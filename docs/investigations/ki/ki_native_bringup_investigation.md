@@ -51,7 +51,7 @@ phonemic orthography. Verdict **🔷** (single-source Wiktionary, but large + hu
 corroborates the phonology). TONE (2-tone H/L + downstep, lexical + grammatical) + numbers deferred.
 
 **Tooling:** this bring-up's referee was built by the NEW committed `tools/corpus/build-referee.ts` — a batched
-(MediaWiki generator, 50 pages/call) + cached Wiktionary word→IPA builder, ported from the espeak-ng-portable
+(MediaWiki generator, 50 pages/call) + cached Wiktionary word→IPA builder, ported from the portable-espeak
 `tools/corpus` "dumps/batching ≫ sequential live API" lesson. 1062 words in ~11s (the old per-word scraper was
 minutes at ~57% coverage). Replaces the throwaway per-language /tmp scrapers.
 

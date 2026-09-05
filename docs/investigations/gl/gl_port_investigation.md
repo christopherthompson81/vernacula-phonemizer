@@ -17,7 +17,7 @@ promotion. `numbers.ts` is a long-scale compositor (millón 10⁶, billón 10¹�
 manifest's word tables.
 
 **FLEURS exists**: the split is `gl_es`
-(`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/gl_es`, train 2175 + dev 395 +
+(`$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/gl_es`, train 2175 + dev 395 +
 test 927 = 3497 lines), so PORTING.md's widening (1) — the corpus-wide FLEURS
 differential — is available. The 200-row golden `csharp/goldens/gl.tsv` is ledger-tier
 (`read_text`), async mode.

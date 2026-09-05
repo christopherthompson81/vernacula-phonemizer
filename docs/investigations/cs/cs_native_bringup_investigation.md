@@ -2,7 +2,7 @@
 
 Target: Czech, canonical IPA. West Slavic, Latin script. espeak ships cs, so the espeak-canonical output is a
 **regression-guard bootstrap** — NOT the correctness target. Linguistic correctness is cross-checked against the
-espeak-independent epitran `ces-Latn` referee (`tools/referee-eval`). Gold (bootstrap) = espeak-ng-portable
+espeak-independent epitran `ces-Latn` referee (`tools/referee-eval`). Gold (bootstrap) = portable-espeak
 canonical over the 50k corpus.
 
 ## Architecture — rule g2p with three context systems
@@ -34,7 +34,7 @@ rˈɛpublˌɪka). Numbers compose Czech text through the g2p with the tisíc/tis
   voices pr→br, tr→dr word-initially (před→bret, třeba→dreba, Praha→braɦa), s→z (jsme→jzme), and writes ch→ɦ —
   all cases where OUR output is the correct one. So epitran is a weak referee for Czech voicing; it does
   corroborate our vowels, palatalisation, and consonant inventory. A human wikipron ces referee (used by the
-  espeak-ng-portable convergence) would be a better second source to add.
+  portable-espeak convergence) would be a better second source to add.
 
 ## Known limitation — loanword palatalisation (~3% of the corpus)
 The regular rule palatalises d/t/n before i/í/ě, which is correct for native words but WRONG for loanwords:

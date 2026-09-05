@@ -1,6 +1,6 @@
 # Irish (ga) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/ga-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/ga-base` (pinned at the commit the work
 started from). Working branch: `norm-ga-562`.
 
 ## Run 1 — 2026-08-01

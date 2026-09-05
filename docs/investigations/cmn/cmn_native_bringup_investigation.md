@@ -8,7 +8,7 @@ independent of the espeak base. Canonical-IPA output only.
 `Han text → segment + Hanzi→pinyin (polyphone-aware) → tone sandhi → pinyin→IPA → canonical IPA (Chao tones)`
 
 - Hanzi→pinyin: pypinyin (MIT) char + phrase dicts; Unihan kMandarin fallback. NON-espeak.
-- pinyin→IPA: ~410-syllable lookup table GENERATED from espeak-ng-portable's already-converged
+- pinyin→IPA: ~410-syllable lookup table GENERATED from portable-espeak's already-converged
   canonical cmn engine (validated vs wikipron+epitran). We carry the OUTPUT correspondence as
   declarative data, not the espeak engine.
 - tones: number → Chao contour letters, kept as numbers through sandhi then rendered.
@@ -23,7 +23,7 @@ independent of the espeak base. Canonical-IPA output only.
 ## Resources located
 - /tmp/pptest/pp/pypinyin/{pinyin_dict.json (788K, char→readings), phrases_dict.json (2.5M, phrase→per-char)}
 - /tmp/Unihan_Readings.txt (kMandarin, 44,349 chars)
-- espeak-ng-portable data/cmn/ (converged; meta.toneChao, sandhi, canonicalGlyphMap)
+- portable-espeak data/cmn/ (converged; meta.toneChao, sandhi, canonicalGlyphMap)
 
 ## Run 1 — Phase 1 complete (pinyin path)
 

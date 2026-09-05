@@ -20,7 +20,7 @@ IPA). Our engine produces the IPA (canonical, consistent); the lexicon supplies 
 - **wikipron rus_cyrl_narrow** (466k) — REJECTED as primary: no stress marks, inconsistent reduction
   (молоко→malako here, ɐ/ə elsewhere), optional-palatalization brackets, some broken entries (человек→t͡ɕek).
 - **kaikki Russian** (Wiktionary, 893 MB) — CLEAN raw IPA WITH stress: собака→sɐˈbakə, кошка→ˈkoʂkə,
-  большой→bɐlʲˈʂoj, зонтик→ˈzonʲtʲɪk. Stream-extracted to /mnt/data/ru_kaikki.tsv (word→IPA). This is the
+  большой→bɐlʲˈʂoj, зонтик→ˈzonʲtʲɪk. Stream-extracted to <data root> (word→IPA). This is the
   stress source AND the validation referee. Single Wiktionary source (independence caveat, as with pt).
 
 ## Convention (canonical target, from kaikki)

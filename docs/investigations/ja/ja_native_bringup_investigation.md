@@ -2,12 +2,12 @@
 
 Target: Standard (Tokyo) Japanese, canonical IPA, espeak-independent. Slot #10 in the OmniVoice coverage set
 (contributes `ɯ`, `ɸ`, `̞`, `̈`, `ɴ`, `ɽ`, `ᵝ`). There is EXTENSIVE prior work in the sibling repo
-`~/Programming/espeak-ng-portable` (verified, PR #1317): a pure-TS kuromoji-style Viterbi morphological analyzer
+`<portable-espeak checkout>` (verified, PR #1317): a pure-TS kuromoji-style Viterbi morphological analyzer
 (`src/japaneseMorph.ts` + `data/ja/morph-dict.tsv` 10.8 MB + `morph-matrix.bin` 3.5 MB), kanji readings
 (`src/kanjiReadings.ts` + JMdict/KANJIDIC/name-reading JSON), pitch accent (`src/japanesePitchAccent.ts` +
 lexicon), and number/prose evals. This bring-up REUSES that work.
 
-## Convention (from the espeak-ng-portable canonical snapshot)
+## Convention (from the portable-espeak canonical snapshot)
 Narrow Tokyo Japanese. Vowels: あ→ä (centralized), い→i, う→ɯᵝ (compressed), え→e̞, お→o̞ (mid-lowered).
 Consonants: し→ɕ, ち→t͡ɕ, つ→t͡s, ひ→ç, ふ→ɸ, ら-row→ɾ (ɽ canonicalizes to ɾ), ん→ɴ (moraic). Long vowel ː;
 おう/えい → o̞ː/e̞ː. Sokuon っ → gemination. Pitch accent → ꜜ downstep (needs the lexicon → Phase 2).
@@ -18,7 +18,7 @@ Examples: 私は学生です → wätäɕihä ɡäkɯᵝse̞ide̞sɯᵝ; です 
   dakuten + youon + sokuon + long vowels + moraic ん), plus Japanese number reading. Handles kana text and emits
   the census primitives. No dictionary needed. Segmental only (pitch deferred).
 - **Phase 2: kanji + segmentation.** Port japaneseMorph.ts (Viterbi) + morph data + kanjiReadings + the reading
-  JSON from espeak-ng-portable → segment unspaced text, resolve kanji→kana, feed the kana engine.
+  JSON from portable-espeak → segment unspaced text, resolve kanji→kana, feed the kana engine.
 - **Phase 3: pitch accent.** Port japanesePitchAccent.ts + the pitch lexicon → ꜜ downstep.
 
 ## Run 1 — kana core — 2026-07-12
@@ -28,7 +28,7 @@ gojūon + dakuten/handakuten + youon (きゃ) + sokuon (っ→geminate, word-fin
 えい→e̞ː, same-vowel→ː) + moraic ん place-assimilation (n/ŋ/m before coronal/velar/labial, else ɴ) +
 extended (foreign-sound) katakana (ファ→ɸä, チェ→t͡ɕe̞, ディ→di, ヴ→v) + Sino-Japanese numbers.
 
-**Validation vs the espeak-ng-portable canonical snapshot** (`words-50000.ja`, kana-only words, pitch/stress
+**Validation vs the portable-espeak canonical snapshot** (`words-50000.ja`, kana-only words, pitch/stress
 stripped): **93.45% exact (15988/17108)**. The residual is almost entirely DELIBERATE canonical divergence
 from espeak's conventions, not error — accounting for those, **98.28%**:
 
@@ -46,7 +46,7 @@ Phase 1 is segmental only (no pitch) and kana-only (kanji spans are skipped unti
 
 ## Run 2 — kanji + segmentation — 2026-07-12
 
-Added `kanji.ts` (ported from espeak-ng-portable) + the reading data (`readings.tsv` 60k whole-word map,
+Added `kanji.ts` (ported from portable-espeak) + the reading data (`readings.tsv` 60k whole-word map,
 `fallback.tsv` 12k per-kanji on/kun/rendaku, `adverbs.txt` 802). Pipeline is now
 `text → segmentText (bunsetsu spaces) → applyReadings (kanji→kana) → kanaToIpa`. The whole-word longest-match
 map resolves on/kun disambiguation (`日本語` matches the 3-char key), so the **14 MB Viterbi IPADIC was NOT
@@ -54,7 +54,7 @@ needed** — only ~1.5 MB of reading data. Bunsetsu segmentation is the lighter 
 (kana→kanji transition = new phrase; case particles が/を/に end a phrase; て-form + auxiliary split; adverbs
 are their own bunsetsu).
 
-**Validation vs the espeak-ng-portable snapshot (`words-50000.ja`, 50k words, 32k containing kanji;
+**Validation vs the portable-espeak snapshot (`words-50000.ja`, 50k words, 32k containing kanji;
 pitch/stress stripped): 93.51% exact, 93.30% on kanji words, 99.55% once deliberate espeak-quirk divergences
 are excluded** (nasV `ん→ũ/ĩ` = 2766, sokuon `hC` = 251).
 
@@ -77,12 +77,12 @@ espeak conventions are deliberately NOT reproduced — we emit the cleaner morai
 Phase 3 (pitch accent ꜜ) remains deferred.
 
 **Data provenance:** the reading tables (`readings.tsv`, `fallback.tsv`, `adverbs.txt`) are derived from the
-espeak-ng-portable Japanese front-end, whose kanji readings come from JMdict / KANJIDIC (© EDRDG, licensed
+portable-espeak Japanese front-end, whose kanji readings come from JMdict / KANJIDIC (© EDRDG, licensed
 CC BY-SA 4.0) with IPADIC-derived surfaces. Attribution is carried here per the EDRDG licence.
 
 ## Run 3 — pitch accent (Phase 3) — 2026-07-12
 
-Added `pitch.ts` (ported from espeak-ng-portable's `japanesePitchAccent.ts` + `render.ts` lookup) + the merged
+Added `pitch.ts` (ported from portable-espeak's `japanesePitchAccent.ts` + `render.ts` lookup) + the merged
 `pitch-accent.tsv` (434k keys, 7.7 MB). Tokyo lexical pitch is contrastive (箸 häꜜɕi vs 端 häɕi vs 橋 häɕiꜜ);
 the accent NUCLEUS (a mora index, 0 = heiban) is marked with the IPA downstep `ꜜ` after the nucleus mora.
 
@@ -97,7 +97,7 @@ stem with trailing case-particles/copula stripped, kanji-ending only (橋を→�
 exact reading (はし). Merged lexicon priority: consensus (kanjium/OpenJTalk/UniDic vote) > OpenJTalk-inflected
 > UniDic base. Sources: kanjium (CC BY-SA), OpenJTalk (naist-jdic), UniDic (NINJAL).
 
-**Validation vs the espeak-ng-portable snapshot (WITH ꜜ): 92.54% byte-for-byte exact, 99.56% accounted**
+**Validation vs the portable-espeak snapshot (WITH ꜜ): 92.54% byte-for-byte exact, 99.56% accounted**
 (2766 `ん→ũ` + 251 sokuon-`hC` deliberate segmental divergences, 490 pitch-position diffs). On the 46,761
 segmentally-identical words, **pitch agrees 98.95%** (46271/46761) — the 490 residual are nucleus-position
 disagreements from merge-priority differences. `phonemizeWord` now carries pitch; `phonemizeWordSegmental` is
@@ -110,7 +110,7 @@ downstep ꜜ are all emitted.
 ## Run 4 — 2026-07-14 — independent validation vs OpenJTalk + は/へ particle fix
 
 The wikipron referee (57.9%) is toneless/segmental and can't measure the kanji front-end or pitch; the Run-3
-validation was vs the espeak-ng-portable SNAPSHOT the tables were ported from (semi-circular). Wired an INDEPENDENT
+validation was vs the portable-espeak SNAPSHOT the tables were ported from (semi-circular). Wired an INDEPENDENT
 reference: pyopenjtalk (OpenJTalk, naist-jdic — a different reading source than our JMdict-derived readings.tsv) over
 6000 random Tatoeba sentences. Compared full-sentence reading via our OWN kanaToIpa (normalises katakana/long-vowel
 notation → the diff is purely the reading).
@@ -213,7 +213,7 @@ ACCENT not reading), and DISCOUNTS OOV-heiban coincidences (a word absent from t
 
 RESULT: **1911/1990 = 96.0%** nucleus agreement (95.6% discounting the 8 OOV-heiban coincidences → good lexicon
 coverage). 503 reading-mismatches (excluded; scored by the reading eval) + 7 mora-mismatches. This matches
-espeak-ng-portable's 95.9% — the port is faithful. The 79 disagreements are 52 off-by-1 and are dominated by the
+portable-espeak's 95.9% — the port is faithful. The 79 disagreements are 52 off-by-1 and are dominated by the
 DOCUMENTED contested set (映画 0/1, 毎日 0/1, 期間 1/2, 機会/機械 1/2, 心 2/3) + verb-stem FRAGMENTS (聞い/言い/歩い —
 mid-conjugation, ill-defined isolated accent), i.e. contested-accent + measurement artifact, NOT systematic error.
 JA accent is an inherent ~90-95% task (dictionaries themselves disagree), so 96% is near the achievable ceiling.

@@ -143,6 +143,6 @@ The lexicon tier is easy and large. What is **not** solved by finding a source:
 
 ## Files
 
-Dumps fetched to `/mnt/data/kaikki-Slovene.jsonl` and `/mnt/data/kaikki-SerboCroatian.jsonl`
+Dumps fetched to `<data root>` and `<data root>`
 (alongside the existing `kaikki-Chinese/Thai/Sindhi/Zhuang` dumps this repo's build tools already
 read from there). Not committed — 277 MB — and the URLs above reproduce them.

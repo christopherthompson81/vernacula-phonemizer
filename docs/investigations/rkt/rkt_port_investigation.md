@@ -3,7 +3,7 @@
 Chronological log of the runs behind the rkt port.
 
 ⚠ **rkt HAS NO CORPUS OF ITS OWN.** No FLEURS split, no `tools/corpus/mined/rkt.jsonc`, no
-`tools/corpus/attest/rkt.jsonc`, no `/mnt/data` artifact, no rkt.wikipedia. Its ONLY source is
+`tools/corpus/attest/rkt.jsonc`, no `<data root>` artifact, no rkt.wikipedia. Its ONLY source is
 `tools/referee-eval/referees/rkt.toulmin-rp.tsv` — 370 Devanagari→IPA pairs machine-extracted from a
 two-column PDF (Toulmin 2006 Appendix A, Rangpur point), which the eval config itself annotates as
 carrying ~15% alignment noise. And `csharp/goldens/rkt.tsv` is **VARIANT-DERIVED**: 200 rows of
@@ -240,7 +240,7 @@ shared Hindi core needed no change**. ⚠ Per trap 55 the ported siblings (bho, 
 were used only to confirm the COMPOSITION SHAPE; no rule, value or reasoning was borrowed from any of them.
 
 ⚠ **rkt HAS NO CORPUS AT ALL, AND ITS GOLDEN IS VARIANT-DERIVED.** No FLEURS split, no
-`tools/corpus/mined/rkt.jsonc`, no `attest/`, no rkt.wikipedia, nothing under `/mnt/data`.
+`tools/corpus/mined/rkt.jsonc`, no `attest/`, no rkt.wikipedia, nothing under `<data root>`.
 `csharp/goldens/rkt.tsv` is 200 rows of **HINDI FLEURS text** re-rendered by `tools/gen_variant_golden.mts`,
 so 200/200 pins C#↔TS parity and says nothing about Rangpuri. Its one source is
 `tools/referee-eval/referees/rkt.toulmin-rp.tsv` — 370 Deva→IPA pairs machine-extracted from a two-column

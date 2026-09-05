@@ -14,7 +14,7 @@ the consonant-consistency mask, int8 export.
 Urdu-specific to build: the Hindi-phonology alignment inventory (retroflex ʈ ɖ ɽ, dental
 t̪ d̪, breathy aspirates, ɦ, ں) from `urdu.jsonc`; the training corpus; the eval framing.
 
-Env: training runs under `/home/chris/base/bin/python3` (torch 2.9.1+cu128, CUDA, onnxruntime
+Env: training runs under `<local path>` (torch 2.9.1+cu128, CUDA, onnxruntime
 1.23 w/ quantization). System `python3` has a broken `~/.local` torch — do not use it.
 
 Data on hand:

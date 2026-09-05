@@ -2,7 +2,7 @@
 
 Chronological log of the runs behind the la port.
 
-⚠ **la HAS NO FLEURS SPLIT** — it is a dead language and `/mnt/data/omnivoice_ipa/corpus/fleurs*`
+⚠ **la HAS NO FLEURS SPLIT** — it is a dead language and `$ASR_ALIGN_ROOT/corpus/fleurs*`
 carries no `la` directory or transcript. So widening (1) of PORTING.md, the corpus-wide differential
 over the FLEURS transcript, **is unavailable in its usual form**, and the weight falls on the mined
 artifact (`tools/corpus/mined/la.jsonc`) plus hand-built off-golden probes. `csharp/goldens/la.tsv` is

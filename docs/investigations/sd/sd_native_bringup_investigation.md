@@ -126,7 +126,7 @@ dialect) — so the abjad short-vowel tail is an inherent property, not a defect
 n: auto-linking loses 111→29 to gloss-synonym mismatches. A hand-map of the ~168 Swadesh concepts to their correct
 abjad words (basic vocabulary, feasible) → a ~100-150 word independent triangulated gold; if the backbone holds near
 the ceiling at that n, sd earns an honest ✅ for its recoverable target (backbone), short-vowel variety-variability
-documented like the majhūl/tone folds elsewhere. Data staged in /mnt/data/sd-lsi/ (lsi_forms.csv, clean.tsv).
+documented like the majhūl/tone folds elsewhere. Data staged in <data root>/ (lsi_forms.csv, clean.tsv).
 
 ### Phase 3 result — committed: Grierson-LSI as an independent secondary referee (25 words)
 
@@ -151,7 +151,7 @@ tradition ceiling, with every residual explained as referee convention rather th
 provably variety-variable (Grierson's Vicholi vs Lari = 62% on short vowels) → abjad-inherent, not a defect. This
 clears the single-Wiktionary-tradition blocker that had capped sd. Remaining limit on a HEADLINE ✅: n=25 (the reliable
 auto-link ceiling; larger n needs hand-authored abjad for the synonym/inflection concepts, which risks transcriber
-error). Data staged in /mnt/data/sd-lsi/. Attribution: Grierson (1928) via lexibank/lsi, CC-BY-4.0.
+error). Data staged in <data root>/. Attribution: Grierson (1928) via lexibank/lsi, CC-BY-4.0.
 
 ## Phase 4 — 2026-07-28 — Weight stress + homorganic-cluster epenthesis (issue #547)
 

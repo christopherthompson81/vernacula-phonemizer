@@ -187,12 +187,12 @@ same kind of artifact test/awadhi.test.ts already holds, just larger and diction
 
 **User steer:** *"Can we tokenize some modern Awadhi, like news articles or something?"* — the dictionary is
 *ठेठ देशज* (rare native words) and omits common vocabulary, and it's rights-restricted. A modern, **permissive**
-corpus fixes both. **User steer 2:** *"we have tools for this action in espeak-ng-portable — for building
+corpus fixes both. **User steer 2:** *"we have tools for this action in portable-espeak — for building
 wordlists."* → use the existing corpus engine, not an ad-hoc scraper.
 
 My first instinct (live MediaWiki `allpages` + `extracts` API) hit exactly the failure its docstring warns about:
 alphabetical `allpages` front-loads number/stub pages, and the extracts API returned mostly empty bodies. The
-committed engine `espeak-ng-portable/tools/corpus/build.ts` streams the **Wikipedia dump** instead — clean, fast,
+committed engine `portable-espeak/tools/corpus/build.ts` streams the **Wikipedia dump** instead — clean, fast,
 rate-limit-free. Ran (Awadhi is Devanagari, so gate on that; no data/awa/meta.json needed):
 
     npx tsx tools/corpus/build.ts --lang awa --wiki awa --alphabet Devanagari --sources dump --out awa-wiki-words.txt

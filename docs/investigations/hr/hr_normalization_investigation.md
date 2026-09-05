@@ -1,11 +1,11 @@
 # Croatian (hr) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/hr-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/hr-base` (pinned at the commit the work
 started from). Working branch: `norm-hr-562`.
 
 ## Run 1 — 2026-08-01
 
-**Setup**: baseline emitted from `~/Programming/tmp/hr-base` → `/tmp/hr.base`. Serbian's normalize.ts
+**Setup**: baseline emitted from `<sibling checkout>/hr-base` → `/tmp/hr.base`. Serbian's normalize.ts
 (`src/languages/serbian/normalize.ts`) is the model — Croatian and Serbian are the pluricentric
 standards of ONE phonological system, and the Serbian file documents the shared Serbo-Croatian number
 system (three-way count agreement, period-thousands, N. ordinals, hyphen+case-suffix decades).

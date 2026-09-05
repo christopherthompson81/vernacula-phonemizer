@@ -284,7 +284,7 @@ grep -rn 'rateDenominators\s*:' src data   # 75 declarations
 grep -oF <noun> tools/corpus/{mined,attest}/<code>.jsonc | wc -l   # then read the contexts
 ```
 
-⚠ **The corpus on `/mnt/data` cannot attest anything** — `corpus/tokens/manifest_*.jsonl` carries `ipa` and no
+⚠ **The corpus on `<data root>` cannot attest anything** — `corpus/tokens/manifest_*.jsonl` carries `ipa` and no
 `text`, and `corpus/fleurs_transcripts/` holds one directory. The attestation tier for this work is the in-repo
 `tools/corpus/mined/<code>.jsonc` (adversarially selected) and `tools/corpus/attest/<code>.jsonc` (Wikipedia
 word attestation), which is what every existing `rateDenominators` comment already cites.

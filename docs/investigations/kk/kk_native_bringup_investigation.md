@@ -2,7 +2,7 @@
 
 Target: Kazakh, canonical IPA. Turkic (Kipchak), Cyrillic script — the second Turkic language in vernacula after
 Turkish. Slot in the OmniVoice coverage set contributes the dark-`ɫ` (shared with Turkish) plus the uvulars
-`q`/`ʁ`/`χ`. espeak ships kk, so this is a **shim-parity** convergence: the reference is espeak-ng-portable's
+`q`/`ʁ`/`χ`. espeak ships kk, so this is a **shim-parity** convergence: the reference is portable-espeak's
 canonical-mode output over the 50k frequency corpus (which already carries the kk convergence relabels ғ→ʁ,
 х→χ, р→r, ү→ʏ, and the word-level л harmony). Gold = 50,000 words.
 
@@ -16,7 +16,7 @@ Kazakh Cyrillic is a shallow orthography, so `g2p.ts` is a left-to-right letter 
 
 **л vowel harmony** (the census contribution) — Kazakh л is dark ɫ in back-harmony words, clear l in front. A
 word is harmonically uniform, so kazakh.ts lightens ALL ɫ→l whenever the token contains any front vowel
-`[eɵʏɪæ]` (ported verbatim from espeak-ng-portable's kk job): тіл→tɪl, Солтүстік→soltʏstɪk, but климаты→kɫəjmɑtə
+`[eɵʏɪæ]` (ported verbatim from portable-espeak's kk job): тіл→tɪl, Солтүстік→soltʏstɪk, but климаты→kɫəjmɑtə
 (no front vowel).
 
 **Stress** is espeak's `STRESSPOSN_1RU`, ported exactly from `dictionary.c`: the default is the LAST syllable,
@@ -37,7 +37,7 @@ at the ceiling of espeak's own kk stress: the 1RU port scores 91.5% against the 
 espeak's lexical stress on Russian loanwords (Индекс→ˈəjndeks, кино→kˈəjno — Russian initial stress espeak
 applies from its dictionary) and inconsistent case-suffix (un)stressing (-дан stem-stressed vs -дары
 final-stressed). Per the kazakh_convergence note, kk stress has NO clean referee (wikipron kk is noisy and
-conflicting) — espeak-ng-portable itself verified on shim segments + referee-majority, not stress parity.
+conflicting) — portable-espeak itself verified on shim segments + referee-majority, not stress parity.
 
 ## Numbers — hardcoded atomic IPA + composition
 Kazakh number words are lexicalised in espeak (жиырма is final-stressed, алпыс has a clear l, нөл has ø — none
@@ -50,7 +50,7 @@ keeps it (бір мің); million omits it (миллион).
 Built g2p.ts / kazakh.ts / numbers.ts; registered kk. Iteration on the 50k gold: found espeak's stress rule is
 `STRESSPOSN_1RU` (read from tr_languages.c + dictionary.c) rather than plain final stress — porting it exactly
 took stress from 55.7% (naive final) to 91.5%. Segmental fixes in order: added missing е→e (was dropped
-entirely, -е is ubiquitous) 53%→86.6%; word-level л harmony (regex ported from espeak-ng-portable) 86.6%→91.4%;
+entirely, -е is ubiquitous) 53%→86.6%; word-level л harmony (regex ported from portable-espeak) 86.6%→91.4%;
 consonant-only abbreviation spelling 91.4%→91.5% seg / seg-diff 385→122; glide-excluded initial-cluster
 epenthesis → seg-diff 122→55; camelCase split → seg-diff 16; е→je glide-stress split → 92.19%. 6 unit tests +
 full suite (130) green.
@@ -68,5 +68,5 @@ Cross-checked against the **espeak-independent** epitran `kaz-Cyrl` referee via 
 segmental-backbone agreement (1400 words) after folding dark-l harmony, uvular convention, and epitran's
 over-marked е palatal onglide. The residual is dominated by epitran's OWN limitations — it merges ө/ү→ʏ where we
 correctly keep ө(ɵ)≠ү(ʏ), and marks allophonic palatalization — so where we differ we are usually the more
-faithful transcription (this is why the espeak-ng-portable kk convergence used wikipron, not epitran). A human
+faithful transcription (this is why the portable-espeak kk convergence used wikipron, not epitran). A human
 kk referee would be a stronger second source to add. `referee-eval.test.ts` pins an 83% floor.

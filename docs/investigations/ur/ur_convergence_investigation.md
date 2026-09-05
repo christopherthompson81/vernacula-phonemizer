@@ -130,7 +130,7 @@ restoration is genuinely hard here). The remaining levers are HEAVYWEIGHT and wo
 
 ## Run 4 — 2026-07-16 — the AUTHORITATIVE held-out eval (the training harness)
 
-Found and ran the training/eval harness (/mnt/data/ar-diac, ar-diac-venv). The project's OWN held-out metric is
+Found and ran the training/eval harness (<data root>, ar-diac-venv). The project's OWN held-out metric is
 `predict_harakat.py` (the fp32 bilstm_multilingual.pt) → `eval_endtoend.ts` (predicted harakat → g2p vs wikipron,
 model vs bare-skeleton baseline, on the held-out `eval_set.tsv`). Ran it:
 

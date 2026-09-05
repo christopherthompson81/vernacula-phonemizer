@@ -15,7 +15,7 @@ This is the project's first **cannot-verify** language, and it is a double bind:
    a Hindi g2p; and since the only automated referee is ALSO a Hindi g2p, any agreement is trivial — it measures
    nothing about actual Bhojpuri pronunciation.
 
-Corpus size does not help (an akshara inventory is not a referee). This is the lesson of the espeak-ng-portable
+Corpus size does not help (an akshara inventory is not a referee). This is the lesson of the portable-espeak
 `cannot_verify_status` note: check for an INDEPENDENT referee, not just data volume; a G2P clone of the parent
 language is circular.
 

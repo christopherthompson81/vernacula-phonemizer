@@ -1,6 +1,6 @@
 # Hausa (ha) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/ha-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/ha-base` (pinned at the commit the work
 started from). Working branch: `norm-ha-562`.
 
 ## Run 1 — 2026-08-01

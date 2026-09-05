@@ -43,7 +43,7 @@ Porting notes, all of which the contract already covers:
 The mn port found that `normalize.ts` claimed no FLEURS for a language that has one (#1099), so this was
 checked rather than assumed:
 
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/ | grep -E '^(tn|st|nso)'  →  nso_za only
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/ | grep -E '^(tn|st|nso)'  →  nso_za only
     sqlite: select fleurs from languages where code='tn'                                  →  0
 
 **tn genuinely has no FLEURS split.** So PORTING.md's widening (1) is unavailable, and the weight falls on

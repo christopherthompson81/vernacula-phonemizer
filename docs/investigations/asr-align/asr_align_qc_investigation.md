@@ -150,7 +150,7 @@ only the 94 below one-third are labelled.
 Not a measurement, but it belongs in the log because it is the §1 failure shape. Five files in
 `tools/corpus/asr-align/` still open with
 
-    sys.path.insert(0, "/mnt/data/Programming/vernacula/scripts/omnivoice_ipa")
+    sys.path.insert(0, "<data root>/vernacula/scripts/omnivoice_ipa")
     from asr_align_report import fold
 
 — `asr_align_label.py`, `consonant_skeleton.py`, `confusion_pairs.py`, `judge_alignment.py`,
@@ -357,7 +357,7 @@ normalizer fix from Run 5b remains. `Celsius` still reads `kˈɛlzi̯ʊs` and th
 ### An input trap worth recording
 
 The first regeneration came out at **1,086 entries against the committed 3,340** — a collapse that looked
-like a catastrophic bug in the change. It was the input: `/mnt/data/de_kaikki.tsv` is **not** the extract
+like a catastrophic bug in the change. It was the input: `<data root>` is **not** the extract
 this generator documents. `tools/gen/extract_kaikki_de.py` lowercases its keys (`key=w.lower()`) and that
 dump does not — 51,213 of its 72,074 rows are capitalised German nouns, and the generator's
 `/^[a-zäöüß]+$/` filter silently discarded every one. Lowercasing first reproduced 3,334 entries against
@@ -2845,9 +2845,9 @@ padded batch finds four more SHIPPED models the rollout never touched: `km-segme
 type. Grep the construct, not the filename.
 
 **And the two Arabic diacritizers are affected as well — their trainer is just in another repo.** Recorded as
-"unknown" until the user pointed at `/mnt/data`, where the whole training rig turned out to be sitting:
-`train.sh` drives `~/Programming/espeak-ng-portable/tools/diacritization/train_bilstm_sent.py`, with
-`/mnt/data/ar-diac` (silver 320k, train 310k, val 5k) and `/mnt/data/arz-diac` (350k). That trainer is
+"unknown" until the user pointed at `<data root>`, where the whole training rig turned out to be sitting:
+`train.sh` drives `<portable-espeak checkout>/tools/diacritization/train_bilstm_sent.py`, with
+`<data root>` (silver 320k, train 310k, val 5k) and `<data root>` (350k). That trainer is
 bidirectional over a `pad_sequence` collate with `def forward(s, x)` — and ⚠ **its collate already returns
 `torch.tensor([len(x) for x in xs])`, computed and then never passed.** The lengths were plumbed and dropped.
 Since the rider is a direct descendant of this file, that is almost certainly where the entire family
@@ -3070,7 +3070,7 @@ different computation than serving performs. Fixing the trainer while leaving th
 meant measuring the fixed model with a broken instrument — precisely the class of error this run already hit
 four times. Packed.
 
-**3. `train_ar.sh` still invoked the espeak-ng-portable path**, so the committed recipe would have trained
+**3. `train_ar.sh` still invoked the portable-espeak path**, so the committed recipe would have trained
 with the OLD unpacked trainer while the repo advertised the fixed one. Rewritten against the in-tree tools,
 and ⚠ **the split reshuffle is now opt-in** (`RESPLIT=1`): the original began every run with
 `shuf silver.txt > silver.shuf` and a fresh train/val/test, which silently changes the held-out set and makes
@@ -3078,7 +3078,7 @@ any retrain incomparable to the shipped model. That is the same mechanism that m
 non-continuous, sitting unremarked at the top of the canonical recipe.
 
 **Also:** `CORPORA.md` still described the trainer as living in another repo — stale the moment this PR moved
-it — and its ar/arz driver row pointed at `/mnt/data/ar-diac/train.sh`. Both corrected, with the unresolved
+it — and its ar/arz driver row pointed at `<data root>/train.sh`. Both corrected, with the unresolved
 int8 and pausal questions recorded where a rebuilder will meet them.
 
 **Method note.** All three defects are the same shape: **an imported file's implicit context does not travel
@@ -3182,7 +3182,7 @@ is not word-final, plus vowel quality in names and loans.
 85.53); the reason to prefer pausal is that its DER describes what serves, while the full model's 2.83% counts
 case endings the runtime discards. But "equivalent overall" and "identical to the ear" are different claims,
 and the second is false — so discarding the alternate would throw away the only thing that might separate them.
-Kept at `/mnt/data/ar-diac/alt-full-diacritization/` with swap and rebuild commands, and feedback solicited
+Kept at `<data root>/alt-full-diacritization/` with swap and rebuild commands, and feedback solicited
 from `diacritizer.PROVENANCE.md` and the `ar` row of `docs/language-maturity.md`.
 
 ⚠ **Review step worth generalising: execute the instructions a user would follow.** The swap-and-revert was

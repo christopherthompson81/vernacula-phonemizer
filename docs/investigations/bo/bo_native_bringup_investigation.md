@@ -80,7 +80,7 @@ Decision: **BUILD** (Lhasa/Standard). Three referees:
 1. **JIPA hand-curated** `bo.jipa-lhasa.tsv` — 40 pairs, INDEPENDENT human primary
    (onset/coda/vowel/diphthong lists, pp.790/795-796; tone á=H, à=L).
 2. **TIBMD@MUC** — INDEPENDENT academic Lhasa pron-dict, being pulled from the
-   29 GB OpenSLR tarball to /mnt/data (text-only kept, audio discarded). Pending.
+   29 GB OpenSLR tarball to <data root> (text-only kept, audio discarded). Pending.
 3. **kaikki Lhasa** `bo.kaikki-lhasa.tsv` — 1281, MODULE-parity secondary (disclosed).
 
 Spec captured from JIPA (all independent of the module):
@@ -146,7 +146,7 @@ onset. JIPA anchor unchanged (100%, monosyllabic); kaikki raw 18→21.5%,
 notation-folded 53.9→55.7% (still deflated by the register ʔ~length split and the
 module's per-syllable contour notation — principled, not chased).
 
-**TIBMD@MUC** (29 GB pulled to /mnt/data; text-only extracted, audio discarded):
+**TIBMD@MUC** (29 GB pulled to <data root>; text-only extracted, audio discarded):
 the tarball has ONLY per-speaker `text.txt` transcripts — NO pronunciation dict /
 phoneme set (the paper's "pron dictionary" is not in this OpenSLR bundle). So
 TIBMD is an INDEPENDENT (non-Wiktionary) Lhasa word-COVERAGE corpus, not an IPA

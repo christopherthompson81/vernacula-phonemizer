@@ -1,7 +1,7 @@
 # Igbo / Asụsụ Igbo (ig) native bring-up
 
 Igboid (Volta-Niger, Niger-Congo), ~44M speakers (SE Nigeria) — Yoruba's sibling. A phonemic Latin orthography →
-a rule-based g2p (the tonal-Latin pattern). Ported from the espeak-ng-portable authoring (which was segmental-only)
+a rule-based g2p (the tonal-Latin pattern). Ported from the portable-espeak authoring (which was segmental-only)
 + tone added.
 
 ## Referee GAP (but NOT circular — adjudicated gold is meaningful)

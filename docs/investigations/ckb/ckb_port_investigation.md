@@ -2,7 +2,7 @@
 
 Chronological log of the runs behind the ckb port and the two TypeScript fixes it sent back.
 Corpus: FLEURS `ckb_iq` (4,348 rows, columns 3+4), `tools/corpus/mined/ckb.jsonc`, and the
-ASR-alignment DB `/mnt/data/omnivoice_ipa/work/asr_align/align.sqlite` (3,040 ckb_iq utterances,
+ASR-alignment DB `$ASR_ALIGN_ROOT/work/asr_align/align.sqlite` (3,040 ckb_iq utterances,
 wav2vec2 in `phones` and allosaurus in `phones_allo_uni`). There is no `tools/corpus/attest/ckb.jsonc`.
 
 ## Run 1 — 2026-08-27 — what does the corpus actually contain?

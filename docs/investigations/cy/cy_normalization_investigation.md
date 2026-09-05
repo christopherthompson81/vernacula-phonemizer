@@ -1,12 +1,12 @@
 # Welsh (cy) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/cy-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/cy-base` (pinned at the commit the work
 started from). Working branch: `norm-cy-562`.
 
 ## Run 1 — 2026-08-01
 
 **Setup**: referee baseline `folded backbone: 12034/14376 (83.7%)` identical in the worktree baseline.
-Baseline emitted from `~/Programming/tmp/cy-base` → `/tmp/cy.base` (2009 utterances).
+Baseline emitted from `<sibling checkout>/cy-base` → `/tmp/cy.base` (2009 utterances).
 
 **Corpus shape** (2,004 unique cy_gb utterances — a FLEURS English translation, modern DECIMAL Welsh):
 - **`Nfed`/`Ned` ordinal suffix** — `7fed`, `190fed`, `1,000fed`, `6ed`. Welsh ordinals: table for 1–10

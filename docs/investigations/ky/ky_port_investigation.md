@@ -55,7 +55,7 @@ suffix), and the whole pipeline. Every expected value is the TypeScript engine's
 
 ## Run 3 — 2026-08-30 ~19:45 — corpus provenance (measured, not assumed)
 
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/ | grep -i "^ky"   → ky_kg
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/ | grep -i "^ky"   → ky_kg
     ky_kg/                                                                   dev.tsv test.tsv train.tsv
 
 Unlike the Kipchak siblings (kaa, kk's mined-only path), **ky has a FLEURS split**, so the 200-row golden

@@ -26,7 +26,7 @@ the first run. The closest structural models read were **Chuvash** (the same day
 scan + manifest + normalize + numbers) and **Estonian** (the Latin nativiser shape).
 
 ⚠ **NO FLEURS.** Faroese is not among FLEURS's 102 languages — checked in
-`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data` (102 splits, no `fo_fo`), not assumed.
+`$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data` (102 splits, no `fo_fo`), not assumed.
 PORTING.md's widening (1) — the corpus-wide FLEURS differential — is unavailable, and the weight
 falls on the 200-row golden, the mined + attest corpora, and the off-golden probes. Stated here
 because it changes what the gate can and cannot see, not to soften the verdict.

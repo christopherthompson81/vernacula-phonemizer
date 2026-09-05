@@ -103,7 +103,7 @@ confound is systematic and will NOT wash out with scale — more fast speech is 
 · Derive the medial-schwa POSITION rule from the full wikipron set (1,586 words — a derivation pass, no
   audio needed now that audio has shown the class is rule-shaped).
 · Take the final-ə question to the eval config as a measured fold candidate.
-· Keep the audio pipeline (recognizer + fold + vote harness, all on /mnt/data/pa-audio) for what it is
+· Keep the audio pipeline (recognizer + fold + vote harness, all on <data root>) for what it is
   reliable at: adjudicating convention questions and validating rule fixes out-of-band — and revisit
   deletion-class corrections only if a citation-register corpus (read speech, dictionary audio) appears.
   Shrutilipi (gate now accepted; 7 shards downloading) adds scale for the swap/final-ə classes.
@@ -130,7 +130,7 @@ are the target, not its direction — a derivation pass over the 70 (+ the audio
 out-of-band, where it is 100% on position swaps). ⚠ The function is SHARED WITH HINDI — any condition change
 must be derived per-language or measured inert on hi.
 
-List at /tmp/pa_medial_class.tsv; FLEURS phones + vote harness at /mnt/data/pa-audio/; Shrutilipi's 7
+List at /tmp/pa_medial_class.tsv; FLEURS phones + vote harness at <data root>/; Shrutilipi's 7
 Punjabi shards downloaded (gate accepted) for scale when needed.
 
 ## Run 4 — 2026-08-09 18:20 — the two rule hypotheses, tested and reverted
@@ -303,7 +303,7 @@ Two findings, neither of which ships a model:
    "retrain pending" is really "retrain BLOCKED until the other three silvers are regenerated to the same
    convention" — now written down where the next person will look.
 
-**Shipped state: unchanged** (v1 stays; v2/v3 checkpoints live on /mnt/data only). Committed: the
+**Shipped state: unchanged** (v1 stays; v2/v3 checkpoints live on <data root> only). Committed: the
 crossscript mining source (dictionary tranche, filtered, justified), the regenerated pa silver (2,541
 dictionary-register labels, 5.5x the old — correct fuel for the retrain once the convention alignment is
 done), and this run. The convention-alignment regeneration (ur/ps analogues of FA_FULL_FOLD) is the
@@ -325,7 +325,7 @@ Run 9: upsample 4×, best at epoch 1) **and the real gap was not consulting it, 
 not the hyperparameters of the winning run. Until that is recovered or re-searched, retrains are guesses
 that keep measuring worse, and the improved silvers (pa 2,541 crossscript-mined; ur 5,710 full-convention)
 sit as fuel without an engine setting. Committed: the mining improvements + silvers + this record; shipped
-model unchanged (v1); v2-v4 checkpoints on /mnt/data only. Next: a small hyperparameter search with the
+model unchanged (v1); v2-v4 checkpoints on <data root> only. Next: a small hyperparameter search with the
 fixed eval as the gate — mechanical, GPU-bound, a fresh-session task.
 
 ## Run 12 — 2026-08-09 23:50 — CORRECTION: v1's recipe WAS recorded; the gap was me not reading it

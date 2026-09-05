@@ -188,7 +188,7 @@ kea.wikipedia.org does not respond as a wiki — a negative from here is NOT evi
 [exited with code 3]
 ```
 
-And `$ESPEAK_NG=/home/chris/Programming/espeak-ng` has `pt_list` and `crh_list` but **no `kea_list`** —
+And `$ESPEAK_NG=<espeak-ng checkout>` has `pt_list` and `crh_list` but **no `kea_list`** —
 espeak-ng does not ship Kabuverdianu at all. The referee is
 `tools/referee-eval/referees/kea.kaikki-anchors.tsv`: **seven words**, none of them a unit, a currency or a
 sign name.

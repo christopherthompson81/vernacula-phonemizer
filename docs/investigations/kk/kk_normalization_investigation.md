@@ -1,11 +1,11 @@
 # Kazakh (kk) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/kk-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/kk-base` (pinned at the commit the work
 started from). Working branch: `norm-kk-562`.
 
 ## Run 1 — 2026-08-01
 
-**Setup**: baseline emitted from `~/Programming/tmp/kk-base` → `/tmp/kk.base`.
+**Setup**: baseline emitted from `<sibling checkout>/kk-base` → `/tmp/kk.base`.
 
 **Corpus shape** (kk_hr FLEURS — a Kazakh translation of the English set):
 - **`N-ші`/`N-шы` ORDINALS** ×16 — `190-шы орын`, `60-шы гол`, `19-шы ғасыр`, `1-ші`. The corpus's

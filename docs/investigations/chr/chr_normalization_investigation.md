@@ -165,8 +165,8 @@ wc -l $ESPEAK_NG/dictsource/chr_list $ESPEAK_NG/dictsource/chr_rules
 **Raw finding.**
 
 ```
-  0 /home/chris/Programming/espeak-ng/dictsource/chr_list
-324 /home/chris/Programming/espeak-ng/dictsource/chr_rules
+  0 <espeak-ng checkout>/dictsource/chr_list
+324 <espeak-ng checkout>/dictsource/chr_rules
 
   [chk?] percent-word    % in corpus, no declaration found
   [chk?] currency-word   sign in corpus, no declaration found

@@ -2,7 +2,7 @@
 
 Target: canonical IPA, espeak-independent, mirroring the Irish (ga) module structure
 (welsh.jsonc data + manifest.ts + g2p.ts + welsh.ts + numbers.ts, registered in registry.ts).
-Bootstrap reference = the espeak-ng-portable cy engine's canonical `phonemize()` output over the
+Bootstrap reference = the portable-espeak cy engine's canonical `phonemize()` output over the
 50k corpus (NOT the raw `--ipa` shim, which mislabels the y-vowel as ʌ/ø; the TS engine already
 applies the ə/ɨ relabel). Referee (later run): wikipron cym_latn.
 

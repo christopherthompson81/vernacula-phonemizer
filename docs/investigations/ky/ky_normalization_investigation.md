@@ -111,7 +111,7 @@ ESPEAK_NG=… npx tsx tools/normalization/sources.ts --lang ky → letter-names:
 ```
 
 RAW, and a finding about the instrument: `sources.ts` reported **NOT SHIPPED** only because `$ESPEAK_NG` was
-unset in this shell. `/home/chris/Programming/espeak-ng/dictsource/ky_list` exists and carries 187 lines. This
+unset in this shell. `<espeak-ng checkout>/dictsource/ky_list` exists and carries 187 lines. This
 is trap 57's shape — an instrument failing toward a confident negative. Always set the env before believing
 a `[NONE]`.
 

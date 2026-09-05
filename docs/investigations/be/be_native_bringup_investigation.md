@@ -41,7 +41,7 @@ Tuned it down data-driven, each step re-measured:
 **Verdict: 🔷 single-source, rule g2p at 96.6%.** wikipron bel is Wiktionary-derived (kaikki be / epitran bel would be
 correlated / rule-based). Floor 0.95. Wired: registry (`case "be"`), eval PHON, `langs/be.jsonc` (no folds),
 `test/belarusian.test.ts` (6 tests), catalogue row, maturity row. NB: the `belarusian_convergence` memory note is the
-OTHER repo (espeak-ng-portable, shim-parity) — this is a fresh vernacula bring-up; the phonology hints (і→ji,
+OTHER repo (portable-espeak, shim-parity) — this is a fresh vernacula bring-up; the phonology hints (і→ji,
 geminate→length, referee-inconsistent assimilation) transferred, the approach did not.
 
 ## Run 2 — 2026-07-24 — code review fixes

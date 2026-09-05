@@ -89,12 +89,12 @@ voweled correctly WITH context) shows the dominant effect is OOD isolated-word i
 
 **Two compounding causes, ranked:** (1) OOD — model trained on sentences, evaluated on isolated lemmas [dominant];
 (2) silver under-restoration — CATT leaves ~4.5% internal consonants bare, teaching a bare/sukun prior [secondary].
-Next: espeak-ng-portable's AUTHORED Arabic restoration (lexicon + clitic-strip + epenthesis) — a dictionary lookup
+Next: portable-espeak's AUTHORED Arabic restoration (lexicon + clitic-strip + epenthesis) — a dictionary lookup
 nails isolated headwords exactly, so it may be the right primary path (or a lexicon-first hybrid) for this task.
 
-## Run 5 — the fix: Tashkeela (classical) lexicon, per the espeak-ng-portable method
+## Run 5 — the fix: Tashkeela (classical) lexicon, per the portable-espeak method
 
-**espeak-ng-portable's authored method** (restoreShortVowels.ts): supplement-only (fires only when the L2S output is
+**portable-espeak's authored method** (restoreShortVowels.ts): supplement-only (fires only when the L2S output is
 a SKELETON — 0 vowels or a ≥3-consonant run, since Arabic forbids CCC), cascade = direct lexicon → clitic-strip→stem
 → suffix-strip→stem → clitic+suffix → syllable-aware epenthesis FLOOR (always sayable). Lexicon = data/ar/
 diacritization.tsv, 258 k entries, PAUSAL, Tashkeela-derived.
@@ -117,10 +117,10 @@ under-voweling (buckets B + much of C) that the running-text neural model struct
 
 **Licensing correction (mine was wrong):** I treated Tashkeela as GPL-blocked. It is ANCIENT TEXT (classical works —
 public-domain content); the word→vocalization facts are orthographic regularities, not the corpus's creative
-expression (same Feist/ADR-0014 reasoning the neural model already relies on). espeak-ng-portable already ships the
+expression (same Feist/ADR-0014 reasoning the neural model already relies on). portable-espeak already ships the
 Tashkeela-derived lexicon with a PROVENANCE. So it can go into the permissive vernacula project too.
 
-**RECOMMENDATION:** port the espeak-ng-portable lexicon-first cascade to vernacula with a Tashkeela-derived pausal
+**RECOMMENDATION:** port the portable-espeak lexicon-first cascade to vernacula with a Tashkeela-derived pausal
 lexicon (unencumbered), keeping the neural BiLSTM as the CONTEXT/OOV fallback + the epenthesis floor + skeleton gate.
 Lexicon nails isolated headwords; neural handles running-text context; floor guarantees sayable. Also apply the
 pausal fold to the ar referee (convention, +6 pts). This inverts the architecture: authored-lexicon-primary,
@@ -128,7 +128,7 @@ neural-secondary — the right shape for a task whose hard cases are isolated/ci
 
 ## Run 6 — implemented: skeleton-gated lexicon supplement (inference-time)
 
-Ported espeak-ng-portable's restoreShortVowels cascade into vernacula as `restore.ts`, wired into phonemizeArabic
+Ported portable-espeak's restoreShortVowels cascade into vernacula as `restore.ts`, wired into phonemizeArabic
 AFTER the neural diacritizer:
   diacritize(sentence) → for each word whose g2p output is a SKELETON (0 vowels or a ≥3-consonant run, via the
   engine's own Seg.vowel) → override from the Tashkeela PAUSAL lexicon (direct → clitic/suffix strip → stem) →
@@ -160,7 +160,7 @@ sounds we should produce. Implemented as an ar preFold: drop a word-final SHORT 
 NOT stripping tanwin -Vn (over-matches real min/ʔan → net-negative, so excluded). Floor 0.40→0.48. ar re-labelled: the
 50% is explicitly NOT a quality signal (referee OOD + convention + ambiguity), pausal-register scope documented.
 
-## Run 8 — kaikki referee (pausal, multi-pron) + espeak-ng-portable head-to-head
+## Run 8 — kaikki referee (pausal, multi-pron) + portable-espeak head-to-head
 
 Built ar.kaikki-ara.tsv from kaikki-Arabic.jsonl (14,291 words, bare headword → PAUSAL IPA, MULTI-pron). Wired as
 the ar SECONDARY source; extended the eval to credit ANY of a word's listed pronunciations (backward-compatible with
@@ -172,7 +172,7 @@ and the standalone replica).
 | pipeline | match |
 |---|---|
 | ours — neural diacritizer PRIMARY + skeleton-gated lexicon supplement | **55.3%** |
-| espeak-ng-portable — authored lexicon PRIMARY + clitic/suffix strip + epenthesis (NO neural) | **69.8%** |
+| portable-espeak — authored lexicon PRIMARY + clitic/suffix strip + epenthesis (NO neural) | **69.8%** |
 
 **This tempers the ✅.** The referee is NOT pure noise — it discriminates quality, and the authored lexicon-PRIMARY
 architecture beats our neural-primary one by **+14.5 pts** on isolated/dictionary words. Root cause: we use the
@@ -189,7 +189,7 @@ specific, known architecture improvement) than a clean ✅.
 Switched phonemizeArabic from the skeleton-gated SUPPLEMENT to lexicon-PRIMARY (restore.ts lexiconPrimary): a direct
 Tashkeela hit is authoritative — it overrides the OOD neural output for any covered word; the neural is kept only for
 OOV (and its skeletons fall to clitic/suffix-strip + epenthesis). Measured: wikipron 50.0→57.4% (+7.4), kaikki
-55.3→62.6% (+7.3) — closing most of the 14.5-pt gap to espeak-ng-portable's authored 69.8%. Full suite 246 green;
+55.3→62.6% (+7.3) — closing most of the 14.5-pt gap to portable-espeak's authored 69.8%. Full suite 246 green;
 bare-text goldens unchanged. Remaining ~7-pt gap to espeak is likely g2p-convention differences + OOV handling (we
 keep the neural for OOV; espeak uses epenthesis) — smaller, partly notation. Floor 0.48→0.55. OPTION 2 (confidence
 hybrid — keep the neural where its CONTEXT disambiguates mid-sentence) is DEFERRED until a running-text referee can
@@ -197,7 +197,7 @@ actually measure the context trade-off, rather than guessing.
 
 ## Run 10 — WHAT we're missing (the 62.6 vs 69.8 gap, decomposed)
 
-Dumped espeak-ng-portable's output for all 14,291 kaikki words and split by who matches (same makeFold):
+Dumped portable-espeak's output for all 14,291 kaikki words and split by who matches (same makeFold):
 both-match 7260 · WE-only 1685 · **ESPEAK-only 2712** · neither 2634. The 2712 espeak-wins ARE "what we're missing":
 - **48% (1305) UNDER-voweled** — we dropped a vowel (ʔabd/ʔabħ/ʔaθ vs ref ʔabid/ʔabaħ/ʔaθaθ).
 - **43% (1156) DIFFERENT vowels, same count = AMBIGUITY** — our reading is valid but ≠ kaikki's (ʔubir vs ʔabar,
@@ -229,7 +229,7 @@ Fair prose test on 600 gold-diacritized modern sentences (modern_eval.txt): for 
 | pipeline | isolated (kaikki) | RUNNING TEXT (prose) |
 |---|---|---|
 | ours — neural + lexicon-primary | 62.6% | **65.7%** |
-| espeak-ng-portable — rule-based + supplement | 69.8% | **51.9%** |
+| portable-espeak — rule-based + supplement | 69.8% | **51.9%** |
 
 **The ranking REVERSES: on running text we beat espeak by +13.8 pts.** The neural's CONTEXT disambiguation — the whole
 point of a sentence-level model — dominates on the real TTS target, which the isolated-lemma referee structurally

@@ -87,7 +87,7 @@ Kamba letter and would misread a genuine foreign spelling.
 
     npx tsx tools/normalization/attest.ts --lang kam --words "asilimia,pasenti,ndola,paundi,…"
     npx tsx tools/normalization/sources.ts --lang kam
-    ESPEAK_NG=/home/chris/Programming/espeak-ng npx tsx tools/normalization/sources.ts --lang kam
+    ESPEAK_NG=<espeak-ng checkout> npx tsx tools/normalization/sources.ts --lang kam
 
 **Raw finding.**
 

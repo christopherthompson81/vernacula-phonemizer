@@ -1,11 +1,11 @@
 # Assamese (as) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/as-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/as-base` (pinned at the commit the work
 started from). Working branch: `norm-as-562`.
 
 ## Run 1 — 2026-07-31
 
-**Setup**: baseline emitted from `~/Programming/tmp/as-base` via
+**Setup**: baseline emitted from `<sibling checkout>/as-base` via
 `npx tsx tools/normalization/corpus-diff.ts emit --lang as --corpus as_in --out /tmp/as.base`;
 identical to `/tmp/as.before` (main tree). Referee baseline: `folded backbone: 2171/2982 (72.8%)`.
 

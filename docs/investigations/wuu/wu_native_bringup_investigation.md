@@ -6,9 +6,9 @@ front-end** (Hanzi is the orthography Wu speakers read) — but phonologically t
 we cover, so reading the same characters produces genuinely different output (上海 → Mandarin *shànghǎi*,
 Cantonese *soeng6hoi2*, **Shanghainese [zɑ̃hɛ]**).
 
-## Ported from espeak-ng-portable
+## Ported from portable-espeak
 
-espeak-ng ships nothing for Wu; we authored a full `wuu` bring-up in the sibling espeak-ng-portable project
+espeak-ng ships nothing for Wu; we authored a full `wuu` bring-up in the sibling portable-espeak project
 (7 runs — segmental, citation tone, numbers, left-prominent sandhi, the 陰平/陰去 split). This vernacula bring-up
 **ports that authoring** into the `yue` architecture:
 - `dict.tsv` (101,308 entries) — Han → Wugniu (zaonhe) readings from `authoring/wuu/{wuu_listx,wuu_words}`,
@@ -29,10 +29,10 @@ espeak-ng ships nothing for Wu; we authored a full `wuu` bring-up in the sibling
 
 ## Run 1 — 2026-07-15 — port + validation
 Generated `dict.tsv`, wrote `wu.jsonc` (ported the initial/final/tone maps) and `wu.ts`. Validated the converter
-against the espeak-ng-portable investigation golds: **14/14** (上海, 中國人, 好人, 你好, 國, 學, 謝, 羊, 雲, 話, 詩,
+against the portable-espeak investigation golds: **14/14** (上海, 中國人, 好人, 你好, 國, 學, 謝, 羊, 雲, 話, 詩,
 試, 好, 衣). One apparent miss (衣 → `i`, not `ji`) resolved to a **doc-prose transcription slip on my part**: the
 rime-wugniu reading for 衣 is bare `i1` (Wugniu writes the on-glide only where phonemic, e.g. 羊 `yan`), so `i˥˧`
-is the faithful port output, confirmed against the compiled espeak-ng-portable dict (`{"words":["衣"],"phonemes":
+is the faithful port output, confirmed against the compiled portable-espeak dict (`{"words":["衣"],"phonemes":
 "i1"}`). Three-way contrast, checked codas, sandhi words, and Han-numeral composition all verified.
 
 ## Result — 🔷 single-source verified (was 🟡; reclassified 2026-07-16)

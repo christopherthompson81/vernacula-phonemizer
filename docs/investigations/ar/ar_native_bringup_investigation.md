@@ -1,7 +1,7 @@
 # Arabic (ar) native bring-up — investigation
 
 Fifth native language. First Semitic / abjad. Sole census provider of ʕ ħ ˤ.
-espeak-ng-portable's ar is heavily customized (not stock espeak-ng): diacritization, al- assimilation,
+portable-espeak's ar is heavily customized (not stock espeak-ng): diacritization, al- assimilation,
 quantity-sensitive stress. Target convention = espeak-PORTABLE canonical.
 
 ## The two layers
@@ -47,7 +47,7 @@ CONVENTION: gemination Cː (consistent; espeak vacillates). Fold espeak narrow a
 ## Phase 2 plan — permissively-sourced neural diacritizer (USER-DIRECTED: not NC-encumbered)
 The espeak-portable ONNX diacritizer's only NC input is Leipzig ara_news_2020 (CC BY-NC). Clean path (per its
 own PROVENANCE): retrain the BiLSTM with the CATT teacher (Apache-2.0) silver-labeling Arabic Wikipedia
-(CC-BY-SA) instead of Leipzig — moots NC at the source. GPU present (RTX 3090). USE /mnt/data (333G free) for
+(CC-BY-SA) instead of Leipzig — moots NC at the source. GPU present (RTX 3090). USE <data root> (333G free) for
 the wiki dump + training. Pipeline exists: tools/diacritization/{catt_silver,train_bilstm_sent,export_onnx}.py.
 Then integrate via onnxruntime-node (optional dep, async pre-pass) → feeds the Phase 1 g2p.
 
@@ -70,7 +70,7 @@ Metrics vs 2500-word canonical (gemination CC↔Cː folded):
 2. numbers (Arabic-Indic + ASCII digits → words; the digit compositor).
 3. text() routing (words / numbers / punctuation / tanwin; ٪ etc).
 4. register es-style, tests, PR + review + merge as the cleanroom "diacritized Arabic" language.
-Then Phase 2: permissive BiLSTM retrain on /mnt/data (CATT teacher + Arabic Wikipedia) → onnxruntime-node pre-pass.
+Then Phase 2: permissive BiLSTM retrain on <data root> (CATT teacher + Arabic Wikipedia) → onnxruntime-node pre-pass.
 
 ## Phase 1 COMPLETE (pending PR/review)
 - Proclitic+article (وَال/بِال/لِل + hamzat-wasl elision + sun assimilation) + الّذي/الله lam-gemination → segments 96.0%.
@@ -83,7 +83,7 @@ Then Phase 2: permissive BiLSTM retrain on /mnt/data (CATT teacher + Arabic Wiki
 
 Residual (deferred edges, ~4%): initial إي→ʔiː defective spelling, الا hamzat-wasl (form VII/VIII), nasal
 place assim (broad/folded), number-word stress. Convention: gemination Cː, pausal (no case ending), fold
-secondary stress. NEXT: PR + review + merge, THEN Phase 2 permissive diacritizer retrain (/mnt/data).
+secondary stress. NEXT: PR + review + merge, THEN Phase 2 permissive diacritizer retrain (<data root>).
 
 ## PR #3 review + fixes
 Two reviewers (g2p; stress/numbers/text). 3 fixes:
@@ -101,7 +101,7 @@ Arabic vocalizes correctly → chained into vernacula phonemize → CORRECT IPA 
 kˈatab ʔatˤːˈaːlib ʔadːˈars). Plumbing PROVEN. Remaining Phase 2: port ~466 lines (arabicDiacritizer.ts +
 arabicDiacritizerModelOnnx.ts + helpers) into vernacula, onnxruntime-node OPTIONAL dep, async diacritize()
 pre-pass (phonemize stays sync), GITIGNORE the NC stand-in .onnx (local dev only), then permissive retrain
-(CATT + Arabic Wikipedia, /mnt/data) → swap the .onnx.
+(CATT + Arabic Wikipedia, <data root>) → swap the .onnx.
 
 ## Phase 2 COMPLETE — permissive neural diacritizer (bare text)
 Integration: ported ONNX inference (diacritizer.ts) + async phonemizeArabic() pre-pass; onnxruntime-node
@@ -114,5 +114,5 @@ CLEAN MODEL (fully permissive — user cleared Tashkeela as ancient-PD, but silv
   2.17% DER vs 2.36%, classical Fadel gold 4.21% vs 4.59%. Maximally-clean = best; no tradeoff. Tashkeela
   not needed.
 - Swapped clean int8 model into vernacula; 7 ar tests pass; bare text → correct IPA (الشمس تشرق في الصباح →
-  ʔaʃːˈams tˈuʃriq fˈiː ʔasˤːabˈaːħ). Pipeline: /mnt/data/ar-diac (dump→extract→catt_silver→train silver-only→
+  ʔaʃːˈams tˈuʃriq fˈiː ʔasˤːabˈaːħ). Pipeline: <data root> (dump→extract→catt_silver→train silver-only→
   export→int8). See src/languages/arabic/diacritizer.PROVENANCE.md.

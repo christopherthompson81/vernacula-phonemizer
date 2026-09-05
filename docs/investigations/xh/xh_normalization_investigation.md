@@ -101,7 +101,7 @@ and inventing an agreement on the numeral would be trap 14 (agreement cannot be 
 The whole risk in this layer is asserting a Xhosa word. `espeak-ng` **has no Xhosa at all** — and no Zulu:
 
 ```
-ls /home/chris/Programming/espeak-ng/dictsource/ | sed 's/_.*//' | sort -u
+ls <espeak-ng checkout>/dictsource/ | sed 's/_.*//' | sort -u
   → ab af am an ar as az ba be bg bn bpy bs ca chr cmn crh cs cv cy da de el en eo es et eu fa fi fo fr
     ga gd gn grc gu hak haw he hi hr ht hu hy ia id io is it ja jbo ka kaa kk kl kn ko kok ku ky la lb
     lfn lt lv mi mk ml mn mr ms mt mto my nci ne nl no nog om or pa pap piqd pl ps pt py qdb qu quc qya

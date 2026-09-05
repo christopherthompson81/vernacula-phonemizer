@@ -14,7 +14,7 @@ Create("kichee")` — only the factory was missing.
 
     ⚠ NO GOLDEN EXISTS, AND THE CORPUS-SOURCING GENERATOR CANNOT MAKE ONE.
 
-No FLEURS split (`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/` has no quc), no mined
+No FLEURS split (`$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/` has no quc), no mined
 artifact (`tools/corpus/mined/` is empty of quc), no TSV under `data/languages/kiche/` (only
 `kiche.jsonc`), and `kiche.ts` does not name the code `"quc"` — so `gen_parity_goldens.mts`'s
 lexicon tier returns `[]` and the generator skips the language. The only K'iche' text in this

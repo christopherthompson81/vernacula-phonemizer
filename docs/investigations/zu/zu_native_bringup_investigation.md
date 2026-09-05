@@ -2,14 +2,14 @@
 
 Target: isiZulu, canonical IPA. Nguni Bantu, Latin script. **AUTHORED beyond-espeak** — espeak ships only a
 crude "testing" voice and has no click phoneme at all; the reference is *our own* authored Zulu in
-espeak-ng-portable (a near-clone of Xhosa: `authoring/zu/{zu_rules,ph_zulu,zu_tone.tsv}`, validated there against
+portable-espeak (a near-clone of Xhosa: `authoring/zu/{zu_rules,ph_zulu,zu_tone.tsv}`, validated there against
 the epitran zul-Latn + kaikki referees). This port lifts that authored convention directly into vernacula. Fills
-the census click gaps ǀ ǃ ǁ. Gold = espeak-ng-portable's canonical-mode output over the 50k corpus (our authored
+the census click gaps ǀ ǃ ǁ. Gold = portable-espeak's canonical-mode output over the 50k corpus (our authored
 output), 49,621 words.
 
 ## Architecture — longest-match rule g2p + penult length + lexical tone
 `g2p.ts` is a longest-match orthography→IPA scan (trigraphs/digraphs before the bare letter, so clicks and
-affricates resolve as single phonemes). The ortho→IPA table is the composition of espeak-ng-portable's
+affricates resolve as single phonemes). The ortho→IPA table is the composition of portable-espeak's
 `zu_rules` (ortho→phoneme-mnemonic) with `ph_zulu` (mnemonic→IPA):
 - **15-way click series**: c/q/x → kǀ/kǃ/kǁ; aspirated ch/qh/xh; voiced-depressor gc/gq/gx (ɡ̤ǀ…); nasal
   nc/nq/nx (ŋǀ…); breathy-nasal ngc/ngq/ngx (ŋ̤ǀ…); ejective-nasal nkc/nkq/nkx (ŋǀʼ…).

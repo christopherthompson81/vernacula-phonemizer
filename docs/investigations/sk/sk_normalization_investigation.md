@@ -2,7 +2,7 @@
 
 Chronological. Each run: the command, the question it was meant to answer, the raw finding, the implication.
 
-Corpus: FLEURS `sk_sk`, `/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/sk_sk/{train,dev,test}.tsv`,
+Corpus: FLEURS `sk_sk`, `$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/sk_sk/{train,dev,test}.tsv`,
 **column 3** (cased) — 1,719 unique utterances. Mined artifact: `tools/corpus/mined/sk.jsonc` (already
 committed, 1,714 segments, 24/30 cells).
 
@@ -210,7 +210,7 @@ nula*, i.e. the number is not merely mis-grouped, it is unrecognisable.
 Question: where does each word this layer will emit come from?
 
 Sources consulted: the corpus itself (token counts over sk.txt), and
-`/home/chris/Programming/espeak-ng/dictsource/sk_list` (READ, never invoked).
+`<espeak-ng checkout>/dictsource/sk_list` (READ, never invoked).
 
 Corpus attestation (`grep -oiE`, counts):
 

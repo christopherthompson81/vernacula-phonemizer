@@ -85,7 +85,7 @@ kaikki (CC BY-SA) is the clean source; a larger permissive Egyptian corpus remai
 Found the scale lever after all — CAMeL Tools `calima-egy` (GPL) diacritizes Egyptian at scale, and per ADR-0014
 a model trained on its *outputs* is clean (facts-not-expression; GPL doesn't propagate to a silver-trained
 student — the same teacher→student pattern the MSA diacritizer used with the Apache CATT teacher). Pipeline (RTX
-3090, camel-tools venv, /mnt/data/arz-diac): extract **Masri Wikipedia** (CC-BY-SA, 350k sentences) + the **MIT
+3090, camel-tools venv, <data root>): extract **Masri Wikipedia** (CC-BY-SA, 350k sentences) + the **MIT
 dialect-corpus** Egyptian subset (90k) → `calima_egy_silver.py` (calima-egy analyzer + MIT BERT disambiguator →
 diacritized silver, **6 parallel GPU workers**, 99% util) → OOV-filter + 90/5/5 split (222,888 train) →
 `train_bilstm_sent.py --pausal 1` (silver-only, same arch/alphabet as MSA) → int8 ONNX (15 MB). **TEST DER
@@ -194,7 +194,7 @@ Impact: SHIPPED path (lexicon:true) covers **75.9%** of the wikipron-arz referee
 value is the correct vocalization for the FLEURS `ar_eg` audio, not the number); rule-only eval UNCHANGED at 47.5%
 (non-circular). 30 arabic tests pass (2 regression-gold values updated to the new consistent convention: ازاى
 ezzaːj→ezːaːj gemination, برتقان burtuʔaːn→bortoʔaːn majhūl o per kaikki). Rebuild is deterministic from the kaikki
-dump; no build script committed (one-off from /mnt/data/kaikki-arz.jsonl).
+dump; no build script committed (one-off from <data root>).
 
 ## Run — 2026-08-20 — the cosine retrain: DER halves, pronunciation does not
 
@@ -236,7 +236,7 @@ could not be independently corroborated. That conflates *"unverified"* with *"ab
 trained further, in less disagreement with its corpus; it is better on its objective (DER), better on the
 silver runtime harness, and unchanged on the audio — **nothing measures it worse**. Absence of an independent
 referee is a fact about Egyptian's instruments, not about the model. Checkpoint archived at
-`/mnt/data/arz-diac/bilstm_egy_cosine.pt`.
+`<data root>/bilstm_egy_cosine.pt`.
 
 **⚠ THE BINDING CONSTRAINT IS THE REFEREE, AND IT WAS ALREADY DOCUMENTED (Run 3, "DATA-BLOCKED").** Egyptian
 has exactly two machine-readable IPA sources and they are the same upstream: wikipron arz (590–800 words) IS

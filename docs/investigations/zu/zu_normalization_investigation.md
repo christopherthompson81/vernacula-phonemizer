@@ -169,10 +169,10 @@ grep -owE '<word>' zu.col3 | wc -l
 espeak has **no Zulu at all** — this is the trap-16 proof, not a feeling:
 
 ```
-ls /home/chris/Programming/espeak-ng/dictsource/ | wc -l         → 439
-ls /home/chris/Programming/espeak-ng/dictsource/ | grep -iE 'zul|^zu'  → (no output, exit 1)
-find /home/chris/Programming/espeak-ng -iname '*zu*' -not -path '*/.git/*'
-  → /home/chris/Programming/espeak-ng/android/res/values-zu        (an Android string resource)
+ls <espeak-ng checkout>/dictsource/ | wc -l         → 439
+ls <espeak-ng checkout>/dictsource/ | grep -iE 'zul|^zu'  → (no output, exit 1)
+find <espeak-ng checkout> -iname '*zu*' -not -path '*/.git/*'
+  → <espeak-ng checkout>/android/res/values-zu        (an Android string resource)
 ```
 
 The in-repo referee is `tools/referee-eval/referees/zu.epitran-zul-Latn.tsv` (1,053 lines) — a

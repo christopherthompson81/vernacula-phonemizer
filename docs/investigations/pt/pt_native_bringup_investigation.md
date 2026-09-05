@@ -23,7 +23,7 @@ r/l/z/x, i/u, or a nasal (-im/-um, ão/ãe/õe); else paroxytone (penult). Writt
 
 ## Run 1 — scaffold + first g2p
 (in progress)
-Referee: espeak-ng pt shim (../espeak-ng-portable/tools/espeak-ng -v pt) as a REGRESSION guard only — its
+Referee: espeak-ng pt shim (../portable-espeak/tools/espeak-ng -v pt) as a REGRESSION guard only — its
 convention differs (no e→ɨ pretonic reduction: pequeno→pekˈenʊ not pɨkˈenu; final o→ʊ not u). Canonical target
 is standard EP. An independent referee (wikipron por) to be wired before any "verified" claim.
 

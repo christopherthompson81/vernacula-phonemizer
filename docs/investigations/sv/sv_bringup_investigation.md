@@ -58,7 +58,7 @@ independent secondary referee (the current `secondaryGap`).
 
 ## Run 4 — 2026-07-14 — Phase 2: NST pitch-accent + stress lexicon
 
-espeak-ng-portable has a full Swedish Phase-2 setup — the CC0 **NST Pronunciation Lexicon**
+portable-espeak has a full Swedish Phase-2 setup — the CC0 **NST Pronunciation Lexicon**
 (`swe030224NST.pron`) + `data/sv/accent-lexicon.tsv`. Reused it (the abstract, convention-independent features
 only — NOT the espeak-convention segments).
 
@@ -68,7 +68,7 @@ only — NOT the espeak-convention segments).
 Restricted to the 50k frequency corpus, homographs majority-resolved. Output committed:
 `src/languages/swedish/accent-stress.tsv` (42,052 words, 11,075 with a non-initial stress ordinal, ~480KB).
 
-**First tried** deriving from espeak-ng-portable's `accent-lexicon.tsv` col-3 IPA corrections — but col 3 only
+**First tried** deriving from portable-espeak's `accent-lexicon.tsv` col-3 IPA corrections — but col 3 only
 covers words espeak MIS-stresses (relative to espeak's rule), so `polis`/`station` (which espeak stressed
 correctly, non-initially) had no correction and stayed wrong. Went to the NST **source** for ABSOLUTE stress
 instead → fixed them.
@@ -140,7 +140,7 @@ ship-safe:
   `påsken → på+sken` (would mis-soften sk→ɧ giving *poɧen* for /ˈpoːskɛn/).
 These produce WRONG pronunciations, so a blind splitter is net-negative. A safe splitter needs fogemorfem-aware
 junctures + a frequency-weighted, function-word-excluded free-morpheme list — a larger effort. Notably
-espeak-ng-portable's own sv convergence doc also leaves "NST compound-juncture conventions" as a residual, so
+portable-espeak's own sv convergence doc also leaves "NST compound-juncture conventions" as a residual, so
 this is a genuinely hard sub-problem, deferred rather than shipped with regressions.
 
 **Still deferred:** compound decomposition (above), OOV loanword stress (words outside the 50k corpus → first

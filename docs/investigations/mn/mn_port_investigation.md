@@ -36,13 +36,13 @@ Three porting hazards actually present here:
 Question: PORTING.md's widening (1) is the corpus-wide FLEURS differential. `normalize.ts`'s header opens
 with "⚠ THE SOURCING SITUATION, STATED PLAINLY. There is NO FLEURS corpus for Mongolian." Is that true?
 
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/ | grep mn   →  mn_mn
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/mn_mn/       →  train.tsv dev.tsv test.tsv
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/ | grep mn   →  mn_mn
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/mn_mn/       →  train.tsv dev.tsv test.tsv
     cut -f3,4 …/{train,dev,test}.tsv | tr '\t' '\n' | sort -u | wc -l      →  3,982
 
 **It is not true.** `mn_mn` exists with all three splits, and the sanity check PORTING.md asks for passes —
 the first line of the extracted list is a SENTENCE, not a WAV filename (column 3, not column 2). There is
-also `/mnt/data/omnivoice_ipa/work/phonemized_vernacula/byid/mn_mn.tsv`, 3,074 rows.
+also `$ASR_ALIGN_ROOT/work/phonemized_vernacula/byid/mn_mn.tsv`, 3,074 rows.
 
 That is not bookkeeping. `normalize.ts` argues its refusals from **one** source ("attest.ts against
 mn.wikipedia — WHICH IS THE WIKI THE ARTIFACT WAS MINED FROM, so that is a bigger sample of ONE source and

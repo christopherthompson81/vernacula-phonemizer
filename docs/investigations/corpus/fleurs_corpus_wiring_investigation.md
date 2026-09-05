@@ -66,7 +66,7 @@ modelling question, not a fact, so those two are left alone and named.
 
 `$FLEURS` was unset, which is why every recent round wrote `--corpus mined:<lang>`; a `hy` investigation doc
 from an earlier round records `FLEURS=unset` in as many words. The root is
-`/mnt/data/omnivoice_ipa/corpus`:
+`$ASR_ALIGN_ROOT/corpus`:
 
 ```
 fleurs_transcripts/data/   66 languages × {train,dev,test}.tsv    179M
@@ -145,7 +145,7 @@ their worktrees do not contain `.claude/` — so this is a hazard for the PARENT
   heuristic tolerates `pt-BR` and still flags `pbt`, which shares `ps_af` with `ps` and has no shared
   prefix). Verified by deliberately re-flagging `eu` and confirming the warning fires.
 - `vitest.config.ts` — new, scoping the suite to `test/`.
-- `/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/{umb_ao,luo_ke,kam_ke,kea_cv,bs_ba}` — fetched.
+- `$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/{umb_ao,luo_ke,kam_ke,kea_cv,bs_ba}` — fetched.
   Outside the repo, so nothing is committed for it; this log is the record that it exists.
 
 ## Backlog

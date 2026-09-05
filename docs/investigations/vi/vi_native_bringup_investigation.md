@@ -2,10 +2,10 @@
 
 Target: Northern (Hanoi) Vietnamese, canonical IPA, espeak-independent. Slot #12 in the OmniVoice coverage set
 (contributes `ˀ` glottalization + `ɗ` implosive). Vietnamese is written as space-separated MONOSYLLABLES; each
-syllable is onset + (glide) + nucleus + tone + coda. espeak has solid Vietnamese, so the espeak-ng-portable
+syllable is onset + (glide) + nucleus + tone + coda. espeak has solid Vietnamese, so the portable-espeak
 canonical output is the oracle.
 
-## Convention (from the espeak-ng-portable canonical output)
+## Convention (from the portable-espeak canonical output)
 - **6 Northern tones** as Chao contour letters AFTER the nucleus: ngang (no mark) `˧` (33), huyền `˨˩` (21),
   sắc `˧˥` (35), hỏi `˧˩˧` (313), ngã `˧ˀ˥` (creaky), nặng `˨˩ˀ` (heavy/glottal).
 - Onsets: đ→`ɗ` (implosive), t→`t̪` (dental), th→`tʰ`, ch/tr→`t͡ɕ`, nh→`ɲ`, ng/ngh→`ŋ`, kh→`x`, ph→`f`,
@@ -19,7 +19,7 @@ canonical output is the oracle.
 2. **Onset** by longest orthographic match (digraphs first). qu → kw (u is the glide) except before ô/ơ where
    u+ô is the nucleus (quốc→kuək); gi → z, with the i rejoining a following iê diphthong (giết→ziɛt̪).
 3. **Rhyme lookup**: Vietnamese rhymes are a CLOSED set (~375), so the rhyme (everything after the onset) is
-   looked up in `rhymes.tsv` (derived from the espeak-ng-portable gold, filtered to Vietnamese-only phonemes) —
+   looked up in `rhymes.tsv` (derived from the portable-espeak gold, filtered to Vietnamese-only phonemes) —
    the same data-driven approach as the Japanese reading map. This captures the context rules (anh→eɲ, ach→ek,
    oa→waː) as data.
 4. **Assembly**: onset + glide + ˈ + nucleus + tone + coda.

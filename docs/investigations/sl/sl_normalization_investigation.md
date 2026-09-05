@@ -3,7 +3,7 @@
 Chronological. Each run: the command, the question it answered, the RAW finding, what it implies next.
 Negative results and dead ends are kept deliberately.
 
-Corpus: FLEURS `sl_si`, `/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/sl_si/{train,dev,test}.tsv`,
+Corpus: FLEURS `sl_si`, `$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/sl_si/{train,dev,test}.tsv`,
 **column 3 (0-indexed 2)** — the cased original. 3,695 rows → **1,903 unique cased utterances**.
 Artifact: `tools/corpus/mined/sl.jsonc` (already committed; 1,899 segments, 23/30 cells).
 

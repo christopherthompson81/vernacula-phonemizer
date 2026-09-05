@@ -41,9 +41,9 @@ TS:
 
 **Question.** Does Tatar have FLEURS text for the corpus-wide differential?
 
-    $ ls /mnt/data/omnivoice_ipa/work/phonemized_vernacula/byid/ | grep -i '^tt'
+    $ ls $ASR_ALIGN_ROOT/work/phonemized_vernacula/byid/ | grep -i '^tt'
     (nothing — 102 languages there, tt is not one)
-    $ ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/ | grep -i 'tt\|tatar'
+    $ ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/ | grep -i 'tt\|tatar'
     (nothing)
 
 **Finding — NEGATIVE, the same shape as the Shan port two commits ago.** *No FLEURS transcript for

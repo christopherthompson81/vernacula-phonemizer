@@ -29,9 +29,9 @@ finalOne / `[number,string][]` magnitudes), same `[[…]]`-in-JSON problem, and 
 **Question.** PORTING.md wants a corpus-wide differential (1) and off-golden probes (2). Does Shan
 have FLEURS text?
 
-    $ ls /mnt/data/omnivoice_ipa/work/phonemized_vernacula/byid/ | grep -i shn
+    $ ls $ASR_ALIGN_ROOT/work/phonemized_vernacula/byid/ | grep -i shn
     (nothing)
-    $ find /mnt/data -ipath "*fleurs*" -name "*shn*"
+    $ find <data root> -ipath "*fleurs*" -name "*shn*"
     (nothing)
 
 **Finding — NEGATIVE, and it changes the plan.** *There is no FLEURS transcript for Shan.* Per

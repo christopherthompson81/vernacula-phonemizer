@@ -3,7 +3,7 @@
 Target: **Crimean Tatar** (qırımtatar tili) — KIPCHAK Turkic with strong OGHUZ influence, ~540k
 speakers (Crimea + a large diaspora, Turkey/Central Asia). The standard Latin alphabet is Turkish-
 based and highly phonemic. Canonical IPA, espeak-independent. Joins the Turkic family (a sibling of
-Karakalpak/Tatar/Kazakh; the espeak-ng-portable memory flagged crh + nog as the remaining Turkic).
+Karakalpak/Tatar/Kazakh; the portable-espeak memory flagged crh + nog as the remaining Turkic).
 
 ## Run 1 — referee landscape (2026-07-27)
 

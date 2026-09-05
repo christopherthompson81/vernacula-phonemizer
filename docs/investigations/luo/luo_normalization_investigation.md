@@ -7,7 +7,7 @@ added one.
 ⚠ **THE CORPUS IS FLEURS AND THERE IS NO MINED ARTIFACT.** `mine.ts scan` is unavailable and
 `review.ts --lang luo` reports `artifact tracked … missing` by construction. Every count below was taken by
 hand over the deduplicated column 3 of
-`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/luo_ke/{train,dev,test}.tsv` — **2,742 rows →
+`$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/luo_ke/{train,dev,test}.tsv` — **2,742 rows →
 1,660 unique cased utterances** (FLEURS repeats each sentence per speaker).
 
 ---
@@ -213,7 +213,7 @@ told otherwise — and it is why the currency rule below is local.
 ## Run 6 — 2026-08-16 — sourcing: espeak ships no Luo, and **there is no Dholuo Wikipedia**
 
 ```
-ESPEAK_NG=/home/chris/Programming/espeak-ng npx tsx tools/normalization/sources.ts --lang luo
+ESPEAK_NG=<espeak-ng checkout> npx tsx tools/normalization/sources.ts --lang luo
 npx tsx tools/normalization/attest.ts --lang luo --words nukta,nyaka,dola,paund,…
 ```
 

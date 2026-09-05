@@ -175,9 +175,9 @@ languages. So the text side of the dataset is exhausted; the audio side is not.
 
 ### Route
 
-Local audio: `/mnt/data/omnivoice_ipa/corpus/audio_cache/data/<corpus>/audio/train.tar.gz`, 29 languages, 46G.
+Local audio: `$ASR_ALIGN_ROOT/corpus/audio_cache/data/<corpus>/audio/train.tar.gz`, 29 languages, 46G.
 ASR: AI4Bharat IndicConformer, ONNX, 22 Indic languages with per-language vocab spans —
-`/home/chris/models/indicconformer_600m_onnx`, driven by
+`<local path>`, driven by
 `vernacula/scripts/indicconformer_export/validate_indicconformer_package.py` (pure onnxruntime, no torch).
 
 ⚠ `indicconformer_onnx` (the 400M export) decodes EMPTY, including on the reference audio its own docs use. A
@@ -334,7 +334,7 @@ cannot re-orthographize, which is exactly the Whisper failure mode.
 
 ### ⚠ THE `omnivoice_ipa` MANIFEST `ipa` FIELD IS OUR OWN OUTPUT — NOT AN AUDIO REFEREE
 
-`/mnt/data/omnivoice_ipa/corpus/tokens/manifest_<corpus>.jsonl` carries a per-utterance `ipa` field, and the
+`$ASR_ALIGN_ROOT/corpus/tokens/manifest_<corpus>.jsonl` carries a per-utterance `ipa` field, and the
 corpus name invites reading it as audio-derived. It is not. Compared against `phonemize()` on the same text for
 am/xh/zu it is **essentially identical** — same phone inventory, same stress marks, same idiosyncratic click
 transcription (`ikʼwiŋɡ̤iŋ̤ǃˈaːna`); the only differences are older behaviour (am lacks today's `diɡɨɾi sˈiː`,

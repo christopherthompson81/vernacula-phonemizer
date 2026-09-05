@@ -22,7 +22,7 @@ specifics:
 - wikipron deu_latn_broad_filtered (57k) — REJECTED as primary: no stress, inconsistent length (Vater→fatɐ),
   devoiced diacritics (Tag→d̥aːɡ̊), -ig→k.
 - **kaikki German** (Wiktionary, 1 GB) — CLEAN, stress + length: ˈɡʁaːtɪs, zɛpˈtɛmbɐ, zynoˈnyːm, fʁaɪ̯. Stream-
-  extracted to /mnt/data/de_kaikki.tsv. Stress source + validation referee (single Wiktionary source caveat).
+  extracted to <data root> Stress source + validation referee (single Wiktionary source caveat).
 
 ## Run 1 — data + core g2p
 (in progress)

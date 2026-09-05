@@ -16,7 +16,7 @@ case 200/200 pins C#↔TS parity and nothing about coverage.
 **Command / finding.**
 
     grep -c mag tools/gen_variant_golden.mts        → 0 (mag is not a variant target)
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data | grep mag   → nothing
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data | grep mag   → nothing
     tools/corpus/mined/mag.jsonc                    → 897 segments, "mag.wikipedia.org
                                                        (random 400 + targeted insource: fill;
                                                         NO DUMP is published for this wiki)"

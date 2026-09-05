@@ -35,7 +35,7 @@ Porting notes, all of which the contract already covers:
 
 ## Run 2 — 2026-08-29 09:35 — does rup have a FLEURS corpus? (checked, not assumed — the #1102 lesson)
 
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/ | grep -i rup   →  (empty)
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/ | grep -i rup   →  (empty)
 
 **rup genuinely has no FLEURS split.** PORTING.md's widening (1) is therefore unavailable, and the weight
 falls on the two corpus artifacts plus hand probes — the tn/la situation, not the mn one. The artifacts

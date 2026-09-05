@@ -1,10 +1,10 @@
 # Uzbek (uz) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/uz-base` (pinned at the commit the work started from).
+Chronological record. Baseline worktree: `<sibling checkout>/uz-base` (pinned at the commit the work started from).
 
 ## Run 1 — 2026-07-31
 
-**Setup**: baseline emitted from `~/Programming/tmp/uz-base` via
+**Setup**: baseline emitted from `<sibling checkout>/uz-base` via
 `npx tsx tools/normalization/corpus-diff.ts emit --lang uz --corpus uz_uz --out /tmp/uz.base`;
 identical to `/tmp/uz.before` (main tree). Referee baseline: `folded backbone: 328/330 (99.4%)`.
 

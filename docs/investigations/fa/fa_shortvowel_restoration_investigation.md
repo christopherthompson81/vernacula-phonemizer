@@ -56,7 +56,7 @@ don't inflate the folded score. Measuring an abjad→IPA lexicon's "unfolded gai
 therefore be **circular** (the gold IS the lexicon's source). The honest metric is real-text **frequency
 coverage**.
 
-Measured the 9.3k gold against the committed fa frequency wordlist (`espeak-ng-portable
+Measured the 9.3k gold against the committed fa frequency wordlist (`portable-espeak
 tools/qa-compare/words-50000.fa.txt`, 15.8k types, frequency-ranked):
 
 | span | coverage |
@@ -182,7 +182,7 @@ Tajik nor the abjad can disambiguate context-free — that's the ceiling the *se
 
 ## Run 6 — the model: a BiLSTM that targets IPA DIRECTLY, not harakat (2026-07-20)
 
-Built the dataset, trained a model on the GPU (`/mnt/data/ar-diac-venv`, torch+cuda), and tested whether it aligns
+Built the dataset, trained a model on the GPU (`<data root>`, torch+cuda), and tested whether it aligns
 closer to the expected IPA. **Architectural pivot (Chris): target IPA, not harakat** — where we diverge from the
 mature `tools/perso-arabic/` pipeline (skeleton→harakat→[g2p]→IPA).
 

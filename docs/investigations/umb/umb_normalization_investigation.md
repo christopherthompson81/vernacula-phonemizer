@@ -241,7 +241,7 @@ any case — **no degree word is sourceable** (Run 8) — so `º` is left entire
 
 ```
 npx tsx tools/normalization/sources.ts --lang umb
-ESPEAK_NG=/home/chris/Programming/espeak-ng npx tsx tools/normalization/sources.ts --lang umb
+ESPEAK_NG=<espeak-ng checkout> npx tsx tools/normalization/sources.ts --lang umb
 npx tsx tools/normalization/attest.ts --lang umb --words "porcento,metelo,kilometelo,…"   # 42 words
 curl -s -o /dev/null -w "%{http_code}" "https://umb.wikipedia.org/w/api.php?…"
 ```

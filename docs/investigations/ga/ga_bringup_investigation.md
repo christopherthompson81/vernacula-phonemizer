@@ -3,7 +3,7 @@
 FIRST Celtic/Goidelic. THE novel axis: BROAD (velarized ˠ) vs SLENDER (palatalized ʲ) consonants — every
 consonant has two forms, orthographically determined by flanking vowels (*caol le caol, leathan le leathan*:
 a consonant is slender next to e/i, broad next to a/o/u). Target: Standard/Connacht-ish canonical IPA.
-Oracle: espeak-ng-portable's mature authored ga engine (`phonemize(w, loadLanguage("ga"))` — full ˠ/ʲ).
+Oracle: portable-espeak's mature authored ga engine (`phonemize(w, loadLanguage("ga"))` — full ˠ/ʲ).
 Referee: wikipron gle_latn broad (21k, but 3-DIALECT multi-pron, heavy vowel variation → ~34% ceiling even
 for a mature engine; the referee is vowel-noise-dominated, NOT a tight guard).
 
@@ -28,7 +28,7 @@ monosyllables), unstressed short vowels → ə.
 **Fixes in-run:** monosyllables DO take stress; unstressed short-vowel reduction → ə (madra→mˠˈad̪ˠɾˠə);
 doubled consonant collapse (carr→kˈaɾˠ); final -dh/-gh silent (chéadaigh→çˈeːd̪ˠə — the -aigh/-idh endings).
 
-**21/24 exact vs the espeak-ng-portable canonical oracle** (the broad/slender + reduction + stress + lenition
+**21/24 exact vs the portable-espeak canonical oracle** (the broad/slender + reduction + stress + lenition
 + digraph system). **Referee 42.6%** — ABOVE the ~34% ceiling a mature engine hits on this referee, because we
 fold the 3-dialect vowel-noise (the wikipron gle referee mixes Connacht/Munster/Ulster with heavy vowel
 variation; it is NOT a tight guard). Unit test 5/5.
@@ -82,7 +82,7 @@ Kept borb/colm svarabhakti (linguistically correct; the oracle is inconsistent t
 
 ## Run 3 — 2026-07-14 — g2p rule-mining + referee-gated Connacht lexicon
 
-Goal (user): "improve g2p rules AND expand coverage." Distilled the espeak-ng-portable ga oracle over the 50k
+Goal (user): "improve g2p rules AND expand coverage." Distilled the portable-espeak ga oracle over the 50k
 corpus (42,326 words), diffed against the pure g2p, and clustered the vowel divergences to separate GENERALIZABLE
 rules from genuinely LEXICAL residue.
 
@@ -97,7 +97,7 @@ rules from genuinely LEXICAL residue.
 - Oracle keeps unstressed short i as **ɪ** (féidir→…dʲɪɾʲ); the referee shows **ə** (…dʲəɾʲ) — real Connacht
   reduces it. Kept our reduction; a tempting "3283-word win toward the oracle" was an over-fit AWAY from ground
   truth. Same for the oracle's spurious `iːə` break (níos: referee iːsˠ, no schwa) and its Munster before-nn/m
-  tense diphthongs (ceann: referee plain /a/, not caᶷ). LESSON: the espeak-ng-portable oracle has espeak DIALECT
+  tense diphthongs (ceann: referee plain /a/, not caᶷ). LESSON: the portable-espeak oracle has espeak DIALECT
   artefacts; validate vowel quality against the independent referee, not the oracle.
 
 **Lexicon (tools/gen/build-ga-lexicon.mts → src/languages/irish/lexicon.tsv, 8108 entries):** oracle-distilled,

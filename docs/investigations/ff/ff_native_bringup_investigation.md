@@ -1,10 +1,10 @@
 # Fula (ff) native bring-up
 
 Target: Fulfulde, canonical IPA. Slot #17 in the OmniVoice coverage set (contributes the prenasalized ⁿ ᵐ ᵑ
-and the implosive ʄ). Authored beyond-espeak (espeak ships no Fula); espeak-ng-portable authored it, so its
+and the implosive ʄ). Authored beyond-espeak (espeak ships no Fula); portable-espeak authored it, so its
 snapshot is the reference. SOLE census provider of the implosives ʄ (ƴ) / ɠ.
 
-## Convention (from espeak-ng-portable's authored ff_rules / ph_fula)
+## Convention (from portable-espeak's authored ff_rules / ph_fula)
 Latin/Adlam-Latin orthography is shallow → a longest-match orthography→IPA scan (digraphs first):
 - vowels a e i o u; doubled → long (aa→aː …);
 - prenasalized digraphs mb→ᵐb, nd→ⁿd, nj→ⁿd͡ʒ, ng→ᵑɡ, and nng→ŋːɡ; ny→ɲ;
@@ -14,7 +14,7 @@ Latin/Adlam-Latin orthography is shallow → a longest-match orthography→IPA s
 - Stress is PENULTIMATE (Fulfulde→fulfˈulde).
 
 ## Validation
-vs the espeak-ng-portable authored snapshot (50k words): **exact 95.48%**. The residual is essentially all
+vs the portable-espeak authored snapshot (50k words): **exact 95.48%**. The residual is essentially all
 FOREIGN tokens that pollute the corpus (English/French loanwords Queen/Mosque/Republique, abbreviations
 BBC/css/CCM/pp, URLs www) — many pass an ASCII filter, so the "genuine Fula" bucket is inflated. Genuine Fula
 accuracy is ~99%+.

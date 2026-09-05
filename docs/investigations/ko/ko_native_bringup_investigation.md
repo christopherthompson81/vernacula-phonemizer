@@ -3,7 +3,7 @@
 Target: Seoul-standard Korean, canonical IPA, espeak-independent. Slot #14 in the OmniVoice coverage set
 (contributes `̚` unreleased stop + `͈` tense/fortis). Korean is written in HANGUL — a featural alphabet composed
 into syllable blocks; each block decomposes algorithmically into initial (L) / medial (V) / final (T) jamo.
-espeak has solid Korean, so the espeak-ng-portable canonical output is the oracle. This is the most
+espeak has solid Korean, so the portable-espeak canonical output is the oracle. This is the most
 allophony-heavy language in the set — Korean's phonology is a web of cross-syllable sandhi.
 
 ## Engine (g2p.ts)
@@ -29,15 +29,15 @@ this is exact: open+closed → stress 2 (사람→sɐɾˈɐm), everything else �
 ## Lexical tensification (경음화) — a lexicon, NOT a rule
 The one class of Korean tensing that is NOT phonologically derivable: Sino-Korean §26 (한자어 ㄹ받침 + ㄷㅅㅈ →
 된소리: 갈등→kɐɭt͈ɯŋ), 사잇소리 compounds (물고기→muɭk͈oɡi), and loanword-initial fortis (게임→k͈eim). The
-espeak-ng-portable investigation MEASURED that no rule works — ㄹ+ㄷ is only 14% tense, ㄹ+ㅅ 43% (a blanket
+portable-espeak investigation MEASURED that no rule works — ㄹ+ㄷ is only 14% tense, ㄹ+ㅅ 43% (a blanket
 "ㄹ+C→tense" would be wrong 57–88% of the time), because §26 is scoped to Hanja-origin morphemes that Hangul
 doesn't mark. So `tensification.tsv` (1,208 entries, `word → syllable indices whose onset tenses`) is ported
-from espeak-ng-portable's `koreanTensLexicon.ts` — itself sourced from wikipron (independent human data). We
+from portable-espeak's `koreanTensLexicon.ts` — itself sourced from wikipron (independent human data). We
 force-tense those onsets (a tense onset never voices); native ㄹ+C words absent from the lexicon stay lenis
 (알다→ɐɭdɐ), so no over-tensing.
 
 ## Validation
-vs the espeak-ng-portable canonical gold (26.8k Hangul words): **exact 91.2%, segmental 99.4%**. Residual:
+vs the portable-espeak canonical gold (26.8k Hangul words): **exact 91.2%, segmental 99.4%**. Residual:
 - ~0.6% segmental — tensing words beyond the 1,208-entry lexicon's coverage (it is word-level, so a tensing
   word not in wikipron, or inside a spaceless compound, is missed).
 - ~8% stress-position — the 11% closed+closed exceptions and longer-word cases beyond the first-heavy rule.

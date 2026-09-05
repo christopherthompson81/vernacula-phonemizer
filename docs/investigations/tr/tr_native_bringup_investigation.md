@@ -3,12 +3,12 @@
 Target: Standard Turkish, canonical IPA, espeak-independent. Slot #11 in the OmniVoice coverage set
 (contributes the dark-L `ɫ`). Turkish orthography is shallow and near-1:1 (vowel harmony is already spelled
 out), so the engine is a rule-based left-to-right g2p — no pronunciation lexicon. espeak has solid Turkish, so
-the espeak-ng-portable *canonical* output (its Turkic-fleet convergence) is the oracle/reference.
+the portable-espeak *canonical* output (its Turkic-fleet convergence) is the oracle/reference.
 
-## Convention (from the espeak-ng-portable canonical output)
+## Convention (from the portable-espeak canonical output)
 Clean phonemic vowels: a e ı i o ö u ü → `a e ɯ i o ø u y` (front = e i ö ü, back = a ı o u). Consonants are
 direct except: c→`d͡ʒ`, ç→`t͡ʃ`, ş→`ʃ`, j→`ʒ`, y→`j`, r→`ɾ`, and the context rules below. Stress mark `ˈ`
-sits immediately before the stressed vowel. (espeak-ng-portable reaches this via `canonicalGlyphMap`
+sits immediately before the stressed vowel. (portable-espeak reaches this via `canonicalGlyphMap`
 ø→y/œ→ø/ɪ→i/ʊ→u/ɛ→e/ɔ→o/r→ɾ + a `k→c`/front-vowel relabel; we emit the canonical values directly.)
 
 Context rules:
@@ -31,7 +31,7 @@ pre-accenting suffix. Implemented as a general morphology rule (`morphStress`), 
   (kaybetme→kajbˈetme), generalizing copula **-DIr** (güzeldir→ɟyzˈeldiɾ), predicative person endings
   **-Im/-sIn/-Iz/-sInIz** (evdeyim→evdˈejim) — each optionally followed by one trailing person/case/plural
   suffix, anchored to the word end (leftmost boundary wins via a single alternation regex).
-- a small hand-authored lexicon (`stress.tsv`, 116 place names / loanwords, from espeak-ng-portable).
+- a small hand-authored lexicon (`stress.tsv`, 116 place names / loanwords, from portable-espeak).
 - Number words bypass the pre-accenting rules (they are lexically final-stressed; the -Iz rule would otherwise
   mis-stress dokuz→dˈokuz).
 
@@ -50,7 +50,7 @@ Number words are emitted space-separated, each stressed (the vernacula conventio
 into one phonological word with stress subordination (12→onici) — a convention difference, not an error.
 
 ## Run 1 — segmental engine + baseline stress — 2026-07-12
-Built g2p.ts + turkish.ts + numbers.ts + stress.tsv; registered `tr`. Validation vs the espeak-ng-portable
+Built g2p.ts + turkish.ts + numbers.ts + stress.tsv; registered `tr`. Validation vs the portable-espeak
 canonical gold for the 50k-word frequency corpus: **77.29% byte-for-byte exact, 98.39% segmental** (stress-only
 diff 21%). Segmental residual (807 words): lexical `g→ɡ` (bölge/bilgi — unruleable, ilgili/bilgi are identical
 contexts with different gold), acronym letter-spell-outs (abd→abede — a deferred feature), a few espeak
@@ -175,7 +175,7 @@ axis — the eval folds stress, so it does not affect this backbone verdict.)
 ## Run 4 — 2026-07-29 — licensing: stress.tsv re-sourced (espeak-seeded list replaced)
 
 Provenance audit follow-up (docs/PROVENANCE.md §4.3): the 244-entry stress-exception lexicon was
-seeded from espeak-ng-portable — the word SELECTION was espeak's editorial choice, the weakest
+seeded from portable-espeak — the word SELECTION was espeak's editorial choice, the weakest
 facts-posture artifact in the espeak-lineage set. Replaced with a kaikki.org Turkish mine
 (Wiktionary CC-BY-SA): every lemma whose stress-marked IPA is NON-final, syllable-count-gated
 against the orthography → **2,103 entries** (+ 8 hand-adjudicated: emphatic reduplication

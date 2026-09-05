@@ -2,7 +2,7 @@
 
 Austronesian (Malayo-Polynesian), ~80M speakers, Java. Written today predominantly in **Latin** (the target here)
 and historically in **Aksara Jawa** (a Brahmic abugida — a separate second script, see the follow-up phase note).
-Ported from the espeak-ng-portable authored `jv` bring-up into a vernacula rule-based g2p (the id/tl pattern), and
+Ported from the portable-espeak authored `jv` bring-up into a vernacula rule-based g2p (the id/tl pattern), and
 — crucially — validated against a **real human referee** the original never had: **kaikki jav** (Wiktionary).
 
 ## The signature Javanese processes (what distinguishes it from Indonesian)

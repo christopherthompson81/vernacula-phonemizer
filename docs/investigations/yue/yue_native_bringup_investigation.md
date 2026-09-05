@@ -15,7 +15,7 @@ Architecture mirrors Mandarin (dict front-end + syllable back-end), but Cantones
   the SIX Cantonese tones as Chao contour letters (1˥ 2˧˥ 3˧ 4˨˩ 5˩˧ 6˨ — matching the espeak-portable
   investigation's contour analysis). Numbers via Han-numeral composition (零一二…十百千萬億) fed back through the dict.
 
-DELIBERATELY NOT reused: the espeak-ng-portable yue data. It exists (data/yue, a full converged reader), but its
+DELIBERATELY NOT reused: the portable-espeak yue data. It exists (data/yue, a full converged reader), but its
 IPA is ESPEAK-PARITY-shaped — no length marks (ho, not hoː; ɡwonɡ), tone placed inside the coda (si˧p), ŋ→"nɡ",
 z=ts. This project's premise is canonical IPA, so inheriting those quirks would be wrong. We keep the phonemic
 length + standard tone placement. (Reused only the tone-contour analysis + the number spellings — both convention,

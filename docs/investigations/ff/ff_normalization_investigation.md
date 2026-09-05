@@ -1,12 +1,12 @@
 # Fula (ff) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/ff-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/ff-base` (pinned at the commit the work
 started from). Working branch: `norm-ff-562`.
 
 ## Run 1 — 2026-08-01
 
 **Setup**: referee baseline `folded backbone: 1424/2000 (71.2%)` identical in the worktree baseline.
-Baseline emitted from `~/Programming/tmp/ff-base` → `/tmp/ff.base` (1500 utterances).
+Baseline emitted from `<sibling checkout>/ff-base` → `/tmp/ff.base` (1500 utterances).
 
 **Corpus shape** (1,500 unique ff_sn utterances — a FLEURS English translation into Fula, heavily
 English-influenced loanwords: miliyon, biliyon, kilometre, miles, hour):

@@ -88,7 +88,7 @@ Found, not fixed, from this batch:
 - **bho ⟨अ⟩ ships [ʌ] while `inherentVowel` ships [ə]** — one phoneme, two symbols, and `provenance`'s
   declared inventory contains ʌ but not ə. **ʌ is in 99/200 golden rows**, so this is not obscure. Both
   need the 1622-pair grammar-mined referee, which is NOT in the repo (searched `tools/corpus/` and
-  `/mnt/data`).
+  `<data root>`).
 - **bho `बजकर` is unattested** (`tokenHits: 0`) yet the inherited Hindi clock rule emits it in 5/200 rows.
 - **tl `numberStressIdx` strips `"ng"` from an /n/-final ligated root** — `sandaan` + `g` → `sandaang`,
   but the stripper removes two characters and recovers `sandaa`. Unreachable today (no /n/-final root is

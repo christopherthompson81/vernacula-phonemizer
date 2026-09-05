@@ -51,7 +51,7 @@ Intervocalic voicing sandhi was the BIGGEST residual class (`က→ka` vs refere
 allow onset-voicing substitutions) said **+14.1 pts recoverable** (55.9→70.0% on kaikki) — worth a lexicon.
 
 Voicing is LEXICAL (compound-boundary governed, ~68% rule-predictable → over-applies as a rule), so it is a
-per-word lexicon like the old espeak-ng-portable bring-up. Refactored the g2p into `syllabify()` (onset + body) so
+per-word lexicon like the old portable-espeak bring-up. Refactored the g2p into `syllabify()` (onset + body) so
 voicing can target an onset without re-parsing, added a `voicing` map (k→ɡ, t→d, s→z, t͡ɕ→d͡ʑ, θ→ð, aspirates→plain
 voiced) + `voicing-lexicon.tsv` (word → per-syllable '0'/'1' flags). `tools/gen/build-my-voicing.ts` mines it: syllabify
 each kaikki word, greedily align our syllables to the folded gold allowing each onset to voice; if the whole gold is

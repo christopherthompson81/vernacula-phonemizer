@@ -59,7 +59,7 @@ passes in TS (13/13, re-run as part of this log), which is the pin.
 
 ## Run 4 — 2026-08-30 ~13:58 — does kaa have a FLEURS corpus? (measured, not assumed)
 
-    ls /mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/ | wc -l          → 102
+    ls $ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/ | wc -l          → 102
     ls ... | grep -iE "^kaa|^kar"                                               → (none)
     sqlite: select fleurs from languages where code='kaa'                       → 1
 

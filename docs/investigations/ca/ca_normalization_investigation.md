@@ -1,11 +1,11 @@
 # Catalan (ca) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/ca-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/ca-base` (pinned at the commit the work
 started from). Working branch: `norm-ca-562`.
 
 ## Run 1 — 2026-08-01
 
-**Setup**: baseline emitted from `~/Programming/tmp/ca-base` via
+**Setup**: baseline emitted from `<sibling checkout>/ca-base` via
 `npx tsx tools/normalization/corpus-diff.ts emit --lang ca --corpus ca_es --out /tmp/ca.base`.
 Referee baseline: `folded backbone: 4201/5168 (81.3%)`.
 

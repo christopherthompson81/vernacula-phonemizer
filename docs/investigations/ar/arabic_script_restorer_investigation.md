@@ -209,7 +209,7 @@ Arabic model). Everything up to `python train_*.py` is now committed and reprodu
 
 ## Run 9 — 2026-07-15 — TRAINED on the GPU box: the multilingual restorer works (+17.8 end-to-end)
 
-Ran the fine-tune on the RTX 3090 (`/mnt/data/ar-diac-venv`, torch 2.6+cu124). `train_multilingual_harakat.py`
+Ran the fine-tune on the RTX 3090 (`<data root>`, torch 2.6+cu124). `train_multilingual_harakat.py`
 warm-starts `bilstm_pausal.pt` (its char/label maps match the committed Arabic meta exactly) — copies the 26
 vocab-independent lstm/fc tensors + 39 Arabic embedding rows by char identity, appends 5 language tokens (prepended
 per word for conditioning, no arch change), and fine-tunes on `train.tsv` with riders upsampled 4× + Arabic replay
@@ -234,7 +234,7 @@ UNSEEN words, lifting end-to-end IPA +17.8. Persian gains most (most data + most
 Punjabi least (257 train words + the و/ی long-vowel ambiguity harakat can't fix — a g2p limitation, not the model).
 Honest scope: this is measured on the held-out INVERTIBLE subset (words a valid vocalization exists for); the full
 pipeline is still capped by g2p expressiveness on the non-invertible tail. Checkpoint `bilstm_multilingual.pt` +
-int8 ONNX live on `/mnt/data` (gitignored, as the Arabic model); `multilingual_diacritizer.meta.json` (char/label/
+int8 ONNX live on `<data root>` (gitignored, as the Arabic model); `multilingual_diacritizer.meta.json` (char/label/
 lang maps) is committed. NEXT: export ONNX + wire a rider restore pass (the Arabic `restore.ts` analogue); fix the
 و/ی long-vowel search to lift Punjabi; add Sindhi/Saraiki once their g2p exists.
 
@@ -256,7 +256,7 @@ for default-ə, matching real undiacritized text. Silver-only retrain (99-char v
 end-to-end **+18.4** (fa +26.4, ps +8.0, ur +5.4; pa noisy on n=37).
 
 **Durable docs (the training knowledge was being lost).** `tools/perso-arabic/MODEL_NOTES.md` now captures the
-whole thing — GPU-box env (`/mnt/data/ar-diac-venv`), checkpoints (`bilstm_pausal.pt` = the warm-start), the 19-label
+whole thing — GPU-box env (`<data root>`), checkpoints (`bilstm_pausal.pt` = the warm-start), the 19-label
 scheme, the fine-tune recipe, every pipeline script, results, the cross-script mechanism + open issue, and how to
 extend to a new language. Memory note `harakat_restorer_training` points to it.
 
@@ -507,7 +507,7 @@ it. Production path today: **lexicon lookup → default g2p**; the full three-ti
 Run 22 shipped the exact-match lexicon; this ships the tier UNDER it — the multilingual BiLSTM, live via ONNX. Now
 the full two-layer path runs: **lexicon (exact) → neural (OOV) → default**.
 
-**ONNX export** (`export_onnx.py`): `/mnt/data/ar-diac/bilstm_multilingual.pt` (15.3M params) → fp32 ONNX → int8
+**ONNX export** (`export_onnx.py`): `<data root>/bilstm_multilingual.pt` (15.3M params) → fp32 ONNX → int8
 dynamic-quantize → **15.3 MB** (on par with the Arabic diacritizer). fp32 argmax == PyTorch **100%**; int8 == fp32
 **98.9%** word-level (≈1% flips — the quantization cost). Committed in-repo like the Arabic model + a small
 `riderDiacritizer.meta.json`.

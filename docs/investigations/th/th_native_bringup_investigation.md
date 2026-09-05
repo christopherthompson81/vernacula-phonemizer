@@ -8,9 +8,9 @@ Brahmic abugida written with no inter-word spaces, wrap-around vowel circumfixes
 ## Approach — REUSE our authored syllabifier
 The genuinely hard subsystem (vowel-span parsing, the epitran-based schwa/inherent-vowel algorithm, leading-
 vowel reorder + อักษรนำ leaders, syllable segmentation, and the tone computation) was already written by us in
-espeak-ng-portable's `src/Normalize/scriptSegmentation.ts` + `thaiPron.ts`. Rather than reimplement it, we PORT
+portable-espeak's `src/Normalize/scriptSegmentation.ts` + `thaiPron.ts`. Rather than reimplement it, we PORT
 those (→ `syllabifier.ts` + `thaiTone.ts`), which produce a per-syllable structure `{onset, nucleus, coda,
-long, tone}`. In espeak-ng-portable that structure is emitted as PUA markers for the espeak L2S rules; here
+long, tone}`. In portable-espeak that structure is emitted as PUA markers for the espeak L2S rules; here
 `g2p.ts` RENDERS it to IPA directly — so vernacula stays espeak-independent while reusing the hard logic.
 
 The lesson: a first from-scratch attempt (bespoke vowel-pattern matcher + greedy syllabifier) plateaued at 24%
@@ -25,14 +25,14 @@ SHORT open syllable takes a glottal `ʔ` — but only word-finally (minor/unstre
 `ˈ` on the first syllable; `ˌ` on the last when there are ≥3.
 
 ## Validation
-vs the espeak-ng-portable authored gold (20k words): **exact 89.3%** (73.2% rules-only → 89.3% with the
+vs the portable-espeak authored gold (20k words): **exact 89.3%** (73.2% rules-only → 89.3% with the
 dictionary; 95% on monosyllables). The lexical irregulars are closed by porting espeak's Thai dictionary
 (dictionary.tsv, 1,789 entries, converted from espeak tone digits 1-5 → Chao contours placed after the nucleus,
 98.8% self-match to the gold): length irregulars (ได้→daːj, น้ำ→naːm), silent-ร Sanskrit (สร้าง→saːŋ,
 จริง→t͡ɕiŋ), cluster-under-leading-vowel (ใคร→kʰraj), and the short เ–ิ exceptions (เงิน) — which let the RULE
 treat เ–ิ as long (ɤː) since the exceptions are dictionaried. Secondary stress fixed to even nuclei (≥2). The
 remaining residual is ~8% compound words espeak splits into separate words (needs the seg-words segmentation,
-also reusable from espeak-ng-portable) + ~3% minor segmental.
+also reusable from portable-espeak) + ~3% minor segmental.
 
 ## Run 1 — reuse the authored syllabifier — 2026-07-13
 Ported scriptSegmentation.ts (Thai portions) + thaiPron.ts; wrote a native IPA renderer over the scan output.
@@ -98,7 +98,7 @@ separate effort. The ceiling for the rule engine alone is here; ✅ would requir
 ## Run 6 — 2026-07-14 — dictionary layer: kaikki (Wiktionary) expansion for the lexical tail
 
 Per user steer (kaikki is the authoritative Thai pronunciation source — the only path to correct lexical output,
-accepting the circularity), expanded the dictionary from espeak-ng-portable's th_kaikki_gold (9025 Wiktionary
+accepting the circularity), expanded the dictionary from portable-espeak's th_kaikki_gold (9025 Wiktionary
 IPA+tone entries), following espeak's methodology: dictionary ONLY the words the rules can't derive.
 
 CONVERTER (tools/gen/build-th-kaikki-dict.mts): kaikki IPA → our convention — strip syllable dots + unreleased ̚

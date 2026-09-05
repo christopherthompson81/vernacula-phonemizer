@@ -8,7 +8,7 @@ this round is therefore not the layer; it is the **re-measurement table** in Run
 
 ⚠ THE CORPUS IS FLEURS ONLY. There is no `tools/corpus/mined/bs.jsonc` and none was created. Everything below
 is measured over the **1,976 deduplicated utterances** of
-`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/bs_ba/{train,dev,test}.tsv`, column 3 (the cased,
+`$ASR_ALIGN_ROOT/corpus/fleurs_transcripts/data/bs_ba/{train,dev,test}.tsv`, column 3 (the cased,
 punctuated text). `mine.ts scan` is not applicable and was not run; `review.ts --lang bs` reports
 `artifact tracked … missing`, which is expected and is not a failure of this round.
 

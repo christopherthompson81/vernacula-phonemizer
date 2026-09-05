@@ -1,7 +1,7 @@
 # Yoruba / Èdè Yorùbá (yo) native bring-up
 
 Volta-Niger (Niger-Congo), ~46M speakers (Nigeria, Benin, Togo, + diaspora). A highly PHONEMIC three-tone Latin
-orthography, so a near one-to-one rule-based g2p (the Hausa tonal-Latin pattern). Ported from the espeak-ng-portable
+orthography, so a near one-to-one rule-based g2p (the Hausa tonal-Latin pattern). Ported from the portable-espeak
 authoring (epitran-validated). Validated here against **three referees**: wikipron yor + kaikki yor (both human,
 large) + epitran yor-Latn.
 

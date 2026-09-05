@@ -239,7 +239,7 @@ model (it correctly diacritizes אפליקציה→ʔaplikatsja, ספוטיפי�
 modern text, then retrain. Contamination guard: validate on the HUMAN Nakdimon holdout (news/blogs, NOT Phonikud)
 as the honest arbiter alongside gt.tsv.
 
-Data: cached he-wiki (espeak-ng-portable tools/corpus/.cache/he — 1.1GB dump + 606k-word freq). Two attempts:
+Data: cached he-wiki (portable-espeak tools/corpus/.cache/he — 1.1GB dump + 606k-word freq). Two attempts:
 - **word-level** (top 30k wiki words → Phonikud niqqud): human 86.4→86.8 (+0.4), gt.tsv flat. Isolated words don't
   transfer to the sentence-level tagger.
 - **sentence-level** (30k wiki sentences → 91k Phonikud-diacritized clauses, real context): human **86.4→85.2 (↓)**,

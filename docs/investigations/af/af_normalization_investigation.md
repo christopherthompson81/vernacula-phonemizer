@@ -1,11 +1,11 @@
 # Afrikaans (af) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/af-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/af-base` (pinned at the commit the work
 started from). Working branch: `norm-af-562`.
 
 ## Run 1 — 2026-07-31
 
-**Setup**: baseline emitted from `~/Programming/tmp/af-base` via
+**Setup**: baseline emitted from `<sibling checkout>/af-base` via
 `npx tsx tools/normalization/corpus-diff.ts emit --lang af --corpus af_za --out /tmp/af.base`;
 identical to `/tmp/af.before` (main tree). 1236 utterances.
 

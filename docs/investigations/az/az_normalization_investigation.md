@@ -1,11 +1,11 @@
 # Azerbaijani (az) normalization investigation (#562)
 
-Chronological record. Baseline worktree: `~/Programming/tmp/az-base` (pinned at the commit the work
+Chronological record. Baseline worktree: `<sibling checkout>/az-base` (pinned at the commit the work
 started from). Working branch: `norm-az-562`.
 
 ## Run 1 — 2026-07-31
 
-**Setup**: baseline emitted from `~/Programming/tmp/az-base` via
+**Setup**: baseline emitted from `<sibling checkout>/az-base` via
 `npx tsx tools/normalization/corpus-diff.ts emit --lang az --corpus az_az --out /tmp/az.base`;
 identical to `/tmp/az.before` (main tree). Referee baseline: `folded backbone: 3293/4034 (81.6%)`.
 

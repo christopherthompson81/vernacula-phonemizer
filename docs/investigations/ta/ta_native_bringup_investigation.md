@@ -2,10 +2,10 @@
 
 Target: Tamil, canonical IPA, espeak-independent. Slot #13 in the OmniVoice coverage set (contributes `ʉ`→`ʊ`
 and the retroflex approximant `ɻ` = ழ). Tamil is an ABUGIDA: consonants carry an inherent vowel /ɐ/, vowel
-signs (matra) replace it, and the pulli ் removes it. espeak has solid Tamil, so the espeak-ng-portable
+signs (matra) replace it, and the pulli ் removes it. espeak has solid Tamil, so the portable-espeak
 canonical output is the oracle.
 
-## Convention (from the espeak-ng-portable canonical output)
+## Convention (from the portable-espeak canonical output)
 - Vowels: அ→a (independent) / inherent→ɐ, ஆ/ா→aː, இ/ி→ɪ, ஈ/ீ→iː, உ/ு→ʊ, ஊ/ூ→uː, எ→e, ஏ→eː, ஐ/ை→aᶦ,
   ஒ→o, ஓ→oː, ஔ/ௌ→aᶷ. Short i/u are lax (ɪ/ʊ).
 - Retroflex ண→ɳ, ட→ʈ, ள→ɭ, ழ→ɻ; dental த→t̪, ந→n̪; three coronal nasals ந(n̪)/ன(n)/ண(ɳ); two rhotics
@@ -28,7 +28,7 @@ phonemes `r`/`ɾ` in the string), then place the two-level stress. No lexicon. (
 refactored onto the shared core — same result, +79 words from the core's more robust cluster handling.)
 
 ## Validation
-vs the espeak-ng-portable canonical gold (50k Tamil-script words): **exact 88.7%** (stress-only diff 0 after
+vs the portable-espeak canonical gold (50k Tamil-script words): **exact 88.7%** (stress-only diff 0 after
 the secondary-stress rule). The residual (~11%) is loanword/lexical, unreachable without a dictionary:
 - Sanskrit-loan initial voicing (தேசிய→d̪eːt͡ɕɪjɐ, காந்தி→ɡaːn̪d̪ɪ) — word-initial க/த voiced in specific loans;
 - `Cir/Cur` syncope (பிரதமர்→pɾɐd̪ɐmɐr — the short i drops to a Cr cluster) in Sanskrit-shaped words;
