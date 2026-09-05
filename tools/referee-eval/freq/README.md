@@ -10,13 +10,13 @@ which are DICTIONARY-shaped and over-sample rare Latinate words, but **96.2% / 9
 frequency-weighted** — real text is short and native. Every earlier af measurement of "real-text
 quality" was a hand-rolled probe against a 2,473-token corpus; this replaces them with a standing
 metric. It also earned its keep immediately by exposing a live tagger defect — see
-docs/afrikaans_stress_investigation.md Run 20.
+docs/investigations/af/afrikaans_stress_investigation.md Run 20.
 
 `ur.txt`: Urdu, same source and licence (9,181 words, 246k tokens). Two filters, matching the
 letters-only shape of `nb.txt`/`af.txt`: 403 non-Urdu-script types (Latin runs, Latin punctuation)
 and 8 **Arabic-range** punctuation types — ⟨،⟩ and ⟨۔⟩ are ranks 2 and 4 by count, so a naive
 script-range filter keeps them and they would have been 5.6% of the token mass. Urdu had **no** frequency list, so
-every accuracy figure in `docs/investigations/ur_tagger_investigation.md` before Run 18 was
+every accuracy figure in `docs/investigations/ur/ur_tagger_investigation.md` before Run 18 was
 dictionary-shaped. The gap is large: **66.3% frequency-weighted on the primary and 79.6% on the
 secondary, against word-exact 56.8% / 59.4%**. ⚠ These score the LEXICON-FREE core — the shipped
 `lexicon-ipa.tsv` is built from kaikki/wikipron, so the eval must not consult it. ⚠ A high
@@ -37,4 +37,4 @@ CC BY-SA 4.0. 50k entries each, from 6.6M and 18.3M tokens.
 words carry a frequency, 2,001 of 4,758 for ar/wikipron. ⚠ **And the two MSA referees move in OPPOSITE
 directions** under token weighting: kaikki 69.7% → 87.4%, wikipron 64.9% → 50.1%. Two referees for one language
 disagreeing in direction on common words is a convention problem in one of them, not an engine result — do not
-quote either MSA figure without the other. arz behaves as the af precedent predicts: 61.7% → 80.4% (both figures re-measured 2026-08-20 after the arz fold-ordering fix — see docs/investigations/arz_referee_investigation.md).
+quote either MSA figure without the other. arz behaves as the af precedent predicts: 61.7% → 80.4% (both figures re-measured 2026-08-20 after the arz fold-ordering fix — see docs/investigations/arz/arz_referee_investigation.md).

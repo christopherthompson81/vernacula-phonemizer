@@ -237,7 +237,7 @@ describe("cmn initialisms → Mandarin letter names", () => {
     // ⚠ WHY THIS EXISTS: `中国GDP总量` read …ɡˈiːdˈiːpʰˈiː…, English [iː], English stress, and NO TONE inside
     // a tonal utterance. The letter NAMES are English-derived in every Sinitic variety (espeak-ng's own
     // `cmn_list` documents them: a ei51 · b pi51 · w ta35pliou); only the phonology was wrong. Evidence and
-    // derivation: docs/investigations/sinitic_initialisms_investigation.md.
+    // derivation: docs/investigations/normalization/sinitic_initialisms_investigation.md.
     test("an initialism is read as letters, in Mandarin", () => {
         expect(phonemize("中国GDP总量", "cmn")).toBe(phonemize("中国 吉 迪 皮 总量", "cmn"));
         expect(phonemize("CEO", "cmn")).toBe(phonemize("西 伊 欧", "cmn"));

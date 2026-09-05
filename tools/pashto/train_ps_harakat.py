@@ -12,7 +12,7 @@ vocalized spelling back through Pashto's own g2p. That choice is what makes espe
     (کَول→kawəl), the final -ی /ai/ diphthong (سړی→saɽaɪ), the sukun-marked medial glide (الوْتل→alwətəl),
     homorganic ŋ. Predicting IPA directly would throw all of that away and ask a 30k-parameter model to relearn it.
 
-WHY IT IS WORTH RETRAINING AT ALL. `docs/investigations/ps_neural_restoration_investigation.md` measured the
+WHY IT IS WORTH RETRAINING AT ALL. `docs/investigations/ps/ps_neural_restoration_investigation.md` measured the
 previous neural as NET-NEGATIVE (sync 45.3% vs neural 44.0% on wikipron) and declined to wire it. That verdict
 was correct FOR ITS DATA: the ps silver was 770 rows and 78% of them were all-bare, because the miner ran under a
 short-vowel-COLLAPSING fold. Both halves have since changed — PS_FULL_FOLD keeps a/ə/i/u/o distinct, and

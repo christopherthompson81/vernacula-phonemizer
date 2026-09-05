@@ -48,7 +48,7 @@ import { rewrite } from "../../core/provenance.ts";
 
 /**
  * The shared symbol tier. Every word is corpus- or wiki-attested IN ITS SLOT (playbook 5e); the sourcing
- * notes are at the top of the file and in `docs/investigations/si_normalization_investigation.md`.
+ * notes are at the top of the file and in `docs/investigations/si/si_normalization_investigation.md`.
  *
  *   සියයට     percent  — corpus ×4, wiki ×4, prefix in all eight
  *   ඩොලර්/යූරෝ/පවුම්/රුපියල්  — `ඩොලර් 38,100ක්`, `යූරෝ මිලියන 152 ක`, `පවුම් 300,000ක මුදල්`,

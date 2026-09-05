@@ -142,7 +142,7 @@ export function createEnglishG2p(
             // REGARDLESS of the order the empty chunk was found at (#1265). The vowel rule exempts an empty chunk
             // found at order ≥ 3 so attested silences pass; but CMUdict carries enough French (`Illinois`, `corps`,
             // `Des Moines`) that a silent final `s` after `…ne` is attested at order 3, and `GIF` read *ɡˈɪ*, `ISIL`
-            // *ˈɪsɪ*, `SNES` *sn*. Measured on the held-out tenth (docs/en_oov_final_consonant_investigation.md):
+            // *ˈɪsɪ*, `SNES` *sn*. Measured on the held-out tenth (docs/investigations/en/en_oov_final_consonant_investigation.md):
             //     baseline            word-acc 47.20%  PER 13.71%  final consonant lost 216
             //     full evp, no order  46.98%           13.72%      44      ← fewer lost, but ordinary words pay
             //     HALF evp, no order  47.39%           13.62%      71      ← taken: nothing gets worse

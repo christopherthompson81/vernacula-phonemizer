@@ -97,7 +97,7 @@ describe("Tibetan (bo) cardinal numbers — ASCII digits + the full magnitude la
     }
 });
 
-// The silent-deletion findings in bo. Evidence and sourcing: docs/investigations/silent_sea_investigation.md
+// The silent-deletion findings in bo. Evidence and sourcing: docs/investigations/normalization/silent_sea_investigation.md
 // Run 5. ⚠ Neither bo referee holds a single ⟨ྥ⟩ or ⟨ཿ⟩, so these are pinned here or nowhere.
 describe("Tibetan (bo) — the characters that used to read as nothing", () => {
     /**

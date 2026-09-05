@@ -101,7 +101,7 @@ const UNSTRESSED_PREFIX = /^(ge|be|er|zer|ze)[^aeiouyäëéô]|^ver/u;
  * reduced first vowel [ɐ ə e] means the referee agrees the syllable is unstressed, a full one means it does
  * not. Over the words where the rule actually shifts the stress it agrees 93.2%, and every miss is the failure
  * mode named below — a root that merely BEGINS with the prefix letters. See
- * docs/investigations/luxembourgish_stress_investigation.md.
+ * docs/investigations/lb/luxembourgish_stress_investigation.md.
  */
 function realizeE(word: string, toks: Tok[]): void {
     const vowelIdx = toks.map((t, i) => (startsWithVowel(t.ph) ? i : -1)).filter((i) => i >= 0);

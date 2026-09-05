@@ -4,7 +4,7 @@
  *
  * EVIDENCE. FLEURS `kea_cv`, 3,945 rows deduplicated to **1,931 unique utterances** (FLEURS repeats each
  * sentence per speaker). There is NO mined artifact for kea, so every count below was measured by hand over
- * column 3 of the TSVs; see `docs/investigations/kea_normalization_investigation.md` for the commands.
+ * column 3 of the TSVs; see `docs/investigations/kea/kea_normalization_investigation.md` for the commands.
  * Corpus-wide counts for the classes claimed here: `digit-run` 673 · `dot-in-number` 55 ·
  * `units` 45 (km ×78, mm ×26, m ×25, km/h ×24, kg ×8 digit-adjacent) · `slash` 24 · `percent` 21 ·
  * `colon` 20 · `comma-in-number` 17 · `dotted` 17 · `hyphen-range` 14 · `degree/ordinal sign` 13 ·

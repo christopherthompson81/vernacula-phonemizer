@@ -36,7 +36,7 @@
  * golden wants to pin). Both are fed to the same single `phonemize()` call as every other tier, so the
  * port's contract is untouched.
  * ⚠ FOUR THINGS ARE FILTERED, each measured over the 23,214 candidate rows — see
- * `docs/mined_goldens_investigation.md` for the numbers:
+ * `docs/investigations/corpus/mined_goldens_investigation.md` for the numbers:
  *   · RESIDUAL MEDIAWIKI MARKUP (~1.2%: `]]`, `{{`, `== heading ==`, `| table`, a URL, a stray tag). A
  *     golden row should be text the engine is MEANT to read.
  *   · LENGTH. `segmentMode` is `paragraph`, so these are paragraphs, not sentences: median 199 characters

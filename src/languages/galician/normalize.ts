@@ -21,7 +21,7 @@
  *   · running Galician compares with `ca`, not `que` — `é maior ca` ×5, `é menor ca` ×8, `é maior que` ×0.
  *     But the SIGN has its own name and gl.wikipedia states it: "o signo > significa maior que (3 > 0) e <
  *     significa menor que (2 < 5)". So the notation reads `maior que` / `menor que` and the prose reads `ca`.
- * See docs/investigations/gl_normalization_investigation.md, run 2.
+ * See docs/investigations/gl/gl_normalization_investigation.md, run 2.
  *
  * ⚠ A CENTURY IS A CARDINAL, and it already works. `século XIX` reads *século dezanove* through the shared
  * `core/roman.ts` cardinal pass, which is the Ibero-Romance reading pt records from Ciberdúvidas. No

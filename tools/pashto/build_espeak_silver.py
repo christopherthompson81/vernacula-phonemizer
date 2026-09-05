@@ -2,7 +2,7 @@
 """espeak-ng's Pashto dictionary → the miner's (word, lang, IPA) silver shape.
 
 WHY THIS EXISTS. Pashto's short-vowel restoration was data-starved: the whole supervision was wikipron
-(1,414) + kaikki (1,055), and `docs/investigations/ps_neural_restoration_investigation.md` concluded there
+(1,414) + kaikki (1,055), and `docs/investigations/ps/ps_neural_restoration_investigation.md` concluded there
 was no larger machine-readable Pashto IPA corpus. There is. espeak-ng ships `dictsource/ps_list` —
 82,583 word→pronunciation entries contributed by Hanif Rahman — and it was missed because
 `tools/normalization/sources.ts` gates its espeak tier on $ESPEAK_NG, which was unset, so it reported

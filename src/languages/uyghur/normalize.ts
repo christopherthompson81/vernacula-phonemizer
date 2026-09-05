@@ -7,7 +7,7 @@ import { renormalize, rewrite } from "../../core/provenance.ts";
  * 66,091 paragraphs, 429 mined segments (229 hard + 200 sample), `covered 32/35` — plus `attest.ts` against
  * ug.wikipedia and the wikipron `uig_arab_broad` HUMAN word list that referees the engine. espeak ships no
  * Uyghur at all, so those three are the whole haystack and every count below says which one it came from.
- * Full log: `docs/investigations/ug_normalization_investigation.md`.
+ * Full log: `docs/investigations/ug/ug_normalization_investigation.md`.
  *
  * ⚠ THE DIGIT HAZARD RESOLVES THE OPPOSITE WAY FROM `ps`. Pashto needed an explicit `toAscii` because it
  * writes ۰-۹ four times more often than ASCII; Uyghur writes ASCII — **1,957 ASCII runs against ONE

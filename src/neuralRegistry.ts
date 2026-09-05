@@ -65,7 +65,7 @@ const NEURAL: Record<string, (text: string) => Promise<string>> = {
     // that pair is scored under the config folds; the DIRECTION is the claim.)
     ur: (t) => phonemizeRiderNeural(t, "ur"),
     // ⚠ `ps` IS DELIBERATELY ABSENT, so `phonemizeAsync` falls through to the sync engine. The same rider
-    // that helps Urdu is NET-NEGATIVE for Pashto, and it always was: `ps_neural_restoration_investigation.md`
+    // that helps Urdu is NET-NEGATIVE for Pashto, and it always was: `docs/investigations/ps/ps_neural_restoration_investigation.md`
     // Run 11 measured it in 2026-07 (sync 45.3% / neural 44.0%) and its DECISION was "do NOT retrain/wire
     // the neural" — but the entry stayed here, so the async path shipped the losing side. Re-measured
     // 2026-08-19 across all NINE ps referees, sync is >= async on every one and worse on none:

@@ -52,7 +52,7 @@ class HausaPhonemizer implements Phonemizer {
             else if (m[2]) {
                 // ⚠ `numberToWords` RETURNS "" ABOVE ITS AUTHORED 10¹² RANGE, and emitting that deleted the
                 // number from the reading with nothing to hear — the fleet's 2^53 defect one magnitude down
-                // (docs/investigations/bignum_fallback_investigation.md). Fall back to digit-at-a-time.
+                // (docs/investigations/numbers/bignum_fallback_investigation.md). Fall back to digit-at-a-time.
                 const bare = m[2].replace(/,/gu, "");
                 const composed = numberToWords(Number(bare));
                 const words = composed === "" ? [...bare].map((c) => numberToWords(Number(c))) : composed.split(" ");

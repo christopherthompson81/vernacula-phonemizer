@@ -151,7 +151,7 @@ function wordIpa(word: string): string {
 
 /**
  * SYMBOL NORMALIZATION — Galician. Every word here is a gl.wikipedia TOKEN attestation whose examples were
- * read (see normalize.ts's header and docs/investigations/gl_normalization_investigation.md, run 2):
+ * read (see normalize.ts's header and docs/investigations/gl/gl_normalization_investigation.md, run 2):
  *   `por cento` ×7 — the *Porcentaxe* article, "Tamén se lle chama comunmente tanto por cento"
  *   `euro` ×298 / `dólar` ×641 / `libras` ×41 / `ien` ×59 — the euro and ien articles NAME their sign
  *   `cadrado` ×219 / `cúbico` ×21 — "O metro cúbico é unha unidade de volume", "Quilómetro cúbico"

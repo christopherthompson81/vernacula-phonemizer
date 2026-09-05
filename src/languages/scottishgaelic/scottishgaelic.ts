@@ -143,7 +143,7 @@ const CLAUSE_MARK = M.clausePunctuation;
 
 /**
  * SYMBOL NORMALIZATION — Scottish Gaelic. Every word is a gd.wikipedia TOKEN attestation whose examples
- * were read (see normalize.ts's header and docs/investigations/gd_normalization_investigation.md):
+ * were read (see normalize.ts's header and docs/investigations/gd/gd_normalization_investigation.md):
  *   `sa cheud` ×7/4 — "Tha a' Ghàidhlig aig **deich sa cheud** duine", "**10 sa cheud** dhiubh"
  *   `not` ×19 — and the currency article names the sign: "Punnd Sasannach (**GB£**, “**not**”)"
  *   `ceàrnagach` ×26/20 — and the corpus glosses its own abbreviation in one sentence: "an fharsaingeachd

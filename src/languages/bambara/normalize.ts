@@ -5,7 +5,7 @@
  * ⚠ THERE IS NO FLEURS FOR BAMBARA. The evidence is `tools/corpus/mined/bm.jsonc` (dump-sourced, so its
  * `sample` tier IS the real distribution) plus a fresh bm.wikipedia dump — 2,359 lines / 430,646 characters
  * after `wikidump-to-text.py`, which is the WHOLE of the Bambara wiki. Every count below is over that dump
- * unless it says otherwise. Full log: `docs/investigations/bm_normalization_investigation.md`.
+ * unless it says otherwise. Full log: `docs/investigations/bm/bm_normalization_investigation.md`.
  *
  * ⚠ BOTH REGISTERED SCRIPTS REACH THIS LAYER, AND ONLY ONE OF THEM IS WRITTEN. bm is catalogued Latin/N'Ko
  * and the engine accepts both (`bambara.ts`'s TOKEN admits `Nko`, and N'Ko digits ߀–߉ fold to ASCII in

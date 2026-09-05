@@ -5,7 +5,7 @@
  * ⚠ THERE IS NO FLEURS FOR ZHUANG. The evidence is `tools/corpus/mined/za.jsonc` plus a fresh
  * za.wikipedia dump — 7,328 paragraphs from `wikidump-to-text.py`, of which **2,929 are Zhuang** after a
  * function-word filter. Every count below is over that Zhuang-only subset unless it says otherwise. Full
- * log: `docs/investigations/za_normalization_investigation.md`.
+ * log: `docs/investigations/za/za_normalization_investigation.md`.
  *
  * ⚠⚠ AND THE FILTER IS NOT OPTIONAL HERE — THE ARTIFACT'S HARD-SET IS MOSTLY NOT ZHUANG. za.wikipedia
  * carries whole imported GERMAN (the `Panzerkampfwagen IV` article) and ENGLISH (Perlmutter, Book of

@@ -3,7 +3,7 @@
 //
 // ⚠ tn HAS NO FLEURS SPLIT (verified, not assumed — the catalogue says `fleurs 0` and there is no `tn`
 // transcript directory), so PORTING.md's corpus-wide differential is unavailable and the weight falls on
-// these plus the off-golden probes. See docs/tn_port_investigation.md.
+// these plus the off-golden probes. See docs/investigations/tn/tn_port_investigation.md.
 using Vernacula.Phonemizer;
 using TnEngine = Vernacula.Phonemizer.Languages.Setswana.SetswanaPhonemizer;
 using TnNormalize = Vernacula.Phonemizer.Languages.Setswana.Normalize;

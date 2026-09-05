@@ -59,7 +59,7 @@ describe("Sesotho cardinal numbers — citation stems + the motso/metso compound
 // Asserted on the NORMALIZER's text output wherever the point is the word chosen, and through `phonemize`
 // wherever the point is that the reading actually reaches the g2p. Every word below is attested on
 // st.wikipedia in SOUTH AFRICAN orthography — see the file header and
-// docs/investigations/st_normalization_investigation.md for the counts and the sense-checked examples.
+// docs/investigations/st/st_normalization_investigation.md for the counts and the sense-checked examples.
 //
 // ⚠ THE BRANCHES ARE PINNED, NOT THE CORPUS'S INSTANCES (trap 13): the unit path has a plain arm, a rate
 // arm and an exponent arm, and the corpus only exercises the first and the third.

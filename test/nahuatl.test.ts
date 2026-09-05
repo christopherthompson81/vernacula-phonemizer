@@ -106,7 +106,7 @@ describe("Nahuatl numbers", () => {
 // ---------------------------------------------------------------------------------------------------------
 // TEXT NORMALIZATION. Every case below encodes a measurement over `tools/corpus/mined/nci.jsonc` (410 unique
 // retained segments of a nah.wikipedia dump); the reason is in the comment. See
-// docs/investigations/nci_normalization_investigation.md and src/languages/nahuatl/normalize.ts.
+// docs/investigations/nci/nci_normalization_investigation.md and src/languages/nahuatl/normalize.ts.
 describe("Classical Nahuatl text normalization", () => {
     // THE SPACE IS A GROUPING MARK, and this is the highest-value rule in the layer: the paleoanthropology
     // articles write `1 000 000`, `720 000`, `480 000`, `128 000`, `149 600 000`, and un-grouped they read as

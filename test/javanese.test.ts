@@ -96,7 +96,7 @@ describe("javanese canonical IPA", () => {
 });
 
 describe("jv text normalization", () => {
-    // Evidence, refusals and dead ends: docs/investigations/jv_normalization_investigation.md.
+    // Evidence, refusals and dead ends: docs/investigations/jv/jv_normalization_investigation.md.
     // ⚠ THE DOT IS CONTESTED BY THREE RULES in this language — thousands separator, decimal point (in the
     // imported English format) and clock — which is what the step order in normalize.ts exists to resolve.
     test("⚠ a grouping separator DESTROYS THE VALUE, in both conventions the corpus uses", () => {

@@ -3,7 +3,7 @@
 WORDIZE — cut the recognizer's flat phone stream into WORDS, so a divergence can be attributed.
 
 `dist` is one edit distance over a whole utterance. It says a row disagrees; it never says WHERE, and every
-finding in docs/investigations/asr_align_qc_investigation.md so far has been reached by a human reading the
+finding in docs/investigations/asr-align/asr_align_qc_investigation.md so far has been reached by a human reading the
 two strings side by side and spotting the word. That does not scale past a queue of a few hundred.
 
 The recognizer emits no word boundaries. **Ours does** — `ipa` is space-separated by construction — so a

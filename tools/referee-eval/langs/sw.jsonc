@@ -11,7 +11,7 @@
 // penalising a notation difference would measure nothing — but they mean this file cannot referee vowels.
 // ⚠ AND THE TWO REFEREES ARE ONE TRADITION on this point: wikipron swa and kaikki swa are both
 // en.wiktionary and both write ɑ (356:8 and 387:7). epitran swa-Latn, which is not, writes a/e/o.
-// See docs/investigations/low_vowel_notation_investigation.md.
+// See docs/investigations/referee/low_vowel_notation_investigation.md.
 {
     "referees": [
         { "file": "sw.wikipron-swa-broad.tsv", "source": "wikipron swa_latn broad (human)", "role": "primary" },

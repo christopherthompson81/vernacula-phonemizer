@@ -167,7 +167,7 @@ MARKERS = {
     # ⚠ THE MACROLANGUAGE IS NOT SPLIT BY THIS ROW, deliberately. Southern Quechua, Ancash and Ecuadorian
     # Kichwa share this core (`nisqa`, `huk`, `kay`, `chay`, `wan`, `-pi`), and the row's job is to
     # separate Quechua from SPANISH, not one variety from another. Variety is settled by reading, not by
-    # a word count — see docs/investigations/qu_normalization_investigation.md.
+    # a word count — see docs/investigations/qu/qu_normalization_investigation.md.
     # ⚠ `kan` AND `wan` ARE TWO-TO-THREE LETTERS AND KEPT ANYWAY: `kan` is the copula "there is" and
     # `wan` the comitative "and/with", both among the highest-frequency Quechua tokens, and neither is a
     # Spanish or English word. Genuinely short and ambiguous tokens (`mi`, `pi`, `ta`, `qa`) are absent.

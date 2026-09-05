@@ -45,7 +45,7 @@
  *     tokens total (`ngeih bak` ×2 — `boux ngeih bak roek cib roek gyauqvuengz`, the 266th pope —
  *     `song bak` ×1), which is not enough to move a series choice.
  *
- * Covers 0 … <10¹²; above that, digit-by-digit. Full sourcing: docs/investigations/za_normalization_investigation.md.
+ * Covers 0 … <10¹²; above that, digit-by-digit. Full sourcing: docs/investigations/za/za_normalization_investigation.md.
  */
 import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";

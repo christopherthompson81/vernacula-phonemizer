@@ -7,7 +7,7 @@
  * NUMBER WORDS (Serbian hiljada/milion lexemes + the ijekavian dvjesta — numbers.ts) over the shared agreement
  * compositor. STRESS POSITION arrives with the shared g2p — phonemizeWord is Serbian's, and it now reads the
  * unified Serbo-Croatian accent lexicon, including the four-way contour.
- * docs/investigations/south_slavic_stress_investigation.md.
+ * docs/investigations/normalization/south_slavic_stress_investigation.md.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

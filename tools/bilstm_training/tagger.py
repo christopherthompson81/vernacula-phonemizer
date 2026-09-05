@@ -46,7 +46,7 @@ class Tagger(nn.Module):
         decides one thing (where an unwritten vowel goes) and so isolates the effect cleanly: it emitted a
         word-final vowel on 2.4% of referee vocabulary against 0.1% in its own training data, and packing took
         that to 0.1% and held-out word-exact from 95.1% to 96.6%. See
-        docs/investigations/asr_align_qc_investigation.md Run 41.
+        docs/investigations/asr-align/asr_align_qc_investigation.md Run 41.
 
         ⚠ THE AFFECTED SET IS EVERY BIDIRECTIONAL LSTM IN THE REPO THAT TRAINS ON PADDED BATCHES, which is
         wider than this module's four callers and wider than the first sweep found. Retrained 2026-08-19:

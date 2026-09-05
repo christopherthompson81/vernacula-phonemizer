@@ -21,7 +21,7 @@ wrong syllable, and ⟨š⟩ is not even a syllable. Only U+0301 U+0300 U+0302 U
 syllabic ⟨r⟩ count.
 
 Source: kaikki.org Slovene (Wiktionary extract, CC-BY-SA), the same licence as the 30+ committed referees.
-The dump is 28 MB and is NOT committed; docs/investigations/south_slavic_stress_sources_investigation.md
+The dump is 28 MB and is NOT committed; docs/investigations/normalization/south_slavic_stress_sources_investigation.md
 has the URL.
 
   python3 tools/slovenian/build_sl_stress_lexicon.py [--dump PATH] [--stats]

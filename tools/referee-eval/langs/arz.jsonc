@@ -16,7 +16,7 @@
 // the word-initial glottal onset: across the 95 orthographically vowel-initial words (alef/hamza carriers, where
 // Egyptian supplies an automatic onset) the referee writes ʔ on 47 and omits it on 48 — a coin flip on an
 // identical environment (أنا → a n a, but آسف → ʔ aː s i f). These are NOTATION, and folding them is what the
-// fold set is for. See docs/investigations/arz_referee_investigation.md.
+// fold set is for. See docs/investigations/arz/arz_referee_investigation.md.
 //
 // ⚠ ORDERING: the symbol-normalizing folds are preFolds, NOT folds, because a POSITIONAL fold must see already-
 // normalized symbols. When [æɑ]→a and [eɛ]→i / [oɔ]→u ran post-backbone while a `[aiu]$` pausal strip ran as a

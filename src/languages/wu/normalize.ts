@@ -6,7 +6,7 @@
  * unlisted character is dropped rather than guessed. That is a stronger sourcing gate than most languages
  * have and it is checkable in one command (`grep -P "^百分之\t" dict.tsv`). Every literal below was checked
  * that way, and separately checked for SENSE against the corpus or wuu.wikipedia prose; the evidence is in
- * `docs/investigations/wuu_normalization_investigation.md` Run 1.
+ * `docs/investigations/wuu/wuu_normalization_investigation.md` Run 1.
  *
  * ⚠ AND IT MUST BE WU'S WORD, NOT MANDARIN'S. The dict will read any Han string, so "it phonemizes" proves
  * nothing about the language. Two places where copying the Cantonese layer would have been wrong:

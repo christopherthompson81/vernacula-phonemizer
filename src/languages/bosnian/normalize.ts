@@ -7,7 +7,7 @@
  * borrows Serbian's `phonemizeWord` outright — which is exactly what makes copying either one dangerous
  * (playbook trap 55). Every rule of both files was re-measured against the 1,976 deduplicated utterances of
  * FLEURS `bs_ba` before anything was written here; **18 of 38 arms held, 47 %**. The table is in
- * `docs/investigations/bs_normalization_investigation.md`. What follows is what SURVIVED that measurement,
+ * `docs/investigations/bs/bs_normalization_investigation.md`. What follows is what SURVIVED that measurement,
  * and the ⚠ notes are the places where it did not.
  *
  * ⚠ THE CLEANEST STATEMENT OF THE TRAP IS IN THE ORDINAL TABLE BELOW, BEFORE ANY RULE RUNS. Bosnian takes

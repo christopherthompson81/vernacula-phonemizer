@@ -10,7 +10,7 @@
  * stays folded. Out of lexicon, accent-transitions.tsv shifts a KNOWN stem's accent by its ending rather than
  * defaulting — see deriveAccent. Croatian and Bosnian import phonemizeWord from here, so all three share the lexicon — which is
  * the shape of the source too: Wiktionary ships one unified Serbo-Croatian dump.
- * docs/investigations/south_slavic_stress_investigation.md. text() tokenizes words / numbers / punctuation.
+ * docs/investigations/normalization/south_slavic_stress_investigation.md. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -190,7 +190,7 @@ function isNucleus(w: string, i: number): boolean {
  * The lexicon agrees on 98.9% of its own 2-nucleus entries. Beyond two syllables it degrades to a default —
  * 78.1% of 3-nucleus entries, 42.4% of 4-nucleus. Frequency-weighted over the FLEURS corpora the fallback lands
  * right on ~83–86% of tokens, because the long words are the rare ones.
- * docs/investigations/south_slavic_stress_investigation.md.
+ * docs/investigations/normalization/south_slavic_stress_investigation.md.
  */
 export function phonemizeWord(word: string): string {
     const w = word.toLowerCase();

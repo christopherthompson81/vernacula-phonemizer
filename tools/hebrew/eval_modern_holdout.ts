@@ -2,7 +2,7 @@
  * The MODERN-HOLDOUT running-text eval for the Hebrew nakdan — end-to-end word-exact on modern prose.
  *
  * ⚠ THIS HARNESS WAS NEVER COMMITTED, AND IT IS THE ONE THAT MATTERED. Every architecture and data decision in
- * `docs/investigations/he_native_bringup_investigation.md` Runs 3–6 was made on its number — word-level →
+ * `docs/investigations/he/he_native_bringup_investigation.md` Runs 3–6 was made on its number — word-level →
  * sentence-level 72.1% → 84.4%, ×5 oversampling → 85.6%, targeted suppression → 86.4% (the shipped model's
  * headline) — yet no commit in this repo's history has ever contained it. Rediscovered 2026-08-19 when a
  * packing retrain could not be judged: the trainer's own per-consonant figure is a POOR proxy, moving 94.0 →

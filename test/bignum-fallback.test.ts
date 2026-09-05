@@ -15,7 +15,7 @@ import { phonemize } from "../src/index.ts";
  *   - FORTY-FOUR emitted the raw digit string into the IPA, where no g2p in this fleet reads Latin digits.
  *
  * Commit 49f9a08 fixed the seven Sinitic engines and named the other 55 so they would not be rediscovered;
- * `docs/investigations/bignum_fallback_investigation.md` is the run log for this half. The fix everywhere is
+ * `docs/investigations/numbers/bignum_fallback_investigation.md` is the run log for this half. The fix everywhere is
  * digit-at-a-time out of the language's OWN number words — every one of these engines already reads a
  * decimal tail or a year that way — and never BigInt, which would need a magnitude register (trillion and
  * above) the dicts were never measured on and would trade a silent drop for a confidently-wrong numeral.

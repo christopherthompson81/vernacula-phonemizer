@@ -13,7 +13,7 @@
  * articles in Persian, whole tribal histories in Urdu, all in the same script. That is worse than `bar`'s
  * 24% German and `ht`'s 15.1% French. `filter-by-language.py` gained a `bal` row for it and every count in
  * this file is over the 383 paragraphs that survive it. Full log:
- * `docs/investigations/bal_normalization_investigation.md`.
+ * `docs/investigations/bal/bal_normalization_investigation.md`.
  *
  * ⚠ BALOCHI IS A MACROLANGUAGE AND THIS ENGINE IS SOUTHERN. `Wp/bgn` (Western) is four times larger and
  * covers 24/35 cells against Southern's 16/35 — it is used below only as a labelled second opinion on
@@ -415,7 +415,7 @@ export function makeBalochiNormalizer({ knownWord }: BalochiNormalizerDeps) {
         //    the shared tier would have meant naming a Balochi percent word, and there isn't one to name
         //    (see the header: `فیصد` is Western, `سدی` is the century). A layer does not get to invent a word
         //    as the price of admission to a seam. That field is OPTIONAL now — shi hit the same wall and it
-        //    was fixed in core (`docs/investigations/tier_optional_fields_investigation.md`), so the door is
+        //    was fixed in core (`docs/investigations/symbols/tier_optional_fields_investigation.md`), so the door is
         //    open and this layer is DECLINING it rather than being refused:
         //      · what the tier would add on top, this corpus does not exercise — it writes
         //        `چارسریکی کیلومتر` ("square kilometre") as WORDS already, and `km/h` is ×0 in BOTH Balochi

@@ -2,7 +2,7 @@
 // *Vox Latina*) over macronized spelling.
 //
 // ⚠ la HAS NO FLEURS SPLIT, so the corpus-wide differential PORTING.md asks for is unavailable in its
-// usual form and the weight falls on these plus the off-golden probes (see docs/la_port_investigation.md).
+// usual form and the weight falls on these plus the off-golden probes (see docs/investigations/la/la_port_investigation.md).
 using Vernacula.Phonemizer;
 using LaEngine = Vernacula.Phonemizer.Languages.Latin.LatinPhonemizer;
 using LaNormalize = Vernacula.Phonemizer.Languages.Latin.Normalize;

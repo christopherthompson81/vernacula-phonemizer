@@ -17,7 +17,7 @@
  * `Pak-khô-chhiòn-sû he tui Ngìn-lui…` currently reads *pʰˈæk khˈoᶷ kʃˈʌn sˈuː hˈiː t͡ʃˈʌwɪ nd͡ʒˈɪn lˈuːɪ…*
  * — the language's own encyclopedia, read as English. **That is an ENGINE gap, not a normalization gap**,
  * and it is deliberately NOT fixed here: it is a romanization front end (what `minnan.ts` has and this
- * language does not), sized and recorded in `docs/investigations/hak_normalization_investigation.md`.
+ * language does not), sized and recorded in `docs/investigations/hak/hak_normalization_investigation.md`.
  *
  * ⚠ WHAT THAT MEANS FOR SCOPE, STATED ONCE AND APPLIED EVERYWHERE. This layer's job is the text that is not
  * a WORD in any orthography — digits, signs, marks. `ngie̍t` (月, ×1,126 after digits) and `ngit` (日, ×965)

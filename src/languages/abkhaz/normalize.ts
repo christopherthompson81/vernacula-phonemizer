@@ -20,7 +20,7 @@
  * ab.wikipedia TEXT, not from the sampled corpus artifact — the artifact's 208 excerpts attest none of it,
  * which originally deferred all of these classes. The full-text search (2026-08-08) attests every word and
  * every frame the rules below emit; counts and verbatim snippets are in
- * docs/abkhaz_vocabulary_investigation.md, and the words live in the manifest's `symbols` block.
+ * docs/investigations/ab/abkhaz_vocabulary_investigation.md, and the words live in the manifest's `symbols` block.
  *
  * ⚠ STILL DEFERRED — AND LOOKED UP, NOT ASSUMED. `tools/normalization/review.ts --lang ab` keeps
  * reporting these as DROPPED, and it is right to; they are blocked on VOCABULARY, not on code:
@@ -165,7 +165,7 @@ export function normalizeAbkhaz(text: string): string {
 
     // 3) SYMBOLS — percent, degrees, currency, км², the clock. The words and their ORDER are the
     //    full-wiki attestations recorded in the manifest `symbols` block (sourcing:
-    //    docs/abkhaz_vocabulary_investigation.md).
+    //    docs/investigations/ab/abkhaz_vocabulary_investigation.md).
     //    ⚠ BEFORE ranges and decimals, deliberately: "83°C" must attach its unit while the digits are
     //    still beside it — the range rewrite inserts words between endpoints, and after it runs the ⟨°C⟩
     //    would be touching ⟨рҟынӡа⟩, not a digit. Symbol rules only move a WORD in beside the digit span,

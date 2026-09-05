@@ -7,7 +7,7 @@
  * and no punctuation in it, so it is a TRIPWIRE for the word path and cannot arbitrate one line of this
  * file. The evidence is therefore `tools/corpus/mined/mos.jsonc` (dump-sourced) plus a fresh
  * mos.wikipedia dump — 2,088 pages / 12,650 paragraphs through `wikidump-to-text.py`, which is the WHOLE
- * of the Mooré wiki. Full log: `docs/investigations/mos_normalization_investigation.md`.
+ * of the Mooré wiki. Full log: `docs/investigations/mos/mos_normalization_investigation.md`.
  *
  * ⚠ AND 11.6% OF THAT WIKI IS NOT MOORÉ, SO EVERY COUNT BELOW IS OVER THE FILTERED TEXT
  * (`filter-by-language.py --lang mos`, a row added by this work). Burkina Faso is francophone and the

@@ -7,7 +7,7 @@
  * tier additionally requires a module .ts naming the code, which kiche.ts does not). The only K'iche'
  * TEXT in this repository is the 127 human headwords of the English-Wiktionary referee
  * (`tools/referee-eval/referees/quc.wiktionary-kiche.tsv`) — the same source the TypeScript engine was
- * brought up against (docs/investigations/quc_native_bringup_investigation.md).
+ * brought up against (docs/investigations/quc/quc_native_bringup_investigation.md).
  *
  * ⚠ SO THIS GOLDEN IS THE REFEREE'S HEADWORDS, NOT A CORPUS. It pins C#↔TS parity over the 127 words
  * the TS engine was tuned on, plus a curated numeral list covering every arm of the vigesimal composer

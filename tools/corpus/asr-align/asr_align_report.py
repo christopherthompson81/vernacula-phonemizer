@@ -75,13 +75,13 @@ PUNCT = set(",.!?;:()[]{}\"'«»„“”‘’—–")
 # voices the year in English), and the recognizer confirms the readers did (`t aʊ z ə n d`). So the
 # expansion is heard, and the cell is real — but it is the ENGLISH offglide inside a Bantu row, and says
 # nothing about Bantu notation. Same for mi (English proper nouns) and ru/mk (loans). See
-# docs/offglide_notation_investigation.md.
+# docs/investigations/asr-align/offglide_notation_investigation.md.
 #
 # A cell is listed when n ≥ 20, the language's MEDIAN does not get worse with only that cell expanded, and
 # more rows move closer than further — `ɀ`'s criterion, applied per language because the fact is per
 # language. Everything else keeps today's behaviour. Targets are what the recognizer writes there, not the
 # letter's nominal value: Welsh ᶤ comes back as ɪ (470 of 741; ɨ 22) and Hausa's ᵘ would be ʊ, not u.
-# Full tables in docs/asr_align_offglide_fold_investigation.md, Runs 2–5.
+# Full tables in docs/investigations/asr-align/asr_align_offglide_fold_investigation.md, Runs 2–5.
 #
 # ⚠ OUR SIDE ONLY, by construction: the recognizer never emits these letters, so `fold(phones, lang)` is
 # unchanged. Callers that do not know the language get the old fold, which is the drop — never a guess.

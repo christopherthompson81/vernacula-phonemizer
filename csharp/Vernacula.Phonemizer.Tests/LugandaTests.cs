@@ -2,9 +2,9 @@
 // Latin orthography. Tone is lexical, unwritten and DEFERRED, so the output is segmental.
 //
 // ⚠ THE REFEREE IS PARTLY CIRCULAR — epitran lug-Latn is the only machine referee and is itself rule-based
-// (see the TS header and docs/investigations/lg_native_bringup_investigation.md), so these goldens pin the
+// (see the TS header and docs/investigations/lg/lg_native_bringup_investigation.md), so these goldens pin the
 // segmental backbone rather than settling correctness. lg DOES have a FLEURS split (`lg_ug`), so
-// PORTING.md's corpus-wide differential is available and was run — see docs/lg_port_investigation.md.
+// PORTING.md's corpus-wide differential is available and was run — see docs/investigations/lg/lg_port_investigation.md.
 using Vernacula.Phonemizer;
 using LgEngine = Vernacula.Phonemizer.Languages.Luganda.LugandaPhonemizer;
 using LgNormalize = Vernacula.Phonemizer.Languages.Luganda.Normalize;

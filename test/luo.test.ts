@@ -92,7 +92,7 @@ describe("Luo (Dholuo) canonical IPA — greedy g2p (Nilotic: dental contrast + 
 // ⚠ EVERY ASSERTION BELOW ENCODES A MEASUREMENT over the luo_ke FLEURS transcripts — 2,742 rows → 1,660
 // UNIQUE cased utterances (column 3), counted by hand because Luo has NO mined artifact and `mine.ts scan`
 // cannot run for it. The evidence and the refusals are argued in src/languages/luo/normalize.ts and
-// registered in ACCEPTED_SIGN_SILENCE; docs/investigations/luo_normalization_investigation.md is the log.
+// registered in ACCEPTED_SIGN_SILENCE; docs/investigations/luo/luo_normalization_investigation.md is the log.
 // Several tests here PIN A REFUSAL, and those are worth as much as the rewrites: a class with no sourceable
 // word must keep reading exactly as it did rather than gain a confidently wrong one.
 describe("Luo text normalization", () => {

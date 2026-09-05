@@ -6,7 +6,7 @@
  * from a shi.wikipedia dump, so its `sample` tier IS the real distribution — read through its 403 retained
  * segments (203 hard + 200 sample), plus `attest.ts` against shi.wikipedia for anything the corpus does not
  * settle. Every count below says which of the two it is over. Full log:
- * `docs/investigations/shi_normalization_investigation.md`.
+ * `docs/investigations/shi/shi_normalization_investigation.md`.
  *
  * ⚠ THE SCRIPT QUESTION FIRST, BECAUSE IT DECIDES EVERYTHING ELSE. shi is catalogued Latin/Tifinagh and is
  * also written in the Arabic manuscript script. The engine's token class is the two SCRIPTS —
@@ -74,7 +74,7 @@
  *   idiom, not ordering, but a mandatory data field the language cannot fill. The field is now OPTIONAL
  *   (its arm skipped, the sign left visible), so the reason is spent and shi's units, rates, exponents and
  *   currency are DATA on the shared tier at step 5 — see `SYMBOLS` below and
- *   `docs/investigations/tier_optional_fields_investigation.md`. The refusal itself is unchanged: shi still
+ *   `docs/investigations/symbols/tier_optional_fields_investigation.md`. The refusal itself is unchanged: shi still
  *   declares no percent word, and the `%` is still dropped visibly rather than read wrongly.
  *
  * ⚠ NO DECIMAL-POINT WORD. `sources.ts` reports `[NONE] decimal-point`. `tanqqiḍt` is attested ×4 and means
@@ -397,7 +397,7 @@ export function normalizeTashelhit(input: string): string {
     //    ⚠ THIS FILE USED TO HAND-WRITE ALL OF IT, and the reason was a single missing cell: `SymbolData`
     //    required a `percent` word, so a language that correctly refuses to invent one could not declare the
     //    tier at all. The field is optional now (see the tier's own header and
-    //    `docs/investigations/tier_optional_fields_investigation.md`), so the ~25 lines of unit-matching,
+    //    `docs/investigations/symbols/tier_optional_fields_investigation.md`), so the ~25 lines of unit-matching,
     //    magnitude-hopping and currency-suppression machinery that were duplicated here are gone and shi
     //    inherits the measured guards instead of a copy of them that can drift:
     //      · `NOT_VERSION` — the `802.11m` lookbehind+lookahead pair, trap 46. It is INHERITED rather than

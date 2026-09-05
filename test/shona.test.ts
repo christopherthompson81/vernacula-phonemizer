@@ -13,7 +13,7 @@ import { normalizeShonaPre, normalizeShonaPost } from "../src/languages/shona/no
 // list contains no digit and no symbol. So this file is not a convenience: it is the only gate that pins a
 // reading. Every expectation below is sourced in `src/languages/shona/normalize.ts`,
 // `src/languages/shona/shona.ts` or `shona.jsonc`, and the evidence is written out in
-// `docs/investigations/sn_normalization_investigation.md`.
+// `docs/investigations/sn/sn_normalization_investigation.md`.
 //
 // ⚠ PIN THE RULE'S BRANCHES, NOT THE CORPUS'S INSTANCES (playbook trap 13). The number composer has a table
 // branch (1–10), a magnitude-concord branch (makumi/mazana/zviuru + a class prefix) and a boundary between

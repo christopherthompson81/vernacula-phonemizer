@@ -90,7 +90,7 @@ describe("Tashelhit (Shilha) canonical IPA — Berber Latin → IPA converter", 
 // ═══ TEXT NORMALIZATION — src/languages/tashelhit/normalize.ts ════════════════════════════════════════
 // There is no FLEURS for Tashelhit; the evidence is tools/corpus/mined/shi.jsonc (43,733 paragraphs from a
 // shi.wikipedia dump) plus attest.ts against shi.wikipedia. Sourcing, counts and every refusal are argued in
-// normalize.ts's header; docs/investigations/shi_normalization_investigation.md is the log.
+// normalize.ts's header; docs/investigations/shi/shi_normalization_investigation.md is the log.
 //
 // ⚠ THESE PIN THE RULE'S BRANCHES, NOT THE CORPUS'S INSTANCES (trap 13). Where a branch the corpus does not
 // exercise exists — `m³`, `km/h`, `802.11m`, an upper-case unit key — it is pinned with a case the corpus

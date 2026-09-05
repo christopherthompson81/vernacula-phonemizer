@@ -106,7 +106,7 @@ describe("Mooré canonical IPA — greedy g2p + gemination", () => {
 // wikipron, and espeak does not ship the language, so the 39-word wiktionary referee is a TRIPWIRE for the
 // word path and can arbitrate none of this. The evidence is the mos.wikipedia dump — 12,650 paragraphs —
 // filtered to Mooré with `filter-by-language.py --lang mos`, because 11.6% of that wiki is English.
-// Full log: docs/investigations/mos_normalization_investigation.md.
+// Full log: docs/investigations/mos/mos_normalization_investigation.md.
 describe("Mooré text normalization — de-grouping and the two sourceable currency signs", () => {
     const say = (s: string): string => createMossi().text(s);
 

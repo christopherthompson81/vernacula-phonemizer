@@ -73,7 +73,7 @@ describe("Hebrew canonical IPA — niqqud→IPA (Modern Israeli)", () => {
 
 // ── TEXT NORMALIZATION (src/languages/hebrew/normalize.ts) ────────────────────────────────────────────
 // The pre-tokenizer pass. Counts, sourcing and every refusal are in that file's header and in
-// docs/investigations/he_normalization_investigation.md. These assert through the real `phonemize`, so
+// docs/investigations/he/he_normalization_investigation.md. These assert through the real `phonemize`, so
 // they also pin the ordering couplings between the numbered steps.
 // ⚠ THE BRANCHES, NOT THE CORPUS'S INSTANCES (trap 13). Each proclitic is exercised separately because
 // each has its OWN vocalization, and the two that are not plain sheva — הַ [ha] and מֵ [me] — are the ones

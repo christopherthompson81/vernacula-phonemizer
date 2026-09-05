@@ -38,7 +38,7 @@ function readDataLines(
  * never be matched from `text()` — it does not throw and it does not drop a phone, the word just takes the
  * OOV path and gets a plausible wrong reading. Passing the engine's own `nat` here adds the folded spelling
  * as an ALIAS for the same value, which is what closes the gap. Measured in
- * `docs/investigations/nativiser_lexicon_seam_investigation.md`; guarded by `test/lexicon-reachability`.
+ * `docs/investigations/normalization/nativiser_lexicon_seam_investigation.md`; guarded by `test/lexicon-reachability`.
  *
  * ⚠ AN UNFOLDED KEY ALREADY IN THE FILE WINS, ALWAYS. An alias is written only into a FREE slot, so no
  * reading the engine already resolves THROUGH THE LEXICON can change. Without this, Slovene alone would

@@ -47,7 +47,7 @@ describe("Armenian canonical IPA — rule g2p (Eastern Armenian)", () => {
     });
     // ─── NORMALIZATION ──────────────────────────────────────────────────────────────────────────────
     // Evidence and refusals: src/languages/armenian/normalize.ts and
-    // docs/investigations/hy_normalization_investigation.md.
+    // docs/investigations/hy/hy_normalization_investigation.md.
 
     // Trap 13: pin the RULE'S BRANCHES, not the corpus's instances. The ordinal has an irregular TABLE
     // (1–4), a composition (everything else) and a boundary between them, and the corpus only writes a

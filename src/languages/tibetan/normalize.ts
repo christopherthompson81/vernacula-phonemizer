@@ -5,7 +5,7 @@ import { rewrite } from "../../core/provenance.ts";
  * tibetan.ts's `text()`, after `foldNativeDigits` and before the tokenizer.
  *
  * Evidence: `tools/corpus/mined/bo.jsonc` (89,427 dump paragraphs, 419 retained segments) and
- * `tools/corpus/attest/bo.jsonc`. The full working is in `docs/investigations/bo_normalization_investigation.md`.
+ * `tools/corpus/attest/bo.jsonc`. The full working is in `docs/investigations/bo/bo_normalization_investigation.md`.
  *
  * ⚠ **TIBETAN PREPOSES THE MEASURE NOUN TO ITS FIGURE, IN EVERY SLOT**, which is the one thing this layer has
  * to get right and the reason none of it can go on the shared `core/normalizeSymbols.ts` tier — that tier can

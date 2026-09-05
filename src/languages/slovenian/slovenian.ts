@@ -9,7 +9,7 @@
  * against "phoneme, non-tonal variety"). The non-tonal (stress + length) norm is the broadcast standard and what
  * most speakers use; the tonemic norm is a minority standard. So unlike the sibling sr/hr/bs engine — where the
  * four-way pitch accent IS the system and is emitted as Chao letters — Slovene gets position and nothing else.
- * docs/investigations/south_slavic_stress_sources_investigation.md. text() tokenizes words / numbers / punctuation.
+ * docs/investigations/normalization/south_slavic_stress_sources_investigation.md. text() tokenizes words / numbers / punctuation.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";

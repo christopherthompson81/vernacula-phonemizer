@@ -281,7 +281,7 @@ describe("khmer signs that are easily left silent", () => {
 // PASS-2 CONSUMPTION GUARDS + the nikahit/⟨ង⟩ merge. Three of these rules DELETE a unit after taking its
 // ons[0] as a coda, and none of them used to ask whether that unit was already carrying a coda of its own —
 // so a whole syllable disappeared. Measured: +3.8pp folded on the 7,108-word wikipron referee, 268 words
-// gained and ZERO lost. See docs/investigations/km_syllabifier_defects_investigation.md.
+// gained and ZERO lost. See docs/investigations/km/km_syllabifier_defects_investigation.md.
 describe("Khmer syllabifier — rules that consume a unit must not destroy its coda", () => {
     test("a trailing bare unit that already owns a coda is NOT sliced away", () => {
         // [ក][ញ្ច][ក់] — ក់ becomes ញ្ច's coda, then the trailing rule deleted ញ្ច and the ក with it (*kɑɲ).

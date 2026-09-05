@@ -162,7 +162,7 @@ const TOKEN = new RegExp(`([${CYRILLIC}'’ʼ]+)|(\\d+(?:,\\d+)?)|([.?!,;:…—
 
 /**
  * SYMBOL NORMALIZATION — Belarusian. Every word is a be.wikipedia TOKEN attestation whose examples were
- * read (see normalize.ts's header and docs/investigations/be_normalization_investigation.md, run 3):
+ * read (see normalize.ts's header and docs/investigations/be/be_normalization_investigation.md, run 3):
  *   `працэнт` ×16/13 — its own article writes the sign and the word in one sentence: "гулец, які кідае на
  *     33 %, пападае кожны трэці кідок. Працэнт апісвае некалькі дыскрэтных падзей."
  *     ⚠ `адсотак` scored HIGHER (×20/20) and was declined: every one of its twenty hits is the same

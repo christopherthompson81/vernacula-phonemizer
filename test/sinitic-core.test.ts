@@ -7,7 +7,7 @@ import { degroupThousands, readDecimals, readDegrees, reorderFraction, spellHanD
  * The shared Sinitic number rules — and, more to the point, the DEFECTS they exist to stop being
  * rediscovered. Five Han-orthography layers (cmn, yue, wuu, nan, cjy) each grew these separately; the
  * measurement that justified extracting them, and the live bug the drift had already shipped, are in
- * `src/core/sinitic.ts` and `docs/investigations/sinitic_core_investigation.md`.
+ * `src/core/sinitic.ts` and `docs/investigations/normalization/sinitic_core_investigation.md`.
  *
  * ⚠ EVERY TEST HERE IS A REGRESSION FROM A REAL DEFECT, not a specification exercise.
  */
