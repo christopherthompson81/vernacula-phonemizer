@@ -522,19 +522,38 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (m0, mo: string, d: string, y: string) =>
         isoDate(Number(y), Number(mo), Number(d)) ?? m0);
 
-    // 0f1) MONEY with cents — "three dollars and fourteen cents", not "three point one four dollars". A
-    //      decimal reading of a price is wrong in a way listeners notice. Must precede the general currency
-    //      rule.
+    // 0f1) MONEY with cents — "three dollars fourteen cents", not "three point one four dollars". A decimal
+    //      reading of a price is wrong in a way listeners notice. Must precede the general currency rule.
     // ⚠ THE FRACTIONAL PART NEEDS ITS UNIT NOUN, and without one the number does not merely sound bare —
     //      IT JOINS THE NEXT CLAUSE. `for $3.14 and the 2nd time` read "for three dollars FOURTEEN AND the
     //      second time", where the listener hears the cents as the head of the following phrase. A bare
     //      integer with no unit has nothing to close it, so the clause boundary lands in the wrong place.
     // ⚠ AN AMOUNT UNDER ONE UNIT IS SPOKEN AS THE FRACTION ALONE. "zero dollars ninety nine cents" is
     //      nobody's reading of `$0.99`; the whole part is written for the column, not to be said.
-    // ⚠ `(?![\p{L}\p{M}])`, NOT `\b` — and the `u` flag is required for it. JS defines `\b` on ASCII `\w`,
-    // so `$1.50é` was read as money while `$1.50a` was not (#949, #950). The `u` flag alone changes nothing
-    // here; the guard is the change.
-    s = rewrite(s, /([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}])/gu,
+    // ⚠ AND THE TWO PARTS ARE JUXTAPOSED, NOT JOINED WITH "and". The conjunction reads more formally and is
+    //      what espeak-ng emits, but it MERGES TWO PRICES INTO ONE: with it, `$1.00 and $0.50` and `$1.50`
+    //      both come out "1 dollar and 50 cents", because the elided whole part above leaves the second
+    //      amount looking like the first one's fraction. That is the very failure this rule exists to
+    //      prevent — a boundary landing in the wrong place — so the word that causes it cannot be spent
+    //      here. Juxtaposition keeps the two distinguishable and is an ordinary reading of a price.
+    // ⚠ EXCEPT BEFORE A MAGNITUDE WORD, where the DECIMAL reading is the right one: `$5.50 million` is five
+    //      and a half million dollars, not five dollars fifty. This rule runs first and consumes the sign,
+    //      so without the decline step 1's magnitude arm never saw the amount and the magnitude was
+    //      orphaned after the unit noun — "5 dollars 50 cents million".
+    // ⚠ `(?![\p{L}\p{M}\d])`, NOT `\b` — and the `u` flag is required for it. JS defines `\b` on ASCII
+    // `\w`, so `$1.50é` was read as money while `$1.50a` was not (#949, #950).
+    // ⚠ KNOWN LIMIT, AND IT IS A DELIBERATE NON-FIX: a symbol GLUED to the cents digits loses its adjacency
+    // to a digit, because the unit noun now sits between them, and the rules that speak those symbols all
+    // require that adjacency. `$1.50%` and `$2.50°` therefore drop the sign, where they used to read "1
+    // dollar 50 percent" and "…50 degrees". Neither reading is right — a price is not a percentage and not
+    // a temperature — and `$1.50+` and `$1.50/kg` strand their symbol on this rule's own account either
+    // way. The shapes are malformed input, so no correct reading is being given up; do not "fix" this by
+    // dropping the unit noun, which is the content that matters.
+    // ⚠ THE DIGIT IN THAT CLASS IS LOAD-BEARING TOO. A THIRD DECIMAL IS NOT CENTS — `$3.499` is a pump
+    // price, and a 4-decimal FX rate has the same shape — and matching only the first two stranded the rest
+    // ON THE UNIT NOUN: "3 dollars 49 cents9", a bare "nine" with nothing to attach to. Declining hands the
+    // whole amount to the general currency rule, which reads it as the decimal it is.
+    s = rewrite(s, /([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}\d])(?!\s+(?:million|billion|trillion|thousand))/gu,
         (m0, sym: string, int: string, cents: string) => {
             const sub = SUBUNIT[sym];
             if (sub === undefined) return m0; // no fractional unit — see SUBUNIT
@@ -544,7 +563,7 @@ export function normalizeEnglish(input: string): string {
             const n = Number(cents);
             if (n === 0) return `${int} ${unit}`;
             const frac = `${n} ${n === 1 ? sub[0] : sub[1]}`;
-            return /^0+$/.test(whole) ? frac : `${int} ${unit} and ${frac}`;
+            return /^0+$/.test(whole) ? frac : `${int} ${unit} ${frac}`;
         });
 
     // 0f2) PLUS. The mirror of the minus rule: a dropped sign is silent content loss. Covers the attached

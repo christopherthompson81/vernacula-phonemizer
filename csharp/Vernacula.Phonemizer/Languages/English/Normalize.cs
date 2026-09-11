@@ -247,7 +247,10 @@ public static class Normalize
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b` — and the `u` flag is required for it. JS defines `\\b` on ASCII
     // `\\w`, so `$1.50é` read as money while `$1.50a` did not. See src/languages/english/normalize.ts.
     private static readonly JsRe MONEY_CENTS =
-        JsRegex.Compile("([$£€¥])\\s?(\\d[\\d,]*)\\.(\\d{2})(?![\\p{L}\\p{M}])", "gu");
+        // ⚠ The class excludes DIGITS (a third decimal is not cents) and the rule declines before a
+        // magnitude word (`$5.50 million` is a decimal amount) — see src/languages/english/normalize.ts.
+        JsRegex.Compile("([$£€¥])\\s?(\\d[\\d,]*)\\.(\\d{2})(?![\\p{L}\\p{M}\\d])"
+            + "(?!\\s+(?:million|billion|trillion|thousand))", "gu");
     private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+\\s?(\\d)", "gu");
     private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|\\s)\\+\\s?(\\d)", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[\\/\\d])", "gu");
@@ -417,8 +420,9 @@ public static class Normalize
             var n = Js.Number(cents);
             if (n == 0) return $"{intPart} {unit}";
             var frac = $"{Js.NumberToString(n)} {(n == 1 ? sub[0] : sub[1])}";
-            // An amount under one unit is spoken as the fraction alone — "ninety nine cents".
-            return ALL_ZEROS.IsMatch(whole) ? frac : $"{intPart} {unit} and {frac}";
+            // ⚠ An amount under one unit is the fraction alone, and the parts are JUXTAPOSED — an "and"
+            // here merges `$1.00 and $0.50` with `$1.50`. See src/languages/english/normalize.ts.
+            return ALL_ZEROS.IsMatch(whole) ? frac : $"{intPart} {unit} {frac}";
         });
 
         s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
