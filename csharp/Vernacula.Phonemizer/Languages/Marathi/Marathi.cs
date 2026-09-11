@@ -55,7 +55,11 @@ public sealed class MarathiDef : HindiDef
     public sealed class SymbolWordsDef
     {
         public string Plus { get; set; } = ""; public string Approximately { get; set; } = ""; public string PlusMinus { get; set; } = "";
-        public string LessThan { get; set; } = ""; public string GreaterThan { get; set; } = ""; public string Divide { get; set; } = ""; public string Equals { get; set; } = "";
+        public string LessThan { get; set; } = ""; public string GreaterThan { get; set; } = ""; public string Divide { get; set; } = "";
+        /** ⚠ `new` because the manifest key is `equals` and PascalCase collides with
+         *  `object.Equals`. Same call as NormalizeSymbols.SymbolWords: the name is kept
+         *  rather than mangled, since marathi.jsonc keys on it and the two sides must diff. */
+        public new string Equals { get; set; } = "";
         /** Declared, but no ASCII-hyphen rule reads it — see marathi.jsonc. */
         public string Minus { get; set; } = "";
     }
