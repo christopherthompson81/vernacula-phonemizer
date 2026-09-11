@@ -210,3 +210,25 @@ wrong for about ten of them. The sixty-two reach ONNX by at least three routes:
 The honest position: the goldens are an artifact of one machine, the local gate is exact there, and the
 post-merge check is a ritual rather than a mechanism. Making the artifact portable is a separate question
 (#1287 keeps it open) and would want the fp32 models or a fixed execution provider, not a threshold.
+
+## Decision — 2026-09-11 — same-machine comparison is the contract
+
+Asked directly, the answer is: **don't compare goldens across machines.** Option 4 of the four on #1287,
+taken deliberately rather than by default, and the issue is closed on it.
+
+What that makes true, and what it costs:
+
+- The port's claim is "byte-identical **on one machine**". The `189 languages byte-identical` line the
+  parity runner prints means "on this machine", and now says so in its own header.
+- `check:goldens` and `csharp/tools/parity` are both same-machine tools. A mismatch on other hardware is
+  expected and is not a port defect.
+- **No CI can verify the port.** That is the real cost and it should not be discovered again by surprise
+  — it is stated at the top of `PORTING.md`, beside the definition of done rather than in a footnote.
+
+The alternatives are recorded as rejected rather than untried: fp32 models for generation, a pinned
+execution provider, or a partial contract covering only the 115 ONNX-independent languages. Each buys
+portability that nothing in this project currently needs, at a cost to the models everything uses.
+
+⚠ The two "fixes" that keep suggesting themselves — a tolerance, or exempting the neural languages — stay
+rejected on the numbers: real staleness has been 3 rows and cross-machine noise 44, so no threshold
+separates them, and the exemption is 39% of the fleet. Anyone reaching for either should read Run 4 first.

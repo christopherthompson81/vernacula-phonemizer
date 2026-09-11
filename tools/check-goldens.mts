@@ -22,12 +22,15 @@
  * source. This re-renders each golden's OWN recorded text and compares the IPA — verifying the rows that are
  * there without needing to re-derive which rows should be there. No corpus required.
  *
- * ⚠ RUN THIS ON THE MACHINE THAT GENERATED THE GOLDENS. For the 74 languages that depend on ONNX (derive
- * them with `--no-ort`), the output is NOT bit-reproducible across CPU microarchitectures: int8 inference
- * dispatches to different kernels, and a rounding difference occasionally flips an argmax. Measured between
- * an Intel Comet Lake and an AMD EPYC runner: 44 rows of 36,495 (0.12%), e.g. `Bellingshausen` losing one
- * phone — `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən`. That is why this check is NOT in the CI workflow: it
- * cannot pass on hardware other than the generator's, and a gate that is red by construction is noise.
+ * ⚠ RUN THIS ON THE MACHINE THAT GENERATED THE GOLDENS — that is the CONTRACT, not a caveat (#1287). For
+ * the 74 languages that depend on ONNX (derive them with `--no-ort`), the output is NOT bit-reproducible
+ * across CPU microarchitectures: int8 inference dispatches to different kernels, and a rounding difference
+ * occasionally flips an argmax. Measured between an Intel Comet Lake and an AMD EPYC runner: 44 rows of
+ * 36,495 (0.12%), e.g. `Bellingshausen` losing one phone — `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən`.
+ * That is why this check is NOT in the CI workflow: it cannot pass on hardware other than the generator's,
+ * and a gate that is red by construction is noise. ⚠ DO NOT "FIX" THAT by making the comparison tolerant or
+ * by exempting the neural languages — both were weighed and rejected (see csharp/PORTING.md); the same
+ * applies to any future attempt to run this somewhere else.
  * ⚠ A COUNT CANNOT SEPARATE THAT NOISE FROM REAL STALENESS, which is why there is no tolerance mode: the
  * `beyond` regression (#1283) was 3 rows and the cross-machine noise is 44, so any threshold that admits
  * the second hides the first.

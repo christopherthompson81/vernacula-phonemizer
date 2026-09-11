@@ -2,9 +2,20 @@
 
 Every ported file follows these rules, so 683 files come out as one dialect instead of 683.
 ⚠ THE GOLDEN OUTPUTS ARE THE DEFINITION OF DONE: `phonemize(text, lang)` in C# must be
-**byte-identical** to the TypeScript engine. 271,798 rows of reference output exist
+**byte-identical** to the TypeScript engine **on one machine**. 271,798 rows of reference output exist
 (`/mnt/data/omnivoice_ipa/work/phonemized_vernacula/byid/<lang>.tsv`, 102 languages), plus the
 4,928-test suite whose expectations are portable goldens. "Looks right" is not a state.
+
+⚠ **"ON ONE MACHINE" IS THE CONTRACT, NOT A CAVEAT — DO NOT COMPARE GOLDENS ACROSS MACHINES.** For the
+**74 of 189** languages that depend on ONNX, the output is not bit-reproducible across CPU
+microarchitectures: int8 inference dispatches to different kernels and a rounding difference occasionally
+flips an argmax. Measured Intel Comet Lake against AMD EPYC — 44 rows of 36,495 (0.12%), e.g.
+`Bellingshausen` as `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən` (#1287).
+
+So **generate, check and parity-test on the same machine.** A mismatch elsewhere is expected and is not a
+port defect — and a count cannot tell the two apart, since real staleness has been as small as 3 rows.
+This was decided rather than merely observed: fp32 models and a pinned execution provider were the
+alternatives, and both buy portability nobody needs at a cost to the thing everyone uses.
 
 ⚠ **A CHANGE TO `data/` OR TO AN ENGINE OBSOLETES `csharp/goldens/`, AND REGENERATING THEM IS PART OF
 THAT CHANGE.** Both engines read the same `data/` tree, so a data edit moves C# and TypeScript together
@@ -18,14 +29,11 @@ time is not enough.
 `npm run ci`) re-renders every golden's own recorded text and compares — no corpus needed, ~60s. A
 branch-scoped check passes both branches in the race above and still lets main break.
 
-⚠ **AND THE GOLDENS ARE MACHINE-LOCAL — REGENERATE AND CHECK THEM ON ONE MACHINE.** For the **74 of 189**
-languages that depend on ONNX (derive the set with `check-goldens.mts --no-ort`; **twelve** directories own
-a model, and the rest reach it by three other routes — the shared Arabic diacritizer serving nine variety
-codes, the core rider diacritizer, and delegation of an embedded foreign run to an engine that does), the output is not bit-reproducible
-across CPU microarchitectures — int8 inference dispatches to different kernels and a rounding difference
-occasionally flips an argmax. Measured Intel Comet Lake against AMD EPYC: **44 rows of 36,495 (0.12%)**,
-e.g. `Bellingshausen` as `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən`. Consequences worth knowing before you
-are confused by them (#1287):
+⚠ **THE SET IS DERIVED, NOT LISTED** — `check-goldens.mts --no-ort` forces every neural path to fall back,
+and a language whose output moves is ONNX-dependent. Twelve directories own a model; the other sixty-two
+reach it by three further routes (the shared Arabic diacritizer serving nine variety codes, the core rider
+diacritizer, and delegation of an embedded foreign run to an engine that does), so a hand-kept list is a
+silent hole. Consequences worth knowing before you are confused by them (#1287):
 
 - `check:goldens` is **not** in the CI workflow. It cannot pass on hardware other than the generator's.
 - A mismatch on a machine that did not generate the goldens is **expected**, not staleness — and a count
