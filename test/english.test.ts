@@ -277,3 +277,35 @@ describe("money with a fractional part", () => {
         expect(phonemize("¥3.14", "en")).toBe(phonemize("3.14 yen", "en"));
     });
 });
+
+// ⚠ THE `-es` PLURAL AFTER A SIBILANT TAKES THE WEAK VOWEL, and the evidence is a CONTRAST rather than a
+// count. Bucketing every referee-aligned slot by WHICH SYMBOL WE WROTE there, the en-US referee writes `ɪ`
+// in 70.4% of our ᵻ slots and 7.1% of our word-final ə slots — it discriminates — and this environment sits
+// at 80-100% (en-GB corroborates at 94.0% of 133 rows). CMUdict also writes the same suffix two ways
+// (`bridges AH0` beside `badges IH0`), so before this the lexicon spelled one morpheme `ə` in 345 words and
+// `ɪ` in 733. See docs/investigations/en/en_es_plural_weak_vowel_investigation.md.
+describe("the -es plural after a sibilant", () => {
+    test("takes the weak vowel, from the lexicon and from the OOV path alike", () => {
+        expect(phonemize("services", "en")).toBe("sˈɝvəsᵻz");
+        expect(phonemize("offices", "en")).toBe("ˈɔːfəsᵻz");
+        expect(phonemize("chances", "en")).toBe("t͡ʃˈænsᵻz");
+        expect(phonemize("bridges", "en")).toBe("bɹˈɪd͡ʒᵻz");
+    });
+
+    test("one morpheme, one spelling — CMUdict's AH0/IH0 split no longer shows", () => {
+        // `bridges` is AH0 and `badges` IH0 in the source; they used to surface as ə and ɪ.
+        expect(phonemize("bridges", "en").slice(-2)).toBe(phonemize("badges", "en").slice(-2));
+        expect(phonemize("advances", "en").slice(-2)).toBe(phonemize("abuses", "en").slice(-2));
+    });
+
+    test("the Greek /iːz/ plurals are untouched — they are IY, not AH/IH", () => {
+        // These need no exclusion in the rule: the base test already refuses anything but IH/AH.
+        expect(phonemize("crises", "en")).toBe("kɹˈaᶦsiz");
+        expect(phonemize("analyses", "en")).toContain("iːz");
+    });
+
+    test("a non-sibilant stem is not this environment", () => {
+        expect(phonemize("goes", "en")).toBe("ɡˈoᶷz");
+        expect(phonemize("notes", "en")).toBe("nˈoᶷts");
+    });
+});
