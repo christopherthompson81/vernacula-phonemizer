@@ -10,7 +10,7 @@
         {
             "pattern": "ᵻ",
             "replace": "ɪ",
-            "note": "the weak vowel ᵻ has NO counterpart in the referee's inventory, so leaving it unfolded maps it to ALWAYS-WRONG — a uniform penalty on a documented house convention across ~4,525 lexicon rows. Measured per slot against this referee: our ᵻ draws ɪ 71.9% / ə 20.2%, our full ɪ draws ɪ 93.1% / ə 3.9%, our ə draws ɪ 10.1% / ə 82.3% — so ɪ is the best-supported single mapping by a wide margin. ⚠ IT IS NOT FREE: the referee PARTIALLY resolves ᵻ (our ᵻ and our full ɪ draw different ɪ-rates, 72% vs 93%), so this fold gives up catching an ᵻ written where a full ɪ belongs. That axis is kept visible outside the headline by tools/english/en_weak_vowel_survey.mts — see #1282."
+            "note": "the weak vowel ᵻ is effectively absent from this referee — 13 rows of 76,284 carry it, so unfolded it maps to ALWAYS-WRONG across 5,580 lexicon rows. Measured per slot against THIS referee (not the US one): our ᵻ draws ɪ 81.4% / ə 13.4%, our full ɪ draws ɪ 93.7% / ə 2.4%, our ə draws ɪ 10.2% / ə 78.4% — on 1,925 ᵻ slots across 27,953 aligned words, which is 16x the US referee's sample and is why this variety carries the evidence. ⚠ IT IS NOT FREE: the referee PARTIALLY resolves ᵻ (our ᵻ and our full ɪ draw different ɪ-rates, 81% vs 94%), so this fold gives up catching an ᵻ written where a full ɪ belongs. Audit that with tools/english/en_weak_vowel_survey.mts --gb — see #1282."
         },
         { "pattern": "ʰ", "replace": "", "note": "aspiration on p/t/k — our GenAm engine marks it, the referee doesn't" },
         { "pattern": "ɫ", "replace": "l", "note": "DARK/velarised coda ⟨l⟩ [ɫ] — our engine marks the velarisation, the broad referee writes plain [l]; one phoneme" },
