@@ -99,3 +99,24 @@ npx vitest run                 295 files, 5812 tests
 npm run check:goldens          189 languages, 36495 rows, 0 stale (after regenerating en, en-GB, en-IN)
 npx tsx tools/english/en_rebuild_lexicon.mts   117,479 sourced rows, 100.00% round-trip
 ```
+
+## Left open — `requiring` has no consonantal ɹ on its `-ing` syllable
+
+Found in review, on the exact row this change edited, by witnesses this investigation had already collected
+and not looked at closely enough:
+
+```
+ours      requiring  ɹᵻkwˈaᶦɚɪŋ        ← no ɹ
+en-GB referee        ɹɪkwaɪəɹɪŋ        ← has one
+espeak-ng            ɹᵻkwˈaɪɚɹɪŋ       ← has one
+siblings  acquiring əkwˈaᶦɹɪŋ · hiring hˈaᶦɹɪŋ · wiring wˈaᶦɹɪŋ · expiring ɪkspˈaᶦɹɪŋ
+```
+
+Inherited from CMUdict spelling this shape two ways — `AY … ER0 IH0 NG` (6 rows: `requiring`, `inquiring`,
+`desiring`, `backfiring`, `rewiring`, `transpiring`) against `AY1 R IH0 NG` (17 rows), which is the same
+kind of arbitrary source split as the `-es` plural's `AH0`/`IH0` in #1275.
+
+⚠ **NOT fixed here, deliberately.** It is a different defect from the prefix vowel — a missing consonant,
+not a reduced vowel — it predates this change, and doing it properly means an evidence pass over all six
+rows rather than the one that happened to be under the cursor. Recorded because both witnesses were already
+quoted above, disagreeing with a row this PR touched, and that is exactly the kind of thing that gets lost.
