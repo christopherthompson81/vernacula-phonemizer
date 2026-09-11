@@ -20,7 +20,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "check:package": "node tools/check-package-fence.mjs",
-    "ci": "npm run typecheck && npm test && npm run check:package"
+    "check:goldens": "tsx tools/check-goldens.mts",
+    "ci": "npm run typecheck && npm test && npm run check:goldens && npm run check:package"
   },
   "optionalDependencies": {
     "onnxruntime-node": "^1.27.0"
