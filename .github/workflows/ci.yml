@@ -1,21 +1,30 @@
 name: CI
 
-# ⚠ AUTOMATIC RUNS ARE OFF, DELIBERATELY. Solo repo, unpublished, and `npm run ci` (typecheck + test +
-# check:package — the same three commands the jobs below run) is run locally before every merge, so the
-# push/pull_request triggers only added a ~6-minute wait after the work was already verified.
+# ⚠ PULL-REQUEST RUNS ARE OFF, DELIBERATELY. Solo repo, unpublished, and `npm run ci` (typecheck + test +
+# check:goldens + check:package — the same commands the jobs below run) is run locally before every merge,
+# so a `pull_request` trigger only added a ~6-minute wait after the work was already verified.
 #
-# TO RUN IT ANYWAY: `gh workflow run ci.yml` (or the Actions tab) — the jobs are live, just not automatic.
-# TO RESTORE BEFORE PUBLISHING: uncomment the two triggers below and delete this note. That is the whole
-# change; nothing else here was touched.
+# ⚠ BUT `push: [main]` IS ON, AND THAT IS NOT A RELAXATION OF THE ABOVE — it is the one case local
+# pre-merge verification CANNOT cover. Two branches can each be green and still merge to a broken main when
+# one changes an input and the other regenerates the artifact built from it: the conflict is SEMANTIC, so
+# git merges it cleanly and both branches passed. That happened (#1283 case 2, and it cost a day of
+# misdiagnosis), and it is why `csharp/PORTING.md` says freshness must be checked on the MERGE RESULT.
+# Running after the merge adds no wait to anyone's loop.
 #
-# ⚠ WHAT LOCAL `npm run ci` DOES NOT COVER, and why this should go back on before the first publish:
+# TO RUN IT ON A BRANCH ANYWAY: `gh workflow run ci.yml` (or the Actions tab).
+# TO RESTORE FULL COVERAGE BEFORE PUBLISHING: uncomment `pull_request` below and delete this note.
+#
+# ⚠ WHAT LOCAL `npm run ci` DOES NOT COVER, and why the rest should go back on before the first publish:
 # these jobs run a FRESH `npm ci` on a clean checkout at a pinned Node 22. A warm local node_modules hides
 # lockfile drift, a dependency that no longer installs, and anything that depends on install order — the
 # optional-dependency typecheck break fixed in #747 was only ever visible in that clean-install path.
+# ⚠ AND THAT CLEAN INSTALL IS EXACTLY WHERE `check:goldens` EARNS ITS KEEP TWICE: `onnxruntime-node` is an
+# OPTIONAL dependency, so `npm ci` does not fail when it does not install — the goldens are async-mode
+# output, and the checker refuses to run rather than report the whole fleet stale.
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [main]
+  push:
+    branches: [main]
   # pull_request:
 
 jobs:
