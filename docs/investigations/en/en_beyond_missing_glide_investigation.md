@@ -1,8 +1,8 @@
 # en: `beyond` has no /j/, and it is the only ordinary English word that doesn't
 
 Noticed while reading a TTS rendering of running prose — `beyond` came out *bɪˈɑnd*, "bee-ond", with the /j/
-missing entirely. Unlike the variant questions in [[en_copula_was_vowel_investigation]] and
-[[en_ative_face_vowel_investigation]], this is a missing SEGMENT: GenAm /bɪˈjɑnd/ has an obligatory
+missing entirely. Unlike the variant questions in `docs/investigations/en/en_copula_was_vowel_investigation.md`
+and `docs/investigations/en/en_ative_face_vowel_investigation.md`, this is a missing SEGMENT: GenAm /bɪˈjɑnd/ has an obligatory
 consonantal /j/, and there is no attested reading without it.
 
 ## Run 1 — 2026-09-11 11:08 — the cause, and why no rule could rescue it
@@ -20,6 +20,10 @@ union     jˈuːnjən      Y UW1 N Y AH0 N
 familiar  fəmˈɪɫjɚ      F AH0 M IH1 L Y ER0
 behavior  bᵻhˈeᶦvjɚ     B IH0 HH EY1 V Y ER0
 ```
+
+`beyonce` is the cross-check that settles it: CMUdict already gives that word its `Y`, so the lexicon renders
+`bɪjɔːnsˈeᶦ` — the same `bɪj` onset from the same spelling. `beyond` was the outlier inside its own spelling
+family, which is what a dictionary omission looks like and what a convention would not.
 
 So it is a plain dictionary omission, not a convention. The engine's ʲ-hiatus rule cannot cover it either:
 `englishArpabet.ts:121` fires only for `IY` before another vowel (`create → kɹiʲˈeᶦt`), and `beyond` has
@@ -57,6 +61,9 @@ reproducibility from `g2p-dict.tsv` intact (re-measured after: 117,479 reproduce
 ```
 beyond   B IH0 AA1 N D  ->  B IH0 Y AA1 N D        bɪˈɑːnd  ->  bɪjˈɑːnd
 ```
+
+en-GB inherits the fix through the same row (`bɪjˈɒnd`), and it is correct there too. Sentence-medial the
+word de-accents as before (`ɪt ɪz bɪjɑːnd ðˈæt .`). No golden test or fixture pins the word.
 
 `npm run typecheck` clean; `npm test` 294 files, 5799 passed / 5 skipped.
 

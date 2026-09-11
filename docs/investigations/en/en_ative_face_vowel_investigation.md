@@ -1,7 +1,7 @@
 # en: the `-ative` adjective takes FACE where its own stem-twin takes schwa
 
 Reported from Kokoro output of running prose: `collaborative → kəlˈæbɚˌeᶦt̬ɪv`, i.e. "collabor-ATE-ive", where
-the reporter expected the short vowel. Unlike the `was` report ([en_copula_was_vowel_investigation.md]), this
+the reporter expected the short vowel. Unlike the `was` report (`docs/investigations/en/en_copula_was_vowel_investigation.md`), this
 is not a word with one wrong reading — both readings of `collaborative` are attested, and the dictionaries
 that list both put the schwa one first and the FACE one second. So the question is not "which is correct" but
 "is the lexicon's choice defensible", and the answer turns out to be no, for a reason that has nothing to do
