@@ -60,6 +60,13 @@ public static class Normalize
         ["€"] = new[] { "euro", "euros" }, ["¥"] = new[] { "yen", "yen" },
     };
 
+    /** The fractional unit of each currency — [singular, plural]; the penny's plural is suppletive.
+     *  ⚠ ⟨¥⟩ HAS NO ENTRY ON PURPOSE — see src/languages/english/normalize.ts. */
+    private static readonly IReadOnlyDictionary<string, string[]> SUBUNIT = new Dictionary<string, string[]>(StringComparer.Ordinal)
+    {
+        ["$"] = new[] { "cent", "cents" }, ["€"] = new[] { "cent", "cents" }, ["£"] = new[] { "penny", "pence" },
+    };
+
     /** A MAGNITUDE ABBREVIATION GLUED TO A MONEY FIGURE — `$1.5m`, `£2.3m`, `$2bn`, `£700k`. */
     private static readonly IReadOnlyDictionary<string, string> MONEY_MAGNITUDE = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -294,6 +301,7 @@ public static class Normalize
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "g");
     private static readonly JsRe ONE_EXACT = JsRegex.Compile("^1(?:\\.0+)?$");
     private static readonly JsRe ONE_INT = JsRegex.Compile("^1$");
+    private static readonly JsRe ALL_ZEROS = JsRegex.Compile("^0+$");
 
     /** A timezone offset spoken as the displacement it is. */
     private static string OffsetWords(Match m)
@@ -402,9 +410,15 @@ public static class Normalize
             var sym = m.Groups[1].Value;
             var intPart = m.Groups[2].Value;
             var cents = m.Groups[3].Value;
+            if (!SUBUNIT.TryGetValue(sym, out var sub)) return m.Value; // no fractional unit — see SUBUNIT
             var forms = CURRENCY[sym];
-            var unit = ONE_INT.IsMatch(Rewrite(intPart, COMMAS, "")) ? forms[0] : forms[1];
-            return cents == "00" ? $"{intPart} {unit}" : $"{intPart} {unit} {Js.NumberToString(Js.Number(cents))}";
+            var whole = Rewrite(intPart, COMMAS, "");
+            var unit = ONE_INT.IsMatch(whole) ? forms[0] : forms[1];
+            var n = Js.Number(cents);
+            if (n == 0) return $"{intPart} {unit}";
+            var frac = $"{Js.NumberToString(n)} {(n == 1 ? sub[0] : sub[1])}";
+            // An amount under one unit is spoken as the fraction alone — "ninety nine cents".
+            return ALL_ZEROS.IsMatch(whole) ? frac : $"{intPart} {unit} and {frac}";
         });
 
         s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");

@@ -80,6 +80,19 @@ const CURRENCY: Record<string, [string, string]> = {
 };
 
 /**
+ * THE FRACTIONAL UNIT of each currency, for the cents rule at 0f1 — [singular, plural], and the plural of
+ * the penny is SUPPLETIVE (`pence`, not *pennies*, for an amount of money).
+ *
+ * ⚠ ⟨¥⟩ HAS NO ENTRY, AND THE OMISSION IS THE DECISION. The sen was demonetised in 1953, so a yen price is
+ * not written with a fractional part at all; a decimal ¥ amount is some other quantity wearing a currency
+ * sign, and inventing a subunit for it would assert a word Japanese money has not used in seventy years.
+ * The rule declines it and the general currency rule at step 1 reads it as the decimal it is.
+ */
+const SUBUNIT: Readonly<Record<string, [string, string]>> = {
+    $: ["cent", "cents"], "€": ["cent", "cents"], "£": ["penny", "pence"],
+};
+
+/**
  * A MAGNITUDE ABBREVIATION GLUED TO A MONEY FIGURE — `$1.5m`, `£2.3m`, `$2bn`, `£700k`.
  *
  * ⚠ THE ONE-LETTER ⟨m⟩ IS THE WHOLE PROBLEM, because it is ALSO the metre, and `UNITS` declares it as one.
@@ -509,16 +522,29 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (m0, mo: string, d: string, y: string) =>
         isoDate(Number(y), Number(mo), Number(d)) ?? m0);
 
-    // 0f1) MONEY with cents. Read as "five dollars fifty", not "five point five zero dollars" — a decimal
-    //      reading of a price is wrong in a way listeners notice. Must precede the general currency rule.
+    // 0f1) MONEY with cents — "three dollars and fourteen cents", not "three point one four dollars". A
+    //      decimal reading of a price is wrong in a way listeners notice. Must precede the general currency
+    //      rule.
+    // ⚠ THE FRACTIONAL PART NEEDS ITS UNIT NOUN, and without one the number does not merely sound bare —
+    //      IT JOINS THE NEXT CLAUSE. `for $3.14 and the 2nd time` read "for three dollars FOURTEEN AND the
+    //      second time", where the listener hears the cents as the head of the following phrase. A bare
+    //      integer with no unit has nothing to close it, so the clause boundary lands in the wrong place.
+    // ⚠ AN AMOUNT UNDER ONE UNIT IS SPOKEN AS THE FRACTION ALONE. "zero dollars ninety nine cents" is
+    //      nobody's reading of `$0.99`; the whole part is written for the column, not to be said.
     // ⚠ `(?![\p{L}\p{M}])`, NOT `\b` — and the `u` flag is required for it. JS defines `\b` on ASCII `\w`,
     // so `$1.50é` was read as money while `$1.50a` was not (#949, #950). The `u` flag alone changes nothing
     // here; the guard is the change.
     s = rewrite(s, /([$£€¥])\s?(\d[\d,]*)\.(\d{2})(?![\p{L}\p{M}])/gu,
-        (_m, sym: string, int: string, cents: string) => {
+        (m0, sym: string, int: string, cents: string) => {
+            const sub = SUBUNIT[sym];
+            if (sub === undefined) return m0; // no fractional unit — see SUBUNIT
             const [sg, pl] = CURRENCY[sym]!;
-            const unit = /^1$/.test(int.replace(/,/g, "")) ? sg : pl;
-            return cents === "00" ? `${int} ${unit}` : `${int} ${unit} ${Number(cents)}`;
+            const whole = int.replace(/,/g, "");
+            const unit = /^1$/.test(whole) ? sg : pl;
+            const n = Number(cents);
+            if (n === 0) return `${int} ${unit}`;
+            const frac = `${n} ${n === 1 ? sub[0] : sub[1]}`;
+            return /^0+$/.test(whole) ? frac : `${int} ${unit} and ${frac}`;
         });
 
     // 0f2) PLUS. The mirror of the minus rule: a dropped sign is silent content loss. Covers the attached

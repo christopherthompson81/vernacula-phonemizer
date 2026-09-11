@@ -223,3 +223,36 @@ describe("a pronounceable initialism that is nonetheless spelled out", () => {
         expect(phonemize("the CRA published a notice", "en")).not.toContain("kɹˈæ");
     });
 });
+
+// ⚠ THE FRACTIONAL PART OF A PRICE NEEDS ITS UNIT NOUN, and the defect is not that the number sounds bare —
+// it is that a bare integer has nothing to close it, so IT JOINS THE NEXT CLAUSE. `for $3.14 and the 2nd
+// time` read "for three dollars FOURTEEN AND the second time", putting the clause boundary in the wrong
+// place. espeak-ng reads the same input as θɹˈiː dˈɑːlɚz ænd fˈɔːɹtiːn sˈɛnts.
+describe("money with a fractional part", () => {
+    test("the cents are spoken as cents, and the clause boundary lands where it should", () => {
+        expect(phonemize("I thought about it for $3.14 and the 2nd time.", "en"))
+            .toContain("θɹˈiː dˈɑːlɚz ənd fˈɔːɹtˈiːn sˈɛnts ənd ðə sˈɛkənd");
+    });
+
+    test("every currency the normalizer expands, with its own subunit", () => {
+        expect(phonemize("£3.14", "en")).toBe("θɹˈiː pʰˈaᶷndz ənd fˈɔːɹtˈiːn pʰˈɛns"); // suppletive plural
+        expect(phonemize("€3.14", "en")).toBe("θɹˈiː jˈʊɹoᶷz ənd fˈɔːɹtˈiːn sˈɛnts");
+        expect(phonemize("$1.01", "en")).toBe("wˈʌn dˈɑːlɚ ənd wˈʌn sˈɛnt"); // both singular
+        expect(phonemize("£0.01", "en")).toBe("wˈʌn pʰˈɛni");
+    });
+
+    test("an amount under one unit is the fraction alone", () => {
+        // "zero dollars ninety nine cents" is nobody's reading of a 99-cent price.
+        expect(phonemize("$0.99", "en")).toBe("nˈaᶦnti nˈaᶦn sˈɛnts");
+    });
+
+    test("a whole amount keeps its old reading, and grouping still rides along", () => {
+        expect(phonemize("$3.00", "en")).toBe("θɹˈiː dˈɑːlɚz");
+        expect(phonemize("$1,234.56", "en")).toContain("ənd fˈɪfti sˈɪks sˈɛnts");
+    });
+
+    test("⟨¥⟩ declines, because the yen has no fractional unit to name", () => {
+        // The sen was demonetised in 1953; a decimal yen amount is read as the decimal it is.
+        expect(phonemize("¥3.14", "en")).toBe(phonemize("3.14 yen", "en"));
+    });
+});
