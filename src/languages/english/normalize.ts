@@ -123,6 +123,51 @@ const MONEY_MAGNITUDE: Readonly<Record<string, string>> = {
 const MONEY_MAG_ALT = Object.keys(MONEY_MAGNITUDE).sort((a, b) => b.length - a.length).join("|");
 
 const MONTH_ALT = "january|february|march|april|may|june|july|august|september|october|november|december";
+/**
+ * ⚠ THE MONTH LIST WITHOUT ⟨may⟩, for the weekday gate below and nothing else. `may` is a modal verb, and
+ * two of the weekday keys take a bare date complement — so "they wed May 5" (they married on the 5th) read
+ * as *ðeᶦ wˈɛnzdi meᶦ fˈɪfθ*, "they WEDNESDAY may fifth". The cost is `Wed May 7`, which now keeps the verb
+ * reading it would have had anyway; the gain is that the commonest verb+month collision in the language
+ * cannot reach the rule at all. `MONTH_ABBREV` excludes `may` for the mirror-image reason.
+ */
+const MONTH_ALT_NO_MAY = MONTH_ALT.split("|").filter((m) => m !== "may").join("|");
+
+/**
+ * THREE-LETTER MONTH ABBREVIATIONS, expanded to the month NAME. Unexpanded they reach the g2p as ordinary
+ * words and are read as such — `Jan` as *d͡ʒˈæn*, `Mar` as *mˈɑːɹ*, `Dec` as *dˈɛk* — and the date rules
+ * below (the ordinal day at step 4, the pair-wise year at step 5) key on the full name, so an abbreviated
+ * date loses BOTH the month and its year reading.
+ *
+ * ⚠ `may` IS ABSENT: it is already the full name, and listing it would let the modal verb into a date rule.
+ * ⚠ EVERY OTHER KEY IS ALSO A NAME OR A WORD (`Jan`, `Mar`, `Aug`, `Sept`), so the rule is gated on an
+ * ADJACENT DIGIT — a day before or a day/year after. That is what a date looks like and what a person's
+ * name does not; `Jan said so` is untouched. The dot, where there is one, is consumed for the usual reason:
+ * left in place it becomes a phrase break in the middle of the date.
+ */
+const MONTH_ABBREV: Readonly<Record<string, string>> = {
+    jan: "january", feb: "february", mar: "march", apr: "april", jun: "june", jul: "july",
+    aug: "august", sep: "september", sept: "september", oct: "october", nov: "november", dec: "december",
+};
+/** Longest-first, so `sept` is claimed before `sep` can take its first three letters. */
+const MONTH_ABBREV_ALT = Object.keys(MONTH_ABBREV).sort((a, b) => b.length - a.length).join("|");
+
+/**
+ * WEEKDAY ABBREVIATIONS, expanded to the weekday NAME — the leading field of a printed timestamp
+ * (`Mon, 02 Jan 2006 15:04:05 -0700`), which otherwise reads as the word *mˈoᶷn*.
+ *
+ * ⚠ THE GATE HERE IS MUCH TIGHTER THAN THE MONTH RULE'S, because four of these keys are ordinary English
+ * words in their own right — `sat` and `wed` are verbs, `sun` and `mon` are nouns — and a bare digit after
+ * them is NOT rare ("he sat 5 metres away"). So a digit alone does not license the expansion: a MONTH NAME
+ * must follow, either immediately (`Sat. January 5`) or after a day number (`Mon, 02 January 2006`). That
+ * is the one context in which the word reading is impossible, and it costs nothing — a weekday written
+ * abbreviated without a date beside it has no date frame to be part of.
+ */
+const WEEKDAY_ABBREV: Readonly<Record<string, string>> = {
+    mon: "monday", tue: "tuesday", tues: "tuesday", wed: "wednesday", weds: "wednesday",
+    thu: "thursday", thur: "thursday", thurs: "thursday", fri: "friday", sat: "saturday", sun: "sunday",
+};
+/** Longest-first: `thurs` before `thur` before `thu`, `tues` before `tue`, `weds` before `wed`. */
+const WEEKDAY_ABBREV_ALT = Object.keys(WEEKDAY_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
 // ── Title/place abbreviations (st, dr, mt, mr, mrs) ─────────────────────────────────────────────────
 // ⚠ The dictionary reads bare "st" as STREET and "dr" as DRIVE, so "st. james" comes out "street . james" —
@@ -313,6 +358,25 @@ export function normalizeEnglish(input: string): string {
     //     have already proved what the run is.
     s = rewrite(s, /\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/g, (m0) => m0.replace(/\./g, "").toUpperCase());
 
+    // 0b2) MONTH AND WEEKDAY ABBREVIATIONS → the full name. BEFORE steps 3-5, whose date machinery all keys
+    //      on the spelled-out month: the ordinal day (`january 5` → `january 5th`) and the pair-wise year
+    //      (`january 2011` → `january 20 11`) are both invisible to `Jan`, so an abbreviated date lost the
+    //      month's reading AND the year's. Also before 0d, whose space-grouping guard is the month list —
+    //      `Jan 21 356 bce` is only protected once the month is a name.
+    //      ⚠ The MONTH rule's gate is an adjacent DIGIT, in either direction, which is what makes it safe on
+    //      the keys that are also personal names. See MONTH_ABBREV.
+    s = rewrite(s, new RegExp(`\\b(${MONTH_ABBREV_ALT})\\b\\.?(?=[ \u00a0]+\\d)`, "giu"),  // space, NBSP
+        (m0, ab: string) => MONTH_ABBREV[ab.toLowerCase()] ?? m0);
+    s = rewrite(s, new RegExp(`(?<=\\b\\d{1,2}[ \u00a0])(${MONTH_ABBREV_ALT})\\b\\.?`, "giu"),  // space, NBSP
+        (m0, ab: string) => MONTH_ABBREV[ab.toLowerCase()] ?? m0);
+    //      ⚠ The WEEKDAY rule runs SECOND and requires a MONTH NAME, so it reads what the two rules above
+    //      just produced. Its keys include four ordinary English words, so a digit alone cannot license it.
+    //      See WEEKDAY_ABBREV.
+    s = rewrite(s,
+        // space, NBSP
+        new RegExp(`\\b(${WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{1,2}[ \u00a0]+)?(?:${MONTH_ALT_NO_MAY})\\b)`, "giu"),
+        (m0, ab: string) => WEEKDAY_ABBREV[ab.toLowerCase()] ?? m0);
+
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".
     s = rewrite(s, /\b(BCE|BC|CE|AD)\b/g,
@@ -366,6 +430,56 @@ export function normalizeEnglish(input: string): string {
             return `${ten} to the power of ${neg ? `negative ${digits.slice(1)}` : digits}`;
         });
 
+    // 0e2) A TIMEZONE OFFSET ON A PRINTED TIMESTAMP — `15:04:05 -0700`, `2026-09-11T08:30:00+05:30`.
+    //      ⚠ IT MUST RUN BEFORE THE SIGN RULES AT 0f/0f2, which claim the sign first and leave the four
+    //      digits to the number path: `-0700` read as *nˈɛɡət̬ɪv sˈɛvən hˈʌndɹəd* — "negative seven hundred",
+    //      a quantity with no unit, where what the field says is seven HOURS. The offset is a displacement
+    //      in hours and minutes, so it is spoken as one.
+    //      ⚠ "MINUS", NOT "NEGATIVE", and the split from 0f is deliberate. 0f's word is the SIGN ON AN
+    //      AMOUNT ("negative forty Celsius"); an offset is a SHIFT APPLIED to a clock, which is the sense
+    //      English spends `minus` on — "minus seven hours", "New York is minus five".
+    //      ⚠ THE GATE IS THE CLOCK IN THE LOOKBEHIND. Nothing else licenses this reading, and without it a
+    //      bare `-0700` is just a negative number.
+    //      `HH:MM`, and `HH:MM:SS` — the two clock shapes an offset can hang off.
+    //      ⚠ NO `\b` ON THE HOUR. These are LOOKBEHINDS, so they only have to succeed, not to span the whole
+    //      field — and requiring a boundary made the ISO form fail outright: in `…11T15:04:05-07:00` there
+    //      is no word boundary between the date's `11` and the `T`, nor between the `T` and the hour, so the
+    //      offset went unclaimed and `-07:00` read as *sˈɛvən əklˈɑːk*, "seven o'clock".
+    const CLOCK = "\\d{1,2}:[0-5]\\d";
+    const CLOCK_SEC = `${CLOCK}:[0-5]\\d`;
+    const SIGN = "([+\\-\u2212])";
+    const offsetWords = (m0: string, sign: string, hh: string, mm: string): string => {
+        const h = Number(hh), m = Number(mm);
+        if (h > 14 || m > 59) return m0; // outside the range any real offset lives in — not an offset
+        // `+0000` is UTC itself, and "plus zero hours" is not a thing anyone says. The letters are left for
+        // the initialism pass, which already reads UTC as three letter names.
+        if (h === 0 && m === 0) return " UTC";
+        const word = sign === "+" ? "plus" : "minus";
+        const hours = h === 0 ? "" : ` ${h} ${h === 1 ? "hour" : "hours"}`;
+        const mins = m === 0 ? "" : ` ${m} ${m === 1 ? "minute" : "minutes"}`;
+        return ` ${word}${hours}${mins}`;
+    };
+    //      THE COMPACT FORM (RFC 2822, and what `date` prints) — four digits, no separator. TWO ARMS, and the
+    //      split is the SAME GUARD the colon form carries below: `09:00-1200` and `10:15-1130` are RANGES
+    //      with the shape of a glued offset, and reading them as one says "nine o'clock minus twelve hours".
+    //      A GLUED offset must therefore show the seconds field, which a range never writes; a SPACED one
+    //      needs no seconds, because a range spaced on one side only (`09:00 -1200`) is not how one is
+    //      written. The `h > 14` test inside `offsetWords` is not enough on its own — it rescues only the
+    //      ranges that end after 14:00.
+    s = rewrite(s, new RegExp(`(?<=${CLOCK_SEC})[ \u00a0]*${SIGN}(\\d{2})(\\d{2})\\b`, "gu"),  // space, NBSP
+        offsetWords as Parameters<typeof rewrite>[2]);
+    s = rewrite(s, new RegExp(`(?<=${CLOCK})[ \u00a0]+${SIGN}(\\d{2})(\\d{2})\\b`, "gu"),  // space, NBSP
+        offsetWords as Parameters<typeof rewrite>[2]);
+    //      ⚠ THE COLON FORM (ISO 8601) REQUIRES THE SECONDS FIELD, and that is not decoration — `12:30-14:00`
+    //      is a TIME RANGE with exactly the shape of a colon offset, and reading it as one says "minus
+    //      fourteen hours" for an afternoon. A range is written without seconds; an ISO timestamp carrying
+    //      an offset has them. That is the only thing separating the two, so it is required.
+    s = rewrite(s, new RegExp(`(?<=${CLOCK_SEC})[ \u00a0]*${SIGN}(\\d{2}):(\\d{2})\\b`, "gu"),  // space, NBSP
+        offsetWords as Parameters<typeof rewrite>[2]);
+    //      `Z` is the same field spelled as a letter (`15:04:05Z`); left bare it reads as the letter zee
+    //      glued to the seconds.
+    s = rewrite(s, new RegExp(`(?<=${CLOCK}(?::[0-5]\\d)?)Z\\b`, "gu"), " UTC");
+
     // 0f) NEGATIVES. A dropped minus sign INVERTS the meaning, which for a temperature is the worst class of
     //     silent error: "-5 degrees" read as "five degrees".
     //     ⚠ "NEGATIVE", NOT "MINUS", and the distinction is the point. `minus` is the ARITHMETIC OPERATOR —
@@ -382,8 +496,16 @@ export function normalizeEnglish(input: string): string {
     // 0f0) NUMERIC DATES, before the fraction rule (which would otherwise have to guard against them) and
     //      before the date/year steps below, whose ordinal-day and pair-wise-year rules then apply to what
     //      this emits. ISO is year-first, the US form month-first.
-    s = rewrite(s, /\b(\d{4})-(\d{2})-(\d{2})\b/g, (m0, y: string, mo: string, d: string) =>
-        isoDate(Number(y), Number(mo), Number(d)) ?? m0);
+    //      ⚠ THE `T` SEPARATOR HAS TO BE CONSUMED, and a trailing `\b` could not even see the date it was
+    //      attached to: in `2026-09-11T08:30:00Z` there is NO word boundary between the `11` and the `T`, so
+    //      the whole ISO arm declined and the commonest printed UTC form read as four bare numbers with a
+    //      stray letter tee between them. The `T` is claimed only when a clock follows it, which is the one
+    //      thing it can be; every other trailing context still takes the plain boundary test.
+    s = rewrite(s, /\b(\d{4})-(\d{2})-(\d{2})(?:T(?=\d{1,2}:)|(?![\p{L}\d-]))/gu,
+        (m0, y: string, mo: string, d: string) => {
+            const date = isoDate(Number(y), Number(mo), Number(d));
+            return date === undefined ? m0 : m0.endsWith("T") ? `${date} ` : date;
+        });
     s = rewrite(s, /\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (m0, mo: string, d: string, y: string) =>
         isoDate(Number(y), Number(mo), Number(d)) ?? m0);
 
@@ -444,12 +566,29 @@ export function normalizeEnglish(input: string): string {
 
     // 3) TIMES: H:MM (optionally already followed by am/pm, which the dictionary reads fine).
     //    :00 → o'clock (dropped before am/pm: "3 pm", not "3 o'clock pm"), :0X → "oh X".
-    s = rewrite(s, /\b(\d{1,2}):([0-5]\d)\b(\s*[ap]m\b)?/gu, (_m, h: string, mm: string, ap?: string) => {
-        const suffix = ap ?? "";
-        if (mm === "00") return suffix ? `${h}${suffix}` : `${h} o'clock`;
-        if (mm.startsWith("0")) return `${h} oh ${Number(mm)}${suffix}`;
-        return `${h} ${mm}${suffix}`;
-    });
+    //    ⚠ THE SECONDS FIELD IS PART OF THE MATCH, and leaving it out was content loss dressed as a pause:
+    //    `15:04:05` matched only its first two fields, so the second colon SURVIVED into the clause
+    //    segmenter and read as *fɪftˈiːn ˈoᶷ fˈɔːɹ , fˈaᶦv* — a phrase break in the middle of a timestamp
+    //    and a stray "five" with nothing to attach to. A printed timestamp is exactly where this shape
+    //    occurs, so the clock rule has to own all three fields.
+    //    ⚠ `:00` SECONDS ARE NOT SPOKEN. "eight thirty and zero seconds" is nobody's reading of `08:30:00`,
+    //    which is the commonest timestamp shape there is; the zero field is a formatting artifact of a
+    //    fixed-width clock, not content. A non-zero field IS content and is spoken.
+    //    ⚠ THE MERIDIEM TRAILS THE WHOLE CLOCK, seconds included. Folded into the hour-and-minute string it
+    //    is spoken in the middle of the time — `8:30:45 pm` read "eight thirty PEE EM and forty-five
+    //    seconds" — so it is appended last, after the seconds it must follow.
+    //    ⚠ AND `o'clock` IS ONLY FOR A BARE CLOCK. It is suppressed before a meridiem for the reason it
+    //    always was ("3 o'clock pm"), and before a seconds field for the same one.
+    s = rewrite(s, /\b(\d{1,2}):([0-5]\d)(?::([0-5]\d))?\b(\s*[ap]m\b)?/gu,
+        (_m, h: string, mm: string, ss?: string, ap?: string) => {
+            const suffix = ap ?? "";
+            const n = ss === undefined ? 0 : Number(ss);
+            const secs = ss === undefined || ss === "00" ? "" : ` and ${n} ${n === 1 ? "second" : "seconds"}`;
+            const body = mm === "00"
+                ? (suffix || secs ? `${h}` : `${h} o'clock`)
+                : mm.startsWith("0") ? `${h} oh ${Number(mm)}` : `${h} ${mm}`;
+            return `${body}${secs}${suffix}`;
+        });
 
     // 4) DATES: month + bare day number → ordinal suffix, letting the existing 16th path speak it
     //    (february 16 → "february 16th"). Runs BEFORE years so "february 16 2011" ordinalizes the day first
@@ -638,6 +777,39 @@ export function normalizeEnglish(input: string): string {
     //    ⚠ LAST, deliberately. Every rule above matches on digits or letters adjacent to a symbol — the
     //    currency step keys on `$` beside a number, the unit step on a number beside an abbreviation — and
     //    inserting words between them first would break those adjacencies.
+    //    ⚠ AN ALL-CAPS PAIR AROUND THE AMPERSAND IS ONE INITIALISM, AND IS SPELLED AS ONE — and it has to be
+    //    claimed HERE, before the generic arms below turn the sign into the word, because after that the two
+    //    halves are ordinary tokens and the dictionary answers for them SEPARATELY. That is where the
+    //    reading goes wrong, and it goes wrong silently: `R&D` survives only because ⟨R⟩ and ⟨D⟩ are not
+    //    words, while a half that IS a recorded token is read as that token — a two-letter half collides
+    //    with an abbreviation entry and comes out as the expanded WORD, and a half like ⟨ED⟩ comes out as
+    //    the name *ˈɛd*. Neither the initialism pass nor the lexicon can see the construction, because by
+    //    then the ampersand that proves it is gone.
+    //    THE DISCRIMINATOR IS CONTIGUITY: `A&B` with no space is a single orthographic word, and no
+    //    conjoined phrase is written that way — `College of Arts & Sciences` and `Johnson & Johnson` both
+    //    have spaces, and neither half is an all-caps run. So the rule claims the glued all-caps shape and
+    //    leaves every spaced one to the generic arms (AT&T, S&P, R&D, PB&J, M&A, B&B).
+    //    ⚠ CONTIGUITY ALONE IS NOT ENOUGH, because a TITLE set in capitals has the same shape: `LAW&ORDER`,
+    //    `ROCK&ROLL`, `MOM&POP` were all spelled letter by letter. Two further gates, both measured against
+    //    every glued all-caps pair in the mined corpora (89 instances, every one an initialism):
+    //      · EACH HALF AT MOST 3 LETTERS. The longest half attested anywhere is TWO (`AT&T`, `BM&F`), so
+    //        this costs nothing and excludes `ORDER`, `ROLL`, `RADIO`, `CRAFTS`.
+    //      · AT LEAST ONE HALF UNSAYABLE AS A WORD, which is the OOV signal `core/initialisms.ts` already
+    //        owns — a pair is an initialism when some half could not be read any other way. `MOM&POP` has
+    //        two readable halves and declines; `SR&O` licenses on ⟨sr⟩, `AT&T` on ⟨t⟩, `S&P` on ⟨s⟩.
+    //        The only attested pairs this declines are all-vowel ones (`A&E`, `A&I`), and a bare vowel
+    //        letter already reads as its letter name, so the generic arm gives the same words anyway.
+    //    ⚠ THE ENTITY IS CASE-INSENSITIVE AND THE LETTER RUNS ARE NOT, so the case folding has to be spelled
+    //    into the entity alone. `&AMP;` is valid HTML5 and is what uppercased markup carries; matching only
+    //    the lowercase spelling let this rule fall through to its bare-`&` arm, where `[A-Z]{1,5}` swallowed
+    //    the `AMP` and left the `;` and the real right half stranded — `R&AMP;D` → "r and ay m p;D". An `i`
+    //    flag cannot do it: it would widen `[A-Z]` too and claim every lowercase pair.
+    s = rewrite(s, /(?<![\p{L}\p{M}])([A-Z]{1,3})&(?:[aA][mM][pP];)?([A-Z]{1,3})(?![\p{L}\p{M}])/gu,
+        (m0, a: string, b: string) => {
+            const isInitialism = (half: string): boolean =>
+                isUnreadableEnglish(half.toLowerCase()) || ACRONYM_LETTERS.has(half.toLowerCase());
+            return isInitialism(a) || isInitialism(b) ? `${spellLetters(a)} and ${spellLetters(b)}` : m0;
+        });
     //    ⚠ THE HTML ENTITY FIRST, or the bare-`&` rule below turns `&amp;` into "and amp;" — a word invented
     //    out of markup, which is worse than the drop it replaces. (`core/markup.ts` decodes these properly,
     //    but English does not use it, and wiring it in would also strip tags.)
@@ -690,6 +862,15 @@ export const isUnreadableEnglish = makeUnreadableTest({
  */
 const LETTER_NAME = (l: string): string | undefined =>
     /^[a-z]$/u.test(l) ? (MANIFEST.letterNameExceptions[l] ?? l) : undefined;
+
+/**
+ * A LETTER RUN AS ITS LETTER NAMES, space-separated. Declared here beside `LETTER_NAME` rather than beside
+ * its caller, so the ampersand-initialism rule at step 8 spells a run the same way the initialism pass does
+ * — the ⟨a⟩ exception included, which is the one letter the dictionary does not name for us.
+ */
+function spellLetters(run: string): string {
+    return [...run.toLowerCase()].map((l) => LETTER_NAME(l) ?? l).join(" ");
+}
 
 /** LEXICAL: acronyms spelled out although their lowercase form is a dictionary word. Authored in
  *  english.jsonc alongside the language's other hand-authored facts, not here. */

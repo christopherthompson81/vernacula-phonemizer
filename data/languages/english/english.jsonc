@@ -416,6 +416,9 @@
         "us", "un", "it", "id", "am", "led", "who", "usaf", "usda", "usps", "ieee",
         // Pronounceable by the OOV test, so it would be left to the g2p, which mangles it ([niːk]).
         "nyc", "latam", "minae", "rov", "suv", "atv", "gps", "hiv", "ufo", "faa", "epa", "irs",
+        // ⟨cr⟩ is a legal onset and ⟨a⟩ a vowel, so the phonotactic test calls this READABLE and leaves it
+        // to the g2p, which duly invents the word [kɹˈæ]. It is said letter by letter.
+        "cra",
     ],
 
     "unstressedWords": [
