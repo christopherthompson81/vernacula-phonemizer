@@ -53,7 +53,12 @@ jobs:
       # ⚠ Goldens are a GENERATED artifact committed to the repo, so they can go stale without any test
       # failing — including through a merge race no branch-scoped check can see. Pure TS, no corpus, no
       # dotnet. See csharp/PORTING.md and #1283.
-      - run: npm run check:goldens
+      # `--show 3` so a failure is DIAGNOSABLE from the log. The default is 0 because a fleet-wide
+      # failure would otherwise print 36k rows; on CI the detail is the whole value of the run.
+      - run: npx tsx tools/check-goldens.mts --show 3
+      - name: CPU of this runner (for cross-machine reproducibility, #1287)
+        if: always()
+        run: lscpu | grep -iE "^Model name|^Flags" | head -1; lscpu | grep -o "avx512[a-z_]*" | sort -u | tr "\n" " "
 
   # What `npm publish` would actually ship. Guards the fence in package.json `files`: without it npm falls
   # back to .gitignore and packs the whole repo, and a `files` allowlist silently overrides .gitignore.
