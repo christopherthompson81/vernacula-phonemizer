@@ -66,17 +66,16 @@ public static class EnglishArpabet
     }
 
     private static readonly JsRe ED_ES = JsRegex.Compile("(ed|es)$");
+    private static readonly JsRe ES = JsRegex.Compile("es$", "");
+    /** The sibilants, before which the `-es` suffix takes an epenthetic vowel at all. */
+    private static readonly IReadOnlySet<string> SIBILANT =
+        new HashSet<string>(new[] { "S", "Z", "SH", "ZH", "CH", "JH" }, StringComparer.Ordinal);
     private static readonly JsRe ITY = JsRegex.Compile("(it|iti|ities|ety|ities)y?$");
     private static readonly JsRe IBLE = JsRegex.Compile("ibl[ey]?$");
     private static readonly JsRe LATINATE_PREFIX = JsRegex.Compile("^(be|de|re|se|pre)[^aeiouy]");
 
     /** Should this unstressed vowel-phone at index `vi` (nucleus number `ni`) surface as the weak vowel ᵻ?
      *  Cleanroom weak-vowel-merger rule from the WORD's morphology (public GenAm phonology). */
-    private static readonly JsRe ES = JsRegex.Compile("es$", "");
-    /** The sibilants, before which the `-es` suffix takes an epenthetic vowel at all. */
-    private static readonly IReadOnlySet<string> SIBILANT =
-        new HashSet<string>(new[] { "S", "Z", "SH", "ZH", "CH", "JH" }, StringComparer.Ordinal);
-
     private static bool IsBarredI(string word, IReadOnlyList<Phone> P, int vi, int ni, int nucleiCount)
     {
         var (bas, stress) = P[vi];

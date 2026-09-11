@@ -31,14 +31,18 @@ import { numberToWords, ordinalToWords } from "./numbers.ts";
 import { foldLatinDiacritics } from "../../core/unicode.ts";
 import { normalizeEnglish, normalizeEnglishInitialisms } from "./normalize.ts";
 
-/** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ɪz, voiceless→s,
- *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone. */
+/** English regular plural/3sg/genitive sibilant allomorph appended to a base IPA: sibilant→ᵻz, voiceless→s,
+ *  else voiced/vowel→z. Skips trailing diacritics/length/stress/offglide to read the final base phone.
+ *  ⚠ THE EPENTHETIC VOWEL IS THE WEAK VOWEL, the same one `isBarredI` writes for the `-es` spelling of this
+ *  morpheme. It used to be `ɪ` here, so `Marx's` and `advance's` were spelled differently from `chances` —
+ *  and a possessive never reaches the lexicon whole (the clitic is stripped and the STEM looked up), so this
+ *  function, not the lexicon, is what every genitive's vowel comes from. */
 function sibilantAllomorph(ipa: string): string {
     const chars = [...ipa.normalize("NFC")];
     let i = chars.length - 1;
     while (i >= 0 && /[̀-ͯːˈˌ‿ᶦᶷʰʲ]/u.test(chars[i]!)) i--;
     const last = chars[i] ?? "";
-    if ("szʃʒ".includes(last)) return "ɪz";
+    if ("szʃʒ".includes(last)) return "ᵻz";
     if ("ptkfθ".includes(last)) return "s";
     return "z";
 }

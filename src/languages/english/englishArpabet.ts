@@ -41,6 +41,9 @@ function isBarredI(
     nucleiCount: number,
 ): boolean {
     const { base, stress } = P[vi]!;
+    // ⚠ KNOWN LIMIT: `stress > 0` also refuses a SECONDARY-stressed suffix vowel, which CMUdict writes for
+    // two rows (`axes AE1 K S IH2 Z`, `pisses P IH1 S IH2 Z`) — they keep `ɪ` where the family has `ᵻ`.
+    // Loosening the guard here would loosen it for the four rules below too, which is not worth two rows.
     if (stress > 0 || (base !== "IH" && base !== "AH")) return false;
     // -ed / -ted / -ded after an alveolar stop (started, wanted, united, decided → ᵻd)
     if (
@@ -51,7 +54,10 @@ function isBarredI(
         (P[vi - 1]!.base === "T" || P[vi - 1]!.base === "D")
     )
         return true;
-    // -es plural / 3sg after a SIBILANT (services, offices, chances, bridges → ᵻz). The epenthetic vowel of
+    // -es plural / 3sg after a SIBILANT (services, offices, chances, bridges → ᵻz).
+    // ⚠ THE POSSESSIVE SPELLING OF THIS MORPHEME IS NOT HANDLED HERE, and an `'s` arm in this test would be
+    // DEAD CODE: `english.ts` strips the clitic and looks up the STEM, so the word that reaches this rule
+    // never carries the apostrophe. That half lives in `sibilantAllomorph`, which is where it is fixed. The epenthetic vowel of
     // this suffix is the weak vowel, not schwa, and the referees say so in the one comparison that is a test
     // rather than a count: bucketed by WHICH SYMBOL WE WROTE in a slot, the en-US referee writes `ɪ` in
     // 70.4% of our ᵻ slots and 7.1% of our word-final ə slots — it discriminates — and in this environment

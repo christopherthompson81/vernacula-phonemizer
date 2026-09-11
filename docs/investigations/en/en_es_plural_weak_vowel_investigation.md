@@ -160,33 +160,51 @@ token changes:  was(#1274)=90   -es(mine)=89   other=0
 This branch therefore repairs #1274's staleness as well as carrying its own. Said explicitly in the PR
 rather than folded in silently.
 
-## Run 7 — 2026-09-11 13:22 — the regeneration exposed a latent PORT divergence (not mine)
+## Run 7 — 2026-09-11 13:22 — a red row I misattributed, and the correction
 
-Regenerating the 13 non-English goldens that carry embedded English spans left one row red:
+Regenerating the 13 non-English goldens that carry embedded English spans left one row red — an English
+parenthetical in `sat`, `(Pt. Udai Mazumdar)`, where the committed golden had `pt` and my regeneration
+produced `t`. Clean main reproduced `t` too, so I concluded it was a pre-existing C#/TS PORT DIVERGENCE:
+TS async warming the English neural OOV cache that the sync foreign reader hits, the port not doing so.
+
+**That was wrong, and the file that disproves it says so in its own docstring.** `core/foreign.ts`:
+
+> ⚠ FOR BATCH TOOLS THAT RENDER MANY LANGUAGES IN ONE PROCESS, and it is not an optimisation — it is what
+> makes their output REPRODUCIBLE. The memo is global and survives across languages, so a mixed-script
+> language whose prewarm tagged `duxbury` leaves that BiLSTM reading behind, and a LATIN-script language
+> rendered afterwards picks it up through the foreign reader … `tools/gen_parity_goldens.mts` captured 15
+> such rows in the Māori golden, none of which the engine reproduces on its own.
+
+`gen_parity_goldens.mts:286` calls `clearForeignOov()` **per language** for exactly this reason. My
+regeneration harness did not — so an earlier language's neural prewarm reached `sat`, the documented
+failure reproduced verbatim. (Run 8 shows the clear alone does not even close it fully.)
+
+## Run 8 — 2026-09-11 13:41 — `clearForeignOov()` alone was NOT enough; one process per language is
+
+Adding the per-language clear to the harness and re-running all 16 in one process still produced the
+contaminated `sat` row. Rendering `sat` BY ITSELF settles it:
 
 ```
-  sat      DIFF  1/200 rows differ        (15 of 16 byte-identical)
+sat rendered alone                  → pt . jˈuːd̬əˌɪ …    matches C# and the original golden
+sat rendered after 10 other langs   → t  . jˈuːd̬əˌɪ …    the contaminated value
 ```
 
-The row contains an English parenthetical, `(Pt. Udai Mazumdar)`. Isolated:
+So the global foreign-OOV memo is not the only state that survives across languages — the English engine's
+own neural cache does too, and `clearForeignOov()` does not reach it. ⚠ A BATCH REGENERATION MUST THEREFORE
+GIVE EACH LANGUAGE ITS OWN PROCESS, not merely call the clear between them.
+
+Re-running one language per process:
 
 ```
-SYNC  (rule g2p) : pt . jˈuːd̬əˌɪ məzəmdˈɑːɹ    ← the OLD golden, and what C# produces
-ASYNC (neural)   : t  . ˈuːd̬i məzˈʌmdɚ         ← what TS produces, and what the generator calls
+en en-GB en-IN chr cjy gan hak mag nan pcm shn syl te tt wuu : 0 rows updated
+sat                                                          : 1 row updated  (t → pt)
 ```
 
-**Not caused by this branch** — clean main with every local change stashed produces `t` as well.
-`readAsEnglish` is sync in BOTH engines; what differs is that TS's async entry point warms the English
-**neural OOV** cache that the sync foreign reader then hits, and the C# port does not. So an embedded
-English span in a non-English language gets the neural reading in TS and the n-gram reading in C#.
+**Only `sat` was ever contaminated**; the other 15 goldens were correct as committed. The earlier
+"0 updated" for those 15 proved nothing on its own — it only showed that two runs with the SAME ordering
+agreed — which is why the per-process re-run was needed to confirm rather than assume.
 
-That is separate plumbing from anything here, so it is NOT fixed in this branch. The golden is left at
-the honest value (the generator's own output) rather than pinned back to the sync string: the gate going
-red is the gate working — it says the port has a gap — and masking it to collect a green tick is the
-failure mode this repo's parity contract exists to prevent.
-
-⚠ It also means a stale golden had been hiding a real divergence for as long as it was stale. Worth a
-freshness gate of the kind `test/regex-corpus-fresh.test.ts` gives the regex corpus.
+**There is no port divergence.** The original `sat` row was right throughout; only my harness was wrong.
 
 ## Decision
 
@@ -203,3 +221,64 @@ Not on the issue's n=14 — which was rightly called insufficient — but on:
 Costs, stated rather than buried: the whole-word referee eval moves **−3 words** (1829→1826) because
 `en.jsonc` carries no `ᵻ`↔`ɪ` fold and scores every `ᵻ` as a miss; scope is **1,078 rows (0.86%)**,
 not the 345 (0.28%) the issue authorised.
+
+## Run 9 — 2026-09-11 13:10 — review, and the two halves of the morpheme I had missed
+
+Six findings. The two that mattered were both the SAME defect this change claims to remove, surviving on
+paths the lexicon does not cover.
+
+**1. The morph OOV branch never saw the rule.** `englishG2p.g2p` passed an empty word to `arpabetToIpa`
+for both the compound AND the morph decomposition, so `isBarredI` could not see the `-es`:
+
+```
+  before:  quiches kʰˈiːʃɪz   crevasses kɹəvˈæsɪz     (OOV, stem in dict)
+           niches  nˈɪt͡ʃᵻz    trusses   tɹˈʌsᵻz        (recorded)
+```
+
+The empty word is right for a COMPOUND — `subreddit` ends "-it" but is not -it suffixed — but a morph
+decomposition only fires when the word ends in a KNOWN suffix whose stem is in the dictionary, so the
+suffix is real by construction. Narrowed the guard to `d.source === "C"`. `subreddit` verified unchanged.
+
+**2. The possessive is the same morpheme, and it is not in this rule at all.** An `'s` arm in `isBarredI`
+would have been DEAD CODE — `english.ts` strips the clitic and looks up the STEM, so the word reaching the
+converter never carries the apostrophe. I wrote that arm first, watched `glorse's` ignore it, and found the
+real site: `sibilantAllomorph` returned a hard-coded `ɪz`.
+
+```
+  before:  advance's ədvˈænsɪz  beside  advances t͡ʃˈænsᵻz-shaped ᵻ
+  after :  advance's ədvˈænsᵻz   Marx's mˈɑːɹksᵻz   (cat's, dog's, putin's untouched)
+```
+
+⚠ This also means the ~954 possessive rows in `accent-lexicon.tsv` are never consulted: the lookup strips
+`'s` first. The earlier reading that they were "unreachable by the regenerator" was true and irrelevant.
+
+**3. The heteronym table shadowed the rebuilt lexicon.** `"houses": { "default": "hˈaᶷzəz" }` wins over the
+regenerated row, so `houses` kept `ə` while `bases` moved — same suffix, two spellings, in both varieties.
+It is the only `-es`-shaped entry in that table. Fixed to `hˈaᶷzᵻz`, keeping the voiced `z` the override
+exists for.
+
+**4. KNOWN LIMIT, kept deliberately.** `stress > 0` also refuses a SECONDARY-stressed suffix vowel, which
+CMUdict writes for two rows (`axes AE1 K S IH2 Z`, `pisses P IH1 S IH2 Z`); they keep `ɪ`. Loosening that
+guard would loosen it for the four other rules it governs, which is not worth two rows. Noted in the source.
+
+**5. Nothing ran the round-trip.** The regenerator was manual-only, so the next edit to `isBarredI` would
+again leave the flat-hit path disagreeing with the G2P path silently. Added
+`test/en-lexicon-regenerable.test.ts`, which asserts every sourced row reproduces byte-identically.
+
+**6.** C# doc comment had been displaced by the new fields; moved them beside the other patterns.
+
+## Run 10 — 2026-09-11 13:20 — the eval cost after the review fixes
+
+```
+baseline (main)        : folded 1829/4558 (40.1%)   symbol 81.6%
+after the -es rule     : folded 1826/4558 (40.1%)   symbol 81.6%    (−3)
+after the review fixes : folded 1822/4558 (40.0%)   symbol 81.6%    (−7 total)
+```
+
+The extra −4 is the OOV/possessive half: `sibilantAllomorph` and the morph branch now emit `ᵻ` where they
+emitted `ɪ`, and the referee writes `ɪ` with no fold to reconcile them. Same instrument limitation as Run 5,
+now reaching more words BECAUSE the change is more complete.
+
+⚠ Stated plainly: making the change CORRECT made the headline number WORSE. That is the expected sign
+whenever an engine moves toward a convention the referee does not notate, and it is the reason the decision
+rests on the slot-level control rather than on this figure. Floor 0.30 against 0.3997 — unaffected.

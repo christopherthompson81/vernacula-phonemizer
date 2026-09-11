@@ -361,10 +361,16 @@ export function createEnglishG2p(
         knownWord: (word: string): boolean => dict.has(word),
         g2p(word: string): string {
             const d = decomposeInner(word);
-            // Compound/morph pieces are pre-resolved dict pronunciations — pass NO word so arpabetToIpa doesn't
-            // re-fire the single-morpheme rules (barred-i) on a compound (subreddit ends "-it" but isn't -it
-            // suffixed). The n-gram path IS a single OOV morpheme, so pass the word (de-/re- reduction applies).
-            return arpabetToIpa(d.phones, d.source === "N" ? word : "");
+            // ⚠ THE COMPOUND PATH PASSES NO WORD, so arpabetToIpa cannot re-fire the single-morpheme rules
+            // (barred-i) on a split that only LOOKS suffixed — `subreddit` ends "-it" but is not -it suffixed.
+            // ⚠ A MORPH DECOMPOSITION IS NOT A COMPOUND, and lumping the two cost the suffix rules the very
+            // words they exist for: `morphDecode` fires only when the word ends in a KNOWN suffix whose stem
+            // is in the dictionary, so the suffix is real by construction. Withholding the word there left
+            // an OOV plural spelled differently from a recorded one in the same environment — `quiches`
+            // ᵻ→ɪ beside `niches` ᵻ — which is the two-spellings-per-morpheme defect this rule removes,
+            // reappearing on the path the lexicon cannot cover. The n-gram path is a single OOV morpheme
+            // and always passed the word.
+            return arpabetToIpa(d.phones, d.source === "C" ? "" : word);
         },
     };
 }
