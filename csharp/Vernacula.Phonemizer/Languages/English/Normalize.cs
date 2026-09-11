@@ -69,6 +69,9 @@ public static class Normalize
     private static readonly string MONEY_MAG_ALT = string.Join("|", MONEY_MAGNITUDE.Keys.OrderByDescending(k => k.Length));
 
     private const string MONTH_ALT = "january|february|march|april|may|june|july|august|september|october|november|december";
+    /** ⚠ The month list WITHOUT ⟨may⟩, for the weekday gate only — `may` is a modal verb and `wed`/`sat`
+     *  take a bare date complement. See src/languages/english/normalize.ts. */
+    private static readonly string MONTH_ALT_NO_MAY = string.Join("|", MONTH_ALT.Split('|').Where(m => m != "may"));
 
     /** Three-letter month abbreviations → the month NAME. ⚠ `may` is deliberately absent. */
     private static readonly IReadOnlyDictionary<string, string> MONTH_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
@@ -209,7 +212,7 @@ public static class Normalize
         JsRegex.Compile($"(?<=\\b\\d{{1,2}}[ \u00a0])({MONTH_ABBREV_ALT})\\b\\.?", "giu");  // space, NBSP
     private static readonly JsRe WEEKDAY_ABBREV_RE = JsRegex.Compile(
         // space, NBSP
-        $"\\b({WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{{1,2}}[ \u00a0]+)?(?:{MONTH_ALT})\\b)", "giu");
+        $"\\b({WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{{1,2}}[ \u00a0]+)?(?:{MONTH_ALT_NO_MAY})\\b)", "giu");
     private static readonly JsRe ERA = JsRegex.Compile("\\b(BCE|BC|CE|AD)\\b", "g");
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
         $"(?<!(?:{MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{{0,2}}(?:[ \u00a0\u202f\u2009]\\d{{3}})+(?![\\d])", "giu");
@@ -222,8 +225,12 @@ public static class Normalize
     private const string TZ_CLOCK = "\\d{1,2}:[0-5]\\d";
     private const string TZ_CLOCK_SEC = TZ_CLOCK + ":[0-5]\\d";
     private const string TZ_SIGN = "([+\\-\u2212])";
-    private static readonly JsRe TZ_COMPACT =
-        JsRegex.Compile($"(?<={TZ_CLOCK}(?::[0-5]\\d)?)[ \u00a0]*{TZ_SIGN}(\\d{{2}})(\\d{{2}})\\b", "gu");  // space, NBSP
+    /** ⚠ TWO ARMS: a GLUED compact offset must show the seconds field, because `09:00-1200` is a RANGE with
+     *  the same shape; a SPACED one needs none. See src/languages/english/normalize.ts. */
+    private static readonly JsRe TZ_COMPACT_GLUED =
+        JsRegex.Compile($"(?<={TZ_CLOCK_SEC})[ \u00a0]*{TZ_SIGN}(\\d{{2}})(\\d{{2}})\\b", "gu");  // space, NBSP
+    private static readonly JsRe TZ_COMPACT_SPACED =
+        JsRegex.Compile($"(?<={TZ_CLOCK})[ \u00a0]+{TZ_SIGN}(\\d{{2}})(\\d{{2}})\\b", "gu");  // space, NBSP
     private static readonly JsRe TZ_COLON =
         JsRegex.Compile($"(?<={TZ_CLOCK_SEC})[ \u00a0]*{TZ_SIGN}(\\d{{2}}):(\\d{{2}})\\b", "gu");  // space, NBSP
     private static readonly JsRe TZ_ZULU = JsRegex.Compile($"(?<={TZ_CLOCK}(?::[0-5]\\d)?)Z\\b", "gu");
@@ -273,7 +280,8 @@ public static class Normalize
     private static readonly JsRe LOWER_ROMAN = JsRegex.Compile(
         "\\b([a-z']+)\\s+(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\\b", "gi");
     private static readonly JsRe AMP_INITIALISM =
-        JsRegex.Compile("(?<![\\p{L}\\p{M}])([A-Z]{1,5})(?:&amp;|&)([A-Z]{1,5})(?![\\p{L}\\p{M}])", "gu");
+        // ⚠ The entity folds case, the letter runs do not — an `i` flag would widen `[A-Z]` too.
+        JsRegex.Compile("(?<![\\p{L}\\p{M}])([A-Z]{1,3})&(?:[aA][mM][pP];)?([A-Z]{1,3})(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("\\s*&amp;\\s*", "giu");
     private static readonly JsRe AMP = JsRegex.Compile("\\s*&\\s*", "gu");
     private static readonly JsRe TIMES_SIGN = JsRegex.Compile("(\\d)\\s*(×|x)\\s*(?=\\d)", "gu");
@@ -299,6 +307,10 @@ public static class Normalize
         var mins = min == 0 ? "" : $" {Js.NumberToString(min)} {(min == 1 ? "minute" : "minutes")}";
         return $" {word}{hours}{mins}";
     }
+
+    /** Could this half be read as a word at all? A pair is an initialism when some half could not. */
+    private static bool IsAmpInitialismHalf(string half) =>
+        IsUnreadableEnglish(half.ToLowerInvariant()) || ACRONYM_LETTERS.Contains(half.ToLowerInvariant());
 
     /** A letter run as its LETTER NAMES, space-separated. */
     private static string SpellLetters(string run) =>
@@ -369,7 +381,8 @@ public static class Normalize
         });
 
         // ⚠ Before the sign rules below, which would otherwise claim the sign off the offset.
-        s = Rewrite(s, TZ_COMPACT, OffsetWords);
+        s = Rewrite(s, TZ_COMPACT_GLUED, OffsetWords);
+        s = Rewrite(s, TZ_COMPACT_SPACED, OffsetWords);
         s = Rewrite(s, TZ_COLON, OffsetWords);
         s = Rewrite(s, TZ_ZULU, " UTC");
 
@@ -420,11 +433,13 @@ public static class Normalize
             var mm = m.Groups[2].Value;
             var ss = m.Groups[3].Success ? m.Groups[3].Value : null;
             var suffix = m.Groups[4].Success ? m.Groups[4].Value : "";
-            var secs = ss is null || ss == "00" ? "" : $" and {Js.NumberToString(Js.Number(ss))} seconds";
-            var hm = mm == "00" ? (suffix.Length > 0 ? $"{h}{suffix}" : $"{h} o'clock")
-                : mm.StartsWith("0", StringComparison.Ordinal) ? $"{h} oh {Js.NumberToString(Js.Number(mm))}{suffix}"
-                : $"{h} {mm}{suffix}";
-            return $"{hm}{secs}";
+            var n = ss is null ? 0 : Js.Number(ss);
+            var secs = ss is null || ss == "00" ? "" : $" and {Js.NumberToString(n)} {(n == 1 ? "second" : "seconds")}";
+            // ⚠ The meridiem trails the WHOLE clock, seconds included, and `o'clock` is only for a bare one.
+            var body = mm == "00" ? (suffix.Length > 0 || secs.Length > 0 ? $"{h}" : $"{h} o'clock")
+                : mm.StartsWith("0", StringComparison.Ordinal) ? $"{h} oh {Js.NumberToString(Js.Number(mm))}"
+                : $"{h} {mm}";
+            return $"{body}{secs}{suffix}";
         });
 
         s = Rewrite(s, MONTH_DAY, m =>
@@ -520,7 +535,14 @@ public static class Normalize
         });
 
         // ⚠ Before the generic ampersand arms below, which dissolve the construction this keys on.
-        s = Rewrite(s, AMP_INITIALISM, m => $"{SpellLetters(m.Groups[1].Value)} and {SpellLetters(m.Groups[2].Value)}");
+        s = Rewrite(s, AMP_INITIALISM, m =>
+        {
+            var a = m.Groups[1].Value;
+            var b = m.Groups[2].Value;
+            return IsAmpInitialismHalf(a) || IsAmpInitialismHalf(b)
+                ? $"{SpellLetters(a)} and {SpellLetters(b)}"
+                : m.Value;
+        });
         s = Rewrite(s, AMP_ENTITY, " and ");
         s = Rewrite(s, AMP, " and ");
         s = Rewrite(s, TIMES_SIGN, m =>

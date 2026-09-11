@@ -127,12 +127,24 @@ describe("abbreviated dates, clocks and timezone offsets", () => {
         // the weekday reading: "he sat 5 metres away" is not a Saturday.
         expect(phonemize("he sat 5 metres away", "en")).toContain("sˈæt");
         expect(phonemize("he sat 5 metres away", "en")).not.toContain("sˈæt̬ɚdeᶦ");
+        // ⚠ AND ⟨may⟩ IS OUT OF THE GATE ENTIRELY: it is a modal verb, and `wed`/`sat` take a bare date
+        // complement, so "they wed May 5" read as "they WEDNESDAY may fifth".
+        expect(phonemize("they wed May 5", "en")).not.toContain("wˈɛnzdi");
     });
 
     test("the seconds field is part of the clock, not a stranded colon", () => {
         expect(phonemize("15:04:05", "en")).toBe("fɪftˈiːn ˈoᶷ fˈɔːɹ ənd fˈaᶦv sˈɛkəndz");
         // `:00` is a fixed-width artifact, not content — nobody reads `08:30:00` with a zero-seconds field.
         expect(phonemize("08:30:00", "en")).toBe("ˈeᶦt θˈɝd̬iː");
+        // …and one second is one second.
+        expect(phonemize("08:30:01", "en")).toBe("ˈeᶦt θˈɝd̬iː ənd wˈʌn sˈɛkənd");
+    });
+
+    test("the meridiem trails the whole clock, seconds included", () => {
+        // Folded into the hour-and-minute string it is spoken in the MIDDLE of the time.
+        expect(phonemize("8:30:45 pm", "en")).toBe("ˈeᶦt θˈɝd̬iː ənd fˈɔːɹt̬i fˈaᶦv sˈɛkəndz pʰˈiːʲˈɛm");
+        // The bare clock is untouched: `o'clock` is still suppressed before a meridiem.
+        expect(phonemize("3:00 pm", "en")).toBe(phonemize("3 pm", "en"));
     });
 
     test("a timezone offset is a displacement in hours, not a bare number", () => {
@@ -151,9 +163,13 @@ describe("abbreviated dates, clocks and timezone offsets", () => {
         );
     });
 
-    test("a time RANGE is not an offset", () => {
-        // `12:30-14:00` has the exact shape of a colon offset. The seconds field is what separates them.
+    test("a time RANGE is not an offset, in either spelling", () => {
+        // `12:30-14:00` has the exact shape of a colon offset, and `09:00-1200` of a glued compact one.
+        // The seconds field is what separates them; a SPACED offset needs none.
         expect(phonemize("the meeting runs 12:30-14:00", "en")).not.toContain("mˈaᶦnəs");
+        expect(phonemize("the 09:00-1200 block", "en")).not.toContain("mˈaᶦnəs");
+        expect(phonemize("the 10:15-1130 slot", "en")).not.toContain("mˈaᶦnəs");
+        expect(phonemize("filed at 12:30 -0700", "en")).toContain("mˈaᶦnəs sˈɛvən ˈaᶷɚz");
     });
 });
 
@@ -169,21 +185,38 @@ describe("an ampersand inside an all-caps run", () => {
     });
 
     test("a half that is a dictionary token is still spelled, not read as that word", () => {
-        // ⟨ED⟩ alone is the name *ˈɛd* and ⟨SR⟩ alone is the abbreviation for "senior"; inside the
-        // construction neither reading is available.
-        expect(phonemize("SR&ED claims", "en")).toBe("ˈɛs ˈɑːɹ ənd ˈiː dˈiː klˈeᶦmz");
+        // ⚠ THIS IS THE CASE THE RULE EXISTS FOR. ⟨SR⟩ on its own is a recorded abbreviation and the
+        // dictionary reads it as the WORD *sˈiːnjɚ*, "senior" — so once the generic arm has spent the
+        // ampersand, `SR&O` came out as "senior and oh". Nothing leaked and nothing vanished.
+        expect(phonemize("the SR&O series", "en")).toBe("ðə ˈɛs ˈɑːɹ ənd ˈoᶷ sˈɪɹiz");
+    });
+
+    test("an uppercase HTML entity is the same construction", () => {
+        // `&AMP;` is valid HTML5 and is what uppercased markup carries.
+        expect(phonemize("R&AMP;D spending", "en")).toBe(phonemize("R&D spending", "en"));
     });
 
     test("a spaced conjunction is untouched — contiguity is the discriminator", () => {
         expect(phonemize("College of Arts & Sciences", "en")).toContain("ənd");
         expect(phonemize("College of Arts & Sciences", "en")).not.toContain("ˈeᶦ ˈɑːɹ");
     });
+
+    test("…and a TITLE set in capitals has the same shape, so contiguity alone is not enough", () => {
+        // Measured over every glued all-caps pair in the mined corpora — 89 instances, every one an
+        // initialism, longest half TWO letters. So: halves of at most 3, and at least one half that could
+        // not be read as a word at all.
+        for (const title of ["LAW&ORDER reruns", "ROCK&ROLL era", "MOM&POP stores"])
+            expect(phonemize(title, "en")).not.toContain("ˈɛɫ ˈeᶦ");
+        expect(phonemize("MOM&POP stores", "en")).toContain("mˈɑːm");
+        // An all-vowel pair declines too, and costs nothing: a bare vowel letter already reads as its name.
+        expect(phonemize("A&E tonight", "en")).toBe(phonemize("A and E tonight", "en"));
+    });
 });
 
-// ⚠ READABILITY IS NOT CONVENTION, which is the whole reason `acronymLetters` exists. A three-letter
-// agency initialism is perfectly syllabifiable, so the phonotactic fail-safe declines it and the OOV g2p
-// reads it as an invented word — CRA as *kɹˈæ*. Nothing leaks and nothing vanishes; it is simply a word
-// that is not there, which no gate in the tree can see.
+// ⚠ READABILITY IS NOT CONVENTION, which is the whole reason `acronymLetters` exists. ⟨cr⟩ is a legal
+// English onset and ⟨a⟩ a vowel, so the phonotactic fail-safe calls the run perfectly syllabifiable,
+// declines it, and the OOV g2p reads it as the invented word *kɹˈæ*. Nothing leaks and nothing vanishes;
+// it is simply a word that is not there, which no gate in the tree can see.
 describe("a pronounceable initialism that is nonetheless spelled out", () => {
     test("it reads as letter names", () => {
         expect(phonemize("the CRA published a notice", "en")).toContain("sˈiː ˈɑːɹ ˈeᶦ");

@@ -123,6 +123,14 @@ const MONEY_MAGNITUDE: Readonly<Record<string, string>> = {
 const MONEY_MAG_ALT = Object.keys(MONEY_MAGNITUDE).sort((a, b) => b.length - a.length).join("|");
 
 const MONTH_ALT = "january|february|march|april|may|june|july|august|september|october|november|december";
+/**
+ * ⚠ THE MONTH LIST WITHOUT ⟨may⟩, for the weekday gate below and nothing else. `may` is a modal verb, and
+ * two of the weekday keys take a bare date complement — so "they wed May 5" (they married on the 5th) read
+ * as *ðeᶦ wˈɛnzdi meᶦ fˈɪfθ*, "they WEDNESDAY may fifth". The cost is `Wed May 7`, which now keeps the verb
+ * reading it would have had anyway; the gain is that the commonest verb+month collision in the language
+ * cannot reach the rule at all. `MONTH_ABBREV` excludes `may` for the mirror-image reason.
+ */
+const MONTH_ALT_NO_MAY = MONTH_ALT.split("|").filter((m) => m !== "may").join("|");
 
 /**
  * THREE-LETTER MONTH ABBREVIATIONS, expanded to the month NAME. Unexpanded they reach the g2p as ordinary
@@ -366,7 +374,7 @@ export function normalizeEnglish(input: string): string {
     //      See WEEKDAY_ABBREV.
     s = rewrite(s,
         // space, NBSP
-        new RegExp(`\\b(${WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{1,2}[ \u00a0]+)?(?:${MONTH_ALT})\\b)`, "giu"),
+        new RegExp(`\\b(${WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{1,2}[ \u00a0]+)?(?:${MONTH_ALT_NO_MAY})\\b)`, "giu"),
         (m0, ab: string) => WEEKDAY_ABBREV[ab.toLowerCase()] ?? m0);
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
@@ -451,8 +459,16 @@ export function normalizeEnglish(input: string): string {
         const mins = m === 0 ? "" : ` ${m} ${m === 1 ? "minute" : "minutes"}`;
         return ` ${word}${hours}${mins}`;
     };
-    //      THE COMPACT FORM (RFC 2822, and what `date` prints) — four digits, no separator.
-    s = rewrite(s, new RegExp(`(?<=${CLOCK}(?::[0-5]\\d)?)[ \u00a0]*${SIGN}(\\d{2})(\\d{2})\\b`, "gu"),  // space, NBSP
+    //      THE COMPACT FORM (RFC 2822, and what `date` prints) — four digits, no separator. TWO ARMS, and the
+    //      split is the SAME GUARD the colon form carries below: `09:00-1200` and `10:15-1130` are RANGES
+    //      with the shape of a glued offset, and reading them as one says "nine o'clock minus twelve hours".
+    //      A GLUED offset must therefore show the seconds field, which a range never writes; a SPACED one
+    //      needs no seconds, because a range spaced on one side only (`09:00 -1200`) is not how one is
+    //      written. The `h > 14` test inside `offsetWords` is not enough on its own — it rescues only the
+    //      ranges that end after 14:00.
+    s = rewrite(s, new RegExp(`(?<=${CLOCK_SEC})[ \u00a0]*${SIGN}(\\d{2})(\\d{2})\\b`, "gu"),  // space, NBSP
+        offsetWords as Parameters<typeof rewrite>[2]);
+    s = rewrite(s, new RegExp(`(?<=${CLOCK})[ \u00a0]+${SIGN}(\\d{2})(\\d{2})\\b`, "gu"),  // space, NBSP
         offsetWords as Parameters<typeof rewrite>[2]);
     //      ⚠ THE COLON FORM (ISO 8601) REQUIRES THE SECONDS FIELD, and that is not decoration — `12:30-14:00`
     //      is a TIME RANGE with exactly the shape of a colon offset, and reading it as one says "minus
@@ -558,14 +574,20 @@ export function normalizeEnglish(input: string): string {
     //    ⚠ `:00` SECONDS ARE NOT SPOKEN. "eight thirty and zero seconds" is nobody's reading of `08:30:00`,
     //    which is the commonest timestamp shape there is; the zero field is a formatting artifact of a
     //    fixed-width clock, not content. A non-zero field IS content and is spoken.
+    //    ⚠ THE MERIDIEM TRAILS THE WHOLE CLOCK, seconds included. Folded into the hour-and-minute string it
+    //    is spoken in the middle of the time — `8:30:45 pm` read "eight thirty PEE EM and forty-five
+    //    seconds" — so it is appended last, after the seconds it must follow.
+    //    ⚠ AND `o'clock` IS ONLY FOR A BARE CLOCK. It is suppressed before a meridiem for the reason it
+    //    always was ("3 o'clock pm"), and before a seconds field for the same one.
     s = rewrite(s, /\b(\d{1,2}):([0-5]\d)(?::([0-5]\d))?\b(\s*[ap]m\b)?/gu,
         (_m, h: string, mm: string, ss?: string, ap?: string) => {
             const suffix = ap ?? "";
-            const secs = ss === undefined || ss === "00" ? "" : ` and ${Number(ss)} seconds`;
-            const hm = mm === "00"
-                ? (suffix ? `${h}${suffix}` : `${h} o'clock`)
-                : mm.startsWith("0") ? `${h} oh ${Number(mm)}${suffix}` : `${h} ${mm}${suffix}`;
-            return `${hm}${secs}`;
+            const n = ss === undefined ? 0 : Number(ss);
+            const secs = ss === undefined || ss === "00" ? "" : ` and ${n} ${n === 1 ? "second" : "seconds"}`;
+            const body = mm === "00"
+                ? (suffix || secs ? `${h}` : `${h} o'clock`)
+                : mm.startsWith("0") ? `${h} oh ${Number(mm)}` : `${h} ${mm}`;
+            return `${body}${secs}${suffix}`;
         });
 
     // 4) DATES: month + bare day number → ordinal suffix, letting the existing 16th path speak it
@@ -767,8 +789,27 @@ export function normalizeEnglish(input: string): string {
     //    conjoined phrase is written that way — `College of Arts & Sciences` and `Johnson & Johnson` both
     //    have spaces, and neither half is an all-caps run. So the rule claims the glued all-caps shape and
     //    leaves every spaced one to the generic arms (AT&T, S&P, R&D, PB&J, M&A, B&B).
-    s = rewrite(s, /(?<![\p{L}\p{M}])([A-Z]{1,5})(?:&amp;|&)([A-Z]{1,5})(?![\p{L}\p{M}])/gu,
-        (_m, a: string, b: string) => `${spellLetters(a)} and ${spellLetters(b)}`);
+    //    ⚠ CONTIGUITY ALONE IS NOT ENOUGH, because a TITLE set in capitals has the same shape: `LAW&ORDER`,
+    //    `ROCK&ROLL`, `MOM&POP` were all spelled letter by letter. Two further gates, both measured against
+    //    every glued all-caps pair in the mined corpora (89 instances, every one an initialism):
+    //      · EACH HALF AT MOST 3 LETTERS. The longest half attested anywhere is TWO (`AT&T`, `BM&F`), so
+    //        this costs nothing and excludes `ORDER`, `ROLL`, `RADIO`, `CRAFTS`.
+    //      · AT LEAST ONE HALF UNSAYABLE AS A WORD, which is the OOV signal `core/initialisms.ts` already
+    //        owns — a pair is an initialism when some half could not be read any other way. `MOM&POP` has
+    //        two readable halves and declines; `SR&O` licenses on ⟨sr⟩, `AT&T` on ⟨t⟩, `S&P` on ⟨s⟩.
+    //        The only attested pairs this declines are all-vowel ones (`A&E`, `A&I`), and a bare vowel
+    //        letter already reads as its letter name, so the generic arm gives the same words anyway.
+    //    ⚠ THE ENTITY IS CASE-INSENSITIVE AND THE LETTER RUNS ARE NOT, so the case folding has to be spelled
+    //    into the entity alone. `&AMP;` is valid HTML5 and is what uppercased markup carries; matching only
+    //    the lowercase spelling let this rule fall through to its bare-`&` arm, where `[A-Z]{1,5}` swallowed
+    //    the `AMP` and left the `;` and the real right half stranded — `R&AMP;D` → "r and ay m p;D". An `i`
+    //    flag cannot do it: it would widen `[A-Z]` too and claim every lowercase pair.
+    s = rewrite(s, /(?<![\p{L}\p{M}])([A-Z]{1,3})&(?:[aA][mM][pP];)?([A-Z]{1,3})(?![\p{L}\p{M}])/gu,
+        (m0, a: string, b: string) => {
+            const isInitialism = (half: string): boolean =>
+                isUnreadableEnglish(half.toLowerCase()) || ACRONYM_LETTERS.has(half.toLowerCase());
+            return isInitialism(a) || isInitialism(b) ? `${spellLetters(a)} and ${spellLetters(b)}` : m0;
+        });
     //    ⚠ THE HTML ENTITY FIRST, or the bare-`&` rule below turns `&amp;` into "and amp;" — a word invented
     //    out of markup, which is worse than the drop it replaces. (`core/markup.ts` decodes these properly,
     //    but English does not use it, and wiring it in would also strip tags.)
