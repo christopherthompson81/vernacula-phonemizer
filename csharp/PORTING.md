@@ -18,6 +18,20 @@ time is not enough.
 `npm run ci`) re-renders every golden's own recorded text and compares — no corpus needed, ~60s. A
 branch-scoped check passes both branches in the race above and still lets main break.
 
+⚠ **AND THE GOLDENS ARE MACHINE-LOCAL — REGENERATE AND CHECK THEM ON ONE MACHINE.** For the **74 of 189**
+languages that depend on ONNX (derive the set with `check-goldens.mts --no-ort`; eleven directories own a
+model, the rest inherit it by delegating an embedded foreign run), the output is not bit-reproducible
+across CPU microarchitectures — int8 inference dispatches to different kernels and a rounding difference
+occasionally flips an argmax. Measured Intel Comet Lake against AMD EPYC: **44 rows of 36,495 (0.12%)**,
+e.g. `Bellingshausen` as `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən`. Consequences worth knowing before you
+are confused by them (#1287):
+
+- `check:goldens` is **not** in the CI workflow. It cannot pass on hardware other than the generator's.
+- A mismatch on a machine that did not generate the goldens is **expected**, not staleness — and a count
+  cannot tell the two apart, since real staleness has been as small as 3 rows.
+- The same applies to `csharp/tools/parity`: run it where the goldens were made, or it reports a
+  divergence between the two engines that does not exist.
+
 ⚠ **AND A MISMATCH IS NOT AUTOMATICALLY "REGENERATE".** It says the engine and the artifact disagree;
 which is wrong is a judgement call. `beyond` survived weeks of green gates because the artifact kept
 being re-recorded around it.

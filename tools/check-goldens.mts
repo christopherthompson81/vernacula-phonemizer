@@ -13,13 +13,24 @@
  *      the conflict is SEMANTIC, exactly like a committed lockfile — and main came out red.
  *
  * ⚠ SO THIS MUST RUN ON THE MERGE RESULT, not only on a branch. A branch-only gate passes both branches in
- * case 2 and still lets main break. `.github/workflows/ci.yml` runs it on push to main for exactly that.
+ * case 2 and still lets main break. That cannot be a CI job (see the machine-locality note below), so it is
+ * `npm run ci` on `main` after a merge — a ritual, not a mechanism, which is the honest state of it.
  *
  * ⚠ IT DOES NOT REGENERATE, AND THAT IS DELIBERATE. `tools/gen_parity_goldens.mts` needs a 337 MB FLEURS
  * corpus and an alignment DB that are not committed; without them it produces a different, THINNER row set,
  * so a naive regenerate-and-diff would either fail for the wrong reason or overwrite goldens from a degraded
  * source. This re-renders each golden's OWN recorded text and compares the IPA — verifying the rows that are
  * there without needing to re-derive which rows should be there. No corpus required.
+ *
+ * ⚠ RUN THIS ON THE MACHINE THAT GENERATED THE GOLDENS. For the 74 languages that depend on ONNX (derive
+ * them with `--no-ort`), the output is NOT bit-reproducible across CPU microarchitectures: int8 inference
+ * dispatches to different kernels, and a rounding difference occasionally flips an argmax. Measured between
+ * an Intel Comet Lake and an AMD EPYC runner: 44 rows of 36,495 (0.12%), e.g. `Bellingshausen` losing one
+ * phone — `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən`. That is why this check is NOT in the CI workflow: it
+ * cannot pass on hardware other than the generator's, and a gate that is red by construction is noise.
+ * ⚠ A COUNT CANNOT SEPARATE THAT NOISE FROM REAL STALENESS, which is why there is no tolerance mode: the
+ * `beyond` regression (#1283) was 3 rows and the cross-machine noise is 44, so any threshold that admits
+ * the second hides the first.
  *
  * ⚠ AND THE FIX FOR A FAILURE IS NOT ALWAYS "REGENERATE". A mismatch means the engine and the artifact
  * disagree; which one is wrong is a judgement call. Re-recording a row is what kept `beyond` alive for weeks.
@@ -29,12 +40,14 @@
  *   npx tsx tools/check-goldens.mts --show 5      print up to N mismatching rows per language
  *   npx tsx tools/check-goldens.mts --isolate     one CHILD PROCESS per language (diagnostic, ~10x slower)
  *   npx tsx tools/check-goldens.mts --no-clear    skip the per-language memo clear (diagnostic)
+ *   npx tsx tools/check-goldens.mts --no-ort      derive which languages depend on ONNX (diagnostic)
  */
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { clearForeignOov } from "../src/core/foreign.ts";
+import { setOrtLoader } from "../src/core/onnx.ts";
 import { phonemize, phonemizeAsync } from "../src/index.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -47,6 +60,16 @@ const isolate = argv.includes("--isolate");
 const noClear = argv.includes("--no-clear");
 /** Internal: emit one JSON object instead of a report, so `--isolate` need not parse prose. */
 const asChild = argv.includes("--child");
+/**
+ * Diagnostic: force every neural path to fall back, so a language whose output MOVES is ONNX-dependent —
+ * directly, or through a foreign span it delegates to an engine that is.
+ *
+ * ⚠ THIS EXISTS BECAUSE THE HAND-WRITTEN ANSWER IS BADLY WRONG. Eleven language directories own an ONNX
+ * model; the derived set is SEVENTY-FOUR of 189, because a non-Latin engine that meets an embedded Latin
+ * run delegates it to the English neural reader. `ru`, `ja`, `th`, `cmn`, `ko`, `el`, `hy`, `ka` are all in
+ * it, at one to ten rows each. Any list of "the neural languages" maintained by hand is a silent hole.
+ */
+const noOrt = argv.includes("--no-ort");
 
 const showAt = argv.indexOf("--show");
 let show = 0;
@@ -143,9 +166,10 @@ function checkIsolated(code: string): Result {
     return JSON.parse(out) as Result;
 }
 
-// ⚠ Not in a child (the parent already proved it) and not under --no-clear, whose whole purpose is to
-// produce mismatches.
-if (!asChild && !noClear) await assertNeuralLive();
+if (noOrt) setOrtLoader(() => Promise.reject(new Error("ORT disabled by --no-ort")));
+// ⚠ Not in a child (the parent already proved it), and not under a flag whose whole purpose is to produce
+// mismatches.
+if (!asChild && !noClear && !noOrt) await assertNeuralLive();
 
 const results: Result[] = [];
 for (const code of codes) results.push(isolate ? checkIsolated(code) : await checkOne(code));
