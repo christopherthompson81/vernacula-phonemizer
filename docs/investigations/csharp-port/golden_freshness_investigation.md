@@ -145,3 +145,68 @@ npm run ci                          295 files, 5812 tests, goldens fresh, packag
 ```
 
 The registry note is new: a newly ported language with no golden rows was previously invisible here.
+
+## Run 4 — 2026-09-11 17:10 — the goldens are machine-local, confirmed (#1287)
+
+Enabling `push: [main]` in Run 3 ran `check:goldens` on a GitHub runner for the first time. It reported
+**44 stale rows across 20 languages** on a commit that is **0-stale locally**.
+
+### Diagnosis, confirmed rather than inferred
+
+```
+generating machine : Intel Core i7-10700K (Comet Lake, NO avx512)
+GitHub runner      : AMD EPYC 9V74 (Zen, avx512)
+
+want (golden/local): … bˈaᶷndᵻd baᶦ ðə bˈɛlɪŋzʃˌaᶷzən sˈiː .
+got  (runner)      : … bˈaᶷndᵻd baᶦ ðə bˈɛlɪŋʃˌaᶷzən sˈiː .
+```
+
+One phone in **Bellingshausen**, an OOV proper noun through the neural g2p. Different CPU vendor entirely.
+
+**Ruled out before accepting it.** Thread count is not the cause — rendering the whole `en` golden at 1, 2,
+8 and default threads gives an identical hash, so it is not intra-op reduction order (the one cause a
+session option could have fixed). A dead model is not the cause either: `en` has ONE stale row in 200, the
+liveness guard passed, and onnxruntime initialises in the runner log. What is left is int8 kernels
+dispatching by instruction set.
+
+### The hand-written exemption list would have been badly wrong
+
+`--no-ort` (new) forces every neural path to fall back; a language whose output MOVES is ONNX-dependent.
+
+```
+ONNX-dependent: 74 of 189 languages
+  acm acw af afb ajp am apc apd ar ary arz as ayl be bg bho bn bo chr chv cjy ckb cmn da el en en-GB
+  en-IN fa fr gan grc gu hak he hi hmn hne hsn hy ja ka kk km kn ko ky lo mag mk mn mr my nb ne or
+  pnb ps rkt ru sd si skr syl ta te tg th ti tt uk ur wuu yue
+```
+
+⚠ **The first draft of this entry said "eleven directories own a model", and that was itself a wrong hand
+count** — in a section whose thesis is that hand counts are wrong. It is **twelve** (afrikaans, arabic,
+bengali, central-kurdish, danish, english, french, hebrew, khmer, norwegian, persian, sindhi), plus
+`data/core/riderDiacritizer.onnx`. And "the rest inherit it by delegating an embedded foreign run" was
+wrong for about ten of them. The sixty-two reach ONNX by at least three routes:
+
+- **the shared Arabic diacritizer** — nine codes beyond `ar` through `ARABIC_VARIETY` (`acm acw afb ajp
+  apc apd ary arz ayl`), none of which owns a model;
+- **the core rider diacritizer** — reached by Punjabi;
+- **delegation** — a non-Latin engine meeting an embedded Latin run hands it to the English neural reader,
+  which is why `ru:1`, `ja:5`, `th:10`, `cmn:6`, `ko:7`, `el:2` appear at one to ten rows each.
+
+`lo`/`pnb`/`ps` — the three that made no sense in the CI output — are in the third class.
+
+### What follows, and what does not
+
+- **Exempting the ONNX languages on CI is not the answer**: that is 39% of the fleet unchecked, to
+  suppress 44 rows.
+- **A tolerance is not the answer either.** Real staleness has been 3 rows (`beyond`) and 78 (#1274);
+  cross-machine noise is 44. No threshold admits the second without hiding the first.
+- **So `check:goldens` cannot live in CI at all.** Removed from the workflow, with the reason in the file.
+  `push: [main]` stays off — with the golden step gone there is nothing left for it to add that the local
+  `npm run ci` does not already cover.
+- ⚠ **It reaches `csharp/tools/parity` too.** That gate compares the C# engine against the same goldens,
+  so running it on a different machine reports a port divergence that does not exist. Recorded in
+  `csharp/PORTING.md`, because that is exactly the misdiagnosis this investigation has already made twice.
+
+The honest position: the goldens are an artifact of one machine, the local gate is exact there, and the
+post-merge check is a ritual rather than a mechanism. Making the artifact portable is a separate question
+(#1287 keeps it open) and would want the fp32 models or a fixed execution provider, not a threshold.

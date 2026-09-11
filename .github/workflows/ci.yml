@@ -4,14 +4,14 @@ name: CI
 # check:goldens + check:package — the same commands the jobs below run) is run locally before every merge,
 # so a `pull_request` trigger only added a ~6-minute wait after the work was already verified.
 #
-# ⚠ `push: [main]` IS CURRENTLY OFF AGAIN, AND NOT BECAUSE THE ARGUMENT BELOW WAS WRONG. Enabling it
-# (#1283) made `check:goldens` run on a GitHub runner for the first time, and it reported 44 stale rows
-# across the 20 ONNX-dependent languages while the same commit is 0-stale locally — `en` 1 row in 200,
-# `ary` 10, `fa` 8. That shape is argmax flips in int8 inference across CPU microarchitectures, not
-# staleness: a dead model would break most OOV words, not one. So the goldens are not bit-reproducible
-# across machines for those languages, which the artifact never claimed and nobody had tested.
-# A gate that is red on every push trains people to ignore red, so the trigger is off until the
-# reproducibility question is settled. Tracked in its own issue. THE ARGUMENT FOR IT STANDS:
+# ⚠ `push: [main]` IS OFF, AND NOT BECAUSE THE ARGUMENT BELOW WAS WRONG. #1283 turned it on so the golden
+# gate would run on the merge result; that made `check:goldens` run on a GitHub runner for the first time
+# and it reported 44 stale rows on a commit that is 0-stale locally. CONFIRMED (#1287), not inferred: this
+# runner is an AMD EPYC 9V74 and the generating machine an Intel Comet Lake, and the differing rows are
+# single-phone flips in OOV words through the neural g2p (`bˈɛlɪŋzʃˌaᶷzən` → `bˈɛlɪŋʃˌaᶷzən`). The goldens
+# are machine-local for the 74 ONNX-dependent languages, so the golden gate cannot live here at all — and
+# with it gone there is nothing left for this trigger to add that the local `npm run ci` does not already
+# cover. THE ARGUMENT FOR THE TRIGGER ITSELF STANDS, and comes back if the artifact ever becomes portable:
 #
 # ⚠ `push: [main]` IS THE RIGHT TRIGGER, AND NOT A RELAXATION OF THE ABOVE — it is the one case local
 # pre-merge verification CANNOT cover. Two branches can each be green and still merge to a broken main when
@@ -21,15 +21,18 @@ name: CI
 # Running after the merge adds no wait to anyone's loop.
 #
 # TO RUN IT ON A BRANCH ANYWAY: `gh workflow run ci.yml` (or the Actions tab).
-# TO RESTORE FULL COVERAGE BEFORE PUBLISHING: uncomment `pull_request` below and delete this note.
+# TO RESTORE FULL COVERAGE BEFORE PUBLISHING: uncomment `pull_request` below and delete this note. ⚠ That
+# restores the TS/package coverage only — it does not bring `check:goldens` back, which needs the goldens
+# to become machine-portable first (#1287).
 #
 # ⚠ WHAT LOCAL `npm run ci` DOES NOT COVER, and why the rest should go back on before the first publish:
 # these jobs run a FRESH `npm ci` on a clean checkout at a pinned Node 22. A warm local node_modules hides
 # lockfile drift, a dependency that no longer installs, and anything that depends on install order — the
 # optional-dependency typecheck break fixed in #747 was only ever visible in that clean-install path.
-# ⚠ AND THAT CLEAN INSTALL IS EXACTLY WHERE `check:goldens` EARNS ITS KEEP TWICE: `onnxruntime-node` is an
-# OPTIONAL dependency, so `npm ci` does not fail when it does not install — the goldens are async-mode
-# output, and the checker refuses to run rather than report the whole fleet stale.
+# ⚠ AND A FAILED OPTIONAL DEPENDENCY IS STILL CAUGHT HERE, though no longer by `check:goldens`:
+# `onnxruntime-node` is optional so `npm ci` does not fail when it will not install, but
+# `test/enNeural.test.ts` asserts the tagger is defined, so `npm test` reddens. That is the property the
+# removed step was credited with, and it survives the removal.
 on:
   workflow_dispatch:
   # ⚠ `push: [main]` WAS ON FOR ONE COMMIT AND IS OFF AGAIN — see the note above. It is the right trigger
@@ -50,10 +53,13 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      # ⚠ Goldens are a GENERATED artifact committed to the repo, so they can go stale without any test
-      # failing — including through a merge race no branch-scoped check can see. Pure TS, no corpus, no
-      # dotnet. See csharp/PORTING.md and #1283.
-      - run: npm run check:goldens
+      # ⚠ `npm run check:goldens` IS DELIBERATELY ABSENT, and it was here for one commit. The goldens are
+      # not bit-reproducible across CPU microarchitectures for the 74 ONNX-dependent languages: int8
+      # inference dispatches to different kernels, and a rounding difference occasionally flips an argmax.
+      # Measured, this runner (AMD EPYC 9V74) against the generating machine (Intel Comet Lake): 44 rows of
+      # 36,495, e.g. `Bellingshausen` losing a phone. A gate that is red by construction is noise, and no
+      # threshold rescues it — real staleness has been 3 rows. See #1287 and tools/check-goldens.mts.
+      # It runs in `npm run ci`, on the machine that generated the goldens, where it is exact.
 
   # What `npm publish` would actually ship. Guards the fence in package.json `files`: without it npm falls
   # back to .gitignore and packs the whole repo, and a `files` allowlist silently overrides .gitignore.
