@@ -181,3 +181,43 @@ that Run 3 itself had invalidated.
 change.** The fold has survived three reviews untouched. What kept failing was the thing measuring it, and
 each failure was of the same kind — a correction applied to one side, one variety, or one file, and not
 carried to its mirror.
+
+## Run 5 — 2026-09-11 18:35 — third review: no correctness bug, and the same mirror error again
+
+Six findings, all in the documentation and instrument layer. The reviewer verified the fold, the jsonc
+wiring, `en.jsonc`'s per-slot figures, the 5,580/5,777 counts, the "13 of 76,284" UK figure, both floors on
+the sampled path, and confirmed `phonemize(w,"en")` is byte-identical to the eval's `createEnglish().text(w)`
+on all 2,065 surveyed words. **No correctness bug in the code.**
+
+**The survey measured a different object than the gate it justifies.** It read only the referee's FIRST
+variant, while the eval credits a word when ANY variant matches — and 16,337 of the UK file's 76,284 rows
+carry more than one. A word whose second variant writes `ə` where the first writes `ɪ` was counted as pure
+`ɪ`-support. Now every aligning variant contributes, each weighted `1/n` so a word cannot outvote another
+purely by having been transcribed twice:
+
+```
+en-GB       aligned   skipped     ᵻ slots     ᵻ: ɪ / ə
+Run 4        30,248     2,322       1,988     81.2% / 13.3%
+Run 5        31,120     1,450       2,019     84.2% / 11.7%
+```
+
+**The published pre-fold figure was wrong by 3x.** `docs/language-maturity.md` said en-GB was "39.1% before
+#1282", crediting the fold with +7.3pp — while the `en` row one line above said +2.4pp, and +1,828 words on
+76,284 rows IS 2.4pp. 39.1% was the previously PUBLISHED number, already stale before the fold; the measured
+pre-fold value is 44.0%. Two contradictory claims one line apart, the larger one flattering this change.
+
+⚠ **AND THE en-GB FOLD NOTE WAS LEFT STALE AGAIN.** Run 4's commit message named "a correction applied to
+one side, one variety, or one file and not carried to its mirror" as the recurring failure — and that same
+commit refreshed `en.jsonc`'s numbers while leaving `en-GB.jsonc` on Run 3's. **Fourth instance, one of them
+in the commit that named it.** Anyone auditing the fold would get a mismatch and be unable to tell whether
+the engine had moved or the instrument had.
+
+Two smaller asymmetries with the gate, both fixed: `VOWEL` omitted `ɐ ʉ ɵ`, which the narrow UK referee
+writes and `en-GB.jsonc` folds (46/18/7 rows — too few to move a percentage, but they were dropping out of
+the `ə` baseline rather than landing in it); and the sample-cap rationale still argued from the floors this
+PR replaced.
+
+⚠ **And a blind spot the guards cannot catch**, now in the header: the survey reads each word back through
+the engine, which resolves an in-lexicon word from the flat file — so after an `isBarredI` change it reports
+the OLD placement until `en_rebuild_lexicon.mts --write` runs. The `slots === 0` guard cannot see this,
+because the slots are all still there. "Rebuild the lexicon first" is now the first line of the usage note.

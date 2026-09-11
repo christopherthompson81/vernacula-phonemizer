@@ -189,7 +189,7 @@ describe("referee corroboration (segmental backbone vs the PRIMARY independent s
     // Sample-cap the floor check so huge referees don't dominate the suite. A uniform stride keeps folded% faithful.
     // Cheap rule-g2p langs are capped at 5000 (enough that even a tight floor like km's 54% is stable); the NEURAL
     // phonemizers (English G2P beam search, the Arabic ONNX diacritizer) are the slow ones and get a tighter 3000 —
-    // their floors (en 30%, en-GB 38%, ar 62%) have ample headroom for the extra sampling variance.
+    // their floors (en 35%, en-GB 44%, ar 62%) clear the SAMPLED measurement — en 41.8%, en-GB 45.4% — though #1282 left en-GB with only ~1pp of that, which is why its floor is set against the sampled number and not the 46.4% the full referee reports.
     // (it.concurrent does not help: the neural G2P is synchronous CPU work Node can't parallelise within a worker.)
     const NEURAL = new Set(["en", "en-GB", "ar"]);
     // ⚠ ckb's floor MEASURES A TIER THAT NEEDS THE OPTIONAL ONNX RUNTIME. Its eval entry is the whole shipped

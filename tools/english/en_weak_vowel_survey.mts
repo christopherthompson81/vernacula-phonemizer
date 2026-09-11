@@ -12,6 +12,12 @@
  * stays visible. Run it when `isBarredI` changes; a class placed wrongly shows as a bucket whose `ɪ`-rate
  * has moved toward the `ə` column.
  *
+ * ⚠ REBUILD THE LEXICON FIRST after an `isBarredI` change — `npx tsx tools/english/en_rebuild_lexicon.mts
+ * --write`. This reads each word back through the engine, which resolves an in-lexicon word from the flat
+ * file; the rule reaches the OOV and tagger paths but NOT that file until it is regenerated. Change the
+ * rule, run this without rebuilding, and every bucket reports the OLD placement unchanged — the one failure
+ * the `slots === 0` guard cannot catch, because the slots are all still there.
+ *
  *   npx tsx tools/english/en_weak_vowel_survey.mts          the US referee (en)
  *   npx tsx tools/english/en_weak_vowel_survey.mts --gb     the UK referee (en-GB)
  */
@@ -34,7 +40,10 @@ const REFEREE = join(ROOT, "tools", "referee-eval", "referees",
 const LEXICON = join(ROOT, "data", "languages", "english", "accent-lexicon.tsv");
 
 /** Vowel letters of BOTH inventories. `ᵻ` is ours alone — the referee never writes it, which is the point. */
-const VOWEL = /[ɪiɨɘəɜɝɚeɛæaɑɒɔoʊuʌyø]/u;
+// ⚠ INCLUDES ɐ ʉ ɵ, which the NARROW UK referee writes and `en-GB.jsonc` folds to ə/u. Omitting them made
+// those rows fail the nucleus count and drop out silently instead of landing in the `ə` baseline the `ᵻ`
+// bucket is measured against. Tiny here (46/18/7 rows of 76,284) but a real asymmetry with the gate.
+const VOWEL = /[ɪiɨɘəɜɝɚeɛæaɑɒɔoʊuʌyøɐʉɵ]/u;
 
 /**
  * ⚠ THE TWO SIDES SPELL A DIPHTHONG DIFFERENTLY, so both are normalised to ONE token before anything is
@@ -59,7 +68,7 @@ const DIPHTHONG = new Set(["eɪ", "oʊ", "aɪ", "aʊ", "ɔɪ", "əʊ", "ʌɪ"]);
 /** Our superscript offglides, to the referee's plain spelling, so both sides tokenize identically. */
 const OFFGLIDE: readonly (readonly [RegExp, string])[] = [[/ᶦ/gu, "ɪ"], [/ᶷ/gu, "ʊ"]];
 
-const referee = new Map<string, string[]>();
+const referee = new Map<string, string[][]>();
 for (const line of readFileSync(REFEREE, "utf8").split("\n")) {
     if (!line) continue;
     const [word, ...rest] = line.split("\t");
@@ -69,7 +78,12 @@ for (const line of readFileSync(REFEREE, "utf8").split("\n")) {
     // is one unsegmented IPA string per row (and carries variant columns — the first is taken). Splitting
     // the UK file on spaces gives ONE token per word, so every comparison becomes a count mismatch and the
     // survey silently reports on nothing.
-    referee.set(word.toLowerCase(), VARIETY === "en-GB" ? [...first.replace(/\s+/gu, "")] : first.trim().split(" "));
+    // ⚠ EVERY VARIANT, NOT THE FIRST. The eval credits a word when ANY of the referee's readings matches
+    // (eval.ts's per-referee alternatives), and 16,337 of the UK file's 76,284 rows carry more than one.
+    // Surveying only `rest[0]` measured a different object than the gate it justifies: a word whose second
+    // variant writes `ə` where the first writes `ɪ` counted as pure ɪ-support, with a bias of unknown sign.
+    referee.set(word.toLowerCase(), rest.filter((r) => r.trim().length > 0).map(
+        (r) => (VARIETY === "en-GB" ? [...r.replace(/\s+/gu, "")] : r.trim().split(" "))));
 }
 
 /**
@@ -122,17 +136,19 @@ function survey(symbol: string): { slots: number; counts: Map<string, number>; w
     for (const [word, ipa] of ours) {
         const ref = referee.get(word);
         if (ref === undefined) continue;
-        const mine = nuclei(ourPhones(ipa)), theirs = nuclei(ref);
+        const mine = nuclei(ourPhones(ipa));
         // ⚠ A COUNT MISMATCH IS SKIPPED, NOT GUESSED AT. What remains after the diphthong merge is a real
         // structural disagreement (the referee's non-syllabic `n` for our `ən`, or a different
         // syllabification), and aligning those by position would manufacture the contamination above.
-        if (mine.length !== theirs.length || mine.length === 0) { skipped++; continue; }
+        const aligning = ref.map(nuclei).filter((t) => t.length === mine.length && t.length > 0);
+        if (aligning.length === 0) { skipped++; continue; }
         words++;
         for (let i = 0; i < mine.length; i++) {
             if (mine[i] !== symbol) continue;
             slots++;
-            const t = theirs[i]!;
-            counts.set(t, (counts.get(t) ?? 0) + 1);
+            // Each aligning variant contributes a fraction, so a multi-variant word cannot outvote a
+            // single-variant one purely by having been transcribed twice.
+            for (const t of aligning) counts.set(t[i]!, (counts.get(t[i]!) ?? 0) + 1 / aligning.length);
         }
     }
     return { slots, counts, words, skipped };
