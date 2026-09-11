@@ -248,9 +248,12 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
     });
 
     test("money reads as currency-plus-cents, not as a decimal", () => {
-        expect(phonemize("it cost $5.50", "en")).toBe("ɪt kʰˈɑːst fˈaᶦv dˈɑːlɚz fˈɪfti");
-        expect(phonemize("$1.99", "en")).toBe("wˈʌn dˈɑːlɚ nˈaᶦnti nˈaᶦn"); // singular at 1
-        expect(phonemize("£2.50 each", "en")).toBe("tʰˈuː pʰˈaᶷndz fˈɪfti ˈiːt͡ʃ");
+        // ⚠ THE FRACTIONAL PART CARRIES ITS UNIT NOUN. Without one the bare integer has nothing to close
+        // it and JOINS THE NEXT CLAUSE — `for $3.14 and the 2nd time` read "three dollars FOURTEEN AND the
+        // second time". The subunit is per currency, and the penny's plural is suppletive.
+        expect(phonemize("it cost $5.50", "en")).toBe("ɪt kʰˈɑːst fˈaᶦv dˈɑːlɚz fˈɪfti sˈɛnts");
+        expect(phonemize("$1.99", "en")).toBe("wˈʌn dˈɑːlɚ nˈaᶦnti nˈaᶦn sˈɛnts"); // singular at 1
+        expect(phonemize("£2.50 each", "en")).toBe("tʰˈuː pʰˈaᶷndz fˈɪfti pʰˈɛns ˈiːt͡ʃ");
     });
 
     // ⚠ A GLUED MAGNITUDE ABBREVIATION AFTER A CURRENCY SIGN IS THE MAGNITUDE, NOT THE UNIT — and the
@@ -290,8 +293,8 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         expect(normalizeEnglish("$1")).toBe("1 dollar");
         expect(normalizeEnglish("$1m")).toBe("1 million dollars");   // a magnitude forces the plural
         // The cents rule is untouched: it needs a word boundary after the two digits, which a glued letter
-        // denies it, so `$2.30bn` never becomes "2 dollars 30".
-        expect(normalizeEnglish("$5.50")).toBe("5 dollars 50");
+        // denies it, so `$2.30bn` never becomes "2 dollars 30 cents".
+        expect(normalizeEnglish("$5.50")).toBe("5 dollars 50 cents");
         expect(normalizeEnglish("$2.30bn")).toBe("2.30 billion dollars");
     });
 

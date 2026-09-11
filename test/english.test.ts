@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
+import { normalizeEnglish } from "../src/languages/english/normalize.ts";
 import { PosTagger, type PosModel } from "../src/languages/english/posTagger.ts";
 
 // Canonical-IPA goldens for English. Pronunciation from the CMUdict lexicon + n-gram OOV G2P + POS
@@ -221,5 +222,58 @@ describe("a pronounceable initialism that is nonetheless spelled out", () => {
     test("it reads as letter names", () => {
         expect(phonemize("the CRA published a notice", "en")).toContain("sˈiː ˈɑːɹ ˈeᶦ");
         expect(phonemize("the CRA published a notice", "en")).not.toContain("kɹˈæ");
+    });
+});
+
+// ⚠ THE FRACTIONAL PART OF A PRICE NEEDS ITS UNIT NOUN, and the defect is not that the number sounds bare —
+// it is that a bare integer has nothing to close it, so IT JOINS THE NEXT CLAUSE. `for $3.14 and the 2nd
+// time` read "for three dollars FOURTEEN AND the second time", putting the clause boundary in the wrong
+// place. espeak-ng reads the same input as θɹˈiː dˈɑːlɚz ænd fˈɔːɹtiːn sˈɛnts.
+describe("money with a fractional part", () => {
+    test("the cents are spoken as cents, and the clause boundary lands where it should", () => {
+        expect(phonemize("I thought about it for $3.14 and the 2nd time.", "en"))
+            .toContain("θɹˈiː dˈɑːlɚz fˈɔːɹtˈiːn sˈɛnts ənd ðə sˈɛkənd");
+    });
+
+    test("every currency the normalizer expands, with its own subunit", () => {
+        expect(phonemize("£3.14", "en")).toBe("θɹˈiː pʰˈaᶷndz fˈɔːɹtˈiːn pʰˈɛns"); // suppletive plural
+        expect(phonemize("€3.14", "en")).toBe("θɹˈiː jˈʊɹoᶷz fˈɔːɹtˈiːn sˈɛnts");
+        expect(phonemize("$1.01", "en")).toBe("wˈʌn dˈɑːlɚ wˈʌn sˈɛnt"); // both singular
+        expect(phonemize("£0.01", "en")).toBe("wˈʌn pʰˈɛni");
+    });
+
+    test("an amount under one unit is the fraction alone", () => {
+        // "zero dollars ninety nine cents" is nobody's reading of a 99-cent price.
+        expect(phonemize("$0.99", "en")).toBe("nˈaᶦnti nˈaᶦn sˈɛnts");
+    });
+
+    test("a whole amount keeps its old reading, and grouping still rides along", () => {
+        expect(phonemize("$3.00", "en")).toBe("θɹˈiː dˈɑːlɚz");
+        expect(phonemize("$1,234.56", "en")).toContain("fˈɪfti sˈɪks sˈɛnts");
+    });
+
+    test("two prices do not merge into one", () => {
+        // ⚠ THIS IS WHY THE PARTS ARE JUXTAPOSED AND NOT JOINED WITH "and". With the conjunction, the
+        // elided whole part of the second amount makes it look like the first one's fraction, and the two
+        // readings become byte-identical — the same misplaced boundary this rule exists to prevent.
+        expect(phonemize("the app is $1.00 and $0.50 for the add-on", "en"))
+            .not.toBe(phonemize("the app is $1.50 for the add-on", "en"));
+        expect(phonemize("$1.00 and $0.50", "en")).toContain("dˈɑːlɚ ənd fˈɪfti sˈɛnts");
+        expect(phonemize("$1.50", "en")).toBe("wˈʌn dˈɑːlɚ fˈɪfti sˈɛnts");
+    });
+
+    test("a third decimal is not cents, and a magnitude word is not a fraction", () => {
+        // `$3.499` is a pump price and a 4-decimal FX rate has the same shape; matching the first two
+        // digits stranded the rest ON THE UNIT NOUN ("3 dollars 49 cents9").
+        expect(normalizeEnglish("$3.499 a gallon")).toBe("3.499 dollars a gallon");
+        // `$5.50 million` is five and a half million dollars — the decimal reading is the right one, and
+        // this rule consumes the sign before step 1's magnitude arm can ever see it.
+        expect(normalizeEnglish("$5.50 million")).toBe("5.50 million dollars");
+        expect(normalizeEnglish("$2.30bn")).toBe("2.30 billion dollars"); // the letter guard still holds
+    });
+
+    test("⟨¥⟩ declines, because the yen has no fractional unit to name", () => {
+        // The sen was demonetised in 1953; a decimal yen amount is read as the decimal it is.
+        expect(phonemize("¥3.14", "en")).toBe(phonemize("3.14 yen", "en"));
     });
 });

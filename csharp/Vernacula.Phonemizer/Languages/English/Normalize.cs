@@ -60,6 +60,13 @@ public static class Normalize
         ["€"] = new[] { "euro", "euros" }, ["¥"] = new[] { "yen", "yen" },
     };
 
+    /** The fractional unit of each currency — [singular, plural]; the penny's plural is suppletive.
+     *  ⚠ ⟨¥⟩ HAS NO ENTRY ON PURPOSE — see src/languages/english/normalize.ts. */
+    private static readonly IReadOnlyDictionary<string, string[]> SUBUNIT = new Dictionary<string, string[]>(StringComparer.Ordinal)
+    {
+        ["$"] = new[] { "cent", "cents" }, ["€"] = new[] { "cent", "cents" }, ["£"] = new[] { "penny", "pence" },
+    };
+
     /** A MAGNITUDE ABBREVIATION GLUED TO A MONEY FIGURE — `$1.5m`, `£2.3m`, `$2bn`, `£700k`. */
     private static readonly IReadOnlyDictionary<string, string> MONEY_MAGNITUDE = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -240,7 +247,10 @@ public static class Normalize
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b` — and the `u` flag is required for it. JS defines `\\b` on ASCII
     // `\\w`, so `$1.50é` read as money while `$1.50a` did not. See src/languages/english/normalize.ts.
     private static readonly JsRe MONEY_CENTS =
-        JsRegex.Compile("([$£€¥])\\s?(\\d[\\d,]*)\\.(\\d{2})(?![\\p{L}\\p{M}])", "gu");
+        // ⚠ The class excludes DIGITS (a third decimal is not cents) and the rule declines before a
+        // magnitude word (`$5.50 million` is a decimal amount) — see src/languages/english/normalize.ts.
+        JsRegex.Compile("([$£€¥])\\s?(\\d[\\d,]*)\\.(\\d{2})(?![\\p{L}\\p{M}\\d])"
+            + "(?!\\s+(?:million|billion|trillion|thousand))", "gu");
     private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+\\s?(\\d)", "gu");
     private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|\\s)\\+\\s?(\\d)", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[\\/\\d])", "gu");
@@ -294,6 +304,7 @@ public static class Normalize
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "g");
     private static readonly JsRe ONE_EXACT = JsRegex.Compile("^1(?:\\.0+)?$");
     private static readonly JsRe ONE_INT = JsRegex.Compile("^1$");
+    private static readonly JsRe ALL_ZEROS = JsRegex.Compile("^0+$");
 
     /** A timezone offset spoken as the displacement it is. */
     private static string OffsetWords(Match m)
@@ -402,9 +413,16 @@ public static class Normalize
             var sym = m.Groups[1].Value;
             var intPart = m.Groups[2].Value;
             var cents = m.Groups[3].Value;
+            if (!SUBUNIT.TryGetValue(sym, out var sub)) return m.Value; // no fractional unit — see SUBUNIT
             var forms = CURRENCY[sym];
-            var unit = ONE_INT.IsMatch(Rewrite(intPart, COMMAS, "")) ? forms[0] : forms[1];
-            return cents == "00" ? $"{intPart} {unit}" : $"{intPart} {unit} {Js.NumberToString(Js.Number(cents))}";
+            var whole = Rewrite(intPart, COMMAS, "");
+            var unit = ONE_INT.IsMatch(whole) ? forms[0] : forms[1];
+            var n = Js.Number(cents);
+            if (n == 0) return $"{intPart} {unit}";
+            var frac = $"{Js.NumberToString(n)} {(n == 1 ? sub[0] : sub[1])}";
+            // ⚠ An amount under one unit is the fraction alone, and the parts are JUXTAPOSED — an "and"
+            // here merges `$1.00 and $0.50` with `$1.50`. See src/languages/english/normalize.ts.
+            return ALL_ZEROS.IsMatch(whole) ? frac : $"{intPart} {unit} {frac}";
         });
 
         s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
