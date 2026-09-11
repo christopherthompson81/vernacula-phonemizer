@@ -16,7 +16,7 @@ describe("english canonical IPA", () => {
         expect(phonemize("what is the use", "en")).toBe("wˌʌt ɪz ðə jˈuːs"); // noun use
         expect(phonemize("please use it", "en")).toBe("plˈiːz jˈuːz ɪt"); // verb use
         expect(phonemize("the subject", "en")).toBe("ðə sˈʌbd͡ʒɪkt"); // noun-dominant default
-        expect(phonemize("the houses", "en")).toBe("ðə hˈaᶷzəz"); // irregular voiced plural (pinned)
+        expect(phonemize("the houses", "en")).toBe("ðə hˈaᶷzᵻz"); // irregular voiced plural (pinned)
     });
 
     test("possessives + OOV G2P", () => {
@@ -275,5 +275,64 @@ describe("money with a fractional part", () => {
     test("⟨¥⟩ declines, because the yen has no fractional unit to name", () => {
         // The sen was demonetised in 1953; a decimal yen amount is read as the decimal it is.
         expect(phonemize("¥3.14", "en")).toBe(phonemize("3.14 yen", "en"));
+    });
+});
+
+// ⚠ THE `-es` PLURAL AFTER A SIBILANT TAKES THE WEAK VOWEL, and the evidence is a CONTRAST rather than a
+// count. Bucketing every referee-aligned slot by WHICH SYMBOL WE WROTE there, the en-US referee writes `ɪ`
+// in 70.4% of our ᵻ slots and 7.1% of our word-final ə slots — it discriminates — and this environment sits
+// at 80-100% (en-GB corroborates at 94.0% of 133 rows). CMUdict also writes the same suffix two ways
+// (`bridges AH0` beside `badges IH0`), so before this the lexicon spelled one morpheme `ə` in 345 words and
+// `ɪ` in 733. See docs/investigations/en/en_es_plural_weak_vowel_investigation.md.
+describe("the -es plural after a sibilant", () => {
+    test("takes the weak vowel, from the lexicon…", () => {
+        expect(phonemize("services", "en")).toBe("sˈɝvəsᵻz");
+        expect(phonemize("offices", "en")).toBe("ˈɔːfəsᵻz");
+        expect(phonemize("chances", "en")).toBe("t͡ʃˈænsᵻz");
+        expect(phonemize("bridges", "en")).toBe("bɹˈɪd͡ʒᵻz");
+    });
+
+    test("…and from every OOV branch, which is where it silently did not", () => {
+        // ⚠ THE MORPH BRANCH WAS THE GAP. `g2p` withheld the word from arpabetToIpa for BOTH the compound
+        // and the morph decomposition, so an OOV plural off an in-dict stem kept `ɪ` while a recorded one
+        // in the same environment had `ᵻ` — the two-spellings defect, on the path the lexicon cannot cover.
+        expect(phonemize("quiches", "en")).toBe("kʰˈiːʃᵻz"); // morph: quiche + es
+        expect(phonemize("crevasses", "en")).toBe("kɹəvˈæsᵻz"); // morph: crevasse + s
+        expect(phonemize("glorses", "en")).toBe("ɡlˈɔːɹsᵻz"); // n-gram: a nonce, no stem at all
+        // ⚠ A COMPOUND STILL WITHHOLDS IT, which is what that guard was for: `subreddit` ends "-it" but is
+        // not -it suffixed, and passing the word would re-fire the single-morpheme rules on the split.
+        expect(phonemize("subreddit", "en")).toBe("sˈʌbɹɛd̬ɪt");
+    });
+
+    test("the possessive is the same morpheme and gets the same vowel", () => {
+        // ⚠ A POSSESSIVE NEVER REACHES THE LEXICON WHOLE — the clitic is stripped and the STEM looked up —
+        // so `sibilantAllomorph`, not the lexicon, supplies this vowel. It said `ɪ` while `-es` said `ᵻ`.
+        expect(phonemize("advance's", "en")).toBe("ədvˈænsᵻz");
+        expect(phonemize("Marx's", "en")).toBe("mˈɑːɹksᵻz");
+        // The other two allomorphs are untouched.
+        expect(phonemize("cat's", "en")).toBe("kʰˈæts");
+        expect(phonemize("dog's", "en")).toBe("dˈɔːɡz");
+    });
+
+    test("the heteronym table does not shadow the rebuilt lexicon", () => {
+        // `houses` is the one -es-shaped override; it kept `ə` while `bases` moved to `ᵻ`.
+        expect(phonemize("houses", "en").slice(-2)).toBe(phonemize("bases", "en").slice(-2));
+    });
+
+    test("one morpheme, one spelling — CMUdict's AH0/IH0 split no longer shows", () => {
+        // `bridges` is AH0 and `badges` IH0 in the source; they used to surface as ə and ɪ.
+        expect(phonemize("bridges", "en").slice(-2)).toBe(phonemize("badges", "en").slice(-2));
+        expect(phonemize("advances", "en").slice(-2)).toBe(phonemize("abuses", "en").slice(-2));
+    });
+
+    test("the Greek /iːz/ plurals are untouched — they are IY, not AH/IH", () => {
+        // These need no exclusion in the rule: the base test already refuses anything but IH/AH.
+        expect(phonemize("crises", "en")).toBe("kɹˈaᶦsiz");
+        expect(phonemize("analyses", "en")).toContain("iːz");
+    });
+
+    test("a non-sibilant stem is not this environment", () => {
+        expect(phonemize("goes", "en")).toBe("ɡˈoᶷz");
+        expect(phonemize("notes", "en")).toBe("nˈoᶷts");
     });
 });

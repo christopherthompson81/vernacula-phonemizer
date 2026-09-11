@@ -309,7 +309,9 @@ public static class EnglishG2pFactory
         public string G2p(string word)
         {
             var d = Decompose(word);
-            return _arpabetToIpa(d.Phones, d.Source == "N" ? word : "");
+            // ⚠ Only the COMPOUND path withholds the word — a morph decomposition's suffix is real by
+            // construction. See src/languages/english/englishG2p.ts.
+            return _arpabetToIpa(d.Phones, d.Source == "C" ? "" : word);
         }
     }
 }

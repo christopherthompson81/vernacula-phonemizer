@@ -28,6 +28,9 @@ function split(phone: string): { base: string; stress: number } {
     return { base: m?.[1] ?? phone, stress: m?.[2] ? Number(m[2]) : -1 };
 }
 
+/** The sibilants, before which the `-es` suffix takes an epenthetic vowel at all. */
+const SIBILANT: ReadonlySet<string> = new Set(["S", "Z", "SH", "ZH", "CH", "JH"]);
+
 /** Should this unstressed vowel-phone at index `vi` (nucleus number `ni`) surface as the weak vowel ᵻ?
  *  Cleanroom weak-vowel-merger rule from the WORD's morphology (public GenAm phonology). */
 function isBarredI(
@@ -38,6 +41,9 @@ function isBarredI(
     nucleiCount: number,
 ): boolean {
     const { base, stress } = P[vi]!;
+    // ⚠ KNOWN LIMIT: `stress > 0` also refuses a SECONDARY-stressed suffix vowel, which CMUdict writes for
+    // two rows (`axes AE1 K S IH2 Z`, `pisses P IH1 S IH2 Z`) — they keep `ɪ` where the family has `ᵻ`.
+    // Loosening the guard here would loosen it for the four rules below too, which is not worth two rows.
     if (stress > 0 || (base !== "IH" && base !== "AH")) return false;
     // -ed / -ted / -ded after an alveolar stop (started, wanted, united, decided → ᵻd)
     if (
@@ -46,6 +52,26 @@ function isBarredI(
         vi + 1 < P.length &&
         vi > 0 &&
         (P[vi - 1]!.base === "T" || P[vi - 1]!.base === "D")
+    )
+        return true;
+    // -es plural / 3sg after a SIBILANT (services, offices, chances, bridges → ᵻz).
+    // ⚠ THE POSSESSIVE SPELLING OF THIS MORPHEME IS NOT HANDLED HERE, and an `'s` arm in this test would be
+    // DEAD CODE: `english.ts` strips the clitic and looks up the STEM, so the word that reaches this rule
+    // never carries the apostrophe. That half lives in `sibilantAllomorph`, which is where it is fixed. The epenthetic vowel of
+    // this suffix is the weak vowel, not schwa, and the referees say so in the one comparison that is a test
+    // rather than a count: bucketed by WHICH SYMBOL WE WROTE in a slot, the en-US referee writes `ɪ` in
+    // 70.4% of our ᵻ slots and 7.1% of our word-final ə slots — it discriminates — and in this environment
+    // it writes `ɪ` 100% (5/5 en-US, and 94.0% of 133 en-GB rows).
+    // ⚠ THE GREEK /iːz/ PLURALS NEED NO EXCLUSION, though they look like they should: `crises`, `analyses`,
+    // `hypotheses` are written with IY in CMUdict, and the stress/base test above already refuses anything
+    // that is not IH or AH. The source data separates the two morphemes before this rule ever sees them.
+    if (
+        /es$/.test(word) &&
+        ni === nucleiCount - 1 &&
+        vi > 0 &&
+        vi + 1 < P.length &&
+        P[vi + 1]!.base === "Z" &&
+        SIBILANT.has(P[vi - 1]!.base)
     )
         return true;
     // -ity/-ety/-ities/-ility (university, quality, security → ᵻti); the vowel before the final -t- cluster

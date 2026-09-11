@@ -66,6 +66,10 @@ public static class EnglishArpabet
     }
 
     private static readonly JsRe ED_ES = JsRegex.Compile("(ed|es)$");
+    private static readonly JsRe ES = JsRegex.Compile("es$", "");
+    /** The sibilants, before which the `-es` suffix takes an epenthetic vowel at all. */
+    private static readonly IReadOnlySet<string> SIBILANT =
+        new HashSet<string>(new[] { "S", "Z", "SH", "ZH", "CH", "JH" }, StringComparer.Ordinal);
     private static readonly JsRe ITY = JsRegex.Compile("(it|iti|ities|ety|ities)y?$");
     private static readonly JsRe IBLE = JsRegex.Compile("ibl[ey]?$");
     private static readonly JsRe LATINATE_PREFIX = JsRegex.Compile("^(be|de|re|se|pre)[^aeiouy]");
@@ -81,6 +85,16 @@ public static class EnglishArpabet
             && vi + 1 < P.Count
             && vi > 0
             && (P[vi - 1].Base == "T" || P[vi - 1].Base == "D"))
+            return true;
+        // -es plural / 3sg after a SIBILANT (services, offices, chances, bridges → ᵻz).
+        // ⚠ The Greek /iːz/ plurals need no exclusion: CMUdict writes them with IY, which the base test
+        // above already refuses. See src/languages/english/englishArpabet.ts.
+        if (ES.IsMatch(word)
+            && ni == nucleiCount - 1
+            && vi > 0
+            && vi + 1 < P.Count
+            && P[vi + 1].Base == "Z"
+            && SIBILANT.Contains(P[vi - 1].Base))
             return true;
         if (ITY.IsMatch(word) && vi + 1 < P.Count && P[vi + 1].Base == "T")
             return true;

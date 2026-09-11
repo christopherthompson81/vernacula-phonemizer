@@ -50,7 +50,9 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var i = chars.Count - 1;
         while (i >= 0 && TRAILING_DIACRITICS.IsMatch(chars[i])) i--;
         var last = i >= 0 ? chars[i] : "";
-        if (last.Length == 1 && "szʃʒ".Contains(last, StringComparison.Ordinal)) return "ɪz";
+        // ⚠ The epenthetic vowel is the WEAK vowel, matching the `-es` spelling of the same morpheme, and a
+        // possessive never reaches the lexicon whole — see src/languages/english/english.ts.
+        if (last.Length == 1 && "szʃʒ".Contains(last, StringComparison.Ordinal)) return "ᵻz";
         if (last.Length == 1 && "ptkfθ".Contains(last, StringComparison.Ordinal)) return "s";
         return "z";
     }
