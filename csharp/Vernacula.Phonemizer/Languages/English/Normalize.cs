@@ -70,6 +70,26 @@ public static class Normalize
 
     private const string MONTH_ALT = "january|february|march|april|may|june|july|august|september|october|november|december";
 
+    /** Three-letter month abbreviations → the month NAME. ⚠ `may` is deliberately absent. */
+    private static readonly IReadOnlyDictionary<string, string> MONTH_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["jan"] = "january", ["feb"] = "february", ["mar"] = "march", ["apr"] = "april", ["jun"] = "june",
+        ["jul"] = "july", ["aug"] = "august", ["sep"] = "september", ["sept"] = "september",
+        ["oct"] = "october", ["nov"] = "november", ["dec"] = "december",
+    };
+    /** Longest-first, so `sept` is claimed before `sep` can take its first three letters. */
+    private static readonly string MONTH_ABBREV_ALT = string.Join("|", MONTH_ABBREV.Keys.OrderByDescending(k => k.Length));
+
+    /** Weekday abbreviations → the weekday NAME. */
+    private static readonly IReadOnlyDictionary<string, string> WEEKDAY_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["mon"] = "monday", ["tue"] = "tuesday", ["tues"] = "tuesday", ["wed"] = "wednesday",
+        ["weds"] = "wednesday", ["thu"] = "thursday", ["thur"] = "thursday", ["thurs"] = "thursday",
+        ["fri"] = "friday", ["sat"] = "saturday", ["sun"] = "sunday",
+    };
+    /** Longest-first: `thurs` before `thur` before `thu`, `tues` before `tue`, `weds` before `wed`. */
+    private static readonly string WEEKDAY_ABBREV_ALT = string.Join("|", WEEKDAY_ABBREV.Keys.OrderByDescending(k => k.Length));
+
     private static readonly JsRe ABBREV_FUNCTION_NEXT = JsRegex.Compile(
         "^(?:in|on|at|and|or|but|the|a|an|is|was|were|are|to|for|with|of|from|by|near|that|this|it|he|she|they|we|you|i|as|his|her|its|their|there|then|when|where|which|who|had|has|have)$", "i");
 
@@ -183,6 +203,13 @@ public static class Normalize
     private static readonly JsRe AM_PM = JsRegex.Compile("\\b([ap])\\.\\s?m\\.", "gi");
     private static readonly JsRe DOTTED_INITIALS = JsRegex.Compile("\\b([A-Za-z](?:\\.[A-Za-z]){1,4})\\.(?!\\w)", "g");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "g");
+    private static readonly JsRe MONTH_ABBREV_BEFORE_NUM =
+        JsRegex.Compile($"\\b({MONTH_ABBREV_ALT})\\b\\.?(?=[ \u00a0]+\\d)", "giu");  // space, NBSP
+    private static readonly JsRe MONTH_ABBREV_AFTER_DAY =
+        JsRegex.Compile($"(?<=\\b\\d{{1,2}}[ \u00a0])({MONTH_ABBREV_ALT})\\b\\.?", "giu");  // space, NBSP
+    private static readonly JsRe WEEKDAY_ABBREV_RE = JsRegex.Compile(
+        // space, NBSP
+        $"\\b({WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{{1,2}}[ \u00a0]+)?(?:{MONTH_ALT})\\b)", "giu");
     private static readonly JsRe ERA = JsRegex.Compile("\\b(BCE|BC|CE|AD)\\b", "g");
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
         $"(?<!(?:{MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{{0,2}}(?:[ \u00a0\u202f\u2009]\\d{{3}})+(?![\\d])", "giu");
@@ -191,7 +218,17 @@ public static class Normalize
         "(?<=[×x·]\\s?)(10)\\s?(\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+|-\\d+)", "gu");
     private static readonly JsRe NEGATIVE = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("(^|[\\s(])±\\s?(\\d)", "gu");
-    private static readonly JsRe ISO_DATE = JsRegex.Compile("\\b(\\d{4})-(\\d{2})-(\\d{2})\\b", "g");
+    /** `HH:MM` and `HH:MM:SS` — the two clock shapes a timezone offset can hang off. */
+    private const string TZ_CLOCK = "\\d{1,2}:[0-5]\\d";
+    private const string TZ_CLOCK_SEC = TZ_CLOCK + ":[0-5]\\d";
+    private const string TZ_SIGN = "([+\\-\u2212])";
+    private static readonly JsRe TZ_COMPACT =
+        JsRegex.Compile($"(?<={TZ_CLOCK}(?::[0-5]\\d)?)[ \u00a0]*{TZ_SIGN}(\\d{{2}})(\\d{{2}})\\b", "gu");  // space, NBSP
+    private static readonly JsRe TZ_COLON =
+        JsRegex.Compile($"(?<={TZ_CLOCK_SEC})[ \u00a0]*{TZ_SIGN}(\\d{{2}}):(\\d{{2}})\\b", "gu");  // space, NBSP
+    private static readonly JsRe TZ_ZULU = JsRegex.Compile($"(?<={TZ_CLOCK}(?::[0-5]\\d)?)Z\\b", "gu");
+    private static readonly JsRe ISO_DATE =
+        JsRegex.Compile("\\b(\\d{4})-(\\d{2})-(\\d{2})(?:T(?=\\d{1,2}:)|(?![\\p{L}\\d-]))", "gu");
     private static readonly JsRe US_DATE = JsRegex.Compile("\\b(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\b", "g");
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b` — and the `u` flag is required for it. JS defines `\\b` on ASCII
     // `\\w`, so `$1.50é` read as money while `$1.50a` did not. See src/languages/english/normalize.ts.
@@ -204,7 +241,7 @@ public static class Normalize
         "([$£€¥])\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?:(\\s+(?:million|billion|trillion|thousand))|("
         + MONEY_MAG_ALT + ")(?![\\p{L}\\p{M}\\d]))?", "gu");
     private static readonly JsRe PERCENT = JsRegex.Compile("(\\d)\\s?%", "gu");
-    private static readonly JsRe CLOCK = JsRegex.Compile("\\b(\\d{1,2}):([0-5]\\d)\\b(\\s*[ap]m\\b)?", "gu");
+    private static readonly JsRe CLOCK = JsRegex.Compile("\\b(\\d{1,2}):([0-5]\\d)(?::([0-5]\\d))?\\b(\\s*[ap]m\\b)?", "gu");
     private static readonly JsRe MONTH_DAY = JsRegex.Compile(
         $"\\b({MONTH_ALT})\\s+(\\d{{1,2}})(?!\\d|\\s*(?:st|nd|rd|th|percent))\\b", "gi");
     private static readonly JsRe YEAR_RANGE = JsRegex.Compile(
@@ -235,6 +272,8 @@ public static class Normalize
     private static readonly JsRe CAP_INITIAL = JsRegex.Compile("^[A-Z]");
     private static readonly JsRe LOWER_ROMAN = JsRegex.Compile(
         "\\b([a-z']+)\\s+(ii|iii|iv|vii|viii|ix|xii|xiii|xiv|xv|xvi|xvii|xviii|xix|xx)\\b", "gi");
+    private static readonly JsRe AMP_INITIALISM =
+        JsRegex.Compile("(?<![\\p{L}\\p{M}])([A-Z]{1,5})(?:&amp;|&)([A-Z]{1,5})(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("\\s*&amp;\\s*", "giu");
     private static readonly JsRe AMP = JsRegex.Compile("\\s*&\\s*", "gu");
     private static readonly JsRe TIMES_SIGN = JsRegex.Compile("(\\d)\\s*(×|x)\\s*(?=\\d)", "gu");
@@ -247,6 +286,23 @@ public static class Normalize
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "g");
     private static readonly JsRe ONE_EXACT = JsRegex.Compile("^1(?:\\.0+)?$");
     private static readonly JsRe ONE_INT = JsRegex.Compile("^1$");
+
+    /** A timezone offset spoken as the displacement it is. */
+    private static string OffsetWords(Match m)
+    {
+        var h = Js.Number(m.Groups[2].Value);
+        var min = Js.Number(m.Groups[3].Value);
+        if (h > 14 || min > 59) return m.Value; // outside the range any real offset lives in — not an offset
+        if (h == 0 && min == 0) return " UTC";
+        var word = m.Groups[1].Value == "+" ? "plus" : "minus";
+        var hours = h == 0 ? "" : $" {Js.NumberToString(h)} {(h == 1 ? "hour" : "hours")}";
+        var mins = min == 0 ? "" : $" {Js.NumberToString(min)} {(min == 1 ? "minute" : "minutes")}";
+        return $" {word}{hours}{mins}";
+    }
+
+    /** A letter run as its LETTER NAMES, space-separated. */
+    private static string SpellLetters(string run) =>
+        string.Join(" ", Js.CodePoints(run.ToLowerInvariant()).Select(l => LetterName(l) ?? l));
 
     /** Normalize one English input string. Pure text→text; no IPA. */
     public static string NormalizeEnglish(string input)
@@ -286,6 +342,14 @@ public static class Normalize
         s = Rewrite(s, AM_PM, m => m.Groups[1].Value.ToLowerInvariant() == "a" ? "ay em" : "pee em");
         s = Rewrite(s, DOTTED_INITIALS, m => DOTS.Replace(m.Value, "").ToUpperInvariant());
 
+        // ⚠ The weekday rule runs AFTER the two month rules — its gate reads the names they emit.
+        s = Rewrite(s, MONTH_ABBREV_BEFORE_NUM, m =>
+            MONTH_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        s = Rewrite(s, MONTH_ABBREV_AFTER_DAY, m =>
+            MONTH_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        s = Rewrite(s, WEEKDAY_ABBREV_RE, m =>
+            WEEKDAY_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+
         s = Rewrite(s, ERA, m => m.Value switch
         {
             "BCE" => "bee see ee", "BC" => "bee see", "CE" => "see ee", "AD" => "ay dee", _ => m.Value,
@@ -304,11 +368,19 @@ public static class Normalize
             return $"{ten} to the power of {(neg ? $"negative {digits[1..]}" : digits)}";
         });
 
+        // ⚠ Before the sign rules below, which would otherwise claim the sign off the offset.
+        s = Rewrite(s, TZ_COMPACT, OffsetWords);
+        s = Rewrite(s, TZ_COLON, OffsetWords);
+        s = Rewrite(s, TZ_ZULU, " UTC");
+
         s = Rewrite(s, NEGATIVE, "$1negative $2");
         s = Rewrite(s, PLUS_MINUS, "$1plus or minus $2");
 
         s = Rewrite(s, ISO_DATE, m =>
-            IsoDate(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value), Js.Number(m.Groups[3].Value)) ?? m.Value);
+        {
+            var date = IsoDate(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value), Js.Number(m.Groups[3].Value));
+            return date is null ? m.Value : m.Value.EndsWith("T", StringComparison.Ordinal) ? $"{date} " : date;
+        });
         s = Rewrite(s, US_DATE, m =>
             IsoDate(Js.Number(m.Groups[3].Value), Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
@@ -346,10 +418,13 @@ public static class Normalize
         {
             var h = m.Groups[1].Value;
             var mm = m.Groups[2].Value;
-            var suffix = m.Groups[3].Success ? m.Groups[3].Value : "";
-            if (mm == "00") return suffix.Length > 0 ? $"{h}{suffix}" : $"{h} o'clock";
-            if (mm.StartsWith("0", StringComparison.Ordinal)) return $"{h} oh {Js.NumberToString(Js.Number(mm))}{suffix}";
-            return $"{h} {mm}{suffix}";
+            var ss = m.Groups[3].Success ? m.Groups[3].Value : null;
+            var suffix = m.Groups[4].Success ? m.Groups[4].Value : "";
+            var secs = ss is null || ss == "00" ? "" : $" and {Js.NumberToString(Js.Number(ss))} seconds";
+            var hm = mm == "00" ? (suffix.Length > 0 ? $"{h}{suffix}" : $"{h} o'clock")
+                : mm.StartsWith("0", StringComparison.Ordinal) ? $"{h} oh {Js.NumberToString(Js.Number(mm))}{suffix}"
+                : $"{h} {mm}{suffix}";
+            return $"{hm}{secs}";
         });
 
         s = Rewrite(s, MONTH_DAY, m =>
@@ -444,6 +519,8 @@ public static class Normalize
             return $"{prev} the {n}{suf}";
         });
 
+        // ⚠ Before the generic ampersand arms below, which dissolve the construction this keys on.
+        s = Rewrite(s, AMP_INITIALISM, m => $"{SpellLetters(m.Groups[1].Value)} and {SpellLetters(m.Groups[2].Value)}");
         s = Rewrite(s, AMP_ENTITY, " and ");
         s = Rewrite(s, AMP, " and ");
         s = Rewrite(s, TIMES_SIGN, m =>
