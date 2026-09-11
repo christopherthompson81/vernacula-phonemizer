@@ -19,8 +19,9 @@ time is not enough.
 branch-scoped check passes both branches in the race above and still lets main break.
 
 ⚠ **AND THE GOLDENS ARE MACHINE-LOCAL — REGENERATE AND CHECK THEM ON ONE MACHINE.** For the **74 of 189**
-languages that depend on ONNX (derive the set with `check-goldens.mts --no-ort`; eleven directories own a
-model, the rest inherit it by delegating an embedded foreign run), the output is not bit-reproducible
+languages that depend on ONNX (derive the set with `check-goldens.mts --no-ort`; **twelve** directories own
+a model, and the rest reach it by three other routes — the shared Arabic diacritizer serving nine variety
+codes, the core rider diacritizer, and delegation of an embedded foreign run to an engine that does), the output is not bit-reproducible
 across CPU microarchitectures — int8 inference dispatches to different kernels and a rounding difference
 occasionally flips an argmax. Measured Intel Comet Lake against AMD EPYC: **44 rows of 36,495 (0.12%)**,
 e.g. `Bellingshausen` as `bˈɛlɪŋzʃˌaᶷzən` against `bˈɛlɪŋʃˌaᶷzən`. Consequences worth knowing before you

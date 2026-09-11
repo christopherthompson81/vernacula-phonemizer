@@ -21,15 +21,18 @@ name: CI
 # Running after the merge adds no wait to anyone's loop.
 #
 # TO RUN IT ON A BRANCH ANYWAY: `gh workflow run ci.yml` (or the Actions tab).
-# TO RESTORE FULL COVERAGE BEFORE PUBLISHING: uncomment `pull_request` below and delete this note.
+# TO RESTORE FULL COVERAGE BEFORE PUBLISHING: uncomment `pull_request` below and delete this note. ⚠ That
+# restores the TS/package coverage only — it does not bring `check:goldens` back, which needs the goldens
+# to become machine-portable first (#1287).
 #
 # ⚠ WHAT LOCAL `npm run ci` DOES NOT COVER, and why the rest should go back on before the first publish:
 # these jobs run a FRESH `npm ci` on a clean checkout at a pinned Node 22. A warm local node_modules hides
 # lockfile drift, a dependency that no longer installs, and anything that depends on install order — the
 # optional-dependency typecheck break fixed in #747 was only ever visible in that clean-install path.
-# ⚠ AND THAT CLEAN INSTALL IS EXACTLY WHERE `check:goldens` EARNS ITS KEEP TWICE: `onnxruntime-node` is an
-# OPTIONAL dependency, so `npm ci` does not fail when it does not install — the goldens are async-mode
-# output, and the checker refuses to run rather than report the whole fleet stale.
+# ⚠ AND A FAILED OPTIONAL DEPENDENCY IS STILL CAUGHT HERE, though no longer by `check:goldens`:
+# `onnxruntime-node` is optional so `npm ci` does not fail when it will not install, but
+# `test/enNeural.test.ts` asserts the tagger is defined, so `npm test` reddens. That is the property the
+# removed step was credited with, and it survives the removal.
 on:
   workflow_dispatch:
   # ⚠ `push: [main]` WAS ON FOR ONE COMMIT AND IS OFF AGAIN — see the note above. It is the right trigger

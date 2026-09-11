@@ -180,10 +180,19 @@ ONNX-dependent: 74 of 189 languages
   pnb ps rkt ru sd si skr syl ta te tg th ti tt uk ur wuu yue
 ```
 
-Eleven directories own an ONNX model. The other sixty-three inherit the dependency by delegating an
-embedded foreign run to an engine that does — `ru:1`, `ja:5`, `th:10`, `cmn:6`, `ko:7`, `el:2`. A list of
-"the neural languages" maintained by hand would have missed most of them, and `lo`/`pnb`/`ps` — the three
-that made no sense in the CI output — are exactly that class.
+⚠ **The first draft of this entry said "eleven directories own a model", and that was itself a wrong hand
+count** — in a section whose thesis is that hand counts are wrong. It is **twelve** (afrikaans, arabic,
+bengali, central-kurdish, danish, english, french, hebrew, khmer, norwegian, persian, sindhi), plus
+`data/core/riderDiacritizer.onnx`. And "the rest inherit it by delegating an embedded foreign run" was
+wrong for about ten of them. The sixty-two reach ONNX by at least three routes:
+
+- **the shared Arabic diacritizer** — nine codes beyond `ar` through `ARABIC_VARIETY` (`acm acw afb ajp
+  apc apd ary arz ayl`), none of which owns a model;
+- **the core rider diacritizer** — reached by Punjabi;
+- **delegation** — a non-Latin engine meeting an embedded Latin run hands it to the English neural reader,
+  which is why `ru:1`, `ja:5`, `th:10`, `cmn:6`, `ko:7`, `el:2` appear at one to ten rows each.
+
+`lo`/`pnb`/`ps` — the three that made no sense in the CI output — are in the third class.
 
 ### What follows, and what does not
 

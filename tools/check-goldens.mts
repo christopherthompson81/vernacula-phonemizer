@@ -64,10 +64,16 @@ const asChild = argv.includes("--child");
  * Diagnostic: force every neural path to fall back, so a language whose output MOVES is ONNX-dependent —
  * directly, or through a foreign span it delegates to an engine that is.
  *
- * ⚠ THIS EXISTS BECAUSE THE HAND-WRITTEN ANSWER IS BADLY WRONG. Eleven language directories own an ONNX
- * model; the derived set is SEVENTY-FOUR of 189, because a non-Latin engine that meets an embedded Latin
- * run delegates it to the English neural reader. `ru`, `ja`, `th`, `cmn`, `ko`, `el`, `hy`, `ka` are all in
- * it, at one to ten rows each. Any list of "the neural languages" maintained by hand is a silent hole.
+ * ⚠ THIS EXISTS BECAUSE THE HAND-WRITTEN ANSWER IS BADLY WRONG — and the first draft of this very comment
+ * proved it by getting the count wrong. TWELVE language directories own an ONNX model (afrikaans, arabic,
+ * bengali, central-kurdish, danish, english, french, hebrew, khmer, norwegian, persian, sindhi) plus
+ * `data/core/riderDiacritizer.onnx`; the derived set is SEVENTY-FOUR of 189, by at least three routes:
+ *   · the shared Arabic diacritizer, which serves nine codes beyond `ar` through `ARABIC_VARIETY`
+ *     (acm acw afb ajp apc apd ary arz ayl) without any of them owning a model;
+ *   · the core rider diacritizer, reached by Punjabi;
+ *   · and delegation — a non-Latin engine that meets an embedded Latin run hands it to the English neural
+ *     reader, which is why `ru`, `ja`, `th`, `cmn`, `ko`, `el` appear at one to ten rows each.
+ * Any list of "the neural languages" maintained by hand is a silent hole.
  */
 const noOrt = argv.includes("--no-ort");
 
@@ -160,7 +166,12 @@ function checkIsolated(code: string): Result {
     // ⚠ THE CHILD SPEAKS JSON. Parsing the human report undercounted every failing language to a single
     // stale row and dropped the per-row detail entirely, so the one mode whose purpose is per-row evidence
     // showed none of it.
-    const out = execFileSync("npx", ["tsx", fileURLToPath(import.meta.url), code, "--child"], {
+    // ⚠ THE DIAGNOSTIC FLAGS MUST BE FORWARDED. `setOrtLoader` and the memo clear act on THIS heap only, so
+    // a child spawned without them runs a fully-enabled engine — and `--isolate --no-ort` then reports
+    // "0 stale", i.e. "nothing depends on ONNX", which is exactly the silently-wrong answer `--no-ort`
+    // exists to prevent. It did that, quietly and green, until review caught it.
+    const flags = [...(noOrt ? ["--no-ort"] : []), ...(noClear ? ["--no-clear"] : [])];
+    const out = execFileSync("npx", ["tsx", fileURLToPath(import.meta.url), code, "--child", ...flags], {
         encoding: "utf8", cwd: ROOT, maxBuffer: 64 * 1024 * 1024,
     });
     return JSON.parse(out) as Result;
@@ -196,6 +207,23 @@ if (only.length === 0) {
     const served = new Set([...registry.matchAll(/^\s*case "([^"]+)":/gm)].map((m) => m[1]!));
     const ungolden = [...served].filter((c) => !available.has(c)).sort();
     if (ungolden.length > 0) console.log(`note: ${ungolden.length} registry codes have no golden: ${ungolden.join(" ")}`);
+}
+
+// ⚠ A DIAGNOSTIC RUN MUST NOT PRINT THE REGENERATE PROMPT. Its mismatches are synthetic by construction —
+// `--no-ort` degrades the engine on purpose and skips the liveness guard — and the single largest hazard
+// this file documents is someone regenerating goldens from a degraded engine. Printing "decide which is
+// wrong before regenerating" at the end of a run that manufactured the mismatches invites precisely that,
+// to a reader who arrives at the tail of a 189-language log minutes later.
+if (noOrt || noClear) {
+    const flag = noOrt ? "--no-ort" : "--no-clear";
+    console.log(
+        staleLangs === 0
+            ? `${flag}: no language moved — nothing here depends on what this flag disables`
+            : `${flag}: ${staleLangs} of ${codes.length} languages moved, ${staleRows} rows.\n`
+              + `  These are NOT stale goldens — this run disabled part of the engine on purpose.\n`
+              + `  ${noOrt ? "A language listed above is ONNX-dependent, directly or by delegation." : ""}`,
+    );
+    process.exit(0);
 }
 
 console.log(
