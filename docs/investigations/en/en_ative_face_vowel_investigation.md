@@ -90,8 +90,49 @@ A sentence of the reported shape (attributive `-ative` adjective before a noun p
 
 `npm run typecheck` clean; `npm test` 294 files, 5799 passed / 5 skipped.
 
-### Left open
+### Left open — CLOSED, see Run N+1 below
 
 `associative əsˈoᶷʃət̬ɪv` has no /i/ glide — GenAm is /əˈsoʊʃiətɪv/ or /əˈsoʊsiˌeɪtɪv/. The CMUdict entry is
 missing a whole segment, which is a different defect from the stray stress fixed here, and is out of scope for
-this run. Recorded so it is not lost.
+this run. Recorded so it is not lost. **Filed as #1278 and fixed below.**
+
+## Run 6 — 2026-09-11 13:19 — `associative` (#1278): which glide, and on whose evidence
+
+The issue named `AH0 S OW1 S IY0 AH0 T IH0 V` as "the obvious candidate" but asked for it to be checked
+rather than assumed, because two readings were on the table — restore the family's plain `S IY0`, or keep
+the palatalisation and add the glide (`SH IY0`, the shape `appreciative` has).
+
+**The referee cannot adjudicate.** No row for `associative` in either en-US or en-GB wikipron, and none for
+`appreciative`, `initiative` or `associativity` either — the en-US set is 4,558 words and does not reach them.
+
+⚠ **AND THE FAMILY ARGUMENT IS WEAKER THAN IT LOOKS**, which is why this needed checking. Merriam-Webster
+lists `\ə-ˈsō-shē-ˌā-tiv, -sē-, -shə-tiv\` — the third variant is exactly what the lexicon already had,
+so "a row that contradicts its own family with no variant reading to account for it" (the argument that
+carried #1276) does **not** hold here. A variant reading does account for it. The question is which reading
+to prefer, not whether the row is indefensible.
+
+**espeak-ng settles it**, and it is the right instrument because it is what the consuming app is aligned to
+(cited as the reference in #1268):
+
+```
+associative    ɐsˈoʊsiətˌɪv      ← S + glide
+associate      ɐsˈoʊsɪˌeɪt
+association    ɐsˌoʊsɪˈeɪʃən
+appreciative   ɐpɹˈiːʃiətˌɪv     ← SH + glide (so the SH shape is real, just not here)
+```
+
+So the plain `S IY0` candidate is confirmed on an independent source AND matches the family; the `SH IY0`
+alternative belongs to `appreciative`, not to this word. Applied to `g2p-dict.tsv` and regenerated:
+
+```
+associative   AH0 S OW1 SH AH0 T IH0 V  →  AH0 S OW1 S IY0 AH0 T IH0 V
+              əsˈoᶷʃət̬ɪv                →  əsˈoᶷsiʲət̬ɪv
+round-trip: 1 row changed, 117,479 sourced rows otherwise byte-identical
+```
+
+Family after: `associate əsˈoᶷsiʲət` · `associates əsˈoᶷsiʲəts` · `association əsˌoᶷsiʲˈeᶦʃən` ·
+`associative əsˈoᶷsiʲət̬ɪv`. No `associatively`, `associativity` or `dissociative` row exists to follow.
+
+⚠ **NOTICED, NOT FIXED:** `initiative IH2 N IH1 SH AH0 T IH0 V` has the same missing glide (espeak:
+`ɪnˈɪʃiətˌɪv`), but Merriam-Webster gives `\i-ˈni-shə-tiv\` as the primary there, so the glideless reading
+is the dominant one for that word and the family argument does not transfer. Left alone deliberately.
