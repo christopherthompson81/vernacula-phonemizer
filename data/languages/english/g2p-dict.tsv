@@ -5424,7 +5424,7 @@ associates	AH0 S OW1 S IY0 AH0 T S
 associating	AH0 S OW1 S IY0 EY2 T IH0 NG
 association	AH0 S OW2 S IY0 EY1 SH AH0 N
 associations	AH0 S OW2 S IY0 EY1 SH AH0 N Z
-associative	AH0 S OW1 SH AH0 T IH2 V
+associative	AH0 S OW1 SH AH0 T IH0 V
 associes	AE1 S AH0 S IY0 Z
 assort	AH0 S AO1 R T
 assorted	AH0 S AO1 R T IH0 D
@@ -20156,7 +20156,7 @@ collaborating	K AH0 L AE1 B ER0 EY2 T IH0 NG
 collaboration	K AH0 L AE2 B ER0 EY1 SH AH0 N
 collaborationist	K AH0 L AE2 B ER0 EY1 SH AH0 N IH0 S T
 collaborations	K AA2 L AH0 B ER0 EY1 SH AH0 N Z
-collaborative	K AH0 L AE1 B ER0 EY2 T IH0 V
+collaborative	K AH0 L AE1 B ER0 AH0 T IH0 V
 collaborator	K AH0 L AE1 B ER0 EY2 T ER0
 collaborators	K AH0 L AE1 B ER0 EY2 T ER0 Z
 collado	K OW0 L AA1 D OW0
@@ -21931,7 +21931,7 @@ cooperates	K OW0 AA1 P ER0 EY2 T S
 cooperating	K OW0 AA1 P ER0 EY2 T IH0 NG
 cooperation	K OW0 AA2 P ER0 EY1 SH AH0 N
 cooperations	K OW0 AA2 P ER0 EY1 SH AH0 N Z
-cooperative	K OW0 AA1 P ER0 EY2 T IH0 V
+cooperative	K OW0 AA1 P ER0 AH0 T IH0 V
 cooperatively	K OW0 AA1 P R AH0 T IH0 V L IY0
 cooperatives	K OW0 AA1 P R AH0 T IH0 V Z
 cooperider	K UW1 P ER0 AY0 D ER0
@@ -22347,7 +22347,7 @@ corroborated	K ER0 AA1 B ER0 EY2 T IH0 D
 corroborates	K ER0 AO1 B ER0 EY2 T S
 corroborating	K ER0 AA1 B ER0 EY2 T IH0 NG
 corroboration	K ER0 AO2 B ER0 EY1 SH AH0 N
-corroborative	K ER0 AA1 B ER0 AH0 T IH2 V
+corroborative	K ER0 AA1 B ER0 AH0 T IH0 V
 corrode	K ER0 OW1 D
 corroded	K ER0 OW1 D IH0 D
 corrodes	K ER0 OW1 D Z
@@ -26160,7 +26160,7 @@ deliberates	D IH0 L IH1 B ER0 EY2 T S
 deliberating	D IH0 L IH1 B ER0 EY2 T IH0 NG
 deliberation	D IH0 L IH2 B ER0 EY1 SH AH0 N
 deliberations	D IH0 L IH2 B ER0 EY1 SH AH0 N Z
-deliberative	D IH0 L IH1 B ER0 EY2 T IH0 V
+deliberative	D IH0 L IH1 B ER0 AH0 T IH0 V
 delicacies	D EH1 L IH0 K AH0 S IY0 Z
 delicacy	D EH1 L AH0 K AH0 S IY0
 delicate	D EH1 L AH0 K AH0 T
@@ -27280,7 +27280,7 @@ determinants	D IH0 T ER1 M AH0 N AH0 N T S
 determinate	D IH0 T ER1 M AH0 N EY2 T
 determination	D IH0 T ER2 M AH0 N EY1 SH AH0 N
 determinations	D IH0 T ER2 M IH0 N EY1 SH AH0 N Z
-determinative	D IH0 T ER1 M IH0 N AH0 T IH2 V
+determinative	D IH0 T ER1 M IH0 N AH0 T IH0 V
 determine	D AH0 T ER1 M AH0 N
 determined	D IH0 T ER1 M AH0 N D
 determinedly	D AH0 T ER1 M AH0 N AH0 D L IY0
@@ -107164,7 +107164,7 @@ transform	T R AE0 N S F AO1 R M
 transformation	T R AE2 N S F ER0 M EY1 SH AH0 N
 transformational	T R AE2 N S F ER0 M EY1 SH AH0 N AH0 L
 transformations	T R AE2 N S F ER0 M EY1 SH AH0 N Z
-transformative	T R AE2 N S F AO1 R M AA0 T IH2 V
+transformative	T R AE2 N S F AO1 R M AH0 T IH0 V
 transformed	T R AE0 N S F AO1 R M D
 transformer	T R AE0 N S F AO1 R M ER0
 transformers	T R AE0 N S F AO1 R M ER0 Z
