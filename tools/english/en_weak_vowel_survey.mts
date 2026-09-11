@@ -19,6 +19,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { phonemize } from "../../src/index.ts";
+import { phonemizeWordRules as enGbRules } from "../../src/languages/english-gb/english-gb.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -36,18 +37,27 @@ const LEXICON = join(ROOT, "data", "languages", "english", "accent-lexicon.tsv")
 const VOWEL = /[ɪiɨɘəɜɝɚeɛæaɑɒɔoʊuʌyø]/u;
 
 /**
- * ⚠ THE REFEREE WRITES A DIPHTHONG AS TWO PHONES AND WE WRITE IT AS ONE NUCLEUS — `e ɪ` against our `eᶦ` —
- * so these are merged before anything is counted, or the two sides disagree about how many nuclei a word
- * has and every FACE/GOAT/PRICE/MOUTH/CHOICE word is lost.
+ * ⚠ THE TWO SIDES SPELL A DIPHTHONG DIFFERENTLY, so both are normalised to ONE token before anything is
+ * counted. We write a superscript offglide (`eᶦ`, and for RP `əᶷ`); the US referee writes two
+ * space-separated phones (`e ɪ`); the UK referee writes two characters (`əʊ`). Left alone, our one nucleus
+ * faces the referee's two and every word carrying one is lost.
  *
- * ⚠ AND LOSING THEM WAS NOT THE WORST OF IT. The first version of this tool skipped on a nucleus-count
- * mismatch — 626 of 756 skipped words went for this reason alone — but 34 more SLIPPED THROUGH, because a
- * second asymmetry (the referee's non-syllabic `n` where we write `ən`) cancelled the offglide's extra
- * nucleus and restored the count while leaving every slot after the diphthong shifted by one.
- * `disqualification` scored our `-tion` schwa against the referee's FACE offglide. Contaminated rows in the
- * one table meant to keep the folded axis honest is the worst failure this tool could have had.
+ * ⚠ AND THE MERGE MUST BE SYMMETRIC. The first version merged only the REFEREE's pairs, which fixed the
+ * count for `en` — whose GOAT onset is `o`, not a surveyed symbol — while making `en-GB` WORSE: RP GOAT is
+ * `əᶷ`, so every recovered slot compared our bare `ə` against the referee's merged `əʊ` and could never
+ * match, dragging the `ə` bucket from 78.4% to 70.6% on 22,216 slots. A one-sided fold is not a fix, it is
+ * a different bug with better coverage.
+ *
+ * ⚠ AND THE SET WAS US-SHAPED. It omitted `əʊ` (RP GOAT) and `ʌɪ` (the narrow-RP PRICE variant the UK
+ * referee writes), which silently dropped 2,369 en-GB words and let 67 through MISALIGNED, because the
+ * referee's syllabic `n̩`/`l̩` against our `ən`/`əl` cancelled the extra nucleus. `broken`, `boastful`,
+ * `cobblestone` scored our `-en`/`-ful` schwa against the referee's GOAT offglide — in the survey that
+ * exists to keep this fold honest, on the variety that carries its evidence.
  */
-const REF_DIPHTHONG = new Set(["eɪ", "oʊ", "aɪ", "aʊ", "ɔɪ"]);
+const DIPHTHONG = new Set(["eɪ", "oʊ", "aɪ", "aʊ", "ɔɪ", "əʊ", "ʌɪ"]);
+
+/** Our superscript offglides, to the referee's plain spelling, so both sides tokenize identically. */
+const OFFGLIDE: readonly (readonly [RegExp, string])[] = [[/ᶦ/gu, "ɪ"], [/ᶷ/gu, "ʊ"]];
 
 const referee = new Map<string, string[]>();
 for (const line of readFileSync(REFEREE, "utf8").split("\n")) {
@@ -75,22 +85,32 @@ for (const line of readFileSync(LEXICON, "utf8").split("\n")) {
     if (!line || line.startsWith("#")) continue;
     const word = line.split("\t")[0];
     if (!word || !referee.has(word)) continue;
-    ours.set(word, phonemize(word, VARIETY));
+    // ⚠ en-GB TAKES THE RULES PATH, NOT THE SHIPPED ONE. `phonemizeWord` applies BATH/CLOTH/PALM word
+    // lists MINED FROM THIS REFEREE, so the shipped reading is circular against it — which is exactly why
+    // the eval scores `phonemizeWordRules` for this variety. An auditing instrument on the circular path
+    // would be a worse version of the problem it exists to check.
+    ours.set(word, VARIETY === "en-GB" ? enGbRules(word) : phonemize(word, VARIETY));
 }
 
-const ourNuclei = (ipa: string): string[] => [...ipa].filter((c) => VOWEL.test(c) || c === "ᵻ");
-
-function refNuclei(phones: string[]): string[] {
+/** Nuclei of a phone list, with the diphthong pairs merged — THE SAME function for both sides. */
+function nuclei(phones: string[]): string[] {
     const bare = phones.map((p) => p.replace(/[ːˑ]/gu, ""));
     const out: string[] = [];
     for (let i = 0; i < bare.length; i++) {
         const p = bare[i]!;
-        if (!VOWEL.test(p)) continue;
+        if (!VOWEL.test(p) && p !== "ᵻ") continue;
         const next = bare[i + 1];
-        if (next !== undefined && REF_DIPHTHONG.has(p + next)) { out.push(p + next); i++; continue; }
+        if (next !== undefined && DIPHTHONG.has(p + next)) { out.push(p + next); i++; continue; }
         out.push(p);
     }
     return out;
+}
+
+/** Our IPA as a phone list in the referee's spelling: offglides plain, then one character per phone. */
+function ourPhones(ipa: string): string[] {
+    let s2 = ipa;
+    for (const [re, rep] of OFFGLIDE) s2 = s2.replace(re, rep);
+    return [...s2];
 }
 
 /** For every slot where WE wrote `symbol`, what did the referee write there?
@@ -102,7 +122,7 @@ function survey(symbol: string): { slots: number; counts: Map<string, number>; w
     for (const [word, ipa] of ours) {
         const ref = referee.get(word);
         if (ref === undefined) continue;
-        const mine = ourNuclei(ipa), theirs = refNuclei(ref);
+        const mine = nuclei(ourPhones(ipa)), theirs = nuclei(ref);
         // ⚠ A COUNT MISMATCH IS SKIPPED, NOT GUESSED AT. What remains after the diphthong merge is a real
         // structural disagreement (the referee's non-syllabic `n` for our `ən`, or a different
         // syllabification), and aligning those by position would manufacture the contamination above.

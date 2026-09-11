@@ -132,3 +132,52 @@ every bucket reported zero. The `slots === 0` guard — added in this same round
 `⚠ NO SLOTS` instead of a row of `NaN%`. Without it the table would have rendered as plausible-looking
 data. That is the argument for loud failure in a monitoring tool, made by the tool on itself within an
 hour of being written.
+
+## Run 4 — 2026-09-11 18:00 — review again: the fix to the instrument was itself US-shaped and one-sided
+
+Six findings. The fold is still untouched; the survey needed a second pass, and the two headline findings
+compound in a way that matters:
+
+**`REF_DIPHTHONG` was US-shaped.** It merged `eɪ oʊ aɪ aʊ ɔɪ` — the GenAm set — and omitted `əʊ`, which is
+RP GOAT and therefore one of the three symbols the en-GB survey BUCKETS ON. 2,369 en-GB words were dropped
+and 67 passed while shifted by one (the referee's syllabic `n̩`/`l̩` against our `ən`/`əl` cancelling the
+extra nucleus): `broken`, `boastful`, `cobblestone` scored a `-en`/`-ful` schwa against the referee's GOAT
+offglide. In the survey that exists to keep this fold honest, on the variety that carries its evidence.
+
+**And the merge was ONE-SIDED**, which is why adding `əʊ` alone would have made things worse rather than
+better. Run 3 merged only the REFEREE's pairs; our `əᶷ` stayed a bare `ə`, so every recovered GOAT slot
+compared `ə` against the merged token `əʊ` and could never match — the `ə` bucket would have fallen from
+78.4% to 70.6% on 22,216 slots. A one-sided fold is not a fix; it is a different bug with better coverage.
+
+Both sides are now normalised the same way — our superscript offglides mapped to the referee's plain
+spelling, then ONE `nuclei()` applied to both:
+
+```
+              aligned   skipped      ᵻ slots
+en   Run 3      1,908       157          118
+en   Run 4      1,929       136          118
+en-GB Run 3    27,953     4,617        1,925
+en-GB Run 4    30,248     2,322        1,988
+```
+
+```
+en-GB      slots     ref ɪ   ref ə          en          slots     ref ɪ   ref ə
+ᵻ           1,988     81.2%   13.3%         ᵻ             118     72.9%   19.5%
+ɪ           9,841     93.6%    2.4%         ɪ             659     91.2%    4.2%
+ə          19,122     10.7%   80.8%         ə             963      9.0%   82.5%
+```
+
+**The survey was also on the CIRCULAR path for en-GB.** `phonemize(word, "en-GB")` goes through
+`phonemizeWord`, which applies BATH/CLOTH/PALM word lists MINED FROM THIS REFEREE — the exact reason the
+eval scores `phonemizeWordRules` for this variety. An auditing instrument on the circular path is a worse
+version of the problem it was built to check. Now on the rules path.
+
+**And Run 3's own numbers had already gone stale in three places** — `en.jsonc`, the floor comment, and the
+published en-GB row in `docs/language-maturity.md` (still `39.1% (.38)`, a floor that no longer exists).
+The en-GB note was refreshed in Run 3 and `en`'s was not, so the fold's justification was citing figures
+that Run 3 itself had invalidated.
+
+⚠ The recurring shape across Runs 3 and 4 is worth naming: **every error was in the instrument, not the
+change.** The fold has survived three reviews untouched. What kept failing was the thing measuring it, and
+each failure was of the same kind — a correction applied to one side, one variety, or one file, and not
+carried to its mirror.

@@ -15,7 +15,7 @@
         {
             "pattern": "ᵻ",
             "replace": "ɪ",
-            "note": "the weak vowel ᵻ has NO counterpart in the referee's inventory, so leaving it unfolded maps it to ALWAYS-WRONG — a uniform penalty on a documented house convention across 5,580 lexicon rows. Measured per slot against this referee: our ᵻ draws ɪ 71.9% / ə 20.2%, our full ɪ draws ɪ 93.1% / ə 3.9%, our ə draws ɪ 10.1% / ə 82.3% — so ɪ is the best-supported single mapping by a wide margin. ⚠ IT IS NOT FREE: the referee PARTIALLY resolves ᵻ (our ᵻ and our full ɪ draw different ɪ-rates, 72% vs 93%), so this fold gives up catching an ᵻ written where a full ɪ belongs. That axis is kept visible outside the headline by tools/english/en_weak_vowel_survey.mts — see #1282."
+            "note": "the weak vowel ᵻ has NO counterpart in the referee's inventory, so leaving it unfolded maps it to ALWAYS-WRONG — a uniform penalty on a documented house convention across 5,580 lexicon rows. Measured per slot against this referee: our ᵻ draws ɪ 72.9% / ə 19.5%, our full ɪ draws ɪ 91.2% / ə 4.2%, our ə draws ɪ 9.0% / ə 82.5% (118 ᵻ slots over 1,929 aligned words) — so ɪ is the best-supported single mapping by a wide margin. ⚠ IT IS NOT FREE: the referee PARTIALLY resolves ᵻ (our ᵻ and our full ɪ draw different ɪ-rates, 72% vs 93%), so this fold gives up catching an ᵻ written where a full ɪ belongs. That axis is kept visible outside the headline by tools/english/en_weak_vowel_survey.mts — see #1282."
         },
         {
             "pattern": "eᶦ",
