@@ -30,6 +30,10 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # ⚠ Goldens are a GENERATED artifact committed to the repo, so they can go stale without any test
+      # failing — including through a merge race no branch-scoped check can see. Pure TS, no corpus, no
+      # dotnet. See csharp/PORTING.md and #1283.
+      - run: npm run check:goldens
 
   # What `npm publish` would actually ship. Guards the fence in package.json `files`: without it npm falls
   # back to .gitignore and packs the whole repo, and a `files` allowlist silently overrides .gitignore.

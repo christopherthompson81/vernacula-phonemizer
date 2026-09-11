@@ -6,6 +6,22 @@ Every ported file follows these rules, so 683 files come out as one dialect inst
 (`/mnt/data/omnivoice_ipa/work/phonemized_vernacula/byid/<lang>.tsv`, 102 languages), plus the
 4,928-test suite whose expectations are portable goldens. "Looks right" is not a state.
 
+⚠ **A CHANGE TO `data/` OR TO AN ENGINE OBSOLETES `csharp/goldens/`, AND REGENERATING THEM IS PART OF
+THAT CHANGE.** Both engines read the same `data/` tree, so a data edit moves C# and TypeScript together
+and leaves only the committed snapshot behind — the gate then reports a divergence that does not exist.
+This has broken the gate twice (#1283): once because a change did not regenerate them at all, and once
+because two branches raced — one edited the inputs, the other regenerated the goldens from a tree that
+predated that edit, and git merged both cleanly because the conflict is SEMANTIC. Being current at branch
+time is not enough.
+
+⚠ **SO CHECK FRESHNESS ON `main` AFTER A MERGE, not only on the branch.** `npm run check:goldens` (in
+`npm run ci`) re-renders every golden's own recorded text and compares — no corpus needed, ~60s. A
+branch-scoped check passes both branches in the race above and still lets main break.
+
+⚠ **AND A MISMATCH IS NOT AUTOMATICALLY "REGENERATE".** It says the engine and the artifact disagree;
+which is wrong is a judgement call. `beyond` survived weeks of green gates because the artifact kept
+being re-recorded around it.
+
 ## Structure
 - Mirror the TS tree 1:1: `src/languages/thai/syllabifier.ts` → `csharp/Vernacula.Phonemizer/Languages/Thai/Syllabifier.cs`.
   One TS module = one C# file; keep names. ⚠ DO NOT keep the comment text — see below.

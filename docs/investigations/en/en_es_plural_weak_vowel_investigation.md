@@ -179,7 +179,7 @@ TS async warming the English neural OOV cache that the sync foreign reader hits,
 regeneration harness did not — so an earlier language's neural prewarm reached `sat`, the documented
 failure reproduced verbatim. (Run 8 shows the clear alone does not even close it fully.)
 
-## Run 8 — 2026-09-11 13:41 — `clearForeignOov()` alone was NOT enough; one process per language is
+## Run 8 — 2026-09-11 13:41 — one process per language ⚠ (CONCLUSION LATER DISPROVED, see below)
 
 Adding the per-language clear to the harness and re-running all 16 in one process still produced the
 contaminated `sat` row. Rendering `sat` BY ITSELF settles it:
@@ -192,6 +192,14 @@ sat rendered after 10 other langs   → t  . jˈuːd̬əˌɪ …    the contamin
 So the global foreign-OOV memo is not the only state that survives across languages — the English engine's
 own neural cache does too, and `clearForeignOov()` does not reach it. ⚠ A BATCH REGENERATION MUST THEREFORE
 GIVE EACH LANGUAGE ITS OWN PROCESS, not merely call the clear between them.
+
+> ⚠ **THE PARAGRAPH ABOVE IS WRONG AND IS KEPT ONLY SO THE CORRECTION HAS SOMETHING TO POINT AT.** It was
+> inferred from file state that I had already noted was confusing, not from an experiment. Measured properly
+> in #1283 over all 36,495 golden rows: single process WITH the clear → 0 stale; one child process per
+> language → 0 stale; single process WITHOUT the clear → 38 stale in 6 languages. **The clear is necessary
+> AND sufficient**; process isolation buys nothing over it. The `sat` contamination was real and its cause
+> (the global memo) was right — only the remedy was over-drawn. See
+> `docs/investigations/csharp-port/golden_freshness_investigation.md`, Run 2.
 
 Re-running one language per process:
 
