@@ -244,9 +244,16 @@ public static class EnglishG2pFactory
         /// fixed in the dict — but on an OPEN class: `misfiring`, `umpiring`, `attiring` are all unlisted.
         ///
         /// ⚠ THE CONDITION IS THE STEM'S SPELLING, NOT THE PRECEDING VOWEL. Over every attested
-        /// stem/derivative pair in the dict, a `-ire` spelling scores 15:0 once the `ER`-initial allomorph
-        /// of `acquire → acquirer` is excluded; a plain ER-before-vowel rule would be WRONG, since
-        /// `water` + `ing` is W AO1 T ER0 IH0 NG and 429 such pairs keep the `ER`.
+        /// stem/derivative pair in the dict a `-ire` spelling scores 15:2; a plain ER-before-vowel rule
+        /// would be WRONG, since `water` + `ing` is W AO1 T ER0 IH0 NG and 429 such pairs keep the `ER`.
+        ///
+        /// ⚠ AN `ER`-INITIAL ALLOMORPH IS NOT EXEMPT, AND THE EVIDENCE IS THIN. Strictly, `enquirer`
+        /// resyllabifies where `acquirer`/`acquirers` do not — 1 against 2, a MINORITY. It is dropped on
+        /// two grounds independent of that tally: the dict's surface shape for `-irer` is `AY1 R ER0`
+        /// (`enquirer`, `inquirer`, `admirer`) against a DOUBLED rhotic nucleus in `acquirer` (3:2), and
+        /// `acquirer`/`acquirers` are dict-resident so the OOV path never reaches them. Cost: 3 dict rows
+        /// move, a held-out net of −1, all on words production answers from the dict.</summary>
+        /// <remarks>See docs/investigations/en/en_oov_curation_gap_investigation.md (#1295).
         /// See docs/investigations/en/en_oov_curation_gap_investigation.md (#1295).
         /// </summary>
         private List<string> JoinMorph(string stem, List<string> sp, List<string> suffix)
@@ -256,8 +263,7 @@ public static class EnglishG2pFactory
                 || !stem.EndsWith("ire", StringComparison.Ordinal)
                 || DropStress(last) != "ER"
                 || suffix.Count == 0
-                || !VOWEL.Contains(DropStress(suffix[0]))
-                || DropStress(suffix[0]) == "ER")
+                || !VOWEL.Contains(DropStress(suffix[0])))
             {
                 return sp.Concat(suffix).ToList();
             }

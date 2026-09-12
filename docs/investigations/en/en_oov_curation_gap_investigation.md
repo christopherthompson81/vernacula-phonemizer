@@ -193,3 +193,69 @@ Byte-identical on all eight, negatives included. `dotnet test` 6,504 pass; `pari
 600/600 byte-identical; `check:goldens` is 0 stale, since none of the nine affected dict words appears in a
 golden row — the same blind spot #1289 recorded for this class, and the reason the dict-wide diff in Run 4
 had to be built by hand.
+
+## Run 7 — 2026-09-11 20:4x — the review kills the `ER`-allomorph carve-out
+
+`/code-review high` on PR #1296 returned five findings. Two changed the code, and one of them undid a claim
+made in Run 3.
+
+**The `15:0` in Run 3 was wrong, and the carve-out it justified was wrong.** Run 3 excluded an `ER`-initial
+allomorph "because both remaining exceptions are `acquire → acquirer`", implying nothing attested
+resyllabifies there. The dict says otherwise:
+
+```
+enquire  IH0 N K W AY1 ER0   →  enquirer  IH0 N K W AY1 R ER0     resyllabifies
+acquire  AH0 K W AY1 ER0     →  acquirer  AH0 K W AY1 ER0 ER0     does not
+                                acquirers AH0 K W AY1 ER0 ER0 Z   does not
+```
+
+So the strict tally for that environment is **1 against 2 — a minority for the rule, not 15:0.** Stated
+plainly because the error ran in the direction of the conclusion, which is the third time today.
+
+The carve-out is dropped anyway, on grounds that do not depend on that tally:
+
+1. The dict's surface shape for `-irer` is `AY1 R ER0` in `enquirer`, `inquirer` and `admirer` against
+   `AY1 ER0 ER0` in `acquirer`/`acquirers` — **3:2** — and the minority spelling is a DOUBLED rhotic
+   nucleus, which every unlisted word was inheriting:
+
+```
+   with the carve-out            without
+   conspirer   kənspˈaᶦɚɚ        kənspˈaᶦɹɚ      ← matches enquirer/inquirer/admirer
+   umpirer     ˈʌmpaᶦɚɚ          ˈʌmpaᶦɹɚ
+   conspirers  kənspˈaᶦɚɚz       kənspˈaᶦɹɚz
+```
+
+2. `acquirer`/`acquirers` are **in the dict**, so the OOV path never reaches them. The carve-out protected
+   two rows the dict already protects, and charged the open class for it.
+
+**The cost, measured and not rounded off:** dropping it moves 3 dict rows — `enquirer` right,
+`acquirer`/`acquirers` wrong — a held-out net of **−1**, on words production always answers from the dict.
+No corpus row covers `-irer` (0 utterances for `-quirer`/`-mirer`/`-pirer`), so this rests on the dict alone
+and is the clause to re-open if a recording ever lands.
+
+## Run 8 — 2026-09-11 20:5x — three instruments that were not measuring what they claimed
+
+The other three findings were all of one kind: a check that could not fail.
+
+- **The negative control was inert.** `expect(phonemize("watering", "en")).toBe(…)` was the only guard
+  against broadening the rule to "any `ER` before a vowel" — and `watering` is in BOTH the lexicon and the
+  dict, so `knownWord` answers it and the morph join is never reached. It passed identically with the
+  `-ire` condition deleted. Replaced with `rechartering`, `decluttering`, `unencumbering`, which are in
+  neither file and do exercise the join.
+- **The tool's own `morphDecode` was not moved with the rule.** `en_g2p_ngram.ts` kept
+  `return [...sp, ...allo(sp)]`, so its `--morph` word accuracy — quoted as the engine's — was scoring a
+  join the engine no longer uses. That makes Run 4's "identical before and after" unfalsifiable rather than
+  reassuring: computed through that `morphDecode`, the number could not have moved whatever the rule did.
+  Now shares the join and the manifest's vowel set.
+- **A bare `--emit` writes to the wrong directory entirely.** `dir` defaults to
+  `<cwd>/src/languages/english` — the pre-908fface location — so it never touches
+  `data/languages/english/`; it deposits a ~3MB model and a dict where the engine never reads them and the
+  package fence would ship them. The Run 5 warning said `--emit` "OVERWRITES g2p-dict.tsv", which pointed
+  the next reader away from the real hazard. Corrected, and the stale default named. Same class as
+  `en_baseline.mts`; neither path is fixed here.
+
+And one waiver had the wrong reason: `was` is **not** a pure-n-gram row. It decodes through `morphDecode`
+on the two-letter dict stem `wa` (`W AA1`) plus an `-s` allomorph, so a stem-side edit or a floor on stem
+length would close it — no retraining needed. Run 1's own table prints `was … M`; the waiver comment
+contradicted it and would have sent the next maintainer at the expensive fix for the cheap problem. Left
+open deliberately (raising the minimum stem length reaches far past this word), but now for its real reason.

@@ -7,11 +7,18 @@
  *   4. Decode a new word with a beam over graphemic segmentations, scoring joint-token n-grams.
  * Predicts stress-bearing ARPABET → arpabetToIpa → canonical. Word-acc vs CMUdict = OOV canonical quality.
  *   npx tsx tools/english/en_g2p_ngram.ts [--order N] [--beam K] [--iters M] [--phonemic] [--errors]
- * ⚠ `--emit` OVERWRITES g2p-dict.tsv FROM $CMUDICT AND WOULD REVERT EVERY HAND CORRECTION. ~20 rows have
- * been curated since the import (`was`, the `-ative` family, #1278, #1279, #1280, #1289); they live in
- * data/languages/english/g2p-curated.tsv, and RE-APPLYING THEM IS PART OF RE-EMITTING. test/en-curation-gap
- * .test.ts fails loudly if the shipped dict has lost them. The model itself is trained on upstream CMUdict
- * either way, so three of those rows stay unreachable from the OOV path by design — see #1295.
+ * ⚠ `--emit` WRITES A DICT FROM $CMUDICT THAT CARRIES NONE OF THE ~20 HAND CORRECTIONS. They live in
+ * data/languages/english/g2p-curated.tsv (`was`, the `-ative` family, #1278, #1279, #1280, #1289), and
+ * RE-APPLYING THEM IS PART OF RE-EMITTING; test/en-curation-gap.test.ts fails loudly if the shipped dict
+ * has lost them. The model itself trains on upstream CMUdict either way, so three of those rows stay
+ * unreachable from the OOV path by design — see #1295.
+ *
+ * ⚠ AND WITH NO DIRECTORY ARGUMENT IT WRITES TO THE WRONG PLACE ENTIRELY: `dir` defaults to
+ * `<cwd>/src/languages/english`, the pre-908fface location, which now holds only .ts files. A bare `--emit`
+ * therefore does NOT update data/languages/english/ — it deposits a ~3MB g2p-model.json, a g2p-dict.tsv and
+ * a g2p-common.txt where the engine never reads them and where the package fence would ship them with the
+ * engine. PASS THE DATA DIRECTORY EXPLICITLY. (Same stale-path class as en_baseline.mts; neither is fixed
+ * here.)
  *   The SHIPPED model (data/languages/english/g2p-model.json) is `--comp --morph --emit`, with CMUDICT the
  *   public-domain cmudict.dict and EN_FREQ the shipped g2p-common.txt; that reproduces it byte for byte
  *   (verified #1260). ⚠ --emit writes the model BEFORE the held-out score below is computed, and prunes with
@@ -26,6 +33,9 @@ import { MANIFEST } from "../../src/languages/english/manifest.ts";
 // ⚠ THE CONVERTER IS BUILT FROM THE SAME MANIFEST THE RUNTIME USES, so a model scored here is scored in
 // exactly the convention `english.ts` will render it in. Do not inline a private ARPABET table.
 const arpabetToIpa = makeArpabetToIpa(MANIFEST.arpabet);
+// ⚠ THE SAME VOWEL SET THE RUNTIME JOIN USES (englishG2p.ts takes MANIFEST.arpabet.vowels as classes.vowels),
+// so this tool's `--morph` decode cannot drift from the shipped one on the definition of "vowel".
+const MORPH_VOWEL = new Set(MANIFEST.arpabet.vowels);
 
 // External data roots, per tools/README — nothing here hardcodes a machine layout.
 // CMUDICT: the CMUdict `cmudict.dict` file (public domain). EN_FREQ: an English frequency wordlist,
@@ -445,7 +455,18 @@ function morphDecode(w: string): string[] | null {
             if (stem.length < 2) continue;
             const sp = fullDict.get(stem);
             if (!sp) continue;
-            return [...sp, ...allo(sp)];
+            // ⚠ THE SAME JOIN AS THE SHIPPED ENGINE (englishG2p.ts joinMorph, #1295). This tool's
+            // `--morph` word accuracy is quoted as the engine's; scoring it through a DIFFERENT join makes
+            // the number unfalsifiable — it could not move whatever the rule did.
+            const suffix = allo(sp);
+            const last = sp[sp.length - 1];
+            return last !== undefined
+                && stem.endsWith("ire")
+                && last.replace(/[012]$/, "") === "ER"
+                && suffix.length > 0
+                && MORPH_VOWEL.has(suffix[0]!.replace(/[012]$/, ""))
+                ? [...sp.slice(0, -1), "R", ...suffix]
+                : [...sp, ...suffix];
         }
     }
     return null;

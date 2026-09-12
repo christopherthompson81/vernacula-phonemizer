@@ -21,14 +21,21 @@ import { MANIFEST } from "../src/languages/english/manifest.ts";
 const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "languages", "english");
 
 /**
- * ⚠ THE KNOWN GAPS ARE LISTED WITH A REASON, NOT WAIVED WHOLESALE. Each is a word the pure n-gram reaches
- * (no dict stem to inherit from), so only re-training or an overlay would close it — the options weighed in
- * #1295. A row leaving this list is progress; a row JOINING it is a regression that must be argued for.
+ * ⚠ THE KNOWN GAPS ARE LISTED WITH A REASON, NOT WAIVED WHOLESALE, AND THE REASON DECIDES THE REMEDY.
+ * A row leaving this list is progress; a row JOINING it is a regression that must be argued for.
+ *
+ * ⚠ THEY ARE NOT ALL THE SAME KIND. A first version of this comment said all three were pure-n-gram rows
+ * that "only re-training or an overlay would close" — true of two of them and FALSE of `was`, which takes
+ * the MORPH path. Saying so sent the next maintainer at the expensive fix for the cheap problem.
  */
 const KNOWN_GAPS = new Map<string, string>([
-    ["collaborative", "n-gram predicts the upstream EY2; -ative is a class #1289-style morphology cannot reach"],
-    ["research", "n-gram predicts upstream R IY0 S ER1 CH; the #1280 stress shift is lexical, not derivable"],
-    ["was", "n-gram predicts upstream W AA1 Z; a closed-class copula the model has no reason to special-case"],
+    ["collaborative", "n-gram (source N): predicts the upstream EY2; -ative is a class morphology cannot reach"],
+    ["research", "n-gram (source N): predicts upstream R IY0 S ER1 CH; the #1280 stress shift is lexical"],
+    // ⚠ NOT AN N-GRAM ROW. `was` decodes through morphDecode on the two-letter dict stem `wa` (W AA1) plus
+    // an `-s` allomorph — so a stem-side edit, or a floor on stem length, would close it without touching
+    // the model. Left open deliberately: `wa` is a real dict row and raising the minimum stem length reaches
+    // far past this word. Cheap to fix, not obviously right to fix.
+    ["was", "morph (source M): `wa` + allomorph Z reconstructs the upstream W AA1 Z; see comment above"],
 ]);
 
 function dict(path: string): Map<string, string[]> {

@@ -396,7 +396,17 @@ describe("the -ing rhotic after a PRICE diphthong", () => {
         // ⚠ AND THE CONSONANT ALLOMORPH MUST NOT MOVE: /z/ is not a vowel, so the ɚ stays a nucleus.
         expect(phonemize("misfires", "en")).toBe("mɪsfˈaᶦɚz");
         // ⚠ NOR MAY A CONSONANT-STEM `-er` WORD BE TOUCHED — the 429-pair majority the rule must not break.
-        expect(phonemize("watering", "en")).toBe("wˈɔːt̬ɚɪŋ");
+        // ⚠ AND THE CONTROL MUST BE GENUINELY OOV. The first version used `watering`, which is IN the
+        // lexicon AND the dict — so it is answered by `knownWord` and never reaches the morph join at all.
+        // It passed identically with the `-ire` test deleted, i.e. it guarded nothing. These three are in
+        // neither file and do exercise the join.
+        expect(phonemize("rechartering", "en")).toBe("ɹˈɛkhɑːɹt̬ɚɪŋ");
+        expect(phonemize("decluttering", "en")).toBe("dˈɛklʌt̬ɚɪŋ");
+        expect(phonemize("unencumbering", "en")).toBe("ˌʌnɛŋkˈʌmbɚɪŋ");
+        // ⚠ AND AN `ER`-INITIAL ALLOMORPH IS NOT EXEMPT: the dict writes `enquirer`/`inquirer`/`admirer`
+        // with the resyllabified ɹ, so an unlisted `-irer` must not get a doubled rhotic nucleus.
+        expect(phonemize("conspirer", "en")).toBe("kənspˈaᶦɹɚ");
+        expect(phonemize("conspirers", "en")).toBe("kənspˈaᶦɹɚz");
     });
 
     test("the environment is a following VOWEL, so `-ies` joins and a non-verb does not", () => {

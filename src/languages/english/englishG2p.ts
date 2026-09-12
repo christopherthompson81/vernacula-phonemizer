@@ -283,10 +283,26 @@ export function createEnglishG2p(
      *
      * ⚠ THE CONDITION IS THE STEM'S SPELLING, NOT THE PRECEDING VOWEL. Tabulated over every attested
      * stem/derivative pair in the dict (see docs/investigations/en/en_oov_curation_gap_investigation.md):
-     * conditioning on a preceding `AY` scores 15:5, conditioning on a `-ire` spelling scores 15:2 — and
-     * both remaining exceptions are `acquire → acquirer` AH0 K W AY1 ER0 ER0, where the allomorph is ITSELF
-     * `ER`. Excluding that makes it 15:0. A plain `ER`-before-vowel rule would be WRONG: `water` + `ing` is
-     * W AO1 T ER0 IH0 NG, and 429 such pairs keep the `ER`.
+     * conditioning on a preceding `AY` scores 15:5, conditioning on a `-ire` spelling scores 15:2. A plain
+     * `ER`-before-vowel rule would be WRONG: `water` + `ing` is W AO1 T ER0 IH0 NG, and 429 such pairs keep
+     * the `ER`.
+     *
+     * ⚠ AN `ER`-INITIAL ALLOMORPH IS NOT EXEMPT — AND THE EVIDENCE HERE IS THIN, SO IT IS STATED STRAIGHT.
+     * A first version carved that case out, on the claim that the only counterexamples were
+     * `acquire → acquirer(s)` AH0 K W AY1 ER0 ER0 and that excluding them made the rule 15:0. Both halves
+     * were wrong. `enquire` IH0 N K W AY1 ER0 → `enquirer` IH0 N K W AY1 R ER0 is an attested `-ire`-stem
+     * pair that DOES resyllabify before an `ER` allomorph, so the strict tally for that environment is
+     * 1 resyllabifying against 2 keeping — a MINORITY, not 15:0.
+     *
+     * It is dropped anyway, for two reasons that do not depend on that tally:
+     *   1. The dict's surface shape for `-irer` is `AY1 R ER0` in `enquirer`, `inquirer` and `admirer`
+     *      against `AY1 ER0 ER0` in `acquirer`/`acquirers` — 3:2 — and the minority spelling is a DOUBLED
+     *      rhotic nucleus, which is what an unlisted word inherited (`conspirer` → kənspˈaᶦɚɚ).
+     *   2. `acquirer`/`acquirers` are IN THE DICT. The OOV path never reaches them, so the exemption
+     *      protected two rows the dict already protects and charged the open class for it.
+     * Measured: dropping it moves 3 dict rows — `enquirer` right, `acquirer`/`acquirers` wrong — a held-out
+     * net of −1 on words that in production are always answered from the dict, in exchange for the whole
+     * unlisted `-irer` class. No corpus row covers `-irer`; if one ever does, this is the clause to re-open.
      *
      * ⚠ AND IT REPRODUCES #1289's OWN EXCLUSIONS rather than overriding them: `friar → friary`,
      * `prior → priory` and `spier → spiering` are `AY`-but-not-`-ire`, and that issue had already decided
@@ -300,7 +316,6 @@ export function createEnglishG2p(
             || dropStress(last) !== "ER"
             || suffix.length === 0
             || !VOWEL.has(dropStress(suffix[0]!))
-            || dropStress(suffix[0]!) === "ER"
         ) {
             return [...sp, ...suffix];
         }
