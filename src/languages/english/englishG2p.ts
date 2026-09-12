@@ -274,6 +274,53 @@ export function createEnglishG2p(
         ["es", (w) => [w.slice(0, -2), w.slice(0, -1)], (s) => allomorphS(s)],
         ["s", (w) => [w.slice(0, -1)], (s) => allomorphS(s)],
     ];
+    /**
+     * ⚠ THE JOIN IS NOT A CONCATENATION for an `-ire` stem. CMUdict writes word-final `-ire` as `… AY ER`
+     * — correct, a syllabic `ɚ` — and that stays before a CONSONANT allomorph (`misfires` AY1 ER0 Z). Before
+     * a VOWEL-initial one the rhotic resyllabifies as that syllable's onset (`firing` F AY1 R IH0 NG), and
+     * pasting the stem on unchanged reproduces the exact defect #1289 fixed in the dict — but on an OPEN
+     * class: `misfiring`, `umpiring`, `attiring` are all unlisted and all took `AY1 ER0 IH0 NG`.
+     *
+     * ⚠ THE CONDITION IS THE STEM'S SPELLING, NOT THE PRECEDING VOWEL. Tabulated over every attested
+     * stem/derivative pair in the dict (see docs/investigations/en/en_oov_curation_gap_investigation.md):
+     * conditioning on a preceding `AY` scores 15:5, conditioning on a `-ire` spelling scores 15:2. A plain
+     * `ER`-before-vowel rule would be WRONG: `water` + `ing` is W AO1 T ER0 IH0 NG, and 429 such pairs keep
+     * the `ER`.
+     *
+     * ⚠ AN `ER`-INITIAL ALLOMORPH IS NOT EXEMPT — AND THE EVIDENCE HERE IS THIN, SO IT IS STATED STRAIGHT.
+     * A first version carved that case out, on the claim that the only counterexamples were
+     * `acquire → acquirer(s)` AH0 K W AY1 ER0 ER0 and that excluding them made the rule 15:0. Both halves
+     * were wrong. `enquire` IH0 N K W AY1 ER0 → `enquirer` IH0 N K W AY1 R ER0 is an attested `-ire`-stem
+     * pair that DOES resyllabify before an `ER` allomorph, so the strict tally for that environment is
+     * 1 resyllabifying against 2 keeping — a MINORITY, not 15:0.
+     *
+     * It is dropped anyway, for two reasons that do not depend on that tally:
+     *   1. The dict's surface shape for `-irer` is `AY1 R ER0` in `enquirer`, `inquirer` and `admirer`
+     *      against `AY1 ER0 ER0` in `acquirer`/`acquirers` — 3:2 — and the minority spelling is a DOUBLED
+     *      rhotic nucleus, which is what an unlisted word inherited (`conspirer` → kənspˈaᶦɚɚ).
+     *   2. `acquirer`/`acquirers` are IN THE DICT. The OOV path never reaches them, so the exemption
+     *      protected two rows the dict already protects and charged the open class for it.
+     * Measured: dropping it moves 3 dict rows — `enquirer` right, `acquirer`/`acquirers` wrong — a held-out
+     * net of −1 on words that in production are always answered from the dict, in exchange for the whole
+     * unlisted `-irer` class. No corpus row covers `-irer`; if one ever does, this is the clause to re-open.
+     *
+     * ⚠ AND IT REPRODUCES #1289's OWN EXCLUSIONS rather than overriding them: `friar → friary`,
+     * `prior → priory` and `spier → spiering` are `AY`-but-not-`-ire`, and that issue had already decided
+     * each of them keeps its `ɚ`. That the spelling cut agrees is the evidence it is cut at the right joint.
+     */
+    function joinMorph(stem: string, sp: string[], suffix: string[]): string[] {
+        const last = sp[sp.length - 1];
+        if (
+            last === undefined
+            || !stem.endsWith("ire")
+            || dropStress(last) !== "ER"
+            || suffix.length === 0
+            || !VOWEL.has(dropStress(suffix[0]!))
+        ) {
+            return [...sp, ...suffix];
+        }
+        return [...sp.slice(0, -1), "R", ...suffix];
+    }
     function morphDecode(w: string): string[] | null {
         for (const [suf, stems, allo] of SUFFIXES) {
             if (!w.endsWith(suf) || w.length <= suf.length + 1) continue;
@@ -281,7 +328,7 @@ export function createEnglishG2p(
                 if (stem.length < 2) continue;
                 const sp = dict.get(stem);
                 if (!sp) continue;
-                return [...sp, ...allo(sp)];
+                return joinMorph(stem, sp, allo(sp));
             }
         }
         return null;
