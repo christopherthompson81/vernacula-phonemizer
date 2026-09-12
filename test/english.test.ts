@@ -358,3 +358,30 @@ describe("`research` is a noun/verb stress heteronym", () => {
         expect(phonemize("researchers say", "en")).toContain("ɹˈiːsɚt͡ʃɚz");
     });
 });
+
+// ⚠ CMUdict WRITES THIS RIME TWO WAYS — `AY … ER0 IH0 NG` (6 rows) against `AY1 R IH0 NG` (17) — and only
+// the second yields a consonantal ɹ. The difference is a SYLLABLE COUNT, and both are real English, so the
+// seventeen-row majority was a reason to look rather than to edit. espeak and the UK referee write BOTH
+// segments (`ɹᵻkwˈaɪɚɹɪŋ`, `faɪəɹɪŋ`) for BOTH sets — but the asr-align recordings are 7 of 7 for the
+// three-syllable form, `requiring` four of them. See docs/investigations/en/en_ing_rhotic_investigation.md.
+describe("the -ing rhotic after a PRICE diphthong", () => {
+    test("the six join the seventeen, on the recordings", () => {
+        expect(phonemize("requiring", "en")).toBe("ɹᵻkwˈaᶦɹɪŋ");
+        expect(phonemize("inquiring", "en")).toBe("ɪŋkwˈaᶦɹɪŋ");
+        expect(phonemize("desiring", "en")).toBe("dᵻzˈaᶦɹɪŋ");
+        expect(phonemize("transpiring", "en")).toBe("tɹænspˈaᶦɹɪŋ");
+    });
+
+    test("the seventeen are unchanged — the corpus confirms them too", () => {
+        expect(phonemize("firing", "en")).toBe("fˈaᶦɹɪŋ");
+        expect(phonemize("hiring", "en")).toBe("hˈaᶦɹɪŋ");
+        expect(phonemize("acquiring", "en")).toBe("əkwˈaᶦɹɪŋ");
+    });
+
+    test("the require family keeps its ɚ — there is no -ing syllable to take an onset", () => {
+        expect(phonemize("require", "en")).toBe("ɹᵻkwˈaᶦɚ"); // #1279
+        expect(phonemize("required", "en")).toBe("ɹᵻkwˈaᶦɚd");
+        // ⚠ `rewiring` keeps IY0: productive `re-` (wire again), not the lexicalized prefix of #1279.
+        expect(phonemize("rewiring", "en")).toBe("ɹiwˈaᶦɹɪŋ");
+    });
+});

@@ -100,7 +100,7 @@ npm run check:goldens          189 languages, 36495 rows, 0 stale (after regener
 npx tsx tools/english/en_rebuild_lexicon.mts   117,479 sourced rows, 100.00% round-trip
 ```
 
-## Left open — `requiring` has no consonantal ɹ on its `-ing` syllable
+## Left open — CLOSED as #1289, see docs/investigations/en/en_ing_rhotic_investigation.md
 
 Found in review, on the exact row this change edited, by witnesses this investigation had already collected
 and not looked at closely enough:
