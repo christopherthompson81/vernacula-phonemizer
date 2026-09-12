@@ -6498,7 +6498,7 @@ backfields	B AE1 K F IY2 L D Z
 backfire	B AE1 K F AY2 R
 backfired	B AE1 K F AY2 ER0 D
 backfires	B AE1 K F AY2 ER0 Z
-backfiring	B AE1 K F AY2 ER0 IH0 NG
+backfiring	B AE1 K F AY2 R IH0 NG
 backgammon	B AE1 K G AE2 M AH0 N
 background	B AE1 K G R AW2 N D
 backgrounds	B AE1 K G R AW2 N D Z
@@ -27133,7 +27133,7 @@ desire	D IH0 Z AY1 ER0
 desired	D IH0 Z AY1 ER0 D
 desiree	D EH1 S AY0 R IY0
 desires	D IH0 Z AY1 ER0 Z
-desiring	D IH0 Z AY1 ER0 IH0 NG
+desiring	D IH0 Z AY1 R IH0 NG
 desirous	D IH0 Z AY1 R AH0 S
 desist	D IH0 S IH1 S T
 desisto	D IH0 S IY1 S T OW0
@@ -52082,8 +52082,8 @@ inquire	IH2 N K W AY1 R
 inquired	IH2 N K W AY1 ER0 D
 inquirer	IH2 N K W AY1 R ER0
 inquires	IH2 N K W AY1 ER0 Z
-inquiries	IH2 N K W AY1 ER0 IY0 Z
-inquiring	IH2 N K W AY1 ER0 IH0 NG
+inquiries	IH2 N K W AY1 R IY0 Z
+inquiring	IH2 N K W AY1 R IH0 NG
 inquiry	IH2 N K W AY1 R IY2
 inquisition	IH2 N K W AH0 Z IH1 SH AH0 N
 inquisitive	IH2 N K W IH1 Z IH0 T IH0 V
@@ -87893,7 +87893,7 @@ required	R IH0 K W AY1 ER0 D
 requirement	R IH0 K W AY1 R M AH0 N T
 requirements	R IH0 K W AY1 R M AH0 N T S
 requires	R IH0 K W AY1 ER0 Z
-requiring	R IH0 K W AY1 ER0 IH0 NG
+requiring	R IH0 K W AY1 R IH0 NG
 requisite	R EH1 K W AH0 Z AH0 T
 requisites	R EH1 K W AH0 Z AH0 T S
 requisition	R EH2 K W AH0 Z IH1 SH AH0 N
@@ -88556,7 +88556,7 @@ rewey	R UW1 IY0
 rewind	R IY1 W AY0 N D
 rewire	R IY0 W AY1 ER0
 rewired	R IY0 W AY1 ER0 D
-rewiring	R IY0 W AY1 ER0 IH0 NG
+rewiring	R IY0 W AY1 R IH0 NG
 rewis	R UW1 IH0 S
 reword	R IY0 W ER1 D
 rework	R IY0 W ER1 K
@@ -107238,7 +107238,7 @@ transpark	T R AE1 N S P AA1 R K
 transpire	T R AE0 N S P AY1 ER0
 transpired	T R AE0 N S P AY1 ER0 D
 transpires	T R AE0 N S P AY1 ER0 Z
-transpiring	T R AE0 N S P AY1 ER0 IH0 NG
+transpiring	T R AE0 N S P AY1 R IH0 NG
 transplant	T R AE0 N S P L AE1 N T
 transplantation	T R AE2 N Z P L AE0 N T EY1 SH AH0 N
 transplanted	T R AE0 N S P L AE1 N T IH0 D
