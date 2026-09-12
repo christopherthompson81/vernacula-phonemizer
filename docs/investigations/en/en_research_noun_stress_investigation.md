@@ -31,24 +31,30 @@ recordings. It is the one instrument here that hears a speaker rather than readi
 two candidate readings are separable in its output without any stress mark: the prefix is either the full
 FLEECE vowel (`ɹ iː`, initial stress) or a reduced one (`ɹ ɪ` / `ɹ ə`, final stress).
 
-Every en_us utterance containing the stem:
+Every en_us utterance containing the stem — 15 rows, 17 stem tokens, 15 of them cleanly recognised:
 
 ```
 …therefore it narrows the | research     → ɹ iː s ɚ tʃ     INITIAL
 …cautioned that the       | research     → ɹ iː s ɚ tʃ     INITIAL
+…his                      | research     → ɹ iː s ɚ tʃ     INITIAL   (research showed that…)
 …a medical doctor and     | research     → ɹ iː s ɚ tʃ     INITIAL   (research scientist)
                           | Research     → ɹ iː s ɚ tʃ     INITIAL   (sentence-initial, ×2)
-…The / Lead               | researchers  → ɹ iː s ɚ tʃ     INITIAL   (×4)
-…said                     | researcher   → ɹ iː s ɚ tʃ     INITIAL   (×4)
+…The / Lead               | researchers  → ɹ iː s ɚ tʃ     INITIAL
+…said                     | researcher   → ɹ iː s ɚ tʃ     INITIAL
+…the Rift Valley          | Research     → ɹ iː s ɚ tʃ     INITIAL   (…Research Service)
 
-initial-stress: 14        final-stress: 0
+full FLEECE prefix: 15        reduced prefix: 0
 ```
 
-**14 of 14, zero counterexamples**, and the unambiguous noun slots — `the research` twice — are among them.
-That settles what the dictionaries could not, and it settles it against espeak.
+**15 of 15, zero counterexamples**, and the unambiguous noun slots — `the research`, `that the research`,
+`his research` — are among them.
 
-⚠ **espeak is a reference for ALIGNMENT, not an oracle for register.** It is the right instrument for
-#1268's money reading and the wrong one here; where recordings exist they outrank it.
+⚠ **ONLY THE PREFIX IS LOAD-BEARING, and the first draft of this entry over-claimed.** It quoted the whole
+string `ɹ iː s ɚ tʃ` as the witness, but the `ɚ` cannot testify about the second syllable: this recognizer
+emits `ɝ` **zero times in 2,602 en_us utterances** while `ɚ` appears in 2,239, so the stressed-rhotic axis
+is simply not in its inventory and an unstressed-looking second syllable is what it would print either way.
+What it CAN resolve is the prefix vowel — it distinguishes bare `i` from `iː` across the corpus (1,911 vs
+1,943 utterances) — and `ɹ iː` is neither of the readings the shipped `ɹisˈɝt͡ʃ` would predict.
 
 ## The change
 

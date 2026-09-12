@@ -198,8 +198,10 @@
         "recess": { "default": "ɹˈiːsɛs", "verb": "ɹᵻsˈɛs" },
         // ⚠ THE NOUN IS INITIAL-STRESSED, AND THIS IS MEASURED RATHER THAN PREFERRED. The asr-align
         // corpus is the only instrument here that witnesses spoken register, and across every en_us
-        // utterance containing the stem it heard the FULL FLEECE prefix — 14 of 14, zero reduced:
-        // `it narrows the research` and `cautioned that the research` both came back as ɹ iː s ɚ tʃ.
+        // utterance containing the stem it heard the FULL FLEECE prefix — 15 of 15, zero reduced:
+        // `it narrows the research`, `cautioned that the research` and `his research showed` all came back
+        // with ɹ iː. ⚠ ONLY THE PREFIX IS EVIDENCE: that recognizer emits ɝ zero times in 2,602 en_us rows,
+        // so its unstressed-looking second syllable would print the same either way.
         // ⚠ espeak DISAGREES (ɹᵻsˈɜːtʃ, and ɹᵻsˈɜːtʃɚ for `researcher`), and Merriam-Webster lists the
         // final-stressed noun first — which is why this needed an instrument rather than a dictionary
         // vote. The verb keeps the final-stressed reading; the corpus has no verb instance to check it
