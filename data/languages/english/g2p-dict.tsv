@@ -87936,7 +87936,7 @@ reseal	R IY0 S IY1 L
 resealable	R IY0 S IY1 L AH0 B AH0 L
 resealed	R IY0 S IY1 L D
 reseals	R IY0 S IY1 L Z
-research	R IY0 S ER1 CH
+research	R IY1 S ER0 CH
 researched	R IY0 S ER1 CH T
 researcher	R IY1 S ER0 CH ER0
 researchers	R IY1 S ER0 CH ER0 Z

@@ -336,3 +336,25 @@ describe("the -es plural after a sibilant", () => {
         expect(phonemize("notes", "en")).toBe("nˈoᶷts");
     });
 });
+
+// ⚠ THE NOUN IS INITIAL-STRESSED, AND THAT IS MEASURED RATHER THAN PREFERRED. espeak says ɹᵻsˈɜːtʃ and
+// Merriam-Webster lists the final-stressed noun FIRST, so the dictionaries do not settle it. The asr-align
+// corpus does: across every en_us utterance containing the stem, wav2vec2 heard the full FLEECE prefix —
+// 14 of 14, zero reduced — including `it narrows the research` and `cautioned that the research`.
+// See docs/investigations/en/en_research_noun_stress_investigation.md.
+describe("`research` is a noun/verb stress heteronym", () => {
+    test("the POS gate picks the stress", () => {
+        expect(phonemize("the research shows", "en")).toBe("ðə ɹˈiːsɚt͡ʃ ʃˈoᶷz"); // noun → initial
+        expect(phonemize("new research suggests", "en")).toContain("ɹˈiːsɚt͡ʃ");
+        expect(phonemize("they research it", "en")).toBe("ðeᶦ ɹisˈɝt͡ʃ ɪt"); // verb → final
+        expect(phonemize("he will research this", "en")).toContain("ɹisˈɝt͡ʃ");
+    });
+
+    test("the -es form inherits the gate, and the derived noun already agreed", () => {
+        expect(phonemize("he researches it", "en")).toContain("ɹisˈɝt͡ʃᵻz"); // 3sg verb → final
+        expect(phonemize("the researches were", "en")).toContain("ɹˈiːsɚt͡ʃᵻz"); // noun plural → initial
+        // `researcher`/`researchers` were ALREADY initial-stressed in the lexicon — the internal
+        // contradiction that prompted the report, now resolved in the direction the corpus attests.
+        expect(phonemize("researchers say", "en")).toContain("ɹˈiːsɚt͡ʃɚz");
+    });
+});
