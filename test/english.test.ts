@@ -359,23 +359,41 @@ describe("`research` is a noun/verb stress heteronym", () => {
     });
 });
 
-// ⚠ CMUdict WRITES THIS RIME TWO WAYS — `AY … ER0 IH0 NG` (6 rows) against `AY1 R IH0 NG` (17) — and only
-// the second yields a consonantal ɹ. The difference is a SYLLABLE COUNT, and both are real English, so the
-// seventeen-row majority was a reason to look rather than to edit. espeak and the UK referee write BOTH
-// segments (`ɹᵻkwˈaɪɚɹɪŋ`, `faɪəɹɪŋ`) for BOTH sets — but the asr-align recordings are 7 of 7 for the
-// three-syllable form, `requiring` four of them. See docs/investigations/en/en_ing_rhotic_investigation.md.
+// ⚠ THE RULE IS THE ENVIRONMENT, NOT THE SUFFIX. CMUdict writes word-final `-ire` as `AY ER0` — correct,
+// a syllabic ɚ — and keeps it before a CONSONANT suffix (`desired`, `desires`). Before a VOWEL the ɹ
+// resyllabifies as that syllable's onset, and there CMUdict is inconsistent: 6 rows kept `ER0` where 20
+// wrote `R`. The difference is a SYLLABLE COUNT, both are real English, so the majority was a reason to
+// look rather than to sweep. espeak and the UK referee write BOTH segments (`ɹᵻkwˈaɪɚɹɪŋ`, `faɪəɹɪŋ`)
+// for BOTH sets — but the asr-align recordings are 7 of 7 for the three-syllable form, `requiring` four of
+// them, and `inquiry` twice more. See docs/investigations/en/en_ing_rhotic_investigation.md.
 describe("the -ing rhotic after a PRICE diphthong", () => {
-    test("the six join the seventeen, on the recordings", () => {
+    test("the six join the twenty, on the recordings", () => {
         expect(phonemize("requiring", "en")).toBe("ɹᵻkwˈaᶦɹɪŋ");
         expect(phonemize("inquiring", "en")).toBe("ɪŋkwˈaᶦɹɪŋ");
         expect(phonemize("desiring", "en")).toBe("dᵻzˈaᶦɹɪŋ");
         expect(phonemize("transpiring", "en")).toBe("tɹænspˈaᶦɹɪŋ");
+        // ⚠ THE WEAKEST-WARRANT ROW OF THE SIX gets the pin it most needs: `backfiring` has no corpus row
+        // and no referee row, and is the lone AY2 member — the one a future sweep could revert unnoticed.
+        expect(phonemize("backfiring", "en")).toBe("bˈækfaᶦɹɪŋ");
     });
 
-    test("the seventeen are unchanged — the corpus confirms them too", () => {
+    test("the twenty are unchanged — the corpus confirms them too", () => {
         expect(phonemize("firing", "en")).toBe("fˈaᶦɹɪŋ");
         expect(phonemize("hiring", "en")).toBe("hˈaᶦɹɪŋ");
         expect(phonemize("acquiring", "en")).toBe("əkwˈaᶦɹɪŋ");
+    });
+
+    test("the environment is a following VOWEL, so `-ies` joins and a non-verb does not", () => {
+        // ⚠ `inquiries` WAS THE SAME DEFECT ONE ROW AWAY, and the review caught it: `ER0` before `IY0`,
+        // while its own singular `inquiry` already read `AY1 R IY2`. The corpus decides it directly —
+        // `inquiry` ×2, both three-syllable (`ɪ n k w aɪ ɹ i`), neither with a schwa before the ɹ.
+        expect(phonemize("inquiry", "en")).toBe("ɪŋkwˈaᶦɹiː");
+        expect(phonemize("inquiries", "en")).toBe("ɪŋkwˈaᶦɹiz");
+        // ⚠ `spiering` IS DELIBERATELY LEFT on the four-syllable shape, not overlooked. It is a surname,
+        // not `-ire` + `-ing`, so the morphological warrant above does not reach it; it has no corpus row
+        // and no referee row; and CMUdict's PRICE vowel for a Dutch-origin name is itself doubtful. A
+        // deliberate non-member, pinned so the decision survives the next sweep.
+        expect(phonemize("spiering", "en")).toBe("spˈaᶦɚɪŋ");
     });
 
     test("the require family keeps its ɚ — there is no -ing syllable to take an onset", () => {
