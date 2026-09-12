@@ -236,6 +236,34 @@ public static class EnglishG2pFactory
             return beam[0].Phones;
         }
 
+        /// <summary>
+        /// ⚠ THE JOIN IS NOT A CONCATENATION for an `-ire` stem. CMUdict writes word-final `-ire` as
+        /// `… AY ER` — correct, a syllabic ɚ — and that stays before a CONSONANT allomorph
+        /// (`misfires` AY1 ER0 Z). Before a VOWEL-initial one the rhotic resyllabifies as that syllable's
+        /// onset (`firing` F AY1 R IH0 NG), and pasting the stem on unchanged reproduces the defect #1289
+        /// fixed in the dict — but on an OPEN class: `misfiring`, `umpiring`, `attiring` are all unlisted.
+        ///
+        /// ⚠ THE CONDITION IS THE STEM'S SPELLING, NOT THE PRECEDING VOWEL. Over every attested
+        /// stem/derivative pair in the dict, a `-ire` spelling scores 15:0 once the `ER`-initial allomorph
+        /// of `acquire → acquirer` is excluded; a plain ER-before-vowel rule would be WRONG, since
+        /// `water` + `ing` is W AO1 T ER0 IH0 NG and 429 such pairs keep the `ER`.
+        /// See docs/investigations/en/en_oov_curation_gap_investigation.md (#1295).
+        /// </summary>
+        private List<string> JoinMorph(string stem, List<string> sp, List<string> suffix)
+        {
+            var last = sp.Count > 0 ? sp[^1] : null;
+            if (last is null
+                || !stem.EndsWith("ire", StringComparison.Ordinal)
+                || DropStress(last) != "ER"
+                || suffix.Count == 0
+                || !VOWEL.Contains(DropStress(suffix[0]))
+                || DropStress(suffix[0]) == "ER")
+            {
+                return sp.Concat(suffix).ToList();
+            }
+            return sp.Take(sp.Count - 1).Append("R").Concat(suffix).ToList();
+        }
+
         private List<string>? MorphDecode(string w)
         {
             foreach (var (suf, stems, allo) in SUFFIXES)
@@ -245,7 +273,7 @@ public static class EnglishG2pFactory
                 {
                     if (stem.Length < 2) continue;
                     if (!_dict.TryGetValue(stem, out var sp)) continue;
-                    return sp.Concat(allo(sp)).ToList();
+                    return JoinMorph(stem, sp, allo(sp));
                 }
             }
             return null;

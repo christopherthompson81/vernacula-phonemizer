@@ -7,6 +7,11 @@
  *   4. Decode a new word with a beam over graphemic segmentations, scoring joint-token n-grams.
  * Predicts stress-bearing ARPABET → arpabetToIpa → canonical. Word-acc vs CMUdict = OOV canonical quality.
  *   npx tsx tools/english/en_g2p_ngram.ts [--order N] [--beam K] [--iters M] [--phonemic] [--errors]
+ * ⚠ `--emit` OVERWRITES g2p-dict.tsv FROM $CMUDICT AND WOULD REVERT EVERY HAND CORRECTION. ~20 rows have
+ * been curated since the import (`was`, the `-ative` family, #1278, #1279, #1280, #1289); they live in
+ * data/languages/english/g2p-curated.tsv, and RE-APPLYING THEM IS PART OF RE-EMITTING. test/en-curation-gap
+ * .test.ts fails loudly if the shipped dict has lost them. The model itself is trained on upstream CMUdict
+ * either way, so three of those rows stay unreachable from the OOV path by design — see #1295.
  *   The SHIPPED model (data/languages/english/g2p-model.json) is `--comp --morph --emit`, with CMUDICT the
  *   public-domain cmudict.dict and EN_FREQ the shipped g2p-common.txt; that reproduces it byte for byte
  *   (verified #1260). ⚠ --emit writes the model BEFORE the held-out score below is computed, and prunes with

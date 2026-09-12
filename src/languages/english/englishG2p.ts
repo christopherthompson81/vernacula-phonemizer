@@ -274,6 +274,38 @@ export function createEnglishG2p(
         ["es", (w) => [w.slice(0, -2), w.slice(0, -1)], (s) => allomorphS(s)],
         ["s", (w) => [w.slice(0, -1)], (s) => allomorphS(s)],
     ];
+    /**
+     * ⚠ THE JOIN IS NOT A CONCATENATION for an `-ire` stem. CMUdict writes word-final `-ire` as `… AY ER`
+     * — correct, a syllabic `ɚ` — and that stays before a CONSONANT allomorph (`misfires` AY1 ER0 Z). Before
+     * a VOWEL-initial one the rhotic resyllabifies as that syllable's onset (`firing` F AY1 R IH0 NG), and
+     * pasting the stem on unchanged reproduces the exact defect #1289 fixed in the dict — but on an OPEN
+     * class: `misfiring`, `umpiring`, `attiring` are all unlisted and all took `AY1 ER0 IH0 NG`.
+     *
+     * ⚠ THE CONDITION IS THE STEM'S SPELLING, NOT THE PRECEDING VOWEL. Tabulated over every attested
+     * stem/derivative pair in the dict (see docs/investigations/en/en_oov_curation_gap_investigation.md):
+     * conditioning on a preceding `AY` scores 15:5, conditioning on a `-ire` spelling scores 15:2 — and
+     * both remaining exceptions are `acquire → acquirer` AH0 K W AY1 ER0 ER0, where the allomorph is ITSELF
+     * `ER`. Excluding that makes it 15:0. A plain `ER`-before-vowel rule would be WRONG: `water` + `ing` is
+     * W AO1 T ER0 IH0 NG, and 429 such pairs keep the `ER`.
+     *
+     * ⚠ AND IT REPRODUCES #1289's OWN EXCLUSIONS rather than overriding them: `friar → friary`,
+     * `prior → priory` and `spier → spiering` are `AY`-but-not-`-ire`, and that issue had already decided
+     * each of them keeps its `ɚ`. That the spelling cut agrees is the evidence it is cut at the right joint.
+     */
+    function joinMorph(stem: string, sp: string[], suffix: string[]): string[] {
+        const last = sp[sp.length - 1];
+        if (
+            last === undefined
+            || !stem.endsWith("ire")
+            || dropStress(last) !== "ER"
+            || suffix.length === 0
+            || !VOWEL.has(dropStress(suffix[0]!))
+            || dropStress(suffix[0]!) === "ER"
+        ) {
+            return [...sp, ...suffix];
+        }
+        return [...sp.slice(0, -1), "R", ...suffix];
+    }
     function morphDecode(w: string): string[] | null {
         for (const [suf, stems, allo] of SUFFIXES) {
             if (!w.endsWith(suf) || w.length <= suf.length + 1) continue;
@@ -281,7 +313,7 @@ export function createEnglishG2p(
                 if (stem.length < 2) continue;
                 const sp = dict.get(stem);
                 if (!sp) continue;
-                return [...sp, ...allo(sp)];
+                return joinMorph(stem, sp, allo(sp));
             }
         }
         return null;

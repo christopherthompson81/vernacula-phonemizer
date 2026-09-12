@@ -1,0 +1,31 @@
+# THE CURATED LAYER over upstream CMUdict — every hand correction to g2p-dict.tsv, made explicit.
+#
+# ⚠ `tools/english/en_g2p_ngram.ts --emit` REGENERATES g2p-dict.tsv FROM $CMUDICT, which would silently
+# revert every row below. This file is the record that makes that loss visible and recoverable: after an
+# --emit, re-apply these rows before shipping the dict. See #1295.
+#
+# ⚠ IT IS ALSO THE GATE'S INPUT. test/en-curation-gap.test.ts holds each word out of the dict and asks the
+# OOV path what it predicts; a row whose OOV answer is the UPSTREAM shape is a LIVE SPLIT — the engine
+# answers one way for the listed word and another for an unlisted word in the same environment.
+#
+# word <TAB> upstream CMUdict <TAB> curated <TAB> issue
+associative	AH0 S OW1 SH AH0 T IH2 V	AH0 S OW1 S IY0 AH0 T IH0 V	#1278
+backfiring	B AE1 K F AY2 ER0 IH0 NG	B AE1 K F AY2 R IH0 NG	#1289
+beyond	B IH0 AA1 N D	B IH0 Y AA1 N D	pre-issue
+collaborative	K AH0 L AE1 B ER0 EY2 T IH0 V	K AH0 L AE1 B ER0 AH0 T IH0 V	pre-issue
+cooperative	K OW0 AA1 P ER0 EY2 T IH0 V	K OW0 AA1 P ER0 AH0 T IH0 V	pre-issue
+corroborative	K ER0 AA1 B ER0 AH0 T IH2 V	K ER0 AA1 B ER0 AH0 T IH0 V	pre-issue
+deliberative	D IH0 L IH1 B ER0 EY2 T IH0 V	D IH0 L IH1 B ER0 AH0 T IH0 V	pre-issue
+desiring	D IH0 Z AY1 ER0 IH0 NG	D IH0 Z AY1 R IH0 NG	#1289
+determinative	D IH0 T ER1 M IH0 N AH0 T IH2 V	D IH0 T ER1 M IH0 N AH0 T IH0 V	pre-issue
+inquiries	IH2 N K W AY1 ER0 IY0 Z	IH2 N K W AY1 R IY0 Z	#1289
+inquiring	IH2 N K W AY1 ER0 IH0 NG	IH2 N K W AY1 R IH0 NG	#1289
+require	R IY2 K W AY1 ER0	R IH0 K W AY1 ER0	#1279
+required	R IY0 K W AY1 ER0 D	R IH0 K W AY1 ER0 D	#1279
+requires	R IY0 K W AY1 ER0 Z	R IH0 K W AY1 ER0 Z	#1279
+requiring	R IY0 K W AY1 ER0 IH0 NG	R IH0 K W AY1 R IH0 NG	#1289
+research	R IY0 S ER1 CH	R IY1 S ER0 CH	#1280
+rewiring	R IY0 W AY1 ER0 IH0 NG	R IY0 W AY1 R IH0 NG	#1289
+transformative	T R AE2 N S F AO1 R M AA0 T IH2 V	T R AE2 N S F AO1 R M AH0 T IH0 V	pre-issue
+transpiring	T R AE0 N S P AY1 ER0 IH0 NG	T R AE0 N S P AY1 R IH0 NG	#1289
+was	W AA1 Z	W AH1 Z	pre-issue

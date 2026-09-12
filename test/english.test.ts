@@ -383,6 +383,22 @@ describe("the -ing rhotic after a PRICE diphthong", () => {
         expect(phonemize("acquiring", "en")).toBe("əkwˈaᶦɹɪŋ");
     });
 
+    // ⚠ THE SAME RULE AT THE MORPH JOIN, for words that are in no dictionary (#1295). `morphDecode` pasted
+    // a dict stem onto an allomorph without resyllabifying, so every unlisted `-ire` verb reproduced the
+    // defect #1289 fixed — on an OPEN class rather than 20 rows. Derived from the dict's own attested
+    // pairs: a `-ire` stem with a vowel-initial allomorph resyllabifies 15:0; a plain ER-before-vowel rule
+    // would be wrong (`water` + `ing` keeps its ER0, as do 429 other pairs).
+    test("an unlisted -ire verb resyllabifies at the morph join too", () => {
+        // None of these is in the dict or the lexicon — they reach the n-gram/morph path.
+        expect(phonemize("misfiring", "en")).toBe("mɪsfˈaᶦɹɪŋ");
+        expect(phonemize("umpiring", "en")).toBe("ˈʌmpaᶦɹɪŋ");
+        expect(phonemize("attiring", "en")).toBe("ətʰˈaᶦɹɪŋ");
+        // ⚠ AND THE CONSONANT ALLOMORPH MUST NOT MOVE: /z/ is not a vowel, so the ɚ stays a nucleus.
+        expect(phonemize("misfires", "en")).toBe("mɪsfˈaᶦɚz");
+        // ⚠ NOR MAY A CONSONANT-STEM `-er` WORD BE TOUCHED — the 429-pair majority the rule must not break.
+        expect(phonemize("watering", "en")).toBe("wˈɔːt̬ɚɪŋ");
+    });
+
     test("the environment is a following VOWEL, so `-ies` joins and a non-verb does not", () => {
         // ⚠ `inquiries` WAS THE SAME DEFECT ONE ROW AWAY, and the review caught it: `ER0` before `IY0`,
         // while its own singular `inquiry` already read `AY1 R IY2`. The corpus decides it directly —
