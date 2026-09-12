@@ -196,6 +196,19 @@
         "rebel": { "default": "ɹˈɛbəɫ", "verb": "ɹᵻbˈɛɫ" },
         "recall": { "default": "ɹˈiːkʰɔːɫ", "verb": "ɹᵻkʰˈɔːɫ" },
         "recess": { "default": "ɹˈiːsɛs", "verb": "ɹᵻsˈɛs" },
+        // ⚠ THE NOUN IS INITIAL-STRESSED, AND THIS IS MEASURED RATHER THAN PREFERRED. The asr-align
+        // corpus is the only instrument here that witnesses spoken register, and across every en_us
+        // utterance containing the stem it heard the FULL FLEECE prefix — 14 of 14, zero reduced:
+        // `it narrows the research` and `cautioned that the research` both came back as ɹ iː s ɚ tʃ.
+        // ⚠ espeak DISAGREES (ɹᵻsˈɜːtʃ, and ɹᵻsˈɜːtʃɚ for `researcher`), and Merriam-Webster lists the
+        // final-stressed noun first — which is why this needed an instrument rather than a dictionary
+        // vote. The verb keeps the final-stressed reading; the corpus has no verb instance to check it
+        // against, so that half rests on the dictionaries alone.
+        // ⚠ KNOWN LIMIT: en-GB inherits this block, and the corpus has ZERO en_gb rows for the stem.
+        // BrE leans final-stressed for both parts of speech, so the noun reading here is the American
+        // one applied to both varieties — mitigated only by the UK referee listing initial-stressed
+        // `researcher` (ɹiːsɜːt͡ʃə) FIRST of its two variants. Revisit if en_gb audio ever lands.
+        "research": { "default": "ɹˈiːsɚt͡ʃ", "verb": "ɹisˈɝt͡ʃ" },
         "record": { "default": "ɹˈɛkɚd", "verb": "ɹᵻkʰˈɔːɹd" },
         "redress": { "default": "ɹᵻdɹˈɛs", "noun": "ɹˈiːdɹɛs" },
         "refund": { "default": "ɹˈiːfənd", "verb": "ɹᵻfˈʌnd" },
