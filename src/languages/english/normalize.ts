@@ -13,7 +13,7 @@
  */
 
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
-import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
+import { foldSubscriptDigits, resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
 import { COLLISIONS as ROMAN_COLLISIONS, romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
@@ -308,7 +308,10 @@ const SUPERSCRIPT_DIGIT: Readonly<Record<string, string>> = {
 
 /** Normalize one English input string. Pure text→text; no IPA. */
 export function normalizeEnglish(input: string): string {
-    let s = input;
+    // ⚠ ENGLISH KEEPS ITS OWN COPY of the shared symbol pass, so a tier feature reaches it only if it
+    // is called here too. Subscript digits fold to ASCII before anything reads a digit — `CH₄` was
+    // read as *sˈiː ˈeᶦt͡ʃ*, the 4 silently gone. See `foldSubscriptDigits` for the whole finding.
+    let s = foldSubscriptDigits(input);
 
     // 0) ABBREVIATIONS: dotted forms first (the dot is consumed so it can't become a phrase break), then the
     //    undotted saint pattern ("st petersburg"). An undotted "st" before a function word stays as-is: the

@@ -42,4 +42,16 @@ public class EnglishReportedMisreadingsTests
     [InlineData("Ir", "ˈɪɹ")]
     public void IrReadsAsInfraredAndOnlyInThatExactCasing(string text, string ipa)
         => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("CH₄", "sˈiː ˈeᶦt͡ʃ fˈɔːɹ")]
+    [InlineData("N₂ and CH₄", "ˈɛn tʰˈuː ənd sˈiː ˈeᶦt͡ʃ fˈɔːɹ")]
+    [InlineData("x²", "ˈɛks skwˈɛɹd")]
+    public void SubscriptDigitsRead(string text, string ipa) => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("en")] [InlineData("de")] [InlineData("fr")]
+    [InlineData("es")] [InlineData("hi")] [InlineData("pl")]
+    public void ASubscriptReadsLikeItsAsciiSpellingInEveryTier(string lang)
+        => Assert.Equal(Phonemizer.Phonemize("CH4", lang), Phonemizer.Phonemize("CH₄", lang));
 }

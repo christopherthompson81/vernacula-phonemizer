@@ -711,6 +711,30 @@ function spacedDigits(base: string, digits: string, all: string, end: number): s
     return LETTER_NEXT.test(all.slice(end)) ? `${base} ${digits} ` : `${base} ${digits}`;
 }
 
+/**
+ * SUBSCRIPT DIGITS → ASCII. `CH₄` read as *sˈiː ˈeᶦt͡ʃ* — "see-ehch", the 4 silently gone; the same for
+ * `H₂O` ("H O"), `CO₂` (which lost the digit and then read the bare `CO` as a word, *kʰˈoᶷ*), and
+ * `Fe₂O₃`. Nothing in any tier read U+2080–U+2089, in ANY of the 192 languages: measured, `CH₄`
+ * dropped its 4 in de, fr, es, hi and pl exactly as it did in en.
+ *
+ * ⚠ THE GAP WAS ALREADY KNOWN, one layer up. `core/markup.ts` deliberately does NOT map `<sub>` to
+ * real subscript characters, and says why: "NOTHING reads a subscript digit, so rendering
+ * `<sub>2</sub>` to `₂` takes a form that was readable and makes it silent." It closes the hole for
+ * HTML input by flattening to ASCII, and ends "if a subscript reading is ever wanted, the digit
+ * words come first and the mapping second". This is that — the digit words, for text that arrives
+ * with the subscripts already in it, where no flattening ever ran.
+ *
+ * A subscript is NOT an exponent and gets none of that machinery: the `4` in `CH₄` is a count and
+ * reads as the plain cardinal, which is exactly what the already-correct ASCII `CH4` does. So the
+ * whole repair is the character fold, and every downstream number rule then works unchanged.
+ */
+const SUBSCRIPT_DIGITS = /[\u2080-\u2089]/gu;
+
+export function foldSubscriptDigits(s: string): string {
+    return rewrite(s, SUBSCRIPT_DIGITS, (m) =>
+        String.fromCharCode(m.charCodeAt(0) - 0x2080 + 0x30));
+}
+
 export function makeSymbolNormalizer(d: SymbolData): (text: string) => string {
     // Validate what IS declared, before any of it is compiled into a pattern. See `assertForms`.
     if (d.percent !== undefined) assertForms("percent", d.percent);
@@ -1101,7 +1125,8 @@ const DESIGNATIONS = ["802[.,]11"];
             // ⚠ BOTH ARMS ON THE SEAM: the inner `.replace` runs on the PIPELINE STRING, so a bare one
             // desyncs the tracker and the outer `rewrite` — which is correct — then poisons for it.
             text = rewrite(rewrite(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
-        let s = text;
+        // Subscript digits fold to ASCII before anything reads a digit — see `foldSubscriptDigits`.
+        let s = foldSubscriptDigits(text);
         const isUnitKey = (k: string): boolean =>
             d.units?.[k] !== undefined ||
             unitsFolded[k.toLowerCase()] !== undefined ||

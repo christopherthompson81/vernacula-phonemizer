@@ -40,3 +40,30 @@ describe("reported misreadings", () => {
         expect(phonemize("Ir", "en")).toBe("ˈɪɹ"); // iridium's symbol, left alone
     });
 });
+
+// Subscript digits were dropped by every tier, in every language — `CH₄` read as "see-ehch".
+// core/markup.ts already documented the hole from one layer up and worked around it for HTML input
+// by flattening `<sub>` to ASCII; text that arrives with the subscripts already in it never met that
+// flattening. A subscript is a COUNT, not an exponent, so it folds to ASCII and reads as the plain
+// cardinal — which is what the already-correct ASCII spelling of each of these did all along.
+describe("subscript digits", () => {
+    test("a subscript reads as its cardinal, like the ASCII spelling", () => {
+        expect(phonemize("CH₄", "en")).toBe("sˈiː ˈeᶦt͡ʃ fˈɔːɹ");
+        expect(phonemize("CH₄", "en")).toBe(phonemize("CH4", "en"));
+        expect(phonemize("H₂O", "en")).toBe(phonemize("H2O", "en"));
+        expect(phonemize("CO₂", "en")).toBe(phonemize("CO2", "en"));
+        expect(phonemize("N₂ and CH₄", "en")).toBe("ˈɛn tʰˈuː ənd sˈiː ˈeᶦt͡ʃ fˈɔːɹ");
+    });
+
+    // The shared tier carries it for the other 141 languages that use makeSymbolNormalizer; English
+    // has its own copy of that pass and needed the call added separately. Both are pinned.
+    test("the shared tier carries it too", () => {
+        for (const lang of ["de", "fr", "es", "hi", "pl"])
+            expect(phonemize("CH₄", lang)).toBe(phonemize("CH4", lang));
+    });
+
+    // Superscripts keep their own machinery — a subscript is a count, a superscript is a power.
+    test("superscripts are untouched", () => {
+        expect(phonemize("x²", "en")).toBe("ˈɛks skwˈɛɹd");
+    });
+});

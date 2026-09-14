@@ -147,13 +147,15 @@ const MATH_BRACE = /[{}]/gu;
  * DIGITS AND SIGNS ONLY. `4<sup>th</sup>` keeps its letters as plain text (`4th`), which the ordinal rule
  * already reads; there is no superscript `th` worth inventing.
  *
- * ⚠ `<sub>` IS DELIBERATELY NOT MAPPED. Superscripts are READ — the exponent machinery speaks them — but
- * NOTHING reads a subscript digit, so rendering `<sub>2</sub>` to `₂` takes a form that was readable and makes
- * it silent:
+ * ⚠ `<sub>` IS DELIBERATELY NOT MAPPED, and it STAYS not mapped. The original reason was that nothing
+ * downstream read a subscript digit, so rendering `<sub>2</sub>` to `₂` took a form that was readable and
+ * made it silent:
  *     `CO2 levels`  → *kʰˈoᶷ tʰˈuː lˈɛvəɫz*   ← flattened ASCII; the 2 is spoken
  *     `CO₂ levels`  → *kʰˈoᶷ lˈɛvəɫz*         ← "correctly" rendered; the 2 is GONE
- * A transform is only a repair if something downstream can read what it produces. If a subscript reading is
- * ever wanted, the digit words come first and the mapping second.
+ * That note ended "if a subscript reading is ever wanted, the digit words come first and the mapping
+ * second". The digit words now exist — `foldSubscriptDigits` in core/normalizeSymbols.ts folds U+2080-9
+ * to ASCII in both tiers — so the hazard is gone and the two forms read identically. The mapping is still
+ * not worth adding: it would render ASCII to subscripts only for the fold to render them straight back.
  */
 const SUP_MAP: Readonly<Record<string, string>> = {
     "0": "\u2070",

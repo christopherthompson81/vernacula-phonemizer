@@ -113,3 +113,41 @@ Investor Relations, incident response, and the ISO code for Iran; the entry asse
 dominates in the text this reader sees. That is true for the reporter's documents and is recorded
 here because nothing downstream can tell that a choice was made. The comment in `normalize.ts`
 carries the same warning, so the next entry added to that arm has to clear the same bar.
+
+## Run 4 — 2026-09-14 12:43 — `CH₄` read as "see-ehch"
+
+**Report.** *"`CH₄` came out 'see-ehch' instead of 'see-ehch-four'"*
+
+**Question.** Is it the `₄`, and is it only English?
+
+**Raw finding.** It is the `₄`, and it is not only English — **nothing in any tier read a subscript
+digit, in any of the 192 languages.** The ASCII spelling of each of these was already correct, which
+is what makes the gap invisible:
+
+```
+"CH₄"   norm: "CH₄"   → sˈiː ˈeᶦt͡ʃ            "CH4"  → sˈiː ˈeᶦt͡ʃ fˈɔːɹ
+"H₂O"   norm: "H₂O"   → ˈeᶦt͡ʃ ˈoᶷ             "H2O"  → ˈeᶦt͡ʃ tʰˈuː ˈoᶷ
+"CO₂"   norm: "CO₂"   → kʰˈoᶷ                  "CO2"  → kʰˈoᶷ tʰˈuː
+"x²"    norm: "x squared"                      ← superscripts DO have machinery
+```
+
+`CO₂` is the worst of them: it loses the digit and then the bare `CO` is short enough to pass the
+initialism pass's pronounceability gate, so it reads as the invented word *kʰˈoᶷ*. Sampled across
+tiers, `CH₄` dropped its 4 in de, fr, es, hi and pl exactly as in en.
+
+**⚠ The gap was already known, one layer up, and written down.** `core/markup.ts` deliberately does
+not map `<sub>` to real subscript characters, and its comment gives this exact reason with this
+exact example — *"NOTHING reads a subscript digit, so rendering `<sub>2</sub>` to `₂` takes a form
+that was readable and makes it silent"* — closing the hole for HTML input by flattening to ASCII,
+and ending: *"if a subscript reading is ever wanted, the digit words come first and the mapping
+second."* Text that arrives with the subscripts already in it never met that flattening. So the
+note was right, the workaround was right for its own entry point, and the underlying hole stayed
+open for every other one.
+
+**Fix.** `foldSubscriptDigits` in `core/normalizeSymbols.ts`, called from the shared pipeline and
+— separately — from English's own copy of that pass, because English does not route through
+`makeSymbolNormalizer` (0 uses; 141 other languages do) and a tier feature reaches it only if it is
+called there too. A subscript is a COUNT, not an exponent, so it gets none of the exponent
+machinery: fold to ASCII and every existing number rule reads it. `CH₄` now equals `CH4` in all six
+languages tested, `x²` is untouched, and the markup.ts note is updated to record that its premise
+no longer holds.

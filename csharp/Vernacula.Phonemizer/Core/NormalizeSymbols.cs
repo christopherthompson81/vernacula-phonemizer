@@ -465,6 +465,13 @@ public static class NormalizeSymbols
      *   ⚠ and it declines a rate, whose denominator noun the language may not declare — a half reading is
      *     worse than a visible leak.
      */
+    /** Subscript digits (U+2080-U+2089) to ASCII. Ported from src/core/normalizeSymbols.ts — see that
+     *  file for the finding: nothing in any tier read them, so `CH4` lost its 4 in every language. */
+    private static readonly JsRe SUBSCRIPT_DIGITS = JsRegex.Compile("[\\u2080-\\u2089]", "gu");
+
+    public static string FoldSubscriptDigits(string s) =>
+        Rewrite(s, SUBSCRIPT_DIGITS, m => ((char)(m.Value[0] - 0x2080 + 0x30)).ToString());
+
     public static Func<string, string> MakeBareUnitNormalizer(
         IEnumerable<KeyValuePair<string, string>> readings)
     {
@@ -733,7 +740,8 @@ public static class NormalizeSymbols
             // become three tokens, and any later rule that reads a token boundary needs the split already done.
             if (d.Ampersand is not null)
                 text = Rewrite(Rewrite(text, AMP_ENTITY, "&"), AMP_SIGN, " " + d.Ampersand + " ");
-            var s = text;
+            // Subscript digits fold to ASCII before anything reads a digit.
+            var s = FoldSubscriptDigits(text);
 
             bool IsUnitKey(string k) =>
                 (d.Units is not null && d.Units.ContainsKey(k))
