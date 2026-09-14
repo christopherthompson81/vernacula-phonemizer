@@ -83,4 +83,10 @@ public class EnglishSpellingVariantsTests
     [InlineData("learnt", "learned")]
     public void PairsThatAreDifferentWordsAreNotFolded(string gb, string us)
         => Assert.NotEqual(Say(gb), Say(us));
+
+    [Theory]
+    [InlineData("vapour", "vepa")]
+    [InlineData("analyse", "analaiz")]
+    public void TheDictOnlyLookupFoldsSoCreolesNativiseACommonwealthSpelling(string word, string ipa)
+        => Assert.Equal(ipa, Phonemizer.Phonemize(word, "pcm"));
 }

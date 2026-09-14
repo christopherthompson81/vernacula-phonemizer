@@ -135,3 +135,26 @@ not reach.
 **Side effect worth recording.** `phonemize` and `phonemizeAsync` now AGREE on these words. They
 disagreed before (`savour` → `sˈeᶦvɚ` vs `səvˈaᶷɚ`) only because the word was OOV and the two paths
 guess differently; resolving it in the lexicon removes the divergence rather than papering over it.
+
+## Run 6 — 2026-09-14 12:33 — review of the change itself
+
+**Question.** `resolveWord` folds. Does anything else look words up, and does it need to?
+
+**Raw finding.** `knownWord` — the DICT-ONLY entry point — did not fold, and it has two callers:
+
+- `naija.ts` uses it to decide whether a word is English-etymological (nativise it) or a substrate
+  loan (leave it). **Naija writes Nigerian English**, which uses Commonwealth spellings, so every
+  `-our`/`-ise` word was being classified as substrate. Measured: `colour` → `kɔla` (nativised,
+  because CMUdict happens to carry that spelling) but `vapour` → untouched. After the fold,
+  `vapour` → `vepa`. That is the same accidental-coverage bug as the original report, one layer up.
+- `englishNeural.ts` uses it as the "already known, skip the BiLSTM" test. Not a correctness bug —
+  `resolveWord` now resolves the fold BEFORE consulting `oovOverride`, so the tagger's answer was
+  being computed and discarded — but it is wasted work on exactly the words this change fixes.
+
+Also gated the fold on `/^[a-z']+$/`. The rules are ASCII-alphabetic throughout and cannot match
+anything else, and the un-gated call was running on every digit and symbol key that reaches the OOV
+branch.
+
+**Implication.** A lookup fold belongs at every lookup, not just the one the report came through.
+Both are now pinned by tests, `pcm` included, so a later reader can see that the creole behaviour
+was a deliberate consequence and not a side effect nobody noticed.

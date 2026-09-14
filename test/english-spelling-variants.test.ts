@@ -88,4 +88,13 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
         expect(phonemize("aluminium", "en")).not.toBe(phonemize("aluminum", "en"));
         expect(phonemize("learnt", "en")).not.toBe(phonemize("learned", "en"));
     });
+
+    // `knownWord` is the DICT-ONLY entry point, and it folds too. Naija writes Nigerian English, so
+    // a Commonwealth spelling there is a known-English word to nativise — without the fold it looked
+    // like a substrate loan and came out untouched. englishNeural.ts uses the same call as its
+    // "already known" test, so this also stops the BiLSTM being handed words the lexicon can answer.
+    test("the dict-only lookup folds, so creoles nativise a Commonwealth spelling", () => {
+        expect(phonemize("vapour", "pcm")).toBe("vepa"); // as `colour` → kɔla already did
+        expect(phonemize("analyse", "pcm")).toBe("analaiz");
+    });
 });
