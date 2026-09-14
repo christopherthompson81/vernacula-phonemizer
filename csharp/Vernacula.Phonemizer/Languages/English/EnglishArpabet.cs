@@ -112,6 +112,8 @@ public static class EnglishArpabet
         var map = def.Map;
         var cv = def.ConditionalVowels;
         var VOWELS = new HashSet<string>(def.Vowels, StringComparer.Ordinal);
+        // The TRUE diphthongs, for the clash exception below — NOT OW/EY. See the TS.
+        var DIPHTHONG = new HashSet<string>(new[] { "AY", "OY", "AW" }, StringComparer.Ordinal);
 
         /**
          * Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm
@@ -136,7 +138,11 @@ public static class EnglishArpabet
                 {
                     var ni = nucleusNum[i];
                     var mark = stress == 1 ? "ˈ" : stress == 2 ? "ˌ" : "";
-                    if (stress == 2 && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1) mark = "";
+                    // ⚠ The exception (closed final syllable on a true diphthong) and all three of its
+                    // conditions are load-bearing — see the TS for the row-count measurement behind each.
+                    if (stress == 2 && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1
+                        && !(DIPHTHONG.Contains(bas) && ni == nucleiIdx.Count - 1 && i < P.Count - 1))
+                        mark = "";
                     outSb.Append(mark);
                     if (bas == "AH" && IsBarredI(word, P, i, ni, nucleiIdx.Count)) outSb.Append('ᵻ');
                     else if (bas == "IH" && IsBarredI(word, P, i, ni, nucleiIdx.Count)) outSb.Append('ᵻ');

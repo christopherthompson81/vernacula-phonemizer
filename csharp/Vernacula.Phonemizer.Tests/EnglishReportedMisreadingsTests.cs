@@ -79,4 +79,18 @@ public class EnglishReportedMisreadingsTests
     [InlineData("Coffee, tea, or water.", "kʰˈɑːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .")]
     public void AClauseInitialCoordinatorTakesItsStrongForm(string text, string ipa)
         => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("profile", "pɹˈoᶷfˌaᶦɫ")]
+    [InlineData("textile", "tʰˈɛkstˌaᶦɫ")]
+    [InlineData("skylines", "skˈaᶦlˌaᶦnz")]
+    [InlineData("zeitgeist", "tsˈaᶦtɡˌaᶦst")]
+    // …and the guards: OW/EY are not true diphthongs here, and an open final syllable is excluded.
+    [InlineData("zorro", "zˈɔːɹoᶷ")]
+    [InlineData("window", "wˈɪndoᶷ")]
+    [InlineData("airplane", "ˈɛɹpleᶦn")]
+    [InlineData("crocodile", "kɹˈɑːkəd̬ˌaᶦɫ")]
+    [InlineData("compile", "kəmpˈaᶦɫ")]
+    public void AClosedFinalSyllableOnATrueDiphthongKeepsItsSecondaryStress(string w, string ipa)
+        => Assert.Equal(ipa, Say(w));
 }

@@ -112,3 +112,36 @@ describe("a coordinator that resumes after a pause takes its strong form", () =>
         expect(phonemize(", and it was", "en")).toBe("ˈænd ɪt wˈʌz");
     });
 });
+
+// `profile` reported as "pro-fil". CMUdict writes P R OW1 F AY2 L, but the secondary-stress clash
+// rule drops a 2° adjacent to the 1°, so the AY reached the output with NO mark — not reduced, just
+// unmarked, which the TTS renders as reduced. The A/B preferred the marked reading, and the marked
+// reading is what the dictionary already said, so this is a faithfulness fix rather than an override.
+describe("a closed final syllable on a true diphthong keeps its secondary stress", () => {
+    test("the reported word, and the compounds in its class", () => {
+        expect(phonemize("profile", "en")).toBe("pɹˈoᶷfˌaᶦɫ");
+        expect(phonemize("textile", "en")).toBe("tʰˈɛkstˌaᶦɫ");
+        expect(phonemize("skylines", "en")).toBe("skˈaᶦlˌaᶦnz");
+        expect(phonemize("zeitgeist", "en")).toBe("tsˈaᶦtɡˌaᶦst");
+    });
+
+    // ⚠ EACH GUARD EXISTS BECAUSE THE VERSION WITHOUT IT WAS MEASURABLY WRONG. Without the true-
+    // diphthong restriction, CMUdict's OW2 on an ordinary final -o gets marked and over-articulated.
+    // Without the closed-syllable one, an open final syllable does. Both are pinned here.
+    test("an ordinary final -o is not marked (OW/EY are not true diphthongs here)", () => {
+        expect(phonemize("zorro", "en")).toBe("zˈɔːɹoᶷ");
+        expect(phonemize("window", "en")).toBe("wˈɪndoᶷ");
+        expect(phonemize("airplane", "en")).toBe("ˈɛɹpleᶦn");
+    });
+
+    test("an open final syllable is not marked", () => {
+        expect(phonemize("a priori", "en")).toContain("pɹaᶦˈɔːɹaᶦ");
+    });
+
+    // The clash rule itself is untouched where the 2° is not final — crocodile keeps the mark it
+    // always had (its 2° is not adjacent to the 1°), and compile's 1° is on the second syllable.
+    test("the rest of the clash rule is unchanged", () => {
+        expect(phonemize("crocodile", "en")).toBe("kɹˈɑːkəd̬ˌaᶦɫ");
+        expect(phonemize("compile", "en")).toBe("kəmpˈaᶦɫ");
+    });
+});
