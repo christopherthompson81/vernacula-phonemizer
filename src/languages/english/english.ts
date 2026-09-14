@@ -13,6 +13,7 @@ import { enterEngine, noteAssembled, noteToken } from "../../core/trace.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
+import { americanSpelling } from "./spellingVariants.ts";
 
 import {
     createEnglishG2p,
@@ -181,6 +182,15 @@ export class EnglishPhonemizer {
             lookupKey = lower.slice(0, -1);
 
         let over = this.lexicon.get(lookupKey);
+        if (over === undefined) {
+            // Commonwealth spelling of a word the lexicon holds under its American one? The lexicon
+            // is CMUdict-derived and its coverage of British spellings is accidental (it has
+            // `colour` and `labour`, not `vapour` or `analyse`), so fold the spelling and retry
+            // before treating the word as genuinely unknown. spellingVariants.ts only ever returns
+            // a spelling that IS a headword, so this either finds the right word or changes nothing.
+            const american = americanSpelling(lookupKey, (w) => this.lexicon.has(w));
+            if (american !== undefined) over = this.lexicon.get(american);
+        }
         if (over === undefined) {
             // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
             // so contractions/loanwords G2P their letters).

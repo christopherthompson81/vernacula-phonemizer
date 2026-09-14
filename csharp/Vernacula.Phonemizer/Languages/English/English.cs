@@ -172,6 +172,11 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var over = _lexicon.TryGetValue(lookupKey, out var lex) ? lex : null;
         if (over is null)
         {
+            var american = SpellingVariants.AmericanSpelling(lookupKey, w => _lexicon.ContainsKey(w));
+            if (american is not null) over = _lexicon.TryGetValue(american, out var us) ? us : null;
+        }
+        if (over is null)
+        {
             var g2pKey = APOSTROPHES.Replace(lookupKey, "");
             over = oovOverride?.Invoke(g2pKey) ?? (ASCII_WORD.IsMatch(g2pKey) ? _g2p.G2p(g2pKey) : g2pKey);
         }
