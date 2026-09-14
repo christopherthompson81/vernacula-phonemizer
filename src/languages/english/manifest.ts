@@ -23,6 +23,7 @@ export interface EnglishManifest {
     clausePunctuation: Record<string, string>;
     nonTonicFinal: string[];
     whSecondary: string[];
+    clauseInitialStressed: Record<string, string>;
     arpabet: ArpabetDef;
     numbers: {
         ones: string[]; // 0–19

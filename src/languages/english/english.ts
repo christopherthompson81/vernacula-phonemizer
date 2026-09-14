@@ -112,6 +112,7 @@ export class EnglishPhonemizer {
         private readonly clausePunctuation: Record<string, string>,
         private readonly nonTonicFinal: ReadonlySet<string>,
         private readonly whSecondary: ReadonlySet<string>,
+        private readonly clauseInitialStressed: Record<string, string>,
     ) {}
 
     /** Dict-only lookup for creoles (e.g. Naija) that NATIVISE English-etymological words: the CMUdict-derived
@@ -390,7 +391,26 @@ export class EnglishPhonemizer {
         const parts: string[] = [];
         const traced = new Map<string, { span: Span; surface: string; emitted: string[]; parts: number[] }>();
         for (const c of clauses) {
+            // A CLAUSE-INITIAL COORDINATOR IS NOT IN A REDUCTION ENVIRONMENT. `and` is an unstressed
+            // function word and reduces to `ənd` wherever it stands — but a coordinator that RESUMES
+            // after a pause is phrase-initial, carries the beat that restarts the clause, and is said
+            // `ˈænd`. Judged by ear on synthesized A/B: in "…, built September, and tested from
+            // November", the reduced reading was reported as sounding like "ind", and the unreduced
+            // one was preferred. The two `and`s in that sentence are byte-identical before this, so
+            // nothing downstream could have told them apart.
+            //
+            // ⚠ COORDINATORS ONLY, NOT FUNCTION WORDS GENERALLY. Clause-initial `the`, `to`, `of`,
+            // `in` are overwhelmingly common and MUST stay reduced — "…, the man arrived" does not
+            // want `ðˈiː`. What licenses this set is the resumption, not the position.
+            const head = c.items[0];
+            const strong =
+                head === undefined ? undefined : this.clauseInitialStressed[head.word];
+            const resumes = strong !== undefined;
             for (const it of c.items) {
+                if (it === head && strong !== undefined) {
+                    it.display = strong;
+                    continue;
+                }
                 if (this.whSecondary.has(it.word))
                     it.display = it.citation.replace(/ˈ/g, "ˌ"); // wh-pronoun → secondary
                 else if (it.reduced) it.display = it.citation.replace(/ˈ/g, ""); // unstressed function word / decimal point
@@ -404,8 +424,13 @@ export class EnglishPhonemizer {
                     c.mark === "." ||
                     c.mark === "?" ||
                     c.mark === "!";
-                const hasPrimary = c.items.some((it) =>
-                    it.display.includes("ˈ"),
+                // ⚠ THE COORDINATOR DOES NOT COUNT TOWARDS THE CLAUSE'S PRIMARY, or restoring its
+                // stress would silently cancel the tonic guarantee below: ", and it was" has no other
+                // primary, and with the coordinator counted the clause would keep its nucleus on
+                // `ˈænd` and leave the final word unstressed. The tonic is about where the clause
+                // LANDS; a resumption mark at its head is not that.
+                const hasPrimary = c.items.some(
+                    (it) => !(it === head && resumes) && it.display.includes("ˈ"),
                 );
                 const last = c.items[c.items.length - 1]!;
                 const promote =
@@ -507,5 +532,6 @@ export function createEnglish(): EnglishPhonemizer {
         manifest.clausePunctuation,
         new Set(manifest.nonTonicFinal),
         new Set(manifest.whSecondary),
+        manifest.clauseInitialStressed,
     );
 }
