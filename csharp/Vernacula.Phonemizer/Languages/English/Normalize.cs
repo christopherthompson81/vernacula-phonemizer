@@ -202,6 +202,11 @@ public static class Normalize
     private static readonly JsRe SAINT_UNDOTTED = JsRegex.Compile("\\bst\\s+([a-z']+)", "gi");
     private static readonly JsRe PLAIN_MID = JsRegex.Compile($"\\b({PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
     private static readonly JsRe PLAIN_END = JsRegex.Compile($"\\b({PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
+    // ⚠ CASE-SENSITIVE ON PURPOSE (no "i"): `IR` is the initialism, `Ir` the iridium symbol; `Max` is
+    // a name. See the TS for the full reasoning.
+    private static readonly JsRe IR_GLOSS = JsRegex.Compile("\\bIR\\b", "gu");
+    private static readonly JsRe MAX_DOT = JsRegex.Compile("\\bmax\\.(\\s+)(?=[\\p{L}\\p{N}])", "gu");
+    private static readonly JsRe MAX_BARE = JsRegex.Compile("\\bmax\\b(?!\\.?\\s+(?:\\w+\\s+)?out\\b)", "gu");
     private static readonly JsRe ET_AL_MID = JsRegex.Compile("\\bet\\s+al\\.(\\s+)(?=\\p{L})", "giu");
     private static readonly JsRe ET_AL_END = JsRegex.Compile("\\bet\\s+al\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
     private static readonly JsRe CIRCA = JsRegex.Compile("\\bca?\\.\\s*(?=\\d{3,4}(?!\\d))", "gi");
@@ -354,6 +359,9 @@ public static class Normalize
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
         s = Rewrite(s, PLAIN_END, m =>
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
+        s = Rewrite(s, IR_GLOSS, "infrared");
+        s = Rewrite(s, MAX_DOT, "maximum$1");
+        s = Rewrite(s, MAX_BARE, "maximum");
         s = Rewrite(s, ET_AL_MID, "et al$1");
         s = Rewrite(s, ET_AL_END, "et al.");
         s = Rewrite(s, CIRCA, "circa ");
