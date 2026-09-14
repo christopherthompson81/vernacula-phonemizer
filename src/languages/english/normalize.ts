@@ -262,6 +262,12 @@ const RELATIONAL: ReadonlyArray<readonly [string, string]> = [
     ["\u2248", "approximately"],
 ];
 
+/** Hoisted, like every other pattern in this file — the loop below runs on every utterance, and none of
+ *  these signs is a regex metacharacter, so the interpolation that built them per call bought nothing. */
+const RELATIONAL_RE: readonly RegExp[] = RELATIONAL.map(
+    ([sign]) => new RegExp(`[ \\t]*${sign}[ \\t]*`, "gu"),
+);
+
 /** The SLASHED unit keys only (`km/h`, `m/s`, `btu/hr/sf`), for the bare-rate arm — see step 6a2. */
 const BARE_RATE_RE = new RegExp(
     `(?<![\\p{L}\\d])(${Object.keys(UNITS).filter((k) => k.includes("/"))
@@ -980,8 +986,8 @@ export function normalizeEnglish(input: string): string {
     //    a missing word, it is the INVERSE claim): `a ≠ b` read as "a b", and `5 ± 0.2` as "five zero
     //    point two", which is a wrong number rather than a missing one.
     //    The separators are consumed on both sides so the prefix form does not leave a doubled space.
-    for (const [sign, words] of RELATIONAL)
-        s = rewrite(s, new RegExp(`[ \\t]*${sign}[ \\t]*`, "gu"), ` ${words} `);
+    for (let i = 0; i < RELATIONAL.length; i++)
+        s = rewrite(s, RELATIONAL_RE[i]!, ` ${RELATIONAL[i]![1]} `);
 
     return s;
 }

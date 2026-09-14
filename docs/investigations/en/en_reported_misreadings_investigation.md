@@ -369,6 +369,13 @@ phoneme stream as raw letters**. Fixed with slashed rate keys, which is the tabl
   Ordered after the number arm so count agreement survives (`50 km/h` plural, bare `km/h` singular),
   with letter lookarounds that keep it out of URLs — `example.com/s/page` contains `m/s`.
 
+⚠ **Also left undone: the plural of a spelled unit.** `50 BTUs` reads `btˈʌs` ("buttus"). The
+initialism pass's run needs a non-letter after it, so a trailing plural `s` blocks the match and the
+g2p reads the whole cluster. Measured on main, so it is pre-existing and general — `50 CDs` and
+`50 MPHs` take the same path and only come out right by accident of the g2p reading their letters.
+The obvious fix, letting the unit rule take an optional `s`, COLLIDES: `m` is a unit key, so `50 ms`
+would become "fifty meters" instead of milliseconds. Not worth it for this.
+
 ⚠ **Left undone, recorded rather than fixed.** `500 SF` still reads `sf` as raw letters: the
 initialism pass only claims ALL-CAPS runs, so a lowercase vowelless OOV token leaks its graphemes.
 `hr` escapes only because it happens to be a lexicon headword with the spelled IPA baked in — the
