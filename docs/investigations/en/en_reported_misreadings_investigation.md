@@ -266,3 +266,44 @@ rather than overruled, plus one listener's A/B. Recorded because a reader later 
 independent corroboration will not find any.
 
 Round trip after the rebuild: 117,480/117,480, 0 would change.
+
+## Run 7 — 2026-09-14 13:35 — adversarial A/B on the clash change before merging
+
+**Question.** Run 6 landed on 1,024 changed rows with NO referee signal and one word's A/B behind it.
+Before merging: what would most likely expose a flaw, and does it?
+
+**Designing the test rather than guessing at it.** All 1,024 changed words were extracted by diffing
+the two lexicon versions, then filtered to the 475 that appear in `/usr/share/dict/british-english`
+— which strips CMUdict's surname noise (`boehnlein`, `grumbine`, `bauknight`) and leaves what
+actually occurs in prose. The class is overwhelmingly COMPOUNDS (`deadline`, `website`, `midnight`,
+`workout`, `playground`), which is the intended target. Two subgroups are where it could be wrong:
+
+- **Latinate non-compounds** — `finite`, `canine`, `senile`, `archive`, `enzyme`, `percentile`,
+  `textile`. Not compounds, so the final syllable has not EARNED a beat the way `sky·line` has.
+- **Idiom-weak** — `in the meantime`, `sometime`, `online`, where the second element normally goes
+  weak; and the test sentence for these puts FIVE marked syllables in a row, so it doubles as the
+  cumulative-rhythm test.
+
+Plus `unite`, the most interesting single word in the set: CMUdict writes `Y UW1 N AY2 T`, primary
+on the FIRST syllable, which is already arguable (most say yoo-NITE). Before, the second syllable was
+unmarked and the oddity was hidden; after, it is audible. And a CONTROL of ordinary compounds, on the
+principle that if the control sounds worse the whole change is wrong.
+
+**Method.** True before/after — the submodule was checked out at `main` and at the branch and each
+sentence synthesized from scratch, so the C# and the lexicon move together. NOT hand-edited phoneme
+strings, which would have tested a string I wrote rather than the change.
+
+```
+before:  ɪn ðə mˈintIm, ðə wˈɛbsIt wˈɛnt ˈɔnlIn sˈʌmtIm ˈæftəɹ mˈɪdnIt.
+after:   ɪn ðə mˈintˌIm, ðə wˈɛbsˌIt wˈɛnt ˈɔnlˌIn sˈʌmtˌIm ˈæftəɹ mˈɪdnˌIt.
+```
+
+**Raw finding.** *"latinate: after A is good; idiom: both are fine, I like after better; unite: after
+(just barely); control: after (again, barely)."*
+
+**Implication.** No flaw found, and the two cases built specifically to break it did not. The
+adversarial subgroups came back at least as good as the compounds, and the control — the case that
+would have condemned the whole change — came back better. The two "barely" verdicts are the honest
+shape of the result: this is a small improvement, not a dramatic one, which is what a
+dictionary-faithfulness fix should look like. Merged on that basis rather than on the single
+`profile` A/B that started it.
