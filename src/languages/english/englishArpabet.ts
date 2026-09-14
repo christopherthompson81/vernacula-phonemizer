@@ -95,7 +95,10 @@ export function makeArpabetToIpa(
     def: ArpabetDef,
 ): (phones: string[], word?: string) => string {
     const { map, conditionalVowels: cv } = def;
-    const VOWELS = new Set(def.vowels);
+    /** The TRUE diphthongs, for the clash exception above — NOT `OW`/`EY`, which CMUdict writes as a 2°
+ *  on an ordinary unstressed final syllable (`zorro`, `aalto`, `adolfo`, `airplane`). */
+const DIPHTHONG = new Set(["AY", "OY", "AW"]);
+const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
     return function arpabetToIpa(phones: string[], word = ""): string {
         const P = phones.map(split);
@@ -112,11 +115,34 @@ export function makeArpabetToIpa(
             if (VOWELS.has(base)) {
                 const ni = nucleusNum.get(i)!;
                 // Secondary-stress clash: drop a 2° whose syllable is ADJACENT (consecutive nucleus) to the 1°.
+                //
+                // ⚠ EXCEPT A CLOSED FINAL SYLLABLE ON A TRUE DIPHTHONG, which is the compound's second
+                // element and does carry a beat. Reported as `profile` sounding like "pro-fil": CMUdict
+                // writes `P R OW1 F AY2 L`, the clash fired, and the AY came out with NO mark at all —
+                // not reduced, just unmarked, which the TTS then renders as reduced. The A/B preferred
+                // the marked reading, and the marked reading is what the dictionary already said.
+                //
+                // ⚠ ALL THREE CONDITIONS ARE LOAD-BEARING, and each was added because the version
+                // without it was measurably wrong (`en_rebuild_lexicon.mts --diff`, rows changed):
+                //   · every diphthong, any position   13,189 rows — far past the reported shape
+                //   · +final nucleus only              2,684 rows — but `zorro`→zˈɔːɹˌoᶷ, `aalto`,
+                //                                      `adolfo`: CMUdict writes OW2 on an ordinary
+                //                                      final -o, and marking it over-articulates
+                //   · +true diphthongs (AY/OY/AW)      1,113 rows — but `a priori`→pɹaᶦˈɔːɹˌaᶦ, an OPEN
+                //                                      final syllable, which broke an existing test
+                //   · +closed syllable                 1,024 rows — clean, whole suite green
+                // What survives is compounds whose second element genuinely takes a beat: `skylines`,
+                // `breakout`, `graveside`, `birthrights`, `yuletide`, `zeitgeist`, `textile`.
                 let mark = stress === 1 ? "ˈ" : stress === 2 ? "ˌ" : "";
                 if (
                     stress === 2 &&
                     primaryNi >= 0 &&
-                    Math.abs(ni - primaryNi) === 1
+                    Math.abs(ni - primaryNi) === 1 &&
+                    !(
+                        DIPHTHONG.has(base) &&
+                        ni === nucleiIdx.length - 1 &&
+                        i < P.length - 1
+                    )
                 )
                     mark = "";
                 out += mark;

@@ -209,3 +209,60 @@ Coordinators only: clause-initial `the`, `to`, `of`, `in` must keep reducing —
 does not want `ðˈiː`. And the strong coordinator is excluded from the clause's primary-stress test,
 or restoring it silently cancels the tonic guarantee: ", and it was" has no other primary, and the
 nucleus must still land on `wˈʌz` rather than staying at the head.
+
+## Run 6 — 2026-09-14 13:05 — `profile` read as "pro-fil"
+
+**Report.** *"profile -> 'pro-fil', I expected 'pro-FI-ul'"*, in a sentence using it as a verb.
+
+**Question.** Is the reader wrong, or is this the acoustic model again?
+
+**Raw finding — the reader agrees with both references.** `pɹˈoᶷfaᶦɫ`, and espeak-ng gives
+`pɹˈoʊfaɪl` and CMUdict `P R OW1 F AY2 L`. Initial stress in all three. So on its face the reported
+expectation contradicts the dictionaries, and the first A/B (A as-is vs B/C with the second syllable
+stressed and the `l` vocalized) came back **C**, i.e. against the references.
+
+⚠ **That is when to look harder, not to edit the lexicon.** A second A/B was run on `profile` as a
+NOUN to test the noun/verb-heteronym hypothesis — the reader has POS-gated heteronyms and this is
+the shape `record`/`permit` take. Result: **still C**, so not a heteronym, and a flat override of
+two references on one listener's preference was the only remaining option. Which was the cue that
+the hypothesis was wrong.
+
+**The real cause.** CMUdict writes `AY2` — a SECONDARY STRESS — and the reader was emitting no
+stress mark on it at all:
+
+```
+profile     P R OW1 F AY2 L      →  pɹˈoᶷfaᶦɫ     ← no mark on the AY
+crocodile   K R AA1 K AH0 D AY2 L →  kɹˈɑːkəd̬ˌaᶦɫ  ← keeps its ˌ
+```
+
+`englishArpabet.ts` drops a 2° whose syllable is ADJACENT to the 1° — the stress-clash rule. It fires
+for `profile` (PRO-file) and not for `crocodile` (CRO-co-dile). The mark is not replaced by anything:
+the vowel is a full diphthong that is simply UNMARKED, and the TTS renders unmarked as reduced. So
+the third A/B offered the faithful reading — `pɹˈoᶷfˌaᶦɫ`, exactly what CMUdict says — and it came
+back **"B, C, and D are all good"**: the dictionary-faithful reading is as good as the override.
+
+⚠ **A rule change alone does nothing here, and `en_rebuild_lexicon.mts` says why.** `profile` is a
+flat-lexicon hit, resolved before the OOV G2P runs, so editing the rule changed what the G2P *would*
+have produced and changed nothing about what is said. The first attempt looked like a no-op for
+exactly that reason.
+
+**Scoping it — every guard was bought with a measurement.** Rows changed, per
+`en_rebuild_lexicon.mts --diff`:
+
+| rule | rows | verdict |
+|---|---|---|
+| every diphthong, any position | 13,189 | far past the reported shape |
+| + final nucleus only | 2,684 | ✗ `zorro`→`zˈɔːɹˌoᶷ`, `aalto`, `adolfo` — CMUdict writes `OW2` on an ordinary final `-o`, and marking it over-articulates |
+| + true diphthongs only (AY/OY/AW) | 1,113 | ✗ `a priori`→`pɹaᶦˈɔːɹˌaᶦ`, an OPEN final syllable — broke an existing test |
+| + closed final syllable | **1,024** | ✓ whole suite green |
+
+What survives is compounds whose second element genuinely takes a beat: `skylines`, `breakout`,
+`graveside`, `birthrights`, `yuletide`, `zeitgeist`, `textile`.
+
+⚠ **The referee cannot see this change, and says so.** en scores **41.86% (954/2279) before and
+41.86% after** — identical, because the eval folds to a segmental backbone and stress marks are not
+in it. So the referee neither supports nor opposes, and this rests on the dictionary being followed
+rather than overruled, plus one listener's A/B. Recorded because a reader later looking for
+independent corroboration will not find any.
+
+Round trip after the rebuild: 117,480/117,480, 0 would change.
