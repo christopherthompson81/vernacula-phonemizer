@@ -206,7 +206,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { lookupForeignOov, setDefaultForeign, setScriptReader, withHost } from "./core/foreign.ts";
 import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
+import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldSubscriptDigits, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -369,7 +369,9 @@ function romanPass(lang: string, input: string): string {
 function foldPass(lang: string, input: string): string {
     const folded = foldCyrillicStressMarks(foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))), CYRILLIC_HOSTS.has(lang)))));
     const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
-    return FOLD_OPT_OUT.has(lang) ? pre : foldNativeDigits(pre);
+    // Subscript digits fold for EVERY language and with no opt-out — see `foldSubscriptDigits`.
+    const subs = foldSubscriptDigits(pre);
+    return FOLD_OPT_OUT.has(lang) ? subs : foldNativeDigits(subs);
 }
 
 /**

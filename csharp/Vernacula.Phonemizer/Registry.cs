@@ -251,7 +251,9 @@ public static class Registry
                                     Markup.StripMarkup(input)))),
                         Scripts.CYRILLIC_HOSTS.Contains(lang)))));
         var pre = VULGAR_FOLD_OPT_OUT.Contains(lang) ? folded : Unicode.FoldVulgarFractions(folded);
-        return FOLD_OPT_OUT.Contains(lang) ? pre : Unicode.FoldNativeDigits(pre);
+        // Subscript digits fold for EVERY language and with no opt-out.
+        var subs = Unicode.FoldSubscriptDigits(pre);
+        return FOLD_OPT_OUT.Contains(lang) ? subs : Unicode.FoldNativeDigits(subs);
     }
 
     /**

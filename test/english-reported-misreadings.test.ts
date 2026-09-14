@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import { readdirSync } from "node:fs";
+
 import { phonemize } from "../src/index.ts";
 
 // Two reported misreadings whose cause was the same shape as the spelling one: a word the reader
@@ -55,11 +57,20 @@ describe("subscript digits", () => {
         expect(phonemize("N₂ and CH₄", "en")).toBe("ˈɛn tʰˈuː ənd sˈiː ˈeᶦt͡ʃ fˈɔːɹ");
     });
 
-    // The shared tier carries it for the other 141 languages that use makeSymbolNormalizer; English
-    // has its own copy of that pass and needed the call added separately. Both are pinned.
-    test("the shared tier carries it too", () => {
-        for (const lang of ["de", "fr", "es", "hi", "pl"])
-            expect(phonemize("CH₄", lang)).toBe(phonemize("CH4", lang));
+    // ⚠ EVERY language, not a sample. The first attempt put this in `makeSymbolNormalizer` and in
+    // English's own copy of that pass, which reads like full coverage and is not: measured, that
+    // reached 151 of 189 and left 38 — ak, bg, fa, he, ka, lt, my, ro, vi and 29 more — still
+    // dropping the digit, because they use neither. The fold belongs at `prePass`, which every
+    // language passes through before its own tokenizer sees a character; there, the two spellings
+    // are the SAME STRING by the time any engine runs, which is why this can assert equality for
+    // all of them rather than spot-check a handful.
+    test("every language reads a subscript like its ASCII spelling", () => {
+        const langs = readdirSync(new URL("../csharp/goldens", import.meta.url))
+            .filter((f) => f.endsWith(".tsv"))
+            .map((f) => f.slice(0, -4));
+        expect(langs.length).toBeGreaterThan(180);
+        const differ = langs.filter((l) => phonemize("CH₄", l) !== phonemize("CH4", l));
+        expect(differ).toEqual([]);
     });
 
     // Superscripts keep their own machinery — a subscript is a count, a superscript is a power.

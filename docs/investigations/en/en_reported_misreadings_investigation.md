@@ -144,10 +144,34 @@ second."* Text that arrives with the subscripts already in it never met that fla
 note was right, the workaround was right for its own entry point, and the underlying hole stayed
 open for every other one.
 
-**Fix.** `foldSubscriptDigits` in `core/normalizeSymbols.ts`, called from the shared pipeline and
-— separately — from English's own copy of that pass, because English does not route through
-`makeSymbolNormalizer` (0 uses; 141 other languages do) and a tier feature reaches it only if it is
-called there too. A subscript is a COUNT, not an exponent, so it gets none of the exponent
-machinery: fold to ASCII and every existing number rule reads it. `CH₄` now equals `CH4` in all six
-languages tested, `x²` is untouched, and the markup.ts note is updated to record that its premise
-no longer holds.
+**First fix, and why it was wrong.** `foldSubscriptDigits` called from `makeSymbolNormalizer` and —
+separately — from English's own copy of that pass, since English does not route through the shared
+one (0 uses; 141 other languages do). Spot-checked on de/fr/es/hi/pl, it looked complete.
+
+**It was not.** Running `CH₄` against `CH4` for every language in the golden set:
+
+```
+languages: 189  match: 151  differ: 38
+ak bal bg bm bo chr ckb ee fa grc he hmn ht is ka ki kl lg ln lt luo mn mos my
+naq nci nog ps quc ro sd smj syl ug vi xh za zu
+```
+
+**38 languages use NEITHER path.** 141 + English is not 189, and "I patched both tiers" reads like
+full coverage while leaving a fifth of the fleet broken. The spot-check could not see it because the
+five languages sampled all happened to be `makeSymbolNormalizer` users.
+
+**Second fix.** The fold belongs at `prePass` in `registry.ts` — the single dispatch point every
+language passes through "before the engine's own tokenizer sees a character" — beside
+`foldNativeDigits`, whose own comment already carries the argument for it: a digit is *script-marked
+but language-neutral in value*. A subscript digit is that same thing. Moved to `core/unicode.ts`
+next to it. Re-measured: **189 of 189 match.** `vi`, `xh` and `zu` now match too, and they were never
+digit failures — they differed in how the LETTERS `CH` tokenized — which is the point: folding
+before the tokenizer makes the two spellings the same string by the time any engine runs, so the
+invariant holds by construction rather than by 189 separate coincidences.
+
+⚠ Not opt-outable, unlike the native-digit fold. `FOLD_OPT_OUT` exists for a language that reads its
+own script's digits natively; a subscript is a formatting mark on an ASCII digit and no language
+wants it preserved.
+
+`x²` is untouched — a subscript is a count, a superscript is a power — and the markup.ts note is
+updated to record that its premise no longer holds.

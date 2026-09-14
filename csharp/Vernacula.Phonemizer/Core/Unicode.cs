@@ -148,6 +148,16 @@ public static class Unicode
     // (Adlam U+1E950–1E959, in the table above) — the one place the JsRegex translator's \p{Nd}
     // pass-through would silently diverge — so this fold walks code points and reads the SAME Unicode
     // property (Rune.GetUnicodeCategory == Nd) the JS regex does. Outputs are identical.
+    /**
+     * Subscript digits (U+2080-U+2089) to ASCII. Beside FoldNativeDigits for the same reason: a
+     * subscript digit is script-marked but language-neutral in value. Ported from src/core/unicode.ts —
+     * see that file for the 189-language measurement and why it has no opt-out.
+     */
+    private static readonly JsRe SUBSCRIPT_DIGITS = JsRegex.Compile("[\\u2080-\\u2089]", "gu");
+
+    public static string FoldSubscriptDigits(string s) =>
+        Rewriter.Rewrite(s, SUBSCRIPT_DIGITS, m => ((char)(m.Value[0] - 0x2080 + 0x30)).ToString());
+
     public static string FoldNativeDigits(string s)
     {
         // ⚠ #1150: THIS REBUILDS, IT DOES NOT REPLACE, and that is why it could not be put on the `Rewrite`

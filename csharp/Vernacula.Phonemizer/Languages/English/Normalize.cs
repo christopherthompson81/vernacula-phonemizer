@@ -335,9 +335,7 @@ public static class Normalize
     /** Normalize one English input string. Pure text→text; no IPA. */
     public static string NormalizeEnglish(string input)
     {
-        // ⚠ ENGLISH KEEPS ITS OWN COPY of the shared symbol pass; a tier feature reaches it only if
-        // called here too. See the TS for the finding.
-        var s = NormalizeSymbols.FoldSubscriptDigits(input);
+        var s = input;
 
         s = Rewrite(s, TITLE_ABBREV, m =>
         {

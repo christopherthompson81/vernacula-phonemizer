@@ -5,6 +5,8 @@
  *
  * ⚠ THE EXPECTED STRINGS ARE THE TYPESCRIPT'S, VERBATIM.
  */
+using System.IO;
+using System.Linq;
 using Vernacula.Phonemizer;
 using Xunit;
 
@@ -49,9 +51,21 @@ public class EnglishReportedMisreadingsTests
     [InlineData("x²", "ˈɛks skwˈɛɹd")]
     public void SubscriptDigitsRead(string text, string ipa) => Assert.Equal(ipa, Say(text));
 
-    [Theory]
-    [InlineData("en")] [InlineData("de")] [InlineData("fr")]
-    [InlineData("es")] [InlineData("hi")] [InlineData("pl")]
-    public void ASubscriptReadsLikeItsAsciiSpellingInEveryTier(string lang)
-        => Assert.Equal(Phonemizer.Phonemize("CH4", lang), Phonemizer.Phonemize("CH₄", lang));
+    // ⚠ EVERY ported language, not a sample — see the TS test for why the first, tier-by-tier
+    // attempt looked like full coverage and reached only 151 of 189.
+    [Fact]
+    public void EveryLanguageReadsASubscriptLikeItsAsciiSpelling()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (dir is not null && !Directory.Exists(Path.Combine(dir, "goldens")))
+            dir = Path.GetDirectoryName(dir);
+        Assert.NotNull(dir);
+        var langs = Directory.EnumerateFiles(Path.Combine(dir!, "goldens"), "*.tsv")
+            .Select(Path.GetFileNameWithoutExtension).Where(l => l is not null).Select(l => l!)
+            .Order(StringComparer.Ordinal).ToList();
+        Assert.True(langs.Count > 180, $"only {langs.Count} languages enumerated");
+        var differ = langs.Where(l =>
+            Phonemizer.Phonemize("CH₄", l) != Phonemizer.Phonemize("CH4", l)).ToList();
+        Assert.Empty(differ);
+    }
 }
