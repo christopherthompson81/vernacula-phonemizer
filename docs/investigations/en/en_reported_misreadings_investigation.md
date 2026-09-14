@@ -113,3 +113,65 @@ Investor Relations, incident response, and the ISO code for Iran; the entry asse
 dominates in the text this reader sees. That is true for the reporter's documents and is recorded
 here because nothing downstream can tell that a choice was made. The comment in `normalize.ts`
 carries the same warning, so the next entry added to that arm has to clear the same bar.
+
+## Run 4 — 2026-09-14 12:43 — `CH₄` read as "see-ehch"
+
+**Report.** *"`CH₄` came out 'see-ehch' instead of 'see-ehch-four'"*
+
+**Question.** Is it the `₄`, and is it only English?
+
+**Raw finding.** It is the `₄`, and it is not only English — **nothing in any tier read a subscript
+digit, in any of the 192 languages.** The ASCII spelling of each of these was already correct, which
+is what makes the gap invisible:
+
+```
+"CH₄"   norm: "CH₄"   → sˈiː ˈeᶦt͡ʃ            "CH4"  → sˈiː ˈeᶦt͡ʃ fˈɔːɹ
+"H₂O"   norm: "H₂O"   → ˈeᶦt͡ʃ ˈoᶷ             "H2O"  → ˈeᶦt͡ʃ tʰˈuː ˈoᶷ
+"CO₂"   norm: "CO₂"   → kʰˈoᶷ                  "CO2"  → kʰˈoᶷ tʰˈuː
+"x²"    norm: "x squared"                      ← superscripts DO have machinery
+```
+
+`CO₂` is the worst of them: it loses the digit and then the bare `CO` is short enough to pass the
+initialism pass's pronounceability gate, so it reads as the invented word *kʰˈoᶷ*. Sampled across
+tiers, `CH₄` dropped its 4 in de, fr, es, hi and pl exactly as in en.
+
+**⚠ The gap was already known, one layer up, and written down.** `core/markup.ts` deliberately does
+not map `<sub>` to real subscript characters, and its comment gives this exact reason with this
+exact example — *"NOTHING reads a subscript digit, so rendering `<sub>2</sub>` to `₂` takes a form
+that was readable and makes it silent"* — closing the hole for HTML input by flattening to ASCII,
+and ending: *"if a subscript reading is ever wanted, the digit words come first and the mapping
+second."* Text that arrives with the subscripts already in it never met that flattening. So the
+note was right, the workaround was right for its own entry point, and the underlying hole stayed
+open for every other one.
+
+**First fix, and why it was wrong.** `foldSubscriptDigits` called from `makeSymbolNormalizer` and —
+separately — from English's own copy of that pass, since English does not route through the shared
+one (0 uses; 141 other languages do). Spot-checked on de/fr/es/hi/pl, it looked complete.
+
+**It was not.** Running `CH₄` against `CH4` for every language in the golden set:
+
+```
+languages: 189  match: 151  differ: 38
+ak bal bg bm bo chr ckb ee fa grc he hmn ht is ka ki kl lg ln lt luo mn mos my
+naq nci nog ps quc ro sd smj syl ug vi xh za zu
+```
+
+**38 languages use NEITHER path.** 141 + English is not 189, and "I patched both tiers" reads like
+full coverage while leaving a fifth of the fleet broken. The spot-check could not see it because the
+five languages sampled all happened to be `makeSymbolNormalizer` users.
+
+**Second fix.** The fold belongs at `prePass` in `registry.ts` — the single dispatch point every
+language passes through "before the engine's own tokenizer sees a character" — beside
+`foldNativeDigits`, whose own comment already carries the argument for it: a digit is *script-marked
+but language-neutral in value*. A subscript digit is that same thing. Moved to `core/unicode.ts`
+next to it. Re-measured: **189 of 189 match.** `vi`, `xh` and `zu` now match too, and they were never
+digit failures — they differed in how the LETTERS `CH` tokenized — which is the point: folding
+before the tokenizer makes the two spellings the same string by the time any engine runs, so the
+invariant holds by construction rather than by 189 separate coincidences.
+
+⚠ Not opt-outable, unlike the native-digit fold. `FOLD_OPT_OUT` exists for a language that reads its
+own script's digits natively; a subscript is a formatting mark on an ASCII digit and no language
+wants it preserved.
+
+`x²` is untouched — a subscript is a count, a superscript is a power — and the markup.ts note is
+updated to record that its premise no longer holds.

@@ -200,6 +200,30 @@ export function foldNativeDigits(s: string): string {
 }
 
 /**
+ * SUBSCRIPT DIGITS (U+2080-U+2089) → ASCII. `CH₄` read as *sˈiː ˈeᶦt͡ʃ* — "see-ehch", the 4 silently
+ * gone; likewise `H₂O` ("H O"), `Fe₂O₃`, and `CO₂`, which loses the digit and then reads the stranded
+ * `CO` as the invented word *kʰˈoᶷ* because two letters pass the initialism pronounceability gate.
+ *
+ * ⚠ IT BELONGS HERE, BESIDE `foldNativeDigits`, AND FOR THE SAME REASON. A subscript digit is
+ * script-MARKED but language-NEUTRAL in value, which is the exact argument that put the native-digit
+ * fold at the single dispatch point. Measured, the two tiers below are not enough: fixing
+ * `makeSymbolNormalizer` and English's own copy of that pass covered 151 of 189 languages and left
+ * 38 — ak, bg, fa, he, ka, lt, my, ro, vi and 29 more — still dropping the digit, because they use
+ * neither. One fold at `prePass` covers all of them and cannot drift between tiers.
+ *
+ * ⚠ AND IT IS NOT OPT-OUTABLE, unlike the native-digit fold. `FOLD_OPT_OUT` exists for a language that
+ * reads its OWN script's digits natively; a subscript is a formatting mark on an ASCII digit and no
+ * language wants it preserved.
+ *
+ * A subscript is a COUNT, not an exponent, and gets none of the exponent machinery — folded to ASCII,
+ * every existing number rule reads it, which is what the already-correct ASCII spellings did all along.
+ */
+export function foldSubscriptDigits(s: string): string {
+    return rewrite(s, /[\u2080-\u2089]/gu, (m) =>
+        String.fromCharCode(m.charCodeAt(0) - 0x2080 + 0x30));
+}
+
+/**
  * GREEK / CYRILLIC LETTERS USED AS LATIN LOOK-ALIKES, folded ONLY when flanked by Latin letters.
  *
  * ⚠ A HOMOGLYPH IS THE SAME SHAPE AS A MOJIBAKE PHANTOM: a character from the wrong script masquerading as one
