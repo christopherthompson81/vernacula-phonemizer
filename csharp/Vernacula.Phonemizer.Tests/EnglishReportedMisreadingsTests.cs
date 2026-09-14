@@ -142,4 +142,14 @@ public class EnglishReportedMisreadingsTests
     [InlineData("pages 5–15", "pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn")]
     [InlineData("2019–2020", "twˈɛnti nˈaᶦntˈiːn tʰuː twˈɛnti twˈɛnti")]
     public void ADashBetweenTwoNumbersIsARange(string text, string ipa) => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("Rev. B, 2025-10-21", "ɹivˈɪʒən bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv")]
+    [InlineData("Rev. 3", "ɹivˈɪʒən θɹˈiː")]
+    // ⚠ The name shapes are the point of the guard — a capital followed by a PERIOD is an initial.
+    [InlineData("Rev. Smith", "ɹˈɛvɚənd smˈɪθ")]
+    [InlineData("Rev. J. Smith", "ɹˈɛvɚənd d͡ʒˈeᶦ . smˈɪθ")]
+    [InlineData("the Rev. Jesse Jackson", "ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksən")]
+    public void RevIsARevisionBeforeADesignatorAndAReverendBeforeAName(string t, string ipa)
+        => Assert.Equal(ipa, Say(t));
 }

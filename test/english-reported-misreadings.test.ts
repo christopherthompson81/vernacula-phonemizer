@@ -284,3 +284,31 @@ describe("a dash between two numbers is a range", () => {
         expect(phonemize("a–b", "en")).not.toContain("tʰuː");
     });
 });
+
+// "Rev. B, 2025-10-21" — a drawing title block — read as "reverend B". `rev` is in the fixed-reading
+// abbreviation table, which claims the token unconditionally.
+describe("Rev. is a revision before a designator and a reverend before a name", () => {
+    test("the designator shapes", () => {
+        expect(phonemize("Rev. B, 2025-10-21", "en"))
+            .toBe("ɹivˈɪʒən bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv");
+        // ⚠ AND THE DOT IS CONSUMED, which the table could not: its arm needs a following LETTER, so
+        // `Rev. 3` matched nothing and the dot survived into the clause segmenter as a phrase break.
+        expect(phonemize("Rev. 3", "en")).toBe("ɹivˈɪʒən θɹˈiː");
+    });
+
+    // ⚠ THE NAME SHAPES ARE THE POINT OF THE GUARD. `Rev. J. Smith` is the hard one — a capital
+    // followed by a PERIOD is a personal initial, and a naive "capital means designator" test claims it.
+    test("the name shapes are untouched", () => {
+        expect(phonemize("Rev. Smith", "en")).toBe("ɹˈɛvɚənd smˈɪθ");
+        expect(phonemize("Rev. J. Smith", "en")).toBe("ɹˈɛvɚənd d͡ʒˈeᶦ . smˈɪθ");
+        expect(phonemize("the Rev. Jesse Jackson", "en")).toBe("ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksən");
+    });
+
+    // ⚠ A two-letter designator is the case that caught the `i` flag: with it, the `[a-z]` in the
+    // lookahead matches uppercase too, so a following capital was REJECTED and this fell through to
+    // "reverend". The flag is off and the literal is cased by hand.
+    test("a multi-character designator still reads as a revision", () => {
+        expect(phonemize("Rev. AB", "en")).toContain("ɹivˈɪʒən");
+        expect(phonemize("Rev. B1", "en")).toContain("ɹivˈɪʒən");
+    });
+});
