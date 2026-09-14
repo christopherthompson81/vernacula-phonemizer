@@ -422,3 +422,48 @@ two-letter-plus-digits token, so nothing moved anywhere but the new tests.
 `RUN_OR_CODE` claims only all-caps runs. Covering mixed-case element symbols needs a periodic table,
 which is the chemical-name question the reporter raised separately and which was recommended against
 — so it is recorded here rather than started.
+
+## Run 10 — 2026-09-14 14:08 — `5–15%` read as "five fifteen percent"
+
+**Report.** *"'the 5–15% methane-in-air flammable range' — the number range to be 'five to fifteen
+percent'; it's currently reading 'five fifteen percent'."*
+
+**Raw finding.** The en dash is dropped outright, and with it the only thing marking the two numbers
+as a span. The year rule makes the same shape worse in its own way:
+
+```
+"5–15%"       → "5–15 percent"        → five fifteen percent
+"2019–2020"   → "20 19–20 20"         → twenty nineteen twenty twenty
+"pages 5–15"  → unchanged
+```
+
+**⚠ The ASCII hyphen is NOT claimable, and the measurement is what settles it.** The obvious rule —
+any dash between digits becomes "to" — is wrong three ways over, all of them already working:
+
+```
+2024-01-15   → "january 15th 20 24"   an ISO DATE, already read by the rule above
+555-0100     → unchanged               a phone number
+3-2          → unchanged               a score
+```
+
+Claiming the hyphen turns all three into ranges. The typographic dashes — figure U+2012, en U+2013,
+em U+2014 — are none of those things: they are what a document uses for a span, and nothing else.
+U+2212 MINUS is excluded too, being a sign that belongs to the negatives rule at step 0f.
+
+**Unspaced only.** A SPACED en dash is a parenthetical break ("the result — 15 — was high"), not a
+span; the range form is written tight in every style guide that has an opinion.
+
+**Ordered after the year rule**, which turns out to be free: `2019–2020` has already become
+`20 19–20 20` by then and the dash is still between digits, so both halves read pair-wise AND the
+range says "to" — `twˈɛnti nˈaᶦntˈiːn tʰuː twˈɛnti twˈɛnti`.
+
+⚠ **A test expectation written by hand was wrong and the suite caught it**: `fifteen` is `fɪftˈiːn`
+in this context, not the `fˈɪftiːn` I assumed — the stress moves with the phrase. Both expectations
+are generated from the engine now rather than guessed.
+
+⚠ **The suite caught a second thing: there was ALREADY a dashed-year-range rule**, and its test
+pinned the dash being KEPT (`guru nanak 1469–1539` → `guru nanak 14 69–15 39`). That rule converts
+both years pair-wise and deliberately left the dash in the text, where the tokenizer dropped it — so
+the span went unsaid there too, and had since it was written. The expectation moved to
+`14 69 to 15 39`; what that test exists for, that the LEFT year is not eaten first, is unaffected.
+Its ASCII-hyphen lines are unchanged, which is the point of the whole gate.
