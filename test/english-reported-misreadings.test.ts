@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { readdirSync } from "node:fs";
 
-import { phonemize } from "../src/index.ts";
+import { phonemize, phonemizeAsync } from "../src/index.ts";
 
 // Two reported misreadings whose cause was the same shape as the spelling one: a word the reader
 // GUESSES instead of knowing. docs/investigations/en/en_reported_misreadings_investigation.md.
@@ -143,5 +143,82 @@ describe("a closed final syllable on a true diphthong keeps its secondary stress
     test("the rest of the clash rule is unchanged", () => {
         expect(phonemize("crocodile", "en")).toBe("kɹˈɑːkəd̬ˌaᶦɫ");
         expect(phonemize("compile", "en")).toBe("kəmpˈaᶦɫ");
+    });
+});
+
+// Three more reports, all of the same shape as `IR`: a token the reader had no claim on.
+describe("relational operators, fiscal years, and slashed rate units", () => {
+    // ⚠ EVERY Unicode relational was silently DROPPED. `=`/`<`/`>`/`×` were already voiced, which is
+    // what hid it. The dangerous two are `≠` and `±`: a dropped `≠` is not a missing word, it is the
+    // INVERSE claim, and a dropped `±` turns a tolerance into a wrong number.
+    test("the Unicode relationals are read", () => {
+        expect(phonemize("Panels lit at ≥30%", "en"))
+            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬iː pɚsˈɛnt");
+        expect(phonemize("a ≠ b", "en")).toBe("ə nɑːt ˈiːkwəɫ tʰuː bˈiː");
+        expect(phonemize("a ± b", "en")).toBe("ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː");
+        expect(phonemize("x ≤ 5", "en")).toContain("lˈɛs ðæn ɔːɹ ˈiːkwəɫ tʰuː");
+        expect(phonemize("a ≈ b", "en")).toContain("əpɹˈɑːksəmətli");
+    });
+
+    // The PREFIX position is the one that matters and the one an infix pattern cannot reach: "at ≥30%"
+    // has no left operand, and read as "at thirty percent" — the threshold gone, the sentence fluent.
+    test("…including with no left operand", () => {
+        expect(phonemize("≥30", "en")).toContain("ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː");
+    });
+
+    // ⚠ The ASCII `<`/`>` keep their digit gate — they can be markup and these cannot.
+    test("the ASCII pair is untouched", () => {
+        expect(phonemize("5 > 3", "en")).toBe("fˈaᶦv ɡɹˈeᶦt̬ɚ ðæn θɹˈiː");
+        expect(phonemize("a = b", "en")).toBe("ə ˈiːkwəɫz bˈiː");
+    });
+
+    // `TY2024` read as the word "tie". The four-digit year is the guard that makes it claimable:
+    // bare `TY` is "thank you" in casual writing. "Year" also earns the pair-wise reading for free.
+    test("a fiscal year is read as one", () => {
+        expect(phonemize("TY2024", "en")).toBe("tʰˈæks jˈɪɹ twˈɛnti twˈɛnti fˈɔːɹ");
+        expect(phonemize("TY 2024", "en")).toBe("tʰˈæks jˈɪɹ twˈɛnti twˈɛnti fˈɔːɹ");
+    });
+
+    test("…and the shapes that are not one are left alone", () => {
+        expect(phonemize("ty2024", "en")).not.toContain("tʰˈæks");   // lowercase: an id, not a year
+        expect(phonemize("TY24", "en")).not.toContain("tʰˈæks");     // two digits: not the shape
+        expect(phonemize("thanks, TY", "en")).not.toContain("tʰˈæks jˈɪɹ");
+    });
+
+    // `BTU/hr/sf` read as *bˈiː tʰˈiː jˈuː ˈeᶦt͡ʃˈɑːɹ sf* — the slashes dropped and `sf` reaching the
+    // phoneme stream AS LETTERS. The comma is deliberate: two denominators with nothing between them
+    // hear as one.
+    test("a slashed rate unit reads, with or without a number", () => {
+        expect(phonemize("BTU/hr/sf", "en")).toBe("bˈiː tʰˈiː jˈuː pʰɝ ˈaᶷɚ , pʰɝ skwˈɛɹ fˈʊt");
+        expect(phonemize("50 BTU/hr", "en")).toBe("fˈɪfti bˈiː tʰˈiː jˈuː pʰɝ ˈaᶷɚ");
+        expect(phonemize("250 BTU", "en")).toBe("tʰˈuː hˈʌndɹəd fˈɪfti bˈiː tʰˈiː jˈuː");
+    });
+
+    // ⚠ The bare arm is ordered after the number arm so count agreement survives, and its lookarounds
+    // are what keep it out of URLs — `example.com/s/page` contains `m/s`.
+    test("the bare arm steals neither the count nor a URL", () => {
+        expect(phonemize("50 km/h", "en")).toContain("kəlˈɑːmʌt̬ɚz");   // plural kept
+        expect(phonemize("km/h", "en")).toContain("kəlˈɑːmət̬ɚ");       // bare → singular
+        expect(phonemize("see example.com/s/page", "en")).not.toContain("sˈɛkənd");
+        expect(phonemize("and/or", "en")).toBe("ˈænd ˈɔːɹ");
+    });
+});
+
+// `thermocouple` reported as "thermo-coople". OOV, so the two entry points guessed — and the async one
+// the app uses guessed `kʰˌuːpəɫ`, literally "coople". The PLURAL guessed differently again
+// (`kʰˌaᶷpəɫz`, "cow-ples"), which is the tell that neither was a reading of anything.
+describe("thermocouple", () => {
+    test("both paths, and both numbers, agree with espeak-ng", async () => {
+        for (const w of ["thermocouple", "thermocouples"])
+            expect(phonemize(w, "en")).toBe(await phonemizeAsync(w, "en"));
+        expect(phonemize("thermocouple", "en")).toBe("θˈɝməkʰˌʌpəɫ");
+        expect(phonemize("thermocouples", "en")).toBe("θˈɝməkʰˌʌpəɫz");
+    });
+
+    // The second vowel is a SCHWA, not `oᶷ` — espeak-ng gives θˈɜːməkˌʌpəl and CMUdict's own
+    // `thermostat` is TH ER1 M AH0 S T AE2 T. The OOV g2p was reading the spelling's ⟨o⟩ literally.
+    test("the -mo- is reduced, as it is in thermostat", () => {
+        expect(phonemize("thermocouple", "en")).toContain("θˈɝmə");
+        expect(phonemize("thermostat", "en")).toContain("θˈɝmə");
     });
 });

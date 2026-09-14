@@ -307,3 +307,72 @@ would have condemned the whole change — came back better. The two "barely" ver
 shape of the result: this is a small improvement, not a dramatic one, which is what a
 dictionary-faithfulness fix should look like. Merged on that basis rather than on the single
 `profile` A/B that started it.
+
+## Run 8 — 2026-09-14 13:30 — four more reports
+
+**Reports.** `BTU/hr/sf` should read "B T U per hour, per square foot"; `thermocouple` sounds like
+"thermo-coople"; `≥` is not said; `TY2024` should read "Tax Year 2024".
+
+### `≥` — and every other Unicode relational
+
+Measured across the operator set, not just the reported symbol:
+
+```
+handled:  =  equals      >  greater than     <  less than      ×  times
+DROPPED:  ≥      ≤      ≠      ±      ≈
+```
+
+`=`, `<`, `>` and `×` being voiced is exactly what hid this. ⚠ `≠` and `±` are the dangerous two:
+this file ranks its failure classes "missing word ≥ wrong word ≫ invented number", and a dropped
+`≠` is not a missing word — it is the INVERSE claim. `a ≠ b` read as "a b"; `5 ± 0.2` as "five zero
+point two", a wrong number rather than an absent one.
+
+The ASCII `<`/`>` are digit-gated on purpose (they can be markup). The Unicode five cannot be
+anything but themselves, so they are claimed wherever they stand — **including the prefix position,
+which is where they mostly occur**: "Panels lit at ≥30%" has no left operand for an infix pattern to
+bind to, and read as "at thirty percent", the threshold gone and the sentence still fluent.
+
+### `thermocouple` — the same shape as `in situ`
+
+OOV, so the two entry points guessed, and they guessed differently — the async one the app uses
+guessed `kʰˌuːpəɫ`, which is literally "coople":
+
+```
+thermocouple    sync: θˈɝmoᶷkʰˌʌpəɫ    async: θˈɝmoᶷkʰˌuːpəɫ    ← the reported reading
+thermocouples   sync: θˈɝmoᶷkʰˌʌpəɫz   async: θˈɝmoᶷkʰˌaᶷpəɫz   ← "cow-ples"
+```
+
+The SINGULAR and PLURAL guessing differently is the tell that neither was a reading of anything.
+Two independent sources fix the entry: espeak-ng gives `θˈɜːməkˌʌpəl`, and CMUdict's own
+`thermostat` is `TH ER1 M AH0 S T AE2 T` — so the `-mo-` is a SCHWA, not the `oᶷ` the OOV g2p read
+off the spelling, and `couple` is `K AH1 P AH0 L`. Added as `TH ER1 M AH0 K AH2 P AH0 L`; round trip
+after, 0 would change. No A/B needed — nothing here was a matter of taste.
+
+### `TY2024` and `BTU/hr/sf`
+
+`TY2024` read as the word "tie" plus a number — the `IR` shape again, two letters with a vowel that
+the phonotactic gate calls pronounceable. The four-digit year is what makes it claimable at all,
+since bare `TY` is "thank you" in casual writing. "Tax Year 2024" then earns the pair-wise year
+reading (`twenty twenty-four`) for free, because the existing rule keys on the word `Year`.
+
+`BTU/hr/sf` read as `bˈiː tʰˈiː jˈuː ˈeᶦt͡ʃˈɑːɹ sf` — slashes dropped and **`sf` arriving in the
+phoneme stream as raw letters**. Fixed with slashed rate keys, which is the table's own idiom
+(`km/h`, `m/s`, `mbit/s`). Two things the measurement forced:
+
+- The expansion spells `b t u` rather than emitting `BTU` for the initialism pass, because **after a
+  number that pass deliberately backs off** — a caps run there is the unit rule's territory. `250 BTU`
+  read as the word *bt͡ʃˈuː* ("btchoo") on main, before any of this, and emitting `BTU` would have
+  changed nothing. Pre-existing, now fixed as a side effect.
+- A bare arm for slashed keys with NO number in front, because that is the shape the report arrived
+  in (a column header). The number gate exists because a bare `km` in prose is mostly not a unit;
+  that reasoning does not extend to a slashed key, since a slash inside a token can never be a word.
+  Ordered after the number arm so count agreement survives (`50 km/h` plural, bare `km/h` singular),
+  with letter lookarounds that keep it out of URLs — `example.com/s/page` contains `m/s`.
+
+⚠ **Left undone, recorded rather than fixed.** `500 SF` still reads `sf` as raw letters: the
+initialism pass only claims ALL-CAPS runs, so a lowercase vowelless OOV token leaks its graphemes.
+`hr` escapes only because it happens to be a lexicon headword with the spelled IPA baked in — the
+same accidental coverage as the Commonwealth-spelling report. Inside a slashed rate there is nothing
+else those tokens can be, which is why the fix above is safe; bare `SF` is San Francisco and bare
+`HR` is home runs often enough that neither earns a unit entry, and the general leak wants its own
+change.
