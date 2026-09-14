@@ -340,6 +340,31 @@ export function normalizeEnglish(input: string): string {
             const w = PLAIN_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}.`;
         });
+    //     INITIALISM GLOSSES — an all-caps initialism read as the WORDS it stands for rather than as its
+    //     letters. Keyed on the EXACT uppercase form and applied case-sensitively, which is what keeps
+    //     `Ir` (the element symbol for iridium) and a lowercase `ir` out of it.
+    //     ⚠ Each entry is a judgement that one expansion dominates the others in the text this reader
+    //     sees, and it is not reversible by context — `IR` is also Investor Relations, incident response
+    //     and the ISO code for Iran. Add an entry only for a reading that is the overwhelming one, and
+    //     record who asked for it, because nothing downstream can tell that the choice was made.
+    //     `IR` (infrared) additionally fixes a misreading: it has a vowel and a legal coda, so the
+    //     phonotactic gate in the initialism pass calls it PRONOUNCEABLE and leaves it to the g2p, which
+    //     invents the word [ˈɪɹ] — neither "infrared" nor the letter names.
+    s = rewrite(s, /\bIR\b/gu, "infrared");
+
+    //     `max` is the one abbreviation here that must be CASE-SENSITIVE, so it cannot join the table
+    //     above (whose arms carry `i` on purpose — `Dr.`/`dr.` are the same abbreviation). `Max` is a
+    //     common given name, and a sentence-final "…is Max." would otherwise read as "maximum".
+    //     Capitalisation is the only signal available at this stage: normalization runs before the POS
+    //     tagger, so the verb cannot be identified by tag. It does not have to be — the verb takes a
+    //     particle ("max out", "max it out", "maxed out"), and `maxed`/`maxing` are different tokens
+    //     this rule never sees. So: lowercase only, and not when `out` follows within two words.
+    //     ⚠ RESIDUAL, both unavoidable at this stage and both rare: a lowercase name ("max said so")
+    //     expands, and a particle-less verb ("max the settings") expands. A sentence-initial "Max 40
+    //     characters" does NOT expand, because it cannot be told from the name.
+    s = rewrite(s, /\bmax\.(\s+)(?=[\p{L}\p{N}])/gu, "maximum$1");
+    s = rewrite(s, /\bmax\b(?!\.?\s+(?:\w+\s+)?out\b)/gu, "maximum");
+
     //     `et al.` is TWO tokens, so it needs its own arm after the single-token rule above has run.
     s = rewrite(s, /\bet\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
     s = rewrite(s, /\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");
