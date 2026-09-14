@@ -365,6 +365,24 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, /\bst\s+([a-z']+)/gi,
         (m0, next: string) => (ABBREV_FUNCTION_NEXT.test(next) ? m0 : `saint ${next}`));
 
+    // 0a2) `Rev.` IS "revision" BEFORE A DESIGNATOR AND "reverend" BEFORE A NAME. It is in the
+    //      fixed-reading table below, so a drawing title block's "Rev. B, 2025-10-21" read as
+    //      *reverend B*. ⚠ THIS MUST RUN BEFORE THAT TABLE, which claims the token unconditionally.
+    //      ⚠ THE DISCRIMINATOR IS WHAT FOLLOWS, the same shape `st.`/`dr.` already use — but their
+    //      neighbour test reads a following LOWERCASE word, and a revision designator is a capital
+    //      or a digit, so this needs its own arm rather than an entry in theirs.
+    //      A designator is a lone capital or a number. `(?![a-z.])` is what separates it from a name:
+    //      `Rev. Smith` has a capital followed by lowercase, and `Rev. J. Smith` a capital followed by
+    //      a PERIOD — a personal initial, which is the shape that would otherwise be claimed wrongly.
+    //      ⚠ IT ALSO CONSUMES THE DOT, which the table below could not: that arm requires a following
+    //      LETTER, so `Rev. 3` matched nothing and its dot survived into the clause segmenter as a
+    //      phrase break — the same defect `cf.`/`viz.`/`max.` have entries for.
+    //      ⚠ NO `i` FLAG, AND THE LITERAL IS CASED BY HAND INSTEAD. With `i`, the `[a-z]` inside the
+    //      lookahead matches UPPERCASE too, so `(?![a-z.])` rejected a following capital and the
+    //      designator test quietly inverted itself — `Rev. AB` fell through to "reverend". The flag
+    //      has to stay off for the two letter classes here to mean what they say.
+    s = rewrite(s, /\b[Rr][Ee][Vv]\.?\s+(?=(?:[A-Z](?![a-z.])|\d))/gu, "revision ");
+
     // 0b) MORE DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
     //     phrase break, and kept at a phrase end where it really is the sentence end — the same discipline
     //     as the st./dr. rule above, and the shape every arm in this step repeats.

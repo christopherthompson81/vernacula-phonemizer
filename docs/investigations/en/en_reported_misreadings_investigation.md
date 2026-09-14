@@ -467,3 +467,42 @@ both years pair-wise and deliberately left the dash in the text, where the token
 the span went unsaid there too, and had since it was written. The expectation moved to
 `14 69 to 15 39`; what that test exists for, that the LEFT year is not eaten first, is unaffected.
 Its ASCII-hyphen lines are unchanged, which is the point of the whole gate.
+
+## Run 11 — 2026-09-14 14:22 — `Rev. B` read as "reverend"
+
+**Report.** *"'Rev. B, 2025-10-21' currently reads 'reverend', instead of 'revision'. Not sure about
+the fix."*
+
+**Raw finding — three problems, not one.** `rev` is in `PLAIN_ABBREV`, the FIXED-reading table, which
+claims the token unconditionally:
+
+```
+"Rev. B, 2025-10-21"  → "reverend B, october 21st 20 25"
+"Rev. 3"              → "Rev. 3"              ← unchanged, and the DOT SURVIVES
+"3000 rev. per minute"→ "3000 reverend per minute"
+```
+
+`Rev. 3` is the `max.` defect again: the table's arm requires a following LETTER, so before a digit it
+does not fire at all and the dot reaches the clause segmenter as a phrase break.
+
+**The discriminator is what follows**, which is the shape `st.` and `dr.` already use — but their
+neighbour test reads a following LOWERCASE word, and a revision designator is a capital or a digit,
+so this needs its own arm rather than an entry in their table. A designator is a lone capital or a
+number; `(?![a-z.])` is what separates it from a name:
+
+```
+Rev. Smith      capital + lowercase → a name        → reverend ✓
+Rev. J. Smith   capital + PERIOD    → an initial    → reverend ✓   ← the hard one
+Rev. B,         capital + comma     → a designator  → revision ✓
+Rev. 3          a digit             → a designator  → revision ✓
+```
+
+⚠ **The `i` flag silently inverted the test, and a two-letter designator is what caught it.** With
+`i`, the `[a-z]` inside the lookahead matches UPPERCASE too, so `(?![a-z.])` rejected a following
+capital and `Rev. AB` fell through to "reverend" while `Rev. B1` worked. The flag is off now and the
+literal is cased by hand (`[Rr][Ee][Vv]`). Worth remembering generally: adding `i` to a pattern
+changes what every character class in it means, including the ones inside lookarounds.
+
+⚠ **Left undone.** `3000 rev. per minute` still reads "reverend" — that `rev.` is *revolutions*, and
+telling it apart needs a preceding number rather than a following designator. Not reported, genuinely
+ambiguous, and a different arm; recorded rather than guessed at.

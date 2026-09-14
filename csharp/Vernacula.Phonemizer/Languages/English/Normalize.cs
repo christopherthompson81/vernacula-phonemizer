@@ -151,6 +151,11 @@ public static class Normalize
 
     /** A dash between two numbers is a range. ⚠ TYPOGRAPHIC dashes only — the ASCII hyphen is already
      *  ISO dates, phone numbers and scores. See the TS. */
+    /** `Rev.` is "revision" before a designator and "reverend" before a name. ⚠ NO "i" FLAG — with it
+     *  the `[a-z]` in the lookahead matches uppercase and the test inverts. See the TS. */
+    private static readonly JsRe REV_REVISION =
+        JsRegex.Compile("\\b[Rr][Ee][Vv]\\.?\\s+(?=(?:[A-Z](?![a-z.])|\\d))", "gu");
+
     private static readonly JsRe NUMBER_RANGE = JsRegex.Compile("(\\d)[\\u2012\\u2013\\u2014](?=\\d)", "gu");
 
     private static readonly JsRe TY_YEAR = JsRegex.Compile("\\bTY\\s?(\\d{4})\\b", "gu");
@@ -384,6 +389,9 @@ public static class Normalize
             var next = m.Groups[1].Value;
             return ABBREV_FUNCTION_NEXT.IsMatch(next) ? m.Value : $"saint {next}";
         });
+
+        // ⚠ BEFORE the fixed-reading table below, which claims `Rev.` unconditionally.
+        s = Rewrite(s, REV_REVISION, "revision ");
 
         s = Rewrite(s, PLAIN_MID, m =>
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
