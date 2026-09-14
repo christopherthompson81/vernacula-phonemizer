@@ -93,4 +93,33 @@ public class EnglishReportedMisreadingsTests
     [InlineData("compile", "kəmpˈaᶦɫ")]
     public void AClosedFinalSyllableOnATrueDiphthongKeepsItsSecondaryStress(string w, string ipa)
         => Assert.Equal(ipa, Say(w));
+
+    [Theory]
+    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬iː pɚsˈɛnt")]
+    [InlineData("a ≠ b", "ə nɑːt ˈiːkwəɫ tʰuː bˈiː")]
+    [InlineData("a ± b", "ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː")]
+    // …and the ASCII pair keeps its digit gate, because it can be markup and these cannot.
+    [InlineData("5 > 3", "fˈaᶦv ɡɹˈeᶦt̬ɚ ðæn θɹˈiː")]
+    [InlineData("a = b", "ə ˈiːkwəɫz bˈiː")]
+    public void TheUnicodeRelationalsAreRead(string text, string ipa) => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("TY2024", "tʰˈæks jˈɪɹ twˈɛnti twˈɛnti fˈɔːɹ")]
+    [InlineData("TY 2024", "tʰˈæks jˈɪɹ twˈɛnti twˈɛnti fˈɔːɹ")]
+    public void AFiscalYearIsReadAsOne(string text, string ipa) => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("BTU/hr/sf", "bˈiː tʰˈiː jˈuː pʰɝ ˈaᶷɚ , pʰɝ skwˈɛɹ fˈʊt")]
+    [InlineData("50 BTU/hr", "fˈɪfti bˈiː tʰˈiː jˈuː pʰɝ ˈaᶷɚ")]
+    [InlineData("250 BTU", "tʰˈuː hˈʌndɹəd fˈɪfti bˈiː tʰˈiː jˈuː")]
+    // ⚠ The bare arm steals neither the count nor a URL.
+    [InlineData("and/or", "ˈænd ˈɔːɹ")]
+    public void ASlashedRateUnitReads(string text, string ipa) => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("thermocouple", "θˈɝməkʰˌʌpəɫ")]
+    [InlineData("thermocouples", "θˈɝməkʰˌʌpəɫz")]
+    [InlineData("thermostat", "θˈɝməstˌæt")]
+    public void ThermocoupleAgreesWithEspeakAndWithItsOwnPlural(string w, string ipa)
+        => Assert.Equal(ipa, Say(w));
 }

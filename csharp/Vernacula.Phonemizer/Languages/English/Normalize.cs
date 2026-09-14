@@ -32,6 +32,11 @@ public static class Normalize
         ["km/h"] = new[] { "kilometer per hour", "kilometers per hour" }, ["m/s"] = new[] { "meter per second", "meters per second" },
         ["miles/hour"] = new[] { "mile per hour", "miles per hour" }, ["mbit/s"] = new[] { "megabit per second", "megabits per second" },
         ["yards/meters"] = new[] { "yard per meter", "yards per meters" },
+        // ⚠ SPELLED OUT IN THE TABLE — after a number the initialism pass backs off. See the TS.
+        ["btu"] = new[] { "b t u", "b t u" },
+        ["btu/hr"] = new[] { "b t u per hour", "b t u per hour" },
+        ["btu/sf"] = new[] { "b t u per square foot", "b t u per square foot" },
+        ["btu/hr/sf"] = new[] { "b t u per hour, per square foot", "b t u per hour, per square foot" },
         ["°c"] = new[] { "degree Celsius", "degrees Celsius" }, ["°f"] = new[] { "degree Fahrenheit", "degrees Fahrenheit" },
         ["℃"] = new[] { "degree Celsius", "degrees Celsius" }, ["℉"] = new[] { "degree Fahrenheit", "degrees Fahrenheit" },
         ["°"] = new[] { "degree", "degrees" },
@@ -122,6 +127,29 @@ public static class Normalize
         NOT_VERSION + "(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?("
         + string.Join("|", UNITS.Keys.OrderByDescending(k => k.Length)) + ")([²³23])?(?![\\p{L}\\p{M}])",
         "giu");
+
+    /** The SLASHED unit keys only, for the bare-rate arm — a slash inside a token can never be a word,
+     *  so these need no number in front of them. See the TS for the URL guard. */
+    private static readonly JsRe BARE_RATE_RE = JsRegex.Compile(
+        "(?<![\\p{L}\\d])(" + string.Join("|", UNITS.Keys.Where(k => k.Contains('/'))
+            .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d])",
+        "giu");
+
+    /** The Unicode relational operators. The ASCII `<`/`>` are NOT here — they keep a digit gate above
+     *  because they can be markup and these cannot. */
+    private static readonly (string Sign, string Words)[] RELATIONAL =
+    [
+        ("\u2265", "greater than or equal to"),
+        ("\u2264", "less than or equal to"),
+        ("\u2260", "not equal to"),
+        ("\u00b1", "plus or minus"),
+        ("\u2248", "approximately"),
+    ];
+
+    private static readonly JsRe[] RELATIONAL_RE =
+        RELATIONAL.Select(r => JsRegex.Compile($"[ \\t]*{r.Sign}[ \\t]*", "gu")).ToArray();
+
+    private static readonly JsRe TY_YEAR = JsRegex.Compile("\\bTY\\s?(\\d{4})\\b", "gu");
 
     /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
      *  the word "no". */
@@ -359,6 +387,7 @@ public static class Normalize
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
         s = Rewrite(s, PLAIN_END, m =>
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
+        s = Rewrite(s, TY_YEAR, "Tax Year $1");
         s = Rewrite(s, IR_GLOSS, "infrared");
         s = Rewrite(s, MAX_DOT, "maximum$1");
         s = Rewrite(s, MAX_BARE, "maximum");
@@ -508,6 +537,14 @@ public static class Normalize
             return $"{num}{mag ?? ""} {measure}{(one ? forms[0] : forms[1])}";
         });
 
+        // A slashed rate standing alone, with no number. ⚠ Ordered AFTER the arm above so count
+        // agreement survives; the lookarounds keep it out of URLs. See the TS.
+        s = Rewrite(s, BARE_RATE_RE, m =>
+        {
+            var forms = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, m.Value);
+            return forms is null ? m.Value : forms[0];
+        });
+
         s = Rewrite(s, BARE_EXPONENT_GLUED, m => $"{m.Value} ");
         var allE = s;
         s = Rewrite(s, BARE_EXPONENT, m =>
@@ -584,6 +621,9 @@ public static class Normalize
         s = Rewrite(s, EQUALS, "$1 equals $2");
         s = Rewrite(s, LESS_THAN, "$1 less than ");
         s = Rewrite(s, GREATER_THAN, "$1 greater than ");
+
+        for (var i = 0; i < RELATIONAL.Length; i++)
+            s = Rewrite(s, RELATIONAL_RE[i], $" {RELATIONAL[i].Words} ");
 
         return s;
     }

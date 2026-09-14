@@ -46,6 +46,26 @@ const UNITS: Record<string, [string, string]> = {
     "km/h": ["kilometer per hour", "kilometers per hour"], "m/s": ["meter per second", "meters per second"],
     "miles/hour": ["mile per hour", "miles per hour"], "mbit/s": ["megabit per second", "megabits per second"],
     "yards/meters": ["yard per meter", "yards per meters"],
+    // ⚠ THE SLASHED RATE KEYS ARE THE TABLE'S OWN IDIOM (km/h, m/s, mbit/s above), and they are what
+    // makes a multi-denominator unit readable at all: the unit rule claims ONE key, so without the
+    // whole chain as a key the tail is stranded and reaches the g2p raw — `BTU/hr/sf` read as
+    // *bˈiː tʰˈiː jˈuː ˈeᶦt͡ʃˈɑːɹ sf*, with `sf` arriving in the phoneme stream AS LETTERS.
+    // ⚠ THE COMMA IS DELIBERATE. "per hour per square foot" is two denominators with nothing between
+    // them; the break is what makes the second one hear as a second denominator rather than a
+    // continuation of the first.
+    // ⚠ `BTU` STAYS AS LETTERS in the expansion — the initialism pass runs after this one and spells
+    // it — because nobody says "British thermal unit" aloud when the page says BTU.
+    // ⚠ AND BARE `hr`/`sf` ARE NOT KEYS. Both are number-gated here, but `2 HR` is home runs and
+    // `500 SF` is San Francisco often enough that neither earns an entry on its own; inside a slashed
+    // rate there is nothing else they can be.
+    // ⚠ SPELLED OUT IN THE TABLE, not left as `BTU` for the initialism pass to claim, because after a
+    // NUMBER that pass deliberately backs off — a caps run there is the unit rule's territory. `250 BTU`
+    // read as the word *bt͡ʃˈuː* ("btchoo") before this, and emitting `BTU` would have changed nothing.
+    // Lowercase space-separated letters is what the house `spellLetters` produces.
+    btu: ["b t u", "b t u"],
+    "btu/hr": ["b t u per hour", "b t u per hour"],
+    "btu/sf": ["b t u per square foot", "b t u per square foot"],
+    "btu/hr/sf": ["b t u per hour, per square foot", "b t u per hour, per square foot"],
     "°c": ["degree Celsius", "degrees Celsius"], "°f": ["degree Fahrenheit", "degrees Fahrenheit"],
     // ⚠ ℃ and ℉ are SINGLE CODE POINTS (U+2103, U+2109), so the two keys above cannot reach them and `20℃`
     // reads as bare "twenty" — the whole unit gone, not merely the sign.
@@ -231,6 +251,30 @@ const UNIT_RE = new RegExp(
     "giu",
 );
 
+/** The Unicode relational operators, none of which were read at all. Ordered longest-first is not needed
+ *  — no sign is a prefix of another — but the ASCII `<`/`>` are deliberately NOT here: they are handled
+ *  above under a digit gate, because they can be markup and these cannot. */
+const RELATIONAL: ReadonlyArray<readonly [string, string]> = [
+    ["\u2265", "greater than or equal to"],
+    ["\u2264", "less than or equal to"],
+    ["\u2260", "not equal to"],
+    ["\u00b1", "plus or minus"],
+    ["\u2248", "approximately"],
+];
+
+/** Hoisted, like every other pattern in this file — the loop below runs on every utterance, and none of
+ *  these signs is a regex metacharacter, so the interpolation that built them per call bought nothing. */
+const RELATIONAL_RE: readonly RegExp[] = RELATIONAL.map(
+    ([sign]) => new RegExp(`[ \\t]*${sign}[ \\t]*`, "gu"),
+);
+
+/** The SLASHED unit keys only (`km/h`, `m/s`, `btu/hr/sf`), for the bare-rate arm — see step 6a2. */
+const BARE_RATE_RE = new RegExp(
+    `(?<![\\p{L}\\d])(${Object.keys(UNITS).filter((k) => k.includes("/"))
+        .sort((a, b) => b.length - a.length).join("|")})(?![\\p{L}\\d])`,
+    "giu",
+);
+
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
  *  the word "no". */
 const PLAIN_ABBREV: Readonly<Record<string, string>> = {
@@ -340,6 +384,15 @@ export function normalizeEnglish(input: string): string {
             const w = PLAIN_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}.`;
         });
+    //     `TY2024` read as the WORD "tie" followed by the number — `tʰˈaᶦ tʰˈuː θˈaᶷzənd twˈɛnti fˈɔːɹ`.
+    //     Two letters with a vowel, so the initialism pass's phonotactic gate calls it pronounceable and
+    //     hands it to the g2p, exactly as `IR` was. Financial and accounting documents write the fiscal
+    //     year this way throughout.
+    //     ⚠ THE FOUR-DIGIT YEAR IS THE GUARD, and it is what makes this safe to claim case-insensitively
+    //     at all: bare `TY` is "thank you" in casual writing, and `ty` is a name fragment. Nothing but a
+    //     year follows it in this shape. The space is optional because documents write both.
+    s = rewrite(s, /\bTY\s?(\d{4})\b/gu, "Tax Year $1");
+
     //     INITIALISM GLOSSES — an all-caps initialism read as the WORDS it stands for rather than as its
     //     letters. Keyed on the EXACT uppercase form and applied case-sensitively, which is what keeps
     //     `Ir` (the element symbol for iridium) and a lowercase `ir` out of it.
@@ -745,6 +798,19 @@ export function normalizeEnglish(input: string): string {
             return `${num}${mag ?? ""} ${measure}${one ? sg : pl}`;
         });
 
+    // 6a2) A SLASHED RATE STANDING ALONE, with no number in front of it — `BTU/hr/sf` as a column
+    //      header or an axis label, which is the shape the report arrived in. The rule above requires a
+    //      NUMBER, deliberately, because a bare `km` in prose is mostly not a unit; that reasoning does
+    //      NOT extend to a slashed key, because a slash inside a token can never be a word. So these are
+    //      claimed wherever they stand.
+    //      ⚠ ORDERED AFTER the number rule, or it would steal `50 km/h` and drop the count agreement.
+    //      ⚠ THE LOOKAROUNDS ARE WHAT KEEP URLS OUT: `example.com/s/page` contains `m/s`, and without the
+    //      letter lookbehind it reads as "meters per second" mid-path.
+    s = rewrite(s, BARE_RATE_RE, (m0: string) => {
+        const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, m0);
+        return forms === undefined ? m0 : forms[0];
+    });
+
     // 6b) A BARE EXPONENT — a base with NO unit for the rule above to attach the power to, so the
     //     superscript is dropped outright. Ordered AFTER the unit rule so a unit exponent is never stolen
     //     from it.
@@ -908,6 +974,20 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, /(\S)\s*=\s*(\S)/gu, "$1 equals $2");
     s = rewrite(s, /(\d)\s*<\s*(?=\d)/gu, "$1 less than ");
     s = rewrite(s, /(\d)\s*>\s*(?=\d)/gu, "$1 greater than ");
+
+    //    ⚠ THE UNICODE RELATIONALS TAKE NEITHER GATE, and every one of them was silently DROPPED.
+    //    `<`/`>` are digit-gated above because they can be markup, and `=` takes the two-operand house
+    //    pattern; `≥ ≤ ≠ ± ≈` can be nothing but themselves, so they are claimed WHEREVER they stand —
+    //    including the PREFIX position, which is where they mostly occur. "Panels lit at ≥30%" has no
+    //    left operand for an infix pattern to bind to, and read as "…at thirty percent": the threshold
+    //    gone and the sentence still fluent.
+    //    ⚠ `≠` AND `±` ARE THE ONES THAT CHANGE MEANING WHEN DROPPED, which is the class this file ranks
+    //    worst everywhere else ("missing word ≥ wrong word ≫ invented number" — but a dropped `≠` is not
+    //    a missing word, it is the INVERSE claim): `a ≠ b` read as "a b", and `5 ± 0.2` as "five zero
+    //    point two", which is a wrong number rather than a missing one.
+    //    The separators are consumed on both sides so the prefix form does not leave a doubled space.
+    for (let i = 0; i < RELATIONAL.length; i++)
+        s = rewrite(s, RELATIONAL_RE[i]!, ` ${RELATIONAL[i]![1]} `);
 
     return s;
 }
