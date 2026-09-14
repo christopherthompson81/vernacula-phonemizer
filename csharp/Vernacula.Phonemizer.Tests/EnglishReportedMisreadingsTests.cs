@@ -122,4 +122,19 @@ public class EnglishReportedMisreadingsTests
     [InlineData("thermostat", "θˈɝməstˌæt")]
     public void ThermocoupleAgreesWithEspeakAndWithItsOwnPlural(string w, string ipa)
         => Assert.Equal(ipa, Say(w));
+
+    [Theory]
+    [InlineData("CO₂", "sˈiː ˈoᶷ tʰˈuː")]
+    [InlineData("SO₂", "ˈɛs ˈoᶷ tʰˈuː")]
+    [InlineData("NO₂", "ˈɛn ˈoᶷ tʰˈuː")]
+    [InlineData("H2SO4", "ˈeᶦt͡ʃ tʰˈuː ˈɛs ˈoᶷ fˈɔːɹ")]
+    [InlineData("AS400", "ˈeᶦ ˈɛs fˈɔːɹ hˈʌndɹəd")]
+    // ⚠ TWO LETTERS ONLY — widening this turns COVID19 into "C O V I D nineteen".
+    [InlineData("COVID19", "koᶷvˈiːd nˈaᶦntˈiːn")]
+    // …and the ones that were already right, pinned as undisturbed.
+    [InlineData("CH₄", "sˈiː ˈeᶦt͡ʃ fˈɔːɹ")]
+    [InlineData("MP3", "ˈɛm pʰˈiː θɹˈiː")]
+    [InlineData("A380", "ˈeᶦ θɹˈiː hˈʌndɹəd ˈeᶦt̬i")]
+    public void ATwoLetterCapsRunGluedToDigitsIsACode(string text, string ipa)
+        => Assert.Equal(ipa, Say(text));
 }

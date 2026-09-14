@@ -383,3 +383,42 @@ same accidental coverage as the Commonwealth-spelling report. Inside a slashed r
 else those tokens can be, which is why the fix above is safe; bare `SF` is San Francisco and bare
 `HR` is home runs often enough that neither earns a unit entry, and the general leak wants its own
 change.
+
+## Run 9 — 2026-09-14 13:48 — `CO₂` read as "co two"
+
+**Report.** *"CO₂ reads as co two instead of see oh two."*
+
+**Question.** Why does `CH₄` spell out and `CO₂` not, when Run 4 fixed the subscript for both?
+
+**Raw finding — the same accidental coverage as every other report in this log.** The subscript fold
+is working; the difference is one step later, in the initialism pass:
+
+```
+CH₄    sˈiː ˈeᶦt͡ʃ fˈɔːɹ      ✓   `CH` has no vowel → isUnreadable → spelled
+CO₂    kʰˈoᶷ tʰˈuː           ✗   `CO` is pronounceable AND a dictionary word
+SO₂    sˈoᶷ tʰˈuː            ✗   "so two"
+NO₂    nˈoᶷ tʰˈuː            ✗   "no two"
+AS400  æz fˈɔːɹ hˈʌndɹəd     ✗   "az four hundred"
+H2SO4  ˈeᶦt͡ʃ tʰˈuː sˈoᶷ fˈɔːɹ ✗  "H two so four"
+```
+
+`CH₄` is right by luck. `CO`, `SO`, `NO`, `AS` are all pronounceable and all recorded, so every test
+in `core/initialisms.ts` passes them through as the word they spell.
+
+**Fix.** A two-letter caps run GLUED to digits is a code, not a word. Placed so it OUTRANKS the
+dictionary test, because the whole failing class is runs that ARE words — placing it after would fix
+nothing. The callback needed the match offset to tell the two `RUN_OR_CODE` alternatives apart; the
+existing `tok.length < 2` check only worked because a free-standing run cannot be one letter.
+
+⚠ **Two letters only, and `COVID19` is the case that says so.** Widening to any glued run turns it
+into "C O V I D nineteen". Longer glued runs are where the real words live; no two-letter caps run
+glued to a digit is a word being used as one.
+
+**Shared-tier change, measured as one.** This is `core/initialisms.ts`, which all 189 languages use.
+`dotnet test` 6,597 passed with **no golden changed** — the fleet's parity corpus contains no
+two-letter-plus-digits token, so nothing moved anywhere but the new tests.
+
+⚠ **Known limit, not fixed.** `Fe₂O₃` still reads "fay two oh three": `Fe` is MIXED case, and
+`RUN_OR_CODE` claims only all-caps runs. Covering mixed-case element symbols needs a periodic table,
+which is the chemical-name question the reporter raised separately and which was recommended against
+— so it is recorded here rather than started.

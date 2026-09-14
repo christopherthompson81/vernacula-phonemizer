@@ -164,11 +164,26 @@ export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): 
         // to reach this pass and exposed it.
         // ⚠ Bounded by `LATIN_MARK`, not `\p{M}` — see that declaration for why a Hebrew point following
         // a Latin run is adjacent rather than attached.
-        return rw(text, RUN_OR_CODE, (tok) => {
+        // ⚠ `at` AND `whole` ARE POSITIONAL, and safe here for one reason: `RUN_OR_CODE` has NO capture
+        // groups, so `String.replace` passes exactly (match, offset, string). Adding a group to that
+        // pattern would shift these silently — put any future group at the END, or read them off the
+        // tail instead.
+        return rw(text, RUN_OR_CODE, (tok: string, at: number, whole: string): string => {
+            // Which alternative matched: a run GLUED to digits, or a free-standing one.
+            const glued = /^\d/u.test(whole.slice(at + tok.length));
             const low = lower(tok);
             const spelled = spellOut(low, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word
             if (d.acronymLetters.has(low)) return spelled ?? tok; // lexical: a listed exception
+            // ⚠ A TWO-LETTER RUN GLUED TO DIGITS IS A CODE, NOT A WORD, and this MUST OUTRANK the
+            // dictionary test below — the entire failing class is runs that ARE words. `CO₂` read as
+            // "co two", `SO₂` as "so two", `NO₂` as "no two", `AS400` as "az four hundred", and
+            // `H2SO4` as "H two so four". They reach here pronounceable and recorded, so every test
+            // after this one passes them through as the word they spell.
+            // ⚠ AND ONLY TWO LETTERS. A longer glued run is where the real words live — `COVID19` must
+            // stay a word, not become "C O V I D nineteen" — and no two-letter caps run glued to a
+            // digit is a word being used as one.
+            if (glued && tok.length === 2) return spelled ?? tok;
             if (d.isRecorded(low)) return tok; // lexical: the dictionary owns it
             if (d.isUnreadable(low)) return spelled ?? tok; // OOV: nothing else could be said
             return tok; // OOV but pronounceable — the OOV g2p reads it as a word
