@@ -13,6 +13,7 @@ import { enterEngine, noteAssembled, noteToken } from "../../core/trace.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
+import { americanSpelling } from "./spellingVariants.ts";
 
 import {
     createEnglishG2p,
@@ -118,7 +119,15 @@ export class EnglishPhonemizer {
      *  caller to handle differently). No OOV G2P and no clause/stress processing — the raw pronunciation to remap. */
     knownWord(word: string): string | undefined {
         const lower = word.toLowerCase();
-        return this.lexicon.get(lower) ?? this.heteronyms.get(lower)?.default;
+        const direct = this.lexicon.get(lower) ?? this.heteronyms.get(lower)?.default;
+        if (direct !== undefined) return direct;
+        // …including under a Commonwealth spelling, which matters in BOTH directions here. Naija
+        // writes Nigerian English, so `colour` there is a known-English word to nativise and not
+        // the substrate loan an unfolded miss would make it; and englishNeural.ts uses this as its
+        // "already known" test, so folding keeps it from sending the BiLSTM a word `resolveWord`
+        // is going to answer from the lexicon anyway.
+        const american = americanSpelling(lower, (w) => this.lexicon.has(w));
+        return american === undefined ? undefined : this.lexicon.get(american);
     }
 
     /** `text` with an `oovOverride`, for the registry's FOREIGN reader (core/foreign.ts) — the path that reads an
@@ -185,6 +194,19 @@ export class EnglishPhonemizer {
             lookupKey = lower.slice(0, -1);
 
         let over = this.lexicon.get(lookupKey);
+        if (over === undefined) {
+            // Commonwealth spelling of a word the lexicon holds under its American one? The lexicon
+            // is CMUdict-derived and its coverage of British spellings is accidental (it has
+            // `colour` and `labour`, not `vapour` or `analyse`), so fold the spelling and retry
+            // before treating the word as genuinely unknown. spellingVariants.ts only ever returns
+            // a spelling that IS a headword, so this either finds the right word or changes nothing.
+            // The rules are ASCII-alphabetic throughout, so anything else cannot match one and the
+            // gate keeps the fold off the digit/symbol keys that reach here.
+            const american = /^[a-z']+$/.test(lookupKey)
+                ? americanSpelling(lookupKey, (w) => this.lexicon.has(w))
+                : undefined;
+            if (american !== undefined) over = this.lexicon.get(american);
+        }
         if (over === undefined) {
             // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
             // so contractions/loanwords G2P their letters).

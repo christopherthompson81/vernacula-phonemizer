@@ -100,6 +100,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     private static readonly JsRe CURLY_APOSTROPHE = JsRegex.Compile("’", "gu");
     private static readonly JsRe APOSTROPHES = JsRegex.Compile("'", "g");
     private static readonly JsRe ASCII_WORD = JsRegex.Compile("^[a-z]+$");
+    private static readonly JsRe ASCII_LOWER_WORD = JsRegex.Compile("^[a-z']+$");
     private static readonly JsRe GROUPING = JsRegex.Compile("[,.]", "g");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "g");
     private static readonly JsRe PRIMARY_MARK = JsRegex.Compile("ˈ", "g");
@@ -112,7 +113,9 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     {
         var lower = Js.ToLowerCase(word);
         if (_lexicon.TryGetValue(lower, out var v)) return v;
-        return _heteronyms.TryGetValue(lower, out var het) ? het.Default : null;
+        if (_heteronyms.TryGetValue(lower, out var het)) return het.Default;
+        var american = SpellingVariants.AmericanSpelling(lower, w => _lexicon.ContainsKey(w));
+        return american is not null && _lexicon.TryGetValue(american, out var us) ? us : null;
     }
 
     /**
@@ -172,6 +175,13 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         }
 
         var over = _lexicon.TryGetValue(lookupKey, out var lex) ? lex : null;
+        if (over is null)
+        {
+            var american = ASCII_LOWER_WORD.IsMatch(lookupKey)
+                ? SpellingVariants.AmericanSpelling(lookupKey, w => _lexicon.ContainsKey(w))
+                : null;
+            if (american is not null) over = _lexicon.TryGetValue(american, out var us) ? us : null;
+        }
         if (over is null)
         {
             var g2pKey = APOSTROPHES.Replace(lookupKey, "");
