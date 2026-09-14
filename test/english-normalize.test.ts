@@ -63,7 +63,13 @@ describe("English text normalization", () => {
      *  ⚠ IT MUST RUN BEFORE THE CONTEXT RULE: with that order reversed, "from 1918-1939" had its left
      *  year consumed by the context arm and came out half-converted as "from 19 18-1939". */
     test("a dashed pair of years is a range, and the left one is not eaten first", () => {
-        expect(normalizeEnglish("guru nanak 1469–1539")).toBe("guru nanak 14 69–15 39");
+        // ⚠ THE EN DASH NOW READS AS "to" — this expectation moved deliberately. The range arm below
+        // converts both years and always left the dash sitting in the text, where the tokenizer
+        // dropped it and the span went unsaid; a typographic dash between digits is now spoken. The
+        // ASCII-hyphen lines that follow are UNCHANGED, which is the point: the hyphen is already
+        // dates, phone numbers and scores, so only the typographic dashes are claimable. What this
+        // test exists for — that the LEFT year is not eaten first — is unaffected either way.
+        expect(normalizeEnglish("guru nanak 1469–1539")).toBe("guru nanak 14 69 to 15 39");
         expect(normalizeEnglish("from 1918-1939 the war")).toBe("from 19 18-19 39 the war");
         expect(normalizeEnglish("the 1418 - 1450 period")).toBe("the 14 18 - 14 50 period");
         // ⚠ 2010s RANGES CONVERT TOO, matching the tight contexts ("in 2011" → "20 11"). Restricting the

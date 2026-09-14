@@ -149,6 +149,10 @@ public static class Normalize
     private static readonly JsRe[] RELATIONAL_RE =
         RELATIONAL.Select(r => JsRegex.Compile($"[ \\t]*{r.Sign}[ \\t]*", "gu")).ToArray();
 
+    /** A dash between two numbers is a range. ⚠ TYPOGRAPHIC dashes only — the ASCII hyphen is already
+     *  ISO dates, phone numbers and scores. See the TS. */
+    private static readonly JsRe NUMBER_RANGE = JsRegex.Compile("(\\d)[\\u2012\\u2013\\u2014](?=\\d)", "gu");
+
     private static readonly JsRe TY_YEAR = JsRegex.Compile("\\bTY\\s?(\\d{4})\\b", "gu");
 
     /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
@@ -621,6 +625,8 @@ public static class Normalize
         s = Rewrite(s, EQUALS, "$1 equals $2");
         s = Rewrite(s, LESS_THAN, "$1 less than ");
         s = Rewrite(s, GREATER_THAN, "$1 greater than ");
+
+        s = Rewrite(s, NUMBER_RANGE, "$1 to ");
 
         for (var i = 0; i < RELATIONAL.Length; i++)
             s = Rewrite(s, RELATIONAL_RE[i], $" {RELATIONAL[i].Words} ");

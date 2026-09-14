@@ -986,6 +986,19 @@ export function normalizeEnglish(input: string): string {
     //    a missing word, it is the INVERSE claim): `a ≠ b` read as "a b", and `5 ± 0.2` as "five zero
     //    point two", which is a wrong number rather than a missing one.
     //    The separators are consumed on both sides so the prefix form does not leave a doubled space.
+    //    A DASH BETWEEN TWO NUMBERS IS A RANGE, and it was dropped outright: "the 5–15% flammable
+    //    range" read as "five fifteen percent", and `2019–2020` as "twenty nineteen twenty twenty".
+    //    ⚠ THE TYPOGRAPHIC DASHES ONLY — figure, en and em. The ASCII hyphen is NOT claimable here and
+    //    the measurement says why: `2024-01-15` is already read as a DATE by the rule above, `555-1234`
+    //    is a phone number and `3-2` is a score, so claiming it would turn all three into ranges. A
+    //    typographic dash is none of those things — it is what a document uses for a span.
+    //    ⚠ AND NOT U+2212 MINUS, which is a sign and belongs to the negatives rule at step 0f.
+    //    ⚠ UNSPACED, because a SPACED en dash is a parenthetical break ("the result — 15 — was high"),
+    //    not a span. The range form is written tight in every style guide that has an opinion.
+    //    Ordered after the year rule, so `2019–2020` has already become `20 19–20 20` and the dash is
+    //    still between digits: the halves read pair-wise and the range still says "to".
+    s = rewrite(s, /(\d)[\u2012\u2013\u2014](?=\d)/gu, "$1 to ");
+
     for (let i = 0; i < RELATIONAL.length; i++)
         s = rewrite(s, RELATIONAL_RE[i]!, ` ${RELATIONAL[i]![1]} `);
 

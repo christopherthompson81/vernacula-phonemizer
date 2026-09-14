@@ -256,3 +256,31 @@ describe("a two-letter caps run glued to digits is a code, not a word", () => {
         expect(phonemize("A380", "en")).toBe("ˈeᶦ θɹˈiː hˈʌndɹəd ˈeᶦt̬i");
     });
 });
+
+// "the 5–15% methane-in-air flammable range" read as "five fifteen percent" — the en dash dropped
+// outright, and with it the only thing marking the two numbers as a span.
+describe("a dash between two numbers is a range", () => {
+    test("the typographic dashes read as 'to'", () => {
+        expect(phonemize("the 5–15% flammable range", "en"))
+            .toBe("ðə fˈaᶦv tʰuː fɪftˈiːn pɚsˈɛnt flˈæməbəɫ ɹˈeᶦnd͡ʒ");
+        expect(phonemize("pages 5–15", "en")).toBe("pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn");
+        expect(phonemize("5—15", "en")).toContain("tʰuː");          // em dash
+        // Ordered after the year rule, so both halves still read pair-wise AND the range says "to".
+        expect(phonemize("2019–2020", "en"))
+            .toBe("twˈɛnti nˈaᶦntˈiːn tʰuː twˈɛnti twˈɛnti");
+    });
+
+    // ⚠ THE ASCII HYPHEN IS NOT CLAIMABLE, and these are the three reasons why. Each is already
+    // something else, and claiming the hyphen would turn all of them into ranges.
+    test("the ASCII hyphen is left alone — it is already dates, phones and scores", () => {
+        expect(phonemize("2024-01-15", "en")).toContain("d͡ʒˈænjuːˌɛɹi"); // a date
+        expect(phonemize("a score of 3-2", "en")).not.toContain("tʰuː tʰˈuː");
+        expect(phonemize("call 555-0100", "en")).not.toContain(" tʰuː ");
+    });
+
+    // ⚠ A SPACED en dash is a parenthetical break, not a span; and a dash between LETTERS is neither.
+    test("the shapes that are not ranges", () => {
+        expect(phonemize("5 – 15", "en")).not.toContain("tʰuː");
+        expect(phonemize("a–b", "en")).not.toContain("tʰuː");
+    });
+});

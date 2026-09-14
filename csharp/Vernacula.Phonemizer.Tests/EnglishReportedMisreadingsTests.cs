@@ -137,4 +137,9 @@ public class EnglishReportedMisreadingsTests
     [InlineData("A380", "ˈeᶦ θɹˈiː hˈʌndɹəd ˈeᶦt̬i")]
     public void ATwoLetterCapsRunGluedToDigitsIsACode(string text, string ipa)
         => Assert.Equal(ipa, Say(text));
+
+    [Theory]
+    [InlineData("pages 5–15", "pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn")]
+    [InlineData("2019–2020", "twˈɛnti nˈaᶦntˈiːn tʰuː twˈɛnti twˈɛnti")]
+    public void ADashBetweenTwoNumbersIsARange(string text, string ipa) => Assert.Equal(ipa, Say(text));
 }
