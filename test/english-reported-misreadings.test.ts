@@ -222,3 +222,37 @@ describe("thermocouple", () => {
         expect(phonemize("thermostat", "en")).toContain("θˈɝmə");
     });
 });
+
+// `CO₂` read as the word "co" plus a number. Same accidental coverage as every other report here:
+// `CH₄` is right only because `CH` has no vowel, so the phonotactic gate calls it unpronounceable and
+// spells it. `CO`, `SO`, `NO` and `AS` are all pronounceable AND dictionary words, so every test in
+// the initialism pass passed them through as the word they spell.
+describe("a two-letter caps run glued to digits is a code, not a word", () => {
+    test("the chemical formulae that were reading as words", () => {
+        expect(phonemize("CO₂", "en")).toBe("sˈiː ˈoᶷ tʰˈuː");
+        expect(phonemize("SO₂", "en")).toBe("ˈɛs ˈoᶷ tʰˈuː");
+        expect(phonemize("NO₂", "en")).toBe("ˈɛn ˈoᶷ tʰˈuː");
+        expect(phonemize("H2SO4", "en")).toBe("ˈeᶦt͡ʃ tʰˈuː ˈɛs ˈoᶷ fˈɔːɹ");
+        expect(phonemize("CO₂", "en")).toBe(phonemize("CO2", "en")); // the subscript fold, still holding
+    });
+
+    // Not only chemistry — any two-letter code glued to digits had the same problem.
+    test("…and the alphanumeric codes", () => {
+        expect(phonemize("AS400", "en")).toBe("ˈeᶦ ˈɛs fˈɔːɹ hˈʌndɹəd"); // was "az four hundred"
+    });
+
+    // ⚠ TWO LETTERS ONLY. A longer glued run is where the real words live, and this is the case that
+    // says so: widening it to any length turns COVID19 into "C O V I D nineteen".
+    test("a longer glued run is still a word", () => {
+        expect(phonemize("COVID19", "en")).toBe("koᶷvˈiːd nˈaᶦntˈiːn");
+    });
+
+    // The cases that already worked, pinned so the new rule is shown not to have disturbed them.
+    test("the runs that were already right are unchanged", () => {
+        expect(phonemize("CH₄", "en")).toBe("sˈiː ˈeᶦt͡ʃ fˈɔːɹ");
+        expect(phonemize("H₂O", "en")).toBe("ˈeᶦt͡ʃ tʰˈuː ˈoᶷ");
+        expect(phonemize("NH₃", "en")).toBe("ˈɛn ˈeᶦt͡ʃ θɹˈiː");
+        expect(phonemize("MP3", "en")).toBe("ˈɛm pʰˈiː θɹˈiː");
+        expect(phonemize("A380", "en")).toBe("ˈeᶦ θɹˈiː hˈʌndɹəd ˈeᶦt̬i");
+    });
+});

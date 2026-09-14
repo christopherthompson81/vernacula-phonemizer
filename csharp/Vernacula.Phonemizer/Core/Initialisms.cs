@@ -96,6 +96,12 @@ public static class Initialisms
                 var spelled = SpellOut(low, d.LetterName);
                 if (tok.Length < 2) return spelled ?? tok; // attached code: a letter, never a word
                 if (d.AcronymLetters.Contains(low)) return spelled ?? tok; // lexical: a listed exception
+                // ⚠ A two-letter run GLUED to digits is a code, not a word, and this must outrank the
+                // dictionary test below — the whole failing class is runs that ARE words (CO₂, SO₂, NO₂,
+                // AS400). ⚠ `IsAsciiDigit`, not `char.IsDigit`: the TS gate is JS `\d`, which is ASCII.
+                var after = m.Index + tok.Length;
+                var glued = after < text.Length && char.IsAsciiDigit(text[after]);
+                if (glued && tok.Length == 2) return spelled ?? tok;
                 if (d.IsRecorded(low)) return tok; // lexical: the dictionary owns it
                 if (d.IsUnreadable(low)) return spelled ?? tok; // OOV: nothing else could be said
                 return tok; // OOV but pronounceable — the OOV g2p reads it as a word
