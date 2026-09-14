@@ -164,10 +164,12 @@ export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): 
         // to reach this pass and exposed it.
         // ⚠ Bounded by `LATIN_MARK`, not `\p{M}` — see that declaration for why a Hebrew point following
         // a Latin run is adjacent rather than attached.
-        return rw(text, RUN_OR_CODE, ((tok: string, ...rest: unknown[]): string => {
-            const whole = rest[rest.length - 1] as string;
-            const at = rest[rest.length - 2] as number;
-            // Which of the two alternatives matched: a run GLUED to digits, or a free-standing one.
+        // ⚠ `at` AND `whole` ARE POSITIONAL, and safe here for one reason: `RUN_OR_CODE` has NO capture
+        // groups, so `String.replace` passes exactly (match, offset, string). Adding a group to that
+        // pattern would shift these silently — put any future group at the END, or read them off the
+        // tail instead.
+        return rw(text, RUN_OR_CODE, (tok: string, at: number, whole: string): string => {
+            // Which alternative matched: a run GLUED to digits, or a free-standing one.
             const glued = /^\d/u.test(whole.slice(at + tok.length));
             const low = lower(tok);
             const spelled = spellOut(low, d.letterName);
@@ -185,7 +187,7 @@ export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): 
             if (d.isRecorded(low)) return tok; // lexical: the dictionary owns it
             if (d.isUnreadable(low)) return spelled ?? tok; // OOV: nothing else could be said
             return tok; // OOV but pronounceable — the OOV g2p reads it as a word
-        }) as unknown as Parameters<typeof rw>[2]);
+        });
     };
 }
 
