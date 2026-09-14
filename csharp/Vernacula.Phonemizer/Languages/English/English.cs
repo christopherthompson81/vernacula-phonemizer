@@ -19,6 +19,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     private readonly IReadOnlyDictionary<string, string> _clausePunctuation;
     private readonly IReadOnlySet<string> _nonTonicFinal;
     private readonly IReadOnlySet<string> _whSecondary;
+    private readonly IReadOnlyDictionary<string, string> _clauseInitialStressed;
 
     public EnglishPhonemizer(
         IReadOnlyDictionary<string, string> lexicon,
@@ -28,7 +29,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         IReadOnlySet<string> unstressed,
         IReadOnlyDictionary<string, string> clausePunctuation,
         IReadOnlySet<string> nonTonicFinal,
-        IReadOnlySet<string> whSecondary)
+        IReadOnlySet<string> whSecondary,
+        IReadOnlyDictionary<string, string> clauseInitialStressed)
     {
         _lexicon = lexicon;
         _heteronyms = heteronyms;
@@ -38,6 +40,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         _clausePunctuation = clausePunctuation;
         _nonTonicFinal = nonTonicFinal;
         _whSecondary = whSecondary;
+        _clauseInitialStressed = clauseInitialStressed;
     }
 
     private static readonly JsRe TRAILING_DIACRITICS = JsRegex.Compile("[̀-ͯːˈˌ‿ᶦᶷʰʲ]", "u");
@@ -358,15 +361,24 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var traced = new Dictionary<string, (Src Src, List<string> Emitted, List<int> Parts)>();
         foreach (var c in clauses)
         {
+            // A clause-initial coordinator takes its STRONG form — see the TS for the A/B evidence and
+            // for why this is a map rather than a list (`and` has no strong form in CMUdict).
+            var head = c.Items.Count > 0 ? c.Items[0] : null;
+            string? strong = null;
+            if (head is not null) _clauseInitialStressed.TryGetValue(head.Word, out strong);
             foreach (var it in c.Items)
             {
+                if (ReferenceEquals(it, head) && strong is not null) { it.Display = strong; continue; }
                 if (_whSecondary.Contains(it.Word)) it.Display = PRIMARY_MARK.Replace(it.Citation, "ˌ"); // wh-pronoun → secondary
                 else if (it.Reduced) it.Display = PRIMARY_MARK.Replace(it.Citation, ""); // unstressed function word / decimal point
             }
             if (c.Items.Count > 0)
             {
                 var terminal = c.Mark is null || c.Mark == "." || c.Mark == "?" || c.Mark == "!";
-                var hasPrimary = c.Items.Any(it => it.Display.Contains('ˈ'));
+                // ⚠ The coordinator does not count towards the clause's primary, or restoring its stress
+                // would silently cancel the tonic guarantee below.
+                var hasPrimary = c.Items.Any(it =>
+                    !(ReferenceEquals(it, head) && strong is not null) && it.Display.Contains('ˈ'));
                 var last = c.Items[^1];
                 var promote = !hasPrimary || (terminal && !last.Display.Contains('ˈ') && !_nonTonicFinal.Contains(last.Word));
                 if (promote)
@@ -452,7 +464,8 @@ public static class EnglishFactory
             unstressed,
             manifest.ClausePunctuation,
             new HashSet<string>(manifest.NonTonicFinal, StringComparer.Ordinal),
-            new HashSet<string>(manifest.WhSecondary, StringComparer.Ordinal));
+            new HashSet<string>(manifest.WhSecondary, StringComparer.Ordinal),
+            manifest.ClauseInitialStressed);
     }
 
     internal static void RegisterSelf() => Registry.Register("english", () => CreateEnglish());

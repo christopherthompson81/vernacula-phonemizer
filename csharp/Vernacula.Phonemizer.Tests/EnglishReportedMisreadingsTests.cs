@@ -68,4 +68,15 @@ public class EnglishReportedMisreadingsTests
             Phonemizer.Phonemize("CH₄", l) != Phonemizer.Phonemize("CH4", l)).ToList();
         Assert.Empty(differ);
     }
+
+    [Theory]
+    [InlineData("It rained, and it was cold.", "ɪt ɹˈeᶦnd , ˈænd ɪt wʌz kʰˈoᶷɫd .")]
+    [InlineData("And then we left.", "ˈænd ðˈɛn wiː lˈɛft .")]
+    [InlineData("dogs and cats", "dˈɑːɡz ənd kʰˈæts")]
+    [InlineData("he and I", "hiː ənd ˈaᶦ")]
+    [InlineData("The man arrived, the woman left.", "ðə mˈæn ɚˈaᶦvd , ðə wˈʊmən lˈɛft .")]
+    [InlineData(", and it was", "ˈænd ɪt wˈʌz")]
+    [InlineData("Coffee, tea, or water.", "kʰˈɑːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .")]
+    public void AClauseInitialCoordinatorTakesItsStrongForm(string text, string ipa)
+        => Assert.Equal(ipa, Say(text));
 }

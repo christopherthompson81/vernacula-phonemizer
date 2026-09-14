@@ -545,6 +545,26 @@
     // NOT listed here.
     "whSecondary": ["what", "which", "who", "whom", "whose"],
 
+    // THE STRONG FORM OF A COORDINATOR THAT OPENS A CLAUSE. Both reduce everywhere else; one
+    // RESUMING after a pause is phrase-initial and carries the beat that restarts the clause.
+    //
+    // ⚠ IT IS A MAP, NOT A LIST, BECAUSE `and` HAS NO STRONG FORM TO FALL BACK ON. CMUdict carries
+    // only the weak `AH0 N D`, so the lexicon's citation IS `ənd` and "keep the citation stress"
+    // would be a no-op for exactly the word this exists for. The strong form is written out.
+    //
+    // ⚠ `or` IS DELIBERATELY ABSENT, and was in an earlier draft. It is the obvious parallel — also a
+    // coordinator, also in "unstressedWords" — but it was extrapolated from `and` rather than tested,
+    // and the A/B did not support it: the listener reported the strong and reduced readings as
+    // differing only in "pure speaker dynamicism", with no meaning carried either way. `and` earns its
+    // entry because the reduced reading was reported as actively WRONG ("ind"). One word, one piece of
+    // evidence; the parallel that sounded obvious is left out until something measures it.
+    //
+    // ⚠ COORDINATORS ONLY — the other clause-initial function words (the, to, of, in) must keep
+    // reducing; "…, the man arrived" does not want `ðˈiː`. What licenses this is the resumption, not
+    // the position. "but", "so", "nor" and "yet" are absent for a different reason: they are not in
+    // "unstressedWords" to begin with and so were never reduced.
+    "clauseInitialStressed": { "and": "ˈænd" },
+
     // ⚠ ENGLISH NEEDS ALMOST NO LETTER-NAME DATA, and that is why there is no `letterNames` table here.
     // CMUdict already carries all 26 single letters with their letter-NAME pronunciations (f = EH1 F,
     // h = EY1 CH, w = D AH1 B AH0 L Y UW0), so emitting the bare letters space-separated resolves

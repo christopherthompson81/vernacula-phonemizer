@@ -78,3 +78,37 @@ describe("subscript digits", () => {
         expect(phonemize("x²", "en")).toBe("ˈɛks skwˈɛɹd");
     });
 });
+
+// A clause-initial coordinator is not in a reduction environment. Reported as `and` sounding like
+// "ind" in "…, built September, and tested from November" — the two `and`s in that sentence were
+// byte-identical before this, so nothing downstream could have told them apart. Judged by ear on
+// synthesized A/B; the unreduced reading was preferred.
+describe("a coordinator that resumes after a pause takes its strong form", () => {
+    test("a clause-initial and is strong, mid-clause ones are not", () => {
+        expect(phonemize("It rained, and it was cold.", "en"))
+            .toBe("ɪt ɹˈeᶦnd , ˈænd ɪt wʌz kʰˈoᶷɫd .");
+        expect(phonemize("And then we left.", "en")).toBe("ˈænd ðˈɛn wiː lˈɛft ."); // utterance-initial
+        expect(phonemize("dogs and cats", "en")).toBe("dˈɑːɡz ənd kʰˈæts");         // mid-clause: reduced
+        expect(phonemize("he and I", "en")).toBe("hiː ənd ˈaᶦ");
+    });
+
+    // ⚠ COORDINATORS ONLY. Clause-initial function words generally must keep reducing, or every
+    // list and every subordinate clause acquires a stressed article.
+    test("other clause-initial function words still reduce", () => {
+        expect(phonemize("The man arrived, the woman left.", "en"))
+            .toBe("ðə mˈæn ɚˈaᶦvd , ðə wˈʊmən lˈɛft .");
+    });
+
+    // ⚠ `or` is the obvious parallel and is NOT in the map — extrapolated, then not supported by the
+    // A/B (reported as differing only in speaker dynamicism). Pinned so re-adding it is deliberate.
+    test("or is left reduced, because nothing measured it", () => {
+        expect(phonemize("Coffee, tea, or water.", "en")).toBe("kʰˈɑːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .");
+    });
+
+    // ⚠ The strong coordinator must NOT satisfy the clause's primary-stress test, or restoring it
+    // silently cancels the tonic guarantee: this clause has no other primary, and the nucleus has to
+    // still land on the final word rather than staying at the head.
+    test("the tonic guarantee still fires behind a strong coordinator", () => {
+        expect(phonemize(", and it was", "en")).toBe("ˈænd ɪt wˈʌz");
+    });
+});

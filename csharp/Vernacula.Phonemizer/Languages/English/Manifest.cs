@@ -39,6 +39,8 @@ public sealed class EnglishManifest
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public IReadOnlyList<string> NonTonicFinal { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> WhSecondary { get; init; } = Array.Empty<string>();
+    public IReadOnlyDictionary<string, string> ClauseInitialStressed { get; init; }
+        = new Dictionary<string, string>();
     public ArpabetDef Arpabet { get; init; } = new();
     public EnglishNumbersDef Numbers { get; init; } = new();
     public G2pClasses G2pClasses { get; init; } = new();

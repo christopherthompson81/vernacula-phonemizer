@@ -175,3 +175,37 @@ wants it preserved.
 
 `x²` is untouched — a subscript is a count, a superscript is a power — and the markup.ts note is
 updated to record that its premise no longer holds.
+
+## Run 5 — 2026-09-14 12:55 — `and` heard as "ind"
+
+**Report.** *"'and' can sometimes sound like 'ind'"*, in a list sentence where the SECOND `and` —
+the one resuming after a comma — was the bad one.
+
+**Question.** Is the reader producing something different for the two `and`s?
+
+**Raw finding.** No. Both are `ənd`, byte-identical, in IPA and in Kokoro tokens alike. So nothing
+downstream could have told them apart, and the difference the listener heard is the acoustic model
+responding to position. That ruled out a reader defect and made this a question about what the
+reader SHOULD emit, which only a listener can answer — so: synthesize both and ask.
+
+**A/B (Kokoro af_heart).** A = as-is (`ənd`), B = the clause-initial one forced to `ˈænd`.
+Reported: **B is better.** A clause-initial coordinator is not in a reduction environment — it is
+phrase-initial and carries the beat that restarts the clause.
+
+**⚠ The first implementation was a no-op for the only word it was for.** It was written as a SET of
+words that "keep their citation stress", which is correct for `or` (CMUdict has the strong `AO1 R`,
+lexicon `ˈɔːɹ`) and does nothing whatever for `and`: CMUdict carries only the weak `AH0 N D`, so
+`and`'s citation IS `ənd`. The probe showed `or` changing and `and` not, which is the only reason it
+was caught. It is a MAP to the strong form now, written out, so neither word depends on which form
+CMUdict happened to record.
+
+**⚠ `or` was extrapolated and is NOT shipped.** It is the obvious parallel — also a coordinator, also
+in `unstressedWords` — and the A/B did not support it: *"I could hear a difference, but not one that
+carried any meaning to me — just pure speaker dynamicism."* `and` earns its entry because the reduced
+reading was reported as actively wrong; `or` gets nothing until something measures it. Its absence is
+pinned by a test so re-adding it has to be deliberate.
+
+Coordinators only: clause-initial `the`, `to`, `of`, `in` must keep reducing — "…, the man arrived"
+does not want `ðˈiː`. And the strong coordinator is excluded from the clause's primary-stress test,
+or restoring it silently cancels the tonic guarantee: ", and it was" has no other primary, and the
+nucleus must still land on `wˈʌz` rather than staying at the head.
