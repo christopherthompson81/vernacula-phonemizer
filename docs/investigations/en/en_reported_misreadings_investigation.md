@@ -506,3 +506,67 @@ changes what every character class in it means, including the ones inside lookar
 ⚠ **Left undone.** `3000 rev. per minute` still reads "reverend" — that `rev.` is *revolutions*, and
 telling it apart needs a preceding number rather than a following designator. Not reported, genuinely
 ambiguous, and a different arm; recorded rather than guessed at.
+
+## Run 12 — 2026-09-15 15:10 — a doubled capital read as one vowel
+
+**Report.** A project code whose last field is `-AA` read as one run-together
+vowel instead of two letter names. Heard through Kokoro, seen against the
+reader's on-screen IPA.
+
+**Question.** Is the code's whole shape misread, or only the doubled field?
+
+**Command.** `phonemize("(ABC-AA)", "en")` and neighbours.
+
+**Raw finding.**
+
+```
+(ABC-AA)  → ˈeᶦbiːsˌiː ˈɑː      ⚠ ABC is letters, AA is the WORD [ˈɑː]
+(ABC-BB)  → ˈeᶦbiːsˌiː bˈiː bˈiː   BB is already letters
+AAA       → tɹˌɪpəlˈeᶦ            "triple-A", a recorded reading
+```
+
+So only the doubled field, and not because it is doubled: `AA` is a CMUdict
+entry (the Hawaiian lava word), so `isRecorded` claims it and the initialism
+pass hands it to the dictionary — which is the documented, correct behaviour of
+that test for `CD`, `TV`, `PC`.
+
+**Census, because one token is not a class.** All 676 two-letter capital runs,
+each in a lowercase frame (`the XX thing`), classified by whether the reading
+comes back as one token or as separate letter names:
+
+```
+read as a WORD: 315/676
+doubled among them: AA CC EE MM OO SS UU YY
+```
+
+The 315 is not a defect count — most of it is CMUdict's own letter readings
+(`CD` → siːdˈiː, `TV`, `PC`, `DC`, `FM`, `IQ`), which are one token with one
+stress and better prosody than spelling out. The genuinely wrong ones are the
+doubled capitals, and there are six:
+
+```
+AA [ˈɑː]   the lava word            MM [m]    the interjection
+EE [ˈiː]   ONE letter name for two  OO [ˈuː]  UU [ˈʌ]  YY [d͡ʒˈiː]
+```
+
+`EE` is the one worth pausing on: it returns a plausible-looking reading that is
+exactly half the token. `CC` and `SS` are on the list of doubled capitals but are
+NOT defects — CMUdict records both with their letter readings already.
+
+**Implication.** A repeated capital is an identifier, a date mask or a size, and
+never a word being used as one. But that is a lexical fact about English, and
+`initialisms.ts` is explicit that lexical facts belong in the manifest rather
+than in logic ("⚠ THERE IS DELIBERATELY NO LENGTH-BASED LEXICALIZATION
+THRESHOLD"). So the fix is six entries in `acronymLetters`, not a doubled-letter
+rule. Data-only, so the C# port inherits it by reading the same `english.jsonc` —
+no port change and parity holds by construction.
+
+**Turned up by the same run, and fixed with it:** `YYYY-MM-DD` read its first
+field as the invented word [jˈiːʲiʲi]. `DD` needs no entry (unrecorded and
+unpronounceable, so the OOV rule already spells it); `yyyy` gets one.
+
+**⚠ NOT FIXED, found while measuring.** `the II thing` → `ðə ðə sˈɛkənd θˈɪŋ` —
+"the the second". The Roman-numeral pass claims `II` and expands it to an
+ordinal WITH its article, without noticing the article already there. Pre-existing,
+unrelated to this report, and a different pass; recorded rather than folded into
+an unrelated change.

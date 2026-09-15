@@ -434,6 +434,21 @@
         // ⟨cr⟩ is a legal onset and ⟨a⟩ a vowel, so the phonotactic test calls this READABLE and leaves it
         // to the g2p, which duly invents the word [kɹˈæ]. It is said letter by letter.
         "cra",
+        // DOUBLED LETTERS. A repeated capital is a code — an alphanumeric identifier, a date mask
+        // (YYYY-MM-DD), a size (AA battery) — and never a word being used as one, but each of these
+        // reaches the initialism pass looking like one and is read as a word:
+        //     AA [ˈɑː]  the Hawaiian lava word, which CMUdict records
+        //     MM [m]    the interjection, likewise recorded
+        //     EE [ˈiː]  ONE letter name for two letters — the worst of them, because it looks right
+        //     OO [ˈuː]  UU [ˈʌ]  YY [d͡ʒˈiː]  invented by the OOV g2p, which finds them pronounceable
+        // Reported as a project code ending in `-AA` read as one run-together vowel instead of two
+        // letter names. CC and SS are absent on purpose: CMUdict already records those two with their
+        // LETTER readings, in one token with one stress, which is better prosody than spelling out.
+        "aa", "ee", "mm", "oo", "uu", "yy",
+        // …and the four-Y date mask, which the same measurement turned up: `YYYY-MM-DD` read its
+        // first field as the invented word [jˈiːʲiʲi]. DD needs no entry — it is unrecorded and
+        // unpronounceable, so the OOV rule already spells it.
+        "yyyy",
     ],
 
     "unstressedWords": [
