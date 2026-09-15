@@ -570,3 +570,93 @@ unpronounceable, so the OOV rule already spells it); `yyyy` gets one.
 ordinal WITH its article, without noticing the article already there. Pre-existing,
 unrelated to this report, and a different pass; recorded rather than folded into
 an unrelated change.
+
+## Run 13 — 2026-09-15 16:20 — a space-guarded dash introduces no pause
+
+**Report.** Space-guarded hyphens, en dashes and em dashes should introduce a
+pause in sentence prosody. Heard in a question with a spaced hyphen mid-clause.
+
+**Command.** `phonemize` on the four written forms against the comma baseline.
+
+**Raw finding.** All four are dropped outright, and the comma is not:
+
+```
+the answer - a long one - arrived   → ðə ˈænsɚ ə lˈɔːŋ wˈʌn ɚˈaᶦvd
+the answer -- … --                  → (identical, no boundary)
+the answer – … –                    → (identical)
+the answer — … —                    → (identical)
+the answer, a long one, arrived     → ðə ˈænsɚ , ə lˈɔːŋ wˈʌn , ɚˈaᶦvd
+```
+
+**Implication.** The rule immediately above this one in `normalize.ts` had
+already written the diagnosis and not acted on it — "⚠ UNSPACED, because a
+SPACED en dash is a parenthetical break, not a span". The span rule correctly
+refused the spaced form and nothing else claimed it.
+
+The pause is a COMMA, not a word: `clausePunctuation` already maps `;` and `:`
+to `,` for the same reason, and inventing a connective would be reading
+something the writer did not write.
+
+**The disambiguation is the spaces, and it was measured against the joiner:**
+
+```
+a well-known case       → ə wˈɛɫ nˈoᶷn kʰˈeᶦs        unchanged ✓
+state-of-the-art design → stˈeᶦt ʌv ðə ˈɑːɹt …       unchanged ✓
+re-enter the code       → ɹˈeᶦ ˈɛntɚ …               unchanged ✓
+```
+
+**A second form, found while checking the first.** The UNSPACED em dash — the
+standard US style — was dropped just as completely, and it is claimed too. The
+unspaced EN dash is NOT: in English it is a joiner (`Bose–Einstein`), and
+between digits it is a span the range rule has already turned into "to". Split
+by evidence rather than symmetry.
+
+**A list marker is why the left guard is a non-space rather than `\s`.** With
+`\s`, a newline satisfies it and `\n- second item` becomes a pause on every
+bullet. Pinned as a test.
+
+**⚠ THE FIRST VERSION BROKE TWO PINNED TESTS, and they were right.** A spaced
+dash between two NUMBERS is a span written loose, not a parenthesis:
+
+```
+the 1418 - 1450 period   expected "the 14 18 - 14 50 period"
+                         got      "the 14 18, 14 50 period"
+Sejong (1418 – 1450)     same shape
+```
+
+Both pins carry corpus measurement behind them (one records +0.106 against two
+recognizers). A pause there is not obviously wrong, but it is a different
+question from this report, and changing a measured reading as a side effect of an
+unrelated fix is how a regression ships under a green gate. The rule is now two
+arms that claim everything EXCEPT digit-on-both-sides; the digit/word mixes
+(`from 1990 - present`, `page - 5`) still pause.
+
+**⚠ LEFT OPEN:** a spaced dash between two numbers still gets no boundary at all
+— neither a pause nor "to". The tight form says "to" and the loose form says
+nothing, which is a real inconsistency, but closing it means moving two measured
+pins and wants its own evidence.
+
+**Goldens: zero drift.** 25 stale `en` rows and 103 findings fleet-wide, before
+and after — no golden row carries the shape. `regex-diff`: 142808 probes, 0
+DIFFER, so both new patterns translate identically for the port.
+
+### ⚠ The class is 179 languages wide
+
+Measured across all 189 shipped languages, comparing `"aba - ebe"` against
+`"aba, ebe"` and counting only the languages that mark a comma as a pause at all:
+
+```
+comma-marking languages: dash also pauses 9, dash DROPPED 179
+```
+
+English was one of the 179 and is now one of the 9 that pause. This is the same
+shape the tree already argues about elsewhere — "the same six characters were
+wrong in eleven files is the case for fixing the class, not the language"
+(`separatorHygiene.ts`) — and the rule qualifies under that file's own test for a
+shared rule: it spends a separator and emits no word, so it cannot speak a word a
+language may not use.
+
+NOT done here, deliberately. It is a punctuation change to 179 languages and
+would move goldens across the fleet, which is a measurement exercise of its own
+and one that should not be started while 103 golden findings are already
+outstanding and undiagnosed. Recorded for a session of its own.
