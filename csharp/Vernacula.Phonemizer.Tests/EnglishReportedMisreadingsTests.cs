@@ -179,4 +179,41 @@ public class EnglishReportedMisreadingsTests
     [InlineData("the AAA thing", "ðə tɹˌɪpəlˈeᶦ θˈɪŋ")]
     [InlineData("the BB thing", "ðə bˈiː bˈiː θˈɪŋ")]
     public void ADoubledCapitalIsACode(string t, string ipa) => Assert.Equal(ipa, Say(t));
+
+    /**
+     * A SPACE-GUARDED DASH IS A PARENTHETICAL BREAK. Reported against a question with a spaced hyphen
+     * mid-clause: the halves ran together with no boundary, where a comma in the same slot pauses.
+     * ⚠ The expected strings are the TypeScript's, verbatim.
+     */
+    [Theory]
+    [InlineData("the answer, a long one, arrived")]   // the baseline this must equal
+    [InlineData("the answer - a long one - arrived")]
+    [InlineData("the answer -- a long one -- arrived")]
+    [InlineData("the answer – a long one – arrived")]
+    [InlineData("the answer — a long one — arrived")]
+    [InlineData("the answer—a long one—arrived")]     // unspaced em dash: the other house style
+    public void ASpaceGuardedDashReadsLikeAComma(string t)
+        => Assert.Equal("ðə ˈænsɚ , ə lˈɔːŋ wˈʌn , ɚˈaᶦvd", Say(t));
+
+    // ⚠ The word-joiner is what this must not touch; an unspaced EN dash joins rather than breaks.
+    [Theory]
+    [InlineData("Bose–Einstein condensate", "bˈoᶷz ˈaᶦnstaᶦn kʰˈɑːndənsˌeᶦt")]
+    [InlineData("a well-known case", "ə wˈɛɫ nˈoᶷn kʰˈeᶦs")]
+    [InlineData("state-of-the-art design", "stˈeᶦt ʌv ðə ˈɑːɹt dᵻzˈaᶦn")]
+    [InlineData("re-enter the code", "ɹˈeᶦ ˈɛntɚ ðə kʰˈoᶷd")]
+    [InlineData("pages 5–15", "pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn")]
+    public void TheJoinerAndTheSpanAreUntouched(string t, string ipa) => Assert.Equal(ipa, Say(t));
+
+    // ⚠ A dash with a DIGIT ON BOTH SIDES is a loose-written span, not a parenthesis, and keeps its
+    // measured reading — no pause. The digit/word mixes DO pause.
+    [Fact]
+    public void ASpacedSpanBetweenNumbersIsNotAParenthesis()
+    {
+        Assert.DoesNotContain(",", Say("from 1990 - 1995"));
+        Assert.Contains(",", Say("from 1990 - present"));
+    }
+
+    // A list marker opening a line has no word before it, so the left guard declines it.
+    [Fact]
+    public void ADashOpeningALineIsNotABreak() => Assert.DoesNotContain(",", Say("first item\n- second item"));
 }

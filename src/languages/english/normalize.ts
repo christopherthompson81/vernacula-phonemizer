@@ -1017,6 +1017,36 @@ export function normalizeEnglish(input: string): string {
     //    still between digits: the halves read pair-wise and the range still says "to".
     s = rewrite(s, /(\d)[\u2012\u2013\u2014](?=\d)/gu, "$1 to ");
 
+    //    A SPACE-GUARDED DASH IS A PARENTHETICAL BREAK, and it was DROPPED OUTRIGHT — the rule above
+    //    already said so ("a SPACED en dash is a parenthetical break, not a span") and then left the
+    //    break unspoken. Reported against a question with a spaced hyphen in it: the two halves ran
+    //    together with no boundary at all, where a comma in the same slot pauses.
+    //    ⚠ THE PAUSE IS A COMMA, NOT A WORD. `clausePunctuation` already maps `;` and `:` to `,` for
+    //    exactly this reason — the mark is a prosodic fact, and inventing a connective ("dash", "to")
+    //    would be reading something the writer did not write.
+    //    ⚠ SPACE-GUARDED ON BOTH SIDES IS THE WHOLE DISAMBIGUATION, and it is what keeps this off the
+    //    word-joiner: `well-known`, `state-of-the-art` and `re-enter` are tight against their letters
+    //    and never match. The left guard is a NON-SPACE rather than `\s`, so a list marker at the start
+    //    of a line (`\n- item`) is not claimed either — its dash has no word before it.
+    //    ⚠ ASCII `-` AND `--` ARE INCLUDED HERE though the range rule above refuses them, and the two
+    //    refusals are about different things: there, an unspaced `5-15` is ambiguous against a date, a
+    //    phone number and a score; here, the spaces have already ruled every one of those out.
+    //    ⚠ EXCEPT BETWEEN TWO NUMBERS, WHICH IS A SPAN AND NOT A PARENTHESIS — `Sejong (1418 – 1450)`
+    //    and `from 1990 - 1995` are date ranges written loose, and two pinned tests say what they read
+    //    as today. A pause is not obviously wrong there, but it is not this report's question either,
+    //    and those pins came with corpus measurement behind them; changing a measured reading as a
+    //    side effect of an unrelated fix is how a regression gets in wearing a green gate. So the two
+    //    arms below claim everything EXCEPT digit-on-both-sides, and the spaced numeric span keeps its
+    //    current reading — which is no boundary at all, recorded in the investigation doc as open.
+    s = rewrite(s, /(?<=[^\s\d])[ \t\u00a0]+[-\u2010\u2011\u2012\u2013\u2014\u2015]+[ \t\u00a0]+(?=\S)/gu, ", ");  // space, tab, NBSP
+    s = rewrite(s, /(?<=\d)[ \t\u00a0]+[-\u2010\u2011\u2012\u2013\u2014\u2015]+[ \t\u00a0]+(?=[^\s\d])/gu, ", ");  // space, tab, NBSP
+    //    …and an UNSPACED EM DASH is the same break in the other house style — `the answer—a long
+    //    one—arrived` is the standard US form and was dropped just as completely.
+    //    ⚠ THE EM DASH ONLY. An unspaced EN dash is a JOINER in English (`Bose–Einstein`), which must
+    //    not gain a pause, and between digits it is a span the rule above has already turned into
+    //    "to". An em dash is neither of those things in any English style guide.
+    s = rewrite(s, /(?<=[^\s\d])\u2014+(?=[^\s\d])/gu, ", ");
+
     for (let i = 0; i < RELATIONAL.length; i++)
         s = rewrite(s, RELATIONAL_RE[i]!, ` ${RELATIONAL[i]![1]} `);
 

@@ -354,3 +354,54 @@ describe("a doubled capital is a code, not a word", () => {
         expect(say("an aardvark")).toBe(phonemize("an aardvark", "en")); // lowercase is untouched
     });
 });
+
+describe("a space-guarded dash is a parenthetical break", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    // Reported against a question with a spaced hyphen mid-clause: the two halves ran together with
+    // no boundary at all, where a comma in the same slot pauses. All four written forms were dropped.
+    const COMMA = "ðə ˈænsɚ , ə lˈɔːŋ wˈʌn , ɚˈaᶦvd";
+
+    test("every space-guarded form reads like the comma it stands in for", () => {
+        expect(say("the answer, a long one, arrived")).toBe(COMMA);   // the baseline
+        expect(say("the answer - a long one - arrived")).toBe(COMMA); // ASCII hyphen
+        expect(say("the answer -- a long one -- arrived")).toBe(COMMA);
+        expect(say("the answer – a long one – arrived")).toBe(COMMA); // en dash
+        expect(say("the answer — a long one — arrived")).toBe(COMMA); // em dash
+    });
+
+    // ⚠ THE OTHER HOUSE STYLE. An unspaced em dash is the standard US form and was dropped just as
+    // completely; an unspaced EN dash is a JOINER and must not gain a pause.
+    test("an unspaced em dash breaks, an unspaced en dash joins", () => {
+        expect(say("the answer—a long one—arrived")).toBe(COMMA);
+        expect(say("Bose–Einstein condensate")).toBe("bˈoᶷz ˈaᶦnstaᶦn kʰˈɑːndənsˌeᶦt");
+    });
+
+    // ⚠ THE WORD-JOINER IS WHAT THIS MUST NOT TOUCH, and the spaces are the whole disambiguation.
+    test("hyphenated compounds are untouched", () => {
+        expect(say("a well-known case")).toBe("ə wˈɛɫ nˈoᶷn kʰˈeᶦs");
+        expect(say("state-of-the-art design")).toBe("stˈeᶦt ʌv ðə ˈɑːɹt dᵻzˈaᶦn");
+        expect(say("re-enter the code")).toBe("ɹˈeᶦ ˈɛntɚ ðə kʰˈoᶷd");
+    });
+
+    // ⚠ A LIST MARKER OPENING A LINE HAS NO WORD BEFORE IT, which is why the left guard is a
+    // non-space rather than \s — otherwise the newline would satisfy it and every bullet would pause.
+    test("a dash opening a line is not a parenthetical break", () => {
+        expect(say("first item\n- second item")).not.toContain(",");
+    });
+
+    // The range rule owns the digit cases and still does: it runs first and says "to", not a pause.
+    test("a numeric span still says the connective", () => {
+        expect(say("pages 5–15")).toBe("pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn");
+        expect(say("the 1990–1995 period")).toContain("tʰuː");
+    });
+
+    // ⚠ A DASH WITH A DIGIT ON BOTH SIDES IS A SPAN WRITTEN LOOSE, not a parenthesis. `1418 – 1450`
+    // is a date range, and what it reads as today is pinned by two measured tests in
+    // english-normalize.test.ts; claiming it here would have changed a measured reading as a side
+    // effect of an unrelated report. The digit/word mixes are claimed — those are not spans.
+    test("a spaced span between two numbers is left to the range rules", () => {
+        expect(say("from 1990 - 1995")).not.toContain(",");
+        expect(say("from 1990 - present")).toContain(",");
+        expect(say("page - 5 of the report")).toContain(",");
+    });
+});

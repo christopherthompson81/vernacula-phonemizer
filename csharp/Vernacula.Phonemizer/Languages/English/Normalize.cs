@@ -158,6 +158,20 @@ public static class Normalize
 
     private static readonly JsRe NUMBER_RANGE = JsRegex.Compile("(\\d)[\\u2012\\u2013\\u2014](?=\\d)", "gu");
 
+    /** A space-guarded dash of any kind is a parenthetical break; the spaces are what keep this off
+     *  the word-joiner (`well-known`, `re-enter`). Two arms, claiming everything EXCEPT a dash with a
+     *  digit on BOTH sides — that is a loose-written span (`1418 – 1450`), not a parenthesis, and it
+     *  keeps its measured reading. See the TS for the whole argument. */
+    private static readonly JsRe SPACED_DASH =
+        JsRegex.Compile("(?<=[^\\s\\d])[ \\t\\u00a0]+[-\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015]+[ \\t\\u00a0]+(?=\\S)", "gu");
+
+    private static readonly JsRe SPACED_DASH_AFTER_NUMBER =
+        JsRegex.Compile("(?<=\\d)[ \\t\\u00a0]+[-\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015]+[ \\t\\u00a0]+(?=[^\\s\\d])", "gu");
+
+    /** …and the unspaced EM dash, which is the same break in the other house style. The em dash only:
+     *  an unspaced en dash is a joiner (`Bose–Einstein`) and between digits it is already a span. */
+    private static readonly JsRe EM_DASH_BREAK = JsRegex.Compile("(?<=[^\\s\\d])\\u2014+(?=[^\\s\\d])", "gu");
+
     private static readonly JsRe TY_YEAR = JsRegex.Compile("\\bTY\\s?(\\d{4})\\b", "gu");
 
     /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
@@ -635,6 +649,10 @@ public static class Normalize
         s = Rewrite(s, GREATER_THAN, "$1 greater than ");
 
         s = Rewrite(s, NUMBER_RANGE, "$1 to ");
+
+        s = Rewrite(s, SPACED_DASH, ", ");
+        s = Rewrite(s, SPACED_DASH_AFTER_NUMBER, ", ");
+        s = Rewrite(s, EM_DASH_BREAK, ", ");
 
         for (var i = 0; i < RELATIONAL.Length; i++)
             s = Rewrite(s, RELATIONAL_RE[i], $" {RELATIONAL[i].Words} ");
