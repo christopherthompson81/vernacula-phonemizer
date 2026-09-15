@@ -44,9 +44,11 @@
  *   npx tsx tools/check-goldens.mts --isolate     one CHILD PROCESS per language (diagnostic, ~10x slower)
  *   npx tsx tools/check-goldens.mts --no-clear    skip the per-language memo clear (diagnostic)
  *   npx tsx tools/check-goldens.mts --no-ort      derive which languages depend on ONNX (diagnostic)
+ *   npx tsx tools/check-goldens.mts --write       rewrite the IPA of the rows that are there, once you
+ *                                                 have DECIDED the engine is right (see `write` below)
  */
 import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { clearForeignOov } from "../src/core/foreign.ts";
@@ -79,6 +81,25 @@ const asChild = argv.includes("--child");
  * Any list of "the neural languages" maintained by hand is a silent hole.
  */
 const noOrt = argv.includes("--no-ort");
+/**
+ * Rewrite each golden's IPA column from what the engine says NOW, leaving the row set untouched.
+ *
+ * ⚠ THIS IS NOT `gen_parity_goldens.mts`, and the difference is the whole reason it can live here. That
+ * tool re-derives WHICH ROWS exist, from a 337 MB FLEURS corpus and an alignment DB that are not committed
+ * — without them it produces a thinner row set, which is why the header says this file does not regenerate.
+ * This writes back the IPA of the rows ALREADY IN THE FILE, against each row's own recorded text, so no
+ * corpus is involved and no row is added, dropped or reordered.
+ *
+ * ⚠ IT WRITES THE VALUE THE CHECK COMPUTED, not a second rendering. A `--write` that re-rendered on its own
+ * could disagree with the gate it is meant to satisfy, which is the one thing a regeneration must never do.
+ *
+ * ⚠ AND IT IS STILL THE DANGEROUS OPERATION THIS FILE WARNS ABOUT. Re-recording a row is how the `beyond`
+ * regression survived weeks of green gates (#1283). The guards below are what make it safe to offer at all:
+ * the neural-liveness assertion still runs, and the degraded and child modes refuse it outright. What they
+ * cannot check is whether the operator actually decided the ENGINE was right — that is on the reader, and
+ * the run prints what it changed so the decision has evidence attached.
+ */
+const write = argv.includes("--write");
 
 const showAt = argv.indexOf("--show");
 let show = 0;
@@ -95,7 +116,7 @@ if (showAt >= 0) {
 }
 const only = argv.filter((a, i) => !a.startsWith("--") && !(showAt >= 0 && i === showAt + 1));
 
-interface Result { code: string; rows: number; stale: string[] }
+interface Result { code: string; rows: number; stale: string[]; rewritten?: string }
 
 const available = new Set(readdirSync(GOLDENS).filter((f) => f.endsWith(".tsv")).map((f) => f.slice(0, -4)));
 // ⚠ AN UNKNOWN CODE IS AN ERROR, NOT AN EMPTY RUN. `check-goldens.mts zz` used to print "0 languages,
@@ -143,7 +164,15 @@ async function checkOne(code: string): Promise<Result> {
     // compare, and "0 rows, 0 stale" is indistinguishable from a clean check.
     if (rows.length === 0) return { code, rows: 0, stale: ["    the golden has no data rows at all"] };
     const stale: string[] = [];
-    for (const line of rows) {
+    // ⚠ WALKED BY INDEX OVER THE WHOLE FILE, not over `rows`, for two reasons that both bite. A golden may
+    // carry blank or comment lines, which `rows` filters out and a rebuild would silently delete. And rows
+    // REPEAT — `en.tsv` carries the same text twice — so keying a rewrite by line CONTENT writes both
+    // copies to the first one's index and leaves the second stale, which reads afterwards as a regeneration
+    // that did not converge.
+    const out = write ? [...lines] : [];
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i]!;
+        if (!line.includes("\t")) continue;
         const tab = line.indexOf("\t");
         const text = line.slice(0, tab), want = line.slice(tab + 1);
         let got: string;
@@ -159,8 +188,9 @@ async function checkOne(code: string): Promise<Result> {
             continue;
         }
         if (got !== want) stale.push(`    text: ${text.slice(0, 70)}\n    want: ${want}\n    got : ${got}`);
+        if (write) out[i] = `${text}\t${got}`;
     }
-    return { code, rows: rows.length, stale };
+    return { code, rows: rows.length, stale, rewritten: write ? out.join("\n") : undefined };
 }
 
 /** One child process per language — the strongest isolation available, and the only way to re-prove that a
@@ -180,6 +210,16 @@ function checkIsolated(code: string): Result {
     return JSON.parse(out) as Result;
 }
 
+// ⚠ THE DEGRADED AND CHILD MODES MAY NOT WRITE. `--no-ort` manufactures mismatches on purpose and skips
+// the liveness guard, so writing under it would re-record the fleet from an engine with its neural path
+// switched off — the exact fleet-scale version of #1283 this file exists to prevent.
+if (write && (noOrt || noClear || isolate || asChild)) {
+    console.error("--write cannot be combined with --no-ort, --no-clear, --isolate or --child:\n"
+        + "  those modes run a degraded or delegated engine, and writing from one re-records the\n"
+        + "  goldens from something that is not the engine.");
+    process.exit(2);
+}
+
 if (noOrt) setOrtLoader(() => Promise.reject(new Error("ORT disabled by --no-ort")));
 // ⚠ Not in a child (the parent already proved it), and not under a flag whose whole purpose is to produce
 // mismatches.
@@ -190,6 +230,25 @@ for (const code of codes) results.push(isolate ? checkIsolated(code) : await che
 
 if (asChild) {
     console.log(JSON.stringify(results[0]));
+    process.exit(0);
+}
+
+// ⚠ WRITTEN ONLY WHERE THE CONTENT ACTUALLY MOVED, so a regeneration touches the files it has a reason to
+// and `git status` after it is the list of languages that changed — evidence, rather than 189 files with
+// identical contents and new mtimes.
+if (write) {
+    let changed = 0;
+    for (const r of results) {
+        if (r.rewritten === undefined) continue;
+        const path = join(GOLDENS, `${r.code}.tsv`);
+        if (r.rewritten === readFileSync(path, "utf8")) continue;
+        writeFileSync(path, r.rewritten);
+        changed++;
+        console.log(`rewrote ${r.code}.tsv (${r.stale.length} rows)`);
+    }
+    console.log(changed === 0
+        ? "nothing to write — every golden already matches the engine"
+        : `wrote ${changed} golden${changed === 1 ? "" : "s"}. Re-run without --write to confirm.`);
     process.exit(0);
 }
 
