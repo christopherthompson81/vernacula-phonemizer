@@ -87729,9 +87729,9 @@ rephrase	R IY0 F R EY1 Z
 repinski	R IH0 P IH1 N S K IY0
 repka	R EH1 P K AH0
 repko	R EH1 P K OW0
-replace	R IY2 P L EY1 S
-replaceable	R IY2 P L EY1 S AH0 B AH0 L
-replaced	R IY2 P L EY1 S T
+replace	R IH0 P L EY1 S
+replaceable	R IH0 P L EY1 S AH0 B AH0 L
+replaced	R IH0 P L EY1 S T
 replacement	R IH0 P L EY1 S M AH0 N T
 replacements	R IY0 P L EY1 S M AH0 N T S
 replaces	R IH0 P L EY1 S IH0 Z

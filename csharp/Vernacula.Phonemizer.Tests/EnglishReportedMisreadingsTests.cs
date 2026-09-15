@@ -261,4 +261,22 @@ public class EnglishReportedMisreadingsTests
     [Fact]
     public void TheCalendarWordsAreNotClaimedAlone()
         => Assert.Equal("ə wˈɛɫ nˈoᶷn kʰˈeᶦs", Say("a well-known case"));
+
+    /**
+     * A PREFIX THE DICTIONARY SPELLED TWO WAYS IN ONE PARADIGM (`replaced` read "ree-placed"), and a
+     * heteronym entry that was a REGIONAL variant rather than a part of speech (`details`).
+     * ⚠ Both fixes are DATA — three ARPABET rows and one manifest entry — so the port inherits them
+     * with no code change at all. That is a claim until the port is asked the same questions.
+     */
+    [Theory]
+    [InlineData("replace", "ɹᵻplˈeᶦs")]
+    [InlineData("replaced", "ɹᵻplˈeᶦst")]
+    [InlineData("replaceable", "ɹᵻplˈeᶦsəbəɫ")]
+    [InlineData("details", "dᵻtʰˈeᶦɫz")]
+    [InlineData("detail", "dᵻtʰˈeᶦɫ")]
+    // ⚠ The PRODUCTIVE prefix meaning "again" keeps its beat — the words a rule-based fix got wrong.
+    [InlineData("reconstructed", "ɹˌiːkənstɹˈʌktᵻd")]
+    [InlineData("relocate", "ɹiːlˈoᶷkeᶦt")]
+    [InlineData("report", "ɹipʰˈɔːɹt")]
+    public void TheReducedPrefixAndTheProductiveOne(string t, string ipa) => Assert.Equal(ipa, Say(t));
 }

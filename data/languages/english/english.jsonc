@@ -143,7 +143,15 @@
         "degenerate": { "default": "dᵻd͡ʒˈɛnɚˌeᶦt", "noun": "dᵻd͡ʒˈɛnɚət" },
         "deliberate": { "default": "dᵻlˈɪbɚət", "verb": "dᵻlˈɪbɚˌeᶦt" },
         "desert": { "default": "dˈɛzɚt", "verb": "dᵻzˈɝt" },
-        "detail": { "default": "dˈiːt̬eᶦɫ", "verb": "dᵻtʰˈeᶦɫ" },
+        // ⚠ `detail` WAS HERE AND IS NOT, because it is the one entry in this table whose two readings
+        // are a REGIONAL variant rather than a part-of-speech distinction. Every other row is a stress
+        // pair a speaker uses BOTH of (`ˈæbstɹækt` the thing, `æbstɹˈækt` the act); this one asked the
+        // POS tagger to choose between `ˈdiːteᶦl` and `dᵻtˈeᶦl`, which no tagger can do because the
+        // noun takes both. It also split its own paradigm: the table claimed the base while the
+        // lexicon kept `detailed`, so `details` read DEE-tails beside de-TAILED.
+        // CMUdict records ONE pronunciation for all three forms — `D IH0 T EY1 L` — so the table was
+        // asserting a reading its own source does not carry. Reported by a Canadian reader; General
+        // American does use the front-stressed noun, so this is a one-line restore if that is wanted.
         "detour": { "default": "dˈiːt̬ʊɹ", "verb": "dᵻtʰˈʊɹ" },
         "dictate": { "default": "dɪktˈeᶦt", "noun": "dˈɪkteᶦt" },
         "digest": { "default": "dˈaᶦd͡ʒɛst", "verb": "daᶦd͡ʒˈɛst" },
