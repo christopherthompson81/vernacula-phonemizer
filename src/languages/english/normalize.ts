@@ -312,6 +312,28 @@ function fractionWords(num: number, den: number): string | undefined {
 
 const MONTHS = MONTH_ALT.split("|");
 
+/**
+ * THE CALENDAR NAMES, for the range rule below: the twelve months and the seven weekdays. A dash
+ * between two of these is a SPAN and is spoken "to" — `May–June 2025` read as "may june", with the
+ * span silently gone and the sentence still fluent.
+ *
+ * ⚠ ⟨may⟩ IS SAFE HERE THOUGH IT IS A MODAL VERB, and that is worth saying because the weekday gate
+ * a few lines up had to exclude it. The licence is not the word: it is TWO calendar names joined by
+ * a dash, and a modal is not followed by a dash and a second month. `March` and `August` are ordinary
+ * words on the same footing.
+ *
+ * ⚠ THE ABBREVIATIONS ARE NOT INCLUDED. `Jan`, `Mar` and `Aug` are also personal names, and this
+ * file's own abbreviation rules already refuse them without a digit adjacent for exactly that
+ * reason — a pair of them is a stronger signal than one, but it is not one this report measured.
+ * `Jan–Mar` therefore still reads as two words; recorded in the investigation doc.
+ */
+const WEEKDAYS = "monday|tuesday|wednesday|thursday|friday|saturday|sunday";
+const CALENDAR_NAME = `${MONTH_ALT}|${WEEKDAYS}`;
+/** Any dash, spaced or tight — a printed range uses all of them. */
+const CALENDAR_RANGE = new RegExp(  // space, tab, NBSP
+    `\\b(${CALENDAR_NAME})[ \\t\\u00a0]*[-\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015][ \\t\\u00a0]*(${CALENDAR_NAME})\\b`,
+    "giu");
+
 /** English ordinal suffix for a day-of-month (1st, 2nd, 3rd, 4th … 21st, 22nd, 23rd). */
 function ordinalSuffix(n: number): string {
     const mod10 = n % 10, mod100 = n % 100;
@@ -1032,6 +1054,11 @@ export function normalizeEnglish(input: string): string {
     //    Ordered after the year rule, so `2019–2020` has already become `20 19–20 20` and the dash is
     //    still between digits: the halves read pair-wise and the range still says "to".
     s = rewrite(s, /(\d)[\u2012\u2013\u2014](?=\d)/gu, "$1 to ");
+
+    //    A DASH BETWEEN TWO CALENDAR NAMES IS A SPAN, not a parenthesis — `May–June 2025` read as
+    //    "may june". ⚠ IT MUST RUN BEFORE THE PARENTHETICAL RULE BELOW, or the SPACED forms
+    //    (`May – June`) are claimed as a pause first and the span is lost a second way.
+    s = rewrite(s, CALENDAR_RANGE, "$1 to $2");
 
     //    A SPACE-GUARDED DASH IS A PARENTHETICAL BREAK, and it was DROPPED OUTRIGHT — the rule above
     //    already said so ("a SPACED en dash is a parenthetical break, not a span") and then left the
