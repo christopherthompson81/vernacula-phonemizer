@@ -224,6 +224,66 @@ export function foldSubscriptDigits(s: string): string {
 }
 
 /**
+ * A SPACE-GUARDED DASH IS A PARENTHETICAL BREAK, spent as a comma. Reported against English and then
+ * measured across the fleet — the defect is 179 languages wide:
+ *
+ *     a comma marks a pause: 188 of 189   (dash also pauses 9, dash DROPPED 179)
+ *
+ * ⚠ THE MEASUREMENT IS WHAT LICENSES THE COMMA, and it is the whole argument for doing this in one
+ * place. The question was not "is a comma the right mark here" in the abstract; it was asked of each
+ * engine directly — does THIS language turn `aba, ebe` into a pause? 188 do, so for those the
+ * rewrite is guaranteed to produce one by construction. The single language that does not (`lo`)
+ * drops the comma exactly as it drops the dash today, so it is no worse off.
+ *
+ * ⚠ AND IT SPENDS A SEPARATOR RATHER THAN SPEAKING A WORD, which is what makes a shared rule
+ * legitimate at all — `core/separatorHygiene.ts` makes the same argument for the same reason. A
+ * connective ("to", "do", "a") is a WORD, and no shared pass may put a word into a language whose
+ * vocabulary it does not know.
+ *
+ * ⚠ THE RIGHT OPERAND MUST NOT BE A DIGIT, and that single condition is what makes a fleet-wide rule
+ * safe. Measured against the engine before and after, over six dash shapes in all 189 languages, a
+ * wider rule DESTROYED A WORD in seventeen of them — every one the same shape:
+ *
+ *     cs   `aba - 28.7`  before: ˈaba mˈiːnus dvˈat͡sɛtosm …   after: ˈaba , dvˈat͡sɛtosm …
+ *     om   `10ffaa - 11ffaa`  reads its own range word *hanga*, not a pause
+ *     ug   a prefix minus before a temperature, likewise
+ *
+ * A MINUS needs a number on its right, and so does a span (`1995 - 96`, `1418 – 1450`). Refusing a
+ * digit there leaves every one of those readings to the language that knows it, and costs only the
+ * `page - 5` shape, which no language in the fleet reads as anything today.
+ *
+ * ⚠ A DASH THAT ALREADY FOLLOWS A PAUSE MARK IS NOT CLAIMED. The bibliographic style `Чебоксары,
+ * 2004. – 215 с.` puts a spaced dash straight after a full stop, and inserting a comma there made the
+ * engine collapse the pair and read a CLAUSE break where the text had a SENTENCE break — 47 rows
+ * across seven languages in the goldens, every one a downgrade rather than a repair. Where a pause
+ * already exists there is nothing for this rule to add — on EITHER side, which is why the guard is
+ * symmetric.
+ *
+ * ⚠ AND A CLOSING BRACKET OR QUOTE DOES NOT HIDE THE MARK BEHIND IT. `"…Christmas?" - Band Aid` and
+ * `(1891 – 1938 (?) ) – belli` put the pause mark one or two characters back, and a guard that reads
+ * only the character before the space claimed both and downgraded a QUESTION to a comma. Those two
+ * rows were the last residue in 36,495 after every other refinement, and they are why the guard is a
+ * NEGATIVE lookbehind rather than a positive one that skips the closing run. A positive lookbehind
+ * BACKTRACKS AROUND ITSELF: `[^pause][closing]*` matches `?"` by letting the closing run go empty and
+ * testing the quote, which is not a pause mark, so the guard passed and claimed the dash anyway.
+ *
+ * ⚠ ENGLISH IS MORE PERMISSIVE THAN THIS, DELIBERATELY, and opts out in the registry: it claims
+ * `page - 5` as a pause too, because it was measured to have no spaced-minus reading to protect —
+ * `the temperature - 28.7` dropped the sign outright before that rule and after it. A language that
+ * HAS such a reading is exactly what this guard is for.
+ *
+ * ⚠ THE LEFT GUARD IS A NON-SPACE, NOT `\s`. With `\s` a newline satisfies it and every list marker
+ * written `- item` becomes a pause attached to the previous line.
+ *
+ * ⚠ ORDERED AFTER THE NATIVE-DIGIT FOLD. The digit exclusion is written with `\d`, which in JS is
+ * ASCII-only, so `٢٠٢٤ – ٢٠٢٥` would read as two words and take the parenthetical arm if this ran
+ * first. After the fold the digits are ASCII and the span is correctly left alone.
+ */
+export function foldSpacedDash(s: string): string {  // space, tab, NBSP
+    return rewrite(s, /(?<=\S)(?<![.!?,;:\u2026][)\]}"'\u00bb\u201d\u2019]*)[ \t\u00a0]+[-\u2010\u2011\u2012\u2013\u2014\u2015]+[ \t\u00a0]+(?=[^\s\d.!?,;:\u2026])/gu, ", ");
+}
+
+/**
  * GREEK / CYRILLIC LETTERS USED AS LATIN LOOK-ALIKES, folded ONLY when flanked by Latin letters.
  *
  * ⚠ A HOMOGLYPH IS THE SAME SHAPE AS A MOJIBAKE PHANTOM: a character from the wrong script masquerading as one

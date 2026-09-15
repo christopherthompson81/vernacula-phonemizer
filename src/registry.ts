@@ -206,7 +206,8 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { lookupForeignOov, setDefaultForeign, setScriptReader, withHost } from "./core/foreign.ts";
 import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldSubscriptDigits, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
+import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldSpacedDash,
+    foldSubscriptDigits, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
     /** Full text → canonical IPA. */
@@ -283,6 +284,28 @@ setScriptReader((run, host) => {
 
 /** Languages whose own script has a digit that is not always a digit; they fold inside normalize.ts. */
 const FOLD_OPT_OUT: ReadonlySet<string> = new Set(["te"]);
+
+/**
+ * Languages that handle a space-guarded dash THEMSELVES, and more specifically than a pause.
+ *
+ * ⚠ ENGLISH READS A CALENDAR RANGE AS A WORD — `May – June` is "May TO June" — and its rule lives in
+ * its own normalize.ts, which runs AFTER this pass. Converting the dash to a comma here would mean
+ * that rule never sees a dash to claim, so the span would be spoken as a parenthesis instead. The
+ * opt-out is what keeps a shared default from pre-empting a language that knows better; `en-GB` and
+ * `en-IN` share that normalize and so share the opt-out.
+ */
+const SPACED_DASH_OPT_OUT: ReadonlySet<string> = new Set([
+    "en", "en-GB", "en-IN",
+    // ⚠ DERIVED FROM THE GOLDENS, NOT GUESSED. Each of these reads a spaced dash as a WORD, and the
+    // shared pause would have taken the word away — found by rendering all 36,495 golden rows before
+    // and after and keeping every row whose difference was not simply the inserted comma:
+    //   hmn  `1740-1748 - Tsov rog …`   loses its range connective *mus txog*
+    //   ug   `1957 -، 1976 - يىللاردا`  loses the ORDINAL year reading: ʔɑltint͡ʃi → ʔɑltɛ (17 rows)
+    //   kaa  a prefix minus before a quantity, likewise
+    // A synthetic probe could not find these: each needs the language's own context — an ordinal
+    // suffix, a native month word — to trigger the rule it would displace.
+    "hmn", "kaa", "ug",
+]);
 
 /** Languages whose own normalization already reads the VULGAR FRACTIONS, and reads them BETTER than the fold
  *  can — with the "and" that joins a mixed number. ca says *vint-i-nou I tres quarts* and mk *…ˈи три
@@ -371,7 +394,10 @@ function foldPass(lang: string, input: string): string {
     const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
     // Subscript digits fold for EVERY language and with no opt-out — see `foldSubscriptDigits`.
     const subs = foldSubscriptDigits(pre);
-    return FOLD_OPT_OUT.has(lang) ? subs : foldNativeDigits(subs);
+    const digits = FOLD_OPT_OUT.has(lang) ? subs : foldNativeDigits(subs);
+    // ⚠ LAST, AND AFTER THE DIGIT FOLD. Its span exclusion is written with ASCII `\d`, so a range in
+    // native digits would otherwise read as two words and be spent as a pause. See `foldSpacedDash`.
+    return SPACED_DASH_OPT_OUT.has(lang) ? digits : foldSpacedDash(digits);
 }
 
 /**
