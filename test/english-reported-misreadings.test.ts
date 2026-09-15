@@ -448,3 +448,40 @@ describe("a postfix plus is read", () => {
         expect(say("first item\n+ second item")).not.toContain("plˈʌs");
     });
 });
+
+describe("a dash between two calendar names is a span", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    // Reported: `May–June 2025` read as "may june" — the span silently gone and the sentence still
+    // fluent. The range rule owns digit–digit only, so a dash between two NAMES had no rule at all.
+    test("the reported shape, in every written form", () => {
+        const both = "meᶦ tʰuː d͡ʒˈuːn twˈɛnti twˈɛnti fˈaᶦv";
+        expect(say("May–June 2025")).toBe(both);   // en dash
+        expect(say("May-June 2025")).toBe(both);   // hyphen
+        expect(say("May — June 2025")).toBe(both); // spaced em dash
+        expect(say("May – June 2025")).toBe(both); // spaced en dash
+    });
+
+    test("months and weekdays alike", () => {
+        expect(say("July–August 2025")).toContain("tʰuː");
+        expect(say("Monday–Friday")).toBe("mˈʌndi tʰuː fɹˈaᶦd̬i");
+    });
+
+    // ⚠ THE SPACED FORMS ARE WHY ORDER MATTERS. The parenthetical rule would claim them as a pause
+    // first, and the span would be lost a second way — this reads "to", not a comma.
+    test("a spaced calendar range is a span, not a parenthesis", () => {
+        expect(say("May – June 2025")).not.toContain(",");
+    });
+
+    // ⚠ ⟨may⟩, ⟨march⟩ and ⟨august⟩ are ordinary English words; the licence is TWO calendar names
+    // joined by a dash, so the words on their own are untouched.
+    test("the calendar words are not claimed on their own", () => {
+        expect(say("they may go")).not.toContain("tʰuː d͡ʒ");
+        expect(say("a well-known case")).toBe("ə wˈɛɫ nˈoᶷn kʰˈeᶦs");
+    });
+
+    // The neighbours from the rules either side of this one.
+    test("the joiner and the numeric span are unaffected", () => {
+        expect(say("Bose–Einstein condensate")).toBe("bˈoᶷz ˈaᶦnstaᶦn kʰˈɑːndənsˌeᶦt");
+        expect(say("the 1990–1995 period")).toContain("tʰuː");
+    });
+});

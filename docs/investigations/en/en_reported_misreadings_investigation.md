@@ -709,3 +709,58 @@ is now there but the ⟨A⟩ is the reduced ARTICLE, not the letter name. A lone
 capital `A` is genuinely ambiguous ("A dog barked." must stay `ə`), so telling
 the grade from the article needs context this pass does not have. Recorded
 rather than guessed at.
+
+## Run 15 — 2026-09-15 17:45 — a dash between two month names is dropped
+
+**Report.** `May–June 2025` should say "to" between the months; it read
+`meᶦ d͡ʒˈuːn twˈɛnti twˈɛnti fˈaᶦv` — "may june".
+
+**Command.** `phonemize` over the written forms and the neighbouring shapes.
+
+**Raw finding.** The span is lost in every form, and the two rules that could
+have claimed it both decline for their own good reasons:
+
+```
+May–June 2025    → meᶦ d͡ʒˈuːn …        ⚠ dropped
+May-June 2025    → meᶦ d͡ʒˈuːn …        ⚠ dropped
+July–August 2025 → d͡ʒuːlˈaᶦ ˈɑːɡəst …  ⚠ dropped
+Monday–Friday    → mˈʌndi fɹˈaᶦd̬i      ⚠ dropped
+May – June 2025  → mˈeᶦ , d͡ʒˈuːn …     ⚠ a PAUSE, from Run 13's rule
+```
+
+**Implication.** The range rule is digit-gated on both sides (`(\d)[dash](?=\d)`)
+because an unspaced dash between digits is a span; a dash between two NAMES had
+no rule at all. And Run 13's parenthetical rule claimed the SPACED forms as a
+pause, which is the right default for words and the wrong one here — so the
+spaced form was losing the span a second way, by a rule added this morning.
+
+A dash between two CALENDAR NAMES is a span. Months and weekdays are closed sets
+the file already carries.
+
+**⚠ ⟨may⟩ IS SAFE THOUGH IT IS A MODAL VERB**, and that is worth stating because
+the weekday-abbreviation gate a few lines above had to exclude it explicitly
+("they wed May 5" read as "they WEDNESDAY may fifth"). The licence here is not
+the word — it is TWO calendar names joined by a dash, and a modal is not followed
+by a dash and a second month. `March` and `August` are ordinary words on the same
+footing and take the same licence.
+
+**⚠ ORDER IS LOAD-BEARING:** the calendar rule runs BEFORE Run 13's parenthetical
+rule, or the spaced forms are claimed as a pause first. Pinned.
+
+**Gates.** TS 5878 pass, C# 6654 pass, goldens unchanged (25 stale en rows, 103
+fleet findings). ⚠ The new pattern is DYNAMIC (built from the month table), so it
+is not a regex LITERAL and the corpus extractor does not see it — the corpus is
+unchanged and the differential does not cover it. Parity is carried by the C#
+tests instead, which assert the TypeScript's strings verbatim. The same is true
+of the month-abbreviation rules already in this file.
+
+**⚠ NOT FIXED, two things visible in the same measurement:**
+
+  · `Jan–Mar` and `Mon–Fri` still read as two words. The abbreviations are
+    deliberately out of the calendar set: `Jan`, `Mar` and `Aug` are personal
+    names, and this file's own abbreviation rules already refuse them without an
+    adjacent digit for exactly that reason. A pair of them IS a stronger signal
+    than one, but it is not a signal this report measured.
+  · `May` in `May to June` reads UNSTRESSED (`meᶦ`, not `mˈeᶦ`), because ⟨may⟩ is
+    in `unstressedWords` as a modal. The month wants citation stress. Telling the
+    noun from the modal is POS work the de-accent pass does not do here.

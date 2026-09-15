@@ -209,6 +209,16 @@ public static class Normalize
 
     private static readonly string[] MONTHS = MONTH_ALT.Split('|');
 
+    /** THE CALENDAR NAMES — the twelve months and the seven weekdays. A dash between two of them is a
+     *  SPAN and is spoken "to"; `May–June 2025` read as "may june", with the span silently gone.
+     *  ⚠ ⟨may⟩ is safe here though it is a modal verb: the licence is TWO calendar names joined by a
+     *  dash, not the word. The ABBREVIATIONS are deliberately out — they are personal names too. */
+    private const string WEEKDAYS = "monday|tuesday|wednesday|thursday|friday|saturday|sunday";
+    private static readonly string CALENDAR_NAME = $"{MONTH_ALT}|{WEEKDAYS}";
+    private static readonly JsRe CALENDAR_RANGE = JsRegex.Compile(  // space, tab, NBSP
+        $"\\b({CALENDAR_NAME})[ \\t\\u00a0]*[-\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015][ \\t\\u00a0]*({CALENDAR_NAME})\\b",
+        "giu");
+
     /** English ordinal suffix for a day-of-month (1st, 2nd, 3rd, 4th … 21st, 22nd, 23rd). */
     private static string OrdinalSuffix(double n)
     {
@@ -663,6 +673,10 @@ public static class Normalize
         s = Rewrite(s, GREATER_THAN, "$1 greater than ");
 
         s = Rewrite(s, NUMBER_RANGE, "$1 to ");
+
+        // ⚠ BEFORE the parenthetical rule, or the SPACED forms are claimed as a pause and the span is
+        // lost a second way. See the TS.
+        s = Rewrite(s, CALENDAR_RANGE, "$1 to $2");
 
         s = Rewrite(s, SPACED_DASH, ", ");
         s = Rewrite(s, SPACED_DASH_AFTER_NUMBER, ", ");

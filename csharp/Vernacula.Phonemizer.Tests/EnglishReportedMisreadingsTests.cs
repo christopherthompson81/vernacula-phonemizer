@@ -239,4 +239,26 @@ public class EnglishReportedMisreadingsTests
     [Fact]
     public void APlusListMarkerIsNotAnOperator()
         => Assert.DoesNotContain("plˈʌs", Say("first item\n+ second item"));
+
+    /**
+     * A DASH BETWEEN TWO CALENDAR NAMES IS A SPAN. `May–June 2025` read as "may june" — the range
+     * rule owns digit–digit only, so a dash between two NAMES had no rule at all.
+     * ⚠ The expected strings are the TypeScript's, verbatim.
+     */
+    [Theory]
+    [InlineData("May–June 2025")]
+    [InlineData("May-June 2025")]
+    [InlineData("May — June 2025")]
+    [InlineData("May – June 2025")]
+    public void ACalendarRangeSaysTo(string t)
+        => Assert.Equal("meᶦ tʰuː d͡ʒˈuːn twˈɛnti twˈɛnti fˈaᶦv", Say(t));
+
+    [Fact]
+    public void WeekdaysRangeTheSameWay() => Assert.Equal("mˈʌndi tʰuː fɹˈaᶦd̬i", Say("Monday–Friday"));
+
+    // ⚠ The licence is TWO calendar names joined by a dash, never the word alone — ⟨may⟩, ⟨march⟩
+    // and ⟨august⟩ are ordinary English words.
+    [Fact]
+    public void TheCalendarWordsAreNotClaimedAlone()
+        => Assert.Equal("ə wˈɛɫ nˈoᶷn kʰˈeᶦs", Say("a well-known case"));
 }
