@@ -216,4 +216,27 @@ public class EnglishReportedMisreadingsTests
     // A list marker opening a line has no word before it, so the left guard declines it.
     [Fact]
     public void ADashOpeningALineIsNotABreak() => Assert.DoesNotContain(",", Say("first item\n- second item"));
+
+    /**
+     * A POSTFIX PLUS IS READ. Both existing arms require a digit on the RIGHT, so a plus in final
+     * position was dropped outright — reported against a code ending in `+`.
+     * ⚠ The expected strings are the TypeScript's, verbatim.
+     */
+    [Theory]
+    [InlineData("C7+", "sˈiː sˈɛvən plˈʌs")]
+    [InlineData("the C7+ cut", "ðə sˈiː sˈɛvən plˈʌs kʰˈʌt")]
+    // ⚠ The run is matched WHOLE: a per-sign rule reads the first and strands the second.
+    [InlineData("C++ code", "sˈiː plˈʌs plˈʌs kʰˈoᶷd")]
+    [InlineData("the + sign", "ðə plˈʌs sˈaᶦn")]
+    // …and what already worked is unchanged.
+    [InlineData("2 + 2", "tʰˈuː plˈʌs tʰˈuː")]
+    [InlineData("2+2", "tʰˈuː plˈʌs tʰˈuː")]
+    [InlineData("+5 volts", "plˈʌs fˈaᶦv vˈoᶷɫts")]
+    [InlineData("5 + 3 = 8", "fˈaᶦv plˈʌs θɹˈiː ˈiːkwəɫz ˈeᶦt")]
+    public void APostfixPlusIsRead(string t, string ipa) => Assert.Equal(ipa, Say(t));
+
+    // A `+`-marked list keeps its bullets: the between-words arm takes horizontal space only.
+    [Fact]
+    public void APlusListMarkerIsNotAnOperator()
+        => Assert.DoesNotContain("plˈʌs", Say("first item\n+ second item"));
 }
