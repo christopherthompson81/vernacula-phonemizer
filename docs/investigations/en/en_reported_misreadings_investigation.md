@@ -764,3 +764,72 @@ of the month-abbreviation rules already in this file.
   · `May` in `May to June` reads UNSTRESSED (`meᶦ`, not `mˈeᶦ`), because ⟨may⟩ is
     in `unstressedWords` as a modal. The month wants citation stress. Telling the
     noun from the modal is POS work the de-accent pass does not do here.
+
+## Run 16 — 2026-09-15 20:40 — three words, two causes, and a rule that had to be withdrawn
+
+**Report.** `details` read "dee-tuls" rather than "de-TAILS"; `determine` and
+`replaced` reported as front-stressed.
+
+**Command.** `phonemize` over each word and its whole inflectional paradigm.
+
+**Raw finding.** Three different situations, and one of them was not a defect:
+
+```
+determine   dᵻtʰˈɝmən     ✓ already second-stressed, in both engines and in the
+                            Kokoro stream (ᵻ is vocab id 177, carried through)
+detail(s)   dˈiːt̬eᶦɫ(z)   ⚠   detailed   dᵻtʰˈeᶦɫd   ✓
+replace(d)  ɹiːplˈeᶦs(t)  ⚠   replacing/replaces/replacement  ɹᵻplˈeᶦs…  ✓
+```
+
+**Implication.** Both defects are a paradigm at war with itself, and neither is a
+missing rule.
+
+`detail` was in the POS-HETERONYM table: `{ default: dˈiːt̬eᶦɫ, verb: dᵻtʰˈeᶦɫ }`.
+It is the one entry there whose two readings are a REGIONAL variant rather than a
+part of speech — every other row is a stress pair a speaker uses both halves of
+(`ˈæbstɹækt` the thing, `æbstɹˈækt` the act), while this asked the POS tagger to
+choose a reading the noun takes both of. CMUdict records ONE pronunciation for
+all three forms, `D IH0 T EY1 L`, so the table was asserting something its own
+source does not carry — and it split the paradigm, since the lexicon still had
+`detailed`. Entry removed. ⚠ General American does use the front-stressed noun;
+this is a one-line restore if that is wanted.
+
+`replace` is `R IY2 P L EY1 S` while `replacing` is `R IH0 P L EY1 S IH0 NG` —
+same stem, same prefix, two ARPABET vowels. Only `IH0` reaches the weak-vowel
+rule.
+
+### ⚠ The rule I wrote for it was wrong, and the lexicon rebuild is what showed it
+
+First attempt: reduce any `IY` in the Latinate-prefix position. 896 lexicon rows
+moved. Narrowing to a SECONDARY stress — on the theory that a 2° on a prefix the
+same paradigm reduces is a recording artifact — still moved 184, and the golden
+check found `reconstructed` among them:
+
+```
+ɹˌiːkənstɹˈʌktᵻd  →  ɹˌᵻkənstɹˈʌktᵻd     ⚠ "REE-constructed" is right
+```
+
+The revert diff is the whole argument: `reconstruct`, `redesign`, `redeploy`,
+`refinance`, `rehabilitate`, `relocate`, `reproduce`, `preteen`, `preseason`,
+`decompose`, `deform` — the PRODUCTIVE prefix meaning "again", which genuinely
+carries that beat. Nothing in the ARPABET separates `R IY2 P L EY1 S` from
+`R IY2 K AH0 N S T R AH1 K T`. What separates them is that `replace`'s own
+inflections contradict it and `reconstruct`'s do not — a lexical fact about three
+rows, not a phonological rule.
+
+**Rule withdrawn; three ARPABET rows corrected instead** (`replace`,
+`replaced`, `replaceable` → `R IH0`), which is what `initialisms.ts` says in its
+own header about not re-deriving lexical facts in logic.
+
+⚠ **An unstressed `IY0` prefix is deliberately left alone.** It cannot be told
+apart from the productive one — `rewire` and `report` are both `R IY0 …` — and
+this tree already pins both readings as correct. `report` → `ɹipʰˈɔːɹt` stands.
+
+**Gates.** TS 5905 pass, C# 6654 pass, lexicon round-trip 100%, goldens 3 rows
+(all `details`, in en/en-GB/en-IN) then 0 stale, parity 189 languages
+byte-identical.
+
+**⚠ Left open, measured:** `review` is `R IY2 V Y UW1` while its own inflections
+are `R IY0` — the same paradigm split one step milder (a length difference, not a
+vowel-quality one: `ɹiːvjˈuː` against `ɹivjˈuː…`). Not reported, and correcting it
+means the same three-row judgement on a word nobody has complained about.

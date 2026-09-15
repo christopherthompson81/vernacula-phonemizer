@@ -485,3 +485,58 @@ describe("a dash between two calendar names is a span", () => {
         expect(say("the 1990–1995 period")).toContain("tʰuː");
     });
 });
+
+describe("a prefix the dictionary spelled two ways in one paradigm", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    /**
+     * Reported: `replaced` read "ree-placed". CMUdict spells this one prefix two ways inside a SINGLE
+     * paradigm — `R IY2 P L EY1 S` beside `R IH0 P L EY1 S IH0 NG` — and only the `IH0` spelling
+     * reaches the weak-vowel rule, so the paradigm came out split down the middle.
+     *
+     * ⚠ FIXED IN THE DICTIONARY, NOT IN THE RULE, and the attempt that came first is why. A rule
+     * reducing any `IY2` Latinate prefix moved 896 lexicon rows and was wrong in most of them: it
+     * reduced the PRODUCTIVE prefix meaning "again", which genuinely carries that beat —
+     * `reconstructed`, `redesign`, `refinance`, `rehabilitate`, `relocate`, `preteen`, `decompose`.
+     * Nothing in the ARPABET separates `R IY2 P L EY1 S` from `R IY2 K AH0 N S T R AH1 K T`; what
+     * separates them is that `replace`'s own inflections contradict it and `reconstruct`'s do not.
+     * That is a lexical fact about three rows, so it is recorded as three rows.
+     */
+    test("the paradigm agrees with itself again", () => {
+        expect(say("replace")).toBe("ɹᵻplˈeᶦs");
+        expect(say("replaced")).toBe("ɹᵻplˈeᶦst");
+        expect(say("replaceable")).toBe("ɹᵻplˈeᶦsəbəɫ");
+        expect(say("replaces")).toBe("ɹᵻplˈeᶦsᵻz");      // was already right
+        expect(say("replacing")).toBe("ɹᵻplˈeᶦsɪŋ");     // was already right
+        expect(say("replacement")).toBe("ɹᵻplˈeᶦsmənt"); // was already right
+    });
+
+    // ⚠ THE PRODUCTIVE PREFIX KEEPS ITS BEAT. These are the words the rejected rule got wrong, pinned
+    // so that a future attempt at "reduce the IY2 prefix" fails here instead of in a reader's ear.
+    test("the prefix meaning \"again\" is untouched", () => {
+        expect(say("reconstructed")).toBe("ɹˌiːkənstɹˈʌktᵻd");
+        expect(say("redesign")).toBe("ɹˌiːd̬ɪzˈaᶦn");
+        expect(say("relocate")).toBe("ɹiːlˈoᶷkeᶦt");
+        expect(say("rewiring")).toBe("ɹiwˈaᶦɹɪŋ");
+        expect(say("report")).toBe("ɹipʰˈɔːɹt");   // an unstressed IY0 prefix, pinned elsewhere too
+    });
+});
+
+
+describe("detail is not a part-of-speech heteronym", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    // Reported as "dee-tails". The heteronym table claimed the base with a front-stressed NOUN
+    // reading while the lexicon kept `detailed`, so one paradigm read both ways at once.
+    test("the whole paradigm reduces", () => {
+        expect(say("detail")).toBe("dᵻtʰˈeᶦɫ");
+        expect(say("details")).toBe("dᵻtʰˈeᶦɫz");
+        expect(say("detailed")).toBe("dᵻtʰˈeᶦɫd");   // was already right
+        expect(say("the details of the design")).toBe("ðə dᵻtʰˈeᶦɫz ʌv ðə dᵻzˈaᶦn");
+    });
+
+    // The genuine stress heteronyms are untouched — those are a PART OF SPEECH distinction a speaker
+    // uses both halves of, which is what that table is for.
+    test("the real heteronyms still turn on their part of speech", () => {
+        expect(say("an abstract idea")).toContain("ˈæbstɹækt");
+        expect(say("they abstract the data")).toContain("æbstɹˈækt");
+    });
+});
