@@ -158,6 +158,17 @@ public static class Unicode
     public static string FoldSubscriptDigits(string s) =>
         Rewriter.Rewrite(s, SUBSCRIPT_DIGITS, m => ((char)(m.Value[0] - 0x2080 + 0x30)).ToString());
 
+    /**
+     * A SPACE-GUARDED DASH IS A PARENTHETICAL BREAK, spent as a comma. See the TypeScript for the
+     * 189-language measurement, and in particular for why the RIGHT OPERAND MUST NOT BE A DIGIT: a
+     * wider rule destroyed a word (a minus, or a range connective) in seventeen languages.
+     */
+    private static readonly JsRe SPACED_DASH = JsRegex.Compile(  // space, tab, NBSP
+        "(?<=\\S)(?<![.!?,;:\\u2026][)\\]}\"'\\u00bb\\u201d\\u2019]*)[ \\t\\u00a0]+[-\\u2010\\u2011\\u2012\\u2013\\u2014\\u2015]+[ \\t\\u00a0]+(?=[^\\s\\d.!?,;:\\u2026])",
+        "gu");
+
+    public static string FoldSpacedDash(string s) => Rewriter.Rewrite(s, SPACED_DASH, ", ");
+
     public static string FoldNativeDigits(string s)
     {
         // ⚠ #1150: THIS REBUILDS, IT DOES NOT REPLACE, and that is why it could not be put on the `Rewrite`

@@ -160,6 +160,12 @@ public static class Registry
     /** Languages whose own script has a digit that is not always a digit; they fold inside normalize.ts. */
     private static readonly IReadOnlySet<string> FOLD_OPT_OUT = new HashSet<string> { "te" };
 
+    /** Languages that handle a space-guarded dash THEMSELVES, and more specifically than a pause —
+     *  English reads a calendar range as a WORD (`May – June` is "May TO June") in its own normalize,
+     *  which runs after this pass. See the TypeScript. */
+    private static readonly IReadOnlySet<string> SPACED_DASH_OPT_OUT =
+        new HashSet<string> { "en", "en-GB", "en-IN", "hmn", "kaa", "ug" };
+
     /**
      * Languages whose own normalization already reads the VULGAR FRACTIONS, and reads them BETTER than the
      * fold can — with the "and" that joins a mixed number, which the fold cannot supply. The fold is for the
@@ -253,7 +259,9 @@ public static class Registry
         var pre = VULGAR_FOLD_OPT_OUT.Contains(lang) ? folded : Unicode.FoldVulgarFractions(folded);
         // Subscript digits fold for EVERY language and with no opt-out.
         var subs = Unicode.FoldSubscriptDigits(pre);
-        return FOLD_OPT_OUT.Contains(lang) ? subs : Unicode.FoldNativeDigits(subs);
+        var digits = FOLD_OPT_OUT.Contains(lang) ? subs : Unicode.FoldNativeDigits(subs);
+        // ⚠ LAST, AND AFTER THE DIGIT FOLD: the span exclusion is ASCII `\d`. See the TypeScript.
+        return SPACED_DASH_OPT_OUT.Contains(lang) ? digits : Unicode.FoldSpacedDash(digits);
     }
 
     /**
