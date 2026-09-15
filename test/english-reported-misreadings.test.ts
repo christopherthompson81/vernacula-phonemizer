@@ -405,3 +405,46 @@ describe("a space-guarded dash is a parenthetical break", () => {
         expect(say("page - 5 of the report")).toContain(",");
     });
 });
+
+describe("a postfix plus is read", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    // Reported against a chemical-fraction code ending in `+`: the sign vanished. Both existing arms
+    // require a DIGIT ON THE RIGHT, so nothing claimed a plus in final position — the same shape the
+    // Unicode relationals were fixed for, a pattern binding to an operand it does not have.
+    test("the reported shape", () => {
+        expect(say("C7+")).toBe("sˈiː sˈɛvən plˈʌs");
+        expect(say("the C7+ cut")).toBe("ðə sˈiː sˈɛvən plˈʌs kʰˈʌt");
+    });
+
+    test("the rest of the postfix class", () => {
+        expect(say("18+")).toContain("plˈʌs");
+        expect(say("100+ people")).toContain("plˈʌs");
+        expect(say("Na+ ion")).toContain("plˈʌs");
+    });
+
+    // ⚠ THE RUN IS MATCHED WHOLE. A per-sign rule reads the first and strands the second, because
+    // String.replace scans the ORIGINAL string: after consuming `C+`, the next `+` has no letter
+    // before it. "C plus plus" is also the right reading of the language's name.
+    test("a run of signs is read once per sign", () => {
+        expect(say("C++ code")).toBe("sˈiː plˈʌs plˈʌs kʰˈoᶷd");
+    });
+
+    // The infix arm's digit gate misses these too.
+    test("between two non-digit operands", () => {
+        expect(say("the + sign")).toBe("ðə plˈʌs sˈaᶦn");
+        expect(say("a + b")).toContain("plˈʌs");
+    });
+
+    test("what already worked is unchanged", () => {
+        expect(say("2 + 2")).toBe("tʰˈuː plˈʌs tʰˈuː");
+        expect(say("2+2")).toBe("tʰˈuː plˈʌs tʰˈuː");
+        expect(say("+5 volts")).toBe("plˈʌs fˈaᶦv vˈoᶷɫts");
+        expect(say("5 + 3 = 8")).toBe("fˈaᶦv plˈʌs θɹˈiː ˈiːkwəɫz ˈeᶦt");
+    });
+
+    // ⚠ A `+`-MARKED LIST KEEPS ITS BULLETS, which is why the between-words arm takes horizontal
+    // space only — with `\s` the newline satisfies the left guard and every marker says "plus".
+    test("a list marker is not an operator", () => {
+        expect(say("first item\n+ second item")).not.toContain("plˈʌs");
+    });
+});

@@ -666,6 +666,22 @@ export function normalizeEnglish(input: string): string {
     //      form too (UTC+1 → "UTC plus 1").
     s = rewrite(s, /(\S)\+\s?(\d)/gu, "$1 plus $2");
     s = rewrite(s, /(^|\s)\+\s?(\d)/gu, "$1plus $2");
+    //      ⚠ BOTH ARMS ABOVE REQUIRE A DIGIT ON THE RIGHT, so a POSTFIX plus was dropped outright —
+    //      the whole reported class, and the same shape the Unicode relationals were fixed for: a
+    //      pattern that can only bind to an operand it does not have, failing silently and leaving a
+    //      fluent sentence with the content gone.
+    //          C7+ → "C seven"    18+ → "eighteen"    100+ people → "a hundred people"
+    //          A+  → "ə"          C++ → "C"           Na+ → "na"
+    //      ⚠ THE RUN IS MATCHED WHOLE, not one sign at a time, because `C++` is two of them and a
+    //      per-sign rule reads the first and STRANDS the second: `String.replace` scans the original
+    //      string, so after consuming `C+` the next `+` no longer has a letter before it.
+    s = rewrite(s, /([\p{L}\d])(\++)(?![ \t\u00a0]?\d)/gu,  // space, tab, NBSP
+        (_m, head: string, signs: string) => head + " plus".repeat(signs.length));
+    //      …and the same sign between two NON-DIGIT operands, which the infix arm's digit gate also
+    //      misses: `a + b` read as "a b" and `the + sign` as "the sign".
+    //      ⚠ HORIZONTAL SPACE ONLY. With `\s` a newline satisfies the left guard and a list written
+    //      with `+` markers turns every bullet into the word "plus".
+    s = rewrite(s, /(?<=\S)[ \t\u00a0]\+[ \t\u00a0](?=\S)/gu, " plus ");  // space, tab, NBSP
 
     // 0g) FRACTIONS. Guarded against dates (3/14/2011) and unit ratios (km/h) by requiring digits both sides
     //     and nothing numeric or alphabetic after.

@@ -309,6 +309,17 @@ public static class Normalize
             + "(?!\\s+(?:million|billion|trillion|thousand))", "gu");
     private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+\\s?(\\d)", "gu");
     private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|\\s)\\+\\s?(\\d)", "gu");
+
+    /** POSTFIX plus — both arms above require a digit on the RIGHT, so `C7+`, `18+`, `A+` and `C++`
+     *  dropped the sign outright. The run is matched WHOLE: `C++` is two signs, and a per-sign rule
+     *  reads the first and strands the second. See the TS. */
+    private static readonly JsRe PLUS_POSTFIX =
+        JsRegex.Compile("([\\p{L}\\d])(\\++)(?![ \\t\\u00a0]?\\d)", "gu");
+
+    /** …and the sign between two NON-DIGIT operands (`a + b`, `the + sign`), which the infix arm's
+     *  digit gate also misses. Horizontal space only, so a `+`-marked list keeps its bullets. */
+    private static readonly JsRe PLUS_BETWEEN_WORDS =
+        JsRegex.Compile("(?<=\\S)[ \\t\\u00a0]\\+[ \\t\\u00a0](?=\\S)", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[\\/\\d])", "gu");
     private static readonly JsRe CURRENCY_RE = JsRegex.Compile(
         "([$£€¥])\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?:(\\s+(?:million|billion|trillion|thousand))|("
@@ -490,6 +501,9 @@ public static class Normalize
 
         s = Rewrite(s, PLUS_ATTACHED, "$1 plus $2");
         s = Rewrite(s, PLUS_LEADING, "$1plus $2");
+        s = Rewrite(s, PLUS_POSTFIX, m =>
+            m.Groups[1].Value + string.Concat(Enumerable.Repeat(" plus", m.Groups[2].Value.Length)));
+        s = Rewrite(s, PLUS_BETWEEN_WORDS, " plus ");
 
         s = Rewrite(s, FRACTION, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);

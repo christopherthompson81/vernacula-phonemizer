@@ -660,3 +660,52 @@ NOT done here, deliberately. It is a punctuation change to 179 languages and
 would move goldens across the fleet, which is a measurement exercise of its own
 and one that should not be started while 103 golden findings are already
 outstanding and undiagnosed. Recorded for a session of its own.
+
+## Run 14 — 2026-09-15 17:05 — a postfix plus is dropped
+
+**Report.** A chemical-fraction code ending in `+` read without the sign.
+
+**Command.** `phonemize` over the sign in every position.
+
+**Raw finding.** The sign is read in INFIX and PREFIX position and dropped in
+POSTFIX position:
+
+```
+2 + 2       → tʰˈuː plˈʌs tʰˈuː      ✓        C7+         → sˈiː sˈɛvən        ⚠
+2+2         → tʰˈuː plˈʌs tʰˈuː      ✓        18+         → eᶦtʰˈiːn           ⚠
++5 volts    → plˈʌs fˈaᶦv vˈoᶷɫts    ✓        100+ people → wˈʌn hˈʌndɹəd …    ⚠
+5 + 3 = 8   → … plˈʌs … ˈiːkwəɫz …   ✓        C++ code    → sˈiː kʰˈoᶷd        ⚠
+                                              Na+ ion     → nˈɑː ˈaᶦən         ⚠
+                                              the + sign  → ðə sˈaᶦn           ⚠
+```
+
+**Implication.** Both existing arms require a DIGIT ON THE RIGHT
+(`(\S)\+\s?(\d)` and `(^|\s)\+\s?(\d)`), so a sign in final position has no
+operand for either to bind to. This is the same shape as the Unicode relationals
+(Run 9): a pattern that can only match an operand it does not have, failing
+silently and leaving a fluent sentence with the content gone.
+
+Two arms added — postfix, and the sign between two NON-digit operands, which the
+infix arm's digit gate misses the same way (`a + b` → "a b").
+
+**⚠ THE RUN MUST BE MATCHED WHOLE, and the first attempt at it would not have
+been.** `C++` is two signs, and a per-sign rule reads the first and STRANDS the
+second: `String.replace` scans the ORIGINAL string, so after consuming `C+` the
+next `+` no longer has a letter before it and the pattern declines. Matched as
+`(\++)` and repeated per sign, `C++` reads "C plus plus", which is also the right
+reading of the language's name.
+
+**The list-marker guard is the same one the dash rule needed** (Run 13): the
+between-words arm takes HORIZONTAL space only, because with `\s` a newline
+satisfies the left guard and a `+`-marked list says "plus" on every bullet.
+Pinned.
+
+**Gates.** TS 5878 pass, C# 6648 pass, regex-diff 142982 probes 0 DIFFER,
+goldens unchanged (25 stale en rows, 103 fleet findings). The corpus freshness
+test caught the two new patterns before the diff did, which is what it is for.
+
+**⚠ NOT FIXED, visible in the same measurement:** `A+` reads `ə plˈʌs` — the sign
+is now there but the ⟨A⟩ is the reduced ARTICLE, not the letter name. A lone
+capital `A` is genuinely ambiguous ("A dog barked." must stay `ə`), so telling
+the grade from the article needs context this pass does not have. Recorded
+rather than guessed at.
