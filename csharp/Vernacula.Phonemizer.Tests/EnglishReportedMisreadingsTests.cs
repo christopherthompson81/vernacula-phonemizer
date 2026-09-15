@@ -152,4 +152,31 @@ public class EnglishReportedMisreadingsTests
     [InlineData("the Rev. Jesse Jackson", "ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksən")]
     public void RevIsARevisionBeforeADesignatorAndAReverendBeforeAName(string t, string ipa)
         => Assert.Equal(ipa, Say(t));
+
+    /**
+     * A DOUBLED CAPITAL IS A CODE, NOT A WORD. Reported against a project code whose last field is
+     * `-AA`, which read as one run-together vowel — CMUdict's Hawaiian lava word — instead of two
+     * letter names.
+     *
+     * ⚠ THIS IS A DATA-ONLY FIX, and that is exactly why it needs a test on THIS side. The port
+     * reads the same english.jsonc, so parity is supposed to hold by construction with no C# change
+     * at all — which is a claim, not a fact, until the port is asked the same questions.
+     */
+    [Theory]
+    [InlineData("(ABC-AA)", "ˈeᶦbiːsˌiː ˈeᶦ ˈeᶦ")]
+    [InlineData("AA battery", "ˈeᶦ ˈeᶦ bˈæt̬ɚi")]
+    [InlineData("the AA thing", "ðə ˈeᶦ ˈeᶦ θˈɪŋ")]
+    [InlineData("the EE thing", "ðə ˈiː ˈiː θˈɪŋ")]
+    [InlineData("the MM thing", "ðə ˈɛm ˈɛm θˈɪŋ")]
+    [InlineData("the OO thing", "ðə ˈoᶷ ˈoᶷ θˈɪŋ")]
+    [InlineData("the UU thing", "ðə jˈuː jˈuː θˈɪŋ")]
+    [InlineData("the YY thing", "ðə wˈaᶦ wˈaᶦ θˈɪŋ")]
+    [InlineData("format YYYY-MM-DD here", "fˈɔːɹmæt wˈaᶦ wˈaᶦ wˈaᶦ wˈaᶦ ˈɛm ˈɛm dˈiː dˈiː hˈɪɹ")]
+    // ⚠ CC and SS are doubled too and are NOT on the list: CMUdict records their letter readings
+    // already, in one token with one stress, which is better prosody than spelling out.
+    [InlineData("the CC thing", "ðə siːsˈiː θˈɪŋ")]
+    [InlineData("the SS thing", "ðə ˈɛsˈɛs θˈɪŋ")]
+    [InlineData("the AAA thing", "ðə tɹˌɪpəlˈeᶦ θˈɪŋ")]
+    [InlineData("the BB thing", "ðə bˈiː bˈiː θˈɪŋ")]
+    public void ADoubledCapitalIsACode(string t, string ipa) => Assert.Equal(ipa, Say(t));
 }

@@ -312,3 +312,45 @@ describe("Rev. is a revision before a designator and a reverend before a name", 
         expect(phonemize("Rev. B1", "en")).toContain("ɹivˈɪʒən");
     });
 });
+
+describe("a doubled capital is a code, not a word", () => {
+    // Reported against a project code whose last field is `-AA`: it read as one run-together vowel
+    // (`ˈɑː`, CMUdict's Hawaiian lava word) instead of two letter names. The class is wider than the
+    // one token — a repeated capital is an identifier, a date mask or a size, never a word being used
+    // as one — and six of them were read as words before this: AA, EE, MM, OO, UU, YY.
+    const say = (s: string): string => phonemize(s, "en");
+
+    test("the reported shape", () => {
+        // A hyphenated code: the pronounceable field stays a word, the doubled one becomes letters.
+        expect(say("(ABC-AA)")).toBe("ˈeᶦbiːsˌiː ˈeᶦ ˈeᶦ");
+        expect(say("AA battery")).toBe("ˈeᶦ ˈeᶦ bˈæt̬ɚi");
+    });
+
+    test("every doubled capital that used to read as a word", () => {
+        expect(say("the AA thing")).toBe("ðə ˈeᶦ ˈeᶦ θˈɪŋ");
+        expect(say("the EE thing")).toBe("ðə ˈiː ˈiː θˈɪŋ");   // ⚠ was ONE letter name for two letters
+        expect(say("the MM thing")).toBe("ðə ˈɛm ˈɛm θˈɪŋ");
+        expect(say("the OO thing")).toBe("ðə ˈoᶷ ˈoᶷ θˈɪŋ");
+        expect(say("the UU thing")).toBe("ðə jˈuː jˈuː θˈɪŋ");
+        expect(say("the YY thing")).toBe("ðə wˈaᶦ wˈaᶦ θˈɪŋ");
+    });
+
+    // ⚠ CC AND SS ARE DELIBERATELY NOT IN THE LIST. CMUdict records both with their LETTER readings
+    // already, as one token with one stress, which is better prosody than spelling them out — the
+    // same reason `CD` is left alone. Pinned so a later "complete the set" does not undo it.
+    test("the two the dictionary already reads as letters keep its reading", () => {
+        expect(say("the CC thing")).toBe("ðə siːsˈiː θˈɪŋ");
+        expect(say("the SS thing")).toBe("ðə ˈɛsˈɛs θˈɪŋ");
+    });
+
+    test("a date mask reads as letters in every field", () => {
+        expect(say("format YYYY-MM-DD here")).toBe("fˈɔːɹmæt wˈaᶦ wˈaᶦ wˈaᶦ wˈaᶦ ˈɛm ˈɛm dˈiː dˈiː hˈɪɹ");
+    });
+
+    // The neighbours: a doubled capital must not drag off anything that was already right.
+    test("what was already right stays right", () => {
+        expect(say("the AAA thing")).toBe("ðə tɹˌɪpəlˈeᶦ θˈɪŋ");   // triple-A, a recorded reading
+        expect(say("the BB thing")).toBe("ðə bˈiː bˈiː θˈɪŋ");     // already spelled, unrecorded
+        expect(say("an aardvark")).toBe(phonemize("an aardvark", "en")); // lowercase is untouched
+    });
+});
