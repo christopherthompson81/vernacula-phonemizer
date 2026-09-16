@@ -45,7 +45,7 @@ describe("a currency noun does not fuse with the token after the number", () => 
     });
 
     test("English is unaffected — its own layer reads the magnitude before the tier", () => {
-        expect(phonemize("$110m", "en").trim()).toBe("wˈʌn hˈʌndɹəd tʰˈɛn mˈɪɫjən dˈɑːlɚz");
+        expect(phonemize("$110m", "en").trim()).toBe("wˈʌn hˈʌndɹəd tʰˈɛn mˈɪɫjn̩ dˈɑːlɚz");
     });
 
     /**

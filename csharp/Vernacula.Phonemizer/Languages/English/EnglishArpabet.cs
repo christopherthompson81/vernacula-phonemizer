@@ -107,7 +107,14 @@ public static class EnglishArpabet
     /** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
      *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA
      *  values. */
-    public static Func<IReadOnlyList<string>, string, string> MakeArpabetToIpa(ArpabetDef def)
+    /// <param name="syllabic">
+    /// Word → the indices of its ARPABET phones that are a SYLLABIC consonant's schwa slot
+    /// (en-syllabic.tsv). Passed in rather than loaded here, because this class is DATA-FREE on
+    /// purpose. Omitted (the OOV tagger's path) means no word has syllabic slots — the prior
+    /// behaviour. Mirrors englishArpabet.ts.
+    /// </param>
+    public static Func<IReadOnlyList<string>, string, string> MakeArpabetToIpa(
+        ArpabetDef def, IReadOnlyDictionary<string, IReadOnlyList<int>>? syllabic = null)
     {
         var map = def.Map;
         var cv = def.ConditionalVowels;
@@ -123,6 +130,10 @@ public static class EnglishArpabet
         {
             word ??= "";
             var P = phones.Select(Split).ToList();
+            // The slots whose schwa is not a schwa but the sonorant after it being syllabic.
+            IReadOnlyList<int>? sylSlots = null;
+            syllabic?.TryGetValue(word, out sylSlots);
+            var pendingSyllabic = false;
             var nucleiIdx = new List<int>();
             for (var i = 0; i < P.Count; i++) if (VOWELS.Contains(P[i].Base)) nucleiIdx.Add(i);
             var nucleusNum = new Dictionary<int, int>();
@@ -135,6 +146,19 @@ public static class EnglishArpabet
                 var (bas, stress) = P[i];
                 var nextIsR = i + 1 < P.Count && P[i + 1].Base == "R";
                 var nextIsV = i + 1 < P.Count && VOWELS.Contains(P[i + 1].Base);
+                // REDUCED SLOT — misaki writes `ᵊ` and we write one of TWO things, because `ᵊ` is not
+                // one phonological fact: in 81% of the slots the sonorant is a CODA and carries the
+                // syllable (`able` → ˈeᶦbɫ̩), in 19% it is the ONSET of the next syllable and cannot
+                // be syllabic (`accompany` → əkʰˈʌmpə̆ni). So `ᵊ` is a REDUCED SCHWA, not a
+                // syllabicity mark; canonical IPA has both and KokoroFormat maps each to ᵊ. See the TS.
+                if (VOWELS.Contains(bas) && sylSlots is not null && sylSlots.Contains(i))
+                {
+                    var son = i + 1;
+                    var sonIsOnset = son + 1 < P.Count && VOWELS.Contains(P[son + 1].Base);
+                    if (sonIsOnset) { outSb.Append("ə\u0306"); continue; }   // extra-short schwa
+                    pendingSyllabic = true;
+                    continue;
+                }
                 if (VOWELS.Contains(bas))
                 {
                     var ni = nucleusNum[i];
@@ -153,6 +177,15 @@ public static class EnglishArpabet
                     else if (bas == "UW") outSb.Append(nextIsR ? cv.UW.BeforeR : cv.UW.Default);
                     else outSb.Append(map.TryGetValue(bas, out var mv) ? mv : bas);
                     if (bas == "IY" && nextIsV) outSb.Append('ʲ');
+                    continue;
+                }
+                // SYLLABIC CONSONANT, part 2 of 2 — takes the mark and skips the allophony below:
+                // the flap rule would look for a following vowel that no longer exists, and dark-l is
+                // already what a syllabic /l/ is.
+                if (pendingSyllabic)
+                {
+                    pendingSyllabic = false;
+                    outSb.Append(bas == "L" ? "ɫ" : (map.TryGetValue(bas, out var sv) ? sv : bas)).Append('\u0329');
                     continue;
                 }
                 if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G"))

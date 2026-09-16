@@ -348,7 +348,7 @@ describe("English's local copy declines the same two shapes", () => {
     });
 
     test("…and every real power English already read still reads", () => {
-        expect(phonemize("10¹¹", "en")).toContain("pʰˈaᶷɚ ʌv ɪlˈɛvən");
+        expect(phonemize("10¹¹", "en")).toContain("pʰˈaᶷɚ ʌv ɪlˈɛvn̩");
         expect(phonemize("20²", "en")).toContain("skwˈɛɹd");
         expect(phonemize("2 ¹⁰", "en")).toContain("pʰˈaᶷɚ ʌv tʰˈɛn");
         expect(phonemize("E = mc²", "en")).toContain("skwˈɛɹd");

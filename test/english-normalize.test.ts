@@ -230,7 +230,7 @@ describe("english normalization: initialisms", () => {
         expect(phonemize("the NHS trust", "en")).toBe("ðə ˈɛn ˈeᶦt͡ʃ ˈɛs tɹˈʌst"); // was [ns] — H gone
         expect(phonemize("an MP said", "en")).toBe("æn ˈɛm pʰˈiː sˈɛd"); // was [mp]
         expect(phonemize("NYC", "en")).toBe("ˈɛn wˈaᶦ sˈiː"); // was [niːk]
-        expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbəɫjuː tʰˈiː ˈoᶷ"); // was [uːt]
+        expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbɫ̩juː tʰˈiː ˈoᶷ"); // was [uːt]
         expect(phonemize("DSLR", "en")).toBe("dˈiː ˈɛs ˈɛɫ ˈɑːɹ"); // was [ʌdslɚ]
     });
 
@@ -256,7 +256,7 @@ describe("english normalization: initialisms", () => {
 
 describe("english normalization: abbreviations, eras, fractions, units", () => {
     test("abbreviations expand and the dot never becomes a pause", () => {
-        expect(phonemize("No. 11", "en")).toBe("nˈʌmbɚ ɪlˈɛvən"); // was the word "no" plus a pause
+        expect(phonemize("No. 11", "en")).toBe("nˈʌmbɚ ɪlˈɛvn̩"); // was the word "no" plus a pause
         expect(phonemize("Dr. Who", "en")).toBe("dˈɑːktɚ hˈuː"); // was "drive who" — "who" is a function word
         expect(phonemize("Prof. Jones", "en")).toBe("pɹəfˈɛsɚ d͡ʒˈoᶷnz");
         expect(phonemize("vs. them", "en")).toBe("vˈɝsəs ðˈɛm");
@@ -270,9 +270,9 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
     });
 
     test("era markers", () => {
-        expect(phonemize("5000 BC", "en")).toBe("fˈaᶦv θˈaᶷzənd bˈiː sˈiː");
+        expect(phonemize("5000 BC", "en")).toBe("fˈaᶦv θˈaᶷzn̩d bˈiː sˈiː");
         expect(phonemize("356 BCE", "en")).toBe("θɹˈiː hˈʌndɹəd fˈɪfti sˈɪks bˈiː sˈiː ˈiː"); // was [bsiː]
-        expect(phonemize("in 1066 AD", "en")).toBe("ɪn wˈʌn θˈaᶷzənd sˈɪksti sˈɪks ˈeᶦ dˈiː"); // not "ad"
+        expect(phonemize("in 1066 AD", "en")).toBe("ɪn wˈʌn θˈaᶷzn̩d sˈɪksti sˈɪks ˈeᶦ dˈiː"); // not "ad"
     });
 
     test("fractions and negatives", () => {
@@ -295,7 +295,7 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("160 km/h", "en")).toBe("wˈʌn hˈʌndɹəd sˈɪksti kəlˈɑːmʌt̬ɚz pʰɝ ˈaᶷɚ"); // /h was "aitch"
         expect(phonemize("30 m", "en")).toBe("θˈɝd̬i mˈiːt̬ɚz"); // was "thirty em"
         // Space-grouped thousands: the number token cannot span a space, so the thousand was lost.
-        expect(phonemize("5 000 years", "en")).toBe("fˈaᶦv θˈaᶷzənd jˈɪɹz");
+        expect(phonemize("5 000 years", "en")).toBe("fˈaᶦv θˈaᶷzn̩d jˈɪɹz");
     });
 });
 
@@ -304,7 +304,7 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         // There is no word boundary between the letters and the digits, so these letters reached the g2p
         // raw: "CG4684" came out [kɡ]. A single letter counts here too — English read the bare A of A380
         // as the reduced article [ə].
-        expect(phonemize("Flight CG4684", "en")).toBe("flˈaᶦt sˈiː d͡ʒˈiː fˈɔːɹ θˈaᶷzənd sˈɪks hˈʌndɹəd ˈeᶦt̬i fˈɔːɹ");
+        expect(phonemize("Flight CG4684", "en")).toBe("flˈaᶦt sˈiː d͡ʒˈiː fˈɔːɹ θˈaᶷzn̩d sˈɪks hˈʌndɹəd ˈeᶦt̬i fˈɔːɹ");
         expect(phonemize("the A380", "en")).toContain("ˈeᶦ"); // the letter name, not the article
     });
 
@@ -368,8 +368,8 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
 
     test("numeric dates read as dates", () => {
         // Both forms emit "march 14th 2011", which the ordinal-day and pair-wise-year rules then speak.
-        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvən ɪt bᵻɡˈæn");
-        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvən ɪt bᵻɡˈæn");
+        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
+        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
     });
 
     test("the lexicalization threshold: long+pronounceable is a word, short is letters", () => {
@@ -392,7 +392,7 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         expect(phonemize("ISIL", "en")).toBe("ˈaᶦsɪɫ");
         expect(phonemize("BAMF", "en")).toBe("bˈæmf");
         expect(phonemize("the NHS", "en")).toBe("ðə ˈɛn ˈeᶦt͡ʃ ˈɛs"); // 3 → letters
-        expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbəɫjuː tʰˈiː ˈoᶷ"); // 3 → letters
+        expect(phonemize("the WTO", "en")).toBe("ðə dˈʌbɫ̩juː tʰˈiː ˈoᶷ"); // 3 → letters
         expect(phonemize("DSLR", "en")).toBe("dˈiː ˈɛs ˈɛɫ ˈɑːɹ"); // 4 but no vowel → letters
         // Convention still overrides the threshold where the two disagree. The referee records the
         // near-identical USAR as a WORD, which is why this can only be listed, not derived.

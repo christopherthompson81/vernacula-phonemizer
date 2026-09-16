@@ -30,7 +30,7 @@ const GOLD: [string, string][] = [
     ["off", "ˈɒf"], ["dog", "dˈɒɡ"], ["cost", "kʰˈɒst"], ["cloth", "klˈɒθ"], ["lost", "lˈɒst"],
     ["gone", "ɡˈɒn"], ["long", "lˈɒŋ"], ["strong", "stɹˈɒŋ"], ["lot", "lˈɒt"],
     // yod-retention (Cuː → Cjuː) after /n s θ/
-    ["new", "njˈuː"], ["news", "njˈuːz"], ["student", "stjˈuːdənt"], ["stupid", "stjˈuːpəd"], ["nude", "njˈuːd"],
+    ["new", "njˈuː"], ["news", "njˈuːz"], ["student", "stjˈuːdn̩t"], ["stupid", "stjˈuːpəd"], ["nude", "njˈuːd"],
     ["enthusiasm", "ɪnθjˈuːziˌæzəm"], ["numerous", "njˈuːməɹəs"], ["assume", "əsjˈuːm"],
     // GOAT (əᶷ — the parent's offglide since #1252, RP's central onset)
     ["goat", "ɡˈəᶷt"], ["home", "hˈəᶷm"], ["road", "ɹˈəᶷd"], ["know", "nˈəᶷ"], ["boat", "bˈəᶷt"],
@@ -44,7 +44,7 @@ const GOLD: [string, string][] = [
     // PALM exceptions (keep [ɑː] against the LOT rule)
     ["father", "fˈɑːðə"], ["spa", "spˈɑː"], ["drama", "dɹˈɑːmə"], ["banana", "bənˈɑːnə"],
     // dark coda [ɫ]
-    ["little", "lˈɪtəɫ"], ["people", "pʰˈiːpəɫ"], ["apple", "ˈæpəɫ"], ["table", "tʰˈeᶦbəɫ"],
+    ["little", "lˈɪtɫ̩"], ["people", "pʰˈiːpɫ̩"], ["apple", "ˈæpɫ̩"], ["table", "tʰˈeᶦbɫ̩"],
     // wide diphthongs FACE/PRICE/MOUTH/CHOICE + FLEECE/GOOSE
     ["face", "fˈeᶦs"], ["price", "pɹˈaᶦs"], ["time", "tʰˈaᶦm"], ["mouth", "mˈaᶷθ"], ["now", "nˈaᶷ"],
     ["choice", "t͡ʃˈɔᶦs"], ["boy", "bˈɔᶦ"], ["fleece", "flˈiːs"], ["goose", "ɡˈuːs"], ["blue", "blˈuː"],

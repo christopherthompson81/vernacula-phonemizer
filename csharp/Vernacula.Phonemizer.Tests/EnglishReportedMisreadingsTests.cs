@@ -98,8 +98,8 @@ public class EnglishReportedMisreadingsTests
         => Assert.Equal(ipa, Say(w));
 
     [Theory]
-    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬i pɚsˈɛnt")]
-    [InlineData("a ≠ b", "ə nɑːt ˈiːkwəɫ tʰuː bˈiː")]
+    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː θˈɝd̬i pɚsˈɛnt")]
+    [InlineData("a ≠ b", "ə nɑːt ˈiːkwɫ̩ tʰuː bˈiː")]
     [InlineData("a ± b", "ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː")]
     // …and the ASCII pair keeps its digit gate, because it can be markup and these cannot.
     [InlineData("5 > 3", "fˈaᶦv ɡɹˈeᶦt̬ɚ ðæn θɹˈiː")]
@@ -120,7 +120,7 @@ public class EnglishReportedMisreadingsTests
     public void ASlashedRateUnitReads(string text, string ipa) => Assert.Equal(ipa, Say(text));
 
     [Theory]
-    [InlineData("thermocouple", "θˈɝməkʰˌʌpəɫ")]
+    [InlineData("thermocouple", "θˈɝməkʰˌʌpɫ̩")]
     [InlineData("thermocouples", "θˈɝməkʰˌʌpəɫz")]
     [InlineData("thermostat", "θˈɝməstˌæt")]
     public void ThermocoupleAgreesWithEspeakAndWithItsOwnPlural(string w, string ipa)
@@ -147,12 +147,12 @@ public class EnglishReportedMisreadingsTests
     public void ADashBetweenTwoNumbersIsARange(string text, string ipa) => Assert.Equal(ipa, Say(text));
 
     [Theory]
-    [InlineData("Rev. B, 2025-10-21", "ɹivˈɪʒən bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv")]
-    [InlineData("Rev. 3", "ɹivˈɪʒən θɹˈiː")]
+    [InlineData("Rev. B, 2025-10-21", "ɹivˈɪʒn̩ bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv")]
+    [InlineData("Rev. 3", "ɹivˈɪʒn̩ θɹˈiː")]
     // ⚠ The name shapes are the point of the guard — a capital followed by a PERIOD is an initial.
     [InlineData("Rev. Smith", "ɹˈɛvɚənd smˈɪθ")]
     [InlineData("Rev. J. Smith", "ɹˈɛvɚənd d͡ʒˈeᶦ . smˈɪθ")]
-    [InlineData("the Rev. Jesse Jackson", "ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksən")]
+    [InlineData("the Rev. Jesse Jackson", "ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksn̩")]
     public void RevIsARevisionBeforeADesignatorAndAReverendBeforeAName(string t, string ipa)
         => Assert.Equal(ipa, Say(t));
 
@@ -274,7 +274,7 @@ public class EnglishReportedMisreadingsTests
     [Theory]
     [InlineData("replace", "ɹᵻplˈeᶦs")]
     [InlineData("replaced", "ɹᵻplˈeᶦst")]
-    [InlineData("replaceable", "ɹᵻplˈeᶦsəbəɫ")]
+    [InlineData("replaceable", "ɹᵻplˈeᶦsəbɫ̩")]
     [InlineData("details", "dᵻtʰˈeᶦɫz")]
     [InlineData("detail", "dᵻtʰˈeᶦɫ")]
     // ⚠ The PRODUCTIVE prefix meaning "again" keeps its beat — the words a rule-based fix got wrong.
