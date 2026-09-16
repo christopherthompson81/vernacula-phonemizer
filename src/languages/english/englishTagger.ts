@@ -10,6 +10,18 @@
  * Self-contained in the English module (no C# port exists / is needed — the language is independently portable).
  * `onnxruntime-node` is an OPTIONAL dependency imported lazily; if it — or the model — is absent, createEnglishTagger()
  * resolves to `undefined` and the async path (enNeural.ts) falls back to the sync n-gram engine.
+ *
+ * ⚠ FALLING BACK IS THE POLICY; BEING SILENT ABOUT IT WAS NOT. Degrading rather than throwing is right — a
+ * missing OPTIONAL model must not take an utterance down — but until this comment was written the two catches
+ * below were bare, so `loadOrt` built a diagnosable message ("…whose native library failed to load: <reason>")
+ * and it was discarded a line later. Nothing downstream could tell a neural reading from an n-gram one, and
+ * the difference is not cosmetic: on the words the dictionary misses, exact agreement with misaki's lexicon is
+ * 31.0% neural against 19.9% n-gram over 80,222 words, and the `-able`/`-ible` suffix alone is misread 28.9%
+ * of the time against 0.2%. A consumer measured the fallback for a full sweep and concluded the engine had a
+ * rule defect; nothing in the system could have told them otherwise.
+ *
+ * So the reason is kept in {@link taggerUnavailableReason}. Reading it is how a caller, a CLI or a test asks
+ * "did the neural path actually load?" — a question that previously had no answer.
  */
 
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
@@ -26,6 +38,18 @@ export interface EnglishTagger {
     tag(word: string): Promise<string>;
 }
 
+let unavailableReason: string | undefined;
+
+/**
+ * Why the last {@link createEnglishTagger} call produced no tagger, or `undefined` when one was built (or when
+ * none has been attempted). Set by the two catches below and cleared on success, so it describes the CURRENT
+ * state rather than accumulating. The model is loaded once per process by enNeural.ts, so after the first
+ * phonemize this is stable.
+ */
+export function taggerUnavailableReason(): string | undefined {
+    return unavailableReason;
+}
+
 /** Build the English OOV tagger, or `undefined` if the model / onnxruntime-node is unavailable. */
 export async function createEnglishTagger(basename = "en-g2p-tagger"): Promise<EnglishTagger | undefined> {
     const dir = dataDir(import.meta.url);
@@ -33,13 +57,24 @@ export async function createEnglishTagger(basename = "en-g2p-tagger"): Promise<E
     try {
         meta = JSON.parse(readDataText(`${dir}/${basename}.meta.json`)) as TaggerMeta;
         modelBytes = readData(`${dir}/${basename}.int8.onnx`); // dynamic-int8 quantised (9.4MB fp32 → 2.4MB)
-    } catch { return undefined; }
+    } catch (e) {
+        // The model files, not the runtime — this is the ordinary "data tree without the optional model" case.
+        unavailableReason = `the English neural OOV G2P model is not readable (${dir}/${basename}.*): ${String(
+            (e as Error)?.message ?? e,
+        )}`;
+        return undefined;
+    }
     let ortLib: OrtLike, sess: OrtSession;
     try {
         ortLib = await loadOrt("English neural OOV G2P");
         const ep = env("EN_ORT_EP"); // CPU default; opt into a GPU execution provider for fast eval
         sess = await ortLib.InferenceSession.create(modelBytes, ep ? { executionProviders: ep.split(",") } : undefined);
-    } catch { return undefined; }
+    } catch (e) {
+        // loadOrt already names the runtime and why it failed; keep ITS message rather than a summary of it.
+        unavailableReason = String((e as Error)?.message ?? e);
+        return undefined;
+    }
+    unavailableReason = undefined;
     const nTags = Object.keys(meta.tags).length;
     const arpabetToIpa = makeArpabetToIpa(MANIFEST.arpabet);
     const vowels = new Set(MANIFEST.arpabet.vowels); // ARPABET vowel bases, for the shared stress/geminate finishing

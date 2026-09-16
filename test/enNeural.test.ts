@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 
 import { phonemize, phonemizeAsync } from "../src/index.ts";
 import { phonemizeEnNeural } from "../src/languages/english/englishNeural.ts";
-import { createEnglishTagger } from "../src/languages/english/englishTagger.ts";
+import { createEnglishTagger, taggerUnavailableReason } from "../src/languages/english/englishTagger.ts";
 
 // The neural OOV tagger is gated on the (optional) ONNX model + onnxruntime-node. When absent the path falls back to
 // the sync CMUdict + n-gram engine, so the fallback contract is testable everywhere; the retagging assertions run only
@@ -19,6 +19,26 @@ describe("english neural OOV tagger", () => {
         for (const s of ["The cat sat on the mat.", "I have twenty-three apples.", "She reads books and closes it."]) {
             expect(await phonemizeEnNeural(s)).toBe(phonemize(s, "en"));
         }
+    });
+
+    // ⚠ THE FALLBACK IS SILENT UNLESS SOMETHING RECORDS WHY. Returning undefined rather than throwing is the
+    // policy — an optional model must not take an utterance down — but for a long time the two catches in
+    // createEnglishTagger were bare, so loadOrt's diagnosable message was built and discarded, and no caller,
+    // CLI or test could tell a neural reading from an n-gram one. That gap is not cosmetic: on dictionary
+    // misses the two paths agree with misaki's lexicon 31.0% vs 19.9%, and -able/-ible is misread 28.9% of
+    // the time vs 0.2%. These two tests are what keep the reason wired up.
+    test("a model it cannot read yields no tagger AND a reason that names it", async () => {
+        expect(await createEnglishTagger("definitely-not-a-model")).toBeUndefined();
+        const why = taggerUnavailableReason();
+        expect(why).toBeTruthy();
+        // Names the thing that failed, not just "error" — this string is the whole point of the change.
+        expect(why).toContain("definitely-not-a-model");
+        expect(why).toContain("English neural OOV G2P model");
+    });
+
+    test.skipIf(!haveModel)("a tagger that builds clears the reason", async () => {
+        expect(await createEnglishTagger()).toBeDefined();
+        expect(taggerUnavailableReason()).toBeUndefined();
     });
 
     describe.skipIf(!haveModel)("with the ONNX model present", () => {
