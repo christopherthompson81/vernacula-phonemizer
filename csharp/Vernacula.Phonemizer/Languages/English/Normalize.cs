@@ -40,6 +40,28 @@ public static class Normalize
         ["°c"] = new[] { "degree Celsius", "degrees Celsius" }, ["°f"] = new[] { "degree Fahrenheit", "degrees Fahrenheit" },
         ["℃"] = new[] { "degree Celsius", "degrees Celsius" }, ["℉"] = new[] { "degree Fahrenheit", "degrees Fahrenheit" },
         ["°"] = new[] { "degree", "degrees" },
+        // ⚠ MICRO IS TWO CODE POINTS AND THE GREEK ONE DOMINATES — U+00B5 MICRO SIGN vs U+03BC GREEK
+        // SMALL LETTER MU, 14 to 490 across the mined corpora. Neither folds to the other, so BOTH are
+        // declared, as ℃ is declared beside °c above. The drop here was a WRONG UNIT, not a missing
+        // word: `5 µg` had no key, the sign fell out, and the bare `g` was SPELLED — "five gee".
+        // ⚠ micro meter / micro liter are TWO WORDS on purpose — "micrometer" is recorded as the
+        // CALIPER and "microliter" comes out with an unstressed `li`. See normalize.ts for the full
+        // reasoning and the British-spelling attempts that do not rescue it.
+        ["\u00b5g"] = new[] { "microgram", "micrograms" }, ["\u03bcg"] = new[] { "microgram", "micrograms" },
+        ["\u00b5s"] = new[] { "microsecond", "microseconds" }, ["\u03bcs"] = new[] { "microsecond", "microseconds" },
+        ["\u00b5mol"] = new[] { "micromole", "micromoles" }, ["\u03bcmol"] = new[] { "micromole", "micromoles" },
+        ["\u00b5m"] = new[] { "micro meter", "micro meters" }, ["\u03bcm"] = new[] { "micro meter", "micro meters" },
+        ["\u00b5l"] = new[] { "micro liter", "micro liters" }, ["\u03bcl"] = new[] { "micro liter", "micro liters" },
+        // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS — µM is MICROMOLAR, µS is MICROSIEMENS, not sloppy
+        // spellings of µm/µs. ResolveUnitSymbol consults the declared table with the EXACT written form
+        // before folding, so declaring them is what stops `25 µM` folding to `µm` and reading "micro
+        // METERS" — the wrong-unit failure this block exists to remove, reintroduced by the fix for it.
+        // ⟨L⟩ needs no twin: µL and µl are the same unit. See normalize.ts.
+        ["\u00b5M"] = new[] { "micromolar", "micromolar" }, ["\u03bcM"] = new[] { "micromolar", "micromolar" },
+        ["\u00b5S"] = new[] { "microsiemens", "microsiemens" }, ["\u03bcS"] = new[] { "microsiemens", "microsiemens" },
+        ["\u00b5g/g"] = new[] { "microgram per gram", "micrograms per gram" }, ["\u03bcg/g"] = new[] { "microgram per gram", "micrograms per gram" },
+        ["\u00b5g/ml"] = new[] { "microgram per milliliter", "micrograms per milliliter" }, ["\u03bcg/ml"] = new[] { "microgram per milliliter", "micrograms per milliliter" },
+        ["\u00b5mol/l"] = new[] { "micromole per liter", "micromoles per liter" }, ["\u03bcmol/l"] = new[] { "micromole per liter", "micromoles per liter" },
         ["m"] = new[] { "meter", "meters" },
         ["l"] = new[] { "liter", "liters" }, ["L"] = new[] { "liter", "liters" }, ["ml"] = new[] { "milliliter", "milliliters" },
         ["g"] = new[] { "gram", "grams" }, ["t"] = new[] { "ton", "tons" }, ["W"] = new[] { "watt", "watts" },
@@ -157,6 +179,14 @@ public static class Normalize
         JsRegex.Compile("\\b[Rr][Ee][Vv]\\.?\\s+(?=(?:[A-Z](?![a-z.])|\\d))", "gu");
 
     private static readonly JsRe NUMBER_RANGE = JsRegex.Compile("(\\d)[\\u2012\\u2013\\u2014](?=\\d)", "gu");
+
+    /// <summary>
+    /// An arrow between two numbers is a TRANSITION, and it was dropped outright — `16 → 28 h` read as
+    /// "sixteen twenty-eight hours". The reading is the range rule's above ("to"), not a gloss of the
+    /// glyph. Digit-gated on both sides, like × and ÷: between words an arrow's reading is contested,
+    /// and a missing word beats a wrong one. Spaced, because an arrow between digits is written loose.
+    /// </summary>
+    private static readonly JsRe NUMBER_ARROW = JsRegex.Compile("(\\d)[ \\t]*\\u2192[ \\t]*(?=\\d)", "gu");
 
     /** A space-guarded dash of any kind is a parenthetical break; the spaces are what keep this off
      *  the word-joiner (`well-known`, `re-enter`). Two arms, claiming everything EXCEPT a dash with a
@@ -673,6 +703,7 @@ public static class Normalize
         s = Rewrite(s, GREATER_THAN, "$1 greater than ");
 
         s = Rewrite(s, NUMBER_RANGE, "$1 to ");
+        s = Rewrite(s, NUMBER_ARROW, "$1 to ");
 
         // ⚠ BEFORE the parenthetical rule, or the SPACED forms are claimed as a pause and the span is
         // lost a second way. See the TS.

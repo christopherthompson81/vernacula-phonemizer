@@ -6,6 +6,61 @@ import { phonemize } from "../src/index.ts";
 // English text normalization: rewrite non-lexical tokens into speakable words BEFORE the
 // tokenizer, so the existing number/ordinal/OOV machinery pronounces them. Asserted mostly at the
 // TEXT level (the rewrite is the contract; pronunciation is the number path's own tested concern).
+describe("micro-prefixed units and the numeric arrow", () => {
+    // ⚠ THE DROP WAS A WRONG UNIT, NOT A MISSING WORD. `5 µg` had no key, so the sign fell out and the
+    // bare `g` reached the initialism pass and was SPELLED: *fˈaᶦv ʤˈiː*, "five gee". A dose read as
+    // grams when the page says micrograms is off by a thousand, and nothing in the stream looks wrong.
+    test("micro is read, and from BOTH code points", () => {
+        // U+00B5 MICRO SIGN and U+03BC GREEK SMALL LETTER MU. Neither folds to the other, and across
+        // the mined corpora the GREEK one outnumbers the micro sign 490 to 14.
+        expect(phonemize("a 5 \u00b5g dose", "en")).toContain("mˈaᶦkɹoᶷɡɹˌæmz");
+        expect(phonemize("a 5 \u03bcg dose", "en")).toContain("mˈaᶦkɹoᶷɡɹˌæmz");
+        expect(phonemize("a 5 \u00b5g dose", "en")).not.toContain("ʤˈiː"); // not "five gee"
+    });
+
+    test("count agreement and the slashed chains", () => {
+        expect(phonemize("1 \u00b5g", "en")).toContain("mˈaᶦkɹoᶷɡɹˌæm");
+        expect(phonemize("1 \u00b5g", "en")).not.toContain("ɡɹˌæmz");
+        // the denominator must be a key too, or the tail strands and reaches the g2p as letters
+        expect(phonemize("94 \u03bcg/mL", "en")).toContain("pʰɝ mˈɪləlˌiːt̬ɚ");
+        expect(phonemize("25 \u00b5mol/L", "en")).toContain("pʰɝ lˈiːt̬ɚ");
+    });
+
+    // ⚠ TWO WORDS ON PURPOSE. "micrometer" is recorded as the CALIPER (maᶦkɹˈɑːmət̬ɚ) and "microliter"
+    // comes out with an unstressed `li`; the British spellings do not rescue it either. gram, second
+    // and mole need no such help.
+    test("the two units whose single-word spelling reads wrong", () => {
+        expect(phonemize("6 \u03bcm wide", "en")).toContain("mˈaᶦkɹoᶷ mˈiːt̬ɚz");
+        expect(phonemize("2 \u00b5L sample", "en")).toContain("mˈaᶦkɹoᶷ lˈiːt̬ɚz");
+    });
+
+    // ⚠ THE CAPITALS ARE DIFFERENT UNITS, and this case was REGRESSED BY THE FIX ITSELF before it was
+    // caught: `25 µM` (micromolar) folded to `µm` and read "micro METERS", turning a merely-dropped
+    // symbol into a wrong unit — the failure the micro keys exist to remove.
+    test("µM is micromolar and µS is microsiemens, not case-sloppy µm/µs", () => {
+        expect(phonemize("a 25 \u00b5M solution", "en")).toContain("mˈaᶦkɹoᶷmˌoᶷləɹ");
+        expect(phonemize("a 25 \u03bcM solution", "en")).toContain("mˈaᶦkɹoᶷmˌoᶷləɹ");
+        expect(phonemize("a 25 \u00b5M solution", "en")).not.toContain("mˈiːt̬ɚz");
+        expect(phonemize("5 \u00b5S conductance", "en")).toContain("mˈaᶦkɹoᶷsˌiːmənz");
+        expect(phonemize("5 \u00b5s delay", "en")).toContain("mˈaᶦkɹoᶷsˌɛkəndz");
+        // ⟨L⟩ is NOT such a case — µL and µl are the same unit, as L/l are
+        expect(phonemize("2 \u00b5L sample", "en")).toContain("mˈaᶦkɹoᶷ lˈiːt̬ɚz");
+    });
+
+    // ⚠ AND A BARE MU IS STILL THE GREEK LETTER — the gate is the preceding number.
+    test("a mu that is not a unit prefix is untouched", () => {
+        expect(phonemize("\u03bc is a Greek letter", "en")).not.toContain("mˈaᶦkɹoᶷ");
+    });
+
+    // An arrow between two numbers is a transition, and read the way the dash range above it is read.
+    // Digit-gated: between words the reading is contested, and a missing word beats a wrong one.
+    test("an arrow between numbers says \"to\"", () => {
+        expect(phonemize("16 \u2192 28 hours", "en")).toBe("sɪkstˈiːn tʰuː twˈɛnti ˈeᶦt ˈaᶷɚz");
+        // not claimed between words
+        expect(phonemize("input \u2192 output", "en")).not.toContain("tʰuː");
+    });
+});
+
 describe("English text normalization", () => {
     test("percent and currency are no longer silently dropped", () => {
         expect(normalizeEnglish("40% of people")).toBe("40 percent of people");
