@@ -55,8 +55,8 @@ describe("space-grouped numbers are not joined across a boundary that is not one
     test("a four-digit head is proof the space is not a separator", () => {
         // 2,008,400 is written `2 008 400`, never `2008 400`. The reader said "two thousand and eight …
         // four hundred"; we had read *two million eight thousand four hundred*.
-        expect(phonemize("the 2008 400 richest americans", "en")).toContain("θˈaᶷzənd ˈeᶦt fˈɔːɹ hˈʌndɹəd");
-        expect(phonemize("the 2008 400 richest americans", "en")).not.toContain("mˈɪɫjən");
+        expect(phonemize("the 2008 400 richest americans", "en")).toContain("θˈaᶷzn̩d ˈeᶦt fˈɔːɹ hˈʌndɹəd");
+        expect(phonemize("the 2008 400 richest americans", "en")).not.toContain("mˈɪɫjn̩");
     });
 
     test("a day followed by a year is two numbers, not a grouped one", () => {
@@ -65,7 +65,7 @@ describe("space-grouped numbers are not joined across a boundary that is not one
     });
 
     test("...but real SI grouping still merges, including multi-group", () => {
-        expect(phonemize("a population of 2 008 400 people", "en")).toContain("mˈɪɫjən");
+        expect(phonemize("a population of 2 008 400 people", "en")).toContain("mˈɪɫjn̩");
     });
 });
 
@@ -111,8 +111,8 @@ describe("POS tagger — a word that is also a prototype member name", () => {
 describe("abbreviated dates, clocks and timezone offsets", () => {
     test("a three-letter month is the month, and the date rules then see it", () => {
         // The ordinal day and the pair-wise year both key on the spelled-out name.
-        expect(phonemize("Jan 5, 2011", "en")).toBe("d͡ʒˈænjuːˌɛɹi fˈɪfθ , twˈɛnti ɪlˈɛvən");
-        expect(phonemize("5 Jan 2011", "en")).toBe("fˈaᶦv d͡ʒˈænjuːˌɛɹi twˈɛnti ɪlˈɛvən");
+        expect(phonemize("Jan 5, 2011", "en")).toBe("d͡ʒˈænjuːˌɛɹi fˈɪfθ , twˈɛnti ɪlˈɛvn̩");
+        expect(phonemize("5 Jan 2011", "en")).toBe("fˈaᶦv d͡ʒˈænjuːˌɛɹi twˈɛnti ɪlˈɛvn̩");
         expect(phonemize("Sept. 11 2001", "en")).toContain("sɛptˈɛmbɚ ɪlˈɛvənθ");
     });
 

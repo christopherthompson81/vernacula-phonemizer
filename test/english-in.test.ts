@@ -36,7 +36,7 @@ describe("Indian English (en-IN) — GIE diagnostic gold", () => {
     test("DE-ASPIRATION of /p k/; CLEAR /l/", () => {
         expect(phonemizeWord("cat")).toBe("kˈæʈ"); // k not kʰ; retroflex final t
         expect(phonemizeWord("full")).toBe("fˈʊl"); // clear l, not dark ɫ
-        expect(phonemizeWord("little")).toBe("lˈɪʈəl");
+        expect(phonemizeWord("little")).toBe("lˈɪʈl̩");
     });
 
     test("RHOTIC with a TAP [ɾ]: coda /ɹ/ kept, r-coloured vowels → V+ɾ", () => {
@@ -54,7 +54,7 @@ describe("Indian English (en-IN) — GIE diagnostic gold", () => {
     test("PRICE/MOUTH stay diphthongs; a multi-feature word", () => {
         expect(phonemizeWord("price")).toBe("pɾˈaɪs");
         expect(phonemizeWord("time")).toBe("ʈˈaɪm");
-        expect(phonemizeWord("student")).toBe("sʈˈuːɖənʈ");
+        expect(phonemizeWord("student")).toBe("sʈˈuːɖn̩ʈ");
         expect(phonemizeWord("university")).toBe("jˌuːnəʋˈəɾsɪʈi");
     });
 });

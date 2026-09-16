@@ -125,7 +125,7 @@ describe("Thai text normalization", () => {
         expect(phonemize("NASA", "th")).not.toMatch(/[æʌɫɹ]/u); // was "nˈæsə" — æ is not in the inventory
         expect(phonemize("XDR-TB", "th")).not.toMatch(/[æʌɫɹ]/u); // the hyphen splits it into two initialisms
         // mixed-case Latin is deliberately LEFT to the English fallback (no sourced Thai loanword lexicon)
-        expect(phonemize("Google", "th")).toBe("ɡˈuːɡəɫ");
+        expect(phonemize("Google", "th")).toBe("ɡˈuːɡɫ̩");
     });
 
     test("degree sign (2)", () => {

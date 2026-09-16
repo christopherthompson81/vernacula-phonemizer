@@ -204,17 +204,17 @@ describe("relational operators, fiscal years, and slashed rate units", () => {
     // INVERSE claim, and a dropped `±` turns a tolerance into a wrong number.
     test("the Unicode relationals are read", () => {
         expect(phonemize("Panels lit at ≥30%", "en"))
-            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬i pɚsˈɛnt");
-        expect(phonemize("a ≠ b", "en")).toBe("ə nɑːt ˈiːkwəɫ tʰuː bˈiː");
+            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː θˈɝd̬i pɚsˈɛnt");
+        expect(phonemize("a ≠ b", "en")).toBe("ə nɑːt ˈiːkwɫ̩ tʰuː bˈiː");
         expect(phonemize("a ± b", "en")).toBe("ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː");
-        expect(phonemize("x ≤ 5", "en")).toContain("lˈɛs ðæn ɔːɹ ˈiːkwəɫ tʰuː");
+        expect(phonemize("x ≤ 5", "en")).toContain("lˈɛs ðæn ɔːɹ ˈiːkwɫ̩ tʰuː");
         expect(phonemize("a ≈ b", "en")).toContain("əpɹˈɑːksəmətli");
     });
 
     // The PREFIX position is the one that matters and the one an infix pattern cannot reach: "at ≥30%"
     // has no left operand, and read as "at thirty percent" — the threshold gone, the sentence fluent.
     test("…including with no left operand", () => {
-        expect(phonemize("≥30", "en")).toContain("ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː");
+        expect(phonemize("≥30", "en")).toContain("ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː");
     });
 
     // ⚠ The ASCII `<`/`>` keep their digit gate — they can be markup and these cannot.
@@ -262,7 +262,7 @@ describe("thermocouple", () => {
     test("both paths, and both numbers, agree with espeak-ng", async () => {
         for (const w of ["thermocouple", "thermocouples"])
             expect(phonemize(w, "en")).toBe(await phonemizeAsync(w, "en"));
-        expect(phonemize("thermocouple", "en")).toBe("θˈɝməkʰˌʌpəɫ");
+        expect(phonemize("thermocouple", "en")).toBe("θˈɝməkʰˌʌpɫ̩");
         expect(phonemize("thermocouples", "en")).toBe("θˈɝməkʰˌʌpəɫz");
     });
 
@@ -313,7 +313,7 @@ describe("a two-letter caps run glued to digits is a code, not a word", () => {
 describe("a dash between two numbers is a range", () => {
     test("the typographic dashes read as 'to'", () => {
         expect(phonemize("the 5–15% flammable range", "en"))
-            .toBe("ðə fˈaᶦv tʰuː fɪftˈiːn pɚsˈɛnt flˈæməbəɫ ɹˈeᶦnd͡ʒ");
+            .toBe("ðə fˈaᶦv tʰuː fɪftˈiːn pɚsˈɛnt flˈæməbɫ̩ ɹˈeᶦnd͡ʒ");
         expect(phonemize("pages 5–15", "en")).toBe("pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn");
         expect(phonemize("5—15", "en")).toContain("tʰuː");          // em dash
         // Ordered after the year rule, so both halves still read pair-wise AND the range says "to".
@@ -341,10 +341,10 @@ describe("a dash between two numbers is a range", () => {
 describe("Rev. is a revision before a designator and a reverend before a name", () => {
     test("the designator shapes", () => {
         expect(phonemize("Rev. B, 2025-10-21", "en"))
-            .toBe("ɹivˈɪʒən bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv");
+            .toBe("ɹivˈɪʒn̩ bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv");
         // ⚠ AND THE DOT IS CONSUMED, which the table could not: its arm needs a following LETTER, so
         // `Rev. 3` matched nothing and the dot survived into the clause segmenter as a phrase break.
-        expect(phonemize("Rev. 3", "en")).toBe("ɹivˈɪʒən θɹˈiː");
+        expect(phonemize("Rev. 3", "en")).toBe("ɹivˈɪʒn̩ θɹˈiː");
     });
 
     // ⚠ THE NAME SHAPES ARE THE POINT OF THE GUARD. `Rev. J. Smith` is the hard one — a capital
@@ -352,15 +352,15 @@ describe("Rev. is a revision before a designator and a reverend before a name", 
     test("the name shapes are untouched", () => {
         expect(phonemize("Rev. Smith", "en")).toBe("ɹˈɛvɚənd smˈɪθ");
         expect(phonemize("Rev. J. Smith", "en")).toBe("ɹˈɛvɚənd d͡ʒˈeᶦ . smˈɪθ");
-        expect(phonemize("the Rev. Jesse Jackson", "en")).toBe("ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksən");
+        expect(phonemize("the Rev. Jesse Jackson", "en")).toBe("ðə ɹˈɛvɚənd d͡ʒˈɛsi d͡ʒˈæksn̩");
     });
 
     // ⚠ A two-letter designator is the case that caught the `i` flag: with it, the `[a-z]` in the
     // lookahead matches uppercase too, so a following capital was REJECTED and this fell through to
     // "reverend". The flag is off and the literal is cased by hand.
     test("a multi-character designator still reads as a revision", () => {
-        expect(phonemize("Rev. AB", "en")).toContain("ɹivˈɪʒən");
-        expect(phonemize("Rev. B1", "en")).toContain("ɹivˈɪʒən");
+        expect(phonemize("Rev. AB", "en")).toContain("ɹivˈɪʒn̩");
+        expect(phonemize("Rev. B1", "en")).toContain("ɹivˈɪʒn̩");
     });
 });
 
@@ -555,10 +555,10 @@ describe("a prefix the dictionary spelled two ways in one paradigm", () => {
     test("the paradigm agrees with itself again", () => {
         expect(say("replace")).toBe("ɹᵻplˈeᶦs");
         expect(say("replaced")).toBe("ɹᵻplˈeᶦst");
-        expect(say("replaceable")).toBe("ɹᵻplˈeᶦsəbəɫ");
+        expect(say("replaceable")).toBe("ɹᵻplˈeᶦsəbɫ̩");
         expect(say("replaces")).toBe("ɹᵻplˈeᶦsᵻz");      // was already right
         expect(say("replacing")).toBe("ɹᵻplˈeᶦsɪŋ");     // was already right
-        expect(say("replacement")).toBe("ɹᵻplˈeᶦsmənt"); // was already right
+        expect(say("replacement")).toBe("ɹᵻplˈeᶦsmn̩t"); // was already right
     });
 
     // ⚠ THE PRODUCTIVE PREFIX KEEPS ITS BEAT. These are the words the rejected rule got wrong, pinned

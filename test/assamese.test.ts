@@ -63,7 +63,7 @@ describe("Assamese text normalization", () => {
 
     test("dotted runs lose their dots (Latin U.S. and Bengali ইউ.এছ.অ.চি); the W. suffix dot goes", () => {
         expect(ph("ইউ.এছ.অ.চি ৰ")).toBe("iu es ɔ si ɹɔ");
-        expect(ph("George W. Bush")).toBe("d͡ʒˈɔːɹd͡ʒ dˈʌbəɫjuː bˈʊʃ");
+        expect(ph("George W. Bush")).toBe("d͡ʒˈɔːɹd͡ʒ dˈʌbɫ̩juː bˈʊʃ");
     });
 
     test("version dots read বিন্দু, not the decimal দশমিক", () => {
@@ -89,7 +89,7 @@ describe("Assamese text normalization", () => {
     test("the version-dot and initial-dot rules stay inside their evidence", () => {
         expect(ph("6.5km")).toBe("sɔj dɔxɔmik pãs kilomitaɹ"); // a decimal with a unit is not a version
         expect(ph("802.11এন মানদণ্ড")).toBe("atʰ ex dui bindu eɡʱaɹ en manɔdɔndo");
-        expect(ph("George W. Bush")).toBe("d͡ʒˈɔːɹd͡ʒ dˈʌbəɫjuː bˈʊʃ"); // an initial loses its dot
+        expect(ph("George W. Bush")).toBe("d͡ʒˈɔːɹd͡ʒ dˈʌbɫ̩juː bˈʊʃ"); // an initial loses its dot
         expect(ph("NASA. Bush")).toBe("nˈæsə . bˈʊʃ"); // a SENTENCE period after an acronym does not
     });
 

@@ -20,7 +20,16 @@ const DATA = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "langua
 
 describe("the English lexicon regenerates from its ARPABET source", () => {
     test("every sourced row reproduces byte-identically", () => {
-        const toIpa = makeArpabetToIpa(MANIFEST.arpabet);
+        // ⚠ THE SYLLABIC TABLE IS PART OF THE SOURCE. Without it this gate regenerates plain schwas for the
+// 3,231 words en-syllabic.tsv marks and reports the lexicon as un-reproducible — the same two-path
+// dependency english.ts and en_rebuild_lexicon.mts have.
+const syllabic = new Map<string, number[]>();
+for (const line of readFileSync(join(DATA, "en-syllabic.tsv"), "utf8").split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const tab = line.indexOf("\t");
+    if (tab > 0) syllabic.set(line.slice(0, tab), line.slice(tab + 1).trim().split(",").map(Number));
+}
+const toIpa = makeArpabetToIpa(MANIFEST.arpabet, syllabic);
         const arpabet = new Map<string, string[]>();
         for (const line of readFileSync(join(DATA, "g2p-dict.tsv"), "utf8").split("\n")) {
             if (!line || line.startsWith("#")) continue;

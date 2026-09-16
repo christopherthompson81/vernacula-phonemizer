@@ -93,6 +93,13 @@ function isBarredI(
  *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
 export function makeArpabetToIpa(
     def: ArpabetDef,
+    /**
+     * Word → the indices of its ARPABET phones that are a SYLLABIC consonant's schwa slot
+     * (`en-syllabic.tsv`). Passed in rather than loaded here, because this module is DATA-FREE on
+     * purpose — a different English variety supplies its own `def`, and would supply its own table.
+     * Omitted (the OOV tagger's path) means no word has syllabic slots, which is the prior behaviour.
+     */
+    syllabic: ReadonlyMap<string, readonly number[]> = new Map(),
 ): (phones: string[], word?: string) => string {
     const { map, conditionalVowels: cv } = def;
     /** The TRUE diphthongs, for the clash exception above — NOT `OW`/`EY`, which CMUdict writes as a 2°
@@ -102,6 +109,9 @@ const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
     return function arpabetToIpa(phones: string[], word = ""): string {
         const P = phones.map(split);
+        // The slots whose schwa is NOT a schwa but the sonorant after it being syllabic.
+        const sylSlots = syllabic.get(word);
+        let pendingSyllabic = false;
         const nucleiIdx = P.map((p, i) => (VOWELS.has(p.base) ? i : -1)).filter(
             (i) => i >= 0,
         );
@@ -113,6 +123,26 @@ const VOWELS = new Set(def.vowels);
             const { base, stress } = P[i]!;
             const nextIsR = i + 1 < P.length && P[i + 1]!.base === "R";
             const nextIsV = i + 1 < P.length && VOWELS.has(P[i + 1]!.base);
+            // REDUCED SLOT — misaki writes `ᵊ` here and we write one of TWO things, because `ᵊ` is
+            // not one phonological fact. Measured over the 3,264 slots this table marks: in 2,647
+            // (81%) the sonorant is in the CODA and genuinely carries the syllable (`able`, EY1 B
+            // AH0 L, [ˈeɪbl̩]); in 617 (19%) it is the ONSET of the next syllable and cannot be
+            // syllabic at all (`accompany`, gold `əkˈʌmpᵊni`, where the n starts `ni`).
+            //
+            // ⚠ SO `ᵊ` IS A REDUCED SCHWA, NOT A SYLLABICITY MARK, and conflating the two would put
+            // a false claim in the canonical IPA to win a true token downstream. Canonical IPA has
+            // both: the syllabic diacritic for the first, and the EXTRA-SHORT breve for the second.
+            // `KokoroFormat` maps each to `ᵊ`, so Kokoro sees what misaki gave it either way.
+            if (VOWELS.has(base) && sylSlots?.includes(i)) {
+                const son = i + 1;
+                const sonIsOnset = son + 1 < P.length && VOWELS.has(P[son + 1]!.base);
+                if (sonIsOnset) {
+                    out += "ə\u0306";   // extra-short schwa: reduced, but the sonorant is an onset
+                    continue;
+                }
+                pendingSyllabic = true;
+                continue;
+            }
             if (VOWELS.has(base)) {
                 const ni = nucleusNum.get(i)!;
                 // Secondary-stress clash: drop a 2° whose syllable is ADJACENT (consecutive nucleus) to the 1°.
@@ -172,6 +202,14 @@ const VOWELS = new Set(def.vowels);
                 else out += map[base] ?? base;
                 // ʲ-glide hiatus: a high front nucleus (i/iː) directly before another vowel inserts ʲ.
                 if (base === "IY" && nextIsV) out += "ʲ";
+                continue;
+            }
+            // SYLLABIC CONSONANT, part 2 of 2 — this sonorant carries the syllable, so it takes the
+            // mark and skips the allophony below: the flap rule would look for a following VOWEL that
+            // no longer exists, and dark-l is already what a syllabic /l/ is.
+            if (pendingSyllabic) {
+                pendingSyllabic = false;
+                out += `${base === "L" ? "ɫ" : (map[base] ?? base)}\u0329`;
                 continue;
             }
             if (

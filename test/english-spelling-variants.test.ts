@@ -20,7 +20,7 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
     });
 
     test("-ise/-yse, -re, -ce", () => {
-        expect(phonemize("analyse", "en")).toBe("ˈænəlˌaᶦz");
+        expect(phonemize("analyse", "en")).toBe("ˈænə̆lˌaᶦz");
         expect(phonemize("organisation", "en")).toBe("ˌɔːɹɡənɪzˈeᶦʃən");
         expect(phonemize("centre", "en")).toBe("sˈɛntɚ");
         expect(phonemize("calibre", "en")).toBe("kʰˈæləbɚ");
@@ -29,11 +29,11 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
 
     test("the l that British doubles, and the one it does not", () => {
         expect(phonemize("travelled", "en")).toBe("tɹˈævəɫd");
-        expect(phonemize("marvellous", "en")).toBe("mˈɑːɹvələs");
-        expect(phonemize("counsellor", "en")).toBe("kʰˈaᶷnsəlɚ");
+        expect(phonemize("marvellous", "en")).toBe("mˈɑːɹvə̆ləs");
+        expect(phonemize("counsellor", "en")).toBe("kʰˈaᶷnsə̆lɚ");
         expect(phonemize("unrivalled", "en")).toBe("ənɹˈaᶦvəɫd"); // stem only known under a prefix
         expect(phonemize("enrolment", "en")).toBe("ɛnɹˈoᶷɫmənt"); // …and the other direction
-        expect(phonemize("skilful", "en")).toBe("skˈɪɫfəɫ");
+        expect(phonemize("skilful", "en")).toBe("skˈɪɫfɫ̩");
     });
 
     test("the ae/oe digraph stems", () => {
@@ -45,7 +45,7 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
     });
 
     test("the one-off families", () => {
-        expect(phonemize("catalogue", "en")).toBe("kʰˈæt̬əlˌɔːɡ");
+        expect(phonemize("catalogue", "en")).toBe("kʰˈæt̬ə̆lˌɔːɡ");
         expect(phonemize("programme", "en")).toBe("pɹˈoᶷɡɹæm");
         expect(phonemize("sulphur", "en")).toBe("sˈʌɫfɚ");
         expect(phonemize("inflexion", "en")).toBe("ɪnflˈɛkʃən");

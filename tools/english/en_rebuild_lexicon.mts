@@ -30,7 +30,18 @@ const LEXICON = join(DATA, "accent-lexicon.tsv");
 const write = process.argv.includes("--write");
 const showDiff = process.argv.includes("--diff");
 
-const toIpa = makeArpabetToIpa(MANIFEST.arpabet);
+// ⚠ THE SAME TABLE THE ENGINE LOADS. Rendering the flat lexicon without it would bake plain schwas
+// into exactly the words the engine would now read as syllabic — the two-path split this tool exists
+// to prevent, in a new place.
+const syllabic = new Map<string, number[]>();
+for (const line of readFileSync(join(DATA, "en-syllabic.tsv"), "utf8").split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const tab = line.indexOf("\t");
+    if (tab <= 0) continue;
+    syllabic.set(line.slice(0, tab), line.slice(tab + 1).trim().split(",").map(Number));
+}
+
+const toIpa = makeArpabetToIpa(MANIFEST.arpabet, syllabic);
 
 const arpabet = new Map<string, string[]>();
 for (const line of readFileSync(join(DATA, "g2p-dict.tsv"), "utf8").split("\n")) {

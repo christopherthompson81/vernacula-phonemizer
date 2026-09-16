@@ -436,7 +436,11 @@ public static class EnglishFactory
         var manifest = Manifest.MANIFEST; // consolidated hand-authored facts (english.jsonc), loaded once by manifest.ts
         var heteronyms = manifest.Heteronyms;
         var unstressed = new HashSet<string>(manifest.UnstressedWords, StringComparer.Ordinal);
-        var arpabetToIpa = EnglishArpabet.MakeArpabetToIpa(manifest.Arpabet);
+        // ⚠ THE SAME TABLE tools/english/en_rebuild_lexicon.mts renders the flat lexicon with — the
+        // two-path split that tool exists to prevent applies here too.
+        var syllabic = LoadTsv.LoadTsvMap<IReadOnlyList<int>>(dir, "en-syllabic.tsv",
+            (v, _) => v.Split(',').Select(x => int.TryParse(x, out var n) ? n : -1).Where(n => n >= 0).ToList());
+        var arpabetToIpa = EnglishArpabet.MakeArpabetToIpa(manifest.Arpabet, syllabic);
 
         var g2pDict = LoadTsv.LoadTsvMap<List<string>>(dir, "g2p-dict.tsv", (v, _) => v.Split(' ').ToList());
         var g2pCommon = new HashSet<string>(LoadTsv.LoadLines(dir, "g2p-common.txt"), StringComparer.Ordinal);

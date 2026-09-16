@@ -100,6 +100,21 @@ const TOKEN_RE =
     // otherwise, minus a TRAILING comma, which is a clause mark and now reads as the pause it is.
     /(\d+(?:(?<!(?<!\d)0),\d+)*(?:\.\d+)?)(st|nd|rd|th)?|(\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*['’]?)|([.?!,;:])/gu;
 
+/**
+ * The citation form a CREOLE nativiser should see — GenAm's REDUCED-SLOT notation undone.
+ *
+ * ⚠ THE SAME BOUNDARY ASPIRATION AND FLAPPING ALREADY CROSS. `nativise` in naija.ts strips `ʰ` and
+ * the voicing diacritic because they are facts about General American, not about Nigerian Pidgin;
+ * the syllabic consonant and the extra-short schwa are the same kind of fact. Without this, adding
+ * them to the English lexicon silently rewrote Naija — `people` became *pipl̩* and `analyze`
+ * *anălaiz*, marks that are in no Naija inventory.
+ *
+ * Restores the plain schwa the creoles were built against: `l̩` → `əl`, `ə̆` → `ə`.
+ */
+function CreoleCitation(ipa: string): string {
+    return ipa.replace(/(\S)\u0329/gu, "ə$1").replace(/\u0306/gu, "");
+}
+
 export class EnglishPhonemizer {
     constructor(
         private readonly lexicon: Map<string, string>,
@@ -121,14 +136,16 @@ export class EnglishPhonemizer {
     knownWord(word: string): string | undefined {
         const lower = word.toLowerCase();
         const direct = this.lexicon.get(lower) ?? this.heteronyms.get(lower)?.default;
-        if (direct !== undefined) return direct;
+        if (direct !== undefined) return CreoleCitation(direct);
         // …including under a Commonwealth spelling, which matters in BOTH directions here. Naija
         // writes Nigerian English, so `colour` there is a known-English word to nativise and not
         // the substrate loan an unfolded miss would make it; and englishNeural.ts uses this as its
         // "already known" test, so folding keeps it from sending the BiLSTM a word `resolveWord`
         // is going to answer from the lexicon anyway.
         const american = americanSpelling(lower, (w) => this.lexicon.has(w));
-        return american === undefined ? undefined : this.lexicon.get(american);
+        if (american === undefined) return undefined;
+        const folded = this.lexicon.get(american);
+        return folded === undefined ? undefined : CreoleCitation(folded);
     }
 
     /** `text` with an `oovOverride`, for the registry's FOREIGN reader (core/foreign.ts) — the path that reads an
@@ -505,7 +522,13 @@ export function createEnglish(): EnglishPhonemizer {
     const manifest = MANIFEST; // consolidated hand-authored facts (english.jsonc), loaded once by manifest.ts
     const heteronyms = new Map(Object.entries(manifest.heteronyms));
     const unstressed = new Set(manifest.unstressedWords);
-    const arpabetToIpa = makeArpabetToIpa(manifest.arpabet);
+    // ⚠ THE SYLLABIC TABLE MUST REACH BOTH RENDERERS. This one feeds the OOV/G2P path; the flat
+    // lexicon is pre-rendered by tools/english/en_rebuild_lexicon.mts, which loads the SAME file —
+    // the split en_rebuild_lexicon's header warns about.
+    const syllabic = loadTsvMap(import.meta.url, "en-syllabic.tsv", (v) =>
+        v.split(",").map(Number).filter((n) => Number.isInteger(n)),
+    );
+    const arpabetToIpa = makeArpabetToIpa(manifest.arpabet, syllabic);
 
     const g2pDict = loadTsvMap(import.meta.url, "g2p-dict.tsv", (v) =>
         v.split(" "),

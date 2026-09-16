@@ -190,7 +190,7 @@ describe("English 7a: the capitalized-previous-word signal is the weak one", () 
 
     test("…while a numbered-event noun still licenses a stoplisted token", () => {
         // Both of these are IN the stoplist and both are genuine numerals here. A blanket check loses them.
-        expect(phonemize("Apollo XI landed", "en")).toContain("ɪlˈɛvən");
+        expect(phonemize("Apollo XI landed", "en")).toContain("ɪlˈɛvn̩");
         expect(phonemize("WrestleMania XL was", "en")).toContain("fˈɔːɹt̬i");
     });
 

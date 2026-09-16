@@ -90,7 +90,7 @@ describe("Hebrew text normalization", () => {
         expect(phonemize("ה-19", "he")).toBe("ha tʃa ʔesʁe"); // הַ patach; read as "" before this layer
         expect(phonemize("ל־650", "he")).toBe("le ʃeʃ meot veχamiʃim"); // MAQAF U+05BE, ×36
         expect(phonemize("בכ-6", "he")).toBe("be ke ʃeʃ"); // a TWO-letter run, each letter vocalized alone
-        expect(phonemize("ב-Google", "he")).toBe("be ɡˈuːɡəɫ"); // …and before a Latin run, ×26
+        expect(phonemize("ב-Google", "he")).toBe("be ɡˈuːɡɫ̩"); // …and before a Latin run, ×26
     });
 
     // ⚠ A HYPHEN BEFORE A HEBREW WORD IS A COMPOUND, NOT A PROCLITIC — all 29 corpus instances. The left
