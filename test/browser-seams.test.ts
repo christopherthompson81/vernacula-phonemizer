@@ -11,7 +11,7 @@
  * readings to be byte-identical. It fails if the engine reaches the filesystem behind the seam's back, and
  * it fails if the recorded key list is short — which is the failure a browser consumer would actually hit.
  */
-import { describe, expect, test, vi } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 
 /** The neural path needs the optional model + onnxruntime-node; without either it degrades to the sync
@@ -89,6 +89,24 @@ function importsNodeBuiltin(src: string): boolean {
 }
 
 describe("the browser seams", () => {
+    // ⚠ THIS FILE INSTALLS A BROWSER DATA SOURCE ON THE SHARED MODULE REGISTRY, and must put it back.
+    // It calls `vi.resetModules()` and re-imports `core/dataSource.ts` so it can install a reader
+    // backed by a FROZEN prefetch map — the whole point of the file. Under per-file isolation that
+    // was contained; the suite now shares one registry per worker (vitest.config.ts), so without
+    // this the NEXT file in the worker inherits a reader that only knows the keys prefetched here
+    // and any other language dies with "not prefetched: languages/<x>/<x>.jsonc".
+    //
+    // ⚠ FOUND BY `--sequence.shuffle`, NOT BY A NORMAL RUN. In file order this file happens to land
+    // late, so a plain run passed every time and three shuffled runs did too; it took a fourth to
+    // fail, and then 8, 14 and 22 files at once depending on what got scheduled behind it. A
+    // reordering gate is the only thing that sees this class.
+    //
+    // Resetting is enough to heal it: a fresh import of dataSource.ts auto-installs the Node reader
+    // (`process.getBuiltinModule`), which is what every other file expects.
+    afterAll(() => {
+        vi.resetModules();
+    });
+
     test("⚠ NOTHING IN src/ IMPORTS A `node:` SPECIFIER — a bundler resolves the graph, not the branch", () => {
         const offenders = sources(new URL("../src/", import.meta.url))
             .filter((f) => importsNodeBuiltin(code(f)))
