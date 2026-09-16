@@ -128,6 +128,7 @@ public static class EnglishArpabet
             var nucleusNum = new Dictionary<int, int>();
             for (var ni = 0; ni < nucleiIdx.Count; ni++) nucleusNum[nucleiIdx[ni]] = ni;
             var primaryNi = nucleiIdx.FindIndex(vi => P[vi].Stress == 1);
+
             var outSb = new StringBuilder();
             for (var i = 0; i < P.Count; i++)
             {
@@ -163,7 +164,9 @@ public static class EnglishArpabet
                 {
                     var prev = P[i - 1];
                     var next = P[i + 1];
-                    if ((VOWELS.Contains(prev.Base) || prev.Base == "R") && VOWELS.Contains(next.Base) && next.Stress != 1)
+                    // ⚠ `== 0`, NOT `!= 1` — stress 2 is not unstressed — and it reads the DICTIONARY's
+                    // digit, not the post-clash stress. See englishArpabet.ts for both measurements.
+                    if ((VOWELS.Contains(prev.Base) || prev.Base == "R") && VOWELS.Contains(next.Base) && next.Stress == 0)
                     {
                         outSb.Append(bas == "T" ? "t̬" : "d̬");
                         continue;

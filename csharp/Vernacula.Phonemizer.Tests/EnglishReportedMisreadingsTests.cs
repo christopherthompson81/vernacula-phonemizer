@@ -89,13 +89,16 @@ public class EnglishReportedMisreadingsTests
     [InlineData("zorro", "zˈɔːɹoᶷ")]
     [InlineData("window", "wˈɪndoᶷ")]
     [InlineData("airplane", "ˈɛɹpleᶦn")]
-    [InlineData("crocodile", "kɹˈɑːkəd̬ˌaᶦɫ")]
+    // ⚠ plain d, not d̬: a 2° the clash rule KEEPS is a real beat, so the coronal before it is a full
+    // stop rather than a flap. misaki's lexicon agrees (kɹˈɑkədˌIl). The ˌ — what this case is about —
+    // is unchanged. See englishArpabet.ts.
+    [InlineData("crocodile", "kɹˈɑːkədˌaᶦɫ")]
     [InlineData("compile", "kəmpˈaᶦɫ")]
     public void AClosedFinalSyllableOnATrueDiphthongKeepsItsSecondaryStress(string w, string ipa)
         => Assert.Equal(ipa, Say(w));
 
     [Theory]
-    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬iː pɚsˈɛnt")]
+    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬i pɚsˈɛnt")]
     [InlineData("a ≠ b", "ə nɑːt ˈiːkwəɫ tʰuː bˈiː")]
     [InlineData("a ± b", "ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː")]
     // …and the ASCII pair keeps its digit gate, because it can be markup and these cannot.

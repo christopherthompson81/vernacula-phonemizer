@@ -269,7 +269,7 @@ describe("Hmong (hmn) — a Latin run the converter cannot read", () => {
     // native/foreign test most Latin-script engines lack. The cost the `ak` run names: a future defect can
     // now hide as a plausible ENGLISH word instead of as raw ASCII — still better than emitting a spelling.
     test("a run that is not RPA is READ, not echoed", () => {
-        expect(say("Crocodile Dundee")).toBe("kɹˈɑːkəd̬ˌaᶦɫ dəndˈiː");
+        expect(say("Crocodile Dundee")).toBe("kɹˈɑːkədˌaᶦɫ dəndˈiː"); // plain d: the kept 2° is a real beat, so no flap
         expect(say("United Nations")).toBe("juːnˈaᶦt̬ᵻd nˈeᶦʃənz");
         // THE INVARIANT, stated as such: no ASCII capital may reach the IPA. No IPA symbol is one — the
         // small capitals the alphabet uses (ʀ ɢ ɪ ʏ ʟ ɴ ʙ) are their own codepoints. This is the exact
