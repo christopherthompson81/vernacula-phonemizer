@@ -136,21 +136,21 @@ describe("abbreviated dates, clocks and timezone offsets", () => {
     test("the seconds field is part of the clock, not a stranded colon", () => {
         expect(phonemize("15:04:05", "en")).toBe("fɪftˈiːn ˈoᶷ fˈɔːɹ ənd fˈaᶦv sˈɛkəndz");
         // `:00` is a fixed-width artifact, not content — nobody reads `08:30:00` with a zero-seconds field.
-        expect(phonemize("08:30:00", "en")).toBe("ˈeᶦt θˈɝd̬iː");
+        expect(phonemize("08:30:00", "en")).toBe("ˈeᶦt θˈɝd̬i");
         // …and one second is one second.
-        expect(phonemize("08:30:01", "en")).toBe("ˈeᶦt θˈɝd̬iː ənd wˈʌn sˈɛkənd");
+        expect(phonemize("08:30:01", "en")).toBe("ˈeᶦt θˈɝd̬i ənd wˈʌn sˈɛkənd");
     });
 
     test("the meridiem trails the whole clock, seconds included", () => {
         // Folded into the hour-and-minute string it is spoken in the MIDDLE of the time.
-        expect(phonemize("8:30:45 pm", "en")).toBe("ˈeᶦt θˈɝd̬iː ənd fˈɔːɹt̬i fˈaᶦv sˈɛkəndz pʰˈiːʲˈɛm");
+        expect(phonemize("8:30:45 pm", "en")).toBe("ˈeᶦt θˈɝd̬i ənd fˈɔːɹt̬i fˈaᶦv sˈɛkəndz pʰˈiːʲˈɛm");
         // The bare clock is untouched: `o'clock` is still suppressed before a meridiem.
         expect(phonemize("3:00 pm", "en")).toBe(phonemize("3 pm", "en"));
     });
 
     test("a timezone offset is a displacement in hours, not a bare number", () => {
         expect(phonemize("15:04:05 -0700", "en")).toContain("mˈaᶦnəs sˈɛvən ˈaᶷɚz");
-        expect(phonemize("08:30:00 +0530", "en")).toContain("plˈʌs fˈaᶦv ˈaᶷɚz θˈɝd̬iː mˈɪnəts");
+        expect(phonemize("08:30:00 +0530", "en")).toContain("plˈʌs fˈaᶦv ˈaᶷɚz θˈɝd̬i mˈɪnəts");
         // Zero offset is UTC itself; "plus zero hours" is nobody's reading of it.
         expect(phonemize("logged at 08:30:00 +0000 today", "en")).toContain("jˈuː tʰˈiː sˈiː");
         expect(phonemize("logged at 2026-09-11T08:30:00Z today", "en")).toContain("jˈuː tʰˈiː sˈiː");

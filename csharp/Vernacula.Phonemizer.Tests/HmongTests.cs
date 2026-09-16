@@ -162,7 +162,8 @@ public class HmongTests
     [Fact]
     public void ARunThatIsNotRpaIsReadNotEchoed()
     {
-        Assert.Equal("kɹˈɑːkəd̬ˌaᶦɫ dəndˈiː", Say("Crocodile Dundee"));
+        // plain d: the kept 2° is a real beat, so no flap. See englishArpabet.ts.
+        Assert.Equal("kɹˈɑːkədˌaᶦɫ dəndˈiː", Say("Crocodile Dundee"));
         Assert.Equal("juːnˈaᶦt̬ᵻd nˈeᶦʃənz", Say("United Nations"));
         // THE INVARIANT: no ASCII capital may reach the IPA.
         Assert.DoesNotMatch("[A-Z]", Say("\"Crocodile\" Dundee yog ib xyoo 1986 Australian American romantic comedy"));

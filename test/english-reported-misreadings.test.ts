@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 import { readdirSync } from "node:fs";
 
 import { phonemize, phonemizeAsync } from "../src/index.ts";
+import { makeArpabetToIpa } from "../src/languages/english/englishArpabet.ts";
+import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 // Two reported misreadings whose cause was the same shape as the spelling one: a word the reader
 // GUESSES instead of knowing. docs/investigations/en/en_reported_misreadings_investigation.md.
@@ -134,14 +136,63 @@ describe("a closed final syllable on a true diphthong keeps its secondary stress
         expect(phonemize("airplane", "en")).toBe("ˈɛɹpleᶦn");
     });
 
+    // ⚠ THE FLAP NEEDS THE FOLLOWING VOWEL UNSTRESSED, and "unstressed" is the DICTIONARY's stress
+    // digit. The guard was `!== 1`, which admits stress 2, and the prose had been rewritten to match
+    // it ("a NON-primary vowel") so the rule documented the code rather than the `V_V0` context it
+    // was mined from.
+    //
+    // Measured against misaki's us_gold — what Kokoro was trained on — over 80,222 words: we emitted
+    // a flap immediately before a secondary-stress mark 1,112 times to gold's 47, agreeing on 0.4% of
+    // them. After: 5. Whole-word exact 41.10% → 41.63%; flap errors 2,214 → 1,290.
+    //
+    // ⚠ THESE DRIVE THE CONVERTER DIRECTLY, NOT `phonemize`. `thirty` is a flat-lexicon hit, so a
+    // phonemize() assertion pins the recorded IPA and would pass with the rule reverted — exactly the
+    // split `tools/english/en_rebuild_lexicon.mts` exists to warn about. Both paths are asserted, as
+    // two separate cases.
+    describe("the flap needs the following vowel unstressed", () => {
+        const toIpa = makeArpabetToIpa(MANIFEST.arpabet);
+        const say = (phones: string, word: string) => toIpa(phones.split(" "), word);
+
+        test("a 2° blocks it — the syllable takes a real onset", () => {
+            expect(say("AE1 S AH0 T EY2 T", "acetate")).toBe("ˈæsətʰˌeᶦt");
+            expect(say("AE1 S AH0 T OW2 N", "acetone")).toBe("ˈæsətʰˌoᶷn");
+            // The row `thirty` USED to carry (TH ER1 D IY2). Kept as a case because it is what the
+            // rule does with a 2°, independent of whether any word still supplies one here.
+            expect(say("TH ER1 D IY2", "thirty")).toBe("θˈɝdiː");
+        });
+
+        test("stress 0 flaps", () => {
+            expect(say("TH ER1 D IY0", "thirty")).toBe("θˈɝd̬i");
+            expect(say("F AO1 R T IY0", "forty")).toBe("fˈɔːɹt̬i");
+            expect(say("S IH1 T IY0", "city")).toBe("sˈɪt̬i");
+        });
+
+        // ⚠ `thirty` WAS THE ONE DECADE WRITTEN IY2 — twenty, forty, fifty, sixty, seventy, eighty and
+        // ninety are all IY0, and gold says θˈɜɹɾi. That is a bad dictionary row, and it is fixed in
+        // g2p-dict.tsv rather than by bending the flap rule around it: reading the post-clash stress
+        // instead scores +29 of 80,222 on exact agreement and WORSE on flaps (997 over-flaps against
+        // 866), because it flaps compounds whose second element really does take a beat — `sawtooth`
+        // → *sˈɔTuθ, `detox` → *dˈiTɑks.
+        test("and the decades agree with each other", () => {
+            expect(phonemize("thirty", "en")).toBe("θˈɝd̬i");
+            expect(phonemize("forty", "en")).toBe("fˈɔːɹt̬i");
+            // twenty is NOT a flap case — its t follows N, not a vowel. gold agrees: twˈɛnti.
+            expect(phonemize("twenty", "en")).toBe("twˈɛnti");
+        });
+    });
+
     test("an open final syllable is not marked", () => {
         expect(phonemize("a priori", "en")).toContain("pɹaᶦˈɔːɹaᶦ");
     });
 
     // The clash rule itself is untouched where the 2° is not final — crocodile keeps the mark it
     // always had (its 2° is not adjacent to the 1°), and compile's 1° is on the second syllable.
+    //
+    // ⚠ THE `ˌ` IS WHAT THIS TEST IS ABOUT, and it is unchanged. The `d̬` → `d` in the expectation is
+    // the flap fix: a 2° this rule KEEPS is a real beat, so the coronal before it is a full stop, not
+    // a flap. misaki's lexicon agrees — `crocodile` is `kɹˈɑkədˌIl` there, with a plain d.
     test("the rest of the clash rule is unchanged", () => {
-        expect(phonemize("crocodile", "en")).toBe("kɹˈɑːkəd̬ˌaᶦɫ");
+        expect(phonemize("crocodile", "en")).toBe("kɹˈɑːkədˌaᶦɫ");
         expect(phonemize("compile", "en")).toBe("kəmpˈaᶦɫ");
     });
 });
@@ -153,7 +204,7 @@ describe("relational operators, fiscal years, and slashed rate units", () => {
     // INVERSE claim, and a dropped `±` turns a tolerance into a wrong number.
     test("the Unicode relationals are read", () => {
         expect(phonemize("Panels lit at ≥30%", "en"))
-            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬iː pɚsˈɛnt");
+            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwəɫ tʰuː θˈɝd̬i pɚsˈɛnt");
         expect(phonemize("a ≠ b", "en")).toBe("ə nɑːt ˈiːkwəɫ tʰuː bˈiː");
         expect(phonemize("a ± b", "en")).toBe("ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː");
         expect(phonemize("x ≤ 5", "en")).toContain("lˈɛs ðæn ɔːɹ ˈiːkwəɫ tʰuː");

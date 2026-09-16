@@ -107,6 +107,7 @@ const VOWELS = new Set(def.vowels);
         );
         const nucleusNum = new Map(nucleiIdx.map((vi, ni) => [vi, ni]));
         const primaryNi = nucleiIdx.findIndex((vi) => P[vi]!.stress === 1);
+
         let out = "";
         for (let i = 0; i < P.length; i++) {
             const { base, stress } = P[i]!;
@@ -181,14 +182,37 @@ const VOWELS = new Set(def.vowels);
                 out += "ŋ";
                 continue;
             }
-            // FLAP (mined t:V_V0=ɾ79 / d:V_V0=ɾ64): t/d intervocalic before a NON-primary vowel → voiced flap.
+            // FLAP (mined t:V_V0=ɾ79 / d:V_V0=ɾ64): t/d intervocalic before an UNSTRESSED vowel → voiced flap.
+            //
+            // ⚠ THE GUARD IS `=== 0`, NOT `!== 1`. It was `!== 1` — which also admits stress 2 — and the
+            // prose above it had been rewritten to match ("a NON-primary vowel"), so the rule documented
+            // the code rather than the measurement it came from. `V_V0` is the mined context and the 0 is
+            // the ARPABET stress digit: the flap needs the FOLLOWING vowel unstressed. A secondary-stressed
+            // syllable takes a real onset, so `acetate` is ˈæsətˌAt, not *ˈæsəTˌAt ("assa-date").
+            //
+            // ⚠ AND IT READS THE DICTIONARY'S OWN DIGIT, NOT THE STRESS THAT SURVIVES THE CLASH RULE.
+            // Reading the post-clash stress was tried, because `thirty` is TH ER1 D IY2 and the clash
+            // drops that 2° — so the flap saw a beat the output does not show. It scores marginally
+            // better on whole-word exact agreement (+29 of 80,222) and WORSE on the thing this rule is
+            // about: 997 words flapped where gold does not against 866, and 917 spurious flap tokens
+            // against 796. The clash rule is a decision about where to PRINT a mark, not a claim that a
+            // syllable is unstressed, and leaning on it flaps compounds whose second element really does
+            // take a beat — `sawtooth` → *sˈɔTuθ, `detox` → *dˈiTɑks. `thirty` is a bad dictionary row
+            // (every other decade is IY0, and gold says θˈɜɹɾi); it is fixed in g2p-dict.tsv where it
+            // belongs, not by bending the rule around it.
+            //
+            // Measured against misaki's us_gold (what Kokoro was trained on), 80,222 words: we emitted a
+            // flap immediately before a secondary-stress mark 1,112 times to gold's 47, and on the 1,109
+            // words where we did it gold agreed on 4 — 0.4%. The twin guard already existed for primary
+            // stress (we never flapped there, 0 occurrences), which is what says this was an oversight
+            // rather than a position.
             if ((base === "T" || base === "D") && i > 0 && i + 1 < P.length) {
                 const prev = P[i - 1]!,
                     next = P[i + 1]!;
                 if (
                     (VOWELS.has(prev.base) || prev.base === "R") &&
                     VOWELS.has(next.base) &&
-                    next.stress !== 1
+                    next.stress === 0
                 ) {
                     out += base === "T" ? "t̬" : "d̬";
                     continue;
