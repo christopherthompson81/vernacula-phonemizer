@@ -6,9 +6,17 @@ import { phonemize } from "../src/index.ts";
 // project's converged cmn engine (validated vs wikipron + epitran); tones are Chao contour letters at the
 // syllable end, with third-tone sandhi. Anchor values (zhong1 guo2, ni3 hao3) carry tone placement
 // regularized to syllable-final.
+//
+// ⚠ -ong IS ʊŋ, NOT oŋ, and these lines asserted oŋ until the syllable table was re-checked against
+// its referee. The header above has always claimed validation against epitran, and epitran says ʈ͡ʂʊŋ —
+// the claim outran what had actually been compared, because the eval's folds cover ɔ~o and ʊ~u but not
+// o~ʊ, so the class sat in the residual rather than failing anything. Kokoro-82M's own pinyin table
+// agrees (zhong1 = ꭧʊ→ŋ), as it does on the other two corrections these lines carry: the bare labial
+// finals take a rounded medial (bo = pwo) and the -un finals are written once (wen = wən, not wuən).
+// Corroborated twice before changing. Do not restore the old values without a third source.
 describe("mandarin canonical IPA — pinyin path", () => {
     test("monosyllables: initials + finals + tones", () => {
-        expect(phonemize("zhong1", "cmn")).toBe("ʈ͡ʂoŋ˥˥"); // zh → ʈ͡ʂ, tone 1 = ˥˥
+        expect(phonemize("zhong1", "cmn")).toBe("ʈ͡ʂʊŋ˥˥"); // zh → ʈ͡ʂ, tone 1 = ˥˥
         expect(phonemize("guo2", "cmn")).toBe("kuo˧˥"); // tone 2 = ˧˥
         expect(phonemize("xing2", "cmn")).toBe("ɕiŋ˧˥"); // x → ɕ (not the leaked pinyin letter)
         expect(phonemize("chi1", "cmn")).toBe("ʈ͡ʂʰʐ̩˥˥"); // retroflex -i → syllabic ʐ̩
@@ -17,7 +25,7 @@ describe("mandarin canonical IPA — pinyin path", () => {
     });
 
     test("multi-syllable + tone at syllable end", () => {
-        expect(phonemize("zhong1 guo2", "cmn")).toBe("ʈ͡ʂoŋ˥˥ kuo˧˥");
+        expect(phonemize("zhong1 guo2", "cmn")).toBe("ʈ͡ʂʊŋ˥˥ kuo˧˥");
     });
 
     test("third-tone sandhi: 3+3 → 2+3", () => {
@@ -31,12 +39,12 @@ describe("mandarin canonical IPA — pinyin path", () => {
     });
 
     test("Hanzi front-end: segmentation + polyphone disambiguation", () => {
-        expect(phonemize("中国", "cmn")).toBe("ʈ͡ʂoŋ˥˥ kuo˧˥");
+        expect(phonemize("中国", "cmn")).toBe("ʈ͡ʂʊŋ˥˥ kuo˧˥");
         expect(phonemize("你好", "cmn")).toBe("ni˧˥ xɑᵘ˨˩˦"); // 3-3 sandhi across segmentation
         expect(phonemize("银行", "cmn")).toBe("jin˧˥ xɑŋ˧˥"); // 行 → háng (phrase-disambiguated, not xíng)
         expect(phonemize("绿", "cmn")).toBe("ly˥˩"); // 绿 → lǜ (ü char)
         expect(phonemize("我是中国人", "cmn")).toBe(
-            "wo˨˩˦ ʂʐ̩˥˩ ʈ͡ʂoŋ˥˥ kuo˧˥ ʐən˧˥",
+            "wo˨˩˦ ʂʐ̩˥˩ ʈ͡ʂʊŋ˥˥ kuo˧˥ ʐən˧˥",
         );
     });
 
@@ -134,7 +142,7 @@ describe("mandarin normalization", () => {
         expect(phonemize("$50", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ meⁱ˨˩˦ jyæn˧˥"); // 五十美元 — the sign was dropped
         expect(phonemize("20 °C", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 摄氏度, was the letter C
         expect(phonemize("35°", "cmn")).toBe("san˥˥ ʂʐ̩˧˥ wu˨˩˦ tu˥˩"); // 度
-        expect(phonemize("120 km/h", "cmn")).toBe("ji˥˩ paⁱ˨˩˦ ər˥˩ ʂʐ̩˧˥ koŋ˥˥ li˧˥ meⁱ˧˥ ɕjɑᵘ˨˩˦ ʂʐ̩˧˥");
+        expect(phonemize("120 km/h", "cmn")).toBe("ji˥˩ paⁱ˨˩˦ ər˥˩ ʂʐ̩˧˥ kʊŋ˥˥ li˧˥ meⁱ˧˥ ɕjɑᵘ˨˩˦ ʂʐ̩˧˥");
         // ℃ / ℉ are SINGLE code points (U+2103, U+2109), so the `°c`/`°f` keys could not reach them and
         // `20℃` read as bare 二十 — the whole unit gone. hi and en had it too.
         expect(phonemize("20℃", "cmn")).toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 摄氏度
@@ -149,7 +157,7 @@ describe("mandarin normalization", () => {
         expect(phonemize("20°C很热", "cmn")) // was: the C read as English *sˈiː*
             .toBe("ər˥˩ ʂʐ̩˧˥ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩ xən˨˩˦ ʐɤ˥˩");
         expect(phonemize("50 km²的面积", "cmn"))
-            .toBe("wu˨˩˦ ʂʐ̩˧˥ pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦ tɤ miɛn˥˩ t͡ɕi˥˥");
+            .toBe("wu˨˩˦ ʂʐ̩˧˥ pʰiŋ˧˥ fɑŋ˥˥ kʊŋ˥˥ li˨˩˦ tɤ miɛn˥˩ t͡ɕi˥˥");
         expect(phonemize("為$500，", "cmn")).toBe("weⁱ˥˩ wu˧˥ paⁱ˨˩˦ meⁱ˨˩˦ jyæn˧˥ ,"); // 美元
         // …and a dotted designation is still not a quantity: `g` must not become 克 here.
         expect(phonemize("802.11g的标准", "cmn")).not.toContain("kʰɤ˥˩");
@@ -165,7 +173,7 @@ describe("mandarin normalization", () => {
         expect(phonemize("-5 度", "cmn")).toBe("liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ tu˥˩"); // 零下五度, "five below zero"
         expect(phonemize("-5 °C", "cmn")).toBe("liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ ʂɤ˥˩ ʂʐ̩˥˩ tu˥˩"); // 零下五摄氏度
         // Han-adjacent, because Chinese has no spaces — the fleet's `(?<!\p{L})` guard would refuse this one.
-        expect(phonemize("气温-5度。", "cmn")).toBe("t͡ɕʰi˥˩ wuən˥˥ liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ tu˥˩ .");
+        expect(phonemize("气温-5度。", "cmn")).toBe("t͡ɕʰi˥˩ wən˥˥ liŋ˧˥ ɕiɑ˥˩ wu˨˩˦ tu˥˩ .");
         expect(phonemize("-5", "cmn")).toBe("fu˥˩ wu˨˩˦"); // 负五 — 负 away from a degree word
     });
 
@@ -195,10 +203,10 @@ describe("mandarin normalization", () => {
     });
 
     test("the exponent's measure word PRECEDES the unit", () => {
-        expect(phonemize("50 km²", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦"); // 五十平方公里
+        expect(phonemize("50 km²", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ pʰiŋ˧˥ fɑŋ˥˥ kʊŋ˥˥ li˨˩˦"); // 五十平方公里
         expect(phonemize("50 m³", "cmn")).toBe("wu˨˩˦ ʂʐ̩˧˥ li˥˩ fɑŋ˥˥ mi˨˩˦"); // 五十立方米
         // A myriad magnitude between the number and the unit — undeclared, `km` fell through to English.
-        expect(phonemize("5 万 km²", "cmn")).toBe("wu˨˩˦ wɑn˥˩ pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦"); // 五万平方公里
+        expect(phonemize("5 万 km²", "cmn")).toBe("wu˨˩˦ wɑn˥˩ pʰiŋ˧˥ fɑŋ˥˥ kʊŋ˥˥ li˨˩˦"); // 五万平方公里
         // A BARE exponent takes 的平方/的立方. Emitting a digit here read 5² as 五的**两**次方.
         expect(phonemize("5²", "cmn")).toBe("wu˨˩˦ tɤ pʰiŋ˧˥ fɑŋ˥˥"); // 五的平方
         expect(phonemize("5³", "cmn")).toBe("wu˨˩˦ tɤ li˥˩ fɑŋ˥˥"); // 五的立方

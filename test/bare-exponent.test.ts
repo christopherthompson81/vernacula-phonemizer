@@ -50,7 +50,7 @@ describe("bare exponent", () => {
         expect(phonemize("19500 km²", "de")).toContain("kvadʁˈaːtkilomeːtɐ");
         expect(phonemize("19500 km²", "it")).toContain("kilomˈetri kwadrˈati");
         expect(phonemize("19500 km²", "hi")).toContain("ʋˈəɾɡ kɪloːmˈiːʈəɾ");
-        expect(phonemize("19500 km²", "cmn")).toContain("pʰiŋ˧˥ fɑŋ˥˥ koŋ˥˥ li˨˩˦");
+        expect(phonemize("19500 km²", "cmn")).toContain("pʰiŋ˧˥ fɑŋ˥˥ kʊŋ˥˥ li˨˩˦");
         // Count agreement on the unit side still works — "one cubic meter", not "meters".
         expect(phonemize("1 m³", "en")).toContain("kjˈuːbɪk mˈiːt̬ɚ");
     });
