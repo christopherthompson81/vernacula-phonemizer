@@ -71,6 +71,45 @@ const UNITS: Record<string, [string, string]> = {
     // reads as bare "twenty" — the whole unit gone, not merely the sign.
     "℃": ["degree Celsius", "degrees Celsius"], "℉": ["degree Fahrenheit", "degrees Fahrenheit"],
     "°": ["degree", "degrees"],
+    // ⚠ MICRO IS TWO CODE POINTS AND THE GREEK ONE DOMINATES. U+00B5 MICRO SIGN is what the key labelled
+    // "micro" produces, but U+03BC GREEK SMALL LETTER MU is what typesetting and copy-paste produce, and
+    // across the mined corpora it outnumbers it 490 to 14. Neither folds to the other — `toLowerCase`
+    // leaves both alone — so BOTH are declared, the same way ℃ is declared beside `°c` above.
+    // ⚠ THE DROP HERE IS A WRONG UNIT, NOT A MISSING WORD, which is the class this file ranks worst:
+    // `5 µg` had no key, so the sign fell out and the bare `g` reached the initialism pass and was
+    // SPELLED — *fˈIv ʤˈi*, "five gee". A dose read as grams when the page says micrograms is off by a
+    // thousand, and nothing in the stream looks wrong.
+    // ⚠ THE SLASHED FORMS ARE KEYS FOR THE REASON THE BTU CHAIN IS: the unit rule claims ONE key, so
+    // without the whole chain the denominator is stranded and reaches the g2p as letters. These are the
+    // combinations the corpora actually carry (µg/g, µg/mL, µmol/L); `resolveUnitSymbol` case-folds, so
+    // `µg/mL` is reached by the lowercase key.
+    // ⚠ TWO OF THESE ARE SPELLED AS TWO WORDS, and the reason is the lexicon rather than orthography.
+    // The table's idiom is to emit what READS right (see `btu: ["b t u"]` above), and "micrometer" is
+    // recorded as the CALIPER — maᶦkɹˈɑːmət̬ɚ, "mi-CROM-eter" — not the unit, while "microliter" comes
+    // out with an unreduced-but-unstressed `li`. Their British spellings do not rescue it either: the
+    // dictionary disagrees with ITSELF there, `micrometre` giving the caliper and `micrometres` the
+    // unit, and `microlitres` reading "lit-rays". `micro meter`/`micro liter` compose from two words
+    // the lexicon is sure about. gram, second and mole need no such help and stay single words.
+    "\u00b5g": ["microgram", "micrograms"], "\u03bcg": ["microgram", "micrograms"],
+    "\u00b5s": ["microsecond", "microseconds"], "\u03bcs": ["microsecond", "microseconds"],
+    "\u00b5mol": ["micromole", "micromoles"], "\u03bcmol": ["micromole", "micromoles"],
+    "\u00b5m": ["micro meter", "micro meters"], "\u03bcm": ["micro meter", "micro meters"],
+    "\u00b5l": ["micro liter", "micro liters"], "\u03bcl": ["micro liter", "micro liters"],
+    // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS, not sloppy spellings of the two above — µM is
+    // MICROMOLAR and µS is MICROSIEMENS. This is the case rule the ⟨W⟩ comment below names, and it has
+    // teeth here: `resolveUnitSymbol` consults the declared table with the EXACT written form before it
+    // folds, so declaring them is what stops `25 µM` folding to `µm` and reading "twenty-five micro
+    // METERS" — a wrong unit, which is the failure this whole block exists to remove, reintroduced by
+    // the fix for it. ⟨L⟩ needs no twin: µL and µl are the same unit, as ⟨L⟩/⟨l⟩ are below.
+    // ⚠ DECLARED AFTER their lower-case twins, which is defensive rather than load-bearing: both exact
+    // forms are declared, so nothing REACHES the folded slot for `µm`/`µs` today. UNITS_FOLDED reverses
+    // before `Object.fromEntries`, so first-declared wins that slot, and this ordering leaves it holding
+    // the commoner meaning if a future case-variant ever does fold into it.
+    "\u00b5M": ["micromolar", "micromolar"], "\u03bcM": ["micromolar", "micromolar"],
+    "\u00b5S": ["microsiemens", "microsiemens"], "\u03bcS": ["microsiemens", "microsiemens"],
+    "\u00b5g/g": ["microgram per gram", "micrograms per gram"], "\u03bcg/g": ["microgram per gram", "micrograms per gram"],
+    "\u00b5g/ml": ["microgram per milliliter", "micrograms per milliliter"], "\u03bcg/ml": ["microgram per milliliter", "micrograms per milliliter"],
+    "\u00b5mol/l": ["micromole per liter", "micromoles per liter"], "\u03bcmol/l": ["micromole per liter", "micromoles per liter"],
     m: ["meter", "meters"], // ⚠ ⟨L⟩ AND ⟨l⟩ ARE BOTH OFFICIAL for the litre (⟨L⟩ is the dominant printed form), so BOTH are
     // declared — the one exception to the one-letter case rule in core/normalizeSymbols.ts, which
     // exists for symbols whose two cases are DIFFERENT units. Here they are the same unit.
@@ -1054,6 +1093,22 @@ export function normalizeEnglish(input: string): string {
     //    Ordered after the year rule, so `2019–2020` has already become `20 19–20 20` and the dash is
     //    still between digits: the halves read pair-wise and the range still says "to".
     s = rewrite(s, /(\d)[\u2012\u2013\u2014](?=\d)/gu, "$1 to ");
+
+    //    AN ARROW BETWEEN TWO NUMBERS IS A TRANSITION, and it was dropped outright — `16 → 28 h` read
+    //    as "sixteen twenty-eight hours", two numbers with nothing between them and the change gone.
+    //    ⚠ THE READING IS THE RANGE RULE'S, NOT A GLOSS OF THE GLYPH. The rule directly above already
+    //    says a dash between two numbers is "to"; an arrow in that position is the same claim written
+    //    with a different mark, and "sixteen to twenty-eight" is what a person reads aloud. misaki says
+    //    "sixteen RIGHT ARROW twenty-eight", which is faithful to the glyph and not to the sentence.
+    //    ⚠ DIGIT-GATED ON BOTH SIDES, like `×` and `÷` above and for the same reason: between words an
+    //    arrow is a relation whose reading is genuinely contested ("implies", "gives", "leads to", or
+    //    the literal name), and this file's rule is that a missing word beats a wrong one. Every arrow
+    //    in the documents this was measured on is `NUMBER → NUMBER`; the prose form is left unread
+    //    rather than guessed at.
+    //    ⚠ SPACED, unlike the dash range. A dash is written tight when it means a span and loose when
+    //    it means a parenthesis, so the spacing disambiguates it; an arrow has no such second sense
+    //    between digits, and it is written loose (`16 → 28`) far more often than tight.
+    s = rewrite(s, /(\d)[ \t]*\u2192[ \t]*(?=\d)/gu, "$1 to ");
 
     //    A DASH BETWEEN TWO CALENDAR NAMES IS A SPAN, not a parenthesis — `May–June 2025` read as
     //    "may june". ⚠ IT MUST RUN BEFORE THE PARENTHETICAL RULE BELOW, or the SPACED forms
