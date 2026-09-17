@@ -697,3 +697,149 @@ it would mark three of our own errors correct — the exact trap the config's co
 
 ⚠ `handegg` is a real finding from that check and is NOT fixed here: a compound whose second element lost
 its vowel quality. Left for the compound-decomposition pass.
+
+## Run 8d — the doubled-vowel malformedness: the fix that was obviously right and wasn't
+
+Run 7 reported `atishoo` → `ˈæt̬ɪʃˌuːˌuː` as "a real defect — the tagger emitted a DOUBLED `uː`". Taken here.
+
+### First: it is NOT in the dictionary path at all
+
+    accent-lexicon.tsv    124,931 rows    doubled adjacent identical segment: 0
+                                          rhotic doubling (ɚɹ/ɹɚ/ɝɹ):          0
+
+Completely clean. So the class is purely an OOV artifact. Over the whole referee:
+
+    4,558 words (2,489 OOV) — doubled segment 13, rhotic doubling 3
+
+Small (0.35%), and the 16 rows sort themselves immediately: ~11 malformed, 5 legitimate. The legitimate
+ones are real cross-morpheme clusters — `shortchange` ʃɔːɹtt͡ʃeᶦnd͡ʒ (`T` then `CH`), `interrelationship`
+ɪntɚɹileᶦʃənʃɪp and `unterrific` (`ER0` then `R`, "inter"+"rel", "un"+"terrific"). Those must not move.
+
+⚠ And **every one of the 11 malformed is a VOWEL DIGRAPH**: `anteroom`/`atishoo`/`Botwood` ⟨oo⟩,
+`gaywad`/`sinamay` ⟨ay⟩, `Yenisei` ⟨ei⟩, `goddaughter` ⟨au⟩, `bourgeoisify` ⟨ou⟩, `sulliage` ⟨ia⟩. The
+tagger emits one ARPABET chunk **per character** with no global constraint, so both letters of a digraph can
+be tagged with the vowel. Not a compound-seam problem at all — the first hypothesis, and wrong.
+
+### ⚠ THE OBVIOUS FIX IS WRONG, AND THE DICTIONARY IS WHAT SAYS SO
+
+`collapseGeminates` already runs on this path and exempts vowels:
+
+    if (out[out.length - 1] !== p || vowels.has(dropStress(p))) out.push(p);
+
+The exemption is what lets the doubling through, and removing it looked correct — especially because
+**`tools/english/en_g2p_ngram.ts` HAS ITS OWN COPY WITH NO EXEMPTION**, whose comment asserts the collapse is
+*"Lossless vs CMUdict"*. So the change was made. Then the claim was checked:
+
+    dict rows an unrestricted collapse would change: 186   — the trainer's comment is FALSE
+      of those, adjacent identical CONSONANT pairs:    91   — correctly collapsed (barroom R R, bookcase K K)
+      adjacent identical VOWEL pairs:                  95   — and 89 of them are `ER0 ER0`
+
+`ER0 ER0` is the **`-erer` agentive**: `acquirer` AH0 K W AY1 ER0 ER0, `adventurer`, `gatherer`, `deliverer`,
+`emperor`, `conqueror`. There the stem's /ər/ meets the suffix's /ər/ and collapsing **deletes a syllable** —
+`acquirer` becomes `acquire`. The original author's one-line reasoning ("that would delete a nucleus/syllable")
+was exactly right, and the change was reverted.
+
+⚠ **This also means the trainer and the shipped engine disagree about post-processing** — the model's
+held-out numbers were measured against a chain that does not ship. Recorded in the test and NOT fixed here,
+because closing it means retraining.
+
+### The fix that works, and the test that distinguishes the two classes
+
+The guard belongs in the tagger, where the alignment still exists, and keys on the one thing that separates a
+digraph from an agentive: **the two copies must come from ADJACENT VOWEL LETTERS.** `-erer`'s two `ER0`s come
+from letters two apart with a consonant between them, so it can never fire; ⟨oo⟩'s come from k−1 and k.
+
+⚠ **It had to match the vowel BASE, not the whole phone.** A digraph's two copies usually carry DIFFERENT
+stress digits — `gaywad` tags EY2 then EY0, `Yenisei` EY2 then EY1 — so byte-equality (what the shared
+collapse uses) caught only 4 of the 11. Base-matching catches all of them, and the **stronger** of the two
+marks is kept, or `Yenisei` loses its primary and `enforceSinglePrimary` then puts the tonic somewhere
+arbitrary.
+
+    anteroom   ˈæntɚˌuːˌuːm → ˈæntɚˌuːm       gaywad   ɡˌeᶦeᶦwˈɑːd → ɡˌeᶦwˈɑːd
+    atishoo    ˈæt̬ɪʃˌuːˌuː → ˈæt̬ɪʃˌuː       Yenisei  jˌɛnɪseᶦˈeᶦ  → jˌɛnɪsˈeᶦ
+    doubled segments over the referee: 13 → 4
+
+The 4 left are the 3 legitimate ones plus `goddaughter`, where the model put the vowel chunk on the second
+⟨d⟩ — a consonant letter — so the guard correctly declines. Relaxing it to "at least one vowel letter" would
+collapse `acquirer`, so the residue is accepted and named.
+
+⚠ **THE REFEREE SCORE DOES NOT MOVE** (59.9% before and after) and that is the point: these words differ from
+the referee in other ways too, so the metric cannot see the repair. A doubled vowel is an audible stutter in
+a TTS. This is the case for not letting the instrument decide what counts as a defect.
+
+### False-positive check, since the guard is heuristic
+
+Every word where adjacent vowel letters are LEGITIMATE was read and is untouched, because in all of them the
+two letters produce two DIFFERENT vowels, which base-matching never fires on:
+
+    cooperate koᶷˈɑːpɚˌeᶦt   reelect ɹiʲɪlˈɛkt    preeminent pɹiʲˈɛmənn̩t   zoology zoᶷˈɑːləd͡ʒi
+    Hawaii həwˈaᶦiː          Kauai kʰˈaᶷˌaᶦ       continuum kəntˈɪnjuːəm    vacuuming vˈækjuːmɪŋ
+
+And a real acronym never reaches the tagger — `IEEE` is spelled out by the initialism pass into four tokens
+(`aᶦ ˈiː ˈiː ˈiː`) before G2P. The only fleet movement was 8 Arabic-variant goldens sharing one embedded
+English token: `Eee` (the ASUS Eee PC), `ˌiːʲˌiːʲəˈiː` → `ˌiːʲəˈiː` — one fewer spurious syllable in a
+3-letter brand name.
+
+## Run 8e — LOT–THOUGHT: the engine was neither accent, and the convention note said so wrongly
+
+Working the AA↔AO class (the largest left in the dict-vs-gold audit) started as 293 single-op rows and turned
+into a design finding.
+
+### The documented convention was false
+
+`english.jsonc` declared `"merge": "LOT–THOUGHT → ɔː"`. The engine does not merge and never did: `AA` renders
+`ɑː`, `AO` renders `ɔː`, two distinct outputs. So whether a given word merged depended entirely on which of the
+two CMUdict happened to write — and CMUdict is not consistent:
+
+    cot   kʰˈɑːt      caught  kʰˈɑːt      ← IDENTICAL (both AA): merged
+    lot   lˈɑːt       law     lˈɔː        ← DISTINCT
+    don   dˈɑːn       dawn    dˈɔːn       ← DISTINCT
+
+**Neither accent.** A merged speaker says `cot`=`caught` AND `don`=`dawn`; a distinguishing speaker says
+neither pair alike. We did one of each, per word, by lottery.
+
+### misaki gold is consistent, and it distinguishes
+
+    cot kˈɑt / caught kˈɔt    don dˈɑn / dawn dˈɔn    lot lˈɑt / law lˈɔ    stock/stalk
+    odd ˈɑd / awed ˈɔd        hock/hawk               tot/taught           — 7 of 7
+    PALM stays ɑ: father fˈɑðəɹ, spa spˈɑ, calm kˈɑm, bra bɹˈɑ
+
+And our dict already agreed with it on **93.1% of the 7,317 AA/AO rows gold covers**. The disagreement was
+504 rows — 6.9%, the CMUdict lottery — and aligning them makes the engine a coherent distinguishing GenAm,
+which is also the system the downstream Kokoro model was trained on.
+
+⚠ **THE WIKIPRON REFEREE CANNOT ARBITRATE THIS.** It writes `dawn` as `d ɑ n` — merged — in the same file where
+it distinguishes elsewhere. That is exactly why Run 5 refused an ɔ/ɑ fold, and it is why **the referee score
+does not move at all** (59.9% before and after). Gold agreement moved 80.5% → 81.5%.
+
+### ⚠ 37 rows were dropped, because gold contradicts ITSELF across a family
+
+The `majority` lesson, mechanised. A containment test (one dict word inside another, ≥4 chars, gold's ɑ/ɔ
+compared at the shared slot) found gold disagreeing with its own stem:
+
+    cost kˈɔst   but  costlier kˈɑstliəɹ        gloss / glossier      call / callable
+    water wˈɔɾəɹ but  waterborne …AA…           wall / footwall       dog / watchdog
+
+⚠ **BOTH members are left alone, not just the derived one.** Rejecting only `costlier` would have CREATED an
+inconsistency — `cost` AO beside `costlier` AA — where today they at least agree. 466 rows applied.
+
+### The change had a consequence in en-GB that the parent could not see
+
+`sorry` moved from ɑː to ɔː, and `test/english-gb.test.ts` caught it: RP is /ˈsɒri/ and the accent transform
+produced `sˈɔːɹi`. The transform has a set for exactly this class — `lotr`, "LOT before intervocalic r" — but
+it matched only `ɑːɹ`, so **7 of its 13 words silently stopped being handled** while the set still listed them.
+Widened to `[ɑɔ]ːɹ` in both TS and C#. US /ˈsɔːri/ vs RP /ˈsɒri/ is a real transatlantic split where both
+varieties are right and only the mapping between them was missing.
+
+Four other tests pinned the old AA reading and were updated, each confirmed against gold first:
+`on` ˌɔn, `coffee` kˈɔfi, `Washington` wˈɔʃɪŋtən, and `palled` (OOV, decodes from `pall`, correctly AA1→AO1).
+
+### The curation gate is now a MEASURE, not a waiver pile
+
+`STRUCTURAL_GAP` is 133 words. Every one is a curated row the model cannot reproduce because it trained on the
+row we corrected. The list is meant to COLLAPSE when the trainer is pointed at the curated dict — that collapse
+is the test that the retrain worked — and to grow only if curation and the OOV path drift apart.
+
+    folded 59.9% (unchanged — the referee cannot see this axis)
+    gold agreement 80.5% → 81.5%      dict rows corrected this run: 466
+    C# parity: 189 languages byte-identical, 0 differ

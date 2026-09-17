@@ -63,7 +63,10 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
         expect(phonemize("hour", "en")).toBe("ˈaᶷɚ");
         expect(phonemize("devour", "en")).toBe("dᵻvˈaᶷɚ");
         expect(phonemize("dolling", "en")).toBe("dˈɑːlɪŋ"); // not `doling` — dˈoᶷlɪŋ
-        expect(phonemize("palled", "en")).toBe("pʰˈɑːɫd"); // not `paled`  — pʰˈeᶦɫd
+        // ⚠ `ɔː` not `ɑː`: `palled` is OOV and decodes from `pall`, whose row #1334 corrected AA1 → AO1
+        // (a pall is /pɔːl/). What this line is actually pinning is unaffected — the doubled ⟨ll⟩ blocks the
+        // Commonwealth fold, so it is not read as `paled` pʰˈeᶦɫd.
+        expect(phonemize("palled", "en")).toBe("pʰˈɔːɫd");
         expect(phonemize("tilled", "en")).toBe("tʰˈɪɫd");
         expect(phonemize("pilled", "en")).toBe("pʰˈɪɫd");
     });

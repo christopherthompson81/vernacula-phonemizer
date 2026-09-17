@@ -104,7 +104,7 @@ describe("a coordinator that resumes after a pause takes its strong form", () =>
     // ⚠ `or` is the obvious parallel and is NOT in the map — extrapolated, then not supported by the
     // A/B (reported as differing only in speaker dynamicism). Pinned so re-adding it is deliberate.
     test("or is left reduced, because nothing measured it", () => {
-        expect(phonemize("Coffee, tea, or water.", "en")).toBe("kʰˈɑːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .");
+        expect(phonemize("Coffee, tea, or water.", "en")).toBe("kʰˈɔːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .");
     });
 
     // ⚠ The strong coordinator must NOT satisfy the clause's primary-stress test, or restoring it

@@ -271,7 +271,7 @@ describe("Min Nan: a foreign name is not a Min Nan word (#1048)", () => {
         for (const w of ["Iran", "Washington", "Ukraina", "Lietuva", "Khorasan"])
             expect(say(w), w).not.toMatch(/[˥˦˧˨˩]/u);
         expect(say("Iran")).toBe("ɪɹˈɑːn");
-        expect(say("Washington")).toBe("wˈɑːʃɪŋtən");
+        expect(say("Washington")).toBe("wˈɔːʃɪŋtən");
     });
 
     test("…and real POJ is untouched, including the shapes a naive fold gets wrong", () => {
