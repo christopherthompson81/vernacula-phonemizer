@@ -90,6 +90,72 @@ function isBarredI(
 }
 
 /**
+ * CMUdict WRITES `AH0` WHERE THE VOWEL IS `/ɪ/`, in three suffixes. Re-base those to `IH0`.
+ *
+ * ⚠ `-ism` IS NOT HERE, though it looks like it belongs: its vowel is `IH2 Z AH0 M`, so the S is voiced
+ * to Z and the schwa before the M is a real schwa. Including it in the spelling test only ever produced
+ * false fires (`Protestantism` re-based `-testant-`).
+ *
+ * `activist` is `AE1 K T AH0 V AH0 S T` — both unstressed slots are `AH0`, and the second one is not a
+ * schwa: it is the `-ist` vowel. Rendering it through `cv.AH.unstressed` gives *ˈæktəvəst, and the
+ * dictionary contradicts itself about it — `abolitionist` came out `…ʃənəst` and `abortionist`
+ * `…ʃənɪst`, the same suffix spelled two ways.
+ *
+ * ⚠ RE-BASED TO `IH`, NOT ROUTED THROUGH `isBarredI`, and the difference is the symbol. `isBarredI`
+ * yields the weak vowel `ᵻ`, which is right for the INFLECTIONAL `-es`/`-ed` — and misaki's gold agrees
+ * there, writing `ᵻ` itself (`Christmases` `kɹˈɪsməsᵻz`, 2,154 entries use it). Gold has that symbol
+ * available and deliberately does NOT use it for `-ist`: it writes a full `ɪ`. Building this as an
+ * `isBarredI` arm was tried and measured at **−486 exact against gold with 0 gained**, because words
+ * that already read `ɪ` were pulled to `ᵻ`. The two families are different, and the reference keeps
+ * them apart.
+ *
+ * Referee evidence per family (en-GB wikipron, which has no `ᵻ` and so writes `ɪ` or `ə`):
+ *
+ *     -ist           ɪ 131 / 135  (97.0%)     -sis   ɪ 17 / 21  (81.0%)
+ *     -age           ɪ  85 /  95  (89.5%)
+ *
+ * ⚠ AND `-ness` / `-less` ARE NOT IN THIS SET, which is the whole reason it stops where it does. Gold
+ * writes `ɪ` in both — 375 `-ness` words and 34 `-less` words diverge from us on exactly that, and they
+ * are the LARGEST family in the class, so following the reference would have looked like the obvious win:
+ *
+ *     -ness   referee ɪ  14 / 100  (14.0%)   ə  81 (81.0%)
+ *     -less   referee ɪ  10 /  43  (23.3%)   ə  32 (74.4%)
+ *
+ * The schwa we already write there is right and gold is wrong. The en-GB referee leans TOWARD `ɪ` by
+ * construction — the weak-vowel merger is less advanced in RP — which makes an 81% `ə` reading stronger
+ * rather than weaker. Adding them on the reference's say-so would have regressed 409 words.
+ */
+function rebaseSuffixIh(
+    P: { base: string; stress: number }[],
+    word: string,
+): void {
+    // ⚠ THE SUFFIX'S OWN VOWEL, LOCATED FROM THE END — not "the last vowel", and not every AH0 that
+    // happens to precede an S. Scanning all of them fired on the PREFIX (`assist`, AH0 S IH1 S T,
+    // became *ɪsˈɪst; `aphesis` marked both slots). Taking the last VOWEL instead missed the plural:
+    // `package` → pʰˈækɪd͡ʒ while `packages` (P AE1 K AH0 JH AH0 Z) stayed *pʰˈækəd͡ʒᵻz, because the
+    // -age vowel is no longer final once the inflection is on. That split a singular from its own
+    // plural, which is the two-spellings-per-morpheme defect `en_rebuild_lexicon.mts` warns about.
+    const n = P.length;
+    const at = (i: number): string => P[i]?.base ?? "";
+    const unstressedVowel = (i: number): boolean =>
+        P[i] !== undefined && P[i]!.stress === 0;
+    let vi = -1;
+    if (/ists?$/.test(word)) {
+        // … AH0 S T  ·  … AH0 S T S (plural)
+        if (at(n - 2) === "S" && at(n - 1) === "T") vi = n - 3;
+        else if (at(n - 3) === "S" && at(n - 2) === "T" && at(n - 1) === "S") vi = n - 4;
+    } else if (/sis$/.test(word)) {
+        if (at(n - 1) === "S") vi = n - 2;                       // … AH0 S
+    } else if (/ages?$/.test(word)) {
+        if (at(n - 1) === "JH") vi = n - 2;                      // … AH0 JH
+        // … AH0 JH <epenthetic vowel> Z — the plural, where the inflection sits past the -age vowel
+        else if (at(n - 3) === "JH" && at(n - 1) === "Z" && unstressedVowel(n - 2)) vi = n - 4;
+    }
+    const p = P[vi];
+    if (p && p.base === "AH" && p.stress === 0) p.base = "IH";
+}
+
+/**
  * CMUdict's final `-y` is `IY0` 7,219 times and `IY2` 198 times, in the same slot. Demote the 198.
  *
  * `city` is `S IH1 T IY0` and `ability` is `AH0 B IH1 L AH0 T IY2` — the same unstressed FLEECE vowel,
@@ -212,6 +278,7 @@ const VOWELS = new Set(def.vowels);
         for (let i = 0; i < phones.length; i++) if (phones[i] !== resolved[i]) demoted.add(i);
         const P = resolved.map(split);
         demoteFinalIy2(P, word);
+        rebaseSuffixIh(P, word);
         // The slots whose schwa is NOT a schwa but the sonorant after it being syllabic.
         const sylSlots = syllabic.get(word);
         let pendingSyllabic = false;
