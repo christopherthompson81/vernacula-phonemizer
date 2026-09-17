@@ -9,17 +9,40 @@
 # answers one way for the listed word and another for an unlisted word in the same environment.
 #
 # word <TAB> upstream CMUdict <TAB> curated <TAB> issue
+#
+# LETTER-NAME SPELLINGS. Eight CMUdict rows spell an initialism letter by letter but give one letter its
+# SOUND instead of its NAME. Five of them are ⟨g⟩ as [G IY] "ghee" where CMUdict's own `g` row is
+# [JH IY] "jee" — so the dictionary contradicts itself, and `GDP` came out ɡˌiːdˌiːpʰˈiː. Found by
+# checking every acronym-shaped row against the dict's OWN single-letter readings; after allowing the
+# documented ⟨a⟩ exception (letterNameExceptions), these eight were all that disagreed.
+# ⚠ `gps` ALREADY READ CORRECTLY and is still fixed here: it is in `acronymLetters`, which spells from
+# the letter rows and bypasses its own bad entry. The defect was invisible from the output alone.
+# ⚠ THE AUDIT'S "AT MOST TWO DIFFERING PHONES" BOUND IS LOAD-BEARING, not a convenience. Dropped, it also
+# returns `lb` [P AW1 N D], `hz` [HH ER1 T Z], `blvd`, `aug`, `mt`, `ct`, `dr`, `msgr` — abbreviation
+# GLOSSES, where CMUdict gives the EXPANSION rather than a letter spelling, which is correct for them.
+# The bound is what separates "a letter spelling with one letter wrong" from "not a letter spelling".
+# ⚠ AND `ia` [IY1 AH0] IS DELIBERATELY NOT HERE. It is the only other row inside the bound, and it is
+# ambiguous: "ee-uh" is a plausible NAME reading, and whether ⟨IA⟩ is Iowa, an initialism, or a name is
+# not something the dictionary row can settle. Left alone rather than guessed at.
+acc	AY2 S IY2 S IY1	EY2 S IY2 S IY1	letter-name
 associative	AH0 S OW1 SH AH0 T IH2 V	AH0 S OW1 S IY0 AH0 T IH0 V	#1278
 backfiring	B AE1 K F AY2 ER0 IH0 NG	B AE1 K F AY2 R IH0 NG	#1289
 beyond	B IH0 AA1 N D	B IH0 Y AA1 N D	pre-issue
+cgi	S IY2 G IY2 AY1	S IY2 JH IY2 AY1	letter-name
 collaborative	K AH0 L AE1 B ER0 EY2 T IH0 V	K AH0 L AE1 B ER0 AH0 T IH0 V	pre-issue
 cooperative	K OW0 AA1 P ER0 EY2 T IH0 V	K OW0 AA1 P ER0 AH0 T IH0 V	pre-issue
 corroborative	K ER0 AA1 B ER0 AH0 T IH2 V	K ER0 AA1 B ER0 AH0 T IH0 V	pre-issue
 deliberative	D IH0 L IH1 B ER0 EY2 T IH0 V	D IH0 L IH1 B ER0 AH0 T IH0 V	pre-issue
 desiring	D IH0 Z AY1 ER0 IH0 NG	D IH0 Z AY1 R IH0 NG	#1289
 determinative	D IH0 T ER1 M IH0 N AH0 T IH2 V	D IH0 T ER1 M IH0 N AH0 T IH0 V	pre-issue
+gdp	G IY1 D IY1 P IY1	JH IY1 D IY1 P IY1	letter-name
+gps	G IY1 P IY0 EH1 S	JH IY1 P IY0 EH1 S	letter-name
 inquiries	IH2 N K W AY1 ER0 IY0 Z	IH2 N K W AY1 R IY0 Z	#1289
 inquiring	IH2 N K W AY1 ER0 IH0 NG	IH2 N K W AY1 R IH0 NG	#1289
+jfk	JH IY1 EH2 F K EY1	JH EY1 EH2 F K EY1	letter-name
+kpmg	K EY1 P IY1 EH1 M JH IH1	K EY1 P IY1 EH1 M JH IY1	letter-name
+mg	EH2 M G IY1	EH2 M JH IY1	letter-name
+mgm	EH2 M G IY2 EH1 M	EH2 M JH IY2 EH1 M	letter-name
 require	R IY2 K W AY1 ER0	R IH0 K W AY1 ER0	#1279
 required	R IY0 K W AY1 ER0 D	R IH0 K W AY1 ER0 D	#1279
 requires	R IY0 K W AY1 ER0 Z	R IH0 K W AY1 ER0 Z	#1279
