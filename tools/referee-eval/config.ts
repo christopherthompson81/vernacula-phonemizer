@@ -58,6 +58,26 @@ export interface RefLang {
     preFolds?: [RegExp, string, string][];
     /** [pattern, replacement, justification] applied AFTER the shared backbone strip, to both sides. */
     folds: [RegExp, string, string][];
+    /**
+     * DECLARED-INTENTIONAL divergences: classes where the two readings differ, we have POSITIVE EVIDENCE
+     * that ours is the better one, and the difference should therefore be credited as agreement.
+     *
+     * ⚠ THIS IS NOT A FOLD AND THE DIFFERENCE IS DIRECTION. A fold rewrites BOTH sides, so it says "these
+     * two notations mean the same thing" — and for a weak vowel that is false in one direction: Run 18
+     * measured that where misaki writes `ə` and we write `ɪ` both referees back US (82%/72%), while where
+     * the referee writes `ɪ` and we write `ə` both referees back THE REFEREE (87%/82%) and we are simply
+     * wrong. A `ə`↔`ɪ` fold would credit us for the second as well as the first. So each entry rewrites
+     * the REFEREE's string ONLY: `refHas` → `weHave`, and the row is credited only if that makes the two
+     * equal. The reverse pairing stays a miss, as it must.
+     *
+     * ⚠ EVERY ENTRY NEEDS EVIDENCE THAT WE ARE RIGHT, not merely that we disagree. The cot–caught pair
+     * `ɔ`/`ɑ` was tested for this and REFUSED: the referee writes `ɔ` in 312 of its 4,558 rows, so it
+     * records the distinction and merely assigns ~38 words differently — a lexical disagreement, where
+     * neither side has been shown right. Crediting that would be marking our own errors correct.
+     *
+     * The count credited here is REPORTED separately on every run, because this moves the headline number.
+     */
+    intentional?: [RegExp, string, string][];
 }
 
 // Shared backbone: strip supra-segmental notation no broad referee reliably carries.
@@ -113,6 +133,15 @@ interface RawLang {
     parenOptional?: boolean;
     preFolds?: RawFold[];
     folds?: RawFold[];
+    intentional?: RawIntentional[];
+}
+
+/** A declared-intentional class as authored in the jsonc. `refHas` is rewritten to `weHave` in the
+ *  REFEREE's string only — see RefLang.intentional for why this is directional and a fold is not. */
+interface RawIntentional {
+    refHas: string;
+    weHave: string;
+    note: string;
 }
 
 const LANGS_DIR = join(dirname(fileURLToPath(import.meta.url)), "langs");
@@ -156,6 +185,18 @@ function loadLang(code: string): RefLang {
         ...(raw.parenOptional ? { parenOptional: true } : {}),
         ...(raw.preFolds ? { preFolds: compile(raw.preFolds) } : {}),
         folds: compile(raw.folds),
+        ...(raw.intentional
+            ? {
+                  intentional: raw.intentional.map(
+                      (i) =>
+                          [new RegExp(i.refHas, "gu"), i.weHave, i.note] as [
+                              RegExp,
+                              string,
+                              string,
+                          ],
+                  ),
+              }
+            : {}),
     };
 }
 
