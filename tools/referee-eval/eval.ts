@@ -823,7 +823,7 @@ export async function evaluate(
                     for (let k = 0; k < rf.length; k++) {
                         if (rf[k] === of[k]) continue;
                         anyDiff = true;
-                        if (!cfg.intentional!.some(([re, rep]) => re.source === rf[k] && rep === of[k]))
+                        if (!cfg.intentional!.some(([from, to]) => from === rf[k] && to === of[k]))
                             return false;
                     }
                     return anyDiff;

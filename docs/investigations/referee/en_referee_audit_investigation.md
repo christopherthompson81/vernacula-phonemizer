@@ -347,7 +347,10 @@ STRESS claim back into a comparison that is meant to be segmental.
 
     en     56.2% → 57.3%      en-GB  47.3% → 48.2%
 
-⚠ It hides nothing contrastive: English has no `ʌ`/`ə` minimal pair independent of stress.
+⚠ It hides nothing contrastive: English has no `ʌ`/`ə` minimal pair independent of stress — and that
+was checked on the data rather than left as a linguistic argument. Folding `ʌ` to `ə` collapses **zero**
+referee readings onto each other and **zero** of ours: no two words anywhere in either side become
+indistinguishable. A fold that erased a real contrast would show up as a collision, and there is none.
 
 ### ⚠ Rejected: cot–caught `ɔ` → `ɑ`
 
@@ -417,3 +420,17 @@ been shown right, as a thing we meant to do.
        70  declared intentional — closed
       137  the reverse weak-vowel pairing — REAL, and the class #1326/#1330 have been shrinking
     1,532  everything else, of which ~57% is OOV vocabulary no third source can adjudicate
+
+
+### Review of the mechanism — two fixes
+
+⚠ **THE DECLARATION WAS COMPILED TO A `RegExp` AND ONLY ITS `.source` WAS READ.** That worked for `ə`
+by accident and would have failed silently for anything else — a `refHas` of `[əɐ]` would have compiled,
+loaded, matched nothing, and reported an empty class, which is indistinguishable from a class that
+turned out not to exist. Now plain strings, **validated at load to be one character on each side**, with
+a throw rather than a silent pass: the positionwise comparison cannot honour anything longer.
+
+⚠ **AND THE SEMANTICS ARE PINNED BY TEST, not by prose** — that the pair is declared one way only, that
+the reverse is absent, that `ɔ`/`ɑ` is absent, that every entry is a single character, and that `en` is
+the only language declaring any. The failure this guards is silent and flattering: a bidirectional
+version credits 137 of our own errors and raises the reported number for it.

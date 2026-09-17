@@ -75,9 +75,15 @@ export interface RefLang {
      * records the distinction and merely assigns ~38 words differently — a lexical disagreement, where
      * neither side has been shown right. Crediting that would be marking our own errors correct.
      *
-     * The count credited here is REPORTED separately on every run, because this moves the headline number.
+     * ⚠ SINGLE CHARACTERS, AND VALIDATED AS SUCH AT LOAD. The comparison is POSITIONWISE — every position
+     * where the two readings differ must be a declared pair — so a multi-character or regex `refHas`
+     * cannot be honoured, and the loader THROWS rather than accepting one that would silently never fire.
+     * These are plain strings for the same reason: an earlier version compiled them to RegExps and then
+     * read only `.source`, which worked for `ə` by accident and would have failed for anything else.
+     *
+     * The count credited here is REPORTED separately on every run; it does NOT move `folded`.
      */
-    intentional?: [RegExp, string, string][];
+    intentional?: [string, string, string][];
 }
 
 // Shared backbone: strip supra-segmental notation no broad referee reliably carries.
@@ -161,6 +167,24 @@ const compileExcludes = (ex: RawExclude[] | undefined): RowExclusion[] =>
         note: e.note,
     }));
 
+/**
+ * ⚠ VALIDATES RATHER THAN TRUSTING. The positionwise comparison can only honour a SINGLE CHARACTER on
+ * each side, so anything else is a declaration that would silently never fire — the failure mode this
+ * whole mechanism exists to avoid, since an entry that never fires looks exactly like a class that
+ * turned out to be empty.
+ */
+const compileIntentional = (
+    code: string,
+    raw: RawIntentional[],
+): [string, string, string][] =>
+    raw.map((i) => {
+        if ([...i.refHas].length !== 1 || [...i.weHave].length !== 1)
+            throw new Error(
+                `${code}.jsonc: intentional entries must be one character each, got ${JSON.stringify(i.refHas)} → ${JSON.stringify(i.weHave)}`,
+            );
+        return [i.refHas, i.weHave, i.note];
+    });
+
 /** Load `langs/<code>.jsonc` → the compiled per-language RefLang config. */
 function loadLang(code: string): RefLang {
     const raw = JSON.parse(
@@ -186,16 +210,7 @@ function loadLang(code: string): RefLang {
         ...(raw.preFolds ? { preFolds: compile(raw.preFolds) } : {}),
         folds: compile(raw.folds),
         ...(raw.intentional
-            ? {
-                  intentional: raw.intentional.map(
-                      (i) =>
-                          [new RegExp(i.refHas, "gu"), i.weHave, i.note] as [
-                              RegExp,
-                              string,
-                              string,
-                          ],
-                  ),
-              }
+            ? { intentional: compileIntentional(code, raw.intentional) }
             : {}),
     };
 }
