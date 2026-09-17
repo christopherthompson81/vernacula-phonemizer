@@ -6,7 +6,29 @@
         {
             "file": "en.wikipron-eng-latn-us-broad.tsv",
             "source": "wikipron eng_latn_us broad (human, GenAm)",
-            "role": "primary"
+            "role": "primary",
+            // ⚠ 10.7% OF A FILE LABELLED GenAm IS RP, and these rows are not noisy US transcriptions —
+            // they are UK transcriptions in the wrong file. Validated against en-gb.wikipron-uk.tsv:
+            // 92% of the RP-vowel rows and 98% of the non-rhotic rows appear there with a BYTE-IDENTICAL
+            // reading. Scoring a rhotic GenAm engine against them marks it wrong for being right.
+            // ⚠ NOT MOVED, because there is almost nothing to move: 471 of the 488 are already in the en-GB
+            // referee. The other 17 (0.37% of the corpus — `vampire`, `Syriac`, `hydrochloric`,
+            // `coefficient`…) are genuinely lost coverage, and that is the right trade: an RP reading scored
+            // against a rhotic engine is worse than no reading, because it is wrong in a direction the
+            // engine cannot fix. And the
+            // source file is left INTACT — it is a provenance-tracked CC-BY-SA import, so the exclusion
+            // lives here where it is reviewable and is reported on every run.
+            "excludeRows": [
+                {
+                    "ipa": "əʊ|ɒ|ɪə|ʊə|ɛə",
+                    "note": "RP-only vowels: GOAT əʊ (US oʊ), LOT ɒ (US ɑ), and the centring diphthongs ɪə/ʊə/ɛə, which a rhotic accent spells ɪɹ/ʊɹ/ɛɹ. 390 rows. ⚠ ɑː IS DELIBERATELY ABSENT and was in the first draft of this list: the backbone strips ː, so ɑː folds to ɑ — the US vowel — and 108 rows would have been dropped for a length mark that never reaches the comparison."
+                },
+                {
+                    "spelling": "[aeiouyAEIOUY]r+(?![aeiouyAEIOUY])",
+                    "ipaLacks": "[ɹɚɝɻr]",
+                    "note": "NON-RHOTIC: spelled with a post-vocalic r, transcribed without any rhotic at all — Dunkirk dʌŋkɜːk, Hartburn hɑːtbən, Gentner ɡɛntnə, ticker tɪkə. 98 further rows. Needs BOTH fields: neither half says it alone. ⚠ ONE KNOWN FALSE POSITIVE in the 98, checked by reading all of them: `dossier` = dɑsieɪ, where the final -r really is silent in GenAm because the word is a French loan. Left in rather than special-cased — a one-word exception to a rule that is otherwise 97/98 clean costs more in machinery than the row is worth, and it is recorded here so the next reader does not rediscover it as a bug."
+                }
+            ]
         }
     ],
     "segmentJoin": true,
