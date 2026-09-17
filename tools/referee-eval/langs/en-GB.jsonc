@@ -16,6 +16,11 @@
     ],
     "folds": [
         {
+            "pattern": "ʌ",
+            "replace": "ə",
+            "note": "STRUT and schwa are one phoneme in complementary distribution by stress, and this engine derives them that way (english.jsonc maps AH to ʌ stressed, ə not). The backbone already strips stress, so leaving them unfolded smuggles a stress claim into a segmental comparison. Same reasoning as the ɐ→ə and ɜ→ə folds beside it; see en.jsonc for the measurement."
+        },
+        {
             "pattern": "ʲ",
             "replace": "",
             "note": "our palatal on-glide before a front vowel — narrow allophonic detail with no counterpart in the referee's broad inventory, exactly like the ʰ and ɫ folds beside it."
