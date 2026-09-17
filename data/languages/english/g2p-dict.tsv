@@ -3536,7 +3536,7 @@ anemia	AH0 N IY1 M IY0 AH0
 anemias	AH0 N IY1 M IY0 AH0 Z
 anemic	AH0 N IY1 M IH0 K
 anemometer	AE2 N AH0 M AA1 M AH0 T ER0
-anemone	AE1 N IH0 M OW2 N
+anemone	AH0 N EH1 M AH0 N IY0
 anencephalic	AE0 N EH2 N S AH0 F AE1 L IH0 K
 anencephaly	AE0 N IH0 N S EH1 F AH0 L IY0
 anestachio	AE2 N IH0 S T AE1 CH IY0 OW0
@@ -5499,7 +5499,7 @@ astrologers	AH0 S T R AA1 L AH0 JH ER0 Z
 astrological	AE2 S T R AH0 L AA1 JH IH0 K AH0 L
 astrology	AH0 S T R AA1 L AH0 JH IY0
 astronaut	AE1 S T R AH0 N AO2 T
-astronautic	AE2 S T R AH0 N AA1 T IH0 K
+astronautic	AE2 S T R AH0 N AO1 T IH0 K
 astronautical	AE2 S T R AH0 N AO1 T IH0 K AH0 L
 astronautics	AE2 S T R AH0 N AO1 T IH0 K S
 astronauts	AE1 S T R AH0 N AO2 T S
@@ -6723,7 +6723,7 @@ bail	B EY1 L
 baila	B AY1 L AH0
 bailard	B EY1 L ER0 D
 bailby	B EY1 L B IY0
-baile	B EY1 L
+baile	B AY1 L EY0
 bailed	B EY1 L D
 bailer	B EY1 L ER0
 bailes	B EY1 L Z
@@ -9069,7 +9069,7 @@ benlate	B EH1 N L EY2 T
 benlox	B EH1 N L AA0 K S
 benn	B EH1 N
 bennardo	B AH0 N AA1 R D OW0
-benne	B EH1 N
+benne	B EH1 N IY0
 bennefield	B EH1 N IH0 F IY0 L D
 benner	B EH1 N ER0
 bennet	B EH1 N IH0 T
@@ -9859,7 +9859,7 @@ bielski	B IY1 L S K IY0
 bien	B IY1 N
 bieniek	B IH1 N IY0 EH0 K
 bienkowski	B IH0 NG K AO1 F S K IY0
-biennale	B IY0 EH1 N EY2 L
+biennale	B IY2 EH0 N AA1 L EY0
 biennial	B AY0 EH1 N IY0 AH0 L
 bienstock	B IY1 N S T AA2 K
 bienvenu	B AH0 N V EH1 N UW0
@@ -16204,7 +16204,7 @@ cargonoff	K AA1 R G AH0 N AO2 F
 cargos	K AA1 R G OW2 Z
 carhart	K AA1 R HH AA2 R T
 caribbean	K ER0 IH1 B IY0 AH0 N
-caribe	K EH2 R IY1 B
+caribe	K EH1 R AH0 B EY2
 caribou	K EH1 R IH0 B UW2
 caricature	K EH1 R AH0 K AH0 CH ER0
 caricatured	K ER0 IH1 K AH0 CH ER0 D
@@ -18314,7 +18314,7 @@ chill	CH IH1 L
 chilled	CH IH1 L D
 chillemi	K IY0 L EH1 M IY0
 chiller	CH IH1 L ER0
-chillicothe	CH IH1 L IH0 K AA0 TH
+chillicothe	CH IH2 L IH0 K AA1 TH IY0
 chillier	CH IH1 L IY0 ER0
 chillies	CH IH1 L IY0 Z
 chilliest	CH IH1 L IY0 AH0 S T
@@ -18802,7 +18802,7 @@ cicco	S IH1 K OW0
 ciccone	CH IY0 K OW1 N IY2
 cicely	S IH1 S AH0 L IY0
 cicero	S IH1 S ER0 OW2
-cicerone	S IH1 S ER0 OW2 N
+cicerone	S IH2 S ER0 OW1 N IY0
 cichocki	S IH0 CH AA1 K IY2
 cichon	S IH1 CH AH0 N
 cichowski	CH IH0 HH AO1 F S K IY2
@@ -22482,7 +22482,7 @@ cossey	K AA1 S IY0
 cossiga	K AO2 S IY1 G AH0
 cossin	K AA1 S IH0 N
 cossman	K AO1 S M AH0 N
-cost	K AA1 S T
+cost	K AO1 S T
 costa	K AO1 S T AA0
 costabile	K AO1 S T AH0 B AY2 L
 costain	K OW2 S T EY1 N
@@ -26577,7 +26577,7 @@ deneve	D EH1 N IH0 V
 deng	D EH1 NG
 dengel	D EH1 NG G AH0 L
 dengler	D IH1 NG AH0 L ER0
-dengue	D EH1 N G
+dengue	D EH1 NG G IY0
 denham	D EH1 N AH0 M
 denhart	D EH1 N HH AA2 R T
 denhartog	D EH1 N HH AA0 R T AH0 G
@@ -28216,7 +28216,7 @@ diodes	D AY1 OW2 D Z
 dioguardi	D IY0 OW0 G AA1 R D IY2
 dion	D AY1 AH0 N
 diona	D IY0 OW1 N AH0
-dione	D IY1 AA0 N
+dione	D AY0 OW1 N IY0
 dionisio	D AY2 AH0 N IH1 S IY0 OW2
 dionne	D IY1 AA0 N
 dionysian	D AY2 AH0 N IH1 S IY0 AH0 N
@@ -29261,8 +29261,8 @@ doffing	D AO1 F IH0 NG
 doffs	D AO1 F S
 dog	D AO1 G
 dogan	D OW1 G AH0 N
-dogbane	D AA1 G B EY2 N
-dogberry	D AA1 G B EH2 R IY0
+dogbane	D AO1 G B EY2 N
+dogberry	D AO1 G B EH2 R IY0
 doge	D OW1 JH
 dogear	D AA1 G IY0 R
 dogeared	D AA1 G IY0 R D
@@ -30487,7 +30487,7 @@ duby	D UW1 B IY0
 duc	D AH1 K
 duca	D UW1 K AH0
 ducal	D UW1 K AH0 L
-duce	D UW1 S
+duce	D UW1 CH EY0
 ducey	D AH1 S IY0
 duch	D AH1 CH
 duchaine	D AH0 SH EY1 N
@@ -30651,7 +30651,7 @@ dulak	D UW1 L AH0 K
 dulaney	D Y UW1 L AH0 N IY0
 dulany	D Y UW0 L AO1 N IY0
 dulay	D Y UW1 L EY0
-dulce	D AH1 L S
+dulce	D UW1 L S EY2
 dulcea	D AH1 L S IY0 AH0
 dulcet	D AH1 L S AH0 T
 dulciana	D UW0 L CH AE1 N AH0
@@ -31372,7 +31372,7 @@ eblin	EH1 B L IH0 N
 ebling	EH1 B AH0 L IH0 NG
 ebner	EH1 B N ER0
 ebola	IY0 B OW1 L AH0
-ebonic	IY0 B AO1 N IH0 K
+ebonic	IY0 B AA1 N IH0 K
 ebonics	IY0 B AA1 N IH0 K S
 ebony	EH1 B AH0 N IY0
 ebright	IH2 B R AY1 T
@@ -33969,7 +33969,7 @@ essary	EH1 S EH0 R IY0
 essay	EH0 S EY1
 essayist	EH1 S EY2 IH0 S T
 essays	EH0 S EY1 Z
-esse	EH1 S
+esse	EH1 S IY0
 esselman	EH1 S AH0 L M AH0 N
 esselte	EH0 S EH1 L T IY0
 essen	EH1 S AH0 N
@@ -46705,7 +46705,7 @@ hebard	HH EH1 B ER0 D
 hebb	HH EH1 B
 hebda	HH EH1 B D AH0
 hebding	HH EH1 B D IH0 NG
-hebe	HH IY1 B
+hebe	HH IY1 B IY0
 hebei	HH IY1 B IY0
 hebel	HH EH1 B AH0 L
 hebeler	HH EH1 B AH0 L ER0
@@ -64920,7 +64920,7 @@ marchand	M AA0 R K HH AE1 N D
 marchant	M AA1 R CH AH0 N T
 marchbank	M AA1 R CH B AE2 NG K
 marchbanks	M AA1 R CH B AE2 NG K S
-marche	M AA1 R SH
+marche	M AA1 R K EY0
 marched	M AA1 R CH T
 marchenko	M AA2 R CH EH1 N K OW0
 marcher	M AA1 R CH ER0
@@ -67844,7 +67844,7 @@ mend	M EH1 N D
 mendacious	M EH0 N D EY1 SH AH0 S
 mendacity	M EH0 N D AE1 S IH0 T IY0
 mendan	M EH1 N D AH0 N
-mende	M EH1 N D
+mende	M EH1 N D IY0
 mended	M EH1 N D IH0 D
 mendel	M EH1 N D AH0 L
 mendell	M EH1 N D EH1 L
@@ -68023,7 +68023,7 @@ meredith	M EH1 R IH0 D IH0 TH
 merely	M IH1 R L IY0
 merenda	M EH0 R EY1 N D AA0
 merendino	M ER0 EH0 N D IY1 N OW2
-merengue	M ER0 EY1 NG
+merengue	M ER0 EH1 NG G EY0
 merest	M EH1 R AH0 S T
 meretz	M EH1 R EH0 T S
 merfeld	M ER1 F EH0 L D
@@ -69247,7 +69247,7 @@ minix	M IH1 N IH0 K S
 minjares	M IY0 N Y AA1 R EH0 S
 minjarez	M IY0 N Y AA1 R EH0 Z
 mink	M IH1 NG K
-minke	M IH1 NG K
+minke	M IH1 NG K IY0
 minkel	M IH1 NG K AH0 L
 minkin	M IH1 NG K IH0 N
 minkler	M IH1 NG K L ER0
@@ -72816,7 +72816,7 @@ nemo	N EH1 M OW0
 nemos	N IY1 M OW0 Z
 nemours	N IH0 M AO1 R Z
 nendick	N EH1 N D IH0 K
-nene	N IY1 N
+nene	N EY1 N EY2
 nenet	N EH1 N IH0 T
 neni	N EH1 N IY0
 nenninger	N EH1 N IH0 NG ER0
@@ -72874,7 +72874,7 @@ nerdy	N ER1 D IY0
 nerenberg	N IH1 R AH0 N B ER0 G
 neri	N EH1 R IY0
 nerice	N EH1 R IH0 S
-nerine	N EH1 R IY0 N
+nerine	N ER0 AY1 N IY0
 nerio	N EH1 R IY0 OW0
 neritic	N ER0 IH1 T IH0 K
 nerl	N ER1 L
@@ -75322,7 +75322,7 @@ olczak	OW1 L CH AE0 K
 old	OW1 L D
 oldaker	OW1 L D AH0 K ER0
 oldani	OW0 L D AA1 N IY0
-olde	OW1 L D
+olde	OW1 L D IY0
 olden	OW1 L D AH0 N
 oldenburg	OW1 L D AH0 N B ER0 G
 oldenkamp	OW1 L D IH0 N K AE0 M P
@@ -75570,7 +75570,7 @@ onions	AH1 N Y AH0 N Z
 onishi	OW0 N IY1 SH IY0
 onken	AA1 NG K AH0 N
 onley	AA1 N L IY0
-online	AA1 N L AY2 N
+online	AO1 N L AY2 N
 onlooker	AO1 N L UH2 K ER0
 onlookers	AO1 N L UH2 K ER0 Z
 only	OW1 N L IY0
@@ -75592,7 +75592,7 @@ onscreen	AA2 N S K R IY1 N
 onset	AO1 N S EH2 T
 onshore	AO1 N SH AO2 R
 onsite	AA1 N S AY1 T
-onslaught	AA1 N S L AO2 T
+onslaught	AO1 N S L AO2 T
 onslow	AA1 N S L OW0
 onstad	AA1 N S T AH0 D
 onstage	AA2 N S T EY1 JH
@@ -83785,7 +83785,7 @@ provoke	P R AH0 V OW1 K
 provoked	P R AH0 V OW1 K T
 provokes	P R AH0 V OW1 K S
 provoking	P R AH0 V OW1 K IH0 NG
-provolone	P R OW1 V AH0 L OW0 N
+provolone	P R OW2 V AH0 L OW1 N IY0
 provost	P R OW1 V OW0 S T
 provosts	P R OW1 V OW0 S T S
 provote	P R OW1 V OW0 T
@@ -85604,7 +85604,7 @@ rata	R AE1 T AH0
 ratajczak	R AE1 T AH0 CH EH0 K
 ratatisement	R AE1 T AH0 T AY2 Z M AH0 N T
 ratatisements	R AE1 T AH0 T AY2 Z M AH0 N T S
-ratatouille	R AE2 T AH0 T UW1 Y
+ratatouille	R AE2 T AH0 T UW1 IY0
 ratay	R AE1 T EY0
 ratchet	R AE1 CH AH0 T
 ratcheted	R AE1 CH AH0 T IH0 D
@@ -88049,7 +88049,7 @@ resolutely	R EH1 Z AH0 L UW2 T L IY0
 resolution	R EH2 Z AH0 L UW1 SH AH0 N
 resolutions	R EH2 Z AH0 L UW1 SH AH0 N Z
 resolve	R IY0 Z AA1 L V
-resolved	R IY0 Z AO1 L V D
+resolved	R IY0 Z AA1 L V D
 resolves	R IY0 Z AA1 L V Z
 resolving	R IY0 Z AA1 L V IH0 NG
 resonance	R EH1 Z AH0 N AH0 N S
@@ -91826,7 +91826,7 @@ sanford	S AE1 N F ER0 D
 sang	S AE1 NG
 sanger	S AE1 NG ER0
 sangfroid	S AA2 N F R AW1
-sangiovese	S AE2 N JH IY1 OW0 V IY2 S
+sangiovese	S AE2 N JH OW0 V EY1 Z IY0
 sangster	S AE1 NG S T ER0
 sanguine	S AE1 NG G W IH0 N
 sanguinetti	S AA0 NG IY0 N EH1 T IY0
@@ -94333,7 +94333,7 @@ selectivity	S IH0 L EH2 K T IH1 V AH0 T IY0
 selectnet	S AH0 L EH1 K T N EH2 T
 selects	S AH0 L EH1 K T S
 selena	S AH0 L IY1 N AH0
-selene	S AH0 L IY1 N
+selene	S AH0 L IY1 N IY0
 selenite	S EH1 L IH0 N AY2 T
 selenium	S AH0 L IY1 N IY0 AH0 M
 seles	S EH1 L EH0 S
@@ -98136,7 +98136,7 @@ soared	S AO1 R D
 soares	S AO1 R EH0 S
 soaring	S AO1 R IH0 NG
 soars	S AO1 R Z
-soave	S OW1 V
+soave	S W AA1 V EY0
 sob	S AA1 B
 sobbed	S AA1 B D
 sobbing	S AA1 B IH0 NG
@@ -99742,9 +99742,9 @@ squarely	S K W EH1 R L IY0
 squares	S K W EH1 R Z
 squaring	S K W EH1 R IH0 NG
 squash	S K W AA1 SH
-squashed	S K W AO1 SH T
+squashed	S K W AA1 SH T
 squashing	S K W AA1 SH IH0 NG
-squashy	S K W AO1 SH IY0
+squashy	S K W AA1 SH IY0
 squat	S K W AA1 T
 squats	S K W AA1 T S
 squatter	S K W AA1 T ER0
@@ -108783,8 +108783,8 @@ unabashed	AH2 N AH0 B AE1 SH T
 unabashedly	AH2 N AH0 B AE1 SH IH0 D L IY0
 unabated	AH2 N AH0 B EY1 T IH0 D
 unable	AH0 N EY1 B AH0 L
-unabom	Y UW1 N AH0 B AO2 M
-unabomb	Y UW1 N AH0 B AO2 M
+unabom	Y UW1 N AH0 B AA2 M
+unabomb	Y UW1 N AH0 B AA2 M
 unabomber	Y UW1 N AH0 B AA2 M ER0
 unabombers	Y UW1 N AH0 B AO2 M ER0 Z
 unabombing	Y UW1 N AH0 B AO2 M IH0 NG
@@ -111574,7 +111574,7 @@ vidales	V IY0 D AA1 L EH0 S
 vidalia	V IH0 D EY1 L Y AH0
 vidartes	V IH0 D AA1 R T EH0 S
 vidaurri	V IH0 D AO1 R IY0
-vide	V AY1 D
+vide	V IY1 D IY0
 video	V IH1 D IY0 OW0
 videocassette	V IH1 D IY0 OW0 K AE0 S EH2 T
 videocassettes	V IH1 D IY0 OW0 K AE0 S EH2 T S

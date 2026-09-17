@@ -73,25 +73,25 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
-    "allelic", "astronautics", "atman", "audible", "awe", "babka", "bellini", "bes", "blog", "bobble",
+    "allelic", "atman", "audible", "awe", "babka", "baile", "bellini", "benne", "bes", "blog", "bobble",
     "boche", "boff", "bog", "bridie", "calabria", "caliph", "cana", "cause", "causeway", "chomp",
-    "coauthor", "collaborative", "conger", "conversely", "costly", "cutoff", "dacron", "dagenham", "dal",
-    "debrief", "denomination", "denominational", "der", "discography", "discombobulate", "dogbane",
-    "dogberry", "dogma", "drachma", "dubrovnik", "eamon", "ebonics", "embargo", "embark", "embattle",
-    "embitter", "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode", "encompass",
-    "encourage", "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enliven", "enmesh",
-    "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage",
-    "envision", "escudo", "evolve", "excoriate", "extort", "extortion", "extortionate", "extortionist",
-    "extraction", "extrapolate", "extravagance", "extravagant", "extreme", "extremist", "favela",
-    "felonious", "fide", "foggy", "forensic", "foster", "frog", "gala", "genotype", "golf", "graben",
-    "grana", "granum", "hadrian", "hamm", "hebron", "hematite", "hog", "homs", "hoss", "hulme", "ideal",
-    "insular", "joseph", "kana", "kanji", "kersey", "kingsport", "knockoff", "lachlan", "loggerhead",
-    "loggia", "masochist", "mulligatawny", "necrologist", "necrology", "on", "onset", "plosive", "pravda",
-    "quahog", "rahway", "raj", "remunerative", "research", "resolved", "revolve", "rouse", "runoff", "saas",
-    "salsa", "sandhog", "sauternes", "serologist", "sodom", "sodomize", "spawn", "splenic", "squashed",
-    "squashy", "stanch", "stasi", "status", "stomp", "strata", "stratus", "synagogue", "tawny", "taxol",
-    "turnoff", "twangy", "ulm", "unabomber", "unencumbered", "unenforceable", "unwashed", "vegan", "vela",
-    "virulence", "virulent", "was", "wash", "washy", "wat", "watchdog", "williamsport", "writhe", "zaftig"
+    "coauthor", "conger", "conversely", "cost", "cutoff", "dacron", "dagenham", "dal", "debrief",
+    "denomination", "denominational", "der", "discography", "discombobulate", "dogma", "drachma",
+    "dubrovnik", "duce", "dulce", "eamon", "embargo", "embark", "embattle", "embitter", "embrace",
+    "embroidery", "employ", "enable", "encase", "enchant", "encode", "encompass", "encourage", "encrypt",
+    "encumber", "endorse", "endow", "enforce", "enhance", "enliven", "enmesh", "enrage", "enrapture",
+    "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage", "envision", "escudo",
+    "esse", "evolve", "excoriate", "extort", "extortion", "extortionate", "extortionist", "extraction",
+    "extrapolate", "extravagance", "extravagant", "extreme", "extremist", "favela", "felonious", "fide",
+    "foggy", "forensic", "foster", "frog", "gala", "genotype", "golf", "graben", "grana", "granum",
+    "hadrian", "hamm", "hebron", "hematite", "hog", "homs", "hoss", "hulme", "ideal", "insular", "joseph",
+    "kana", "kanji", "kersey", "kingsport", "knockoff", "lachlan", "loggerhead", "loggia", "masochist",
+    "mende", "minke", "mulligatawny", "necrologist", "necrology", "nerine", "olde", "on", "onset",
+    "plosive", "pravda", "quahog", "rahway", "raj", "remunerative", "revolve", "rouse", "runoff", "saas",
+    "salsa", "sandhog", "sauternes", "selene", "serologist", "soave", "sodom", "sodomize", "spawn",
+    "splenic", "stanch", "stasi", "status", "stomp", "strata", "stratus", "synagogue", "tawny", "taxol",
+    "turnoff", "twangy", "ulm", "unencumbered", "unenforceable", "unwashed", "vegan", "vela", "virulence",
+    "virulent", "wash", "washy", "wat", "watchdog", "williamsport", "writhe", "zaftig"
 ]);
 
 function dict(path: string): Map<string, string[]> {
@@ -119,6 +119,18 @@ describe("the curated layer against the OOV path", () => {
         const [word, upstream, want] = l.split("\t");
         curated.push({ word: word!, upstream: upstream!, want: want! });
     }
+
+    // ⚠ ONE ROW PER WORD, and this exists because #1334 broke it. A word corrected in two separate passes
+    // (`chillicothe`, LOT/THOUGHT and then the loanword final `-e`) got TWO rows, whose `upstream` columns
+    // chained: the second row's upstream was the first row's output. The test below reads the FIRST match, so
+    // it compared the shipped dict against a superseded value and failed with a message about the wrong thing.
+    // A duplicate also makes the file's central claim — "this is the record needed to re-apply after an
+    // --emit" — false, because replaying the rows in order depends on which one you take.
+    test("no word has two curated rows", () => {
+        const seen = new Map<string, number>();
+        for (const { word } of curated) seen.set(word, (seen.get(word) ?? 0) + 1);
+        expect([...seen.entries()].filter(([, n]) => n > 1).map(([w]) => w)).toEqual([]);
+    });
 
     test("every curated row is still applied in the shipped dict", () => {
         // ⚠ THE FIRST THING AN --emit WOULD BREAK. If this fails, the dict was regenerated from CMUdict and

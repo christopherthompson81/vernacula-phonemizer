@@ -947,3 +947,76 @@ which are mostly COMBINATIONS of the classes already ruled convention (weak vowe
 the declared ones: IH0→AH0 (1,457), IY0/OW0/AE0/AA0→AH0 (~370), R→ER0 (65, decided the other way by #1289),
 SH→CH (47, gold's /nʃ/→/nʧ/ affrication). **The productive single-word work on this instrument is done**; what
 is left needs either a decision (marry–merry) or a retrain (the 174-word structural gap).
+
+## Run 9 — reviewing the run, and four defects the review found
+
+Reviewing ~950 dictionary corrections. Every finding below was in work already committed.
+
+### 1. ⚠ A DUPLICATE CURATED ROW, from my own apply tooling
+
+`chillicothe` was corrected twice (LOT/THOUGHT, then the loanword final `-e`) and the apply script APPENDS
+rather than merges, so the file had two rows whose `upstream` columns chained — the second row's upstream was
+the first row's output. `test/en-curation-gap.test.ts` reads the FIRST match, so it compared the shipped dict
+against a superseded value and failed with a message about the wrong thing.
+
+A duplicate also makes the file's central claim false: it is "the record that makes an `--emit` recoverable",
+and replaying rows in order stops being well-defined once a word has two. **A `no word has two curated rows`
+test was added** — the old gate caught this by accident, not by design.
+
+### 2. ⚠ THE STEM FILTER HAD A LENGTH FLOOR, AND SHORT STEMS SLIPPED THROUGH
+
+Run 8e's family check required a dict-word stem of **≥4 characters**, so `on` (2) and `dog` (3) were never
+tested. Six families were left internally inconsistent by the LOT–THOUGHT pass:
+
+    on AO1        but  online AA1, onslaught AA1        dog AO1   but  dogbane/dogberry AA1
+    resolve AA1   but  resolved AO1                     squash AA1 but  squashed/squashy AO1
+    ebonic AO1    but  ebonics AA1                      unabom/unabomb AO2 but unabomber AA2 (cf. bomb B AA1 M)
+
+All made consistent with the base form. `cost`/`costly`/`costlier`/`costliest` were also split — three ways —
+and are now uniformly AO1; Run 8e's "leave BOTH alone" rule had preserved a pre-existing inconsistency rather
+than fixing it.
+
+### 3. ⚠ THE en-GB CONSEQUENCE: 119 RP REGRESSIONS THE SUITE COULD NOT SEE
+
+This is the big one. A CLOTH word at `ɑː` was converted to RP `ɒ` by the LOT rule (`ɑː(?!ɹ)` → `ɒ`). Moving it
+to `ɔː` for GenAm takes it **out of that rule's reach**, and it then needs membership in `en-gb-cloth.tsv`
+(`ɔː` → `ɒ`) or RP silently regresses. 124 moved words were CLOTH-shaped and not in the set; the en-GB suite
+had a test for exactly two of them (`cost`, `sorry`).
+
+⚠ **Two successive attempts to decide the list were WRONG, and the third is the one to copy:**
+
+1. A spelling heuristic (⟨o⟩, not au/aw/ough) — wrong: `snowfall`'s moved slot is `-fall`, which is THOUGHT.
+2. A distance test against the en-GB referee — wrong in a subtler way: it compared RAW strings, so `əᶷ` vs
+   `əʊ` and dark `ɫ` vs `l` made the before AND after readings both distance-1 and the test could not
+   discriminate. It kept `snowfall`. It also called `toRP(..., lex: undefined)`, i.e. with the lexical sets
+   switched off, so it was not measuring the shipped pipeline at all.
+3. **Write the candidates into the file, run the REAL `phonemizeWord`, and fold with the en-GB referee's own
+   folds.** 119 added; 5 rejected — `snowfall`, `thorium`, `waldo`, `mekong` (the referee has `ɔ` there) and
+   `quahog` (the referee's `ɒ` is on the SECOND syllable, `kwɑhɒɡ`, and the cloth rule replaces the FIRST `ɔː`).
+
+The same first-`ɔː` limit is why `forgone` fɔːɡˈɔːn, `sorbonne`, `waterlog` and `waterlogged` are excluded:
+their first `ɔː` is NORTH, and the rule would change the wrong vowel.
+
+    cost kʰˈɒst   sorry sˈɒɹi   coffee kʰˈɒfi   soft sˈɒft   dog dˈɒɡ   long lˈɒŋ      ← CLOTH, ɒ
+    caught kʰˈɔːt   law lˈɔː   snowfall snˈəᶷfˌɔːɫ   thorium θˈɔːɹiəm                 ← THOUGHT, ɔː
+
+### 4. ⚠ MY OWN REVIEW DELETED 28 CURATED ROWS
+
+While resyncing the curated record after fix #2, the second version of the script dropped its `if w in pre`
+guard. For a PRE-EXISTING curated row the shipped dict already holds the curated value, so the test
+"dict equals the pre-PR dict → this row is obsolete, drop it" fired on **every one of them** — `acc`, `gdp`,
+`gps`, `beyond`, `research`, `was`, the whole `-ative` family, all 28 silently deleted.
+
+The gate caught it, and caught it precisely: `KNOWN_GAPS` still listed `collaborative`, `research` and `was`
+while the live set no longer did, because their rows were gone. Restored, and the invariants now checked
+explicitly: 948 changed dict rows, 976 curated records, no duplicates, every `want` equal to the shipped dict,
+every changed row recorded, every PR-added row's `upstream` equal to the pre-PR dict.
+
+⚠ **Both #1 and #4 are the same underlying mistake** — writing a data file with a script that reasons about
+"what should be here" instead of merging into what IS here. The lesson the file itself should carry.
+
+### Final state
+
+    tests 5,971 pass / 308 files      goldens 0 stale      package fence ok
+    folded 59.8%   ONNX-less 53.4%    en floor 0.50, en-GB 0.44 (measured 59.8% / 47.5%)
+    948 dict rows corrected, 976 curated records, 119 en-gb-cloth additions
