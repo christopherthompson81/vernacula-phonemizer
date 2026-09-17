@@ -56,6 +56,32 @@ public static class EnglishArpabet
 
     private static readonly JsRe PHONE = JsRegex.Compile("^([A-Z]+)([0-2])?$");
 
+    /**
+     * CMUdict's final `-y` is `IY0` 7,219 times and `IY2` 198 times, in the same slot. Demote the 198.
+     * Ported from englishArpabet.ts — see that file for the full evidence and the two narrowings.
+     *
+     * `city` is `S IH1 T IY0` and `ability` is `AH0 B IH1 L AH0 T IY2`: the same unstressed FLEECE vowel,
+     * same environment, different digit. Upstream noise rather than a convention, and misaki's gold agrees
+     * with the 97% — of the 123 `-y`-spelled `IY2` rows it covers, it leaves 121 unstressed.
+     *
+     * ⚠ ONLY `IY`, AND ONLY ON A `-y` SPELLING. A blanket rule is WRONG: gold KEEPS the 2° on 94–100% of
+     * final `EY`/`AY`/`OY`/`AW` (`airway`, `alibi`, `aircrew`), and final `IY2` NOT spelled `-y` is only
+     * 67% unstressed because those are `-ee` compounds whose last syllable is a free morpheme
+     * (`bumblebee`, `jubilee`, `oversee`). No `-key` exception: 15 of the 17 `-key` rows are SURNAMES
+     * whose CMUdict twins are `IY0`, and it would buy nothing anyway — `latchkey`/`turnkey` carry the
+     * `IY2` adjacent to the primary, so the clash rule drops their mark before this rule is reachable.
+     *
+     * Demoting the DIGIT rather than suppressing the mark is deliberate: the digit also selects the vowel
+     * (`iː` vs `i`) and gates the flap, so `ability` becomes `əbˈɪlᵻt̬i` — all three consistent.
+     */
+    private static void DemoteFinalIy2(List<Phone> P, string word)
+    {
+        if (P.Count == 0) return;
+        var last = P[^1];
+        if (word.EndsWith("y", StringComparison.Ordinal) && last.Base == "IY" && last.Stress == 2)
+            P[^1] = last with { Stress = 0 };
+    }
+
     /** One CMUdict phone (e.g. "AH0", "T", "ER1") → {base, stress}. */
     private static Phone Split(string phone)
     {
@@ -130,6 +156,7 @@ public static class EnglishArpabet
         {
             word ??= "";
             var P = phones.Select(Split).ToList();
+            DemoteFinalIy2(P, word);
             // The slots whose schwa is not a schwa but the sonorant after it being syllabic.
             IReadOnlyList<int>? sylSlots = null;
             syllabic?.TryGetValue(word, out sylSlots);

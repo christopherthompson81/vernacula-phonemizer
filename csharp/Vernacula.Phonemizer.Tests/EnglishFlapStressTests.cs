@@ -26,8 +26,10 @@ public class EnglishFlapStressTests
     [Theory]
     [InlineData("AE1 S AH0 T EY2 T", "acetate", "ˈæsətʰˌeᶦt")]
     [InlineData("AE1 S AH0 T OW2 N", "acetone", "ˈæsətʰˌoᶷn")]
-    // the row `thirty` USED to carry; kept as a case for what the rule does with a 2°
-    [InlineData("TH ER1 D IY2", "thirty", "θˈɝdiː")]
+    // ⚠ WAS the synthetic ("TH ER1 D IY2", "thirty"). `DemoteFinalIy2` fires on a `-y` SPELLING, so
+    // that case no longer reaches this branch; `manatee` is a real final-IY2 row that does, and gold
+    // confirms it (`mˈænətˌi` — 2° kept, t unflapped). Mirrors english-reported-misreadings.test.ts.
+    [InlineData("M AE1 N AH0 T IY2", "manatee", "mˈænətʰˌiː")]
     public void ASecondaryStressBlocksTheFlap(string phones, string word, string expected)
         => Assert.Equal(expected, Say(phones, word));
 

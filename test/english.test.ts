@@ -413,7 +413,11 @@ describe("the -ing rhotic after a PRICE diphthong", () => {
         // ⚠ `inquiries` WAS THE SAME DEFECT ONE ROW AWAY, and the review caught it: `ER0` before `IY0`,
         // while its own singular `inquiry` already read `AY1 R IY2`. The corpus decides it directly —
         // `inquiry` ×2, both three-syllable (`ɪ n k w aɪ ɹ i`), neither with a schwa before the ɹ.
-        expect(phonemize("inquiry", "en")).toBe("ɪŋkwˈaᶦɹiː");
+        // ⚠ `iː` → `i` HERE IS THE FINAL-`-y` DEMOTION, and it removes a contradiction this very test
+        // carried: the dict wrote `inquiry` as `IH2 N K W AY1 R IY2` and `inquiries` as `…R IY0 Z`, so
+        // the singular was long and stressed while its own plural was short and unstressed, one line
+        // apart. Gold has `ˈɪnkwˌIɹi` — unstressed. They now agree.
+        expect(phonemize("inquiry", "en")).toBe("ɪŋkwˈaᶦɹi");
         expect(phonemize("inquiries", "en")).toBe("ɪŋkwˈaᶦɹiz");
         // ⚠ `spiering` IS DELIBERATELY LEFT on the four-syllable shape, not overlooked. It is a surname,
         // not `-ire` + `-ing`, so the morphological warrant above does not reach it; it has no corpus row

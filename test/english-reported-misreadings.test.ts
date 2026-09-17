@@ -156,9 +156,13 @@ describe("a closed final syllable on a true diphthong keeps its secondary stress
         test("a 2° blocks it — the syllable takes a real onset", () => {
             expect(say("AE1 S AH0 T EY2 T", "acetate")).toBe("ˈæsətʰˌeᶦt");
             expect(say("AE1 S AH0 T OW2 N", "acetone")).toBe("ˈæsətʰˌoᶷn");
-            // The row `thirty` USED to carry (TH ER1 D IY2). Kept as a case because it is what the
-            // rule does with a 2°, independent of whether any word still supplies one here.
-            expect(say("TH ER1 D IY2", "thirty")).toBe("θˈɝdiː");
+            // ⚠ THIS CASE USED TO BE THE SYNTHETIC `("TH ER1 D IY2", "thirty")`, kept after #1317 fixed
+            // that dict row "independent of whether any word still supplies one here". It is now
+            // `manatee`, which is a REAL final-IY2 row and still reaches this branch: the demotion in
+            // `demoteFinalIy2` only fires on a `-y` SPELLING, so the synthetic thirty no longer
+            // demonstrates what it was kept for, while manatee does — and gold confirms it, `mˈænətˌi`,
+            // 2° kept and the t unflapped.
+            expect(say("M AE1 N AH0 T IY2", "manatee")).toBe("mˈænətʰˌiː");
         });
 
         test("stress 0 flaps", () => {
