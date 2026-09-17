@@ -316,3 +316,56 @@ floor I just raised is unsafe". Both were plausible, both were built on the repo
 than on the error text, and the error text said `Test timed out` the whole time. The degraded-path
 measurement that came out of it (sync 50.0% against neural 56.1%) is still worth having and still
 shapes where the floor sits — but it was not the answer to this question.
+
+## Run 5 — 2026-09-17 — working the classified table: one fold taken, one rejected, the rest not fixable
+
+The 43.9% was classified into named classes. This works each line and records the verdict, so nobody
+re-derives them.
+
+| class | n | verdict |
+|---|---|---|
+| weak vowel `ə`/`ɪ` | 205 | **intentional** — Run 1; both referees back us (82%/72%) |
+| `i`/`ɪ` tense-lax | 57 | mixed 39:19, no rule — mostly OOV proper nouns |
+| **`ʌ`/`ə` STRUT–schwa** | **42** | **FOLDED — taken, +1.1pp** |
+| cot–caught `ɑ`/`ɔ` | 38 | **fold TESTED AND REJECTED** |
+| `æ`/`ɑ` | 32 | mixed 18:14, OOV foreign names — not rule-shaped |
+| j-glide | 28 | mixed; partly yod-retention, partly my test catching syllabics |
+| initial `æ`/`ə` | 28 | bidirectional |
+| final `-s`/`-z` | 11 | 9 of 11 are the tagger adding `z` to classical names (`Mimas`, `Patras`) |
+| different reading, in dict | 371 | 71 ours · 119 referee · 181 no verdict |
+| different reading, OOV | 1,011 | 129 ours · 49 referee · 833 no verdict |
+
+### Taken: `ʌ` → `ə`
+
+**STRUT and schwa are one phoneme in English, in complementary distribution by stress — and this
+engine derives them that way**: `english.jsonc` maps `AH` to `ʌ` when stressed and `ə` when not, from
+the same ARPABET symbol. The backbone already strips stress, so leaving the pair unfolded smuggles a
+STRESS claim back into a comparison that is meant to be segmental.
+
+42 rows differ by nothing else, 37 of them the referee writing `ʌ` where we write `ə` (`bugsona`
+`bʌɡsoʊnə`, `decussation` `dɛkʌseɪʃən`, `buttinski` `bʌtɪnski`).
+
+    en     56.2% → 57.3%      en-GB  47.3% → 48.2%
+
+⚠ It hides nothing contrastive: English has no `ʌ`/`ə` minimal pair independent of stress.
+
+### ⚠ Rejected: cot–caught `ɔ` → `ɑ`
+
+38 rows, skewed 31:8 toward the referee writing `ɑ` where we write `ɔ` — which looks like a merged
+referee against an unmerged engine, and therefore like a fold.
+
+**It is not.** The referee writes `ɔ` in **312 of its 4,558 rows (6.8%)** against `ɑ` in 610 (13.4%).
+It records the distinction; it just assigns ~38 words differently from us. Folding would hide a
+genuine LEXICAL disagreement — which word belongs to which set — behind a notational one.
+
+⚠ The lexical sets could not be tested directly, which is worth recording: `caught`, `bought`, `law`,
+`cot`, `pot`, `hot` are not in this referee at all. Of 40 THOUGHT-set probes, **one** was present.
+A 4,558-row corpus of rare and proper words cannot answer a question about the common core, and the
+overall `ɑ`:`ɔ` ratio had to stand in for it.
+
+### The rest are not rule-shaped
+
+`i`/`ɪ` (39:19), `æ`/`ɑ` (18:14) and initial `æ`/`ə` go both ways on OOV proper nouns and foreign
+names — the tagger guessing, not a convention gap. The `-s`/`-z` eleven are the tagger voicing a final
+`s` on classical names (`Mimas` → *maɪməz); real, but eleven rows and no discriminator short of a
+name lexicon.
