@@ -247,3 +247,21 @@ exclusion can be built correctly on top of it. Left as its own change.
 The referee eval is **single-threaded**: en-GB is 76,284 words through the rules path on one core,
 with seven idle. Nothing in this run depends on fixing that, but it is the reason a fleet sweep is
 slow, and it is a different kind of work from the audit.
+
+### Review — the two claims that needed narrowing
+
+**"Nothing to move them to" was 96.5% true.** 471 of the 488 excluded rows are already in the en-GB
+referee; **17 are in neither file afterwards** — `vampire`, `Syriac`, `hydrochloric`, `coefficient`,
+`Deleuzoguattarian` — 0.37% of the corpus, genuinely lost coverage. That is still the right trade: an
+RP reading scored against a rhotic engine is worse than no reading, because it is wrong in a direction
+the engine cannot fix. But it is a cost, not a free move.
+
+**The non-rhotic rule has one false positive, found by reading all 98.** `dossier` = `dɑsieɪ` is
+correct GenAm — the final `-r` really is silent, because the word is a French loan. The other 97 are
+unambiguous (`ticker` `tɪkə`, `whisker` `wɪskə`, `voucher` `vaʊt͡ʃə`, `avenger` `əvɛndʒə`). Left in
+rather than special-cased: a one-word exception to a 97/98 rule costs more machinery than the row is
+worth. Recorded so it is not rediscovered as a bug.
+
+Checked and clean: 39 of the 98 carry no RP length or quality tell (`ɜː`/`ɑː`/`ɔː`) and were read
+individually in case the rule was firing on something other than non-rhoticity. It was not — they are
+final `-er` → `ə` and `-or` → `ə`, which is the same phenomenon without the length mark.
