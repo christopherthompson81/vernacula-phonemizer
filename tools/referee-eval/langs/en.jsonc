@@ -11,11 +11,41 @@
     ],
     "segmentJoin": true,
     "secondaryGap": "epitran eng-Latn is itself CMU-derived — circular with our CMUdict-based g2p, so not independent.",
+    // ⚠ BEFORE THE BACKBONE, because the backbone strips combining marks and the syllabic one has to be
+    // turned into a vowel first, not deleted. Without this `Anglican` folds to `æŋɡləkn` against the
+    // referee's `æŋɡlɪkən` and every syllabic consonant is scored ALWAYS-WRONG — which means #1319, the PR
+    // that ADDED the reduced slot misaki writes and Kokoro was trained on, LOWERED this score by being
+    // right. Measured at 7.5% of in-dictionary disagreements. Same rule as KokoroFormat's SyllabicRe.
+    //
+    // ⚠ IT IS BIDIRECTIONAL, not a concession: the referee writes the mark too (60 of 4,558 US rows, 1,196
+    // of 76,284 UK rows), so this normalises BOTH sides — their `zm̩` and our `zəm` meet at `zəm`, and so do
+    // their `zəm` and our `zm̩`. Under the bare backbone strip the first pair met at `zm` vs `zəm` and missed.
+    //
+    // ⚠ AND IT IS NOT A FLEET-WIDE FIX — that was measured, because 43 referee files carry this mark and the
+    // obvious conclusion is that BACKBONE should do this for everyone. It makes them WORSE:
+    //     sr 26,048 → 25,529     cs 17,254 → 17,144     mk 62,375 → 62,314     de 3,732 → 3,711
+    // In those languages BOTH sides write `r̩`/`n̩`, so deleting the mark already aligns them and turning it
+    // into a vowel exposes a mere presence/absence difference instead. English is the reverse case: its
+    // referee spells the same syllable with a real vowel. The right fold is language-specific and this is
+    // English's.
+    "preFolds": [
+        { "pattern": "(\\S)\u0329", "replace": "ə$1", "note": "our syllabic sonorant n̩/l̩/m̩ vs the referee's ən/əl/əm — the referee's inventory has no syllabicity mark, so leaving it unfolded maps a documented convention to always-wrong (the #1282 principle, applied to the mark instead of to ᵻ)" }
+    ],
     "folds": [
         {
             "pattern": "ᵻ",
             "replace": "ɪ",
             "note": "the weak vowel ᵻ has NO counterpart in the referee's inventory, so leaving it unfolded maps it to ALWAYS-WRONG — a uniform penalty on a documented house convention across 5,580 lexicon rows. Measured per slot against this referee: our ᵻ draws ɪ 72.9% / ə 19.5%, our full ɪ draws ɪ 91.2% / ə 4.2%, our ə draws ɪ 9.0% / ə 82.5% (118 ᵻ slots over 1,929 aligned words) — so ɪ is the best-supported single mapping by a wide margin. ⚠ IT IS NOT FREE: the referee PARTIALLY resolves ᵻ (our ᵻ and our full ɪ draw different ɪ-rates, 72% vs 93%), so this fold gives up catching an ᵻ written where a full ɪ belongs. That axis is kept visible outside the headline by tools/english/en_weak_vowel_survey.mts — see #1282."
+        },
+        {
+            "pattern": "ʲ",
+            "replace": "",
+            "note": "our palatal on-glide before a front vowel (`Albania` ælbeɪniʲə) — narrow allophonic detail with no counterpart in the referee's broad inventory, exactly like the ʰ and ɫ folds beside it. 6.9% of in-dictionary disagreements."
+        },
+        {
+            "pattern": "ɝ",
+            "replace": "əɹ",
+            "note": "STRESSED NURSE. ɚ is already folded to əɹ and ɝ was not, so the pair differed only by a stress the segmental backbone has already stripped — `advert` ours ædvəɹt vs referee ædvɝt. Folding both to the same sequence is what makes the ɚ/ɝ distinction invisible on BOTH sides rather than on one."
         },
         {
             "pattern": "eᶦ",

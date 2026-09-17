@@ -62,6 +62,7 @@ import { phonemizeWord as cdo } from "../../src/languages/mindong/mindong.ts";
 import { phonemizeWord as hmn } from "../../src/languages/hmong/hmong.ts";
 import { phonemizeWord as shi } from "../../src/languages/tashelhit/tashelhit.ts";
 import { createEnglish } from "../../src/languages/english/english.ts";
+import { phonemizeEnNeural } from "../../src/languages/english/englishNeural.ts";
 // RULE-ONLY for en-GB: the shipped phonemizeWord applies BATH/CLOTH/yod/PALM lexical-set word lists MINED FROM
 // this wikipron UK referee, so evaluating it against the referee would be circular. phonemizeWordRules is the
 // GenAm-engine + rule-delta signal (no lexical sets) → the honest, non-circular accent-transform number.
@@ -225,7 +226,16 @@ import { BACKBONE, CONFIG, type RefLang } from "./config.ts";
 // and hi have no bare phonemizeWord export — instantiate their factory once and take the word through .text().
 const cmn = createPinyinPhonemizer();
 const enP = createEnglish();
-const en = (w: string): string => enP.text(w);
+/**
+ * ⚠ THE NEURAL TAIL, WHICH IS WHAT SHIPS. `enP.text(w)` reads OOV words with the n-gram, and English's OOV
+ * tier is the BiLSTM tagger — so the eval was grading the weaker of the two paths on the half of the corpus
+ * where they differ. Measured over the 2,489 OOV rows of the en referee: n-gram 23.9%, tagger 32.3%.
+ * `phonemizeEnNeural` calls the same `E.text()` underneath and only fills the OOV tail, so this is still the
+ * engine's own text() — no romanPass/foldPass/withHost — and the `engine-text-neural` label says so.
+ * ⚠ `en-GB` IS NOT AFFECTED and must not be "fixed" to match: it is scored on `rules` DELIBERATELY, because
+ * its lexicon shares a source with its referee. That is a circularity decision, not a path oversight.
+ */
+const en = (w: string): Promise<string> => phonemizeEnNeural(w);
 const hiP = createHindi();
 const hi = (w: string): string => hiP.text(w);
 /**
@@ -468,7 +478,7 @@ export const PHON: Record<string, (w: string) => string | Promise<string>> = {
  * path exercises the product-only transformations, which is how #1131 hid: `makeNativiser` runs in `text()`
  * only, so a nativiser defect was invisible to the referee no matter how good the referee was.
  */
-export type ScoredPath = "rules" | "word" | "engine-text";
+export type ScoredPath = "rules" | "word" | "engine-text" | "engine-text-neural";
 /**
  * ⚠ HAND-KEPT, AND ONLY BECAUSE IT HAS TO BE. Most entries are derivable from the import symbol below, but
  * three are hand-written WRAPPERS with no symbol to key on — `arz` is `ar(w, "egyptian", {lexicon:false})`.
@@ -503,6 +513,13 @@ export const PATH_OF: Record<string, ScoredPath> = (() => {
     for (const m of src.matchAll(/^const (\w+) = \(w: string\)[^\n]*\.text\(w\)/gmu)) {
         const k = key(m[1]!);
         if (k !== undefined) out[k] = "engine-text";
+    }
+    // ⚠ DERIVED, NOT HAND-KEPT, for the same reason as the two above: a language whose entry gains the neural
+    // tail must relabel itself. Without this `en` falls through to "word" — the bare word g2p — which is the
+    // wrong answer on the very field whose job is to stop that.
+    for (const m of src.matchAll(/^const (\w+) = \(w: string\)[^\n]*phonemizeEnNeural\(w\)/gmu)) {
+        const k = key(m[1]!);
+        if (k !== undefined) out[k] = "engine-text-neural";
     }
     Object.assign(out, PATH_OVERRIDE);
     // ⚠ FAIL LOUDLY, NOT CLOSED. This reads its own source and matches TYPE ANNOTATIONS; under any transform
@@ -819,8 +836,10 @@ async function main(): Promise<void> {
                 r.path === "rules"
                     ? "  — the rules-only engine, DELIBERATELY: the lexicon/neural path shares a source with the referee"
                     : r.path === "engine-text"
-                      ? "  — this engine's OWN text(), NOT the registry-wrapped phonemize(): no romanPass/foldPass/withHost, and for en not the neural OOV path"
-                      : "  — the bare word g2p"
+                      ? "  — this engine's OWN text(), NOT the registry-wrapped phonemize(): no romanPass/foldPass/withHost, and NOT the neural OOV tail"
+                      : r.path === "engine-text-neural"
+                        ? "  — this engine's OWN text() WITH the neural OOV tier, i.e. the tier that ships; still not the registry-wrapped phonemize() (no romanPass/foldPass/withHost)"
+                        : "  — the bare word g2p"
             }`,
         );
         if (r.product.compared > 0)

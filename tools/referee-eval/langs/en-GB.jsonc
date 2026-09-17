@@ -6,7 +6,20 @@
     "referees": [
         { "file": "en-gb.wikipron-uk.tsv", "source": "wikipron eng_latn_uk (human, narrow)", "role": "primary" }
     ],
+    // ⚠ BEFORE THE BACKBONE, which strips combining marks — the syllabic one has to become a vowel first,
+    // not be deleted. Same rule and same reason as en.jsonc; this engine is the same engine. It is
+    // BIDIRECTIONAL (this referee writes the mark in 1,196 of its 76,284 rows) and it is NOT fleet-wide —
+    // the same fold measured WORSE on sr, cs, mk and de, where both sides already write the mark. See
+    // en.jsonc for the numbers.
+    "preFolds": [
+        { "pattern": "(\\S)\u0329", "replace": "ə$1", "note": "our syllabic sonorant n̩/l̩/m̩ vs the referee's ən/əl/əm. The referee inventory has no syllabicity mark, so unfolded it is always-wrong — the #1282 principle. Worth +1.7pp here against +7.5% of disagreements on en, the difference being that en-GB is scored on the rules-only path, which reaches fewer syllabic slots." }
+    ],
     "folds": [
+        {
+            "pattern": "ʲ",
+            "replace": "",
+            "note": "our palatal on-glide before a front vowel — narrow allophonic detail with no counterpart in the referee's broad inventory, exactly like the ʰ and ɫ folds beside it."
+        },
         {
             "pattern": "ᵻ",
             "replace": "ɪ",
