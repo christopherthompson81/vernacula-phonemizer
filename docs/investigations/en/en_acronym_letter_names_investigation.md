@@ -73,3 +73,25 @@ that file's contract. Its own header calls it "every hand correction to g2p-dict
 ⚠ TWO OF THE 22 ARE NOT DEFECTS AT ALL. `SQL` is in the dict as the letter spelling and gold says
 "sequel"; `ASAP` likewise. **Both readings are attested** — this is the multiple-readings problem, not
 a wrong entry. And `BBQ`'s gold reading `bˈɑɹbəkjˌu` is a GLOSS: the expansion, not the initialism.
+
+## Run 3 — 2026-09-17 — review: the audit's bound, and the row left alone
+
+**The "at most two differing phones" bound is load-bearing.** Re-run without it, the audit returns
+nine rows instead of eight, and the extra eight are not letter spellings at all:
+
+    dr  [D R AY1 V] "drive"      lb   [P AW1 N D] "pound"     aug  [AO1 G AH0 S T] "August"
+    ct  [K AO1 R T] "court"      mt   [M AW1 N T] "mount"     blvd [B UH1 L AH0 V AA2 R D]
+    hz  [HH ER1 T Z] "hertz"     msgr [M AA0 N S IY1 N Y ER0] "monsignor"
+
+These are abbreviation GLOSSES — CMUdict giving the expansion, which is correct for them. The bound is
+what separates "a letter spelling with one letter wrong" from "not a letter spelling", and the eight
+shipped corrections are therefore the complete set, not a sample.
+
+**`ia` is the one row inside the bound that was left alone.** `[IY1 AH0]` against the letters' `AY EY`
+— but "ee-uh" is a plausible NAME reading, and whether ⟨IA⟩ is Iowa, an initialism, or a name is not
+something the dictionary row can settle. Guessing would have been the same class of error as the ones
+being fixed.
+
+**The curation gate covers the new rows and is not vacuous.** `en-curation-gap.test.ts` passes both
+halves — every curated row still applied in the shipped dict, and no row falling back to the upstream
+shape on the OOV path beyond the three known gaps. The eight did not join that list.

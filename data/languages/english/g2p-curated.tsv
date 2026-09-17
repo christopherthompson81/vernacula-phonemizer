@@ -17,6 +17,13 @@
 # documented ⟨a⟩ exception (letterNameExceptions), these eight were all that disagreed.
 # ⚠ `gps` ALREADY READ CORRECTLY and is still fixed here: it is in `acronymLetters`, which spells from
 # the letter rows and bypasses its own bad entry. The defect was invisible from the output alone.
+# ⚠ THE AUDIT'S "AT MOST TWO DIFFERING PHONES" BOUND IS LOAD-BEARING, not a convenience. Dropped, it also
+# returns `lb` [P AW1 N D], `hz` [HH ER1 T Z], `blvd`, `aug`, `mt`, `ct`, `dr`, `msgr` — abbreviation
+# GLOSSES, where CMUdict gives the EXPANSION rather than a letter spelling, which is correct for them.
+# The bound is what separates "a letter spelling with one letter wrong" from "not a letter spelling".
+# ⚠ AND `ia` [IY1 AH0] IS DELIBERATELY NOT HERE. It is the only other row inside the bound, and it is
+# ambiguous: "ee-uh" is a plausible NAME reading, and whether ⟨IA⟩ is Iowa, an initialism, or a name is
+# not something the dictionary row can settle. Left alone rather than guessed at.
 acc	AY2 S IY2 S IY1	EY2 S IY2 S IY1	letter-name
 associative	AH0 S OW1 SH AH0 T IH2 V	AH0 S OW1 S IY0 AH0 T IH0 V	#1278
 backfiring	B AE1 K F AY2 ER0 IH0 NG	B AE1 K F AY2 R IH0 NG	#1289
