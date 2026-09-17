@@ -24,7 +24,18 @@
         "offglides": "FACE/PRICE/MOUTH offglides as superscripts aᶦ aᶷ",
         "weakVowel": "reduced KIT → ᵻ",
         "rhotic": "NURSE ɝ, lettER ɚ",
-        "merge": "LOT–THOUGHT → ɔː",
+        // ⚠ THIS SAID "merge": "LOT–THOUGHT → ɔː" AND THAT WAS NEVER TRUE OF THE ENGINE. `AA` renders `ɑː` and
+        // `AO` renders `ɔː`, two distinct outputs, so whether a word merged depended entirely on which of the two
+        // CMUdict happened to write — and CMUdict is not consistent. The result was an accent that was NEITHER:
+        // `cot` and `caught` came out identical (both AA) while `lot`/`law` and `don`/`dawn` stayed distinct.
+        // #1334 aligned the 466 straggler rows to misaki gold, which IS consistent — it distinguishes all seven
+        // minimal pairs (cot/caught, don/dawn, lot/law, stock/stalk, odd/awed, hock/hawk, tot/taught) and keeps
+        // PALM as ɑ — and which is the lexicon the downstream Kokoro model was trained on. 93.1% of our AA/AO
+        // rows already agreed with it; the change was the remaining 6.9%.
+        // ⚠ THE WIKIPRON REFEREE CANNOT ARBITRATE THIS and must not be used to: it writes `dawn` as `d ɑ n`,
+        // merged, in the same file where it distinguishes elsewhere. That inconsistency is why the referee-eval
+        // config REFUSES an ɔ/ɑ fold (see RefLang.intentional) — nothing there has been shown right.
+        "lotThought": "DISTINGUISHED: LOT/CLOTH ɑː (cot, lot, don) vs THOUGHT ɔː (caught, law, dawn); PALM ɑː",
     },
 
     // ARPABET → canonical IPA correspondence (General American values). This is the DATA the converter reads;

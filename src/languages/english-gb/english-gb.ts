@@ -181,7 +181,13 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         if (lex.bath.has(w)) s = s.replace(/æ/u, "ɑː"); // BATH
         if (lex.cloth.has(w)) s = s.replace(/ɔː/u, "ɒ"); // CLOTH
         if (lex.yod.has(w)) s = s.replace(/([tdnszθl])(ʰ?)([ˈˌ]?)uː/u, "$1$2j$3uː"); // yod-retention (glide after any aspiration, before the stressed vowel)
-        if (lex.lotr.has(w)) s = s.replace(/ɑːɹ/u, "ɒɹ"); // LOT before intervocalic r (the LOT rule's (?!ɹ) skipped it)
+        // LOT before intervocalic r (the LOT rule's (?!ɹ) skipped it).
+        // ⚠ EITHER GenAm REALIZATION, not just ɑː. #1334 aligned the parent's AA/AO assignment to misaki gold's
+        // consistent LOT–THOUGHT split, and 7 of this set's 13 words moved to ɔː with it (`sorry`, `sorrow`,
+        // `morrow`, `florist`, `categorical`…) — `sorry` is the US /ˈsɔːri/ vs RP /ˈsɒri/ split, where BOTH
+        // varieties are right and only the mapping between them was missing. Matching only ɑːɹ left the rule
+        // silently failing on over half its own list, with the set still listing the words.
+        if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s

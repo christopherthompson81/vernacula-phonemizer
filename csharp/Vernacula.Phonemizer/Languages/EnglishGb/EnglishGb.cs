@@ -88,7 +88,7 @@ public static class EnglishGb
     private static readonly JsRe BATH_FIRST = JsRegex.Compile("æ", "u");
     private static readonly JsRe CLOTH_FIRST = JsRegex.Compile("ɔː", "u");
     private static readonly JsRe YOD_FIRST = JsRegex.Compile("([tdnszθl])(ʰ?)([ˈˌ]?)uː", "u");
-    private static readonly JsRe LOTR_FIRST = JsRegex.Compile("ɑːɹ", "u");
+    private static readonly JsRe LOTR_FIRST = JsRegex.Compile("[ɑɔ]ːɹ", "u");
     /** The OFFGLIDE TRIPHTHONGS. ⚠ WITHOUT THESE #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS: the generic
      *  offglide map used to rewrite `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` first, so NEAR and CURE fired on the result and
      *  turned offglide + coda /ɹ/ into RP's triphthong (`ˈæbʃaᶦɹ` → `ˈæbʃaɪə`). Keeping the superscript stops
@@ -127,6 +127,9 @@ public static class EnglishGb
             // yod-retention: the glide goes after any aspiration and before the stressed vowel.
             if (lex.Yod.Contains(w)) s = YOD_FIRST.Replace(s, "$1$2j$3uː");
             // LOT before intervocalic r — the LOT rule's (?!ɹ) skipped it.
+            // ⚠ EITHER GenAm REALIZATION — the TS twin carries the reasoning: #1334 aligned the parent's AA/AO
+            // to gold's consistent LOT–THOUGHT split and 7 of this set's 13 words moved from ɑː to ɔː, so
+            // matching only ɑːɹ left the rule silently failing on over half its own list.
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.

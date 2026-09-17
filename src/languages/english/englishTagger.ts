@@ -27,6 +27,15 @@
 import { loadOrt, type OrtLike, type OrtSession } from "../../core/onnx.ts";
 import { maskedArgmax, type TaggerMeta } from "../../core/structuralTagger.ts";
 import { collapseGeminates, enforceSinglePrimary } from "./englishG2p.ts";
+
+/** Orthographic vowel letters, for the digraph guard in `tag`. ⟨y⟩ is included: `gaywad`/`sinamay` double their
+ *  vowel across ⟨ay⟩, which is the same misfire as ⟨oo⟩ and is invisible to a set without it. */
+const VOWEL_LETTER = /^[aeiouy]$/u;
+
+const base = (p: string): string => p.replace(/[0-2]$/u, "");
+const stress = (p: string): string => (/[0-2]$/u.test(p) ? p.slice(-1) : "");
+/** 1° beats 2° beats unstressed — for picking which of a digraph's two tagged copies keeps its mark. */
+const STRENGTH: Record<string, number> = { "1": 3, "2": 2, "0": 1, "": 0 };
 import { makeArpabetToIpa } from "./englishArpabet.ts";
 import { MANIFEST } from "./manifest.ts";
 import { dataDir } from "../../core/dataPath.ts";
@@ -95,11 +104,57 @@ export async function createEnglishTagger(basename = "en-g2p-tagger"): Promise<E
             const r = await sess.run({ chars: new ortLib.Tensor("int64", BigInt64Array.from(ids, (x) => BigInt(x)), [1, T]) });
             const logits = r.logits!.data as Float32Array; // flat [T * nTags], row-major (t·nTags + tag)
             const phones: string[] = [];
+            // ⚠ WHICH CHARACTER PRODUCED THE LAST PHONE, for the vowel-digraph guard below. Tracked here rather
+            // than recovered afterwards because by the time `phones` is a flat list the alignment is gone.
+            let lastFromChar = -2;
             for (let k = 0; k < T; k++) {
                 const best = maskedArgmax(logits, k * nTags, meta.charTags[String(ids[k])]);
                 if (best < 0) return "";
                 const chunk = meta.tags[String(best)] ?? ""; // an ARPABET chunk: "K", "AE1", "HH AH0", or "" (silent)
-                if (chunk) for (const p of chunk.split(" ")) phones.push(p);
+                if (!chunk) continue;
+                for (const p of chunk.split(" ")) {
+                    // ⚠ A VOWEL DIGRAPH TAGGED ON BOTH OF ITS LETTERS. This model emits one chunk PER CHARACTER with
+                    // no global constraint, so ⟨oo⟩/⟨ay⟩/⟨ei⟩/⟨au⟩ can get the vowel twice: `atishoo` came out
+                    // ˈæt̬ɪʃˌuːˌuː, `anteroom` ˈæntɚˌuːˌuːm, `gaywad` ɡˌeᶦeᶦwˈɑːd. Reported as a malformedness in
+                    // #1334's ten-row diagnosis; every instance in the referee is a digraph.
+                    //
+                    // ⚠ IT IS GUARDED ON THE TWO LETTERS BEING ADJACENT, AND THAT IS THE WHOLE RULE. The obvious
+                    // fix — let the shared `collapseGeminates` drop doubled vowels too — IS WRONG, and the dictionary
+                    // says so: 95 rows carry a real adjacent identical vowel pair and 89 of them are `ER0 ER0`, the
+                    // `-erer` agentive (`acquirer` AH0 K W AY1 ER0 ER0, `adventurer`, `gatherer`, `emperor`). There
+                    // the stem's /ər/ meets the suffix's /ər/ and collapsing DELETES A SYLLABLE — `acquirer` becomes
+                    // `acquire`. That class is separated from a digraph by exactly this test: its two `ER0`s come
+                    // from letters two apart with a silent consonant between them, never from adjacent vowels.
+                    //
+                    // ⚠ AND `tools/english/en_g2p_ngram.ts` HAS THE OPPOSITE BUG, still unfixed here: its own copy of
+                    // collapseGeminates has no vowel exemption and its comment claims the collapse is "Lossless vs
+                    // CMUdict". It is not — it changes 186 rows, and the 95 vowel ones are this same `-erer` class.
+                    // So the trainer's targets/scoring and the shipped engine disagree. Fixing that means retraining.
+                    const prev = phones[phones.length - 1];
+                    if (
+                        prev !== undefined &&
+                        // ⚠ THE BASE, NOT THE WHOLE PHONE. The two copies of a digraph's vowel often carry
+                        // DIFFERENT stress digits — `gaywad` tags EY2 then EY0, `Yenisei` EY2 then EY1 — so a
+                        // byte-equality test (which is what the shared collapseGeminates uses) sees them as two
+                        // different phones and lets every one of those through. Measured: base-matching catches
+                        // all of them, byte-matching catches four.
+                        base(prev) === base(p) &&
+                        vowels.has(base(p)) &&
+                        k - 1 === lastFromChar &&
+                        VOWEL_LETTER.test(chars[k]!) &&
+                        VOWEL_LETTER.test(chars[k - 1]!)
+                    ) {
+                        // ⚠ KEEP THE STRONGER STRESS. The digraph is ONE syllable and the model may have put the
+                        // beat on either letter — dropping the second blindly loses `Yenisei`'s primary and leaves
+                        // the word with its tonic on the wrong syllable (or, after enforceSinglePrimary promotes
+                        // one, on an arbitrary one).
+                        if (STRENGTH[stress(p)]! > STRENGTH[stress(prev)]!)
+                            phones[phones.length - 1] = base(p) + stress(p);
+                        continue;
+                    }
+                    phones.push(p);
+                    lastFromChar = k;
+                }
             }
             if (phones.length === 0) return "";
             // finish the SAME way the n-gram path does: one primary stress, collapse seam geminates, then render to IPA

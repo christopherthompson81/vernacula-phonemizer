@@ -11,12 +11,43 @@ import { CONFIG } from "../tools/referee-eval/config.ts";
 describe("referee row exclusion", () => {
     const en = CONFIG["en"]!.referees[0]!;
 
-    test("en declares exactly the two validated rules", () => {
-        expect(en.excludeRows).toHaveLength(2);
-        const [vowel, rhotic] = en.excludeRows!;
+    test("en declares exactly the four validated rules", () => {
+        expect(en.excludeRows).toHaveLength(4);
+        const [vowel, rhotic, finalR, glyph] = en.excludeRows!;
+        // ⚠ THE FOURTH IS NOT A VARIETY RULE and is here for a different reason: a one-character headword
+        // has no fixed meaning in this file (`m` ɛm, `q` kjuː are the letter's NAME; `x` ks is its SOUND),
+        // so it cannot arbitrate. It is score-neutral by construction — 3 of its 6 rows were passing.
+        expect(glyph!.spelling!.source).toBe("^.$");
+        expect(glyph!.ipa).toBeUndefined();
         expect(vowel!.ipa!.source).toBe("əʊ|ɒ|ɪə|ʊə|ɛə");
         expect(rhotic!.spelling).toBeDefined();
         expect(rhotic!.ipaLacks).toBeDefined();
+        expect(finalR!.spelling).toBeDefined();
+        expect(finalR!.ipaLacks).toBeDefined();
+    });
+
+    // ⚠ THE WORD-FINAL RULE EXISTS BECAUSE THE WHOLE-STRING ONE HAS A BLIND SPOT: its `ipaLacks` asks
+    // "is there a rhotic ANYWHERE", when it means "is there one where the spelling puts it". `crowner` is
+    // transcribed `kɹaʊnə` — non-rhotic, an RP row in a GenAm file — and survived because the ONSET of
+    // `crowner` supplies a `ɹ`. Found by sampling ten undetermined divergences and diagnosing each.
+    test("an onset r does not mask a non-rhotic coda", () => {
+        const [, whole, finalR] = en.excludeRows!;
+        const caught = (w: string, ipa: string, x: typeof whole): boolean =>
+            (x!.spelling?.test(w) ?? true) && (x!.ipaLacks ? !x!.ipaLacks.test(ipa) : true);
+        expect(caught("crowner", "kɹaʊnə", whole)).toBe(false); // the blind spot
+        expect(caught("crowner", "kɹaʊnə", finalR)).toBe(true); // closed by the companion
+        expect(caught("featured", "fiːt͡ʃəd", finalR)).toBe(true);
+    });
+
+    // ⚠ `-s`/`-es` AFTER THE r IS DELIBERATELY EXCLUDED FROM THE WORD-FINAL RULE. There the r is usually
+    // the ONSET of the next syllable and IS pronounced, so `Pescadores` pɛskədɔːɹiːz — correct GenAm —
+    // would be dropped. Measured: allowing it adds one row and one false positive.
+    test("a plural -es does not make the r a coda", () => {
+        const finalR = en.excludeRows![2]!;
+        const caught = (w: string, ipa: string): boolean =>
+            (finalR.spelling?.test(w) ?? true) && (finalR.ipaLacks ? !finalR.ipaLacks.test(ipa) : true);
+        expect(caught("Pescadores", "pɛskədɔːɹiːz")).toBe(false);
+        expect(caught("cacciatore", "kɑt͡ʃətɔɹi")).toBe(false); // the r IS pronounced here
     });
 
     // ⚠ NOT `g`. These are membership tests reused across thousands of rows, and a `g` regex carries

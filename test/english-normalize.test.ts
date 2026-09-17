@@ -312,7 +312,10 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
         // ⚠ THE FRACTIONAL PART CARRIES ITS UNIT NOUN. Without one the bare integer has nothing to close
         // it and JOINS THE NEXT CLAUSE — `for $3.14 and the 2nd time` read "three dollars FOURTEEN AND the
         // second time". The subunit is per currency, and the penny's plural is suppletive.
-        expect(phonemize("it cost $5.50", "en")).toBe("ɪt kʰˈɑːst fˈaᶦv dˈɑːlɚz fˈɪfti sˈɛnts");
+        // ⚠ `kʰˈɔːst`, not `kʰˈɑːst`: `cost` is CLOTH, and #1334 aligned the AA/AO assignment to gold's
+        // consistent LOT–THOUGHT split (the family `cost`/`costly`/`costlier`/`costliest` now agrees).
+        // Incidental to what this line pins, which is that $5.50 reads as dollars-plus-cents.
+        expect(phonemize("it cost $5.50", "en")).toBe("ɪt kʰˈɔːst fˈaᶦv dˈɑːlɚz fˈɪfti sˈɛnts");
         expect(phonemize("$1.99", "en")).toBe("wˈʌn dˈɑːlɚ nˈaᶦnti nˈaᶦn sˈɛnts"); // singular at 1
         expect(phonemize("£2.50 each", "en")).toBe("tʰˈuː pʰˈaᶷndz fˈɪfti pʰˈɛns ˈiːt͡ʃ");
     });
@@ -368,8 +371,8 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
 
     test("numeric dates read as dates", () => {
         // Both forms emit "march 14th 2011", which the ordinal-day and pair-wise-year rules then speak.
-        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˌɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
-        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˌɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
+        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɔːn mˈɑːɹt͡ʃ fˌɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
+        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɔːn mˈɑːɹt͡ʃ fˌɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
     });
 
     test("the lexicalization threshold: long+pronounceable is a word, short is letters", () => {

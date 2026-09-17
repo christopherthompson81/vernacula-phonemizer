@@ -109,18 +109,55 @@ public static class EnglishTaggerFactory
             }).ConfigureAwait(false);
             var logits = r["logits"].AsFloat32(); // flat [T * nTags], row-major (t·nTags + tag)
             var phones = new List<string>();
+            // ⚠ WHICH CHARACTER PRODUCED THE LAST PHONE, for the vowel-digraph guard below. Tracked here rather
+            // than recovered afterwards because by the time `phones` is a flat list the alignment is gone.
+            var lastFromChar = -2;
             for (var k = 0; k < T; k++)
             {
                 var best = StructuralTagger.MaskedArgmax(logits, k * _nTags,
                     _meta.CharTags.TryGetValue(ids[k].ToString(System.Globalization.CultureInfo.InvariantCulture), out var valid) ? valid : null);
                 if (best < 0) return "";
                 var chunk = _meta.Tags.TryGetValue(best.ToString(System.Globalization.CultureInfo.InvariantCulture), out var t) ? t : ""; // "K", "AE1", "HH AH0", or "" (silent)
-                if (chunk.Length > 0) phones.AddRange(chunk.Split(' '));
+                if (chunk.Length == 0) continue;
+                foreach (var p in chunk.Split(' '))
+                {
+                    // ⚠ A VOWEL DIGRAPH TAGGED ON BOTH OF ITS LETTERS — the TS twin carries the full reasoning.
+                    // This model emits one chunk PER CHARACTER with no global constraint, so ⟨oo⟩/⟨ay⟩/⟨ei⟩ can get
+                    // the vowel twice (`atishoo` ˈæt̬ɪʃˌuːˌuː, `anteroom` ˈæntɚˌuːˌuːm, `gaywad` ɡˌeᶦeᶦwˈɑːd).
+                    // ⚠ BOTH LETTERS MUST BE VOWELS, and letting the shared CollapseGeminates drop doubled vowels
+                    // instead would be WRONG: 89 dict rows are the `-erer` agentive (`acquirer` AH0 K W AY1 ER0 ER0)
+                    // where collapsing deletes a syllable. Its two ER0s never come from adjacent vowel letters.
+                    var prev = phones.Count > 0 ? phones[^1] : null;
+                    if (prev is not null
+                        && Bse(prev) == Bse(p)                       // the BASE: a digraph's copies often differ in stress
+                        && _vowels.Contains(Bse(p))
+                        && k - 1 == lastFromChar
+                        && k >= 1
+                        && IsVowelLetter(chars[k]) && IsVowelLetter(chars[k - 1]))
+                    {
+                        // keep the STRONGER stress: the digraph is one syllable and the model may mark either letter
+                        if (Strength(Str(p)) > Strength(Str(prev))) phones[^1] = Bse(p) + Str(p);
+                        continue;
+                    }
+                    phones.Add(p);
+                    lastFromChar = k;
+                }
             }
             if (phones.Count == 0) return "";
             return _arpabetToIpa(
                 EnglishG2pFactory.EnforceSinglePrimary(EnglishG2pFactory.CollapseGeminates(phones, _vowels), _vowels),
                 word);
         }
+
+        /// ⟨y⟩ is included: `gaywad`/`sinamay` double their vowel across ⟨ay⟩, the same misfire as ⟨oo⟩.
+        private static bool IsVowelLetter(string c) =>
+            c is "a" or "e" or "i" or "o" or "u" or "y";
+
+        private static string Bse(string p) => p.Length > 0 && p[^1] is >= '0' and <= '2' ? p[..^1] : p;
+
+        private static string Str(string p) => p.Length > 0 && p[^1] is >= '0' and <= '2' ? p[^1..] : "";
+
+        /// 1° beats 2° beats unstressed.
+        private static int Strength(string s) => s switch { "1" => 3, "2" => 2, "0" => 1, _ => 0 };
     }
 }

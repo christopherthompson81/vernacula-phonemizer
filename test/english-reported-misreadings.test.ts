@@ -104,7 +104,7 @@ describe("a coordinator that resumes after a pause takes its strong form", () =>
     // ⚠ `or` is the obvious parallel and is NOT in the map — extrapolated, then not supported by the
     // A/B (reported as differing only in speaker dynamicism). Pinned so re-adding it is deliberate.
     test("or is left reduced, because nothing measured it", () => {
-        expect(phonemize("Coffee, tea, or water.", "en")).toBe("kʰˈɑːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .");
+        expect(phonemize("Coffee, tea, or water.", "en")).toBe("kʰˈɔːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .");
     });
 
     // ⚠ The strong coordinator must NOT satisfy the clause's primary-stress test, or restoring it
@@ -518,7 +518,11 @@ describe("a dash between two calendar names is a span", () => {
 
     test("months and weekdays alike", () => {
         expect(say("July–August 2025")).toContain("tʰuː");
-        expect(say("Monday–Friday")).toBe("mˈʌndi tʰuː fɹˈaᶦd̬i");
+        // ⚠ `-dˌeᶦ`, not `-di`. CMUdict had the weekday set SPLIT (thursday/sunday/birthday EY2,
+        // monday/tuesday/friday/saturday IY0) and misaki gold is unanimous `dˌA` across all 12 `-day`
+        // words; #1334 corrected the four stragglers. The flap also goes with it — `D EY2` is stressed,
+        // so `fɹˈaᶦd̬i` becomes `fɹˈaᶦdˌeᶦ`.
+        expect(say("Monday–Friday")).toBe("mˈʌndˌeᶦ tʰuː fɹˈaᶦdˌeᶦ");
     });
 
     // ⚠ THE SPACED FORMS ARE WHY ORDER MATTERS. The parenthetical rule would claim them as a pause

@@ -434,3 +434,589 @@ a throw rather than a silent pass: the positionwise comparison cannot honour any
 the reverse is absent, that `ɔ`/`ɑ` is absent, that every entry is a single character, and that `en` is
 the only language declaring any. The failure this guards is silent and flattering: a bidirectional
 version credits 137 of our own errors and raises the reported number for it.
+
+## Run 7 — 2026-09-17 — ten undetermined divergences, diagnosed one at a time
+
+**913 of the 1,736 disagreements (53%) have no gold entry at all**, so no third source can adjudicate
+them and they had been left as a single undifferentiated bucket. Ten were taken by deterministic
+stride (not chosen) and diagnosed individually. They do not all have the same cause, and one of them
+was a bug in this repo's own instrument.
+
+| | word | referee | ours | diagnosis |
+|---|---|---|---|---|
+| 1 | `ACOG` | `eɪkɑɡ` | `əkʰˈɔːɡ` | **our dict row is wrong**: `AH0 K AO1 G` reads "uh-KOG"; it is an initialism said "AY-kog". Belongs in `acronymLetters` or as a curated row |
+| 2 | `Francesca` | `fɹænsɛskə` | `fɹænt͡ʃˈɛskə` | **we are right.** The dict has `CH` (`F R AE0 N CH EH1 S K AH0`) and fran-CHES-ka is the English reading of the Italian name; the referee's `s` is a spelling pronunciation |
+| 3 | `Ortiz` | `ɔɹtis` | `ɔːɹtˈiːz` | **both attested.** `AO2 R T IY1 Z` gives /z/, which is the usual American reading; the referee's /s/ is Spanish-faithful |
+| 4 | `Yauch` | `jaʊk` | `jˈɔːt͡ʃ` | **we are wrong**, and it is the dict row: `Y AO1 CH`. German ⟨au⟩+⟨ch⟩ is /aʊk/ |
+| 5 | `atishoo` | `ətɪʃuː` | `ˈæt̬ɪʃˌuːˌuː` | ⚠ **a real defect — the tagger emitted a DOUBLED `uː`.** Malformed, not a variant |
+| 6 | `crowner` | `kɹaʊnə` | `kɹˈaᶷnɚ` | ⚠ **AN RP ROW THE EXCLUSION MISSED — a bug in #1328**, fixed in this run. See below |
+| 7 | `gasahol` | `ɡæsəhɑl` | `ɡˈæsəhˌɔːɫ` | cot–caught, the class Run 5 refused to fold because it is lexical |
+| 8 | `mecamylamine` | `mɛkəmɪləmiːn` | `məkʰˈæmɪlˌæmˌaᶦn` | the tagger on a drug name — stress and two vowels wrong. OOV letter-to-sound, no rule |
+| 9 | `projectivize` | `pɹɑdʒɛktɪvaɪz` | `pɹəd͡ʒˈɛktəvˌaᶦz` | the declared weak-vowel convention plus initial-vowel reduction. Not work |
+| 10 | `suevite` | `sweɪvaɪt` | `sˌuːvˈaᶦt` | **we are wrong**: ⟨ue⟩ as /weɪ/ in a German loan. OOV, lexical |
+
+    we are right                     1      the referee is odd or Spanish/spelling-faithful
+    both attested                    1
+    we are wrong, lexically          3      Yauch, suevite, mecamylamine — OOV or a bad dict row
+    a real malformedness defect      1      atishoo's doubled uː
+    an INSTRUMENT bug                1      crowner
+    already-declared convention      2      gasahol, projectivize
+    a dict row to curate             1      ACOG
+
+**The bucket is not one thing.** A third of it is us being wrong on loanword letter-to-sound with no
+rule available; a fifth is convention already accounted for; and one in ten was the measuring
+apparatus rather than the engine.
+
+### ⚠ The instrument bug: an onset `r` masked a non-rhotic coda
+
+`crowner` is transcribed `kɹaʊnə` — non-rhotic, an RP row in a file labelled GenAm, exactly what
+#1328's second rule exists to drop. It survived because that rule's `ipaLacks` scans the WHOLE string,
+and `kɹaʊnə` contains a `ɹ` — the onset of `crowner`. The test asked "is there a rhotic anywhere" when
+it meant "is there one where the spelling puts it".
+
+Fixed with a companion rule: spelling ends in a word-final `r` (a silent `e` or an `-ed` allowed) and
+the IPA has **no rhotic in its last three symbols**. 18 further rows, **17 of which the en-GB referee
+carries with a byte-identical reading** — the same validation standard as #1328.
+
+⚠ `-s`/`-es` after the `r` is deliberately NOT allowed. There the `r` is usually the onset of the next
+syllable and is pronounced, so `Pescadores` `pɛskədɔːɹiːz` — correct GenAm — would have been dropped.
+Measured: allowing it adds one row and one false positive.
+
+    excluded 488 → 506      folded 57.3% → 57.6%      +intentional 62.4% → 62.7%
+
+## Run 8 — 2026-09-17 — working the divergences serially, and finding the defect is in the DICTIONARY
+
+Instruction: go through the wikipron divergences one at a time and fix each — correct the data, change the
+rule, mark it intentional, or add a lexical entry, whichever is right — fixing a whole class when one turns up.
+
+    npx tsx .scratch/ref7/dump.mts     # reproduces eval.ts's scorer exactly, per-row, + gold arbitration
+    total 4052  folded 2334 (57.6%)  intentional 205  divergent rows 1718
+
+### The first three rows bought a rule, and it was score-neutral
+
+`A` / `a` / `x` are single-character headwords. The referee has six of them and **does not have a fixed
+semantics for the class**: `m` ɛm, `p` piː, `q` kjuː, `a` eɪ are the letter's NAME, while `x` ks is the
+letter's SOUND. A row whose meaning is not constant within the file cannot arbitrate a reading, so all six
+are excluded. Three of the six were already passing, so `folded` moved by 0.01pp — which is the honest sign
+this was not score-hunting. What it removes is three PERMANENT divergences: `x` we read `ɛks` and gold agrees
+(the referee is simply wrong), and `A`/`a` we read as the reduced article DELIBERATELY, because a bare capital
+`A` in running text is overwhelmingly sentence-initial and a determiner.
+
+### Then the queue was split, because copying a referee row into our dict is CIRCULAR
+
+    divergent rows      1,714
+      in g2p-dict.tsv     429   ← we have an answer and still disagree: a real defect, or a referee error
+      OOV                1,080  ← genuine letter-to-sound error on unseen words
+
+For an OOV rare proper noun the referee is the ONLY source, so "add it to the lexicon" would copy the
+instrument into the engine and then score against the instrument. The 429 recorded rows are the non-circular
+slice and were worked first.
+
+### ⚠ THE FINDING: `ours` == `dictIPA` in essentially every recorded row
+
+Enriching each row with its ARPABET and rendering that row through our own converter shows our rules
+reproducing the dictionary faithfully. **The divergences are not rule defects. They are bad upstream CMUdict
+rows.** Arbitrated against misaki gold (independent of wikipron, and the lexicon Kokoro was trained on):
+
+    gold backs US, referee is wrong        185   43%   nothing to fix
+    gold backs the REFEREE, we are wrong    81   19%   ← a verified correction each
+    three-way disagreement                  80   19%
+    no gold entry                           83   19%
+
+Each of the 81 was produced by a converter (gold IPA → ARPABET) and then **verified by round-trip**: the
+candidate is rendered back through this repo's own `makeArpabetToIpa` and required to fold-equal BOTH gold and
+wikipron. Nothing was guessed. Examples: `writhe` ɹˈɪθ → ɹˈaᶦð, `herbaceous` ɚbˈeᶦʃəs → hɚbˈeᶦʃəs (no `h`),
+`interpolate` ɪtʰˈɝpəlˌeᶦt → ɪntˈɝpəlˌeᶦt (no `n`), `segue` sˈɛɡ → sˈɛɡwˌeᶦ, `laugher` lˈɑːkɚ → lˈæfɚ.
+
+### Three of the 81 were REJECTED, and the reason generalises
+
+- **`majority`** AO1→AA1. Two sources agreed, and it is still wrong: gold's OWN `-ority` family is
+  `ɔ` in all five other members (`minority`, `authority`, `priority`, `sorority`, `seniority`). Gold is the
+  outlier here, not us. **Family consistency beats two-source agreement on a single row.**
+- **`gluttonous`** → `G L AH1 T N AH0 S` renders a VOWELLESS `tn` with no syllabic mark — worse for a TTS
+  than the 3-syllable reading we already had, referee agreement notwithstanding.
+- **`exploit`** is in the POS-gated heteronym block. Its bare-word citation correctly defaults to the noun;
+  the referee gives the verb. Not a defect.
+
+### And the accepted ones are backed by a THIRD line of evidence: our own dict contradicts itself
+
+Every low-vowel swap was checked against its morphological family, and in every case **our row was the
+outlier and the correction makes our dictionary self-consistent**:
+
+    meritocracy  AO1 → AA1    every other -ocracy in our dict is AA1 (democracy, autocracy, theocracy)
+    astronaut    AA2 → AO2    juggernaut, argonaut, aeronautics are AO2
+    tongs        AA1 → AO1    tong, long, song, wrong, prong, thong are AO1
+    snowfall     AA0 → AO2    rainfall, football, waterfall, windfall are AO2
+    foreskin     OW1 → AO1    forehead, forecast, foresee, forearm, foreword are AO1 R
+    seaworthy    AO2R → ER2   noteworthy, trustworthy, praiseworthy, worthy are ER
+    caudal       AA1 → AO1    audit, caudle are AO1
+
+⚠ **The corrections go in BOTH directions** (AA→AO and AO→AA), which is what says this is per-word CMUdict
+error rather than a systematic bias one fold could absorb.
+
+### The family check then found more instances the referee never covered
+
+    Wednesday  W EH1 N Z D IY0 → D EY2   and gold is UNANIMOUS across all 12 `-day` words (`dˌA`)
+      → our dict was SPLIT: thursday/sunday/yesterday/birthday/holiday/someday/doomsday already EY2,
+        monday/tuesday/friday/saturday still IY0. Four more corrected. High-frequency words.
+    writhed    R IH1 TH D → R AY1 DH D   (`writhing` was already right — the dict contradicted itself)
+    virulence  missing the Y that `virulent` has;  insularity missing `insular`'s;  debriefing vs debrief
+    annul      AE1 N AH0 L → AH0 N AH1 L — and THIS is why `annulled` could not propagate
+
+`test/english.test.ts` was asserting `wˈɛnzdi` on one line and `θˈɝzdˌeᶦ` on the next — both halves of
+CMUdict's own split, pinned as if both were intended.
+
+### Total, and the measured effect
+
+    88 dict rows corrected + 1 acronym row (acog EY1 K AA0 G, "AY-kog" not "uh-KOG")
+    folded 57.6% → 59.6%      +intentional 62.7% → 64.6%
+
+## Run 8b — the full dict-vs-gold audit, and two instrument bugs in it
+
+Having found the defect class is dictionary rows, the obvious next instrument is to stop waiting for wikipron
+to cover a word. `.scratch/ref7/audit.mts` compares EVERY g2p-dict.tsv row gold also carries, rendering **both
+sides through our own converter** so house conventions (ᵻ, syllabics, ʲ, flaps, ɝ) cancel:
+
+    compared 36,036 dict rows against gold
+    agree (folded): 28,804 (79.93%)      disagree: 7,232
+
+⚠ **~2,244 of the 7,232 is DECLARED CONVENTION, not defect**, and reporting the raw number would repeat
+exactly the error Run 1 was about:
+
+    unstressed X→AH0 (the weak-vowel / reduction convention)   2,109
+    R→ER0   (the -ire class, decided the OTHER way by #1289)       65
+    SH→CH   (gold's /nʃ/→/nʧ/ affrication)                         47
+    +HH     (wh-: the wine/whine merger; ours is mainstream GenAm)  23
+
+⚠ **AND THE AUDIT ITSELF HAD THE #1334 BUG AGAIN.** The en config folds OUR `ʲ` away (it has no referee
+counterpart) but gold writes the same hiatus glide as a full `j`, which survived — so `hawaiian`, `tortilla`,
+`flamboyant`, `reunion` all scored as a MISSING `Y` when we already emit the glide. Fixed by folding a
+POST-VOCALIC `j` only: a `j` after a consonant is a real yod (`pjuːmə`, `mjuː`) and folding that would have
+hidden the one genuine defect in the bucket. 21 phantom rows.
+
+### The `+Y` bucket was three unrelated things, and gold is WRONG in the largest
+
+| slice | verdict |
+|---|---|
+| hiatus glide (`hawaiian`, `tortilla`, `flamboyant`, `reunion`) | the fold artifact above — not a difference |
+| yod after a CORONAL (`pursued`, `issued`, `subduing`, `dueled`, `maneuvered`, `nucleonic`) | **gold is wrong for GenAm** |
+| yod after a LABIAL (`puma`, `mu`, `barbuda`) | **ours to fix** — 3 rows, applied |
+
+⚠ **Gold contradicts itself on the coronal slice, which is what settles it.** The BASE forms drop the yod
+exactly as GenAm requires — `pursue` pəɹsˈu, `issue` ˈɪʃu, `subdue` səbdˈu, `duel` dˈuəl, `maneuver` mənˈuvəɹ,
+`student`, `tuna`, `nude`, `news` — and only the INFLECTED forms carry it. Yod-dropping after coronals is the
+defining GenAm feature; we are right and gold's inflected rows are its own defect.
+
+The labial slice is the mirror image: **every** labial+UW word in our own dict already has the `Y` (music,
+mute, beauty, bugle, fuel, cube, pew, mule, computer, putrid, pubic, humid, fume) and only those three lacked it.
+
+### What the audit is FOR, and what it is not
+
+It is the map for non-circular work on the 1,080 OOV rows — a word absent from wikipron can still be
+arbitrated by gold plus its own morphological family. It is NOT a licence to apply 7,232 edits: `majority`
+and the coronal yods are both cases where a bulk apply would have written a defect in. The remaining large
+classes, each needing the family/merger treatment before anything is touched:
+
+    AA↔AO both directions   ~370   cot–caught/PALM; lexical, per-word (Run 5 refused to fold it)
+    ±AH0 syllable           ~209   mixed: real epenthesis vs gold's syllabics
+    AE1→EH1                   48   the marry–merry merger — a DIALECT DECISION, not 48 silent edits
+    S→Z                       54   lexical voicing (-sive/-sic)
+    Y→IY0 / +IY0              43   the Bayesian/Macedonian class, partly real
+    AE1→EY1                   24   real
+    EH1→IY1                   20   real
+
+### Structural consequence for the curation gate
+
+`test/en-curation-gap.test.ts` went from 3 known gaps to 17. That is not rot: the model trains on UPSTREAM
+CMUdict, so a corrected word with no morphological handle has only the n-gram, and the n-gram learned the row
+we corrected. Four words LEFT the list during this run by having their stem corrected too (`annulled`,
+`writhed`, `insularity`, `debriefing`) — the list working as designed. The remedy is named in the test and is
+NOT "add to the list": train the model on the curated dict. Deliberately not bundled here, because it is a
+model regeneration that moves held-out accuracy, the parity goldens and the referee floors.
+
+## Run 8c — the single-source bucket, and a categorical rule CMUdict violates
+
+### 83 recorded divergences have no gold entry — so the SECOND referee file was used as the second source
+
+wikipron US alone is one source, and this repo's standard is ≥2. `en-gb.wikipron-uk.tsv` is an independent
+file, already used in #1328/#1334 to validate row exclusions. Of 15 candidates read individually, **all 15
+were corroborated there**:
+
+    Aba       EY2 B IY2 EY1 → AA1 B AA0      ⚠ our row SPELLED IT OUT, "A-B-A", for a Nigerian city
+    Acuff     AH0 K AH1 F   → EY1 K AH0 F
+    Crichton  K R IH1 CH T AH0 N → K R AY1 T AH0 N    a spelling pronunciation
+    Dagenham  …N HH AE2 M   → …N AH0 M       British placename -ham is /əm/
+    Der       D ER1         → D EH1 R        the German article
+    Eamon     IY1 M AH0 N   → EY1 M AH0 N
+    FIDE      F AY1 D       → F IY1 D EY0
+    Hulme     HH AH1 L M    → HH Y UW1 M
+    ideal(s)  AY0 D IY1 L   → AY0 D IY1 AH0 L    a syllable was missing outright
+    bridie, gaz, inga, honda, doldrum(s)
+
+And the family check kept paying: `honda` was `AO1` while `hondas` was `AA1` **and** ended in `S`;
+`ideal`/`ideals` were both short a syllable; `doldrum`/`doldrums` both had `OW1`.
+
+### ⚠ THE PLURAL-VOICING CLASS: a categorical rule, and 96 candidate violations
+
+`hondas` ending in `/s/` is not a variant — English plural `-s` is `[z]` after any voiced segment, with no
+dialect that does otherwise. Searching the dict for it needed two tries:
+
+- **First attempt found 2,137 rows and was nearly all false positives.** The filter was "final `S` after a
+  voiced segment, spelled `-s`", which catches `abacus`, `acropolis`, `aegis`, `alias`, `adventurous`,
+  `acrimonious` — Greek/Latin stems where the `s` is not a morpheme at all.
+- **The real test is morphological**: the word minus `-s` must itself be a dict row AND its phones must be
+  our phones minus the final `S`. That gives **96**.
+
+Those 96 then split on a distinction no phonological test can make — is the `-s` an English plural, or part
+of a Spanish/Greek name? Gold covers only 10 of them, and **the 7 it keeps as `/s/` are exactly the names**
+(`atlas`, `dallas`, `kiwanis`, `pallas`, `salinas`, `santos`, `vegas`), which is a clean confirmation that the
+distinction is real and that gold tracks it. 23 unambiguous English common-noun plurals were corrected
+(`gerbils`, `synonyms`, `orbitals`, `tubers`, `marsupials`, `persecutions`, `replicators`, `cads`, …);
+every `-os`/`-as` row where name-vs-plural was a judgement call was LEFT ALONE.
+
+### Where this leaves the numbers
+
+    folded         57.6% → 59.9%        +intentional 62.7% → 65.0%
+    ONNX-less path 50.0% → 53.4%        (lexicon-level, so BOTH paths move — see the floor comment)
+    dict rows corrected: 330
+
+⚠ The `en` floor was RAISED 0.47 → 0.50, for the Run 4 reason: 0.47 against a 59.8% sampled measurement is
+not a margin. It cannot track the shipped number — 0.59 would fail every ONNX-less checkout — so it is set
+3.4pp under the degraded path, which is the property the floor exists to have.
+
+### A note on what the EH0 class cost, and why it was not declared
+
+Correcting the unstressed prefix lost ~6 wikipron rows, because on this class the two references genuinely
+differ: for `enhance`, `extravagance`, `forceps`, `existence` our output is now **byte-identical to gold**
+and it is wikipron that writes the full `ɛ`. That is an honest trade (187 gold-and-family-consistent rows for
+6 wikipron rows) and it is deliberately NOT hidden behind an `intentional` declaration. A positionwise
+`ɛ`→`ɪ` entry would credit 10 rows, and **3 of them are not this class at all** — `armet`, `handegg`,
+`pomerium`, where the `ɪ` is in a non-initial syllable and is simply wrong (`handegg` is hand+egg and we read
+`hˈændɪɡ`). The `intentional` mechanism is single-character and cannot see position or stress, so declaring
+it would mark three of our own errors correct — the exact trap the config's cot–caught note warns about.
+
+⚠ `handegg` is a real finding from that check and is NOT fixed here: a compound whose second element lost
+its vowel quality. Left for the compound-decomposition pass.
+
+## Run 8d — the doubled-vowel malformedness: the fix that was obviously right and wasn't
+
+Run 7 reported `atishoo` → `ˈæt̬ɪʃˌuːˌuː` as "a real defect — the tagger emitted a DOUBLED `uː`". Taken here.
+
+### First: it is NOT in the dictionary path at all
+
+    accent-lexicon.tsv    124,931 rows    doubled adjacent identical segment: 0
+                                          rhotic doubling (ɚɹ/ɹɚ/ɝɹ):          0
+
+Completely clean. So the class is purely an OOV artifact. Over the whole referee:
+
+    4,558 words (2,489 OOV) — doubled segment 13, rhotic doubling 3
+
+Small (0.35%), and the 16 rows sort themselves immediately: ~11 malformed, 5 legitimate. The legitimate
+ones are real cross-morpheme clusters — `shortchange` ʃɔːɹtt͡ʃeᶦnd͡ʒ (`T` then `CH`), `interrelationship`
+ɪntɚɹileᶦʃənʃɪp and `unterrific` (`ER0` then `R`, "inter"+"rel", "un"+"terrific"). Those must not move.
+
+⚠ And **every one of the 11 malformed is a VOWEL DIGRAPH**: `anteroom`/`atishoo`/`Botwood` ⟨oo⟩,
+`gaywad`/`sinamay` ⟨ay⟩, `Yenisei` ⟨ei⟩, `goddaughter` ⟨au⟩, `bourgeoisify` ⟨ou⟩, `sulliage` ⟨ia⟩. The
+tagger emits one ARPABET chunk **per character** with no global constraint, so both letters of a digraph can
+be tagged with the vowel. Not a compound-seam problem at all — the first hypothesis, and wrong.
+
+### ⚠ THE OBVIOUS FIX IS WRONG, AND THE DICTIONARY IS WHAT SAYS SO
+
+`collapseGeminates` already runs on this path and exempts vowels:
+
+    if (out[out.length - 1] !== p || vowels.has(dropStress(p))) out.push(p);
+
+The exemption is what lets the doubling through, and removing it looked correct — especially because
+**`tools/english/en_g2p_ngram.ts` HAS ITS OWN COPY WITH NO EXEMPTION**, whose comment asserts the collapse is
+*"Lossless vs CMUdict"*. So the change was made. Then the claim was checked:
+
+    dict rows an unrestricted collapse would change: 186   — the trainer's comment is FALSE
+      of those, adjacent identical CONSONANT pairs:    91   — correctly collapsed (barroom R R, bookcase K K)
+      adjacent identical VOWEL pairs:                  95   — and 89 of them are `ER0 ER0`
+
+`ER0 ER0` is the **`-erer` agentive**: `acquirer` AH0 K W AY1 ER0 ER0, `adventurer`, `gatherer`, `deliverer`,
+`emperor`, `conqueror`. There the stem's /ər/ meets the suffix's /ər/ and collapsing **deletes a syllable** —
+`acquirer` becomes `acquire`. The original author's one-line reasoning ("that would delete a nucleus/syllable")
+was exactly right, and the change was reverted.
+
+⚠ **This also means the trainer and the shipped engine disagree about post-processing** — the model's
+held-out numbers were measured against a chain that does not ship. Recorded in the test and NOT fixed here,
+because closing it means retraining.
+
+### The fix that works, and the test that distinguishes the two classes
+
+The guard belongs in the tagger, where the alignment still exists, and keys on the one thing that separates a
+digraph from an agentive: **the two copies must come from ADJACENT VOWEL LETTERS.** `-erer`'s two `ER0`s come
+from letters two apart with a consonant between them, so it can never fire; ⟨oo⟩'s come from k−1 and k.
+
+⚠ **It had to match the vowel BASE, not the whole phone.** A digraph's two copies usually carry DIFFERENT
+stress digits — `gaywad` tags EY2 then EY0, `Yenisei` EY2 then EY1 — so byte-equality (what the shared
+collapse uses) caught only 4 of the 11. Base-matching catches all of them, and the **stronger** of the two
+marks is kept, or `Yenisei` loses its primary and `enforceSinglePrimary` then puts the tonic somewhere
+arbitrary.
+
+    anteroom   ˈæntɚˌuːˌuːm → ˈæntɚˌuːm       gaywad   ɡˌeᶦeᶦwˈɑːd → ɡˌeᶦwˈɑːd
+    atishoo    ˈæt̬ɪʃˌuːˌuː → ˈæt̬ɪʃˌuː       Yenisei  jˌɛnɪseᶦˈeᶦ  → jˌɛnɪsˈeᶦ
+    doubled segments over the referee: 13 → 4
+
+The 4 left are the 3 legitimate ones plus `goddaughter`, where the model put the vowel chunk on the second
+⟨d⟩ — a consonant letter — so the guard correctly declines. Relaxing it to "at least one vowel letter" would
+collapse `acquirer`, so the residue is accepted and named.
+
+⚠ **THE REFEREE SCORE DOES NOT MOVE** (59.9% before and after) and that is the point: these words differ from
+the referee in other ways too, so the metric cannot see the repair. A doubled vowel is an audible stutter in
+a TTS. This is the case for not letting the instrument decide what counts as a defect.
+
+### False-positive check, since the guard is heuristic
+
+Every word where adjacent vowel letters are LEGITIMATE was read and is untouched, because in all of them the
+two letters produce two DIFFERENT vowels, which base-matching never fires on:
+
+    cooperate koᶷˈɑːpɚˌeᶦt   reelect ɹiʲɪlˈɛkt    preeminent pɹiʲˈɛmənn̩t   zoology zoᶷˈɑːləd͡ʒi
+    Hawaii həwˈaᶦiː          Kauai kʰˈaᶷˌaᶦ       continuum kəntˈɪnjuːəm    vacuuming vˈækjuːmɪŋ
+
+And a real acronym never reaches the tagger — `IEEE` is spelled out by the initialism pass into four tokens
+(`aᶦ ˈiː ˈiː ˈiː`) before G2P. The only fleet movement was 8 Arabic-variant goldens sharing one embedded
+English token: `Eee` (the ASUS Eee PC), `ˌiːʲˌiːʲəˈiː` → `ˌiːʲəˈiː` — one fewer spurious syllable in a
+3-letter brand name.
+
+## Run 8e — LOT–THOUGHT: the engine was neither accent, and the convention note said so wrongly
+
+Working the AA↔AO class (the largest left in the dict-vs-gold audit) started as 293 single-op rows and turned
+into a design finding.
+
+### The documented convention was false
+
+`english.jsonc` declared `"merge": "LOT–THOUGHT → ɔː"`. The engine does not merge and never did: `AA` renders
+`ɑː`, `AO` renders `ɔː`, two distinct outputs. So whether a given word merged depended entirely on which of the
+two CMUdict happened to write — and CMUdict is not consistent:
+
+    cot   kʰˈɑːt      caught  kʰˈɑːt      ← IDENTICAL (both AA): merged
+    lot   lˈɑːt       law     lˈɔː        ← DISTINCT
+    don   dˈɑːn       dawn    dˈɔːn       ← DISTINCT
+
+**Neither accent.** A merged speaker says `cot`=`caught` AND `don`=`dawn`; a distinguishing speaker says
+neither pair alike. We did one of each, per word, by lottery.
+
+### misaki gold is consistent, and it distinguishes
+
+    cot kˈɑt / caught kˈɔt    don dˈɑn / dawn dˈɔn    lot lˈɑt / law lˈɔ    stock/stalk
+    odd ˈɑd / awed ˈɔd        hock/hawk               tot/taught           — 7 of 7
+    PALM stays ɑ: father fˈɑðəɹ, spa spˈɑ, calm kˈɑm, bra bɹˈɑ
+
+And our dict already agreed with it on **93.1% of the 7,317 AA/AO rows gold covers**. The disagreement was
+504 rows — 6.9%, the CMUdict lottery — and aligning them makes the engine a coherent distinguishing GenAm,
+which is also the system the downstream Kokoro model was trained on.
+
+⚠ **THE WIKIPRON REFEREE CANNOT ARBITRATE THIS.** It writes `dawn` as `d ɑ n` — merged — in the same file where
+it distinguishes elsewhere. That is exactly why Run 5 refused an ɔ/ɑ fold, and it is why **the referee score
+does not move at all** (59.9% before and after). Gold agreement moved 80.5% → 81.5%.
+
+### ⚠ 37 rows were dropped, because gold contradicts ITSELF across a family
+
+The `majority` lesson, mechanised. A containment test (one dict word inside another, ≥4 chars, gold's ɑ/ɔ
+compared at the shared slot) found gold disagreeing with its own stem:
+
+    cost kˈɔst   but  costlier kˈɑstliəɹ        gloss / glossier      call / callable
+    water wˈɔɾəɹ but  waterborne …AA…           wall / footwall       dog / watchdog
+
+⚠ **BOTH members are left alone, not just the derived one.** Rejecting only `costlier` would have CREATED an
+inconsistency — `cost` AO beside `costlier` AA — where today they at least agree. 466 rows applied.
+
+### The change had a consequence in en-GB that the parent could not see
+
+`sorry` moved from ɑː to ɔː, and `test/english-gb.test.ts` caught it: RP is /ˈsɒri/ and the accent transform
+produced `sˈɔːɹi`. The transform has a set for exactly this class — `lotr`, "LOT before intervocalic r" — but
+it matched only `ɑːɹ`, so **7 of its 13 words silently stopped being handled** while the set still listed them.
+Widened to `[ɑɔ]ːɹ` in both TS and C#. US /ˈsɔːri/ vs RP /ˈsɒri/ is a real transatlantic split where both
+varieties are right and only the mapping between them was missing.
+
+Four other tests pinned the old AA reading and were updated, each confirmed against gold first:
+`on` ˌɔn, `coffee` kˈɔfi, `Washington` wˈɔʃɪŋtən, and `palled` (OOV, decodes from `pall`, correctly AA1→AO1).
+
+### The curation gate is now a MEASURE, not a waiver pile
+
+`STRUCTURAL_GAP` is 133 words. Every one is a curated row the model cannot reproduce because it trained on the
+row we corrected. The list is meant to COLLAPSE when the trainer is pointed at the curated dict — that collapse
+is the test that the retrain worked — and to grow only if curation and the OOV path drift apart.
+
+    folded 59.9% (unchanged — the referee cannot see this axis)
+    gold agreement 80.5% → 81.5%      dict rows corrected this run: 466
+    C# parity: 189 languages byte-identical, 0 differ
+
+## Run 8f — two more classes taken, and one DELIBERATELY NOT TAKEN
+
+### S→Z (49 rows applied, 4 refused)
+
+Intervocalic and voiced-context /s/→/z/: `diesel`, `Joseph`, `adhesive`, `Medusa`, `mausoleum`, `whimsy`,
+`fundraising`, `forensic`, `clumsily`, `plosive`, `masochist`, `Pisa`. Unambiguous.
+
+⚠ **Four were refused because gold produces a PHONOTACTICALLY IMPOSSIBLE cluster**, and they are worth
+recording as a demonstrated defect class in gold rather than a one-off:
+
+    installation   ˌɪnztəlˈAʃən      /nzt/
+    obstacle       ˈɑbztəkᵊl         /bzt/
+    obstetrician   ˌɑbztətɹˈɪʃən     /bzt/
+    transcript     tɹˈænzkɹˌɪpt      /nzk/
+
+English does not permit a voiced sibilant before a voiceless stop inside a syllable. ⚠ A general phonotactic
+FILTER was considered and rejected: `groundskeeper` ɡɹˈWndzkˌipəɹ, `kingsport`, `williamsport` have exactly
+that shape and are CORRECT, because there the /z/ is a plural or possessive morpheme. No test available to
+the audit separates them, so the four were excluded by name after reading them.
+
+### Tense vowels AE1→EY1 / EH1→IY1 (41 applied, 3 refused)
+
+`aphid` ˈeᶦfəd, `babel`, `caliph`, `calyx`, `arcana`, `gala`, `status`, `strata`, `stratum`, `instantaneous`,
+`acetic`, `amenable`, `egret`, `betel`, `allelic`, `angeleno`, `leisure`, `vegan`, `splenic`, `hematite`.
+
+⚠ **The en-GB referee caught three that gold gets wrong or cannot settle**, which is the argument for always
+consulting it even on a GenAm question:
+
+    nematode   gold nˈimətˌOd   but en-GB nɛmətəʊd — and US is /ˈnɛmətoʊd/. Gold is wrong.
+    gena       gold ʤˈinə       but en-GB dʒɛnə — genuinely ambiguous as a name. Ours kept.
+    lead       gold lˈid        — a HETERONYM, and `lead` is already in the POS-gated block. Not the dict's call.
+
+### ⚠ THE marry–merry MERGER (48 rows) IS NOT TAKEN, AND THAT IS A DECISION FOR THE OWNER
+
+`AE1→EH1` before intervocalic ⟨r⟩: `arrow`, `baron`, `barrel`, `barrier`, `carrot`, `carry`, `carriage`,
+`carrier`, `charitable`, `arid`, `arab`, `apparel`, `barricade`, `caraway`.
+
+This looks like the LOT–THOUGHT class and **is not the same case at all**:
+
+| | LOT–THOUGHT | marry–merry |
+|---|---|---|
+| our dict | **internally inconsistent** (cot=caught but lot≠law) | **internally consistent** — æ throughout |
+| gold | internally consistent | internally consistent — ɛ throughout |
+| therefore | any coherent choice is an improvement | two coherent systems, and picking one is a DIALECT CHOICE |
+
+There is no defect to point at. Both are real GenAm: the merged system (gold's, and the majority) says
+`marry`=`merry`=`Mary`; the unmerged one keeps them apart. It affects very common words and would be plainly
+audible. Taking it silently on the strength of "gold says so" would be changing the product's accent under
+cover of a data-cleaning pass, so it is left for an explicit decision.
+
+⚠ And one member of the bucket is NOT the merger at all and must not ride along with it if it is ever taken:
+`catch` kʰˈæt͡ʃ → kʰˈɛt͡ʃ is the regional "ketch" reading, not a merry-merger effect.
+
+    gold agreement 81.45% → 81.70%     folded 59.8% (flat, as expected on these axes)
+
+## Run 8g — the loanword PALM class, and two large buckets that turn out to be the house rules
+
+### AE1→AA1: foreign ⟨a⟩ as PALM (38 applied, 17 refused)
+
+`Ghana` ɡˈɑːnə, `kanji`, `Bhutan`, `Pravda`, `Napoli`, `Agra`, `Esperanto`, `Calabria`, `Malaga`, `drachma`,
+`padre`, `dal`, `babka`, `Anasazi`, `Nablus`, `Sami`, `Kandahar`, `zaftig`, `graben`, `Caen`, `Montmartre`.
+
+⚠ **The en-GB referee did the arbitration and it split the bucket exactly along naturalisation.** It gives
+our `æ` as the first or only reading for every word that has become an ordinary English one, and is silent or
+agrees on the genuine loans:
+
+    aqueduct ækwɪdʌkt   aquifer ækwɪfə   aquaculture ækwəkʌlt͡ʃə   anna ænə   malacca məlækə
+    scallop skæləp (US too)   barry bæɹi   ab æb   americana lists əmɛɹɪkænə BEFORE əmɛɹɪkɑːnə
+
+Also refused: `mineralogist` (/ˌmɪnəˈrælədʒɪst/ — gold's ɑ is simply wrong) and **`palay`, which would have
+REVERTED a two-referee correction made earlier in this same run** — both wikipron files say `pæleɪ`. A bucket
+applied wholesale would have undone it silently.
+
+### ⚠ IH0→IY0 (77 rows) IS THE `isBarredI` RULE, NOT A DEFECT CLASS
+
+It looks like a clean class — gold writes a tense `i` where we write `ɪ`/`ᵻ` — and most of it is this repo's
+own documented rule, in `englishArpabet.ts`:
+
+    // Latinate reduced prefix be/de/re/se/pre + consonant (believe, decide, review, security → ᵻ)
+    if (ni === 0 && /^(be|de|re|se|pre)[^aeiouy]/.test(word)) return true;
+
+`december`, `debunk`, `decentralize`, `deforest`, `denature`, `desegregate`, `destabilize`, `precede`,
+`precise`, `precipitating` — all of it is that rule firing correctly. The remainder (`economy`, `ecology`,
+`equality`, `egalitarian`, `bailiwick`, `bandicoot`) is free variation: /ɪˈkɑːnəmi/ and /iːˈkɑːnəmi/ are
+both ordinary GenAm. **Nothing to fix. Skipped whole.**
+
+### ±AH0 (210 rows) is the syllabic notation plus gold noise
+
+`-AH0` is gold writing the syllabic consonant unmarked — `button` bˈʌt̬ən vs gold `bˈʌtn`, `cotton`,
+`certain`, `beaten` — the same axis #1319 and the `preFolds` entry already handle for the referee. `+AH0` is
+largely gold being wrong: `athlete` → ˈæθəlˌiːt is the stigmatized "ath-a-lete", and the `-ically`/`-fully`
+rows (`chemically` → kʰˈɛməkəli) are the unsyncopated variant where ours is the commoner one. **Skipped.**
+
+### Where the audit stands
+
+    gold agreement 79.9% (start of Run 8b) → 81.81%
+    folded 59.8%   ONNX-less 53.4%   dict rows corrected across Run 8: ~990
+
+The single-op buckets are now either taken or classified. What remains is 1,918 two-op and 632 three-op rows,
+which are mostly COMBINATIONS of the classes already ruled convention (weak vowel + reduction + syllabic), plus
+the declared ones: IH0→AH0 (1,457), IY0/OW0/AE0/AA0→AH0 (~370), R→ER0 (65, decided the other way by #1289),
+SH→CH (47, gold's /nʃ/→/nʧ/ affrication). **The productive single-word work on this instrument is done**; what
+is left needs either a decision (marry–merry) or a retrain (the 174-word structural gap).
+
+## Run 9 — reviewing the run, and four defects the review found
+
+Reviewing ~950 dictionary corrections. Every finding below was in work already committed.
+
+### 1. ⚠ A DUPLICATE CURATED ROW, from my own apply tooling
+
+`chillicothe` was corrected twice (LOT/THOUGHT, then the loanword final `-e`) and the apply script APPENDS
+rather than merges, so the file had two rows whose `upstream` columns chained — the second row's upstream was
+the first row's output. `test/en-curation-gap.test.ts` reads the FIRST match, so it compared the shipped dict
+against a superseded value and failed with a message about the wrong thing.
+
+A duplicate also makes the file's central claim false: it is "the record that makes an `--emit` recoverable",
+and replaying rows in order stops being well-defined once a word has two. **A `no word has two curated rows`
+test was added** — the old gate caught this by accident, not by design.
+
+### 2. ⚠ THE STEM FILTER HAD A LENGTH FLOOR, AND SHORT STEMS SLIPPED THROUGH
+
+Run 8e's family check required a dict-word stem of **≥4 characters**, so `on` (2) and `dog` (3) were never
+tested. Six families were left internally inconsistent by the LOT–THOUGHT pass:
+
+    on AO1        but  online AA1, onslaught AA1        dog AO1   but  dogbane/dogberry AA1
+    resolve AA1   but  resolved AO1                     squash AA1 but  squashed/squashy AO1
+    ebonic AO1    but  ebonics AA1                      unabom/unabomb AO2 but unabomber AA2 (cf. bomb B AA1 M)
+
+All made consistent with the base form. `cost`/`costly`/`costlier`/`costliest` were also split — three ways —
+and are now uniformly AO1; Run 8e's "leave BOTH alone" rule had preserved a pre-existing inconsistency rather
+than fixing it.
+
+### 3. ⚠ THE en-GB CONSEQUENCE: 119 RP REGRESSIONS THE SUITE COULD NOT SEE
+
+This is the big one. A CLOTH word at `ɑː` was converted to RP `ɒ` by the LOT rule (`ɑː(?!ɹ)` → `ɒ`). Moving it
+to `ɔː` for GenAm takes it **out of that rule's reach**, and it then needs membership in `en-gb-cloth.tsv`
+(`ɔː` → `ɒ`) or RP silently regresses. 124 moved words were CLOTH-shaped and not in the set; the en-GB suite
+had a test for exactly two of them (`cost`, `sorry`).
+
+⚠ **Two successive attempts to decide the list were WRONG, and the third is the one to copy:**
+
+1. A spelling heuristic (⟨o⟩, not au/aw/ough) — wrong: `snowfall`'s moved slot is `-fall`, which is THOUGHT.
+2. A distance test against the en-GB referee — wrong in a subtler way: it compared RAW strings, so `əᶷ` vs
+   `əʊ` and dark `ɫ` vs `l` made the before AND after readings both distance-1 and the test could not
+   discriminate. It kept `snowfall`. It also called `toRP(..., lex: undefined)`, i.e. with the lexical sets
+   switched off, so it was not measuring the shipped pipeline at all.
+3. **Write the candidates into the file, run the REAL `phonemizeWord`, and fold with the en-GB referee's own
+   folds.** 119 added; 5 rejected — `snowfall`, `thorium`, `waldo`, `mekong` (the referee has `ɔ` there) and
+   `quahog` (the referee's `ɒ` is on the SECOND syllable, `kwɑhɒɡ`, and the cloth rule replaces the FIRST `ɔː`).
+
+The same first-`ɔː` limit is why `forgone` fɔːɡˈɔːn, `sorbonne`, `waterlog` and `waterlogged` are excluded:
+their first `ɔː` is NORTH, and the rule would change the wrong vowel.
+
+    cost kʰˈɒst   sorry sˈɒɹi   coffee kʰˈɒfi   soft sˈɒft   dog dˈɒɡ   long lˈɒŋ      ← CLOTH, ɒ
+    caught kʰˈɔːt   law lˈɔː   snowfall snˈəᶷfˌɔːɫ   thorium θˈɔːɹiəm                 ← THOUGHT, ɔː
+
+### 4. ⚠ MY OWN REVIEW DELETED 28 CURATED ROWS
+
+While resyncing the curated record after fix #2, the second version of the script dropped its `if w in pre`
+guard. For a PRE-EXISTING curated row the shipped dict already holds the curated value, so the test
+"dict equals the pre-PR dict → this row is obsolete, drop it" fired on **every one of them** — `acc`, `gdp`,
+`gps`, `beyond`, `research`, `was`, the whole `-ative` family, all 28 silently deleted.
+
+The gate caught it, and caught it precisely: `KNOWN_GAPS` still listed `collaborative`, `research` and `was`
+while the live set no longer did, because their rows were gone. Restored, and the invariants now checked
+explicitly: 948 changed dict rows, 976 curated records, no duplicates, every `want` equal to the shipped dict,
+every changed row recorded, every PR-added row's `upstream` equal to the pre-PR dict.
+
+⚠ **Both #1 and #4 are the same underlying mistake** — writing a data file with a script that reasons about
+"what should be here" instead of merging into what IS here. The lesson the file itself should carry.
+
+### Final state
+
+    tests 5,971 pass / 308 files      goldens 0 stale      package fence ok
+    folded 59.8%   ONNX-less 53.4%    en floor 0.50, en-GB 0.44 (measured 59.8% / 47.5%)
+    948 dict rows corrected, 976 curated records, 119 en-gb-cloth additions

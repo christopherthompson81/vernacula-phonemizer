@@ -122,7 +122,11 @@ describe("abbreviated dates, clocks and timezone offsets", () => {
     });
 
     test("a weekday abbreviation needs a MONTH beside it, not just a number", () => {
-        expect(phonemize("Wed. October 8", "en")).toContain("wˈɛnzdi");
+        // ⚠ BOTH WEEKDAYS READ `-dˌeᶦ`, and `Wed.` did not used to. This line asserted `wˈɛnzdi` while the
+        // line below it asserted `θˈɝzdˌeᶦ` — the two halves of CMUdict's own split across the weekday set,
+        // pinned as if both were intended. misaki gold is unanimous (all 12 `-day` words `dˌA`) and wikipron
+        // agrees on the two it carries, so `monday`/`tuesday`/`friday`/`saturday` were corrected too.
+        expect(phonemize("Wed. October 8", "en")).toContain("wˈɛnzdˌeᶦ");
         expect(phonemize("Thurs, 9 October 2025", "en")).toContain("θˈɝzdˌeᶦ");
         // ⚠ `sat` and `wed` are verbs and `sun`/`mon` are nouns, so a bare following digit cannot license
         // the weekday reading: "he sat 5 metres away" is not a Saturday.
