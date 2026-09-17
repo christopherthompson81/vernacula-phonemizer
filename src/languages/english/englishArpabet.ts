@@ -195,7 +195,9 @@ export function makeArpabetToIpa(
  *  on an ordinary unstressed final syllable (`zorro`, `aalto`, `adolfo`, `airplane`). */
 /** The vowels gold marks on an OPEN final syllable next to the primary — see the clash rule below.
  *  Measured, not chosen: of the 330 such sites gold covers, it marks OY 10/10, AW 8/8, EY 65/71,
- *  AY 11/12, AO 10/11 and UW 22/33, against OW 22/104, IY 9/55 and AA 5/15. */
+ *  AY 11/12, AO 10/11 and UW 22/33, against OW 22/104, IY 9/55 and AA 5/15.
+ *  ⚠ `UW` AND `AO` ARE THE MARGINAL MEMBERS and were tested rather than assumed: dropping UW costs 8
+ *  words (87.82% → 87.79%) and AO another 9. Both stay, but they are the ones to drop first. */
 const STRONG_OPEN_FINAL = new Set(["EY", "AY", "OY", "AW", "AO", "UW"]);
 const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */

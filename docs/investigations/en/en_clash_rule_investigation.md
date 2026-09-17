@@ -74,6 +74,37 @@ Exempt a `2°` on the FINAL syllable when that syllable is closed, or when its v
 
     exact vs gold   39,160 (43.80%) → 41,767 (46.71%)     +3,038 / −431, net +2,607
 
+Basis: the 89,411 gold entries both sweeps produced a reading for. ⚠ Earlier runs in
+`kokoro_vphon_investigation.md` quote percentages on an 80,222-word basis (the intersection with the
+Run 16 sweep), so the two are not directly comparable — the DELTAS are, the absolute percentages are
+not.
+
+### Review — the two weak members of the vowel set earn their place, barely
+
+`UW` at 22/33 (67%) is well below the others (91–100%), so it was tested rather than assumed:
+
+    closed final + EY AY OY AW AO UW        27,891   87.82%   ← shipped
+    …without UW                             27,883   87.79%
+    …without UW or AO                       27,874   87.76%
+
+`UW` is worth +8 words and `AO` +9. Both positive, both marginal — recorded so that a future reader
+knows they are the members to drop first if this set ever needs to shrink, and that dropping them
+costs almost nothing.
+
+### Review — the curated layer is undisturbed
+
+`g2p-curated.tsv` is the record of every hand correction to the dictionary, and a rule that moves
+5,945 lexicon rows could silently overwrite one. Checked directly: every curated word's
+`accent-lexicon.tsv` row is byte-identical to `main`. None of them has a `2°` adjacent to the primary
+on a final syllable, so the rule never fires on them.
+
+### Review — both exemptions are load-bearing, and they are independent
+
+`!demoted.has(i)` (from #1324) and the final-syllable exception cover different sites and neither
+subsumes the other. `nineteen` (`N AY1 N T IY1 N`) demotes to `AY2 … IY1`, and that `AY2` is nucleus
+0 — NOT the final syllable — so without the `demoted` exemption it would still be deleted. `aardvark`
+has no demotion at all and depends entirely on the final-syllable exception.
+
 The largest single gain of this series — larger than the syllabic-schwa import (+2,053). 5,945
 `accent-lexicon.tsv` rows regenerate.
 
