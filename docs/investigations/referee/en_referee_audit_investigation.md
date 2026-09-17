@@ -843,3 +843,58 @@ is the test that the retrain worked — and to grow only if curation and the OOV
     folded 59.9% (unchanged — the referee cannot see this axis)
     gold agreement 80.5% → 81.5%      dict rows corrected this run: 466
     C# parity: 189 languages byte-identical, 0 differ
+
+## Run 8f — two more classes taken, and one DELIBERATELY NOT TAKEN
+
+### S→Z (49 rows applied, 4 refused)
+
+Intervocalic and voiced-context /s/→/z/: `diesel`, `Joseph`, `adhesive`, `Medusa`, `mausoleum`, `whimsy`,
+`fundraising`, `forensic`, `clumsily`, `plosive`, `masochist`, `Pisa`. Unambiguous.
+
+⚠ **Four were refused because gold produces a PHONOTACTICALLY IMPOSSIBLE cluster**, and they are worth
+recording as a demonstrated defect class in gold rather than a one-off:
+
+    installation   ˌɪnztəlˈAʃən      /nzt/
+    obstacle       ˈɑbztəkᵊl         /bzt/
+    obstetrician   ˌɑbztətɹˈɪʃən     /bzt/
+    transcript     tɹˈænzkɹˌɪpt      /nzk/
+
+English does not permit a voiced sibilant before a voiceless stop inside a syllable. ⚠ A general phonotactic
+FILTER was considered and rejected: `groundskeeper` ɡɹˈWndzkˌipəɹ, `kingsport`, `williamsport` have exactly
+that shape and are CORRECT, because there the /z/ is a plural or possessive morpheme. No test available to
+the audit separates them, so the four were excluded by name after reading them.
+
+### Tense vowels AE1→EY1 / EH1→IY1 (41 applied, 3 refused)
+
+`aphid` ˈeᶦfəd, `babel`, `caliph`, `calyx`, `arcana`, `gala`, `status`, `strata`, `stratum`, `instantaneous`,
+`acetic`, `amenable`, `egret`, `betel`, `allelic`, `angeleno`, `leisure`, `vegan`, `splenic`, `hematite`.
+
+⚠ **The en-GB referee caught three that gold gets wrong or cannot settle**, which is the argument for always
+consulting it even on a GenAm question:
+
+    nematode   gold nˈimətˌOd   but en-GB nɛmətəʊd — and US is /ˈnɛmətoʊd/. Gold is wrong.
+    gena       gold ʤˈinə       but en-GB dʒɛnə — genuinely ambiguous as a name. Ours kept.
+    lead       gold lˈid        — a HETERONYM, and `lead` is already in the POS-gated block. Not the dict's call.
+
+### ⚠ THE marry–merry MERGER (48 rows) IS NOT TAKEN, AND THAT IS A DECISION FOR THE OWNER
+
+`AE1→EH1` before intervocalic ⟨r⟩: `arrow`, `baron`, `barrel`, `barrier`, `carrot`, `carry`, `carriage`,
+`carrier`, `charitable`, `arid`, `arab`, `apparel`, `barricade`, `caraway`.
+
+This looks like the LOT–THOUGHT class and **is not the same case at all**:
+
+| | LOT–THOUGHT | marry–merry |
+|---|---|---|
+| our dict | **internally inconsistent** (cot=caught but lot≠law) | **internally consistent** — æ throughout |
+| gold | internally consistent | internally consistent — ɛ throughout |
+| therefore | any coherent choice is an improvement | two coherent systems, and picking one is a DIALECT CHOICE |
+
+There is no defect to point at. Both are real GenAm: the merged system (gold's, and the majority) says
+`marry`=`merry`=`Mary`; the unmerged one keeps them apart. It affects very common words and would be plainly
+audible. Taking it silently on the strength of "gold says so" would be changing the product's accent under
+cover of a data-cleaning pass, so it is left for an explicit decision.
+
+⚠ And one member of the bucket is NOT the merger at all and must not ride along with it if it is ever taken:
+`catch` kʰˈæt͡ʃ → kʰˈɛt͡ʃ is the regional "ketch" reading, not a merry-merger effect.
+
+    gold agreement 81.45% → 81.70%     folded 59.8% (flat, as expected on these axes)

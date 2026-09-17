@@ -45,7 +45,7 @@ const KNOWN_GAPS = new Map<string, string>([
  * root, a proper noun, a loan — the OOV path has only the n-gram, and the n-gram learned the row we corrected.
  * It reproduces the upstream shape by construction, and no amount of curation can change that.
  *
- * ⚠ IT IS 133 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
+ * ⚠ IT IS 161 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
  * Every entry is a curated row whose correction the model cannot reproduce because the model learned the row we
  * corrected. When the remedy below is taken, this list should COLLAPSE, and that collapse is the test that the
  * retrain worked. If it instead keeps growing while nobody retrains, the gate is telling you the curated layer
@@ -73,21 +73,24 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
-    "astronautics", "audible", "awe", "bellini", "bes", "blog", "bobble", "boche", "boff", "bog", "bridie",
-    "cause", "causeway", "chomp", "coauthor", "conger", "conversely", "costly", "cutoff", "dagenham",
-    "debrief", "denomination", "denominational", "der", "discography", "discombobulate", "dogbane",
-    "dogberry", "dogma", "dubrovnik", "eamon", "ebonics", "embargo", "embark", "embattle", "embitter",
-    "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode", "encompass", "encourage",
-    "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enliven", "enmesh", "enrage",
-    "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage", "envision",
-    "escudo", "evolve", "excoriate", "extort", "extortion", "extortionate", "extortionist", "extraction",
-    "extrapolate", "extravagance", "extravagant", "extreme", "extremist", "favela", "felonious", "fide",
-    "foggy", "foster", "frog", "golf", "hog", "homs", "hoss", "hulme", "ideal", "insular", "kersey",
-    "knockoff", "loggerhead", "loggia", "mulligatawny", "necrologist", "necrology", "on", "onset", "quahog",
-    "rahway", "raj", "remunerative", "resolved", "revolve", "runoff", "saas", "salsa", "sandhog",
-    "sauternes", "serologist", "sodom", "sodomize", "spawn", "squashed", "squashy", "stomp", "synagogue",
-    "tawny", "taxol", "turnoff", "twangy", "ulm", "unabomber", "unencumbered", "unenforceable", "unwashed",
-    "virulence", "virulent", "wash", "washy", "wat", "watchdog", "writhe"
+    "allelic", "astronautics", "audible", "awe", "bellini", "bes", "blog", "bobble", "boche", "boff", "bog",
+    "bridie", "caliph", "cana", "cause", "causeway", "chomp", "coauthor", "collaborative", "conger",
+    "conversely", "costly", "cutoff", "dacron", "dagenham", "debrief", "denomination", "denominational",
+    "der", "discography", "discombobulate", "dogbane", "dogberry", "dogma", "dubrovnik", "eamon", "ebonics",
+    "embargo", "embark", "embattle", "embitter", "embrace", "embroidery", "employ", "enable", "encase",
+    "enchant", "encode", "encompass", "encourage", "encrypt", "encumber", "endorse", "endow", "enforce",
+    "enhance", "enliven", "enmesh", "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure",
+    "entitle", "entreaty", "envisage", "envision", "escudo", "evolve", "excoriate", "extort", "extortion",
+    "extortionate", "extortionist", "extraction", "extrapolate", "extravagance", "extravagant", "extreme",
+    "extremist", "favela", "felonious", "fide", "foggy", "forensic", "foster", "frog", "gala", "genotype",
+    "golf", "grana", "granum", "hadrian", "hebron", "hematite", "hog", "homs", "hoss", "hulme", "ideal",
+    "insular", "joseph", "kersey", "kingsport", "knockoff", "loggerhead", "loggia", "masochist",
+    "mulligatawny", "necrologist", "necrology", "on", "onset", "plosive", "quahog", "rahway", "raj",
+    "remunerative", "research", "resolved", "revolve", "rouse", "runoff", "saas", "salsa", "sandhog",
+    "sauternes", "serologist", "sodom", "sodomize", "spawn", "splenic", "squashed", "squashy", "stasi",
+    "status", "stomp", "strata", "stratus", "synagogue", "tawny", "taxol", "turnoff", "twangy", "ulm",
+    "unabomber", "unencumbered", "unenforceable", "unwashed", "vegan", "vela", "virulence", "virulent",
+    "was", "wash", "washy", "wat", "watchdog", "williamsport", "writhe"
 ]);
 
 function dict(path: string): Map<string, string[]> {
