@@ -21,34 +21,357 @@
 # returns `lb` [P AW1 N D], `hz` [HH ER1 T Z], `blvd`, `aug`, `mt`, `ct`, `dr`, `msgr` — abbreviation
 # GLOSSES, where CMUdict gives the EXPANSION rather than a letter spelling, which is correct for them.
 # The bound is what separates "a letter spelling with one letter wrong" from "not a letter spelling".
+# ⚠ `acog` IS THE SAME FAULT ONE STEP IN. It is not spelled out letter by letter — it is an acronym said as
+# a word, "AY-kog" — but its FIRST letter still carries its NAME, and CMUdict's [AH0 K AO1 G] reads it as the
+# reduced article instead ("uh-KOG") and moves the stress to the second syllable to match. Found by diagnosing
+# undetermined wikipron divergences one at a time; the referee has eɪkɑɡ.
 # ⚠ AND `ia` [IY1 AH0] IS DELIBERATELY NOT HERE. It is the only other row inside the bound, and it is
 # ambiguous: "ee-uh" is a plausible NAME reading, and whether ⟨IA⟩ is Iowa, an initialism, or a name is
 # not something the dictionary row can settle. Left alone rather than guessed at.
+aba	EY2 B IY2 EY1	AA1 B AA0	wikipron US+UK (two files)
+abnegation	AE2 B N EH0 G EY1 SH AH0 N	AE2 B N AH0 G EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+abo	AA1 B OW0	AE1 B OW0	wikipron+gold
 acc	AY2 S IY2 S IY1	EY2 S IY2 S IY1	letter-name
+acog	AH0 K AO1 G	EY1 K AA0 G	letter-name
+acuff	AH0 K AH1 F	EY1 K AH0 F	wikipron US+UK (two files)
+alar	EY1 L AA2 R	EY1 L ER0	wikipron+gold
+allied	AH0 L AY1 D	AE1 L AY2 D	wikipron+gold
+anaesthetist	AH0 N EH1 S TH EH0 T IH0 S T	AH0 N EH1 S TH AH0 T IH0 S T	unstressed EH0 (gold; dict self-inconsistent)
+annul	AE1 N AH0 L	AH0 N AH1 L	family completion (gold)
+annulled	AE1 N AH0 L D	AH0 N AH1 L D	wikipron+gold
+antechamber	AE1 N T EH0 CH EY2 M B ER0	AE1 N T AH0 CH EY2 M B ER0	unstressed EH0 (gold; dict self-inconsistent)
+antipodes	AE2 N T IH0 P OW2 D IY0 Z	AE0 N T IH1 P AH0 D IY0 Z	wikipron+gold
+argumentation	AA2 R G Y AH0 M EH0 N T EY1 SH AH0 N	AA2 R G Y AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+arugula	AA2 R UW1 G UW0 L AH0	ER0 UW1 G AH0 L AH0	wikipron+gold
 associative	AH0 S OW1 SH AH0 T IH2 V	AH0 S OW1 S IY0 AH0 T IH0 V	#1278
+astronaut	AE1 S T R AH0 N AA2 T	AE1 S T R AH0 N AO2 T	wikipron+gold
+auschwitz	AO1 SH W IH0 T S	AW1 SH V IH0 T S	wikipron+gold
+baboon	B AH0 B UW1 N	B AE0 B UW1 N	wikipron+gold
 backfiring	B AE1 K F AY2 ER0 IH0 NG	B AE1 K F AY2 R IH0 NG	#1289
+balaclava	B AA2 L AA0 K L AA1 V AA0	B AE2 L AH0 K L AA1 V AH0	wikipron+gold
+balsamic	B AA2 L S AA1 M IH0 K	B AO0 L S AE1 M IH0 K	wikipron+gold
+barbuda	B AA0 R B UW1 D AH0	B AA0 R B Y UW1 D AH0	labial yod (dict was the outlier)
+bayesian	B EY1 ZH IH0 N	B EY1 Z IY0 AH0 N	wikipron+gold
+belize	B EH0 L IY1 Z	B AH0 L IY1 Z	unstressed EH0 (gold; dict self-inconsistent)
+bellini	B EH0 L IY1 N IY0	B AH0 L IY1 N IY0	unstressed EH0 (gold; dict self-inconsistent)
+benoni	B EH0 N OW1 N IY0	B AH0 N OW1 N IY0	unstressed EH0 (gold; dict self-inconsistent)
+beret	B EH1 R AH0 T	B ER0 EY1	wikipron+gold
+bes	B IY1 Z	B EH1 S	wikipron+gold
 beyond	B IH0 AA1 N D	B IH0 Y AA1 N D	pre-issue
+bicentennial	B AY2 S EH0 N T EH1 N IY0 AH0 L	B AY2 S AH0 N T EH1 N IY0 AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+bimbos	B IH1 M B OW0 S	B IH1 M B OW0 Z	plural voicing after a voiced segment
+biosynthesis	B AY2 OW0 S IH1 N TH EH0 S IH0 S	B AY2 OW0 S IH1 N TH AH0 S IH0 S	wikipron+gold
+bitumen	B IH2 T UW1 M AH0 N	B AY0 T UW1 M AH0 N	wikipron+gold
+boatswain	B OW1 T S W EY0 N	B OW1 S AH0 N	wikipron+gold
+bradenton	B R AE1 D AH0 N T AH0 N	B R EY1 D AH0 N T AH0 N	wikipron+gold
+bridie	B R IH1 D IY0	B R AY1 D IY0	wikipron US+UK (two files)
+brisbane	B R IH1 Z B EY2 N	B R IH1 Z B AH0 N	wikipron+gold
+burritos	B ER0 IY1 T OW0 S	B ER0 IY1 T OW0 Z	plural voicing after a voiced segment
+cads	K AE1 D S	K AE1 D Z	plural voicing after a voiced segment
+caprese	K AA2 P R EY1 S EY0	K AH0 P R EY1 Z IY0	wikipron+gold
+caravan	K AE1 R AH0 V AE2 N	K EH1 R AH0 V AE2 N	wikipron+gold
+carmine	K AA1 R M AH0 N	K AA1 R M AY0 N	wikipron+gold
+casualness	K AE1 ZH AH0 W AH0 L N EH0 S	K AE1 ZH AH0 W AH0 L N AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+cataclysm	K AE1 T AH0 K L IH2 S AH0 M	K AE1 T AH0 K L IH2 Z AH0 M	wikipron+gold
+caudal	K AA1 D AH0 L	K AO1 D AH0 L	wikipron+gold
+centrifugal	S EH1 N T R IH0 F Y UW2 G AH0 L	S EH0 N T R IH1 F Y AH0 G AH0 L	wikipron+gold
 cgi	S IY2 G IY2 AY1	S IY2 JH IY2 AY1	letter-name
+cheerios	CH IH1 R IY0 OW0 S	CH IH1 R IY0 OW0 Z	plural voicing after a voiced segment
+chevys	SH EH1 V IY2 S	SH EH1 V IY2 Z	plural voicing after a voiced segment
+colas	K OW1 L AH0 S	K OW1 L AH0 Z	plural voicing after a voiced segment
 collaborative	K AH0 L AE1 B ER0 EY2 T IH0 V	K AH0 L AE1 B ER0 AH0 T IH0 V	pre-issue
+conversely	K AA1 N V ER0 S L IY0	K AH0 N V ER1 S L IY0	wikipron+gold
 cooperative	K OW0 AA1 P ER0 EY2 T IH0 V	K OW0 AA1 P ER0 AH0 T IH0 V	pre-issue
 corroborative	K ER0 AA1 B ER0 AH0 T IH2 V	K ER0 AA1 B ER0 AH0 T IH0 V	pre-issue
+coyotes	K AY0 OW1 T IY0 S	K AY0 OW1 T IY0 Z	plural voicing after a voiced segment
+crichton	K R IH1 CH T AH0 N	K R AY1 T AH0 N	wikipron US+UK (two files)
+cuckoo	K AH1 K UW2	K UW1 K UW2	wikipron+gold
+dagenham	D AE1 G AH0 N HH AE2 M	D AE1 G AH0 N AH0 M	wikipron US+UK (two files)
+dalian	D EY1 L IY0 AH0 N	D AA2 L IY0 AE1 N	wikipron+gold
+darnedest	D AA1 R N D EH0 S T	D AA1 R N D AH0 S T	unstressed EH0 (gold; dict self-inconsistent)
+debrief	D IH0 B R IY1 F	D IY0 B R IY1 F	wikipron+gold
+debriefing	D IH0 B R IY1 F IH0 NG	D IY0 B R IY1 F IH0 NG	family completion (gold)
+decedent	D EH0 S IY1 D AH0 N T	D AH0 S IY1 D AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+defenestration	D IY0 F EH2 N EH0 S T R EY1 SH AH0 N	D IY0 F EH2 N AH0 S T R EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 deliberative	D IH0 L IH1 B ER0 EY2 T IH0 V	D IH0 L IH1 B ER0 AH0 T IH0 V	pre-issue
+der	D ER1	D EH1 R	wikipron US+UK (two files)
+descry	D EH0 S K R AY1	D AH0 S K R AY1	unstressed EH0 (gold; dict self-inconsistent)
 desiring	D IH0 Z AY1 ER0 IH0 NG	D IH0 Z AY1 R IH0 NG	#1289
 determinative	D IH0 T ER1 M IH0 N AH0 T IH2 V	D IH0 T ER1 M IH0 N AH0 T IH0 V	pre-issue
+disfigurement	D IH0 S F IH1 G Y ER0 M EH0 N T	D IH0 S F IH1 G Y ER0 M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+documentation	D AA2 K Y AH0 M EH0 N T EY1 SH AH0 N	D AA2 K Y AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+doldrum	D OW1 L D R AH0 M	D AA1 L D R AH0 M	wikipron US+UK (two files)
+doldrums	D OW1 L D R AH0 M Z	D AA1 L D R AH0 M Z	wikipron US+UK (two files)
+dressage	D R EH0 S AA1 ZH	D R AH0 S AA1 ZH	unstressed EH0 (gold; dict self-inconsistent)
+eamon	IY1 M AH0 N	EY1 M AH0 N	wikipron US+UK (two files)
+effete	EH0 F IY1 T	AH0 F IY1 T	unstressed EH0 (gold; dict self-inconsistent)
+elijah	EH0 L AY1 JH AH0	AH0 L AY1 JH AH0	unstressed EH0 (gold; dict self-inconsistent)
+embankment	EH0 M B AE1 NG K M AH0 N T	AH0 M B AE1 NG K M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+embargo	EH0 M B AA1 R G OW0	AH0 M B AA1 R G OW0	unstressed EH0 (gold; dict self-inconsistent)
+embark	EH0 M B AA1 R K	AH0 M B AA1 R K	unstressed EH0 (gold; dict self-inconsistent)
+embattle	EH0 M B AE1 T AH0 L	AH0 M B AE1 T AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+embattled	EH0 M B AE1 T AH0 L D	AH0 M B AE1 T AH0 L D	unstressed EH0 (gold; dict self-inconsistent)
+embayment	EH0 M B EY1 M AH0 N T	AH0 M B EY1 M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+embedding	EH0 M B EH1 D IH0 NG	AH0 M B EH1 D IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+embellishment	EH0 M B EH1 L IH0 SH M AH0 N T	AH0 M B EH1 L IH0 SH M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+embezzlement	EH0 M B EH1 Z AH0 L M AH0 N T	AH0 M B EH1 Z AH0 L M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+embitter	EH0 M B IH1 T ER0	AH0 M B IH1 T ER0	unstressed EH0 (gold; dict self-inconsistent)
+embittered	EH0 M B IH1 T ER0 D	AH0 M B IH1 T ER0 D	unstressed EH0 (gold; dict self-inconsistent)
+emblazon	EH0 M B L EY1 Z AH0 N	AH0 M B L EY1 Z AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+embolden	EH0 M B OW1 L D AH0 N	AH0 M B OW1 L D AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+embrace	EH0 M B R EY1 S	AH0 M B R EY1 S	unstressed EH0 (gold; dict self-inconsistent)
+embroidered	EH0 M B R OY1 D ER0 D	IH0 M B R OY1 D ER0 D	unstressed EH0 (gold; dict self-inconsistent)
+embroiderer	EH0 M B R OY1 D ER0 ER0	AH0 M B R OY1 D ER0 ER0	unstressed EH0 (gold; dict self-inconsistent)
+embroidery	EH0 M B R OY1 D ER0 IY0	IH0 M B R OY1 D ER0 IY0	unstressed EH0 (gold; dict self-inconsistent)
+emphatic	EH0 M F AE1 T IH0 K	IH0 M F AE1 T IH0 K	unstressed EH0 (gold; dict self-inconsistent)
+empiricism	EH0 M P IH1 R AH0 S IH2 Z AH0 M	AH0 M P IH1 R AH0 S IH2 Z AH0 M	unstressed EH0 (gold; dict self-inconsistent)
+employ	EH0 M P L OY1	IH0 M P L OY1	unstressed EH0 (gold; dict self-inconsistent)
+employable	EH0 M P L OY1 AH0 B AH0 L	IH0 M P L OY1 AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+employed	EH0 M P L OY1 D	IH0 M P L OY1 D	unstressed EH0 (gold; dict self-inconsistent)
+employment	EH0 M P L OY1 M AH0 N T	IH0 M P L OY1 M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+emporia	EH0 M P AO1 R IY0 AH0	AH0 M P AO1 R IY0 AH0	unstressed EH0 (gold; dict self-inconsistent)
+empress	EH1 M P R EH0 S	EH1 M P R AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+enable	EH0 N EY1 B AH0 L	IH0 N EY1 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+enabled	EH0 N EY1 B AH0 L D	IH0 N EY1 B AH0 L D	unstressed EH0 (gold; dict self-inconsistent)
+enabler	EH0 N EY1 B AH0 L ER0	IH0 N EY1 B AH0 L ER0	unstressed EH0 (gold; dict self-inconsistent)
+enactment	EH0 N AE1 K T M AH0 N T	IH0 N AE1 K T M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enamor	EH0 N AE1 M ER0	IH0 N AE1 M ER0	wikipron+gold
+encase	EH0 N K EY1 S	IH0 N K EY1 S	unstressed EH0 (gold; dict self-inconsistent)
+encephalitis	EH0 N S EH2 F AH0 L AY1 T AH0 S	IH0 N S EH2 F AH0 L AY1 T AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+enchant	EH0 N CH AE1 N T	IH0 N CH AE1 N T	unstressed EH0 (gold; dict self-inconsistent)
+enchanter	EH0 N CH AE1 N T ER0	IH0 N CH AE1 N T ER0	unstressed EH0 (gold; dict self-inconsistent)
+enchanting	EH0 N CH AE1 N T IH0 NG	IH0 N CH AE1 N T IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+enchantment	EH0 N CH AE1 N T M AH0 N T	IH0 N CH AE1 N T M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+encircle	EH0 N S ER1 K AH0 L	IH0 N S ER1 K AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+encirclement	EH0 N S ER1 K AH0 L M AH0 N T	IH0 N S ER1 K AH0 L M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enclosed	EH0 N K L OW1 Z D	IH0 N K L OW1 Z D	unstressed EH0 (gold; dict self-inconsistent)
+encode	EH0 N K OW1 D	IH0 N K OW1 D	unstressed EH0 (gold; dict self-inconsistent)
+encompass	EH0 N K AH1 M P AH0 S	IH0 N K AH1 M P AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+encourage	EH0 N K ER1 IH0 JH	IH0 N K ER1 IH0 JH	unstressed EH0 (gold; dict self-inconsistent)
+encouragement	EH0 N K ER1 IH0 JH M AH0 N T	IH0 N K ER1 IH0 JH M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+encouraging	EH0 N K ER1 IH0 JH IH0 NG	IH0 N K ER1 IH0 JH IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+encroachment	EH0 N K R OW1 CH M AH0 N T	IH0 N K R OW1 CH M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+encrypt	EH0 N K R IH1 P T	IH0 N K R IH1 P T	unstressed EH0 (gold; dict self-inconsistent)
+encryption	EH0 N K R IH1 P SH AH0 N	IH0 N K R IH1 P SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+encumber	EH0 N K AH1 M B ER0	IH0 N K AH1 M B ER0	unstressed EH0 (gold; dict self-inconsistent)
+endanger	EH0 N D EY1 N JH ER0	IH0 N D EY1 N JH ER0	unstressed EH0 (gold; dict self-inconsistent)
+endangered	EH0 N D EY1 N JH ER0 D	IH0 N D EY1 N JH ER0 D	unstressed EH0 (gold; dict self-inconsistent)
+endangerment	EH0 N D EY1 N JH ER0 M AH0 N T	IH0 N D EY1 N JH ER0 M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+endorse	EH0 N D AO1 R S	IH0 N D AO1 R S	unstressed EH0 (gold; dict self-inconsistent)
+endorsement	EH0 N D AO1 R S M AH0 N T	IH0 N D AO1 R S M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+endow	EH0 N D AW1	IH0 N D AW1	unstressed EH0 (gold; dict self-inconsistent)
+endowment	EH0 N D AW1 M AH0 N T	IH0 N D AW1 M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enfeeble	EH0 N F IY1 B AH0 L	IH0 N F IY1 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+enfeebled	EH0 N F IY1 B AH0 L D	IH0 N F IY1 B AH0 L D	unstressed EH0 (gold; dict self-inconsistent)
+enforce	EH0 N F AO1 R S	IH0 N F AO1 R S	unstressed EH0 (gold; dict self-inconsistent)
+enforceable	EH0 N F AO1 R S AH0 B AH0 L	IH0 N F AO1 R S AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+enforced	EH0 N F AO1 R S T	IH0 N F AO1 R S T	unstressed EH0 (gold; dict self-inconsistent)
+enforcement	EH0 N F AO1 R S M AH0 N T	IH0 N F AO1 R S M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enforcer	EH0 N F AO1 R S ER0	IH0 N F AO1 R S ER0	unstressed EH0 (gold; dict self-inconsistent)
+engage	EH0 N G EY1 JH	IH0 N G EY1 JH	unstressed EH0 (gold; dict self-inconsistent)
+engaged	EH0 N G EY1 JH D	IH0 N G EY1 JH D	unstressed EH0 (gold; dict self-inconsistent)
+engagement	EH0 N G EY1 JH M AH0 N T	IH0 N G EY1 JH M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+engaging	EH0 N G EY1 JH IH0 NG	IH0 N G EY1 JH IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+engender	EH0 N JH EH1 N D ER0	IH0 N JH EH1 N D ER0	unstressed EH0 (gold; dict self-inconsistent)
+enhance	EH0 N HH AE1 N S	IH0 N HH AE1 N S	unstressed EH0 (gold; dict self-inconsistent)
+enhancement	EH0 N HH AE1 N S M AH0 N T	IH0 N HH AE1 N S M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enhancer	EH0 N HH AE1 N S ER0	IH0 N HH AE1 N S ER0	unstressed EH0 (gold; dict self-inconsistent)
+enlistment	EH0 N L IH1 S T M AH0 N T	IH0 N L IH1 S T M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enliven	EH0 N L AY1 V AH0 N	IH0 N L AY1 V AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+enmesh	EH0 N M EH1 SH	IH0 N M EH1 SH	unstressed EH0 (gold; dict self-inconsistent)
+enrage	EH0 N R EY1 JH	IH0 N R EY1 JH	unstressed EH0 (gold; dict self-inconsistent)
+enraged	EH0 N R EY1 JH D	IH0 N R EY1 JH D	unstressed EH0 (gold; dict self-inconsistent)
+enrapture	EH0 N R AE1 P CH ER0	IH0 N R AE1 P CH ER0	unstressed EH0 (gold; dict self-inconsistent)
+enrich	EH0 N R IH1 CH	IH0 N R IH1 CH	unstressed EH0 (gold; dict self-inconsistent)
+enriched	EH0 N R IH1 CH T	IH0 N R IH1 CH T	unstressed EH0 (gold; dict self-inconsistent)
+enrichment	EH0 N R IH1 CH M AH0 N T	IH0 N R IH1 CH M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enroll	EH0 N R OW1 L	IH0 N R OW1 L	unstressed EH0 (gold; dict self-inconsistent)
+enrolled	EH0 N R OW1 L D	IH0 N R OW1 L D	unstressed EH0 (gold; dict self-inconsistent)
+enrolling	EH0 N R OW1 L IH0 NG	IH0 N R OW1 L IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+enrollment	EH0 N R OW1 L M AH0 N T	IH0 N R OW1 L M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enshrine	EH0 N SH R AY1 N	IH0 N SH R AY1 N	unstressed EH0 (gold; dict self-inconsistent)
+enslave	EH0 N S L EY1 V	IH0 N S L EY1 V	unstressed EH0 (gold; dict self-inconsistent)
+enslavement	EH0 N S L EY1 V M AH0 N T	IH0 N S L EY1 V M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+ensure	EH0 N SH UH1 R	IH0 N SH UH1 R	unstressed EH0 (gold; dict self-inconsistent)
+ensuring	EH0 N SH UH1 R IH0 NG	IH0 N SH UH1 R IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+entangle	EH0 N T AE1 NG G AH0 L	IH0 N T AE1 NG G AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+entanglement	EH0 N T AE1 NG G AH0 L M AH0 N T	IH0 N T AE1 NG G AH0 L M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+enthral	EH0 N TH R AO1 L	IH0 N TH R AO1 L	unstressed EH0 (gold; dict self-inconsistent)
+enthralled	EH0 N TH R AO1 L D	IH0 N TH R AO1 L D	unstressed EH0 (gold; dict self-inconsistent)
+enthusiast	EH0 N TH UW1 Z IY0 AE2 S T	IH0 N TH UW1 Z IY0 AE2 S T	unstressed EH0 (gold; dict self-inconsistent)
+enticing	EH0 N T AY1 S IH0 NG	IH0 N T AY1 S IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+entitle	EH0 N T AY1 T AH0 L	IH0 N T AY1 T AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+entitled	EH0 N T AY1 T AH0 L D	IH0 N T AY1 T AH0 L D	unstressed EH0 (gold; dict self-inconsistent)
+entitlement	EH0 N T AY1 T AH0 L M AH0 N T	IH0 N T AY1 T AH0 L M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+entomb	EH0 N T UW1 M	IH0 N T UW1 M	unstressed EH0 (gold; dict self-inconsistent)
+entourage	AA2 N T UH0 R AA1 ZH	AA1 N T ER0 AA2 ZH	wikipron+gold
+entreating	EH0 N T R IY1 T IH0 NG	IH0 N T R IY1 T IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+entreaty	EH0 N T R IY1 T IY0	IH0 N T R IY1 T IY0	unstressed EH0 (gold; dict self-inconsistent)
+entrench	EH0 N T R EH1 N CH	IH0 N T R EH1 N CH	unstressed EH0 (gold; dict self-inconsistent)
+entrenched	EH0 N T R EH1 N CH T	IH0 N T R EH1 N CH T	unstressed EH0 (gold; dict self-inconsistent)
+entrenchment	EH0 N T R EH1 N CH M AH0 N T	IH0 N T R EH1 N CH M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+entrust	EH0 N T R AH1 S T	AH0 N T R AH1 S T	unstressed EH0 (gold; dict self-inconsistent)
+entwine	EH0 N T W AY1 N	AH0 N T W AY1 N	unstressed EH0 (gold; dict self-inconsistent)
+enveloped	EH0 N V EH1 L AH0 P T	AH0 N V EH1 L AH0 P T	unstressed EH0 (gold; dict self-inconsistent)
+envisage	EH0 N V IH1 Z IH0 JH	IH0 N V IH1 Z IH0 JH	unstressed EH0 (gold; dict self-inconsistent)
+envision	EH0 N V IH1 ZH AH0 N	IH0 N V IH1 ZH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+epistemic	EH2 P IH0 S T EH1 M IH0 K	EH2 P AH0 S T IY1 M IH0 K	wikipron+gold
+escarpment	EH0 S K AA1 R P M AH0 N T	AH0 S K AA1 R P M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+eschew	EH0 S CH UW1	AH0 S CH UW1	unstressed EH0 (gold; dict self-inconsistent)
+escudo	EH0 S K UW1 D OW0	AH0 S K UW1 D OW0	unstressed EH0 (gold; dict self-inconsistent)
+espalier	EH0 S P AE1 L Y ER0	AH0 S P AE1 L Y ER0	unstressed EH0 (gold; dict self-inconsistent)
+esprit	EH0 S P R IY1	AH0 S P R IY1	unstressed EH0 (gold; dict self-inconsistent)
+estimator	EH0 S T IH1 M AH0 T ER0	EH1 S T AH0 M EY2 T ER0	wikipron+gold
+estrange	EH0 S T R EY1 N JH	AH0 S T R EY1 N JH	unstressed EH0 (gold; dict self-inconsistent)
+estranged	EH0 S T R EY1 N JH D	AH0 S T R EY1 N JH D	unstressed EH0 (gold; dict self-inconsistent)
+excelling	EH0 K S EH1 L IH0 NG	IH0 K S EH1 L IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+excoriate	EH0 K S K AO1 R IY0 EY2 T	IH0 K S K AO1 R IY0 EY2 T	unstressed EH0 (gold; dict self-inconsistent)
+existence	EH0 G Z IH1 S T AH0 N S	IH0 G Z IH1 S T AH0 N S	unstressed EH0 (gold; dict self-inconsistent)
+existent	EH0 G Z IH1 S T AH0 N T	IH0 G Z IH1 S T AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+exportable	EH0 K S P AO1 R T AH0 B AH0 L	IH0 K S P AO1 R T AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+expressly	EH0 K S P R EH1 S L IY0	IH0 K S P R EH1 S L IY0	unstressed EH0 (gold; dict self-inconsistent)
+extort	EH0 K S T AO1 R T	IH0 K S T AO1 R T	unstressed EH0 (gold; dict self-inconsistent)
+extortion	EH0 K S T AO1 R SH AH0 N	IH0 K S T AO1 R SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+extortionate	EH0 K S T AO1 R SH AH0 N AH0 T	IH0 K S T AO1 R SH AH0 N AH0 T	unstressed EH0 (gold; dict self-inconsistent)
+extortionist	EH0 K S T AO1 R SH AH0 N IH0 S T	IH0 K S T AO1 R SH AH0 N IH0 S T	unstressed EH0 (gold; dict self-inconsistent)
+extracting	EH0 K S T R AE1 K T IH0 NG	IH0 K S T R AE1 K T IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
+extraction	EH0 K S T R AE1 K SH AH0 N	IH0 K S T R AE1 K SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+extraneous	EH0 K S T R EY1 N IY0 AH0 S	IH0 K S T R EY1 N IY0 AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+extraneously	EH0 K S T R EY1 N IY0 AH0 S L IY0	IH0 K S T R EY1 N IY0 AH0 S L IY0	unstressed EH0 (gold; dict self-inconsistent)
+extrapolate	EH0 K S T R AE1 P AH0 L EY2 T	IH0 K S T R AE1 P AH0 L EY2 T	unstressed EH0 (gold; dict self-inconsistent)
+extrapolation	EH0 K S T R AE2 P AH0 L EY1 SH AH0 N	IH0 K S T R AE2 P AH0 L EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+extravagance	EH0 K S T R AE1 V AH0 G AH0 N S	IH0 K S T R AE1 V AH0 G AH0 N S	unstressed EH0 (gold; dict self-inconsistent)
+extravagant	EH0 K S T R AE1 V AH0 G AH0 N T	IH0 K S T R AE1 V AH0 G AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+extravaganza	EH0 K S T R AE2 V AH0 G AE1 N Z AH0	IH0 K S T R AE2 V AH0 G AE1 N Z AH0	unstressed EH0 (gold; dict self-inconsistent)
+extreme	EH0 K S T R IY1 M	IH0 K S T R IY1 M	unstressed EH0 (gold; dict self-inconsistent)
+extremely	EH0 K S T R IY1 M L IY0	IH0 K S T R IY1 M L IY0	unstressed EH0 (gold; dict self-inconsistent)
+extremist	EH0 K S T R IY1 M IH0 S T	IH0 K S T R IY1 M IH0 S T	unstressed EH0 (gold; dict self-inconsistent)
+extremity	EH0 K S T R EH1 M AH0 T IY0	IH0 K S T R EH1 M AH0 T IY0	unstressed EH0 (gold; dict self-inconsistent)
+extricable	EH0 K S T R IH1 K AH0 B AH0 L	IH0 K S T R IH1 K AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+favela	F AA0 V EH1 L AH0	F AH0 V EH1 L AH0	wikipron+gold
+fellas	F EH1 L AH0 S	F EH1 L AH0 Z	plural voicing after a voiced segment
+felonious	F EH0 L OW1 N IY0 AH0 S	F AH0 L OW1 N IY0 AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+fide	F AY1 D	F IY1 D EY0	wikipron US+UK (two files)
+forceps	F AO1 R S EH0 P S	F AO1 R S AH0 P S	unstressed EH0 (gold; dict self-inconsistent)
+foreskin	F OW1 R S K IH2 N	F AO1 R S K IH2 N	wikipron+gold
+friday	F R AY1 D IY0	F R AY1 D EY2	weekday -day family (gold unanimous)
+gamekeepers	G EY1 M K IY2 P ER0 S	G EY1 M K IY2 P ER0 Z	plural voicing after a voiced segment
+gaz	G AA1 Z	G AE1 Z	wikipron US+UK (two files)
 gdp	G IY1 D IY1 P IY1	JH IY1 D IY1 P IY1	letter-name
+gerbils	JH ER1 B IH0 L S	JH ER1 B IH0 L Z	plural voicing after a voiced segment
+gimlet	G IH1 M L EH2 T	G IH1 M L AH0 T	wikipron+gold
+giveth	G IH1 V EH0 TH	G IH1 V AH0 TH	unstressed EH0 (gold; dict self-inconsistent)
+gondwana	G AA2 N D W AA1 N AA2	G AA0 N D W AA1 N AH0	wikipron+gold
 gps	G IY1 P IY0 EH1 S	JH IY1 P IY0 EH1 S	letter-name
+gulag	G Y UW1 L AE0 G	G UW1 L AA2 G	wikipron+gold
+gutless	G AH1 T L EH0 S	G AH1 T L AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+herbaceous	ER0 B EY1 SH AH0 S	HH ER0 B EY1 SH AH0 S	wikipron+gold
+honda	HH AO1 N D AH0	HH AA1 N D AH0	wikipron US+UK (two files)
+hondas	HH AA1 N D AH0 S	HH AA1 N D AH0 Z	wikipron US+UK (two files)
+hulme	HH AH1 L M	HH Y UW1 M	wikipron US+UK (two files)
+ideal	AY0 D IY1 L	AY0 D IY1 AH0 L	wikipron US+UK (two files)
+ideals	AY0 D IY1 L Z	AY0 D IY1 AH0 L Z	wikipron US+UK (two files)
+implementation	IH2 M P L AH0 M EH0 N T EY1 SH AH0 N	IH2 M P L AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+inga	IY1 NG G AH0	IH1 NG G AH0	wikipron US+UK (two files)
+inherent	IH0 N HH IH1 R AH0 N T	IH0 N HH EH1 R AH0 N T	wikipron+gold
 inquiries	IH2 N K W AY1 ER0 IY0 Z	IH2 N K W AY1 R IY0 Z	#1289
 inquiring	IH2 N K W AY1 ER0 IH0 NG	IH2 N K W AY1 R IH0 NG	#1289
+insular	IH1 N S AH0 L ER0	IH1 N S Y AH0 L ER0	wikipron+gold
+insularity	IH2 N S AH0 L EH1 R IH0 T IY0	IH2 N S Y AH0 L EH1 R IH0 T IY0	family completion (gold)
+interpolate	IH2 T ER1 P AH0 L EY2 T	IH0 N T ER1 P AH0 L EY2 T	wikipron+gold
 jfk	JH IY1 EH2 F K EY1	JH EY1 EH2 F K EY1	letter-name
+kerala	K EH2 R AA1 L AH0	K EH1 R AH0 L AH0	wikipron+gold
+kersey	K ER1 S IY0	K ER1 Z IY0	wikipron+gold
+koshers	K OW1 SH ER0 S	K OW1 SH ER0 Z	plural voicing after a voiced segment
 kpmg	K EY1 P IY1 EH1 M JH IH1	K EY1 P IY1 EH1 M JH IY1	letter-name
+kuiper	K UW1 P ER0	K AY1 P ER0	wikipron+gold
+laugher	L AA1 K ER0	L AE1 F ER0	wikipron+gold
+legit	L EH1 JH IH0 T	L AH0 JH IH1 T	wikipron+gold
+lenexa	L EH0 N EH1 K S AH0	L AH0 N EH1 K S AH0	unstressed EH0 (gold; dict self-inconsistent)
+longe	L AA1 N JH	L AH1 N JH	wikipron+gold
+macedonian	M AE2 S AH0 D OW1 N Y AH0 N	M AE2 S AH0 D OW1 N IY0 AH0 N	wikipron+gold
+manifestation	M AE2 N AH0 F EH0 S T EY1 SH AH0 N	M AE2 N AH0 F AH0 S T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+marsupials	M AA0 R S UW1 P IY0 AH0 L S	M AA0 R S UW1 P IY0 AH0 L Z	plural voicing after a voiced segment
+marveled	M AA1 R V EH0 L D	M AA1 R V AH0 L D	unstressed EH0 (gold; dict self-inconsistent)
+meritocracy	M EH0 R IH0 T AO1 K R AH0 S IY0	M EH2 R AH0 T AA1 K R AH0 S IY0	wikipron+gold
 mg	EH2 M G IY1	EH2 M JH IY1	letter-name
 mgm	EH2 M G IY2 EH1 M	EH2 M JH IY2 EH1 M	letter-name
+microfiche	M AY1 K R OW0 F IY2 CH	M AY1 K R OW0 F IY2 SH	wikipron+gold
+moldovan	M OW2 L D OW0 V AA1 N	M AA0 L D OW1 V AH0 N	wikipron+gold
+monday	M AH1 N D IY0	M AH1 N D EY2	weekday -day family (gold unanimous)
+mu	M UW1	M Y UW1	labial yod (dict was the outlier)
+mujahideen	M UW2 JH AH0 HH EH0 D IY1 N	M UW2 JH AH0 HH IH0 D IY1 N	unstressed EH0 (gold; dict self-inconsistent)
+mutagen	M Y UW1 T AH0 JH EH0 N	M Y UW1 T AH0 JH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+necrosis	N AH0 K R OW1 S AH0 S	N EH0 K R OW1 S IH0 S	wikipron+gold
+odours	OW1 D ER0 S	OW1 D ER0 Z	plural voicing after a voiced segment
+orbitals	AO1 R B AH0 T AH0 L S	AO1 R B AH0 T AH0 L Z	plural voicing after a voiced segment
+orientation	AO2 R IY0 EH0 N T EY1 SH AH0 N	AO2 R IY0 AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+overexcite	OW2 V ER0 EH0 K S AY1 T	OW2 V ER0 IH0 K S AY1 T	unstressed EH0 (gold; dict self-inconsistent)
+ow	OW1	AW1	wikipron+gold
+panache	P AH0 N AA1 SH	P AH0 N AE1 SH	wikipron+gold
+pecuniary	P EH0 K Y UW1 N IY0 EH2 R IY0	P AH0 K Y UW1 N IY0 EH2 R IY0	unstressed EH0 (gold; dict self-inconsistent)
+penultimate	P EH0 N AH1 L T AH0 M AH0 T	P AH0 N AH1 L T AH0 M AH0 T	unstressed EH0 (gold; dict self-inconsistent)
+pepita	P EH0 P IY1 T AH0	P AH0 P IY1 T AH0	unstressed EH0 (gold; dict self-inconsistent)
+persecutions	P ER2 S AH0 K Y UW1 SH AH0 N S	P ER2 S AH0 K Y UW1 SH AH0 N Z	plural voicing after a voiced segment
+polygon	P AA1 L IH0 G AA2 N	P AA1 L IY0 G AA2 N	wikipron+gold
+postmortem	P OW2 S T M AO1 R T EH0 M	P OW2 S T M AO1 R T AH0 M	unstressed EH0 (gold; dict self-inconsistent)
+prequel	P R IY1 K W EH0 L	P R IY1 K W AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+protrude	P R OW0 T R UW1 D	P R AH0 T R UW1 D	wikipron+gold
+puma	P UW1 M AH0	P Y UW1 M AH0	labial yod (dict was the outlier)
+quasimodo	K AE0 Z IY0 M OW1 D OW0	K W AA2 Z IY0 M OW1 D OW2	wikipron+gold
+raj	R AA1 ZH	R AA1 JH	wikipron+gold
+receptor	R IY0 S EH1 P T ER0	R AH0 S EH1 P T ER0	wikipron+gold
+regimentation	R EH2 JH AH0 M EH0 N T EY1 SH AH0 N	R EH2 JH AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+regina	R IH0 JH IY1 N AH0	R AH0 JH AY1 N AH0	wikipron+gold
+reinspections	R IY2 IH0 N S P EH1 K SH AH0 N S	R IY2 IH0 N S P EH1 K SH AH0 N Z	plural voicing after a voiced segment
+remunerate	R IH0 M Y UW2 N ER0 EY1 T	R AH0 M Y UW1 N ER0 EY2 T	family completion (gold)
+remunerative	R IY0 M Y UW1 N ER0 AH0 T IH0 V	R AH0 M Y UW1 N ER0 AH0 T IH0 V	wikipron+gold
+reorient	R IY0 AO1 R IY0 EH0 N T	R IY0 AO1 R IY0 AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+replicators	R EH1 P L IH0 K EY2 T ER0 S	R EH1 P L IH0 K EY2 T ER0 Z	plural voicing after a voiced segment
 require	R IY2 K W AY1 ER0	R IH0 K W AY1 ER0	#1279
 required	R IY0 K W AY1 ER0 D	R IH0 K W AY1 ER0 D	#1279
 requires	R IY0 K W AY1 ER0 Z	R IH0 K W AY1 ER0 Z	#1279
 requiring	R IY0 K W AY1 ER0 IH0 NG	R IH0 K W AY1 R IH0 NG	#1289
 research	R IY0 S ER1 CH	R IY1 S ER0 CH	#1280
 rewiring	R IY0 W AY1 ER0 IH0 NG	R IY0 W AY1 R IH0 NG	#1289
+robusta	R AO2 B UH1 S T AH0	R OW0 B AH1 S T AH0	wikipron+gold
+saas	S AA1 S	S AE1 S	wikipron+gold
+saturday	S AE1 T ER0 D IY0	S AE1 T ER0 D EY2	weekday -day family (gold unanimous)
+sauternes	S OW0 T ER1 N Z	S OW0 T ER1 N	wikipron+gold
+seaworthy	S IY1 W AO2 R DH IY0	S IY1 W ER2 DH IY0	wikipron+gold
+segue	S EH1 G	S EH1 G W EY2	wikipron+gold
+serologist	S EH0 R AA1 L AH0 JH IH0 S T	S IH0 R AA1 L AH0 JH IH0 S T	unstressed EH0 (gold; dict self-inconsistent)
+snowfall	S N OW1 F AA0 L	S N OW1 F AO2 L	wikipron+gold
+streptococcus	S T R EH2 P T AH0 K AO1 K AH0 S	S T R EH0 P T AH0 K AA1 K AH0 S	wikipron+gold
+supercenters	S UW1 P ER0 S EH2 N T ER0 S	S UW1 P ER0 S EH2 N T ER0 Z	plural voicing after a voiced segment
+swaziland	S W AA1 Z IH0 L AH0 N D	S W AA1 Z IY0 L AE2 N D	wikipron+gold
+synonyms	S IH1 N AH0 N IH2 M S	S IH1 N AH0 N IH2 M Z	plural voicing after a voiced segment
+tellurium	T EH0 L UH1 R IY0 AH0 M	T AH0 L UH1 R IY0 AH0 M	unstressed EH0 (gold; dict self-inconsistent)
+thankfulness	TH AE1 NG K F AH0 L N EH0 S	TH AE1 NG K F AH0 L N AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+themself	DH EH0 M S EH1 L F	DH AH0 M S EH1 L F	unstressed EH0 (gold; dict self-inconsistent)
+themselves	DH EH0 M S EH1 L V Z	DH AH0 M S EH1 L V Z	unstressed EH0 (gold; dict self-inconsistent)
+tobruk	T OW1 B R UH0 K	T AH0 B R UH1 K	wikipron+gold
+tongs	T AA1 NG Z	T AO1 NG Z	wikipron+gold
 transformative	T R AE2 N S F AO1 R M AA0 T IH2 V	T R AE2 N S F AO1 R M AH0 T IH0 V	pre-issue
 transpiring	T R AE0 N S P AY1 ER0 IH0 NG	T R AE0 N S P AY1 R IH0 NG	#1289
+treasons	T R IY1 Z AH0 N S	T R IY1 Z AH0 N Z	plural voicing after a voiced segment
+trieste	T R IY1 S T	T R IY0 EH1 S T	wikipron+gold
+tubers	T UW1 B ER0 S	T UW1 B ER0 Z	plural voicing after a voiced segment
+tuesday	T UW1 Z D IY0	T UW1 Z D EY2	weekday -day family (gold unanimous)
+ulm	AH1 L M	UH1 L M	wikipron+gold
+unemployed	AH2 N EH0 M P L OY1 D	AH2 N AH0 M P L OY1 D	unstressed EH0 (gold; dict self-inconsistent)
+unencumbered	AH2 N EH0 N K AH1 M B ER0 D	AH2 N AH0 N K AH1 M B ER0 D	unstressed EH0 (gold; dict self-inconsistent)
+unenforceable	AH2 N EH0 N F AO1 R S AH0 B AH0 L	AH2 N AH0 N F AO1 R S AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+valium	V EY1 L IY0 AH0 M	V AE1 L IY0 AH0 M	wikipron+gold
+vestment	V EH1 S T M EH0 N T	V EH1 S T M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+virulence	V IH1 R AH0 L AH0 N S	V IH1 R Y AH0 L AH0 N S	family completion (gold)
+virulent	V IH1 R AH0 L AH0 N T	V IH1 R Y AH0 L AH0 N T	wikipron+gold
 was	W AA1 Z	W AH1 Z	pre-issue
+wednesday	W EH1 N Z D IY0	W EH1 N Z D EY2	wikipron+gold
+whenever	W EH0 N EH1 V ER0	W AH0 N EH1 V ER0	unstressed EH0 (gold; dict self-inconsistent)
+winos	W IY1 N OW0 S	W IY1 N OW0 Z	plural voicing after a voiced segment
+writhe	R IH1 TH	R AY1 DH	wikipron+gold
+writhed	R IH1 TH D	R AY1 DH D	family completion (gold)
+wyeth	W AY1 EH0 TH	W AY1 AH0 TH	unstressed EH0 (gold; dict self-inconsistent)
+yarmulkes	Y AA1 R M AH2 L K AH0 S	Y AA1 R M AH2 L K AH0 Z	plural voicing after a voiced segment
+yokel	Y OW1 K EH0 L	Y OW1 K AH0 L	unstressed EH0 (gold; dict self-inconsistent)

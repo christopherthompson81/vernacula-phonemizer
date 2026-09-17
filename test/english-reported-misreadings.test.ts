@@ -518,7 +518,11 @@ describe("a dash between two calendar names is a span", () => {
 
     test("months and weekdays alike", () => {
         expect(say("July–August 2025")).toContain("tʰuː");
-        expect(say("Monday–Friday")).toBe("mˈʌndi tʰuː fɹˈaᶦd̬i");
+        // ⚠ `-dˌeᶦ`, not `-di`. CMUdict had the weekday set SPLIT (thursday/sunday/birthday EY2,
+        // monday/tuesday/friday/saturday IY0) and misaki gold is unanimous `dˌA` across all 12 `-day`
+        // words; #1334 corrected the four stragglers. The flap also goes with it — `D EY2` is stressed,
+        // so `fɹˈaᶦd̬i` becomes `fɹˈaᶦdˌeᶦ`.
+        expect(say("Monday–Friday")).toBe("mˈʌndˌeᶦ tʰuː fɹˈaᶦdˌeᶦ");
     });
 
     // ⚠ THE SPACED FORMS ARE WHY ORDER MATTERS. The parenthetical rule would claim them as a pause

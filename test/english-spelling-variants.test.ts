@@ -32,7 +32,10 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
         expect(phonemize("marvellous", "en")).toBe("mˈɑːɹvə̆ləs");
         expect(phonemize("counsellor", "en")).toBe("kʰˈaᶷnsə̆lɚ");
         expect(phonemize("unrivalled", "en")).toBe("ənɹˈaᶦvəɫd"); // stem only known under a prefix
-        expect(phonemize("enrolment", "en")).toBe("ɛnɹˈoᶷɫmənt"); // …and the other direction
+        // …and the other direction. ⚠ `ɪn-`, not `ɛn-`: the unstressed prefix was corrected in #1334 (misaki
+        // gold, and our own dict could not have `embark` EH0 beside `embarks` IH0). The vowel is incidental
+        // to what this test is about — that `enrolment` folds to the `enrollment` row.
+        expect(phonemize("enrolment", "en")).toBe("ɪnɹˈoᶷɫmənt");
         expect(phonemize("skilful", "en")).toBe("skˈɪɫfɫ̩");
     });
 

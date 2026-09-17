@@ -11,9 +11,14 @@ import { CONFIG } from "../tools/referee-eval/config.ts";
 describe("referee row exclusion", () => {
     const en = CONFIG["en"]!.referees[0]!;
 
-    test("en declares exactly the three validated rules", () => {
-        expect(en.excludeRows).toHaveLength(3);
-        const [vowel, rhotic, finalR] = en.excludeRows!;
+    test("en declares exactly the four validated rules", () => {
+        expect(en.excludeRows).toHaveLength(4);
+        const [vowel, rhotic, finalR, glyph] = en.excludeRows!;
+        // ⚠ THE FOURTH IS NOT A VARIETY RULE and is here for a different reason: a one-character headword
+        // has no fixed meaning in this file (`m` ɛm, `q` kjuː are the letter's NAME; `x` ks is its SOUND),
+        // so it cannot arbitrate. It is score-neutral by construction — 3 of its 6 rows were passing.
+        expect(glyph!.spelling!.source).toBe("^.$");
+        expect(glyph!.ipa).toBeUndefined();
         expect(vowel!.ipa!.source).toBe("əʊ|ɒ|ɪə|ʊə|ɛə");
         expect(rhotic!.spelling).toBeDefined();
         expect(rhotic!.ipaLacks).toBeDefined();

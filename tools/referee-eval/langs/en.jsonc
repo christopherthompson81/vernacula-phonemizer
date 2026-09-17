@@ -32,6 +32,10 @@
                     "spelling": "[aeiouy]r(e|ed)?$",
                     "ipaLacks": "[ɹɚɝɻr].{0,2}$",
                     "note": "NON-RHOTIC, WORD-FINAL: spelled with a word-final r (a silent `e` or an `-ed` allowed after it) and transcribed with NO rhotic in its last three symbols — `crowner` kɹaʊnə, `featured` fiːt͡ʃəd, `Dromore` dɹəmɔː, `tenderizer` tɛndəɹaɪzə. ⚠ THIS EXISTS BECAUSE THE RULE ABOVE SCANS THE WHOLE STRING and an ONSET r masks a non-rhotic coda: `kɹaʊnə` contains a `ɹ`, so `ipaLacks` was satisfied and the row survived. Found by sampling ten undetermined divergences and diagnosing each — it was one of the ten. 18 further rows, 17 of which the en-GB referee carries with a byte-identical reading. ⚠ `-s`/`-es` IS DELIBERATELY NOT ALLOWED after the r: there the r is usually the ONSET of the next syllable and is pronounced, so `Pescadores` pɛskədɔːɹiːz — correct GenAm — would have been dropped. Measured: allowing it adds one row and one false positive."
+                },
+                {
+                    "spelling": "^.$",
+                    "note": "A ONE-CHARACTER HEADWORD IS A GLYPH, NOT A WORD, and this referee has no fixed semantics for one: `m` ɛm, `p` piː, `q` kjuː and `a` eɪ are the letter's NAME, while `x` ks is the letter's SOUND. A row whose meaning is not constant within the file cannot arbitrate a reading. 6 rows. ⚠ IT IS SCORE-NEUTRAL BY CONSTRUCTION and that is the point — 3 of the 6 were already passing (m, p, q read as letter names) and 3 were not, so this moves `folded` by 0.01pp. What it removes is three PERMANENT divergences with no fix: `x` we read `ɛks` and misaki gold agrees, so the referee is simply wrong; `A`/`a` we read as the reduced article `ə`, DELIBERATELY, because a bare capital `A` in real text is overwhelmingly sentence-initial and a determiner. Not expressible via `intentional`, which is positionwise and single-character."
                 }
             ]
         }
