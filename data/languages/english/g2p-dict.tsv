@@ -961,7 +961,7 @@ adherents	AE0 D HH IH1 R AH0 N T S
 adheres	AH0 D HH IH1 R Z
 adhering	AH0 D HH IH1 R IH0 NG
 adhesion	AE0 D HH IY1 ZH AH0 N
-adhesive	AE0 D HH IY1 Z IH0 V
+adhesive	AE0 D HH IY1 S IH0 V
 adhesives	AE0 D HH IY1 S IH0 V Z
 adia	AA1 D IY0 AH0
 adid	AH0 D IH1 D
@@ -3886,7 +3886,7 @@ anteater	AE1 N T IY2 T ER0
 anteaters	AE1 N T IY2 T ER0 Z
 antebellum	AE2 N T IH0 B EH1 L AH0 M
 antec	AE1 N T EH2 K
-antecedent	AE2 N T EH1 S AH0 D AH0 N T
+antecedent	AE2 N T AH0 S IY1 D AH0 N T
 antecedents	AE2 N T IH0 S IY1 D AH0 N T S
 antechamber	AE1 N T AH0 CH EY2 M B ER0
 anted	AE1 N T IH0 D
@@ -4191,7 +4191,7 @@ apopa	AH0 P OW1 P AH0
 apopka	AH0 P AO1 P K AH0
 apoplectic	AE2 P AH0 P L EH1 K T IH0 K
 apoplexy	AE1 P AH0 P L EH2 K S IY0
-apoptosis	AE2 P AO0 P T OW1 S IH0 Z
+apoptosis	AE2 P AH0 P T OW1 S IH0 S
 apostate	AH0 P AA1 S T EY0 T
 apostle	AH0 P AA1 S AH0 L
 apostles	AH0 P AA1 S AH0 L Z
@@ -8417,7 +8417,7 @@ bedner	B EH1 D N ER0
 bednorz	B EH1 D N AO0 R Z
 bedolla	B EH0 D OW1 L AH0
 bedore	B EH1 D AO2 R
-bedouin	B EH1 D OW0 AH0 N
+bedouin	B EH1 D AH0 W AH0 N
 bedouins	B EH1 D OW0 AH0 N Z
 bedoya	B EY0 D OY1 AH0
 bedpan	B EH1 D P AE2 N
@@ -8992,7 +8992,7 @@ benedix	B EH1 N AH0 D IH0 K S
 benefactor	B EH1 N AH0 F AE2 K T ER0
 benefactors	B EH1 N AH0 F AE2 K T ER0 Z
 beneficence	B AH0 N EH1 F AH0 S AH0 N S
-beneficent	B EH2 N AH0 F IH1 SH AH0 N T
+beneficent	B AH0 N EH1 F AH0 S AH0 N T
 beneficial	B EH2 N AH0 F IH1 SH AH0 L
 beneficially	B EH2 N AH0 F IH1 SH AH0 L IY0
 beneficiaries	B EH2 N AH0 F IH1 SH IY0 EH2 R IY0 Z
@@ -12006,7 +12006,7 @@ borrow	B AA1 R OW2
 borrowed	B AA1 R OW2 D
 borrower	B AA1 R OW0 ER0
 borrowers	B AA1 R OW0 ER0 Z
-borrowing	B AA1 R OW0 IH0 NG
+borrowing	B AA1 R AH0 W IH0 NG
 borrowings	B AA1 R OW0 IH0 NG Z
 borrowman	B AA1 R OW0 M AH0 N
 borrows	B AA1 R OW0 Z
@@ -32736,7 +32736,7 @@ emphasized	EH1 M F AH0 S AY2 Z D
 emphasizes	EH1 M F AH0 S AY2 Z AH0 Z
 emphasizing	EH1 M F AH0 S AY2 Z IH0 NG
 emphatic	IH0 M F AE1 T IH0 K
-emphatically	EH0 M F AE1 T IH0 K L IY0
+emphatically	IH0 M F AE1 T IH0 K L IY0
 emphysema	EH2 M F AH0 Z IY1 M AH0
 empie	EH1 M P IY0
 empire	EH1 M P AY0 ER0
@@ -33143,7 +33143,7 @@ enjoyable	EH2 N JH OY1 AH0 B AH0 L
 enjoyably	EH2 N JH OY1 AH0 B L IY0
 enjoyed	EH2 N JH OY1 D
 enjoying	EH2 N JH OY1 IH0 NG
-enjoyment	EH2 N JH OY1 M AH0 N T
+enjoyment	IH0 N JH OY1 M AH0 N T
 enjoyments	EH0 N JH OY1 M AH0 N T S
 enjoys	EH2 N JH OY1 Z
 enke	EH1 NG K
@@ -33771,7 +33771,7 @@ errand	EH1 R AH0 N D
 errands	EH1 R AH0 N D Z
 errant	EH1 R AH0 N T
 erratic	IH0 R AE1 T IH0 K
-erratically	EH0 R AE1 T IH0 K L IY0
+erratically	IH0 R AE1 T IH0 K L IY0
 erred	EH1 R D
 errett	EH1 R IH0 T
 erria	EH1 R IY0 AH0
@@ -34725,7 +34725,7 @@ exline	EH1 K S L AY0 N
 exner	EH1 K S N ER0
 exocet	EH1 K S OW0 S EH2 T
 exodus	EH1 K S AH0 D AH0 S
-exogenous	EH2 K S OW1 JH AH0 N AH0 S
+exogenous	EH2 K S AA1 JH AH0 N AH0 S
 exon	EH2 K S AA1 N
 exonerate	IH0 G Z AA1 N ER0 EY2 T
 exonerated	IH0 G Z AA1 N ER0 EY2 T IH0 D
@@ -43066,7 +43066,7 @@ grachov	G R AA1 CH AO1 V
 graci	G R AA1 CH IY0
 gracia	G R AA1 CH AH0
 graciano	G R AA0 CH IY0 AA1 N OW0
-gracias	G R AA1 S IY0 AH0 Z
+gracias	G R AA1 S IY0 AH0 S
 gracie	G R EY1 S IY0
 gracile	G R AE1 S AH0 L
 gracing	G R EY1 S IH0 NG
@@ -50386,7 +50386,7 @@ hypertensive	HH AY2 P ER0 T EH1 N S IH0 V
 hypertext	HH AY1 P ER0 T EH2 K S T
 hypertonic	HH AY2 P ER0 T AA1 N IH0 K
 hypertrophic	HH AY2 P ER0 T R OW1 F IH0 K
-hypertrophy	HH AY1 P ER0 T R OW2 F IY0
+hypertrophy	HH AY0 P ER1 T R AH0 F IY0
 hypes	HH AY1 P S
 hyphae	HH AY1 F IY2
 hyphen	HH AY1 F AH0 N
@@ -51523,7 +51523,7 @@ indigenously	IH2 N D IH1 JH AH0 N AH0 S L IY2
 indigent	IH1 N D IH0 JH AH0 N T
 indigents	IH1 N D IH0 JH AH0 N T S
 indigest	IH2 N D AY0 JH EH1 S T
-indigestion	IH2 N D AY0 JH EH1 S CH AH0 N
+indigestion	IH2 N D IH0 JH EH1 S CH AH0 N
 indignant	IH2 N D IH1 G N AH0 N T
 indignantly	IH2 N D IH1 G N AH0 N T L IY2
 indignation	IH2 N D IH0 G N EY1 SH AH0 N
@@ -51541,7 +51541,7 @@ indiscriminately	IH2 N D IH0 S K R IH1 M AH0 N AH0 T L IY2
 indispensable	IH2 N D IH0 S P EH1 N S AH0 B AH0 L
 indispensible	IH2 N D IH0 S P EH1 N S IH0 B AH0 L
 indisputable	IH2 N D IH0 S P Y UW1 T AH0 B AH0 L
-indisputably	IH2 N D IH1 S P Y UW0 T AE2 B L IY2
+indisputably	IH2 N D IH0 S P Y UW1 T AH0 B L IY0
 indistinct	IH2 N D IH0 S T IH1 NG K T
 indistinguishable	IH2 N D IH0 S T IH1 NG G W IH0 SH AH0 B AH0 L
 indite	IH2 N D AY1 T
@@ -54203,7 +54203,7 @@ jockeying	JH AA1 K IY0 IH0 NG
 jockeys	JH AA1 K IY0 Z
 jocks	JH AA1 K S
 jocosa	Y OW0 K OW1 S AH0
-jocose	JH AO2 K OW1 Z
+jocose	JH AO2 K OW1 S
 jocular	JH AA1 K Y AH0 L ER0
 jocylan	JH AO1 S L AH0 N
 jodhpur	JH AA1 D P ER0
@@ -64407,7 +64407,7 @@ malted	M AO1 L T AH0 D
 malter	M AO1 L T ER0
 maltese	M AO0 L T IY1 Z
 malting	M AO1 L T IH0 NG
-maltose	M AO1 L T OW0 Z
+maltose	M AO1 L T OW0 S
 maltreated	M AE0 L T R IY1 T IH0 D
 maltreatment	M AE0 L T R IY1 T M AH0 N T
 malts	M AO1 L T S
@@ -71292,7 +71292,7 @@ muckrake	M AH1 K R EY2 K
 muckraker	M AH1 K R EY2 K ER0
 muckraking	M AH1 K R EY2 K IH0 NG
 mucky	M AH1 K IY0
-mucosa	M Y UW0 K OW1 Z AH0
+mucosa	M Y UW0 K OW1 S AH0
 mucosal	M Y UW0 K OW1 Z AH0 L
 mucous	M Y UW1 K AH0 S
 mucus	M Y UW1 K AH0 S
@@ -76332,7 +76332,7 @@ otherwise	AH1 DH ER0 W AY2 Z
 otherworldly	AH1 DH ER0 W ER1 L D L IY0
 othilia	OW0 TH IY1 L IY0 AH0
 othman	AA1 TH M AH0 N
-otiose	OW1 T IY0 OW2 Z
+otiose	OW1 T IY0 OW2 S
 otis	OW1 T IH0 S
 otmar	AA1 T M AA0 R
 otologies	OW0 T AA1 L AH0 JH IY0 Z
@@ -81209,7 +81209,7 @@ plonski	P L AA1 N S K IY0
 ploof	P L UW1 F
 plop	P L AA1 P
 plopped	P L AA1 P T
-plosive	P L OW1 Z IH0 V
+plosive	P L OW1 S IH0 V
 ploss	P L AO1 S
 plot	P L AA1 T
 plotkin	P L AA1 T K IH0 N

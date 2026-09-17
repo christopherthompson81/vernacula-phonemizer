@@ -1082,3 +1082,87 @@ the tool rather than only in the data.
 
     gold agreement 81.91% → 81.97%     dict rows this round: 45
     tests 5,973 pass / 309 files   goldens 0 stale
+
+## Run 11 — a THIRD source, and what it says about the ~1,000 corrections already made
+
+Asked whether the remaining divergences are unfixable for lack of a source, or fixable and being left. The
+answer turned out to be both, in different proportions than I had been reporting — and the search for a third
+source found one.
+
+### The survey: almost every open English lexicon is circular with something we already use
+
+| candidate | verdict |
+|---|---|
+| ipa-dict (open-dict-data) | its README: en_US is "based on a modified version of **cmudict-ipa**" — circular with our dict |
+| falkreon/ipa-dictionary | "adapted from Wikipedia" — circular with our referee |
+| HuggingFace pronunciation sets | Wiktionary dumps or audio corpora |
+| espeak-ng | rule-based, GPL, deliberately excluded by this engine's cleanroom posture |
+| **Moby Pronunciator II** | **177,267 words, independent of both, and public domain** |
+
+⚠ **THE LICENSE NEEDED CHECKING TWICE.** The GitHub mirror bundles the ORIGINAL 1993 readme — *"licensed,
+not sold … may not be copied in whole or part"* — which is superseded. The Gutenberg edition (eBook #3205)
+carries the author's later grant: **"Public Domain material by grant from the author, January, 2001."**
+Nearly proceeded on the mirror's text without reading it. ⚠ That Gutenberg package also BUNDLES cmudict 0.3
+separately; only `mobypron.unc` is used, or the "third source" would have been our own dictionary.
+
+### Validating the converter before trusting it
+
+Moby's notation is its own (`/@/ /[@]/ /oU/ /dZ/`, `'`/`,` stress, `//Oi//` for OY). The mapping is validated
+by measuring agreement with CMUdict on the 35,227 shared words — a wrong mapping would score near zero:
+
+    raw segmental                                  56.4%
+    + modernised (FORCE/NORTH merger, yod coalescence)   57.8%
+
+⚠ **Moby is a PRE-MERGER, CONSERVATIVE lexicon** and the validation is what showed it: 694 rows where it
+writes `OW R` against CMUdict's `AO R` are `aboard`, `adore`, `airport`, `afford` — it keeps FORCE distinct
+from NORTH, which GenAm merged. It also keeps the conservative `s/i/z/j//u/r` for `seizure`. Both are folded
+before it is allowed to arbitrate.
+
+### ⚠ THE PAYOFF: re-checking every correction in #1334 and this branch against an independent source
+
+    curated rows Moby covers:              723
+      Moby backs what we changed TO:       319
+      Moby backs the UPSTREAM we changed:  166
+      matches neither exactly:             238
+
+The 166 sort almost entirely into classes where Moby is EXPECTED to differ — 76 are the unstressed-vowel axis
+(a 1990s lexicon writes full vowels where modern GenAm reduces) and 3 are the weekday `-di` reading. But two
+classes needed real examination.
+
+**LOT–THOUGHT (54 flags) — the third source CORROBORATES the biggest change in the PR.** Moby distinguishes
+the merger, so its opinion counts here. On a 28-word control set it agrees with gold on 23:
+
+    cloth off cost lost soft coffee cross loss broth moth dog long song wrong   AO in BOTH
+    boss frog fog golf on                                                       Moby AA, gold AO
+
+Five genuinely-variable words, and the rest of the class independently confirmed. Left as gold has them —
+gold is internally consistent and is the lexicon the downstream model was trained on — but recorded.
+
+### ⚠ AND IT CAUGHT FIVE REAL ERRORS OF MINE, IN A CLASS I APPLIED WITHOUT A FAMILY CHECK
+
+The S→Z pass ran no morphological-family check, because I had only been running those on VOWEL classes.
+Moby flagged 14 of the 49, and five are genuinely wrong:
+
+    adhesive  Z   but `-sive` is S across the family: cohesive, explosive, corrosive, abrasive, decisive,
+    plosive   Z        expensive, massive, passive, persuasive — and `plosive` is the STEM of `explosive`
+    maltose   Z   but the sugars are S: glucose, fructose, lactose, sucrose, dextrose, cellulose
+    mucosa    Z   but mimosa is S
+    otiose    Z   but the `-ose` adjectives are S: bellicose, comatose, grandiose, morose
+
+All five reverted, and `jocose` — a PRE-EXISTING outlier in the same `-ose` family — corrected with them.
+
+⚠ **The ones Moby flagged that are NOT errors matter too, because they show the sweep needs judgement:**
+`rouse`/`dowse` are Z and correct — `arouse`, `carouse`, `espouse` are all Z, a real sub-family distinct from
+`house`/`mouse`/`blouse`; `diesel` is Z with `easel`/`weasel`; `coyotes` is Z because it is the plural of a
+vowel-final stem; and the four `trans-` rows follow a real voicing rule (`translate`/`transmit` Z before a
+voiced segment, `transfer`/`transport` S before a voiceless one).
+
+### Coverage, and therefore what Moby cannot do
+
+    recorded divergences            264/331   80%   ← where it did the work above
+    all OOV divergences             338/1079  31%
+    the 730 currently unarbitrable   93/730   13%
+
+A 1990s lexicon has no `Gitmo`, no `AIgiarism`. It validates the past far better than it extends the future.
+
+    tests 5,973 pass / 309 files   goldens 0 stale   gold agreement 81.98%

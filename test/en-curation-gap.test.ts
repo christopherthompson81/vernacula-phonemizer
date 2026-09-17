@@ -45,7 +45,7 @@ const KNOWN_GAPS = new Map<string, string>([
  * root, a proper noun, a loan — the OOV path has only the n-gram, and the n-gram learned the row we corrected.
  * It reproduces the upstream shape by construction, and no amount of curation can change that.
  *
- * ⚠ IT IS 178 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
+ * ⚠ IT IS 179 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
  * Every entry is a curated row whose correction the model cannot reproduce because the model learned the row we
  * corrected. When the remedy below is taken, this list should COLLAPSE, and that collapse is the test that the
  * retrain worked. If it instead keeps growing while nobody retrains, the gate is telling you the curated layer
@@ -79,15 +79,15 @@ const STRUCTURAL_GAP = new Set([
     "denomination", "denominational", "der", "discography", "discombobulate", "dogma", "drachma",
     "dramatize", "dubrovnik", "duce", "dulce", "eamon", "embargo", "embark", "embattle", "embitter",
     "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode", "encompass", "encourage",
-    "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enliven", "enmesh", "enrage",
-    "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage", "envision",
-    "escudo", "esse", "evolve", "excoriate", "extort", "extortion", "extortionate", "extortionist",
-    "extraction", "extrapolate", "extravagance", "extravagant", "extreme", "extremist", "favela",
-    "felonious", "fide", "foggy", "forensic", "foster", "frog", "gala", "genotype", "golf", "graben",
-    "grana", "granum", "hadrian", "hamm", "hebron", "hematite", "hog", "homs", "hoss", "hulme", "ideal",
-    "insular", "joseph", "kana", "kanji", "kersey", "kingsport", "knockoff", "lachlan", "loge",
-    "loggerhead", "loggia", "masochist", "mende", "minke", "mulligatawny", "necrologist", "necrology",
-    "nerine", "olde", "on", "onset", "plosive", "pravda", "quahog", "rahway", "raj", "remunerative",
+    "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enjoyment", "enliven", "enmesh",
+    "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage",
+    "envision", "escudo", "esse", "evolve", "excoriate", "extort", "extortion", "extortionate",
+    "extortionist", "extraction", "extrapolate", "extravagance", "extravagant", "extreme", "extremist",
+    "favela", "felonious", "fide", "foggy", "forensic", "foster", "frog", "gala", "genotype", "golf",
+    "graben", "grana", "granum", "hadrian", "hamm", "hebron", "hematite", "hog", "homs", "hoss", "hulme",
+    "hypertrophy", "ideal", "insular", "joseph", "kana", "kanji", "kersey", "kingsport", "knockoff",
+    "lachlan", "loge", "loggerhead", "loggia", "masochist", "mende", "minke", "mulligatawny", "necrologist",
+    "necrology", "nerine", "olde", "on", "onset", "pravda", "quahog", "rahway", "raj", "remunerative",
     "revolve", "rouse", "runoff", "saas", "salsa", "sandhog", "sauternes", "selene", "serologist", "soave",
     "sodom", "sodomize", "spawn", "splenic", "stanch", "stasi", "status", "stomp", "strata", "stratus",
     "swanky", "synagogue", "tawny", "taxol", "turnoff", "twangy", "ulm", "unencumbered", "unenforceable",
