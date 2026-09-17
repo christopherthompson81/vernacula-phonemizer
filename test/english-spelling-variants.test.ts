@@ -46,7 +46,7 @@ describe("commonwealth spellings fold to the lexicon's spelling", () => {
 
     test("the one-off families", () => {
         expect(phonemize("catalogue", "en")).toBe("kʰˈæt̬ə̆lˌɔːɡ");
-        expect(phonemize("programme", "en")).toBe("pɹˈoᶷɡɹæm");
+        expect(phonemize("programme", "en")).toBe("pɹˈoᶷɡɹˌæm");
         expect(phonemize("sulphur", "en")).toBe("sˈʌɫfɚ");
         expect(phonemize("inflexion", "en")).toBe("ɪnflˈɛkʃən");
     });

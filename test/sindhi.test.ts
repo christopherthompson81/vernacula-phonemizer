@@ -140,7 +140,7 @@ describe("Sindhi: no silent content loss", () => {
     // composer.
     test("Latin words route through the foreign phonemizer, digits do NOT", () => {
         const ipa = phonemize("facebook تي 45", "sd");
-        expect(ipa).toContain("fˈeᶦsbʊk"); // Latin → English, as before
+        expect(ipa).toContain("fˈeᶦsbˌʊk"); // Latin → English, as before
         expect(ipa).not.toContain("fˈɔːɹt̬i"); // no longer the English "forty"
         expect(ipa).toContain(phonemize("45", "sd")); // read in Sindhi
     });

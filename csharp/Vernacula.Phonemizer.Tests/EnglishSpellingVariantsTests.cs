@@ -42,7 +42,7 @@ public class EnglishSpellingVariantsTests
     [InlineData("paediatric", "pʰˌiːd̬iʲˈætɹɪk")]
     [InlineData("manoeuvre", "mənˈuːvɚ")]
     [InlineData("catalogue", "kʰˈæt̬ə̆lˌɔːɡ")]
-    [InlineData("programme", "pɹˈoᶷɡɹæm")]
+    [InlineData("programme", "pɹˈoᶷɡɹˌæm")]
     [InlineData("sulphur", "sˈʌɫfɚ")]
     [InlineData("inflexion", "ɪnflˈɛkʃən")]
     public void ACommonwealthSpellingReadsAsItsLexiconTwin(string word, string ipa)

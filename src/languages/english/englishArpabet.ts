@@ -193,7 +193,10 @@ export function makeArpabetToIpa(
     const { map, conditionalVowels: cv } = def;
     /** The TRUE diphthongs, for the clash exception above — NOT `OW`/`EY`, which CMUdict writes as a 2°
  *  on an ordinary unstressed final syllable (`zorro`, `aalto`, `adolfo`, `airplane`). */
-const DIPHTHONG = new Set(["AY", "OY", "AW"]);
+/** The vowels gold marks on an OPEN final syllable next to the primary — see the clash rule below.
+ *  Measured, not chosen: of the 330 such sites gold covers, it marks OY 10/10, AW 8/8, EY 65/71,
+ *  AY 11/12, AO 10/11 and UW 22/33, against OW 22/104, IY 9/55 and AA 5/15. */
+const STRONG_OPEN_FINAL = new Set(["EY", "AY", "OY", "AW", "AO", "UW"]);
 const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
     return function arpabetToIpa(phones: string[], word = ""): string {
@@ -245,23 +248,39 @@ const VOWELS = new Set(def.vowels);
                 const ni = nucleusNum.get(i)!;
                 // Secondary-stress clash: drop a 2° whose syllable is ADJACENT (consecutive nucleus) to the 1°.
                 //
-                // ⚠ EXCEPT A CLOSED FINAL SYLLABLE ON A TRUE DIPHTHONG, which is the compound's second
-                // element and does carry a beat. Reported as `profile` sounding like "pro-fil": CMUdict
-                // writes `P R OW1 F AY2 L`, the clash fired, and the AY came out with NO mark at all —
-                // not reduced, just unmarked, which the TTS then renders as reduced. The A/B preferred
-                // the marked reading, and the marked reading is what the dictionary already said.
+                // ⚠ EXCEPT ON THE FINAL SYLLABLE, which is the compound's second element and does carry
+                // a beat. Reported as `profile` sounding like "pro-fil": CMUdict writes `P R OW1 F AY2 L`,
+                // the clash fired, and the AY came out with NO mark at all — not reduced, just unmarked,
+                // which the TTS then renders as reduced. The A/B preferred the marked reading, and the
+                // marked reading is what the dictionary already said.
                 //
-                // ⚠ ALL THREE CONDITIONS ARE LOAD-BEARING, and each was added because the version
-                // without it was measurably wrong (`en_rebuild_lexicon.mts --diff`, rows changed):
-                //   · every diphthong, any position   13,189 rows — far past the reported shape
-                //   · +final nucleus only              2,684 rows — but `zorro`→zˈɔːɹˌoᶷ, `aalto`,
-                //                                      `adolfo`: CMUdict writes OW2 on an ordinary
-                //                                      final -o, and marking it over-articulates
-                //   · +true diphthongs (AY/OY/AW)      1,113 rows — but `a priori`→pɹaᶦˈɔːɹˌaᶦ, an OPEN
-                //                                      final syllable, which broke an existing test
-                //   · +closed syllable                 1,024 rows — clean, whole suite green
-                // What survives is compounds whose second element genuinely takes a beat: `skylines`,
-                // `breakout`, `graveside`, `birthrights`, `yuletide`, `zeitgeist`, `textile`.
+                // ⚠ THE EXCEPTION WAS RE-MEASURED AGAINST GOLD AND WIDENED. It used to require a TRUE
+                // diphthong (AY/OY/AW) AND a closed syllable, which was tuned on "rows changed" and on
+                // not breaking tests — never against the reference. Asking misaki's gold what it does at
+                // each clash site, over 31,760 words whose alignment was validated first:
+                //
+                //   final syllable, CLOSED    gold marks it  1,849 / 1,973   94%   → exempt, any vowel
+                //   final syllable, OPEN      gold marks it    167 /   330   51%   → exempt by VOWEL
+                //   NOT the final syllable    gold marks it    918 / 1,973   47%   → keep dropping
+                //
+                // The open-final half is not a coin flip once split by vowel: OY 10/10, AW 8/8, EY 65/71,
+                // AY 11/12, AO 10/11, UW 22/33 against OW 22/104, IY 9/55, AA 5/15. That split IS the
+                // `airway` (EH1 R W EY2, gold `ˈɛɹwˌA`) versus `zorro` (Z AO1 R OW2) distinction the
+                // original narrowing was reaching for — CMUdict writes OW2 on an ordinary final -o, and
+                // marking it over-articulates, but a final EY/AY/OY/AW is a real beat.
+                //
+                // Whole per-nucleus stress patterns matching gold, by variant:
+                //   as it was (true diphthong + closed)          83.32%
+                //   no clash rule at all                         86.63%   ← the rule DOES do work
+                //   any vowel, closed final                      87.50%
+                //   + open final on the strong vowels            87.82%   ← this, +1,430 words
+                //   + also exempting non-final sites             86.88%   ← worse; non-final stays dropped
+                //
+                // ⚠ AND `a priori` MOVES, which the old comment recorded as the reason not to widen. The
+                // test that pinned it was titled "an open final syllable is not marked" and was pinning a
+                // design choice rather than a reported misreading; `priori` is `P R AY0 AO1 R AY2`, an
+                // open final AY, and gold marks open-final AY 11 times out of 12. The blanket claim is
+                // now measured to be wrong, so the test records the vowel split instead.
                 let mark = stress === 1 ? "ˈ" : stress === 2 ? "ˌ" : "";
                 if (
                     stress === 2 &&
@@ -269,9 +288,8 @@ const VOWELS = new Set(def.vowels);
                     primaryNi >= 0 &&
                     Math.abs(ni - primaryNi) === 1 &&
                     !(
-                        DIPHTHONG.has(base) &&
                         ni === nucleiIdx.length - 1 &&
-                        i < P.length - 1
+                        (i < P.length - 1 || STRONG_OPEN_FINAL.has(base))
                     )
                 )
                     mark = "";
