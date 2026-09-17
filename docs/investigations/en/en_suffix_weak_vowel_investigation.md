@@ -118,3 +118,56 @@ says it was dead.
 one line looks like it passed. That is how 18 stale rows got through a gate sweep in this session and
 surfaced instead as a parity DIFF, which read like a port divergence and was not one — TS and C#
 agreed throughout. Grep for `fresh|STALE`, not `tail`.
+
+## Run 4 — 2026-09-17 — `-is`, not `-sis`: the rule was split from itself
+
+Found while asking whether TAXONOMIC LATIN is rule-handleable. Taxonomic-shaped endings are 5.7% of
+the en referee and 48.8% wrong against its 38.6% baseline — and two endings were **entirely** wrong:
+`-itis` 6/6 and `-aceous` 3/3. The `-itis` rows turned out not to be a Latin problem at all:
+
+    mastitis     ours mæstaɪtəs      referee mæstaɪtɪs
+    encephalitis ours ɛnsɛfəlaɪtəs   referee ɛnkɛfəlaɪtɪs
+
+That is Run 2's defect, in a spelling Run 2's rule did not cover. `/sis$/` matched `analysis` and not
+`arthritis` — **the same ending, split from itself, one dictionary row apart.**
+
+### The half `/sis$/` missed is the stronger half
+
+    -sis  (shipped)   referee ɪ  9 / 12  (75.0%)   ə 2
+    -is, NOT -sis     referee ɪ 35 / 36  (97.2%)   ə 0
+
+### ⚠ And the two references disagree, so the choice had to be argued
+
+Against gold this LOSES: **+7 / −55, net −48** (47.11% → 47.06%). Gold writes `ə` for `Iris`, `Davis`,
+`Tigris`, `arthritis`, `acropolis`.
+
+It is still right, because **gold cannot arbitrate this ending — it is a coin flip on itself.** Over
+the 88 dictionary words the rule targets:
+
+    gold writes ɪ   48 (55%)    analysis, axis, antithesis, asbestosis, apotheosis
+    gold writes ə   40 (45%)    arthritis, aegis, acropolis, amaryllis, cannabis
+
+The same ending both ways with no discriminator, while the referee is 97.2% one way with zero
+counterexamples. Following a source that contradicts itself is not following a convention, it is
+copying noise; and Run 1 of this document already established that where misaki writes `ə` for the
+weak vowel and the referee writes `ɪ`, the referee is the better guide.
+
+⚠ **THE STRONGEST ARGUMENT IS SELF-CONSISTENCY, NOT EITHER REFERENCE.** #1326 created the split itself:
+before it, `analysis` and `arthritis` both read `ə` and agreed. After it they disagreed. This closes
+that, which is the same two-spellings-per-morpheme invariant `en_rebuild_lexicon.mts` exists for — and
+the invariant is why the gold loss is acceptable rather than a reason to revert.
+
+### The phone guard does the discriminating, not the spelling
+
+Widening to `/is$/` sweeps in every common word ending in those letters; the stressed-vowel and
+final-S tests refuse them. `this` (DH IH1 S) is stressed, `his` ends in Z. `axis`, `tennis`, `Paris`,
+`polis` are correctly caught — `polis` (P OW1 L AH0 S, the Greek city-state) is not `police`
+(P AH0 L IY1 S, stressed), which the goldens made look alarming until it was checked.
+
+### What is left of the taxonomic question
+
+`-itis` was the weak vowel wearing a Latin coat. The genuinely Latin residue is smaller and less
+tractable: `-ae` where the referee says `-i` (`cannulae` kænjəli, `coronae` kəɹoʊni) against our
+`-eɪ` — but `alumnae` is `əlˈʌmnaɪ` in gold, so **both /iː/ and /aɪ/ are attested traditions** and a
+single rule cannot serve them. `-ata` and `-aceous` are OOV guessing, not a convention gap. Taxonomic
+Latin is NOT the rule-shaped seam it looked like; one slice of it was an ordinary English suffix.

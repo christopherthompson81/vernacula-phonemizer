@@ -89,7 +89,7 @@ public static class EnglishArpabet
     private static readonly JsRe PRIMARY_DIGIT = JsRegex.Compile("1$");
 
     private static readonly JsRe SUFFIX_IST = JsRegex.Compile("ists?$");
-    private static readonly JsRe SUFFIX_SIS = JsRegex.Compile("sis$");
+    private static readonly JsRe SUFFIX_SIS = JsRegex.Compile("is$");
     private static readonly JsRe SUFFIX_AGE = JsRegex.Compile("ages?$");
 
     /**
@@ -103,6 +103,10 @@ public static class EnglishArpabet
      *
      * ⚠ AND IT IS THE SUFFIX'S OWN VOWEL, THE LAST ONE — scanning every AH0 fired on the prefix instead
      * (`assist` → *ɪsˈɪst, `aphesis` → *ˈæfɪsɪs), 58 regressions.
+     *
+     * ⚠ `-is`, NOT `-sis`. The first version tested `/sis$/` and missed every other spelling of the same
+     * ending, so `mastitis` read *mæstaɪtəs while `analysis` was right one row away. The part it missed is
+     * the stronger half: 35 of 36 referee rows `ɪ` (97.2%) with ZERO `ə`, against 9 of 12 for `-sis`.
      *
      * ⚠ `-ness` AND `-less` ARE DELIBERATELY ABSENT. Gold writes `ɪ` in both and they are the LARGEST
      * family in the class, but the referee says `ə` — 81.0% over 100 `-ness` rows, 74.4% over 43 `-less`

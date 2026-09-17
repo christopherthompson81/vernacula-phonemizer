@@ -16,6 +16,26 @@ const toIpa = makeArpabetToIpa(MANIFEST.arpabet);
 const ipa = (word: string, arpabet: string) => toIpa(arpabet.split(" "), word);
 
 describe("the -ist / -sis / -age vowel is ɪ, not schwa", () => {
+    // ⚠ `-is`, NOT `-sis`, AND THE FIRST VERSION OF THIS RULE GOT THAT WRONG. Testing `/sis$/` split the
+    // ending from itself: `analysis` was right and `arthritis` read *ɑːɹθɹˈaᶦt̬əs one row away. The half
+    // `/sis$/` missed is the STRONGER half — 35 of 36 referee rows `ɪ` (97.2%) with zero `ə`, against 9 of
+    // 12 for `-sis` itself — and misaki's gold cannot arbitrate it: over the 88 dict words this rule
+    // targets, gold writes `ɪ` on 48 and `ə` on 40, the same ending both ways with no discriminator
+    // (`analysis` ɪ, `arthritis` ə; `axis` ɪ, `aegis` ə). The consistent source wins.
+    test("-is is one family, whatever precedes the s", () => {
+        expect(ipa("arthritis", "AA0 R TH R AY1 T AH0 S")).toBe("ɑːɹθɹˈaᶦt̬ɪs");
+        expect(ipa("analysis", "AH0 N AE1 L AH0 S AH0 S")).toBe("ənˈæləsɪs");
+        expect(ipa("axis", "AE1 K S AH0 S")).toBe("ˈæksɪs");
+        expect(ipa("tennis", "T EH1 N AH0 S")).toBe("tʰˈɛnɪs");
+    });
+
+    // ⚠ THE PHONE GUARD DOES THE DISCRIMINATING, NOT THE SPELLING. Widening to `/is$/` sweeps in every
+    // common word ending in those letters, and the stressed-vowel and final-S tests refuse them all.
+    test("a stressed or voiced -is is refused", () => {
+        expect(ipa("this", "DH IH1 S")).toBe("ðˈɪs");     // stressed IH1
+        expect(ipa("his", "HH IH1 Z")).toBe("hˈɪz");      // Z, not S
+    });
+
     test("the three families", () => {
         expect(ipa("activist", "AE1 K T AH0 V AH0 S T")).toBe("ˈæktəvɪst");      // gold ˈæktəvɪst
         expect(ipa("analysis", "AH0 N AE1 L AH0 S AH0 S")).toBe("ənˈæləsɪs");     // gold ənˈæləsɪs

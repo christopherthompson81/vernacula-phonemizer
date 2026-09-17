@@ -111,8 +111,16 @@ function isBarredI(
  *
  * Referee evidence per family (en-GB wikipron, which has no `ᵻ` and so writes `ɪ` or `ə`):
  *
- *     -ist           ɪ 131 / 135  (97.0%)     -sis   ɪ 17 / 21  (81.0%)
+ *     -ist           ɪ 131 / 135  (97.0%)     -is    ɪ  44 /  48  (91.7%)
  *     -age           ɪ  85 /  95  (89.5%)
+ *
+ * ⚠ `-is`, NOT `-sis`. The first version of this rule tested `/sis$/` and missed every other spelling of
+ * the same ending — `-itis`, `-tis`, `-nis`, `-ris` — so `mastitis` read *mæstaɪtəs against the referee's
+ * mæstaɪtɪs while `analysis` was correct one row away. Measured separately, the part `/sis$/` missed is
+ * the STRONGER half: 35 of 36 referee rows `ɪ` (97.2%) with ZERO `ə`, against 9 of 12 (75%) for `-sis`
+ * itself. The phone guard does the discriminating, not the spelling — `this` (DH IH1 S) and `his`
+ * (… Z) are refused by the stressed-vowel and final-S tests, and `axis`, `tennis`, `Paris` are all
+ * correctly caught.
  *
  * ⚠ AND `-ness` / `-less` ARE NOT IN THIS SET, which is the whole reason it stops where it does. Gold
  * writes `ɪ` in both — 375 `-ness` words and 34 `-less` words diverge from us on exactly that, and they
@@ -144,7 +152,7 @@ function rebaseSuffixIh(
         // … AH0 S T  ·  … AH0 S T S (plural)
         if (at(n - 2) === "S" && at(n - 1) === "T") vi = n - 3;
         else if (at(n - 3) === "S" && at(n - 2) === "T" && at(n - 1) === "S") vi = n - 4;
-    } else if (/sis$/.test(word)) {
+    } else if (/is$/.test(word)) {
         if (at(n - 1) === "S") vi = n - 2;                       // … AH0 S
     } else if (/ages?$/.test(word)) {
         if (at(n - 1) === "JH") vi = n - 2;                      // … AH0 JH
