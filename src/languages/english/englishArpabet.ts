@@ -87,9 +87,13 @@ function isBarredI(
     // and the rest, which the word-final match covers for free. gold writes a plain schwa on exactly
     // these ten of the 111 `-est` words it carries, and on no others.
     // ⚠ A STEM TEST DOES NOT SEPARATE THEM and was tried first: stripping `est` and looking the remainder
-    // up (as-is, +e, undoubled, i→y) finds a dictionary word for EIGHT of the ten — `for`, `harv`… no,
-    // `honest`→`hone`, `modest`→`mode`, `tempest`→`tempe`, `interest`→`intere`. The morphology is not
-    // recoverable from the spelling, so the list is explicit.
+    // up — as-is, +e, undoubled, i→y, which are the four shapes a real superlative takes — finds a
+    // dictionary word for EIGHT of the ten (`for`, `hone`, `mode`, `tempe`, `intere`…). The morphology is
+    // not recoverable from the spelling, so the list is explicit.
+    // ⚠ AND THE STRESS GUARD DOES THE REST OF THE WORK, which is why the list is only six long: every
+    // other `-est` noun and verb carries a STRESSED final syllable in CMUdict and never reaches here —
+    // `manifest` EH2, `protest` EH2, `request` EH1, `conquest` EH0, `midwest` EH1, `budapest` EH2. Only
+    // the six with an unstressed AH0 needed naming. Residue: `arbalest` and `doest`, both rare.
     if (
         /est$/.test(word) &&
         !/(forest|harvest|honest|modest|tempest|interest)$/.test(word) &&

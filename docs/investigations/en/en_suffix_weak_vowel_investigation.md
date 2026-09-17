@@ -1,5 +1,25 @@
 # The unstressed-vowel classes, and which of them are defects
 
+## ⚠ Two numbers run through this series and they are NOT comparable
+
+Every run below quotes both. They answer different questions, over different corpora, with different
+comparisons, and conflating them is the easiest mistake to make here:
+
+| number | reference | corpus | comparison |
+|---|---|---|---|
+| `folded backbone` — e.g. **57.3%**, or **62.4%** with `intentional` | **wikipron**, independent human transcription | 4,070 rows, rare and proper words, after the RP exclusion | segmental backbone, **stress stripped**, config folds applied |
+| `exact vs gold` — e.g. **47.64%** | **misaki's `us_gold.json`**, the lexicon Kokoro was trained on | 89,411 words, gold's whole vocabulary | **byte-exact** Kokoro-alphabet string, **stress included** |
+
+The first asks *are we phonetically right*. The second asks *do we produce what the model heard*.
+A change can move them in opposite directions, and several in this series do — Run 5's ⟨i⟩ rule was
++1.1pp on the first and −1,978 words on the second, which is exactly why it was reverted. When the two
+disagree, the question is always which reference has evidence behind it on that specific class, never
+which number is larger.
+
+⚠ Neither is a percentage of the same denominator as the other, so **they must never be averaged,
+differenced, or quoted side by side without their reference**.
+
+
 Run 18 of the kokoro comparison re-censused after #1325. `replace ə → ɪ` was the largest single edit
 operation left, at 6,079 — gold writes a schwa where we write `ɪ`. The obvious reading is that we
 fail to reduce.
