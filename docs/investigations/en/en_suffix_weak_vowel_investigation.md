@@ -1,5 +1,25 @@
 # The unstressed-vowel classes, and which of them are defects
 
+## ⚠ Two numbers run through this series and they are NOT comparable
+
+Every run below quotes both. They answer different questions, over different corpora, with different
+comparisons, and conflating them is the easiest mistake to make here:
+
+| number | reference | corpus | comparison |
+|---|---|---|---|
+| `folded backbone` — e.g. **57.3%**, or **62.4%** with `intentional` | **wikipron**, independent human transcription | 4,070 rows, rare and proper words, after the RP exclusion | segmental backbone, **stress stripped**, config folds applied |
+| `exact vs gold` — e.g. **47.64%** | **misaki's `us_gold.json`**, the lexicon Kokoro was trained on | 89,411 words, gold's whole vocabulary | **byte-exact** Kokoro-alphabet string, **stress included** |
+
+The first asks *are we phonetically right*. The second asks *do we produce what the model heard*.
+A change can move them in opposite directions, and several in this series do — Run 5's ⟨i⟩ rule was
++1.1pp on the first and −1,978 words on the second, which is exactly why it was reverted. When the two
+disagree, the question is always which reference has evidence behind it on that specific class, never
+which number is larger.
+
+⚠ Neither is a percentage of the same denominator as the other, so **they must never be averaged,
+differenced, or quoted side by side without their reference**.
+
+
 Run 18 of the kokoro comparison re-censused after #1325. `replace ə → ɪ` was the largest single edit
 operation left, at 6,079 — gold writes a schwa where we write `ɪ`. The obvious reading is that we
 fail to reduce.
@@ -171,3 +191,106 @@ tractable: `-ae` where the referee says `-i` (`cannulae` kænjəli, `coronae` k�
 `-eɪ` — but `alumnae` is `əlˈʌmnaɪ` in gold, so **both /iː/ and /aɪ/ are attested traditions** and a
 single rule cannot serve them. `-ata` and `-aceous` are OOV guessing, not a convention gap. Taxonomic
 Latin is NOT the rule-shaped seam it looked like; one slice of it was an ordinary English suffix.
+
+## Run 5 — 2026-09-17 — the reverse pairing is a CONVENTION, not a defect class. Closed.
+
+The 137 rows where the referee writes `ɪ` and we write `ə` were the last bucket with a known shape.
+Reading them showed one pattern, and it looked like the biggest rule in the series: **every one is an
+unstressed `AH0` whose spelling is ⟨i⟩** — `Al-i-ce`, `cab-i-n`, `dest-i-ny`, `arch-i-tecture`,
+`Angl-i-can`. CMUdict writes `AH0` for both qualities and loses the distinction; the spelling recovers
+it.
+
+Measured against the en-GB referee, over every dictionary word whose vowel-letter groups align 1:1
+with its nuclei:
+
+    ⟨i⟩   1,089 slots   referee ɪ  83%   ə 16%     ← inverts
+    ⟨e⟩   2,182         referee ɪ  26%   ə 68%
+    ⟨a⟩   2,913         referee ɪ   1%   ə 92%
+    ⟨o⟩   1,420         referee ɪ   0%   ə 93%
+    ⟨u⟩     649         referee ɪ   2%   ə 56%
+    ⟨io⟩    518         referee ɪ  13%   ə 86%
+
+Only ⟨i⟩ inverts, and it inverts hard. It was implemented: 2,520 lexicon rows, referee 57.3% → 58.4%.
+
+### ⚠ And then reverted, because gold is CONSISTENT here and says the opposite
+
+    at unstressed AH0 spelled ⟨i⟩:   en-GB referee  ɪ 83%      misaki gold  ə 88%  (n=2,059)
+
+**Both sources are internally consistent and flatly contradict each other.** That is a CONVENTION
+SPLIT, not noise on either side — and it is the opposite of the `-is` case in Run 4, where the whole
+justification for following the referee was that gold contradicted *itself* (48 `ɪ` against 40 `ə`).
+Against gold the rule scored **+115 / −2,093, net −1,978** (47.06% → 44.84%), taking `American`
+`əmˈɛɹəkᵊn` → *`əmˈɛɹɪkᵊn` and `African` → *`ˈæfɹɪkən` — 2,000 words further from the stream Kokoro was
+trained on, on the say-so of a source that disagrees by convention rather than by evidence.
+
+A change of that size against the training-target metric needs AUDIO, the way
+`kokoro_word_final_flap_investigation.md` decided its question. Not taken.
+
+### ⚠ And the narrow subset that BOTH sources agree on is already shipped
+
+Gold writes `ɪ` at 176 of the 2,059 slots. Split by the following phone, there is exactly one
+environment where it does so at any rate:
+
+    before S   gold ɪ 123 / 236  (52%)      before T  3%   N  3%   K  9%   F  1%   L  3%   B  0%
+
+`abolitionist`, `accompanist`, `acidosis`, `activist`, `analysis` — **the `-is`/`-ist` family, which
+`rebaseSuffixIh` already covers.** Before `S` is the one place gold's own convention breaks down, and
+that is precisely why Run 4's measurement found gold split 48/40 there while it is 88% `ə` everywhere
+else. The two findings are the same fact seen twice.
+
+### What this closes
+
+There is no further rule-shaped work in the weak-vowel class. The residue is 53 slots where gold
+writes `ɪ` outside the `S` environment — individual lexical exceptions with no environment to key on.
+The 137 "reverse pairing" is not a defect list; it is the referee's convention showing through, and
+the `intentional` marker already records that the two notations differ by choice rather than by error.
+
+## Run 6 — 2026-09-17 — chasing the over-credit found `-est`, and the convention is now declared
+
+Declaring the `referee ɪ / ours ə` direction as intentional needed a cost: how many of the 137 rows
+are real defects rather than the convention? Arbitrated against gold:
+
+    gold writes ə too → our convention   54
+    gold writes ɪ     → a real defect     6
+    no verdict                           77
+
+Reading the six found one that was not lexical at all. **`weakest` is gold `wˈikᵻst` — the `-est`
+superlative, the same weak vowel as the `-es`/`-ed` arms `isBarredI` already carries.**
+
+### Both references agree, which is what made it a rule
+
+    -est superlatives with a final AH0 S T: 207 dictionary words
+      misaki gold      ᵻ 101 / 111  (91%)     ə 10
+      en-GB referee    ɪ  26 /  41  (63%)     ə 13      (it has no ᵻ; `ɪ` is how it says "not a schwa")
+
+    exact vs gold   42,073 (47.06%) → 42,598 (47.64%)     +527 / −2
+
+⚠ **IT BELONGS IN `isBarredI`, NOT `rebaseSuffixIh`**, and the two are told apart by asking gold WHICH
+SYMBOL it used — `ᵻ` here, a full `ɪ` for `-ist`/`-is`/`-age`. Choosing by which ending looks similar
+would have put it in the wrong one and cost the difference, exactly as Run 2 measured (−486 for using
+`ᵻ` where gold wanted `ɪ`).
+
+⚠ **SIX LEXICAL `-est` WORDS ARE NOT SUPERLATIVES** — `forest`, `harvest`, `honest`, `modest`,
+`tempest`, `interest`, plus `deforest`/`rainforest`/`dishonest` which a word-final match covers for
+free. gold writes a plain schwa on exactly those ten of its 111 and on no others. **A stem test does
+not separate them and was tried first**: stripping `est` and looking the remainder up finds a
+dictionary word for EIGHT of the ten (`hone`, `mode`, `tempe`, `intere`, `for`…). The morphology is
+not recoverable from the spelling, so the list is explicit. Residue: `arbalest` and `doest`.
+
+### And then the convention was declared
+
+With `-est` taken, the reverse direction is declared in `en.jsonc` alongside the forward one. Both
+entries are the same pair opposed, and the note says what each is:
+
+    referee ə / ours ɪ   the referee reduces and we do not — both referees back us
+    referee ɪ / ours ə   the referee keeps /ɪ/ where CMUdict writes AH0 — a NOTATION CHOICE, where
+                         the referee is 83% ɪ and gold 88% ə over the same 2,059 slots, both
+                         internally consistent, and we follow the one Kokoro was trained on
+
+    folded backbone: 2334/4070 (57.3%)
+      +intentional:  2539/4070 (62.4%)   — 205 rows
+
+⚠ **THE DECLARATION OVER-CREDITS BY ABOUT FIVE ROWS AND SAYS SO**: `Alice`, `creamily`, `inevitable`,
+`instil`, `minim` — lexical exceptions with no environment to key on. If that set ever grows an
+environment it becomes an engine rule and leaves the list. The environments we HAVE measured are
+overridden in the engine rather than declared away, which is the line between the two mechanisms.
