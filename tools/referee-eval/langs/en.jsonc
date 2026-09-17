@@ -16,6 +16,18 @@
     // referee's `æŋɡlɪkən` and every syllabic consonant is scored ALWAYS-WRONG — which means #1319, the PR
     // that ADDED the reduced slot misaki writes and Kokoro was trained on, LOWERED this score by being
     // right. Measured at 7.5% of in-dictionary disagreements. Same rule as KokoroFormat's SyllabicRe.
+    //
+    // ⚠ IT IS BIDIRECTIONAL, not a concession: the referee writes the mark too (60 of 4,558 US rows, 1,196
+    // of 76,284 UK rows), so this normalises BOTH sides — their `zm̩` and our `zəm` meet at `zəm`, and so do
+    // their `zəm` and our `zm̩`. Under the bare backbone strip the first pair met at `zm` vs `zəm` and missed.
+    //
+    // ⚠ AND IT IS NOT A FLEET-WIDE FIX — that was measured, because 43 referee files carry this mark and the
+    // obvious conclusion is that BACKBONE should do this for everyone. It makes them WORSE:
+    //     sr 26,048 → 25,529     cs 17,254 → 17,144     mk 62,375 → 62,314     de 3,732 → 3,711
+    // In those languages BOTH sides write `r̩`/`n̩`, so deleting the mark already aligns them and turning it
+    // into a vowel exposes a mere presence/absence difference instead. English is the reverse case: its
+    // referee spells the same syllable with a real vowel. The right fold is language-specific and this is
+    // English's.
     "preFolds": [
         { "pattern": "(\\S)\u0329", "replace": "ə$1", "note": "our syllabic sonorant n̩/l̩/m̩ vs the referee's ən/əl/əm — the referee's inventory has no syllabicity mark, so leaving it unfolded maps a documented convention to always-wrong (the #1282 principle, applied to the mark instead of to ᵻ)" }
     ],

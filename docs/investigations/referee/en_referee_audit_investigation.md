@@ -158,3 +158,24 @@ and `ə` (74.1% referee-`ɪ`), which is the invariant #1282 left that tool to pr
    PARTLY CIRCULAR label: six merged PRs tuned English toward misaki gold, so our score on rows gold
    helped select is inflated relative to an untuned engine.
 5. Only then read the residual as engine defects.
+
+### Review — the syllabic fold is bidirectional, and deliberately NOT fleet-wide
+
+Two things checked on review rather than assumed.
+
+**It normalises both sides.** The referee writes the syllabic mark itself — 60 of 4,558 US rows, 1,196
+of 76,284 UK rows — so the fold is not a concession to our notation. Their `zm̩` and our `zəm` meet at
+`zəm`, and so do their `zəm` and our `zm̩`. Under the bare backbone strip the first pair met at `zm`
+against `zəm` and missed.
+
+**And the obvious generalisation is wrong.** 43 referee files carry `U+0329`, which makes this look
+like a `BACKBONE` fix for the whole fleet — Serbian alone has it in 54.6% of rows. Measured:
+
+    sr  26,048 → 25,529      cs  17,254 → 17,144
+    mk  62,375 → 62,314      de   3,732 →  3,711
+
+**Worse everywhere.** In those languages BOTH sides write `r̩`/`n̩`, so deleting the mark already aligns
+them, and turning it into a vowel exposes a mere presence/absence difference instead. English is the
+reverse case: its referee spells the same syllable with a real vowel. The right fold is
+language-specific, and a fleet-wide `BACKBONE` entry would have cost ~700 rows across four languages
+to gain 60 on English.
