@@ -112,3 +112,121 @@ slowest FILE, not by total CPU. Floor is 486s / 16 cores ≈ 30s.
 | typecheck / package fence | 6s / 16s | unchanged |
 
 Suite −40%, and one latent order-dependence bug fixed on the way.
+
+## Run 4 — 2026-09-16 18:45 — the tests themselves: at the floor, and one trap
+
+After #1320 the suite is 59s with ~486s of CPU. The question left was whether the 390s of TEST time
+(as opposed to loading, now 96s) has anything in it.
+
+### The machine is 8 cores, not 16
+
+    workers=6   62.7s      workers=10  56.7s
+    workers=8   63.9s      workers=16  55.9s
+
+2.7× the workers buys 11%. `lscpu`: **i7-10700K, 8 cores / 16 threads**. Hyperthreading is worth
+almost nothing for this work, so the floor is 486s ÷ 8 ≈ **61s**, not the 30s an earlier run in this
+doc claimed by dividing by the thread count. **We are at it.**
+
+Sampling worker CPU during a run agrees: 12–14 busy until t≈36s, then 6 for the last 20s.
+
+### The scheduler is doing its job
+
+Vitest 2.x sorts files by CACHED DURATION descending when `node_modules/.vite/vitest/results.json`
+exists, and it does — the cached numbers track the reporter's within noise (referee-eval-english
+43s cached / 38s measured). Shuffled runs came out ~7s faster on average, but across interleaved
+samples the two overlap (default 62–66s, shuffled 55–62s); that is scheduling noise on a saturated
+box, not a better order.
+
+### What redundancy there is, and why it was not taken
+
+| | saving | wall |
+|---|---|---|
+| `onset-r` computes the PARENT reading twice — once per `test.each` language, though it is language-independent | ~9s CPU | ~1s |
+| `trace` re-traces the same corpus in 10 tests (sample sizes 12,4,4,6,4,2,6,6,4 — 48 passes per language where 12 would do) | ~20s CPU | ~2s |
+
+Both are real and neither loses coverage, but together they are 6% of CPU on a box that is CPU-bound,
+and the second one edits ten tests. Recorded rather than done.
+
+Everything else is genuinely necessary: `onset-r` audits all 117,479 dict words (its header explains
+that the full corpus is what makes it an audit rather than a spot check), `referee-eval` covers 171
+languages, `latin-tokenizers` every registered code. **The cost is the coverage.**
+
+### ⚠ The one big lever is a trap, and it looks like a 4× win
+
+`englishTagger.tag()` runs ONE ONNX inference per word, shape `[1, T]` — 6,000 of them in
+referee-eval-english, the slowest file. The export has a dynamic batch dimension and accepts `[B, T]`,
+and batching equal-length words (so there is no padding for the BiLSTM's backward pass to eat) is
+**4.2× faster** at B=64.
+
+It is also not output-preserving:
+
+    batch [A, A]  row 0 vs solo(A)   0.00e+0      exact
+    batch [A, A]  row 1 vs solo(A)   0.00e+0      exact
+    batch [A, B]  row 0 vs solo(A)   1.11e-1
+
+⚠ **THE MODEL IS DYNAMICALLY QUANTIZED int8**, so activation scales are computed at runtime over the
+whole tensor — a row's logits depend on its batch NEIGHBOURS. Identical rows agree exactly, which is
+what proves the indexing is right and the effect is the quantizer. Batching would make a word's
+reading depend on which other words happened to be grouped with it. For a phonemizer that is not a
+speed/accuracy trade, it is non-determinism.
+
+Available only with a statically-quantized or fp32 re-export, and then it would want measuring
+again — the 4.2× is an int8 number.
+
+⚠ **AND THE FIRST MEASUREMENT OF IT SAID 0.1× — batching TEN TIMES SLOWER.** That was the harness:
+`Array.from(d)` inside the per-row loop copied the whole batch output once per row, O(B²). The
+lesson from Run 3 repeating itself — the number that looks impossible usually is.
+
+## Run 5 — 2026-09-16 19:10 — the cross-implementation gate: already parallel, and sharding it loses
+
+`check:goldens` (48–55s) is the TS half of the C#/TS parity gate — 189 languages, 36,495 rows
+through `phonemizeAsync`, compared against `csharp/goldens/*.tsv`; the C# suite reads the same files
+for its half. Run 1 left it alone on the strength of a comment. This measured it.
+
+### It is already 5.4× parallel, and nothing in the tool does that
+
+| | wall | CPU | parallelism |
+|---|---|---|---|
+| serial, as shipped | 48.3s | 261s | **5.4×** |
+| serial, `--no-ort` | 31.4s | 38.5s | 1.2× |
+
+⚠ **THE PARALLELISM IS ONNX RUNTIME'S OWN THREAD POOL**, not the tool's — the loop at the bottom of
+`check-goldens.mts` is a plain `for`. Disabling ORT drops CPU from 261s to 38s and wall from 48s to
+31s, which splits the gate cleanly: ~31s of single-threaded engine work, and ~17s of neural work that
+already spreads across ~5 cores by itself.
+
+### So process sharding was built, measured, and thrown away
+
+The only state crossing languages is the foreign-OOV memo, which `checkOne` already clears per
+language — that clear is what makes an in-process run equal to one-child-per-language. If in-process
+ORDER does not matter then neither does which PROCESS, so the languages can be partitioned freely.
+A `--jobs=N` mode was implemented on that reasoning (strided, not chunked, because `en`/`en-GB` carry
+the neural cost), and it produces the identical verdict — 189 languages, 36,495 rows, 0 stale.
+
+    serial   48.3s / 261s CPU        jobs=3   45.2s / 497s
+    jobs=2   41.9s / 351s            jobs=4   46.5s / 504s
+    jobs=8   42.7s / 570s            jobs=6   51.0s / 608s   ← SLOWER than serial
+
+Best case 12% of wall for 1.3–2.2× the CPU, no monotonic trend, and one setting that loses outright.
+On a box whose cores are already saturated by ORT's threads, extra processes mostly oversubscribe —
+and each child re-pays the fixed setup, which is where the doubled CPU goes.
+
+**Reverted.** A second mode of a gate whose whole job is to be trusted is not worth 6 seconds.
+
+The one configuration that might genuinely pay — pin ORT to a single intra-op thread and then shard,
+so N children × 1 thread matches the 8 physical cores instead of fighting over them — needs a
+thread-count option threaded through `Onnx.CreateInferenceSession`, and that setting also governs
+PRODUCTION inference latency, where the current behaviour is the one you want. Not worth it for a
+~13s gate.
+
+### Where the gate set stands
+
+    vitest        59s       (was 103s, #1320)
+    check:goldens 48s       already ~5.4× parallel; at the floor
+    C# tests      24s
+    package fence 16s
+    typecheck      6s
+
+Sequentially 153s. The gates are independent of one another, so the largest remaining win is not
+inside any of them — it is running them concurrently, which is a change to how `npm run ci` reports
+failures rather than to how fast anything computes.
