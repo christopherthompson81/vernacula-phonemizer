@@ -66,11 +66,11 @@ public static class EnglishArpabet
      * verbatim — so 372 words came out with two or three primary marks in one group. `EnforceSinglePrimary`
      * had always run on the n-gram and tagger output, which is why it never showed there.
      *
-     * ⚠ THE LAST HERE, THE FIRST IN `EnforceSinglePrimary`, and that asymmetry is measured. Several `1`s
-     * from a per-position classifier are an artifact; several `1`s in CMUdict are a lexicographic statement,
-     * which gold resolves to the later element (81:24 on prefixed rows, 7 of 7 on the teen numerals). Over
-     * 89,411 words: this split is +92 exact with ZERO regressions, last-in-both is +292 but −106, and
-     * first-in-both is +37.
+     * ⚠ THE LAST, AND THIS IS THE ONLY PLACE THE CHOICE IS MADE — `EnforceSinglePrimary` no longer demotes,
+     * so the predictor and the dictionary cannot disagree. Gold resolves CMUdict's unresolved rows to the
+     * later element (81:24 on the 150 prefixed rows, 7 of 7 on the teen numerals: `nˌIntˈin`, `θˌɜɹtˈin`).
+     * Over 89,411 words against gold: +341 / −106, net +235. Keeping the first is +37 / −0, and splitting
+     * the two paths was +147 / −0 but reintroduced the seam.
      */
     public static List<string> SinglePrimary(IReadOnlyList<string> phones)
     {

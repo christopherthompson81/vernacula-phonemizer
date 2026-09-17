@@ -12,6 +12,7 @@
 import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { makeArpabetToIpa, singlePrimary } from "../src/languages/english/englishArpabet.ts";
+import { enforceSinglePrimary } from "../src/languages/english/englishG2p.ts";
 import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 const toIpa = makeArpabetToIpa(MANIFEST.arpabet);
@@ -50,6 +51,26 @@ describe("exactly one primary stress per word", () => {
         expect(ipa("aalto", "AA1 L T OW2")).toBe("ˈɑːɫtoᶷ");
     });
 
+    // ⚠ ONE POLICY, BOTH PATHS, AND THIS IS THE CASE THAT SAYS SO. An earlier version of this change kept a
+    // demotion in `enforceSinglePrimary` too (the FIRST there, the LAST here), which scored +147 against gold
+    // with ZERO regressions — better on paper than what shipped (+341/−106). It was rejected because it made
+    // the SAME ARPABET read two different ways depending on which path delivered it, which is the seam the
+    // curation gate exists to catch. The justification for allowing it — a predictor's extra `1` is noise
+    // while CMUdict's is a statement — does not survive the COMPOUND path, which joins two dictionary stems
+    // each carrying its own real primary.
+    test("the predictor and the dictionary read the same phones the same way", () => {
+        const phones = "AA1 R CH B IH1 SH AH0 P".split(" ");
+        const viaDict = toIpa(phones, "archbishop");
+        const viaPredictor = toIpa(enforceSinglePrimary(phones, new Set(MANIFEST.arpabet.vowels)), "archbishop");
+        expect(viaPredictor).toBe(viaDict);
+        expect(viaDict).toBe("ˌɑːɹt͡ʃbˈɪʃəp");
+    });
+
+    // ⚠ THE LAST. The teen numerals are why it matters in practice: gold is unanimous (7 of 7) that they are
+    // end-stressed, which is what separates nineTEEN from NINEty, and they are far more frequent in real text
+    // than the fore-stressed compounds keeping the last costs. That cost is real — 106 words, `Afrobeat`,
+    // `Twitterverse`, `Humean` — and it names the next refinement: the discriminator is PREFIXED (stem keeps
+    // the primary, 81:24) versus COMPOUND (fore-stressed, 37:31), not which path the phones came from.
     test("CMUdict's unresolved rows go to the LATER element", () => {
         expect(singlePrimary(["TH", "ER1", "T", "IY1", "N"])).toEqual(["TH", "ER2", "T", "IY1", "N"]);
         expect(singlePrimary(["F", "AO1", "R", "T", "IY1", "N"])).toEqual(["F", "AO2", "R", "T", "IY1", "N"]);

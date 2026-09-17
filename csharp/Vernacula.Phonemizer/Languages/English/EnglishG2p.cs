@@ -79,28 +79,18 @@ public static class EnglishG2pFactory
     }
 
     /**
-     * A word has exactly ONE primary stress, and this is the PREDICTOR's half: an n-gram or BiLSTM tagger
-     * emits a digit per position with no global constraint, so it can return several `1`s (keep the FIRST,
-     * demote the rest) or ZERO (then promote the first vowel, so every content word carries a tonic).
+     * A predictor emits a digit per position with no global constraint, so it can return ZERO `1`s for a
+     * short or odd word; PROMOTE the first vowel so every content word carries a tonic.
      *
-     * ⚠ THE DICTIONARY'S HALF IS `EnglishArpabet.SinglePrimary` AND IT KEEPS THE LAST. Deliberate and
-     * measured: several `1`s here are a prediction artifact with no information in them (switching to last
-     * regresses 106 words against gold), while several `1`s in CMUdict are a lexicographic statement gold
-     * resolves to the later element. And the demotion used to live ONLY here, which was the bug — the
-     * dictionary path does not come through this function, so 372 words were emitted with more than one
-     * primary mark.
+     * ⚠ THE DEMOTION HALF MOVED TO `EnglishArpabet.SinglePrimary`. It was only reachable from the OOV paths
+     * — the DICTIONARY path does not come through here — so 372 words were emitted with more than one primary
+     * mark. It MOVED rather than being copied, because a demotion in both places made the same ARPABET read
+     * two ways depending on which path delivered it (`AA1 R CH B IH1 SH AH0 P` → `ˈɑːɹt͡ʃbɪʃəp` via the
+     * predictor, `ˌɑːɹt͡ʃbˈɪʃəp` via the dictionary), which is the seam the curation gate exists to catch.
      */
     public static List<string> EnforceSinglePrimary(IReadOnlyList<string> ph, IReadOnlySet<string> vowels)
     {
-        var seen = false;
-        var outp = new List<string>(ph.Count);
-        foreach (var p in ph)
-        {
-            if (!PRIMARY.IsMatch(p)) { outp.Add(p); continue; }
-            if (seen) { outp.Add(PRIMARY.Replace(p, "2")); continue; }
-            seen = true;
-            outp.Add(p);
-        }
+        var outp = new List<string>(ph);
         if (!outp.Exists(PRIMARY.IsMatch))
         {
             var vi = outp.FindIndex(p => vowels.Contains(DropStress(p)));

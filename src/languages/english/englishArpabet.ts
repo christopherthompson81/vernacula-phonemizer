@@ -144,17 +144,25 @@ function demoteFinalIy2(P: { base: string; stress: number }[], word: string): vo
  * had always run on the n-gram and tagger output, which is exactly why it never showed there: the guard
  * existed on one path and not its twin. Here it cannot be bypassed.
  *
- * ⚠ THE LAST, WHERE THE PREDICTOR'S HALF KEEPS THE FIRST. Deliberate, measured, and explained in
- * `enforceSinglePrimary`: several `1`s from a per-position classifier are an artifact with no information in
- * them, while several `1`s in CMUdict are a lexicographic statement about a prefixed form or compound. Gold
- * resolves the latter to the later element — 81:24 on the 150 prefixed rows, and unanimously on the teen
- * numerals, which are the frequent case in real text:
+ * ⚠ THE LAST, AND THIS IS THE ONLY PLACE THE CHOICE IS MADE. `enforceSinglePrimary` no longer demotes at
+ * all, so the predictor and the dictionary cannot disagree — a demotion in both places made the SAME
+ * ARPABET read two ways depending on which path delivered it (`AA1 R CH B IH1 SH AH0 P` → `ˈɑːɹt͡ʃbɪʃəp`
+ * via the predictor, `ˌɑːɹt͡ʃbˈɪʃəp` via the dictionary), which is the seam the curation gate exists to
+ * catch. Splitting them scored +147 with zero regressions and was rejected for that reason.
+ *
+ * Gold resolves CMUdict's unresolved rows to the LATER element — 81:24 on the 150 prefixed rows, and
+ * unanimously on the teen numerals, which are the frequent case in real text:
  *
  *     nineteen  nˌIntˈin      thirteen  θˌɜɹtˈin      fourteen  fˌɔɹtˈin      eighteen  ˌAtˈin
  *
- * Over 89,411 words: last-here/first-there is +92 exact with ZERO regressions; last in BOTH places is +292
- * but −106, and those losses are ordinary fore-stressed words gold has right (`Humean`, `Lockean`,
- * `apishly`). First in both places is only +37.
+ * Over 89,411 words against gold: **+341 / −106, net +235**; keeping the first is +37 / −0.
+ *
+ * ⚠ THE 106 ARE REAL AND NAME THE NEXT REFINEMENT. They are fore-stressed COMPOUNDS — `Afrobeat`,
+ * `Twitterverse`, `Antabuse`, `allemande` — plus short proper nouns (`Attu`, `Padang`, `Sauria`) and the
+ * `-ean` pair `Humean`/`Lockean`. So the real discriminator is not which path the phones came from, it is
+ * PREFIXED (stem keeps the primary) versus COMPOUND (fore-stressed), which needs a morphological inventory
+ * this module does not have. Measured: prefixed rows go to the last 81:24, compound rows to the first
+ * 37:31. Those 106 words are that refinement's evidence set.
  *
  * ⚠ AND THE CEILING IS NOT HERE. A demoted mark that lands next to the primary is then deleted outright by
  * the secondary-stress CLASH RULE below — `archbishop` → `ˈɑːɹt͡ʃbɪʃəp`, `nineteen` → `nIntˈin` where gold
