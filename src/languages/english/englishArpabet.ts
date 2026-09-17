@@ -89,6 +89,44 @@ function isBarredI(
     return false;
 }
 
+/**
+ * CMUdict's final `-y` is `IY0` 7,219 times and `IY2` 198 times, in the same slot. Demote the 198.
+ *
+ * `city` is `S IH1 T IY0` and `ability` is `AH0 B IH1 L AH0 T IY2` — the same unstressed FLEECE vowel,
+ * same environment, different digit. It is upstream noise rather than a convention, and the reference
+ * agrees with the 97%: of the 123 `-y`-spelled `IY2` rows misaki's gold covers, it leaves **121
+ * unstressed**. Fixing it here rather than in `g2p-dict.tsv` because the dict is REGENERATED from
+ * upstream by `en_g2p_ngram.ts --emit` (which is what `g2p-curated.tsv` exists to record), and because
+ * the n-gram and the BiLSTM predict the same digit from the same training data — a per-row edit would
+ * leave the OOV path saying `IY2` for an unlisted word in the identical environment.
+ *
+ * ⚠ ONLY `IY`, AND ONLY ON A `-y` SPELLING. Both narrowings are load-bearing, measured against gold:
+ *   · other final vowels    a blanket rule is WRONG — gold KEEPS the 2° on 94–100% of final
+ *                           `EY`/`AY`/`OY`/`AW` (`airway`, `alibi`, `aircrew`, `afterglow`), and on
+ *                           50.5% of final stress-2 rows overall. `OW` is genuinely mixed (69%)
+ *   · the `-y` spelling     final `IY2` NOT spelled `-y` is only 67% unstressed in gold, because those
+ *                           are `-ee` compounds and loans whose last syllable is a free morpheme —
+ *                           `bumblebee`, `carefree`, `jubilee`, `filigree`, `oversee`, `divorcee`
+ *
+ * ⚠ AND THE OBVIOUS EXCEPTION GATE IS A TRAP. The only two `-y` words gold stresses are `latchkey` and
+ * `turnkey`, so "unless it ends `-key`" looks right. But 17 of the 198 rows end `-key` and 15 are
+ * SURNAMES (`starkey`, `markey`, `pankey`, `whipkey`…), while CMUdict writes `IY0` on 100 of the 121
+ * `-key` words including the identical `berkey`, `blakey`, `buckey`. Gating on `-key` would hold the
+ * stress on 15 surnames whose twins are unstressed — re-creating this very inconsistency, on the side
+ * with less evidence. So `latchkey`/`turnkey` are DECLARED MISSES: 2 against 121.
+ *
+ * This also unblocks the flap, which reads the digit directly: `ability` was `əbˈɪlᵻtˌi` because a
+ * stressed vowel takes a real onset, and is now `əbˈɪlᵻTi` — gold `əbˈɪləTi`.
+ *
+ * Not applied when `word` is absent, which is the COMPOUND path deliberately withholding it — and a
+ * compound's final element is precisely where a free morpheme does carry its own beat.
+ */
+function demoteFinalIy2(P: { base: string; stress: number }[], word: string): void {
+    const last = P[P.length - 1];
+    if (word.endsWith("y") && last?.base === "IY" && last.stress === 2)
+        last.stress = 0;
+}
+
 /** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
  *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
 export function makeArpabetToIpa(
@@ -109,6 +147,7 @@ const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
     return function arpabetToIpa(phones: string[], word = ""): string {
         const P = phones.map(split);
+        demoteFinalIy2(P, word);
         // The slots whose schwa is NOT a schwa but the sonorant after it being syllabic.
         const sylSlots = syllabic.get(word);
         let pendingSyllabic = false;
