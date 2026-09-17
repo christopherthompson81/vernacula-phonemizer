@@ -438,7 +438,16 @@
     "acronymLetters": [
         "us", "un", "it", "id", "am", "led", "who", "usaf", "usda", "usps", "ieee",
         // Pronounceable by the OOV test, so it would be left to the g2p, which mangles it ([niːk]).
-        "nyc", "latam", "minae", "rov", "suv", "atv", "gps", "hiv", "ufo", "faa", "epa", "irs",
+        "nyc", "latam", "minae", "rov", "suv",
+        // ⚠ `ai` IS A DICTIONARY WORD AND THAT IS WHY IT NEEDS TO BE HERE. CMUdict records `ai` as [AY1]
+        // — the three-toed sloth — so `AI` resolved to the word and read as "eye". The lowercase form is
+        // untouched (this list is case-gated: `it` is still [ˈɪt]), and the acronym is now spelled out.
+        // Confirmed against misaki's gold, which letter-spells it. The frequency argument is one-sided:
+        // the sloth is a crossword word and the initialism is in every other sentence about software.
+        "ai",
+        // ⟨u⟩ and ⟨a⟩ are vowels and ⟨cl⟩ a legal onset, so the phonotactic gate calls this READABLE and
+        // leaves it to the g2p, which invents the word [ˈuːklɑː]. Same shape as `cra` and `nyc` above.
+        "ucla", "atv", "gps", "hiv", "ufo", "faa", "epa", "irs",
         // ⟨cr⟩ is a legal onset and ⟨a⟩ a vowel, so the phonotactic test calls this READABLE and leaves it
         // to the g2p, which duly invents the word [kɹˈæ]. It is said letter by letter.
         "cra",

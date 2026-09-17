@@ -173,7 +173,9 @@ public class HmongTests
     public void InitialismsGetEnglishLetterNames()
     {
         Assert.Equal("bˌiːbisˈiː", Say("BBC"));
-        Assert.Equal("ɡˌiːdˌiːpʰˈiː", Say("GDP"));
+        // ⚠ `d͡ʒiː`, NOT `ɡiː`. This used to read ɡˌiːdˌiːpʰˈiː, recording a CMUdict defect as correct: the
+        // `gdp` row spelled ⟨g⟩ with its SOUND [G IY] where CMUdict's own `g` row is [JH IY].
+        Assert.Equal("d͡ʒˌiːdˌiːpʰˈiː", Say("GDP"));
         Assert.Equal("ˈɛɫ . ˈɛɫ . zˈæmɪnhəf", Say("L. L. Zamenhof"));
     }
 

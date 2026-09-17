@@ -283,7 +283,10 @@ describe("Hmong (hmn) — a Latin run the converter cannot read", () => {
     // not from a table this engine made up.
     test("an initialism gets ENGLISH letter names, because no Hmong letter-name table is attested", () => {
         expect(say("BBC")).toBe("bˌiːbisˈiː");
-        expect(say("GDP")).toBe("ɡˌiːdˌiːpʰˈiː");
+        // ⚠ `d͡ʒiː`, NOT `ɡiː`. This expectation used to read ɡˌiːdˌiːpʰˈiː, which recorded a CMUdict
+        // defect as correct: the `gdp` row spelled ⟨g⟩ with its SOUND [G IY] where CMUdict's own `g` row
+        // is [JH IY] — the dictionary contradicting itself. Corrected in g2p-curated.tsv.
+        expect(say("GDP")).toBe("d͡ʒˌiːdˌiːpʰˈiː");
         expect(say("L. L. Zamenhof")).toBe("ˈɛɫ . ˈɛɫ . zˈæmɪnhəf"); // the corpus's own `L. L. Zamenhof` (n-gram OOV; was *zˈæmənhf* before #1260)
     });
 
