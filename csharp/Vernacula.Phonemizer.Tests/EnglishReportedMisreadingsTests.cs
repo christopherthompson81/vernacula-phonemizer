@@ -40,7 +40,7 @@ public class EnglishReportedMisreadingsTests
 
     [Theory]
     [InlineData("IR spectroscopy", "ˌɪnfɹɚˈɛd spɛktɹˈɑːskəpi")]
-    [InlineData("UV and IR light", "jˈuːvˈiː ənd ˌɪnfɹɚˈɛd lˈaᶦt")]
+    [InlineData("UV and IR light", "jˌuːvˈiː ənd ˌɪnfɹɚˈɛd lˈaᶦt")]
     [InlineData("Ir", "ˈɪɹ")]
     public void IrReadsAsInfraredAndOnlyInThatExactCasing(string text, string ipa)
         => Assert.Equal(ipa, Say(text));
@@ -133,7 +133,7 @@ public class EnglishReportedMisreadingsTests
     [InlineData("H2SO4", "ˈeᶦt͡ʃ tʰˈuː ˈɛs ˈoᶷ fˈɔːɹ")]
     [InlineData("AS400", "ˈeᶦ ˈɛs fˈɔːɹ hˈʌndɹəd")]
     // ⚠ TWO LETTERS ONLY — widening this turns COVID19 into "C O V I D nineteen".
-    [InlineData("COVID19", "koᶷvˈiːd nˈaᶦntˈiːn")]
+    [InlineData("COVID19", "koᶷvˈiːd nˌaᶦntˈiːn")]
     // …and the ones that were already right, pinned as undisturbed.
     [InlineData("CH₄", "sˈiː ˈeᶦt͡ʃ fˈɔːɹ")]
     [InlineData("MP3", "ˈɛm pʰˈiː θɹˈiː")]
@@ -143,7 +143,7 @@ public class EnglishReportedMisreadingsTests
 
     [Theory]
     [InlineData("pages 5–15", "pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn")]
-    [InlineData("2019–2020", "twˈɛnti nˈaᶦntˈiːn tʰuː twˈɛnti twˈɛnti")]
+    [InlineData("2019–2020", "twˈɛnti nˌaᶦntˈiːn tʰuː twˈɛnti twˈɛnti")]
     public void ADashBetweenTwoNumbersIsARange(string text, string ipa) => Assert.Equal(ipa, Say(text));
 
     [Theory]
@@ -178,7 +178,7 @@ public class EnglishReportedMisreadingsTests
     // ⚠ CC and SS are doubled too and are NOT on the list: CMUdict records their letter readings
     // already, in one token with one stress, which is better prosody than spelling out.
     [InlineData("the CC thing", "ðə siːsˈiː θˈɪŋ")]
-    [InlineData("the SS thing", "ðə ˈɛsˈɛs θˈɪŋ")]
+    [InlineData("the SS thing", "ðə ˌɛsˈɛs θˈɪŋ")]
     [InlineData("the AAA thing", "ðə tɹˌɪpəlˈeᶦ θˈɪŋ")]
     [InlineData("the BB thing", "ðə bˈiː bˈiː θˈɪŋ")]
     public void ADoubledCapitalIsACode(string t, string ipa) => Assert.Equal(ipa, Say(t));

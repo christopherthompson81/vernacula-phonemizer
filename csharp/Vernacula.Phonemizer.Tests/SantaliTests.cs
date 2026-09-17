@@ -244,7 +244,7 @@ public class SantaliTests
     public void AnEnglishOrdinalGoesToEnglishWhole()
     {
         Assert.Equal("fˈɝst", Say("1st"));                                   // was "mitʼ stɹˈiːt"
-        Assert.Equal("θˈɝtʰˈiːnθ", Say("13th"));                             // was "ɡel pe tʰˈiːʲˈeᶦt͡ʃ"
+        Assert.Equal("θˌɝtʰˈiːnθ", Say("13th"));                             // was "ɡel pe tʰˈiːʲˈeᶦt͡ʃ"
         Assert.Equal("fˈɔːɹθ sˈɛnt͡ʃɚi bˈiː sˈiː ˈiː", Say("4th century BCE"));
         // ⚠ THE NEIGHBOUR IT MUST REFUSE: an Ol Chiki numeral takes no Latin ordinal suffix, and a plain
         // ASCII number is still read in SANTALI, not handed to English.

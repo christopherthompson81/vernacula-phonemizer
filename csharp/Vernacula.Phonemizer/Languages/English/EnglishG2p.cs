@@ -78,19 +78,20 @@ public static class EnglishG2pFactory
         return outp;
     }
 
-    /** A word has exactly ONE primary stress. */
+    /**
+     * A predictor emits a digit per position with no global constraint, so it can return ZERO `1`s for a
+     * short or odd word; PROMOTE the first vowel so every content word carries a tonic.
+     *
+     * ⚠ THE DEMOTION HALF MOVED TO `EnglishArpabet.SinglePrimary`. It was only reachable from the OOV paths
+     * — the DICTIONARY path does not come through here — so 372 words were emitted with more than one primary
+     * mark. It MOVED rather than being copied, because a demotion in both places made the same ARPABET read
+     * two ways depending on which path delivered it (`AA1 R CH B IH1 SH AH0 P` → `ˈɑːɹt͡ʃbɪʃəp` via the
+     * predictor, `ˌɑːɹt͡ʃbˈɪʃəp` via the dictionary), which is the seam the curation gate exists to catch.
+     */
     public static List<string> EnforceSinglePrimary(IReadOnlyList<string> ph, IReadOnlySet<string> vowels)
     {
-        var seen = false;
-        var outp = new List<string>(ph.Count);
-        foreach (var p in ph)
-        {
-            if (!PRIMARY.IsMatch(p)) { outp.Add(p); continue; }
-            if (seen) { outp.Add(PRIMARY.Replace(p, "2")); continue; }
-            seen = true;
-            outp.Add(p);
-        }
-        if (!seen)
+        var outp = new List<string>(ph);
+        if (!outp.Exists(PRIMARY.IsMatch))
         {
             var vi = outp.FindIndex(p => vowels.Contains(DropStress(p)));
             if (vi >= 0) outp[vi] = STRESS_DIGIT.Replace(outp[vi], "1");

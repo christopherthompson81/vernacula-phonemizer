@@ -46,18 +46,28 @@ export function collapseGeminates(ph: string[], vowels: ReadonlySet<string>): st
     return out;
 }
 
-/** A word has exactly ONE primary stress. A per-position predictor (n-gram OR the BiLSTM tagger) can emit several
- *  `1`s (keep the FIRST, demote the rest to `2`) OR — for a short/odd word — ZERO `1`s (then PROMOTE the first vowel
- *  to primary so every content word carries a tonic). Exported so englishTagger.ts shares the exact stress invariant. */
+/** A predictor (n-gram OR the BiLSTM tagger) emits a digit per position with no global constraint, so it can
+ *  return ZERO `1`s for a short or odd word; PROMOTE the first vowel to primary so every content word carries
+ *  a tonic. Exported so englishTagger.ts shares it with the n-gram path.
+ *
+ *  ⚠ THIS USED TO ALSO DEMOTE — several `1`s, keep the FIRST — and that half now lives in `singlePrimary`,
+ *  inside `arpabetToIpa`. It had to move because it was only reachable from the OOV paths: the DICTIONARY
+ *  path does not come through this function, so 1,029 `g2p-dict.tsv` rows with more than one stress-1
+ *  nucleus were rendered verbatim and 372 words were emitted with two or three primary marks in one group.
+ *
+ *  ⚠ AND IT HAD TO MOVE RATHER THAN BE COPIED, because keeping a demotion here as well made the SAME
+ *  ARPABET read two different ways depending on which path delivered it — `AA1 R CH B IH1 SH AH0 P` came out
+ *  `ˈɑːɹt͡ʃbɪʃəp` through the predictor and `ˌɑːɹt͡ʃbˈɪʃəp` through the dictionary. That is the seam this repo
+ *  keeps a curation gate to catch, and the argument for allowing it (that a predictor's extra `1` is noise
+ *  while CMUdict's is a statement) does not survive contact with the COMPOUND path, which joins two dict
+ *  stems each carrying its own real primary. One function, one policy, both paths.
+ *
+ *  The "at least one" half stays here, because only a predictor can return zero primaries: a dictionary row
+ *  always has one, and promoting inside the converter would invent a tonic for the function words that
+ *  correctly carry none. */
 export function enforceSinglePrimary(ph: string[], vowels: ReadonlySet<string>): string[] {
-    let seen = false;
-    const out = ph.map((p) => {
-        if (!/1$/.test(p)) return p;
-        if (seen) return p.replace(/1$/, "2");
-        seen = true;
-        return p;
-    });
-    if (!seen) {
+    const out = [...ph];
+    if (!out.some((p) => /1$/.test(p))) {
         const vi = out.findIndex((p) => vowels.has(dropStress(p)));
         if (vi >= 0) out[vi] = out[vi]!.replace(/[0-2]$/, "1");
     }

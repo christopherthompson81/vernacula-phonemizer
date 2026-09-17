@@ -173,7 +173,7 @@ public class HmongTests
     public void InitialismsGetEnglishLetterNames()
     {
         Assert.Equal("bˌiːbisˈiː", Say("BBC"));
-        Assert.Equal("ɡˈiːdˈiːpʰˈiː", Say("GDP"));
+        Assert.Equal("ɡˌiːdˌiːpʰˈiː", Say("GDP"));
         Assert.Equal("ˈɛɫ . ˈɛɫ . zˈæmɪnhəf", Say("L. L. Zamenhof"));
     }
 

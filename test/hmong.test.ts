@@ -283,7 +283,7 @@ describe("Hmong (hmn) — a Latin run the converter cannot read", () => {
     // not from a table this engine made up.
     test("an initialism gets ENGLISH letter names, because no Hmong letter-name table is attested", () => {
         expect(say("BBC")).toBe("bˌiːbisˈiː");
-        expect(say("GDP")).toBe("ɡˈiːdˈiːpʰˈiː");
+        expect(say("GDP")).toBe("ɡˌiːdˌiːpʰˈiː");
         expect(say("L. L. Zamenhof")).toBe("ˈɛɫ . ˈɛɫ . zˈæmɪnhəf"); // the corpus's own `L. L. Zamenhof` (n-gram OOV; was *zˈæmənhf* before #1260)
     });
 

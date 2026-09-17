@@ -91,7 +91,7 @@ describe("numeral register (corpus rendering policy)", () => {
         // Emitted as the digit-pair tokens `src/languages/english/normalize.ts` uses, so the English number
         // path composes the words rather than this module.
         expect(words("ngo-1998", "zu")).toContain("19 98");
-        expect(render("ngo-1998", "zu")).toContain("nˈaᶦntˈiːn");     // nineteen
+        expect(render("ngo-1998", "zu")).toContain("nˌaᶦntˈiːn");     // nineteen
         expect(render("ngo-1998", "zu")).not.toContain("θˈaᶷzənd");   // …not "thousand"
         // The four irregular shapes of the pair-wise reading.
         expect(words("mu 1905", "nya")).toContain("19 oh 5");
