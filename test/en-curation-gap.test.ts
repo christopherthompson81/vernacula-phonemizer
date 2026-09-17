@@ -45,7 +45,7 @@ const KNOWN_GAPS = new Map<string, string>([
  * root, a proper noun, a loan — the OOV path has only the n-gram, and the n-gram learned the row we corrected.
  * It reproduces the upstream shape by construction, and no amount of curation can change that.
  *
- * ⚠ IT IS 179 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
+ * ⚠ IT IS 260 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
  * Every entry is a curated row whose correction the model cannot reproduce because the model learned the row we
  * corrected. When the remedy below is taken, this list should COLLAPSE, and that collapse is the test that the
  * retrain worked. If it instead keeps growing while nobody retrains, the gate is telling you the curated layer
@@ -73,9 +73,12 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
-    "allelic", "atman", "audible", "awe", "babka", "baile", "bellini", "benne", "bes", "blog", "bobble",
-    "boche", "boff", "bog", "bridie", "calabria", "caliph", "cana", "cause", "causeway", "chomp",
-    "coauthor", "conger", "conversely", "cost", "cutoff", "dacron", "dagenham", "dal", "debrief",
+    "allelic", "ara", "arab", "arable", "arenson", "arrant", "arrick", "arrow", "atman", "audible", "awe",
+    "babka", "baile", "baranek", "barratt", "barrel", "barrett", "barrie", "barrineau", "barris",
+    "barrowman", "barry", "bellini", "benne", "bes", "blog", "bobble", "boche", "boff", "bog", "bridie",
+    "calabria", "caliph", "cana", "carignan", "carrel", "carrigan", "carrigg", "carris", "carriveau",
+    "carry", "cause", "causeway", "chomp", "clarisse", "clarridge", "clarrisse", "coauthor", "conger",
+    "conversely", "cost", "cutoff", "dacron", "dagenham", "dal", "darin", "darrin", "debrief",
     "denomination", "denominational", "der", "discography", "discombobulate", "dogma", "drachma",
     "dramatize", "dubrovnik", "duce", "dulce", "eamon", "embargo", "embark", "embattle", "embitter",
     "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode", "encompass", "encourage",
@@ -83,16 +86,22 @@ const STRUCTURAL_GAP = new Set([
     "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage",
     "envision", "escudo", "esse", "evolve", "excoriate", "extort", "extortion", "extortionate",
     "extortionist", "extraction", "extrapolate", "extravagance", "extravagant", "extreme", "extremist",
-    "favela", "felonious", "fide", "foggy", "forensic", "foster", "frog", "gala", "genotype", "golf",
-    "graben", "grana", "granum", "hadrian", "hamm", "hebron", "hematite", "hog", "homs", "hoss", "hulme",
-    "hypertrophy", "ideal", "insular", "joseph", "kana", "kanji", "kersey", "kingsport", "knockoff",
-    "lachlan", "loge", "loggerhead", "loggia", "masochist", "mende", "minke", "mulligatawny", "necrologist",
-    "necrology", "nerine", "olde", "on", "onset", "pravda", "quahog", "rahway", "raj", "remunerative",
-    "revolve", "rouse", "runoff", "saas", "salsa", "sandhog", "sauternes", "selene", "serologist", "soave",
-    "sodom", "sodomize", "spawn", "splenic", "stanch", "stasi", "status", "stomp", "strata", "stratus",
-    "swanky", "synagogue", "tawny", "taxol", "turnoff", "twangy", "ulm", "unencumbered", "unenforceable",
-    "unwashed", "vegan", "vela", "virulence", "virulent", "wank", "wash", "washy", "wat", "watchdog",
-    "williamsport", "writhe", "zaftig"
+    "farabee", "faraday", "farold", "favela", "felonious", "fide", "foggy", "forensic", "foster", "frog",
+    "gala", "garrahan", "garraway", "garrels", "garrett", "garrigan", "garriott", "garris", "garritt",
+    "garrott", "garroway", "garry", "genotype", "golf", "graben", "grana", "granum", "hadrian", "hamm",
+    "harral", "harralson", "harrel", "harrill", "harring", "harriott", "harrisburgh", "harrity", "hebron",
+    "hematite", "hog", "homs", "hoss", "hulme", "hypertrophy", "ideal", "insular", "jarratt", "joseph",
+    "kana", "kanji", "karrick", "karriker", "kersey", "kingsport", "klarich", "knockoff", "lachlan",
+    "larimer", "larison", "larrabee", "loge", "loggerhead", "loggia", "marold", "marolf", "marolt",
+    "masochist", "mccarrell", "mccarrick", "mccarroll", "mccarron", "mccarry", "mcclaran", "mcgarity",
+    "mckarrick", "mende", "minke", "mulligatawny", "necrologist", "necrology", "nerine", "ocarroll", "olde",
+    "on", "onset", "parrett", "parriott", "pharris", "pravda", "quahog", "rahway", "raj", "rarick",
+    "remunerative", "revolve", "rouse", "runoff", "saas", "salsa", "sandhog", "sauternes", "scarry",
+    "schara", "selene", "serologist", "sharrett", "sharrock", "sharron", "sharrow", "soave", "sodom",
+    "sodomize", "spawn", "splenic", "stanch", "stasi", "status", "stomp", "strata", "stratus", "swanky",
+    "synagogue", "tawny", "taxol", "tharrington", "turnoff", "twangy", "ulm", "unencumbered",
+    "unenforceable", "unwashed", "vegan", "vela", "virulence", "virulent", "wank", "wash", "washy", "wat",
+    "watchdog", "williamsport", "writhe", "zaftig", "zara"
 ]);
 
 function dict(path: string): Map<string, string[]> {

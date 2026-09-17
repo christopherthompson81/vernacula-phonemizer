@@ -18,8 +18,12 @@ describe("reported misreadings", () => {
         expect(phonemize("in situ", "en-GB")).toBe("ɪn sˈɪt͡ʃuː");
     });
 
+        // ⚠ `kʰˈɛɹəktɚz`, not `kʰˈæɹəktɚz`: the marry–merry merger was applied consistently. CMUdict had
+        // `character` and `characteristic` as EH but the PLURAL `characters` as AE — a word contradicting
+        // its own singular, which is the kind of split that made the merger a coherence fix rather than a
+        // dialect preference. Incidental to what this line pins, which is that `max` expands to `maximum`.
     test("max expands to maximum, lowercase only and never the verb", () => {
-        expect(phonemize("max 40 characters", "en")).toBe("mˈæksəməm fˈɔːɹt̬i kʰˈæɹəktɚz");
+        expect(phonemize("max 40 characters", "en")).toBe("mˈæksəməm fˈɔːɹt̬i kʰˈɛɹəktɚz");
         expect(phonemize("a max of 40", "en")).toBe("ə mˈæksəməm ʌv fˈɔːɹt̬i");
         expect(phonemize("to the max", "en")).toBe("tʰuː ðə mˈæksəməm");
         // the dot is consumed, so it cannot become a phrase break mid-sentence

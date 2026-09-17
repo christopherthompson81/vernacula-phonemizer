@@ -114,6 +114,21 @@ export interface LexSets {
     yod: Set<string>; // Cuː → Cjuː
     palm: Set<string>; // keep [ɑː] against the LOT rule
     lotr: Set<string>; // ɑːɹ → ɒɹ before a vowel (sorry, borrow — LOT before intervocalic r; cf. starry which keeps ɑː)
+    /**
+     * ɛɹ → æɹ before a vowel: the marry–merry merger, UNDONE for RP.
+     *
+     * ⚠ THIS SET EXISTS BECAUSE THE PARENT MERGED AND BRITISH DID NOT. GenAm (and Canadian) has
+     * marry = merry = Mary; SSBE keeps `marry` /ˈmæri/ apart from `merry` /ˈmɛri/. The parent's dictionary
+     * was INCOHERENT about it — `arrogate` æ beside `arrogance` ɛ, `arrow` beside `arrowroot`, 208 rows one
+     * way and 147 the other in the same environment — and was made consistently merged against misaki gold
+     * (66 of 66, no counterexamples). That change would otherwise cost this accent ~50 referee rows, so the
+     * mapping back lives here, exactly as `lotr` carries `sorry` and `bath` carries `dramatize`.
+     *
+     * ⚠ IT IS A WORD LIST AND NOT A RULE, deliberately: a blanket ɛɹ→æɹ would wrongly convert the words that
+     * are GENUINELY ɛ in both varieties — `merry`, `very`, `ferry`, `error`, `herald`, `America`. Only words
+     * the parent moved belong here.
+     */
+    marry: Set<string>;
 }
 const loadSet = (file: string): Set<string> =>
     new Set([...loadTsvMap(import.meta.url, file, (v) => v, { optional: true }).keys()]);
@@ -125,6 +140,7 @@ const sets = (): LexSets =>
         yod: loadSet("en-gb-yod.tsv"),
         palm: loadSet("en-gb-palm.tsv"),
         lotr: loadSet("en-gb-lotr.tsv"),
+        marry: loadSet("en-gb-marry.tsv"),
     });
 
 /** GenAm citation IPA → SSBE. `lex` (present on the shipped path) supplies the lexical-set membership for `word`. */
@@ -188,6 +204,8 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // varieties are right and only the mapping between them was missing. Matching only ɑːɹ left the rule
         // silently failing on over half its own list, with the set still listing the words.
         if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
+        // marry–merry: undo the parent's merger for RP, which does not have it. First occurrence only, as above.
+        if (lex.marry.has(w)) s = s.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ");
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s

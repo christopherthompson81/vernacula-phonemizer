@@ -1231,3 +1231,64 @@ Gutenberg package — taking that file would have made the "independent third so
 
     tests 5,973 pass / 309 files   goldens 0 stale   package fence ok
     en 60.0% (floor 0.50)   en-GB 47.5% (floor 0.44)
+
+## Run 13 — the marry–merry merger, taken, and the en-GB half it required
+
+Deferred in Run 8f as "a dialect choice, not a defect — our dict is internally consistent (æ throughout)".
+**That claim was wrong**, and the owner supplying their own dialect ("where I'm from, marry–merry are
+pronounced the same") prompted the check that showed it.
+
+### ⚠ THE DICTIONARY WAS NOT CONSISTENT. I had only looked at the divergence bucket, not the minimal pair
+
+    marry  M EH1 R IY0      merry  M EH1 R IY0      mary  M EH1 R IY0     ← already MERGED
+    carry  K AE1 R IY0      barrel B AE1 R AH0 L    arrow AE1 R OW0       ← not
+
+In the unambiguous ⟨arr⟩+vowel environment the dict is **208 AE against 147 EH**, and the same stem goes
+both ways:
+
+    arrogate   AE      but   arrogance / arrogant   EH
+    arrow      AE      but   arrowroot              EH
+    character  EH      but   characters (its own PLURAL)  AE
+
+That is the LOT–THOUGHT shape exactly, and it settles the question the same way: where a dictionary is
+incoherent, any consistent choice is an improvement and the reference decides which.
+
+### What each source says, and which ones cannot arbitrate
+
+| source | verdict |
+|---|---|
+| misaki gold | **merged, 66 of 66 covered words, zero counterexamples** |
+| our dict | incoherent, 208/147, same-stem contradictions |
+| US wikipron | **itself split — 60 merged against 27 unmerged** (`Garrett` beside `Barrett`) |
+| Moby | unmerged — but PRE-MERGER on every axis tested (FORCE/NORTH, the `seizure` yod) |
+| the owner | merged |
+
+⚠ The US referee cannot arbitrate this, exactly as it could not arbitrate cot–caught (it writes `dawn` as
+`dɑn` in a file where it distinguishes elsewhere). Applied: **404 rows**, `AE`→`EH` before an intervocalic
+`R`. The net effect on that referee is −2 rows, which is noise from its own 27 unmerged entries.
+
+### ⚠ AND THE en-GB HALF, WHICH IS NOT OPTIONAL — RP DOES NOT HAVE THE MERGER
+
+Measured immediately after applying it: en-GB fell from **53 matching referee rows in the class to 3**. SSBE
+keeps `marry` /ˈmæri/ apart from `merry` /ˈmɛri/, so the parent's merger has to be mapped back.
+
+A new lexical set, `en-gb-marry.tsv` (`ɛɹ` → `æɹ`), built the same way as the cloth additions in #1334 —
+trial the membership, measure against the referee, prune what does not improve:
+
+    the 404 the parent moved                     → 3 dropped (`ara`, `arabs`, `multivariate`: the
+                                                   referee shows those as genuinely ɛ/ɛə in British)
+    + 121 words ALREADY merged before this change  ← a pre-existing en-GB defect this set also fixes:
+                                                   `character`, `apparent`, `caramel`, `Arizona`, `asparagus`
+    = 522 rows;   en-GB back to 49 in the class, and marry/merry correctly distinct again
+
+⚠ **A WORD LIST AND NOT A RULE**, deliberately: a blanket `ɛɹ`→`æɹ` would wrongly convert `merry`, `very`,
+`ferry`, `error`, `America`, which are genuinely `ɛ` in both varieties.
+
+⚠ **Ordering checked, not assumed.** The lexical block runs BEFORE the SQUARE rule, so a marry word's
+prevocalic `ɛɹ` is still spelled `ɛɹ` when this fires while a preconsonantal one still becomes `ɛə`
+(`care` kʰˈɛə, `caretaker` kʰˈɛəteᶦkə are untouched). And the first-occurrence limit was audited: exactly
+one member has two `ɛɹ` (`lariviere` lˈɛɹɪviʲɛɹ) and its FIRST is the marry one, so the rule picks right.
+Pinned in the test rather than left to luck.
+
+    en 59.9% (floor 0.50)   en-GB 47.5% (floor 0.44)
+    tests 5,979 pass / 310 files   goldens 0 stale   regex parity 0 differ

@@ -27,6 +27,13 @@ public sealed class LexSets
     public required IReadOnlySet<string> Palm { get; init; }   // keep [ɑː] against the LOT rule
     /** ɑːɹ → ɒɹ before a vowel (sorry, borrow — LOT before intervocalic r; cf. starry, which keeps ɑː). */
     public required IReadOnlySet<string> Lotr { get; init; }
+
+    /// ɛɹ → æɹ before a vowel: the marry–merry merger, UNDONE for RP. The TS twin carries the reasoning —
+    /// GenAm (and Canadian) has marry = merry = Mary, SSBE keeps them apart, and the parent's dictionary was
+    /// INCOHERENT about it (`arrogate` æ beside `arrogance` ɛ) until it was made consistently merged.
+    /// ⚠ A WORD LIST, NOT A RULE: a blanket ɛɹ→æɹ would wrongly convert `merry`, `very`, `ferry`, `error`,
+    /// `America`, which are genuinely ɛ in BOTH varieties.
+    public required IReadOnlySet<string> Marry { get; init; }
 }
 
 public static class EnglishGb
@@ -64,6 +71,7 @@ public static class EnglishGb
         Yod = LoadSet("en-gb-yod.tsv"),
         Palm = LoadSet("en-gb-palm.tsv"),
         Lotr = LoadSet("en-gb-lotr.tsv"),
+        Marry = LoadSet("en-gb-marry.tsv"),
     };
 
     private static readonly JsRe FLAP_T = JsRegex.Compile("t̬", "gu");
@@ -89,6 +97,8 @@ public static class EnglishGb
     private static readonly JsRe CLOTH_FIRST = JsRegex.Compile("ɔː", "u");
     private static readonly JsRe YOD_FIRST = JsRegex.Compile("([tdnszθl])(ʰ?)([ˈˌ]?)uː", "u");
     private static readonly JsRe LOTR_FIRST = JsRegex.Compile("[ɑɔ]ːɹ", "u");
+
+    private static readonly JsRe MARRY_FIRST = JsRegex.Compile("ɛ(ˈ|ˌ)?ɹ", "u");
     /** The OFFGLIDE TRIPHTHONGS. ⚠ WITHOUT THESE #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS: the generic
      *  offglide map used to rewrite `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` first, so NEAR and CURE fired on the result and
      *  turned offglide + coda /ɹ/ into RP's triphthong (`ˈæbʃaᶦɹ` → `ˈæbʃaɪə`). Keeping the superscript stops
@@ -131,6 +141,8 @@ public static class EnglishGb
             // to gold's consistent LOT–THOUGHT split and 7 of this set's 13 words moved from ɑː to ɔː, so
             // matching only ɑːɹ left the rule silently failing on over half its own list.
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
+            // marry–merry: undo the parent's merger for RP. First occurrence only, as above.
+            if (lex.Marry.Contains(w)) s = MARRY_FIRST.Replace(s, "æ$1ɹ");
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
         s = IGLIDE_R.Replace(s, "ᶦə");  // any ᶦ-glide + coda r: FACE, PRICE, CHOICE (ayr, fire, choir)

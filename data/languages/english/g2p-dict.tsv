@@ -2025,7 +2025,7 @@ albano	AA0 L B AA1 N OW0
 albans	AE1 L B AE0 N Z
 albany	AO1 L B AH0 N IY0
 albarado	AA0 L B AA0 R AA1 D OW0
-albarran	AE2 L B AE1 R AH0 N
+albarran	AE2 L B EH1 R AH0 N
 albashaun	AE1 L B AH0 SH AA2 N
 albatross	AE1 L B AH0 T R AO2 S
 albatrosses	AE1 L B AH0 T R AO2 S IH0 Z
@@ -4215,7 +4215,7 @@ apparatchik	AE2 P ER0 AE1 CH IH0 K
 apparatchiks	AE2 P ER0 AE1 CH IH0 K S
 apparatus	AE2 P ER0 AE1 T AH0 S
 apparatuses	AE2 P ER0 AE1 T AH0 S AH0 Z
-apparel	AH0 P AE1 R AH0 L
+apparel	AH0 P EH1 R AH0 L
 apparent	AH0 P EH1 R AH0 N T
 apparently	AH0 P EH1 R AH0 N T L IY0
 apparition	AE2 P ER0 IH1 SH AH0 N
@@ -4434,21 +4434,21 @@ aquino	AH0 K IY1 N OW0
 aquirre	AE1 K W ER0
 aquitaine	AE2 K W IH0 T EY1 N
 ar	AA1 R
-ara	AE1 R AH0
-arab	AE1 R AH0 B
+ara	EH1 R AH0
+arab	EH1 R AH0 B
 arabe	AA0 R AA1 B EY0
-arabella	AE2 R AH0 B EH1 L AH0
+arabella	EH2 R AH0 B EH1 L AH0
 arabia	AH0 R EY1 B IY0 AH0
 arabian	AH0 R EY1 B IY0 AH0 N
 arabians	AH0 R EY1 B IY0 AH0 N Z
-arabic	AE1 R AH0 B IH0 K
+arabic	EH1 R AH0 B IH0 K
 arabica	ER0 AE1 B IH0 K AH0
 arabichon	AH0 R AE1 B IH0 SH AO2 N
 arabicon	AH0 R AE1 B AH0 K AO2 N
-arabie	AE1 R AH0 B IY0
-arable	AE1 R AH0 B AH0 L
-arabs	AE1 R AH0 B Z
-araby	AE1 R AH0 B IY2
+arabie	EH1 R AH0 B IY0
+arable	EH1 R AH0 B AH0 L
+arabs	EH1 R AH0 B Z
+araby	EH1 R AH0 B IY2
 arachnid	AH0 R AE1 K N AH0 D
 arachnids	ER0 AE1 K N AH0 D Z
 arafat	EH1 R AH0 F AE0 T
@@ -4458,14 +4458,14 @@ arai	AA0 R AA1 IY0
 araiza	ER0 EY1 Z AH0
 arakaki	AA0 R AA0 K AA1 K IY0
 arakawa	AA2 R AA0 K AA1 W AH0
-arakelian	AE0 R AH0 K EH1 L Y AH0 N
+arakelian	EH0 R AH0 K EH1 L Y AH0 N
 araki	AA0 R AA1 K IY0
 aral	AA1 R AA0 L
 aramaic	AA2 R AA0 M EH1 Y IH0 K
 arambula	AA0 R AA0 M B UW1 L AH0
 aramco	ER0 AE1 M K OW0
 aramid	EH1 R AH0 M IH0 D
-araminta	AE2 R AH0 M IH1 N T AH0
+araminta	EH2 R AH0 M IH1 N T AH0
 aramis	EH1 R AH0 M IH0 S
 aramony	AA1 R AH0 M OW2 N IY0
 aran	EH1 R AH0 N
@@ -4479,7 +4479,7 @@ arantza	AH0 R AA1 N T Z AH0
 aranyos	ER0 AA1 N Y OW2 S
 arapaho	ER0 AE1 P AH0 HH OW2
 arapahoe	ER0 AE1 P AH0 HH OW2
-ararat	AE1 R AH0 R AA2 T
+ararat	EH1 R AH0 R AA2 T
 araskog	ER0 AE1 S AA0 G
 arata	AA0 R AA1 T AH0
 arau	AH0 R AW1
@@ -4648,9 +4648,9 @@ area	EH1 R IY0 AH0
 areas	EH1 R IY0 AH0 Z
 arebalo	AA0 R EH0 B AA1 L OW0
 arechiga	AA0 R EH0 K IY1 G AH0
-arehart	AE1 R IH0 HH AA0 R T
+arehart	EH1 R IH0 HH AA0 R T
 arel	AA0 R EH1 L
-arellanes	AE1 R IH0 L EY2 N Z
+arellanes	EH1 R IH0 L EY2 N Z
 arellano	AA0 R EH0 L AA1 N OW0
 aren	AA1 R AH0 N
 arena	ER0 IY1 N AH0
@@ -4663,9 +4663,9 @@ arendsee	ER0 EH1 N D S IY2
 arendt	EH1 R IH0 N T
 arenella	AA2 R AH0 N EH1 L AH0
 arens	EH1 R AH0 N Z
-arenson	AE1 R IH0 N S AH0 N
+arenson	EH1 R IH0 N S AH0 N
 arent	AA1 R AH0 N T
-arentz	AE1 R IH0 N T S
+arentz	EH1 R IH0 N T S
 arenz	AA1 R EY0 N Z
 arequipa	AA2 R EH0 K IY1 P AA0
 ares	AA1 R Z
@@ -4675,7 +4675,7 @@ aretina	AA0 R EH0 T IY1 N AH0
 aretsky	EH0 R EH1 T S K IY1
 aretta	AA0 R EH1 T AH0
 arevalo	AA0 R EY0 V AA1 L OW0
-arey	AE1 R IY0
+arey	EH1 R IY0
 argabright	AA1 R G AH0 B R AY2 T
 argall	AA1 R G AH0 L
 arganbright	AA0 R G AE1 N B R AY0 T
@@ -4723,16 +4723,16 @@ ari	AA1 R IY0
 aria	AA1 R IY0 AH0
 ariadne	EH2 R IY0 AE1 D N IY0
 arial	EH1 R IY2 AH0 L
-arian	AE1 R IY0 AH0 N
+arian	EH1 R IY0 AH0 N
 ariana	AA0 R IY0 AE1 N AH0
 ariane	EH2 R IY0 AE1 N
 arianespace	EH2 R IY0 AE1 N S P EY1 S
-arianism	AE1 R IY0 AH0 N IH2 Z AH0 M
+arianism	EH1 R IY0 AH0 N IH2 Z AH0 M
 arianna	AA0 R IY0 AE1 N AH0
 arias	AA1 R IY0 AH0 Z
-aric	AE1 R IH0 K
+aric	EH1 R IH0 K
 arico	AA0 R IY1 K OW0
-arid	AE1 R AH0 D
+arid	EH1 R AH0 D
 arida	AH0 R IY1 D AH0
 arie	EH1 R IY0
 ariel	EH1 R IY0 AH0 L
@@ -4756,7 +4756,7 @@ aristocracy	EH2 R AH0 S T AA1 K R AH0 S IY0
 aristocrat	ER0 IH1 S T AH0 K R AE2 T
 aristocratic	ER0 IH2 S T AH0 K R AE1 T IH0 K
 aristocrats	ER0 IH1 S T AH0 K R AE2 T S
-aristophanes	AE2 R AH0 S T AA1 F AH0 N IY0 Z
+aristophanes	EH2 R AH0 S T AA1 F AH0 N IY0 Z
 aristotelian	ER0 IH2 S T AH0 T IY1 L IY0 AH0 N
 aristotle	EH1 R AH0 S T AA2 T AH0 L
 arithmetic	EH2 R IH0 TH M EH1 T IH0 K
@@ -4932,7 +4932,7 @@ aromatherapy	AH0 R OW2 M AH0 TH ER1 AH0 P IY0
 aromatic	EH2 R AH0 M AE1 T IH0 K
 aron	EH1 R AH0 N
 arone	ER0 OW1 N
-aronhalt	AE1 R AH0 N HH AH0 L T
+aronhalt	EH1 R AH0 N HH AH0 L T
 aronie	ER0 OW1 N IY0
 aronoff	EH1 R AH0 N AO0 F
 aronow	ER0 OW1 N OW0
@@ -4968,8 +4968,8 @@ arrangements	ER0 EY1 N JH M AH0 N T S
 arranger	ER0 EY1 N JH ER0
 arranges	ER0 EY1 N JH IH0 Z
 arranging	ER0 EY1 N JH IH0 NG
-arrant	AE1 R AH0 N T
-arrants	AE1 R AH0 N T S
+arrant	EH1 R AH0 N T
+arrants	EH1 R AH0 N T S
 arrasmith	EH1 R AH0 S M IH2 TH
 array	ER0 EY1
 arrayed	ER0 EY1 D
@@ -4989,14 +4989,14 @@ arrests	ER0 EH1 S T S
 arrhythmia	ER0 IH1 DH M IY0 AH0
 arrhythmias	ER0 IH1 DH M IY0 AH0 Z
 arriaga	AA2 R IY0 AA1 G AH0
-arrick	AE1 R IH0 K
+arrick	EH1 R IH0 K
 arrieta	AA0 R IY1 T AH0
 arrigo	AA2 R IY1 G OW0
 arrigoni	AA0 R IY0 G OW1 N IY0
 arrington	EH1 R IH0 NG T AH0 N
 arriola	AA2 R IY0 OW1 L AH0
 arriortua	AA2 R IY0 AO0 R T UW1 AH0
-arris	AE1 R AH0 S
+arris	EH1 R AH0 S
 arrival	ER0 AY1 V AH0 L
 arrivals	ER0 AY1 V AH0 L Z
 arrive	ER0 AY1 V
@@ -5006,17 +5006,17 @@ arriving	ER0 AY1 V IH0 NG
 arrogance	EH1 R AH0 G AH0 N S
 arrogant	EH1 R AH0 G AH0 N T
 arrogantly	EH1 R AH0 G AH0 N T L IY0
-arrogate	AE1 R OW0 G EY2 T
-arrow	AE1 R OW0
-arrowhead	AE1 R OW0 HH EH2 D
-arrowheads	AE1 R OW0 HH EH2 D Z
-arrowood	AE1 R OW0 W UH2 D
+arrogate	EH1 R OW0 G EY2 T
+arrow	EH1 R OW0
+arrowhead	EH1 R OW0 HH EH2 D
+arrowheads	EH1 R OW0 HH EH2 D Z
+arrowood	EH1 R OW0 W UH2 D
 arrowroot	EH1 R OW0 R UW2 T
-arrows	AE1 R OW0 Z
-arrowsmith	AE1 R OW0 S M IH2 TH
+arrows	EH1 R OW0 Z
+arrowsmith	EH1 R OW0 S M IH2 TH
 arroyo	ER0 OY1 OW0
 arruda	AA0 R UW1 D AH0
-arrupe	AE1 R UW2 P
+arrupe	EH1 R UW2 P
 arsdale	AA1 R Z D EY2 L
 arse	AA1 R S
 arsehole	AA1 R S HH OW2 L
@@ -5143,7 +5143,7 @@ as	AE1 Z
 asa	AA1 S AH0
 asaf	AA0 S AA1 F
 asahan	AE1 S AH0 HH AE0 N
-asahara	AE0 S AH0 HH AE1 R AH0
+asahara	AE0 S AH0 HH EH1 R AH0
 asahi	AH0 S AA1 HH IY0
 asamera	AE2 S AH0 M EH1 R AH0
 asap	EY1 EH1 S EY1 P IY1
@@ -7273,20 +7273,20 @@ barach	B AH0 R AA1 K
 barack	B AA1 R AH0 K
 baraff	B AA0 R AA1 F
 baragi	B AH0 R AA1 G IY0
-barahona	B AE2 R AH0 HH OW1 N AH0
+barahona	B EH2 R AH0 HH OW1 N AH0
 barajas	B AA0 R AA1 Y AA0 Z
 barak	B AA1 R AH0 K
 barakat	B AA1 R AH0 K AA2 T
 baram	B EH1 R AE0 M
 baran	B AA0 R AA1 N
-baranek	B AE1 R AH0 N IH0 K
+baranek	B EH1 R AH0 N IH0 K
 baranoski	B ER0 AH0 N AW1 S K IY0
 baranowski	B ER0 AH0 N AO1 F S K IY0
 baranski	B ER0 AE1 N S K IY0
 barany	B ER0 AO1 N IY0
-barasch	B AE1 R AH0 SH
-barash	B AE1 R AH0 SH
-barath	B AE1 R AH0 TH
+barasch	B EH1 R AH0 SH
+barash	B EH1 R AH0 SH
+barath	B EH1 R AH0 TH
 baratta	B AA0 R AA1 T AH0
 barb	B AA1 R B
 barba	B AA1 R B AH0
@@ -7299,10 +7299,10 @@ barbara	B AA1 R B ER0 AH0
 barbaree	B AA1 R B ER0 IY1
 barbarian	B AA0 R B EH1 R IY0 AH0 N
 barbarians	B AA0 R B EH1 R IY0 AH0 N Z
-barbaric	B AA0 R B AE1 R IH0 K
+barbaric	B AA0 R B EH1 R IH0 K
 barbarino	B AA0 R B AA0 R IY1 N OW0
 barbarism	B AA1 R B ER0 IH2 Z AH0 M
-barbarity	B AA0 R B AE1 R AH0 T IY0
+barbarity	B AA0 R B EH1 R AH0 T IY0
 barbaro	B AA0 R B AA1 R OW0
 barbarous	B AA1 R B ER0 AH0 S
 barbary	B AA1 R B ER0 IY0
@@ -7387,9 +7387,9 @@ bardulph	B AA1 R D AH0 L F
 bardwell	B AA1 R D W EH2 L
 bare	B EH1 R
 bared	B EH1 R D
-barefield	B AE1 R IH0 F IY0 L D
+barefield	B EH1 R IH0 F IY0 L D
 barefoot	B EH1 R F UH2 T
-bareis	B AE1 R AY0 Z
+bareis	B EH1 R AY0 Z
 barela	B AA0 R EH1 L AH0
 barely	B EH1 R L IY0
 barenboim	B EH1 R AH0 N B OY2 M
@@ -7427,8 +7427,8 @@ bargo	B AA1 R G OW2
 barham	B AA1 R HH AH0 M
 barhorst	B AA1 R HH AO0 R S T
 bari	B AA1 R IY0
-baribeau	B AE1 R IH0 B OW0
-barich	B AE1 R IH0 K
+baribeau	B EH1 R IH0 B OW0
+barich	B EH1 R IH0 K
 baril	B EH1 R AH0 L
 barile	B AA1 R AH0 L
 barillari	B EH2 R IH0 L EH1 R IY0
@@ -7524,14 +7524,14 @@ baro	B AA1 R OW0
 baroid	B ER0 OY1 D
 barometer	B ER0 AA1 M IH0 T ER0
 barometers	B ER0 AA1 M IH0 T ER0 Z
-barometric	B AE2 R AH0 M EH1 T R IH0 K
-baron	B AE1 R AH0 N
+barometric	B EH2 R AH0 M EH1 T R IH0 K
+baron	B EH1 R AH0 N
 barone	B ER0 OW1 N
 baroness	B EH1 R AH0 N IH0 S
 baronet	B EH1 R AH0 N AH0 T
 baronets	B EH1 R AH0 N AH0 T S
 baroni	B AA0 R OW1 N IY0
-barons	B AE1 R AH0 N Z
+barons	B EH1 R AH0 N Z
 baroody	B ER0 UW1 D IY0
 baroque	B ER0 OW1 K
 baros	B AA1 R OW0 Z
@@ -7539,9 +7539,9 @@ barovic	B EH1 R AH0 V IH0 K
 barovsky	B ER0 AA1 V S K IY0
 barr	B AA1 R
 barra	B AA1 R AH0
-barrack	B AE1 R AH0 K
-barracks	B AE1 R AH0 K S
-barraclough	B AE1 R AH0 K L AW0
+barrack	B EH1 R AH0 K
+barracks	B EH1 R AH0 K S
+barraclough	B EH1 R AH0 K L AW0
 barraco	B AA0 R AA1 K OW0
 barracuda	B EH2 R AH0 K UW1 D AH0
 barradino	B EH2 R AH0 D IY1 N OW0
@@ -7550,75 +7550,75 @@ barrage	B ER0 AA1 ZH
 barraged	B ER0 AA1 ZH D
 barrages	B ER0 AA1 ZH IH0 Z
 barranco	B AA0 R AA1 N K OW0
-barras	B AE1 R AH0 Z
+barras	B EH1 R AH0 Z
 barrasso	B AA2 R AA1 S OW0
-barratt	B AE1 R AH0 T
+barratt	B EH1 R AH0 T
 barraza	B AA2 R AA1 Z AH0
 barre	B EH1 R IY0
 barreca	B AA2 R EH1 K AH0
 barred	B AA1 R D
 barreda	B AA0 R EY1 D AH0
 barreiro	B AA0 R EH1 R OW0
-barrel	B AE1 R AH0 L
-barreled	B AE1 R AH0 L D
-barreling	B AE1 R AH0 L IH0 NG
+barrel	B EH1 R AH0 L
+barreled	B EH1 R AH0 L D
+barreling	B EH1 R AH0 L IH0 NG
 barrell	B AA0 R EY1 L
-barrels	B AE1 R AH0 L Z
-barren	B AE1 R AH0 N
-barrens	B AE1 R AH0 N Z
-barrentine	B AE1 R AH0 N T AY2 N
+barrels	B EH1 R AH0 L Z
+barren	B EH1 R AH0 N
+barrens	B EH1 R AH0 N Z
+barrentine	B EH1 R AH0 N T AY2 N
 barrera	B AA2 R EH1 R AH0
 barreras	B AA0 R EH1 R AA0 Z
 barres	B AA1 R Z
 barresi	B AA2 R EH1 S IY0
-barret	B AE1 R IH0 T
+barret	B EH1 R IH0 T
 barreto	B AA0 R EH1 T OW0
-barrett	B AE1 R IH0 T
+barrett	B EH1 R IH0 T
 barretta	B AA0 R EH1 T AH0
 barrette	B ER0 EH1 T
 barretto	B AA0 R EH1 T OW0
 barricada	B AA2 R IH0 K AA1 D AH0
-barricade	B AE1 R AH0 K EY2 D
-barricaded	B AE1 R AH0 K EY2 D IH0 D
-barricades	B AE1 R AH0 K EY2 D Z
-barrick	B AE1 R IH0 K
-barricklow	B AE1 R IH0 K L AW0
-barrickman	B AE1 R IH0 K M AH0 N
-barrie	B AE1 R IY0
+barricade	B EH1 R AH0 K EY2 D
+barricaded	B EH1 R AH0 K EY2 D IH0 D
+barricades	B EH1 R AH0 K EY2 D Z
+barrick	B EH1 R IH0 K
+barricklow	B EH1 R IH0 K L AW0
+barrickman	B EH1 R IH0 K M AH0 N
+barrie	B EH1 R IY0
 barrientes	B ER0 IY1 N T S
 barrientez	B AA0 R IY1 N T EH0 Z
 barrientos	B AA0 R IY1 N T OW0 Z
-barrier	B AE1 R IY0 ER0
+barrier	B EH1 R IY0 ER0
 barriere	B AA0 R IH1 R IY0
-barriers	B AE1 R IY0 ER0 Z
+barriers	B EH1 R IY0 ER0 Z
 barriga	B AA2 R IY1 G AH0
-barriger	B AE1 R IH0 G ER0
-barrilleaux	B AE1 R IH0 L OW2
-barrineau	B AE1 R IH0 N OW2
+barriger	B EH1 R IH0 G ER0
+barrilleaux	B EH1 R IH0 L OW2
+barrineau	B EH1 R IH0 N OW2
 barring	B AA1 R IH0 NG
-barringer	B AE1 R IH0 NG ER0
+barringer	B EH1 R IH0 NG ER0
 barrings	B AA1 R IH0 NG Z
-barrington	B AE1 R IH0 NG T AH0 N
+barrington	B EH1 R IH0 NG T AH0 N
 barrio	B AA1 R IY0 OW0
 barrios	B AA0 R IY1 OW0 Z
-barris	B AE1 R IH0 S
-barrish	B AE1 R IH0 SH
-barrister	B AE1 R IH0 S T ER0
-barristers	B AE1 R IH0 S T ER0 Z
+barris	B EH1 R IH0 S
+barrish	B EH1 R IH0 SH
+barrister	B EH1 R IH0 S T ER0
+barristers	B EH1 R IH0 S T ER0 Z
 barritt	B ER0 IH1 T
 barro	B AA1 R OW0
-barron	B AE1 R AH0 N
+barron	B EH1 R AH0 N
 barrone	B ER0 OW1 N
 barroom	B AA1 R R UW2 M
 barros	B AA1 R OW0 Z
 barroso	B AA2 R OW1 S OW0
-barrow	B AE1 R OW0
-barrowman	B AE1 R OW0 M AH0 N
-barrows	B AE1 R OW0 Z
+barrow	B EH1 R OW0
+barrowman	B EH1 R OW0 M AH0 N
+barrows	B EH1 R OW0 Z
 barrs	B AA1 R Z
-barrus	B AE1 R AH0 S
-barry	B AE1 R IY0
-barrymore	B AE1 R IY0 M AO2 R
+barrus	B EH1 R AH0 S
+barry	B EH1 R IY0
+barrymore	B EH1 R IY0 M AO2 R
 bars	B AA1 R Z
 barsamian	B AA2 R S EY1 M IY0 AH0 N
 barsanti	B AA0 R S AA1 N T IY0
@@ -16017,8 +16017,8 @@ caq	K AE1 K
 car	K AA1 R
 cara	K EH1 R AH0
 carabajal	K ER0 AE1 B AH0 JH AH0 L
-caraballo	K AE2 R AH0 B AE1 L OW0
-carabello	K AE2 R AH0 B EH1 L OW0
+caraballo	K EH2 R AH0 B AE1 L OW0
+carabello	K EH2 R AH0 B EH1 L OW0
 caracara	K AA2 R AH0 K AA1 R AH0
 caracas	K ER0 AA1 K AH0 S
 caracci	K AA0 R AA1 CH IY0
@@ -16027,9 +16027,9 @@ caradine	K AA0 R AA0 D IY1 N IY0
 caradonna	K AA0 R AA0 D OW1 N AH0
 carafate	K EH1 R AH0 F EY2 T
 carafe	K AH0 R AE1 F
-caraher	K AE1 R AH0 HH ER0
-caraker	K AE1 R AH0 K ER0
-caramandi	K AE2 R AH0 M AA1 N D IY0
+caraher	K EH1 R AH0 HH ER0
+caraker	K EH1 R AH0 K ER0
+caramandi	K EH2 R AH0 M AA1 N D IY0
 caramel	K EH1 R AH0 M AH0 L
 caramelize	K EH1 R AH0 M AH0 L AY2 Z
 caramelized	K EH1 R AH0 M AH0 L AY2 Z D
@@ -16038,16 +16038,16 @@ carano	K AA0 R AA1 N OW0
 caras	K AA1 R AH0 Z
 carat	K EH1 R AH0 T
 carats	K EH1 R AH0 T S
-carava	K AE1 R AH0 V AH0
+carava	K EH1 R AH0 V AH0
 caravan	K EH1 R AH0 V AE2 N
-caravans	K AE1 R AH0 V AE2 N Z
+caravans	K EH1 R AH0 V AE2 N Z
 caravel	K EH1 R AH0 V EH2 L
-caravella	K AE2 R AH0 V EH1 L AH0
+caravella	K EH2 R AH0 V EH1 L AH0
 caravelle	K EH1 R AH0 V EH2 L
-caravello	K AE2 R AH0 V EH1 L OW0
+caravello	K EH2 R AH0 V EH1 L OW0
 caraveo	K AA0 R AA1 V IY0 OW0
-carawan	K AE1 R AH0 W AE0 N
-caraway	K AE1 R AH0 W EY2
+carawan	K EH1 R AH0 W AE0 N
+caraway	K EH1 R AH0 W EY2
 carb	K AA1 R B
 carbajal	K AA0 R B AA0 Y AE1 L
 carballo	K AA0 R B AA1 L OW0
@@ -16176,7 +16176,7 @@ carelessness	K EH1 R L AH0 S N AH0 S
 carella	K AA0 R EH1 L AA0
 carelli	K AA0 R EH1 L IY0
 carello	K EH2 R EH1 L OW0
-carelock	K AE1 R IH0 L AA0 K
+carelock	K EH1 R IH0 L AA0 K
 caremark	K EH1 R M AA2 R K
 carena	K EH2 R IY1 N AA0
 careplus	K EH1 R P L AH1 S
@@ -16191,7 +16191,7 @@ caretaker	K EH1 R T EY2 K ER0
 caretakers	K EH1 R T EY2 K ER0 Z
 careunit	K EH1 R Y UW2 N IH0 T
 careunits	K EH1 R Y UW2 N IH0 T S
-carew	K AE1 R UW0
+carew	K EH1 R UW0
 carey	K EH1 R IY0
 carfagno	K AA0 R F AA1 G N OW0
 carfora	K AA0 R F AO1 R AA0
@@ -16212,28 +16212,28 @@ caricatures	K ER0 IH1 K AH0 CH ER0 Z
 caricaturist	K EH1 R AH0 K AH0 CH ER0 AH0 S T
 carico	K AA0 R IY1 K OW0
 caricom	K EH1 R IH0 K AA2 M
-caridad	K AE1 R AH0 D AE2 D
+caridad	K EH1 R AH0 D AE2 D
 caridi	K AA0 R IY1 D IY0
 carie	K EH1 R IY0
 cariello	K AA0 R IY0 EH1 L OW0
-carignan	K AE1 R IH0 G N AH0 N
-cariker	K AE1 R IH0 K ER0
+carignan	K EH1 R IH0 G N AH0 N
+cariker	K EH1 R IH0 K ER0
 carilla	K AA0 R IH1 L AA0
 carillo	K AA0 R IH1 L OW0
 carillon	K EH1 R AH0 L AA2 N
 carilou	K EH2 R AH0 L UW1
-carin	K AE1 R IH0 N
+carin	K EH1 R IH0 N
 carine	K AA0 R IY1 N IY0
 caring	K EH1 R IH0 NG
 carini	K AA0 R IY1 N IY0
 carinii	K EH2 R IY1 N IY0
 carino	K AA0 R IY1 N OW0
 carioca	K EH2 R IY0 OW1 K AH0
-caris	K AE1 R IH0 S
+caris	K EH1 R IH0 S
 carisbrook	K EH1 R IH0 S B R UH2 K
 carissa	K AA0 R IY1 S AH0
 carita	K AA0 R IY1 T AH0
-carithers	K AE1 R IH0 DH ER0 Z
+carithers	K EH1 R IH0 DH ER0 Z
 carjack	K AA1 R JH AE2 K
 carjacked	K AA1 R JH AE2 K T
 carjacker	K AA1 R JH AE2 K ER0
@@ -16354,10 +16354,10 @@ carns	K AA1 R N Z
 caro	K AA1 R OW0
 carob	K EH1 R AH0 B
 caroche	K ER0 OW1 CH
-carol	K AE1 R AH0 L
+carol	K EH1 R AH0 L
 carolan	K EH1 R AH0 L AE0 N
 carolco	K ER0 AA1 L K OW0
-carole	K AE1 R AH0 L
+carole	K EH1 R AH0 L
 carolina	K EH2 R AH0 L AY1 N AH0
 carolinas	K EH2 R AH0 L AY1 N AH0 Z
 caroline	K EH1 R AH0 L AY2 N
@@ -16380,12 +16380,12 @@ carota	K ER0 OW1 T AH0
 carotene	K EH1 R AH0 T IY2 N
 carotenes	K EH1 R AH0 T IY2 N Z
 carotenuto	K AA0 R OW0 T EH0 N UW1 T OW0
-carothers	K AE1 R AH0 DH ER0 Z
+carothers	K EH1 R AH0 DH ER0 Z
 carotid	K ER0 AA1 T IH0 D
 carouse	K ER0 AW1 Z
 carousel	K EH1 R AH0 S EH2 L
 carousing	K ER0 AW1 Z IH0 NG
-carow	K AE1 R OW0
+carow	K EH1 R OW0
 carozza	K ER0 AA1 Z AH0
 carp	K AA1 R P
 carpal	K AA1 R P AH0 L
@@ -16412,23 +16412,23 @@ carport	K AA1 R P AO2 R T
 carports	K AA1 R P AO2 R T S
 carr	K AA1 R
 carra	K AA1 R AH0
-carragher	K AE1 R AH0 G ER0
-carraher	K AE1 R AH0 HH ER0
+carragher	K EH1 R AH0 G ER0
+carraher	K EH1 R AH0 HH ER0
 carranco	K AA0 R AA1 N K OW0
 carrano	K AA2 R AA1 N OW0
 carranza	K AA0 R AA1 N Z AH0
 carrara	K AA2 R AA1 R AH0
-carras	K AE1 R AH0 Z
+carras	K EH1 R AH0 Z
 carrasco	K AA0 R AA1 S K OW0
 carrasquel	K EH2 R AH0 S K EH1 L
 carrasquillo	K EH2 R AH0 S K IH1 L OW0
-carraway	K AE1 R AH0 W EY2
+carraway	K EH1 R AH0 W EY2
 carrawell	K EH1 R AH0 W EH0 L
 carre	K AA1 R
 carreira	K AA0 R EH1 R AA0
 carreiro	K AA0 R EH1 R OW0
 carreker	K EH1 R IH0 K ER0
-carrel	K AE1 R AH0 L
+carrel	K EH1 R AH0 L
 carrell	K AA0 R EY1 L
 carreno	K AA0 R EH1 N OW2
 carreon	K AA0 R EY0 AO1 N
@@ -16438,53 +16438,53 @@ carrere	K AA0 R EH1 R EY0
 carrero	K AA2 R EH1 R OW0
 carretta	K AA0 R EH1 T AH0
 carrey	K EH1 R IY0
-carriage	K AE1 R IH0 JH
-carriages	K AE1 R IH0 JH IH0 Z
+carriage	K EH1 R IH0 JH
+carriages	K EH1 R IH0 JH IH0 Z
 carrian	K EH1 R IY0 AH0 N
 carribean	K ER0 IH1 B IY2 AH0 N
 carrick	K EH1 R IH0 K
 carrico	K AA0 R IY1 K OW0
 carrie	K EH1 R IY0
-carried	K AE1 R IY0 D
-carrier	K AE1 R IY0 ER0
+carried	K EH1 R IY0 D
+carrier	K EH1 R IY0 ER0
 carriere	K AA0 R IH1 R IY0
 carriero	K AA0 R IH1 R OW0
-carriers	K AE1 R IY0 ER0 Z
-carries	K AE1 R IY0 Z
-carrig	K AE1 R IH0 G
-carrigan	K AE1 R IH0 G AH0 N
-carriger	K AE1 R IH0 JH ER0
-carrigg	K AE1 R IH0 G
-carriker	K AE1 R IH0 K ER0
+carriers	K EH1 R IY0 ER0 Z
+carries	K EH1 R IY0 Z
+carrig	K EH1 R IH0 G
+carrigan	K EH1 R IH0 G AH0 N
+carriger	K EH1 R IH0 JH ER0
+carrigg	K EH1 R IH0 G
+carriker	K EH1 R IH0 K ER0
 carrillo	K ER0 IH1 L OW0
-carringer	K AE1 R IH0 NG ER0
+carringer	K EH1 R IH0 NG ER0
 carrington	K EH1 R IH0 NG T AH0 N
 carrino	K AA2 R IY1 N OW0
 carrion	K EH1 R IY0 AH0 N
-carris	K AE1 R IH0 S
-carrisyn	K AE1 R IH0 S IH0 N
-carrithers	K AE1 R IH0 DH ER0 Z
-carriveau	K AE1 R IH0 V OW2
+carris	K EH1 R IH0 S
+carrisyn	K EH1 R IH0 S IH0 N
+carrithers	K EH1 R IH0 DH ER0 Z
+carriveau	K EH1 R IH0 V OW2
 carrizales	K AA0 R IY0 Z AA1 L EH0 S
 carro	K AA1 R OW0
-carrol	K AE1 R AH0 L
-carroll	K AE1 R AH0 L
+carrol	K EH1 R AH0 L
+carroll	K EH1 R AH0 L
 carrollton	K EH1 R AH0 L T AH0 N
-carron	K AE1 R AH0 N
-carrot	K AE1 R AH0 T
-carrothers	K AE1 R AH0 DH ER0 Z
-carrots	K AE1 R AH0 T S
+carron	K EH1 R AH0 N
+carrot	K EH1 R AH0 T
+carrothers	K EH1 R AH0 DH ER0 Z
+carrots	K EH1 R AH0 T S
 carrousel	K EH1 R AH0 S EH2 L
-carrow	K AE1 R OW0
+carrow	K EH1 R OW0
 carrozza	K AA0 R OW1 Z AH0
 carrubba	K AA2 R UW1 B AH0
-carruth	K AE1 R UW0 TH
+carruth	K EH1 R UW0 TH
 carruthers	K ER0 AH1 DH ER0 Z
-carry	K AE1 R IY0
-carryanne	K AE1 R IY0 AE1 N
+carry	K EH1 R IY0
+carryanne	K EH1 R IY0 AE1 N
 carryforward	K EH1 R IY0 F AO2 R W ER0 D
 carryforwards	K EH1 R IY0 F AO2 R W ER0 D Z
-carrying	K AE1 R IY0 IH0 NG
+carrying	K EH1 R IY0 IH0 NG
 carryover	K EH1 R Y OW2 V ER0
 cars	K AA1 R Z
 carse	K AA1 R S
@@ -16544,7 +16544,7 @@ caruana	K AA0 R UW0 AE1 N AH0
 carucci	K AA0 R UW1 CH IY0
 caruso	K ER0 UW1 S OW0
 carusone	K AA0 R UW0 S OW1 N IY0
-caruth	K AE1 R UW0 TH
+caruth	K EH1 R UW0 TH
 caruthers	K ER0 AH1 DH ER0 Z
 carvajal	K AA0 R V AA0 Y AE1 L
 carvalho	K AA0 R V AA1 L HH OW0
@@ -17719,7 +17719,7 @@ characterize	K EH1 R AH0 K T ER0 AY2 Z
 characterized	K EH1 R AH0 K T ER0 AY2 Z D
 characterizes	K EH1 R AH0 K T ER0 AY2 Z AH0 Z
 characterizing	K EH1 R AH0 K T ER0 AY2 Z IH0 NG
-characters	K AE1 R AH0 K T ER0 Z
+characters	K EH1 R AH0 K T ER0 Z
 charade	SH ER0 EY1 D
 charades	SH ER0 EY1 D Z
 charalambos	CH AA2 R AH0 L AA1 M B OW0 S
@@ -17755,7 +17755,7 @@ charismatic	K EH0 R IH0 Z M AE1 T IH0 K
 charismatics	K EH2 R IH0 Z M AE1 T IH0 K S
 charissa	K AA0 R IY1 S AH0
 charita	K AA0 R IY1 T AH0
-charitable	CH AE1 R AH0 T AH0 B AH0 L
+charitable	CH EH1 R AH0 T AH0 B AH0 L
 charitably	CH EH1 R IH0 T AH0 B L IY0
 charities	CH EH1 R AH0 T IY0 Z
 charity	CH EH1 R IH0 T IY0
@@ -17808,10 +17808,10 @@ charpie	CH AA1 R P IY0
 charred	CH AA1 R D
 charren	CH EH1 R AH0 N
 charrette	SH AH0 R EH1 T
-charrier	CH AE1 R IY0 ER0
+charrier	CH EH1 R IY0 ER0
 charring	CH AA1 R IH0 NG
 charron	CH EH1 R AH0 N
-charry	CH AE1 R IY0
+charry	CH EH1 R IY0
 chart	CH AA1 R T
 charted	CH AA1 R T AH0 D
 charter	CH AA1 R T ER0
@@ -17832,7 +17832,7 @@ charvat	CH AA1 R V AH0 T
 charwoman	CH AA1 R W UH0 M AH0 N
 charwomen	CH AA1 R W IH0 M AH0 N
 chary	CH AA1 R IY0
-charyl	CH AE1 R AH0 L
+charyl	CH EH1 R AH0 L
 chas	CH AA1 Z
 chase	CH EY1 S
 chased	CH EY1 S T
@@ -17911,7 +17911,7 @@ chauvinist	SH OW1 V AH0 N AH0 S T
 chauvinistic	CH OW2 V AH0 N IH1 S T IH0 K
 chauvinists	SH OW1 V AH0 N AH0 S T S
 chavalit	CH AH0 V AA1 L IH0 T
-chavarria	CH AH0 V AE1 R IY0 AH0
+chavarria	CH AH0 V EH1 R IY0 AH0
 chavers	CH EY1 V ER0 Z
 chaves	CH EY1 V Z
 chavez	SH AA1 V EH0 Z
@@ -19124,20 +19124,20 @@ claps	K L AE1 P S
 clapsaddle	K L AE1 P S AE2 D AH0 L
 clapton	K L AE1 P T AH0 N
 clar	K L AA1 R
-clara	K L AE1 R AH0
-clarabelle	K L AE1 R AH0 B AH0 L
+clara	K L EH1 R AH0
+clarabelle	K L EH1 R AH0 B AH0 L
 claramae	K L AA0 R AA1 M AY0
 claran	K L EH1 R AH0 N
 clarcor	K L AA1 R K AO2 R
 clardy	K L AA1 R D IY0
 clare	K L EH1 R
 claremont	K L EH1 R M AA2 N T
-claren	K L AE1 R AH0 N
+claren	K L EH1 R AH0 N
 clarence	K L EH1 R AH0 N S
 clarendon	K L EH1 R AH0 N D AH0 N
 claresta	K L AA0 R EH1 S T AH0
 clarette	K L ER0 EH1 T
-clarey	K L AE1 R IY0
+clarey	K L EH1 R IY0
 claribel	K L EH1 R AH0 B EH2 L
 clarice	K L ER0 IY1 S
 clarida	K L AA0 R IY1 D AH0
@@ -19150,7 +19150,7 @@ clarified	K L EH1 R AH0 F AY2 D
 clarifies	K L EH1 R AH0 F AY2 Z
 clarify	K L EH1 R AH0 F AY2
 clarifying	K L EH1 R AH0 F AY2 IH0 NG
-clarimond	K L AE1 R IH0 M AH0 N D
+clarimond	K L EH1 R IH0 M AH0 N D
 clarinda	K L ER0 IH1 N D AH0
 clarine	K L EH1 R IY0 N
 clarinet	K L EH2 R AH0 N EH1 T
@@ -19160,7 +19160,7 @@ clarins	K L EH1 R IH0 N Z
 clarion	K L EH1 R IY0 AH0 N
 claris	K L EH1 R IH0 S
 clarissa	K L ER0 IH1 S AH0
-clarisse	K L AE1 R IH0 S
+clarisse	K L EH1 R IH0 S
 clarita	K L AA0 R IY1 T AH0
 claritin	K L EH1 R IH0 T IH0 N
 clarity	K L EH1 R AH0 T IY0
@@ -19175,8 +19175,8 @@ clarkston	K L AA1 R K S T AH0 N
 clarksville	K L AA1 R K S V IH2 L
 claro	K L AA1 R OW0
 clarostat	K L EH1 R AH0 S T AE2 T
-clarridge	K L AE1 R IH0 JH
-clarrisse	K L AE1 R IH0 S
+clarridge	K L EH1 R IH0 JH
+clarrisse	K L EH1 R IH0 S
 clary	K L EH1 R IY0
 clasby	K L AE1 S B IY0
 clasen	K L EY1 S AH0 N
@@ -20535,7 +20535,7 @@ commends	K AH0 M EH1 N D Z
 commensurate	K AH0 M EH1 N S ER0 AH0 T
 commensurately	K AH0 M EH1 N S ER0 AH0 T L IY0
 comment	K AA1 M EH0 N T
-commentariat	K AA2 M AH0 N T AE1 R IY2 AH0 T
+commentariat	K AA2 M AH0 N T EH1 R IY2 AH0 T
 commentaries	K AA1 M AH0 N T EH2 R IY0 Z
 commentary	K AA1 M AH0 N T EH2 R IY0
 commentator	K AA1 M AH0 N T EY2 T ER0
@@ -23470,7 +23470,7 @@ critter	K R IH1 T ER0
 critters	K R IH1 T ER0 Z
 critz	K R IH1 T S
 critzer	K R IH1 T Z ER0
-crivaro	K R IH0 V AE1 R OW0
+crivaro	K R IH0 V EH1 R OW0
 crivelli	K R IH0 V EH1 L IY0
 crivello	K R IH0 V EH1 L OW0
 criven	K R IH1 V AH0 N
@@ -24051,8 +24051,8 @@ cups	K AH1 P S
 cur	K ER1
 curable	K Y UH1 R AH0 B AH0 L
 curacao	K Y UH1 R AH0 S AW2
-curare	K Y UW2 R AE1 R EY2
-curari	K Y UW2 R AE1 R EY2
+curare	K Y UW2 R EH1 R EY2
+curari	K Y UW2 R EH1 R EY2
 curate	K Y UH1 R AH0 T
 curated	K Y UH0 R EY1 T IH0 D
 curative	K Y UH1 R AH0 T IH0 V
@@ -24874,7 +24874,7 @@ dapper	D AE1 P ER0
 dapuzzo	D AH0 P AH1 Z OW0
 daquila	D AA0 K W IY1 L AH0
 dar	D AA1 R
-dara	D AE1 R AH0
+dara	D EH1 R AH0
 darak	D EH1 R AE0 K
 darblay	D AA1 R B L EY0
 darbonne	D AA1 R B AH0 N
@@ -24893,8 +24893,8 @@ dared	D EH1 R D
 daredevil	D EH1 R D EH2 V AH0 L
 daredevils	D EH1 R D EH2 V AH0 L Z
 daremblum	D EH1 R AH0 M B L UW2 M
-daren	D AE1 R IH0 N
-darensbourg	D AE1 R IH0 N S B ER0 G
+daren	D EH1 R IH0 N
+darensbourg	D EH1 R IH0 N S B ER0 G
 dares	D EH1 R Z
 daresay	D EH1 R S EY0
 darfur	D AA2 F UW1 R
@@ -24905,10 +24905,10 @@ daria	D AA1 R IY0 AH0
 darice	D AA1 R IH0 S
 darien	D EH1 R IY0 AH0 N
 darienzo	D AA0 R IY1 N Z OW0
-darin	D AE1 R IH0 N
+darin	D EH1 R IH0 N
 daring	D EH1 R IH0 NG
 dario	D EH1 R IY0 OW2
-darity	D AE1 R IH0 T IY0
+darity	D EH1 R IH0 T IY0
 darius	D ER0 AY1 AH0 S
 darjeeling	D AA2 R JH IY1 L IH0 NG
 dark	D AA1 R K
@@ -24951,17 +24951,17 @@ darpa	D AA1 R P AH0
 darpino	D AA0 R P IY1 N OW0
 darr	D EH1 R
 darragh	D EH1 R AH0
-darrah	D AE1 R AH0
+darrah	D EH1 R AH0
 darrel	D EH1 R AH0 L
 darrell	D EH1 R AH0 L
 darrelle	D ER0 EH1 L
 darren	D AA1 R AH0 N
-darrick	D AE1 R IH0 K
+darrick	D EH1 R IH0 K
 darrigo	D AA2 R IY1 G OW0
-darrin	D AE1 R IH0 N
-darrington	D AE1 R IH0 NG T AH0 N
-darroch	D AE1 R AH0 K
-darrough	D AE1 R AW0
+darrin	D EH1 R IH0 N
+darrington	D EH1 R IH0 NG T AH0 N
+darroch	D EH1 R AH0 K
+darrough	D EH1 R AW0
 darrow	D EH1 R OW0
 darryl	D EH1 R AH0 L
 darsey	D AA1 R S IY0
@@ -25444,7 +25444,7 @@ decapitation	D IH0 K AE2 P IH0 T EY1 SH AH0 N
 decapitations	D IH0 K AE2 P IH0 T EY1 SH AH0 N Z
 decaprio	D IH0 K AA1 P R IY0 OW0
 decapua	D IH0 K AA0 P UW1 AH0
-decarava	D IH0 K AE1 R AH0 V AH0
+decarava	D IH0 K EH1 R AH0 V AH0
 decarli	D IH0 K AA1 R L IY0
 decarlo	D IH0 K AA1 R L OW0
 decaro	D IH0 K AA1 R OW0
@@ -26545,8 +26545,8 @@ dena	D IY1 N AH0
 denapoli	D IH0 N AA1 P AH0 L IY0
 denard	D IH0 N AA1 R D
 denardo	D IH0 N AA1 R D OW0
-denarii	D IH0 N AE1 R IY0
-denarius	D IH0 N AE1 R IY0 AH0 S
+denarii	D IH0 N EH1 R IY0
+denarius	D IH0 N EH1 R IY0 AH0 S
 denaro	D IH0 N AA1 R OW0
 denatale	D IH0 N AA0 T AA1 L IY0
 denationalization	D IY2 N AE2 SH AH0 N AH0 L IH0 Z EY1 SH AH0 N
@@ -28840,7 +28840,7 @@ dissidence	D IH1 S AH0 D AH0 N S
 dissident	D IH1 S AH0 D AH0 N T
 dissidents	D IH1 S AH0 D AH0 N T S
 dissimilar	D IH0 S IH1 M AH0 L ER0
-dissimilarity	D IH2 S IH2 M AH0 L AE1 R AH0 T IY0
+dissimilarity	D IH2 S IH2 M AH0 L EH1 R AH0 T IY0
 dissing	D IH1 S IH0 NG
 dissinger	D IH1 S IH0 N JH ER0
 dissipate	D IH1 S AH0 P EY2 T
@@ -31392,7 +31392,7 @@ ecclesiastical	IH0 K L IY2 Z IY0 AE1 S T IH0 K AH0 L
 eccleston	EH1 K AH0 L S T AA0 N
 ecevit	EH1 S AH0 V IH0 T
 echard	EH1 CH ER0 D
-echavarria	EH2 CH AH0 V AE1 R IY0 AH0
+echavarria	EH2 CH AH0 V EH1 R IY0 AH0
 echelon	EH1 SH AH0 L AA2 N
 echelons	EH1 SH AH0 L AA2 N Z
 echemende	EH2 K AH0 M EH1 N D
@@ -32522,7 +32522,7 @@ embarking	EH0 M B AA1 R K IH0 NG
 embarks	IH0 M B AA1 R K S
 embarrass	IH0 M B EH1 R AH0 S
 embarrassed	IH0 M B EH1 R AH0 S T
-embarrasses	IH0 M B AE1 R AH0 S IH0 Z
+embarrasses	IH0 M B EH1 R AH0 S IH0 Z
 embarrassing	IH0 M B EH1 R AH0 S IH0 NG
 embarrassingly	IH0 M B EH1 R AH0 S IH0 NG L IY0
 embarrassment	IH0 M B EH1 R AH0 S M AH0 N T
@@ -35520,17 +35520,17 @@ fanucchi	F AA0 N UW1 K IY0
 fanueil	F AE1 N Y AH0 L
 fao	F AW1
 far	F AA1 R
-farabaugh	F AE1 R AH0 B AO2
-farabee	F AE1 R AH0 B IY0
+farabaugh	F EH1 R AH0 B AO2
+farabee	F EH1 R AH0 B IY0
 farabundo	F EH2 R AH0 B UW1 N D OW2
 farace	F AA0 R AA1 CH IY0
 faraci	F AA0 R AA1 CH IY0
-faraday	F AE1 R AH0 D EY2
-faragher	F AE1 R AH0 G ER0
+faraday	F EH1 R AH0 D EY2
+faragher	F EH1 R AH0 G ER0
 farago	F AA0 R AA1 G OW0
 farah	F EH1 R AH0
 faraha	F AA1 R AH0 HH AA0
-farahkan	F AE1 R AH0 K AE2 N
+farahkan	F EH1 R AH0 K AE2 N
 farai	F EH1 R EY0
 faranda	F ER0 AE1 N D AH0
 faraone	F AA0 R AA0 OW1 N IY0
@@ -35558,7 +35558,7 @@ farha	F AA1 R HH AH0
 farhat	F AA1 R HH AE2 T
 faria	F AA1 R IY0 AH0
 farias	F EH1 R IY0 AH0 Z
-faribault	F AE1 R AH0 B AA2 L T
+faribault	F EH1 R AH0 B AA2 L T
 farica	F AA0 R IY1 K AH0
 faridoun	F AA1 R IH0 D UW0 N
 fariello	F AA0 R IY0 EH1 L OW0
@@ -35615,7 +35615,7 @@ farnsworth	F AA1 R N S W ER0 TH
 farnum	F AA1 R N AH0 M
 farnworth	F AA1 R N W ER0 TH
 faro	F EH1 R OW0
-farold	F AE1 R OW0 L D
+farold	F EH1 R OW0 L D
 faron	F EH1 R AH0 N
 farone	F ER0 OW1 N
 farouk	F AH0 R UW1 K
@@ -35627,29 +35627,29 @@ farra	F AA1 R AH0
 farragut	F EH1 R AH0 G AH0 T
 farrah	F EH1 R AH0
 farrakhan	F AA1 R AH0 K AA2 N
-farran	F AE1 R AH0 N
-farrand	F AE1 R AH0 N D
+farran	F EH1 R AH0 N
+farrand	F EH1 R AH0 N D
 farrant	F AA1 R AH0 N T
 farrar	F ER0 AA1 R
 farrel	F EH1 R AH0 L
 farrell	F EH1 R IH0 L
 farrelly	F EH1 R AH0 L IY0
 farren	F EH1 R AH0 N
-farrens	F AE1 R AH0 N Z
+farrens	F EH1 R AH0 N Z
 farrer	F AA1 R ER0
-farrey	F AE1 R IY0
+farrey	F EH1 R IY0
 farrier	F EH1 R IY0 ER0
 farrington	F EH1 R IH0 NG T AH0 N
 farrior	F AA0 R IY1 ER0
 farris	F EH1 R IH0 S
-farrish	F AE1 R IH0 SH
+farrish	F EH1 R IH0 SH
 farro	F AA1 R OW0
 farron	F EH1 R AH0 N
 farrow	F EH1 R OW2
-farrowing	F AE1 R OW2 IH0 NG
+farrowing	F EH1 R OW2 IH0 NG
 farruggia	F AA0 R UW1 G JH AH0
 farrugia	F AA0 R UW1 JH AH0
-farry	F AE1 R IY0
+farry	F EH1 R IY0
 farsi	F AA1 R S IY0
 farsighted	F AA1 R S AY1 T AH0 D
 farsightedness	F AA2 R S AY1 T IH0 D N AH0 S
@@ -37186,7 +37186,7 @@ fitzer	F IH1 T S ER0
 fitzgerald	F IH0 T S JH EH1 R AH0 L D
 fitzgibbon	F IH2 T S JH IH1 B AH0 N
 fitzgibbons	F IH2 T S JH IH1 B AH0 N Z
-fitzharris	F IH0 T S HH AE1 R IH0 S
+fitzharris	F IH0 T S HH EH1 R IH0 S
 fitzhenry	F IH0 T S HH EH1 N ER0 IY0
 fitzhugh	F IH0 T S HH Y UW1
 fitzmaurice	F IH0 T S M AO1 R IH0 S
@@ -40192,8 +40192,8 @@ gapp	G AE1 P
 gappa	G AE1 P AH0
 gaps	G AE1 P S
 gar	G AA1 R
-gara	G AE1 R AH0
-garabedian	G AE2 R AH0 B IY1 D IY0 AH0 N
+gara	G EH1 R AH0
+garabedian	G EH2 R AH0 B IY1 D IY0 AH0 N
 garafalo	G AA0 R AA0 F AA1 L OW0
 garafola	G AA0 R AA0 F OW1 L AH0
 garage	G ER0 AA1 ZH
@@ -40201,11 +40201,11 @@ garages	G ER0 AA1 ZH IH0 Z
 garagiola	G ER0 AE2 JH IY0 OW1 L AH0
 garajda	G ER0 AA1 ZH D AH0
 garamendi	G EH2 R AH0 M EH1 N D IY0
-garand	G AE1 R AH0 N D
+garand	G EH1 R AH0 N D
 garant	G AA1 R AH0 N T
 garard	G ER0 AA1 R D
 garavaglia	G AA0 R AA0 V AA1 G L IY0 AH0
-garay	G AE1 R EY0
+garay	G EH1 R EY0
 garb	G AA1 R B
 garbacz	G AA1 R B AH0 CH
 garbage	G AA1 R B IH0 JH
@@ -40256,11 +40256,11 @@ garduno	G AA0 R D UW1 N OW0
 gardyne	G AA1 R D AY2 N
 gare	G EH1 R
 gareau	G ER0 OW1
-gared	G AE1 R AH0 D
-garelick	G AE1 R IH0 L IH0 K
+gared	G EH1 R AH0 D
+garelick	G EH1 R IH0 L IH0 K
 gareth	G EH1 R IH0 TH
-garett	G AE1 R IH0 T
-garey	G AE1 R IY0
+garett	G EH1 R IH0 T
+garey	G EH1 R IY0
 garfield	G AA1 R F IY2 L D
 garfinkel	G AA1 R F IH0 NG K AH0 L
 garfinkle	G AA1 R F IH2 NG K AH0 L
@@ -40279,16 +40279,16 @@ gargoyles	G AA1 R G OY2 L Z
 garguilo	G AA0 R G W IY1 L OW0
 gargus	G AA1 R G AH0 S
 gari	G AA1 R IY0
-garibaldi	G AE2 R AH0 B AO1 L D IY0
-garibay	G AE1 R IH0 B EY0
+garibaldi	G EH2 R AH0 B AO1 L D IY0
+garibay	G EH1 R IH0 B EY0
 gariepy	G ER0 IY1 P IY0
 garin	G EH1 R IH0 N
 garing	G EH1 R IH0 NG
 garinger	G EH1 R IH0 NG ER0
-garis	G AE1 R IH0 S
+garis	G EH1 R IH0 S
 garish	G EH1 R IH0 SH
 garissa	G AH0 R IH1 S AH0
-garity	G AE1 R IH0 T IY0
+garity	G EH1 R IH0 T IY0
 garl	G AA1 R L
 garlan	G AA1 R L AH0 N
 garland	G AA1 R L AH0 N D
@@ -40335,7 +40335,7 @@ garo	G EH1 R OW0
 garofalo	G AA0 R OW0 F AA1 L OW0
 garofano	G AA0 R OW0 F AA1 N OW0
 garofolo	G EH0 R AH0 F OW1 L AH0
-garols	G AE1 R AO0 L Z
+garols	G EH1 R AO0 L Z
 garon	G AA0 R AO1 N
 garone	G ER0 OW1 N
 garonzik	G ER0 AA1 N Z IH0 K
@@ -40344,47 +40344,47 @@ garp	G AA1 R P
 garps	G AA1 R P S
 garr	G AE1 R
 garrabrant	G AA0 R AA1 B R AH0 N T
-garrahan	G AE1 R AH0 HH AE0 N
-garramone	G AE1 R AH0 M OW2 N
-garrard	G AE1 R ER0 D
+garrahan	G EH1 R AH0 HH AE0 N
+garramone	G EH1 R AH0 M OW2 N
+garrard	G EH1 R ER0 D
 garratt	G EH1 R AH0 T
-garraway	G AE1 R AH0 W EY0
+garraway	G EH1 R AH0 W EY0
 garrell	G AA0 R EY1 L
-garrels	G AE1 R AH0 L Z
-garrelts	G AE1 R IH0 L T S
+garrels	G EH1 R AH0 L Z
+garrelts	G EH1 R IH0 L T S
 garren	G AA1 R AH0 N
 garret	G EH1 R IH0 T
 garrets	G EH1 R AH0 T S
-garretson	G AE1 R IH0 T S AH0 N
-garrett	G AE1 R IH0 T
+garretson	G EH1 R IH0 T S AH0 N
+garrett	G EH1 R IH0 T
 garrette	G ER0 EH1 T
-garrey	G AE1 R IY0
+garrey	G EH1 R IY0
 garrick	G EH1 R IH0 K
 garrido	G AA0 R IY1 D OW0
-garriga	G AE1 R IH0 G AH0
-garrigan	G AE1 R IH0 G AH0 N
+garriga	G EH1 R IH0 G AH0
+garrigan	G EH1 R IH0 G AH0 N
 garrigues	G AA0 R IY1 G EH0 S
 garrigus	G AA0 R IY1 G IH0 S
-garringer	G AE1 R IH0 NG ER0
-garriott	G AE1 R IY0 AH0 T
-garris	G AE1 R IH0 S
-garrison	G AE1 R IH0 S AH0 N
-garrisoned	G AE1 R AH0 S AH0 N D
+garringer	G EH1 R IH0 NG ER0
+garriott	G EH1 R IY0 AH0 T
+garris	G EH1 R IH0 S
+garrison	G EH1 R IH0 S AH0 N
+garrisoned	G EH1 R AH0 S AH0 N D
 garritano	G AA0 R IY0 T AA1 N OW0
-garritt	G AE1 R IH0 T
+garritt	G EH1 R IH0 T
 garrity	G EH1 R IH0 T IY0
 garro	G AA1 R OW0
-garrod	G AE1 R AH0 D
-garrol	G AE1 R AH0 L
-garrols	G AE1 R AH0 L Z
-garron	G AE1 R AH0 N
+garrod	G EH1 R AH0 D
+garrol	G EH1 R AH0 L
+garrols	G EH1 R AH0 L Z
+garron	G EH1 R AH0 N
 garros	G EH1 R OW0 S
-garrott	G AE1 R AH0 T
+garrott	G EH1 R AH0 T
 garrow	G EH1 R OW0
-garroway	G AE1 R OW0 W EY2
-garroz	G AE1 R AH0 Z
+garroway	G EH1 R OW0 W EY2
+garroz	G EH1 R AH0 Z
 garrulous	G EH1 R AH0 L AH0 S
-garry	G AE1 R IY0
+garry	G EH1 R IY0
 gars	G AA1 R Z
 garside	G AA1 R S AY2 D
 garske	G AA1 R S K
@@ -42206,7 +42206,7 @@ gluskin	G L AH1 S K IH0 N
 glut	G L AH1 T
 glutamate	G L UW1 T AH0 M EY2 T
 glutamic	G L UW0 T AE1 M IH0 K
-glutaric	G L UW0 T AE1 R IH0 K
+glutaric	G L UW0 T EH1 R IH0 K
 gluten	G L UW1 T AH0 N
 gluth	G L UW1 TH
 gluts	G L AH1 T S
@@ -45686,11 +45686,11 @@ har	HH AA1 R
 hara	HH EH1 R AH0
 harada	HH AA0 R AA1 D AH0
 haradim	HH AH0 R AE1 D IH2 M
-harahan	HH AE1 R AH0 HH AE2 N
+harahan	HH EH1 R AH0 HH AE2 N
 harald	HH AA1 R AH0 L D
 haralda	HH AA0 R AA1 L D AH0
-haralson	HH AE1 R AH0 L S AH0 N
-haran	HH AE1 R AH0 N
+haralson	HH EH1 R AH0 L S AH0 N
+haran	HH EH1 R AH0 N
 harangue	HH ER0 AE1 NG
 harangued	HH ER0 AE1 NG D
 harangues	HH ER0 AE1 NG Z
@@ -45809,7 +45809,7 @@ hardy	HH AA1 R D IY0
 hardymon	HH AA1 R D IY0 M AA2 N
 hare	HH EH1 R
 harebrained	HH EH1 R B R EY2 N D
-harelson	HH AE1 R IH0 L S AH0 N
+harelson	HH EH1 R IH0 L S AH0 N
 harem	HH EH1 R AH0 M
 haren	HH EH1 R AH0 N
 harer	HH EH1 R ER0
@@ -45830,7 +45830,7 @@ hargreaves	HH AA1 R G R IY2 V Z
 hargrove	HH AA1 R G R OW2 V
 hargus	HH AA1 R G AH0 S
 hari	HH AA1 R IY0
-harig	HH AE1 R IH0 G
+harig	HH EH1 R IH0 G
 harima	HH EH0 R IY1 M AH0
 haring	HH EH1 R IH0 NG
 hariri	HH ER0 IH1 R IY0
@@ -45929,7 +45929,7 @@ harnish	HH AA1 R N IH0 SH
 harnois	HH AA0 R N W AA1
 haro	HH AA1 R OW0
 harold	HH EH1 R AH0 L D
-haroldson	HH AE1 R OW0 L D S AH0 N
+haroldson	HH EH1 R OW0 L D S AH0 N
 harp	HH AA1 R P
 harpe	HH AA1 R P
 harped	HH AA1 R P T
@@ -45957,46 +45957,46 @@ harpster	HH AA1 R P S T ER0
 harquebus	HH AA1 R K W AH0 B AH0 S
 harr	HH AE1 R
 harra	HH AA1 R AH0
-harrah	HH AE1 R AH0
-harral	HH AE1 R AH0 L
-harralson	HH AE1 R AH0 L S AH0 N
+harrah	HH EH1 R AH0
+harral	HH EH1 R AH0 L
+harralson	HH EH1 R AH0 L S AH0 N
 harre	HH AE1 R
-harrel	HH AE1 R AH0 L
-harreld	HH AE1 R IH0 L D
+harrel	HH EH1 R AH0 L
+harreld	HH EH1 R IH0 L D
 harrell	HH EH1 R AH0 L
 harrelson	HH EH1 R IH0 L S AH0 N
-harren	HH AE1 R AH0 N
+harren	HH EH1 R AH0 N
 harrer	HH AA1 R ER0
 harried	HH EH1 R IY0 D
 harrier	HH EH1 R IY0 ER0
 harries	HH EH1 R IY0 Z
 harriet	HH EH1 R IY0 AH0 T
-harriette	HH AE1 R IY0 EH0 T
+harriette	HH EH1 R IY0 EH0 T
 harrigan	HH EH1 R IH0 G AH0 N
-harriger	HH AE1 R IH0 G ER0
-harrill	HH AE1 R AH0 L
+harriger	HH EH1 R IH0 G ER0
+harrill	HH EH1 R AH0 L
 harriman	HH EH1 R IH0 M AH0 N
-harring	HH AE1 R IH0 NG
+harring	HH EH1 R IH0 NG
 harrington	HH EH1 R IH0 NG T AH0 N
-harriott	HH AE1 R IY0 AH0 T
+harriott	HH EH1 R IY0 AH0 T
 harris	HH EH1 R IH0 S
-harrisburg	HH AE1 R IH0 S B ER0 G
-harrisburgh	HH AE1 R IH0 S B ER0 G
-harrises	HH AE1 R IH0 S IH0 Z
+harrisburg	HH EH1 R IH0 S B ER0 G
+harrisburgh	HH EH1 R IH0 S B ER0 G
+harrises	HH EH1 R IH0 S IH0 Z
 harrison	HH EH1 R IH0 S AH0 N
-harriss	HH AE1 R IH0 S
-harrity	HH AE1 R IH0 T IY0
+harriss	HH EH1 R IH0 S
+harrity	HH EH1 R IH0 T IY0
 harrod	HH EH1 R AH0 D
 harrods	HH EH1 R AH0 D Z
 harrold	HH EH1 R AH0 L D
-harron	HH AE1 R AH0 N
+harron	HH EH1 R AH0 N
 harrop	HH EH1 R AH0 P
 harroun	HH ER0 UW1 N
-harrow	HH AE1 R OW0
-harrower	HH AE1 R OW0 W ER0
+harrow	HH EH1 R OW0
+harrower	HH EH1 R OW0 W ER0
 harrowing	HH EH1 R OW0 IH0 NG
 harry	HH EH1 R IY0
-harryman	HH AE1 R IY0 M AH0 N
+harryman	HH EH1 R IY0 M AH0 N
 harsch	HH AA1 R SH
 harsco	HH AA1 R S K OW0
 harsh	HH AA1 R SH
@@ -52495,8 +52495,8 @@ intermagnetics	IH2 N T ER0 M AE0 G N EH1 T IH0 K S
 intermark	IH2 N T ER0 M AA1 R K
 intermarket	IH2 N T ER0 M AA1 R K IH0 T
 intermarriage	IH2 N T ER0 M EH1 R IH0 JH
-intermarried	IH2 N T ER0 M AE1 R IY0 D
-intermarry	IH2 N T ER0 M AE1 R IY0
+intermarried	IH2 N T ER0 M EH1 R IY0 D
+intermarry	IH2 N T ER0 M EH1 R IY0
 intermec	IH1 N T ER0 M AH0 K
 intermedia	IH2 N T ER0 M IY1 D IY0 AH0
 intermediaries	IH2 N T ER0 M IY1 D IY0 EH2 R IY0 Z
@@ -52976,7 +52976,7 @@ irish	AY1 R IH0 SH
 irishman	AY1 R IH0 SH M AH0 N
 irishness	AY1 R IH0 SH N IH0 S
 irit	IH1 R IH0 T
-irizarry	IH1 R IH0 Z AE0 R IY0
+irizarry	IH1 R IH0 Z EH0 R IY0
 irk	ER1 K
 irked	ER1 K T
 irks	ER1 K S
@@ -53676,7 +53676,7 @@ jaquish	JH AE1 K W IH0 SH
 jaquith	JH AE1 K W IH0 TH
 jar	JH AA1 R
 jara	JH AA1 R AH0
-jaramillo	JH AE2 R AH0 M IH1 L OW0
+jaramillo	JH EH2 R AH0 M IH1 L OW0
 jarara	JH AH0 R AA1 R AH0
 jarash	JH AA1 R AH0 SH
 jarboe	JH AA1 R B OW2
@@ -53694,22 +53694,22 @@ jarmin	JH AA1 R M AH0 N
 jarmon	Y AA0 R M AO1 N
 jarnagin	JH AA1 R N AH0 JH IH0 N
 jarnigan	JH AA1 R N IH0 G AE0 N
-jaromir	JH AE1 R AH0 M IH0 R
+jaromir	JH EH1 R AH0 M IH0 R
 jaros	Y AA1 R OW0 Z
 jarosz	Y AA1 R AH0 SH
 jaroszewski	Y ER0 AH0 SH EH1 F S K IY0
 jaroszynski	JH EH2 R AH0 Z IH1 N S K IY0
 jarrard	ZH ER0 AA1 R D
-jarratt	JH AE1 R AH0 T
+jarratt	JH EH1 R AH0 T
 jarreau	ZH ER0 OW1
 jarred	JH AA1 R D
 jarrell	Y AA0 R EY1 L
-jarrells	JH AE1 R AH0 L Z
+jarrells	JH EH1 R AH0 L Z
 jarrett	JH EH1 R AH0 T
 jarriel	ZH ER0 IY1 L
 jarring	JH AA1 R IH0 NG
-jarrod	JH AE1 R AH0
-jarryd	JH AE1 R IH0 D
+jarrod	JH EH1 R AH0
+jarryd	JH EH1 R IH0 D
 jars	JH AA1 R Z
 jaruzelski	JH EH2 R AH0 Z EH1 L S K IY0
 jarvi	JH AA1 R V IY0
@@ -53718,7 +53718,7 @@ jarvie	JH AA1 R V IY0
 jarvik	JH AA1 R V IH0 K
 jarvinen	JH AA1 R V IH0 N AH0 N
 jarvis	JH AA1 R V AH0 S
-jaryl	JH AE1 R AH0 L
+jaryl	JH EH1 R AH0 L
 jarzombek	Y ER0 Z AA1 M B EH0 K
 jas	JH AE1 S
 jasek	Y AA1 S EH0 K
@@ -55107,13 +55107,13 @@ kapusta	K AH0 P AH1 S T AH0
 kara	K EH1 R AH0
 karabakh	K EH1 R AH0 B AE0 K
 karabin	K AA0 R AA1 B IY0 N
-karach	K AE1 R AH0 CH
+karach	K EH1 R AH0 CH
 karachi	K AA0 R AA1 CH IY0
 karadzic	K AA0 R AA1 JH IH0 K
-karaffa	K AE1 R AH0 F AH0
+karaffa	K EH1 R AH0 F AH0
 karajan	K EH1 R AH0 JH AH0 N
 karakos	K AA1 R AH0 K AO2 S
-karam	K AE1 R AH0 M
+karam	K EH1 R AH0 M
 karami	K ER0 AA1 M IY0
 karan	K EH1 R AH0 N
 karanicki	K EH2 R AH0 N IH1 K IY0
@@ -55191,7 +55191,7 @@ karoline	K EH1 R AH0 L AY2 N
 karolinska	K EH2 R OW0 L IH1 N S K AH0
 karoly	K ER0 OW1 L IY0
 karolyi	K ER0 OW1 L Y IY0
-karolyn	K AE1 R AH0 L IH0 N
+karolyn	K EH1 R AH0 L IH0 N
 karon	K EH1 R AH0 N
 karos	K AA1 R OW0 S
 karoun	K ER0 UW1 N
@@ -55206,11 +55206,11 @@ karpov	K AA1 R P AA2 V
 karpowicz	K AA1 R P AH0 V IH0 CH
 karr	K AA1 R
 karraker	K AA1 R AH0 K ER0
-karras	K AE1 R AH0 Z
-karren	K AE1 R AH0 N
+karras	K EH1 R AH0 Z
+karren	K EH1 R AH0 N
 karrer	K AA1 R ER0
-karrick	K AE1 R IH0 K
-karriker	K AE1 R IH0 K ER0
+karrick	K EH1 R IH0 K
+karriker	K EH1 R IH0 K ER0
 karry	K EH1 R IY0
 karsh	K AA1 R SH
 karshner	K AA1 R SH N ER0
@@ -55230,7 +55230,7 @@ karwoski	K ER0 V AW1 S K IY0
 karwowski	K ER0 V AO1 F S K IY0
 kary	K EH1 R IY0
 karydakis	K EH2 R IY0 D AE1 K IH0 S
-karyn	K AE1 R IH0 N
+karyn	K EH1 R IH0 N
 karyrrhexis	K EH2 R IY0 R EH1 K S IH0 S
 kasabian	K AH0 S EY1 B IY0 AH0 N
 kasagic	K AH0 S AA1 G IH0 K
@@ -56736,7 +56736,7 @@ klapper	K L AE1 P ER0
 klapperich	K L AE1 P ER0 IH0 K
 klar	K L AA1 R
 klare	K L EH1 R
-klarich	K L AE1 R IH0 K
+klarich	K L EH1 R IH0 K
 klarman	K L AA1 R M AH0 N
 klas	K L AE1 S
 klase	K L EY1 Z
@@ -59405,13 +59405,13 @@ laptop	L AE1 P T AA2 P
 laptops	L AE1 P T AA2 P S
 lar	L AA1 R
 lara	L AA1 R AH0
-larabee	L AE1 R AH0 B IY0
+larabee	L EH1 R AH0 B IY0
 laraia	L AA0 R AA1 Y AH0
 laraine	L ER0 EY1 N
-laramee	L AE1 R AH0 M IY0
+laramee	L EH1 R AH0 M IY0
 laramie	L EH1 R AH0 M IY0
-laramore	L AE1 R AH0 M AO2 R
-laraway	L AE1 R AH0 W EY2
+laramore	L EH1 R AH0 M AO2 R
+laraway	L EH1 R AH0 W EY2
 larcenous	L AA1 R S AH0 N AH0 S
 larceny	L AA1 R S AH0 N IY0
 larch	L AA1 R CH
@@ -59428,7 +59428,7 @@ lareau	L ER0 OW1
 laredo	L ER0 EY1 D OW0
 lareina	L AA0 R EY0 IY1 N AH0
 larena	L AA0 R EH1 N AH0
-larew	L AE1 R UW0
+larew	L EH1 R UW0
 large	L AA1 R JH
 largely	L AA1 R JH L IY0
 largen	L AA1 R G AH0 N
@@ -59442,16 +59442,16 @@ largo	L AA1 R G OW0
 lariat	L EH1 R IY0 AH0 T
 lariccia	L AA0 R IY1 CH AH0
 larijani	L EH2 R IH0 JH AA1 N IY0
-larimer	L AE1 R IH0 M ER0
+larimer	L EH1 R IH0 M ER0
 larimore	L AA0 R IY1 M AO0 R
 larina	L AA0 R IY1 N AH0
 larine	L AA0 R IY1 N IY0
 larios	L AA0 R IY1 OW0 Z
 lariscy	L ER0 IH1 S K IY0
-larison	L AE1 R IH0 S AH0 N
+larison	L EH1 R IH0 S AH0 N
 larissa	L AA0 R IY1 S AH0
-larivee	L AE1 R IH0 V IY0
-lariviere	L AE1 R IH0 V IY0 EH0 R
+larivee	L EH1 R IH0 V IY0
+lariviere	L EH1 R IH0 V IY0 EH0 R
 larizza	L ER0 IH1 Z AH0
 lark	L AA1 R K
 larke	L AA1 R K
@@ -59468,26 +59468,26 @@ larner	L AA1 R N ER0
 larocca	L AA0 R OW1 K AH0
 larocco	L AA0 R OW1 K OW0
 laroche	L AA0 R OW1 SH
-larochelle	L AE1 R AH0 SH AH0 L
-larock	L AE1 R AH0 K
+larochelle	L EH1 R AH0 SH AH0 L
+larock	L EH1 R AH0 K
 larocque	L ER0 OW1 K
-laroe	L AE1 R OW0
+laroe	L EH1 R OW0
 laroque	L ER0 OW1 K
 larosa	L AA0 R OW1 S AH0
 larose	L AA0 R OW1 S IY0
 larosiere	L AA0 R OW0 S Y EH1 R
 larouche	L AA0 R UW1 SH
 laroux	L ER0 UW1
-larowe	L AE1 R AW0
-larrabee	L AE1 R AH0 B IY0
-larrance	L AE1 R AH0 N S
-larrea	L AE1 R IY0 AH0
-larrick	L AE1 R IH0 K
+larowe	L EH1 R AW0
+larrabee	L EH1 R AH0 B IY0
+larrance	L EH1 R AH0 N S
+larrea	L EH1 R IY0 AH0
+larrick	L EH1 R IH0 K
 larrimore	L AA0 R IY1 M AO0 R
-larrison	L AE1 R IH0 S AH0 N
-larrivee	L AE1 R IH0 V IY0
+larrison	L EH1 R IH0 S AH0 N
+larrivee	L EH1 R IH0 V IY0
 larroquette	L AA2 R OW0 K EH1 T
-larrow	L AE1 R OW0
+larrow	L EH1 R OW0
 larry	L EH1 R IY0
 lars	L AA1 R Z
 larsen	L AA1 R S AH0 N
@@ -64841,7 +64841,7 @@ maquiladoras	M AE0 K IY2 Y AH0 D AO1 R AH0 S
 maquilas	M AE1 K W AH0 L AH0 S
 mar	M AA1 R
 mara	M AA1 R AH0
-marabella	M AE2 R AH0 B EH1 L AH0
+marabella	M EH2 R AH0 B EH1 L AH0
 marable	M EH1 R AH0 B AH0 L
 marabou	M EH1 R AH0 B UW2
 maraca	M AA2 R AA1 K AA0
@@ -64851,7 +64851,7 @@ maradona	M AA2 R AH0 D OW1 N AH2
 maradonna	M AA2 R AH0 D OW1 N AH2
 marafat	M EH1 R AH0 F AE0 T
 marais	M EH2 R EY1
-marak	M AE1 R AH0 K
+marak	M EH1 R AH0 K
 maralina	M AA0 R AA0 L IY1 N AH0
 maraline	M AA0 R AA0 L IY1 N IY0
 maran	M AA0 R AA1 N
@@ -64862,10 +64862,10 @@ marano	M AA0 R AA1 N OW0
 maranon	M EH1 R AH0 N AA0 N
 marantette	M EH1 R AH0 N T EH2 T
 maranto	M ER0 AE1 N T OW0
-marantz	M AE1 R AH0 N T S
+marantz	M EH1 R AH0 N T S
 maranville	M AA0 R AA1 N V IH0 L
 maras	M AA1 R AH0 Z
-maraschino	M AE2 R AH0 S K IY1 N OW0
+maraschino	M EH2 R AH0 S K IY1 N OW0
 marasco	M AA0 R AA1 S K OW0
 marasek	M ER0 AA1 S EH0 K
 marash	M AA1 R AH0 SH
@@ -65001,9 +65001,9 @@ mareno	M AA0 R EH1 N OW0
 mares	M EH1 R Z
 maresca	M AA0 R EH1 S K AH0
 maresco	M AA0 R EH1 S K OW0
-maresh	M AE1 R IH0 SH
+maresh	M EH1 R IH0 SH
 maret	M AA1 R EY0 T
-marett	M AE1 R IH0 T
+marett	M EH1 R IH0 T
 maretta	M AA0 R EH1 T AH0
 marette	M ER0 EH1 T
 marez	M AA0 R EH1 Z
@@ -65070,10 +65070,10 @@ mariani	M AA0 R IY0 AA1 N IY0
 marianna	M AA0 R IY0 AA1 N AH0
 marianne	M EH2 R IY0 AE1 N
 mariano	M EH2 R IY0 AA1 N OW0
-maribel	M AE1 R IH0 B EH0 L
+maribel	M EH1 R IH0 B EH0 L
 marice	M AA1 R IH0 S
-marich	M AE1 R IH0 K
-maricle	M AE1 R IH0 K AH0 L
+marich	M EH1 R IH0 K
+maricle	M EH1 R IH0 K AH0 L
 maricopa	M EH2 R IH0 K OW1 P AH0
 marie	M ER0 IY1
 mariel	M EH1 R IY0 AH0 L
@@ -65088,9 +65088,9 @@ marife	M AH0 R IY1 F EY0
 marigold	M EH1 R AH0 G OW2 L D
 marigolds	M EH1 R AH0 G OW2 L D Z
 marijuana	M EH2 R AH0 W AA1 N AH0
-marik	M AE1 R IH0 K
+marik	M EH1 R IH0 K
 marilda	M AA0 R IY1 L D AH0
-marilin	M AE1 R IH0 L IH0 N
+marilin	M EH1 R IH0 L IH0 N
 marilla	M AA0 R IH1 L AH0
 marilu	M EH1 R IY0 L UW0
 marilyn	M EH1 R AH0 L AH0 N
@@ -65121,7 +65121,7 @@ maring	M EH1 R IH0 NG
 marini	M AA0 R IY1 N IY0
 marinkovich	M ER0 IH1 NG K AH0 V IH0 CH
 marino	M ER0 IY1 N OW0
-marinoff	M AE1 R IH0 N AO0 F
+marinoff	M EH1 R IH0 N AO0 F
 marinos	M ER0 IY1 N OW0 Z
 marinucci	M AA0 R IY0 N UW1 CH IY0
 marinvest	M ER0 IH1 N V AH0 S T
@@ -65129,7 +65129,7 @@ mario	M AA1 R IY0 OW0
 marion	M EH1 R IY0 AH0 N
 mariotta	M AA2 R IY0 AO1 T AA0
 mariotti	M AA2 R IY0 AO1 T IY0
-mariposa	M AE2 R IH0 P OW1 S AH0
+mariposa	M EH2 R IH0 P OW1 S AH0
 maris	M EH1 R IH0 S
 marisa	M AH0 R IH1 S AH0
 mariscal	M AA1 R AH0 S K AH0 L
@@ -65273,12 +65273,12 @@ marnie	M AA1 R N IY0
 maro	M AA1 R OW0
 maroc	M AA2 R AO1 K
 marogen	M EH1 R OW0 G AH0 N
-marohl	M AE1 R OW0 L
+marohl	M EH1 R OW0 L
 marohn	M AA1 R AH0 N
 marois	M ER0 W AA1
-marold	M AE1 R OW0 L D
-marolf	M AE1 R OW0 L F
-marolt	M AE1 R OW0 L T
+marold	M EH1 R OW0 L D
+marolf	M EH1 R OW0 L F
+marolt	M EH1 R OW0 L T
 maron	M AA0 R AO1 N
 marone	M ER0 OW1 N
 maroney	M ER0 OW1 N IY0
@@ -65291,7 +65291,7 @@ marose	M ER0 OW1 S
 marotta	M ER0 AA1 T AH0
 marotte	M ER0 AO1 T
 marotto	M AA0 R OW1 T OW0
-marotz	M AE1 R AH0 T S
+marotz	M EH1 R AH0 T S
 marous	M EH1 R AH0 S
 marovich	M AA1 R AH0 V IH0 CH
 marplan	M AA1 R P L AE2 N
@@ -65314,7 +65314,7 @@ marquiss	M AA1 R K W IY0 S
 marquita	M AA0 R K W IY1 T AH0
 marr	M AA1 R
 marra	M AA1 R AH0
-marrakech	M AE1 R AH0 K EH2 SH
+marrakech	M EH1 R AH0 K EH2 SH
 marrazzo	M AA2 R AA1 Z OW0
 marred	M AA1 R D
 marren	M AA1 R AH0 N
@@ -65324,11 +65324,11 @@ marriage	M EH1 R IH0 JH
 marriages	M EH1 R IH0 JH IH0 Z
 married	M EH1 R IY0 D
 marries	M EH1 R IY0 Z
-marrin	M AE1 R IH0 N
+marrin	M EH1 R IH0 N
 marriner	M EH1 R IH0 N ER0
 marring	M AA1 R IH0 NG
 marriott	M EH1 R IY0 AH0 T
-marris	M AE1 R IH0 S
+marris	M EH1 R IH0 S
 marro	M AA1 R OW0
 marrocco	M AA0 R OW1 K OW0
 marron	M EH1 R AH0 N
@@ -65476,7 +65476,7 @@ maruca	M ER0 UW1 K AH0
 marucci	M AA0 R UW1 CH IY0
 marui	M ER0 UW1 IY0
 marukin	M ER0 UW1 K IH0 N
-marulanda	M AE2 R UW0 L AE1 N D AH0
+marulanda	M EH2 R UW0 L AE1 N D AH0
 marullo	M AA0 R UW1 L OW0
 maruska	M ER0 AH1 S K AH0
 maruti	M ER0 UW1 T IY0
@@ -65514,10 +65514,10 @@ maryanne	M EH0 R IY0 AE1 N
 marybeth	M EH1 R IY0 B EH1 TH
 maryland	M EH1 R AH0 L AH0 N D
 marylebone	M AA1 R L IH0 B AH0 N
-marylin	M AE1 R IH0 L IH0 N
-marylou	M AE1 R IY0 L UW0
+marylin	M EH1 R IH0 L IH0 N
+marylou	M EH1 R IY0 L UW0
 marymount	M EH1 R IY0 M AW2 N T
-maryruth	M AE1 R IH0 R UW0 TH
+maryruth	M EH1 R IH0 R UW0 TH
 maryse	M AA0 R IY1 S
 marysville	M EH1 R IY0 Z V IH2 L
 maryville	M EH1 R IY0 V IH2 L
@@ -66352,7 +66352,7 @@ mccants	M AH0 K AE1 N T S
 mccard	M AH0 K AA1 R D
 mccardell	M AH0 K AA1 R D AH0 L
 mccardle	M AH0 K AA1 R D AH0 L
-mccarey	M AH0 K AE1 R IY0
+mccarey	M AH0 K EH1 R IY0
 mccargar	M AH0 K AA1 R G ER0
 mccargo	M AH0 K AA1 R G OW0
 mccarl	M AH0 K AA1 R L
@@ -66360,12 +66360,12 @@ mccarley	M AH0 K AA1 R L IY0
 mccarn	M AH0 K AA1 R N
 mccarney	M AH0 K AA1 R N IY0
 mccarran	M AH0 K EH1 R AH0 N
-mccarrell	M AH0 K AE1 R AH0 L
+mccarrell	M AH0 K EH1 R AH0 L
 mccarren	M AH0 K EH1 R AH0 N
-mccarrick	M AH0 K AE1 R IH0 K
-mccarroll	M AH0 K AE1 R AH0 L
-mccarron	M AH0 K AE1 R AH0 N
-mccarry	M AH0 K AE1 R IY0
+mccarrick	M AH0 K EH1 R IH0 K
+mccarroll	M AH0 K EH1 R AH0 L
+mccarron	M AH0 K EH1 R AH0 N
+mccarry	M AH0 K EH1 R IY0
 mccarson	M AH0 K AA1 R S AH0 N
 mccart	M AH0 K AA1 R T
 mccartan	M AH0 K AA1 R T AH0 N
@@ -66406,7 +66406,7 @@ mcclaine	M AH0 K L EY1 N
 mcclam	M AH0 K L AE1 M
 mcclanahan	M AH0 K L AE1 N AH0 HH AE0 N
 mcclane	M AH0 K L EY1 N
-mcclaran	M AH0 K L AE1 R AH0 N
+mcclaran	M AH0 K L EH1 R AH0 N
 mcclard	M AH0 K L AA1 R D
 mcclaren	M AH0 K L AA1 R AH0 N
 mcclarnon	M AH0 K L AA1 R N AH0 N
@@ -66591,7 +66591,7 @@ mcdanel	M AH0 K D AE1 N AH0 L
 mcdaniel	M AH0 K D AE1 N Y AH0 L
 mcdaniels	M AH0 K D AE1 N Y AH0 L Z
 mcdannel	M AH0 K D AE1 N AH0 L
-mcdaris	M AH0 K D AE1 R AH0 S
+mcdaris	M AH0 K D EH1 R AH0 S
 mcdavid	M AH0 K D EY1 V AH0 D
 mcdavitt	M AH0 K D AE1 V AH0 T
 mcdeal	M AH0 K D IY1 L
@@ -66713,11 +66713,11 @@ mcgalley	M AH0 G AE1 L IY0
 mcgalliard	M AH0 G AE1 L IY0 AA0 R D
 mcgann	M AH0 G AE1 N
 mcgannon	M AH0 G AE1 N AH0 N
-mcgarity	M AH0 G AE1 R AH0 T IY0
+mcgarity	M AH0 G EH1 R AH0 T IY0
 mcgarr	M AH0 G AA1 R
-mcgarrah	M AH0 G AE1 R AH0
-mcgarrigle	M AH0 G AE1 R AH0 G AH0 L
-mcgarrity	M AH0 G AE1 R AH0 T IY0
+mcgarrah	M AH0 G EH1 R AH0
+mcgarrigle	M AH0 G EH1 R AH0 G AH0 L
+mcgarrity	M AH0 G EH1 R AH0 T IY0
 mcgarry	M AH0 G EH1 R IY0
 mcgarvey	M AH0 G AA0 R V EY1
 mcgary	M AH0 G EH1 R IY0
@@ -66874,7 +66874,7 @@ mckamey	M AH0 K AE1 M IY0
 mckane	M AH0 K EY1 N
 mckanie	M AH0 K EY1 N IY0
 mckanna	M AH0 K AE1 N AH0
-mckarrick	M AH0 K AE1 R IH0 K
+mckarrick	M AH0 K EH1 R IH0 K
 mckay	M AH0 K EY1
 mckeag	M AH0 K IY1 G
 mckeague	M AH0 K IY1 G
@@ -67535,7 +67535,7 @@ mehall	M AH0 HH AO1 L
 mehan	M EY1 HH AE0 N
 mehanovitch	M AH0 HH AE1 N AH0 V AH0 CH
 meharg	M EY2 HH AA1 R G
-meharry	M EY2 HH AE1 R IY0
+meharry	M EY2 HH EH1 R IY0
 mehdi	M EH1 D IY0
 mehetabel	M IH0 HH EH1 T AH0 B IH0 L
 mehitabel	M EH1 HH IH0 T AH0 B AH0 L
@@ -69447,10 +69447,10 @@ miscellaneous	M IH2 S AH0 L EY1 N IY0 AH0 S
 miscellany	M IH1 S AH0 L EY2 N IY0
 misch	M IH1 SH
 mischa	M IH1 SH AH0
-mischaracterize	M IH0 S K AE1 R AH0 K T ER0 AY2 Z
-mischaracterized	M IH0 S K AE1 R AH0 K T ER0 AY2 Z D
-mischaracterizes	M IH0 S K AE1 R AH0 K T ER0 AY2 Z IH0 Z
-mischaracterizing	M IH0 S K AE1 R AH0 K T ER0 AY2 Z IH0 NG
+mischaracterize	M IH0 S K EH1 R AH0 K T ER0 AY2 Z
+mischaracterized	M IH0 S K EH1 R AH0 K T ER0 AY2 Z D
+mischaracterizes	M IH0 S K EH1 R AH0 K T ER0 AY2 Z IH0 Z
+mischaracterizing	M IH0 S K EH1 R AH0 K T ER0 AY2 Z IH0 NG
 mischarge	M IH0 S CH AA1 R JH
 mischarged	M IH0 S CH AA1 R JH D
 mischarges	M IH0 S CH AA1 R JH IH0 Z
@@ -71365,7 +71365,7 @@ muhabara	M UW2 HH AH0 B AA1 R AH0
 muhamed	M UH0 HH AA1 M EH0 D
 muhammad	M UH0 HH AA1 M AH0 D
 muhammed	M UH0 HH AA1 M EH0 D
-muharram	M AH0 HH AE1 R AH0 M
+muharram	M AH0 HH EH1 R AH0 M
 muhl	M AH1 L
 muhlbauer	M UW1 L B AW0 ER0
 muhlenkamp	M UW1 L IH0 N K AE0 M P
@@ -71523,8 +71523,8 @@ multitude	M AH1 L T AH0 T UW2 D
 multitudes	M AH1 L T AH0 T Y UW2 D Z
 multiuser	M AH1 L T IY0 Y UW2 Z ER0
 multivalve	M AH1 L T IY0 V AE0 L V
-multivariate	M AH2 L T IY0 V AE1 R IY0 IH0 T
-multivariates	M AH2 L T IY0 V AE1 R IY0 IH0 T S
+multivariate	M AH2 L T IY0 V EH1 R IY0 IH0 T
+multivariates	M AH2 L T IY0 V EH1 R IY0 IH0 T S
 multivision	M AH2 L T IY0 V IH1 ZH AH0 N
 multivitamin	M AH2 L T IY0 V AY1 T AH2 M AH0 N
 multiyear	M AH1 L T IY0 Y IY1 R
@@ -72168,7 +72168,7 @@ namis	N AE1 M IH0 S
 namphy	N AE1 M F IY0
 nan	N AE1 N
 nana	N AE1 N AH0
-nancarrow	N AE2 NG K AE1 R OW0
+nancarrow	N AE2 NG K EH1 R OW0
 nance	N AE1 N S
 nanchang	N AE1 N CH AE1 NG
 nancy	N AE1 N S IY0
@@ -72294,11 +72294,11 @@ narrate	N EH1 R EY2 T
 narrated	N EH1 R EY2 T IH0 D
 narrates	N EH0 R EY1 T S
 narration	N EH0 R EY1 SH AH0 N
-narrative	N AE1 R AH0 T IH0 V
-narratives	N AE1 R AH0 T IH0 V Z
+narrative	N EH1 R AH0 T IH0 V
+narratives	N EH1 R AH0 T IH0 V Z
 narrator	N EH1 R EY0 T ER0
 narrators	N EH1 R EY2 T ER0 Z
-narron	N AE1 R AH0 N
+narron	N EH1 R AH0 N
 narrow	N EH1 R OW0
 narrowed	N EH1 R OW0 D
 narrower	N EH1 R OW0 ER0
@@ -74866,7 +74866,7 @@ ocallahan	OW0 K AE1 L AH0 HH AE2 N
 ocampo	OW0 K AE1 M P OW0
 ocana	OW0 K AE1 N AH0
 ocanas	OW0 K AE1 N AH0 Z
-ocarroll	OW0 K AE1 R AH0 L
+ocarroll	OW0 K EH1 R AH0 L
 ocasio	OW0 K AA1 S IY0 OW0
 ocaw	OW0 K AO1
 occasion	AH0 K EY1 ZH AH0 N
@@ -77787,8 +77787,8 @@ paraffin	P EH1 R AH0 F AH0 N
 parag	P ER0 AA1 G
 paraglide	P EH1 R AH0 G L AY2 D
 paragon	P EH1 R AH0 G AA2 N
-paragraph	P AE1 R AH0 G R AE2 F
-paragraphs	P AE1 R AH0 G R AE2 F S
+paragraph	P EH1 R AH0 G R AE2 F
+paragraphs	P EH1 R AH0 G R AE2 F S
 paraguay	P EH1 R AH0 G W EY2
 paraguayan	P EH2 R AH0 G W AY1 AH0 N
 parakeet	P EH1 R AH0 K IY2 T
@@ -77808,7 +77808,7 @@ paralyze	P EH1 R AH0 L AY2 Z
 paralyzed	P EH1 R AH0 L AY2 Z D
 paralyzes	P EH1 R AH0 L AY2 Z IH0 Z
 paralyzing	P EH1 R AH0 L AY2 Z IH0 NG
-paramagnetic	P AE2 R AH0 M AE2 G N EH1 T IH0 K
+paramagnetic	P EH2 R AH0 M AE2 G N EH1 T IH0 K
 paramax	P EH1 R AH0 M AE0 K S
 paramecium	P EH2 R AH0 M IY1 S IY0 AH0 M
 paramedic	P EH2 R AH0 M EH1 D IH0 K
@@ -77911,15 +77911,15 @@ pariah	P ER0 AY1 AH0
 pariahs	P ER0 AY1 AH0 Z
 paribas	P EH0 R IY1 B AH0 S
 parietal	P ER0 AY1 AH0 T AH0 L
-parikh	P AE1 R IH0 K
+parikh	P EH1 R IH0 K
 parillo	P AA0 R IH1 L OW0
 parimutuel	P EH2 R IH0 M Y UW1 CH UW0 AH0 L
 paring	P EH1 R IH0 NG
 paris	P EH1 R IH0 S
 parise	P AA1 R AY0 Z
-pariseau	P AE1 R IH0 S OW0
-parish	P AE1 R IH0 SH
-parishes	P AE1 R IH0 SH IH0 Z
+pariseau	P EH1 R IH0 S OW0
+parish	P EH1 R IH0 SH
+parishes	P EH1 R IH0 SH IH0 Z
 parishioner	P ER0 IH1 SH AH0 N ER0
 parishioners	P ER0 IH1 SH AH0 N ER0 Z
 parisi	P AA0 R IY1 S IY0
@@ -78003,7 +78003,7 @@ parochialism	P ER0 OW1 K IY0 AH0 L IH2 Z AH0 M
 parodi	P AA0 R OW1 D IY0
 parodied	P EH1 R AH0 D IY0 D
 parodies	P EH1 R AH0 D IY0 Z
-parodist	P AE1 R AH0 D IH0 S T
+parodist	P EH1 R AH0 D IH0 S T
 parody	P EH1 R AH0 D IY0
 parole	P ER0 OW1 L
 paroled	P ER0 OW1 L D
@@ -78015,20 +78015,20 @@ parpart	P AA1 R P AA2 R T
 parquet	P AA0 R K EY1
 parr	P AA1 R
 parra	P AA1 R AH0
-parrack	P AE1 R AH0 K
+parrack	P EH1 R AH0 K
 parramore	P AA0 R AA1 M AO0 R
 parras	P EH1 R AH0 Z
 parrella	P AA0 R EH1 L AH0
 parrent	P AA1 R AH0 N T
-parrett	P AE1 R IH0 T
+parrett	P EH1 R IH0 T
 parretti	P ER0 EH1 T IY0
 parried	P EH1 R IY0 D
-parrill	P AE1 R AH0 L
+parrill	P EH1 R AH0 L
 parrilla	P AA2 R IH1 L AH0
 parrillo	P AA2 R IH1 L OW0
 parrinello	P AA0 R IY0 N EH1 L OW0
 parrino	P AA2 R IY1 N OW0
-parriott	P AE1 R IY0 AH0 T
+parriott	P EH1 R IY0 AH0 T
 parris	P EH1 R IH0 S
 parrish	P EH1 R IH0 SH
 parrishes	P EH1 R IH0 SH IH0 Z
@@ -78036,7 +78036,7 @@ parrot	P EH1 R AH0 T
 parrots	P EH1 R AH0 T S
 parrott	P EH1 R AH0 T
 parrotta	P AA0 R OW1 T AH0
-parrow	P AE1 R OW0
+parrow	P EH1 R OW0
 parry	P EH1 R IY0
 pars	P AA1 R Z
 parse	P AA1 R S
@@ -78095,7 +78095,7 @@ participles	P AA1 R T IH0 S IH2 P AH0 L Z
 particle	P AA1 R T AH0 K AH0 L
 particles	P AA1 R T AH0 K AH0 L Z
 particular	P ER0 T IH1 K Y AH0 L ER0
-particularity	P ER0 T IH2 K Y AH0 L AE1 R AH0 T IY0
+particularity	P ER0 T IH2 K Y AH0 L EH1 R AH0 T IY0
 particularly	P AA2 R T IH1 K Y AH0 L ER0 L IY0
 particulars	P ER0 T IH1 K Y AH0 L ER0 Z
 particulate	P ER0 T IH1 K Y AH0 L AH0 T
@@ -79915,8 +79915,8 @@ pharaohs	F EH1 R OW0 Z
 pharaon	F EH1 R OW0 N
 pharaonic	F EH2 R AH0 AA1 N IH0 K
 phares	F EH1 R Z
-pharis	F AE1 R AH0 S
-pharisaism	F AE1 R IH0 S EY2 IH2 Z AH0 M
+pharis	F EH1 R AH0 S
+pharisaism	F EH1 R IH0 S EY2 IH2 Z AH0 M
 pharisee	F AA1 R IH0 S IY2
 pharisees	F AA1 R IH0 S IY2 Z
 phariss	F ER0 IH1 S
@@ -79939,7 +79939,7 @@ pharoah	F EY1 R OW0
 pharoahs	F EY1 R OW0 Z
 pharos	F EH1 R OW2 Z
 pharr	F AA1 R
-pharris	F AE1 R IH0 S
+pharris	F EH1 R IH0 S
 pharynx	F EH1 R IH0 NG K S
 phase	F EY1 Z
 phased	F EY1 Z D
@@ -80558,7 +80558,7 @@ pinching	P IH1 N CH IH0 NG
 pinckard	P IH1 NG K ER0 D
 pinckney	P IH1 NG K N IY0
 pincus	P IH1 NG K AH0 S
-pindaric	P IH0 N D AE1 R IH0 K
+pindaric	P IH0 N D EH1 R IH0 K
 pindell	P IH1 N D AH0 L
 pinder	P AY1 N D ER0
 pindling	P IH1 N D L IH0 NG
@@ -85132,7 +85132,7 @@ rahm	R AE1 M
 rahman	R AA1 M AH0 N
 rahming	R AA1 M IH0 NG
 rahn	R AE1 N
-rahrig	R AE1 R IH0 G
+rahrig	R EH1 R IH0 G
 rahul	R AH0 HH UW1 L
 rahway	R AO1 W EY2
 rai	R AA1 IY0
@@ -85547,7 +85547,7 @@ rarely	R EH1 R L IY0
 rareness	R EH1 R N IH0 S
 rarer	R EH1 R ER0
 rarest	R EH1 R AH0 S T
-rarick	R AE1 R IH0 K
+rarick	R EH1 R IH0 K
 raritan	R EH1 R IH0 T AH0 N
 rarities	R EH1 R IH0 T IY0 Z
 rarity	R EH1 R AH0 T IY0
@@ -91966,16 +91966,16 @@ saraceno	S AA0 R AA0 CH EH1 N OW0
 saracens	S EH1 R AH0 S AH0 N Z
 saracino	S AA0 R AA0 CH IY1 N OW0
 sarafian	S ER0 EY1 F IY0 AH0 N
-sarafin	S AE1 R AH0 F IH0 N
-sarafina	S AE2 R AH0 F IY1 N AH0
-sarage	S AE1 R AH0 JH
+sarafin	S EH1 R AH0 F IH0 N
+sarafina	S EH2 R AH0 F IY1 N AH0
+sarage	S EH1 R AH0 JH
 sarah	S EH1 R AH0
 sarajevan	S AA2 R AH0 Y EY1 V AH0 N
 sarajevans	S AA2 R AH0 Y EY1 V AH0 N Z
 sarajevo	S AA2 R AH0 Y EY1 V OW0
 saran	S ER0 AE1 N
 sarandon	S EH1 R AH0 N D IH0 N
-sarant	S AE1 R AH0 N T
+sarant	S EH1 R AH0 N T
 sarasin	S EH1 R IH0 S IH0 N
 sarasota	S EH2 R AH0 S OW1 T AH0
 saratoga	S EH2 R AH0 T OW1 G AH0
@@ -92017,7 +92017,7 @@ sargen	S AA1 R G AH0 N
 sargent	S AA1 R JH AH0 N T
 sargis	S AA1 R G IH0 S
 sari	S AA1 R IY0
-sarich	S AE1 R IH0 K
+sarich	S EH1 R IH0 K
 sarin	S AA0 R IH0 N
 sarine	S AA0 R IY1 N IY0
 saris	S AA1 R IY0 Z
@@ -92046,13 +92046,13 @@ sarokin	S EH1 R AH0 K IH0 N
 sarong	S ER0 AO1 NG
 sarongs	S ER0 AO1 NG Z
 saros	S AA1 R OW0 S
-sarowiwa	S AE2 R OW0 W IY1 W AH0
+sarowiwa	S EH2 R OW0 W IY1 W AH0
 sarra	S AA1 R AA2
 sarraj	S AA2 R AY1
 sarratt	S ER2 AE1 T
 sarrazin	S AA1 R AH0 Z IH2 N
-sarrett	S AE1 R IH0 T
-sarris	S AE1 R IH0 S
+sarrett	S EH1 R IH0 T
+sarris	S EH1 R IH0 S
 sarro	S AA1 R OW0
 sars	S AA1 R Z
 sarsfield	S AA1 R S F IY0 L D
@@ -92066,7 +92066,7 @@ sartorius	S AA0 R T AO1 R IY0 IH0 S
 sartrain	S AA1 R T R EY2 N
 sartre	S AA1 R T R AH0
 sartwell	S AA1 R T W EH2 L
-sarum	S AE1 R AH0 M
+sarum	S EH1 R AH0 M
 sarver	S AA1 R V ER0
 sarvis	S AA1 R V IH0 S
 sas	S AE1 S
@@ -92468,7 +92468,7 @@ scapegoating	S K EY1 P G OW2 T IH0 NG
 scapegoats	S K EY1 P G OW2 T S
 scapula	S K AE1 P Y AH0 L AH0
 scar	S K AA1 R
-scaramouch	S K AE1 R AH0 M AW2 CH
+scaramouch	S K EH1 R AH0 M AW2 CH
 scarano	S K AA0 R AA1 N OW0
 scarberry	S K AA1 R B EH2 R IY0
 scarborough	S K AA1 R B ER2 OW0
@@ -92510,7 +92510,7 @@ scarpone	S K AA0 R P OW1 N IY0
 scarpulla	S K AA2 R P UH1 L AH0
 scarred	S K AA1 R D
 scarring	S K AA1 R IH0 NG
-scarry	S K AE1 R IY0
+scarry	S K EH1 R IY0
 scars	S K AA1 R Z
 scarsdale	S K AA1 R Z D EY2 L
 scarsella	S K AA2 R S EH1 L AH0
@@ -92622,7 +92622,7 @@ schapp	SH AE1 P
 schappell	SH AE1 P AH0 L
 schappert	SH AE1 P ER0 T
 schar	SH AA1 R
-schara	S K AE1 R AH0
+schara	S K EH1 R AH0
 schardt	SH AA1 R T
 scharenberg	SH EH1 R AH0 N B ER0 G
 scharer	SH EH1 R ER0
@@ -95231,7 +95231,7 @@ sharlow	SH AA1 R L OW0
 sharm	SH AA1 R M
 sharma	SH AA1 R M AH0
 sharman	SH AA1 R M AH0 N
-sharon	SH AE1 R AH0 N
+sharon	SH EH1 R AH0 N
 sharp	SH AA1 R P
 sharpe	SH AA1 R P
 sharpen	SH AA1 R P AH0 N
@@ -95256,10 +95256,10 @@ sharpton	SH AA1 R P T AH0 N
 sharpy	SH AA1 R P IY0
 sharrar	SH ER0 AA1 R
 sharrer	SH AA1 R ER0
-sharrett	SH AE1 R IH0 T
-sharrock	SH AE1 R AH0 K
-sharron	SH AE1 R AH0 N
-sharrow	SH AE1 R OW0
+sharrett	SH EH1 R IH0 T
+sharrock	SH EH1 R AH0 K
+sharron	SH EH1 R AH0 N
+sharrow	SH EH1 R OW0
 sharry	SH AA1 R IY0
 shartzer	SH AA1 R T Z ER0
 sharum	SH AA2 R AH1 M
@@ -100210,7 +100210,7 @@ stargate	S T AA1 R G EY2 T
 stargates	S T AA1 R G EY2 T S
 stargazer	S T AA1 R G EY2 Z ER0
 stargazers	S T AA1 R G EY2 Z ER0 Z
-starin	S T AE1 R IH0 N
+starin	S T EH1 R IH0 N
 staring	S T EH1 R IH0 NG
 stark	S T AA1 R K
 starke	S T AA1 R K
@@ -100241,12 +100241,12 @@ starner	S T AA1 R N ER0
 starnes	S T AA1 R N Z
 starns	S T AA1 R N Z
 starodubstev	S T AA2 R OW0 D AH1 B S T EH2 V
-staron	S T AE1 R AH0 N
+staron	S T EH1 R AH0 N
 starplex	S T AA1 R P L EH2 K S
 starpointe	S T AA1 R P OY2 N T
 starr	S T AA1 R
 starred	S T AA1 R D
-starrett	S T AE1 R IH0 T
+starrett	S T EH1 R IH0 T
 starring	S T AA1 R IH0 NG
 starrs	S T AA1 R Z
 starry	S T AA1 R IY2
@@ -104120,7 +104120,7 @@ tarantula	T AH0 R AE1 N CH UW0 L AH0
 tarantulas	T AH0 R AE1 N CH UW0 L AH0 Z
 taras	T AA1 R AH0 Z
 tarasoff	T EH1 R IH0 S AO0 F
-taravella	T AE2 R AH0 V EH1 L AH0
+taravella	T EH2 R AH0 V EH1 L AH0
 tarbell	T AA1 R B EH2 L
 tarbert	T AA1 R B ER0 T
 tarbet	T AA1 R B IH0 T
@@ -104158,8 +104158,8 @@ tarnower	T AA1 R N AW0 ER0
 tarnowski	T ER0 N AO1 F S K IY0
 taro	T EH1 R OW0
 tarom	T EH1 R AH0 M
-tarot	T AE2 R OW1
-tarots	T AE2 R OW1 Z
+tarot	T EH2 R OW1
+tarots	T EH2 R OW1 Z
 tarp	T AA1 R P
 tarpey	T AA1 R P IY0
 tarpley	T AA1 R P L IY0
@@ -105210,7 +105210,7 @@ thao	DH AW1
 thar	TH AA1 R
 tharp	TH AA1 R P
 tharpe	TH AA1 R P
-tharrington	TH AE1 R IH0 NG T AH0 N
+tharrington	TH EH1 R IH0 NG T AH0 N
 thaser	TH EY1 Z ER0
 thassos	TH AE1 S OW0 S
 that	DH AE1 T
@@ -109025,7 +109025,7 @@ underbid	AH1 N D ER0 B IH2 D
 underbrush	AH1 N D ER0 B R AH2 SH
 undercapitalize	AH0 N D ER0 K AE1 P AH0 T AH0 L AY2 Z
 undercapitalized	AH0 N D ER0 K AE1 P AH0 T AH0 L AY2 Z D
-undercarriage	AH1 N D ER0 K AE2 R IH0 JH
+undercarriage	AH1 N D ER0 K EH2 R IH0 JH
 underclass	AH1 N D ER0 K L AE2 S
 underclassmen	AH2 N D ER0 K L AE1 S M EH0 N
 undercoat	AH1 N D ER0 K OW2 T
@@ -110489,7 +110489,7 @@ vanbergen	V AE0 N B ER1 G AH0 N
 vanbibber	V AE2 N B IH1 B ER0
 vanbiesbrouck	V AE2 N B IY1 AH0 S B R UW2 K
 vanblarcom	V AE2 N B L AA1 R K AH0 M
-vanblaricom	V AE2 N B L AE1 R IH0 K AH0 M
+vanblaricom	V AE2 N B L EH1 R IH0 K AH0 M
 vanbrocklin	V AE2 N B R AA1 K L IH0 N
 vanbrunt	V AE2 N B R AH1 N T
 vanburen	V AE0 N B Y UW1 R AH0 N
@@ -114007,7 +114007,7 @@ whang	W AE1 NG
 wharf	W AO1 R F
 wharff	W AA1 R F
 wharfs	W AO1 R F S
-wharry	W AE1 R IY0
+wharry	W EH1 R IY0
 wharton	W AO1 R T AH0 N
 what	W AH1 T
 whate	W EY1 T
@@ -116182,8 +116182,8 @@ yarnell	Y AA1 R N AH0 L
 yarns	Y AA1 R N Z
 yaron	Y EH1 R AH0 N
 yaros	Y EH1 R OW0 Z
-yarosh	Y AE1 R AH0 SH
-yarrington	Y AE1 R IH0 NG T AH0 N
+yarosh	Y EH1 R AH0 SH
+yarrington	Y EH1 R IH0 NG T AH0 N
 yarrow	Y AA1 R OW0
 yarwood	Y AA1 R W UH2 D
 yasin	Y AE1 S IH0 N
@@ -116831,9 +116831,9 @@ zappos	Z AA1 P OW0 Z
 zappulla	Z AA0 P UW1 L AH0
 zapruder	Z AH0 P R UW1 D ER0
 zaps	Z AE1 P S
-zara	Z AE1 R AH0
+zara	Z EH1 R AH0
 zaragoza	Z AA0 R AA0 G OW1 Z AH0
-zarah	Z AE1 R AH0
+zarah	Z EH1 R AH0
 zarate	Z AA1 R EY0 T
 zarb	Z AA1 R B
 zarcone	Z AA0 R K OW1 N IY0
@@ -116848,7 +116848,7 @@ zaria	Z AA1 R IY0 AH0
 zaring	Z EH1 R IH0 NG
 zarlengo	Z AA0 R L EY1 NG G OW0
 zarling	Z AA1 R L IH0 NG
-zaro	Z AE1 R OW0
+zaro	Z EH1 R OW0
 zarr	Z AE1 R
 zarre	Z AA1 R
 zarrella	Z AA2 R EH1 L AH0
