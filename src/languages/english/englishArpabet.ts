@@ -90,6 +90,63 @@ function isBarredI(
 }
 
 /**
+ * CMUdict WRITES `AH0` WHERE THE VOWEL IS `/ɪ/`, in three suffixes. Re-base those to `IH0`.
+ *
+ * ⚠ `-ism` IS NOT HERE, though it looks like it belongs: its vowel is `IH2 Z AH0 M`, so the S is voiced
+ * to Z and the schwa before the M is a real schwa. Including it in the spelling test only ever produced
+ * false fires (`Protestantism` re-based `-testant-`).
+ *
+ * `activist` is `AE1 K T AH0 V AH0 S T` — both unstressed slots are `AH0`, and the second one is not a
+ * schwa: it is the `-ist` vowel. Rendering it through `cv.AH.unstressed` gives *ˈæktəvəst, and the
+ * dictionary contradicts itself about it — `abolitionist` came out `…ʃənəst` and `abortionist`
+ * `…ʃənɪst`, the same suffix spelled two ways.
+ *
+ * ⚠ RE-BASED TO `IH`, NOT ROUTED THROUGH `isBarredI`, and the difference is the symbol. `isBarredI`
+ * yields the weak vowel `ᵻ`, which is right for the INFLECTIONAL `-es`/`-ed` — and misaki's gold agrees
+ * there, writing `ᵻ` itself (`Christmases` `kɹˈɪsməsᵻz`, 2,154 entries use it). Gold has that symbol
+ * available and deliberately does NOT use it for `-ist`: it writes a full `ɪ`. Building this as an
+ * `isBarredI` arm was tried and measured at **−486 exact against gold with 0 gained**, because words
+ * that already read `ɪ` were pulled to `ᵻ`. The two families are different, and the reference keeps
+ * them apart.
+ *
+ * Referee evidence per family (en-GB wikipron, which has no `ᵻ` and so writes `ɪ` or `ə`):
+ *
+ *     -ist           ɪ 131 / 135  (97.0%)     -sis   ɪ 17 / 21  (81.0%)
+ *     -age           ɪ  85 /  95  (89.5%)
+ *
+ * ⚠ AND `-ness` / `-less` ARE NOT IN THIS SET, which is the whole reason it stops where it does. Gold
+ * writes `ɪ` in both — 375 `-ness` words and 34 `-less` words diverge from us on exactly that, and they
+ * are the LARGEST family in the class, so following the reference would have looked like the obvious win:
+ *
+ *     -ness   referee ɪ  14 / 100  (14.0%)   ə  81 (81.0%)
+ *     -less   referee ɪ  10 /  43  (23.3%)   ə  32 (74.4%)
+ *
+ * The schwa we already write there is right and gold is wrong. The en-GB referee leans TOWARD `ɪ` by
+ * construction — the weak-vowel merger is less advanced in RP — which makes an 81% `ə` reading stronger
+ * rather than weaker. Adding them on the reference's say-so would have regressed 409 words.
+ */
+function rebaseSuffixIh(
+    P: { base: string; stress: number }[],
+    word: string,
+    vowels: ReadonlySet<string>,
+): void {
+    // ⚠ THE SUFFIX'S OWN VOWEL, WHICH IS THE LAST ONE — not every AH0 that happens to precede an S.
+    // Scanning all of them fired on the PREFIX instead and was measurably wrong: `assist`
+    // (AH0 S IH1 S T) became *ɪsˈɪst, `aphesis` (AE1 F AH0 S AH0 S) marked both slots as *ˈæfɪsɪs
+    // where gold has ˈæfəsɪs, and `Protestantism` re-based `-testant-`. 58 regressions, all of this
+    // shape. In each of the three families the target is the final nucleus by construction.
+    let last = -1;
+    for (let i = 0; i < P.length; i++) if (vowels.has(P[i]!.base)) last = i;
+    if (last < 0) return;
+    const p = P[last]!;
+    if (p.base !== "AH" || p.stress !== 0) return;
+    const next = P[last + 1];
+    if (!next) return;
+    if (next.base === "S" && (/ists?$/.test(word) || /sis$/.test(word))) p.base = "IH";
+    else if (next.base === "JH" && /age$/.test(word)) p.base = "IH";
+}
+
+/**
  * CMUdict's final `-y` is `IY0` 7,219 times and `IY2` 198 times, in the same slot. Demote the 198.
  *
  * `city` is `S IH1 T IY0` and `ability` is `AH0 B IH1 L AH0 T IY2` — the same unstressed FLEECE vowel,
@@ -212,6 +269,7 @@ const VOWELS = new Set(def.vowels);
         for (let i = 0; i < phones.length; i++) if (phones[i] !== resolved[i]) demoted.add(i);
         const P = resolved.map(split);
         demoteFinalIy2(P, word);
+        rebaseSuffixIh(P, word, VOWELS);
         // The slots whose schwa is NOT a schwa but the sonorant after it being syllabic.
         const sylSlots = syllabic.get(word);
         let pendingSyllabic = false;

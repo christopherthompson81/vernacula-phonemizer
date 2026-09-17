@@ -88,6 +88,37 @@ public static class EnglishArpabet
 
     private static readonly JsRe PRIMARY_DIGIT = JsRegex.Compile("1$");
 
+    private static readonly JsRe SUFFIX_IST = JsRegex.Compile("(ists?|sis)$");
+    private static readonly JsRe SUFFIX_AGE = JsRegex.Compile("age$");
+
+    /**
+     * CMUdict WRITES `AH0` WHERE THE VOWEL IS `/ɪ/`, in three suffixes. Re-base those to `IH0`.
+     * Ported from englishArpabet.ts — see that file for the referee evidence and the two rejected designs.
+     *
+     * ⚠ RE-BASED TO `IH`, NOT ROUTED THROUGH `IsBarredI`, and the difference is the symbol. `IsBarredI`
+     * yields the weak vowel `ᵻ`, which is right for the INFLECTIONAL `-es`/`-ed` — and misaki's gold agrees
+     * there, writing `ᵻ` itself. Gold has that symbol and deliberately does NOT use it for `-ist`: it writes
+     * a full `ɪ`. Building this as an `IsBarredI` arm was measured at −486 exact against gold with 0 gained.
+     *
+     * ⚠ AND IT IS THE SUFFIX'S OWN VOWEL, THE LAST ONE — scanning every AH0 fired on the prefix instead
+     * (`assist` → *ɪsˈɪst, `aphesis` → *ˈæfɪsɪs), 58 regressions.
+     *
+     * ⚠ `-ness` AND `-less` ARE DELIBERATELY ABSENT. Gold writes `ɪ` in both and they are the LARGEST
+     * family in the class, but the referee says `ə` — 81.0% over 100 `-ness` rows, 74.4% over 43 `-less`
+     * rows — so the schwa already written there is right and the reference is wrong.
+     */
+    private static void RebaseSuffixIh(List<Phone> P, string word, ISet<string> vowels)
+    {
+        var last = -1;
+        for (var i = 0; i < P.Count; i++) if (vowels.Contains(P[i].Base)) last = i;
+        if (last < 0) return;
+        var p = P[last];
+        if (p.Base != "AH" || p.Stress != 0 || last + 1 >= P.Count) return;
+        var next = P[last + 1].Base;
+        if ((next == "S" && SUFFIX_IST.IsMatch(word)) || (next == "JH" && SUFFIX_AGE.IsMatch(word)))
+            P[last] = p with { Base = "IH" };
+    }
+
     /**
      * CMUdict's final `-y` is `IY0` 7,219 times and `IY2` 198 times, in the same slot. Demote the 198.
      * Ported from englishArpabet.ts — see that file for the full evidence and the two narrowings.
@@ -200,6 +231,7 @@ public static class EnglishArpabet
             for (var i = 0; i < phones.Count; i++) if (phones[i] != resolved[i]) demoted.Add(i);
             var P = resolved.Select(Split).ToList();
             DemoteFinalIy2(P, word);
+            RebaseSuffixIh(P, word, VOWELS);
             // The slots whose schwa is not a schwa but the sonorant after it being syllabic.
             IReadOnlyList<int>? sylSlots = null;
             syllabic?.TryGetValue(word, out sylSlots);
