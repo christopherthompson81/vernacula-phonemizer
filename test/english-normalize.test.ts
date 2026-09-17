@@ -250,7 +250,7 @@ describe("english normalization: initialisms", () => {
         expect(phonemize("UNESCO", "en")).toBe("juːnˈɛskoᶷ");
         expect(phonemize("HELLO", "en")).toBe("həlˈoᶷ"); // an ordinary word in caps is not an initialism
         expect(phonemize("THE QUICK BROWN FOX", "en")).toBe("ðə kwˈɪk bɹˈaᶷn fˈɑːks"); // all-caps document
-        expect(phonemize("Louis XIV", "en")).toBe("lˈuːɪs ðə fˈɔːɹtˈiːnθ"); // not EX-EYE-VEE
+        expect(phonemize("Louis XIV", "en")).toBe("lˈuːɪs ðə fˌɔːɹtˈiːnθ"); // not EX-EYE-VEE
     });
 });
 
@@ -368,8 +368,8 @@ describe("english normalization: alphanumeric codes, money, signs, numeric dates
 
     test("numeric dates read as dates", () => {
         // Both forms emit "march 14th 2011", which the ordinal-day and pair-wise-year rules then speak.
-        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
-        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˈɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
+        expect(phonemize("on 2011-03-14 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˌɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
+        expect(phonemize("on 3/14/2011 it began", "en")).toBe("ˈɑːn mˈɑːɹt͡ʃ fˌɔːɹtˈiːnθ twˈɛnti ɪlˈɛvn̩ ɪt bᵻɡˈæn");
     });
 
     test("the lexicalization threshold: long+pronounceable is a word, short is letters", () => {

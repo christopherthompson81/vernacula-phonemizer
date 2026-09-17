@@ -57,6 +57,38 @@ public static class EnglishArpabet
     private static readonly JsRe PHONE = JsRegex.Compile("^([A-Z]+)([0-2])?$");
 
     /**
+     * A WORD HAS EXACTLY ONE PRIMARY STRESS. Demote every primary but the LAST to secondary.
+     * Ported from englishArpabet.ts — see that file for the full measurement.
+     *
+     * ⚠ THIS WAS ENFORCED ON THE OOV PATHS AND NOT ON THE DICTIONARY. 1,029 `g2p-dict.tsv` rows carry more
+     * than one stress-1 nucleus, because CMUdict declines to resolve prefixed forms, compounds and
+     * initialisms (`AA1 R CH B IH1 SH AH0 P`, `N AY1 N T IY1 N`), and the flat lexicon rendered them
+     * verbatim — so 372 words came out with two or three primary marks in one group. `EnforceSinglePrimary`
+     * had always run on the n-gram and tagger output, which is why it never showed there.
+     *
+     * ⚠ THE LAST HERE, THE FIRST IN `EnforceSinglePrimary`, and that asymmetry is measured. Several `1`s
+     * from a per-position classifier are an artifact; several `1`s in CMUdict are a lexicographic statement,
+     * which gold resolves to the later element (81:24 on prefixed rows, 7 of 7 on the teen numerals). Over
+     * 89,411 words: this split is +92 exact with ZERO regressions, last-in-both is +292 but −106, and
+     * first-in-both is +37.
+     */
+    public static List<string> SinglePrimary(IReadOnlyList<string> phones)
+    {
+        var last = -1;
+        for (var i = 0; i < phones.Count; i++)
+            if (PRIMARY_DIGIT.IsMatch(phones[i])) last = i;
+        // ⚠ ALWAYS A FRESH LIST, including the no-primary case: EnforceSinglePrimary writes into what it
+        // gets back, so handing the input straight through would mutate a caller's phones in place.
+        var outp = new List<string>(phones.Count);
+        for (var i = 0; i < phones.Count; i++)
+            outp.Add(last >= 0 && i != last && PRIMARY_DIGIT.IsMatch(phones[i])
+                ? PRIMARY_DIGIT.Replace(phones[i], "2") : phones[i]);
+        return outp;
+    }
+
+    private static readonly JsRe PRIMARY_DIGIT = JsRegex.Compile("1$");
+
+    /**
      * CMUdict's final `-y` is `IY0` 7,219 times and `IY2` 198 times, in the same slot. Demote the 198.
      * Ported from englishArpabet.ts — see that file for the full evidence and the two narrowings.
      *
@@ -155,7 +187,15 @@ public static class EnglishArpabet
         return (phones, word) =>
         {
             word ??= "";
-            var P = phones.Select(Split).ToList();
+            // ⚠ WHICH PHONES THE DEMOTION TOUCHED, because the clash rule below must not delete those marks.
+            // It exists to drop a 2° CMUdict WROTE on an ordinary syllable next to the primary (`zorro`,
+            // `aalto`); a 2° this engine just created from a 1° is the opposite case — the dictionary called
+            // that syllable strong, and deleting the mark leaves `nineteen` as `naᶦntˈiːn` with nothing on
+            // `nine`, where gold has `nˌIntˈin`. Worth +55 exact on its own.
+            var resolved = SinglePrimary(phones);
+            var demoted = new HashSet<int>();
+            for (var i = 0; i < phones.Count; i++) if (phones[i] != resolved[i]) demoted.Add(i);
+            var P = resolved.Select(Split).ToList();
             DemoteFinalIy2(P, word);
             // The slots whose schwa is not a schwa but the sonorant after it being syllabic.
             IReadOnlyList<int>? sylSlots = null;
@@ -192,7 +232,7 @@ public static class EnglishArpabet
                     var mark = stress == 1 ? "ˈ" : stress == 2 ? "ˌ" : "";
                     // ⚠ The exception (closed final syllable on a true diphthong) and all three of its
                     // conditions are load-bearing — see the TS for the row-count measurement behind each.
-                    if (stress == 2 && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1
+                    if (stress == 2 && !demoted.Contains(i) && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1
                         && !(DIPHTHONG.Contains(bas) && ni == nucleiIdx.Count - 1 && i < P.Count - 1))
                         mark = "";
                     outSb.Append(mark);

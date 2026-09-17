@@ -230,7 +230,7 @@ describe("Santali (sat) text normalization", () => {
     // The whole run now goes to the same English reader the rest of the phrase already reaches.
     test("an English ordinal goes to English WHOLE — `1st` is not *street*", () => {
         expect(say("1st")).toBe("fˈɝst"); // was "mitʼ stɹˈiːt" — one Santali digit plus *street*
-        expect(say("13th")).toBe("θˈɝtʰˈiːnθ"); // was "ɡel pe tʰˈiːʲˈeᶦt͡ʃ"
+        expect(say("13th")).toBe("θˌɝtʰˈiːnθ"); // was "ɡel pe tʰˈiːʲˈeᶦt͡ʃ"
         expect(say("4th century BCE")).toBe("fˈɔːɹθ sˈɛnt͡ʃɚi bˈiː sˈiː ˈiː");
         // ⚠ AND THE NEIGHBOUR IT MUST REFUSE: an Ol Chiki numeral takes no Latin ordinal suffix, and a
         // plain ASCII number is still read in SANTALI, not handed to English.

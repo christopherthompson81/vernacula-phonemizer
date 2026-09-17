@@ -40,7 +40,7 @@ describe("reported misreadings", () => {
     // the expansion the reporter asked for; it is case-sensitive so the iridium symbol is untouched.
     test("IR reads as infrared, and only in that exact casing", () => {
         expect(phonemize("IR spectroscopy", "en")).toBe("ˌɪnfɹɚˈɛd spɛktɹˈɑːskəpi");
-        expect(phonemize("UV and IR light", "en")).toBe("jˈuːvˈiː ənd ˌɪnfɹɚˈɛd lˈaᶦt");
+        expect(phonemize("UV and IR light", "en")).toBe("jˌuːvˈiː ənd ˌɪnfɹɚˈɛd lˈaᶦt");
         expect(phonemize("Ir", "en")).toBe("ˈɪɹ"); // iridium's symbol, left alone
     });
 });
@@ -299,7 +299,7 @@ describe("a two-letter caps run glued to digits is a code, not a word", () => {
     // ⚠ TWO LETTERS ONLY. A longer glued run is where the real words live, and this is the case that
     // says so: widening it to any length turns COVID19 into "C O V I D nineteen".
     test("a longer glued run is still a word", () => {
-        expect(phonemize("COVID19", "en")).toBe("koᶷvˈiːd nˈaᶦntˈiːn");
+        expect(phonemize("COVID19", "en")).toBe("koᶷvˈiːd nˌaᶦntˈiːn");
     });
 
     // The cases that already worked, pinned so the new rule is shown not to have disturbed them.
@@ -322,7 +322,7 @@ describe("a dash between two numbers is a range", () => {
         expect(phonemize("5—15", "en")).toContain("tʰuː");          // em dash
         // Ordered after the year rule, so both halves still read pair-wise AND the range says "to".
         expect(phonemize("2019–2020", "en"))
-            .toBe("twˈɛnti nˈaᶦntˈiːn tʰuː twˈɛnti twˈɛnti");
+            .toBe("twˈɛnti nˌaᶦntˈiːn tʰuː twˈɛnti twˈɛnti");
     });
 
     // ⚠ THE ASCII HYPHEN IS NOT CLAIMABLE, and these are the three reasons why. Each is already
@@ -395,7 +395,7 @@ describe("a doubled capital is a code, not a word", () => {
     // same reason `CD` is left alone. Pinned so a later "complete the set" does not undo it.
     test("the two the dictionary already reads as letters keep its reading", () => {
         expect(say("the CC thing")).toBe("ðə siːsˈiː θˈɪŋ");
-        expect(say("the SS thing")).toBe("ðə ˈɛsˈɛs θˈɪŋ");
+        expect(say("the SS thing")).toBe("ðə ˌɛsˈɛs θˈɪŋ");
     });
 
     test("a date mask reads as letters in every field", () => {

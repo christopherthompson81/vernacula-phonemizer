@@ -46,9 +46,31 @@ export function collapseGeminates(ph: string[], vowels: ReadonlySet<string>): st
     return out;
 }
 
-/** A word has exactly ONE primary stress. A per-position predictor (n-gram OR the BiLSTM tagger) can emit several
- *  `1`s (keep the FIRST, demote the rest to `2`) OR — for a short/odd word — ZERO `1`s (then PROMOTE the first vowel
- *  to primary so every content word carries a tonic). Exported so englishTagger.ts shares the exact stress invariant. */
+/** A word has exactly ONE primary stress, and this is the PREDICTOR's half of that: an n-gram or BiLSTM tagger
+ *  emits a digit per position with no global constraint, so it can return several `1`s (keep the FIRST, demote
+ *  the rest) or — for a short or odd word — ZERO (then PROMOTE the first vowel, so every content word carries a
+ *  tonic). Exported so englishTagger.ts shares the exact invariant with the n-gram path.
+ *
+ *  ⚠ THE DICTIONARY'S HALF IS `singlePrimary`, IN `arpabetToIpa`, AND IT KEEPS THE LAST INSTEAD. That asymmetry
+ *  is deliberate and measured, not an oversight. The two sites resolve different things:
+ *
+ *    · here, several `1`s are a PREDICTION ARTIFACT — a per-position classifier with no global constraint. There
+ *      is no information in which one came first, and keeping the first is what this has always done; switching
+ *      it to last regresses 106 words against misaki's gold (`Humean` → *hjumˈiən, `Lockean`, `apishly`).
+ *    · there, several `1`s are a LEXICOGRAPHIC STATEMENT — CMUdict declining to resolve a prefixed form or a
+ *      compound (`AA1 R CH B IH1 SH AH0 P`). Gold resolves those to the later element 81:24 on prefixed rows,
+ *      and unanimously on the teen numerals (`nˌIntˈin`, `θˌɜɹtˈin`, `fˌɔɹtˈin`, `ˌAtˈin` — 7 of 7).
+ *
+ *  Measured over 89,411 words, against gold, exact matches gained/lost versus shipped:
+ *
+ *      first everywhere                        +37   −0
+ *      last everywhere                        +292  −106
+ *      last in the converter, first here       +92   −0      ← this
+ *
+ *  ⚠ AND THE DEMOTION USED TO LIVE ONLY HERE, which was the bug: the DICTIONARY path does not come through this
+ *  function, so 1,029 `g2p-dict.tsv` rows with more than one stress-1 nucleus were rendered verbatim and 372
+ *  words were emitted with two or three primary marks inside one group. The "at most one" half now also runs in
+ *  the converter every path funnels through, so it cannot be bypassed again. */
 export function enforceSinglePrimary(ph: string[], vowels: ReadonlySet<string>): string[] {
     let seen = false;
     const out = ph.map((p) => {
@@ -57,7 +79,7 @@ export function enforceSinglePrimary(ph: string[], vowels: ReadonlySet<string>):
         seen = true;
         return p;
     });
-    if (!seen) {
+    if (!out.some((p) => /1$/.test(p))) {
         const vi = out.findIndex((p) => vowels.has(dropStress(p)));
         if (vi >= 0) out[vi] = out[vi]!.replace(/[0-2]$/, "1");
     }

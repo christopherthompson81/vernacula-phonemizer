@@ -133,6 +133,43 @@ function demoteFinalIy2(P: { base: string; stress: number }[], word: string): vo
         last.stress = 0;
 }
 
+/**
+ * A WORD HAS EXACTLY ONE PRIMARY STRESS. Demote every primary but the LAST to secondary.
+ *
+ * ⚠ THIS WAS ENFORCED ON THE OOV PATHS AND NOT ON THE DICTIONARY, which is why it is here and not only in
+ * `englishG2p.ts`. 1,029 `g2p-dict.tsv` rows carry more than one stress-1 nucleus, because CMUdict declines
+ * to resolve prefixed forms, compounds and initialisms (`AA1 R CH B IH1 SH AH0 P`, `N AY1 N T IY1 N`,
+ * `EY1 B IY1 EH1 S`), and the flat lexicon rendered them verbatim — so **372 words came out with two or
+ * three primary marks inside one group**, which is not a transcription of anything. `enforceSinglePrimary`
+ * had always run on the n-gram and tagger output, which is exactly why it never showed there: the guard
+ * existed on one path and not its twin. Here it cannot be bypassed.
+ *
+ * ⚠ THE LAST, WHERE THE PREDICTOR'S HALF KEEPS THE FIRST. Deliberate, measured, and explained in
+ * `enforceSinglePrimary`: several `1`s from a per-position classifier are an artifact with no information in
+ * them, while several `1`s in CMUdict are a lexicographic statement about a prefixed form or compound. Gold
+ * resolves the latter to the later element — 81:24 on the 150 prefixed rows, and unanimously on the teen
+ * numerals, which are the frequent case in real text:
+ *
+ *     nineteen  nˌIntˈin      thirteen  θˌɜɹtˈin      fourteen  fˌɔɹtˈin      eighteen  ˌAtˈin
+ *
+ * Over 89,411 words: last-here/first-there is +92 exact with ZERO regressions; last in BOTH places is +292
+ * but −106, and those losses are ordinary fore-stressed words gold has right (`Humean`, `Lockean`,
+ * `apishly`). First in both places is only +37.
+ *
+ * ⚠ AND THE CEILING IS NOT HERE. A demoted mark that lands next to the primary is then deleted outright by
+ * the secondary-stress CLASH RULE below — `archbishop` → `ˈɑːɹt͡ʃbɪʃəp`, `nineteen` → `nIntˈin` where gold
+ * has `nˌIntˈin`. Half of the 311 gold-covered rows match neither policy for that reason; with the clash
+ * rule off, agreement on the stress PATTERN goes 120 → 175 of 311. That rule is the next thing to look at,
+ * and it now blocks two fixes rather than one.
+ */
+export function singlePrimary(phones: string[]): string[] {
+    let lastPrimary = -1;
+    for (let i = 0; i < phones.length; i++) if (/1$/.test(phones[i]!)) lastPrimary = i;
+    // ⚠ ALWAYS A FRESH ARRAY, including the no-primary case. `enforceSinglePrimary` writes into the array it
+    // gets back, so returning the input here would mutate a caller's phones in place.
+    return phones.map((p, i) => (lastPrimary >= 0 && i !== lastPrimary && /1$/.test(p) ? p.replace(/1$/, "2") : p));
+}
+
 /** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
  *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
 export function makeArpabetToIpa(
@@ -152,7 +189,15 @@ const DIPHTHONG = new Set(["AY", "OY", "AW"]);
 const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
     return function arpabetToIpa(phones: string[], word = ""): string {
-        const P = phones.map(split);
+        // ⚠ WHICH PHONES THE DEMOTION TOUCHED, because the clash rule below must not delete those marks.
+        // It exists to drop a 2° CMUdict WROTE on an ordinary syllable next to the primary (`zorro`,
+        // `aalto`); a 2° this engine just created from a 1° is the opposite case — the dictionary called
+        // that syllable strong, and deleting the mark leaves `nineteen` as `naᶦntˈiːn` with nothing on
+        // `nine` at all, where gold has `nˌIntˈin`.
+        const resolved = singlePrimary(phones);
+        const demoted = new Set<number>();
+        for (let i = 0; i < phones.length; i++) if (phones[i] !== resolved[i]) demoted.add(i);
+        const P = resolved.map(split);
         demoteFinalIy2(P, word);
         // The slots whose schwa is NOT a schwa but the sonorant after it being syllabic.
         const sylSlots = syllabic.get(word);
@@ -212,6 +257,7 @@ const VOWELS = new Set(def.vowels);
                 let mark = stress === 1 ? "ˈ" : stress === 2 ? "ˌ" : "";
                 if (
                     stress === 2 &&
+                    !demoted.has(i) &&
                     primaryNi >= 0 &&
                     Math.abs(ni - primaryNi) === 1 &&
                     !(

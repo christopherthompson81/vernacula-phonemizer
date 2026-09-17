@@ -78,7 +78,18 @@ public static class EnglishG2pFactory
         return outp;
     }
 
-    /** A word has exactly ONE primary stress. */
+    /**
+     * A word has exactly ONE primary stress, and this is the PREDICTOR's half: an n-gram or BiLSTM tagger
+     * emits a digit per position with no global constraint, so it can return several `1`s (keep the FIRST,
+     * demote the rest) or ZERO (then promote the first vowel, so every content word carries a tonic).
+     *
+     * ⚠ THE DICTIONARY'S HALF IS `EnglishArpabet.SinglePrimary` AND IT KEEPS THE LAST. Deliberate and
+     * measured: several `1`s here are a prediction artifact with no information in them (switching to last
+     * regresses 106 words against gold), while several `1`s in CMUdict are a lexicographic statement gold
+     * resolves to the later element. And the demotion used to live ONLY here, which was the bug — the
+     * dictionary path does not come through this function, so 372 words were emitted with more than one
+     * primary mark.
+     */
     public static List<string> EnforceSinglePrimary(IReadOnlyList<string> ph, IReadOnlySet<string> vowels)
     {
         var seen = false;
@@ -90,7 +101,7 @@ public static class EnglishG2pFactory
             seen = true;
             outp.Add(p);
         }
-        if (!seen)
+        if (!outp.Exists(PRIMARY.IsMatch))
         {
             var vi = outp.FindIndex(p => vowels.Contains(DropStress(p)));
             if (vi >= 0) outp[vi] = STRESS_DIGIT.Replace(outp[vi], "1");

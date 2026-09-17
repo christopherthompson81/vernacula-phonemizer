@@ -143,7 +143,7 @@ describe("abbreviated dates, clocks and timezone offsets", () => {
 
     test("the meridiem trails the whole clock, seconds included", () => {
         // Folded into the hour-and-minute string it is spoken in the MIDDLE of the time.
-        expect(phonemize("8:30:45 pm", "en")).toBe("ˈeᶦt θˈɝd̬i ənd fˈɔːɹt̬i fˈaᶦv sˈɛkəndz pʰˈiːʲˈɛm");
+        expect(phonemize("8:30:45 pm", "en")).toBe("ˈeᶦt θˈɝd̬i ənd fˈɔːɹt̬i fˈaᶦv sˈɛkəndz pʰˌiːʲˈɛm");
         // The bare clock is untouched: `o'clock` is still suppressed before a meridiem.
         expect(phonemize("3:00 pm", "en")).toBe(phonemize("3 pm", "en"));
     });
@@ -232,12 +232,12 @@ describe("a pronounceable initialism that is nonetheless spelled out", () => {
 describe("money with a fractional part", () => {
     test("the cents are spoken as cents, and the clause boundary lands where it should", () => {
         expect(phonemize("I thought about it for $3.14 and the 2nd time.", "en"))
-            .toContain("θɹˈiː dˈɑːlɚz fˈɔːɹtˈiːn sˈɛnts ənd ðə sˈɛkənd");
+            .toContain("θɹˈiː dˈɑːlɚz fˌɔːɹtˈiːn sˈɛnts ənd ðə sˈɛkənd");
     });
 
     test("every currency the normalizer expands, with its own subunit", () => {
-        expect(phonemize("£3.14", "en")).toBe("θɹˈiː pʰˈaᶷndz fˈɔːɹtˈiːn pʰˈɛns"); // suppletive plural
-        expect(phonemize("€3.14", "en")).toBe("θɹˈiː jˈʊɹoᶷz fˈɔːɹtˈiːn sˈɛnts");
+        expect(phonemize("£3.14", "en")).toBe("θɹˈiː pʰˈaᶷndz fˌɔːɹtˈiːn pʰˈɛns"); // suppletive plural
+        expect(phonemize("€3.14", "en")).toBe("θɹˈiː jˈʊɹoᶷz fˌɔːɹtˈiːn sˈɛnts");
         expect(phonemize("$1.01", "en")).toBe("wˈʌn dˈɑːlɚ wˈʌn sˈɛnt"); // both singular
         expect(phonemize("£0.01", "en")).toBe("wˈʌn pʰˈɛni");
     });
