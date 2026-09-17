@@ -265,3 +265,54 @@ worth. Recorded so it is not rediscovered as a bug.
 Checked and clean: 39 of the 98 carry no RP length or quality tell (`ɜː`/`ɑː`/`ɔː`) and were read
 individually in case the rule was firing on something other than non-rhoticity. It was not — they are
 final `-er` → `ə` and `-or` → `ə`, which is the same phenomenon without the length mark.
+
+## Run 4 — 2026-09-17 — review: the floor had stopped being a gate
+
+Raising the measurement 40.9% → 56.1% left `en`'s referee floor at **0.35, twenty points below the
+number it guards**. A floor that far under the measurement catches nothing: the engine could lose a
+third of its agreement and the gate would still be green. Raised to **0.47**.
+
+    en     sampled 54.9%  (1118/2035)   floor 0.47   margin 7.9pp
+    en-GB  sampled 46.5%  (1365/2934)   floor 0.44   margin 2.5pp
+
+⚠ **0.47 IS BELOW THE DEGRADED-PATH SCORE ON PURPOSE.** `en` is now scored through
+`phonemizeEnNeural`, which falls back to the sync engine when onnxruntime is unavailable — and that
+fallback measures **50.0%** on the full referee against the neural path's 56.1%. A floor above 50
+would turn every ONNX-less environment into a red gate that looks like a regression. Below it, the
+gate still passes, and **a result near 50% rather than 55% is itself the signature of the fallback** —
+which is worth more than a failure, because this session already lost a whole finding to a harness
+that had silently degraded to the wrong path.
+
+`en-GB` was NOT raised: it is scored rules-only, so it has no degraded-path question, and 2.5pp is
+already the tight margin this repo sets floors at. `en`'s was raised because 20pp is not a margin.
+
+### Both floor comments described the old instrument
+
+`en`'s said "measured 41.8%" and `en-GB`'s "measured 45.4%" — the pre-#1327 numbers. Corrected, with
+the reason each moved. This matters more than it looks: those comments are the only record of WHY a
+floor sits where it does, and #1327/#1328 changed the measurement without touching them.
+
+### ⚠ The "transient failure" was a missing timeout, and it was NOT transient
+
+It reproduced as soon as the floor was raised, and the reporter had been lying about what it was:
+
+    × en backbone ≥ 47% … 5079ms  →  Test timed out in 5000ms.
+
+**Not a score failure at all.** `en` measures 2.2s alone and exceeds 5s inside a full parallel run.
+`referee-eval.test.ts` — the file this one was carved out of, "for wall time only, same gate" —
+passes **120000** as a per-test timeout, for the reason documented beside it: these tests sit 8× under
+the default when idle, and a loaded machine eats exactly that headroom. **Carving out the two English
+cases took the floors and the `evaluate` call and left the timeout behind**, so this file has been
+running on vitest's 5s default ever since.
+
+Two things this got wrong before it was chased properly:
+
+⚠ **IT WAS CALLED A FLAKE AND ALMOST LEFT THERE.** One occurrence, passing on re-run, with an existing
+flakiness investigation to point at — every reason to file it and move on. Raising the floor is what
+made it reproduce, which was luck rather than method.
+
+⚠ **AND THE DIAGNOSIS WAS WRONG TWICE.** First "ONNX degradation under worker pressure", then "the
+floor I just raised is unsafe". Both were plausible, both were built on the reporter's line rather
+than on the error text, and the error text said `Test timed out` the whole time. The degraded-path
+measurement that came out of it (sync 50.0% against neural 56.1%) is still worth having and still
+shapes where the floor sits — but it was not the answer to this question.
