@@ -898,7 +898,7 @@ async function main(): Promise<void> {
             );
         if (r.intentionalCredited > 0)
             console.log(
-                `  +intentional: ${r.folded + r.intentionalCredited}/${r.total} (${(100 * (r.folded + r.intentionalCredited) / r.total).toFixed(1)}%)  — the line above PLUS ${r.intentionalCredited} rows in a DECLARED-INTENTIONAL class: a divergence where the referee's notation was measured to be the wrong one, so it is not work left to do. See the language's \`intentional\` notes. ⚠ The bare number is the one every floor and every recorded measurement is set against; this one says how much of the residual is known-not-a-defect.`,
+                `  +intentional: ${r.folded + r.intentionalCredited}/${r.total} (${(100 * (r.folded + r.intentionalCredited) / r.total).toFixed(1)}%)  — the line above PLUS ${r.intentionalCredited} rows in a DECLARED-INTENTIONAL class: a divergence measured to be a NOTATION CHOICE rather than an error — either the referee's is the wrong one, or the two are internally consistent and opposed and we follow the one the downstream model was trained on. Not work left to do. See the language's \`intentional\` notes. ⚠ The bare number is the one every floor and every recorded measurement is set against; this one says how much of the residual is known-not-a-defect.`,
             );
         if (r.excluded > 0)
             console.log(

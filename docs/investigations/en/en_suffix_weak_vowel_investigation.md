@@ -224,3 +224,53 @@ There is no further rule-shaped work in the weak-vowel class. The residue is 53 
 writes `ɪ` outside the `S` environment — individual lexical exceptions with no environment to key on.
 The 137 "reverse pairing" is not a defect list; it is the referee's convention showing through, and
 the `intentional` marker already records that the two notations differ by choice rather than by error.
+
+## Run 6 — 2026-09-17 — chasing the over-credit found `-est`, and the convention is now declared
+
+Declaring the `referee ɪ / ours ə` direction as intentional needed a cost: how many of the 137 rows
+are real defects rather than the convention? Arbitrated against gold:
+
+    gold writes ə too → our convention   54
+    gold writes ɪ     → a real defect     6
+    no verdict                           77
+
+Reading the six found one that was not lexical at all. **`weakest` is gold `wˈikᵻst` — the `-est`
+superlative, the same weak vowel as the `-es`/`-ed` arms `isBarredI` already carries.**
+
+### Both references agree, which is what made it a rule
+
+    -est superlatives with a final AH0 S T: 207 dictionary words
+      misaki gold      ᵻ 101 / 111  (91%)     ə 10
+      en-GB referee    ɪ  26 /  41  (63%)     ə 13      (it has no ᵻ; `ɪ` is how it says "not a schwa")
+
+    exact vs gold   42,073 (47.06%) → 42,598 (47.64%)     +527 / −2
+
+⚠ **IT BELONGS IN `isBarredI`, NOT `rebaseSuffixIh`**, and the two are told apart by asking gold WHICH
+SYMBOL it used — `ᵻ` here, a full `ɪ` for `-ist`/`-is`/`-age`. Choosing by which ending looks similar
+would have put it in the wrong one and cost the difference, exactly as Run 2 measured (−486 for using
+`ᵻ` where gold wanted `ɪ`).
+
+⚠ **SIX LEXICAL `-est` WORDS ARE NOT SUPERLATIVES** — `forest`, `harvest`, `honest`, `modest`,
+`tempest`, `interest`, plus `deforest`/`rainforest`/`dishonest` which a word-final match covers for
+free. gold writes a plain schwa on exactly those ten of its 111 and on no others. **A stem test does
+not separate them and was tried first**: stripping `est` and looking the remainder up finds a
+dictionary word for EIGHT of the ten (`hone`, `mode`, `tempe`, `intere`, `for`…). The morphology is
+not recoverable from the spelling, so the list is explicit. Residue: `arbalest` and `doest`.
+
+### And then the convention was declared
+
+With `-est` taken, the reverse direction is declared in `en.jsonc` alongside the forward one. Both
+entries are the same pair opposed, and the note says what each is:
+
+    referee ə / ours ɪ   the referee reduces and we do not — both referees back us
+    referee ɪ / ours ə   the referee keeps /ɪ/ where CMUdict writes AH0 — a NOTATION CHOICE, where
+                         the referee is 83% ɪ and gold 88% ə over the same 2,059 slots, both
+                         internally consistent, and we follow the one Kokoro was trained on
+
+    folded backbone: 2334/4070 (57.3%)
+      +intentional:  2539/4070 (62.4%)   — 205 rows
+
+⚠ **THE DECLARATION OVER-CREDITS BY ABOUT FIVE ROWS AND SAYS SO**: `Alice`, `creamily`, `inevitable`,
+`instil`, `minim` — lexical exceptions with no environment to key on. If that set ever grows an
+environment it becomes an engine rule and leaves the list. The environments we HAVE measured are
+overridden in the engine rather than declared away, which is the line between the two mechanisms.

@@ -13,18 +13,26 @@ import { CONFIG } from "../tools/referee-eval/config.ts";
 describe("declared-intentional divergences", () => {
     const en = CONFIG["en"]!;
 
-    test("en declares the weak vowel, in the referee→ours direction only", () => {
-        expect(en.intentional).toHaveLength(1);
-        const [from, to] = en.intentional![0]!;
-        expect([from, to]).toEqual(["ə", "ɪ"]);
+    test("en declares the weak vowel in both directions", () => {
+        expect(en.intentional).toHaveLength(2);
+        expect(en.intentional!.map(([f, t]) => `${f}${t}`).sort()).toEqual(["ɪə", "əɪ"].sort());
     });
 
-    // ⚠ THE PAIR IS NOT SYMMETRIC AND MUST NEVER BE DECLARED BOTH WAYS. Where the referee writes `ə` and
-    // we write `ɪ`, both referees back US (UK 82.3%, US 72.3%). Where the referee writes `ɪ` and we write
-    // `ə`, both back THE REFEREE (87.0%, 82.4%) and we are wrong. On the en referee those are 70 rows and
-    // 137 rows; declaring the reverse would mark the larger, real defect class as intentional.
-    test("the reverse pairing is not declared", () => {
-        expect(en.intentional!.some(([from, to]) => from === "ɪ" && to === "ə")).toBe(false);
+    // ⚠ BOTH DIRECTIONS, AND THE SECOND ONE WAS REFUSED ONCE BEFORE IT WAS MEASURED. Declaring `ɪ`→`ə`
+    // looked like marking a defect class correct, because for ONE environment it is: where the referee
+    // writes `ɪ` at an unstressed AH0 and misaki's gold agrees, we are wrong. Those environments are
+    // overridden IN THE ENGINE instead — `-ist`/`-is`/`-age` in rebaseSuffixIh, `-est`/`-ed`/`-es`/`-ity`/
+    // `-ible` in isBarredI — so what remains here is the convention itself: at an unstressed AH0 spelled
+    // ⟨i⟩ the referee writes `ɪ` 83% of the time and gold writes `ə` 88%, both internally consistent over
+    // 2,059 slots. A notation choice, not an error, and we follow the one Kokoro was trained on.
+    //
+    // ⚠ IT OVER-CREDITS BY ABOUT FIVE ROWS and that is recorded rather than hidden: `Alice`, `creamily`,
+    // `inevitable`, `instil`, `minim` — lexical exceptions with no environment to key on. If that set ever
+    // grows an environment it becomes an engine rule and leaves this list.
+    test("the two entries are the same pair, opposed — not two unrelated classes", () => {
+        const pairs = en.intentional!.map(([f, t]) => [f, t].sort().join(""));
+        expect(new Set(pairs).size).toBe(1);
+        expect(pairs[0]).toBe(["ə", "ɪ"].sort().join(""));
     });
 
     // ⚠ `ɔ`/`ɑ` WAS TESTED FOR THIS AND REFUSED. The referee writes `ɔ` in 312 of its 4,558 rows, so it

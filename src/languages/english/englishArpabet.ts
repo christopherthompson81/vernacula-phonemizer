@@ -74,6 +74,31 @@ function isBarredI(
         SIBILANT.has(P[vi - 1]!.base)
     )
         return true;
+    // -est superlative (weakest, finest, largest → ᵻst). The SAME weak vowel as the -es/-ed arms above,
+    // and both references agree it is: misaki's gold writes `ᵻ` on 101 of the 111 it covers (91%) and the
+    // en-GB referee — which has no `ᵻ` and so says "not a schwa" by writing `ɪ` — writes `ɪ` on 26 of 41
+    // (63%) against `ə` on 13. 207 dictionary words.
+    // ⚠ NOT AN `ɪ` VIA `rebaseSuffixIh`, WHICH IS THE OTHER HALF OF THIS FAMILY. That function exists for
+    // the endings where gold writes a FULL `ɪ` (`-ist`, `-is`, `-age`); `-est` is one where gold reaches
+    // for `ᵻ` instead, exactly as it does for `-es`/`-ed`, so this belongs here. The two are told apart by
+    // asking gold which symbol it used, not by which looks similar.
+    // ⚠ SIX LEXICAL `-est` WORDS ARE NOT SUPERLATIVES, and they are ordinary enough to matter: `forest`,
+    // `harvest`, `honest`, `modest`, `tempest`, `interest` — plus `deforest`, `rainforest`, `dishonest`
+    // and the rest, which the word-final match covers for free. gold writes a plain schwa on exactly
+    // these ten of the 111 `-est` words it carries, and on no others.
+    // ⚠ A STEM TEST DOES NOT SEPARATE THEM and was tried first: stripping `est` and looking the remainder
+    // up (as-is, +e, undoubled, i→y) finds a dictionary word for EIGHT of the ten — `for`, `harv`… no,
+    // `honest`→`hone`, `modest`→`mode`, `tempest`→`tempe`, `interest`→`intere`. The morphology is not
+    // recoverable from the spelling, so the list is explicit.
+    if (
+        /est$/.test(word) &&
+        !/(forest|harvest|honest|modest|tempest|interest)$/.test(word) &&
+        ni === nucleiCount - 1 &&
+        vi + 2 === P.length - 1 &&
+        P[vi + 1]?.base === "S" &&
+        P[vi + 2]?.base === "T"
+    )
+        return true;
     // -ity/-ety/-ities/-ility (university, quality, security → ᵻti); the vowel before the final -t- cluster
     if (
         /(it|iti|ities|ety|ities)y?$/.test(word) &&
