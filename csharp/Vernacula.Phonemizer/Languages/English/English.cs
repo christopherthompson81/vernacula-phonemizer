@@ -136,8 +136,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
      * *inasant* — 56 rows across pcm. The C# TEST SUITE PASSED THROUGHOUT: nothing in it replays the
      * goldens fleet-wide, and the runner that does (csharp/tools/parity) is not part of `dotnet test`.
      */
-    private static string CreoleCitation(string? ipa) =>
-        ipa is null ? "" : SYLLABIC_SEGMENT.Replace(ipa, "ə$1").Replace("\u0306", "");
+    private static string CreoleCitation(string ipa) =>
+        SYLLABIC_SEGMENT.Replace(ipa, "ə$1").Replace("\u0306", "");
 
     /**
      * `text` with an `oovOverride`, for the registry's FOREIGN reader — the path that reads an embedded Latin
