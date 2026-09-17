@@ -80,9 +80,9 @@ the phonologically identical `berkey`, `blakey`, `buckey`, `brickey`. A `-key` e
 secondary stress on 15 surnames whose twins are unstressed — re-creating exactly the inconsistency
 this is fixing, and on the side with less evidence.
 
-So: no exception gate. The demotion applies uniformly to final `IY2` on a `-y` spelling, and
-`latchkey`/`turnkey` are **declared known misses** — 2 words against 121, in a mark on a vowel that
-is already the right vowel.
+So: no exception gate. The demotion applies uniformly to final `IY2` on a `-y` spelling.
+
+⚠ **AND THE COST OF THAT IS ZERO, WHICH RUN 2 GOT WRONG BEFORE REVIEW CORRECTED IT** — see Run 3.
 
 ## Run 2 — 2026-09-16 19:45 — implemented in the converter; 275 → 122, and the flap came with it
 
@@ -145,3 +145,30 @@ divergence — just a different one. Pinned as its own test case so the two cann
 
 Gates: parity 189/189 byte-identical (36,495 rows, 0 differ), C# 6,687, vitest 5,930, goldens 0
 stale, tsc and package fence clean.
+
+
+## Run 3 — 2026-09-16 19:52 — review: the "2 declared misses" were not misses of this rule
+
+Runs 1–2, the commit message, the PR body and the new test all recorded the cost of having no
+`-key` exception as "2 declared misses against 121" — `latchkey` and `turnkey`, the only two `-y`
+words gold stresses. **That was wrong, and checking it was a one-line query that should have been
+run before writing it down.**
+
+    word       gold        BEFORE      AFTER
+    latchkey   lˈæʧkˌi     lˈæʧki      lˈæʧki
+    turnkey    tˈɜɹnkˌi    tˈɜɹŋki     tˈɜɹŋki
+
+**Byte-identical.** Both carry the `IY2` on the syllable ADJACENT to the primary — `L AE1 CH K IY2`,
+`T ER1 N K IY2` — so the older **secondary-stress clash rule** drops the mark long before this rule
+is reachable. The only thing the demotion changes for them is the vowel, `iː` → `i`, and
+`KokoroFormat` collapses `iː` to `i` regardless. They were already missing the mark, for a different
+reason, and they still are.
+
+So the `-key` exception would have bought **literally nothing**: it would have restored `stress = 2`,
+and the clash rule would have dropped the mark anyway. The decision not to build it stands on the 15
+surnames alone, and stands more firmly than Run 1 claimed — the trap was not a trade-off at all.
+
+The general lesson, and it is the third time this investigation series has hit it: a cost asserted
+from a table rather than measured is a guess. The gold column said "gold stresses these 2", and the
+inference "therefore we lose 2" skipped the question of whether we had them BEFORE. Corrected in the
+source comments (both TS and C#), the test, the commit message and the PR body.

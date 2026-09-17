@@ -67,8 +67,9 @@ public static class EnglishArpabet
      * ⚠ ONLY `IY`, AND ONLY ON A `-y` SPELLING. A blanket rule is WRONG: gold KEEPS the 2° on 94–100% of
      * final `EY`/`AY`/`OY`/`AW` (`airway`, `alibi`, `aircrew`), and final `IY2` NOT spelled `-y` is only
      * 67% unstressed because those are `-ee` compounds whose last syllable is a free morpheme
-     * (`bumblebee`, `jubilee`, `oversee`). `latchkey`/`turnkey` are declared misses — 2 against 121 —
-     * because gating on `-key` would hold the stress on 15 SURNAMES whose CMUdict twins are `IY0`.
+     * (`bumblebee`, `jubilee`, `oversee`). No `-key` exception: 15 of the 17 `-key` rows are SURNAMES
+     * whose CMUdict twins are `IY0`, and it would buy nothing anyway — `latchkey`/`turnkey` carry the
+     * `IY2` adjacent to the primary, so the clash rule drops their mark before this rule is reachable.
      *
      * Demoting the DIGIT rather than suppressing the mark is deliberate: the digit also selects the vowel
      * (`iː` vs `i`) and gates the flap, so `ability` becomes `əbˈɪlᵻt̬i` — all three consistent.

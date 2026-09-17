@@ -113,7 +113,13 @@ function isBarredI(
  * SURNAMES (`starkey`, `markey`, `pankey`, `whipkey`…), while CMUdict writes `IY0` on 100 of the 121
  * `-key` words including the identical `berkey`, `blakey`, `buckey`. Gating on `-key` would hold the
  * stress on 15 surnames whose twins are unstressed — re-creating this very inconsistency, on the side
- * with less evidence. So `latchkey`/`turnkey` are DECLARED MISSES: 2 against 121.
+ * with less evidence.
+ *
+ * ⚠ AND IT WOULD BUY NOTHING. Both words carry the `IY2` on the syllable ADJACENT to the primary
+ * (`L AE1 CH K IY2`, `T ER1 N K IY2`), so the older secondary-stress clash rule drops the mark before
+ * this rule is reachable — `latchkey` rendered `lˈæʧki` before this change and renders `lˈæʧki` after,
+ * byte-identical. An exception would restore `stress = 2` and the clash rule would drop the mark
+ * anyway. They are missed against gold, but they were missed before this and for another reason.
  *
  * This also unblocks the flap, which reads the digit directly: `ability` was `əbˈɪlᵻtˌi` because a
  * stressed vowel takes a real onset, and is now `əbˈɪlᵻTi` — gold `əbˈɪləTi`.

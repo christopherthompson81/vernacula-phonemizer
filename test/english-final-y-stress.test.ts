@@ -74,10 +74,18 @@ describe("the final -y is unstressed, whichever digit CMUdict happened to write"
     // 198 rows end `-key` and 15 are SURNAMES (`starkey`, `markey`, `whipkey`), while CMUdict writes
     // IY0 on 100 of the 121 `-key` words including the identical `berkey`, `blakey`, `buckey`. Gating
     // on `-key` would hold the stress on 15 surnames whose twins are unstressed — re-creating this
-    // very inconsistency on the side with LESS evidence. 2 declared misses against 121.
-    test("latchkey and turnkey are the declared misses", () => {
-        expect(ipa("latchkey", "L AE1 CH K IY2")).toBe("lˈæt͡ʃki");     // gold: lˈæʧkˌi
-        expect(ipa("starkey", "S T AA1 R K IY2")).toBe("stˈɑːɹki");     // and the surname it shares a shape with
+    // very inconsistency on the side with LESS evidence.
+    //
+    // ⚠ AND IT WOULD BUY NOTHING, which is the part worth pinning. Both words have their `IY2` on the
+    // syllable ADJACENT to the primary, so the older clash rule drops the mark before this rule is
+    // even reachable: `latchkey` read `lˈæʧki` in the Kokoro stream BEFORE this change and reads
+    // `lˈæʧki` after — byte-identical, because the only thing demotion changes for them is `iː`→`i`,
+    // which KokoroFormat collapses anyway. An exception would have restored `stress = 2` and the clash
+    // rule would still have dropped the mark. Zero gain, 15 surnames lost.
+    test("the -key compounds are unchanged by this rule, mark already gone to the clash rule", () => {
+        expect(ipa("latchkey", "L AE1 CH K IY2")).toBe("lˈæt͡ʃki");     // gold lˈæʧkˌi — still missed, as before
+        expect(ipa("turnkey", "T ER1 N K IY2")).toBe("tʰˈɝŋki");        // gold tˈɜɹnkˌi — ditto
+        expect(ipa("starkey", "S T AA1 R K IY2")).toBe("stˈɑːɹki");     // the surname it shares a shape with
     });
 
     // The rule lives in the converter rather than in `g2p-dict.tsv` because the dict is REGENERATED
