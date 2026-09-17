@@ -347,7 +347,10 @@ STRESS claim back into a comparison that is meant to be segmental.
 
     en     56.2% → 57.3%      en-GB  47.3% → 48.2%
 
-⚠ It hides nothing contrastive: English has no `ʌ`/`ə` minimal pair independent of stress.
+⚠ It hides nothing contrastive: English has no `ʌ`/`ə` minimal pair independent of stress — and that
+was checked on the data rather than left as a linguistic argument. Folding `ʌ` to `ə` collapses **zero**
+referee readings onto each other and **zero** of ours: no two words anywhere in either side become
+indistinguishable. A fold that erased a real contrast would show up as a collision, and there is none.
 
 ### ⚠ Rejected: cot–caught `ɔ` → `ɑ`
 
@@ -369,3 +372,65 @@ overall `ɑ`:`ɔ` ratio had to stand in for it.
 names — the tagger guessing, not a convention gap. The `-s`/`-z` eleven are the tagger voicing a final
 `s` on classical names (`Mimas` → *maɪməz); real, but eleven rows and no discriminator short of a
 name lexicon.
+
+## Run 6 — 2026-09-17 — marking the intentional classes, and why the marker must be DIRECTIONAL
+
+The classified table left several classes verdicted "intentional" in a document, which is where they
+stayed: the tool kept printing them under *"residual divergence classes … investigate"*, so every
+re-reading of the output re-opened a question that was already closed.
+
+`RefLang.intentional` declares them, and the eval reports a **second number** beside the first:
+
+    folded backbone: 2331/4070 (57.3%)   — after the config folds
+      +intentional:  2401/4070 (59.0%)   — plus 70 rows in a declared-intentional class
+
+⚠ **THE BARE NUMBER STAYS BARE.** `folded` is what every floor and every measurement in this repo is
+set against; moving it would silently restate the history. The second line answers a different
+question — how much of the residual is known-not-a-defect — and both are printed so neither can be
+mistaken for the other.
+
+### ⚠ It is NOT a fold, and the reason is worth the mechanism
+
+A fold rewrites BOTH sides, so it asserts the two notations mean the same thing. For the weak vowel
+that is **true in one direction and false in the other**:
+
+    referee `ə` / ours `ɪ`    UK 82.3%  US 72.3%  back US      ← intentional
+    referee `ɪ` / ours `ə`    UK 87.0%  US 82.4%  back the REF  ← a real defect
+
+Measured on this referee, the two directions are **70 and 137 rows**. A `ə`↔`ɪ` fold would have
+credited us for **137 of our own errors** — the class #1326 and #1330 exist to fix — and raised the
+score for it. So each entry rewrites the REFEREE's string only, and the reverse pairing stays a miss.
+
+### ⚠ And positionwise, not a global replace
+
+The first implementation rewrote every `ə` in the referee's string. That also rewrites the ones where
+we *also* have `ə`, breaking rows that would otherwise match: it credited **34** rows where the honest
+test credits **70**. The rule is that every position where the two DIFFER must be a declared pair, and
+every position where they agree is left alone.
+
+### What is NOT declared
+
+`ɔ`/`ɑ` was tested for this and refused — see Run 5. Declaring it would have been the same error as a
+bidirectional fold, in a different costume: marking a lexical disagreement, where neither side has
+been shown right, as a thing we meant to do.
+
+### What this leaves
+
+    1,739 disagreements
+       70  declared intentional — closed
+      137  the reverse weak-vowel pairing — REAL, and the class #1326/#1330 have been shrinking
+    1,532  everything else, of which ~57% is OOV vocabulary no third source can adjudicate
+
+
+### Review of the mechanism — two fixes
+
+⚠ **THE DECLARATION WAS COMPILED TO A `RegExp` AND ONLY ITS `.source` WAS READ.** That worked for `ə`
+by accident and would have failed silently for anything else — a `refHas` of `[əɐ]` would have compiled,
+loaded, matched nothing, and reported an empty class, which is indistinguishable from a class that
+turned out not to exist. Now plain strings, **validated at load to be one character on each side**, with
+a throw rather than a silent pass: the positionwise comparison cannot honour anything longer.
+
+⚠ **AND THE SEMANTICS ARE PINNED BY TEST, not by prose** — that the pair is declared one way only, that
+the reverse is absent, that `ɔ`/`ɑ` is absent, that every entry is a single character, and that `en` is
+the only language declaring any. The failure this guards is silent and flattering: a bidirectional
+version credits 137 of our own errors and raises the reported number for it.

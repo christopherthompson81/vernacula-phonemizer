@@ -114,5 +114,27 @@
             "replace": "l",
             "note": "dark-l is allophonic — referee writes plain l"
         }
+    ],
+    // ⚠ DECLARED-INTENTIONAL DIVERGENCES — credited as agreement, and NOT folds. A fold rewrites both
+    // sides and so claims the two notations mean the same thing; these rewrite the REFEREE's string only,
+    // because the class is DIRECTIONAL. Measured in
+    // docs/investigations/en/en_suffix_weak_vowel_investigation.md Run 1, at exactly the disputed sites:
+    //
+    //     gold `ə` / ours `ɪ`   6,079 sites   UK referee 82.3% US   US referee 72.3% US   ← we are right
+    //     gold `ɪ` / ours `ə`   1,462 sites   UK referee 87.0% ref  US referee 82.4% ref  ← we are WRONG
+    //
+    // Both directions look like one class and are not, which is why a `ə`↔`ɪ` fold would be wrong: it
+    // would credit the second as well as the first. Only the first is declared here.
+    //
+    // ⚠ WHAT IS NOT HERE MATTERS AS MUCH. The cot–caught pair `ɔ`/`ɑ` was tested for this and REFUSED —
+    // the referee writes `ɔ` in 312 of its 4,558 rows, so it records the distinction and merely assigns
+    // ~38 words differently. That is a lexical disagreement where neither side has been shown right, and
+    // crediting it would be marking our own errors correct.
+    "intentional": [
+        {
+            "refHas": "ə",
+            "weHave": "ɪ",
+            "note": "the WEAK VOWEL. misaki and this referee write unstressed /ɪ/ as `ə`; we write `ɪ`, and both independent referees back us at the disputed sites (82.3% en-GB over 1,484 sites, 72.3% en-US over 95). The reverse pairing — referee `ɪ`, ours `ə` — is NOT credited and is a real defect class we have been fixing (#1326, #1330)."
+        }
     ]
 }

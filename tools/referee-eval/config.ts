@@ -58,6 +58,32 @@ export interface RefLang {
     preFolds?: [RegExp, string, string][];
     /** [pattern, replacement, justification] applied AFTER the shared backbone strip, to both sides. */
     folds: [RegExp, string, string][];
+    /**
+     * DECLARED-INTENTIONAL divergences: classes where the two readings differ, we have POSITIVE EVIDENCE
+     * that ours is the better one, and the difference should therefore be credited as agreement.
+     *
+     * ⚠ THIS IS NOT A FOLD AND THE DIFFERENCE IS DIRECTION. A fold rewrites BOTH sides, so it says "these
+     * two notations mean the same thing" — and for a weak vowel that is false in one direction: Run 18
+     * measured that where misaki writes `ə` and we write `ɪ` both referees back US (82%/72%), while where
+     * the referee writes `ɪ` and we write `ə` both referees back THE REFEREE (87%/82%) and we are simply
+     * wrong. A `ə`↔`ɪ` fold would credit us for the second as well as the first. So each entry rewrites
+     * the REFEREE's string ONLY: `refHas` → `weHave`, and the row is credited only if that makes the two
+     * equal. The reverse pairing stays a miss, as it must.
+     *
+     * ⚠ EVERY ENTRY NEEDS EVIDENCE THAT WE ARE RIGHT, not merely that we disagree. The cot–caught pair
+     * `ɔ`/`ɑ` was tested for this and REFUSED: the referee writes `ɔ` in 312 of its 4,558 rows, so it
+     * records the distinction and merely assigns ~38 words differently — a lexical disagreement, where
+     * neither side has been shown right. Crediting that would be marking our own errors correct.
+     *
+     * ⚠ SINGLE CHARACTERS, AND VALIDATED AS SUCH AT LOAD. The comparison is POSITIONWISE — every position
+     * where the two readings differ must be a declared pair — so a multi-character or regex `refHas`
+     * cannot be honoured, and the loader THROWS rather than accepting one that would silently never fire.
+     * These are plain strings for the same reason: an earlier version compiled them to RegExps and then
+     * read only `.source`, which worked for `ə` by accident and would have failed for anything else.
+     *
+     * The count credited here is REPORTED separately on every run; it does NOT move `folded`.
+     */
+    intentional?: [string, string, string][];
 }
 
 // Shared backbone: strip supra-segmental notation no broad referee reliably carries.
@@ -113,6 +139,15 @@ interface RawLang {
     parenOptional?: boolean;
     preFolds?: RawFold[];
     folds?: RawFold[];
+    intentional?: RawIntentional[];
+}
+
+/** A declared-intentional class as authored in the jsonc. `refHas` is rewritten to `weHave` in the
+ *  REFEREE's string only — see RefLang.intentional for why this is directional and a fold is not. */
+interface RawIntentional {
+    refHas: string;
+    weHave: string;
+    note: string;
 }
 
 const LANGS_DIR = join(dirname(fileURLToPath(import.meta.url)), "langs");
@@ -131,6 +166,24 @@ const compileExcludes = (ex: RawExclude[] | undefined): RowExclusion[] =>
         ...(e.ipaLacks ? { ipaLacks: new RegExp(e.ipaLacks, "u") } : {}),
         note: e.note,
     }));
+
+/**
+ * ⚠ VALIDATES RATHER THAN TRUSTING. The positionwise comparison can only honour a SINGLE CHARACTER on
+ * each side, so anything else is a declaration that would silently never fire — the failure mode this
+ * whole mechanism exists to avoid, since an entry that never fires looks exactly like a class that
+ * turned out to be empty.
+ */
+const compileIntentional = (
+    code: string,
+    raw: RawIntentional[],
+): [string, string, string][] =>
+    raw.map((i) => {
+        if ([...i.refHas].length !== 1 || [...i.weHave].length !== 1)
+            throw new Error(
+                `${code}.jsonc: intentional entries must be one character each, got ${JSON.stringify(i.refHas)} → ${JSON.stringify(i.weHave)}`,
+            );
+        return [i.refHas, i.weHave, i.note];
+    });
 
 /** Load `langs/<code>.jsonc` → the compiled per-language RefLang config. */
 function loadLang(code: string): RefLang {
@@ -156,6 +209,9 @@ function loadLang(code: string): RefLang {
         ...(raw.parenOptional ? { parenOptional: true } : {}),
         ...(raw.preFolds ? { preFolds: compile(raw.preFolds) } : {}),
         folds: compile(raw.folds),
+        ...(raw.intentional
+            ? { intentional: compileIntentional(code, raw.intentional) }
+            : {}),
     };
 }
 

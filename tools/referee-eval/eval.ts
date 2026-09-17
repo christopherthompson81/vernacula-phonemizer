@@ -644,6 +644,9 @@ export interface RefereeResult {
     product: { differ: number; compared: number };
     /** Rows dropped by the referee's `excludeRows`. Reported so a shrinking denominator is never silent. */
     excluded: number;
+    /** Rows credited by a DECLARED-INTENTIONAL class rather than by matching. Reported because it moves
+     *  `folded`, and a reader must be able to subtract it back out. */
+    intentionalCredited: number;
     total: number;
     raw: number;
     folded: number;
@@ -718,6 +721,7 @@ export async function evaluate(
         // is not a fold. Counted and reported, because a silently shrinking denominator is how a score
         // improves for no reason.
         let excluded = 0;
+        let intentionalCredited = 0;
         if (ref.excludeRows?.length) {
             const before = pairs.length;
             // ⚠ TESTED ON THE JOINED FORM, exactly as the scorer sees it. Under `segmentJoin` the referee
@@ -802,6 +806,30 @@ export async function evaluate(
             const of = fold(ours);
             const foldedRefs = refIpas.map(fold);
             const hit = foldedRefs.includes(of);
+            // ⚠ DECLARED-INTENTIONAL CLASSES DO NOT MOVE `folded`. They are counted only where the plain
+            // comparison MISSED, and only in the REFEREE→ours direction (see RefLang.intentional), and
+            // reported as a SECOND number beside the first. Keeping `folded` bare is what makes it
+            // comparable with every floor and every measurement this repo has recorded; the adjusted
+            // figure answers a different question — how much of the residual is known-not-a-defect.
+            if (!hit && cfg.intentional?.length) {
+                // ⚠ POSITIONWISE, NOT A GLOBAL REPLACE, and the difference is large. Rewriting every `ə`
+                // in the referee also rewrites the ones where we ALSO have `ə`, which breaks rows that
+                // would otherwise match — the first version of this credited 34 rows where the honest
+                // test credits 205. The rule is: every position where the two DIFFER must be a declared
+                // (refHas → weHave) pair, and every position where they agree is left alone.
+                const allDeclared = (rf: string): boolean => {
+                    if (rf.length !== of.length) return false;
+                    let anyDiff = false;
+                    for (let k = 0; k < rf.length; k++) {
+                        if (rf[k] === of[k]) continue;
+                        anyDiff = true;
+                        if (!cfg.intentional!.some(([from, to]) => from === rf[k] && to === of[k]))
+                            return false;
+                    }
+                    return anyDiff;
+                };
+                if (foldedRefs.some(allDeclared)) intentionalCredited++;
+            }
             // SYMBOL accuracy: best-matching variant's edit distance (0 on a hit), summed as a phone-error-rate.
             const oSyms = [...of];
             let bestEdit = Infinity, bestLen = 1;
@@ -829,6 +857,7 @@ export async function evaluate(
             path: pathOf(lang),
             product: { differ: pDiffer, compared: pCompared },
             excluded,
+            intentionalCredited,
             total: pairs.length,
             raw,
             folded,
@@ -866,6 +895,10 @@ async function main(): Promise<void> {
         if (r.freqWeighted !== undefined)
             console.log(
                 `frequency-weighted:${(100 * r.freqWeighted).toFixed(1)}%  — token-weighted real-text quality (${r.freqCovered} referee words have a frequency; unbiased by a dictionary-shaped referee)`,
+            );
+        if (r.intentionalCredited > 0)
+            console.log(
+                `  +intentional: ${r.folded + r.intentionalCredited}/${r.total} (${(100 * (r.folded + r.intentionalCredited) / r.total).toFixed(1)}%)  — the line above PLUS ${r.intentionalCredited} rows in a DECLARED-INTENTIONAL class: a divergence where the referee's notation was measured to be the wrong one, so it is not work left to do. See the language's \`intentional\` notes. ⚠ The bare number is the one every floor and every recorded measurement is set against; this one says how much of the residual is known-not-a-defect.`,
             );
         if (r.excluded > 0)
             console.log(
