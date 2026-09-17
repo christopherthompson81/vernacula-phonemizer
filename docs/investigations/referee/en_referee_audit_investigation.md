@@ -1020,3 +1020,214 @@ every changed row recorded, every PR-added row's `upstream` equal to the pre-PR 
     tests 5,971 pass / 308 files      goldens 0 stale      package fence ok
     folded 59.8%   ONNX-less 53.4%    en floor 0.50, en-GB 0.44 (measured 59.8% / 47.5%)
     948 dict rows corrected, 976 curated records, 119 en-gb-cloth additions
+
+## Run 10 — a dropped /r/ is a well-formedness defect, and it has its own gate now
+
+Second round on the dict-vs-gold audit, after #1334 merged.
+
+### ⚠ THE FINDING: 30 dictionary rows were missing an /r/ the spelling puts there
+
+The audit's `+R` bucket looked unpromising — 25 rows — and split into two things that are not alike:
+
+    20 rows   gold writing a GEMINATE ɹɹ      irrelevant ɪɹɹˈɛləvənt, irrevocable, forerunner
+     5 rows   a genuinely DROPPED /r/          housewarming hˈaᶷswɔːmɪŋ, marjoram mˈɑːd͡ʒɚəm
+
+English has no geminate consonants, so the first 20 are gold's error and our single `ɹ` is right. But the
+second group prompted a dict-wide sweep, and the right query took two tries:
+
+    rows with FEWER R/ER than spelled ⟨r⟩        1,898   ← useless: ⟨rr⟩ legitimately maps to ONE /r/
+    rows spelled with ⟨r⟩ and NO rhotic AT ALL      45   ← the real signal
+
+Of the 45, **16 are legitimately r-less and each names an orthographic rule**: French ⟨-ier⟩ is /jeɪ/
+(`dossier`, `olivier`, `bouvier`, `gaultier`), Polish ⟨rz⟩ is a single /ʒ/ (`andrzejewski`, `drzewiecki`),
+and `mrs` is an abbreviation gloss for "missus". The other **29 are CMUdict simply dropping the /r/**:
+
+    backstreet  B AE1 K S T IY2 T          housewarming HH AW1 S W AO2 M IH0 NG
+    forgings    F AO1 JH IH0 NG Z          kardashian   K AA1 D AH0 SH EY2 N
+    chandeliers SH AE2 N D AH0 L IH1 Z     pleomorphic  P L IY2 AH0 M AO1 F IH0 K
+    centrality  S EH0 N T AE1 L IH0 T IY0  commissars   K AA1 M IH0 S AA0 Z
+
+8 are confirmed by misaki gold and were applied from the round-trip-verified candidates; the other 22 are
+repaired from the SPELLING, which fixes the insertion point exactly — the ⟨r⟩ says where the phone goes.
+This is a well-formedness repair, not a choice of reading, which is why it needs no reference.
+
+⚠ **`test/en-missing-rhotic.test.ts` makes it a permanent gate**, written as an ALLOW-LIST rather than a
+count: every exception names the rule that licenses it, and a new r-less row is a defect until someone
+argues it onto the list. The list is also checked for rot, the failure mode #1334's waivers demonstrated.
+
+### The French -age/-ige class: the en-GB referee split it, 4 of 10
+
+Gold disagrees with us in BOTH directions on ʒ~dʒ, and the en-GB referee settles each:
+
+    backs OURS  barrage bæɹɑːʒ, camouflage kæməflɑːʒ, doge dəʊdʒ, luge luːdʒ, prestige pɹəstiːdʒ
+    backs GOLD  beijing beɪdʒɪŋ, fuselage fjuːsəlɑːʒ, loge ləʊʒ   (+ taj, uncovered but unambiguous)
+
+### ⚠ AND A CLASS WHERE THE en-GB REFEREE MUST NOT BE USED
+
+`AA1→AE1` (31 rows: `nevada`, `khaki`, `samba`, `soprano`, `dramatize`) is PALM-vs-TRAP in loanwords, and
+British and American genuinely differ there — en-GB says `nɪvɑːdə` and `kɑːki` where GenAm says `nəvædə`
+and `kæki`. Using it as an arbiter here would import the wrong variety, so its verdicts were discarded for
+this class. The US wikipron file is silent on nearly all 31.
+
+That leaves gold alone, on exactly the kind of word where gold's error rate is demonstrated (`majority`,
+`nematode`, `barry`, `malacca` were all caught earlier). **Only 11 were applied** — the common words where
+the US reading is not in doubt (`dramatize`, `nevada`, `soprano`, `quadratic`, `xanadu`, `consonantal`,
+`nano`, `rando`, `swanky`, `wank`, `wanker`). The other 20 are recorded as gold-only and unarbitrable.
+
+### Tooling change carried forward from the #1334 review
+
+`apply.mts` now MERGES into the curated record instead of appending: a word corrected in two passes keeps
+ONE row whose `upstream` stays the ORIGINAL CMUdict value. That is the defect the review found, fixed in
+the tool rather than only in the data.
+
+    gold agreement 81.91% → 81.97%     dict rows this round: 45
+    tests 5,973 pass / 309 files   goldens 0 stale
+
+## Run 11 — a THIRD source, and what it says about the ~1,000 corrections already made
+
+Asked whether the remaining divergences are unfixable for lack of a source, or fixable and being left. The
+answer turned out to be both, in different proportions than I had been reporting — and the search for a third
+source found one.
+
+### The survey: almost every open English lexicon is circular with something we already use
+
+| candidate | verdict |
+|---|---|
+| ipa-dict (open-dict-data) | its README: en_US is "based on a modified version of **cmudict-ipa**" — circular with our dict |
+| falkreon/ipa-dictionary | "adapted from Wikipedia" — circular with our referee |
+| HuggingFace pronunciation sets | Wiktionary dumps or audio corpora |
+| espeak-ng | rule-based, GPL, deliberately excluded by this engine's cleanroom posture |
+| **Moby Pronunciator II** | **177,267 words, independent of both, and public domain** |
+
+⚠ **THE LICENSE NEEDED CHECKING TWICE.** The GitHub mirror bundles the ORIGINAL 1993 readme — *"licensed,
+not sold … may not be copied in whole or part"* — which is superseded. The Gutenberg edition (eBook #3205)
+carries the author's later grant: **"Public Domain material by grant from the author, January, 2001."**
+Nearly proceeded on the mirror's text without reading it. ⚠ That Gutenberg package also BUNDLES cmudict 0.3
+separately; only `mobypron.unc` is used, or the "third source" would have been our own dictionary.
+
+### Validating the converter before trusting it
+
+Moby's notation is its own (`/@/ /[@]/ /oU/ /dZ/`, `'`/`,` stress, `//Oi//` for OY). The mapping is validated
+by measuring agreement with CMUdict on the 35,227 shared words — a wrong mapping would score near zero:
+
+    raw segmental                                  56.4%
+    + modernised (FORCE/NORTH merger, yod coalescence)   57.8%
+
+⚠ **Moby is a PRE-MERGER, CONSERVATIVE lexicon** and the validation is what showed it: 694 rows where it
+writes `OW R` against CMUdict's `AO R` are `aboard`, `adore`, `airport`, `afford` — it keeps FORCE distinct
+from NORTH, which GenAm merged. It also keeps the conservative `s/i/z/j//u/r` for `seizure`. Both are folded
+before it is allowed to arbitrate.
+
+### ⚠ THE PAYOFF: re-checking every correction in #1334 and this branch against an independent source
+
+    curated rows Moby covers:              723
+      Moby backs what we changed TO:       319
+      Moby backs the UPSTREAM we changed:  166
+      matches neither exactly:             238
+
+The 166 sort almost entirely into classes where Moby is EXPECTED to differ — 76 are the unstressed-vowel axis
+(a 1990s lexicon writes full vowels where modern GenAm reduces) and 3 are the weekday `-di` reading. But two
+classes needed real examination.
+
+**LOT–THOUGHT (54 flags) — the third source CORROBORATES the biggest change in the PR.** Moby distinguishes
+the merger, so its opinion counts here. On a 28-word control set it agrees with gold on 23:
+
+    cloth off cost lost soft coffee cross loss broth moth dog long song wrong   AO in BOTH
+    boss frog fog golf on                                                       Moby AA, gold AO
+
+Five genuinely-variable words, and the rest of the class independently confirmed. Left as gold has them —
+gold is internally consistent and is the lexicon the downstream model was trained on — but recorded.
+
+### ⚠ AND IT CAUGHT FIVE REAL ERRORS OF MINE, IN A CLASS I APPLIED WITHOUT A FAMILY CHECK
+
+The S→Z pass ran no morphological-family check, because I had only been running those on VOWEL classes.
+Moby flagged 14 of the 49, and five are genuinely wrong:
+
+    adhesive  Z   but `-sive` is S across the family: cohesive, explosive, corrosive, abrasive, decisive,
+    plosive   Z        expensive, massive, passive, persuasive — and `plosive` is the STEM of `explosive`
+    maltose   Z   but the sugars are S: glucose, fructose, lactose, sucrose, dextrose, cellulose
+    mucosa    Z   but mimosa is S
+    otiose    Z   but the `-ose` adjectives are S: bellicose, comatose, grandiose, morose
+
+All five reverted, and `jocose` — a PRE-EXISTING outlier in the same `-ose` family — corrected with them.
+
+⚠ **The ones Moby flagged that are NOT errors matter too, because they show the sweep needs judgement:**
+`rouse`/`dowse` are Z and correct — `arouse`, `carouse`, `espouse` are all Z, a real sub-family distinct from
+`house`/`mouse`/`blouse`; `diesel` is Z with `easel`/`weasel`; `coyotes` is Z because it is the plural of a
+vowel-final stem; and the four `trans-` rows follow a real voicing rule (`translate`/`transmit` Z before a
+voiced segment, `transfer`/`transport` S before a voiceless one).
+
+### Coverage, and therefore what Moby cannot do
+
+    recorded divergences            264/331   80%   ← where it did the work above
+    all OOV divergences             338/1079  31%
+    the 730 currently unarbitrable   93/730   13%
+
+A 1990s lexicon has no `Gitmo`, no `AIgiarism`. It validates the past far better than it extends the future.
+
+    tests 5,973 pass / 309 files   goldens 0 stale   gold agreement 81.98%
+
+## Run 12 — reviewing #1335, and the allow-list that excused a defect
+
+### 1. The data invariants hold, measured against the PRISTINE baseline
+
+The first check used the wrong baseline and flagged the five S→Z reverts as "changed but unrecorded". They
+are reverted to the ORIGINAL CMUdict value, so they correctly have NO curated row — the invariant is about
+pristine CMUdict, not about the previous PR's shipped state. Against the right baseline:
+
+    dict rows changed vs pristine: 1,000    all recorded    no duplicates
+    curated rows that are now no-ops: 0     every `want` equals the shipped dict
+
+### 2. ⚠ THE en-GB CONSEQUENCE CHECK, which #1334's review made mandatory
+
+Measured before AND after the branch rather than reasoned about:
+
+    en-GB referee coverage of this branch's 64 changed words: 34
+      matching BEFORE: 7      matching AFTER: 17      → then 19
+
+Ten words were FIXED by the branch. Three regressed, and two were repairable: `dramatize` and `nevada` are
+transatlantic splits (US `æ`, RP `ɑː`) and the transform has a set for exactly that mapping — added to
+`en-gb-bath.tsv`, both now match.
+
+The third, `maltose`, is NOT a regression on inspection. The en-GB referee lists BOTH `/s/` and `/z/` for
+`glucose`, `fructose`, `lactose` and `sucrose`, and only `/z/` for `maltose`; our `/s/` is consistent with
+all five siblings and correct for GenAm. The word went from matching by accident to being consistent with
+its family, which is the right direction.
+
+### 3. The 22 spelling-derived rhotic repairs, checked against Moby
+
+Those were derived from the SPELLING with no reference, so they needed an independent look. Moby covers 8:
+
+    agree exactly: 5
+    differ:        3 — and all three differ only on an UNSTRESSED VOWEL, never on the /r/
+                       (`expresso` IH/EH, `centrality` AH/IH, `marjoram` ER vs AH R)
+
+Every Moby-covered repair carries the rhotic. Confirmed.
+
+### 4. ⚠ AND THE ALLOW-LIST ITSELF WAS WRONG — it excused a real defect
+
+`test/en-missing-rhotic.test.ts` lists the words permitted to be r-less, each with the rule licensing it.
+Checking THAT list against Moby confirmed `dossier`, `dossiers`, `olivier`, `boucher` and `mrs` as genuinely
+r-less — and broke `croissant`:
+
+    ours       K W AA2 S AA1 N T          no /r/
+    Moby       K R AO0 S AA1 N            has it
+    gold       kɹwˌɑsˈɑnt                 has it
+    en-GB      kwæsɒ̃ / kɹwæsɒ̃            lists both
+
+I had excused it as "French, /kwɑː-/ attested in English" — which is true, it is the en-GB referee's first
+variant — but two independent sources carry the /r/ and the third calls it a variant. **A defect wearing an
+exception's clothes.** `croissant`/`croissants` corrected to `K R W AA2 S AA1 N T`.
+
+⚠ This is the argument for writing that gate as a list of NAMED RULES rather than a count: a count cannot be
+audited, but "French ⟨-ier⟩ is /jeɪ/" can be checked against a third source and found not to apply.
+
+### 5. Moby recorded in PROVENANCE §5
+
+Added as §5.3, the section for sources whose role is adjudication rather than shipped bytes (where Wiktionary
+and epitran already sit). Nothing from Moby is redistributed. Both traps are written down: the mirrored 1993
+readme that is superseded by the 2001 public-domain grant, and the cmudict 0.3 bundled beside it in the same
+Gutenberg package — taking that file would have made the "independent third source" a copy of our own dict.
+
+    tests 5,973 pass / 309 files   goldens 0 stale   package fence ok
+    en 60.0% (floor 0.50)   en-GB 47.5% (floor 0.44)
