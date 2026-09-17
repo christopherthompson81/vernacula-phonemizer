@@ -21,7 +21,7 @@ describe("english canonical IPA", () => {
 
     test("possessives + OOV G2P", () => {
         expect(phonemize("putin's car", "en")).toBe("pʰˈuːt̬ɪnz kʰˈɑːɹ");
-        expect(phonemize("doomscroll", "en")).toBe("dˈuːmskɹoᶷɫ"); // OOV → native G2P
+        expect(phonemize("doomscroll", "en")).toBe("dˈuːmskɹˌoᶷɫ"); // OOV → native G2P
     });
 
     test("numbers (cardinal, decimal, ordinal) become words → lexicon", () => {
@@ -123,7 +123,7 @@ describe("abbreviated dates, clocks and timezone offsets", () => {
 
     test("a weekday abbreviation needs a MONTH beside it, not just a number", () => {
         expect(phonemize("Wed. October 8", "en")).toContain("wˈɛnzdi");
-        expect(phonemize("Thurs, 9 October 2025", "en")).toContain("θˈɝzdeᶦ");
+        expect(phonemize("Thurs, 9 October 2025", "en")).toContain("θˈɝzdˌeᶦ");
         // ⚠ `sat` and `wed` are verbs and `sun`/`mon` are nouns, so a bare following digit cannot license
         // the weekday reading: "he sat 5 metres away" is not a Saturday.
         expect(phonemize("he sat 5 metres away", "en")).toContain("sˈæt");
@@ -237,7 +237,7 @@ describe("money with a fractional part", () => {
 
     test("every currency the normalizer expands, with its own subunit", () => {
         expect(phonemize("£3.14", "en")).toBe("θɹˈiː pʰˈaᶷndz fˌɔːɹtˈiːn pʰˈɛns"); // suppletive plural
-        expect(phonemize("€3.14", "en")).toBe("θɹˈiː jˈʊɹoᶷz fˌɔːɹtˈiːn sˈɛnts");
+        expect(phonemize("€3.14", "en")).toBe("θɹˈiː jˈʊɹˌoᶷz fˌɔːɹtˈiːn sˈɛnts");
         expect(phonemize("$1.01", "en")).toBe("wˈʌn dˈɑːlɚ wˈʌn sˈɛnt"); // both singular
         expect(phonemize("£0.01", "en")).toBe("wˈʌn pʰˈɛni");
     });

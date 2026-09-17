@@ -88,7 +88,7 @@ public class EnglishReportedMisreadingsTests
     // …and the guards: OW/EY are not true diphthongs here, and an open final syllable is excluded.
     [InlineData("zorro", "zˈɔːɹoᶷ")]
     [InlineData("window", "wˈɪndoᶷ")]
-    [InlineData("airplane", "ˈɛɹpleᶦn")]
+    [InlineData("airplane", "ˈɛɹplˌeᶦn")]
     // ⚠ plain d, not d̬: a 2° the clash rule KEEPS is a real beat, so the coronal before it is a full
     // stop rather than a flap. misaki's lexicon agrees (kɹˈɑkədˌIl). The ˌ — what this case is about —
     // is unchanged. See englishArpabet.ts.
@@ -174,7 +174,7 @@ public class EnglishReportedMisreadingsTests
     [InlineData("the OO thing", "ðə ˈoᶷ ˈoᶷ θˈɪŋ")]
     [InlineData("the UU thing", "ðə jˈuː jˈuː θˈɪŋ")]
     [InlineData("the YY thing", "ðə wˈaᶦ wˈaᶦ θˈɪŋ")]
-    [InlineData("format YYYY-MM-DD here", "fˈɔːɹmæt wˈaᶦ wˈaᶦ wˈaᶦ wˈaᶦ ˈɛm ˈɛm dˈiː dˈiː hˈɪɹ")]
+    [InlineData("format YYYY-MM-DD here", "fˈɔːɹmˌæt wˈaᶦ wˈaᶦ wˈaᶦ wˈaᶦ ˈɛm ˈɛm dˈiː dˈiː hˈɪɹ")]
     // ⚠ CC and SS are doubled too and are NOT on the list: CMUdict records their letter readings
     // already, in one token with one stress, which is better prosody than spelling out.
     [InlineData("the CC thing", "ðə siːsˈiː θˈɪŋ")]

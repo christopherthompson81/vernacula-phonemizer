@@ -441,7 +441,7 @@ describe("Latin abbreviations and phrases", () => {
         expect(p("Ali vs. Frazier")).toContain("vˈɝsəs");
         // Latin PHRASES spelled in full are ordinary dictionary words and need no rule.
         expect(p("ad hoc committee")).toContain("ˈæd hˈɑːk");
-        expect(p("a priori reasoning")).toContain("pɹaᶦˈɔːɹaᶦ");
+        expect(p("a priori reasoning")).toContain("pɹaᶦˈɔːɹˌaᶦ");
     });
 
     // ⚠ THE EXPONENT AND THE AMPERSAND WERE DROPPED FLEET-WIDE, because no gate could see either until

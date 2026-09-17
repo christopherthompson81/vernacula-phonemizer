@@ -133,7 +133,7 @@ describe("a closed final syllable on a true diphthong keeps its secondary stress
     test("an ordinary final -o is not marked (OW/EY are not true diphthongs here)", () => {
         expect(phonemize("zorro", "en")).toBe("zˈɔːɹoᶷ");
         expect(phonemize("window", "en")).toBe("wˈɪndoᶷ");
-        expect(phonemize("airplane", "en")).toBe("ˈɛɹpleᶦn");
+        expect(phonemize("airplane", "en")).toBe("ˈɛɹplˌeᶦn");
     });
 
     // ⚠ THE FLAP NEEDS THE FOLLOWING VOWEL UNSTRESSED, and "unstressed" is the DICTIONARY's stress
@@ -186,7 +186,7 @@ describe("a closed final syllable on a true diphthong keeps its secondary stress
     });
 
     test("an open final syllable is not marked", () => {
-        expect(phonemize("a priori", "en")).toContain("pɹaᶦˈɔːɹaᶦ");
+        expect(phonemize("a priori", "en")).toContain("pɹaᶦˈɔːɹˌaᶦ");
     });
 
     // The clash rule itself is untouched where the 2° is not final — crocodile keeps the mark it
@@ -399,7 +399,7 @@ describe("a doubled capital is a code, not a word", () => {
     });
 
     test("a date mask reads as letters in every field", () => {
-        expect(say("format YYYY-MM-DD here")).toBe("fˈɔːɹmæt wˈaᶦ wˈaᶦ wˈaᶦ wˈaᶦ ˈɛm ˈɛm dˈiː dˈiː hˈɪɹ");
+        expect(say("format YYYY-MM-DD here")).toBe("fˈɔːɹmˌæt wˈaᶦ wˈaᶦ wˈaᶦ wˈaᶦ ˈɛm ˈɛm dˈiː dˈiː hˈɪɹ");
     });
 
     // The neighbours: a doubled capital must not drag off anything that was already right.

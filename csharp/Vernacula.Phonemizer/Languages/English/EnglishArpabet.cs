@@ -178,7 +178,10 @@ public static class EnglishArpabet
         var cv = def.ConditionalVowels;
         var VOWELS = new HashSet<string>(def.Vowels, StringComparer.Ordinal);
         // The TRUE diphthongs, for the clash exception below — NOT OW/EY. See the TS.
-        var DIPHTHONG = new HashSet<string>(new[] { "AY", "OY", "AW" }, StringComparer.Ordinal);
+        // The vowels gold marks on an OPEN final syllable next to the primary. Measured, not chosen:
+        // OY 10/10, AW 8/8, EY 65/71, AY 11/12, AO 10/11, UW 22/33 against OW 22/104, IY 9/55, AA 5/15.
+        // See englishArpabet.ts for the full re-measurement of this rule against the reference.
+        var STRONG_OPEN_FINAL = new HashSet<string>(new[] { "EY", "AY", "OY", "AW", "AO", "UW" }, StringComparer.Ordinal);
 
         /**
          * Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm
@@ -233,7 +236,8 @@ public static class EnglishArpabet
                     // ⚠ The exception (closed final syllable on a true diphthong) and all three of its
                     // conditions are load-bearing — see the TS for the row-count measurement behind each.
                     if (stress == 2 && !demoted.Contains(i) && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1
-                        && !(DIPHTHONG.Contains(bas) && ni == nucleiIdx.Count - 1 && i < P.Count - 1))
+                        && !(ni == nucleiIdx.Count - 1
+                             && (i < P.Count - 1 || STRONG_OPEN_FINAL.Contains(bas))))
                         mark = "";
                     outSb.Append(mark);
                     if (bas == "AH" && IsBarredI(word, P, i, ni, nucleiIdx.Count)) outSb.Append('ᵻ');

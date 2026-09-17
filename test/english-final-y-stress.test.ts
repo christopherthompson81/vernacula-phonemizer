@@ -51,15 +51,16 @@ describe("the final -y is unstressed, whichever digit CMUdict happened to write"
         expect(ipa("buffalo", "B AH1 F AH0 L OW2")).toBe("bˈʌfəlˌoᶷ");
     });
 
-    // ⚠ NOT EVERY FINAL 2° SURVIVES, AND THE REASON IS OLDER THAN THIS RULE. `airway` (EH1 R W EY2)
-    // and `aircrew` (EH1 R K R UW2) have the 2° on the syllable NEXT TO the primary, so the
-    // secondary-stress CLASH rule above drops the mark — and its diphthong exception covers only the
-    // true diphthongs AY/OY/AW, not EY/UW. Gold marks both (`ˈɛɹwˌA`, `ˈɛɹkɹˌu`), so this is a real
-    // divergence; it is simply a DIFFERENT one, and pinning it here keeps the two from being confused
-    // if either rule is touched later.
-    test("a final 2° adjacent to the primary is dropped by the older clash rule", () => {
-        expect(ipa("airway", "EH1 R W EY2")).toBe("ˈɛɹweᶦ");
-        expect(ipa("aircrew", "EH1 R K R UW2")).toBe("ˈɛɹkɹuː");
+    // ⚠ THIS CASE WAS PINNED AS A KNOWN DIVERGENCE IN #1323 AND IS NOW FIXED — kept as the record.
+    // `airway` (EH1 R W EY2) and `aircrew` (EH1 R K R UW2) carry the 2° on the syllable NEXT TO the
+    // primary, so the secondary-stress CLASH RULE dropped the mark, and its exception then covered only
+    // the true diphthongs AY/OY/AW in a CLOSED syllable. Gold marks both (`ˈɛɹwˌA`, `ˈɛɹkɹˌu`), which is
+    // why it was pinned here rather than folded into that PR. Re-measuring the clash rule against gold
+    // (#1325) widened the exception to any vowel in a closed final syllable, plus EY/AY/OY/AW/AO/UW in an
+    // open one — and these two are inside it.
+    test("a final 2° next to the primary now survives, where gold keeps it", () => {
+        expect(ipa("airway", "EH1 R W EY2")).toBe("ˈɛɹwˌeᶦ");       // gold ˈɛɹwˌA
+        expect(ipa("aircrew", "EH1 R K R UW2")).toBe("ˈɛɹkɹˌuː");   // gold ˈɛɹkɹˌu
     });
 
     test("final IY2 NOT spelled -y keeps it — those are compounds with a free morpheme", () => {
