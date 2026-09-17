@@ -86,7 +86,10 @@ public class EnglishSpellingVariantsTests
 
     [Theory]
     [InlineData("vapour", "vepa")]
-    [InlineData("analyse", "anălaiz")]
+    // ⚠ analaiz, NOT anălaiz. The breve form was re-recorded here by #1319's bulk expectation update,
+    // when the C# port was missing English.CreoleCitation and leaked the parent's extra-short schwa into
+    // Naija. The TS twin kept the right value throughout, which is what the port had drifted from.
+    [InlineData("analyse", "analaiz")]
     public void TheDictOnlyLookupFoldsSoCreolesNativiseACommonwealthSpelling(string word, string ipa)
         => Assert.Equal(ipa, Phonemizer.Phonemize(word, "pcm"));
 }

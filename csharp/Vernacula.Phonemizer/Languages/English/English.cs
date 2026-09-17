@@ -115,11 +115,29 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     public string? KnownWord(string word)
     {
         var lower = Js.ToLowerCase(word);
-        if (_lexicon.TryGetValue(lower, out var v)) return v;
-        if (_heteronyms.TryGetValue(lower, out var het)) return het.Default;
+        if (_lexicon.TryGetValue(lower, out var v)) return CreoleCitation(v);
+        if (_heteronyms.TryGetValue(lower, out var het)) return CreoleCitation(het.Default);
         var american = SpellingVariants.AmericanSpelling(lower, w => _lexicon.ContainsKey(w));
-        return american is not null && _lexicon.TryGetValue(american, out var us) ? us : null;
+        return american is not null && _lexicon.TryGetValue(american, out var us) ? CreoleCitation(us) : null;
     }
+
+    private static readonly JsRe SYLLABIC_SEGMENT = JsRegex.Compile("(\\S)\\u0329", "gu");
+
+    /**
+     * The citation form a CREOLE nativiser should see — GenAm's REDUCED-SLOT notation undone.
+     * Ported from english.ts; it existed there and NOT here, and that gap is what this fixes.
+     *
+     * ⚠ THE SAME BOUNDARY ASPIRATION AND FLAPPING ALREADY CROSS. Naija's `Nativise` strips `ʰ` and the
+     * voicing diacritic because they are facts about General American rather than Nigerian Pidgin; the
+     * syllabic consonant and the extra-short schwa are the same kind of fact.
+     *
+     * ⚠ THIS WAS A LIVE PORT DIVERGENCE, not a hypothetical. #1319 added the reduced slot to the English
+     * lexicon and this strip to the TS side only, so C# Naija read `innocent` as *inasn̩t* where TS read
+     * *inasant* — 56 rows across pcm. The C# TEST SUITE PASSED THROUGHOUT: nothing in it replays the
+     * goldens fleet-wide, and the runner that does (csharp/tools/parity) is not part of `dotnet test`.
+     */
+    private static string CreoleCitation(string ipa) =>
+        SYLLABIC_SEGMENT.Replace(ipa, "ə$1").Replace("\u0306", "");
 
     /**
      * `text` with an `oovOverride`, for the registry's FOREIGN reader — the path that reads an embedded Latin

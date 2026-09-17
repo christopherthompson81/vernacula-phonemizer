@@ -230,3 +230,26 @@ PRODUCTION inference latency, where the current behaviour is the one you want. N
 Sequentially 153s. The gates are independent of one another, so the largest remaining win is not
 inside any of them — it is running them concurrently, which is a change to how `npm run ci` reports
 failures rather than to how fast anything computes.
+
+### ⚠ Correction to that table — it is missing a gate, and that omission has now cost something
+
+The list above is "the gates", and it is the set `npm run ci` runs. **`csharp/tools/parity` is not
+in it and is not in `dotnet test` either** — it is a standalone program, run by hand, that replays
+every golden through the C# engine and diffs. 2m10s, and the only thing anywhere that compares the
+two implementations *fleet-wide in the direction that matters*:
+
+| | direction | in an automatic gate? |
+|---|---|---|
+| `check:goldens` | TS engine → `csharp/goldens/*.tsv` | yes, `npm run ci` |
+| `dotnet test` | 6,687 hand-written C# assertions | yes |
+| `csharp/tools/parity` | **C# engine → the same goldens** | **no** |
+
+So the TS side is pinned to the goldens and the C# side is pinned to whatever a human remembered to
+assert. #1319 shipped a TS-only change with every gate green; the C# port read `innocent` as
+*inasn̩t* across 56 pcm rows, and #1319's bulk expectation re-record wrote the leaked value INTO a
+C# test, so the divergence was recorded twice and caught by neither. Found by running the standalone
+program on a hunch while timing it for this document.
+
+Relevant here because the honest cost of closing it is a wall-time number: 2m10s, roughly 1.4× the
+whole 153s gate set. That is why it belongs in CI rather than in the local loop — the local loop is
+what this investigation has been shortening, and this is the one thing worth NOT putting in it.
