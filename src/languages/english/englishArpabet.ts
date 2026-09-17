@@ -128,22 +128,31 @@ function isBarredI(
 function rebaseSuffixIh(
     P: { base: string; stress: number }[],
     word: string,
-    vowels: ReadonlySet<string>,
 ): void {
-    // ⚠ THE SUFFIX'S OWN VOWEL, WHICH IS THE LAST ONE — not every AH0 that happens to precede an S.
-    // Scanning all of them fired on the PREFIX instead and was measurably wrong: `assist`
-    // (AH0 S IH1 S T) became *ɪsˈɪst, `aphesis` (AE1 F AH0 S AH0 S) marked both slots as *ˈæfɪsɪs
-    // where gold has ˈæfəsɪs, and `Protestantism` re-based `-testant-`. 58 regressions, all of this
-    // shape. In each of the three families the target is the final nucleus by construction.
-    let last = -1;
-    for (let i = 0; i < P.length; i++) if (vowels.has(P[i]!.base)) last = i;
-    if (last < 0) return;
-    const p = P[last]!;
-    if (p.base !== "AH" || p.stress !== 0) return;
-    const next = P[last + 1];
-    if (!next) return;
-    if (next.base === "S" && (/ists?$/.test(word) || /sis$/.test(word))) p.base = "IH";
-    else if (next.base === "JH" && /age$/.test(word)) p.base = "IH";
+    // ⚠ THE SUFFIX'S OWN VOWEL, LOCATED FROM THE END — not "the last vowel", and not every AH0 that
+    // happens to precede an S. Scanning all of them fired on the PREFIX (`assist`, AH0 S IH1 S T,
+    // became *ɪsˈɪst; `aphesis` marked both slots). Taking the last VOWEL instead missed the plural:
+    // `package` → pʰˈækɪd͡ʒ while `packages` (P AE1 K AH0 JH AH0 Z) stayed *pʰˈækəd͡ʒᵻz, because the
+    // -age vowel is no longer final once the inflection is on. That split a singular from its own
+    // plural, which is the two-spellings-per-morpheme defect `en_rebuild_lexicon.mts` warns about.
+    const n = P.length;
+    const at = (i: number): string => P[i]?.base ?? "";
+    const unstressedVowel = (i: number): boolean =>
+        P[i] !== undefined && P[i]!.stress === 0;
+    let vi = -1;
+    if (/ists?$/.test(word)) {
+        // … AH0 S T  ·  … AH0 S T S (plural)
+        if (at(n - 2) === "S" && at(n - 1) === "T") vi = n - 3;
+        else if (at(n - 3) === "S" && at(n - 2) === "T" && at(n - 1) === "S") vi = n - 4;
+    } else if (/sis$/.test(word)) {
+        if (at(n - 1) === "S") vi = n - 2;                       // … AH0 S
+    } else if (/ages?$/.test(word)) {
+        if (at(n - 1) === "JH") vi = n - 2;                      // … AH0 JH
+        // … AH0 JH <epenthetic vowel> Z — the plural, where the inflection sits past the -age vowel
+        else if (at(n - 3) === "JH" && at(n - 1) === "Z" && unstressedVowel(n - 2)) vi = n - 4;
+    }
+    const p = P[vi];
+    if (p && p.base === "AH" && p.stress === 0) p.base = "IH";
 }
 
 /**
@@ -269,7 +278,7 @@ const VOWELS = new Set(def.vowels);
         for (let i = 0; i < phones.length; i++) if (phones[i] !== resolved[i]) demoted.add(i);
         const P = resolved.map(split);
         demoteFinalIy2(P, word);
-        rebaseSuffixIh(P, word, VOWELS);
+        rebaseSuffixIh(P, word);
         // The slots whose schwa is NOT a schwa but the sonorant after it being syllabic.
         const sylSlots = syllabic.get(word);
         let pendingSyllabic = false;

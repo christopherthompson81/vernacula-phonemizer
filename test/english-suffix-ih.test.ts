@@ -35,6 +35,21 @@ describe("the -ist / -sis / -age vowel is ɪ, not schwa", () => {
         expect(ipa("aphesis", "AE1 F AH0 S AH0 S")).toBe("ˈæfəsɪs");      // gold ˈæfəsɪs — only the LAST
     });
 
+    // ⚠ A SINGULAR AND ITS OWN PLURAL MUST AGREE, and the first version of this rule broke that. It took
+    // "the last vowel", which is the suffix's own vowel in `package` (P AE1 K AH0 JH) but NOT in
+    // `packages` (P AE1 K AH0 JH AH0 Z), where the inflection has moved past it — so the singular read
+    // `pʰˈækɪd͡ʒ` and the plural stayed `pʰˈækəd͡ʒᵻz`. That is the two-spellings-per-morpheme defect
+    // `en_rebuild_lexicon.mts` exists to warn about, introduced by the fix for another one.
+    //
+    // ⚠ AND THE REFERENCE CANNOT SEE IT: gold has no entry for `packages`, `messages` or `cottages`, so
+    // the score was identical either way (+357 / −3 both times). This case is the only thing that holds it.
+    test("a singular and its plural agree", () => {
+        expect(ipa("package", "P AE1 K AH0 JH")).toBe("pʰˈækɪd͡ʒ");
+        expect(ipa("packages", "P AE1 K AH0 JH AH0 Z")).toBe("pʰˈækɪd͡ʒᵻz");
+        expect(ipa("activist", "AE1 K T AH0 V AH0 S T")).toBe("ˈæktəvɪst");
+        expect(ipa("activists", "AE1 K T AH0 V AH0 S T S")).toBe("ˈæktəvɪsts");
+    });
+
     // ⚠ `-ism` IS NOT IN THE SET. Its vowel is `IH2 Z AH0 M`: the S is voiced to Z, and the schwa before
     // the M is a real schwa. Including it in the spelling test only produced false fires.
     test("-ism keeps its schwa", () => {

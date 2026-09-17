@@ -88,8 +88,9 @@ public static class EnglishArpabet
 
     private static readonly JsRe PRIMARY_DIGIT = JsRegex.Compile("1$");
 
-    private static readonly JsRe SUFFIX_IST = JsRegex.Compile("(ists?|sis)$");
-    private static readonly JsRe SUFFIX_AGE = JsRegex.Compile("age$");
+    private static readonly JsRe SUFFIX_IST = JsRegex.Compile("ists?$");
+    private static readonly JsRe SUFFIX_SIS = JsRegex.Compile("sis$");
+    private static readonly JsRe SUFFIX_AGE = JsRegex.Compile("ages?$");
 
     /**
      * CMUdict WRITES `AH0` WHERE THE VOWEL IS `/ɪ/`, in three suffixes. Re-base those to `IH0`.
@@ -107,16 +108,34 @@ public static class EnglishArpabet
      * family in the class, but the referee says `ə` — 81.0% over 100 `-ness` rows, 74.4% over 43 `-less`
      * rows — so the schwa already written there is right and the reference is wrong.
      */
-    private static void RebaseSuffixIh(List<Phone> P, string word, ISet<string> vowels)
+    private static void RebaseSuffixIh(List<Phone> P, string word)
     {
-        var last = -1;
-        for (var i = 0; i < P.Count; i++) if (vowels.Contains(P[i].Base)) last = i;
-        if (last < 0) return;
-        var p = P[last];
-        if (p.Base != "AH" || p.Stress != 0 || last + 1 >= P.Count) return;
-        var next = P[last + 1].Base;
-        if ((next == "S" && SUFFIX_IST.IsMatch(word)) || (next == "JH" && SUFFIX_AGE.IsMatch(word)))
-            P[last] = p with { Base = "IH" };
+        // ⚠ THE SUFFIX'S OWN VOWEL, LOCATED FROM THE END. Taking "the last vowel" instead split a
+        // singular from its own plural: `package` (P AE1 K AH0 JH) was reached and `packages`
+        // (P AE1 K AH0 JH AH0 Z) was not, because the inflection has moved past the -age vowel. Gold has
+        // no entry for `packages`, so the score was identical either way — only the invariant catches it.
+        var n = P.Count;
+        string At(int i) => i >= 0 && i < P.Count ? P[i].Base : "";
+        bool Unstressed(int i) => i >= 0 && i < P.Count && P[i].Stress == 0;
+        var vi = -1;
+        if (SUFFIX_IST.IsMatch(word))
+        {
+            if (At(n - 2) == "S" && At(n - 1) == "T") vi = n - 3;
+            else if (At(n - 3) == "S" && At(n - 2) == "T" && At(n - 1) == "S") vi = n - 4;
+        }
+        else if (SUFFIX_SIS.IsMatch(word))
+        {
+            if (At(n - 1) == "S") vi = n - 2;
+        }
+        else if (SUFFIX_AGE.IsMatch(word))
+        {
+            if (At(n - 1) == "JH") vi = n - 2;
+            // … AH0 JH <epenthetic vowel> Z — the plural, where the inflection sits past the -age vowel
+            else if (At(n - 3) == "JH" && At(n - 1) == "Z" && Unstressed(n - 2)) vi = n - 4;
+        }
+        if (vi < 0 || vi >= P.Count) return;
+        var p = P[vi];
+        if (p.Base == "AH" && p.Stress == 0) P[vi] = p with { Base = "IH" };
     }
 
     /**
@@ -231,7 +250,7 @@ public static class EnglishArpabet
             for (var i = 0; i < phones.Count; i++) if (phones[i] != resolved[i]) demoted.Add(i);
             var P = resolved.Select(Split).ToList();
             DemoteFinalIy2(P, word);
-            RebaseSuffixIh(P, word, VOWELS);
+            RebaseSuffixIh(P, word);
             // The slots whose schwa is not a schwa but the sonorant after it being syllabic.
             IReadOnlyList<int>? sylSlots = null;
             syllabic?.TryGetValue(word, out sylSlots);

@@ -82,3 +82,39 @@ only false fires.
 `tools/english/en_weak_vowel_survey.mts`, which buckets the referee's vowel by the symbol we wrote:
 the `ᵻ` bucket still sits between `ɪ` and `ə` (74.5% referee-`ɪ`, the shape that file exists to
 protect), and the `ə` bucket's schwa rate rose 81.5% → 82.0% — schwas removed that were not schwas.
+
+## Run 3 — 2026-09-17 — review: the rule split a singular from its own plural
+
+The shipped rule took **the last vowel**, which is the suffix's own vowel in `package`
+(`P AE1 K AH0 JH`) but NOT in `packages` (`P AE1 K AH0 JH AH0 Z`), where the inflection has moved
+past it:
+
+    package    pʰˈækɪd͡ʒ        ← re-based
+    packages   pʰˈækəd͡ʒᵻz      ← not reached
+
+Before this change both were `ə` and agreed. After it they disagreed — the
+two-spellings-per-morpheme defect `en_rebuild_lexicon.mts` exists to warn about, introduced by the
+fix for another one.
+
+⚠ **AND THE REFERENCE CANNOT SEE IT.** Gold has no entry for `packages`, `messages`, `cottages` or
+`villages`, so the score is **identical either way — +357 / −3 both times**. A metric-driven review
+would have passed this. The invariant is the only thing that catches it, and it is now a test.
+
+Fixed by locating the suffix consonant from the END rather than requiring the vowel to be last:
+`… AH0 S T` / `… AH0 S T S` for `-ist`, `… AH0 S` for `-sis`, `… AH0 JH` / `… AH0 JH <V0> Z` for
+`-age`. The over-firing guard is unchanged and re-verified: `assist`, `exist`, `fist`, `garage`,
+`stage`, `teenage`, `sabotage` are all still refused by the stress test.
+
+### Two process notes
+
+⚠ **A DEAD BRANCH SHIPPED IN BOTH LANGUAGES.** The first plural arm read
+`at(n - 2) === "JH" && at(n - 1) === "Z" && unstressedVowel(n - 2 + 1)` — and `n - 2 + 1` is the `Z`
+itself, a consonant, so the condition was never true. It was never reached because the third arm
+already handled the case. Removed from TS and C#; behaviour identical before and after, which is what
+says it was dead.
+
+⚠ **`tail -1` ON `check:goldens` REPORTS THE WRONG THING.** The stale warning's last line is prose
+("re-recording a row is how a real defect survived weeks of green gates"), so a STALE run tailed to
+one line looks like it passed. That is how 18 stale rows got through a gate sweep in this session and
+surfaced instead as a parity DIFF, which read like a port divergence and was not one — TS and C#
+agreed throughout. Grep for `fresh|STALE`, not `tail`.
