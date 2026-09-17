@@ -179,3 +179,71 @@ them, and turning it into a vowel exposes a mere presence/absence difference ins
 reverse case: its referee spells the same syllable with a real vowel. The right fold is
 language-specific, and a fleet-wide `BACKBONE` entry would have cost ~700 rows across four languages
 to gain 60 on English.
+
+## Run 3 — 2026-09-17 — step 3: the RP rows are out, 50.6% → 56.1%
+
+| | folded | symbol accuracy |
+|---|---|---|
+| originally reported | 40.9% | 81.8% |
+| + the three missing folds | 45.0% | 83.5% |
+| + the neural tier (what ships) | 50.6% | 87.3% |
+| **+ the RP rows excluded** | **56.1%** | **89.1%** |
+
+**+15.2 points of folded agreement and +7.3 of symbol accuracy, cumulative, with no engine change.**
+
+### The detector, and the false positive in the first draft
+
+    RP-only vowels  əʊ ɒ ɪə ʊə ɛə      390 rows
+    non-rhotic      post-vocalic r in the spelling, no rhotic in the IPA     98 rows
+                                                                      union 488 (10.7%)
+
+⚠ **`ɑː` WAS IN THE FIRST DRAFT AND IS NOT A MARKER.** The backbone strips `ː`, so `ɑː` folds to `ɑ` —
+the GenAm vowel — and 108 rows would have been dropped for a length mark that never reaches the
+comparison. The earlier "488 rows" figure in Run 1 happened to land on the same total by a different
+route (it counted `ɑː` and missed the non-rhotic rule); this one is the composition that survives.
+
+⚠ **NON-RHOTICITY NEEDS BOTH FIELDS.** It is a word SPELLED with a post-vocalic r whose transcription
+has no rhotic at all (`Dunkirk` `dʌŋkɜːk`, `Gentner` `ɡɛntnə`). Neither half says it alone, so the
+rule is a conjunction — `spelling` ∧ `ipaLacks` — not a regex.
+
+### Validated against the other referee, not asserted
+
+Of the flagged rows, the ones the en-GB referee also has carry a **byte-identical** reading:
+**92% of the RP-vowel rows (347/376) and 98% of the non-rhotic rows (93/95)**. These are not noisy US
+transcriptions; they are UK transcriptions in the wrong file.
+
+### Excluded, not moved, and the file is left intact
+
+There is nothing to move them to — the en-GB referee already has them. And the referee files are
+provenance-tracked CC-BY-SA imports, so editing one in place would make it unreproducible from its
+source. The exclusion is declared in `en.jsonc`, and the dropped count is **printed on every run**,
+because a silently shrinking denominator is how a score improves for no reason.
+
+### Two mechanism bugs found while building it
+
+⚠ **THE PATTERN MATCHED NOTHING AND LOOKED LIKE IT WORKED.** Under `segmentJoin` the referee stores one
+space-separated phoneme per position, so `əʊ` is on disk as `ə ʊ`, and a pattern written the way a
+reader writes IPA silently matches nothing. Only the single-character `ɒ` rule fired — 298 of 488
+rows, a plausible-looking number. Fixed by testing the JOINED form, exactly as the scorer sees it.
+
+⚠ **AND `g` IS THE WRONG FLAG FOR A MEMBERSHIP TEST.** These regexes are reused across thousands of
+rows and a `g` regex carries `lastIndex` between `.test()` calls, so every other row would have passed
+the filter. Compiled with `u` only, and pinned by a test.
+
+### The symmetric case is real but NOT taken here
+
+The UK referee has the mirror problem — 2,249 rows (2.95%) where every variant carries a US marker
+(`ɚ`/`ɝ`, `oʊ`, `ɑɹ`). Probed: en-GB **47.3% → 48.8%**, 2,532 dropped.
+
+**Not shipped, because that probe over-excluded.** en-gb is **21.4% multi-variant, up to 24 readings
+per row**, and the scorer credits ANY of them — so a row whose first reading is US but whose second is
+RP is still usable evidence. The probe dropped 2,532 where only 2,249 qualify. The mechanism now
+requires **every** variant to match before a row is dropped (identical on a single-variant file — the
+en referee is strictly one reading per row — and load-bearing on a multi-variant one), so the en-GB
+exclusion can be built correctly on top of it. Left as its own change.
+
+### Also observed
+
+The referee eval is **single-threaded**: en-GB is 76,284 words through the rules path on one core,
+with seven idle. Nothing in this run depends on fixing that, but it is the reason a fleet sweep is
+slow, and it is a different kind of work from the audit.

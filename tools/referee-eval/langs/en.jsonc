@@ -6,7 +6,25 @@
         {
             "file": "en.wikipron-eng-latn-us-broad.tsv",
             "source": "wikipron eng_latn_us broad (human, GenAm)",
-            "role": "primary"
+            "role": "primary",
+            // ⚠ 10.7% OF A FILE LABELLED GenAm IS RP, and these rows are not noisy US transcriptions —
+            // they are UK transcriptions in the wrong file. Validated against en-gb.wikipron-uk.tsv:
+            // 92% of the RP-vowel rows and 98% of the non-rhotic rows appear there with a BYTE-IDENTICAL
+            // reading. Scoring a rhotic GenAm engine against them marks it wrong for being right.
+            // ⚠ NOT MOVED, because there is nothing to move to: the en-GB referee already has them. And the
+            // source file is left INTACT — it is a provenance-tracked CC-BY-SA import, so the exclusion
+            // lives here where it is reviewable and is reported on every run.
+            "excludeRows": [
+                {
+                    "ipa": "əʊ|ɒ|ɪə|ʊə|ɛə",
+                    "note": "RP-only vowels: GOAT əʊ (US oʊ), LOT ɒ (US ɑ), and the centring diphthongs ɪə/ʊə/ɛə, which a rhotic accent spells ɪɹ/ʊɹ/ɛɹ. 390 rows. ⚠ ɑː IS DELIBERATELY ABSENT and was in the first draft of this list: the backbone strips ː, so ɑː folds to ɑ — the US vowel — and 108 rows would have been dropped for a length mark that never reaches the comparison."
+                },
+                {
+                    "spelling": "[aeiouyAEIOUY]r+(?![aeiouyAEIOUY])",
+                    "ipaLacks": "[ɹɚɝɻr]",
+                    "note": "NON-RHOTIC: spelled with a post-vocalic r, transcribed without any rhotic at all — Dunkirk dʌŋkɜːk, Hartburn hɑːtbən, Gentner ɡɛntnə. 98 further rows. Needs BOTH fields: neither half says it alone."
+                }
+            ]
         }
     ],
     "segmentJoin": true,

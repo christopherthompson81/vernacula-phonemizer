@@ -18,6 +18,22 @@ export interface Referee {
      *  fold is valid for one script but not another (e.g. the majhūl و/ی quality is unrecoverable in the Shahmukhi
      *  abjad but written in Gurmukhi, so pa folds it only for the pan_arab referee). Compiled from the jsonc. */
     folds?: [RegExp, string, string][];
+    /**
+     * Rows to DROP from this referee before scoring — `[pattern, justification]`, matched against the
+     * referee's own IPA (or, with the `spelling:` prefix, against the headword).
+     *
+     * ⚠ THIS IS NOT A FOLD AND MUST NOT BE USED AS ONE. A fold neutralises a NOTATION difference on both
+     * sides; this DELETES evidence, so it is only ever correct when a row does not belong to the variety the
+     * file claims to cover. The one case it was built for: `en.wikipron-eng-latn-us-broad.tsv` is labelled
+     * GenAm and 10.7% of it is RP — `Amazonia` as `æməzəʊniə`, `Dunkirk` as `dʌŋkɜːk`. Those rows are not
+     * noisy US transcriptions, they are UK transcriptions in the wrong file: 92% of the RP-vowel rows and
+     * 98% of the non-rhotic ones appear in `en-gb.wikipron-uk.tsv` with a byte-identical reading.
+     *
+     * ⚠ AND THE FILE IS LEFT INTACT. The referees are provenance-tracked imports (CC-BY-SA, see
+     * data/LICENSES/PROVENANCE.md); editing one in place would make it unreproducible from its source. The
+     * exclusion lives here, where it is reviewable, and the count is REPORTED so a dropped row is never silent.
+     */
+    excludeRows?: RowExclusion[];
 }
 
 export interface RefLang {
@@ -62,10 +78,32 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stripJsonc } from "../../src/core/jsonc.ts";
 
+/**
+ * One exclusion rule: a CONJUNCTION of up to three conditions, all of which must hold for the row to drop.
+ * Two fields are needed because non-rhoticity is not visible in either half alone — it is a word SPELLED with
+ * a post-vocalic r whose transcription has NO rhotic, and a regex over one field cannot say that.
+ */
+export interface RowExclusion {
+    /** must match the referee's IPA */
+    ipa?: RegExp;
+    /** must match the headword */
+    spelling?: RegExp;
+    /** must NOT match the referee's IPA */
+    ipaLacks?: RegExp;
+    note: string;
+}
+
 /** A fold as authored in the jsonc: a self-documenting object. `pattern` compiles with the `gu` flags. */
 interface RawFold {
     pattern: string;
     replace: string;
+    note: string;
+}
+/** An exclusion as authored in the jsonc — no `replace`, because it drops the row rather than rewriting it. */
+interface RawExclude {
+    ipa?: string;
+    spelling?: string;
+    ipaLacks?: string;
     note: string;
 }
 interface RawLang {
@@ -84,6 +122,16 @@ const compile = (
 ): [RegExp, string, string][] =>
     (folds ?? []).map((f) => [new RegExp(f.pattern, "gu"), f.replace, f.note]);
 
+/** ⚠ NOT `gu`. These are membership TESTS reused across thousands of rows, and a `g` regex carries
+ *  `lastIndex` between `.test()` calls — every other row would silently pass. */
+const compileExcludes = (ex: RawExclude[] | undefined): RowExclusion[] =>
+    (ex ?? []).map((e) => ({
+        ...(e.ipa ? { ipa: new RegExp(e.ipa, "u") } : {}),
+        ...(e.spelling ? { spelling: new RegExp(e.spelling, "u") } : {}),
+        ...(e.ipaLacks ? { ipaLacks: new RegExp(e.ipaLacks, "u") } : {}),
+        note: e.note,
+    }));
+
 /** Load `langs/<code>.jsonc` → the compiled per-language RefLang config. */
 function loadLang(code: string): RefLang {
     const raw = JSON.parse(
@@ -91,8 +139,17 @@ function loadLang(code: string): RefLang {
     ) as RawLang;
     return {
         referees: raw.referees.map((r) => {
-            const rr = r as Referee & { folds?: RawFold[] };
-            return rr.folds ? { ...r, folds: compile(rr.folds) } : r;
+            const rr = r as Referee & {
+                folds?: RawFold[];
+                excludeRows?: RawExclude[];
+            };
+            return {
+                ...r,
+                ...(rr.folds ? { folds: compile(rr.folds) } : {}),
+                ...(rr.excludeRows
+                    ? { excludeRows: compileExcludes(rr.excludeRows) }
+                    : {}),
+            };
         }),
         ...(raw.secondaryGap ? { secondaryGap: raw.secondaryGap } : {}),
         ...(raw.segmentJoin ? { segmentJoin: true } : {}),

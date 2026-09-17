@@ -642,6 +642,8 @@ export interface RefereeResult {
      * `makeNativiser`, so anything living there is invisible until this line is non-zero and someone looks.
      */
     product: { differ: number; compared: number };
+    /** Rows dropped by the referee's `excludeRows`. Reported so a shrinking denominator is never silent. */
+    excluded: number;
     total: number;
     raw: number;
     folded: number;
@@ -712,6 +714,39 @@ export async function evaluate(
             .filter((l) => l.trim() !== "" && !l.startsWith("#"))
             .map((l) => l.split("\t"))
             .filter((a) => a.length >= 2 && a[0] && a[1]);
+        // ⚠ ROWS THAT DO NOT BELONG TO THE VARIETY THE FILE CLAIMS — see Referee.excludeRows for why this
+        // is not a fold. Counted and reported, because a silently shrinking denominator is how a score
+        // improves for no reason.
+        let excluded = 0;
+        if (ref.excludeRows?.length) {
+            const before = pairs.length;
+            // ⚠ TESTED ON THE JOINED FORM, exactly as the scorer sees it. Under `segmentJoin` the referee
+            // writes one space-separated PHONEME per position, so `əʊ` is stored as `ə ʊ` and a pattern
+            // written the way a reader writes IPA silently matches nothing. That under-excluded by 190 rows
+            // (298 of the 488) while looking like it worked: only the single-character `ɒ` rule fired.
+            const variants = (a: string[]): string[] =>
+                a
+                    .slice(1)
+                    .filter((v) => v !== "")
+                    .map((v) => (cfg.segmentJoin ? v.replace(/\s+/gu, "") : v));
+            // ⚠ EVERY VARIANT MUST MATCH, not just the first. A referee row can carry several readings and
+            // the scorer credits ANY of them, so a row whose first reading is out-of-variety but whose
+            // second is in-variety is still usable evidence — dropping it throws away a good row. Identical
+            // behaviour on a single-variant file (the en referee is strictly one reading per row, max 1),
+            // and load-bearing on a multi-variant one: en-gb is 21.4% multi-variant, up to 24 readings.
+            pairs = pairs.filter(
+                (a) =>
+                    !ref.excludeRows!.some((x) =>
+                        variants(a).every(
+                            (ipa) =>
+                                (x.ipa?.test(ipa) ?? true) &&
+                                (x.spelling?.test(a[0]!) ?? true) &&
+                                (x.ipaLacks ? !x.ipaLacks.test(ipa) : true),
+                        ),
+                    ),
+            );
+            excluded = before - pairs.length;
+        }
         if (sampleCap > 0 && pairs.length > sampleCap) {
             const stride = Math.ceil(pairs.length / sampleCap);
             pairs = pairs.filter((_, i) => i % stride === 0);
@@ -793,6 +828,7 @@ export async function evaluate(
             role: ref.role,
             path: pathOf(lang),
             product: { differ: pDiffer, compared: pCompared },
+            excluded,
             total: pairs.length,
             raw,
             folded,
@@ -830,6 +866,10 @@ async function main(): Promise<void> {
         if (r.freqWeighted !== undefined)
             console.log(
                 `frequency-weighted:${(100 * r.freqWeighted).toFixed(1)}%  — token-weighted real-text quality (${r.freqCovered} referee words have a frequency; unbiased by a dictionary-shaped referee)`,
+            );
+        if (r.excluded > 0)
+            console.log(
+                `excluded rows:  ${r.excluded} dropped as not belonging to this variety (see the referee's excludeRows notes) — the denominator below is AFTER that`,
             );
         console.log(
             `scored path:    ${r.path}${
