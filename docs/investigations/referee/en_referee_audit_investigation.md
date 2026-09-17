@@ -434,3 +434,52 @@ a throw rather than a silent pass: the positionwise comparison cannot honour any
 the reverse is absent, that `ɔ`/`ɑ` is absent, that every entry is a single character, and that `en` is
 the only language declaring any. The failure this guards is silent and flattering: a bidirectional
 version credits 137 of our own errors and raises the reported number for it.
+
+## Run 7 — 2026-09-17 — ten undetermined divergences, diagnosed one at a time
+
+**913 of the 1,736 disagreements (53%) have no gold entry at all**, so no third source can adjudicate
+them and they had been left as a single undifferentiated bucket. Ten were taken by deterministic
+stride (not chosen) and diagnosed individually. They do not all have the same cause, and one of them
+was a bug in this repo's own instrument.
+
+| | word | referee | ours | diagnosis |
+|---|---|---|---|---|
+| 1 | `ACOG` | `eɪkɑɡ` | `əkʰˈɔːɡ` | **our dict row is wrong**: `AH0 K AO1 G` reads "uh-KOG"; it is an initialism said "AY-kog". Belongs in `acronymLetters` or as a curated row |
+| 2 | `Francesca` | `fɹænsɛskə` | `fɹænt͡ʃˈɛskə` | **we are right.** The dict has `CH` (`F R AE0 N CH EH1 S K AH0`) and fran-CHES-ka is the English reading of the Italian name; the referee's `s` is a spelling pronunciation |
+| 3 | `Ortiz` | `ɔɹtis` | `ɔːɹtˈiːz` | **both attested.** `AO2 R T IY1 Z` gives /z/, which is the usual American reading; the referee's /s/ is Spanish-faithful |
+| 4 | `Yauch` | `jaʊk` | `jˈɔːt͡ʃ` | **we are wrong**, and it is the dict row: `Y AO1 CH`. German ⟨au⟩+⟨ch⟩ is /aʊk/ |
+| 5 | `atishoo` | `ətɪʃuː` | `ˈæt̬ɪʃˌuːˌuː` | ⚠ **a real defect — the tagger emitted a DOUBLED `uː`.** Malformed, not a variant |
+| 6 | `crowner` | `kɹaʊnə` | `kɹˈaᶷnɚ` | ⚠ **AN RP ROW THE EXCLUSION MISSED — a bug in #1328**, fixed in this run. See below |
+| 7 | `gasahol` | `ɡæsəhɑl` | `ɡˈæsəhˌɔːɫ` | cot–caught, the class Run 5 refused to fold because it is lexical |
+| 8 | `mecamylamine` | `mɛkəmɪləmiːn` | `məkʰˈæmɪlˌæmˌaᶦn` | the tagger on a drug name — stress and two vowels wrong. OOV letter-to-sound, no rule |
+| 9 | `projectivize` | `pɹɑdʒɛktɪvaɪz` | `pɹəd͡ʒˈɛktəvˌaᶦz` | the declared weak-vowel convention plus initial-vowel reduction. Not work |
+| 10 | `suevite` | `sweɪvaɪt` | `sˌuːvˈaᶦt` | **we are wrong**: ⟨ue⟩ as /weɪ/ in a German loan. OOV, lexical |
+
+    we are right                     1      the referee is odd or Spanish/spelling-faithful
+    both attested                    1
+    we are wrong, lexically          3      Yauch, suevite, mecamylamine — OOV or a bad dict row
+    a real malformedness defect      1      atishoo's doubled uː
+    an INSTRUMENT bug                1      crowner
+    already-declared convention      2      gasahol, projectivize
+    a dict row to curate             1      ACOG
+
+**The bucket is not one thing.** A third of it is us being wrong on loanword letter-to-sound with no
+rule available; a fifth is convention already accounted for; and one in ten was the measuring
+apparatus rather than the engine.
+
+### ⚠ The instrument bug: an onset `r` masked a non-rhotic coda
+
+`crowner` is transcribed `kɹaʊnə` — non-rhotic, an RP row in a file labelled GenAm, exactly what
+#1328's second rule exists to drop. It survived because that rule's `ipaLacks` scans the WHOLE string,
+and `kɹaʊnə` contains a `ɹ` — the onset of `crowner`. The test asked "is there a rhotic anywhere" when
+it meant "is there one where the spelling puts it".
+
+Fixed with a companion rule: spelling ends in a word-final `r` (a silent `e` or an `-ed` allowed) and
+the IPA has **no rhotic in its last three symbols**. 18 further rows, **17 of which the en-GB referee
+carries with a byte-identical reading** — the same validation standard as #1328.
+
+⚠ `-s`/`-es` after the `r` is deliberately NOT allowed. There the `r` is usually the onset of the next
+syllable and is pronounced, so `Pescadores` `pɛskədɔːɹiːz` — correct GenAm — would have been dropped.
+Measured: allowing it adds one row and one false positive.
+
+    excluded 488 → 506      folded 57.3% → 57.6%      +intentional 62.4% → 62.7%
