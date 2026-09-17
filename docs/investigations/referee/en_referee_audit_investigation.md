@@ -1166,3 +1166,68 @@ voiced segment, `transfer`/`transport` S before a voiceless one).
 A 1990s lexicon has no `Gitmo`, no `AIgiarism`. It validates the past far better than it extends the future.
 
     tests 5,973 pass / 309 files   goldens 0 stale   gold agreement 81.98%
+
+## Run 12 — reviewing #1335, and the allow-list that excused a defect
+
+### 1. The data invariants hold, measured against the PRISTINE baseline
+
+The first check used the wrong baseline and flagged the five S→Z reverts as "changed but unrecorded". They
+are reverted to the ORIGINAL CMUdict value, so they correctly have NO curated row — the invariant is about
+pristine CMUdict, not about the previous PR's shipped state. Against the right baseline:
+
+    dict rows changed vs pristine: 1,000    all recorded    no duplicates
+    curated rows that are now no-ops: 0     every `want` equals the shipped dict
+
+### 2. ⚠ THE en-GB CONSEQUENCE CHECK, which #1334's review made mandatory
+
+Measured before AND after the branch rather than reasoned about:
+
+    en-GB referee coverage of this branch's 64 changed words: 34
+      matching BEFORE: 7      matching AFTER: 17      → then 19
+
+Ten words were FIXED by the branch. Three regressed, and two were repairable: `dramatize` and `nevada` are
+transatlantic splits (US `æ`, RP `ɑː`) and the transform has a set for exactly that mapping — added to
+`en-gb-bath.tsv`, both now match.
+
+The third, `maltose`, is NOT a regression on inspection. The en-GB referee lists BOTH `/s/` and `/z/` for
+`glucose`, `fructose`, `lactose` and `sucrose`, and only `/z/` for `maltose`; our `/s/` is consistent with
+all five siblings and correct for GenAm. The word went from matching by accident to being consistent with
+its family, which is the right direction.
+
+### 3. The 22 spelling-derived rhotic repairs, checked against Moby
+
+Those were derived from the SPELLING with no reference, so they needed an independent look. Moby covers 8:
+
+    agree exactly: 5
+    differ:        3 — and all three differ only on an UNSTRESSED VOWEL, never on the /r/
+                       (`expresso` IH/EH, `centrality` AH/IH, `marjoram` ER vs AH R)
+
+Every Moby-covered repair carries the rhotic. Confirmed.
+
+### 4. ⚠ AND THE ALLOW-LIST ITSELF WAS WRONG — it excused a real defect
+
+`test/en-missing-rhotic.test.ts` lists the words permitted to be r-less, each with the rule licensing it.
+Checking THAT list against Moby confirmed `dossier`, `dossiers`, `olivier`, `boucher` and `mrs` as genuinely
+r-less — and broke `croissant`:
+
+    ours       K W AA2 S AA1 N T          no /r/
+    Moby       K R AO0 S AA1 N            has it
+    gold       kɹwˌɑsˈɑnt                 has it
+    en-GB      kwæsɒ̃ / kɹwæsɒ̃            lists both
+
+I had excused it as "French, /kwɑː-/ attested in English" — which is true, it is the en-GB referee's first
+variant — but two independent sources carry the /r/ and the third calls it a variant. **A defect wearing an
+exception's clothes.** `croissant`/`croissants` corrected to `K R W AA2 S AA1 N T`.
+
+⚠ This is the argument for writing that gate as a list of NAMED RULES rather than a count: a count cannot be
+audited, but "French ⟨-ier⟩ is /jeɪ/" can be checked against a third source and found not to apply.
+
+### 5. Moby recorded in PROVENANCE §5
+
+Added as §5.3, the section for sources whose role is adjudication rather than shipped bytes (where Wiktionary
+and epitran already sit). Nothing from Moby is redistributed. Both traps are written down: the mirrored 1993
+readme that is superseded by the 2001 public-domain grant, and the cmudict 0.3 bundled beside it in the same
+Gutenberg package — taking that file would have made the "independent third source" a copy of our own dict.
+
+    tests 5,973 pass / 309 files   goldens 0 stale   package fence ok
+    en 60.0% (floor 0.50)   en-GB 47.5% (floor 0.44)

@@ -30,9 +30,13 @@ const SILENT_R = new Map<string, string>([
     ["olivier", "French -ier"], ["touvier", "French -ier"], ["boucher", "French -er"],
     // Polish ⟨rz⟩ is a single fricative /ʒ/ (or /ʂ/), never a rhotic plus anything.
     ["andrzejewski", "Polish rz = /ʒ/"], ["biedrzycki", "Polish rz = /ʒ/"], ["drzewiecki", "Polish rz = /ʒ/"],
-    // French loans whose English reading drops the /r/ of the onset cluster.
-    ["croissant", "French, /kwɑː-/ attested in English"], ["croissants", "French, /kwɑː-/ attested"],
-    ["trois", "French /twɑː/"],
+    // ⚠ `croissant` WAS ON THIS LIST AND SHOULD NOT HAVE BEEN. It was excused as "French, /kwɑː-/
+    // attested in English" — which it is, as the en-GB referee's FIRST variant — but misaki gold has
+    // kɹwˌɑsˈɑnt, Moby has K R AO S AA N, and en-GB lists kɹwæsɒ̃ too. Two independent sources carry the
+    // /r/ and the third calls it a variant, so the r-less row was a defect wearing an exception's clothes.
+    // Caught by checking this allow-list itself against Moby, which is the reason to write it as a list of
+    // named rules rather than a count.
+    ["trois", "French /twɑː/ — no source carries an /r/ for this one"],
     // An abbreviation whose EXPANSION has no r: Mrs = "missus".
     ["mrs", "abbreviation gloss — 'missus'"],
 ]);
