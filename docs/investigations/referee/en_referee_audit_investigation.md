@@ -1020,3 +1020,65 @@ every changed row recorded, every PR-added row's `upstream` equal to the pre-PR 
     tests 5,971 pass / 308 files      goldens 0 stale      package fence ok
     folded 59.8%   ONNX-less 53.4%    en floor 0.50, en-GB 0.44 (measured 59.8% / 47.5%)
     948 dict rows corrected, 976 curated records, 119 en-gb-cloth additions
+
+## Run 10 — a dropped /r/ is a well-formedness defect, and it has its own gate now
+
+Second round on the dict-vs-gold audit, after #1334 merged.
+
+### ⚠ THE FINDING: 30 dictionary rows were missing an /r/ the spelling puts there
+
+The audit's `+R` bucket looked unpromising — 25 rows — and split into two things that are not alike:
+
+    20 rows   gold writing a GEMINATE ɹɹ      irrelevant ɪɹɹˈɛləvənt, irrevocable, forerunner
+     5 rows   a genuinely DROPPED /r/          housewarming hˈaᶷswɔːmɪŋ, marjoram mˈɑːd͡ʒɚəm
+
+English has no geminate consonants, so the first 20 are gold's error and our single `ɹ` is right. But the
+second group prompted a dict-wide sweep, and the right query took two tries:
+
+    rows with FEWER R/ER than spelled ⟨r⟩        1,898   ← useless: ⟨rr⟩ legitimately maps to ONE /r/
+    rows spelled with ⟨r⟩ and NO rhotic AT ALL      45   ← the real signal
+
+Of the 45, **16 are legitimately r-less and each names an orthographic rule**: French ⟨-ier⟩ is /jeɪ/
+(`dossier`, `olivier`, `bouvier`, `gaultier`), Polish ⟨rz⟩ is a single /ʒ/ (`andrzejewski`, `drzewiecki`),
+and `mrs` is an abbreviation gloss for "missus". The other **29 are CMUdict simply dropping the /r/**:
+
+    backstreet  B AE1 K S T IY2 T          housewarming HH AW1 S W AO2 M IH0 NG
+    forgings    F AO1 JH IH0 NG Z          kardashian   K AA1 D AH0 SH EY2 N
+    chandeliers SH AE2 N D AH0 L IH1 Z     pleomorphic  P L IY2 AH0 M AO1 F IH0 K
+    centrality  S EH0 N T AE1 L IH0 T IY0  commissars   K AA1 M IH0 S AA0 Z
+
+8 are confirmed by misaki gold and were applied from the round-trip-verified candidates; the other 22 are
+repaired from the SPELLING, which fixes the insertion point exactly — the ⟨r⟩ says where the phone goes.
+This is a well-formedness repair, not a choice of reading, which is why it needs no reference.
+
+⚠ **`test/en-missing-rhotic.test.ts` makes it a permanent gate**, written as an ALLOW-LIST rather than a
+count: every exception names the rule that licenses it, and a new r-less row is a defect until someone
+argues it onto the list. The list is also checked for rot, the failure mode #1334's waivers demonstrated.
+
+### The French -age/-ige class: the en-GB referee split it, 4 of 10
+
+Gold disagrees with us in BOTH directions on ʒ~dʒ, and the en-GB referee settles each:
+
+    backs OURS  barrage bæɹɑːʒ, camouflage kæməflɑːʒ, doge dəʊdʒ, luge luːdʒ, prestige pɹəstiːdʒ
+    backs GOLD  beijing beɪdʒɪŋ, fuselage fjuːsəlɑːʒ, loge ləʊʒ   (+ taj, uncovered but unambiguous)
+
+### ⚠ AND A CLASS WHERE THE en-GB REFEREE MUST NOT BE USED
+
+`AA1→AE1` (31 rows: `nevada`, `khaki`, `samba`, `soprano`, `dramatize`) is PALM-vs-TRAP in loanwords, and
+British and American genuinely differ there — en-GB says `nɪvɑːdə` and `kɑːki` where GenAm says `nəvædə`
+and `kæki`. Using it as an arbiter here would import the wrong variety, so its verdicts were discarded for
+this class. The US wikipron file is silent on nearly all 31.
+
+That leaves gold alone, on exactly the kind of word where gold's error rate is demonstrated (`majority`,
+`nematode`, `barry`, `malacca` were all caught earlier). **Only 11 were applied** — the common words where
+the US reading is not in doubt (`dramatize`, `nevada`, `soprano`, `quadratic`, `xanadu`, `consonantal`,
+`nano`, `rando`, `swanky`, `wank`, `wanker`). The other 20 are recorded as gold-only and unarbitrable.
+
+### Tooling change carried forward from the #1334 review
+
+`apply.mts` now MERGES into the curated record instead of appending: a word corrected in two passes keeps
+ONE row whose `upstream` stays the ORIGINAL CMUdict value. That is the defect the review found, fixed in
+the tool rather than only in the data.
+
+    gold agreement 81.91% → 81.97%     dict rows this round: 45
+    tests 5,973 pass / 309 files   goldens 0 stale
