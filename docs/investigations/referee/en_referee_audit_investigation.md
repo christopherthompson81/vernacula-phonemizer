@@ -898,3 +898,52 @@ cover of a data-cleaning pass, so it is left for an explicit decision.
 `catch` kʰˈæt͡ʃ → kʰˈɛt͡ʃ is the regional "ketch" reading, not a merry-merger effect.
 
     gold agreement 81.45% → 81.70%     folded 59.8% (flat, as expected on these axes)
+
+## Run 8g — the loanword PALM class, and two large buckets that turn out to be the house rules
+
+### AE1→AA1: foreign ⟨a⟩ as PALM (38 applied, 17 refused)
+
+`Ghana` ɡˈɑːnə, `kanji`, `Bhutan`, `Pravda`, `Napoli`, `Agra`, `Esperanto`, `Calabria`, `Malaga`, `drachma`,
+`padre`, `dal`, `babka`, `Anasazi`, `Nablus`, `Sami`, `Kandahar`, `zaftig`, `graben`, `Caen`, `Montmartre`.
+
+⚠ **The en-GB referee did the arbitration and it split the bucket exactly along naturalisation.** It gives
+our `æ` as the first or only reading for every word that has become an ordinary English one, and is silent or
+agrees on the genuine loans:
+
+    aqueduct ækwɪdʌkt   aquifer ækwɪfə   aquaculture ækwəkʌlt͡ʃə   anna ænə   malacca məlækə
+    scallop skæləp (US too)   barry bæɹi   ab æb   americana lists əmɛɹɪkænə BEFORE əmɛɹɪkɑːnə
+
+Also refused: `mineralogist` (/ˌmɪnəˈrælədʒɪst/ — gold's ɑ is simply wrong) and **`palay`, which would have
+REVERTED a two-referee correction made earlier in this same run** — both wikipron files say `pæleɪ`. A bucket
+applied wholesale would have undone it silently.
+
+### ⚠ IH0→IY0 (77 rows) IS THE `isBarredI` RULE, NOT A DEFECT CLASS
+
+It looks like a clean class — gold writes a tense `i` where we write `ɪ`/`ᵻ` — and most of it is this repo's
+own documented rule, in `englishArpabet.ts`:
+
+    // Latinate reduced prefix be/de/re/se/pre + consonant (believe, decide, review, security → ᵻ)
+    if (ni === 0 && /^(be|de|re|se|pre)[^aeiouy]/.test(word)) return true;
+
+`december`, `debunk`, `decentralize`, `deforest`, `denature`, `desegregate`, `destabilize`, `precede`,
+`precise`, `precipitating` — all of it is that rule firing correctly. The remainder (`economy`, `ecology`,
+`equality`, `egalitarian`, `bailiwick`, `bandicoot`) is free variation: /ɪˈkɑːnəmi/ and /iːˈkɑːnəmi/ are
+both ordinary GenAm. **Nothing to fix. Skipped whole.**
+
+### ±AH0 (210 rows) is the syllabic notation plus gold noise
+
+`-AH0` is gold writing the syllabic consonant unmarked — `button` bˈʌt̬ən vs gold `bˈʌtn`, `cotton`,
+`certain`, `beaten` — the same axis #1319 and the `preFolds` entry already handle for the referee. `+AH0` is
+largely gold being wrong: `athlete` → ˈæθəlˌiːt is the stigmatized "ath-a-lete", and the `-ically`/`-fully`
+rows (`chemically` → kʰˈɛməkəli) are the unsyncopated variant where ours is the commoner one. **Skipped.**
+
+### Where the audit stands
+
+    gold agreement 79.9% (start of Run 8b) → 81.81%
+    folded 59.8%   ONNX-less 53.4%   dict rows corrected across Run 8: ~990
+
+The single-op buckets are now either taken or classified. What remains is 1,918 two-op and 632 three-op rows,
+which are mostly COMBINATIONS of the classes already ruled convention (weak vowel + reduction + syllabic), plus
+the declared ones: IH0→AH0 (1,457), IY0/OW0/AE0/AA0→AH0 (~370), R→ER0 (65, decided the other way by #1289),
+SH→CH (47, gold's /nʃ/→/nʧ/ affrication). **The productive single-word work on this instrument is done**; what
+is left needs either a decision (marry–merry) or a retrain (the 174-word structural gap).
