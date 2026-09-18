@@ -50,7 +50,7 @@ defaults to OFF — and nb's tag alphabet EMBEDS ˈ/ˌ, so training without it y
 stress — and `NB_SUBSAMPLE` defaults to **150000**, i.e. a quarter of the ~630k lexicon. The first draft of
 this file omitted all three and would have produced a materially worse model while calling it a reproduction.
 
-⚠ `src/languages/norwegian/nb-lexicon.tsv` is the ~38k SHIPPING subset, **not** the ~814k training dump.
+⚠ `data/languages/norwegian/nb-lexicon.tsv` is the ~38k SHIPPING subset, **not** the ~814k training dump.
 Training on it produces a smaller, different model — do not substitute it.
 
 ## da — Danish g2p tagger (`da-g2p-tagger.int8.onnx`)
@@ -84,7 +84,7 @@ DA_PRODUCTION=1 DA_LEX=/tmp/da_train.tsv .venv/bin/python -u tools/danish/da_bil
 git clone https://github.com/elazarg/hebrew_diacritized /tmp/hebrew_diacritized
 npx tsx tools/hebrew/build_tagger_data.ts /tmp/hebrew_diacritized /tmp/he_tagger_train.tsv
 .venv/bin/python tools/hebrew/train_he_tagger.py /tmp/he_tagger_train.tsv src/languages/hebrew
-.venv/bin/python tools/hebrew/export_he_tagger_onnx.py src/languages/hebrew
+.venv/bin/python tools/hebrew/export_he_tagger_onnx.py data/languages/hebrew
 # ⚠ VERIFY — the trainer's own numbers do NOT measure what he is judged on:
 npx tsx tools/hebrew/eval_modern_holdout.ts /tmp/hebrew_diacritized     # → modern-holdout word-exact
 ```
@@ -109,7 +109,7 @@ and mean neither. Reference points on that harness: shipped incumbent **87.9%**,
 huggingface-cli download MahtaFetrat/HomoRich-G2P-Persian --repo-type dataset --local-dir /tmp/homorich
 .venv/bin/python tools/persian/build_homorich_ipa.py /tmp/homorich/<file>.parquet tools/persian/homorich_ipa_clean.tsv
 .venv/bin/python tools/persian/train_tagger.py tools/persian      # → fa_tagger.pt
-.venv/bin/python tools/persian/export_tagger_onnx.py tools/persian src/languages/persian
+.venv/bin/python tools/persian/export_tagger_onnx.py tools/persian data/languages/persian
 ```
 
 ⚠ `train_tagger.py` also wants `test_heldout.tsv` in the same directory — a 1,500-sentence slice held out by
@@ -127,7 +127,7 @@ the skeleton leakage guard. Regenerate it with the same split before claiming a 
 python3 tools/normalization/wikidump-to-text.py <kmwiki-latest-pages-articles.xml.bz2> /tmp/km-paragraphs.txt
 .venv/bin/python tools/khmer/build_km_segmenter_data.py /tmp/km-paragraphs.txt /tmp/km_seg.tsv
 .venv/bin/python tools/khmer/train_km_segmenter.py /tmp/km_seg.tsv src/languages/khmer
-.venv/bin/python tools/khmer/export_km_segmenter_onnx.py src/languages/khmer
+.venv/bin/python tools/khmer/export_km_segmenter_onnx.py data/languages/khmer
 ```
 
 ⚠ A *latest* dump is not the one the committed model saw, so a rebuild is a NEW model on NEWER data, not a

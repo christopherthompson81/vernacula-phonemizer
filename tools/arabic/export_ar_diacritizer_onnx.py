@@ -17,7 +17,7 @@ import onnxruntime as ort
 from onnxruntime.quantization import quantize_dynamic, QuantType
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEST = os.path.join(HERE, "..", "..", "src", "languages", "arabic")
+DEST = os.path.join(HERE, "..", "..", "data", "languages", "arabic")
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--ckpt", required=True, help="trained .pt (best-val), e.g. /tmp/ar_pack_cos.pt")

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { createEnglishG2p, type EnglishG2pModel } from "../../src/languages/english/englishG2p.ts";
 import { MANIFEST } from "../../src/languages/english/manifest.ts";
 
-const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "languages", "english");
+const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data", "languages", "english");
 const full = new Map<string, string[]>();
 for (const l of readFileSync(join(EN, "g2p-dict.tsv"), "utf8").split("\n")) {
     if (l.startsWith("#") || !l.includes("\t")) continue;

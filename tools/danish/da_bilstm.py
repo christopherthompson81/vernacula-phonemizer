@@ -78,7 +78,7 @@ def main():
         print("\n[production] full-lexicon train + export…", flush=True)
         alf = align.align_parallel(rows); chars, tags, ct = build_vocab(alf); itag = {v: k for k, v in tags.items()}
         Xf, Yf = encode(alf, chars, tags); full = train(Tagger(len(chars), len(tags), hid=HID), Xf, Yf, batch=BATCH, log_every=LOG_EVERY); full.eval().cpu()
-        SRC = os.path.join(HERE, "..", "..", "src", "languages", "danish")
+        SRC = os.path.join(HERE, "..", "..", "data", "languages", "danish")
         torch.onnx.export(full, torch.tensor([[1, 2, 3, 4]]), os.path.join(SRC, "da-g2p-tagger.onnx"),
                           input_names=["chars"], output_names=["logits"],
                           dynamic_axes={"chars": {0: "batch", 1: "len"}, "logits": {0: "batch", 1: "len"}}, opset_version=17)

@@ -1,6 +1,6 @@
 # Shared harakat restorer — training & eval harness
 
-Fine-tune the existing Arabic diacritizer (`src/languages/arabic/diacritizer.onnx`) into a **multilingual** harakat
+Fine-tune the existing Arabic diacritizer (`data/languages/arabic/diacritizer.onnx`) into a **multilingual** harakat
 restorer for the Perso-Arabic abjad languages. This doc is the recipe; the actual run is an **offline GPU job** (as
 for the Arabic model — staged outside CI, per `data/languages/arabic/diacritizer.PROVENANCE.md`).
 

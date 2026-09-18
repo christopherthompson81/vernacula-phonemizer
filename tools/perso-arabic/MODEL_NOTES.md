@@ -14,7 +14,7 @@ extension (this line of work). Both are char-level BiLSTMs with the same 19-labe
   what ships is the trained model plus its provenance. Retraining from scratch means reimplementing that pipeline —
   the architecture, vocab, label scheme and data sources are all documented below precisely so that is possible.
 
-## The Arabic base model (`src/languages/arabic/diacritizer.onnx`, gitignored)
+## The Arabic base model (`data/languages/arabic/diacritizer.onnx`, gitignored)
 - **Architecture:** char-level **BiLSTM**, emb 128, hidden 512, 3 layers, bidirectional, per-position softmax over
   19 labels. ~15.3 M params. int8 `quantize_dynamic` ONNX (~15 MB).
 - **Vocab:** 39 chars (`<pad>`=0, `<unk>`=1, `<sp>`=2, then 36 Arabic letters), 19 labels. In `diacritizer.meta.json`.

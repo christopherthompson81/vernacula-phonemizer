@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fine-tune the Arabic harakat BiLSTM into a MULTILINGUAL Perso-Arabic restorer.
 
-Warm-starts from the Arabic checkpoint (bilstm_pausal.pt — its char/label maps match src/languages/arabic/
+Warm-starts from the Arabic checkpoint (bilstm_pausal.pt — its char/label maps match data/languages/arabic/
 diacritizer.meta.json, and multilingual_charvocab.json preserves those indices). The lstm+fc weights are
 vocab-independent → copied directly; embedding rows are copied by CHAR IDENTITY (Arabic rows transfer, the new
 rider letters init random). Language conditioning = a per-word language TOKEN prepended to the char sequence (no

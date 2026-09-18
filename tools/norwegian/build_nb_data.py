@@ -6,10 +6,10 @@ Inputs (both public):
       https://www.nb.no/sbfil/leksikalske_databaser/leksikon/no.leksikon.tar.gz
       → nor030224NST.pron  (ISO-8859-1, CRLF, ';'-separated; word = field 0, NST-SAMPA transcription = field 11)
   - a frequency wordlist — OpenSubtitles Norwegian (hermitdave FrequencyWords, CC BY-SA), one "word count" per line.
-      The shipped src/languages/norwegian/nb-lexicon.tsv is the NST ∩ (top ~50k of this list).
+      The shipped data/languages/norwegian/nb-lexicon.tsv is the NST ∩ (top ~50k of this list).
 
 Outputs:
-  - src/languages/norwegian/nb-lexicon.tsv — tier-1 shipping lexicon: the freq-list words that NST covers, each mapped
+  - data/languages/norwegian/nb-lexicon.tsv — tier-1 shipping lexicon: the freq-list words that NST covers, each mapped
     to its SHORTEST NST variant → canonical IPA (with stress). ~38k forms, ~98% of real-text tokens.
   - <train-out> (default /tmp/nb_train_stress.tsv) — the FULL NST (every alphabetic word → shortest IPA-with-stress),
     the OOV BiLSTM tagger's training set (train_nb_bilstm.py).

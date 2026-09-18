@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Bengali G2P STRUCTURAL tagger — the DEFAULT-for-OOV neural Bengali reader (ships as
-src/languages/bengali/bn-g2p-tagger.int8.onnx). A per-grapheme BiLSTM: each Bengali grapheme → one IPA-chunk TAG
+data/languages/bengali/bn-g2p-tagger.int8.onnx). A per-grapheme BiLSTM: each Bengali grapheme → one IPA-chunk TAG
 (its consonant, COPIED, plus the following inherent vowel ɔ/o or deletion). Output length == input length, so it
 CANNOT degenerate and CANNOT break the consonant skeleton — a single forward pass, no beam, no autoregressive
 decode. Context (the whole-word ɔ/o realization) comes from the bidirectional pass. The per-grapheme labels come
@@ -12,7 +12,7 @@ rule engine's 62.6% ɔ/o.
 
   npx tsx tools/bengali/build_tagger_data.ts /tmp/bn_tagger_train.tsv
   python train_bn_tagger.py /tmp/bn_tagger_train.tsv src/languages/bengali   # writes bn_tagger.pt (+ reports held-out)
-  python export_bn_tagger_onnx.py src/languages/bengali                      # writes bn-g2p-tagger.int8.onnx + .meta.json
+  python export_bn_tagger_onnx.py data/languages/bengali                      # writes bn-g2p-tagger.int8.onnx + .meta.json
 """
 import sys
 import math

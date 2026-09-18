@@ -4,7 +4,7 @@
 Hebrew Wiktionary headwords are UNVOCALIZED (bare consonantal) — the full vowel-restoration problem (Phase 2,
 deferred). But each ==Hebrew== entry ALSO carries (a) the VOCALIZED citation form with niqqud in its headword
 template's `wv=` param, and (b) the MODERN ISRAELI IPA in the `{{IPA|he|/…/|a=IL}}` tag. This tool pairs those two
-into a `vocalized-form <TAB> Modern-IPA` referee that grades the Phase-1 segmental niqqud→IPA g2p (src/languages/
+into a `vocalized-form <TAB> Modern-IPA` referee that grades the Phase-1 segmental niqqud→IPA g2p (data/languages/
 hebrew), independent of restoration.
 
 Reads the batch cache populated by `npx tsx tools/corpus/build-referee.ts --lang he --wnl Hebrew` (the batched

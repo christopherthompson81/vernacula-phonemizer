@@ -1,4 +1,4 @@
-# Khmer word-frequency list — src/languages/khmer/km-wordfreq.tsv re-emitted in the eval's "word count"
+# Khmer word-frequency list — data/languages/khmer/km-wordfreq.tsv re-emitted in the eval's "word count"
 # format (desc). That table is this repo's own harvest — 2,851,516 ZWSP/space-delimited tokens the mined-km
 # corpus's writers themselves delimited, freq>=25 — built by tools/gen/build-km-wordfreq.mts; no external
 # licence attaches. Regenerate by re-emitting that file whenever it is rebuilt.

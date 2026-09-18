@@ -6,7 +6,7 @@ The graph is one BiLSTM forward pass: character ids [1,L] → boundary logits [1
 length == input length, so there is no autoregressive decode and no way for the model to lose or invent
 characters: the worst it can do is put a boundary in the wrong place.
 
-  .venv/bin/python tools/khmer/export_km_segmenter_onnx.py src/languages/khmer
+  .venv/bin/python tools/khmer/export_km_segmenter_onnx.py data/languages/khmer
     reads km_segmenter.pt, writes km-segmenter.{int8.onnx,meta.json}
 """
 import json

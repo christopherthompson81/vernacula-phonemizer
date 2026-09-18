@@ -3,7 +3,7 @@
 forward pass: skeleton char-ids [1,L] → tag logits [1,L,nTags]. The consonant-consistency mask + masked argmax +
 tag concatenation happen in TS (hebrewTagger.ts, via the shared core/structuralTagger.ts). No decode loop.
 
-  python tools/hebrew/export_he_tagger_onnx.py src/languages/hebrew   # → he-tagger.int8.onnx + .meta.json
+  python tools/hebrew/export_he_tagger_onnx.py data/languages/hebrew   # → he-tagger.int8.onnx + .meta.json
 """
 import sys, os, json
 import torch, torch.nn as nn

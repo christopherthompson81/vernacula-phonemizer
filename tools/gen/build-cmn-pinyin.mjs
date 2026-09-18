@@ -33,7 +33,7 @@ for (const [phrase, perChar] of Object.entries(phrases)) {
   if (toks.every(Boolean)) phraseRows.push(`${phrase}\t${toks.join(" ")}`);
 }
 charRows.sort(); phraseRows.sort((a, b) => a.split("\t")[0].length - b.split("\t")[0].length || (a < b ? -1 : 1));
-const dir = "src/languages/mandarin";
+const dir = "data/languages/mandarin";
 writeFileSync(`${dir}/chars.tsv`, "# Hanzi → base+tone pinyin (most-common first). From pypinyin (MIT) char dict.\n" + charRows.join("\n") + "\n");
 writeFileSync(`${dir}/phrases.tsv`, "# Multi-char phrase → space-separated base+tone pinyin (polyphone disambiguation). From pypinyin (MIT) phrase dict.\n" + phraseRows.join("\n") + "\n");
 console.log(`chars=${charRows.length} phrases=${phraseRows.length}`);

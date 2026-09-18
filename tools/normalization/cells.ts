@@ -145,7 +145,7 @@ export const CELLS: Cell[] = [
     // sentence in the corpus ran into the next one.
     //
     // WHY IT IS SHARED AND NOT SYLHETI'S OWN DATA (the local-vs-core question, asked properly). Grepping
-    // `src/languages/*/` for a script-specific boundary mark — the same metric `langs` means everywhere
+    // `data/languages/*/` for a script-specific boundary mark — the same metric `langs` means everywhere
     // else in this table, "treated languages that authored a rule in that category" — finds **50 layers**:
     // danda in 20, the CJK marks in 14, the Arabic marks in 10, Ethiopic 2, Burmese 2, and one apiece for
     // Khmer, Santali, Tibetan, Javanese and Sylheti. That is the LARGEST langs figure in this file, ahead
