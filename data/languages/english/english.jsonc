@@ -471,6 +471,11 @@
         // Confirmed against misaki's gold, which letter-spells it. The frequency argument is one-sided:
         // the sloth is a crossword word and the initialism is in every other sentence about software.
         "ai",
+        // ⚠ SAME SHAPE AS `ai`, AND THE GOLDS AGREE WITH THE DICTIONARY THAT IT SHOULD. CMUdict and both
+        // misaki golds record `psi` as [S AY1] — the Greek letter — so `PSI` resolved to the word and read
+        // as "sigh" where the unit (pounds per square inch) is said letter by letter. Case-gated like the
+        // rest of this list, so the Greek letter in running prose is untouched.
+        "psi",
         // ⟨u⟩ and ⟨a⟩ are vowels and ⟨cl⟩ a legal onset, so the phonotactic gate calls this READABLE and
         // leaves it to the g2p, which invents the word [ˈuːklɑː]. Same shape as `cra` and `nyc` above.
         "ucla", "atv", "gps", "hiv", "ufo", "faa", "epa", "irs",

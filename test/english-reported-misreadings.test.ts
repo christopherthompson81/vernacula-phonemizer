@@ -748,3 +748,36 @@ describe("a slash, a section dot, a bare abbreviation and a month range", () => 
         expect(norm("Mar and Aug")).toBe("Mar and Aug");
     });
 });
+
+describe("four lexical facts the dictionary had wrong or lacked", () => {
+    const say = (s: string): string => phonemize(s, "en");
+
+    // ⚠ CMUdict AND BOTH MISAKI GOLDS RECORD `psi` AS [S AY1] — the Greek letter — so the unit resolved
+    // to the word and read "sigh". Same shape as `ai` (the sloth) above it in the list: the dictionary is
+    // right about the word and cannot express the case-keyed acronym, which is what acronymLetters is for.
+    test("PSI is the unit, psi is the Greek letter", () => {
+        expect(say("PSI")).toBe("pʰˈiː ˈɛs aᶦ");
+        expect(say("the psi function")).toContain("sˈaᶦ");   // ⚠ case-gated: the word is untouched
+    });
+
+    // CMUdict has K OW1 L IH0 N, "Coe-lin". Moby has `colin 'k/A/l/I/n` — the LOT vowel — and that is
+    // what was reported. Neither gold carries the name, so Moby plus the report is the whole evidence.
+    test("Colin has the LOT vowel", () => {
+        expect(say("Colin")).toBe("kʰˈɑːlɪn");
+    });
+
+    // ⚠ THE OOV PATH PATTERNED IT ON `derivative`, which is the other stem: gold has derivative
+    // dəɹˈɪvəɾɪv with the short vowel but derive dəɹˈIv and derivable dəɹˈIvəbᵊl with the long one.
+    // Both golds agree, and the word was in no dictionary at all.
+    test("derivable takes its stem's vowel, not derivative's", () => {
+        expect(say("derivable")).toBe("dɚˈaᶦvəbəɫ");
+        expect(say("derivative")).toBe("dɚˈɪvət̬ɪv");   // ⚠ the control: still short
+    });
+
+    // A lexical acronym — spelled like an initialism, said as a word. The phonotactic test calls it
+    // unreadable (⟨msa⟩ is not a legal onset) and spelled it out; a dictionary row is what settles it,
+    // and a recorded pronunciation is not the OOV tier's business.
+    test("a lexical acronym is read as the word it is said as", () => {
+        expect(say("MSAPR")).toBe("ɛmsˈæpɚ");
+    });
+});

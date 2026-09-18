@@ -1052,3 +1052,77 @@ this batch's scope and recorded here so it is not rediscovered.
 
 **Still open from the thirteen:** `PSI` (read as the Greek letter), `MSAPR` (wants a lexical
 reading), `Colin`, `derivable`, `Saipavan` — two acronym classifications and three lexicon entries.
+
+## Run 19 — 2026-09-18 16:30 — four lexical facts, and one name that is not going in
+
+The residue of the thirteen: two dictionary rows that were wrong, two words that were in no
+dictionary at all, and one that will not be committed.
+
+**`PSI`.** CMUdict records `psi` as `S AY1` — the Greek letter — and BOTH misaki golds agree
+(`us='sˈI'`, `gb='sˈI'`). So the dictionary is right about the word and simply cannot express that the
+capitalized form is a unit said letter by letter. That is exactly what `acronymLetters` is for, and
+`ai` (CMUdict's three-toed sloth, versus the initialism) is the precedent sitting two lines above it.
+Case-gated, so the Greek letter in running prose is untouched.
+
+**`Colin`.** CMUdict has `K OW1 L IH0 N`. Moby has
+
+```
+colin 'k/A/l/I/n
+Colin 'k/A/l/I/n
+```
+
+— the LOT vowel, which is what was reported. ⚠ The first Moby lookup came back EMPTY, and the reason
+is the trap this log already records twice: Moby is CR-delimited, so a `^`-anchored grep matches
+nothing. Caught this time by re-checking with `tr '\r' '\n'` before concluding the source was silent.
+Neither gold carries the name, so Moby plus the listener's report is the whole of the evidence, and
+they agree.
+
+**`derivable`.** In no dictionary — and the OOV path patterned it on the wrong stem:
+
+```
+derive      gold us dəɹˈIv        (I = /aɪ/)
+derivative  gold us dəɹˈɪvəɾɪv    ← short
+derivable   gold us dəɹˈIvəbᵊl    ← LONG, and gb agrees
+ours                dɚˈɪvəbəɫ     ← derivative's vowel on derive's word
+```
+
+Both golds distinguish the two stems exactly as the report does. `derivative` is kept as the control
+in the test, since a fix that moved it too would be trading one error for another.
+
+**`MSAPR`** is a lexical acronym — spelled like an initialism, said as a word. ⟨msa⟩ is not a legal
+onset, so the phonotactic test called it unreadable and spelled it out; a dictionary row settles it,
+because a recorded pronunciation is not the OOV tier's business.
+
+**`Saipavan` is NOT being committed.** It is a person's given name, taken from a document under
+review — real names are PII, and this repository is public. The reading is wrong (`spˈʌvən`, with the
+⟨ai⟩ dropped entirely, against the reported *saɪ-PA-van*) and a lexicon row would fix it, but the row
+would publish the name. Flagged for the user to add locally if they want it.
+
+The underlying defect is visible without the name: the BiLSTM drops a whole syllable on an unfamiliar
+`Cai-` onset. That is the OOV tail the dictionary growth of #1344 was aimed at, and a retrain on the
+enlarged dictionary — not yet run — is where it would be measured.
+
+**Result — twelve of thirteen.**
+
+```
+horsepower           hˈɔːɹspaᶷɚ                    (did not reproduce)
+Section G.2          sˈɛkʃən d͡ʒˈiː pʰˈɔᶦnt tʰˈuː
+PSI                  pʰˈiː ˈɛs aᶦ
+WD 40                dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i
+litres/day           lˈiːt̬ɚz pʰɝ dˈeᶦ
+m³/hr                ˈɛm kjˈuːbd pʰɝ ˈaᶷɚ
+Colin                kʰˈɑːlɪn
+vs                   vˈɝsəs
+derivable            dɚˈaᶦvəbəɫ
+Oct-Dec 2024         ɑːktˈoᶷbɚ tʰuː dᵻsˈɛmbɚ twˈɛnti twˈɛnti fˈɔːɹ
+FREQUENCY/CRITERIA   fɹˈiːkwənsi slˈæʃ kɹaᶦtʰˈɪɹiʲə
+MSAPR                ɛmsˈæpɚ
+Saipavan             spˈʌvən                       (not fixed — see above)
+```
+
+⚠ `wd 40` in LOWERCASE is still `wdˈiː fˈɔːɹt̬i`. The initialism pass is deliberately caps-only — a
+lowercase vowelless token is genuinely ambiguous — and the product is written `WD-40`, which reads
+correctly. Left alone rather than widened on one report.
+
+**Gates.** 6028 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, lexicon round-trip
+100.00%.
