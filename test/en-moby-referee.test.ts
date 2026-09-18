@@ -25,7 +25,12 @@ const oov = read("en.moby-oov.tsv");
 describe("the Moby referee corpora", () => {
     test("they are large, disjoint, and one reading per headword", () => {
         expect(lex.size).toBeGreaterThan(30_000);
-        expect(oov.size).toBeGreaterThan(50_000);
+        // ⚠ 41,276, NOT THE ORIGINAL 57,503: #1344 imported 16,227 of these headwords into the dictionary
+        // and the generator now EXCLUDES every imported word from both corpora, because scoring ourselves
+        // against Moby on a word whose reading we took from Moby is a mirror. The remainder is the harder
+        // residue — gold has no reading for most of it — so its score is not comparable to the pre-import
+        // number and the config says so.
+        expect(oov.size).toBeGreaterThan(38_000);
         // ⚠ DISJOINT BY CONSTRUCTION: the split IS "does g2p-dict.tsv carry this word", which is what makes
         // the second file a referee for the OOV tier rather than a second opinion on the lexicon.
         expect([...lex.keys()].filter((w) => oov.has(w))).toEqual([]);

@@ -45,8 +45,9 @@ const KNOWN_GAPS = new Map<string, string>([
     // because the dictionary ITSELF is inconsistent: it geminates `bookkeeper` and collapses `granddad`
     // and `spacesuit`. There is no target to converge on. See the referee audit investigation, Run 17.
     ["earrings", "seam (source M): `ear` + `rings` collapses the R R; measured, see above"],
-    ["forerunner", "seam (source C): `fore` + `runner` collapses the R R; measured, see above"],
-    ["forerunners", "seam (source C): `fore` + `runners` collapses the R R; measured, see above"],
+    // ⚠ `forerunner`/`forerunners` LEFT THIS LIST AT #1344: the Moby import changed their morph stem, so
+    // they no longer reconstruct the upstream shape at all. The seam reasoning below still stands for the
+    // rows that remain.
     ["roommate", "seam (source C): `room` + `mate` collapses the M M; measured, see above"],
     ["roommates", "seam (source M): `roommate` + `s` collapses the M M; measured, see above"],
     ["teammate", "seam (source C): `team` + `mate` collapses the M M; measured, see above"],

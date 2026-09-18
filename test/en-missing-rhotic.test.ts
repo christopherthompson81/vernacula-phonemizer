@@ -39,6 +39,11 @@ const SILENT_R = new Map<string, string>([
     ["trois", "French /twɑː/ — no source carries an /r/ for this one"],
     // An abbreviation whose EXPANSION has no r: Mrs = "missus".
     ["mrs", "abbreviation gloss — 'missus'"],
+    // ⚠ THE THREE BELOW ARRIVED WITH THE MOBY IMPORT (#1344) and are the same French -ier rule as the
+    // block above, plus one English word whose spelling simply lies. Each was checked against gold, which
+    // agreed with Moby on all three — that agreement is what admitted them to the dictionary at all.
+    ["atelier", "French -ier"], ["sommelier", "French -ier"],
+    ["forecastle", "the sailors' pronunciation is 'fo'c'sle' /ˈfoʊksəl/ — the ⟨r⟩ has been silent for centuries"],
 ]);
 
 describe("no dropped /r/ in the English dictionary", () => {

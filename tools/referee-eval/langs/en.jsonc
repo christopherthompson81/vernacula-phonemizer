@@ -65,6 +65,14 @@
             // the dictionary does not already believe.
             // ⚠ IT IS PROPER-NOUN HEAVY and will score far below the lexicon file — that is the tier, not a
             // defect. Read it as a baseline to move, not as a quality claim.
+            // ⚠ AND ITS POPULATION CHANGED AT #1344, SO 42.2% AND 36.0% ARE NOT COMPARABLE NUMBERS. That PR
+            // imported 16,227 of these headwords into the dictionary — every one corroborated by misaki
+            // gold — and the generator excludes an imported word from BOTH corpora, because scoring
+            // ourselves against Moby on a reading we took from Moby is a mirror. What is left is 41,276
+            // rows of harder residue: gold has no reading at all for most of it, which is precisely why it
+            // was not importable. A drop here across that boundary is the corpus getting harder, not the
+            // engine getting worse — the independent check is the PRIMARY referee, which went 60.1% → 61.7%
+            // over the same change.
         }
     ],
     "segmentJoin": true,

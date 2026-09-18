@@ -355,6 +355,24 @@ therefore cannot regress into it. Its unmerged marry–merry and its conservativ
 the referee can still catch a regression on the two axes most recently changed here. The argument for each
 is in the generator's header.
 
+**And 16,227 rows now ship in the dictionary itself.** `tools/english/en_import_moby.mts` adds Moby
+headwords `g2p-dict.tsv` lacked, recorded in `data/languages/english/moby-import.tsv` — which is a
+re-appliable layer for the same reason `g2p-curated.tsv` is one: `en_g2p_ngram.ts --emit` rebuilds the
+dict from CMUdict and carries none of them.
+
+⚠ **THE BAR IS THE SAME TWO-SOURCE STANDARD every correction in #1334–#1341 had to clear**: Moby and
+misaki gold must agree after both are folded to this engine's conventions. Of 57,503 absent headwords,
+gold has no reading for 33,684 and disagrees on 7,413; 166 more were dropped because they are Commonwealth
+spellings the `americanSpelling` fold already resolves, and giving those their own row SHADOWS the fold
+and swaps a curated reading for a raw one. The independent check that this was worth doing is the
+*primary* referee: wikipron went 60.1% → 61.7%.
+
+⚠ **AND THE CONVERSION RUNS THE OPPOSITE WAY FROM THE REFEREE'S**, which is the one thing to hold in mind
+when reading either. A row entering the LEXICON is fully modernised — FORCE→NORTH, yod-dropping, æɹ→ɛɹ —
+because it must arrive in this engine's conventions or contradict the dictionary it joins. A row entering
+the REFEREE keeps marry–merry and the conservative yod, because folding them would blind it to the two
+axes most recently changed here. Same source, two derivations, opposite treatment of the same distinction.
+
 Attribution is owed as a courtesy rather than as a licence condition: the grant imposes none.
 
 ## 6. License architecture (to implement at publication)
