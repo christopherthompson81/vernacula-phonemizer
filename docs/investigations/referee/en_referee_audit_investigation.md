@@ -1327,3 +1327,70 @@ pre-existing curation applied, so those rows correctly look unchanged against it
 meaningful for rows this work added.
 
     tests 5,979 / 310 files   goldens 0 stale   regex parity 0 differ
+
+## Run 15 — the frequency audit, phase 2: the top two bands
+
+Working the 50 candidates in the top 5,000 words, reading each.
+
+    top 1k   10 → 4        1k–5k   40 → 18        triple-source agreement 68.6% → 68.9%
+
+### What was applied (17 single fixes + 77 in one class)
+
+    without  W IH0 TH AW1 T → DH     a voiceless θ in /wɪˈðaʊt/
+    vehicle  V IY1 HH IH0 K… → no HH we pronounced the silent h
+    really   2 → 3 syllables          suggest  S AH0 JH → S AH0 G JH
+    poor     P UW1 R → P UH1 R        schedule S K EH1 JH UH0 L → UW2
+    tissue   T IH1 S Y UW2 → T IH1 SH UW0   bankruptcy  …P S IY → …P T S IY
+    casual · semi · sri · finland · africa · indonesia · costa · boston
+
+### ⚠ THE `re-` CLASS, AND THE PRIOR DECISION IT RAN INTO
+
+40 rows where our tense `R IY0` meets a reduced prefix in BOTH sources. The dictionary had **three values
+for one prefix** — `reduce` R AH0, `reward` R IH0, `review` R IY0 — and only the first two reach the
+weak-vowel rule, so `reduce` read `ɹᵻdˈuːs` while `review` read `ɹiːvjˈuː`.
+
+⚠ **`test/english-reported-misreadings.test.ts` already records a REJECTED attempt at this** — a rule
+reducing any `IY2` Latinate prefix, which moved 896 rows and wrongly reduced the PRODUCTIVE prefix
+(`reconstructed`, `redesign`, `relocate`). That work fixed three rows in the DICTIONARY instead. This change
+is the same shape and extends it: 40 dictionary rows chosen by two independent sources agreeing, never a
+rule, and the productive prefix verified untouched (`reacquire` ɹiʲəkwˈaᶦɹ, `react` ɹiʲˈækt, `realign`).
+
+Of the 683 `R IY0` rows in the dictionary, the two-source filter selected 36 in the first pass and **not one
+was a productive `re-`** — they are all Latinate (`report`, `release`, `republic`, `revenge`, `repose`,
+`rebuke`, `replenish`). That is the filter doing exactly the job the rejected rule could not.
+
+⚠ **AND THE PARADIGMS WERE SPLIT, WHICH THE TESTS CAUGHT.** `report` was IY0, `reported` IY2, `reporting`
+IY0, `reports` IH0 — four spellings of one prefix in one paradigm, exactly the `replace` defect this repo
+fixed once before. 37 more siblings completed so each paradigm agrees with itself.
+
+Two pins moved and one was REVERTED:
+- `report` left the "productive prefix is untouched" test — it is Latinate and never belonged there; the
+  line described it as "an unstressed IY0 prefix" rather than claiming the reading was right. The four
+  genuine controls stay.
+- `report` also left `onset-r.test.ts`, where it was the CONTRAST ("its first vowel resolves to `i`, not
+  `ᵻ`") — a contrast that existed only because the paradigm was split.
+- ⚠ **`cafe` was REVERTED.** Both sources said `K AE0`, but /kæˈfeɪ/ and /kəˈfeɪ/ are both attested and the
+  existing value was a considered pin from a previous fix. Two-source agreement does not outrank a
+  deliberate decision on a genuine variant.
+
+### ⚠ A LIMITATION OF THE INSTRUMENT, found by chasing `reroute`
+
+`reroute` renders `ɹɪɹˈuːt` where gold has `ɹiɹˈut` — and it is NOT an audit candidate, because its
+dictionary row is IDENTICAL to gold's. The difference is introduced by the RENDERER: the manifest's
+`"IY": { "beforeR": "ɪ" }`, which is right for tautosyllabic NEAR (`beer`, `beard`) and wrong when the `ɹ`
+is the onset of the next syllable (`copy|right`, `re|route`, `de|regulation`).
+
+**The audit compares ARPABET, so it is blind to renderer defects.** Worth stating plainly: it can only find
+bad dictionary rows.
+
+Measured before reaching for a rule change, and it rules one out:
+
+    ɹ is a CODA    gold says ɪ  28 / 28      ← our rule is right, unanimously
+    ɹ is an ONSET  gold says i  14, ɪ  20    ← MIXED
+
+The 20 are NEAR stems with a suffix (`career|ism`, `dreari|ness`, `endear|ing`); the 14 are compound or
+prefix boundaries (`copy|right`, `pre|record`). The discriminator is morphological, which the converter
+cannot see — so this needs a lexical exception list, not a rule, and is left as the next piece of work.
+`copyright` is rank #150, so it is worth doing.
+
+    tests 5,989 / 311 files   goldens 0 stale   en 59.9%   en-GB 47.5%

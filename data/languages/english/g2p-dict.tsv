@@ -1397,7 +1397,7 @@ aforethought	AH0 F AO1 R TH AA2 T
 afoul	AH0 F AW1 L
 afraid	AH0 F R EY1 D
 afresh	AH0 F R EH1 SH
-africa	AE1 F R AH0 K AA0
+africa	AE1 F R AH0 K AH0
 african	AE1 F R AH0 K AH0 N
 africanist	AE1 F R IH0 K AH0 N IH0 S T
 africanists	AE1 F R IH0 K AA0 N IH0 S T S
@@ -7200,7 +7200,7 @@ bankrolls	B AE1 NG K R OW2 L Z
 bankrupcty	B AE1 NG K R AH0 P T S IY0
 bankrupt	B AE1 NG K R AH0 P T
 bankruptcies	B AE1 NG K R AH0 P T S IY0 Z
-bankruptcy	B AE1 NG K R AH0 P S IY0
+bankruptcy	B AE1 NG K R AH0 P T S IY0
 bankrupted	B AE1 NG K R AH0 P T IH0 D
 bankrupting	B AE1 NG K R AH2 P T IH0 NG
 banks	B AE1 NG K S
@@ -12101,7 +12101,7 @@ bostian	B AA1 S CH IH0 N
 bostic	B AA1 S T IH0 K
 bostick	B OW1 S T IH0 K
 bostock	B OW1 S T AA2 K
-boston	B AA1 S T AH0 N
+boston	B AO1 S T AH0 N
 bostonian	B AO2 S T OW1 N IY0 AH0 N
 bostonians	B AA1 S T OW0 N IY0 AH0 N Z
 bostra	B AA1 S T R AH0
@@ -16802,7 +16802,7 @@ castronovo	K AE0 S T R OW0 N OW1 V OW0
 castrucci	K AH0 S T R UW1 CH IY0
 castruita	K AA0 S T R UW1 T AH0
 casts	K AE1 S T S
-casual	K AE1 ZH AH0 W AH0 L
+casual	K AE1 ZH UW0 AH0 L
 casually	K AE1 ZH AH0 W AH0 L IY0
 casualness	K AE1 ZH AH0 W AH0 L N AH0 S
 casuals	K AE1 ZH AH0 W AH0 L Z
@@ -22483,7 +22483,7 @@ cossiga	K AO2 S IY1 G AH0
 cossin	K AA1 S IH0 N
 cossman	K AO1 S M AH0 N
 cost	K AO1 S T
-costa	K AO1 S T AA0
+costa	K AA1 S T AH0
 costabile	K AO1 S T AH0 B AY2 L
 costain	K OW2 S T EY1 N
 costales	K AA1 S T AH0 L Z
@@ -36947,7 +36947,7 @@ finklea	F IH1 NG K L IY0 AH0
 finkler	F IH1 NG K L ER0
 finkley	F IH1 NG K L IY0
 finks	F IH1 NG K S
-finland	F IH1 N L AE2 N D
+finland	F IH1 N L AH0 N D
 finlandization	F IH2 N L AE0 N D IH0 Z EY1 SH AH0 N
 finlay	F IH1 N L IY0
 finlayson	F IH1 N L IY0 S AH0 N
@@ -51566,7 +51566,7 @@ indoctrinated	IH2 N D AA1 K T R AH0 N EY2 T IH0 D
 indoctrination	IH2 N D AA2 K T R AH0 N EY1 SH AH0 N
 indolent	IH1 N D AH0 L AH0 N T
 indomitable	IH2 N D AA1 M AH0 T AH0 B AH0 L
-indonesia	IH2 N D OW0 N IY1 ZH AH0
+indonesia	IH2 N D AH0 N IY1 ZH AH0
 indonesian	IH2 N D OW0 N IY1 ZH AH0 N
 indonesians	IH2 N D OW0 N IY1 S IY0 AH0 N Z
 indoor	IH1 N D AO2 R
@@ -81858,7 +81858,7 @@ pooped	P UW1 P T
 pooper	P UW1 P ER0
 poopers	P UW1 P ER0 Z
 poops	P UW1 P S
-poor	P UW1 R
+poor	P UH1 R
 poorbaugh	P UW1 R B AO0
 poore	P UW1 R
 poorer	P UW1 R ER0
@@ -85948,7 +85948,7 @@ reallocated	R IY2 AE1 L AH0 K EY2 T IH0 D
 reallocating	R IY0 AE1 L AH0 K EY2 T IH0 NG
 reallocation	R IY0 AE2 L AH0 K EY1 SH AH0 N
 reallowance	R IY1 AH0 L AW1 AH0 N S
-really	R IH1 L IY0
+really	R IY1 AH0 L IY0
 realm	R EH1 L M
 realms	R EH1 L M Z
 realmuto	R AH0 L M UW1 T OW0
@@ -86113,10 +86113,10 @@ rebuilders	R IY0 B IH1 L D ER0 Z
 rebuilding	R IY0 B IH1 L D IH0 NG
 rebuilds	R IY0 B IH1 L D Z
 rebuilt	R IY0 B IH1 L T
-rebuke	R IY0 B Y UW1 K
+rebuke	R IH0 B Y UW1 K
 rebuked	R IH0 B Y UW1 K T
-rebukes	R IY0 B Y UW1 K S
-rebuking	R IY0 B Y UW1 K IH0 NG
+rebukes	R IH0 B Y UW1 K S
+rebuking	R IH0 B Y UW1 K IH0 NG
 rebus	R IY1 B AH0 S
 rebut	R IH0 B AH1 T
 rebuttal	R IH0 B AH1 T AH0 L
@@ -86417,7 +86417,7 @@ recurred	R IY0 K ER1 D
 recurrence	R IH0 K ER1 AH0 N S
 recurrent	R IH0 K ER1 AH0 N T
 recurring	R IH0 K ER1 IH0 NG
-recursive	R IY2 K ER1 S IH0 V
+recursive	R IH0 K ER1 S IH0 V
 recusal	R IH0 K Y UW1 Z AH0 L
 recuse	R IH2 K Y UW1 Z
 recused	R IH0 K Y UW1 Z D
@@ -86961,9 +86961,9 @@ rehearing	R IY0 HH IY1 R IH0 NG
 rehearings	R IY0 HH IY1 R IH0 NG Z
 rehearsal	R IH0 HH ER1 S AH0 L
 rehearsals	R IH0 HH ER1 S AH0 L Z
-rehearse	R IY0 HH ER1 S
-rehearsed	R IY0 HH ER1 S T
-rehearses	R IY0 HH ER1 S IH0 Z
+rehearse	R IH0 HH ER1 S
+rehearsed	R IH0 HH ER1 S T
+rehearses	R IH0 HH ER1 S IH0 Z
 rehearsing	R IH0 HH ER1 S IH0 NG
 reher	R EH1 R
 rehfeld	R EH1 F EH2 L D
@@ -87255,11 +87255,11 @@ relate	R IH0 L EY1 T
 related	R IH0 L EY1 T IH0 D
 relates	R IH0 L EY1 T S
 relating	R IH0 L EY1 T IH0 NG
-relation	R IY0 L EY1 SH AH0 N
-relational	R IY0 L EY1 SH AH0 N AH0 L
-relations	R IY0 L EY1 SH AH0 N Z
-relationship	R IY0 L EY1 SH AH0 N SH IH2 P
-relationships	R IY0 L EY1 SH AH0 N SH IH2 P S
+relation	R IH0 L EY1 SH AH0 N
+relational	R IH0 L EY1 SH AH0 N AH0 L
+relations	R IH0 L EY1 SH AH0 N Z
+relationship	R IH0 L EY1 SH AH0 N SH IH2 P
+relationships	R IH0 L EY1 SH AH0 N SH IH2 P S
 relative	R EH1 L AH0 T IH0 V
 relatively	R EH1 L AH0 T IH0 V L IY0
 relatives	R EH1 L AH0 T IH0 V Z
@@ -87279,10 +87279,10 @@ relaying	R IY1 L EY2 IH0 NG
 relays	R IY1 L EY2 Z
 relearn	R IY0 L EH1 R N
 relearning	R IY0 L EH1 R N IH0 NG
-release	R IY0 L IY1 S
-released	R IY0 L IY1 S T
+release	R IH0 L IY1 S
+released	R IH0 L IY1 S T
 releases	R IH0 L IY1 S IH0 Z
-releasing	R IY0 L IY1 S IH0 NG
+releasing	R IH0 L IY1 S IH0 NG
 releford	R EH1 L IH0 F ER0 D
 relegate	R EH1 L AH0 G EY2 T
 relegated	R EH1 L AH0 G EY2 T IH0 D
@@ -87404,7 +87404,7 @@ remember	R IH0 M EH1 M B ER0
 remembered	R IH0 M EH1 M B ER0 D
 remembering	R IH0 M EH1 M B ER0 IH0 NG
 remembers	R IH0 M EH1 M B ER0 Z
-remembrance	R IY0 M EH1 M B R AH0 N S
+remembrance	R IH0 M EH1 M B R AH0 N S
 remembrances	R IH0 M EH1 M B R AH0 N S IH0 Z
 remer	R IY1 M ER0
 remerchandise	R IY0 M ER1 CH AH0 N D AY2 Z
@@ -87434,8 +87434,8 @@ reminiscing	R EH2 M AH0 N IH1 S IH0 NG
 remis	R EY1 M IY0 Z
 remiss	R IY0 M IH1 S
 remisses	R IY0 M IH1 S IH0 Z
-remission	R IY0 M IH1 SH AH0 N
-remissions	R IY0 M IH1 SH AH0 N Z
+remission	R IH0 M IH1 SH AH0 N
+remissions	R IH0 M IH1 SH AH0 N Z
 remit	R IY0 M IH1 T
 remittance	R IY0 M IH1 T AH0 N S
 remittances	R IY0 M IH1 T AH0 N S IH0 Z
@@ -87468,11 +87468,11 @@ remoulded	R IY0 M OW1 L D IH0 D
 removable	R IH0 M UW1 V AH0 B AH0 L
 removal	R IH0 M UW1 V AH0 L
 removals	R IH0 M UW1 V AH0 L Z
-remove	R IY0 M UW1 V
-removed	R IY0 M UW1 V D
+remove	R IH0 M UW1 V
+removed	R IH0 M UW1 V D
 remover	R IH0 M UW1 V ER0
-removes	R IY0 M UW1 V Z
-removing	R IY0 M UW1 V IH0 NG
+removes	R IH0 M UW1 V Z
+removing	R IH0 M UW1 V IH0 NG
 rempac	R EH1 M P AE2 K
 rempe	R EH1 M P
 rempel	R EH1 M P AH0 L
@@ -87743,11 +87743,11 @@ replay	R IY0 P L EY1
 replayed	R IY0 P L EY1 D
 replaying	R IY0 P L EY1 IH0 NG
 replays	R IY0 P L EY1 Z
-replenish	R IY0 P L EH1 N IH0 SH
-replenished	R IY0 P L EH1 N IH0 SH T
-replenishing	R IY0 P L EH1 N IH0 SH IH0 NG
+replenish	R IH0 P L EH1 N IH0 SH
+replenished	R IH0 P L EH1 N IH0 SH T
+replenishing	R IH0 P L EH1 N IH0 SH IH0 NG
 replenishment	R IH0 P L EH1 N IH0 SH M AH0 N T
-replete	R IY0 P L IY1 T
+replete	R IH0 P L IY1 T
 replica	R EH1 P L IH0 K AH0
 replicas	R EH1 P L AH0 K AH0 Z
 replicase	R EH1 P L IH0 K EY2 Z
@@ -87766,24 +87766,24 @@ reply	R IH0 P L AY1
 replying	R IH0 P L AY1 IH0 NG
 repo	R IY1 P OW0
 reponse	R IH0 P AA1 N S
-report	R IY0 P AO1 R T
+report	R IH0 P AO1 R T
 reportable	R IH0 P AO1 R T AH0 B AH0 L
 reportage	R IH0 P AO1 R T IH0 JH
-reported	R IY2 P AO1 R T IH0 D
+reported	R IH0 P AO1 R T IH0 D
 reportedly	R IH0 P AO1 R T AH0 D L IY0
 reporter	R IH0 P AO1 R T ER0
 reporters	R IH0 P AO1 R T ER0 Z
-reporting	R IY0 P AO1 R T IH0 NG
+reporting	R IH0 P AO1 R T IH0 NG
 reportorial	R EH2 P ER0 T AO1 R IY0 AH0 L
 reports	R IH0 P AO1 R T S
 repos	R IY1 P OW2 Z
 reposa	R EH0 P OW1 S AH0
-repose	R IY0 P OW1 Z
+repose	R IH0 P OW1 Z
 reposition	R IY2 P AH0 Z IH1 SH AH0 N
 repositioned	R IY2 P AH0 Z IH1 SH AH0 N D
 repositioning	R IY2 P AH0 Z IH1 SH AH0 N IH0 NG
 repositories	R IY0 P AA1 Z AH0 T AO2 R IY0 Z
-repository	R IY0 P AA1 Z AH0 T AO2 R IY0
+repository	R IH0 P AA1 Z AH0 T AO2 R IY0
 repossess	R IY2 P AH0 Z EH1 S
 repossessed	R IY2 P AH0 Z EH1 S T
 repossession	R IY2 P AH0 Z EH1 SH AH0 N
@@ -87808,9 +87808,9 @@ represents	R EH2 P R IH0 Z EH1 N T S
 repress	R IY0 P R EH1 S
 repressed	R IY0 P R EH1 S T
 repressing	R IY0 P R EH1 S IH0 NG
-repression	R IY0 P R EH1 SH AH0 N
-repressions	R IY0 P R EH1 SH AH0 N Z
-repressive	R IY0 P R EH1 S IH0 V
+repression	R IH0 P R EH1 SH AH0 N
+repressions	R IH0 P R EH1 SH AH0 N Z
+repressive	R IH0 P R EH1 S IH0 V
 reprice	R IY0 P R AY1 S
 repriced	R IY0 P R AY1 S T
 repricing	R IY0 P R AY1 S IH0 NG
@@ -87825,7 +87825,7 @@ reprints	R IY0 P R IH1 N T S
 reprisal	R IY0 P R AY1 Z AH0 L
 reprisals	R IH0 P R AY1 Z AH0 L Z
 reprise	R IH0 P R AY1 Z
-reproach	R IY0 P R OW1 CH
+reproach	R IH0 P R OW1 CH
 reprobate	R EH1 P R AO0 B EY0 T
 reprocess	R IY0 P R AA1 S EH0 S
 reprocessed	R IY0 P R AO1 S EH0 S T
@@ -87852,13 +87852,13 @@ reptile	R EH1 P T AY0 L
 reptiles	R EH1 P T AY0 L Z
 reptilian	R EH0 P T IH1 L Y AH0 N
 reptilians	R EH0 P T IH1 L Y AH0 N Z
-republic	R IY0 P AH1 B L AH0 K
+republic	R IH0 P AH1 B L AH0 K
 republica	R IH0 P AH1 B L IH0 K AH0
 republican	R IH0 P AH1 B L IH0 K AH0 N
 republicanism	R IH0 P AH1 B L IH0 K AH0 N IH2 Z AH0 M
 republicans	R IH0 P AH1 B L IH0 K AH0 N Z
 republicbank	R IY0 P AH1 B L IH0 K B AE2 NG K
-republics	R IY0 P AH1 B L IH0 K S
+republics	R IH0 P AH1 B L IH0 K S
 republika	R IH0 P AH1 B L IH0 K AH0
 repudiate	R IY0 P Y UW1 D IY0 EY2 T
 repudiated	R IY0 P Y UW1 D IY0 EY2 T IH0 D
@@ -87869,7 +87869,7 @@ repugnant	R IH0 P AH1 G N AH0 N T
 repulse	R IY0 P AH1 L S
 repulsed	R IY0 P AH1 L S T
 repulsing	R IY0 P AH1 L S IH0 NG
-repulsive	R IY0 P AH1 L S IH0 V
+repulsive	R IH0 P AH1 L S IH0 V
 repurchase	R IY0 P ER1 CH AH0 S
 repurchased	R IY0 P ER1 CH AH0 S T
 repurchases	R IY0 P ER1 CH AH0 S IH0 Z
@@ -87942,7 +87942,7 @@ researcher	R IY1 S ER0 CH ER0
 researchers	R IY1 S ER0 CH ER0 Z
 researches	R IY0 S ER1 CH IH0 Z
 researching	R IY0 S ER1 CH IH0 NG
-resection	R IY2 S EH1 K SH AH0 N
+resection	R IH0 S EH1 K SH AH0 N
 reseda	R EH0 S EY1 D AH0
 reseed	R IY0 S IY1 D
 resell	R IY0 S EH1 L
@@ -88078,7 +88078,7 @@ respectably	R IY0 S P EH1 K T AH0 B L IY0
 respected	R IH0 S P EH1 K T IH0 D
 respectful	R IH0 S P EH1 K T F AH0 L
 respectfully	R IH0 S P EH1 K T F AH0 L IY0
-respecting	R IY0 S P EH1 K T IH0 NG
+respecting	R IH0 S P EH1 K T IH0 NG
 respective	R IH0 S P EH1 K T IH0 V
 respectively	R IH0 S P EH1 K T IH0 V L IY0
 respects	R IH0 S P EH1 K T S
@@ -88102,8 +88102,8 @@ responds	R IH0 S P AA1 N D Z
 response	R IH0 S P AA1 N S
 responses	R IH0 S P AA1 N S IH0 Z
 responsibilities	R IY0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z
-responsibility	R IY0 S P AA2 N S AH0 B IH1 L AH0 T IY0
-responsible	R IY0 S P AA1 N S AH0 B AH0 L
+responsibility	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0
+responsible	R IH0 S P AA1 N S AH0 B AH0 L
 responsibly	R IH0 S P AA1 N S AH0 B L IY0
 responsive	R IH0 S P AA1 N S IH0 V
 responsiveness	R IH0 S P AA1 N S IH0 V N AH0 S
@@ -88157,21 +88157,21 @@ restored	R IH0 S T AO1 R D
 restorer	R IH0 S T AO1 R ER0
 restores	R IH0 S T AO1 R Z
 restoring	R IH0 S T AO1 R IH0 NG
-restrain	R IY0 S T R EY1 N
-restrained	R IY0 S T R EY1 N D
-restraining	R IY0 S T R EY1 N IH0 NG
-restrains	R IY0 S T R EY1 N Z
+restrain	R IH0 S T R EY1 N
+restrained	R IH0 S T R EY1 N D
+restraining	R IH0 S T R EY1 N IH0 NG
+restrains	R IH0 S T R EY1 N Z
 restraint	R IH0 S T R EY1 N T
 restraints	R IH0 S T R EY1 N T S
 restrepo	R EH0 S T R EH1 P OW0
-restrict	R IY0 S T R IH1 K T
-restricted	R IY0 S T R IH1 K T AH0 D
-restricting	R IY0 S T R IH1 K T IH0 NG
-restriction	R IY0 S T R IH1 K SH AH0 N
-restrictions	R IY0 S T R IH1 K SH AH0 N Z
-restrictive	R IY0 S T R IH1 K T IH0 V
+restrict	R IH0 S T R IH1 K T
+restricted	R IH0 S T R IH1 K T AH0 D
+restricting	R IH0 S T R IH1 K T IH0 NG
+restriction	R IH0 S T R IH1 K SH AH0 N
+restrictions	R IH0 S T R IH1 K SH AH0 N Z
+restrictive	R IH0 S T R IH1 K T IH0 V
 restrictiveness	R AH0 S T R IH1 K T IH0 V N AH0 S
-restricts	R IY0 S T R IH1 K T S
+restricts	R IH0 S T R IH1 K T S
 restroom	R EH1 S T R UW2 M
 restrooms	R EH1 S T R UW2 M Z
 restructure	R IY0 S T R AH1 K CH ER0
@@ -88186,7 +88186,7 @@ resubmit	R IY2 S AH0 B M IH1 T
 resubmitted	R IY2 S AH0 B M IH1 T IH0 D
 resubmitting	R IY2 S AH0 B M IH1 T IH0 NG
 result	R IH0 Z AH1 L T
-resultant	R IY0 Z AH1 L T AH0 N T
+resultant	R IH0 Z AH1 L T AH0 N T
 resulted	R IH0 Z AH1 L T IH0 D
 resulting	R IH0 Z AH1 L T IH0 NG
 results	R IH0 Z AH1 L T S
@@ -88233,7 +88233,7 @@ retaking	R IY0 T EY1 K IH0 NG
 retaliate	R IH0 T AE1 L IY0 EY2 T
 retaliated	R IH0 T AE1 L IY0 EY2 T IH0 D
 retaliating	R IH0 T AE1 L IY0 EY2 T IH0 NG
-retaliation	R IY0 T AE2 L IY0 EY1 SH AH0 N
+retaliation	R IH0 T AE2 L IY0 EY1 SH AH0 N
 retaliatory	R IY0 T AE1 L Y AH0 T AO2 R IY0
 retana	R EH0 T AE1 N AH0
 retard	R IH0 T AA1 R D
@@ -88249,7 +88249,7 @@ retargeting	R IY0 T AA1 R G AH0 T IH0 NG
 retell	R IY0 T EH1 L
 retelling	R IY0 T EH1 L IH0 NG
 retemeyer	R EH1 T AH0 M AY2 R
-retention	R IY0 T EH1 N SH AH0 N
+retention	R IH0 T EH1 N SH AH0 N
 retest	R IY1 T EH1 S T
 retested	R IY0 T EH1 S T IH0 D
 retesting	R IY0 T EH1 S T IH0 NG
@@ -88284,20 +88284,20 @@ retook	R IY0 T UH1 K
 retool	R IY0 T UW1 L
 retooled	R IY0 T UW1 L D
 retooling	R IY0 T UW1 L IH0 NG
-retort	R IY1 T AO2 R T
-retorted	R IY0 T AO1 R T IH0 D
+retort	R IH0 T AO2 R T
+retorted	R IH0 T AO1 R T IH0 D
 retorts	R IH0 T AO1 R T S
 retouching	R IY0 T AH1 CH IH0 NG
 retrace	R IY0 T R EY1 S
 retraced	R IY0 T R EY1 S T
 retracement	R IY0 T R EY1 S M AH0 N T
 retracing	R IY0 T R EY1 S IH0 NG
-retract	R IY0 T R AE1 K T
-retractable	R IY0 T R AE1 K T AH0 B AH0 L
-retracted	R IY0 T R AE1 K T AH0 D
-retracting	R IY0 T R AE1 K T IH0 NG
-retraction	R IY0 T R AE1 K SH AH0 N
-retracts	R IY0 T R AE1 K T S
+retract	R IH0 T R AE1 K T
+retractable	R IH0 T R AE1 K T AH0 B AH0 L
+retracted	R IH0 T R AE1 K T AH0 D
+retracting	R IH0 T R AE1 K T IH0 NG
+retraction	R IH0 T R AE1 K SH AH0 N
+retracts	R IH0 T R AE1 K T S
 retrain	R IY0 T R EY1 N
 retrained	R IY0 T R EY1 N D
 retraining	R IY0 T R EY1 N IH0 NG
@@ -88353,7 +88353,7 @@ rettinger	R EH1 T IH0 N JH ER0
 rettke	R EH1 T K IY0
 retton	R EH1 T AH0 N
 return	R IH0 T ER1 N
-returnable	R IY0 T ER1 N AH0 B AH0 L
+returnable	R IH0 T ER1 N AH0 B AH0 L
 returned	R IH0 T ER1 N D
 returnee	R IH0 T ER0 N IY1
 returnees	R IH0 T ER0 N IY1 Z
@@ -88427,7 +88427,7 @@ revellers	R EH1 V AH0 L ER0 Z
 revello	R EH0 V EH1 L OW0
 revelry	R EH1 V AH0 L R IY0
 revels	R EH1 V AH0 L Z
-revenge	R IY0 V EH1 N JH
+revenge	R IH0 V EH1 N JH
 revenue	R EH1 V AH0 N UW2
 revenuer	R EH1 V AH0 N UW2 ER0
 revenuers	R EH1 V AH0 N UW2 ER0 Z
@@ -88470,12 +88470,12 @@ reverts	R IH0 V ER1 T S
 reves	R IY1 V Z
 revette	R IH0 V EH1 T
 revier	R IY1 V IY0 ER0
-review	R IY2 V Y UW1
-reviewed	R IY0 V Y UW1 D
-reviewer	R IY0 V Y UW1 ER0
-reviewers	R IY0 V Y UW1 ER0 Z
-reviewing	R IY0 V Y UW1 IH0 NG
-reviews	R IY0 V Y UW1 Z
+review	R IH0 V Y UW1
+reviewed	R IH0 V Y UW1 D
+reviewer	R IH0 V Y UW1 ER0
+reviewers	R IH0 V Y UW1 ER0 Z
+reviewing	R IH0 V Y UW1 IH0 NG
+reviews	R IH0 V Y UW1 Z
 reviglio	R AH0 V IH1 G L IY0 OW0
 revile	R IY0 V AY1 L
 reviled	R IY0 V AY1 L D
@@ -88486,11 +88486,11 @@ revise	R IH0 V AY1 Z
 revised	R IH0 V AY1 Z D
 revises	R IH0 V AY1 Z IH0 Z
 revising	R IH0 V AY1 Z IH0 NG
-revision	R IY0 V IH1 ZH AH0 N
+revision	R IH0 V IH1 ZH AH0 N
 revisionism	R IY0 V IH1 ZH AH0 N IH2 Z AH0 M
-revisionist	R IY0 V IH1 ZH AH0 N IH0 S T
-revisionists	R IY0 V IH1 ZH AH0 N IH0 S T S
-revisions	R IY0 V IH1 ZH AH0 N Z
+revisionist	R IH0 V IH1 ZH AH0 N IH0 S T
+revisionists	R IH0 V IH1 ZH AH0 N IH0 S T S
+revisions	R IH0 V IH1 ZH AH0 N Z
 revisit	R IY0 V IH1 Z IH0 T
 revisited	R IY0 V IH1 Z AH0 T IH0 D
 revisiting	R IY0 V IH1 Z IH0 T IH0 NG
@@ -88834,7 +88834,7 @@ ricocheted	R IH1 K AH0 SH EY2 D
 ricocheting	R IH1 K AH0 SH EY2 IH0 NG
 ricoh	R IY1 K OW0
 ricostruzione	R IY0 K OW0 S T R UW0 Z IY0 OW1 N IY0
-ricotta	R IY0 K AA1 T AH0
+ricotta	R IH0 K AA1 T AH0
 rid	R IH1 D
 ridable	R AY1 D AH0 B AH0 L
 riddance	R IH1 D AH0 N S
@@ -92663,7 +92663,7 @@ scheck	SH EH1 K
 scheckel	SH EH1 K AH0 L
 schecter	SH EH1 K T ER0
 schedler	SH EH1 D AH0 L ER0
-schedule	S K EH1 JH UH0 L
+schedule	S K EH1 JH UW2 L
 scheduled	S K EH1 JH UH0 L D
 scheduler	S K EH1 JH UH0 L ER0
 schedulers	S K EH1 JH UH0 L ER0 Z
@@ -94433,7 +94433,7 @@ semenza	S EH0 M EH1 N Z AH0
 semerad	S EH1 M ER0 AE0 D
 semester	S AH0 M EH1 S T ER0
 semesters	S AH0 M EH1 S T ER0 Z
-semi	S EH1 M IY0
+semi	S EH1 M AY2
 semiannual	S EH2 M IY0 AE1 N Y AH0 W AH0 L
 semiannually	S EH2 M IY0 AE1 N UW0 AH0 L IY0
 semiautomatic	S EH2 M IY0 AO2 T AH0 M AE1 T IH0 K
@@ -99807,7 +99807,7 @@ sramek	SH R AE1 M IH0 K
 srdan	S ER1 D AE2 N
 srebrenica	S R EY2 B R EH0 N IY1 T S AH0
 sremac	S R IY1 M AE2 K
-sri	SH R IY1
+sri	S R IY1
 srinagar	S R IY1 N AH0 G AA2 R
 srinagarb	S R IY1 N AH0 G AA2 R B
 srinivas	S R IY1 N IH0 V AA2 S
@@ -102318,7 +102318,7 @@ sugary	SH UH1 G ER0 IY0
 sugden	S AH1 G D AH0 N
 sugerman	S UW1 G ER0 M AH0 N
 sugg	S AH1 G
-suggest	S AH0 JH EH1 S T
+suggest	S AH0 G JH EH1 S T
 suggested	S AH0 JH EH1 S T IH0 D
 suggestible	S AH0 JH EH1 S T AH0 B AH0 L
 suggesting	S AH0 JH EH1 S T IH0 NG
@@ -106175,7 +106175,7 @@ tisher	T IH1 SH ER0
 tishler	T IH1 SH L ER0
 tishman	T IH1 SH M AH0 N
 tison	T IH1 S AH0 N
-tissue	T IH1 S Y UW2
+tissue	T IH1 SH UW0
 tissues	T IH1 S Y UW2 Z
 tit	T IH1 T
 tita	T IY1 T AH0
@@ -111042,7 +111042,7 @@ vegisnax	V AH0 G IH1 S N AE0 K S
 vehemence	V IY1 AH0 M AH0 N S
 vehement	V IY1 AH0 M AH0 N T
 vehemently	V IY1 AH0 M AH0 N T L IY0
-vehicle	V IY1 HH IH0 K AH0 L
+vehicle	V IY1 IH0 K AH0 L
 vehicles	V IY1 HH IH0 K AH0 L Z
 vehicular	V IY0 HH IH1 K Y AH0 L ER0
 veiga	V EY1 G AH0
@@ -115169,7 +115169,7 @@ withholds	W IH1 TH HH OW2 L D Z
 within	W IH0 DH IH1 N
 withington	W IH1 TH IH0 NG T AH0 N
 withnail	W IH0 TH N EY1 L
-without	W IH0 TH AW1 T
+without	W IH0 DH AW1 T
 withrow	W IH1 TH R OW2
 withstand	W IH0 TH S T AE1 N D
 withstanding	W IH0 TH S T AE1 N D IH0 NG

@@ -349,10 +349,10 @@ describe("a dash between two numbers is a range", () => {
 describe("Rev. is a revision before a designator and a reverend before a name", () => {
     test("the designator shapes", () => {
         expect(phonemize("Rev. B, 2025-10-21", "en"))
-            .toBe("ɹivˈɪʒn̩ bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv");
+            .toBe("ɹᵻvˈɪʒn̩ bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv");
         // ⚠ AND THE DOT IS CONSUMED, which the table could not: its arm needs a following LETTER, so
         // `Rev. 3` matched nothing and the dot survived into the clause segmenter as a phrase break.
-        expect(phonemize("Rev. 3", "en")).toBe("ɹivˈɪʒn̩ θɹˈiː");
+        expect(phonemize("Rev. 3", "en")).toBe("ɹᵻvˈɪʒn̩ θɹˈiː");
     });
 
     // ⚠ THE NAME SHAPES ARE THE POINT OF THE GUARD. `Rev. J. Smith` is the hard one — a capital
@@ -367,8 +367,8 @@ describe("Rev. is a revision before a designator and a reverend before a name", 
     // lookahead matches uppercase too, so a following capital was REJECTED and this fell through to
     // "reverend". The flag is off and the literal is cased by hand.
     test("a multi-character designator still reads as a revision", () => {
-        expect(phonemize("Rev. AB", "en")).toContain("ɹivˈɪʒn̩");
-        expect(phonemize("Rev. B1", "en")).toContain("ɹivˈɪʒn̩");
+        expect(phonemize("Rev. AB", "en")).toContain("ɹᵻvˈɪʒn̩");
+        expect(phonemize("Rev. B1", "en")).toContain("ɹᵻvˈɪʒn̩");
     });
 });
 
@@ -580,7 +580,16 @@ describe("a prefix the dictionary spelled two ways in one paradigm", () => {
         expect(say("redesign")).toBe("ɹˌiːd̬ɪzˈaᶦn");
         expect(say("relocate")).toBe("ɹiːlˈoᶷkeᶦt");
         expect(say("rewiring")).toBe("ɹiwˈaᶦɹɪŋ");
-        expect(say("report")).toBe("ɹipʰˈɔːɹt");   // an unstressed IY0 prefix, pinned elsewhere too
+        // ⚠ `report` USED TO BE PINNED HERE AS ɹipʰˈɔːɹt AND HAS LEFT, because it never belonged in a test
+        // about the PRODUCTIVE prefix: it is a Latinate `re-`, and the line described it as "an unstressed
+        // IY0 prefix" rather than claiming the reading was right. It is now ɹᵻpʰˈɔːɹt — misaki gold and Moby
+        // both reduce it, and so does Merriam-Webster (\ri-ˈpȯrt\). The four controls above are the ones
+        // that actually guard the rejected rule, and they are untouched.
+        expect(say("report")).toBe("ɹᵻpʰˈɔːɹt");
+        // ⚠ AND THE PRINCIPLE THE REJECTED RULE ESTABLISHED STILL HOLDS: the Latinate prefix was reduced in
+        // the DICTIONARY, 40 rows picked by two independent sources agreeing, never by a rule over `IY`.
+        expect(say("reacquire")).toBe("ɹiʲəkwˈaᶦɹ");
+        expect(say("react")).toBe("ɹiʲˈækt");
     });
 });
 
