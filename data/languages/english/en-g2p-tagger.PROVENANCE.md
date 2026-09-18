@@ -53,9 +53,21 @@ is byte-identical to `phonemize(text, "en")`).
 Reproduce:
 
 ```bash
-EN_PRODUCTION=1 .venv/bin/python -u tools/english/en_g2p_bilstm.py   # held-out report + full-CMUdict train + export
-# then dynamic-int8 quantise en-g2p-tagger.onnx → en-g2p-tagger.int8.onnx (onnxruntime.quantization.quantize_dynamic)
+EN_PRODUCTION=1 EN_FREQ=data/languages/english/g2p-common.txt \
+  .venv/bin/python -u tools/english/en_g2p_bilstm.py   # held-out report + full train + int8 export
 ```
+
+⚠ THE QUANTISE USED TO BE A PROSE STEP HERE AND IS NOW IN THE SCRIPT, because a two-step recipe whose
+second step is a comment is a step that does not get run. The exporter wrote fp32 under the bare name
+`en-g2p-tagger.onnx` while the runtime loads `en-g2p-tagger.int8.onnx`, so a production run left the
+shipped model untouched — and, worse, still overwrote `meta.json`, which IS read, leaving a new vocab
+beside old weights. English was also the only tagger language with no committed export script at all;
+`bengali/`, `hebrew/`, `khmer/` and `sindhi/` each have one.
+
+⚠ AND THE TRAINING SOURCE IS THIS REPO'S OWN `g2p-dict.tsv`, NOT RAW CMUdict — it always was (`load()`
+reads the shipped dict), which means a retrain absorbs every correction in `g2p-curated.tsv` for free.
+The weights shipped before 2026-09-18 predate ~2,000 of them: asked for the 2,077 curated words, the old
+model emitted the PRE-CORRECTION reading for 2,035 of them.
 
 `onnxruntime-node` is an OPTIONAL dependency, imported lazily; absent it (or the model), `createEnglishTagger()`
 resolves to `undefined` and `phonemizeEnNeural` returns exactly the sync path (CMUdict + n-gram, no throw). This is a
