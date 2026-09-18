@@ -98,7 +98,7 @@ public class EnglishReportedMisreadingsTests
         => Assert.Equal(ipa, Say(w));
 
     [Theory]
-    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː θˈɝd̬i pɚsˈɛnt")]
+    [InlineData("Panels lit at ≥30%", "pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː θˈɝt̬i pɚsˈɛnt")]
     [InlineData("a ≠ b", "ə nɑːt ˈiːkwɫ̩ tʰuː bˈiː")]
     [InlineData("a ± b", "ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː")]
     // …and the ASCII pair keeps its digit gate, because it can be markup and these cannot.

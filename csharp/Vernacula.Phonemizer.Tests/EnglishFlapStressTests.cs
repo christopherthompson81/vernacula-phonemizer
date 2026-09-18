@@ -35,19 +35,22 @@ public class EnglishFlapStressTests
 
     /// <summary>Stress 0 flaps.</summary>
     [Theory]
-    [InlineData("TH ER1 D IY0", "thirty", "θˈɝd̬i")]
+    [InlineData("TH ER1 T IY0", "thirty", "θˈɝt̬i")]
     [InlineData("F AO1 R T IY0", "forty", "fˈɔːɹt̬i")]
     [InlineData("S IH1 T IY0", "city", "sˈɪt̬i")]
     public void StressZeroFlaps(string phones, string word, string expected)
         => Assert.Equal(expected, Say(phones, word));
 
     /// <summary>
-    /// ⚠ `thirty` WAS THE ONE DECADE WRITTEN IY2 — twenty, forty, fifty, sixty, seventy, eighty and
-    /// ninety are all IY0, and gold says θˈɜɹɾi. A bad dictionary row, fixed in g2p-dict.tsv rather
-    /// than by bending the flap rule around it. (twenty is not a flap case at all: its t follows N.)
+    /// ⚠ `thirty` WAS WRONG TWICE IN THE SAME ROW. It was the one decade written IY2 — twenty, forty,
+    /// fifty, sixty, seventy, eighty and ninety are all IY0, and gold says θˈɜɹɾi. Its medial consonant
+    /// was ALSO written D where every other decade has T, so it rendered `d̬` while `forty` rendered
+    /// `t̬` and this test — whose name says the decades AGREE — asserted that they did not. The D was
+    /// caught by the triple-source audit (gold and Moby both have T). Both fixed in g2p-dict.tsv rather
+    /// than by bending the flap rule. (twenty is not a flap case at all: its t follows N.)
     /// </summary>
     [Theory]
-    [InlineData("thirty", "θˈɝd̬i")]
+    [InlineData("thirty", "θˈɝt̬i")]
     [InlineData("forty", "fˈɔːɹt̬i")]
     [InlineData("twenty", "twˈɛnti")]
     public void TheDecadesAgreeWithEachOther(string word, string expected)
