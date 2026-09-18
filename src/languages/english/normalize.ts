@@ -284,11 +284,42 @@ const UNIT_RE = new RegExp(
     // phoneme stream AS RAW LETTERS. Invisible to every gate, because bare Latin letters are in no leak
     // class and nothing vanished for the DROP test to catch. The magnitude is RE-EMITTED in place: it
     // belongs to the number's reading, not the unit's.
-    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?(${
+    // ⚠ A GLUED UNIT MAY NOT SIT INSIDE AN ALPHANUMERIC CODE, which is what the lookbehind on the UNIT
+    // refuses: going back past the digits just consumed, there must be no letter. A Canadian postal code
+    // is `A1A 1A1`, so its digits touch letters on both sides — `V6L 2T5` read "vee six LITRES two tee
+    // five" and `L4W 5M1` read "el four WATTS five em one". ⟨L⟩ and ⟨W⟩ are the only two that can
+    // collide: one-letter symbols resolve case-SENSITIVELY (#763), so uppercase ⟨G⟩/⟨T⟩/⟨M⟩ are not
+    // gram/ton/metre — which is why `T2G` was already clean and the leak looked narrower than it was.
+    // ⚠ IT GUARDS THE UNIT, NOT THE NUMBER, and the difference is a real regression caught by the suite:
+    // the same refusal written as a letter-lookbehind on the NUMBER breaks `6x6 cm` → "6 by 6
+    // centimetres", because that `6` is preceded by ⟨x⟩ while the unit is a SEPARATE token. Only a unit
+    // GLUED to the digits can be a code's letter slot; `[\\d,]*` stops at the space, so a spaced unit is
+    // never refused however the number is spelled.
+    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?(?<!\\p{L}[\\d,]*)(${
         Object.keys(UNITS).sort((a, b) => b.length - a.length)
-            .join("|")})([²³23])?(?![\\p{L}\\p{M}])`,
+            .join("|")})([²³23])?(?![\\p{L}\\p{M}\\d])`,
     "giu",
 );
+
+/**
+ * The units an ASCII `2`/`3` may follow — the LENGTHS, where an exponent means area or volume.
+ *
+ * ⚠ WITHOUT THIS THE EXPONENT ITSELF SWALLOWS THE POSTAL CODE'S LAST DIGIT. The trailing-digit guard
+ * above cannot see `0L2`, because the `2` is consumed as an exponent and the match then ends at the
+ * token boundary quite legitimately — `T2G 0L2` read "zero SQUARE LITRES", and `Suite 5L2` "five square
+ * litres". ⚠ AND A SQUARE LITRE IS NOT A THING THAT COULD BE MEANT: the litre is ALREADY a volume
+ * (1 dm³). Area and volume are what you derive FROM a length, so a length is the only kind of unit
+ * an exponent says anything about — `m2`/`km2` are real, `L2`/`g3`/`W2` never are. Naming the lengths
+ * therefore costs no legitimate reading, and an ASCII digit after anything else is what it looks
+ * like: a code’s digit.
+ * ⚠ THE SUPERSCRIPTS ARE NOT RESTRICTED. `²`/`³` cannot be a code's digit — nobody writes a postal code
+ * with a superscript — so someone who types `L²` means it, and the ambiguity this guards does not exist.
+ * ⚠ AND THE MICRO- FORMS ARE DELIBERATELY ABSENT. ⟨µm⟩ is the micrometre, but ⟨µM⟩ is MICROMOLAR, and the
+ * two fold together under the case-insensitive lookup this check has to use — so admitting the length
+ * would silently admit "square micromolar" with it. ⟨µm2⟩ is not a form anyone writes; the superscript
+ * ⟨µm²⟩ is, and it is unaffected.
+ */
+const ASCII_EXPONENT_UNITS: ReadonlySet<string> = new Set(["m", "km", "cm", "mm", "ft", "mi"]);
 
 /** The Unicode relational operators, none of which were read at all. Ordered longest-first is not needed
  *  — no sign is a prefix of another — but the ASCII `<`/`>` are deliberately NOT here: they are handled
@@ -1089,6 +1120,8 @@ export function normalizeEnglish(input: string): string {
             // THROW. Declaring ⟨W⟩ correctly is what exposed it here.
             const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, u);
             if (forms === undefined) return _m; // unresolvable → leave the text alone
+            // An ASCII exponent on anything but a length is an alphanumeric code, not a measurement.
+            if ((exp === "2" || exp === "3") && !ASCII_EXPONENT_UNITS.has(u.toLowerCase())) return _m;
             const [sg, pl] = forms;
             // English puts the measure word BEFORE the unit — "square kilometers" — and the COUNT still
             // governs the noun: "one cubic meter", not "one cubic meters".

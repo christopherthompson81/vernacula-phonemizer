@@ -506,3 +506,41 @@ describe("Latin abbreviations and phrases", () => {
         expect(normalizeEnglish("COVID-19 cases")).not.toContain("negative");
     });
 });
+
+describe("a unit symbol may not be a slot in an alphanumeric code", () => {
+    // ⚠ A CANADIAN POSTAL CODE IS `A1A 1A1`, so every digit in it sits against a letter — and ⟨L⟩ and
+    // ⟨W⟩ are units. `T2G 0L1` read "zero LITRES one". Only those two can collide: one-letter symbols
+    // resolve case-sensitively (#763), so uppercase ⟨G⟩/⟨T⟩/⟨M⟩ are not gram/ton/metre, which is why
+    // `T2G` was already clean and the leak looked narrower than it was.
+    test("a postal code keeps its letters", () => {
+        for (const [code, read] of [
+            ["T2G 0L1", "T2G 0L1"],   // unit followed by a digit
+            ["M5V 3L9", "M5V 3L9"],
+            ["V6L 2T5", "V6L 2T5"],   // unit at the end of a group, preceded by a letter
+            ["N2L 3G1", "N2L 3G1"],
+            ["L4W 5M1", "L4W 5M1"],   // ⟨W⟩, the other case-sensitive one-letter unit
+        ] as const) {
+            expect(normalizeEnglish(code)).toBe(read);
+            expect(normalizeEnglish(code)).not.toMatch(/liter|watt/u);
+        }
+    });
+
+    // ⚠ THE EXPONENT IS A SEPARATE HOLE AND THE DIGIT GUARD CANNOT SEE IT: in `0L2` the `2` is consumed
+    // as an exponent, so the match ends at the token boundary quite legitimately and reads "zero SQUARE
+    // litres". Square litres is not a quantity — an ASCII exponent is only meaningful on a length.
+    test("an ASCII exponent belongs to a length, not to whatever letter precedes it", () => {
+        expect(normalizeEnglish("T2G 0L2")).toBe("T2G 0L2");
+        expect(normalizeEnglish("Suite 5L2")).not.toMatch(/liter/u);
+        expect(normalizeEnglish("Model 3G3")).not.toMatch(/gram/u);
+    });
+
+    // …and none of it costs the real units, including the ASCII exponent on the lengths that take one.
+    test("the units themselves still read", () => {
+        expect(normalizeEnglish("5 L of water")).toBe("5 liters of water");
+        expect(normalizeEnglish("a 100 W bulb")).toBe("a 100 watts bulb");
+        expect(normalizeEnglish("3 m2 of floor")).toBe("3 square meters of floor");
+        expect(normalizeEnglish("19,500 km2")).toBe("19,500 square kilometers");
+        expect(normalizeEnglish("19,500 km\u00b2")).toBe("19,500 square kilometers");
+        expect(normalizeEnglish("1 L")).toBe("1 liter");
+    });
+});
