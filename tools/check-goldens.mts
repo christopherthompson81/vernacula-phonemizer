@@ -40,19 +40,38 @@
  *
  *   npx tsx tools/check-goldens.mts               every language, one process
  *   npx tsx tools/check-goldens.mts en en-GB      only these
+ *   npx tsx tools/check-goldens.mts --jobs 8      N worker processes, one ORT thread each (~2x faster)
  *   npx tsx tools/check-goldens.mts --show 5      print up to N mismatching rows per language
  *   npx tsx tools/check-goldens.mts --isolate     one CHILD PROCESS per language (diagnostic, ~10x slower)
  *   npx tsx tools/check-goldens.mts --no-clear    skip the per-language memo clear (diagnostic)
  *   npx tsx tools/check-goldens.mts --no-ort      derive which languages depend on ONNX (diagnostic)
  *   npx tsx tools/check-goldens.mts --write       rewrite the IPA of the rows that are there, once you
  *                                                 have DECIDED the engine is right (see `write` below)
+ *
+ * ⚠ `--jobs` IS A SCHEDULING CHANGE, AND EVERY WORD OF THE MACHINE-LOCALITY CONTRACT ABOVE STILL HOLDS —
+ * it makes the same comparison on the same rows, in a different order across more heaps. What it may NOT
+ * be read as is a second opinion: pool size changes float reduction order the same way a different
+ * microarchitecture does, so ⚠ IF A `--jobs` RUN AND A SERIAL RUN EVER DISAGREE, THE SERIAL RUN IS THE ONE
+ * THAT DEFINES THE GOLDENS, and the disagreement itself is the finding. It was measured not to move the
+ * output on the generating machine (189 languages, 36,495 rows, identical verdict at 1, 2, 4 and 16
+ * threads), which is a measurement on one CPU, not a guarantee for another — hence the refusal to write
+ * from it, below.
+ *
+ * ⚠ AND A NAIVE SHARD WAS ALREADY BUILT ONCE AND THROWN AWAY. Partitioning the languages at the DEFAULT
+ * ORT settings bought 12% of the wall for double the CPU, with one setting slower than serial, because
+ * ORT's intra-op pool is already one thread per core and N children × that fight over the same cores
+ * (docs/investigations/en/test_wall_time_investigation.md, Run 5). The cap is the whole mechanism: with
+ * the pool pinned to one thread per child the same partition runs 47.5 s → 23.8 s on 8 physical cores.
+ * The floor past that is arithmetic, not scheduling — 93 CPU-seconds of work and one language (`pnb`) that
+ * is 10.6 s of it on its own (docs/investigations/check_goldens_runtime_investigation.md).
  */
-import { execFileSync } from "node:child_process";
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { type ChildProcess, execFileSync, spawn } from "node:child_process";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { clearForeignOov } from "../src/core/foreign.ts";
-import { setOrtLoader } from "../src/core/onnx.ts";
+import { setOrtLoader, setOrtSessionDefaults } from "../src/core/onnx.ts";
 import { phonemize, phonemizeAsync } from "../src/index.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -63,8 +82,19 @@ const argv = process.argv.slice(2);
 const isolate = argv.includes("--isolate");
 /** Diagnostic: skip the per-language memo clear, to show that the clear is load-bearing. */
 const noClear = argv.includes("--no-clear");
-/** Internal: emit one JSON object instead of a report, so `--isolate` need not parse prose. */
+/**
+ * Internal: serve JSON instead of a report, so the parent modes need not parse prose — a code per line on
+ * stdin, a Result per line on stdout. See `serveChild`.
+ */
 const asChild = argv.includes("--child");
+/**
+ * Internal: cap THIS heap's ORT intra-op pool to one thread. Set on every `--jobs` child and nowhere else.
+ *
+ * ⚠ IT BELONGS TO THE CHILD, NOT TO THE ENGINE. The per-core default is the right setting for a single
+ * serial run and for production inference, where one request wants every core it can get; it is only wrong
+ * when the CALLER is already running N of them, which is exactly and only the `--jobs` children.
+ */
+const capOrt = argv.includes("--cap-ort");
 /**
  * Diagnostic: force every neural path to fall back, so a language whose output MOVES is ONNX-dependent —
  * directly, or through a foreign span it delegates to an engine that is.
@@ -101,20 +131,29 @@ const noOrt = argv.includes("--no-ort");
  */
 const write = argv.includes("--write");
 
-const showAt = argv.indexOf("--show");
-let show = 0;
-if (showAt >= 0) {
-    const raw = argv[showAt + 1];
-    show = Number(raw);
-    // ⚠ A NON-NUMERIC OPERAND USED TO FAIL IN THE WORST DIRECTION: `--show en` gave NaN, `slice(0, NaN)`
-    // printed nothing, AND `en` was swallowed as the flag's operand — so the run checked all 189 languages
-    // and reported no detail, silently, after a minute.
-    if (!Number.isInteger(show) || show < 0) {
-        console.error(`--show needs a non-negative integer, got ${JSON.stringify(raw)}`);
+/** Argv positions eaten by a flag's operand, so they are not read back as language codes. */
+const operands = new Set<number>();
+
+// ⚠ A NON-NUMERIC OPERAND FAILS IN THE WORST DIRECTION, so every numeric flag is parsed here: `--show en`
+// gave NaN, `slice(0, NaN)` printed nothing, AND `en` was swallowed as the flag's operand — so the run
+// checked all 189 languages and reported no detail, silently, after a minute.
+function intFlag(name: string, fallback: number, min: number): number {
+    const at = argv.indexOf(name);
+    if (at < 0) return fallback;
+    operands.add(at + 1);
+    const raw = argv[at + 1];
+    const value = Number(raw);
+    if (!Number.isInteger(value) || value < min) {
+        console.error(`${name} needs an integer >= ${min}, got ${JSON.stringify(raw)}`);
         process.exit(2);
     }
+    return value;
 }
-const only = argv.filter((a, i) => !a.startsWith("--") && !(showAt >= 0 && i === showAt + 1));
+
+const show = intFlag("--show", 0, 0);
+/** `--jobs N`: N worker processes, each with a one-thread ORT pool. 1 is the shipped serial behaviour. */
+const jobs = intFlag("--jobs", 1, 1);
+const only = argv.filter((a, i) => !a.startsWith("--") && !operands.has(i));
 
 interface Result { code: string; rows: number; stale: string[]; rewritten?: string }
 
@@ -203,35 +242,164 @@ function checkIsolated(code: string): Result {
     // a child spawned without them runs a fully-enabled engine — and `--isolate --no-ort` then reports
     // "0 stale", i.e. "nothing depends on ONNX", which is exactly the silently-wrong answer `--no-ort`
     // exists to prevent. It did that, quietly and green, until review caught it.
-    const flags = [...(noOrt ? ["--no-ort"] : []), ...(noClear ? ["--no-clear"] : [])];
-    const out = execFileSync("npx", ["tsx", fileURLToPath(import.meta.url), code, "--child", ...flags], {
-        encoding: "utf8", cwd: ROOT, maxBuffer: 64 * 1024 * 1024,
+    const out = execFileSync("npx", ["tsx", fileURLToPath(import.meta.url), "--child", ...childFlags()], {
+        encoding: "utf8", cwd: ROOT, maxBuffer: 64 * 1024 * 1024, input: `${code}\n`,
     });
     return JSON.parse(out) as Result;
+}
+
+/**
+ * ⚠ THE DIAGNOSTIC FLAGS MUST BE FORWARDED TO EVERY CHILD. `setOrtLoader` and the memo clear act on the
+ * heap that called them, so a child spawned without them runs a fully-enabled engine — and
+ * `--isolate --no-ort` then reports "0 stale", i.e. "nothing depends on ONNX", which is exactly the
+ * silently-wrong answer `--no-ort` exists to prevent. It did that, quietly and green, until review caught
+ * it. Shared by both child-spawning modes so neither can drift from the other.
+ */
+function childFlags(): string[] {
+    return [...(noOrt ? ["--no-ort"] : []), ...(noClear ? ["--no-clear"] : [])];
+}
+
+/**
+ * `--jobs N`: N long-lived children, each handed the next unstarted language as it reports the last one.
+ *
+ * ⚠ THE PARTITION IS LEGITIMATE FOR THE SAME REASON `--isolate` IS. The only state that crosses languages
+ * is the foreign-OOV memo, and `checkOne` already clears it per language — measured: without the clear 38
+ * rows go stale in 6 languages, with it 0, in-process and one-child-per-language alike. If the ORDER
+ * within a heap does not matter, neither does WHICH heap.
+ *
+ * ⚠ WORK-STEALING, NOT A STATIC SPLIT, BECAUSE THE COSTS ARE NOT REMOTELY EVEN. `pnb` is 10.6 s and `nan`
+ * 7.9 s of a 93 CPU-second fleet; the median language is under 0.1 s. Any fixed partition either needs a
+ * committed cost table — a second generated artifact going stale inside the very tool that exists to
+ * complain about the first — or leaves seven cores idle behind one language. Handing out the next code on
+ * completion needs neither.
+ *
+ * ⚠ LARGEST GOLDEN FIRST, which is the one scheduling decision left. The tail of the run is a single
+ * language long, so a big one picked up last is dead wall time; file size is a free, always-current proxy
+ * for "probably slow" and needs nothing committed. It is only a heuristic — `nan`'s cost is its Latin
+ * delegation, not its byte count — but it is strictly better than directory order.
+ */
+async function checkPooled(order: string[], n: number): Promise<Result[]> {
+    const queue = [...order].sort((a, b) => weigh(b) - weigh(a));
+    const children: ChildProcess[] = [];
+    const results: Result[] = [];
+    let next = 0;
+    const worker = (): Promise<void> => new Promise<void>((resolve, reject) => {
+        const child = spawn("npx", ["tsx", fileURLToPath(import.meta.url), "--child", "--cap-ort", ...childFlags()], {
+            cwd: ROOT, stdio: ["pipe", "pipe", "inherit"],
+        });
+        children.push(child);
+        const feed = (): void => {
+            if (next < queue.length) child.stdin!.write(`${queue[next++]}\n`);
+            else child.stdin!.end();
+        };
+        createInterface({ input: child.stdout!, crlfDelay: Infinity }).on("line", (line) => {
+            results.push(JSON.parse(line) as Result);
+            feed();
+        });
+        child.on("error", reject);
+        // ⚠ A CHILD THAT DIES IS A FAILED RUN, NOT A SHORTER ONE. Its share of the queue is simply never
+        // dealt out, so swallowing the exit code would print "goldens fresh" over languages nobody checked
+        // — a green gate that verified less than it claimed, which is this file's oldest failure mode.
+        child.on("exit", (status) => {
+            if (status === 0) resolve();
+            else reject(new Error(`a worker exited with status ${status} — see its output above`));
+        });
+        feed();
+    });
+    try {
+        await Promise.all(Array.from({ length: Math.min(n, queue.length) }, worker));
+    } catch (e) {
+        for (const c of children) c.kill();
+        console.error(`--jobs: ${(e as Error).message}`);
+        process.exit(2);
+    }
+    // Completion order is a race; the report is not allowed to be.
+    return results.sort((a, b) => a.code.localeCompare(b.code));
+}
+
+/** Golden file size, the largest-first scheduling proxy. */
+function weigh(code: string): number {
+    return statSync(join(GOLDENS, `${code}.tsv`)).size;
+}
+
+/**
+ * The child's whole protocol: a language code per line in, one `Result` as JSON per line out, EOF to stop.
+ *
+ * ⚠ IT IS A STREAM RATHER THAN ONE CODE ON ARGV BECAUSE `--jobs` NEEDS THE CHILD TO OUTLIVE THE LANGUAGE.
+ * A child per language pays the module graph and the model loads 189 times — that is what makes `--isolate`
+ * ~10× slower than serial, and it would eat the entire win here. One protocol serves both modes:
+ * `--isolate` writes a single line and closes the pipe.
+ */
+async function serveChild(): Promise<void> {
+    for await (const line of createInterface({ input: process.stdin, crlfDelay: Infinity })) {
+        const code = line.trim();
+        if (code === "") continue;
+        process.stdout.write(`${JSON.stringify(await checkOne(code))}\n`);
+    }
 }
 
 // ⚠ THE DEGRADED AND CHILD MODES MAY NOT WRITE. `--no-ort` manufactures mismatches on purpose and skips
 // the liveness guard, so writing under it would re-record the fleet from an engine with its neural path
 // switched off — the exact fleet-scale version of #1283 this file exists to prevent.
-if (write && (noOrt || noClear || isolate || asChild)) {
-    console.error("--write cannot be combined with --no-ort, --no-clear, --isolate or --child:\n"
-        + "  those modes run a degraded or delegated engine, and writing from one re-records the\n"
-        + "  goldens from something that is not the engine.");
+if (write && (noOrt || noClear || isolate || asChild || jobs > 1)) {
+    console.error("--write cannot be combined with --no-ort, --no-clear, --isolate, --child or --jobs:\n"
+        + "  those modes run a degraded, delegated or differently-configured engine, and writing\n"
+        + "  from one re-records the goldens from something that is not the engine.");
+    process.exit(2);
+}
+
+// ⚠ THE TWO PARALLEL MODES ARE NOT COMPOSABLE AND MUST NOT SILENTLY PICK ONE. `--isolate` exists to prove
+// that a mismatch belongs to its row by giving the row a virgin heap; `--jobs` packs many languages into
+// each heap for speed. Accepting both would advertise the first guarantee while delivering the second.
+if (jobs > 1 && isolate) {
+    console.error("--jobs and --isolate are opposite answers to the same question; pick one:\n"
+        + "  --isolate proves a mismatch belongs to its row, --jobs shares a heap between languages.");
+    process.exit(2);
+}
+
+// ⚠ `--jobs --no-clear` PRODUCES A SILENTLY WEAKER ANSWER, WHICH IS WHY IT IS REFUSED RATHER THAN
+// DOCUMENTED. `--no-clear` exists to demonstrate that the per-language memo clear is load-bearing, and it
+// does so by letting each language inherit whatever the PREVIOUS one left in the foreign-OOV memo —
+// a result that is a property of the sequence. Split that sequence across N heaps and most languages no
+// longer follow the language that poisoned them: measured on the six known-sensitive codes, serial
+// `--no-clear` moves `hmn`, and `--jobs 4 --no-clear` moves nothing and prints "nothing here depends on
+// what this flag disables". That is the strongest possible wrong answer to the only question the flag
+// asks. (`--no-ort` has no such interaction — it degrades each row on its own terms, and serial and
+// pooled runs agree row for row — so it is forwarded, not refused.)
+if (jobs > 1 && noClear) {
+    console.error("--jobs cannot be combined with --no-clear:\n"
+        + "  --no-clear asks what each language inherits from the one before it, and --jobs\n"
+        + "  gives each worker a different 'one before it'. Run --no-clear serially.");
     process.exit(2);
 }
 
 if (noOrt) setOrtLoader(() => Promise.reject(new Error("ORT disabled by --no-ort")));
-// ⚠ Not in a child (the parent already proved it), and not under a flag whose whole purpose is to produce
-// mismatches.
-if (!asChild && !noClear && !noOrt) await assertNeuralLive();
+// ⚠ BEFORE ANY MODEL LOADS. Every neural path memoises its own session, so a cap installed after the first
+// inference would be accepted and ignored — and the run would look capped while running at full width.
+if (capOrt) setOrtSessionDefaults({ intraOpNumThreads: 1, interOpNumThreads: 1, executionMode: "sequential" });
 
-const results: Result[] = [];
-for (const code of codes) results.push(isolate ? checkIsolated(code) : await checkOne(code));
+// Not under a flag whose whole purpose is to produce mismatches, and not in a plain `--isolate` child —
+// there the parent has already proved it in an identically-configured heap.
+// ⚠ BUT A CAPPED CHILD RE-PROVES IT, because the parent's proof does NOT cover the capped configuration.
+// If the thread cap ever broke session creation, `loadOrt` would reject, every neural path would fall back
+// silently, and the fleet would read as stale — the failure this guard exists to refuse, arriving by a new
+// route. It costs one model load per worker, in parallel, which is the cheapest insurance in this file.
+// ⚠ AND THE `--jobs` PARENT SKIPS IT: it renders nothing itself, and each worker proving its own heap is
+// strictly stronger than the parent proving a heap no row will be rendered in.
+if (!noClear && !noOrt && (capOrt || (!asChild && jobs === 1))) await assertNeuralLive();
 
 if (asChild) {
-    console.log(JSON.stringify(results[0]));
+    await serveChild();
     process.exit(0);
 }
+
+async function runAll(): Promise<Result[]> {
+    if (jobs > 1) return checkPooled(codes, jobs);
+    const out: Result[] = [];
+    for (const code of codes) out.push(isolate ? checkIsolated(code) : await checkOne(code));
+    return out;
+}
+const results = await runAll();
 
 // ⚠ WRITTEN ONLY WHERE THE CONTENT ACTUALLY MOVED, so a regeneration touches the files it has a reason to
 // and `git status` after it is the list of languages that changed — evidence, rather than 189 files with
