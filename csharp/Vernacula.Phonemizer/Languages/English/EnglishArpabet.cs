@@ -254,6 +254,17 @@ public static class EnglishArpabet
         var STRONG_OPEN_FINAL = new HashSet<string>(new[] { "EY", "AY", "OY", "AW", "AO", "UW" }, StringComparer.Ordinal);
 
         /**
+         * Diphthongs that take an r-coloured offglide — the `-ower`, `-ire`, `-ayer`, `-oer` nucleus.
+         * ARPABET writes these as TWO nuclei (`AW2 ER0`) so the clash rule counts the site as "not the
+         * final syllable" and drops its mark; phonetically it is one syllable, and gold marks it 63 times
+         * out of 64 (AY 28/29, AW 20/20, OW 8/8, EY 7/7) against 60% at every other clash site. ⚠ The
+         * monophthongs are NOT in this set: `IY+ER0`/`UW+ER0` are the same shape on paper and gold marks
+         * neither. See englishArpabet.ts for the measurement.
+         */
+        var R_OFFGLIDE_DIPHTHONG =
+            new HashSet<string>(new[] { "AY", "AW", "OW", "EY", "OY" }, StringComparer.Ordinal);
+
+        /**
          * Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm
          * allophony).
          */
@@ -308,7 +319,11 @@ public static class EnglishArpabet
                     // conditions are load-bearing — see the TS for the row-count measurement behind each.
                     if (stress == 2 && !demoted.Contains(i) && primaryNi >= 0 && Math.Abs(ni - primaryNi) == 1
                         && !(ni == nucleiIdx.Count - 1
-                             && (i < P.Count - 1 || STRONG_OPEN_FINAL.Contains(bas))))
+                             && (i < P.Count - 1 || STRONG_OPEN_FINAL.Contains(bas)))
+                        // ⚠ And not an r-coloured offglide, which ARPABET spells as two nuclei and is one
+                        // syllable — see R_OFFGLIDE_DIPHTHONG for the 64-site measurement against gold.
+                        && !(R_OFFGLIDE_DIPHTHONG.Contains(bas)
+                             && i + 1 < P.Count && P[i + 1].Base == "ER" && P[i + 1].Stress == 0))
                         mark = "";
                     outSb.Append(mark);
                     if (bas == "AH" && IsBarredI(word, P, i, ni, nucleiIdx.Count)) outSb.Append('ᵻ');

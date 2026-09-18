@@ -331,6 +331,29 @@ export function makeArpabetToIpa(
  *  ⚠ `UW` AND `AO` ARE THE MARGINAL MEMBERS and were tested rather than assumed: dropping UW costs 8
  *  words (87.82% → 87.79%) and AO another 9. Both stay, but they are the ones to drop first. */
 const STRONG_OPEN_FINAL = new Set(["EY", "AY", "OY", "AW", "AO", "UW"]);
+
+/**
+ * DIPHTHONGS THAT TAKE AN R-COLOURED OFFGLIDE — the `-ower`, `-ire`, `-ayer`, `-oer` nucleus. ARPABET
+ * writes these as TWO nuclei (`AW2 ER0`), so the clash rule below counted the site as "not the final
+ * syllable" and dropped its mark; phonetically it is one syllable, and gold says so:
+ *
+ *     AY+ER0  bonfire, backfire      29 sites   gold marks 28   97%
+ *     AW+ER0  horsepower, coneflower 20 sites   gold marks 20  100%
+ *     OW+ER0  filmgoer, flamethrower  8 sites   gold marks  8  100%
+ *     EY+ER0  bricklayer, minelayer   7 sites   gold marks  7  100%
+ *                                    ── 64 sites, 63 marked, 98% ──
+ *
+ * against 60% (1,225 of 2,038) at every other clash site, which is why the blanket rule drops them.
+ * Reported as `horsepower` sounding like "horse-pour": HH AO1 R S P AW2 ER0 lost the beat on `-power`
+ * and the compound flattened, where `lighthouse` (L AY1 T HH AW2 S) kept it — the AW2 there IS the final
+ * nucleus, so the existing final-syllable exemption already covered it.
+ *
+ * ⚠ THE MONOPHTHONGS ARE NOT IN THIS SET AND MUST NOT BE. `IY+ER0` and `UW+ER0` are the same shape on
+ * paper — `nonlinear` nɑnlˈɪniəɹ, `rescuer` ɹˈɛskjuəɹ — and gold marks neither. It is the DIPHTHONG that
+ * makes the pair one syllable. ⚠ `OY` is here on phonetic grounds with no evidence either way: the
+ * dictionary has no OY2+ER0 clash site at all.
+ */
+const R_OFFGLIDE_DIPHTHONG = new Set(["AY", "AW", "OW", "EY", "OY"]);
 const VOWELS = new Set(def.vowels);
     /** Convert a CMUdict ARPABET phone list → canonical IPA (before-nucleus stress + cleanroom GenAm allophony). */
     return function arpabetToIpa(phones: string[], word = ""): string {
@@ -425,7 +448,11 @@ const VOWELS = new Set(def.vowels);
                     !(
                         ni === nucleiIdx.length - 1 &&
                         (i < P.length - 1 || STRONG_OPEN_FINAL.has(base))
-                    )
+                    ) &&
+                    // ⚠ AND NOT AN R-COLOURED OFFGLIDE, which ARPABET spells as two nuclei and is one
+                    // syllable — see R_OFFGLIDE_DIPHTHONG for the 64-site measurement against gold.
+                    !(R_OFFGLIDE_DIPHTHONG.has(base)
+                        && P[i + 1]?.base === "ER" && P[i + 1]?.stress === 0)
                 )
                     mark = "";
                 out += mark;

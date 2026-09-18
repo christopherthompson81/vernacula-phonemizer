@@ -4,6 +4,7 @@ import { readdirSync } from "node:fs";
 
 import { phonemize, phonemizeAsync } from "../src/index.ts";
 import { makeArpabetToIpa } from "../src/languages/english/englishArpabet.ts";
+import { normalizeEnglish } from "../src/languages/english/normalize.ts";
 import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 // Two reported misreadings whose cause was the same shape as the spelling one: a word the reader
@@ -642,5 +643,193 @@ describe("an IY before an R that starts the NEXT element", () => {
         expect(phonemize("careerism", "en")).toBe("kɚˈɪɹɪzəm");   // ONSET, and still lax
         expect(phonemize("serious", "en")).toBe("sˈɪɹiʲəs");
         expect(phonemize("experience", "en")).toBe("ɪkspˈɪɹiʲəns");
+    });
+});
+
+describe("an acronym beside a number is not a shouting document", () => {
+    const say = (s: string): string => phonemize(s, "en");
+
+    // ⚠ REPORTED AS ONE TOKEN — `wd 40` heard as "d 40" — AND IT WAS THE WHOLE PASS. The initialism
+    // guard read "no lowercase AND has whitespace" as a shouting document, and digits and punctuation
+    // carry no case, so one acronym beside a number satisfied it and core/initialisms.ts returned
+    // early. Adding a single lowercase letter anywhere fixed every row below, which is how it was found.
+    test("an all-caps acronym followed by a number is spelled out", () => {
+        expect(say("WD 40")).toBe("dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i");
+        expect(say("NHS 24")).toBe("ˈɛn ˈeᶦt͡ʃ ˈɛs twˈɛnti fˈɔːɹ");
+        expect(say("MP 3")).toBe("ˈɛm pʰˈiː θɹˈiː");
+        expect(say("DSLR 5")).toBe("dˈiː ˈɛs ˈɛɫ ˈɑːɹ fˈaᶦv");
+    });
+
+    // The same strings with any lowercase in them always worked; that they now AGREE is the point.
+    test("the reading no longer depends on a lowercase letter being present", () => {
+        expect(say("WD 40")).toBe(say("the WD 40").replace("ðə ", ""));
+        expect(say("NHS 24")).toBe(say("the NHS 24").replace("ðə ", ""));
+    });
+
+    // ⚠ A RUN GLUED TO DIGITS IS A CODE WHETHER OR NOT THE DOCUMENT SHOUTS, which is why those two
+    // branches sit ABOVE the guard. `CO2 LEVELS` is two shouting words, so everything that asks
+    // "is this a word" is off — and `CO2` must still not read as "co two".
+    test("a digit-glued code is claimed even inside a shouting document", () => {
+        expect(say("CO2 LEVELS")).toBe("sˈiː ˈoᶷ tʰˈuː lˈɛvəɫz");
+    });
+
+    // ⚠ THE GUARD IS REAL AND MUST STILL FIRE. `acronymLetters` lists acronyms whose lowercase form is
+    // an ordinary word, so in a genuinely shouting document they have to stay words.
+    test("a genuinely shouting document still reads as words", () => {
+        expect(say("WHO CARES")).toBe(say("who cares"));
+        expect(say("IT DEPENDS")).toBe(say("it depends"));
+    });
+
+    // ⚠ AND A CODE IS ONE WORD, NOT A DOCUMENT. Counting caps RUNS instead of words made `(ABC-AA)`
+    // a document and lost the doubled capital that the run above this one exists to protect.
+    test("a hyphenated code is one word, not two shouting ones", () => {
+        expect(say("(ABC-AA)")).toBe("ˈeᶦbiːsˌiː ˈeᶦ ˈeᶦ");
+    });
+});
+
+describe("a slash, a section dot, a bare abbreviation and a month range", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    const norm = (s: string): string => normalizeEnglish(s);
+
+    // ⚠ THE MARK WAS DROPPED OUTRIGHT — it is not a phone, so `litres/day` read "litres day" and
+    // `FREQUENCY/CRITERIA` ran two column headings into one phrase. Reported as three separate
+    // misreadings; it is one missing rule with two readings.
+    test("a slash before a period of time is a rate", () => {
+        expect(norm("litres/day")).toBe("litres per day");
+        expect(norm("5 m³/hr")).toBe("5 cubic meters per hour");
+        expect(norm("visits/week")).toBe("visits per week");
+        expect(norm("mg/L")).toBe("milligrams per liter");
+    });
+
+    // ⚠ AND IT IS SAID ONLY BETWEEN TWO ALL-CAPS LABELS. In running prose the slash is a conjunction
+    // English does not voice: the en goldens carry `transport to/from the airport` and `the
+    // cluster/group of islands`, and "to slash from" is not how either is read.
+    test("the mark is spoken between labels and silent in prose", () => {
+        expect(norm("FREQUENCY/CRITERIA")).toBe("FREQUENCY slash CRITERIA");
+        expect(norm("the cluster/group of islands")).toBe("the cluster/group of islands");
+        expect(norm("transport to/from the airport")).toBe("transport to/from the airport");
+    });
+
+    // ⚠ TWO SINGLE LETTERS ARE AN ABBREVIATION, NOT A CONJUNCTION. Without this they would have been
+    // given a "slash" that is confidently wrong — these are words written with a mark in them.
+    test("a slashed abbreviation has its own reading", () => {
+        expect(norm("w/o")).toBe("without");
+        expect(norm("N/A")).toBe("not applicable");
+        expect(norm("c/o")).toBe("care of");
+        expect(norm("and/or")).toBe("and or");
+    });
+
+    // ⚠ AND THE SINGLE-LETTER GUARD OUTRANKS THE RATE ARM TOO, which the first cut of this rule got
+    // wrong. Half the alphabet is a unit symbol or a period of time on its own — `s`, `h`, `d`, `w`,
+    // `g`, `l` — so the rate test fired on pairs that are nothing of the kind. The real rates of this
+    // shape (`m/s`, `km/h`) are enumerated unit keys claimed by the arm above, so nothing is lost.
+    test("two single letters are never a rate", () => {
+        expect(norm("A/D converter")).toBe("A/D converter");   // was "A per day converter"
+        expect(norm("R/W")).toBe("R/W");                        // was "R per watt"
+        expect(norm("O/S")).toBe("O/S");                        // was "O per second"
+        expect(norm("Smith A/S")).toBe("Smith A/S");            // was "Smith A per second"
+        expect(norm("5 g/L")).toBe("5 grams per liter");         // a real unit still resolves
+    });
+
+    // ⚠ `24/7` IS AN IDIOM, NOT A FRACTION. The fraction rule read it "twenty four sevenths"; it is the
+    // one digit pair in English prose whose slash is neither a fraction nor a date.
+    test("24/7 is not a fraction", () => {
+        expect(say("open 24/7")).toBe("ˈoᶷpn̩ twˈɛnti fˈɔːɹ sˈɛvən");
+        expect(norm("3/4")).toBe("3 quarters");                 // a real fraction is untouched
+        expect(norm("12/25/2024")).toBe("december 25th 20 24");  // and a date
+    });
+
+    // A section reference: the dot is neither an abbreviation dot nor a sentence end, and left alone it
+    // became a phrase break between the letter and the number.
+    test("a section number's dot is point", () => {
+        expect(say("Section G.2")).toBe("sˈɛkʃən d͡ʒˈiː pʰˈɔᶦnt tʰˈuː");
+        expect(norm("Appendix B.3")).toBe("Appendix B point 3");
+        expect(norm("v1.2")).toBe("v1.2");          // a version is not this
+        expect(norm("802.11n")).toBe("802.11n");
+    });
+
+    // ⚠ BARE, `vs` REACHED THE INITIALISM PASS, which found no vowel and read it *vee ess*. Only the
+    // keys that are not English words in their own right may lose their dot.
+    test("an abbreviation that is not a word may drop its dot", () => {
+        expect(say("vs")).toBe("vˈɝsəs");
+        expect(norm("Smith vs Jones")).toBe("Smith versus Jones");
+        expect(norm("no 5")).toBe("no 5");             // `no` is a word; it keeps needing its dot
+        // ⚠ `sr` cost exactly this for one commit: "the senior and O series". A two-letter run is half of
+        // an initialism far more often than it is a bare abbreviation.
+        expect(norm("the SR&O series")).toBe("the s r and o series");
+    });
+
+    // ⚠ A RANGE IS A DATE FRAME the digit gate cannot see: `Oct-Dec 2024` has a digit after `Dec` and
+    // nothing at all after `Oct`, so one date was read two ways in four characters.
+    test("a month range expands both months", () => {
+        expect(norm("Oct-Dec 2024")).toBe("october to december 20 24");
+        expect(norm("Jan-Mar")).toBe("january to march");
+        expect(norm("Jan said so")).toBe("Jan said so");   // a name is not a date
+        expect(norm("Mar and Aug")).toBe("Mar and Aug");
+    });
+});
+
+describe("four lexical facts the dictionary had wrong or lacked", () => {
+    const say = (s: string): string => phonemize(s, "en");
+
+    // ⚠ CMUdict AND BOTH MISAKI GOLDS RECORD `psi` AS [S AY1] — the Greek letter — so the unit resolved
+    // to the word and read "sigh". Same shape as `ai` (the sloth) above it in the list: the dictionary is
+    // right about the word and cannot express the case-keyed acronym, which is what acronymLetters is for.
+    test("PSI is the unit, psi is the Greek letter", () => {
+        expect(say("PSI")).toBe("pʰˈiː ˈɛs aᶦ");
+        expect(say("the psi function")).toContain("sˈaᶦ");   // ⚠ case-gated: the word is untouched
+    });
+
+    // CMUdict has K OW1 L IH0 N, "Coe-lin". Moby has `colin 'k/A/l/I/n` — the LOT vowel — and that is
+    // what was reported. Neither gold carries the name, so Moby plus the report is the whole evidence.
+    test("Colin has the LOT vowel", () => {
+        expect(say("Colin")).toBe("kʰˈɑːlɪn");
+    });
+
+    // ⚠ THE OOV PATH PATTERNED IT ON `derivative`, which is the other stem: gold has derivative
+    // dəɹˈɪvəɾɪv with the short vowel but derive dəɹˈIv and derivable dəɹˈIvəbᵊl with the long one.
+    // Both golds agree, and the word was in no dictionary at all.
+    test("derivable takes its stem's vowel, not derivative's", () => {
+        expect(say("derivable")).toBe("dɚˈaᶦvəbəɫ");
+        expect(say("derivative")).toBe("dɚˈɪvət̬ɪv");   // ⚠ the control: still short
+    });
+
+    // A lexical acronym — spelled like an initialism, said as a word. The phonotactic test calls it
+    // unreadable (⟨msa⟩ is not a legal onset) and spelled it out; a dictionary row is what settles it,
+    // and a recorded pronunciation is not the OOV tier's business.
+    test("a lexical acronym is read as the word it is said as", () => {
+        expect(say("MSAPR")).toBe("ɛmsˈæpɚ");
+    });
+});
+
+describe("a secondary stress on an r-coloured offglide", () => {
+    const say = (s: string): string => phonemize(s, "en");
+
+    // ⚠ FOUND BY ASKING FOR THE KOKORO RENDERING, NOT THE IPA. `horsepower` was called "does not
+    // reproduce" on the strength of hˈɔːɹspaᶷɚ looking right; against misaki's gold hˈɔɹspˌWəɹ the
+    // secondary stress on `-power` is missing, and that is what flattens the compound to "horse-pour".
+    //
+    // ARPABET writes the `-ower` nucleus as TWO nuclei (AW2 ER0), so the clash rule counted the site as
+    // "not the final syllable" and dropped the mark. `lighthouse` (L AY1 T HH AW2 S) kept it, because
+    // there the AW2 IS the final nucleus — that contrast is what localized it.
+    test("a diphthong before ER0 keeps its mark", () => {
+        expect(say("horsepower")).toBe("hˈɔːɹspˌaᶷɚ");
+        expect(say("manpower")).toBe("mˈænpˌaᶷɚ");
+        expect(say("bonfire")).toBe("bˈɑːnfˌaᶦɚ");
+        expect(say("bricklayer")).toBe("bɹˈɪklˌeᶦɚ");
+        expect(say("filmgoer")).toBe("fˈɪɫmɡˌoᶷɚ");
+    });
+
+    // ⚠ THE MONOPHTHONGS ARE THE CONTROL AND MUST NOT MOVE. `IY+ER0` and `UW+ER0` are the same shape on
+    // paper — gold marks neither, because it is the DIPHTHONG that makes the pair one syllable.
+    test("a monophthong before ER0 does not", () => {
+        expect(say("nonlinear")).toBe("nɑːnlˈɪniːʲɚ");
+        expect(say("rescuer")).toBe("ɹˈɛskjuːɚ");
+    });
+
+    // And the site the existing final-syllable exemption already covered is unchanged.
+    test("a final-nucleus diphthong is untouched", () => {
+        expect(say("lighthouse")).toBe("lˈaᶦthˌaᶷs");
+        expect(say("powerhouse")).toBe("pʰˈaᶷɚhˌaᶷs");
     });
 });

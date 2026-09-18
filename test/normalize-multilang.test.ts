@@ -464,7 +464,13 @@ describe("symbol normalization — FLEURS-priority round", () => {
         // Keys were a character class, so a letter code could not be declared at all and Polish had to
         // omit its own currency.
         expect(phonemize("20 zł", "pl")).toContain("zwˈɔtɨx");
+        // ⚠ AND IT IS EXPRESSIBLE IN A SENTENCE, which is the part that was not true. The symbol tier
+        // runs last, so a currency CODE met the initialism pass first and `pln` has no vowel: `mam 100
+        // PLN` read *pe el en*. Only the caseless `100 PLN` escaped, because the shouting-document guard
+        // switched that pass off — so this line passed on an accident. Polish now names its own currency
+        // codes as recorded, and both forms reach the tier.
         expect(phonemize("100 PLN", "pl")).toContain("zwˈɔtɨx");
+        expect(phonemize("mam 100 PLN", "pl")).toContain("zwˈɔtɨx");
     });
 
     test("the Arabic percent sign reaches the shared tier", () => {

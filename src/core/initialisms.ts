@@ -104,6 +104,12 @@ export const LATIN_MARK = "\\u0300-\\u036F\\u1AB0-\\u1AFF\\u1DC0-\\u1DFF\\uFE20-
 const RUN_OR_CODE = new RegExp(
     `(?<![\\p{L}${LATIN_MARK}])\\p{Lu}{2,}(?![\\p{L}${LATIN_MARK}])`
     + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`, "gu");
+/** Two or more capitals in a row, for counting the WORDS of a shouting document. Not global: it is
+ *  used with `.test` per word, and a global regex carries `lastIndex` between calls. See `shouting`. */
+const CAPS_RUN = /\p{Lu}{2,}/u;
+/** The words of the text. ⚠ MATCHED, not split on whitespace — the port has no `String.split(regex)`
+ *  with JavaScript's empty-part semantics, and matching the runs is the same count either way. */
+const WORD_RUN = /\S+/gu;
 const INITIAL_RUN = new RegExp(`(?<![\\p{L}${LATIN_MARK}])(?:\\p{Lu}\\.[ \u00a0]*){2,}`, "gu");  // space, NBSP
 // ⚠ `^` IS IN THE LOOKBEHIND because an initial can OPEN an utterance — `M. Bayramov`, and the pass
 // requires a preceding capitalised word, so a lone opening initial kept its bare letter and read as a
@@ -148,10 +154,31 @@ export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): 
     };
 
     function inner(text: string): string {
-        // Gated on the text containing lowercase: in an all-caps DOCUMENT the capitals carry no signal
-        // and spelling out every word would be absurd. A lone all-caps token is exempt — there is no
-        // shouting document to misread, and it is the "user typed an acronym" case.
-        if (!/\p{Ll}/u.test(text) && /\s/u.test(text.trim())) return text;
+        // An all-caps DOCUMENT: the capitals carry no signal, so a run that is an ordinary word must not
+        // be spelled out.
+        //
+        // ⚠ THE TEST IS TWO OR MORE CAPS RUNS, NOT "HAS WHITESPACE", and the difference is a whole class
+        // of failures. Digits and punctuation carry no case, so `WD 40`, `NHS 24`, `ISO 9001`, `DSLR 5`,
+        // `WTO 2024` and `MP 3` all satisfied "no lowercase, has whitespace" — one acronym and a number
+        // looked exactly like a shouting document — and the pass returned early and did NOTHING. The
+        // failures that followed are verbatim the ones this file's header says the pass exists to
+        // prevent: `NHS` with the H gone (ɛnˈɛs), `WTO` as *wtoo*, `DSLR` as *deezlyer*. Adding one
+        // lowercase letter anywhere fixed every one of them, which is how it was found. A document under
+        // review is full of all-caps headings, cells and form fields, so this was not a rare shape.
+        //
+        // ⚠ AND THE GUARD IS REAL — narrowing it to `acronymLetters` alone was tried first and is wrong.
+        // A tt golden reads a Russian accounting-standard title in caps, where `ВЛОЖЕНИЙ` is an ordinary
+        // word whose ⟨вл⟩ onset is illegal in TATAR phonotactics: the OOV arm calls it unreadable and
+        // spells it letter by letter. A shouting document can contain a foreign word that no amount of
+        // reasoning about "this cannot be a word" will save, so the guard has to cover the unreadable
+        // arm too — it just must not fire on one acronym beside a number.
+        //
+        // ⚠ THE UNIT IS THE WHITESPACE-SEPARATED WORD, not the caps run, because a CODE holds several
+        // runs inside one word: `(ABC-AA)` is two runs and no document at all, and counting runs made it
+        // a document and lost the `AA`. The tt title is eight WORDS; every shape in the batch above is
+        // one.
+        const shouting = !/\p{Ll}/u.test(text)
+            && [...text.matchAll(WORD_RUN)].filter((w) => CAPS_RUN.test(w[0])).length >= 2;
         // Two shapes. A free-standing all-caps run of 2+ letters is the ordinary initialism. A run
         // ATTACHED TO DIGITS is an alphanumeric code (CG4684, A380, B747, X5) and needs claiming
         // separately, because there is no word boundary between the letters and the digits for `\b` to
@@ -174,7 +201,6 @@ export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): 
             const low = lower(tok);
             const spelled = spellOut(low, d.letterName);
             if (tok.length < 2) return spelled ?? tok; // attached code: a letter, never a word
-            if (d.acronymLetters.has(low)) return spelled ?? tok; // lexical: a listed exception
             // ⚠ A TWO-LETTER RUN GLUED TO DIGITS IS A CODE, NOT A WORD, and this MUST OUTRANK the
             // dictionary test below — the entire failing class is runs that ARE words. `CO₂` read as
             // "co two", `SO₂` as "so two", `NO₂` as "no two", `AS400` as "az four hundred", and
@@ -184,6 +210,12 @@ export function makeInitialismNormalizer(d: InitialismData, onPipeline = true): 
             // stay a word, not become "C O V I D nineteen" — and no two-letter caps run glued to a
             // digit is a word being used as one.
             if (glued && tok.length === 2) return spelled ?? tok;
+            // ⚠ EVERY BRANCH BELOW IS OFF INSIDE A SHOUTING DOCUMENT, and the two above are not. A run
+            // glued to digits is a CODE whether or not the document shouts — `CO2 LEVELS` is "C O two",
+            // never "co two" — while everything below asks whether a run is a word, which is the one
+            // question all-caps text cannot answer. See `shouting` above.
+            if (shouting) return tok;
+            if (d.acronymLetters.has(low)) return spelled ?? tok; // lexical: a listed exception
             if (d.isRecorded(low)) return tok; // lexical: the dictionary owns it
             if (d.isUnreadable(low)) return spelled ?? tok; // OOV: nothing else could be said
             return tok; // OOV but pronounceable — the OOV g2p reads it as a word

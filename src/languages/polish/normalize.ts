@@ -119,16 +119,34 @@ const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
  * Initialism pass. ORDERING: must run AFTER the abbreviation rules below (`m.in.` must not become EM-EN)
  * and after Roman numerals — Polish is not in `ROMAN_NATIVE`, so romans are already digits/ordinal words
  * by the time `text()` is entered and the hazard cannot arise. Polish has no pronunciation dictionary
- * (its g2p is rule-based), so `isRecorded` is always false, as in Russian.
+ * (its g2p is rule-based), so `isRecorded` answers for the one thing the language DOES own by name.
  */
 export function normalizePolishInitialisms(text: string): string {
     return makeInitialismNormalizer({
         letterName: (l) => MANIFEST.letterNames[l],
         acronymLetters: ACRONYM_LETTERS,
-        isRecorded: () => false,
+        isRecorded: (low) => CURRENCY_CODES.has(low),
         isUnreadable: isUnreadablePolish,
     })(text);
 }
+
+/**
+ * THE LANGUAGE'S OWN CURRENCY CODES, so the initialism pass leaves them for the symbol tier.
+ *
+ * ⚠ THE SYMBOL TIER RUNS LAST — it needs the number still adjacent to its unit — so a currency CODE
+ * reaches the initialism pass first, and `PLN` has no vowel, so the OOV arm spells it *pe el en* before
+ * the tier can read it as *złotych*. That is what `isRecorded` is for: "a recorded pronunciation is not
+ * the OOV tier's business", and a code the language names in its own currency table is as recorded as a
+ * dictionary headword. Single-character signs (`zł`, `€`) never reached the pass anyway — it wants two
+ * capitals — so this claims exactly the multi-letter codes.
+ *
+ * ⚠ THIS WAS ALWAYS BROKEN, and was visible only in a string with no lowercase in it. `mam 100 PLN` read
+ * *pe el en* long before the shouting-document guard in core/initialisms.ts was narrowed; `100 PLN` alone
+ * happened to be caseless, so the guard switched the whole pass off and the tier got its turn. The test
+ * that covered it was green for that reason rather than on merit.
+ */
+const CURRENCY_CODES: ReadonlySet<string> = new Set(
+    Object.keys(MANIFEST.symbolTier.currency ?? {}).map((k) => k.toLowerCase()));
 
 /** Multi-dot abbreviations. ⚠ Claimed FIRST, or their interior dots survive as phrase breaks. */
 const MULTI_DOT: ReadonlyArray<readonly [RegExp, string]> = [

@@ -84,13 +84,26 @@ public static class Normalize
     private static readonly IReadOnlySet<string> ACRONYM_LETTERS =
         new HashSet<string>(Manifest.MANIFEST.AcronymLetters, StringComparer.Ordinal);
 
+    /**
+     * THE LANGUAGE'S OWN CURRENCY CODES, so the initialism pass leaves them for the symbol tier.
+     *
+     * ⚠ THE SYMBOL TIER RUNS LAST — it needs the number still adjacent to its unit — so a currency CODE
+     * reaches the initialism pass first, and `PLN` has no vowel, so the OOV arm spells it *pe el en*
+     * before the tier can read it as *złotych*. `IsRecorded` is what answers that: a code the language
+     * names in its own currency table is as recorded as a dictionary headword. See the TypeScript.
+     */
+    private static readonly IReadOnlySet<string> CURRENCY_CODES =
+        new HashSet<string>(Manifest.MANIFEST.SymbolTier.Currency.Keys.Select(k => k.ToLowerInvariant()),
+                            StringComparer.Ordinal);
+
     /** Initialism pass. ⚠ ORDERING: must run AFTER the abbreviation rules below, or `m.in.` is spelled out
-     *  EM-EN. Polish has no pronunciation dictionary (its g2p is rule-based), so `IsRecorded` is always false. */
+     *  EM-EN. Polish has no pronunciation dictionary (its g2p is rule-based), so `IsRecorded` answers for
+     *  the one thing the language DOES own by name — see `CURRENCY_CODES`. */
     private static readonly Func<string, string> INITIALISMS = Initialisms.MakeInitialismNormalizer(new InitialismData
     {
         LetterName = l => Manifest.MANIFEST.LetterNames.GetValueOrDefault(l),
         AcronymLetters = ACRONYM_LETTERS,
-        IsRecorded = _ => false,
+        IsRecorded = low => CURRENCY_CODES.Contains(low),
         IsUnreadable = IsUnreadablePolish,
     });
 

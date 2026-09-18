@@ -833,3 +833,421 @@ byte-identical.
 are `R IY0` — the same paradigm split one step milder (a length difference, not a
 vowel-quality one: `ɹiːvjˈuː` against `ɹivjˈuː…`). Not reported, and correcting it
 means the same three-row judgement on a word nobody has complained about.
+
+## Run 17 — 2026-09-18 13:10 — thirteen reports from a document review, and one gate behind five of them
+
+**Report.** A batch of thirteen, from reading real documents in the desktop reader:
+
+| reported | heard | wanted |
+|---|---|---|
+| `horsepower` | horse-pour | horse-power |
+| `Section G.2` | G 2 | gee point two |
+| `PSI` | psy | P S I |
+| `wd 40` | d 40 | W D forty |
+| `litres/day` | litres day | litres per day |
+| `m³/hr` | cubic meters H R | cubic metres per hour |
+| `Colin` | co-lin | call-lin |
+| `vs` | v s | versus |
+| `derivable` | der-iv-able | der-**I**v-able |
+| `Oct-Dec 2024` | Oct December 2024 | October to December 2024 |
+| `Saipavan` | s'puvan | sI-PA-van |
+| `FREQUENCY/CRITERIA` | frequency criteria | frequency slash criteria |
+| `MSAPR` | M S A P R | em sapper |
+
+**Question.** Which reproduce, and against which engine? The reports come from the app, which runs
+the C# port, so a report could be a port defect rather than an engine one.
+
+**Raw finding — the first probe was wrong, and wrong in a way worth recording.** Comparing
+`phonemize()` in TypeScript against `PhonemizeAsync` in C# showed four rows differing:
+
+```
+                TS (sync)          C# (async)
+wd 40           wd fˈɔːɹt̬i         wdˈiː fˈɔːɹt̬i
+litres/day      lˈɪtɹˌeᶦz dˈeᶦ     lˈiːt̬ɚz dˈeᶦ
+derivable       dɚˈaᶦvəbəɫ         dɚˈɪvəbəɫ
+Saipavan        sˈeᶦpəvən          spˈʌvən
+```
+
+Every differing row is an OOV word, which is the tell: `phonemize()` is the SYNC entry point and
+falls back to the n-gram, while `PhonemizeAsync` loads the BiLSTM. Re-probed through
+`phonemizeAsync`, the two engines are byte-identical on all thirteen. **No port defect.** The parity
+gate's own header warns about exactly this ("the goldens are async-mode output"); the warning is
+about generating goldens, and it applies just as much to an ad-hoc comparison.
+
+Corrected baseline, `en`, neural:
+
+```
+horsepower           hˈɔːɹspaᶷɚ             ← already correct, does not reproduce
+Section G.2          sˈɛkʃən d͡ʒˈiː . tʰˈuː  ← the dot is a phrase break, not "point"
+PSI                  sˈaᶦ                   ← read as the Greek letter
+wd 40                wdˈiː fˈɔːɹt̬i
+litres/day           lˈiːt̬ɚz dˈeᶦ           ← slash dropped
+m³/hr                ˈɛm kjˈuːbd ˌeᶦt͡ʃˈɑːɹ
+Colin                kʰˈoᶷlɪn
+vs                   vˌiːʲˈɛs
+derivable            dɚˈɪvəbəɫ
+Oct-Dec 2024         ˈɔːkt dᵻsˈɛmbɚ …       ← Dec expanded, Oct not
+FREQUENCY/CRITERIA   fɹˈiːkwənsi kɹaᶦtʰˈɪɹiʲə
+MSAPR                ˈɛm ˈɛs ˈeᶦ pʰˈiː ˈɑːɹ
+Saipavan             spˈʌvən
+```
+
+**The finding that outgrew the report.** `wd 40` looked like one bad token. It is not:
+
+```
+"WD 40"        → wdˈiː fˈɔːɹt̬i        "WD 40 spray"  → dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i   ✓
+"NHS 24"       → ˌɛnˈɛs …             "the NHS 24"   → ðə ˈɛn ˈeᶦt͡ʃ ˈɛs …       ✓
+"ISO 9001"     → ˈaᶦsoᶷ nˈaᶦn …
+"DSLR 5"       → dˈiːzɫjɚ fˈaᶦv
+"WTO 2024"     → wtˈuː …
+"CO2 LEVELS"   → kʰˈoᶷ tʰˈuː lˈɛvəɫz
+```
+
+Adding one lowercase letter anywhere fixes every one of them. `core/initialisms.ts` opens with
+
+```js
+if (!/\p{Ll}/u.test(text) && /\s/u.test(text.trim())) return text;
+```
+
+— the shouting-document guard. Digits and punctuation carry no case, so a heading, a table cell or a
+form field with no lowercase in it satisfies "no lowercase + has whitespace" and **the entire
+initialism pass is switched off**. The failures it then produces — `NHS` with the H gone, `WTO` as
+*wtoo*, `DSLR` as *deezlyer*, `CO2` as *co two* — are verbatim the failures the file's own header
+says the pass exists to prevent. The reader reaching this often is not bad luck: a document under
+review is full of all-caps cells and headings.
+
+**What the guard actually protects.** Walking the branches: `isRecorded` and the pronounceable
+fall-through both return the token unchanged, and the glued-digit and unreadable branches only ever
+claim runs that cannot be a shouted word. The only branch that would misfire on a shouting document
+is `acronymLetters` — the lexical list of acronyms whose lowercase form IS a word (`US`, `IT`, `WHO`,
+`LED`), where `WHO CARES` would become *W H O CARES*. So the guard is needed for exactly one branch
+and is being applied to all six.
+
+**Implication.** Narrow the guard to the `acronymLetters` branch instead of returning early. That is
+strictly additive — the only outputs that can change are glued-digit codes and vowelless runs, both
+of which are wrong today by construction.
+
+**The narrow fix was wrong, and the goldens said so.** Guarding only `acronymLetters` and letting the
+unreadable arm run made one tt row stale:
+
+```
+text: ПОЛОЖЕНИЕ ПО БУХГАЛТЕРСКОМУ УЧЁТУ «УЧЁТ ФИНАНСОВЫХ ВЛОЖЕНИЙ» ПБУ 19/02
+want: … finansoˈvɨx vloʒeˈnij pˈbu …
+got : … finansoˈvɨx ˈve ˈel ˈo ˈʒe ˈje ˈen ˈi qɨˈsqɑ ˈi ˈpe ˈbe ˈu …
+```
+
+`ВЛОЖЕНИЙ` is an ordinary Russian word in a Russian title being read by the TATAR engine, and its
+⟨вл⟩ onset is illegal in Tatar phonotactics — so the unreadable arm calls it OOV and spells it out.
+The claim that the unreadable arm "only claims runs that cannot be a shouted word" is therefore
+false: a shouting document can contain a foreign word that no phonotactic test will save. The guard
+is real; it was only its DEFINITION that was wrong.
+
+(The same row also shows the guard costing something: `ПБУ` stays the cluster [pbu]. Both are true
+at once, which is why the answer is a better document test rather than removing the guard.)
+
+**Second attempt: count caps RUNS ≥ 2.** Failed on `(ABC-AA)` — a project code, one word, two runs,
+no document anywhere in sight, and the `AA` that Run 12 had fixed went back to reading as CMUdict's
+Hawaiian lava word.
+
+**What shipped: count WHITESPACE-SEPARATED WORDS containing a caps run, ≥ 2.** The tt title is eight
+such words; every shape in this batch is one; `(ABC-AA)` is one. And the two branches that claim a
+run GLUED TO DIGITS moved above the guard, because a code is a code whether or not the document
+shouts — that is what recovers `CO2 LEVELS` → "C O two".
+
+```
+WD 40        dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i          NHS 24     ˈɛn ˈeᶦt͡ʃ ˈɛs twˈɛnti fˈɔːɹ
+DSLR 5       dˈiː ˈɛs ˈɛɫ ˈɑːɹ fˈaᶦv         MP 3       ˈɛm pʰˈiː θɹˈiː
+WTO 2024     dˈʌbɫ̩juː tʰˈiː ˈoᶷ …            CO2 LEVELS sˈiː ˈoᶷ tʰˈuː lˈɛvəɫz
+```
+
+`ISO 9001` deliberately still reads as a word: `iso` is pronounceable and unrecorded, which is the
+documented "needs a data entry" case, and *eye-so* is what people say anyway.
+
+**A pre-existing Polish defect fell out of it.** With the pass no longer switched off, `100 PLN` read
+*sto pe el en*. Not a regression — `mam 100 PLN` (any lowercase at all) read that way already; the
+caseless form was the only one the guard was accidentally rescuing, so the test covering it was green
+on an accident. Cause: the symbol tier runs LAST, so a currency CODE meets the initialism pass first
+and `pln` has no vowel. Fixed where the hook was designed for it — Polish now names its own currency
+codes through `isRecorded`, and BOTH forms now reach the tier as *złotych*.
+
+**Gates.** 6012 TS tests, 6687 C# tests, goldens fresh at 189 languages / 36495 rows, parity 189
+languages byte-identical, regex-diff 143816 probes identical.
+
+**Still open from the batch of thirteen:** `horsepower` does not reproduce (already
+`hˈɔːɹspaᶷɚ`). The other eleven are untouched by this run and are separate causes — the slash, the
+letter-dot-digit, the month range, bare `vs`, two lexicon entries, and two acronym classifications.
+
+## Run 18 — 2026-09-18 15:20 — the slash, the section dot, bare `vs`, and half a month range
+
+Four of the thirteen, all in `normalize.ts`, all the same shape: a mark or an abbreviation that no
+rule claimed, reaching the g2p to be read as letters or dropped on the floor.
+
+**The slash was three reports and one gap.** The unit table enumerates its slashed keys (`km/h`,
+`btu/hr/sf`) and step 6a2 claims those wherever they stand; anything else kept its slash into the
+g2p, where the mark is not a phone and vanishes.
+
+```
+litres/day           litres day
+m³/hr                cubic meters aitch ar      ← `hr` spelled, the mark gone
+FREQUENCY/CRITERIA   frequency criteria         ← two column headings run into one phrase
+```
+
+The compositional rule has two readings. A RATE — "per" — when either side resolves against the unit
+table or the denominator is a period of time; that second test is what carries the measure words the
+table does not have (`litres`, `visits`, `doses`). A CONJUNCTION — "slash" — otherwise.
+
+**The conjunction arm over-fired, and the goldens caught it.** Said between any two words it makes
+prose absurd:
+
+```
+transport to/from the airport   → "transport to slash from the airport"
+the cluster/group of islands    → "the cluster slash group of islands"
+```
+
+Both are `en` golden rows. English does not voice this slash in running prose; it voices it between
+LABELS. So the arm now requires both sides to be ALL-CAPS — the column-heading shape the report came
+from — and leaves prose exactly as it was. `FREQUENCY/CRITERIA` and `TCP/IP` are claimed; `Pass/Fail`
+and `yes/no` are not, which is the conservative side of a line that has to be drawn somewhere.
+
+**And single letters are not a conjunction either.** `w/o`, `c/o`, `n/a` are words written with a
+mark in them; giving them "slash" would have been louder than the old silent drop. They have fixed
+readings, and any other two-single-letter pair is left alone.
+
+**Bare `vs`.** `PLAIN_ABBREV` already had `vs: versus`, but every arm requires the dot — and bare it
+reached the initialism pass, which found no vowel and read it *vee ess*. The table cannot simply drop
+the dot requirement: `no`, `ed`, `col`, `gen`, `rep`, `sen`, `ave` and `ch` are all English words.
+A small bare-safe list answers it.
+
+⚠ **`jr`/`sr` were on that list for one commit.** `the SR&O series` came out "the senior and O
+series". A two-letter run is half of an initialism far more often than it is a bare abbreviation;
+`vs` survives the test only because it sits between two names, where an initialism half cannot.
+
+**The month range.** `MONTH_ABBREV`'s gate is an adjacent DIGIT, which is what makes it safe on keys
+that are also personal names (`Jan`, `Mar`, `Aug`). `Oct-Dec 2024` has a digit after `Dec` and
+nothing at all after `Oct`, so one date was read two different ways in four characters — *ockt
+December*. A month abbreviation with a dash and another month on the far side of it is as good a
+frame as a digit, and better than one for the name keys: no person is written `Jan-Mar`. Ordered
+first, so the digit rules and the existing dash-range rule then see two month NAMES.
+
+**A section number's dot.** `Section G.2` — the dot is neither an abbreviation dot nor a sentence
+end, and left alone it became a phrase break between the letter and the number, so the reference read
+as two fragments with a pause where the listener needs the opposite.
+
+**Result.**
+
+```
+Section G.2          sˈɛkʃən d͡ʒˈiː pʰˈɔᶦnt tʰˈuː
+litres/day           lˈiːt̬ɚz pʰɝ dˈeᶦ
+m³/hr                ˈɛm kjˈuːbd pʰɝ ˈaᶷɚ
+vs                   vˈɝsəs
+Oct-Dec 2024         ɑːktˈoᶷbɚ tʰuː dᵻsˈɛmbɚ twˈɛnti twˈɛnti fˈɔːɹ
+FREQUENCY/CRITERIA   fɹˈiːkwənsi slˈæʃ kɹaᶦtʰˈɪɹiʲə
+```
+
+**Gates.** 6024 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 143990
+probes identical.
+
+**Found in passing, not fixed:** `24/7` reads "24 sevenths" — the fraction rule claims it. Out of
+this batch's scope and recorded here so it is not rediscovered.
+
+**Still open from the thirteen:** `PSI` (read as the Greek letter), `MSAPR` (wants a lexical
+reading), `Colin`, `derivable`, `Saipavan` — two acronym classifications and three lexicon entries.
+
+## Run 19 — 2026-09-18 16:30 — four lexical facts, and one name that is not going in
+
+The residue of the thirteen: two dictionary rows that were wrong, two words that were in no
+dictionary at all, and one that will not be committed.
+
+**`PSI`.** CMUdict records `psi` as `S AY1` — the Greek letter — and BOTH misaki golds agree
+(`us='sˈI'`, `gb='sˈI'`). So the dictionary is right about the word and simply cannot express that the
+capitalized form is a unit said letter by letter. That is exactly what `acronymLetters` is for, and
+`ai` (CMUdict's three-toed sloth, versus the initialism) is the precedent sitting two lines above it.
+Case-gated, so the Greek letter in running prose is untouched.
+
+**`Colin`.** CMUdict has `K OW1 L IH0 N`. Moby has
+
+```
+colin 'k/A/l/I/n
+Colin 'k/A/l/I/n
+```
+
+— the LOT vowel, which is what was reported. ⚠ The first Moby lookup came back EMPTY, and the reason
+is the trap this log already records twice: Moby is CR-delimited, so a `^`-anchored grep matches
+nothing. Caught this time by re-checking with `tr '\r' '\n'` before concluding the source was silent.
+Neither gold carries the name, so Moby plus the listener's report is the whole of the evidence, and
+they agree.
+
+**`derivable`.** In no dictionary — and the OOV path patterned it on the wrong stem:
+
+```
+derive      gold us dəɹˈIv        (I = /aɪ/)
+derivative  gold us dəɹˈɪvəɾɪv    ← short
+derivable   gold us dəɹˈIvəbᵊl    ← LONG, and gb agrees
+ours                dɚˈɪvəbəɫ     ← derivative's vowel on derive's word
+```
+
+Both golds distinguish the two stems exactly as the report does. `derivative` is kept as the control
+in the test, since a fix that moved it too would be trading one error for another.
+
+**`MSAPR`** is a lexical acronym — spelled like an initialism, said as a word. ⟨msa⟩ is not a legal
+onset, so the phonotactic test called it unreadable and spelled it out; a dictionary row settles it,
+because a recorded pronunciation is not the OOV tier's business.
+
+**`Saipavan` is NOT being committed.** It is a person's given name, taken from a document under
+review — real names are PII, and this repository is public. The reading is wrong (`spˈʌvən`, with the
+⟨ai⟩ dropped entirely, against the reported *saɪ-PA-van*) and a lexicon row would fix it, but the row
+would publish the name. Flagged for the user to add locally if they want it.
+
+The underlying defect is visible without the name: the BiLSTM drops a whole syllable on an unfamiliar
+`Cai-` onset. That is the OOV tail the dictionary growth of #1344 was aimed at, and a retrain on the
+enlarged dictionary — not yet run — is where it would be measured.
+
+**Result — twelve of thirteen.**
+
+```
+horsepower           hˈɔːɹspaᶷɚ                    (did not reproduce)
+Section G.2          sˈɛkʃən d͡ʒˈiː pʰˈɔᶦnt tʰˈuː
+PSI                  pʰˈiː ˈɛs aᶦ
+WD 40                dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i
+litres/day           lˈiːt̬ɚz pʰɝ dˈeᶦ
+m³/hr                ˈɛm kjˈuːbd pʰɝ ˈaᶷɚ
+Colin                kʰˈɑːlɪn
+vs                   vˈɝsəs
+derivable            dɚˈaᶦvəbəɫ
+Oct-Dec 2024         ɑːktˈoᶷbɚ tʰuː dᵻsˈɛmbɚ twˈɛnti twˈɛnti fˈɔːɹ
+FREQUENCY/CRITERIA   fɹˈiːkwənsi slˈæʃ kɹaᶦtʰˈɪɹiʲə
+MSAPR                ɛmsˈæpɚ
+Saipavan             spˈʌvən                       (not fixed — see above)
+```
+
+⚠ `wd 40` in LOWERCASE is still `wdˈiː fˈɔːɹt̬i`. The initialism pass is deliberately caps-only — a
+lowercase vowelless token is genuinely ambiguous — and the product is written `WD-40`, which reads
+correctly. Left alone rather than widened on one report.
+
+**Gates.** 6028 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, lexicon round-trip
+100.00%.
+
+## Run 20 — 2026-09-18 17:40 — the Kokoro rendering, and why `horsepower` DID reproduce
+
+**Question.** What does `horsepower` become in Kokoro's phoneme vocabulary?
+
+```
+en     ipa    hˈɔːɹspaᶷɚ        kokoro  hˈɔɹspWəɹ
+en-GB  ipa    hˈɔːspaᶷə         kokoro  hˈɔːspWə
+```
+
+Every character is in vocabulary. But against misaki's gold — which is what Kokoro was trained on —
+
+```
+gold us  hˈɔɹspˌWəɹ
+ours     hˈɔɹspWəɹ
+```
+
+**the secondary stress on `-power` is missing, and that is the reported defect.** Run 17 called this
+report "does not reproduce" on the strength of the IPA looking right. That was wrong: the IPA is
+right about the phones and wrong about the beat, and a compound whose second element loses its beat
+is exactly what flattens *horse-POW-er* into *horse-pour*. Asking for the Kokoro form is what
+exposed it, because gold is written in that alphabet.
+
+**Localized by contrast.** Across eleven compounds, nine matched gold and three did not —
+`horsepower`, `manpower`, `sunflower`. All three are `-ower`; `powerhouse` and `lighthouse` were
+fine. The dictionary has `AW2` in every one of them:
+
+```
+horsepower  HH AO1 R S P AW2 ER0   → hˈɔɹspWəɹ    ✗
+lighthouse  L AY1 T HH AW2 S       → lˈIthˌWs     ✓
+```
+
+The clash rule drops a secondary stress adjacent to the primary unless it is the FINAL nucleus. In
+`lighthouse` the AW2 is final. In `horsepower` the `ER0` counts as a further nucleus, so the AW2 is
+not final and the mark goes — but `AW2 ER0` is one syllable phonetically, and the two-nucleus
+spelling is an artifact of ARPABET.
+
+**Measured against gold at every clash site in the dictionary**, split by whether the next nucleus is
+contiguous (no consonant between) and by the pair:
+
+```
+AY+ER0   bonfire, backfire        29 sites   gold marks 28    97%
+AW+ER0   horsepower, coneflower   20 sites   gold marks 20   100%
+OW+ER0   filmgoer, flamethrower    8 sites   gold marks  8   100%
+EY+ER0   bricklayer, minelayer     7 sites   gold marks  7   100%
+                                  ── 64 sites, 63 marked, 98% ──
+separated (a consonant between) 2038 sites   gold marks 1225  60%   ← why the blanket rule drops them
+```
+
+⚠ **The monophthongs are not in the class and must not be.** `IY+ER0` and `UW+ER0` are the same shape
+on paper — `nonlinear` nɑnlˈɪniəɹ, `rescuer` ɹˈɛskjuəɹ — and gold marks neither. It is the DIPHTHONG
+that makes the pair one syllable. `OY` is included on phonetic grounds with no evidence either way:
+the dictionary has no `OY2+ER0` clash site at all.
+
+⚠ **The first edit did nothing, and the rebuild tool said so.** `P[i + 1] === "ER0"` compares a
+`{base, stress}` record against a string, so the guard was always false; `en_rebuild_lexicon.mts`
+reported "would change: 0", which is the one output that cannot be explained by a correct change to a
+converter this narrow. ⚠ And the lexicon is where this lands at all — `horsepower` is a flat-lexicon
+hit, so the converter is not run at request time and a rule change reaches nothing until the rebuild.
+That is the split the tool's own header exists to prevent.
+
+**123 lexicon rows moved, every one of them adding `ˌ` before a diphthong-plus-ɚ nucleus.** Five
+golden rows followed (`hairdryer`, `Montours`); gold covers neither word, but it covers `backfire` as
+`bˈækfˌIəɹ`, which is the same site.
+
+**Result — all eleven compounds now match gold in the Kokoro alphabet:**
+
+```
+horsepower hˈɔɹspˌWəɹ    manpower  mˈænpˌWəɹ    sunflower sˈʌnflˌWəɹ
+lighthouse lˈIthˌWs      powerhouse pˈWəɹhˌWs   football  fˈʊtbˌɔl
+```
+
+**And the name is in after all.** Run 19 withheld `Saipavan` as PII. On challenge that was too broad:
+a bare given name in a pronunciation lexicon carries no surname, no document and no link to a person,
+and this dictionary already ships thousands of them — `colin` two runs above is one. What must not be
+recorded is where it came from, not the token. Added as `S AY0 P AA1 V AH0 N` → saᶦpʰˈɑːvən.
+
+**Gates.** 6031 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, lexicon round-trip
+100.00%.
+
+## Run 21 — 2026-09-18 18:30 — reviewing the slash rule, and the half of the alphabet that is a unit
+
+**Question.** The new rules (the slash, the section dot, the month range) are barely represented in the
+parity corpus — 36,495 rows of prose that mostly predate them. Does the C# port actually agree, and
+do the rules misfire on shapes nobody wrote a test for?
+
+**Method.** A 73-line corpus of the new shapes, run through both engines and diffed.
+
+**Port: byte-identical on all 73.** The parity gate's green was not evidence for these rules; this is.
+
+**And the rate arm was wrong on a whole family.** Probing two-single-letter pairs:
+
+```
+A/S             → "A per second"
+A/D converter   → "A per day converter"     ← analog-to-digital
+R/W             → "R per watt"              ← read/write
+O/S             → "O per second"
+B/D             → "B per day"
+Smith A/S       → "Smith A per second"
+```
+
+Half the alphabet is a unit symbol or a period of time on its own — `s`, `h`, `d`, `w`, `g`, `l` — so
+`TIME_PERIOD[right]` and `resolveUnitSymbol(right)` both fire on pairs that are nothing of the kind.
+
+⚠ **The guard already existed and was in the wrong place.** The conjunction arm already refused two
+single letters, on exactly this reasoning ("`a/c`, `s/n`, `b/w` are abbreviations, not conjunctions")
+— but it sat BELOW the rate arm, so the rate arm claimed them first and the guard never ran. Hoisting
+it above both readings is the whole fix. Nothing is lost: the real rates of this shape (`m/s`,
+`km/h`) are enumerated unit keys that step 6a2 claims before this rule is reached. The one cost is
+`g/L` standing alone, which keeps the silent mark it has always had — `5 g/L` still resolves, because
+the number-and-unit rule expands `g` upstream and the left side is then six letters.
+
+This is the second time in this batch that saying a mark aloud turned out to need a narrower licence
+than dropping it silently: prose (Run 18) and now abbreviations.
+
+**Also fixed: `24/7` read "twenty four sevenths".** Flagged in Run 18 as out of scope and picked up
+here because it is the same rule's neighbourhood. It is an idiom, it is said "twenty-four seven", and
+it is the one digit pair in English prose whose slash is neither a fraction nor a date.
+
+**Not fixed, recorded:** `A/B` reads *ə bˈiː* — the lone capital ⟨A⟩ resolving to the reduced article
+rather than the letter name. Pre-existing, unrelated to the slash (the pair is left alone by the
+guard above), and a different rule's problem.
+
+**Gates.** 6031 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144048
+probes identical, package fence ok.

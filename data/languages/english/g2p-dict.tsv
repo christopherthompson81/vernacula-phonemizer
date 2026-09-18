@@ -23008,7 +23008,7 @@ colicky	K AA1 L AH0 K IY0
 colier	K OW1 L IY0 ER0
 coliform	K OW1 L AH0 F AO2 R M
 coliforms	K OW1 L AH0 F AO2 R M Z
-colin	K OW1 L IH0 N
+colin	K AA1 L IH0 N
 colina	K OW0 L IY1 N AH0
 colinas	K OW0 L IY1 N AH0 S
 coline	K OW0 L IY1 N IY0
@@ -30861,6 +30861,7 @@ derision	D ER0 IH1 ZH AH0 N
 derisive	D ER0 IH1 S IH0 V
 derisively	D ER0 IH1 S IH0 V L IY0
 deriso	D IH0 R IY1 S OW0
+derivable	D ER0 AY1 V AH0 B AH0 L
 derivation	D EH2 R AH0 V EY1 SH AH0 N
 derivative	D ER0 IH1 V AH0 T IH0 V
 derivatives	D ER0 IH1 V AH0 T IH0 V Z
@@ -80776,6 +80777,7 @@ mrozinski	M R AH0 Z IH1 N S K IY0
 mrs	M IH1 S IH0 Z
 mruk	M R AH1 K
 ms	M IH1 Z
+msapr	EH2 M S AE1 P ER0
 msgr	M AA0 N S IY1 N Y ER0
 mssrs	M EH1 S ER0 Z
 mt	M AW1 N T
@@ -103763,6 +103765,7 @@ saintly	S EY1 N T L IY0
 saints	S EY1 N T S
 sainz	S EY1 N Z
 saipan	S EY1 P AH0 N
+saipavan	S AY0 P AA1 V AH0 N
 sais	S EY1 Z
 saison	S EY1 S AA0 N
 saitama	S AA2 IH0 T AA1 M AH0

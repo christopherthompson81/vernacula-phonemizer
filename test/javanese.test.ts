@@ -129,7 +129,12 @@ describe("jv text normalization", () => {
         // ⚠ THE COLON IS DECLINED ENTIRELY: every one in the corpus is a 3-field timestamp, a sports time
         // or a Qur'an verse reference — the shapes a clock rule must NOT claim.
         expect(normalizeJavanese("jam 00:02:32 WIB")).toBe("jam 00:02:32 WIB");
-        expect(normalizeJavanese("QS 3:83")).toBe("QS 3:83");
+        // ⚠ THE ASSERTION HERE IS THE COLON, NOT THE `QS`. The verse reference keeps its colon; the
+        // abbreviation in front of it is spelled by the initialism pass, which is what a vowelless
+        // capital run gets. It used to come through untouched and reach the g2p as the cluster [ks] —
+        // green only because a caseless string switched that pass off wholesale (core/initialisms.ts).
+        expect(normalizeJavanese("QS 3:83")).toBe("ki ès 3:83");
+        expect(normalizeJavanese("Ana QS 3:83")).toBe("Ana ki ès 3:83");
     });
 
     test("ranges take nganti — including the two whose endpoints are not bare digits", () => {
