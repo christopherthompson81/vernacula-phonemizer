@@ -38,6 +38,33 @@
                     "note": "A ONE-CHARACTER HEADWORD IS A GLYPH, NOT A WORD, and this referee has no fixed semantics for one: `m` ɛm, `p` piː, `q` kjuː and `a` eɪ are the letter's NAME, while `x` ks is the letter's SOUND. A row whose meaning is not constant within the file cannot arbitrate a reading. 6 rows. ⚠ IT IS SCORE-NEUTRAL BY CONSTRUCTION and that is the point — 3 of the 6 were already passing (m, p, q read as letter names) and 3 were not, so this moves `folded` by 0.01pp. What it removes is three PERMANENT divergences with no fix: `x` we read `ɛks` and misaki gold agrees, so the referee is simply wrong; `A`/`a` we read as the reduced article `ə`, DELIBERATELY, because a bare capital `A` in real text is overwhelmingly sentence-initial and a determiner. Not expressible via `intentional`, which is positionwise and single-character."
                 }
             ]
+        },
+        {
+            "file": "en.moby-lexicon.tsv",
+            "source": "Moby Pronunciator II (Grady Ward, public domain) — words this dictionary carries",
+            "role": "secondary",
+            // ⚠ 35,202 ROWS AGAINST THE PRIMARY'S 4,558, AND THAT IS THE POINT. The wikipron referee is
+            // short AND skewed: 64% of it sits outside the 50k frequency list, so it measures the hard tail
+            // and cannot say whether the BASICS are right. 22,934 of these rows are inside the 40k list.
+            // ⚠ SECONDARY, NOT PRIMARY, BECAUSE IT IS ONLY HALF-INDEPENDENT. #1338 selected ~500 dictionary
+            // corrections on the rule "gold AND Moby agree against us", so for those rows this is partly a
+            // mirror. #1334–#1336 were driven by wikipron + gold and are independent of it; so is the whole
+            // OOV file below, from which no correction has ever been derived.
+            // What is folded into the artifact and what is deliberately left in it — marry–merry and the
+            // conservative yod are LEFT IN, so this referee can still catch a regression on them — is
+            // argued in tools/gen/build-en-moby-referee.mts.
+        },
+        {
+            "file": "en.moby-oov.tsv",
+            "source": "Moby Pronunciator II (Grady Ward, public domain) — words this dictionary does NOT carry",
+            "role": "secondary",
+            // ⚠ THE FIRST REFEREE THIS REPO HAS EVER HAD FOR THE OOV TIER. Every other English referee
+            // scores the lexicon; these 57,503 headwords are absent from g2p-dict.tsv by construction, so
+            // every row exercises the compound / morph / BiLSTM / n-gram path instead. Until now the only
+            // instrument for that was a held-out split of our OWN dictionary, which cannot tell us anything
+            // the dictionary does not already believe.
+            // ⚠ IT IS PROPER-NOUN HEAVY and will score far below the lexicon file — that is the tier, not a
+            // defect. Read it as a baseline to move, not as a quality claim.
         }
     ],
     "segmentJoin": true,

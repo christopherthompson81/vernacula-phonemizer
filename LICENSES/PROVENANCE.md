@@ -46,6 +46,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
 | tools: ASJP/Lexibank Swadesh referees (`mto`, `nog`, `smj`) | Lexibank | CC0 |
 | tools: the 11 `gold-adjudicated`/`gold-freq` referees, `fa-abjad-ipa-gold.tsv`, KRNB tables | in-repo human adjudication / facts hand-read from open-access scholarship | Own work |
+| tools: `en.moby-lexicon.tsv`, `en.moby-oov.tsv` | Moby Pronunciator II (Grady Ward), Project Gutenberg #3205 | PD by explicit grant (§5.3) |
 | `persian/fa-context-restorer.*.onnx` (text component) | Ferdowsi Shahnameh | PD (Tajik edition → §3) |
 
 ## 2. Permissive with attribution — data keeps its license; NOTICE entry required
@@ -225,15 +226,18 @@ Sources that shaped **what** the repo ships without contributing distributable e
 They were read as *witnesses* — does this word exist, how is it spelled, what does an independent
 transcription say — and the artifact was then authored, adjudicated or measured here. They are listed
 because the determination that nothing distributable derives from them is part of this map, and
-because credit is owed either way. Only the Catalan pair below leaves an artifact in `src/`, and that
-one is a *measurement* taken with a tool rather than data copied from it (§5.1); everything else in
-this section informed a decision and left no bytes.
+because credit is owed either way. Two entries are exceptions and are marked as such: the Catalan pair
+leaves an artifact in `src/`, and that one is a *measurement* taken with a tool rather than data copied
+from it (§5.1); and **Moby leaves two derived referee corpora under `tools/`** (§5.3), which is possible
+only because it is public domain by explicit grant rather than merely readable. Everything else in this
+section informed a decision and left no bytes.
 
 | Source | License | Role |
 |---|---|---|
 | **espeak-ng 1.52** — `dictsource/<lang>_list`, `<lang>_extra` | GPL-3.0 | word-hole witness, coverage baseline, and the instrument behind one measured fact-table (§5.1). ⚠ **Not consulted-only for `ps`**: `pashto/lexicon.tsv` derives from `ps_list` and is fenced GPL-3.0 in §4 item 3 |
 | **Wiktionary** — via wikipron, kaikki, and the MediaWiki API | CC-BY-SA 3.0/4.0 | the primary referee family: the 188 human sets in the §3 eval stratum, and the measured floor behind every language in `docs/language-maturity.md` |
 | **epitran** | MIT (code); the wordlists it was run over are often kaikki | the independent *programmatic* second opinion — 32 outputs, used as a deliberately fallible corroborator, never as a target |
+| **Moby Pronunciator II** — `mobypron.unc` | Public domain by grant from the author, Jan 2001 | the third English opinion, independent of both CMUdict and Wiktionary. Arbiter for ~2,000 dictionary corrections, and ⚠ **the one source in this section that DOES leave bytes** — two derived referee corpora, §5.3 |
 
 ### 5.1 espeak-ng 1.52
 
@@ -310,6 +314,48 @@ disagreements are treated as candidates to adjudicate, not as bugs. A language w
 recorded as `🔷 single-source` or `⛔ cannot-verify` in `docs/language-maturity.md` rather than
 quietly reported as fine — an evidence verdict those two sources define the boundary of.
 Attribution is owed under CC-BY-SA regardless of whether a given use shipped bytes.
+
+### 5.3 Moby Pronunciator II
+
+Grady Ward's Moby Pronunciator II, 177,267 entries, distributed as Project Gutenberg eBook #3205. ⚠ **It
+is public domain by an EXPLICIT GRANT, not by age or by assumption** — the file says so in its own header:
+*"Public Domain material by grant from the author, January, 2001."* That is what separates it from every
+other source in this section: the others are read and left behind, and this one may legally be *derived
+from and shipped*.
+
+⚠ **TWO LICENCE TRAPS, BOTH NAVIGATED RATHER THAN ASSUMED AWAY.** The Project Gutenberg *boilerplate*
+wrapped around the content carries a trademark licence on the "Project Gutenberg" name and a
+redistribution clause that has nothing to do with the work itself; the grant above is the operative term
+for the data. The generator reads only the pronunciation body, never the header, and reproduces none of
+it. And the upstream `.unc` file is **not** committed here — only the derived corpora are, which keeps the
+repo free of the boilerplate entirely.
+
+**Why it was brought in.** English had two sources and they share ancestry problems: this repo's lexicon
+is CMUdict-derived, and the wikipron referee is Wiktionary. Moby is independent of both — a third opinion
+with its own lineage — which is what made it usable as an *arbiter* for the ~2,000 dictionary corrections
+in #1334–#1341, where "gold and Moby agree against us" was the selection rule for one band of them.
+
+**What ships.** Two referee corpora built by `tools/gen/build-en-moby-referee.mts`:
+
+| file | rows | role |
+|---|---|---|
+| `en.moby-lexicon.tsv` | 35,202 | words this dictionary carries — 22,934 of them inside the 40k frequency list |
+| `en.moby-oov.tsv` | 57,503 | words it does **not** — the first referee this repo has had for the OOV tier |
+
+⚠ **THEY ARE `secondary`, AND THE REASON IS CIRCULARITY, NOT QUALITY.** One band of #1338's corrections
+was selected on Moby's agreement, so for those rows scoring against it is partly a mirror. #1334–#1336
+were driven by wikipron + gold and are independent of it, as is the entire OOV file, from which no
+correction has ever been derived. The wikipron set remains `primary` and keeps the floor.
+
+⚠ **THE GENERATOR FOLDS NOTATION AND DELIBERATELY DOES NOT FOLD PHONOLOGY**, and that distinction is the
+whole basis for treating the artifact as a referee rather than a mirror. Moby spells out what this engine
+writes as one phone (`ə`+`r` for `ɚ`, two-segment diphthongs); that is transcription convention and is
+folded. Its FORCE/NORTH distinction is folded too, but only because CMUdict has none and this engine
+therefore cannot regress into it. Its unmerged marry–merry and its conservative yod are **left in**, so
+the referee can still catch a regression on the two axes most recently changed here. The argument for each
+is in the generator's header.
+
+Attribution is owed as a courtesy rather than as a licence condition: the grant imposes none.
 
 ## 6. License architecture (to implement at publication)
 
