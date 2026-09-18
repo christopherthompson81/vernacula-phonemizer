@@ -644,3 +644,44 @@ describe("an IY before an R that starts the NEXT element", () => {
         expect(phonemize("experience", "en")).toBe("ɪkspˈɪɹiʲəns");
     });
 });
+
+describe("an acronym beside a number is not a shouting document", () => {
+    const say = (s: string): string => phonemize(s, "en");
+
+    // ⚠ REPORTED AS ONE TOKEN — `wd 40` heard as "d 40" — AND IT WAS THE WHOLE PASS. The initialism
+    // guard read "no lowercase AND has whitespace" as a shouting document, and digits and punctuation
+    // carry no case, so one acronym beside a number satisfied it and core/initialisms.ts returned
+    // early. Adding a single lowercase letter anywhere fixed every row below, which is how it was found.
+    test("an all-caps acronym followed by a number is spelled out", () => {
+        expect(say("WD 40")).toBe("dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i");
+        expect(say("NHS 24")).toBe("ˈɛn ˈeᶦt͡ʃ ˈɛs twˈɛnti fˈɔːɹ");
+        expect(say("MP 3")).toBe("ˈɛm pʰˈiː θɹˈiː");
+        expect(say("DSLR 5")).toBe("dˈiː ˈɛs ˈɛɫ ˈɑːɹ fˈaᶦv");
+    });
+
+    // The same strings with any lowercase in them always worked; that they now AGREE is the point.
+    test("the reading no longer depends on a lowercase letter being present", () => {
+        expect(say("WD 40")).toBe(say("the WD 40").replace("ðə ", ""));
+        expect(say("NHS 24")).toBe(say("the NHS 24").replace("ðə ", ""));
+    });
+
+    // ⚠ A RUN GLUED TO DIGITS IS A CODE WHETHER OR NOT THE DOCUMENT SHOUTS, which is why those two
+    // branches sit ABOVE the guard. `CO2 LEVELS` is two shouting words, so everything that asks
+    // "is this a word" is off — and `CO2` must still not read as "co two".
+    test("a digit-glued code is claimed even inside a shouting document", () => {
+        expect(say("CO2 LEVELS")).toBe("sˈiː ˈoᶷ tʰˈuː lˈɛvəɫz");
+    });
+
+    // ⚠ THE GUARD IS REAL AND MUST STILL FIRE. `acronymLetters` lists acronyms whose lowercase form is
+    // an ordinary word, so in a genuinely shouting document they have to stay words.
+    test("a genuinely shouting document still reads as words", () => {
+        expect(say("WHO CARES")).toBe(say("who cares"));
+        expect(say("IT DEPENDS")).toBe(say("it depends"));
+    });
+
+    // ⚠ AND A CODE IS ONE WORD, NOT A DOCUMENT. Counting caps RUNS instead of words made `(ABC-AA)`
+    // a document and lost the doubled capital that the run above this one exists to protect.
+    test("a hyphenated code is one word, not two shouting ones", () => {
+        expect(say("(ABC-AA)")).toBe("ˈeᶦbiːsˌiː ˈeᶦ ˈeᶦ");
+    });
+});

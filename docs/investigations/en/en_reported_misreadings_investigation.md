@@ -833,3 +833,146 @@ byte-identical.
 are `R IY0` — the same paradigm split one step milder (a length difference, not a
 vowel-quality one: `ɹiːvjˈuː` against `ɹivjˈuː…`). Not reported, and correcting it
 means the same three-row judgement on a word nobody has complained about.
+
+## Run 17 — 2026-09-18 13:10 — thirteen reports from a document review, and one gate behind five of them
+
+**Report.** A batch of thirteen, from reading real documents in the desktop reader:
+
+| reported | heard | wanted |
+|---|---|---|
+| `horsepower` | horse-pour | horse-power |
+| `Section G.2` | G 2 | gee point two |
+| `PSI` | psy | P S I |
+| `wd 40` | d 40 | W D forty |
+| `litres/day` | litres day | litres per day |
+| `m³/hr` | cubic meters H R | cubic metres per hour |
+| `Colin` | co-lin | call-lin |
+| `vs` | v s | versus |
+| `derivable` | der-iv-able | der-**I**v-able |
+| `Oct-Dec 2024` | Oct December 2024 | October to December 2024 |
+| `Saipavan` | s'puvan | sI-PA-van |
+| `FREQUENCY/CRITERIA` | frequency criteria | frequency slash criteria |
+| `MSAPR` | M S A P R | em sapper |
+
+**Question.** Which reproduce, and against which engine? The reports come from the app, which runs
+the C# port, so a report could be a port defect rather than an engine one.
+
+**Raw finding — the first probe was wrong, and wrong in a way worth recording.** Comparing
+`phonemize()` in TypeScript against `PhonemizeAsync` in C# showed four rows differing:
+
+```
+                TS (sync)          C# (async)
+wd 40           wd fˈɔːɹt̬i         wdˈiː fˈɔːɹt̬i
+litres/day      lˈɪtɹˌeᶦz dˈeᶦ     lˈiːt̬ɚz dˈeᶦ
+derivable       dɚˈaᶦvəbəɫ         dɚˈɪvəbəɫ
+Saipavan        sˈeᶦpəvən          spˈʌvən
+```
+
+Every differing row is an OOV word, which is the tell: `phonemize()` is the SYNC entry point and
+falls back to the n-gram, while `PhonemizeAsync` loads the BiLSTM. Re-probed through
+`phonemizeAsync`, the two engines are byte-identical on all thirteen. **No port defect.** The parity
+gate's own header warns about exactly this ("the goldens are async-mode output"); the warning is
+about generating goldens, and it applies just as much to an ad-hoc comparison.
+
+Corrected baseline, `en`, neural:
+
+```
+horsepower           hˈɔːɹspaᶷɚ             ← already correct, does not reproduce
+Section G.2          sˈɛkʃən d͡ʒˈiː . tʰˈuː  ← the dot is a phrase break, not "point"
+PSI                  sˈaᶦ                   ← read as the Greek letter
+wd 40                wdˈiː fˈɔːɹt̬i
+litres/day           lˈiːt̬ɚz dˈeᶦ           ← slash dropped
+m³/hr                ˈɛm kjˈuːbd ˌeᶦt͡ʃˈɑːɹ
+Colin                kʰˈoᶷlɪn
+vs                   vˌiːʲˈɛs
+derivable            dɚˈɪvəbəɫ
+Oct-Dec 2024         ˈɔːkt dᵻsˈɛmbɚ …       ← Dec expanded, Oct not
+FREQUENCY/CRITERIA   fɹˈiːkwənsi kɹaᶦtʰˈɪɹiʲə
+MSAPR                ˈɛm ˈɛs ˈeᶦ pʰˈiː ˈɑːɹ
+Saipavan             spˈʌvən
+```
+
+**The finding that outgrew the report.** `wd 40` looked like one bad token. It is not:
+
+```
+"WD 40"        → wdˈiː fˈɔːɹt̬i        "WD 40 spray"  → dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i   ✓
+"NHS 24"       → ˌɛnˈɛs …             "the NHS 24"   → ðə ˈɛn ˈeᶦt͡ʃ ˈɛs …       ✓
+"ISO 9001"     → ˈaᶦsoᶷ nˈaᶦn …
+"DSLR 5"       → dˈiːzɫjɚ fˈaᶦv
+"WTO 2024"     → wtˈuː …
+"CO2 LEVELS"   → kʰˈoᶷ tʰˈuː lˈɛvəɫz
+```
+
+Adding one lowercase letter anywhere fixes every one of them. `core/initialisms.ts` opens with
+
+```js
+if (!/\p{Ll}/u.test(text) && /\s/u.test(text.trim())) return text;
+```
+
+— the shouting-document guard. Digits and punctuation carry no case, so a heading, a table cell or a
+form field with no lowercase in it satisfies "no lowercase + has whitespace" and **the entire
+initialism pass is switched off**. The failures it then produces — `NHS` with the H gone, `WTO` as
+*wtoo*, `DSLR` as *deezlyer*, `CO2` as *co two* — are verbatim the failures the file's own header
+says the pass exists to prevent. The reader reaching this often is not bad luck: a document under
+review is full of all-caps cells and headings.
+
+**What the guard actually protects.** Walking the branches: `isRecorded` and the pronounceable
+fall-through both return the token unchanged, and the glued-digit and unreadable branches only ever
+claim runs that cannot be a shouted word. The only branch that would misfire on a shouting document
+is `acronymLetters` — the lexical list of acronyms whose lowercase form IS a word (`US`, `IT`, `WHO`,
+`LED`), where `WHO CARES` would become *W H O CARES*. So the guard is needed for exactly one branch
+and is being applied to all six.
+
+**Implication.** Narrow the guard to the `acronymLetters` branch instead of returning early. That is
+strictly additive — the only outputs that can change are glued-digit codes and vowelless runs, both
+of which are wrong today by construction.
+
+**The narrow fix was wrong, and the goldens said so.** Guarding only `acronymLetters` and letting the
+unreadable arm run made one tt row stale:
+
+```
+text: ПОЛОЖЕНИЕ ПО БУХГАЛТЕРСКОМУ УЧЁТУ «УЧЁТ ФИНАНСОВЫХ ВЛОЖЕНИЙ» ПБУ 19/02
+want: … finansoˈvɨx vloʒeˈnij pˈbu …
+got : … finansoˈvɨx ˈve ˈel ˈo ˈʒe ˈje ˈen ˈi qɨˈsqɑ ˈi ˈpe ˈbe ˈu …
+```
+
+`ВЛОЖЕНИЙ` is an ordinary Russian word in a Russian title being read by the TATAR engine, and its
+⟨вл⟩ onset is illegal in Tatar phonotactics — so the unreadable arm calls it OOV and spells it out.
+The claim that the unreadable arm "only claims runs that cannot be a shouted word" is therefore
+false: a shouting document can contain a foreign word that no phonotactic test will save. The guard
+is real; it was only its DEFINITION that was wrong.
+
+(The same row also shows the guard costing something: `ПБУ` stays the cluster [pbu]. Both are true
+at once, which is why the answer is a better document test rather than removing the guard.)
+
+**Second attempt: count caps RUNS ≥ 2.** Failed on `(ABC-AA)` — a project code, one word, two runs,
+no document anywhere in sight, and the `AA` that Run 12 had fixed went back to reading as CMUdict's
+Hawaiian lava word.
+
+**What shipped: count WHITESPACE-SEPARATED WORDS containing a caps run, ≥ 2.** The tt title is eight
+such words; every shape in this batch is one; `(ABC-AA)` is one. And the two branches that claim a
+run GLUED TO DIGITS moved above the guard, because a code is a code whether or not the document
+shouts — that is what recovers `CO2 LEVELS` → "C O two".
+
+```
+WD 40        dˈʌbɫ̩juː dˈiː fˈɔːɹt̬i          NHS 24     ˈɛn ˈeᶦt͡ʃ ˈɛs twˈɛnti fˈɔːɹ
+DSLR 5       dˈiː ˈɛs ˈɛɫ ˈɑːɹ fˈaᶦv         MP 3       ˈɛm pʰˈiː θɹˈiː
+WTO 2024     dˈʌbɫ̩juː tʰˈiː ˈoᶷ …            CO2 LEVELS sˈiː ˈoᶷ tʰˈuː lˈɛvəɫz
+```
+
+`ISO 9001` deliberately still reads as a word: `iso` is pronounceable and unrecorded, which is the
+documented "needs a data entry" case, and *eye-so* is what people say anyway.
+
+**A pre-existing Polish defect fell out of it.** With the pass no longer switched off, `100 PLN` read
+*sto pe el en*. Not a regression — `mam 100 PLN` (any lowercase at all) read that way already; the
+caseless form was the only one the guard was accidentally rescuing, so the test covering it was green
+on an accident. Cause: the symbol tier runs LAST, so a currency CODE meets the initialism pass first
+and `pln` has no vowel. Fixed where the hook was designed for it — Polish now names its own currency
+codes through `isRecorded`, and BOTH forms now reach the tier as *złotych*.
+
+**Gates.** 6012 TS tests, 6687 C# tests, goldens fresh at 189 languages / 36495 rows, parity 189
+languages byte-identical, regex-diff 143816 probes identical.
+
+**Still open from the batch of thirteen:** `horsepower` does not reproduce (already
+`hˈɔːɹspaᶷɚ`). The other eleven are untouched by this run and are separate causes — the slash, the
+letter-dot-digit, the month range, bare `vs`, two lexicon entries, and two acronym classifications.

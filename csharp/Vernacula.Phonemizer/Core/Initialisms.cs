@@ -61,12 +61,10 @@ public static class Initialisms
 
     private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "gu");
     private static readonly JsRe LOWER_TEST = JsRegex.Compile("\\p{Ll}", "u");
-    private static readonly JsRe SPACE_TEST = JsRegex.Compile("\\s", "u");
-    /**
-     * JS `String.prototype.trim` trims the ECMAScript WhiteSpace+LineTerminator set (U+FEFF included, U+0085
-     * excluded) — not .NET's `Trim()` set.
-     */
-    private static readonly JsRe JS_TRIM = JsRegex.Compile("^\\s+|\\s+$", "gu");
+    /** Two or more capitals in a row, for counting the WORDS of a shouting document. See `shouting`. */
+    private static readonly JsRe CAPS_RUN = JsRegex.Compile("\\p{Lu}{2,}", "u");
+    /** The words of the text, matched rather than split — see the TS. */
+    private static readonly JsRe WORD_RUN = JsRegex.Compile("\\S+", "gu");
 
     /** Build the text→text initialism pass. */
     /**
@@ -85,23 +83,29 @@ public static class Initialisms
 
         string Inner(string text)
         {
-            // ⚠ THE RESULT IS DISCARDED — it only feeds a test, and `text` is what gets returned. On the seam
-            // this would commit the mapping to a string the pipeline never carries, desyncing everything
-            // after it. A `Rewrite` whose output is thrown away is always wrong.
-            if (!LOWER_TEST.IsMatch(text) && SPACE_TEST.IsMatch(JsRegex.Replace(text, JS_TRIM, ""))) return text;
+            // An all-caps DOCUMENT: the capitals carry no signal, so a run that is an ordinary word must
+            // not be spelled out. ⚠ THE UNIT IS THE WHITESPACE-SEPARATED WORD — see the TS for why this
+            // is not "has whitespace" (`WD 40` was a document, and the pass did nothing) and not a count
+            // of caps RUNS (`(ABC-AA)` is two runs in one word).
+            var shouting = !LOWER_TEST.IsMatch(text)
+                && WORD_RUN.Matches(text).Count(w => CAPS_RUN.IsMatch(w.Value)) >= 2;
             return Rw(text, RUN_OR_CODE, m =>
             {
                 var tok = m.Value;
                 var low = lower(tok);
                 var spelled = SpellOut(low, d.LetterName);
                 if (tok.Length < 2) return spelled ?? tok; // attached code: a letter, never a word
-                if (d.AcronymLetters.Contains(low)) return spelled ?? tok; // lexical: a listed exception
                 // ⚠ A two-letter run GLUED to digits is a code, not a word, and this must outrank the
                 // dictionary test below — the whole failing class is runs that ARE words (CO₂, SO₂, NO₂,
                 // AS400). ⚠ `IsAsciiDigit`, not `char.IsDigit`: the TS gate is JS `\d`, which is ASCII.
                 var after = m.Index + tok.Length;
                 var glued = after < text.Length && char.IsAsciiDigit(text[after]);
                 if (glued && tok.Length == 2) return spelled ?? tok;
+                // ⚠ Every branch below is off inside a shouting document, and the two above are not: a run
+                // glued to digits is a CODE either way, while everything below asks whether a run is a
+                // word — the one question all-caps text cannot answer.
+                if (shouting) return tok;
+                if (d.AcronymLetters.Contains(low)) return spelled ?? tok; // lexical: a listed exception
                 if (d.IsRecorded(low)) return tok; // lexical: the dictionary owns it
                 if (d.IsUnreadable(low)) return spelled ?? tok; // OOV: nothing else could be said
                 return tok; // OOV but pronounceable — the OOV g2p reads it as a word
