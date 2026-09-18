@@ -5,12 +5,26 @@
  * residual is the linguistic signal to adjudicate against published phonology (referees are fallible; a
  * divergence is a candidate, not a verdict). See config.ts for the per-language fold justifications.
  *
- * Usage:  npx tsx tools/referee-eval/eval.ts <zu|si|kk> [--examples N]
+ * Usage:  npx tsx tools/referee-eval/eval.ts <zu|si|kk> [--examples N] [--jobs N]
+ *
+ * ⚠ `--jobs N` SHARDS THE ROWS ACROSS N CHILD PROCESSES and merges the sums. The scorer is CPU-bound and
+ * single-threaded, so a big referee used ONE core however many the machine has: en-GB is 76,284 rows through
+ * the neural English G2P and took over eight minutes, against 2m08 at `--jobs 12`. The output is
+ * BYTE-IDENTICAL to the unsharded run and that is the gate — see test/referee-eval-shard.test.ts. Two things
+ * make it so, and both were wrong first:
+ *   • the shard filter is applied INSIDE the loop, so `pairs.length` and therefore `pStride` are the same in
+ *     every shard, and the product-delta sample is keyed on the GLOBAL row index rather than on a per-shard
+ *     running counter — otherwise N shards sample N different row sets.
+ *   • the residual histogram is sorted with a TIE-BREAK on the key. Equal counts otherwise keep insertion
+ *     order, which is row order, so the listed 1× examples changed with the job count while every number
+ *     matched.
+ * `total` and `excluded` describe the full pair list and are taken once; everything else is summed.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { phonemizeAsync } from "../../src/index.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { availableParallelism } from "node:os";
 
 import { phonemizeArabic as ar } from "../../src/languages/arabic/arabic.ts";
 import { phonemizeWord as ca } from "../../src/languages/catalan/catalan.ts";
@@ -661,6 +675,25 @@ export interface RefereeResult {
     // wrong word — the honest measure where the residual is pervasive 1-phone variation (English reduced vowels /
     // dialect / proper-noun anglicisation). Best-matching variant per word (credits any attested pronunciation).
     symbolAcc: number;
+    /** ⚠ THE RAW SUMS, carried so `--jobs` can MERGE shards. Every field above is either one of these or a
+     *  ratio of them, so a merged result is the arithmetic sum of its parts and nothing is re-derived from
+     *  a partial denominator. Not part of the reported output. */
+    acc: {
+        raw: number; folded: number; total: number; excluded: number; intentionalCredited: number;
+        pDiffer: number; pCompared: number; editSum: number; symTot: number;
+        /** ⚠ Σ of the GLOBAL row indices the product-delta sampled. Carried only so a test can compare the
+         *  sampled SET across shardings: `pCompared` sums to the same value whether the sampler keys on the
+         *  global index or on a per-shard counter, so the counts cannot tell those apart and the row
+         *  identities are the only witness. */
+        pIdxSum: number;
+        freqNum: number; freqDen: number; freqCovered: number;
+        diffClass: Record<string, number>; example: Record<string, string>;
+        /** ⚠ The GLOBAL row index each example came from. A shard's `example` map is first-row-in-THAT-SHARD,
+         *  so merging by "first shard that has the key" picks a LATER row than the unsharded run whenever the
+         *  earliest row does not fall in the lowest-numbered shard. Merging by this index instead makes the
+         *  listing identical to the unsharded one for every class, not just the singleton ones. */
+        exampleIdx: Record<string, number>;
+    };
 }
 
 /** Levenshtein distance over two symbol arrays (IPA characters after folding). */
@@ -703,6 +736,10 @@ export async function evaluate(
     // `evaluate(lang, true, 3000)` in the floor test as withDelta=3000 and sampleCap=0 — a signature change
     // that type-checks and quietly measures something else.
     withDelta = false, // compute the product-path delta — CLI only; see RefereeResult.product
+    // ⚠ ROW SHARD for `--jobs`: score only rows whose index ≡ i (mod n) of the FULL pair list. The filter is
+    // applied inside the loop rather than to `pairs`, so `pairs.length` — and therefore `pStride` and the
+    // product-delta sample — stay identical in every shard and the union is exactly the unsharded run.
+    shard: { i: number; n: number } = { i: 0, n: 1 },
 ): Promise<RefereeResult[]> {
     const cfg = CONFIG[lang],
         phon = PHON[lang];
@@ -759,7 +796,7 @@ export async function evaluate(
             folded = 0;
         let pDiffer = 0,
             pCompared = 0,
-            pSeen = 0;
+            pIdxSum = 0;
         const pStride = withDelta ? Math.max(1, Math.ceil(pairs.length / 300)) : 0;
         let freqNum = 0,
             freqDen = 0,
@@ -768,7 +805,9 @@ export async function evaluate(
             symTot = 0; // Σ symbols (max of ours / best-matching ref)
         const diffClass: Record<string, number> = {};
         const example: Record<string, string> = {};
-        for (const row of pairs) {
+        const exampleIdx: Record<string, number> = {};
+        for (const [gi, row] of pairs.entries()) {
+            if (gi % shard.n !== shard.i) continue;
             const w = row[0]!;
             const wCount = freq?.get(w.toLowerCase()) ?? 0; // corpus token count (0 = not a common word)
             // A word may carry MULTIPLE reference pronunciations (kaikki/ca dictionaries list variants) as extra
@@ -789,7 +828,11 @@ export async function evaluate(
             // ⚠ THE PRODUCT-PATH DELTA (#1141) — folded in HERE so it reuses the reading just computed. Doing
             // it in a second pass re-invoked the engine for every sampled row, which for `ar` (ONNX
             // diacritizer), `ckb` (bizroke tagger) and `en` (beam search) meant doubling the model calls.
-            if (withDelta && pStride > 0 && pSeen++ % pStride === 0) {
+            // ⚠ KEYED ON THE GLOBAL INDEX, not on a running counter. A counter advances only over the rows a
+            // shard actually sees, so N shards would sample N different row sets and the merged delta would
+            // describe rows the unsharded run never looked at. Identical to the counter when n = 1.
+            if (withDelta && pStride > 0 && gi % pStride === 0) {
+                pIdxSum += gi;
                 try {
                     const shipped = (await phonemizeAsync(w, lang)).trim();
                     pCompared++;
@@ -846,10 +889,17 @@ export async function evaluate(
             }
             const key = `${of}  ≠  ${foldedRefs[0]!}`;
             diffClass[key] = (diffClass[key] ?? 0) + 1;
-            example[key] ??= `${w}: ${ours}  |  ${row.slice(1).join(" / ")}`;
+            if (example[key] === undefined) {
+                example[key] = `${w}: ${ours}  |  ${row.slice(1).join(" / ")}`;
+                exampleIdx[key] = gi;
+            }
         }
         const residual = Object.entries(diffClass)
-            .sort((a, b) => b[1] - a[1])
+            // ⚠ TIE-BROKEN ON THE KEY. Equal counts otherwise keep INSERTION order, which is row order —
+            // so `--jobs N` (which merges shard by shard) listed a different set of 1× examples than the
+            // unsharded run while every number matched. A reported example that moves with the job count
+            // is not reproducible evidence.
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
             .map(([key, count]) => ({ key, count, example: example[key]! }));
         out.push({
             source: ref.source,
@@ -863,23 +913,120 @@ export async function evaluate(
             folded,
             residual,
             symbolAcc: symTot ? 1 - editSum / symTot : 0,
+            acc: {
+                raw, folded, total: pairs.length, excluded, intentionalCredited,
+                pDiffer, pCompared, pIdxSum, editSum, symTot, freqNum, freqDen, freqCovered,
+                diffClass, example, exampleIdx,
+            },
             ...(freq ? { freqWeighted: freqDen ? freqNum / freqDen : 0, freqCovered } : {}),
         });
     }
     return out;
 }
 
+/**
+ * Merge shard results into the single result the unsharded run would have produced.
+ *
+ * ⚠ TWO KINDS OF FIELD, AND SUMMING THE WRONG ONE INFLATES THE DENOMINATOR. `total` and `excluded`
+ * describe the FULL pair list and every shard reports the same value, so they are taken ONCE. Everything
+ * else is a per-row tally and is summed. The ratios are then recomputed from the merged sums rather than
+ * averaged — averaging ratios over unequal shards is not the same number.
+ */
+export function mergeShards(parts: RefereeResult[][]): RefereeResult[] {
+    return parts[0]!.map((first, ri) => {
+        const accs = parts.map((p) => p[ri]!.acc);
+        const sum = (f: (a: RefereeResult["acc"]) => number): number => accs.reduce((n, a) => n + f(a), 0);
+        const diffClass: Record<string, number> = {};
+        const example: Record<string, string> = {};
+        const exampleIdx: Record<string, number> = {};
+        for (const a of accs) {
+            for (const [k, v] of Object.entries(a.diffClass)) diffClass[k] = (diffClass[k] ?? 0) + v;
+            // ⚠ EARLIEST GLOBAL ROW WINS, not earliest shard. `??=` here took whichever shard came first,
+            // which is a LATER row than the unsharded run picks whenever the earliest row is not in shard 0.
+            for (const [k, v] of Object.entries(a.example))
+                if (exampleIdx[k] === undefined || a.exampleIdx[k]! < exampleIdx[k]!) {
+                    example[k] = v; exampleIdx[k] = a.exampleIdx[k]!;
+                }
+        }
+        const editSum = sum((a) => a.editSum), symTot = sum((a) => a.symTot);
+        const freqNum = sum((a) => a.freqNum), freqDen = sum((a) => a.freqDen);
+        const freqCovered = sum((a) => a.freqCovered);
+        const acc: RefereeResult["acc"] = {
+            raw: sum((a) => a.raw), folded: sum((a) => a.folded),
+            total: first.acc.total, excluded: first.acc.excluded,          // ⚠ once, not summed
+            intentionalCredited: sum((a) => a.intentionalCredited),
+            pDiffer: sum((a) => a.pDiffer), pCompared: sum((a) => a.pCompared),
+            pIdxSum: sum((a) => a.pIdxSum),
+            editSum, symTot, freqNum, freqDen, freqCovered, diffClass, example, exampleIdx,
+        };
+        return {
+            source: first.source, role: first.role, path: first.path,
+            product: { differ: acc.pDiffer, compared: acc.pCompared },
+            excluded: acc.excluded, intentionalCredited: acc.intentionalCredited,
+            total: acc.total, raw: acc.raw, folded: acc.folded,
+            residual: Object.entries(diffClass)
+                // ⚠ TIE-BROKEN ON THE KEY. Equal counts otherwise keep INSERTION order, which is row order —
+            // so `--jobs N` (which merges shard by shard) listed a different set of 1× examples than the
+            // unsharded run while every number matched. A reported example that moves with the job count
+            // is not reproducible evidence.
+            .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+                .map(([key, count]) => ({ key, count, example: example[key]! })),
+            symbolAcc: symTot ? 1 - editSum / symTot : 0,
+            ...(first.freqWeighted !== undefined
+                ? { freqWeighted: freqDen ? freqNum / freqDen : 0, freqCovered }
+                : {}),
+            acc,
+        };
+    });
+}
+
+/** Run the shards as child processes and merge. One process per shard because the scorer is CPU-bound and
+ *  single-threaded: en-GB is 76k rows through the neural English G2P and used one core of however many. */
+async function runSharded(lang: string, jobs: number): Promise<RefereeResult[]> {
+    const { spawn } = await import("node:child_process");
+    const parts = await Promise.all(
+        Array.from({ length: jobs }, (_, i) => new Promise<RefereeResult[]>((res, rej) => {
+            const child = spawn("npx", ["tsx", fileURLToPath(import.meta.url), lang, "--shard", `${i}/${jobs}`],
+                { stdio: ["ignore", "pipe", "inherit"] });
+            let buf = "";
+            child.stdout.on("data", (d: Buffer) => { buf += d.toString(); });
+            child.on("error", rej);
+            child.on("close", (code) => {
+                if (code !== 0) { rej(new Error(`shard ${i} exited ${code}`)); return; }
+                try { res(JSON.parse(buf) as RefereeResult[]); } catch (e) { rej(e as Error); }
+            });
+        })),
+    );
+    return mergeShards(parts);
+}
+
 async function main(): Promise<void> {
     const lang = process.argv[2];
     if (!lang || !CONFIG[lang]) {
         console.error(
-            `usage: eval.ts <${Object.keys(CONFIG).join("|")}> [--examples N]`,
+            `usage: eval.ts <${Object.keys(CONFIG).join("|")}> [--examples N] [--jobs N]`,
         );
         process.exit(1);
     }
+    // ⚠ A SHARD PRINTS JSON AND NOTHING ELSE — the parent parses its whole stdout. Child stderr is inherited
+    // so a real error is still visible.
+    const shIdx = process.argv.indexOf("--shard");
+    if (shIdx >= 0) {
+        const [i, n] = (process.argv[shIdx + 1] ?? "0/1").split("/").map(Number);
+        process.stdout.write(JSON.stringify(await evaluate(lang, false, 0, true, { i: i!, n: n! })));
+        return;
+    }
     const exIdx = process.argv.indexOf("--examples");
     const nEx = exIdx >= 0 ? Number(process.argv[exIdx + 1] ?? 25) : 12;
-    for (const r of await evaluate(lang, false, 0, true)) {
+    const jIdx = process.argv.indexOf("--jobs");
+    // ⚠ CLAMPED: each shard is a whole child process that loads the engine, so an unbounded `--jobs` is a
+    // fork bomb with a model in each one. More than the core count is slower anyway — measured on the C#
+    // parity gate, where 12 processes beat 6 on CPU and lost on wall clock.
+    const jobs = jIdx >= 0
+        ? Math.min(Math.max(1, Math.trunc(Number(process.argv[jIdx + 1]) || 1)), availableParallelism())
+        : 1;
+    const results = jobs > 1 ? await runSharded(lang, jobs) : await evaluate(lang, false, 0, true);
+    for (const r of results) {
         console.log(
             `\n=== ${lang} vs ${r.source} [${r.role}] (${r.total} words) ===`,
         );

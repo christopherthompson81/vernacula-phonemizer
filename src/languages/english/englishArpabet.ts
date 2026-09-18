@@ -31,6 +31,35 @@ function split(phone: string): { base: string; stress: number } {
 /** The sibilants, before which the `-es` suffix takes an epenthetic vowel at all. */
 const SIBILANT: ReadonlySet<string> = new Set(["S", "Z", "SH", "ZH", "CH", "JH"]);
 
+/**
+ * Is the `R` after this `IY` the ONSET of a following element rather than a coda on the same syllable?
+ *
+ * ⚠ THE `beforeR` LAXING IS RIGHT FOR A CODA AND WRONG ACROSS A MORPHEME BOUNDARY. `career` is kɚˈɪɹ, but
+ * `copyright` is copy + right and its IY belongs to `copy` — laxing it gave kʰˈɑːpɪɹˌaᶦt, "copperite". The
+ * rule fired on the R alone, which cannot tell the two apart.
+ *
+ * ⚠ AND PREVOCALIC-R IS NOT THE DISCRIMINATOR, which is why this is a morphological test and not a
+ * phonological one. Measured against misaki gold over every dict row with IY immediately before R: gold
+ * writes `ɪɹ` on 28 of 28 codas AND on 20 of 34 ONSETS — `careerism`, `experience`, `serious` are all lax
+ * across an onset r. The 14 it writes `iɹ` on are ALL a productive prefix or compound-initial element
+ * ending in /iː/ before an ⟨r⟩- or ⟨wr⟩-initial base: copy|right, copy|writer, deoxy|ribonucleic,
+ * de|regulation, pre|record, pre|requisite, re|route, re|running, re|written, re|wrote.
+ *
+ * ⚠ THE ⟨wr⟩ HALF IS LOAD-BEARING: `rewriting` has no ⟨r⟩ after the prefix at all, because ⟨wr⟩ spells /r/.
+ * Testing only for ⟨r⟩ misses `rewrite`, `rewrote`, `rewritten`, `copywriter`.
+ *
+ * ⚠ THE TEST IS ON THE WHOLE WORD, SO IT EXEMPTS EVERY `IY`-BEFORE-`R` IN A MATCHING WORD, not only the
+ * one at the morpheme boundary. That is safe today and measured: of the 37 dict rows the guard fires on,
+ * NONE has a second IY-before-R site. A word that had one would need this tightened to locate the boundary
+ * rather than test the spelling once.
+ *
+ * Scored over the 62 gold-covered rows: 14 correct, 0 missed, 0 false positives, 48 correctly silent. It
+ * then generalises to 22 more dict rows gold does not cover (`rerouted`, `rewrite`, `deregulated`,
+ * `copyrights`, `prerequisites`), which is why this is a rule and not the 14-word list it was nearly
+ * written as.
+ */
+const IY_PREFIX_BEFORE_R = /^(?:copy|deoxy|re|pre|de)(?:r|wr)/u;
+
 /** Should this unstressed vowel-phone at index `vi` (nucleus number `ni`) surface as the weak vowel ᵻ?
  *  Cleanroom weak-vowel-merger rule from the WORD's morphology (public GenAm phonology). */
 function isBarredI(
@@ -415,7 +444,7 @@ const VOWELS = new Set(def.vowels);
                 else if (base === "ER")
                     out += stress <= 0 ? cv.ER.unstressed : cv.ER.stressed;
                 else if (base === "IY")
-                    out += nextIsR
+                    out += nextIsR && !IY_PREFIX_BEFORE_R.test(word)
                         ? cv.IY.beforeR
                         : stress <= 0
                           ? cv.IY.unstressed

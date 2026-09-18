@@ -207,7 +207,15 @@ public static class JsRegex
 
     private static JsRe CompileUncached(string pattern, string flags)
     {
-        var options = RegexOptions.CultureInvariant | RegexOptions.Compiled;
+        // ⚠ NOT RegexOptions.Compiled, AND THAT IS MEASURED. Compiled JITs a bespoke matcher per pattern,
+        // which only pays back if the pattern then runs many times. This fleet's patterns do not: 2,357
+        // distinct patterns across 189 languages, most of them touched a handful of times in a process.
+        // The parity gate over all 189 goldens went 131s → 81.5s single-threaded on this one line, and the
+        // JIT never wins even on the HEAVIEST single language — `nan` 24.6s → 23.8s, `hak` 11.5s → 9.9s,
+        // `en-GB` 4.8s → 3.8s — so there is no steady-state case to preserve and no reason to promote
+        // hot patterns lazily. Output is unchanged: 189/189 goldens byte-identical, and regex-diff's
+        // 143,678 probes still agree with V8 exactly.
+        var options = RegexOptions.CultureInvariant;
         bool global = false, sticky = false, singleline = false, multiline = false, unicode = false;
         foreach (var f in flags)
         {

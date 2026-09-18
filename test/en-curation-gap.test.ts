@@ -36,6 +36,40 @@ const KNOWN_GAPS = new Map<string, string>([
     // the model. Left open deliberately: `wa` is a real dict row and raising the minimum stem length reaches
     // far past this word. Cheap to fix, not obviously right to fix.
     ["was", "morph (source M): `wa` + allomorph Z reconstructs the upstream W AA1 Z; see comment above"],
+
+    // ⚠ THE COMPOUND-SEAM GEMINATE, and the remedy for these five was MEASURED AND REJECTED — do not
+    // "fix" it by turning off `collapseGeminates` on the compositional paths. The dict geminates a
+    // compound seam (`bookkeeper` B UH1 K K IY2 P ER0, `misspell`, `coattail`, `lamppost` — 93 rows) and
+    // these five were corrected to match it, but the C/M paths collapse the seam, so each reconstructs
+    // the upstream. Scoring the collapse on an UNBIASED 1-in-10 sweep of the dict says keep it: collapsing
+    // matches the dict on 36 rows against 7, because `legally`/`cynically`/`artificially` really are one
+    // L. Splitting it by path (keep the seam on C, collapse on M) then came out 3 against 4 — a wash —
+    // because the dictionary ITSELF is inconsistent: it geminates `bookkeeper` and collapses `granddad`
+    // and `spacesuit`. There is no target to converge on. See the referee audit investigation, Run 17.
+    ["earrings", "seam (source M): `ear` + `rings` collapses the R R; measured, see above"],
+    ["forerunner", "seam (source C): `fore` + `runner` collapses the R R; measured, see above"],
+    ["forerunners", "seam (source C): `fore` + `runners` collapses the R R; measured, see above"],
+    ["roommate", "seam (source C): `room` + `mate` collapses the M M; measured, see above"],
+    ["roommates", "seam (source M): `roommate` + `s` collapses the M M; measured, see above"],
+    ["teammate", "seam (source C): `team` + `mate` collapses the M M; measured, see above"],
+
+    // ⚠ MORPH-PATH ROWS, like `was` above and NOT like the structural set below: each has a stem the
+    // decoder reaches, and each reconstructs the upstream through a rule the morphology does not carry.
+    ["truths", "morph (source M): `truth` + `s`; the /θ/ → /ðz/ plural allomorph is not in the suffix table"],
+    ["matrices", "morph (source M): the -ices plural reconstructs IH0 S IH0 Z rather than IH0 S IY2 Z"],
+    ["fairbanks", "morph (source M): `fairbank` + `s` reduces the compound's second element to AH0"],
+    ["cannes", "morph (source M): read as an English `-es` plural; the word is French and the s is silent"],
+    ["ares", "morph (source M): `are` + `s`; the word is the god's name, ˈɛɹiːz, not a plural of `are`"],
+    ["idler", "morph (source M): `idle` + `er` keeps idle's syllabic l, which does not survive the suffix"],
+    ["leominster", "compound (source C): split as `leo` + `minster`; the name is ˈlɛmənstɚ"],
+    ["soledad", "compound (source C): split as `sole` + `dad`, which drops the middle syllable"],
+    ["wolfram", "compound (source C): `wolf` + `ram` gives the second element a full vowel it does not have"],
+    ["cloths", "morph (source M): `cloth` + `s`; the /θ/ → /ðz/ plural allomorph is not in the suffix table"],
+    ["wreaths", "morph (source M): `wreath` + `s`; same missing /θ/ → /ðz/ allomorph as truths and cloths"],
+    ["loathing", "morph (source M): decodes through the ADJECTIVE `loath` (voiceless) rather than the verb `loathe`"],
+    ["lowland", "compound (source C): `low` + `land` gives -land the full vowel it keeps in woodland but not here"],
+    ["neolithic", "compound (source C): `neo` + `lithic` keeps neo's full OW and its own primary stress"],
+    ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
 ]);
 
 /**
@@ -73,38 +107,40 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
-    "allelic", "ara", "arab", "arable", "arenson", "arrant", "arrick", "arrow", "atman", "audible", "awe",
-    "babka", "baile", "baranek", "barratt", "barrel", "barrett", "barrie", "barrineau", "barris",
-    "barrowman", "barry", "bellini", "benne", "bes", "blog", "bobble", "boche", "boff", "bog", "bridie",
-    "calabria", "caliph", "cana", "carignan", "carrel", "carrigan", "carrigg", "carris", "carriveau",
-    "carry", "casual", "cause", "causeway", "chomp", "clarisse", "clarridge", "clarrisse", "coauthor",
-    "conger", "conversely", "cost", "cutoff", "dacron", "dagenham", "dal", "darin", "darrin", "debrief",
-    "denomination", "denominational", "der", "discography", "discombobulate", "dogma", "drachma",
-    "dramatize", "dubrovnik", "duce", "dulce", "eamon", "embargo", "embark", "embattle", "embitter",
-    "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode", "encompass", "encourage",
-    "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enjoyment", "enliven", "enmesh",
-    "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty", "envisage",
-    "envision", "escudo", "esse", "evolve", "excoriate", "extort", "extortion", "extortionate",
-    "extortionist", "extraction", "extrapolate", "extravagance", "extravagant", "extreme", "extremist",
-    "farabee", "faraday", "farold", "favela", "felonious", "fide", "finland", "foggy", "forensic", "foster",
-    "frog", "gala", "garrahan", "garraway", "garrels", "garrett", "garrigan", "garriott", "garris",
-    "garritt", "garrott", "garroway", "garry", "genotype", "golf", "graben", "grana", "granum", "hadrian",
-    "hamm", "harral", "harralson", "harrel", "harrill", "harring", "harriott", "harrisburgh", "harrity",
-    "hebron", "hematite", "hog", "homs", "hoss", "hulme", "hypertrophy", "ideal", "indonesia", "insular",
-    "jarratt", "joseph", "kana", "kanji", "karrick", "karriker", "kersey", "kingsport", "klarich",
-    "knockoff", "lachlan", "larimer", "larison", "larrabee", "loge", "loggerhead", "loggia", "marold",
-    "marolf", "marolt", "masochist", "mccarrell", "mccarrick", "mccarroll", "mccarron", "mccarry",
-    "mcclaran", "mcgarity", "mckarrick", "mende", "minke", "mulligatawny", "necrologist", "necrology",
-    "nerine", "ocarroll", "olde", "on", "onset", "parrett", "parriott", "pharris", "poor", "pravda",
-    "quahog", "rahway", "raj", "rarick", "rebuke", "relation", "relational", "remission", "remove",
-    "remunerative", "repression", "repressive", "repulsive", "restrict", "restriction", "restrictive",
-    "retention", "retract", "retraction", "revision", "revisionist", "revolve", "rouse", "runoff", "saas",
-    "salsa", "sandhog", "sauternes", "scarry", "schara", "schedule", "selene", "semi", "serologist",
-    "sharrett", "sharrock", "sharron", "sharrow", "soave", "sodom", "sodomize", "spawn", "splenic",
-    "stanch", "stasi", "status", "stomp", "strata", "stratus", "swanky", "synagogue", "tawny", "taxol",
-    "tharrington", "turnoff", "twangy", "ulm", "unencumbered", "unenforceable", "unwashed", "vegan", "vela",
-    "virulence", "virulent", "wank", "wash", "washy", "wat", "watchdog", "williamsport", "writhe", "zaftig",
-    "zara"
+    "admire", "allelic", "appreciable", "ara", "arab", "arable", "arenson", "arrant", "arrick", "arrow", "atman",
+    "audible", "awe", "babka", "baile", "baranek", "barratt", "barrel", "barrett", "barrie", "barrineau", "barris",
+    "barrowman", "barry", "bellini", "benne", "bes", "beseech", "blog", "bobble", "boche", "boff", "bog", "bridie",
+    "calabria", "caliph", "cana", "carignan", "carrel", "carrigan", "carrigg", "carris", "carriveau", "carry",
+    "casual", "cause", "causeway", "chomp", "clarisse", "clarridge", "clarrisse", "coarticulate", "coauthor",
+    "conger", "conversely", "convex", "cost", "cruelty", "curry", "cutoff", "cyclist", "dacron", "dagenham", "dal",
+    "darin", "darrin", "debrief", "denomination", "denominational", "der", "discography", "discombobulate",
+    "dogma", "drachma", "dramatize", "dubrovnik", "duce", "dulce", "dwire", "eamon", "eh", "embargo", "embark",
+    "embattle", "embitter", "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode",
+    "encompass", "encourage", "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enjoyment",
+    "enliven", "enmesh", "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty",
+    "envisage", "envision", "escudo", "esse", "evolve", "excoriate", "exorcism", "expire", "extort", "extortion",
+    "extortionate", "extortionist", "extraction", "extrapolate", "extravagance", "extravagant", "extreme",
+    "extremist", "farabee", "faraday", "farold", "favela", "felonious", "fide", "fie", "finland", "fireman",
+    "foggy", "forensic", "foster", "frog", "gala", "galloway", "garrahan", "garraway", "garrels", "garrett",
+    "garrigan", "garriott", "garris", "garritt", "garrott", "garroway", "garry", "genotype", "golf", "graben",
+    "grana", "granum", "guire", "hadrian", "hamm", "harral", "harralson", "harrel", "harrill", "harring",
+    "harriott", "harrisburgh", "harrity", "hebron", "heifer", "hematite", "hog", "homeopathic", "homs", "hoss",
+    "hulme", "hypertrophy", "hyre", "ideal", "idiopathic", "indonesia", "insular", "jarratt", "joseph", "kana",
+    "kanji", "karrick", "karriker", "kersey", "kinda", "kingsport", "klarich", "knockoff", "lachlan", "larimer",
+    "larison", "larrabee", "loge", "loggia", "lorain", "lough", "marold", "marolf", "marolt", "masochist",
+    "mccarrell", "mccarrick", "mccarroll", "mccarron", "mccarry", "mcclaran", "mcgarity", "mckarrick", "mende",
+    "mezzo", "minke", "monarchy", "mulligatawny", "myre", "necrologist", "necrology", "nerine", "obscene",
+    "ocarroll", "olde", "on", "onset", "parrett", "parriott", "pedicure", "permutate", "pharris", "polka", "poor",
+    "pravda", "pretzel", "privilege", "quahog", "quire", "rahway", "raj", "rarick", "realization", "rebuke",
+    "relation", "relational", "remission", "remove", "remunerative", "repression", "repressive", "repulsive",
+    "restrict", "restriction", "restrictive", "retention", "retract", "retraction", "reunite", "revision",
+    "revisionist", "revolve", "riel", "rouse", "runoff", "saas", "salsa", "sandhog", "sauternes", "scarry",
+    "schara", "schedule", "selene", "semi", "serologist", "sharrett", "sharrock", "sharron", "sharrow", "shire",
+    "smyre", "soave", "sodom", "sodomize", "spawn", "splenic", "stanch", "stasi", "status", "stipend", "stomp",
+    "strata", "stratus", "suggestive", "swanky", "synagogue", "tawny", "taxol", "tharrington", "thyme", "turnoff",
+    "twangy", "tyre", "ulm", "unencumbered", "unenforceable", "unreal", "unwashed", "uranium", "urea", "urine",
+    "urology", "vegan", "vela", "virulence", "virulent", "wank", "wash", "washy", "wat", "watchdog", "waymire",
+    "williamsport", "wireman", "writhe", "wuhan", "wyre", "zaftig", "zara"
 ]);
 
 function dict(path: string): Map<string, string[]> {

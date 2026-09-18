@@ -38,6 +38,13 @@
  * modernisation.
  */
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+/** ⚠ Derived from THIS MODULE, not from the cwd. Every other path this file reads is a parameter; the
+ *  heteronym table was briefly a bare relative string, which silently ties `audit()` to being called from
+ *  the repo root. */
+const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // ── source converters ────────────────────────────────────────────────────────────────────────────────
 
@@ -124,11 +131,24 @@ export function mobyToArpabet(p: string): string[] | undefined {
     return out.length ? out : undefined;
 }
 
-/** Fold Moby's pre-merger layers so it can vote on modern GenAm. See the header. */
+/**
+ * Fold Moby's pre-merger layers AND its rhotic notation so it can vote on modern GenAm. See the header.
+ *
+ * ⚠ MOBY SPELLS EVERY UNSTRESSED `-ər` AS TWO SYMBOLS, `/@/r` — `ocular` is \'/A/k/j//@/l/@/r. Both this
+ * repo and gold write that as the single phone ER, so without folding it back the converter returned
+ * `AH0 R` and EVERY WORD ENDING IN -er/-or/-ar/-ur fell out of the audit into "split" — the two sources
+ * could never be seen to agree. That is not a small class: it hid the whole `-ular`/`-ulation` family
+ * (`ocular`, `mandibular`, `ventricular`, `permutation`), where Moby in fact agrees with gold exactly.
+ * ⚠ THE CONSONANT LOOKAHEAD IS LOAD-BEARING. `AH R` before a VOWEL is an onset `r` in the next syllable
+ * (`around` = ə-ɹaʊnd), not a coda, and folding it would rewrite that as ɚ.
+ */
 export function modernise(a: string[]): string[] {
     const out: string[] = [];
     for (let i = 0; i < a.length; i++) {
         const p = a[i]!, b = p.replace(/[0-2]$/u, ""), st = p.slice(b.length);
+        if (b === "AH" && a[i + 1] === "R" && !VOWELS.has((a[i + 2] ?? "").replace(/[0-2]$/u, ""))) {
+            out.push(`ER${st}`); i++; continue;                                 // /@/r → ɚ
+        }
         if (b === "OW" && a[i + 1] === "R") { out.push(`AO${st}`); continue; }   // FORCE → NORTH
         if (b === "Y" && out.length > 0 && a[i + 1]?.startsWith("UW")) {
             const prev = out[out.length - 1]!;
@@ -161,6 +181,17 @@ export interface Candidate { rank: number; word: string; ours: string[]; agreed:
 export function audit(dictPath: string, freqPath: string, goldPath: string, mobyPath: string): {
     compared: number; agree: number; candidates: Candidate[]; split: number;
 } {
+    // ⚠ A DECLARED HETERONYM IS NOT COMPARABLE and must be skipped, for the same reason the audit skips
+    // gold's POS-conditioned entries: the dict row is only the fallback, and english.jsonc `heteronyms`
+    // is what the engine actually reads. All 8 that surfaced — `accent`, `address`, `concrete`, `detour`,
+    // `egress`, `lead` — already carry the RIGHT default there; the dict row they sit on is dead weight,
+    // and "fixing" it to match the sources would have moved a row the engine never consults.
+    const het = new Set<string>(
+        Object.keys(JSON.parse(
+            readFileSync(join(REPO, "data/languages/english/english.jsonc"), "utf8")
+                .replace(/^\s*\/\/.*$/gmu, "").replace(/,(\s*[}\]])/gu, "$1"),
+        ).heteronyms as Record<string, unknown>),
+    );
     const dict = new Map<string, string[]>();
     for (const l of readFileSync(dictPath, "utf8").split("\n")) {
         if (l.startsWith("#") || !l.includes("\t")) continue;
@@ -189,7 +220,7 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
     const candidates: Candidate[] = [];
     freq.forEach((w, rank) => {
         const ours = dict.get(w), g = goldOf(w), m = moby.get(w);
-        if (!ours || !g || !m) return;
+        if (!ours || !g || !m || het.has(w)) return;
         const ga = goldToArpabet(g);
         if (!ga) return;
         compared++;

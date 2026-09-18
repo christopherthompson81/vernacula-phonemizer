@@ -170,19 +170,23 @@ describe("a closed final syllable on a true diphthong keeps its secondary stress
         });
 
         test("stress 0 flaps", () => {
-            expect(say("TH ER1 D IY0", "thirty")).toBe("θˈɝd̬i");
+            expect(say("TH ER1 T IY0", "thirty")).toBe("θˈɝt̬i");
             expect(say("F AO1 R T IY0", "forty")).toBe("fˈɔːɹt̬i");
             expect(say("S IH1 T IY0", "city")).toBe("sˈɪt̬i");
         });
 
-        // ⚠ `thirty` WAS THE ONE DECADE WRITTEN IY2 — twenty, forty, fifty, sixty, seventy, eighty and
-        // ninety are all IY0, and gold says θˈɜɹɾi. That is a bad dictionary row, and it is fixed in
+        // ⚠ `thirty` WAS WRONG TWICE IN THE SAME ROW. It was the one decade written IY2 — twenty, forty,
+        // fifty, sixty, seventy, eighty and ninety are all IY0, and gold says θˈɜɹɾi. Its medial consonant
+        // was ALSO written D where every other decade has T, so it rendered `d̬` while `forty` rendered
+        // `t̬`: this test asserted that the decades DISAGREED. The D was caught later, by the triple-source
+        // audit (gold and Moby both have T), and the two now genuinely agree. That is a bad dictionary
+        // row, and it is fixed in
         // g2p-dict.tsv rather than by bending the flap rule around it: reading the post-clash stress
         // instead scores +29 of 80,222 on exact agreement and WORSE on flaps (997 over-flaps against
         // 866), because it flaps compounds whose second element really does take a beat — `sawtooth`
         // → *sˈɔTuθ, `detox` → *dˈiTɑks.
         test("and the decades agree with each other", () => {
-            expect(phonemize("thirty", "en")).toBe("θˈɝd̬i");
+            expect(phonemize("thirty", "en")).toBe("θˈɝt̬i");
             expect(phonemize("forty", "en")).toBe("fˈɔːɹt̬i");
             // twenty is NOT a flap case — its t follows N, not a vowel. gold agrees: twˈɛnti.
             expect(phonemize("twenty", "en")).toBe("twˈɛnti");
@@ -212,7 +216,7 @@ describe("relational operators, fiscal years, and slashed rate units", () => {
     // INVERSE claim, and a dropped `±` turns a tolerance into a wrong number.
     test("the Unicode relationals are read", () => {
         expect(phonemize("Panels lit at ≥30%", "en"))
-            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː θˈɝd̬i pɚsˈɛnt");
+            .toBe("pʰˈænəɫz lˈɪt æt ɡɹˈeᶦt̬ɚ ðæn ɔːɹ ˈiːkwɫ̩ tʰuː θˈɝt̬i pɚsˈɛnt");
         expect(phonemize("a ≠ b", "en")).toBe("ə nɑːt ˈiːkwɫ̩ tʰuː bˈiː");
         expect(phonemize("a ± b", "en")).toBe("ə plˈʌs ɔːɹ mˈaᶦnəs bˈiː");
         expect(phonemize("x ≤ 5", "en")).toContain("lˈɛs ðæn ɔːɹ ˈiːkwɫ̩ tʰuː");
@@ -588,7 +592,8 @@ describe("a prefix the dictionary spelled two ways in one paradigm", () => {
         expect(say("report")).toBe("ɹᵻpʰˈɔːɹt");
         // ⚠ AND THE PRINCIPLE THE REJECTED RULE ESTABLISHED STILL HOLDS: the Latinate prefix was reduced in
         // the DICTIONARY, 40 rows picked by two independent sources agreeing, never by a rule over `IY`.
-        expect(say("reacquire")).toBe("ɹiʲəkwˈaᶦɹ");
+        // (its -ire tail is ˈaᶦɚ since the -ire rhyme class; the prefix is what this line pins.)
+        expect(say("reacquire")).toBe("ɹiʲəkwˈaᶦɚ");
         expect(say("react")).toBe("ɹiʲˈækt");
     });
 });
@@ -610,5 +615,32 @@ describe("detail is not a part-of-speech heteronym", () => {
     test("the real heteronyms still turn on their part of speech", () => {
         expect(say("an abstract idea")).toContain("ˈæbstɹækt");
         expect(say("they abstract the data")).toContain("æbstɹˈækt");
+    });
+});
+
+// `copyright` reported as "copperite". The IY→ɪ laxing before R fired on the R ALONE, which cannot tell a
+// CODA (`career`, kɚˈɪɹ) from the ONSET of a following element (`copy` + `right`, where the IY belongs to
+// `copy`). Fixed by a morphological guard, because the phonological one does not exist: gold laxes across
+// an onset r too, in `careerism`, `experience` and `serious`.
+describe("an IY before an R that starts the NEXT element", () => {
+    test("the reported word and the rest of its class", () => {
+        expect(phonemize("copyright", "en")).toBe("kʰˈɑːpiɹˌaᶦt");
+        expect(phonemize("copywriter", "en")).toBe("kʰˈɑːpiɹˌaᶦt̬ɚ");
+        // ⚠ ⟨wr⟩ SPELLS /r/, so these have no ⟨r⟩ after the prefix at all and a bare ⟨r⟩ test misses them.
+        expect(phonemize("rewrite", "en")).toBe("ɹiɹˈaᶦt");
+        expect(phonemize("rewritten", "en")).toBe("ɹiɹˈɪt̬ən");
+        expect(phonemize("reroute", "en")).toBe("ɹiɹˈuːt");
+        expect(phonemize("prerequisite", "en")).toBe("pɹiɹˈɛkwəzət");
+        expect(phonemize("deregulation", "en")).toBe("diɹˌɛɡjəlˈeᶦʃən");
+    });
+
+    // ⚠ AND THE GUARD MUST NOT REACH A REAL beforeR, which is 48 of the 62 gold-covered rows — 28 codas
+    // and 20 onsets. Without the onset controls this test would pass on a "prevocalic r" rule, which is
+    // the rule the measurement rejected.
+    test("a genuine beforeR is untouched, coda and onset alike", () => {
+        expect(phonemize("career", "en")).toBe("kɚˈɪɹ");          // coda
+        expect(phonemize("careerism", "en")).toBe("kɚˈɪɹɪzəm");   // ONSET, and still lax
+        expect(phonemize("serious", "en")).toBe("sˈɪɹiʲəs");
+        expect(phonemize("experience", "en")).toBe("ɪkspˈɪɹiʲəns");
     });
 });

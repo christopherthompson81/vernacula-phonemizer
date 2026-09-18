@@ -115,6 +115,15 @@
     "heteronyms": {
         "absent": { "default": "ˈæbsənt", "verb": "æbsˈɛnt" },
         "abstract": { "default": "ˈæbstɹækt", "verb": "æbstɹˈækt" },
+        // ⚠ THESE TWO ARE HERE BECAUSE english.ts DELIBERATELY DOES NOT DERIVE THEM. It resolves the -s form
+        // of a stress-shift heteronym at runtime (stem reading + sibilant allomorph), so `records`,
+        // `projects` and 70-odd others need no row here and must not get one — a static copy of a runtime
+        // rule is a second source of truth that goes stale silently. But `isVoicingHeteronym` EXCLUDES
+        // voicing pairs, whose plural voicing is irregular (`house` hˈaᶷs → hˈaᶷzᵻz), and defers them to the
+        // flat lexicon — which carries ONE reading. So "he uses it" read the NOUN's /s/, jˈuːsᵻz.
+        // ⚠ Stated, not derived, which is the right mechanism for an irregular: each reading is written out
+        // rather than computed from the stem. gold agrees on both (jˈuzᵻz/jˈusᵻz, əbjˈuzᵻz/əbjˈusᵻz).
+        "abuses": { "default": "əbjˈuːsᵻz", "verb": "əbjˈuːzᵻz" },
         "abuse": { "default": "əbjˈuːs", "verb": "əbjˈuːz" },
         "accent": { "default": "ˈæksɛnt", "verb": "əksˈɛnt" },
         "addict": { "default": "ˈædɪkt", "verb": "ədˈɪkt" },
@@ -175,7 +184,12 @@
         "essay": { "default": "ˈɛseᶦ", "verb": "ɛsˈeᶦ" },
         "estimate": { "default": "ˈɛstəmət", "verb": "ˈɛstəmˌeᶦt" },
         "excess": { "default": "ˈɛksɛs", "verb": "ɪksˈɛs" },
-        "excise": { "default": "ˈɛksaᶦz", "verb": "ɛksˈaᶦs" },
+        // ⚠ THE VERB IS /z/, NOT /s/, AND THAT MAKES THIS A STRESS PAIR RATHER THAN A VOICING ONE. misaki
+        // gold has ˈɛksˌIz / ɪksˈIz and Moby /I/k's/aI/z — both readings voiced, in both sources. With the
+        // /s/ the two readings differed only in their FINAL CONSONANT, so `isVoicingHeteronym` classified
+        // it as a voicing pair and english.ts stopped deriving its -s plural, which then fell to the flat
+        // lexicon as a single reading. Corrected, `excises` is derived POS-gated for free.
+        "excise": { "default": "ˈɛksaᶦz", "verb": "ɛksˈaᶦz" },
         "exploit": { "default": "ˈɛksplɔᶦt", "verb": "ɛksplˈɔᶦt" },
         "export": { "default": "ˈɛkspɔːɹt", "verb": "ɪkspˈɔːɹt" },
         "extract": { "default": "ˈɛkstɹækt", "verb": "ɪkstɹˈækt" },
@@ -253,6 +267,7 @@
         "update": { "default": "ˈʌpdeᶦt", "verb": "əpdˈeᶦt" },
         "upgrade": { "default": "ˈʌpɡɹeᶦd", "verb": "əpɡɹˈeᶦd" },
         "upset": { "default": "ˈʌpsɛt", "verb": "əpsˈɛt" },
+        "uses": { "default": "jˈuːsᵻz", "verb": "jˈuːzᵻz" },
         "use": { "default": "jˈuːs", "verb": "jˈuːz" },
         "wind": { "default": "wˈɪnd", "verb": "wˈaᶦnd" },
         "wound": { "default": "wˈuːnd", "past": "wˈaᶷnd" },
