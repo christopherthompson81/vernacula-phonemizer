@@ -186,6 +186,20 @@ public static class EnglishArpabet
     private static readonly JsRe IBLE = JsRegex.Compile("ibl[ey]?$");
     private static readonly JsRe LATINATE_PREFIX = JsRegex.Compile("^(be|de|re|se|pre)[^aeiouy]");
 
+    /**
+     * Is the `R` after an `IY` the ONSET of a following element rather than a coda on the same syllable?
+     *
+     * The `BeforeR` laxing is right for a coda and wrong across a morpheme boundary: `career` is kɚˈɪɹ, but
+     * `copyright` is copy + right and its IY belongs to `copy` — laxing gave kʰˈɑːpɪɹˌaᶦt, "copperite".
+     * Prevocalic-r is NOT the discriminator, so this is morphological: measured against misaki gold over
+     * every dict row with IY immediately before R, gold writes `ɪɹ` on 28 of 28 codas AND on 20 of 34
+     * onsets (`careerism`, `experience`, `serious`). The 14 it writes `iɹ` on are all a productive prefix
+     * or compound-initial element ending in /iː/ before an ⟨r⟩- or ⟨wr⟩-initial base.
+     * The ⟨wr⟩ half is load-bearing: `rewriting` has no ⟨r⟩ after the prefix, because ⟨wr⟩ spells /r/.
+     * See the TS twin in englishArpabet.ts for the full scoring.
+     */
+    private static readonly JsRe IY_PREFIX_BEFORE_R = JsRegex.Compile("^(?:copy|deoxy|re|pre|de)(?:r|wr)");
+
     /** Should this unstressed vowel-phone at index `vi` (nucleus number `ni`) surface as the weak vowel ᵻ?
      *  Cleanroom weak-vowel-merger rule from the WORD's morphology (public GenAm phonology). */
     private static bool IsBarredI(string word, IReadOnlyList<Phone> P, int vi, int ni, int nucleiCount)
@@ -299,7 +313,7 @@ public static class EnglishArpabet
                     else if (bas == "IH" && IsBarredI(word, P, i, ni, nucleiIdx.Count)) outSb.Append('ᵻ');
                     else if (bas == "AH") outSb.Append(stress <= 0 ? cv.AH.Unstressed : cv.AH.Stressed);
                     else if (bas == "ER") outSb.Append(stress <= 0 ? cv.ER.Unstressed : cv.ER.Stressed);
-                    else if (bas == "IY") outSb.Append(nextIsR ? cv.IY.BeforeR : stress <= 0 ? cv.IY.Unstressed : cv.IY.Stressed);
+                    else if (bas == "IY") outSb.Append(nextIsR && !IY_PREFIX_BEFORE_R.IsMatch(word) ? cv.IY.BeforeR : stress <= 0 ? cv.IY.Unstressed : cv.IY.Stressed);
                     else if (bas == "UW") outSb.Append(nextIsR ? cv.UW.BeforeR : cv.UW.Default);
                     else outSb.Append(map.TryGetValue(bas, out var mv) ? mv : bas);
                     if (bas == "IY" && nextIsV) outSb.Append('ʲ');

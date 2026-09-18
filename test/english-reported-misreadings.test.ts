@@ -617,3 +617,30 @@ describe("detail is not a part-of-speech heteronym", () => {
         expect(say("they abstract the data")).toContain("æbstɹˈækt");
     });
 });
+
+// `copyright` reported as "copperite". The IY→ɪ laxing before R fired on the R ALONE, which cannot tell a
+// CODA (`career`, kɚˈɪɹ) from the ONSET of a following element (`copy` + `right`, where the IY belongs to
+// `copy`). Fixed by a morphological guard, because the phonological one does not exist: gold laxes across
+// an onset r too, in `careerism`, `experience` and `serious`.
+describe("an IY before an R that starts the NEXT element", () => {
+    test("the reported word and the rest of its class", () => {
+        expect(phonemize("copyright", "en")).toBe("kʰˈɑːpiɹˌaᶦt");
+        expect(phonemize("copywriter", "en")).toBe("kʰˈɑːpiɹˌaᶦt̬ɚ");
+        // ⚠ ⟨wr⟩ SPELLS /r/, so these have no ⟨r⟩ after the prefix at all and a bare ⟨r⟩ test misses them.
+        expect(phonemize("rewrite", "en")).toBe("ɹiɹˈaᶦt");
+        expect(phonemize("rewritten", "en")).toBe("ɹiɹˈɪt̬ən");
+        expect(phonemize("reroute", "en")).toBe("ɹiɹˈuːt");
+        expect(phonemize("prerequisite", "en")).toBe("pɹiɹˈɛkwəzət");
+        expect(phonemize("deregulation", "en")).toBe("diɹˌɛɡjəlˈeᶦʃən");
+    });
+
+    // ⚠ AND THE GUARD MUST NOT REACH A REAL beforeR, which is 48 of the 62 gold-covered rows — 28 codas
+    // and 20 onsets. Without the onset controls this test would pass on a "prevocalic r" rule, which is
+    // the rule the measurement rejected.
+    test("a genuine beforeR is untouched, coda and onset alike", () => {
+        expect(phonemize("career", "en")).toBe("kɚˈɪɹ");          // coda
+        expect(phonemize("careerism", "en")).toBe("kɚˈɪɹɪzəm");   // ONSET, and still lax
+        expect(phonemize("serious", "en")).toBe("sˈɪɹiʲəs");
+        expect(phonemize("experience", "en")).toBe("ɪkspˈɪɹiʲəns");
+    });
+});

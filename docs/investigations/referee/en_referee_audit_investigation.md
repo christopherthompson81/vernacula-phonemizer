@@ -1667,3 +1667,40 @@ tests catch them; that is the only reason to believe they do.
     tests 5,996 / 312 files   goldens 0 stale   C# parity 189 byte-identical   package fence ok
     en 59.9% / 65.1% +intentional      en-GB 48.7% (47.5% at the start of this branch)
     triple-source agreement 68.9% → 80.2%   candidates 587 → 271
+
+## Run 19 — 2026-09-17 21:20
+
+The `IY beforeR` exception, queued since Run 16 because `copyright` is rank #150 and read `kʰˈɑːpɪɹˌaᶦt`
+— "copperite".
+
+The laxing fired on the following `R` alone, which cannot tell a CODA from the ONSET of the next element.
+⚠ AND THE OBVIOUS FIX — "don't lax before a PREVOCALIC r" — IS WRONG, which is why this was measured
+before it was written. Scoring every dict row with `IY` immediately before `R` against misaki gold:
+
+    gold writes ɪɹ on 28 of 28 CODAS
+    gold writes ɪɹ on 20 of 34 ONSETS      ← careerism, experience, serious are lax across an onset r
+    gold writes iɹ on the other 14
+
+The 14 are ALL a productive prefix or compound-initial element ending in /iː/ before an ⟨r⟩-initial base:
+`copy|right`, `copy|righted`, `copy|writer`, `deoxy|ribonucleic`, `de|regulation`, `pre|record`,
+`pre|recorded`, `pre|requisite`, `re|reading`, `re|route`, `re|running`, `re|writing`, `re|written`,
+`re|wrote`. So the discriminator is morphological, not phonological.
+
+    /^(?:copy|deoxy|re|pre|de)(?:r|wr)/    14 correct, 0 missed, 0 false positives, 48 correctly silent
+
+⚠ THE ⟨wr⟩ HALF IS LOAD-BEARING and a bare ⟨r⟩ test looked complete: `rewriting`, `rewrote`, `rewritten`
+and `copywriter` have NO ⟨r⟩ after the prefix, because ⟨wr⟩ spells /r/. Four of fourteen, silently missed.
+
+⚠ WRITTEN AS A RULE RATHER THAN THE 14-WORD LIST IT NEARLY WAS, because it then fires correctly on 22 more
+dict rows gold does not cover (`rerouted`, `rewrite`, `rewrites`, `deregulated`, `deregulatory`,
+`copyrights`, `prerequisites`, `reregulation`) and on OOV `re-` forms the list could never reach. That is
+the opposite call from the en-GB lexical sets, and for the opposite reason: there the membership is not
+recoverable from the GenAm output, here it is recoverable from the SPELLING, which this converter already
+has in hand for `isBarredI`.
+
+⚠ CAUGHT BY THE GOLDEN GATE IN A LANGUAGE THAT IS NOT ENGLISH, again: `hak.tsv` carries a Hakka sentence
+containing `deoxyribonucleic`.
+
+### Invariants
+
+    tests 5,998 / 312 files   goldens 0 stale   C# parity 189 byte-identical   regex-diff 0 differ
