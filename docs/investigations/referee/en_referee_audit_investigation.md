@@ -1704,3 +1704,58 @@ containing `deoxyribonucleic`.
 ### Invariants
 
     tests 5,998 / 312 files   goldens 0 stale   C# parity 189 byte-identical   regex-diff 0 differ
+
+## Run 20 — 2026-09-17 21:55
+
+The last queued item: the POS-conditioned entries gold has and we do not. Recorded as "298 heteronyms"
+in Run 16; the real number is neither 298 nor the 513 the first query returned.
+
+### ⚠ 513 → 247. Most of gold's POS entries are not heteronyms at all.
+
+    a POS whose reading is NULL (gold DECLINING a reading, not a pronunciation):  60
+    same segments, STRESS only:                                                  206
+    genuine segmental alternations:                                              247
+
+The 206 are `in`, `is`, `by`, `this`, `it`, `or`, `be`, `as`, `have`, `will`, `can`, `my`, `has`, `he`,
+`there`, `his`, `who`, `been`, `would`, `me`, `these`, `had`, `her`, `through`, `could` — FUNCTION WORDS
+whose two readings differ only in a stress mark. This engine de-accents those at the PHRASE layer, which
+is the third time on this branch that the same fact has had to be re-derived: it is also normalise step 1
+in the audit and the reason `and`/`your` sit in the candidate list looking like defects.
+
+### The 79 that were free
+
+Of the 247, ⚠ 79 are the `-s` INFLECTION of a heteronym THIS ENGINE ALREADY DECLARES — `records`,
+`projects`, `contents`, `subjects`, `objects`, `contracts`, `presents`, `permits`, `conflicts`,
+`abstracts`. The dict carried ONE reading for each, so "the company records revenue" read the noun.
+
+They need no new linguistic judgement: each reading is its stem's already-vetted reading plus the English
+-s allomorph chosen by THAT READING's own last segment. ⚠ The per-reading part is the whole trick —
+`use` is jˈuːs/jˈuːz and the two halves take DIFFERENT allomorphs, giving `uses` jˈuːsᵻz/jˈuːzᵻz. A
+single suffix per word would be wrong for one of the two.
+
+⚠ VERIFIED BY READING-SET, NOT BY POS KEY, and comparing keys would have condemned 38 of the 79. gold
+makes the VERB the default for `constructs`, `contents` and `extracts` where this engine makes the NOUN
+one — which is the right default for `records` and `contracts`. Which reading sits on which key is this
+engine's decision; what gold can confirm is that both readings exist with the segments derived.
+
+    68 of 79 match gold segment for segment
+    11 differ ONLY on declared convention axes: ŋ before /k/ (`increases`), the ᵻ weak vowel
+       (`presents`), unstressed ɛ/ə (`objects`, `subjects`)
+
+The heteronym table goes 120 → 199. ⚠ AND IT WAS 120, NOT THE 220 RECORDED IN RUN 16 — that count came
+from a regex run over `s[s.index('"heteronyms"'):]`, which does not stop at the end of the block and swept
+up every 8-space-indented key in the rest of the file.
+
+⚠ The mechanical rule has exactly ONE exception in the table and it is the same fricative-voicing that
+gives `truths` and `wreaths` their ðz in the dictionary: `house` hˈaᶷs pluralises to hˈaᶷzᵻz. Pinned as a
+one-row exception list rather than smuggled into the rule.
+
+The remaining 168 are not derivable from a declared stem (`document`, `associate`, `certificate`,
+`minute`, `affiliate`, `estimates`, `bass`, `learned`, `mouth`, `closer`) and are left: each is a separate
+judgement about a reading this engine does not currently make at all, which is a different piece of work
+from inheriting one it already does.
+
+### Invariants
+
+    tests 6,001 / 313 files   goldens 0 stale   C# parity 189 byte-identical   package fence ok
+    heteronyms 120 → 199
