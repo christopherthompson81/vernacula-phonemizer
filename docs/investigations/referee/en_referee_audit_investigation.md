@@ -1722,40 +1722,52 @@ whose two readings differ only in a stress mark. This engine de-accents those at
 is the third time on this branch that the same fact has had to be re-derived: it is also normalise step 1
 in the audit and the reason `and`/`your` sit in the candidate list looking like defects.
 
-### The 79 that were free
+### ⚠ THE 79 THAT WERE FREE WERE ALREADY FREE — 75 OF THEM CHANGED NOTHING
 
-Of the 247, ⚠ 79 are the `-s` INFLECTION of a heteronym THIS ENGINE ALREADY DECLARES — `records`,
-`projects`, `contents`, `subjects`, `objects`, `contracts`, `presents`, `permits`, `conflicts`,
-`abstracts`. The dict carried ONE reading for each, so "the company records revenue" read the noun.
+Of the 247, 79 are the `-s` inflection of a heteronym this engine already declares — `records`,
+`projects`, `contents`, `subjects`, `objects`, `contracts`, `presents`. They were written out as table
+rows, each reading derived as its stem's reading plus the English -s allomorph chosen by THAT READING's own
+last segment, and verified against gold by reading-set rather than by POS key.
 
-They need no new linguistic judgement: each reading is its stem's already-vetted reading plus the English
--s allomorph chosen by THAT READING's own last segment. ⚠ The per-reading part is the whole trick —
-`use` is jˈuːs/jˈuːz and the two halves take DIFFERENT allomorphs, giving `uses` jˈuːsᵻz/jˈuːzᵻz. A
-single suffix per word would be wrong for one of the two.
+⚠ **AND THE PREMISE WAS FALSE. `english.ts` ALREADY RESOLVES THEM AT RUNTIME.** Its resolution order is
+documented in its own header — "heteronym (POS-gated, incl. -s plural)" — and lines 172-190 derive the -s
+form of a stress-shift heteronym from the stem, POS-gated, plus `sibilantAllomorph`. The 79 rows duplicated
+a rule the engine already ran.
 
-⚠ VERIFIED BY READING-SET, NOT BY POS KEY, and comparing keys would have condemned 38 of the 79. gold
-makes the VERB the default for `constructs`, `contents` and `extracts` where this engine makes the NOUN
-one — which is the right default for `records` and `contracts`. Which reading sits on which key is this
-engine's decision; what gold can confirm is that both readings exist with the segments derived.
+⚠ THE SIZING THAT MISSED IT COMPARED THE WRONG FILE. It read main's `accent-lexicon.tsv` and found no
+POS-gated reading there, concluding the engine had only one. The lexicon is the FALLBACK; the heteronym
+table is consulted first, so for these words the lexicon row is never reached. Diffing the ENGINE's output
+on all 79 words in three contexts — bare, "the X are here", "he X it" — against main settles it:
 
-    68 of 79 match gold segment for segment
-    11 differ ONLY on declared convention axes: ŋ before /k/ (`increases`), the ᵻ weak vowel
-       (`presents`), unstressed ɛ/ə (`objects`, `subjects`)
+    75 of 79 produce byte-identical output on main and with the rows added
+     4 differ, and all four are the cases `isVoicingHeteronym` EXCLUDES from the runtime derivation
 
-The heteronym table goes 120 → 199. ⚠ AND IT WAS 120, NOT THE 220 RECORDED IN RUN 16 — that count came
-from a regex run over `s[s.index('"heteronyms"'):]`, which does not stop at the end of the block and swept
-up every 8-space-indented key in the rest of the file.
+So the 79 rows were reverted and the four looked at individually. `isVoicingHeteronym` skips pairs whose
+two readings differ only in their final consonant, because their plural voicing is irregular (`house`
+hˈaᶷs → hˈaᶷzᵻz) and defers them to the flat lexicon — which carries one reading.
 
-⚠ The mechanical rule has exactly ONE exception in the table and it is the same fricative-voicing that
-gives `truths` and `wreaths` their ðz in the dictionary: `house` hˈaᶷs pluralises to hˈaᶷzᵻz. Pinned as a
-one-row exception list rather than smuggled into the rule.
+  * `uses`, `abuses` — KEPT as explicit rows. "he uses it" read the noun's /s/ on main. Stating both
+    readings is the right mechanism for an irregular, and gold agrees on both.
+  * `excises` — ⚠ MY ROW WAS A REGRESSION AND I HAD WAVED IT THROUGH. It derived jˈ…ˈaᶦsᵻz with /s/, and
+    I had put it among "11 that differ only on declared convention axes" — but s against z is a CONSONANT,
+    not a convention. The real defect is upstream: the `excise` STEM was written `verb: ɛksˈaᶦs`, where gold
+    (ˈɛksˌIz / ɪksˈIz) and Moby (/I/k's/aI/z) both voice both readings. Corrected there, `excise` stops
+    looking like a voicing pair, the runtime derives `excises` itself, and no row is needed.
+  * `transfers` — DROPPED. `isVoicingHeteronym` false-positives on `transfer` (ɚ against ɝ is a
+    stress-conditioned rhotic, not a voicing contrast), so its plural did fall to the lexicon. But gold
+    gives `transfer` and `transfers` the SAME reading for both parts of speech, so there is no split to
+    assert, and the row would have flipped a common word's default on no evidence.
 
-The remaining 168 are not derivable from a declared stem (`document`, `associate`, `certificate`,
-`minute`, `affiliate`, `estimates`, `bass`, `learned`, `mouth`, `closer`) and are left: each is a separate
-judgement about a reading this engine does not currently make at all, which is a different piece of work
-from inheriting one it already does.
+Net: 2 rows added, 1 upstream row corrected, 76 not taken. The heteronym table goes 120 → 122.
+
+⚠ AND IT WAS 120, NOT THE 220 RECORDED IN RUN 16 — that count came from a regex run over
+`s[s.index('"heteronyms"'):]`, which does not stop at the end of the block and swept up every
+8-space-indented key in the rest of the file.
+
+The remaining 168 of the 247 are not derivable from a declared stem (`document`, `associate`,
+`certificate`, `minute`, `affiliate`, `bass`, `learned`, `mouth`, `closer`) and are left: each is a
+separate judgement about a reading this engine does not currently make at all.
 
 ### Invariants
 
-    tests 6,001 / 313 files   goldens 0 stale   C# parity 189 byte-identical   package fence ok
-    heteronyms 120 → 199
+    heteronyms 120 → 122 (2 added, 1 corrected, 76 reverted as duplicating a runtime rule)

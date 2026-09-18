@@ -1,15 +1,16 @@
 /**
- * THE `-s` FORM OF A HETERONYM IS A HETERONYM TOO, and the dictionary carried only one reading for each.
+ * THE `-s` FORM OF A HETERONYM, AND THE TWO CASES english.ts DOES NOT COVER.
  *
- * ⚠ 79 entries derived from the stems already in english.jsonc `heteronyms`: each reading is its stem's
- * reading plus the English -s allomorph chosen by THAT READING's own last segment, so `use` jˈuːs/jˈuːz
- * gives `uses` jˈuːsᵻz/jˈuːzᵻz — the two forms take DIFFERENT allomorphs and a single suffix would have
- * been wrong for one of them.
+ * ⚠ IT ALREADY COVERS ALMOST ALL OF THEM, AND THIS TEST EXISTS BECAUSE THAT WAS NEARLY MISSED. `english.ts`
+ * resolves the -s form of a stress-shift heteronym AT RUNTIME — stem reading, POS-gated, plus the sibilant
+ * allomorph — so `records`, `projects`, `contracts` and 70-odd others are already correct with no table row,
+ * and must not be given one: a static copy of a runtime rule is a second source of truth that goes stale
+ * silently. 79 such rows were written and then reverted after diffing the ENGINE rather than the flat
+ * lexicon; 75 of them changed nothing at all.
  *
- * ⚠ CONFIRMED AGAINST misaki gold BY READING-SET RATHER THAN BY POS KEY. gold makes the VERB the default
- * for `constructs`, `contents` and `extracts`; this engine makes the NOUN one, which is the right default
- * for `records` and `contracts`. Comparing keys would have called 38 of 79 wrong; comparing the readings
- * says 68 match segment for segment and the other 11 differ only on declared convention axes.
+ * ⚠ WHAT IT DOES NOT COVER IS THE VOICING PAIRS. `isVoicingHeteronym` excludes them, because their plural
+ * voicing is irregular (`house` hˈaᶷs → hˈaᶷzᵻz, not hˈaᶷsᵻz), and defers them to the flat lexicon — which
+ * carries ONE reading. So "he uses it" read the noun's /s/.
  */
 import { describe, expect, test } from "vitest";
 import { readFileSync } from "node:fs";
@@ -20,42 +21,31 @@ const HET: Record<string, Record<string, string>> = JSON.parse(
         .replace(/^\s*\/\/.*$/gmu, "").replace(/,(\s*[}\]])/gu, "$1"),
 ).heteronyms;
 
-describe("heteronym -s inflections", () => {
-    test("the allomorph follows each reading's own final segment", () => {
-        // ⚠ THE WHOLE POINT: one stem, two readings, two DIFFERENT plural allomorphs.
-        expect(HET["uses"]).toEqual({ default: "jˈuːsᵻz", verb: "jˈuːzᵻz" });
-        expect(HET["records"]).toEqual({ default: "ɹˈɛkɚdz", verb: "ɹᵻkʰˈɔːɹdz" });
-        expect(HET["projects"]).toEqual({ default: "pɹˈɑːd͡ʒɛkts", verb: "pɹəd͡ʒˈɛkts" });
+describe("the -s form of a heteronym", () => {
+    test("a voicing pair's plural is POS-gated, not a single lexicon reading", () => {
+        expect(phonemize("He uses it daily.", "en")).toContain("jˈuːzᵻz");
+        expect(phonemize("The uses are many.", "en")).toContain("jˈuːsᵻz");
+        expect(phonemize("He abuses it.", "en")).toContain("əbjˈuːzᵻz");
+        expect(phonemize("The abuses continue.", "en")).toContain("əbjˈuːsᵻz");
     });
 
-    test("every -s entry is its stem's reading plus an allomorph", () => {
-        const SIB = ["s", "z", "ʃ", "ʒ", "t͡ʃ", "d͡ʒ"], VOICELESS = ["p", "t", "k", "f", "θ"];
-        const plural = (i: string): string =>
-            SIB.some((x) => i.endsWith(x)) ? `${i}ᵻz` : VOICELESS.some((x) => i.endsWith(x)) ? `${i}s` : `${i}z`;
-        // ⚠ ONE DOCUMENTED IRREGULAR, and it is the same fricative-voicing that makes `truths` ðz and
-        // `wreaths` ðz in the dictionary: `house` hˈaᶷs pluralises to hˈaᶷzᵻz, voicing the stem's final /s/.
-        // The rule cannot predict it and is not meant to — this is the exception list, and it has one row.
-        const VOICING_PLURAL = new Set(["houses.default"]);
-        let checked = 0;
-        for (const [w, v] of Object.entries(HET)) {
-            // ⚠ `!== w` IS LOAD-BEARING: `.replace(/s$/)` returns the word UNCHANGED when it has no final
-            // ⟨s⟩, so `absent` matched itself as its own stem and the test demanded `absents`.
-            const stem = [w.replace(/s$/u, ""), w.replace(/es$/u, "")].find((x) => x !== w && HET[x]);
-            if (!stem) continue;
-            checked++;
-            for (const [pos, ipa] of Object.entries(v)) {
-                const from = HET[stem]![pos];
-                if (from === undefined || VOICING_PLURAL.has(`${w}.${pos}`)) continue;
-                expect(`${w}.${pos}: ${ipa}`).toBe(`${w}.${pos}: ${plural(from)}`);
-            }
-        }
-        expect(checked).toBeGreaterThanOrEqual(79);
+    // ⚠ `excise` was CLASSIFIED as a voicing pair only because its verb was written with /s/. gold
+    // (ˈɛksˌIz / ɪksˈIz) and Moby (/I/k's/aI/z) both voice BOTH readings. With the row corrected the two
+    // readings differ by STRESS, english.ts derives the plural itself, and no table row is needed.
+    test("excise is a stress pair, so its plural derives at runtime", () => {
+        expect(HET["excises"]).toBeUndefined();
+        expect(phonemize("He excises it.", "en")).toContain("ɛksˈaᶦzᵻz");
+        expect(phonemize("The excises are levied.", "en")).toContain("ˈɛksaᶦzᵻz");
     });
 
-    test("the POS tagger selects between them in a sentence", () => {
+    // ⚠ THE REGRESSION GUARD FOR THE REVERTED 79. If a future change starts writing these rows out again,
+    // this fails — and the point is that the runtime already gets them right without any.
+    test("stress-shift plurals are POS-gated WITHOUT a table row of their own", () => {
+        for (const w of ["records", "projects", "contracts", "presents", "subjects", "objects"])
+            expect(`${w} in table: ${HET[w] !== undefined}`).toBe(`${w} in table: false`);
         expect(phonemize("She opened the presents.", "en")).toContain("pɹˈɛzənts");
         expect(phonemize("The bill presents a problem.", "en")).toContain("pɹᵻzˈɛnts");
-        expect(phonemize("The uses are many.", "en")).toContain("jˈuːsᵻz");
-        expect(phonemize("He uses it daily.", "en")).toContain("jˈuːzᵻz");
+        expect(phonemize("He records it.", "en")).toContain("ɹᵻkʰˈɔːɹdz");
+        expect(phonemize("The records are sealed.", "en")).toContain("ɹˈɛkɚdz");
     });
 });

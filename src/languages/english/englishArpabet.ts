@@ -48,6 +48,11 @@ const SIBILANT: ReadonlySet<string> = new Set(["S", "Z", "SH", "ZH", "CH", "JH"]
  * ⚠ THE ⟨wr⟩ HALF IS LOAD-BEARING: `rewriting` has no ⟨r⟩ after the prefix at all, because ⟨wr⟩ spells /r/.
  * Testing only for ⟨r⟩ misses `rewrite`, `rewrote`, `rewritten`, `copywriter`.
  *
+ * ⚠ THE TEST IS ON THE WHOLE WORD, SO IT EXEMPTS EVERY `IY`-BEFORE-`R` IN A MATCHING WORD, not only the
+ * one at the morpheme boundary. That is safe today and measured: of the 37 dict rows the guard fires on,
+ * NONE has a second IY-before-R site. A word that had one would need this tightened to locate the boundary
+ * rather than test the spelling once.
+ *
  * Scored over the 62 gold-covered rows: 14 correct, 0 missed, 0 false positives, 48 correctly silent. It
  * then generalises to 22 more dict rows gold does not cover (`rerouted`, `rewrite`, `deregulated`,
  * `copyrights`, `prerequisites`), which is why this is a rule and not the 14-word list it was nearly

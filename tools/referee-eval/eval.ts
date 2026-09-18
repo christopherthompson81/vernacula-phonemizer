@@ -24,6 +24,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { phonemizeAsync } from "../../src/index.ts";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { availableParallelism } from "node:os";
 
 import { phonemizeArabic as ar } from "../../src/languages/arabic/arabic.ts";
 import { phonemizeWord as ca } from "../../src/languages/catalan/catalan.ts";
@@ -687,6 +688,11 @@ export interface RefereeResult {
         pIdxSum: number;
         freqNum: number; freqDen: number; freqCovered: number;
         diffClass: Record<string, number>; example: Record<string, string>;
+        /** ⚠ The GLOBAL row index each example came from. A shard's `example` map is first-row-in-THAT-SHARD,
+         *  so merging by "first shard that has the key" picks a LATER row than the unsharded run whenever the
+         *  earliest row does not fall in the lowest-numbered shard. Merging by this index instead makes the
+         *  listing identical to the unsharded one for every class, not just the singleton ones. */
+        exampleIdx: Record<string, number>;
     };
 }
 
@@ -799,6 +805,7 @@ export async function evaluate(
             symTot = 0; // Σ symbols (max of ours / best-matching ref)
         const diffClass: Record<string, number> = {};
         const example: Record<string, string> = {};
+        const exampleIdx: Record<string, number> = {};
         for (const [gi, row] of pairs.entries()) {
             if (gi % shard.n !== shard.i) continue;
             const w = row[0]!;
@@ -882,7 +889,10 @@ export async function evaluate(
             }
             const key = `${of}  ≠  ${foldedRefs[0]!}`;
             diffClass[key] = (diffClass[key] ?? 0) + 1;
-            example[key] ??= `${w}: ${ours}  |  ${row.slice(1).join(" / ")}`;
+            if (example[key] === undefined) {
+                example[key] = `${w}: ${ours}  |  ${row.slice(1).join(" / ")}`;
+                exampleIdx[key] = gi;
+            }
         }
         const residual = Object.entries(diffClass)
             // ⚠ TIE-BROKEN ON THE KEY. Equal counts otherwise keep INSERTION order, which is row order —
@@ -905,7 +915,8 @@ export async function evaluate(
             symbolAcc: symTot ? 1 - editSum / symTot : 0,
             acc: {
                 raw, folded, total: pairs.length, excluded, intentionalCredited,
-                pDiffer, pCompared, pIdxSum, editSum, symTot, freqNum, freqDen, freqCovered, diffClass, example,
+                pDiffer, pCompared, pIdxSum, editSum, symTot, freqNum, freqDen, freqCovered,
+                diffClass, example, exampleIdx,
             },
             ...(freq ? { freqWeighted: freqDen ? freqNum / freqDen : 0, freqCovered } : {}),
         });
@@ -927,9 +938,15 @@ export function mergeShards(parts: RefereeResult[][]): RefereeResult[] {
         const sum = (f: (a: RefereeResult["acc"]) => number): number => accs.reduce((n, a) => n + f(a), 0);
         const diffClass: Record<string, number> = {};
         const example: Record<string, string> = {};
+        const exampleIdx: Record<string, number> = {};
         for (const a of accs) {
             for (const [k, v] of Object.entries(a.diffClass)) diffClass[k] = (diffClass[k] ?? 0) + v;
-            for (const [k, v] of Object.entries(a.example)) example[k] ??= v;
+            // ⚠ EARLIEST GLOBAL ROW WINS, not earliest shard. `??=` here took whichever shard came first,
+            // which is a LATER row than the unsharded run picks whenever the earliest row is not in shard 0.
+            for (const [k, v] of Object.entries(a.example))
+                if (exampleIdx[k] === undefined || a.exampleIdx[k]! < exampleIdx[k]!) {
+                    example[k] = v; exampleIdx[k] = a.exampleIdx[k]!;
+                }
         }
         const editSum = sum((a) => a.editSum), symTot = sum((a) => a.symTot);
         const freqNum = sum((a) => a.freqNum), freqDen = sum((a) => a.freqDen);
@@ -940,7 +957,7 @@ export function mergeShards(parts: RefereeResult[][]): RefereeResult[] {
             intentionalCredited: sum((a) => a.intentionalCredited),
             pDiffer: sum((a) => a.pDiffer), pCompared: sum((a) => a.pCompared),
             pIdxSum: sum((a) => a.pIdxSum),
-            editSum, symTot, freqNum, freqDen, freqCovered, diffClass, example,
+            editSum, symTot, freqNum, freqDen, freqCovered, diffClass, example, exampleIdx,
         };
         return {
             source: first.source, role: first.role, path: first.path,
@@ -1002,7 +1019,12 @@ async function main(): Promise<void> {
     const exIdx = process.argv.indexOf("--examples");
     const nEx = exIdx >= 0 ? Number(process.argv[exIdx + 1] ?? 25) : 12;
     const jIdx = process.argv.indexOf("--jobs");
-    const jobs = jIdx >= 0 ? Math.max(1, Number(process.argv[jIdx + 1] ?? 1)) : 1;
+    // ⚠ CLAMPED: each shard is a whole child process that loads the engine, so an unbounded `--jobs` is a
+    // fork bomb with a model in each one. More than the core count is slower anyway — measured on the C#
+    // parity gate, where 12 processes beat 6 on CPU and lost on wall clock.
+    const jobs = jIdx >= 0
+        ? Math.min(Math.max(1, Math.trunc(Number(process.argv[jIdx + 1]) || 1)), availableParallelism())
+        : 1;
     const results = jobs > 1 ? await runSharded(lang, jobs) : await evaluate(lang, false, 0, true);
     for (const r of results) {
         console.log(

@@ -38,6 +38,13 @@
  * modernisation.
  */
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+/** ⚠ Derived from THIS MODULE, not from the cwd. Every other path this file reads is a parameter; the
+ *  heteronym table was briefly a bare relative string, which silently ties `audit()` to being called from
+ *  the repo root. */
+const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // ── source converters ────────────────────────────────────────────────────────────────────────────────
 
@@ -181,7 +188,7 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
     // and "fixing" it to match the sources would have moved a row the engine never consults.
     const het = new Set<string>(
         Object.keys(JSON.parse(
-            readFileSync("data/languages/english/english.jsonc", "utf8")
+            readFileSync(join(REPO, "data/languages/english/english.jsonc"), "utf8")
                 .replace(/^\s*\/\/.*$/gmu, "").replace(/,(\s*[}\]])/gu, "$1"),
         ).heteronyms as Record<string, unknown>),
     );

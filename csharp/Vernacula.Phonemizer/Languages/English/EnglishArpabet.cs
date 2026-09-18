@@ -196,6 +196,8 @@ public static class EnglishArpabet
      * onsets (`careerism`, `experience`, `serious`). The 14 it writes `iɹ` on are all a productive prefix
      * or compound-initial element ending in /iː/ before an ⟨r⟩- or ⟨wr⟩-initial base.
      * The ⟨wr⟩ half is load-bearing: `rewriting` has no ⟨r⟩ after the prefix, because ⟨wr⟩ spells /r/.
+     * The test is on the WHOLE WORD, so it exempts every IY-before-R in a matching word rather than only
+     * the one at the boundary; of the 37 dict rows it fires on, none has a second such site.
      * See the TS twin in englishArpabet.ts for the full scoring.
      */
     private static readonly JsRe IY_PREFIX_BEFORE_R = JsRegex.Compile("^(?:copy|deoxy|re|pre|de)(?:r|wr)");

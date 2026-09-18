@@ -11,7 +11,12 @@
  *     the rows behind them differ. The `pIdxSum` test below exists for exactly that gap.
  *   • the residual histogram broke ties by INSERTION order, so the listed 1× examples moved with the job
  *     count while every number matched. `kk` is 193 residual classes and all 193 are ties, so any
- *     order-dependence shows up immediately.
+ *     order-dependence in the SORT shows up immediately.
+ *   • the merge picked each class's example from the first SHARD holding that class, where the unsharded
+ *     run picks the first ROW. Those differ whenever a class's earliest row is not in shard 0.
+ *     ⚠ `kk` CANNOT SEE THIS — every one of its 193 classes has count 1, so there is only ever one row to
+ *     choose from and the two rules agree by accident. `vi` is the fixture that can: 278 of its 783 classes
+ *     have count > 1 over only 5,453 rows, and against the old merge it diverged on 129–166 entries.
  */
 import { describe, expect, test } from "vitest";
 import { evaluate, mergeShards, type RefereeResult } from "../tools/referee-eval/eval.ts";
@@ -45,6 +50,23 @@ describe("sharded referee evaluation", () => {
             );
             expect(parts.reduce((t, p) => t + p[0]!.acc.pIdxSum, 0)).toBe(whole.acc.pIdxSum);
         }
+    });
+
+    // ⚠ A SEPARATE FIXTURE, because kk's classes are all singletons and cannot witness this at all.
+    for (const n of [3, 4, 7]) {
+        test(`${n} shards pick each residual example from the same ROW as the unsharded run`, async () => {
+            const whole = (await evaluate("vi", true, 0, true))[0]!;
+            const parts = await Promise.all(
+                Array.from({ length: n }, (_, i) => evaluate("vi", true, 0, true, { i, n })),
+            );
+            const merged = mergeShards(parts)[0]!;
+            expect(merged.residual).toEqual(whole.residual);
+        });
+    }
+
+    test("the vi fixture is dense in REPEATED classes, or the example rule is untested", async () => {
+        const whole = (await evaluate("vi", true, 0, true))[0]!;
+        expect(whole.residual.filter((r) => r.count > 1).length).toBeGreaterThan(100);
     });
 
     test("the fixture actually exercises both hazards", async () => {
