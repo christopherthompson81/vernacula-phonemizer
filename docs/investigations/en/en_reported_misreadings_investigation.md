@@ -1295,3 +1295,23 @@ recorded twice because it will keep showing up wherever a pair is left to the le
 
 **Gates.** 6035 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144106
 probes identical, plus a cross-engine diff on the new shapes.
+
+**Review of Run 22 — three findings.**
+
+⚠ **`the /w/ path` read "the /with path".** A URL is protected only by the letter that usually follows
+a path segment (`example.com/w/page`), and a segment at the END of one is not. The lookbehind now
+refuses a leading slash. This is the same shape as the URL guard on the bare-rate rule two steps
+above, which the comment there already warns about — and it still was not carried over.
+
+⚠ **`R/W easement` reads "read write easement", and that is wrong.** Probing the new rows against
+their second readings turned up the one row that does not meet the bar Run 22 set for itself:
+read/write is dominant and is the reading asked for, but RIGHT-OF-WAY is live in civil and property
+text. Kept, because computing text is far the commoner context and it was the explicit request — but
+recorded in the table's own comment rather than hidden, so the trade-off is visible to whoever reads
+it next. The row to delete if that stops being true.
+
+**Added: `w/out` → without.** Same word as `w/o`, and it fell through both arms — left one letter,
+right three, so neither the single-letter guard nor the label test claimed it.
+
+**Gates.** 6036 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144106
+probes identical, cross-engine diff on 26 shapes byte-identical.

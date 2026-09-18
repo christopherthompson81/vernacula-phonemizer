@@ -748,6 +748,15 @@ describe("a slash, a section dot, a bare abbreviation and a month range", () => 
     test("a bare w-slash is with", () => {
         expect(norm("she was w/ him")).toBe("she was with him");
         expect(norm("w/o milk")).toBe("without milk");
+        expect(norm("w/out milk")).toBe("without milk");
+    });
+
+    // ⚠ AND A SLASH BEFORE IT IS A PATH, NOT THE ABBREVIATION. A URL is protected only by the letter
+    // that usually follows it — a segment at the END of one is not, and `the /w/ path` read
+    // "the /with path".
+    test("a path segment is not the abbreviation", () => {
+        expect(norm("the /w/ path")).toBe("the /w/ path");
+        expect(norm("see http://example.com/w/page")).toBe("see http://example.com/w/page");
     });
 
     // ⚠ `24/7` IS AN IDIOM, NOT A FRACTION. The fraction rule read it "twenty four sevenths"; it is the

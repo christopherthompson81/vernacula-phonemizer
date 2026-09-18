@@ -265,14 +265,18 @@ public static class Normalize
     private static readonly IReadOnlyDictionary<string, string> SLASH_ABBREV = new Dictionary<string, string>
     {
         ["w/o"] = "without", ["c/o"] = "care of", ["n/a"] = "not applicable",
-        ["a/d"] = "analog to digital", ["d/a"] = "digital to analog",
-        ["r/w"] = "read write", ["y/n"] = "yes no",
+        ["w/out"] = "without",
+        ["a/d"] = "analog to digital", ["d/a"] = "digital to analog", ["y/n"] = "yes no",
+        // ⚠ `r/w` is the one row that does not fully meet the bar: read/write is dominant and is the
+        // reading asked for, but RIGHT-OF-WAY is live in civil and property text. See the TypeScript.
+        ["r/w"] = "read write",
     };
 
     /** ⚠ `w/` has no right-hand side, so the pair rule cannot see it and the token reached the g2p as a
      *  dangling letter. Gated on nothing following the slash, so `w/o` stays with the pair rule. */
+    /** ⚠ A leading slash is a PATH, not the abbreviation — `the /w/ path` read "the /with path". */
     private static readonly JsRe W_WITH =
-        JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])w\\/(?![\\p{L}\\d])", "giu");
+        JsRegex.Compile("(?<![\\p{L}\\p{M}\\d/])w\\/(?![\\p{L}\\d])", "giu");
 
     /** The compositional slash — a rate, a fixed abbreviation, or (between two ALL-CAPS labels) the mark
      *  said aloud. See the TypeScript for why prose keeps it silent. */

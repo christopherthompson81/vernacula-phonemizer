@@ -367,7 +367,13 @@ const SLASH_ELIDED: ReadonlySet<string> = new Set(
  */
 const SLASH_ABBREV: Readonly<Record<string, string>> = {
     "w/o": "without", "c/o": "care of", "n/a": "not applicable",
-    "a/d": "analog to digital", "d/a": "digital to analog", "r/w": "read write", "y/n": "yes no",
+    "w/out": "without",
+    "a/d": "analog to digital", "d/a": "digital to analog", "y/n": "yes no",
+    // ⚠ `r/w` IS THE ONE ROW THAT DOES NOT FULLY MEET THE BAR ABOVE, recorded rather than hidden.
+    // Read/write is the dominant reading and the one asked for, but RIGHT-OF-WAY is live in civil and
+    // property text — `R/W easement` now reads "read write easement", which is wrong there. Kept
+    // because computing text is far the commoner context; delete this row if that stops being true.
+    "r/w": "read write",
 };
 
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
@@ -1017,7 +1023,10 @@ export function normalizeEnglish(input: string): string {
     //      ⚠ `w/` IS THE ONE WITH NO RIGHT-HAND SIDE, so the pair rule below cannot see it and the token
     //      reached the g2p as a dangling letter. Claimed first, and gated on the slash being followed by
     //      nothing — `w/o` still belongs to the pair rule and its own entry there.
-    s = rewrite(s, /(?<![\p{L}\p{M}\d])w\/(?![\p{L}\d])/giu, "with");
+    //      ⚠ AND A SLASH BEFORE IT IS A PATH, NOT AN ABBREVIATION. `the /w/ path` read "the /with path":
+    //      a URL is protected only by the letter that usually follows (`example.com/w/page`), and a
+    //      segment at the END of one is not. The lookbehind refuses a leading slash for that reason.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d/])w\/(?![\p{L}\d])/giu, "with");
 
     // 6a3) A SLASH THAT THE TABLE CANNOT ENUMERATE. 6a2 above claims the slashed keys that are WRITTEN
     //      OUT in the unit table (`km/h`, `btu/hr/sf`); everything else kept its slash into the g2p, where
