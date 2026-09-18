@@ -87,3 +87,71 @@ the gap is specific to the Sinitic path, not to the port in general. Not chased 
 `TheReducedPrefixAndTheProductiveOne`, `AnOnsetRSurvivesTheReducedVowel`, two
 `EnglishSpellingVariantsTests`, and `LanguageBootstrapTests.PortedEnginesAnswer`. Pre-existing and not
 touched here; recorded because the suite is not green and a reader will otherwise assume it was.
+
+## Run 2 — 2026-09-18 — the threading refactor, tested and NOT taken
+
+Run 1 concluded that splitting into processes costs 37 s of duplicated setup before concurrency can win
+anything, and that threads would collect it because setup is paid once. That reasoning was incomplete, and
+this run measures it properly: a standalone benchmark against the same 36,495 golden rows, with the
+bootstrap warmed OUTSIDE the timed region, so per-process setup is not in the number at all.
+
+    threads=1   work 76.7 s
+    threads=4   work 54.3 s   1.41×
+    threads=8   work 67.1 s   WORSE than 4
+    threads=16  work 83.1 s   WORSE than serial
+
+⚠ **THREADS DO NOT SCALE EITHER, AND SETUP WAS NEVER THE WHOLE STORY.** Warm-up is 1.1 s here and outside
+the measurement, so whatever limits this is inside the work.
+
+### Five hypotheses, four of them wrong
+
+Each was tested rather than argued, and the first four changed nothing measurable:
+
+  * **ORT / OMP intra-op threads oversubscribing.** `OMP_NUM_THREADS=1 ORT_NUM_THREADS=1`: 76.9 / 53.0 /
+    64.5 / 81.4 — identical curve.
+  * **Load imbalance** — `nan` alone is ~20 s of the 77 s, so one thread could hold the wall time hostage.
+    Re-partitioned at the ROW level (36,495 items, perfect distribution): 75.3 / 48.1 / 56.0 / 78.4. Same
+    shape. Not imbalance.
+  * **The `JsRegex.Compile` global lock**, taken on every call including cache hits. ⚠ MY RUN-1 COUNT WAS
+    3,000 AND IT WAS MEASURED OVER THREE LANGUAGES; the fleet figure is **110,751**. Replaced with a
+    lock-free `ConcurrentDictionary` anyway: 75.4 / 47.6 / 55.5 / 81.5. Not the lock.
+  * **.NET `Regex` runner contention** — a `Regex` caches one runner per instance, and every thread shares
+    the same cached `JsRe` objects, so losers allocate (gen1 collections do jump 212 → ~650 under threads).
+    Gave each thread its own regex cache: 74.8 / 47.6 / 57.2 / 82.4. Not that either.
+
+### ⚠ IT IS ONNX RUNTIME, AND THE MACHINE
+
+Moving all 17 `.onnx` files aside — the documented degraded path, where `createEnglishTagger()` returns
+undefined and the engines fall back to their rule/lexicon tiers — changes the SHAPE of the curve:
+
+                    with ONNX          without ONNX
+    threads=1        75.3 s             72.9 s
+    threads=4        48.1 s  1.57×      38.8 s  1.88×
+    threads=8        56.0 s  worse      36.8 s  1.98×   ← still scaling
+    threads=16       78.4 s  worse      42.7 s
+
+With ONNX the curve peaks at 4 and degrades hard; without it, it keeps scaling to 8 and only degrades at
+16. Shared `InferenceSession` use is a serialisation point that outer threads cannot get past — and the
+English tagger is reached from EVERY language carrying a Latin run, through the foreign-OOV prewarm, so it
+is not confined to the 12 languages that own a model.
+
+⚠ AND EVEN WITHOUT ONNX THE CEILING IS ~2×, on a box whose "16 CPUs" are **8 physical cores with 2 threads
+each** (i7-10700K). Scaling to 8 and degrading at 16 is exactly hyperthreads thrashing a shared L3 on a
+workload that walks large lexicons. The remaining gap to 8× is memory-bound, not lock-bound.
+
+### Not taken, and why
+
+The best case is the real gate going ~82 s → ~50 s, and buying it costs:
+
+  * `Foreign.foreignOov` becoming per-thread — ⚠ WHICH ITS OWN COMMENT ARGUES AGAINST IN THOSE WORDS:
+    "UNLIKE THE HOST STACK THIS ONE MUST STAY SHARED. The memo is deliberately process-wide — a warm cache
+    across languages — so per-thread storage would be the wrong fix." Overturning that for a dev tool's
+    wall clock is the wrong trade.
+  * `Registry.PortPending` becoming per-thread, and the gate's blocked-vs-wrong accounting — the thing it
+    exists to report — being restructured around it.
+  * A `--threads` knob that makes the gate SLOWER than serial at its most obvious setting (16 on a
+    "16-CPU" box), which is a footgun pointed at the next person.
+
+1.6× on a gate that already went 131 s → 82 s for one line in Run 1 is not worth that. Recorded so the next
+person does not re-derive the four dead ends; the ONNX finding is the one worth keeping, because it says
+something about the ENGINE (a shared session serialises concurrent callers) rather than about this tool.
