@@ -295,9 +295,18 @@ const UNIT_RE = new RegExp(
     // centimetres", because that `6` is preceded by ⟨x⟩ while the unit is a SEPARATE token. Only a unit
     // GLUED to the digits can be a code's letter slot; `[\\d,]*` stops at the space, so a spaced unit is
     // never refused however the number is spelled.
-    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?(?<!\\p{L}[\\d,]*)(${
+    // ⚠ AND IT MATCHES THE CODE GROUP EXACTLY — a TOKEN-INITIAL letter, then ONE digit, then a ONE-LETTER
+    // unit — because every looser spelling of it drops a real unit somewhere. `\\p{L}[\\d,]*` behind any unit
+    // refuses ⟨mm⟩ in `A4 210mm` (an earlier rule in this file already eats that space, its own defect) and
+    // leaves the abbreviation to reach the phoneme stream as raw letters. Narrowed to one-letter units it
+    // still refuses ⟨m⟩ in `2x3m`, because the `x`→`by` rewrite runs LATER in this file than the unit rule,
+    // so at this point the text really is `2x3m` and `x` really is a letter behind digits — `2 by 3m rug`,
+    // the same invisible leak. What a code slot has and neither of those has is a letter with NOTHING
+    // alphanumeric before it and exactly ONE digit after: `V6L`, `N2L`, `L4W`. In `2x3m` the `x` is
+    // preceded by a digit; in `A4210m` the unit is two digits past the letter.
+    `${NOT_VERSION}(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?(?!(?<=(?<![\\p{L}\\d])\\p{L}\\d)\\p{L}(?!\\p{L}))(${
         Object.keys(UNITS).sort((a, b) => b.length - a.length)
-            .join("|")})([²³23])?(?![\\p{L}\\p{M}\\d])`,
+            .join("|")})([²³23])?(?![\\p{L}\\p{M}])(?!(?<=(?<!\\p{L})\\p{L})\\d)`,
     "giu",
 );
 
@@ -314,12 +323,17 @@ const UNIT_RE = new RegExp(
  * like: a code’s digit.
  * ⚠ THE SUPERSCRIPTS ARE NOT RESTRICTED. `²`/`³` cannot be a code's digit — nobody writes a postal code
  * with a superscript — so someone who types `L²` means it, and the ambiguity this guards does not exist.
- * ⚠ AND THE MICRO- FORMS ARE DELIBERATELY ABSENT. ⟨µm⟩ is the micrometre, but ⟨µM⟩ is MICROMOLAR, and the
- * two fold together under the case-insensitive lookup this check has to use — so admitting the length
- * would silently admit "square micromolar" with it. ⟨µm2⟩ is not a form anyone writes; the superscript
- * ⟨µm²⟩ is, and it is unaffected.
+ * ⚠ AND THE TEST IS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS, which a list would have got wrong twice
+ * over. Spelled as a set of length keys it declines the whole match for every OTHER unit — so `5 µg2`
+ * stopped reading "square micrograms" and put a RAW µ into the g2p, the precise defect the ⟨µg⟩ entry
+ * above was added to fix. And a hand-kept list of lengths silently drifts: adding ⟨in⟩ or ⟨yd⟩ to UNITS
+ * later would decline `in2`/`yd2` with no test failing. Only a ONE-LETTER ASCII unit can be a code's
+ * slot, and ⟨m⟩ is the only one of those an exponent is meaningful on — which is the whole rule.
  */
-const ASCII_EXPONENT_UNITS: ReadonlySet<string> = new Set(["m", "km", "cm", "mm", "ft", "mi"]);
+function asciiExponentIsCodeDigit(unit: string, exponent: string | undefined): boolean {
+    if (exponent !== "2" && exponent !== "3") return false; // ²/³ can never be a code's digit
+    return /^[A-Za-z]$/u.test(unit) && unit.toLowerCase() !== "m";
+}
 
 /** The Unicode relational operators, none of which were read at all. Ordered longest-first is not needed
  *  — no sign is a prefix of another — but the ASCII `<`/`>` are deliberately NOT here: they are handled
@@ -1120,8 +1134,8 @@ export function normalizeEnglish(input: string): string {
             // THROW. Declaring ⟨W⟩ correctly is what exposed it here.
             const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, u);
             if (forms === undefined) return _m; // unresolvable → leave the text alone
-            // An ASCII exponent on anything but a length is an alphanumeric code, not a measurement.
-            if ((exp === "2" || exp === "3") && !ASCII_EXPONENT_UNITS.has(u.toLowerCase())) return _m;
+            // An ASCII exponent on a one-letter unit that is not ⟨m⟩ is a code's digit, not an exponent.
+            if (asciiExponentIsCodeDigit(u, exp)) return _m;
             const [sg, pl] = forms;
             // English puts the measure word BEFORE the unit — "square kilometers" — and the COUNT still
             // governs the noun: "one cubic meter", not "one cubic meters".

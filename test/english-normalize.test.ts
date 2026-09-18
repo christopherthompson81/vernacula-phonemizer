@@ -534,6 +534,53 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
         expect(normalizeEnglish("Model 3G3")).not.toMatch(/gram/u);
     });
 
+    // ⚠ EVERY LOOSER SPELLING OF THIS GUARD DROPS A REAL UNIT, and each of these is one that did. The
+    // shape refused is the CODE GROUP exactly — a token-initial letter, one digit, a one-letter unit —
+    // and the failures below are what forced each narrowing:
+    //   · `\p{L}[\d,]*` behind ANY unit refused ⟨mm⟩ in `A4 210mm` (an earlier rule in this file already
+    //     eats that space, its own defect), leaving the abbreviation to reach the g2p as raw letters;
+    //   · narrowed to one-letter units it still refused ⟨m⟩ in `2x3m`, because the `x`→`by` rewrite runs
+    //     LATER in this file than the unit rule — at unit time the text really is `2x3m`. ⚠ AND THE ASCII
+    //     ⟨x⟩ IS THE COMMON SPELLING, ~4:1 over ⟨×⟩, so `3×5m` reading correctly hid it.
+    // In `2x3m` the letter is preceded by a DIGIT; in `A4210m` the unit is two digits past the letter.
+    test("a dimension idiom keeps its unit — the x→by rewrite has not run yet", () => {
+        expect(normalizeEnglish("2x3m rug")).toBe("2 by 3 meters rug");
+        expect(normalizeEnglish("a 4x8m field")).toBe("a 4 by 8 meters field");
+        expect(normalizeEnglish("5x5W LEDs")).toBe("5 by 5 watts LEDs");
+        expect(normalizeEnglish("100x100L tanks")).toBe("100 by 100 liters tanks");
+        expect(normalizeEnglish("1.5x2m")).toBe("1.5 by 2 meters");
+        expect(normalizeEnglish("3\u00d75m")).toBe("3 by 5 meters"); // the ⟨×⟩ spelling that never broke
+    });
+
+    test("a multi-letter unit glued to digits is not a code slot", () => {
+        expect(normalizeEnglish("A4 210mm wide")).toContain("millimeters");
+        expect(normalizeEnglish("B5 100mm")).toContain("millimeters");
+        expect(normalizeEnglish("A4 210m")).toContain("meters");
+    });
+
+    // ⚠ THE TRAILING-DIGIT REFUSAL IS ALSO ONE-LETTER-ONLY. Applied to every unit it took the feet with
+    // it — `he is 5ft11` stopped reading "feet" — and ⟨ft⟩ is not a code slot either.
+    test("feet-and-inches keeps its unit", () => {
+        expect(normalizeEnglish("he is 5ft11")).toContain("feet");
+        expect(normalizeEnglish("6ft0 tall")).toContain("feet");
+    });
+
+    // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
+    // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
+    // the ⟨µg⟩ entry in UNITS was added to fix.
+    test("a micro- unit with an ASCII exponent still reads, sign and all", () => {
+        expect(normalizeEnglish("5 \u00b5g2")).toBe("5 square micrograms");
+        expect(normalizeEnglish("5 \u00b5m2")).not.toContain("\u00b5");
+    });
+
+    // …and a one-letter unit still reads wherever it is NOT in a code — glued to its number included.
+    test("a glued one-letter unit still reads", () => {
+        expect(normalizeEnglish("100W bulb")).toBe("100 watts bulb");
+        expect(normalizeEnglish("a 5L jug")).toBe("a 5 liters jug");
+        expect(normalizeEnglish("12km run")).toBe("12 kilometers run");
+        expect(normalizeEnglish("500ml bottle")).toBe("500 milliliters bottle");
+    });
+
     // …and none of it costs the real units, including the ASCII exponent on the lengths that take one.
     test("the units themselves still read", () => {
         expect(normalizeEnglish("5 L of water")).toBe("5 liters of water");
