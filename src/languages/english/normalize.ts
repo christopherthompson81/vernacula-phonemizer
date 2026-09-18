@@ -835,6 +835,11 @@ export function normalizeEnglish(input: string): string {
 
     // 0g) FRACTIONS. Guarded against dates (3/14/2011) and unit ratios (km/h) by requiring digits both sides
     //     and nothing numeric or alphabetic after.
+    // ⚠ `24/7` IS AN IDIOM, NOT A FRACTION, and the rule below read it "twenty four sevenths". It means
+    //    all the time, it is said "twenty-four seven", and it is the only digit pair in English prose
+    //    whose slash is neither a fraction nor a date. Claimed here so the fraction rule never sees it.
+    s = rewrite(s, /(?<![\d/])24\/7(?![\d/])/gu, "24 7");
+
     s = rewrite(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d])/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
@@ -1017,6 +1022,14 @@ export function normalizeEnglish(input: string): string {
             const key = m0.toLowerCase().replace(/[ \t]/gu, "");
             if (SLASH_ABBREV[key] !== undefined) return SLASH_ABBREV[key];
             if (SLASH_ELIDED.has(key)) return `${left} ${right}`;
+            // ⚠ TWO SINGLE LETTERS ARE AN ABBREVIATION, AND THAT OUTRANKS BOTH READINGS BELOW. Half the
+            // alphabet is a unit symbol or a period of time on its own — `s`, `h`, `d`, `w`, `g`, `l` —
+            // so the rate test fires on pairs that are nothing of the kind: `A/D converter` read "A per
+            // day converter", `R/W` "R per watt", `O/S` "O per second", `A/S` "A per second". The real
+            // rates of this shape (`m/s`, `km/h`) are enumerated unit keys and step 6a2 above has already
+            // claimed them, so nothing is lost by declining here. The cost is `g/L`, which keeps the
+            // silent mark it has always had.
+            if (left.length < 2 && right.length < 2) return m0;
             // A side that resolves against the unit table is spoken as its unit: the numerator PLURAL
             // ("kilograms per metre"), the denominator SINGULAR, which is how a rate is said.
             const num = resolveUnitSymbol(UNITS, UNITS_FOLDED, left);
@@ -1031,10 +1044,7 @@ export function normalizeEnglish(input: string): string {
             // `the cluster/group of islands`, and "to slash from" is not how either is read aloud.
             // Getting that wrong is loud in a way the old silent drop was not, so the conjunction arm
             // claims only the shape where saying it is right and leaves prose exactly as it was.
-            // ⚠ IT ALSO EXCLUDES TWO SINGLE LETTERS — `a/c`, `s/n`, `b/w` are abbreviations, not
-            // conjunctions; the three commonest have readings in SLASH_ABBREV above.
-            const label = left.length >= 2 && right.length >= 2
-                && left === left.toUpperCase() && right === right.toUpperCase();
+            const label = left === left.toUpperCase() && right === right.toUpperCase();
             return label ? `${left} slash ${right}` : m0;
         });
 

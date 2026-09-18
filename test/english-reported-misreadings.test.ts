@@ -719,6 +719,26 @@ describe("a slash, a section dot, a bare abbreviation and a month range", () => 
         expect(norm("and/or")).toBe("and or");
     });
 
+    // ⚠ AND THE SINGLE-LETTER GUARD OUTRANKS THE RATE ARM TOO, which the first cut of this rule got
+    // wrong. Half the alphabet is a unit symbol or a period of time on its own — `s`, `h`, `d`, `w`,
+    // `g`, `l` — so the rate test fired on pairs that are nothing of the kind. The real rates of this
+    // shape (`m/s`, `km/h`) are enumerated unit keys claimed by the arm above, so nothing is lost.
+    test("two single letters are never a rate", () => {
+        expect(norm("A/D converter")).toBe("A/D converter");   // was "A per day converter"
+        expect(norm("R/W")).toBe("R/W");                        // was "R per watt"
+        expect(norm("O/S")).toBe("O/S");                        // was "O per second"
+        expect(norm("Smith A/S")).toBe("Smith A/S");            // was "Smith A per second"
+        expect(norm("5 g/L")).toBe("5 grams per liter");         // a real unit still resolves
+    });
+
+    // ⚠ `24/7` IS AN IDIOM, NOT A FRACTION. The fraction rule read it "twenty four sevenths"; it is the
+    // one digit pair in English prose whose slash is neither a fraction nor a date.
+    test("24/7 is not a fraction", () => {
+        expect(say("open 24/7")).toBe("ˈoᶷpn̩ twˈɛnti fˈɔːɹ sˈɛvən");
+        expect(norm("3/4")).toBe("3 quarters");                 // a real fraction is untouched
+        expect(norm("12/25/2024")).toBe("december 25th 20 24");  // and a date
+    });
+
     // A section reference: the dot is neither an abbreviation dot nor a sentence end, and left alone it
     // became a phrase break between the letter and the number.
     test("a section number's dot is point", () => {

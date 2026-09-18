@@ -416,6 +416,9 @@ public static class Normalize
     private static readonly JsRe PLUS_BETWEEN_WORDS =
         JsRegex.Compile("(?<=\\S)[ \\t\\u00a0]\\+[ \\t\\u00a0](?=\\S)", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[\\/\\d])", "gu");
+    /** ⚠ `24/7` is an IDIOM, not a fraction — the rule above read it "twenty four sevenths". Claimed
+     *  before it so the fraction rule never sees it. See the TypeScript. */
+    private static readonly JsRe TWENTY_FOUR_SEVEN = JsRegex.Compile("(?<![\\d/])24\\/7(?![\\d/])", "gu");
     private static readonly JsRe CURRENCY_RE = JsRegex.Compile(
         "([$£€¥])\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?:(\\s+(?:million|billion|trillion|thousand))|("
         + MONEY_MAG_ALT + ")(?![\\p{L}\\p{M}\\d]))?", "gu");
@@ -615,6 +618,7 @@ public static class Normalize
             m.Groups[1].Value + string.Concat(Enumerable.Repeat(" plus", m.Groups[2].Value.Length)));
         s = Rewrite(s, PLUS_BETWEEN_WORDS, " plus ");
 
+        s = Rewrite(s, TWENTY_FOUR_SEVEN, "24 7");
         s = Rewrite(s, FRACTION, m =>
             FractionWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)) ?? m.Value);
 
@@ -704,14 +708,18 @@ public static class Normalize
             var key = JsRegex.Replace(m.Value.ToLowerInvariant(), SLASH_WS, "");
             if (SLASH_ABBREV.TryGetValue(key, out var fixedReading)) return fixedReading;
             if (SLASH_ELIDED.Contains(key)) return $"{left} {right}";
+            // ⚠ Two single letters are an ABBREVIATION, and that outranks both readings below — half the
+            // alphabet is a unit symbol or a period of time on its own, so the rate test fired on `A/D
+            // converter`, `R/W`, `O/S`. The real rates of this shape are enumerated unit keys the arm
+            // above has already claimed. See the TypeScript.
+            if (left.Length < 2 && right.Length < 2) return m.Value;
             var num = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, left);
             var den = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, right);
             var hasPeriod = TIME_PERIOD.TryGetValue(right.ToLowerInvariant(), out var period);
             var rate = hasPeriod || num is not null || den is not null
                 || UNIT_WORDS.Contains(left.ToLowerInvariant()) || UNIT_WORDS.Contains(right.ToLowerInvariant());
             if (rate) return $"{num?[1] ?? left} per {(hasPeriod ? period : den?[0] ?? right)}";
-            var label = left.Length >= 2 && right.Length >= 2
-                && left == left.ToUpperInvariant() && right == right.ToUpperInvariant();
+            var label = left == left.ToUpperInvariant() && right == right.ToUpperInvariant();
             return label ? $"{left} slash {right}" : m.Value;
         });
 

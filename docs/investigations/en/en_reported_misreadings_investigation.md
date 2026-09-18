@@ -1205,3 +1205,49 @@ recorded is where it came from, not the token. Added as `S AY0 P AA1 V AH0 N` �
 
 **Gates.** 6031 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, lexicon round-trip
 100.00%.
+
+## Run 21 — 2026-09-18 18:30 — reviewing the slash rule, and the half of the alphabet that is a unit
+
+**Question.** The new rules (the slash, the section dot, the month range) are barely represented in the
+parity corpus — 36,495 rows of prose that mostly predate them. Does the C# port actually agree, and
+do the rules misfire on shapes nobody wrote a test for?
+
+**Method.** A 73-line corpus of the new shapes, run through both engines and diffed.
+
+**Port: byte-identical on all 73.** The parity gate's green was not evidence for these rules; this is.
+
+**And the rate arm was wrong on a whole family.** Probing two-single-letter pairs:
+
+```
+A/S             → "A per second"
+A/D converter   → "A per day converter"     ← analog-to-digital
+R/W             → "R per watt"              ← read/write
+O/S             → "O per second"
+B/D             → "B per day"
+Smith A/S       → "Smith A per second"
+```
+
+Half the alphabet is a unit symbol or a period of time on its own — `s`, `h`, `d`, `w`, `g`, `l` — so
+`TIME_PERIOD[right]` and `resolveUnitSymbol(right)` both fire on pairs that are nothing of the kind.
+
+⚠ **The guard already existed and was in the wrong place.** The conjunction arm already refused two
+single letters, on exactly this reasoning ("`a/c`, `s/n`, `b/w` are abbreviations, not conjunctions")
+— but it sat BELOW the rate arm, so the rate arm claimed them first and the guard never ran. Hoisting
+it above both readings is the whole fix. Nothing is lost: the real rates of this shape (`m/s`,
+`km/h`) are enumerated unit keys that step 6a2 claims before this rule is reached. The one cost is
+`g/L` standing alone, which keeps the silent mark it has always had — `5 g/L` still resolves, because
+the number-and-unit rule expands `g` upstream and the left side is then six letters.
+
+This is the second time in this batch that saying a mark aloud turned out to need a narrower licence
+than dropping it silently: prose (Run 18) and now abbreviations.
+
+**Also fixed: `24/7` read "twenty four sevenths".** Flagged in Run 18 as out of scope and picked up
+here because it is the same rule's neighbourhood. It is an idiom, it is said "twenty-four seven", and
+it is the one digit pair in English prose whose slash is neither a fraction nor a date.
+
+**Not fixed, recorded:** `A/B` reads *ə bˈiː* — the lone capital ⟨A⟩ resolving to the reduced article
+rather than the letter name. Pre-existing, unrelated to the slash (the pair is left alone by the
+guard above), and a different rule's problem.
+
+**Gates.** 6031 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144048
+probes identical, package fence ok.
