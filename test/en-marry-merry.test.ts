@@ -70,6 +70,18 @@ describe("marry–merry", () => {
         expect(phonemize("caretaker", "en-GB")).toBe("kʰˈɛəteᶦkə");
     });
 
+    // ⚠ FOUR WORDS ARE IN BOTH `marry` AND `bath`, AND THE ORDER BETWEEN THEM IS LOAD-BEARING. They were `æ`
+    // in the parent and BATH lifted them to RP `ɑː`; the merger then made them `ɛ`, which BATH cannot see, so
+    // with BATH running first they came out `æ` and RP lost `klˈɑːɹə`. Running marry FIRST chains ɛ → æ → ɑː.
+    // Missed during development — the en-GB class score went 53 → 49 and the four were not chased.
+    test("a word in both marry and bath chains ɛ → æ → ɑː", () => {
+        expect(phonemize("clara", "en-GB")).toBe("klˈɑːɹə");
+        expect(phonemize("dara", "en-GB")).toBe("dˈɑːɹə");
+        expect(phonemize("scarry", "en-GB")).toBe("skˈɑːɹi");
+        // ⚠ AND A marry WORD THAT IS *NOT* IN BATH MUST STOP AT æ, or the chain has over-applied.
+        expect(phonemize("carry", "en-GB")).toBe("kʰˈæɹi");
+    });
+
     test("the set carries every word the parent moved, and only prevocalic ones", () => {
         const set = readFileSync(join(HERE, "..", "data", "languages", "english-gb", "en-gb-marry.tsv"), "utf8")
             .split("\n").filter((l) => l.includes("\t")).map((l) => l.split("\t")[0]!);

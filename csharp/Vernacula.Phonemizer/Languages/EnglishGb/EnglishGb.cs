@@ -132,6 +132,10 @@ public static class EnglishGb
             // against the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not
             // …mˌɑːθ); a global replace would wrongly convert it. Words whose diagnostic vowel is NOT first
             // never entered the set.
+            // ⚠ marry–merry RUNS FIRST, BEFORE BATH — the TS twin carries the reasoning. Four words are in
+            // BOTH sets (`barry`, `clara`, `dara`, `scarry`): the merger made them ɛ, which BATH cannot see,
+            // so they came out æ and RP lost `klˈɑːɹə`. Running marry first chains ɛ → æ → ɑː.
+            if (lex.Marry.Contains(w)) s = MARRY_FIRST.Replace(s, "æ$1ɹ");
             if (lex.Bath.Contains(w)) s = BATH_FIRST.Replace(s, "ɑː");
             if (lex.Cloth.Contains(w)) s = CLOTH_FIRST.Replace(s, "ɒ");
             // yod-retention: the glide goes after any aspiration and before the stressed vowel.
@@ -141,8 +145,7 @@ public static class EnglishGb
             // to gold's consistent LOT–THOUGHT split and 7 of this set's 13 words moved from ɑː to ɔː, so
             // matching only ɑːɹ left the rule silently failing on over half its own list.
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
-            // marry–merry: undo the parent's merger for RP. First occurrence only, as above.
-            if (lex.Marry.Contains(w)) s = MARRY_FIRST.Replace(s, "æ$1ɹ");
+
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
         s = IGLIDE_R.Replace(s, "ᶦə");  // any ᶦ-glide + coda r: FACE, PRICE, CHOICE (ayr, fire, choir)

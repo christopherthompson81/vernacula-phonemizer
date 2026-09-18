@@ -1292,3 +1292,38 @@ Pinned in the test rather than left to luck.
 
     en 59.9% (floor 0.50)   en-GB 47.5% (floor 0.44)
     tests 5,979 pass / 310 files   goldens 0 stale   regex parity 0 differ
+
+## Run 14 — reviewing #1336: the lexical sets can fight, and two of mine did
+
+### ⚠ FOUR WORDS ARE IN BOTH `marry` AND `bath`, AND I SHIPPED THEM BROKEN
+
+`barry`, `clara`, `dara`, `scarry` were already in `en-gb-bath.tsv`. The chain that used to work:
+
+    parent æ  →  BATH lifts it  →  RP ɑː        klˈæɹə → klˈɑːɹə  ✓
+
+After the merger the parent says `ɛ`, which BATH cannot see, so BATH became a no-op and `marry` mapped
+`ɛ`→`æ` and stopped there: `klˈæɹə` where the referee says `klɑːɹə`.
+
+⚠ **I had the evidence and did not chase it.** The development note says "en-GB back to 49 in the class
+(was 53)" — those missing four ARE these words. A net number that moves the right way can still hide a
+regression, and "49, was 53" was a finding I wrote down and walked past.
+
+Fixed by ORDER, not by editing either set: `marry` now runs BEFORE `bath`, so a word in both chains
+`ɛ → æ → ɑː` and each set does what it is for. A `marry` word that is *not* in `bath` still stops at `æ`
+(`carry` kʰˈæɹi), which the test pins alongside — an over-applied chain would look identical on the four
+and wrong everywhere else.
+
+    en-GB referee coverage of the marry set: 196 words, 173 matching
+
+### The rest of the review
+
+    curated rows 1,432, no duplicates, every `want` equal to the shipped dict
+    dict rows changed vs pristine 1,404, all recorded
+    words left in the AE + R + vowel environment: 0   ← the merger is exhaustive, not partial
+
+⚠ The "no-op curated rows" check flagged `acc`, `associative`, `backfiring`, `beyond` for the second time
+this session, and it is the same false positive both times: the pristine baseline ALREADY has the
+pre-existing curation applied, so those rows correctly look unchanged against it. The check is only
+meaningful for rows this work added.
+
+    tests 5,979 / 310 files   goldens 0 stale   regex parity 0 differ

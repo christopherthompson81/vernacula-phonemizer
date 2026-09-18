@@ -194,6 +194,11 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // FIRST-occurrence only (no /g) — mirrors the set builder, which validated a first-occurrence edit against
         // the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not …mˌɑːθ); a global
         // replace would wrongly convert it. Words whose diagnostic vowel is NOT first never entered the set.
+        // ⚠ marry–merry RUNS FIRST, BEFORE BATH, and the order is load-bearing. Four words are in BOTH sets
+        // (`barry`, `clara`, `dara`, `scarry`): they were `æ` in the parent, BATH lifted them to `ɑː`, and the
+        // merger then made them `ɛ` — which BATH cannot see, so they came out `æ` and RP lost `klˈɑːɹə`.
+        // Running marry first chains ɛ → æ → ɑː and both sets get what they are for.
+        if (lex.marry.has(w)) s = s.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ");
         if (lex.bath.has(w)) s = s.replace(/æ/u, "ɑː"); // BATH
         if (lex.cloth.has(w)) s = s.replace(/ɔː/u, "ɒ"); // CLOTH
         if (lex.yod.has(w)) s = s.replace(/([tdnszθl])(ʰ?)([ˈˌ]?)uː/u, "$1$2j$3uː"); // yod-retention (glide after any aspiration, before the stressed vowel)
@@ -204,8 +209,6 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // varieties are right and only the mapping between them was missing. Matching only ɑːɹ left the rule
         // silently failing on over half its own list, with the set still listing the words.
         if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
-        // marry–merry: undo the parent's merger for RP, which does not have it. First occurrence only, as above.
-        if (lex.marry.has(w)) s = s.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ");
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
