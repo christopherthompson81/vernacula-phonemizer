@@ -89,8 +89,14 @@ describe("a non-rhotic descendant keeps every onset /r/ the parent had (#1250)",
         // …and the vowel+r remaps were misfiring on the same gap — `ɛɹ` before `ᵻ` is not SQUARE.
         expect(phonemize("asperity", "en-GB")).toBe("əspˈɛɹᵻti");
         expect(phonemize("authority", "en-GB")).toBe("əθˈɔːɹᵻti");
-        // `report` was never affected, and is the tell: its first vowel resolves to `i`, not `ᵻ`.
-        expect(phonemize("report", "en-GB")).toBe("ɹipʰˈɔːt");
+        // ⚠ `report` USED TO BE THE CONTRAST HERE — "its first vowel resolves to `i`, not `ᵻ`" — and that
+        // contrast only existed because the paradigm was SPLIT FOUR WAYS: `report` IY0, `reported` IY2,
+        // `reporting` IY0, `reports` IH0. Only the IH0 spelling reached the weak-vowel rule, exactly the
+        // `replace` defect this repo already fixed once. All four now agree, so the word is no longer a tell.
+        expect(phonemize("report", "en-GB")).toBe("ɹᵻpʰˈɔːt");
+        expect(phonemize("reported", "en-GB")).toBe("ɹᵻpʰˈɔːtᵻd");
+        // …and a word whose first vowel genuinely IS `i` still shows it — the productive prefix.
+        expect(phonemize("react", "en-GB")).toBe("ɹiˈækt"); // en-GB drops the ʲ glide
     });
 
     test("a PRE-VOCALIC ɚ/ɝ is an onset /r/ in Naija too, not an absorbed one", () => {
