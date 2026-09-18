@@ -124,7 +124,10 @@ public class LanguageBootstrapTests
 
     // #1048: POJ is ASCII Latin, so a foreign name used to be read as Min Nan syllables with a tone letter.
     // The dict's own 970 syllable skeletons are the discriminator; a mixed compound keeps both halves.
-    [InlineData("nan", "Washington", "w\u02c8\u0251\u02d0\u0283\u026a\u014bt\u0259n")]
+    // ⚠ `wˈɔːʃ...`, not `wˈɑːʃ...`: #1334 aligned the dictionary's AA/AO to gold's consistent
+    // LOT–THOUGHT split and `washington` moved AA1 → AO1. Incidental to what this pins, which is that an
+    // ASCII-Latin foreign name is NOT read as Min Nan syllables.
+    [InlineData("nan", "Washington", "w\u02c8\u0254\u02d0\u0283\u026a\u014bt\u0259n")]
     [InlineData("nan", "Ukraina-g\u00ed", "\u028ck\u0279\u02c8e\u1da6n\u0259 \u0261i\u02e5\u02e9")]
     [InlineData("nan", "chit-\u00ea l\u00e2ng", "t\u0361\u0255it\u031a\u02e5 e\u02e8\u02e6 la\u014b\u02e8\u02e6")]
     // Saraiki's defining shapes: the four implosives plus the voiced aspirate the Punjabi sibling turns into

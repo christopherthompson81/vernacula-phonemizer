@@ -279,7 +279,16 @@ being re-recorded around it.
     1. the fix lands in the TypeScript FIRST, with a test that pins it (the TS side is where the
        4,928-test suite and the corpus tooling live — it is the side that can VALIDATE a fix);
     2. the affected goldens are regenerated (tools/gen_parity_goldens.mts);
-    3. the C# implements the FIXED behaviour and the parity gate closes over the new goldens.
+    3. the C# implements the FIXED behaviour and the parity gate closes over the new goldens;
+    4. ⚠ AND THE C# TESTS THAT HARDCODE THE OLD READING ARE UPDATED — with the REASON, not just the new
+       string. This step is the one that gets skipped, because for a DATA-only fix (a dictionary row, a
+       lexical-set entry) step 3 is a NO-OP: the C# needs no code change, parity stays green because the
+       goldens moved with the engine, and nothing points at `csharp/Vernacula.Phonemizer.Tests`. Ten
+       expectations rotted that way across #1334/#1336 and later — `coffee` kʰˈɑːfi, `Monday` mˈʌndi,
+       `report` ɹipʰˈɔːɹt, `characters` kʰˈæɹəktɚz, `palled` pʰˈɑːɫd, `enrolment` ɛn-, `washington`
+       wˈɑːʃ-, `molar` …ləɹ — every one of them a value the TypeScript twin had already left behind, and
+       the C# ENGINE was right in every case. `dotnet test csharp` is in CONTRIBUTING.md's gate list for
+       this reason; run it when you change DATA, not only when you change C#.
   ⚠ NEVER fix the C# alone: an improvement that exists in one engine is a fork wearing a fix's
   clothes, invisible to both sides' tests. If the TS half of a fix cannot land now (needs corpus
   evidence, needs a decision), the C# ports the CURRENT behaviour and the finding is filed — matched

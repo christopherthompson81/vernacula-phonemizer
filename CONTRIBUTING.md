@@ -5,8 +5,16 @@
 ```
 npm ci
 npm run typecheck      # tsc --noEmit
-npm test               # vitest, ~3100 tests
+npm test               # vitest
+dotnet test csharp     # the C# port's own suite
 ```
+
+⚠ **`dotnet test csharp` IS PART OF THE ROUTINE, NOT A PORTING-ONLY STEP**, and it was missing from this
+list until ten of its tests had quietly gone red. The parity gate proves the two ENGINES agree over the
+goldens; it says nothing about the C# suite's own hand-written expectations, which hardcode IPA strings and
+therefore rot whenever the dictionary moves under them. Every one of those ten was a stale expectation
+whose TypeScript twin had been updated in an earlier PR — the C# engine was right in all ten. See
+[`csharp/PORTING.md`](csharp/PORTING.md) for the rule that closes the hole.
 
 There is no build step — `exports` points at `src/index.ts` and the package ships TypeScript source.
 `onnxruntime-node` is an optional dependency; every neural path degrades to a rule or lexicon path

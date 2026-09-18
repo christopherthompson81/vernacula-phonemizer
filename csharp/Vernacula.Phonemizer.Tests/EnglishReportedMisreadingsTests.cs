@@ -23,7 +23,10 @@ public class EnglishReportedMisreadingsTests
         => Assert.Equal(ipa, Phonemizer.Phonemize("in situ", lang));
 
     [Theory]
-    [InlineData("max 40 characters", "mˈæksəməm fˈɔːɹt̬i kʰˈæɹəktɚz")]
+    // ⚠ `kʰˈɛɹəktɚz`, not `kʰˈæɹəktɚz`: the marry–merry merger was applied consistently in #1336. CMUdict
+    // had `character` and `characteristic` as EH but the PLURAL `characters` as AE — a word contradicting
+    // its own singular. Incidental to what this line pins, which is that `max` expands to `maximum`.
+    [InlineData("max 40 characters", "mˈæksəməm fˈɔːɹt̬i kʰˈɛɹəktɚz")]
     [InlineData("a max of 40", "ə mˈæksəməm ʌv fˈɔːɹt̬i")]
     [InlineData("to the max", "tʰuː ðə mˈæksəməm")]
     [InlineData("max. 40", "mˈæksəməm fˈɔːɹt̬i")]
@@ -76,7 +79,10 @@ public class EnglishReportedMisreadingsTests
     [InlineData("he and I", "hiː ənd ˈaᶦ")]
     [InlineData("The man arrived, the woman left.", "ðə mˈæn ɚˈaᶦvd , ðə wˈʊmən lˈɛft .")]
     [InlineData(", and it was", "ˈænd ɪt wˈʌz")]
-    [InlineData("Coffee, tea, or water.", "kʰˈɑːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .")]
+    // ⚠ `kʰˈɔːfi`, not `kʰˈɑːfi`: #1334 aligned the dictionary's AA/AO to gold's consistent LOT–THOUGHT
+    // split and `coffee` moved AA1 → AO1. Incidental to what this line pins, which is that `or` stays
+    // REDUCED clause-initially, because nothing measured it.
+    [InlineData("Coffee, tea, or water.", "kʰˈɔːfi , tʰˈiː , ɔːɹ wˈɔːt̬ɚ .")]
     public void AClauseInitialCoordinatorTakesItsStrongForm(string text, string ipa)
         => Assert.Equal(ipa, Say(text));
 
@@ -147,8 +153,11 @@ public class EnglishReportedMisreadingsTests
     public void ADashBetweenTwoNumbersIsARange(string text, string ipa) => Assert.Equal(ipa, Say(text));
 
     [Theory]
-    [InlineData("Rev. B, 2025-10-21", "ɹivˈɪʒn̩ bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv")]
-    [InlineData("Rev. 3", "ɹivˈɪʒn̩ θɹˈiː")]
+    // ⚠ `ɹᵻvˈɪʒn̩`, not `ɹivˈɪʒn̩`: the Latinate `re-` prefix REDUCES — misaki gold and Moby both reduce it
+    // and so does Merriam-Webster. The dict row moved R IY0 → R IH0. Incidental to what these two lines
+    // pin, which is that `Rev.` before a DESIGNATOR is a revision.
+    [InlineData("Rev. B, 2025-10-21", "ɹᵻvˈɪʒn̩ bˈiː , ɑːktˈoᶷbɚ twˈɛnti fˈɝst twˈɛnti twˈɛnti fˈaᶦv")]
+    [InlineData("Rev. 3", "ɹᵻvˈɪʒn̩ θɹˈiː")]
     // ⚠ The name shapes are the point of the guard — a capital followed by a PERIOD is an initial.
     [InlineData("Rev. Smith", "ɹˈɛvɚənd smˈɪθ")]
     [InlineData("Rev. J. Smith", "ɹˈɛvɚənd d͡ʒˈeᶦ . smˈɪθ")]
@@ -256,8 +265,13 @@ public class EnglishReportedMisreadingsTests
     public void ACalendarRangeSaysTo(string t)
         => Assert.Equal("meᶦ tʰuː d͡ʒˈuːn twˈɛnti twˈɛnti fˈaᶦv", Say(t));
 
+    // ⚠ `-dˌeᶦ`, not `-di`. CMUdict had the weekday set SPLIT (thursday/sunday/birthday EY2,
+    // monday/tuesday/friday/saturday IY0) while misaki gold is unanimous `dˌA` across all 12 `-day`
+    // words; #1334 corrected the four stragglers. The flap goes with it — `D EY2` is stressed, so
+    // `fɹˈaᶦd̬i` becomes `fɹˈaᶦdˌeᶦ`. Incidental to what this pins, which is that a dash between two
+    // WEEKDAY names is a span, exactly as it is between two months.
     [Fact]
-    public void WeekdaysRangeTheSameWay() => Assert.Equal("mˈʌndi tʰuː fɹˈaᶦd̬i", Say("Monday–Friday"));
+    public void WeekdaysRangeTheSameWay() => Assert.Equal("mˈʌndˌeᶦ tʰuː fɹˈaᶦdˌeᶦ", Say("Monday–Friday"));
 
     // ⚠ The licence is TWO calendar names joined by a dash, never the word alone — ⟨may⟩, ⟨march⟩
     // and ⟨august⟩ are ordinary English words.
@@ -280,6 +294,10 @@ public class EnglishReportedMisreadingsTests
     // ⚠ The PRODUCTIVE prefix meaning "again" keeps its beat — the words a rule-based fix got wrong.
     [InlineData("reconstructed", "ɹˌiːkənstɹˈʌktᵻd")]
     [InlineData("relocate", "ɹiːlˈoᶷkeᶦt")]
-    [InlineData("report", "ɹipʰˈɔːɹt")]
+    // ⚠ `ɹᵻpʰˈɔːɹt`, not `ɹipʰˈɔːɹt`, and it does NOT belong to the productive-prefix class this test is
+    // about: `report` is a LATINATE `re-`, which reduces. misaki gold and Moby both reduce it and so
+    // does Merriam-Webster (\ri-ˈpȯrt\); the dict row moved R IY0 → R IH0. The four controls below are
+    // the ones that guard the rejected rule.
+    [InlineData("report", "ɹᵻpʰˈɔːɹt")]
     public void TheReducedPrefixAndTheProductiveOne(string t, string ipa) => Assert.Equal(ipa, Say(t));
 }

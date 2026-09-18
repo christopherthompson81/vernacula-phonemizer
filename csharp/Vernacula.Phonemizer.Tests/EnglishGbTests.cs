@@ -85,7 +85,12 @@ public class EnglishGbTests
     [InlineData("alacrity", "əlˈækɹᵻti")]   // NOT only word-initial — the /ɹ/ of the cluster `kɹ`
     [InlineData("asperity", "əspˈɛɹᵻti")]   // …and `ɛɹ` before `ᵻ` is not SQUARE
     [InlineData("authority", "əθˈɔːɹᵻti")]  // …nor `ɔːɹ` NORTH
-    [InlineData("report", "ɹipʰˈɔːt")]      // the tell: this vowel resolves to `i`, and was never affected
+    // ⚠ WAS `ɹipʰˈɔːt` AND WAS THE "TELL" HERE — a vowel that resolved to `i` rather than `ᵻ`, showing the
+    // guard had not touched it. It is now `ᵻ` for an unrelated reason: `report` is a LATINATE `re-`, which
+    // reduces (gold, Moby and Merriam-Webster all agree), so the dict row moved R IY0 → R IH0. The line
+    // still earns its place — an onset /ɹ/ surviving beside the reduced vowel is exactly the contract —
+    // but it is no longer the counter-example it was, and `greedier` below is what carries that now.
+    [InlineData("report", "ɹᵻpʰˈɔːt")]
     [InlineData("greedier", "ɡɹˌˈiːdiə")]   // `ɡɹˌˈiːd̬iʲɚ` — two stress marks, one optional mark could not see past
     public void AnOnsetRSurvivesTheReducedVowel(string word, string want) =>
         Assert.Equal(want, EnglishGb.PhonemizeWord(word));

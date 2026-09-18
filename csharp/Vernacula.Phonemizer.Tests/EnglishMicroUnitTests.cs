@@ -56,8 +56,11 @@ public class EnglishMicroUnitTests
     [Fact]
     public void TheCapitalsAreDifferentUnits()
     {
-        Assert.Contains("mˈaᶦkɹoᶷmˌoᶷləɹ", Say("a 25 \u00b5M solution"));
-        Assert.Contains("mˈaᶦkɹoᶷmˌoᶷləɹ", Say("a 25 \u03bcM solution"));
+        // ⚠ `…lɚ`, not `…ləɹ`: the `molar` row was written M OW1 L AH0 R, which is the AH0-R spelling of ɚ,
+        // and the triple-source audit corrected it to M OW1 L ER0 (/ˈmoʊlɚ/ is not in question). The vowel
+        // is incidental to what this pins — that ⟨µM⟩ is micromolar and not micro-METERS.
+        Assert.Contains("mˈaᶦkɹoᶷmˌoᶷlɚ", Say("a 25 \u00b5M solution"));
+        Assert.Contains("mˈaᶦkɹoᶷmˌoᶷlɚ", Say("a 25 \u03bcM solution"));
         Assert.DoesNotContain("mˈiːt̬ɚz", Say("a 25 \u00b5M solution"));
         Assert.Contains("mˈaᶦkɹoᶷsˌiːmənz", Say("5 \u00b5S conductance"));
         Assert.Contains("mˈaᶦkɹoᶷsˌɛkəndz", Say("5 \u00b5s delay"));
