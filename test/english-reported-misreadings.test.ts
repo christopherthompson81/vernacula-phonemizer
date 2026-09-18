@@ -724,11 +724,39 @@ describe("a slash, a section dot, a bare abbreviation and a month range", () => 
     // `g`, `l` — so the rate test fired on pairs that are nothing of the kind. The real rates of this
     // shape (`m/s`, `km/h`) are enumerated unit keys claimed by the arm above, so nothing is lost.
     test("two single letters are never a rate", () => {
-        expect(norm("A/D converter")).toBe("A/D converter");   // was "A per day converter"
-        expect(norm("R/W")).toBe("R/W");                        // was "R per watt"
         expect(norm("O/S")).toBe("O/S");                        // was "O per second"
         expect(norm("Smith A/S")).toBe("Smith A/S");            // was "Smith A per second"
+        expect(norm("B/D")).toBe("B/D");                        // was "B per day"
         expect(norm("5 g/L")).toBe("5 grams per liter");         // a real unit still resolves
+    });
+
+    // ⚠ AND A PAIR WITH ONE DOMINANT READING IS A WHOLE UNIT, not two letters. The bar is that single
+    // reading: the pairs with two live ones (`a/c` air conditioning OR account, `b/w` black and white OR
+    // between, `s/n` serial number OR signal to noise) are deliberately absent and fall through to the
+    // guard above, which reads the letters — which is what people say for those anyway.
+    test("a slashed abbreviation with one reading is expanded", () => {
+        expect(norm("A/D converter")).toBe("analog to digital converter");
+        expect(norm("R/W access")).toBe("read write access");
+        expect(norm("Y/N")).toBe("yes no");
+        expect(norm("A/C unit")).toBe("A/C unit");
+        expect(norm("B/W photo")).toBe("B/W photo");
+        expect(norm("S/N ratio")).toBe("S/N ratio");
+    });
+
+    // ⚠ `w/` HAS NO RIGHT-HAND SIDE, so the pair rule cannot see it and it reached the g2p as a
+    // dangling letter. Gated on nothing following the slash, so `w/o` stays with the pair rule.
+    test("a bare w-slash is with", () => {
+        expect(norm("she was w/ him")).toBe("she was with him");
+        expect(norm("w/o milk")).toBe("without milk");
+        expect(norm("w/out milk")).toBe("without milk");
+    });
+
+    // ⚠ AND A SLASH BEFORE IT IS A PATH, NOT THE ABBREVIATION. A URL is protected only by the letter
+    // that usually follows it — a segment at the END of one is not, and `the /w/ path` read
+    // "the /with path".
+    test("a path segment is not the abbreviation", () => {
+        expect(norm("the /w/ path")).toBe("the /w/ path");
+        expect(norm("see http://example.com/w/page")).toBe("see http://example.com/w/page");
     });
 
     // ⚠ `24/7` IS AN IDIOM, NOT A FRACTION. The fraction rule read it "twenty four sevenths"; it is the

@@ -1251,3 +1251,67 @@ guard above), and a different rule's problem.
 
 **Gates.** 6031 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144048
 probes identical, package fence ok.
+
+## Run 22 — 2026-09-18 19:20 — whole-unit recognition for the slashed abbreviations
+
+**Suggested while reviewing Run 21:** `A/D converter` is *analogue to digital converter*, `R/W` is
+*read write* — recognize the pair as a WHOLE UNIT rather than only declining to mis-read it.
+
+Run 21's guard stopped `A/D converter` becoming "A per day converter", but it stopped there: the pair
+fell through with the mark silent and read "A D converter". Correct enough to ship, and less than the
+document says.
+
+**The bar for a row is a SINGLE DOMINANT READING**, and it has to be, because the failure mode of
+guessing here is a wrong word inserted into prose — which is precisely what the rate arm did. Sorting
+the common pairs by that test:
+
+```
+one reading    a/d analog to digital · d/a digital to analog · r/w read write · y/n yes no
+               w/o without · c/o care of · n/a not applicable          → a row
+two readings   a/c air conditioning OR account · b/w black and white OR between
+               s/n serial number OR signal to noise · p/e · o/s · n/s  → no row
+the letters    i/o                                                      → no row needed
+```
+
+The two-reading pairs fall through to the single-letter guard, which leaves the mark silent and reads
+the letters — and "P E ratio", "A C unit", "S N ratio" are what people say anyway. `i/o` has one
+reading, but that reading IS the letters, so a row would only be a second place to maintain it.
+
+⚠ **`w/` needed its own rule.** It has no right-hand side, so the pair rule cannot see it at all and
+the token reached the g2p as a dangling letter — `she was w/ him` read "w him". Gated on nothing
+following the slash, so `w/o` stays with the pair rule and its own entry there.
+
+```
+A/D converter    ˈænə̆lˌɔːɡ tʰuː dˈɪd͡ʒət̬ɫ̩ kənvˈɝt̬ɚ
+R/W access       ɹˈiːd ɹˈaᶦt ˈæksˌɛs
+Y/N              jˈɛs nˈoᶷ
+she was w/ him   ʃiː wʌz wɪð hˈɪm
+A/C unit         ə sˈiː jˈuːnᵻt          ← deliberately unclaimed
+```
+
+⚠ `A/C unit` shows the `A/B` defect from Run 21 again — the lone capital ⟨A⟩ resolving to the reduced
+article rather than the letter name. Still pre-existing, still a different rule's problem, now
+recorded twice because it will keep showing up wherever a pair is left to the letters.
+
+**Gates.** 6035 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144106
+probes identical, plus a cross-engine diff on the new shapes.
+
+**Review of Run 22 — three findings.**
+
+⚠ **`the /w/ path` read "the /with path".** A URL is protected only by the letter that usually follows
+a path segment (`example.com/w/page`), and a segment at the END of one is not. The lookbehind now
+refuses a leading slash. This is the same shape as the URL guard on the bare-rate rule two steps
+above, which the comment there already warns about — and it still was not carried over.
+
+⚠ **`R/W easement` reads "read write easement", and that is wrong.** Probing the new rows against
+their second readings turned up the one row that does not meet the bar Run 22 set for itself:
+read/write is dominant and is the reading asked for, but RIGHT-OF-WAY is live in civil and property
+text. Kept, because computing text is far the commoner context and it was the explicit request — but
+recorded in the table's own comment rather than hidden, so the trade-off is visible to whoever reads
+it next. The row to delete if that stops being true.
+
+**Added: `w/out` → without.** Same word as `w/o`, and it fell through both arms — left one letter,
+right three, so neither the single-letter guard nor the label test claimed it.
+
+**Gates.** 6036 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144106
+probes identical, cross-engine diff on 26 shapes byte-identical.
