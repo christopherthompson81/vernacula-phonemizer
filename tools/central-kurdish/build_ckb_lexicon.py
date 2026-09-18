@@ -35,7 +35,7 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "..", "src", "languages", "central-kurdish", "lexicon.tsv")
+OUT = os.path.join(HERE, "..", "..", "data", "languages", "central-kurdish", "lexicon.tsv")
 PARK = "\u0001"  # ⟨ř⟩ parks here so the ⟨r⟩→ɾ rule below cannot claim it
 
 MAP = [("û", "uː"), ("î", "iː"), ("ê", "eː"), ("ç", "t͡ʃ"), ("ş", "ʃ"), ("ř", PARK), ("ł", "ɫ"),

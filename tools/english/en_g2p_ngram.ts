@@ -534,7 +534,7 @@ if (argIdx("--emit") >= 0) {
     const dir =
         process.argv[argIdx("--emit") + 1] && !process.argv[argIdx("--emit") + 1]!.startsWith("--")
             ? process.argv[argIdx("--emit") + 1]!
-            : pjoin(process.cwd(), "src", "languages", "english");
+            : pjoin(process.cwd(), "data", "languages", "english");
     const model: Record<string, { t: number; c: [string, number][] }> = {};
     for (let o = 0; o < ORDER; o++)
         for (const [ctx, m] of ngram[o]!) {

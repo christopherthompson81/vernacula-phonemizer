@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""fa STRUCTURAL tagger — the DEFAULT modern fa restorer (ships as src/languages/persian/fa-tagger.int8.onnx).
+"""fa STRUCTURAL tagger — the DEFAULT modern fa restorer (ships as data/languages/persian/fa-tagger.int8.onnx).
 Sentence-level BiLSTM that labels each abjad char with its IPA-chunk TAG (consonant/vowel + following short
 vowel/ezafe, from the monotonic aligner). Consonants are COPIED inside the tags; output length == input length →
 CANNOT degenerate, CANNOT break the skeleton. Context (ezafe/homographs) comes from the bidirectional pass.
 
 Reproduce:  build_homorich_ipa.py <homorich.parquet> homorich_ipa_clean.tsv   # grapheme→canonical IPA (CC0)
             python train_tagger.py <dir-with homorich_ipa_clean.tsv + test_heldout.tsv>   # writes fa_tagger.pt
-            python export_tagger_onnx.py <same-dir> src/languages/persian   # writes fa-tagger.int8.onnx + .meta.json
+            python export_tagger_onnx.py <same-dir> data/languages/persian   # writes fa-tagger.int8.onnx + .meta.json
 test_heldout.tsv is a 1500-sentence slice held out of training by the skeleton leakage guard below. FA_WARM=1
 warm-starts from a saved fa_tagger.pt (4 epochs) for a single vocab-preserving change. See fa-tagger.PROVENANCE.md."""
 import sys, os, random

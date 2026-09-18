@@ -35,8 +35,8 @@ import random
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-LEX = os.path.join(HERE, "..", "..", "src", "languages", "serbian", "stress.tsv")
-OUT = os.path.join(HERE, "..", "..", "src", "languages", "serbian", "accent-transitions.tsv")
+LEX = os.path.join(HERE, "..", "..", "data", "languages", "serbian", "stress.tsv")
+OUT = os.path.join(HERE, "..", "..", "data", "languages", "serbian", "accent-transitions.tsv")
 
 # ⚠ MEASURED, NOT PICKED. Sweeping the maximum ending length trades accuracy against reach (--sweep prints it):
 #   maxcut 2   pos 84.0%  tone 65.0%  +19.5pp corpus coverage

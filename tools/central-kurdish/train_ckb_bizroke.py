@@ -50,7 +50,7 @@ from build_ckb_lexicon import to_ipa
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
-DEST = os.path.join(ROOT, "src", "languages", "central-kurdish")
+DEST = os.path.join(ROOT, "data", "languages", "central-kurdish")
 BASENAME = "ckb-bizroke-tagger"
 
 SEED, EPOCHS, BS, LR = 0, 40, 128, 2e-3

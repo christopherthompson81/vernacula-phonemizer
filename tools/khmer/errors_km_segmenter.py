@@ -28,7 +28,7 @@ import torch
 import torch.nn as nn
 
 SEG = sys.argv[1]
-DIR = sys.argv[2] if len(sys.argv) > 2 else "src/languages/khmer"
+DIR = sys.argv[2] if len(sys.argv) > 2 else "data/languages/khmer"
 DUMP = sys.argv[3] if len(sys.argv) > 3 else None
 LIMIT = int(sys.argv[4]) if len(sys.argv) > 4 else 20000
 

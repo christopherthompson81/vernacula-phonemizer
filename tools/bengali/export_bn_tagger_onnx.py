@@ -3,7 +3,7 @@
 single BiLSTM forward pass: grapheme-ids [1,L] → tag logits [1,L,nTags]. The consonant-consistency mask + masked
 argmax + tag concatenation happen in TS (bengaliTagger.ts). No autoregressive decode → no degeneration, tiny+fast.
 
-  python export_bn_tagger_onnx.py src/languages/bengali   # reads bn_tagger.pt, writes bn-g2p-tagger.{int8.onnx,meta.json}
+  python export_bn_tagger_onnx.py data/languages/bengali   # reads bn_tagger.pt, writes bn-g2p-tagger.{int8.onnx,meta.json}
 """
 import numpy as np
 import onnxruntime as ort

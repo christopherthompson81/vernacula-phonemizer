@@ -36,7 +36,7 @@ import sys
 import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "..", "src", "languages", "slovenian", "stress.tsv")
+OUT = os.path.join(HERE, "..", "..", "data", "languages", "slovenian", "stress.tsv")
 DUMP = "/mnt/data/kaikki-Slovene.jsonl"
 
 # The five ORTHOGRAPHIC accent marks. ⚠ U+030C (caron) is NOT here — in Slovene it spells š/č/ž. U+0323

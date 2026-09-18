@@ -38,7 +38,7 @@ import sys
 import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "..", "..", "src", "languages", "serbian", "stress.tsv")
+OUT = os.path.join(HERE, "..", "..", "data", "languages", "serbian", "stress.tsv")
 DUMP = "/mnt/data/kaikki-SerboCroatian.jsonl"
 
 # The four ORTHOGRAPHIC accent marks. ⚠ The macron U+0304 is deliberately absent: it writes post-accentual
@@ -123,7 +123,7 @@ def to_cyrillic(word: str) -> str | None:
 # one the g2p cannot pronounce, so an ordinal into it would not line up.
 def _alphabet() -> str:
     import re as _re
-    src = open(os.path.join(HERE, "..", "..", "src", "languages", "serbian", "serbian.jsonc"),
+    src = open(os.path.join(HERE, "..", "..", "data", "languages", "serbian", "serbian.jsonc"),
                encoding="utf-8").read()
     body = src[src.index('"letters"'):]
     return "".join(_re.findall(r'"(\w)":', body[:body.index("}")]))

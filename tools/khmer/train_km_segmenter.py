@@ -9,7 +9,7 @@ then re-inserted as U+200B and the existing sync engine reads the result.
 
   .venv/bin/python tools/khmer/build_km_segmenter_data.py <km-paragraphs.txt> /tmp/km_seg.tsv
   .venv/bin/python tools/khmer/train_km_segmenter.py /tmp/km_seg.tsv src/languages/khmer
-  .venv/bin/python tools/khmer/export_km_segmenter_onnx.py src/languages/khmer
+  .venv/bin/python tools/khmer/export_km_segmenter_onnx.py data/languages/khmer
 
 ⚠ THE LABELS ARE CLEANED, AND '?' MEANS ABSTAIN. See build_km_segmenter_data.py: ZWSP is a one-sided signal, so
 positions the corpus cannot settle are masked out of BOTH the loss and the score. Never silently treat '?' as 0 —

@@ -6,10 +6,10 @@ Inputs (both public):
       https://www.nb.no/sbfil/leksikalske_databaser/leksikon/da_leksikon.tar.gz  →  dan030224NST.pron
       (ISO-8859-1, ';'-separated, 51 fields; field 0 = word, field 11 = X-SAMPA transcription.)
   - a frequency wordlist — OpenSubtitles Danish (hermitdave FrequencyWords, CC BY-SA), one "word count" per line.
-      The shipped src/languages/danish/da-lexicon.tsv is the NST ∩ (top ~50k of this list).
+      The shipped data/languages/danish/da-lexicon.tsv is the NST ∩ (top ~50k of this list).
 
 Outputs:
-  - src/languages/danish/da-lexicon.tsv — tier-1 SHIPPING lexicon: the freq-list words that NST covers, each mapped to
+  - data/languages/danish/da-lexicon.tsv — tier-1 SHIPPING lexicon: the freq-list words that NST covers, each mapped to
     its SHORTEST NST variant → canonical IPA (NARROW: r-vocalisation ɐ, stop lenition, soft-d ð, length ː, stød ˀ).
     ~37k forms. The frequency head (~98.2% of real-text tokens) — the full 199k differs only on the rank>50k tail,
     which the BiLSTM (trained on the FULL set) recovers, so trimming keeps the bundle ~7× smaller at no head cost.
@@ -89,7 +89,7 @@ def main() -> None:
     ap.add_argument("--train-out", default="/tmp/da_train.tsv")
     args = ap.parse_args()
     here = os.path.dirname(os.path.abspath(__file__))
-    lex_out = os.path.join(here, "..", "..", "src", "languages", "danish", "da-lexicon.tsv")
+    lex_out = os.path.join(here, "..", "..", "data", "languages", "danish", "da-lexicon.tsv")
 
     var = read_nst(args.pron)
     print(f"NST: {len(var):,} alphabetic word forms")

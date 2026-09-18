@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.join(HERE, ".."))  # must precede the bilstm_training
 from bilstm_training import align  # noqa: E402 — SEP stays "" (single-codepoint IPA chunks)
 from bilstm_training.tagger import DEV, Tagger, build_vocab, decode_chunks, encode, train  # noqa: E402
 
-SRC = os.path.join(HERE, "..", "..", "src", "languages", "norwegian")
+SRC = os.path.join(HERE, "..", "..", "data", "languages", "norwegian")
 HID, BATCH, LOG_EVERY = 128, 128, 5  # as trained for the committed nb-g2p-tagger.onnx
 
 _VOWEL = set("ɑaeɛiɪoɔuʉʊyʏøœæ")

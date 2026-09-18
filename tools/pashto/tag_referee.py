@@ -11,7 +11,7 @@ import hashlib, json, os, sys, unicodedata
 import numpy as np, onnxruntime as ort
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SRC = os.path.join(HERE, "..", "..", "src", "languages", "pashto")
+SRC = os.path.join(HERE, "..", "..", "data", "languages", "pashto")
 meta = json.load(open(os.path.join(SRC, "ps-harakat-tagger.meta.json"), encoding="utf8"))
 chars, tags = meta["src"], meta["tags"]
 itag = {v: k for k, v in tags.items()}

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the multilingual character vocabulary for the shared harakat restorer.
 
-The existing Arabic diacritizer (src/languages/arabic/diacritizer.meta.json) knows 39 chars — Arabic letters only.
+The existing Arabic diacritizer (data/languages/arabic/diacritizer.meta.json) knows 39 chars — Arabic letters only.
 The multilingual model must EMBED every letter the rider languages use (Persian گ چ پ ژ, Urdu ٹ ڈ ڑ ہ ھ ے ں,
 Punjabi ݨ ࣇ, …). This scans every skeleton in silver.tsv, unions the letters with the existing Arabic char map
 PRESERVING its indices (so the trained Arabic embedding rows stay valid — new letters just append), and writes the
@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # Scan EVERY skeleton source so the vocab covers every letter the g2ps can read — the wikipron silver alone misses
 # letters only the sister-script transliteration produces (e.g. Punjabi ࣇ U+08C7, from Gurmukhi ਲ਼).
 SKELETON_SOURCES = [os.path.join(HERE, "silver.tsv")] + sorted(glob.glob(os.path.join(HERE, "harakat.*.tsv")))
-META = os.path.join(HERE, "..", "..", "src", "languages", "arabic", "diacritizer.meta.json")
+META = os.path.join(HERE, "..", "..", "data", "languages", "arabic", "diacritizer.meta.json")
 OUT = os.path.join(HERE, "multilingual_charvocab.json")
 
 

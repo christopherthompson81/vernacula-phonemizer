@@ -2,7 +2,7 @@
 """Export the trained multilingual harakat BiLSTM to ONNX for the LIVE rider phonemizers (the neural GENERALIZATION
 tier under the exact-match lexicon). Mirrors the Arabic diacritizer.onnx pipeline: fp32 export → parity check vs
 PyTorch (argmax must match exactly) → int8 dynamic-quantize (keeps the committed model near the Arabic 15 MB
-footprint) → re-check quantized argmax agreement. Writes the .onnx + copies the sidecar meta beside the TS module.
+footprint) → re-check quantized argmax agreement. Writes the .onnx + copies the sidecar meta into data/core/.
 
   $ARDIAC_PY export_onnx.py
 """
@@ -14,10 +14,16 @@ from onnxruntime.quantization import quantize_dynamic, QuantType
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CKPT = os.environ.get("RIDER_CKPT", os.path.expandvars("$ARDIAC/bilstm_multilingual.pt"))
-# ⚠ STALE PATH FIXED 2026-08-19: this said `src/core`, where riderDiacritizer.ts has not lived for some time.
-# A successful-looking export wrote two ORPHAN files into src/core while the model the runtime loads stayed
-# untouched — the same shape of failure as fr/en exporting fp32 while the int8 ships (Run 43).
-DEST = os.path.join(HERE, "..", "..", "src", "languages", "perso-arabic")  # beside riderDiacritizer.ts
+# ⚠ THIS DESTINATION HAS BEEN WRONG TWICE, AND BOTH TIMES THE EXPORT STILL LOOKED LIKE IT WORKED. It wrote
+# two ORPHAN files into a directory the runtime does not read, while the model actually loaded stayed
+# untouched — the same shape as fr/en exporting fp32 while the int8 ships (Run 43). First it said
+# `src/core`; the 2026-08-19 fix moved it to `src/languages/perso-arabic`, which has never existed as a
+# language directory at all; #876 then moved every data asset under `data/`.
+# ⚠ `data/core` IS THE ANSWER, and the reason is that riderDiacritizer is a SHARED multilingual model —
+# `src/core/riderDiacritizer.ts` loads it for every Perso-Arabic rider — so it has no language directory to
+# live in. (The 2026-08-19 note claimed riderDiacritizer.ts had left src/core; it has not, and the file is
+# there today. What moved was the MODEL, not the module.)
+DEST = os.path.join(HERE, "..", "..", "data", "core")
 FP32 = "/tmp/rider_diac.fp32.onnx"
 INT8 = os.path.join(DEST, "riderDiacritizer.onnx")
 META = os.path.join(DEST, "riderDiacritizer.meta.json")

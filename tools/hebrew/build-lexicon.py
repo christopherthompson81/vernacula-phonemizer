@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Hebrew pronunciation lexicon (src/languages/hebrew/he-lexicon.tsv) — a lookup layer that captures
+"""Build the Hebrew pronunciation lexicon (data/languages/hebrew/he-lexicon.tsv) — a lookup layer that captures
 Phonikud's modern-vocabulary READINGS (loanwords, brand names) that the neural tagger misses, WITHOUT importing
 Phonikud's IPA convention. The key move: store Phonikud's niqqud and render it through OUR g2p at runtime, so the
 lexicon output is always in our canonical convention; keep only entries where that our-g2p rendering independently
@@ -14,7 +14,7 @@ renikud-onnx (CC-BY, git+github.com/thewh1teagle/renikud#subdirectory=renikud-on
 Wordlist: a frequency-ranked modern wordlist (e.g. the Hebrew Wikipedia dump via tools/corpus).
 
   python tools/hebrew/build-lexicon.py WORDLIST.txt PHONIKUD.onnx RENIKUD.onnx > /tmp/lexicon-candidates.tsv
-  npx tsx tools/hebrew/finalize-lexicon.ts /tmp/lexicon-candidates.tsv > src/languages/hebrew/he-lexicon.tsv
+  npx tsx tools/hebrew/finalize-lexicon.ts /tmp/lexicon-candidates.tsv > data/languages/hebrew/he-lexicon.tsv
 """
 import sys, re
 from phonikud_onnx import Phonikud

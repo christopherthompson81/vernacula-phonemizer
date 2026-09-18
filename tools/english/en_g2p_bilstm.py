@@ -19,7 +19,7 @@ from bilstm_training.tagger import DEV, Tagger, build_vocab, decode_chunks, enco
 
 align.SEP = " "  # ARPABET phones are multi-char tokens → join 2-phone chunks with a space (K S, not KS)
 
-DICT = os.path.join(HERE, "..", "..", "src", "languages", "english", "g2p-dict.tsv")
+DICT = os.path.join(HERE, "..", "..", "data", "languages", "english", "g2p-dict.tsv")
 HID, BATCH, LOG_EVERY = 256, 256, 5  # as trained for the committed en-g2p-tagger.onnx
 
 
@@ -114,7 +114,7 @@ def main():
         Xf, Yf = encode(aln, chars, tags)
         full = train(Tagger(len(chars), len(tags), hid=HID), Xf, Yf, batch=BATCH, log_every=LOG_EVERY)
         full.eval().cpu()
-        SRC = os.path.join(HERE, "..", "..", "src", "languages", "english")
+        SRC = os.path.join(HERE, "..", "..", "data", "languages", "english")
         dummy = torch.tensor([[1, 2, 3, 4]])
         torch.onnx.export(full, dummy, os.path.join(SRC, "en-g2p-tagger.onnx"),
                           input_names=["chars"], output_names=["logits"],

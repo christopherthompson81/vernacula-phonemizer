@@ -26,7 +26,7 @@ import torch
 import torch.nn as nn
 
 HERE = Path(__file__).resolve().parent
-DEST = HERE.parent.parent / "src/languages/sindhi"
+DEST = HERE.parent.parent / "data/languages/sindhi"
 DATA = HERE / "sd_tagger_data_marked.tsv"
 META = HERE / "sd_tagger_meta_marked.json"
 

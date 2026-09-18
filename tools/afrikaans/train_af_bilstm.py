@@ -34,7 +34,7 @@ sys.path.insert(0, os.path.join(HERE, ".."))  # must precede the bilstm_training
 from bilstm_training import align  # noqa: E402 — SEP stays "" (single-codepoint IPA chunks)
 from bilstm_training.tagger import DEV, Tagger, build_vocab, decode_chunks, encode, train  # noqa: E402
 
-SRC = os.path.join(HERE, "..", "..", "src", "languages", "afrikaans")
+SRC = os.path.join(HERE, "..", "..", "data", "languages", "afrikaans")
 DATA = os.path.join(HERE, "af-g2p-data.tsv")
 HID, BATCH, LOG_EVERY = 256, 256, 5  # hyperparameters are provenance — see tools/bilstm_training/README.md
 

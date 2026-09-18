@@ -12,7 +12,7 @@
 # different words, which is why the scoping exists.
 #
 # PROVENANCE. Every month name below except ဇွန် is corroborated in the repo's own Burmese data
-# (`src/languages/burmese/dictionary.tsv`, `seg-words.txt`); ဇွန် is absent from those files, and was checked
+# (`data/languages/burmese/dictionary.tsv`, `seg-words.txt`); ဇွန် is absent from those files, and was checked
 # through the phonemizer instead — it reads as `zʊ˨ɴ` from the g2p rules, so its absence is a dictionary gap
 # and not a missing reading. The ordinals are the Pali-derived series, all ten corroborated in the same files.
 # Checked mechanically: of the 22 terms here, ဇွန် is the only one absent from the repo's Burmese data.

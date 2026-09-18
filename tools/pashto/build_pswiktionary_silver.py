@@ -69,7 +69,7 @@ a = ap.parse_args()
 #     ṣ/x̌ = ښ  ʂ   (ارزښت  = arz-áṣt, اوښسپور = ux̌-spór)
 #     ẓ/ǧ = ږ  ʐ   (اروالېږد = arwā-léẓd, غږپوهه = …γaǧ-póha)
 #     ɤ/γ = غ  ɣ   — a VOWEL-LOOKING glyph for a consonant; read as a vowel this would corrupt every غ word.
-# Targets are this engine's inventory (src/languages/pashto/pashto.jsonc), including the dental t̪/d̪.
+# Targets are this engine's inventory (data/languages/pashto/pashto.jsonc), including the dental t̪/d̪.
 MAP = {
     # vowels — quality only; length is folded away downstream
     "ā": "ɑ", "â": "ɑ", "ɑ": "ɑ",

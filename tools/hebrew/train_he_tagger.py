@@ -11,7 +11,7 @@ by the loss. No aligner needed — the tags are already 1:1 with the skeleton.
 
   npx tsx tools/hebrew/build_tagger_data.ts /tmp/hebrew_diacritized /tmp/he_tagger_train.tsv
   python tools/hebrew/train_he_tagger.py /tmp/he_tagger_train.tsv src/languages/hebrew   # writes he_tagger.pt
-  python tools/hebrew/export_he_tagger_onnx.py src/languages/hebrew                       # → he-tagger.int8.onnx + meta
+  python tools/hebrew/export_he_tagger_onnx.py data/languages/hebrew                       # → he-tagger.int8.onnx + meta
 """
 import sys, random
 import torch, torch.nn as nn

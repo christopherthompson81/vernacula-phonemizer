@@ -27,6 +27,6 @@ $PY -u "$REPO/tools/arabic/train_ar_diacritizer.py" \
   --ckpt "${CKPT:-/mnt/data/ar-diac/bilstm_silver_only.pt}" \
   --epochs "${EPOCHS:-25}" --hidden 512 --layers 3 --emb 128 --amp 1
 
-echo "[export] int8 ONNX + meta → src/languages/arabic/"
+echo "[export] int8 ONNX + meta → data/languages/arabic/"
 $PY "$REPO/tools/arabic/export_ar_diacritizer_onnx.py" --ckpt "${CKPT:-/mnt/data/ar-diac/bilstm_silver_only.pt}"
 echo TRAIN_EXPORT_DONE

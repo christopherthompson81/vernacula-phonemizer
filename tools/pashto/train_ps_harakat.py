@@ -43,7 +43,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, ".."))
 from bilstm_training.tagger import DEV, Tagger, build_vocab, encode, train  # noqa: E402
 
-SRC = os.path.join(HERE, "..", "..", "src", "languages", "pashto")
+SRC = os.path.join(HERE, "..", "..", "data", "languages", "pashto")
 SILVER = os.path.join(HERE, "..", "perso-arabic", "harakat.ps.silver.tsv")
 HID, BATCH, EPOCHS, LOG_EVERY = 256, 256, 40, 5  # hyperparameters are provenance — see bilstm_training/README.md
 
