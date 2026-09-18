@@ -285,6 +285,44 @@ public static class Normalize
         "giu");  // superscript two, superscript three
     private static readonly JsRe SLASH_WS = JsRegex.Compile("[ \\t]", "gu");
 
+    /**
+     * Canadian provinces and territories, and US states, as the two-letter codes an address writes.
+     * ⚠ Half of these are ordinary English words (IN, ON, OR, OK, HI, ME, MA, DE, LA, PA, CA…), so the
+     * table is worthless without the gate in ADDRESS_CODE. See the TypeScript.
+     */
+    private static readonly IReadOnlyDictionary<string, string> REGION_CODE = new Dictionary<string, string>
+    {
+        ["ab"] = "Alberta", ["bc"] = "British Columbia", ["mb"] = "Manitoba", ["nb"] = "New Brunswick",
+        ["nl"] = "Newfoundland and Labrador", ["ns"] = "Nova Scotia", ["nt"] = "Northwest Territories",
+        ["nu"] = "Nunavut", ["on"] = "Ontario", ["pe"] = "Prince Edward Island", ["qc"] = "Quebec",
+        ["sk"] = "Saskatchewan", ["yt"] = "Yukon",
+        ["al"] = "Alabama", ["ak"] = "Alaska", ["az"] = "Arizona", ["ar"] = "Arkansas",
+        ["ca"] = "California", ["co"] = "Colorado", ["ct"] = "Connecticut", ["de"] = "Delaware",
+        ["fl"] = "Florida", ["ga"] = "Georgia", ["hi"] = "Hawaii", ["ia"] = "Iowa", ["id"] = "Idaho",
+        ["il"] = "Illinois", ["in"] = "Indiana", ["ks"] = "Kansas", ["ky"] = "Kentucky",
+        ["la"] = "Louisiana", ["ma"] = "Massachusetts", ["md"] = "Maryland", ["me"] = "Maine",
+        ["mi"] = "Michigan", ["mn"] = "Minnesota", ["mo"] = "Missouri", ["ms"] = "Mississippi",
+        ["mt"] = "Montana", ["nc"] = "North Carolina", ["nd"] = "North Dakota", ["ne"] = "Nebraska",
+        ["nh"] = "New Hampshire", ["nj"] = "New Jersey", ["nm"] = "New Mexico", ["nv"] = "Nevada",
+        ["ny"] = "New York", ["oh"] = "Ohio", ["ok"] = "Oklahoma", ["or"] = "Oregon",
+        ["pa"] = "Pennsylvania", ["ri"] = "Rhode Island", ["sc"] = "South Carolina",
+        ["sd"] = "South Dakota", ["tn"] = "Tennessee", ["tx"] = "Texas", ["ut"] = "Utah",
+        ["va"] = "Virginia", ["vt"] = "Vermont", ["wa"] = "Washington", ["wi"] = "Wisconsin",
+        ["wv"] = "West Virginia", ["wy"] = "Wyoming", ["dc"] = "District of Columbia",
+    };
+
+    /** The one shape that licenses the table: a comma, the code IN CAPITALS, then a postal code or the
+     *  end of the phrase. See the TypeScript for why the capitals and the comma are both part of it. */
+    private static readonly JsRe ADDRESS_CODE = JsRegex.Compile(
+        "(,[ \u00a0]*)(" + string.Join("|", REGION_CODE.Keys.Select(k => k.ToUpperInvariant())) + ")"
+        + "(?=[ \u00a0]*(?:[A-Z]\\d[A-Z][ \u00a0]?\\d[A-Z]\\d|\\d{5}(?:-\\d{4})?)(?![\\w-])"
+        + "|[ \u00a0]*(?:[.;:!?]|$))",  // NBSP throughout
+        "gu");
+
+    /** `Re:` is "regarding", not the note of the scale. The colon is consumed for the reason every
+     *  abbreviation dot is: left in place it becomes a phrase break. */
+    private static readonly JsRe RE_REGARDING = JsRegex.Compile("(?<![\\p{L}\\p{M}])[Rr][Ee]:[ \\t]*", "gu");
+
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
         // space, tab, NBSP; hyphen through horizontal bar (U+2010-U+2015)
@@ -559,6 +597,12 @@ public static class Normalize
         s = Rewrite(s, DOTTED_INITIALS, m => DOTS.Replace(m.Value, "").ToUpperInvariant());
 
         // ⚠ The weekday rule runs AFTER the two month rules — its gate reads the names they emit.
+        s = Rewrite(s, RE_REGARDING, "regarding ");
+        // A province or state code in an address. See ADDRESS_CODE for why the gate is this narrow.
+        s = Rewrite(s, ADDRESS_CODE, m =>
+            m.Groups[1].Value + (REGION_CODE.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var name)
+                ? name : m.Groups[2].Value));
+
         // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
         s = Rewrite(s, MONTH_RANGE, m =>
         {

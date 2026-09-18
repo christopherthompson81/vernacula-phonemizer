@@ -14,6 +14,9 @@ export interface HeteronymEntry {
     verb?: string;
     noun?: string;
     past?: string;
+    /** The ADJECTIVE reading, where it differs from the default — `arithmetic` the property versus
+     *  arithmetic the subject. See `PosExpectation.adj`. */
+    adj?: string;
 }
 
 export interface EnglishManifest {

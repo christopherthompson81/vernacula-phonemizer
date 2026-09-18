@@ -412,6 +412,49 @@ const PLAIN_ABBREV_ALT = Object.keys(PLAIN_ABBREV).sort((a, b) => b.length - a.l
 const BARE_ABBREV_ALT = ["vs", "approx", "dept", "univ", "blvd"]
     .sort((a, b) => b.length - a.length).join("|");
 
+/**
+ * CANADIAN PROVINCES AND TERRITORIES, AND US STATES, as the two-letter codes an address writes.
+ *
+ * ⚠ HALF OF THESE ARE ORDINARY ENGLISH WORDS — `IN`, `ON`, `OR`, `OK`, `HI`, `ME`, `MA`, `DE`, `LA`,
+ * `PA`, `MS`, `MT`, `MD`, `CA`, `CO`, `AL`, `AR`, `ID`, `MI`, `NE`, `OH`, `SC`, `UT`, `VA`, `WA` —
+ * so the table is worthless without a gate that no running sentence can satisfy. See ADDRESS_CODE.
+ */
+const REGION_CODE: Readonly<Record<string, string>> = {
+    // Canada
+    ab: "Alberta", bc: "British Columbia", mb: "Manitoba", nb: "New Brunswick",
+    nl: "Newfoundland and Labrador", ns: "Nova Scotia", nt: "Northwest Territories", nu: "Nunavut",
+    on: "Ontario", pe: "Prince Edward Island", qc: "Quebec", sk: "Saskatchewan", yt: "Yukon",
+    // United States
+    al: "Alabama", ak: "Alaska", az: "Arizona", ar: "Arkansas", ca: "California", co: "Colorado",
+    ct: "Connecticut", de: "Delaware", fl: "Florida", ga: "Georgia", hi: "Hawaii", ia: "Iowa",
+    id: "Idaho", il: "Illinois", in: "Indiana", ks: "Kansas", ky: "Kentucky", la: "Louisiana",
+    ma: "Massachusetts", md: "Maryland", me: "Maine", mi: "Michigan", mn: "Minnesota",
+    mo: "Missouri", ms: "Mississippi", mt: "Montana", nc: "North Carolina", nd: "North Dakota",
+    ne: "Nebraska", nh: "New Hampshire", nj: "New Jersey", nm: "New Mexico", nv: "Nevada",
+    ny: "New York", oh: "Ohio", ok: "Oklahoma", or: "Oregon", pa: "Pennsylvania", ri: "Rhode Island",
+    sc: "South Carolina", sd: "South Dakota", tn: "Tennessee", tx: "Texas", ut: "Utah",
+    va: "Virginia", vt: "Vermont", wa: "Washington", wi: "Wisconsin", wv: "West Virginia",
+    wy: "Wyoming", dc: "District of Columbia",
+};
+const REGION_CODE_ALT = Object.keys(REGION_CODE).join("|");
+
+/**
+ * THE ONE SHAPE THAT LICENSES THE TABLE ABOVE: a comma, the code IN CAPITALS, and then either a
+ * postal code or the end of the phrase. That is an address line and nothing else — a sentence cannot
+ * put a full stop or a postcode after "…, OR" and go on meaning "or".
+ *
+ * ⚠ CAPITALS ARE PART OF THE GATE, not decoration: `in`, `on` and `or` in running prose are
+ * lowercase, and an address writes the code uppercase. ⚠ AND THE COMMA IS REQUIRED — `Vancouver BC`
+ * without one is a real address shape, but so is "the BC era", and the comma is what separates them.
+ *
+ * Canadian postcode `A1A 1A1` (the space optional), US ZIP `12345` or `12345-6789`.
+ */
+const ADDRESS_CODE = new RegExp(
+    `(,[ \u00a0]*)(${REGION_CODE_ALT.toUpperCase()})`  // NBSP
+    + `(?=[ \u00a0]*(?:[A-Z]\\d[A-Z][ \u00a0]?\\d[A-Z]\\d|\\d{5}(?:-\\d{4})?)(?![\\w-])`  // NBSP ×2
+    + `|[ \u00a0]*(?:[.;:!?]|$))`,  // NBSP
+    "gu");
+
 /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
  *  spelled out here rather than emitted as "5th" because the ordinal-suffix path has no plural form and
  *  "2/5" needs "fifths". Beyond 20 a fraction is vanishingly rare in prose and is left as digits. */
@@ -655,6 +698,16 @@ export function normalizeEnglish(input: string): string {
     //      own rules, `v1.2` and `802.11n` are versions that `NOT_VERSION` guards elsewhere, and a
     //      sentence ending in a capital before a digit ("…ask B. 42 times") is not a shape prose produces.
     s = rewrite(s, /(?<![\p{L}\p{M}.])(\p{L})\.(?=\d)/gu, "$1 point ");
+
+    // 0b4) `Re:` IS "REGARDING", not the note of the scale. Reported reading as *ray* at the head of a
+    //      memo or a subject line. The colon is consumed for the reason every abbreviation dot is:
+    //      left in place it becomes a phrase break between the label and what it labels.
+    s = rewrite(s, /(?<![\p{L}\p{M}])[Rr][Ee]:[ \t]*/gu, "regarding ");
+
+    // 0b5) A PROVINCE OR STATE CODE IN AN ADDRESS. See ADDRESS_CODE for why the gate is this narrow:
+    //      half the table is ordinary English words, so only the address shape may claim them.
+    s = rewrite(s, ADDRESS_CODE, (_m0, comma: string, code: string) =>
+        `${comma}${REGION_CODE[code.toLowerCase()] ?? code}`);
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".

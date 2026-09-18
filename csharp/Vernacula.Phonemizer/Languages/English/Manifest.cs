@@ -12,6 +12,8 @@ public sealed class HeteronymEntry
     public string? Verb { get; init; }
     public string? Noun { get; init; }
     public string? Past { get; init; }
+    /** The ADJECTIVE reading, where it differs from the default. See the TypeScript. */
+    public string? Adj { get; init; }
 }
 
 public sealed class EnglishNumbersDef

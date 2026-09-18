@@ -245,6 +245,13 @@
         // `researcher` (ɹiːsɜːt͡ʃə) FIRST of its two variants. Revisit if en_gb audio ever lands.
         "research": { "default": "ɹˈiːsɚt͡ʃ", "verb": "ɹisˈɝt͡ʃ" },
         "record": { "default": "ɹˈɛkɚd", "verb": "ɹᵻkʰˈɔːɹd" },
+        // ⚠ THE DEFAULT IS THE NOUN AND THE MARKED FORM IS THE ADJECTIVE, which is the opposite way
+        // round from every other entry here — and is what the reference gold says, keying this word
+        // as {ADJ, DEFAULT} rather than {NOUN, DEFAULT}. CMUdict carries only the adjective
+        // (EH2 R IH0 TH M EH1 T IH0 K), so "the arithmetic is wrong" came out ar-ith-MET-ic: the
+        // property's stress on the subject's word. The adjective use is the narrower one — an
+        // arithmetic mean, an arithmetic progression — so it is the one that has to be asked for.
+        "arithmetic": { "default": "əɹˈɪθmətʰˌɪk", "adj": "ˌɛɹɪθmˈɛt̬ɪk" },
         "redress": { "default": "ɹᵻdɹˈɛs", "noun": "ɹˈiːdɹɛs" },
         "refund": { "default": "ɹˈiːfənd", "verb": "ɹᵻfˈʌnd" },
         "refuse": { "default": "ɹᵻfjˈuːz", "noun": "ɹˈɛfjuːs" },
@@ -631,9 +638,18 @@
     // ⚠ ENGLISH NEEDS ALMOST NO LETTER-NAME DATA, and that is why there is no `letterNames` table here.
     // CMUdict already carries all 26 single letters with their letter-NAME pronunciations (f = EH1 F,
     // h = EY1 CH, w = D AH1 B AH0 L Y UW0), so emitting the bare letters space-separated resolves
-    // correctly — the speller is a RULE, not a table. The one EXCEPTION is genuine data: the dict has ⟨a⟩
-    // as the reduced article AH0 rather than the letter name, so it alone must be respelled.
-    "letterNameExceptions": { "a": "ay" },
+    // correctly — the speller is a RULE, not a table. The EXCEPTIONS are genuine data, and there are
+    // exactly TWO — checked by spelling every letter of the alphabet inside a run and asking which came
+    // out with no stress mark at all:
+    //
+    //   ⟨a⟩  the dict has it as the reduced article AH0, not the letter name
+    //   ⟨i⟩  the dict has the letter name, but `i` is the PRONOUN and so is in `unstressedWords`
+    //
+    // ⚠ THE ⟨i⟩ CASE IS ABOUT STRESS, NOT PHONES, which is why it hid: `I` alone is ˈaᶦ and looks
+    // perfectly right. Inside a spelled run it reduces to a bare `aᶦ`, so `PSI` came out pʰˈiː ˈɛs aᶦ —
+    // the last two run together as "sigh", and the unit was reported as reading "psy" even after it was
+    // correctly classified as an initialism. `eye` is a content word and keeps its beat.
+    "letterNameExceptions": { "a": "ay", "i": "eye" },
 
     // English PHONOTACTICS, for the fail-safe guard in core/initialisms.ts. English codas are far more
     // permissive than French ones, so the load here is carried mostly by the NO-VOWEL test — which is
