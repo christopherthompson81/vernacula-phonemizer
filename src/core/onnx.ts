@@ -21,11 +21,23 @@ export interface OrtSession {
     run(feeds: Record<string, unknown>): Promise<Record<string, OrtTensor>>;
 }
 
+/**
+ * The session knobs every runtime behind `OrtLike` understands. `executionProviders` is the one the call
+ * sites set (CPU default; the taggers opt into CUDA via an env var for fast eval); the thread knobs exist
+ * for `setOrtSessionDefaults` and are never passed by a language.
+ */
+export interface OrtSessionOptions {
+    executionProviders?: string[];
+    /** Size of ORT's intra-op pool. ⚠ THE RUNTIME DEFAULT IS ONE THREAD PER CORE — see `setOrtSessionDefaults`. */
+    intraOpNumThreads?: number;
+    interOpNumThreads?: number;
+    executionMode?: "sequential" | "parallel";
+}
+
 export interface OrtLike {
-    /** `create` accepts either a path or the model bytes, with an optional execution-provider list (CPU default;
-     *  the taggers opt into CUDA via an env var for fast eval). */
+    /** `create` accepts either a path or the model bytes, with optional session options. */
     InferenceSession: {
-        create(model: string | Uint8Array, options?: { executionProviders: string[] }): Promise<OrtSession>;
+        create(model: string | Uint8Array, options?: OrtSessionOptions): Promise<OrtSession>;
     };
     Tensor: new (
         type: string,
@@ -71,6 +83,55 @@ export function setOrtLoader(next: (() => Promise<unknown>) | undefined): void {
     ortPromise = undefined;
 }
 
+let sessionDefaults: OrtSessionOptions | undefined;
+
+/**
+ * Merge these options into EVERY `InferenceSession.create` the engine makes — the seam that lets a caller
+ * cap ORT's thread pool WITHOUT reaching past `loadOrt()` into `onnxruntime-node` itself, which
+ * test/onnx-optional.test.ts forbids outright (core/onnx.ts is the sole importer, and that is what keeps
+ * the optional dependency optional).
+ *
+ * ⚠ IT EXISTS BECAUSE THE DEFAULT POOL SCALES BADLY, AND A CALLER WITH ITS OWN PARALLELISM WANTS IT OUT OF
+ * THE WAY. Measured over the whole golden fleet on 8 physical cores (189 languages, 36,495 rows): the
+ * default per-core pool spends 254 CPU-seconds to finish in 47.5 s wall, a one-thread pool spends 93 to
+ * finish in 83.5 s. That is 2.7× the CPU for 43% of the wall — so `tools/check-goldens.mts --jobs N` caps
+ * the pool in each child and gets ~2× overall, where sharding at the default setting got 12% and one
+ * setting lost outright (docs/investigations/en/test_wall_time_investigation.md, Run 5).
+ *
+ * ⚠ NOTHING IN THE LIBRARY CALLS THIS, AND NOTHING SHOULD. The default is the right one for production
+ * inference latency, where a single request wants every core it can get; this is for a batch caller that
+ * is already running N of them.
+ *
+ * ⚠ THESE WIN OVER THE CALL SITE'S OWN OPTIONS, deliberately — the point is to override a runtime default
+ * the call sites never set. Nothing here sets `executionProviders`, so a tagger's CUDA opt-in survives.
+ *
+ * ⚠ IT CLEARS THE LOADER MEMO, AND IT MUST. Whether the runtime is wrapped at all is decided ONCE, when
+ * `loadOrt` resolves; without the clear, a single earlier `loadOrt()` — a bare availability probe that
+ * created no session at all — would fix the unwrapped runtime in place and this call would be a silent
+ * no-op for every path, forever. Measured while reviewing this: probe, then set a one-thread cap, then
+ * create a session, and the session is created at full width with no error. That is the Run 2 dead end
+ * (N shards × one thread per CORE) reappearing behind a green verdict, which is the worst way to lose it.
+ *
+ * ⚠ IT STILL ONLY GOVERNS SESSIONS CREATED AFTER IT. Clearing the memo re-wraps the RUNTIME; it cannot
+ * reach a session a neural path already built and memoised for itself. Call it before any phonemization.
+ */
+export function setOrtSessionDefaults(next: OrtSessionOptions | undefined): void {
+    sessionDefaults = next;
+    ortPromise = undefined;
+}
+
+/** ⚠ ONLY WRAPPED WHEN THERE IS SOMETHING TO MERGE. test/browser-seams.test.ts pins that `loadOrt()`
+ *  resolves to the very object `setOrtLoader` installed; an unconditional wrapper would break that identity
+ *  for every caller in order to serve a mode almost nobody turns on. */
+function withSessionDefaults(ort: OrtLike): OrtLike {
+    return {
+        ...ort,
+        InferenceSession: {
+            create: (model, options) => ort.InferenceSession.create(model, { ...options, ...sessionDefaults }),
+        },
+    };
+}
+
 /**
  * Lazily import onnxruntime-node once per process. `context` names the caller for the missing-dependency error (e.g.
  * "Arabic diacritization"). On import failure the memo is cleared so a later call can retry, and the rejection is
@@ -81,7 +142,10 @@ export function loadOrt(context = "Neural inference"): Promise<OrtLike> {
     const installed = loader;
     const load = installed ?? ((): Promise<unknown> => import(ORT_SPECIFIER));
     const mine: Promise<OrtLike> = load()
-        .then((m) => ((m as { default?: unknown }).default ?? m) as unknown as OrtLike)
+        .then((m) => {
+            const ort = ((m as { default?: unknown }).default ?? m) as unknown as OrtLike;
+            return sessionDefaults ? withSessionDefaults(ort) : ort;
+        })
         .catch((err: unknown) => {
             // ⚠ ONLY CLEAR THE MEMO IF IT IS STILL OURS. A `setOrtLoader()` during an in-flight load
             //   installs a new promise; a blanket `ortPromise = undefined` here would then discard the

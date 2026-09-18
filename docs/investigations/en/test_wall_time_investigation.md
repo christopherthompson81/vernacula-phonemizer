@@ -219,6 +219,15 @@ thread-count option threaded through `Onnx.CreateInferenceSession`, and that set
 PRODUCTION inference latency, where the current behaviour is the one you want. Not worth it for a
 ~13s gate.
 
+⚠ **SUPERSEDED, 2026-09-18 — THAT LAST PARAGRAPH WAS THE ANSWER AND IT WAS WORTH IT.** Capping the pool
+and then sharding is 47.5s → 22.8s on this box, a clean 2.0×, with an identical verdict at every worker
+count. The production objection was real and dissolves once the knob is per-heap and opt-in
+(`setOrtSessionDefaults`, set by the gate's own children and by nothing else) rather than a global
+default. Shipped as `check-goldens.mts --jobs N`; the default stays serial. The measurement, including why
+`--jobs` refuses `--no-clear` and why in-process row concurrency buys exactly nothing, is in
+`docs/investigations/check_goldens_runtime_investigation.md`. "At the floor" in the table below is
+therefore no longer true of the gate, only of its serial mode.
+
 ### Where the gate set stands
 
     vitest        59s       (was 103s, #1320)
