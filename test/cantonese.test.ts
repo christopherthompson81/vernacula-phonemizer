@@ -153,7 +153,7 @@ describe("yue initialisms → Cantonese letter names, from the dict's own data",
     test("⚠ spelling stops at 3 letters; the DICT lookup does not", () => {
         // A recorded reading needs no length guard — it is lexical. Spelling a 4-letter run is where
         // English WORDS start being taken for acronyms (measured on cmn: FIFA ×7, BANK, SEAL).
-        expect(phonemize("FTIR", "yue")).toBe("ˈɛf tʰˈiː aᶦ ˈɑːɹ");
+        expect(phonemize("FTIR", "yue")).toBe("ˈɛf tʰˈiː ˈaᶦ ˈɑːɹ");
     });
 
     test("⚠ an ALL-CAPS alphanumeric token is not Jyutping input", () => {

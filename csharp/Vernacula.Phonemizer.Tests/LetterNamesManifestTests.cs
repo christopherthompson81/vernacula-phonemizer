@@ -185,10 +185,18 @@ public class LetterNamesManifestTests
     public void EnglishSpellerIsARuleAndItsPhonotacticsAreNearlyUnreachable()
     {
         var en = Languages.English.Manifest.MANIFEST;
-        Assert.Equal(new[] { "a" }, en.LetterNameExceptions.Keys);
+        // ⚠ EXACTLY TWO, FOUND BY MEASUREMENT: spelling every letter inside a run and asking which came
+        // out with no stress mark returns ⟨a⟩ and ⟨i⟩. ⟨i⟩ is the subtler — the dict gives it the right
+        // PHONES (it is the pronoun, which sounds like the letter) and the wrong STRESS, because the
+        // pronoun is an unstressed word. See the TypeScript.
+        Assert.Equal(new[] { "a", "i" }, en.LetterNameExceptions.Keys.OrderBy(k => k, StringComparer.Ordinal));
         // GWALT is spelled because ⟨gw⟩ is not licensed; its A must be the exception, not the article.
         Assert.Contains(Say("en", en.LetterNameExceptions["a"]), Say("en", "the GWALT team"));
         // A run the DICTIONARY owns never reaches the cluster test.
+        // And a spelled run standing alone gives every letter a beat; the ⟨i⟩ was the one that lost it.
+        foreach (var run in new[] { "PSI", "FTIR", "AI" })
+            foreach (var group in Phonemizer.Phonemize(run, "en").Split(' '))
+                Assert.True(group.Contains('ˈ') || group.Contains('ˌ'), $"{run} → {group}");
         foreach (var w in new[] { "NASA", "TEST", "STRENGTH" })
             Assert.DoesNotContain(Say("en", "ay"), Say("en", $"the {w} team"));
         Assert.DoesNotContain("gw", en.Phonotactics.Onsets);

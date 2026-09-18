@@ -177,6 +177,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             // JS `(a && b) || (c && d) || … || fallback` — the first NON-EMPTY marked reading wins.
             var ipa = (e?.Past == true && !string.IsNullOrEmpty(het.Past)) ? het.Past!
                 : (e?.Verb == true && !string.IsNullOrEmpty(het.Verb)) ? het.Verb!
+                // ⚠ Adjective before noun: entries carrying an Adj have the NOUN as their default.
+                : (e?.Adj == true && !string.IsNullOrEmpty(het.Adj)) ? het.Adj!
                 : (e?.Noun == true && !string.IsNullOrEmpty(het.Noun)) ? het.Noun!
                 : het.Default;
             if (pluralAllomorph) ipa += SibilantAllomorph(ipa);
@@ -217,8 +219,15 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     {
         var tags = _tagger.Tag(words);
         var outp = tags.Select(t => (PosExpectation?)Pos.PosExpectationOf(t)).ToList();
+        // ⚠ An attributive adjective modifies something, and the tagger does not hold that line — it
+        // calls the word an adjective standing alone, where it is the subject. See the TypeScript.
+        for (var i = 0; i < outp.Count; i++)
+            if (outp[i]!.Adj && !(i + 1 < tags.Count && tags[i + 1].StartsWith("NN", StringComparison.Ordinal)))
+                outp[i] = new PosExpectation
+                    { Verb = outp[i]!.Verb, Noun = outp[i]!.Noun, Past = outp[i]!.Past, Adj = false };
         if (outp.Count > 1 && outp[0]!.Verb == false && Pos.HeadsObjectPhrase(tags.Count > 1 ? tags[1] : ""))
-            outp[0] = new PosExpectation { Verb = true, Noun = false, Past = false }; // sentence-initial imperative ("Wind the clock")
+            // sentence-initial imperative ("Wind the clock")
+            outp[0] = new PosExpectation { Verb = true, Noun = false, Past = false, Adj = false };
         return outp;
     }
 

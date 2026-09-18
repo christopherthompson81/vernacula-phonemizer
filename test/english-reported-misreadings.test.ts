@@ -803,8 +803,11 @@ describe("four lexical facts the dictionary had wrong or lacked", () => {
     // ⚠ CMUdict AND BOTH MISAKI GOLDS RECORD `psi` AS [S AY1] — the Greek letter — so the unit resolved
     // to the word and read "sigh". Same shape as `ai` (the sloth) above it in the list: the dictionary is
     // right about the word and cannot express the case-keyed acronym, which is what acronymLetters is for.
+    // ⚠ THIS TEST PINNED THE DEFECT ONCE. It asserted `pʰˈiː ˈɛs aᶦ` — the classification was right and
+    // the last letter had no stress mark, so ˈɛs aᶦ ran together and the unit was reported STILL reading
+    // "psy" after the fix. A spelled letter keeps its beat; see letterNameExceptions.
     test("PSI is the unit, psi is the Greek letter", () => {
-        expect(say("PSI")).toBe("pʰˈiː ˈɛs aᶦ");
+        expect(say("PSI")).toBe("pʰˈiː ˈɛs ˈaᶦ");
         expect(say("the psi function")).toContain("sˈaᶦ");   // ⚠ case-gated: the word is untouched
     });
 
@@ -859,5 +862,103 @@ describe("a secondary stress on an r-coloured offglide", () => {
     test("a final-nucleus diphthong is untouched", () => {
         expect(say("lighthouse")).toBe("lˈaᶦthˌaᶷs");
         expect(say("powerhouse")).toBe("pʰˈaᶷɚhˌaᶷs");
+    });
+});
+
+describe("a spelled letter, an adjective, a state code and a subject line", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    const norm = (s: string): string => normalizeEnglish(s);
+
+    // ⚠ THE UNIT WAS CLASSIFIED CORRECTLY AND STILL READ WRONG. `PSI` spelled out as p-s-i, but the
+    // last letter had NO stress mark — the dict's ⟨i⟩ is the PRONOUN, which is an unstressed word — so
+    // ˈɛs aᶦ ran together as "sigh" and the report came back unchanged. Phones right, beat wrong.
+    // Found by spelling all 26 letters inside a run: exactly ⟨a⟩ and ⟨i⟩ came out unstressed, and ⟨a⟩
+    // already had its exception.
+    test("every letter of a spelled run keeps its beat", () => {
+        for (const run of ["PSI", "FTIR", "API", "AI", "NHS"])
+            for (const group of say(run).split(" "))
+                expect(`${run} → ${group}`).toMatch(/[ˈˌ]/u);
+        expect(say("PSI")).toBe("pʰˈiː ˈɛs ˈaᶦ");
+        expect(say("the AI system")).toBe("ðə ˈeᶦ ˈaᶦ sˈɪstəm");
+    });
+
+    // ⚠ THE DEFAULT IS THE NOUN AND THE MARKED FORM IS THE ADJECTIVE — the opposite way round from
+    // every other heteronym here, and what the reference gold says by keying the word {ADJ, DEFAULT}.
+    // CMUdict carries only the adjective, so the subject's word took the property's stress.
+    test("an adjective-marked heteronym takes its noun reading by default", () => {
+        expect(say("arithmetic")).toBe("əɹˈɪθmətʰˌɪk");
+        expect(say("the arithmetic is wrong")).toBe("ðə əɹˈɪθmətʰˌɪk ɪz ɹˈɔːŋ");
+        expect(say("an arithmetic mean")).toBe("æn ˌɛɹɪθmˈɛt̬ɪk mˈiːn");
+    });
+
+    // ⚠ AN ATTRIBUTIVE ADJECTIVE MODIFIES SOMETHING, and the tagger does not hold that line: it calls
+    // the word an adjective standing alone and after another adjective, where it is the subject.
+    // Requiring a noun after it is the constraint the tag is missing.
+    test("the adjective reading needs something to modify", () => {
+        expect(say("basic arithmetic")).toBe(say("arithmetic").replace(/^/, "bˈeᶦsɪk "));
+        expect(say("arithmetic progression")).toContain("ˌɛɹɪθmˈɛt̬ɪk");
+    });
+
+    // ⚠ HALF THE TABLE IS ORDINARY ENGLISH WORDS — IN, ON, OR, OK, ME, MA, DE, LA, PA, CA — so only
+    // the address shape may claim them: a comma, the code IN CAPITALS, then a postal code or the end
+    // of the phrase. A sentence cannot put a postcode or a full stop after "…, OR" and go on meaning
+    // "or".
+    test("a province or state code is expanded only in an address", () => {
+        expect(norm("Toronto, ON")).toBe("Toronto, Ontario");
+        expect(norm("Calgary, AB T2P 1J9")).toBe("Calgary, Alberta T2P 1J9");
+        expect(norm("Portland, ME")).toBe("Portland, Maine");
+        expect(norm("Austin, TX 78701")).toBe("Austin, Texas 7 8 7 0 1");
+        // The words, untouched.
+        expect(norm("pick one, or the other")).toBe("pick one, or the other");
+        expect(norm("stay in, or go out")).toBe("stay in, or go out");
+        expect(norm("it is ok, or so they say")).toBe("it is ok, or so they say");
+        // ⚠ NO COMMA IS NO ADDRESS, which is what keeps "the BC era" safe — so this rule declines
+        // `Vancouver BC` entirely. What it reads as instead is the ERA rule's business (BC/AD are
+        // spelled out as letters), and that is a different rule with its own reasons.
+        expect(norm("Vancouver BC")).toBe("Vancouver bee see");
+        expect(norm("dated 500 BC")).toBe("dated 500 bee see");
+    });
+
+    // ⚠ AN ADDRESS BLOCK PUTS A COMMA OR A LINE BREAK AFTER THE CODE, which the first cut refused —
+    // and refusing them is not safe either way, because `Portland, OR, is closed` IS an address. The
+    // signal is the CAPITALISED WORD before the comma: a city, not a clause.
+    test("a comma or a line break after the code is still an address", () => {
+        expect(norm("Toronto, ON, Canada")).toBe("Toronto, Ontario, Canada");
+        expect(norm("the office in Portland, OR, is closed")).toBe("the office in Portland, Oregon, is closed");
+        expect(norm("Toronto, ON\nnext line")).toBe("Toronto, Ontario\nnext line");
+        // …and a lowercase word before the comma is a clause, so these stay put.
+        expect(norm("he lives in, or near, Boston")).toBe("he lives in, or near, Boston");
+        expect(norm("pick one, or, the other")).toBe("pick one, or, the other");
+    });
+
+    // ⚠ `Smith, MD` IS A DOCTOR AND `Baltimore, MD` IS AN ADDRESS, and nothing in the shape tells them
+    // apart. The three codes that are also post-nominal credentials need a POSTCODE after them, which
+    // a credential never has. The cost is a bare `Baltimore, MD` left as letters; the alternative is
+    // reading a physician's name as a state in a document full of names.
+    test("a post-nominal credential is not a state", () => {
+        expect(norm("Smith, MD")).toBe("Smith, MD");
+        expect(norm("Smith, MD, said")).toBe("Smith, MD, said");
+        expect(norm("Jones, PA")).toBe("Jones, PA");
+        expect(norm("Baltimore, MD 21201")).toBe("Baltimore, Maryland 2 1 2 0 1");
+        expect(norm("Pittsburgh, PA 15201")).toBe("Pittsburgh, Pennsylvania 1 5 2 0 1");
+        expect(norm("Washington, DC 20001")).toBe("Washington, District of Columbia 2 0 0 0 1");
+    });
+
+    // ⚠ A ZIP IS A DIGIT STRING, NOT A QUANTITY. With the state a name, the five digits after it
+    // reached the number rules — "Austin, Texas seventy eight thousand seven hundred one".
+    test("a ZIP after a state is read as digits", () => {
+        expect(norm("Austin, TX 78701")).toBe("Austin, Texas 7 8 7 0 1");
+        expect(norm("Austin, TX 78701-1234")).toBe("Austin, Texas 7 8 7 0 1 1 2 3 4");
+        // A Canadian postcode was always letters and digits, and stays as it was.
+        expect(norm("Halifax, NS B3H 4R2")).toBe("Halifax, Nova Scotia B3H 4R2");
+    });
+
+    // `Re:` at the head of a subject line or a memo read as the note of the scale. The colon is
+    // consumed for the reason every abbreviation dot is: left in place it is a phrase break between
+    // the label and what it labels.
+    test("a subject-line Re is regarding", () => {
+        expect(norm("Re: the meeting")).toBe("regarding the meeting");
+        expect(norm("RE: your note")).toBe("regarding your note");
+        expect(norm("a re-entry")).toBe("a re-entry");
     });
 });

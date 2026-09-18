@@ -84,6 +84,10 @@ export interface PosExpectation {
     verb: boolean;
     noun: boolean;
     past: boolean;
+    /** ⚠ AN ADJECTIVE IS NOT A WEAKER NOUN. The pair it settles is a word whose NOUN reading is the
+     *  ordinary one and whose ADJECTIVE reading shifts the stress — the reference gold models exactly
+     *  this, keying `arithmetic` as `{ADJ, DEFAULT}` rather than `{NOUN, DEFAULT}`. */
+    adj: boolean;
 }
 
 /** Map a Penn-Treebank tag to {@link PosExpectation}. */
@@ -92,6 +96,7 @@ export function posExpectation(tag: string): PosExpectation {
         verb: tag === "MD" || tag.startsWith("VB"),
         noun: tag.startsWith("NN"),
         past: tag === "VBD" || tag === "VBN",
+        adj: tag.startsWith("JJ"),
     };
 }
 

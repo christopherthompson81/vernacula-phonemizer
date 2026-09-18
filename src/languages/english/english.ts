@@ -192,6 +192,10 @@ export class EnglishPhonemizer {
             let ipa =
                 (e?.past && het.past) ||
                 (e?.verb && het.verb) ||
+                // ⚠ ADJECTIVE BEFORE NOUN. The entries that carry an `adj` are the ones whose DEFAULT
+                // is already the noun, so a noun tag must fall through to it rather than be caught by
+                // a `noun` slot the entry does not have — and the two tags never co-occur anyway.
+                (e?.adj && het.adj) ||
                 (e?.noun && het.noun) ||
                 het.default;
             if (pluralAllomorph) ipa += sibilantAllomorph(ipa);
@@ -241,12 +245,21 @@ export class EnglishPhonemizer {
     private posExpectations(words: string[]): (PosExpectation | undefined)[] {
         const tags = this.tagger.tag(words);
         const out = tags.map((t) => posExpectation(t));
+        // ⚠ AN ATTRIBUTIVE ADJECTIVE MODIFIES SOMETHING, and the tagger does not hold that line: it
+        // calls `arithmetic` an adjective in "basic arithmetic" and standing alone, where the word is
+        // the subject. Requiring a NOUN after it is the constraint the tag is missing — "an arithmetic
+        // mean" and "arithmetic progression" keep the adjective, "basic arithmetic" and a bare mention
+        // fall through to the default. These entries are attributive-only in practice, so nothing is
+        // lost by refusing the predicative reading the tagger never gets right anyway.
+        for (let i = 0; i < out.length; i++)
+            if (out[i]!.adj && !(tags[i + 1] ?? "").startsWith("NN")) out[i] = { ...out[i]!, adj: false };
         if (
             out.length > 1 &&
             !out[0]!.verb &&
             headsObjectPhrase(tags[1] ?? "")
         ) {
-            out[0] = { verb: true, noun: false, past: false }; // sentence-initial imperative ("Wind the clock")
+            // sentence-initial imperative ("Wind the clock")
+            out[0] = { verb: true, noun: false, past: false, adj: false };
         }
         return out;
     }

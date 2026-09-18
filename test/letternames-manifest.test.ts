@@ -221,13 +221,29 @@ describe.each(RECOGNITION)("%s recognises an initialism run from initialismLette
 describe("en: the speller is a rule, and the phonotactics are nearly unreachable", () => {
     const say = (s: string): string => phonemize(s, "en").replace(/[ˈˌ]/gu, "");
 
-    test("only the ⟨a⟩ exception is declared, and it is what a spelled A reads as", () => {
+    test("the two exceptions are declared, and each is what its spelled letter reads as", () => {
         // ⚠ CANNOT CATCH ITS OWN DECOUPLING — re-hardcoding `l === "a" ? "ay" : l` is observationally
         // identical while the data agrees, the same limit the es and pt lifts recorded. The guard is the
         // manifest-sabotage sweep, where wrecking `letterNameExceptions` moves 1 reading.
-        expect(Object.keys(EN.letterNameExceptions)).toEqual(["a"]);
+        //
+        // ⚠ THE LIST IS EXACTLY TWO, AND IT WAS FOUND BY MEASUREMENT, not by inspection: spelling every
+        // letter of the alphabet inside a run and asking which came out with NO stress mark returns ⟨a⟩
+        // and ⟨i⟩ and nothing else. ⟨i⟩ is the subtler of the two — the dict gives it the right PHONES
+        // (it is the pronoun, which sounds like the letter) and the wrong STRESS, because the pronoun is
+        // in `unstressedWords`. `PSI` came out pʰˈiː ˈɛs aᶦ, whose last two syllables run together as
+        // "sigh", and was reported still reading "psy" long after it was correctly spelled out.
+        expect(Object.keys(EN.letterNameExceptions).sort()).toEqual(["a", "i"]);
         // GWALT is spelled because ⟨gw⟩ is not a licensed onset; its A must be the exception, not the article.
         expect(say("the GWALT team")).toContain(say(EN.letterNameExceptions["a"]!));
+    });
+
+    // ⚠ AND THE POINT OF THE ⟨i⟩ ENTRY IS THE STRESS MARK, which is what a phones-only assertion misses
+    // — including this file's own `say`, which strips both marks on purpose so it can compare NAMES.
+    // A spelled run standing alone gives every letter a beat; the ⟨i⟩ was the one that lost it.
+    test("a spelled letter keeps its beat", () => {
+        for (const run of ["PSI", "FTIR", "API", "AI"])
+            for (const group of phonemize(run, "en").split(" "))
+                expect(`${run} → ${group}`).toMatch(/[ˈˌ]/u);
     });
 
     test("a run the DICTIONARY owns never reaches the cluster test", () => {

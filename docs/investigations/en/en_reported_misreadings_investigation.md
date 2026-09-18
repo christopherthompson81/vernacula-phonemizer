@@ -1315,3 +1315,115 @@ right three, so neither the single-letter guard nor the label test claimed it.
 
 **Gates.** 6036 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144106
 probes identical, cross-engine diff on 26 shapes byte-identical.
+
+## Run 23 — 2026-09-18 23:40 — a beat, an adjective, an address, and two that are staying
+
+Six more from the reader. Examples here are generic shapes, not the reported text.
+
+**`PSI` was classified right and still read wrong, which is why it survived Run 19.** That run put
+`psi` in `acronymLetters` and the letters came out — `pʰˈiː ˈɛs aᶦ`. The third group has NO STRESS
+MARK, so `ˈɛs aᶦ` runs together as "sigh" and the report came back unchanged. **Phones right, beat
+wrong**, and the test written for it pinned the defect verbatim.
+
+Cause: the speller emits bare letters as words, and the dict's `i` is the PRONOUN, which sits in
+`unstressedWords`. Solo it is `ˈaᶦ`; inside a run it reduces.
+
+Found properly by asking the question of the whole alphabet — spell each letter inside a run, report
+any that come back with no stress mark:
+
+```
+⟨a⟩  solo ˈə    in a run: ə     ← already had its exception
+⟨i⟩  solo ˈaᶦ   in a run: aᶦ    ← this one
+— and no others
+```
+
+So `letterNameExceptions` goes from one entry to two: `{ "a": "ay", "i": "eye" }`. ⟨a⟩ was there
+because the dict has the wrong PHONES for it (the reduced article); ⟨i⟩ is there because the dict has
+the right phones and the wrong STRESS. Same table, different reason, and the second reason is the one
+that hides — 34 golden rows across 23 languages moved, every one an embedded `AI`/`FTIR` gaining its
+beat.
+
+**`arithmetic` needed a slot the schema did not have.** Gold keys it `{ADJ: ˌɛɹɪθmˈɛɾɪk, DEFAULT:
+əɹˈɪθmətˌɪk}` — the DEFAULT is the noun and the marked form is the ADJECTIVE, the opposite way round
+from every other heteronym here. CMUdict carries only the adjective, so the subject's word took the
+property's stress. `PosExpectation` gains `adj`, `HeteronymEntry` gains `adj`, and the chain consults
+it before `noun` (entries with an `adj` have the noun as their default; the two tags never co-occur).
+
+⚠ **The tagger does not hold the adjective line.** It calls the word an adjective standing alone and
+after another adjective, where it is the subject:
+
+```
+arithmetic             → adjective    ✗
+basic arithmetic       → adjective    ✗
+an arithmetic mean     → adjective    ✓
+```
+
+The missing constraint is that an attributive adjective MODIFIES something, so the `adj` flag is
+cleared unless the next tag is a noun. These entries are attributive-only in practice, so refusing
+the predicative reading costs nothing and buys the three rows above.
+
+**Province and state codes.** Half the table is ordinary English words — `IN`, `ON`, `OR`, `OK`,
+`ME`, `MA`, `DE`, `LA`, `PA`, `CA` — so the table is worthless without a gate no running sentence can
+satisfy: a comma, the code IN CAPITALS, then a postal code or the end of the phrase. Capitals are
+part of the gate rather than decoration (prose writes `in`/`on`/`or` lowercase), and the comma is what
+separates `Vancouver, BC` from "the BC era". `pick one, or the other` and `stay in, or go out` are
+untouched.
+
+**`Re:`** read as the note of the scale. The colon is consumed for the reason every abbreviation dot
+is: left in place it becomes a phrase break between the label and what it labels.
+
+### Two that are NOT being changed, with the reason
+
+**`records` in "the file records each change" reads as the noun.** The `-s` derivation works and the
+heteronym data is right — it is the POS tag that is wrong:
+
+```
+he records the meeting        → verb ✓     the records are kept  → noun ✓
+she records data daily        → verb ✓     the file records …    → noun ✗
+```
+
+With a pronoun subject the tagger is certain; after `the NOUN` it reads `records` as a plural noun,
+which is a genuinely available parse of those three words. Fixing it needs either a better tagger or
+a clause-level rule ("this clause has no other finite verb, so the heteronym is it") — and that rule
+misfires on the heading-shaped fragments a reviewed document is full of (`the meeting records`).
+Left alone deliberately rather than traded for a new error.
+
+**`wd 40` in LOWERCASE.** The initialism pass is caps-only, and widening it to vowelless LOWERCASE
+runs collides head-on with English interjections: `hmm`, `brr`, `tsk`, `psst`, `shh`, `grr`, `nth`
+are all vowelless lowercase runs that must NOT be spelled out. The caps gate is what separates an
+abbreviation from an interjection, and there is no second signal. `WD 40` and `WD-40` both read
+correctly; the lowercase spelling is left to the writer.
+
+**Found in passing, not fixed:** a US ZIP after a state now reads as a number — `Austin, TX 78701`
+gives "seventy eight thousand seven hundred and one". A postcode is a digit string, not a quantity.
+Out of this batch's scope and recorded so it is not rediscovered.
+
+**Gates.** 6042 TS, 6687 C#, goldens 189/36495 fresh (23 rewritten, all the ⟨i⟩ beat), parity 189
+byte-identical, regex-diff 144164 probes identical, plus an 18-shape cross-engine diff.
+
+**Review of Run 23 — the address gate was both too narrow and too wide.**
+
+⚠ **Too narrow: an address block puts a COMMA or a LINE BREAK after the code**, and the trailing set
+had neither. `Toronto, ON, Canada` and a state ending its own line were both missed — which is most
+of what an address actually looks like.
+
+⚠ **And widening the trailing set alone would have been wrong**, because `he lives in, or near,
+Boston` has exactly that shape. The signal that separates them is the word BEFORE the comma:
+`Portland, OR, is closed` is an address and `in, or near,` is a clause, and the difference is
+`Portland` against `in`. A capitalised word in the lookbehind carries it, and it strengthens every
+other case at the same time.
+
+⚠ **Too wide: `Smith, MD` is a doctor.** `MD`, `PA` and `DC` are post-nominal credentials as well as
+regions, and nothing in the shape tells them apart — both are a capitalised word, a comma and the
+code. Those three are now expanded only with a POSTCODE after them, which a credential never has.
+The cost is a bare `Baltimore, MD` left as letters; the alternative is reading a physician's name as
+a state, in a document that is full of names.
+
+**And the ZIP is fixed after all.** Run 23 recorded it as out of scope, but it is a wart in the
+feature that run shipped: with the state a name, the five digits after it reach the number rules.
+`Austin, TX 78701` read "Austin, Texas seventy eight thousand seven hundred one". Scoped to a ZIP
+directly after a state name this pass just produced — the one place five digits are certainly a
+postcode and not a count.
+
+**Gates.** 6045 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144164
+probes identical, plus a 20-shape cross-engine diff.

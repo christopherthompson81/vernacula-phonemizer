@@ -12,6 +12,9 @@ public sealed class PosExpectation
     public required bool Verb { get; init; }
     public required bool Noun { get; init; }
     public required bool Past { get; init; }
+    /** ⚠ An adjective is not a weaker noun — it settles a pair whose NOUN reading is the ordinary one
+     *  and whose ADJECTIVE reading shifts the stress. See the TypeScript. */
+    public required bool Adj { get; init; }
 }
 
 /** Serialized model artifact format (emitted by `tools/english/en_pos_train.ts`). */
@@ -70,6 +73,7 @@ public static class Pos
         Verb = tag == "MD" || tag.StartsWith("VB", StringComparison.Ordinal),
         Noun = tag.StartsWith("NN", StringComparison.Ordinal),
         Past = tag == "VBD" || tag == "VBN",
+        Adj = tag.StartsWith("JJ", StringComparison.Ordinal),
     };
 
     /**
