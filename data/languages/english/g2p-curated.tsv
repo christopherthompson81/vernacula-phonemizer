@@ -1218,10 +1218,13 @@ realpolitik	R IY2 L P AO2 L IH0 T IH1 K	R IY2 L P AA2 L IH0 T IH1 K	LOT/THOUGHT:
 rebuke	R IY0 B Y UW1 K	R IH0 B Y UW1 K	Latinate re- prefix reduces (gold+Moby)
 rebukes	R IY0 B Y UW1 K S	R IH0 B Y UW1 K S	paradigm completion (the #replace precedent)
 rebuking	R IY0 B Y UW1 K IH0 NG	R IH0 B Y UW1 K IH0 NG	paradigm completion (the #replace precedent)
+recedes	R IY0 S IY1 D Z	R IH0 S IY1 D Z	split re- paradigm (majority / two-source)
 receptor	R IY0 S EH1 P T ER0	R AH0 S EH1 P T ER0	wikipron+gold
 recon	R IY1 K AO0 N	R IY1 K AA0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 reconquer	R IY0 K AO1 NG K ER0	R IY0 K AA1 NG K ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 recursive	R IY2 K ER1 S IH0 V	R IH0 K ER1 S IH0 V	Latinate re- prefix reduces (gold+Moby)
+refreshed	R IY0 F R EH1 SH T	R IH0 F R EH1 SH T	split re- paradigm (majority / two-source)
+refreshingly	R IY0 F R EH1 SH IH0 NG L IY0	R IH0 F R EH1 SH IH0 NG L IY0	split re- paradigm (majority / two-source)
 regimentation	R EH2 JH AH0 M EH0 N T EY1 SH AH0 N	R EH2 JH AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 regina	R IH0 JH IY1 N AH0	R AH0 JH AY1 N AH0	wikipron+gold
 rehearse	R IY0 HH ER1 S	R IH0 HH ER1 S	Latinate re- prefix reduces (gold+Moby)
@@ -1237,18 +1240,23 @@ relationships	R IY0 L EY1 SH AH0 N SH IH2 P S	R IH0 L EY1 SH AH0 N SH IH2 P S	pa
 release	R IY0 L IY1 S	R IH0 L IY1 S	Latinate re- prefix reduces (gold+Moby)
 released	R IY0 L IY1 S T	R IH0 L IY1 S T	paradigm completion (the #replace precedent)
 releasing	R IY0 L IY1 S IH0 NG	R IH0 L IY1 S IH0 NG	paradigm completion (the #replace precedent)
+religions	R IY0 L IH1 JH AH0 N Z	R IH0 L IH1 JH AH0 N Z	split re- paradigm (majority / two-source)
+relinquishing	R IY0 L IH1 NG K W IH0 SH IH0 NG	R IH0 L IH1 NG K W IH0 SH IH0 NG	split re- paradigm (majority / two-source)
 remembrance	R IY0 M EH1 M B R AH0 N S	R IH0 M EH1 M B R AH0 N S	Latinate re- prefix reduces (gold+Moby)
 remission	R IY0 M IH1 SH AH0 N	R IH0 M IH1 SH AH0 N	Latinate re- prefix reduces (gold+Moby)
 remissions	R IY0 M IH1 SH AH0 N Z	R IH0 M IH1 SH AH0 N Z	paradigm completion (the #replace precedent)
+remotely	R IY0 M OW1 T L IY0	R IH0 M OW1 T L IY0	split re- paradigm (majority / two-source)
 remove	R IY0 M UW1 V	R IH0 M UW1 V	Latinate re- prefix reduces (gold+Moby)
 removed	R IY0 M UW1 V D	R IH0 M UW1 V D	Latinate re- prefix reduces (gold+Moby)
 removes	R IY0 M UW1 V Z	R IH0 M UW1 V Z	paradigm completion (the #replace precedent)
 removing	R IY0 M UW1 V IH0 NG	R IH0 M UW1 V IH0 NG	paradigm completion (the #replace precedent)
 remunerate	R IH0 M Y UW2 N ER0 EY1 T	R AH0 M Y UW1 N ER0 EY2 T	family completion (gold)
 remunerative	R IY0 M Y UW1 N ER0 AH0 T IH0 V	R AH0 M Y UW1 N ER0 AH0 T IH0 V	wikipron+gold
+renewable	R IY0 N UW1 AH0 B AH0 L	R IH0 N UW1 AH0 B AH0 L	split re- paradigm (majority / two-source)
 renominate	R IY0 N AO1 M IH0 N EY2 T	R IY0 N AA1 M IH0 N EY2 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 reoccupy	R IY0 AO1 K Y UW2 P AY0	R IY0 AA1 K Y UW2 P AY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 reorient	R IY0 AO1 R IY0 EH0 N T	R IY0 AO1 R IY0 AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
+replacements	R IY0 P L EY1 S M AH0 N T S	R IH0 P L EY1 S M AH0 N T S	split re- paradigm (majority / two-source)
 replenish	R IY0 P L EH1 N IH0 SH	R IH0 P L EH1 N IH0 SH	Latinate re- prefix reduces (gold+Moby)
 replenished	R IY0 P L EH1 N IH0 SH T	R IH0 P L EH1 N IH0 SH T	paradigm completion (the #replace precedent)
 replenishing	R IY0 P L EH1 N IH0 SH IH0 NG	R IH0 P L EH1 N IH0 SH IH0 NG	paradigm completion (the #replace precedent)
@@ -1273,6 +1281,7 @@ requires	R IY0 K W AY1 ER0 Z	R IH0 K W AY1 ER0 Z	#1279
 requiring	R IY0 K W AY1 ER0 IH0 NG	R IH0 K W AY1 R IH0 NG	#1289
 research	R IY0 S ER1 CH	R IY1 S ER0 CH	#1280
 resection	R IY2 S EH1 K SH AH0 N	R IH0 S EH1 K SH AH0 N	Latinate re- prefix reduces (gold+Moby)
+resented	R IY0 Z EH1 N T IH0 D	R IH0 Z EH1 N T IH0 D	split re- paradigm (majority / two-source)
 resolutely	R EH1 S AH0 L UW2 T L IY0	R EH1 Z AH0 L UW2 T L IY0	intervocalic/voiced-context S→Z (gold)
 respecting	R IY0 S P EH1 K T IH0 NG	R IH0 S P EH1 K T IH0 NG	Latinate re- prefix reduces (gold+Moby)
 responsibility	R IY0 S P AA2 N S AH0 B IH1 L AH0 T IY0	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0	Latinate re- prefix reduces (gold+Moby)
@@ -1293,6 +1302,8 @@ resveratrol	R EH0 S V ER1 AH0 T R AO0 L	R EH0 S V ER1 AH0 T R AA0 L	LOT/THOUGHT:
 retaliation	R IY0 T AE2 L IY0 EY1 SH AH0 N	R IH0 T AE2 L IY0 EY1 SH AH0 N	Latinate re- prefix reduces (gold+Moby)
 retention	R IY0 T EH1 N SH AH0 N	R IH0 T EH1 N SH AH0 N	Latinate re- prefix reduces (gold+Moby)
 retinol	R EH1 T IH0 N AO2 L	R EH1 T IH0 N AA2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+retirees	R IY0 T AY1 R IY1 Z	R IH0 T AY1 R IY1 Z	split re- paradigm (majority / two-source)
+retirement	R IY0 T AY1 ER0 M AH0 N T	R IH0 T AY1 ER0 M AH0 N T	split re- paradigm (majority / two-source)
 retort	R IY1 T AO2 R T	R IH0 T AO2 R T	Latinate re- prefix reduces (gold+Moby)
 retorted	R IY0 T AO1 R T IH0 D	R IH0 T AO1 R T IH0 D	paradigm completion (the #replace precedent)
 retract	R IY0 T R AE1 K T	R IH0 T R AE1 K T	Latinate re- prefix reduces (gold+Moby)
@@ -1313,6 +1324,8 @@ revision	R IY0 V IH1 ZH AH0 N	R IH0 V IH1 ZH AH0 N	Latinate re- prefix reduces (
 revisionist	R IY0 V IH1 ZH AH0 N IH0 S T	R IH0 V IH1 ZH AH0 N IH0 S T	Latinate re- prefix reduces (gold+Moby)
 revisionists	R IY0 V IH1 ZH AH0 N IH0 S T S	R IH0 V IH1 ZH AH0 N IH0 S T S	paradigm completion (the #replace precedent)
 revisions	R IY0 V IH1 ZH AH0 N Z	R IH0 V IH1 ZH AH0 N Z	paradigm completion (the #replace precedent)
+revives	R IY0 V AY1 V Z	R IH0 V AY1 V Z	split re- paradigm (majority / two-source)
+revolting	R IY0 V OW1 L T IH0 NG	R IH0 V OW1 L T IH0 NG	split re- paradigm (majority / two-source)
 revolve	R IY0 V AA1 L V	R IY0 V AO1 L V	LOT/THOUGHT: align AA/AO to gold's consistent system
 revolver	R IH0 V AA1 L V ER0	R IH0 V AO1 L V ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 rewiring	R IY0 W AY1 ER0 IH0 NG	R IY0 W AY1 R IH0 NG	#1289

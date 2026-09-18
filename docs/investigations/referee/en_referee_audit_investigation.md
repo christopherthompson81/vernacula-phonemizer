@@ -1394,3 +1394,42 @@ cannot see — so this needs a lexical exception list, not a rule, and is left a
 `copyright` is rank #150, so it is worth doing.
 
     tests 5,989 / 311 files   goldens 0 stale   en 59.9%   en-GB 47.5%
+
+## Run 16 — reviewing #1337: paradigm completeness, and a cloth row the branch needed
+
+### The re- paradigms: 0 introduced, 13 pre-existing closed
+
+    split re- paradigms found:                            49
+      the tense member is STRESSED IY1/IY2                20   ← legitimate noun/verb (`recall`
+                                                               ˈriːkɔːl beside `recalled` rɪˈkɔːld)
+      the tense member is UNSTRESSED IY0 — a true split   29
+        INTRODUCED by this branch                          0   ← the phase-2 completion was correct
+        closed here                                       13
+
+The 13 are backed either by two sources or by the repo's own documented precedent — `replace` was fixed
+because "replace's own inflections contradict it", so the paradigm MAJORITY wins. ⚠ **One of them is
+`replacements`**, a direct sibling of the rows that fix touched, left behind at the time.
+
+The other 16 are left alone: no source covers them and their paradigm majority does not settle it, so
+choosing would be guessing.
+
+### ⚠ THE en-GB CONSEQUENCE CHECK CAUGHT ONE, AND THE SET LOOKED LIKE IT ALREADY HAD IT
+
+`boston` moved AA1 → AO1 in this branch and needed `en-gb-cloth` membership, exactly as 119 words did in
+#1334. ⚠ A `grep -c boston` on the cloth file returns 1 and that is **`bostonian`** — the word itself was
+absent. A substring check answered a membership question, which is the same shape of mistake as the
+onset-`r` blind spot. Added; `boston` now reads `bˈɒstən` and en-GB matching on this branch's changed words
+went 46 → 47 of 59.
+
+⚠ Checked in BOTH directions: `costa` moved AO1 → AA1 and needs NO cloth row, because at `ɑː` the plain LOT
+rule already gives `kʰˈɒstə`. A set that is right for one direction can be wrong for the other.
+
+The remaining 12 misses are variety differences, not defects — British `semi` /ˈsɛmi/ against US /ˈsɛmaɪ/,
+`suggest` /səˈdʒɛst/ without the /ɡ/, `really` /ˈrɪəli/ with NEAR.
+
+### Invariants
+
+    curated rows 1,538, no duplicates, every `want` equal to the shipped dict
+    93 dict rows changed on this branch, all recorded
+    tests 5,989 / 311 files   goldens 0 stale   package fence ok (368 data files)
+    en 59.9%   en-GB 47.5%   triple-source agreement 68.9%

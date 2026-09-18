@@ -86159,7 +86159,7 @@ recasting	R IY0 K AE1 S T IH0 NG
 recchia	R EH1 K IY0 AH0
 recede	R IH0 S IY1 D
 receded	R AH0 S IY1 D IH0 D
-recedes	R IY0 S IY1 D Z
+recedes	R IH0 S IY1 D Z
 receding	R IH0 S IY1 D IH0 NG
 receipt	R IH0 S IY1 T
 receipts	R IH0 S IY1 T S
@@ -86776,11 +86776,11 @@ refrained	R IH0 F R EY1 N D
 refraining	R IH0 F R EY1 N IH0 NG
 refrains	R IH0 F R EY1 N Z
 refresh	R IH0 F R EH1 SH
-refreshed	R IY0 F R EH1 SH T
+refreshed	R IH0 F R EH1 SH T
 refresher	R IH0 F R EH1 SH ER0
 refreshes	R IH0 F R EH1 SH IH0 Z
 refreshing	R IH0 F R EH1 SH IH0 NG
-refreshingly	R IY0 F R EH1 SH IH0 NG L IY0
+refreshingly	R IH0 F R EH1 SH IH0 NG L IY0
 refreshment	R AH0 F R EH1 SH M AH0 N T
 refreshments	R AH0 F R EH1 SH M AH0 N T S
 refrigerant	R IH0 F R IH1 JH ER0 AH0 N T
@@ -87322,14 +87322,14 @@ relig	R IH0 L IH1 JH
 religion	R IH0 L IH1 JH AH0 N
 religione	R IH0 L IH2 JH IY0 OW1 N IY0
 religionist	R IY0 L IH1 JH AH0 N IH0 S T
-religions	R IY0 L IH1 JH AH0 N Z
+religions	R IH0 L IH1 JH AH0 N Z
 religiosity	R IH0 L IH2 JH IY0 AA1 S AH0 T IY0
 religious	R IH0 L IH1 JH AH0 S
 religiously	R IH0 L IH1 JH AH0 S L IY0
 relinquish	R IH0 L IH1 NG K W IH0 SH
 relinquished	R IH0 L IH1 NG K W IH0 SH T
 relinquishes	R IH0 L IH1 NG K W IH0 SH IH0 Z
-relinquishing	R IY0 L IH1 NG K W IH0 SH IH0 NG
+relinquishing	R IH0 L IH1 NG K W IH0 SH IH0 NG
 relish	R EH1 L IH0 SH
 relished	R EH1 L IH0 SH T
 relishes	R EH1 L IH0 SH AH0 Z
@@ -87461,7 +87461,7 @@ remorse	R IH0 M AO1 R S
 remorseful	R IH0 M AO1 R S F AH0 L
 remorseless	R IH0 M AO1 R S L AH0 S
 remote	R IH0 M OW1 T
-remotely	R IY0 M OW1 T L IY0
+remotely	R IH0 M OW1 T L IY0
 remoteness	R IY0 M OW1 T N AH0 S
 remotest	R IH0 M OW1 T AH0 S T
 remoulded	R IY0 M OW1 L D IH0 D
@@ -87540,7 +87540,7 @@ renegotiation	R IY2 N IH0 G OW2 SH IY0 EY1 SH AH0 N
 renegotiations	R IY2 N IH0 G OW2 SH IY0 EY1 SH AH0 N Z
 renehan	R EH1 N IH0 HH AE0 N
 renew	R IH0 N UW1
-renewable	R IY0 N UW1 AH0 B AH0 L
+renewable	R IH0 N UW1 AH0 B AH0 L
 renewal	R IH0 N UW1 AH0 L
 renewals	R IH0 N UW1 AH0 L Z
 renewed	R IH0 N UW1 D
@@ -87733,7 +87733,7 @@ replace	R IH0 P L EY1 S
 replaceable	R IH0 P L EY1 S AH0 B AH0 L
 replaced	R IH0 P L EY1 S T
 replacement	R IH0 P L EY1 S M AH0 N T
-replacements	R IY0 P L EY1 S M AH0 N T S
+replacements	R IH0 P L EY1 S M AH0 N T S
 replaces	R IH0 P L EY1 S IH0 Z
 replacing	R IH0 P L EY1 S IH0 NG
 replant	R IY0 P L AE1 N T
@@ -87962,7 +87962,7 @@ resendes	R EH1 S IH0 N D Z
 resendez	R EY0 S EY1 N D EH0 Z
 resendiz	R IH0 S EH1 N D IH0 Z
 resent	R IH0 Z EH1 N T
-resented	R IY0 Z EH1 N T IH0 D
+resented	R IH0 Z EH1 N T IH0 D
 resentful	R IH0 Z EH1 N T F AH0 L
 resenting	R IH0 Z EH1 N T IH0 NG
 resentment	R IH0 Z EH1 N T M AH0 N T
@@ -88273,8 +88273,8 @@ retinyl	R EH1 T IH0 N AH0 L
 retire	R IH0 T AY1 R
 retired	R IH0 T AY1 R D
 retiree	R IY0 T AY1 R IY1
-retirees	R IY0 T AY1 R IY1 Z
-retirement	R IY0 T AY1 ER0 M AH0 N T
+retirees	R IH0 T AY1 R IY1 Z
+retirement	R IH0 T AY1 ER0 M AH0 N T
 retirements	R IH0 T AY1 R M AH0 N T S
 retires	R IH0 T AY1 R Z
 retiring	R IH0 T AY1 R IH0 NG
@@ -88504,7 +88504,7 @@ revivalist	R IY0 V AY1 V AH0 L IH0 S T
 revivals	R IY0 V AY1 V AH0 L Z
 revive	R IH0 V AY1 V
 revived	R IH0 V AY1 V D
-revives	R IY0 V AY1 V Z
+revives	R IH0 V AY1 V Z
 reviving	R IH0 V AY1 V IH0 NG
 revlon	R EH1 V L AA0 N
 revocable	R EH1 V AH0 K AH0 B AH0 L
@@ -88516,7 +88516,7 @@ revoked	R IH0 V OW1 K T
 revoking	R IH0 V OW1 K IH0 NG
 revolt	R IH0 V OW1 L T
 revolted	R IH0 V OW1 L T IH0 D
-revolting	R IY0 V OW1 L T IH0 NG
+revolting	R IH0 V OW1 L T IH0 NG
 revolts	R IY0 V OW1 L T S
 revolucion	R EH2 V OW0 L UW2 S IY0 OW1 N
 revolucionario	R EH2 V OW0 L UW2 S IY0 AH0 N EH1 R IY0 OW0
