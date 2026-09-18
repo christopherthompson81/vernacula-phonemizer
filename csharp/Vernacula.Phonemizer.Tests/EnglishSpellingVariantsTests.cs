@@ -34,7 +34,10 @@ public class EnglishSpellingVariantsTests
     [InlineData("marvellous", "mˈɑːɹvə̆ləs")]
     [InlineData("counsellor", "kʰˈaᶷnsə̆lɚ")]
     [InlineData("unrivalled", "ənɹˈaᶦvəɫd")]
-    [InlineData("enrolment", "ɛnɹˈoᶷɫmənt")]
+    // ⚠ `ɪn-`, not `ɛn-`: the unstressed prefix was corrected in #1334 (misaki gold, and our own dict
+    // could not have `embark` EH0 beside `embarks` IH0). The vowel is incidental to what this line pins —
+    // that `enrolment` folds to the `enrollment` row.
+    [InlineData("enrolment", "ɪnɹˈoᶷɫmənt")]
     [InlineData("skilful", "skˈɪɫfɫ̩")]
     [InlineData("anaemia", "ənˈiːmiʲə")]
     [InlineData("foetus", "fˈiːt̬əs")]
@@ -55,7 +58,10 @@ public class EnglishSpellingVariantsTests
     [InlineData("hour", "ˈaᶷɚ")]
     [InlineData("devour", "dᵻvˈaᶷɚ")]
     [InlineData("dolling", "dˈɑːlɪŋ")]
-    [InlineData("palled", "pʰˈɑːɫd")]
+    // ⚠ `ɔː` not `ɑː`: `palled` is OOV and decodes from `pall`, whose row #1334 corrected AA1 → AO1 (a
+    // pall is /pɔːl/). What this line pins is unaffected — the doubled ⟨ll⟩ blocks the Commonwealth fold,
+    // so it is not read as `paled` pʰˈeᶦɫd.
+    [InlineData("palled", "pʰˈɔːɫd")]
     [InlineData("tilled", "tʰˈɪɫd")]
     [InlineData("pilled", "pʰˈɪɫd")]
     public void AWordThatOnlyLooksCommonwealthIsLeftAlone(string word, string ipa)
