@@ -255,11 +255,24 @@ public static class Normalize
     private static readonly IReadOnlySet<string> SLASH_ELIDED = new HashSet<string>(
         new[] { "and/or", "he/she", "she/he", "his/her", "her/his", "s/he", "either/or" }, StringComparer.Ordinal);
 
-    /** Slashed abbreviations with a fixed reading — a WORD written with a mark in it. */
+    /**
+     * Slashed abbreviations with a fixed reading — a WHOLE UNIT, where neither the rate reading nor the
+     * conjunction reading is right. ⚠ The bar for a row is a SINGLE DOMINANT reading, because the failure
+     * mode of guessing is a wrong word inserted into prose; `a/c`, `b/w`, `s/n`, `p/e`, `o/s` have two
+     * live readings each and deliberately fall through to the single-letter guard, which leaves the mark
+     * silent and reads the letters. See the TypeScript.
+     */
     private static readonly IReadOnlyDictionary<string, string> SLASH_ABBREV = new Dictionary<string, string>
     {
         ["w/o"] = "without", ["c/o"] = "care of", ["n/a"] = "not applicable",
+        ["a/d"] = "analog to digital", ["d/a"] = "digital to analog",
+        ["r/w"] = "read write", ["y/n"] = "yes no",
     };
+
+    /** ⚠ `w/` has no right-hand side, so the pair rule cannot see it and the token reached the g2p as a
+     *  dangling letter. Gated on nothing following the slash, so `w/o` stays with the pair rule. */
+    private static readonly JsRe W_WITH =
+        JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])w\\/(?![\\p{L}\\d])", "giu");
 
     /** The compositional slash — a rate, a fixed abbreviation, or (between two ALL-CAPS labels) the mark
      *  said aloud. See the TypeScript for why prose keeps it silent. */
@@ -699,6 +712,7 @@ public static class Normalize
             return forms is null ? m.Value : forms[0];
         });
 
+        s = Rewrite(s, W_WITH, "with");
         // A slash the table cannot enumerate: a rate, a fixed abbreviation, or the mark said aloud
         // between two ALL-CAPS labels. Ordered after the two arms above. See the TypeScript.
         s = Rewrite(s, SLASH_PAIR, m =>

@@ -350,10 +350,24 @@ const TIME_PERIOD: Readonly<Record<string, string>> = {
 const SLASH_ELIDED: ReadonlySet<string> = new Set(
     ["and/or", "he/she", "she/he", "his/her", "her/his", "s/he", "either/or"]);
 
-/** SLASHED ABBREVIATIONS with a fixed reading. Each is a WORD written with a mark in it, so neither the
- *  rate reading nor the conjunction reading is right: `w/o` is "without", never "w slash o". */
+/**
+ * SLASHED ABBREVIATIONS with a fixed reading — a WHOLE UNIT, where neither the rate reading nor the
+ * conjunction reading is right. `w/o` is "without", never "w slash o" and never "w per o".
+ *
+ * ⚠ THE BAR FOR A ROW HERE IS A SINGLE DOMINANT READING, because the failure mode of guessing is a
+ * WRONG WORD inserted into prose — which is exactly what the rate arm did before the single-letter
+ * guard went in above it (`A/D converter` → "A per day converter"). So the pairs with two live
+ * readings are deliberately ABSENT and fall through to that guard, which leaves the mark silent and
+ * reads the letters: `a/c` (air conditioning OR account), `b/w` (black and white OR between), `s/n`
+ * (serial number OR signal to noise), `p/e`, `o/s`, `n/s`. "P E ratio" and "A C unit" are what people
+ * say anyway; "price per earnings ratio" would not be.
+ *
+ * ⚠ AND `i/o` IS ABSENT ON PURPOSE. It has one reading, but that reading IS the letters — "I O" — so
+ * the fall-through already produces it and a row would only be a second place to maintain it.
+ */
 const SLASH_ABBREV: Readonly<Record<string, string>> = {
     "w/o": "without", "c/o": "care of", "n/a": "not applicable",
+    "a/d": "analog to digital", "d/a": "digital to analog", "r/w": "read write", "y/n": "yes no",
 };
 
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
@@ -999,6 +1013,11 @@ export function normalizeEnglish(input: string): string {
         const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, m0);
         return forms === undefined ? m0 : forms[0];
     });
+
+    //      ⚠ `w/` IS THE ONE WITH NO RIGHT-HAND SIDE, so the pair rule below cannot see it and the token
+    //      reached the g2p as a dangling letter. Claimed first, and gated on the slash being followed by
+    //      nothing — `w/o` still belongs to the pair rule and its own entry there.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])w\/(?![\p{L}\d])/giu, "with");
 
     // 6a3) A SLASH THAT THE TABLE CANNOT ENUMERATE. 6a2 above claims the slashed keys that are WRITTEN
     //      OUT in the unit table (`km/h`, `btu/hr/sf`); everything else kept its slash into the g2p, where
