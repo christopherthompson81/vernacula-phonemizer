@@ -1400,3 +1400,30 @@ Out of this batch's scope and recorded so it is not rediscovered.
 
 **Gates.** 6042 TS, 6687 C#, goldens 189/36495 fresh (23 rewritten, all the ⟨i⟩ beat), parity 189
 byte-identical, regex-diff 144164 probes identical, plus an 18-shape cross-engine diff.
+
+**Review of Run 23 — the address gate was both too narrow and too wide.**
+
+⚠ **Too narrow: an address block puts a COMMA or a LINE BREAK after the code**, and the trailing set
+had neither. `Toronto, ON, Canada` and a state ending its own line were both missed — which is most
+of what an address actually looks like.
+
+⚠ **And widening the trailing set alone would have been wrong**, because `he lives in, or near,
+Boston` has exactly that shape. The signal that separates them is the word BEFORE the comma:
+`Portland, OR, is closed` is an address and `in, or near,` is a clause, and the difference is
+`Portland` against `in`. A capitalised word in the lookbehind carries it, and it strengthens every
+other case at the same time.
+
+⚠ **Too wide: `Smith, MD` is a doctor.** `MD`, `PA` and `DC` are post-nominal credentials as well as
+regions, and nothing in the shape tells them apart — both are a capitalised word, a comma and the
+code. Those three are now expanded only with a POSTCODE after them, which a credential never has.
+The cost is a bare `Baltimore, MD` left as letters; the alternative is reading a physician's name as
+a state, in a document that is full of names.
+
+**And the ZIP is fixed after all.** Run 23 recorded it as out of scope, but it is a wart in the
+feature that run shipped: with the state a name, the five digits after it reach the number rules.
+`Austin, TX 78701` read "Austin, Texas seventy eight thousand seven hundred one". Scoped to a ZIP
+directly after a state name this pass just produced — the one place five digits are certainly a
+postcode and not a count.
+
+**Gates.** 6045 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144164
+probes identical, plus a 20-shape cross-engine diff.

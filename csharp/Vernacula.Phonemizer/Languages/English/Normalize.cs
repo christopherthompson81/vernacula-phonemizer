@@ -311,12 +311,35 @@ public static class Normalize
         ["wv"] = "West Virginia", ["wy"] = "Wyoming", ["dc"] = "District of Columbia",
     };
 
-    /** The one shape that licenses the table: a comma, the code IN CAPITALS, then a postal code or the
-     *  end of the phrase. See the TypeScript for why the capitals and the comma are both part of it. */
+    private const string POSTCODE =
+        "(?:[A-Z]\\d[A-Z][ \u00a0]?\\d[A-Z]\\d|\\d{5}(?:-\\d{4})?)(?![\\w-])";  // NBSP
+
+    /** ⚠ The three codes that are also POST-NOMINAL CREDENTIALS. `Smith, MD` is a doctor and
+     *  `Baltimore, MD` an address, and nothing in the shape tells them apart — so these need a
+     *  postcode after them, which a credential never has. See the TypeScript. */
+    private static readonly IReadOnlySet<string> CREDENTIAL_CODE =
+        new HashSet<string>(new[] { "MD", "PA", "DC" }, StringComparer.Ordinal);
+
+    /** The shape that licenses the table, all three parts load-bearing: a CAPITALISED WORD, a comma,
+     *  the code IN CAPITALS, then a postcode or the end of the phrase. The capitalised word is what
+     *  separates a city from a clause — `Portland, OR, is closed` against `he lives in, or near,
+     *  Boston`. See the TypeScript. */
     private static readonly JsRe ADDRESS_CODE = JsRegex.Compile(
-        "(,[ \u00a0]*)(" + string.Join("|", REGION_CODE.Keys.Select(k => k.ToUpperInvariant())) + ")"
-        + "(?=[ \u00a0]*(?:[A-Z]\\d[A-Z][ \u00a0]?\\d[A-Z]\\d|\\d{5}(?:-\\d{4})?)(?![\\w-])"
-        + "|[ \u00a0]*(?:[.;:!?]|$))",  // NBSP throughout
+        "(?<=\\p{Lu}\\p{L}*)(,[ \u00a0]*)("
+        + string.Join("|", REGION_CODE.Keys.Select(k => k.ToUpperInvariant())) + ")"
+        + "(?=[ \u00a0]*" + POSTCODE
+        + "|[ \u00a0]*(?:[.,;:!?\\n]|$))",  // NBSP throughout
+        "gu");
+
+    private static readonly JsRe FOLLOWED_BY_POSTCODE =
+        JsRegex.Compile("^[ \u00a0]*" + POSTCODE, "u");  // NBSP
+
+    /** ⚠ A US ZIP is a DIGIT STRING, not a quantity — once the state is a name the five digits after
+     *  it reach the number rules and are read as one. Scoped to a ZIP directly after a state name this
+     *  pass just produced. See the TypeScript. */
+    private static readonly JsRe ADDRESS_ZIP = JsRegex.Compile(
+        "(?<=\\b(?:" + string.Join("|", REGION_CODE.Values.Distinct().OrderByDescending(v => v.Length))
+        + ")[ \u00a0])(\\d{5})(-(\\d{4}))?(?![\\w-])",  // NBSP
         "gu");
 
     /** `Re:` is "regarding", not the note of the scale. The colon is consumed for the reason every
@@ -599,9 +622,21 @@ public static class Normalize
         // ⚠ The weekday rule runs AFTER the two month rules — its gate reads the names they emit.
         s = Rewrite(s, RE_REGARDING, "regarding ");
         // A province or state code in an address. See ADDRESS_CODE for why the gate is this narrow.
+        var beforeCodes = s;
         s = Rewrite(s, ADDRESS_CODE, m =>
-            m.Groups[1].Value + (REGION_CODE.TryGetValue(m.Groups[2].Value.ToLowerInvariant(), out var name)
-                ? name : m.Groups[2].Value));
+        {
+            var code = m.Groups[2].Value;
+            // ⚠ A credential needs the stronger gate — see CREDENTIAL_CODE.
+            if (CREDENTIAL_CODE.Contains(code)
+                && !FOLLOWED_BY_POSTCODE.IsMatch(beforeCodes[(m.Index + m.Length)..]))
+                return m.Value;
+            return m.Groups[1].Value + (REGION_CODE.TryGetValue(code.ToLowerInvariant(), out var name)
+                ? name : code);
+        });
+        // ⚠ AFTER the rule above, because it keys on the state NAME that rule just produced.
+        s = Rewrite(s, ADDRESS_ZIP, m =>
+            string.Join(" ", m.Groups[1].Value.ToCharArray())
+            + (m.Groups[3].Success ? " " + string.Join(" ", m.Groups[3].Value.ToCharArray()) : ""));
 
         // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
         s = Rewrite(s, MONTH_RANGE, m =>

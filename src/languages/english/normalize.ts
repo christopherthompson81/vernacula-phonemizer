@@ -439,20 +439,53 @@ const REGION_CODE: Readonly<Record<string, string>> = {
 const REGION_CODE_ALT = Object.keys(REGION_CODE).join("|");
 
 /**
- * THE ONE SHAPE THAT LICENSES THE TABLE ABOVE: a comma, the code IN CAPITALS, and then either a
- * postal code or the end of the phrase. That is an address line and nothing else — a sentence cannot
- * put a full stop or a postcode after "…, OR" and go on meaning "or".
+ * THE SHAPE THAT LICENSES THE TABLE ABOVE, and all three parts of it are load-bearing: a CAPITALISED
+ * WORD, a comma, the code IN CAPITALS, and then a postal code or the end of the phrase. That is an
+ * address line and nothing else.
  *
  * ⚠ CAPITALS ARE PART OF THE GATE, not decoration: `in`, `on` and `or` in running prose are
- * lowercase, and an address writes the code uppercase. ⚠ AND THE COMMA IS REQUIRED — `Vancouver BC`
- * without one is a real address shape, but so is "the BC era", and the comma is what separates them.
+ * lowercase, and an address writes the code uppercase. ⚠ THE COMMA IS REQUIRED — `Vancouver BC`
+ * without one is a real address shape, but so is "the BC era". ⚠ AND THE CAPITALISED WORD BEFORE THE
+ * COMMA IS WHAT SEPARATES A CITY FROM A CLAUSE, which the first cut of this rule got wrong by
+ * refusing every code with a comma after it. `Portland, OR, is closed` is an address and
+ * `he lives in, or near, Boston` is not; the difference is `Portland` against `in`.
  *
- * Canadian postcode `A1A 1A1` (the space optional), US ZIP `12345` or `12345-6789`.
+ * Canadian postcode `A1A 1A1` (the space optional), US ZIP `12345` or `12345-6789`. The trailing set
+ * includes a COMMA and a LINE BREAK because that is what an address block actually looks like —
+ * `Toronto, ON, Canada` and a state at the end of its own line were both missed without them.
  */
+const POSTCODE = `(?:[A-Z]\\d[A-Z][ \u00a0]?\\d[A-Z]\\d|\\d{5}(?:-\\d{4})?)(?![\\w-])`;  // NBSP
+
+/**
+ * THE THREE CODES THAT ARE ALSO POST-NOMINAL CREDENTIALS. `Smith, MD` is a doctor and `Baltimore, MD`
+ * is an address, and NOTHING in the shape tells them apart — both are a capitalised word, a comma and
+ * the code. So these three are expanded only with a POSTCODE after them, which a credential never has.
+ * The cost is `Baltimore, MD` standing alone, left as letters; the alternative is reading a physician's
+ * name as a state, in a document that is full of names.
+ */
+const CREDENTIAL_CODE = new Set(["MD", "PA", "DC"]);
+
 const ADDRESS_CODE = new RegExp(
-    `(,[ \u00a0]*)(${REGION_CODE_ALT.toUpperCase()})`  // NBSP
-    + `(?=[ \u00a0]*(?:[A-Z]\\d[A-Z][ \u00a0]?\\d[A-Z]\\d|\\d{5}(?:-\\d{4})?)(?![\\w-])`  // NBSP ×2
-    + `|[ \u00a0]*(?:[.;:!?]|$))`,  // NBSP
+    `(?<=\\p{Lu}\\p{L}*)(,[ \u00a0]*)(${REGION_CODE_ALT.toUpperCase()})`  // NBSP
+    + `(?=[ \u00a0]*${POSTCODE}`  // NBSP
+    + `|[ \u00a0]*(?:[.,;:!?\\n]|$))`,  // NBSP
+    "gu");
+
+/** Whether what follows the code is a postcode — the stronger of the two gates. */
+const FOLLOWED_BY_POSTCODE = new RegExp(`^[ \u00a0]*${POSTCODE}`, "u");  // NBSP
+
+/** The expanded names, for the ZIP rule below. */
+const REGION_NAME_ALT = [...new Set(Object.values(REGION_CODE))]
+    .sort((a, b) => b.length - a.length).join("|");
+
+/**
+ * A US ZIP IS A DIGIT STRING, NOT A QUANTITY. Once the state above is a name, the five digits after it
+ * reach the number rules and are read as one — `Austin, TX 78701` became "Austin, Texas seventy eight
+ * thousand seven hundred one". Scoped to a ZIP that directly follows a state NAME this rule just
+ * produced, which is the one place five digits are certainly a postcode and not a count.
+ */
+const ADDRESS_ZIP = new RegExp(
+    `(?<=\\b(?:${REGION_NAME_ALT})[ \u00a0])(\\d{5})(-(\\d{4}))?(?![\\w-])`,  // NBSP
     "gu");
 
 /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
@@ -706,8 +739,14 @@ export function normalizeEnglish(input: string): string {
 
     // 0b5) A PROVINCE OR STATE CODE IN AN ADDRESS. See ADDRESS_CODE for why the gate is this narrow:
     //      half the table is ordinary English words, so only the address shape may claim them.
-    s = rewrite(s, ADDRESS_CODE, (_m0, comma: string, code: string) =>
-        `${comma}${REGION_CODE[code.toLowerCase()] ?? code}`);
+    s = rewrite(s, ADDRESS_CODE, (m0: string, comma: string, code: string, at: number, whole: string) => {
+        // ⚠ A credential needs the stronger gate — see CREDENTIAL_CODE.
+        if (CREDENTIAL_CODE.has(code) && !FOLLOWED_BY_POSTCODE.test(whole.slice(at + m0.length))) return m0;
+        return `${comma}${REGION_CODE[code.toLowerCase()] ?? code}`;
+    });
+    //      ⚠ AFTER the rule above, because it keys on the state NAME that rule just produced.
+    s = rewrite(s, ADDRESS_ZIP, (_m0, zip: string, _dash: string | undefined, plus4: string | undefined) =>
+        [...zip].join(" ") + (plus4 === undefined ? "" : ` ${[...plus4].join(" ")}`));
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".

@@ -906,8 +906,8 @@ describe("a spelled letter, an adjective, a state code and a subject line", () =
     test("a province or state code is expanded only in an address", () => {
         expect(norm("Toronto, ON")).toBe("Toronto, Ontario");
         expect(norm("Calgary, AB T2P 1J9")).toBe("Calgary, Alberta T2P 1J9");
-        expect(norm("Austin, TX 78701")).toBe("Austin, Texas 78701");
         expect(norm("Portland, ME")).toBe("Portland, Maine");
+        expect(norm("Austin, TX 78701")).toBe("Austin, Texas 7 8 7 0 1");
         // The words, untouched.
         expect(norm("pick one, or the other")).toBe("pick one, or the other");
         expect(norm("stay in, or go out")).toBe("stay in, or go out");
@@ -917,6 +917,40 @@ describe("a spelled letter, an adjective, a state code and a subject line", () =
         // spelled out as letters), and that is a different rule with its own reasons.
         expect(norm("Vancouver BC")).toBe("Vancouver bee see");
         expect(norm("dated 500 BC")).toBe("dated 500 bee see");
+    });
+
+    // ⚠ AN ADDRESS BLOCK PUTS A COMMA OR A LINE BREAK AFTER THE CODE, which the first cut refused —
+    // and refusing them is not safe either way, because `Portland, OR, is closed` IS an address. The
+    // signal is the CAPITALISED WORD before the comma: a city, not a clause.
+    test("a comma or a line break after the code is still an address", () => {
+        expect(norm("Toronto, ON, Canada")).toBe("Toronto, Ontario, Canada");
+        expect(norm("the office in Portland, OR, is closed")).toBe("the office in Portland, Oregon, is closed");
+        expect(norm("Toronto, ON\nnext line")).toBe("Toronto, Ontario\nnext line");
+        // …and a lowercase word before the comma is a clause, so these stay put.
+        expect(norm("he lives in, or near, Boston")).toBe("he lives in, or near, Boston");
+        expect(norm("pick one, or, the other")).toBe("pick one, or, the other");
+    });
+
+    // ⚠ `Smith, MD` IS A DOCTOR AND `Baltimore, MD` IS AN ADDRESS, and nothing in the shape tells them
+    // apart. The three codes that are also post-nominal credentials need a POSTCODE after them, which
+    // a credential never has. The cost is a bare `Baltimore, MD` left as letters; the alternative is
+    // reading a physician's name as a state in a document full of names.
+    test("a post-nominal credential is not a state", () => {
+        expect(norm("Smith, MD")).toBe("Smith, MD");
+        expect(norm("Smith, MD, said")).toBe("Smith, MD, said");
+        expect(norm("Jones, PA")).toBe("Jones, PA");
+        expect(norm("Baltimore, MD 21201")).toBe("Baltimore, Maryland 2 1 2 0 1");
+        expect(norm("Pittsburgh, PA 15201")).toBe("Pittsburgh, Pennsylvania 1 5 2 0 1");
+        expect(norm("Washington, DC 20001")).toBe("Washington, District of Columbia 2 0 0 0 1");
+    });
+
+    // ⚠ A ZIP IS A DIGIT STRING, NOT A QUANTITY. With the state a name, the five digits after it
+    // reached the number rules — "Austin, Texas seventy eight thousand seven hundred one".
+    test("a ZIP after a state is read as digits", () => {
+        expect(norm("Austin, TX 78701")).toBe("Austin, Texas 7 8 7 0 1");
+        expect(norm("Austin, TX 78701-1234")).toBe("Austin, Texas 7 8 7 0 1 1 2 3 4");
+        // A Canadian postcode was always letters and digits, and stays as it was.
+        expect(norm("Halifax, NS B3H 4R2")).toBe("Halifax, Nova Scotia B3H 4R2");
     });
 
     // `Re:` at the head of a subject line or a memo read as the note of the scale. The colon is
