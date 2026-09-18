@@ -1433,3 +1433,123 @@ The remaining 12 misses are variety differences, not defects — British `semi` 
     93 dict rows changed on this branch, all recorded
     tests 5,989 / 311 files   goldens 0 stale   package fence ok (368 data files)
     en 59.9%   en-GB 47.5%   triple-source agreement 68.9%
+
+## Run 17 — 2026-09-17 19:05
+
+Working the 5k–20k frequency band of the triple-source audit. Two instrument defects and one negative
+result; the instrument defects were worth more than the band.
+
+### The audit could not see any word ending in -er/-or/-ar
+
+    MOBY=… GOLD=… npx tsx tools/english/en_source_compare.mts
+
+⚠ **Moby writes every unstressed `-ər` as TWO symbols, `/@/r`** — `ocular` is `'/A/k/j//@/l/@/r`. The
+converter rendered that `AH0 R`, while this repo and gold both write the single phone `ER`. So Moby could
+never be seen to agree with gold on any such word, and the entire class fell into "split".
+
+This was found by chasing why `ocular`, `mandibular`, `ventricular`, `monument`, `permutation` and
+`incubation` were absent from the candidate list when gold plainly disagreed with us — `grep` on Moby
+showed it agreeing with gold exactly. ⚠ The first `grep -aiP "^ocular "` returned NOTHING, which briefly
+looked like "Moby does not have it": the file is **CR-delimited**, so `^` never matches. Same trap as the
+original 0-words-compared bug, hit a second time from a different direction.
+
+Folded in `modernise`, with a consonant lookahead so prevocalic `AH R` (`around` = ə-ɹaʊnd) is untouched:
+
+    agreement  68.9% → 78.3%    split  28% → 18.4%    candidates  587 → 644
+
+Over 9 points of the headline was instrument error, not dictionary error — the third time on this branch
+that a measured "defect rate" was mostly the measuring device.
+
+### Declared heteronyms are not comparable and were being compared
+
+8 candidates (`accent`, `address`, `concrete`, `detour`, `egress`, `lead`) are in english.jsonc
+`heteronyms`, and **all 8 already carry the correct default there**. The dict row the audit was comparing
+is the fallback the engine does not consult. Skipped now, for the same reason the audit already skips
+gold's 789 POS-conditioned entries. `and` and `your` remain and are correct: those are de-accented at the
+phrase layer, so the dictionary's citation form is right.
+
+### ⚠ NEGATIVE RESULT: the compound-seam geminate. Two measurements, opposite answers, sample bias.
+
+`roommate` was corrected to `R UW1 M M EY2 T` (gold `ɹˈummˌAt`, Moby `'r/u/m,m/eI/t`, and our own dict
+geminates `bookkeeper` B UH1 K K IY2 P ER0, `misspell`, `coattail`, `lamppost`, `nighttime` — 93 rows).
+It then failed the curation gate at `source=C`, because `collapseGeminates` removes the seam geminate on
+the compound path. Its comment claims "CMUdict has no consonant geminates", which is false.
+
+Measuring whether to stop collapsing on the compositional paths:
+
+    sample = the 93 geminate rows + a 1-in-40 control
+    collapse on  →  C 21.0% exact, M 71.0%
+    collapse off →  C 25.4% exact, M 72.8%      +42 rows, no regressions
+
+⚠ **THAT MEASUREMENT IS WORTHLESS AND THE SAMPLE IS WHY.** It is dominated by 93 rows selected for having
+the feature under test. On an unbiased 1-in-10 sweep of the whole dict:
+
+    keeping the geminate matches the dict:  7   barroom goddamned misspells misstates molelike notetaker suddenness
+    collapsing matches the dict:           36   artificially brazenness cynically legally locally painfully partially …
+
+Collapsing wins 36 to 7. Every row it wins is a `-ly` suffix seam — `legally` really is /ˈliɡəli/ — and
+every row it loses is a compound. So the split is by PATH, not by principle. Re-measured with the collapse
+kept on M and N and dropped only on C:
+
+    keeping:  3   barroom molelike notetaker
+    collapsing: 4 gentlelady granddad roddick spacesuit
+
+⚠ A WASH, so the change is **NOT** made and the engine is reverted. The reason is that the dictionary is
+itself inconsistent at compound seams: it geminates `bookkeeper`/`misspell`/`coattail` and collapses
+`granddad`/`spacesuit`. The OOV path cannot be made to agree with a target that disagrees with itself, and
+no variant is measurably better. `roommate` is recorded as a C-path gap with that as its reason.
+
+The dict-side corrections stand on their own evidence (`teammate` was an outlier against its own plural
+`teammates`, `earring` missing the geminate gold has) — what is rejected is the engine change.
+
+### ⚠ `dis-` looked like the same class and is NOT
+
+`dissatisfied`/`dissatisfaction` also want `S S` from both sources. But our dict is internally consistent
+at a single S across the whole prefix — `dissimilar`, `dissuade`, `dissolve`, `dissatisfy` — so family
+consistency wins and they are skipped, the same call as `syrup` and the `di-` class.
+
+### Two classes where the sources are UNANIMOUS
+
+Both were found the same way: take a suspicious row, ask what SHAPE it is, then score that shape over the
+whole dict rather than over the frequency band.
+
+    npx tsx .scratch/class.mts "AY[0-2] R($| [^AEIOU])"   agree 0, both-against-us 28, unsourced 139
+    npx tsx .scratch/class.mts "[DTN] Y UW[0-2] [^AEIOU]" agree 0, both-against-us  4, unsourced  50
+
+⚠ **`agree 0` is the finding.** Not one sourced row in either shape is confirmed by either source. For the
+`-ire` rhyme gold covers 42 of them and reads `Iəɹ` on **42 of 42**, and our own dict already agrees on the
+words that matter — `fire`, `hire`, `tire`, `wire`, `desire`, `entire`, `require`, `choir`, `sire`,
+`ireland`, `tireless` are all `AY ER0`, 96 rows against 41. 126 rows corrected.
+
+⚠ AND NEITHER SHAPE IS THE WHOLE REGEX, which is why each was scoped before it was applied:
+
+  * `[DTN] Y UW` is mostly PREVOCALIC and mostly CORRECT — `annual` /ˈænjuəl/, `menu`, `danube`, `unusual`,
+    `used`, `utility` keep a real yod. The defect only exists before a CONSONANT (`duplication`, `tupelo`,
+    `tutelage`, `nubian`), and there the family settles it: `duplicate` has no yod while `duplicates` and
+    `duplication` do, `dude` has none while `dudes` does, `tube` none while `youtube` does.
+  * County-name `-shire` is NOT the `-ire` rhyme. Our dict reduces it in `berkshire`, `cheshire`,
+    `hampshire`, `yorkshire` and Moby agrees (`'/j//O/rk/S//i/r`), so the six that read `SH AY2 R` were
+    brought to `SH ER0` rather than to `SH AY ER0`. Personal names in `-ire`/`-mire`/`-guire` DO take the
+    rhyme and were included.
+
+⚠ The `-shire` split was found by the GOLDEN GATE, not by the audit: `nan.tsv` carries
+`Buckinghamshire` and moved to `ʃˌaᶦɚ` when `shire` was corrected. Five non-English goldens (`hak`, `hmn`,
+`nan`, `pcm`, `sat`) went stale on this branch and every one of them is embedded English text —
+`government`, `hogan`, `hon`, `indonesian`, `Buckinghamshire`. They are a consequence check the English
+work does not otherwise get.
+
+⚠ AND ONE OF THOSE "FINDINGS" WAS MY OWN TOOL. A scratch script that walked several languages in one
+process reported `Ch.` in `hmn` regressing from `ʃ` to a letter spelling. It does not: `check-goldens.mts`
+calls `clearForeignOov()` between languages and says in a comment that the clear is load-bearing, and the
+scratch script did not. Run correctly the row matches. The diagnostic was wrong, not the engine.
+
+### Invariants
+
+    curated rows 1,806, no duplicates, every `want` equal to the shipped dict
+    275 dict rows changed on this branch, all recorded
+    tests 5,991 / 311 files   goldens 0 stale   C# parity 189 byte-identical   regex-diff 0 differ
+    en-GB 47.5% → 48.6% (the dict corrections reach it through the shared lexicon)
+    en 59.9% / 65.1% +intentional (unmoved: the wikipron referee is 4,046 rows and 64% of them sit
+      outside the 50K frequency list, so band-3 work barely touches it — this is the known skew)
+    triple-source agreement 68.9% → 78.9%   candidates 536 (was 587, and 644 once the Moby
+      -ər fold exposed the class it had been hiding)

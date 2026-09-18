@@ -34,14 +34,20 @@ abba	AE1 B AH0	AA1 B AH0	loanword PALM ɑː (gold; en-GB arbitrated)
 abele	AH0 B EH1 L	AH0 B IY1 L	tense vowel (gold + en-GB)
 abnegation	AE2 B N EH0 G EY1 SH AH0 N	AE2 B N AH0 G EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 abo	AA1 B OW0	AE1 B OW0	wikipron+gold
+abshire	AE1 B SH AY2 R	AE1 B SH AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 acc	AY2 S IY2 S IY1	EY2 S IY2 S IY1	letter-name
+accessibility	AE2 K S EH0 S AH0 B IH1 L IH0 T IY0	AH0 K S EH2 S AH0 B IH1 L AH0 T IY0	stress pattern (gold + moby)
 acetic	AH0 S EH1 T IH0 K	AH0 S IY1 T IH0 K	tense vowel (gold + en-GB)
 acog	AH0 K AO1 G	EY1 K AA0 G	letter-name
 acuff	AH0 K AH1 F	EY1 K AH0 F	wikipron US+UK (two files)
+admire	AE0 D M AY1 R	AE0 D M AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+admires	AE0 D M AY1 R Z	AE0 D M AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 admonitory	AE2 D M AO1 N IH0 T AO2 R IY0	AE2 D M AA1 N IH0 T AO2 R IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+advertisement	AE0 D V ER1 T AH0 Z M AH0 N T	AE1 D V ER0 T AY2 Z M AH0 N T	British stressing in a US dict; outlier against its own plural (gold + moby)
 aeronautic	EH2 R OW0 N AA1 T AH0 K	EH2 R OW0 N AO1 T AH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 aeronautical	EH2 R OW0 N AA1 T AH0 K AH0 L	EH2 R OW0 N AO1 T AH0 K AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 aerosol	EH1 R AH0 S AA2 L	EH1 R AH0 S AO2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+afire	AH0 F AY1 R	AH0 F AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 africa	AE1 F R AH0 K AA0	AE1 F R AH0 K AH0	frequency audit: gold+Moby agree
 afterthought	AE1 F T ER0 TH AA2 T	AE1 F T ER0 TH AO2 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 agitprop	AE1 JH AH0 T P R AO2 P	AE1 JH AH0 T P R AA2 P	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -54,6 +60,7 @@ albatrosses	AE1 L B AH0 T R AA2 S IH0 Z	AE1 L B AH0 T R AO2 S IH0 Z	LOT/THOUGHT:
 alcohol	AE1 L K AH0 HH AA2 L	AE1 L K AH0 HH AO2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 alcoholic	AE2 L K AH0 HH AA1 L IH0 K	AE2 L K AH0 HH AO1 L IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 algol	AE1 L G AA0 L	AE1 L G AO0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+alkire	AH0 L K AY1 R	AH0 L K AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 allelic	AH0 L EH1 L IH0 K	AH0 L IY1 L IH0 K	tense vowel (gold + en-GB)
 allied	AH0 L AY1 D	AE1 L AY2 D	wikipron+gold
 almanac	AA1 L M AH0 N AE2 K	AO1 L M AH0 N AE2 K	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -71,9 +78,10 @@ androgynous	AE0 N D R AO1 JH AH0 N AH0 S	AE0 N D R AA1 JH AH0 N AH0 S	LOT/THOUGH
 androgyny	AE0 N D R AO1 JH AH0 N IY0	AE0 N D R AA1 JH AH0 N IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 anemone	AE1 N IH0 M OW2 N	AH0 N EH1 M AH0 N IY0	loanword final -e is pronounced (gold + en-GB)
 angeleno	AE2 N JH AH0 L EH1 N OW0	AE2 N JH AH0 L IY1 N OW0	tense vowel (gold + en-GB)
+anguilla	AE2 NG W IH1 L AH0	AE0 NG G W IH1 L AH0	segment/vowel defect (gold + moby; family consistency)
 annul	AE1 N AH0 L	AH0 N AH1 L	family completion (gold)
 annulled	AE1 N AH0 L D	AH0 N AH1 L D	wikipron+gold
-anon	AE2 N AO1 N	AE2 N AA1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+anon	AE2 N AO1 N	AH0 N AA1 N	LOT/THOUGHT: align AA/AO to gold's consistent system; gold + moby; family consistency
 antecedent	AE2 N T EH1 S AH0 D AH0 N T	AE2 N T AH0 S IY1 D AH0 N T	three-way: both sources agree on the segment
 antechamber	AE1 N T EH0 CH EY2 M B ER0	AE1 N T AH0 CH EY2 M B ER0	unstressed EH0 (gold; dict self-inconsistent)
 anthologist	AE0 N TH AO1 L AH0 G IH2 S T	AE0 N TH AA1 L AH0 G IH2 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -125,6 +133,8 @@ arrowsmith	AE1 R OW0 S M IH2 TH	EH1 R OW0 S M IH2 TH	marry–merry merger
 arrupe	AE1 R UW2 P	EH1 R UW2 P	marry–merry merger
 arugula	AA2 R UW1 G UW0 L AH0	ER0 UW1 G AH0 L AH0	wikipron+gold
 asahara	AE0 S AH0 HH AE1 R AH0	AE0 S AH0 HH EH1 R AH0	marry–merry merger
+aspire	AH0 S P AY1 R	AH0 S P AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+aspired	AH0 S P AY1 R D	AH0 S P AY1 ER0 D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 associative	AH0 S OW1 SH AH0 T IH2 V	AH0 S OW1 S IY0 AH0 T IH0 V	#1278
 astronaut	AE1 S T R AH0 N AA2 T	AE1 S T R AH0 N AO2 T	wikipron+gold
 astronautic	AE2 S T R AH0 N AA1 T IH0 K	AE2 S T R AH0 N AO1 T IH0 K	family consistency (#1334 review)
@@ -133,6 +143,7 @@ astronautics	AE2 S T R AH0 N AA1 T IH0 K S	AE2 S T R AH0 N AO1 T IH0 K S	LOT/THO
 asymptotic	AE1 S IH0 M P T AO2 T IH0 K	AE1 S IH0 M P T AA2 T IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 atman	AE1 T M AH0 N	AA1 T M AH0 N	loanword PALM ɑː (gold; en-GB arbitrated)
 atoll	AE1 T AA2 L	AE1 T AO2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+attired	AH0 T AY1 R D	AH0 T AY1 ER0 D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 auburn	AA1 B ER0 N	AO1 B ER0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 auckland	AA1 K L AH0 N D	AO1 K L AH0 N D	LOT/THOUGHT: align AA/AO to gold's consistent system
 auction	AA1 K SH AH0 N	AO1 K SH AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -167,6 +178,7 @@ awning	AA1 N IH0 NG	AO1 N IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent s
 babel	B AE1 B AH0 L	B EY1 B AH0 L	tense vowel (gold + en-GB)
 babka	B AE1 B K AH0	B AA1 B K AH0	loanword PALM ɑː (gold; en-GB arbitrated)
 baboon	B AH0 B UW1 N	B AE0 B UW1 N	wikipron+gold
+backfire	B AE1 K F AY2 R	B AE1 K F AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 backfiring	B AE1 K F AY2 ER0 IH0 NG	B AE1 K F AY2 R IH0 NG	#1289
 backlog	B AE1 K L AA2 G	B AE1 K L AO2 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 backsaw	B AE1 K S AA2	B AE1 K S AO2	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -190,6 +202,7 @@ barefield	B AE1 R IH0 F IY0 L D	B EH1 R IH0 F IY0 L D	marry–merry merger
 bareis	B AE1 R AY0 Z	B EH1 R AY0 Z	marry–merry merger
 baribeau	B AE1 R IH0 B OW0	B EH1 R IH0 B OW0	marry–merry merger
 barich	B AE1 R IH0 K	B EH1 R IH0 K	marry–merry merger
+barkshire	B AA1 R K SH AY2 R	B AA1 R K SH AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 barometric	B AE2 R AH0 M EH1 T R IH0 K	B EH2 R AH0 M EH1 T R IH0 K	marry–merry merger
 baron	B AE1 R AH0 N	B EH1 R AH0 N	marry–merry merger
 barons	B AE1 R AH0 N Z	B EH1 R AH0 N Z	marry–merry merger
@@ -247,19 +260,23 @@ benoni	B EH0 N OW1 N IY0	B AH0 N OW1 N IY0	unstressed EH0 (gold; dict self-incon
 beret	B EH1 R AH0 T	B ER0 EY1	wikipron+gold
 bes	B IY1 Z	B EH1 S	wikipron+gold
 besotted	B IH0 S AO1 T IH0 D	B IH0 S AA1 T IH0 D	LOT/THOUGHT: align AA/AO to gold's consistent system
+bestiality	B EH0 S CH AE1 L IH0 T IY0	B EH2 S CH IY0 AE1 L AH0 T IY0	missing syllable; outlier against bestial (gold + moby)
 betel	B EH1 T AH0 L	B IY1 T AH0 L	tense vowel (gold + en-GB)
 beyond	B IH0 AA1 N D	B IH0 Y AA1 N D	pre-issue
 bhutan	B UW2 T AE1 N	B UW2 T AA1 N	loanword PALM ɑː (gold; en-GB arbitrated)
+bibliographic	B IH2 B L IY0 AA1 G R AA2 F IH0 K	B IH2 B L IY0 AH0 G R AE1 F IH0 K	stress shift to -graph-, cf. bibliography (gold + moby)
 bicentennial	B AY2 S EH0 N T EH1 N IY0 AH0 L	B AY2 S AH0 N T EH1 N IY0 AH0 L	unstressed EH0 (gold; dict self-inconsistent)
 biennale	B IY0 EH1 N EY2 L	B IY2 EH0 N AA1 L EY0	loanword final -e is pronounced (gold + en-GB)
 bimbos	B IH1 M B OW0 S	B IH1 M B OW0 Z	plural voicing after a voiced segment
 bionic	B AY2 AO1 N IH0 K	B AY2 AA1 N IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 biophysics	B AY2 OW0 F IH1 S IH0 K S	B AY2 OW0 F IH1 Z IH0 K S	intervocalic/voiced-context S→Z (gold)
 biosynthesis	B AY2 OW0 S IH1 N TH EH0 S IH0 S	B AY2 OW0 S IH1 N TH AH0 S IH0 S	wikipron+gold
+bires	B AY1 R Z	B AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 bisbee	B IH1 S B IY0	B IH1 Z B IY0	intervocalic/voiced-context S→Z (gold)
 biscotti	B IH0 S K AO1 T IY0	B IH0 S K AA1 T IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 bitumen	B IH2 T UW1 M AH0 N	B AY0 T UW1 M AH0 N	wikipron+gold
 bizrate	B IH1 Z EY2 T	B IH1 Z R EY2 T	missing rhotic (spelled ⟨r⟩, no rhotic phone)
+blackshire	B L AE1 K SH AY2 R	B L AE1 K SH AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 blog	B L AO1 G	B L AA1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 blogosphere	B L AO1 G AH0 S F IH2 R	B L AA1 G AH0 S F IH2 R	LOT/THOUGHT: align AA/AO to gold's consistent system
 bluebottle	B L UW1 B AO2 T AH0 L	B L UW1 B AA2 T AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -282,7 +299,10 @@ bridie	B R IH1 D IY0	B R AY1 D IY0	wikipron US+UK (two files)
 brisbane	B R IH1 Z B EY2 N	B R IH1 Z B AH0 N	wikipron+gold
 brobdingnagian	B R AO2 B D IH0 G N AE1 G IY0 AH0 N	B R AA2 B D IH0 G N AE1 G IY0 AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 brontosaurus	B R AO2 N T AH0 S AO1 R AH0 S	B R AA2 N T AH0 S AO1 R AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
+brookshire	B R UW1 K SH AY0 R	B R UW1 K SH AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 brothel	B R AA1 TH AH0 L	B R AO1 TH AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+brushfire	B R AH1 SH F AY2 R	B R AH1 SH F AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+brushfires	B R AH1 SH F AY2 R Z	B R AH1 SH F AY2 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 burritos	B ER0 IY1 T OW0 S	B ER0 IY1 T OW0 Z	plural voicing after a voiced segment
 cads	K AE1 D S	K AE1 D Z	plural voicing after a voiced segment
 caen	K AE1 N	K AA1 N	loanword PALM ɑː (gold; en-GB arbitrated)
@@ -290,6 +310,7 @@ calabria	K AH0 L AE1 B R IY0 AH0	K AH0 L AA1 B R IY0 AH0	loanword PALM ɑː (gol
 caliph	K AE1 L AH0 F	K EY1 L AH0 F	tense vowel (gold + en-GB)
 calyx	K AE1 L IH0 K S	K EY1 L IH0 K S	tense vowel (gold + en-GB)
 cana	K AE1 N AH0	K EY1 N AH0	tense vowel (gold + en-GB)
+cannes	K AE1 N Z	K AE1 N	gold + moby; family consistency
 caprese	K AA2 P R EY1 S EY0	K AH0 P R EY1 Z IY0	wikipron+gold
 caraballo	K AE2 R AH0 B AE1 L OW0	K EH2 R AH0 B AE1 L OW0	marry–merry merger
 carabello	K AE2 R AH0 B EH1 L OW0	K EH2 R AH0 B EH1 L OW0	marry–merry merger
@@ -387,6 +408,7 @@ cheerios	CH IH1 R IY0 OW0 S	CH IH1 R IY0 OW0 Z	plural voicing after a voiced seg
 chevys	SH EH1 V IY2 S	SH EH1 V IY2 Z	plural voicing after a voiced segment
 chillicothe	CH IH1 L IH0 K AO0 TH	CH IH2 L IH0 K AA1 TH IY0	loanword final -e is pronounced; also LOT/THOUGHT
 chocolate	CH AO1 K L AH0 T	CH AA1 K L AH0 T	LOT/THOUGHT: align AA/AO to gold's consistent system
+choirs	K W AY1 R Z	K W AY1 ER0 Z	outlier against its own singular choir
 chomp	CH AA1 M P	CH AO1 M P	LOT/THOUGHT: align AA/AO to gold's consistent system
 cicerone	S IH1 S ER0 OW2 N	S IH2 S ER0 OW1 N IY0	loanword final -e is pronounced (gold + en-GB)
 cinemark	S IH1 N AH0 M AA2 K	S IH1 N AH0 M AA2 R K	missing rhotic (spelled ⟨r⟩, no rhotic phone)
@@ -399,6 +421,10 @@ clarisse	K L AE1 R IH0 S	K L EH1 R IH0 S	marry–merry merger
 clarridge	K L AE1 R IH0 JH	K L EH1 R IH0 JH	marry–merry merger
 clarrisse	K L AE1 R IH0 S	K L EH1 R IH0 S	marry–merry merger
 clumsily	K L AH1 M S AH0 L IY0	K L AH1 M Z AH0 L IY0	intervocalic/voiced-context S→Z (gold)
+coarticulate	K OW2 AA0 R T IH1 K Y UW0 L EY0 T	K OW2 AA0 R T IH1 K Y AH0 L EY2 T	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+coarticulates	K OW2 AA0 R T IH1 K Y UW0 L EY0 T S	K OW2 AA0 R T IH1 K Y AH0 L EY2 T S	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+coarticulating	K OW2 AA0 R T IH1 K Y UW0 L EY0 T IH0 NG	K OW2 AA0 R T IH1 K Y AH0 L EY2 T IH0 NG	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+coarticulation	K OW2 AA0 R T IH1 K Y UW0 L EY0 SH AH0 N	K OW2 AA0 R T IH2 K Y AH0 L EY1 SH AH0 N	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 coauthor	K OW1 AA1 TH ER0	K OW1 AO1 TH ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 cockamamie	K AO2 K AH0 M EY1 M IY0	K AA2 K AH0 M EY1 M IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 coffee	K AA1 F IY0	K AO1 F IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -415,7 +441,9 @@ commissars	K AA1 M IH0 S AA0 Z	K AA1 M IH0 S AA0 R Z	missing rhotic (spelled ⟨
 conga	K AO1 NG G AH0	K AA1 NG G AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
 conger	K AO1 NG ER0	K AA1 NG ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 congeries	K AO1 NG JH AH0 R IY2 Z	K AA1 NG JH AH0 R IY2 Z	LOT/THOUGHT: align AA/AO to gold's consistent system
+conquest	K AA1 NG K W EH0 S T	K AA1 NG K W EH2 S T	secondary stress on the second element (gold + moby)
 consonantal	K AA2 N S AH0 N AA1 N T AH0 L	K AA2 N S AH0 N AE1 N T AH0 L	TRAP not PALM (gold; common words only)
+contracted	K AA1 N T R AE0 K T AH0 D	K AH0 N T R AE1 K T AH0 D	noun stress on a verb participle (gold + moby)
 conversely	K AA1 N V ER0 S L IY0	K AH0 N V ER1 S L IY0	wikipron+gold
 cooperative	K OW0 AA1 P ER0 EY2 T IH0 V	K OW0 AA1 P ER0 AH0 T IH0 V	pre-issue
 coos	K UW1 S	K UW1 Z	intervocalic/voiced-context S→Z (gold)
@@ -441,13 +469,17 @@ crivaro	K R IH0 V AE1 R OW0	K R IH0 V EH1 R OW0	marry–merry merger
 croissant	K W AA2 S AA1 N T	K R W AA2 S AA1 N T	missing rhotic: gold kɹwˌɑsˈɑnt + Moby K R AO S AA N
 croissants	K W AA2 S AA1 N T S	K R W AA2 S AA1 N T S	missing rhotic: gold kɹwˌɑsˈɑnt + Moby K R AO S AA N
 crosse	K R AA1 S	K R AO1 S	LOT/THOUGHT: align AA/AO to gold's consistent system
+crossfire	K R AO1 S F AY0 R	K R AO1 S F AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 crosswalk	K R AA1 S W AA2 K	K R AO1 S W AO2 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 cryonics	K R AY2 AO1 N IH0 K S	K R AY2 AA1 N IH0 K S	LOT/THOUGHT: align AA/AO to gold's consistent system
 cuckoo	K AH1 K UW2	K UW1 K UW2	wikipron+gold
 curare	K Y UW2 R AE1 R EY2	K Y UW2 R EH1 R EY2	marry–merry merger
 curari	K Y UW2 R AE1 R EY2	K Y UW2 R EH1 R EY2	marry–merry merger
 curitiba	K Y UH2 IH0 T IY1 B AH0	K UH2 R AH0 T IY1 B AH0	missing rhotic (gold)
+curry	K AH1 R IY0	K ER1 IY0	NURSE, cf. hurry/worry/furry and its own curried (gold + moby)
 cutoff	K AH1 T AO2 F	K AH1 T AA2 F	LOT/THOUGHT: align AA/AO to gold's consistent system
+cyclone	S IH0 K L OW1 N	S AY1 K L OW2 N	⟨cy⟩ is AY (gold + moby)
+cyclones	S IH0 K L OW1 N Z	S AY1 K L OW2 N Z	⟨cy⟩ is AY, cf. cyclone (gold + moby)
 cyclops	S AY1 K L AO2 P S	S AY1 K L AA2 P S	LOT/THOUGHT: align AA/AO to gold's consistent system
 dacron	D AE1 K R AA2 N	D EY1 K R AA2 N	tense vowel (gold + en-GB)
 dagenham	D AE1 G AH0 N HH AE2 M	D AE1 G AH0 N AH0 M	wikipron US+UK (two files)
@@ -456,6 +488,7 @@ dal	D AE1 L	D AA1 L	loanword PALM ɑː (gold; en-GB arbitrated)
 dalian	D EY1 L IY0 AH0 N	D AA2 L IY0 AE1 N	wikipron+gold
 damson	D AE1 M S AH0 N	D AE1 M Z AH0 N	intervocalic/voiced-context S→Z (gold)
 dara	D AE1 R AH0	D EH1 R AH0	marry–merry merger
+darbyshire	D AA1 R B IH0 SH AY2 R	D AA1 R B IH0 SH ER0	county-name -shire reduces in this dict (berkshire, cheshire, hampshire, yorkshire); moby agrees. NOT the -ire rhyme
 daren	D AE1 R IH0 N	D EH1 R IH0 N	marry–merry merger
 darensbourg	D AE1 R IH0 N S B ER0 G	D EH1 R IH0 N S B ER0 G	marry–merry merger
 darin	D AE1 R IH0 N	D EH1 R IH0 N	marry–merry merger
@@ -479,20 +512,28 @@ denarius	D IH0 N AE1 R IY0 AH0 S	D IH0 N EH1 R IY0 AH0 S	marry–merry merger
 dengue	D EH1 N G	D EH1 NG G IY0	loanword final -e is pronounced (gold + en-GB)
 denomination	D IH0 N AO2 M AH0 N EY1 SH AH0 N	D IH0 N AA2 M AH0 N EY1 SH AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 denominational	D IH0 N AO2 M AH0 N EY1 SH AH0 N AH0 L	D IH0 N AA2 M AH0 N EY1 SH AH0 N AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+departmental	D IH0 P AA2 R T M EH1 N AH0 L	D IH0 P AA2 R T M EH1 N T AH0 L	segment/vowel defect (gold + moby; family consistency)
 der	D ER1	D EH1 R	wikipron US+UK (two files)
 descry	D EH0 S K R AY1	D AH0 S K R AY1	unstressed EH0 (gold; dict self-inconsistent)
 deseret	D EH2 S ER0 EH1 T	D EH2 Z ER0 EH1 T	intervocalic/voiced-context S→Z (gold)
 desiring	D IH0 Z AY1 ER0 IH0 NG	D IH0 Z AY1 R IH0 NG	#1289
 determinative	D IH0 T ER1 M IH0 N AH0 T IH2 V	D IH0 T ER1 M IH0 N AH0 T IH0 V	pre-issue
+devonshire	D IH0 V AA1 N SH AY2 R	D IH0 V AA1 N SH ER0	county-name -shire reduces in this dict (berkshire, cheshire, hampshire, yorkshire); moby agrees. NOT the -ire rhyme
+dewire	D UW1 AY0 R	D IH0 W AY1 ER0	missing /w/ as well as the -ire rhyme
 diesel	D IY1 S AH0 L	D IY1 Z AH0 L	intervocalic/voiced-context S→Z (gold)
 dione	D IY1 AA0 N	D AY0 OW1 N IY0	loanword final -e is pronounced (gold + en-GB)
+diploma	D IH0 P L OW1 M AA0	D IH0 P L OW1 M AH0	outlier against its own plural diplomas (gold + moby)
+dire	D AY1 R	D AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 discography	D IH0 S K AO1 G R AH0 F IY0	D IH0 S K AA1 G R AH0 F IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
-discombobulate	D IH2 S K AH0 M B AO1 B Y UW0 L EY0 T	D IH2 S K AH0 M B AA1 B Y UW0 L EY0 T	LOT/THOUGHT: align AA/AO to gold's consistent system
-discombobulated	D IH2 S K AH0 M B AO1 B Y UW0 L EY0 T AH0 D	D IH2 S K AH0 M B AA1 B Y UW0 L EY0 T AH0 D	LOT/THOUGHT: align AA/AO to gold's consistent system
+discombobulate	D IH2 S K AH0 M B AO1 B Y UW0 L EY0 T	D IH2 S K AH0 M B AA1 B Y AH0 L EY2 T	LOT/THOUGHT: align AA/AO to gold's consistent system; post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+discombobulated	D IH2 S K AH0 M B AO1 B Y UW0 L EY0 T AH0 D	D IH2 S K AH0 M B AA1 B Y AH0 L EY2 T AH0 D	LOT/THOUGHT: align AA/AO to gold's consistent system; post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+discombobulates	D IH2 S K AH0 M B AO1 B Y UW0 L EY0 T S	D IH2 S K AH0 M B AA1 B Y AH0 L EY2 T S	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+discombobulating	D IH2 S K AH0 M B AO1 B Y UW0 L EY0 T IH0 NG	D IH2 S K AH0 M B AA1 B Y AH0 L EY2 T IH0 NG	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 disfigurement	D IH0 S F IH1 G Y ER0 M EH0 N T	D IH0 S F IH1 G Y ER0 M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
 dishonestly	D IH0 S AO1 N AH0 S T L IY0	D IH0 S AA1 N AH0 S T L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 dishwasher	D IH1 SH W AA2 SH ER0	D IH1 SH W AO2 SH ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 dissimilarity	D IH2 S IH2 M AH0 L AE1 R AH0 T IY0	D IH2 S IH2 M AH0 L EH1 R AH0 T IY0	marry–merry merger
+distributive	D IH0 S T R IH1 B Y UW0 T IH0 V	D IH0 S T R IH1 B Y AH0 T IH0 V	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 documentation	D AA2 K Y AH0 M EH0 N T EY1 SH AH0 N	D AA2 K Y AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 dogfight	D AA1 G F AY2 T	D AO1 G F AY2 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 doggerel	D AA1 G ER0 AH0 L	D AO1 G ER0 AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -508,6 +549,7 @@ doss	D AO1 S	D AA1 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 dowse	D AW1 S	D AW1 Z	intervocalic/voiced-context S→Z (gold)
 dowsing	D AW1 S IH0 NG	D AW1 Z IH0 NG	intervocalic/voiced-context S→Z (gold)
 drachma	D R AE1 K M AH0	D R AA1 K M AH0	loanword PALM ɑː (gold; en-GB arbitrated)
+dracula	D R AE1 K Y UW0 L AH0	D R AE1 K Y AH0 L AH0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 dramatize	D R AA1 M AH0 T AY2 Z	D R AE1 M AH0 T AY2 Z	TRAP not PALM (gold; common words only)
 dressage	D R EH0 S AA1 ZH	D R AH0 S AA1 ZH	unstressed EH0 (gold; dict self-inconsistent)
 drina	D IY1 N AH0	D R IY1 N AH0	missing rhotic (spelled ⟨r⟩, no rhotic phone)
@@ -515,16 +557,30 @@ drinas	D IY1 N AH0 Z	D R IY1 N AH0 Z	missing rhotic (spelled ⟨r⟩, no rhotic 
 drywall	D R AY1 W AA2 L	D R AY1 W AO2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 dubrovnik	D UW0 B R AA1 V N IH0 K	D UW0 B R AO1 V N IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 duce	D UW1 S	D UW1 CH EY0	loanword final -e is pronounced (gold + en-GB)
+dudes	D Y UW1 D Z	D UW1 D Z	US yod-dropping; outlier against its own singular dude
 duisburg	D UW1 S B ER0 G	D UW1 Z B ER0 G	intervocalic/voiced-context S→Z (gold)
 dulce	D AH1 L S	D UW1 L S EY2	loanword final -e is pronounced (gold + en-GB)
+duplicates	D Y UW1 P L AH0 K EY2 T S	D UW1 P L AH0 K EY2 T S	US yod-dropping; outlier against its own base duplicate (gold + moby)
+duplication	D Y UW2 P L AH0 K EY1 SH AH0 N	D UW2 P L AH0 K EY1 SH AH0 N	US yod-dropping; outlier against its own base duplicate (gold + moby)
+dwire	D W AY1 R	D W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 eamon	IY1 M AH0 N	EY1 M AH0 N	wikipron US+UK (two files)
+earring	IH1 R IH0 NG	IH1 R R IH0 NG	compound-seam geminate, cf. bookkeeper/misspell/teammates (gold + moby)
+earrings	IH1 R IH0 NG Z	IH1 R R IH0 NG Z	compound-seam geminate, cf. bookkeeper/misspell/teammates (gold + moby)
 ebonic	IY0 B AO1 N IH0 K	IY0 B AA1 N IH0 K	family consistency (#1334 review)
 ebonics	IY0 B AO1 N IH0 K S	IY0 B AA1 N IH0 K S	LOT/THOUGHT: align AA/AO to gold's consistent system
 echavarria	EH2 CH AH0 V AE1 R IY0 AH0	EH2 CH AH0 V EH1 R IY0 AH0	marry–merry merger
 effete	EH0 F IY1 T	AH0 F IY1 T	unstressed EH0 (gold; dict self-inconsistent)
+efficacy	EH1 F IH0 K AE2 S IY0	EH1 F AH0 K AH0 S IY0	gold + moby; family consistency
+effusive	EH1 F Y UW0 S IH0 V	AH0 F Y UW1 S IH0 V	stress on the /fjuː/ syllable, cf. profusion (gold + moby)
 egret	EH1 G R AH0 T	IY1 G R AH0 T	tense vowel (gold + en-GB)
+eh	EH1	EY1	gold + moby; family consistency
+ejaculate	IH0 JH AE1 K Y UW0 L EY2 T	IH0 JH AE1 K Y AH0 L EY2 T	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+ejaculation	IY0 JH AE2 K Y UW0 L EY1 SH AH0 N	IH0 JH AE2 K Y AH0 L EY1 SH AH0 N	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 eleemosynary	EH2 L AH0 M AO1 S AH0 N EH2 R IY0	EH2 L AH0 M AA1 S AH0 N EH2 R IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 elijah	EH0 L AY1 JH AH0	AH0 L AY1 JH AH0	unstressed EH0 (gold; dict self-inconsistent)
+elvire	EH1 L V AY2 R	EH1 L V AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+emasculate	AH0 M AE1 S K Y UW0 L IH0 T	AH0 M AE1 S K Y AH0 L EY2 T	final vowel: outlier against emasculated; Y UW0→Y AH0 (gold + moby)
+emasculated	AH0 M AE1 S K Y UW0 L EY2 T IH0 D	AH0 M AE1 S K Y AH0 L EY2 T IH0 D	Y UW0→Y AH0 (gold + moby)
 embankment	EH0 M B AE1 NG K M AH0 N T	AH0 M B AE1 NG K M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
 embargo	EH0 M B AA1 R G OW0	AH0 M B AA1 R G OW0	unstressed EH0 (gold; dict self-inconsistent)
 embark	EH0 M B AA1 R K	AH0 M B AA1 R K	unstressed EH0 (gold; dict self-inconsistent)
@@ -649,10 +705,12 @@ escudo	EH0 S K UW1 D OW0	AH0 S K UW1 D OW0	unstressed EH0 (gold; dict self-incon
 espalier	EH0 S P AE1 L Y ER0	AH0 S P AE1 L Y ER0	unstressed EH0 (gold; dict self-inconsistent)
 esperanto	EH2 S P ER0 AE1 N T OW0	EH2 S P ER0 AA1 N T OW0	loanword PALM ɑː (gold; en-GB arbitrated)
 esprit	EH0 S P R IY1	AH0 S P R IY1	unstressed EH0 (gold; dict self-inconsistent)
+esquire	EH1 S K W AY2 R	EH1 S K W AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 esse	EH1 S	EH1 S IY0	loanword final -e is pronounced (gold + en-GB)
 estimator	EH0 S T IH1 M AH0 T ER0	EH1 S T AH0 M EY2 T ER0	wikipron+gold
 estrange	EH0 S T R EY1 N JH	AH0 S T R EY1 N JH	unstressed EH0 (gold; dict self-inconsistent)
 estranged	EH0 S T R EY1 N JH D	AH0 S T R EY1 N JH D	unstressed EH0 (gold; dict self-inconsistent)
+evacuation	IH0 V AE2 K Y AH0 W EY1 SH AH0 N	IH0 V AE2 K Y UW0 EY1 SH AH0 N	epenthetic /w/ in hiatus (gold + moby)
 evolve	IH0 V AA1 L V	IH0 V AO1 L V	LOT/THOUGHT: align AA/AO to gold's consistent system
 excelling	EH0 K S EH1 L IH0 NG	IH0 K S EH1 L IH0 NG	unstressed EH0 (gold; dict self-inconsistent)
 excoriate	EH0 K S K AO1 R IY0 EY2 T	IH0 K S K AO1 R IY0 EY2 T	unstressed EH0 (gold; dict self-inconsistent)
@@ -661,6 +719,8 @@ existence	EH0 G Z IH1 S T AH0 N S	IH0 G Z IH1 S T AH0 N S	unstressed EH0 (gold; 
 existent	EH0 G Z IH1 S T AH0 N T	IH0 G Z IH1 S T AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
 exogenous	EH2 K S OW1 JH AH0 N AH0 S	EH2 K S AA1 JH AH0 N AH0 S	three-way: both sources agree on the segment
 exon	EH2 K S AO1 N	EH2 K S AA1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+expire	IH0 K S P AY1 R	IH0 K S P AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+expired	IH0 K S P AY1 R D	IH0 K S P AY1 ER0 D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 exportable	EH0 K S P AO1 R T AH0 B AH0 L	IH0 K S P AO1 R T AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
 expressly	EH0 K S P R EH1 S L IY0	IH0 K S P R EH1 S L IY0	unstressed EH0 (gold; dict self-inconsistent)
 expresso	IH0 K S P EH1 S OW0	IH0 K S P R EH1 S OW0	missing rhotic (spelled ⟨r⟩, no rhotic phone)
@@ -672,6 +732,8 @@ extracting	EH0 K S T R AE1 K T IH0 NG	IH0 K S T R AE1 K T IH0 NG	unstressed EH0 
 extraction	EH0 K S T R AE1 K SH AH0 N	IH0 K S T R AE1 K SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 extraneous	EH0 K S T R EY1 N IY0 AH0 S	IH0 K S T R EY1 N IY0 AH0 S	unstressed EH0 (gold; dict self-inconsistent)
 extraneously	EH0 K S T R EY1 N IY0 AH0 S L IY0	IH0 K S T R EY1 N IY0 AH0 S L IY0	unstressed EH0 (gold; dict self-inconsistent)
+extraordinaire	EH2 K S T R AH0 AO1 R D IH0 N EH2 R	IH0 K S T R AO2 R D IH0 N EH1 R	segment/vowel defect (gold + moby; family consistency)
+extraordinary	EH2 K S T R AH0 AO1 R D AH0 N EH2 R IY0	IH0 K S T R AO1 R D AH0 N EH2 R IY0	segment/vowel defect (gold + moby; family consistency)
 extrapolate	EH0 K S T R AE1 P AH0 L EY2 T	IH0 K S T R AE1 P AH0 L EY2 T	unstressed EH0 (gold; dict self-inconsistent)
 extrapolation	EH0 K S T R AE2 P AH0 L EY1 SH AH0 N	IH0 K S T R AE2 P AH0 L EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 extravagance	EH0 K S T R AE1 V AH0 G AH0 N S	IH0 K S T R AE1 V AH0 G AH0 N S	unstressed EH0 (gold; dict self-inconsistent)
@@ -682,6 +744,8 @@ extremely	EH0 K S T R IY1 M L IY0	IH0 K S T R IY1 M L IY0	unstressed EH0 (gold; 
 extremist	EH0 K S T R IY1 M IH0 S T	IH0 K S T R IY1 M IH0 S T	unstressed EH0 (gold; dict self-inconsistent)
 extremity	EH0 K S T R EH1 M AH0 T IY0	IH0 K S T R EH1 M AH0 T IY0	unstressed EH0 (gold; dict self-inconsistent)
 extricable	EH0 K S T R IH1 K AH0 B AH0 L	IH0 K S T R IH1 K AH0 B AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+fabulously	F AE1 B Y UW0 L AH0 S L IY0	F AE1 B Y AH0 L AH0 S L IY0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+fairbanks	F EH1 R B AH0 NG K S	F EH1 R B AE2 NG K S	gold + moby; family consistency
 fallen	F AA1 L AH0 N	F AO1 L AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 falling	F AA1 L IH0 NG	F AO1 L IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
 farabaugh	F AE1 R AH0 B AO2	F EH1 R AH0 B AO2	marry–merry merger
@@ -700,11 +764,29 @@ farrowing	F AE1 R OW2 IH0 NG	F EH1 R OW2 IH0 NG	marry–merry merger
 farry	F AE1 R IY0	F EH1 R IY0	marry–merry merger
 faunal	F AA1 N AH0 L	F AO1 N AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 favela	F AA0 V EH1 L AH0	F AH0 V EH1 L AH0	wikipron+gold
+fayetteville	F EY1 EH2 T V IH2 L	F EY1 AH0 T V IH0 L	gold + moby; family consistency
 fellas	F EH1 L AH0 S	F EH1 L AH0 Z	plural voicing after a voiced segment
 felonious	F EH0 L OW1 N IY0 AH0 S	F AH0 L OW1 N IY0 AH0 S	unstressed EH0 (gold; dict self-inconsistent)
+fesmire	F EH1 S M AY2 R	F EH1 S M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 fide	F AY1 D	F IY1 D EY0	wikipron US+UK (two files)
 finland	F IH1 N L AE2 N D	F IH1 N L AH0 N D	frequency audit: gold+Moby agree
-firewall	F AY1 R W AA0 L	F AY1 R W AO0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+firebaugh	F AY1 R B AO2	F AY1 ER0 B AO2	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firebombed	F AY1 R B AA2 M D	F AY1 ER0 B AA2 M D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firebombs	F AY1 R B AA2 M Z	F AY1 ER0 B AA2 M Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firefight	F AY1 R F AY2 T	F AY1 ER0 F AY2 T	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firefighter	F AY1 R F AY2 T ER0	F AY1 ER0 F AY2 T ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firefighting	F AY1 R F AY2 T IH0 NG	F AY1 ER0 F AY2 T IH0 NG	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firefights	F AY1 R F AY2 T S	F AY1 ER0 F AY2 T S	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+fireman	F AY1 R M AH0 N	F AY1 ER0 M AH0 N	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firemen	F AY1 R M AH0 N	F AY1 ER0 M AH0 N	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firepower	F AY1 R P AW2 ER0	F AY1 ER0 P AW2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firestine	F AY0 R S T IY1 N IY0	F AY0 ER0 S T IY1 N IY0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firestone	F AY1 R S T OW2 N	F AY1 ER0 S T OW2 N	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firestorm	F AY1 R S T AO2 R M	F AY1 ER0 S T AO2 R M	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firewall	F AY1 R W AA0 L	F AY1 ER0 W AO0 L	LOT/THOUGHT: align AA/AO to gold's consistent system; the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+firework	F AY1 R W ER2 K	F AY1 ER0 W ER2 K	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+fireworks	F AY1 R W ER2 K S	F AY1 ER0 W ER2 K S	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+fisherman	F IH1 SH ER0 M AE2 N	F IH1 SH ER0 M AH0 N	common-noun -man reduces, as in 1,927 other rows (gold + moby)
 fitzharris	F IH0 T S HH AE1 R IH0 S	F IH0 T S HH EH1 R IH0 S	marry–merry merger
 florist	F L AA1 R IH0 S T	F L AO1 R IH0 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
 floss	F L AA1 S	F L AO1 S	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -712,24 +794,30 @@ fob	F AO1 B	F AA1 B	LOT/THOUGHT: align AA/AO to gold's consistent system
 fog	F AA1 G	F AO1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 foggiest	F AA1 G IY0 AH0 S T	F AO1 G IY0 AH0 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
 foggy	F AA1 G IY0	F AO1 G IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+foliage	F OW1 L IH0 JH	F OW1 L IY0 IH0 JH	missing syllable (gold + moby)
 fondle	F AO1 N D AH0 L	F AA1 N D AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 fontana	F AO0 N T AE1 N AH0	F AA0 N T AE1 N AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
 fop	F AO1 P	F AA1 P	LOT/THOUGHT: align AA/AO to gold's consistent system
 forceps	F AO1 R S EH0 P S	F AO1 R S AH0 P S	unstressed EH0 (gold; dict self-inconsistent)
 forensic	F ER0 EH1 N S IH0 K	F ER0 EH1 N Z IH0 K	intervocalic/voiced-context S→Z (gold)
 forensically	F ER0 EH1 N S IH0 K L IY0	F ER0 EH1 N Z IH0 K L IY0	intervocalic/voiced-context S→Z (gold)
+forerunner	F AO1 R AH2 N ER0	F AO1 R R AH2 N ER0	compound-seam geminate, cf. bookkeeper/misspell/teammates (gold + moby)
+forerunners	F AO1 R AH2 N ER0 Z	F AO1 R R AH2 N ER0 Z	compound-seam geminate, cf. bookkeeper/misspell/teammates (gold + moby)
 foreskin	F OW1 R S K IH2 N	F AO1 R S K IH2 N	wikipron+gold
 forgings	F AO1 JH IH0 NG Z	F AO1 R JH IH0 NG Z	missing rhotic (spelled ⟨r⟩, no rhotic phone)
 forgone	F AO0 R G AA1 N	F AO0 R G AO1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 foster	F AA1 S T ER0	F AO1 S T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
+foxfire	F AA1 K S F AY2 R	F AA1 K S F AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 friday	F R AY1 D IY0	F R AY1 D EY2	weekday -day family (gold unanimous)
 frog	F R AA1 G	F R AO1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 frogman	F R AA1 G M AE2 N	F R AO1 G M AE2 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 frogmouth	F R AA1 G M AW2 TH	F R AO1 G M AW2 TH	LOT/THOUGHT: align AA/AO to gold's consistent system
+frymire	F R IH0 M AY1 R	F R IH0 M AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 fundraising	F AH1 N D R EY2 S IH0 NG	F AH1 N D R EY2 Z IH0 NG	intervocalic/voiced-context S→Z (gold)
 fuselage	F Y UW1 S AH0 L AA2 JH	F Y UW1 S AH0 L AA2 ZH	French -age/-ige ʒ~dʒ (gold + en-GB)
 gagarin	G AH0 G AE1 R AH0 N	G AH0 G AA1 R AH0 N	loanword PALM ɑː (gold; en-GB arbitrated)
 gala	G AE1 L AH0	G EY1 L AH0	tense vowel (gold + en-GB)
+galloway	G AE1 L OW0 W EY2	G AE1 L AH0 W EY2	gold + moby; family consistency
 galway	G AA1 L W EY0	G AO1 L W EY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 gamecock	G EY1 M K AO2 K	G EY1 M K AA2 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 gamekeepers	G EY1 M K IY2 P ER0 S	G EY1 M K IY2 P ER0 Z	plural voicing after a voiced segment
@@ -737,6 +825,7 @@ gara	G AE1 R AH0	G EH1 R AH0	marry–merry merger
 garabedian	G AE2 R AH0 B IY1 D IY0 AH0 N	G EH2 R AH0 B IY1 D IY0 AH0 N	marry–merry merger
 garand	G AE1 R AH0 N D	G EH1 R AH0 N D	marry–merry merger
 garay	G AE1 R EY0	G EH1 R EY0	marry–merry merger
+gardenhire	G AA1 R D AH0 N HH AY2 R	G AA1 R D AH0 N HH AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 gared	G AE1 R AH0 D	G EH1 R AH0 D	marry–merry merger
 garelick	G AE1 R IH0 L IH0 K	G EH1 R IH0 L IH0 K	marry–merry merger
 garett	G AE1 R IH0 T	G EH1 R IH0 T	marry–merry merger
@@ -783,6 +872,7 @@ geronimo	JH AH0 R AO1 N IH0 M OW2	JH AH0 R AA1 N IH0 M OW2	LOT/THOUGHT: align AA
 gewgaw	G Y UW1 G AA0	G Y UW1 G AO0	LOT/THOUGHT: align AA/AO to gold's consistent system
 ghana	G AE1 N AH0	G AA1 N AH0	loanword PALM ɑː (gold; en-GB arbitrated)
 gimlet	G IH1 M L EH2 T	G IH1 M L AH0 T	wikipron+gold
+gire	G AY1 R	G AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 gironde	JH ER0 AO1 N D	JH ER0 AA1 N D	LOT/THOUGHT: align AA/AO to gold's consistent system
 giveth	G IH1 V EH0 TH	G IH1 V AH0 TH	unstressed EH0 (gold; dict self-inconsistent)
 globetrotter	G L OW1 B T R AO0 T ER0	G L OW1 B T R AA0 T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -790,11 +880,15 @@ gloriana	G L AO2 R IY0 AE1 N AH0	G L AO2 R IY0 AA1 N AH0	loanword PALM ɑː (gol
 gloucester	G L AA1 S T ER0	G L AO1 S T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 glutaric	G L UW0 T AE1 R IH0 K	G L UW0 T EH1 R IH0 K	marry–merry merger
 goldilocks	G OW1 L D IY0 L AO2 K S	G OW1 L D IY0 L AA2 K S	LOT/THOUGHT: align AA/AO to gold's consistent system
+goldwire	G OW1 L D W AY2 R	G OW1 L D W AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 golf	G AA1 L F	G AO1 L F	LOT/THOUGHT: align AA/AO to gold's consistent system
 golfer	G AA1 L F ER0	G AO1 L F ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 golfing	G AA1 L F IH0 NG	G AO1 L F IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
 gondwana	G AA2 N D W AA1 N AA2	G AA0 N D W AA1 N AH0	wikipron+gold
 goner	G AA1 N ER0	G AO1 N ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
+government	G AH1 V ER0 M AH0 N T	G AH1 V ER0 N M AH0 N T	elided /n/ restored (gold + moby; whole family was consistently wrong)
+governmental	G AH1 V ER0 M EH2 N T AH0 L	G AH1 V ER0 N M EH2 N T AH0 L	elided /n/ restored (gold + moby; whole family was consistently wrong)
+governments	G AH1 V ER0 M AH0 N T S	G AH1 V ER0 N M AH0 N T S	elided /n/ restored (gold + moby; whole family was consistently wrong)
 gps	G IY1 P IY0 EH1 S	JH IY1 P IY0 EH1 S	letter-name
 graben	G R AE1 B AH0 N	G R AA1 B AH0 N	loanword PALM ɑː (gold; en-GB arbitrated)
 gracias	G R AA1 S IY0 AH0 Z	G R AA1 S IY0 AH0 S	three-way: both sources agree on the segment
@@ -804,6 +898,7 @@ groundhog	G R AW1 N D HH AA2 G	G R AW1 N D HH AO2 G	LOT/THOUGHT: align AA/AO to 
 groundskeeper	G R AW1 N D S K IY2 P ER0	G R AW1 N D Z K IY2 P ER0	intervocalic/voiced-context S→Z (gold)
 groundwater	G R AW1 N D W AA2 T ER0	G R AW1 N D W AO2 T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 groveling	G R AO1 V AH0 L IH0 NG	G R AA1 V AH0 L IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
+guire	G AY1 R	G AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 gulag	G Y UW1 L AE0 G	G UW1 L AA2 G	wikipron+gold
 gutless	G AH1 T L EH0 S	G AH1 T L AH0 S	unstressed EH0 (gold; dict self-inconsistent)
 hackathon	HH AE1 K AH0 TH AO2 N	HH AE1 K AH0 TH AA2 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -839,16 +934,20 @@ harron	HH AE1 R AH0 N	HH EH1 R AH0 N	marry–merry merger
 harrow	HH AE1 R OW0	HH EH1 R OW0	marry–merry merger
 harrower	HH AE1 R OW0 W ER0	HH EH1 R OW0 W ER0	marry–merry merger
 harryman	HH AE1 R IY0 M AH0 N	HH EH1 R IY0 M AH0 N	marry–merry merger
+haywire	HH EY1 W AY2 R	HH EY1 W AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 hebe	HH IY1 B	HH IY1 B IY0	loanword final -e is pronounced (gold + en-GB)
 hebron	HH EH1 B R AH0 N	HH IY1 B R AH0 N	tense vowel (gold + en-GB)
 hedgehog	HH EH1 JH HH AA2 G	HH EH1 JH HH AO2 G	LOT/THOUGHT: align AA/AO to gold's consistent system
+hellfire	HH EH1 L F AY2 R	HH EH1 L F AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 hematite	HH EH1 M AH0 T AY2 T	HH IY1 M AH0 T AY2 T	tense vowel (gold + en-GB)
 herbaceous	ER0 B EY1 SH AH0 S	HH ER0 B EY1 SH AH0 S	wikipron+gold
 hog	HH AA1 G	HH AO1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
+hogan	HH OW1 G AA2 N	HH OW1 G AH0 N	gold + moby; family consistency
 hogwarts	HH AA1 G W AO2 R T S	HH AO1 G W AO2 R T S	LOT/THOUGHT: align AA/AO to gold's consistent system
 hogwash	HH AA1 G W AA2 SH	HH AO1 G W AO2 SH	LOT/THOUGHT: align AA/AO to gold's consistent system
 homonym	HH AO1 M AH0 N IH0 M	HH AA1 M AH0 N IH0 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 homs	HH AA1 M Z	HH AO1 M Z	LOT/THOUGHT: align AA/AO to gold's consistent system
+hon	HH AA1 N	HH AH1 N	gold + moby; family consistency
 honcho	HH AO1 N CH OW0	HH AA1 N CH OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
 honda	HH AO1 N D AH0	HH AA1 N D AH0	wikipron US+UK (two files)
 hondas	HH AA1 N D AH0 S	HH AA1 N D AH0 Z	wikipron US+UK (two files)
@@ -859,8 +958,14 @@ hoss	HH AA1 S	HH AO1 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 housewarming	HH AW1 S W AA2 M IH0 NG	HH AW1 S W AO2 R M IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system; missing rhotic (gold)
 hulme	HH AH1 L M	HH Y UW1 M	wikipron US+UK (two files)
 hypertrophy	HH AY1 P ER0 T R OW2 F IY0	HH AY0 P ER1 T R AH0 F IY0	three-way: both sources agree on the segment
+hyre	HH AY1 R	HH AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 ideal	AY0 D IY1 L	AY0 D IY1 AH0 L	wikipron US+UK (two files)
 ideals	AY0 D IY1 L Z	AY0 D IY1 AH0 L Z	wikipron US+UK (two files)
+immaculate	IH2 M AE1 K Y UW0 L IH0 T	IH2 M AE1 K Y AH0 L AH0 T	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+immunization	IH2 M Y UW0 N AH0 Z EY1 SH AH0 N	IH2 M Y AH0 N AH0 Z EY1 SH AH0 N	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+immunizations	IH2 M Y UW0 N AH0 Z EY1 SH AH0 N Z	IH2 M Y AH0 N AH0 Z EY1 SH AH0 N Z	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+immunize	IH1 M Y UW0 N AY2 Z	IH1 M Y AH0 N AY2 Z	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+immunology	IH2 M Y UW0 N AA1 L AH0 JH IY0	IH2 M Y AH0 N AA1 L AH0 JH IY0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 implementation	IH2 M P L AH0 M EH0 N T EY1 SH AH0 N	IH2 M P L AH0 M AH0 N T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 impolitic	IH2 M P AO0 L IH1 T IH2 K	IH2 M P AA0 L IH1 T IH2 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 impossibility	IH2 M P AO2 S IH0 B IH1 L IH0 T IY0	IH2 M P AA2 S IH0 B IH1 L IH0 T IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -871,13 +976,21 @@ incognito	IH2 N K AO0 G N IY1 T OW0	IH2 N K AA0 G N IY1 T OW0	LOT/THOUGHT: align
 incongruous	IH2 NG K AO1 NG R UW0 AH0 S	IH2 NG K AA1 NG R UW0 AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 incongruously	IH2 NG K AO1 NG R UW0 AH0 S L IY0	IH2 NG K AA1 NG R UW0 AH0 S L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 incorrigible	IH2 N K AA1 R AH0 JH AH0 B AH0 L	IH2 N K AO1 R AH0 JH AH0 B AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+incubation	IH2 NG K Y UW0 B EY1 SH AH0 N	IH2 N K Y AH0 B EY1 SH AH0 N	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
+incubator	IH1 NG K Y AH0 B EY2 T ER0	IH1 N K Y AH0 B EY2 T ER0	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
+incubators	IH1 NG K Y UW0 B EY2 T ER0 Z	IH1 N K Y AH0 B EY2 T ER0 Z	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
 indigestion	IH2 N D AY0 JH EH1 S CH AH0 N	IH2 N D IH0 JH EH1 S CH AH0 N	three-way: both sources agree on the segment
 indisputably	IH2 N D IH1 S P Y UW0 T AE2 B L IY2	IH2 N D IH0 S P Y UW1 T AH0 B L IY0	three-way: both sources agree on the segment
 indonesia	IH2 N D OW0 N IY1 ZH AH0	IH2 N D AH0 N IY1 ZH AH0	frequency audit: gold+Moby agree
+indonesian	IH2 N D OW0 N IY1 ZH AH0 N	IH2 N D AH0 N IY1 ZH AH0 N	outlier against its own base indonesia (gold + moby)
 inga	IY1 NG G AH0	IH1 NG G AH0	wikipron US+UK (two files)
+ingmire	IH1 NG M AY0 R	IH1 NG M AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 inherent	IH0 N HH IH1 R AH0 N T	IH0 N HH EH1 R AH0 N T	wikipron+gold
+inquire	IH2 N K W AY1 R	IH2 N K W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 inquiries	IH2 N K W AY1 ER0 IY0 Z	IH2 N K W AY1 R IY0 Z	#1289
 inquiring	IH2 N K W AY1 ER0 IH0 NG	IH2 N K W AY1 R IH0 NG	#1289
+inspire	IH2 N S P AY1 R	IH2 N S P AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+inspires	IH2 N S P AY1 R Z	IH2 N S P AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 instantaneous	IH2 N S T AH0 N T AE1 N IY0 AH0 S	IH2 N S T AH0 N T EY1 N IY0 AH0 S	tense vowel (gold + en-GB)
 instantaneously	IH2 N S T AH0 N T AE1 N IY0 AH0 S L IY0	IH2 N S T AH0 N T EY1 N IY0 AH0 S L IY0	tense vowel (gold + en-GB)
 insular	IH1 N S AH0 L ER0	IH1 N S Y AH0 L ER0	wikipron+gold
@@ -886,8 +999,13 @@ intermarried	IH2 N T ER0 M AE1 R IY0 D	IH2 N T ER0 M EH1 R IY0 D	marry–merry m
 intermarry	IH2 N T ER0 M AE1 R IY0	IH2 N T ER0 M EH1 R IY0	marry–merry merger
 interoperate	IH2 N T ER0 AO1 P ER0 AH0 T	IH2 N T ER0 AA1 P ER0 AH0 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 interpolate	IH2 T ER1 P AH0 L EY2 T	IH0 N T ER1 P AH0 L EY2 T	wikipron+gold
+intraocular	IH2 N T R AH0 OW1 K Y UW0 L ER0	IH2 N T R AH0 OW1 K Y AH0 L ER0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+ire	AY1 R	AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+irelands	AY1 R L AH0 N D Z	AY1 ER0 L AH0 N D Z	outlier against its own singular ireland
 irizarry	IH1 R IH0 Z AE0 R IY0	IH1 R IH0 Z EH0 R IY0	marry–merry merger
 isosceles	AY0 S AO1 S AH0 L IY2 Z	AY0 S AA1 S AH0 L IY2 Z	LOT/THOUGHT: align AA/AO to gold's consistent system
+italic	AY0 T AE1 L IH0 K	IH0 T AE1 L IH0 K	gold + moby; family consistency
+italics	AY0 T AE1 L IH0 K S	IH0 T AE1 L IH0 K S	gold + moby; family consistency
 jaramillo	JH AE2 R AH0 M IH1 L OW0	JH EH2 R AH0 M IH1 L OW0	marry–merry merger
 jaromir	JH AE1 R AH0 M IH0 R	JH EH1 R AH0 M IH0 R	marry–merry merger
 jarratt	JH AE1 R AH0 T	JH EH1 R AH0 T	marry–merry merger
@@ -918,6 +1036,7 @@ kerala	K EH2 R AA1 L AH0	K EH1 R AH0 L AH0	wikipron+gold
 keratotomy	K EH2 R AH0 T AO1 T AH0 M IY0	K EH2 R AH0 T AA1 T AH0 M IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 kersey	K ER1 S IY0	K ER1 Z IY0	wikipron+gold
 kilometre	K IH2 L AO1 M AH2 T ER0	K IH2 L AA1 M AH2 T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
+kinda	K IH1 N D AH0	K AY1 N D AH0	gold + moby; family consistency
 kingsport	K IH1 NG S P AO2 R T	K IH1 NG Z P AO2 R T	intervocalic/voiced-context S→Z (gold)
 kiosk	K IY1 AO2 S K	K IY1 AA2 S K	LOT/THOUGHT: align AA/AO to gold's consistent system
 kirov	K IH1 R AA0 V	K IH1 R AO0 V	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -927,9 +1046,11 @@ korns	K AO1 N Z	K AO1 R N Z	missing rhotic (spelled ⟨r⟩, no rhotic phone)
 koshers	K OW1 SH ER0 S	K OW1 SH ER0 Z	plural voicing after a voiced segment
 kpmg	K EY1 P IY1 EH1 M JH IH1	K EY1 P IY1 EH1 M JH IY1	letter-name
 kuiper	K UW1 P ER0	K AY1 P ER0	wikipron+gold
+kung	K AH1 NG	K UH1 NG	gold + moby; family consistency
 kwangju	K W AA0 NG JH UW1	K W AO0 NG JH UW1	LOT/THOUGHT: align AA/AO to gold's consistent system
 lachlan	L AE1 K L AH0 N	L AA1 K L AH0 N	loanword PALM ɑː (gold; en-GB arbitrated)
 lagos	L EY1 G AO0 S	L EY1 G AA0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
+lancashire	L AE1 NG K AH0 SH AY2 R	L AE1 NG K AH0 SH ER0	county-name -shire reduces in this dict (berkshire, cheshire, hampshire, yorkshire); moby agrees. NOT the -ire rhyme
 larabee	L AE1 R AH0 B IY0	L EH1 R AH0 B IY0	marry–merry merger
 laramee	L AE1 R AH0 M IY0	L EH1 R AH0 M IY0	marry–merry merger
 laramore	L AE1 R AH0 M AO2 R	L EH1 R AH0 M AO2 R	marry–merry merger
@@ -969,13 +1090,20 @@ longan	L AA1 NG G AH0 N	L AO1 NG G AH0 N	LOT/THOUGHT: align AA/AO to gold's cons
 longe	L AA1 N JH	L AH1 N JH	wikipron+gold
 longitude	L AA1 N JH AH0 T UW2 D	L AO1 N JH AH0 T UW2 D	LOT/THOUGHT: align AA/AO to gold's consistent system
 longitudinal	L AA2 N JH AH0 T UW1 D AH0 N AH0 L	L AO2 N JH AH0 T UW1 D AH0 N AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+longmire	L AA1 NG M AY0 R	L AA1 NG M AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 lozenge	L AO1 Z AH0 N JH	L AA1 Z AH0 N JH	LOT/THOUGHT: align AA/AO to gold's consistent system
 ludology	L UW2 D AO1 L AH0 JH IY2	L UW2 D AA1 L AH0 JH IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
+luxuriant	L AH0 G ZH ER1 IY0 AH0 N T	L AH0 G ZH UH1 R IY0 AH0 N T	segment/vowel defect (gold + moby; family consistency)
+luxurious	L AH0 G ZH ER1 IY0 AH0 S	L AH0 G ZH UH1 R IY0 AH0 S	segment/vowel defect (gold + moby; family consistency)
+lyre	L AY1 R	L AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 macedonian	M AE2 S AH0 D OW1 N Y AH0 N	M AE2 S AH0 D OW1 N IY0 AH0 N	wikipron+gold
+macintyre	M AE1 K AH0 N T AY2 R	M AE1 K AH0 N T AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+maguire	M AH0 G W AY1 R	M AH0 G W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 majolica	M AH0 JH AO1 L AH0 K AH0	M AH0 JH AA1 L AH0 K AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
 malaga	M AE1 L AH0 G AH0	M AA1 L AH0 G AH0	loanword PALM ɑː (gold; en-GB arbitrated)
 malathion	M AH0 L AE1 TH IY0 AO0 N	M AH0 L AE1 TH IY0 AA0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 maldives	M AO1 L D AY2 V Z	M AA1 L D AY2 V Z	LOT/THOUGHT: align AA/AO to gold's consistent system
+mandibular	M AE2 N D IH1 B Y UW0 L ER0	M AE2 N D IH1 B Y AH0 L ER0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 manifestation	M AE2 N AH0 F EH0 S T EY1 SH AH0 N	M AE2 N AH0 F AH0 S T EY1 SH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
 marabella	M AE2 R AH0 B EH1 L AH0	M EH2 R AH0 B EH1 L AH0	marry–merry merger
 marak	M AE1 R AH0 K	M EH1 R AH0 K	marry–merry merger
@@ -1002,6 +1130,7 @@ marrakech	M AE1 R AH0 K EH2 SH	M EH1 R AH0 K EH2 SH	marry–merry merger
 marrin	M AE1 R IH0 N	M EH1 R IH0 N	marry–merry merger
 marris	M AE1 R IH0 S	M EH1 R IH0 S	marry–merry merger
 marsupials	M AA0 R S UW1 P IY0 AH0 L S	M AA0 R S UW1 P IY0 AH0 L Z	plural voicing after a voiced segment
+martyre	M AA0 R T AY1 R	M AA0 R T AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 marulanda	M AE2 R UW0 L AE1 N D AH0	M EH2 R UW0 L AE1 N D AH0	marry–merry merger
 marveled	M AA1 R V EH0 L D	M AA1 R V AH0 L D	unstressed EH0 (gold; dict self-inconsistent)
 marylin	M AE1 R IH0 L IH0 N	M EH1 R IH0 L IH0 N	marry–merry merger
@@ -1010,6 +1139,8 @@ maryruth	M AE1 R IH0 R UW0 TH	M EH1 R IH0 R UW0 TH	marry–merry merger
 masochist	M AE1 S AH0 K IH0 S T	M AE1 Z AH0 K IH0 S T	intervocalic/voiced-context S→Z (gold)
 masonite	M AE1 S AH0 N AY2 T	M EY1 S AH0 N AY2 T	tense vowel (gold + en-GB)
 mastodon	M AE1 S T AH0 D AO2 N	M AE1 S T AH0 D AA2 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+matrices	M EY1 T R IH0 S IH0 Z	M EY1 T R IH0 S IY2 Z	-ices plural, cf. indices/vertices (gold + moby)
+mauritius	M AO0 R IH1 T IY0 AH0 S	M AO0 R IH1 SH AH0 S	segment/vowel defect (gold + moby; family consistency)
 mauser	M AW1 S ER0	M AW1 Z ER0	intervocalic/voiced-context S→Z (gold)
 mausoleum	M AO2 S AH0 L IY1 AH0 M	M AO2 Z AH0 L IY1 AH0 M	intervocalic/voiced-context S→Z (gold)
 mccarey	M AH0 K AE1 R IY0	M AH0 K EH1 R IY0	marry–merry merger
@@ -1021,11 +1152,17 @@ mccarry	M AH0 K AE1 R IY0	M AH0 K EH1 R IY0	marry–merry merger
 mcclaran	M AH0 K L AE1 R AH0 N	M AH0 K L EH1 R AH0 N	marry–merry merger
 mcclard	M AH0 K L AA1 D	M AH0 K L AA1 R D	missing rhotic (spelled ⟨r⟩, no rhotic phone)
 mcdaris	M AH0 K D AE1 R AH0 S	M AH0 K D EH1 R AH0 S	marry–merry merger
+mcentire	M AE1 K AH0 N T AY0 R	M AE1 K AH0 N T AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+mcentyre	M AE1 K AH0 N T AY0 R	M AE1 K AH0 N T AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 mcgarity	M AH0 G AE1 R AH0 T IY0	M AH0 G EH1 R AH0 T IY0	marry–merry merger
 mcgarrah	M AH0 G AE1 R AH0	M AH0 G EH1 R AH0	marry–merry merger
 mcgarrigle	M AH0 G AE1 R AH0 G AH0 L	M AH0 G EH1 R AH0 G AH0 L	marry–merry merger
 mcgarrity	M AH0 G AE1 R AH0 T IY0	M AH0 G EH1 R AH0 T IY0	marry–merry merger
+mcguire	M AH0 G W AY1 R	M AH0 G W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+mcintire	M AE1 K IH2 N T AY2 R	M AE1 K IH2 N T AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+mcintyre	M AE1 K IH2 N T AY2 R	M AE1 K IH2 N T AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 mckarrick	M AH0 K AE1 R IH0 K	M AH0 K EH1 R IH0 K	marry–merry merger
+mcquire	M AH0 K W AY1 R	M AH0 K W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 medusa	M AH0 D UW1 S AH0	M AH0 D UW1 Z AH0	intervocalic/voiced-context S→Z (gold)
 meharry	M EY2 HH AE1 R IY0	M EY2 HH EH1 R IY0	marry–merry merger
 mekong	M EY1 K AA0 NG	M EY1 K AO0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1039,9 +1176,14 @@ methanol	M EH1 TH AH0 N AA2 L	M EH1 TH AH0 N AO2 L	LOT/THOUGHT: align AA/AO to g
 mg	EH2 M G IY1	EH2 M JH IY1	letter-name
 mgm	EH2 M G IY2 EH1 M	EH2 M JH IY2 EH1 M	letter-name
 microfiche	M AY1 K R OW0 F IY2 CH	M AY1 K R OW0 F IY2 SH	wikipron+gold
+microscopy	M AY0 K R AH1 S K AH0 P IY0	M AY0 K R AA1 S K AH0 P IY0	gold + moby; family consistency
+microwave	M AY1 K R AH0 W EY2 V	M AY1 K R OW0 W EY2 V	outlier against its own plural microwaves (gold + moby)
 milwaukee	M IH0 L W AO1 K IY0	M IH0 L W AA1 K IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 minke	M IH1 NG K	M IH1 NG K IY0	loanword final -e is pronounced (gold + en-GB)
 minnetonka	M IH2 N IH0 T AO1 NG K AH0	M IH2 N IH0 T AA1 NG K AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
+mire	M AY1 R	M AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+mired	M AY1 R D	M AY1 ER0 D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+mires	M AY1 R Z	M AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 mischaracterize	M IH0 S K AE1 R AH0 K T ER0 AY2 Z	M IH0 S K EH1 R AH0 K T ER0 AY2 Z	marry–merry merger
 mischaracterized	M IH0 S K AE1 R AH0 K T ER0 AY2 Z D	M IH0 S K EH1 R AH0 K T ER0 AY2 Z D	marry–merry merger
 mischaracterizes	M IH0 S K AE1 R AH0 K T ER0 AY2 Z IH0 Z	M IH0 S K EH1 R AH0 K T ER0 AY2 Z IH0 Z	marry–merry merger
@@ -1050,14 +1192,20 @@ mishawaka	M IH2 SH AH0 W AO1 K AH0	M IH2 SH AH0 W AA1 K AH0	LOT/THOUGHT: align A
 mitotic	M AY2 T AO1 T IH0 K	M AY2 T AA1 T IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 mixology	M IH1 K S AO1 L AH0 G IY2	M IH1 K S AA1 L AH0 G IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
 mod	M AO1 D	M AA1 D	LOT/THOUGHT: align AA/AO to gold's consistent system
-modulate	M AO1 JH Y UW0 L EY0 T	M AA1 JH Y UW0 L EY0 T	LOT/THOUGHT: align AA/AO to gold's consistent system
+modulate	M AO1 JH Y UW0 L EY0 T	M AA1 JH AH0 L EY2 T	LOT/THOUGHT: align AA/AO to gold's consistent system; doubled yod: outlier against modular/modulation (gold + moby)
+modulated	M AO1 JH Y UW0 L EY0 T IH0 D	M AA1 JH AH0 L EY2 T IH0 D	doubled yod: outlier against modular/modulation (gold + moby)
 modulo	M AO1 JH UW0 L OW2	M AA1 JH UW0 L OW2	LOT/THOUGHT: align AA/AO to gold's consistent system
 modulus	M AO1 JH UW0 L UH0 S	M AA1 JH UW0 L UH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 moldovan	M OW2 L D OW0 V AA1 N	M AA0 L D OW1 V AH0 N	wikipron+gold
 molotov	M AO1 L AH0 T AA2 F	M AA1 L AH0 T AO2 F	LOT/THOUGHT: align AA/AO to gold's consistent system
+monarch	M AA1 N AA2 R K	M AA1 N ER0 K	unstressed -arch is ɚ (gold + moby)
+monarchy	M AA1 N AA0 R K IY0	M AA1 N ER0 K IY0	unstressed -arch is ɚ, cf. monarch (gold + moby)
 monday	M AH1 N D IY0	M AH1 N D EY2	weekday -day family (gold unanimous)
 mong	M AO1 NG	M AA1 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
+mono	M OW1 N OW0	M AA1 N OW0	gold + moby; family consistency
 montmartre	M AA2 N M AE1 R T R AH0	M AA2 N M AA1 R T R AH0	loanword PALM ɑː (gold; en-GB arbitrated)
+montreal	M AH2 N T R IY0 AO1 L	M AA2 N T R IY0 AO1 L	gold + moby; family consistency
+monument	M AA1 N Y UW0 M AH0 N T	M AA1 N Y AH0 M AH0 N T	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 morrow	M AA1 R OW0	M AO1 R OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
 mosh	M AO1 SH	M AA1 SH	LOT/THOUGHT: align AA/AO to gold's consistent system
 mouthwash	M AW1 TH W AA2 SH	M AW1 TH W AO2 SH	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1067,9 +1215,12 @@ mucosal	M Y UW0 K OW1 S AH0 L	M Y UW0 K OW1 Z AH0 L	intervocalic/voiced-context 
 muharram	M AH0 HH AE1 R AH0 M	M AH0 HH EH1 R AH0 M	marry–merry merger
 mujahideen	M UW2 JH AH0 HH EH0 D IY1 N	M UW2 JH AH0 HH IH0 D IY1 N	unstressed EH0 (gold; dict self-inconsistent)
 mulligatawny	M AH1 L IH0 G AH0 T AA1 N IY0	M AH1 L IH0 G AH0 T AO1 N IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+multitudes	M AH1 L T AH0 T Y UW2 D Z	M AH1 L T AH0 T UW2 D Z	US yod-dropping; outlier against its own singular multitude
 multivariate	M AH2 L T IY0 V AE1 R IY0 IH0 T	M AH2 L T IY0 V EH1 R IY0 IH0 T	marry–merry merger
 multivariates	M AH2 L T IY0 V AE1 R IY0 IH0 T S	M AH2 L T IY0 V EH1 R IY0 IH0 T S	marry–merry merger
 mutagen	M Y UW1 T AH0 JH EH0 N	M Y UW1 T AH0 JH AH0 N	unstressed EH0 (gold; dict self-inconsistent)
+myre	M AY1 R	M AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+myres	M AY1 R Z	M AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 nablus	N AE1 B L AH0 S	N AA1 B L AH0 S	loanword PALM ɑː (gold; en-GB arbitrated)
 nahum	N AE1 HH AH0 M	N EY1 HH AH0 M	tense vowel (gold + en-GB)
 nam	N AE1 M	N AA1 M	loanword PALM ɑː (gold; en-GB arbitrated)
@@ -1087,13 +1238,16 @@ nene	N IY1 N	N EY1 N EY2	loanword final -e is pronounced (gold + en-GB)
 nepal	N AH0 P AO1 L	N AH0 P AA1 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 nerine	N EH1 R IY0 N	N ER0 AY1 N IY0	loanword final -e is pronounced (gold + en-GB)
 nevada	N AH0 V AA1 D AH0	N AH0 V AE1 D AH0	TRAP not PALM (gold; common words only)
+newswire	N UW1 Z W AY2 R	N UW1 Z W AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+newswires	N UW1 Z W AY2 R Z	N UW1 Z W AY2 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 nonalcoholic	N AA2 N AE2 L K AH0 HH AA1 L IH0 K	N AA2 N AE2 L K AH0 HH AO1 L IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 nostradamus	N AO2 S T R AH0 D AE1 M AH0 S	N AO2 S T R AH0 D AA1 M AH0 S	loanword PALM ɑː (gold; en-GB arbitrated)
+nubian	N Y UW1 B IY0 AH0 N	N UW1 B IY0 AH0 N	US yod-dropping (gold + moby)
 nugatory	N UW1 G AA0 T AO2 R IY0	N UW1 G AH0 T AO2 R IY0	three-way: both sources agree on the segment
 obloquy	AO1 B L AH0 K W IY2	AA1 B L AH0 K W IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
 ocarroll	OW0 K AE1 R AH0 L	OW0 K EH1 R AH0 L	marry–merry merger
-ocular	AO1 K Y UW0 L ER0	AA1 K Y UW0 L ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
-oculist	AO1 K Y UW0 L IH2 S T	AA1 K Y UW0 L IH2 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
+ocular	AO1 K Y UW0 L ER0	AA1 K Y AH0 L ER0	LOT/THOUGHT: align AA/AO to gold's consistent system; post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+oculist	AO1 K Y UW0 L IH2 S T	AA1 K Y AH0 L IH2 S T	LOT/THOUGHT: align AA/AO to gold's consistent system; post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 odours	OW1 D ER0 S	OW1 D ER0 Z	plural voicing after a voiced segment
 olde	OW1 L D	OW1 L D IY0	loanword final -e is pronounced (gold + en-GB)
 on	AA1 N	AO1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1144,21 +1298,34 @@ parrill	P AE1 R AH0 L	P EH1 R AH0 L	marry–merry merger
 parriott	P AE1 R IY0 AH0 T	P EH1 R IY0 AH0 T	marry–merry merger
 parrow	P AE1 R OW0	P EH1 R OW0	marry–merry merger
 particularity	P ER0 T IH2 K Y AH0 L AE1 R AH0 T IY0	P ER0 T IH2 K Y AH0 L EH1 R AH0 T IY0	marry–merry merger
+particularly	P AA2 R T IH1 K Y AH0 L ER0 L IY0	P ER0 T IH1 K Y AH0 L ER0 L IY0	unreduced first syllable; outlier against particular/particulars (gold + moby)
+pasadena	P AE2 S AH0 D IY1 N ER0	P AE2 S AH0 D IY1 N AH0	gold + moby; family consistency
 pecuniary	P EH0 K Y UW1 N IY0 EH2 R IY0	P AH0 K Y UW1 N IY0 EH2 R IY0	unstressed EH0 (gold; dict self-inconsistent)
 pellagra	P AH0 L AE1 G R AH0	P AH0 L EY1 G R AH0	tense vowel (gold + en-GB)
 pentothal	P EH1 N T AH0 TH AA0 L	P EH1 N T AH0 TH AO0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 penultimate	P EH0 N AH1 L T AH0 M AH0 T	P AH0 N AH1 L T AH0 M AH0 T	unstressed EH0 (gold; dict self-inconsistent)
 pepita	P EH0 P IY1 T AH0	P AH0 P IY1 T AH0	unstressed EH0 (gold; dict self-inconsistent)
 peridot	P EH1 R IH0 D AO0 T	P EH1 R IH0 D AA0 T	LOT/THOUGHT: align AA/AO to gold's consistent system
+permutate	P ER1 M Y UW0 T EY2 T	P ER1 M Y AH0 T EY2 T	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+permutated	P ER1 M Y UW0 T EY2 T IH0 D	P ER1 M Y AH0 T EY2 T IH0 D	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+permutates	P ER1 M Y UW0 T EY2 T S	P ER1 M Y AH0 T EY2 T S	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+permutating	P ER1 M Y UW0 T EY2 T IH0 NG	P ER1 M Y AH0 T EY2 T IH0 NG	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+permutation	P ER2 M Y UW0 T EY1 SH AH0 N	P ER2 M Y AH0 T EY1 SH AH0 N	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+permutations	P ER2 M Y UW0 T EY1 SH AH0 N Z	P ER2 M Y AH0 T EY1 SH AH0 N Z	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+perpetuity	P ER2 P IH0 T Y UW1 IH0 T IY0	P ER2 P AH0 T UW1 AH0 T IY0	US yod-dropping (gold + moby)
 persecutions	P ER2 S AH0 K Y UW1 SH AH0 N S	P ER2 S AH0 K Y UW1 SH AH0 N Z	plural voicing after a voiced segment
+perspire	P ER0 S P AY1 R	P ER0 S P AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 peshawar	P EH1 SH AH0 W AO0 R	P EH1 SH AH0 W AA0 R	LOT/THOUGHT: align AA/AO to gold's consistent system
+petrol	P EH1 T R OW0 L	P EH1 T R AH0 L	gold + moby; family consistency
 pharis	F AE1 R AH0 S	F EH1 R AH0 S	marry–merry merger
 pharisaism	F AE1 R IH0 S EY2 IH2 Z AH0 M	F EH1 R IH0 S EY2 IH2 Z AH0 M	marry–merry merger
 pharris	F AE1 R IH0 S	F EH1 R IH0 S	marry–merry merger
 phenol	F IY1 N AA0 L	F IY1 N AO0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 pindaric	P IH0 N D AE1 R IH0 K	P IH0 N D EH1 R IH0 K	marry–merry merger
+pires	P AY1 R Z	P AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 pisa	P IY1 S AH0	P IY1 Z AH0	intervocalic/voiced-context S→Z (gold)
 piton	P IY1 T AO2 N	P IY1 T AA2 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+platinum	P L AE1 T N AH0 M	P L AE1 T AH0 N AH0 M	missing syllable (gold + moby)
 pleomorphic	P L IY2 AH0 M AO1 F IH0 K	P L IY2 AH0 M AO1 R F IH0 K	missing rhotic (gold)
 pleomorphism	P L IY2 AH0 M AO1 F IH0 Z AH0 M	P L IY2 AH0 M AO1 R F IH2 Z AH0 M	missing rhotic (gold)
 podcast	P AO1 D K AE2 S T	P AA1 D K AE2 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1167,13 +1334,17 @@ podcasting	P AO1 D K AE2 S T IH0 NG	P AA1 D K AE2 S T IH0 NG	LOT/THOUGHT: align 
 pog	P AA1 G	P AO1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 pol	P AO1 L	P AA1 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 polygon	P AA1 L IH0 G AA2 N	P AA1 L IY0 G AA2 N	wikipron+gold
+polyphonic	P AA2 L IH2 F AA1 N IH0 K	P AA2 L IY0 F AA1 N IH0 K	stress mis-transferred to the linking -y-, cf. polyphony (gold + moby)
 pom	P AO1 M	P AA1 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 poor	P UW1 R	P UH1 R	frequency audit: gold+Moby agree
+poorly	P UW1 R L IY0	P UH1 R L IY0	outlier against its own base poor (gold + moby)
 poppycock	P AA1 P IY0 K AO2 K	P AA1 P IY0 K AA2 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 poss	P AO1 S	P AA1 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 posterior	P AO2 S T IH1 R Y ER0	P AA2 S T IH1 R Y ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 postmortem	P OW2 S T M AO1 R T EH0 M	P OW2 S T M AO1 R T AH0 M	unstressed EH0 (gold; dict self-inconsistent)
 postoperative	P OW2 S T AO1 P AH0 R AH0 T IH0 V	P OW2 S T AA1 P AH0 R AH0 T IH0 V	LOT/THOUGHT: align AA/AO to gold's consistent system
+postscript	P OW1 S K R IH2 P T	P OW1 S T S K R IH2 P T	segment/vowel defect (gold + moby; family consistency)
+postscripts	P OW1 S K R IH2 P T S	P OW1 S T S K R IH2 P T S	segment/vowel defect (gold + moby; family consistency)
 pravda	P R AE1 V D AH0	P R AA1 V D AH0	loanword PALM ɑː (gold; en-GB arbitrated)
 prebiotic	P R IY2 B AY2 AO1 T IH0 K	P R IY2 B AY2 AA1 T IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 premodern	P R IY0 M AO1 D ER0 N	P R IY0 M AA1 D ER0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1181,26 +1352,35 @@ preoperative	P R IY2 AO1 P AH0 R AH0 T IH0 V	P R IY2 AA1 P AH0 R AH0 T IH0 V	LOT
 prepuce	P R EH1 P Y UW2 S	P R IY1 P Y UW2 S	tense vowel (gold + en-GB)
 prequel	P R IY1 K W EH0 L	P R IY1 K W AH0 L	unstressed EH0 (gold; dict self-inconsistent)
 prescience	P R IY1 SH IY0 AH0 N S	P R EH1 S IY0 AH0 N S	three-way: both sources agree on the segment
+privilege	P R IH1 V L AH0 JH	P R IH1 V AH0 L IH0 JH	segment/vowel defect (gold + moby; family consistency)
+privileged	P R IH1 V L AH0 JH D	P R IH1 V AH0 L IH0 JH D	segment/vowel defect (gold + moby; family consistency)
+privileges	P R IH1 V L AH0 JH AH0 Z	P R IH1 V AH0 L IH0 JH AH0 Z	segment/vowel defect (gold + moby; family consistency)
 proctologist	P R AO2 K T AA1 L AH0 G IH2 S T	P R AA2 K T AA1 L AH0 G IH2 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
 prody	P OW1 D IY0	P R OW1 D IY0	missing rhotic (spelled ⟨r⟩, no rhotic phone)
 profanation	P R AO2 F AH0 N EY1 SH AH0 N	P R AA2 F AH0 N EY1 SH AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+proficient	P R AA0 F IH1 SH AH0 N T	P R AH0 F IH1 SH AH0 N T	pro- reduces in this dict (produce, protect, propose, provide) (gold + moby)
 profligacy	P R AO1 F L IH0 G AE2 S IY0	P R AA1 F L IH0 G AE2 S IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 profligate	P R AO1 F L IH0 G EY2 T	P R AA1 F L IH0 G EY2 T	LOT/THOUGHT: align AA/AO to gold's consistent system
+profound	P R OW0 F AW1 N D	P R AH0 F AW1 N D	pro- reduces in this dict (produce, protect, propose, provide) (gold + moby)
 prolog	P R OW0 L AA1 G	P R OW0 L AO1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 prologue	P R OW1 L AA0 G	P R OW1 L AO0 G	LOT/THOUGHT: align AA/AO to gold's consistent system
+pronunciation	P R OW0 N AH2 N S IY0 EY1 SH AH0 N	P R AH0 N AH2 N S IY0 EY1 SH AH0 N	pro- reduces in this dict (produce, protect, propose, provide) (gold + moby)
 prospecting	P R AO2 S P EH1 K T IH0 NG	P R AA2 S P EH1 K T IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
 prospector	P R AO1 S P EH2 K T ER0	P R AA1 S P EH2 K T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 prosthesis	P R AO2 S TH EH1 S IH0 S	P R AA2 S TH EH1 S IH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 protocol	P R OW1 T AH0 K AA2 L	P R OW1 T AH0 K AO2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 protrude	P R OW0 T R UW1 D	P R AH0 T R UW1 D	wikipron+gold
 provolone	P R OW1 V AH0 L OW0 N	P R OW2 V AH0 L OW1 N IY0	loanword final -e is pronounced (gold + en-GB)
+proxmire	P R AA1 K S M AY2 R	P R AA1 K S M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 psychopathology	S AY2 K AH0 P AE0 TH AO1 L AH0 G IY2	S AY2 K AH0 P AE0 TH AA1 L AH0 G IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
+pugmire	P AH1 G M AY2 R	P AH1 G M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 puma	P UW1 M AH0	P Y UW1 M AH0	labial yod (dict was the outlier)
 quadratic	K W AA0 D R AA1 T IH0 K	K W AA0 D R AE1 T IH0 K	TRAP not PALM (gold; common words only)
 quahog	K W AA1 HH AO2 G	K W AO1 HH AO2 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 quant	K W AE1 N T	K W AA1 N T	loanword PALM ɑː (gold; en-GB arbitrated)
 quarreling	K W AA1 R AH0 L IH0 NG	K W AO1 R AH0 L IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
 quasimodo	K AE0 Z IY0 M OW1 D OW0	K W AA2 Z IY0 M OW1 D OW2	wikipron+gold
+quire	K W AY1 R	K W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 quod	K W AO1 D	K W AA1 D	LOT/THOUGHT: align AA/AO to gold's consistent system
 ragtop	R AE1 G T AO0 P	R AE1 G T AA0 P	LOT/THOUGHT: align AA/AO to gold's consistent system
 rahrig	R AE1 R IH0 G	R EH1 R IH0 G	marry–merry merger
@@ -1213,6 +1393,8 @@ rarick	R AE1 R IH0 K	R EH1 R IH0 K	marry–merry merger
 ratatouille	R AE2 T AH0 T UW1 Y	R AE2 T AH0 T UW1 IY0	loanword final -e is pronounced (gold + en-GB)
 raw	R AA1	R AO1	LOT/THOUGHT: align AA/AO to gold's consistent system
 rawalpindi	R AE2 W AO0 L P IH1 N D IY0	R AE2 W AA0 L P IH1 N D IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+reacquire	R IY0 AH0 K W AY1 R	R IY0 AH0 K W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+reacquired	R IY0 AH0 K W AY1 R D	R IY0 AH0 K W AY1 ER0 D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 really	R IH1 L IY0	R IY1 AH0 L IY0	frequency audit: gold+Moby agree
 realpolitik	R IY2 L P AO2 L IH0 T IH1 K	R IY2 L P AA2 L IH0 T IH1 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 rebuke	R IY0 B Y UW1 K	R IH0 B Y UW1 K	Latinate re- prefix reduces (gold+Moby)
@@ -1230,6 +1412,7 @@ regina	R IH0 JH IY1 N AH0	R AH0 JH AY1 N AH0	wikipron+gold
 rehearse	R IY0 HH ER1 S	R IH0 HH ER1 S	Latinate re- prefix reduces (gold+Moby)
 rehearsed	R IY0 HH ER1 S T	R IH0 HH ER1 S T	paradigm completion (the #replace precedent)
 rehearses	R IY0 HH ER1 S IH0 Z	R IH0 HH ER1 S IH0 Z	paradigm completion (the #replace precedent)
+rehire	R IY0 HH AY1 R	R IY0 HH AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 reinspections	R IY2 IH0 N S P EH1 K SH AH0 N S	R IY2 IH0 N S P EH1 K SH AH0 N Z	plural voicing after a voiced segment
 reinstall	R IY2 IH0 N S T AA1 L	R IY2 IH0 N S T AO1 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 relation	R IY0 L EY1 SH AH0 N	R IH0 L EY1 SH AH0 N	Latinate re- prefix reduces (gold+Moby)
@@ -1277,6 +1460,8 @@ republics	R IY0 P AH1 B L IH0 K S	R IH0 P AH1 B L IH0 K S	paradigm completion (t
 repulsive	R IY0 P AH1 L S IH0 V	R IH0 P AH1 L S IH0 V	Latinate re- prefix reduces (gold+Moby)
 require	R IY2 K W AY1 ER0	R IH0 K W AY1 ER0	#1279
 required	R IY0 K W AY1 ER0 D	R IH0 K W AY1 ER0 D	#1279
+requirement	R IH0 K W AY1 R M AH0 N T	R IH0 K W AY1 ER0 M AH0 N T	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+requirements	R IH0 K W AY1 R M AH0 N T S	R IH0 K W AY1 ER0 M AH0 N T S	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 requires	R IY0 K W AY1 ER0 Z	R IH0 K W AY1 ER0 Z	#1279
 requiring	R IY0 K W AY1 ER0 IH0 NG	R IH0 K W AY1 R IH0 NG	#1289
 research	R IY0 S ER1 CH	R IY1 S ER0 CH	#1280
@@ -1302,8 +1487,12 @@ resveratrol	R EH0 S V ER1 AH0 T R AO0 L	R EH0 S V ER1 AH0 T R AA0 L	LOT/THOUGHT:
 retaliation	R IY0 T AE2 L IY0 EY1 SH AH0 N	R IH0 T AE2 L IY0 EY1 SH AH0 N	Latinate re- prefix reduces (gold+Moby)
 retention	R IY0 T EH1 N SH AH0 N	R IH0 T EH1 N SH AH0 N	Latinate re- prefix reduces (gold+Moby)
 retinol	R EH1 T IH0 N AO2 L	R EH1 T IH0 N AA2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+retire	R IH0 T AY1 R	R IH0 T AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+retired	R IH0 T AY1 R D	R IH0 T AY1 ER0 D	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 retirees	R IY0 T AY1 R IY1 Z	R IH0 T AY1 R IY1 Z	split re- paradigm (majority / two-source)
 retirement	R IY0 T AY1 ER0 M AH0 N T	R IH0 T AY1 ER0 M AH0 N T	split re- paradigm (majority / two-source)
+retirements	R IH0 T AY1 R M AH0 N T S	R IH0 T AY1 ER0 M AH0 N T S	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+retires	R IH0 T AY1 R Z	R IH0 T AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 retort	R IY1 T AO2 R T	R IH0 T AO2 R T	Latinate re- prefix reduces (gold+Moby)
 retorted	R IY0 T AO1 R T IH0 D	R IH0 T AO1 R T IH0 D	paradigm completion (the #replace precedent)
 retract	R IY0 T R AE1 K T	R IH0 T R AE1 K T	Latinate re- prefix reduces (gold+Moby)
@@ -1313,6 +1502,8 @@ retracting	R IY0 T R AE1 K T IH0 NG	R IH0 T R AE1 K T IH0 NG	paradigm completion
 retraction	R IY0 T R AE1 K SH AH0 N	R IH0 T R AE1 K SH AH0 N	Latinate re- prefix reduces (gold+Moby)
 retracts	R IY0 T R AE1 K T S	R IH0 T R AE1 K T S	paradigm completion (the #replace precedent)
 returnable	R IY0 T ER1 N AH0 B AH0 L	R IH0 T ER1 N AH0 B AH0 L	Latinate re- prefix reduces (gold+Moby)
+reunion	R IY0 UW1 N Y AH0 N	R IY0 Y UW1 N Y AH0 N	missing /j/ (gold + moby)
+reunions	R IY0 UW1 N Y AH0 N Z	R IY0 Y UW1 N Y AH0 N Z	missing /j/ (gold + moby)
 revenge	R IY0 V EH1 N JH	R IH0 V EH1 N JH	Latinate re- prefix reduces (gold+Moby)
 review	R IY2 V Y UW1	R IH0 V Y UW1	Latinate re- prefix reduces (gold+Moby)
 reviewed	R IY0 V Y UW1 D	R IH0 V Y UW1 D	paradigm completion (the #replace precedent)
@@ -1332,12 +1523,16 @@ rewiring	R IY0 W AY1 ER0 IH0 NG	R IY0 W AY1 R IH0 NG	#1289
 rheology	R IY0 AO1 L AH0 JH IY0	R IY0 AA1 L AH0 JH IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 rial	R AY1 AH0 L	R IY0 AA1 L	three-way: both sources agree on the segment
 ricotta	R IY0 K AA1 T AH0	R IH0 K AA1 T AH0	Latinate re- prefix reduces (gold+Moby)
+rightmire	R AY1 T M AY2 R	R AY1 T M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 robusta	R AO2 B UH1 S T AH0	R OW0 B AH1 S T AH0	wikipron+gold
 rohypnol	R OW2 HH AY1 P N AO2 L	R OW2 HH AY1 P N AA2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
+roommate	R UW1 M EY2 T	R UW1 M M EY2 T	degeminated across the compound boundary, cf. meanness/unnamed (gold + moby)
+roommates	R UW1 M EY2 T S	R UW1 M M EY2 T S	degeminated across the compound boundary, cf. meanness/unnamed (gold + moby)
 rouse	R AW1 S	R AW1 Z	intervocalic/voiced-context S→Z (gold)
 rubicon	R UW1 B IH0 K AO0 N	R UW1 B IH0 K AA0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 runoff	R AH1 N AO2 F	R AH1 N AA2 F	LOT/THOUGHT: align AA/AO to gold's consistent system
 saas	S AA1 S	S AE1 S	wikipron+gold
+safire	S AH0 F AY1 R	S AH0 F AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 saguaro	S AH0 G W AO1 R OW0	S AH0 G W AA1 R OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
 salsa	S AO1 L S AH0	S AA1 L S AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
 salzgitter	S AO1 L T S G IH2 T ER0	S AA1 L T S G IH2 T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1366,6 +1561,7 @@ schara	S K AE1 R AH0	S K EH1 R AH0	marry–merry merger
 schedule	S K EH1 JH UH0 L	S K EH1 JH UW2 L	frequency audit: gold+Moby agree
 schleswig	SH L EH1 S W IH0 G	SH L EH1 Z W IH0 G	intervocalic/voiced-context S→Z (gold)
 schmaltz	SH M AA1 L T S	SH M AO1 L T S	LOT/THOUGHT: align AA/AO to gold's consistent system
+scire	S AY1 R	S AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 scopolamine	S K AO1 P AH0 L AH0 M IY2 N	S K AA1 P AH0 L AH0 M IY2 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 seawater	S IY1 W AA2 T ER0	S IY1 W AO2 T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 seaworthy	S IY1 W AO2 R DH IY0	S IY1 W ER2 DH IY0	wikipron+gold
@@ -1375,13 +1571,23 @@ seismological	S AY2 Z M AH0 L AO1 JH AH0 K AH0 L	S AY2 Z M AH0 L AA1 JH AH0 K AH
 selene	S AH0 L IY1 N	S AH0 L IY1 N IY0	loanword final -e is pronounced (gold + en-GB)
 semi	S EH1 M IY0	S EH1 M AY2	frequency audit: gold+Moby agree
 serologist	S EH0 R AA1 L AH0 JH IH0 S T	S IH0 R AA1 L AH0 JH IH0 S T	unstressed EH0 (gold; dict self-inconsistent)
+settlemire	S EH1 T AH0 L M AY2 R	S EH1 T AH0 L M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+settlemyre	S EH1 T AH0 L M AY2 R	S EH1 T AH0 L M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 shanti	SH AE1 N T IY0	SH AA1 N T IY0	loanword PALM ɑː (gold; en-GB arbitrated)
 sharon	SH AE1 R AH0 N	SH EH1 R AH0 N	marry–merry merger
 sharrett	SH AE1 R IH0 T	SH EH1 R IH0 T	marry–merry merger
 sharrock	SH AE1 R AH0 K	SH EH1 R AH0 K	marry–merry merger
 sharron	SH AE1 R AH0 N	SH EH1 R AH0 N	marry–merry merger
 sharrow	SH AE1 R OW0	SH EH1 R OW0	marry–merry merger
+shire	SH AY1 R	SH AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+shiremanstown	SH AY1 R M AH0 N Z T AW2 N	SH AY1 ER0 M AH0 N Z T AW2 N	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+shires	SH AY1 R Z	SH AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+shropshire	SH R AA1 P SH AY2 R	SH R AA1 P SH ER0	county-name -shire reduces in this dict (berkshire, cheshire, hampshire, yorkshire); moby agrees. NOT the -ire rhyme
+sires	S AY1 R Z	S AY1 ER0 Z	outlier against its own singular sire
+sirius	S IH1 R IH2 AH0 S	S IH1 R IY0 AH0 S	gold + moby; family consistency
+skier	S K AY1 R	S K IY1 ER0	⟨ski⟩+⟨er⟩, not the -ire rhyme: gold skˈiəɹ (gold + moby)
 smog	S M AA1 G	S M AO1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
+smyre	S M AY1 R	S M AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 snog	S N AO1 G	S N AA1 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 snot	S N AO1 T	S N AA1 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 snotty	S N AO1 T IY2	S N AA1 T IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1392,10 +1598,13 @@ sodomize	S AO1 D AH0 M AY2 Z	S AA1 D AH0 M AY2 Z	LOT/THOUGHT: align AA/AO to gol
 soffit	S AO1 F IH0 T	S AA1 F IH0 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 soft	S AA1 F T	S AO1 F T	LOT/THOUGHT: align AA/AO to gold's consistent system
 soften	S AA1 F AH0 N	S AO1 F AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+solely	S OW1 AH0 L IY0	S OW1 L IY0	spurious schwa; takes wholly/coolly's DEgeminated L, not the sources' L L (dict convention)
 solemnly	S AO1 L AH0 M L IY0	S AA1 L AH0 M L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 solvency	S AO1 L V AH0 N S IY0	S AA1 L V AH0 N S IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+soma	S OW1 M AA0	S OW1 M AH0	gold + moby; family consistency
 sonogram	S AO1 N AH0 G R AE2 M	S AA1 N AH0 G R AE2 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 sophistry	S AO1 F IH0 S T R IY2	S AA1 F IH0 S T R IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
+sophomore	S AA1 F M AO2 R	S AA1 F AH0 M AO2 R	missing syllable (gold + moby)
 sophomoric	S AA2 F OW0 M AA1 R IH0 K	S AO2 F OW0 M AO1 R IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 soprano	S AH0 P R AA1 N OW0	S AH0 P R AE1 N OW0	TRAP not PALM (gold; common words only)
 sorbonne	S AO0 R B AA1 N	S AO0 R B AO1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1408,7 +1617,11 @@ spacewalk	S P EY1 S W AA2 K	S P EY1 S W AO2 K	LOT/THOUGHT: align AA/AO to gold's
 spasmodic	S P AE0 Z M AO1 D IH0 K	S P AE0 Z M AA1 D IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 spasmodically	S P AE0 Z M AO1 D IH0 K L IY0	S P AE0 Z M AA1 D IH0 K L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 spawn	S P AA1 N	S P AO1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+spire	S P AY1 R	S P AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+spires	S P AY1 R Z	S P AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 splenic	S P L EH1 N IH0 K	S P L IY1 N IH0 K	tense vowel (gold + en-GB)
+squire	S K W AY1 R	S K W AY1 ER0	outlier against its own plural squires
+squyres	S K W AY1 R Z	S K W AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 sri	SH R IY1	S R IY1	frequency audit: gold+Moby agree
 stanch	S T AE1 N CH	S T AA1 N CH	loanword PALM ɑː (gold; en-GB arbitrated)
 staphylococcus	S T AE2 F AH0 L AH0 K AO1 K AH0 S	S T AE2 F AH0 L AH0 K AA1 K AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1418,16 +1631,23 @@ starrett	S T AE1 R IH0 T	S T EH1 R IH0 T	marry–merry merger
 stasi	S T AA1 S IY0	S T AA1 Z IY0	intervocalic/voiced-context S→Z (gold)
 status	S T AE1 T AH0 S	S T EY1 T AH0 S	tense vowel (gold + en-GB)
 stereolab	S T EH1 IY0 OW0 L AE2 B	S T EH1 R IY0 OW0 L AE2 B	missing rhotic (spelled ⟨r⟩, no rhotic phone)
+steroid	S T ER0 OY1 D	S T EH1 R OY2 D	outlier against its own plural steroids (gold + moby)
+stires	S T AY1 R Z	S T AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 stollen	S T AA1 L AH0 N	S T AO1 L AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 stomp	S T AA1 M P	S T AO1 M P	LOT/THOUGHT: align AA/AO to gold's consistent system
 stomping	S T AA1 M P IH0 NG	S T AO1 M P IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
+stoudemire	S T UW1 D AH0 M AY2 R	S T UW1 D AH0 M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+stoudenmire	S T UW1 D AH0 N M AY2 R	S T UW1 D AH0 N M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 strasbourg	S T R AE1 S B AO2 R G	S T R AE1 S B AA2 R G	LOT/THOUGHT: align AA/AO to gold's consistent system
 strata	S T R AE1 T AH0	S T R EY1 T AH0	tense vowel (gold + en-GB)
 stratum	S T R AE1 T AH0 M	S T R EY1 T AH0 M	tense vowel (gold + en-GB)
 stratus	S T R AE1 T AH0 S	S T R EY1 T AH0 S	tense vowel (gold + en-GB)
 streptococcus	S T R EH2 P T AH0 K AO1 K AH0 S	S T R EH0 P T AH0 K AA1 K AH0 S	wikipron+gold
+substitutions	S AH2 B S T IH0 T Y UW1 SH AH0 N Z	S AH2 B S T IH0 T UW1 SH AH0 N Z	US yod-dropping; outlier against its own singular substitution
 suggest	S AH0 JH EH1 S T	S AH0 G JH EH1 S T	frequency audit: gold+Moby agree
+sunfire	S AH1 N F AY2 R	S AH1 N F AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 supercenters	S UW1 P ER0 S EH2 N T ER0 S	S UW1 P ER0 S EH2 N T ER0 Z	plural voicing after a voiced segment
+superman	S UW1 P ER0 M AH0 N	S UW1 P ER0 M AE2 N	proper-name compound keeps the full vowel (gold + moby)
 supremely	S UW0 P R IY1 M AH0 L IY0	S AH0 P R IY1 M L IY0	three-way: both sources agree on the segment
 surreal	S ER0 IY1 L	S ER0 IY1 AH0 L	three-way: both sources agree on the segment
 susa	S UW1 S AH0	S UW1 Z AH0	intervocalic/voiced-context S→Z (gold)
@@ -1435,22 +1655,31 @@ sverdlovsk	S V ER1 D L AA0 V S K	S V ER1 D L AO0 V S K	LOT/THOUGHT: align AA/AO 
 swanky	S W AA1 NG K IY0	S W AE1 NG K IY0	TRAP not PALM (gold; common words only)
 swashbuckling	S W AA1 SH B AH2 K L IH0 NG	S W AO1 SH B AH2 K L IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
 swaziland	S W AA1 Z IH0 L AH0 N D	S W AA1 Z IY0 L AE2 N D	wikipron+gold
+swire	S W AY1 R	S W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 synagogue	S IH1 N AH0 G AO2 G	S IH1 N AH0 G AA2 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 synonyms	S IH1 N AH0 N IH2 M S	S IH1 N AH0 N IH2 M Z	plural voicing after a voiced segment
 syntheses	S IH1 N TH AH0 S IY2 S	S IH1 N TH AH0 S IY2 Z	intervocalic/voiced-context S→Z (gold)
 systolic	S IH0 S T AO1 L IH0 K	S IH0 S T AA1 L IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
+tacoma	T AH0 K OW1 M AA0	T AH0 K OW1 M AH0	gold + moby; family consistency
 taj	T AA1 ZH	T AA1 JH	French -age/-ige ʒ~dʒ (gold + en-GB)
 talkin	T AA1 K AH0 N	T AO1 K AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+tanzania	T AE0 N Z EY1 N IY0 AH0	T AE2 N Z AH0 N IY1 AH0	whole family consistently wrong (gold + moby)
+tanzanian	T AE2 N Z EY1 N IY0 AH0 N	T AE2 N Z AH0 N IY1 AH0 N	whole family consistently wrong (gold + moby)
 taravella	T AE2 R AH0 V EH1 L AH0	T EH2 R AH0 V EH1 L AH0	marry–merry merger
 tarot	T AE2 R OW1	T EH2 R OW1	marry–merry merger
 tarots	T AE2 R OW1 Z	T EH2 R OW1 Z	marry–merry merger
 tawny	T AA1 N IY0	T AO1 N IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 taxol	T AE1 K S AA2 L	T AE1 K S AO2 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 taxonomy	T AE2 K S AO1 N AH0 M IY2	T AE2 K S AA1 N AH0 M IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
+teammate	T IY1 M EY2 T	T IY1 M M EY2 T	compound-seam geminate, cf. bookkeeper/misspell/teammates (gold + moby)
 teleological	T IY2 L IY0 AH0 L AO1 JH IH0 K AH0 L	T IY2 L IY0 AH0 L AA1 JH IH0 K AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 teleology	T IY1 L IY0 AO2 L AH0 JH IY2	T IY1 L IY0 AA2 L AH0 JH IY2	LOT/THOUGHT: align AA/AO to gold's consistent system
+telephony	T EH1 L AH0 F OW2 N IY0	T AH0 L EH1 F AH0 N IY0	stress mis-transferred from telephone (gold + moby)
 telescopic	T EH2 L AH0 S K AO1 P IH0 K	T EH2 L AH0 S K AA1 P IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 tellurium	T EH0 L UH1 R IY0 AH0 M	T AH0 L UH1 R IY0 AH0 M	unstressed EH0 (gold; dict self-inconsistent)
+temptation	T EH0 M T EY1 SH AH0 N	T EH0 M P T EY1 SH AH0 N	missing /p/, cf. tempt (gold + moby)
+temptations	T EH0 M T EY1 SH AH0 N Z	T EH0 M P T EY1 SH AH0 N Z	missing /p/, cf. tempt (gold + moby)
+terra	T EH1 R AA2	T EH1 R AH0	gold + moby; family consistency
 teutonic	T UW0 T AO1 N IH0 K	T UW0 T AA1 N IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 thaler	TH EY1 L ER0	T EY1 L ER0	three-way: both sources agree on the segment
 thanatology	TH AE0 N AH0 T AO1 L AH0 JH IY0	TH AE0 N AH0 T AA1 L AH0 JH IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1459,7 +1688,10 @@ tharrington	TH AE1 R IH0 NG T AH0 N	TH EH1 R IH0 NG T AH0 N	marry–merry merger
 themself	DH EH0 M S EH1 L F	DH AH0 M S EH1 L F	unstressed EH0 (gold; dict self-inconsistent)
 themselves	DH EH0 M S EH1 L V Z	DH AH0 M S EH1 L V Z	unstressed EH0 (gold; dict self-inconsistent)
 thereon	DH EH0 R AO1 N	DH EH0 R AA1 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+thirty	TH ER1 D IY0	TH ER1 T IY0	flap written as D; outlier against thirteen/forty (gold + moby)
 thorium	TH AA1 R IY0 AH0 M	TH AO1 R IY0 AH0 M	LOT/THOUGHT: align AA/AO to gold's consistent system
+tirelessly	T AY1 R L AH0 S L IY0	T AY1 ER0 L AH0 S L IY0	outlier against its own stem tireless
+tiremaker	T AY1 R M EY2 K ER0	T AY1 ER0 M EY2 K ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 tissue	T IH1 S Y UW2	T IH1 SH UW0	frequency audit: gold+Moby agree
 tobruk	T OW1 B R UH0 K	T AH0 B R UH1 K	wikipron+gold
 toluene	T AO1 L UW0 IY2 N	T AA1 L UW0 IY2 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1479,13 +1711,20 @@ transnational	T R AE0 N S N AE1 SH AH0 N AH0 L	T R AE0 N Z N AE1 SH AH0 N AH0 L	
 transpiring	T R AE0 N S P AY1 ER0 IH0 NG	T R AE0 N S P AY1 R IH0 NG	#1289
 treasons	T R IY1 Z AH0 N S	T R IY1 Z AH0 N Z	plural voicing after a voiced segment
 treetop	T R IY1 T AO2 P	T R IY1 T AA2 P	LOT/THOUGHT: align AA/AO to gold's consistent system
+triangulation	T R AY0 AE2 NG G Y UW0 L EY1 SH AH0 N	T R AY0 AE2 NG G Y AH0 L EY1 SH AH0 N	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 triceratops	T R AY2 S EH1 R AH0 T AO2 P S	T R AY2 S EH1 R AH0 T AA2 P S	LOT/THOUGHT: align AA/AO to gold's consistent system
 trieste	T R IY1 S T	T R IY0 EH1 S T	wikipron+gold
+truths	T R UW1 TH S	T R UW1 DH Z	segment/vowel defect (gold + moby; family consistency)
 tubers	T UW1 B ER0 S	T UW1 B ER0 Z	plural voicing after a voiced segment
 tuesday	T UW1 Z D IY0	T UW1 Z D EY2	weekday -day family (gold unanimous)
+tuition	T Y UW0 IH1 SH AH0 N	T UW0 IH1 SH AH0 N	yod in a US dict; outlier against intuition (gold + moby)
+tupelo	T Y UW1 P AH0 L OW2	T UW1 P AH0 L OW2	US yod-dropping (gold + moby)
+turnmire	T ER1 N M AY0 R	T ER1 N M AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 turnoff	T ER1 N AO2 F	T ER1 N AA2 F	LOT/THOUGHT: align AA/AO to gold's consistent system
+tutelage	T Y UW1 T IH0 L IH0 JH	T UW1 T AH0 L IH0 JH	US yod-dropping (gold + moby)
 twang	T W AA1 NG	T W AE1 NG	three-way: both sources agree on the segment
 twangy	T W AA1 N JH IY0	T W AE1 NG IY0	three-way: both sources agree on the segment
+tyre	T AY1 R	T AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 ulm	AH1 L M	UH1 L M	wikipron+gold
 unabom	Y UW1 N AH0 B AO2 M	Y UW1 N AH0 B AA2 M	family consistency (#1334 review)
 unabomb	Y UW1 N AH0 B AO2 M	Y UW1 N AH0 B AA2 M	family consistency (#1334 review)
@@ -1500,11 +1739,20 @@ ungodly	AH0 N G AO1 D L IY0	AH0 N G AA1 D L IY0	LOT/THOUGHT: align AA/AO to gold
 unicom	Y UW1 N IH0 K AO0 M	Y UW1 N IH0 K AA0 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 unprocessed	AH0 N P R AO1 S EH2 S T	AH0 N P R AA1 S EH2 S T	LOT/THOUGHT: align AA/AO to gold's consistent system
 unpromising	AH0 N P R AO1 M IH0 S IH0 NG	AH0 N P R AA1 M IH0 S IH0 NG	LOT/THOUGHT: align AA/AO to gold's consistent system
+unreal	AH0 N R IY1 L	AH2 N R IY1 AH0 L	gold + moby; family consistency
+unreasonable	AH0 N R IY1 Z N AH0 B AH0 L	AH2 N R IY1 Z AH0 N AH0 B AH0 L	missing syllable; outlier against its own base reasonable (gold + moby)
 unwanted	AH0 N W AO1 N T IH0 D	AH0 N W AA1 N T IH0 D	LOT/THOUGHT: align AA/AO to gold's consistent system
 unwashed	AH0 N W AA1 SH T	AH0 N W AO1 SH T	LOT/THOUGHT: align AA/AO to gold's consistent system
+uranium	Y ER0 EY1 N IY0 AH0 M	Y UH0 R EY1 N IY0 AH0 M	segment/vowel defect (gold + moby; family consistency)
+urinary	Y ER1 AH0 N EH2 R IY0	Y UH1 R AH0 N EH2 R IY0	segment/vowel defect (gold + moby; family consistency)
+urinate	Y ER1 AH0 N EY2 T	Y UH1 R AH0 N EY2 T	segment/vowel defect (gold + moby; family consistency)
+urine	Y ER1 AH0 N	Y UH1 R AH0 N	segment/vowel defect (gold + moby; family consistency)
 ustinov	UW1 S T IH0 N AA0 V	UW1 S T IH0 N AO0 V	LOT/THOUGHT: align AA/AO to gold's consistent system
+vaginal	V AH0 JH AY1 N AH0 L	V AE1 JH AH0 N AH0 L	gold + moby; family consistency
 valdosta	V AE2 L D AO1 S T AH0	V AE2 L D AA1 S T AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
 valium	V EY1 L IY0 AH0 M	V AE1 L IY0 AH0 M	wikipron+gold
+vampire	V AE1 M P AY0 R	V AE1 M P AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+vampires	V AE1 M P AY0 R Z	V AE1 M P AY0 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 vanblaricom	V AE2 N B L AE1 R IH0 K AH0 M	V AE2 N B L EH1 R IH0 K AH0 M	marry–merry merger
 vaudeville	V AA1 D V IH0 L	V AO1 D V IH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 vaudevillian	V AA0 D V IH1 L Y AH0 N	V AO0 D V IH1 L Y AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1512,15 +1760,21 @@ vegan	V EH1 G AH0 N	V IY1 G AH0 N	tense vowel (gold + en-GB)
 vehicle	V IY1 HH IH0 K AH0 L	V IY1 IH0 K AH0 L	frequency audit: gold+Moby agree
 vela	V EH1 L AH0	V IY1 L AH0	tense vowel (gold + en-GB)
 velociraptor	V AH0 L AO1 S AH0 R AE2 P T ER0	V AH0 L AA1 S AH0 R AE2 P T ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
+ventricular	V EH0 N T R IH1 K Y UW0 L ER0	V EH0 N T R IH1 K Y AH0 L ER0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
+vestibular	V EH2 S T IH1 B Y UW0 L ER0	V EH2 S T IH1 B Y AH0 L ER0	post-tonic -ular/-ulate reduction ʊ→ə (gold + moby; family consistency)
 vestment	V EH1 S T M EH0 N T	V EH1 S T M AH0 N T	unstressed EH0 (gold; dict self-inconsistent)
 vicomte	V IH0 K AA1 M T IY0	V IH0 K AO1 M T IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 vide	V AY1 D	V IY1 D IY0	loanword final -e is pronounced (gold + en-GB)
 videographer	V IH0 D IY0 AO1 G R AH0 F ER0	V IH0 D IY0 AA1 G R AH0 F ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
+vires	V AY1 R Z	V AY1 ER0 Z	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 virulence	V IH1 R AH0 L AH0 N S	V IH1 R Y AH0 L AH0 N S	family completion (gold)
 virulent	V IH1 R AH0 L AH0 N T	V IH1 R Y AH0 L AH0 N T	wikipron+gold
 vladivostok	V L AE2 D IH0 V AO1 S T AA0 K	V L AE2 D IH0 V AA1 S T AA0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 volunteerism	V AO2 L AH0 N T IH1 R IH2 Z AH0 M	V AA2 L AH0 N T IH1 R IH2 Z AH0 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 waldo	W AA1 L D OW0	W AO1 L D OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
+wallet	W AO1 L AH0 T	W AA1 L AH0 T	LOT/THOUGHT: ⟨wa⟩ is LOT here (gold + moby)
+wallets	W AO1 L AH0 T S	W AA1 L AH0 T S	LOT/THOUGHT: ⟨wa⟩ is LOT here (gold + moby)
+waltermire	W AO1 L T ER0 M AY0 R	W AO1 L T ER0 M AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 wank	W AA1 NG K	W AE1 NG K	TRAP not PALM (gold; common words only)
 wanker	W AA1 NG K ER0	W AE1 NG K ER0	TRAP not PALM (gold; common words only)
 wanton	W AO1 N T AH0 N	W AA1 N T AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1543,25 +1797,39 @@ wat	W AO1 T	W AA1 T	LOT/THOUGHT: align AA/AO to gold's consistent system
 watchdog	W AA1 CH D AO2 G	W AA1 CH D AA2 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 waterlog	W AO1 T ER0 L AA2 G	W AO1 T ER0 L AO2 G	LOT/THOUGHT: align AA/AO to gold's consistent system
 waterlogged	W AO1 T ER0 L AA2 G D	W AO1 T ER0 L AO2 G D	LOT/THOUGHT: align AA/AO to gold's consistent system
+waymire	W EY1 M AY2 R	W EY1 M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 wednesday	W EH1 N Z D IY0	W EH1 N Z D EY2	wikipron+gold
+welsh	W EH1 L CH	W EH1 L SH	gold + moby; family consistency
 wharry	W AE1 R IY0	W EH1 R IY0	marry–merry merger
 whenever	W EH0 N EH1 V ER0	W AH0 N EH1 V ER0	unstressed EH0 (gold; dict self-inconsistent)
 whimsy	W IH1 M S IY0	W IH1 M Z IY0	intervocalic/voiced-context S→Z (gold)
 whitewash	W AY1 T W AA2 SH	W AY1 T W AO2 SH	LOT/THOUGHT: align AA/AO to gold's consistent system
+whitmire	W IH1 T M AY2 R	W IH1 T M AY2 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+wickwire	V IH1 S K V AY0 R	W IH1 K W AY2 ER0	V for W as well as the -ire rhyme
 wilfredo	W IH2 L F EY1 D OW2	W IH2 L F R EY1 D OW2	missing rhotic (spelled ⟨r⟩, no rhotic phone)
 williamsport	W IH1 L Y AH0 M S P AO2 R T	W IH1 L Y AH0 M Z P AO2 R T	intervocalic/voiced-context S→Z (gold)
+wilshire	W IH1 L SH AY2 R	W IH1 L SH ER0	county-name -shire reduces in this dict (berkshire, cheshire, hampshire, yorkshire); moby agrees. NOT the -ire rhyme
+wiltshire	W IH1 L CH AY2 R	W IH1 L CH ER0	county-name -shire reduces in this dict (berkshire, cheshire, hampshire, yorkshire); moby agrees. NOT the -ire rhyme
 winos	W IY1 N OW0 S	W IY1 N OW0 Z	plural voicing after a voiced segment
+wireless	W AY1 R L IH0 S	W AY1 ER0 L IH0 S	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+wireline	W AY1 R L AY2 N	W AY1 ER0 L AY2 N	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+wireman	W AY1 R M AH0 N	W AY1 ER0 M AH0 N	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+wiretaps	W AY1 R T AE2 P S	W AY1 ER0 T AE2 P S	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
+withdrawn	W IH0 TH D R AO1 N	W IH0 DH D R AO1 N	voiced ⟨th⟩, outlier against withdraw (gold + moby)
+withdrew	W IH0 TH D R UW1	W IH0 DH D R UW1	voiced ⟨th⟩, outlier against withdraw (gold + moby)
 without	W IH0 TH AW1 T	W IH0 DH AW1 T	frequency audit: gold+Moby agree
 witwatersrand	W IH1 T W AO2 T ER0 S R AE0 N D	W IH1 T W AA2 T ER0 S R AE0 N D	LOT/THOUGHT: align AA/AO to gold's consistent system
 workaholic	W ER2 K AH0 HH AA1 L IH0 K	W ER2 K AH0 HH AO1 L IH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
 writhe	R IH1 TH	R AY1 DH	wikipron+gold
 writhed	R IH1 TH D	R AY1 DH D	family completion (gold)
 wyeth	W AY1 EH0 TH	W AY1 AH0 TH	unstressed EH0 (gold; dict self-inconsistent)
+wyre	W AY1 R	W AY1 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
 xanadu	Z AA1 N AH0 D UW2	Z AE1 N AH0 D UW2	TRAP not PALM (gold; common words only)
 yarmulkes	Y AA1 R M AH2 L K AH0 S	Y AA1 R M AH2 L K AH0 Z	plural voicing after a voiced segment
 yarosh	Y AE1 R AH0 SH	Y EH1 R AH0 SH	marry–merry merger
 yarrington	Y AE1 R IH0 NG T AH0 N	Y EH1 R IH0 NG T AH0 N	marry–merry merger
 yokel	Y OW1 K EH0 L	Y OW1 K AH0 L	unstressed EH0 (gold; dict self-inconsistent)
+youtube	Y UW1 T Y UW2 B	Y UW1 T UW2 B	US yod-dropping; outlier against its own element tube
 zaftig	Z AE1 F T IH0 G	Z AA1 F T IH0 G	loanword PALM ɑː (gold; en-GB arbitrated)
 zara	Z AE1 R AH0	Z EH1 R AH0	marry–merry merger
 zarah	Z AE1 R AH0	Z EH1 R AH0	marry–merry merger

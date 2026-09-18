@@ -293,7 +293,7 @@ describe("english normalization: abbreviations, eras, fractions, units", () => {
         expect(phonemize("20℃", "en")).toBe("twˈɛnti dᵻɡɹˈiːz sˈɛɫsiʲəs");
         expect(phonemize("20℉", "en")).toBe("twˈɛnti dᵻɡɹˈiːz fˈɛɹənhˌaᶦt");
         expect(phonemize("160 km/h", "en")).toBe("wˈʌn hˈʌndɹəd sˈɪksti kəlˈɑːmʌt̬ɚz pʰɝ ˈaᶷɚ"); // /h was "aitch"
-        expect(phonemize("30 m", "en")).toBe("θˈɝd̬i mˈiːt̬ɚz"); // was "thirty em"
+        expect(phonemize("30 m", "en")).toBe("θˈɝt̬i mˈiːt̬ɚz"); // was "thirty em"
         // Space-grouped thousands: the number token cannot span a space, so the thousand was lost.
         expect(phonemize("5 000 years", "en")).toBe("fˈaᶦv θˈaᶷzn̩d jˈɪɹz");
     });

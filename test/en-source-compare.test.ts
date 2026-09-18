@@ -75,6 +75,19 @@ describe("the source converters", () => {
         expect(modernise(["T", "Y", "UW1", "N"])).toEqual(["CH", "UW1", "N"]); // tune
     });
 
+    test("modernise folds Moby's two-symbol /@/r into ER", () => {
+        // ⚠ ocular: Moby writes the unstressed -ər as `/@/r`, which converts to AH0 R. Left unfolded, every
+        // word ending in -er/-or/-ar fell out of the audit and the whole -ular family was invisible.
+        expect(modernise(["AA1", "K", "Y", "AH0", "L", "AH0", "R"])).toEqual(["AA1", "K", "Y", "AH0", "L", "ER0"]);
+        expect(modernise(["P", "ER2", "M", "Y", "AH0", "T", "EY1", "SH", "AH0", "N"]))
+            .toEqual(["P", "ER2", "M", "Y", "AH0", "T", "EY1", "SH", "AH0", "N"]); // no R: untouched
+    });
+
+    test("modernise leaves a PREVOCALIC r alone", () => {
+        // `around` is ə-ɹaʊnd — that r is the next syllable's ONSET, and folding it would give ɚ-aʊnd.
+        expect(modernise(["AH0", "R", "AW1", "N", "D"])).toEqual(["AH0", "R", "AW1", "N", "D"]);
+    });
+
     // ⚠ AND IT MUST NOT TOUCH A REAL YOD after a labial, which GenAm keeps.
     test("modernise leaves a labial yod alone", () => {
         expect(modernise(["P", "Y", "UW1", "M", "AH0"])).toEqual(["P", "Y", "UW1", "M", "AH0"]); // puma
