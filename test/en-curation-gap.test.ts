@@ -29,8 +29,6 @@ const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "language
  * the MORPH path. Saying so sent the next maintainer at the expensive fix for the cheap problem.
  */
 const KNOWN_GAPS = new Map<string, string>([
-    ["collaborative", "n-gram (source N): predicts the upstream EY2; -ative is a class morphology cannot reach"],
-    ["research", "n-gram (source N): predicts upstream R IY0 S ER1 CH; the #1280 stress shift is lexical"],
     // ⚠ NOT AN N-GRAM ROW. `was` decodes through morphDecode on the two-letter dict stem `wa` (W AA1) plus
     // an `-s` allomorph — so a stem-side edit, or a floor on stem length, would close it without touching
     // the model. Left open deliberately: `wa` is a real dict row and raising the minimum stem length reaches
@@ -100,47 +98,39 @@ const KNOWN_GAPS = new Map<string, string>([
  * There is no phonological discriminator: it tracks how far the prefix has assimilated, which is lexis. A
  * converter rule would be wrong 43% of the time, so the dictionary is the right mechanism.
  *
- * ⚠ THE REMEDY IS NAMED AND IT IS NOT "ADD TO THIS LIST". Train the model on the CURATED dict rather than on
- * upstream CMUdict — `en_g2p_ngram.ts` reads $CMUDICT directly, so applying g2p-curated.tsv to its input
+ * ⚠ THE REMEDY WAS TAKEN, AND THIS IS WHAT IT BOUGHT (#1341). The model now trains on the CURATED dict —
+ * `en_g2p_ngram.ts` is given a CMUdict-format re-emission of `g2p-dict.tsv` instead of upstream — and the
+ * set collapsed from 346 to 115, with 213 rows closing. Held-out exact went 48.90% → 49.43%, the whole gain
+ * in source N, which is the correct signature: C and M decode through the DICTIONARY, so only the n-gram
+ * tier can move when only the model changes.
+ * ⚠ AND THE TWO NAMED n-gram GAPS BELOW WENT WITH IT — `collaborative` ("predicts the upstream EY2; -ative
+ * is a class morphology cannot reach") and `research` ("the #1280 stress shift is lexical") are gone from
+ * KNOWN_GAPS entirely. They were the rows the remedy was named for.
+ * ⚠ WHAT DID NOT MOVE IS THE POINT: the M and C residue held at exactly 22 and 21. Those are morph and
+ * compound-seam gaps — `truths`' /θ/→/ðz/ allomorph, the `roommate` seam — and no retrain can reach them,
+ * because they are not the model's answer. A future collapse of THIS set means the same remedy again;
+ * a collapse of those means something else was fixed.
+ *
+ * The original note, kept because the reasoning is still why the set exists: train the model on the CURATED
+ * dict rather than on upstream CMUdict — `en_g2p_ngram.ts` reads $CMUDICT directly, so applying g2p-curated.tsv to its input
  * before the EM alignment would close this class outright, for these 14 and for every future correction.
  * That is a model regeneration with fleet-wide OOV consequences (held-out accuracy, the parity goldens and
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
-    "admire", "allelic", "appreciable", "ara", "arab", "arable", "arenson", "arrant", "arrick", "arrow", "atman",
-    "audible", "awe", "babka", "baile", "baranek", "barratt", "barrel", "barrett", "barrie", "barrineau", "barris",
-    "barrowman", "barry", "bellini", "benne", "bes", "beseech", "blog", "bobble", "boche", "boff", "bog", "bridie",
-    "calabria", "caliph", "cana", "carignan", "carrel", "carrigan", "carrigg", "carris", "carriveau", "carry",
-    "casual", "cause", "causeway", "chomp", "clarisse", "clarridge", "clarrisse", "coarticulate", "coauthor",
-    "conger", "conversely", "convex", "cost", "cruelty", "curry", "cutoff", "cyclist", "dacron", "dagenham", "dal",
-    "darin", "darrin", "debrief", "denomination", "denominational", "der", "discography", "discombobulate",
-    "dogma", "drachma", "dramatize", "dubrovnik", "duce", "dulce", "dwire", "eamon", "eh", "embargo", "embark",
-    "embattle", "embitter", "embrace", "embroidery", "employ", "enable", "encase", "enchant", "encode",
-    "encompass", "encourage", "encrypt", "encumber", "endorse", "endow", "enforce", "enhance", "enjoyment",
-    "enliven", "enmesh", "enrage", "enrapture", "enrich", "enroll", "enshrine", "ensure", "entitle", "entreaty",
-    "envisage", "envision", "escudo", "esse", "evolve", "excoriate", "exorcism", "expire", "extort", "extortion",
-    "extortionate", "extortionist", "extraction", "extrapolate", "extravagance", "extravagant", "extreme",
-    "extremist", "farabee", "faraday", "farold", "favela", "felonious", "fide", "fie", "finland", "fireman",
-    "foggy", "forensic", "foster", "frog", "gala", "galloway", "garrahan", "garraway", "garrels", "garrett",
-    "garrigan", "garriott", "garris", "garritt", "garrott", "garroway", "garry", "genotype", "golf", "graben",
-    "grana", "granum", "guire", "hadrian", "hamm", "harral", "harralson", "harrel", "harrill", "harring",
-    "harriott", "harrisburgh", "harrity", "hebron", "heifer", "hematite", "hog", "homeopathic", "homs", "hoss",
-    "hulme", "hypertrophy", "hyre", "ideal", "idiopathic", "indonesia", "insular", "jarratt", "joseph", "kana",
-    "kanji", "karrick", "karriker", "kersey", "kinda", "kingsport", "klarich", "knockoff", "lachlan", "larimer",
-    "larison", "larrabee", "loge", "loggia", "lorain", "lough", "marold", "marolf", "marolt", "masochist",
-    "mccarrell", "mccarrick", "mccarroll", "mccarron", "mccarry", "mcclaran", "mcgarity", "mckarrick", "mende",
-    "mezzo", "minke", "monarchy", "mulligatawny", "myre", "necrologist", "necrology", "nerine", "obscene",
-    "ocarroll", "olde", "on", "onset", "parrett", "parriott", "pedicure", "permutate", "pharris", "polka", "poor",
-    "pravda", "pretzel", "privilege", "quahog", "quire", "rahway", "raj", "rarick", "realization", "rebuke",
-    "relation", "relational", "remission", "remove", "remunerative", "repression", "repressive", "repulsive",
-    "restrict", "restriction", "restrictive", "retention", "retract", "retraction", "reunite", "revision",
-    "revisionist", "revolve", "riel", "rouse", "runoff", "saas", "salsa", "sandhog", "sauternes", "scarry",
-    "schara", "schedule", "selene", "semi", "serologist", "sharrett", "sharrock", "sharron", "sharrow", "shire",
-    "smyre", "soave", "sodom", "sodomize", "spawn", "splenic", "stanch", "stasi", "status", "stipend", "stomp",
-    "strata", "stratus", "suggestive", "swanky", "synagogue", "tawny", "taxol", "tharrington", "thyme", "turnoff",
-    "twangy", "tyre", "ulm", "unencumbered", "unenforceable", "unreal", "unwashed", "uranium", "urea", "urine",
-    "urology", "vegan", "vela", "virulence", "virulent", "wank", "wash", "washy", "wat", "watchdog", "waymire",
-    "williamsport", "wireman", "writhe", "wuhan", "wyre", "zaftig", "zara"
+    "abba", "acuff", "atman", "babka", "baile", "bellini", "benne", "bes", "boche", "bog", "bridie", "calabria",
+    "cana", "casual", "chomp", "coauthor", "conger", "conversely", "convex", "cost", "cruelty", "cutoff", "dacron",
+    "dagenham", "dal", "drachma", "duce", "dulce", "eamon", "eh", "embargo", "embark", "embrace", "embroidery",
+    "encode", "encompass", "endorse", "endow", "enjoyment", "enliven", "enmesh", "envisage", "envision", "escudo",
+    "esse", "evolve", "excoriate", "extort", "extortion", "extortionate", "extortionist", "fie", "finland",
+    "forensic", "foster", "frog", "gala", "galloway", "genotype", "golf", "graben", "grana", "granum", "hadrian",
+    "hamm", "harring", "heifer", "hog", "homs", "hulme", "hypertrophy", "ideal", "insular", "joseph", "kana",
+    "kanji", "kersey", "kinda", "kingsport", "knockoff", "lachlan", "lough", "masochist", "mende", "mezzo",
+    "minke", "monarchy", "mulligatawny", "myre", "nerine", "olde", "on", "onset", "pedicure", "poor", "pravda",
+    "quahog", "rahway", "repression", "repressive", "repulsive", "retention", "reunite", "revolve", "riel",
+    "runoff", "sandhog", "sauternes", "schedule", "selene", "semi", "smyre", "soave", "sodom", "sodomize",
+    "soffit", "spawn", "splenic", "stanch", "stasi", "stomp", "strata", "stratus", "suggestive", "swanky", "thyme",
+    "turnoff", "ulm", "unencumbered", "unreal", "vela", "wank", "wat", "watchdog", "williamsport", "zaftig"
 ]);
 
 function dict(path: string): Map<string, string[]> {

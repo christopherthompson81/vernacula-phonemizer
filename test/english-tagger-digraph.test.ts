@@ -10,14 +10,15 @@
  * adjacent identical vowel pair and 89 of them are `ER0 ER0` — the `-erer` agentive, where the stem's /ər/
  * meets the suffix's /ər/. Collapsing there DELETES A SYLLABLE and turns `acquirer` into `acquire`.
  *
- * ⚠ `tools/english/en_g2p_ngram.ts` HAS THE OPPOSITE BUG and it is NOT fixed here: its own copy of
- * collapseGeminates has no vowel exemption, and its comment claims the collapse is "Lossless vs CMUdict". It
- * is not — it changes 186 rows, and the 95 vowel ones are this same `-erer` class. The trainer and the shipped
- * engine therefore disagree about post-processing, which means the model's held-out numbers were measured
- * against a chain that does not ship. Closing that means retraining, so it is recorded rather than patched.
+ * ⚠ `tools/english/en_g2p_ngram.ts` HAD THE OPPOSITE BUG AND IT IS FIXED NOW (#1341, the retrain this was
+ * waiting for): its own copy of collapseGeminates had no vowel exemption while claiming to be "Lossless vs
+ * CMUdict". It changed 186 rows, the 95 vowel ones being this same `-erer` class. ⚠ THE EMITTED MODEL WAS
+ * NEVER AFFECTED — that collapse runs in the tool's SCORING path, not over the EM-aligned tables it ships —
+ * so what it skewed was the tool's own held-out numbers, measured against a chain that does not ship.
  */
 import { describe, expect, test } from "vitest";
 import { phonemizeEnNeural } from "../src/languages/english/englishNeural.ts";
+import { createEnglishTagger } from "../src/languages/english/englishTagger.ts";
 import { collapseGeminates } from "../src/languages/english/englishG2p.ts";
 import { MANIFEST } from "../src/languages/english/manifest.ts";
 
@@ -33,10 +34,23 @@ describe("the OOV tagger's vowel-digraph guard", () => {
         }
     });
 
-    // ⚠ THE STRONGER STRESS SURVIVES. The digraph is ONE syllable and the model may mark either of its letters;
-    // dropping the second copy blindly loses `Yenisei`'s primary and leaves the tonic on the wrong syllable.
+    // ⚠ THE STRONGER STRESS SURVIVES. The digraph is ONE syllable and the model may mark either of its
+    // letters; dropping the second copy blindly loses the primary and leaves the tonic on the wrong syllable.
+    //
+    // ⚠ THIS USED TO BE `Yenisei`, PINNED THROUGH phonemizeEnNeural, AND IT STOPPED EXERCISING THE GUARD at
+    // the #1341 retrain: the new weights emit `eᶦ` + `iː` for its ⟨ei⟩ — two DIFFERENT phones — so the guard,
+    // which collapses a REPEATED one, never fires and the word is no longer evidence of anything here.
+    // ⚠ AND THE GUARD IS NOW NEARLY DEAD, WHICH IS WORTH KNOWING RATHER THAN HIDING. Swept over the 4,862
+    // dict words containing adjacent vowel LETTERS, with the guard on and off: it changes TWO of them. The
+    // retrained tagger simply learned not to double. `hiaa` is one of the two and is the stronger-mark case
+    // exactly — ˌeᶦt͡ʃˌaᶦˌeᶦˈeᶦ collapses to ˌeᶦt͡ʃˌaᶦˈeᶦ, keeping the PRIMARY — so it is pinned here in
+    // Yenisei's place. It is a dict word, so it is asked of the TAGGER directly; through the full path the
+    // lexicon would answer and the guard would never run.
     test("the digraph keeps the stronger of the two marks", async () => {
-        expect(await phonemizeEnNeural("Yenisei")).toBe("jˌɛnɪsˈeᶦ");
+        const tagger = await createEnglishTagger();
+        expect(tagger, "no tagger: onnxruntime or the model is unavailable").toBeDefined();
+        expect(await tagger!.tag("hiaa")).toBe("ˌeᶦt͡ʃˌaᶦˈeᶦ");
+        expect(await tagger!.tag("fujii")).toBe("fuːd͡ʒˈiː");   // the other live case: iː + i → iː
     });
 
     // ⚠ THE PROTECTED CLASS. These are dictionary rows, so they do not pass through the tagger at all — but they

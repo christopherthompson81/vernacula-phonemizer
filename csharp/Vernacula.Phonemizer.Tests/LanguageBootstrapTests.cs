@@ -128,7 +128,9 @@ public class LanguageBootstrapTests
     // LOT–THOUGHT split and `washington` moved AA1 → AO1. Incidental to what this pins, which is that an
     // ASCII-Latin foreign name is NOT read as Min Nan syllables.
     [InlineData("nan", "Washington", "w\u02c8\u0254\u02d0\u0283\u026a\u014bt\u0259n")]
-    [InlineData("nan", "Ukraina-g\u00ed", "\u028ck\u0279\u02c8e\u1da6n\u0259 \u0261i\u02e5\u02e9")]
+    // ⚠ juːkɹ- since the #1341 tagger retrain, and it is the better reading (Ukraine's /juː/ onset). The
+    // English half is an OOV GUESS and has moved before; what this pins is the SPLIT, which is unaffected.
+    [InlineData("nan", "Ukraina-g\u00ed", "j\u0075\u02d0k\u0279\u02c8e\u1da6n\u0259 \u0261i\u02e5\u02e9")]
     [InlineData("nan", "chit-\u00ea l\u00e2ng", "t\u0361\u0255it\u031a\u02e5 e\u02e8\u02e6 la\u014b\u02e8\u02e6")]
     // Saraiki's defining shapes: the four implosives plus the voiced aspirate the Punjabi sibling turns into
     // tone (skr keeps it as a segment), the ZWJ/ZWNJ that used to hide a percentage from the symbol tier, the
@@ -312,8 +314,19 @@ public class LanguageBootstrapTests
         // and no golden's FIRST row carries a Latin OOV word — 0 of 23,496 rows moved when this was fixed.
         // Found by a one-line differential against Node: `ኣብ Wolaytta ዝብል` read *wˈʌleᶦt̬ˌeᶦ* (the n-gram)
         // against Node's *woᶷlˈeᶦt̬ə* (the BiLSTM).
+        // ⚠ THE WORD MOVED FROM `Wolaytta` TO `Maandag` AT THE #1341 RETRAIN, AND THE REASON IS THE POINT OF
+        // THE TEST. This asserts that the ASYNC path used the BiLSTM rather than the n-gram, so it needs a
+        // word the two tiers READ DIFFERENTLY. After the retrain they both learn from the same corrected
+        // dictionary and agree far more often — on `Wolaytta` they now agree exactly (wˈoᶷɫtə either way),
+        // which would have left this asserting nothing while still passing. Swept 400 OOV tokens from the
+        // goldens: 6 still discriminate. `Maandag` is one, and the gap is unmistakable.
         Foreign.ClearForeignOov();
-        Assert.Equal("ʔab woᶷlˈeᶦt̬ə zɨbl", await Phonemizer.PhonemizeAsync("ኣብ Wolaytta ዝብል", "ti"));
+        Assert.Equal("ʔab mˈændæɡ zɨbl", await Phonemizer.PhonemizeAsync("ኣብ Maandag ዝብል", "ti"));
+        // …and the n-gram reading it must NOT be. ⚠ THE CLEAR IS REQUIRED: the foreign-OOV memo is
+        // PROCESS-WIDE, so without it this reads back what the async call above just warmed and passes
+        // for the wrong reason.
+        Foreign.ClearForeignOov();
+        Assert.Equal("ʔab mˈɑːndəɡ zɨbl", Phonemizer.Phonemize("ኣብ Maandag ዝብል", "ti"));
     }
 
     [Fact]

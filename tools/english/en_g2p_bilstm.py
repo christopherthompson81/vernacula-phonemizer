@@ -116,13 +116,36 @@ def main():
         full.eval().cpu()
         SRC = os.path.join(HERE, "..", "..", "data", "languages", "english")
         dummy = torch.tensor([[1, 2, 3, 4]])
-        torch.onnx.export(full, dummy, os.path.join(SRC, "en-g2p-tagger.onnx"),
+        # ⚠ THE RUNTIME LOADS `.int8.onnx`, NOT `.onnx` — englishTagger.ts reads `${basename}.int8.onnx`. This
+        # block used to export fp32 under the bare name and stop, so a production run wrote a ~9MB file the
+        # engine never opens while the shipped int8 stayed untouched: the exact failure
+        # tools/perso-arabic/export_onnx.py records as "fr/en exporting fp32 while the int8 ships" (Run 43).
+        # ⚠ AND IT WAS WORSE THAN A NO-OP, because meta.json IS read: the run left a NEW vocab beside the OLD
+        # weights, which is a silently mismatched pair rather than a harmless orphan. The quantise now happens
+        # here, and the meta is written next to the file it actually describes.
+        # ⚠ `dynamo=False` IS LOAD-BEARING, per the bn/sd exporters: the dynamo path specialises the sequence
+        # length to the dummy's and breaks variable-length inference, which is every real word.
+        fp32 = "/tmp/en-g2p-tagger.fp32.onnx"
+        torch.onnx.export(full, dummy, fp32,
                           input_names=["chars"], output_names=["logits"],
-                          dynamic_axes={"chars": {0: "batch", 1: "len"}, "logits": {0: "batch", 1: "len"}}, opset_version=17)
+                          dynamic_axes={"chars": {0: "batch", 1: "len"}, "logits": {0: "batch", 1: "len"}},
+                          opset_version=17, dynamo=False)
         meta = {"src": chars, "tags": {str(i): itag[i] for i in range(len(tags))},
                 "charTags": {str(ci): sorted(ti) for ci, ti in char_tags.items()}}
         json.dump(meta, open(os.path.join(SRC, "en-g2p-tagger.meta.json"), "w", encoding="utf-8"), ensure_ascii=False)
-        print(f"[production] exported → {SRC}/en-g2p-tagger.onnx + .meta.json ({len(chars)} chars, {len(tags)} tags)", flush=True)
+        from onnxruntime.quantization import quantize_dynamic, QuantType
+        int8 = os.path.join(SRC, "en-g2p-tagger.int8.onnx")
+        quantize_dynamic(fp32, int8, weight_type=QuantType.QInt8)
+        os.remove(fp32)  # keep only the shipped int8 graph
+        # sanity: the shipped graph must load and answer, or the export is not done
+        import onnxruntime as ort
+        import numpy as np
+        sess = ort.InferenceSession(int8)
+        probe = np.array([[chars.get(c, 1) for c in "phonemizer"]], dtype=np.int64)
+        out = sess.run(["logits"], {"chars": probe})[0]
+        assert out.shape[1] == probe.shape[1], f"int8 graph is length-specialised: {out.shape} for {probe.shape}"
+        print(f"[production] exported → {int8} ({os.path.getsize(int8)//1024}KB) + .meta.json "
+              f"({len(chars)} chars, {len(tags)} tags)", flush=True)
 
 
 if __name__ == "__main__":

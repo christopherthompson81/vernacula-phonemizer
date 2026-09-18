@@ -474,10 +474,19 @@ function morphDecode(w: string): string[] | null {
 
 const COMP = process.argv.includes("--comp");
 // Collapse adjacent identical phones — CMUdict has no geminates, so a doubled phone is always spurious
-// (bus+sin seam → bʌssɪn → bʌsɪn; any compound-seam or n-gram accidental double). Lossless vs CMUdict.
-function collapseGeminates(ph: string[]): string[] {
+// (bus+sin seam → bʌssɪn → bʌsɪn; any compound-seam or n-gram accidental double).
+// ⚠ VOWELS ARE EXEMPT, AND THEY WERE NOT — this copy had no exemption while the SHIPPED engine's
+// (englishG2p.ts) does, so the two disagreed about post-processing and this tool's held-out numbers were
+// measured against a chain that does not ship. The comment here even claimed the collapse was "Lossless vs
+// CMUdict"; it changed 186 rows, 95 of them an adjacent identical VOWEL pair, and 89 of those are the
+// `-erer` agentive (`acquirer`, where the stem's /ər/ meets the suffix's /ər/) — collapsing there DELETES A
+// SYLLABLE and turns `acquirer` into `acquire`. Recorded in test/english-tagger-digraph.test.ts as needing
+// a retrain to close; closed at #1341, which is that retrain.
+// ⚠ THE EMITTED MODEL WAS NEVER AFFECTED: this runs in `decompose`, which is the SCORING path. The model is
+// built from the EM-aligned n-gram tables. So this changes what the tool REPORTS, not what it ships.
+function collapseGeminates(ph: string[], vowels: ReadonlySet<string>): string[] {
     const out: string[] = [];
-    for (const p of ph) if (out[out.length - 1] !== p) out.push(p);
+    for (const p of ph) if (out[out.length - 1] !== p || vowels.has(p.replace(/[0-2]$/u, ""))) out.push(p);
     return out;
 }
 function enforceSinglePrimary(ph: string[]): string[] {
@@ -489,7 +498,7 @@ function enforceSinglePrimary(ph: string[]): string[] {
         return p;
     });
 }
-const clean = (ph: string[]): string[] => enforceSinglePrimary(collapseGeminates(ph));
+const clean = (ph: string[]): string[] => enforceSinglePrimary(collapseGeminates(ph, MORPH_VOWEL));
 // Unified OOV decomposition: try COMPOUND split (dict pieces) first, then suffix MORPHOLOGY, then the
 // n-gram G2P. Returns [phones, source-tag].
 function decompose(w: string): [string[], string] {
@@ -529,8 +538,9 @@ if (argIdx("--emit") >= 0) {
     // `croydon` was K R AA1 OY2 D AA0 N because `d:D` after `o:AA1 y:OY2` was a stored continuation. `--topk N`
     // restores the pruning for a size experiment; 0 means all.
     const topK = argIdx("--topk") >= 0 ? Number(process.argv[argIdx("--topk") + 1]) : 0;
-    // Default output is the English engine's own directory — "read from an external data root, write into
-    // src/", the convention tools/README states.
+    // Default output is the English engine's own data directory. (tools/README used to state the convention
+    // as "write into src/"; that stopped being true at #876 and the line is corrected there now — see
+    // test/tool-data-paths.test.ts, which fails on a tool that names a src/languages data path.)
     const dir =
         process.argv[argIdx("--emit") + 1] && !process.argv[argIdx("--emit") + 1]!.startsWith("--")
             ? process.argv[argIdx("--emit") + 1]!

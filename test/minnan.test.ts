@@ -289,7 +289,10 @@ describe("Min Nan: a foreign name is not a Min Nan word (#1048)", () => {
         // read `Fontaine-la-Soret` as English + Min Nan + English. The discriminator, measured over the
         // golden's 26 mixed runs: all 5 real native morphemes carry a POJ TONE DIACRITIC and none of the 20
         // particles do.
-        expect(say("Ukraina-gí")).toBe("ʌkɹˈeᶦnə ɡi˥˩"); // split: English + Min Nan (n-gram OOV; *ˈuːkɹæˌiːnə* before #1260)
+        // ⚠ juːkɹ-, not ʌkɹ-, since the #1341 tagger retrain — and it is the better reading (Ukraine's /juː/
+        // onset). The English half is an OOV GUESS and has moved twice now (*ˈuːkɹæˌiːnə* before #1260);
+        // what this line pins is the SPLIT, which is unaffected.
+        expect(say("Ukraina-gí")).toBe("juːkɹˈeᶦnə ɡi˥˩"); // split: English + Min Nan
         expect(say("Italia-bûn")).toBe("itʰˈæliʲə bun˨˦");
         expect(say("Fontaine-la-Soret")).not.toMatch(/[˥˦˧˨˩]/u); // wholly French, `la` included
         expect(say("Kahriz-e")).not.toMatch(/[˥˦˧˨˩]/u); // the Persian ezafe
