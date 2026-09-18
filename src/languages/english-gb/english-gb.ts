@@ -114,6 +114,21 @@ export interface LexSets {
     yod: Set<string>; // Cuː → Cjuː
     palm: Set<string>; // keep [ɑː] against the LOT rule
     lotr: Set<string>; // ɑːɹ → ɒɹ before a vowel (sorry, borrow — LOT before intervocalic r; cf. starry which keeps ɑː)
+    /**
+     * ɛɹ → æɹ before a vowel: the marry–merry merger, UNDONE for RP.
+     *
+     * ⚠ THIS SET EXISTS BECAUSE THE PARENT MERGED AND BRITISH DID NOT. GenAm (and Canadian) has
+     * marry = merry = Mary; SSBE keeps `marry` /ˈmæri/ apart from `merry` /ˈmɛri/. The parent's dictionary
+     * was INCOHERENT about it — `arrogate` æ beside `arrogance` ɛ, `arrow` beside `arrowroot`, 208 rows one
+     * way and 147 the other in the same environment — and was made consistently merged against misaki gold
+     * (66 of 66, no counterexamples). That change would otherwise cost this accent ~50 referee rows, so the
+     * mapping back lives here, exactly as `lotr` carries `sorry` and `bath` carries `dramatize`.
+     *
+     * ⚠ IT IS A WORD LIST AND NOT A RULE, deliberately: a blanket ɛɹ→æɹ would wrongly convert the words that
+     * are GENUINELY ɛ in both varieties — `merry`, `very`, `ferry`, `error`, `herald`, `America`. Only words
+     * the parent moved belong here.
+     */
+    marry: Set<string>;
 }
 const loadSet = (file: string): Set<string> =>
     new Set([...loadTsvMap(import.meta.url, file, (v) => v, { optional: true }).keys()]);
@@ -125,6 +140,7 @@ const sets = (): LexSets =>
         yod: loadSet("en-gb-yod.tsv"),
         palm: loadSet("en-gb-palm.tsv"),
         lotr: loadSet("en-gb-lotr.tsv"),
+        marry: loadSet("en-gb-marry.tsv"),
     });
 
 /** GenAm citation IPA → SSBE. `lex` (present on the shipped path) supplies the lexical-set membership for `word`. */
@@ -178,6 +194,11 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // FIRST-occurrence only (no /g) — mirrors the set builder, which validated a first-occurrence edit against
         // the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not …mˌɑːθ); a global
         // replace would wrongly convert it. Words whose diagnostic vowel is NOT first never entered the set.
+        // ⚠ marry–merry RUNS FIRST, BEFORE BATH, and the order is load-bearing. Four words are in BOTH sets
+        // (`barry`, `clara`, `dara`, `scarry`): they were `æ` in the parent, BATH lifted them to `ɑː`, and the
+        // merger then made them `ɛ` — which BATH cannot see, so they came out `æ` and RP lost `klˈɑːɹə`.
+        // Running marry first chains ɛ → æ → ɑː and both sets get what they are for.
+        if (lex.marry.has(w)) s = s.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ");
         if (lex.bath.has(w)) s = s.replace(/æ/u, "ɑː"); // BATH
         if (lex.cloth.has(w)) s = s.replace(/ɔː/u, "ɒ"); // CLOTH
         if (lex.yod.has(w)) s = s.replace(/([tdnszθl])(ʰ?)([ˈˌ]?)uː/u, "$1$2j$3uː"); // yod-retention (glide after any aspiration, before the stressed vowel)
