@@ -92,6 +92,19 @@ const dict = new Set<string>();
 for (const l of readFileSync(join(REPO, "data/languages/english/g2p-dict.tsv"), "utf8").split("\n"))
     if (l.includes("\t") && !l.startsWith("#")) dict.add(l.split("\t")[0]!.toLowerCase());
 
+/**
+ * ⚠ EVERY IMPORTED WORD IS DROPPED FROM BOTH CORPORA, and this is the line that keeps the referee a
+ * referee. `tools/english/en_import_moby.mts` adds Moby headwords to the dictionary where gold concurs;
+ * scoring ourselves against Moby on a word whose reading we TOOK FROM MOBY is a mirror, and it would
+ * read as a free jump in the lexicon score. Without this the import would have moved 16,393 guaranteed
+ * matches out of the OOV file and into the lexicon file.
+ */
+const imported = new Set<string>();
+try {
+    for (const l of readFileSync(join(REPO, "data/languages/english/moby-import.tsv"), "utf8").split("\n"))
+        if (l.includes("\t") && !l.startsWith("#")) imported.add(l.split("\t")[0]!.toLowerCase());
+} catch { /* no import layer yet — every Moby headword is then fair game */ }
+
 const lex: string[] = [], oov: string[] = [];
 let rows = 0, declined = 0, unmapped = 0;
 const seen = new Set<string>();
@@ -102,7 +115,7 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const w = line.slice(0, sp).toLowerCase();
     // ⚠ ONE ROW PER HEADWORD. Moby lists variants as separate lines; the eval credits ANY tab-separated
     // reading, but a duplicate KEY would be two rows scoring the same word twice. First reading wins.
-    if (seen.has(w)) continue;
+    if (seen.has(w) || imported.has(w)) continue;
     if (!/^[a-z]{2,20}$/u.test(w)) continue;          // no multi-word, no digits, no punctuation headwords
     const a = mobyToArpabet(line.slice(sp + 1));
     if (!a) { declined++; continue; }                  // multi-word body / Moby's French sub-scheme
@@ -121,6 +134,6 @@ const header = (what: string, n: number): string =>
 const dir = join(REPO, "tools/referee-eval/referees");
 writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary carries", lex.length) + lex.join("\n") + "\n");
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
-console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}`);
+console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, excluded-as-imported ${imported.size}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);
 console.log(`  en.moby-oov.tsv      ${oov.length}`);

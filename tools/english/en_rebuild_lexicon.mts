@@ -28,6 +28,8 @@ import { MANIFEST } from "../../src/languages/english/manifest.ts";
 const DATA = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data", "languages", "english");
 const LEXICON = join(DATA, "accent-lexicon.tsv");
 const write = process.argv.includes("--write");
+// ⚠ OPT-IN: a bare rebuild must stay byte-stable, so adding rows is never implicit.
+const addMissing = process.argv.includes("--add-missing");
 const showDiff = process.argv.includes("--diff");
 
 // ⚠ THE SAME TABLE THE ENGINE LOADS. Rendering the flat lexicon without it would bake plain schwas
@@ -66,6 +68,33 @@ for (const line of readFileSync(LEXICON, "utf8").split("\n")) {
     if (rebuilt === ipa) unchanged++;
     else { regenerated++; changes.push(`${word}\t${ipa}\t→\t${rebuilt}`); }
     out.push(`${word}\t${fields[1]}\t${rebuilt}`);
+}
+
+/**
+ * ⚠ A DICT WORD ABSENT FROM THE LEXICON IS INVISIBLE TO THE ENGINE, and the loop above cannot see it —
+ * it walks the LEXICON and looks each row's ARPABET up, so a word added to `g2p-dict.tsv` and nowhere
+ * else reaches only the OOV path's compound/morph tier and is never a lookup hit. That is what the
+ * 16,393-row Moby import (#1344, `moby-import.tsv`) would have been: present in the dict, absent from
+ * the flat lexicon, and therefore still guessed at by the tagger at runtime.
+ * ⚠ APPENDED, NOT MERGED IN PLACE, and then the whole file is re-sorted below — the lexicon is otherwise
+ * byte-stable under a rebuild, and that stability is what makes the round-trip check above meaningful.
+ */
+let added = 0;
+if (addMissing) {
+    const known = new Set(out.filter((l) => l.includes("\t")).map((l) => l.split("\t")[0]!));
+    for (const [word, phones] of arpabet) {
+        if (known.has(word)) continue;
+        out.push(`${word}\t\t${toIpa(phones, word)}`);
+        added++;
+    }
+    // keep the file's own ordering convention rather than leaving a block bolted on the end
+    // ⚠ NOT `out.push(...body)` — spreading 140k arguments overflows the call stack (RangeError).
+    const head = out.filter((l) => l.startsWith("#"));
+    const body = out.filter((l) => l.includes("\t")).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    out.length = 0;
+    for (const l of head) out.push(l);
+    for (const l of body) out.push(l);
+    console.log(`rows ADDED from the dict (--add-missing): ${added}`);
 }
 
 const sourced = unchanged + regenerated;
