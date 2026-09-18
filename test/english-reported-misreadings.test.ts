@@ -4,6 +4,7 @@ import { readdirSync } from "node:fs";
 
 import { phonemize, phonemizeAsync } from "../src/index.ts";
 import { makeArpabetToIpa } from "../src/languages/english/englishArpabet.ts";
+import { normalizeEnglish } from "../src/languages/english/normalize.ts";
 import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 // Two reported misreadings whose cause was the same shape as the spelling one: a word the reader
@@ -683,5 +684,67 @@ describe("an acronym beside a number is not a shouting document", () => {
     // a document and lost the doubled capital that the run above this one exists to protect.
     test("a hyphenated code is one word, not two shouting ones", () => {
         expect(say("(ABC-AA)")).toBe("ˈeᶦbiːsˌiː ˈeᶦ ˈeᶦ");
+    });
+});
+
+describe("a slash, a section dot, a bare abbreviation and a month range", () => {
+    const say = (s: string): string => phonemize(s, "en");
+    const norm = (s: string): string => normalizeEnglish(s);
+
+    // ⚠ THE MARK WAS DROPPED OUTRIGHT — it is not a phone, so `litres/day` read "litres day" and
+    // `FREQUENCY/CRITERIA` ran two column headings into one phrase. Reported as three separate
+    // misreadings; it is one missing rule with two readings.
+    test("a slash before a period of time is a rate", () => {
+        expect(norm("litres/day")).toBe("litres per day");
+        expect(norm("5 m³/hr")).toBe("5 cubic meters per hour");
+        expect(norm("visits/week")).toBe("visits per week");
+        expect(norm("mg/L")).toBe("milligrams per liter");
+    });
+
+    // ⚠ AND IT IS SAID ONLY BETWEEN TWO ALL-CAPS LABELS. In running prose the slash is a conjunction
+    // English does not voice: the en goldens carry `transport to/from the airport` and `the
+    // cluster/group of islands`, and "to slash from" is not how either is read.
+    test("the mark is spoken between labels and silent in prose", () => {
+        expect(norm("FREQUENCY/CRITERIA")).toBe("FREQUENCY slash CRITERIA");
+        expect(norm("the cluster/group of islands")).toBe("the cluster/group of islands");
+        expect(norm("transport to/from the airport")).toBe("transport to/from the airport");
+    });
+
+    // ⚠ TWO SINGLE LETTERS ARE AN ABBREVIATION, NOT A CONJUNCTION. Without this they would have been
+    // given a "slash" that is confidently wrong — these are words written with a mark in them.
+    test("a slashed abbreviation has its own reading", () => {
+        expect(norm("w/o")).toBe("without");
+        expect(norm("N/A")).toBe("not applicable");
+        expect(norm("c/o")).toBe("care of");
+        expect(norm("and/or")).toBe("and or");
+    });
+
+    // A section reference: the dot is neither an abbreviation dot nor a sentence end, and left alone it
+    // became a phrase break between the letter and the number.
+    test("a section number's dot is point", () => {
+        expect(say("Section G.2")).toBe("sˈɛkʃən d͡ʒˈiː pʰˈɔᶦnt tʰˈuː");
+        expect(norm("Appendix B.3")).toBe("Appendix B point 3");
+        expect(norm("v1.2")).toBe("v1.2");          // a version is not this
+        expect(norm("802.11n")).toBe("802.11n");
+    });
+
+    // ⚠ BARE, `vs` REACHED THE INITIALISM PASS, which found no vowel and read it *vee ess*. Only the
+    // keys that are not English words in their own right may lose their dot.
+    test("an abbreviation that is not a word may drop its dot", () => {
+        expect(say("vs")).toBe("vˈɝsəs");
+        expect(norm("Smith vs Jones")).toBe("Smith versus Jones");
+        expect(norm("no 5")).toBe("no 5");             // `no` is a word; it keeps needing its dot
+        // ⚠ `sr` cost exactly this for one commit: "the senior and O series". A two-letter run is half of
+        // an initialism far more often than it is a bare abbreviation.
+        expect(norm("the SR&O series")).toBe("the s r and o series");
+    });
+
+    // ⚠ A RANGE IS A DATE FRAME the digit gate cannot see: `Oct-Dec 2024` has a digit after `Dec` and
+    // nothing at all after `Oct`, so one date was read two ways in four characters.
+    test("a month range expands both months", () => {
+        expect(norm("Oct-Dec 2024")).toBe("october to december 20 24");
+        expect(norm("Jan-Mar")).toBe("january to march");
+        expect(norm("Jan said so")).toBe("Jan said so");   // a name is not a date
+        expect(norm("Mar and Aug")).toBe("Mar and Aug");
     });
 });

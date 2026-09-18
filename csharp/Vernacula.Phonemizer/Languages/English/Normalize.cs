@@ -219,6 +219,61 @@ public static class Normalize
     };
     private static readonly string PLAIN_ABBREV_ALT = string.Join("|", PLAIN_ABBREV.Keys.OrderByDescending(k => k.Length));
 
+    /** The keys above that may be expanded WITHOUT their dot — a key qualifies only if its bare form is
+     *  not an English word. ⚠ No two-letter key but `vs`: `jr`/`sr` cost `SR&O series` → "senior and O
+     *  series". See the TypeScript. */
+    private static readonly string BARE_ABBREV_ALT = string.Join("|",
+        new[] { "vs", "approx", "dept", "univ", "blvd" }.OrderByDescending(k => k.Length));
+    private static readonly JsRe BARE_ABBREV_RE =
+        JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}.])({BARE_ABBREV_ALT})(?![\\p{{L}}\\p{{M}}.])", "giu");
+
+    /** A section number's dot is "point" — `Section G.2`. A single letter only; versions are guarded
+     *  elsewhere. See the TypeScript. */
+    private static readonly JsRe SECTION_POINT = JsRegex.Compile("(?<![\\p{L}\\p{M}.])(\\p{L})\\.(?=\\d)", "gu");
+
+    /** The words the unit table expands to, single-word forms only — what tells a slash it is a RATE.
+     *  See the TypeScript. */
+    private static readonly IReadOnlySet<string> UNIT_WORDS =
+        new HashSet<string>(UNITS.Values.SelectMany(v => new[] { v[0], v[1] }).Where(w => !w.Contains(' ')),
+                            StringComparer.Ordinal);
+
+    /** Periods of time as a denominator: a slash before one is a rate whatever the numerator is. The
+     *  abbreviations map to the word because the unit rules key on a preceding number and there is none
+     *  after a slash — `hr` stayed `hr` and read as *aitch ar*. */
+    private static readonly IReadOnlyDictionary<string, string> TIME_PERIOD = new Dictionary<string, string>
+    {
+        ["s"] = "second", ["sec"] = "second", ["secs"] = "seconds", ["second"] = "second",
+        ["seconds"] = "seconds", ["min"] = "minute", ["mins"] = "minutes", ["minute"] = "minute",
+        ["minutes"] = "minutes", ["h"] = "hour", ["hr"] = "hour", ["hrs"] = "hours", ["hour"] = "hour",
+        ["hours"] = "hours", ["d"] = "day", ["day"] = "day", ["days"] = "days", ["wk"] = "week",
+        ["wks"] = "weeks", ["week"] = "week", ["weeks"] = "weeks", ["mo"] = "month", ["month"] = "month",
+        ["months"] = "months", ["yr"] = "year", ["yrs"] = "years", ["year"] = "year", ["years"] = "years",
+        ["annum"] = "annum", ["capita"] = "capita",
+    };
+
+    /** Pairs read without the mark — `and/or` is said "and or". */
+    private static readonly IReadOnlySet<string> SLASH_ELIDED = new HashSet<string>(
+        new[] { "and/or", "he/she", "she/he", "his/her", "her/his", "s/he", "either/or" }, StringComparer.Ordinal);
+
+    /** Slashed abbreviations with a fixed reading — a WORD written with a mark in it. */
+    private static readonly IReadOnlyDictionary<string, string> SLASH_ABBREV = new Dictionary<string, string>
+    {
+        ["w/o"] = "without", ["c/o"] = "care of", ["n/a"] = "not applicable",
+    };
+
+    /** The compositional slash — a rate, a fixed abbreviation, or (between two ALL-CAPS labels) the mark
+     *  said aloud. See the TypeScript for why prose keeps it silent. */
+    private static readonly JsRe SLASH_PAIR = JsRegex.Compile(
+        "(?<![\\p{L}\\d/])(\\p{L}[\\p{L}\u00b2\u00b3]*)[ \\t]*/[ \\t]*(\\p{L}[\\p{L}\u00b2\u00b3]*)(?![\\p{L}\\d/])",
+        "giu");  // superscript two, superscript three
+    private static readonly JsRe SLASH_WS = JsRegex.Compile("[ \\t]", "gu");
+
+    /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
+    private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
+        // space, tab, NBSP; hyphen through horizontal bar (U+2010-U+2015)
+        $"\\b({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?[ \\t ]*([-‐-―])[ \\t ]*"
+        + $"({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?", "giu");
+
     /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
      *  spelled out here rather than emitted as "5th" because the ordinal-suffix path has no plural form and
      *  "2/5" needs "fifths". Beyond 20 a fraction is vanishingly rare in prose and is left as digits. */
@@ -462,6 +517,10 @@ public static class Normalize
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+        // ⚠ Some of these are written without the dot far more often than with it — `vs` was reported
+        // reading *vee ess*. Only the keys that are not words in their own right; see the TypeScript.
+        s = Rewrite(s, BARE_ABBREV_RE, m =>
+            PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var b) ? b : m.Value);
         s = Rewrite(s, PLAIN_END, m =>
             PLAIN_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
         s = Rewrite(s, TY_YEAR, "Tax Year $1");
@@ -480,6 +539,15 @@ public static class Normalize
         s = Rewrite(s, DOTTED_INITIALS, m => DOTS.Replace(m.Value, "").ToUpperInvariant());
 
         // ⚠ The weekday rule runs AFTER the two month rules — its gate reads the names they emit.
+        // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
+        s = Rewrite(s, MONTH_RANGE, m =>
+        {
+            var a = m.Groups[1].Value;
+            var b = m.Groups[3].Value;
+            return (MONTH_ABBREV.TryGetValue(a.ToLowerInvariant(), out var ea) ? ea : a)
+                 + m.Groups[2].Value
+                 + (MONTH_ABBREV.TryGetValue(b.ToLowerInvariant(), out var eb) ? eb : b);
+        });
         s = Rewrite(s, MONTH_ABBREV_BEFORE_NUM, m =>
             MONTH_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
         s = Rewrite(s, MONTH_ABBREV_AFTER_DAY, m =>
@@ -487,6 +555,8 @@ public static class Normalize
         s = Rewrite(s, WEEKDAY_ABBREV_RE, m =>
             WEEKDAY_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
 
+        // A section number's dot is "point", not a phrase break. See the TypeScript.
+        s = Rewrite(s, SECTION_POINT, "$1 point ");
         s = Rewrite(s, ERA, m => m.Value switch
         {
             "BCE" => "bee see ee", "BC" => "bee see", "CE" => "see ee", "AD" => "ay dee", _ => m.Value,
@@ -623,6 +693,26 @@ public static class Normalize
         {
             var forms = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, m.Value);
             return forms is null ? m.Value : forms[0];
+        });
+
+        // A slash the table cannot enumerate: a rate, a fixed abbreviation, or the mark said aloud
+        // between two ALL-CAPS labels. Ordered after the two arms above. See the TypeScript.
+        s = Rewrite(s, SLASH_PAIR, m =>
+        {
+            var left = m.Groups[1].Value;
+            var right = m.Groups[2].Value;
+            var key = JsRegex.Replace(m.Value.ToLowerInvariant(), SLASH_WS, "");
+            if (SLASH_ABBREV.TryGetValue(key, out var fixedReading)) return fixedReading;
+            if (SLASH_ELIDED.Contains(key)) return $"{left} {right}";
+            var num = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, left);
+            var den = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, right);
+            var hasPeriod = TIME_PERIOD.TryGetValue(right.ToLowerInvariant(), out var period);
+            var rate = hasPeriod || num is not null || den is not null
+                || UNIT_WORDS.Contains(left.ToLowerInvariant()) || UNIT_WORDS.Contains(right.ToLowerInvariant());
+            if (rate) return $"{num?[1] ?? left} per {(hasPeriod ? period : den?[0] ?? right)}";
+            var label = left.Length >= 2 && right.Length >= 2
+                && left == left.ToUpperInvariant() && right == right.ToUpperInvariant();
+            return label ? $"{left} slash {right}" : m.Value;
         });
 
         s = Rewrite(s, BARE_EXPONENT_GLUED, m => $"{m.Value} ");

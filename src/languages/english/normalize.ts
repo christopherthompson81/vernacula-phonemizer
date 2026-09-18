@@ -314,6 +314,48 @@ const BARE_RATE_RE = new RegExp(
     "giu",
 );
 
+/**
+ * THE WORDS THE UNIT TABLE EXPANDS TO, single-word forms only — what tells a slash that it is a RATE and
+ * not a conjunction. Derived from `UNITS` so a new unit needs no second declaration here, and the
+ * multi-word forms are dropped on purpose: they are the slashed keys (`miles per hour`), which already
+ * carry their own "per" and are claimed by 6a2 before this runs.
+ */
+const UNIT_WORDS: ReadonlySet<string> = new Set(
+    Object.values(UNITS).flatMap(([sg, pl]) => [sg, pl]).filter((w) => !w.includes(" ")));
+
+/**
+ * PERIODS OF TIME, as a denominator. `litres/day` is a rate whatever the numerator is — a slash before a
+ * period of time has no second reading in prose — so this side alone licenses "per", which is what makes
+ * the rule work for measure words the unit table does not carry (`litres`, `visits`, `doses`).
+ *
+ * The abbreviations map to the word because the denominator is NOT in a position the unit rules reach:
+ * they key on a preceding number, and after a slash there is none, so `hr` stayed `hr` and was read as
+ * the letter names *aitch ar*.
+ */
+const TIME_PERIOD: Readonly<Record<string, string>> = {
+    s: "second", sec: "second", secs: "seconds", second: "second", seconds: "seconds",
+    min: "minute", mins: "minutes", minute: "minute", minutes: "minutes",
+    h: "hour", hr: "hour", hrs: "hours", hour: "hour", hours: "hours",
+    d: "day", day: "day", days: "days", wk: "week", wks: "weeks", week: "week", weeks: "weeks",
+    mo: "month", month: "month", months: "months", yr: "year", yrs: "years",
+    year: "year", years: "years", annum: "annum", capita: "capita",
+};
+
+/**
+ * PAIRS READ WITHOUT THE SLASH. `and/or` is said "and or" and `he/she` "he she"; saying the mark there is
+ * the reading almost nobody uses, and these are frequent enough in prose that guessing wrong is loud.
+ * ⚠ EVERYTHING ELSE GETS THE MARK SAID. A slash between two words is a real distinction — `FREQUENCY/
+ * CRITERIA` is two column headings, not one — and dropping it silently joined them into a phrase.
+ */
+const SLASH_ELIDED: ReadonlySet<string> = new Set(
+    ["and/or", "he/she", "she/he", "his/her", "her/his", "s/he", "either/or"]);
+
+/** SLASHED ABBREVIATIONS with a fixed reading. Each is a WORD written with a mark in it, so neither the
+ *  rate reading nor the conjunction reading is right: `w/o` is "without", never "w slash o". */
+const SLASH_ABBREV: Readonly<Record<string, string>> = {
+    "w/o": "without", "c/o": "care of", "n/a": "not applicable",
+};
+
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
  *  the word "no". */
 const PLAIN_ABBREV: Readonly<Record<string, string>> = {
@@ -333,6 +375,22 @@ const PLAIN_ABBREV: Readonly<Record<string, string>> = {
     etc: "etc", ibid: "ibid", cf: "compare", viz: "namely",
 };
 const PLAIN_ABBREV_ALT = Object.keys(PLAIN_ABBREV).sort((a, b) => b.length - a.length).join("|");
+
+/**
+ * THE KEYS ABOVE THAT MAY BE EXPANDED WITHOUT THEIR DOT. Deliberately tiny: a key qualifies only if its
+ * bare form is NOT an English word, so no sentence can lose one. `vs` is the reported case and the one
+ * that matters — "Smith vs Jones" is written bare far more often than "vs." — and the rest are here on
+ * the same test. Everything else in `PLAIN_ABBREV` keeps needing its dot, because `no`, `ed`, `col`,
+ * `gen`, `rep`, `sen`, `ave` and `ch` are all words, and expanding those bare would be a far louder
+ * error than the letter-names they are read as today.
+ *
+ * ⚠ AND NO TWO-LETTER KEY BUT `vs`. `jr`/`sr` are not words either, and were here for one commit — until
+ * `SR&O series` came out "the senior and O series". A two-letter run is half of an initialism far more
+ * often than it is a bare abbreviation, and `vs` survives that test only because it sits BETWEEN two
+ * names, where an initialism half cannot.
+ */
+const BARE_ABBREV_ALT = ["vs", "approx", "dept", "univ", "blvd"]
+    .sort((a, b) => b.length - a.length).join("|");
 
 /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
  *  spelled out here rather than emitted as "5th" because the ordinal-suffix path has no plural form and
@@ -455,6 +513,15 @@ export function normalizeEnglish(input: string): string {
             const w = PLAIN_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
+    //     ⚠ AND SOME OF THESE ARE WRITTEN WITHOUT THE DOT FAR MORE OFTEN THAN WITH IT. `vs` is the case
+    //     that was reported: bare, it reached the initialism pass, which found no vowel in it and read it
+    //     out as *vee ess*. The table above cannot simply drop its dot requirement — most of its keys ARE
+    //     English words (`no`, `ed`, `col`, `gen`, `rep`), and expanding those bare would be far worse
+    //     than the dot they are missing. So the bare form is opened to the keys that are not words in
+    //     their own right and are ordinarily written bare.
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${BARE_ABBREV_ALT})(?![\\p{L}\\p{M}.])`, "giu"),
+        (m0, ab: string) => PLAIN_ABBREV[ab.toLowerCase()] ?? m0);
+
     s = rewrite(s, new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
@@ -535,6 +602,19 @@ export function normalizeEnglish(input: string): string {
     //      `Jan 21 356 bce` is only protected once the month is a name.
     //      ⚠ The MONTH rule's gate is an adjacent DIGIT, in either direction, which is what makes it safe on
     //      the keys that are also personal names. See MONTH_ABBREV.
+    //      ⚠ A RANGE IS A DATE FRAME TOO, and the digit gate cannot see it. `Oct-Dec 2024` has a digit
+    //      after `Dec` but nothing at all after `Oct`, so the month on the LEFT of the dash was left as
+    //      the word *ockt* while the one on the right expanded — one date read two different ways in
+    //      four characters. A month abbreviation with a dash and ANOTHER MONTH on the far side of it is
+    //      as good a frame as an adjacent digit, and better than one for the keys that are also names:
+    //      no person is written `Jan-Mar`. Runs FIRST, so the digit rules below see two month NAMES and
+    //      the dash rule at step 8 can then read the dash as "to".
+    s = rewrite(s, new RegExp(
+        // space, tab, NBSP; hyphen through horizontal bar (U+2010–U+2015)
+        `\\b(${MONTH_ABBREV_ALT}|${MONTH_ALT})\\b\\.?[ \\t\u00a0]*([-\u2010-\u2015])[ \\t\u00a0]*`
+        + `(${MONTH_ABBREV_ALT}|${MONTH_ALT})\\b\\.?`, "giu"),
+        (_m0, a: string, dash: string, b: string) =>
+            `${MONTH_ABBREV[a.toLowerCase()] ?? a}${dash}${MONTH_ABBREV[b.toLowerCase()] ?? b}`);
     s = rewrite(s, new RegExp(`\\b(${MONTH_ABBREV_ALT})\\b\\.?(?=[ \u00a0]+\\d)`, "giu"),  // space, NBSP
         (m0, ab: string) => MONTH_ABBREV[ab.toLowerCase()] ?? m0);
     s = rewrite(s, new RegExp(`(?<=\\b\\d{1,2}[ \u00a0])(${MONTH_ABBREV_ALT})\\b\\.?`, "giu"),  // space, NBSP
@@ -546,6 +626,15 @@ export function normalizeEnglish(input: string): string {
         // space, NBSP
         new RegExp(`\\b(${WEEKDAY_ABBREV_ALT})\\b\\.?(?=,?[ \u00a0]+(?:\\d{1,2}[ \u00a0]+)?(?:${MONTH_ALT_NO_MAY})\\b)`, "giu"),
         (m0, ab: string) => WEEKDAY_ABBREV[ab.toLowerCase()] ?? m0);
+
+    // 0b3) A SECTION NUMBER'S DOT IS "POINT". `Section G.2`, `Appendix B.3`, `clause D.11` — a single
+    //      letter, a dot, digits. The dot is not an abbreviation dot and not a sentence end: left alone it
+    //      became a PHRASE BREAK between the letter and the number, so the reference was read as two
+    //      fragments ("gee" … "two") with a pause where the reader needs the opposite.
+    //      ⚠ A SINGLE LETTER ONLY, and no dot on either outside edge. `U.S.2` is an initialism with its
+    //      own rules, `v1.2` and `802.11n` are versions that `NOT_VERSION` guards elsewhere, and a
+    //      sentence ending in a capital before a digit ("…ask B. 42 times") is not a shape prose produces.
+    s = rewrite(s, /(?<![\p{L}\p{M}.])(\p{L})\.(?=\d)/gu, "$1 point ");
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".
@@ -905,6 +994,49 @@ export function normalizeEnglish(input: string): string {
         const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, m0);
         return forms === undefined ? m0 : forms[0];
     });
+
+    // 6a3) A SLASH THAT THE TABLE CANNOT ENUMERATE. 6a2 above claims the slashed keys that are WRITTEN
+    //      OUT in the unit table (`km/h`, `btu/hr/sf`); everything else kept its slash into the g2p, where
+    //      the mark is not a phone and was DROPPED OUTRIGHT — `litres/day` read "litres day", `m³/hr`
+    //      "cubic meters aitch ar", and `FREQUENCY/CRITERIA` ran two column headings into one phrase.
+    //      Reported as three separate misreadings; it is one missing rule.
+    //
+    //      TWO READINGS, decided by what is on either side:
+    //        · a RATE — "per" — when either side is a unit the table knows, or the denominator is a
+    //          period of time. That second test is what carries the measure words the table does not
+    //          have: `litres/day`, `visits/week`, `doses/hour`.
+    //        · a CONJUNCTION — "slash" — between two ordinary words, which is how the mark is actually
+    //          read aloud when it separates two headings or two alternatives.
+    //
+    //      ⚠ ORDERED AFTER 6a AND 6a2, so a number-and-unit (`60 km/h`) and an enumerated slashed key are
+    //      both already gone; what reaches here is the residue those two declined.
+    //      ⚠ DIGITS ON EITHER SIDE ARE NOT THIS. Dates (`12/25/2024`), fractions (`3/4`) and `24/7` are
+    //      claimed by their own rules well before this, and the letter-only sides here cannot re-steal them.
+    s = rewrite(s, /(?<![\p{L}\d/])(\p{L}[\p{L}\u00b2\u00b3]*)[ \t]*\/[ \t]*(\p{L}[\p{L}\u00b2\u00b3]*)(?![\p{L}\d/])/giu,
+        (m0: string, left: string, right: string) => {
+            const key = m0.toLowerCase().replace(/[ \t]/gu, "");
+            if (SLASH_ABBREV[key] !== undefined) return SLASH_ABBREV[key];
+            if (SLASH_ELIDED.has(key)) return `${left} ${right}`;
+            // A side that resolves against the unit table is spoken as its unit: the numerator PLURAL
+            // ("kilograms per metre"), the denominator SINGULAR, which is how a rate is said.
+            const num = resolveUnitSymbol(UNITS, UNITS_FOLDED, left);
+            const den = resolveUnitSymbol(UNITS, UNITS_FOLDED, right);
+            const period = TIME_PERIOD[right.toLowerCase()];
+            const rate = period !== undefined || num !== undefined || den !== undefined
+                || UNIT_WORDS.has(left.toLowerCase()) || UNIT_WORDS.has(right.toLowerCase());
+            if (rate) return `${num?.[1] ?? left} per ${period ?? den?.[0] ?? right}`;
+            // ⚠ THE MARK IS SAID ONLY BETWEEN TWO ALL-CAPS WORDS, which is the LABEL shape — a column
+            // heading, a form field, `FREQUENCY/CRITERIA`. In running prose the slash is a conjunction
+            // that English does not voice: the en goldens carry `transport to/from the airport` and
+            // `the cluster/group of islands`, and "to slash from" is not how either is read aloud.
+            // Getting that wrong is loud in a way the old silent drop was not, so the conjunction arm
+            // claims only the shape where saying it is right and leaves prose exactly as it was.
+            // ⚠ IT ALSO EXCLUDES TWO SINGLE LETTERS — `a/c`, `s/n`, `b/w` are abbreviations, not
+            // conjunctions; the three commonest have readings in SLASH_ABBREV above.
+            const label = left.length >= 2 && right.length >= 2
+                && left === left.toUpperCase() && right === right.toUpperCase();
+            return label ? `${left} slash ${right}` : m0;
+        });
 
     // 6b) A BARE EXPONENT — a base with NO unit for the rule above to attach the power to, so the
     //     superscript is dropped outright. Ordered AFTER the unit rule so a unit exponent is never stolen

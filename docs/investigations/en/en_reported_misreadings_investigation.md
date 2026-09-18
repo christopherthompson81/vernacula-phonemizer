@@ -976,3 +976,79 @@ languages byte-identical, regex-diff 143816 probes identical.
 **Still open from the batch of thirteen:** `horsepower` does not reproduce (already
 `hˈɔːɹspaᶷɚ`). The other eleven are untouched by this run and are separate causes — the slash, the
 letter-dot-digit, the month range, bare `vs`, two lexicon entries, and two acronym classifications.
+
+## Run 18 — 2026-09-18 15:20 — the slash, the section dot, bare `vs`, and half a month range
+
+Four of the thirteen, all in `normalize.ts`, all the same shape: a mark or an abbreviation that no
+rule claimed, reaching the g2p to be read as letters or dropped on the floor.
+
+**The slash was three reports and one gap.** The unit table enumerates its slashed keys (`km/h`,
+`btu/hr/sf`) and step 6a2 claims those wherever they stand; anything else kept its slash into the
+g2p, where the mark is not a phone and vanishes.
+
+```
+litres/day           litres day
+m³/hr                cubic meters aitch ar      ← `hr` spelled, the mark gone
+FREQUENCY/CRITERIA   frequency criteria         ← two column headings run into one phrase
+```
+
+The compositional rule has two readings. A RATE — "per" — when either side resolves against the unit
+table or the denominator is a period of time; that second test is what carries the measure words the
+table does not have (`litres`, `visits`, `doses`). A CONJUNCTION — "slash" — otherwise.
+
+**The conjunction arm over-fired, and the goldens caught it.** Said between any two words it makes
+prose absurd:
+
+```
+transport to/from the airport   → "transport to slash from the airport"
+the cluster/group of islands    → "the cluster slash group of islands"
+```
+
+Both are `en` golden rows. English does not voice this slash in running prose; it voices it between
+LABELS. So the arm now requires both sides to be ALL-CAPS — the column-heading shape the report came
+from — and leaves prose exactly as it was. `FREQUENCY/CRITERIA` and `TCP/IP` are claimed; `Pass/Fail`
+and `yes/no` are not, which is the conservative side of a line that has to be drawn somewhere.
+
+**And single letters are not a conjunction either.** `w/o`, `c/o`, `n/a` are words written with a
+mark in them; giving them "slash" would have been louder than the old silent drop. They have fixed
+readings, and any other two-single-letter pair is left alone.
+
+**Bare `vs`.** `PLAIN_ABBREV` already had `vs: versus`, but every arm requires the dot — and bare it
+reached the initialism pass, which found no vowel and read it *vee ess*. The table cannot simply drop
+the dot requirement: `no`, `ed`, `col`, `gen`, `rep`, `sen`, `ave` and `ch` are all English words.
+A small bare-safe list answers it.
+
+⚠ **`jr`/`sr` were on that list for one commit.** `the SR&O series` came out "the senior and O
+series". A two-letter run is half of an initialism far more often than it is a bare abbreviation;
+`vs` survives the test only because it sits between two names, where an initialism half cannot.
+
+**The month range.** `MONTH_ABBREV`'s gate is an adjacent DIGIT, which is what makes it safe on keys
+that are also personal names (`Jan`, `Mar`, `Aug`). `Oct-Dec 2024` has a digit after `Dec` and
+nothing at all after `Oct`, so one date was read two different ways in four characters — *ockt
+December*. A month abbreviation with a dash and another month on the far side of it is as good a
+frame as a digit, and better than one for the name keys: no person is written `Jan-Mar`. Ordered
+first, so the digit rules and the existing dash-range rule then see two month NAMES.
+
+**A section number's dot.** `Section G.2` — the dot is neither an abbreviation dot nor a sentence
+end, and left alone it became a phrase break between the letter and the number, so the reference read
+as two fragments with a pause where the listener needs the opposite.
+
+**Result.**
+
+```
+Section G.2          sˈɛkʃən d͡ʒˈiː pʰˈɔᶦnt tʰˈuː
+litres/day           lˈiːt̬ɚz pʰɝ dˈeᶦ
+m³/hr                ˈɛm kjˈuːbd pʰɝ ˈaᶷɚ
+vs                   vˈɝsəs
+Oct-Dec 2024         ɑːktˈoᶷbɚ tʰuː dᵻsˈɛmbɚ twˈɛnti twˈɛnti fˈɔːɹ
+FREQUENCY/CRITERIA   fɹˈiːkwənsi slˈæʃ kɹaᶦtʰˈɪɹiʲə
+```
+
+**Gates.** 6024 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 143990
+probes identical.
+
+**Found in passing, not fixed:** `24/7` reads "24 sevenths" — the fraction rule claims it. Out of
+this batch's scope and recorded here so it is not rediscovered.
+
+**Still open from the thirteen:** `PSI` (read as the Greek letter), `MSAPR` (wants a lexical
+reading), `Colin`, `derivable`, `Saipavan` — two acronym classifications and three lexicon entries.
