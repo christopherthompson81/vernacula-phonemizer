@@ -781,3 +781,35 @@ describe("four lexical facts the dictionary had wrong or lacked", () => {
         expect(say("MSAPR")).toBe("ɛmsˈæpɚ");
     });
 });
+
+describe("a secondary stress on an r-coloured offglide", () => {
+    const say = (s: string): string => phonemize(s, "en");
+
+    // ⚠ FOUND BY ASKING FOR THE KOKORO RENDERING, NOT THE IPA. `horsepower` was called "does not
+    // reproduce" on the strength of hˈɔːɹspaᶷɚ looking right; against misaki's gold hˈɔɹspˌWəɹ the
+    // secondary stress on `-power` is missing, and that is what flattens the compound to "horse-pour".
+    //
+    // ARPABET writes the `-ower` nucleus as TWO nuclei (AW2 ER0), so the clash rule counted the site as
+    // "not the final syllable" and dropped the mark. `lighthouse` (L AY1 T HH AW2 S) kept it, because
+    // there the AW2 IS the final nucleus — that contrast is what localized it.
+    test("a diphthong before ER0 keeps its mark", () => {
+        expect(say("horsepower")).toBe("hˈɔːɹspˌaᶷɚ");
+        expect(say("manpower")).toBe("mˈænpˌaᶷɚ");
+        expect(say("bonfire")).toBe("bˈɑːnfˌaᶦɚ");
+        expect(say("bricklayer")).toBe("bɹˈɪklˌeᶦɚ");
+        expect(say("filmgoer")).toBe("fˈɪɫmɡˌoᶷɚ");
+    });
+
+    // ⚠ THE MONOPHTHONGS ARE THE CONTROL AND MUST NOT MOVE. `IY+ER0` and `UW+ER0` are the same shape on
+    // paper — gold marks neither, because it is the DIPHTHONG that makes the pair one syllable.
+    test("a monophthong before ER0 does not", () => {
+        expect(say("nonlinear")).toBe("nɑːnlˈɪniːʲɚ");
+        expect(say("rescuer")).toBe("ɹˈɛskjuːɚ");
+    });
+
+    // And the site the existing final-syllable exemption already covered is unchanged.
+    test("a final-nucleus diphthong is untouched", () => {
+        expect(say("lighthouse")).toBe("lˈaᶦthˌaᶷs");
+        expect(say("powerhouse")).toBe("pʰˈaᶷɚhˌaᶷs");
+    });
+});

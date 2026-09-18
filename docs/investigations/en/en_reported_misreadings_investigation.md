@@ -1126,3 +1126,82 @@ correctly. Left alone rather than widened on one report.
 
 **Gates.** 6028 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, lexicon round-trip
 100.00%.
+
+## Run 20 — 2026-09-18 17:40 — the Kokoro rendering, and why `horsepower` DID reproduce
+
+**Question.** What does `horsepower` become in Kokoro's phoneme vocabulary?
+
+```
+en     ipa    hˈɔːɹspaᶷɚ        kokoro  hˈɔɹspWəɹ
+en-GB  ipa    hˈɔːspaᶷə         kokoro  hˈɔːspWə
+```
+
+Every character is in vocabulary. But against misaki's gold — which is what Kokoro was trained on —
+
+```
+gold us  hˈɔɹspˌWəɹ
+ours     hˈɔɹspWəɹ
+```
+
+**the secondary stress on `-power` is missing, and that is the reported defect.** Run 17 called this
+report "does not reproduce" on the strength of the IPA looking right. That was wrong: the IPA is
+right about the phones and wrong about the beat, and a compound whose second element loses its beat
+is exactly what flattens *horse-POW-er* into *horse-pour*. Asking for the Kokoro form is what
+exposed it, because gold is written in that alphabet.
+
+**Localized by contrast.** Across eleven compounds, nine matched gold and three did not —
+`horsepower`, `manpower`, `sunflower`. All three are `-ower`; `powerhouse` and `lighthouse` were
+fine. The dictionary has `AW2` in every one of them:
+
+```
+horsepower  HH AO1 R S P AW2 ER0   → hˈɔɹspWəɹ    ✗
+lighthouse  L AY1 T HH AW2 S       → lˈIthˌWs     ✓
+```
+
+The clash rule drops a secondary stress adjacent to the primary unless it is the FINAL nucleus. In
+`lighthouse` the AW2 is final. In `horsepower` the `ER0` counts as a further nucleus, so the AW2 is
+not final and the mark goes — but `AW2 ER0` is one syllable phonetically, and the two-nucleus
+spelling is an artifact of ARPABET.
+
+**Measured against gold at every clash site in the dictionary**, split by whether the next nucleus is
+contiguous (no consonant between) and by the pair:
+
+```
+AY+ER0   bonfire, backfire        29 sites   gold marks 28    97%
+AW+ER0   horsepower, coneflower   20 sites   gold marks 20   100%
+OW+ER0   filmgoer, flamethrower    8 sites   gold marks  8   100%
+EY+ER0   bricklayer, minelayer     7 sites   gold marks  7   100%
+                                  ── 64 sites, 63 marked, 98% ──
+separated (a consonant between) 2038 sites   gold marks 1225  60%   ← why the blanket rule drops them
+```
+
+⚠ **The monophthongs are not in the class and must not be.** `IY+ER0` and `UW+ER0` are the same shape
+on paper — `nonlinear` nɑnlˈɪniəɹ, `rescuer` ɹˈɛskjuəɹ — and gold marks neither. It is the DIPHTHONG
+that makes the pair one syllable. `OY` is included on phonetic grounds with no evidence either way:
+the dictionary has no `OY2+ER0` clash site at all.
+
+⚠ **The first edit did nothing, and the rebuild tool said so.** `P[i + 1] === "ER0"` compares a
+`{base, stress}` record against a string, so the guard was always false; `en_rebuild_lexicon.mts`
+reported "would change: 0", which is the one output that cannot be explained by a correct change to a
+converter this narrow. ⚠ And the lexicon is where this lands at all — `horsepower` is a flat-lexicon
+hit, so the converter is not run at request time and a rule change reaches nothing until the rebuild.
+That is the split the tool's own header exists to prevent.
+
+**123 lexicon rows moved, every one of them adding `ˌ` before a diphthong-plus-ɚ nucleus.** Five
+golden rows followed (`hairdryer`, `Montours`); gold covers neither word, but it covers `backfire` as
+`bˈækfˌIəɹ`, which is the same site.
+
+**Result — all eleven compounds now match gold in the Kokoro alphabet:**
+
+```
+horsepower hˈɔɹspˌWəɹ    manpower  mˈænpˌWəɹ    sunflower sˈʌnflˌWəɹ
+lighthouse lˈIthˌWs      powerhouse pˈWəɹhˌWs   football  fˈʊtbˌɔl
+```
+
+**And the name is in after all.** Run 19 withheld `Saipavan` as PII. On challenge that was too broad:
+a bare given name in a pronunciation lexicon carries no surname, no document and no link to a person,
+and this dictionary already ships thousands of them — `colin` two runs above is one. What must not be
+recorded is where it came from, not the token. Added as `S AY0 P AA1 V AH0 N` → saᶦpʰˈɑːvən.
+
+**Gates.** 6031 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, lexicon round-trip
+100.00%.
