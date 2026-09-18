@@ -38,8 +38,8 @@ describe("micro-prefixed units and the numeric arrow", () => {
     // caught: `25 µM` (micromolar) folded to `µm` and read "micro METERS", turning a merely-dropped
     // symbol into a wrong unit — the failure the micro keys exist to remove.
     test("µM is micromolar and µS is microsiemens, not case-sloppy µm/µs", () => {
-        expect(phonemize("a 25 \u00b5M solution", "en")).toContain("mˈaᶦkɹoᶷmˌoᶷləɹ");
-        expect(phonemize("a 25 \u03bcM solution", "en")).toContain("mˈaᶦkɹoᶷmˌoᶷləɹ");
+        expect(phonemize("a 25 \u00b5M solution", "en")).toContain("mˈaᶦkɹoᶷmˌoᶷlɚ");
+        expect(phonemize("a 25 \u03bcM solution", "en")).toContain("mˈaᶦkɹoᶷmˌoᶷlɚ");
         expect(phonemize("a 25 \u00b5M solution", "en")).not.toContain("mˈiːt̬ɚz");
         expect(phonemize("5 \u00b5S conductance", "en")).toContain("mˈaᶦkɹoᶷsˌiːmənz");
         expect(phonemize("5 \u00b5s delay", "en")).toContain("mˈaᶦkɹoᶷsˌɛkəndz");

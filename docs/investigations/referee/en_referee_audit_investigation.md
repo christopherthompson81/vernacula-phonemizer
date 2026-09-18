@@ -1553,3 +1553,117 @@ scratch script did not. Run correctly the row matches. The diagnostic was wrong,
       outside the 50K frequency list, so band-3 work barely touches it — this is the known skew)
     triple-source agreement 68.9% → 78.9%   candidates 536 (was 587, and 644 once the Moby
       -ər fold exposed the class it had been hiding)
+
+## Run 18 — 2026-09-17 20:40
+
+Finishing the 5k–20k band and working 20k–40k. Same method throughout: take a candidate, ask what SHAPE
+it is, score the shape, and check the morphological family before applying anything.
+
+### The `pre-`/`re-` axis is CLOSED as a non-defect
+
+It kept resurfacing (`predict`, `precisely`, `comprehend`, `comprehensive`, `predictable`, `retriever`,
+`decode`, `pretoria`), so it was settled rather than deferred again. ⚠ **THE SOURCES DISAGREE WITH EACH
+OTHER ABOUT THE DIRECTION**: they want the FULL vowel in `predict` (P R IY0 against our P R IH0) and the
+REDUCED one in `comprehend` (our P R IY0 against their P R AH0). Our own dict is split the same way —
+`precise`, `predict`, `prevail`, `prevent` reduce while `prediction`, `prepare`, `pretend` do not. That is
+the identical finding to the `en-`/`em-`/`ex-` measurement already recorded in the curation-gap header:
+it tracks how far the prefix has assimilated, which is lexis, not phonology. No rule, no sweep, skipped.
+
+### Families kept finding second defects the audit had not flagged
+
+Checking the family before applying is not a safety check, it is a SEARCH. Rows the audit never surfaced,
+found only because a flagged word's relative was pulled up beside it:
+
+    idealist      had idealism's missing syllable        realization  had realisation's
+    cyclists      had cyclist's spurious syllable        electrolytes had electrolyte's stress
+    insignificance had insignificant's spurious /j/      nitro        had nitrous's ⟨ni⟩
+    temptations   had temptation's missing /p/           withdrew     had withdrawn's voiced ⟨th⟩
+    monarchy      had monarch's -arch                    governments/governmental had government's /n/
+
+And two rows were found to be **exactly swapped**: `phosphor` held phosphoric's value and `phosphoric`
+held phosphor's. `tern` held its own PLURAL — identical to the `terns` row.
+
+### ⚠ REVERTED: `zeitgeist`
+
+Corrected T S → Z on both sources, and a test pinned `tsˈaᶦtɡˌaᶦst`. That test is about SECONDARY STRESS
+on a final closed diphthong and the onset was incidental to it — but Merriam-Webster lists \ˈtsīt-ˌgīst\
+FIRST, so this is an attested variant carrying a deliberate decision, not a defect. Same call as `cafe`
+and `syrup`: two-source agreement does not outrank a considered pin on a genuine variant. Reverted.
+
+`molar` went the other way and the expectation was updated: `M OW1 L AH0 R` is the AH0-R-for-ɚ notation
+defect, `/ˈmoʊlɚ/` is not in question, and the test that moved (`µM` is micromolar) is about the UNIT.
+
+### ⚠ THE CURATED FILE WAS TRUNCATED TO ZERO BY A SCRATCH SCRIPT, AND THE GATE CAUGHT IT
+
+Removing the `zeitgeist` row with `open(c,"w").write("".join(l for l in open(c) if …))` — the write handle
+truncates before the generator reads. 1,836 rows gone. `en-curation-gap.test.ts` failed with
+`expected 0 to be greater than 15`, which is the `curated.length > 15` assertion doing exactly the job its
+comment claims ("the first thing an --emit would break").
+
+⚠ **AND IT WAS FULLY RECOVERABLE WITHOUT REDOING THE WORK, because the dict is the other half of the
+record.** Restore the committed curated file, diff the working dict against the committed dict, and every
+differing word is a row to re-add — with the COMMITTED dict value as its `upstream`, or, for a word
+already curated, its existing upstream kept and only `want` updated. 163 words differed, 160 rows were
+new, and `government` came back with its original upstream intact. The two files are redundant on purpose
+and this is the first time that redundancy has been needed.
+
+### Invariants
+
+    curated rows 1,966, no duplicates, every `want` equal to the shipped dict
+
+### The wikipron referee as a THIRD vote, and it overruled me three times
+
+After the band work the wikipron score had moved 59.9% → 59.8%. Five rows, worth chasing: the audit uses
+gold + Moby, and wikipron is a third source that had not voted on any of this.
+
+    git diff main data/languages/english/g2p-dict.tsv | grep '^+[a-z]' | cut -f1 | sort -u  →  552 words
+    intersected with the en referee                                                          →  8 words
+
+Four confirmed the fix outright — `curry` k ɝ i, `molar` m o ʊ l ɚ, `vampire` v æ m p a ɪ ə, `fireworks`
+f a ɪ̯ ɚ w ɝ k s, i.e. the NURSE fix, the ɚ-notation fix and two of the `-ire` class. Three did not:
+
+  * `abdomen` — wikipron has æ b d o ʊ m ə n, OUR ORIGINAL. Gold and Moby wanted ˈab-də-mən and MW lists
+    that first, but with the third source siding with the old reading this is a genuine variant, not a
+    defect. **Reverted**, the same call as `syrup` and `cafe`.
+  * `mandala` — the missing /n/ was real and stands, but wikipron says m ʌ n d ə l ə against gold+Moby's
+    æ. Took the /n/ from two sources and the VOWEL from the third.
+  * `oxymoron` — the two primary stresses were real and stand; wikipron keeps `i` in the second syllable
+    where I had reduced it. Took the stress fix and restored the vowel.
+  * `amour` — none of the three had it whole: wikipron has ɑ + ʊ, gold and Moby ə + ʊ, ours was ɑ + uː.
+    `AA0 M UH1 R` is the reading all three agree on, and nobody's single row was it.
+
+⚠ THREE OF EIGHT CHECKED ROWS NEEDED ADJUSTING. Two-source agreement is a good filter and it is not a
+verdict; where a third source exists it is worth the two minutes. Score restored to 59.9% / 65.1%.
+
+### The eval was using one core of sixteen
+
+Every referee run in this investigation has been a multi-minute block — en-GB is 76,284 rows through the
+neural English G2P — and the scorer is a sequential `for … of` with an `await` per row, so Node used one
+core. Added `--jobs N`: shard the rows across N child processes and merge the sums.
+
+    en-GB   8+ min  →  2m05 at --jobs 12   (user 24m44 over 2m05 wall)
+    en      ~55 s   →  8.1 s
+
+⚠ **THE GATE IS BYTE-IDENTICAL OUTPUT**, and two bugs had to be fixed before it was:
+
+  1. The product-delta sampler used a RUNNING COUNTER (`pSeen++ % pStride`). A counter advances only over
+     the rows a shard sees, so N shards sample N DIFFERENT row sets. Keyed on the global row index instead,
+     and the shard filter moved inside the loop so `pairs.length` — and therefore `pStride` — is the same
+     in every shard.
+  2. The residual histogram sorted on count alone. Equal counts keep INSERTION order, which is row order,
+     so `--jobs 12` listed a different set of 1× examples than the unsharded run while every number
+     matched. Tie-broken on the key.
+
+⚠ AND THE FIRST TEST FOR (1) WAS VACUOUS. Reintroducing the counter bug left all four tests passing:
+`kk`'s delta is 0/280 and `pCompared` sums to 280 whether the sampler keys on the global index or a local
+counter, because the totals coincide — only the row IDENTITIES differ. The test now compares a checksum of
+the sampled global indices, and reintroducing the bug fails it. Both bugs were re-injected to confirm the
+tests catch them; that is the only reason to believe they do.
+
+### Invariants
+
+    curated rows 2,077, no duplicates, every `want` equal to the shipped dict
+    552 dict rows changed against main, all recorded
+    tests 5,996 / 312 files   goldens 0 stale   C# parity 189 byte-identical   package fence ok
+    en 59.9% / 65.1% +intentional      en-GB 48.7% (47.5% at the start of this branch)
+    triple-source agreement 68.9% → 80.2%   candidates 587 → 271
