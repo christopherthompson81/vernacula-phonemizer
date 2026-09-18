@@ -196,6 +196,47 @@ proven equal on ONE CPU — the same class of claim the header refuses to make f
 microarchitectures. So the flag is opt-in, the header says that if a `--jobs` run and a serial run ever
 disagree the serial run defines the goldens, and `--write` cannot be reached from it at all.
 
+## Run 8 — 2026-09-18 17:05 — review, and the three ways it could still have gone quietly wrong
+
+Six findings on PR #1349, all real. Three of them are the same shape — a mechanism that fails by doing
+nothing rather than by erroring — which is the shape this whole file keeps circling.
+
+  1. ⚠ **`setOrtSessionDefaults` WAS A SILENT NO-OP IF ANYTHING HAD ALREADY CALLED `loadOrt()`.** Whether
+     the runtime gets wrapped is decided once, when the memoised promise resolves, so a bare availability
+     probe that created no session at all was enough to fix the unwrapped runtime in place. Verified:
+     probe → set a one-thread cap → create a session, and the session is created at full width with no
+     error. The failure mode is precisely Run 2 — N shards × one thread per core — reappearing behind a
+     green verdict, and no measurement in this document would have caught it, because the verdict is
+     right and only the wall clock moves. `setOrtLoader` already cleared the memo for this exact reason;
+     `setOrtSessionDefaults` now does too. Pinned by a test that fails without the clear.
+  2. ⚠ **`--cap-ort --write` WAS ACCEPTED.** The refusal list named `--child`, equally internal, but not
+     `--cap-ort` — so an operator reproducing a `--jobs` mismatch on one language could re-record that
+     golden from the capped engine, which is the one thing the header says must never happen. Added.
+  3. ⚠ **`--jobs` HAD NO UPPER CLAMP**, so `--jobs 189` was one engine-loading process per language — a
+     fork bomb with a model in each one. `tools/referee-eval/eval.ts` had already learned this and clamps
+     to `availableParallelism()`; this now does the same. Nothing above the core count was faster anyway.
+  4. **A worker was three processes, not one.** `npx tsx` interposes a shell and the tsx launcher re-execs
+     node, so the engine ran two levels below the handle: measured `sh -c` → `tsx` → `node`, and
+     `child.kill()` on the failure path reaped a wrapper while the process doing the work carried on until
+     its stdin happened to EOF — ten more seconds for `pnb`. Workers are now `node --import tsx`, one
+     process, the one we hold. Verified by process tree, and by no survivors after a kill.
+  5. **The verdict counted `codes.length`, never `results.length`** — a language that never came back
+     would subtract from a row total nobody reads while still printing "189 languages". The hand-off is
+     depth-1 so no live drop could be constructed, but that is an argument for the invariant, not against
+     it. Added, and `exit` became `close`: `exit` fires when the process ends and says nothing about
+     whether the parent drained the pipe it left behind.
+  6. **`statSync` inside the sort comparator** — ~1,500 syscalls for 189 codes, and a throw surfacing as a
+     sort error rather than as the missing golden it is. Sized once into a map.
+
+`test/check-goldens-jobs.test.ts` is new, and its equivalence case deliberately runs `--no-ort --show 200`
+rather than a clean check: ⚠ TWO CLEAN RUNS AGREE BY SAYING NOTHING. The degraded run makes the engine
+disagree on purpose and prints every mismatching row, so the comparison covers per-row text, per-language
+ordering and the order of the languages themselves — 643 lines, byte-identical, instead of one.
+
+Re-measured after the runner change:
+
+    jobs=1  46.5 s / 253 s CPU      jobs=6  22.5 s / 149 s  ← 2.06×      jobs=8  24.0 s / 182 s
+
 ## Where this leaves it
 
   1. **Done: `--jobs N`, 47.5 s → ~23 s.** Best at 6–8 workers on 8 physical cores.

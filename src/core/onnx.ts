@@ -105,11 +105,19 @@ let sessionDefaults: OrtSessionOptions | undefined;
  * ⚠ THESE WIN OVER THE CALL SITE'S OWN OPTIONS, deliberately — the point is to override a runtime default
  * the call sites never set. Nothing here sets `executionProviders`, so a tagger's CUDA opt-in survives.
  *
- * ⚠ IT ONLY GOVERNS SESSIONS CREATED AFTER IT. Every neural path memoises its own session, so a cap
- * installed after the first inference is a no-op for that path — call it before any phonemization.
+ * ⚠ IT CLEARS THE LOADER MEMO, AND IT MUST. Whether the runtime is wrapped at all is decided ONCE, when
+ * `loadOrt` resolves; without the clear, a single earlier `loadOrt()` — a bare availability probe that
+ * created no session at all — would fix the unwrapped runtime in place and this call would be a silent
+ * no-op for every path, forever. Measured while reviewing this: probe, then set a one-thread cap, then
+ * create a session, and the session is created at full width with no error. That is the Run 2 dead end
+ * (N shards × one thread per CORE) reappearing behind a green verdict, which is the worst way to lose it.
+ *
+ * ⚠ IT STILL ONLY GOVERNS SESSIONS CREATED AFTER IT. Clearing the memo re-wraps the RUNTIME; it cannot
+ * reach a session a neural path already built and memoised for itself. Call it before any phonemization.
  */
 export function setOrtSessionDefaults(next: OrtSessionOptions | undefined): void {
     sessionDefaults = next;
+    ortPromise = undefined;
 }
 
 /** ⚠ ONLY WRAPPED WHEN THERE IS SOMETHING TO MERGE. test/browser-seams.test.ts pins that `loadOrt()`

@@ -68,6 +68,7 @@
 import { type ChildProcess, execFileSync, spawn } from "node:child_process";
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { availableParallelism } from "node:os";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { clearForeignOov } from "../src/core/foreign.ts";
@@ -151,8 +152,15 @@ function intFlag(name: string, fallback: number, min: number): number {
 }
 
 const show = intFlag("--show", 0, 0);
-/** `--jobs N`: N worker processes, each with a one-thread ORT pool. 1 is the shipped serial behaviour. */
-const jobs = intFlag("--jobs", 1, 1);
+/**
+ * `--jobs N`: N worker processes, each with a one-thread ORT pool. 1 is the shipped serial behaviour.
+ *
+ * ⚠ CLAMPED TO THE CORE COUNT, as `tools/referee-eval/eval.ts` already clamps its own: each worker is a
+ * whole child process that loads the engine and its models, so an unbounded `--jobs` is a fork bomb with a
+ * model in each one — `--jobs 189` would be one process per language. Nothing above the core count is
+ * faster anyway: measured 22.8 s at 6 workers, 23.9 s at 8, 26.7 s at 12 on 8 physical cores.
+ */
+const jobs = Math.min(intFlag("--jobs", 1, 1), availableParallelism());
 const only = argv.filter((a, i) => !a.startsWith("--") && !operands.has(i));
 
 interface Result { code: string; rows: number; stale: string[]; rewritten?: string }
@@ -242,10 +250,26 @@ function checkIsolated(code: string): Result {
     // a child spawned without them runs a fully-enabled engine — and `--isolate --no-ort` then reports
     // "0 stale", i.e. "nothing depends on ONNX", which is exactly the silently-wrong answer `--no-ort`
     // exists to prevent. It did that, quietly and green, until review caught it.
-    const out = execFileSync("npx", ["tsx", fileURLToPath(import.meta.url), "--child", ...childFlags()], {
+    const out = execFileSync(RUNNER, childArgv(), {
         encoding: "utf8", cwd: ROOT, maxBuffer: 64 * 1024 * 1024, input: `${code}\n`,
     });
     return JSON.parse(out) as Result;
+}
+
+/**
+ * ⚠ A WORKER IS ONE PROCESS, AND THAT IS A CORRECTNESS REQUIREMENT BEFORE IT IS A SPEED ONE. `npx tsx`
+ * interposes a shell AND the tsx launcher re-execs node, so the engine ran two levels down — `child.kill()`
+ * reaped a wrapper and left the process doing the work alive. On the failure path below the parent would
+ * then exit 2 while N−1 workers kept rendering, stopping only whenever their stdin happened to EOF, which
+ * for `pnb` is another ten seconds. Measured: `npx tsx` gave `sh -c` → `tsx` → `node`, and
+ * `node --import tsx` gives one process, the one we hold. It also drops two process spawns per worker from
+ * a change whose whole point is wall time.
+ */
+const RUNNER = process.execPath;
+
+/** The argv every child is spawned with, so the two spawning modes cannot drift apart. */
+function childArgv(extra: string[] = []): string[] {
+    return ["--import", "tsx", fileURLToPath(import.meta.url), "--child", ...extra, ...childFlags()];
 }
 
 /**
@@ -279,14 +303,16 @@ function childFlags(): string[] {
  * delegation, not its byte count — but it is strictly better than directory order.
  */
 async function checkPooled(order: string[], n: number): Promise<Result[]> {
-    const queue = [...order].sort((a, b) => weigh(b) - weigh(a));
+    // ⚠ SIZED ONCE, NOT INSIDE THE COMPARATOR. `statSync` per comparison is ~1,500 syscalls for 189 codes
+    // instead of 189, and a throw from inside a comparator surfaces as a sort error rather than as the
+    // missing golden it actually is.
+    const size = new Map(order.map((c) => [c, statSync(join(GOLDENS, `${c}.tsv`)).size]));
+    const queue = [...order].sort((a, b) => size.get(b)! - size.get(a)!);
     const children: ChildProcess[] = [];
     const results: Result[] = [];
     let next = 0;
     const worker = (): Promise<void> => new Promise<void>((resolve, reject) => {
-        const child = spawn("npx", ["tsx", fileURLToPath(import.meta.url), "--child", "--cap-ort", ...childFlags()], {
-            cwd: ROOT, stdio: ["pipe", "pipe", "inherit"],
-        });
+        const child = spawn(RUNNER, childArgv(["--cap-ort"]), { cwd: ROOT, stdio: ["pipe", "pipe", "inherit"] });
         children.push(child);
         const feed = (): void => {
             if (next < queue.length) child.stdin!.write(`${queue[next++]}\n`);
@@ -300,7 +326,10 @@ async function checkPooled(order: string[], n: number): Promise<Result[]> {
         // ⚠ A CHILD THAT DIES IS A FAILED RUN, NOT A SHORTER ONE. Its share of the queue is simply never
         // dealt out, so swallowing the exit code would print "goldens fresh" over languages nobody checked
         // — a green gate that verified less than it claimed, which is this file's oldest failure mode.
-        child.on("exit", (status) => {
+        // ⚠ AND IT IS `close`, NOT `exit`: `exit` fires when the PROCESS ends, which says nothing about
+        // whether the parent has drained the pipe it left behind. `close` fires once the stdio streams are
+        // done, so every line the worker wrote has reached the reader above before this resolves.
+        child.on("close", (status) => {
             if (status === 0) resolve();
             else reject(new Error(`a worker exited with status ${status} — see its output above`));
         });
@@ -313,13 +342,19 @@ async function checkPooled(order: string[], n: number): Promise<Result[]> {
         console.error(`--jobs: ${(e as Error).message}`);
         process.exit(2);
     }
-    // Completion order is a race; the report is not allowed to be.
-    return results.sort((a, b) => a.code.localeCompare(b.code));
-}
-
-/** Golden file size, the largest-first scheduling proxy. */
-function weigh(code: string): number {
-    return statSync(join(GOLDENS, `${code}.tsv`)).size;
+    // ⚠ EVERY LANGUAGE MUST COME BACK, AND THE REPORT CANNOT NOTICE ON ITS OWN. The verdict line counts
+    // `codes.length`, so a worker that dropped a language would print the full "189 languages" over a
+    // smaller row total — a green gate that verified less than it claimed, which is the failure this file
+    // exists to refuse. The hand-off is depth-1 and a worker only exits after its last line was read, so
+    // this should be unreachable; it is here because "should be unreachable" is what the two bugs in the
+    // sibling `--jobs` mode also were (test/referee-eval-shard.test.ts).
+    if (results.length !== order.length) {
+        console.error(`--jobs: ${results.length} of ${order.length} languages came back — the run is incomplete`);
+        process.exit(2);
+    }
+    // Completion order is a race; the report is not allowed to be. Sorted the way `codes` is, by code
+    // unit, so a pooled report is line-for-line comparable with a serial one.
+    return results.sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
 }
 
 /**
@@ -341,8 +376,9 @@ async function serveChild(): Promise<void> {
 // ⚠ THE DEGRADED AND CHILD MODES MAY NOT WRITE. `--no-ort` manufactures mismatches on purpose and skips
 // the liveness guard, so writing under it would re-record the fleet from an engine with its neural path
 // switched off — the exact fleet-scale version of #1283 this file exists to prevent.
-if (write && (noOrt || noClear || isolate || asChild || jobs > 1)) {
-    console.error("--write cannot be combined with --no-ort, --no-clear, --isolate, --child or --jobs:\n"
+if (write && (noOrt || noClear || isolate || asChild || capOrt || jobs > 1)) {
+    console.error("--write cannot be combined with --no-ort, --no-clear, --isolate, --child,\n"
+        + "  --cap-ort or --jobs:\n"
         + "  those modes run a degraded, delegated or differently-configured engine, and writing\n"
         + "  from one re-records the goldens from something that is not the engine.");
     process.exit(2);
