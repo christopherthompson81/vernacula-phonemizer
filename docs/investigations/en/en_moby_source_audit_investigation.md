@@ -2320,12 +2320,131 @@ gone the referee-side collapse, gated on the headword ending `-lly`, hides nothi
 ⚠ AND THE YOD CLASS IS REFUSED, on the repo's own bar. Moby is conservative after coronals — `avenue`
 `ævənju`, `costume` `kɑstjum` — where GenAm drops the yod and we are right. It cannot go in
 `intentional`, which is positionwise and needs equal length. As a fold, `[tdnszlθ]ju` → `$1u` buys 28
-rows. But WE EMIT CORONAL+`ju` 199 TIMES IN OUR OWN SHIPPED LEXICON (`nju` 121, `dju` 42, `sju` 18,
-`θju` 12), so we make this distinction lexically and a symmetric fold would blind the referee to a real
-yod error, in either direction, at all 199 sites. FORCE→NORTH was accepted because it blinds nothing;
-this is the same test with the opposite answer, and 28 rows is not worth 199 blind spots.
+rows. But WE EMIT CORONAL+`ju` OURSELVES, so we make this distinction lexically and a symmetric fold
+would blind the referee to a real yod error, in either direction, at every one of those sites.
+FORCE→NORTH was accepted because it blinds nothing; this is the same test with the opposite answer.
+⚠ THE COUNT IS 147, NOT THE 199 FIRST WRITTEN HERE — see Run 45. 199 was a grep over the whole TSV, so
+the SPELLING column supplied most of it (`adjunct`, `adjudicate`, `manjur`). In the IPA column alone it
+is 147: `n` 62, `ɫ` 59, `θ` 12, `s` 6, `d` 5, `t` 3. The refusal is unchanged — 147 against 28 is the
+same verdict — but a number that large was worth being right about.
 
 Left on the table, measured and not taken: the syllabic-l class (78 rows, `cycling` `saɪkəlɪŋ` against
 `saɪklɪŋ`) is the same shape as the yod one and probably falls the same way; the ~650 unstressed-vowel
 rows need the weak-vowel classes revisited rather than a new mechanism; and `astilbe əstɪbi` — we drop
 an /l/ Moby has — is a genuine single defect found in the dropped-l bucket while looking for the class.
+
+## Run 44 — 2026-09-19 09:55 — reviewing Run 43: reproduced, and where its prose overstates its evidence
+
+Independent review of `fix/lly-geminate-and-yod` against `origin/main` (4b2c463e), run from a detached
+worktree pinned to 9f3abda8 so nothing shared the working tree.
+
+    MOBY=/mnt/data/moby/mobypron.unc npx tsx tools/gen/build-en-moby-referee.mts
+    npx tsx tools/english/en_rebuild_lexicon.mts
+    npx tsx tools/referee-eval/eval.ts en --jobs 8      # on BOTH 4b2c463e and 9f3abda8
+
+⚠ EVERYTHING NUMERIC IN RUN 43 REPRODUCES. The referee regenerates byte-identical (both
+`en.moby-lexicon.tsv` and `en.moby-oov.tsv`, `git status` clean after the run) and the lexicon
+round-trips 135,305/135,305 with 0 rows changed. Baseline → branch, re-measured end to end:
+
+    primary (wikipron us)   2584/4037 (64.0%)  →  2584/4037   unmoved
+    Moby in-dict            26522 (75.7%)      →  26624 (76.0%)   +102
+    Moby +intentional       28890 (82.4%)      →  29004 (82.8%)   intentional 2368 → 2380
+    Moby OOV                17454 (44.2%)      →  17454           unmoved
+
+⚠ AND THE 143-vs-102 GAP IS NOT A REGRESSION — MEASURED, NOT ARGUED. Dumped the full residual set on
+both trees (the rows that are neither folded-exact nor intentional-credited) and diffed them as sets:
+
+    main residual 6159 · branch residual 6045 · left the residual 114 · ENTERED the residual 0
+
+The 143 changed referee rows decompose as 102 newly exact + 12 newly intentional-credited + 27 still
+residual + 2 (`bully`, `gilly`) that already passed on main via a second, geminate-free variant. Zero
+rows moved the wrong way, and the structural reason is checkable without the run: `en.jsonc` has no
+`(.)\1` fold, our own dictionary now has 0 of 713 `-lly` rows with `L L`, and no engine reading of the
+143 contains an adjacent `l`/`ɫ` pair — so a referee row carrying the geminate could not have been
+matching before it was collapsed.
+
+⚠ THE RESIDUAL CHARACTERISATION IS EXACT. Recomputed on 4b2c463e: 6,159 rows, distance 1 = 3,217
+(52.2%), ≤2 = 82.2%, ≤3 = 93.3%; 2,508 single substitutions + 317 extra-symbol + 392 dropped-symbol =
+3,217, and every listed pair and count matches (the doc writes substitutions referee→ours, the
+`intentional` convention). `æ→ə 91` and `ʊ→ə 84` are each in a tie (with `æ→ɑ 91` and `ɛ→ə 84`), which
+is presentation, not error.
+
+`collapseSuffixL` IS SAFE, and the strongest check is not the spelling gate but the phone filter: it
+removes only an `L` whose predecessor is `L`. `unnaturally` is the one dictionary word that both ends
+`-lly` AND carries a real geminate, and its geminate is `N N`, so the filter cannot see it. Of the 150
+real geminates remaining in `g2p-dict.tsv`, no other ends `-lly`; `earring`, `bookkeeper`, `coattail`
+and `backcourt` are all still there.
+
+⚠ THREE PLACES WHERE THE PROSE CLAIMS MORE THAN THE DATA.
+
+  • THE en-GB CITATION IS SELECTIVE. `evilly` is `iːvli`/`iːvəli` — both single, as claimed. But
+    `foully` is `faʊli` AND `faʊlli`, and the citation takes the first of two variants; and `drolly`,
+    the headline example, is `dɹəʊlli` in en-GB — geminate, single variant, and not mentioned. The
+    corrections are still right, but on OUR OWN 708-to-5 consistency, not on en-GB corroboration.
+    The internal argument is in fact stronger than Run 43 made it: 554 `-lly` dictionary words whose
+    stem is itself in the dictionary and ends in `/L/` are single, 0 geminate, and the directly
+    comparable shapes — `fully`, `coolly`, `cruelly`, `wholly`, `solely`, `civilly`, `squally`,
+    `smelly` — are all single.
+  • THE YOD COUNT OF 199 IS A GREP ARTIFACT. `nju` 121 / `dju` 42 / `sju` 18 / `θju` 12 are substring
+    hits over the WHOLE TSV, and the spelling column supplies most of them — `adjunct`, `adjudicate`,
+    `manjur`. Counted in the IPA column only, we emit coronal+`ju` at 146 sites (`n` 62, `ɫ` 58, `θ`
+    12, `s` 6, `d` 5, `t` 3). THE REFUSAL SURVIVES THE CORRECTION — 146 blind spots against 28 rows
+    bought is the same verdict — and so does the environment-scoped variant, which was worth asking
+    about: restricting the fold to coronal + STRESSED `juː` still covers 58 sites, and they include
+    `disunion`, `disunity`, `disuse`, `ingenue`, `fondue`, `bethune`, where the yod is correct GenAm.
+    There is no environment here that separates our right yods from Moby's wrong ones.
+  • `155 real geminates` IS NOW 150. It was 155 on `origin/main` — and 5 of those 155 are exactly
+    `drolly`, `dully`, `evilly`, `foully`, `genteelly`, the rows this branch declares NOT real. The
+    number in the new comment and in Run 43 counts the defect it is fixing as part of the protected
+    class. The file header separately still says 144, a third figure, and still reads as an absolute
+    ("THE DICTIONARY PATH DOES NOT COLLAPSE") with no pointer to the carve-out 90 lines below it.
+
+  Two smaller things: `degeminate`'s one-line doc comment is now orphaned above `collapseSuffixL`'s
+  block comment, so `degeminate` is undocumented and `collapseSuffixL` has two headers; and the claim
+  that the 102 rows are "every one stem-final ⟨l⟩ plus `-ly`" is not quite true — `bally`, `bully`,
+  `colly`, `gilly`, `hally` are simplex and `gravelly` is stem + `-y`. Collapsing them is still right
+  (Moby is transcribing ⟨ll⟩), but the class is "headword spelled `-lly`", not "the adverbial suffix".
+
+The one residual blind spot the carve-out does buy: `coolly` and `cruelly` are collapsed on the
+referee side, and some GenAm sources do give `coolly` a long/ambisyllabic /l/. Our dictionary already
+commits to single there, so nothing regressed — but the referee can no longer say otherwise.
+
+    goldens 0 stale · C# parity 189 languages byte-identical, 36,495 rows · 6,076 tests / 317 files pass
+
+## Run 45 — 2026-09-19 — Run 44's findings applied, and a citation that was selective
+
+Run 44 measured what I argued: dumping the full residual on both trees and diffing as SETS, 114 rows
+left it and **0 entered**, so the 143-row referee diff hides no regression. The 143 are 102 newly
+exact, 12 newly intentional-credited, 27 still residual, and 2 (`bully`, `gilly`) that already passed
+via a geminate-free second variant. That is a better proof than the one I offered, which was that the
+count matched my prediction.
+
+⚠ I CITED THE en-GB REFEREE SELECTIVELY, WHICH IS THE FINDING WORTH KEEPING. I wrote that it "reads
+`evilly` as `iːvli` and `foully` as `faʊli`, single". True of `evilly`. `foully` has BOTH `faʊli` and
+`faʊlli`, and `drolly` — the first word on the list — is `dɹəʊlli`, geminate, its only variant. I
+quoted the two that agreed with me and not the one that did not. The corrections are still right, and
+the argument that makes them right was already in hand and stronger: restricted to `-lly` words whose
+STEM is in the dictionary and ends in /L/, the dictionary was 551 single to 3, with `fully`, `coolly`,
+`cruelly`, `wholly`, `solely` and `civilly` all single. That needs no witness. Both the curated note
+and the builder now say so, and say what the referee actually holds.
+
+⚠ AND THE YOD COUNT WAS A GREP ARTIFACT. 199 was a substring search over the whole TSV, so the
+SPELLING column supplied most of it — `adjunct`, `adjudicate`, `manjur`. In the IPA column alone it is
+147: `n` 62, `ɫ` 59, `θ` 12, `s` 6, `d` 5, `t` 3. The refusal stands (147 against 28 is the same
+verdict), and Run 44 also closed the variant I had not tried: restricting to coronal + STRESSED `juː`
+still covers 58 sites including `disunion`, `disunity`, `disuse`, `ingenue`, `fondue` and `bethune`,
+where the yod is correct GenAm. There is no safe environment here, not just no safe blanket fold.
+
+Two comment defects, both the kind that rot quietly:
+- THE PROTECTED-GEMINATE COUNT WAS WRITTEN THREE TIMES AND NEVER AGREED: 144 in the file header, 155 in
+  the new block, 150 in fact — and five of the 155 were the very rows this branch declares defective,
+  so the comment was counting the defect as part of the class protecting against it. One number now,
+  with the header pointing at the carve-out instead of reading as absolute.
+- `degeminate` LOST ITS DOC COMMENT to the new block landing directly beneath it, leaving
+  `collapseSuffixL` with two headers and `degeminate` with none.
+
+Also corrected: "every one stem-final ⟨l⟩ plus `-ly`" is the majority and not the rule — `bally`,
+`bully`, `colly`, `gilly`, `hally` are simplex and `gravelly` is stem + `-y`; the class the gate names
+is "headword spelled `-lly`". And the carve-out's one honest cost is now recorded: `coolly` and
+`cruelly` are collapsed on the referee side too, so the referee can no longer disagree with our single
+/l/ there, though nothing regressed because our dictionary already committed to it.

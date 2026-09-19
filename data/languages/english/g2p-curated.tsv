@@ -2170,8 +2170,14 @@ appreciatively	AH0 P R IY1 SH IY0 EY2 T IH0 V L IY0	AH0 P R IY1 SH IY0 AH0 T IH0
 # THE `-lly` GEMINATE, AND THE DICTIONARY DISAGREEING WITH ITSELF 708 TO 5. Stem-final ⟨l⟩ plus the
 # adverbial `-ly` degeminates in GenAm — `fully` is /ˈfʊli/, not /ˈfʊlli/ — and our dictionary already
 # says so for 708 words ending `-lly`, `abnormally` and `actually` and `accidentally` among them. Five
-# rows carry `L L` instead, which is CMUdict's own inconsistency rather than a distinction: the en-GB
-# referee reads `evilly` as `iːvli` and `foully` as `faʊli`, both single. Found while mining the Moby
+# rows carry `L L` instead, which is CMUdict's own inconsistency rather than a distinction. Restricted
+# to the like-for-like comparison — words whose STEM is itself in the dictionary and ends in /L/ — it
+# was 551 single to 3, with `fully`, `coolly`, `cruelly`, `wholly`, `solely` and `civilly` all single.
+# ⚠ THE en-GB REFEREE IS NOT A CLEAN WITNESS AND WAS FIRST CITED AS IF IT WERE. It reads `evilly` as
+# `iːvli` (single, both variants), but `foully` as BOTH `faʊli` and `faʊlli`, and `drolly` — the first
+# word on this list — as `dɹəʊlli`, geminate, its only variant. Quoting the two that agreed and not the
+# one that did not is how a weak witness passes for a strong one. The internal 551-to-3 carries this
+# on its own and is the reason to believe it. Found while mining the Moby
 # in-dict residual, where the mirror-image artifact — Moby writing the geminate for all 102 of these —
 # is fixed on the referee side in `build-en-moby-referee.mts`.
 # ⚠ `foully` ALSO GAINS ITS PRIMARY STRESS, which is the only change here that is not the geminate:
