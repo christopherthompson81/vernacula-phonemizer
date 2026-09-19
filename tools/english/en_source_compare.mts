@@ -125,6 +125,21 @@ export function mobyToArpabet(p: string): string[] | undefined {
             if (sym === "ju") { out.push("Y", "UW" + stress); stress = "0"; continue; }
             return undefined;
         }
+        // ⚠ AN ADJACENT BARE `sh` IS MOBY WRITING ʃ AS THE LETTERS, NOT AN /s/+/h/ SEAM. The file's
+        // consonants are bare letters and its ʃ is `/S/`, but it lapses into the spelling on 41 rows —
+        // `Dalmatian d/&/l'm/eI//S//@/n` and `dalmatian d/&/l'm/eI/sh/@/n` sit four lines apart. Left
+        // alone, `adulation`, `charades`, `oxidation`, `violation`, `reddish`, `vichy` and twelve more
+        // scored as permanent false disagreements in the in-dict tier.
+        // ⚠ THE DISCRIMINATOR IS THE SEPARATOR, AND IT IS EXACT — no headword, no seam test, no
+        // morphology. Moby writes a genuine /s/+/h/ seam with a stress or syllable mark between them:
+        // `mishap 'm/I/s,h/&/p`, `grasshopper 'gr/&/s,h/A/p/@/r`, `household 'h/AU/s,h/oU/ld`,
+        // `foxhole 'f/A/ks,h/oU/l`. Measured over every in-dict row: ADJACENT `sh` is 18 lapses and 0
+        // seams; SEPARATED `s,h`/`s'h` is 35 seams and 0 lapses. Not one exception either way.
+        // ⚠ AND IT IS `sh` ONLY. The same test fails for its neighbours, which is why they are absent:
+        // adjacent `gh` has `leghorn` (leg|horn) among its four, and adjacent `kh` is almost all seams
+        // — `back·haus`, `bank·head`, `lock·hart`, `monk·hood`, `stock·holm`. Moby's separator habit is
+        // consistent for this digraph and not for those.
+        if (c === "s" && s[i + 1] === "h") { out.push("SH"); i += 2; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
     }

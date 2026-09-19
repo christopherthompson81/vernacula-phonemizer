@@ -2946,3 +2946,39 @@ reading sits beside it. Multi-reading rows hide corruption from any all-readings
 
     Moby — words the dict carries   26,639/35,048 (76.0%)
     primary                         2,584 unmoved
+
+## Run 52 — 2026-09-19 — the bare `sh` class, and a discriminator that needed no morphology
+
+Run 51 left this measured and untaken: Moby writes ʃ as `/S/` but lapses into the spelling `sh` on 41
+rows, and `Dalmatian d/&/l'm/eI//S//@/n` sits four lines from `dalmatian d/&/l'm/eI/sh/@/n`.
+
+⚠ THE DISCRIMINATOR IS THE SEPARATOR, and finding it meant the block needed no headword, no seam test
+and no boundary table — which is the opposite of how the last three blocks went. Moby writes a genuine
+/s/+/h/ seam with a stress or syllable mark between the two letters:
+
+    mishap 'm/I/s,h/&/p     grasshopper 'gr/&/s,h/A/p/@/r     foxhole 'f/A/ks,h/oU/l
+
+Measured over every in-dict row: ADJACENT `sh` is **18 lapses and 0 seams**; SEPARATED `s,h`/`s'h` is
+**35 seams and 0 lapses**. Not one exception in either direction.
+
+⚠ AND THE FOUR APPARENT EXCEPTIONS WERE MY CLASSIFIER, NOT THE DATA. `exhalation`, `exhumation`,
+`ludwigshafen` and `sheepshead` first came out as "separated lapses". They are nothing of the kind:
+`exhalation ,/E/ks,h/@/'l/eI//S//@/n` has a genuine `ks,h` AND a correct `/S/` in the same row. I had
+classified on "our dictionary has SH somewhere in this word", which is not the same question as "at
+this position" — the same position-versus-anywhere error that produced 293 phantom hits in Run 49.
+
+⚠ AND IT IS `sh` ONLY, which is worth stating because the obvious generalisation is wrong. The same
+test fails for the neighbouring digraphs: adjacent `gh` has `leghorn` (leg·horn) among its four
+in-dict rows, and adjacent `kh` is almost entirely seams — `back·haus`, `bank·head`, `lock·hart`,
+`monk·hood`, `stock·holm`, 15 rows of them. Moby's separator habit is consistent for this digraph and
+not for those, so the rule is scoped to the one place it was verified.
+
+    Moby — words the dict carries   26,639 → 26,651 (76.0%), +intentional 82.8%
+    Moby — OOV                      17,455 → 17,464
+    primary                         2,584 unmoved — this is a referee repair, not an engine change
+    goldens 0 stale · parity 189 byte-identical · 6,076 tests
+
+`dalmatian` also collapses from two referee readings to one, the `/S/` row and the `sh` row having
+been the same reading written twice. Seam rows are untouched and verified by name: `mishap mɪshæp`,
+`grasshopper ɡɹæshɑpɚ`, `household haʊshoʊld`, `foxhole fɑkshoʊl`, `dachshund dækshʊnd`,
+`leghorn lɛɡhɔɹn`, `stockholm stɑkhoʊm`.
