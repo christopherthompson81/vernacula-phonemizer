@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39402 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39881 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -208,6 +208,7 @@ acanthaceous	ækənθeɪʃəs
 acanthine	əkænθɪn
 acanthite	əkænθaɪt
 acanthocarpous	əkænθəkɑɹpəs
+acanthocephalan	əkænθəsɛfələn
 acanthocladous	ækənθɑklədəs
 acanthoid	əkænθɔɪd
 acanthopterygian	ækənθɑptɚɪd͡ʒiən
@@ -463,6 +464,7 @@ acrography	əkɹɑɡɹəfi
 acrogynous	əkɹɑd͡ʒənəs
 acrolith	ækɹəlɪθ
 acrology	əkɹɑləd͡ʒi
+acromegaly	ækɹəmɛɡəli
 acromicria	ækɹəmɪkɹiə
 acromion	əkɹoʊmiən
 acron	ækɹɑn
@@ -519,6 +521,7 @@ actinozoan	æktənəzoʊən
 actis	æktɪs
 actium	æktiəm
 activize	æktəvaɪz
+actomyosin	æktəmaɪəsɪn
 actoridae	æktɔɹɪdi
 actualise	ækt͡ʃuəlaɪz
 actualism	ækt͡ʃuəlɪzəm
@@ -800,10 +803,13 @@ aeroembolism	ɛɹoʊɛmbəlɪzəm
 aerofoil	ɚəfɔɪl
 aerogenic	ɛɹəd͡ʒɛnɪk
 aerogenous	ɛɹɑd͡ʒənəs
+aerogram	ɛɹəɡɹæm
+aerogramme	ɛɹəɡɹæm
 aerograph	ɛɹəɡɹæf
 aerographic	ɛɹəɡɹæfɪk
 aerography	ɛɹɑɡɹəfi
 aerol	ɛɹoʊl
+aerolite	ɛɹəlaɪt
 aerolitic	ɛɹəlɪtɪk
 aerolitics	ɛɹəlɪtɪks
 aerologic	ɛɹəlɑd͡ʒɪk
@@ -811,9 +817,12 @@ aeromancy	ɛɹəmænsi
 aeromarine	ɛɹoʊmɚin
 aeromechanic	ɛɹoʊməkænɪk
 aeromechanics	ɛɹoʊməkænɪks
+aeromedical	ɛɹəmɛdɪkəl
+aeromedicine	ɛɹəmɛdɪsən
 aerometeorograph	ɛɹəmitiɚəɡɹæf
 aerometer	ɛɹɑmɪtɚ
 aerometry	ɛɹɑmɪtɹi
+aeronaut	ɛɹənɔt
 aeroneurosis	ɛɹoʊnʊɹoʊsɪs
 aeropause	ɛɹəpɔz
 aerope	eɪɛɹəpi
@@ -823,6 +832,7 @@ aerophilatelic	ɛɹoʊfɪlətɛlɪk
 aerophilately	ɛɹoʊfɪlætəli
 aerophobia	ɛɹəfoʊbiə
 aerophobic	ɛɹəfoʊbɪk
+aerophone	ɛɹəfoʊn
 aerophore	ɛɹəfɔɹ
 aerophoto	ɛɹoʊfoʊtoʊ
 aerophotography	ɛɹoʊfətɑɡɹəfi
@@ -952,6 +962,7 @@ agama	æɡəmə	ɑɡəmə
 agamede	æɡəmidi
 agamedes	æɡəmidiz
 agamete	eɪɡæmit
+agamic	əɡæmɪk
 agammaglobulinemia	eɪɡæməɡlɑbjələnʌmiə
 agamogenesis	æɡəmoʊd͡ʒɛnɪsɪs
 agamogenetic	æɡəmoʊd͡ʒənɛtɪk
@@ -1059,6 +1070,7 @@ agrammatism	eɪɡɹæmətɪzəm
 agrammatologia	əɡɹæmətəloʊd͡ʒiə
 agranulocytosis	əɡɹænjəloʊsaɪtoʊsɪs
 agrapha	æɡɹəfə
+agraphia	eɪɡɹæfiə
 agrarianly	əɡɹɛɹiənli
 agraulos	əɡɹɔləs
 agravic	əɡɹævɪk
@@ -1373,6 +1385,7 @@ alghero	ɑlɡɛɹoʊ
 algid	æld͡ʒɪd
 algin	æld͡ʒɪn
 algoid	ælɡɔɪd
+algolagnia	ælɡəlæɡniə
 algoman	ælɡoʊmən
 algometer	ælɡɑmɪtɚ
 algometric	ælɡəmɛtɹɪk
@@ -1485,6 +1498,7 @@ allochthon	əlɑkθən
 allodial	əloʊdiəl
 allodially	əloʊdiəli
 allodium	əloʊdiəm
+allogenic	æləd͡ʒɛnɪk
 alloiometric	əlɔɪəmɛtɹɪk
 allomerism	əlɑmɚɪzəm
 allomerize	əlɑmɚaɪz
@@ -2098,6 +2112,7 @@ andrewes	ændɹuz
 andreychuk	ændɹət͡ʃək
 andreyevka	əndɹeɪəfkə
 andrija	ɑndɹiə
+androcentric	ændɹəsɛntɹɪk
 androclea	ændɹoʊkliə
 androclinium	ændɹəklɪniəm
 androclus	ændɹəkləs
@@ -2135,6 +2150,7 @@ anemochorous	ænəmɑkɚəs
 anemogram	ənɛməɡɹæm
 anemographic	ənɛməɡɹæfɪk
 anemography	ænəmɑɡɹəfi
+anemometric	ænəmoʊmɛtɹɪk
 anemoscope	ənɛməskoʊp
 anemosis	ænəmoʊsɪs
 anemotaxis	ænəmoʊtæksɪs
@@ -2203,8 +2219,12 @@ anglify	æŋɡləfaɪ
 anglist	æŋɡlɪst
 anglistics	æŋɡlɪstɪks
 anglocentric	æŋloʊsɛntɹik
+anglomania	æŋɡləmeɪnəə
+anglomaniac	æŋɡləmeɪniæk
 anglomaniacal	æŋɡloʊmənaɪəkəl
 anglophilic	æŋɡləfɪlɪk
+anglophobe	æŋloʊfoʊb	æŋɡləfoʊb
+anglophobia	æŋɡləfoʊbiə
 anglophobic	æŋɡləfoʊbɪk
 angolese	æŋɡoʊliz
 angor	æŋɡɚ
@@ -2429,6 +2449,7 @@ anthracosilicosis	ænθɹəkoʊsɪləkoʊsɪs
 anthracosis	ænθɹəkoʊsɪs
 anthracotic	ænθɹəkɑtɪk
 anthrasilicosis	ænθɹəsɪləkoʊsɪs
+anthropocentrism	ænθɹəpoʊsɛntɹɪzəm
 anthropogenesis	ænθɹəpoʊd͡ʒɛnɪsɪs
 anthropogenetic	ænθɹəpoʊd͡ʒənɛtɪk
 anthropogeographic	ænθɹəpoʊd͡ʒiəɡɹæfɪk
@@ -2466,7 +2487,6 @@ anticatalase	æntikætəleɪs
 anticatalyst	æntikætəlɪst
 anticatarrhal	æntikətɑɹəl
 anticathexis	æntikəθɛksɪs
-anticathode	æntikæθoʊd
 antichlor	æntɪklɔɹ
 antichloristic	æntɪklɔɹɪstɪk
 antichristian	æntikɹɪst͡ʃən
@@ -2478,7 +2498,6 @@ anticipatively	æntɪsəpeɪtɪvli
 anticlastic	æntiklæstɪk
 anticlimax	æntɪklaɪmæks
 anticlinorium	æntɪklaɪnɔɹiəm
-anticlockwise	æntɪklɑkwaɪz
 anticly	æntɪkli
 anticoagulant	ænteɪkoʊæɡjələnt
 anticoagulative	æntikoʊæɡjəleɪtɪv
@@ -2824,6 +2843,7 @@ appropriable	əpɹoʊpɹiəbəl
 appropriative	əpɹoʊpɹieɪtɪv
 approximal	əpɹɑksəməl
 appulse	əpʌls
+apraxia	əpɹæksiə
 apresoline	əpɹɛsəlin
 apriorism	eɪpɹaɪɔɹɪzəm
 aprioristic	eɪpɹaɪɚɪstɪk
@@ -2978,6 +2998,7 @@ arcograph	ɑɹkəɡɹæf
 arcosolium	ɑɹkəsoʊliəm
 arcticologist	ɑɹktəkɑləd͡ʒɪst
 arcticology	ɑɹktəkɑləd͡ʒi
+arctogaea	ɑɹktəd͡ʒiə
 arcuately	ɑɹkjuɪtli
 arcuation	ɑɹkjueɪʃən
 arcus	ɑɹkəs
@@ -3293,6 +3314,8 @@ asemia	əsimiə
 asemic	əsɛmɪk
 asenath	æsənæθ
 aseneth	æsənɛθ
+asepsis	əsɛpsɪs
+aseptic	əsɛptɪk
 asepticism	əsɛptɪsɪzəm
 aser	eɪsɚ
 asexualise	eɪsɛkʃuəlaɪz
@@ -3460,6 +3483,7 @@ astrologous	əstɹɑləɡəs
 astromancy	æstɹəmænsi
 astrometric	æstɹoʊmɛtɹɪk
 astronautarum	æstɹoʊnɔtɑɹəm
+astronavigation	æstɹoʊnævəɡeɪʃən
 astrophotographic	æstɹoʊfoʊtəɡɹæfɪk
 astrosphere	æstɹəsfiɹ
 astucious	æstuʃəs
@@ -3498,6 +3522,7 @@ ataxy	ətæksi
 atebrin	ætəbɹɪn	ætəbɹin
 atelectatic	ætəlɛktætɪk
 ateleiosis	ətilioʊsɪs
+atelic	ætɛlɪk
 ateliers	ætəljeɪz
 ateliosis	ətilioʊsɪs
 ateliotic	ətɛliɑtɪk
@@ -3552,6 +3577,7 @@ atomics	ətɑmɪks
 atomise	ætəmaɪz
 atonally	eɪtoʊnəli
 atonia	ətoʊniə
+atonic	ətɑnɪk
 atonicity	ætʌnɪsɪti
 atrabiliousness	ætɹəbɪljəsnɪs
 atrahasis	ɑtɹɑhɑsɪs
@@ -3703,6 +3729,7 @@ autobiographically	ɔtəbaɪəɡɹæfɪkəli
 autobus	ɔtəbʌs
 autocade	ɔtəkeɪd
 autocar	ɑtoʊkɑɹ
+autocatalysis	ɔtoʊkətælɪsɪs
 autocatalytic	ɔtoʊkætəlɪtɪk
 autocatharsis	ɔtoʊkəθɑɹsɪs
 autocephaly	ɔtəsɛfəli
@@ -3711,6 +3738,7 @@ autocode	ɑtəkoʊd
 autocoid	ɔtəkɔɪd
 autocollimation	ɔtoʊkɑləmeɪʃən
 autocollimator	ɔtoʊkɑləmeɪtɚ
+autocorrelation	ɔtoʊkɔɹəleɪʃən
 autocross	ɑtoʊkɹɑs
 autocue	ɑtoʊkju
 autodidact	ɔtoʊdaɪdækt
@@ -3725,9 +3753,13 @@ autoerotism	ɔtoʊɛɹətɪzəm
 autofocus	ɑtoʊfoʊkəs
 autogamic	ɔtoʊɡæmɪk
 autogenesis	ɔtoʊd͡ʒɛnɪsɪs
+autogenetic	ɔtoʊd͡ʒənɛtɪk
 autogenously	ɔtɑd͡ʒənəsli
 autogeny	ɔtɑd͡ʒəni
+autogiro	ɔtəd͡ʒaɪɹoʊ
+autograft	ɔtəɡɹæft
 autogyro	ɔtəd͡ʒaɪɹoʊ
+autoharp	ɔtoʊhɑɹp
 autohypnosis	ɔoʊtoʊhɪpnoʊsɪs
 autohypnotic	ɔtoʊhɪpnɑtɪk
 autoicous	ɔtɔɪkəs
@@ -3763,11 +3795,14 @@ autostability	ɔtoʊstəbɪlɪti
 autostoper	ɔtoʊstoʊpɚ
 autostrada	ɑtoʊstɹɑdə
 autosuggestibility	ɔtoʊsəɡd͡ʒɛstəbɪlɪti
+autotelic	ɔtətɛlɪk
 autotomic	ɔtətɑmɪk
 autotomise	ɔtɑtəmaɪz
 autotomize	ɔtɑtəmaɪz
 autotoxemia	ɔtoʊtɑksimiə
 autotoxicosis	ɔtətɑksəkoʊsɪs
+autotoxin	ɔtətɑksɪn
+autotransplant	ɔtətɹænsplænt
 autotroph	ɔtətɹɑf
 autotrophy	ɔtɑtɹəfi
 autotruck	ɔtoʊtɹʌk
@@ -3817,6 +3852,7 @@ aviso	əvaɪzoʊ
 avitaminotic	eɪvaɪtəmənɑtɪk
 aviva	əvivə
 avlona	ɑvlɔnɑ
+avo	ɑvu	eɪvoʊ
 avoca	əvoʊkə
 avocatory	əvɑkətɔɹi
 avodire	ævədɚeɪ
@@ -3855,6 +3891,8 @@ axised	æksɪst
 axletree	æksəltɹi
 axman	æksmən
 axone	æksoʊn
+axonometric	æksənoʊmɛtɹɪk
+axoplasm	æksəplæzəm
 axseed	æksid
 axum	ɑksum
 ayah	ɑjə
@@ -3875,6 +3913,7 @@ azazel	əzeɪzəl
 azcarate	ɑzkɑɹɑteɪ
 azedarach	əzɛdɚæk
 azeglio	ɑzɛljɔ
+azeotrope	əziətɹoʊp
 azeotropy	eɪziɑtɹəpi
 azide	æzaɪd
 azido	æzɪdoʊ
@@ -3885,6 +3924,7 @@ azlon	æzlɑn
 azo	æzoʊ
 azobenzene	æzoʊbɛnzin
 azof	ɑzɔf
+azoic	æzoʊɪk
 azoimide	æzoʊɪmaɪd
 azole	æzoʊl
 azonic	eɪzɑnɪk
@@ -3980,6 +4020,7 @@ backswordman	bæksɔɹdmən
 backswordsman	bæksɔɹdzmən
 backveld	bækvɛlt
 baco	bɑkoʊ
+baconian	beɪkoʊniən
 bacteremia	bæktɚimiə
 bactericide	bæktiɹɪsaɪd
 bacterin	bæktɚɪn
@@ -4112,6 +4153,8 @@ ballism	bælɪzəm
 ballismus	bælɪzməs
 ballistician	bælɪstɪʃən
 ballistite	bælɪstaɪt
+ballistocardiogram	bəlɪstoʊkɑɹdiəɡɹæm
+ballistocardiograph	bəlɪstoʊkɑɹdiəɡɹæf
 ballistocardiography	bəlɪstoʊkɑɹdiɑɡɹəfi
 ballium	bæliəm
 ballocks	bɑləks
@@ -4282,6 +4325,7 @@ baroda	bɚoʊdə
 barognosis	bæɹɔɡnoʊsɪs
 barographic	bæɹəɡɹæfɪk
 barolo	bɚoʊloʊ
+barometrical	bæɹoʊmɛtɹikəl
 barometrograph	bæɹəmɛtɹəɡɹæf
 barometry	bɚɑmɪtɹi
 baronetise	bæɹənɪtaɪz
@@ -4707,6 +4751,7 @@ benzamine	bɛnzəmin
 benzeneazobenzene	bɛnzinæzoʊbɛnzin
 benzin	bɛnzɪn
 benzoate	bɛnzoʊeɪt
+benzocaine	bɛnzoʊkeɪn
 benzofuran	bɛnzoʊfjʊɹæn
 benzoic	bɛnzoʊɪk
 benzol	bɛnzoʊl
@@ -4888,6 +4933,8 @@ bibliogony	bɪbliɑɡəni
 biblioklept	bɪbliəklɛpt
 bibliological	bɪbliəlɑd͡ʒɪkəl
 bibliology	bɪbliɑləd͡ʒi
+bibliomancy	bɪblioʊmænsi
+bibliomania	bɪblioʊmeɪniə
 bibliomaniacal	bɪblioʊmənaɪəkəl
 bibliopegic	bɪbliəpɛd͡ʒɪk
 bibliopegy	bɪbliɑpəd͡ʒi
@@ -5054,12 +5101,17 @@ biogenous	baɪɑd͡ʒənəs
 biogeochemistry	baɪoʊd͡ʒioʊkɛmɪstɹi
 biogeographic	baɪoʊɡiʌɡɹæfɪk
 biographically	baɪəɡɹæfɪkəli
+bioluminescence	baɪoʊlumeɪnɛsəns
 biolysis	baɪɑlɪsɪs
 biolytic	baɪəlɪtɪk
 biomagnetic	baɪoʊmæɡnɛtɪk
+biomedicine	baɪoʊmɛdɪsən
 biometer	baɪɑmɪtɚ
 biometricist	baɪoʊmɛtɹɪsɪst
+biometrics	baɪəmɛtɹɪks
+biomorphic	baɪoʊmɔɹfɪk
 bion	baɪɑn
+bionomics	baɪənɑmɪks
 bionomist	baɪɑnəmɪst
 bionomy	baɪɑnəmi
 bioplasm	baɪoʊplæzəm
@@ -5074,6 +5126,7 @@ biostatics	baɪoʊstætɪks
 biot	bioʊ
 biotechnologically	baɪoʊtɛknəlɑd͡ʒɪkəli
 biotitic	baɪətɪtɪk
+biotype	baɪətaɪp
 biotypic	baɪətɪpɪk
 biotypology	baɪətaɪpɑləd͡ʒi
 bipack	baɪpæk
@@ -5239,6 +5292,7 @@ blasphemousness	blæsfəməsnɪs
 blastemic	blæstɛmɪk
 blastie	blæsti
 blastment	blæstmənt
+blastogenesis	blæstəd͡ʒɛnɪsɪs
 blastomere	blæstəmiɹ
 blastomeric	blæstəmɛɹɪk
 blastomycotic	blæstoʊmaɪkɑtɪk
@@ -5378,6 +5432,7 @@ bogues	boʊɡs
 boguslawsky	boʊɡəslɑfski
 bogy	boʊɡi
 bohnenberger	boʊnənbɚɡɚ
+bohol	bɔhɔl
 bohorok	boʊhɔɹɑk
 bohuslav	bɔhʊslɑf
 boiardo	bɔɪɑɹdoʊ
@@ -5396,6 +5451,7 @@ bolases	boʊləsɪz
 boldfacedly	boʊldfeɪsɪdli
 boldhearted	boʊldhɑɹtɪd
 boldo	bɑldoʊ
+boliviano	boʊlɪviɑnoʊ
 bollandist	bɑləndɪst
 bollandus	boʊlændəs
 bollock	bɑlək
@@ -5403,6 +5459,7 @@ bollocking	bɑləkɪŋ
 bologne	bɔlɔnjə
 bolograph	boʊləɡɹæf
 bolography	bəlɑɡɹəfi
+bolometric	boʊləmɛtɹɪk
 bolshevistic	boʊlʃəvɪstɪk
 bolshevize	boʊlʃəvaɪz
 bolshy	boʊlʃi
@@ -5752,6 +5809,7 @@ brassiere	bɹæziɚ
 bratianu	bɹɑtiɑnoʊ
 bratina	bɹətinə
 brattishing	bɹætɪʃɪŋ
+brattleboro	bɹætəlbɚoʊ
 braunfels	bɹɔnfəlz
 braunite	bɹaʊnaɪt
 brawly	bɹɔli
@@ -6794,6 +6852,7 @@ carinate	kæɹəneɪt
 carinthia	kɚɪnθiə
 carinula	kɚɪnjələ
 carinulate	kɚɪnjəleɪt
+cariogenic	kɛɹioʊd͡ʒɛnɪk
 cariole	kæɹioʊl
 cariousness	kɛɹiəsnɪs
 carisa	kɚɪsə
@@ -7108,6 +7167,7 @@ caxias	kɑʃiəs
 caxtonian	kækstoʊniən
 cayey	kɑjɛi
 cayley	keɪli
+cayuga	keɪjuɡə
 cazenovia	kæzənoʊviə
 ceaselessness	sislɪsnɪs
 cebriones	səbɹaɪəniz
@@ -7175,6 +7235,7 @@ cenogenetic	sinəd͡ʒənɛtɪk
 cenotaphic	sɛnətæfɪk
 cenote	sɛnoʊti
 censorinus	sɛnsɔɹinəs
+censoriousness	sɛnsɔɹiəsnɪs
 censual	sɛnʃuəl
 censurable	sɛnʃɚəbəl
 censurableness	sɛnʃɚəbəlnɪs
@@ -7228,10 +7289,12 @@ cephalad	sɛfəlæd
 cephalalgia	sɛfəlæld͡ʒə
 cephalate	sɛfəlɪt
 cephalitis	sɛfəlaɪtɪs
+cephalochordate	sɛfəloʊkɔɹdeɪt
 cephalodium	sɛfəloʊdiəm
 cephalonia	sɛfəloʊniə
 cephalopodous	sɛfəlɑpədəs
 cephalothoracic	sɛfəloʊθɚæsɪk
+cephalothorax	sɛfəloʊθɔɹæks
 cephalous	sɛfələs
 cephalus	sɛfələs
 cepicka	t͡ʃɛpɪt͡ʃkɑ
@@ -7421,6 +7484,7 @@ changemaker	t͡ʃeɪnd͡ʒmeɪkɚ
 changepocket	t͡ʃeɪnd͡ʒpɑkɪt
 changsha	t͡ʃɑŋʃɑ
 changteh	t͡ʃɑŋdʌ
+chanoyu	t͡ʃɑnɔju
 chansonnier	ʃɑnsənjeɪ
 chantecler	t͡ʃæntəklɛɹ
 chanterelle	ʃæntɚɛl
@@ -7787,6 +7851,7 @@ chiriqui	t͡ʃiɹiki
 chirk	t͡ʃɚk
 chiro	t͡ʃiɹoʊ
 chirogymnast	kaɪɹoʊd͡ʒɪmnæst
+chiromancy	kaɪɹəmænsi
 chiropodic	kaɪɹəpɑdɪk
 chiropodist	kaɪɹɑpədɪst
 chiropody	kaɪɹɑpədi
@@ -7831,6 +7896,7 @@ chlorellaceous	klɔɹəleɪʃəs
 chlorenchyma	klɚɛŋkəmə
 chlorguanide	klɔɹɡwɑnaɪd
 chloridize	klɔɹɪdaɪz
+chlorination	klɔɹineɪʃən
 chlorinity	klɔɹɪnɪti
 chlorinous	klɔɹənəs
 chloroacetic	klɔɹoʊəsitɪk
@@ -7838,6 +7904,7 @@ chloroacetone	klɔɹoʊæsɪtoʊn
 chloroacetophenone	klɔɹoʊæsətoʊfənoʊn
 chlorobenzene	klɔɹəbɛnzin
 chlorobromomethane	klɔɹəbɹoʊməmɛθeɪn
+chlorocarbon	klɔɹəkɑɹbən
 chloroethene	klɔɹoʊɛθin
 chloroethylene	klɔɹoʊɛθəlin
 chloroguanide	klɔɹəɡwɑnaɪd
@@ -7910,6 +7977,7 @@ chondriome	kɑndɹioʊm
 chondriomite	kɑndɹioʊmaɪt
 chondriosome	kɑndɹioʊsoʊm
 chondritic	kɑndɹɪtɪk
+chondrocranium	kɑndɹoʊkɹeɪniəm
 chondroma	kɑndɹoʊmə
 chondrosarcoma	kɑndɹoʊsɑɹkoʊmə
 chondrus	kɑndɹəs
@@ -7923,6 +7991,7 @@ choplogic	t͡ʃɑplɑd͡ʒɪk
 choragic	kɚæd͡ʒɪk
 choragus	kɚeɪɡəs
 chordamesoderm	kɔɹdəmɛzədɚm
+chordate	kɔɹdeɪt
 chordee	kɔɹdi
 chorea	kɚiə
 choregrapher	kɚɛɡɹəfɚ
@@ -7939,7 +8008,6 @@ choriso	t͡ʃɚisoʊ
 chorizo	t͡ʃɚizoʊ
 chorobates	kɔɹɑbətiz
 chorogi	t͡ʃɔɹoʊɡi
-chorographic	kɔɹəɡɹæfɪk
 chorography	kɚɑɡɹəfi
 choroiditis	kɔɹɔɪdaɪtɪs
 chorological	kɔɹəlɑd͡ʒɪkəl
@@ -7974,6 +8042,7 @@ christingle	kɹistɪŋəl
 christless	kɹaɪstlɪs
 christmasberry	kɹɪsməsbɛɹi
 christmastide	kɹɪsməstaɪd
+christocentric	kɹɪstəsɛntɹɪk
 christophany	kɹɪstɑfəni
 chromatics	kɹoʊmætɪks
 chromatism	kɹoʊmətɪzəm
@@ -8193,6 +8262,7 @@ circumgyration	sɚkəmd͡ʒaɪɹeɪʃən
 circumgyratory	sɚkəmd͡ʒaɪɹətɔɹi
 circumincession	sɚkəmɪnsɛʃən
 circumlittoral	sɚkəmlɪtɚəl
+circumlocution	sɚkəmloʊkjuʃən
 circumnavigatory	sɚkəmnævəɡətɔɹi
 circumnutate	sɚkəmnuteɪt
 circumnutatory	sɚkəmnutətɔɹi
@@ -8560,7 +8630,6 @@ cocalus	kɑkələs
 coccic	kɑksɪk
 coccobacillus	kɑkoʊbəsɪləs
 coccygius	kɑksaɪd͡ʒiəs
-cochabamba	koʊt͡ʃɑbɑmbɑ
 cochineal	kɑt͡ʃənil
 cockabully	kɑkəbʊli
 cockaigne	kɑkeɪn
@@ -8584,6 +8653,7 @@ cockswain	kɑksən
 cockup	kɑkʌp
 cocles	koʊkliz
 cocobola	koʊkəboʊlə
+cocobolo	koʊkəboʊloʊ
 cocomat	koʊkoʊmæt
 coconsciousness	koʊkɑnʃəsnɪs
 cocozelle	kɑkəzɛli
@@ -8595,6 +8665,7 @@ codetta	koʊdɛtə
 codicillary	kɑdɪsɪlɚi
 codicology	koʊdɪkɑləd͡ʒi
 codline	kɑdlaɪn
+codomain	koʊdoʊmeɪn
 cods	kɑdz
 codswallop	kpdzwɑləp
 coeditor	koʊɛdɪtɚ
@@ -8649,7 +8720,6 @@ coft	kɑft
 cogitatively	kɑd͡ʒɪteɪtɪvli
 cogitativeness	kɑd͡ʒɪteɪtɪvnɪs
 cogito	koʊɡɪtoʊ
-cognateness	kɑɡneɪtnɪs
 cognatic	kɑɡnætɪk
 cognation	kɑɡneɪʃən
 cognisable	kɑɡnɪzəbəl
@@ -8698,6 +8768,7 @@ colchis	kɑlkɪs
 colcothar	kɑlkəθɚ
 coldslaw	koʊldslɔ
 coldstream	koʊldstɹim
+colectomy	kəlɛktəmi
 coleoptera	koʊliɑptɚə
 coleopteran	koʊliɑptɚən
 coleopteron	koʊliɑptɚən
@@ -8708,6 +8779,7 @@ colfax	koʊlfæks
 colichemarde	koʊliʃmɑɹd
 colicroot	kɑlɪkɹut
 coligny	kɔlinji
+colima	koʊlimɑ
 colinette	kɑlənɛt
 colitic	koʊlɪtɪk
 collaboratively	kəlæbɚeɪtɪvli
@@ -8728,6 +8800,7 @@ collenchymatic	kəlɛŋkəmætɪk
 collied	kɑlid
 colliery	kɑljɚi
 collieshangie	kɑliʃæŋi
+collinear	kəlɪniɚ
 collinearly	kəlɪniɚli
 collingswood	kɑlɪŋzwʊd
 collinsia	kəlɪnsiə
@@ -9024,6 +9097,7 @@ condylomatous	kɑndəlɑmətəs
 conelrad	kɑnəlɹæd
 conenose	koʊnoʊz
 confab	kɑnfæb
+confabulatory	kənfæbjʊlətɔɹi
 confalonieri	koʊnfɑloʊnjɛɹi
 confarreate	kənfæɹiɪt
 confarreation	kɑnfæɹieɪʃən
@@ -9075,7 +9149,9 @@ congruently	kɑŋɡɹuəntli
 congruousness	kɑŋɡɹuəsnɪs
 conicity	kɑnɪsɪti
 conicoid	kɑnəkɔɪd
+conidiophore	koʊnɪdiəfɔɹ
 conidiophorous	kənɪdiɑfɚəs
+conidium	koʊnɪdiəm
 coniferin	koʊnɪfɚɪn
 coniine	koʊniin
 conine	koʊnin
@@ -9391,7 +9467,6 @@ cordwainer	kɔɹdweɪnɚ
 corelation	kɔɹəleɪʃən
 corelative	kɚɛlətɪv
 corelatively	kɚɛlətɪvli
-coreligionist	kɔɹɪlɪd͡ʒənɪst
 corelli	kɔɹɛli
 coremaker	kɔɹmeɪkɚ
 coremium	kɔɹimiəm
@@ -9487,6 +9562,7 @@ corsetiere	kɔɹsɪtjɛɹ
 corsicana	kɔɹsəkænə
 corslet	kɔɹslɪt
 cortically	kɔɹtɪkəli
+corticate	kɔɹtəkɪt
 corticolous	kɔɹtɪkələs
 corticotrophin	kɔɹtɪkoʊtɹoʊfɪn
 corunna	kɚʌnə
@@ -9564,6 +9640,7 @@ cothamore	koʊtəmɔɹ
 cothurn	koʊθɚn
 cotice	kɑtɪs
 cotidal	koʊtaɪdəl
+cotillion	koʊtɪljən
 cotillon	kətɪljən
 cotise	kɑtɪs
 cotquean	kɑtkwin
@@ -9804,6 +9881,7 @@ crescente	kɹɛsɛnteɪ
 crescive	kɹɛsɪv
 cresco	kɹɛskoʊ
 cresius	kɹiʃiəs
+cresol	kɹisoʊl
 cresphontes	kɹɛsfɑntiz
 cressie	kɹɛsi
 cresskill	kɹɛskɪl
@@ -9966,6 +10044,7 @@ cryptoanalyst	kɹɪptoʊænəlɪst
 cryptobranchiate	kɹiptoʊbɹæŋkɪeɪt
 cryptoclimate	kɹɪptoʊklaɪmɪt
 cryptoclimatology	kɹɪptoʊklaɪmətɑləd͡ʒi
+cryptococcosis	kɹɪptoʊkɑkoʊsɪs
 cryptocrystalline	kɹɪptoʊkɹɪstəlɪn
 cryptogrammatic	kɹɪptəɡɹəmætɪk
 cryptolith	kɹɪptəlɪθ
@@ -10058,6 +10137,7 @@ cunaxa	kjunæksə
 cunctative	kʌŋktətɪv
 cunctator	kəŋkteɪtɚ
 cuneal	kjuniəl
+cuneate	kjuniɪt
 cuneately	kjuniɪtli
 cuneatic	kjuniætɪk
 cuneiformist	kjuniəfɔɹmɪst
@@ -10207,6 +10287,7 @@ cyclization	saɪklɪzeɪʃən
 cyclize	saɪklaɪz
 cycloacetylene	saɪkloʊəsɛtəlɪn
 cyclocephaly	saɪkləsɛfəli
+cyclogenesis	saɪkləd͡ʒɛnɪsɪs
 cyclograph	saɪkləɡɹæf
 cyclohexatriene	saɪkləhɛksətɹaɪin
 cyclohexylsulfamate	saɪkloʊhɛksəlsʌlfəmeɪt
@@ -10215,10 +10296,12 @@ cyclonal	saɪkloʊnəl
 cyclonite	saɪklənaɪt
 cycloolefin	saɪkloʊoʊləfɪn
 cyclopaedia	saɪkləpidiə
+cycloparaffin	saɪkləpæɹəfɪn
 cyclopentadiene	saɪkləpɛntədaɪin
 cyclopentane	saɪkləpɛnteɪn
 cyclopes	saɪkloʊpiz
 cyclopia	saɪkloʊpiə
+cycloplegia	saɪkləplid͡ʒiə
 cyclopropane	saɪkləpɹoʊpeɪn
 cyclorama	saɪklɚæmə
 cyclosilicate	saɪkləsɪləkɪt
@@ -10226,6 +10309,7 @@ cyclosis	saɪkloʊsɪs
 cyclostomate	saɪklɑstəmɪt
 cyclostomatous	saɪkləstɑmətəs
 cyclostrophic	saɪkləstɹɑfɪk
+cyclostyle	saɪkleɪstaɪl
 cyclothymiac	saɪkləθaɪmiæk
 cyclotome	saɪklətoʊm
 cyclotomic	saɪklətɑmɪk
@@ -10306,11 +10390,15 @@ cystotomy	sɪstɑsəmi
 cytaster	saɪtæstɚ
 cythera	sɪθɚə
 cytissorus	saɪtɪsɔɹəs
+cytochemistry	saɪtəkɛmɪstɹi
 cytoclasis	saɪtɑkləsɪs
 cytoclastic	saɪtəklæstɪk
+cytogenetics	saɪtoʊd͡ʒənɛtɪks
 cytoid	saɪtɔɪd
+cytokinesis	saɪtoʊkɪnisɪs
 cytologic	saɪtəlɑd͡ʒɪk
 cytolysin	saɪtɑlɪsɪn
+cytolytic	saɪtəlɪtɪk
 cyton	saɪtən
 cytopathogenic	saɪtoʊpæθəd͡ʒɛnɪk
 cytopathology	saɪtoʊpəθɑləd͡ʒi
@@ -10388,6 +10476,7 @@ dahoon	dəhun
 daibutsu	daɪbʊtsʊ
 daimen	deɪmɪn
 daimonistic	daɪmənɪstɪk
+daimyo	daɪmjɔ
 daingerfield	deɪnd͡ʒɚfild
 daira	deɪaɪɹə
 dairywoman	dɛɹiwʊmən
@@ -10871,6 +10960,7 @@ demineralize	dimɪnɚəlaɪz
 demiphon	dɛməfɑn
 demipique	dɛmɪpik
 demirelief	dɛmiɹɪlif
+demisemiquaver	dɛmisɛmikweɪvɚ
 demist	dimɪst
 demitasse	dɛmɪtæs
 demiurgeous	dɛmiɚd͡ʒəs
@@ -10959,7 +11049,6 @@ deodorise	dioʊdɚaɪz
 deodorize	dioʊdɚaɪz
 deoxidise	diɑksɪdaɪz
 deoxygenize	diɑksɪd͡ʒənaɪz
-deoxyribonuclease	diɑksɚaɪboʊnuklieɪs
 depaint	dɪpeɪnt
 departmentalise	dɪpɑɹtmɛntəlaɪz
 departmentally	dɪpɑɹtmɛntəli
@@ -11358,12 +11447,14 @@ dichondra	daɪkɑndɹə
 dichotomic	daɪkətɑmɪk
 dichotomise	daɪkɑtəmaɪz
 dichotomist	daɪkɑtəmɪst
+dichotomous	dɪkɑtəməs
 dichotomously	dɪkɑtəməsli
 dichroiscope	daɪkɹoʊɪskoʊp
 dichroiscopic	daɪkɹoʊɪskɑpɪk
 dichroite	daɪkɹoʊaɪt
 dichroitic	daɪkɹoʊɪtɪk
 dichromat	daɪkɹoʊmæt
+dichromatic	daɪkɹoʊmætɪk
 dichromaticism	daɪkɹoʊmætɪsɪzəm
 dichromatopsia	daɪkɹoʊmətɑpsiə
 dichromic	daɪkɹoʊmɪk
@@ -11416,6 +11507,7 @@ diethylacetal	daɪɛθəlæsɪtæl
 diethylaminoethanol	daɪɛθələminoʊɛθənoʊl
 diethylethanolamine	daɪɛθəlɛθənoʊləmin
 diethylmalonylurea	daɪɛθəlmælənɪljʊɹiə
+diethylstilbestrol	daɪɛθəlstɪlbɛstɹoʊl
 differentia	dɪfɚɛnʃiə
 differentiable	dɪfɚɛnʃiəbəl
 differentially	dɪfɚɛnʃəli
@@ -11455,6 +11547,7 @@ diglyph	daɪɡlɪf
 dignifiedly	dɪɡnəfaɪdli
 dignifiedness	dɪɡnəfaɪdnɪs
 dignitarial	dɪɡnɪtɛɹiəl
+digressive	dɪɡɹɛsɪv
 dihedron	daɪhidɹən
 dihigo	diiɡoʊ
 dihydrate	daɪhaɪdɹeɪt
@@ -11489,6 +11582,7 @@ dilutely	dɪlutli
 diluteness	dɪlutnɪs
 diluvium	dɪluviəm
 dimenhydrinate	daɪmɛnhaɪdɹəneɪt
+dimercaprol	daɪmɚkæpɹoʊl
 dimerize	daɪmɚaɪz
 dimerous	dɪmɚəs
 dimethoxymethane	daɪməθɑksimɛθeɪn
@@ -11579,6 +11673,7 @@ dipleurula	daɪplʊɹjʊlə
 diplex	daɪplɛks
 diplocardiac	dɪpləkɑɹdiæk
 diplococcic	dɪpləkɑksɪk
+diplococcus	dɪpləkɑkəs
 diploe	dɪploʊi
 diploetic	dɪploʊɛtɪk
 diplomatics	dɪpləmætɪks
@@ -11589,6 +11684,7 @@ diplophonic	dɪpləfɑnɪk
 diplopic	dɪplɑpɪk
 diplosis	dɪploʊsɪs
 diplostemonous	dɪpləstimənəs
+diplotene	dɪploʊtin
 dipnoan	dɪpnoʊən
 dipodic	daɪpɑdɪk
 dipody	dɪpədi
@@ -11829,6 +11925,7 @@ dissyllabic	dɪsɪlæbɪk
 dissyllabise	dɪsɪləbaɪz
 dissyllabism	dɪsɪləbɪzəm
 dissyllabize	dɪsɪləbaɪz
+dissyllable	dɪsɪləbəl
 distain	dɪsteɪn
 distally	dɪstəli
 distastefully	dɪsteɪstfəli
@@ -11879,12 +11976,12 @@ ditokous	dɪtəkəs
 ditriglyph	daɪtɹaɪɡlɪf
 dittersdorf	dɪtɚzdɔɹf
 dittograph	dɪtəɡɹæf
+dittographic	dɪtəɡɹæfɪk
 diu	diʊ
 diuresis	daɪjʊɹisɪs
 diuril	daɪɚɪl
 diushambe	djʊʃɑmbɛ
 divali	dɪvɑli
-divaricate	daɪvæɹikeɪt
 diversiform	dɪvɚsəfɔɹm
 diversionist	daɪvɚʃənɪst
 divertive	dɪvɚtɪv
@@ -11933,6 +12030,7 @@ dobrovir	doʊbɹoʊviɹ
 dobrovolsky	doʊbɹoʊvoʊlski
 dobruja	doʊbɹud͡ʒə
 dobuan	doʊbuən
+docetism	dəsitɪzəm
 dockmackie	dɑkmæki
 dockmaster	dɑkmæstɚ
 docosanoic	dɑkəsənoʊɪk
@@ -12021,6 +12119,7 @@ dolphinarium	dɑlfɪnɛɹiəm
 dolphinfish	dɑlfɪnfɪʃ
 dolus	doʊləs
 domagk	doʊmɑk
+domanial	dəmeɪniəl
 domenic	dɑmənɪk
 domett	dɑmɪt
 domically	doʊmɪkəli
@@ -12128,6 +12227,7 @@ doughface	doʊfeɪs
 dought	daʊt
 doughton	dɔtʊn
 douglasville	dʌɡləsvɪl
+doukhobor	dukoʊbɔɹ
 doumbia	dʌmbiɑ
 doup	daʊp
 doupion	dupioʊn
@@ -12179,7 +12279,9 @@ drabbler	dɹæblɚ
 drack	dɹæk
 dracon	dɹeɪkɑn
 dracone	dɹækoʊn
+draconic	dɹeɪkɑnɪk
 draconid	dɹækənɪd
+draconis	dɹeɪkoʊnɪs
 draegerman	dɹeɪɡɚmən
 dragee	dɹæʒeɪ
 draggingly	dɹæɡɪŋli
@@ -12244,7 +12346,6 @@ drogher	dɹoʊɡɚ
 droits	dɹɔɪts
 droitural	dɹɔɪt͡ʃɚəl
 drollery	dɹoʊlɚi
-drollness	dɹoʊlnɪs
 drome	dɹoʊm
 dromoi	dɹɑmɔɪ
 dromond	dɹɑmənd
@@ -12263,6 +12364,7 @@ dropwort	dɹɑpwɚt
 droshky	dɹɑʃki
 drosky	dɹɑski
 drosometer	dɹoʊsɑmɪtɚ
+drosophila	dɹoʊsɑfələ
 drossos	dɹoʊsoʊs
 drouth	dɹaʊθ
 drouthy	dɹaʊθi
@@ -12308,6 +12410,7 @@ dudeen	dudin
 dudelsack	dudəlsæk
 duecento	duət͡ʃɛntoʊ
 duello	duɛloʊ
+duende	dʊɛndi
 duerk	dɚk
 duffle	dʌfəl
 dugento	dud͡ʒɛntoʊ
@@ -12372,6 +12475,7 @@ duodenary	duədɛnɚi
 duodenitis	duoʊdɪnaɪtɪs
 duodiode	duədaɪoʊd
 duodiodepentode	duoʊdaɪoʊdpɛntoʊd
+duomo	dwɔmɔ
 duopsony	duɑpsəni
 duotriode	duətɹaɪoʊd
 duotype	duətaɪp
@@ -12611,6 +12715,8 @@ ectoblast	ɛktəblæst
 ectocornea	ɛktoʊkɔɹniə
 ectocranial	ɛktoʊkɹeɪniəl
 ectoenzyme	ɛktoʊɛnzaɪm
+ectogenesis	ɛktoʊd͡ʒɛnɪsɪs
+ectogenetic	ɛktoʊd͡ʒənɛtɪk
 ectogenic	ɛktoʊd͡ʒɛnɪk
 ectogenous	ɛktɑd͡ʒənəs
 ectomere	ɛktəmiɹ
@@ -12828,18 +12934,23 @@ electrolyse	ɪlɛktɹəlaɪz
 electromagnetics	ɪlɛktɹoʊmæɡnɛtɪks
 electrometallurgy	ɪlɛktɹoʊmɛtəlɚd͡ʒi
 electrometeor	ɪlɛktɹoʊmitiɚ
+electrometric	ɪlɛktɹoʊmɛtɹɪk
 electromotor	ɪlɛktɹəmoʊtɚ
 electromyogram	ɪlɛktɹəmaɪəɡɹæm
 electronarcosis	ɪlɛktɹoʊnɑɹkoʊsɪs
+electronegative	ɪlɛktɹoʊnɛɡətɪv
 electroneutral	ɪlɛktɹoʊnutɹæl
 electronvolt	ɪlɛktɹɑnvɑlt
+electrophile	ɪlɛktɹoʊfaɪl
 electrophone	ɪlɛktɹəfoʊn
 electrophonic	ɪlɛktɹəfɑnɪk
 electrophoretic	ɪlɛktɹoʊfɚɛtɪk
 electrophorus	ɪlɛktɹɑfɚəs
 electrophotographic	ɪlɛktɹəfoʊtəɡɹæfɪk
 electrophotography	ɪlɛktɹoʊfətɑɡɹəfi
+electrophysiological	ɪlɛktɹoʊfɪziəlɑd͡ʒɪkəl
 electroplaque	ɪlɛktɹəplæk
+electroplax	ɪlɛktɹəplæks
 electroplexy	ɪlɛktɹəplɛksi
 electroreduction	ɪlɛktɹɔɹɪdʌkʃən
 electrorefining	ɪlɛktɹɔɹɪfaɪnɪŋ
@@ -12852,8 +12963,12 @@ electrosynthetic	ɪlɛktɹoʊsɪnθɛtɪk
 electrotactic	ɪlɛktɹoʊtæktɪk
 electrotaxis	ɪlɛktɹoʊtæksɪs
 electrotechnician	ɪlɛktɹoʊtɛknɪʃən
+electrotechnics	ɪlɛktɹoʊtɛknɪks
 electrotherapeutics	ɪlɛktɹoʊθɛɹəpjutɪks
 electrotherapeutist	ɪlɛktɹoʊθɛɹəpjutɪst
+electrotherapist	ɪlɛktɹoʊθɛɹəpɪst
+electrotherapy	ɪlɛktɹoʊθɛɹəpi
+electrothermal	ɪlɛktɹəθɚməl
 electrothermally	ɪlɛktɹəθɚməli
 electrothermics	ɪlɛktɹoʊθɚmɪks
 electrotonic	ɪlɛktɹətɑnɪk
@@ -12862,6 +12977,8 @@ electrotropic	ɪlɛktɹoʊtɹɑpɪk
 electrotropism	ɪlɛktɹətɹoʊpɪzəm
 electrotypist	ɪlɛktɹoʊtaɪpɪst
 electrotypy	ɪlɛktɹətaɪpi
+electrovalence	ɪlɛktɹoʊveɪləns
+electrovalent	ɪlɛktɹoʊveɪlənt
 electrowinning	ɪlɛktɹoʊwɪnɪŋ
 electryon	ɪlɛktɹiən
 electuary	ɪlɛkt͡ʃuɛɹi
@@ -12983,6 +13100,7 @@ embracery	ɛmbɹeɪsɚi
 embranchment	ɛmbɹænt͡ʃmənt
 embrangle	ɛmbɹæŋɡəl
 embrocate	ɛmbɹoʊkeɪt
+embrocation	ɛmbɹoʊkeɪʃən
 embroideress	ɛmbɹɔɪdɚɪs
 embrown	ɪmbɹaʊn
 embrue	ɛmbɹu
@@ -13048,6 +13166,7 @@ employe	ɑmplɔɪeɪ
 empoison	ɛmpɔɪzən
 empoverish	ɛmpɑvɚɪʃ
 empusae	ɛmpjusi
+empyema	ɛmpiimə
 empyreal	ɛmpɚiəl
 empyrean	ɛmpɚiən
 emsworth	ɛmzwɚθ
@@ -13061,11 +13180,13 @@ enallage	ɛnæləd͡ʒi
 enalus	inələs
 enamour	ɪnæmɚ
 enantiomorph	ɪnæntiəmɔɹf
+enantiomorphism	ɪnæntiəmɔɹfɪzəm
 enantiosis	ɪnæntioʊsɪs
 enantiotropic	ɪnæntiətɹɑpɪk
 enantiotropy	ɪnæntiɑtɹəpi
 enarched	ɛnɑɹt͡ʃt
 enarete	ɪnɑɹɪti
+enargite	ɛnɑɹd͡ʒaɪt
 enarme	ɪnɑɹm
 enarthrodial	ɛnɑɹθɹoʊdiəl
 enate	ineɪt
@@ -13098,6 +13219,7 @@ encincture	ɛnsɪŋkt͡ʃɚ
 encke	ɛŋki
 encoignure	ɛnkɑnjɚ
 encolpion	ɛnkoʊlpiən
+encopresis	ɛnkoʊpɹisɪs
 encrimson	ɛnkɹɪmzən
 encrinite	ɛnkɹənaɪt
 enculturate	ɛnkʌlt͡ʃɚeɪt
@@ -13130,6 +13252,7 @@ endoaortitis	ɛndoʊeɪɔɹtaɪtɪs
 endoarteritis	ɛndoʊɑɹteɪɹaɪtɪs
 endoblast	ɛndəblæst
 endocarditic	ɛndoʊkɑɹdɪtɪk
+endocarp	ɛndəkɑɹp
 endocarpoid	ɛndoʊkɑɹpɔɪd
 endocranium	ɛndoʊkɹeɪniəm
 endocrinal	ɛndəkɹaɪnəl
@@ -13147,7 +13270,9 @@ endogen	ɛndəd͡ʒɛn
 endogenesis	ɛndoʊd͡ʒɛnɪsɪs
 endogenicity	ɛndoʊd͡ʒənɪsɪti
 endogeny	ɛndɑd͡ʒəni
+endolithic	ɛndoʊlɪθɪk
 endolymphatic	ɛndoʊlɪmfætɪk
+endometrium	ɛndoʊmitɹiəm
 endomorphism	ɛndoʊmɔɹfɪzəm
 endoparasitic	ɛndoʊpæɹəsɪtɪk
 endoperidium	ɛndoʊpɚɪdiəm
@@ -13156,6 +13281,7 @@ endophytous	ɛndɑfɪtəs
 endopoditic	ɛndɑpədɪtɪk
 endopterygote	ɛndoʊtɛɹəɡoʊt
 endosarc	ɛndəsɑɹk
+endoskeleton	ɛndoʊskɛlɪtən
 endosmosis	ɛndɑsmoʊsɪs
 endosmotic	ɛndɑsmɑtɪk
 endosporium	ɛndəspɔɹiəm
@@ -13167,7 +13293,9 @@ endothecial	ɛndoʊθiʃiəl
 endothecium	ɛndoʊθiʃiəm
 endothelioid	ɛndoʊθiliɔɪd
 endothelioma	ɛndoʊθioʊmə
+endothelium	ɛndoʊθiliəm
 endothermal	ɛndoʊθɚməl
+endotoxin	ɛndoʊtɑksɪn
 endotoxoid	ɛndoʊtɑksɔɪd
 endotrophic	ɛndoʊtɹɑfɪk
 endpiece	ɛndpis
@@ -13294,6 +13422,7 @@ entomologically	ɛntəməlɑd͡ʒɪkəli
 entomologise	ɛntəmɑləd͡ʒaɪz
 entomologize	ɛntəmɑləd͡ʒaɪz
 entomostracan	ɛntəmɑstɹəkən
+entoparasite	ɛntoʊpæɹəsaɪt
 entophyte	ɛntəfaɪt
 entophytic	ɛntəfɪtɪk
 entopic	ɛntɑpɪk
@@ -13324,6 +13453,7 @@ enyalius	ɛnieɪliəs
 enyeus	ɪnaɪjus
 enyo	ɪnaɪoʊ
 enzygotic	ɛnzaɪɡɑtɪk
+enzymology	ɛnzaɪmɑləd͡ʒi
 enzymolysis	ɛnzaɪmɑlɪsɪs
 enzymolytic	ɛnzəməlɪtɪk
 eogene	iəd͡ʒin
@@ -13492,7 +13622,6 @@ eponychium	ɛpənɪkiəm
 epopee	ɛpəpi
 epopoeia	ɛpəpiə
 epos	ɛpɑs
-epoxide	ɪpɑksaɪd
 epulafquen	ɛpulɑfkən
 epulo	ɛpjəloʊ
 epulones	ɛpjəloʊniz
@@ -13647,6 +13776,7 @@ erythroblastotic	ɚɪθɹoʊblæstɑtɪk
 erythrocyte	ɚɪθɹəsaɪt
 erythrocytic	ɚɪθɹəsɪtɪk
 erythrocytometer	ɚɪθɹoʊsaɪtɑmɪtɚ
+erythromycin	ɚɪθɹoʊmaɪsɪn
 erythrophobia	ɚɪθɹəfoʊbiə
 erythrophyll	ɚɪθɹəfɪl
 erythropoietic	ɚɪθɹoʊpɔɪɛtɪk
@@ -13742,6 +13872,7 @@ estocs	ɛstɑks
 estoppage	ɛstɑpɪd͡ʒ
 estovers	ɛstoʊvɚz
 estrade	ɛstɹɑd
+estradiol	ɛstɹədaɪoʊl
 estragon	ɛstɹəɡɑn
 estrangedness	ɛstɹeɪnd͡ʒɪdnɪs
 estray	ɛstɹeɪ
@@ -13763,7 +13894,6 @@ eternalise	ɪtɚnəlaɪz
 eternality	ɪtɚnælɪti
 eterne	ɪtɚn
 eternise	ɪtɚnaɪz
-eternize	ɪtɚnaɪz
 ethal	ɛθæl
 ethanethiol	ɛθeɪnθaɪoʊl
 ethanim	ɛθənɪm
@@ -13818,6 +13948,7 @@ etruscology	itɹəskɑləd͡ʒi
 ettabeth	ɛtəbəθ
 ettarre	ɪtɑɹ
 etude	eɪtud
+etui	eɪtwi
 etymologically	ɛtəməlɑd͡ʒɪkəli
 etymologise	ɛtəmɑləd͡ʒaɪz
 euaechme	juikmi
@@ -14113,7 +14244,9 @@ eximiously	ɛɡzɪmiəsli
 existentialism	ɛɡzɪstɛnʃəlɪzəm
 existentially	ɛɡzɪstɛnʃəli
 exmoor	ɛksmʊɹ
+exocarp	ɛksoʊkɑɹp
 exoderm	ɛksoʊdɚm
+exodermis	ɛksoʊdɚmɪs
 exodontia	ɛksədɑnʃə
 exodontics	ɛksədɑntɪks
 exodontist	ɛksədɑntɪst
@@ -14139,6 +14272,7 @@ exosporal	ɛksəspɔɹəl
 exostotic	ɛksɑstɑtɪk
 exoterica	ɛksətɛɹəkə
 exothermicity	ɛksoʊθɚmɪsɪti
+exotoxin	ɛksoʊtɑksɪn
 exotropia	ɛksətɹoʊpiə
 expansivity	ɛkspænsɪvɪti
 expectative	ɪkspɛktətɪv
@@ -14221,6 +14355,8 @@ exteriorly	ɪkstiɹiɚli
 exterminable	ɪkstɚmənəbəl
 exterminative	ɪkstɚməneɪtɪv
 extermine	ɪkstɚmɪn
+externalisation	ɪkstɚnəlɪzeɪʃən
+externalization	ɪkstɚnəlɪzeɪʃən
 exteroceptive	ɛkstɚəsɛptɪv
 exteroceptor	ɛkstɚəsɛptɚ
 exterritorial	ɛkstɛɹɪtɔɹiəl
@@ -14258,6 +14394,7 @@ extravert	ɛkstɹəvɚt
 extremal	ɪkstɹiməl
 extrorsely	ɛkstɹɔɹsli
 extrospection	ɛkstɹəspɛkʃən
+extroversion	ɛkstɹoʊvɚʒən
 extrusible	ɪkstɹusəbəl
 exuberantly	ɪɡzubɚəntli
 exuberate	ɪɡzubɚeɪt
@@ -14654,6 +14791,7 @@ fernata	fɚneɪtə
 fernelius	fɚneɪliəs
 ferociousness	fɚoʊʃəsnɪs
 ferreous	fɛɹiəs
+ferricyanide	fɛɹaɪsaɪənaɪd
 ferriday	fɛɹɪdeɪ
 ferriferous	fɚɪfɚəs
 ferrihemoglobin	fɛɹaɪhiməɡloʊbɪn
@@ -14730,6 +14868,7 @@ fibrinogenous	faɪbɹənɑd͡ʒənəs
 fibrinokinase	faɪbɹənoʊkaɪneɪs
 fibrinolysin	faɪbɹənɑlɪsɪn
 fibro	faɪbɹoʊ
+fibroblast	faɪbɹəblæst
 fibrocartilaginous	faɪbɹoʊkɑɹtəlæd͡ʒənəs
 fibroin	faɪbɹoʊɪn
 fibromatous	faɪbɹɑmətəs
@@ -14834,6 +14973,7 @@ finick	fɪnɪk
 finickin	fɪnəkɪn
 finistere	fɪnɪstɛɹ
 finisterre	fɪnɪstɛɹ
+finitism	faɪnaɪtɪzəm
 finlander	fɪnləndɚ
 finlandia	fɪnlændiə
 finlet	fɪnlɪt
@@ -14893,6 +15033,7 @@ fitcher	fɪt͡ʃɚ
 fitchew	fɪt͡ʃu
 fitchy	fɪt͡ʃi
 fitten	fɪtən
+fiume	fjumɛ
 fiumicino	fjumit͡ʃinoʊ
 fivepenny	faɪvpɛni
 fivestones	faɪvstoʊnz
@@ -15022,6 +15163,7 @@ florella	flɔɹɛlə
 florencita	flɔɹənsitə
 florenda	flɔɹɛndə
 florenz	flɔɹənz
+florescence	flɔɹɛsəns
 florette	flɔɹɛt
 floretty	flɔɹɛti
 florianopolis	flɔɹiənɑpəlɪs
@@ -15032,6 +15174,7 @@ florie	flɔɹi
 floriferous	flɔɹɪfɚəs
 floriferously	flɔɹɪfɚəsli
 floriferousness	flɔɹɪfɚəsnɪs
+florilegium	flɔɹilid͡ʒiəm
 florina	flɔɹinə
 floristic	flɔɹɪstɪk
 floscular	flɑskjʊlɚ
@@ -15101,6 +15244,7 @@ focometer	foʊkɑmɪtɚ
 fodgel	fɑd͡ʒəl
 foecunditatis	feɪkʊndɪtɑtɪs
 foehe	feɪɡi
+foehn	feɪn
 foeman	foʊmən
 foetation	fiteɪʃən
 foeticide	fitɪsaɪd
@@ -15705,6 +15849,7 @@ gahanna	ɡəhænə
 gahnite	ɡɑnaɪt
 gaiety	ɡeɪɪti
 gaikwar	ɡaɪkwɑɹ
+gaillardia	ɡeɪlɑɹdiə
 gaine	ɡeɪn
 gainless	ɡeɪnlɪs
 gainlessness	ɡeɪnlɪsnɪs
@@ -15790,6 +15935,7 @@ galva	ɡælvə
 galvani	ɡɑlvɑni
 galvanise	ɡælvənaɪz
 galvanocautery	ɡælvənoʊkɔtɚi
+galvanometric	ɡælvənoʊmɛtɹɪk
 galvanometry	ɡælvənɑmɪtɹi
 galvanoplastic	ɡælvənoʊplæstɪk
 galvanoplastics	ɡælvənoʊplæstɪks
@@ -15918,6 +16064,7 @@ gastralgia	ɡæstɹæld͡ʒiə
 gastrectasia	ɡæstɹɛkteɪʒə
 gastrectasis	ɡæstɹɛkteɪsɪs
 gastritic	ɡæstɹɪtɪk
+gastrocnemius	ɡæstɹɑknimiəs
 gastrodermis	ɡæstɹoʊdɚmɪs
 gastroduodenostomy	ɡæstɹoʊduədənɑstəmi
 gastroenteritic	ɡæstɹoʊɛntɚɪtɪk
@@ -15946,7 +16093,6 @@ gathic	ɡɑtɪk
 gatow	ɡɑtoʊ
 gattamelata	ɡɑtəməlɑtə
 gatun	ɡɑtun
-gaucheness	ɡoʊʃnɪs
 gaucherie	ɡoʊʃɚi
 gaudeamus	ɡɔdieɪməs
 gaudery	ɡɔdɚi
@@ -16105,10 +16251,12 @@ geognosy	d͡ʒiɑɡnəsi
 geoisotherm	d͡ʒioʊaɪsəθɚm
 geologise	d͡ʒiɑləd͡ʒaɪz
 geomagnetician	d͡ʒioʊmæɡnɪtɪʃən
+geomancy	d͡ʒiəmænsi
 geomedical	d͡ʒioʊmɛdɪkəl
 geomedicine	d͡ʒioʊmɛdɪsən
 geometrise	d͡ʒiɑmɪtɹaɪz
 geometrize	d͡ʒiɑmɪtɹaɪz
+geomorphic	d͡ʒiəmɔɹfɪk
 geomorphological	d͡ʒiəmɔɹphəlɑd͡ʒɪkəl
 geonic	ɡeɪɑnɪk
 geonim	ɡeɪoʊnɪm
@@ -16243,6 +16391,7 @@ gigameter	ɡɪɡəmitɚ
 gigantean	d͡ʒaɪɡæntiən
 gigantes	d͡ʒɪɡæntiz
 giganticness	d͡ʒaɪɡæntɪknɪs
+gigantism	d͡ʒɪɡæntɪzəm
 gigantomachia	d͡ʒaɪɡæntəmeɪkiə
 gigantopithecus	d͡ʒaɪɡæntoʊpɪθikəs
 gigasecond	d͡ʒaɪɡəsɛkənd
@@ -16422,6 +16571,8 @@ glochis	ɡloʊkɪs
 glomerate	ɡlɑmɚɪt
 glomeration	ɡlɑmɚeɪʃən
 glomerule	ɡlɑmɚul
+glomerulonephritis	ɡloʊmɛɹjəloʊnɪfɹaɪtɪs
+glomerulus	ɡloʊmɛɹjʊləs
 glomi	ɡloʊmaɪ
 glomma	ɡlɔmɑ
 glomus	ɡloʊməs
@@ -16431,6 +16582,7 @@ glooms	ɡlumz
 glooscap	ɡlʊskæp
 gloriann	ɡlɔɹiæn
 gloriole	ɡlɔɹioʊl
+gloriousness	ɡlɔɹiəsnɪs
 glossarial	ɡlɑsɛɹiəl
 glossarially	ɡlɑsɛɹiəli
 glossator	ɡlɑseɪtɚ
@@ -16441,6 +16593,7 @@ glosseme	ɡlɑsim
 glossitic	ɡlɑsɪtɪk
 glossmeter	ɡlɑsmitɚ
 glossographical	ɡlɑsəɡɹæfɪkəl
+glossolalia	ɡlɑsoʊleɪliə
 glossolalist	ɡlɑsɑləlɪst
 glossological	ɡlɑsəlɑd͡ʒɪkəl
 glossology	ɡlɑsɑləd͡ʒɛ
@@ -16469,6 +16622,7 @@ gluconeogenetic	ɡlukoʊnioʊd͡ʒənɛtɪk
 gluconokinase	ɡlukoʊnəkaɪneɪs
 glucoprotein	ɡlukoʊpɹoʊtin
 glucosan	ɡlukəsæn
+glucosidic	ɡlukəsɪdɪk
 glucosulfone	ɡlukoʊsʌlfoʊn
 glucosuria	ɡlukoʊsjʊɹiə
 glucuronide	ɡlukjʊɹənaɪd
@@ -16789,6 +16943,7 @@ granularly	ɡɹænjəlɚli
 granulative	ɡɹænjəleɪtɪv
 granulitic	ɡɹænjəlɪtɪk
 granuloblast	ɡɹænjəloʊblæst
+granulocytic	ɡɹænjəloʊsɪtɪk
 granulomatosis	ɡɹænjəloʊmətoʊsɪs
 grapeline	ɡɹæplɪn
 grapery	ɡɹeɪpɚi
@@ -17188,6 +17343,7 @@ gyroidal	d͡ʒaɪɹɔɪdəl
 gyroidally	d͡ʒaɪɹɔɪdəli
 gyrose	d͡ʒaɪɹoʊs
 gyrostabilized	d͡ʒaɪɹəsteɪbəlaɪzd
+gyrostabilizer	d͡ʒaɪɹəsteɪbəlaɪzɚ
 gyrostat	d͡ʒaɪɹəstæt
 gyrostatic	d͡ʒaɪɹəstætɪk
 gyrostatics	d͡ʒaɪɹəstætɪks
@@ -17602,6 +17758,7 @@ haussmannization	haʊsmənɪzeɪʃən
 haustoria	hɔstɔɹiə
 hautbois	hoʊbɔɪ
 hautboy	hoʊbɔɪ
+hauteur	hoʊtɚ
 hauyne	ɑwin
 hauynite	ɑwinaɪt
 havasu	hævʊsu
@@ -17710,6 +17867,7 @@ hecatonchires	hɛkətɑnkaɪɹiz
 hecatonstylon	hɛkətɑnstaɪlɑn
 hectarage	hɛktɚid͡ʒ
 hecticly	hɛktɪkli
+hectocotylus	hɛktəkɑtələs
 hectography	hɛktɑɡɹəfi
 hectolitre	hɛktəlitɚ
 hectometre	hɛktəmitɚ
@@ -17730,6 +17888,7 @@ heep	hip
 heeze	hiz
 hegari	hɪɡæɹi
 hegeleos	hɪd͡ʒɛliɑs
+hegelianism	heɪɡeɪliənɪzəm
 hegemone	hɪd͡ʒɛməni
 hegira	hɛd͡ʒɚə	hɪd͡ʒaɪɹə
 hegumen	hɪɡjumɛn
@@ -17781,9 +17940,11 @@ helicograph	hɛləkoʊɡɹæf
 heliconian	hɛləkoʊniən
 heligoland	hɛləɡoʊlænd
 helio	hilioʊ
+heliocentric	hilioʊsɛntɹɪk
 heliocentricism	hilioʊsɛntɹɪsɪzəm
 heliochrome	hiliəkɹoʊm
 heliodor	hiliədɔɹ
+heliograph	hiliəɡɹæf
 heliolatry	hiliɑlətɹi
 heliolithic	hiliəlɪθɪk
 heliometric	hiliəmɛtɹɪk
@@ -17943,6 +18104,7 @@ henize	hʌnjz
 hennery	hɛnɚi
 hennin	hɛnɪn
 henoch	hinək
+henotheism	hɛnəθiɪzəm
 henryetta	hɛnɹiɛtə
 henslowe	hɛnzloʊ
 hent	hɛnt
@@ -18385,8 +18547,11 @@ histie	hɪsti
 histiocytic	hɪstiəsɪtɪk
 histioid	hɪstiɔɪd
 histoblast	hɪstəblæst
+histochemical	hɪstəkɛmɪkəl
 histochemically	hɪstəkɛmɪkəli
+histochemistry	hɪstəkɛmɪstɹi
 histogen	hɪstəd͡ʒən
+histogenesis	hɪstəd͡ʒɛnɪsɪs
 histogenic	hɪstəd͡ʒɛnɪk
 histogeny	hɪstɑd͡ʒɪni
 histographic	hɪstəɡɹæfɪk
@@ -18433,6 +18598,7 @@ hockenheim	hɔkəhaɪm
 hockle	hɑkəl
 hockshop	hɑkʃɑp
 hocktide	hɑktaɪd
+hodeida	hʊdeɪdɑ
 hoder	hɔdɚ
 hodgenville	hɑd͡ʒənvɪl
 hodiernal	hɑdɪɚnəl
@@ -18492,6 +18658,7 @@ holocaine	hɑləkeɪn
 holocarpic	hɑləkɑɹpɪk
 holocrine	hɑləkɹɪn
 hologonidium	hɑloʊɡənɪdiəm
+holography	həlɑɡɹəfi
 hololith	hɑləlɪθ
 holometabolic	hɑloʊmɛtəbɑlɪk
 holometabolous	hɑləmɪtæbələs
@@ -18503,6 +18670,7 @@ holophyte	hɑləfaɪt
 holopneustic	hɑləpnustɪk
 holosericeous	hɑləsɚɪʃəs
 holothurioid	hɑləθʊɹiɔɪd
+holothuroidea	hɑləθʊɹɔɪdiə
 holotypic	hɑlətɪpɪk
 holozoic	hɑləzoʊɪk
 holp	hoʊlp
@@ -18535,6 +18703,7 @@ hominian	hoʊmɪniən
 hominine	hɑmənaɪn
 hommock	hɑmək
 homobront	hoʊməbɹɑnt
+homocentric	hoʊməsɛntɹɪk
 homocercality	hoʊməsɚkælɪti
 homochromatic	hoʊməkɹoʊmætɪk
 homochromatism	hoʊməkɹoʊmətɪzəm
@@ -18555,6 +18724,7 @@ homoerotic	hoʊmoʊɚɑtɪk
 homoeroticism	hoʊmoʊɚɑtɪsɪzəm
 homofermentative	hoʊmoʊfɚmɛntətɪv
 homogametic	hoʊmoʊɡəmitɪk
+homogenate	həmɑd͡ʒɪneɪt
 homogenesis	hoʊməd͡ʒɛnɪsɪs
 homogenetic	hoʊməd͡ʒənɛtɪk
 homogonous	həmɑɡənəs
@@ -18565,6 +18735,7 @@ homoiotherm	hoʊmɔɪəθɚm
 homoiothermal	hoʊmɔɪəθɚməl
 homoiousian	hɑmɔɪusiən	hoʊmɔɪusiən
 homolecithal	hoʊməlɛsəθəl
+homologate	həmɑləɡeɪt
 homological	hoʊməlɑd͡ʒɪkəl
 homologically	hoʊməlɑd͡ʒɪkəli
 homologise	həmɑləd͡ʒaɪz
@@ -18572,10 +18743,13 @@ homologize	həmɑləd͡ʒaɪz
 homolographic	hoʊmɑləɡɹæfɪk
 homologue	hɑməlɔɡ
 homologumena	hoʊmoʊləɡumənə
+homology	həmɑləd͡ʒi
 homonid	hɑmənɪd
 homonymously	həmɑnəməsli
 homoousian	hɑmoʊusiən	hoʊmoʊusiən
 homopause	hɑməpɔz
+homophonous	həmɑfənəs
+homophony	həmɑfəni
 homoplastic	hoʊməplæstɪk
 homoplasy	həmɑpləsi
 homopolar	hoʊməpoʊlɚ
@@ -18755,6 +18929,7 @@ htindaw	tindɔ
 htizwe	tizweɪ
 huac	hjuæk
 hualapai	hælɑpʌj
+huambo	wɑmbɔ
 huamuchil	wɑmut͡ʃɪl
 huanuco	wɑnukɔ
 huapango	wəpɑŋɡoʊ
@@ -18882,6 +19057,7 @@ hydracid	haɪdɹæsɪd
 hydraemia	haɪdɹimiə
 hydragogue	haɪdɹəɡɔɡ
 hydralazine	haɪdɹəlæzin
+hydrangea	haɪdɹeɪnd͡ʒeɪ
 hydranth	haɪdɹənθ
 hydrarch	haɪdɹɑɹk
 hydrargyriasis	haɪdɹɑɹd͡ʒɚaɪəsɪs
@@ -18926,6 +19102,7 @@ hydrogenase	haɪdɹɑd͡ʒɪneɪz
 hydrogenise	haɪdɹəd͡ʒənaɪz
 hydrogenize	haɪdɹəd͡ʒənaɪz
 hydrogenolysis	haɪdɹoʊd͡ʒɪnɑlɪsɪs
+hydrogeology	haɪdɹoʊd͡ʒiɑləd͡ʒi
 hydrograph	haɪdɹəɡɹæf
 hydrokineter	haɪdɹəkɪnɪtɚ
 hydrokinetic	haɪdɹoʊkɪnɛtɪk
@@ -18938,6 +19115,7 @@ hydrolyte	haɪdɹəlaɪt
 hydromania	haɪdɹəmeɪniə
 hydromedusa	haɪdɹoʊmɪdusə
 hydrometallurgy	haɪdɹəmɛtəlɚd͡ʒi
+hydrometeor	haɪdɹəmitiɚ
 hydronitrogen	haɪdɹənaɪtɹəd͡ʒən
 hydronium	haɪdɹoʊniəm
 hydropac	haɪdɹəpæk
@@ -18954,6 +19132,7 @@ hydroponist	haɪdɹɑpənɪst
 hydrops	haɪdɹɑps
 hydropsy	haɪdɹɑpsi
 hydroquinol	haɪdɹəkwɪnoʊl
+hydroquinone	haɪdɹoʊkwɪnoʊn
 hydrorhiza	haɪdɹɚaɪzə
 hydroscope	haɪdɹəskoʊp
 hydroscopicity	haɪdɹəskoʊpɪsɪti
@@ -18963,6 +19142,7 @@ hydrosome	haɪdɹəsoʊm
 hydrosphere	haɪdɹəsfiɹ
 hydrostat	haɪdɹəstæt
 hydrosulfate	haɪdɹəsʌlfeɪt
+hydrosulfite	haɪdɹəsʌlfaɪt
 hydrosulfurous	haɪdɹoʊsəlfjʊɹəs
 hydrotactic	haɪdɹətæktɪk
 hydrotaxis	haɪdɹətæksɪs
@@ -18998,10 +19178,12 @@ hygrophytic	haɪɡɹəfɪtɪk
 hygroscopicity	haɪɡɹəskoʊpɪsɪti
 hygrostat	haɪɡɹəstæt
 hygrothermograph	haɪɡɹəθɚməɡɹæf
+hyksos	hɪksoʊs
 hylaeus	haɪliəs
 hylas	haɪləs
 hyllus	hɪləs
 hylomorphic	haɪləmɔɹfɪk
+hylomorphism	haɪloʊmɔɹfɪzəm
 hylophagous	haɪlɑfəɡəs
 hylotheism	haɪləθiɪzəm
 hylotropic	haɪlətɹɑpɪk
@@ -19033,6 +19215,7 @@ hypaesthesic	hɪpɪsθisɪk
 hypaethral	hɪpiθɹəl
 hypalgesia	hɪpæld͡ʒiziə
 hypalgesic	hɪpæld͡ʒizɪk
+hypallage	hɪpæləd͡ʒi
 hypanis	hɪpənɪs
 hypaspist	hɪpæspɪst
 hypatie	hɪpəti
@@ -19176,6 +19359,7 @@ hypertherm	haɪpɚθɚm
 hyperthermy	haɪpɚθɚmi
 hyperthrombinemia	haɪpɚθɹɑmbɪnimiə
 hyperthymia	haɪpɚθaɪmiə
+hypertonicity	haɪpɚtoʊnɪsɪti
 hyperurbanism	haɪpɚɚbənɪzəm
 hypervitaminosis	haɪpɚvaɪtəmɪnoʊsɪs
 hypesthesia	hɪpɪsθiʒə
@@ -19261,6 +19445,7 @@ hypohydrochloria	haɪpoʊhaɪdɹəklɔɹiə
 hypohypophysism	haɪpoʊhaɪpɑfɪsɪzəm
 hypoidrosis	haɪpoʊɪdɹoʊsɪs
 hypoinosemia	haɪpoʊɪnəsimiə
+hypokalemia	haɪpoʊkeɪlimiə
 hypokaliemia	haɪpəkæliimiə
 hypokinemia	haɪpoʊkɪnimiə
 hypokinesia	haɪpoʊkɪniʒə
@@ -19327,6 +19512,7 @@ hyposthenic	haɪpɑsθɛnɪk
 hypostome	haɪpəstoʊm
 hyposulfite	haɪpəsʌlfaɪt
 hyposulfurous	haɪpəsəlfjʊɹəs
+hypotactic	haɪpətæktɪk
 hypothallus	haɪpəθæləs
 hypothec	haɪpɑθɪk
 hypothecary	haɪpɑθəkɛɹi
@@ -19342,6 +19528,7 @@ hypotrich	haɪpətɹɪk
 hypotrichous	haɪpɑtɹəkəs
 hypotyposis	haɪpətaɪpoʊsɪs
 hypoxaemia	haɪpɑksimiə
+hypoxanthine	haɪpəzænθin
 hypoxic	haɪpɑksɪk
 hypozeugma	haɪpəzuɡmə
 hypozeuxis	haɪpoʊzuksɪs
@@ -19350,6 +19537,8 @@ hypsicephalic	hɪpsɪsəfælɪk
 hypsicephaly	hɪpsɪsɛfəli
 hypsipyle	hɪpsɪpəli
 hypsistus	hɪpsɪstəs
+hypsographic	hɪpsəɡɹæfɪk
+hypsometric	hɪpsəmɛtɹɪk
 hypsometry	hɪpsɑmɪtɹi
 hyraces	haɪɹəsiz
 hyracoid	haɪɹəkɔɪd
@@ -19407,6 +19596,7 @@ ibycus	ɪbɪkəs
 ica	isɑ
 icaaaa	aɪsifɔɹeɪ
 icaria	ɪkɛɹiə
+icarian	ɪkɛɹiən
 icarius	ɪkɛɹiəs
 iceblock	aɪsblɑk
 iceboating	aɪsboʊtɪŋ
@@ -19479,6 +19669,7 @@ idiodynamics	ɪdioʊdaɪnæmɪks
 idioglossia	ɪdiəɡlɑsiə
 idioglottic	ɪdiəɡlɑtɪk
 idiograph	ɪdiəɡɹæf
+idiographic	ɪdiəɡɹæfɪk
 idiomaticity	ɪdioʊmətɪsɪti
 idiomorphic	ɪdiəmɔɹfɪk
 idiophonic	ɪdiəfɑnɪk
@@ -19668,7 +19859,6 @@ immoralize	ɪmɔɹəlaɪz
 immortalise	ɪmɔɹtəlaɪz
 immortally	ɪmɔɹtəli
 immunise	ɪmjənaɪz
-immunoassay	ɪmjunoʊæseɪ
 immunogenetics	ɪmjənoʊd͡ʒənɛtɪks
 immunogenicity	ɪmjənoʊd͡ʒənɪsɪti
 immunoglobulin	ɪmd͡ʒunoʊɡlɑbjʊlɪn
@@ -20161,6 +20351,7 @@ ingenuousness	ɪnd͡ʒɛnjuəsnɪs
 inghirami	ɪŋɡɚɑmi
 ingine	ɪnd͡ʒaɪn
 ingleside	ɪŋɡəlsaɪd
+ingloriousness	ɪnɡlɔɹiəsnɪs
 ingolstadt	ɪŋɡɔlʃtɑt
 ingraft	ɪnɡɹæft
 ingrainedly	ɪnɡɹeɪndli
@@ -20213,6 +20404,7 @@ innocuity	ɪnəkjuɪti
 innocuously	ɪnɑkjuəsli
 innocuousness	ɪnɑkjuəsnɪs
 innomine	ɪnɑməneɪ
+innovatory	ɪnoʊvətɔɹi
 innoxious	ɪnɑkʃəs
 innoxiously	ɪnɑkʃəsli
 innoxiousness	ɪnɑkʃəsnɪs
@@ -20277,9 +20469,11 @@ insipience	ɪnsɪpiəns
 insnare	ɪnsnɛɹ
 insociable	ɪnsoʊʃəbəl
 insolate	ɪnsoʊleɪt
+insolation	ɪnsoʊleɪʃən
 insolubleness	ɪnsɑljəbəlnɪs
 insomnolence	ɪnsɑmnələns
 insomnolency	ɪnsɑmnələnsi
+insomuch	ɪnsoʊmʌt͡ʃ
 insouciantly	ɪnsusiəntli
 insoul	ɪnsoʊl
 inspective	ɪnspɛktɪv
@@ -20325,7 +20519,6 @@ inswathe	ɪnsweɪð
 inswept	ɪnswɛpt
 inswinger	ɪnswɪŋɚ
 intactly	ɪntæktli
-intagliated	ɪntælɪeɪtɪd
 intangibleness	ɪntænd͡ʒəbəlnɪs
 intarsiate	ɪntɑɹsieɪt
 intarsist	ɪntɑɹsɪst
@@ -20404,6 +20597,7 @@ interfold	ɪntɚfoʊld
 interfoliaceous	ɪntɚfoʊlieɪʃəs
 interfoliar	ɪntɚfoʊliɚ
 interglyph	ɪntɚɡlɪf
+intergradation	ɪntɚɡɹeɪdeɪʃən
 intergrade	ɪntɚɡɹeɪd
 interhemispheric	ɪntɚhɛmɪsfɛɹɪk
 interinsurance	ɪntɚɪnʃʊɹəns
@@ -20510,6 +20704,7 @@ intolerableness	ɪntɑlɚəbəlnɪs
 intolerantly	ɪntɑlɚəntli
 intomb	ɪntum
 intonaco	ɪntɑnəkoʊ
+intonate	ɪntoʊneɪt
 intorsion	ɪntɔɹʃən
 intort	ɪntɔɹt
 intortus	ɪntɔɹtəs
@@ -20649,6 +20844,7 @@ iphthime	ɪfθəmi
 ipiales	ipjɑlɛs
 ipiutak	ɪpijutæk
 ipoctonus	ɪpɑktənəs
+iproniazid	aɪpɹənaɪəzɪd
 ipsambul	ɪpsæmbul
 ipsus	ɪpsəs
 iquique	ikikɛ
@@ -20842,6 +21038,7 @@ isobathytherm	aɪsəbæθəθɚm
 isobront	aɪsəbɹɑnt
 isobutane	aɪsəbjuteɪn
 isobutene	aɪsəbjutin
+isobutylene	aɪsəbjutəlin
 isocarpic	aɪsəkɑɹpɪk
 isocephalic	aɪsoʊsəfælɪk
 isocephaly	aɪsoʊsɛfəli
@@ -20850,6 +21047,7 @@ isochasm	aɪsəkæzəm
 isocheimenal	aɪsəkaɪmənəl
 isochor	aɪsəkɔɹ
 isochoric	aɪsəkɔɹɪk
+isochromatic	aɪsəkɹoʊmætɪk
 isochronal	aɪsɑkɹənəl
 isochronally	aɪsɑkɹənəli
 isochrone	aɪsəkɹoʊn
@@ -20865,12 +21063,15 @@ isocyanine	aɪsəsaɪənin
 isocyano	aɪsəsaɪənoʊ
 isocyclic	aɪsoʊsaɪklɪk
 isodef	aɪsədɛf
+isodiametric	aɪsədaɪəmɛtɹɪk
 isodimorphism	aɪsoʊdaɪmɔɹfɪzəm
 isodomic	aɪsədɑmɪk
 isodomum	aɪsɑdəməm
 isodose	aɪsədoʊs
 isodrosotherm	aɪsədɹɑsəθɚm
+isodynamic	aɪsoʊdaɪnæmɪk
 isoelastic	aɪsoʊɪlæstɪk
+isogamete	aɪsəɡæmit
 isogametic	aɪsoʊɡəmɛtɪk
 isogamous	aɪsɑɡəməs
 isogenous	aɪsɑd͡ʒənəs
@@ -20887,6 +21088,7 @@ isogriv	aɪsəɡɹɪv
 isohaline	aɪsəheɪlin
 isohalsine	aɪsəhælsin
 isohume	aɪsəhjum
+isohyet	aɪsəhaɪət
 isokeraunic	aɪsoʊkɚɔnɪk
 isolatedly	aɪsəleɪtɪdli
 isolative	aɪsəleɪtɪv
@@ -20895,11 +21097,14 @@ isolecithal	aɪsəlɛsəθəl
 isologous	aɪsɑləɡəs
 isologue	aɪsəlɔɡ
 isomagnetic	aɪsoʊmæɡnɛtɪk
+isomeric	aɪsəmɛɹɪk
 isomerism	aɪsɑmɚɪzəm
 isomerize	aɪsɑmɚaɪz
 isomerous	aɪsɑmɚəs
+isometric	aɪsəmɛtɹɪk
 isometropia	aɪsoʊmətɹoʊpiə
 isomorph	aɪsəmɔɹf
+isomorphous	aɪsəmɔɹfəs
 isoneph	aɪsənɛf
 isonephelic	aɪsoʊnəfɛlɪk
 isonomic	aɪsənɑmɪk
@@ -20925,6 +21130,7 @@ isopropanol	aɪsəpɹoʊpənoʊl
 isopyre	aɪsəpaɪɚ
 isorhythm	aɪsɚɪðəm
 isorhythmic	aɪsɚɪðmɪk
+isoseismal	aɪsoʊsaɪzməl
 isostemonous	aɪsəstimənəs
 isostere	aɪsəstiɹ
 isosteric	aɪsəstɛɹɪk
@@ -20940,6 +21146,7 @@ isothermobath	aɪsəθɚməbæθ
 isothiocyano	aɪsəθaɪoʊsaɪənoʊ
 isotimic	aɪsətɪmɪk
 isotone	aɪsətoʊn
+isotonicity	aɪsətoʊnɪsɪti
 isotopy	aɪsɑtəpi
 isotropous	aɪsɑtɹəpəs
 isotype	aɪsətaɪp
@@ -21103,6 +21310,7 @@ jalapic	d͡ʒælæpɪk
 jalapin	d͡ʒæləpɪn
 jalee	d͡ʒɑli
 jalgaon	d͡ʒɑɡɔn
+jalisco	hɑliskɔ
 jalloud	d͡ʒɑlud
 jalor	d͡ʒɑlɚ
 jamalpur	d͡ʒəmɑlpʊɹ
@@ -21178,6 +21386,7 @@ jebusite	d͡ʒɛbjəsaɪt
 jebusitish	d͡ʒɛbjəsaɪtɪʃ
 jedburgh	d͡ʒɛdbɚoʊ
 jedda	d͡ʒɛdə
+jefe	hɛfɛ
 jeffersonville	d͡ʒɛfɚsənvɪl
 jeh	d͡ʒeɪ
 jehad	d͡ʒihɑd
@@ -21318,7 +21527,6 @@ jooste	justə
 jormungandr	jɔɹmʊnɡɑndɚ
 jornada	hɔɹnɑdə
 joropo	hɚoʊpoʊ
-jorum	d͡ʒɔɹəm
 joselyn	d͡ʒɑsəlɪn
 josep	d͡ʒoʊsəp
 josias	d͡ʒoʊsaɪəs
@@ -21353,6 +21561,7 @@ judahite	d͡ʒudəaɪt
 judaica	d͡ʒudeɪɪkə
 judaise	d͡ʒudiaɪz
 judaist	d͡ʒudiɪst
+judaize	d͡ʒudiaɪz
 judean	d͡ʒudiən
 judette	d͡ʒudɛt
 judgematic	d͡ʒəd͡ʒmætɪk
@@ -21522,6 +21731,7 @@ kanchanjanga	kɑnt͡ʃənd͡ʒɑŋɡə
 kandinsky	kændɪnski
 kaneelhart	kənilhɑɹt
 kaneoche	keɪneɪoʊheɪ
+kaneohe	kɑneɪoʊheɪ
 kangarooing	kæŋɡɚuɪŋ
 kannapolis	kənæpəlɪs
 kanone	kənoʊnə
@@ -21571,6 +21781,7 @@ karyoplasm	kæɹiəplæzəm
 karyoplasmatic	kæɹioʊplæzmætɪk
 karyosome	kæɹiəsoʊm
 karyotin	kæɹioʊtɪn
+karyotype	kæɹiətaɪp
 karyotypic	kæɹiʌtɪpɪk
 kas	kɑs
 kasai	kɑsj
@@ -21733,6 +21944,7 @@ keratoid	kɛɹətɔɪd
 keratoma	kɛɹətoʊmə
 keratometer	kɛɹətɑmɪtɚ
 keratometry	kɛɹətɑmɪtɹi
+keratoplasty	kɛɹətoʊplæsti
 keratoscope	kɛɹətəskoʊp
 keratoscopy	kɛɹətɑskəpi
 keratotic	kɛɹətɑtɪk
@@ -21764,6 +21976,8 @@ ketohexose	kitoʊhɛksoʊs
 ketoi	kjɪtoʊj
 ketolysis	kɪtɑlɪsɪs
 ketolytic	kitəlɪtɪk
+ketonemia	kitoʊnimiə
+ketonuria	kitoʊnʊɹiə
 ketose	kitoʊs
 ketubah	kətubɑ
 ketubim	kətubim
@@ -22059,7 +22273,6 @@ koffka	kɔfkɑ
 kogai	koʊɡaɪ
 kohanim	kɔhɑnim
 koheleth	koʊhɛlɛθ
-kohima	koʊhimɑ
 kohinoor	koʊənʊɹ
 kohistan	koʊhɪstɑn
 kohoutek	kɔhoʊtək
@@ -22264,6 +22477,7 @@ labialism	leɪbiəlɪzəm
 labialized	leɪbiəlaɪzd
 labiate	leɪbieɪt
 labile	leɪbɪl
+lability	ləbɪlɪti
 labilize	leɪbəlaɪz
 labiogression	leɪbioʊɡɹɛʃən
 labionasal	leɪbioʊneɪzəl
@@ -22781,6 +22995,7 @@ lemnian	lɛmniən
 lemniscate	lɛmnɪskɪt
 lemniscus	lɛmnɪskəs
 lemnitzer	lɛmnɪtsɚ
+lemnos	lɛmnɑs
 lemonfish	lɛmənfɪʃ
 lemonnier	ləmoʊnjeɪ
 lemoore	ləmɔɹ
@@ -22843,6 +23058,7 @@ lepsius	lɛpsiʊs
 leptocephalic	lɛptəsɪfælɪk
 leptodactyl	lɛptoʊdæktɪl
 leptodactylous	lɛptədæktələs
+leptokurtic	lɛptoʊkɚtɪk
 leptokurtosis	lɛptoʊkɚtoʊsɪs
 leptophyllous	lɛptoʊfɪləs
 leptoprosopic	lɛptoʊpɹəsoʊpɪk
@@ -22926,6 +23142,7 @@ leukocidin	lukəsaɪdən
 leukocythemia	lukoʊsaɪθimiə
 leukocytic	lukəsaɪtɪk
 leukocytopenia	lukəsaɪtəpiniə
+leukocytosis	lukoʊsaɪtoʊsɪs
 leukocytotic	lukəsaɪtɑtɪk
 leukopedesis	lukoʊpɪdisɪs
 leukopoiesis	lukoʊpɔɪisɪs
@@ -22970,6 +23187,7 @@ lewisville	luɪsvɪl
 lexell	lɛkəl
 lexica	lɛksəkə
 lexically	lɛksɪkəli
+lexicographic	lɛksəkoʊɡɹæfɪk
 lexicologist	lɛksəkɑləd͡ʒɪst
 lexicostatistics	lɛksəkoʊstətɪstɪks
 lexigraphy	lɛksɪɡɹəfi
@@ -23151,6 +23369,7 @@ linkman	lɪŋkmən
 linlithgow	lɪnlɪθɡoʊ
 linnaeus	lɪniəs
 linnean	lɪniən
+linocut	laɪnəkʌt
 linoleic	lɪnəliɪk
 linolic	lənoʊlɪk
 linseman	lɪnzmən
@@ -23177,6 +23396,7 @@ lipogrammatism	lɪpəɡɹæmətɪzəm
 lipographic	lɪpəɡɹæfɪk
 lipography	lɪpɑɡɹəfi
 lipolitic	lɪpəlɪtɪk
+lipolysis	lɪpɑlɪsɪs
 lipomatous	lɪpɑmətəs
 lipopectic	lɪpəpɛktɪk
 lipopexia	lɪpəpɛksiə
@@ -23194,6 +23414,7 @@ liquorish	lɪkɚɪʃ
 lir	liɹ
 lirella	lɚɛlə
 lirellate	lɚɛleɪt
+liriodendron	lɚioʊdɛndɹən
 lisboa	liʒbɔə
 liselotte	lisəlɑti
 lissom	lɪsəm
@@ -23287,6 +23508,7 @@ lobately	loʊbeɪtli
 lobbyism	lɑbiɪzəm
 lobeliaceous	loʊbilieɪʃəs
 lobeline	loʊbəlin
+lobito	lubitu
 lobolo	loʊbələ
 lobose	loʊboʊs
 lobscourse	lɑbskɔɹs
@@ -23408,6 +23630,7 @@ lopper	lɑpɚ
 loppy	lɑpi
 lopseed	lɑpsid
 lopstick	lɑpstɪk
+loquaciously	loʊkweɪʃəsli
 lorca	lɔɹkə
 lording	lɔɹdɪŋ
 lordsburg	lɔɹdzbɚɡ
@@ -23645,6 +23868,7 @@ lyrism	lɚɪzəm
 lyrus	laɪɹəs
 lys	lis
 lysenko	lɪsɛŋkoʊ
+lysenkoism	lɪsɛŋkoʊɪzəm
 lysias	lɪsiəs
 lysimachus	laɪsɪməkəs
 lysimeter	laɪsɪmɪtɚ
@@ -23695,6 +23919,7 @@ macoun	mɑkɔɛn
 macready	məkɹidi
 macrobiotics	mækɹoʊbaɪɑtɪks
 macrobius	məkɹoʊbiəs
+macrocarpa	mækɹoʊkɑɹpə
 macrocarpous	mækɹoʊkɑɹpəs
 macrocephalus	mækɹoʊsɛfələs
 macroclimate	mækɹəklaɪmɪt
@@ -23712,8 +23937,10 @@ macrolecithal	mækɹoʊlɛsəθəl
 macrolinguistics	mækɹoʊlɪŋɡwɪstɪks
 macrolith	mækɹəlɪθ
 macrometeorological	mækɹoʊmitiɚəlɑd͡ʒɪkəl
+macromolecule	mækɹəmɑləkjul
 macronucleate	mækɹoʊnukliɪt
 macronucleus	mækɹənukliəs
+macropod	mækɹoʊpɑd
 macropodous	mækɹɑpədəs
 macropsia	mækɹɑpsiə
 macropsy	mækɹɑpsi
@@ -23818,6 +24045,7 @@ maigre	meɪɡɚ
 maihem	meɪhɛm
 mailcatcher	meɪlkæt͡ʃɚ
 maill	meɪl
+maillot	mɑjoʊ
 maillots	mɑjoʊz
 mainsail	meɪnseɪl
 maintainor	meɪnteɪnɚ
@@ -23949,6 +24177,7 @@ mandlikova	mɑndlɪkoʊvə
 mandragora	mændɹæɡɚə
 manducable	mænd͡ʒəkəbəl
 manducate	mændjʊkeɪt
+manducatory	mænd͡ʒʊkətɔɹi
 mandyas	mɑndiɑs
 manege	mæneɪʒ
 manent	mɑnɛnt
@@ -24298,6 +24527,7 @@ meclizine	mɛklɪzin
 mecometer	məkɑmɪtɚ
 medaka	mɪdækə
 medallist	mɛdəlɪst
+medan	mɛdɑn
 medawar	mɛdəwɚ
 medeus	midiəs
 mediad	midiæd
@@ -24339,8 +24569,10 @@ megakaryoblast	mɛɡəkæɹiəblæst
 megalecithal	mɛɡəlɛsəθəl
 megalesia	mɛɡəliʒə
 megalocardia	mɛɡəloʊkɑɹdiə
+megalomaniacal	mɛɡəloʊmənaɪəkəl
 megalopia	mɛɡəlɑpiə
 megalopsia	mɛɡəlɑpsiə
+megalosaurus	mɛɡələsɔɹəs
 megamede	mɛɡəmidi
 megameter	mɛɡəmitɚ
 meganthropus	məɡænθɹəpəs
@@ -24559,6 +24791,7 @@ mesolecithal	mɛzəlɛsəθəl
 mesolite	mɛzəlaɪt
 mesometeorological	mɛzoʊmitiɚəlɑd͡ʒɪkəl
 mesometeorology	mɛzoʊmitiɚɑləd͡ʒi
+mesomorphic	mɛzəmɔɹfɪk
 mesonephros	mɛzənɛfɹɑs
 mesopeak	mɛzəpik
 mesophile	mɛzəfaɪl
@@ -24567,6 +24800,7 @@ mesophytic	mɛzəfɪtɪk
 mesorectum	mɛzɚɛktəm
 mesorrhine	mɛzɚaɪn
 mesosphere	mɛzəsfiɹ
+mesothelium	mɛzəθiliəm
 mesothoracic	mɛzəθɔɹæsɪk
 mesothorium	mɛzəθɔɹiəm
 mesotron	mɛzətɹɑn
@@ -24721,6 +24955,7 @@ miaul	miaʊl
 miazine	maɪəzin
 micajah	maɪkeɪjə
 micawber	mɪkɔbɚ
+micelle	mɪsɛl
 miche	mɪt͡ʃ
 micheas	maɪkiəs
 michiganian	mɪʃəɡeɪniən
@@ -24742,12 +24977,16 @@ microcephalia	maɪkɹoʊsəfeɪliə
 microchemical	maɪkɹoʊkɛmɪkəl
 microciona	maɪkɹəsaɪənə
 microclimatologic	maɪkɹoʊklaɪmətəlɑd͡ʒɪk
+microcline	maɪkɹəklaɪn
 micrococcic	maɪkɹəkɑksɪk
+micrococcus	maɪkɹəkɑkəs
 microconstituent	maɪkɹoʊkənstɪt͡ʃuənt
+microcopy	maɪkɹəkɑpi
 microcoulomb	maɪkɹəkulɑm
 microcrystal	maɪkɹəkɹɪstəl
 microcrystallinity	maɪkɹoʊkɹɪstəlɪnɪti
 microcurie	maɪkɹəkjʊɹi
+microcyte	maɪkɹəsaɪt
 microdissection	maɪkɹoʊdɪsɛkʃən
 microdistillation	maɪkɹoʊdɪstəleɪʃən
 microdont	maɪkɹədɑnt
@@ -24762,6 +25001,9 @@ microenvironmental	maɪkɹoʊɛnvaɪɚnmɛntəl
 microfarad	maɪkɹəfæɹəd
 microfloppy	maɪkɹoʊflɑpi
 microgamy	maɪkɹɑɡəmi
+microglia	maɪkɹɑɡliə
+micrograph	maɪkɹoʊɡɹæf
+microgroove	maɪkɹəɡɹuv
 microhardness	maɪkɹoʊhɑɹdnɪs
 microhenry	maɪkɹəhɛnɹi
 microhm	maɪkɹoʊm
@@ -24769,6 +25011,7 @@ microlambert	maɪkɹəlæmbɚt
 microlecithal	maɪkɹəlɛsəθəl
 microlight	maɪkɹoʊlaɪt
 microlite	maɪkɹəlaɪt
+microlith	maɪkɹəlɪθ
 micrological	maɪkɹəlɑd͡ʒɪkəl
 microlux	maɪkɹəlʌks
 micromesh	maɪkɹoʊmɛʃ
@@ -24787,23 +25030,34 @@ microminiaturization	maɪkɹoʊmɪniət͡ʃɚɪzeɪʃən
 microminiaturize	maɪkɹoʊmɪniət͡ʃɚaɪz
 micromotion	maɪkɹəmoʊʃən
 micronemous	maɪkɹəniməs
+micronesian	maɪkɹəniʒən
 micronucleate	maɪkɹoʊnukliɪt
 micronucleus	maɪkɹoʊnukliəs
 micropaleontological	maɪkɹoʊpeɪliɑntəlɑd͡ʒɪkəl
 microparasite	maɪkɹoʊpæɹəsaɪt
 microparasitic	maɪkɹoʊpæɹəsɪtɪk
 micropathology	maɪkɹoʊpəθɑləd͡ʒi
+microphage	maɪkɹəfeɪd͡ʒ
 microphonism	maɪkɹəfoʊnɪzəm
 microphot	maɪkɹəfɑt
+microphotograph	maɪkɹəfoʊtəɡɹæf
 microphotometer	maɪkɹoʊfoʊtɑmɪtɚ
+microphysics	maɪkɹəfɪzɪks
 microphyte	maɪkɹəfaɪt
 microphytic	maɪkɹəfɪtɪk
+microporous	maɪkɹəpɔɹəs
+microprint	maɪkɹəpɹɪnt
 microptic	maɪkɹɑptɪk
+micropyle	maɪkɹəpaɪl
 microreader	maɪkɹɔɹidɚ
 microreproduction	maɪkɹɔɹipɹədʌkʃən
+microsecond	maɪkɹəsɛkənd
 microsegment	maɪkɹəsɛɡmənt
+microseism	maɪkɹəsaɪzəm
 microsiemens	maɪkɹəsimənz
+microsome	maɪkɹəsoʊm
 microsporangium	maɪkɹoʊspɔɹænd͡ʒiəm
+microspore	maɪkɹəspɔɹ
 microsporophyll	maɪkɹəspɔɹəfɪl
 microsporous	maɪkɹəspɔɹəs
 microstat	maɪkɹəstæt
@@ -24811,8 +25065,11 @@ microstethoscope	maɪkɹəsməs
 microstress	maɪkɹoʊstɹɛs
 microstylous	maɪkɹəstaɪləs
 microsurgery	maɪkɹoʊsɚd͡ʒɚi
+microswitch	maɪkɹəswɪt͡ʃ
 microtechnique	maɪkɹoʊtɛknik
 microtherm	maɪkɹəθɚm
+microtome	maɪkɹətoʊm
+microtone	maɪkɹətoʊn
 microvolt	maɪkɹəvoʊlt
 microwatt	maɪkɹoʊwɑt
 micrurgy	maɪkɹɚd͡ʒi
@@ -25043,6 +25300,7 @@ mithgarthr	mɪθɡɑɹθɚ
 mithra	mɪθɹə
 mithraea	mɪθɹiə
 mithraeum	mɪθɹiəm
+mithraism	mɪθɹəɪzəm
 mithridatic	mɪθɹɪdætɪk
 mithridatise	mɪθɹɪdeɪtaɪz
 mithridatism	mɪθɹɪdeɪtɪzəm
@@ -25083,6 +25341,7 @@ moderatorial	mɑdɚətɔɹiəl
 modernise	mɑdɚnaɪz
 modibo	mɔdibɔ
 modificand	mɑdəfəkænd
+modillion	mədɪljən
 modjeska	mɔd͡ʒɛskə
 modred	moʊdɹɪd
 modularity	mɑd͡ʒəleɪɹɪti
@@ -25119,6 +25378,7 @@ moji	mɔd͡ʒi
 mokpo	mɔkpoʊ
 moldwarp	moʊldwɔɹp
 molech	moʊlɛk
+molecularity	moʊlɛkjəlæɹɪti
 molilalia	mɑləleɪliə
 molinism	moʊlənɪzəm
 molinos	məlinoʊs
@@ -25157,6 +25417,7 @@ monachism	mɑnəkɪzəm
 monacid	mɑnæsɪd
 monacillo	mɑnəsioʊ
 monades	mɑnədiz
+monadic	mənædɪk
 monadism	mɑnədɪzəm
 monadology	mɑnədɑləd͡ʒi
 monahans	mɑnəhænz
@@ -25186,6 +25447,8 @@ mongrelize	mʌŋɡɹəlaɪz
 monial	moʊniəl
 monilia	mənɪliə
 monilial	mənɪliəl
+moniliform	moʊnɪləfɔɹm
+monition	moʊnɪʃən
 monitory	mɑnɪtɚi
 monitress	mɑnɪtɹɪs
 monkery	mʌŋkɚi
@@ -25211,6 +25474,7 @@ monochroic	mɑnəkɹoʊɪk
 monochromat	mɑnəkɹoʊmæt
 monochromate	mɑnəkɹoʊmeɪt
 monochromaticity	mɑnəkɹoʊmətɪsɪti
+monocline	mɑnoʊklaɪn
 monoclinous	mɑnəklaɪnəs
 monocotyl	mɑnəkɑtəl
 monocrat	mɑnəkɹæt
@@ -25220,9 +25484,12 @@ monodomous	mənɑdəməs
 monodramatic	mɑnədɹəmætɪk
 monofil	mɑnəfɪl
 monogamic	mɑnəɡæmɪk
+monogenetic	mɑnoʊd͡ʒənɛtɪk
+monogenic	mɑnəd͡ʒɛnɪk
 monogenism	mənɑd͡ʒənɪzəm
 monogenous	mənɑd͡ʒənəs
 monogynoecial	mɑnoʊd͡ʒɪniʃəl
+monohybrid	mɑnoʊhaɪbɹid
 monohydroxy	mɑnəhaɪdɹɑksi
 monoicous	mənɔɪkəs
 monoid	mɑnɔɪd
@@ -25230,8 +25497,11 @@ monokini	mɑnəkini
 monolater	mənɑlətɚ
 monomark	mɑnoʊmɚk
 monomerous	mənɑmɚəs
+monometallic	mɑnoʊmətælɪk
 monomethylamine	mɑnəmɛθələmin
 monometrical	mɑnəmɛtɹɪkəl
+monomial	moʊnoʊmiəl
+monomolecular	mɑnoʊməlɛkjəlɚ
 monomolecularly	mɑnoʊməlɛkjəlɚli
 monona	mənoʊnə
 monopetalous	mɑnəpɛtələs
@@ -25253,6 +25523,7 @@ monorhinous	mɑnɚaɪnəs
 monorhyme	mɑnɚaɪm
 monosepalous	mɑnəsɛpələs
 monosodium	mɑnəsoʊdiəm
+monosomic	mɑnəsoʊmɪk
 monospermous	mɑnəspɚməs
 monostich	mɑnəstɪk
 monostichous	mənɑstɪkəs
@@ -25354,9 +25625,11 @@ morosely	mɚoʊsli
 moroseness	mɚoʊsnɪs
 morosity	mɚɑsɪti
 morphinize	mɔɹfənaɪz
+morphogenetic	mɔɹfoʊd͡ʒənɛtɪk
 morphoneme	mɔɹfoʊnim
 morphonemic	mɔɹfənimɪk
 morphonemics	mɔɹfənimɪks
+morphophoneme	mɔɹfəfoʊnim
 morphosis	mɔɹfoʊsɪs
 morphotic	mɔɹfɑtɪk
 morphotonemics	mɔɹfoʊtənimɪks
@@ -25472,6 +25745,7 @@ multichannel	mʌltɪtʃænəl
 multicoil	mʌltɪkɔɪl
 multicolour	mʌltɪkʌlɚ
 multidentate	mʌltɪdɛnteɪt
+multidimensional	mʌltɪdaɪmɛnʃənəl
 multidirectional	mʌltɪdaɪɹɛkʃənəl
 multifil	mʌltɪfɪl
 multiflorous	mʌltɪflɔɹəs
@@ -25484,7 +25758,6 @@ multinominal	mʌltɪnɑmənəl
 multinuclear	mʌltɪnukliɚ
 multipara	məltɪpɚə
 multiparous	məltɪpɚəs
-multipartite	mʌltɪpɑɹtaɪt
 multiped	mʌltəpɛd
 multipede	mʌltəpid
 multiplicable	mʌltɪplɪkəbəl
@@ -25584,10 +25857,13 @@ mycerinus	mɪsɚaɪnəs
 mycetozoan	maɪsitəzoʊən
 mycobacterium	maɪkoʊbæktiɹiəm
 mycocecidium	maɪkoʊsɪsɪdiəm
+mycological	maɪkəlɑd͡ʒɪkəl
 mycologically	maɪkəlɑd͡ʒɪkəli
+mycorrhiza	maɪkɚaɪzə
 mycosozin	maɪkoʊsoʊzɪn
 mycostat	maɪkoʊstæt
 mycostatin	maɪkoʊstætɪn
+mycotoxin	maɪkətɑksɪn
 mydriatic	mɪdɹiætɪk
 myelencephalon	maɪələnsɛfəlɑn
 myeline	maɪəlin
@@ -25611,8 +25887,11 @@ myocardiograph	maɪəkɑɹdiəɡɹæf
 myoclonic	maɪəklɑnɪk
 myoclonus	maɪɑklənəs
 myocoele	maɪəsil
+myocyte	maɪəsaɪt
 myoedema	maɪoʊɪdimə
+myogenic	maɪəd͡ʒɛnɪk
 myogenicity	maɪəd͡ʒənɪsɪti
+myoglobin	maɪəɡloʊbɪn
 myoglobinuria	maɪəɡɹæf
 myography	maɪɑɡɹəfi
 myohemoglobin	maɪəhiməɡloʊbɪn
@@ -25622,8 +25901,11 @@ myoneuralgia	maɪoʊnʊɹæld͡ʒə
 myoneurasthenia	maɪənʊɹəsθiniə
 myosis	maɪoʊsɪs
 myosote	maɪəsoʊt
+myosotis	maɪəsoʊtɪs
 myotic	maɪɑtɪk
+myotome	maɪətoʊm
 myotomy	maɪɑtəmi
+myotonia	maɪətoʊniə
 myriagram	mɚiəɡɹæm
 myrialiter	mɚiəlitɚ
 myriameter	mɚiəmitɚ
@@ -25758,6 +26040,7 @@ nasology	neɪzɑləd͡ʒi
 nasopalatine	neɪzoʊpælətaɪn
 nasute	neɪsut
 nasuteness	neɪsutnɪs
+natality	neɪtælɪti
 natator	neɪtətɚ
 nathless	næθlɪs
 natta	nɑtɑ
@@ -25823,6 +26106,10 @@ necrolatry	nəkɹɑlətɹi
 necrologically	nɛkɹəlɑd͡ʒɪkəli
 necromimesis	nɛkɹoʊmɪmisɪs
 necrophagous	nɛkɹɑfəɡəs
+necrophile	nɛkɹəfaɪl
+necrophilia	nɛkɹəfɪliə
+necrophiliac	nɛkɹəfɪliæk
+necrophobia	nɛkɹəfoʊbiə
 necropolitan	nɛkɹəpɑlɪtən
 necrotise	nɛkɹətaɪz
 necrotize	nɛkɹətaɪz
@@ -25902,9 +26189,11 @@ neopentane	nioʊpɛnteɪn
 neophron	nioʊfɹɑn
 neophytism	niəfaɪtɪzəm
 neopilina	nioʊpaɪlaɪnə
+neoplastic	niəplæstɪk
 neoplasty	niəplæsti
 neosho	nioʊʃoʊ
 neostyle	niəstaɪl
+neoteric	niətɛɹik
 neoterise	niɑtɚaɪz
 neoterism	niɑtɚɪzəm
 neoterize	niɑtɚaɪz
@@ -25936,6 +26225,7 @@ nephrostomous	nəfɹɑstəməs
 nephrotome	nɛfɹətoʊm
 nephrotomise	nəfɹɑtəmaɪz
 nephrotomy	nɪfɹɑtəmi
+nephrotoxic	nɛfɹətɑksɪk
 nephrotoxicity	nɛfɹoʊtɑksɪsɪti
 nephtali	nɛftəlaɪ
 nepman	nɛpmən
@@ -25983,15 +26273,19 @@ neurocoele	nʊɹəsil
 neuroembryology	nʊɹoʊɛmbɹiɑləd͡ʒi
 neuroendocrine	njʊɚoʊɛndoʊkɹaɪn
 neurogenesis	njʊɚoʊd͡ʒɛnɪsɪs
+neurogenic	nʊɹəd͡ʒɛnɪk
 neurogenous	nʊɹɑd͡ʒənəs
 neurogliac	nʊɹɑɡliæk
 neurogram	nʊɹəɡɹæm
 neurohormone	njʊɚoʊhɔɹmoʊn
 neuroleptic	njʊɚoʊlɛptɪk
 neurolytic	nʊɹəlɪtɪk
+neuromast	nʊɹəmæst
 neuromatous	nʊɹɑmətəs
+neuromuscular	nʊɹəmʌskjəlɚ
 neuronic	nʊɹɑnɪk
 neuropathology	njʊɚoʊpəθɑləd͡ʒi
+neurophysiology	nʊɹəfɪziɑləd͡ʒi
 neuroplasm	nʊɹəplæzəm
 neuroplasmatic	nʊɹoʊplæzmætɪk
 neuropteran	njʊɚɑptɚən
@@ -25999,6 +26293,7 @@ neurosecretion	njʊɚoʊsɪkɹiʃən
 neurotransmitter	njʊɚoʊtɹænsmɪtɚ
 neurotrophic	nʊɹətɹɑfɪk
 neurotrophy	nʊɹɑtɹəfi
+neurotropic	nʊɹətɹɑpɪk
 neurotropism	nʊɹɑtɹəpɪzəm
 neurovascular	nʊɹəvæskjəlɚ
 neusatz	nɔɪzɑts
@@ -26014,6 +26309,7 @@ newburyport	nubɚipɔɹt
 newcomen	nukʌmən
 newcomerstown	nukʌmɚztaʊn
 newel	nuəl
+newfoundlander	nufaʊndlʌndɚ
 newground	nuɡɹaʊnd
 newmanise	numənaɪz
 newmanism	numənɪzəm
@@ -26058,7 +26354,9 @@ nicotinize	nɪkətinaɪz
 nidana	nɪdɑnə
 nidaros	nidɑɹoʊs
 niddering	nɪdɚɪŋ
+nidicolous	naɪdɪkələs
 nidificate	nɪdəfəkeɪt
+nidifugous	naɪdɪfjəɡəs
 nidify	nɪdəfaɪ
 nielli	niɛli
 niepce	njɛps
@@ -26184,6 +26482,7 @@ nomenclator	noʊmənkleɪtɚ
 nomina	nɑmənə
 nomism	noʊmɪzəm
 nomocanon	noʊməkænən
+nomography	noʊmɑɡɹəfi
 nomology	noʊmɑləd͡ʒi
 nonage	nɑnɪd͡ʒ
 nonagon	nɑnəɡən
@@ -26295,6 +26594,7 @@ nothus	noʊθəs
 notionality	noʊʃənælɪti
 notionate	noʊʃənɪt
 notoriousness	noʊtɔɹiəsnɪs
+notornis	noʊtɔɹnɪs
 nottinghamshire	nɑtɪŋəmʃiɹ
 notts	nɑts
 notturno	nətʊɹnoʊ
@@ -26329,9 +26629,11 @@ nucleate	nukliɪt
 nucleolar	nukliəlɚ
 nucleolated	nukliəleɪtɪd
 nucleole	nuklioʊl
+nucleoplasm	nukliəplæzəm
 nucleoplasmatic	nuklioʊplæzmætɪk
 nucleoprotein	nukliəpɹoʊtin
 nucleosidase	nukliəsaɪdeɪs
+nucleoside	nukliəsaɪd
 nucleotidase	nukliətaɪdeɪs
 nuclidic	njuklɪdɪk
 nudely	nudli
@@ -26396,6 +26698,9 @@ nylghau	nɪlɡɔ
 nympha	nɪmfə
 nymphae	nɪmfi
 nymphalid	nɪmfəlɪd
+nympholepsy	nɪmfəlɛpsi
+nympholept	nɪmfəlɛpt
+nymphomania	nɪmfəmeɪniə
 nymwegen	nɪmveɪɡən
 nysa	naɪsə
 nystatin	nɪstətɪn
@@ -26475,6 +26780,7 @@ oceanity	oʊʃiænɪti
 oceanport	oʊʃənpɔɹt
 ocellate	ɑsəleɪt
 ocellation	ɑsəleɪʃən
+ocellus	ɑsɛləs
 ochimus	ɑkəməs
 ochlesis	ɑklisɪs
 ochone	əkoʊn
@@ -26507,9 +26813,11 @@ octavo	ɑkteɪvoʊ
 octocentenary	ɑktoʊsɛntinɚi
 octode	ɑktoʊd
 octodecillion	ɑktoʊdɪsɪljən
+octodecimo	ɑktədɛsəmoʊ
 octofoil	ɑktəfɔɪl
 octonarius	ɑktoʊnɛɹiəs
 octoroon	ɑktɚun
+octosyllabic	ɑktoʊsɪlæbɪk
 octroi	ɑktɹɔɪ
 octuple	ɑktʊpəl
 ocularist	ɑkjʊlɚist
@@ -26624,6 +26932,7 @@ oleandomycin	oʊliændoʊmaɪsɪn
 olefine	oʊləfɪn
 oleic	oʊliɪk
 olein	oʊliɪn
+oleograph	oʊliəɡɹæf
 oleomargaric	oʊlioʊmɑɹɡɑɹɪk
 oleomargarine	oʊlioʊmɑɹd͡ʒɚɪn
 oleometer	oʊlɪɑmɪtɚ
@@ -26693,11 +27002,13 @@ onefold	wʌnfoʊld
 onega	oʊniɡə
 oneirocritic	oʊnaɪɹəkɹɪtɪk
 oneirocriticism	oʊnaɪɹəkɹɪtɪsɪzəm
+oneiromancy	ənaɪɹəmænsi
 onerosity	oʊnɚɑsɪti
 onestep	wʌnstɛp
 onfall	ɑnfɑl
 onflow	ɑnfloʊ
 onglaze	ɑŋleɪz
+oniomania	oʊniəmeɪniə
 oniomaniac	oʊniəmeɪniæk
 onker	ɑŋkɚ
 onlap	ɑnlæp
@@ -26716,10 +27027,16 @@ onychia	oʊnɪkiə
 onychophoran	ɑnəkɑfɚən
 onymous	ɑnɪməs
 onyxis	oʊnɪksɪs
+oocyte	oʊəsaɪt
 oogamous	oʊɑɡəməs
+oogenesis	oʊəd͡ʒɛnɪsɪs
 oogenetic	oʊəd͡ʒənɛtɪk
+oogonium	oʊəɡoʊniəm
 ookinetic	oʊəkɪnɛtɪk
 oolachan	uləkɑn
+oolite	oʊəlaɪt
+oolith	oʊəlɪθ
+oolitic	oʊəlɪtɪk
 oology	oʊɑləd͡ʒi
 oonagh	unə
 oophore	oʊəfɔɹ
@@ -26729,8 +27046,10 @@ oophoric	oʊəfɔɹɪk
 oophytic	oʊəfɪtɪk
 oosperm	oʊəspɚm
 oosphere	oʊəsfiɹ
+oospore	oʊəspɔɹ
 oosporous	oʊɑspɚəs
 oost	oʊst
+ootid	oʊətɪd
 opacimeter	oʊpəsɪmɪtɚ
 opacus	oʊpeɪkəs
 opai	oʊpaɪ
@@ -26771,11 +27090,13 @@ opisthenar	əpɪsθənɑɹ
 opisthodomos	ɑpɪsθɑdəməs
 opiumism	oʊpiəmɪzəm
 opodeldoc	ɑpədɛldɑk
+oporto	oʊpɔɹtoʊ
 oppidan	ɑpɪdən
 oppilate	ɑpəleɪt
 opponency	əpoʊnənsi
 opponens	əpoʊnənt
 oppositive	əpɑzɪtɪv
+opsonize	ɑpsənaɪz
 optant	ɑptənt
 opthalmoscope	ɑfθælməskoʊp
 opticist	ɑptɪsɪst
@@ -26843,6 +27164,7 @@ oribi	ɑɹibi
 orientalia	ɔɹiənteɪliə
 orientalis	ɔɹiəntɑlɪs
 orientalise	ɔɹiɛntəlaɪz
+orientate	ɔɹiɛnteɪt
 orienteering	ɔɹɪɛntiɚɪŋ
 origan	ɔɹəɡən
 origanum	ɚiɡənəm
@@ -26900,7 +27222,9 @@ orthicon	ɔɹθəkɑn
 orthiconoscope	ɔɹθəkɑnəskoʊp
 orthocenter	ɔɹθəsɛntɚ
 orthocephalous	ɔɹθəsɛfələs
+orthochromatic	ɔɹθoʊkɹoʊmætɪk
 orthoclastic	ɔɹθəklæstɪk
+orthogenesis	ɔɹθəd͡ʒɛnɪsɪs
 orthogenic	ɔɹθəd͡ʒɛnɪk
 orthogonality	ɔɹθɑɡənælɪti
 orthogonalize	ɔɹθɑɡənəlaɪz
@@ -26915,12 +27239,14 @@ orthopraxy	ɔɹθəpɹæksi
 orthopteran	ɔɹθɑptɚən
 orthopteron	ɔɹθɑptɚɑn
 orthopterous	ɔɹθɑptɚəs
+orthorhombic	ɔɹθɚɑmbɪk
 orthoscopic	ɔɹθəskɑpɪk
 orthoselection	ɔɹθoʊsɪlɛkʃən
 orthostat	ɔɹθəstæt
 orthostates	ɔɹθɑstətiz
 orthostyle	ɔɹθəstaɪl
 orthotone	ɔɹθətoʊn
+orthotropic	ɔɹθətɹɑpɪk
 orthotropism	ɔɹθɑtɹəpɪzəm
 orthrus	ɔɹθɹəs
 ortler	ɔɹtlɚ
@@ -26968,16 +27294,22 @@ osteitic	ɑstiɪtɪk
 ostensorium	ɑstənsɔɹiəm
 ostensory	ɑstɛnsɚi
 osteoarthrosis	ɑstɪoʊɑɹθɹoʊsɪs
+osteoblast	ɑstiəblæst
 osteoclasis	ɑstiɑkləsɪs
+osteoclast	ɑstiəklæst
+osteogenesis	ɑstiəd͡ʒɛnɪsɪs
 osteogenous	ɑstiɑd͡ʒənəs
 osteography	ɑstɪɑɡɹəfi
+osteological	ɑstiəlɑd͡ʒɪkəl
 osteologically	ɑstiəlɑd͡ʒɪkəli
 osteoma	ɑstioʊmə
 osteomalacia	ɑstioʊməleɪʃə
 osteometric	ɑstiəmɛtɹɪk
 osteopathist	ɑstiɑpəθɪst
+osteophyte	ɑstiəfaɪt
 osteophytic	ɑstiəfɪtɪk
 osteoplastic	ɑstiəplæstɪk
+osteotome	ɑstiətoʊm
 ostiak	ɑstiæk
 ostiary	ɑstiɛɹi
 ostiolar	ɑstiəlɚ
@@ -26986,6 +27318,7 @@ ostmark	ɔstmɑɹk
 ostosis	ɑstoʊsɪs
 ostracise	ɑstɹəsaɪz
 ostracodan	ɑstɹəkoʊdən
+ostracoderm	ɑstɹəkoʊdɚm
 ostringer	ɔstɹɪnd͡ʒɚ
 osvaldo	ɔsvɑldɔ
 oswaldo	ɔswɑldɔ
@@ -27001,6 +27334,7 @@ othoniel	əθoʊniəl
 otionia	oʊʃioʊniə
 otocystic	oʊtəsɪstɪk
 otoneurasthenia	oʊtoʊnʊɹəsθiniə
+otoplasty	oʊtəplæsti
 otosclerosis	oʊtəsklɚoʊsɪs
 otoscopy	oʊtɑskəpi
 otranto	oʊtɹɑntoʊ
@@ -27045,7 +27379,6 @@ outguard	aʊtɡɑɹd
 outjockey	aʊtd͡ʒɑki
 outjump	aʊtd͡ʒʌmp
 outlaid	aʊtleɪd
-outlandishness	aʊtlændɪʃnɪs
 outleap	aʊtlip
 outmarch	aʊtmɑɹt͡ʃ
 outparish	aʊtpæɹɪʃ
@@ -27296,6 +27629,7 @@ padeye	pædaɪ
 padnag	pædnæɡ
 padouk	pəduk
 padraic	pɔdɹɪk
+padrone	pədɹoʊni
 paduasoy	pæd͡ʒuəsɔɪ
 padus	peɪdəs
 paedagogy	pɛdəɡoʊd͡ʒi
@@ -27527,6 +27861,7 @@ panthous	pænθoʊəs
 pantie	pænti
 pantihose	pæntɪhoʊz
 pantler	pæntlɚ
+pantograph	pæntəɡɹæf
 pantography	pæntɑɡɹəfi
 pantologic	pæntəlɑd͡ʒɪk
 pantology	pæntɑləd͡ʒi
@@ -27560,6 +27895,7 @@ paphian	peɪfiən
 paphlagonia	pæfləɡoʊniə
 paphos	peɪfɑs
 paphus	peɪfəs
+papiamento	pɑpjɑmɛntɔ
 papillar	pæpəlɚ
 papillomatous	pæpəloʊmətəs
 papillon	pæpəlɑn
@@ -27567,6 +27903,7 @@ papillosity	pæpəlɑsɪti
 papillote	pæpəloʊt
 papinian	pəpɪniən
 papistic	pəpɪstɪk
+papistical	peɪpɪstɪkəl
 papistically	peɪpɪstɪkəli
 pappenheimer	pæpənhaɪmɚ
 papuan	pæpjuən
@@ -27652,6 +27989,7 @@ paraselenic	pæɹəsɪlinɪk
 parashah	pɑɹəʃɑ
 parashioth	pɑɹɑʃiɔt
 parasitological	pæɹəsaɪtəlɑd͡ʒɪkəl
+parasitology	pæɹəsaɪtɑləd͡ʒi
 parasitosis	pæɹəsaɪtoʊsɪs
 parastades	pɚæstədiz
 parastas	pæɹəstæs
@@ -27814,6 +28152,7 @@ pathobiology	pæθoʊbaɪɑləd͡ʒi
 pathocure	pæθəkjʊɹ
 pathoformic	pæθəfɔɹmɪk
 pathogene	pæθəd͡ʒin
+pathogenetic	pæθoʊd͡ʒənɛtɪk
 pathognomy	pəθɑɡnəmi
 pathographic	pæθəɡɹæfɪk
 pathoneurosis	pæθənʊɹoʊsɪs
@@ -28194,6 +28533,7 @@ periodicity	piɹiədɪsɪti
 periodide	pɚaɪədaɪd
 periodization	piɚiədaɪzeɪʃən
 periodontia	pɛɹiədɑnʃə
+periodontics	pɛɹiədɑntɪks
 periodontology	pɛɹiədɑntɑləd͡ʒi
 perioeci	pɛɹiisaɪ
 perionychia	pɛɹioʊnɪkiə
@@ -28348,6 +28688,7 @@ petrogenic	pɛtɹəd͡ʒɛnɪk
 petrogeny	pɪtɹɑd͡ʒəni
 petrogram	pɛtɹəɡɹæm
 petrograph	pɛtɹəɡɹæf
+petrolatum	pɛtɹəleɪtəm
 petrolic	pɪtɹɑlɪk
 petronel	pɛtɹənɛl
 petronius	pɪtɹoʊniəs
@@ -28483,6 +28824,7 @@ philologically	fɪləlɑd͡ʒɪkəli
 philonis	fɪloʊnɪs
 philonome	fɪlɑnəmi
 philopena	fɪləpinə
+philoprogenitive	fɪloʊpɹoʊd͡ʒɛnɪtɪv
 philosophism	fɪlɑsəfɪzəm
 philyra	fɪlɚə
 phineus	fɪniəs
@@ -28500,6 +28842,7 @@ phlegmatized	flɛɡmətaɪzd
 phlegyas	flɛd͡ʒjəs
 phlias	flaɪəs
 phlogistic	fləd͡ʒɪstɪk
+phlogiston	fləd͡ʒɪstən
 phlogosis	fləɡoʊsɪs
 phlogotic	fləɡɑtɪk
 phloridzin	flɚɪdzɪn
@@ -28523,10 +28866,12 @@ phonematic	foʊnəmætɪk
 phonematics	foʊnəmætɪks
 phonemicist	foʊnimɪsɪst
 phonemicize	foʊnimɪsaɪz
+phonemics	fənimɪks
 phonendoscope	fənɛndəskoʊp
 phonesthemic	foʊnɪsθimɪk
 phonetist	foʊnɪtɪst
 phonevision	foʊnvɪʒən
+phonocardiogram	foʊnəkɑɹdiəɡɹæm
 phonocardiograph	foʊnəkɑɹdiəɡɹæf
 phonocardiography	foʊnəkɑɹdiɑɡɹəfi
 phonography	foʊnɑɡɹəfi
@@ -28550,6 +28895,7 @@ phosphation	fɑsfeɪʃən
 phosphatise	fɑsfətaɪz
 phosphatize	fɑsfətaɪz
 phosphaturia	fɑsfətʊɹiə
+phospholipid	fɑsfəlɪpɪd
 phospholipide	fɑsfoʊlɪpaɪd
 phospholipin	fɑsfoʊlɪpɪn
 phosphonuclease	fɑsfoʊnuklieɪs
@@ -28568,10 +28914,13 @@ photism	foʊtɪzəm
 photius	foʊʃiəs
 photobathic	foʊtəbæθɪk
 photobiotic	foʊtoʊbaɪɑtɪk
+photocell	foʊtoʊsɛl
 photochemically	foʊtoʊkɛmɪkəli
+photochemistry	foʊtoʊkɛmɪstɹi
 photochronography	foʊtəkɹɑnɑɡɹəfi
 photocompose	foʊtoʊkəmpoʊz
 photocomposer	foʊtoʊkəmpoʊzɚ
+photocomposition	foʊtoʊkɑmpəzɪʃən
 photodisintegration	foʊtoʊdɪsɪntəɡɹeɪʃən
 photodissociation	foʊtoʊdɪsoʊsieɪʃən
 photodrama	foʊtədɹɑmə
@@ -28584,20 +28933,27 @@ photoemissive	foʊtoʊɪmɪsɪv
 photoengrave	foʊtoʊɛnɡɹeɪv
 photoengraving	foʊtoʊɛnɡɹeɪvɪŋ
 photofission	foʊtəfɪʃən
+photofit	foʊtoʊfɪt
 photoflash	foʊtəflæsh
 photoflight	foʊtəflaɪt
 photogen	foʊtəd͡ʒɛn
 photogene	foʊtəd͡ʒin
 photoheliography	foʊtəhiliɑɡɹəfi
+photojournalism	foʊtoʊd͡ʒɚnəlɪzəm
 photokinesis	foʊtoʊkɪnisɪs
 photokinetic	foʊtoʊkɪnɛtɪk
 photolithoprint	foʊtəlɪθəpɹɪnt
 photoluminescence	foʊtəlumənɛsəns
+photomechanical	foʊtoʊməkænɪkəl
 photomechanically	foʊtoʊməkænɪkəli
+photometric	foʊtoʊmɛtɹik
 photometrician	foʊtəmɛtɹɪʃən
+photometry	foʊtɑmɪtɹi
 photomicroscope	foʊtəmaɪkɹəskoʊp
 photomicroscopy	foʊtəmaɪkɹɑskəpi
 photomontage	foʊtəmɑntɑʒ
+photomultiplier	foʊtəmʌltəplaɪɚ
+photomural	foʊtəmjʊɹəl
 photoneutron	foʊtənutɹɑn
 photopathic	foʊtəpæθɪk
 photopathy	foʊtɑpəθi
@@ -28605,6 +28961,7 @@ photoperiod	foʊtəpiɹiəd
 photoperiodic	foʊtəpiɹiɑdɪk
 photoperiodism	foʊtoʊpiɚiədɪzəm
 photophilous	foʊtɑfələs
+photophore	foʊtəfɔɹ
 photophosphorylation	foʊtəfɑsfɚəleɪʃən
 photopia	foʊtoʊpiə
 photoplay	foʊtəpleɪ
@@ -28614,6 +28971,7 @@ photoreception	foʊtɔɹɪsɛpʃən
 photoreceptor	foʊtɔɹɪsɛptɚ
 photorecorder	foʊtɔɹɪkɔɹdɚ
 photorecording	foʊtɔɹɪkɔɹdɪŋ
+photosensitive	foʊtoʊsɛnsɪtɪv
 photosetting	foʊtoʊsɛtɪŋ
 photospectroscopy	foʊtəspɛktɹɑskəpi
 photosphere	foʊtəsfiɹ
@@ -28629,6 +28987,7 @@ phototonic	foʊtətɑnɪk
 phototonus	foʊtɑtənəs
 phototopographic	foʊtətɑpəɡɹæfɪk
 phototroph	foʊtətɹɑf
+phototropism	foʊtoʊtɹoʊpɪzəm
 phototype	foʊtətaɪp
 phototypic	foʊtətɪpɪk
 phototypographic	foʊtətaɪpəɡɹæfɪk
@@ -28658,6 +29017,7 @@ phthalocyanine	θæləsaɪənaɪn
 phthia	θaɪə
 phugoid	fjuɡɔɪd
 phycocolloid	faɪkəkɑlɔɪd
+phycocyanin	faɪkoʊsaɪənɪn
 phycomyces	faɪkoʊmaɪsiz
 phycomycete	faɪkoʊmaɪsit
 phycomycetes	faɪkoʊmaɪsitiz
@@ -28714,6 +29074,7 @@ phytoplasm	faɪtəplæzəm
 phytosociologic	faɪtəsoʊsiəlɑd͡ʒɪk
 phytosociology	faɪtoʊsoʊsiɑləd͡ʒi
 phytosuccivorous	faɪtoʊsəksɪvɚəs
+phytotoxic	faɪtətɑksɪk
 phyxius	fɪksiəs
 piacenza	pjɑt͡ʃɛntsɑ
 piaffer	pɪæfɚ
@@ -28751,8 +29112,10 @@ picofarad	paɪkoʊfæɹəd
 picoline	pɪkəlin
 picolinic	pɪkəlɪnɪk
 picometer	paɪkoʊmitɚ
+picosecond	paɪkəsɛkənd
 picowatt	paɪkəwɑt
 picric	pɪkɹɪk
+picrotoxin	pɪkɹətɑksɪn
 pictogram	pɪktəɡɹæm
 pictores	pɪktɔɹɪs
 pictorialise	pɪktɔɹiəlaɪz
@@ -28821,6 +29184,7 @@ piliform	pɪləfɔɹm
 pillaret	pɪlɚɛt
 pilliwinks	pɪləwɪŋks
 pillwort	pɪlwɚt
+pilocarpine	paɪləkɑɹpin
 pilonidal	paɪlənaɪdəl
 pilos	pilɔs
 piloti	pɪlɑti
@@ -28900,7 +29264,6 @@ pipy	paɪpi
 piqua	pɪkweɪ
 piquantly	pikəntli
 piquantness	pikəntnɪs
-piquet	pɪkɛt	pɪkeɪ
 piragua	pɚɑɡwə
 pirarucu	pɚɚʊku
 piratically	paɪɹætɪkəli
@@ -28923,6 +29286,7 @@ pisgah	pɪzɡə
 pish	pʃ
 pishogue	pɪʃoʊɡ
 pisistratidae	paɪsɪstɹætɪdi
+pisistratus	paɪsɪstɹətəs
 pisolitic	pɪsəlɪtɪk
 pissarro	pɪsɑɹoʊ
 pistache	pɪstæʃ
@@ -29015,6 +29379,7 @@ plasmapheresis	plæzməfɛɹɪsɪs
 plasmasol	plæzməsoʊl
 plasmochin	plæzməkɪn
 plasmocyte	plæzməsaɪt
+plasmodesma	plæzmədɛzmə
 plasmogamy	plæzmɑɡəmi
 plasmolyse	plæzməlaɪz
 plasmoquine	plæzməkwaɪn
@@ -29112,6 +29477,7 @@ plisse	pliseɪ
 plisthenes	plaɪsθəniz
 ploce	ploʊsi
 plotinism	ploʊtaɪnɪzəm
+plotinus	ploʊtaɪnəs
 plottage	plɑtɪd͡ʒ
 ploughboy	plaʊbɔɪ
 plowboy	plaʊbɔɪ
@@ -29152,12 +29518,16 @@ pneumatophorous	numətɑfɚəs
 pneumatotherapy	numətoʊθɛɹəpi
 pneumectomy	numɛktəmi
 pneumococcous	numəkɑkəs
+pneumococcus	numəkɑkəs
+pneumoconiosis	numəkoʊnioʊsɪs
 pneumodynamics	numədaɪnæmɪks
 pneumoencephalitis	numoʊɛnsɛfəlaɪtɪs
 pneumoencephalogram	numoʊɛnsɛfələɡɹæm
+pneumogastric	numəɡæstɹɪk
 pneumograph	numəɡɹæf
 pneumographic	numəɡɹæfɪk
 pneumography	nʊmɑɡɹəfi
+pneumonectomy	numənɛktəmi
 pneumonoconiosis	numənoʊkoʊnioʊsɪs
 pneumothorax	numəθɔɹæks
 poaceous	poʊeɪʃəs
@@ -29167,6 +29537,7 @@ pococurante	poʊkoʊkuɹænti
 pococurantism	poʊkoʊkʊɹæntɪzəm
 pocosin	pəkoʊsən
 poculiform	pɑkjələfɔɹm
+podagra	poʊdæɡɹə
 podalirius	pɑdəlaɪɹiəs
 podarces	poʊdɑɹsiz
 podarge	poʊdɑɹd͡ʒi
@@ -29175,6 +29546,7 @@ poddubny	poʊdʌbni
 poddy	pɑdi
 podes	poʊdiz
 podetium	poʊdiʃiəm
+podiatry	poʊdaɪətɹi
 podite	pɑdaɪt
 poditic	pədɪtɪk
 pododynia	pɑdədɪniə
@@ -29276,6 +29648,7 @@ polycarbonate	pɑlikɑɹbəneɪt
 polycarp	pɑlikɑɹp
 polycaste	pɑləkæsti
 polychasium	pɑlikeɪʒəm
+polychromatic	pɑlikɹoʊmætɪk
 polyclad	pɑliklæd
 polycletus	pɑləklitəs
 polyclinic	pɑliklɪnɪk
@@ -29310,6 +29683,7 @@ polymelus	pɑləmiləs
 polymerism	pəlɪmɚɪzəm
 polymerous	pəlɪmɚəs
 polymnestor	pɑləmnɛstɚ
+polymorphonuclear	pɑlimɔɹfənukliɚ
 polyneuritic	pɑlinʊɹɪtɪk
 polyneuritis	pɑlinjʊɚaɪtɪs
 polynice	pɑlɪnis
@@ -29430,6 +29804,7 @@ pornocracy	pɔɹnɑkɹəsi
 poroplastic	pɔɹəplæstɪk
 porosity	pɔɹɑsɪti
 porously	pɔɹəsli
+porousness	pɔɹəsnɪs
 porphyria	pɔɹfiɹiə
 porphyrin	pɔɹfɚɪn
 porphyrion	pɔɹfaɪɹiɑn
@@ -29510,6 +29885,7 @@ potbelly	pɑtbɛli
 potboy	pɑtbɔɪ
 potch	pɑtʃ
 poteau	pətoʊ
+poteen	poʊtin
 potentee	poʊtənteɪ
 potentiate	pətɛnʃieɪt
 potentiometer	pətɛnʃiɑmɪtɚ
@@ -29526,7 +29902,6 @@ potman	pɑtmən
 potometer	pətɑmɪtɚ
 potoroo	poʊtɚu
 potosi	pətoʊsi
-potrero	pɑtɹɛɹoʊ
 potstone	pɑtstoʊn
 potsy	pɑtsi
 pottsville	pɑtsvɪl
@@ -29636,6 +30011,7 @@ predicant	pɹɛdəkənt
 predicative	pɹidɪkətɪv
 predicatory	pɹɛdɪkətɚi
 predictory	pɹɪdɪktɚi
+predigest	pɹidɪd͡ʒɛst
 predikant	pɹeɪdikɑnt
 predisposedly	pɹidɪspoʊzɪdli
 predistortion	pɹidɪstɔɹʃən
@@ -29667,6 +30043,7 @@ preindicate	pɹiɪndəkeɪt
 preinform	pɹiɪnfɔɹm
 preinstruct	pɹiɪnstɹʌkt
 preinvasive	pɹiɪnveɪsɪv
+prelatical	pɹilætɪkəl
 prelatism	pɹɛlətɪzəm
 prelatize	pɹɛlətaɪz
 prelect	pɹɪlɛkt
@@ -29791,6 +30168,7 @@ primigravida	pɹimɪɡɹævɪdə
 primine	pɹaɪmɪn
 primipara	pɹaɪmɪpɚə
 primogenial	pɹaɪməd͡ʒiniəl
+primogenitor	pɹaɪməd͡ʒɛnɪtɚ
 primogeniture	pɹaɪməd͡ʒɛnɪt͡ʃɚ
 primulaceous	pɹɪmjəlʌʃəs
 princekin	pɹɪnskɪn
@@ -29840,11 +30218,13 @@ prochronism	pɹoʊkɹənɪzəm
 proclus	pɹoʊkləs
 proconsulate	pɹoʊkɑnsəlɪt
 procopius	pɹoʊkoʊpiəs
+procrastinatory	pɹoʊkɹæstənətɔɹi
 procryptic	pɹoʊkɹɪptɪk
 proctoclysis	pɹɑktɑklɪsɪs
 proctodaeum	pɹɑktədiəm
 proctodeum	pɹɑktədiəm
 proctologic	pɹɑktəlɑd͡ʒɪk
+procurable	pɹoʊkjʊɹəbəl
 procuracy	pɹɑkjɚəsi
 procurance	pɹoʊkjʊɹəns
 procuration	pɹɑkjʊɹeɪʃən
@@ -29858,6 +30238,7 @@ prodigalize	pɹɑdɪɡəlaɪz
 prodomos	pɹoʊdoʊmɑs
 prodromal	pɹɑdɹəməl
 prodromia	pɹədɹoʊmiə
+prodromic	pɹədɹɑmɪk
 producibility	pɹədjusɪbɪlɪti
 producible	pɹədjusɪbəl
 productile	pɹədʌktɪl
@@ -29878,6 +30259,7 @@ profunda	pɹəfʌndə
 profusive	pɹəfjusɪv
 profusively	pɹəfjusɪvli
 profusiveness	pɹəfjusɪvnɪs
+progenitive	pɹoʊd͡ʒɛnɪtɪv
 progenitiveness	pɹoʊd͡ʒɛnɪtɪvnɪs
 progeniture	pɹoʊd͡ʒɛnɪtjʊɚ
 progestational	pɹoʊd͡ʒɛsteɪʃənəl
@@ -29910,6 +30292,7 @@ prologuize	pɹoʊlɔɡaɪz
 prologus	pɹoʊloʊɡəs
 prolongate	pɹəlɔŋɡeɪt
 prolonge	pɹoʊlɑnd͡ʒ
+prolusion	pɹəljuʒən
 prolusory	pɹoʊlusɚi
 promachorma	pɹoʊməkɔɹmə
 promachus	pɹɑməkəs
@@ -29927,6 +30310,7 @@ pronaus	pɹoʊneɪəs
 pronephric	pɹoʊnɛfɹɪk
 proneur	pɹoʊnɚɹ
 pronoea	pɹoʊniə
+pronominal	pɹoʊnɑmənəl
 pronominally	pɹoʊnɑmənəli
 pronotum	pɹoʊnoʊtəm
 pronuba	pɹoʊnubə
@@ -29949,6 +30333,7 @@ propenyl	pɹoʊpənɪl
 propenylic	pɹoʊpənɪlɪk
 propertius	pɹoʊpɚʃiəs
 propine	pɹoʊpin
+propinquity	pɹoʊpɪŋkwɪti
 propionibacterium	pɹoʊpiɑnəbæktiɹiəm
 propitiable	pɹəpɪʃiəbəl
 propjet	pɹɑpd͡ʒɛt
@@ -29961,12 +30346,14 @@ propositus	pɹəpɑzɪtəs
 propraetor	pɹoʊpɹitɚ
 propretorial	pɹoʊpɹɪtɔɹiəl
 proprietrix	pɹəpɹaɪɪtɹɪks
+proprioceptive	pɹoʊpɹiəsɛptɪv
+proprioceptor	pɹoʊpɹiəsɛptɚ
 propylhexedrine	pɹoʊpɪlhɛksɪdɹin
 propylic	pɹoʊpɪlɪk
 propylite	pɹɑpəlaɪt
-prorogation	pɹɔɹəɡeɪʃən
 prorsa	pɹɔɹsə
 prosaicism	pɹoʊzeɪɪsɪzəm
+prosaicness	pɹoʊzeɪɪknɪs
 prosaism	pɹoʊzeɪɪzəm
 prosaist	pɹoʊzeɪɪst
 prosclystius	pɹɑsklɪstiəs
@@ -29980,6 +30367,7 @@ prosify	pɹoʊzɪfaɪ
 proslavery	pɹoʊsleɪvɚi
 prosodemic	pɹɑsədɛmɪk
 prosopography	pɹoʊsəpɑɡɹəfi
+prosopopoeia	pɹoʊsoʊpəpiə
 prosopyle	pɹɑsəpaɪl
 prospero	pɹɑspɚoʊ
 prosphora	pɹɑsfɚɑ
@@ -30018,6 +30406,7 @@ prothetics	pɹɑsθɛtɪks
 prothoenor	pɹoʊθoʊinɔɹ
 prothonotary	pɹoʊθɑnətɛɹi
 prothoracic	pɹoʊθɔɹæsɪk
+protista	pɹətɪstə
 protoactinium	pɹoʊtoʊæktɪniəm
 protochordate	pɹoʊtoʊkɔɹdeɪt
 protogenea	pɹoʊtəd͡ʒəniə
@@ -30030,6 +30419,7 @@ protolithic	pɹoʊtəlɪθɪk
 protomorphic	pɹoʊtəmɔɹfɪk
 protonema	pɹoʊtənimə
 protonematal	pɹoʊtənɛmətəl
+protonic	pɹətɑnɪk
 protonotary	pɹoʊtɑnətɛɹi
 protopathy	pɹətɑpəθi
 protopectin	pɹoʊtəpɛktɪn
@@ -30049,7 +30439,12 @@ protoxide	pɹoʊtɑksaɪd
 protoxylem	pɹoʊtəzaɪlɛm
 protozology	pɹoʊzoʊɑləd͡ʒi
 protozoological	pɹoʊtəzoʊəlɑd͡ʒɪkəl
+protractile	pɹoʊtɹæktɪl
 protractor	pɹətɹæktɚ
+protrusible	pɹoʊtɹusəbəl
+protrusile	pɹoʊtɹusɪl
+protrusion	pɹoʊtɹuʒən
+protrusive	pɹoʊtɹusɪv
 protuberancy	pɹoʊtubɚənsi
 protuberant	pɹoʊtubɚənt
 protuberantial	pɹoʊtubɚænʃəl
@@ -30096,6 +30491,7 @@ pseudamphora	sudæmfɚə
 pseudaxis	sudæksɪs
 pseudisodomic	sudɪsədɑmɪk
 pseudoaquatic	sudoʊəkwætɪk
+pseudocarp	sudəkɑɹp
 pseudocelom	sudoʊsiləm
 pseudocercus	sudoʊsɚkəs
 pseudoclassicism	sudoʊklæsɪsɪzəm
@@ -30148,10 +30544,12 @@ psychogenetic	saɪkoʊd͡ʒənɛtɪk
 psychograph	saɪkoʊɡɹæf
 psychographer	saɪkɑɡɹəfɚ
 psychographic	saɪkəɡɹæfɪk
+psychometrics	saɪkoʊmɛtɹiks
 psychoneurosis	saɪkoʊnʊɹoʊsɪs
 psychoneurotic	saɪkoʊnʊɹɑtɪk
 psychopathist	saɪkɑpəθɪst
 psychopharmacologic	saɪkoʊfɑɹməkəlɑd͡ʒɪk
+psychophysics	saɪkoʊfɪzɪks
 psychopompus	saɪkəpɑmpəs
 psychoprophylactic	saɪkoʊpɹoʊfəlæktɪk
 psychoprophylaxis	saɪkoʊpɹoʊfəlæksɪs
@@ -30160,6 +30558,7 @@ psychosomatics	saɪkoʊsoʊmætɪks
 psychosurgery	saɪkoʊsɚd͡ʒɚi
 psychotechnics	saɪkoʊtɛknɪks
 psychotechnology	saɪkoʊtɛknɑləd͡ʒi
+psychotropic	saɪkoʊtɹɑpɪk
 psychrometric	saɪkɹəmɛtɹɪk
 psychrometry	saɪkɹɑmɪtɹi
 psychrophile	saɪkɹəfaɪl
@@ -30276,6 +30675,7 @@ purpure	pɚpjʊɹ
 purpuric	pɚpjʊɹɪk
 purpurin	pɚpjɚɪn
 purree	pʊɹi
+purslane	pɚsleɪn
 pursuance	pɚsjuəns
 purtenance	pɚtənəns
 purulence	pjʊɹələns
@@ -30325,6 +30725,7 @@ pylas	paɪləs
 pylorectomy	paɪlɚɛktəmi
 pym	pɪm
 pynchon	pɪnt͡ʃən
+pyogenic	paɪəd͡ʒɛnɪk
 pyoid	paɪɔɪd
 pyometra	paɪoʊmitɹə
 pyonephritis	paɪoʊnəfɹaɪtɪs
@@ -30365,6 +30766,7 @@ pyrocatechin	paɪɹəkætət͡ʃɪn
 pyrochemical	paɪɹəkɛmɪkəl
 pyrochemically	paɪɹəkɛmɪkəli
 pyrochlore	paɪɹəklɔɹ
+pyroclastic	paɪɹəklæstɪk
 pyroconductivity	paɪɹəkɑndəktɪvɪti
 pyrocrystalline	paɪɹəkɹɪstəlɪn
 pyroelectric	paɪɚoʊɪlɛktɹik
@@ -30372,6 +30774,7 @@ pyrogallate	paɪɹəɡæleɪt
 pyrogallic	paɪɚoʊɡælɪk
 pyrogallol	paɪɹəɡæloʊl
 pyrogen	paɪɹəd͡ʒɛn
+pyrogenic	paɪɹəd͡ʒɛnɪk
 pyrogenous	paɪɹɑd͡ʒənəs
 pyrographic	paɪɹəɡɹæfɪk
 pyrolatry	paɪɹɑlətɹi
@@ -30381,10 +30784,13 @@ pyrology	paɪɹɑləd͡ʒi
 pyrolyse	paɪɚəlaɪz
 pyromagnetic	paɪɹoʊmæɡnɛtɪk
 pyromancy	paɪɹəmænsi
+pyromania	paɪɹəmeɪniə
 pyromaniacal	paɪɹoʊmənaɪəkəl
+pyrometallurgy	paɪɹəmɛtəlɚd͡ʒi
 pyromorphite	paɪɹəmɔɹfaɪt
 pyrone	paɪɹoʊn
 pyronia	pɚoʊniə
+pyrophoric	paɪɹəfɔɹɪk
 pyrophosphate	paɪɹəfɑsfeɪt
 pyrophotometer	paɪɹoʊfoʊtɑmɪtɚ
 pyrophyllite	paɪɹəfɪlaɪt
@@ -30404,6 +30810,7 @@ pythius	pɪθiəs
 pytho	paɪθoʊ
 pythogenic	paɪθəd͡ʒɛnɪk
 pythogenous	paɪθɑd͡ʒənəs
+pyuria	pɪjʊɹiə
 pyxie	pɪksi
 qadarite	kædɚaɪt
 qadianis	kɑdiɑnɪs
@@ -30594,8 +31001,10 @@ raceabout	ɹeɪsəbaʊt
 racecard	ɹeɪskɑɹd
 racegoer	ɹeɪsɡoʊɚ
 raceme	ɹeɪsim
+racemic	ɹəsimɪk
 racemiform	ɹeɪsiməfɔɹm
 racemism	ɹæsəmɪzəm
+racemization	ɹæsəmɪzeɪʃən
 racemous	ɹæsəməs
 racemule	ɹæsəmjul
 rachial	ɹeɪkiəl
@@ -30613,6 +31022,7 @@ raddleman	ɹædəlmən
 radeau	ɹədoʊ
 radectomy	ɹədɛktəmi
 radhakrishnan	ɹɑdəkɹɪʃnən
+radiative	ɹeɪdieɪtɪv
 radiatus	ɹeɪdieɪtəs
 radicand	ɹædəkænd
 radicant	ɹædəkənt
@@ -30625,16 +31035,22 @@ radioactivate	ɹeɪdioʊæktəveɪt
 radioautography	ɹeɪdioʊɔtɑɡɹəfi
 radiodiagnosis	ɹeɪdioʊdaɪəɡnoʊsɪs
 radiofrequency	ɹeɪdioʊfɹikwənsi
+radiogram	ɹeɪdioʊɡɹæm
+radiograph	ɹeɪdioʊɡɹæf
 radioiron	ɹeɪdioʊaɪɚn
+radiolarian	ɹeɪdioʊlɛɹiən
 radiolocation	ɹeɪdioʊloʊkeɪʃən
 radioluminescence	ɹeɪdioʊlumənɛsəns
+radiometric	ɹeɪdioʊmɛtɹɪk
 radiomicrometer	ɹeɪdioʊmaɪkɹɑmɪtɚ
 radiopacity	ɹeɪdioʊpæsɪti
 radiophare	ɹeɪdioʊfɛɹ
 radiophone	ɹeɪdioʊfoʊn
+radiophonic	ɹeɪdɪoʊfɑnɪk
 radiophosphorus	ɹeɪdioʊfɑsfɚəs
 radiophotograph	ɹeɪdioʊfoʊtəɡɹæf
 radiophotography	ɹeɪdioʊfətɑɡɹəfi
+radioscopic	ɹeɪdioʊskɑpɪk
 radiosensitive	ɹeɪdioʊsɛnsɪtɪv
 radiostrontium	ɹeɪdioʊstɹɑnʃiəm
 radiosurgery	ɹeɪdioʊsɚd͡ʒɚi
@@ -30727,6 +31143,7 @@ rantipole	ɹæntɪpoʊl
 ranula	ɹænjələ
 ranunculaceous	ɹənʌŋkjəleɪʃəs
 raob	ɹeɪɑb
+raphide	ɹeɪfaɪd
 raphides	ɹæfɪdiz
 rapidan	ɹæpɪdæn
 raploch	ɹæplək
@@ -30835,6 +31252,7 @@ receptual	ɹɪsɛpt͡ʃuəl
 receptually	ɹɪsɛpt͡ʃuəli
 recercelee	ɹɪsɚsəleɪ
 recidivate	ɹɪsɪdəveɪt
+recife	ɹɛsifə
 reciprocatory	ɹɪsɪpɹəkətɔɹi
 recitatif	ɹɛsɪtətif
 recitative	ɹɛsɪteɪtɪv
@@ -31166,8 +31584,10 @@ retrally	ɹitɹəli
 retransmit	ɹitɹænzmɪt
 retributively	ɹɪtɹɪbjətɪvli
 retrim	ɹitɹim
+retrochoir	ɹɛtɹəkwaɪɚ
 retrodirective	ɹɛtɹoʊdɚɛktɪv
 retrogradatory	ɹɛtɹəɡɹeɪdətɔɹi
+retroject	ɹɛtɹoʊd͡ʒɛkt
 retrorsely	ɹɪtɹɔɹsli
 retroserrate	ɹɛtɹoʊsɛɹɪt
 retroserrulate	ɹɛtɹoʊsɛɹjəlɪt
@@ -31279,6 +31699,7 @@ rhizopus	ɹaɪzoʊpəs
 rhizotomy	ɹaɪzɑtəmi
 rhodian	ɹoʊdiən
 rhodic	ɹoʊdɪk
+rhodochrosite	ɹoʊdoʊkɹoʊsaɪt
 rhodope	ɹɑdəpi
 rhodopis	ɹɑdoʊpɪs
 rhoecus	ɹikəs
@@ -31286,6 +31707,7 @@ rhoeo	ɹioʊ
 rhoetus	ɹitəs
 rhomb	ɹɑm
 rhombencephalon	ɹɑmbɛnsɛfəlɑn
+rhombohedron	ɹɑmbəhidɹən
 rhonchal	ɹɑŋkəl
 rhonchus	ɹɑŋkəs
 rhondda	ɹɑndə
@@ -31302,6 +31724,7 @@ ribat	ɹɪbɑt
 ribband	ɹɪbənd
 ribbonwood	ɹɪbənwʊd
 ribcage	ɹibkeɪd͡ʒ
+riboflavin	ɹaɪboʊfleɪvɪn
 ribose	ɹaɪboʊs
 riboso	ɹɪboʊsoʊ
 ribozo	ɹɪboʊzoʊ
@@ -31330,7 +31753,6 @@ riessersee	ɹisɚzeɪ
 rieti	ɹiɛti
 rifacimento	ɹɪfɑt͡ʃɪmɛntoʊ
 rifely	ɹaɪfli
-rifeness	ɹaɪfnɪs
 riffi	ɹɪfi
 rightabout	ɹaɪtəbaʊt
 righten	ɹaɪtən
@@ -31484,6 +31906,7 @@ ropery	ɹoʊpɚi
 roquelaure	ɹoʊkəlɔɹ
 roris	ɹɔɹɪs
 rosaline	ɹoʊzəlin	ɹoʊzəlɪn
+rosarian	ɹəzɛɹiən
 roscian	ɹɑʃiən
 roscoelite	ɹɑskoʊlaɪt
 roseanna	ɹoʊzænə
@@ -31509,6 +31932,7 @@ rostra	ɹɑstɹə
 rostral	ɹɑstɹəl
 rostrated	ɹɑstɹeɪtɪd
 rostrocarinate	ɹɑstɹoʊkæɹəneɪt
+rotative	ɹoʊteɪtɪv
 rotatively	ɹoʊteɪtɪvli
 rotatores	ɹoʊtətɔɹiz
 rotch	ɹɑtʃ
@@ -31530,6 +31954,7 @@ roughhouse	ɹʌfhaʊs
 roughie	ɹʌfi
 roughstring	ɹʌfstɹɪŋ
 roulers	ɹulɛɹs
+roumanian	ɹʊmeɪniən
 rounce	ɹaʊns
 rouncy	ɹaʊnsi
 roundelay	ɹaʊndɪleɪ
@@ -31617,6 +32042,7 @@ rushwork	ɹʌʃwɚk
 russellite	ɹʌsəlaɪt
 russelyn	ɹʌsəlɪn
 russianise	ɹʌʃənaɪz
+russophile	ɹʌsoʊfaɪl
 rustre	ɹʌstɚ
 rustred	ɹʌstɚd
 rutaceous	ɹuteɪʃəs
@@ -31758,6 +32184,7 @@ salience	seɪliəns
 salientian	seɪliɛnʃiən
 saliferous	səlɪfɚəs
 salify	sæləfaɪ
+salinization	sælɪnaɪzeɪʃən
 salishan	seɪlɪʃən
 salivary	səlɪveɪɹi
 salivator	sæləveɪtɚ
@@ -31778,6 +32205,7 @@ salpingitic	sælpɪnd͡ʒɪtɪk
 salpingostomatomy	sælpɪŋɡoʊstəmætəmi
 salpingotomy	sælpɪŋɡɑtəmi
 salpinx	sælpɪŋks
+salsify	sælsəfaɪ
 salta	sɑltɑ
 saltando	sɑltɑndoʊ
 saltant	sæltənt
@@ -31854,7 +32282,6 @@ sandron	sændɹən
 sandskipper	sændskɪpɚ
 sandsoap	sændsoʊp
 sandstock	sændstɑk
-saneness	seɪnɪs
 sanforized	sænfɚaɪzd
 sanga	sæŋə
 sangallensis	sæŋɡɔlɛnsɪs
@@ -31913,6 +32340,7 @@ sapphira	səfaɪɹə
 sapphirine	sæfɚɪn
 sapremia	səpɹimiə
 saprogenous	səpɹɑd͡ʒənəs
+saprolegnia	sæpɹəlɛɡniə
 saprolite	sæpɹəlaɪt
 saprophile	sæpɹəfaɪl
 sapsago	sæpsəɡoʊ
@@ -31924,6 +32352,7 @@ sarcocarcinoma	sɑɹkoʊkɑɹsənoʊmə
 sarcocarp	sɑɹkoʊkɑɹp
 sarcode	sɑɹkoʊd
 sarcoenchondroma	sɑɹkoʊɛnkəndɹoʊmə
+sarcolemma	sɑɹkoʊlɛmə
 sarcology	sɑɹkɑləd͡ʒi
 sarcomatous	sɑɹkoʊmətəs
 sarcophagic	sɑɹkəfæd͡ʒɪk
@@ -32102,6 +32531,7 @@ schiffli	ʃɪfli
 schillerize	ʃɪlɚaɪz
 schipa	skipɑ
 schistosis	ʃɪstoʊsɪs
+schistosomiasis	ʃɪstəsoʊmaɪəsɪs
 schiz	skɪts
 schizanthus	skɪzænθəs
 schizocarp	skɪzəkɑɹp
@@ -32246,7 +32676,9 @@ scorzonera	skɔɹzəniɚə
 scotchman	skɑtʃmən
 scotism	skoʊtɪzəm
 scotodinia	skɑtədɪniə
+scotoma	skɑtoʊmə
 scotopia	skətoʊpiə
+scotopic	skətɑpɪk
 scottdale	skɑtdeɪl
 scotti	skɔti
 scottice	skɑtɪsi
@@ -32384,6 +32816,7 @@ segreant	sɛɡɹiənt
 segregator	sɛɡɹəɡeɪtɚ
 seguidilla	seɪɡədiljə
 seguso	sɛɡusoʊ
+seigneur	sinjɚ
 seigneurial	sinjɚiəl
 seigneury	sinjɚi
 seignior	sinjɚ
@@ -32475,6 +32908,7 @@ semiglobular	sɛmiɡlɑbjəlɚ
 semigroup	sɛmiɡɹup
 semiliterate	sɛmilɪtɚɪt
 semillon	sɛmijɑn
+semilunar	sɛmilunɚ
 semimat	sɛmimæt
 semination	sɛməneɪʃən
 seminiferous	sɛminɪfɚəs
@@ -32518,6 +32952,7 @@ senecio	sɪniʃɪoʊ
 senefelder	zeɪnəfɛldɚ
 senega	sɛnəɡə
 senes	sɛneɪz
+senhor	sɪnjɔɹ
 senhoras	sɪnjɔɹəz
 senhorita	sinjɚitə
 senlac	sɛnlæk
@@ -32696,6 +33131,7 @@ sextantis	sɛkstæntɪs
 sextern	sɛkstɚn
 sextic	sɛkstɪl
 sexto	sɛkstoʊ
+sextodecimo	sɛkstoʊdɛsəmoʊ
 sextolet	sɛkstəlɛt
 sexualize	sɛkʃuəlaɪz
 sezession	zeɪtsɛsjoʊn
@@ -32978,6 +33414,7 @@ significative	sɪɡnɪfəkeɪtɪv
 significatively	sɪɡnɪfəkeɪtɪvli
 significativeness	sɪɡnɪfəkeɪtɪvnɪs
 significs	sɪɡnɪfɪks
+signora	sɪnjɔɹə
 signorina	sinjɔɹinə
 signorino	sinjɔɹinoʊ
 signory	sinjɚi
@@ -33339,7 +33776,6 @@ sneesh	sniʃ
 snefru	snɛfɹu
 snellius	snɛliəs
 snickersnee	snɪkəsni
-snideness	snaɪdnɪs
 sniffish	snɪfɪʃ
 snig	snɪɡ
 sniperscope	snaɪpɚskoʊp
@@ -33370,7 +33806,6 @@ sociability	sɑʃəbɪlɪti
 socialise	soʊʃəlaɪz
 socinian	soʊsɪniən
 socinus	soʊsaɪnəs
-sociobiology	soʊsɪoʊbaɪɑləd͡ʒi
 sociocultural	soʊsɪoʊkʌltʃɚəl
 sociogenesis	soʊsioʊd͡ʒɛnɪsɪs
 sociogenetic	soʊsioʊd͡ʒənɛtɪk
@@ -33404,7 +33839,9 @@ soken	soʊkən
 sokoto	soʊkoʊtoʊ
 sokotra	soʊkoʊtɹə
 solarism	soʊlɚɪzəm
+solarium	soʊlɛɹiəm
 solarize	soʊlɚaɪz
+solatium	soʊleɪʃiəm
 soldanella	sɑldənɛlə
 soldiery	soʊld͡ʒɚi
 solen	soʊlən
@@ -33657,6 +34094,8 @@ spectrological	spɛktɹəlɑd͡ʒɪkəl
 spectrologically	spɛktɹəlɑd͡ʒɪkəli
 spectrology	spɛktɹɑləd͡ʒi
 spectrophotoelectric	spɛktɹoʊfoʊtoʊɪlɛktɹɪk
+spectrophotometer	spɛktɹoʊfoʊtɑmɪtɚ
+spectrophotometric	spɛktɹoʊfoʊtəmɛtɹɪk
 spectropolarimeter	spɛktɹoʊpoʊlɚɪmɪtɚ
 spectropolariscope	spɛktɹoʊpoʊlæɹɪskoʊp
 spectroradiometer	spɛktɹɔɹeɪdiɑmɪtɚ
@@ -33682,6 +34121,7 @@ spere	spiɹ
 spermary	spɚmɚi
 spermatium	spɚmeɪʃiəm
 spermatoblast	spɚmətoʊblæst
+spermatogenesis	spɚmətoʊd͡ʒɛnɪsɪs
 spermatoid	spɚmətɔɪd
 spermatophorous	spɚmətɑfɚəs
 spermic	spɚmɪk
@@ -33756,6 +34196,7 @@ spinningly	spɪnɪŋli
 spinode	spaɪnoʊd
 spinosely	spaɪnoʊsli
 spinosity	spaɪnɑsɪti
+spinozistic	spɪnoʊzɪstɪk
 spinproof	spɪnpɹuf
 spinthariscopic	spɪnθæɹɪskɑpɪk
 spinule	spaɪnjul
@@ -33890,6 +34331,7 @@ squaloid	skweɪlɔɪd
 squama	skweɪmə
 squamacellular	skweɪməsɛljəlɚ
 squamation	skweɪmeɪʃən
+squamosal	skwəmoʊsəl
 squamose	skweɪmoʊs
 squamosely	skweɪmoʊsli
 squamoseness	skweɪmoʊsnɪs
@@ -33952,7 +34394,6 @@ stagnatory	stæɡnətɔɹi
 stagnicolous	stæɡnɪkələs
 stagyrite	stæd͡ʒɚaɪt
 stahlhelm	ʃtɑlhɛlm
-staidness	steɪdnɪs
 staithe	steɪð
 stalactiform	stəlæktəfɔɹm
 stalagmometer	stæləɡmɑmɪtɚ
@@ -34197,6 +34638,7 @@ stofler	stɔflɚ
 stogey	stoʊɡi
 stogy	stoʊɡi
 stoicheiometrically	stɔɪkiəmɛtɹɪkli
+stoichiometric	stɔɪkiəmɛtɹɪk
 stoit	stoʊt
 stokesia	stoʊkiʒiə
 stola	stoʊlə
@@ -34204,6 +34646,7 @@ stolonic	stoʊlɑnɪk
 stoloniferous	stoʊlənɪfɚəs
 stoloniferously	stoʊlənɪfɚəsli
 stolonization	stoʊlənɪzeɪʃən
+stomachic	stoʊmækɪk
 stomatal	stɑmətəl
 stomatic	stoʊmætɪk
 stomatitic	stoʊmətɪtɪk
@@ -34302,6 +34745,7 @@ strikeover	stɹaɪkoʊvɚ
 stringholder	stɹɪŋhoʊldɚ
 striplight	stɹɪplaɪt
 strix	stɹɪks
+strobila	stɹoʊbaɪlə
 strobilaceous	stɹɑbəleɪʃəs
 strobile	stɹɑbɪl
 strobiloid	stɹɑbəlɔɪd
@@ -34491,6 +34935,7 @@ subrail	sʌbɹeɪl
 subreption	səbɹɛpʃən
 subreptitious	sʌbɹɛptɪʃəs
 subring	sʌbɹɪŋ
+subrogate	sʌbɹoʊɡeɪt
 subsaturated	səbsætʃɚeɪtɪd
 subscapular	səbskæpjəlɚ
 subsegment	səbsɛɡmənt
@@ -34979,6 +35424,7 @@ synaxes	sɪnæksiz
 synaxis	sɪnæksɪs
 syncarp	sɪnkɑɹp
 syncarpy	sɪnkɑɹpi
+synchrocyclotron	sɪŋkɹoʊsaɪklətɹɑn
 synchroflash	sɪŋkɹəflæʃ
 synchronise	sɪŋkɹənaɪz
 synchronoscope	sɪnkɹɑnəskoʊp
@@ -35134,6 +35580,7 @@ tailshaft	teɪlʃæft
 tain	teɪn
 taintlessly	teɪntlɪsli
 taintlessness	teɪntlɪsnɪs
+tajo	tɑhɔ
 takamatsu	tɑkɑmɑtsʊ
 takin	tɚkɪn
 talaemenes	təliməniz
@@ -35393,6 +35840,7 @@ telegony	təlɛɡəni
 telegrammatic	tɛləɡɹəmætɪk
 telegraphone	təlɛɡɹəfoʊn
 telegu	tɛləɡu
+telekinesis	tɛlɪkaɪnisɪs
 telemann	teɪləmɑn
 telemechanics	tɛləməkænɪks
 telemessage	tɛlɪmɛsɪd͡ʒ
@@ -35440,6 +35888,7 @@ tellurion	təlʊɹiɑn
 tellurite	tɛljɚaɪt
 tellurize	tɛljɚaɪz
 telodynamic	tɛloʊdaɪnæmɪk
+telolecithal	tɛloʊlɛsɪθəl
 telophase	tɛləfeɪz
 telotaxis	tɛlətæksɪs
 telpher	tɛlfɚ
@@ -35494,6 +35943,7 @@ tenonitis	tɛnənaɪtɪs
 tenorite	tɛnɚaɪt
 tenorrhaphy	tənɔɹəfi
 tenositis	tɛnəsaɪtɪs
+tenosynovitis	tɛnoʊsaɪnoʊvaɪtɪs
 tensible	tɛnsəbəl
 tensibleness	tɛnsəbəlnɪs
 tensilely	tɛnsəli
@@ -35510,16 +35960,20 @@ tenuis	tɛnjuɪs
 tenurial	tɛnjʊɹiəl
 tenzing	tɛnzɪŋ
 tenzon	tinzən
+teocalli	tiəkæli
+teosinte	tiəsɪnti
 tepefaction	tɛpəfækʃən
 tephillin	təfɪlɪn
 tephrite	tɛfɹaɪt
 tephritic	tɛfɹɪtɪk
 tephroite	tɛfɹoʊaɪt
+tepic	teɪpik
 terah	tiɹə
 terai	tɚaɪ
 terass	tɚæs
 teratism	tɛɹətɪzəm
 teratogenetic	tɛɹətoʊd͡ʒənɛtɪk
+teratogenic	tɛɹətoʊd͡ʒɛnɪk
 teratogeny	tɛɹətɑd͡ʒəni
 teratoid	tɛɹətɔɪd
 terbia	tɚbiə
@@ -35710,6 +36164,7 @@ themiste	θəmɪsti
 themisto	θəmɪstoʊ
 theobold	θiəboʊld
 theobromine	θiəbɹoʊmɪn
+theocentric	θiəsɛntɹɪk
 theocentricism	θioʊsɛntɹɪsɪzəm
 theoclymenus	θiəklaɪmənəs
 theocrasy	θiɑkɹəsi
@@ -35787,6 +36242,7 @@ thermolability	θɚmoʊləbɪlɪti
 thermomagnetic	θɚmoʊmæɡnɛtɪk
 thermomotive	θɚməmoʊtɪv
 thermomotor	θɚməmoʊtɚ
+thermophile	θɚmoʊfaɪl
 thermophone	θɚməfoʊn
 thermoplasticity	θɚmoʊplæstɪsɪti
 thermoscope	θɚməskoʊp
@@ -35866,6 +36322,8 @@ thiolic	θaɪɑlɪk
 thionate	θaɪəneɪt
 thionic	θaɪɑnɪk
 thionin	θaɪənɪn
+thiopental	θaɪəpɛntəl
+thiopentone	θaɪəpɛntoʊn
 thiophen	θaɪəfɛn
 thiophene	θaɪəfin
 thiophenol	θaɪəfinoʊl
@@ -35902,6 +36360,7 @@ thornbill	θɔɹnbɪl
 thornhead	θɔɹnhɛd
 thorntail	θɔɹnteɪl
 thoron	θɔɹɑn
+thoroughgoing	θɚoʊɡoʊɪŋ
 thoroughgoingly	θɚoʊɡoʊɪŋli
 thoroughgoingness	θɚoʊɡoʊɪŋnɪs
 thoroughpaced	θɚoʊpeɪst
@@ -35933,6 +36392,7 @@ thromboclastic	θɹɑmbəklæstɪk
 thrombokinase	θɹɑmboʊkaɪneɪs
 thrombolysin	θɹɑmboʊlaɪsɪn
 thromboplastic	θɹɑmbəplæstɪk
+thromboplastin	θɹɑmbəplæstɪn
 thrombose	θɹɑmboʊz
 thronos	θɹoʊnɑs
 throttlebottom	θɹɑtəlbɑtəm
@@ -36038,6 +36498,7 @@ timepleaser	taɪmplizɚ
 timeserver	taɪmsɚvɚ
 timework	taɪmwɚk
 timocharis	tɪmɑkɚɪs
+timocracy	taɪmɑkɹəsi
 timocratic	taɪməkɹætɪk
 timoleon	tɪmoʊliən
 timoshenko	tɪməʃɛŋkoʊ
@@ -36071,6 +36532,7 @@ tippecanoe	tɪpəkənu
 tippler	tɪplɚ
 tiptop	tɪptɑp
 tirailleur	tiɹɑjɚɹ
+tiresias	taɪɹisiəs
 tirewoman	taɪɚwʊmən
 tiro	taɪɹoʊ
 tirol	tɚɑl
@@ -36080,6 +36542,7 @@ tirrivee	tɚəvi
 tirthankara	tɚtʌŋkɚə
 tiruchirapalli	tɚʊt͡ʃɚəpʌli
 tiselius	tiseɪliʊs
+tishri	tɪʃɹeɪ
 tissot	tisoʊ
 tiswin	tɪzwin
 titanesque	taɪtənɛsk
@@ -36090,6 +36553,7 @@ titch	tɪtʃ
 titchy	tɪtʃi
 titfer	tɪtfɚ
 tither	taɪðɚ
+tithonus	tɪθoʊnəs
 titi	titi
 titicaca	titikɑkɑ
 titlark	tɪtlɚk
@@ -36117,6 +36581,7 @@ tobira	təbaɪɹə
 tobolsk	tɑbɔlsk
 tocantins	tɔkɑntins
 tocchet	tɑkɛt
+tocharian	təkɛɹiən
 tocodynamometer	toʊkoʊdaɪnəmɑmɪtɚ
 tocology	toʊkɑləd͡ʒi
 tocometer	toʊkɑmɪtɚ
@@ -36131,6 +36596,7 @@ togate	toʊɡeɪt
 toggery	tɑɡɚi
 togliatti	tɔljɑti
 togoland	toʊɡoʊlænd
+togolese	toʊɡəliz
 togue	toʊɡ
 toilette	tɔɪlɛt
 toilful	tɔɪlfəl
@@ -36166,6 +36632,7 @@ tombigbee	tɑmbɪɡbi
 tombola	tɑmbələ
 tombolo	tɑmbəloʊ
 tomentose	təmɛntoʊs
+tomentum	təmɛntəm
 tomfoolery	tɑmfulɚi
 tomium	toʊmiəm
 tomjanovich	tɑmd͡ʒoʊnoʊvɪt͡ʃ
@@ -36235,6 +36702,7 @@ toppenish	tɑpənɪʃ
 toprail	tɑpɹeɪl
 topsmelt	tɑpsmɛlt
 topspin	tɑpspɪn
+toquilla	təkijə
 torana	tɔɹənə
 torbanite	tɔɹbənaɪt
 torbernite	tɔɹbɚnaɪt
@@ -36276,6 +36744,7 @@ tossup	tɔsʌp
 tost	tɔst
 totalisator	toʊtələzeɪtɚ
 totalitarianize	toʊtælɪtɛɹiənaɪz
+totalizator	toʊtəlaɪzeɪtɚ
 totaquine	toʊtəkwin
 tother	tʌðɚ
 totient	toʊʃənt
@@ -36546,6 +37015,7 @@ trichopathy	tɹikɑpəθi
 trichord	tɹaɪkɔɹd
 trichosis	tɹɪkoʊsɪs
 trichotomic	tɹɪkətɑmɪk
+trichotomy	tɹɪkɑtəmi
 trichroism	tɹaɪkɹoʊɪzəm
 trichromat	tɹaɪkɹoʊmæt
 trichromatopsia	tɹaɪkɹoʊmətɑpsiə
@@ -36578,6 +37048,7 @@ trierarchy	tɹaɪɚɚki
 triethyl	tɹaɪɛθəl
 triethylamine	tɹaɪɛθələmin
 trifacial	tɹaɪfeɪʃəl
+trifluoperazine	tɹaɪfluəpɛɹəzin
 trifluoride	tɹaɪfluɚaɪd
 trifocals	tɹaɪfoʊkəlz
 trifoliated	tɹaɪfoʊlɪeɪtɪd
@@ -36750,6 +37221,7 @@ tropicalize	tɹɑpɪkəlaɪz
 tropine	tɹoʊpin
 tropistic	tɹoʊpɪstɪk
 tropologic	tɹɑpəlɑd͡ʒɪk
+tropology	tɹoʊpɑləd͡ʒi
 tropophilous	tɹoʊpɑfələs
 troposphere	tɹɑpəsfiɚ
 tros	tɹoʊs
@@ -37740,6 +38212,7 @@ upis	upɪs
 upolu	upoʊlu
 uppsala	ʌpsɑlə
 uprear	əpɹiɹ
+uproariousness	əpɹɔɹiəsnɪs
 upsides	əpsaɪdz
 upsilon	jupsəlɑn
 upspring	əpspɹɪŋ
@@ -38142,6 +38615,7 @@ vernacularise	vɚnækjəlɚaɪz
 vernacularism	vɚnækjəlɚɪzəm
 vernacularize	vɚnækjəlɚaɪz
 vernalise	vɚnəlaɪz
+vernalization	vɚnəlaɪzeɪʃən
 vernell	vɚnɛl
 veronal	vɛɹənəl
 verrazano	vɛɹəzɑnoʊ
@@ -38210,6 +38684,8 @@ vibrissae	vaɪbɹisi
 vibrometer	vaɪbɹɑmɪtɚ
 vicarage	vɪkɚid͡ʒ
 vicarate	vɪkɚɪt
+vicarial	vɪkɛɹiəl
+vicariousness	vaɪkɛɹiəsnɪs
 vicarly	vɪkɚli
 vicegeral	vaɪsd͡ʒiɹəl
 vicegerency	vaɪsd͡ʒiɹənsi
@@ -38225,6 +38701,7 @@ viconian	vɪkoʊniən
 vicontiel	vaɪkɑntiəl
 victimise	vɪktəmaɪz
 victoriate	vɪktɔɹiɪt
+victoriousness	vɪktɔɹiəsnɪs
 victress	vɪktɹɪs
 victrices	vɪktɹɪsiz
 victrix	vɪktɹɪks
@@ -38241,6 +38718,7 @@ vienne	vjɛn
 vieta	vjeɪtə
 viewlessly	vjulɪsli
 viewy	vjui
+vigesimal	vɪd͡ʒɛsɪməl
 vigesimo	vaɪd͡ʒɛsəmoʊ
 vigia	vɪd͡ʒiə
 vigilius	vɪd͡ʒɪliəs
@@ -38289,6 +38767,7 @@ vinificator	vɪnəfəkeɪtɚ
 vinnitsa	vinɪtsɑ
 vinoba	vinoʊbə
 vinometer	vɪnɑmɪtɚ
+vinosity	vaɪnɑsɪti
 vinum	vaɪnəm
 viny	vaɪnɪl
 vinylacetylene	vaɪnɪləsɛtəlin
@@ -38368,7 +38847,6 @@ vituline	vɪt͡ʃəlaɪn
 vituperate	vaɪtupɚeɪt
 vituperation	vaɪtupɚeɪʃən
 vitus	vitʊs
-vivace	vɪvɑt͡ʃeɪ
 vivat	vaɪvæt
 vivax	vaɪvæks
 vivekananda	vivəkənʌndə
@@ -39340,6 +39818,7 @@ zoogloea	zoʊəɡliə
 zoografting	zoʊəɡɹæftɪŋ
 zoographic	zoʊəɡɹæfɪk
 zoography	zoʊɑɡɹəfi
+zoolatry	zoʊɑlətɹi
 zoologically	zoʊəlɑd͡ʒɪkəli
 zoomancy	zoʊəmænsi
 zoometric	zoʊəmɛtɹɪk

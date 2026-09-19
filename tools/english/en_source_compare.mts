@@ -149,7 +149,14 @@ export function modernise(a: string[]): string[] {
         if (b === "AH" && a[i + 1] === "R" && !VOWELS.has((a[i + 2] ?? "").replace(/[0-2]$/u, ""))) {
             out.push(`ER${st}`); i++; continue;                                 // /@/r → ɚ
         }
-        if (b === "OW" && a[i + 1] === "R") { out.push(`AO${st}`); continue; }   // FORCE → NORTH
+        // FORCE → NORTH. ⚠ THE SAME CONSONANT LOOKAHEAD AS THE RULE ABOVE, and its absence was a latent
+        // bug: `OW R` before a VOWEL is a compound seam whose `r` is the ONSET of the next syllable —
+        // `auto·radiography`, `photo·reconnaissance`, `oleo·resin` — not a coda to merge. Unguarded it
+        // rewrote the `oʊ` of `auto-` as `ɔ`. Invisible until gold's readings began flowing through
+        // `modernise` on the import path, where it moved 12 rows.
+        if (b === "OW" && a[i + 1] === "R" && !VOWELS.has((a[i + 2] ?? "").replace(/[0-2]$/u, ""))) {
+            out.push(`AO${st}`); continue;
+        }
         if (b === "Y" && out.length > 0 && a[i + 1]?.startsWith("UW")) {
             const prev = out[out.length - 1]!;
             const co: Record<string, string> = { Z: "ZH", S: "SH", T: "CH", D: "JH" };

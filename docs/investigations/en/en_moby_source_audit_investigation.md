@@ -501,3 +501,54 @@ path's guess. Likewise `Enceladus` ɛn→ən is gold's reduced initial, which Me
 population went 41,276 → 39,402 because the imported words leave the corpus, and they were words the OOV
 path was guessing at, so removing them raises the rate mechanically. ⚠ THE PRIMARY IS THE ONE THAT
 SPEAKS: 61.9% → 62.0%, on a referee that knows nothing about either source.
+
+
+## Run 17 — 2026-09-18 23:45 — review: the fold was merging READINGS, not just notation
+
+Five findings, and two changed the import materially.
+
+⚠ **THE FOLD MERGED THE DIPHTHONGS, WHICH IS A READING DIFFERENCE.** `reduceUnstressed` collapsed twelve
+qualities into one, so it accepted 501 rows where the two sources disagree `AH0` against `OW0` at an
+unstressed slot — `acanthocephalan` Moby `TH AH0 S`, gold `TH OW0 S`. A diphthong is a different vowel,
+not a different way of writing the same one. Restricted to monophthongs: **1,874 → 1,395**.
+
+⚠ **AND THE COMMENT'S EMPIRICAL CLAIM WAS WRONG.** It said "Moby writes a FULL unstressed vowel where
+gold reduces". Measured over the selected rows, 488 are the INVERSE — Moby reduced, gold full
+(`abjection` Moby `AH0`, gold `AE0`). The axis is real; its direction is not constant. Gold is taken
+because it is the convention this engine follows, not because it is the reduced side. Corrected in
+place.
+
+⚠ **GOLD'S READING WAS NOT MODERNISED, AND THE MOBY BRANCH'S IS.** The module header states the
+invariant — a row entering the LEXICON arrives in this engine's conventions — and `merge` alone is only
+the marry–merry half. Two rows shipped with a yod the Moby path removes: `exudation` as
+`ˌɛksjuːdˈeᶦʃən` where the engine coalesces S+j+uː → ʃuː, and `minho` as `mˈiːnjuː` where it drops the
+yod after N.
+
+⚠ **AND THE OBVIOUS FIX WOULD HAVE BROKEN TWELVE MORE, WHICH IS A LATENT BUG IN `modernise` ITSELF.**
+Its `AH R` rule carries a following-vowel lookahead — `AH R` before a vowel is an onset, `around` =
+ə-ɹaʊnd — and its `OW R` rule carries none. So FORCE→NORTH fired on compound seams:
+`auto·radiography`, `photo·reconnaissance`, `oleo·resin`, rewriting the `oʊ` of `auto-` as `ɔ`. The
+guard was given to both rules, then gold's reading modernised.
+
+    exudation            EH2 K SH UW0 D EY1 SH AH0 N       yod coalesced
+    minho                M IY1 N UW0                       yod dropped
+    autoradiography      AO2 T OW0 R EY2 D IY0 AA1 …       OW0 kept before the onset r
+
+Also from the review: the manifest's `catch {}` swallowed every read error, not only a missing file, so
+any other failure would write the new rows over the whole manifest — the silent deletion the block was
+added to prevent, arriving by a different door. Carried-forward rows are now reconciled against
+`g2p-dict.tsv` rather than copied, so a later hand correction cannot be reverted by the re-apply step.
+And `have` learns the rows a run adds, so a Commonwealth spelling and its American counterpart arriving
+together no longer both slip past the spelling-fold guard.
+
+    imported            1,395 (manifest 16,227 + 1,395 = 17,622)
+    g2p-dict.tsv        133,712 → 135,107 rows
+    goldens             5 languages, 11 rows
+
+                       folded             +intentional
+    primary wikipron   61.9% → 62.0%      67.4%
+    Moby lexicon       75.3% (unchanged)  82.0%
+    Moby OOV           37.2% → 38.0%      45.3%
+
+⚠ The primary gains one row rather than four, which is the stricter fold being right rather than
+generous. The OOV figure is still not comparable across the change — its population is now 39,881.
