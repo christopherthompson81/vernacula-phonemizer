@@ -267,6 +267,27 @@ function checkIsolated(code: string): Result {
  */
 const RUNNER = process.execPath;
 
+/**
+ * Exit once stdout has actually drained.
+ *
+ * ⚠ `process.exit` DOES NOT FLUSH A PIPE, and every output this tool produces goes down one — to the
+ * `--jobs` parent, or to a test harness capturing it. A bare `process.exit(0)` after ~640 `console.log`
+ * calls can therefore truncate the report mid-line, and the truncation is SILENT: the reader sees a
+ * short but well-formed transcript with no error in it. Worse in a child, where a lost last line is a
+ * lost LANGUAGE, and worse again on the error paths, where the `console.error` explaining the failure
+ * is the thing that goes missing.
+ * ⚠ THIS IS A SUSPECT, NOT A PROVEN CAUSE. `test/check-goldens-jobs.test.ts` fails intermittently with
+ * exactly that signature — a 349-line pooled report against a 643-line serial one, no error line — and
+ * three separate diagnoses of it (contention, maxBuffer, a dead worker) were all wrong. This removes
+ * the cheapest mechanism that produces the symptom; if the flake survives, it was something else.
+ */
+async function exitFlushed(code: number): Promise<never> {
+    for (const s of [process.stdout, process.stderr]) {
+        if (s.writableLength > 0) await new Promise<void>((r) => s.write("", () => r()));
+    }
+    process.exit(code);
+}
+
 /** The argv every child is spawned with, so the two spawning modes cannot drift apart. */
 function childArgv(extra: string[] = []): string[] {
     return ["--import", "tsx", fileURLToPath(import.meta.url), "--child", ...extra, ...childFlags()];
@@ -340,7 +361,7 @@ async function checkPooled(order: string[], n: number): Promise<Result[]> {
     } catch (e) {
         for (const c of children) c.kill();
         console.error(`--jobs: ${(e as Error).message}`);
-        process.exit(2);
+        await exitFlushed(2);
     }
     // ⚠ EVERY LANGUAGE MUST COME BACK, AND THE REPORT CANNOT NOTICE ON ITS OWN. The verdict line counts
     // `codes.length`, so a worker that dropped a language would print the full "189 languages" over a
@@ -350,7 +371,7 @@ async function checkPooled(order: string[], n: number): Promise<Result[]> {
     // sibling `--jobs` mode also were (test/referee-eval-shard.test.ts).
     if (results.length !== order.length) {
         console.error(`--jobs: ${results.length} of ${order.length} languages came back — the run is incomplete`);
-        process.exit(2);
+        await exitFlushed(2);
     }
     // Completion order is a race; the report is not allowed to be. Sorted the way `codes` is, by code
     // unit, so a pooled report is line-for-line comparable with a serial one.
@@ -381,7 +402,7 @@ if (write && (noOrt || noClear || isolate || asChild || capOrt || jobs > 1)) {
         + "  --cap-ort or --jobs:\n"
         + "  those modes run a degraded, delegated or differently-configured engine, and writing\n"
         + "  from one re-records the goldens from something that is not the engine.");
-    process.exit(2);
+    await exitFlushed(2);
 }
 
 // ⚠ THE TWO PARALLEL MODES ARE NOT COMPOSABLE AND MUST NOT SILENTLY PICK ONE. `--isolate` exists to prove
@@ -390,7 +411,7 @@ if (write && (noOrt || noClear || isolate || asChild || capOrt || jobs > 1)) {
 if (jobs > 1 && isolate) {
     console.error("--jobs and --isolate are opposite answers to the same question; pick one:\n"
         + "  --isolate proves a mismatch belongs to its row, --jobs shares a heap between languages.");
-    process.exit(2);
+    await exitFlushed(2);
 }
 
 // ⚠ `--jobs --no-clear` PRODUCES A SILENTLY WEAKER ANSWER, WHICH IS WHY IT IS REFUSED RATHER THAN
@@ -406,7 +427,7 @@ if (jobs > 1 && noClear) {
     console.error("--jobs cannot be combined with --no-clear:\n"
         + "  --no-clear asks what each language inherits from the one before it, and --jobs\n"
         + "  gives each worker a different 'one before it'. Run --no-clear serially.");
-    process.exit(2);
+    await exitFlushed(2);
 }
 
 if (noOrt) setOrtLoader(() => Promise.reject(new Error("ORT disabled by --no-ort")));
@@ -426,7 +447,7 @@ if (!noClear && !noOrt && (capOrt || (!asChild && jobs === 1))) await assertNeur
 
 if (asChild) {
     await serveChild();
-    process.exit(0);
+    await exitFlushed(0);
 }
 
 async function runAll(): Promise<Result[]> {
@@ -453,7 +474,7 @@ if (write) {
     console.log(changed === 0
         ? "nothing to write — every golden already matches the engine"
         : `wrote ${changed} golden${changed === 1 ? "" : "s"}. Re-run without --write to confirm.`);
-    process.exit(0);
+    await exitFlushed(0);
 }
 
 let staleRows = 0, staleLangs = 0;
@@ -489,7 +510,7 @@ if (noOrt || noClear) {
               + `  These are NOT stale goldens — this run disabled part of the engine on purpose.\n`
               + `  ${noOrt ? "A language listed above is ONNX-dependent, directly or by delegation." : ""}`,
     );
-    process.exit(0);
+    await exitFlushed(0);
 }
 
 console.log(

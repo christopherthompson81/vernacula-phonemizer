@@ -24,16 +24,34 @@ run, almost entirely the Moby imports of #1344 and #1353. The md5 held-out split
 the old held-out population survives inside the new one exactly (n=11,748) and the two eras are
 directly comparable:
 
+⚠ **THE TRAINING ENVIRONMENT IS RECORDED BECAUSE THE SEEDS CANNOT CARRY IT.** `random.seed(0)` and
+`torch.manual_seed(0)` are set and `cudnn.deterministic` is now requested, but a cuDNN LSTM's backward
+pass uses atomics: a re-run on this machine may differ slightly and a re-run on different hardware
+almost certainly will. The weights shipped 2026-09-19 were produced by
+
+    torch 2.11.0+cu128 · cuda 12.8 · onnx 1.21.0 · onnxruntime 1.24.4
+    python 3.12.3 · NVIDIA GeForce RTX 3090
+
+so a reproduction attempt that lands somewhere else knows why. There is no `requirements.txt` and no
+`.venv` in the checkout; the recipe above wants any venv carrying those four packages.
+
+⚠ THESE ARE THE 90%-SPLIT MODEL'S NUMBERS, NOT THE SHIPPED ARTIFACT'S. The script trains a split model
+to measure, then retrains on the full dictionary to export. The shipped graph scores 99.1% on the rows
+below because they are its training data; only the split model can be asked how it generalises.
+
 | held-out population | stress-indep | incl. stress |
 |---|---|---|
 | words the old dictionary also had (n=11,748) | **71.4%** — baseline 71.5% | 66.4% |
 | words added since, the Moby tail (n=1,780) | **65.7%** | 53.7% |
 
 So the extra data taught the model nothing about the vocabulary it already handled, and cost it nothing
-either. What it bought is the tail: the SHIPPED model before this run scored **56.3%** on those same
-added words (they postdate it, so all 17,825 were unseen), against 65.7% here — about **+9 points on
-the obscure/foreign/proper-noun vocabulary the OOV tier exists for**. That is the whole gain, and it is
-narrow by construction.
+either. What it bought is the tail: decoding the PREVIOUS shipped int8 graph over those same 1,780 words
+gives **59.6%** stress-independent, against 65.7% here — **+6.1pp on the obscure/foreign/proper-noun
+vocabulary the OOV tier exists for**. That is the whole gain, and it is narrow by construction.
+⚠ IT IS +6.1, NOT THE +9 THIS FILE FIRST CLAIMED. The 56.3% behind that figure came from a 3,000-word
+stride sample of ALL 17,825 added words through the full serving path, which is neither the same
+population nor the same decode as the 65.7% it was subtracted from. Measured like for like — same graph
+interface, same 1,780 rows — the gain is a third smaller.
 
 ⚠ **AND THE REFEREES AGREE, INCLUDING THE INDEPENDENT ONE**, which is what rules out the obvious
 objection. The new training rows are MOBY-DERIVED, so a jump against the Moby OOV referee could be the
@@ -47,11 +65,32 @@ relationship to them:
 +1.3pp on the independent referee is the largest single move it has recorded in this audit; the +6.1pp
 on Moby-OOV is partly the circularity above and should not be read alone.
 
-⚠ **55 GOLDEN LANGUAGES MOVED, 232 ROWS, AND NONE OF THEM IS ENGLISH-ONLY.** The English neural tagger
-renders EMBEDDED English inside every other language's text, so retraining it moves Cherokee
-(`Sundance`), Tibetan (`vasanta`) and Belarusian (`caro`) goldens too. Sampled before accepting: the
-changes are majority repairs — `medicines` was reading as "medi-signs" (`mˈɛd̬ɪsˌaᶦnz` → `mˈɛd̬ɪsˌɪnz`),
-`Aldwych` `ˈɔːɫdwɪk` → `ˈɔːɫdwɪt͡ʃ`, `panthera` and a dropped /ɡ/ in a compound both fixed.
+⚠ **55 GOLDEN LANGUAGES MOVED, 232 ROWS.** The English neural tagger renders EMBEDDED English inside
+every other language's text, so retraining it moves Cherokee (`Sundance`), Tibetan (`vasanta`) and
+Belarusian (`caro`) goldens too. ⚠ THIS FILE FIRST SAID "NONE OF THEM IS ENGLISH-ONLY", WHICH IS THE
+OPPOSITE OF THE DIFF: `en`, `en-GB` and `en-IN` are three of the 55 files and carry 45 of the 232 rows,
+15 each, the largest block after `chr` at 21. What is true is that every changed row contains Latin
+source text.
+
+Repairs confirmed: `medicines` was reading as "medi-signs" (`mˈɛd̬ɪsˌaᶦnz` → `mˈɛd̬ɪsˌɪnz`), `Aldwych`
+`ˈɔːɫdwɪk` → `ˈɔːɫdwɪt͡ʃ`, `Saint-Saëns` `snz` → `sˈiːnz`, plus `resistivity`, `tahlequah`, `biorhythm`,
+and a 32-row block where bare `rr` becomes `ˌɑːɹˈɑːɹ`, consistent with the bare `r` both eras already
+read as `ˈɑːɹ`.
+
+⚠ AND SIX ROWS REGRESSED, which "majority repairs" alone would have buried:
+
+    Tt (Audi TT)  tʰˌiːtʰˈiː → t        ← a bare consonant, no vowel at all
+    kW            kʰˈuː      → kw       ← the same shape
+    heHe          hˈiːhi     → hˈiːh
+    Rossby        ɹˈɔːsbi    → ɹˈɔːbi   ← the /s/ is gone
+    Dhara         dˈɑːɹə     → dˈɛɹə
+    stealthily    ɪ → ə (the weak-vowel axis, minor)
+
+⚠ THE VOWELLESS-OUTPUT CLASS IS FLAT, NOT A NEW DEFECT, and that is what makes these six acceptable
+rather than blocking: enumerating every 2- and 3-letter string plus a 1-in-7 sample of 4-letter ones
+gives 48/853/3,189 vowelless outputs before and 52/850/3,209 after. `tt` and `kw` fell in while others
+fell out. The cause is structural — a per-letter tagger with no nucleus constraint — and it belongs in
+its own issue, not in a retrain.
 
 ⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES — the largest gain in the fleet (+3.1pp).** Training ran the
 BiLSTM over padded batches without `pack_padded_sequence`, so its backward direction crossed the padding
