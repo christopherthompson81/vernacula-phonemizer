@@ -213,7 +213,7 @@ export function mobyToArpabet(p: string, w: string): string[] | undefined {
         // that way — `Deutsche d//Oi//t/S//@/`, `putsch p/U/t/S/` and `kaffeeklatsch` are affricates,
         // while `Festschrift 'f/E/st,/S/r/I/ft` is a seam — so it cannot arbitrate. It needs no clause:
         // the three affricates are adjacent and the seam is separated, so the separator already has them.
-        if (c === "t" && s.startsWith("/S/", i + 1) && !/t[e'-]?sh/u.test(w)) { out.push("CH"); i += 4; continue; }
+        if (c === "t" && s.startsWith("/S/", i + 1) && !/t[e-]?sh|ts[tp]/u.test(w)) { out.push("CH"); i += 4; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
     }

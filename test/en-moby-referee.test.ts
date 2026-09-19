@@ -135,10 +135,19 @@ describe("the Moby referee corpora", () => {
             ["associateship", "əsoʊʃiətʃɪp"], ["buteshire", "bjutʃiɹ"],
             ["nightshade", "naɪtʃeɪd"], ["hotshot", "hɑtʃɑt"], ["outshine", "aʊtʃaɪn"]] as const)
             expect([w, lex.get(w) ?? oov.get(w)]).toEqual([w, ipa]);
-        // ⚠ AND THE THREE THAT AN `sh`-ANYWHERE TEST GETS WRONG. Each spells ⟨sh⟩ somewhere ELSE while
-        // its `t/S/` is an ordinary affricate; they are the reason the rule tests the POSITION.
-        for (const [w, ipa] of [["pushchair", "pʊʃt͡ʃɛɹ"], ["shakuhachi", "ʃʌkʊhʌt͡ʃi"],
-            ["putsch", "pʊt͡ʃ"]] as const)
+        // ⚠ THE ONES AN `sh`-ANYWHERE TEST GETS WRONG. `pushchair` and `shakuhachi` spell ⟨sh⟩ somewhere
+        // ELSE while their `t/S/` is an ordinary affricate; they are why the rule requires the ⟨t⟩ WITH
+        // the ⟨sh⟩ rather than ⟨sh⟩ alone. (`chafing-dish` is the third and is not asserted here — its
+        // Moby body is truncated to just `chafing`, so it is a defective row, not a clean example.)
+        for (const [w, ipa] of [["pushchair", "pʊʃt͡ʃɛɹ"], ["shakuhachi", "ʃʌkʊhʌt͡ʃi"]] as const)
+            expect([w, lex.get(w) ?? oov.get(w)]).toEqual([w, ipa]);
+        // ⚠ AND THE GERMAN SEAM NEITHER THE SEPARATOR NOR ⟨sh⟩ CAN SEE. German ⟨St⟩ is /ʃt/, so
+        // `Altstoetter` is Alt+Stötter — a /t/+/ʃ/ boundary spelled with no ⟨h⟩ anywhere. Its siblings
+        // `Jugendstil`, `Landsturm`, `Waldstein` are written separated and were already safe; this is
+        // the one Moby wrote adjacent, and the first version of this rule folded it to an affricate.
+        expect(lex.get("altstoetter") ?? oov.get("altstoetter")).toBe("ɑltʃtɛtɚ");
+        // ⚠ BUT ⟨ts⟩ + ANY LETTER WOULD BE TOO WIDE: these spell ⟨ts⟩ and are affricates.
+        for (const [w, ipa] of [["putsch", "pʊt͡ʃ"], ["tsarevich", "zɑɹivɪt͡ʃ"]] as const)
             expect([w, lex.get(w) ?? oov.get(w)]).toEqual([w, ipa]);
     });
 
