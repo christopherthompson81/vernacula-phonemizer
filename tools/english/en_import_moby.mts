@@ -47,6 +47,28 @@ const goldOf = (w: string): string | undefined => {
     const v = gold[w] ?? gold[w[0]!.toUpperCase() + w.slice(1)];
     return typeof v === "string" ? v : undefined;
 };
+/**
+ * Reduce every vowel the source ITSELF marks unstressed (ARPABET stress digit 0) to one symbol.
+ *
+ * ⚠ THIS IS WHAT MOBY AND GOLD MOSTLY DISAGREE ABOUT, and it is a notation difference rather than a
+ * reading. Moby writes a FULL unstressed vowel where gold reduces — `abstruseness` as
+ * `AE B S T R UW S N EH S` against gold's `ə B S T R UW S N ə S`, `abstractionism` with `AE` against
+ * gold's `ə`. Found by READING the disagreements rather than counting them: 243 of them differ in the
+ * first phone alone and 116 in the last, almost all on this axis. Folding it makes 1,954 more headwords
+ * clear the two-source bar.
+ * ⚠ IT IS SAFE BECAUSE IT IS CONDITIONED ON THE SOURCE'S OWN STRESS MARK, not on position or guesswork:
+ * a vowel either source writes as stressed is untouched, so no stressed contrast can be merged. It runs
+ * BEFORE `normalise`, which strips stress and would otherwise take the condition with it.
+ * ⚠ AND IT IS ONLY A COMPARISON FOLD. What gets IMPORTED is gold's reading, never the folded form.
+ * ⚠ `ER` IS EXCLUDED, AND QC CAUGHT WHY. `en_source_compare.mts` already states the rule — "ɚ against ə
+ * is a real distinction, not a notation one" — and reducing it merged a RHOTIC away: on `squiredom`
+ * Moby has `S K W AY1 ER0 D AH0 M` and gold `S K W AY1 AH0 D AH0 M`, i.e. gold simply drops the /r/ of
+ * `squire`. Folded together they "agreed" and the import would have taken the r-less reading.
+ */
+const VOWEL = /^(AA|AE|AH|AO|AW|AY|EH|EY|IH|IY|OW|OY|UH|UW)[0-2]?$/u;
+const reduceUnstressed = (a: string[]): string[] =>
+    a.map((p) => (VOWEL.test(p) && p.endsWith("0") ? "AH0" : p));
+
 /** æɹ → ɛɹ: the marry–merry merger this engine applies (#1336). Moby is unmerged. */
 const merge = (a: string[]): string[] =>
     a.map((p, i) => (p.replace(/[0-2]$/u, "") === "AE" && a[i + 1]?.replace(/[0-2]$/u, "") === "R"
@@ -54,7 +76,7 @@ const merge = (a: string[]): string[] =>
 
 const rows: string[] = [];
 const seen = new Set<string>();
-let noGold = 0, disagree = 0, skipped = 0, shadowed = 0;
+let noGold = 0, disagree = 0, skipped = 0, shadowed = 0, reduced = 0;
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const sp = line.indexOf(" "); if (sp < 0) continue;
     const w = line.slice(0, sp).toLowerCase();
@@ -67,20 +89,52 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const g = goldOf(w); if (!g) { noGold++; continue; }
     const ga = goldToArpabet(g); if (!ga) { noGold++; continue; }
     const ours = merge(modernise(m));
-    if (normalise(ours) !== normalise(ga)) { disagree++; continue; }
+    let take = ours, viaFold = false;
+    if (normalise(ours) !== normalise(ga)) {
+        // ⚠ AGREEING ONLY AFTER THE REDUCTION FOLD MEANS GOLD'S READING IS THE ONE TO TAKE, not Moby's.
+        // The two now differ ONLY in unstressed vowels, and Moby's are the unreliable half — the same
+        // conservatism that writes `-ness` as `nɛs` in 1,622 of its own rows. Gold is also the lexicon
+        // this engine's conventions follow (#1319 added the reduced slot misaki writes).
+        if (normalise(reduceUnstressed(ours)) !== normalise(reduceUnstressed(ga))) { disagree++; continue; }
+        take = merge(ga);
+        viaFold = true;
+    }
     // ⚠ A COMMONWEALTH SPELLING THE FOLD ALREADY RESOLVES MUST NOT BE IMPORTED. `analyse` was not in the
     // dictionary and did not need to be: `americanSpelling` mapped it to `analyze`, which carries this
     // repo's curated reading AND its `en-syllabic.tsv` marking. Giving it its own row SHADOWS the fold —
     // the lookup now hits first — and swaps a curated reading for a raw imported one. 188 rows, caught by
     // english-spelling-variants.test.ts when `analyse` lost its ə̆.
     if (americanSpelling(w, (x) => have.has(x)) !== undefined) { shadowed++; continue; }
-    rows.push(`${w}\t${ours.join(" ")}`);
+    if (viaFold) reduced++;
+    rows.push(`${w}\t${take.join(" ")}`);
 }
 rows.sort();
 console.log(`considered ${seen.size + skipped}  skipped ${skipped}  no gold ${noGold}  gold disagrees ${disagree}  shadows a spelling fold ${shadowed}`);
-console.log(`IMPORTABLE (moby + gold agree): ${rows.length}`);
+console.log(`IMPORTABLE (moby + gold agree): ${rows.length}  — of which ${reduced} agree only after the unstressed-vowel fold (gold's reading taken)`);
 
 if (!process.argv.includes("--write")) { console.log("\n(dry run — pass --write to apply)"); process.exit(0); }
+
+/**
+ * ⚠ THE MANIFEST IS THE UNION OF EVERY IMPORT, NOT THE LAST ONE, and the first re-run of this tool
+ * proved why. A word imported by an earlier run is in `g2p-dict.tsv`, so `have` skips it and it never
+ * reaches `rows` — writing `rows` over the file therefore DELETED all 16,227 rows of the #1344 import,
+ * leaving 1,874. Nothing in the dictionary changed, so the loss was silent there; it surfaced as the
+ * lexicon referee jumping 35,202 → 51,429, because `build-en-moby-referee.mts` reads this file to
+ * exclude imported words and they had stopped being listed.
+ * ⚠ THE FILE'S WHOLE PURPOSE IS TO BE RE-APPLIABLE AFTER AN `--emit`, so losing earlier rows loses
+ * exactly what it exists to protect.
+ */
+const previous: [string, string][] = [];
+try {
+    for (const l of readFileSync(join(EN, "moby-import.tsv"), "utf8").split("\n")) {
+        if (l.startsWith("#") || !l.includes("\t")) continue;
+        const [w, p] = l.split("\t");
+        if (w && p && !rows.some((r) => r.startsWith(`${w}\t`))) previous.push([w, p]);
+    }
+} catch { /* first run — no manifest yet */ }
+const manifest = [...previous, ...rows.map((r) => r.split("\t") as [string, string])]
+    .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+console.log(`manifest: ${previous.length} carried forward + ${rows.length} new = ${manifest.length}`);
 
 writeFileSync(join(EN, "moby-import.tsv"),
     `# THE MOBY IMPORT LAYER — headwords g2p-dict.tsv lacked, where Moby AND misaki gold agree.\n` +
@@ -91,14 +145,15 @@ writeFileSync(join(EN, "moby-import.tsv"),
     `# carries none of these rows — the same hazard g2p-curated.tsv exists for.\n` +
     `# ⚠ AND tools/gen/build-en-moby-referee.mts READS THIS FILE to exclude these words from both referee\n` +
     `# corpora. Having imported Moby's reading, scoring ourselves against Moby on the same word is a mirror.\n` +
-    `#\n# word <TAB> ARPABET (Moby, modernised to this engine's conventions; gold concurring)\n` +
-    rows.join("\n") + "\n");
+    `#\n# word <TAB> ARPABET (Moby modernised to this engine's conventions where the two agree outright;\n` +
+    `# gold's where they agree only after unstressed vowels are folded — see en_import_moby.mts).\n` +
+    manifest.map(([w, p]) => `${w}\t${p}`).join("\n") + "\n");
 
 const merged = [...dict, ...rows.map((r) => r.split("\t") as [string, string])]
     .sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
 writeFileSync(join(EN, "g2p-dict.tsv"),
     `# word <TAB> ARPABET. CMUdict (public domain) → the OOV G2P dict (compound pieces / morph stems),\n` +
-    `# plus ${rows.length} rows imported from Moby Pronunciator II where misaki gold concurs — see\n` +
+    `# plus ${manifest.length} rows imported from Moby Pronunciator II where misaki gold concurs — see\n` +
     `# moby-import.tsv, which is the re-appliable record of that layer.\n` +
     merged.map(([w, p]) => `${w}\t${p}`).join("\n") + "\n");
-console.log(`wrote moby-import.tsv (${rows.length}) and g2p-dict.tsv (${merged.length} rows)`);
+console.log(`wrote moby-import.tsv (${manifest.length}) and g2p-dict.tsv (${merged.length} rows)`);
