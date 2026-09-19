@@ -63,6 +63,10 @@
  *   ⚠ ONLY WHERE THE SYLLABLE IS UNSTRESSED and the headword actually ends `-ing`, so a monosyllable
  *   whose vowel IS the tonic keeps whatever Moby gave it.
  *
+ *   ⚠ AN INITIAL `/dZ/` ON A VOWEL-SPELLED WORD — CORRECTED to the palatal glide. Five entries, and the
+ *   only reason they were found is that the Moby/gold disagreements were READ rather than counted: a word
+ *   spelled with an initial vowel cannot begin with /d͡ʒ/. See `fixInitialYod`.
+ *
  *   ⚠ GEMINATE CONSONANTS — COLLAPSED, BUT IN THE OOV FILE ONLY, and the asymmetry is the whole point.
  *   Moby writes 1,031 rows with an identical adjacent consonant pair (`aboriginally` as `…n/-/ll/i/`,
  *   694 of them `LL`). The engine's OOV paths finish every reading through `collapseGeminates`, so they
@@ -125,6 +129,20 @@ const CONSONANT = new Set(
     "B CH D DH F G HH JH K L M N NG P R S SH T TH V W Y Z ZH".split(" "),
 );
 
+/**
+ * `JH` where the palatal glide belongs. ⚠ FIVE ENTRIES, FOUND BY READING THE MOBY/GOLD DISAGREEMENTS
+ * RATHER THAN COUNTING THEM: a word spelled with an initial vowel cannot begin with /d͡ʒ/, and Moby writes
+ * `/dZ/` for `/j/` in `Eurocommunism`, `unilocular`, `uninucleate`, `usucaption` and `Egan` — in four of
+ * the five directly before /u/ or /ʊ/, which is where the yod belongs. The converter is not at fault: it
+ * renders `/j/` as Y correctly everywhere else (`euro`, `yes`, `beauty`).
+ */
+function fixInitialYod(word: string, a: string[]): string[] {
+    if (a[0] !== "JH" || !/^[aeiou]/u.test(word)) return a;
+    const out = [...a];
+    out[0] = "Y";
+    return out;
+}
+
 /** Collapse an identical adjacent CONSONANT pair — see the header. OOV rows only. */
 function degeminate(a: string[]): string[] {
     const out: string[] = [];
@@ -180,25 +198,49 @@ try {
 
 const lex: string[] = [], oov: string[] = [];
 let rows = 0, declined = 0, unmapped = 0;
-const seen = new Set<string>();
+
+/**
+ * Every reading Moby gives a headword, grouped by the LOWER-CASED key the dictionary uses.
+ *
+ * ⚠ FIRST-WINS WAS SCORING COMMON WORDS AGAINST PROPER NOUNS. Moby lists `City 'b/oU//Z//[@]/r` (a
+ * surname) immediately before `city 's/I/t/i/`, and case-folding the key made the surname win — so the
+ * referee asked what `city` sounds like and answered "Bougère". 565 headwords carry more than one
+ * distinct reading once folded, and in 273 of them a CAPITALISED entry displaced a lower-case one:
+ * `air`, `acre`, `airy`, `abbe`, `alba`. Every one was scoring the wrong word.
+ * ⚠ THE CASE IS THE DISCRIMINATOR, NOT THE ORDER. Our dictionary keys are lower-case common words, so
+ * where Moby has both, the lower-case entry is the one being asked about; the capitalised reading is a
+ * different lexeme and is dropped rather than offered as an alternative, because crediting a surname's
+ * reading for a common noun would hide a real error.
+ * ⚠ GENUINE VARIANTS — several lines at the SAME case — are all kept and emitted tab-separated, which
+ * the eval credits ANY of. That is what the old comment's "one row per headword" was protecting, and it
+ * is preserved: one ROW, several READINGS.
+ */
+const readings = new Map<string, { lower: string[]; upper: string[] }>();
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const sp = line.indexOf(" ");
     if (sp < 0) continue;
     rows++;
-    const w = line.slice(0, sp).toLowerCase();
-    // ⚠ ONE ROW PER HEADWORD. Moby lists variants as separate lines; the eval credits ANY tab-separated
-    // reading, but a duplicate KEY would be two rows scoring the same word twice. First reading wins.
-    if (seen.has(w) || imported.has(w)) continue;
+    const cased = line.slice(0, sp), w = cased.toLowerCase();
+    if (imported.has(w)) continue;
     if (!/^[a-z]{2,20}$/u.test(w)) continue;          // no multi-word, no digits, no punctuation headwords
     const a0 = mobyToArpabet(line.slice(sp + 1));
     if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
     const inLexicon = dict.has(w);
-    // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseNess` applies to both.
-    const a = inLexicon ? normaliseSuffix(w, a0) : degeminate(normaliseSuffix(w, a0));
+    // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseSuffix` applies to both.
+    const fixed = fixInitialYod(w, normaliseSuffix(w, a0));
+    const a = inLexicon ? fixed : degeminate(fixed);
     const ipa = fold(a).map(sym).join("");
     if (ipa === "" || fold(a).some((p) => sym(p) === "")) { unmapped++; continue; }
-    seen.add(w);
-    (inLexicon ? lex : oov).push(`${w}\t${ipa}`);
+    let e = readings.get(w);
+    if (!e) readings.set(w, e = { lower: [], upper: [] });
+    const bucket = /^[A-Z]/u.test(cased) ? e.upper : e.lower;
+    if (!bucket.includes(ipa)) bucket.push(ipa);
+}
+let caseResolved = 0;
+for (const [w, { lower, upper }] of readings) {
+    if (lower.length > 0 && upper.length > 0) caseResolved++;
+    const pick = lower.length > 0 ? lower : upper;
+    (dict.has(w) ? lex : oov).push(`${w}\t${pick.join("\t")}`);
 }
 
 const header = (what: string, n: number): string =>
@@ -211,5 +253,6 @@ const dir = join(REPO, "tools/referee-eval/referees");
 writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary carries", lex.length) + lex.join("\n") + "\n");
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
 console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, excluded-as-imported ${imported.size}`);
+console.log(`  headwords where a lower-case entry displaced a capitalised one: ${caseResolved}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);
 console.log(`  en.moby-oov.tsv      ${oov.length}`);
