@@ -11,10 +11,12 @@ import { CONFIG } from "../tools/referee-eval/config.ts";
 describe("referee row exclusion", () => {
     const en = CONFIG["en"]!.referees[0]!;
 
-    test("en declares exactly the four validated rules", () => {
-        expect(en.excludeRows).toHaveLength(4);
-        const [vowel, rhotic, finalR, glyph] = en.excludeRows!;
-        // ⚠ THE FOURTH IS NOT A VARIETY RULE and is here for a different reason: a one-character headword
+    test("en declares exactly the five validated rules", () => {
+        expect(en.excludeRows).toHaveLength(5);
+        const [vowel, rhotic, finalR, coda, glyph] = en.excludeRows!;
+        expect(coda!.spelling).toBeDefined();
+        expect(coda!.ipaLacks).toBeDefined();
+        // ⚠ THE LAST ONE IS NOT A VARIETY RULE and is here for a different reason: a one-character headword
         // has no fixed meaning in this file (`m` ɛm, `q` kjuː are the letter's NAME; `x` ks is its SOUND),
         // so it cannot arbitrate. It is score-neutral by construction — 3 of its 6 rows were passing.
         expect(glyph!.spelling!.source).toBe("^.$");
@@ -37,6 +39,41 @@ describe("referee row exclusion", () => {
         expect(caught("crowner", "kɹaʊnə", whole)).toBe(false); // the blind spot
         expect(caught("crowner", "kɹaʊnə", finalR)).toBe(true); // closed by the companion
         expect(caught("featured", "fiːt͡ʃəd", finalR)).toBe(true);
+    });
+
+    // ⚠ AND THE COMPANION HAS ITS OWN BLIND SPOT, which is why non-rhoticity takes THREE rules: it only looks at the
+    // last three symbols, so a non-rhotic word whose r is mid-word and whose only ɹ is some other
+    // syllable's ONSET passes both. `perchlorate` pəklɔːɹeɪt and `weatherproof` wɛðəpɹuːf are RP rows that
+    // survived until the coda rule was written; they were surfacing as dictionary "defects" where the
+    // referee, not the dictionary, was wrong.
+    test("an onset r elsewhere in the word does not mask a non-rhotic coda either", () => {
+        const [, whole, finalR, coda] = en.excludeRows!;
+        const caught = (w: string, ipa: string, x: typeof whole): boolean =>
+            (x!.spelling?.test(w) ?? true) && (x!.ipaLacks ? !x!.ipaLacks.test(ipa) : true);
+        for (const [w, ipa] of [["perchlorate", "pəklɔːɹeɪt"], ["weatherproof", "wɛðəpɹuːf"]] as const) {
+            expect(caught(w, ipa, whole)).toBe(false);
+            expect(caught(w, ipa, finalR)).toBe(false);
+            expect(caught(w, ipa, coda)).toBe(true);
+        }
+        // a real GenAm coda rhotic is not touched, however many onset ɹ the word also has
+        expect(caught("perchlorate", "pɚklɔɹeɪt", coda)).toBe(false);
+        expect(caught("Bombardier", "bɑmbɑɹdieɪ", coda)).toBe(false);
+    });
+
+    // ⚠ BOTH OF THESE WERE FALSE POSITIVES THE FIRST TIME THE CODA RULE WAS RUN, and both are in the
+    // SPELLING half. `r+` backtracks, so a geminate matches its own first half and every `arr`/`err` word
+    // looked like a coda r with no coda rhotic; the `rh` digraph did the same, where the ɹ legitimately
+    // serves the spelled r.
+    test("a geminate rr and an rh digraph are not a coda r", () => {
+        const coda = en.excludeRows![3]!;
+        const caught = (w: string, ipa: string): boolean =>
+            coda.spelling!.test(w) && !coda.ipaLacks!.test(ipa);
+        expect(caught("arrange", "əɹeɪnd͡ʒ")).toBe(false);
+        expect(caught("narrow", "næɹoʊ")).toBe(false);
+        expect(caught("gonorrhea", "ɡɑnəɹiə")).toBe(false);
+        // but a compound seam spelled `rh` is still caught by the whole-string rule, which needs no coda
+        const whole = en.excludeRows![1]!;
+        expect(whole.spelling!.test("letterhead") && !whole.ipaLacks!.test("lɛtəhɛd")).toBe(true);
     });
 
     // ⚠ `-s`/`-es` AFTER THE r IS DELIBERATELY EXCLUDED FROM THE WORD-FINAL RULE. There the r is usually

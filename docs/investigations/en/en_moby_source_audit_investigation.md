@@ -837,3 +837,219 @@ an `OW R` the builder collapsed. It survives the gate unchanged and correctly. O
 `bowring`, and four were the real damage. The gate is cheap and the class is closed.
 
 Primary unmoved at 62.4% by construction (this touches only the Moby artifacts). Moby-lexicon 75.6%.
+
+## Run 25 — 2026-09-19 04:05 — two referees agreeing against us, and what is left when they do
+
+A new selection rule, and the strongest bar this audit has used. Question: where do the two INDEPENDENT
+referees — wikipron GenAm (human transcribers) and Moby — agree with EACH OTHER on a reading that is not
+ours? Neither alone settles anything; together they are two sources that have never seen each other.
+
+    both referees cover:                    1,428 dictionary words
+    they agree and we differ:                  73
+    …after every declared-intentional class:   38
+
+The intentional filter is doing most of the work and doing it correctly: the weak vowel ə↔ɪ in both
+directions and the NEAR vowel before ɹ account for 35 of the 73, exactly the classes measured and declared
+in earlier runs. ⚠ THE 38 REPRODUCED A PRE-COMPACTION COUNT EXACTLY, which is the only reason it is
+quoted with confidence — the same probe written twice from different directions gave the same number.
+
+The 38 break down as:
+
+    known axes, not actionable      13   marry–merry (barrett, paris, apparel, comparatively, narrow),
+                                         cot–caught (dong, thong, stomp, backwash), en-/ɪn- (enfranchise,
+                                         enhance, exploit), transmit
+    two attested readings, ours     11   octave ɑktɪv/ɑkteɪv, whoop wup/hup, holm, ensign (the rank vs the
+       being one of them                 flag), lower (the verb vs the scowl), kafka, cremation, newness
+                                         (yod), reconstitute (yod), saccharine, absorbing/absurdity
+    referee wrong, instrument gap     2   perchlorate, weatherproof — see below
+    genuine dictionary defects        8   shipped
+    a defect the dictionary cannot    1   bancroft — see below
+       express
+
+⚠ TWO OF THE 38 WERE THE INSTRUMENT, NOT THE DICTIONARY, and finding them is why a residual gets read
+rather than counted. `perchlorate pəklɔːɹeɪt` and `weatherproof wɛðəpɹuːf` are RP rows in the GenAm file
+that BOTH existing non-rhotic exclusions miss: the first asks whether a rhotic appears anywhere, the second
+only in the last three symbols, and here the only ɹ is another syllable's ONSET (`klɔːɹ`, `pɹuːf`). This is
+the same onset/coda confusion the Moby builder had in Run 24 — third time this distinction has been the
+bug. A third exclusion now asks for a CODA rhotic specifically: `ɚ`/`ɝ`, or `ɹ`/`ɻ`/`r` not followed by a
+vowel. 9 rows, all failing, so the denominator drops and the numerator does not.
+
+⚠ ITS SPELLING SIDE NEEDED TWO EXCLUSIONS, BOTH FOUND BY READING THE ROWS IT ADDED rather than by trusting
+the count. `[aeiouy]r+` BACKTRACKS, so a geminate matches its own first half and `arrange əɹeɪnd͡ʒ`,
+`narrow næɹoʊ`, `Barrett bæɹɪt` — ordinary GenAm — were flagged for having an onset ɹ where there is no
+coda r at all; the `rh` digraph did the same to `gonorrhea` and `ornithorhynchus`. Excluding a following
+`r` or `h` took the rule from 61 newly-caught rows (mostly wrong) to 14 (all right). It also does NOT
+subsume the word-final rule, which is what I expected it to do: 12 rows spelled `-re`/`-red` have no
+post-vocalic r for its spelling side to match, so all three rules stay.
+
+The 8 shipped corrections, each recorded in `g2p-curated.tsv` with both referees' readings:
+
+    siobhan         ʃaʊbɑn        → ʃəvɔn          an Irish name read off its letter shape
+    champaign       tʃæmpeɪn      → ʃæmpeɪn        said like `champagne`
+    clio            klioʊ         → klaɪoʊ         the muse is KLY-oh
+    parthenia       pɑɹθɛniə      → pɑɹθiniə
+    marmara         mɑɹmɑɹə       → mɑɹməɹə        stress AND reduction both wrong
+    terracotta      təɹəkɑtə      → tɛɹəkɑtə       ɛɹ under secondary stress, not a reduced ɚ
+    appreciative    əpɹiʃieɪtɪv   → əpɹiʃiətɪv     no FACE vowel in -ciative; GOLD AGREES, so three sources
+    appreciatively  (as above)
+
+⚠ THE LAST TWO DO NOT CONVERGE ON THE REFEREES AND THE ARROW ABOVE IS NOT THE REFEREE'S READING. What the
+two referees settle is the ABSENCE OF THE FACE VOWEL: they write `əpɹiʃətɪv`, CMUdict's EY2 is the error,
+and both are now gone. They ALSO drop the `i` and we keep it — gold reads `əpɹˈiʃiəɾɪv`, our corrected
+reading segment-for-segment, and `appreciatory` is parallel — so these two rows still SCORE as divergences
+after the fix. That is why eight corrections bought SIX rows on the primary and not eight, and the
+arithmetic only closes if this is said out loud.
+
+⚠ THE GOLD DISSENTS ON TWO AND THEY SHIPPED ANYWAY, recorded rather than quietly dropped: misaki reads
+`champaign` with tʃ and `clio` as kliːoʊ. Two referees plus the dictionaries outweigh it, and on
+`appreciative` gold agrees with the referees AGAINST CMUdict — which is what a third source is for.
+
+⚠ `bancroft` IS A REAL DEFECT THAT THE DICTIONARY CANNOT EXPRESS, and the edit was made, measured, and
+reverted. Both referees read `bænkɹɔft`: `Ban·croft` is a compound seam where the nasal ends the first
+element and never assimilated. But the converter DERIVES ŋ from N before K/G itself, gated only on a
+transparent PREFIX, so `NG`→`N` in the dictionary changes nothing — `en_rebuild_lexicon.mts --diff` listed
+all 8 other rows and not this one. A seam-aware guard in the converter is its own block. Recorded in
+`g2p-curated.tsv` as an explicit absence so the next reader does not spend the edit again.
+⚠ AND IT DOES NOT CONTRADICT THE VELAR REFUSAL. That refusal was of a BLANKET intentional credit, on the
+ground that Moby RECORDS the ŋ/n distinction and so its `n` is a per-word judgement. A per-word judgement
+is evidence about the word it is made about; it is only a notation choice that cannot be evidence.
+
+    primary folded backbone   62.4% → 62.6%   (2523/4046 → 2529/4037)
+    +intentional              67.8% → 68.1%
+    Moby — lexicon            26499 → 26505   (75.6%)   ⚠ a MIRROR, see below
+    Moby — OOV                unchanged
+    goldens                   189 languages, 36,495 rows, 0 stale
+
+The primary moved on both counts at once — 6 rows entered the numerator (the dictionary fixes) and 9 left
+the denominator (the instrument fix) — so the two are separable and are reported separately above.
+
+⚠ THE MOBY-LEXICON +6 IS NOT INDEPENDENT EVIDENCE AND MUST NOT BE READ AS CONFIRMATION. The builder drops
+a headword from the referee only when it is in `moby-import.tsv`; a CURATED correction is not an import,
+so all eight rows stay in the referee and six of them now match because we changed the dictionary to agree
+with Moby. 26,499 → 26,505 is that, by construction. The number worth reading is the PRIMARY, where
+wikipron had no part in the correction — and even there, half the credit is the exclusion rather than the
+dictionary. Recorded because a mirror that moves in the right direction is the easiest number to believe.
+
+⚠ AND THE RULE HAS A NAMED FALSE POSITIVE, `Jedburgh` — the one of its 9 rows with no en-GB counterpart.
+The referee's `d͡ʒɛdbəɹə` is correct (Scottish `-burgh`); we read `d͡ʒɛdbəɹɡ` off the OOV path because the
+dictionary is itself split, `edinburgh` B ER0 OW0 against `pittsburgh`/`newburgh` B ER0 G. Dropping the row
+hides a real divergence. Left in and named, exactly as rule 1 names `dossier`: one row does not buy the
+machinery to special-case it, and the split dictionary is its own finding for a later block.
+
+## Run 26 — 2026-09-19 04:35 — independent review of Run 25 (verify, don't trust)
+
+Re-measured every claim in Run 25 from scratch on `fix/two-referee-agreement` (bec817ea) rather than
+reading the numbers off the previous entry. Commands: `MOBY=/mnt/data/moby/mobypron.unc npx tsx
+tools/referee-eval/eval.ts en`, `npx tsx tools/english/en_rebuild_lexicon.mts --diff`, `npx vitest run`,
+plus a standalone probe that loads `CONFIG["en"].referees[0].excludeRows` and replays eval.ts's own
+filter predicate row by row over `en.wikipron-eng-latn-us-broad.tsv`.
+
+**Everything load-bearing reproduces.** The headline numbers are exact:
+
+    primary   folded 2529/4037 (62.6%)   +intentional 2749/4037 (68.1%)   symbolAcc 90.8%
+    Moby lex  folded 26505/35049 (75.6%)                                  symbolAcc 94.6%
+    Moby OOV  folded 15056/39485 (38.1%)
+    excluded rows 521      lexicon round-trip 135,305/135,305, 0 would change
+    vitest 316 files / 6,069 tests green
+
+The denominator arithmetic holds and is separable exactly as claimed. Replaying the five exclusions
+cumulatively gives marginal counts **98 / 18 / 9 / 6** for rules 1–4 (rule 0 catches 390), so the new
+coda rule removes **9** rows — 4046 → 4037. I read all nine and phonemized each against the folded
+referee: every one was a FAIL before the change, so the numerator cannot have moved from them.
+
+    Jedburgh  interlocutory  ornithorhynchus  perchlorate  perlustrate
+    reimbursement  resort  retards  weatherproof
+
+Eight of the nine appear in `en-gb.wikipron-uk.tsv` with a byte-identical first reading — the same
+corroboration standard rules 1 and 2 were validated against. The exception is `Jedburgh`, below.
+
+And the numerator: of the 8 corrected headwords, 7 are in the primary referee (`appreciative` is not),
+and exactly **6 flipped FAIL→PASS** — champaign, clio, marmara, parthenia, siobhan, terracotta. 2523 + 6
+= 2529. `appreciatively` still fails; see the finding below.
+
+**ARPABET is well-formed.** All 16 strings (8 upstream + 8 curated) use only the 39-phone set, carry
+exactly one primary stress, and stress-mark every vowel. `g2p-curated.tsv` column 3 equals the live
+`g2p-dict.tsv` row for all 2,097 curated words (not just the 8), no duplicate headwords in either file,
+4 columns on every row, no trailing whitespace or CR. The `accent-lexicon.tsv` diff is exactly 8 rows —
+the 8 corrected words and nothing else — and `--diff` reports 0 further rows would change, so the
+generated file is in sync with the converter and the dict.
+
+**The exclusion regexes do what the note claims, and the two carve-outs are load-bearing.** Removing the
+`r`/`h` exclusion from the spelling side takes the rule from 9 uniquely-dropped rows to **53** (the note
+says 61; that figure is against rules 1–2 only, where I measure 60 — see the count discrepancy below).
+The 44 extra are ordinary GenAm: `arrange`, `narrow`, `Barrett`, `Garrett`, `Perry`, `horrible`,
+`burrito`, `gonorrhea`, `irrespective`… ⚠ **AND `terracotta` IS AMONG THEM.** Without the carve-out the
+rule would have dropped the very referee row this PR used as evidence for one of its 8 corrections. That
+is the strongest argument for the carve-out and it is not in the note.
+
+Things I probed for and did **not** find:
+- the `˞` rhotic hook (U+02DE) is absent from the coda-rhotic class, but the file has only 2 rows using
+  it (`Cryptocarya`, `Hicoria`) and both are spared by the spelling side anyway.
+- the spelling class matches lowercase `r` only (`[…AEIOUY]r+`). The only two headwords with an
+  uppercase post-vocalic R are `ARPA` and `USAR`, both rhotic. Empty in practice; rule 1 has the same
+  asymmetry already.
+- a coda ɹ before a stress mark cannot be misread as an onset (stress precedes its syllable), and a ɹ
+  followed by a non-listed symbol falls to the CODA side, which is the conservative direction.
+- word-final geminates (`Barr`, `Kerr`) do still match the spelling side — `r+` plus end-of-string — but
+  every such row here carries a coda rhotic, so none is dropped.
+- one row the carve-out costs us: `furriery fɜɹiəɹi` is non-rhotic and now survives. One row.
+
+### Findings
+
+⚠ **`Jedburgh` IS THE RULE'S ONE FALSE POSITIVE, and it is exactly the `dossier` case rule 1 documents.**
+The referee reads `d͡ʒɛdbəɹə`, which is correct — Jedburgh is a Scottish `-burgh` that rhymes with
+Edinburgh — and it is the one dropped row with no en-GB counterpart, i.e. the one that is *not* an RP row
+in the GenAm file. We read `d͡ʒɛdbəɹɡ`, off the OOV path (the word is not in the dict), because `-burgh`
+is genuinely split in the dictionary: `edinburgh EH1 D AH0 N B ER0 OW0` against `pittsburgh … B ER0 G`
+and `newburgh … B ER0 G`. So a real divergence is now hidden, on a word where the referee is right. The
+remedy is the one rule 1 already chose for `dossier`: leave it in and NAME it in the note, so the next
+reader does not rediscover it as a bug. Right now the note claims the rule's 14 rows are "all right".
+
+⚠ **THE `14 further rows` IN THE JSONC NOTE IS WRONG BY THE FILE'S OWN CONVENTION, and it contradicts
+this document.** Measured cumulatively — the convention the sibling notes use, and the one that matches
+the denominator — the rule adds **9**, which is what Run 25 says in prose and what 4046→4037 says in
+arithmetic. 14 is the count against rules 1 and 2 *only*, ignoring rule 0; five of those 14 (`arthropod`,
+`asterperious`, `overarm`, `overpraise`, `superoverlord`) are already dropped as RP-vowel rows. The note
+should read 9, or say explicitly which baseline 14 is against. Same for "61 newly-caught rows", which
+measures 60 against rules 1–2 and 53 cumulatively.
+
+⚠ **`appreciative` / `appreciatively` DID NOT CONVERGE ON THE REFEREES, AND THE SUMMARY TABLE SAYS THEY
+DID.** This entry's table writes the new reading as `əpɹiʃətɪvli`. The shipped reading is
+`əpɹˈiːʃiʲət̬ɪvli` → folded `əpɹiʃiətɪvli`, with the `i` retained. Both referees write it WITHOUT the
+i — Moby `əpɹiʃətɪv`, wikipron `ʌpɹiʃətɪvli` — so `appreciatively` remains a FAIL against the primary
+referee after the fix, and the 8 corrections bought 6 rows, not 7, for this reason. The correction that
+shipped is still right and is better evidenced than the table suggests: misaki gold reads
+`əpɹˈiʃiəɾɪv`, i.e. it agrees with the shipped form segment for segment, and the existing
+`appreciatory AH0 P R IY1 SH IY0 AH0 T AO2 R IY0` row is parallel. What the two referees actually agreed
+on is the absence of the FACE vowel, not the absence of the `i`; the curated note's `əpɹiʃi/ətɪv` slash
+is carrying that whole distinction silently. Worth one clause in both places, and the table's
+`→ əpɹiʃətɪvli` should be `→ əpɹiʃiətɪvli`.
+
+⚠ **THE MOBY-LEXICON +6 IS A MIRROR AND IS REPORTED BESIDE THE INDEPENDENT ONE WITHOUT SAYING SO.**
+`build-en-moby-referee.mts` drops a headword from both corpora when it appears in `moby-import.tsv`,
+on the stated ground that "scoring ourselves against Moby on a word whose reading we TOOK FROM MOBY is a
+mirror". A curated correction is not in that file, so all 8 of these rows stay in the referee — and 6 of
+them now match Moby because we changed the dict to match Moby. 26499→26505 is definitionally that. It is
+0.017pp and harmless, but the primary referee's +6 is only half-independent for the same reason (the
+selection rule was "both referees agree against us"), and neither number is evidence the engine improved.
+The honest framing is the one this entry already uses for the exclusion — report the movement, say which
+part is by construction.
+
+Smaller notes, no action needed:
+- `ornithorhynchus` is cited in the jsonc note as a row the `rh` carve-out protects; it is dropped
+  anyway, via its *first* `or`, and correctly so (`ɔːnɪθəɹɪŋkəs` is RP). The carve-out's real
+  beneficiaries are the `arr`/`err` geminates and `gonorrhea`.
+- the `marmara` curated note says "Moby + wikipron mɑɹməɹə"; Moby actually writes `mɑɹmɚə` and wikipron
+  `mɑːɹməɹə`. Both fold to the same thing, so the conclusion stands.
+- `docs/language-maturity.md` line 136 still shows en at "41.8% word · 82.0% symbol" against today's
+  62.6% / 90.8%. Pre-existing — several PRs have moved these — but it is now badly stale.
+
+### Verdict
+
+The eight corrections are right as GenAm readings and well-formed; `clio` and `champaign` are the two
+where a second reading genuinely exists (Clio Awards KLEE-oh, and gold dissents on both), and both are
+declared rather than buried, which is the right handling. The exclusion rule is sound, its carve-outs are
+necessary, and its effect on the score is the honest direction — 9 rows out of the denominator, all of
+them already failing. Nothing else in the tree breaks. The defects are in the prose: one mis-stated count
+(14 vs 9), one summary row that states an outcome the engine does not produce (`appreciatively`), one
+undeclared false positive (`Jedburgh`), and one score movement that is partly self-scored.
