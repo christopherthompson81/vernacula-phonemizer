@@ -162,7 +162,7 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     // ⚠ ≥3 LETTERS: a one- or two-letter headword is a GLYPH, not a word, and its reading is not constant
     // — the same reason the wikipron referee excludes them (`x` is the letter's SOUND, `m` its NAME).
     if (!/^[a-z]{3,20}$/u.test(w)) { skipped++; continue; }
-    const raw = mobyToArpabet(line.slice(sp + 1)); if (!raw) { skipped++; continue; }
+    const raw = mobyToArpabet(line.slice(sp + 1), w); if (!raw) { skipped++; continue; }
     seen.add(w);
     // ⚠ REPAIRED BEFORE THE COMPARISON, NOT ONLY ON THE SINGLE-SOURCE ARM. A known Moby defect was
     // BLOCKING legitimate two-source agreement: `unilocular` is `JH UW2 …` in Moby — its initial-yod

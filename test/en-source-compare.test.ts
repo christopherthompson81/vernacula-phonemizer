@@ -50,19 +50,34 @@ describe("the source converters", () => {
     // ⚠ OY IS WRITTEN `//Oi//` THROUGHOUT MOBY, never `/OI/`. Un-normalised it tokenises as two empty
     // slash-pairs plus a raw `Oi`, which is where the file's 5,389 stray `//` come from.
     test("Moby's notation maps, including its doubled-slash OY", () => {
-        expect(mobyToArpabet("h/@/t")).toEqual(["HH", "AH0", "T"]);          // hut
-        expect(mobyToArpabet("t//Oi//")).toEqual(["T", "OY0"]);              // toy
+        expect(mobyToArpabet("h/@/t", "hut")).toEqual(["HH", "AH0", "T"]);          // hut
+        expect(mobyToArpabet("t//Oi//", "toy")).toEqual(["T", "OY0"]);              // toy
         // ⚠ THE NURSE VOWEL CONSUMES ITS FOLLOWING `r`: Moby writes them separately, and not consuming it
         // gave `P ER1 R S AH0 N` — a doubled rhotic in every NURSE word.
-        expect(mobyToArpabet("'p/[@]/rs/@/n")).toEqual(["P", "ER1", "S", "AH0", "N"]);
-        expect(mobyToArpabet("b/[@]/rd")).toEqual(["B", "ER0", "D"]);
+        expect(mobyToArpabet("'p/[@]/rs/@/n", "person")).toEqual(["P", "ER1", "S", "AH0", "N"]);
+        expect(mobyToArpabet("b/[@]/rd", "bird")).toEqual(["B", "ER0", "D"]);
+    });
+
+    // ⚠ THE BARE-DIGRAPH RULES, AND THE ONE THAT NEEDS THE HEADWORD. `sh` and `wh` are decided by Moby's
+    // own separator — adjacent is the file lapsing into the spelling, separated is a real seam. `gh`
+    // CANNOT be, because the file writes `Leghorn` separated and `leghorn` adjacent for the same word;
+    // it is decided by whether the headword spells the ⟨gh⟩ at all.
+    test("a bare digraph is read by the rule its own class supports", () => {
+        expect(mobyToArpabet("d/&/l'm/eI/sh/@/n", "dalmatian")).toEqual(["D", "AE0", "L", "M", "EY1", "SH", "AH0", "N"]);
+        expect(mobyToArpabet("'m/I/s,h/&/p", "mishap")).toEqual(["M", "IH1", "S", "HH", "AE2", "P"]);
+        expect(mobyToArpabet("'w/I/p/@/t", "whippet")![0]).toBe("W");
+        // ⚠ THE LOAD-BEARING PAIR. Same digraph, same adjacency, opposite readings — only the spelling
+        // separates them, and getting this backwards would break a row that currently passes.
+        expect(mobyToArpabet("'gh/i/z/@/", "giza")).toEqual(["G", "IY1", "Z", "AH0"]);
+        expect(mobyToArpabet("'l/E/gh/oU/rn", "leghorn")).toEqual(["L", "EH1", "G", "HH", "OW0", "R", "N"]);
+        expect(mobyToArpabet("'l/E/g,h/O/rn", "leghorn")).toEqual(["L", "EH1", "G", "HH", "AO2", "R", "N"]);
     });
 
     // ⚠ A MULTI-WORD ENTRY OR MOBY'S FRENCH SUB-SCHEME RETURNS undefined, so the audit skips it rather than
     // voting on a partial reading.
     test("unmappable entries decline rather than guess", () => {
-        expect(mobyToArpabet("'&/b/@/k/@/s_'m/eI//dZ//@/r")).toBeUndefined(); // multi-word
-        expect(mobyToArpabet("AbA'/Z//u/R")).toBeUndefined();                 // French scheme
+        expect(mobyToArpabet("'&/b/@/k/@/s_'m/eI//dZ//@/r", "abacus_major")).toBeUndefined(); // multi-word
+        expect(mobyToArpabet("AbA'/Z//u/R", "abat-jour")).toBeUndefined();                 // French scheme
     });
 
     // ⚠ MOBY IS PRE-MERGER and must be folded before it may vote: it keeps FORCE apart from NORTH, which

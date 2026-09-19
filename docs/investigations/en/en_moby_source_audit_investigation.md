@@ -3140,3 +3140,68 @@ test they fail — and `kh` is seams plus foreign /x/ with no lapses at all.
 Run 53's reconciliation is worth keeping as the shape a future sweep should produce: 46 adjacent rows
 − 7 multi-word − 1 hyphenated = 38, exactly the referee rows the `sh` diff touches, with nothing lost
 to the import, non-rhotic or defective filters.
+
+## Run 55 — 2026-09-19 14:55
+
+Taking the `gh` candidate Run 54 recorded as available. The question was whether "right 34 times in 37"
+could be raised to the exception-free standard the `sh` and `wh` rules meet.
+
+    python3 — enumerate every `gh` occurrence in the 177,267 raw bodies, and every `g[,']h`
+
+⚠ THE 34-OF-37 FIGURE WAS MEASURED OVER ROWS THAT MOSTLY CANNOT REACH THE CONVERTER. Whole-file
+there are 36 adjacent `gh` rows and 17 separated. Seventeen of the 36 are MULTI-WORD (`Antoine_Gizenga`,
+`Guillain_Barre_Syndrome`) and `mobyToArpabet` rejects any body containing `_` before it reaches the
+character loop. The reachable set is 19: sixteen hard-/ɡ/ and three seams. So the honest ratio was
+16 of 19, not 34 of 37 — a WORSE ratio than I quoted, measured on the rows that actually matter.
+
+⚠ AND THE SEPARATOR DISCRIMINATOR IS FALSE FOR `gh`, BY THE FILE'S OWN HAND. Moby writes
+
+    Leghorn        'l/E/g,h/O/rn        (separated)
+    leghorn        'l/E/gh/oU/rn        (adjacent)
+
+THE SAME WORD, both ways. This is the mirror image of the `gooseflesh`/`washhouse` evidence that
+supported the `sh` rule: there a single body carried both forms and they agreed with the rule, here
+two bodies carry both forms and they contradict it. Had I ported the `sh` rule across, it would have
+broken `leghorn` — an in-dict row that is currently correct and passing — to fix foreign proper names
+in the OOV tier. That is the trade I would have made on Run 54's framing.
+
+⚠ THE HEADWORD'S SPELLING ARBITRATES IT EXACTLY, and it is the same test that should have been used
+for `guisewite` in Run 54. All three genuine seams spell the ⟨gh⟩ (`leghorn`, `lughole`, `Barghoorn`);
+not one of the 33 hard-/ɡ/ rows has an ⟨h⟩ after its ⟨g⟩ anywhere in the spelling. The 17 separated
+rows all spell it too (`bighead`, `doghouse`, `froghopper`), so the spelling test and the separator
+agree wherever the separator is present and only the spelling covers the rest. The one occurrence the
+rule misreads is `Hayato_Ikeda h/I/gh'/j//A/t/A//@/`, which is neither a seam nor a hard /ɡ/ but a
+corrupt body — and it is multi-word, so it never reaches the converter.
+
+⚠ OUR OWN DICTIONARY CONFIRMS THE SPLIT INDEPENDENTLY. This is what took the rule from 16-of-19 to
+exception-free, because it is not the same evidence: of the five members gold carries, `leghorn` is
+`L EH1 G HH AO0 R N` WITH the /h/, and `giza G IH1 Z AH0`, `guillermo G W IH0 L Y EH1 R M OW0`,
+`jauregui Y AW0 R EY1 G W IY0`, `gehrke JH EH1 R K` are all without it. Five for five.
+
+A first attempt at a discriminator used the FOLLOWING VOWEL — hard /ɡ/ before front/central
+(`/i/ /E/ /@/ /aI/ /[@]/`), seam before back rounded (`/O/ /oU/`) — which also separates all 37. It was
+dropped in favour of the spelling: same coverage, but it restates the phonology rather than the
+orthographic fact Moby is actually encoding, and it needs a hand-maintained vowel set.
+
+`mobyToArpabet` now takes the lowercased headword as a REQUIRED second argument. Required rather than
+optional because a default would let a new call site silently pick the wrong branch for this one rule;
+four call sites and six test calls, all of which had the headword in scope already.
+
+⚠ THE SCORE MOVE IS ONE ROW. Fifteen referee readings lose a spurious /h/ and exactly one of them
+begins to match (`corporation`'s masked second reading also cleans up, cosmetically). The other
+fourteen are words this engine gets wrong for unrelated reasons — `giza` is `ɡɪzə` against Moby's
+`/i/`. So this is not a scoring change and should not be reported as one: it removes fifteen provably
+wrong readings from a REFERENCE ARTIFACT, where a wrong reading is a hazard to every future
+measurement taken against it, not just to today's.
+
+    Moby — words the dict carries   26,651/35,048 (76.0%)  unmoved
+    Moby — OOV                      17,465 → 17,466        (+1)
+    primary                         2,584 unmoved
+    goldens 0 stale · 6,077 tests
+
+Still open, unchanged: the ~650 unstressed-vowel rows (the weak-vowel intentional classes need
+revisiting, not new machinery) and the syllabic-l class (78 rows, `cycling saɪkəlɪŋ` against `saɪklɪŋ`).
+The `corporation` caution from Run 54 stands and this run did not address it: its Bungee-derived second
+reading is still corrupt, merely no longer corrupt AND misconverted. A defective READING is not
+expressible in `MOBY_DEFECTIVE`, which drops whole headwords, so multi-reading rows remain the place
+corruption hides from any all-readings test.
