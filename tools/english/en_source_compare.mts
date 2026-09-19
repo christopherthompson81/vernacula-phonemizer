@@ -125,6 +125,34 @@ export function mobyToArpabet(p: string): string[] | undefined {
             if (sym === "ju") { out.push("Y", "UW" + stress); stress = "0"; continue; }
             return undefined;
         }
+        // ⚠ AN ADJACENT BARE `sh` IS MOBY WRITING ʃ AS THE LETTERS, NOT AN /s/+/h/ SEAM. The file's
+        // consonants are bare letters and its ʃ is `/S/`, but it lapses into the spelling on 41 rows —
+        // `Dalmatian d/&/l'm/eI//S//@/n` and `dalmatian d/&/l'm/eI/sh/@/n` sit four lines apart. Left
+        // alone, `adulation`, `charades`, `oxidation`, `violation`, `reddish`, `vichy` and twelve more
+        // scored as permanent false disagreements in the in-dict tier.
+        // ⚠ THE DISCRIMINATOR IS THE SEPARATOR, AND IT IS EXACT — no headword, no seam test, no
+        // morphology. Moby writes a genuine /s/+/h/ seam with a stress or syllable mark between them:
+        // `mishap 'm/I/s,h/&/p`, `grasshopper 'gr/&/s,h/A/p/@/r`, `household 'h/AU/s,h/oU/ld`,
+        // `foxhole 'f/A/ks,h/oU/l`. Measured over every in-dict row: ADJACENT `sh` is 18 lapses and 0
+        // seams; SEPARATED `s,h`/`s'h` is 35 seams and 0 lapses. Not one exception either way.
+        // ⚠ AND IT IS `sh` AND `wh` ONLY. The same test fails for the others, each in its own way:
+        // adjacent `kh` is seams plus foreign /x/ (`back·haus`, `bank·head`, `lock·hart`, `monk·hood`,
+        // `stock·holm`) with no lapses at all; `ph` runs 4 seams to 1 lapse, and that one lapse is
+        // handled as a MOBY_DEFECTIVE row instead; and `th`, `ch` and `ng` have ZERO adjacent
+        // occurrences, so there is nothing to scope.
+        // ⚠ `gh` IS EXCLUDED FOR A DIFFERENT REASON THAN THE FIRST DRAFT GAVE, and the reason is more
+        // interesting: of its 37 adjacent rows only three are seams (`leg·horn`, `lug·hole`,
+        // `Barg·hoorn`). The other 34 are a THIRD convention — Moby spelling a hard /ɡ/ before a front
+        // vowel in Romance names, `Giza 'gh/i/z/@/`, `Guillermo gh/i/'/E/rm/oU/`. Mapping it to `G`
+        // would be right 34 times in 37, which is not the standard the two rules above meet.
+        if (c === "s" && s[i + 1] === "h") { out.push("SH"); i += 2; continue; }
+        // ⚠ AND BARE `wh` IS THE SAME LAPSE, by the file's own convention: Moby HAS a `/hw/` symbol and
+        // uses it 1,088 times, so writing the spelling instead is a slip. The partition is as clean as
+        // `sh` and smaller — 5 adjacent occurrences, 0 separated. It maps to `W`, exactly where `M_C`
+        // already sends `hw`, because this converter follows the GenAm wine–whine merger; gold reads
+        // `whippet` as `wˈɪpət`. Left alone it shipped a spurious /h/ on `guisewite` — which has no ⟨h⟩
+        // in its spelling at all — plus `whap`, `whapping` and `whippet` in the OOV tier.
+        if (c === "w" && s[i + 1] === "h") { out.push("W"); i += 2; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
     }
