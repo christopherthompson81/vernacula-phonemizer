@@ -2747,3 +2747,202 @@ the notation, not a defect in it.
 and `upholstered` close through `morphDecode` the moment the stem is corrected, because that path
 looks the stem up in the shipped dictionary. Only the roots the n-gram must spell from letters stay
 open, and it has no way to know ⟨ph⟩ spans a seam in `up·holstery` and not in `morphology`.
+
+## Run 50 — 2026-09-19 11:33 — review of #1364: the four corrections hold, the SWEEP does not
+
+Independent review of `fix/ph-seam` (fc68153c) against `origin/main` (aa684f1e), run from detached
+worktrees so the shared tree stayed untouched.
+
+### What reproduced exactly
+
+    npx tsx tools/gen/build-en-moby-referee.mts      git status clean — byte-identical
+    npx tsx tools/english/en_rebuild_lexicon.mts     135305/135305 round-trip, 0 would change
+                                                     --write leaves the tree clean
+    npx tsx tools/referee-eval/eval.ts en   (MOBY=/mnt/data/moby/mobypron.unc, both trees)
+        primary          2584/4037 →  2584/4037   unmoved, as claimed
+        Moby in-dict    26636/35049 → 26639/35049 +3, as claimed
+        Moby OOV        17455/39485 → 17455/39484 held, denominator −1, as claimed
+    npx vitest run                          317 files, 6076 passed, 5 skipped
+    npx tsx tools/check-goldens.mts --jobs 8   189 languages, 36495 rows, 0 stale
+    dotnet run --project csharp/tools/parity -c Release   189 byte-identical, 0 differ
+
+### The four corrections: all four hold, `upholster` included
+
+misaki `us_gold.json` was read directly rather than taken from the note:
+
+    haphazard    hˌæphˈæzəɹd     haphazardly  hˌæphˈæzəɹdli
+    upholster    ˌʌphˈOlstəɹ     upholstery   ˌʌphˈOlstəɹi
+    upholstered  ˌʌphˈOlstəɹd    upholsterer  ˌʌphˈOlstəɹəɹ
+
+⚠ `upholstered` IS DIRECTLY ATTESTED IN GOLD and does not need the family-consistency argument the
+curated note gives it. The note is not wrong, only weaker than the evidence — cite gold.
+
+On `upholster`: the en-GB dissent is a variant, not a rival GenAm reading. Wells lists /ʌpˈhəʊlstə/
+first and the h-less form as a variant, and the SAME en-GB referee file carries `upholstery ʌphəʊlstəɹi`
+and `upholsterer ʌphəʊlstəɹə` WITH the /h/ — so the referee contradicts itself inside the family and the
+h-less row is the outlier, exactly as argued. Confirmed.
+
+`decompose()` on a held-out dict, all four plus the two OOV relatives:
+
+    haphazardly   M  HH AE0 P HH AE1 Z ER0 D L IY0   = dict     KNOWN_GAPS correctly omits it
+    upholstered   M  AH0 P HH OW1 L S T ER0 D        = dict     KNOWN_GAPS correctly omits it
+    upholstery    N  AH0 P OW1 L S T ER0 IY0         ≠ dict     live source-N gap, as listed
+    upholster     N  AH0 P OW1 L S T ER0             ≠ dict     live source-N gap, as listed
+    upholsterer   M  AH0 P HH OW1 L S T ER0 ER0      now right — an OOV word the stem fix reached
+    upholstering  M  AH0 P HH OW1 L S T ER0 IH0 NG   same
+
+### `geomorphological` is genuinely defective — and gold says so more sharply than Moby does
+
+Moby's own `morphological ,m/O/rf/@/'l/A//dZ//I/k/@/l` is the same word minus `geo-` and has /f/;
+gold has `ʤˌiOmˌɔɹfəlˈɑʤəkᵊl`. The note cites `morphology`; `morphological` is the stronger citation.
+The five rows dismissed as false alarms are all correctly dismissed — `hap|hazard`, `hip|huggers`,
+`up|heaval`, `up|holsterer`, `up|holstery` are genuine seams that the both-halves-are-dict-words test
+cannot see because `hazardly`, `huggers`, `heaval`, `holsterer`, `holstery` are not dict rows.
+
+### ⚠ THE SWEEP IS REPRODUCIBLE AND IT IS WRONG IN TWO PLACES
+
+The 35/29/6 partition reproduces exactly — same 35 rows, same 29, same 6 — which is what makes the two
+holes worth naming, because both are in the METHOD and not in the arithmetic.
+
+**1. `Imphal` was never "explained". The split that cleared it is `imp` + `hal`.** Both are dict rows,
+so the two-dictionary-words test passed it into the 29 and it never reached the bucket to be judged.
+Gold has `ˈɪmpˌʌl` — /p/, no /h/, no /f/. It is OOV-only, so nothing in the dictionary turns on it, and
+leaving the row alone is a defensible outcome (Moby's `ph` plausibly transliterates the Indic aspirate).
+But it was left alone on a justification that does not exist. The test admits spurious splits whenever
+a short head and a short tail both happen to be words; `imp|hal` is the case in this sweep, and nothing
+bounds how often it fires in the next one.
+
+**2. The sweep required ⟨ph⟩ IN THE SPELLING, and that is what makes it 35 rows instead of 39.** The four
+single-word Moby rows with a bare `p`+`h` body and no ⟨ph⟩ spelling are `crapehanger`, `crepehanger`,
+`typeholder` — and `snapped`:
+
+    Moby  snapped  'sn/&/p,h/E/d        (sits between `snapout` and `snapper`)
+    ours  snapped  S N AE1 P T          gold  snˈæpt
+    en.moby-lexicon.tsv   snapped   snæphɛd     ← single reading, IN-DICT tier
+
+⚠ `snapped` IS A MOBY_DEFECTIVE ROW THAT THE SWEEP CANNOT SEE, and unlike `geomorphological` it is in the
+tier that scores against the shipped dictionary, so it is a permanent false disagreement on a common word.
+It belongs in MOBY_DEFECTIVE ("body is a compound of `snap`"). Found by asking a question the ph-sweep
+does not ask: which referee rows contain an /h/ the SPELLING has no letter for.
+
+### ⚠ AND THE ⟨ph⟩ CLASS IS THE SMALL END OF ITS OWN FAMILY — ⟨sh⟩ HAS 21 IN-DICT ROWS
+
+The premise of the whole probe — "Moby's consonants are bare letters, so `p,h` is a deliberate two-sound
+claim" — is TRUE FOR `p`+`h` AND FALSE FOR `s`+`h`, because Moby is internally inconsistent about ʃ. It
+normally writes `/S/`, but lapses into the spelling `sh` on hundreds of rows. `Dalmatian d/&/l'm/eI//S//@/n`
+and `dalmatian d/&/l'm/eI/sh/@/n` are both in the file, four lines apart.
+
+Sweeping the in-dict referee for rows where EVERY reading contains a bare `s`+`h` while OUR dict has `SH`
+at that position — i.e. guaranteed false disagreements, not judgement calls — gives 21:
+
+    adulation charades confucianism decentralization exhalation exhumation fashioned initiate
+    ludwigshafen oxidation pagination plowshare predaceous rationality reddish rehash shears
+    shew sugarcane violation washbasin
+
+(The other 18 bare-`s`+`h` rows — `mishap`, `grasshopper`, `foxhole`, `household`, `dachshund` … — are
+genuine seams and correct, the same 29-to-6 shape the ⟨ph⟩ sweep found.) Five more of the same kind sit in
+`ɡh`/`kh`: `giza ɡhizə` (dict `G IH1 Z AH0`), `guillermo ɡhiɛɹmoʊ`, `gehrke ɡhɚki`, `jauregui jɔɹeɪɡhi`,
+`deconcini dikhænsini`. So the honest headline is not "one defective row" but "the ⟨ph⟩ slice of a
+bare-letter-digraph class, and it is the smallest slice."
+
+⚠ These are NOT dictionary defects — every one of the 21 is a REFEREE row that can never be satisfied.
+They are also not all MOBY_DEFECTIVE material: the row is not corrupt, the NOTATION is ambiguous, so the
+cheaper remedy is in `mobyToArpabet` (read a bare `sh` as /ʃ/ except across a seam) rather than 21 more
+map entries. Either way it is a separate change from this PR and is left as a finding, not a request.
+
+Two rows survive only because Moby happens to carry a second reading: `corporation` has both
+`kɔɹpəɹeɪʃən` and `bʊŋɡhi` (the body of a lost `Bungee` headword), `county` both `kaʊnti` and `bəlɑhi`.
+Multi-reading rows hide corruption from any all-readings test — worth remembering for the next sweep.
+
+### Is MOBY_DEFECTIVE the right mechanism?
+
+Yes, but not for the reason the header gives. `repairMoby` lives in `en_import_moby.mts` and never runs
+in `build-en-moby-referee.mts`, so it CANNOT reach the referee at all; it is also a set of class-wide
+regexes with no per-word table. MOBY_DEFECTIVE is the only lever that exists on the referee side. The
+header's stated rationale — "a repair would be a guess at what Moby meant" — does not hold for this row
+(gold and Moby's own `morphological` both say /f/, unambiguously), and the cost of dropping rather than
+repairing is one lost OOV referee row. Small, but the comment should say the real reason.
+`geomorphological` is not in `moby-import.tsv` (Moby and gold disagreed there), so the import layer is
+unaffected and no regeneration is owed.
+
+⚠ The two call-site comments now overstate the set: "NEVER IMPORT A ROW WHOSE BODY IS A DIFFERENT WORD"
+and "A ROW WHOSE BODY IS A DIFFERENT WORD CANNOT ARBITRATE ANYTHING" no longer describe every member —
+this row's body is the right word with one wrong consonant.
+
+### Did the dictionary keep any other ⟨ph⟩ seam defect? No.
+
+Every dict row whose ⟨ph⟩ is preceded by a free morpheme ending in ⟨p⟩ (282 rows) was read out and
+classified. All 252 non-`P HH` ones are genuinely /f/ (`alpha`, `amphora`, `earphone` = ear+phone,
+`rephrase` = re+phrase, `prophet`, `sophomore`, the `stephan-` family) or correctly h-less
+(`shepherd`, `stephen`, `upham`, `ophthalmology`). The 34 `P HH` rows are all real seams. The dict is
+clean on this class after the fix.
+
+The same sweep was run for ⟨th⟩ ⟨sh⟩ ⟨ch⟩ ⟨gh⟩ ⟨wh⟩ against `en-morph-boundary.tsv` and against the
+both-halves-are-words test. It returns hundreds of candidates and no defects — `doublethink`, `bethink`,
+`enthuse`, `garlinghouse`, `widowhood`, `nowhere`, `gingham` are all already right, and the rest are
+surnames where the split is an accident of spelling. The negative result is the finding: ⟨ph⟩ was the
+only digraph with a live seam defect in the dictionary.
+
+### Verdict
+
+Ship it. The change is correct, the numbers are exactly as recorded, the referee and lexicon regenerate
+byte-identically, and all three gates pass. Two follow-ups, neither blocking:
+
+  1. `snapped` → MOBY_DEFECTIVE. In-dict tier, common word, currently unsatisfiable.
+  2. The bare-`sh`-as-/ʃ/ class: 21 in-dict rows plus 5 `ɡh`/`kh` names. Probably a `mobyToArpabet`
+     change, not 26 map entries.
+
+And one correction to the record above: Run 49's "35 rows, 29 genuine seams" should read "35 rows OF THE
+39 that exist, because the sweep filtered on the spelling", and `Imphal` should be counted with the 6, not
+the 29.
+
+## Run 51 — 2026-09-19 — Run 50's findings, and the hole the ⟨ph⟩ sweep could not see
+
+Run 50 reproduced the 35/29/6 partition row for row, which is what makes its two objections method
+holes rather than arithmetic.
+
+⚠ `snapped` IS A DEFECTIVE ROW THE SWEEP WAS BUILT NOT TO FIND. It filtered on ⟨ph⟩ in the SPELLING,
+so it found 35 rows where 39 exist. Moby writes `snapped 'sn/&/p,h/E/d` — a `-ped` past tense with a
+stray `h` — and it reaches the IN-DICT tier as `snæphɛd`, single reading, against our `S N AE1 P T`
+and gold's `snˈæpt`. A permanent false disagreement on an ordinary word, invisible to a filter keyed
+on the spelling of the thing being mis-transcribed. Added; MOBY_DEFECTIVE is 35 and the in-dict
+referee is 35,048.
+
+⚠ `Imphal` WAS LEFT ALONE ON A JUSTIFICATION THAT DOES NOT EXIST. It cleared into the 29 "genuine
+seams" on the split `imp`+`hal`, both of which happen to be dictionary rows, which is not a
+morphological analysis of a city in Manipur. The outcome is still right — it is OOV-only and Moby's
+`ph` plausibly transliterates the Indic aspirate — but the both-halves-are-words test admits spurious
+splits and nothing in the sweep bounds how often. Recorded as unexplained rather than as cleared.
+
+Two citations improved, both toward evidence that already existed:
+- `upholstered` is DIRECTLY ATTESTED in gold as `ˌʌphˈOlstəɹd`. The note appealed to the inflection
+  principle instead, which is the weaker claim when the row is simply there.
+- `upholster`'s en-GB dissent is SELF-REFUTING: the same referee file reads `upholstery ʌphəʊlstəɹi`
+  and `upholsterer ʌphəʊlstəɹə` with the /h/, so the h-less verb is the outlier inside its own source.
+- `geomorphological` is now cited against `morphological` — the same word minus `geo-`, `/f/` in the
+  same file — rather than `morphology`, which needed one more inferential step.
+And the MOBY_DEFECTIVE reason is corrected: it is a drop rather than a repair because `repairMoby`
+lives in `en_import_moby.mts` and NEVER RUNS in the referee builder, not because the intent is
+unclear. Gold and Moby's own `morphological` make it unambiguous; the cost of dropping is one referee
+row.
+
+⚠ AND ⟨ph⟩ IS THE SMALL END OF ITS OWN FAMILY, which is the finding to carry forward. The premise
+"bare letters, so `p,h` is a deliberate two-sound claim" holds for `p`+`h` and FAILS for `s`+`h`:
+Moby normally writes `/S/` for ʃ but lapses into the spelling on hundreds of rows, and both forms
+appear four lines apart — `Dalmatian d/&/l'm/eI//S//@/n` against `dalmatian d/&/l'm/eI/sh/@/n`. In the
+in-dict tier, 21 rows have bare `s`+`h` in EVERY reading where our dictionary has `SH`: `adulation`,
+`charades`, `confucianism`, `exhalation`, `fashioned`, `initiate`, `oxidation`, `plowshare`, `reddish`,
+`rehash`, `shears`, `sugarcane`, `violation`, `washbasin` and seven more, plus five in `ɡh`/`kh`
+(`giza ɡhizə`, `guillermo`, `gehrke`). Another 18 bare-`s`+`h` rows ARE genuine seams (`mishap`,
+`grasshopper`, `household`, `dachshund`) — the same 29-to-6 shape, one digraph over.
+These are 26 guaranteed false disagreements and they are NOT 26 more MOBY_DEFECTIVE entries: the
+notation is ambiguous rather than the rows being corrupt, so the remedy belongs in `mobyToArpabet`
+with the same seam test. Left as a measured finding for its own block, because a converter change has
+a wider blast radius than a defect list and deserves its own before-and-after.
+
+Also recorded for whoever writes that block: `corporation` and `county` each carry a corrupt reading
+(`bʊŋɡhi` from a lost `Bungee` headword; `bəlɑhi`) that stays harmless only because a second, correct
+reading sits beside it. Multi-reading rows hide corruption from any all-readings test.
+
+    Moby — words the dict carries   26,639/35,048 (76.0%)
+    primary                         2,584 unmoved

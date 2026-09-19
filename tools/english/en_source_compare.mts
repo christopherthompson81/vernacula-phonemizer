@@ -176,13 +176,22 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     // them; they were found by reading what the sweep left behind.
     ["monosaccharide", "body is 'monoscope'"], ["missouri", "truncated — 'mɪzʊi'"],
     ["zippered", "truncated — 'zɪpi'"],
-    // ⚠ ⟨ph⟩ WRITTEN AS /p/+/h/ WHERE MOBY ITSELF WRITES /f/ ELSEWHERE. Moby's consonants are BARE
-    // LETTERS — only vowels sit inside slashes — so `p,h` is a deliberate two-sound claim, and for the
-    // 29 real seams it has (`hap·hazard`, `loop·hole`, `up·heaval`, `chop·house`) it is right. This one
-    // is not a seam: `morpho-` is /f/, and Moby's own `morphology` is `m/O/rf/@/l/oU/g/i/`. Found by
-    // sweeping every row whose body has a bare `p`+`h` against whether the spelling splits into two
-    // dictionary words — 35 rows, 29 genuine seams, and this the only one the split cannot explain.
-    ["geomorphological", "⟨ph⟩ as p+h where Moby's own `morphology` has /f/"],
+    // ⚠ A BARE `p`+`h` WHERE THE ⟨ph⟩ IS /f/, OR WHERE THERE IS NO ⟨ph⟩ AT ALL. Moby's consonants are
+    // BARE LETTERS — only vowels sit inside slashes — so `p,h` is a deliberate two-sound claim, and for
+    // the 29 real seams it has (`hap·hazard`, `loop·hole`, `up·heaval`, `chop·house`) it is right.
+    // `geomorphological` is not a seam: `morpho-` is /f/, and the same file has `morphological` as
+    // `,m/O/rf/@/'l/A//dZ//I/k/@/l` — the same word minus `geo-`, with /f/. Gold agrees.
+    // ⚠ `snapped` HAS NO ⟨ph⟩ IN IT AND THE FIRST SWEEP COULD NOT SEE IT, which is the more useful half
+    // of this pair. That sweep filtered on ⟨ph⟩ in the SPELLING, so it found 35 rows where 39 exist;
+    // `snapped 'sn/&/p,h/E/d` is a `-ped` past tense with a stray `h`, and it reached the IN-DICT tier
+    // as `snæphɛd`, single reading — a permanent false disagreement on an ordinary word.
+    // ⚠ AND THE REASON THIS IS A DROP RATHER THAN A REPAIR IS NARROWER THAN THE HEADER ABOVE SAYS.
+    // `repairMoby` lives in `en_import_moby.mts` and never runs in the referee builder, so it cannot
+    // reach these rows at all; MOBY_DEFECTIVE is the only lever on this side. It is NOT that a repair
+    // would be a guess — gold and Moby's own `morphological` make the intent unambiguous. The cost of
+    // dropping is one referee row each, which is the cheaper error.
+    ["geomorphological", "⟨ph⟩ as p+h where Moby's own `morphological` has /f/"],
+    ["snapped", "a stray `h` in a `-ped` past tense: 'sn/&/p,h/E/d"],
 ]);
 
 /**
