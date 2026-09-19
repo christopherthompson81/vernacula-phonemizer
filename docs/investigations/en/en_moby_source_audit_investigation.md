@@ -1869,3 +1869,189 @@ defensible rule is one witness per RIGHT-hand element, applied only to that elem
 big families have no witness at all (`-kamp`, `-quist`, `-corp`, `-co` are unattested by any referee).
 It would reach roughly 15 words today. Recorded as available and not taken: it is real, it is small,
 and it is a different mechanism from the boundary table, so it should not ride in on this PR.
+
+## Run 38 — 2026-09-19 08:41 — re-review of #1360 after the fix commit: the kind fix reproduces, and what it did not reach
+
+Second review of `feat/morph-boundary-table` (bc90952e + 7a47b53e), focused on the fix commit and on
+what Run 36 did not ask. Every gate green: typecheck clean, `npx vitest run` 317 files / 6,076 passed
+/ 5 skipped, `check-goldens --jobs 8` 189 languages 36,495 rows 0 stale, `dotnet run --project
+csharp/tools/parity -c Release` 189 byte-identical 0 differ + 5/5 accent variants,
+`check-package-fence` ok, `MOBY=… referee-eval en` unchanged (no shipped data differs from the first
+commit).
+
+### Reproduction — byte-identical, counts exact
+
+    npx tsx tools/gen/build-en-morph-boundary.mts --kaikki /mnt/data/kaikki-English.jsonl --write
+    → cmp against the committed table: IDENTICAL
+    kaikki lines 1492836 · carried 88631 · split 24368 · 6905/1175/2963 rejected · ROWS 13325
+    suffix 6099  compound 4036  prefix 3571  confix 121   — exactly as the commit message claims
+
+Diffed against the first commit's table: the ROW SET is unchanged (0 words added, 0 removed) and 79
+rows changed kind — 48 compound→suffix, 18 compound→prefix, 6 compound→confix, 7 suffix→suffix
+(inner boundary of a two-level row). Every change moves AWAY from `compound`, never toward it, so the
+fix can only shrink the false-compound population. The 24 compound→prefix/confix flips are all
+`{{surf}}` `+pre`/`+con` or template `con` and all read correctly (`a|breast`, `mis|lead`,
+`in|comparable`, `tri|angle`, `pre|fix`, `poly|phonic`).
+
+`build-en-nasal-seam.mts --write` after the move also reproduces `en-nasal-seam.tsv` byte-identically
+at 49 rows, so the new `dirname(fileURLToPath(import.meta.url))` path resolves end to end.
+
+### The control-arg vocabulary, enumerated from the dump rather than assumed
+
+Full pass over the 3.0 GB extract collecting every arg beginning `+` or `:` on any of the twelve
+templates in `TPL`. On the template the builder actually SELECTS (dict words only), the distinct
+control values are:
+
+    8130 :af      127 +suf      34 :afeq     32 :af<surf>   31 +com    26 +pre
+      21 :inh      19 :bor      15 +af       11 :lbor        9 +con      7 :blend
+       6 :influence 4 :uder      3 :from      3 :der<unc>    2 +com+     2 :blend<unc>
+       2 :from<unc> 2 :clq       2 :clipping  2 +suffix      1 each of :calque, :clip, :univ,
+       :der, :afeq<surf>, :calque<unc>, :af<ref:…>, :inh<ref:…>
+
+Across the WHOLE dump (not just selected templates) the only other `+`-form controls are `+prefix` ×2,
+`+deverbal` ×3, `+blend` ×2, `+clip` ×2, `+com+` ×2 and a bare `+` ×2.
+
+**Verdict: `STATED` is complete for every control value that actually states a kind and reaches a
+selected template.** `+suf/+suffix/+pre/+prefix/+com/+con/+af` are all covered. Everything unmapped
+(`:af`, `:afeq`, `:af<surf>`, `:inh`, `:bor`, `:lbor`, `:blend`, `:clq`, `:uder`, `:from`, `:influence`,
+…) is an ETYMOLOGY-TYPE marker on `{{ety}}`, not a kind claim, and correctly falls through to the
+hyphen heuristic. There is no `:pre`/`:suf`/`:com`/`:con` anywhere in the dump, so the `:` branch of
+the control test is speculative but harmless.
+
+⚠ `af: "affix-unknown" as Kind` IS A BEHAVIOURAL NO-OP AND SLIGHTLY WORSE THAN OMITTING IT. Recomputed
+all 24,368 found entries offline with `af` deleted from the map: **0 of 24,368 kinds change.** The
+sentinel exists only to be ignored by `kindOf`. Where it is not a no-op it is a hazard: `stated` is
+last-wins, so a template carrying a real control followed by `:af` has its real kind ERASED back to the
+heuristic, which omitting the key would not do. Same for `+com+`, whose `slice(1)` is `"com+"` and
+misses the map — 0 of 24,368 changes today (both words are compounds anyway), but it is an exact-match
+lookup with no trailing-`+` strip. Both are cleanups, not defects.
+
+### The 4,036 compounds, sampled adversarially
+
+Grouped every compound-labelled row by its source template and control:
+
+    2918 compound/—   400 com/—   299 ety/:af   247 af/—   47 surf/—   24 surf/+com
+      24 affix/—      and a dozen singletons
+
+The `surf/—` and `af/—` buckets are where a false compound can still hide: `{{surf}}` or `{{af}}` with
+NO control arg and args spelled WITHOUT the hyphen that the heuristic needs. Reading all 47 `surf/—`
+rows and cross-checking every compound row whose last element is a derivational suffix or whose last
+element is not a free dictionary word:
+
+    burying   = bury|ing     → should be suffix
+    buxomness = buxom|ness   → should be suffix
+    foully    = foul|ly      → should be suffix
+    rootless  = root|less    → should be suffix
+    wrathful  = wrath|ful    → should be suffix
+    (marginal: nonetheless = none|the|less; hayward/millward/woodward on agentive -ward)
+
+**So the fix closed the `{{surf}}`-with-a-control subset (79 rows) but not the
+`{{surf}}`-without-a-control subset.** Five clear residual false compounds, none with an N+velar site,
+so no engine output changes today — the same standard the commit message applies to its own 79. The
+root cause is unchanged and structural: where Wiktionary omits both the control arg and the hyphen, the
+hyphen heuristic has no signal and `compound` is still the default. Worth a follow-up, not a blocker:
+a cheap patch is to treat an unhyphenated final element drawn from a closed derivational-suffix list as
+`suffix`, which reaches all five.
+
+All 14 compound rows whose last element is NOT a free dictionary word are otherwise sound compounds
+(`seafarer`, `wayfarer`, `gatecrasher`, `potsherd`, `henpecked`, `stargazer`, …); only `wrathful`
+is wrong in that set.
+
+### ⚠ The replacement example in the seam builder's header is itself wrong
+
+The fix replaced three examples that had no row (`Anglophile`, `laryngoscope`, `vancomycin` — verified
+absent) with `pan-chromatic` and `humankind`, and both DO have rows (`panchromatic 3:prefix`,
+`humankind 6:suffix`). But the sentence says they "assimilate", and `humankind` does not:
+
+    en-nasal-seam.tsv:33   humankind   5          ← it is a listed seam, admitted on referee evidence
+    engine: humankind → hjˈuːmənkˌaᶦnd            ← [n], not [ŋ]
+
+`humankind` is a `suffix` row, so the boundary table does not block it; the referee tier does, and the
+engine ships it with [n]. It is the same defect the fix commit was correcting — an example that does
+not hold — with the polarity reversed. `panchromatic → pʰˌæŋkɹoᶷmˈæt̬ɪk` is correct. The honest
+non-compound assimilating example from the table is a prefix row such as `incalculable` or
+`syncarpous`, or `irangate` (`ɪɹˈɑːŋɡˌeᶦt`, a `suffix` row) if a suffix one is wanted.
+
+Same sentence, minor: "160 non-compound N+velar boundaries". Measured against the shipped dict it is
+**161** (155 prefix + 3 suffix + 3 confix, 161 distinct words), against 29 compound N+velar boundaries.
+
+### The move out of `data/` — verified, and sufficient
+
+    npm pack --dry-run   root package: 735 files, no tools/ entry at all
+    npm pack --dry-run   data package: 371 files, no morph entry
+    npm run check:package → ok — engine 735 files (no docs/ tools/ test/, no data/), data package 371
+
+Root `files` is `["src","LICENSES","NOTICE.md",…]` and data `files` is `["core","languages",…]`, so
+`tools/gen/en-morph-boundary.tsv` is genuinely outside both published tarballs. No stale reference to
+the old path survives (`grep -rn en-morph-boundary`). The test's
+`join(EN, "..", "..", "..", "tools", "gen", …)` resolves correctly. The builder's ENOENT fallback
+still works — with the table moved away it prints `(no en-morph-boundary.tsv — referee evidence only)`
+and rebuilds 38 referee-backed rows — though `test/en-nasal-seam.test.ts` hard-fails at collect time in
+that state (top-level `readFileSync`). That asymmetry is fine: the table is committed, so any checkout
+has it; the builder tolerates absence because a contributor may not have the 3 GB dump.
+
+LICENSES/PROVENANCE.md §3 row is in §3, its 13,325 rows is right, and "same shape and same terms as
+the German row below" is accurate. NOTICE.md §3 Wiktionary bullet is accurate.
+
+Two documentation staleness nits from this commit:
+
+- ⚠ `tools/gen/en-morph-boundary.PROVENANCE.md` still says "Regenerate with
+  `KAIKKI=/path/… npx tsx tools/gen/build-en-morph-boundary.mts --write`". The commit changed the tool
+  to `--kaikki <path>` and the env var now throws. The tool's own header and `tools/gen/README.md`
+  were updated; this file was missed.
+- The NOTICE bullet says the two build inputs are "not shipped in either package". True of the FILES,
+  but `de-consonant-curated.tsv` is merged into the shipped `german/consonant.tsv` per its own §3 row,
+  so its CONTENT is shipped. The English one genuinely is not. Worth one clause so the two cases do
+  not read alike.
+
+### One observation the PR should record rather than fix
+
+`foreman`, `overman` and `underman` moved compound→prefix/confix on Wiktionary's `+pre`/`con`. The
+table's own stress column says a prefix boundary leaves primary stress on the stem — which predicts
+`fore-MAN`. English has `FORE-man`. So for the stress consumer the commit message invokes as the
+motivation, the fix trades `MIS-lead` (removed, correct) against `fore-MAN` (introduced, wrong) on a
+handful of `-man` words. The table faithfully reports the source and says a consumer decides which
+kinds it respects, so this belongs in the stress consumer's design, not here — but it should be known
+before that consumer lands.
+
+## Run 39 — 2026-09-19 — Run 38's findings applied, including one I made twice
+
+⚠ I NAMED `humankind` AS A WORD THAT ASSIMILATES AND IT IS ROW 33 OF THE TABLE I WAS DOCUMENTING.
+Run 37 replaced three examples that had no row at all with two that do — and got the polarity wrong on
+one of them. `humankind`'s boundary is a SUFFIX (`-kind`) and it ships `hjuːmənkaᶦnd` with an [n] on
+referee evidence. The same defect the fix was fixing, reversed. The honest statement is narrower than
+either version: a suffix boundary is not evidence about this process in EITHER direction, only
+`compound` is, which is exactly why the referee path exists underneath. Now uses `pan-chromatic` and
+`syn-carpous`, both real prefix/confix rows that do assimilate, and the count is 161 rather than 160
+(155 prefixes, 3 confixes, 3 suffixes).
+
+⚠ AND THE COMPOUND DEFAULT WAS STILL LEAKING, because Run 37 closed only the subset that HAS a control
+arg. `{{surf}}`/`{{af}}` with neither a control nor a hyphen still fell through: `burying`,
+`buxomness`, `foully`, `rootless`, `wrathful` shipped as compounds. Closed with a list of bound
+derivational suffixes for an unhyphenated final element — a second element that is a FREE word stays a
+compound. compound 4,036 → 4,008. None of the five has an N+velar site, so none reached engine output,
+which is the same standard the previous fix was held to; the stress consumer would have read every one
+as fore-stressed.
+
+Two cleanups from the same review, both measured as 0-change and taken anyway because they are hazards
+rather than bugs: `af` is gone from `STATED` (it mapped to a sentinel `kindOf` ignored, and since
+`stated` is LAST-WINS a real control followed by `:af` was erased back to the heuristic — omitting the
+key cannot do that), and a trailing `+` is now stripped before the lookup, so `+com+` matches.
+Enumerating every control value in the dump confirms the map is otherwise complete: the kind-stating
+ones are `+suf`, `+suffix`, `+pre`, `+com`, `+con`, `+af`, `+com+`, and everything else — `:af` ×8,130,
+`:inh`, `:bor`, `:blend`, `:clq` — is an etymology-TYPE marker on `{{ety}}`, correctly left to the
+hyphens.
+
+Docs: the provenance file still said `KAIKKI=…`, which the tool now rejects; and the NOTICE bullet
+called both build inputs "not shipped in either package", true of the English one and false of the
+German one, whose rows are merged into the shipped `german/consonant.tsv`.
+
+⚠ RECORDED FOR THE STRESS CONSUMER, NOT FIXED HERE. `foreman`, `overman` and `underman` moved
+compound → prefix/confix on Wiktionary's own `+pre`. The kind table says a prefix leaves the primary on
+the stem, which predicts `fore-MAN`. So for the very consumer this table was built to serve, the fix
+trades `MIS-lead` away (correct) and introduces `fore-MAN` (wrong) on a few `-man` words. That is a
+decision for that consumer's design — the label is right, the stress rule keyed to it will need an
+exception — and it should be known before it lands rather than discovered by a golden.
+
+    compound 4,036 → 4,008;  seam table unchanged at 49 rows
+    goldens 0 stale;  C# parity 189 byte-identical;  6,076 tests

@@ -20,9 +20,13 @@
  * boundary at the site in `en-morph-boundary.tsv`. Wiktionary states the morpheme split AND its kind,
  * and the kind is what three home-grown discriminators could not recover — measured on the referee-
  * labelled sites, `compound` is 12 for 12 with no false positives and not one of the 17 known
- * assimilating words is a compound (`pan-chromatic` and `humankind` are a prefix and a
- * suffix boundary and they assimilate; `pan·cake` and `corn·cob` are compounds and do not — the table
- * carries 160 non-compound N+velar boundaries to be told apart from 4,036 compounds).
+ * assimilating words is a compound (`pan-chromatic` and `syn-carpous` are a prefix and a confix
+ * boundary and they assimilate; `pan·cake` and `corn·cob` are compounds and do not).
+ * ⚠ `humankind` IS NOT AN EXAMPLE OF EITHER, and naming it as one was a second version of the same
+ * mistake: its boundary is a SUFFIX (`-kind`) and it is row 33 below, shipping `hjuːmənkaᶦnd` with an
+ * [n] on referee evidence. A suffix boundary is simply not evidence about this process in either
+ * direction — only `compound` is — which is why the referee path exists underneath.
+ * Of the table's 161 non-compound N+velar boundaries, 155 are prefixes, 3 confixes and 3 suffixes.
  * ⚠ IT IS A CASCADE AND NOT A REPLACEMENT. `vanguard`, `leningrad` and `cancan` are referee-confirmed
  * seams with NO Wiktionary template — from *avant-garde* in `vanguard`'s case, which is why no split
  * exists — so the referee evidence below stays as the recall patch. Neither source alone is the table.

@@ -227,7 +227,7 @@ airplane	2:compound
 airport	2:compound
 airpower	2:compound
 airscrew	2:compound
-airship	2:compound
+airship	2:suffix
 airsick	2:compound
 airsickness	2:compound
 airspace	2:compound
@@ -768,7 +768,7 @@ battlefield	5:compound
 battlefront	5:compound
 battleground	5:compound
 battlement	5:suffix
-battleship	5:compound
+battleship	5:suffix
 batwing	3:compound
 bayard	2:suffix
 bayesian	3:suffix
@@ -917,7 +917,7 @@ bilingualism	2:prefix,9:suffix
 billable	3:suffix
 billboard	3:compound
 billfish	3:compound
-billfold	3:compound
+billfold	3:suffix
 billhook	3:compound
 billie	3:suffix
 billionaire	6:suffix
@@ -1483,7 +1483,7 @@ burning	3:suffix
 burningly	3:suffix,5:suffix
 burnside	3:compound
 burrfish	2:compound
-burying	4:compound
+burying	4:suffix
 busbar	3:compound
 bushbuck	3:compound
 bushelful	5:suffix
@@ -1515,7 +1515,7 @@ butterwort	4:compound
 butthead	3:compound
 buttock	3:suffix
 buttonhole	5:compound
-buxomness	6:compound
+buxomness	6:suffix
 buying	2:suffix
 buzzword	3:compound
 byland	2:prefix
@@ -1686,7 +1686,7 @@ celled	3:suffix
 celtic	4:suffix
 censorship	5:suffix
 centerboard	5:compound
-centerfold	5:compound
+centerfold	5:suffix
 centerpiece	5:compound
 centesimally	10:suffix
 centime	4:prefix
@@ -3897,7 +3897,7 @@ flagitiously	8:suffix
 flagitiousness	8:suffix
 flagman	4:suffix
 flagpole	4:compound
-flagship	4:compound
+flagship	4:suffix
 flagstaff	4:compound
 flagstone	4:compound
 flameproof	4:suffix
@@ -4140,7 +4140,7 @@ forwardness	6:suffix
 forwent	3:prefix
 fossiliferous	5:prefix
 fossilize	5:suffix
-foully	3:compound
+foully	3:suffix
 foulness	3:suffix
 foundational	8:suffix
 founder	4:suffix
@@ -4347,7 +4347,7 @@ gastrointestinal	6:prefix
 gastrovascular	6:prefix
 gasworks	3:compound
 gatecrasher	3:compound
-gatefold	3:compound
+gatefold	3:suffix
 gatehouse	3:compound
 gatekeeper	3:compound
 gateman	3:suffix
@@ -4710,7 +4710,7 @@ gunpowder	3:compound
 gunroom	3:compound
 gunrunner	3:compound
 gunrunning	3:compound
-gunship	3:compound
+gunship	3:suffix
 gunshot	3:compound
 gunslinger	3:compound
 gunsmith	3:compound
@@ -4909,7 +4909,7 @@ hayrick	2:compound
 hayride	2:compound
 hayseed	2:compound
 haystack	2:compound
-hayward	2:compound
+hayward	2:suffix
 haywire	2:compound
 hazardous	5:suffix
 hazardousness	5:suffix,7:suffix
@@ -6446,7 +6446,7 @@ lightly	3:suffix
 lightman	3:suffix
 lightness	3:suffix
 lightproof	3:suffix
-lightship	3:compound
+lightship	3:suffix
 lightsome	3:suffix
 lightsomely	3:suffix,6:suffix
 lightweight	3:compound
@@ -6472,7 +6472,7 @@ limned	3:suffix
 limner	3:suffix
 lincolnshire	6:suffix
 linebacker	3:compound
-linenfold	5:compound
+linenfold	5:suffix
 linerboard	4:compound
 linesman	3:prefix
 lingcod	3:compound
@@ -6552,7 +6552,7 @@ longing	3:suffix
 longish	3:suffix
 longleaf	3:compound
 longrange	3:compound
-longship	3:compound
+longship	3:suffix
 longshot	3:compound
 longspur	3:compound
 longstaff	3:compound
@@ -7036,7 +7036,7 @@ millionaire	6:suffix
 millman	3:suffix
 millpond	3:compound
 millstream	3:compound
-millward	3:compound
+millward	3:suffix
 millworker	3:compound
 millwright	3:compound
 mimicry	5:suffix
@@ -7281,7 +7281,7 @@ mothering	4:suffix
 motherland	4:compound
 motherless	4:suffix
 motherly	4:suffix
-mothership	4:compound
+mothership	4:suffix
 motherwort	4:compound
 motionless	5:suffix
 motorboat	4:compound
@@ -7631,7 +7631,7 @@ nonelectrical	3:prefix
 nonemergency	3:prefix
 nonempty	3:prefix
 nonesuch	3:compound
-nonetheless	3:compound
+nonetheless	3:suffix
 nonevent	3:prefix
 nonexistence	3:prefix
 nonfarm	3:prefix
@@ -8464,7 +8464,7 @@ pegboard	3:compound
 pegbox	3:compound
 pegtop	3:compound
 pekingese	5:suffix
-penfold	3:compound
+penfold	3:suffix
 penknife	3:compound
 penlight	3:compound
 penman	3:suffix
@@ -9602,8 +9602,8 @@ roomie	3:suffix
 roommate	3:suffix
 rooting	3:suffix
 rootkit	3:compound
-rootless	3:compound
-rootlessness	3:compound,6:suffix
+rootless	3:suffix
+rootlessness	3:suffix,6:suffix
 rootlet	3:suffix
 rootstock	3:compound
 rootworm	3:compound
@@ -10459,7 +10459,7 @@ soybean	2:compound
 spaceband	4:compound
 spaceman	4:suffix
 spaceport	4:compound
-spaceship	4:compound
+spaceship	4:suffix
 spacewalk	4:compound
 spaciousness	6:suffix
 spadefish	4:compound
@@ -10639,7 +10639,7 @@ starlike	4:suffix
 starlit	4:compound
 starman	4:suffix
 stars	4:suffix
-starship	4:compound
+starship	4:suffix
 starter	5:suffix
 startle	5:suffix
 startup	5:compound
@@ -10665,7 +10665,7 @@ steakhouse	4:compound
 steamer	4:suffix
 steaming	4:suffix
 steamroller	4:compound
-steamship	4:compound
+steamship	4:suffix
 steamtight	4:compound
 steamy	4:suffix
 steeler	4:suffix
@@ -10964,7 +10964,7 @@ subway	3:prefix
 subzero	3:prefix
 successful	6:suffix
 successiveness	8:suffix
-suchlike	3:compound
+suchlike	3:suffix
 sucker	3:suffix
 suckerfish	3:suffix,4:compound
 suckle	3:suffix
@@ -11704,7 +11704,7 @@ triumvirate	7:suffix
 trivalent	3:confix
 trivialize	7:suffix
 trooper	4:suffix
-troopship	4:compound
+troopship	4:suffix
 trotskyism	7:suffix
 troubleshoot	6:compound
 troubleshooter	6:compound
@@ -12860,7 +12860,7 @@ warrantable	6:suffix
 warrantableness	6:suffix,10:suffix
 warranter	6:suffix
 warrantless	6:suffix
-warship	3:compound
+warship	3:suffix
 warthog	4:compound
 wartime	3:compound
 washable	3:suffix
@@ -13206,7 +13206,7 @@ woodside	3:suffix
 woodsman	4:suffix
 woodsy	4:suffix
 woodturner	3:compound
-woodward	3:compound
+woodward	3:suffix
 woodwasp	3:compound
 woodwork	3:compound
 woodworker	3:compound
@@ -13269,7 +13269,7 @@ worshipful	5:suffix
 worthless	3:suffix
 worthwhile	3:compound
 worts	3:suffix
-wrathful	3:compound
+wrathful	3:suffix
 wreckage	3:suffix
 wretched	3:suffix
 wretchedly	3:suffix,5:suffix

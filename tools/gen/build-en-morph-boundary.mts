@@ -77,21 +77,51 @@ function partsOf(t: { args?: Record<string, string> }): { parts: string[]; state
         // `{1:'+pre', 2:'en', 3:'in', 4:'comparable'}` — and the split it gives is unhyphenated, so
         // with the control dropped `kindOf` saw two bare morphemes and fell through to its default.
         // 17 `+pre` rows and 46 `+suf` rows shipped as `compound`. `pancake` was right by luck.
-        if (v[0] === "+") { stated = STATED[v.slice(1)] ?? stated; continue; }
-        if (v[0] === ":") { stated = STATED[v.slice(1)] ?? stated; continue; }
+        if (v[0] === "+" || v[0] === ":") { stated = statedKind(v.slice(1)) ?? stated; continue; }
         if (v.includes(":")) continue;              // `la:ātricapillus` — a cognate arg, not a part
         if (isLangCode(v)) continue;
         out.push(v);
     }
     return { parts: out, ...(stated ? { stated } : {}) };
 }
-/** The kind a `+`/`:` control arg states outright, which always beats the hyphen heuristic. */
+/**
+ * The kind a `+`/`:` control arg states outright, which always beats the hyphen heuristic.
+ *
+ * ⚠ `af` IS DELIBERATELY ABSENT and was here as a sentinel that `kindOf` then ignored. Enumerating
+ * every control value in the dump: on the SELECTED template the kind-stating ones are exactly
+ * `+suf`, `+suffix`, `+pre`, `+com`, `+con`, `+af` and `+com+`. Everything else (`:af` ×8,130,
+ * `:afeq`, `:inh`, `:bor`, `:blend`, `:clq`, …) is an etymology-TYPE marker on `{{ety}}` and not a
+ * kind claim, so falling through to the hyphen heuristic is correct for it. `af` says "an affix, side
+ * unspecified", which is exactly what the hyphens then answer — so mapping it to a sentinel bought
+ * nothing and cost something: `stated` is LAST-WINS, so a real control followed by `:af` was erased
+ * back to the heuristic. Omitting the key cannot do that. Recomputed over all 24,368 entries: 0 kinds
+ * change either way, so this is a hazard removed rather than a bug fixed.
+ */
 const STATED: Record<string, Kind> = {
     com: "compound", compound: "compound",
     pre: "prefix", prefix: "prefix",
     suf: "suffix", suffix: "suffix",
-    con: "confix", confix: "confix", af: "affix-unknown" as Kind,
+    con: "confix", confix: "confix",
 };
+/** ⚠ TRAILING `+` IS PART OF THE CONTROL, not of the value — `+com+` missed an exact-match lookup. */
+const statedKind = (v: string): Kind | undefined => STATED[v.replace(/\+$/u, "")];
+
+/**
+ * Derivational suffixes that Wiktionary sometimes writes WITHOUT the leading hyphen.
+ *
+ * ⚠ THIS EXISTS BECAUSE `compound` IS THE DEFAULT and the control-arg fix only closed the subset that
+ * HAS a control. `{{surf}}` and `{{af}}` with neither a control nor a hyphen still fall through, which
+ * left `burying`, `buxomness`, `foully`, `rootless` and `wrathful` labelled `compound`. None has an
+ * N+velar site so none reaches engine output today — the same standard applied to the other 79 — but
+ * the stress consumer would read every one of them as a fore-stressed compound. Closed list on
+ * purpose: a second element that is a FREE word stays a compound, and only bound derivational
+ * suffixes are listed here.
+ */
+const BOUND_SUFFIX = new Set([
+    "ness", "less", "ful", "ly", "ing", "ed", "er", "est", "able", "ible", "ish", "ment",
+    "tion", "sion", "ity", "ous", "ive", "ise", "ize", "ism", "ist", "hood", "ship", "ward",
+    "wise", "some", "like", "most", "fold", "ery", "ary", "ory", "ance", "ence", "dom",
+]);
 
 type Kind = "compound" | "prefix" | "suffix" | "confix";
 /**
@@ -101,10 +131,12 @@ type Kind = "compound" | "prefix" | "suffix" | "confix";
  * `pre·fix` shipped as compounds.
  */
 const kindOf = (name: string, parts: string[], stated?: Kind): Kind => {
-    if (stated && stated !== ("affix-unknown" as Kind)) return stated;
+    if (stated) return stated;
     if (name === "confix" || name === "con") return "confix";
     if (name === "prefix" || parts.some((p) => p.replace(/<[^>]*>/gu, "").endsWith("-"))) return "prefix";
     if (name === "suffix" || parts.some((p) => p.replace(/<[^>]*>/gu, "").startsWith("-"))) return "suffix";
+    const last = parts[parts.length - 1]?.replace(/<[^>]*>/gu, "").toLowerCase() ?? "";
+    if (BOUND_SUFFIX.has(last)) return "suffix";
     return "compound";
 };
 const clean = (p: string) => p.replace(/<[^>]*>/gu, "").replace(/[-‐]/gu, "").toLowerCase().trim();

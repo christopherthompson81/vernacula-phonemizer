@@ -7,8 +7,9 @@ PHONE indices into its `g2p-dict.tsv` row — and what KIND each boundary is: `c
 **Source.** English Wiktionary via [kaikki.org](https://kaikki.org/dictionary/English/) (wiktextract),
 **CC BY-SA 4.0 / GFDL**. Only the etymology-template arguments are read — the morpheme split and its
 kind. No definitions, no pronunciations, nothing that could make this circular with a referee.
-Regenerate with `KAIKKI=/path/to/kaikki.org-dictionary-English.jsonl npx tsx
-tools/gen/build-en-morph-boundary.mts --write`. The dump is 3.0 GB and is **not** in the repo.
+Regenerate with `npx tsx tools/gen/build-en-morph-boundary.mts --kaikki
+/path/to/kaikki.org-dictionary-English.jsonl --write` — the `--kaikki` flag matches the sibling kaikki
+builders. The dump is 3.0 GB and is **not** in the repo.
 
 **Why it exists.** Three separate investigations in this codebase stopped at the same missing thing, in
 almost the same words. `englishArpabet.ts` on compound stress: *"the real discriminator is PREFIXED

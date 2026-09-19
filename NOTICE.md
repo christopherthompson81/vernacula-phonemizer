@@ -99,9 +99,10 @@ Used without obligation beyond the credit given here.
 These files are **redistributable only under CC-BY-SA**, and are fenced as such inside the MIT repo.
 
 - **Wiktionary**, via **wikipron**, **kaikki.org**, and the MediaWiki API — CC-BY-SA 3.0/4.0.
-  Also the source of `tools/gen/en-morph-boundary.tsv` (English morpheme boundaries and their kind,
-  from etymology templates) and `tools/gen/de-consonant-curated.tsv` — build inputs under `tools/`,
-  not shipped in either package, and attributed here because attribution is owed regardless.
+  Also the source of two build inputs under `tools/`: `en-morph-boundary.tsv` (English morpheme
+  boundaries and their kind, from etymology templates), which is read only by a generator and ships in
+  neither package; and `de-consonant-curated.tsv`, whose rows ARE merged into the shipped
+  `german/consonant.tsv` and are fenced with it in LICENSES/PROVENANCE.md §3.
   The single largest upstream: the shipped lexica and stress/tone/quality tables listed in §3, and
   the 188 Wiktionary-family referee sets in the evaluation harness.
   <https://en.wiktionary.org>
