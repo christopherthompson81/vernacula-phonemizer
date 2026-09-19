@@ -223,6 +223,27 @@ let rows = 0, declined = 0, unmapped = 0, defective = 0;
  * now credits either, so a real error on one of them can hide. That is a far narrower loss than the 63,
  * and it is the same latitude every multi-variant referee row in this repo already carries.
  */
+/**
+ * NON-RHOTIC ROWS — Moby transcribing RP, which cannot arbitrate a GenAm reading.
+ *
+ * ⚠ RP IS NOT THE SAME THING AS A LOANWORD, and conflating them was the first draft's mistake. Moby
+ * writes `afterwards` as `æftəwədz` and `backwards` as `bækwədz` because the transcription is BRITISH:
+ * we say the /r/, Moby does not, and scoring us against that marks us wrong for being right. But it
+ * also writes `dossier` as `dɑsieɪ` and `metier` as `meɪtjeɪ`, where the ⟨r⟩ is silent IN GenAm TOO —
+ * a fact about how English borrowed the word. Those rows are correct, we read them r-less as well, and
+ * they PASS today. Excluding them would throw away credit we are earning.
+ *
+ * ⚠ THE FRENCH EXEMPTION IS `-ier`, NOT `-er`/`-et`, AND THAT WAS MEASURED. `et$` looked reasonable and
+ * exempts `hairnet` hɛnɛt, `overset` oʊvəsɛt and `superhet` supəhɛt — all plainly RP. `-ier` and its
+ * plural are the ending that is reliably French (`dossier`, `bustier`, `chansonnier`, `menuisier`,
+ * `cuvier`, `tablier`, 30 of them); the handful that do not fit it are named individually.
+ */
+const NON_RHOTIC = /[ɹɚɝɻr]/u;
+const POSTVOCALIC_R = /[aeiouy]r+(?![aeiouy])/u;
+const SILENT_R_IN_GENAM = /(?:iers?|oir|eur)$/u;
+/** Silent-⟨r⟩ words the ending rule above does not reach, each a loan whose ⟨r⟩ is silent in GenAm. */
+const SILENT_R_WORDS = new Set(["boucher", "tourniquet", "angers", "chorzow", "beziers", "ateliers"]);
+
 const readings = new Map<string, { lower: string[]; upper: string[] }>();
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const sp = line.indexOf(" ");
@@ -246,9 +267,12 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const bucket = /^[A-Z]/u.test(cased) ? e.upper : e.lower;
     if (!bucket.includes(ipa)) bucket.push(ipa);
 }
-let multiReading = 0;
+let multiReading = 0, nonRhotic = 0;
 for (const [w, { lower, upper }] of readings) {
     const all = [...lower, ...upper.filter((r) => !lower.includes(r))];
+    // ⚠ EVERY reading must lack the rhotic — a row that carries a rhotic variant can still arbitrate.
+    if (POSTVOCALIC_R.test(w) && all.every((r) => !NON_RHOTIC.test(r))
+        && !SILENT_R_IN_GENAM.test(w) && !SILENT_R_WORDS.has(w)) { nonRhotic++; continue; }
     // ⚠ COUNTS ROWS THAT ACTUALLY CARRY MORE THAN ONE READING, not headwords that merely appear in both
     // cases: an earlier version counted the latter and reported 1,759 where the real figure is ~230.
     if (all.length > 1) multiReading++;
@@ -267,5 +291,6 @@ writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary ca
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
 console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, defective ${defective}, excluded-as-imported ${imported.size}`);
 console.log(`  headwords emitting more than one reading: ${multiReading}`);
+console.log(`  dropped as NON-RHOTIC (Moby transcribing RP): ${nonRhotic}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);
 console.log(`  en.moby-oov.tsv      ${oov.length}`);

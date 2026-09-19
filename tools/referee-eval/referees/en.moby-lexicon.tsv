@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary carries (35185 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary carries (35098 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -607,12 +607,10 @@ aftermarket	æftəmɚkɪt
 aftermath	æftɚmæθ
 afternoon	æftɚnun
 afternoons	æftɚnunz
-aftershave	æftəʃeɪv
 aftershock	æftɚʃɑk
 aftertaste	æftɚteɪst
 afterthought	æftɚθɔt
 afterward	æftɚwɚd
-afterwards	æftəwədz
 aga	ɑɡə
 again	əɡɛn
 against	əɡɛnst
@@ -728,7 +726,6 @@ ainu	aɪnu
 air	ɛɹ	ɑiɹ
 airbase	ɚbeɪs
 airborne	ɛɹbɔɹn
-airbus	ɛbəs
 aircraft	ɛɹkɹæft
 aircrew	ɛɹkɹu
 airdrop	ɛɹdɹɑp
@@ -867,7 +864,6 @@ alewife	eɪlwaɪf
 alex	ælɪks
 alexa	əlɛksə
 alexander	ælɪɡzændɚ
-alexanders	ælɪɡzɑndəz
 alexandra	ælɪɡzændɹə
 alexandria	ælɪɡzændɹiə
 alexandrine	ælɪɡzændɹaɪn
@@ -1313,7 +1309,6 @@ andante	ændænti
 andantino	ændæntinoʊ
 andean	ændiən
 andersen	ændɚsən
-anderson	sulɑm
 andersonville	ændɚsənvɪl
 andes	ændiz
 andesite	ændɪzaɪt
@@ -2557,7 +2552,6 @@ backtrack	bæktɹæk
 backup	bækʌp
 backward	bækwɚd
 backwardation	bækwɚdeɪʃən
-backwards	bækwədz
 backwash	bækwɑʃ
 backwater	bækwɔtɚ
 backwoods	bækwʊdz
@@ -2801,7 +2795,6 @@ bare	bɛɹ
 barefoot	bɛɹfʊt
 barely	bɛɹli
 barents	bæɹənts
-barf	bæf
 bargain	bɑɹɡɪn
 barge	bɑɹd͡ʒ
 bari	bɑɹi
@@ -3039,7 +3032,6 @@ beatrix	beɪətɹɪks
 beattie	biti
 beatty	biti
 beau	boʊ
-beauford	boʊfɔd
 beaufort	bjufɚt
 beaujolais	boʊʒəleɪ
 beaumont	boʊmɑnt
@@ -3474,8 +3466,6 @@ bies	bis
 biff	bɪf
 bifocal	baɪfoʊkəl
 bifocals	baɪfoʊkəlz
-bifurcate	baɪfəkeɪt
-bifurcation	baɪfəkeɪʃən
 big	bɪɡ
 biggie	bɪɡi
 biggio	biʒioʊ
@@ -3536,7 +3526,6 @@ binghamton	bɪŋəmtən
 bingle	bɪŋɡəl
 bingo	bɪŋɡoʊ
 binocular	bənɑkjəlɚ
-binoculars	bɪnɑkjʊləz
 binomial	baɪnoʊmiəl
 biochemical	baɪoʊkɛmɪkəl
 biochemistry	baɪoʊkɛmɪstɹi
@@ -3767,7 +3756,6 @@ bloodthirsty	blʌdθɚsti
 bloody	blʌdi
 bloom	blum
 bloomer	blumɚ
-bloomers	bluməz
 bloomfield	blumfild
 blooming	blumɪŋ
 bloomingdale	blumɪŋdeɪl
@@ -6017,7 +6005,6 @@ chitchat	t͡ʃɪtt͡ʃæt
 chitlin	t͡ʃɪtlɪn
 chitlins	t͡ʃɪtlənz
 chitter	t͡ʃɪtɚ
-chitterlings	t͡ʃɪtlənz
 chivalry	ʃɪvəlɹi
 chlamydia	kləmɪdijə
 chloe	kloʊi
@@ -6727,7 +6714,6 @@ comet	kɑmɪt
 cometh	kʌmɪθ
 comeuppance	kʌmʌpəns
 comfort	kʌmfɚt
-comfortable	kʌmftəbəl
 comforter	kʌmfɚtɚ
 comfrey	kʌmfɹi
 comfy	kʌmfi
@@ -7632,7 +7618,6 @@ countenance	kaʊntənəns
 counter	kaʊntɚ
 counteract	kaʊntɚækt
 counterattack	kaʊntɚətæk
-counterbalance	kaʊntəbæləns
 countercharge	kaʊntətʃɑɹd͡ʒ
 counterclaim	kaʊntɚkleɪm
 counterclockwise	kaʊntɚklɑkwaɪz
@@ -7642,7 +7627,6 @@ counterforce	kaʊntɚfɔɹs
 counterinsurgency	kaʊntɚɪnsɚd͡ʒənsi
 counterman	kaʊntɚmæn
 countermeasure	kaʊntɚmɛʒɚ
-countermove	kaʊntəmuv
 counteroffensive	kaʊntɚəfɛnsɪv
 counteroffer	kaʊntɚɔfɚ
 counterpart	kaʊntɚpɑɹt
@@ -9535,7 +9519,6 @@ disinfectant	dɪsɪnfɛktənt
 disinfection	dɪsɪnfɛkʃən
 disinflate	dɪsɪnfleɪt
 disinflation	dɪsɪnfleɪʃən
-disinformation	dɪsɪnfəmeɪʃən
 disingenuous	dɪsɪnd͡ʒɛnjuəs
 disingenuousness	dɪsɪnd͡ʒɛnjuəsnɪs
 disintegrate	dɪsɪntəɡɹeɪt
@@ -14826,7 +14809,6 @@ hairdressing	hɛɹdɹɛsɪŋ
 hairless	hɛɹlɪs
 hairline	hɛɹlaɪn
 hairspray	hɛspɹeɪ
-hairstyle	hɛstaɪl
 hairy	hɛɹi
 haiti	heɪti
 haitian	heɪʃən
@@ -14900,9 +14882,6 @@ hamlin	hæmlɪn
 hammer	hæmɚ
 hammered	hæmɚd
 hammering	hæmɚɪŋ
-hammerlock	hæməlɑk
-hammerman	hæməmæn
-hammersmith	hæməsmɪθ
 hammerstein	hæmɚstaɪn
 hammett	hæmɪt
 hammock	hæmək
@@ -14992,7 +14971,6 @@ hanukkah	hɑnəkə
 hanzlik	hænzlɪk
 hao	hɔ
 hap	hæp
-haphazard	hæphæzəd
 haphazardly	hæphæzɚdli
 hapless	hæplɪs
 haploid	hæplɔɪd
@@ -15013,7 +14991,6 @@ harbinger	hɑɹbɪnd͡ʒɚ
 harbor	hɑɹbɚ
 harbour	hɑɹbɚ
 hard	hɑɹd
-hardback	hɑdbæk
 hardball	hɑɹdbɔl
 hardboard	hɑɹdbɔɹd
 hardcore	hɑɹdkɔɹ
@@ -17005,7 +16982,6 @@ inform	ɪnfɔɹm
 informal	ɪnfɔɹməl
 informality	ɪnfɔɹmælɪti
 informant	ɪnfɔɹmənt
-informatics	ɪnfəmætɪks
 information	ɪnfɚmeɪʃən
 informative	ɪnfɔɹmətɪv
 informed	ɪnfɔɹmd
@@ -17772,7 +17748,6 @@ jawbone	d͡ʒɔboʊn
 jaworski	d͡ʒʊwɔɹskɪ
 jay	d͡ʒeɪ
 jaycee	d͡ʒeɪsi
-jayewardene	d͡ʒɑvɑdɛni
 jayhawker	d͡ʒeɪhɔkɚ
 jayne	d͡ʒeɪn
 jaywalk	d͡ʒeɪwɔk
@@ -19024,7 +18999,6 @@ leash	liʃ
 leasing	lizɪŋ
 least	list
 leather	lɛðɚ
-leatherback	lɛðəbæk
 leatherwood	lɛðɚwʊd
 leathery	lɛðɚi
 leave	liv
@@ -19067,7 +19041,6 @@ left	lɛft
 leftism	lɛftɪzəm
 leftist	lɛftɪst
 leftover	lɛftoʊvɚ
-leftovers	lɛftoʊvəz
 leftward	lɛftwɚd
 lefty	lɛfti
 leg	lɛɡ
@@ -20595,7 +20568,6 @@ master	mæstɚ
 masterful	mæstɚfəl
 masterfully	mæstɚfəlli
 masterly	mæstɚli
-mastermind	mɑstəmaɪnd
 masterpiece	mæstɚpis
 masters	mæstɚz
 masterwork	mæstɚwɚk
@@ -20604,7 +20576,6 @@ masthead	mæsthɛd
 mastiff	mæstɪf
 mastodon	mæstədɑn
 mastoiditis	mæstɔɪdaɪtɪs
-masturbate	mæstəbeɪt
 masturbation	mæstɚbeɪʃən
 masur	məsuɹ
 mat	mæt
@@ -21232,7 +21203,6 @@ milligram	mɪləɡɹæm
 millikan	mɪləkən
 milliliter	mɪləlitɚ
 millilitre	mɪlɪlitɚ
-millimeter	mɪləmoʊ
 millimetre	mɪlɪmitɚ
 milliner	mɪlənɚ
 milling	mɪlɪŋ
@@ -21701,7 +21671,6 @@ moor	mʊɹ
 moore	mʊɹ
 mooring	mʊɹɪŋ
 moorish	mʊɹɪʃ
-moorland	mʊələnd
 moose	mus
 moot	mut
 mop	mɑp
@@ -21804,7 +21773,6 @@ mother	mʌðɚ
 motherhood	mʌðɚhʊd
 mothering	mʌðɚɪŋ
 motherland	mʌðɚlænd
-motherly	mʌðəli
 motif	moʊtif
 motile	moʊtəl
 motility	moʊtɪlɪti
@@ -22266,8 +22234,6 @@ neighborhood	neɪbɚhʊd
 neighboring	neɪbɛɹɪŋ
 neighborly	neɪbɚli
 neighbour	neɪbɚ
-neighbourhood	neɪbəhʊd
-neighbourly	neɪbəli
 neil	nil
 neilson	nilsən
 neither	niðɚ
@@ -22346,7 +22312,6 @@ nevada	nəvædə
 never	nɛvɚ
 nevermind	nɛvɚmaɪnd
 nevermore	nɛvɚmɔɹ
-nevertheless	nɛvəðəlɛs
 nevil	nɛvɪl
 neville	nɛvɪl
 nevin	nɛvɪn
@@ -22900,7 +22865,6 @@ odds	ɑdz
 ode	oʊd
 odea	oʊdiə
 odell	oʊdɛl
-oder	oʊdɛsə
 odette	oʊdɛt
 odin	oʊdɪn
 odious	oʊdiəs
@@ -23257,7 +23221,6 @@ oswald	ɑzwɔld
 oswego	ɑswiɡoʊ
 otello	ɔtɛllɔ
 other	ʌðɚ
-otherness	ʌðənɪs
 otherwise	ʌðɚwaɪz
 otherworldly	ʌðɚwɚldli
 otiose	oʊʃioʊs
@@ -23386,22 +23349,18 @@ overate	oʊvɚeɪt
 overbearing	oʊvɚbɛɹɪŋ
 overblown	oʊvɚbloʊn
 overboard	oʊvɚbɔɹd
-overbook	oʊvəbʊk
 overbought	oʊvɚbɔt
 overburden	oʊvəbɚdən
 overbuy	oʊvɚbaɪ
 overcame	oʊvɚkeɪm
-overcapacity	oʊvəkəpæsɪti
 overcast	oʊvɚkæst
 overcharge	oʊvətʃɑɹd͡ʒ
 overcoat	oʊvɚkoʊt
 overcome	oʊvɚkʌm
 overconfident	oʊvɚkɑnfɪdənt
-overcook	oʊvəkʊk
 overcrowd	oʊvɚkɹaʊd
 overdo	oʊvɚdu
 overdone	oʊvɚdʌn
-overdose	oʊvədoʊs
 overdraft	oʊvɚdɹæft
 overdraw	oʊvədɹɑ
 overdrive	oʊvədɹaɪv
@@ -23424,7 +23383,6 @@ overhaul	oʊvɚhɔl
 overhead	oʊvɚhɛd
 overhear	oʊvɚhiɹ
 overheat	oʊvɚhit
-overjoyed	oʊvəd͡ʒɔɪd
 overkill	oʊvɚkɪl
 overland	oʊvɚlænd	oʊvɚlənd
 overlap	oʊvɚlæp
@@ -23443,12 +23401,10 @@ overpay	oʊvɚpeɪ
 overpayment	oʊvɚpeɪmənt
 overplay	oʊvɚpleɪ
 overpopulate	oʊvɚpɑpjəleɪt
-overpopulated	oʊvəpɑpjʊleɪtɪd
 overpower	oʊvəpaʊɚ
 overpowering	oʊvɚpaʊɚɪŋ
 overprice	oʊvəpɹaɪs
 overproduce	oʊvəpɹədjus
-overqualified	oʊvəkwɑlɪfaɪd
 overran	oʊvɚɹæn
 overrate	oʊvɚɹeɪt
 overreach	oʊvɚɹit͡ʃ
@@ -24056,7 +24012,6 @@ pectic	pɛktɪk
 pectin	pɛktɪn
 pectoral	pɛktɚəl
 peculiar	pɪkjuljɚ
-peculiarly	pɪkjuliəli
 pecuniary	pɪkjuniɛɹi
 pedagogy	pɛdəɡɑd͡ʒi
 pedal	pɛdæl
@@ -24358,7 +24313,6 @@ petard	pɪtɑɹd
 pete	pit
 peter	pitɚ
 peterborough	pitɚbɚoʊ
-peterman	pitəmən
 peters	pitɚz
 petersburg	pitɚzbɚɡ
 petit	pɛti	pɛtɪt
@@ -24591,7 +24545,6 @@ pigmy	pɪɡmi
 pigskin	pɪɡskɪn
 pigsty	pɪɡstaɪ
 pike	paɪk
-piker	paɪkstæf
 pilaf	pɪlɑf
 pilar	paɪlɚ
 pilaster	pɪlæstɚ
@@ -24996,7 +24949,6 @@ polo	poʊloʊ
 polonaise	pɑləneɪz
 polonium	pəloʊniəm
 polonius	pəloʊniəs
-poltergeist	pɑltəɡaɪst
 poly	pɑli
 polyamide	pɑliæmaɪd
 polyandrous	pɑliændɹəs
@@ -25073,7 +25025,6 @@ pool	pul
 poon	pun
 poop	pup
 poor	pʊɹ
-poorhouse	pʊəhaʊs
 poorly	pʊɹli
 pop	pɑp
 popcorn	pɑpkɔɹn
@@ -25229,7 +25180,6 @@ power	paʊɚ
 powerboat	paʊɚboʊt
 powered	paʊɚd
 powerful	paʊɚfəl
-powerhouse	paʊəhaʊs
 powerless	paʊɚlɪs
 powwow	paʊwaʊ
 pox	pɑks
@@ -27909,7 +27859,6 @@ sandblast	sændblæst
 sandbox	sændbɑks
 sanded	sændɪd
 sander	sændɚ
-sanders	sændəz
 sandhog	sændhɑɡ
 sandie	sændinɪs
 sandman	sændmæn
@@ -28081,7 +28030,6 @@ scar	skɑɹ
 scaramouch	skæɹəmaʊtʃ	skæɹəmaʊt͡ʃ
 scarborough	skɑɹbɚoʊ
 scarce	skɛɹs
-scarcely	skɛsli
 scarcity	skɛɹsɪti
 scare	skɛɹ
 scarecrow	skɛɹkɹoʊ
@@ -29572,7 +29520,6 @@ soho	soʊhoʊ
 soil	sɔɪl
 soiree	swɑɹeɪ
 soja	soʊd͡ʒə
-sojourn	sɑd͡ʒən
 sol	soʊl	sɑl
 sola	soʊlɑ
 solace	sɑlɪs
@@ -29799,7 +29746,6 @@ speaker	spikɚ
 speaking	spikɪŋ
 spear	spiɹ
 spearhead	spiɹhɛd
-spearman	spiɛmən
 spec	spɛk
 special	spɛʃəl
 specialist	spɛʃəlɪst
@@ -29870,7 +29816,6 @@ spice	spaɪs
 spicey	spaɪsi
 spicy	spaɪsi
 spider	spaɪdɚ
-spiderman	spaɪdəmæn
 spiel	spil
 spieler	spaɪɚ
 spielman	spilmən
@@ -30119,7 +30064,6 @@ stanch	stɔnt͡ʃ
 stand	stænd
 standalone	stændəloʊn
 standard	stændɚd
-standardize	stændədaɪz
 standby	stændbaɪ
 standing	stændɪŋ
 standish	stændɪʃ
@@ -30648,7 +30592,6 @@ submersion	səbmɚʒən
 submission	səbmɪsʃən
 submissive	səbmɪsɪv
 submit	səbmɪt
-subordinate	səboʊdəneɪt
 subpoena	səbpinə
 subprincipal	səbpɹɪnsəpəl
 subroutine	sʌbɹutin
@@ -30671,7 +30614,6 @@ subsistence	səbsɪstəns
 subsoil	sʌbsɔɪl
 subspace	sʌbspeɪs
 substance	sʌbstəns
-substandard	səbstændəd
 substantial	səbstænʃəl
 substantially	səbstænʃəlli
 substantiate	səbstænʃieɪt
@@ -30842,16 +30784,13 @@ superbly	sʊpɚbli
 supercharge	supɚt͡ʃɑɹd͡ʒ
 supercilious	supɚsɪliəs
 supercomputer	supəkəmpjutɚ
-superconductivity	supəkɑndəktɪvɪti
 superconductor	supɚkʌndəktɚ
 supercool	supɚkul
 superfamily	supɚfæməli
 superficial	supɚfɪʃəl
 superficially	supɚfɪʃəlli
 superfluous	sʊpɚfluəs
-supergiant	supəd͡ʒaɪənt
 superheterodyne	supɚhɛtɚədaɪn
-superhighway	supəhaɪweɪ
 superhuman	supɚhjumən
 superimpose	supɚɪmpoʊz
 superimposed	supɚɪmpoʊzd
@@ -30866,7 +30805,6 @@ supernova	supɚnoʊvə
 superpower	supɚpaʊɚ
 supersede	supɚsid
 supersonic	supɚsɑnɪk
-supersonics	supəsɑnɪks
 superstar	supəstɑɹ
 superstition	supɚstɪʃən
 superstitious	supɚstɪʃəs
@@ -31130,7 +31068,6 @@ syncopation	sɪŋkəpeɪʃən
 syncope	sɪŋkəpi
 syndicate	sɪndɪkət
 syndrome	sɪndɹɑm
-synergism	sɪnəd͡ʒɪzəm
 synergistic	sɪnɚd͡ʒɪstɪk
 synergy	sɪnɚd͡ʒi
 syngman	sɪŋmən
@@ -31165,7 +31102,6 @@ tabasco	təbæskoʊ
 tabbouleh	təbuleɪ
 tabby	tæbi
 taber	teɪbɚ
-tabernacle	tæbənækəl
 tabitha	tæbəθə
 tablature	tæblət͡ʃɚ
 table	teɪbəl
@@ -31283,7 +31219,6 @@ tangled	tæŋɡəld
 tango	tæŋoʊ
 tania	tænjə
 tank	tæŋk
-tankard	tæŋkəd
 tanked	tæŋkt
 tanker	tæŋkɚ
 tanner	tænɚ
@@ -31358,7 +31293,6 @@ tater	teɪtɚ
 tatiana	tɑtjɑnɑ
 tatter	tætɚ
 tattered	tætəd
-tattersall	tætəsɑl
 tattle	tætəl
 tattler	tætlɚ
 tattoo	tætu
@@ -31411,7 +31345,6 @@ teamwork	timwɚk
 teaneck	tinɛk
 teapot	tipɑt
 tear	tɛɹ
-tearful	tiəfʊl
 tearing	tɛɹɪŋ
 teary	tiɹi
 teasdale	tizdeɪl
@@ -31680,7 +31613,6 @@ thee	ði
 theft	θɛft
 theiler	θaɪlɚ
 their	ðɛɹ
-theirs	ðɛz
 theirselves	ðɛɹsɛlvz
 theism	θiɪzəm
 theiss	taɪs
@@ -31920,7 +31852,6 @@ tidy	taɪdi
 tie	taɪ
 tied	taɪd
 tier	taɪɚ
-tierce	tiəs
 tiff	tɪf
 tiffany	tɪfəni
 tiffin	tɪfɪn
@@ -31951,7 +31882,6 @@ tilth	tɪlθ
 tilton	tɪltən
 timber	tɪmbɚ
 timberland	tɪmbɚlænd
-timberline	tɪmbəlaɪn
 timbre	tæmbɚ
 timbuktu	tɪmbəktu
 time	taɪm
@@ -32883,7 +32813,6 @@ unclean	ənklin
 unclear	ənkliɚ
 uncluttered	ənklʌtəd
 uncoil	ənkɔɪl
-uncomfortable	ənkʌmftəbəl
 uncommitted	ʌnkəmɪtɪd
 uncommon	ənkɑmən
 uncompensated	ənkɑmpɛnseɪtɪd
@@ -32938,12 +32867,10 @@ undeniable	ʌndɪnaɪəbəl
 under	ʌndɚ
 underage	ʌndɚɪd͡ʒ
 underarm	ʌndɚɑɹm
-underbelly	ʌndəbɛli
 underbid	ʌndɚbɪd
 underbrush	ʌndɚbɹʌʃ
 undercapitalize	ʌndɚkæpɪtəlaɪz
 undercarriage	ʌndɚkæɹɪd͡ʒ
-underclass	ʌndəklɑs
 undercoat	ʌndɚkoʊt
 undercover	ʌndəkʌvɚ
 undercurrent	ʌndɚkɚənt
@@ -32960,7 +32887,6 @@ undergraduate	ʌndɚɡɹæd͡ʒuɪt
 underground	ʌndɚɡɹaʊnd
 undergrowth	ʌndɚɡɹoʊθ
 underhanded	ʌndɚhændɪd
-underlie	ʌndəlaɪ
 underline	ʌndɚlaɪn
 underling	ʌndɚlɪŋ
 undermanned	ʌndɚmænd
@@ -32970,8 +32896,6 @@ undernourish	ʌndɚnɚɪʃ
 undernourished	ʌndənɚiʃt
 underpaid	ʌndɚpeɪd
 underpants	ʌndɚpænts
-underpass	ʌndəpɑs
-underpay	ʌndəpeɪ
 underpin	ʌndɚpɪn
 underpinning	ʌndɚpɪnɪŋ
 underplay	ʌndɛɹpleɪ
@@ -32992,7 +32916,6 @@ understand	ʌndɚstænd
 understandable	ʌndɚstændəbəl
 understanding	ʌndɚstændɪŋ
 understate	ʌndɚsteɪt
-understatement	ʌndəsteɪtmənt
 understood	ʌndɚstʊd
 understudy	ʌndɚstʌdi
 undersubscribed	ʌndəsəbskɹaɪbd
@@ -33007,7 +32930,6 @@ underwater	ʌndəwɔɹtɚ
 underwear	ʌndɚwɛɹ
 underweight	ʌndɚweɪt
 underwent	ʌndɚwɛnt
-underwhelm	ʌndəwɛlm
 underwood	ʌndɚwʊd
 underworld	ʌndəwɚld
 underwrite	ʌndɚɹaɪt
@@ -33103,9 +33025,6 @@ unfolded	ənfoʊldəd
 unforeseeable	ʌnfɔɹsiəbəl
 unforeseen	ʌnfɔɹsin
 unforgettable	ʌnfɚɡɛtəbəl
-unforgivable	ʌnfəɡɪvəbəl
-unforgiven	ʌnfəɡɪvən
-unforgiving	ʌnfəɡɪvɪŋ
 unformed	ənfɔɹmd
 unfortunate	ənfɔɹt͡ʃənɪt
 unfortunately	ənfɔɹtjʊnətli
@@ -33384,11 +33303,9 @@ unsuitable	ənsutəbəl
 unsuited	ənsutɪd
 unsullied	ənsʌlɪd
 unsung	ənsʌŋ
-unsupervised	ənsupəvaɪzd
 unsupportable	ʌnsəpɔɹtəbəl
 unsupported	ʌnsəpɔɹtɪd
 unsure	ənʃʊɚ
-unsurpassed	ʌnsəpɑst
 unsurprising	ʌnsəpɹaɪzɪŋ
 unsuspected	ʌnsəspɛktɪd
 unsuspecting	ʌnsəspɛktɪŋ
@@ -33501,7 +33418,6 @@ uptown	ʌptaʊn
 uptrend	ʌptɹɛnd
 upturn	ʌptɚn
 upward	ʌpwɚd
-upwardly	ʌpwədli
 ur	ɚ
 uranium	jʊɹeɪniəm
 uranus	jʊɹənəs
@@ -34668,7 +34584,6 @@ windsor	wɪnzɚ
 windstorm	wɪndstɔɹm
 windswept	wɪndswɛpt
 windup	waɪndʌp
-windward	wɪndwəd
 windy	wɪndi
 wine	waɪn
 winery	waɪnɚi
@@ -34884,7 +34799,6 @@ worsen	wɚsən
 worship	wɚʃɪp
 worshipful	wɚʃɪpfəl
 worst	wɚst
-worsted	wʊstɪd
 worth	wɚθ
 worthington	wɚðɪŋtən
 worthless	wɚθlɪs
@@ -35002,7 +34916,6 @@ yea	jeɪ
 yeah	jɛ
 year	jiɹ
 yearbook	jiɹbʊk
-yearling	jiəlɪŋ
 yearlong	jiɹlɔŋ
 yearly	jiɹli
 yearn	jɚn

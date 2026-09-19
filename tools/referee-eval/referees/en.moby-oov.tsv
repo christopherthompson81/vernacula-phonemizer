@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39675 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39515 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -935,10 +935,8 @@ aftergrowth	æftɚɡɹoʊθ
 afterguard	æftɚɡɑɹd
 afterheat	æftɚhit
 afterpain	æftɚpeɪn
-afterpains	æftəpeɪnz
 afterpeak	æftɚpik
 afterpiece	æftɚpis
-afters	æftəz
 aftersensation	æftɚsɛnseɪʃən
 aftershaft	æftɚʃæft
 aftertime	æftɚtaɪm
@@ -2359,7 +2357,6 @@ anserine	ænsɚaɪn
 ansgarius	ænsɡɛɹiəs
 anstoss	ɑnʃtoʊs
 answerableness	ænsɚəbəlnɪs
-answerphone	ɑnsəfoʊn
 anta	æntə
 antaea	æntiə
 antaeus	æntiəs
@@ -3123,7 +3120,6 @@ armil	ɑɹmɪl
 armilda	ɑɹmɪldə
 armill	ɑɹmɪl
 armillary	ɑɹməlɛɹi
-arminian	ɑmɪniən
 arminius	ɑɹmɪniəs
 armipotent	ɑɹmɪpətənt
 armomancy	ɑɹməmænsi
@@ -4517,7 +4513,6 @@ bearableness	bɛɹəbəlnɪs
 bearbaiting	bɛɹbeɪtɪŋ
 bearbush	bɛɹbʊʃ
 beardfish	biɹdfɪʃ
-beardie	biədi
 bearding	biɹdɪŋ
 beardless	biɹdlɪs
 beardlessness	biɹdlɪsnɪs
@@ -4769,7 +4764,6 @@ bergere	bɚʒɛɹ
 bergschrund	bɛɹkʃɹʊnt
 bergson	bɚɡsən
 bergsonism	bɚɡsənɪzəm
-bergylt	bɛɡɪlt
 berhyme	bɚaɪm
 beribboned	bɚɪbənd
 berime	bɚaɪm
@@ -5297,7 +5291,6 @@ blepharospasm	blɛfɚoʊspæzəm
 blesbuck	blɛsbʌk
 blessingly	blɛsɪŋli
 blether	blɛðɚ
-bletherskate	blɛðəskeɪt
 bletting	blɛtɪŋ
 bleuler	blɔɪlɚ
 blewits	bluɪts
@@ -5341,7 +5334,6 @@ blub	bləb
 blubberhead	blʌbɚhɛd
 blubbery	blʌbɚi
 blucher	blukɚ
-bluchers	blukəz
 bludge	bləd͡ʒ
 bludgeoneer	blʌd͡ʒəniɹ
 bludger	blʌd͡ʒɚ
@@ -6522,7 +6514,6 @@ cameroons	kæmɚunz
 cameroun	kæmɹun
 camicia	kɑmɪʃɑ
 camiguin	kɑmiɡin
-camiknickers	kæmɪnɪkəz
 camilo	kəmiloʊ
 camion	kæmiən
 camions	kæmiənz
@@ -6819,7 +6810,6 @@ caren	kæɹən
 carenton	kɑɹɑntɑn
 caressive	kɚɛsɪv
 caressively	kɚɛsɪvli
-carfax	kæfæks
 carfloat	kɑɹfloʊt
 cariama	kæɹiæmə
 caribees	kæɹəbiz
@@ -7426,7 +7416,6 @@ chamos	keɪmɑs
 chamosite	ʃæməzaɪt
 chamotte	ʃəmɑt
 champac	t͡ʃæmpæk
-champers	ʃæmpəz
 champignon	ʃæmpɪnjən
 chamyne	kæməni
 chanaan	keɪnən
@@ -7581,7 +7570,6 @@ chechako	t͡ʃit͡ʃɑkoʊ
 chechia	ʃeɪʃjɑ
 checkback	t͡ʃɛkbæk
 checkerbloom	t͡ʃɛkɚblum
-checkerman	tʃɛkəmæn
 checkerwork	t͡ʃɛkɚwɚk
 checkhook	t͡ʃɛkhʊk
 checkrein	t͡ʃɛkɹeɪn
@@ -8388,7 +8376,6 @@ clearheadedly	kliɹhɛdɪdli
 clearheadedness	kliɹhɛdɪdnɪs
 clearstarch	kliɹstɑɹt͡ʃ
 clearstory	kliɹstɔɹi
-clearway	kliəweɪ
 clearwing	kliɹwɪŋ
 cleburne	klibɚn
 cleche	kleɪʃeɪ
@@ -8823,9 +8810,7 @@ colossians	kəlɑʃənz
 colotomy	kəlɑtəmi
 colourable	kʌlɚəbəl
 colourant	kʌlɚənt
-colourful	kʌləfʊl
 colourist	kʌlɚist
-colourless	kʌləlɛs
 coloury	kʌlɚi
 colpitis	kɑlpaɪtɪs
 colpoda	kɑlpoʊdə
@@ -8876,8 +8861,6 @@ comenius	kəminiəs
 cometes	kəmitiz
 comether	koʊmɛðɚ
 cometic	kəmɛtɪk
-comfortableness	kʌmftəbəlnɪs
-comfortless	kʌmfətlɛs
 comilla	kʊmɪlə
 comines	kɔmin
 cominform	kɑmɪnfɔɹm
@@ -9303,7 +9286,6 @@ convergently	kənvɚd͡ʒəntli
 conversable	kənvɚsəbəl
 conversableness	kənvɚsəbəlnɪs
 conversantly	kənvɚsəntli
-conversationist	kɑnvəseɪʃənɪst
 conversionary	kənvɚʒənɛɹi
 conversus	kənvɚsəs
 convertin	kənvɚtɪn
@@ -9640,7 +9622,6 @@ counterbrace	kaʊntɚbɹeɪs
 counterbracing	kaʊntɚbɹeɪsɪŋ
 counterbrand	kaʊntɚbɹænd
 counterchanged	kaʊntɚt͡ʃeɪnd͡ʒd
-countercheck	kaʊntətʃɛk
 countercolored	kaʊntɚkʌlɚd
 countercurrently	kaʊntɚkɚəntli
 counterdeclaration	kaʊntɚdɛklɚeɪʃən
@@ -9656,11 +9637,8 @@ counterinsurgent	kaʊntɚɪnsɚd͡ʒənt
 counterintelligence	kaʊntɚɪntɛlɪd͡ʒəns
 counterirritant	kaʊntɚɚɪtənt
 counterjumper	kaʊntɚd͡ʒʌmpɚ
-countermand	kaʊntəmɑnd
 countermanifesto	kaʊntɚmænəfɛstoʊ
 countermarch	kaʊntəmɑɹtʃ
-countermine	kaʊntəmaɪn
-counterplot	kaʊntəplɑt
 counterpoison	kaʊntɚpɔɪzən
 counterpotent	kaʊntɚpoʊtənt
 counterpressure	kaʊntɚpɹɛʃɚ
@@ -9671,8 +9649,6 @@ counterreformation	kaʊntɚɛfɚmeɪʃən
 counterrevolutionary	kaʊntɚɛvəluʃənɛɹi
 counterrotating	kaʊntɚoʊteɪtɪŋ
 countersalient	kaʊntɚseɪliənt
-countersign	kaʊntəsaɪn
-countersink	kaʊntəsɪŋk
 counterstatement	kaʊntɚsteɪtmənt
 counterstroke	kaʊntɚstɹoʊk
 countertendency	kaʊntɚtɛndənsi
@@ -9680,7 +9656,6 @@ counterthrust	kaʊntɚθɹʌst
 counterturn	kaʊntɚtɚn
 countertype	kaʊntɚtaɪp
 countervair	kaʊntɚvɛɹ
-countervalue	kaʊntəvælju
 counterview	kaʊntɚvju
 counterweigh	kaʊntɚweɪ
 counterword	kaʊntɚwɚd
@@ -9692,7 +9667,6 @@ countryseat	kʌntɹisit
 couped	kupt
 couperus	kupeɪɹəs
 couplement	kʌpəlmənt
-courgette	kʊəʒɛt
 courlan	kʊɹlən
 courland	kʊɹlənd
 cournand	kʊɹnænd
@@ -10151,7 +10125,6 @@ currer	kɚɚ
 curriery	kɚiɚi
 currijong	kɚɪd͡ʒɑŋ
 currycomb	kɚikoʊm
-cursillo	kʊəsɪloʊ
 curstly	kɚstli
 curstness	kɚstnɪs
 curtalax	kɚtəlæks
@@ -11962,7 +11935,6 @@ dmitrov	dimitɹoʊv
 dmitrovka	dimitɹoʊvkɑ
 doat	doʊt
 dobber	dɑbɚ
-dobermann	doʊbəmən
 dobla	doʊblɑ
 doblon	dəbloʊn
 dobrovir	doʊbɹoʊviɹ
@@ -12541,7 +12513,6 @@ eagre	iɡɚ
 ealdorman	ɔldɚmən
 eanling	inlɪŋ
 earache	iɹeɪk
-earbash	ɪəbæʃ
 earbob	iɹbɑb
 eardrop	iɹdɹɑp
 eardrum	iɹdɹʌm
@@ -13243,7 +13214,6 @@ energetistic	ɛnɚd͡ʒɪtɪstɪk
 energise	ɛnɚd͡ʒaɪz
 energism	ɛnɚd͡ʒɪzəm
 enervate	ɛnɚveɪt
-enervation	ɛnəveɪʃən
 enesco	ɛnɛskoʊ
 enescu	ɛnɛsku
 enewetak	ɛnɛwitɑk
@@ -14188,7 +14158,6 @@ exopoditic	ɛksɑpədɪtɪk
 exopterygote	ɛksoʊtɛɹəɡoʊt
 exorable	ɛksɚəbəl
 exorcisory	ɛksɔɹsaɪzɚi
-exorcize	ɛksɑsaɪz
 exosmic	ɛksɑsmɪk
 exosmosis	ɛksɑsmoʊsɪs
 exosphere	ɛksoʊsfiɹ
@@ -14386,7 +14355,6 @@ faery	feɪɛɹi
 fafnir	fɑvnɚ
 fagaceous	fəɡeɪʃəs
 fagaras	fæɡæɹɑs
-fagerholm	fɑɡʊhoʊlm
 faggi	fɑd͡ʒi
 fagot	fæɡət
 fahlband	fɑlbænd
@@ -15013,7 +14981,6 @@ flavouring	fleɪvɚɪŋ
 flavoury	fleɪvɚi
 flawedness	flɔdnɪs
 flawy	flɔi
-flayer	ɛfwʌn
 fleam	flim
 fleawort	fliwɚt
 fleche	fleɪʃ
@@ -16027,7 +15994,6 @@ gazogene	ɡæzəd͡ʒin
 gbari	ɡəbɑɹi
 ge	d͡ʒi
 geanticlinal	d͡ʒiæntɪklaɪnəl
-gearcase	ɡiəkeɪs
 gearshift	ɡiɹʃɪft
 gearwheel	ɡiɹwil
 geb	ɡɛb
@@ -16763,12 +16729,10 @@ gouda	ɡaʊdə
 goujon	ɡud͡ʒən
 goulds	ɡuldz
 gourami	ɡʊɹəmi
-gourmandise	ɡʊəmɑndiz
 gournia	ɡʊɹniə
 goutish	ɡaʊtɪʃ
 goutte	ɡut
 gouverneur	ɡʌvɚnʊɹ
-governessy	ɡʌvənɪsi
 gowanda	ɡəwɑndə
 gowd	ɡaʊd
 gownsman	ɡaʊnzmən
@@ -17391,7 +17355,6 @@ hainaut	ɛnoʊ
 haiphong	haɪfɑŋ
 hairbrained	hɛɹbɹeɪnd
 hairgrip	hɛɡɹip
-hairnet	hɛnɛt
 hairtail	hɛɹteɪl
 hairworm	hɛɹwɚm
 haise	heɪz
@@ -17484,7 +17447,6 @@ hamiticized	hæmɪtɪsaɪzd
 hammal	həmɑl
 hammam	həmɑm
 hammarskjold	hɑmɚʃoʊld
-hammerbeam	hæməbim
 hammercloth	hæmɚklɔθ
 hammerfest	hɑmɚfɛst
 hammeringly	hæmɚɪŋli
@@ -17711,7 +17673,6 @@ headreach	hɛdɹit͡ʃ
 headrig	hɛdɹɪɡ
 headright	hɛdɹaɪt
 headsaw	hɛdsɔ
-headscarf	hɛdskæf
 headsheet	hɛdʃit
 headsquare	hɛdskwɛɹ
 headstrongly	hɛdstɹɔŋli
@@ -18883,7 +18844,6 @@ hummum	hʌməm
 humoresque	hjumɚɛsk
 humoresquely	hjumɚɛskli
 humorum	hjumɚəm
-humoursome	hjuməsəm
 humous	hjuməs
 humperdinck	hʊmpɚdɪŋk
 humulon	hjumjəlɑn
@@ -19171,7 +19131,6 @@ hyperesthetic	haɪpɚɪsθɛtɪk
 hypereutectoid	haɪpɚjʊtɛktɔɪd
 hyperextension	haɪpɚɪkstɛnʃən
 hyperfine	haɪpɚfaɪn
-hyperfocal	haɪpəfoʊkəl
 hyperform	haɪpɚfɔɹm
 hyperfunction	haɪpɚfʌŋkʃən
 hypergalactia	haɪpɚɡəlæktiə
@@ -19180,7 +19139,6 @@ hypergeusesthesia	haɪpɚɡjusɪsθiziə
 hypergeusia	haɪpɚɡjusiə
 hyperglobulia	haɪpɚɡloʊbjuliə
 hyperglobulism	haɪpɚɡlɑbjəlɪzəm
-hyperglycaemia	haɪpəɡlaɪsimiə
 hyperglycistia	haɪpɚɡlaɪsɪstiə
 hypergol	haɪpɚɡoʊl
 hypergolic	haɪpɚɡɔlɪk
@@ -19807,7 +19765,6 @@ imperscriptible	ɪmpəskɹiptɪbəl
 impersonalise	ɪmpɚsənəlaɪz
 impersonalism	ɪmpɚsənəlɪzəm
 impersonalize	ɪmpɚsənəlaɪz
-impersonify	ɪmpəsɑnɪfaɪ
 impertinency	ɪmpɚtənənsi
 impertinentness	ɪmpɚtənəntnɪs
 imperturbableness	ɪmpɚtɚbəbəlnɪs
@@ -21361,7 +21318,6 @@ joannes	d͡ʒoʊæniz	jɔɑnjis
 joas	d͡ʒoʊæs
 joash	d͡ʒoʊæʃ
 jobation	d͡ʒoʊbeɪʃən
-jobbernowl	d͡ʒɑbənoʊl
 jobbery	d͡ʒɑbɚi
 jobcentre	d͡ʒɑbsɛntɚ
 jobholder	d͡ʒɑbhoʊldɚ
@@ -21371,7 +21327,6 @@ jochebed	d͡ʒɑkəbɛd
 jocko	d͡ʒɑkoʊ
 jockteleg	d͡ʒɑktəlɛɡ
 jodean	d͡ʒoʊdin
-jodhpurs	d͡ʒɑdpəz
 jodl	joʊdəl
 jodo	d͡ʒɔdɔ
 jodrell	d͡ʒɑdɹəl
@@ -22382,7 +22337,6 @@ lacerative	læsɚeɪtɪv
 lacerna	ləsɚnə
 lacertian	ləsɚʃən
 lacertilian	læsɚtɪliən
-lacertine	læsətaɪn
 lachaise	ləʃɛz
 lachesis	læt͡ʃɪsɪs
 lachish	leɪkɪʃ
@@ -22589,7 +22543,6 @@ lansa	lænsə
 lansberg	lænzbɛɹɡ
 lanseh	lænsə
 lanternfish	læntɚnfɪʃ
-lanternist	læntənɪst
 lanthorn	lænthɔɹn
 lantsang	lɑntsɑŋ
 lanuginose	lənud͡ʒənoʊs
@@ -22780,7 +22733,6 @@ learoy	liɹɔɪ
 leaseman	lismən
 leastwise	listwaɪz
 leat	lit
-leathercloth	lɛðəklɑθ
 leatherette	lɛðɚɛt
 leatherfish	lɛðɚfɪʃ
 leatherflower	lɛðɚflaʊɚ
@@ -23611,7 +23563,6 @@ luluabourg	lulwɑbuɹ
 lumberingly	lʌmbɚɪŋli
 lumberingness	lʌmbɚɪŋnɪs
 lumbermill	lʌmbɚmɪl
-lumbersome	lʌmbəsəm
 lumbosacral	lʌmboʊseɪkɹəl
 lumbrical	lʌmbɹɪkəl
 lumbricalis	lʌmbɹəkeɪlɪs
@@ -23977,7 +23928,6 @@ mallanders	mæləndɚz
 malleablize	mæliəblaɪz
 malleate	mælieɪt
 mallemuck	mæləmʌk
-mallenders	mæləndəz
 malmaison	mælmeɪzɑn
 malmesbury	mɑmzbɛɹi
 malmo	mælmoʊ
@@ -24422,7 +24372,6 @@ medullated	mɛdəleɪtɪd
 medullation	mɛdəleɪʃən
 medullization	mɛdəlɪzeɪʃən
 medusoid	mədusɔɪd
-meerkat	miəkæt
 meerschaum	miɹʃəm
 mefitis	məfaɪtɪs
 megacephalic	mɛɡəsəfælɪk
@@ -25116,7 +25065,6 @@ misesteem	mɪsɛstim
 misfeasor	mɪsfizɚ
 misfeature	mɪsfit͡ʃɚ
 misgivingly	mɪsɡɪvɪŋli
-misgovern	mɪsɡʌvən
 misguidance	mɪsɡaɪdəns
 misjoinder	mɪsd͡ʒɔɪndɚ
 misknow	mɪsnoʊ
@@ -25444,9 +25392,7 @@ moonsail	munsəl
 moonshee	munʃi
 moonshiny	munʃaɪni
 moonsif	munsɪf
-moorcock	mʊəkɑk
 mooresville	mʊɹzvɪl
-moorhen	mʊəhɛn
 moorwort	mʊɹwɚt
 moosally	musæli
 moosemilk	musmɪlk
@@ -27262,7 +27208,6 @@ outthrow	aʊtθɹoʊ
 outvalue	aʊtvælju
 outwait	aʊtweɪt
 outwalk	aʊtwɔk
-outwardness	aʊtwədnɪs
 outwash	aʊtwɑʃ
 outwatch	aʊtwɑtʃ
 outwear	aʊtwæɚ
@@ -27285,19 +27230,14 @@ overanxiousness	oʊvɚæŋkʃəsnɪs
 overarch	oʊvɚɑɹt͡ʃ
 overarm	oʊvɚɑɹm
 overawe	oʊvɚɔ
-overbalance	oʊvəbæləns
 overbank	oʊvɚbæŋk
-overblow	oʊvəbloʊ
-overboot	oʊvəbut
 overbreak	oʊvɚbɹeɪk
 overbrim	oʊvəbɹim
-overbusy	oʊvəbɪzi
 overcapitalise	oʊvɚkæpɪtəlaɪz
 overcertify	oʊvɚsɚtəfaɪ
 overclothes	oʊvɚkloʊz
 overcoating	oʊvɚkoʊtɪŋ
 overcoil	oʊvɚkɔɪl
-overcompensate	oʊvəkɑmpɛnseɪt
 overcrop	oʊvəkɹɑp
 overcrow	oʊvəkɹoʊ
 overcurious	oʊvɚkjʊɹiəs
@@ -27307,7 +27247,6 @@ overdelicate	oʊvɚdɛləkɪt
 overdelicately	oʊvɚdɛləkɪtli
 overdelicateness	oʊvɚdɛləkɪtnɪs
 overdoor	oʊvɚdɔɹ
-overdosage	oʊvədoʊsɪd͡ʒ
 overdrawer	ɑvɚdɹɔɚ
 overdrink	oʊvədɹiŋk
 overeagerly	oʊvɚiɡɚli
@@ -27316,21 +27255,13 @@ overelaborate	oʊvɚɪlæbɚɪt
 overemphasis	oʊvɚɛmfəsɪs
 overenthusiasm	oʊvɚinθjuzɪæzəm
 overexert	oʊvɚɪɡzɚt
-overfall	oʊvəfɑl
 overfamiliar	oʊvəfəmɪliɚ
-overfatigue	oʊvəfətiɡ
-overfine	oʊvəfaɪn
 overflap	oʊvɚflæp
-overfold	oʊvəfoʊld
-overfond	oʊvəfɑnd
-overfulfil	oʊvəfʊlfɪl
-overfull	oʊvəfʊl
 overgeneralize	oʊvəd͡ʒɛnɹəlaɪz
 overgild	oʊvɚɡɪld
 overglance	oʊvɚɡlæns
 overground	oʊvəɡɹaʊnd
 overhappy	oʊvɚhæpi
-overhaste	oʊvəheɪst
 overhatted	oʊvɚhætɪd
 overijssel	oʊvɚaɪsəl
 overindulge	oʊvɚɪndʌld͡ʒ
@@ -27338,10 +27269,7 @@ overinsure	oʊvɚinʃʊɚ
 overissue	oʊvɚɪʃu
 overjoy	oʊvɚd͡ʒɔɪ
 overkind	oʊvɚkaɪnd
-overladen	oʊvəleɪdən
 overlander	oʊvəlændɚ
-overleaf	oʊvəlif
-overleap	oʊvəlip
 overliberal	oʊvɚlɪbɚəl
 overline	oʊvɚlaɪn
 overlive	oʊvɚlɪv
@@ -27355,9 +27283,6 @@ overorganization	oʊvɚɔɹɡənɪzeɪʃən
 overorganize	oʊvɚɔɹɡənaɪz
 overparted	oʊvəpɑɹtɪd
 overpeople	oʊvɚpipəl
-overpersuade	oʊvəpəsweɪd
-overpitch	oʊvəpɪtʃ
-overpoise	oʊvəpɔɪz
 overpotential	oʊvɚpətɛnʃəl
 overprize	oʊvɚpɹaɪz
 overpronounce	oʊvɚpɹənaʊns
@@ -27367,13 +27292,10 @@ overrake	oʊvɚeɪk
 overrefine	oʊvɚifaɪn
 overrefinement	oʊvɚɪfaɪnmənt
 overrider	oʊvɚaɪdɚ
-oversailing	oʊvəseɪlɪŋ
 overscore	oʊvɚskɔɹ
 overscrupulous	oʊvɚskɹupjələs
 overscrupulously	oʊvɚskɹupjələsli
 overscrupulousness	oʊvɚskɹupjələsnɪs
-overset	oʊvəsɛt
-oversexed	oʊvəsɛkst
 overshade	oʊvɚʃeɪd
 overshine	oʊvɚʃaɪn
 overshirt	oʊvɚʃɚt
@@ -28280,7 +28202,6 @@ peperino	pɛpɚinoʊ
 peperoni	pɛpɚoʊni
 peplosed	pɛpləst
 pepo	pipoʊ
-pepperbox	pɛpəbɑks
 pepperwood	pɛpɚwʊd
 pepperwort	pɛpəwɚt
 peppery	pɛpɚi
@@ -29615,8 +29536,6 @@ pontormo	pɑntɔɹmoʊ
 pontos	pɑntɑs
 pood	pud
 poopo	pɔɔpɔ
-poorness	pʊənɪs
-poort	pʊət
 popayan	pɔpɑjɑn
 popery	poʊpɚi
 popeyed	pɑpaɪd
@@ -29758,10 +29677,8 @@ poulard	pulɑɹd
 poulterer	poʊltɚɚ
 poultryman	poʊltɹimən
 poundal	paʊndəl
-pourpoint	pʊəpɔɪnt
 poussette	pusɛt
 poussie	pusi
-powerplant	paʊəplɑnt
 powys	poʊɪs
 poxy	pɑksi
 poyang	pɔjɑŋ
@@ -30730,7 +30647,6 @@ quatercentenary	kwætəsɛntinɚi
 quaternate	kwɑtɚneɪt
 quaternity	kwətɚnɪti
 quathlamba	kwɑtlɑmbɑ
-quatorzain	kætəzeɪn
 quatre	kɑtɚ
 quattrocento	kwætɹoʊtʃɛntoʊ
 quavery	kweɪvɚi
@@ -30808,7 +30724,6 @@ quirinus	kwɚaɪnəs
 quirites	kwɚaɪtiz
 quisle	kwɪzəl
 quittor	kwɪtɚ
-quiverful	kwɪvəfʊl
 qumran	kʊmɹɑn
 quodlibetz	kwɑdləbɛts
 quorate	kwɔɹət
@@ -31940,8 +31855,6 @@ saccharose	sækɚoʊs
 sacciform	sæksɪfɔɹm
 sacculate	sækjəleɪt
 sacellum	səkɛləm
-sacerdotage	sækədoʊtɪd͡ʒ
-sacerdotal	sækədoʊtəl
 sachemic	seɪt͡ʃɛmɪk
 sachsen	zɑksən
 sacker	sækɚ
@@ -32023,7 +31936,6 @@ salinization	sælɪnaɪzeɪʃən
 salishan	seɪlɪʃən
 salivary	səlɪveɪɹi
 salivator	sæləveɪtɚ
-sallenders	sæləndəz
 sallisaw	sælɪsɔ
 sallowy	sæloʊi
 sallust	sæləst
@@ -32242,7 +32154,6 @@ saturable	sæt͡ʃɚəbəl
 saturant	sæt͡ʃɚənt
 saturator	sæt͡ʃɚeɪtɚ
 saturnalia	sætəneɪliə	sætɚneɪliə
-saturnism	sætənɪzəm
 satyagraha	sətjɑɡɹəhɑ	sʌtjəɡɹʌhə
 satyaloka	sʌtjəlɔkə
 satyr	seɪtɚ
@@ -32355,8 +32266,6 @@ schellingianism	ʃɛlɪŋiənɪzəm
 schematise	skimətaɪz
 schembechler	ʃɛmbɛklɚ
 scherm	skɛɹm
-scherzando	skɛtsændoʊ
-scherzo	skɛtsoʊ
 scheveningen	skeɪvənɪŋən
 schiaparelli	skjɑpɚɛli
 schiavona	skaɪəvoʊnə
@@ -33022,9 +32931,7 @@ shavie	ʃeɪvi
 shavuoth	ʃəvuoʊs
 shawano	ʃɔwənoʊ
 shealing	ʃilɪŋ
-shearbill	ʃiəbɪl
 shearhog	ʃiɹɑɡ
-shearling	ʃiəlɪŋ
 shearwater	ʃiɹwɔtɚ
 sheathy	ʃiθi
 sheave	ʃɪv
@@ -33064,7 +32971,6 @@ shend	ʃɛnd
 shensi	ʃɛnsi
 shenstone	ʃɛnstən
 sheol	ʃioʊl
-shepherdess	ʃɛpədɛs
 sherardize	ʃɛɹədaɪz
 sherbrooke	ʃɚbɹʊk
 sherd	ʃɚd
@@ -33599,7 +33505,6 @@ snecked	snɛkt
 sneesh	sniʃ
 snefru	snɛfɹu
 snellius	snɛliəs
-snickersnee	snɪkəsni
 sniffish	snɪfɪʃ
 snig	snɪɡ
 sniperscope	snaɪpɚskoʊp
@@ -33758,7 +33663,6 @@ soogee	sud͡ʒi
 sool	sul
 soom	sum
 soony	suni
-sooterkin	sʊtəkɪn
 soothfast	suθfæst
 soothfastly	suθfæstli
 soothfastness	suθfæstnɪs
@@ -33815,7 +33719,6 @@ souple	sʌpəl
 soupmeat	supmit
 sourdough	saʊɹdoʊ
 sourpuss	saʊɹpʊs
-soursop	saʊəsɑp
 sourwood	saʊɹwʊd
 soustelle	sustɛl
 soutache	sutæʃ
@@ -33826,7 +33729,6 @@ southbridge	saʊθbɹɪd͡ʒ
 southeasterner	saʊθistɚnɚ
 southeastwardly	saʊθistwɚdli
 southernly	sʌðɚnli
-southernwood	sʌðənwʊd
 southey	saʊði
 southington	sʌðɪŋtən
 southmont	saʊθmɑnt
@@ -33898,7 +33800,6 @@ spaviet	speɪvɪt
 spayard	speɪɚd
 spean	spin
 spearfish	spiɹfɪʃ
-spearmint	spiəmɪnt
 spearwort	spiɹwɚt
 specialise	spɛʃəlaɪz
 specialistic	spɛʃəlɪstɪk
@@ -34423,7 +34324,6 @@ stimulability	stɪmjələbɪlɪti
 stimy	staɪmi
 stingaree	stɪŋɚi
 stingo	stɪŋɡoʊ
-stinkard	stɪŋkəd
 stinkaroo	stɪŋkɚu
 stinkeroo	stɪŋkɚu
 stinkstone	stɪŋkstoʊn
@@ -34629,7 +34529,6 @@ subacidness	səbæsɪdnɪs
 subadar	subədɑɹ
 subahdar	subədɑɹ
 subalimentation	sʌbæləmɛnteɪʃən
-subaltern	sʌbəltən
 subalternate	səbɔltɚnɪt
 subalternation	səbɔltɚneɪʃən
 subapostolic	sʌbæpəstɑlɪk
@@ -34831,7 +34730,6 @@ suffruticose	səfɹutəkoʊs
 suffumigate	səfjuməɡeɪt
 suffusive	səfjusɪv
 sug	ʃʊɡ
-sugarbag	ʃʊɡəbæɡ
 sugarbush	ʃʊɡɚbʊʃ
 sugarhouse	ʃʊɡɚhaʊs
 sugh	suk
@@ -34949,12 +34847,10 @@ superbomb	supɚbɑm
 supercalender	supəkælɪndɚ
 supercapital	supɚkæpɪtəl
 supercavitation	supɚkævɪteɪʃən
-supercelestial	supəsɪlɛstiəl
 supercharger	supətʃɑɹd͡ʒɚ
 superciliary	supəsɪliɚi
 supercilium	supɚsɪliəm
 supercolumnar	supɚkəlʌmnɚ
-superconscious	supəkɑnʃəs
 superdominant	supɚdɑmənənt
 superdreadnought	supɚdɹɛdnɔt
 superego	supɚiɡoʊ
@@ -34965,7 +34861,6 @@ supererogate	supɚɛɹəɡeɪt
 supererogation	supɚɛɹəɡeɪʃən
 superette	supɚɛt
 superexcellent	supɚɛksələnt
-superfatted	supəfætɪd
 superficies	supɚfɪʃiiz
 superfluid	supɚfluɪd
 superfort	supɚfɔɹt
@@ -34973,10 +34868,7 @@ superfortress	supɚfɔɹtɹɪs
 superfuse	supɚfjuz
 superfusion	supɚfjuʒən
 supergalactic	supɚɡəlæktɪk
-superglue	supəɡlu
 supergrass	supəɡɹɑs
-superheat	supəhit
-superhet	supəhɛt
 superhive	supɚhaɪv
 superhumanity	supɚhjumænɪti
 superhumanness	supɚhjumənɪs
@@ -34991,7 +34883,6 @@ superliner	supɚlaɪnɚ
 superload	supɚloʊd
 superlunary	supɚlunɚi
 supermundane	supɚməndeɪn
-supernaculum	supənækjʊləm
 supernatation	supɚnəteɪʃən
 supernational	supɚnæʃənəl
 supernationalism	supɚnæʃənəlɪzəm
@@ -35007,8 +34898,6 @@ superparasite	supɚpæɹəsaɪt
 superparasitic	supɚpæɹəsɪtɪk
 superpatriot	supɚpeɪtɹiət
 superpatriotic	supɚpeɪtɹiɑtɪk
-superphysical	supəfɪzɪkəl
-superpose	supəpoʊz
 superpossition	supɚpəzɪʃən
 superrace	supɚeɪs
 superrational	supɚæʃənəl
@@ -35030,13 +34919,11 @@ supersensually	supɚsɛnʃuəli
 superserviceable	supɚsɚvɪsəbəl
 superspeed	supɚspid
 superstratum	supəstɹɑtəm
-supersubstantial	supəsəbstænʃəl
 supersubtle	supɚsʌtəl
 supertemporal	supətɛmpɚəl
 superterranean	supətɛɹeɪniən
 superterrene	supətɛɹin
 superterrestrial	supətɚɛstɹiəl
-supertonic	supətɑnɪk
 supervenient	supɚvinjənt
 suppe	supeɪ
 suppedaneum	sʌpɪdeɪniəm
@@ -35678,7 +35565,6 @@ teleprinter	tɛlɪpɹintɚ
 teleran	tɛlɚæn
 telerecord	tɛlɚikɔɹd
 telerecording	tɛlɚikɔɹdɪŋ
-telergy	tɛləd͡ʒi
 telescopy	təlɛskəpi
 telesoftware	tɛlɪsɑftwɛɹ
 telespectroscope	tɛlɪspɛktɹəskoʊp
@@ -35720,7 +35606,6 @@ temesvari	tɛmɛsvɑɹi
 temmoku	tɛmoʊku
 temperately	tɛmpɚɪtli
 temperateness	tɛmpɚɪtnɪs
-tempersome	tɛmpəsəm
 tempestates	tɛmpɪsteɪtiz
 templon	tɛmplɑn
 temporality	tɛmpɚælɪti
@@ -35828,7 +35713,6 @@ terrane	tɚeɪn
 terrarium	tɛɹɛɹiəm
 terrazzo	tɚæzoʊ
 terrene	tɛɹin
-terreplein	tɛpleɪn
 terrine	tɚin
 territorialise	tɛɹɪtɔɹiəlaɪz
 territorialize	tɛɹɪtɔɹiəlaɪz
@@ -36583,7 +36467,6 @@ touse	taʊz
 touzle	taʊzəl
 towanda	təwɑndə
 towardly	tɔɹdli
-towardness	toʊədnɪs
 towerman	taʊɚmən
 towmond	taʊmənd
 towmont	taʊmənt
@@ -37100,7 +36983,6 @@ tsushima	tsuʃimɑ
 tubate	tubeɪt
 tubectomy	tjubɛktəmi
 tubenose	tubnoʊz
-tubercle	tjubəkəl
 tubercularise	tʊbɚkjəlɚaɪz
 tubercularize	tʊbɚkjəlɚaɪz
 tubercularly	tʊbɚkjəlɚli
@@ -37219,7 +37101,6 @@ tutelar	tutəlɚ
 tutelary	tjutɪlɚi
 tutenag	tutənæɡ
 tutenkhamon	tutɛŋkɑmən
-tutoyer	tutwɑjeɪ
 tutto	tutoʊ
 tutty	tʌti
 tutuila	tutuilɑ
@@ -37386,8 +37267,6 @@ unarresting	ʌnɚɛstɪŋ
 unarticulated	ʌnɑɹtɪkjʊleɪtɪd
 unartistic	ʌnɑɹtɪstɪk
 unary	junɛɹi
-unascertainable	ʌnæsəteɪnəbəl
-unascertained	ʌnæsəteɪnd
 unasked	ənɑskt
 unatoned	ʌnətoʊnd
 unattackable	ʌnətækəbəl
@@ -37436,7 +37315,6 @@ uncapable	ənkeɪpəbəl
 uncaught	ənkɑt
 uncaused	ənkɔzd
 uncensured	ənsɛnsjəd
-uncertificated	ʌnsətɪfɪkeɪtɪd
 unchallengeable	əntʃælɪnd͡ʒəbəl
 unchangeable	əntʃeɪnd͡ʒəbəl
 unchaperoned	ənʃæpɚoʊnd
@@ -37489,7 +37367,6 @@ unculled	ənkʌld
 unculture	ənkʌlt͡ʃɚ
 uncultured	ənkʌltʃəd
 uncurb	ənkɚb
-uncurtailed	ʌnkəteɪld
 uncurtained	ənkɚtənd
 uncustomed	ənkʌstəmd
 unde	əndeɪ
@@ -37509,7 +37386,6 @@ undercart	ʌndəkɑɹt
 undercellar	ʌndɚsɛlɚ
 undercharge	ʌndətʃɑɹd͡ʒ
 underclay	ʌndɚkleɪ
-undercliff	ʌndəklɪf
 underclothes	ʌndɚkloʊz
 undercoating	ʌndɚkoʊtɪŋ
 underdevelope	ʌndɚdɪvɛləp
@@ -37522,43 +37398,29 @@ underdress	ʌndədɹɛs
 underemphasis	ʌndɚɛmfəsɪs
 underexpose	ʌndɚɪkspoʊz
 underexposure	ʌndɚɪkspoʊʒɚ
-underfed	ʌndəfɛd
-underfelt	ʌndəfɛlt
 underfired	ʌndɚfɪɚd
 underfloor	ʌndəflɔɹ
-underflow	ʌndəfloʊ
 undergird	ʌndəɡɚd
 undergraduette	ʌndəɡɹædjʊɛt
 undergrown	ʌndɚɡɹoʊn
 underinsurance	ʌndɚɪnʃʊɹəns
 underlap	ʌndɚlæp
 underlayer	ʌndɚleɪɚ
-underlease	ʌndəlis
-underlet	ʌndəlɛt
 underlineation	ʌndɚlɪnieɪʃən
-underlinen	ʌndəlɪnɪn
 underlit	ʌndɚlɪt
-undermentioned	ʌndəmɛnʃənd
 undernsong	ʌndɚnsɔŋ
 underogatory	ʌndɚɑɡətɔɹi
-underplant	ʌndəplɑnt
 underplot	ʌndɚpɹaɪs
-underpopulated	ʌndəpɑpjʊleɪtɪd
 underquote	ʌndɚkwoʊt
 underrun	ʌndɚʌn
 undersaturated	ʌndɚsæt͡ʃɚeɪtɪd
-underseal	ʌndəsil
 underservant	ʌndɚsɚvənt
 underset	ʌndɚsɛt
-undersexed	ʌndəsɛkst
 undershoot	ʌndɚʃut
 undershrub	ʌndɚʃɹʌb
-undersigned	ʌndəsaɪnd
 undersize	ʌndɚsaɪz
 undersleeve	ʌndɚsliv
-undersow	ʌndəsoʊ
 undersparred	ʌndɚspɑɹd
-underspend	ʌndəspɛnd
 understandableness	ʌndɚstændəbəlnɪs
 understandingness	ʌndɚstændɪŋnɪs
 understeer	ʌndəstiɚ
@@ -37619,23 +37481,19 @@ unexecuted	ənɛksɪkjutɪd
 unexhausted	ʌnɪɡzɑstɪd
 unexpendable	ʌnɪkspɛndəbəl
 unexpiated	ənɛkspɪeɪtɪd
-unexpurgated	ənɛkspəɡeɪtɪd
 unfaced	ənfeɪst
 unfaith	ənfeɪθ
 unfaltering	ənfɑltɚɪŋ
 unfasten	ənfɑsən
 unfastened	ənfɑsənd
-unfatherly	ənfɑðəli
 unfavourable	ənfeɪvɚəbəl
 unfavourite	ənfeɪvɚit
 unfeather	ənfɛðɚ
 unfeed	ənfid
-unfermented	ʌnfəmɛntɪd
 unfinishedness	ənfɪnɪʃtnɪs
 unflavoured	ənfleɪvəd
 unfleshly	ənflɛʃli
 unfordable	ənfɔɹdəbəl
-unforgotten	ʌnfəɡɑtən
 unformulated	ənfɔɹmjʊleɪtɪd
 unfoundedness	ənfaʊndɪdnɪs
 unfriendedness	ənfɹɛndɪdnɪs
@@ -37769,13 +37627,11 @@ unmold	ənmoʊld
 unmoral	ənmɑɹəl
 unmorality	ʌnmɚælɪti
 unmortise	ənmɔɹtɪs
-unmotherly	ənmʌðəli
 unmounted	ənmaʊntɪd
 unmown	ənmoʊn
 unmuffle	ənmʌfəl
 unnail	əneɪl
 unnational	ənæʃənəl
-unneighbourly	əneɪbəli
 unobscured	ʌnəbskjʊəd
 unordinary	ənɔɹdɪnɚi
 unoriginal	ʌnɚid͡ʒɪnəl
@@ -37786,15 +37642,9 @@ unpasteurized	ənpɑstjɚaɪzd
 unpatented	ənpeɪtəntɪd
 unpen	ənpɛn
 unpeople	ənpipəl
-unperceived	ʌnpəsivd
-unperceptive	ʌnpəsɛptɪv
-unperfected	ʌnpəfɛktɪd
 unperforated	ənpɚfɚeɪtɪd
 unperformed	ʌnpəfɔɹmd
 unperfumed	ənpɚfjumd
-unpersuadable	ʌnpəsweɪdəbəl
-unpersuaded	ʌnpəsweɪdɪd
-unpersuasive	ʌnpəsweɪsɪv
 unpicturesque	ʌnpɪktʃɚɛsk
 unpile	ənpaɪl
 unpitied	ənpɪtɪd
@@ -37871,7 +37721,6 @@ unsalted	ənsɑltɪd
 unsanctified	ənsæŋktɪfaɪd
 unsaturate	ənsæt͡ʃɚɪt
 unsavoury	ənseɪvɚi
-unscholarly	ənskɑləli
 unscrambler	ənskɹæmblɚ
 unscriptural	ənskɹiptʃɚəl
 unseam	ənsim
@@ -37897,7 +37746,6 @@ unsicker	ənsɪkɚ
 unsight	ənsaɪt
 unskilful	ənskɪlfʊl
 unsolder	ənsoʊldɚ
-unsoldierly	ənsoʊld͡ʒəli
 unsonsy	ənsɑnsi
 unsordid	ənsɔɹdɪd
 unsought	ənsɑt
@@ -37936,8 +37784,6 @@ unsuggestive	ʌnsədzɛstɪv
 unsummoned	ənsʌmənd
 unsunned	ənsʌnd
 unsupplied	ʌnsəplaɪd
-unsurpassable	ʌnsəpɑsəbəl
-unsurveyed	ʌnsəveɪd
 unswathe	ənsweɪð
 unswear	ənswɛɹ
 untameable	ənteɪməbəl
@@ -38460,7 +38306,6 @@ vespasian	vɛspeɪʒiən
 vesperal	vɛspɚəl
 vespertide	vɛspɚtaɪd
 vespertilionine	vɛspɚtɪliənaɪn
-vespertine	vɛspətaɪn
 vespucci	vɛsput͡ʃi
 vestalia	vɛsteɪliə
 vestie	vɛsti
@@ -38864,7 +38709,6 @@ waseca	wɑsikə
 washbowl	wɑʃboʊl
 washday	wɑʃdeɪ
 washerman	wɑʃɚmən
-washerwoman	wɑʃəwʊmən
 washery	wɑʃɚi
 washeteria	wɑʃətiɚiə
 washhouse	wɔshaʊs
@@ -38945,10 +38789,8 @@ wearproof	wɛɹpɹuf
 weasand	wizənd
 weason	wizən
 weatherability	wɛðɚəbɪləti
-weathercock	wɛðəkɑk
 weatherfish	wɛðɚfɪʃ
 weatherglass	wɛðɚɡlæs
-weathermost	wɛðəmoʊst
 weazand	wizənd
 weazen	wizən
 webby	wɛbi
@@ -38971,7 +38813,6 @@ weightedly	weɪtɪdli
 weihaiwei	weɪhaɪweɪ
 weimaraner	waɪmɚɑɹnə
 weinek	waɪnɛk
-weirdie	wiədi
 weirdy	wiɹdi
 weisenheimer	waɪzənhaɪmɚ
 weismannism	vaɪsmənɪzəm
@@ -39454,7 +39295,6 @@ yipe	jaɪp
 yma	imɑ
 yod	jʊd
 yodle	joʊdəl
-yoghurt	jɑɡət
 yogin	joʊɡɪn
 yogini	joʊɡəni
 yoicks	haɪk
