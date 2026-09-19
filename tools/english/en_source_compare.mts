@@ -192,6 +192,28 @@ export function mobyToArpabet(p: string, w: string): string[] | undefined {
         // Its `gh` does want the hard-/ɡ/ reading for the word the body actually encodes, so it does not
         // break the count — but it is thirty-two real words plus a row that happens to agree.
         if (c === "g" && s[i + 1] === "h" && !w.includes("gh")) { out.push("G"); i += 2; continue; }
+        // ⚠ AND BARE `t`+`/S/` IS THE AFFRICATE, 257 TIMES OUT OF 271. Moby has `/tS/` and uses it 7,519
+        // times, so writing the two symbols instead is the same kind of lapse as bare `sh` — but this
+        // one is FIFTEEN TIMES LARGER than any digraph class above it, and its seam side is real
+        // enough that neither of the two rules already in this function would have got it right.
+        // ⚠ THE SEPARATOR IS NECESSARY AND NOT SUFFICIENT. It is honest as far as it goes: all 38
+        // separated `t,/S/` rows are genuine seams (`nightshade`, `hotshot`, `outshine`, `lightship`,
+        // `assistantship`, `Dorsetshire`). But 14 more seams are written ADJACENT — `courtship`,
+        // `nutshell`, `sweatshirt`, `Wiltshire` — so unlike `sh` and `wh` the adjacent side is mixed
+        // and the separator alone would have folded fourteen real /t/+/ʃ/ boundaries into an affricate.
+        // ⚠ THE SPELLING FINISHES IT, AND ONLY AT THE RIGHT POSITION. `sh` ANYWHERE in the headword —
+        // the `gh` rule's shape — gets three of the fourteen wrong, and all three are this audit's
+        // recurring error: `pushchair 'p/U//S/t/S//(@)/r`, `shakuhachi`, `chafing-dish` each spell ⟨sh⟩
+        // somewhere ELSE while their `t/S/` is an ordinary affricate. The test is a ⟨t⟩ followed by the
+        // ⟨sh⟩, with at most a silent ⟨e⟩ or a hyphen between — which also reaches `associateship` and
+        // `Buteshire`, two real seams a plain ⟨tsh⟩ test misses. Checked, not assumed: no headword
+        // spells ⟨tesh⟩ AND carries a second adjacent `t/S/` elsewhere, so "anywhere" and "at this
+        // position" cannot diverge on this class today.
+        // ⚠ ⟨tsch⟩ IS NOT A SEAM MARKER AND WAS IN THE FIRST DRAFT AS ONE. German spells both sounds
+        // that way — `Deutsche d//Oi//t/S//@/`, `putsch p/U/t/S/` and `kaffeeklatsch` are affricates,
+        // while `Festschrift 'f/E/st,/S/r/I/ft` is a seam — so it cannot arbitrate. It needs no clause:
+        // the three affricates are adjacent and the seam is separated, so the separator already has them.
+        if (c === "t" && s.startsWith("/S/", i + 1) && !/t[e-]?sh|ts[tp]/u.test(w)) { out.push("CH"); i += 4; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
     }

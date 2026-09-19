@@ -3444,3 +3444,146 @@ The other structural limit: this table cannot reach a SINGLE-reading row, which 
     primary                         2,584/4,037 (64.0%)    unmoved
     headwords emitting >1 reading   463 → 437
     declarations                    12 → 26
+
+## Run 58 — 2026-09-19 16:10
+
+Taking the `t/S/` class Run 57 recorded as "a block of its own, larger than any of the last four".
+It is the largest, and the headline finding is that it is worth nothing — which is the useful part.
+
+    python3 — every `t/S/` and `t[,']/S/` in the 177,267 raw bodies
+
+Moby has `/tS/` and uses it 7,519 times. It also writes the two symbols separately 271 times, against
+38 separated `t,/S/`.
+
+⚠ THE SEPARATOR IS NECESSARY AND NOT SUFFICIENT HERE, which is where this class differs from `sh` and
+`wh`. All 38 separated rows are genuine seams (`nightshade`, `hotshot`, `outshine`, `lightship`,
+`assistantship`, `Dorsetshire`) — the separator never lies. But 14 MORE seams are written ADJACENT
+(`courtship`, `nutshell`, `sweatshirt`, `Wiltshire`, `Flintshire`, `sweetshop`), so the adjacent side
+is mixed and the Run 54 rule ported over would have folded fourteen real /t/+/ʃ/ boundaries into an
+affricate. Three digraph classes, three different discriminators; the separator settled `sh` and `wh`,
+the spelling settled `gh`, and this one needs both.
+
+⚠ THE SPELLING FINISHES IT — WITH A TIGHTER PATTERN, NOT A POSITION. (Run 59 corrects this heading;
+the shipped test is still "anywhere in the headword". What changed is the pattern, not the scoping.) `⟨sh⟩
+anywhere in the headword` — the `gh` rule's shape, and my first draft — gets three of the fourteen
+wrong: `pushchair 'p/U//S/t/S//(@)/r`, `shakuhachi ,/S//@/k/U/'h/@/t/S//i/` and `chafing-dish` each
+spell ⟨sh⟩ somewhere ELSE while their `t/S/` is an ordinary affricate. Fifth occurrence of
+anywhere-versus-position in this audit; the first I caught myself, by reading the flagged list
+instead of trusting the count. The test is a ⟨t⟩ then at most a silent ⟨e⟩ or hyphen then the ⟨sh⟩,
+which also reaches `associateship` and `Buteshire` — two real seams a plain ⟨tsh⟩ test misses.
+Checked rather than assumed: no headword spells ⟨tesh⟩ AND carries a second adjacent `t/S/`, so
+"anywhere" and "at this position" cannot diverge on this class today.
+
+⚠ ⟨tsch⟩ WAS IN MY FIRST DRAFT AS A SEAM MARKER AND IS NOT ONE. German spells both sounds that way:
+`Deutsche d//Oi//t/S//@/`, `putsch p/U/t/S/` and `kaffeeklatsch` are affricates, `Festschrift
+'f/E/st,/S/r/I/ft` is a seam. It cannot arbitrate — and it needs no clause, because the three
+affricates are adjacent and the seam is separated, so the separator already has them. I invented the
+clause to cover a case the existing machinery handled.
+
+⚠ THE CLASS IS SCORE-NEUTRAL BY CONSTRUCTION, AND I TOLD THE USER THE OPPOSITE LAST RUN. The backbone
+strips tie bars — `config.ts:100`, `[/[͜͡]/gu, ""]` — so `t͡ʃ` and `tʃ` fold to the same string and
+this distinction has never been visible to any score. 220 referee rows change and every total is
+unmoved: 26,651/35,047, 17,466/39,484, 2,584/4,037. Run 57 called this "the largest converter class
+found in this audit" and put it first in the queue on that basis. Largest by row count, worth zero.
+The lesson is not about `t/S/`: I ranked a candidate by how many rows it touched without checking
+whether the fold that makes the referee comparable at all can even see the difference. That check is
+one grep and belongs BEFORE the measurement, not after the implementation.
+
+⚠ NOR WAS IT REACHING THE SHIPPED DICTIONARY. All 9 `T SH` rows in `moby-import.tsv` are genuine
+seams — `assistantship`, `countship`, `festschrift`, `hatshepsut`, `jugendstil`, `outshoot`,
+`outshout`, `potsherd`, `presidentship`. The gold-agreement gate rejected every affricate written as
+two phones, the same second gate Run 57 found guarding the `Corporation` case.
+
+SHIPPED ANYWAY, for one reason that survives all of the above: the referee was rendering THE SAME
+MOBY SOUND TWO DIFFERENT WAYS depending on which of Moby's two notations a row happened to use —
+`t͡ʃ` for 7,519 of them and `tʃ` for 257. That is an internal inconsistency in a reference artifact,
+independent of whether today's fold hides it, and it would surface the moment anyone compares
+without the backbone. It also collapses five spurious multi-reading rows (`charlie tʃɑɹli t͡ʃɑɹli`
+was two readings of one sound), and multi-reading rows are where Run 56 found corruption hiding.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%)  unmoved
+    Moby — OOV                      17,466/39,484 (44.2%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    headwords emitting >1 reading   437 → 432
+    referee rows changed            220
+
+WHAT THIS REPRIORITISES. The two remaining candidates should be checked against the backbone BEFORE
+being measured: the ~650 unstressed-vowel rows turn on vowel QUALITY, which the fold does not touch,
+so they are real; the syllabic-l class (`cycling saɪkəlɪŋ` against `saɪklɪŋ`) is a SEGMENT COUNT
+difference, also not folded away, so it is real too. Both survive the test `t/S/` failed.
+
+
+## Run 59 — 2026-09-19 16:20
+
+Review of the Run 58 block. One real misclassification, one claim of mine that was self-congratulation
+rather than fact, and a justification better than the one I shipped with.
+
+⚠ `Altstoetter` IS A SEAM AND THE RULE FOLDED IT. German ⟨St⟩ is /ʃt/, so `Altstoetter
+'/A/lt/S/t/E/tt/[@]/r` is Alt+Stötter — a /t/+/ʃ/ boundary spelled with NO ⟨h⟩ at all, which neither
+the separator nor any ⟨sh⟩ test can see. Its siblings `Jugendstil`, `Landsturm` and `Waldstein` are
+all written SEPARATED, so the separator had them and I concluded the German case was handled. It was
+handled by luck: `Altstoetter` is the one Moby wrote adjacent. Run 58's ⟨tsch⟩ paragraph reasoned
+about German and enumerated the wrong pattern.
+
+The fix is a `ts[tp]` clause, and its width was measured rather than chosen: `ts[a-z]` would pull in
+`putsch`, `kaffeeklatsch`, `Deutsche` and `tsarevich`, every one an affricate. It is inert on the 45
+English ⟨tst⟩ words (`bootstrap`, `footstep`, `breaststroke`) because none writes an adjacent `t/S/`
+— the rule fires only on the CONJUNCTION of spelling and body, which is what makes it safe rather
+than lucky. `Ehrenbreitstein` is the same error and is declined upstream by the French-capital guard,
+so it never reached the corpus; it is covered now anyway.
+⚠ AND IT WOULD HAVE SHIPPED. `altstoetter` was among the 148 words a future `--no-gold` import would
+newly admit, so the wrong seam would have entered the dictionary rather than merely the referee.
+
+⚠ "THE RULE TESTS THE POSITION" IS FALSE, AND I WROTE IT FOUR TIMES. The shipped test is
+`!/t[e-]?sh|ts[tp]/u.test(w)` — the WHOLE lowercased headword, exactly the scoping the `gh` rule uses
+and exactly what the `gh` comment says is unavoidable ("nothing here aligns the body to the spelling,
+so the test cannot ask about THIS position"). What changed between drafts is the PATTERN, from ⟨sh⟩
+to ⟨t⟩+⟨sh⟩. Run 58 claimed this as the first time I had caught the anywhere-versus-position error
+before shipping; what I actually did was fix the three wrong answers it gave and then describe the
+fix in the vocabulary of a different one. The hedge I added in the same breath — "no headword spells
+⟨tesh⟩ AND carries a second adjacent `t/S/`" — is precisely the admission that the test is NOT
+positional, sitting directly under a heading saying it is. Failure mode (c) on top of an incomplete
+(a) catch, which is worse than either alone.
+
+⚠ "`t͡ʃ` FOR 7,519 OF THEM AND `tʃ` FOR 257" ATTRIBUTES A WHOLE-SOURCE COUNT TO THE ARTIFACT. Those
+are counts of `/tS/` in the 177,267-row Moby file and of adjacent Moby ROWS. In the referee itself
+the figures are 2,146 `t͡ʃ` against 252 bare `tʃ` — the inconsistency is 8.5:1, not 29:1. The claim
+survives, the number does not. Failure mode (b), in a sentence that appeared in the commit message,
+the PR body and this document; the code comment stated the same figure correctly because it said
+"Moby has `/tS/` and uses it 7,519 times", which is the right population.
+
+⚠ AND THE SCORE-NEUTRALITY MECHANISM I GAVE IS NOT THE OPERATIVE ONE for the whole eval. The backbone
+strips tie bars, so every FOLDED comparison is blind to this — that part is right, and doubly so:
+the combining-diacritic range already covers U+0361 before the explicit tie-bar rule reaches it. But
+`raw exact` does NOT fold, so the distinction is visible there in principle. It is empirically blind
+for an unrelated reason: raw exact is 0/4037 and 1/35047 because our readings carry stress marks the
+referee does not. "Never visible to any measurement" is true; "because the backbone strips tie bars"
+is only three quarters of why.
+
+⚠ THE BETTER ARGUMENT FOR SHIPPING IS ONE I DID NOT MAKE, and "zero observable effect" was wrong.
+Two consumers of `mobyToArpabet` are not folded at all:
+  · `audit()` compares Moby to our dictionary and to gold. 55 words in the 40k frequency list change
+    from `T SH` to `CH` — `congestion`, `riches`, `merchandise`, `saturation`, `watchman`,
+    `aquaculture`. Our dict reads every one with `CH`, so Moby's reading could NEVER land in the
+    `agree` bucket for them; they were forced into `split` on a pure notation difference.
+  · `en_import_moby.mts` gains 148 candidates that previously failed the gold-agreement check on the
+    affricate alone. A future `--write` admits a batch it used to reject.
+Both measured here independently rather than taken from the review. So the honest framing is: score-
+neutral in the REFEREE, and a real unblocking in the two unfolded paths. I led with artifact tidiness
+when there was a measurable argument sitting one call site away.
+
+Smaller corrections: `Wiltshire_cheese` carries `_` and is declined, so "14 seams written adjacent"
+is 13 LIVE rows. Of the 38 separated rows 30 use `,` and 8 use `'`, so writing the class as `t,/S/`
+names only 30 of them. The apostrophe branch of the regex was dead — zero headwords in the file match
+`t'sh` — and is removed; the hyphen branch is also dead today (41 headwords match `t-sh`, none with
+an adjacent `t/S/`) but is kept because the shape is plausible and it costs nothing. And the rule
+contains no separator test at all: separated rows never reach it, because the `,` is consumed as a
+stress mark and the `t` and `/S/` are no longer adjacent. A reader will look for that clause, so the
+comment now says it.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%)  unmoved
+    Moby — OOV                      17,466/39,484 (44.2%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    referee rows changed            219 (220 less `altstoetter`, now retained as a seam)
+    audit() frequency words freed   55
+    import candidates unblocked     148
