@@ -2152,11 +2152,17 @@ hippocrates	HH IH1 P AH0 K R EY2 T S	HH IH0 P AA1 K R AH0 T IY2 Z	classical -es 
 # misaki gold reads `champaign` with tʃ and `clio` as kliːoʊ. Both referees and the dictionaries say
 # otherwise — Champaign is said like `champagne`, and the muse is KLY-oh — and on `appreciative` gold
 # AGREES with the two referees against CMUdict, which is what a third source is for.
+# ⚠ `appreciative` DOES NOT CONVERGE ON THE REFEREES AND IS NOT MEANT TO. What the two referees settle is
+# the ABSENCE OF THE FACE VOWEL — they write `əpɹiʃətɪv`, we wrote `əpɹiʃieɪtɪv`, and CMUdict's EY2 is the
+# error. They also drop the `i`, and we keep it; gold reads `əpɹˈiʃiəɾɪv`, which is our corrected reading
+# segment-for-segment, and `appreciatory` is parallel. So this row still SCORES as a divergence against
+# both referees after the fix, which is why eight corrections bought six rows and not eight. Said plainly
+# here because a reader counting the table against the score will otherwise think one of them failed.
 siobhan	SH AW1 B AA2 N	SH AH0 V AO1 N	Irish name read letter-shape; /ʃəˈvɔn/, Moby ʃəvɔn + wikipron ʃəvɔːn
 champaign	CH AE0 M P EY1 N	SH AE0 M P EY1 N	said like `champagne`; Moby ʃæmpeɪn + wikipron ʃæmpeɪn (gold dissents, tʃ)
 clio	K L IY1 OW0	K L AY1 OW0	the muse is KLY-oh; Moby klaɪoʊ + wikipron klaɪoʊ (gold dissents, kliːoʊ)
 parthenia	P AA0 R TH EH1 N IY0 AH0	P AA0 R TH IY1 N IY0 AH0	/pɑɹˈθiniə/; Moby pɑɹθiniə + wikipron pɑɹθiniə
-marmara	M AA0 R M AA1 R AH0	M AA1 R M ER0 AH0	Sea of Marmara is /ˈmɑɹmərə/, stress and reduction both wrong; Moby + wikipron mɑɹməɹə
+marmara	M AA0 R M AA1 R AH0	M AA1 R M ER0 AH0	Sea of Marmara is /ˈmɑɹmərə/, stress and reduction both wrong; Moby mɑɹmɚə + wikipron mɑɹməɹə (one ɚ, one əɹ — the same reading after the fold)
 terracotta	T ER2 AH0 K AA1 T AH0	T EH2 R AH0 K AA1 T AH0	first syllable is ɛɹ under secondary stress, not a reduced ɚ; Moby + wikipron tɛɹəkɑtə
-appreciative	AH0 P R IY1 SH IY0 EY2 T IH0 V	AH0 P R IY1 SH IY0 AH0 T IH0 V	no FACE vowel in -ciative; Moby + wikipron + GOLD all əpɹiʃi/ətɪv
+appreciative	AH0 P R IY1 SH IY0 EY2 T IH0 V	AH0 P R IY1 SH IY0 AH0 T IH0 V	no FACE vowel in -ciative; gold əpɹˈiʃiəɾɪv segment-for-segment, Moby + wikipron əpɹiʃətɪv (see note above on what the two referees settle)
 appreciatively	AH0 P R IY1 SH IY0 EY2 T IH0 V L IY0	AH0 P R IY1 SH IY0 AH0 T IH0 V L IY0	as `appreciative`
