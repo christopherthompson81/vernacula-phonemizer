@@ -866,7 +866,12 @@ export async function evaluate(
                     for (let k = 0; k < rf.length; k++) {
                         if (rf[k] === of[k]) continue;
                         anyDiff = true;
-                        if (!cfg.intentional!.some(([from, to]) => from === rf[k] && to === of[k]))
+                        // ⚠ `nextIs` IS TESTED ON **OUR** READING, because it is our reading the class
+                        // defends — and at a differing position the referee's neighbour may itself be
+                        // part of the same disagreement.
+                        if (!cfg.intentional!.some(([from, to, , nextIs]) =>
+                            from === rf[k] && to === of[k]
+                            && (nextIs === undefined || (of[k + 1] !== undefined && nextIs.includes(of[k + 1]!)))))
                             return false;
                     }
                     return anyDiff;

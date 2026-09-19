@@ -2107,3 +2107,20 @@ zaftig	Z AE1 F T IH0 G	Z AA1 F T IH0 G	loanword PALM ɑː (gold; en-GB arbitrate
 zara	Z AE1 R AH0	Z EH1 R AH0	marry–merry merger
 zarah	Z AE1 R AH0	Z EH1 R AH0	marry–merry merger
 zaro	Z AE1 R OW0	Z EH1 R OW0	marry–merry merger
+
+# VELAR NASAL AT A MORPHEME BOUNDARY. `englishArpabet.ts` rewrites `N` before a velar to ŋ unless a
+# TRANSPARENT PREFIX intervenes — CMUdict already distinguishes the two (2,424 `NG` against 923 `N`) and
+# the rule only repairs its slips. These nine are where the dictionary contradicted ITSELF and the
+# repair therefore landed on the wrong side of the boundary.
+# ⚠ FIXED HERE RATHER THAN BY WIDENING THE RULE, because a symmetric guard reaches `congo`, `congress`,
+# `congregate`, `english` and `uncle`, which are ŋ for everyone, and narrowing the prefix list measures
+# worse (full list 68.9% of the 867 nasal+velar words Moby covers, `un|in|non` 65.2%, no rule 52.0%).
+conquests	K AA1 N K W EH2 S T S	K AA1 NG K W EH2 S T S	velar nasal: disagreed with its own stem `conquest` NG
+engel	EH1 N G AH0 L	EH1 NG G AH0 L	velar nasal: disagreed with its own plural `engels` NG
+incompetents	IH2 NG K AA1 M P AH0 T AH0 N T S	IH2 N K AA1 M P AH0 T AH0 N T S	velar nasal: disagreed with its own stem `incompetent` N
+inconclusively	IH2 NG K AA1 N K L UW0 S IH0 V L IY0	IH2 N K AA1 N K L UW0 S IH0 V L IY0	velar nasal: disagreed with its own stem `inconclusive` N
+increment	IH1 N K R AH0 M AH0 N T	IH1 NG K R AH0 M AH0 N T	velar nasal: no live prefix; wikipron reads ŋ, and `increments` was already NG
+congruent	K AO1 N G R UW0 EH2 N T	K AO1 NG G R UW0 EH2 N T	velar nasal: no live prefix; /ˈkɑŋɡruənt/, Moby kɑŋɡɹuənt
+congruence	K AO1 N G R UW0 AH0 N S	K AO1 NG G R UW0 AH0 N S	velar nasal: no live prefix; as `congruent`
+syncope	S IH1 N K AH0 P IY2	S IH1 NG K AH0 P IY2	velar nasal: no live prefix; /ˈsɪŋkəpi/, Moby sɪŋkəpi
+encore	AA1 N K AO2 R	AA1 NG K AO2 R	velar nasal: no live prefix; /ˈɑŋkɔɹ/, Moby ɑŋkɔɹ

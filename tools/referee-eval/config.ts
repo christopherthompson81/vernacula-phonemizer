@@ -75,6 +75,11 @@ export interface RefLang {
      * records the distinction and merely assigns ~38 words differently — a lexical disagreement, where
      * neither side has been shown right. Crediting that would be marking our own errors correct.
      *
+     * ⚠ `nextIs` NARROWS A CLASS TO AN ENVIRONMENT, and without it some classes cannot be declared at all.
+     * The NEAR vowel is a notation choice only BEFORE `ɹ`; a bare `i`→`ɪ` would also credit every other
+     * position where we read `ɪ` and the referee reads `i`, which includes real defects. It is a set of
+     * permitted FOLLOWING characters in OUR reading, tested at the differing position.
+     *
      * ⚠ SINGLE CHARACTERS, AND VALIDATED AS SUCH AT LOAD. The comparison is POSITIONWISE — every position
      * where the two readings differ must be a declared pair — so a multi-character or regex `refHas`
      * cannot be honoured, and the loader THROWS rather than accepting one that would silently never fire.
@@ -83,7 +88,7 @@ export interface RefLang {
      *
      * The count credited here is REPORTED separately on every run; it does NOT move `folded`.
      */
-    intentional?: [string, string, string][];
+    intentional?: [string, string, string, string?][];
 }
 
 // Shared backbone: strip supra-segmental notation no broad referee reliably carries.
@@ -148,6 +153,8 @@ interface RawIntentional {
     refHas: string;
     weHave: string;
     note: string;
+    /** Optional environment: the class fires only where OUR next character is one of these. */
+    nextIs?: string;
 }
 
 const LANGS_DIR = join(dirname(fileURLToPath(import.meta.url)), "langs");
@@ -176,13 +183,17 @@ const compileExcludes = (ex: RawExclude[] | undefined): RowExclusion[] =>
 const compileIntentional = (
     code: string,
     raw: RawIntentional[],
-): [string, string, string][] =>
+): [string, string, string, string?][] =>
     raw.map((i) => {
         if ([...i.refHas].length !== 1 || [...i.weHave].length !== 1)
             throw new Error(
                 `${code}.jsonc: intentional entries must be one character each, got ${JSON.stringify(i.refHas)} → ${JSON.stringify(i.weHave)}`,
             );
-        return [i.refHas, i.weHave, i.note];
+        // ⚠ AN EMPTY `nextIs` WOULD NEVER FIRE, which is the silently-wrong answer this loader exists to
+        // refuse — the same reasoning as the one-character check above.
+        if (i.nextIs !== undefined && [...i.nextIs].length === 0)
+            throw new Error(`${code}.jsonc: intentional \`nextIs\` must not be empty (${i.refHas} → ${i.weHave})`);
+        return [i.refHas, i.weHave, i.note, i.nextIs];
     });
 
 /** Load `langs/<code>.jsonc` → the compiled per-language RefLang config. */

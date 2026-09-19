@@ -187,6 +187,17 @@ public static class EnglishArpabet
     private static readonly JsRe LATINATE_PREFIX = JsRegex.Compile("^(be|de|re|se|pre)[^aeiouy]");
 
     /**
+     * Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below.
+     * ⚠ THE OUTER PREFIX IS OPTIONAL BECAUSE A DERIVED FORM MUST NOT CONTRADICT ITS OWN STEM:
+     * `disengage` against `engage`, `disincline` against `incline`. Measured 591 → 597 of the 867
+     * nasal+velar words the Moby referee covers.
+     * ⚠ `JsRegex.Compile`, NOT `new Regex`, like every other pattern in this tree — csharp/regex-diff
+     * validates the JS dialect, and a raw Regex would bypass the harness that proves the two ports agree.
+     */
+    private static readonly JsRe TRANSPARENT_PREFIX =
+        JsRegex.Compile("^(?:dis|re|mis|over|under|pre|post)?(?:un|in|non|con|en|syn|down|trans)");
+
+    /**
      * Is the `R` after an `IY` the ONSET of a following element rather than a coda on the same syllable?
      *
      * The `BeforeR` laxing is right for a coda and wrong across a morpheme boundary: `career` is kɚˈɪɹ, but
@@ -345,7 +356,25 @@ public static class EnglishArpabet
                     outSb.Append(bas == "L" ? "ɫ" : (map.TryGetValue(bas, out var sv) ? sv : bas)).Append('\u0329');
                     continue;
                 }
-                if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G"))
+                // VELAR ASSIMILATION: /n/ before /k/ or /ɡ/ is [ŋ]. ⚠ IT REPAIRS CMUdict RATHER THAN
+                // DUPLICATING IT, which is why it cannot simply be deleted: the dictionary already
+                // writes `NG` where the assimilation applies (2,424 rows — bank, uncle, anchor,
+                // finger) and `N` where it does not (923), but 346 of that second group are slips on
+                // tautomorphemic words — anglophile, anglophone, ankh, ancona — which this fixes.
+                //
+                // ⚠ AND IT MUST NOT CROSS A TRANSPARENT PREFIX BOUNDARY, where assimilation is blocked
+                // and CMUdict's `N` is a statement rather than a slip. Unconditioned it read `unclean`
+                // as əŋklˈiːn. Four independent lines agree on `n` there: the dictionary, Moby, the
+                // wikipron referee (4 of the 5 rows it arbitrates), and the recordings, 15 to 2.
+                // ⚠ THE INDEX GUARD IS WHAT MAKES THE SPELLING TEST SAFE: only a nasal inside the
+                // prefix is exempt, so `unkink` keeps its second [ŋ] — ənkˈɪŋk. The OUTER prefix group
+                // is what stops a derived form contradicting its stem (`disengage` against `engage`).
+                // ⚠ THE WORDS THAT MERELY BEGIN WITH THE LETTERS — congruent, syncope, encore, engel —
+                // are fixed in g2p-dict.tsv, not by narrowing the rule: narrowing measures worse
+                // (full list 68.9%, un|in|non 65.2%, none 52.0% over the 867 words Moby covers).
+                // ⚠ MIRRORS src/languages/english/englishArpabet.ts; the goldens are the parity gate.
+                if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G")
+                    && !(i <= 6 && TRANSPARENT_PREFIX.IsMatch(word)))
                 {
                     outSb.Append('ŋ');
                     continue;

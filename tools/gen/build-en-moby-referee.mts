@@ -40,6 +40,37 @@
  *   ⚠ THE CONSERVATIVE YOD — NOT APPLIED, same reasoning: `tuition` and `duplication` lost a yod in #1338
  *   and en-GB adds it back from a word list, so the distinction is live in this engine and must stay
  *   scoreable.
+ *
+ *   ⚠ MOBY'S `-ness` — NORMALISED, and the case for it is MOBY'S OWN INCONSISTENCY, not our disagreement.
+ *   Moby writes the unstressed `-ness` suffix with a FULL `/E/`: 1,622 rows against 146 with `/I/`. No
+ *   other unstressed suffix in the file behaves that way — the phonologically identical `-less` is IH 209
+ *   to EH 34, `-age` is IH 334, `-ous` is AH 1,693. So the suffix is reduced everywhere in Moby except
+ *   here, and the rule maps it to `IH0`: MOBY'S OWN OTHER SPELLING OF THE SAME SUFFIX, not to our schwa.
+ *   That keeps the claim minimal — it asserts nothing about English that Moby does not already assert
+ *   about `-less` — and leaves the ə/ɪ weak-vowel axis to the `intentional` class that already declares it.
+ *   ⚠ CONDITIONED ON THE SYLLABLE BEING UNSTRESSED, because `-ness` IS stressed in `dungeness`,
+ *   `inverness` and `sultaness`, where `/E/` is correct and folding it would be a real loss.
+ *   ⚠ AND IT COSTS US ROWS IN THE LEXICON FILE, DELIBERATELY. Our own dictionary writes `EH2` on this
+ *   suffix for `carefulness`, `faithfulness`, `awesomeness` and five others — rows that PASSED only
+ *   because Moby had the same full vowel. They now fail, which is the referee reporting our defect
+ *   instead of agreeing with it.
+ *
+ *   ⚠ MOBY'S `-ing` — NORMALISED, on the same footing as `-ness` and found the same way. Moby writes the
+ *   suffix `/I//N/` in 1,264 rows and `/i//N/` in 230 — 15% of its own `-ing` words disagree with the
+ *   other 85%, and `king`, `sing`, `ring`, `thing`, `building`, `farming` and `running` are all in the
+ *   majority. `alarming` is `/@/'l/A/rm/i//N/`. There is no GenAm reading `-iŋ`, and the minority is not
+ *   an environment — it is scatter. Mapped to `IH0`, Moby's own majority spelling.
+ *   ⚠ ONLY WHERE THE SYLLABLE IS UNSTRESSED and the headword actually ends `-ing`, so a monosyllable
+ *   whose vowel IS the tonic keeps whatever Moby gave it.
+ *
+ *   ⚠ GEMINATE CONSONANTS — COLLAPSED, BUT IN THE OOV FILE ONLY, and the asymmetry is the whole point.
+ *   Moby writes 1,031 rows with an identical adjacent consonant pair (`aboriginally` as `…n/-/ll/i/`,
+ *   694 of them `LL`). The engine's OOV paths finish every reading through `collapseGeminates`, so they
+ *   CANNOT emit one — scoring them against a geminate marks us wrong on a class we can neither get right
+ *   nor regress on, which is the same argument FORCE→NORTH is applied under above.
+ *   ⚠ THE DICTIONARY PATH DOES NOT COLLAPSE, which is why this stops at the OOV file: 144 `g2p-dict.tsv`
+ *   rows carry a real geminate (`backcourt`, `barroom`, `blackcap` — compound seams), so in the LEXICON
+ *   file the engine has freedom here and a blanket fold would hide a genuine difference.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -88,6 +119,48 @@ function fold(a: string[]): [string, string][] {
 const sym = ([base, stress]: [string, string]): string =>
     base === "AH" && stress === "0" ? "ə" : (IPA[base] ?? "");
 
+/** Consonants, for the geminate collapse. Mirrors the engine's `collapseGeminates`, which exempts vowels
+ *  because an identical adjacent VOWEL pair is a nucleus, not a doubled segment. */
+const CONSONANT = new Set(
+    "B CH D DH F G HH JH K L M N NG P R S SH T TH V W Y Z ZH".split(" "),
+);
+
+/** Collapse an identical adjacent CONSONANT pair — see the header. OOV rows only. */
+function degeminate(a: string[]): string[] {
+    const out: string[] = [];
+    for (const p of a) {
+        const prev = out[out.length - 1];
+        if (prev !== undefined && prev === p && CONSONANT.has(p.replace(/[0-2]$/u, ""))) continue;
+        out.push(p);
+    }
+    return out;
+}
+
+/**
+ * Moby's minority spelling of an unstressed suffix vowel → its own MAJORITY spelling. Two suffixes, both
+ * found by ranking the OOV residual by grapheme and both argued from Moby's own inconsistency:
+ *   `-ness`  EH 1622 / IH 146  — every other unstressed suffix in the file is reduced (`-less` IH 209)
+ *   `-ing`   IH 1264 / i   230 — and `king`/`sing`/`ring`/`thing` are all in the majority
+ * ⚠ THE STRESSED CASES ARE EXEMPT: `-ness` is the tonic in `dungeness`/`inverness`/`sultaness`, and a
+ * monosyllable in `-ing` carries its own stress. Both keep whatever Moby gave them.
+ */
+const SUFFIX_FIX: [RegExp, string, string][] = [
+    [/^[a-z]{3,}ness$/u, "EH", "IH0"],
+    [/^[a-z]{3,}ing$/u, "IY", "IH0"],
+];
+function normaliseSuffix(word: string, a: string[]): string[] {
+    if (a.length < 3) return a;
+    const i = a.length - 2;
+    for (const [re, from, to] of SUFFIX_FIX) {
+        if (!re.test(word)) continue;
+        if (a[i] !== from && a[i] !== `${from}0`) continue;  // stressed → leave it
+        const out = [...a];
+        out[i] = to;
+        return out;
+    }
+    return a;
+}
+
 const dict = new Set<string>();
 for (const l of readFileSync(join(REPO, "data/languages/english/g2p-dict.tsv"), "utf8").split("\n"))
     if (l.includes("\t") && !l.startsWith("#")) dict.add(l.split("\t")[0]!.toLowerCase());
@@ -117,12 +190,15 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     // reading, but a duplicate KEY would be two rows scoring the same word twice. First reading wins.
     if (seen.has(w) || imported.has(w)) continue;
     if (!/^[a-z]{2,20}$/u.test(w)) continue;          // no multi-word, no digits, no punctuation headwords
-    const a = mobyToArpabet(line.slice(sp + 1));
-    if (!a) { declined++; continue; }                  // multi-word body / Moby's French sub-scheme
+    const a0 = mobyToArpabet(line.slice(sp + 1));
+    if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
+    const inLexicon = dict.has(w);
+    // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseNess` applies to both.
+    const a = inLexicon ? normaliseSuffix(w, a0) : degeminate(normaliseSuffix(w, a0));
     const ipa = fold(a).map(sym).join("");
     if (ipa === "" || fold(a).some((p) => sym(p) === "")) { unmapped++; continue; }
     seen.add(w);
-    (dict.has(w) ? lex : oov).push(`${w}\t${ipa}`);
+    (inLexicon ? lex : oov).push(`${w}\t${ipa}`);
 }
 
 const header = (what: string, n: number): string =>

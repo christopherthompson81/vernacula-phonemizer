@@ -142,7 +142,11 @@
         "compact": { "default": "kʰˈɑːmpækt", "verb": "kəmpˈækt" },
         "compound": { "default": "kʰˈɑːmpaᶷnd", "verb": "kəmpˈaᶷnd" },
         "concert": { "default": "kʰˈɑːnsɚt", "verb": "kənsˈɝt" },
-        "concrete": { "default": "kʰˈɑːŋkɹit", "verb": "kəŋkɹˈiːt" },
+        // ⚠ ⟨n⟩, NOT ⟨ŋ⟩, at the `con-`/`in-` boundary — these three carried the unconditioned velar
+        // assimilation the engine rule used to apply, frozen into the table where the rule fix cannot
+        // reach them. CMUdict writes `N` for all three and the recordings agree (`conclude` n, `income`
+        // n×4, `increase` n×4); see the rule in englishArpabet.ts for the full evidence.
+        "concrete": { "default": "kʰˈɑːnkɹit", "verb": "kənkɹˈiːt" },
         "conduct": { "default": "kʰˈɑːndəkt", "verb": "kəndˈʌkt" },
         "conflict": { "default": "kʰˈɑːnflɪkt", "verb": "kənflˈɪkt" },
         "conscript": { "default": "kʰˈɑːnskɹɪpt", "verb": "kənskɹˈɪpt" },
@@ -207,8 +211,8 @@
         "impulse": { "default": "ˈɪmpəɫs", "verb": "ɪmpˈʌɫs" },
         "inbound": { "default": "ˈɪnbaᶷnd", "verb": "ɪnbˈaᶷnd" },
         "incense": { "default": "ˈɪnsɛns", "verb": "ɪnsˈɛns" },
-        "incline": { "default": "ɪŋklˈaᶦn", "noun": "ˈɪŋklaᶦn" },
-        "increase": { "default": "ˈɪŋkɹiːs", "verb": "ɪŋkɹˈiːs" },
+        "incline": { "default": "ɪnklˈaᶦn", "noun": "ˈɪnklaᶦn" },
+        "increase": { "default": "ˈɪnkɹiːs", "verb": "ɪnkɹˈiːs" },
         "insert": { "default": "ˈɪnsɚt", "verb": "ɪnsˈɝt" },
         "insult": { "default": "ˈɪnsʌɫt", "verb": "ɪnsˈʌɫt" },
         "intern": { "default": "ˈɪntɚn", "verb": "ɪntˈɝn" },

@@ -13,9 +13,9 @@ import { CONFIG } from "../tools/referee-eval/config.ts";
 describe("declared-intentional divergences", () => {
     const en = CONFIG["en"]!;
 
-    test("en declares the weak vowel in both directions", () => {
-        expect(en.intentional).toHaveLength(2);
-        expect(en.intentional!.map(([f, t]) => `${f}${t}`).sort()).toEqual(["ɪə", "əɪ"].sort());
+    test("en declares the weak vowel in both directions, and the NEAR vowel in one", () => {
+        expect(en.intentional).toHaveLength(3);
+        expect(en.intentional!.map(([f, t]) => `${f}${t}`).sort()).toEqual(["ɪə", "əɪ", "iɪ"].sort());
     });
 
     // ⚠ BOTH DIRECTIONS, AND THE SECOND ONE WAS REFUSED ONCE BEFORE IT WAS MEASURED. Declaring `ɪ`→`ə`
@@ -29,10 +29,30 @@ describe("declared-intentional divergences", () => {
     // ⚠ IT OVER-CREDITS BY ABOUT FIVE ROWS and that is recorded rather than hidden: `Alice`, `creamily`,
     // `inevitable`, `instil`, `minim` — lexical exceptions with no environment to key on. If that set ever
     // grows an environment it becomes an engine rule and leaves this list.
-    test("the two entries are the same pair, opposed — not two unrelated classes", () => {
-        const pairs = en.intentional!.map(([f, t]) => [f, t].sort().join(""));
+    test("the weak-vowel entries are the same pair, opposed — not two unrelated classes", () => {
+        const weak = en.intentional!.filter(([, , , nextIs]) => nextIs === undefined);
+        const pairs = weak.map(([f, t]) => [f, t].sort().join(""));
         expect(new Set(pairs).size).toBe(1);
         expect(pairs[0]).toBe(["ə", "ɪ"].sort().join(""));
+    });
+
+    // ⚠ AN UNSCOPED CLASS IS A MUCH BIGGER CLAIM THAN A SCOPED ONE, so the NEAR vowel carries its
+    // environment and the test pins that it does. A bare `i`→`ɪ` would credit every position where we
+    // read `ɪ` and the referee reads `i` — 520 residual rows including real defects — where the declared
+    // claim is only about the NEAR vowel, which is 258 of them and only before `ɹ`.
+    test("the NEAR vowel is scoped to its environment, not declared bare", () => {
+        const near = en.intentional!.filter(([f, t]) => f === "i" && t === "ɪ");
+        expect(near).toHaveLength(1);
+        expect(near[0]![3]).toBe("ɹ");
+    });
+
+    // ⚠ THE VELAR NASAL WAS TESTED ALONGSIDE THE NEAR VOWEL AND REFUSED, on the same ground as cot–caught:
+    // Moby RECORDS the distinction (`ŋ`+k/ɡ 556 against `n`+k/ɡ 302), so it is a lexical disagreement.
+    // Arbitrating it per-word then showed our own engine is the wrong one at a prefix boundary, which is
+    // an engine fix and not a declaration. Pinned so it is not quietly added later.
+    test("the velar nasal pair is not declared", () => {
+        for (const [from, to] of en.intentional!)
+            expect([from, to].sort().join("")).not.toBe(["n", "ŋ"].sort().join(""));
     });
 
     // ⚠ `ɔ`/`ɑ` WAS TESTED FOR THIS AND REFUSED. The referee writes `ɔ` in 312 of its 4,558 rows, so it
