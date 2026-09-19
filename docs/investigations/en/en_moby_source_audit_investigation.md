@@ -552,3 +552,114 @@ together no longer both slip past the spelling-fold guard.
 
 ⚠ The primary gains one row rather than four, which is the stricter fold being right rather than
 generous. The OOV figure is still not comparable across the change — its population is now 39,881.
+
+## Run 18 — 2026-09-19 00:30 — the no-gold bucket: REFUSED, and the evidence that nearly admitted it
+
+33,684 Moby headwords the dictionary lacks and gold has no reading for. Importing them means dropping
+the two-source bar to one, so the question was measured rather than argued.
+
+⚠ **THE FIRST MEASUREMENT SAID NO, AND IT WAS CONFOUNDED.** Judged against GOLD, over 6,184
+out-of-dictionary words gold can arbitrate:
+
+    Moby matches gold 23.0%     our OOV tier matches gold 36.9%
+
+But gold is CMUdict-derived and so is our OOV model, while Moby is independent — gold was scoring its
+own descendant.
+
+⚠ **THE SECOND MEASUREMENT SAID YES, AND IT WAS CONFOUNDED THE OTHER WAY.** Against wikipron:
+
+    arbiter          n       Moby     our OOV   Moby-only right   OOV-only right
+    wikipron US    352      46.6%      34.4%          77                34
+    wikipron UK  6,416      30.9%      21.1%         949               322
+
+Same direction, ~3:1, and the UK sample is large. On that basis the import was built and run: 33,383
+rows, with Moby's known tail defects repaired on the way in.
+
+⚠ **AND THE REPO'S OWN GATE REFUSED IT.** `en-missing-rhotic.test.ts` found **115 rows with no rhotic
+at all**, and they are systematic rather than scattered:
+
+    answerphone  AA1 N S AH0 F OW2 N        overblow        OW2 V AH0 B L OW1
+    undercliff   AH1 N D AH0 K L IH0 F      supercelestial  S UW2 P AH0 S IH0 L EH1 S …
+    uncoloured, unflavoured, unhonoured, unneighbourly, governessy, weathermost …
+
+**Moby's tail is NON-RHOTIC.** It transcribes RP for a whole class of words, and the import was putting
+r-less readings into a GenAm dictionary. Alongside them, outright garbage: `cury` HH OW0 T IY1 N,
+`neanderthaloid` N IY0 P, `sleipnir` S N T, `shtreimel` SH UW0, `frykowski` V OW0 Y T IH0 K (Wojciech).
+
+⚠ **WHICH EXPOSES THE SECOND CONFOUND: UK WIKIPRON IS NON-RHOTIC TOO.** Using it as the "independent"
+arbiter systematically rewarded exactly the readings that make Moby unusable here — the mirror of the
+gold confound, and the larger sample was the more misleading one. The only clean arbiter was US
+wikipron at n=352, which is too thin to carry a 33,684-row change.
+
+⚠ AND THE SIZE ARGUMENT WAS SOUND BUT IRRELEVANT. 6,300 remaining OOV rows would have been a respectable
+referee — larger than English's own PRIMARY (4,558), larger than Norwegian (5,943), above the 75th
+percentile of the fleet's 257 files. The instrument was never the reason to refuse; the readings were.
+
+**Refused.** The two-source bar is not conservatism, it is the thing that catches this.
+
+### What the block did produce
+
+⚠ **A KNOWN MOBY DEFECT WAS BLOCKING LEGITIMATE TWO-SOURCE AGREEMENT.** The repairs ran only on the
+single-source arm, so `unilocular` — `JH UW2 …` in Moby, its initial-yod bug — could never match gold's
+`jˌunəlˈɑkjələɹ`, fell out as "gold disagrees", and would then have come back through `--no-gold` on ONE
+source when TWO actually agree about it. Moving the repairs BEFORE the comparison recovers **198**
+headwords, each with two-source backing. The repairs are Moby-internal and independent of gold, so this
+removes a corruption rather than manufacturing an agreement.
+
+    unilocular  JH UW2 N IH0 L AA1 K Y UH0 L AH0 R → Y UW2 N AH0 L AA1 K Y AH0 L ER0
+
+    imported     198 (manifest 17,622 + 198 = 17,820)
+    g2p-dict     135,107 → 135,305 rows
+    goldens      unchanged, 0 stale
+
+                       folded             +intentional
+    primary wikipron   62.0% (unchanged)  67.4%
+    Moby lexicon       75.3% (unchanged)  82.0%
+    Moby OOV           38.0% → 37.9%      45.2%
+
+## Run 19 — 2026-09-19 01:00 — the defective rows, marked
+
+Run 18 refused the single-source import but left two things it had surfaced. The first: the nonsense
+rows are defects and have to be recorded as such.
+
+⚠ **NOT A LINE OFFSET, WHICH WAS CHECKED FIRST** because an offset would have been recoverable — the
+whole block could have been shifted back. It is not: the NEIGHBOURS of every corrupt row are correct.
+
+    shrunken 'S r@Nk@n     shtreimel /S//u/       shuck /S//@/k
+    soleplate 'soUl,pleIt  soleprint s/O/'l/E/m   Soleure s/O/'l/y/R
+
+Each row is individually corrupt, so each has to be named.
+
+**Found three ways, and each found rows the others missed.** A first-phone plausibility test (a surname
+cannot be read as a given name); a phones-per-letter ratio (median 0.89, these sit under 0.40 with six
+or more letters); and reading the Moby/gold disagreements.
+⚠ THE RATIO TEST NEEDS THE LENGTH GATE, and without it flags only correct rows: `awe` AO, `eau` OW,
+`err` ER, `aye` EY all score low and are all right, as are `thorough`, `though`, `borough`, `jacques`
+and `maugham` with their silent letters.
+
+25 rows, in three shapes:
+
+    a surname whose body is a GIVEN name    carr→Antoine, cordero→Ángel, corrigan→Mairead,
+                                            dunston→Sean, frana→Javier, gaston→Cieto,
+                                            gorbachev→Mikhail, frykowski→Wojciech
+    the body is a DIFFERENT word            hodges→canister, pathology→pathomorphism,
+                                            terminology→terminological, result→resultive,
+                                            react→reactor, soleprint→solemn, selfward→selfwill
+    truncated or nonsense                   workbasket, freelance, ninetieth, shtreimel,
+                                            neanderthaloid, passel, reiterate, sleipnir, wakayama
+
+⚠ **THEY ARE DROPPED, NOT REPAIRED.** A repair would be a guess at what Moby meant; dropping leaves the
+word to the OOV tier, which is what already happens for every word Moby does not carry. Both the
+referee builder and the import tool read the same list, so a defective row can never arbitrate and can
+never be imported.
+
+    en.moby-lexicon.tsv   35,202 → 35,185
+    en.moby-oov.tsv       39,683 → 39,675
+
+### Still open: the non-rhotic tail belongs to en-GB, not to GenAm
+
+The 115 r-less rows that refused the import are not worthless — they are RP, and en-GB is the variety
+that wants them. en-GB today has ONE referee (`en-gb.wikipron-uk`, 76,284 rows), no secondary, and no
+declared `intentional` class at all, against a 51.7% score. A Moby-derived en-GB referee — or an en-GB
+import on the same two-source bar, with a non-rhotic gold — is the obvious next use for the half of
+this corpus GenAm cannot take. Not started.

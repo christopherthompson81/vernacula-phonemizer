@@ -79,7 +79,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { mobyToArpabet } from "../english/en_source_compare.mts";
+import { MOBY_DEFECTIVE, mobyToArpabet } from "../english/en_source_compare.mts";
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const MOBY = process.env["MOBY"];
@@ -201,7 +201,7 @@ try {
 } catch { /* no import layer yet — every Moby headword is then fair game */ }
 
 const lex: string[] = [], oov: string[] = [];
-let rows = 0, declined = 0, unmapped = 0;
+let rows = 0, declined = 0, unmapped = 0, defective = 0;
 
 /**
  * Every reading Moby gives a headword, grouped by the LOWER-CASED key the dictionary uses.
@@ -230,6 +230,8 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     rows++;
     const cased = line.slice(0, sp), w = cased.toLowerCase();
     if (imported.has(w)) continue;
+    // ⚠ A ROW WHOSE BODY IS A DIFFERENT WORD CANNOT ARBITRATE ANYTHING. See MOBY_DEFECTIVE.
+    if (MOBY_DEFECTIVE.has(w)) { defective++; continue; }
     if (!/^[a-z]{2,20}$/u.test(w)) continue;          // no multi-word, no digits, no punctuation headwords
     const a0 = mobyToArpabet(line.slice(sp + 1));
     if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
@@ -263,7 +265,7 @@ const header = (what: string, n: number): string =>
 const dir = join(REPO, "tools/referee-eval/referees");
 writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary carries", lex.length) + lex.join("\n") + "\n");
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
-console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, excluded-as-imported ${imported.size}`);
+console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, defective ${defective}, excluded-as-imported ${imported.size}`);
 console.log(`  headwords emitting more than one reading: ${multiReading}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);
 console.log(`  en.moby-oov.tsv      ${oov.length}`);

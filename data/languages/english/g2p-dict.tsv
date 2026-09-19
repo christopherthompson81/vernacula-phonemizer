@@ -1,5 +1,5 @@
 # word <TAB> ARPABET. CMUdict (public domain) → the OOV G2P dict (compound pieces / morph stems),
-# plus 17622 rows imported from Moby Pronunciator II where misaki gold concurs — see
+# plus 17820 rows imported from Moby Pronunciator II where misaki gold concurs — see
 # moby-import.tsv, which is the re-appliable record of that layer.
 a	AH0
 aaa	T R IH2 P AH0 L EY1
@@ -873,6 +873,7 @@ acromegalic	AE2 K R OW0 M AH0 G AE1 L IH0 K
 acronym	AE1 K R AH0 N IH0 M
 acronyms	AE1 K R AH0 N IH0 M Z
 acropetal	AH0 K R AA1 P EH0 T AH0 L
+acropetally	AH0 K R AA1 P EH0 T AH0 L IY0
 acrophobia	AE2 K R AH0 F OW1 B IY0 AH0
 acropolis	AH0 K R AA1 P AH0 L AH0 S
 across	AH0 K R AO1 S
@@ -1376,6 +1377,7 @@ adventurism	AE0 D V EH1 N CH ER0 IH2 Z AH0 M
 adventurous	AE0 D V EH1 N CH ER0 AH0 S
 adverb	AE1 D V ER0 B
 adverbial	AE0 D V ER1 B IY0 AH0 L
+adverbially	AH0 D V ER1 B IY0 AH0 L IY0
 adverbs	AE1 D V ER0 B Z
 adversarial	AE2 D V ER0 S EH1 R IY0 AH0 L
 adversaries	AE1 D V ER0 S EH2 R IY0 Z
@@ -2766,6 +2768,7 @@ allegiances	AE2 L IY1 JH IY0 AE2 N S IH0 Z
 alleging	AH0 L EH1 JH IH0 NG
 allegis	AE2 L EY1 JH IH0 S
 allegorical	AE2 L AH0 G AO1 R AH0 K AH0 L
+allegorically	AE2 L AH0 G AO1 R AH0 K AH0 L IY0
 allegories	AE1 L AH0 G AO2 R IY0 Z
 allegorist	AE1 L AH0 G AO2 R IH0 S T
 allegory	AE1 L AH0 G AO2 R IY0
@@ -3832,9 +3835,11 @@ analeptic	AE2 N AH0 L EH1 P T IH0 K
 analgesia	AE2 N AH0 L JH IY1 Z IY0 AH0
 analgesic	AE2 N AH0 L JH IY1 Z IH0 K
 analgesics	AE2 N AH0 L JH IY1 Z IH0 K S
+anally	EY1 N AH0 L IY0
 analog	AE1 N AH0 L AO2 G
 analogic	AE2 N AH0 L AA1 JH IH0 K
 analogical	AE2 N AH0 L AA1 JH IH0 K AH0 L
+analogically	AE2 N AH0 L AA1 JH AH0 K AH0 L IY0
 analogies	AH0 N AE1 L AH0 JH IY0 Z
 analogize	AH0 N AE1 L AH0 JH AY2 Z
 analogous	AH0 N AE1 L AH0 G AH0 S
@@ -4651,6 +4656,7 @@ antipathy	AE0 N T IH1 P AH0 TH IY0
 antipersonnel	AE2 N T IY0 P ER0 S AH0 N EH1 L
 antiphon	AE1 N T AH0 F AA2 N
 antiphonal	AE0 N T IH1 F AH0 N AH0 L
+antiphonally	AE0 N T IH1 F AH0 N AH0 L IY0
 antiphonary	AE0 N T IH1 F AH0 N EH2 R IY0
 antiphons	AE1 N T AH0 F AA2 N Z
 antiphony	AE0 N T IH1 F AH0 N IY0
@@ -5342,6 +5348,7 @@ arceneaux	AA1 R S IH0 N OW0
 arceo	AA1 R S IY0 OW0
 arch	AA1 R CH
 archaeological	AA2 R K IY0 AH0 L AA1 JH IH0 K AH0 L
+archaeologically	AA2 R K IY0 AH0 L AA1 JH AH0 K AH0 L IY0
 archaeologist	AA2 R K IY0 AA1 L AH0 JH IH0 S T
 archaeologists	AA2 R K IY0 AA1 L AH0 JH IH0 S T S
 archaeology	AA2 R K IY0 AA1 L AH0 JH IY0
@@ -5370,6 +5377,7 @@ arched	AA1 R CH T
 archegonium	AA2 R K AH0 G OW1 N IY0 AH0 M
 archenemy	AA1 R CH EH1 N AH0 M IY0
 archeological	AA2 R K IY0 AH0 L AA1 JH IH0 K AH0 L
+archeologically	AA2 R K IY0 AH0 L AA1 JH AH0 K AH0 L IY0
 archeology	AA2 R K IY0 AA1 L AH0 JH IY0
 archer	AA1 R CH ER0
 archerd	AA1 R K ER0 D
@@ -6062,6 +6070,7 @@ ascertain	AE2 S ER0 T EY1 N
 ascertained	AE2 S ER0 T EY1 N D
 ascertaining	AE2 S ER0 T EY1 N IH0 NG
 ascetic	AH0 S EH1 T IH0 K
+ascetically	AH0 S EH1 T AH0 K AH0 L IY0
 asceticism	AH0 S EH1 T IH0 S IH2 Z AH0 M
 asch	AE1 SH
 asche	AE1 SH
@@ -6732,6 +6741,7 @@ attributive	AH0 T R IH1 B Y AH0 T IH0 V
 attributively	AH0 T R IH1 B Y AH0 T IH0 V L IY0
 attridge	AH0 T R IH1 JH
 attrition	AH0 T R IH1 SH AH0 N
+attu	AE1 T UW0
 attune	AH0 T UW1 N
 attuned	AH0 T UW1 N D
 attwood	AE1 T W UH2 D
@@ -6746,6 +6756,7 @@ atx	EY1 T IY1 EH1 K S
 atypia	EY2 T IH1 P IY2 AH0
 atypic	EY2 T IH1 P IH0 K
 atypical	EY2 T IH1 P IH0 K AH0 L
+atypically	EY2 T IH1 P AH0 K AH0 L IY0
 atz	AE1 T S
 au	OW1
 aube	AO1 B
@@ -8236,6 +8247,7 @@ banach	B AE1 N AH0 K
 banal	B AH0 N AA1 L
 banalities	B AH0 N AE1 L IH0 T IY0 Z
 banality	B AH0 N AE1 L IH0 T IY0
+banally	B EY1 N AH0 L IY0
 banamex	B AE1 N AH0 M EH2 K S
 banana	B AH0 N AE1 N AH0
 bananaquit	B AH0 N AE1 N AH0 K W IH2 T
@@ -9003,6 +9015,7 @@ bashers	B AE1 SH ER0 Z
 bashes	B AE1 SH IH0 Z
 bashford	B AE1 SH F ER0 D
 bashful	B AE1 SH F AH0 L
+bashfully	B AE1 SH F AH0 L IY0
 bashfulness	B AE1 SH F AH0 L N EH2 S
 bashing	B AE1 SH IH0 NG
 bashir	B AH0 SH IH1 R
@@ -10166,6 +10179,7 @@ beller	B EH1 L ER0
 bellerophon	B AH0 L EH1 R AH0 F AA2 N
 bellerose	B EH1 L ER0 AH0 Z
 belles	B EH1 L Z
+belletristic	B EH2 L AH0 T R IH1 S T IH0 K
 belleville	B EH1 L V IH0 L
 bellevue	B EH1 L V Y UW2
 bellew	B IH0 L UW1
@@ -11201,6 +11215,7 @@ bible	B AY1 B AH0 L
 bibler	B AY1 B AH0 L ER0
 bibles	B AY1 B AH0 L Z
 biblical	B IH1 B L AH0 K AH0 L
+biblically	B IH1 B L AH0 K AH0 L IY0
 biblicist	B IH1 B L IH0 S IH0 S T
 bibliographer	B IH2 B L IY0 AA1 G R AH0 F ER0
 bibliographic	B IH2 B L IY0 AH0 G R AE1 F IH0 K
@@ -11333,6 +11348,7 @@ bieniek	B IH1 N IY0 EH0 K
 bienkowski	B IH0 NG K AO1 F S K IY0
 biennale	B IY2 EH0 N AA1 L EY0
 biennial	B AY0 EH1 N IY0 AH0 L
+biennially	B AY0 EH1 N IY0 AH0 L IY0
 biennium	B AY0 EH1 N IY0 AH0 M
 bienstock	B IY1 N S T AA2 K
 bienvenu	B AH0 N V EH1 N UW0
@@ -11665,6 +11681,7 @@ biographer	B AY0 AA1 G R AH0 F ER0
 biographers	B AY0 AA1 G R AH0 F ER0 Z
 biographic	B AY2 AH0 G R AE1 F IH0 K
 biographical	B AY2 AH0 G R AE1 F IH0 K AH0 L
+biographically	B AY2 AH0 G R AE1 F IH0 K AH0 L IY0
 biographies	B AY0 AA1 G R AH0 F IY0 Z
 biography	B AY0 AA1 G R AH0 F IY0
 biohazard	B AY2 OW0 HH AE1 Z ER0 D
@@ -12514,6 +12531,7 @@ blondes	B L AA1 N D Z
 blondest	B L AA1 N D AH0 S T
 blondie	B L AA1 N D IY0
 blondin	B L AA1 N D IH0 N
+blondness	B L AA1 N D N AH0 S
 blonds	B L AA1 N D Z
 blood	B L AH1 D
 bloodbath	B L AH1 D B AE2 TH
@@ -12807,6 +12825,7 @@ boast	B OW1 S T
 boasted	B OW1 S T AH0 D
 boaster	B OW1 S T ER0
 boastful	B OW1 S T F AH0 L
+boastfully	B OW1 S T F AH0 L IY0
 boastfulness	B OW1 S T F AH0 L N AH0 S
 boasting	B OW1 S T IH0 NG
 boasts	B OW1 S T S
@@ -14036,6 +14055,7 @@ bounteously	B AW1 N T IY0 AH0 S L IY0
 bounteousness	B AW1 N T IY0 AH0 S N IH0 S
 bounties	B AW1 N T IY0 Z
 bountiful	B AW1 N T IH0 F AH0 L
+bountifully	B AW1 N T AH0 F AH0 L IY0
 bounty	B AW1 N T IY0
 bouquet	B UW0 K EY1
 bouquets	B OW0 K EY1 Z
@@ -17997,6 +18017,7 @@ canon	K AE1 N AH0 N
 canoness	K AE1 N AH0 N IH0 S
 canonic	K AH0 N AA1 N AH0 K
 canonical	K AH0 N AA1 N AH0 K AH0 L
+canonically	K AH0 N AA1 N AH0 K AH0 L IY0
 canonicity	K AE2 N AH0 N IH1 S IH0 T IY0
 canonico	K AA0 N OW0 N IY1 K OW0
 canonie	K AE1 N AH0 N IY0
@@ -18407,6 +18428,7 @@ cardin	K AA1 R D IH0 N
 cardinal	K AA1 R D AH0 N AH0 L
 cardinale	K AA0 R D IY0 N AA1 L IY0
 cardinali	K AA0 R D IY0 N AA1 L IY2
+cardinally	K AA1 R D AH0 N AH0 L IY0
 cardinals	K AA1 R D AH0 N AH0 L Z
 cardio	K AA1 R D IY0 OW0
 cardiodynia	K AA2 R D IY0 OW0 D IH1 N IY0 AH0
@@ -18634,6 +18656,7 @@ carnage	K AA1 R N IH0 JH
 carnahan	K AA1 R N AH0 HH AE0 N
 carnal	K AA1 R N AH0 L
 carnallite	K AA1 R N AH0 L AY2 T
+carnally	K AA1 R N AH0 L IY0
 carnap	K AA1 R N AE0 P
 carnassial	K AA0 R N AE1 S IY0 AH0 L
 carnathan	K AA1 R N AH0 TH AE0 N
@@ -19408,6 +19431,7 @@ caucasus	K AO1 K AH0 S AH0 S
 caucus	K AO1 K AH0 S
 caucuses	K AO1 K AH0 S IH0 Z
 caudal	K AO1 D AH0 L
+caudally	K AO1 D AH0 L IY0
 caudate	K AO1 D EY0 T
 caudell	K OW0 D EH1 L
 caudex	K AO1 D EH0 K S
@@ -19435,6 +19459,7 @@ causal	K AO1 Z AH0 L
 causalgia	K AO0 Z AE1 L JH IY0 AH0
 causalities	K AO2 Z AE1 L IH0 T IY0 Z
 causality	K AO0 Z AE1 L AH0 T IY0
+causally	K AO1 Z AH0 L IY0
 causation	K AO2 Z EY1 SH AH0 N
 causative	K AO1 Z AH0 T IH0 V
 causby	K AO1 Z B IY0
@@ -19665,6 +19690,7 @@ celery	S EH1 L ER0 IY0
 celesta	S IH0 L EH1 S T AH0
 celeste	S AH0 L EH1 S T
 celestial	S AH0 L EH1 S CH AH0 L
+celestially	S AH0 L EH1 S CH AH0 L IY0
 celestin	S EH1 L IH0 S T IH0 N
 celestina	CH EH0 L EH0 S T IY1 N AH0
 celestine	CH EH0 L EH0 S T IY1 N IY0
@@ -19788,6 +19814,7 @@ centerre	S EH1 N T ER0
 centers	S EH1 N T ER0 Z
 centerville	S EH1 N T ER0 V IH0 L
 centesimal	S EH0 N T EH1 S AH0 M AH0 L
+centesimally	S EH0 N T EH1 S AH0 M AH0 L IY0
 centex	S EH1 N T EH2 K S
 centigrade	S EH1 N T AH0 G R EY2 D
 centigram	S EH1 N T AH0 G R AE2 M
@@ -19828,11 +19855,13 @@ centrex	S EH1 N T R AH0 K S
 centric	S EH1 N T R IH0 K
 centricity	S EH0 N T R IH1 S IH0 T IY0
 centrifugal	S EH0 N T R IH1 F Y AH0 G AH0 L
+centrifugally	S EH0 N T R IH1 F Y AH0 G AH0 L IY0
 centrifugation	S EH0 N T R IH2 F Y AH0 G EY1 SH AH0 N
 centrifuge	S EH1 N T R AH0 F Y UW2 JH
 centrifuges	S EH1 N T R AH0 F Y UW2 JH IH0 Z
 centriole	S EH1 N T R IY0 OW2 L
 centripetal	S EH0 N T R IH1 P IH0 T AH0 L
+centripetally	S EH0 N T R IH1 P AH0 T AH0 L IY0
 centrist	S EH1 N T R IH0 S T
 centrists	S EH1 N T R IH0 S T S
 centro	S EH1 N T R OW0
@@ -19895,6 +19924,7 @@ ceredase	S EH1 R AH0 D EY2 Z
 cereghino	CH ER0 EH0 G IY1 N OW0
 cerelia	CH ER0 EH1 L IY0 AH0
 ceremonial	S EH2 R AH0 M OW1 N IY0 AH0 L
+ceremonially	S EH2 R AH0 M OW1 N IY0 AH0 L IY0
 ceremonies	S EH1 R AH0 M OW2 N IY0 Z
 ceremonious	S EH2 R AH0 M OW1 N IY0 AH0 S
 ceremoniously	S EH2 R AH0 M OW1 N IY0 AH0 S L IY0
@@ -22273,6 +22303,7 @@ clergyman	K L ER1 JH IY0 M AH0 N
 clergymen	K L ER1 JH IY0 M IH0 N
 cleric	K L EH1 R IH0 K
 clerical	K L EH1 R AH0 K AH0 L
+clerically	K L EH1 R AH0 K AH0 L IY0
 clerics	K L EH1 R IH0 K S
 clerihew	K L EH1 R IH0 HH Y UW2
 clerissa	K L ER0 IY1 S AH0
@@ -22941,9 +22972,11 @@ coercive	K OW0 ER1 S IH0 V
 coercively	K OW0 ER1 S IH0 V L IY0
 coetaneous	K OW2 IH0 T EY1 N IY0 AH0 S
 coeternal	K OW2 IH0 T ER1 N AH0 L
+coeternally	K OW2 AH0 T ER1 N AH0 L IY0
 coeur	K UW1 R
 coeval	K OW0 IY1 V AH0 L
 coevality	K OW2 IY0 V AE1 L AH0 T IY0
+coevally	K OW2 IY1 V AH0 L IY0
 coexist	K OW2 AH0 G Z IH1 S T
 coexisted	K OW2 AH0 G Z IH1 S T AH0 D
 coexistence	K OW2 IH0 G Z IH1 S T AH0 N S
@@ -23732,6 +23765,7 @@ communal	K AH0 M Y UW1 N AH0 L
 communalism	K AH0 M Y UW1 N AH0 L IH2 Z AH0 M
 communality	K AA2 M Y AH0 N AE1 L AH0 T IY0
 communalize	K AH0 M Y UW1 N AH0 L AY2 Z
+communally	K AH0 M Y UW1 N AH0 L IY0
 communard	K AA1 M Y AH0 N AA2 R D
 commune	K AA1 M Y UW0 N
 communes	K AA1 M Y UW0 N Z
@@ -23814,6 +23848,7 @@ compartment	K AH0 M P AA1 R T M AH0 N T
 compartmental	K AH0 M P AA2 R T M EH1 N T AH0 L
 compartmentalize	K AH0 M P AA2 R T M EH1 N T AH0 L AY2 Z
 compartmentalized	K AA2 M P AA0 R T M EH1 N T AH0 L AY0 Z D
+compartmentally	K AH0 M P AA2 R T M EH1 N T AH0 L IY0
 compartments	K AH0 M P AA1 R T M AH0 N T S
 compas	K AA1 M P AH0 S
 compass	K AH1 M P AH0 S
@@ -24448,7 +24483,9 @@ congelation	K AA2 N JH AH0 L EY1 SH AH0 N
 congeneric	K AA2 N JH AH0 N EH1 R IH0 K
 congenial	K AH0 N JH IY1 N Y AH0 L
 congeniality	K AH0 N JH IY2 N IY0 AE1 L AH0 T IY0
+congenially	K AH0 N JH IY1 N Y AH0 L IY0
 congenital	K AH0 N JH EH1 N AH0 T AH0 L
+congenitally	K AH0 N JH EH1 N AH0 T AH0 L IY0
 conger	K AA1 NG ER0
 congeries	K AA1 NG JH AH0 R IY2 Z
 congest	K AH0 N JH EH1 S T
@@ -24511,6 +24548,7 @@ conjoined	K AA2 N JH OY1 N D
 conjoint	K AH0 N JH OY1 N T
 conjointly	K AH0 N JH OY1 N T L IY0
 conjugal	K AA1 N JH AH0 G AH0 L
+conjugally	K AA1 N JH AH0 G AH0 L IY0
 conjugate	K AA2 N JH AH0 G EY1 T
 conjugated	K AA2 N JH AH0 G EY1 T IH0 D
 conjugates	K AA2 N JH AH0 G EY1 T S
@@ -24604,6 +24642,7 @@ connotative	K AA1 N AH0 T EY2 T IH0 V
 connote	K AH0 N OW1 T
 connotes	K AH0 N OW1 T S
 connubial	K AH0 N UW1 B IY0 AH0 L
+connubially	K AH0 N UW1 B IY0 AH0 L IY0
 conny	K AA1 N IY0
 conoco	K AA1 N AH0 K OW0
 conoid	K OW1 N OY0 D
@@ -24671,6 +24710,7 @@ consequence	K AA1 N S AH0 K W AH0 N S
 consequences	K AA1 N S AH0 K W EH2 N S AH0 Z
 consequent	K AA1 N S AH0 K W AH0 N T
 consequential	K AA2 N S AH0 K W EH1 N SH AH0 L
+consequentially	K AA2 N S AH0 K W EH1 N SH AH0 L IY0
 consequently	K AA1 N S AH0 K W AH0 N T L IY0
 conser	K AA1 N S ER0
 conservancy	K AH0 N S ER1 V AH0 N S IY0
@@ -25049,6 +25089,7 @@ contraptions	K AH0 N T R AE1 P SH AH0 N Z
 contrapunction	K AH2 N T R AE0 P UH1 K CH AH0 N
 contrapunctual	K AH2 N T R AE0 P UH1 K CH UW2 AH0 L
 contrapuntal	K AA2 N T R AH0 P AH1 N T AH0 L
+contrapuntally	K AA2 N T R AH0 P AH1 N T AH0 L IY0
 contrapuntist	K AA2 N T R AH0 P AH1 N T IH0 S T
 contrarian	K AA2 N T R EH1 R IY0 AH0 N
 contrarians	K AH0 N T R EH1 R IY0 AH0 N Z
@@ -25143,6 +25184,7 @@ conversant	K AH0 N V ER1 S AH0 N T
 conversation	K AA2 N V ER0 S EY1 SH AH0 N
 conversational	K AA2 N V ER0 S EY1 SH AH0 N AH0 L
 conversationalist	K AA2 N V ER0 S EY1 SH AH0 N AH0 L AH0 S T
+conversationally	K AA2 N V ER0 S EY1 SH AH0 N AH0 L IY0
 conversations	K AA2 N V ER0 S EY1 SH AH0 N Z
 converse	K AA1 N V ER0 S
 conversed	K AH0 N V ER1 S T
@@ -25186,6 +25228,7 @@ convinces	K AH0 N V IH1 N S IH0 Z
 convincing	K AH0 N V IH1 N S IH0 NG
 convincingly	K AH0 N V IH1 N S IH0 NG L IY0
 convivial	K AH0 N V IH1 V IY0 AH0 L
+convivially	K AH0 N V IH1 V IY0 AH0 L IY0
 convocation	K AA2 N V AH0 K EY1 SH AH0 N
 convoke	K AA0 N V OW1 K
 convoked	K AA0 N V OW1 K T
@@ -26654,6 +26697,7 @@ crasnianski	K R AE2 S N IY0 AE1 N S K IY0
 crass	K R AE1 S
 crassitude	K R AE1 S IH0 T UW2 D
 crassly	K R AE0 S L IY0
+crassness	K R AE1 S N AH0 S
 crassweller	K R AE1 S W EH2 L ER0
 crate	K R EY1 T
 crater	K R EY1 T ER0
@@ -27553,6 +27597,7 @@ cubed	K Y UW1 B D
 cubes	K Y UW1 B Z
 cubic	K Y UW1 B IH0 K
 cubical	K Y UW1 B IH0 K AH0 L
+cubically	K Y UW1 B AH0 K AH0 L IY0
 cubicle	K Y UW1 B IH0 K AH0 L
 cubicles	K Y UW1 B IH0 K AH0 L Z
 cubiform	K Y UW1 B AH0 F AO2 R M
@@ -28706,6 +28751,7 @@ danker	D AE1 NG K ER0
 dankert	D AE1 NG K ER0 T
 dankly	D AE0 NG K L IY0
 dankner	D AE1 NG K N ER0
+dankness	D AE1 NG K N AH0 S
 danko	D AE1 NG K OW0
 danks	D AE1 NG K S
 danley	D AE1 N L IY0
@@ -29444,6 +29490,7 @@ decedent	D AH0 S IY1 D AH0 N T
 decedents	D EH0 S IY1 D AH0 N T S
 deceit	D AH0 S IY1 T
 deceitful	D AH0 S IY1 T F AH0 L
+deceitfully	D AH0 S IY1 T F AH0 L IY0
 deceitfulness	D AH0 S IY1 T F AH0 L N AH0 S
 deceits	D AH0 S IY1 T S
 deceive	D IH0 S IY1 V
@@ -29459,6 +29506,7 @@ december	D IH0 S EH1 M B ER0
 decembrist	D IY0 S EH1 M B R IH0 S T
 decency	D IY1 S AH0 N S IY0
 decennial	D AH0 S EH1 N IY0 AH0 L
+decennially	D AH0 S EH1 N IY0 AH0 L IY0
 decennium	D IH0 S EH1 N IY0 AH0 M
 decent	D IY1 S AH0 N T
 decenter	D IY0 S EH1 N T ER0
@@ -29501,6 +29549,7 @@ deciliter	D EH1 S AH0 L IY2 T ER0
 decima	D IH0 CH IY1 M AH0
 decimal	D EH1 S AH0 M AH0 L
 decimalize	D EH1 S AH0 M AH0 L AY2 Z
+decimally	D EH1 S AH0 M AH0 L IY0
 decimals	D EH1 S AH0 M AH0 L Z
 decimate	D EH1 S AH0 M EY2 T
 decimated	D EH1 S AH0 M EY2 T IH0 D
@@ -30912,6 +30961,7 @@ departmentalize	D IH0 P AA2 R T M EH1 N T AH0 L AY2 Z
 departmentalized	D IH0 P AA2 R T M EH1 N T AH0 L AY2 Z D
 departmentalizes	D IH0 P AA2 R T M EH1 N T AH0 L AY2 Z IH0 Z
 departmentalizing	D IH0 P AA2 R T M EH1 N T AH0 L AY2 Z IH0 NG
+departmentally	D AH0 P AA2 R T M EH1 N T AH0 L IY0
 departments	D IH0 P AA1 R T M AH0 N T S
 departs	D IH0 P AA1 R T S
 departure	D IH0 P AA1 R CH ER0
@@ -31578,6 +31628,7 @@ detrich	D EH1 T R IH0 K
 detrick	D EH1 T R IH0 K
 detriment	D EH1 T R AH0 M AH0 N T
 detrimental	D EH2 T R AH0 M EH1 N T AH0 L
+detrimentally	D EH2 T R AH0 M EH1 N T AH0 L IY0
 detrital	D IH0 T R AY1 T AH0 L
 detrition	D IH0 T R IH1 SH AH0 N
 detritus	D IH0 T R AY1 T AH0 S
@@ -31826,6 +31877,7 @@ dexterity	D EH0 K S T EH1 R AH0 T IY0
 dextra	D EH1 K S T R AH0
 dextral	D EH1 K S T R AH0 L
 dextrality	D EH0 K S T R AE1 L IH0 T IY0
+dextrally	D EH1 K S T R AH0 L IY0
 dextran	D EH1 K S T R AE2 N
 dextrathoraphan	D EH0 K S T R AH0 TH AO1 R AH0 F AH0 N
 dextrin	D EH1 K S T R IH0 N
@@ -31910,8 +31962,10 @@ diakinesis	D AY2 AH0 K IH0 N IY1 S IH0 S
 dial	D AY1 AH0 L
 dialect	D AY1 AH0 L EH2 K T
 dialectal	D AY2 AH0 L EH1 K T AH0 L
+dialectally	D AY2 AH0 L EH1 K T AH0 L IY0
 dialectic	D AY2 AH0 L EH1 K T IH0 K
 dialectical	D AY2 AH0 L EH1 K T IH0 K AH0 L
+dialectically	D AY2 AH0 L EH1 K T AH0 K AH0 L IY0
 dialectician	D AY2 AH0 L EH0 K T IH1 SH AH0 N
 dialectologist	D AY2 AH0 L EH0 K T AA1 L AH0 JH IH0 S T
 dialectology	D AY2 AH0 L EH0 K T AA1 L AH0 JH IY0
@@ -32701,6 +32755,7 @@ directory	D ER0 EH1 K T ER0 IY0
 directs	D ER0 EH1 K T S
 directv	D ER0 EH1 K T IY1 V IY1
 direful	D AY1 ER0 F AH0 L
+direfully	D AY1 ER0 F AH0 L IY0
 direly	D AY0 ER0 L IY0
 direnzo	D IH0 R EH1 N Z OW2
 direst	D AY1 R AH0 S T
@@ -32998,6 +33053,7 @@ discussions	D IH0 S K AH1 SH AH0 N Z
 disdain	D IH0 S D EY1 N
 disdained	D IH0 S D EY1 N D
 disdainful	D IH0 S D EY1 N F AH0 L
+disdainfully	D IH0 S D EY1 N F AH0 L IY0
 disdainfulness	D IH0 S D EY1 N F AH0 L N AH0 S
 disdaining	D IH0 S D EY1 N IH0 NG
 disdains	D IH0 S D EY1 N Z
@@ -33048,6 +33104,7 @@ disgorgement	D IH0 S G AO1 R JH M AH0 N T
 disgrace	D IH0 S G R EY1 S
 disgraced	D IH0 S G R EY1 S T
 disgraceful	D IH0 S G R EY1 S F AH0 L
+disgracefully	D IH0 S G R EY1 S F AH0 L IY0
 disgruntled	D IH0 S G R AH1 N T AH0 L D
 disgruntlement	D IH0 S G R AH1 N T AH0 L M AH0 N T
 disgruntling	D IH0 S G R AH1 N T AH0 L IH0 NG
@@ -33154,6 +33211,7 @@ dislodge	D IH0 S L AA1 JH
 dislodged	D IH0 S L AA1 JH D
 dislodging	D IH0 S L AA1 JH IH0 NG
 disloyal	D IH0 S L OY1 AH0 L
+disloyally	D IH0 S L OY1 AH0 L IY0
 disloyalty	D IH0 S L OY1 AH0 L T IY0
 dismal	D IH1 Z M AH0 L
 dismally	D IH1 Z M AH0 L IY0
@@ -33386,6 +33444,7 @@ dissimilarity	D IH2 S IH2 M AH0 L EH1 R AH0 T IY0
 dissimilate	D IH0 S IH1 M AH0 L EY2 T
 dissimilation	D IH0 S IH2 M AH0 L EY1 SH AH0 N
 dissimilatory	D IH0 S IH1 M AH0 L AH0 T AO2 R IY0
+dissimilitude	D IH2 S IH0 M IH1 L AH0 T UW0 D
 dissimulate	D IH0 S IH1 M Y AH0 L EY2 T
 dissimulation	D IH0 S IH2 M Y AH0 L EY1 SH AH0 N
 dissing	D IH1 S IH0 NG
@@ -33423,6 +33482,7 @@ dissymmetry	D IH0 S IH1 M AH0 T R IY0
 distad	D IH1 S T AH0 D
 distaff	D IH1 S T AE0 F
 distal	D IH1 S T AH0 L
+distally	D IH1 S T AH0 L IY0
 distance	D IH1 S T AH0 N S
 distanced	D IH1 S T AH0 N S T
 distances	D IH1 S T AH0 N S AH0 Z
@@ -33433,6 +33493,7 @@ distasi	D IH0 S T AA1 S IY0
 distasio	D IH0 S T AA1 S IY0 OW0
 distaste	D IH0 S T EY1 S T
 distasteful	D IH0 S T EY1 S T F AH0 L
+distastefully	D IH0 S T EY1 S T F AH0 L IY0
 distastefulness	D IH0 S T EY1 S T F AH0 L N AH0 S
 distefano	D IH0 S T EH0 F AA1 N OW0
 distel	D IH1 S T AH0 L
@@ -33814,6 +33875,7 @@ doctoring	D AA1 K T ER0 IH0 NG
 doctors	D AA1 K T ER0 Z
 doctrinaire	D AA2 K T R AH0 N EH1 R
 doctrinal	D AA1 K T R AH0 N AH0 L
+doctrinally	D AA1 K T R AH0 N AH0 L IY0
 doctrine	D AA1 K T R AH0 N
 doctrines	D AA1 K T R AH0 N Z
 docudrama	D OW2 K AH0 D R AE1 M AH0
@@ -33968,6 +34030,7 @@ dole	D OW1 L
 dolecki	D AH0 L EH1 T S K IY0
 doled	D OW1 L D
 doleful	D OW1 L F AH0 L
+dolefully	D OW1 L F AH0 L IY0
 dolefulness	D OW1 L F AH0 L N AH0 S
 dolen	D OW1 L AH0 N
 dolence	D OW1 L AH0 N S
@@ -34388,6 +34451,7 @@ dorsiflexion	D AO2 R S AH0 F L EH1 K SH AH0 N
 dorsiflexor	D AO1 R S AH0 F L EH2 K S ER0
 dorsiventral	D AO1 R S AH0 V EH1 N T R AH0 L
 dorsoventral	D AO2 R S OW0 V EH1 N T R AH0 L
+dorsoventrally	D AO0 R S OW0 V EH1 N T R AH0 L IY0
 dorst	D AO1 R S T
 dorsum	D AO1 R S AH0 M
 dort	D AO1 R T
@@ -36255,6 +36319,7 @@ ecclesiarch	IH0 K L IY1 Z IY0 AA2 R K
 ecclesiastes	IH0 K L IY2 Z IY0 AE1 S T IY0 Z
 ecclesiastic	IH0 K L IY2 Z IY0 AE1 S T IH0 K
 ecclesiastical	IH0 K L IY2 Z IY0 AE1 S T IH0 K AH0 L
+ecclesiastically	AH0 K L IY2 Z IY0 AE1 S T AH0 K AH0 L IY0
 ecclesiasticism	IH0 K L IY2 Z IY0 AE1 S T IH0 S IH2 Z AH0 M
 ecclesiasticus	IH0 K L IY2 Z IY0 AE1 S T IH0 K AH0 S
 ecclesiology	IH0 K L IY2 Z IY0 AA1 L AH0 JH IY0
@@ -36398,6 +36463,7 @@ ecuadorean	EH2 K W AH0 D AO1 R IY0 AH0 N
 ecuadorian	EH2 K W AH0 D AO1 R IY0 AH0 N
 ecumena	EH2 K Y UW0 M IY1 N AH0
 ecumenical	EH2 K Y UW0 M EH1 N IH0 K AH0 L
+ecumenically	EH2 K Y AH0 M EH1 N AH0 K AH0 L IY0
 ecumenism	EH1 K Y AH0 M AH0 N IH2 Z AH0 M
 eczema	EH1 K S AH0 M AH0
 ed	EH1 D
@@ -37360,6 +37426,7 @@ ellipsoid	IH0 L IH1 P S OY0 D
 ellipsoids	IH0 L IH1 P S OY0 D Z
 elliptic	IH0 L IH1 P T IH0 K
 elliptical	IH0 L IH1 P T IH0 K AH0 L
+elliptically	AH0 L IH1 P T AH0 K AH0 L IY0
 ellipticity	IY0 L IH2 P T IH1 S AH0 T IY0
 ellis	EH1 L IH0 S
 ellison	EH1 L IH0 S AH0 N
@@ -37645,6 +37712,7 @@ embryo	EH1 M B R IY0 OW2
 embryogenesis	EH2 M B R IY0 OW0 JH EH1 N IH0 S IH0 S
 embryogenetic	EH2 M B R IY0 OW0 JH AH0 N EH1 T IH0 K
 embryological	EH2 M B R IY0 AH0 L AA1 JH IH0 K AH0 L
+embryologically	EH2 M B R IY0 AH0 L AA1 JH AH0 K AH0 L IY0
 embryologist	EH2 M B R IY0 AA1 L AH0 JH IH0 S T
 embryology	EH2 M B R IY0 AA1 L AH0 JH IY0
 embryonic	EH2 M B R IY0 AA1 N IH0 K
@@ -38771,6 +38839,7 @@ episcopal	IH0 P IH1 S K AH0 P AH0 L
 episcopalian	IH0 P IH2 S K AH0 P EY1 L IY0 AH0 N
 episcopalians	IH0 P IH2 S K AH0 P EY1 L IY0 AH0 N Z
 episcopalism	IH0 P IH1 S K AH0 P AH0 L IH2 Z AH0 M
+episcopally	AH0 P IH1 S K AH0 P AH0 L IY0
 episcopate	IH0 P IH1 S K AH0 P IH0 T
 episcope	EH1 P IH0 S K OW2 P
 episcopo	IH0 P IH0 S K OW1 P OW0
@@ -38917,6 +38986,7 @@ equivalent	IH0 K W IH1 V AH0 L AH0 N T
 equivalently	IH0 K W IH1 V AH0 L AH0 N T L IY0
 equivalents	IH0 K W IH1 V AH0 L AH0 N T S
 equivocal	IH0 K W IH1 V AH0 K AH0 L
+equivocally	AH0 K W IH1 V AH0 K AH0 L IY0
 equivocalness	AH0 K W IH1 V AH0 K AH0 L N AH0 S
 equivocate	IH0 K W IH1 V AH0 K EY2 T
 equivocating	IH0 K W IH1 V AH0 K EY2 T IH0 NG
@@ -39504,6 +39574,7 @@ ethnography	EH0 TH N AA1 G R AH0 F IY0
 ethnohistorical	EH2 TH N OW0 HH IH0 S T AO1 R IH0 K AH0 L
 ethnolinguistics	EH2 TH N OW0 L IH0 NG G W IH1 S T IH0 K S
 ethnological	EH2 TH N AH0 L AA1 JH IH0 K AH0 L
+ethnologically	EH2 TH N AH0 L AA1 JH AH0 K AH0 L IY0
 ethnology	EH0 TH N AA1 L AH0 JH IY0
 ethnomusicological	EH2 TH N OW0 M Y UW2 Z IH0 K AH0 L AA1 JH IH0 K AH0 L
 ethnomusicologist	EH0 TH N AH0 M Y UW2 Z AH0 K AA1 L AH0 JH IH0 S T
@@ -39519,6 +39590,7 @@ ethyne	EH1 TH AY0 N
 ethyol	EH1 TH AY0 AA0 L
 etienne	EH1 T IY0 EH0 N
 etiological	IY2 T IY0 AH0 L AA1 JH IH0 K AH0 L
+etiologically	IY2 T IY0 AH0 L AA1 JH AH0 K AH0 L IY0
 etiologies	IY2 T IY0 AA1 L AH0 JH IY0 Z
 etiology	IY2 T IY0 AA1 L AH0 JH IY0
 etiquette	EH1 T AH0 K AH0 T
@@ -39543,6 +39615,7 @@ ettlinger	EH1 T L IH0 NG ER0
 etty	EH1 T IY0
 etudes	EY1 T UW2 D Z
 etymological	EH2 T AH0 M AH0 L AA1 JH AH0 K AH0 L
+etymologically	EH2 T AH0 M AH0 L AA1 JH AH0 K AH0 L IY0
 etymologize	EH2 T AH0 M AA1 L AH0 JH AY2 Z
 etymology	EH2 T AH0 M AA1 L AH0 JH IY0
 etymon	EH1 T AH0 M AA2 N
@@ -39731,6 +39804,7 @@ evangel	IY0 V AE1 N JH AH0 L
 evangelic	IY2 V AE0 N JH EH1 L IH0 K
 evangelical	IY2 V AE0 N JH EH1 L IH0 K AH0 L
 evangelicalism	IY2 V AE0 N JH EH1 L IH0 K AH0 L IH2 Z AH0 M
+evangelically	IY2 V AE2 N JH EH1 L AH0 K AH0 L IY0
 evangelicals	IY2 V AE2 N JH EH1 L IH0 K AH0 L Z
 evangeline	IH0 V AE1 N JH IH0 L AY2 N
 evangelism	IH0 V AE1 N JH AH0 L IH2 Z AH0 M
@@ -39785,6 +39859,7 @@ evenson	EH1 V IH0 N S AH0 N
 evensong	IY1 V AH0 N S AO2 NG
 event	IH0 V EH1 N T
 eventful	IH0 V EH1 N T F AH0 L
+eventfully	AH0 V EH1 N T F AH0 L IY0
 eventfulness	AH0 V EH1 N T F AH0 L N AH0 S
 eventide	IY1 V AH0 N T AY2 D
 eventing	AH0 V EH1 N T IH0 NG
@@ -40492,7 +40567,11 @@ expurgate	EH1 K S P ER0 G EY2 T
 expurgatory	IH0 K S P ER1 G AH0 T AO2 R IY0
 exquisite	EH1 K S K W AH0 Z AH0 T
 exquisitely	EH2 K S K W IH1 Z IH0 T L IY0
+exquisiteness	EH0 K S K W IH1 Z AH0 T N AH0 S
+exsanguinate	IH0 K S AE1 NG G W AH0 N EY2 T
 exsanguine	EH0 K S S AE1 NG G W IH0 N
+exsert	EH0 K S ER1 T
+exserted	EH0 K S ER1 T AH0 D
 exsolve	EH0 K S S AA1 L V
 extant	EH1 K S T AH0 N T
 extel	EH1 K S T EH2 L
@@ -40581,10 +40660,12 @@ extrados	EH1 K S T R AH0 D AA2 S
 extrafloral	EH2 K S T R AH0 F L AO1 R AH0 L
 extragalactic	EH2 K S T R AH0 G AH0 L AE1 K T IH0 K
 extrajudicial	EH2 K S T R AH0 JH UW0 D IH1 SH AH0 L
+extrajudicially	EH2 K S T R AH0 JH UW0 D IH1 SH AH0 L IY0
 extralegal	EH2 K S T R AH0 L IY1 G AH0 L
 extramarital	EH2 K S T R AH0 M EH1 R AH0 T AH0 L
 extramundane	EH2 K S T R AH0 M AH1 N D EY0 N
 extramural	EH2 K S T R AH0 M Y UH1 R AH0 L
+extramurally	EH2 K S T R AH0 M Y UH1 R AH0 L IY0
 extraneous	IH0 K S T R EY1 N IY0 AH0 S
 extraneously	IH0 K S T R EY1 N IY0 AH0 S L IY0
 extraneousness	IH0 K S T R EY1 N IY0 AH0 S N AH0 S
@@ -40802,6 +40883,7 @@ facets	F AE1 S AH0 T S
 facey	F EY1 S IY0
 fachet	F AE1 CH AH0 T
 facial	F EY1 SH AH0 L
+facially	F EY1 SH AH0 L IY0
 facials	F EY1 SH AH0 L Z
 faciane	F AA0 S IY0 AA1 N EY0
 facie	F EY1 S IY0
@@ -41145,6 +41227,7 @@ fanciers	F AE1 N S IY0 ER0 Z
 fancies	F AE1 N S IY0 Z
 fanciest	F AE1 N S IY0 AH0 S T
 fanciful	F AE1 N S IH0 F AH0 L
+fancifully	F AE1 N S AH0 F AH0 L IY0
 fancifulness	F AE1 N S AH0 F AH0 L N AH0 S
 fancy	F AE1 N S IY0
 fancywork	F AE1 N S IY0 W ER2 K
@@ -41230,6 +41313,7 @@ farberware	F AA1 R B ER0 W EH2 R
 farbman	F AA1 R B M AH0 N
 farce	F AA1 R S
 farcical	F AA1 R S AH0 K AH0 L
+farcically	F AA1 R S AH0 K AH0 L IY0
 farcy	F AA1 R S IY0
 fard	F AA0 R D
 fardel	F AA1 R D AH0 L
@@ -41442,6 +41526,7 @@ fatback	F AE1 T B AE2 K
 fate	F EY1 T
 fated	F EY1 T IH0 D
 fateful	F EY1 T F AH0 L
+fatefully	F EY1 T F AH0 L IY0
 fateh	F AA1 T EH0
 fates	F EY1 T S
 fath	F AE1 TH
@@ -42226,6 +42311,7 @@ fessler	F EH1 S L ER0
 fest	F EH1 S T
 festa	F EH1 S T AH0
 festal	F EH1 S T AH0 L
+festally	F EH1 S T AH0 L IY0
 fester	F EH1 S T ER0
 festered	F EH1 S T ER0 D
 festering	F EH1 S T ER0 IH0 NG
@@ -42298,6 +42384,7 @@ feudalism	F Y UW1 D AH0 L IH2 Z AH0 M
 feudalistic	F Y UW2 D AH0 L IH1 S T IH0 K
 feudality	F Y UW0 D AE1 L IH0 T IY0
 feudalize	F Y UW1 D AH0 L AY2 Z
+feudally	F Y UW1 D AH0 L IY0
 feudatory	F Y UW1 D AH0 T AO2 R IY0
 feuded	F Y UW1 D IH0 D
 feuding	F Y UW1 D IH0 NG
@@ -42405,6 +42492,7 @@ fiction	F IH1 K SH AH0 N
 fictional	F IH1 K SH AH0 N AH0 L
 fictionalize	F IH1 K SH AH0 N AH0 L AY2 Z
 fictionalized	F IH1 K SH AH0 N AH0 L AY2 Z D
+fictionally	F IH1 K SH AH0 N AH0 L IY0
 fictionist	F IH1 K SH AH0 N IH0 S T
 fictions	F IH1 K SH AH0 N Z
 fictitious	F IH0 K T IH1 SH AH0 S
@@ -42583,6 +42671,7 @@ files	F AY1 L Z
 filet	F IH0 L EY1
 filets	F IH0 L EY1 Z
 filial	F IH1 L IY0 AH0 L
+filially	F IH1 L IY0 AH0 L IY0
 filiation	F IH2 L IY0 EY1 SH AH0 N
 filibeg	F IH1 L AH0 B EH2 G
 filibuster	F IH1 L AH0 B AH2 S T ER0
@@ -42792,6 +42881,7 @@ fini	F IY1 N IY0
 finial	F IH1 N IY0 AH0 L
 finian	F IH1 N IY0 AH0 N
 finical	F IH1 N IH0 K AH0 L
+finically	F IH1 N IH0 K AH0 L IY0
 finicalness	F IH1 N AH0 K AH0 L N AH0 S
 finicking	F IH1 N AH0 K IH0 NG
 finicky	F IH1 N AH0 K IY0
@@ -44336,6 +44426,7 @@ forgery	F AO1 R JH ER0 IY0
 forges	F AO1 R JH IH0 Z
 forget	F ER0 G EH1 T
 forgetful	F AO0 R G EH1 T F AH0 L
+forgetfully	F ER0 G EH1 T F AH0 L IY0
 forgetfulness	F ER0 G EH1 T F AH0 L N AH0 S
 forgets	F ER0 G EH1 T S
 forgettable	F AO0 R G EH1 T AH0 B AH0 L
@@ -45207,6 +45298,7 @@ fresquez	F R EY0 S K W EH1 Z
 freston	F R EH1 S T AH0 N
 fret	F R EH1 T
 fretful	F R EH1 T F AH0 L
+fretfully	F R EH1 T F AH0 L IY0
 fretfulness	F R EH1 T F AH0 L N AH0 S
 frets	F R EH1 T S
 frett	F R EH1 T
@@ -45474,6 +45566,7 @@ frons	F R AA0 N Z
 front	F R AH1 N T
 frontage	F R AH1 N T IH0 JH
 frontal	F R AH1 N T AH0 L
+frontally	F R AH1 N T AH0 L IY0
 fronted	F R AH1 N T IH0 D
 frontera	F R OW0 N T EH1 R AH0
 fronterhouse	F R AH1 N T ER0 HH AW2 S
@@ -45555,6 +45648,7 @@ fruitcakes	F R UW1 T K EY2 K S
 fruited	F R UW1 T IH0 D
 fruiter	F R UW1 T ER0
 fruitful	F R UW1 T F AH0 L
+fruitfully	F R UW1 T F AH0 L IY0
 fruitfulness	F R UW1 T F AH0 L N AH0 S
 fruiting	F R UW1 T IH0 NG
 fruition	F R UW0 IH1 SH AH0 N
@@ -45653,6 +45747,7 @@ fugaciously	F Y UW0 G EY1 SH AH0 S L IY0
 fugaciousness	F Y UW0 G EY1 SH AH0 S N AH0 S
 fugacity	F Y UW0 G AE1 S IH0 T IY0
 fugal	F Y UW1 G AH0 L
+fugally	F Y UW1 G AH0 L IY0
 fugard	F Y UW1 G AA2 R D
 fugate	F AH1 G EY0 T
 fugato	F UW0 G AA1 T OW0
@@ -45828,6 +45923,7 @@ fundus	F AH1 N D AH0 S
 funeral	F Y UW1 N ER0 AH0 L
 funerals	F Y UW1 N ER0 AH0 L Z
 funerary	F Y UW1 N ER0 EH2 R IY0
+funereally	F Y AH0 N IY1 R IY0 AH0 L IY0
 funes	F Y UW1 N Z
 funfair	F AH1 N F EH0 R
 fung	F AH1 NG
@@ -47390,6 +47486,7 @@ gendrisek	JH EH1 D R IH0 S EH2 K
 gendron	JH EH1 N D R AH0 N
 gene	JH IY1 N
 genealogical	JH IY2 N IY0 AH0 L AA1 JH IH0 K AH0 L
+genealogically	JH IY2 N IY0 AH0 L AA1 JH AH0 K AH0 L IY0
 genealogy	JH IY2 N IY0 AA1 L AH0 JH IY0
 geneen	JH AH0 N IY1 N
 genego	G EH1 N AH0 G OW2
@@ -47457,6 +47554,7 @@ genghis	JH EH1 NG HH IH0 S
 gengler	G EH1 NG L ER0
 genial	JH IY1 N Y AH0 L
 geniality	JH IY2 N IY0 AE1 L AH0 T IY0
+genially	JH IY1 N Y AH0 L IY0
 genic	JH EH1 N IH0 K
 genicom	JH EH1 N IH0 K AA0 M
 geniculate	JH AH0 N IH1 K Y AH0 L IH0 T
@@ -47469,6 +47567,7 @@ genital	JH EH1 N AH0 T AH0 L
 genitalia	JH EH0 N AH0 T AA1 L Y AH0
 genitals	JH EH1 N AH0 T AH0 L Z
 genitival	JH EH2 N IH0 T AY1 V AH0 L
+genitivally	JH EH2 N AH0 T AY1 V AH0 L IY0
 genitive	JH EH1 N IH0 T IH0 V
 genitor	JH EH1 N IH0 T ER0
 genitourinary	JH EH2 N IH0 T OW0 Y UH1 R AH0 N EH2 R IY0
@@ -47740,6 +47839,7 @@ germe	JH ER1 M
 germer	JH ER1 M ER0
 germicide	JH ER1 M AH0 S AY2 D
 germinal	JH ER1 M AH0 N AH0 L
+germinally	JH ER1 M AH0 N AH0 L IY0
 germinate	JH ER1 M AH0 N EY2 T
 germinated	JH ER1 M AH0 N EY2 T IH0 D
 germination	JH ER2 M AH0 N EY1 SH AH0 N
@@ -48462,6 +48562,7 @@ glabella	G L AH0 B EH1 L AH0
 glabrous	G L EY1 B R AH0 S
 glace	G L EY1 S
 glacial	G L EY1 SH AH0 L
+glacially	G L EY1 SH AH0 L IY0
 glaciate	G L EY1 SH IY0 EY2 T
 glaciated	G L EY1 SH IY0 EY2 T AH0 D
 glaciation	G L EY2 SH IY0 EY1 SH AH0 N
@@ -49921,6 +50022,7 @@ grammar	G R AE1 M ER0
 grammarian	G R AH0 M EH1 R IY0 AH0 N
 grammatical	G R AH0 M AE1 T AH0 K AH0 L
 grammaticalize	G R AH0 M AE1 T IH0 K AH0 L AY2 Z
+grammatically	G R AH0 M AE1 T AH0 K AH0 L IY0
 grammatico	G R AA0 M AA0 T IY1 K OW0
 grammer	G R AE1 M ER0
 grammies	G R AE1 M IY2 Z
@@ -51242,6 +51344,7 @@ guilds	G IH1 L D Z
 guildsman	G IH1 L D Z M AH0 N
 guile	G AY1 L
 guileful	G AY1 L F AH0 L
+guilefully	G AY1 L F AH0 L IY0
 guileless	G AY1 L L AH0 S
 guilelessly	G AY1 L L IH0 S L IY0
 guilelessness	G AY1 L L AH0 S N AH0 S
@@ -53317,6 +53420,7 @@ hatchway	HH AE1 CH W EY2
 hate	HH EY1 T
 hated	HH EY1 T AH0 D
 hateful	HH EY1 T F AH0 L
+hatefully	HH EY1 T F AH0 L IY0
 hatefulness	HH EY1 T F AH0 L N AH0 S
 hatem	HH AE1 T IH0 M
 hater	HH EY1 T ER0
@@ -53977,6 +54081,7 @@ heebner	HH IY1 B N ER0
 heed	HH IY1 D
 heeded	HH IY1 D AH0 D
 heedful	HH IY1 D F AH0 L
+heedfully	HH IY1 D F AH0 L IY0
 heedfulness	HH IY1 D F AH0 L N AH0 S
 heeding	HH IY1 D IH0 NG
 heedless	HH IY1 D L IH0 S
@@ -54261,6 +54366,7 @@ heliacal	HH IH0 L AY1 AH0 K AH0 L
 helianthemum	HH IY2 L IY0 AE1 N TH AH0 M AH0 M
 helianthus	HH IY2 L IY0 AE1 N TH AH0 S
 helical	HH EH1 L IH0 K AH0 L
+helically	HH EH1 L AH0 K AH0 L IY0
 helice	HH EH1 L IH0 S
 helicoid	HH EH1 L AH0 K OY2 D
 helicon	HH EH1 L IH0 K AA2 N
@@ -55631,6 +55737,7 @@ hirshhorn	HH ER1 SH HH AO2 R N
 hirshman	HH ER1 SH M AH0 N
 hirst	HH ER1 S T
 hirsute	HH ER0 S UW1 T
+hirsuteness	HH ER1 S UW2 T N AH0 S
 hirsutism	HH ER1 S UW0 T IH2 Z AH0 M
 hirt	HH ER1 T
 hirth	HH ER1 TH
@@ -58010,6 +58117,7 @@ hypercard	HH AY2 P ER0 K AA1 R D
 hyperchromatic	HH AY2 P ER0 K R OW0 M AE1 T IH0 K
 hyperconscious	HH AY2 P ER0 K AA1 N SH AH0 S
 hypercritical	HH AY2 P ER0 K R IH1 T IH0 K AH0 L
+hypercritically	HH AY2 P ER0 K R IH1 T AH0 K AH0 L IY0
 hyperdrive	HH AY1 P ER0 D R AY2 V
 hypergamy	HH AY0 P ER1 G AH0 M IY0
 hyperglycemia	HH AY2 P ER0 G L AY0 S IY1 M IY0 AH0
@@ -58314,6 +58422,7 @@ iden	AY1 D AH0 N
 ident	AY0 D EH1 N T
 identa	AY0 D EH1 N T AH0
 identical	AY0 D EH1 N T IH0 K AH0 L
+identically	AY0 D EH1 N T AH0 K AH0 L IY0
 identics	AY0 D EH1 N T IH0 K S
 identifiable	AY0 D EH1 N T AH0 F AY2 AH0 B AH0 L
 identification	AY0 D EH2 N T AH0 F AH0 K EY1 SH AH0 N
@@ -59322,6 +59431,7 @@ incompetents	IH2 N K AA1 M P AH0 T AH0 N T S
 incomplete	IH2 N K AH0 M P L IY1 T
 incompletion	IH2 N K AH0 M P L IY1 SH AH0 N
 incomprehensible	IH2 N K AA2 M P R AH0 HH EH1 N S AH0 B AH0 L
+incomprehensibleness	IH2 N K AA2 M P R AH0 HH EH1 N S AH0 B AH0 L N AH0 S
 incomprehensibly	IH2 NG K AA2 M P R AH0 HH EH1 N S IH0 B L IY0
 incomprehension	IH2 N K AA2 M P R AH0 HH EH1 N SH AH0 N
 incompressible	IH2 N K AH0 M P R EH1 S AH0 B AH0 L
@@ -59814,6 +59924,7 @@ inferential	IH2 N F ER0 EH1 N SH AH0 L
 inferior	IH2 N F IH1 R IY0 ER0
 inferiority	IH2 N F IH0 R IY0 AO1 R IH0 T IY2
 infernal	IH2 N F ER1 N AH0 L
+infernally	IH0 N F ER1 N AH0 L IY0
 inferno	IH2 N F ER1 N OW2
 inferred	IH2 N F ER1 D
 inferring	IH2 N F ER1 IH0 NG
@@ -59847,8 +59958,10 @@ infinger	IH1 N F IH0 NG ER0
 infinite	IH1 N F AH0 N AH0 T
 infinitely	IH1 N F AH0 N AH0 T L IY0
 infinitesimal	IH2 N F IH0 N IH0 T EH1 S IH0 M AH0 L
+infinitesimally	IH2 N F IH2 N AH0 T EH1 S AH0 M AH0 L IY0
 infiniti	IH2 N F IH1 N IH0 T IY0
 infinitival	IH2 N F IH0 N IH0 T AY1 V AH0 L
+infinitivally	IH2 N F IH0 N IH0 T AY1 V AH0 L IY0
 infinitive	IH2 N F IH1 N IH0 T IH0 V
 infinitude	IH0 N F IH1 N IH0 T UW2 D
 infinitum	IH2 N F IH1 N IH0 T AH0 M
@@ -60091,6 +60204,7 @@ inhofe	IH1 N HH OW2 F
 inhomogeneity	IH0 N HH OW2 M AH0 JH AH0 N IY1 IH0 T IY0
 inhomogeneous	IH2 N HH OW0 M AH0 JH IY1 N IY0 AH0 S
 inhospitable	IH0 N HH AA1 S P AH0 T AH0 B AH0 L
+inhospitableness	IH2 N HH AA0 S P IH1 T AH0 B AH0 L N AH0 S
 inhospitality	IH2 N HH AA0 S P IH0 T AE1 L IH0 T IY0
 inhouse	IH1 N HH AW2 S
 inhuman	IH2 N HH Y UW1 M AH0 N
@@ -60103,6 +60217,7 @@ iniguez	IH2 N IY1 G EH0 Z
 iniki	IY2 N IY1 K IY2
 inikpratt	IH2 N IY1 K P R AE0 T
 inimical	IH2 N IH1 M IH0 K AH0 L
+inimically	IH0 N IH1 M AH0 K AH0 L IY0
 inimitable	IH2 N IH1 M AH0 T AH0 B AH0 L
 inion	IH1 N IY0 AA0 N
 iniquitous	IH0 N IH1 K W IH0 T AH0 S
@@ -60480,6 +60595,7 @@ instinct	IH1 N S T IH0 NG K T
 instinctive	IH2 N S T IH1 NG K T IH0 V
 instinctively	IH2 N S T IH1 NG K T IH0 V L IY2
 instincts	IH1 N S T IH0 NG K T S
+instinctually	IH0 N S T IH1 NG K CH UW0 AH0 L IY0
 instinet	IH1 N S T IH0 N EH2 T
 institucional	IH2 N S T IH0 T UW2 S IY0 AH0 N AE1 L
 institut	IH1 N S T IH0 T UW0 T
@@ -60717,6 +60833,7 @@ intercooler	IH1 N T ER0 K UW2 L ER0
 intercorp	IH1 N T ER0 K AO2 R P
 intercorporation	IH2 N T ER0 K AO2 R P ER0 EY1 SH AH0 N
 intercostal	IH2 N T ER0 K AA1 S T AH0 L
+intercostally	IH2 N T ER0 K AA1 S T AH0 L IY0
 intercourse	IH1 N T ER0 K AO2 R S
 intercrop	IH2 N T ER0 K R AA1 P
 intercultural	IH2 N T ER0 K AH1 L CH ER0 AH0 L
@@ -60958,6 +61075,7 @@ interstates	IH1 N T ER0 S T EY2 T S
 interstellar	IH2 N T ER0 S T EH1 L ER0
 interstice	IH0 N T ER1 S T IH0 S
 interstitial	IH2 N T ER0 S T IH1 SH AH0 L
+interstitially	IH2 N T ER0 S T IH1 SH AH0 L IY0
 intersubjective	IH2 N T ER0 S AH0 B JH EH1 K T IH0 V
 intertan	IH2 N T ER0 T AE1 N
 intertech	IH1 N T ER0 T EH2 K
@@ -61129,6 +61247,7 @@ intuitively	IH2 N T UW1 IH0 T IH0 V L IY0
 intuitiveness	IH0 N T UW1 AH0 T IH0 V N AH0 S
 intumesce	IH2 N T UW0 M EH1 S
 intumescence	IH2 N T UW0 M EH1 S AH0 N S
+intussusception	IH2 N T AH0 S AH0 S EH1 P SH AH0 N
 intwine	IH0 N T W AY1 N
 inuit	IH1 N UW0 T
 inulin	IH1 N Y AH0 L IH0 N
@@ -61692,6 +61811,7 @@ isostasy	AY0 S AA1 S T AH0 S IY0
 isostatic	AY2 S AH0 S T AE1 T IH0 K
 isotherm	AY1 S AH0 TH ER2 M
 isothermal	AY2 S AH0 TH ER1 M AH0 L
+isothermally	AY2 S AH0 TH ER1 M AH0 L IY0
 isotoner	IH1 Z OW0 T AH2 N ER0
 isotonic	AY2 S AH0 T AA1 N IH0 K
 isotope	AY1 S AH0 T OW2 P
@@ -61717,6 +61837,7 @@ issachar	IH1 S AH0 K AA2 R
 issah	IH1 S AH0
 issam	IH1 S AH0 M
 issar	IY1 S AA2 R
+issei	IY1 S EY0
 issie	IH1 S IY0
 issing	IH1 S IH0 NG
 issuable	IH1 SH UW0 AH0 B AH0 L
@@ -63078,6 +63199,7 @@ jove	JH OW0 V
 jovi	JH OW1 V IY0
 jovial	JH OW1 V IY0 AH0 L
 joviality	JH OW2 V IY0 AE1 L IH0 T IY0
+jovially	JH OW1 V IY0 AH0 L IY0
 jovian	JH OW1 V IY0 AH0 N
 jovita	Y AH0 V AY1 T AH0
 jovito	JH OW0 V IY1 T OW0
@@ -67618,6 +67740,7 @@ laciniate	L AH0 S IH1 N IY0 EY2 T
 lacivita	L AA0 CH IY0 V IY1 T AH0
 lack	L AE1 K
 lackadaisical	L AE2 K AH0 D EY1 Z IH0 K AH0 L
+lackadaisically	L AE2 K AH0 D EY1 Z AH0 K AH0 L IY0
 lackaday	L AE1 K AH0 D EY2
 lackawanna	L AE2 K AH0 W AA1 N AH0
 lacked	L AE1 K T
@@ -67639,6 +67762,7 @@ lacomb	L AE1 K AH0 M
 lacombe	L AA0 K OW1 M B IY0
 laconian	L AH0 K OW1 N IY0 AH0 N
 laconic	L AA0 K AA1 N IH0 K
+laconically	L AH0 K AA1 N AH0 K AH0 L IY0
 laconicism	L AH0 K AA1 N IH0 S IH2 Z AH0 M
 laconte	L AA0 K OW1 N T IY0
 lacorte	L AA0 K AO1 R T IY0
@@ -68728,6 +68852,7 @@ latisha	L AH0 T IH1 SH AH0
 latitude	L AE1 T AH0 T UW2 D
 latitudes	L AE1 T AH0 T UW2 D Z
 latitudinal	L AE2 T AH0 T UW1 D AH0 N AH0 L
+latitudinally	L AE2 T AH0 T UW1 D AH0 N AH0 L IY0
 latitudinarian	L AE2 T AH0 T UW2 D AH0 N EH1 R IY0 AH0 N
 latium	L EY1 SH IY0 AH0 M
 latka	L AA1 T K AH0
@@ -70221,6 +70346,7 @@ lewandowski	L UW0 AH0 N D AO1 F S K IY0
 lewanna	L UW1 IH0 N AH0
 lewd	L UW1 D
 lewdly	L UW0 D L IY0
+lewdness	L UW1 D N AH0 S
 lewellen	L UW2 EH1 L AH0 N
 lewelling	L UW2 EH1 L IH0 NG
 lewellyn	L UW2 EH1 L IH0 N
@@ -70248,6 +70374,7 @@ lewton	L UW1 T AH0 N
 lewy	L UW1 IY0
 lex	L EH1 K S
 lexical	L EH1 K S IH0 K AH0 L
+lexically	L EH1 K S AH0 K AH0 L IY0
 lexicographer	L EH2 K S IH0 K AA1 G R AH0 F ER0
 lexicographers	L EH2 K S IH0 K AA1 G R AH0 F ER0 Z
 lexicography	L EH2 K S AH0 K AA1 G R AH0 F IY0
@@ -70352,6 +70479,7 @@ libertinism	L IH1 B ER0 T IY0 N IH2 Z AH0 M
 liberto	L IY0 B EH1 R T OW2
 liberty	L IH1 B ER0 T IY2
 libidinal	L IH0 B IH1 D AH0 N AH0 L
+libidinally	L AH0 B IH1 D AH0 N AH0 L IY0
 libidinous	L IH0 B IH1 D AH0 N AH0 S
 libidinously	L IH0 B IH1 D AH0 N AH0 S L IY0
 libidinousness	L AH0 B IH1 D AH0 N AH0 S N AH0 S
@@ -70845,6 +70973,7 @@ line	L AY1 N
 lineage	L IH1 N IY0 AH0 JH
 lineages	L IH1 N IY0 IH0 JH IH0 Z
 lineal	L IH1 N IY0 AH0 L
+lineally	L IH1 N IY0 AH0 L IY0
 lineament	L IH1 N IY0 AH0 M AH0 N T
 linear	L IH1 N IY0 ER0
 linearity	L IH2 N IY0 EH1 R IH0 T IY0
@@ -73810,6 +73939,7 @@ making	M EY1 K IH0 NG
 makings	M EY1 K IH0 NG Z
 makinson	M AE1 K IH0 N S AH0 N
 makita	M AH0 K IY1 T AH0
+makkah	M AE1 K AH0
 mako	M AA1 K OW0
 makos	M EY1 K OW0 Z
 makoto	M AH0 K OW1 T OW0
@@ -74861,6 +74991,7 @@ marish	M EH1 R IH0 SH
 marissa	M AH0 R IH1 S AH0
 marist	M EH1 R IH0 S T
 marital	M EH1 R AH0 T AH0 L
+maritally	M EH1 R AH0 T AH0 L IY0
 maritime	M EH1 R AH0 T AY2 M
 maritimes	M EH1 R AH0 T AY2 M Z
 maritz	M EH1 R IH0 T S
@@ -75665,6 +75796,7 @@ matriculating	M AH0 T R IH1 K Y AH0 L EY0 T IH0 NG
 matrilineal	M AE2 T R IH0 L IH1 N IY0 AH0 L
 matrilocal	M AE1 T R AH0 L OW2 K AH0 L
 matrimonial	M AE2 T R AH0 M OW1 N IY0 AH0 L
+matrimonially	M AE2 T R AH0 M OW1 N IY0 AH0 L IY0
 matrimony	M AE1 T R AH0 M OW2 N IY0
 matrix	M EY1 T R IH0 K S
 matrixes	M EY1 T R IH0 K S IH0 Z
@@ -77783,6 +77915,7 @@ menhaden	M EH0 N HH EY1 D AH0 N
 menhir	M EH1 N HH IH0 R
 menia	M IY1 N Y AH0
 menial	M IY1 N IY0 AH0 L
+menially	M IY1 N IY0 AH0 L IY0
 menifee	M EH1 N IH0 F IY2
 menil	M EH0 N IY1 L
 meningeal	M IH0 N IH1 N JH IY0 AH0 L
@@ -78360,6 +78493,7 @@ metonomy	M AH0 T AO1 N AH0 M IY0
 metonym	M EH1 T AH0 N IH0 M
 metonymic	M EH2 T AH0 N IH1 M IH0 K
 metonymical	M EH2 T AH0 N IH1 M IH0 K AH0 L
+metonymically	M EH2 T AH0 N IH1 M AH0 K AH0 L IY0
 metonymy	M IH0 T AA1 N AH0 M IY0
 metope	M EH1 T AH0 P IY2
 metoyer	M EH1 T OY0 ER0
@@ -78586,6 +78720,7 @@ microbes	M AY1 K R OW2 B Z
 microbial	M AY0 K R OW1 B IY0 AH0 L
 microbilt	M AY1 K R OW0 B IH2 L T
 microbiological	M AY2 K R OW0 B AY2 AH0 L AA1 JH IH0 K AH0 L
+microbiologically	M AY2 K R OW0 B AY2 AH0 L AA1 JH AH0 K AH0 L IY0
 microbiologist	M AY2 K R OW0 B IY0 AA1 L AH0 JH IH0 S T
 microbiologists	M AY2 K R OW0 B IY0 AA1 L AH0 JH IH0 S T S
 microbiology	M AY2 K R OW0 B AY2 AA1 L AH0 JH IY0
@@ -79031,6 +79166,7 @@ millerbrook	M IH1 L ER0 B R UH2 K
 millerick	M IH1 L ER0 IH0 K
 millers	M IH1 L ER0 Z
 millesimal	M IH0 L EH1 S AH0 M AH0 L
+millesimally	M AH0 L EH1 S AH0 M AH0 L IY0
 milleson	M IH1 L IH0 S AH0 N
 millet	M IH1 L AH0 T
 millets	M IH1 L AH0 T S
@@ -79510,6 +79646,7 @@ mirsad	M IH1 R S AE2 D
 mirsky	M ER1 S K IY0
 mirth	M ER1 TH
 mirthful	M ER1 TH F AH0 L
+mirthfully	M ER1 TH F AH0 L IY0
 mirthless	M ER1 TH L IH0 S
 mirthlessly	M ER1 TH L IH0 S L IY0
 mirthlessness	M ER1 TH L AH0 S N AH0 S
@@ -80446,6 +80583,7 @@ monarch	M AA1 N ER0 K
 monarchal	M AH0 N AA1 R K AH0 L
 monarchial	M AH0 N AA1 R K IY0 AH0 L
 monarchical	M AH0 N AA1 R K IH0 K AH0 L
+monarchically	M AH0 N AA1 R K IH0 K AH0 L IY0
 monarchies	M AA1 N AA0 R K IY0 Z
 monarchism	M AA1 N ER0 K IH2 Z AH0 M
 monarchist	M AA1 N AA0 R K IH0 S T
@@ -82348,6 +82486,7 @@ mycelium	M AY0 S IY1 L IY0 AH0 M
 mycenae	M AY0 S IY1 N IY0
 mycenaean	M AY2 S AH0 N IY1 AH0 N
 mycogen	M AY1 K OW0 G AH0 N
+mycologically	M AY2 K AH0 L AA1 JH AH0 K AH0 L IY0
 mycology	M AY0 K AA1 L AH0 JH IY0
 mycosis	M AY0 K OW1 S IH0 S
 mycotrophy	M AY0 K AA1 T R AH0 F IY0
@@ -82430,6 +82569,7 @@ mysterium	M IH2 S T IY1 R IY0 AH0 M
 mystery	M IH1 S T ER0 IY0
 mystic	M IH1 S T IH0 K
 mystical	M IH1 S T IH0 K AH0 L
+mystically	M IH1 S T AH0 K AH0 L IY0
 mysticism	M IH1 S T IH0 S IH2 Z AH0 M
 mystics	M IH1 S T IH0 K S
 mystified	M IH1 S T AH0 F AY2 D
@@ -82441,11 +82581,13 @@ myszka	M IH1 SH K AH0
 myth	M IH1 TH
 mythic	M IH1 TH IH0 K
 mythical	M IH1 TH AH0 K AH0 L
+mythically	M IH1 TH AH0 K AH0 L IY0
 mythicize	M IH1 TH IH0 S AY2 Z
 mythify	M IH1 TH AH0 F AY2
 mythographer	M IH0 TH AA1 G R AH0 F ER0
 mythography	M IH0 TH AA1 G R AH0 F IY0
 mythological	M IH2 TH AH0 L AA1 JH IH0 K AH0 L
+mythologically	M IH2 TH AH0 L AA1 JH AH0 K AH0 L IY0
 mythologize	M IH0 TH AA1 L AH0 JH AY2 Z
 mythology	M AH0 TH AA1 L AH0 JH IY2
 mythomania	M IH2 TH AH0 M EY1 N IY0 AH0
@@ -84404,6 +84546,7 @@ noctiluca	N AA2 K T AH0 L UW1 K AH0
 noctule	N AA1 K CH UW0 L
 nocturn	N AA1 K T ER0 N
 nocturnal	N AA0 K T ER1 N AH0 L
+nocturnally	N AA0 K T ER1 N AH0 L IY0
 nocturne	N AA1 K T ER0 N
 nod	N AA1 D
 noda	N OW1 D AH0
@@ -86046,6 +86189,7 @@ officiated	AH0 F IH1 SH IY0 EY2 T AH0 D
 officiates	AH0 F IH1 SH IY0 EY2 T S
 officiating	AH0 F IH1 SH IY0 EY2 T IH0 NG
 officinal	AH0 F IH1 S AH0 N AH0 L
+officinally	AH0 F IH1 S AH0 N AH0 L IY0
 officio	AH0 F IH1 S IY0 OW0
 officious	AH0 F IH1 SH AH0 S
 officiously	AH0 F IH1 SH AH0 S L IY0
@@ -86849,6 +86993,7 @@ orations	AO0 R EY1 SH AH0 N Z
 orator	AO1 R AH0 T ER0
 oratorian	AO2 R AH0 T AO1 R IY0 AH0 N
 oratorical	AO2 R AH0 T AO1 R AH0 K AH0 L
+oratorically	AO2 R AH0 T AO1 R AH0 K AH0 L IY0
 oratorio	AO2 R AH0 T AO1 R IY0 OW0
 orators	AO1 R AH0 T ER0 Z
 oratory	AO1 R AH0 T AO2 R IY0
@@ -87114,6 +87259,7 @@ ornish	AO1 R N IH0 SH
 ornithine	AO1 R N AH0 TH IY2 N
 ornithischian	AO2 R N AH0 TH IH1 S K IY0 AH0 N
 ornithological	AO2 R N IH0 TH AH0 L AA1 JH IH0 K AH0 L
+ornithologically	AO0 R N IH2 TH AH0 L AA1 JH AH0 K AH0 L IY0
 ornithology	AO2 R N IH0 TH AA1 L AH0 JH IY0
 ornithopter	AO2 R N AH0 TH AA1 P T ER0
 ornoff	AO1 R N AA0 F
@@ -87372,6 +87518,7 @@ ostentatious	AA2 S T AH0 N T EY1 SH AH0 S
 ostentatiously	AA2 S T AH0 N T EY1 SH AH0 S L IY0
 osteoarthritis	AA2 S T IY0 OW2 AA0 R TH R AY1 T AH0 S
 osteoid	AA1 S T IY0 OY2 D
+osteologically	AA2 S T IY0 AH0 L AA1 JH AH0 K AH0 L IY0
 osteology	AA2 S T IY0 AA1 L AH0 JH IY0
 osteomyelitis	AA2 S T IH0 OW0 M AY2 AH0 L AY1 T AH0 S
 osteopath	AA1 S T IY0 AH0 P AE2 TH
@@ -91697,6 +91844,7 @@ pharisees	F AA1 R IH0 S IY2 Z
 phariss	F ER0 IH1 S
 pharma	F AA1 R M AH0
 pharmaceutical	F AA2 R M AH0 S UW1 T IH0 K AH0 L
+pharmaceutically	F AA2 R M AH0 S UW1 T AH0 K AH0 L IY0
 pharmaceuticals	F AA2 R M AH0 S UW1 T IH0 K AH0 L Z
 pharmaceutics	F AA2 R M AH0 S UW1 T IH0 K S
 pharmacia	F AA0 R M EY1 S IY0 AH0
@@ -91706,6 +91854,7 @@ pharmacists	F AA1 R M AH0 S IH0 S T S
 pharmacodynamics	F AA2 R M AH0 K OW0 D AY0 N AE1 M IH0 K S
 pharmacognosy	F AA2 R M AH0 K AA1 G N AH0 S IY0
 pharmacological	F AA2 R M AH0 K AH0 L AA1 JH IH0 K AH0 L
+pharmacologically	F AA2 R M AH0 K AH0 L AA1 JH AH0 K AH0 L IY0
 pharmacologist	F AA2 R M AH0 K AA1 L AH0 JH IH0 S T
 pharmacologists	F AA2 R M AH0 K AA1 L AH0 JH IH0 S T S
 pharmacology	F AA2 R M AH0 K AA1 L AH0 JH IY0
@@ -91855,6 +92004,7 @@ philodendron	F IH2 L AH0 D EH1 N D R AH0 N
 philogynist	F IH0 L AA1 JH AH0 N IH0 S T
 philologian	F IH2 L AH0 L OW1 JH IY0 AH0 N
 philological	F IH2 L AH0 L AA1 JH IH0 K AH0 L
+philologically	F IH2 L AH0 L AA1 JH AH0 K AH0 L IY0
 philology	F IH1 L AA0 L AH0 JH IY0
 philomel	F IH1 L AH0 M EH2 L
 philomela	F IH2 L AH0 M IY1 L AH0
@@ -92000,6 +92150,7 @@ photolithographic	F OW2 T AH0 L IH2 TH AH0 G R AE1 F IH0 K
 photolithography	F OW2 T OW0 L IH0 TH AA1 G R AH0 F IY0
 photolysis	F OW0 T AA1 L IH0 S IH0 S
 photolytic	F OW2 T AH0 L IH1 T IH0 K
+photomechanically	F OW2 T OW0 M AH0 K AE1 N AH0 K AH0 L IY0
 photometer	F AH0 T AA1 M IH0 T ER0
 photomicrograph	F OW2 T OW0 M AY1 K R AH0 G R AE2 F
 photon	F OW1 T AA2 N
@@ -92706,6 +92857,7 @@ pirate	P AY1 R AH0 T
 pirated	P AY1 R AH0 T IH0 D
 pirates	P AY1 R AH0 T S
 piratical	P AY0 R AE1 T IH0 K AH0 L
+piratically	P AY0 R AE1 T AH0 K AH0 L IY0
 pirating	P AY1 R AH0 T IH0 NG
 pirelli	P IH0 R EH1 L IY0
 pires	P AY1 ER0 Z
@@ -93233,6 +93385,7 @@ plenteous	P L EH1 N T IY0 AH0 S
 plenteously	P L EH1 N T IY0 AH0 S L IY0
 plenteousness	P L EH1 N T IY0 AH0 S N AH0 S
 plentiful	P L EH1 N T AH0 F AH0 L
+plentifully	P L EH1 N T AH0 F AH0 L IY0
 plentifulness	P L EH1 N T AH0 F AH0 L N AH0 S
 plenty	P L EH1 N T IY0
 plenum	P L EH1 N AH0 M
@@ -94023,6 +94176,7 @@ pontic	P AA1 N T IH0 K
 pontifex	P AA1 N T AH0 F EH2 K S
 pontiff	P AA1 N T AH0 F
 pontifical	P AA0 N T IH1 F AH0 K AH0 L
+pontifically	P AA0 N T IH1 F IH0 K AH0 L IY0
 pontificate	P AA0 N T IH1 F AH0 K EY2 T
 pontificated	P AA0 N T IH1 F AH0 K EY2 T IH0 D
 pontificater	P AA0 N T IH1 F AH0 K EY2 T ER0
@@ -95977,6 +96131,7 @@ pronged	P R AO1 NG D
 pronger	P R AO1 N G ER0
 pronghorn	P R AO1 NG HH AO2 R N
 prongs	P R AO1 NG Z
+pronominally	P R OW0 N AA1 M AH0 N AH0 L IY0
 pronoun	P R OW1 N AW0 N
 pronounce	P R AH0 N AW1 N S
 pronounced	P R AH0 N AW1 N S T
@@ -96260,6 +96415,7 @@ protoplast	P R OW1 T AH0 P L AE2 S T
 prototype	P R OW1 T AH0 T AY2 P
 prototypes	P R OW1 T AH0 T AY2 P S
 prototypical	P R OW2 T AH0 T IH1 P IH0 K AH0 L
+prototypically	P R OW2 T AH0 T IH1 P AH0 K AH0 L IY0
 prototyping	P R OW1 T OW0 T AY2 P IH0 NG
 protozoa	P R OW2 T AH0 Z OW1 AH0
 protozoal	P R OW2 T AH0 Z OW1 AH0 L
@@ -96365,6 +96521,7 @@ prowse	P R AW1 Z
 proxemics	P R AA0 K S IY1 M IH0 K S
 proxies	P R AA1 K S IY0 Z
 proximal	P R AA1 K S AH0 M AH0 L
+proximally	P R AA1 K S AH0 M AH0 L IY0
 proximate	P R AA1 K S AH0 M AH0 T
 proximately	P R AA1 K S AH0 M IH0 T L IY0
 proximity	P R AA0 K S IH1 M AH0 T IY0
@@ -97186,6 +97343,7 @@ quadratic	K W AA0 D R AE1 T IH0 K
 quadrature	K W AA1 D R AH0 CH ER0
 quadrennia	K W AA0 D R EH1 N IY0 AH0
 quadrennial	K W AA0 D R EH1 N IY0 AH0 L
+quadrennially	K W AA0 D R EH1 N IY0 AH0 L IY0
 quadrennium	K W AA0 D R EH1 N IY0 AH0 M
 quadrex	K W AA1 D R EH0 K S
 quadric	K W AA1 D R IH0 K
@@ -99889,6 +100047,7 @@ regard	R IH0 G AA1 R D
 regardant	R IH0 G AA1 R D AH0 N T
 regarded	R IH0 G AA1 R D IH0 D
 regardful	R IH0 G AA1 R D F AH0 L
+regardfully	R AH0 G AA1 R D F AH0 L IY0
 regarding	R IH0 G AA1 R D IH0 NG
 regardless	R AH0 G AA1 R D L AH0 S
 regards	R IH0 G AA1 R D Z
@@ -99928,6 +100087,7 @@ regimen	R EH1 JH AH0 M AH0 N
 regimens	R EH1 JH AH0 M AH0 N Z
 regiment	R EH1 JH AH0 M AH0 N T
 regimental	R EH2 JH AH0 M EH1 N T AH0 L
+regimentally	R EH2 JH AH0 M EH1 N T AH0 L IY0
 regimentals	R EH2 JH AH0 M EH1 N T AH0 L Z
 regimentation	R EH2 JH AH0 M AH0 N T EY1 SH AH0 N
 regimented	R EH1 JH AH0 M EH2 N T IH0 D
@@ -100572,6 +100732,7 @@ remonstrator	R IH0 M AA1 N S T R EY0 T ER0
 remontant	R IH0 M AA1 N T AH0 N T
 remorse	R IH0 M AO1 R S
 remorseful	R IH0 M AO1 R S F AH0 L
+remorsefully	R AH0 M AO1 R S F AH0 L IY0
 remorseless	R IH0 M AO1 R S L AH0 S
 remorselessly	R IH0 M AO1 R S L IH0 S L IY0
 remorselessness	R AH0 M AO1 R S L AH0 S N AH0 S
@@ -101675,6 +101836,7 @@ revels	R EH1 V AH0 L Z
 revenant	R EH1 V AH0 N AH0 N T
 revenge	R IH0 V EH1 N JH
 revengeful	R IH0 V EH1 N JH F AH0 L
+revengefully	R AH0 V EH1 N JH F AH0 L IY0
 revengefulness	R AH0 V EH1 N JH F AH0 L N AH0 S
 revenue	R EH1 V AH0 N UW2
 revenuer	R EH1 V AH0 N UW2 ER0
@@ -104670,6 +104832,7 @@ saco	S EY1 K OW0
 sacra	S AE1 K R AH0
 sacrament	S AE1 K R AH0 M AH0 N T
 sacramental	S AE1 K R AH0 M AH0 N T AH0 L
+sacramentally	S AE2 K R AH0 M EH1 N T AH0 L IY0
 sacramento	S AE2 K R AH0 M EH1 N T OW0
 sacraments	S AE1 K R AH0 M AH0 N T S
 sacrarium	S AH0 K R EH1 R IY0 AH0 M
@@ -106263,6 +106426,7 @@ scents	S EH1 N T S
 scepter	S EH1 P T ER0
 sceptic	S K EH1 P T IH0 K
 sceptical	S K EH1 P T IH0 K AH0 L
+sceptically	S K EH1 P T AH0 K AH0 L IY0
 scepticism	S K EH1 P T IH0 S IH2 Z AH0 M
 sceptics	S K EH1 P T IH0 K S
 sceptre	S EH1 P T ER0
@@ -107319,6 +107483,7 @@ scoring	S K AO1 R IH0 NG
 scorn	S K AO1 R N
 scorned	S K AO1 R N D
 scornful	S K AO1 R N F AH0 L
+scornfully	S K AO1 R N F AH0 L IY0
 scornfulness	S K AO1 R N F AH0 L N AH0 S
 scorns	S K AO1 R N Z
 scorpio	S K AO1 R P IY0 OW2
@@ -107867,6 +108032,7 @@ section	S EH1 K SH AH0 N
 sectional	S EH1 K SH AH0 N AH0 L
 sectionalism	S EH1 K SH AH0 N AH0 L IH2 Z AH0 M
 sectionalize	S EH1 K SH AH0 N AH0 L AY2 Z
+sectionally	S EH1 K SH AH0 N AH0 L IY0
 sectioned	S EH1 K SH AH0 N D
 sectioning	S EH1 K SH AH0 N IH0 NG
 sections	S EH1 K SH AH0 N Z
@@ -108604,6 +108770,7 @@ septuple	S EH1 P T AH0 P AH0 L
 septuplet	S EH0 P T AH1 P L IH0 T
 sepulcher	S EH1 P AH0 L K ER0
 sepulchral	S AH0 P AH1 L K R AH0 L
+sepulchrally	S AH0 P AH1 L K R AH0 L IY0
 sepulchre	S EH1 P AH0 L K ER0
 sepultura	S EH1 P UH0 L T UH1 R UH0
 sepulture	S EH1 P AH0 L CH ER0
@@ -108844,6 +109011,7 @@ setser	S EH1 T S ER0
 sett	S EH0 T
 settanni	S EH0 T AA1 N IY0
 sette	S EH1 T
+settee	S EH0 T IY1
 setter	S EH1 T ER0
 setterlund	S EH1 T ER0 L AH0 N D
 setters	S EH1 T ER0 Z
@@ -109718,6 +109886,7 @@ shillinger	SH IH1 L IH0 N JH ER0
 shillinglaw	SH IH1 L IH0 NG L AO2
 shillings	SH IH1 L IH0 NG Z
 shillington	SH IH1 L IH0 NG T AH0 N
+shillong	SH AH0 L AO1 NG
 shiloh	SH AY1 L OW0
 shilts	SH IH1 L T S
 shim	SH IH1 M
@@ -110965,6 +111134,7 @@ sinewy	S IH1 N Y UW0 IY0
 sinfonia	S IH0 N F OW1 N IY0 AH0
 sinfonietta	S IH2 N F AH0 N Y EH1 T AH0
 sinful	S IH1 N F AH0 L
+sinfully	S IH1 N F AH0 L IY0
 sinfulness	S IH1 N F AH0 L N AH0 S
 sing	S IH1 NG
 singapore	S IH1 NG AH0 P AO2 R
@@ -111011,6 +111181,7 @@ sinisi	S IH0 N IY1 S IY0
 sinister	S IH1 N IH0 S T ER0
 sinistral	S IH1 N IH0 S T R AH0 L
 sinistrality	S IH2 N IH0 S T R AE1 L IH0 T IY0
+sinistrally	S IH1 N IH0 S T R AH0 L IY0
 sink	S IH1 NG K
 sinker	S IH1 NG K ER0
 sinkfield	S IH1 NG K F IY2 L D
@@ -113531,6 +113702,7 @@ spath	S P AE1 TH
 spathe	S P EY0 DH
 spatial	S P EY1 SH AH0 L
 spatiality	S P EY2 SH IY0 AE1 L IH0 T IY0
+spatially	S P EY1 SH AH0 L IY0
 spatola	S P AA0 T OW1 L AA0
 spats	S P AE1 T S
 spatter	S P AE1 T ER0
@@ -113945,6 +114117,7 @@ spiral	S P AY1 R AH0 L
 spiraled	S P AY1 R AH0 L D
 spiraling	S P AY1 R AH0 L IH0 NG
 spiralling	S P AY1 R AH0 L IH0 NG
+spirally	S P AY1 R AH0 L IY0
 spirals	S P AY1 R AH0 L Z
 spirant	S P AY1 R AH0 N T
 spirantize	S P AY1 R AH0 N T AY2 Z
@@ -117398,6 +117571,7 @@ suhua	S UW1 HH W AA1
 suhud	S UW0 HH UH1 D
 sui	S UW1 IY0
 suicidal	S UW2 AH0 S AY1 D AH0 L
+suicidally	S UW2 AH0 S AY1 D AH0 L IY0
 suicide	S UW1 AH0 S AY2 D
 suicides	S UW1 AH0 S AY2 D Z
 suing	S UW1 IH0 NG
@@ -117776,6 +117950,7 @@ superminicomputers	S UW1 P ER0 M IH2 N IY0 K AH0 M P Y UW2 T ER0 Z
 supermodel	S UW1 P ER0 M AA2 D AH0 L
 supermodels	S UW1 P ER0 M AA2 D AH0 L Z
 supernal	S AH0 P ER1 N AH0 L
+supernally	S AH0 P ER1 N AH0 L IY0
 supernatant	S UW2 P ER0 N EY1 T AH0 N T
 supernatural	S UW2 P ER0 N AE1 CH ER0 AH0 L
 supernaturalism	S UW2 P ER0 N AE1 CH ER0 AH0 L IH2 Z AH0 M
@@ -119703,6 +119878,7 @@ tauscher	T AW1 SH ER0
 taussig	T AW1 S IH0 G
 taut	T AO1 T
 tautological	T AO2 T AH0 L AA1 JH IH0 K AH0 L
+tautologically	T AO2 T AH0 L AA1 JH AH0 K AH0 L IY0
 tautologize	T AO0 T AA1 L AH0 JH AY2 Z
 tautology	T AO0 T AA1 L AH0 JH IY0
 tautomer	T AO1 T AH0 M ER0
@@ -120924,6 +121100,7 @@ theorizing	TH IY1 ER0 AY2 Z IH0 NG
 theory	TH IH1 R IY0
 theosophic	TH IY0 AH0 S AA1 F IH0 K
 theosophical	TH IY2 AH0 S AA1 F IH0 K AH0 L
+theosophically	TH IY2 AH0 S AA1 F AH0 K AH0 L IY0
 theosophy	TH IY0 AA1 S AH0 F IY0
 thera	TH EH1 R AH0
 therafectin	TH EH2 R AH0 F EH1 K T IH0 N
@@ -121548,6 +121725,7 @@ ticonderoga	T AY0 K AA2 N D ER0 OW1 G AH0
 ticor	T AY1 K AO2 R
 tics	T IH1 K S
 tidal	T AY1 D AH0 L
+tidally	T AY1 D AH0 L IY0
 tidball	T IH1 D B AO2 L
 tidbit	T IH1 D B IH2 T
 tidbits	T IH1 D B IH0 T S
@@ -122069,6 +122247,7 @@ togethers	T AH0 G EH1 DH ER0 Z
 toggle	T AA1 G AH0 L
 toggled	T AA1 G AH0 L D
 toggling	T AA1 G L IH0 NG
+togliatti	T AO0 L Y AA1 T IY0
 tognino	T AA2 G N IY1 N OW0
 togo	T OW1 G OW0
 togs	T AA1 G Z
@@ -122386,6 +122565,7 @@ topiary	T OW1 P IY0 EH2 R IY0
 topic	T AA1 P IH0 K
 topical	T AA1 P AH0 K AH0 L
 topicality	T AA2 P AH0 K AE1 L IH0 T IY0
+topically	T AA1 P AH0 K AH0 L IY0
 topics	T AA1 P IH0 K S
 topix	T OW1 P IH2 K S
 topkapi	T AA2 P K AA1 P IY0
@@ -123641,6 +123821,7 @@ triglyph	T R AY1 G L IH2 F
 trigo	T R IY1 G OW0
 trigon	T R AY1 G AA0 N
 trigonal	T R IH1 G AH0 N AH0 L
+trigonally	T R IH1 G AH0 N AH0 L IY0
 trigone	T R AY1 G OW0 N
 trigonometric	T R IH2 G AH0 N AH0 M EH1 T R IH0 K
 trigraph	T R AY1 G R AE0 F
@@ -124317,6 +124498,7 @@ tundra	T AH1 N D R AH0
 tune	T UW1 N
 tuned	T UW1 N D
 tuneful	T UW1 N F AH0 L
+tunefully	T UW1 N F AH0 L IY0
 tunefulness	T UW1 N F AH0 L N AH0 S
 tuneless	T UW1 N L IH0 S
 tunelessly	T UW1 N L IH0 S L IY0
@@ -124997,6 +125179,7 @@ umber	AH1 M B ER0
 umberger	AH1 M B ER0 G ER0
 umberto	AH0 M B EH1 R T OW2
 umbilical	AH0 M B IH1 L IH0 K AH0 L
+umbilically	AH2 M B IH1 L IH0 K AH0 L IY0
 umbilicate	AH0 M B IH1 L AH0 K IH0 T
 umbilicus	AH0 M B IH1 L AH0 K AH0 S
 umble	AH1 M B AH0 L
@@ -125234,6 +125417,7 @@ uncircumcised	AH0 N S ER1 K AH0 M S AY2 Z D
 uncircumcision	AH2 N S ER0 K AH0 M S IH1 ZH AH0 N
 uncivil	AH0 N S IH1 V AH0 L
 uncivilized	AH0 N S IH1 V AH0 L AY0 Z D
+uncivilly	AH2 N S IH1 V AH0 L IY0
 unclad	AH0 N K L AE1 D
 unclaimed	AH0 N K L EY1 M D
 unclamp	AH0 N K L AE1 M P
@@ -125708,6 +125892,7 @@ unexamined	AH2 N IH0 G Z AE1 M IH0 N D
 unexceptionable	AH2 N IH0 K S EH1 P SH AH0 N AH0 B AH0 L
 unexceptionableness	AH2 N AH0 K S EH1 P SH AH0 N AH0 B AH0 L N AH0 S
 unexceptional	AH2 N IH0 K S EH1 P SH AH0 N AH0 L
+unexceptionally	AH2 N AH0 K S EH1 P SH AH0 N AH0 L IY0
 unexcitable	AH2 N IH0 K S AY1 T AH0 B AH0 L
 unexciting	AH0 N IH0 K S AY1 T IH0 NG
 unexercised	AH0 N EH1 K S ER0 S AY2 Z D
@@ -125730,6 +125915,7 @@ unfair	AH0 N F EH1 R
 unfairly	AH0 N F EH1 R L IY0
 unfairness	AH0 N F EH1 R N AH0 S
 unfaithful	AH0 N F EY1 TH F AH0 L
+unfaithfully	AH2 N F EY1 TH F AH0 L IY0
 unfaithfulness	AH2 N F EY1 TH F AH0 L N AH0 S
 unfamiliar	AH2 N F AH0 M IH1 L Y ER0
 unfamiliarities	AH2 N F AH0 M IH2 L Y EH1 R AH0 T IY0 Z
@@ -125781,6 +125967,7 @@ unforgivable	AH2 N F AO0 R G IH1 V AH0 B AH0 L
 unforgiven	AH2 N F AO0 R G IH1 V AH0 N
 unforgiving	AH0 N F ER0 G IH1 V IH0 NG
 unformed	AH0 N F AO1 R M D
+unforthcoming	AH2 N F AO2 R TH K AH1 M IH0 NG
 unfortified	AH0 N F AO1 R T IH0 F AY2 D
 unfortunate	AH0 N F AO1 R CH AH0 N AH0 T
 unfortunately	AH0 N F AO1 R CH AH0 N AH0 T L IY0
@@ -125901,6 +126088,7 @@ unilateralism	Y UW2 N IH0 L AE1 T ER0 AH0 L IH2 Z AH0 M
 unilaterally	Y UW2 N AH0 L AE1 T ER0 AH0 L IY0
 unilever	Y UW2 N IH0 L IY1 V ER0
 unilingual	Y UW2 N AH0 L IH1 NG G W AH0 L
+unilocular	Y UW2 N AH0 L AA1 K Y AH0 L ER0
 unimaginable	AH2 N IH0 M AE1 JH IH0 N AH0 B AH0 L
 unimaginative	AH0 N IH0 M AE1 JH IH2 N AH0 T IH0 V
 unimagined	AH2 N IH0 M AE1 JH AH0 N D
@@ -126418,6 +126606,7 @@ unseen	AH0 N S IY1 N
 unselect	AH2 N S IH0 L EH1 K T
 unselfconscious	AH2 N S EH0 L F K AA1 N SH AH0 S
 unselfconsciously	AH2 N S EH0 L F K AA1 N SH AH0 S L IY0
+unselfconsciousness	AH2 N S EH2 L F K AA1 N SH AH0 S N AH0 S
 unselfish	AH0 N S EH1 L F IH0 SH
 unselfishly	AH0 N S EH1 L F IH0 SH L IY0
 unselfishness	AH2 N S EH1 L F IH0 SH N AH0 S
@@ -126458,6 +126647,7 @@ unsinkable	AH0 N S IH1 NG K AH0 B AH0 L
 unsized	AH0 N S AY1 Z D
 unskilled	AH0 N S K IH1 L D
 unskillful	AH0 N S K IH1 L F AH0 L
+unskillfully	AH2 N S K IH1 L F AH0 L IY0
 unskillfulness	AH2 N S K IH1 L F AH0 L N AH0 S
 unskimmed	AH0 N S K IH1 M D
 unsling	AH0 N S L IH1 NG
@@ -127305,6 +127495,7 @@ vallejos	V AA0 L EY1 Y OW0 Z
 vallely	V EY1 L IY0
 vallery	V AE1 L ER0 IY0
 valles	V EY1 L Z
+valletta	V AH0 L EH1 T AH0
 vallette	V AE2 L EH1 T
 valley	V AE1 L IY0
 valleys	V AE1 L IY0 Z
@@ -128110,6 +128301,7 @@ venezuelan	V EH2 N IH0 Z W EY1 L AH0 N
 venezuelans	V EH2 N IH0 Z W EY1 L AH0 N Z
 vengeance	V EH1 N JH AH0 N S
 vengeful	V EH1 N JH F AH0 L
+vengefully	V EH1 N JH F AH0 L IY0
 vengefulness	V EH1 N JH F AH0 L N AH0 S
 venial	V IY1 N IY0 AH0 L
 venice	V EH1 N AH0 S
@@ -128152,6 +128344,7 @@ ventner	V EH1 N T N ER0
 vento	V EH1 N T OW0
 ventola	V EH0 N T OW1 L AH0
 ventral	V EH1 N T R AH0 L
+ventrally	V EH1 N T R AH0 L IY0
 ventre	V EH1 N T ER0
 ventrella	V EH2 N T R EH1 L AH0
 ventres	V EH1 N T ER0 Z
@@ -128362,6 +128555,7 @@ versace	V ER0 S AA1 CH EY0
 versailles	V EH0 R S AY1
 versant	V ER1 S AH0 N T
 versatile	V ER1 S AH0 T AH0 L
+versatilely	V ER1 S AH0 T AH0 L IY0
 versatility	V ER2 S AH0 T IH1 L AH0 T IY0
 verse	V ER1 S
 versed	V ER1 S T
@@ -128450,6 +128644,7 @@ vestibules	V EH1 S T IH0 B Y UW2 L Z
 vestige	V EH1 S T IH0 JH
 vestiges	V EH1 S T IH0 JH IH0 Z
 vestigial	V AH0 S T IH1 JH IY0 AH0 L
+vestigially	V EH0 S T IH1 JH IY0 AH0 L IY0
 vesting	V EH1 S T IH0 NG
 vestment	V EH1 S T M AH0 N T
 vestments	V EH1 S T M EH0 N T S
@@ -129752,6 +129947,7 @@ wakashan	W AA0 K AE1 SH AH0 N
 wake	W EY1 K
 wakefield	W EY1 K F IY2 L D
 wakeful	W EY1 K F AH0 L
+wakefully	W EY1 K F AH0 L IY0
 wakefulness	W EY1 K F AH0 L N AH0 S
 wakeham	W AE1 K AH0 M
 wakeland	W EY1 K L AH0 N D
@@ -130325,6 +130521,7 @@ watcher	W AA1 CH ER0
 watchers	W AA1 CH ER0 Z
 watches	W AA1 CH AH0 Z
 watchful	W AA1 CH F AH0 L
+watchfully	W AA1 CH F AH0 L IY0
 watchfulness	W AA1 CH F AH0 L N AH0 S
 watching	W AA1 CH IH0 NG
 watchmaker	W AA1 CH M EY2 K ER0
@@ -133166,6 +133363,7 @@ worshiped	W ER1 SH IH0 P T
 worshiper	W ER1 SH AH0 P ER0
 worshipers	W ER1 SH IH0 P ER0 Z
 worshipful	W ER1 SH AH0 P F AH0 L
+worshipfully	W ER1 SH IH0 P F AH0 L IY0
 worshipfulness	W ER1 SH IH0 P F AH0 L N AH0 S
 worshiping	W ER1 SH AH0 P IH2 NG
 worshipped	W ER1 SH AH0 P T
