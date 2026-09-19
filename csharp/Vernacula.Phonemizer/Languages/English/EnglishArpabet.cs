@@ -252,8 +252,15 @@ public static class EnglishArpabet
     /// purpose. Omitted (the OOV tagger's path) means no word has syllabic slots — the prior
     /// behaviour. Mirrors englishArpabet.ts.
     /// </param>
+    /// <param name="nasalSeam">
+    /// Word → the indices of its ARPABET phones that are an N before a K/G at a COMPOUND SEAM, where
+    /// the velar assimilation below must not fire (en-nasal-seam.tsv). Injected for the same reason
+    /// syllabic is: this class is data-free, and the fact is lexical — measured, not assumed. See
+    /// englishArpabet.ts and Run 27 of the English audit.
+    /// </param>
     public static Func<IReadOnlyList<string>, string, string> MakeArpabetToIpa(
-        ArpabetDef def, IReadOnlyDictionary<string, IReadOnlyList<int>>? syllabic = null)
+        ArpabetDef def, IReadOnlyDictionary<string, IReadOnlyList<int>>? syllabic = null,
+        IReadOnlyDictionary<string, IReadOnlyList<int>>? nasalSeam = null)
     {
         var map = def.Map;
         var cv = def.ConditionalVowels;
@@ -362,6 +369,8 @@ public static class EnglishArpabet
                 // finger) and `N` where it does not (923), but 346 of that second group are slips on
                 // tautomorphemic words — anglophile, anglophone, ankh, ancona — which this fixes.
                 //
+                // ⚠ AND A COMPOUND SEAM BLOCKS IT TOO (pan·cake, rain·coat, man·kind, Lenin·grad) — a
+                // TABLE and not a rule, because no rule survives the evidence. See englishArpabet.ts.
                 // ⚠ AND IT MUST NOT CROSS A TRANSPARENT PREFIX BOUNDARY, where assimilation is blocked
                 // and CMUdict's `N` is a statement rather than a slip. Unconditioned it read `unclean`
                 // as əŋklˈiːn. Four independent lines agree on `n` there: the dictionary, Moby, the
@@ -374,7 +383,8 @@ public static class EnglishArpabet
                 // (full list 68.9%, un|in|non 65.2%, none 52.0% over the 867 words Moby covers).
                 // ⚠ MIRRORS src/languages/english/englishArpabet.ts; the goldens are the parity gate.
                 if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G")
-                    && !(i <= 6 && TRANSPARENT_PREFIX.IsMatch(word)))
+                    && !(i <= 6 && TRANSPARENT_PREFIX.IsMatch(word))
+                    && !(nasalSeam is not null && nasalSeam.TryGetValue(word, out var seam) && seam.Contains(i)))
                 {
                     outSb.Append('ŋ');
                     continue;

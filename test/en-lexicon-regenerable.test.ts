@@ -29,7 +29,17 @@ for (const line of readFileSync(join(DATA, "en-syllabic.tsv"), "utf8").split("\n
     const tab = line.indexOf("\t");
     if (tab > 0) syllabic.set(line.slice(0, tab), line.slice(tab + 1).trim().split(",").map(Number));
 }
-const toIpa = makeArpabetToIpa(MANIFEST.arpabet, syllabic);
+// ⚠ AND SO IS THE SEAM TABLE, which is now the THIRD copy of this loader — english.ts, the rebuild tool
+// and this gate. A table added without touching all three shows up here as an un-reproducible lexicon,
+// which is the right failure but not an obvious one, so: if this gate reports rows that differ only in
+// `ŋ` against `n` before a velar, en-nasal-seam.tsv reached the renderer and not this test.
+const nasalSeam = new Map<string, number[]>();
+for (const line of readFileSync(join(DATA, "en-nasal-seam.tsv"), "utf8").split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const tab = line.indexOf("\t");
+    if (tab > 0) nasalSeam.set(line.slice(0, tab), line.slice(tab + 1).trim().split(",").map(Number));
+}
+const toIpa = makeArpabetToIpa(MANIFEST.arpabet, syllabic, nasalSeam);
         const arpabet = new Map<string, string[]>();
         for (const line of readFileSync(join(DATA, "g2p-dict.tsv"), "utf8").split("\n")) {
             if (!line || line.startsWith("#")) continue;

@@ -43,7 +43,17 @@ for (const line of readFileSync(join(DATA, "en-syllabic.tsv"), "utf8").split("\n
     syllabic.set(line.slice(0, tab), line.slice(tab + 1).trim().split(",").map(Number));
 }
 
-const toIpa = makeArpabetToIpa(MANIFEST.arpabet, syllabic);
+// ⚠ AND SO MUST THE SEAM TABLE, for the same reason: the velar assimilation it blocks is baked into
+// this file, so a rebuild without it would silently re-assimilate every `pan·cake` seam.
+const nasalSeam = new Map<string, number[]>();
+for (const line of readFileSync(join(DATA, "en-nasal-seam.tsv"), "utf8").split("\n")) {
+    if (!line || line.startsWith("#")) continue;
+    const tab = line.indexOf("\t");
+    if (tab <= 0) continue;
+    nasalSeam.set(line.slice(0, tab), line.slice(tab + 1).trim().split(",").map(Number));
+}
+
+const toIpa = makeArpabetToIpa(MANIFEST.arpabet, syllabic, nasalSeam);
 
 const arpabet = new Map<string, string[]>();
 for (const line of readFileSync(join(DATA, "g2p-dict.tsv"), "utf8").split("\n")) {
