@@ -72,9 +72,16 @@
  *   694 of them `LL`). The engine's OOV paths finish every reading through `collapseGeminates`, so they
  *   CANNOT emit one — scoring them against a geminate marks us wrong on a class we can neither get right
  *   nor regress on, which is the same argument FORCE→NORTH is applied under above.
- *   ⚠ THE DICTIONARY PATH DOES NOT COLLAPSE, which is why this stops at the OOV file: 144 `g2p-dict.tsv`
+ *   ⚠ THE DICTIONARY PATH DOES NOT COLLAPSE, which is why this stops at the OOV file: 150 `g2p-dict.tsv`
  *   rows carry a real geminate (`backcourt`, `barroom`, `blackcap` — compound seams), so in the LEXICON
  *   file the engine has freedom here and a blanket fold would hide a genuine difference.
+ *   ⚠ WITH ONE CARVE-OUT, `collapseSuffixL` BELOW, which does reach the lexicon file. It is not a
+ *   blanket fold: it removes an `L` after an `L` and only where the headword is spelled `-lly`, where
+ *   the geminate is Moby transcribing the ⟨ll⟩ rather than recording a seam. Read that block before
+ *   treating this paragraph as absolute.
+ *   ⚠ AND THE COUNT WAS 144 HERE AND 155 IN THE BLOCK BELOW, two figures for one class written at
+ *   different times. It is 150 after this branch corrects five `-lly` rows that were themselves the
+ *   defect — so the older number counted part of what it was protecting against.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -153,7 +160,43 @@ function fixInitialYod(word: string, a: string[]): string[] {
     return out;
 }
 
-/** Collapse an identical adjacent CONSONANT pair — see the header. OOV rows only. */
+/**
+ * The `-lly` geminate, collapsed on BOTH files.
+ *
+ * ⚠ THIS IS THE ONE CARVE-OUT FROM THE OOV-ONLY RULE, and it is safe for a reason the blanket collapse
+ * is not: the geminate here is Moby transcribing the ⟨ll⟩ SPELLING of the adverbial suffix, not a claim
+ * about a compound seam. `abnormally` is `æbnɔɹməlli`, `annually` `ænjuəlli`, `bally` `bælli` — 102 rows
+ * of the in-dictionary residual, every one stem-final ⟨l⟩ plus `-ly`.
+ * ⚠ AND OUR OWN DICTIONARY AGREES, WHICH IS THE ARGUMENT — not the referee. Stem-l + `-ly` degeminates
+ * in GenAm (`fully` is /ˈfʊli/) and 708 `-lly` rows said so against 5; restricted to the words whose
+ * STEM is itself in the dictionary and ends in /L/, which is the like-for-like comparison, it was 551
+ * to 3, with `fully`, `coolly`, `cruelly`, `wholly`, `solely` and `civilly` all single. The five
+ * exceptions were CMUdict's own inconsistency and are corrected in `g2p-curated.tsv`.
+ * ⚠ THE en-GB REFEREE IS NOT A CLEAN WITNESS HERE AND WAS FIRST CITED AS IF IT WERE. It reads `evilly`
+ * as `iːvli` (single, both variants) but `foully` as BOTH `faʊli` and `faʊlli`, and `drolly` — the
+ * headline example — as `dɹəʊlli`, geminate, its only variant. Quoting the two that agreed and not the
+ * one that did not is how a weak witness gets mistaken for a strong one; the internal 551-to-3 needs
+ * no witness at all.
+ * ⚠ THE PHONE FILTER IS THE REAL PROTECTION, not the spelling gate: this removes only an `L` preceded
+ * by an `L`. `unnaturally` is the one dictionary word that both ends `-lly` and carries a real
+ * geminate, and its geminate is `N N` — invisible here. Of the 150 real geminates left in
+ * `g2p-dict.tsv` after this change, no other ends `-lly`, and `earring`, `bookkeeper`, `coattail` and
+ * `backcourt` are untouched.
+ * ⚠ A BOUNDARY-TABLE GATE WAS TRIED FIRST AND REJECTED — only 88 of those geminates have a row in
+ * `tools/gen/en-morph-boundary.tsv`, and the uncovered ones are exactly the inflections (`earrings`,
+ * `bookkeepers`, `coattails`), so gating on it would collapse what the OOV-only rule protects.
+ * ⚠ AND IT BUYS ONE BLIND SPOT, which is the honest cost: `coolly` and `cruelly` are now collapsed on
+ * the referee side too, and some GenAm sources do give `coolly` a long /l/. Nothing regressed — our
+ * dictionary already commits to the single — but the referee can no longer disagree with it.
+ * ⚠ "STEM-FINAL ⟨l⟩ PLUS `-ly`" IS THE MAJORITY, NOT THE RULE: `bally`, `bully`, `colly`, `gilly` and
+ * `hally` are simplex and `gravelly` is stem + `-y`. Collapsing them is still right; the class this
+ * gate actually names is "headword spelled `-lly`".
+ */
+const collapseSuffixL = (w: string, a: string[]): string[] =>
+    w.endsWith("lly") ? a.filter((p, i) => !(i > 0 && p === "L" && a[i - 1] === "L")) : a;
+
+/** Collapse an identical adjacent CONSONANT pair — see the header. OOV rows only; the `-lly` carve-out
+ *  above is the one exception, and it reaches the lexicon file too. */
 function degeminate(a: string[]): string[] {
     const out: string[] = [];
     for (const p of a) {
@@ -298,7 +341,7 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
     const inLexicon = dict.has(w);
     // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseSuffix` applies to both.
-    const fixed = fixInitialYod(w, normaliseSuffix(w, a0));
+    const fixed = collapseSuffixL(w, fixInitialYod(w, normaliseSuffix(w, a0)));
     const a = inLexicon ? fixed : degeminate(fixed);
     const folded = fold(w, a);
     const ipa = folded.map(sym).join("");
