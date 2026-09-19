@@ -2055,3 +2055,50 @@ exception — and it should be known before it lands rather than discovered by a
 
     compound 4,036 → 4,008;  seam table unchanged at 49 rows
     goldens 0 stale;  C# parity 189 byte-identical;  6,076 tests
+
+## Run 40 — 2026-09-19 — the BiLSTM retrain, and the measurement that nearly misled me
+
+The dictionary gained 17,825 rows (117,483 → 135,308) since #1341 retrained the OOV models, almost all
+of it the Moby imports. Retrained on the full 135,305-row dict; held-out report first, then the
+production train and int8 export.
+
+⚠ THE HEADLINE IS FLAT, AND ONLY THE SPLIT MAKES THAT VISIBLE. The raw held-out reads 70.7%
+stress-independent against a 71.5% baseline, which looks like a small regression and is not one: the
+held-out is 10% of a dictionary that GAINED the hard Moby tail, so the population changed. The md5
+split is deterministic, so the old population survives exactly (n=11,748):
+
+    words the old dictionary also had   71.4%   (baseline 71.5% — flat)
+    words added since, the Moby tail    65.7%
+
+The old shipped model scored 56.3% on the added words, so the gain is ~+9pp and it is entirely on the
+tail. More data did not make the model better at English; it made it cover a vocabulary type it had
+never seen. For an OOV tier that is the right kind of gain, but it should not be sold as a general one.
+
+    wikipron primary (independent)   62.7% → 64.0%   symbol 90.8% → 91.3%
+    Moby — OOV tier                  38.1% → 44.2%   symbol 85.6% → 87.4%
+    Moby — words the dict carries    75.7%, unchanged (the model is not consulted for them)
+
+⚠ AND I TOLD THE USER SOMETHING FALSE ON THE WAY HERE. Before the run I reported "the BiLSTM scores
+37.8% on the Moby OOV referee against the sync path's 38.0% — on an independent OOV corpus it has no
+advantage over its own fallback". `PHON["en"]` resolves to `engine-text-neural`, so BOTH columns were
+the neural path and the tie was tautological. There was no n-gram in that measurement. The conclusion I
+drew from it — that the BiLSTM may not be worth retraining — was unfounded, and the retrain moved the
+independent referee more than any dictionary block in this audit.
+
+⚠ A QUARTER OF THE OOV CORPUS IS EXACTLY ONE SYMBOL OFF, which is why 44.2% understates the model.
+Edit distance from the nearest referee reading: 0 off 37.9%, ≤1 off 63.0%, ≤2 off 81.4% (pre-retrain
+sample). Reading the one-symbol misses, the symbol is almost always an unstressed vowel — `aerometry
+ɛɹɑmətɹi` against `ɛɹɑmɪtɹi`, `acmatic əkmætɪk` against `ækmætɪk` — which is the weak-vowel axis already
+declared intentional on the other two referees. Much of the OOV gap is a referee floor.
+
+⚠ 55 GOLDEN LANGUAGES MOVED, 232 ROWS, AND THE REASON IS WORTH KNOWING: the English neural tagger
+renders EMBEDDED English in every other language, so Cherokee (`Sundance`), Tibetan (`vasanta`) and
+Belarusian (`caro`) all move when it is retrained. Sampled before accepting rather than regenerated on
+faith — majority repairs: `medicines` had been reading as "medi-signs", `Aldwych` as `ˈɔːɫdwɪk`.
+
+⚠ AND ONE OPEN FLAKE, RECORDED HONESTLY BECAUSE I MISDIAGNOSED IT TWICE. `test/check-goldens-jobs.test.ts`
+fails intermittently inside a full suite run and passes in isolation. I called it "contention" twice and
+then "maxBuffer"; both are wrong. Run cleanly, the serial and pooled reports are byte-identical
+(159,335 bytes each), the tool already refuses an incomplete pool (`results.length !== order.length`
+→ exit 2), and the captured failure is a TRUNCATED capture — 349 lines against 644 — with no error line
+at all. It predates this change (it first failed during #1357). Not fixed, not explained, not dismissed.

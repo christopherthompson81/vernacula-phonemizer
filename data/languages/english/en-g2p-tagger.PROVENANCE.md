@@ -18,6 +18,41 @@ the noisy wikipron referee couldn't even measure it. On a CLEAN CMUdict 90/10 he
 | current pipeline (compound→morph→n-gram) | 42.7% | 81.8% |
 | **BiLSTM tagger (this model)** | **71.5%** | **93.4%** (PER 6.6% vs 18.2% — 64% fewer phone errors) |
 
+⚠ **RETRAINED 2026-09-19 ON THE MOBY-EXPANDED DICTIONARY (+15% data), AND THE HEADLINE IS THAT IT DID
+NOT MOVE THE ORIGINAL POPULATION.** The dictionary went 117,483 → 135,308 rows between #1341 and this
+run, almost entirely the Moby imports of #1344 and #1353. The md5 held-out split is deterministic, so
+the old held-out population survives inside the new one exactly (n=11,748) and the two eras are
+directly comparable:
+
+| held-out population | stress-indep | incl. stress |
+|---|---|---|
+| words the old dictionary also had (n=11,748) | **71.4%** — baseline 71.5% | 66.4% |
+| words added since, the Moby tail (n=1,780) | **65.7%** | 53.7% |
+
+So the extra data taught the model nothing about the vocabulary it already handled, and cost it nothing
+either. What it bought is the tail: the SHIPPED model before this run scored **56.3%** on those same
+added words (they postdate it, so all 17,825 were unseen), against 65.7% here — about **+9 points on
+the obscure/foreign/proper-noun vocabulary the OOV tier exists for**. That is the whole gain, and it is
+narrow by construction.
+
+⚠ **AND THE REFEREES AGREE, INCLUDING THE INDEPENDENT ONE**, which is what rules out the obvious
+objection. The new training rows are MOBY-DERIVED, so a jump against the Moby OOV referee could be the
+model learning that corpus's conventions rather than learning English. The wikipron primary has no such
+relationship to them:
+
+    wikipron primary (independent)   62.7% → 64.0%   (2531 → 2584)   symbol 90.8% → 91.3%
+    Moby — the OOV tier              38.1% → 44.2%   (15,056 → 17,454)  symbol 85.6% → 87.4%
+    Moby — words the dict carries    75.7%, unchanged — correct, the model is not consulted for them
+
++1.3pp on the independent referee is the largest single move it has recorded in this audit; the +6.1pp
+on Moby-OOV is partly the circularity above and should not be read alone.
+
+⚠ **55 GOLDEN LANGUAGES MOVED, 232 ROWS, AND NONE OF THEM IS ENGLISH-ONLY.** The English neural tagger
+renders EMBEDDED English inside every other language's text, so retraining it moves Cherokee
+(`Sundance`), Tibetan (`vasanta`) and Belarusian (`caro`) goldens too. Sampled before accepting: the
+changes are majority repairs — `medicines` was reading as "medi-signs" (`mˈɛd̬ɪsˌaᶦnz` → `mˈɛd̬ɪsˌɪnz`),
+`Aldwych` `ˈɔːɫdwɪk` → `ˈɔːɫdwɪt͡ʃ`, `panthera` and a dropped /ɡ/ in a compound both fixed.
+
 ⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES — the largest gain in the fleet (+3.1pp).** Training ran the
 BiLSTM over padded batches without `pack_padded_sequence`, so its backward direction crossed the padding
 before reaching each word's last letter, while serving (`englishNeural.ts`) is batch=1 and unpadded. The damage
