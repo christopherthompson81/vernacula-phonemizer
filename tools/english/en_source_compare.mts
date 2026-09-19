@@ -92,8 +92,14 @@ const M_RAW: Record<string, string> = {
     n: "N", p: "P", r: "R", s: "S", t: "T", v: "V", w: "W", z: "Z",
 };
 
-/** Moby notation → ARPABET. `undefined` for multi-word entries and for its French sub-scheme (raw capitals). */
-export function mobyToArpabet(p: string): string[] | undefined {
+/**
+ * Moby notation → ARPABET. `undefined` for multi-word entries and for its French sub-scheme (raw capitals).
+ *
+ * ⚠ `w` IS THE LOWERCASED HEADWORD AND IT IS REQUIRED, not a convenience. One rule below — bare `gh` —
+ * cannot be decided from the body alone, and a default would let a new call site silently pick the
+ * wrong branch for it. Same reason `fold` in build-en-moby-referee.mts takes the headword.
+ */
+export function mobyToArpabet(p: string, w: string): string[] | undefined {
     // ⚠ OY is written `//Oi//` throughout the file, never `/OI/`. Un-normalised it tokenises as two empty
     // slash-pairs plus a raw `Oi`, which is where the file's 5,389 stray `//` come from.
     const s = p.replace(/\/\/Oi\/\//gu, "/OI/");
@@ -135,16 +141,11 @@ export function mobyToArpabet(p: string): string[] | undefined {
         // `mishap 'm/I/s,h/&/p`, `grasshopper 'gr/&/s,h/A/p/@/r`, `household 'h/AU/s,h/oU/ld`,
         // `foxhole 'f/A/ks,h/oU/l`. Measured over every in-dict row: ADJACENT `sh` is 18 lapses and 0
         // seams; SEPARATED `s,h`/`s'h` is 35 seams and 0 lapses. Not one exception either way.
-        // ⚠ AND IT IS `sh` AND `wh` ONLY. The same test fails for the others, each in its own way:
+        // ⚠ AND THE SEPARATOR TEST IS `sh` AND `wh` ONLY. It fails for the others, each in its own way:
         // adjacent `kh` is seams plus foreign /x/ (`back·haus`, `bank·head`, `lock·hart`, `monk·hood`,
         // `stock·holm`) with no lapses at all; `ph` runs 4 seams to 1 lapse, and that one lapse is
         // handled as a MOBY_DEFECTIVE row instead; and `th`, `ch` and `ng` have ZERO adjacent
-        // occurrences, so there is nothing to scope.
-        // ⚠ `gh` IS EXCLUDED FOR A DIFFERENT REASON THAN THE FIRST DRAFT GAVE, and the reason is more
-        // interesting: of its 37 adjacent rows only three are seams (`leg·horn`, `lug·hole`,
-        // `Barg·hoorn`). The other 34 are a THIRD convention — Moby spelling a hard /ɡ/ before a front
-        // vowel in Romance names, `Giza 'gh/i/z/@/`, `Guillermo gh/i/'/E/rm/oU/`. Mapping it to `G`
-        // would be right 34 times in 37, which is not the standard the two rules above meet.
+        // occurrences, so there is nothing to scope. `gh` needs a different discriminator entirely — below.
         if (c === "s" && s[i + 1] === "h") { out.push("SH"); i += 2; continue; }
         // ⚠ AND BARE `wh` IS THE SAME LAPSE, by the file's own convention: Moby HAS a `/hw/` symbol and
         // uses it 1,088 times, so writing the spelling instead is a slip. The partition is as clean as
@@ -153,6 +154,44 @@ export function mobyToArpabet(p: string): string[] | undefined {
         // `whippet` as `wˈɪpət`. Left alone it shipped a spurious /h/ on `guisewite` — which has no ⟨h⟩
         // in its spelling at all — plus `whap`, `whapping` and `whippet` in the OOV tier.
         if (c === "w" && s[i + 1] === "h") { out.push("W"); i += 2; continue; }
+        // ⚠ AND BARE `gh` IS A THIRD CONVENTION AGAIN — not a lapse and not a seam, but Moby FORCING a
+        // hard /ɡ/ where the spelling's ⟨g⟩ would otherwise read soft: `Giza 'gh/i/z/@/`, `Guillermo
+        // gh/i/'/E/rm/oU/`, `Genda 'gh/@/nd/A/`. Thirty-three of its thirty-seven whole-file occurrences
+        // are this.
+        // ⚠ THE SEPARATOR CANNOT ARBITRATE HERE, which is why this rule is shaped differently from the
+        // two above. Moby writes `Leghorn 'l/E/g,h/O/rn` and `leghorn 'l/E/gh/oU/rn` — THE SAME WORD,
+        // both ways — so "adjacent means lapse" is false for `gh` by the file's own hand. Trusting the
+        // separator would have broken `leghorn`, a row that is currently correct and passing.
+        // ⚠ THE HEADWORD'S SPELLING DOES ARBITRATE IT, exactly. All three genuine seams spell the
+        // DIGRAPH ⟨gh⟩ (`leghorn`, `lughole`, `Barghoorn`); not one of the thirty-three hard-/ɡ/ rows
+        // does — `Giza`, `Guillermo`, `Jauregui`, `Heintges`. And the seventeen SEPARATED rows all
+        // spell it too (`bighead`, `doghouse`, `froghopper`), so the spelling test and the separator
+        // agree wherever the separator is present and only the spelling covers the rest.
+        // ⚠ THE TEST IS THE ADJACENT DIGRAPH AND NOTHING WEAKER. "An ⟨h⟩ somewhere after the ⟨g⟩" is a
+        // DIFFERENT AND FALSE property: `Gehrke`, `Gerhard`, `Gerhart` are hard-/ɡ/ rows with an ⟨h⟩
+        // two characters on. Anyone reimplementing this as `/g.*h/` flips `Gehrke` to a seam.
+        // ⚠ WHAT MAKES "ANYWHERE IN THE HEADWORD" SAFE is not that the class is small — nothing here
+        // aligns the body to the spelling, so the test cannot ask about THIS position. It is safe
+        // because Moby writes ORTHOGRAPHIC ⟨gh⟩=/ɡ/ as a plain `g`, without exception: `ghetto
+        // 'g/E/t/oU/`, `spaghetti sp/@/'g/E/t/i/`, `Ghana 'g/A/n/@/`, `Borghese b/O/R'g/E/z/E/`. The
+        // bare-`gh` convention is used ONLY where the spelling has no ⟨h⟩, so a word that spells ⟨gh⟩
+        // anywhere never writes a bare `gh` for a hard /ɡ/ elsewhere. ⚠ THE MARGIN IS THINNER THAN THE
+        // ENUMERATION LOOKS: several ⟨gh⟩-spelled hard-/ɡ/ names (`Ghiberti`, `Gheorghiu-Dej`) are
+        // declined today for UNRELATED reasons — Moby's French-scheme capitals — so they are not
+        // evidence this rule handles them. A new source needs the premise re-checked, not assumed.
+        // ⚠ THE DICTIONARY CONFIRMS THE SPLIT INDEPENDENTLY, which is what took this from 16-of-19 to
+        // exception-free. `data/languages/english/g2p-dict.tsv` — OUR ARPABET DICTIONARY, not misaki
+        // gold — carries five of these words, and none of the five is among its 17,831 Moby-imported
+        // rows, so the corroboration is not circular. `leghorn` is `L EH1 G HH AO0 R N` WITH the /h/;
+        // `giza G IH1 Z AH0`, `guillermo G W IH0 L Y EH1 R M OW0`, `jauregui Y AW0 R EY1 G W IY0`,
+        // `gehrke JH EH1 R K` are without it. ⚠ ONLY `leghorn` CONFIRMS A SEAM; the other four confirm
+        // an ABSENCE of /h/ on rows that disagree with Moby about other phones anyway (`gehrke` reads
+        // an initial /d͡ʒ/, `jauregui` inserts a /w/), so this is four absences and one positive, not
+        // five independent confirmations of the split.
+        // ⚠ ONE OF THE THIRTY-THREE IS A CORRUPT BODY: `Corporation 'b/U//N/gh/i/` transcribes *bungee*.
+        // Its `gh` does want the hard-/ɡ/ reading for the word the body actually encodes, so it does not
+        // break the count — but it is thirty-two real words plus a row that happens to agree.
+        if (c === "g" && s[i + 1] === "h" && !w.includes("gh")) { out.push("G"); i += 2; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
     }
@@ -310,7 +349,7 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         const sp = line.indexOf(" ");
         if (sp < 0) continue;
         const w = line.slice(0, sp).toLowerCase();
-        const a = mobyToArpabet(line.slice(sp + 1));
+        const a = mobyToArpabet(line.slice(sp + 1), w);
         if (a) (moby.get(w) ?? moby.set(w, []).get(w)!).push(a);
     }
     const freq = readFileSync(freqPath, "utf8").split("\n").map((s) => s.trim()).filter((s) => s && !s.startsWith("#"));

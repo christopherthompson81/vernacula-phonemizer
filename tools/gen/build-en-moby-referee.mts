@@ -337,7 +337,7 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     // ⚠ A ROW WHOSE BODY IS A DIFFERENT WORD CANNOT ARBITRATE ANYTHING. See MOBY_DEFECTIVE.
     if (MOBY_DEFECTIVE.has(w)) { defective++; continue; }
     if (!/^[a-z]{2,20}$/u.test(w)) continue;          // no multi-word, no digits, no punctuation headwords
-    const a0 = mobyToArpabet(line.slice(sp + 1));
+    const a0 = mobyToArpabet(line.slice(sp + 1), w);
     if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
     const inLexicon = dict.has(w);
     // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseSuffix` applies to both.
