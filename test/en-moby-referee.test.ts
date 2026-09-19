@@ -88,6 +88,18 @@ describe("the Moby referee corpora", () => {
         expect(lex.get("nor")).toBe("nɔɹ");
     });
 
+    // ⚠ AND IT IS GATED ON THE SPELLING, because the phone shape cannot tell a FORCE coda from a compound
+    // seam: `chorus` is also `AO R` before a vowel and DOES merge. Without the `owr` exemption the builder
+    // wrote `ʃɔɹum`/`tɔɹoʊp` and scored our correct GOAT readings wrong, with the damage baked into the
+    // artifact where no config fold could reach it.
+    test("FORCE→NORTH does NOT fire across a compound seam", () => {
+        expect(lex.get("showroom")).toBe("ʃoʊɹum");
+        expect(lex.get("elbowroom")).toBe("ɛlboʊɹum");
+        expect(oov.get("towrope")).toBe("toʊɹoʊp");
+        // `bowring` is NOT one of these — Moby writes it with a source `/O/`, not an OW the fold collapsed.
+        expect(lex.get("bowring")).toBe("bɔɹɪŋ");
+    });
+
     // ⚠ THE LOAD-BEARING NEGATIVE. 402 dictionary rows moved on the marry–merry axis in #1336 and this
     // engine writes BOTH æɹ and ɛɹ, so folding Moby's unmerged reading would blind the referee to exactly
     // the class most recently changed. `carol` MUST stay æ here while the engine says ɛ.

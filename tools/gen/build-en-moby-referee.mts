@@ -108,14 +108,20 @@ const JOIN: [string, string, string][] = [
  *  both the STRUT vowel and schwa and separates them by stress alone — the same convention CMUdict uses
  *  (AH1 = ʌ, AH0 = ə). Stripping stress before the IPA map wrote `general` as `dʒɛnɚʌl` and `carolina` as
  *  `kæɹʌlaɪnʌ`, turning every unstressed schwa in the corpus into STRUT. */
-function fold(a: string[]): [string, string][] {
+function fold(w: string, a: string[]): [string, string][] {
     const t = a.map((p) => [p.replace(/[0-2]$/u, ""), /[0-2]$/u.test(p) ? p.slice(-1) : ""] as [string, string]);
     const out: [string, string][] = [];
     for (let i = 0; i < t.length; i++) {
         const j = JOIN.find(([x, y]) => t[i]![0] === x && t[i + 1]?.[0] === y);
         if (j) { out.push([j[2], t[i]![1]]); i++; continue; }   // the joined nucleus keeps the FIRST stress
         // FORCE → NORTH: Moby keeps oʊɹ where GenAm merged to ɔɹ. Safe — CMUdict has no such distinction.
-        if (t[i]![0] === "OW" && t[i + 1]?.[0] === "R") { out.push(["AO", t[i]![1]]); continue; }
+        // ⚠ SPELLED `owr` IS EXEMPT, because there the `r` is the NEXT syllable's ONSET, not this one's
+        // coda: `show·room`, `tow·rope`, `arrow·root`, `elbow·room` are compound seams whose GOAT vowel
+        // never merged with anything. Folding them wrote `ʃɔɹum`/`tɔɹoʊp` and scored our correct
+        // `ʃoᶷɹuːm`/`toᶷɹoᶷp` wrong — damage baked into the TSV that no config fold could reach. The
+        // phone shape cannot tell the two apart (`chorus` is also `AO R` + vowel and DOES merge), so the
+        // discriminator has to be the spelling.
+        if (t[i]![0] === "OW" && t[i + 1]?.[0] === "R" && !w.includes("owr")) { out.push(["AO", t[i]![1]]); continue; }
         out.push(t[i]!);
     }
     return out;
@@ -294,8 +300,9 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseSuffix` applies to both.
     const fixed = fixInitialYod(w, normaliseSuffix(w, a0));
     const a = inLexicon ? fixed : degeminate(fixed);
-    const ipa = fold(a).map(sym).join("");
-    if (ipa === "" || fold(a).some((p) => sym(p) === "")) { unmapped++; continue; }
+    const folded = fold(w, a);
+    const ipa = folded.map(sym).join("");
+    if (ipa === "" || folded.some((p) => sym(p) === "")) { unmapped++; continue; }
     let e = readings.get(w);
     if (!e) readings.set(w, e = { lower: [], upper: [] });
     const bucket = /^[A-Z]/u.test(cased) ? e.upper : e.lower;

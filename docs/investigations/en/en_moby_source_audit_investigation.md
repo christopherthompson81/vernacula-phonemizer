@@ -742,3 +742,98 @@ Four rows were identified in that session (`anderson`→Sulam, `millimeter` trun
 row whose body is a different word often also loses the ⟨r⟩ its headword is spelled with, so the r-less
 detector catches corruption the rhotic rules were not looking for. With `flayer` (`ɛfwʌn`, i.e. "F one")
 the list is now 30.
+
+## Run 22 — 2026-09-19 03:10 — FORCE→NORTH on the PRIMARY, which never had it
+
+With RP and the corrupt rows out of the corpora, the residual is finally clean enough to read, and the
+first thing in it is a fold the Moby artifact has had all along and the primary never got.
+
+The primary marks us wrong on `chorus` koɹəs, `gore` ɡoɹ, `morning` moɹnɪŋ, `emporium`, `Cawnpore`,
+`Mauritania`, `aurally`, `amorce`, `corniced` — it keeps FORCE apart from NORTH and this engine cannot:
+CMUdict writes `more` and `nor` alike as `AO R`, so there is no FORCE for us to regress INTO.
+`build-en-moby-referee.mts` applies exactly that argument when folding FORCE→NORTH into the Moby
+artifact; `en.jsonc` simply never got the same treatment.
+
+⚠ **AND THE BLINDING WAS MEASURED, NOT ASSUMED, WHICH CHANGED THE ANSWER.** Scoped first as a trade —
++13 rows against blinding the 36 `OW R` rows the dictionary holds — it turns out to cost nothing:
+
+    rows the pattern can touch   26
+    pass today                    0
+    pass after the fold          16
+    rows where BOTH sides write `oɹ`   0
+
+⚠ THE REASON IS THE PATTERN, NOT LUCK. It matches a BARE `o` before `ɹ`, never `oʊɹ`, and our inventory
+has no bare `oɹ`: AO renders `ɔɹ` and OW renders `oʊɹ`. So the 36 rows are compound seams —
+`arrow·root` ɛɹoʊɹut, `auto·rad`, `elbow·room`, where the `r` is an ONSET — and they fold to themselves
+on both sides.
+
+    primary wikipron   62.0% → 62.4%      +intentional 67.4% → 67.8%
+    Moby corpora       unchanged (the builder already folds this into the artifact)
+
+⚠ AND THE PRIMARY IS THE ONE THAT COUNTS. Every referee-repair run in this log left 62.0% untouched by
+construction; the two that moved it were the velar fix (an ENGINE change) and this, a fold the
+instrument was missing.
+
+## Run 23 — 2026-09-19 03:40 — review: the fold re-measured independently, and the one thing it does NOT cover
+
+Review of Run 22's fold. Question: is `oɹ`→`ɔɹ` really score-positive and really non-blinding, or was the
++16 measured on a path the scorer does not take?
+
+Re-ran the primary at the gate's own sample (`evaluate("en", true, 3000)`), once with the fold and once
+with the fold object deleted from `en.jsonc`:
+
+    with fold      1265/2023   62.53%   intentional-credited 112
+    without fold   1257/2023   62.14%   intentional-credited 112
+
++8 rows on a 2,023-row sample scales to the claimed +16 on the full corpus, nothing regresses in the
+aggregate, and `intentionalCredited` is unchanged — the fold is not eating rows the `intentional` classes
+were already crediting. The referee file holds exactly 26 rows matching `o ɹ`, which is the note's number.
+
+The non-blinding claim also holds by construction, checked rather than assumed:
+
+- `grep -rP "oɹ" data/languages/english/ src/languages/english/` → 0 hits. The ARPABET map has no bare `o`
+  (AO `ɔː`, OW `oᶷ`), so the fold rewrites the REFEREE side only and cannot credit an error of ours.
+- fold ORDER is not load-bearing here: `oᶷ`→`oʊ` sits *after* this fold, and neither `oᶷɹ` nor `oʊɹ`
+  matches `oɹ`, so moving it either way changes nothing. `makeFold` normalizes NFD, not NFKD, so the
+  modifier letters survive to their own folds.
+- the fold is length-preserving (1 char → 1 char), so the positionwise `intentional` alignment is untouched.
+- both Moby corpora hold ZERO occurrences of `oɹ` — the artifact is already `ɔɹ` — so "Moby unchanged" is
+  exact, not approximate.
+
+⚠ AND THE REVIEW FOUND ONE THING RUN 22's NOTE OVERSTATES, in the Moby artifact rather than in this fold.
+The note says the compound seams "fold to themselves on BOTH sides". True on the primary and in our
+dictionary. NOT true of the Moby artifact: `build-en-moby-referee.mts` folds `OW R → AO R` on the bare
+phone pair with no check that the `r` is a coda, so it has already collapsed the seams —
+
+    arrowroot  æɹɔɹut     elbowroom  ɛlbɔɹum    showroom  ʃɔɹum
+    towrope    tɔɹoʊp     bowring    bɔɹɪŋ                        (10 rows spelled `owr` across both files)
+
+against our `ʃoᶷɹuːm`, `toᶷɹoᶷp`. Those rows are marked wrong for a GOAT we read correctly, and no fold on
+our side can reach them because the damage is baked into the artifact. Pre-existing, not introduced by
+Run 22, and small — but it is the same onset/coda distinction Run 22 relied on, applied in the one place
+that did not make it. Fixing it means gating the builder's fold on the `r` not being a following syllable's
+onset, and rebuilding the artifact.
+
+## Run 24 — 2026-09-19 03:52 — the builder's FORCE fold, gated on spelling
+
+Acting on Run 23's finding. Question: what tells a FORCE coda from a compound seam, given the phone shape
+cannot?
+
+Nothing in the phone string can. `chorus` is `AO R` followed by a vowel and DOES merge; `showroom` is the
+same phone shape and must not. The discriminator has to be the spelling, so the builder's fold now takes
+the headword and exempts any word containing `owr`:
+
+    if (t[i]![0] === "OW" && t[i+1]?.[0] === "R" && !w.includes("owr"))
+
+Rebuilt. Four rows corrected, corpus sizes unchanged (lexicon 35,049 / OOV 39,485):
+
+    arrowroot  æɹɔɹut  → æɹoʊɹut      elbowroom  ɛlbɔɹum → ɛlboʊɹum
+    showroom   ʃɔɹum   → ʃoʊɹum       towrope    tɔɹoʊp  → toʊɹoʊp
+
+⚠ `bowring` WAS NOT A FOLD ARTIFACT, which is worth recording because Run 23 listed it as one and the
+count of ten rows made it look like a class. Moby writes it `'b/O/r/I//N/` — an `/O/` in the source, not
+an `OW R` the builder collapsed. It survives the gate unchanged and correctly. Of the ten rows spelled
+`owr`, five carry MOUTH (`dowry`, `lowry`, `cowry`, `avowry`, `mowrah`) and were never eligible, one is
+`bowring`, and four were the real damage. The gate is cheap and the class is closed.
+
+Primary unmoved at 62.4% by construction (this touches only the Moby artifacts). Moby-lexicon 75.6%.
