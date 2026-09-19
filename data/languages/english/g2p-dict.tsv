@@ -52815,7 +52815,7 @@ hapag	HH EY1 P AE2 G
 hapeman	HH EY1 P M AH0 N
 hapgood	HH AE1 P G UH2 D
 haphazard	HH AE0 P HH AE1 Z ER0 D
-haphazardly	HH AE1 F AH0 Z ER0 D L IY0
+haphazardly	HH AE0 P HH AE1 Z ER0 D L IY0
 hapke	HH EY1 P K IY0
 hapless	HH AE1 P L AH0 S
 haplessly	HH AE1 P L IH0 S L IY0
@@ -126924,9 +126924,9 @@ uphoff	AH1 P HH AO2 F
 uphold	AH0 P HH OW1 L D
 upholding	AH0 P HH OW1 L D IH0 NG
 upholds	AH0 P HH OW1 L D Z
-upholster	AH0 P OW1 L S T ER0
-upholstered	AH0 P OW1 L S T ER0 D
-upholstery	AH0 P OW1 L S T ER0 IY0
+upholster	AH0 P HH OW1 L S T ER0
+upholstered	AH0 P HH OW1 L S T ER0 D
+upholstery	AH0 P HH OW1 L S T ER0 IY0
 upjohn	AH1 P JH AA2 N
 upkeep	AH1 P K IY2 P
 upland	AH1 P L AH0 N D

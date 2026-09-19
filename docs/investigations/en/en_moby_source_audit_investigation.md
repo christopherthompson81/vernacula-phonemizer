@@ -2698,3 +2698,52 @@ because none of these words is in its 4,037 rows. That is also why they survived
 
 `cham` joins `gaea`, `mainz` and `piazza` in KNOWN_GAPS: held out, the n-gram reads ⟨ch⟩ as /t͡ʃ/,
 which is right for the English word and wrong for the title.
+
+## Run 49 — 2026-09-19 — the grapheme seam: the last boundary-table consumer, and it was nearly clean
+
+The class #1360 named as where the table's value lay: a digraph straddling a morpheme boundary, where a
+grapheme-level reader gives the single sound. `haphazardly hæfəzɚdli` — ⟨ph⟩ read as /f/ across
+`hap|hazard` — was the motivating example.
+
+⚠ TWO PROBES IN A ROW FOUND HUNDREDS OF NOTHING, and the reason is worth recording because the same
+mistake is available to anything that reconstructs a spelling split from a phone index. The boundary
+table stores phone indices, not morphemes, so the split has to be recovered by trying each cut and
+keeping the one whose head has the right phone count. Taking the FIRST such cut gives `as|hen`,
+`fis|hing`, `pac|king`, `wit|hout` — 293 hits, all spurious, because a shorter head can have the same
+phone count as the right one. Requiring both halves to be dictionary words cuts it to 85, still all
+spurious. Taking the LONGEST cut gives 6, and those 6 are ambiguous splits where the digraph is inside
+the head anyway (`goth|ic`, `smooth|ie`).
+
+So the dictionary is already right on this class, and comprehensively: `haphazard`, `alphorn`,
+`chophouse`, `cupholder`, `flophouse`, `hophead`, `loophole`, `peephole`, `upheaval`, `uphill` and
+`uphold` all carry `P HH`. What is left is four rows where a STEM is right and something derived from
+it is not:
+
+    haphazardly  hˈæfəzɚdli   → hæphˈæzɚdli    Moby + uk + gold; the stem was already right
+    upholstery   əpʰˈoᶷɫstɚi  → əphˈoᶷɫstɚi    the /h/ was ABSENT, not read as /f/
+    upholster    əpʰˈoᶷɫstɚ   → əphˈoᶷɫstɚ     Moby + gold (⚠ uk dissents: əpɐlstə, no /h/)
+    upholstered  (follows its stem)
+
+⚠ AND THE OOV PROBE FOUND A MOBY DEFECT INSTEAD OF AN ENGINE ONE. 18 of 63 probed OOV rows looked like
+our failures; reading the raw source, Moby's consonants are BARE LETTERS with only vowels in slashes,
+so `p,h` is a deliberate two-sound claim and `althorn '/&/lt,h/O/rn`, `Einthoven`, `Godthaab`,
+`Gruithuisen`, `Jagannatha`, `lanthorn` are all genuine seams we read wrong — but they are OOV, so
+there is nothing to correct in a dictionary that does not contain them. Sweeping all 35 rows whose
+body has a bare `p`+`h` against whether the spelling splits into two dictionary words: 29 genuine
+seams, and one row the split cannot explain — `geomorphological`, where `morpho-` is /f/ and Moby's
+OWN `morphology` is `m/O/rf/@/l/oU/g/i/`. Added to MOBY_DEFECTIVE, which is now 34.
+
+⚠ I ALSO SPENT A PROBE ON A THEORY THAT WAS BACKWARDS. Seeing bare letters outside the slashes in
+`Imphal '/I/mph/@/l`, I swept for "rows with bare letters" as a corruption detector and got 96,713 —
+i.e. most of the file, because that is simply how Moby writes consonants. The detector was measuring
+the notation, not a defect in it.
+
+    Moby — words the dict carries   26,636 → 26,639
+    Moby — OOV                      39,485 → 39,484 rows (the defective row dropped), 17,455 held
+    primary                         2,584 unmoved
+    goldens 0 stale · parity 189 byte-identical · 6,076 tests
+
+`upholstery` and `upholster` join KNOWN_GAPS as source N. Their derived forms do NOT: `haphazardly`
+and `upholstered` close through `morphDecode` the moment the stem is corrected, because that path
+looks the stem up in the shipped dictionary. Only the roots the n-gram must spell from letters stay
+open, and it has no way to know ⟨ph⟩ spans a seam in `up·holstery` and not in `morphology`.

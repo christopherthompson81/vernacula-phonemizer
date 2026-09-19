@@ -176,6 +176,13 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     // them; they were found by reading what the sweep left behind.
     ["monosaccharide", "body is 'monoscope'"], ["missouri", "truncated — 'mɪzʊi'"],
     ["zippered", "truncated — 'zɪpi'"],
+    // ⚠ ⟨ph⟩ WRITTEN AS /p/+/h/ WHERE MOBY ITSELF WRITES /f/ ELSEWHERE. Moby's consonants are BARE
+    // LETTERS — only vowels sit inside slashes — so `p,h` is a deliberate two-sound claim, and for the
+    // 29 real seams it has (`hap·hazard`, `loop·hole`, `up·heaval`, `chop·house`) it is right. This one
+    // is not a seam: `morpho-` is /f/, and Moby's own `morphology` is `m/O/rf/@/l/oU/g/i/`. Found by
+    // sweeping every row whose body has a bare `p`+`h` against whether the spelling splits into two
+    // dictionary words — 35 rows, 29 genuine seams, and this the only one the split cannot explain.
+    ["geomorphological", "⟨ph⟩ as p+h where Moby's own `morphology` has /f/"],
 ]);
 
 /**

@@ -2236,3 +2236,19 @@ chiron	CH AY1 R AH0 N	K AY1 R AH0 N	as `achaean`; Moby kaɪɹɑn + uk kaɪɹən 
 concha	K AA1 N CH AH0	K AA1 NG K AH0	⟨ch⟩ is /k/; Moby kɑŋkə + uk kɒŋkə + gold kˈɑŋkə. ⚠ NG, NOT N: `con-` is a transparent prefix, so the converter will not assimilate it for us
 catsup	K EH1 CH AH0 P	K AE1 T S AH0 P	read as `ketchup`, which is a different spelling; Moby + uk kætsəp + gold kˈætsəp
 paparazzis	P AA2 P AA0 R AO1 Z IY2 Z	P AA2 P AA0 R AA1 T S IY2 Z	the inflection of `paparazzi`, one line below it and missed in the first draft
+
+# ⟨ph⟩ ACROSS A MORPHEME SEAM IS /p/+/h/, NOT /f/. Four rows, and the notable thing is how few: the
+# dictionary already reads `haphazard`, `alphorn`, `chophouse`, `cupholder`, `flophouse`, `hophead`,
+# `loophole`, `peephole`, `upheaval`, `uphill` and `uphold` correctly as `P HH`. The class was the
+# LAST untouched consumer of `tools/gen/en-morph-boundary.tsv` and it turned out to be nearly clean —
+# what is left is a stem that is right and a derived form that is not.
+# ⚠ `upholstery` WAS MISSING THE /h/ ENTIRELY, not reading it as /f/: `AH0 P OW1 L S T ER0 IY0`.
+# ⚠ `upholster` RESTS ON TWO SOURCES, NOT THREE, and the dissent is real: the en-GB referee gives
+# `əpɐlstə`/`əpɒlstə` with no /h/ at all. Moby `əphoʊlstɚ` and gold `ˌʌphˈOlstəɹ` carry it, and the
+# whole family — `upholstery`, `upholsterer` — is unanimous, so the /h/-less variant looks like the
+# odd one out rather than the GenAm reading. `upholstered` follows its stem on the same argument that
+# carries inflections in `en-nasal-seam.tsv`: a suffix cannot move a seam.
+haphazardly	HH AE1 F AH0 Z ER0 D L IY0	HH AE0 P HH AE1 Z ER0 D L IY0	⟨ph⟩ at the hap|hazard seam is /p/+/h/; Moby hæphæzɚdli + uk hæphæzədli + gold hˌæphˈæzəɹdli. The STEM `haphazard` was already right
+upholstery	AH0 P OW1 L S T ER0 IY0	AH0 P HH OW1 L S T ER0 IY0	the /h/ was absent altogether; Moby əphoʊlstɚi + uk ʌphəʊlstəɹi + gold ˌʌphˈOlstəɹi
+upholster	AH0 P OW1 L S T ER0	AH0 P HH OW1 L S T ER0	as `upholstery`; Moby + gold (⚠ uk dissents with əpɐlstə, no /h/)
+upholstered	AH0 P OW1 L S T ER0 D	AH0 P HH OW1 L S T ER0 D	the inflection of `upholster`, which a suffix cannot change
