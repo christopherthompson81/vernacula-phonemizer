@@ -3276,7 +3276,9 @@ defect quietly back in the corpus. The body is source data and never moves. A te
 declared body is 7-bit, since Moby's notation is ASCII and a stray IPA character is the signature of
 exactly that mistake.
 
-⚠ TWO DETECTORS, AND NEITHER ALONE WAS ENOUGH — the more useful half of this run. The first compares a
+⚠ TWO DETECTORS, AND NEITHER ALONE WAS ENOUGH — the more useful half of this run. (Run 57 adds two
+more and finds fourteen further declarations, so "the twelve that survived" below is a floor, not a
+count. The `vineyard` explanation in this paragraph is also wrong; see Run 57.) The first compares a
 row's readings TO EACH OTHER (consonant-skeleton Jaccard < 0.34) and flagged 21 pairs. The second
 compares each reading TO THE HEADWORD'S SPELLING (60%+ of the body's consonants unaccounted for) and
 flagged 21, mostly different ones. Detector 1 alone misses `luce d/@/'l/u/s` — "De Luce" with the
@@ -3330,7 +3332,7 @@ a safeguard.
     Moby — words the dict carries   26,651/35,048 (76.0%)  unmoved
     Moby — OOV                      17,466/39,484 (44.2%)  unmoved
     primary                         2,584/4,037 (64.0%)    unmoved
-    headwords emitting >1 reading   463 → 451
+    headwords emitting >1 reading   463 → 451   (→ 437 after Run 57)
     goldens 0 stale
 
 ⚠ EVERY NUMBER IS UNMOVED, AND THAT IS THE RESULT, not a disappointing one. Because the eval credits
@@ -3338,3 +3340,107 @@ ANY reading on a row, dropping a reading can only ever cost score — never gain
 engine was not matching any of the twelve, so they were latent rather than inflating anything. What
 changes is that a future regression TOWARD one of those readings would now be caught instead of
 silently credited. That is the entire value of this run and it is not visible in any score line.
+
+
+## Run 57 — 2026-09-19 16:05
+
+Review of the Run 56 block. The mechanism survived; the table was half a table and two of the guards
+had holes.
+
+⚠ THE BUILD GUARD RAN AFTER `writeFileSync`, WHICH IS THE WORST OF BOTH OUTCOMES. A non-matching
+declaration threw — and left the corpus on disk with the defect restored. The build failed AND the
+bad row shipped. The comment claimed it "fails the build instead of quietly restoring the defect";
+it did both. Moved above the writes and verified: the failed build now leaves the file byte-identical.
+
+⚠ AND IT COULD NOT SEE A DUPLICATE DECLARATION. `MOBY_DEFECTIVE_READING` is a Map of Sets, so the same
+pair declared twice collapses — declared stays N, matched stays N, build passes with a silently
+ignored row. Caught now at module load, where the duplicate still exists as an array element:
+`DEFECTIVE_READINGS: duplicate declaration(s) luce	d/@/'l/u/s`.
+
+⚠ A THIRD HOLE, NOT YET REACHABLE BUT MADE REACHABLE BY THIS VERY CHANGE. `imported.has(w)` short-
+circuits above the count, so a declared word that later enters `moby-import.tsv` stops being counted
+and trips the check with a misleading message. Run 56 itself makes these words newly importable —
+the corrupt body no longer consumes their `seen` slot — so the next `en_import_moby --write` would
+have walked into it. The count now excludes imported headwords.
+
+⚠ FOURTEEN MORE DECLARATIONS, AND THE DETECTOR THAT FOUND THEM IS THE ONE I SHOULD HAVE WRITTEN FIRST.
+Both of Run 56's detectors reason about ONE ROW. A fourth — does this exact raw body occur elsewhere
+in the file as some other headword's body? — turns a guess about what a corrupt body says into a
+CITATION, and it overturned four of Run 56's twelve reasons:
+
+    county      b/@/'l/A/h/i/   not "Balahi" (a back-transliteration I invented) but Moby's own
+                                `Bellaghy b/@/'l/A/h/i/`, byte-identical
+    rouse       r/O/ss          not "a word-final geminate is not an English coda" but Moby's own
+                                `Ross r/O/s` with a doubled ⟨s⟩ — a DISPLACED WORD, not a bad coda
+    soufriere   s/AU/           not "truncated" but Moby's own `Sau s/AU/`, byte-identical
+    cahill      k/eI/l          Moby's own `kale`/`kail k/eI/l`
+
+Run 56 stated two guessed back-transliterations as fact. The declarations were right; two of the
+reasons were fiction, and one ("a word-final geminate") was a phonological argument for what is
+simply a different word.
+
+The fourteen new ones: `wellington`, `college`, `junta`, `zed` (Zedekiah), `cahill`, `quoin` (Du
+Coyne, space lost) as displaced words; `early`, `somali` (/l/ dropped), `began` (/ɡ/ dropped),
+`crises`, `messieurs` (doubled ⟨rr⟩), `swaraj` (intrusive /r/), `watergate`, `duralumin` (stray
+`d/dZ/` onset) as the right word transcribed impossibly.
+
+⚠ "NINE OF TWELVE ARE CAPITAL-CORRUPT" WAS TEN OF TWELVE, and the error had reached a TEST HEADING.
+`Rouse r/O/ss` is the capitalised row; Run 56's test block headed "the LOWER-CASE row is the corrupt
+one" listed `rouse` among its members. The assertion was right and the heading was wrong, which is
+the worse of the two — a reader trusts the heading. Failure mode (c). With the new members the split
+is: most capital-corrupt, six lower-case-corrupt (`toy`, `whitehead`, `early`, `somali`, `crises`,
+`watergate`).
+
+⚠ AND THE `vineyard` EXPLANATION WAS FAILURE MODE (a) AGAIN. I wrote that detector 2 missed it
+"because Jumara's consonants happen to sit inside `vineyard`'s". They do not — `d͡ʒumɑɹɑ` has {d͡ʒ, m, ɹ}
+and `vineyard` is spelled v-n-y-r-d with NO ⟨m⟩. It missed because 1 of 3 unaccounted is 33%, under
+the 60% threshold. I described a containment that does not hold instead of reading my own arithmetic.
+
+⚠ THREE-OR-MORE READINGS IS PROVABLY A NON-ISSUE, which Run 56 never checked. Of 175,210 headwords,
+174,516 have exactly one distinct raw body and 694 have exactly two. NONE has three. There is no
+deeper tier of this problem. Also: "659 headwords" is the count after the builder's `[a-z]{2,20}`
+filter; the population-level figure is 694.
+
+⚠ `watergate` LEAVES THE CORPUS ENTIRELY, and that is the right outcome. Its capitalised reading is
+non-rhotic RP (`wɑtəɡeɪt`) and its lower-case one metathesises the /r/ to before the ⟨t⟩
+(`wɔɹtəɡeɪt`); declaring the second leaves only the first, which the non-rhotic filter then takes.
+Neither reading could arbitrate a GenAm pronunciation. The lexicon is 35,048 → 35,047 for this one
+word, with the numerator unmoved — so it was failing already, and the corpus simply stopped
+pretending it could judge.
+
+⚠ THE IMPORT-PATH CLAIM WAS OVERSTATED IN ONE DIRECTION AND UNDERSTATED IN THE OTHER. Run 56 said the
+corrupt body ships "only because `have.has(w)`". There is a second independent gate: a body that
+disagrees with misaki gold hits `disagree++`, and `bʊŋɡi` can never match gold's `corporation`. Two
+gates, not one accident — the claim was alarmist. But the actual harm was under-claimed: `seen.add(w)`
+fires on the CORRUPT body, so the good lower-case row never gets its turn and the word is dropped
+from the import altogether. This table unlocks coverage rather than merely preventing damage. And an
+independent check of all 17,820 `moby-import.tsv` rows found no shipped row taken from a corrupt
+second reading — 59 are multi-body headwords and every one took the sound body.
+
+⚠ TWO CLAIMS FROM THE REVIEW THAT DID NOT SURVIVE MEASUREMENT, recorded because taking them on trust
+would have put a wrong rule in the converter:
+  · `t/S/`-for-`/tS/` was reported as an eleven-row typo class wanting a converter rule. It is 271
+    rows, and the majority are NOT typos — `aquaculture '/&/kw/@/,k/@/lt/S//@/r`, `arch-enemy
+    /A/rt/S/'/E/n/@/m/i/`, `astrohatch '/&/str/@/,h/&/t/S/` are ordinary words where `t` + `/S/` is
+    how Moby writes the affricate. Only 12 sit on a multi-reading headword. A converter fold is
+    probably right and needs a seam discriminator like `sh`/`wh`/`gh` did — 271 rows makes it a
+    block of its own, larger than any of the last four, not a footnote to this one.
+  · `/oU//j/` was reported as a recurring error class with `toyon` as a second victim. It occurs 66
+    times and is a LEGITIMATE notation in the large majority — `Amboina /&/m'b/oU//j/n/@/`,
+    `actinouranium ,/&/kt/@/n/oU//j//U/'r/eI/n/i//@/`. `toyon` is at worst ambiguous (the plant is
+    attested both ˈtɔɪ-ɒn and toʊˈjoʊn). `toy` is the one place the notation is misapplied. The
+    notation recurring is not the same thing as the error recurring.
+
+A LINE THE TABLE NOW DRAWS EXPLICITLY, because it is more useful than any entry: a CASE COLLISION IS
+NOT CORRUPTION. `UP /j//u/'p/i/` is the correct reading of the initialism and `Piquet 'p/I/k/eI/` of
+the surname; they merely share a lower-cased key with `up` and `piquet`. Those readings CAN be their
+spelling — a different lexeme, not a defect — and the builder's header accepts that risk having
+measured the alternative as worse. Declaring them here would be a policy change dressed as a fix.
+The other structural limit: this table cannot reach a SINGLE-reading row, which belongs in
+`MOBY_DEFECTIVE` instead.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%)  numerator unmoved, denominator −1
+    Moby — OOV                      17,466/39,484 (44.2%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    headwords emitting >1 reading   463 → 437
+    declarations                    12 → 26

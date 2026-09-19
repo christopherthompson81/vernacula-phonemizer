@@ -279,38 +279,82 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
  * defect back in with no test failing. The body is source data and never moves.
  *
  * ⚠ CASE DOES NOT PREDICT WHICH READING IS THE BAD ONE, the same finding the builder records for a
- * different reason. The capitalised row is corrupt for `City`, `County`, `Corporation`, `Peak`,
- * `Plateau`, `Vineyard`, `Bey`, `Luce` and `Soufriere` — and the LOWER-CASE row is the corrupt one for
- * `toy` and `whitehead`, where the capitalised `Toy t//Oi//` and `Whitehead '/hw//aI/t,h/E/d` are
- * right. A rule that dropped capitals would fix nine and break two.
+ * different reason. The capitalised row is the corrupt one in most of these — and the LOWER-CASE row
+ * is corrupt for `toy`, `whitehead`, `early`, `somali`, `crises` and `watergate`, where the
+ * capitalised `Toy t//Oi//`, `Whitehead '/hw//aI/t,h/E/d` and `Early '/[@]/rl/i/` are right. A rule
+ * that dropped capitals would fix most of the table and break six of it.
  *
- * ⚠ FOUND BY TWO DETECTORS THAT DISAGREE, and neither alone was enough. The first compares a row's
- * readings TO EACH OTHER (consonant-skeleton Jaccard below 0.34) and found `vineyard`, which the
- * second misses. The second compares each reading TO THE HEADWORD'S SPELLING (60%+ of the body's
- * consonants unaccounted for) and found `luce`, which the first misses. 659 headwords carry more than
- * one distinct raw body; these are the twelve that survived reading every flagged pair by hand.
+ * ⚠ FOUR DETECTORS, AND EVERY ONE OF THEM MISSED SOMETHING THE OTHERS CAUGHT. Two compare within a
+ * row — consonant-skeleton Jaccard between its readings, and order-sensitive edit distance ranked by
+ * the GAP between them. Two compare outward — each reading against the headword's SPELLING, and each
+ * body against EVERY OTHER BODY IN THE FILE. The last is the strongest and was added late: it turns a
+ * guess about what a corrupt body says into a citation, and it is how `county`, `rouse`, `soufriere`
+ * and `cahill` are known rather than surmised.
+ * ⚠ 694 headwords carry more than one distinct raw body — 659 once the builder's `[a-z]{2,20}` filter
+ * applies, which is the number to quote only when talking about what reaches the corpus. NONE carries
+ * three: of 175,210 headwords, 174,516 have exactly one distinct body and 694 have exactly two, so
+ * there is no deeper tier of this problem to look for.
  */
 const DEFECTIVE_READINGS: readonly (readonly [string, string, string])[] = [
-    // The body is a DIFFERENT WORD — the same corruption `MOBY_DEFECTIVE` collects, but on a row whose
-    // other reading is sound. Several are a lost SPACE: Moby's source held a multi-word entry and the
-    // headword kept only its last word.
+    // THE BODY IS A DIFFERENT WORD — the same corruption `MOBY_DEFECTIVE` collects, but on a row whose
+    // other reading is sound.
+    // ⚠ WHERE THE DISPLACED WORD IS ITSELF A MOBY HEADWORD, SAY SO AND GIVE THE LINE. A back-
+    // transliteration from the phones is a guess; a byte-identical body elsewhere in the file is
+    // evidence. Four of these were guesses in the first draft and two of the guesses were wrong.
     ["city", "'b/oU//Z//[@]/r", "body is 'Bougère', a surname"],
     ["corporation", "'b/U//N/gh/i/", "body is 'Bungee' — and NOT Moby's own `bungee 'b/@/n/dZ//i/`"],
-    ["county", "b/@/'l/A/h/i/", "body is 'Balahi'"],
+    ["county", "b/@/'l/A/h/i/", "body is Moby's own `Bellaghy b/@/'l/A/h/i/`, byte-identical"],
+    ["rouse", "r/O/ss", "body is Moby's own `Ross r/O/s` with a doubled ⟨s⟩"],
+    ["soufriere", "s/AU/", "body is Moby's own `Sau s/AU/`, byte-identical — displaced, not truncated"],
+    ["cahill", "k/eI/l", "body is Moby's own `kale`/`kail k/eI/l`, byte-identical"],
     ["plateau", "b/@/l'/oU/v/E/ns", "body is 'Bellovens'"],
-    ["peak", "k/oU/rk/oU/'v/A/d/oU/", "body is 'Corcovado'"],
+    ["peak", "k/oU/rk/oU/'v/A/d/oU/", "body is 'Corcovado', which Moby also carries as its own headword"],
     ["vineyard", "/dZ//u/'m/A/r/A/", "body is 'Jumara'"],
+    ["wellington", "'w/i/'g/j//I/n", "body is not Wellington — 'wiɡjɪn'"],
+    ["college", "'k/j//u/k/U/", "body is not College — 'kjukʊ'"],
+    ["junta", "'h/u/nt/&/n", "body is 'huntæn', against its own `junta 'h/U/nt/@/`"],
+    ["zed", ",z/E/d/@/'k/aI//@/", "body is 'Zedekiah'"],
+    // A LOST SPACE: Moby's source held a multi-word entry and the headword kept only its last word.
     ["bey", "/A/zz/@/d'd/i/nb/eI/", "body is 'Azzeddin Bey' with the space lost"],
     ["luce", "d/@/'l/u/s", "body is 'De Luce' with the space lost"],
-    // Truncated: two phones for nine letters.
-    ["soufriere", "s/AU/", "truncated — 'saʊ' for a word its own other reading reads 'sufɹiɛɹ'"],
-    // ⚠ A DIFFERENT CLASS, AND DECLARED HERE ANYWAY. These three are not a displaced word but the RIGHT
-    // word transcribed impossibly, and they are worth dropping for the same reason: the row goes on
-    // passing on its good reading while crediting a reading no speaker produces.
-    ["rouse", "r/O/ss", "'ɹɔss' — a word-final geminate /ss/ is not an English coda"],
-    ["toy", "t/oU//j/", "'toʊj' — OY written as GOAT+glide; Moby's own `Toy t//Oi//` is correct"],
+    ["quoin", "d/u/'k/oU//j/n", "body is 'Du Coyne' with the space lost"],
+    // ⚠ A DIFFERENT CLASS, AND DECLARED HERE ANYWAY. Not a displaced word but the RIGHT word
+    // transcribed impossibly — a phone dropped, doubled, or plainly wrong. Worth dropping for the same
+    // reason: the row goes on passing on its good reading while crediting a reading no speaker produces.
+    ["toy", "t/oU//j/", "'toʊj' — Moby's own `Toy t//Oi//` is correct"],
     ["whitehead", "'w/aI//T//E/d", "'waɪθɛd' — the ⟨th⟩ read across the compound seam as θ"],
+    ["early", "/i/rl/i/", "'iɹli' — Moby's own `Early '/[@]/rl/i/` is correct"],
+    ["somali", "s/oU/'m/&//i/", "'soʊmæi' — the /l/ dropped"],
+    ["began", "'b/i//&/n", "'biæn' — the /ɡ/ dropped"],
+    ["crises", "kr/i/z", "'kɹiz' — a syllable short of its own `Crises 'kr/aI/s/i/z`"],
+    ["messieurs", "m/E/'s/j//[@]/rr", "'mɛsjɚɹ' — a doubled ⟨rr⟩ coda"],
+    ["swaraj", "sw/@/'r/A/r/dZ/", "'swɚɑɹd͡ʒ' — an intrusive /r/ its own `swaraj sw/@/'r/A//dZ/` lacks"],
+    ["watergate", "'w/oU/rt/@/,g/eI/t", "'wɔɹtəɡeɪt' — an intrusive /r/ in a syllable spelled without one"],
+    ["duralumin", "d/dZ//U//@/'r/&/l/j//U/m/I/n", "a stray `d/dZ/` onset on an otherwise sound reading"],
 ];
+
+/**
+ * ⚠ WHAT THIS TABLE DELIBERATELY DOES NOT COVER, because the line matters more than the entries.
+ *
+ * A CASE COLLISION IS NOT CORRUPTION. Moby's `UP /j//u/'p/i/` is the correct reading of the INITIALISM,
+ * and `Piquet 'p/I/k/eI/` the correct reading of the surname; they merely share a lower-cased key with
+ * `up` and `piquet`. Those readings CAN be their spelling — they are simply a different lexeme — and
+ * the builder's header accepts that risk explicitly, having measured the alternative as worse. This
+ * table is for readings that CANNOT be the headword's at all. Declaring `UP` here would be a policy
+ * change to that decision dressed up as a defect fix.
+ *
+ * AND IT CANNOT REACH A SINGLE-READING ROW, which is the structural limit: a headword with one corrupt
+ * reading and no other belongs in `MOBY_DEFECTIVE`, which drops it whole. Per-reading declarations
+ * only ever apply where a sound reading survives to keep the row alive.
+ */
+// ⚠ A DUPLICATE PAIR COLLAPSES INTO THE SET AND IS OTHERWISE INVISIBLE — the builder's
+// fired-exactly-once check counts SET members, so declaring the same pair twice keeps both the
+// declared and the matched count at their old values and the build passes with a silently ignored
+// row. Caught here at module load instead, where the duplicate still exists as an array element.
+const dupes = DEFECTIVE_READINGS
+    .map(([w, body]) => `${w}\t${body}`)
+    .filter((k, i, all) => all.indexOf(k) !== i);
+if (dupes.length) throw new Error(`DEFECTIVE_READINGS: duplicate declaration(s) ${dupes.join(", ")}`);
 
 /** Lower-cased headword → the raw Moby bodies that cannot be that word's reading. See above. */
 export const MOBY_DEFECTIVE_READING: ReadonlyMap<string, ReadonlySet<string>> = new Map(

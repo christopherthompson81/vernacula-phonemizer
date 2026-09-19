@@ -377,16 +377,26 @@ const header = (what: string, n: number): string =>
     `# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,\n` +
     `# tab-separated, and the eval credits any of them.\n`;
 
+// ⚠ A DECLARATION THAT NO LONGER MATCHES IS SILENT, and silence here reads exactly like success — the
+// row simply comes back. Every declared (headword, body) pair must fire exactly once.
+// ⚠ THIS RUNS BEFORE THE WRITES, AND THE FIRST VERSION DID NOT. Throwing after `writeFileSync` leaves
+// the corpus ON DISK with the defect restored — the build fails AND the bad row ships, which is the
+// worst of both. Nothing may be written until the table is known to have applied.
+// ⚠ `imported.has(w)` SHORT-CIRCUITS ABOVE THIS COUNT, so a declared word that later enters
+// `moby-import.tsv` stops being seen here and trips the check with a misleading message. That is
+// reachable: this table makes exactly these words newly importable, because the corrupt body no
+// longer consumes their `seen` slot. `declaredReachable` excludes them so the count stays honest.
+const declaredPairs = [...MOBY_DEFECTIVE_READING.values()].reduce((n, b) => n + b.size, 0);
+const declaredReachable = [...MOBY_DEFECTIVE_READING.entries()]
+    .filter(([w]) => !imported.has(w)).reduce((n, [, b]) => n + b.size, 0);
+if (defectiveReading !== declaredReachable)
+    throw new Error(`MOBY_DEFECTIVE_READING: ${declaredReachable} declared and reachable (${declaredPairs} total), ` +
+        `${defectiveReading} matched — a declaration no longer matches its Moby body`);
+
 const dir = join(REPO, "tools/referee-eval/referees");
 writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary carries", lex.length) + lex.join("\n") + "\n");
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
-// ⚠ A DECLARATION THAT NO LONGER MATCHES IS SILENT, and silence here reads exactly like success — the
-// row simply comes back. Every declared (headword, body) pair must fire exactly once, so a typo in the
-// table or a change to the source file fails the build instead of quietly restoring the defect.
-const declared = [...MOBY_DEFECTIVE_READING.values()].reduce((n, b) => n + b.size, 0);
-if (defectiveReading !== declared)
-    throw new Error(`MOBY_DEFECTIVE_READING: ${declared} declared, ${defectiveReading} matched — a declaration no longer matches its Moby body`);
-console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, defective ${defective}, defective-reading ${defectiveReading}, excluded-as-imported ${imported.size}`);
+console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, defective ${defective}, defective-reading ${defectiveReading}/${declaredPairs}, excluded-as-imported ${imported.size}`);
 console.log(`  headwords emitting more than one reading: ${multiReading}`);
 console.log(`  dropped as NON-RHOTIC (Moby transcribing RP): ${nonRhotic}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);

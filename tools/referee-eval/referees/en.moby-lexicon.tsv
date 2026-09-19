@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary carries (35048 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary carries (35047 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -3117,7 +3117,7 @@ beforehand	bɪfɔɹhænd
 befriend	bɪfɹɛnd
 befuddle	bɪfʌdəl
 beg	bɛɡ
-began	bɪɡæn	biæn
+began	bɪɡæn
 begat	bɪɡæt
 begelman	biɡɛlmən
 beget	bɪɡɛt
@@ -4897,7 +4897,7 @@ cage	keɪd͡ʒ
 cagey	keɪd͡ʒi
 cagliari	kɑljɚi
 caguas	kɑɡwɑs
-cahill	kɑhɪl	keɪl
+cahill	kɑhɪl
 cahoot	kəhut
 cahoots	kəhuts
 cain	keɪn
@@ -6606,7 +6606,7 @@ collectivism	kəlɛktəvɪzəm
 collectivize	kəlɛktəvaɪz
 collector	kəlɛktɚ
 colleen	kɑlin
-college	kɑlɪd͡ʒ	kjukʊ
+college	kɑlɪd͡ʒ
 collegial	kəlid͡ʒiəl
 collegian	kəlid͡ʒən
 collegiate	kəlid͡ʒɪt
@@ -7871,7 +7871,7 @@ crimson	kɹɪmzən
 cringe	kɹɪnd͡ʒ
 cripple	kɹɪpəl
 cripps	kɹɪps
-crises	kɹiz	kɹaɪsiz
+crises	kɹaɪsiz
 crisis	kɹaɪsɪs
 crisp	kɹɪsp
 crispen	kɹɪspən
@@ -10375,7 +10375,7 @@ earhart	ɛɹhɑɹt
 earl	ɚl
 earldom	ɚldəm
 earlene	ɚlin
-early	iɹli	ɚli
+early	ɚli
 earmark	iɹmɑɹk
 earmuff	iɹmʌf
 earn	ɚn
@@ -18021,7 +18021,7 @@ junket	d͡ʒʌŋkɪt
 junkie	d͡ʒʌŋki
 junkyard	d͡ʒʌnkjɑɹd
 juno	d͡ʒunoʊ
-junta	hʊntə	huntæn
+junta	hʊntə
 jupiter	d͡ʒupɪtɚ
 jura	d͡ʒʊɹə
 jurassic	d͡ʒʊɹæsɪk
@@ -20966,7 +20966,7 @@ messenger	mɛsɪnd͡ʒɚ
 messerschmitt	mɛsɚʃmɪt
 messiah	mɪsaɪə
 messianic	mɛsɪænɪk
-messieurs	mɛsɚz	mɛsjɚɹ
+messieurs	mɛsɚz
 messina	mɛsinə
 messrs	mɛsɚz
 messy	mɛsi
@@ -26062,7 +26062,7 @@ quiz	kwɪz
 quizzical	kwɪzɪkəl
 quo	kwoʊ
 quod	kwɑd
-quoin	kɔɪn	dukoʊjn
+quoin	kɔɪn
 quorum	kwɔɹəm
 quota	kwoʊtə
 quotable	kwoʊtəbəl
@@ -29541,7 +29541,7 @@ solve	sɑlv
 solvency	sɑlvənsi
 solvent	sɑlvənt
 soma	soʊmə
-somali	soʊmæi	səmɑli
+somali	səmɑli
 somaliland	soʊmɑlilænd
 somatic	soʊmætɪk
 somber	sɑmbɚ
@@ -34118,7 +34118,6 @@ waterfall	wɔtɚfɔl
 waterford	wɔtɚfɚd
 waterfowl	wɔtɚfaʊl
 waterfront	wɔtɚfɹʌnt
-watergate	wɔɹtəɡeɪt	wɑtəɡeɪt
 watering	wɔtɚɪŋ
 waterishness	wɔtɚɪʃnɪs
 waterlog	wɔtɚlɔɡ
@@ -34246,7 +34245,7 @@ wellborn	wɛlbɔɹn
 welles	wɛlz
 wellesley	wɛlzli
 wellhead	wɛlhɛd
-wellington	wɛlɪŋtən	wiɡjɪn
+wellington	wɛlɪŋtən
 wellpoint	wɛlpɔɪnt
 wells	wɛlz
 welp	vɛlp
@@ -34981,7 +34980,7 @@ zealous	zɛləs
 zealously	zɛləsli
 zebra	zɛbɹə
 zebulon	zɛbjəlɑn
-zed	zɛd	zɛdəkaɪə
+zed	zɛd
 zee	zi
 zeebrugge	zibɹʊɡə
 zeeland	zilənd
