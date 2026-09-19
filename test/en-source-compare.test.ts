@@ -6,7 +6,8 @@
  * tools/english/en_source_compare.mts — the frequency-ranked triple-source audit.
  */
 import { describe, expect, test } from "vitest";
-import { normalise, goldToArpabet, mobyToArpabet, modernise } from "../tools/english/en_source_compare.mts";
+import { normalise, goldToArpabet, mobyToArpabet, modernise,
+    MOBY_DEFECTIVE, MOBY_DEFECTIVE_READING, MOBY_DEFECTIVE_READING_WHY } from "../tools/english/en_source_compare.mts";
 
 describe("the triple-source comparison form", () => {
     // ⚠ STEP 1. Keeping stress made the top-frequency hits almost entirely FUNCTION WORDS differing only in
@@ -109,5 +110,31 @@ describe("the source converters", () => {
     // ⚠ AND IT MUST NOT TOUCH A REAL YOD after a labial, which GenAm keeps.
     test("modernise leaves a labial yod alone", () => {
         expect(modernise(["P", "Y", "UW1", "M", "AH0"])).toEqual(["P", "Y", "UW1", "M", "AH0"]); // puma
+    });
+
+    // ⚠ THE TABLE IS KEYED ON THE RAW MOBY BODY, AND THAT IS THE WHOLE POINT. `corporation`'s corrupt
+    // reading was `bʊŋɡhi` until the bare-`gh` rule landed and made it `bʊŋɡi`; a declaration keyed on
+    // the IPA would have stopped matching at that moment, with no test failing and the defect back in
+    // the corpus. Moby's notation is 7-bit, so a stray IPA character is the signature of that mistake.
+    test("a defective READING is declared by its Moby body, never by the IPA it produces", () => {
+        for (const [w, bodies] of MOBY_DEFECTIVE_READING)
+            for (const body of bodies) {
+                expect([w, /^[\x20-\x7E]+$/u.test(body)]).toEqual([w, true]);
+                // and it must be a body Moby could have written — slashes, letters, stress marks
+                expect([w, /[/a-zA-Z]/u.test(body)]).toEqual([w, true]);
+            }
+    });
+
+    // ⚠ THE TWO TABLES MUST NOT OVERLAP. `MOBY_DEFECTIVE` drops the whole headword, so a word in both
+    // would make its per-reading declarations dead code — and dead declarations are exactly what the
+    // builder's fired-exactly-once check exists to catch. Better to never create the ambiguity.
+    test("no headword is declared defective both wholly and per-reading", () => {
+        expect([...MOBY_DEFECTIVE_READING.keys()].filter((w) => MOBY_DEFECTIVE.has(w))).toEqual([]);
+    });
+
+    test("every per-reading declaration carries a stated reason", () => {
+        for (const [w, bodies] of MOBY_DEFECTIVE_READING)
+            for (const body of bodies)
+                expect([w, (MOBY_DEFECTIVE_READING_WHY.get(`${w}\t${body}`) ?? "").length > 8]).toEqual([w, true]);
     });
 });

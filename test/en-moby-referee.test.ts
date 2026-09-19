@@ -67,6 +67,59 @@ describe("the Moby referee corpora", () => {
             expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
     });
 
+    // ⚠ A CORRUPT READING BESIDE A CORRECT ONE IS INVISIBLE TO EVERY OTHER TEST IN THIS FILE, because
+    // the row goes on passing on its good reading. `corporation` shipped `kɔɹpɚeɪʃən` AND `bʊŋɡi` for
+    // four blocks with nothing noticing. These assertions are the only thing standing between that
+    // class and a silent return.
+    test("a headword's corrupt reading is dropped and its sound one kept", () => {
+        for (const [w, keep, gone] of [
+            ["corporation", "kɔɹpɚeɪʃən", "bʊŋɡi"],      // body is 'Bungee'
+            ["city", "sɪti", "boʊʒɚ"],                    // body is 'Bougère'
+            ["county", "kaʊnti", "bəlɑhi"],               // Moby's own `Bellaghy`, byte-identical
+            ["rouse", "ɹaʊz", "ɹɔss"],                    // Moby's own `Ross` with a doubled ⟨s⟩
+            ["soufriere", "sufɹiɛɹ", "saʊ"],              // Moby's own `Sau`, byte-identical
+            ["cahill", "kɑhɪl", "keɪl"],                  // Moby's own `kale`/`kail`
+            ["peak", "pik", "kɔɹkoʊvɑdoʊ"],               // body is 'Corcovado'
+            ["plateau", "plætoʊ", "bəloʊvɛns"],           // body is 'Bellovens'
+            ["vineyard", "vɪnjɚd", "d͡ʒumɑɹɑ"],            // body is 'Jumara'
+            ["wellington", "wɛlɪŋtən", "wiɡjɪn"],
+            ["college", "kɑlɪd͡ʒ", "kjukʊ"],
+            ["junta", "hʊntə", "huntæn"],
+            ["zed", "zɛd", "zɛdəkaɪə"],                   // body is 'Zedekiah'
+            ["bey", "beɪ", "ɑzzəddinbeɪ"],                // 'Azzeddin Bey', space lost
+            ["luce", "lus", "dəlus"],                     // 'De Luce', space lost
+            ["quoin", "kɔɪn", "dukoʊjn"],                 // 'Du Coyne', space lost
+            ["somali", "səmɑli", "soʊmæi"],               // the /l/ dropped
+            ["began", "bɪɡæn", "biæn"],                   // the /ɡ/ dropped
+            ["crises", "kɹaɪsiz", "kɹiz"],
+            ["messieurs", "mɛsɚz", "mɛsjɚɹ"],             // a doubled ⟨rr⟩ coda
+            ["swaraj", "swɚɑd͡ʒ", "swɚɑɹd͡ʒ"],              // an intrusive /r/
+            ["duralumin", "dʊɹæljəmɪn", "dd͡ʒʊɚæljʊmɪn"],  // a stray `d/dZ/` onset
+        ] as const) {
+            const row = lex.get(w) ?? oov.get(w);
+            expect([w, row]).toEqual([w, keep]);
+            expect(row).not.toContain(gone);
+        }
+    });
+
+    // ⚠ CASE DOES NOT SAY WHICH READING IS THE BAD ONE, and an earlier version of this test said it did
+    // — it listed `rouse` here, where the corrupt row is the CAPITALISED `Rouse r/O/ss`. The assertion
+    // passed and the heading was wrong, which is the worse of the two failures. For these the
+    // lower-case row really is the corrupt one and the capital is right, so no case rule can work.
+    test("the corrupt reading is not always the capitalised one", () => {
+        expect(lex.get("toy") ?? oov.get("toy")).toBe("tɔɪ");                 // not `toʊj`
+        expect(lex.get("whitehead") ?? oov.get("whitehead")).toBe("waɪthɛd"); // not `waɪθɛd`
+        expect(lex.get("early") ?? oov.get("early")).toBe("ɚli");             // not `iɹli`
+    });
+
+    // ⚠ A WORD WHOSE EVERY READING IS DEFECTIVE LEAVES THE CORPUS, and that is the right outcome rather
+    // than a loss. Moby's `Watergate 'w/A/t/@/,g/eI/t` is non-rhotic RP and its `watergate
+    // 'w/oU/rt/@/,g/eI/t` metathesises the /r/ to before the ⟨t⟩; with the second declared, the first
+    // is all that is left and the non-rhotic filter takes it. Neither could arbitrate a GenAm reading.
+    test("a headword with no sound reading left is dropped entirely", () => {
+        expect([lex.has("watergate"), oov.has("watergate")]).toEqual([false, false]);
+    });
+
     test("NOTATION is folded — Moby's two symbols become this engine's one", () => {
         expect(lex.get("general")).toBe("d͡ʒɛnɚəl");    // ə + r  → ɚ
         expect(lex.get("history")).toBe("hɪstɚi");
