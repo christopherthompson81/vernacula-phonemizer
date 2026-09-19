@@ -288,3 +288,52 @@ did not. Expectations updated with that noted in place.
 `increment` — wikipron reads `ŋ` and we now read `n`, because `in-` is not transparent there. One
 lexicalised exception against a rule this regular is not worth a word list, and it is written into the
 rule's comment so the next reader does not rediscover it as a bug.
+
+## Run 12 — 2026-09-18 20:55 — review, and the two findings whose proposed remedies were wrong
+
+Seven findings on the velar fix. Two are worth recording because acting on them as written would have
+regressed the engine.
+
+⚠ **THE SYMMETRIC GUARD WAS REJECTED, AND MEASURED BEFORE BEING REJECTED.** The observation is real —
+the one-directional guard leaves CMUdict's own `NG` at a prefix boundary untouched, so ten families now
+split (`increment`/`increments`, `conquest`/`conquests`, `engel`/`engels`, `incompetent`/`incompetents`,
+`inconclusive`/`inconclusively`). But rewriting `NG`→n at the same boundary also reaches `congo`,
+`congress`, `congregate`, `conga`, `english` and `uncle`, which are ŋ for everyone. The splits were
+CMUdict disagreeing with ITSELF, so they are fixed in the dictionary.
+
+⚠ **NARROWING THE PREFIX LIST MEASURES WORSE**, which is the opposite of what the individual misses
+suggest. Over the 867 nasal+velar words the Moby referee covers:
+
+    no rule at all              451/867  52.0%
+    un|in                       561/867  64.7%
+    un|in|non                   565/867  65.2%
+    un|in|non|con               585/867  67.5%
+    un|in|non|con|en|syn|down|trans  589/867  67.9%   ← shipped
+    …plus the dict corrections       591/867  68.2%
+    …plus an optional OUTER prefix   597/867  68.9%   ← final
+
+So `congruent`, `syncope`, `encore` and `engel` are genuine misses of the spelling test, and the right
+place for them is the DICTIONARY, not a narrower rule that costs more than it saves.
+
+### What the review changed
+
+  1. **Nine dictionary corrections**, each a CMUdict row that contradicted itself or had no live prefix:
+     `conquests`, `engel`, `incompetents`, `inconclusively`, `increment` (which also closes the recorded
+     wikipron miss), `congruent`, `congruence`, `syncope`, `encore`.
+     ⚠ AND RECORDED IN `g2p-curated.tsv`, which the first pass forgot. That file exists because
+     `en_g2p_ngram.ts --emit` regenerates the dict from upstream and silently reverts hand edits; every
+     hand-correction PR since #1329 has paired the two, and this one now does.
+  2. **An optional OUTER prefix** in `TRANSPARENT_PREFIX`, so a derived form cannot contradict its stem:
+     `disengage` was dɪsɪŋɡˈeᶦd͡ʒ against `engage` ɛnɡˈeᶦd͡ʒ, `disincline` against `incline`. +6 rows.
+  3. **Nine source-less lexicon rows hand-patched** — `incumbent's`, `concord's`, `inco's`,
+     `uncharacteristically` and five more. `en_rebuild_lexicon.mts` passes rows with no ARPABET source
+     through untouched, so these kept the pre-fix ŋ: the frozen-copy problem again, a third layer down
+     after the generated lexicon and the heteronym table.
+  4. `JsRegex.Compile` rather than `new Regex` in the C# port — the only raw Regex in the whole
+     `Languages` tree, and it bypassed the dialect harness that proves the two ports agree.
+  5. The vacuous null guards dropped from both ports: `word` defaults to `""` in TS and is non-nullable
+     in C#, where the test was also producing three new CS8604 warnings. Build is back to 0 warnings.
+  6. Two doc comments reattached to the declarations they describe, in both ports.
+
+Final: goldens 2 further rows (`increment` in `nan`), C# parity 189 byte-identical, regex-diff 144,302
+identical, 316 TS files / 6,064 tests, C# 6,687 tests, check:package clean.

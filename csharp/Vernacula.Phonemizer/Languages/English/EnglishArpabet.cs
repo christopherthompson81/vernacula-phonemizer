@@ -4,7 +4,6 @@
  */
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.English;
@@ -113,9 +112,6 @@ public static class EnglishArpabet
      * family in the class, but the referee says `ə` — 81.0% over 100 `-ness` rows, 74.4% over 43 `-less`
      * rows — so the schwa already written there is right and the reference is wrong.
      */
-    /** Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below. */
-    private static readonly Regex TRANSPARENT_PREFIX = new("^(?:un|in|non|con|en|syn|down|trans)", RegexOptions.Compiled);
-
     private static void RebaseSuffixIh(List<Phone> P, string word)
     {
         // ⚠ THE SUFFIX'S OWN VOWEL, LOCATED FROM THE END. Taking "the last vowel" instead split a
@@ -189,6 +185,17 @@ public static class EnglishArpabet
     private static readonly JsRe ITY = JsRegex.Compile("(it|iti|ities|ety|ities)y?$");
     private static readonly JsRe IBLE = JsRegex.Compile("ibl[ey]?$");
     private static readonly JsRe LATINATE_PREFIX = JsRegex.Compile("^(be|de|re|se|pre)[^aeiouy]");
+
+    /**
+     * Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below.
+     * ⚠ THE OUTER PREFIX IS OPTIONAL BECAUSE A DERIVED FORM MUST NOT CONTRADICT ITS OWN STEM:
+     * `disengage` against `engage`, `disincline` against `incline`. Measured 591 → 597 of the 867
+     * nasal+velar words the Moby referee covers.
+     * ⚠ `JsRegex.Compile`, NOT `new Regex`, like every other pattern in this tree — csharp/regex-diff
+     * validates the JS dialect, and a raw Regex would bypass the harness that proves the two ports agree.
+     */
+    private static readonly JsRe TRANSPARENT_PREFIX =
+        JsRegex.Compile("^(?:dis|re|mis|over|under|pre|post)?(?:un|in|non|con|en|syn|down|trans)");
 
     /**
      * Is the `R` after an `IY` the ONSET of a following element rather than a coda on the same syllable?
@@ -360,10 +367,14 @@ public static class EnglishArpabet
                 // as əŋklˈiːn. Four independent lines agree on `n` there: the dictionary, Moby, the
                 // wikipron referee (4 of the 5 rows it arbitrates), and the recordings, 15 to 2.
                 // ⚠ THE INDEX GUARD IS WHAT MAKES THE SPELLING TEST SAFE: only a nasal inside the
-                // prefix is exempt, so `unkink` keeps its second [ŋ] — ənkˈɪŋk.
+                // prefix is exempt, so `unkink` keeps its second [ŋ] — ənkˈɪŋk. The OUTER prefix group
+                // is what stops a derived form contradicting its stem (`disengage` against `engage`).
+                // ⚠ THE WORDS THAT MERELY BEGIN WITH THE LETTERS — congruent, syncope, encore, engel —
+                // are fixed in g2p-dict.tsv, not by narrowing the rule: narrowing measures worse
+                // (full list 68.9%, un|in|non 65.2%, none 52.0% over the 867 words Moby covers).
                 // ⚠ MIRRORS src/languages/english/englishArpabet.ts; the goldens are the parity gate.
                 if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G")
-                    && !(i <= 3 && word != null && TRANSPARENT_PREFIX.IsMatch(word)))
+                    && !(i <= 6 && TRANSPARENT_PREFIX.IsMatch(word)))
                 {
                     outSb.Append('ŋ');
                     continue;

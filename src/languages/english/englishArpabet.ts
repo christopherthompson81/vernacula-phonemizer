@@ -310,11 +310,18 @@ export function singlePrimary(phones: string[]): string[] {
     return phones.map((p, i) => (lastPrimary >= 0 && i !== lastPrimary && /1$/.test(p) ? p.replace(/1$/, "2") : p));
 }
 
+/**
+ * Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below.
+ *
+ * ⚠ THE OUTER PREFIX IS OPTIONAL BECAUSE A DERIVED FORM MUST NOT CONTRADICT ITS OWN STEM. Anchored with
+ * no outer group, `engage` was ɛnɡˈeᶦd͡ʒ while `disengage` was dɪsɪŋɡˈeᶦd͡ʒ, and `incline` — a heteronym
+ * corrected for exactly this — was ɪnklˈaᶦn while `disincline` was dˌɪsɪŋklˈaᶦn. Measured over the 867
+ * nasal+velar words the Moby referee covers: 591 → 597.
+ */
+const TRANSPARENT_PREFIX = /^(?:dis|re|mis|over|under|pre|post)?(?:un|in|non|con|en|syn|down|trans)/u;
+
 /** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
  *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
-/** Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below. */
-const TRANSPARENT_PREFIX = /^(?:un|in|non|con|en|syn|down|trans)/u;
-
 export function makeArpabetToIpa(
     def: ArpabetDef,
     /**
@@ -510,14 +517,21 @@ const VOWELS = new Set(def.vowels);
             // ⚠ THE INDEX GUARD IS WHAT MAKES THE SPELLING TEST SAFE: only a nasal inside the prefix
             // itself is exempt (`un` N at 1, `non`/`con`/`down` at 2, `trans` at 3), so a later N+velar
             // in the same word still assimilates.
-            // ⚠ IT MISSES `increment`, where wikipron reads `ŋ` — the prefix is not transparent there.
-            // Recorded rather than hidden, as the declared-intentional classes record theirs; one
-            // lexicalised exception is not worth a word list against a rule this regular.
+            // ⚠ THE SPELLING TEST OVER-FIRES ON WORDS THAT MERELY BEGIN WITH THE LETTERS, and those are
+            // fixed in the DICTIONARY rather than by narrowing the rule, because narrowing measures
+            // WORSE: over the 867 nasal+velar words the Moby referee covers, the full prefix list scores
+            // 68.9%, `un|in|non` 65.2%, `un|in` 64.7%, and no rule at all 52.0%. `congruent`,
+            // `congruence`, `syncope`, `encore`, `engel` and `increment` were CMUdict slips this rule
+            // used to paper over; corrected in g2p-dict.tsv, where the evidence points.
+            // ⚠ AND A SYMMETRIC GUARD WAS REJECTED. Rewriting `NG`→n at the same boundary would make a
+            // stem and its inflection agree (`increment`/`increments`), but it also reaches `congo`,
+            // `congress`, `congregate`, `conga`, `english` and `uncle`, which are ŋ for everyone. The
+            // ten split families were CMUdict disagreeing with itself, and are fixed there too.
             if (
                 base === "N" &&
                 i + 1 < P.length &&
                 (P[i + 1]!.base === "K" || P[i + 1]!.base === "G") &&
-                !(i <= 3 && word !== undefined && TRANSPARENT_PREFIX.test(word))
+                !(i <= 6 && TRANSPARENT_PREFIX.test(word))
             ) {
                 out += "ŋ";
                 continue;
