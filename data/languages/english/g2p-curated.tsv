@@ -2166,3 +2166,20 @@ marmara	M AA0 R M AA1 R AH0	M AA1 R M ER0 AH0	Sea of Marmara is /ˈmɑɹmərə/,
 terracotta	T ER2 AH0 K AA1 T AH0	T EH2 R AH0 K AA1 T AH0	first syllable is ɛɹ under secondary stress, not a reduced ɚ; Moby + wikipron tɛɹəkɑtə
 appreciative	AH0 P R IY1 SH IY0 EY2 T IH0 V	AH0 P R IY1 SH IY0 AH0 T IH0 V	no FACE vowel in -ciative; gold əpɹˈiʃiəɾɪv segment-for-segment, Moby + wikipron əpɹiʃətɪv (see note above on what the two referees settle)
 appreciatively	AH0 P R IY1 SH IY0 EY2 T IH0 V L IY0	AH0 P R IY1 SH IY0 AH0 T IH0 V L IY0	as `appreciative`
+
+# THE `-lly` GEMINATE, AND THE DICTIONARY DISAGREEING WITH ITSELF 708 TO 5. Stem-final ⟨l⟩ plus the
+# adverbial `-ly` degeminates in GenAm — `fully` is /ˈfʊli/, not /ˈfʊlli/ — and our dictionary already
+# says so for 708 words ending `-lly`, `abnormally` and `actually` and `accidentally` among them. Five
+# rows carry `L L` instead, which is CMUdict's own inconsistency rather than a distinction: the en-GB
+# referee reads `evilly` as `iːvli` and `foully` as `faʊli`, both single. Found while mining the Moby
+# in-dict residual, where the mirror-image artifact — Moby writing the geminate for all 102 of these —
+# is fixed on the referee side in `build-en-moby-referee.mts`.
+# ⚠ `foully` ALSO GAINS ITS PRIMARY STRESS, which is the only change here that is not the geminate:
+# CMUdict wrote `F AW0 L L IY0` with no stressed syllable at all.
+# ⚠ AND `unnaturally` IS NOT ONE OF THESE and was in the first draft of this list: its geminate is `N N`
+# across the `un-` prefix boundary, which is real and which the engine must keep.
+drolly	D R OW1 L L IY0	D R OW1 L IY0	stem-l + -ly degeminates; 708 dict rows against 5
+dully	D AH1 L L IY0	D AH1 L IY0	as `drolly`
+evilly	IY1 V AH0 L L IY0	IY1 V AH0 L IY0	as `drolly`; en-GB referee iːvli
+foully	F AW0 L L IY0	F AW1 L IY0	as `drolly`; en-GB referee faʊli. ALSO had no primary stress
+genteelly	JH EH0 N T IY1 L L IY0	JH EH0 N T IY1 L IY0	as `drolly`

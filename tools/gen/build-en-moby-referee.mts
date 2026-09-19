@@ -154,6 +154,26 @@ function fixInitialYod(word: string, a: string[]): string[] {
 }
 
 /** Collapse an identical adjacent CONSONANT pair — see the header. OOV rows only. */
+/**
+ * The `-lly` geminate, collapsed on BOTH files.
+ *
+ * ⚠ THIS IS THE ONE CARVE-OUT FROM THE OOV-ONLY RULE, and it is safe for a reason the blanket collapse
+ * is not: the geminate here is Moby transcribing the ⟨ll⟩ SPELLING of the adverbial suffix, not a claim
+ * about a compound seam. `abnormally` is `æbnɔɹməlli`, `annually` `ænjuəlli`, `bally` `bælli` — 102 rows
+ * of the in-dictionary residual, every one stem-final ⟨l⟩ plus `-ly`.
+ * ⚠ AND OUR OWN DICTIONARY AGREES 708 TO 5. Stem-l + `-ly` degeminates in GenAm (`fully` is /ˈfʊli/)
+ * and 708 `-lly` rows say so; the five that said otherwise — `drolly`, `dully`, `evilly`, `foully`,
+ * `genteelly` — were CMUdict's own inconsistency and are corrected in `g2p-curated.tsv`, so there is
+ * nothing left on our side for this to hide. The en-GB referee independently reads `evilly` as `iːvli`
+ * and `foully` as `faʊli`.
+ * ⚠ GATED ON THE SPELLING, not the phones, which is what keeps it away from the 155 real geminates the
+ * OOV-only rule protects: `earring`, `bookkeeper`, `coattail`, `backcourt` do not end `-lly`. A
+ * boundary-table gate was tried first and rejected — only 88 of those 155 have a boundary row at all,
+ * and the uncovered ones are exactly the inflections (`earrings`, `bookkeepers`, `coattails`).
+ */
+const collapseSuffixL = (w: string, a: string[]): string[] =>
+    w.endsWith("lly") ? a.filter((p, i) => !(i > 0 && p === "L" && a[i - 1] === "L")) : a;
+
 function degeminate(a: string[]): string[] {
     const out: string[] = [];
     for (const p of a) {
@@ -298,7 +318,7 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
     const inLexicon = dict.has(w);
     // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseSuffix` applies to both.
-    const fixed = fixInitialYod(w, normaliseSuffix(w, a0));
+    const fixed = collapseSuffixL(w, fixInitialYod(w, normaliseSuffix(w, a0)));
     const a = inLexicon ? fixed : degeminate(fixed);
     const folded = fold(w, a);
     const ipa = folded.map(sym).join("");

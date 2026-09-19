@@ -2281,3 +2281,51 @@ recurs, it was something else.
 
     goldens 0 stale · C# parity 189 byte-identical · 6,076 tests · serial and pooled reports
     byte-identical at 159,335 bytes each
+
+## Run 43 — 2026-09-19 — mining the inverse of the 82.4%: one class shipped, one refused
+
+The in-dictionary residual — the rows that are neither exact nor declared-intentional — is 6,159 of
+35,049. Enumerated it and classified by what actually differs:
+
+    edit distance from the referee   1 off 3,217 (52.2%)   ≤2 off 82.2%   ≤3 off 93.3%
+
+    single substitutions (2,508)  æ→ɛ 222   ɑ→ɔ 175   i→ɪ 164   ɛ→ɪ 154   ɪ→i 150
+                                  ɑ→ə 137   ə→ɑ 130   ɛ→ə 124   æ→ə 91   ʊ→ə 84
+    we have an extra symbol (317) ə 78   a 56   ɹ 47
+    we drop a symbol (392)        l 108   ə 72   i 41   j 41
+
+⚠ THE SUBSTITUTION HALF IS ALMOST ENTIRELY SETTLED AXES. `æ→ɛ` is marry–merry (deliberate, #1336),
+`ɑ→ɔ` is cot–caught (refused on evidence), `i↔ɪ` is the NEAR vowel (already partly intentional), and
+the ə-against-everything rows are unstressed vowel quality. 41% of the residual is not work.
+
+The insert/delete half is where the classes are, and they turned out to be three different things.
+
+⚠ THE `-lly` GEMINATE WAS OURS AS WELL AS THEIRS. Moby writes `abnormally` as `æbnɔɹməlli` from the
+⟨ll⟩ spelling — 102 residual rows. The obvious move is to collapse it in the builder, and the builder
+refuses precisely this: the geminate collapse is OOV-only because 155 dictionary rows carry a REAL
+geminate (`earring`, `bookkeeper`, `backcourt` — compound seams) and a blanket fold would hide them.
+⚠ A BOUNDARY-TABLE GATE WAS TRIED FIRST AND FAILED. #1360's table should say where a real seam is, but
+only 88 of the 155 have a boundary row and the uncovered ones are exactly the inflections —
+`earrings`, `bookkeepers`, `coattails`. Gating on it would collapse what the rule protects.
+What worked was going at it from the spelling, and doing that surfaced the better finding: OUR OWN
+DICTIONARY DISAGREES WITH ITSELF 708 TO 5. Stem-l + `-ly` degeminates in GenAm and 708 `-lly` rows say
+so; five say otherwise — `drolly`, `dully`, `evilly`, `foully`, `genteelly` — and the en-GB referee
+reads `evilly` as `iːvli` and `foully` as `faʊli`, single. Those five are CMUdict slips against our own
+majority (`foully` additionally had NO primary stress at all). Fixed in `g2p-curated.tsv`; with them
+gone the referee-side collapse, gated on the headword ending `-lly`, hides nothing.
+
+    Moby — words the dict carries   26,522 → 26,624 (75.7% → 76.0%), +intentional 82.4% → 82.8%
+    primary / OOV / goldens          unmoved — the five words are in no other corpus
+
+⚠ AND THE YOD CLASS IS REFUSED, on the repo's own bar. Moby is conservative after coronals — `avenue`
+`ævənju`, `costume` `kɑstjum` — where GenAm drops the yod and we are right. It cannot go in
+`intentional`, which is positionwise and needs equal length. As a fold, `[tdnszlθ]ju` → `$1u` buys 28
+rows. But WE EMIT CORONAL+`ju` 199 TIMES IN OUR OWN SHIPPED LEXICON (`nju` 121, `dju` 42, `sju` 18,
+`θju` 12), so we make this distinction lexically and a symmetric fold would blind the referee to a real
+yod error, in either direction, at all 199 sites. FORCE→NORTH was accepted because it blinds nothing;
+this is the same test with the opposite answer, and 28 rows is not worth 199 blind spots.
+
+Left on the table, measured and not taken: the syllabic-l class (78 rows, `cycling` `saɪkəlɪŋ` against
+`saɪklɪŋ`) is the same shape as the yod one and probably falls the same way; the ~650 unstressed-vowel
+rows need the weak-vowel classes revisited rather than a new mechanism; and `astilbe əstɪbi` — we drop
+an /l/ Moby has — is a genuine single defect found in the dropped-l bucket while looking for the class.
