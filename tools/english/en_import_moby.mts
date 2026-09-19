@@ -27,7 +27,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MOBY_DEFECTIVE, mobyToArpabet, goldToArpabet, modernise, normalise } from "./en_source_compare.mts";
+import { MOBY_DEFECTIVE, MOBY_DEFECTIVE_READING, mobyToArpabet, goldToArpabet, modernise, normalise } from "./en_source_compare.mts";
 import { americanSpelling } from "../../src/languages/english/spellingVariants.ts";
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -159,6 +159,10 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     if (have.has(w) || seen.has(w)) continue;
     // ⚠ NEVER IMPORT A ROW WHOSE BODY IS A DIFFERENT WORD. See MOBY_DEFECTIVE.
     if (MOBY_DEFECTIVE.has(w)) { skipped++; continue; }
+    // ⚠ THIS PATH IS FIRST-WINS, so a corrupt reading that sorts before the good one is what gets
+    // IMPORTED INTO THE SHIPPING DICTIONARY. Moby lists `Corporation` before `corporation` and `City`
+    // before `city`; both are saved today only by `have.has(w)` already carrying the word.
+    if (MOBY_DEFECTIVE_READING.get(w)?.has(line.slice(sp + 1))) { skipped++; continue; }
     // ⚠ ≥3 LETTERS: a one- or two-letter headword is a GLYPH, not a word, and its reading is not constant
     // — the same reason the wikipron referee excludes them (`x` is the letter's SOUND, `m` its NAME).
     if (!/^[a-z]{3,20}$/u.test(w)) { skipped++; continue; }

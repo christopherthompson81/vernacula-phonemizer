@@ -67,6 +67,37 @@ describe("the Moby referee corpora", () => {
             expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
     });
 
+    // ⚠ A CORRUPT READING BESIDE A CORRECT ONE IS INVISIBLE TO EVERY OTHER TEST IN THIS FILE, because
+    // the row goes on passing on its good reading. `corporation` shipped `kɔɹpɚeɪʃən` AND `bʊŋɡi` for
+    // four blocks with nothing noticing. These assertions are the only thing standing between that
+    // class and a silent return.
+    test("a headword's corrupt reading is dropped and its sound one kept", () => {
+        for (const [w, keep, gone] of [
+            ["corporation", "kɔɹpɚeɪʃən", "bʊŋɡi"],      // body is 'Bungee'
+            ["city", "sɪti", "boʊʒɚ"],                    // body is 'Bougère'
+            ["county", "kaʊnti", "bəlɑhi"],               // body is 'Balahi'
+            ["peak", "pik", "kɔɹkoʊvɑdoʊ"],               // body is 'Corcovado'
+            ["plateau", "plætoʊ", "bəloʊvɛns"],           // body is 'Bellovens'
+            ["vineyard", "vɪnjɚd", "d͡ʒumɑɹɑ"],            // body is 'Jumara'
+            ["bey", "beɪ", "ɑzzəddinbeɪ"],                // 'Azzeddin Bey', space lost
+            ["luce", "lus", "dəlus"],                     // 'De Luce', space lost
+            ["soufriere", "sufɹiɛɹ", "saʊ"],              // truncated
+        ] as const) {
+            const row = lex.get(w) ?? oov.get(w);
+            expect([w, row]).toEqual([w, keep]);
+            expect(row).not.toContain(gone);
+        }
+    });
+
+    // ⚠ CASE DOES NOT SAY WHICH READING IS THE BAD ONE. For these two the LOWER-CASE row is the corrupt
+    // one and the capitalised row is right — the reverse of the nine above. A rule that dropped
+    // capitals would fix nine and break two, which is why the table names bodies one at a time.
+    test("the corrupt reading is not always the capitalised one", () => {
+        expect(lex.get("toy") ?? oov.get("toy")).toBe("tɔɪ");              // not `toʊj`
+        expect(lex.get("whitehead") ?? oov.get("whitehead")).toBe("waɪthɛd"); // not `waɪθɛd`
+        expect(lex.get("rouse") ?? oov.get("rouse")).toBe("ɹaʊz");         // not `ɹɔss`
+    });
+
     test("NOTATION is folded — Moby's two symbols become this engine's one", () => {
         expect(lex.get("general")).toBe("d͡ʒɛnɚəl");    // ə + r  → ɚ
         expect(lex.get("history")).toBe("hɪstɚi");

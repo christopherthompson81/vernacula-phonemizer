@@ -262,6 +262,68 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
 ]);
 
 /**
+ * MOBY ROWS WHERE ONE READING IS CORRUPT AND ANOTHER IS FINE. `MOBY_DEFECTIVE` cannot express this: it
+ * drops a HEADWORD, and dropping `city` or `county` to be rid of one bad reading throws away a correct
+ * one that is scoring today.
+ *
+ * ⚠ THE SECOND READING IS WHERE CORRUPTION HIDES, and this table exists because nothing was looking
+ * there. The builder emits every reading tab-separated and the eval credits ANY of them — a deliberate
+ * choice, argued in build-en-moby-referee.mts, because case does not predict which Moby row is right.
+ * The cost was named at the time and is exactly this: a corrupt reading beside a correct one is
+ * invisible to every all-readings test, because the row keeps passing. `corporation` shipped
+ * `kɔɹpɚeɪʃən` AND `bʊŋɡi` for four blocks without a single test noticing.
+ *
+ * ⚠ KEYED ON THE RAW MOBY BODY, NOT ON THE IPA IT PRODUCES. The IPA is downstream of every converter
+ * rule and moves when they change — `corporation`'s bad reading was `bʊŋɡhi` until the bare-`gh` rule
+ * landed one block ago, so an IPA-keyed declaration would have silently stopped matching and let the
+ * defect back in with no test failing. The body is source data and never moves.
+ *
+ * ⚠ CASE DOES NOT PREDICT WHICH READING IS THE BAD ONE, the same finding the builder records for a
+ * different reason. The capitalised row is corrupt for `City`, `County`, `Corporation`, `Peak`,
+ * `Plateau`, `Vineyard`, `Bey`, `Luce` and `Soufriere` — and the LOWER-CASE row is the corrupt one for
+ * `toy` and `whitehead`, where the capitalised `Toy t//Oi//` and `Whitehead '/hw//aI/t,h/E/d` are
+ * right. A rule that dropped capitals would fix nine and break two.
+ *
+ * ⚠ FOUND BY TWO DETECTORS THAT DISAGREE, and neither alone was enough. The first compares a row's
+ * readings TO EACH OTHER (consonant-skeleton Jaccard below 0.34) and found `vineyard`, which the
+ * second misses. The second compares each reading TO THE HEADWORD'S SPELLING (60%+ of the body's
+ * consonants unaccounted for) and found `luce`, which the first misses. 659 headwords carry more than
+ * one distinct raw body; these are the twelve that survived reading every flagged pair by hand.
+ */
+const DEFECTIVE_READINGS: readonly (readonly [string, string, string])[] = [
+    // The body is a DIFFERENT WORD — the same corruption `MOBY_DEFECTIVE` collects, but on a row whose
+    // other reading is sound. Several are a lost SPACE: Moby's source held a multi-word entry and the
+    // headword kept only its last word.
+    ["city", "'b/oU//Z//[@]/r", "body is 'Bougère', a surname"],
+    ["corporation", "'b/U//N/gh/i/", "body is 'Bungee' — and NOT Moby's own `bungee 'b/@/n/dZ//i/`"],
+    ["county", "b/@/'l/A/h/i/", "body is 'Balahi'"],
+    ["plateau", "b/@/l'/oU/v/E/ns", "body is 'Bellovens'"],
+    ["peak", "k/oU/rk/oU/'v/A/d/oU/", "body is 'Corcovado'"],
+    ["vineyard", "/dZ//u/'m/A/r/A/", "body is 'Jumara'"],
+    ["bey", "/A/zz/@/d'd/i/nb/eI/", "body is 'Azzeddin Bey' with the space lost"],
+    ["luce", "d/@/'l/u/s", "body is 'De Luce' with the space lost"],
+    // Truncated: two phones for nine letters.
+    ["soufriere", "s/AU/", "truncated — 'saʊ' for a word its own other reading reads 'sufɹiɛɹ'"],
+    // ⚠ A DIFFERENT CLASS, AND DECLARED HERE ANYWAY. These three are not a displaced word but the RIGHT
+    // word transcribed impossibly, and they are worth dropping for the same reason: the row goes on
+    // passing on its good reading while crediting a reading no speaker produces.
+    ["rouse", "r/O/ss", "'ɹɔss' — a word-final geminate /ss/ is not an English coda"],
+    ["toy", "t/oU//j/", "'toʊj' — OY written as GOAT+glide; Moby's own `Toy t//Oi//` is correct"],
+    ["whitehead", "'w/aI//T//E/d", "'waɪθɛd' — the ⟨th⟩ read across the compound seam as θ"],
+];
+
+/** Lower-cased headword → the raw Moby bodies that cannot be that word's reading. See above. */
+export const MOBY_DEFECTIVE_READING: ReadonlyMap<string, ReadonlySet<string>> = new Map(
+    [...new Set(DEFECTIVE_READINGS.map(([w]) => w))].map((w) =>
+        [w, new Set(DEFECTIVE_READINGS.filter(([x]) => x === w).map(([, body]) => body))]),
+);
+
+/** The reason each declaration was made, for the tests and for whoever audits this next. */
+export const MOBY_DEFECTIVE_READING_WHY: ReadonlyMap<string, string> = new Map(
+    DEFECTIVE_READINGS.map(([w, body, why]) => [`${w}\t${body}`, why]),
+);
+
+/**
  * Fold Moby's pre-merger layers AND its rhotic notation so it can vote on modern GenAm. See the header.
  *
  * ⚠ MOBY SPELLS EVERY UNSTRESSED `-ər` AS TWO SYMBOLS, `/@/r` — `ocular` is \'/A/k/j//@/l/@/r. Both this
@@ -349,6 +411,7 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         const sp = line.indexOf(" ");
         if (sp < 0) continue;
         const w = line.slice(0, sp).toLowerCase();
+        if (MOBY_DEFECTIVE_READING.get(w)?.has(line.slice(sp + 1))) continue;
         const a = mobyToArpabet(line.slice(sp + 1), w);
         if (a) (moby.get(w) ?? moby.set(w, []).get(w)!).push(a);
     }
