@@ -2490,3 +2490,211 @@ reproduces the upstream shape for `gaea`, `mainz` and `piazza` — all source N,
 a loanword spelling as English. There is no rule to key a fix on (the 41-to-67 split is exactly the
 absence of one), and the model has not been retrained since these corrections landed, so a retrain
 absorbs them for free the way #1341 did for `collaborative`.
+
+## Run 47 — 2026-09-19 — reviewing Run 46: reproduced, one rejection that was wrong, and a class not exhausted
+
+Reviewed `fix/moby-consonant-defects` (8b062a0e) against `origin/main` (cd2f5dbf) from a detached
+worktree. Every number in Run 46 reproduces; every cited source exists and reads as quoted; the twelve
+readings are all right as GenAm. What follows is the residue.
+
+### Reproduced exactly
+
+    MOBY=/mnt/data/moby/mobypron.unc npx tsx tools/referee-eval/eval.ts en   (both trees)
+    Moby — words the dict carries   26,624/35,049 → 26,632/35,049   (+8, as claimed)
+    Moby — OOV                      17,454/39,485 → 17,455/39,485   (+1, as claimed)
+    primary wikipron-US             2,584/4,037 on BOTH trees       (unmoved, as claimed)
+
+    npx tsx tools/english/en_rebuild_lexicon.mts    135,305 rows regenerate byte-identically, 0 would
+                                                   change — the 12 lexicon rows are exactly the 12 dict rows
+
+The **41 to 67** split reproduces on `main` for headwords spelled `-zz[aeio]`: 41 `T S`, 67 `Z`, n=108,
+and `intermezzo` does carry `T S`. ⚠ AFTER THIS BRANCH IT IS **44 to 64** — `palazzo`, `piazza` and
+`paparazzi` all end `-zz[aeio]` — yet both the `g2p-curated.tsv` block and the new `KNOWN_GAPS` comment
+state 41-to-67 in the PRESENT TENSE about the shipped tree. Two stale numbers in files this branch edits.
+
+The skeleton probe was re-run independently (Moby ∩ en-GB referee ∩ our accent-lexicon, vowels and
+length/stress/tie marks stripped, ɫ→l and ɚ/ɝ/ɹ→r): **409** words where both referees share a skeleton
+that is not ours, against Run 46's 433. Same instrument, different folding; the denominator stands. ⚠ THE
+PROBE ITSELF IS NOT COMMITTED, so neither 433 nor the class membership behind it is reproducible from the
+tree — and the repo already owns the instrument for this bar, `tools/english/en_source_compare.mts`.
+
+### Source support, row by row
+
+Three sources (Moby + en-GB referee + misaki gold): `achaean` `armiger` `gibberish` `hemorrhagic`
+`palazzo` `astilbe`. Two: `stich` `gaea` `mozart` `mainz` (Moby + en-GB), `piazza` `paparazzi` (en-GB +
+gold; Moby has no `paparazzi` row and dissents on `piazza`). INDEPENDENCE HOLDS IN EVERY PAIR — no row
+rests on wikipron-US and wikipron-UK alone, which is the one pair that shares ancestry.
+
+⚠ "All eleven carry two or more; **six** carry three" — five of the eleven do. The sixth three-source row
+is `astilbe`, which that sentence has already set aside.
+
+### `cham` WAS REJECTED ON A WRONG READING OF THE EVIDENCE
+
+Run 46: "`cham` and `ich` were dropped because the two referees disagree with each other." For `ich` that
+is right. For `cham` it is not:
+
+    ours          cham  CH AE1 M
+    Moby          kæm
+    en-GB referee t͡ʃæm | kæm          ← carries the /k/ reading as a variant
+    misaki gold   Cham → kˈæm         ← NOT CONSULTED
+
+Gold has no lowercase `cham`, exactly as it has no lowercase `achaean` — and Run 46 DID consult the
+capitalized key for `achaean` ("gold əkˈiən" exists only under `Achaean`). `en_import_moby.mts` codifies
+that lookup: `gold[w] ?? gold[Capitalized]`. Applied consistently, `cham` clears the bar with three
+sources, and the title (a variant of *khan*) is \ˈkam\. This is the one rejection that should be reversed.
+
+### THE THREE CLASSES WERE NOT EXHAUSTED
+
+Crossing the 409 against gold gives 136 rows where Moby, the en-GB referee AND gold all agree against us.
+Inside the three classes Run 46 names, these clear the same three-source bar and were not taken:
+
+    chalcedony  CH AE1 L S AH0 D OW2 N IY0   Moby kælsɛdəni · uk kælsədoʊni|kælsɛdəni · gold kælsˈɛdəni
+    chimera     CH IH0 M EH1 R AH0           Moby kɪmiɹə · uk kɪmɪəɹə|kʌɪmɪəɹə|kaɪmɪəɹə · gold kImˈɪɹə
+    chiron      CH AY1 R AH0 N               Moby kaɪɹɑn · uk kaɪɹən · gold kˈIɹən
+    concha      K AA1 N CH AH0               Moby kɑŋkə · uk kɒŋkə · gold kˈɑŋkə
+    loggia      L AO1 G IY0 AH0              Moby lɑd͡ʒə · uk loʊd͡ʒə|lɒd͡ʒiə|lɒd͡ʒə · gold lˈɔʤiə
+    catsup      K EH1 CH AH0 P               Moby kætsəp · uk kætsəp · gold kˈætsəp
+
+`celtic` and `padua` also surface and are correctly skippable — the en-GB referee carries BOTH readings
+for each, so they are live variants like `hegemonic`. The point is the prose: "three classes come out of
+it clean", followed by eleven words, reads as if the classes were exhausted, and they were not.
+
+### STALE SIBLINGS
+
+    paparazzis    g2p-dict        P AA2 P AA0 R AO1 Z IY2 Z   ← one line below the corrected paparazzi,
+                                                                still carrying BOTH the old Z and the old AO1
+    paparazzi's   accent-lexicon  pʰˌɑːpɑːɹˈɔːziːz            ← no dict source, so the rebuild passes it through
+    mozart's      accent-lexicon  mˈoᶷzɑːɹts                  ← same; the lexicon now says Mozart /moʊts-/
+                                                                and Mozart's /moʊz-/
+
+`mozartean` (`M OW2 Z AA1 R T IY0 AH0 N`) and `piazzolla` (`P IY2 AH0 Z AA1 L AH0`) are the same family
+and also /z/. No referee evidence was cited either way, so they are out of scope — recorded here so the
+next pass does not rediscover them as new.
+
+### THE VOWEL RIDERS ARE NOT UNIFORMLY COVERED BY THE CONSONANT ARGUMENT
+
+Run 46's admissibility rule is that a consonant is a spelling trap and a vowel is an accent difference,
+which is precisely what licenses a BrE referee on a GenAm lexical fact. Held to it:
+
+- `mainz` EY1→AY1 — CLEAN. Both cited sources read `maɪnts`, and German ⟨ai⟩ is not an accent axis.
+- `piazza` AE1→AA1 — gold `piˈɑtsə` plus the en-GB referee's SECOND variant; its first is `piætsə`.
+- `paparazzi` AO1→AA1 — gold alone. The en-GB referee reads `pæpəɹætsi`, whose TRAP vowel the rule itself
+  declares inadmissible for a GenAm claim.
+
+Both readings are right (M-W \pē-ˈät-sə\, \ˌpä-pə-ˈrät-sē\) and the old `AO1` was plainly wrong, so
+nothing needs reverting. But "as `palazzo`, nucleus too" asserts the consonant bar carries the vowel, and
+for `paparazzi` it does not.
+
+### CITATION SLIPS, ALL IN THE BRANCH'S OWN FAVOUR
+
+- `reg`: "both referees say `ɹɛd͡ʒ`". The en-GB referee carries `ɹɛd͡ʒ` AND `ɹɛɡ`, and **wikipron-US — the
+  PRIMARY referee — reads `ɹ ɛ ɡ`**, positively confirming our row. The strongest evidence for the
+  rejection is the piece not cited. Rejection right.
+- `hegemonic`: "both referees say `hɛd͡ʒəmɑnɪk`". The en-GB referee also carries `hɛɡɪmɒnɪk`, and gold's
+  `hˌɛɡəmˈɑnɪk` matches our `HH EH2 G AH0 M AA1 N IH0 K` phone for phone. Rejection right.
+- `piazza`: "uk piɑtsə" is cited without saying the en-GB row's FIRST variant is `piætsə`. Run 45 of this
+  same document was about a selective citation; this is the same shape.
+
+### "NO INTERNAL MAJORITY TO APPEAL TO" IS TOO STRONG
+
+True of the Italian surname class. False of the words. Our own dictionary already reads the corrected way
+across the immediate family of six of the twelve — `achaea` K; `distich`/`hemistich`/`tetrastich`/
+`stichomythia`/`sticht`/`stichter` all K; `neogaea`/`notogaea` JH; `gibber` JH; `hemorrhage`/`-ed`/`-ing`
+JH; `palazzi`/`palazzola`/`palazzolo`/`dipiazza` T S — and the n-gram, held out, already PREDICTS the
+corrected consonant for `stich` (`S T IH1 K`), `palazzo` (`P AA0 L AA0 T S OW1`) and `astilbe`
+(`AH0 S T IH1 L B`). The sentence disclaims support the change actually has.
+
+### KNOWN_GAPS: the three additions are right
+
+Held out of the dict and read through `decompose()`:
+
+    gaea    src=N  oov=[G IY1 AH0]        = upstream → LIVE
+    mainz   src=N  oov=[M EY1 N Z]        = upstream → LIVE
+    piazza  src=N  oov=[P IY0 AE1 Z AH0]  = upstream → LIVE
+
+and the other nine are NOT live, so three is exactly the right number. Source N is confirmed for all
+three. The `gaea` and `mainz` waivers are accurate. The `piazza` waiver names only the ⟨zz⟩; the n-gram
+also returns `AE1` for the nucleus, which is half the correction that row made.
+
+### The Moby delta is not independent evidence
+
+`26,624 → 26,632` scores eight corrections taken FROM Moby against the Moby referee.
+`test/en-moby-referee.test.ts` says so itself — "against Moby on a word whose reading we took from Moby is
+a mirror". Run 46 reports "primary 2,584 unmoved", which is the honest line; the Moby delta should be
+labelled confirmation that the edit landed rather than a quality gain.
+
+### Gates (serial, PR worktree)
+
+    npx vitest run                                    317 files, 6,076 passed / 5 skipped — matches
+    npx tsx tools/check-goldens.mts --jobs 8          189 languages, 36,495 rows, 0 stale — matches
+    dotnet run --project csharp/tools/parity -c Release
+                                                      189 byte-identical, 0 differ; 5/5 accent variants build
+
+No English golden carries any of the twelve (`csharp/goldens/en.tsv` is 200 rows and holds none of them),
+so "0 stale" is the expected result rather than a near miss. The only golden rows matching these stems
+belong to other engines — `gn`, `rup`, `chr` — and none reads through the English dictionary rows changed
+here.
+
+### Verdict
+
+The twelve corrections are right and the evidence for them exists. Four things should change before
+merge: reverse the `cham` rejection (or restate its reason), fix the `paparazzis` dict row and the two
+pass-through lexicon rows, update 41-to-67 to 44-to-64 in both places, and soften the prose where it
+claims more (three classes "clean") and less (no internal majority) than the evidence supports.
+
+## Run 48 — 2026-09-19 — Run 47's findings: a wrong rejection, stale siblings, and three slips my way
+
+⚠ `cham` WAS REJECTED ON EVIDENCE I DID NOT GATHER. Run 46 dropped it saying "the two referees
+disagree with each other". Moby reads `kæm`; the en-GB referee carries `kæm` as its SECOND variant;
+and gold — never consulted — has `Cham` → `kˈæm` under the capitalized key, which is the same lookup
+`en_import_moby.mts` codifies and the same one Run 46 itself used for `achaean` two rows earlier. Three
+sources. Fixed, and it is the second time in three runs that the failure was reading only part of what
+a multi-variant referee holds.
+
+⚠ AND THE THREE CLASSES WERE NOT EMPTIED, which "come out of it clean" implied. Crossing the probe
+against gold surfaces six more that clear the same bar and were left behind — `chalcedony`, `chimera`,
+`chiron`, `concha` (⟨ch⟩=/k/), `loggia` (⟨gg⟩=/d͡ʒ/), `catsup` (read as `ketchup`, a different word).
+All six now fixed; `celtic` and `padua` also surface and are correctly skipped, being live variants
+the en-GB referee carries both readings of.
+⚠ `concha` NEEDED `NG`, NOT `N`, and the first attempt shipped `kʰˈɑːnkə`. `con-` is a transparent
+prefix, so the converter's velar rule declines to assimilate — the guard from #1358 working exactly as
+designed against a word that is not prefixed at all. Caught by reading the rebuilt lexicon rather than
+by a gate.
+⚠ `loggia` ALREADY HAD A CURATED ROW from a LOT/THOUGHT pass, so adding a second one broke the
+file's own "no word has two curated rows" rule — the exact failure #1334 wrote that test for, where
+`upstream` columns chain and the re-apply order stops being defined. Folded into the existing row.
+
+⚠ THREE STALE SIBLINGS. `paparazzis` sat one line below `paparazzi` in the dictionary keeping both the
+old /z/ and the old AO1. `mozart's` and `paparazzi's` are apostrophe rows with NO dictionary source, so
+`en_rebuild_lexicon.mts` passes them through and cannot reach them — the shipped lexicon said Mozart
+/moʊts-/ and Mozart's /moʊz-/. Hand-corrected.
+
+⚠ AND THREE CITATIONS WERE SLANTED MY WAY, each omitting the piece that argued hardest for what I
+concluded. `reg`: I wrote "both referees say `ɹɛd͡ʒ`" — wikipron-US, the PRIMARY referee, positively
+reads `ɹ ɛ ɡ`, confirming our row, and the en-GB referee carries `ɹɛɡ` too. `hegemonic`: the en-GB
+referee likewise carries `hɛɡɪmɒnɪk`. `piazza`: the en-GB variant I quoted is its SECOND; the first is
+`piætsə`. In all three the conclusion was right and the evidence was reported thinner than it was —
+the mirror image of Run 45, where I quoted only what agreed with me.
+
+⚠ AND I DID SMUGGLE ONE VOWEL. `mainz` EY1→AY1 is clean. `piazza` AE1→AA1 rests on gold plus the
+en-GB SECOND variant. `paparazzi` AO1→AA1 rests on GOLD ALONE — the en-GB reading is `pæpəɹætsi`,
+whose TRAP vowel this audit's own admissibility rule rules out for a GenAm claim. The readings are
+right and the old AO1 was plainly wrong, but "as `palazzo`, nucleus too" asserted the consonant bar
+covered the vowel, and for `paparazzi` it does not. Both notes now say what each rests on.
+
+Two corrections of fact: the `-zz[aeio]` split is **44 to 64** after this branch, not the 41-to-67
+stated in the present tense in two places; and of the original eleven, FIVE carried three sources, not
+six — the sixth was `astilbe`, which that sentence excluded.
+
+⚠ AND THE HEADLINE NUMBER IS A MIRROR, which Run 46 should have said. Scoring corrections taken FROM
+Moby against the Moby referee is what `en-moby-referee.test.ts` calls a mirror in as many words. The
+honest line is the one that did not move: the independent wikipron primary is 2,584 before and after,
+because none of these words is in its 4,037 rows. That is also why they survived this long.
+
+    Moby — words the dict carries   26,624 → 26,636 (76.0%)   ⚠ a mirror, see above
+    Moby — OOV                      17,454 → 17,455
+    primary                         2,584 unmoved
+    goldens 0 stale · parity 189 byte-identical · 6,076 tests
+
+`cham` joins `gaea`, `mainz` and `piazza` in KNOWN_GAPS: held out, the n-gram reads ⟨ch⟩ as /t͡ʃ/,
+which is right for the English word and wrong for the title.

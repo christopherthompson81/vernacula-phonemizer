@@ -51,7 +51,8 @@ const KNOWN_GAPS = new Map<string, string>([
     // corrections landed; a retrain absorbs them for free, as #1341 did for `collaborative`.
     ["gaea", "n-gram (source N): reads ⟨g⟩ before a front vowel as /ɡ/; closes on a retrain"],
     ["mainz", "n-gram (source N): reads German ⟨z⟩ as /z/ and ⟨ai⟩ as FACE; closes on a retrain"],
-    ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 41-to-67 on that class"],
+    ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 44-to-64 on that class"],
+    ["cham", "n-gram (source N): reads ⟨ch⟩ as /t͡ʃ/, which is right for the English word and wrong for this title; closes on a retrain"],
 
     // ⚠ THE COMPOUND-SEAM GEMINATE, and the remedy for these five was MEASURED AND REJECTED — do not
     // "fix" it by turning off `collapseGeminates` on the compositional paths. The dict geminates a

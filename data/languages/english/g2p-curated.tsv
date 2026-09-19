@@ -1225,7 +1225,7 @@ logarithmic	L AA2 G ER0 IH1 DH M IH0 K	L AO2 G ER0 IH1 DH M IH0 K	LOT/THOUGHT: a
 loge	L OW1 JH	L OW1 ZH	French -age/-ige ʒ~dʒ (gold + en-GB)
 logger	L AA1 G ER0	L AO1 G ER0	LOT/THOUGHT; outlier against log/logs/logging (gold + moby)
 loggerhead	L AA1 G ER0 HH EH2 D	L AO1 G ER0 HH EH2 D	LOT/THOUGHT: align AA/AO to gold's consistent system
-loggia	L AA1 G IY0 AH0	L AO1 G IY0 AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
+loggia	L AA1 G IY0 AH0	L AO1 JH IY0 AH0	LOT/THOUGHT: align AA/AO to gold's consistent system; AND ⟨gg⟩ before a front vowel is /d͡ʒ/ — Moby lɑd͡ʒə + uk lɒd͡ʒiə + gold lˈɔd͡ʒiə. ⚠ ONE ROW, TWO PASSES: the second correction is folded into the first rather than appended as its own row, because the `upstream` columns would chain and the re-apply order would stop being well defined
 logjam	L AA1 G JH AE2 M	L AO1 G JH AE2 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 logwood	L AA1 G W UH2 D	L AO1 G W UH2 D	LOT/THOUGHT: align AA/AO to gold's consistent system
 longan	L AA1 NG G AH0 N	L AO1 NG G AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -2195,17 +2195,28 @@ genteelly	JH EH0 N T IY1 L L IY0	JH EH0 N T IY1 L IY0	as `drolly`
 # referee's — which is what makes a non-rhotic referee admissible for a GenAm lexical fact — leaves 433
 # dictionary words where both referees agree on a skeleton that is not ours. These are the rows from
 # three of its classes where two or more INDEPENDENT sources back the referees.
-# ⚠ UNLIKE THE `-lly` BLOCK THERE IS NO INTERNAL MAJORITY TO APPEAL TO, and the temptation was to fix
-# the class rather than the words. Our dictionary splits 41 to 67 on whether Italian `-zz-` is /ts/ or
-# /z/ — `intermezzo` already has `T S` while `palazzo` had `Z` — so the dictionary is inconsistent
-# without being wrong in a direction, and the ~108 Italian surnames in that class have no evidence
-# either way. Per-word referee agreement is the only bar that holds here, and it is the only one used.
-# ⚠ TWO CANDIDATES WERE DROPPED FOR FAILING IT, which is what the bar is for: `reg`, where both
-# referees say `ɹɛd͡ʒ` but American `reg` (regulation, regs) is /ɹɛɡ/ and gold has no entry; and
-# `hegemonic`, where both referees say `hɛd͡ʒəmɑnɪk` and GOLD SAYS `hˌɛɡəmˈɑnɪk` — a live variant, not
-# a defect. `cham` and `ich` were dropped because the two referees disagree with each other.
-# ⚠ `piazza` IS THE WEAKEST ROW KEPT: Moby reads it `piæzə` with /z/, against the en-GB referee's
-# `piɑtsə` and gold's `piˈɑtsə`. Two of three, and the two that agree are the independent pair.
+# ⚠ NO INTERNAL MAJORITY FOR THE ITALIAN `-zz-` CLASS, which is why this is a list of words and not a
+# rule. Our dictionary splits 44 to 64 on whether `-zz[aeio]` is /ts/ or /z/ AFTER these corrections
+# (41 to 67 before them) — `intermezzo` already carried `T S` while `palazzo` carried `Z` — so it is
+# inconsistent without being wrong in a direction, and the ~108 Italian surnames in the class have no
+# evidence either way. Per-word referee agreement is the only bar that holds there.
+# ⚠ THAT IS TRUE OF THE SURNAME CLASS AND FALSE OF THESE WORDS, and the first draft said the stronger
+# thing. Our own dictionary already reads the corrected way across the immediate family of most of
+# them: `achaea` has K; `distich`, `hemistich`, `tetrastich`, `stichomythia` have K; `neogaea` and
+# `notogaea` have JH; `gibber` has JH; `hemorrhage`/`-ed`/`-ing` have JH; `palazzi`, `palazzola`,
+# `dipiazza` have `T S`. Held out, the n-gram already predicts the corrected consonant for `stich`,
+# `palazzo` and `astilbe`. The evidence here is better than "two referees said so".
+# ⚠ THREE CANDIDATES WERE DROPPED, and for each the strongest evidence is the piece the first draft
+# did NOT cite: `reg` — wikipron-US, the primary referee, positively reads `ɹ ɛ ɡ`, confirming our row,
+# and the en-GB referee carries `ɹɛɡ` as well as `ɹɛd͡ʒ`; `hegemonic` — the en-GB referee likewise
+# carries `hɛɡɪmɒnɪk`, and gold's `hˌɛɡəmˈɑnɪk` matches our row phone for phone; `ich` — the two
+# referees genuinely disagree.
+# ⚠ AND `cham` WAS DROPPED ON A WRONG READING AND IS NOW FIXED. The stated reason was "the referees
+# disagree"; in fact Moby reads `kæm`, the en-GB referee carries `kæm` as its second variant, and
+# GOLD WAS NEVER CONSULTED — it has `Cham` → `kˈæm` under the capitalized key, the same lookup
+# `en_import_moby.mts` codifies and the same one used for `achaean` two lines above. Three sources.
+# ⚠ `piazza` IS THE WEAKEST ROW KEPT: Moby reads it `piæzə` with /z/, and the en-GB referee's FIRST
+# variant is `piætsə` — it is the second variant, `piɑtsə`, plus gold's `piˈɑtsə` that carry it.
 achaean	AH0 CH IY1 AH0 N	AH0 K IY1 AH0 N	⟨ch⟩ is /k/ in a Greek name; Moby əkiən + uk əkiːən + gold əkˈiən
 stich	S T IH1 CH	S T IH1 K	as `achaean`; Moby stɪk + uk stɪk
 armiger	AA1 R M IH0 G ER0	AA1 R M IH0 JH ER0	⟨g⟩ before a front vowel is /d͡ʒ/; Moby + uk + gold ɑɹməd͡ʒəɹ
@@ -2215,6 +2226,13 @@ hemorrhagic	HH EH2 M ER0 AE1 G IH0 K	HH EH2 M ER0 AE1 JH IH0 K	as `armiger`; Mob
 mozart	M OW1 Z AA0 R T	M OW1 T S AA0 R T	German ⟨z⟩ is /ts/; Moby moʊtsɑɹt + uk məʊtsɑːt
 mainz	M EY1 N Z	M AY1 N T S	as `mozart`, and the nucleus was wrong too; Moby + uk maɪnts
 palazzo	P AH0 L AA1 Z OW0	P AH0 L AA1 T S OW0	Italian ⟨zz⟩ is /ts/; Moby pɑlɑtsɔ + uk pəlætsəʊ + gold pəlˈɑtsO
-piazza	P IY0 AE1 Z AH0	P IY0 AA1 T S AH0	as `palazzo`, nucleus too; uk piɑtsə + gold piˈɑtsə (Moby dissents, piæzə)
-paparazzi	P AA2 P AA0 R AO1 Z IY2	P AA2 P AA0 R AA1 T S IY2	as `palazzo`, nucleus too; uk pæpəɹætsi + gold pˌɑpəɹˈɑtsˌi
+piazza	P IY0 AE1 Z AH0	P IY0 AA1 T S AH0	as `palazzo`; the AA1 rests on gold + the uk SECOND variant piɑtsə, not on the consonant bar
+paparazzi	P AA2 P AA0 R AO1 Z IY2	P AA2 P AA0 R AA1 T S IY2	as `palazzo`; ⚠ the AA1 rests on GOLD ALONE — uk reads pæpəɹætsi, whose TRAP vowel this audit rules inadmissible for a GenAm claim. The old AO1 was plainly wrong; the consonant bar does not cover the nucleus and the first draft implied it did
 astilbe	AH0 S T IH1 B IY2	AH0 S T IH1 L B IY2	a dropped /l/, not a class — Moby əstɪlbi + uk əstɪlbiː + gold əstˈɪlbi
+cham	CH AE1 M	K AE1 M	⟨ch⟩ is /k/; Moby kæm + uk (2nd variant) kæm + gold `Cham` kˈæm. Rejected in the first draft on a misread
+chalcedony	CH AE1 L S AH0 D OW2 N IY0	K AE2 L S EH1 D AH0 N IY0	as `achaean`, and the stress was on the wrong syllable; Moby + uk + gold kælsˈɛdəni
+chimera	CH IH0 M EH1 R AH0	K IH0 M IH1 R AH0	as `achaean`; the DRESS nucleus is in no source. Moby kɪmiɹə + uk kɪmɪəɹə + gold kaɪmˈɪɹə (the first vowel is a live ɪ/aɪ variant, left alone)
+chiron	CH AY1 R AH0 N	K AY1 R AH0 N	as `achaean`; Moby kaɪɹɑn + uk kaɪɹən + gold `Chiron` kˈaɪɹən
+concha	K AA1 N CH AH0	K AA1 NG K AH0	⟨ch⟩ is /k/; Moby kɑŋkə + uk kɒŋkə + gold kˈɑŋkə. ⚠ NG, NOT N: `con-` is a transparent prefix, so the converter will not assimilate it for us
+catsup	K EH1 CH AH0 P	K AE1 T S AH0 P	read as `ketchup`, which is a different spelling; Moby + uk kætsəp + gold kˈætsəp
+paparazzis	P AA2 P AA0 R AO1 Z IY2 Z	P AA2 P AA0 R AA1 T S IY2 Z	the inflection of `paparazzi`, one line below it and missed in the first draft
