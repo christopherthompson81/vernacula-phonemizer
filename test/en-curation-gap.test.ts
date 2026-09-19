@@ -54,6 +54,14 @@ const KNOWN_GAPS = new Map<string, string>([
     ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 44-to-64 on that class"],
     ["cham", "n-gram (source N): reads ⟨ch⟩ as /t͡ʃ/, which is right for the English word and wrong for this title; closes on a retrain"],
 
+    // ⚠ TWO ROOTS, AND THEIR DERIVED FORMS ARE NOT HERE, which is the shape to notice: `haphazardly`
+    // and `upholstered` close through morphDecode the moment their stems are corrected, because that
+    // path looks the stem up in the SHIPPED dict. Only the roots the n-gram must spell from letters
+    // stay open, and it has no way to know that ⟨ph⟩ spans a seam in `up·holstery` but not in
+    // `morphology`. A retrain closes both.
+    ["upholstery", "n-gram (source N): reads ⟨ph⟩ across the up|holstery seam as /f/-less /p/; closes on a retrain"],
+    ["upholster", "n-gram (source N): as `upholstery`"],
+
     // ⚠ THE COMPOUND-SEAM GEMINATE, and the remedy for these five was MEASURED AND REJECTED — do not
     // "fix" it by turning off `collapseGeminates` on the compositional paths. The dict geminates a
     // compound seam (`bookkeeper` B UH1 K K IY2 P ER0, `misspell`, `coattail`, `lamppost` — 93 rows) and
