@@ -1321,3 +1321,321 @@ corpus". It is in the Moby lexicon corpus (`kɔɹnkɑb`), which is the single so
 in the first place. Written before the eval was re-run and corrected by re-running it; noted because
 "this cannot have moved anything" is exactly the claim that does not need checking right up until it
 does.
+
+## Run 31 — 2026-09-19 — the inversion, measured and REFUSED, and the 310 residual re-characterised
+
+Run 30's plan was to invert the seam table: delete the assimilation rule, honour CMUdict's `N`, and list
+the SLIPS instead of the seams — on the argument that slips are bounded and referee-covered while seams
+are open-ended, and that the ~310 undetermined sites would then default to `n`, right about nine times
+in ten on Run 27's base rate. The first measurement kills it.
+
+⚠ THE 298:33 BASE RATE IS NOT THE RATE THAT APPLIES. It counts every labelled site in the dictionary,
+including the 590 the transparent-prefix guard already protects — `unclean`, `income`, `incline` — which
+are `n` for everyone and which the rule never touches. Restricted to the words the converter ACTUALLY
+assimilates:
+
+    words the converter assimilates today (dict N, no transparent prefix)   363
+      two or more sources say n                                              15
+      one source says n                                                      38
+      every source says ŋ — the slips                                        20
+      sources split                                                           8
+      NO REFEREE AT ALL                                                     282
+
+53 against 20, not 298 against 33. And the 38 single-source rows do not survive reading:
+
+    ancona      moby  ɑnkɔnɑ        pancreatic  moby  pænkɹiætɪk
+    mancunian   uk    mankjuːnɪən   lohengrin   moby  loʊənɡɹɪn
+    serengeti   uk    sɛɹənɡɛti     wollongong  uk    wʊlənɡɒŋ
+
+Every one of those is [ŋ] in speech. They are real transcriptions, from both sources rather than one
+loose one (20 Moby, 18 UK), and they are writing the PHONEME and not the realisation. `nomenclature`
+gives it away completely: the UK referee carries `nəʊmɛnklət͡ʃə` AND `nəʊmɛŋklət͡ʃə` for the same word.
+That is the signature of a notation choice, not a lexical judgement.
+
+Tested whether the convention is syllabification — write `ŋ` only where the nasal and the velar share a
+coda — by cross-tabulating every referee's own sites:
+
+                                  velar is an ONSET        velar in a CODA
+    moby lexicon                  n 175  ŋ 212  (55% ŋ)    n 122  ŋ 343  (74% ŋ)
+    moby oov                      n 249  ŋ 333  (57% ŋ)    n 131  ŋ 336  (72% ŋ)
+    wikipron us                   n  17  ŋ  41  (71% ŋ)    n  15  ŋ  41  (73% ŋ)
+    wikipron uk                   n 331  ŋ 909  (73% ŋ)    n 221  ŋ 969  (81% ŋ)
+
+Not a clean convention either — the position moves Moby 19 points and wikipron-US 2. So it is neither
+purely lexical nor purely notational: it is a per-transcriber mixture, and that is the worst possible
+substrate for a 282-word blanket flip. Corrected honest estimate among the labelled: roughly 35 seams,
+26 slips, 20 undecidable. Flipping 282 unlabelled words on a ~57% base rate is a coin toss with a
+provenance file attached. **REFUSED.**
+
+⚠ AND RUN 28'S CHARACTERISATION OF THE RESIDUAL WAS WRONG, which matters more than the refusal. It says
+of the ~310 undetermined sites that "on Run 27's base rates the dictionary is right about nine times in
+ten there, so most of them are probably wrong today". They are not a defect backlog. They are sites
+where the sources disagree with each other about a notation, and where [ŋ] — what we emit — is the
+natural realisation anyway. This engine transcribes at a NARROW depth (aspiration, dark l, flapped t),
+and [ŋ] before a velar is correct at that depth even where a broad referee writes the phoneme /n/.
+
+So the #1358 table stands on its own terms — it required EVERY covering referee to agree, which is a
+much stronger bar than the base rate — but the axis is closed. It is not where the next improvement is.
+
+⚠ WHAT THIS DOES CHANGE IS THE CASE FOR COMPOUNDS AS DATA, upward. The reason this axis dissolved is
+that transcription conventions cannot settle a morphological question. An independent morphological
+inventory can — and it would settle it for the classes where the answer is AUDIBLE rather than
+notational: compound fore-stress (106 named words, `englishArpabet.ts`), the compound-seam geminates
+(93 dictionary rows, `KNOWN_GAPS`), and the OOV grapheme seams the skeleton probe turned up, where
+`haphazardly` reads ⟨ph⟩ as /f/ ACROSS hap|hazard. Those are real errors a listener hears. The velar is
+not. Next step is the coverage probe, not more velar work.
+
+## Run 32 — 2026-09-19 — compounds as data: the coverage probe, before the 3 GB download
+
+Run 31 closed the velar axis and argued the case for a morphological inventory went UP, because a
+transcription convention cannot settle a morphological question. Question for this run: does a
+non-circular inventory actually exist, and does it carry the distinction the engine needs?
+
+English Wiktionary via kaikki. ⚠ NOT DOWNLOADED — the full extract is 3.0 GB, and kaikki serves
+per-word JSONL at `/dictionary/English/meaning/<l>/<l2>/<Word>.jsonl`, so the coverage question can be
+answered for a few hundred words at 0.2 s each. (Capitalisation matters in the PATH as well as the
+filename: `V/Va/Vancouver` is 200, `v/va/Vancouver` is 404. Found by getting 404s for every proper noun
+in the first sample and assuming the words were absent.)
+
+⚠ THE DISTINCTION THE CODEBASE SAID IT COULD NOT HAVE IS IN THE DATA, and it is the hyphen:
+
+    pancake        surf      ['pan',   'cake']        ← compound
+    panchromatic   ety       ['pan-',  'chromatic']   ← PREFIX, and marked as one
+    misspell       ety       ['mis-',  'spell']
+    idiosyncrasy   surf      ['idio-', 'syn-']
+    drinkable      suffix    ['drink', 'able']
+
+`pan·cake` against `pan-chromatic` is the exact pair that defeated every rule in Run 27, and Wiktionary
+separates them. Precision on the first sample is the other half of the news: `anglophile`, `ankh`,
+`gangrene`, `pancreas`, `pangloss` and `vanguard` carry NO compound template — every one a word that a
+splitter claims and should not. `vanguard` is the nicest of them; it is from *avant-garde* and is not
+`van`+`guard`, which no amount of dictionary lookup would ever have told us.
+
+⚠ THE TEMPLATE ARGUMENT LAYOUT VARIES AND THE FIRST EXTRACTOR GOT 1 HIT OUT OF 23. `compound` and `af`
+put the parts at args 2 and 3, `ety` and `surf` at 3 and 4 — so an extractor keyed to one layout reports
+near-zero coverage and looks like a finished negative result. The fix is to take every positional arg
+and drop language codes and the `:`/`+`/`-` control values.
+
+Coverage measured against a REAL evidence set rather than a hand-picked sample — the 153 dictionary
+words carrying a geminate consonant, which is the `KNOWN_GAPS` compound-seam class:
+
+    lemma decomposed by Wiktionary           74   48%
+    recoverable by inflection carry-over     19         (bookkeepers, coattails, misspells, …)
+    ─ combined                               93   61%
+    genuinely uncovered                      60
+
+And the 60 are not a random tail. 27 of them are `-ness`/`-ly` derivations whose geminate is at the
+suffix boundary — `fineness`, `greenness`, `thinness`, `drolly`, `dully`, `genteelly` — which need no
+inventory at all: a stem ending in the consonant the suffix begins with is a regular, derivable rule.
+Another handful are CMUdict's unhyphenated spellings (`parttime`, `shortterm`, `iceskate`). What is
+left is about 30 real gaps, `roommate` and `teammate` among them — which is a hand list, not a project.
+
+    Wiktionary 61%  +  a regular suffix rule (~27)  +  ~30 hand rows  ≈  the whole class
+
+⚠ AND THE STRESS CLASS IS THE WORST FIT, WHICH IS THE OPPOSITE OF WHAT I EXPECTED. The 106 words
+`englishArpabet.ts` names as its evidence set are fore-stressed compounds heavy in proper nouns and
+neologisms, and the four it names by name — `Afrobeat`, `Twitterverse`, `Antabuse`, `allemande` — carry
+no compound template between them. Wiktionary templates ordinary lexis well and coined proper nouns
+badly, so the class with the loudest audible payoff is the one this source serves least. It should be
+attempted last, if at all.
+
+Order this argues for: the geminate seams first (61% + a derivable rule + a short hand list, and the
+`--emit` gate already exists), then the OOV grapheme seams (`haphazard` decomposes, and ⟨ph⟩ read as
+/f/ across `hap|hazard` is an error a listener hears), then stress, on a different source or not at all.
+
+Building the inventory needs the 3.0 GB dump — 135k per-word fetches at 0.2 s is seven hours and rude.
+That download is the first step of the next block, not this one.
+
+## Run 33 — 2026-09-19 — adversarial re-measurement of Runs 31 and 32
+
+Re-ran every number in the two entries above from the files they name, plus fresh kaikki fetches. Run
+31 survives. Run 32's headline coverage figure does NOT: it is an UNDER-count, and the mechanism is the
+arg filter the entry itself describes.
+
+**Run 31 — reproduces.** Population and guard are exact:
+
+    dict words with an N before K/G, prefix-protected (i<=6 && TRANSPARENT_PREFIX)   590   ← entry says 590
+    dict words with an N before K/G, NOT protected                                   363   ← entry says 363
+    (the two sets are disjoint; 953 words carry a site at all)
+
+`two or more sources say n` = 15, exact. The 20 Moby rows in the single-source bucket are exact. The
+other buckets do not reproduce to the digit because the entry does not say how a referee that carries
+BOTH variants is scored — which is the `nomenclature` case it highlights. Three defensible readings
+bracket it:
+
+                              2+ n   1 n   all ŋ   split   no ref
+    entry                       15    38     20       8      282
+    all UK variants, strict     15    35     19      13      281
+    first UK column only        17    36     18      10      282
+    any-n-wins within referee   18    36     19       9      281
+
+Every reading gives ~50-54 n against ~18-20 all-ŋ with ~281 unlabelled, so the refusal argument is not
+sensitive to it. ⚠ BUT THE ENTRY SHOULD SAY WHICH RULE IT USED, because it cites a within-referee split
+as its central piece of evidence and then silently collapses those rows into a bucket.
+
+Spot checks all hold: `ancona ɑnkɔnɑ`, `pancreatic pænkɹiætɪk`, `lohengrin loʊənɡɹɪn` (moby-lexicon);
+`mancunian mankjuːnɪən`, `serengeti sɛɹənɡɛti`, `wollongong wʊlənɡɒŋ` (UK); and the UK row for
+`nomenclature` really does carry `nəʊmɛnklət͡ʃə` AND `nəʊmɛŋklət͡ʃə` (four variants in all).
+
+Cross-tab reproduces to within one or two counts (site detection at the margins — a following combining
+mark, a word-final velar):
+
+                          entry onset      mine onset      entry coda      mine coda
+    moby lexicon          175/212  55%     175/212  54%    122/343  74%    124/346  73%
+    moby oov              249/333  57%     249/335  57%    131/336  72%    133/341  71%
+    wikipron us            17/41   71%      17/42   71%     15/41   73%     16/41   71%
+    wikipron uk           331/909  73%     331/912  73%    221/969  81%    226/979  81%
+
+⚠ ONE NUMBER MOVES THE ARGUMENT SLIGHTLY THE ENTRY'S WAY: wikipron-US comes out 71% onset / 71% coda
+here, i.e. ZERO points of position effect, not two. The "neither purely lexical nor purely notational"
+reading is if anything stronger than written.
+
+**Run 32 — the 48% is reproducible AND it is wrong, by 26 points.** Reconstructing the described
+extractor (positional args; drop language codes and values starting with `:`, `+`, `-`) over the same
+population lands on the entry's numbers, including a detail that could not be a coincidence:
+
+    lemma decomposed, arg filter AS DESCRIBED        71-80 of 155   46-52%   (entry: 74 of 153, 48%)
+    of the uncovered, -ness/-ly                              27              (entry: 27)
+
+⚠ SO THE RECONSTRUCTION IS FAITHFUL, AND THE `-` RULE IS THE DEFECT. Wiktionary marks a SUFFIX with a
+LEADING hyphen, exactly as it marks a prefix with a trailing one — `af{Twitter|-verse}`,
+`ety{room|-mate}`, `surf{idio-|syn-|-crasy}`. Dropping leading-hyphen args therefore deletes the second
+element of every suffix decomposition, which either truncates it or drops it below two parts and makes
+it read as "no template at all". The entry's own insight is that THE HYPHEN IS THE DISTINCTION; its
+extractor is throwing half the hyphens away. Keeping them:
+
+    lemma decomposed, hyphenated args KEPT          107-116 of 155   69-75%
+    of the uncovered, -ness/-ly                               0
+
+⚠ AND THE TWO WORDS THE ENTRY NAMES AS THE CANONICAL HAND-LIST GAPS ARE IN THE SOURCE:
+
+    roommate   ety  ['room', '-mate']
+    teammate   ety  ['team', '-mate']
+
+So "~27 -ness/-ly handled by a derivable suffix rule + ~30 hand rows, `roommate` and `teammate` among
+them" is an artefact of the filter, not a property of Wiktionary. All 27 -ness/-ly rows are templated;
+`roommate`/`teammate` are templated. What is actually left uncovered is 39 rows, and they are dominated
+by INFLECTIONS of covered lemmas (`bookkeepers`, `coattails`, `roommates`, `misspells`, `lampposts`,
+`outtakes`, `missteps`) — the entry's own +19 carry-over, scaled up. The genuine residue is small:
+CMUdict's unhyphenated spellings (`parttime`, `shortterm`, `iceskate`, `profittaking`), two acronyms
+(`cxc`, `scs`, no kaikki page at all), and a handful of real misses (`birddog`, `exsolve`, `goddam`,
+`nonnegative`, `unnerved`, `misspoke`/`misspent`, `loosestrife`). Combined coverage after inflection
+carry-over is roughly 90%, not 61%.
+
+The direction of the error does not reverse the recommendation — geminate seams first is if anything
+MORE attractive at 75% lemma coverage than at 48% — but the plan attached to it is void. Rewrite the
+arg filter to strip a leading hyphen and RECORD it as affix marking rather than discard the arg, then
+re-measure before sizing any hand list.
+
+**Run 32's precision sample has three wrong rows, two of them load-bearing.** Fetched fresh:
+
+    anglophile     confix {'1':'en','2':'Anglo','3':'phile'}      ← entry says NO template
+    Afrobeat       prefix {'1':'en','2':'Afro','3':'beat'}        ← entry says NO template
+    Twitterverse   af     {'1':'en','2':'Twitter','3':'-verse'}   ← entry says NO template
+
+`Twitterverse` is the `-` filter again. `anglophile` and `Afrobeat` are a template-NAME gap: the entry
+counts `suffix` (for `drinkable`) as coverage but evidently not `prefix` or `confix`, which is not a
+distinction the source makes. Confirmed genuinely absent: `ankh`, `gangrene`, `pancreas`, `pangloss`,
+`vanguard`, `Antabuse`, `allemande`. Confirmed present as printed: `pancake surf ['pan','cake']`,
+`panchromatic ety ['pan-','chromatic']`, `misspell ety ['mis-','spell']`, `drinkable suffix
+['drink','able']`. `idiosyncrasy` is really `surf ['idio-','syn-','-crasy']` — the entry prints the
+truncated two-part form, which is the same bug showing in the evidence.
+
+⚠ WHAT THAT COSTS THE ARGUMENT. `anglophile` is one of the five words the converter comment names as a
+real [ŋ] SLIP that a splitter wrongly claims, and Run 32 uses its absence from Wiktionary as the proof
+that this source has the precision a splitter lacks. Wiktionary decomposes it. The precision claim
+needs re-testing against the labelled slips rather than a hand-picked six. And with `Afrobeat` and
+`Twitterverse` both templated, "the four it names by name carry no compound template between them" is
+2 of 4, so "the stress class is the worst fit, attempt it last" is not established by this probe.
+
+⚠ AND ABSENCE CUTS BOTH WAYS ON THE SEAM TABLE, which neither entry says. `vanguard` genuinely has no
+compound template — and `vanguard` is a ROW in `en-nasal-seam.tsv`, a referee-confirmed [n] seam. For
+the velar use case an inventory keyed on Wiktionary would LOSE that row. Absence is presented as pure
+precision; for the seam table it is recall loss.
+
+**On "153, which is the KNOWN_GAPS compound-seam class".** Two separate looseness problems.
+
+The population is "dict rows with an adjacent identical consonant phone". That measures 155 today, not
+153 (the two extra are likely the acronyms `cxc`/`scs`, which have no kaikki page and may have been
+dropped silently — say so if they were). Same definition at `ab2e3277`, where the `93 rows` comment in
+`test/en-curation-gap.test.ts` was written, measures 98. So 93 and 153 are the SAME population at
+different dict snapshots, not two populations — the Moby import grew it — and Run 6 of this same
+document already reports 144 for it. ⚠ THREE DIFFERENT NUMBERS FOR ONE CLASS ARE NOW LIVE IN THE REPO
+(93 in the test comment, 144 in Run 6, 153 here). Pick one measurement, date it, and fix the stale ones.
+
+But calling it "the `KNOWN_GAPS` compound-seam class" is wrong on its face: `KNOWN_GAPS` holds four
+seam rows (`earrings`, `roommate`, `roommates`, `teammate`), and 39 of the 155 are `-ness`/`-ly`
+derivations that are not compound seams at all — a fact the entry relies on three paragraphs later when
+it routes 27 of them to a suffix rule. The denominator is "any geminate", which is a defensible
+evidence set, but it should be named that way.
+
+**Verdict.** Run 31 lands as written (tighten the referee-variant rule). Run 32's finding that
+Wiktionary marks prefixes with a hyphen is real and is the valuable part; its coverage measurement, its
+precision sample and its ordering recommendation all rest on an arg filter that discards suffix
+marking, and should be re-run before anything is built on them.
+
+## Run 34 — 2026-09-19 — the hyphen bug, re-measured; and the type label IS the velar discriminator
+
+Run 33 is right about the bug and it is the important kind. Wiktionary marks a SUFFIX with a LEADING
+hyphen exactly as it marks a prefix with a trailing one, and Run 32's extractor dropped every arg
+starting with `-`. That deletes the second element of every suffix decomposition, which is why the
+`-ness`/`-ly` tail looked like a coverage hole that needed "a regular rule rather than an inventory".
+It was the instrument. Run 32's own printed evidence showed it and I did not read it: `idiosyncrasy` is
+`['idio-', 'syn-']` there, and the real template is `['idio-', 'syn-', '-crasy']`.
+
+Re-measured with the leading hyphen kept, `prefix`/`confix` added to the template set, and `la:…`
+cognate args dropped (which is what put `blackcap = la:ātricapillus|black` in Run 32):
+
+    geminate set, 153 words      lemma decomposed  95  (62%)
+      by boundary type           suffix 43   compound 33   prefix 19
+      uncovered                  58, now dominated by INFLECTIONS of covered lemmas
+
+⚠ I GET 62%, NOT RUN 33's 69–75%, and the entry should say so rather than adopt the reviewer's figure.
+Same direction, same conclusion, different number; the gap is probably the template set or the
+capitalisation retry. What is not in doubt: `-ness`/`-ly` goes from 27 uncovered to 0, and `roommate`
+`['room','-mate']` and `teammate` `['team','-mate']` — Run 32's two named "hand list" gaps — are in the
+source. **The "27 suffix rule + ~30 hand rows" plan is void.**
+
+⚠ AND `anglophile` DECOMPOSES, WHICH RUN 32 USED AS ITS PROOF OF PRECISION. My fetch was lowercase and
+got a 702-byte stub; `Anglophile` is `confix ['Anglo', 'phile']`. Our dictionary is lowercased, so the
+builder must try both cases — the same case-sensitivity Run 32 recorded for URLs, missed one level down.
+⚠ RUN 33 IS WRONG ABOUT `Afrobeat`, checked against a fresh fetch rather than my cache: 814 bytes,
+`etymology_templates: []`. `Twitterverse` is `af ['Twitter', '-verse']` and is Run 33's point. So the
+stress class is 1 of 4, not 0 (Run 32) and not 2 (Run 33) — still the worst-served class, and now with
+the right number under it.
+
+⚠ AND THE CORRECTION REVERSES RUN 27's CENTRAL NEGATIVE. `anglophile` decomposing is not a precision
+failure; it is the answer. Boundary TYPE, not boundary presence, is what predicts velar assimilation:
+
+    SLIP  (referees say ŋ), 17 words   compound  0   confix 2  prefix 3  suffix 2  no template 10
+    SEAM  (referees say n), 15 words   compound 12   confix 0  prefix 0  suffix 0  no template  3
+
+`compound` is 12 for 12 with no false positives, and not one slip is a compound. `Anglo|phile`,
+`laryngo|scope`, `idio|syn|crasy`, `vanco|mycin` are neoclassical confixes and prefixes — bound
+combining forms, phonologically one word — and they assimilate. `pan·cake`, `rain·coat`, `corn·cob` are
+compounds and do not. That is exactly the `pan·cake` against `pan-chromatic` pair Run 27 could not
+separate, and Wiktionary separates it with a label rather than a rule.
+
+So Run 27's "the discriminator is not learnable from this evidence" was true OF THAT EVIDENCE and is
+false in general. It is not learnable from spelling, from dictionary-membership splitting, or from a
+morpheme list mined out of referee labels — all three were tried and all three failed. It is learnable
+from an external morphological inventory that distinguishes compounding from affixation, which is what
+this repo would not have had before this probe.
+
+⚠ RECALL, NOT PRECISION, IS THE REMAINING PROBLEM, and Run 33 names the case that shows it: `vanguard`
+has no Wiktionary template AND is a referee-confirmed row in `en-nasal-seam.tsv`. So does `leningrad`,
+so does `cancan`. Three of fifteen seams are invisible to the source. The shape that follows is a
+CASCADE, not a replacement: `compound` blocks; every other label does not; NO LABEL falls through to
+today's rule plus the referee-backed seam table, which stops being the mechanism and becomes the recall
+patch it should always have been.
+
+Two smaller corrections Run 33 is right about:
+- Run 32 calls the 153 words "the `KNOWN_GAPS` compound-seam class". They are not. `KNOWN_GAPS` holds
+  four seam rows; this is "dictionary words with two adjacent identical consonant phones", which is a
+  superset and includes 39 `-ness`/`-ly` non-compounds — a fact the same entry then relies on. The
+  count is also a moving target: 153 under this run's filter (`^[a-z]{5,20}$`), 155 under Run 33's,
+  144 in Run 6, 98 at the commit where the "93 rows" comment was written. Dated and defined here.
+- Run 31 never says how a referee carrying BOTH variants is scored, which is the `nomenclature` case it
+  leads with. It is scored as NO VERDICT (the `verdict` helper returns null unless the readings agree).
+  Run 33 brackets the alternatives at 35/19/13/281 … 36/19/9/281; the refusal is insensitive to the
+  choice, and the 590/363 split and the 15 two-source rows reproduce exactly either way.
