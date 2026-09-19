@@ -450,3 +450,105 @@ pre-empted a rule with two exceptions. Reverted; they come back with the rest.
   · The diagnostic counted headwords appearing in BOTH cases (1,759) while claiming to count
     DISPLACEMENTS (~230). It now counts rows that actually carry more than one reading: 471.
   · The emitted header no longer claims "one reading per headword".
+
+## Run 16 — 2026-09-18 23:00 — the unstressed-vowel import, and the three things QC caught
+
+The extension measured in Run 14, built. `en_import_moby.mts` now folds vowels the sources THEMSELVES
+mark unstressed before comparing, and takes GOLD's reading where they agree only after that fold —
+Moby's unstressed vowels being the unreliable half, as its own `-ness` rows (1,622 `nɛs`) demonstrate.
+
+⚠ **THREE THINGS WENT WRONG AND EACH WAS CAUGHT BY A DIFFERENT GATE.** None of them by the headline
+number, which is the point of having the gates.
+
+**1. The fold merged a RHOTIC away — caught by reading the QC sample.** `ER0` reduces to the same symbol
+as `AH0`, so on `squiredom` Moby's `S K W AY1 ER0 D AH0 M` and gold's `S K W AY1 AH0 D AH0 M` — gold
+simply dropping the /r/ of `squire` — "agreed", and the import would have taken the r-less reading.
+`en_source_compare.mts` already states the rule this broke: "ɚ against ə is a real distinction, not a
+notation one". ER excluded; 1,960 → 1,874.
+
+**2. The manifest DELETED the previous import — caught by the referee corpus size.** A word imported by
+an earlier run is in `g2p-dict.tsv`, so `have` skips it and it never reaches `rows`; writing `rows` over
+`moby-import.tsv` therefore dropped all 16,227 rows of #1344, leaving 1,874. ⚠ NOTHING IN THE DICTIONARY
+CHANGED, SO THE LOSS WAS SILENT THERE. It surfaced as the lexicon referee jumping 35,202 → 51,429,
+because the builder reads that file to exclude imported words and they had stopped being listed. The
+manifest is now the UNION: 16,227 carried forward + 1,874 new = 18,101.
+
+**3. Two rows dropped an ⟨r⟩ — caught by `en-missing-rhotic.test.ts`.** `cahier` and `zabrze`, and both
+turned out to be legitimate silent-⟨r⟩ under rules the allow-list already names (French `-ier`, Polish
+`rz` = /ʒ/), so they joined it rather than being excluded. That test is an allow-list of NAMED RULES
+precisely so this decision has to be argued.
+
+⚠ **AND ONE ALARM WAS FALSE, CHECKED BEFORE ACTING ON IT.** The goldens moved `Toscana` from
+`tʰˌɔːskˈænə` to `tɔːskˈɑːnə`, which looked like a STRESSED vowel changing — something the fold must
+never do. Tracing it: Moby `T AO0 S K AA1 N AA0` against gold `T AO0 S K AA1 N AH0` differ only in the
+final unstressed vowel, and the large output change is OOV → DICTIONARY, the old reading being the OOV
+path's guess. Likewise `Enceladus` ɛn→ən is gold's reduced initial, which Merriam-Webster gives as
+\in-ˈse-lə-dəs\. Both improvements.
+
+### Measured
+
+    imported                1,874 headwords (manifest 16,227 + 1,874 = 18,101)
+    g2p-dict.tsv            133,712 → 135,586 rows
+    goldens                 5 languages, 9 rows — all embedded English runs
+    C# parity               189 byte-identical, 0 differ
+
+                       folded             +intentional
+    primary wikipron   61.9% → 62.0%      67.4%
+    Moby lexicon       75.3% (unchanged)  82.0%
+    Moby OOV           37.2% → 38.1%      45.4% → 45.5%
+
+⚠ **THE OOV NUMBER IS NOT COMPARABLE ACROSS THIS CHANGE** — the same caveat #1344 carries. Its
+population went 41,276 → 39,402 because the imported words leave the corpus, and they were words the OOV
+path was guessing at, so removing them raises the rate mechanically. ⚠ THE PRIMARY IS THE ONE THAT
+SPEAKS: 61.9% → 62.0%, on a referee that knows nothing about either source.
+
+
+## Run 17 — 2026-09-18 23:45 — review: the fold was merging READINGS, not just notation
+
+Five findings, and two changed the import materially.
+
+⚠ **THE FOLD MERGED THE DIPHTHONGS, WHICH IS A READING DIFFERENCE.** `reduceUnstressed` collapsed twelve
+qualities into one, so it accepted 501 rows where the two sources disagree `AH0` against `OW0` at an
+unstressed slot — `acanthocephalan` Moby `TH AH0 S`, gold `TH OW0 S`. A diphthong is a different vowel,
+not a different way of writing the same one. Restricted to monophthongs: **1,874 → 1,395**.
+
+⚠ **AND THE COMMENT'S EMPIRICAL CLAIM WAS WRONG.** It said "Moby writes a FULL unstressed vowel where
+gold reduces". Measured over the selected rows, 488 are the INVERSE — Moby reduced, gold full
+(`abjection` Moby `AH0`, gold `AE0`). The axis is real; its direction is not constant. Gold is taken
+because it is the convention this engine follows, not because it is the reduced side. Corrected in
+place.
+
+⚠ **GOLD'S READING WAS NOT MODERNISED, AND THE MOBY BRANCH'S IS.** The module header states the
+invariant — a row entering the LEXICON arrives in this engine's conventions — and `merge` alone is only
+the marry–merry half. Two rows shipped with a yod the Moby path removes: `exudation` as
+`ˌɛksjuːdˈeᶦʃən` where the engine coalesces S+j+uː → ʃuː, and `minho` as `mˈiːnjuː` where it drops the
+yod after N.
+
+⚠ **AND THE OBVIOUS FIX WOULD HAVE BROKEN TWELVE MORE, WHICH IS A LATENT BUG IN `modernise` ITSELF.**
+Its `AH R` rule carries a following-vowel lookahead — `AH R` before a vowel is an onset, `around` =
+ə-ɹaʊnd — and its `OW R` rule carries none. So FORCE→NORTH fired on compound seams:
+`auto·radiography`, `photo·reconnaissance`, `oleo·resin`, rewriting the `oʊ` of `auto-` as `ɔ`. The
+guard was given to both rules, then gold's reading modernised.
+
+    exudation            EH2 K SH UW0 D EY1 SH AH0 N       yod coalesced
+    minho                M IY1 N UW0                       yod dropped
+    autoradiography      AO2 T OW0 R EY2 D IY0 AA1 …       OW0 kept before the onset r
+
+Also from the review: the manifest's `catch {}` swallowed every read error, not only a missing file, so
+any other failure would write the new rows over the whole manifest — the silent deletion the block was
+added to prevent, arriving by a different door. Carried-forward rows are now reconciled against
+`g2p-dict.tsv` rather than copied, so a later hand correction cannot be reverted by the re-apply step.
+And `have` learns the rows a run adds, so a Commonwealth spelling and its American counterpart arriving
+together no longer both slip past the spelling-fold guard.
+
+    imported            1,395 (manifest 16,227 + 1,395 = 17,622)
+    g2p-dict.tsv        133,712 → 135,107 rows
+    goldens             5 languages, 11 rows
+
+                       folded             +intentional
+    primary wikipron   61.9% → 62.0%      67.4%
+    Moby lexicon       75.3% (unchanged)  82.0%
+    Moby OOV           37.2% → 38.0%      45.3%
+
+⚠ The primary gains one row rather than four, which is the stricter fold being right rather than
+generous. The OOV figure is still not comparable across the change — its population is now 39,881.

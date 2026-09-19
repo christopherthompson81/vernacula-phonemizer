@@ -44,6 +44,11 @@ const SILENT_R = new Map<string, string>([
     // agreed with Moby on all three — that agreement is what admitted them to the dictionary at all.
     ["atelier", "French -ier"], ["sommelier", "French -ier"],
     ["forecastle", "the sailors' pronunciation is 'fo'c'sle' /ˈfoʊksəl/ — the ⟨r⟩ has been silent for centuries"],
+    // ⚠ AND THESE TWO ARRIVED WITH THE UNSTRESSED-VOWEL EXTENSION OF THAT IMPORT. Both fall under rules
+    // already named above rather than needing new ones, which is the check that they are exceptions and
+    // not defects: gold and Moby agree on the shape of each, and the ⟨r⟩ is silent for the same reason
+    // it is in `bouvier` and `drzewiecki`.
+    ["cahier", "French -ier"], ["zabrze", "Polish rz = /ʒ/"],
 ]);
 
 describe("no dropped /r/ in the English dictionary", () => {
