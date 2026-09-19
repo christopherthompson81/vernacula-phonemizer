@@ -373,7 +373,11 @@ describe("`research` is a noun/verb stress heteronym", () => {
 describe("the -ing rhotic after a PRICE diphthong", () => {
     test("the six join the twenty, on the recordings", () => {
         expect(phonemize("requiring", "en")).toBe("ɹᵻkwˈaᶦɹɪŋ");
-        expect(phonemize("inquiring", "en")).toBe("ɪŋkwˈaᶦɹɪŋ");
+        // ⚠ THE NASAL IS ⟨n⟩, NOT ⟨ŋ⟩, AND THAT IS NOT WHAT THESE ROWS TEST. `in-`/`en-` are transparent
+        // prefixes, so velar assimilation is blocked across the boundary (englishArpabet.ts) — CMUdict
+        // writes `N` for all of them and Merriam-Webster agrees (in-ˈkwī(-ə)r, in-ˈkəm-bər). What these
+        // rows pin is the -ing RHOTIC after the PRICE diphthong, `aᶦɹ`, which is unchanged.
+        expect(phonemize("inquiring", "en")).toBe("ɪnkwˈaᶦɹɪŋ");
         expect(phonemize("desiring", "en")).toBe("dᵻzˈaᶦɹɪŋ");
         expect(phonemize("transpiring", "en")).toBe("tɹænspˈaᶦɹɪŋ");
         // ⚠ THE WEAKEST-WARRANT ROW OF THE SIX gets the pin it most needs: `backfiring` has no corpus row
@@ -406,7 +410,7 @@ describe("the -ing rhotic after a PRICE diphthong", () => {
         // neither file and do exercise the join.
         expect(phonemize("rechartering", "en")).toBe("ɹˈɛkhɑːɹt̬ɚɪŋ");
         expect(phonemize("decluttering", "en")).toBe("dˈɛklʌt̬ɚɪŋ");
-        expect(phonemize("unencumbering", "en")).toBe("ˌʌnɛŋkˈʌmbɚɪŋ");
+        expect(phonemize("unencumbering", "en")).toBe("ˌʌnɛnkˈʌmbɚɪŋ");
         // ⚠ AND AN `ER`-INITIAL ALLOMORPH IS NOT EXEMPT: the dict writes `enquirer`/`inquirer`/`admirer`
         // with the resyllabified ɹ, so an unlisted `-irer` must not get a doubled rhotic nucleus.
         expect(phonemize("conspirer", "en")).toBe("kənspˈaᶦɹɚ");
@@ -421,8 +425,8 @@ describe("the -ing rhotic after a PRICE diphthong", () => {
         // carried: the dict wrote `inquiry` as `IH2 N K W AY1 R IY2` and `inquiries` as `…R IY0 Z`, so
         // the singular was long and stressed while its own plural was short and unstressed, one line
         // apart. Gold has `ˈɪnkwˌIɹi` — unstressed. They now agree.
-        expect(phonemize("inquiry", "en")).toBe("ɪŋkwˈaᶦɹi");
-        expect(phonemize("inquiries", "en")).toBe("ɪŋkwˈaᶦɹiz");
+        expect(phonemize("inquiry", "en")).toBe("ɪnkwˈaᶦɹi");
+        expect(phonemize("inquiries", "en")).toBe("ɪnkwˈaᶦɹiz");
         // ⚠ `spiering` IS DELIBERATELY LEFT on the four-syllable shape, not overlooked. It is a surname,
         // not `-ire` + `-ing`, so the morphological warrant above does not reach it; it has no corpus row
         // and no referee row; and CMUdict's PRICE vowel for a Dutch-origin name is itself doubtful. A

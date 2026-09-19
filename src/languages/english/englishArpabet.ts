@@ -312,6 +312,9 @@ export function singlePrimary(phones: string[]): string[] {
 
 /** Build the ARPABET→IPA converter from a correspondence def. The allophony (flap/aspirate/dark-l/ŋ/ʲ,
  *  stress marking, weak-vowel merger) is the shared engine; `def` supplies the variety-specific IPA values. */
+/** Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below. */
+const TRANSPARENT_PREFIX = /^(?:un|in|non|con|en|syn|down|trans)/u;
+
 export function makeArpabetToIpa(
     def: ArpabetDef,
     /**
@@ -491,10 +494,30 @@ const VOWELS = new Set(def.vowels);
                 out += `${base === "L" ? "ɫ" : (map[base] ?? base)}\u0329`;
                 continue;
             }
+            // VELAR ASSIMILATION: /n/ before /k/ or /ɡ/ is [ŋ]. ⚠ IT REPAIRS CMUdict RATHER THAN
+            // DUPLICATING IT, which is why it cannot simply be deleted: the dictionary already writes
+            // `NG` where the assimilation applies (2,424 rows — `bank`, `uncle`, `anchor`, `finger`) and
+            // `N` where it does not (923), but 346 of that second group are slips on tautomorphemic
+            // words — `anglophile`, `anglophone`, `ankh`, `ancona`, `agincourt` — which this fixes.
+            //
+            // ⚠ AND IT MUST NOT CROSS A TRANSPARENT PREFIX BOUNDARY, where assimilation is blocked and
+            // CMUdict's `N` is a statement rather than a slip. Unconditioned, it read `unclean` as
+            // əŋklˈiːn and `income` as ˈɪŋkˌʌm, overwriting the distinction the lexicon had made. Four
+            // independent lines agree on `n` there: the dictionary itself; Moby; the wikipron referee
+            // (backs `n` on `unclean`, `unconditional`, `inclination`, `bancroft` — 4 of the 5 it
+            // arbitrates); and the RECORDINGS, 15 to 2 (`income` n×4 ŋ×1, `increase` n×4,
+            // `uncomfortable` n×2, `increasingly` n×4, `conclude` n×1).
+            // ⚠ THE INDEX GUARD IS WHAT MAKES THE SPELLING TEST SAFE: only a nasal inside the prefix
+            // itself is exempt (`un` N at 1, `non`/`con`/`down` at 2, `trans` at 3), so a later N+velar
+            // in the same word still assimilates.
+            // ⚠ IT MISSES `increment`, where wikipron reads `ŋ` — the prefix is not transparent there.
+            // Recorded rather than hidden, as the declared-intentional classes record theirs; one
+            // lexicalised exception is not worth a word list against a rule this regular.
             if (
                 base === "N" &&
                 i + 1 < P.length &&
-                (P[i + 1]!.base === "K" || P[i + 1]!.base === "G")
+                (P[i + 1]!.base === "K" || P[i + 1]!.base === "G") &&
+                !(i <= 3 && word !== undefined && TRANSPARENT_PREFIX.test(word))
             ) {
                 out += "ŋ";
                 continue;

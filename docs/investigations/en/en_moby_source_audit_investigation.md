@@ -235,3 +235,56 @@ before/after.
     Moby OOV           folded 36.0% → 36.9%       +intentional 40.4% → 44.9%
 
 ⚠ The bare `folded` number on the PRIMARY is untouched, which is the one every floor is set against.
+
+## Run 11 — 2026-09-18 20:40 — the velar fix, and why it is a CONDITION and not a deletion
+
+The finding of Run 10 turned into a change. Three things had to be right, and the first draft of each
+was wrong.
+
+⚠ **THE RULE CANNOT SIMPLY BE DELETED, WHICH THE FIRST ATTEMPT ASSUMED.** "CMUdict already encodes the
+distinction" is true of the 2,424 `NG` rows and of the prefix cases, but not of everything: 346 of the
+923 `N`-before-velar rows are slips on TAUTOMORPHEMIC words — `anglophile`, `anglophone`, `ankh`,
+`ancona`, `agincourt` — where the rule is the only thing producing the right reading. So it is a REPAIR
+with an over-application, and the fix is a condition:
+
+    !(i <= 3 && TRANSPARENT_PREFIX.test(word))     un|in|non|con|en|syn|down|trans
+
+⚠ THE INDEX GUARD IS WHAT MAKES THE SPELLING TEST SAFE. Only a nasal inside the prefix is exempt, so
+`unkink` keeps its second one: `ənkˈɪŋk`. Verified in the diff.
+
+⚠ **THE C# PORT CARRIES THE SAME RULE** (`EnglishArpabet.cs:350`) and the goldens are the parity gate,
+so it was mirrored. Parity after: 189 languages byte-identical, 0 differ.
+
+⚠ **AND THE HETERONYM TABLE HAD ITS OWN FROZEN COPIES.** `concrete`, `incline` and `increase` are
+consulted BEFORE the lexicon, so the rule fix could not reach them and `increase` still read `ˈɪŋkɹiːs`
+after everything else was corrected. Three rows in `english.jsonc`, now `n`.
+
+### The measured result
+
+    accent-lexicon.tsv    545 rows rewritten (round-trip was 100.00% clean beforehand, so every
+                          changed row changed BECAUSE of the rule)
+    goldens               42 rows across 7 languages, all `include`/`incubator`/`incomplete`
+    C# parity             189 byte-identical, 0 differ
+    regex-diff            144,302 probes identical, 0 DIFFER
+
+                       folded            +intentional
+    primary wikipron   61.7% → 61.9%     67.0% → 67.4%
+    Moby lexicon       74.2% → 74.9%     79.9% → 81.6%
+    Moby OOV           36.0% → 37.1%     40.4% → 45.3%
+
+⚠ **THE PRIMARY'S BARE NUMBER MOVED, AND THAT IS THE ONE THAT MATTERS.** Everything before this run was
+instrument repair and left 61.7% untouched by construction. This is an ENGINE change measured against
+the INDEPENDENT referee, and it is the only part of this whole investigation that improved it.
+
+### Three tests moved, and none of them was testing this
+
+`inquiring`, `inquiry`, `inquiries`, `unencumbering` — all `in-`/`en-` prefixes, all now `n`. CMUdict
+writes `N` for every one and Merriam-Webster agrees (`in-ˈkwī(-ə)r`, `in-ˈkəm-bər`). What those rows pin
+is the `-ing` RHOTIC after a PRICE diphthong, `aᶦɹ`, which is unchanged — the example moved, the claim
+did not. Expectations updated with that noted in place.
+
+### Known miss, recorded rather than hidden
+
+`increment` — wikipron reads `ŋ` and we now read `n`, because `in-` is not transparent there. One
+lexicalised exception against a rule this regular is not worth a word list, and it is written into the
+rule's comment so the next reader does not rediscover it as a bug.

@@ -4,6 +4,7 @@
  */
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.English;
@@ -112,6 +113,9 @@ public static class EnglishArpabet
      * family in the class, but the referee says `ə` — 81.0% over 100 `-ness` rows, 74.4% over 43 `-less`
      * rows — so the schwa already written there is right and the reference is wrong.
      */
+    /** Prefixes ending in a spelled ⟨n⟩ whose boundary BLOCKS velar assimilation — see the rule below. */
+    private static readonly Regex TRANSPARENT_PREFIX = new("^(?:un|in|non|con|en|syn|down|trans)", RegexOptions.Compiled);
+
     private static void RebaseSuffixIh(List<Phone> P, string word)
     {
         // ⚠ THE SUFFIX'S OWN VOWEL, LOCATED FROM THE END. Taking "the last vowel" instead split a
@@ -345,7 +349,21 @@ public static class EnglishArpabet
                     outSb.Append(bas == "L" ? "ɫ" : (map.TryGetValue(bas, out var sv) ? sv : bas)).Append('\u0329');
                     continue;
                 }
-                if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G"))
+                // VELAR ASSIMILATION: /n/ before /k/ or /ɡ/ is [ŋ]. ⚠ IT REPAIRS CMUdict RATHER THAN
+                // DUPLICATING IT, which is why it cannot simply be deleted: the dictionary already
+                // writes `NG` where the assimilation applies (2,424 rows — bank, uncle, anchor,
+                // finger) and `N` where it does not (923), but 346 of that second group are slips on
+                // tautomorphemic words — anglophile, anglophone, ankh, ancona — which this fixes.
+                //
+                // ⚠ AND IT MUST NOT CROSS A TRANSPARENT PREFIX BOUNDARY, where assimilation is blocked
+                // and CMUdict's `N` is a statement rather than a slip. Unconditioned it read `unclean`
+                // as əŋklˈiːn. Four independent lines agree on `n` there: the dictionary, Moby, the
+                // wikipron referee (4 of the 5 rows it arbitrates), and the recordings, 15 to 2.
+                // ⚠ THE INDEX GUARD IS WHAT MAKES THE SPELLING TEST SAFE: only a nasal inside the
+                // prefix is exempt, so `unkink` keeps its second [ŋ] — ənkˈɪŋk.
+                // ⚠ MIRRORS src/languages/english/englishArpabet.ts; the goldens are the parity gate.
+                if (bas == "N" && i + 1 < P.Count && (P[i + 1].Base == "K" || P[i + 1].Base == "G")
+                    && !(i <= 3 && word != null && TRANSPARENT_PREFIX.IsMatch(word)))
                 {
                     outSb.Append('ŋ');
                     continue;
