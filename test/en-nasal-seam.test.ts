@@ -66,3 +66,50 @@ describe("velar assimilation across a compound seam", () => {
         expect(bad).toEqual([]);
     });
 });
+
+/**
+ * THE MORPHEME BOUNDARY TABLE is generated from a 3 GB Wiktionary dump that is not in the repo, so
+ * these are the only gates standing between it and a silent rot. See en-morph-boundary.PROVENANCE.md.
+ */
+describe("the morpheme boundary table", () => {
+    const rows = new Map<string, [number, string][]>();
+    for (const l of readFileSync(join(EN, "..", "..", "..", "tools", "gen", "en-morph-boundary.tsv"), "utf8").split("\n")) {
+        if (!l || l.startsWith("#")) continue;
+        const t = l.indexOf("\t");
+        if (t <= 0) continue;
+        rows.set(l.slice(0, t), l.slice(t + 1).split(",").map((f) => {
+            const [i, k] = f.split(":");
+            return [Number(i), k ?? ""] as [number, string];
+        }));
+    }
+
+    test("every kind is one of the four the consumers switch on", () => {
+        const KINDS = new Set(["compound", "prefix", "suffix", "confix"]);
+        const bad = [...rows].flatMap(([w, bs]) => bs.filter(([, k]) => !KINDS.has(k)).map(([, k]) => `${w}:${k}`));
+        expect(bad.slice(0, 5)).toEqual([]);
+    });
+
+    // ⚠ AN INDEX PAST THE END OF THE ROW IS A SILENT NO-OP, which is how this table rots after an
+    // `--emit` regenerates g2p-dict.tsv and shifts a word's phones.
+    test("every index lands inside the shipped dictionary row", () => {
+        const dict = new Map<string, string[]>();
+        for (const l of readFileSync(join(EN, "g2p-dict.tsv"), "utf8").split("\n")) {
+            const [w, ph] = l.split("\t");
+            if (w && ph) dict.set(w, ph.split(" "));
+        }
+        const bad: string[] = [];
+        for (const [w, bs] of rows) {
+            const p = dict.get(w);
+            if (!p) { bad.push(`${w}: not in the dict`); continue; }
+            for (const [i] of bs) if (!(i > 0 && i < p.length)) bad.push(`${w}[${i}] of ${p.length}`);
+        }
+        expect(bad.slice(0, 5)).toEqual([]);
+    });
+
+    // ⚠ THE LOAD-BEARING DISTINCTION. If these two ever carry the same kind, the velar consumer will
+    // either ship `panchromatic` with an [n] it has never had, or lose every compound seam.
+    test("a compound and a neoclassical prefix are not the same kind", () => {
+        expect(rows.get("pancake")?.some(([, k]) => k === "compound")).toBe(true);
+        expect(rows.get("panchromatic")?.every(([, k]) => k !== "compound")).toBe(true);
+    });
+});
