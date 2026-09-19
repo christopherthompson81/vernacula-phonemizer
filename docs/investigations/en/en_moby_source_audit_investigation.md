@@ -161,3 +161,77 @@ made of, plus a possible real `-es` class. That is a list worth working; the old
 transcription bugs wearing 4,000 rows as a disguise.
 
 Full suite 316 files / 6,062 tests green; 189 languages, 36,495 golden rows, 0 stale (no engine change).
+
+
+## Run 8 — 2026-09-18 19:45 — mining the LEXICON residual, and what the blocks turn out to be
+
+Same method as Run 5, against the lexicon file and the `+intentional` line: 35,202 rows, 28,204 credited,
+**6,998 residual** (reproduced the eval exactly, intentional crediting and all). Ranked by edit shape:
+
+    same length (pure substitution) 4,103   |   length differs 2,895
+    of the first, exactly ONE symbol differs: 3,035
+
+    520  ɪ → i     258 of them before ɹ, 103 in `-ing`
+    220  ɛ → æ     216 before ɹ — MARRY–MERRY, deliberately left visible by the builder
+    189  ŋ → n     160 before k, 26 before ɡ
+    174  ɔ → ɑ     cot–caught, already refused as a class
+
+⚠ **THE TOP BLOCKS ARE AXES, NOT DEFECTS — AND THEY DO NOT ALL RESOLVE THE SAME WAY.** Three were run
+through the bar `RefLang.intentional` sets ("evidence that WE ARE RIGHT, not merely that we disagree"),
+which is the bar the `ɔ`/`ɑ` pair already failed.
+
+## Run 9 — 2026-09-18 19:55 — one declared, one refused, one turned out to be ours
+
+**`-ing` → a BUILDER fix, not a class.** Moby writes the suffix `/I//N/` 1,264 times and `/i//N/` 230 —
+`king`, `sing`, `ring`, `thing`, `building`, `farming`, `running` all in the majority, `alarming` not.
+15% scatter with no environment, so it is the `-ness` finding again and belongs in the builder.
+
+**NEAR vowel `i`→`ɪ` before `ɹ` → DECLARED.** It passes the bar the cot–caught pair failed, by the same
+test: ⚠ MOBY DOES NOT RECORD THE DISTINCTION — `iɹ` 349 rows, `ɪɹ` **zero** — so its `i` is a convention,
+not a per-word judgement. wikipron backs us at 76.9% (40 against 12, diphthong offglides excluded; the
+naive count says 60/12 and is contaminated by `baɪɹi`-shaped rows). Scoped to the environment, because a
+bare `i`→`ɪ` would credit all 520 rows including real defects — which needed a new `nextIs` field on the
+intentional schema.
+
+**VELAR `n`→`ŋ` → REFUSED as a class.** wikipron backs us 71% (82 against 33), which looked sufficient.
+⚠ BUT MOBY RECORDS IT: `ŋ`+k/ɡ 556 against `n`+k/ɡ 302. Lexical disagreement, neither side shown right —
+the cot–caught ground exactly. And our own dictionary is split the same way, 2,424 `NG` against 924 `N`.
+
+## Run 10 — 2026-09-18 20:05 — arbitrating the velar anyway, and finding it is OUR defect
+
+Refusing the class is not the same as not knowing the answer, so the 189 rows were arbitrated per word.
+
+    wikipron covers 7:  backs US 2 (dunkirk, increment)
+                        backs MOBY 5 (bancroft, inclination, unclean, unconditional, unquestionable)
+
+Four of the five are transparent `un-`/`in-` boundaries, which is the phonological rule: velar
+assimilation is obligatory WITHIN a morpheme and blocked across a transparent prefix boundary. The split
+is 148 of 189 at a prefix (115 productive `un-`/`in-`/`non-`, 33 lexicalised `con-`/`en-`/`syn-`).
+
+The recordings settle it — 15 to 2 for `n`:
+
+    income n×4 ŋ×1   increase n×4   uncomfortable n×2   increasingly n×4   incredible ŋ×1   conclude n×1
+
+⚠ **AND CMUdict ALREADY ENCODES THE DISTINCTION CORRECTLY:**
+
+    bank NG    uncle NG    anchor NG    finger NG          ← assimilation applies
+    unclean N  income N    increase N   conclude N         ← assimilation blocked
+
+So the dictionary is right, all three referees agree with it, and the defect is ours: an UNCONDITIONED
+rule at `englishArpabet.ts:494` rewriting every `N` before `K`/`G` to `ŋ`, destroying a distinction the
+lexicon had already made. ⚠ AND IT HAS NO COMMENT, which in this file is itself a signal.
+
+⚠ **THE CODE IS NOT THE WHOLE FIX, WHICH THE FIRST ATTEMPT AT IT MISSED.** Disabling the rule changes
+nothing: `unclean` still reads `əŋklˈiːn`, because `data/languages/english/accent-lexicon.tsv` is a
+GENERATED layer with the `ŋ` already baked in (`conclude` → `kəŋklˈuːd`), and it is consulted before the
+ARPABET path. 3,466 of its rows carry `ŋ` before a velar. The fix is the rule PLUS a regeneration of that
+artifact PLUS the goldens that follow — a separate change from this referee work, and one worth its own
+before/after.
+
+## Standing state
+
+    primary wikipron   folded 61.7% (unchanged)   +intentional 67.0% → 67.2%
+    Moby lexicon       folded 74.2% → 74.5%       +intentional 79.9% → 81.2%
+    Moby OOV           folded 36.0% → 36.9%       +intentional 40.4% → 44.9%
+
+⚠ The bare `folded` number on the PRIMARY is untouched, which is the one every floor is set against.

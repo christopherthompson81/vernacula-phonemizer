@@ -55,6 +55,14 @@
  *   because Moby had the same full vowel. They now fail, which is the referee reporting our defect
  *   instead of agreeing with it.
  *
+ *   ⚠ MOBY'S `-ing` — NORMALISED, on the same footing as `-ness` and found the same way. Moby writes the
+ *   suffix `/I//N/` in 1,264 rows and `/i//N/` in 230 — 15% of its own `-ing` words disagree with the
+ *   other 85%, and `king`, `sing`, `ring`, `thing`, `building`, `farming` and `running` are all in the
+ *   majority. `alarming` is `/@/'l/A/rm/i//N/`. There is no GenAm reading `-iŋ`, and the minority is not
+ *   an environment — it is scatter. Mapped to `IH0`, Moby's own majority spelling.
+ *   ⚠ ONLY WHERE THE SYLLABLE IS UNSTRESSED and the headword actually ends `-ing`, so a monosyllable
+ *   whose vowel IS the tonic keeps whatever Moby gave it.
+ *
  *   ⚠ GEMINATE CONSONANTS — COLLAPSED, BUT IN THE OOV FILE ONLY, and the asymmetry is the whole point.
  *   Moby writes 1,031 rows with an identical adjacent consonant pair (`aboriginally` as `…n/-/ll/i/`,
  *   694 of them `LL`). The engine's OOV paths finish every reading through `collapseGeminates`, so they
@@ -128,14 +136,29 @@ function degeminate(a: string[]): string[] {
     return out;
 }
 
-/** Moby's full `/E/` in an UNSTRESSED `-ness` → `IH0`, Moby's own reduced spelling of the same suffix. */
-function normaliseNess(word: string, a: string[]): string[] {
-    if (!/^[a-z]{3,}ness$/u.test(word) || a.length < 3) return a;
+/**
+ * Moby's minority spelling of an unstressed suffix vowel → its own MAJORITY spelling. Two suffixes, both
+ * found by ranking the OOV residual by grapheme and both argued from Moby's own inconsistency:
+ *   `-ness`  EH 1622 / IH 146  — every other unstressed suffix in the file is reduced (`-less` IH 209)
+ *   `-ing`   IH 1264 / i   230 — and `king`/`sing`/`ring`/`thing` are all in the majority
+ * ⚠ THE STRESSED CASES ARE EXEMPT: `-ness` is the tonic in `dungeness`/`inverness`/`sultaness`, and a
+ * monosyllable in `-ing` carries its own stress. Both keep whatever Moby gave them.
+ */
+const SUFFIX_FIX: [RegExp, string, string][] = [
+    [/^[a-z]{3,}ness$/u, "EH", "IH0"],
+    [/^[a-z]{3,}ing$/u, "IY", "IH0"],
+];
+function normaliseSuffix(word: string, a: string[]): string[] {
+    if (a.length < 3) return a;
     const i = a.length - 2;
-    if (a[i] !== "EH0" && a[i] !== "EH") return a;   // stressed EH1/EH2 is dungeness/inverness — leave it
-    const out = [...a];
-    out[i] = "IH0";
-    return out;
+    for (const [re, from, to] of SUFFIX_FIX) {
+        if (!re.test(word)) continue;
+        if (a[i] !== from && a[i] !== `${from}0`) continue;  // stressed → leave it
+        const out = [...a];
+        out[i] = to;
+        return out;
+    }
+    return a;
 }
 
 const dict = new Set<string>();
@@ -171,7 +194,7 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     if (!a0) { declined++; continue; }                 // multi-word body / Moby's French sub-scheme
     const inLexicon = dict.has(w);
     // ⚠ THE GEMINATE COLLAPSE IS OOV-ONLY — see the header. `normaliseNess` applies to both.
-    const a = inLexicon ? normaliseNess(w, a0) : degeminate(normaliseNess(w, a0));
+    const a = inLexicon ? normaliseSuffix(w, a0) : degeminate(normaliseSuffix(w, a0));
     const ipa = fold(a).map(sym).join("");
     if (ipa === "" || fold(a).some((p) => sym(p) === "")) { unmapped++; continue; }
     seen.add(w);
