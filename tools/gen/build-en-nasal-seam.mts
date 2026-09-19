@@ -59,8 +59,18 @@ const refs: [string, Map<string, string[]>][] = [
     ["uk", readRef("en-gb.wikipron-uk.tsv")],
 ];
 
-/** The referee's own verdict at the site: the nasal it writes before a /k/ or /ɡ/, or null if its
- *  readings disagree with each other or it has no such site at all. */
+/**
+ * The referee's own verdict at the site: the nasal it writes before a /k/ or /ɡ/, or null if its
+ * readings disagree with each other or it has no such site at all.
+ *
+ * ⚠ IT READS THE FIRST SITE AND SPEAKS FOR ALL OF THEM, which is wrong in principle and empty in fact:
+ * the only dictionary words with TWO N+velar sites are `inconclusive`/`-ly`/`-ness`, and all three are
+ * protected by the prefix guard before they reach here. Left as-is rather than fixed speculatively —
+ * but a word with two sites whose referee disagrees between them would be mis-licensed, so if this file
+ * ever grows a multi-index row, fix this first.
+ * ⚠ `ɡ` IS U+0261 AND ASCII `g` IS NOT ACCEPTED. Checked rather than assumed: the phone columns of all
+ * four referee files contain zero ASCII `g`.
+ */
 const verdict = (reads: string[]): string | null => {
     const v = new Set<string>();
     for (const r of reads) {
@@ -87,15 +97,23 @@ const common = new Set(
  *
  * ⚠ THE `common` GATE IS WHAT MAKES IT TIGHT, and it was added after reading the rows it let through.
  * Dictionary membership alone is nearly free — CMUdict carries every surname — so `kalanchoe` parsed as
- * `kalan`+`choe` and `agincourt` as `agin`+`court`, neither of which is a compound. Both happened to
- * have the right answer, which is how a loose gate survives a spot check. `g2p-common.txt` is the same
- * frequency gate the OOV compound splitter uses.
+ * `kalan`+`choe`. `g2p-common.txt` is the same frequency gate the OOV compound splitter uses.
+ * ⚠ AND THE LENGTH FLOOR IS 3, NOT 4, WHICH IS NOT A ROUNDING CHOICE. At 4 the gate dropped `corncob`
+ * — `corn`+`cob`, Moby `kɔɹnkɑb`, as plain a seam as the file contains — while still admitting
+ * `agincourt` (`court` is common) and `mankato` (`kato` is in the frequency list, which carries
+ * surnames freely). So the floor was costing a true positive and buying neither of the two rows it was
+ * supposed to stop. At 3 it admits `corncob` and nothing else; the two survivors are handled by being
+ * NAMED rather than by a threshold that does not separate them. Both have the right answer on
+ * independent authority, which is how a loose gate passes a spot check — see the census below.
  */
 const transparentCompound = (w: string): boolean => {
+    // ⚠ THE SPLIT IS NOT TIED TO THE PHONE INDEX IT LICENSES — any spelled `n` that divides the word
+    // licenses every site in it. Harmless while every row has one index (see `verdict` above); it becomes
+    // wrong at the same moment that does.
     for (const m of w.matchAll(/n(?=[ckgq])/gu)) {
         const i = m.index + 1;
         const head = w.slice(0, i), tail = w.slice(i);
-        if (i >= 3 && tail.length >= 4 && dict.has(head) && common.has(tail)) return true;
+        if (i >= 3 && tail.length >= 3 && dict.has(head) && common.has(tail)) return true;
     }
     return false;
 };
@@ -129,7 +147,15 @@ for (const [w, idx] of [...rows]) {
         const f = w + suffix;
         if (have.has(f)) continue;
         const p = dict.get(f);
-        if (!p || !idx.every((i) => p[i]?.replace(/[0-2]$/u, "") === "N")) continue;
+        // ⚠ BOTH HALVES OF THE SITE, not just the nasal — `test/en-nasal-seam.test.ts` asserts that every
+        // listed index is an N followed by a K or G, so checking only the N here would let the builder
+        // emit a row its own gate test rejects. No such form exists today; the check is what keeps it so.
+        if (!p) continue;
+        const stillASite = (i: number) => {
+            const a = p[i]?.replace(/[0-2]$/u, ""), b = p[i + 1]?.replace(/[0-2]$/u, "");
+            return a === "N" && (b === "K" || b === "G");
+        };
+        if (!idx.every(stillASite)) continue;
         have.add(f);
         rows.push([f, idx, "inflection of " + w]);
     }
@@ -142,12 +168,35 @@ console.log(`  every covering referee says [n]  → A ROW:  ${rows.length}`);
 console.log(`  every covering referee says [ŋ] (a CMUdict slip the rule repairs): ${refereeSaysVelar}`);
 console.log(`  referees split, or no referee, or single-source and not a transparent compound: ${split + thin}`);
 console.log(`  (words with no N+velar site at all: ${noSite})`);
+// ⚠ THE PER-ROW PROVENANCE IS PRINTED AND NOT SHIPPED, because the TSV's value column is the index list
+// and a third column would have to be parsed by three separate loaders. Printed because the SHAPE of the
+// evidence is the thing a reader needs to judge the table, and a census says it in one line.
+const census = new Map<string, number>();
+for (const [, , src] of rows) census.set(src, (census.get(src) ?? 0) + 1);
+console.log(`\nby evidence:`);
+for (const [src, n] of [...census].sort((a, b) => b[1] - a[1])) console.log(`  ${String(n).padStart(3)}  ${src}`);
+// ⚠ THE SINGLE-SOURCE ROWS ARE THE ONES TO READ, and two of them are not compounds at all: `agincourt`
+// (`agin`+`court`) and `mankato` (`kato` is in the frequency list — it carries surnames). Both have the
+// right answer on independent authority, so they stay; they are named here because the gate that let
+// them in cannot tell them from a real seam, and the next reader should not have to rediscover that.
+const single = rows.filter(([, , src]) => !src.includes("+") && !src.startsWith("inflection"));
+console.log(`\nsingle-source rows (${single.length}), admitted on a seam visible in the spelling:`);
+console.log(`  ${single.map(([w]) => w).join(" ")}`);
 
 if (!write) { console.log("\n(run with --write to rewrite the table)"); process.exit(0); }
 const header = [
-    "# NASAL SEAM SLOTS — which `N` before a `K`/`G` must NOT assimilate to [ŋ], because the boundary",
-    "# between them is a COMPOUND SEAM (`pan·cake`, `rain·coat`, `man·kind`, `Van·couver`) and not a",
-    "# syllable contact.",
+    "# NASAL SEAM SLOTS — which `N` before a `K`/`G` must NOT assimilate to [ŋ]. Most are a COMPOUND",
+    "# SEAM (`pan·cake`, `rain·coat`, `man·kind`, `turn·key`, `Lenin·grad`) rather than a syllable",
+    "# contact, which is what the name says.",
+    "#",
+    "# ⚠ BUT THE BAR IS THE REFEREES, NOT THE MORPHOLOGY, and the difference is visible in the file:",
+    "# `hangul`, `melancholy` and `quincuncial` are here and are not compounds of anything. A row means",
+    "# `every referee that covers this word writes [n] here`. Do not read the filename as a claim about",
+    "# a word's structure, and do not add a row because a word LOOKS like a compound.",
+    "#",
+    "# ⚠ AND IT IS NOT A LIST OF EVERY SEAM. `Vancouver`, `Dunkirk`, `plainclothes`, `songbook` and some",
+    "# three hundred surnames are seams with no row, because no referee arbitrates them — they still",
+    "# assimilate. See the provenance file.",
     "#",
     "# Generated by tools/gen/build-en-nasal-seam.mts. See that file for the two discriminators that were",
     "# built and failed, and for why this has to be a word list rather than a rule.",

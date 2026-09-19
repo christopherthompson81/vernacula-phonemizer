@@ -1100,9 +1100,14 @@ slips at the same time as it is destroying real CMUdict statements.
 ⚠ THE DISCRIMINATOR IS A COMPOUND SEAM, AND IT IS NOT LEARNABLE FROM THIS EVIDENCE. Two attempts:
 
 1. A SPLITTER — does the word divide at the n|velar boundary into two dictionary words? On the labelled
-   seam words it is 31 right to 2 wrong, but it also claims `benghazi`, `hangul`, `pangloss`, `sancho`,
-   `panchromatic`, `vainglorious`, `cancan`, `galingale` (all `ŋ`) and misses 20 labelled rows including
-   `vancouver`, `ongoing`, `stonecutter`, `minecraft`, `serengeti`.
+   seam words it is 31 right to 2 wrong, but it also claims `benghazi`, `pangloss`, `sancho`,
+   `panchromatic`, `galingale` and misses 20 labelled rows including `vancouver`, `ongoing`,
+   `stonecutter`, `minecraft`, `serengeti`.
+   ⚠ CORRECTED IN RUN 30. This list first read "`benghazi`, `hangul`, `pangloss`, `sancho`,
+   `panchromatic`, `vainglorious`, `cancan`, `galingale` (all `ŋ`)" and three of those eight are
+   not `ŋ`: `hangul` (wikipron US *and* UK), `vainglorious` and `cancan` are `n` on referee
+   evidence, and Run 28 shipped rows for all three. Five of eight is still enough to sink the
+   splitter as a rule, but the aside asserted a verdict for words it had not looked up.
 2. A MORPHEME LIST, derived from the labelled data rather than imagined — the first elements attested by a
    referee-labelled `n` with a real second element, outside the transparent prefixes, are: `corn` 3,
    `green` 3, `pan` 3, `man` 2, `on` 2, `turn` 2, and then thirty morphemes with ONE attestation each.
@@ -1133,6 +1138,9 @@ into two dictionary words at the boundary — and dictionary membership alone is
 CMUdict carries every surname: `kalanchoe` parsed as `kalan`+`choe` and `agincourt` as `agin`+`court`.
 Both happen to have the right answer, which is exactly how a loose gate survives a spot check. Requiring
 the second element to be in `g2p-common.txt` and four letters or more drops the count 35 → 32.
+⚠ AND THE `four letters` HALF OF THAT WAS WRONG — see Run 30. It dropped `corncob`, a true positive,
+while leaving both rows it was aimed at; the floor is 3 now and the count is 33 (+5 = 38). The `35 → 32`
+figure does not reproduce either: the obvious loose variant gives 34.
 
 ⚠ AND INFLECTIONS ARE CARRIED ALONG, because the first table shipped `pancake` but not `pancaked`, and
 `sunglass` but not `sunglasses` — the referees happened to cover one form of each. A suffix cannot move
@@ -1161,3 +1169,155 @@ not cover — `vancouver`, `dunkirk`, `plainclothes`, `songbook`, `minecraft`, `
 [ŋ], and nothing arbitrates. On Run 27's base rates the dictionary is right about nine times in ten
 there, so most of them are probably wrong today. That is the largest single block of known-unknown left
 on this axis, and closing it needs a source that covers surnames rather than a cleverer rule.
+
+## Run 29 — 2026-09-19 — review of the seam table: every claim reproduces, and the gate dropped a true positive
+
+Independent review of `fix/nasal-compound-seam` (#1358) against `origin/main`. Everything Run 28 claims
+was re-run rather than taken on trust.
+
+    npx tsx tools/gen/build-en-nasal-seam.mts --write   → byte-identical to the committed table
+    npx vitest run                                       → 317 files, 6073 passed, 5 skipped
+    npx tsx tools/check-goldens.mts --jobs 8             → 189 languages, 36495 rows, 0 stale
+    dotnet run --project csharp/tools/parity -c Release  → 189 byte-identical, 0 differ; 5/5 accents build
+    MOBY=… npx tsx tools/referee-eval/eval.ts en         → primary 2531/4037 62.7%; Moby-lexicon 26520 75.7%;
+                                                           Moby-OOV 15056 (unchanged)
+
+Run 28's numbers are exactly right — 2529→2531, 26505→26520, OOV flat, 3 golden rows, C# parity intact.
+The builder's census reproduces at 590 / 37 / 20 / 311. TS and C# guards are behaviourally identical
+(`!nasalSeam.get(word)?.includes(i)` against `!(nasalSeam is not null && TryGetValue && Contains(i))`),
+both loaders skip `#` and blanks the same way, both regexes are the same `JsRegex`-compiled source, and
+the tagger path is unwired on both sides symmetrically. Word casing is folded before the lookup, so
+`Pancake`/`PANCAKE`/`pancake's` all read `pʰˈænkˌeᶦk`.
+
+⚠ THE TIGHTENED GATE DROPPED A TRUE POSITIVE AND KEPT BOTH FALSE POSITIVES. Run 28 records the
+`common`-membership tightening as the thing that stopped `kalanchoe`=`kalan`+`choe` and
+`agincourt`=`agin`+`court`. Re-ran the builder with the loose gate (`dict.has(head) && dict.has(tail)`,
+no length bound) and diffed the row lists. The tightening removes exactly two rows:
+
+    corncob      ← corn·cob, Moby `kɔɹnkɑb`, an unambiguous compound seam
+    kalanchoe    ← the intended casualty
+
+`agincourt` survived, because `court` is in `g2p-common.txt`; so did `mankato`, because `kato` sits at
+rank 20,530 of a 40,000-word Norvig web-frequency list that carries surnames freely. `corncob` was lost
+to `tail.length >= 4`, not to the frequency gate at all. Net effect in the shipped lexicon:
+
+    corncrake  kʰˈɔːɹnkɹeᶦk     corncrib  kʰˈɔːɹnkɹˌɪb     corncob  kʰˈɔːɹŋkˌɑːb   ← same `corn·`
+    greengrocer ɡɹˈiːnɡɹoᶷsɚ                               greenkeeper ɡɹˈiːŋkiːpɚ ← same `green·`
+
+Relaxing the bound to `tail.length >= 3` adds `corncob` and NOTHING ELSE (re-ran and diffed), so it is a
+one-character change with one row of effect and no new risk.
+
+⚠ THE SINGLE-SOURCE LICENCE IS DOING REAL WORK AND IS MOSTLY RIGHT. Instrumented the builder to emit the
+`src` field it computes and then discards. 17 of the 32 derived rows rest on one referee:
+
+    moby only  agincourt corncrib glengarry greencastle guncotton ironclad loincloth mankato pancake
+               rheingold sunglass
+    uk only    greengage greengrocer mooncalf pancakes pincushion vainglorious
+
+Fifteen are transparent compounds and are right. The two that are not — `agincourt` (a French place
+name, `agin`+`court`) and `mankato` (a Dakota place name, `man`+`kato`) — are exactly the words the
+tightening was supposed to catch, and both rest on Moby alone, the noisiest of the three referees and
+the subject of this very audit. Both happen to have the defensible answer (M-W writes `\ˈa-jən-ˌkȯrt\`
+and `\man-ˈkā-(ˌ)tō\`), which is again how a loose gate survives a spot check.
+
+⚠ THE TABLE IS NOT A COMPOUND-SEAM TABLE, WHICH THE HEADER AND THE FILENAME BOTH CLAIM. `hangul`,
+`quincuncial`, `melancholy`, `agincourt` and `mankato` are not compounds; they are in the table because
+two referees, or one plus a spurious split, write `n`. That is a defensible bar — but it is "the
+referees say `n` here", not "there is a seam here", and the difference matters for the next reader
+deciding whether a word belongs.
+
+⚠ RUN 27'S PROSE CONTRADICTS THE SHIPPED TABLE. Run 27 lists the splitter's false positives as
+"`benghazi`, `hangul`, `pangloss`, `sancho`, `panchromatic`, `vainglorious`, `cancan`, `galingale` (all
+`ŋ`)". Three of those eight — `hangul`, `vainglorious`, `cancan` — are rows in the table Run 28 shipped.
+The referees are unambiguous (`hangul`: us `h ɑ n ɡ u l`, uk `hɑːnɡuːl`; `cancan`: moby `kænkæn`, uk both
+readings `n`; `vainglorious`: uk `veɪnɡlɔːɹiəs`), so the table is right and Run 27's aside is wrong.
+
+⚠ THE TSV HEADER ADVERTISES A WORD IT DOES NOT CONTAIN. Both `en-nasal-seam.tsv` and
+`build-en-nasal-seam.mts` use `Van·couver` as the worked example; `vancouver` is not a row and still
+reads `væŋkˈuːvɚ`. It fails the bar legitimately — Moby says `n`, but wikipron-UK carries both
+`vænkuːvɚ` and `væŋkuːvɚ`, so `verdict` returns null for UK and the word falls to single-source with no
+common tail (`couver`). Run 28's "what this does not buy" is honest about it; the header is not.
+
+Three latent defects in the builder, all empty against today's data:
+
+1. `verdict` takes the FIRST `[nŋ]` before a velar in each reading and applies that one verdict to EVERY
+   index in `idx`. Only three dictionary words have two `N`+velar sites (`inconclusive`, and its two
+   inflections) and all three are prefix-protected, so nothing is affected today.
+2. The inflection carry-over checks `p[i] === "N"` but NOT that `p[i+1]` is a `K`/`G`, while
+   `test/en-nasal-seam.test.ts` checks both. The builder can therefore emit a row its own gate test
+   rejects. Swept every stem × suffix against the dict: no such form exists today.
+3. `transparentCompound` scans every `n` before `[ckgq]` in the SPELLING and licences the whole word if
+   any of them splits, without checking that the split position corresponds to the phone index being
+   licensed. Harmless while every row is single-index.
+
+Rot: the new test catches the documented vector — an `en_g2p_ngram.ts --emit` that shifts phones leaves
+an index that is no longer `N`+velar, and the test reports it by name; a word dropped from the dict is
+caught too. What is NOT caught is a word that NEWLY earns a row, a referee file rebuilt from a different
+`$MOBY`, or an index that silently lands on a different `N`+velar site in the same word. There is no
+"the generated table is up to date" gate re-running the builder and diffing, and this repo has no such
+convention for `tools/gen/*` generally, so that is a gap rather than a regression.
+
+Smaller notes. The `src` provenance string the builder computes is never written — the third tuple
+element is dropped by `rows.map(([w, i]) => …)`, so per-row sourcing exists only in the author's head.
+`verdict`'s velar class is `[kɡ]` with U+0261 only; all four referee files are clean of ASCII `g` today
+(checked: 0 occurrences in the phone columns) and clean of prosodic marks between nasal and velar (2 of
+4,445 sites, both junk headwords), so neither bites, but neither is asserted. The C# parse maps a
+`int.TryParse` failure to −1 and filters, while the TS keeps anything `Number.isInteger` accepts — so an
+empty value field is index 0 in TS and nothing in C#; this mirrors the existing `en-syllabic` loader
+exactly, so it is precedent rather than a new divergence. Run 28's "35 → 32" does not reproduce: the
+obvious loose variant gives 34, so the intermediate being described is not the one the tool can express.
+
+Verdict: the change is sound, the measurement is honest, and the one substantive defect is `corncob`.
+
+## Run 30 — 2026-09-19 — review fixes: one real row, and three claims that were not checked
+
+Acting on Run 29.
+
+⚠ THE LENGTH FLOOR WAS COSTING A TRUE POSITIVE AND BUYING NOTHING. Run 28 tightened the single-source
+licence with two conditions at once — the second element must be in `g2p-common.txt` AND be four letters
+or more — and reported the pair as "35 → 32". Separating them:
+
+    tail ≥ 3, no common gate      34 rows      (Run 28's "35" does not reproduce)
+    tail ≥ 4, common gate         37 rows      shipped
+    tail ≥ 3, common gate         38 rows      ← now
+
+The `common` gate is the one that works: it drops `kalanchoe`, which is what it was added for. The
+length floor drops only **`corncob`** — `corn`+`cob`, Moby `kɔɹnkɑb`, as plain a seam as the file
+contains — and leaves BOTH rows the tightening was aimed at, because `agincourt` has a common `court`
+and `mankato` a `kato` that the frequency list carries along with every other surname. So the shipped
+table said `corncrake` and `corncrib` with `n` and `corncob` with `ŋ`, and `greengrocer` with `n` beside
+`greenkeeper` with `ŋ`. Floor is 3; `corncob` is the only row it adds, verified by diff.
+
+⚠ AND THE TWO SURVIVORS ARE NOW NAMED RATHER THAN THRESHOLDED, which is the right shape for them: a
+threshold that cannot separate `agin`+`court` from `corn`+`cob` should not be asked to. The builder
+prints the 18 single-source rows and says which two are not really compounds. It also now prints the
+evidence census it was computing and throwing away.
+
+⚠ THE FILE IS NOT A COMPOUND-SEAM FILE AND THE HEADER SAID IT WAS. `hangul`, `melancholy`,
+`quincuncial`, `agincourt` and `mankato` have rows and are not compounds of anything; the bar is "every
+referee covering this word writes `n` here", and the name describes the majority, not the criterion.
+Header and provenance now say so, and both now say what the file is NOT — `Vancouver` was offered in the
+header as an example and has no row, because wikipron-UK carries both readings and the verdict is null.
+
+⚠ AND RUN 27 ASSERTED A VERDICT FOR WORDS IT HAD NOT LOOKED UP. Its splitter-false-positive list read
+"`benghazi`, `hangul`, `pangloss`, `sancho`, `panchromatic`, `vainglorious`, `cancan`, `galingale` (all
+`ŋ`)". Three of the eight are `n` on referee evidence and Run 28 shipped rows for them. Five of eight
+still sinks the splitter as a rule, so the conclusion holds and the supporting sentence did not.
+Corrected in place with a pointer here rather than silently, because the overstatement is the finding.
+
+Three latent builder gaps Run 29 found are all empty against today's data and are now named in the code
+rather than fixed speculatively: `verdict` reads the first site and speaks for all of them (only
+`inconclusive*` has two, all prefix-protected); `transparentCompound` licences a whole word rather than
+an index; and the inflection carry-over checked only that the phone was an `N`, not that a `K`/`G`
+followed — that one IS fixed, because the gate test asserts both and the builder could have emitted a
+row its own test rejects.
+
+    en-nasal-seam.tsv         37 → 38 rows (+corncob)
+    accent-lexicon.tsv        1 further row
+    Moby — lexicon            26520 → 26521
+    primary / OOV / goldens   unmoved
+⚠ AND THAT +1 CONTRADICTS WHAT THIS ENTRY FIRST SAID, which was "unmoved — `corncob` is in no referee
+corpus". It is in the Moby lexicon corpus (`kɔɹnkɑb`), which is the single source that licensed the row
+in the first place. Written before the eval was re-run and corrected by re-running it; noted because
+"this cannot have moved anything" is exactly the claim that does not need checking right up until it
+does.
