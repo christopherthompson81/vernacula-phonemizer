@@ -697,6 +697,44 @@ fit it — `boucher`, `tourniquet`, `angers`, `chorzow`, `beziers`, `ateliers` �
 the gain is entirely the removal of rows we could never have passed. No reading improved; the instrument
 stopped asking a question GenAm cannot answer.
 
+## Run 21 — 2026-09-19 02:40 — review: one of the two non-rhotic rules is not enough
+
+⚠ **THE FIRST RULE ALONE LEAVES THE LARGEST CLASS.** `[aeiouy]r(?![aeiouy])` rejects every
+`-ered`/`-ored`/`-ured`/`-ared` word, because the ⟨e⟩ after the ⟨r⟩ is a vowel LETTER even when it is
+silent — so `battered bætəd`, `coloured kʌləd`, `unanswered ənɑnsəd`, `unpaired ənpɛd` all survived,
+45 of them. en.jsonc:31 already carries the second rule for exactly this and names `featured fiːt͡ʃəd`;
+this reimplemented only the first. ⚠ AND THE SECOND RULE LOOKS AT THE TAIL ONLY, because an ONSET /ɹ/
+shields a non-rhotic coda: a whole-string test keeps `particolored pɑɹtɪkʌləd`.
+
+⚠ **AND THE SPELLING EXEMPTION WAS THE THING I HAD ARGUED AGAINST ONE RUN EARLIER.** Run 20 says the
+discriminator is the word, not the shape — and then used `iers?$`. 8 of the 12 rows it exempted have a
+RHOTIC dictionary reading, i.e. they are RP rows readmitted by hand: `pliers` against our
+`P L AY1 ER0 Z`, and `messier`, where Moby has the ASTRONOMER and our headword is the comparative of
+`messy` — the common-word/proper-noun collision #1352 exists to prevent. `tourniquet` too: ours is
+`tʰˈɝnɪkɪt`, rhotic, so Moby's `tʊənɪkeɪ` is the RP CURE diphthong, not a silent-⟨r⟩ loan.
+
+The builder already loads `g2p-dict.tsv`, so the real discriminator was available all along: **drop the
+row iff OUR reading carries a rhotic and the referee's does not.** Exact wherever the dictionary has the
+word; the `-ier` ending survives only as a proxy for the OOV corpus, where there is no second opinion.
+⚠ `-eur`/`-oir` ARE GONE: the ⟨r⟩ of `chauffeur`, `connoisseur`, `liqueur`, `memoir`, `choir` is
+PRONOUNCED in GenAm and Moby writes it, so those arms fired on nothing and would have retained RP if
+they ever had.
+
+    dropped as non-rhotic   242 → 318
+    en.moby-lexicon.tsv     35,185 → 35,049
+    en.moby-oov.tsv         39,675 → 39,485
+
+                       folded             +intentional
+    primary wikipron   62.0% (unchanged)  67.4%
+    Moby lexicon       75.3% → 75.6%      82.0% → 82.4%
+    Moby OOV           37.9% → 38.1%      45.2% → 45.4%
+
+Three more defective rows, and the reason none of the rhotic rules reach them is worth recording: their
+⟨r⟩ is INTERVOCALIC, which RP pronounces, so a reading with no ⟨r⟩ at all is corruption rather than a
+dialect difference — `monosaccharide` (body is *monoscope*), `missouri` mɪzʊi, `zippered` zɪpi. The list
+is 33. And the exclusion is now pinned in `test/en-moby-referee.test.ts`, which that file's own header
+asks for: the fold/no-fold line lives in the test, not in the generator's comments.
+
 ### And the defective list was 25, not the 29 the last PR claimed
 
 Four rows were identified in that session (`anderson`→Sulam, `millimeter` truncated, `oder`→Odessa,

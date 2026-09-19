@@ -170,6 +170,12 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     // detector finds corruption the rhotic rules were not looking for.
     ["anderson", "body is 'Sulam'"], ["oder", "body is 'Odessa'"], ["piker", "body is 'pikestaff'"],
     ["millimeter", "truncated — 'mɪləmoʊ'"], ["flayer", "nonsense — 'ɛfwʌn', i.e. 'F one'"],
+    // ⚠ THREE MORE THAT NO RHOTIC RULE REACHES, and the reason is instructive: their ⟨r⟩ is
+    // INTERVOCALIC, which RP pronounces, so a reading carrying no ⟨r⟩ at all is corruption rather than
+    // a dialect difference. The non-rhotic rules look at codas and word-final position and cannot see
+    // them; they were found by reading what the sweep left behind.
+    ["monosaccharide", "body is 'monoscope'"], ["missouri", "truncated — 'mɪzʊi'"],
+    ["zippered", "truncated — 'zɪpi'"],
 ]);
 
 /**

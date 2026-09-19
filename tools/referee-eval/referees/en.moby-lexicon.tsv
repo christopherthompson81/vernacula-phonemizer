@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary carries (35098 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary carries (35049 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -1355,7 +1355,6 @@ angelique	ænd͡ʒəlik
 angell	eɪnd͡ʒəl
 angelo	ænd͡ʒəloʊ
 anger	æŋɡɚ
-angers	ɑnʒeɪ
 angevine	ænd͡ʒəvɪn
 angie	ænd͡ʒi
 angina	ænd͡ʒaɪnə
@@ -2934,7 +2933,6 @@ batt	bæt
 battalion	bətæljən
 batten	bætən
 batter	bætɚ
-battered	bætəd
 batteries	bætɚiz
 battersea	bætɚsi
 battery	bætɚi
@@ -4780,7 +4778,6 @@ bust	bəst
 bustamante	bustɑmɑntɛ
 bustard	bʌstɚd
 buster	bʌstɚ
-bustier	bʌstɪeɪ
 bustle	bʌsəl
 busty	bʌsti
 busy	bɪzi
@@ -5696,7 +5693,6 @@ challis	ʃæli	t͡ʃælɪs
 chalmers	t͡ʃɑmɚz
 cham	kæm
 chamber	t͡ʃeɪmbɚ
-chambered	tʃeɪmbəd
 chamberlain	t͡ʃeɪmbɚlɪn
 chambers	t͡ʃeɪmbɚz
 chamblee	t͡ʃæmbli
@@ -5916,7 +5912,6 @@ cheverly	ʃɛvɚli
 cheves	t͡ʃɪvɪs
 cheviot	t͡ʃɛviət
 chevrette	ʃəvɹɛt
-chevrier	ʃɛvɹieɪ
 chevron	ʃɛvɹən
 chevy	t͡ʃɛvi
 chew	t͡ʃu
@@ -6664,7 +6659,6 @@ colossally	kəlɑsəlli
 colosseum	kɑləsiəm
 colossus	kəlɑsəs
 colour	kʌlɚ
-coloured	kʌləd
 colouring	kʌlɚɪŋ
 colt	koʊlt
 colter	koʊltɚ
@@ -7431,7 +7425,6 @@ cordelia	kɔɹdiljə
 cordell	kɔɹdɛl
 cordial	kɔɹd͡ʒəl
 cordially	kɔɹd͡ʒəlli
-cordier	kɔɹdjeɪ
 cording	kɔɹdɪŋ
 cordis	kɔɹdɪs
 cordless	kɔɹdlɪs
@@ -7674,7 +7667,6 @@ cousin	kʌzən	kuzæn
 cousteau	kustoʊ
 cousy	kuzi
 couture	kutʊɹ
-couturier	kutʊɹieɪ
 covariance	koʊvɛɹiəns
 covarrubias	koʊvɚubiəs
 cove	koʊv
@@ -10322,7 +10314,6 @@ dutiful	dutɪfəl
 dutifully	dutɪfəlli
 duty	duti
 duval	duvæl
-duvalier	duvɑljeɪ
 dux	dəks
 dvorak	dvɑɹʒæk
 dwarf	dwɔɹf
@@ -13002,8 +12993,6 @@ foundry	faʊndɹi
 fountain	faʊntən
 four	fɔɹ
 fourfold	fɔɹfoʊld
-fourier	fʊɹieɪ
-fournier	fʊɹnieɪ
 foursome	fɔɹsəm
 foursquare	fɔɹskwɛɹ
 fourteen	fɔɹtin
@@ -13601,7 +13590,6 @@ gaullist	ɡoʊlɪst
 gaunt	ɡɔnt
 gauntlet	ɡɔntlɪt
 gauss	ɡaʊs
-gautier	ɡoʊtjeɪ
 gauze	ɡɔz
 gave	ɡeɪv
 gavel	ɡævəl
@@ -18658,7 +18646,6 @@ laevo	livoʊ
 lafayette	læfiɛt
 lafitte	lɑfit
 lafontaine	lɑfɑnteɪn
-lafreniere	lɑfɹɛnjeɪ
 lag	læɡ
 lagan	læɡən
 lager	lɑɡɚ
@@ -20979,7 +20966,6 @@ messenger	mɛsɪnd͡ʒɚ
 messerschmitt	mɛsɚʃmɪt
 messiah	mɪsaɪə
 messianic	mɛsɪænɪk
-messier	mɛsieɪ
 messieurs	mɛsɚz	mɛsjɚɹ
 messina	mɛsinə
 messrs	mɛsɚz
@@ -21032,7 +21018,6 @@ methyl	mɛθɪl
 methylene	mɛθəlin
 meticulous	mətɪkjələs
 meticulously	mətɪkjələsli
-metier	meɪtjeɪ
 metis	meɪtis	mitɪs
 metre	mitɚ
 metric	mɛtɹɪk
@@ -21401,7 +21386,6 @@ missis	mɪsɪz
 mississippi	mɪsɪsɪpi
 mississippian	mɪsɪsɪpiən
 missive	mɪsɪv
-missouri	mɪzʊi
 misspeak	mɪsspik
 misspell	mɪsspɛl
 misspelling	mɪsspɛlɪŋ
@@ -21615,7 +21599,6 @@ monopolist	mənɑpəlɪst
 monopolize	mənɑpəlaɪz
 monopoly	mənɑpəli
 monorail	mɑnɚeɪl
-monosaccharide	mɑnəskoʊp
 monotheism	mɑnəθiɪzəm
 monotone	mɑnətoʊn
 monotonous	mənɑtənəs
@@ -22147,7 +22130,6 @@ naturalistic	nætʃɚəlɪstɪk
 naturalize	næt͡ʃɚəlaɪz
 naturally	nætʃɚəli
 nature	neɪt͡ʃɚ
-natured	neɪtʃəd
 naught	nɑt
 naughty	nɔti
 naumann	naʊmən
@@ -23771,7 +23753,6 @@ parliamentary	pɑɹləmɛntɚi
 parlor	pɑɹlɚ
 parlour	pɑɹlɚ
 parma	pɑɹmə
-parmentier	pɑɹmɛntjeɪ
 parmesan	pɑɹmɪzæn
 parnell	pɑɹnəl
 parochial	pɚoʊkiəl
@@ -24791,7 +24772,6 @@ plexus	plɛksəs
 pliable	plaɪəbəl
 pliant	plaɪənt
 plier	plaɪɚ
-pliers	plaɪəz
 plies	plieɪz
 plight	plaɪt
 plinius	plɪniəs
@@ -25159,7 +25139,6 @@ pottle	pɑtəl
 potty	pɑti
 potvin	pɑtvæn
 pouch	paʊt͡ʃ
-poudrier	pudɹieɪ
 poughkeepsie	pəkɪpsi
 poulin	pulɪn
 poultice	poʊltɪs
@@ -26348,7 +26327,6 @@ reaction	ɹiækʃən
 reactionary	ɹiækʃənɚi
 reactivate	ɹiæktəveɪt
 reactive	ɹiæktɪv
-reactor	ɹiækt
 read	ɹid
 readability	ɹidəbɪlɪti
 readable	ɹidəbəl
@@ -27060,7 +27038,6 @@ retina	ɹɛtənə
 retinol	ɹɛtənoʊl
 retinue	ɹɛtənu
 retire	ɹɪtaɪɚ
-retired	ɹitaɪəd
 retiree	ɹɪtaɪɹi
 retirement	ɹɪtaɪɚmənt
 retiring	ɹɪtaɪɚɪŋ
@@ -27207,7 +27184,6 @@ richard	ɹɪʃæɹd
 richards	ɹɪt͡ʃɚdz
 richardson	ɹɪt͡ʃɚdsən
 richelieu	ɹɪʃəlu
-richer	ɹiʃeɪ
 riches	ɹitʃɪz
 richfield	ɹɪt͡ʃfild
 richie	ɹɪt͡ʃi
@@ -31292,7 +31268,6 @@ tate	teɪt
 tater	teɪtɚ
 tatiana	tɑtjɑnɑ
 tatter	tætɚ
-tattered	tætəd
 tattle	tætəl
 tattler	tætlɚ
 tattoo	tætu
@@ -31497,7 +31472,6 @@ tentative	tɛntətɪv
 tenth	tɛnθ
 tenuous	tɛnjuəs
 tenure	tɛnjɚ
-tenured	tɛnjəd
 tepe	tɛpi
 tepid	tɛpɪd
 tequila	təkilə
@@ -32149,7 +32123,6 @@ tourmaline	tɚməlin
 tournament	tʊɹnəmənt
 tournedos	tʊɹnɪdoʊ
 tourney	tʊɹni
-tourniquet	tʊənɪkeɪ
 tours	tʊɹ
 tout	taʊt
 tovey	toʊvi
@@ -32159,7 +32132,6 @@ towards	təwɔɹdz
 towboat	toʊboʊt
 towel	taʊəl
 tower	toʊɚ
-towered	taʊəd
 towering	taʊɚɪŋ
 towery	taʊɚi
 town	taʊn
@@ -32453,7 +32425,6 @@ tropopause	tɹɑpəpɔz
 trot	tɹɑt
 troth	tɹɔθ
 trotter	tɹɑtɚ
-trottier	tɹɑtjeɪ
 troubadour	tɹubədɔɹ
 trouble	tɹʌbəl
 troubled	tɹʌbəld
@@ -32742,13 +32713,11 @@ unalienable	əneɪliənəbəl
 unallowable	ʌnəlaʊəbəl
 unalloyed	ʌnəlɔɪd
 unalterable	ənɔltɚəbəl
-unaltered	ənɑltəd
 unanimity	junənɪmɪti
 unanimous	junænəməs
 unanimously	junænəməsli
 unannounced	ʌnənaʊnst
 unanswerable	ənænsɚəbəl
-unanswered	ənɑnsəd
 unanticipated	ʌnæntɪsɪpeɪtɪd
 unapproachable	ʌnəpɹoʊt͡ʃəbəl
 unarm	ənɑɹm
@@ -32793,7 +32762,6 @@ unbutton	ənbʌtən
 uncalled	ənkɑld
 uncanny	ənkæni
 unceasing	ənsisɪŋ
-uncensored	ənsɛnsəd
 unceremonious	ʌnsɛɹəmoʊniəs
 uncertain	ənsɚtən
 uncertainty	ənsɚtənti
@@ -32811,7 +32779,6 @@ unclassified	ənklæsəfaɪd
 uncle	ʌŋkəl
 unclean	ənklin
 unclear	ənkliɚ
-uncluttered	ənklʌtəd
 uncoil	ənkɔɪl
 uncommitted	ʌnkəmɪtɪd
 uncommon	ənkɑmən
@@ -32852,16 +32819,13 @@ uncouth	ənkuθ
 uncover	ənkʌvɚ
 uncritical	ənkɹɪtɪkəl
 unctuous	ʌŋkt͡ʃuəs
-uncured	ənkjʊəd
 uncut	ənkʌt
 undamaged	əndæmɪd͡ʒd
 undated	əndeɪtɪd
 undaunted	əndɔntɪd
 undecided	ʌndɪsaɪdɪd
-undeclared	ʌndɪklɛd
 undefeated	ʌndɪfitɪd
 undefined	ʌndɪfaɪnd
-undelivered	ʌndɪlɪvəd
 undemocratic	ʌndɛməkɹætɪk
 undeniable	ʌndɪnaɪəbəl
 under	ʌndɚ
@@ -32951,7 +32915,6 @@ undine	əndin
 undiplomatic	ʌndɪpləmætɪk
 undisciplined	əndɪsɪplɪnd
 undisclosed	ʌndɪskloʊzd
-undiscovered	ʌndɪskʌvəd
 undisguised	ʌndɪsɡaɪzd
 undisputed	ʌndɪspjutɪd
 undistinguished	ʌndɪstɪŋwɪʃt
@@ -32981,7 +32944,6 @@ unemotional	ʌnɪmoʊʃənəl
 unemployable	ʌnɛmplɔɪəbəl
 unemployed	ʌnɛmplɔɪd
 unemployment	ʌnɪmplɔɪmənt
-unencumbered	ʌnɪnkʌmbəd
 unending	ənɛndɪŋ
 unenlightened	ʌnɪnlaɪtənd
 unenthusiastic	ʌnɪnθjuzɪæstɪk
@@ -32994,7 +32956,6 @@ uneven	ənivən
 uneventful	ʌnɪvɛntfəl
 unexciting	ʌnɪksaɪtɪŋ
 unexpected	ʌnɪkspɛktɪd
-unexpired	ʌnɪkspaɪəd
 unexplainable	ʌnɪkspleɪnəbəl
 unexplained	ʌnɪkspleɪnd
 unexploited	ʌnɪksplɔɪtɪd
@@ -33010,9 +32971,7 @@ unfazed	ənfeɪzd
 unfeasible	ənfizɪbəl
 unfeeling	ənfilɪŋ
 unfenced	ənfɛnst
-unfettered	ənfɛtəd
 unfilled	ənfɪld
-unfiltered	ənfɪltəd
 unfinished	ənfɪnɪʃt
 unfit	ənfɪt
 unflagging	ənflæɡɪŋ
@@ -33040,7 +32999,6 @@ ungodly	ənɡɑdli
 ungovernable	ənɡʌvɚnəbəl
 ungrateful	ənɡɹeɪtfəl
 unguarded	ənɡɑɹdɪd
-unhampered	ənhæmpəd
 unhappy	ənhæpi
 unharmed	ənhɑɹmd
 unhealthful	ənhɛlθfʊl
@@ -33049,7 +33007,6 @@ unheard	ənhɚd
 unheeded	ənhidɪd
 unhelpful	ənhɛlpfʊl
 unheralded	ənhɛɹəldɪd
-unhindered	ənhɪndəd
 unhinge	ənhɪnd͡ʒ
 unhitch	ənhɪt͡ʃ
 unholy	ənhoʊli
@@ -33076,11 +33033,9 @@ uninhabitable	ʌnɪnhæbɪtəbəl
 uninhabited	ʌnɪnhæbɪtɪd
 uninhibited	ʌnɪnhɪbɪtɪd
 uninitiated	ʌnɪnɪʃɪeɪtɪd
-uninjured	ənɪnd͡ʒəd
 uninspired	ʌnɪnspaɪɚd
 uninspiring	ʌnɪnspaɪɚɪŋ
 uninsurable	ʌnɪnʃʊɚəbəl
-uninsured	ʌnɪnʃʊəd
 unintelligible	ʌnɪntɛlɪd͡ʒəbəl
 unintended	ʌnɪntɛndɪd
 unintentional	ʌnɪntɛnʃənəl
@@ -33179,7 +33134,6 @@ unpopular	ʌnpɑpjəlæɹ
 unpopularity	ʌnpɑpjəlæɹɪti
 unprecedented	ənpɹɛsɪdɛntɪd
 unpredictable	ʌnpɹidɪktəbəl
-unprepared	ʌnpɹipɛd
 unpretentious	ʌnpɹɪtɛnʃəs
 unprincipled	ənpɹinsɪpəld
 unprintable	ənpɹintəbəl
@@ -33213,7 +33167,6 @@ unreconstructed	ʌnɹikənstɹʌktɪd
 unrecorded	ʌnɹɪkɔɹdɪd
 unredeemed	ʌnɹidimd
 unrefined	ʌnɹɪfaɪnd
-unregistered	ənɹɛd͡ʒɪstəd
 unregulated	ənɹɛɡjʊleɪtɪd
 unrehearsed	ʌnɹihɚst
 unrelated	ʌnɹileɪtɪd
@@ -33295,7 +33248,6 @@ unsteady	ənstɛdi
 unstinting	ənstɪntɪŋ
 unstoppable	ənstɑpəbəl
 unstressed	ənstɹɛst
-unstructured	ənstɹʌktʃəd
 unsubstantiated	ʌnsəbstænʃɪeɪtɪd
 unsuccessful	ʌnsəksɛsfəl
 unsuccessfully	ʌnsəksɛsfəlli
@@ -35068,7 +35020,6 @@ zion	zaɪən
 zionism	zaɪənɪzəm
 zip	zɪp
 zipper	zɪpɚ
-zippered	zɪpi
 zippy	zɪpi
 zircon	zɚkɑn
 zirconium	zɚkoʊniəm

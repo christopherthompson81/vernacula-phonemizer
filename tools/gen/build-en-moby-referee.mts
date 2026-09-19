@@ -184,8 +184,15 @@ function normaliseSuffix(word: string, a: string[]): string[] {
 }
 
 const dict = new Set<string>();
-for (const l of readFileSync(join(REPO, "data/languages/english/g2p-dict.tsv"), "utf8").split("\n"))
-    if (l.includes("\t") && !l.startsWith("#")) dict.add(l.split("\t")[0]!.toLowerCase());
+/** Our own ARPABET for the word, where we have one — the discriminator the non-rhotic rule needs. */
+const ourArpabet = new Map<string, string>();
+for (const l of readFileSync(join(REPO, "data/languages/english/g2p-dict.tsv"), "utf8").split("\n")) {
+    if (!l.includes("\t") || l.startsWith("#")) continue;
+    const [w, a] = l.split("\t");
+    const k = w!.toLowerCase();
+    dict.add(k);
+    if (!ourArpabet.has(k)) ourArpabet.set(k, a!);
+}
 
 /**
  * ⚠ EVERY IMPORTED WORD IS DROPPED FROM BOTH CORPORA, and this is the line that keeps the referee a
@@ -238,11 +245,38 @@ let rows = 0, declined = 0, unmapped = 0, defective = 0;
  * plural are the ending that is reliably French (`dossier`, `bustier`, `chansonnier`, `menuisier`,
  * `cuvier`, `tablier`, 30 of them); the handful that do not fit it are named individually.
  */
-const NON_RHOTIC = /[ɹɚɝɻr]/u;
-const POSTVOCALIC_R = /[aeiouy]r+(?![aeiouy])/u;
-const SILENT_R_IN_GENAM = /(?:iers?|oir|eur)$/u;
-/** Silent-⟨r⟩ words the ending rule above does not reach, each a loan whose ⟨r⟩ is silent in GenAm. */
-const SILENT_R_WORDS = new Set(["boucher", "tourniquet", "angers", "chorzow", "beziers", "ateliers"]);
+const RHOTIC = /[ɹɚɝɻr]/u;
+/** Our reading carries a rhotic. `R` and `ER` are the only ARPABET symbols that do. */
+const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
+/**
+ * BOTH of the wikipron config's non-rhotic rules, because the first alone leaves the largest class.
+ *
+ * ⚠ THE SECOND RULE IS NOT OPTIONAL, AND ITS ABSENCE WAS THE BUG. `[aeiouy]r(?![aeiouy])` rejects every
+ * `-ered`/`-ored`/`-ured`/`-ared` word, because the ⟨e⟩ after the ⟨r⟩ is a vowel LETTER even though it
+ * is silent — so `battered bætəd`, `coloured kʌləd`, `unanswered ənɑnsəd`, `unpaired ənpɛd` all
+ * survived, 45 of them, which is the biggest RP class in the corpus. en.jsonc:31 already carries the
+ * second rule for exactly this, naming `featured fiːt͡ʃəd`.
+ * ⚠ AND THE SECOND RULE LOOKS ONLY AT THE TAIL, because an ONSET /ɹ/ shields a non-rhotic coda: a
+ * whole-string test keeps `particolored pɑɹtɪkʌləd` and `pilastered pɪləstɹeɪd`.
+ */
+const SPELLED_R = /[aeiouy]r(?![aeiouy])/u;
+const FINAL_R = /[aeiouy]r(?:e|ed)?$/u;
+const refereeIsNonRhotic = (w: string, reads: string[]): boolean =>
+    (SPELLED_R.test(w) && reads.every((r) => !RHOTIC.test(r)))
+    || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))));
+/**
+ * ⚠ A SPELLING TEST CANNOT TELL RP FROM A LOANWORD, WHICH THE FIRST DRAFT ASSUMED IT COULD. `-ier`
+ * looked reliably French and admits `pliers` (ours `P L AY1 ER0 Z`, rhotic) and `messier` — where Moby
+ * has the ASTRONOMER and our headword is the comparative of *messy*. 8 of the 12 rows it exempted have
+ * a rhotic dictionary reading, i.e. they are RP rows readmitted by hand.
+ * ⚠ THE REAL DISCRIMINATOR IS OUR OWN READING: on a loanword we are r-less TOO and the row passes; on
+ * an RP row we have the rhotic and it never can. Where the dictionary has the word, that is exact.
+ * ⚠ WHERE IT DOES NOT — the OOV corpus — there is no second opinion, so the `-ier` ending is used as a
+ * proxy and nothing else. `-eur`/`-oir` were in the first draft and are NOT here: the ⟨r⟩ of
+ * `chauffeur`, `connoisseur`, `liqueur`, `memoir`, `choir` is PRONOUNCED in GenAm, and Moby writes it —
+ * an exemption that fires on zero rows today and would retain RP if it ever fired.
+ */
+const FRENCH_IER = /iers?$/u;
 
 const readings = new Map<string, { lower: string[]; upper: string[] }>();
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
@@ -271,8 +305,11 @@ let multiReading = 0, nonRhotic = 0;
 for (const [w, { lower, upper }] of readings) {
     const all = [...lower, ...upper.filter((r) => !lower.includes(r))];
     // ⚠ EVERY reading must lack the rhotic — a row that carries a rhotic variant can still arbitrate.
-    if (POSTVOCALIC_R.test(w) && all.every((r) => !NON_RHOTIC.test(r))
-        && !SILENT_R_IN_GENAM.test(w) && !SILENT_R_WORDS.has(w)) { nonRhotic++; continue; }
+    if (refereeIsNonRhotic(w, all)) {
+        const ours = ourArpabet.get(w);
+        const drop = ours !== undefined ? WE_ARE_RHOTIC.test(ours) : !FRENCH_IER.test(w);
+        if (drop) { nonRhotic++; continue; }
+    }
     // ⚠ COUNTS ROWS THAT ACTUALLY CARRY MORE THAN ONE READING, not headwords that merely appear in both
     // cases: an earlier version counted the latter and reported 1,759 where the real figure is ~230.
     if (all.length > 1) multiReading++;

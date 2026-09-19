@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39515 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39485 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -7972,7 +7972,6 @@ chorological	kɔɹəlɑd͡ʒɪkəl
 chorology	kɚɑləd͡ʒi
 chorten	t͡ʃɔɹtɛn
 chorwon	t͡ʃɚwʊn
-chorzow	hɔʒʊf
 chosunilbo	t͡ʃoʊsʊnilboʊ
 chotiner	t͡ʃɑtɪnɚ
 choukoutien	d͡ʒoʊkoʊtjɛn
@@ -27856,7 +27855,6 @@ partialise	pɑɹʃəlaɪz
 participance	pɑɹtɪsəpəns
 participantly	pɑɹtɪsəpəntli
 participiality	pɑɹtɪsɪpiælɪti
-particolored	pɑɹtɪkʌləd
 particularise	pɚtɪkjəlɚaɪz
 particularism	pətɪkjʊlɚizəm
 particularize	pɚtɪkjəlɚaɪz
@@ -28940,7 +28938,6 @@ pikelet	paɪklɪt
 pikesville	paɪksvɪl
 pikeville	paɪkvɪl
 pilaff	pɪlæf
-pilastered	pɪləstɹeɪd
 pilau	pɪlɑf
 pileate	paɪliɪt
 pileated	paɪlieɪtɪd
@@ -30906,7 +30903,6 @@ rapparee	ɹæpɚi
 rappist	ɹæpɪst
 rappite	ɹæpaɪt
 rapporteur	ɹæpɔɹtɚɹ
-raptured	ɹæptʃəd
 raptus	ɹæptəs
 rarebit	ɹɛɹbɪt	ɹæɚbət
 rarefactive	ɹɛɹəfæktɪv
@@ -31489,7 +31485,6 @@ richlands	ɹɪt͡ʃləndz
 richweed	ɹɪt͡ʃwid
 ricinolein	ɹɪsənoʊliɪn
 rickle	ɹɪkəl
-rickover	ɹɪkʃɔ
 rickshaw	ɹikʃɑ
 ricrac	ɹɪkɹæk
 riddling	ɹidlɪŋ
@@ -34385,7 +34380,6 @@ stonehatch	stoʊnhætʃ
 stonewashed	stoʊnwɑʃd
 stoneweed	stoʊnwid
 stonker	stɑŋkɚ
-stonkered	stɑŋkəd
 stook	stuk
 stoolball	stulbɑl
 stoper	stoʊpɚ
@@ -37298,7 +37292,6 @@ unbonnet	ənbɑnɪt
 unbonneted	ənbɑnɪtɪd
 unbookish	ənbʊkɪʃ
 unboot	ənbut
-unbothered	ənbɑðəd
 unbreachable	ənbɹitʃəbəl
 unbreathable	ənbɹiðəbəl
 unbreathed	ənbɹiðd
@@ -37314,7 +37307,6 @@ uncanonized	ənkænənaɪzd
 uncapable	ənkeɪpəbəl
 uncaught	ənkɑt
 uncaused	ənkɔzd
-uncensured	ənsɛnsjəd
 unchallengeable	əntʃælɪnd͡ʒəbəl
 unchangeable	əntʃeɪnd͡ʒəbəl
 unchaperoned	ənʃæpɚoʊnd
@@ -37334,7 +37326,6 @@ unclassically	ənklæsɪkəli
 unclinch	ənklɪnt͡ʃ
 uncloister	ənklɔɪstɚ
 unclouded	ənklaʊdɪd
-uncoloured	ənkʌləd
 uncomely	ənkʌmli
 uncompanionable	ʌnkəmpænjənəbəl
 uncomplimentary	ʌnkɑmplɪmɛntɚi
@@ -37343,11 +37334,9 @@ uncomprehending	ʌnkɑmpɹihɛndɪŋ
 unconcluded	ʌnkənkludɪd
 unconjecturable	ʌnkənd͡ʒɛktʃɚəbəl
 unconquerable	ənkɑŋkɚəbəl
-unconquered	ənkɑŋkəd
 unconscionableness	ənkɑnʃənəbəlnɪs
 unconsecrated	ənkɑnsɪkɹeɪtɪd
 unconsenting	ʌnkənsɛntɪŋ
-unconsidered	ʌnkənsɪdəd
 unconstraint	ʌnkənstɹeɪnt
 unconstricted	ʌnkənstɹiktɪd
 unconsumed	ʌnkənsjumd
@@ -37365,7 +37354,6 @@ unctuously	ʌŋkt͡ʃuəsli
 unctuousness	ʌŋkt͡ʃuəsnɪs
 unculled	ənkʌld
 unculture	ənkʌlt͡ʃɚ
-uncultured	ənkʌltʃəd
 uncurb	ənkɚb
 uncurtained	ənkɚtənd
 uncustomed	ənkʌstəmd
@@ -37436,7 +37424,6 @@ undesigning	ʌndɪzaɪnɪŋ
 undesigningly	ʌndɪzaɪnɪŋli
 undesigningness	ʌndɪzaɪnɪŋnɪs
 undesirableness	ʌndɪzaɪɚəbəlnɪs
-undesired	ʌndɪzaɪəd
 undesirous	ʌndɪzaɪɚəs
 undigestible	ʌndɪd͡ʒɛstəbəl
 undimmed	əndɪmd
@@ -37491,7 +37478,6 @@ unfavourite	ənfeɪvɚit
 unfeather	ənfɛðɚ
 unfeed	ənfid
 unfinishedness	ənfɪnɪʃtnɪs
-unflavoured	ənfleɪvəd
 unfleshly	ənflɛʃli
 unfordable	ənfɔɹdəbəl
 unformulated	ənfɔɹmjʊleɪtɪd
@@ -37533,7 +37519,6 @@ unhelm	ənhɛlm
 unheroic	ʌnhɚoʊɪk
 unhistoric	ʌnhɪstɑɹik
 unhistorical	ʌnhɪstɑɹikəl
-unhonoured	ənɑnəd
 unhouse	ənhaʊz
 unhouseled	ənhaʊzəld
 uniat	juniæt
@@ -37593,7 +37578,6 @@ unking	ənkiŋ
 unkingly	ənkɪŋli
 unknightly	ənaɪtli
 unlabelled	ənleɪbəld
-unlaboured	ənleɪbəd
 unlearned	ənlɚnɪd
 unliberated	ənlɪbɚeɪtɪd
 unlikeable	ənlaɪkəbəl
@@ -37603,7 +37587,6 @@ unmalleable	ənmæliəbəl
 unmarketable	ənmɚkɪtəbəl
 unmarriageable	ənmæɹid͡ʒəbəl
 unmatchable	ənmætʃəbəl
-unmatured	ʌnmətjʊəd
 unmeaningful	ənminɪŋfəl
 unmeaningfulness	ənminɪŋfəlnɪs
 unmeant	ənmɛnt
@@ -37632,11 +37615,9 @@ unmown	ənmoʊn
 unmuffle	ənmʌfəl
 unnail	əneɪl
 unnational	ənæʃənəl
-unobscured	ʌnəbskjʊəd
 unordinary	ənɔɹdɪnɚi
 unoriginal	ʌnɚid͡ʒɪnəl
 unornamental	ʌnɔɹnəmɛntəl
-unpaired	ənpɛd
 unparliamentary	ʌnpɑɹləmɛntɚi
 unpasteurized	ənpɑstjɚaɪzd
 unpatented	ənpeɪtəntɪd
@@ -37650,7 +37631,6 @@ unpile	ənpaɪl
 unpitied	ənpɪtɪd
 unplait	ənpleɪt
 unplanted	ənplɑntɪd
-unplastered	ənplɑstəd
 unplausible	ənplɑzɪbəl
 unpledged	ənplɛd͡ʒd
 unploughed	ənplaʊd
@@ -37690,7 +37670,6 @@ unregenerate	ʌnɹɪd͡ʒɛnɚɪt
 unregenerated	ʌnɹɪd͡ʒɛnɚeɪtɪd
 unregretted	ʌnɹiɡɹɛtɪd
 unreligiously	ʌnɹɪlɪd͡ʒəsli
-unremembered	ʌnɹimɛmbəd
 unremorseful	ʌnɹimɔɹsfʊl
 unremovable	ʌnɹimuvəbəl
 unremunerative	ʌnɹimjunɚətɪv
@@ -37734,9 +37713,7 @@ unseparated	ənsɛpɚeɪtɪd
 unsewn	ənsoʊn
 unshapely	ənʃeɪpli
 unshapen	ənʃeɪpən
-unshared	ənʃɛd
 unshell	ənʃɛl
-unsheltered	ənʃɛltəd
 unshockable	ənʃɑkəbəl
 unshoe	ənʃu
 unshrinkable	ənʃɹiŋkəbəl
@@ -37750,7 +37727,6 @@ unsonsy	ənsɑnsi
 unsordid	ənsɔɹdɪd
 unsought	ənsɑt
 unsounded	ənsaʊndɪd
-unsoured	ənsaʊəd
 unspell	ənspɛl
 unsphere	ənsfiɹ
 unspilt	ənspɪlt
@@ -37779,7 +37755,6 @@ unsubstantial	ʌnsəbstænʃəl
 unsubstantiality	ʌnsəbstænʃiælɪti
 unsuccess	ʌnsəksɛs
 unsuccessfulness	ʌnsəksɛsfəlnɪs
-unsugared	ənʃʊɡəd
 unsuggestive	ʌnsədzɛstɪv
 unsummoned	ənsʌmənd
 unsunned	ənsʌnd
@@ -37809,7 +37784,6 @@ untune	əntun
 untuned	əntjund
 untuneful	əntjunfʊl
 unutterable	ənʌtɚəbəl
-unuttered	ənʌtəd
 unvalued	ənvæljud
 unvesiculated	ʌnvɪsɪkjəleɪtɪd
 unvocal	ənvoʊkəl
@@ -37821,7 +37795,6 @@ unwarped	ənwɔɹpt
 unwarrantable	ənwɑɹəntəbəl
 unwatched	ənwɑtʃt
 unwatchful	ənwɑtʃfʊl
-unwatered	ənwɔɹtəd
 unwearied	ənwiɹid
 unweary	ənwiɚi
 unwearying	ənwiɚiɪŋ
@@ -37834,7 +37807,6 @@ unwilled	ənwɪld
 unwiseness	ənwaɪznɪs
 unwish	ənwɪʃ
 unwit	ənwɪt
-unwithered	ənwɪðəd
 unwitty	ənwɪti
 unwonted	ənwoʊntɪd
 unwooed	ənwud
@@ -38087,7 +38059,6 @@ varia	vɛɹiə
 variative	vɛɹieɪtɪv
 varicellation	væɹɪsəleɪʃən
 varicelloid	væɹɪsɛlɔɪd
-varicoloured	vɛɹikʌləd
 varicotomy	væɹəkɑtəmi
 varidase	vɛɹɪdeɪs
 variegation	vɛɹiəɡeɪʃən
@@ -38277,7 +38248,6 @@ verrucous	vɛɹəkəs
 versatileness	vɚsətɪlnɪs
 verset	vɚsɪt
 versicolor	vɚsɪkʌlɚ
-versicolored	vɚsɪkʌləd
 versicular	vɚsɪkjəlɚ
 versie	vɚsi
 versiera	vɛɹsjɛɹə
