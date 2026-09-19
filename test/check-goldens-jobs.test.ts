@@ -27,8 +27,14 @@ function run(args: string[]): { out: string; status: number } {
     try {
         return { out: execFileSync(TSX, [TOOL, ...args], { encoding: "utf8", cwd: ROOT }), status: 0 };
     } catch (e) {
-        const err = e as { status?: number; stdout?: string; stderr?: string };
-        return { out: `${err.stdout ?? ""}${err.stderr ?? ""}`, status: err.status ?? -1 };
+        // ⚠ THE SIGNAL MUST SURVIVE, because without it a child KILLED mid-stream is indistinguishable
+        // from one that ran to completion and disagreed: both arrive as partial stdout with no error
+        // line, and the byte comparison below then reports "the pooled report differs" for what is
+        // actually a dead process. This test has failed that way intermittently and the capture threw
+        // the evidence away — `status` was coerced to -1 and `signal` dropped on the floor.
+        const err = e as { status?: number; signal?: string; stdout?: string; stderr?: string };
+        const died = err.signal ? ` [killed by ${err.signal}]` : "";
+        return { out: `${err.stdout ?? ""}${err.stderr ?? ""}${died}`, status: err.status ?? -1 };
     }
 }
 
@@ -41,6 +47,10 @@ describe("check-goldens --jobs", () => {
         const serial = run(["--no-ort", "--show", "200", ...LANGS]);
         const pooled = run(["--jobs", "3", "--no-ort", "--show", "200", ...LANGS]);
         expect(serial.status).toBe(0);
+        // ⚠ AND THE POOLED ONE TOO, asserted BEFORE the byte comparison so a non-zero exit is reported
+        // as itself rather than as a content difference. The omission is why an intermittent failure
+        // here read as "the pool disagrees" for three separate diagnoses, none of them right.
+        expect(pooled.status).toBe(0);
         expect(pooled.out).toBe(serial.out);
         // ⚠ AND IT IS NOT AGREEING BY BEING EMPTY. If `--no-ort` ever stopped producing mismatches this
         // test would pass while comparing two one-line reports, so the detail itself is asserted.

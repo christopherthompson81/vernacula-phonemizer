@@ -7,7 +7,12 @@ tagger (the bn/nb structuralTagger pattern: hard-EM many-to-{0,1,2} alignment �
 per-position tag) on 90% of g2p-dict.tsv (117k words, public-domain CMUdict) and reports held-out WORD accuracy
 (exact ARPABET incl. stress, and stress-independent phones). Model + aligner: tools/bilstm_training.
 
-    .venv/bin/python -u tools/english/en_g2p_bilstm.py
+    EN_PRODUCTION=1 <a torch+onnx venv>/bin/python -u tools/english/en_g2p_bilstm.py
+
+⚠ THERE IS NO `.venv` IN THIS CHECKOUT and this line used to name one. Any venv with torch (CUDA),
+onnx, onnxruntime and onnxscript will do; the one the shipped weights came from is recorded in
+data/languages/english/en-g2p-tagger.PROVENANCE.md. Without EN_PRODUCTION the script only reports the
+held-out split and writes nothing.
 """
 import os, sys, time, random, hashlib, json
 import torch
@@ -72,6 +77,12 @@ def predict(model, chars, itag, char_tags, word):
 
 def main():
     random.seed(0); torch.manual_seed(0)
+    # ⚠ SEEDS ALONE DO NOT MAKE A cuDNN LSTM REPRODUCIBLE — its backward pass uses atomics, so two runs
+    # on the same GPU can differ and two GPUs almost certainly will. Requested here so a re-run has a
+    # chance of matching; the environment that produced the shipped weights is recorded in
+    # en-g2p-tagger.PROVENANCE.md, because a flag cannot promise what the library does not.
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
     t0 = time.time()
     print(f"device: {DEV}")
     rows = load()
@@ -132,10 +143,17 @@ def main():
                           opset_version=17, dynamo=False)
         meta = {"src": chars, "tags": {str(i): itag[i] for i in range(len(tags))},
                 "charTags": {str(ci): sorted(ti) for ci, ti in char_tags.items()}}
-        json.dump(meta, open(os.path.join(SRC, "en-g2p-tagger.meta.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        # ⚠ THE META IS WRITTEN AFTER THE QUANTISE, AND THE ORDER IS THE WHOLE POINT. It used to be
+        # written first, so a quantise that raised left a NEW vocab beside the OLD weights — the exact
+        # silently-mismatched pair this file's header says was fixed, still reachable by the one path
+        # that matters. Both now land only once the graph exists, and the meta goes to a temp file
+        # promoted by os.replace, so an interrupted write cannot leave a truncated vocab either.
         from onnxruntime.quantization import quantize_dynamic, QuantType
         int8 = os.path.join(SRC, "en-g2p-tagger.int8.onnx")
         quantize_dynamic(fp32, int8, weight_type=QuantType.QInt8)
+        tmp = os.path.join(SRC, "en-g2p-tagger.meta.json.tmp")
+        json.dump(meta, open(tmp, "w", encoding="utf-8"), ensure_ascii=False)
+        os.replace(tmp, os.path.join(SRC, "en-g2p-tagger.meta.json"))
         os.remove(fp32)  # keep only the shipped int8 graph
         # sanity: the shipped graph must load and answer, or the export is not done
         import onnxruntime as ort

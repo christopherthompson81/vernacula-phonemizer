@@ -2055,3 +2055,229 @@ exception — and it should be known before it lands rather than discovered by a
 
     compound 4,036 → 4,008;  seam table unchanged at 49 rows
     goldens 0 stale;  C# parity 189 byte-identical;  6,076 tests
+
+## Run 40 — 2026-09-19 — the BiLSTM retrain, and the measurement that nearly misled me
+
+The dictionary gained 17,825 rows (117,483 → 135,308) since #1341 retrained the OOV models, almost all
+of it the Moby imports. Retrained on the full 135,305-row dict; held-out report first, then the
+production train and int8 export.
+
+⚠ THE HEADLINE IS FLAT, AND ONLY THE SPLIT MAKES THAT VISIBLE. The raw held-out reads 70.7%
+stress-independent against a 71.5% baseline, which looks like a small regression and is not one: the
+held-out is 10% of a dictionary that GAINED the hard Moby tail, so the population changed. The md5
+split is deterministic, so the old population survives exactly (n=11,748):
+
+    words the old dictionary also had   71.4%   (baseline 71.5% — flat)
+    words added since, the Moby tail    65.7%
+
+The old shipped model scored 56.3% on the added words, so the gain is ~+9pp and it is entirely on the
+tail. More data did not make the model better at English; it made it cover a vocabulary type it had
+never seen. For an OOV tier that is the right kind of gain, but it should not be sold as a general one.
+
+    wikipron primary (independent)   62.7% → 64.0%   symbol 90.8% → 91.3%
+    Moby — OOV tier                  38.1% → 44.2%   symbol 85.6% → 87.4%
+    Moby — words the dict carries    75.7%, unchanged (the model is not consulted for them)
+
+⚠ AND I TOLD THE USER SOMETHING FALSE ON THE WAY HERE. Before the run I reported "the BiLSTM scores
+37.8% on the Moby OOV referee against the sync path's 38.0% — on an independent OOV corpus it has no
+advantage over its own fallback". `PHON["en"]` resolves to `engine-text-neural`, so BOTH columns were
+the neural path and the tie was tautological. There was no n-gram in that measurement. The conclusion I
+drew from it — that the BiLSTM may not be worth retraining — was unfounded, and the retrain moved the
+independent referee more than any dictionary block in this audit.
+
+⚠ A QUARTER OF THE OOV CORPUS IS EXACTLY ONE SYMBOL OFF, which is why 44.2% understates the model.
+Edit distance from the nearest referee reading: 0 off 37.9%, ≤1 off 63.0%, ≤2 off 81.4% (pre-retrain
+sample). Reading the one-symbol misses, the symbol is almost always an unstressed vowel — `aerometry
+ɛɹɑmətɹi` against `ɛɹɑmɪtɹi`, `acmatic əkmætɪk` against `ækmætɪk` — which is the weak-vowel axis already
+declared intentional on the other two referees. Much of the OOV gap is a referee floor.
+
+⚠ 55 GOLDEN LANGUAGES MOVED, 232 ROWS, AND THE REASON IS WORTH KNOWING: the English neural tagger
+renders EMBEDDED English in every other language, so Cherokee (`Sundance`), Tibetan (`vasanta`) and
+Belarusian (`caro`) all move when it is retrained. Sampled before accepting rather than regenerated on
+faith — majority repairs: `medicines` had been reading as "medi-signs", `Aldwych` as `ˈɔːɫdwɪk`.
+
+⚠ AND ONE OPEN FLAKE, RECORDED HONESTLY BECAUSE I MISDIAGNOSED IT TWICE. `test/check-goldens-jobs.test.ts`
+fails intermittently inside a full suite run and passes in isolation. I called it "contention" twice and
+then "maxBuffer"; both are wrong. Run cleanly, the serial and pooled reports are byte-identical
+(159,335 bytes each), the tool already refuses an incomplete pool (`results.length !== order.length`
+→ exit 2), and the captured failure is a TRUNCATED capture — 349 lines against 644 — with no error line
+at all. It predates this change (it first failed during #1357). Not fixed, not explained, not dismissed.
+
+## Run 41 — 2026-09-19 — independent review of the retrain (#1361), and the two claims that did not survive it
+
+Adversarial re-measurement of Run 40 from a clean worktree (`git worktree add --detach` at
+`788934a8`, because the shared checkout went dirty mid-review with an unrelated `-lly` block). Every
+number below was re-derived, not read off the provenance.
+
+⚠ EVERY REFEREE NUMBER REPRODUCES EXACTLY, INCLUDING THE BEFORE-NUMBERS. Ran
+`MOBY=… npx tsx tools/referee-eval/eval.ts en` twice, the second time with the `origin/main` model
+checked back in over the new one, so the "before" column is a measurement rather than a memory:
+
+    wikipron primary   2531/4037 62.7% → 2584/4037 64.0%   symbol 90.8% → 91.3%
+    Moby OOV           15,056/39,485 38.1% → 17,454/39,485 44.2%   symbol 85.6% → 87.4%
+    Moby in-dict       26,522/35,049 75.7% both eras — unchanged to the row
+
+⚠ THE HELD-OUT SPLIT CLAIM IS SOUND, AND IT IS THE ONE CLAIM THAT MOST DESERVED CHECKING. The split
+is `md5("en:"+w) % 10 == 0` over a word key, so it is content-addressed per word and cannot reshuffle
+when the dictionary grows. Recomputed against `dedf6398`'s dictionary (117,482 loadable rows vs today's
+135,305): held-out 11,748 then, 13,528 now, the old held-out is a strict subset of the new one with
+**zero words lost**, and new-minus-old is exactly 1,780. n=11,748 and n=1,780 are both confirmed. The
+three accuracies recompute off `/tmp/en_bilstm_holdout.tsv` to the decimal: 70.7% raw, 71.4%/66.4% on
+the old population, 65.7%/53.7% on the added tail. Gold drift between the two eras touches **1 row**
+of the 11,748, so "flat against a 71.5% baseline" is comparing the same population against the same
+labels.
+
+⚠ BUT THE "56.3% → 65.7%, ABOUT +9 POINTS" FIGURE DOES NOT REPRODUCE, AND THE GAIN IS SMALLER. Decoded
+the shipped `origin/main` int8 graph directly (onnxruntime + its own meta, masked argmax, the same
+`decode_chunks` rule the trainer uses) over the same 1,780 added words:
+
+    OLD shipped model, 1,780 added words   59.6% stress-indep   45.4% incl. stress
+    NEW held-out model, same words         65.7%                53.7%
+
+So +6.1pp, not +9pp. Via the full serving path (`englishTagger.ts`, i.e. after the digraph guard,
+`enforceSinglePrimary`, `collapseGeminates`, `arpabetToIpa`, compared against the gold rendered through
+the same `arpabetToIpa`) the old model reads 54.9% stressless — still not 56.3%. The direction of the
+claim holds and is the real gain; the magnitude is overstated by about a third and should be corrected
+to +6pp before this is quoted again. Also worth stating plainly in the provenance: 71.4/65.7 belong to
+the **90%-split model**, not to the artifact that ships. The shipped model is trained on the full dict
+and scores 99.1%/98.9% on those same rows because they are its training data — a number that means
+nothing except "the export is not broken".
+
+⚠ "55 GOLDEN LANGUAGES MOVED … AND NONE OF THEM IS ENGLISH-ONLY" IS FALSE AS WRITTEN. `en.tsv`,
+`en-GB.tsv` and `en-IN.tsv` are three of the 55 files and carry 45 of the 232 rows (15 each) — the
+largest block after `chr.tsv` (21). The underlying point survives (the other 187 rows are embedded
+English inside non-Latin hosts, and all 232 changed rows do contain Latin letters in their source), but
+the sentence says the opposite of what the diff shows.
+
+⚠ AND THE SAMPLE IS NOT ALL REPAIRS. Aligned old-vs-new at the IPA-token level with `difflib` over all
+232 rows (170 distinct old→new→context triples) and probed the tagger directly on the suspects. Repairs
+confirmed: `aldwych` ˈɔːɫdwɪk → ˈɔːɫdwɪt͡ʃ, `medecines` …sˌaᶦnz → …sˌɪnz, `resistivity` ɹˌɛz… → ɹˌiːz…,
+`saens` snz (no vowel at all) → sˈiːnz, `tahlequah` təlˈɛkwə → tʰˈɑːɫkwə, `vidhi` vˈiːd̬i → vˈɪd̬i,
+`nasab` nɑːsˈɑːb → nˈæsæb, `biorhythm` baᶦˈɔːɹhɪðəm → bˈaᶦɔːɹhˌɪðəm. The 32-row `rr` block
+(ɹˈɝ → ˌɑːɹˈɑːɹ) is also a repair and a consistency one: the adjacent bare `r` already reads ˈɑːɹ in
+both eras, so spelling `rr` as ar-ar now matches its neighbour. But:
+
+    Tt (Audi TT)   tʰˌiːtʰˈiː  →  t        a bare consonant, no vowel — REGRESSION
+    kW             kʰˈuː       →  kw       same shape — REGRESSION
+    heHe           hˈiːhi      →  hˈiːh    trailing bare h — REGRESSION
+    Rossby         ɹˈɔːsbi     →  ɹˈɔːbi   the /s/ is gone — REGRESSION
+    Dhara          dˈɑːɹə      →  dˈɛɹə    REGRESSION
+    stealthily     stˈɛɫθɪli   →  stˈɛɫθəli   weak-vowel axis, minor
+
+⚠ THE VOWELLESS OUTPUTS LOOK ALARMING AND ARE NOT NEW, WHICH IS WORTH RECORDING BECAUSE I ALMOST
+REPORTED THEM AS A SYSTEMIC REGRESSION. Enumerated every 2- and 3-letter string and a 1-in-7 sample of
+the 4-letter space, counting predictions with no ARPABET vowel:
+
+    len 2   old 48 / 676      new 52 / 676
+    len 3   old 853 / 17,576  new 850 / 17,576
+    len 4   old 3,189/65,283  new 3,209/65,283
+
+The class is flat; `tt` and `kw` fell into it while others fell out. So this is churn on a pre-existing
+defect (a per-letter tagger with no "the word needs a nucleus" constraint), not something the retrain
+introduced. It is still worth its own issue — a vowelless reading is unpronounceable, and declining to
+"" so the n-gram takes the word would be strictly better.
+
+⚠ THE ARTIFACT IS SOUND AND THE META MATCHES THE WEIGHTS. `onnx.checker` passes; the graph answers
+T = 1/4/7/23 with `[1, T, 208]`, so it is not length-specialised; `emb.weight_quantized` is `[28, 64]`
+against a 28-entry `src`; `tags` is contiguous 0…207 with no duplicates; every `charTags` list is
+non-empty, references only in-range tag ids, covers all 26 letter ids, and contains the silent tag. The
+pairing is also proven behaviourally — the old meta over the new graph throws an out-of-range tag id
+(209 tags vs 208 logits), which is the mismatch, and in TS `maskedArgmax` that same index would read
+silently into the next position's row rather than throw.
+⚠ ONE ORDERING HAZARD REMAINS IN THE EXPORTER. `en_g2p_bilstm.py` writes `meta.json` into `data/` and
+THEN calls `quantize_dynamic`. If the quantise raises, the tree is left with a new vocab beside the old
+weights — the exact failure the provenance says was fixed. Writing the meta after the quantise, or to a
+temp path promoted on success, closes it.
+
+⚠ REPRODUCIBILITY IS WEAKER THAN THE PROVENANCE IMPLIES. `random.seed(0)` and `torch.manual_seed(0)`
+are set, but there is no `cudnn.deterministic`, no `use_deterministic_algorithms`, and the model is a
+cuDNN LSTM whose backward uses non-deterministic atomics — so a re-run on the same dictionary and the
+same box may produce a materially different model, and on a different GPU almost certainly will.
+Nothing in the repo pins the training environment: no `requirements.txt`, no recorded torch / CUDA /
+onnxruntime version, and the recipe's `.venv/bin/python` does not exist in this checkout (the run used
+`/mnt/data/Programming/vernacula/.venv-indicconformer-export/bin/python`). The recipe should name the
+interpreter that was actually used and record the three versions, or the provenance table is a number
+nobody can re-derive.
+
+⚠ GATES: ALL THREE GREEN, RUN SERIALLY IN THE ISOLATED WORKTREE.
+
+    npx vitest run                              317 files, 6,076 passed, 5 skipped
+    npx tsx tools/check-goldens.mts --jobs 8    189 languages, 36,495 rows, 0 stale
+    dotnet run --project csharp/tools/parity    189 byte-identical, 0 differ; 5/5 accent variants
+
+`test/check-goldens-jobs.test.ts` PASSED here (all 9), so the flake did not reproduce in one full run.
+
+⚠ ON THAT FLAKE, A STRUCTURAL FINDING RATHER THAN A ROOT CAUSE. I could not reproduce the truncation
+(three slow-pipe runs against the `--no-ort --show 200` path all returned the full 643 lines /
+159,335 bytes), so the mechanism is still open. But the test cannot TELL you which mechanism it was,
+and that is fixable now: `run()` catches, discards `err.signal`, coerces a missing `err.status` to -1,
+and returns `stdout + stderr` — so a child that was KILLED mid-stream (partial stdout, no error line,
+status swallowed) is indistinguishable from a child that ran to completion and disagreed. The suite
+then fails on `expect(pooled.out).toBe(serial.out)` with a truncated string, which is exactly the
+reported signature: 349 lines, no error line, and a diff where the real event was a death. The test
+asserts `serial.status === 0` but never asserts `pooled.status === 0`. Two lines — assert the pooled
+status, and surface `err.signal` in `run()` — and the next occurrence names its own cause instead of
+presenting as a content mismatch. Note also that the report path the test exercises ends in
+`process.exit(0)` after ~640 `console.log` calls (`tools/check-goldens.mts`, the `noOrt || noClear`
+branch); `process.exit` does not flush pending async writes to a pipe, which is the standard way to get
+exactly this symptom. Unproven here, but it is the cheapest thing to remove.
+
+VERDICT: the model change is real and the evidence for it holds — approve after (1) correcting the
++9pp claim to +6pp and saying which model the held-out numbers describe, (2) fixing the "none of them
+is English" sentence, (3) recording the six golden regressions above rather than describing the set as
+"majority repairs" only. The exporter ordering, the vowelless-reading class and the flaky test's
+diagnosis are follow-ups, not blockers.
+
+## Run 42 — 2026-09-19 — Run 41's findings applied, and a plausible cause for the flake
+
+⚠ THE GAIN IS +6.1pp, NOT +9. Run 40 subtracted two numbers that were not comparable: 56.3% came from
+a 3,000-word stride sample of ALL 17,825 added words through the full serving path, while 65.7% is the
+split model decoding 1,780 specific rows off the raw graph. Measured like for like — same graph
+interface, same rows — the previous shipped model gives 59.6%, so the tail gain is a third smaller than
+claimed. The provenance now also says which model the 71.4/65.7 belong to: the 90%-SPLIT model. The
+shipped artifact scores 99.1% on those rows because they are its training data, and quoting a shipped
+model's number against its own training set is the mistake that table was one sentence away from.
+
+⚠ AND "55 LANGUAGES MOVED, NONE OF THEM ENGLISH-ONLY" WAS THE OPPOSITE OF THE DIFF. `en`, `en-GB` and
+`en-IN` are three of the 55 files and carry 45 of the 232 rows — the largest block after `chr` at 21.
+What I meant, and what is true, is that every changed row contains Latin source text.
+
+⚠ SIX ROWS REGRESSED AND "MAJORITY REPAIRS" BURIED THEM:
+
+    Tt (Audi TT)  tʰˌiːtʰˈiː → t        kW      kʰˈuː   → kw
+    heHe          hˈiːhi     → hˈiːh    Rossby  ɹˈɔːsbi → ɹˈɔːbi   (the /s/ is gone)
+    Dhara         dˈɑːɹə     → dˈɛɹə    stealthily  ɪ → ə
+
+They are recorded rather than fixed because the class they belong to is FLAT, which is the only reason
+that is defensible: enumerating every 2- and 3-letter string plus a 1-in-7 sample of 4-letter ones
+gives 48/853/3,189 vowelless outputs before and 52/850/3,209 after. `tt` and `kw` fell in while others
+fell out. A per-letter tagger with no nucleus constraint can always emit a vowelless word; that is a
+structural issue for its own block, not a retrain regression.
+
+⚠ THE EXPORTER COULD STILL STRAND A VOCAB BESIDE OLD WEIGHTS — the failure its own header says was
+fixed. `meta.json` was written into `data/` BEFORE `quantize_dynamic`, so a quantise that raised left
+the new vocab next to the old graph. Meta now lands after the quantise, via a temp file and
+`os.replace`, so neither an exception nor an interrupted write can produce the mismatched pair.
+
+Reproducibility: `cudnn.deterministic` is requested (seeds alone cannot make a cuDNN LSTM repeatable —
+its backward pass uses atomics), the recipe no longer names a `.venv` that does not exist, and the
+exact environment behind the shipped weights is in the provenance: torch 2.11.0+cu128, cuda 12.8, onnx
+1.21.0, onnxruntime 1.24.4, python 3.12.3, RTX 3090.
+
+⚠ AND THE FLAKE HAS A MECHANISM AT LAST, after three wrong diagnoses of mine (contention, maxBuffer, a
+dead worker). Run 41 found the capture discards `err.signal` and coerces a missing status to −1, so a
+child KILLED mid-stream is indistinguishable from one that finished and disagreed — which is exactly
+the reported signature. Both are now surfaced, and `pooled.status` is asserted before the byte
+comparison so a non-zero exit reports as itself.
+
+The likelier cause is upstream of that, though, and is now removed: `process.exit` DOES NOT FLUSH A
+PIPE, and every one of this tool's outputs goes down one. The report branch the test exercises ends in
+`process.exit(0)` after ~640 `console.log` calls; a child ends in one after streaming its JSON lines,
+where a lost last line is a lost LANGUAGE; and the error paths end in one after the `console.error`
+that explains the failure. All eight exits after the helper now drain stdout and stderr first.
+⚠ STILL A SUSPECT, NOT A PROVEN CAUSE. The flake did not reproduce in this session's last four full
+runs either. Recorded as the cheapest mechanism that produces the symptom, with the note that if it
+recurs, it was something else.
+
+    goldens 0 stale · C# parity 189 byte-identical · 6,076 tests · serial and pooled reports
+    byte-identical at 159,335 bytes each
