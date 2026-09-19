@@ -32,6 +32,35 @@ import { americanSpelling } from "../../src/languages/english/spellingVariants.t
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const EN = join(REPO, "data/languages/english");
+/**
+ * `--no-gold`: ALSO import the headwords gold has no reading for at all — Moby as a SINGLE source.
+ *
+ * ⚠ THIS DROPS THE TWO-SOURCE BAR, AND THE ONLY REASON IT IS DEFENSIBLE IS THAT THE ALTERNATIVE IS NOT
+ * A CORRECT READING BUT OUR OWN GUESS. Measured on the out-of-dictionary words an INDEPENDENT referee
+ * can arbitrate — Moby is independent of CMUdict, our OOV model is not:
+ *
+ *     arbiter             n       Moby    our OOV tier   Moby-only right   OOV-only right
+ *     wikipron US       352      46.6%        34.4%              77              34
+ *     wikipron UK     6,416      30.9%        21.1%             949             322
+ *
+ * ⚠ AND JUDGING THEM AGAINST **GOLD** SAYS THE OPPOSITE — Moby 23.0% against our 36.9% over 6,184 words.
+ * That is a CONFOUND, not a contradiction: gold is CMUdict-derived and so is our OOV model, so gold
+ * scores its own descendant. The independent arbiters are the ones that answer the question, and they
+ * agree with each other at roughly 3:1 on the rows that discriminate.
+ *
+ * ⚠ IT COSTS THE OOV REFEREE, DELIBERATELY. `build-en-moby-referee.mts` excludes imported words from
+ * both corpora, so the OOV corpus falls 39,881 → ~6,200. That is still larger than English's own PRIMARY
+ * referee (4,558 rows) and than Norwegian, Swedish, German or French, and above the 75th percentile of
+ * the fleet's 257 referee files — but it is a real loss of GRANULARITY: the grapheme mining that found
+ * Moby's `-ness` defect needed thousands of rows to make a 1,590-row class visible.
+ *
+ * ⚠ AND MOBY'S KNOWN TAIL DEFECTS MUST BE REPAIRED ON THE WAY IN, because there is no second source to
+ * catch them here. In this bucket: 921 of 968 `-ness` rows carry Moby's spurious full `EH`, 32 of 318
+ * `-ing` rows its `IY`, 439 rows a geminate consonant English does not have, and one an initial `/dZ/`
+ * where the palatal glide belongs. Same repairs, same evidence, as tools/gen/build-en-moby-referee.mts.
+ */
+const noGold = process.argv.includes("--no-gold");
+
 const MOBY = process.env["MOBY"], GOLD = process.env["GOLD"];
 if (!MOBY || !GOLD) throw new Error("set MOBY (mobypron.unc) and GOLD (misaki us_gold.json)");
 
@@ -76,6 +105,35 @@ const VOWEL = /^(AA|AE|AH|AO|EH|IH|IY|UH|UW)[0-2]?$/u;
 const reduceUnstressed = (a: string[]): string[] =>
     a.map((p) => (VOWEL.test(p) && p.endsWith("0") ? "AH0" : p));
 
+/** The consonants, for the geminate collapse — English has no consonant-length contrast. */
+const CONSONANT = new Set("B CH D DH F G HH JH K L M N NG P R S SH T TH V W Y Z ZH".split(" "));
+
+/**
+ * Moby's own tail defects, repaired on the way into the lexicon. Only reached by `--no-gold`, where no
+ * second source can catch them; the two-source arm needs none of this because gold already has.
+ * Each repair and its evidence is argued in tools/gen/build-en-moby-referee.mts.
+ */
+function repairMoby(word: string, a: string[]): string[] {
+    let out = [...a];
+    // The unstressed suffix vowel, normalised to Moby's OWN majority spelling.
+    const last = out.length - 2;
+    if (last >= 1) {
+        if (/^[a-z]{3,}ness$/u.test(word) && (out[last] === "EH" || out[last] === "EH0")) out[last] = "IH0";
+        if (/^[a-z]{3,}ing$/u.test(word) && (out[last] === "IY" || out[last] === "IY0")) out[last] = "IH0";
+    }
+    // An initial /dZ/ on a vowel-spelled word before /u/–/ʊ/ is the palatal glide.
+    if (out[0] === "JH" && /^[aeiou]/u.test(word) && /^(UW|UH)/u.test(out[1] ?? "")) out[0] = "Y";
+    // Geminate consonants: the engine's own OOV paths collapse them and CMUdict does not carry them.
+    const deg: string[] = [];
+    for (const p of out) {
+        const prev = deg[deg.length - 1];
+        if (prev !== undefined && prev === p && CONSONANT.has(p.replace(/[0-2]$/u, ""))) continue;
+        deg.push(p);
+    }
+    out = deg;
+    return out;
+}
+
 /** æɹ → ɛɹ: the marry–merry merger this engine applies (#1336). Moby is unmerged. */
 const merge = (a: string[]): string[] =>
     a.map((p, i) => (p.replace(/[0-2]$/u, "") === "AE" && a[i + 1]?.replace(/[0-2]$/u, "") === "R"
@@ -83,7 +141,7 @@ const merge = (a: string[]): string[] =>
 
 const rows: string[] = [];
 const seen = new Set<string>();
-let noGold = 0, disagree = 0, skipped = 0, shadowed = 0, reduced = 0;
+let noGoldN = 0, disagree = 0, skipped = 0, shadowed = 0, reduced = 0, single = 0;
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const sp = line.indexOf(" "); if (sp < 0) continue;
     const w = line.slice(0, sp).toLowerCase();
@@ -91,10 +149,28 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     // ⚠ ≥3 LETTERS: a one- or two-letter headword is a GLYPH, not a word, and its reading is not constant
     // — the same reason the wikipron referee excludes them (`x` is the letter's SOUND, `m` its NAME).
     if (!/^[a-z]{3,20}$/u.test(w)) { skipped++; continue; }
-    const m = mobyToArpabet(line.slice(sp + 1)); if (!m) { skipped++; continue; }
+    const raw = mobyToArpabet(line.slice(sp + 1)); if (!raw) { skipped++; continue; }
     seen.add(w);
-    const g = goldOf(w); if (!g) { noGold++; continue; }
-    const ga = goldToArpabet(g); if (!ga) { noGold++; continue; }
+    // ⚠ REPAIRED BEFORE THE COMPARISON, NOT ONLY ON THE SINGLE-SOURCE ARM. A known Moby defect was
+    // BLOCKING legitimate two-source agreement: `unilocular` is `JH UW2 …` in Moby — its initial-yod
+    // bug — and can never match gold's `jˌunəlˈɑkjələɹ`, so the word fell out as "gold disagrees" and
+    // then came back in through `--no-gold` on ONE source when TWO actually agree about it.
+    // ⚠ THE REPAIRS ARE MOBY-INTERNAL AND INDEPENDENT OF GOLD — each is argued from Moby's own
+    // inconsistency in build-en-moby-referee.mts — so applying them first removes a corruption rather
+    // than manufacturing an agreement.
+    const m = repairMoby(w, raw);
+    const g = goldOf(w);
+    const ga = g === undefined ? undefined : goldToArpabet(g);
+    if (!ga) {
+        noGoldN++;
+        if (!noGold) continue;
+        // SINGLE SOURCE: Moby alone, with its known tail defects repaired first. See the header.
+        if (americanSpelling(w, (x) => have.has(x)) !== undefined) { shadowed++; continue; }
+        have.add(w);
+        single++;
+        rows.push(`${w}\t${merge(modernise(m)).join(" ")}`);
+        continue;
+    }
     const ours = merge(modernise(m));
     let take = ours, viaFold = false;
     if (normalise(ours) !== normalise(ga)) {
@@ -128,8 +204,9 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     rows.push(`${w}\t${take.join(" ")}`);
 }
 rows.sort();
-console.log(`considered ${seen.size + skipped}  skipped ${skipped}  no gold ${noGold}  gold disagrees ${disagree}  shadows a spelling fold ${shadowed}`);
-console.log(`IMPORTABLE (moby + gold agree): ${rows.length}  — of which ${reduced} agree only after the unstressed-vowel fold (gold's reading taken)`);
+console.log(`considered ${seen.size + skipped}  skipped ${skipped}  no gold ${noGoldN}  gold disagrees ${disagree}  shadows a spelling fold ${shadowed}`);
+if (noGold) console.log(`  --no-gold: ${single} imported from MOBY ALONE, tail defects repaired`);
+console.log(`IMPORTABLE: ${rows.length}  = ${rows.length - single} two-source (${reduced} of them via the unstressed-vowel fold, gold's reading taken) + ${single} single-source`);
 
 if (!process.argv.includes("--write")) { console.log("\n(dry run — pass --write to apply)"); process.exit(0); }
 
