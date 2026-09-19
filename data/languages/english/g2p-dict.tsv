@@ -700,7 +700,7 @@ aceves	AA0 S EY1 V EH0 S
 acey	EY1 S IY0
 ach	EY1 S IY1 EY1 CH
 achaea	AH0 K IY1 AH0
-achaean	AH0 CH IY1 AH0 N
+achaean	AH0 K IY1 AH0 N
 achaemenid	AH0 K IY1 M AH0 N IH0 D
 achates	AH0 K EY1 T IY0 Z
 achatz	AE1 K AH0 T S
@@ -5703,7 +5703,7 @@ armguard	AA1 R M G AA2 R D
 armhole	AA1 R M HH OW2 L
 armida	AA0 R M IY1 D AH0
 armies	AA1 R M IY0 Z
-armiger	AA1 R M IH0 G ER0
+armiger	AA1 R M IH0 JH ER0
 armijo	AA0 R M IY1 Y OW0
 armilla	AA0 R M IH1 L AH0
 armin	AA1 R M AH0 N
@@ -6412,7 +6412,7 @@ asthmatic	AE0 Z M AE1 T IH0 K
 asthmatics	EH0 S TH M EH1 T IH0 K S
 astigmatic	AE2 S T IH0 G M AE1 T IH0 K
 astigmatism	AH0 S T IH1 G M AH0 T IH2 Z AH0 M
-astilbe	AH0 S T IH1 B IY2
+astilbe	AH0 S T IH1 L B IY2
 astin	AH0 S T IH1 N
 astir	AH0 S T ER1
 astle	AE1 S AH0 L
@@ -19401,7 +19401,7 @@ cats	K AE1 T S
 catskill	K AE1 T S K IH2 L
 catskills	K AE1 T S K IH2 L Z
 catsuit	K AE1 T S UW0 T
-catsup	K EH1 CH AH0 P
+catsup	K AE1 T S AH0 P
 catt	K AE1 T
 cattail	K AE1 T T EY2 L
 cattanach	K AE1 T AH0 N AE0 CH
@@ -20120,7 +20120,7 @@ chalaza	K AH0 L EY1 Z AH0
 chalcedon	K AE1 L S IH0 D AA2 N
 chalcedonian	K AE2 L S IH0 D OW1 N IY0 AH0 N
 chalcedonic	K AE2 L S IH0 D AA1 N IH0 K
-chalcedony	CH AE1 L S AH0 D OW2 N IY0
+chalcedony	K AE2 L S EH1 D AH0 N IY0
 chalcocite	K AE1 L K AH0 S AY2 T
 chalcopyrite	K AE2 L K AH0 P AY1 R AY0 T
 chaldea	K AE0 L D IY1 AH0
@@ -20158,7 +20158,7 @@ chaloux	SH AH0 L UW1
 chalsty	CH AE1 L S T IY0
 chalupa	CH AH0 L UW1 P AH0
 chalybeate	K AH0 L IH1 B IY0 IH0 T
-cham	CH AE1 M
+cham	K AE1 M
 chamaephyte	K AE1 M IH0 F AY2 T
 chamber	CH EY1 M B ER0
 chambered	CH EY1 M B ER0 D
@@ -21014,7 +21014,7 @@ chime	CH AY1 M
 chimed	CH AY1 M D
 chimenti	CH IH0 M EH1 N T IY0
 chimento	CH IH0 M EH1 N T OW0
-chimera	CH IH0 M EH1 R AH0
+chimera	K IH0 M IH1 R AH0
 chimerical	K IH0 M EH1 R AH0 K AH0 L
 chimerine	CH IH1 M ER0 IY2 N
 chimes	CH AY1 M Z
@@ -21087,7 +21087,7 @@ chirico	K IH0 R IY1 K OW0
 chirm	CH ER0 M
 chirographic	K AY2 R AH0 G R AE1 F IH0 K
 chirography	K AY0 R AA1 G R AH0 F IY0
-chiron	CH AY1 R AH0 N
+chiron	K AY1 R AH0 N
 chiropractic	K AY1 R AH0 P R AE2 K T IH0 K
 chiropractor	K AY1 R AH0 P R AE2 K T ER0
 chiropractors	K AY1 R AH0 P R AE2 K T ER0 Z
@@ -24176,7 +24176,7 @@ concessionary	K AH0 N S EH1 SH AH0 N EH2 R IY0
 concessions	K AH0 N S EH1 SH AH0 N Z
 concessive	K AH0 N S EH1 S IH0 V
 conch	K AA1 N CH
-concha	K AA1 N CH AH0
+concha	K AA1 NG K AH0
 conchemco	K AA2 N CH EH1 M K OW0
 conchie	K AA1 N CH IY0
 conchiolin	K AA0 NG K AY1 AH0 L IH0 N
@@ -46225,7 +46225,7 @@ gadway	G AE1 D W EY2
 gadzinski	G AH0 JH IH1 N S K IY0
 gadzooks	G AE2 D Z UW1 K S
 gae	G AY1
-gaea	G IY1 AH0
+gaea	JH IY1 AH0
 gaebel	G EH1 B AH0 L
 gaede	G IY1 D
 gael	G EY1 L
@@ -48101,7 +48101,7 @@ gibb	JH IH1 B
 gibbard	ZH IH0 B AA1 R D
 gibbens	G IH1 B AH0 N Z
 gibber	JH IH1 B ER0
-gibberish	G IH1 B ER0 IH0 SH
+gibberish	JH IH1 B ER0 IH0 SH
 gibbet	JH IH1 B IH0 T
 gibbins	JH IH1 B IH0 N Z
 gibble	JH IH1 B AH0 L
@@ -54606,7 +54606,7 @@ hemophilic	HH IY2 M AH0 F IH1 L IH0 K
 hemoptysis	HH IY0 M AA1 P T AH0 S IH0 S
 hemorrhage	HH EH1 M ER0 IH0 JH
 hemorrhaged	HH EH1 M ER0 IH0 JH D
-hemorrhagic	HH EH2 M ER0 AE1 G IH0 K
+hemorrhagic	HH EH2 M ER0 AE1 JH IH0 K
 hemorrhaging	HH EH1 M ER0 IH0 JH IH0 NG
 hemorrhoid	HH EH1 M ER0 OY2 D
 hemorrhoids	HH EH1 M ER0 OY2 D Z
@@ -71759,7 +71759,7 @@ logger	L AO1 G ER0
 loggerhead	L AO1 G ER0 HH EH2 D
 loggerheads	L AA1 G ER0 HH EH2 D Z
 loggers	L AA1 G ER0 Z
-loggia	L AO1 G IY0 AH0
+loggia	L AO1 JH IY0 AH0
 logging	L AO1 G IH0 NG
 loggins	L AA1 G IH0 N Z
 loghry	L AA1 G R IY0
@@ -73852,7 +73852,7 @@ maintenance	M EY1 N T AH0 N AH0 N S
 maintop	M EY1 N T AA2 P
 mainville	M EY1 N V IH2 L
 mainwaring	M EY1 N W EH2 R IH0 NG
-mainz	M EY1 N Z
+mainz	M AY1 N T S
 maio	M EY1 OW0
 maiolica	M AH0 Y AA1 L AH0 K AH0
 maiolo	M AY1 OW0 L OW0
@@ -81715,7 +81715,7 @@ mozambican	M OW2 Z AE0 M B IY1 K AH0 N
 mozambicans	M OW2 Z AE0 M B IY1 K AH0 N Z
 mozambique	M OW2 Z AE0 M B IY1 K
 mozarabic	M OW0 Z EH1 R AH0 B IH0 K
-mozart	M OW1 Z AA0 R T
+mozart	M OW1 T S AA0 R T
 mozartean	M OW2 Z AA1 R T IY0 AH0 N
 mozee	M AA1 Z IY0
 mozelle	M AH0 Z EH1 L
@@ -88834,7 +88834,7 @@ palauans	P AH0 L AW1 AH0 N Z
 palay	P AE1 L EY2
 palazina	P AE2 L AH0 Z IY1 N AH0
 palazzi	P AA0 L AA1 T S IY0
-palazzo	P AH0 L AA1 Z OW0
+palazzo	P AH0 L AA1 T S OW0
 palazzola	P AA0 L AA0 T S OW1 L AH0
 palazzolo	P AA0 L AA0 T S OW1 L OW0
 palca	P AE1 L K AH0
@@ -89224,8 +89224,8 @@ papalia	P AA0 P AA1 L IY0 AH0
 papandrea	P AA0 P AA1 N D R IY0 AH0
 papandreou	P AH0 P AE1 N D R IY0 UW2
 papania	P AA0 P AA1 N IY0 AH0
-paparazzi	P AA2 P AA0 R AO1 Z IY2
-paparazzis	P AA2 P AA0 R AO1 Z IY2 Z
+paparazzi	P AA2 P AA0 R AA1 T S IY2
+paparazzis	P AA2 P AA0 R AA1 T S IY2 Z
 paparella	P AA0 P AA0 R EH1 L AH0
 papas	P AA1 P AH0 Z
 papaw	P AO1 P AO0
@@ -92270,7 +92270,7 @@ piaster	P IY0 AE1 S T ER0
 piatek	P IY0 AA1 T EH0 K
 piatkowski	P IY0 AH0 T K AO1 F S K IY0
 piatt	P AY1 AH0 T
-piazza	P IY0 AE1 Z AH0
+piazza	P IY0 AA1 T S AH0
 piazzolla	P IY2 AH0 Z AA1 L AH0
 pic	P IH1 K
 pica	P AY1 K AH0
@@ -115844,7 +115844,7 @@ sthenic	S TH EH1 N IH0 K
 stibel	S T IH1 B AH0 L
 stibnite	S T IH1 B N AY0 T
 stice	S T AY1 S
-stich	S T IH1 CH
+stich	S T IH1 K
 sticha	S T IH1 CH AH0
 stichnoth	S T IH1 K N AA2 TH
 stichomythia	S T IH2 K AH0 M IH1 TH IY0 AH0
