@@ -5101,8 +5101,8 @@ appreciated	AH0 P R IY1 SH IY0 EY2 T IH0 D
 appreciates	AH0 P R IY1 SH IY0 EY2 T S
 appreciating	AH0 P R IY1 SH IY0 EY2 T IH0 NG
 appreciation	AH0 P R IY2 SH IY0 EY1 SH AH0 N
-appreciative	AH0 P R IY1 SH IY0 EY2 T IH0 V
-appreciatively	AH0 P R IY1 SH IY0 EY2 T IH0 V L IY0
+appreciative	AH0 P R IY1 SH IY0 AH0 T IH0 V
+appreciatively	AH0 P R IY1 SH IY0 AH0 T IH0 V L IY0
 appreciatory	AH0 P R IY1 SH IY0 AH0 T AO2 R IY0
 apprehend	AE2 P R IH0 HH EH1 N D
 apprehended	AE2 P R IH0 HH EH1 N D IH0 D
@@ -20190,7 +20190,7 @@ champ	CH AE1 M P
 champa	K AA1 M P AH0
 champagne	SH AE0 M P EY1 N
 champagnes	SH AE0 M P EY1 N Z
-champaign	CH AE0 M P EY1 N
+champaign	SH AE0 M P EY1 N
 champeau	SH AE0 M P OW1
 champerty	CH AE1 M P ER0 T IY0
 champine	CH AE1 M P AY2 N
@@ -22424,7 +22424,7 @@ clintonite	K L IH1 N T AH0 N AY2 T
 clintonites	K L IH1 N T AH0 N AY2 T S
 clintonomics	K L IH2 N T AH0 N AA1 M IH0 K S
 clintons	K L IH1 N T AH0 N Z
-clio	K L IY1 OW0
+clio	K L AY1 OW0
 clip	K L IH1 P
 clipboard	K L IH1 P B AO2 R D
 clippard	K L IH1 P ER0 D
@@ -75120,7 +75120,7 @@ marlys	M AA1 R L IY0 Z
 marmaduke	M AA1 R M AH0 D UW2 K
 marmalade	M AA1 R M AH0 L EY2 D
 marmalades	M AA1 R M AH0 L EY2 D Z
-marmara	M AA0 R M AA1 R AH0
+marmara	M AA1 R M ER0 AH0
 marmer	M AA1 R M ER0
 marmion	M AA1 R M IY0 AH0 N
 marmite	M AA1 R M AY0 T
@@ -89683,7 +89683,7 @@ partee	P AA1 R T IY1
 parten	P AA1 R T AH0 N
 partenope	P AA1 R T AH0 N OW2 P
 parterre	P AA0 R T EH1 R
-parthenia	P AA0 R TH EH1 N IY0 AH0
+parthenia	P AA0 R TH IY1 N IY0 AH0
 parthenocarpic	P AA2 R TH AH0 N OW0 K AA1 R P IH0 K
 parthenocarpy	P AA1 R TH AH0 N OW0 K AA2 R P IY0
 parthenogenesis	P AA2 R TH IH0 N OW0 JH EH1 N IH0 S IH0 S
@@ -111219,7 +111219,7 @@ sinusoid	S AY1 N AH0 S OY2 D
 sinusoidal	S AY1 N AH0 S OY2 D AH0 L
 sinusoidally	S AY2 N AH0 S OY1 D AH0 L IY0
 sinyard	S IH1 N Y AA2 R D
-siobhan	SH AW1 B AA2 N
+siobhan	SH AH0 V AO1 N
 siouan	S UW1 AH0 N
 sioux	S UW1
 sip	S IH1 P
@@ -120646,7 +120646,7 @@ terracciano	T ER0 AA0 CH IY0 AA1 N OW0
 terrace	T EH1 R AH0 S
 terraced	T EH1 R AH0 S T
 terraces	T EH1 R AH0 S AH0 Z
-terracotta	T ER2 AH0 K AA1 T AH0
+terracotta	T EH2 R AH0 K AA1 T AH0
 terrain	T ER0 EY1 N
 terrains	T ER0 EY1 N Z
 terral	T EH1 R AH0 L

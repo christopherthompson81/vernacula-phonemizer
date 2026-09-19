@@ -837,3 +837,81 @@ an `OW R` the builder collapsed. It survives the gate unchanged and correctly. O
 `bowring`, and four were the real damage. The gate is cheap and the class is closed.
 
 Primary unmoved at 62.4% by construction (this touches only the Moby artifacts). Moby-lexicon 75.6%.
+
+## Run 25 — 2026-09-19 04:05 — two referees agreeing against us, and what is left when they do
+
+A new selection rule, and the strongest bar this audit has used. Question: where do the two INDEPENDENT
+referees — wikipron GenAm (human transcribers) and Moby — agree with EACH OTHER on a reading that is not
+ours? Neither alone settles anything; together they are two sources that have never seen each other.
+
+    both referees cover:                    1,428 dictionary words
+    they agree and we differ:                  73
+    …after every declared-intentional class:   38
+
+The intentional filter is doing most of the work and doing it correctly: the weak vowel ə↔ɪ in both
+directions and the NEAR vowel before ɹ account for 35 of the 73, exactly the classes measured and declared
+in earlier runs. ⚠ THE 38 REPRODUCED A PRE-COMPACTION COUNT EXACTLY, which is the only reason it is
+quoted with confidence — the same probe written twice from different directions gave the same number.
+
+The 38 break down as:
+
+    known axes, not actionable      13   marry–merry (barrett, paris, apparel, comparatively, narrow),
+                                         cot–caught (dong, thong, stomp, backwash), en-/ɪn- (enfranchise,
+                                         enhance, exploit), transmit
+    two attested readings, ours     11   octave ɑktɪv/ɑkteɪv, whoop wup/hup, holm, ensign (the rank vs the
+       being one of them                 flag), lower (the verb vs the scowl), kafka, cremation, newness
+                                         (yod), reconstitute (yod), saccharine, absorbing/absurdity
+    referee wrong, instrument gap     2   perchlorate, weatherproof — see below
+    genuine dictionary defects        8   shipped
+    a defect the dictionary cannot    1   bancroft — see below
+       express
+
+⚠ TWO OF THE 38 WERE THE INSTRUMENT, NOT THE DICTIONARY, and finding them is why a residual gets read
+rather than counted. `perchlorate pəklɔːɹeɪt` and `weatherproof wɛðəpɹuːf` are RP rows in the GenAm file
+that BOTH existing non-rhotic exclusions miss: the first asks whether a rhotic appears anywhere, the second
+only in the last three symbols, and here the only ɹ is another syllable's ONSET (`klɔːɹ`, `pɹuːf`). This is
+the same onset/coda confusion the Moby builder had in Run 24 — third time this distinction has been the
+bug. A third exclusion now asks for a CODA rhotic specifically: `ɚ`/`ɝ`, or `ɹ`/`ɻ`/`r` not followed by a
+vowel. 9 rows, all failing, so the denominator drops and the numerator does not.
+
+⚠ ITS SPELLING SIDE NEEDED TWO EXCLUSIONS, BOTH FOUND BY READING THE ROWS IT ADDED rather than by trusting
+the count. `[aeiouy]r+` BACKTRACKS, so a geminate matches its own first half and `arrange əɹeɪnd͡ʒ`,
+`narrow næɹoʊ`, `Barrett bæɹɪt` — ordinary GenAm — were flagged for having an onset ɹ where there is no
+coda r at all; the `rh` digraph did the same to `gonorrhea` and `ornithorhynchus`. Excluding a following
+`r` or `h` took the rule from 61 newly-caught rows (mostly wrong) to 14 (all right). It also does NOT
+subsume the word-final rule, which is what I expected it to do: 12 rows spelled `-re`/`-red` have no
+post-vocalic r for its spelling side to match, so all three rules stay.
+
+The 8 shipped corrections, each recorded in `g2p-curated.tsv` with both referees' readings:
+
+    siobhan         ʃaʊbɑn        → ʃəvɔn          an Irish name read off its letter shape
+    champaign       tʃæmpeɪn      → ʃæmpeɪn        said like `champagne`
+    clio            klioʊ         → klaɪoʊ         the muse is KLY-oh
+    parthenia       pɑɹθɛniə      → pɑɹθiniə
+    marmara         mɑɹmɑɹə       → mɑɹməɹə        stress AND reduction both wrong
+    terracotta      təɹəkɑtə      → tɛɹəkɑtə       ɛɹ under secondary stress, not a reduced ɚ
+    appreciative    əpɹiʃieɪtɪvli → əpɹiʃətɪvli    no FACE vowel in -ciative; GOLD AGREES, so three sources
+    appreciatively  (as above)
+
+⚠ THE GOLD DISSENTS ON TWO AND THEY SHIPPED ANYWAY, recorded rather than quietly dropped: misaki reads
+`champaign` with tʃ and `clio` as kliːoʊ. Two referees plus the dictionaries outweigh it, and on
+`appreciative` gold agrees with the referees AGAINST CMUdict — which is what a third source is for.
+
+⚠ `bancroft` IS A REAL DEFECT THAT THE DICTIONARY CANNOT EXPRESS, and the edit was made, measured, and
+reverted. Both referees read `bænkɹɔft`: `Ban·croft` is a compound seam where the nasal ends the first
+element and never assimilated. But the converter DERIVES ŋ from N before K/G itself, gated only on a
+transparent PREFIX, so `NG`→`N` in the dictionary changes nothing — `en_rebuild_lexicon.mts --diff` listed
+all 8 other rows and not this one. A seam-aware guard in the converter is its own block. Recorded in
+`g2p-curated.tsv` as an explicit absence so the next reader does not spend the edit again.
+⚠ AND IT DOES NOT CONTRADICT THE VELAR REFUSAL. That refusal was of a BLANKET intentional credit, on the
+ground that Moby RECORDS the ŋ/n distinction and so its `n` is a per-word judgement. A per-word judgement
+is evidence about the word it is made about; it is only a notation choice that cannot be evidence.
+
+    primary folded backbone   62.4% → 62.6%   (2523/4046 → 2529/4037)
+    +intentional              67.8% → 68.1%
+    Moby — lexicon            26499 → 26505   (75.6%)
+    Moby — OOV                unchanged
+    goldens                   189 languages, 36,495 rows, 0 stale
+
+The primary moved on both counts at once — 6 rows entered the numerator (the dictionary fixes) and 9 left
+the denominator (the instrument fix) — so the two are separable and are reported separately above.

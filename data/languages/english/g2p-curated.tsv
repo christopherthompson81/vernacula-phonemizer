@@ -2132,3 +2132,31 @@ encore	AA1 N K AO2 R	AA1 NG K AO2 R	velar nasal: no live prefix; /ˈɑŋkɔɹ/, 
 # already right; the rest of the `-es` residual is Moby reading ENGLISH words as Latin (`comes` koʊmiz,
 # `dares` dɛɹiz, `manes`, `tales`), where our reading is the correct one.
 hippocrates	HH IH1 P AH0 K R EY2 T S	HH IH0 P AA1 K R AH0 T IY2 Z	classical -es read as an English plural; /hɪˈpɑkrətiːz/, Moby hɪpɑkɹətiz
+
+# TWO INDEPENDENT REFEREES AGREEING WITH EACH OTHER AND AGAINST US. A new selection rule, and the
+# strongest evidence bar this audit has used: the wikipron GenAm referee (human transcribers) and the Moby
+# referee cover 1,428 dictionary words in common; on 38 of them they agree on a reading that is not ours,
+# and that 38 is what is left AFTER the config's excludeRows and every declared-intentional class. Most of
+# the 38 are the known axes — marry–merry (5 rows), cot–caught (4), the en-/ɪn- prefix (3), `transmit` —
+# or words with two attested readings where ours is one of them (`octave` ɑktɪv/ɑkteɪv, `whoop` wup/hup,
+# `holm`, `ensign` the rank vs the flag, `lower` the verb vs the scowl). These are the rows where the
+# referees are simply right.
+# ⚠ `bancroft` BELONGS ON THIS LIST ON THE EVIDENCE AND IS DELIBERATELY ABSENT, because the dictionary is
+# the wrong mechanism for it and a row here would be INERT. Both referees read `bænkɹɔft`, and the reason
+# is a compound seam — `Ban·croft`, where the nasal ends the first element and never assimilated. But the
+# converter derives `ŋ` from N before K/G itself, gated only on a TRANSPARENT PREFIX, so changing the
+# dictionary's `NG` to `N` changes nothing about what is said: `en_rebuild_lexicon.mts --diff` listed
+# every other row below and not this one. Fixing it needs a seam-aware guard in the converter, which is
+# its own block; recorded here so the next reader does not spend the edit a second time.
+# ⚠ THE GOLD DISSENTS ON TWO OF THESE and they are kept anyway, recorded rather than quietly dropped:
+# misaki gold reads `champaign` with tʃ and `clio` as kliːoʊ. Both referees and the dictionaries say
+# otherwise — Champaign is said like `champagne`, and the muse is KLY-oh — and on `appreciative` gold
+# AGREES with the two referees against CMUdict, which is what a third source is for.
+siobhan	SH AW1 B AA2 N	SH AH0 V AO1 N	Irish name read letter-shape; /ʃəˈvɔn/, Moby ʃəvɔn + wikipron ʃəvɔːn
+champaign	CH AE0 M P EY1 N	SH AE0 M P EY1 N	said like `champagne`; Moby ʃæmpeɪn + wikipron ʃæmpeɪn (gold dissents, tʃ)
+clio	K L IY1 OW0	K L AY1 OW0	the muse is KLY-oh; Moby klaɪoʊ + wikipron klaɪoʊ (gold dissents, kliːoʊ)
+parthenia	P AA0 R TH EH1 N IY0 AH0	P AA0 R TH IY1 N IY0 AH0	/pɑɹˈθiniə/; Moby pɑɹθiniə + wikipron pɑɹθiniə
+marmara	M AA0 R M AA1 R AH0	M AA1 R M ER0 AH0	Sea of Marmara is /ˈmɑɹmərə/, stress and reduction both wrong; Moby + wikipron mɑɹməɹə
+terracotta	T ER2 AH0 K AA1 T AH0	T EH2 R AH0 K AA1 T AH0	first syllable is ɛɹ under secondary stress, not a reduced ɚ; Moby + wikipron tɛɹəkɑtə
+appreciative	AH0 P R IY1 SH IY0 EY2 T IH0 V	AH0 P R IY1 SH IY0 AH0 T IH0 V	no FACE vowel in -ciative; Moby + wikipron + GOLD all əpɹiʃi/ətɪv
+appreciatively	AH0 P R IY1 SH IY0 EY2 T IH0 V L IY0	AH0 P R IY1 SH IY0 AH0 T IH0 V L IY0	as `appreciative`

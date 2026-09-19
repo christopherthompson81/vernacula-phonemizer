@@ -35,6 +35,14 @@ const KNOWN_GAPS = new Map<string, string>([
     // far past this word. Cheap to fix, not obviously right to fix.
     ["was", "morph (source M): `wa` + allomorph Z reconstructs the upstream W AA1 Z; see comment above"],
 
+    // ⚠ `-ative` AGAIN, AND IT IS THE CLASS #1341's RETRAIN WAS NAMED FOR. `collaborative` sat here for
+    // exactly this — the n-gram tier reads the suffix off the `-ate` verb and keeps its FACE vowel — and
+    // left when the model was retrained on the curated dict. It is back for a different word because the
+    // model has not been retrained since, so the shape `-ciative` was never in its training data with the
+    // reduced vowel. Source N confirmed by holding the word out and reading `decompose().source`. The
+    // remedy is the same retrain, not a rule: there is no spelling that says whether `-ative` reduces.
+    ["appreciative", "n-gram (source N): predicts the upstream EY2 from the `-ate` stem; the `-ative` reduction is lexical and closes on a retrain"],
+
     // ⚠ THE COMPOUND-SEAM GEMINATE, and the remedy for these five was MEASURED AND REJECTED — do not
     // "fix" it by turning off `collapseGeminates` on the compositional paths. The dict geminates a
     // compound seam (`bookkeeper` B UH1 K K IY2 P ER0, `misspell`, `coattail`, `lamppost` — 93 rows) and
