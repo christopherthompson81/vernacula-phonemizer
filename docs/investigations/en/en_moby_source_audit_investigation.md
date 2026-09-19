@@ -1321,3 +1321,127 @@ corpus". It is in the Moby lexicon corpus (`kɔɹnkɑb`), which is the single so
 in the first place. Written before the eval was re-run and corrected by re-running it; noted because
 "this cannot have moved anything" is exactly the claim that does not need checking right up until it
 does.
+
+## Run 31 — 2026-09-19 — the inversion, measured and REFUSED, and the 310 residual re-characterised
+
+Run 30's plan was to invert the seam table: delete the assimilation rule, honour CMUdict's `N`, and list
+the SLIPS instead of the seams — on the argument that slips are bounded and referee-covered while seams
+are open-ended, and that the ~310 undetermined sites would then default to `n`, right about nine times
+in ten on Run 27's base rate. The first measurement kills it.
+
+⚠ THE 298:33 BASE RATE IS NOT THE RATE THAT APPLIES. It counts every labelled site in the dictionary,
+including the 590 the transparent-prefix guard already protects — `unclean`, `income`, `incline` — which
+are `n` for everyone and which the rule never touches. Restricted to the words the converter ACTUALLY
+assimilates:
+
+    words the converter assimilates today (dict N, no transparent prefix)   363
+      two or more sources say n                                              15
+      one source says n                                                      38
+      every source says ŋ — the slips                                        20
+      sources split                                                           8
+      NO REFEREE AT ALL                                                     282
+
+53 against 20, not 298 against 33. And the 38 single-source rows do not survive reading:
+
+    ancona      moby  ɑnkɔnɑ        pancreatic  moby  pænkɹiætɪk
+    mancunian   uk    mankjuːnɪən   lohengrin   moby  loʊənɡɹɪn
+    serengeti   uk    sɛɹənɡɛti     wollongong  uk    wʊlənɡɒŋ
+
+Every one of those is [ŋ] in speech. They are real transcriptions, from both sources rather than one
+loose one (20 Moby, 18 UK), and they are writing the PHONEME and not the realisation. `nomenclature`
+gives it away completely: the UK referee carries `nəʊmɛnklət͡ʃə` AND `nəʊmɛŋklət͡ʃə` for the same word.
+That is the signature of a notation choice, not a lexical judgement.
+
+Tested whether the convention is syllabification — write `ŋ` only where the nasal and the velar share a
+coda — by cross-tabulating every referee's own sites:
+
+                                  velar is an ONSET        velar in a CODA
+    moby lexicon                  n 175  ŋ 212  (55% ŋ)    n 122  ŋ 343  (74% ŋ)
+    moby oov                      n 249  ŋ 333  (57% ŋ)    n 131  ŋ 336  (72% ŋ)
+    wikipron us                   n  17  ŋ  41  (71% ŋ)    n  15  ŋ  41  (73% ŋ)
+    wikipron uk                   n 331  ŋ 909  (73% ŋ)    n 221  ŋ 969  (81% ŋ)
+
+Not a clean convention either — the position moves Moby 19 points and wikipron-US 2. So it is neither
+purely lexical nor purely notational: it is a per-transcriber mixture, and that is the worst possible
+substrate for a 282-word blanket flip. Corrected honest estimate among the labelled: roughly 35 seams,
+26 slips, 20 undecidable. Flipping 282 unlabelled words on a ~57% base rate is a coin toss with a
+provenance file attached. **REFUSED.**
+
+⚠ AND RUN 28'S CHARACTERISATION OF THE RESIDUAL WAS WRONG, which matters more than the refusal. It says
+of the ~310 undetermined sites that "on Run 27's base rates the dictionary is right about nine times in
+ten there, so most of them are probably wrong today". They are not a defect backlog. They are sites
+where the sources disagree with each other about a notation, and where [ŋ] — what we emit — is the
+natural realisation anyway. This engine transcribes at a NARROW depth (aspiration, dark l, flapped t),
+and [ŋ] before a velar is correct at that depth even where a broad referee writes the phoneme /n/.
+
+So the #1358 table stands on its own terms — it required EVERY covering referee to agree, which is a
+much stronger bar than the base rate — but the axis is closed. It is not where the next improvement is.
+
+⚠ WHAT THIS DOES CHANGE IS THE CASE FOR COMPOUNDS AS DATA, upward. The reason this axis dissolved is
+that transcription conventions cannot settle a morphological question. An independent morphological
+inventory can — and it would settle it for the classes where the answer is AUDIBLE rather than
+notational: compound fore-stress (106 named words, `englishArpabet.ts`), the compound-seam geminates
+(93 dictionary rows, `KNOWN_GAPS`), and the OOV grapheme seams the skeleton probe turned up, where
+`haphazardly` reads ⟨ph⟩ as /f/ ACROSS hap|hazard. Those are real errors a listener hears. The velar is
+not. Next step is the coverage probe, not more velar work.
+
+## Run 32 — 2026-09-19 — compounds as data: the coverage probe, before the 3 GB download
+
+Run 31 closed the velar axis and argued the case for a morphological inventory went UP, because a
+transcription convention cannot settle a morphological question. Question for this run: does a
+non-circular inventory actually exist, and does it carry the distinction the engine needs?
+
+English Wiktionary via kaikki. ⚠ NOT DOWNLOADED — the full extract is 3.0 GB, and kaikki serves
+per-word JSONL at `/dictionary/English/meaning/<l>/<l2>/<Word>.jsonl`, so the coverage question can be
+answered for a few hundred words at 0.2 s each. (Capitalisation matters in the PATH as well as the
+filename: `V/Va/Vancouver` is 200, `v/va/Vancouver` is 404. Found by getting 404s for every proper noun
+in the first sample and assuming the words were absent.)
+
+⚠ THE DISTINCTION THE CODEBASE SAID IT COULD NOT HAVE IS IN THE DATA, and it is the hyphen:
+
+    pancake        surf      ['pan',   'cake']        ← compound
+    panchromatic   ety       ['pan-',  'chromatic']   ← PREFIX, and marked as one
+    misspell       ety       ['mis-',  'spell']
+    idiosyncrasy   surf      ['idio-', 'syn-']
+    drinkable      suffix    ['drink', 'able']
+
+`pan·cake` against `pan-chromatic` is the exact pair that defeated every rule in Run 27, and Wiktionary
+separates them. Precision on the first sample is the other half of the news: `anglophile`, `ankh`,
+`gangrene`, `pancreas`, `pangloss` and `vanguard` carry NO compound template — every one a word that a
+splitter claims and should not. `vanguard` is the nicest of them; it is from *avant-garde* and is not
+`van`+`guard`, which no amount of dictionary lookup would ever have told us.
+
+⚠ THE TEMPLATE ARGUMENT LAYOUT VARIES AND THE FIRST EXTRACTOR GOT 1 HIT OUT OF 23. `compound` and `af`
+put the parts at args 2 and 3, `ety` and `surf` at 3 and 4 — so an extractor keyed to one layout reports
+near-zero coverage and looks like a finished negative result. The fix is to take every positional arg
+and drop language codes and the `:`/`+`/`-` control values.
+
+Coverage measured against a REAL evidence set rather than a hand-picked sample — the 153 dictionary
+words carrying a geminate consonant, which is the `KNOWN_GAPS` compound-seam class:
+
+    lemma decomposed by Wiktionary           74   48%
+    recoverable by inflection carry-over     19         (bookkeepers, coattails, misspells, …)
+    ─ combined                               93   61%
+    genuinely uncovered                      60
+
+And the 60 are not a random tail. 27 of them are `-ness`/`-ly` derivations whose geminate is at the
+suffix boundary — `fineness`, `greenness`, `thinness`, `drolly`, `dully`, `genteelly` — which need no
+inventory at all: a stem ending in the consonant the suffix begins with is a regular, derivable rule.
+Another handful are CMUdict's unhyphenated spellings (`parttime`, `shortterm`, `iceskate`). What is
+left is about 30 real gaps, `roommate` and `teammate` among them — which is a hand list, not a project.
+
+    Wiktionary 61%  +  a regular suffix rule (~27)  +  ~30 hand rows  ≈  the whole class
+
+⚠ AND THE STRESS CLASS IS THE WORST FIT, WHICH IS THE OPPOSITE OF WHAT I EXPECTED. The 106 words
+`englishArpabet.ts` names as its evidence set are fore-stressed compounds heavy in proper nouns and
+neologisms, and the four it names by name — `Afrobeat`, `Twitterverse`, `Antabuse`, `allemande` — carry
+no compound template between them. Wiktionary templates ordinary lexis well and coined proper nouns
+badly, so the class with the loudest audible payoff is the one this source serves least. It should be
+attempted last, if at all.
+
+Order this argues for: the geminate seams first (61% + a derivable rule + a short hand list, and the
+`--emit` gate already exists), then the OOV grapheme seams (`haphazard` decomposes, and ⟨ph⟩ read as
+/f/ across `hap|hazard` is an error a listener hears), then stress, on a different source or not at all.
+
+Building the inventory needs the 3.0 GB dump — 135k per-word fetches at 0.2 s is seven hours and rude.
+That download is the first step of the next block, not this one.
