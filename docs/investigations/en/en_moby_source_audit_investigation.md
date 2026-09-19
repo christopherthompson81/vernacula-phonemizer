@@ -337,3 +337,116 @@ place for them is the DICTIONARY, not a narrower rule that costs more than it sa
 
 Final: goldens 2 further rows (`increment` in `nan`), C# parity 189 byte-identical, regex-diff 144,302
 identical, 316 TS files / 6,064 tests, C# 6,687 tests, check:package clean.
+
+## Run 13 — 2026-09-18 21:30 — two vowel blocks that dissolved, and the instrument bug underneath them
+
+Working the residual by block. ⚠ **TWO OF THE THREE BIGGEST DID NOT SURVIVE MEASUREMENT**, and that is
+the finding: after the velar fix, what is left of the lexicon residual is mostly AXIS, not defect.
+
+**`-es` (486 OOV rows, 91% failing) — not productive.** The OOV half is real (classical `-es` is its own
+syllable /iːz/) but it is `aeacides`, `aegicores`, `aesyetes`. The LEXICON half is 23 rows and almost all
+false: Moby reads ENGLISH words as Latin — `comes` koʊmiz, `dares` dɛɹiz, `manes`, `tales`, `imagines` —
+where our reading is the right one. Every common member of the class (`Socrates`, `Hercules`, `Achilles`,
+`Hades`, `Archimedes`, `Aristophanes`, `Thucydides`, `Xerxes`, `Ramses`) was already correct. One real
+defect: `Hippocrates`, which CMUdict read as the plural of a "hippocrate", hˈɪpəkɹˌeᶦts.
+
+**The `re-`/`pre-` prefix vowel (83 frequency words) — an axis, not a defect.** Our dictionary splits 49
+families arbitrarily (`predict` ɪ ×10 against `prediction`/`predictions` i; `prevent` 6 against 3), which
+looked exactly like the velar's self-evidencing inconsistency. ⚠ **BUT BOTH REFEREES ARE SPLIT TOO** —
+wikipron ɪ30/i25, Moby ɪ357/i252 — and normalising each family to its own majority measured
+SCORE-NEUTRAL: Moby 10→10 of the 23 covered, and the single wikipron-covered row went 1→0. 72 rows not
+changed, on the repo's own bar that a class needs evidence we are RIGHT, not merely that we disagree.
+
+**And underneath them, a referee bug worth more than either.** Mining the length-differs bucket surfaced
+rows that are not disagreements at all: `city` scored against `boʊʒɚ`, `peak` against `kɔɹkoʊvɑdoʊ`.
+Moby has BOTH `City 'b/oU//Z//[@]/r` (a surname) and `city 's/I/t/i/`, and the builder lower-cased the
+key and took FIRST-WINS — so the surname displaced the common noun. 565 headwords carry more than one
+distinct reading once folded and 273 had a capitalised entry winning: `air`, `acre`, `airy`, `abbe`,
+`alba`. ⚠ THE OLD COMMENT'S REASONING WAS SOUND FOR THE CASE IT ADDRESSED (variants of ONE word) AND
+BLIND TO THIS ONE (two different lexemes). Case is the discriminator: our keys are lower-case common
+words, so the lower-case entry wins and the capitalised reading is DROPPED rather than offered as an
+alternative — crediting a surname's reading for a common noun would hide a real error. Genuine
+same-case variants are still emitted tab-separated, which the eval credits any of.
+
+## Run 14 — 2026-09-18 21:45 — how far the dictionary can be extended, measured
+
+⚠ **THE DICTIONARY ALREADY COVERS ALL 40,000 FREQUENCY WORDS — zero gaps.** So extension means the tail,
+and the import census says what is there:
+
+    considered 123,211   already in dict 81,950   no gold 33,684   gold disagrees 7,411   importable 0
+
+⚠ **THE DISAGREEMENTS ARE MOSTLY SUBSTANTIVE, NOT CONVENTION.** 6,170 of 7,453 differ in LENGTH, i.e. in
+syllable count. The two-source bar was right to exclude them.
+
+⚠ **BUT READING THEM, RATHER THAN COUNTING THEM, FOUND TWO THINGS A PASS/FAIL TEST CANNOT.**
+  · The delta-1 bucket (4,565, the largest) is dominated by `-ian` as /iən/ against /jən/
+    (`abbevillian` L IY ə N vs L Y ə N, `abelian` the same) and by weak vowels — DECLARED axes, so much
+    of that bucket may be importable after all. Not taken here; it wants its own sizing.
+  · Five Moby entries transcribe an initial `/dZ/` on a VOWEL-SPELLED word, where the palatal glide
+    belongs: `Eurocommunism`, `unilocular`, `uninucleate`, `usucaption`, `Egan` — four of them directly
+    before /u/ or /ʊ/. A word spelled with an initial vowel cannot begin with /d͡ʒ/. The converter is not
+    at fault; it renders `/j/` correctly everywhere else. Fixed in the builder.
+
+    eurocommunism  d͡ʒʊɚoʊkɑmjʊnɪzəm → jʊɚoʊkɑmjʊnɪzəm
+
+### Shipped in this block
+
+  · `Hippocrates` corrected (dict + curated).
+  · `Euripides` and `Herodotus` ADDED — both were OOV and wrong (jʊɹˌɪpʰˈaᶦdz, hˈɛɹoᶷdˌɑːt̬əs with the
+    stress on the wrong syllable), both carried by Moby AND gold, both recorded in `moby-import.tsv` so
+    the referee excludes them rather than scoring us on a reading we took from it.
+  · The case-folding collision and the initial-yod defect in the referee builder.
+
+                       folded            +intentional
+    primary wikipron   61.9% (unchanged) 67.4%
+    Moby lexicon       74.9% → 75.0%     81.6% → 81.7%
+    Moby OOV           37.1% → 37.2%     45.3%
+
+⚠ THE SCORE BARELY MOVES AND THAT IS NOT THE POINT OF THE CASE FIX: most collisions shared a reading, or
+we were wrong on both. What changed is that the instrument stopped asking about `city` and answering
+"Bougère".
+
+
+## Run 15 — 2026-09-18 22:10 — review: "lower-case wins" was the wrong fix, measured
+
+⚠ **PREFERRING THE LOWER-CASE ENTRY FIXED `city` AND BROKE 63 OTHER ROWS.** Measured pass→fail against
+fail→pass on the lexicon referee: 63 against 75. Roughly half our headwords ARE the capitalised lexeme,
+and several lower-case Moby rows are TYPOS that the capitalised row gets right:
+
+    cook       k/u/k          against  Cook      k/U/k              (ours kʊk — the lower-case row is wrong)
+    charlie    't/S//A/rl/i/  against  Charlie   '/tS//A/rl/i/      (affricate written as two symbols)
+    dalmatian  d/&/l'm/eI/sh/@/n       Dalmatian …/S//@/n           (a literal ASCII `sh`)
+    canada     k/@/n'/j//A/d/@/        Canada    'k/&/n/@/d/@/      (Cañada)
+    august     /O/'g/@/st              August    '/O/g/@/st         (the adjective, not the month)
+
+⚠ **THE ANSWER WAS TO STOP DISCARDING READINGS, NOT TO CHOOSE BETTER ONES.** The eval credits ANY
+tab-separated reading, so both cases are now emitted and nothing is picked. `city` gets `sɪti boʊʒɚ` and
+is credited; `cook` gets both and is credited. 471 rows carry more than one reading.
+⚠ The residual risk is named rather than hidden: where a surname and a common noun genuinely differ, the
+row credits either, so a real error on one can hide. That is far narrower than the 63, and it is the
+latitude every multi-variant referee row already carries.
+
+    Moby lexicon   75.0% → 75.3%      +intentional 81.7% → 82.0%
+
+### And the two hand-added headwords were reverted, for a better reason than the review gave
+
+`euripides` and `herodotus` were put in `moby-import.tsv`, whose contract is "Moby AND gold agree" and
+whose job is to be RE-APPLIABLE after an `--emit`. They cleared neither: the readings match neither
+source exactly, so the generator would reject them. ⚠ AND CHECKING **WHY** THEY FAIL SETTLES WHERE THEY
+BELONG:
+
+    euripides  moby Y UH0 R IH1 P IH0 D IY2 Z   gold Y ER0 IH1 P AH0 D IY0 Z    UH0 vs ER0
+    herodotus  moby HH IH0 R AA1 D AH0 T AH0 S  gold HH EH0 R AA1 D AH0 T AH0 S IH0 vs EH0
+
+Both differ ONLY on an UNSTRESSED vowel — they are members of the 1,954-row class measured in Run 14,
+which the import tool will take mechanically once it folds that axis. Hand-adding them now would have
+pre-empted a rule with two exceptions. Reverted; they come back with the rest.
+
+### Also from the review
+
+  · `fixInitialYod` is now gated on a following /u/–/ʊ/. Ungated it also rewrote `Egan /dZ//oU/gz` — a
+    MISALIGNED row whose body belongs to another headword — laundering obvious garbage into a
+    plausible-looking wrong reading. The four real entries are all before the yod's vowel.
+  · The diagnostic counted headwords appearing in BOTH cases (1,759) while claiming to count
+    DISPLACEMENTS (~230). It now counts rows that actually carry more than one reading: 471.
+  · The emitted header no longer claims "one reading per headword".

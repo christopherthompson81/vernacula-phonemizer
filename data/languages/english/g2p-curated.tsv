@@ -2124,3 +2124,11 @@ congruent	K AO1 N G R UW0 EH2 N T	K AO1 NG G R UW0 EH2 N T	velar nasal: no live 
 congruence	K AO1 N G R UW0 AH0 N S	K AO1 NG G R UW0 AH0 N S	velar nasal: no live prefix; as `congruent`
 syncope	S IH1 N K AH0 P IY2	S IH1 NG K AH0 P IY2	velar nasal: no live prefix; /ˈsɪŋkəpi/, Moby sɪŋkəpi
 encore	AA1 N K AO2 R	AA1 NG K AO2 R	velar nasal: no live prefix; /ˈɑŋkɔɹ/, Moby ɑŋkɔɹ
+
+# A CLASSICAL NAME READ AS AN ENGLISH PLURAL. The `-es` of a Greek/Latin name is its own syllable /iːz/
+# (Socrates, Hercules, Archimedes, Sophocles — all correct in the dict already); CMUdict read this one as
+# the plural of a thing called a "hippocrate", stressing the wrong syllable with it.
+# ⚠ THE ONLY ONE. Every other common member of the class was checked against the Moby referee and is
+# already right; the rest of the `-es` residual is Moby reading ENGLISH words as Latin (`comes` koʊmiz,
+# `dares` dɛɹiz, `manes`, `tales`), where our reading is the correct one.
+hippocrates	HH IH1 P AH0 K R EY2 T S	HH IH0 P AA1 K R AH0 T IY2 Z	classical -es read as an English plural; /hɪˈpɑkrətiːz/, Moby hɪpɑkɹətiz
