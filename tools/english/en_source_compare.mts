@@ -132,17 +132,6 @@ export function mobyToArpabet(p: string): string[] | undefined {
 }
 
 /**
- * Fold Moby's pre-merger layers AND its rhotic notation so it can vote on modern GenAm. See the header.
- *
- * ⚠ MOBY SPELLS EVERY UNSTRESSED `-ər` AS TWO SYMBOLS, `/@/r` — `ocular` is \'/A/k/j//@/l/@/r. Both this
- * repo and gold write that as the single phone ER, so without folding it back the converter returned
- * `AH0 R` and EVERY WORD ENDING IN -er/-or/-ar/-ur fell out of the audit into "split" — the two sources
- * could never be seen to agree. That is not a small class: it hid the whole `-ular`/`-ulation` family
- * (`ocular`, `mandibular`, `ventricular`, `permutation`), where Moby in fact agrees with gold exactly.
- * ⚠ THE CONSONANT LOOKAHEAD IS LOAD-BEARING. `AH R` before a VOWEL is an onset `r` in the next syllable
- * (`around` = ə-ɹaʊnd), not a coda, and folding it would rewrite that as ɚ.
- */
-/**
  * MOBY ROWS WHOSE BODY IS NOT THE HEADWORD'S READING. Not a pronunciation variant, not a notation
  * difference — the pronunciation field carries a DIFFERENT WORD, or a fragment of one.
  *
@@ -178,6 +167,17 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     ["wakayama", "nonsense — 'W EH P'"],
 ]);
 
+/**
+ * Fold Moby's pre-merger layers AND its rhotic notation so it can vote on modern GenAm. See the header.
+ *
+ * ⚠ MOBY SPELLS EVERY UNSTRESSED `-ər` AS TWO SYMBOLS, `/@/r` — `ocular` is \'/A/k/j//@/l/@/r. Both this
+ * repo and gold write that as the single phone ER, so without folding it back the converter returned
+ * `AH0 R` and EVERY WORD ENDING IN -er/-or/-ar/-ur fell out of the audit into "split" — the two sources
+ * could never be seen to agree. That is not a small class: it hid the whole `-ular`/`-ulation` family
+ * (`ocular`, `mandibular`, `ventricular`, `permutation`), where Moby in fact agrees with gold exactly.
+ * ⚠ THE CONSONANT LOOKAHEAD IS LOAD-BEARING. `AH R` before a VOWEL is an onset `r` in the next syllable
+ * (`around` = ə-ɹaʊnd), not a coda, and folding it would rewrite that as ɚ.
+ */
 export function modernise(a: string[]): string[] {
     const out: string[] = [];
     for (let i = 0; i < a.length; i++) {

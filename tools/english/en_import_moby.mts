@@ -105,14 +105,33 @@ const VOWEL = /^(AA|AE|AH|AO|EH|IH|IY|UH|UW)[0-2]?$/u;
 const reduceUnstressed = (a: string[]): string[] =>
     a.map((p) => (VOWEL.test(p) && p.endsWith("0") ? "AH0" : p));
 
+/**
+ * Moby's own tail defects, repaired before the comparison so that a defect cannot BLOCK a legitimate
+ * agreement — `unilocular` is `JH UW2 …` in Moby, its initial-yod bug, and could never match gold.
+ * Each repair and its evidence is argued in tools/gen/build-en-moby-referee.mts.
+ *
+ * ⚠ THE GEMINATE COLLAPSE IS A MATCHING AID ONLY, NEVER A SHIPPED READING, and the distinction is
+ * load-bearing. The sibling tool degeminates in the OOV referee file ONLY, because the DICTIONARY path
+ * does not collapse and 144 `g2p-dict.tsv` rows carry a real geminate at a compound seam. Applying it
+ * unconditionally here dropped 58 already-shipped words on re-apply — `backcourt` and `blackcap` among
+ * them, the two the sibling names as the reason not to. Applying it not at all lost the `-ally` class,
+ * where Moby's spurious `L L` is what blocks a legitimate gold match. So BOTH forms are offered to the
+ * comparison, and whichever agrees decides — but a row that needed the collapse takes GOLD's reading,
+ * so no degeminated Moby reading ever enters the dictionary.
+ */
+function degeminate(a: string[]): string[] {
+    const out: string[] = [];
+    for (const p of a) {
+        const prev = out[out.length - 1];
+        if (prev !== undefined && prev === p && CONSONANT.has(p.replace(/[0-2]$/u, ""))) continue;
+        out.push(p);
+    }
+    return out;
+}
+
 /** The consonants, for the geminate collapse — English has no consonant-length contrast. */
 const CONSONANT = new Set("B CH D DH F G HH JH K L M N NG P R S SH T TH V W Y Z ZH".split(" "));
 
-/**
- * Moby's own tail defects, repaired on the way into the lexicon. Only reached by `--no-gold`, where no
- * second source can catch them; the two-source arm needs none of this because gold already has.
- * Each repair and its evidence is argued in tools/gen/build-en-moby-referee.mts.
- */
 function repairMoby(word: string, a: string[]): string[] {
     let out = [...a];
     // The unstressed suffix vowel, normalised to Moby's OWN majority spelling.
@@ -123,14 +142,6 @@ function repairMoby(word: string, a: string[]): string[] {
     }
     // An initial /dZ/ on a vowel-spelled word before /u/–/ʊ/ is the palatal glide.
     if (out[0] === "JH" && /^[aeiou]/u.test(word) && /^(UW|UH)/u.test(out[1] ?? "")) out[0] = "Y";
-    // Geminate consonants: the engine's own OOV paths collapse them and CMUdict does not carry them.
-    const deg: string[] = [];
-    for (const p of out) {
-        const prev = deg[deg.length - 1];
-        if (prev !== undefined && prev === p && CONSONANT.has(p.replace(/[0-2]$/u, ""))) continue;
-        deg.push(p);
-    }
-    out = deg;
     return out;
 }
 
@@ -161,6 +172,9 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     // inconsistency in build-en-moby-referee.mts — so applying them first removes a corruption rather
     // than manufacturing an agreement.
     const m = repairMoby(w, raw);
+    const rawOurs = merge(modernise(raw));
+    // ⚠ THE CANDIDATES THE COMPARISON MAY USE, widest last. Only the FIRST is a reading Moby earned.
+    const candidates = [rawOurs, merge(modernise(m)), merge(modernise(degeminate(m)))];
     const g = goldOf(w);
     const ga = g === undefined ? undefined : goldToArpabet(g);
     if (!ga) {
@@ -175,18 +189,27 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     }
     const ours = merge(modernise(m));
     let take = ours, viaFold = false;
-    if (normalise(ours) !== normalise(ga)) {
+    // ⚠ AGREEMENT THE REPAIR PRODUCED IS NOT AGREEMENT MOBY EARNED, and treating it as such defeated the
+    // rule below for the exact class it was written for. The `-ness` repair rewrites the very vowel the
+    // unstressed fold is about, so the pair agreed OUTRIGHT and Moby's reading was taken — and Moby
+    // marks no stress on `blondness`, `crassness`, `dankness`, `lewdness`, which shipped with no primary
+    // at all. Only agreement on the RAW reading counts as Moby's; anything the repair or the fold
+    // produced takes gold's.
+    if (normalise(rawOurs) !== normalise(ga)) {
+        if (candidates.some((c) => normalise(c) === normalise(ga))) { take = merge(modernise(ga)); viaFold = true; }
+        else {
         // ⚠ AGREEING ONLY AFTER THE REDUCTION FOLD MEANS GOLD'S READING IS THE ONE TO TAKE, not Moby's.
         // The two now differ ONLY in unstressed vowels, and Moby's are the unreliable half — the same
         // conservatism that writes `-ness` as `nɛs` in 1,622 of its own rows. Gold is also the lexicon
         // this engine's conventions follow (#1319 added the reduced slot misaki writes).
-        if (normalise(reduceUnstressed(ours)) !== normalise(reduceUnstressed(ga))) { disagree++; continue; }
-        // ⚠ FULLY MODERNISED, LIKE THE MOBY BRANCH. A row entering the LEXICON must arrive in this
-        // engine's conventions — the header says so — and `merge` alone is only the marry–merry half.
-        // Without `modernise`, gold's yod shipped intact: `exudation` as ˌɛksjuːdˈeᶦʃən where the engine
-        // coalesces S+j+uː → ʃuː, and `minho` as mˈiːnjuː where it drops the yod after N.
-        take = merge(modernise(ga));
-        viaFold = true;
+            if (!candidates.some((c) => normalise(reduceUnstressed(c)) === normalise(reduceUnstressed(ga)))) { disagree++; continue; }
+            // ⚠ FULLY MODERNISED, LIKE THE MOBY BRANCH. A row entering the LEXICON must arrive in this
+            // engine's conventions — the header says so — and `merge` alone is only the marry–merry
+            // half. Without `modernise`, gold's yod shipped intact: `exudation` as ˌɛksjuːdˈeᶦʃən where
+            // the engine coalesces S+j+uː → ʃuː, and `minho` as mˈiːnjuː where it drops the yod after N.
+            take = merge(modernise(ga));
+            viaFold = true;
+        }
     }
     // ⚠ A COMMONWEALTH SPELLING THE FOLD ALREADY RESOLVES MUST NOT BE IMPORTED. `analyse` was not in the
     // dictionary and did not need to be: `americanSpelling` mapped it to `analyze`, which carries this
