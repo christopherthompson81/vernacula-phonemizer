@@ -184,8 +184,15 @@ function normaliseSuffix(word: string, a: string[]): string[] {
 }
 
 const dict = new Set<string>();
-for (const l of readFileSync(join(REPO, "data/languages/english/g2p-dict.tsv"), "utf8").split("\n"))
-    if (l.includes("\t") && !l.startsWith("#")) dict.add(l.split("\t")[0]!.toLowerCase());
+/** Our own ARPABET for the word, where we have one — the discriminator the non-rhotic rule needs. */
+const ourArpabet = new Map<string, string>();
+for (const l of readFileSync(join(REPO, "data/languages/english/g2p-dict.tsv"), "utf8").split("\n")) {
+    if (!l.includes("\t") || l.startsWith("#")) continue;
+    const [w, a] = l.split("\t");
+    const k = w!.toLowerCase();
+    dict.add(k);
+    if (!ourArpabet.has(k)) ourArpabet.set(k, a!);
+}
 
 /**
  * ⚠ EVERY IMPORTED WORD IS DROPPED FROM BOTH CORPORA, and this is the line that keeps the referee a
@@ -223,6 +230,54 @@ let rows = 0, declined = 0, unmapped = 0, defective = 0;
  * now credits either, so a real error on one of them can hide. That is a far narrower loss than the 63,
  * and it is the same latitude every multi-variant referee row in this repo already carries.
  */
+/**
+ * NON-RHOTIC ROWS — Moby transcribing RP, which cannot arbitrate a GenAm reading.
+ *
+ * ⚠ RP IS NOT THE SAME THING AS A LOANWORD, and conflating them was the first draft's mistake. Moby
+ * writes `afterwards` as `æftəwədz` and `backwards` as `bækwədz` because the transcription is BRITISH:
+ * we say the /r/, Moby does not, and scoring us against that marks us wrong for being right. But it
+ * also writes `dossier` as `dɑsieɪ` and `metier` as `meɪtjeɪ`, where the ⟨r⟩ is silent IN GenAm TOO —
+ * a fact about how English borrowed the word. Those rows are correct, we read them r-less as well, and
+ * they PASS today. Excluding them would throw away credit we are earning.
+ *
+ * ⚠ THE FRENCH EXEMPTION IS `-ier`, NOT `-er`/`-et`, AND THAT WAS MEASURED. `et$` looked reasonable and
+ * exempts `hairnet` hɛnɛt, `overset` oʊvəsɛt and `superhet` supəhɛt — all plainly RP. `-ier` and its
+ * plural are the ending that is reliably French (`dossier`, `bustier`, `chansonnier`, `menuisier`,
+ * `cuvier`, `tablier`, 30 of them); the handful that do not fit it are named individually.
+ */
+const RHOTIC = /[ɹɚɝɻr]/u;
+/** Our reading carries a rhotic. `R` and `ER` are the only ARPABET symbols that do. */
+const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
+/**
+ * BOTH of the wikipron config's non-rhotic rules, because the first alone leaves the largest class.
+ *
+ * ⚠ THE SECOND RULE IS NOT OPTIONAL, AND ITS ABSENCE WAS THE BUG. `[aeiouy]r(?![aeiouy])` rejects every
+ * `-ered`/`-ored`/`-ured`/`-ared` word, because the ⟨e⟩ after the ⟨r⟩ is a vowel LETTER even though it
+ * is silent — so `battered bætəd`, `coloured kʌləd`, `unanswered ənɑnsəd`, `unpaired ənpɛd` all
+ * survived, 45 of them, which is the biggest RP class in the corpus. en.jsonc:31 already carries the
+ * second rule for exactly this, naming `featured fiːt͡ʃəd`.
+ * ⚠ AND THE SECOND RULE LOOKS ONLY AT THE TAIL, because an ONSET /ɹ/ shields a non-rhotic coda: a
+ * whole-string test keeps `particolored pɑɹtɪkʌləd` and `pilastered pɪləstɹeɪd`.
+ */
+const SPELLED_R = /[aeiouy]r(?![aeiouy])/u;
+const FINAL_R = /[aeiouy]r(?:e|ed)?$/u;
+const refereeIsNonRhotic = (w: string, reads: string[]): boolean =>
+    (SPELLED_R.test(w) && reads.every((r) => !RHOTIC.test(r)))
+    || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))));
+/**
+ * ⚠ A SPELLING TEST CANNOT TELL RP FROM A LOANWORD, WHICH THE FIRST DRAFT ASSUMED IT COULD. `-ier`
+ * looked reliably French and admits `pliers` (ours `P L AY1 ER0 Z`, rhotic) and `messier` — where Moby
+ * has the ASTRONOMER and our headword is the comparative of *messy*. 8 of the 12 rows it exempted have
+ * a rhotic dictionary reading, i.e. they are RP rows readmitted by hand.
+ * ⚠ THE REAL DISCRIMINATOR IS OUR OWN READING: on a loanword we are r-less TOO and the row passes; on
+ * an RP row we have the rhotic and it never can. Where the dictionary has the word, that is exact.
+ * ⚠ WHERE IT DOES NOT — the OOV corpus — there is no second opinion, so the `-ier` ending is used as a
+ * proxy and nothing else. `-eur`/`-oir` were in the first draft and are NOT here: the ⟨r⟩ of
+ * `chauffeur`, `connoisseur`, `liqueur`, `memoir`, `choir` is PRONOUNCED in GenAm, and Moby writes it —
+ * an exemption that fires on zero rows today and would retain RP if it ever fired.
+ */
+const FRENCH_IER = /iers?$/u;
+
 const readings = new Map<string, { lower: string[]; upper: string[] }>();
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const sp = line.indexOf(" ");
@@ -246,9 +301,15 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const bucket = /^[A-Z]/u.test(cased) ? e.upper : e.lower;
     if (!bucket.includes(ipa)) bucket.push(ipa);
 }
-let multiReading = 0;
+let multiReading = 0, nonRhotic = 0;
 for (const [w, { lower, upper }] of readings) {
     const all = [...lower, ...upper.filter((r) => !lower.includes(r))];
+    // ⚠ EVERY reading must lack the rhotic — a row that carries a rhotic variant can still arbitrate.
+    if (refereeIsNonRhotic(w, all)) {
+        const ours = ourArpabet.get(w);
+        const drop = ours !== undefined ? WE_ARE_RHOTIC.test(ours) : !FRENCH_IER.test(w);
+        if (drop) { nonRhotic++; continue; }
+    }
     // ⚠ COUNTS ROWS THAT ACTUALLY CARRY MORE THAN ONE READING, not headwords that merely appear in both
     // cases: an earlier version counted the latter and reported 1,759 where the real figure is ~230.
     if (all.length > 1) multiReading++;
@@ -267,5 +328,6 @@ writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary ca
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
 console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, defective ${defective}, excluded-as-imported ${imported.size}`);
 console.log(`  headwords emitting more than one reading: ${multiReading}`);
+console.log(`  dropped as NON-RHOTIC (Moby transcribing RP): ${nonRhotic}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);
 console.log(`  en.moby-oov.tsv      ${oov.length}`);

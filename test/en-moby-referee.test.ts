@@ -25,7 +25,7 @@ const oov = read("en.moby-oov.tsv");
 describe("the Moby referee corpora", () => {
     test("they are large, disjoint, and one reading per headword", () => {
         expect(lex.size).toBeGreaterThan(30_000);
-        // ⚠ 41,276, NOT THE ORIGINAL 57,503: #1344 imported 16,227 of these headwords into the dictionary
+        // ⚠ 39,485, NOT THE ORIGINAL 57,503: #1344 imported 16,227 of these headwords into the dictionary
         // and the generator now EXCLUDES every imported word from both corpora, because scoring ourselves
         // against Moby on a word whose reading we took from Moby is a mirror. The remainder is the harder
         // residue — gold has no reading for most of it — so its score is not comparable to the pre-import
@@ -34,6 +34,37 @@ describe("the Moby referee corpora", () => {
         // ⚠ DISJOINT BY CONSTRUCTION: the split IS "does g2p-dict.tsv carry this word", which is what makes
         // the second file a referee for the OOV tier rather than a second opinion on the lexicon.
         expect([...lex.keys()].filter((w) => oov.has(w))).toEqual([]);
+    });
+
+    // ⚠ THE NON-RHOTIC EXCLUSION IS PINNED HERE BECAUSE A REGEX EDIT MOVES HUNDREDS OF ROWS SILENTLY,
+    // and because the line it draws is the subtle one in this file: RP is dropped, a LOANWORD is not.
+    // Moby writes `afterwards` as æftəwədz because the transcription is BRITISH — we say the /r/. It
+    // writes `dossier` as dɑsieɪ because the ⟨r⟩ is silent in GenAm too, we read it r-less as well, and
+    // the row passes. The discriminator is OUR OWN reading, not the spelling: a spelling test exempted
+    // `pliers` (ours `P L AY1 ER0 Z`) and `messier` — where Moby has the ASTRONOMER and our headword is
+    // the comparative of `messy`.
+    test("RP rows are dropped and GenAm-silent loanwords are kept", () => {
+        for (const w of ["afterwards", "backwards", "bifurcate", "binoculars", "comfortable",
+            // ⚠ THE `-ered` FAMILY IS THE LARGEST CLASS AND THE FIRST RULE ALONE MISSES IT: the ⟨e⟩
+            // after the ⟨r⟩ is a vowel LETTER even when silent, so the coda lookahead rejects the word.
+            "battered", "coloured", "chambered", "unanswered", "tattered",
+            // ⚠ AND AN ONSET /ɹ/ SHIELDS A NON-RHOTIC CODA unless the test looks at the TAIL only.
+            "particolored"])
+            expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
+        // Kept: we are r-less here too, so these are not RP and they score.
+        expect(lex.get("dossier")).toBe("dɑsieɪ");
+        expect(lex.get("boucher")).toBe("buʃeɪ");
+        // ⚠ AND THESE WERE EXEMPTED BY A SPELLING RULE AND SHOULD NOT HAVE BEEN — our reading is rhotic,
+        // so the row can never pass and is RP readmitted by hand.
+        for (const w of ["pliers", "messier", "tourniquet", "angers"])
+            expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
+    });
+
+    // ⚠ A ROW WHOSE BODY IS A DIFFERENT WORD CANNOT ARBITRATE ANYTHING, so MOBY_DEFECTIVE drops it from
+    // both corpora. Pinned because the list is hand-curated and silence is how it would rot.
+    test("defective rows reach neither corpus", () => {
+        for (const w of ["gorbachev", "carr", "pathology", "workbasket", "sleipnir", "monosaccharide"])
+            expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
     });
 
     test("NOTATION is folded — Moby's two symbols become this engine's one", () => {
