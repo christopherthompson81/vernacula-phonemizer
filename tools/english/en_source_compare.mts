@@ -135,11 +135,24 @@ export function mobyToArpabet(p: string): string[] | undefined {
         // `mishap 'm/I/s,h/&/p`, `grasshopper 'gr/&/s,h/A/p/@/r`, `household 'h/AU/s,h/oU/ld`,
         // `foxhole 'f/A/ks,h/oU/l`. Measured over every in-dict row: ADJACENT `sh` is 18 lapses and 0
         // seams; SEPARATED `s,h`/`s'h` is 35 seams and 0 lapses. Not one exception either way.
-        // ⚠ AND IT IS `sh` ONLY. The same test fails for its neighbours, which is why they are absent:
-        // adjacent `gh` has `leghorn` (leg|horn) among its four, and adjacent `kh` is almost all seams
-        // — `back·haus`, `bank·head`, `lock·hart`, `monk·hood`, `stock·holm`. Moby's separator habit is
-        // consistent for this digraph and not for those.
+        // ⚠ AND IT IS `sh` AND `wh` ONLY. The same test fails for the others, each in its own way:
+        // adjacent `kh` is seams plus foreign /x/ (`back·haus`, `bank·head`, `lock·hart`, `monk·hood`,
+        // `stock·holm`) with no lapses at all; `ph` runs 4 seams to 1 lapse, and that one lapse is
+        // handled as a MOBY_DEFECTIVE row instead; and `th`, `ch` and `ng` have ZERO adjacent
+        // occurrences, so there is nothing to scope.
+        // ⚠ `gh` IS EXCLUDED FOR A DIFFERENT REASON THAN THE FIRST DRAFT GAVE, and the reason is more
+        // interesting: of its 37 adjacent rows only three are seams (`leg·horn`, `lug·hole`,
+        // `Barg·hoorn`). The other 34 are a THIRD convention — Moby spelling a hard /ɡ/ before a front
+        // vowel in Romance names, `Giza 'gh/i/z/@/`, `Guillermo gh/i/'/E/rm/oU/`. Mapping it to `G`
+        // would be right 34 times in 37, which is not the standard the two rules above meet.
         if (c === "s" && s[i + 1] === "h") { out.push("SH"); i += 2; continue; }
+        // ⚠ AND BARE `wh` IS THE SAME LAPSE, by the file's own convention: Moby HAS a `/hw/` symbol and
+        // uses it 1,088 times, so writing the spelling instead is a slip. The partition is as clean as
+        // `sh` and smaller — 5 adjacent occurrences, 0 separated. It maps to `W`, exactly where `M_C`
+        // already sends `hw`, because this converter follows the GenAm wine–whine merger; gold reads
+        // `whippet` as `wˈɪpət`. Left alone it shipped a spurious /h/ on `guisewite` — which has no ⟨h⟩
+        // in its spelling at all — plus `whap`, `whapping` and `whippet` in the OOV tier.
+        if (c === "w" && s[i + 1] === "h") { out.push("W"); i += 2; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
     }

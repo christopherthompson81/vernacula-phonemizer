@@ -2982,3 +2982,161 @@ not for those, so the rule is scoped to the one place it was verified.
 been the same reading written twice. Seam rows are untouched and verified by name: `mishap mɪshæp`,
 `grasshopper ɡɹæshɑpɚ`, `household haʊshoʊld`, `foxhole fɑkshoʊl`, `dachshund dækshʊnd`,
 `leghorn lɛɡhɔɹn`, `stockholm stɑkhoʊm`.
+
+## Run 53 — 2026-09-19 12:37 — review of #1365: the partition holds, and it holds wider than claimed
+
+Reviewed `fix/moby-bare-sh` (577402ce) against `origin/main` (17bc6a7e) from a detached worktree, with
+the referees regenerated from `MOBY=/mnt/data/moby/mobypron.unc` on **both** trees before any number was
+read. Verdict: **approve**. Every claim reproduced, one of them understated, and one exact-analogue class
+left on the floor.
+
+### The partition, re-derived independently
+
+Rather than classify against our dictionary at all — the step that produced Run 52's four phantom
+exceptions — I enumerated the raw Moby bodies directly: strip every `/…/` group to a sentinel, then scan
+the surviving bare-letter stream for `s`+`h` adjacent versus `s,h`/`s'h` separated, over all 177,267 rows
+rather than only the in-dict ones. Question: does the separator predict the reading with no reference to
+our side of the comparison?
+
+    sh  adjacent 48 occurrences (46 distinct rows)   separated 108 occurrences
+    gh  adjacent 37   kh adjacent 37   ph adjacent 5   zh 1   wh 5
+    th  adjacent  0   ch adjacent  0   ng adjacent 0
+
+Then I read all 46 adjacent rows and all 108 separated rows by hand. **Every one of the 46 is ʃ. Every one
+of the 108 is a seam.** No dictionary was consulted, so there is no position-versus-anywhere error
+available to make. The claim is not just exception-free in-dict — it is exception-free over the whole file.
+
+⚠ THE TWO ROWS THAT LOOK LIKE COUNTEREXAMPLES ARE THE PROOF. `gooseflesh 'g/u/s,fl/E/sh` and
+`washhouse 'w/O/sh,h/&//U/s` each contain BOTH forms in one body: the compound seam written with the
+comma, the ʃ written adjacent. Moby is not being inconsistent within a row — it is using the separator
+exactly as the PR says. `sheepshead '/S//i/ps,h/E/d` is the same evidence from the other direction: `/S/`
+for the ʃ and `s,h` for the seam, one row.
+
+### The OOV tier, which Run 52 did not characterise
+
+Asked for explicitly, and it is the right question — the rule changes both files but only the in-dict half
+was measured. Of the 17 OOV rows the change touches, exactly two are seam-adjacent, and both get BETTER:
+
+    washhouse   wɔshaʊs  →  wɔʃhaʊs      engine: wˈɔːʃhˌaᶷs   fail → PASS
+    gooseflesh  ɡusflɛsh →  ɡusflɛʃ      engine: ɡˈuːsflˌɛʃ   fail → PASS
+
+`washhouse` is the interesting one. Old converter: `sh` → S HH, then the separated `,h` → HH, and the
+OOV-only `degeminate` **swallowed the second HH** — so the old referee reading had lost the seam /h/
+entirely and read `wɔshaʊs`. The new rule restores it. A row that was wrong in two ways is now right.
+
+No OOV row has an adjacent `sh` that is a genuine seam.
+
+### All 18 in-dict lapse rows are ʃ in GenAm
+
+Checked each against the shipped engine (`phonemizeAsync(w,"en")`); all 18 plus the 3 collapse rows come
+out with ʃ at the position in question — `adulation ˌæd͡ʒəlˈeᶦʃən`, `predaceous pɹidˈeᶦʃəs`,
+`shew ʃˈuː`, `qursh kʰˈɝʃ`, `washbasin wˈɔːʃbeᶦsn̩`, and so on. None is a /s/+/h/ word.
+
+⚠ NO ROW CAN GO PASS→FAIL HERE, and this is structural rather than lucky: the old reading differed from
+the new one ONLY by carrying a literal `s`+`h` where the new one has `ʃ`, so a row that passed before
+required the engine to emit /sh/ at that spot. None of the 38 does. The +12/+9 is 38 rows changed, 21 of
+them newly agreeing, 17 still failing for unrelated reasons (`machicolation` is ours: we drop the t͡ʃ
+outright, `məˌɪkəlˈeᶦʃən`).
+
+### The exclusions are right, and `th`/`ch`/`ng` are righter than stated
+
+`th`, `ch` and `ng` have **zero** adjacent occurrences in the entire file — Moby never once lapses into
+those spellings, so there is nothing to scope in or out. The three excluded by measurement:
+
+  • `gh` — correctly excluded, but the stated reason undersells it. Of 37 adjacent rows only `leghorn`,
+    `lughole` and `Barghoorn` are seams; the other 34 are a THIRD convention entirely, Moby spelling hard
+    /ɡ/ before a front vowel in Romance names — `Giza 'gh/i/z/@/`, `Guillermo gh/i/'/E/rm/oU/`,
+    `Genda 'gh/@/nd/A/`. Not a digraph lapse at all, and a rule modelled on `sh` would have wrecked them.
+  • `kh` — correctly excluded: seams (`back·haus`, `lock·hart`, `monk·hood`, `stock·holm`, `Elk·hart`,
+    `Lake·hurst`, `Pank·hurst`, `Durk·heim`) plus foreign /x/ (`Dachau`, `Heydrich`, `Khalifa`). No lapses.
+  • `ph` — 5 adjacent: four seams (`mop·head`, `tap·house`, `up·heaped`, `Imphal`) and ONE lapse,
+    `geomorphological ,m/O/rph/@/…`. 4-to-1 is not exception-free, so excluding it is the correct call.
+
+⚠ AND ONE DIGRAPH NOBODY CHECKED: `wh`. **5 adjacent occurrences, 0 separated** — the same clean partition
+as `sh`, and Moby has its own symbol for this sound (`hw` is in `M_C`), so the bare spelling is a lapse by
+the file's own convention. Four of the five reach the shipped referees today carrying a spurious /h/:
+
+    en.moby-lexicon.tsv:14624  guisewite  ɡaɪzwhaɪt
+    en.moby-oov.tsv:38846      whap       whɑp
+    en.moby-oov.tsv:38848      whapping   whɑpɪŋ
+    en.moby-oov.tsv:38888      whippet    whɪpɪt
+
+Four permanently-unwinnable rows, one of them in the lexicon file. Not this PR's job — the block is scoped
+to where it was verified, which is the right instinct — but it is the identical argument on an identical
+partition, and it should be the next one.
+
+### `dalmatian`: a duplicate, not a lost variant
+
+Confirmed at the source. The collapse is a case-pair where Moby wrote the same word both ways:
+
+    Dalmatian d/&/l'm/eI//S//@/n      dalmatian d/&/l'm/eI/sh/@/n
+    Swedish   'sw/i/d/I//S/           swedish   'sw/i/d/I/sh
+    Vichy     'v/I//S//i/             vichy     'v/I/sh/i/
+
+All three collapse, 466 → 463 multi-reading headwords. Nothing is lost: the two readings were the same
+reading. These pairs are also the cleanest independent evidence for the lapse hypothesis there is — one
+headword, one pronunciation, two spellings of it, four lines apart.
+
+### Numbers, both trees, regenerated
+
+    referee rows        35,048 / 39,484        unchanged on both trees
+    regenerated output  byte-identical to what is committed, on BOTH main and the branch
+    Moby in-dict        26,639 → 26,651 (76.0%)
+    Moby OOV            17,455 → 17,464 (44.2%)
+    primary wikipron    2,584/4,037 (64.0%) unmoved
+    npx vitest run                              317 files, 6,076 passed, 5 skipped
+    npx tsx tools/check-goldens.mts --jobs 8    189 languages, 36,495 rows, 0 stale
+    dotnet run --project csharp/tools/parity    189 byte-identical, 0 differ, 5/5 accent variants
+
+Every figure in the commit message reproduces exactly. Regenerating on `main` as well as the branch is
+what makes the diff attributable — both were already in sync with their converters, so the 38 changed
+referee rows are the change and nothing else.
+
+### One reconciliation worth keeping
+
+46 distinct adjacent-`sh` rows, minus 7 multi-word bodies (`attache_case`, `Rosh_Hashanah`,
+`venetian_blind`, …) and 1 hyphenated (`papier-mache`) rejected by the headword filter, leaves **38** —
+exactly the number of referee rows the diff touches. Nothing was dropped by the import filter, the
+non-rhotic filter or `MOBY_DEFECTIVE` along the way, so the class is fully accounted for end to end.
+
+## Run 54 — 2026-09-19 — Run 53's findings: `wh` taken, and `gh` excluded for a better reason
+
+Run 53 re-derived the partition from the raw bodies alone — never consulting our dictionary, so the
+position-versus-anywhere error that bit Runs 49 and 52 was not available to it — and got a stronger
+result than Run 52 claimed: over all 177,267 rows, adjacent `sh` is 46 rows and **all 46 are ʃ**;
+separated `s,h` is 108 occurrences and **all are seams**. Exception-free over the whole file, not just
+the in-dict tier I measured. The two rows that look like counterexamples are the proof:
+`gooseflesh 'g/u/s,fl/E/sh` and `washhouse 'w/O/sh,h/&//U/s` each carry BOTH forms in one body.
+
+⚠ AND THE OOV TIER, WHICH RUN 52 DID NOT CHARACTERISE, CONTAINED THE BEST CASE FOR THE CHANGE.
+`washhouse` was worse than a false disagreement: the old converter produced `S HH` for the spelling
+and `HH` for the genuine separated seam, and the OOV-only `degeminate` then swallowed the second — so
+the referee had LOST the seam /h/ entirely, reading `wɔshaʊs`. It now reads `wɔʃhaʊs` against our
+`wˈɔːʃhˌaᶷs`. Two OOV rows are seam-adjacent and both improve; none is a genuine adjacent-`sh` seam.
+
+⚠ `wh` IS THE SAME LAPSE AND IS NOW TAKEN. Moby HAS a `/hw/` symbol and uses it 1,088 times, so the
+bare spelling is a slip by the file's own convention — 5 adjacent occurrences, 0 separated, the same
+clean shape one digraph over. It maps to `W`, exactly where `M_C` already sends `hw`, because this
+converter follows the wine–whine merger; gold reads `whippet` as `wˈɪpət`. Four rows shipped a
+spurious /h/, `guisewite ɡaɪzwhaɪt → ɡaɪzwaɪt` among them — a word with no ⟨h⟩ in its spelling at all.
+⚠ MY OWN `wh` MEASUREMENT SAID 2 ADJACENT AND 3 SEPARATED, and it was wrong. I tested for a mark
+BEFORE the pair (`[,']wh`) rather than BETWEEN the letters (`w[,']h`), so a word-initial stress mark
+read as a separator. The `sh` version of the same test was written correctly; the copy was not.
+
+⚠ AND `gh` IS EXCLUDED FOR A BETTER REASON THAN RUN 52 GAVE. I wrote that it "has `leghorn` among its
+four in-dict rows". Whole-file, it has 37 adjacent rows, of which only three are seams (`leg·horn`,
+`lug·hole`, `Barg·hoorn`) — and the other 34 are a THIRD convention entirely: Moby spelling a hard
+/ɡ/ before a front vowel in Romance names, `Giza 'gh/i/z/@/`, `Guillermo gh/i/'/E/rm/oU/`. Mapping it
+to `G` would be right 34 times in 37, which is a real option and not the standard the two rules
+above meet. Recorded as available rather than as refused.
+Also corrected: `th`, `ch` and `ng` have ZERO adjacent occurrences — nothing to scope, rather than a
+test they fail — and `kh` is seams plus foreign /x/ with no lapses at all.
+
+    Moby — words the dict carries   26,651/35,048 (76.0%)
+    Moby — OOV                      17,464 → 17,465
+    primary                         2,584 unmoved
+    goldens 0 stale · parity 189 byte-identical · 6,076 tests
+
+Run 53's reconciliation is worth keeping as the shape a future sweep should produce: 46 adjacent rows
+− 7 multi-word − 1 hyphenated = 38, exactly the referee rows the `sh` diff touches, with nothing lost
+to the import, non-rhotic or defective filters.
