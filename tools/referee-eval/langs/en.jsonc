@@ -114,6 +114,11 @@
             "note": "our palatal on-glide before a front vowel (`Albania` ælbeɪniʲə) — narrow allophonic detail with no counterpart in the referee's broad inventory, exactly like the ʰ and ɫ folds beside it. 6.9% of in-dictionary disagreements."
         },
         {
+            "pattern": "oɹ",
+            "replace": "ɔɹ",
+            "note": "FORCE \u2192 NORTH. The referee keeps them apart \u2014 `chorus` ko\u0279\u0259s, `gore` \u0261o\u0279, `morning` mo\u0279n\u026a\u014b, `emporium`, `Cawnpore`, `Mauritania` \u2014 and this engine cannot: CMUdict has no FORCE/NORTH distinction, writing `more` and `nor` alike as AO R, so there is no FORCE for us to regress INTO and the fold can hide nothing we could get wrong. Exactly the argument tools/gen/build-en-moby-referee.mts applies when folding it into the Moby artifact; this config simply never got the same treatment. 26 rows on this referee can be touched by it, 0 of which pass today and 16 of which pass after. \u26a0 AND IT BLINDS NOTHING, WHICH IS A PROPERTY OF THE PATTERN AND NOT A COINCIDENCE: it matches a BARE `o` before `\u0279`, never `o\u028a\u0279`. Our inventory has no bare `o\u0279` \u2014 AO renders `\u0254\u0279` and OW renders `o\u028a\u0279` \u2014 so the 36 `OW R` rows the dictionary does hold are compound seams (`arrow\u00b7root` \u025b\u0279o\u028a\u0279ut, `auto\u00b7rad`, `elbow\u00b7room`) where the `r` is an ONSET, and they fold to themselves on BOTH sides. Measured: of the 26 rows the pattern can touch, 0 pass today and 16 pass after, and no row goes the other way."
+        },
+        {
             "pattern": "ɝ",
             "replace": "əɹ",
             "note": "STRESSED NURSE. ɚ is already folded to əɹ and ɝ was not, so the pair differed only by a stress the segmental backbone has already stripped — `advert` ours ædvəɹt vs referee ædvɝt. Folding both to the same sequence is what makes the ɚ/ɝ distinction invisible on BOTH sides rather than on one."

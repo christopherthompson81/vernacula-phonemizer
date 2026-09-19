@@ -742,3 +742,34 @@ Four rows were identified in that session (`anderson`→Sulam, `millimeter` trun
 row whose body is a different word often also loses the ⟨r⟩ its headword is spelled with, so the r-less
 detector catches corruption the rhotic rules were not looking for. With `flayer` (`ɛfwʌn`, i.e. "F one")
 the list is now 30.
+
+## Run 22 — 2026-09-19 03:10 — FORCE→NORTH on the PRIMARY, which never had it
+
+With RP and the corrupt rows out of the corpora, the residual is finally clean enough to read, and the
+first thing in it is a fold the Moby artifact has had all along and the primary never got.
+
+The primary marks us wrong on `chorus` koɹəs, `gore` ɡoɹ, `morning` moɹnɪŋ, `emporium`, `Cawnpore`,
+`Mauritania`, `aurally`, `amorce`, `corniced` — it keeps FORCE apart from NORTH and this engine cannot:
+CMUdict writes `more` and `nor` alike as `AO R`, so there is no FORCE for us to regress INTO.
+`build-en-moby-referee.mts` applies exactly that argument when folding FORCE→NORTH into the Moby
+artifact; `en.jsonc` simply never got the same treatment.
+
+⚠ **AND THE BLINDING WAS MEASURED, NOT ASSUMED, WHICH CHANGED THE ANSWER.** Scoped first as a trade —
++13 rows against blinding the 36 `OW R` rows the dictionary holds — it turns out to cost nothing:
+
+    rows the pattern can touch   26
+    pass today                    0
+    pass after the fold          16
+    rows where BOTH sides write `oɹ`   0
+
+⚠ THE REASON IS THE PATTERN, NOT LUCK. It matches a BARE `o` before `ɹ`, never `oʊɹ`, and our inventory
+has no bare `oɹ`: AO renders `ɔɹ` and OW renders `oʊɹ`. So the 36 rows are compound seams —
+`arrow·root` ɛɹoʊɹut, `auto·rad`, `elbow·room`, where the `r` is an ONSET — and they fold to themselves
+on both sides.
+
+    primary wikipron   62.0% → 62.4%      +intentional 67.4% → 67.8%
+    Moby corpora       unchanged (the builder already folds this into the artifact)
+
+⚠ AND THE PRIMARY IS THE ONE THAT COUNTS. Every referee-repair run in this log left 62.0% untouched by
+construction; the two that moved it were the velar fix (an ENGINE change) and this, a fold the
+instrument was missing.
