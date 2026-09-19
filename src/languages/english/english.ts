@@ -541,7 +541,11 @@ export function createEnglish(): EnglishPhonemizer {
     const syllabic = loadTsvMap(import.meta.url, "en-syllabic.tsv", (v) =>
         v.split(",").map(Number).filter((n) => Number.isInteger(n)),
     );
-    const arpabetToIpa = makeArpabetToIpa(manifest.arpabet, syllabic);
+    // ⚠ THE SEAM TABLE MUST REACH BOTH RENDERERS TOO, for the reason the syllabic note above gives.
+    const nasalSeam = loadTsvMap(import.meta.url, "en-nasal-seam.tsv", (v) =>
+        v.split(",").map(Number).filter((n) => Number.isInteger(n)),
+    );
+    const arpabetToIpa = makeArpabetToIpa(manifest.arpabet, syllabic, nasalSeam);
 
     const g2pDict = loadTsvMap(import.meta.url, "g2p-dict.tsv", (v) =>
         v.split(" "),

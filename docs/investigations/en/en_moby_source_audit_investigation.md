@@ -1053,3 +1053,111 @@ necessary, and its effect on the score is the honest direction — 9 rows out of
 them already failing. Nothing else in the tree breaks. The defects are in the prose: one mis-stated count
 (14 vs 9), one summary row that states an outcome the engine does not produce (`appreciatively`), one
 undeclared false positive (`Jedburgh`), and one score movement that is partly self-scored.
+
+## Run 27 — 2026-09-19 — the velar rule measured AT THE SITE, and it is wrong more often than right
+
+The `bancroft` row Run 25 could not express turned out to be a class. Question: across the whole
+dictionary, where a nasal precedes /k/ or /ɡ/, what do the referees say, and what does the engine say?
+
+Built a labelled evaluation set — every `g2p-dict.tsv` word with `N`/`NG` before `K`/`G`, labelled by
+whichever of Moby, wikipron-US and wikipron-UK cover it, keeping only sites where every covering source
+agrees. ⚠ THE en-GB REFEREE IS ADMISSIBLE HERE AND NOWHERE ELSE IN THIS AUDIT: `ŋ` versus `n` is a
+CONSONANT, so it is not part of the RP delta — non-rhoticity and the RP vowels cannot reach it.
+
+    labelled sites                    1,130   (461 with two or more agreeing sources)
+    dict N, referees say n               298      ← the dictionary is right
+    dict N, referees say ŋ                33      ← the dictionary slipped
+    dict NG, referees say ŋ              774
+    dict NG, referees say n               25
+
+⚠ THAT IS 298 AGAINST 33, AND THE RULE ASSIMILATES ALL OF THEM. The converter's comment justifies itself
+as repairing "346 slips" among the 923 `N`+velar rows; at two or more sources the split is 107 against 4.
+So the dictionary's `N` is a statement roughly nine times out of ten, and the rule overrides it every time
+a transparent prefix does not intervene.
+
+Then measured the engine against those labels — and the first measurement was WRONG IN A WAY WORTH
+RECORDING: toggling the rule off changed nothing at all (1041/89 both ways, referee scores flat to ±2
+rows). The reason is that `accent-lexicon.tsv` is consulted BEFORE the ARPABET path, so for a dictionary
+word the rule's output is already baked into the flat lexicon. Rebuilding the lexicon with the rule off
+is what makes the experiment real:
+
+                           labelled sites   primary   Moby-lexicon   Moby-OOV
+    rule on  (baseline)      1041 / 89       2529       26505         15056
+    rule off                 1072 / 58       2530       26527         15054
+
++31 at the site, +22 on Moby-lexicon, +1 primary, −2 OOV. The "68.9% against 52.0%" that licensed the
+rule does not reproduce as a corpus effect in either direction: whole-word exact match over 867 words was
+measuring everything in the word except the site in question.
+
+⚠ AND YET THE RULE MUST NOT SIMPLY BE DELETED, which is the finding that cost the most to establish.
+Turning it off flips 360 shipped words. Of the 71 the referees label, 51 flip correctly — `pancake`,
+`raincoat`, `mankind`, `painkiller`, `turnkey`, `vanguard`, `vancouver`, `leningrad`, `dunkirk`,
+`ironclad`, `loincloth`, `plainclothes`, `sunglasses` — every one a COMPOUND SEAM. But 20 flip wrongly:
+`anglophile`, `ankh`, `gangrene`, `idiosyncrasy`, `laryngoscope`, `tonga`, `drinkable`, `lancaster`,
+`punctate`, `thunk` are tautomorphemic and are `ŋ` for everyone. The rule is papering over real CMUdict
+slips at the same time as it is destroying real CMUdict statements.
+
+⚠ THE DISCRIMINATOR IS A COMPOUND SEAM, AND IT IS NOT LEARNABLE FROM THIS EVIDENCE. Two attempts:
+
+1. A SPLITTER — does the word divide at the n|velar boundary into two dictionary words? On the labelled
+   seam words it is 31 right to 2 wrong, but it also claims `benghazi`, `hangul`, `pangloss`, `sancho`,
+   `panchromatic`, `vainglorious`, `cancan`, `galingale` (all `ŋ`) and misses 20 labelled rows including
+   `vancouver`, `ongoing`, `stonecutter`, `minecraft`, `serengeti`.
+2. A MORPHEME LIST, derived from the labelled data rather than imagined — the first elements attested by a
+   referee-labelled `n` with a real second element, outside the transparent prefixes, are: `corn` 3,
+   `green` 3, `pan` 3, `man` 2, `on` 2, `turn` 2, and then thirty morphemes with ONE attestation each.
+   `pan` reaches `pancreas`/`pangloss`/`panchromatic`, `van` reaches `vancomycin`, `ton` reaches `tonga` —
+   all `ŋ`. A list built from one-attestation morphemes is a word list wearing a rule's clothes.
+
+So the code comment's own guess — "the real discriminator is PREFIXED versus COMPOUND, which needs a
+morphological inventory this module does not have" — is confirmed, and now with a measurement behind it.
+This is LEXIS, not phonology, and the repo already has a mechanism reserved for exactly that: a per-word
+table injected into the data-free converter, the way `en-syllabic.tsv` is. That is the next step.
+
+## Run 28 — 2026-09-19 — the seam table, and what it does and does not buy
+
+Built `en-nasal-seam.tsv` on Run 27's conclusion: the seam is lexis, so it ships the way this repo ships
+lexis — a per-word table of phone indices injected into the data-free converter, exactly as
+`en-syllabic.tsv` is. `tools/gen/build-en-nasal-seam.mts` derives it from the three referees; nothing is
+hand-listed.
+
+    dictionary words with an N+velar site the converter would assimilate
+      protected by a transparent prefix already:                     590
+      every covering referee says [n]  → A ROW:                       32  (+5 inflections = 37)
+      every covering referee says [ŋ] — a CMUdict slip the rule fixes: 20
+      referees split, no referee, or single-source and not a seam:   311
+
+⚠ THE GATE WAS TIGHTENED AFTER READING THE ROWS IT LET THROUGH, which is the only reason the table is
+worth anything. A single source is admitted when the seam is visible in the spelling — the word divides
+into two dictionary words at the boundary — and dictionary membership alone is nearly free, because
+CMUdict carries every surname: `kalanchoe` parsed as `kalan`+`choe` and `agincourt` as `agin`+`court`.
+Both happen to have the right answer, which is exactly how a loose gate survives a spot check. Requiring
+the second element to be in `g2p-common.txt` and four letters or more drops the count 35 → 32.
+
+⚠ AND INFLECTIONS ARE CARRIED ALONG, because the first table shipped `pancake` but not `pancaked`, and
+`sunglass` but not `sunglasses` — the referees happened to cover one form of each. A suffix cannot move
+a seam, so the stem's indices are reused; +5 rows.
+
+36 of the 37 rows change the flat lexicon (`melancholy` was already `n`), all in the same direction:
+
+    pancake  pʰˈæŋkˌeᶦk → pʰˈænkˌeᶦk      raincoat  ɹˈeᶦŋkˌoᶷt → ɹˈeᶦnkˌoᶷt
+    mankind  mˌæŋkˈaᶦnd → mˌænkˈaᶦnd      vanguard  vˈæŋɡˌɑːɹd → vˈænɡˌɑːɹd
+    turnkey  tʰˈɝŋki    → tʰˈɝnki         leningrad lˈɛnəŋɡɹˌæd → lˈɛnənɡɹˌæd
+
+    primary folded backbone   62.6% → 62.7%   (2529 → 2531)
+    Moby — lexicon            26505 → 26520   (75.6% → 75.7%)
+    Moby — OOV                unchanged
+    goldens                   3 English rows moved (`ongoing` in the en/en-GB/en-IN sentence 200)
+    C# parity                 189 byte-identical after mirroring the table into EnglishArpabet.cs
+
+⚠ THE LOADER IS NOW IN THREE PLACES and the third one is a test. `english.ts`, `en_rebuild_lexicon.mts`
+and `test/en-lexicon-regenerable.test.ts` each build the map themselves, and adding the table to the
+first two made the third fail with "the lexicon is not reproducible" — the right failure for the wrong
+reason. Noted in that test, because the next table added will hit it again.
+
+⚠ WHAT THIS DOES NOT BUY: the 311 undetermined sites. They are surnames and place names the referees do
+not cover — `vancouver`, `dunkirk`, `plainclothes`, `songbook`, `minecraft`, `stonecutter`, `moonquake`,
+`womankind`, and two hundred Rosen-/Steen-/Van- names — where the dictionary says `N`, the engine says
+[ŋ], and nothing arbitrates. On Run 27's base rates the dictionary is right about nine times in ten
+there, so most of them are probably wrong today. That is the largest single block of known-unknown left
+on this axis, and closing it needs a source that covers surnames rather than a cleverer rule.

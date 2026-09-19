@@ -331,6 +331,15 @@ export function makeArpabetToIpa(
      * Omitted (the OOV tagger's path) means no word has syllabic slots, which is the prior behaviour.
      */
     syllabic: ReadonlyMap<string, readonly number[]> = new Map(),
+    /**
+     * Word → the indices of its ARPABET phones that are an `N` before a `K`/`G` at a COMPOUND SEAM,
+     * where the velar assimilation below must not fire (`en-nasal-seam.tsv`). Injected for the same
+     * reason `syllabic` is: this module is data-free, and the fact is lexical.
+     * ⚠ A TABLE AND NOT A RULE, MEASURED. See the velar-assimilation comment below and Run 27 of
+     * docs/investigations/en/en_moby_source_audit_investigation.md — two discriminators were built from
+     * 1,130 referee-labelled sites and both misfire on `benghazi`/`pangloss`/`pancreas`.
+     */
+    nasalSeam: ReadonlyMap<string, readonly number[]> = new Map(),
 ): (phones: string[], word?: string) => string {
     const { map, conditionalVowels: cv } = def;
     /** The TRUE diphthongs, for the clash exception above — NOT `OW`/`EY`, which CMUdict writes as a 2°
@@ -523,6 +532,19 @@ const VOWELS = new Set(def.vowels);
             // 68.9%, `un|in|non` 65.2%, `un|in` 64.7%, and no rule at all 52.0%. `congruent`,
             // `congruence`, `syncope`, `encore`, `engel` and `increment` were CMUdict slips this rule
             // used to paper over; corrected in g2p-dict.tsv, where the evidence points.
+            // ⚠ AND THE PREFIX IS NOT THE ONLY BOUNDARY IT MUST NOT CROSS — a COMPOUND SEAM blocks
+            // assimilation too (`pan·cake`, `rain·coat`, `man·kind`, `turn·key`, `Lenin·grad`), and the
+            // dictionary already says `N` at every one of them. Measured over 1,130 referee-labelled
+            // sites: where the dictionary writes `N`, the referees back it 298 to 33, so this rule is
+            // overriding a statement far more often than it is repairing a slip. It still earns its
+            // place — the 33 are real (`anglophile`, `ankh`, `gangrene`, `drinkable`, `lancaster`) and
+            // turning the rule off ships them wrong — but the seams need `nasalSeam` above.
+            // ⚠ THE SEAM IS A TABLE AND NOT A RULE, AND THAT WAS THE EXPENSIVE PART. A splitter (does
+            // the word divide into two dictionary words at the boundary?) is 31:2 on the labelled seams
+            // and also claims `benghazi`, `hangul`, `pangloss`, `panchromatic`, `vainglorious`; a
+            // morpheme list derived from the labelled data has `corn` 3, `green` 3, `pan` 3 and then
+            // thirty morphemes with ONE attestation each, and `pan` alone reaches `pancreas`,
+            // `pangloss` and `panchromatic`. This is lexis. Run 27 of the audit has the numbers.
             // ⚠ AND A SYMMETRIC GUARD WAS REJECTED. Rewriting `NG`→n at the same boundary would make a
             // stem and its inflection agree (`increment`/`increments`), but it also reaches `congo`,
             // `congress`, `congregate`, `conga`, `english` and `uncle`, which are ŋ for everyone. The
@@ -531,7 +553,8 @@ const VOWELS = new Set(def.vowels);
                 base === "N" &&
                 i + 1 < P.length &&
                 (P[i + 1]!.base === "K" || P[i + 1]!.base === "G") &&
-                !(i <= 6 && TRANSPARENT_PREFIX.test(word))
+                !(i <= 6 && TRANSPARENT_PREFIX.test(word)) &&
+                !nasalSeam.get(word)?.includes(i)
             ) {
                 out += "ŋ";
                 continue;

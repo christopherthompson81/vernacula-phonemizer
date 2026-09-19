@@ -467,7 +467,10 @@ public static class EnglishFactory
         // two-path split that tool exists to prevent applies here too.
         var syllabic = LoadTsv.LoadTsvMap<IReadOnlyList<int>>(dir, "en-syllabic.tsv",
             (v, _) => v.Split(',').Select(x => int.TryParse(x, out var n) ? n : -1).Where(n => n >= 0).ToList());
-        var arpabetToIpa = EnglishArpabet.MakeArpabetToIpa(manifest.Arpabet, syllabic);
+        // ⚠ AND THE SEAM TABLE TOO, for the same reason — see the TS.
+        var nasalSeam = LoadTsv.LoadTsvMap<IReadOnlyList<int>>(dir, "en-nasal-seam.tsv",
+            (v, _) => v.Split(',').Select(x => int.TryParse(x, out var n) ? n : -1).Where(n => n >= 0).ToList());
+        var arpabetToIpa = EnglishArpabet.MakeArpabetToIpa(manifest.Arpabet, syllabic, nasalSeam);
 
         var g2pDict = LoadTsv.LoadTsvMap<List<string>>(dir, "g2p-dict.tsv", (v, _) => v.Split(' ').ToList());
         var g2pCommon = new HashSet<string>(LoadTsv.LoadLines(dir, "g2p-common.txt"), StringComparer.Ordinal);
