@@ -16,6 +16,16 @@
  * ships the way `en-syllabic.tsv` ships lexis: a per-word table of PHONE INDICES injected into the
  * data-free converter. docs/investigations/en/en_moby_source_audit_investigation.md, Run 27.
  *
+ * ⚠ AND SINCE #1360 THERE IS A SECOND WAY TO EARN A ROW, which is the one that scales: a COMPOUND
+ * boundary at the site in `en-morph-boundary.tsv`. Wiktionary states the morpheme split AND its kind,
+ * and the kind is what three home-grown discriminators could not recover — measured on the referee-
+ * labelled sites, `compound` is 12 for 12 with no false positives and not one of the 17 known
+ * assimilating words is a compound (`Anglo·phile`, `laryngo·scope`, `vanco·mycin` are confixes and
+ * prefixes, and they assimilate; `pan·cake` and `corn·cob` are compounds and do not).
+ * ⚠ IT IS A CASCADE AND NOT A REPLACEMENT. `vanguard`, `leningrad` and `cancan` are referee-confirmed
+ * seams with NO Wiktionary template — from *avant-garde* in `vanguard`'s case, which is why no split
+ * exists — so the referee evidence below stays as the recall patch. Neither source alone is the table.
+ *
  * ⚠ A ROW IS EARNED, NOT ASSERTED. It needs the dictionary to say `N`, the engine to be about to say
  * [ŋ] anyway, and EVERY referee that covers the word to say [n] — with at least two of them covering it
  * where the word is not a plain compound of two dictionary words. Single-source rows are admitted only
@@ -118,8 +128,35 @@ const transparentCompound = (w: string): boolean => {
     return false;
 };
 
+/**
+ * Words with a COMPOUND boundary at a given phone index, from `en-morph-boundary.tsv`.
+ * ⚠ ONLY `compound`. A `prefix`, `suffix` or `confix` boundary is a real boundary and blocks other
+ * processes (the geminate collapse, for one) but does NOT block velar assimilation — that is the whole
+ * finding, and reading this file as "any boundary blocks" would ship `panchromatic` and `Anglophile`
+ * with an [n] they have never had.
+ */
+const compoundAt = new Map<string, Set<number>>();
+try {
+    for (const line of readFileSync(join(DATA, "en-morph-boundary.tsv"), "utf8").split("\n")) {
+        if (!line || line.startsWith("#")) continue;
+        const tab = line.indexOf("\t");
+        if (tab <= 0) continue;
+        const set = new Set<number>();
+        for (const f of line.slice(tab + 1).trim().split(",")) {
+            const [i, k] = f.split(":");
+            if (k === "compound" && i && Number.isInteger(+i)) set.add(+i);
+        }
+        if (set.size) compoundAt.set(line.slice(0, tab), set);
+    }
+} catch (e) {
+    // ⚠ ENOENT ONLY. The boundary table is generated from a 3 GB dump that is not in the repo, so a
+    // checkout without it must still rebuild the referee-backed rows rather than fail.
+    if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    console.log("(no en-morph-boundary.tsv — referee evidence only)");
+}
+
 const rows: [string, number[], string][] = [];
-let noSite = 0, protectedByPrefix = 0, refereeSaysVelar = 0, split = 0, thin = 0;
+let noSite = 0, protectedByPrefix = 0, refereeSaysVelar = 0, split = 0, thin = 0, byCompound = 0;
 for (const [w, p] of dict) {
     const idx: number[] = [];
     for (let i = 0; i + 1 < p.length; i++) {
@@ -131,8 +168,21 @@ for (const [w, p] of dict) {
     if (idx.every((i) => i <= 6) && TRANSPARENT_PREFIX.test(w)) { protectedByPrefix++; continue; }
     const seen = refs.map(([, m]) => { const r = m.get(w); return r ? verdict(r) : null; });
     const named = seen.filter((v): v is string => v !== null);
+    // ⚠ A REFEREE THAT SAYS [ŋ] OUTRANKS THE SPLIT, even a compound one. Wiktionary states morphology;
+    // the referees state pronunciation, and where they are unanimous against the morphology they win.
+    if (named.length && named.every((v) => v === "ŋ")) { refereeSaysVelar++; continue; }
+    const comp = compoundAt.get(w);
+    // ⚠ `i + 1`, NOT `i`. The boundary table indexes the FIRST PHONE AFTER the boundary and `idx` holds
+    // the position of the NASAL, so `rain·coat` is R EY1 N | K OW2 T — nasal at 2, boundary at 3. Matching
+    // on `i` finds nothing at all and looks exactly like a source with no coverage.
+    const byComp = comp ? idx.filter((i) => comp.has(i + 1)) : [];
+    if (byComp.length && !named.some((v) => v !== "n")) {
+        byCompound++;
+        rows.push([w, byComp, named.length ? `compound+${refs.filter((_, k) => seen[k] !== null).map(([n]) => n).join("+")}` : "compound"]);
+        continue;
+    }
     if (!named.length) { thin++; continue; }
-    if (named.some((v) => v !== "n")) { named.every((v) => v === "ŋ") ? refereeSaysVelar++ : split++; continue; }
+    if (named.some((v) => v !== "n")) { split++; continue; }
     if (named.length < 2 && !transparentCompound(w)) { thin++; continue; }
     const src = refs.filter((_, k) => seen[k] !== null).map(([n]) => n).join("+");
     rows.push([w, idx, src]);
@@ -164,7 +214,8 @@ rows.sort((a, b) => (a[0] < b[0] ? -1 : 1));
 
 console.log(`dictionary words with an N+velar site the converter would assimilate:`);
 console.log(`  protected by a transparent prefix already: ${protectedByPrefix}`);
-console.log(`  every covering referee says [n]  → A ROW:  ${rows.length}`);
+console.log(`  a COMPOUND boundary at the site  → A ROW:  ${byCompound}`);
+console.log(`  every covering referee says [n]  → A ROW:  ${rows.length - byCompound}`);
 console.log(`  every covering referee says [ŋ] (a CMUdict slip the rule repairs): ${refereeSaysVelar}`);
 console.log(`  referees split, or no referee, or single-source and not a transparent compound: ${split + thin}`);
 console.log(`  (words with no N+velar site at all: ${noSite})`);

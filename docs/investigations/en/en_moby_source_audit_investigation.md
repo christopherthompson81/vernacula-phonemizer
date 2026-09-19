@@ -1639,3 +1639,62 @@ Two smaller corrections Run 33 is right about:
   leads with. It is scored as NO VERDICT (the `verdict` helper returns null unless the readings agree).
   Run 33 brackets the alternatives at 35/19/13/281 … 36/19/9/281; the refusal is insensitive to the
   choice, and the 590/363 split and the 15 two-source rows reproduce exactly either way.
+
+## Run 35 — 2026-09-19 — the boundary table, built; and an honest accounting of what it bought
+
+Downloaded the 3.0 GB kaikki English extract and built `en-morph-boundary.tsv`.
+
+    kaikki lines                                     1,492,836
+    English entries whose headword we carry             88,631
+    a stated morpheme split                             24,368
+      rejected — parts do not concatenate to the word    6,905
+      rejected — first element not in our dictionary     1,175
+      rejected — its phones are not a prefix of the word's 2,963
+    → ROWS                                              13,325
+        suffix 6,048   compound 4,115   prefix 3,549   confix 115
+
+⚠ THE DESIGN GOT CHEAPER THAN RUN 34 PROPOSED, and this is the part worth copying. The boundary table
+is a BUILD-TIME input to `build-en-nasal-seam.mts`, not a runtime input to the converter. So there is
+no new engine parameter, no C# mirror, and no fourth copy of a loader — the cascade lives in one place
+and the thing that ships is a table the engine already consults. An ENOENT catch means a checkout
+without the 3 GB dump rebuilds the referee-backed rows byte-identically, which was verified before the
+dump finished downloading.
+
+⚠ THE DRY RUN CAUGHT TWO BUGS THAT WOULD BOTH HAVE SHIPPED AS A CONVINCING ZERO. Running the builder
+against ~200 cached per-word fetches before the dump landed:
+- SHORT MORPHEMES WERE BEING DELETED AS LANGUAGE CODES. The first `partsOf` dropped any 2–3 letter arg
+  on the assumption it was a code, which removes `cob` from `corn·cob`, `pan` from `pan·cake`, and
+  `gun`, `key`, `man`, `ear`, `bar` — most of the compounds worth having. The table just looks sparse;
+  nothing errors. These templates are only read off English entries, so the only code is `en` and it is
+  dropped by value now. 74 → 98 rows on the mini set.
+- AN OFF-BY-ONE IN THE CONSUMER. The table indexes the first phone AFTER the boundary; the seam
+  builder's index is the position of the NASAL. `rain·coat` is R EY1 N | K OW2 T — nasal at 2, boundary
+  at 3. Matching on the wrong one finds nothing and is indistinguishable from a source with no coverage.
+
+What it bought on the velar class, stated plainly because it is less than Run 34 implied:
+
+    seam table          38 → 49 rows   (26 now earned by a compound boundary, 23 by referees)
+    new rows            greenkeeper, machinegun(s), mankiller, moonquake, oceangoing,
+                        stonecutter(s), suncoast, turncock, winegrower
+    undetermined        310 → 300
+    Moby — lexicon      26521 → 26522
+    primary             2531, unmoved
+    goldens             0 stale; C# parity 189 byte-identical; 6,076 tests
+
+⚠ ELEVEN ROWS AND ONE SCORE POINT. The residual on this axis is surnames — Rosenkranz, Steenkamp,
+Vancamp — and Wiktionary has no etymology for those, exactly as Run 32 predicted. The velar consumer
+was chosen first because its gate already existed, not because it was the payoff; it is the smallest of
+the table's four uses. The 11 words are ones Run 28 listed under "what this does not buy", so the
+mechanism is doing what it claimed — there is just not much of this particular class left.
+
+The table is the deliverable. Its other three consumers are untouched and are where the value is:
+the compound-seam geminates (155 words, and the `-ness`/`-ly` boundaries are now IN the source rather
+than needing a rule of their own), compound fore-stress (worst-served — 1 of the 4 words
+`englishArpabet.ts` names has a template), and the OOV grapheme seams, where `haphazard` decomposes and
+⟨ph⟩ read as /f/ across `hap|hazard` is an error a listener hears.
+
+⚠ AND THE INTERMITTENT TEST FAILURE IS NAMED THIS TIME. `test/check-goldens-jobs.test.ts` failed once
+during this run and passed in isolation and on re-run. It spawns child processes to compare a pooled
+golden check against a serial one, and both failures in this session happened while something else was
+saturating the machine (a `dotnet` build here, a parallel suite earlier). It is contention, not flake,
+and the fix if it recurs is to serialise that test rather than to retry it.
