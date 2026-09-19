@@ -135,9 +135,13 @@ const CONSONANT = new Set(
  * `/dZ/` for `/j/` in `Eurocommunism`, `unilocular`, `uninucleate`, `usucaption` and `Egan` — in four of
  * the five directly before /u/ or /ʊ/, which is where the yod belongs. The converter is not at fault: it
  * renders `/j/` as Y correctly everywhere else (`euro`, `yes`, `beauty`).
+ * ⚠ GATED ON THE FOLLOWING VOWEL, because the fifth entry is not a yod row at all: `Egan /dZ//oU/gz` is
+ * a MISALIGNED row whose body belongs to another headword, and rewriting its `/dZ/` would launder
+ * obvious garbage into a plausible-looking wrong reading. The four real ones are all before /u/ or /ʊ/.
  */
 function fixInitialYod(word: string, a: string[]): string[] {
     if (a[0] !== "JH" || !/^[aeiou]/u.test(word)) return a;
+    if (!/^(UW|UH)/u.test(a[1] ?? "")) return a;
     const out = [...a];
     out[0] = "Y";
     return out;
@@ -207,13 +211,17 @@ let rows = 0, declined = 0, unmapped = 0;
  * referee asked what `city` sounds like and answered "Bougère". 565 headwords carry more than one
  * distinct reading once folded, and in 273 of them a CAPITALISED entry displaced a lower-case one:
  * `air`, `acre`, `airy`, `abbe`, `alba`. Every one was scoring the wrong word.
- * ⚠ THE CASE IS THE DISCRIMINATOR, NOT THE ORDER. Our dictionary keys are lower-case common words, so
- * where Moby has both, the lower-case entry is the one being asked about; the capitalised reading is a
- * different lexeme and is dropped rather than offered as an alternative, because crediting a surname's
- * reading for a common noun would hide a real error.
- * ⚠ GENUINE VARIANTS — several lines at the SAME case — are all kept and emitted tab-separated, which
- * the eval credits ANY of. That is what the old comment's "one row per headword" was protecting, and it
- * is preserved: one ROW, several READINGS.
+ * ⚠ EVERY READING IS EMITTED, TAB-SEPARATED; NOTHING IS PICKED. The eval credits ANY reading on a row,
+ * so the fix for `city` is to stop DISCARDING readings, not to choose a better one.
+ * ⚠ PREFERRING THE LOWER-CASE ENTRY WAS TRIED AND MEASURED WORSE: 63 lexicon rows went pass→fail against
+ * 75 the other way, because roughly half our headwords ARE the capitalised lexeme and several lower-case
+ * Moby rows are typos — `cook k/u/k` against the correct `Cook k/U/k`, `charlie` writing the affricate as
+ * two symbols, `dalmatian` with a literal ASCII `sh`, `canada` giving Cañada, `august` the adjective
+ * rather than the month. Case does not predict which row is right; emitting both costs nothing and
+ * presumes nothing.
+ * ⚠ THE RESIDUAL RISK IS ACCEPTED AND NAMED: where a surname and a common noun genuinely differ, the row
+ * now credits either, so a real error on one of them can hide. That is a far narrower loss than the 63,
+ * and it is the same latitude every multi-variant referee row in this repo already carries.
  */
 const readings = new Map<string, { lower: string[]; upper: string[] }>();
 for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
@@ -236,23 +244,26 @@ for (const line of readFileSync(MOBY, "latin1").split(/\r\n|\r|\n/u)) {
     const bucket = /^[A-Z]/u.test(cased) ? e.upper : e.lower;
     if (!bucket.includes(ipa)) bucket.push(ipa);
 }
-let caseResolved = 0;
+let multiReading = 0;
 for (const [w, { lower, upper }] of readings) {
-    if (lower.length > 0 && upper.length > 0) caseResolved++;
-    const pick = lower.length > 0 ? lower : upper;
-    (dict.has(w) ? lex : oov).push(`${w}\t${pick.join("\t")}`);
+    const all = [...lower, ...upper.filter((r) => !lower.includes(r))];
+    // ⚠ COUNTS ROWS THAT ACTUALLY CARRY MORE THAN ONE READING, not headwords that merely appear in both
+    // cases: an earlier version counted the latter and reported 1,759 where the real figure is ~230.
+    if (all.length > 1) multiReading++;
+    (dict.has(w) ? lex : oov).push(`${w}\t${all.join("\t")}`);
 }
 
 const header = (what: string, n: number): string =>
     `# en — MOBY PRONUNCIATOR II, ${what} (${n} rows)\n` +
     `# Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.\n` +
     `# Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,\n` +
-    `# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA, one reading per headword.\n`;
+    `# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,\n` +
+    `# tab-separated, and the eval credits any of them.\n`;
 
 const dir = join(REPO, "tools/referee-eval/referees");
 writeFileSync(join(dir, "en.moby-lexicon.tsv"), header("words this dictionary carries", lex.length) + lex.join("\n") + "\n");
 writeFileSync(join(dir, "en.moby-oov.tsv"), header("words this dictionary does NOT carry — the OOV tier", oov.length) + oov.join("\n") + "\n");
 console.log(`moby rows ${rows}, declined ${declined}, unmapped ${unmapped}, excluded-as-imported ${imported.size}`);
-console.log(`  headwords where a lower-case entry displaced a capitalised one: ${caseResolved}`);
+console.log(`  headwords emitting more than one reading: ${multiReading}`);
 console.log(`  en.moby-lexicon.tsv  ${lex.length}`);
 console.log(`  en.moby-oov.tsv      ${oov.length}`);

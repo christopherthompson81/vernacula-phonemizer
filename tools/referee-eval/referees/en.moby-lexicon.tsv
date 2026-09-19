@@ -1,7 +1,8 @@
 # en — MOBY PRONUNCIATOR II, words this dictionary carries (35202 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
-# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA, one reading per headword.
+# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
+# tab-separated, and the eval credits any of them.
 aachen	ɑkən
 aalborg	ɔlbɔɹɡ
 aalto	ɑltɔ
@@ -21,8 +22,8 @@ abasia	əbeɪʒə
 abate	əbeɪt
 abatement	əbeɪtmənt
 abattoir	æbətwɑɹ
-abba	əbɑ
-abbe	æbeɪ
+abba	əbɑ	æbə
+abbe	æbeɪ	æbi
 abbeville	æbivɪl
 abbey	æbi
 abbie	æbi
@@ -78,7 +79,7 @@ abner	æbnɚ
 abnormal	æbnɔɹməl
 abnormality	æbnɔɹmælɪti
 abnormally	æbnɔɹməlli
-abo	æboʊ
+abo	æboʊ	ɔbu
 aboard	əbɔɹd
 abode	əboʊd
 abolish	əbɑlɪʃ
@@ -289,7 +290,7 @@ acquisition	ækwɪzɪʃən
 acquisitive	əkwɪzɪtɪv
 acquit	əkwɪt
 acquittal	əkwɪtəl
-acre	eɪkɚ
+acre	eɪkɚ	ɑkɹə
 acreage	eɪkɚɪd͡ʒ
 acrid	ækɹɪd
 acrimonious	ækɹəmoʊniəs
@@ -571,7 +572,7 @@ afford	əfɔɹd
 affricate	æfɹəkɪt
 affrication	æfɹəkeɪʃən
 affront	əfɹʌnt
-afghan	æfɡæn
+afghan	æfɡæn	æfɡən
 afghani	æfɡæni
 afghanistan	æfɡænɪstæn
 aficionado	əfɪʃjənɑdoʊ
@@ -618,7 +619,7 @@ against	əɡɛnst
 agamemnon	æɡəmɛmnɑn
 agana	ɑɡɑnnaɪə
 agape	ɑɡɑpeɪ
-agar	ɑɡɑɹ
+agar	ɑɡɑɹ	eɪɡɑɹ
 agassi	æɡəsi
 agassiz	æɡəsi
 agate	æɡɪt
@@ -626,7 +627,7 @@ agatha	æɡəθə
 agawam	æɡəwɑm
 age	eɪd͡ʒ
 aged	eɪd͡ʒɪd
-agee	əd͡ʒi
+agee	əd͡ʒi	eɪd͡ʒi
 ageless	eɪd͡ʒlɪs
 agency	eɪd͡ʒənsi
 agenda	əd͡ʒɛndə
@@ -724,7 +725,7 @@ aimlessly	eɪmlɪsli
 aine	ɛneɪ
 ainge	eɪnd͡ʒ
 ainu	aɪnu
-air	ɛɹ
+air	ɛɹ	ɑiɹ
 airbase	ɚbeɪs
 airborne	ɛɹbɔɹn
 airbus	ɛbəs
@@ -756,7 +757,7 @@ airtight	ɛɹtaɪt
 airwaves	ɛɹweɪvz
 airway	ɛɹweɪ
 airworthy	ɛɹwɚði
-airy	ɛɹi
+airy	ɛɹi	ɛɹɛ
 ais	ɑiz
 aisha	ɑiʃɑ
 aisle	aɪl
@@ -775,19 +776,19 @@ akkadian	əkeɪdiən
 akkerman	ɑkɚmɑn
 akron	ækɹən
 al	æl
-ala	eɪlə
+ala	eɪlə	ɑlɑ
 alabama	æləbæmə
 alabaster	æləbæstɚ
 alachua	əlæt͡ʃuə
 alacrity	əlækɹɪti
 aladdin	əlædən
 alagoas	ɑləɡoʊəs
-alameda	æləmeɪdə
+alameda	æləmeɪdə	æləmidə
 alamein	æləmeɪn
 alamo	æləmoʊ
 alamosa	æləmoʊsə
 alan	ælən
-alar	eɪlɚ
+alar	eɪlɚ	ælɑɹ
 alaric	ælɚɪk
 alarie	ælɚi
 alarm	əlɑɹm
@@ -798,7 +799,7 @@ alaska	əlæskə
 alastair	æləstɚ
 alaster	æləstɚ
 alayne	əleɪn
-alba	ɑlbə
+alba	ɑlbə	ælbə
 albacore	ælbəkɔɹ
 alban	ɑlbɑn
 albanese	ælbəneɪzə
@@ -810,7 +811,7 @@ albee	ɔlbi
 albeit	ɔlbiɪt
 albemarle	ælbəmɑɹl
 alben	ælbən
-albert	ælbət
+albert	ælbət	ælbɚt
 alberta	ælbɚtə
 albertina	ælbɚtinə
 albertine	ælbɚtin
@@ -822,7 +823,7 @@ album	ælbəm
 albumin	ælbjumən
 albuquerque	ælbəkɚki
 alcatraz	ælkətɹæz
-alcazar	ælkæzɚ
+alcazar	ælkæzɚ	ælkəzɑɹ
 alchemist	ælkəmɪst
 alchemy	ælkəmi
 alcide	ɑlt͡ʃidɛ
@@ -836,14 +837,14 @@ alcove	ælkoʊv
 alda	ɑldə
 aldebaran	ældɛbɚən
 alden	ɔldən
-alder	ɔldɚ
+alder	ɔldɚ	ɑldɚ
 alderman	ɔldɚmən
 aldis	ɔldɪs
 aldo	ɑldoʊ
 aldous	ɔldəs
 aldrete	ældɹeɪteɪ
 aldrich	ɔldɹɪt͡ʃ
-aldrin	ɔldɹɪn
+aldrin	ɔldɹɪn	ɑldɹɪn
 aldus	ɔldəs
 ale	eɪl
 aleatory	eɪliətɔɹi
@@ -909,7 +910,7 @@ alignment	əlaɪnmənt
 alike	əlaɪk
 alimentary	æləmɛntɚi
 alimony	æləmoʊni
-aline	əlaɪn
+aline	əlaɪn	əlin
 alioto	ællioʊtoʊ
 aliquippa	æləkwɪpə
 alisa	əlisə
@@ -1144,7 +1145,7 @@ amelia	əmiljə
 ameliorate	əmiljɚeɪt
 amelioration	əmiljɚeɪʃən
 amelita	æməlitə
-amen	eɪmɛn
+amen	eɪmɛn	ɑmən
 amenable	əminəbəl
 amend	əmɛnd
 amendment	əmɛndmənt
@@ -1246,7 +1247,7 @@ amusingly	əmjuzɪŋli
 amy	eɪmi
 amygdala	əmɪɡdələ
 amyloid	æməlɔɪd
-an	ən
+an	ən	ɑn
 ana	ænə
 anabaptist	ænəbæptɪst
 anabolic	ænəbɑlɪk
@@ -1363,14 +1364,14 @@ angers	ɑnʒeɪ
 angevine	ænd͡ʒəvɪn
 angie	ænd͡ʒi
 angina	ænd͡ʒaɪnə
-angle	æŋɡəl
+angle	æŋɡəl	æŋəl
 angled	æŋɡəld
 angler	æŋɡlɚ
 angles	æŋɡəlz
 angleton	æŋɡəltən
 anglia	æŋɡliə
 anglican	æŋɡləkən
-anglicize	æŋɡləsaɪz
+anglicize	æŋɡləsaɪz	æŋɡlɪsaɪz
 angling	æŋɡlɪŋ
 anglo	æŋɡloʊ
 anglophile	æŋɡləfaɪl
@@ -1477,7 +1478,7 @@ antagonist	æntæɡənɪst
 antagonistic	æntæɡənɪstɪk
 antagonize	æntæɡənaɪz
 antal	ɑntɑl
-antarctic	æntɑɹktɪk
+antarctic	æntɑɹktɪk	æntɚktɪk
 antarctica	æntɑɹktɪkə
 antares	æntɛɹiz
 ante	ænti
@@ -1588,11 +1589,11 @@ anzac	ænzæk
 aoki	ɑɔki
 aorta	eɪɔɹtə
 apace	əpeɪs
-apache	əpɑʃ
+apache	əpɑʃ	əpæt͡ʃi
 apaches	əpɑʃɪz
 apalachicola	æpəlæt͡ʃəkoʊlə
 apart	əpɑɹt
-apartheid	əpɑɹtheɪt
+apartheid	əpɑɹtheɪt	əpɑɹteɪt
 apartment	əpɑɹtmənt
 apathetic	æpəθɛtɪk
 apathy	æpəθi
@@ -1796,7 +1797,7 @@ archivist	ɑɹkəvɪst
 archly	ɑɹt͡ʃli
 archway	ɑɹt͡ʃweɪ
 arco	ɑɹkoʊ
-arctic	ɑɹktɪk
+arctic	ɑɹktɪk	ɚktɪk
 arcturus	ɑɹktʊɹəs
 ard	ɑɹd
 ardeen	ɑɹdin
@@ -1823,7 +1824,7 @@ argall	ɑɹɡɔl
 argent	ɑɹd͡ʒənt
 argenta	ɑɹd͡ʒʌntə
 argentina	ɑɹd͡ʒəntinə
-argentine	ɑɹd͡ʒəntɪn
+argentine	ɑɹd͡ʒəntɪn	ɑɹd͡ʒəntin
 argo	ɑɹɡoʊ
 argon	ɑɹɡɑn
 argonaut	ɑɹɡənɔt
@@ -1987,7 +1988,7 @@ asa	eɪsə
 asahi	ɑsɑhi
 asat	ʌsət
 asbestos	æsbɛstəs
-asbestosis	æsbɛstoʊsɪs
+asbestosis	æsbɛstoʊsɪs	æsbəstoʊsɪs
 asbury	æzbɚi
 ascend	əsɛnd
 ascendancy	əsɛndənsi
@@ -2033,13 +2034,13 @@ aside	əsaɪd
 asinine	æsənaɪn
 ask	æsk
 askance	əskæns
-askew	əskju
+askew	əskju	æskju
 asleep	əslip
 asmara	ɑsmɑɹə
 asmodeus	æzmədiəs
 asp	æsp
 asparagus	əspæɹəɡəs
-aspartame	əspɑɹteɪm
+aspartame	əspɑɹteɪm	æspɑɹteɪm
 aspect	æspɛkt
 aspen	æspən
 asper	æspɚ
@@ -2057,7 +2058,7 @@ asquith	æskwɪθ
 ass	æs
 assail	əseɪl
 assailant	əseɪlənt
-assam	æsæm
+assam	æsæm	æssæm
 assassin	əsæsɪn
 assassinate	əsæsəneɪt
 assault	əsɔlt
@@ -2127,7 +2128,7 @@ astounding	əstaʊndɪŋ
 astoundingly	əstaʊndɪŋli
 astra	æstɹə
 astraddle	əstɹædəl
-astrakhan	æstɹəkən
+astrakhan	æstɹəkən	æstɹəkæn
 astral	æstɹəl
 astray	əstɹeɪ
 astrid	æstɹɪd
@@ -2170,7 +2171,7 @@ atavistic	ætəvɪstɪk
 ataxia	ətæksiə
 atcheson	æt͡ʃɪsən
 atchison	æt͡ʃɪsən
-ate	eɪt
+ate	eɪt	eɪti
 aten	ɑtən
 atheism	eɪθiɪzəm
 atheist	eɪθiɪst
@@ -2297,7 +2298,7 @@ augment	ɔɡmɛnt
 augmentation	ɔɡmɛnteɪʃən
 augsburg	ɔɡzbɚɡ
 augur	ɔɡɚ
-august	ɔɡʌst
+august	ɔɡʌst	ɔɡəst
 augusta	ɔɡʌstə
 auguste	oʊɡjst
 augustine	ɔɡəstin
@@ -2310,9 +2311,9 @@ aura	ɔɹə
 aural	ɔɹəl
 aureole	ɔɹioʊl
 aureus	ɔɹiəs
-aurora	ɑɹɔɹə
+aurora	ɑɹɔɹə	ɔɹɔɹə
 auroral	ɔɹɔɹəl
-aurum	ɔɹəm
+aurum	ɔɹəm	aʊɹəm
 auschwitz	ɔʃvɪts
 auspice	ɔspɪs
 auspices	ɔspɪsiz
@@ -2379,7 +2380,7 @@ autumn	ɔtəm
 autumnal	ɔtʌmnəl
 aux	ɔks
 auxiliary	ɔɡzɪljɚi
-ava	əvɑ
+ava	əvɑ	eɪvə
 avail	əveɪl
 availability	əveɪləbɪlɪti
 available	əveɪləbəl
@@ -2507,9 +2508,9 @@ bacardi	bəkɑɹdi
 baccalaureate	bækəlɔɹiɪt
 baccarat	bɑkɚɑ
 bacchanal	bɑkənɑl
-bacchanalia	bækəneɪljə
+bacchanalia	bækəneɪljə	bækəneɪliə
 bacchus	bækəs
-bach	bæt͡ʃ
+bach	bæt͡ʃ	bɑk
 bache	beɪt͡ʃ
 bacheller	bæt͡ʃəlɚ
 bachelor	bæt͡ʃəlɚ
@@ -2637,7 +2638,7 @@ balas	bæləs
 balata	bælətə
 balbo	bɑlbɔ
 balboa	bælboʊə
-balbriggan	bælbɹɪɡən
+balbriggan	bælbɹɪɡən	bælbɹiɡən
 balch	bɔlt͡ʃ
 balcony	bælkəni
 bald	bɔld
@@ -2684,7 +2685,7 @@ ballroom	bɔlɹum
 bally	bælli
 ballyhoo	bælihu
 balm	bɑm
-balmoral	bælmɑɹəl
+balmoral	bælmɑɹəl	bælmɑɹʊl
 balmy	bɑmi
 baloney	bəloʊni
 balsa	bɔlsə
@@ -2761,7 +2762,7 @@ bantu	bæntu
 banyan	bænjən
 baptism	bæptɪzəm
 baptismal	bæptɪzməl
-baptist	bæptɪst
+baptist	bæptɪst	bæptəst
 baptista	bæptɪstə
 baptistery	bæptɪstɚi
 baptize	bæptaɪz
@@ -2834,7 +2835,7 @@ barrack	bæɹək
 barracks	bæɹəks
 barracuda	bæɹəkudə
 barrage	bɚɑʒ
-barre	bɑɹeɪ
+barre	bɑɹeɪ	bæɹi
 barred	bɑɹd
 barrel	bæɹəl
 barren	bæɹən
@@ -2850,7 +2851,7 @@ barrington	bæɹɪŋtən
 barrister	bæɹɪstɚ
 barroom	bɑɹɹum
 barrow	bæɹoʊ
-barry	bɑɹi
+barry	bɑɹi	bæɹi
 barrymore	bæɹəmɔɹ
 barstow	bɑɹstoʊ
 bart	bɑɹt
@@ -2934,7 +2935,7 @@ batik	bətik
 batista	bɑtistɑ
 batiste	bətist
 batman	bætmən
-baton	bætɑn
+baton	bætɑn	beɪtən
 bats	bæts
 batt	bæt
 battalion	bətæljən
@@ -3082,7 +3083,7 @@ bedford	bɛdfɚd
 bedizen	bɪdaɪzən
 bedlam	bɛdləm
 bedlington	bɛdlɪŋtən
-bedouin	bɛdəwən
+bedouin	bɛdəwən	bɛduɪn
 bedpan	bɛdpæn
 bedraggle	bɪdɹæɡəl
 bedraggled	bɪdɹæɡəld
@@ -3126,7 +3127,7 @@ beforehand	bɪfɔɹhænd
 befriend	bɪfɹɛnd
 befuddle	bɪfʌdəl
 beg	bɛɡ
-began	bɪɡæn
+began	bɪɡæn	biæn
 begat	bɪɡæt
 begelman	biɡɛlmən
 beget	bɪɡɛt
@@ -3139,7 +3140,7 @@ begot	bɪɡɑt
 begotten	bɪɡɑtən
 begrudge	bɪɡɹʌd͡ʒ
 beguile	bɪɡaɪl
-begun	bɪɡʌn
+begun	bɪɡʌn	bɛɡun
 behalf	bɪhæf
 behan	biən
 behar	bɪhɑɹ
@@ -3163,7 +3164,7 @@ beira	beɪɹə
 beirne	bɚn
 beirut	beɪɹut
 bekaa	bəkɑ
-bel	bɛl
+bel	bɛl	beɪl
 bela	beɪlɑ
 belabor	bɪleɪbɚ
 belafonte	bɛləfɑnti
@@ -3309,7 +3310,7 @@ beresford	bɛɹɪzfɚd
 beret	bɚeɪ
 berets	bɚeɪz
 beretta	bɚɛtə
-berg	bɚɡ
+berg	bɚɡ	bɛɹɡ
 berge	bɚd͡ʒ
 bergen	bɚɡən
 bergenfield	bɚɡənfild
@@ -3354,7 +3355,7 @@ berton	bɚtən
 bertram	bɚtɹəm
 berwick	bɛɹɪk
 berwyn	bɚwɪn
-beryl	bɛɹəl
+beryl	bɛɹəl	bɛɹɪl
 beryllium	bɚɪliəm
 bes	bɛs
 besant	bɛzənt
@@ -3382,10 +3383,10 @@ betake	bɪteɪk
 betancourt	bɛtənkʊɹ
 betel	bitəl
 betelgeuse	bitəld͡ʒuz
-beth	bɛt
+beth	bɛt	bɛθ
 bethany	bɛθəni
 bethel	bɛθəl
-bethesda	bɪθɛzdə
+bethesda	bɪθɛzdə	bəθɛzdə
 bethlehem	bɛθliəm
 betide	bɪtaɪd
 betook	bɪtʊk
@@ -3418,7 +3419,7 @@ beware	bɪwɛɹ
 bewilder	bɪwɪldɚ
 bewilderment	bɪwɪldɚmənt
 bewitch	bɪwɪt͡ʃ
-bey	beɪ
+bey	beɪ	ɑzzəddinbeɪ
 beyond	biɑnd
 bhakta	bʌktə
 bhopal	boʊpɑl
@@ -3488,7 +3489,7 @@ bigwig	bɪɡwɪɡ
 bihari	bihɑɹi
 bike	baɪk
 biker	baɪkɚ
-bikini	bɪkini
+bikini	bɪkini	bikini
 biko	bikoʊ
 bilateral	baɪlætɚəl
 bilaterally	baɪlætɚəlli
@@ -3912,7 +3913,7 @@ boll	boʊl
 bolland	bɑlənd
 bollard	bɑlɚd
 bollocks	bɑləks
-bologna	bəloʊni
+bologna	bəloʊni	bɔlɔnjɑ
 bolognese	boʊləniz
 bolshevik	boʊlʃəvɪk
 bolshevism	boʊlʃəvɪzəm
@@ -3938,7 +3939,7 @@ bona	boʊnə
 bonanza	bənænzə
 bonaparte	boʊnəpɑɹt
 bonaventura	bɑnəvɛnt͡ʃʊɹə
-bonaventure	bɑnəvɛnt͡ʃɚ
+bonaventure	bɑnəvɛnt͡ʃɚ	bɑnəvɛnt͡ʃɛɹ
 bond	bɑnd
 bondage	bɑndɪd͡ʒ
 bonded	bɑndɪd
@@ -3959,7 +3960,7 @@ bonkers	bɑŋkɚz
 bonn	bɑn
 bonne	bɔn
 bonnes	bɔn
-bonnet	bɑnɪt
+bonnet	bɑnɪt	bɔnɛ
 bonnibelle	bɑnibɛl
 bonnie	bɑni
 bonny	bɑni
@@ -3992,7 +3993,7 @@ bookstand	bʊstænd
 bookstore	bʊkstɔɹ
 bookworm	bʊkwɚm
 boole	bul
-boolean	buliɑn
+boolean	buliɑn	buliən
 boom	bum
 boomer	bumɚ
 boomerang	bumɚæŋ
@@ -4091,7 +4092,7 @@ bottler	bɑtlɚ
 bottom	bɑtəm
 bottomless	bɑtəmlɪs
 botulism	bɑt͡ʃəlɪzəm
-bouche	buʃ
+bouche	buʃ	buʃeɪ
 boucher	buʃeɪ
 boudin	budin
 boudoir	budwɑɹ
@@ -4101,7 +4102,7 @@ boughten	bɔtən
 bougie	bud͡ʒi
 bouillon	bʊljɑn
 boulder	boʊldɚ
-boule	bul
+boule	bul	buli
 boulevard	bʊləvɑɹd
 boulter	boʊltɚ
 bounce	baʊns
@@ -4116,16 +4117,16 @@ boundless	baʊndlɪs
 bountiful	baʊntəfəl
 bounty	baʊnti
 bouquet	boʊkeɪ
-bourbon	bɚbən
+bourbon	bɚbən	bʊɹbən
 bourg	bʊɹɡ
-bourgeois	bʊɹʒwɑ
+bourgeois	bʊɹʒwɑ	buɹzwɑ
 bourgeoisie	bʊɹʒwɑzi
 bourget	bʊɹʒeɪ
 bourguiba	bʊɹɡibə
 bourn	bɔɹn
 bourne	bɔɹn
 bourque	bɑɹk
-bourse	bʊəs
+bourse	bʊəs	bʊɹs
 bouse	baʊs
 bout	baʊt
 boutilier	butɑliɹ
@@ -4142,7 +4143,7 @@ bowen	boʊən
 bower	boʊɚ
 bowers	baʊɚz
 bowery	baʊɚi
-bowie	boʊi
+bowie	boʊi	bui
 bowing	boʊɪŋ
 bowl	boʊl
 bowler	boʊlɚ
@@ -4206,7 +4207,7 @@ bragg	bɹæɡ
 braggadocio	bɹæɡədoʊʃioʊ
 bragger	bɹæɡɚ
 brahman	bɹɑmən
-brahmin	bɹɑmən
+brahmin	bɹɑmən	bɹɑmɪn
 brahms	bɹɑmz
 braid	bɹeɪd
 braiding	bɹeɪdɪŋ
@@ -4415,7 +4416,7 @@ bristle	bɹɪsəl
 bristling	bɹislɪŋ
 bristol	bɹɪstəl
 bristow	bɹɪstoʊ
-brit	bɹɪt
+brit	bɹɪt	bɹit
 britain	bɹɪtən
 britannia	bɹɪtæniə
 britches	bɹɪt͡ʃɪz
@@ -4619,7 +4620,7 @@ bugher	bjuɚ
 bugle	bjuɡəl
 bugliosi	bulioʊsi
 bugs	bəɡz
-buhl	bul
+buhl	bul	bjul
 buhr	bɚ
 buice	baɪs
 build	bɪld
@@ -4660,7 +4661,7 @@ bullitt	bʊlɪt
 bullock	bʊlək
 bullpen	bʊlpɛn
 bullshit	bʊlʃɪt
-bully	bʊli
+bully	bʊli	bulli
 bulrush	bʊlɹʌʃ
 bulwark	bʊlwɚk
 bum	bəm
@@ -4676,7 +4677,7 @@ bun	bən
 bunch	bənt͡ʃ
 bunche	bənt͡ʃ
 bunchy	bʌnt͡ʃi
-bund	bənd
+bund	bənd	bʊnd
 bunde	bʊndə
 bundesrat	bundɛsɹɑt
 bundestag	bʊndəstɑɡ
@@ -4697,8 +4698,8 @@ bunyan	bʌnjən
 buoy	bui
 buoyancy	bɔɪənsi
 buoyant	bɔɪənt
-bur	bɚ
-buran	bʊɹɑn
+bur	bɚ	bʊɹ
+buran	bʊɹɑn	bɚɑn
 burbage	bɚbɪd͡ʒ
 burbank	bɚbæŋk
 burble	bɚbəl
@@ -4741,7 +4742,7 @@ burman	bɚmən
 burmese	bɚmiz
 burn	bɚn
 burner	bɚnɚ
-burnet	bɚnɪt
+burnet	bɚnɪt	bɚnɛt
 burnett	bɚnɛt
 burney	bɚni
 burnham	bɚnəm
@@ -4849,7 +4850,7 @@ byzantine	bɪzəntin
 byzantium	bɪzænʃiəm
 cab	kæb
 cabal	kəbæl
-caballero	kæbəljɛɹoʊ
+caballero	kæbəljɛɹoʊ	kæbɑjɑɹoʊ
 cabana	kɑbɑnjɑ
 cabaret	kæbɚeɪ
 cabbage	kæbɪd͡ʒ
@@ -4911,7 +4912,7 @@ cage	keɪd͡ʒ
 cagey	keɪd͡ʒi
 cagliari	kɑljɚi
 caguas	kɑɡwɑs
-cahill	kɑhɪl
+cahill	kɑhɪl	keɪl
 cahoot	kəhut
 cahoots	kəhuts
 cain	keɪn
@@ -4996,7 +4997,7 @@ calm	kɑm
 calmly	kɑmli
 caloric	kəlɔɹɪk
 calorie	kælɚi
-calumet	kæljəmɛt
+calumet	kæljəmɛt	kæljumɛt
 calumny	kæləmni
 calvary	kælvɚi
 calvert	kælvɚt
@@ -5052,7 +5053,7 @@ cana	keɪnə
 canaan	keɪnən
 canaanite	keɪnənaɪt
 canace	kænəsi
-canada	kənjɑdə
+canada	kənjɑdə	kænədə
 canadian	kəneɪdiən
 canal	kənæl
 canandaigua	kænəndeɪɡwə
@@ -5128,7 +5129,7 @@ canterbury	kæntɚbɛɹi
 cantina	kæntinə
 cantle	kæntəl
 canto	kæntoʊ
-canton	kæntən
+canton	kæntən	kæntɑn
 cantonal	kæntənəl
 cantonese	kæntəniz
 cantor	kæntɚ
@@ -5156,20 +5157,20 @@ capitalist	kæpɪtəlɪst
 capitalistic	kæpɪtəlɪstɪk
 capitalization	kæpɪtəlɪzeɪʃən
 capitalize	kæpɪtəlaɪz
-capitol	kæpətəl
+capitol	kæpətəl	kæpɪtəl
 capitoline	kæpɪtəlaɪn
 capitulate	kəpɪt͡ʃəleɪt
 capitulation	kəpɪt͡ʃəleɪʃən
 caplin	kæplɪn
 capo	keɪpoʊ
 capon	keɪpɑn
-capote	kəpoʊt
+capote	kəpoʊt	kəpoʊti
 cappelletti	kæpəlɛti
 capper	kæpɚ
 capping	kæpɪŋ
 cappuccino	kæpʊt͡ʃinoʊ
 capri	kɑpɹi
-caprice	kəpɹis
+caprice	kəpɹis	kɑpɹis
 capricious	kəpɹɪʃəs
 capriciously	kəpɹɪʃəsli
 capricorn	kæpɹəkɔɹn
@@ -5282,7 +5283,7 @@ carly	kɑɹli
 carlyle	kɑɹlaɪl
 carma	kɑɹmə
 carman	kɑɹmən
-carmel	kɑɹməl
+carmel	kɑɹməl	kɑɹmɛl
 carmela	kɑɹmɛlə
 carmelita	kɑɹməlitə
 carmelite	kɑɹməlaɪt
@@ -5326,19 +5327,19 @@ carport	kɑɹpɔɹt
 carr	æntwɑn
 carranza	kɚænzə
 carrara	kɚɑɹə
-carrel	kæɹəl
+carrel	kæɹəl	kɚɛl
 carrere	kɚɛɹ
 carriage	kæɹɪd͡ʒ
 carrie	kæɹi
 carrier	kæɹiɚ
 carrington	kæɹɪŋtən
-carrion	kæɹiən
+carrion	kæɹiən	kɑɹioʊn
 carrol	kæɹəl
 carroll	kæɹəl
 carrollton	kæɹəltən
 carrot	kæɹət
 carrousel	kæɹəsɛl
-carry	kæɹi
+carry	kæɹi	kæɹɛ
 carsick	kɑɹsɪk
 carson	kɑɹsən
 cart	kɑɹt
@@ -5380,7 +5381,7 @@ casey	keɪzi
 cash	kæʃ
 cashew	kæʃu
 cashier	kæʃiɹ
-cashmere	kæʒmiɹ
+cashmere	kæʒmiɹ	kæʃmiɹ
 casing	keɪsɪŋ
 casino	kəsinoʊ
 cask	kæsk
@@ -5446,7 +5447,7 @@ cataract	kætɚækt
 catastrophe	kətæstɹəfi
 catastrophic	kætəstɹɑfɪk
 catatonic	kætətɑnɪk
-catawba	kətɑbə
+catawba	kətɑbə	kətɔbə
 catbird	kætbɚd
 catcall	kætkɔl
 catch	kæt͡ʃ
@@ -5501,7 +5502,7 @@ caucasian	kɔkeɪʒən
 caucasus	kɔkəssəs
 caucus	kɔkəs
 caudal	kɔdəl
-caudillo	kɔdiljoʊ
+caudillo	kɔdiljoʊ	kɔdijoʊ
 caudle	kɔdəl
 caught	kɔt
 caul	kɔl
@@ -5574,10 +5575,10 @@ celebrity	səlɛbɹɪti
 celerity	səlɛɹɪti
 celery	sɛlɚi
 celesta	səlɛstə
-celeste	sɪlɛst
+celeste	sɪlɛst	səlɛst
 celestial	səlɛst͡ʃəl
 celestina	sɛlɪstinə
-celestine	sɛlɪstɪn
+celestine	sɛlɪstɪn	sɛlɪstaɪn
 celia	siljə
 celibacy	sɛləbəsi
 celibate	sɛləbɪt
@@ -5704,7 +5705,7 @@ chalk	t͡ʃɔk
 challenge	t͡ʃælɪnd͡ʒ
 challenger	t͡ʃælɪnd͡ʒɚ
 challenging	t͡ʃælɪnd͡ʒɪŋ
-challis	ʃæli
+challis	ʃæli	t͡ʃælɪs
 chalmers	t͡ʃɑmɚz
 cham	kæm
 chamber	t͡ʃeɪmbɚ
@@ -5787,10 +5788,10 @@ charleen	ʃɑɹlin
 charlemagne	ʃɑɹləmeɪn
 charlene	ʃɑɹlin
 charles	t͡ʃɑɹlz
-charleston	tʃɑɹlstən
+charleston	tʃɑɹlstən	t͡ʃɑɹlztən
 charlestown	t͡ʃɑɹlztaʊn
 charlevoix	ʃɑɹləvoʊj
-charlie	tʃɑɹli
+charlie	tʃɑɹli	t͡ʃɑɹli
 charline	ʃɑɹlin
 charlot	ʃɑɹloʊ
 charlotte	ʃɑɹlət
@@ -5836,7 +5837,7 @@ chatty	t͡ʃæti
 chaucer	t͡ʃɔsɚ
 chauffeur	ʃoʊfɚ
 chauncey	t͡ʃɔnsi
-chautauqua	tʃɑtɑkwə
+chautauqua	tʃɑtɑkwə	ʃɑtɑkwɑ
 chauvinism	ʃoʊvənɪzəm
 chauvinist	ʃoʊvɪnɪst
 chavez	t͡ʃɑvɛz
@@ -5894,7 +5895,7 @@ chemist	kɛmɪst
 chemistry	kɛmɪstɹi
 chemotherapy	kɛməθɛɹəpi
 cheney	t͡ʃini
-chenier	ʃɪnɚi
+chenier	ʃɪnɚi	ʃeɪnjeɪ
 chennault	ʃənɔlt
 chenoweth	t͡ʃʌnoʊwɪθ
 cheque	t͡ʃɛk
@@ -5923,7 +5924,7 @@ chesterfield	t͡ʃɛstɚfild
 chesterton	t͡ʃɛstɚtən
 chestnut	t͡ʃɛsnʌt
 chet	t͡ʃɛt
-chevalier	ʃɛvəliɹ
+chevalier	ʃɛvəliɹ	ʃəvæljeɪ
 cheverly	ʃɛvɚli
 cheves	t͡ʃɪvɪs
 cheviot	t͡ʃɛviət
@@ -5944,7 +5945,7 @@ chiba	t͡ʃibɑ
 chic	ʃik
 chicago	ʃɪkɑɡoʊ
 chicanery	ʃɪkeɪnɚi
-chicano	tʃɪkɑnoʊ
+chicano	tʃɪkɑnoʊ	t͡ʃɪkænoʊ
 chichester	t͡ʃɪt͡ʃəstɚ
 chichi	ʃiʃi
 chick	t͡ʃɪk
@@ -5991,7 +5992,7 @@ chinchilla	t͡ʃɪnt͡ʃɪlə
 chinese	t͡ʃaɪniz
 chink	t͡ʃɪŋk
 chino	t͡ʃinoʊ
-chinook	ʃənʊk
+chinook	ʃənʊk	ʃɪnʊk
 chintzy	t͡ʃɪntsi
 chip	t͡ʃɪp
 chipboard	t͡ʃɪpbɔɹd
@@ -6051,7 +6052,7 @@ chook	t͡ʃʊk
 choose	t͡ʃuz
 choosy	tʃuzi
 chop	t͡ʃɑp
-chopin	t͡ʃɑpɪn
+chopin	t͡ʃɑpɪn	ʃoʊpæn
 chopper	t͡ʃɑpɚ
 chopping	t͡ʃɑpɪŋ
 choppy	t͡ʃɑpi
@@ -6071,8 +6072,8 @@ choric	kɔɹɪk
 chortle	t͡ʃɔɹtəl
 chorus	kɔɹəs
 chose	ʃoʊz
-chosen	t͡ʃoʊzən
-chou	ʃu
+chosen	t͡ʃoʊzən	t͡ʃoʊsɛn
+chou	ʃu	d͡ʒoʊ
 chow	t͡ʃaʊ
 chowder	t͡ʃaʊdɚ
 choy	t͡ʃɔɪ
@@ -6212,7 +6213,7 @@ citrine	sɪtɹin
 citron	sɪtɹən
 citronella	sɪtɹənɛlə
 citrus	sɪtɹəs
-city	sɪti
+city	sɪti	boʊʒɚ
 ciudad	sjuðɑð
 civet	sɪvɪt
 civic	sɪvɪk
@@ -6578,7 +6579,7 @@ coiner	kɔɪnɚ
 coinsurance	koʊɪnʃʊɹəns
 cointreau	kwɑntɹoʊ
 coitus	koʊɪtəs
-coke	koʊk
+coke	koʊk	kʊk
 coker	koʊkɚ
 cola	koʊlə
 colander	kʌləndɚ
@@ -6624,7 +6625,7 @@ collectivism	kəlɛktəvɪzəm
 collectivize	kəlɛktəvaɪz
 collector	kəlɛktɚ
 colleen	kɑlin
-college	kɑlɪd͡ʒ
+college	kɑlɪd͡ʒ	kjukʊ
 collegial	kəlid͡ʒiəl
 collegian	kəlid͡ʒən
 collegiate	kəlid͡ʒɪt
@@ -6653,7 +6654,7 @@ cologne	kəloʊn
 colomb	kəlɔmb
 colombia	kəlʌmbiə
 colombo	kɔlɔmbɔ
-colon	koʊloʊn
+colon	koʊloʊn	koʊlɑn
 colonel	kɚnəl
 colonial	kəloʊniəl
 colonialism	kəloʊniəlɪzəm
@@ -6964,7 +6965,7 @@ concoct	kɑnkɑkt
 concoction	kɑnkɑkʃən
 concomitant	kɑnkɑmɪtənt
 concomitantly	kɑnkɑmɪtəntli
-concord	kɑnkɔɹd
+concord	kɑnkɔɹd	kɑŋkɚd
 concourse	kɑnkɔɹs
 concrete	kɑnkɹit
 concretely	kɑnkɹitli
@@ -7191,7 +7192,7 @@ conspicuously	kənspɪkjuəsli
 conspiracy	kənspɚəsi
 conspirator	kənspɚətɚ
 conspire	kənspaɪɚ
-constable	kɑnstəbəl
+constable	kɑnstəbəl	kʌnstəbəl
 constabulary	kənstæbjəlɛɹi
 constance	kɑnstəns
 constancy	kɑnstənsi
@@ -7369,8 +7370,8 @@ convulsion	kənvʌlʃən
 convulsive	kənvʌlsɪv
 conway	kɑnweɪ
 conyers	kɑnjɚz
-coo	ku
-cook	kuk
+coo	ku	kɔɔ
+cook	kuk	kʊk
 cookbook	kʊkbʊk
 cooke	kʊk
 cooker	kʊkɚ
@@ -7431,7 +7432,7 @@ cora	kɔɹə
 coracle	kɔɹəkəl
 coral	kɔɹəl
 corban	kɔɹbən
-corbeil	kɔɹbəl
+corbeil	kɔɹbəl	kɔɹbeɪ
 corbel	kɔɹbəl
 corbet	kɔɹbɪt
 corbett	kɔɹbɪt
@@ -7450,12 +7451,12 @@ cordier	kɔɹdjeɪ
 cording	kɔɹdɪŋ
 cordis	kɔɹdɪs
 cordless	kɔɹdlɪs
-cordoba	kɔɹdəbə
+cordoba	kɔɹdəbə	kɔɹðɔvɑ
 cordon	kɔɹdən
 cordova	kɔɹdəvə
 cords	kɔɹdz
 corduroy	kɔɹdɚɔɪ
-core	kɔɹ
+core	kɔɹ	kɔɹi
 corella	kɚɛlə
 corespondent	kɔɹɪspɑndənt
 corey	kɔɹi
@@ -7515,7 +7516,7 @@ coronet	kɔɹənɪt
 corpora	kɔɹpɚə
 corporal	kɔɹpɚəl
 corporate	kɔɹpɚɪt
-corporation	kɔɹpɚeɪʃən
+corporation	kɔɹpɚeɪʃən	bʊŋɡhi
 corporatism	kɔɹpɚətɪzəm
 corps	kɔɹ
 corpse	kɔɹps
@@ -7574,7 +7575,7 @@ corvo	kɔɹvoʊ
 corvus	kɔɹvəs
 corwin	kɔɹwɪn
 corzine	kɔɹzin
-cos	koʊs
+cos	koʊs	kɔs
 cose	koʊs
 cosenza	kɔzɛntsɑ
 cosey	koʊzi
@@ -7661,7 +7662,7 @@ country	kʌntɹi
 countryfolk	kʌntɹifoʊk
 countryman	kʌntɹimən
 countryside	kʌntɹisaɪd
-county	kaʊnti
+county	kaʊnti	bəlɑhi
 coup	ku
 coupe	kupeɪ
 couple	kʌpəl
@@ -7688,7 +7689,7 @@ courtney	kɔɹtni
 courtroom	kɔɹtɹum
 courtship	kɔɹtʃɪp
 courtyard	kɔɹtjɑɹd
-cousin	kʌzən
+cousin	kʌzən	kuzæn
 cousteau	kustoʊ
 cousy	kuzi
 couture	kutʊɹ
@@ -7810,7 +7811,7 @@ creagh	kɹeɪ
 creak	kɹik
 creaky	kɹiki
 cream	kɹim
-creamer	kɹimɚ
+creamer	kɹimɚ	kɹeɪmɚ
 creamery	kɹimɚi
 creamy	kɹimi
 crease	kɹis
@@ -7897,7 +7898,7 @@ crimson	kɹɪmzən
 cringe	kɹɪnd͡ʒ
 cripple	kɹɪpəl
 cripps	kɹɪps
-crises	kɹiz
+crises	kɹiz	kɹaɪsiz
 crisis	kɹaɪsɪs
 crisp	kɹɪsp
 crispen	kɹɪspən
@@ -8051,7 +8052,7 @@ cubbyhole	kʌbihoʊl
 cube	kjub
 cubic	kjubɪk
 cubicle	kjubɪkəl
-cubism	kjubɪzəm
+cubism	kjubɪzəm	kubɪzəm
 cubit	kjubɪt
 cuckoo	kuku
 cucumber	kjukəmbɚ
@@ -8107,13 +8108,13 @@ cup	kəp
 cupboard	kʌbɚd
 cupcake	kʌpkeɪk
 cupertino	kupɚtinoʊ
-cupid	kjupəd
+cupid	kjupəd	kjupɪd
 cupidity	kjupɪdɪti
 cupola	kjupələ
 cuppy	kʌpi
 cur	kɚ
 curable	kjʊɹəbəl
-curare	kjʊɹɑɹi
+curare	kjʊɹɑɹi	kjuɹɑɹi
 curate	kjʊɹɪt
 curative	kjʊɹətɪv
 curator	kjʊɹeɪtɚ
@@ -8161,7 +8162,7 @@ curtsy	kɚtsi
 curvature	kɚvət͡ʃɚ
 curve	kɚv
 curvy	kɚvi
-cush	kʊʃ
+cush	kʊʃ	kəʃ
 cushing	kʊʃɪŋ
 cushion	kʊʃən
 cushitic	kəʃɪtɪk
@@ -8266,7 +8267,7 @@ dachau	dɑkhɔ
 dachshund	dækshʊnd
 dacia	deɪʃiə
 dacron	deɪkɹɑn
-dactyl	dæktəl
+dactyl	dæktəl	dæktɪl
 dad	dæd
 dada	dɑdɑ
 daddy	dædi
@@ -8277,7 +8278,7 @@ daemon	dimən
 daffodil	dæfədɪl
 daffy	dæfi
 daft	dæft
-dag	dæɡ
+dag	dæɡ	dɑɡ
 dagan	dɑɡɑn
 dagenham	dæɡənəm
 dagestan	dɑɡɪstɑn
@@ -8309,14 +8310,14 @@ dalila	dælələ
 dallas	dæləs
 dalliance	dæliəns
 dally	dæli
-dalmatian	dælmeɪshən
+dalmatian	dælmeɪshən	dælmeɪʃən
 dalrymple	dælɹɪmpəl
 dalton	dɔltən
 daly	deɪli
 dam	dæm
 damage	dæmɪd͡ʒ
 damaging	dæmɪd͡ʒɪŋ
-daman	dæmən
+daman	dæmən	dəmɑn
 damaris	dæmɚɪs
 damascus	dəmæskəs
 damask	dæməsk
@@ -8533,7 +8534,7 @@ debt	dɛt
 debtor	dɛtɚ
 debug	dibʌɡ
 debunk	dɪbʌŋk
-debus	dibʌs
+debus	dibʌs	dibʊs
 debussy	dɛbjʊsi
 debut	deɪbju
 debutante	dɛbjutɑnt
@@ -8711,7 +8712,7 @@ deftly	dɛftli
 defunct	dɪfʌŋkt
 defuse	difjuz
 defy	dɪfaɪ
-degas	dɪɡæs
+degas	dɪɡæs	dəɡɑ
 degeneracy	dɪd͡ʒɛnɚəsi
 degenerate	d͡ʒɛnɛɹət
 degeneration	dɪd͡ʒɛnɚeɪʃən
@@ -8766,7 +8767,7 @@ delicatessen	dɛləkətɛsən
 delicia	dəlɪʃə
 delicious	dɪlɪʃəs
 deliciously	dɪlɪʃəsli
-delight	dɪlaɪt
+delight	dɪlaɪt	dəlaɪt
 delighted	dɪlaɪtɪd
 delightful	dɪlaɪtfəl
 delightfully	dɪlaɪtfəlli
@@ -8783,7 +8784,7 @@ deliver	dɪlɪvɚ
 deliverance	dɪlɪvɚəns
 delivery	dɪlɪvɚi
 dell	dɛl
-della	dɛllɑ
+della	dɛllɑ	dɛlə
 delma	dɛlmə
 delmore	dɛlmɔɹ
 delorean	dəlɔɹiən
@@ -9113,7 +9114,7 @@ deuterium	dutiɹiəm
 deutsch	dɔɪt͡ʃ
 deutscher	dɔɪt͡ʃɚ
 deutschland	dɔɪt͡ʃlɑnt
-deva	deɪvə
+deva	deɪvə	divə
 devaluate	divæljueɪt
 devaluation	divæljueɪʃən
 devalue	divælju
@@ -9156,7 +9157,7 @@ devout	dɪvaʊt
 devoutly	dɪvaʊtli
 dew	du
 dewan	dɪwɑn
-dewar	djuɚ
+dewar	djuɚ	duɚ
 dewberry	dubɛɹi
 dewclaw	duklɔ
 dewey	dui
@@ -9174,7 +9175,7 @@ dhahran	dɑɹɑn
 dhaka	dɑkə
 dharma	dɑɹmə
 dhole	doʊl
-di	di
+di	di	daɪ
 dia	daɪə
 diabase	daɪəbeɪs
 diabetes	daɪəbitɪs
@@ -9231,7 +9232,7 @@ diazo	daɪæzoʊ
 dibble	dɪbəl
 diboll	daɪbəl
 dibs	dɪbz
-dice	daɪs
+dice	daɪs	daɪsi
 dicey	daɪsi
 dichotomy	daɪkɑtəmi
 dichroic	daɪkɹoʊɪk
@@ -9261,7 +9262,7 @@ did	dɪd
 didactic	daɪdæktɪk
 diddle	dɪdəl
 dido	daɪdoʊ
-die	daɪ
+die	daɪ	di
 diehl	dil
 dielectric	daɪɪlɛktɹɪk
 dies	daɪz
@@ -9303,7 +9304,7 @@ dignitary	dɪɡnɪtɛɹi
 dignity	dɪɡnɪti
 digress	dɪɡɹɛs
 digression	dɪɡɹɛʃən
-dike	daɪk
+dike	daɪk	daɪki
 dilapidate	dɪlæpɪdeɪt
 dilapidated	dɪlæpɪdeɪtɪd
 dilatation	dɪləteɪʃən
@@ -9889,11 +9890,11 @@ dong	dɑŋ
 donica	dɑnəkə
 donizetti	dɑnɪzɛti
 donkey	dɑŋki
-donna	dɔnnɑ
+donna	dɔnnɑ	dɑnə
 donne	dən
 donnie	dɑni
 donny	dɑni
-donnybrook	dɑnibɹʊk
+donnybrook	dɑnibɹʊk	dɑnɪbɹʊk
 donor	doʊnɚ
 donut	doʊnət
 doodad	dudæd
@@ -9924,7 +9925,7 @@ doran	dɔɹæn	dɔɹən
 doraville	dɔɹəvɪl
 dorcas	dɔɹkəs
 dorchester	dɔɹt͡ʃɛstɚ
-dore	dɔɹeɪ
+dore	dɔɹeɪ	dɔɹi
 doreen	dɔɹin
 dorette	dɔɹɛt
 dori	dɔɹi
@@ -10170,10 +10171,10 @@ druce	dɹuss
 drudge	dɹəd͡ʒ
 drudgery	dɹʌd͡ʒɚi
 druella	dɹuɛlə
-drug	dɹəɡ
+drug	dɹəɡ	dɹʊɡ
 druggist	dɹʌɡɪst
 drugstore	dɹʌɡstɔɹ
-druid	dɹuəd
+druid	dɹuəd	dɹuɪd
 druidism	dɹuɪdɪzəm
 drum	dɹəm
 drumbeat	dɹʌmbit
@@ -10336,7 +10337,7 @@ dustin	dʌstɪn
 dusting	dʌstɪŋ
 dustman	dʌstmæn
 dusty	dʌsti
-dutch	dətʃ
+dutch	dətʃ	dət͡ʃ
 dutchman	dʌt͡ʃmən
 dutiful	dutɪfəl
 dutifully	dutɪfəlli
@@ -10404,7 +10405,7 @@ earhart	ɛɹhɑɹt
 earl	ɚl
 earldom	ɚldəm
 earlene	ɚlin
-early	iɹli
+early	iɹli	ɚli
 earmark	iɹmɑɹk
 earmuff	iɹmʌf
 earn	ɚn
@@ -10611,7 +10612,7 @@ effy	ɛfi
 efta	ɛftə
 egalitarian	ɪɡælɪtɛɹiən
 egalitarianism	ɪɡælətɛɹiənɪzəm
-egan	joʊɡz
+egan	d͡ʒoʊɡz
 egbert	ɛɡbɚt
 egg	ɛɡ
 eggcup	ɛɡkʌp
@@ -11205,7 +11206,7 @@ epic	ɛpɪk
 epicenter	ɛpɪsɛntɚ
 epictetus	ɛpɪktitəs
 epicure	ɛpəkjʊɹ
-epicurean	ɛpəkjʊɹiən
+epicurean	ɛpəkjʊɹiən	ɛpɪkjʊɚiən
 epidemic	ɛpɪdɛmɪk
 epidemiological	ɛpɪdimiəlɑd͡ʒɪkəl
 epidemiologically	ɛpɪdimiəlɑd͡ʒɪkəlli
@@ -11220,9 +11221,9 @@ epilepsy	ɛpəlɛpsi
 epileptic	ɛpəlɛptɪk
 epilogue	ɛpəlɔɡ
 epinephrine	ɛpənɛfɹɪn
-epiphany	ɛpɪfəni
+epiphany	ɛpɪfəni	ɪpɪfəni
 episcopal	ɪpɪskəpəl
-episcopalian	ɪpɪskəpeɪliən
+episcopalian	ɪpɪskəpeɪliən	ɪpɪskəpeɪljən
 episode	ɛpɪsoʊd
 episodic	ɛpɪsɑdɪk
 episteme	ɛpɪstimi
@@ -11582,7 +11583,7 @@ evolve	ɪvɑlv
 ewald	eɪvɑlt
 ewan	juən
 ewbank	jubænk
-ewe	ju
+ewe	ju	eɪveɪ
 ewell	juɛl
 ewer	juɚ
 ewing	juɪŋ
@@ -12018,7 +12019,7 @@ fantasize	fæntəsaɪz
 fantastic	fæntæstɪk
 fantasy	fæntəsi
 far	fɑɹ
-faraday	fæɹədeɪ
+faraday	fæɹədeɪ	fæɹədi
 faraway	fɑɹəweɪ
 farce	fɑɹs
 farcical	fɑɹsɪkəl
@@ -13144,7 +13145,7 @@ freeman	fɹimən
 freemason	fɹimeɪsən
 freemasonry	fɹimeɪsənɹi
 freeport	fɹipɔɹt
-freer	fɹiɚ
+freer	fɹiɚ	fɹiɹ
 freest	fɹiɪst
 freestanding	fɹistændɪŋ
 freestone	fɹistoʊn
@@ -13196,7 +13197,7 @@ friday	fɹaɪdi
 fridays	fɹaɪdiz
 fridge	fɹɪd͡ʒ
 fridley	fɹɪdli
-fried	fɹaɪd
+fried	fɹaɪd	fɹid
 frieda	fɹidə
 frieder	fɹidɚ
 friedly	fɹidli
@@ -13281,7 +13282,7 @@ fuck	fək
 fuddle	fʌdəl
 fudge	fəd͡ʒ
 fuel	fjuəl
-fugate	fjuɡeɪt
+fugate	fjuɡeɪt	fuɡeɪt
 fugazy	fjuɡeɪzi
 fugitive	fjud͡ʒɪtɪv
 fugue	fjuɡ
@@ -13372,8 +13373,8 @@ fusty	fʌsti
 futile	fjutəl
 futility	fjutɪlɪti
 future	fjut͡ʃɚ
-futurism	fjutʃɚizəm
-futurist	fjutʃɚist
+futurism	fjutʃɚizəm	fjut͡ʃɚɪzəm
+futurist	fjutʃɚist	fjut͡ʃɚɪst
 futuristic	fjut͡ʃɚɪstɪk
 fuzz	fəz
 fuzzy	fʌzi
@@ -13391,7 +13392,7 @@ gabled	ɡeɪbəld
 gabor	ɡɑbɔɹ
 gabriella	ɡeɪbɹiɛlə
 gabrielle	ɡeɪbɹiɛl
-gaby	ɡeɪbi
+gaby	ɡeɪbi	ɡæbi
 gad	ɡæd
 gadfly	ɡædflaɪ
 gadget	ɡæd͡ʒɪt
@@ -13553,7 +13554,7 @@ garment	ɡɑɹmənt
 garn	ɡɑɹn
 garner	ɡɑɹnɚ
 garnet	ɡɑɹnɪt
-garnett	ɡɑɹnɛt
+garnett	ɡɑɹnɛt	ɡɑɹnɪt
 garnish	ɡɑɹnɪʃ
 garnishment	ɡɑɹnɪʃmənt
 garret	ɡæɹɪt
@@ -13704,7 +13705,7 @@ generous	d͡ʒɛnɚəs
 generously	d͡ʒɛnɚəsli
 genesee	d͡ʒɛnɪsi
 genesis	d͡ʒɛnɪsɪs
-genet	d͡ʒɛnɪt
+genet	d͡ʒɛnɪt	ʒəneɪ
 genetic	d͡ʒənɛtɪk
 geneticist	d͡ʒənɛtɪsɪst
 genetics	d͡ʒənɛtɪks
@@ -13730,7 +13731,7 @@ genovese	d͡ʒɛnəviz
 genre	ʒɑnɹə
 gens	d͡ʒɛnz
 genscher	ɡʌnʃɚ
-gent	d͡ʒɛnt
+gent	d͡ʒɛnt	kɛnt
 genteel	d͡ʒɛntil
 gentian	d͡ʒɛnʃən
 gentile	d͡ʒɛntaɪl
@@ -13887,7 +13888,7 @@ gillett	d͡ʒɪlɛt
 gillette	d͡ʒɪlɛt
 gillian	d͡ʒɪliən
 gillie	ɡɪli
-gilly	ɡɪli
+gilly	ɡɪli	ɡɪlli
 gilman	ɡɪlmən
 gilmer	ɡɪlmɚ
 gilroy	ɡɪlɹɔɪ
@@ -14078,7 +14079,7 @@ gnomic	noʊmɪk
 gnomonic	noʊmɑnɪk
 gnu	nu
 go	ɡoʊ
-goa	ɡoʊə
+goa	ɡoʊə	ɡoʊʊ
 goad	ɡoʊd
 goal	ɡoʊl
 goalie	ɡoʊli
@@ -14114,7 +14115,7 @@ godwin	ɡɑdwɪn
 goer	ɡoʊɚ
 goering	ɡɚɪŋ
 goerlitz	ɡɚlɪts
-goes	ɡoʊz
+goes	ɡoʊz	ɡus
 goethals	ɡoʊθəlz
 goethe	ɡɚtə
 goggle	ɡɑɡəl
@@ -14200,7 +14201,7 @@ goral	ɡɔɹəl
 gorbachev	mɪʊɑil
 gordian	ɡɔɹdiən
 gordon	ɡɔɹdən
-gore	ɡɔɹ
+gore	ɡɔɹ	ɡɔɹeɪ
 goren	ɡɔɹeɪn
 gorgas	ɡɔɹɡəs
 gorge	ɡɔɹd͡ʒ
@@ -14298,7 +14299,7 @@ grained	ɡɹeɪnd
 grainger	ɡɹeɪnd͡ʒɚ
 grains	ɡɹeɪnz
 grainy	ɡɹeɪni
-gram	ɡɹæm
+gram	ɡɹæm	ɡɹɑm
 grama	ɡɹeɪmə
 grambling	ɡɹæmblɪŋ
 gramercy	ɡɹəmɚsi
@@ -14380,7 +14381,7 @@ gratuitously	ɡɹətuɪtəsli
 gratuity	ɡɹətuɪti
 gravamen	ɡɹəveɪmən
 grave	ɡɹeɪv
-gravel	ɡɹævəl
+gravel	ɡɹævəl	ɡɹɑvʌl
 gravelly	ɡɹævəlli
 gravely	ɡɹɑveɪli
 graven	ɡɹeɪvən
@@ -14656,7 +14657,7 @@ guiltless	ɡɪltlɪs
 guilty	ɡɪlti
 guinea	ɡɪni
 guinness	ɡɪnɪs
-guise	ɡaɪz
+guise	ɡaɪz	ɡiz
 guisewite	ɡaɪzwhaɪt
 guitar	ɡɪtɑɹ
 guitarist	ɡɪtɑɹɪst
@@ -15194,7 +15195,7 @@ haymarket	heɪmɑɹkɪt
 haynes	heɪnz
 hays	heɪz
 haystack	heɪstæk
-hayward	heɪwɔɹd
+hayward	heɪwɔɹd	heɪwɚd
 haywire	heɪwaɪɚ
 haywood	heɪwʊd
 hazan	kɑzɑn
@@ -15332,7 +15333,7 @@ hefty	hɛfti
 hegel	heɪɡəl
 hegelian	heɪɡeɪliən
 hegemonic	hɛd͡ʒəmɑnɪk
-hegemony	hɪd͡ʒɛməni
+hegemony	hɪd͡ʒɛməni	hɪd͡ʒʌməni
 heh	hɛ
 heidegger	haɪdɛɡɚ
 heidelberg	haɪdəlbɚɡ
@@ -15449,7 +15450,7 @@ hera	hiɹə
 herald	hɛɹəld
 heraldic	hɛɹældɪk
 heraldry	hɛɹəldɹi
-herb	ɚb
+herb	ɚb	hɚb
 herbaceous	hɚbeɪʃəs
 herbal	hɚbəl
 herbalist	hɚbəlɪst
@@ -15457,12 +15458,12 @@ herbarium	hɚbɛɹiəm
 herbicide	ɚbɪsaɪd
 herbivore	hɚbəvɔɹ
 herbivorous	hɚbɪvɚəs
-herculean	hɚkjəliən
+herculean	hɚkjəliən	hɚkjʊliən
 hercules	hɚkjəliz
 herd	hɚd
 herder	hɚdɚ
 herdman	hɚdmən
-here	hiɹ
+here	hiɹ	hiɹi
 hereabout	hiɹəbaʊt
 hereabouts	hiɚəbaʊts
 hereafter	hiɹæftɚ
@@ -15504,7 +15505,7 @@ heroin	hɛɹoʊɪn
 heroine	hɛɹoʊɪn
 heroism	hɛɹoʊɪzəm
 heroize	hɛɹoʊaɪz
-heron	hɛɹən
+heron	hɛɹən	hiɹɑn
 heros	hɛɹoʊs
 herpes	hɚpiz
 herrera	ɛɹɹɛɹɑ
@@ -15763,9 +15764,9 @@ hoffa	hɑfə
 hoffman	hɑfmən
 hofmann	hɑfmən
 hog	hɔɡ
-hogan	hoʊɡɔn
+hogan	hoʊɡɔn	hoʊɡən
 hogarth	hoʊɡɑɹθ
-hogg	hɔɡ
+hogg	hɔɡ	hɑɡ
 hogue	ɔɡ
 hogwash	hɔɡwɑʃ
 hoisington	hɔɪzɪŋtən
@@ -15800,7 +15801,7 @@ hollow	hɑloʊ
 holly	hɑli
 hollyhock	hɑlihɑk
 hollywood	hɑliwʊd
-holm	hoʊm
+holm	hoʊm	hoʊlm
 holmes	hoʊmz
 holmium	hoʊlmiəm
 holocaust	hɑləkɔst
@@ -15819,7 +15820,7 @@ homa	hoʊmə
 homage	hɑmɪd͡ʒ
 hombre	hɑmbɚ
 homburg	hɑmbɚɡ
-home	hoʊm
+home	hoʊm	hjum
 homebound	hoʊmbaʊnd
 homecoming	hoʊmkʌmɪŋ
 homegrown	hoʊmɡɹoʊn
@@ -16029,7 +16030,7 @@ hotpot	hɑtpɑt
 hotshot	hɑtʃɑt
 hotter	hɑtɚ
 houdini	hudini
-hough	hɑk
+hough	hɑk	həf
 houghton	hoʊtʊn
 houlton	hoʊltən
 hound	haʊnd
@@ -16061,7 +16062,7 @@ hove	hoʊv
 hovel	hʌvəl
 hoven	hoʊvən
 hover	hʌvɚ
-hovercraft	hɑvəkɹæft
+hovercraft	hɑvəkɹæft	hʌvɚkɹæft
 hovey	hʌvi
 how	haʊ
 howard	haʊɚd
@@ -16095,7 +16096,7 @@ hud	həd
 huddie	hʌdi
 huddle	hʌdəl
 hudson	hʌdsən
-hue	hju
+hue	hju	weɪ
 huebner	haɪubnɚ
 hued	hjud
 huerta	wɛɹtə
@@ -16294,7 +16295,7 @@ hyperbaric	haɪpɚbæɹɪk
 hyperbola	haɪpɚbələ
 hyperbole	haɪpɚbəli
 hyperbolic	haɪpɚbɑlɪk
-hyperborean	haɪpəbɔɹiən
+hyperborean	haɪpəbɔɹiən	haɪpɚbɔɹiən
 hypercritical	haɪpɚkɹɪtɪkəl
 hyperion	haɪpiɹiən
 hyperkinetic	haɪpɚkɪnɛtɪk
@@ -17495,7 +17496,7 @@ iodine	aɪədaɪn
 iola	aɪoʊlə
 iolanthe	aɪəlænθi
 iole	aɪəli
-ion	aɪən
+ion	aɪən	aɪɑn
 iona	aɪoʊnə
 ionic	aɪɑnɪk
 ionization	aɪənaɪzeɪʃən
@@ -17795,7 +17796,7 @@ jeanette	d͡ʒənɛt
 jeanne	ʒɑn
 jeannette	d͡ʒənɛt
 jeannie	d͡ʒini
-jeans	d͡ʒinz
+jeans	d͡ʒinz	d͡ʒins
 jee	d͡ʒi
 jeep	d͡ʒip
 jeer	d͡ʒiɹ
@@ -17849,7 +17850,7 @@ jespersen	jɛspɚsən
 jess	d͡ʒɛs
 jessamine	d͡ʒɛsəmɪn
 jessamyn	d͡ʒɛsəmɪn
-jesse	d͡ʒɛs
+jesse	d͡ʒɛs	d͡ʒɛsi
 jessica	d͡ʒɛsəkə
 jessie	d͡ʒɛsi
 jest	d͡ʒɛst
@@ -17904,7 +17905,7 @@ joanna	d͡ʒoʊænə
 joanne	d͡ʒoʊæn
 joaquim	ʒɔɑkɪm
 joaquin	wɑkin
-job	d͡ʒɑb
+job	d͡ʒɑb	d͡ʒoʊb
 jobber	d͡ʒɑbɚ
 jobina	d͡ʒoʊbinə
 jobless	d͡ʒɑblɪs
@@ -17913,7 +17914,7 @@ jock	d͡ʒɑk
 jockey	d͡ʒɑki
 jocose	d͡ʒoʊkoʊs
 jocular	d͡ʒɑkjəlɚ
-jodhpur	d͡ʒɑdpɚ
+jodhpur	d͡ʒɑdpɚ	d͡ʒoʊdpʊɹ
 jodi	d͡ʒoʊdi
 jody	d͡ʒoʊdi
 joe	d͡ʒoʊ
@@ -17924,7 +17925,7 @@ jogger	d͡ʒɑɡɚ
 johan	joʊhɑn
 johann	joʊhɑn
 johanna	d͡ʒoʊhænə
-johannes	d͡ʒoʊhæniz
+johannes	d͡ʒoʊhæniz	joʊhɑnəs
 johannesburg	d͡ʒoʊhænɪsbɚɡ
 john	d͡ʒɑn
 johnny	d͡ʒɑni
@@ -17997,7 +17998,7 @@ juan	wɑn
 juana	wɑnə
 juanita	wɑnitə
 juarez	wɑɹɛz
-juba	d͡ʒubə
+juba	d͡ʒubə	d͡ʒubɑ
 jubilant	d͡ʒubələnt
 jubilation	d͡ʒubəleɪʃən
 jubilee	d͡ʒubəli
@@ -18021,7 +18022,7 @@ judith	d͡ʒudɪθ
 judo	d͡ʒudoʊ
 judy	d͡ʒudi
 jug	d͡ʒəɡ
-juggernaut	d͡ʒʌɡənɔɹt
+juggernaut	d͡ʒʌɡənɔɹt	d͡ʒʌɡɚnɔt
 juggle	d͡ʒʌɡəl
 juggler	d͡ʒʌɡlɚ
 jugular	d͡ʒʌɡjəlɚ
@@ -18066,7 +18067,7 @@ junket	d͡ʒʌŋkɪt
 junkie	d͡ʒʌŋki
 junkyard	d͡ʒʌnkjɑɹd
 juno	d͡ʒunoʊ
-junta	hʊntə
+junta	hʊntə	huntæn
 jupiter	d͡ʒupɪtɚ
 jura	d͡ʒʊɹə
 jurassic	d͡ʒʊɹæsɪk
@@ -18106,14 +18107,14 @@ kahului	kɑhului
 kahuna	kəhunə
 kail	keɪl
 kailua	kaɪluɑ
-kain	kaɪn
+kain	kaɪn	keɪn
 kaiser	kaɪzɚ
 kalamazoo	kæləməzu
 kalb	kælb
 kale	keɪl
 kaleidoscope	kəlaɪdəskoʊp
 kalgoorlie	kælɡʊɹli
-kali	kæli
+kali	kæli	kɑli
 kaliningrad	kɑlinɪnɡɹɑd
 kalispell	kælɪspɛl
 kalisz	kɑlɪʃ
@@ -18123,7 +18124,7 @@ kama	kɑmɑ
 kamchatka	kæmt͡ʃætkə
 kamehameha	kɑmeɪhɑmeɪhɑ
 kamel	kɑməl
-kamikaze	kɑməkɑzi
+kamikaze	kɑməkɑzi	kɑmikɑzeɪ
 kampala	kɑmpɑlɑ
 kana	kɑnɑ
 kanazawa	kɑnɑzɑwɑ
@@ -18158,8 +18159,8 @@ karoline	kæɹəlaɪn
 karrer	kɑɹɚ
 karst	kɑɹst
 karyn	kæɹən
-kasha	kɑʃə
-kashmir	kæʒmiɹ
+kasha	kɑʃə	kæʃə
+kashmir	kæʒmiɹ	kæʃmiɹ
 kashmiri	kæʃmiɹi
 kasper	kæspɚ
 kassa	kɑʃʃɑ
@@ -18192,7 +18193,7 @@ kazakhstan	kɑzɑkstɑn
 kazan	kəzæn
 kazmierski	kæzmiɹski
 kazoo	kəzu
-kea	keɪə
+kea	keɪə	kɛɑ
 keady	keɪdi
 kean	kin
 kearney	kɑɹni
@@ -18475,7 +18476,7 @@ kleptomaniac	klɛptəmeɪniæk
 kleve	kleɪvə
 kline	klaɪn
 klondike	klɑndaɪk
-kluck	klək
+kluck	klək	klʊk
 klutz	kləts
 knack	næk
 knapsack	næpsæk
@@ -18492,7 +18493,7 @@ knell	nɛl
 knelt	nɛlt
 knesset	knɛsɛt
 knew	nu
-knickerbocker	nɪkəbɑkɚ
+knickerbocker	nɪkəbɑkɚ	nɪkɚbɑkɚ
 knickerbockers	nɪkɚbɑkɚz
 knickers	nɪkɚz
 knickknack	nɪknæk
@@ -18731,7 +18732,7 @@ lamas	lɑmɑs
 lamb	læm
 lambaste	læmbeɪst
 lambda	læmdə
-lambert	læmbɚt
+lambert	læmbɚt	læmbɛɹ
 lambeth	læmbɪθ
 lamboy	læmbɔɪ
 lame	leɪm
@@ -18762,7 +18763,7 @@ lancer	lænsɚ
 lancers	lænsɚz
 lancet	lænsɪt
 land	lænd
-landau	lændɔ
+landau	lændɔ	lɑndaʊ
 landed	lændɪd
 lander	lændɚ
 landfall	lændfɔl
@@ -18808,7 +18809,7 @@ lanny	læni
 lanolin	lænəlɪn
 lansford	lænsfɚd
 lansing	lænsɪŋ
-lantana	lænteɪnə
+lantana	lænteɪnə	læntænə
 lantern	læntɚn
 lanthanum	lænθənəm
 lanyard	lænjɚd
@@ -18846,7 +18847,7 @@ largesse	lɑɹʒɛs
 largo	lɑɹɡoʊ
 lariat	læɹiət
 larina	lɚinə
-larine	læɹɪn
+larine	læɹɪn	lɚin
 larissa	lɚɪsə
 lark	lɑɹk
 larkspur	lɑɹkspɚ
@@ -18929,7 +18930,7 @@ laundry	lɔndɹi
 laura	lɔɹə
 laureate	lɔɹiɪt
 laureen	lɔɹin
-laurel	lɔɹəl
+laurel	lɔɹəl	lɔɹɛl
 laurena	lɔɹinə
 laurence	lɔɹəns
 laurens	lɔɹənz
@@ -18955,7 +18956,7 @@ lawing	lɔɪŋ
 lawless	lɔlɪs
 lawlessness	lɔlɪsnɪs
 lawmaker	lɔmeɪkɚ
-lawman	lɔmæn
+lawman	lɔmæn	lɔmən
 lawn	lɔn
 lawnmower	lɔɹnmoʊɚ
 lawrence	lɔɹəns
@@ -18982,10 +18983,10 @@ lazear	ləziɹ
 lazuli	læzʊli
 lazulite	læzəlaɪt
 lazy	leɪzi
-lea	li
+lea	li	liə
 leach	lit͡ʃ
 leacock	likɑk
-lead	lɛd
+lead	lɛd	lid
 leadbelly	lɛdbɛli
 leaden	lɛdən
 leader	lidɚ
@@ -19020,7 +19021,7 @@ leapfrog	lipfɹɑɡ
 leapt	lɛpt
 lear	liɹ
 learn	lɚn
-learned	lɚnd
+learned	lɚnd	lɚnɪd
 learner	lɚnɚ
 learning	lɚnɪŋ
 learnt	lɚnt
@@ -19091,7 +19092,7 @@ legato	ləɡɑtoʊ
 legend	lɛd͡ʒənd
 legendary	lɛd͡ʒəndɛɹi
 legendre	ləʒɑndɚ
-leger	lɛd͡ʒɚ
+leger	lɛd͡ʒɚ	leɪʒeɪ
 legerdemain	lɛd͡ʒɚdəmeɪn
 legged	lɛɡd
 legging	lɛɡɪŋ
@@ -19130,7 +19131,7 @@ leighton	leɪtən
 leila	lilə
 leinsdorf	laɪnzdɔɹf
 leipzig	laɪpsɪɡ
-leister	listɚ
+leister	listɚ	laɪsnɚ
 leisure	liʒɚ
 leisurely	liʒɚli
 leith	liθ
@@ -19140,7 +19141,7 @@ lek	lɛk
 lela	lilə
 leland	lilənd
 lem	lɛm
-leman	lɛmən
+leman	lɛmən	limən
 lemelin	lɛməlɪn
 lemieux	lɛmju
 lemma	lɛmə
@@ -19244,7 +19245,7 @@ levant	lɪvænt
 levee	lɛvi
 level	lɛvəl
 leven	livən
-lever	lɛvɚ
+lever	lɛvɚ	livɚ
 leverage	lɛvɚɪd͡ʒ
 leverett	lɛvɚɪt
 levi	livaɪ
@@ -19259,7 +19260,7 @@ levitation	lɛvɪteɪʃən
 leviticus	lɪvɪtəkəs
 levittown	lɛvɪttaʊn
 levity	lɛvɪti
-levy	lɛvi
+levy	lɛvi	livi
 lew	lu
 lewd	lud
 lewis	luɪs
@@ -19302,7 +19303,7 @@ libertarian	lɪbɚtɛɹiən
 libertine	lɪbɚtin
 liberty	lɪbɚti
 libido	lɪbidoʊ
-libra	libɹɑ
+libra	libɹɑ	laɪbɹə
 librarian	laɪbɹɛɹiən
 library	laɪbɹɛɹi
 libration	laɪbɹeɪʃən
@@ -19325,14 +19326,14 @@ licking	lɪkɪŋ
 licorice	lɪkɚɪs
 lid	lɪd
 lido	lidoʊ
-lie	laɪ
+lie	laɪ	li
 liebermann	libɚmɑn
 liebig	libɪk
 liechtenstein	lɪktənstaɪn
 lied	lid
 lieder	lidɚ
 lief	lif
-liege	lid͡ʒ
+liege	lid͡ʒ	lieɪʒ
 lien	laɪən
 lietzke	lɪtski
 lieu	lu
@@ -19384,7 +19385,7 @@ likeness	laɪknɪs
 likewise	laɪkwaɪz
 liking	laɪkɪŋ
 likud	likud
-lila	lilɑ
+lila	lilɑ	laɪlə
 lilac	laɪlək
 lili	lɪli
 lilian	lɪliən
@@ -19398,7 +19399,7 @@ lilliputian	lɪlɪpjuʃən
 lillo	lɪloʊ
 lilly	lɪli
 lilt	lɪlt
-lily	lɪli
+lily	lɪli	lɪlɛ
 lilyan	lɪljən
 lima	limə
 liman	laɪmæn
@@ -19483,7 +19484,7 @@ linton	lɪntən
 linus	laɪnəs
 linwood	lɪnwʊd
 linz	lɪnts
-lion	laɪən
+lion	laɪən	liɔn
 lionel	laɪənəl
 lionheart	laɪənhɑɹt
 lionize	laɪənaɪz
@@ -19517,7 +19518,7 @@ lire	liɹeɪ
 lisa	lisə
 lisbon	lɪzbən
 lise	lisə
-lisle	laɪl
+lisle	laɪl	lil
 lisp	lɪsp
 list	lɪst
 listed	lɪstɪd
@@ -19682,7 +19683,7 @@ logjam	lɔɡd͡ʒæm
 logo	lɔɡoʊ
 logogram	lɔɡəɡɹæm
 logographic	lɔɡəɡɹæfɪk
-logos	loʊɡɑs
+logos	loʊɡɑs	liɡɑs
 logwood	lɔɡwʊd
 lohengrin	loʊənɡɹɪn
 lohrmann	lɔɹmən
@@ -19721,7 +19722,7 @@ longevity	lɑnd͡ʒɛvɪti
 longfellow	lɔŋfɛloʊ
 longhair	lɔŋhɛɹ
 longhand	lɔŋhænd
-longhorn	lɑŋhɔɹn
+longhorn	lɑŋhɔɹn	lɔŋhɔɹn
 longhouse	lɑŋhaʊs
 longing	lɔŋɪŋ
 longingly	lɔŋɪŋli
@@ -19757,7 +19758,7 @@ loosen	lusən
 loosestrife	lusstɹaɪf
 loot	lut
 lop	lɑp
-lope	loʊp
+lope	loʊp	loʊpeɪ
 loper	loʊpɚ
 lopez	loʊpɛz
 lopsided	lɑpsaɪdɪd
@@ -19772,7 +19773,7 @@ lord	lɔɹd
 lordly	lɔɹdli
 lordship	lɔɹdʃɪp
 lordy	lɔɹdi
-lore	lɔɹ
+lore	lɔɹ	lɔɹə
 lorelei	lɔɹəlaɪ
 loren	lɔɹən
 lorena	lɔɹinə
@@ -19881,7 +19882,7 @@ lubricity	lubɹɪsɪti
 luca	lukɑ
 lucas	lukəs
 lucca	lukkɑ
-luce	lus
+luce	lus	dəlus
 lucent	lusənt
 lucerne	lusɚn
 lucia	luʃə
@@ -19913,7 +19914,7 @@ ludwigshafen	lutvɪkshɑfən
 luella	luɛlə
 luff	ləf
 lufkin	lʌfkɪn
-lug	ləɡ
+lug	ləɡ	lʊk
 luge	luʒ
 luger	luɡɚ
 luggage	lʌɡɪd͡ʒ
@@ -19943,7 +19944,7 @@ lumberman	lʌmbɚmən
 lumberton	lʌmbɚtən
 lumberyard	lʌmbɚjɑɹd
 lumen	lumən
-luminal	lumɪnəl
+luminal	lumɪnəl	lumənəl
 luminance	lumənəns
 luminary	lumənɛɹi
 luminescence	lumənɛsəns
@@ -20096,14 +20097,14 @@ macrophage	mækɹəfeɪd͡ʒ
 mad	mæd
 madagascar	mædəɡæskɚ
 madam	mædəm
-madame	mədæm
+madame	mədæm	mədɑm
 madcap	mædkæp
 madden	mædən
 madder	mædɚ
 madding	mædɪŋ
 made	meɪd
 madeira	mədiɚə
-madeleine	mædəleɪn
+madeleine	mædəleɪn	mædəlɪn
 mademoiselle	mædəməzɛl
 madge	mæd͡ʒ
 madhouse	mædhaʊs
@@ -20113,7 +20114,7 @@ madly	mædli
 madman	mædmæn
 madness	mædnɪs
 madonna	mədɑnə
-madras	mædɹəs
+madras	mædɹəs	mədɹæs
 madrid	mədɹɪd
 madrigal	mædɹəɡəl
 mae	meɪ
@@ -20143,7 +20144,7 @@ magma	mæɡmə
 magna	mæɡnə
 magnanimous	mæɡnænəməs
 magnate	mæɡneɪt
-magnesia	mæɡniʒə
+magnesia	mæɡniʒə	mæɡniʃiə
 magnesite	mæɡnɪsaɪt
 magnesium	mæɡniziəm
 magnet	mæɡnɪt
@@ -20191,7 +20192,7 @@ main	meɪn
 maine	meɪn
 mainer	meɪnɚ
 mainframe	meɪnfɹeɪm
-mainland	meɪnlənd
+mainland	meɪnlənd	meɪnlænd
 mainline	meɪnlaɪn
 mainly	meɪnli
 mains	meɪnz
@@ -20230,7 +20231,7 @@ malanga	məlæŋɡə
 malaprop	mæləpɹɑp
 malaria	məlɛɹiə
 malarkey	məlɑɹki
-malathion	mæləθaɪən
+malathion	mæləθaɪən	mæləθaɪɑn
 malawi	mɑlɑwi
 malay	meɪleɪ
 malayan	məleɪən
@@ -20240,7 +20241,7 @@ malcolm	mælkəm
 malcontent	mælkəntɛnt
 malden	mɔldən
 maldives	mældaɪvz
-male	meɪl
+male	meɪl	mɑli
 malefactor	mæləfæktɚ
 malevolent	məlɛvələnt
 malfeasance	mælfizəns
@@ -20287,8 +20288,8 @@ mammalian	məmeɪliən
 mammary	mæmɚi
 mammography	mæmɑɡɹəfi
 mammoth	mæməθ
-man	mɑn
-mana	mɑnɑ
+man	mɑn	mæn
+mana	mɑnɑ	mæneɪ
 manage	mænɪd͡ʒ
 manageable	mænɪd͡ʒəbəl
 management	mænɪd͡ʒmənt
@@ -20318,7 +20319,7 @@ mandrill	mændɹil
 mane	meɪn
 maned	meɪnd
 manes	meɪniz
-manet	mɑnɛt
+manet	mɑnɛt	mæneɪ
 maneuver	mənjuvɚ
 manfred	mænfɹɪd
 manfully	mænfəlli
@@ -20381,7 +20382,7 @@ mansfield	mænzfild
 mansion	mænʃən
 manslaughter	mænslɔtɚ
 manson	mænsən
-manta	mæntə
+manta	mæntə	mɑntɑ
 manteca	mæntikə
 mantel	mæntəl
 mantell	mæntɛl
@@ -20455,7 +20456,7 @@ marginal	mɑɹd͡ʒənəl
 marginalize	mɑɹd͡ʒɪnəlaɪz
 margrave	mɑɹɡɹeɪv
 marguerite	mɑɹɡɚit
-maria	mɑɹiə
+maria	mɑɹiə	mɚiə
 mariam	mɛɹiəm
 marian	mɛɹiən
 marianna	mɛɹiænə
@@ -20563,7 +20564,7 @@ marver	mɑɹvɚ
 marvin	mɑɹvɪn
 marxism	mɑɹksɪzəm
 marxist	mɑɹksɪst
-mary	mɛɹi
+mary	mɛɹi	mɛɛɹi
 maryann	mɛɹiæn
 marybeth	mɛɹibɛθ
 maryland	mɛɹələnd
@@ -20582,7 +20583,7 @@ masked	mæskt
 masker	mæskɚ
 maslin	mæzlɪn
 masochism	mæsəkɪzəm
-mason	maɪsən
+mason	maɪsən	meɪsən
 masonic	məsɑnɪk
 masonite	meɪsənaɪt
 masonry	meɪsənɹi
@@ -20671,7 +20672,7 @@ maturation	mæt͡ʃʊɹeɪʃən
 mature	mətjʊɚ
 matuszak	mətuzɑk
 matuszewski	mætəzuski
-maud	mɑd
+maud	mɑd	mɔd
 maudlin	mɔdlɪn
 maui	mɔi
 maul	mɑl
@@ -20950,7 +20951,7 @@ mentally	mɛntəli
 menthol	mɛnθoʊl
 mention	mɛnʃən
 menton	mɛntoʊn
-mentor	mɛntɔɹ
+mentor	mɛntɔɹ	mɛntɚ
 menu	mɛnju
 menzies	mɛnziz
 meow	miaʊ
@@ -21017,7 +21018,7 @@ messerschmitt	mɛsɚʃmɪt
 messiah	mɪsaɪə
 messianic	mɛsɪænɪk
 messier	mɛsieɪ
-messieurs	mɛsɚz
+messieurs	mɛsɚz	mɛsjɚɹ
 messina	mɛsinə
 messrs	mɛsɚz
 messy	mɛsi
@@ -21070,7 +21071,7 @@ methylene	mɛθəlin
 meticulous	mətɪkjələs
 meticulously	mətɪkjələsli
 metier	meɪtjeɪ
-metis	meɪtis
+metis	meɪtis	mitɪs
 metre	mitɚ
 metric	mɛtɹɪk
 metrical	mɛtɹikəl
@@ -21159,7 +21160,7 @@ middling	mɪdlɪŋ
 mideast	mɪdist
 midge	mɪd͡ʒ
 midget	mɪd͡ʒɪt
-midi	mɪdi
+midi	mɪdi	midi
 midland	mɪdlənd
 midlands	mɪdləndz
 midline	mɪdlaɪn
@@ -21231,7 +21232,7 @@ millen	mɪlən
 millennial	mɪllɛniəl
 millennium	mɪlɛniəm
 miller	mɪlɚ
-millet	mɪlɪt
+millet	mɪlɪt	mɪleɪ
 millibar	mɪləbɑɹ
 millicent	mɪlɪsənt
 millie	mɪli
@@ -21265,7 +21266,7 @@ mimic	mɪmɪk
 mimicry	mɪmɪkɹi
 mimosa	mɪmoʊzə
 mims	mɪmz
-mina	maɪnə
+mina	maɪnə	mɪnə
 minaret	mɪnɚɛt
 mince	mɪns
 mincemeat	mɪnsmit
@@ -21301,7 +21302,7 @@ miniaturize	mɪniət͡ʃɚaɪz
 minibus	mɪnibʌs
 minicomputer	mɪnɪkəmpjutɚ
 minimal	mɪnəməl
-minimalist	mɪnɪməlɪst
+minimalist	mɪnɪməlɪst	mɪnəməlɪst
 minimize	mɪnəmaɪz
 minimum	mɪnəməm
 mining	maɪnɪŋ
@@ -21343,7 +21344,7 @@ minus	maɪnəs
 minuscule	mɪnəskjul
 minute	mɪnɪt
 minutely	mɪnɪtli
-minuteman	mɪnətmæn
+minuteman	mɪnətmæn	mɪnɪtmæn
 minutia	mɪnuʃiə
 miocene	maɪəsin
 mir	miɹ
@@ -21471,9 +21472,9 @@ miter	maɪtɚ
 mithridate	mɪθɹɪdeɪt
 mitigate	mɪtɪɡeɪt
 mitotic	maɪtɑtɪk
-mitra	maɪtɹə
+mitra	maɪtɹə	mitɹə
 mitral	maɪtɹəl
-mitre	maɪtɚ
+mitre	maɪtɚ	mitɹeɪ
 mitsotakis	mɪtsoʊtɑkɪs
 mitt	mɪt
 mitten	mɪtɛn
@@ -21491,7 +21492,7 @@ mo	moʊ
 moan	moʊn
 moat	moʊt
 mob	mɑb
-mobile	moʊbəl
+mobile	moʊbəl	moʊbil
 mobility	moʊbɪlɪti
 mobilize	moʊbəlaɪz
 mobster	mɑbstɚ
@@ -21560,7 +21561,7 @@ moleskin	moʊlskɪn
 molest	məlɛst
 molestation	moʊlɛsteɪʃən
 molina	moʊlinə
-moline	moʊlɪn
+moline	moʊlɪn	moʊlin
 molitor	mɑlɪtɚ
 moll	mɑl
 mollet	moʊleɪ
@@ -21582,7 +21583,7 @@ momentary	moʊməntɛɹi
 momentous	moʊmɛntəs
 momentum	moʊmɛntəm
 momma	mɑmə
-mon	mɑn
+mon	mɑn	moʊn
 mona	moʊnə
 monaco	mɑnəkoʊ
 monad	mɑnæd
@@ -21673,7 +21674,7 @@ montagu	mɑntəɡju
 montalvo	mɔntɑlvɔ
 montana	mɑntænə
 montanari	mɑntənɛɹi
-monte	mɑnti
+monte	mɑnti	mɔntɛ
 montenegro	mɔntəniɡɹoʊ
 montero	mɑntɛɹoʊ
 monterrey	mɑntɚeɪ
@@ -21727,7 +21728,7 @@ moralize	mɔɹəlaɪz
 morass	mɚæs
 moratorium	mɔɹətɔɹiəm
 moravian	mɔɹeɪviən
-moray	mɔɹeɪ
+moray	mɔɹeɪ	mɚi
 morbid	mɔɹbɪd
 morbidity	mɔɹbɪdɪti
 mordant	mɔɹdənt
@@ -21736,7 +21737,7 @@ more	mɔɹ
 morea	mɔɹiə
 moreau	mɔɹoʊ
 moreen	mɚin
-morel	mɚɛl
+morel	mɚɛl	mɔɹɛl
 morello	mɚɛloʊ
 moreover	mɔɹoʊvɚ
 mores	mɔɹeɪz
@@ -21767,7 +21768,7 @@ morphogenesis	mɔɹfəd͡ʒɛnɪsɪs
 morphological	mɔɹfəlɑd͡ʒɪkəl
 morphology	mɔɹfəloʊɡi
 morrie	mɔɹi
-morris	mɔɹəs
+morris	mɔɹəs	mɔɹɪs
 morrison	mɔɹɪsən
 morrow	mɔɹoʊ
 morse	mɔɹs
@@ -21965,7 +21966,7 @@ mummer	mʌmɚ
 mummify	mʌməfaɪ
 mummy	mʌmi
 mumps	məmps
-munch	mənt͡ʃ
+munch	mənt͡ʃ	mʊŋk
 munchausen	məntʃɑzən
 muncie	mʌnsi
 muncy	mʌnsi
@@ -22000,7 +22001,7 @@ murrey	mɚi
 murrow	mɚoʊ
 murry	mɚi
 murzyn	mɚzɪn
-muscat	mʌskət
+muscat	mʌskət	məskæt
 muscatine	mʌskətin
 muscle	məsəl
 muscovite	mʌskəvaɪt
@@ -22036,7 +22037,7 @@ mustachio	məstɑʃoʊ
 mustafa	mʊstɑfɑ
 mustang	mʌstæŋ
 mustard	mʌstɚd
-muster	mʌstɚ
+muster	mʌstɚ	mustɚ
 musty	mʌsti
 mutable	mjutəbəl
 mutagen	mjutəd͡ʒən
@@ -22067,7 +22068,7 @@ myopia	maɪoʊpiə
 myopic	maɪɑpɪk
 myosin	maɪəsɪn
 myriad	mɚiəd
-myrmidon	mɚmɪdən
+myrmidon	mɚmɪdən	mɚmɪdɑn
 myron	maɪɹən
 myrrh	mɚ
 myrtice	mɚtɪs
@@ -22116,7 +22117,7 @@ nance	næns
 nanchang	nɑnt͡ʃɑŋ
 nancy	nænsi
 nanette	nænɛt
-nanna	nænə
+nanna	nænə	nɑnnɑ
 nanny	næni
 nanometer	neɪnəmitɚ
 nanosecond	neɪnəsɛkənd
@@ -22158,7 +22159,7 @@ nasser	nɑsɚ
 nast	næst
 nasty	næsti
 nat	nɑt
-natal	neɪtəl
+natal	neɪtəl	nətæl
 natalia	nəteɪljə
 natalie	nætəli
 natchez	næt͡ʃɪz
@@ -22176,7 +22177,7 @@ nationwide	neɪʃənwaɪd
 native	neɪtɪv
 natively	neɪtɪvli
 nativism	neɪtɪvɪzəm
-nativity	nətɪvɪti
+nativity	nətɪvɪti	nətɪvəti
 nato	neɪtoʊ
 natter	nætɚ
 natty	næti
@@ -22197,7 +22198,7 @@ nauseating	nɔzieɪtɪŋ
 nauseous	nɔʃəs
 nautical	nɔtɪkəl
 nautilus	nɔtələs
-navajo	nævəhoʊ
+navajo	nævəhoʊ	nævɑhoʊ
 naval	neɪvəl
 navarre	nəvɑɹ
 nave	neɪv
@@ -22411,7 +22412,7 @@ nibble	nɪbəl
 nibs	nɪbz
 nicaragua	nɪkɚɑɡwə
 niccolite	nɪkəlaɪt
-nice	naɪs
+nice	naɪs	nis
 nicety	naɪsɪti
 niche	nɪt͡ʃ
 nicholas	nɪkələs
@@ -22628,7 +22629,7 @@ northeastward	nɔɹθistwɚd
 norther	nɔɹðɚ
 northerly	nɔɹðɚli
 northern	nɔɹðən
-northerner	nɔɹðənɚ
+northerner	nɔɹðənɚ	nɔɹðɚnɚ
 northernmost	nɔɹðɚnmoʊst
 northland	nɔɹθlənd
 northrop	nɔɹθɹəp
@@ -22733,7 +22734,7 @@ numidia	numɪdiə
 numismatic	njumɪzmætɪk
 numismatics	numɪzmætɪks
 numismatist	numɪzmətɪst
-nun	nən
+nun	nən	nun
 nuncio	nʌnʃioʊ
 nunez	nunjɛz
 nunnery	nʌnɚi
@@ -22797,7 +22798,7 @@ oberhausen	oʊbɚhaʊzən
 oberon	oʊbɚɑn
 obese	oʊbis
 obesity	oʊbisɪti
-obey	oʊbeɪ
+obey	oʊbeɪ	oʊbi
 obfuscate	ɑbfʌskeɪt
 obit	oʊbɪt
 obituary	oʊbɪt͡ʃuɛɹi
@@ -22891,7 +22892,7 @@ octagon	ɑktəɡɑn
 octahedral	ɑktəhidɹəl
 octahedron	ɑktəhidɹən
 octane	ɑkteɪn
-octave	ɑkteɪv
+octave	ɑkteɪv	ɑktɪv
 octavia	ɑkteɪviə
 octavius	ɑkteɪviəs
 octet	ɑktɛt
@@ -22958,7 +22959,7 @@ ointment	ɔɪntmənt
 ojeda	oʊhidə
 ojibwa	oʊd͡ʒɪbweɪ
 ok	oʊkeɪ
-oka	oʊkə
+oka	oʊkə	oʊkɑ
 okay	oʊkʌ
 okazaki	ɔkɑzɑki
 okeechobee	oʊkit͡ʃoʊbi
@@ -23130,7 +23131,7 @@ orabelle	ɔɹəbɛl
 oracle	ɔɹəkæl
 oral	ɔɹəl
 oran	ɔɹæn
-orange	ɔɹɪnd͡ʒ
+orange	ɔɹɪnd͡ʒ	ɑɹind͡ʒ
 orangeburg	ɔɹɪnd͡ʒbɚɡ
 orangutan	ɔɹæŋʊtæn
 oration	ɔɹeɪʃən
@@ -23245,7 +23246,7 @@ osmium	ɑzmiəm
 osmond	ɑzmənd
 osmosis	ɑzmoʊsɪs
 osmund	ɑzmənd
-osprey	ɑspɹeɪ
+osprey	ɑspɹeɪ	ɑspɹi
 ossa	ɑsə
 ossification	ɑsəfəkeɪʃən
 ossified	ɑsəfaɪd
@@ -23435,7 +23436,7 @@ overhear	oʊvɚhiɹ
 overheat	oʊvɚhit
 overjoyed	oʊvəd͡ʒɔɪd
 overkill	oʊvɚkɪl
-overland	oʊvɚlænd
+overland	oʊvɚlænd	oʊvɚlənd
 overlap	oʊvɚlæp
 overlay	oʊvɚleɪ
 overload	oʊvɚloʊd
@@ -23699,7 +23700,7 @@ pannier	pænjɚ
 panoply	pænəpli
 panorama	pænɚæmə
 pansophic	pænsɑfɪk
-pansy	pænsi
+pansy	pænsi	pænzi
 pant	pænt
 pantaloon	pæntəlun
 pantaloons	pæntəlunz
@@ -24039,7 +24040,7 @@ peach	pit͡ʃ
 peachy	pit͡ʃi
 peacock	pikɑk
 peafowl	pifaʊl
-peak	pik
+peak	pik	kɔɹkoʊvɑdoʊ
 peaked	pikt
 peal	pil
 peale	pil
@@ -24084,7 +24085,7 @@ pediatrician	pidiətɹɪʃən
 pediatrics	pidiætɹɪks
 pedicure	pɛdəkjʊɹ
 pedigree	pɛdəɡɹi
-pedro	pidɹoʊ
+pedro	pidɹoʊ	peɪdɹoʊ
 peebles	pibəlz
 peek	pik
 peel	pil
@@ -24107,7 +24108,7 @@ pegmatite	pɛɡmətaɪt
 pejorative	pɪd͡ʒɑɹətɪv
 pekin	pikɪn
 peking	pikɪŋ
-pelagian	pɪleɪd͡ʒiən
+pelagian	pɪleɪd͡ʒiən	pəleɪd͡ʒiən
 pelagic	pəlæd͡ʒɪk
 pele	pil
 pelham	pɛləm
@@ -24126,7 +24127,7 @@ penal	pinəl
 penalize	pinəlaɪz
 penalty	pɛnəlti
 penance	pɛnəns
-penang	pənæŋ
+penang	pənæŋ	pinæŋ
 pence	pɛns
 penchant	pɛnt͡ʃənt
 pencil	pɛnsəl
@@ -24249,7 +24250,7 @@ period	piɹiəd
 periodic	piɹiɑdɪk
 periodical	piɹiɑdɪkəl
 periodontal	pɛɹiədɑntəl
-peripatetic	pɛɹipətɛtɪk
+peripatetic	pɛɹipətɛtɪk	pɛɹəpətɛtɪk
 peripheral	pɚɪfɚəl
 periphery	pɚɪfɚi
 periscope	pɛɹɪskoʊp
@@ -24300,7 +24301,7 @@ perrault	pɛɹoʊ
 perrine	pɚaɪn
 perron	pɛɹən
 perry	pɛɹi
-perse	pɚs
+perse	pɚs	pɛɹs
 persecute	pɚsəkjut
 persecution	pɚsəkjuʃən
 persecutor	pɚsəkjutɛɹ
@@ -24372,7 +24373,7 @@ peterborough	pitɚbɚoʊ
 peterman	pitəmən
 peters	pitɚz
 petersburg	pitɚzbɚɡ
-petit	pɛti
+petit	pɛti	pɛtɪt
 petite	pətit
 petition	pɪtɪʃən
 peto	peɪtoʊ
@@ -24400,17 +24401,17 @@ peyton	peɪtən
 pfaff	fɑf
 pfeil	faɪl
 pfennig	fɛnɪɡ
-phalange	fælənd͡ʒ
+phalange	fælənd͡ʒ	fɑlɑnd͡ʒ
 phalanges	fəlænd͡ʒiz
 phalanx	feɪlæŋks
 phallic	fælɪk
 phantasm	fæntæzəm
 phantasmagoria	fæntæzməɡɔɹiə
 phantom	feɪən
-pharaoh	fɛɛɹoʊ
+pharaoh	fɛɛɹoʊ	fɛɹoʊ
 pharaonic	fɛɹeɪɑnɪk
 pharisaism	fæɹɪseɪɪzəm
-pharisee	fæɹəsi
+pharisee	fæɹəsi	fæɹisi
 pharmaceutical	fɑɹməsutɪkəl
 pharmacist	fɑɹməsɪst
 pharmacological	fɑɹməkəlɑd͡ʒɪkəl
@@ -24454,7 +24455,7 @@ philippi	fɪlɪpaɪ
 philippic	fɪlɪpɪk
 philippines	fɪləpinz
 philips	fɪlɪps
-philistine	fɪləstin
+philistine	fɪləstin	fɪlɪstaɪn
 phillip	fɪlɪp
 phillippe	filip
 phillips	fɪlɪps
@@ -24547,7 +24548,7 @@ picard	pɪkæɹd
 picaresque	pɪkɚɛsk
 picaro	pɪkɚoʊ
 picasso	pɪkɑsoʊ
-picayune	pɪkijun
+picayune	pɪkijun	pɪkəjun
 piccadilly	pɪkədɪli
 piccolo	pɪkəloʊ
 pick	pɪk
@@ -24583,9 +24584,9 @@ piecework	piswɚk
 pied	paɪd
 piedmont	pidmɑnt
 pier	piɹ
-pierce	piəs
+pierce	piəs	piɹs
 piercing	piɹsɪŋ
-piet	paɪɪt
+piet	paɪɪt	pit
 pietism	paɪətɪzəm
 piety	paɪɪti
 pig	pɪɡ
@@ -24626,7 +24627,7 @@ pillion	pɪljən
 pillory	pɪlɚi
 pillow	pɪloʊ
 pilot	paɪlət
-pilsner	pɪlzɛnɚ
+pilsner	pɪlzɛnɚ	pɪlznɚ
 pima	pimə
 pimp	pɪmp
 pimping	pɪmpɪŋ
@@ -24782,7 +24783,7 @@ plasticizer	plæstɪsaɪzɚ
 plastics	plæstɪks
 plata	plɑtɑ
 plate	pleɪt
-plateau	plætoʊ
+plateau	plætoʊ	bəloʊvɛns
 plated	pleɪtɪd
 platelet	pleɪtlɪt
 platen	plætən
@@ -24971,8 +24972,8 @@ policy	pɑlɪsi
 policyholder	pɑlɪsihoʊldɚ
 polio	poʊliɑ
 polis	poʊlɪs
-polish	pɑlɪʃ
-politburo	pɑlɪtbjʊɚoʊ
+polish	pɑlɪʃ	poʊlɪʃ
+politburo	pɑlɪtbjʊɚoʊ	pɑlɪtbjʊɹoʊ
 polite	pəlaɪt
 politely	pəlaɪtli
 politeness	pəlaɪtnɪs
@@ -25052,14 +25053,14 @@ pommel	pʌməl
 pomology	poʊmɑləd͡ʒi
 pomona	pəmoʊnə
 pomp	pɑmp
-pompadour	pɑmpədʊɚ
+pompadour	pɑmpədʊɚ	pɑmpədɔɹ
 pompano	pɑmpənoʊ
 pompey	pɑmpi
 pompom	pɑmpɑm
 pompon	pɑmpɑn
 pomposity	pɑmpɑsɪti
 pompous	pɑmpəs
-ponce	pɑns
+ponce	pɑns	pɔnsɛ
 poncho	pɑnt͡ʃoʊ
 pond	pɑnd
 ponder	pɑndɚ
@@ -25400,7 +25401,7 @@ prerequisite	pɹɚɛkwɪzɪt
 prerogative	pɹɚɑɡətɪv
 pres	pɹɛs
 presage	pɹɛsɪd͡ʒ
-presbyterian	pɹɛzbɪtiɹiən
+presbyterian	pɹɛzbɪtiɹiən	pɹɛzbɪtiɚiən
 preschool	pɹiskul
 prescience	pɹiʃiəns
 prescient	pɹɛsiənt
@@ -25814,7 +25815,7 @@ prying	pɹaɪɪŋ
 prynne	pɹɪn
 psalm	sɑm
 psalms	sɑmz
-psalter	sɑltɚ
+psalter	sɑltɚ	sɔltɚ
 pseudo	sudu
 pseudomonas	sudɑmənəs
 pseudonym	sudənɪm
@@ -25921,7 +25922,7 @@ punishment	pʌnɪʃmənt
 punitive	pjunɪtɪv
 punjab	pənd͡ʒɑb
 punk	pəŋk
-punt	pənt
+punt	pənt	pʊnt
 punta	puntɑ
 punxsutawney	pʌŋksətɔni
 puny	pjuni
@@ -25945,7 +25946,7 @@ purification	pjʊɹifɪkeɪʃən
 purify	pjʊɹəfaɪ
 purim	pjʊɚim
 purist	pjʊɚist
-puritan	pjʊɚitən
+puritan	pjʊɚitən	pjʊɹɪtən
 puritanical	pjʊɹɪtænɪkəl
 puritanism	pjʊɹɪtənɪzəm
 purity	pjʊɹɪti
@@ -25985,7 +25986,7 @@ put	pʊt
 putative	pjutətɪv
 putnam	pʌtnəm
 putrid	pjutɹɪd
-putsch	pʊtʃ
+putsch	pʊtʃ	pʊt͡ʃ
 putt	pət
 putter	pʊtɚ
 putty	pʌti
@@ -26112,7 +26113,7 @@ quilted	kwɪltɪd
 quilting	kwɪltɪŋ
 quin	kwɪn
 quince	kwɪns
-quincy	kwɪnsi
+quincy	kwɪnsi	kwɪnzi
 quinine	kwɪnin
 quinn	kwɪn
 quinoa	kinoʊə
@@ -26144,7 +26145,7 @@ quiz	kwɪz
 quizzical	kwɪzɪkəl
 quo	kwoʊ
 quod	kwɑd
-quoin	kɔɪn
+quoin	kɔɪn	dukoʊjn
 quorum	kwɔɹəm
 quota	kwoʊtə
 quotable	kwoʊtəbəl
@@ -26274,7 +26275,7 @@ ramsden	ɹæmzdən
 ramses	ɹæmsiz
 ramshackle	ɹæmʃækəl
 ramstein	ɹɑmʃtaɪn
-ran	ɹæn
+ran	ɹæn	ɹɑn
 rance	ɹæns
 ranch	ɹænt͡ʃ
 rancher	ɹænt͡ʃɚ
@@ -26375,7 +26376,7 @@ raucous	ɹɔkəs
 raunchy	ɹɑnt͡ʃi
 ravage	ɹævɪd͡ʒ
 rave	ɹeɪv
-ravel	ɹævəl
+ravel	ɹævəl	ɹəvɛl
 raveling	ɹævəlɪŋ
 raven	ɹeɪvən
 ravenna	ɹəvɛnə
@@ -26419,7 +26420,7 @@ reader	ɹidɚ
 readership	ɹidɚʃɪp
 readily	ɹɛdəli
 readiness	ɹɛdɪnɪs
-reading	ɹidɪŋ
+reading	ɹidɪŋ	ɹɛdɪŋ
 readjust	ɹiəd͡ʒʌst
 readjustment	ɹiəd͡ʒʌstmənt
 readmit	ɹiədmɪt
@@ -26726,7 +26727,7 @@ regime	ɹəʒim
 regimen	ɹɛd͡ʒɪmɛn
 regiment	ɹɛd͡ʒəmɛnt
 regimental	ɹɛd͡ʒəmɛntəl
-regina	ɹɪd͡ʒaɪnə
+regina	ɹɪd͡ʒaɪnə	ɹid͡ʒaɪnə
 region	ɹid͡ʒən
 regional	ɹid͡ʒɛnəl
 regionalize	ɹid͡ʒənəlaɪz
@@ -26872,7 +26873,7 @@ remuneration	ɹɪmjunɚeɪʃən
 remunerative	ɹɪmjunɚeɪtɪv
 remus	ɹiməs
 rena	ɹinə
-renaissance	ɹɛnəsɑns
+renaissance	ɹɛnəsɑns	ɹineɪsəns
 renal	ɹinəl
 rename	ɹineɪm
 renard	ɹɛnɚd
@@ -27305,7 +27306,7 @@ ridiculous	ɹɪdɪkjələs
 ridiculously	ɹɪdɪkjələsli
 riding	ɹaɪdɪŋ
 ridley	ɹɪdli
-riel	ɹil
+riel	ɹil	ɹiɛl
 riesling	ɹizlɪŋ
 rife	ɹaɪf
 riff	ɹɪf
@@ -27377,7 +27378,7 @@ risk	ɹɪsk
 risky	ɹɪski
 risotto	ɹɪsɔtoʊ
 risque	ɹiskeɪ
-rita	ɹɪtə
+rita	ɹɪtə	ɹitə
 rite	ɹaɪt
 ritter	ɹɪtɚ
 rittman	ɹɪtmən
@@ -27541,7 +27542,7 @@ rosamund	ɹoʊzəmənd
 rosanne	ɹoʊzæn
 rosary	ɹoʊzɚi
 roscoe	ɹɑskoʊ
-rose	ɹoʊzeɪ
+rose	ɹoʊzeɪ	ɹoʊz
 roseate	ɹoʊziɪt
 rosebud	ɹoʊzbʌd
 rosebush	ɹoʊzbʊʃ
@@ -27609,7 +27610,7 @@ rounding	ɹaʊndɪŋ
 roundly	ɹaʊndli
 roundup	ɹaʊndʌp
 roundworm	ɹaʊndwɚm
-rouse	ɹaʊz
+rouse	ɹaʊz	ɹɔss
 rousing	ɹaʊzɪŋ
 rout	ɹaʊt
 route	ɹut
@@ -27865,7 +27866,7 @@ salmonella	sælmənɛlə
 salomon	sæləmən
 salon	səlɑn
 saloon	səlun
-salt	sɔlt
+salt	sɔlt	sɑlt
 salted	sɔltɪd
 salter	sɔltɚ
 saltier	sɔltiɚ
@@ -27885,7 +27886,7 @@ salvia	sælviə
 salvo	sælvoʊ
 salzburg	sɔlzbɚɡ
 sam	sæm
-samara	sæmɚə
+samara	sæmɚə	səmɑɹə
 samaranch	sɑmɑɹæŋ
 samaria	səmɛɹiə
 samaritan	səmæɹɪtən
@@ -27976,7 +27977,7 @@ sardonic	sɑɹdɑnɪk
 sargent	sɑɹd͡ʒənt
 sari	sɑɹi
 sarong	sɚɔŋ
-saros	sɛɹɑs
+saros	sɛɹɑs	sɑɹoʊs
 sarrazin	sæɹəzɪn
 sartorial	sɑɹtɔɹiəl
 sartorius	sɑɹtɔɹiəs
@@ -28008,7 +28009,7 @@ satisfaction	sætɪsfækʃən
 satisfactory	sætɪsfæktɚi
 satisfied	sætɪsfaɪd
 satisfy	sætɪsfaɪ
-satsuma	sætsʊmə
+satsuma	sætsʊmə	sɑtsʊmɑ
 saturate	sætʃɚeɪt
 saturated	sæt͡ʃɚeɪtɪd
 saturation	sætʃɚeɪʃən
@@ -28093,7 +28094,7 @@ scape	skeɪp
 scapegoat	skeɪpɡoʊt
 scapula	skæpjələ
 scar	skɑɹ
-scaramouch	skæɹəmaʊtʃ
+scaramouch	skæɹəmaʊtʃ	skæɹəmaʊt͡ʃ
 scarborough	skɑɹbɚoʊ
 scarce	skɛɹs
 scarcely	skɛsli
@@ -28223,7 +28224,7 @@ scorpio	skɔɹpɪoʊ
 scorpion	skɔɹpiən
 scorsese	skɑɹseɪsi
 scot	skɑt
-scotch	skɑt͡ʃ
+scotch	skɑt͡ʃ	skɑtʃ
 scotia	skoʊʃə
 scotland	skɑtlənd
 scots	skɑts
@@ -28241,7 +28242,7 @@ scouring	skaʊɹɪŋ
 scout	skaʊt
 scouter	skaʊtɚ
 scouting	skaʊtɪŋ
-scoutmaster	skaʊtmæstɚ
+scoutmaster	skaʊtmæstɚ	skaʊtmɑstɚ
 scow	skaʊ
 scowcroft	skoʊkɹɔft
 scowl	skaʊl
@@ -28514,7 +28515,7 @@ semiprecious	sɛmipɹɛʃəs
 semireligious	sɛmiɹɪlɪd͡ʒəs
 semis	seɪmɪs
 semite	sɛmaɪt
-semitic	sæmɪtɪk
+semitic	sæmɪtɪk	sɪmɪtɪk
 semitism	sɛmɪtɪzəm
 semitrailer	sɛmɪtɹeɪlɚ
 semitropical	sɛmitɹɑpɪkəl
@@ -28587,7 +28588,7 @@ sera	siɹə
 seraphim	sɛɹəfɪm
 serb	sɚb
 sere	siɹ
-serena	sɚeɪnə
+serena	sɚeɪnə	sɚinə
 serenade	sɛɹəneɪd
 serendipity	sɛɹəndɪpɪti
 serene	sɚin
@@ -28862,7 +28863,7 @@ shipshape	ʃɪpʃeɪp
 shipwreck	ʃɪpɹɛk
 shipwright	ʃɪpɹaɪt
 shipyard	ʃɪpjɑɹd
-shire	ʃaɪɚ
+shire	ʃaɪɚ	ʃiɹeɪ
 shirk	ʃɚk
 shirleen	ʃɚlin
 shirley	ʃɚli
@@ -29001,7 +29002,7 @@ siamese	saɪəmiz
 sian	siɑn
 sib	sɪb
 siberia	saɪbiɹiə
-sibyl	sɪbɪl
+sibyl	sɪbɪl	sɪbəl
 sic	sɪk
 sichuan	sɛt͡ʃwɑn
 sicilia	sit͡ʃiljɑ
@@ -29123,7 +29124,7 @@ simulator	sɪmjəleɪtɔɹ
 simulcast	saɪməlkæst
 simultaneous	saɪməlteɪniəs
 simultaneously	saɪməlteɪniəsli
-sin	sɪn
+sin	sɪn	sin
 sinai	saɪnaɪ
 sinatra	sɪnɑtɹə
 sinbad	sɪnbæd
@@ -29140,7 +29141,7 @@ sinful	sɪnfəl
 sing	sɪŋ
 singapore	sɪŋɡəpɔɹ
 singe	sɪnd͡ʒ
-singer	sɪnd͡ʒɚ
+singer	sɪnd͡ʒɚ	sɪŋɚ
 singh	siŋ
 single	sɪŋɡəl
 singleton	sɪŋɡəltən
@@ -29169,7 +29170,7 @@ siphon	saɪfən
 siple	saɪpəl
 sir	sɚ
 sire	saɪɚ
-siren	saɪɹən
+siren	saɪɹən	siɹɪn
 sirena	saɪɹinə
 siris	sɚis
 sirius	sɚiəs
@@ -29588,7 +29589,7 @@ soil	sɔɪl
 soiree	swɑɹeɪ
 soja	soʊd͡ʒə
 sojourn	sɑd͡ʒən
-sol	soʊl
+sol	soʊl	sɑl
 sola	soʊlɑ
 solace	sɑlɪs
 solan	soʊlən
@@ -29634,7 +29635,7 @@ solve	sɑlv
 solvency	sɑlvənsi
 solvent	sɑlvənt
 soma	soʊmə
-somali	soʊmæi
+somali	soʊmæi	səmɑli
 somaliland	soʊmɑlilænd
 somatic	soʊmætɪk
 somber	sɑmbɚ
@@ -29942,7 +29943,7 @@ splenic	splinɪk
 splice	splaɪs
 splint	splɪnt
 splinter	splɪntɚ
-split	splɪt
+split	splɪt	split
 splurge	splɚd͡ʒ
 spock	spɑk
 spoil	spɔɪl
@@ -30110,7 +30111,7 @@ stairwell	stɛɹwɛl
 stake	steɪk
 stakeholder	steɪkhoʊldɚ
 stakeout	steɪkaʊt
-stalag	stæləɡ
+stalag	stæləɡ	stælæɡ
 stalagmite	stəlæɡmaɪt
 stale	steɪl
 stalemate	steɪlmeɪt
@@ -30170,7 +30171,7 @@ starlike	stɑɹlaɪk
 starling	stɑɹlɪŋ
 starlit	stɑɹlɪt
 starry	stɑɹi
-start	stɑɹt
+start	stɑɹt	stɑt
 starter	stɑɹtɚ
 starting	stɑɹtɪŋ
 startle	stɑɹtəl
@@ -30244,7 +30245,7 @@ steelman	stilmən
 steelworker	stilwɚkɚ
 steelworks	stilwɚks
 steely	stili
-steen	stin
+steen	stin	steɪn
 steep	stip
 steeple	stipəl
 steeplechase	stipəlt͡ʃeɪs
@@ -30284,7 +30285,7 @@ stephenson	stivənsən
 stephenville	stivənvɪl
 stepladder	stɛplædɚ
 stepmother	stɛpmʌðɚ
-steppe	stɛp
+steppe	stɛp	stɛpi
 steppenwolf	ʃtɛpənvɔlf
 stepper	stɛpɚ
 stepsister	stɛpsɪstɚ
@@ -30544,7 +30545,7 @@ striven	stɹɪvən
 strobe	stɹoʊb
 strode	stɹoʊd
 stroessner	stɹɑsnɚ
-stroganoff	stɹɔɡənɔf
+stroganoff	stɹɔɡənɔf	stɹoʊɡənɑf
 stroke	stɹoʊk
 stroll	stɹoʊl
 stroller	stɹoʊlɚ
@@ -30793,7 +30794,7 @@ sultan	sʌltən
 sultanate	sʌltəneɪt
 sultry	sʌltɹi
 sum	səm
-sumac	ʃumæk
+sumac	ʃumæk	sumɑk
 sumatra	sʊmɑtɹə
 summa	sʊmə
 summarily	səmɛɹəli
@@ -30830,7 +30831,7 @@ sundown	sʌndaʊn
 sundry	sʌndɹi
 sunfish	sʌnfɪʃ
 sunflower	sʌnflaʊɚ
-sung	səŋ
+sung	səŋ	sʊŋ
 sunglass	sʌnɡlæs
 sunk	səŋk
 sunken	sʌŋkən
@@ -30916,7 +30917,7 @@ supranational	supɹənæʃənəl
 supremacist	səpɹɛməsɪst
 supremacy	səpɹɛməsi
 supreme	səpɹim
-sur	sɚ
+sur	sɚ	sʊɹ
 surat	sʊɹæt
 surcharge	sɚt͡ʃɑɹd͡ʒ
 sure	ʃʊɹ
@@ -31030,7 +31031,7 @@ sweatshop	swɛtʃɑp
 sweatsuit	swɛtsut
 sweaty	swɛti
 swede	swid
-swedish	swidɪsh
+swedish	swidɪsh	swidɪʃ
 sweeny	swini
 sweep	swip
 sweeper	swiɛɹ
@@ -31268,7 +31269,7 @@ talmud	tɑlmʊd
 talon	tælən
 tam	tæm
 tama	teɪmə
-tamara	təmɑɹə
+tamara	təmɑɹə	təmæɹə
 tamarin	tæmɚin
 tamarisk	tæmɚɪsk
 tamas	tʌməs
@@ -31474,7 +31475,7 @@ teflon	tɛflɑn
 tegucigalpa	tɛɡusiɡɑlpɑ
 teheran	tɛhɚæn
 tejera	tɛhɛɹɑ
-telamon	tɛləmɑn
+telamon	tɛləmɑn	tɛləmən
 tele	tɛli
 telecast	tɛləkæst
 telecommunication	tɛləkəmjunəkeɪʃən
@@ -31491,9 +31492,9 @@ telepathy	təlɛpəθi
 telephone	tɛləfoʊn
 telephonic	tɛləfɑnɪk
 telephony	təlɛfəni
-telephoto	tɛlɪfoʊtoʊ
+telephoto	tɛlɪfoʊtoʊ	tɛləfoʊtoʊ
 teleport	tɛlɪpɔɹt
-teleprompter	tɛlɪpɹɑmptɚ
+teleprompter	tɛlɪpɹɑmptɚ	tɛləpɹɑmptɚ
 telescope	tɛlɪskoʊp
 telescopic	tɛlɪskɑpɪk
 telesis	tɛlɪsɪs
@@ -32026,7 +32027,7 @@ tissue	tɪʃu
 tit	tɪt
 titan	taɪtən
 titanate	taɪtəneɪt
-titania	taɪteɪniə
+titania	taɪteɪniə	tɪteɪniə
 titanic	taɪtænɪk
 titanium	taɪteɪniəm
 tithe	taɪð
@@ -32093,7 +32094,7 @@ tolerate	tɑlɚeɪt
 toleration	tɑlɚeɪʃən
 toll	toʊl
 tollbooth	toʊlbuθ
-toller	toʊlɚ
+toller	toʊlɚ	tɔlɚ
 tolly	tɑli
 toluene	tɑljʊin
 tom	tɑm
@@ -32262,7 +32263,7 @@ toxicity	tɑksɪsɪti
 toxicological	tɑksəkəlɑd͡ʒɪkəl
 toxicology	tɑksəkɑləd͡ʒi
 toxin	tɑksɪn
-toy	toʊj
+toy	toʊj	tɔɪ
 toyama	tɔjɑmɑ
 trabert	tɹeɪbɚt
 trace	tɹeɪs
@@ -32467,7 +32468,7 @@ tricycle	tɹaɪsɪkəl
 trident	tɹaɪdənt
 tried	tɹaɪd
 triennial	tɹaɪɛniəl
-trier	tɹaɪɚ
+trier	tɹaɪɚ	tɹiɹ
 trieste	tɹiɛst
 trifecta	tɹaɪfɛktə
 trifle	tɹaɪfəl
@@ -32477,7 +32478,7 @@ trigger	tɹɪɡɚ
 triglyceride	tɹaɪɡlɪsɚaɪd
 trigo	tɹiɡoʊ
 trilateral	tɹaɪlætɚəl
-trilby	tɹilbi
+trilby	tɹilbi	tɹɪlbi
 trill	tɹɪlɪŋ
 trilling	tɹilɪŋ
 trillion	tɹɪljən
@@ -32490,7 +32491,7 @@ trimming	tɹɪmɪŋ
 trincomalee	tɹɪŋkoʊməli
 trine	tɹaɪn
 trinidad	tɹɪnɪdæd
-trinity	tɹinɪti
+trinity	tɹinɪti	tɹɪnɪti
 trinket	tɹɪŋkɪt
 trio	tɹioʊ
 trip	tɹɪp
@@ -32511,7 +32512,7 @@ tristan	tɹɪstən
 tristram	tɹɪstɹəm
 trite	tɹaɪt
 tritium	tɹɪtiəm
-triton	tɹaɪtɑn
+triton	tɹaɪtɑn	tɹaɪtən
 triumph	tɹaɪʌmf
 triumphal	tɹaɪʌmfəl
 triumphant	tɹaɪʌmfənt
@@ -32660,7 +32661,7 @@ tunnel	tʌnəl
 tunney	tʌni
 tunny	tʌni
 tuolumne	twænləmi
-tupelo	tupəloʊ
+tupelo	tupəloʊ	tjupəloʊ
 turandot	tʊɹəndɑt
 turban	tɚbən
 turbid	tɚbɪd
@@ -33187,7 +33188,7 @@ uninterrupted	ʌnɪntɚʌptɪd
 uninvited	ʌnɪnvaɪtɪd
 uninviting	ʌnɪnvaɪtɪŋ
 uninvolved	ʌnɪnvɑlvd
-union	junjɛn
+union	junjɛn	junjən
 uniondale	junjəndeɪl
 unionism	junjənɪzəm
 unionist	junjənɪst
@@ -33469,7 +33470,7 @@ unwrap	ənɹæp
 unwritten	ənɹɪtən
 unyielding	ənjildɪŋ
 unzip	ənzɪp
-up	əp
+up	əp	jupi
 upbeat	ʌpbit
 upbraid	əpbɹeɪd
 upbringing	ʌpbɹɪŋɪŋ
@@ -33575,7 +33576,7 @@ utilitarian	jʊtɪlɪtɛɹiən
 utility	jutɪlɪti
 utilize	jutəlaɪz
 utmost	ʌtmoʊst
-utopia	jʊtoʊpiə
+utopia	jʊtoʊpiə	jutoʊpiə
 utopian	jutoʊpiən
 utter	ʌtɚ
 utterance	ʌtɚəns
@@ -33605,7 +33606,7 @@ vala	vɑlə
 valda	vɑldə
 valdez	vældiz
 valdosta	vældɑstə
-vale	veɪl
+vale	veɪl	wɑleɪ
 valedictorian	vælɪdɪktɔɹiən
 valedictory	vælɪdɪktɚi
 valence	veɪləns
@@ -33857,7 +33858,7 @@ vicariously	vaɪkɛɹiəsli
 vice	vaɪsi
 vicente	biθɛntɛ
 viceroy	vaɪsɹɔɪ
-vichy	vɪshi
+vichy	vɪshi	vɪʃi
 vichyssoise	vɪʃiswɑz
 vicinity	vɪsɪnɪti
 vicious	vɪʃəs
@@ -33907,7 +33908,7 @@ vigorously	vɪɡɚəsli
 viking	vaɪkɪŋ
 vile	vaɪl
 vilify	vɪləfaɪ
-villa	vɪlə
+villa	vɪlə	viə
 village	vɪlɪd͡ʒ
 villain	vɪlən
 villainous	vɪlənəs
@@ -33928,8 +33929,8 @@ vindictive	vɪndɪktɪv
 vindictiveness	vɪndɪktɪvnɪs
 vine	vaɪn
 vinegar	vɪnəɡɚ
-vineland	vaɪnlænd
-vineyard	vɪnjɚd
+vineland	vaɪnlænd	vaɪnlənd
+vineyard	vɪnjɚd	d͡ʒumɑɹɑ
 vinnie	vɪni
 vinny	vɪni
 vinson	vɪnsən
@@ -33999,7 +34000,7 @@ vista	vɪstə
 visual	vɪʒuəl
 visualize	vɪʒuəlaɪz
 visually	vɪʒuəli
-vita	vaɪtə
+vita	vaɪtə	vitə
 vitae	vaɪti
 vital	vaɪtəl
 vitality	vaɪtælɪti
@@ -34165,7 +34166,7 @@ walloping	wɑləpɪŋ
 wallow	wɑloʊ
 wallpaper	wɑlpeɪpɚ
 wallsend	wɔlzɛnd
-wally	weɪli
+wally	weɪli	wɑli
 walnut	wɔlnʌt
 walrus	wɔlɹəs
 walt	wɔlt
@@ -34251,7 +34252,7 @@ wasteland	weɪstlænd
 wastepaper	weɪstpeɪpɚ
 waster	weɪstɚ
 wasting	weɪstɪŋ
-wat	wæt
+wat	wæt	wɑt
 watch	wɑt͡ʃ
 watchdog	wɑt͡ʃdɔɡ
 watcher	wɑt͡ʃɚ
@@ -34267,7 +34268,7 @@ waterfall	wɔtɚfɔl
 waterford	wɔtɚfɚd
 waterfowl	wɔtɚfaʊl
 waterfront	wɔtɚfɹʌnt
-watergate	wɔɹtəɡeɪt
+watergate	wɔɹtəɡeɪt	wɑtəɡeɪt
 watering	wɔtɚɪŋ
 waterishness	wɔtɚɪʃnɪs
 waterlog	wɔtɚlɔɡ
@@ -34290,7 +34291,7 @@ watt	wɑt
 wattage	wɑtɪd͡ʒ
 wattle	wɑtəl
 watts	wɑts
-waugh	wɔf
+waugh	wɔf	wɔ
 waukegan	wɔkiɡən
 waukesha	wɔkɪʃɔ
 wausau	wɔsɔ
@@ -34395,7 +34396,7 @@ wellborn	wɛlbɔɹn
 welles	wɛlz
 wellesley	wɛlzli
 wellhead	wɛlhɛd
-wellington	wɛlɪŋtən
+wellington	wɛlɪŋtən	wiɡjɪn
 wellpoint	wɛlpɔɪnt
 wells	wɛlz
 welp	vɛlp
@@ -34532,7 +34533,7 @@ white	waɪt
 whited	waɪtɪd
 whitefish	waɪtfɪʃ
 whitehall	waɪthɔl
-whitehead	waɪθɛd
+whitehead	waɪθɛd	waɪthɛd
 whitehorse	waɪthɔɹs
 whitely	waɪtli
 whiten	waɪtən
@@ -34752,7 +34753,7 @@ withdrawn	wɪðdɹɔn
 withdrew	wɪðdɹu
 withe	wɪθ
 wither	wɪðɚ
-withers	wɪðəz
+withers	wɪðəz	wɪðɚz
 witherspoon	wɪðɚspun
 withhold	wɪθhoʊld
 within	wɪðɪn
@@ -34788,7 +34789,7 @@ woke	woʊk
 woken	woʊkən
 wolanin	woʊlɑnɪn
 wold	wɔld
-wolf	wʊlf
+wolf	wʊlf	vɔlf
 wolfe	wʊlf
 wolff	vɔlf
 wolfgang	wʊlfɡæŋ
@@ -34987,7 +34988,7 @@ yacht	jɑt
 yachtsman	jɑtsmən
 yacoub	jɑkub
 yah	jɑ
-yahoo	jəhu
+yahoo	jəhu	jɑhu
 yahweh	jɑwɛ
 yak	jæk
 yakima	jækəmə
@@ -35001,7 +35002,7 @@ yang	jɑŋ
 yangtze	jæŋsi
 yank	jæŋk
 yankee	jæŋki
-yap	jæp
+yap	jæp	jɑp
 yapp	jæp
 yarborough	jɑɹbɚoʊ
 yard	jɑɹd
@@ -35133,7 +35134,7 @@ zealous	zɛləs
 zealously	zɛləsli
 zebra	zɛbɹə
 zebulon	zɛbjəlɑn
-zed	zɛd
+zed	zɛd	zɛdəkaɪə
 zee	zi
 zeebrugge	zibɹʊɡə
 zeeland	zilənd
@@ -35149,7 +35150,7 @@ zenith	zinɪθ
 zeno	zinoʊ
 zenobia	zənoʊbiə
 zephyr	zɛfɚ
-zeppelin	zɛpɛlən
+zeppelin	zɛpɛlən	zɛpəlɪn
 zero	ziɹoʊ
 zest	zɛst
 zestful	zɛstfəl

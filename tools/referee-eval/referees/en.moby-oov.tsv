@@ -1,7 +1,8 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (41274 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (41276 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
-# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA, one reading per headword.
+# and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
+# tab-separated, and the eval credits any of them.
 aa	ɑɑ
 aalesund	ɔləsʊn
 aalii	ɑlii
@@ -979,7 +980,7 @@ agalloch	əɡælək
 agallochum	əɡæləkəm
 agalmatolite	æɡəlmætəlaɪt
 agalwood	æɡəlwʊd
-agama	æɡəmə
+agama	æɡəmə	ɑɡəmə
 agamede	æɡəmidi
 agamedes	æɡəmidiz
 agamete	eɪɡæmit
@@ -1072,7 +1073,7 @@ agnize	æɡnaɪz
 agnoiology	æɡnɔɪɑləd͡ʒi
 agnominal	æɡnɑmənəl
 agogics	əɡɑd͡ʒɪks
-agon	æɡoʊn
+agon	æɡoʊn	æɡɑn
 agonal	æɡənəl
 agone	əɡɔn
 agones	əɡoʊniz
@@ -2213,7 +2214,7 @@ anethole	ænəθoʊl
 aneto	ɑnɛtɔ
 aneuch	ənuk
 aneuria	ənʊɹiə
-aneurin	ænjɚɪn
+aneurin	ænjɚɪn	ənaɪɹɪn
 aneurine	ænjɚin
 anfractuosity	ænfɹækt͡ʃuɑsɪti
 anfractuous	ænfɹækt͡ʃuəs
@@ -2243,7 +2244,7 @@ angiospermous	ænd͡ʒioʊspɚməs
 angiotonase	ænd͡ʒiɑtəneɪs
 angiotonin	ænd͡ʒiətoʊnɪn
 angiotribe	ænd͡ʒiətɹaɪb
-angledozer	æŋəldoʊzɚ
+angledozer	æŋəldoʊzɚ	æŋɡəldoʊzɚ
 anglepod	æŋɡəlpɑd
 anglesite	æŋɡəlsaɪt
 anglesmith	æŋɡəlsmɪθ
@@ -2252,7 +2253,7 @@ angleworm	æŋɡəlwɚm
 anglic	æŋɡlɪk
 anglicanism	æŋɡləkənɪzəm
 anglicanly	æŋɡləkənli
-anglice	æŋlɪsi
+anglice	æŋlɪsi	æŋɡlɪsi
 anglicise	æŋɡlɪsaɪz
 anglicist	æŋɡlɪsɪst
 anglify	æŋɡləfaɪ
@@ -2263,7 +2264,7 @@ anglomania	æŋɡləmeɪnəə
 anglomaniac	æŋɡləmeɪniæk
 anglomaniacal	æŋɡloʊmənaɪəkəl
 anglophilic	æŋɡləfɪlɪk
-anglophobe	æŋloʊfoʊb
+anglophobe	æŋloʊfoʊb	æŋɡləfoʊb
 anglophobia	æŋɡləfoʊbiə
 anglophobic	æŋɡləfoʊbɪk
 angolese	æŋɡoʊliz
@@ -3096,7 +3097,7 @@ areopagitica	æɹiɑpəd͡ʒɪtəkə
 areostyle	ɚiəstaɪl
 areosystyle	ɚiəsɪstaɪl
 areskutan	ɔɹəskʌtɑn
-arete	ɚeɪt
+arete	ɚeɪt	ɚiti
 aretino	ɑɹɪtinoʊ
 aretus	ɚitəs
 areus	ɚiəs
@@ -3597,7 +3598,7 @@ ataraxy	ætɚæksi
 atavic	ətævɪk
 ataxite	ətæksaɪt
 ataxy	ətæksi
-atebrin	ætəbɹɪn
+atebrin	ætəbɹɪn	ætəbɹin
 atelectatic	ætəlɛktætɪk
 ateleiosis	ətilioʊsɪs
 atelic	ætɛlɪk
@@ -3755,12 +3756,12 @@ aurar	ɔɪɹɑɹ
 aureately	ɔɹiɪtli
 aureateness	ɔɹiɪtnɪs
 aurei	ɔɹiaɪ
-aurelia	ɔɹiliə
+aurelia	ɔɹiliə	ɔɹiljə
 aurelius	ɔɹiliəs
 aureola	ɔɹiələ
 aureolin	ɔɹiəlɪn
 aureoline	ɔɹiəlɪn
-aureomycin	ɑɹioʊmaɪsɪn
+aureomycin	ɑɹioʊmaɪsɪn	ɔɹioʊmaɪsɪn
 aures	ɔɹɛs
 auricula	ɔɹɪkjələ
 auricularia	ɔɹɪkjəlɛɹiə
@@ -3940,7 +3941,7 @@ aviso	əvaɪzoʊ
 avitaminotic	eɪvaɪtəmənɑtɪk
 aviva	əvivə
 avlona	ɑvlɔnɑ
-avo	ɑvu
+avo	ɑvu	eɪvoʊ
 avoca	əvoʊkə
 avocatory	əvɑkətɔɹi
 avodire	ævədɚeɪ
@@ -3994,7 +3995,7 @@ ayuntamiento	ɑjuntɑmjɛntɔ
 ayurveda	ɑjɚveɪdə
 ayuthea	ɑjuθiɑ
 ayutthaya	ɑjutɑjɑ
-azan	ɑzɑn
+azan	ɑzɑn	eɪzən
 azana	ɑθɑnjɑ
 azariah	æzɚaɪə
 azazel	əzeɪzəl
@@ -4168,7 +4169,7 @@ bagheera	bæɡiɹə
 baghla	bʌɡlɑ
 bagio	bɑɡioʊ
 bagram	bʌɡɹɑm
-baguio	bɑɡioʊ
+baguio	bɑɡioʊ	bæɡioʊ
 bagwash	bæɡwɑʃ
 bagwoman	bæɡwʊmən
 bagwork	bæɡwɚk
@@ -4589,7 +4590,7 @@ bawtie	bɔti
 bawty	bɔti
 baya	bɑjə
 bayadere	baɪədiɹ
-bayamo	bəjɑmoʊ
+bayamo	bəjɑmoʊ	bɑjɑmɔ
 bayamon	bɑjɑmɔn
 bayeau	bɑjʊ
 bayi	bɑji
@@ -4721,10 +4722,10 @@ beggarlice	bɛɡɚlaɪs
 beggarweed	bɛɡɚwid
 beggary	bɛɡɚi
 beggiatoa	bəd͡ʒætoʊə
-beghard	bɛɡəd
+beghard	bɛɡəd	bɛɡɚd
 begorra	bɪɡɔɹə
 beguin	bɛɡɪn
-beguine	bɪɡin
+beguine	bɪɡin	bɛɡin
 begum	bɪɡʌm
 behaim	beɪhaɪm
 behaviorism	bɪheɪvjɚɪzəm
@@ -4811,7 +4812,7 @@ bendlet	bɛndlɪt
 bendways	bɛndweɪz
 bendwise	bɛndwaɪz
 beneaped	bɪnipt
-benedicite	bɛnɪdaɪsɪti
+benedicite	bɛnɪdaɪsɪti	bɛnɪdɪsɪti
 benedictional	bɛnɪdɪkʃənəl
 benedictionale	bɛnɪdɪkʃəneɪli
 benedictory	bɛnɪdɪktɚi
@@ -5288,7 +5289,7 @@ biserrate	baɪsɛɹeɪt
 bishopville	bɪʃəpvɪl
 bishydroxycoumarin	bɪshaɪdɹɑksɪkumɚɪn
 bisitun	bisɪtun
-bisk	bɪsk
+bisk	bɪsk	bisk
 biskra	bɪskɹɑ
 bismanol	bɪsmənoʊl
 bismuthic	bɪzmjuθɪk
@@ -6060,7 +6061,7 @@ broidery	bɹɔɪdɚi
 brokage	bɹoʊkɪd͡ʒ
 brokenhearted	bɹoʊkənhɑɹtəd
 bromal	bɹoʊmæl
-brome	bɹoʊm
+brome	bɹoʊm	bɹoʊmi
 bromelia	bɹoʊmiliə
 bromeliaceous	bɹoʊmilieɪʃəs
 bromeosin	bɹoʊmiəsɪn
@@ -6236,7 +6237,7 @@ bummaree	bʌmɚi
 bumpkinly	bʌmpkɪnli
 bumpoff	bʌmpɔf
 bumptiousness	bʌmpʃəsnɪs
-buna	bjunə
+buna	bjunə	bunə
 bunaea	bjuniə
 bunbury	bʌnbɚi
 buncombe	bʌŋkəm
@@ -6307,7 +6308,7 @@ bushbeater	bʊʃbitɚ
 bushelman	bʊʃəlmæn
 bushfire	bʊʃfaɪɚ
 bushhammer	bʊʃhæmɚ
-bushido	buʃidoʊ
+bushido	buʃidoʊ	buʃidɔ
 bushmanship	bʊʃmənʃɪp
 bushveld	bʊʃfɛlt
 bushwa	bʊʃwɑ
@@ -6623,7 +6624,7 @@ caltanissetta	kæltənɪsɛtə
 calthrop	kælθɹəp
 calumniatory	kəlʌmniətɔɹi
 calumniously	kəlʌmniəsli
-calvados	kælvədɑs
+calvados	kælvədɑs	kælvədoʊs
 calvaria	kælvɛɹiə
 calvities	kælvɪʃiiz
 calvous	kælvəs
@@ -6883,7 +6884,7 @@ captainship	kæptənʃɪp
 captiousness	kæpʃəsnɪs
 capuanus	kæpuɑnəs
 capuche	kəpuʃ
-capuchin	kæpjʊt͡ʃɪn
+capuchin	kæpjʊt͡ʃɪn	kæpjutʃɪn
 capuzzo	kɑputsoʊ
 capybara	kæpəbɑɹə
 capys	keɪpɪs
@@ -7027,7 +7028,7 @@ carniferous	kɑɹnɪfɚəs
 carnification	kɑɹnəfəkeɪʃən
 carnify	kɑɹnəfaɪ
 carniola	kɑɹnioʊlə
-carnivora	kɑɹnɪvɛɹə
+carnivora	kɑɹnɪvɛɹə	kɑɹnɪvɚə
 carnivoral	kɑɹnɪvɚəl
 carnivorously	kɑɹnɪvɚəsli
 carnivorousness	kɑɹnɪvɚəsnɪs
@@ -7444,7 +7445,7 @@ cephalothoracic	sɛfəloʊθɚæsɪk
 cephalothorax	sɛfəloʊθɔɹæks
 cephalous	sɛfələs
 cephalus	sɛfələs
-cepheid	sifɪɪd
+cepheid	sifɪɪd	sifiɪd
 cepicka	t͡ʃɛpɪt͡ʃkɑ
 ceram	siɹæm
 ceramal	sɚæməl
@@ -7744,7 +7745,7 @@ chasmogamic	kæzməɡæmɪk
 chasmogamy	kæzmɑɡəmi
 chasmophyte	kæzməfaɪt
 chastisement	t͡ʃæstɪzmənt
-chateaubriand	ʃætoʊbɹiɑn
+chateaubriand	ʃætoʊbɹiɑn	ʃɑtoʊbɹiɑn
 chateaus	shætoʊz
 chatelaines	ʃætəleɪnz
 chatelains	ʃætəleɪnz
@@ -8309,7 +8310,7 @@ churchward	t͡ʃɚt͡ʃwɚd
 churinga	t͡ʃʊɹɪŋɡə
 churlishness	t͡ʃɚlɪʃnɪs
 churr	t͡ʃɚ
-churrigueresque	t͡ʃʊɹiɡɚɛsk
+churrigueresque	t͡ʃʊɹiɡɚɛsk	tʃɚiɡɚɛsk
 chut	ʃət
 chutzpa	kʊtspə
 chuvash	t͡ʃuvɑʃ
@@ -9100,7 +9101,7 @@ comfortless	kʌmfətlɛs
 comilla	kʊmɪlə
 comines	kɔmin
 cominform	kɑmɪnfɔɹm
-comitadji	kɑmɪtæd͡ʒi
+comitadji	kɑmɪtæd͡ʒi	koʊmitɑdd͡ʒi
 comitative	kɑmɪteɪtɪv
 comites	kɑmɪtiz
 comitia	kəmɪʃiə
@@ -9653,7 +9654,7 @@ copyfitting	kɑpifɪtɪŋ
 copyread	kɑpiɹid
 coquelicot	kɑkləkoʊ
 coquillage	koʊkɪlɑʒ
-coquille	koʊkɪl
+coquille	koʊkɪl	koʊkil
 coquimbo	koʊkimboʊ
 coraciiform	kɔɹəsaɪəfɔɹm
 coraji	kɚɑd͡ʒi
@@ -9671,7 +9672,7 @@ corblimey	kɔɹblaɪmi
 corcyraean	kɔɹsɚiən
 cordately	kɔɹdeɪtli
 cordele	kɔɹdil
-cordelier	kɔɹdɪliɚ
+cordelier	kɔɹdɪliɚ	kɔɹdəliɹ
 cordelle	kɔɹdɛl
 cordia	kɔɹdiə
 cordiality	kɔɹd͡ʒælɪti
@@ -9729,7 +9730,7 @@ coromell	kɔɹəmɛl
 coronagraph	kɚoʊnəɡɹæf
 coronagraphic	kɚoʊnəɡɹæfɪk
 coronate	kɔɹəneɪt
-coronel	kɔɹənəl
+coronel	kɔɹənəl	kɔɹoʊnɛl
 coroneted	kɔɹənɪtɪd
 coronis	kɚoʊnɪs
 coronitis	kɔɹənaɪtɪs
@@ -10411,7 +10412,7 @@ curetes	kjʊɹitiz
 curettage	kjʊɹɛtɪd͡ʒ
 curettement	kjʊɹɛtmənt
 curf	kɚf
-curia	kjʊɹiə
+curia	kjʊɹiə	kjʊɚiə
 curiae	kjʊɹii
 curiatii	kjʊɹieɪʃiaɪ
 curitis	kjʊɹaɪtɪs
@@ -10729,7 +10730,7 @@ dalesman	deɪlzmeɪn
 dalhart	dælhɑɹt
 dalhousie	dælhuzi
 dalilia	dəliliə
-dallan	dəlɑn
+dallan	dəlɑn	dælən
 dallapiccola	dɑlɑpikoʊlə
 dallastown	dæləstaʊn
 dalles	dælz
@@ -10854,7 +10855,7 @@ dauk	dɔk
 daume	dɔmə
 daumier	doʊmjeɪ
 dauntlessness	dɔntlɪsnɪs
-dauphine	dɔfin
+dauphine	dɔfin	doʊfineɪ
 dauphiness	dɔfɪnɪs
 daut	dɔt
 dautie	dɔti
@@ -10917,7 +10918,7 @@ debrett	dɪbɹɛt
 debruise	dəbɹuz
 debussyan	dɪbjusiən
 debutant	dɛbjʊtɑnt
-debye	dɪbaɪ
+debye	dɪbaɪ	dɛbaɪ
 decadally	dɛkədəli
 decadency	dɛkədənsi
 decadrachm	dɛkədɹæm
@@ -12820,7 +12821,7 @@ dupondius	dupɑndiəs
 dupuytren	dupətɹɑnz
 durableness	dʊɹəbəlnɪs
 durain	dʊeɪn
-duralumin	dʊɹæljəmɪn
+duralumin	dʊɹæljəmɪn	dd͡ʒʊɚæljʊmɪn
 duranty	dʊɹænti
 durazzo	dɚɑtsoʊ
 dure	dʊɹ
@@ -13160,7 +13161,7 @@ egeberg	ʌɡəbɚɡ
 egede	ɛɡədə
 egeria	ɪd͡ʒiɹiə
 egest	id͡ʒɛst
-egesta	id͡ʒɛstə
+egesta	id͡ʒɛstə	ɪd͡ʒɛstə
 egestion	id͡ʒɛst͡ʃən
 eggcrate	ɛɡkɹeɪt
 egidius	eɪkidiʊs
@@ -13584,7 +13585,7 @@ enchondroma	ɛnkəndɹoʊmə
 enchondromatous	ɛnkəndɹɑmətəs
 enchorial	ɛnkɔɹiəl
 enchoric	ɛnkɔɹɪk
-encina	ɛnsinə
+encina	ɛnsinə	ɛnθinɑ
 encincture	ɛnsɪŋkt͡ʃɚ
 encipher	ɛnsaɪfɚ
 encke	ɛŋki
@@ -13951,7 +13952,7 @@ epigenous	ɪpɪd͡ʒənəs
 epigeous	ɛpɪd͡ʒiəs
 epiglottidean	ɛpəɡlɑtɪdiən
 epigoneion	ɛpəɡoʊnaɪən
-epigoni	ɛpɪɡənaɪ
+epigoni	ɛpɪɡənaɪ	ɪpɪɡənaɪ
 epigonism	ɪpɪɡʌnɪzəm
 epigrammatise	ɛpəɡɹæmətaɪz
 epigrammatism	ɛpəɡɹæmətɪzəm
@@ -14473,6 +14474,7 @@ eupnea	jupniə
 eupotamic	jupətæmɪk
 euramerican	jʊɹəmɛɹɪkən
 euratom	jʊɹætəm
+euripides	jʊɹɪpɪdiz
 eurippa	jʊɹɪpə
 euripus	jʊɹaɪpəs
 eurithermophile	jʊɹəθɚməfaɪl
@@ -14960,7 +14962,7 @@ falbala	fælbələ
 falbelo	fælbəloʊ
 falcial	fælʃəl
 falconiform	fɔlkoʊnəfɔɹm
-falda	fɑldə
+falda	fɑldə	fɔldə
 falderal	fældɚæl
 falderol	fældɚɑl
 falernian	fəlɚniən
@@ -16344,7 +16346,7 @@ gabo	ɡɑbə
 gabrilowitsch	ɡɑbɹɪlʌvɪt͡ʃ
 gabumi	ɡɑbumi
 gabun	ɡəbun
-gaddi	ɡʌdi
+gaddi	ɡʌdi	ɡɑdi
 gadgeteer	ɡæd͡ʒɪtiɹ
 gadgety	ɡæd͡ʒɪti
 gadhelic	ɡədɛlɪk
@@ -16401,7 +16403,7 @@ galeass	ɡæliæs
 galeate	ɡeɪlieɪt
 galeeny	ɡəlini
 galeiform	ɡəliəfɔɹm
-galenic	ɡəlinɪk
+galenic	ɡəlinɪk	ɡeɪlɛnɪk
 galenism	ɡeɪlənɪzəm
 galenite	ɡəlinaɪt
 galenus	ɡəlinəs
@@ -17333,7 +17335,7 @@ goneness	ɡɔnɪs
 goneril	ɡɑnɚɪl
 gonfalonier	ɡɑnfələniɹ
 gonfanon	ɡɑnfənən
-gongorism	ɡɑŋɚizəm
+gongorism	ɡɑŋɚizəm	ɡɑŋɡɚɪzəm
 gonidium	ɡənɪdiəm
 gonion	ɡoʊniɑn
 gonococcic	ɡɑnəkɑksɪk
@@ -17713,7 +17715,7 @@ guadiana	ɡwɑðjɑnɑ
 guafo	ɡwɑfoʊ
 guaguanche	ɡwəɡwɑnt͡ʃi
 guaiacol	ɡwaɪəkoʊl
-guajira	ɡwɑhiɹə
+guajira	ɡwɑhiɹə	ɡwɑhiɹɑ
 guamachil	ɡwəmæt͡ʃɪl
 guamuchil	ɡwəmut͡ʃɪl
 guana	ɡwɑnə
@@ -17944,7 +17946,7 @@ hadas	hædəs
 hadassah	hədɑsə
 haddington	hædɪŋtən
 hadhramautian	hɑdɹəmɔʃən
-hadith	hɑdiθ
+hadith	hɑdiθ	hædɪθ
 hadj	hæd͡ʒ
 hadji	hæd͡ʒi
 hadjipanos	hɑdd͡ʒipɑnoʊs
@@ -18378,7 +18380,7 @@ headfish	hɛdfɪʃ
 headforemost	hɛdfɔɹmoʊst
 headframe	hɛdfɹeɪm
 headlamp	hɛdlæmp
-headland	hɛdlənd
+headland	hɛdlənd	hɛdlænd
 headledge	hɛdlɛd͡ʒ
 headlessness	hɛdlɪsnɪs
 headlongness	hɛdlɔŋnɪs
@@ -18468,7 +18470,7 @@ hegari	hɪɡæɹi
 hegeleos	hɪd͡ʒɛliɑs
 hegelianism	heɪɡeɪliənɪzəm
 hegemone	hɪd͡ʒɛməni
-hegira	hɛd͡ʒɚə
+hegira	hɛd͡ʒɚə	hɪd͡ʒaɪɹə
 hegumen	hɪɡjumɛn
 hegumenos	hɪɡjumənɑs
 hegyeshalom	hʌdjəʃhɑlɔm
@@ -18610,7 +18612,7 @@ hemera	hɛmɚə
 hemeralopia	hɛmɚəloʊpiə
 hemeralopic	hɛmɚəlɑpɪk
 hemerasia	himɚeɪʒə
-hemerocallis	hɛmɚoʊkælɪs
+hemerocallis	hɛmɚoʊkælɪs	hɛmɚəkælɪs
 hemiacetal	hɛmiæsɪtæl
 hemianopia	hɛmiənoʊpiə
 hemianopsia	hɛmiənɑpsiə
@@ -18801,6 +18803,7 @@ herniotomy	hɚniɑtəmi
 hernshaw	hɚnʃɔ
 herodian	hɚoʊdiən
 herodias	hɚoʊdiəs
+herodotus	hɚɑdətəs
 heroicity	hiɹoʊɪsɪti
 heroicness	hɚoʊɪknɪs
 heronsew	hɛɹənsoʊ
@@ -19328,7 +19331,7 @@ homogony	həmɑɡəni
 homograft	hoʊməɡɹæft
 homoiotherm	hoʊmɔɪəθɚm
 homoiothermal	hoʊmɔɪəθɚməl
-homoiousian	hɑmɔɪusiən
+homoiousian	hɑmɔɪusiən	hoʊmɔɪusiən
 homolecithal	hoʊməlɛsəθəl
 homologate	həmɑləɡeɪt
 homological	hoʊməlɑd͡ʒɪkəl
@@ -19341,7 +19344,7 @@ homologumena	hoʊmoʊləɡumənə
 homology	həmɑləd͡ʒi
 homonid	hɑmənɪd
 homonymously	həmɑnəməsli
-homoousian	hɑmoʊusiən
+homoousian	hɑmoʊusiən	hoʊmoʊusiən
 homopause	hɑməpɔz
 homophonous	həmɑfənəs
 homophony	həmɑfəni
@@ -21004,7 +21007,7 @@ infuscate	ɪnfʌskeɪt
 infusibleness	ɪnfjuzəbəlnɪs
 infusionism	ɪnfjuʒənɪzəm
 infusive	ɪnfjusɪv
-infusoria	ɪnfjuzɔɹiə
+infusoria	ɪnfjuzɔɹiə	ɪnfjʊsɔɹiə
 infusorial	ɪnfjʊsɔɹiəl
 infusorian	ɪnfjʊsɔɹiən
 ingate	ɪnɡeɪt
@@ -21923,7 +21926,7 @@ izzak	aɪzək
 jabal	d͡ʒeɪbəl
 jabalpur	d͡ʒʌbəlpɔɹ
 jabberwock	d͡ʒæbɚwɑk
-jabberwocky	d͡ʒæbəwɑki
+jabberwocky	d͡ʒæbəwɑki	d͡ʒæbɚwɑki
 jabez	d͡ʒeɪbɪz
 jabir	d͡ʒɑbɚ
 jabiru	d͡ʒæbɚu
@@ -22026,7 +22029,7 @@ janiform	d͡ʒænəfɔɹm
 janissarian	d͡ʒænɪsɛɹiən
 janitress	d͡ʒænɪtɹɪs
 janizarian	d͡ʒænɪzɛɹiən
-janizary	d͡ʒænɪzɚi
+janizary	d͡ʒænɪzɚi	d͡ʒænɪzɛɹi
 janok	jɑnoʊk
 januarius	d͡ʒænjuɛɹiəs
 jany	d͡ʒeɪni
@@ -22092,7 +22095,7 @@ jehol	d͡ʒəhoʊl
 jehoshaphat	d͡ʒɪhɑʃəfæt
 jehovic	d͡ʒɪhoʊvɪk
 jehovistic	d͡ʒihoʊvɪstɪk
-jehu	d͡ʒihɛu
+jehu	d͡ʒihɛu	d͡ʒihju
 jehudah	d͡ʒəhudə
 jejunectomy	d͡ʒɪd͡ʒunɛktəmi
 jejuneness	d͡ʒɪd͡ʒunɪs
@@ -22177,7 +22180,7 @@ jivatma	d͡ʒivɑtmə
 jizya	d͡ʒɪzjə
 jnana	d͡ʒənjɑnə
 joab	d͡ʒoʊæb
-joannes	d͡ʒoʊæniz
+joannes	d͡ʒoʊæniz	jɔɑnjis
 joas	d͡ʒoʊæs
 joash	d͡ʒoʊæʃ
 jobation	d͡ʒoʊbeɪʃən
@@ -22517,7 +22520,7 @@ katalyze	kætəlaɪz
 katamorphism	kætəmɔɹfɪzəm
 katanga	kɑtɑnɡɑ
 kataplasia	kætəpleɪʒə
-katar	kətɑɹ
+katar	kətɑɹ	kɑtɑɹ
 katatonia	kætətoʊniə
 katatonic	kætətɑnɪk
 katayev	kɑtɑjɛf
@@ -23003,7 +23006,7 @@ kokka	kɔkɑ
 kokkola	kɔkɔlɑ
 kokoda	kɔkoʊdɑ
 koku	koʊku
-kola	koʊlə
+kola	koʊlə	kɔlɑ
 kolach	koʊlɑt͡ʃ
 kolacin	koʊlɑt͡ʃin
 kolacky	kəlɑt͡ʃi
@@ -23152,7 +23155,7 @@ kurbash	kʊɹbæʃ
 kurg	kʊɹɡ
 kurikata	kɚikətɑ
 kurrajong	kɚəd͡ʒɑŋ
-kurus	kʊɹuʃ
+kurus	kʊɹuʃ	kʊɹuz
 kusnyer	kʌʃnɚ
 kusso	kʊsoʊ
 kustanai	kʊstɑnaɪ
@@ -23513,7 +23516,7 @@ laryngotracheal	lɚɪŋɡoʊtɹeɪkiəl
 lasagne	ləzɑnjə
 lasciviousness	ləsɪviəsnɪs
 lashio	lɑʃjoʊ
-lashkar	læʃkɚ
+lashkar	læʃkɚ	lʌʃkɚ
 lassalle	ləsæl
 lassell	lɑsɛl
 lastex	læstɛks
@@ -23587,7 +23590,7 @@ lavabo	ləveɪboʊ
 lavada	ləveɪdə
 lavages	ləvɑʒɪz
 lavaliere	lævəliɹ
-lavalliere	lɑvəlɪɚ
+lavalliere	lɑvəlɪɚ	ləvæljɚ
 lavaret	lævɚɛt
 lavater	lɑvɑtɚ
 lavation	læveɪʃən
@@ -23605,7 +23608,7 @@ lawndale	lɔndeɪl
 lawrencian	lɔɹɛnt͡ʃən
 lawrentian	lɚɛnʃən
 laxation	lækseɪʃən
-laxness	læksnɪs
+laxness	læksnɪs	lɑksnɪs
 layamon	leɪəmən
 layard	lɛɹd
 laydown	leɪdaʊn
@@ -23933,7 +23936,7 @@ liaoning	ljaʊnɪŋ
 liaopeh	ljaʊbeɪ
 liaotung	ljaʊdʊŋ
 liaoyang	ljaʊjɑŋ
-liard	liɑɹ
+liard	liɑɹ	liɑɹd
 liards	liɑɹz
 libau	libaʊ
 libava	lɪbɑvɑ
@@ -25248,7 +25251,7 @@ maulvi	maʊlvi
 mauman	meɪumən
 maun	mɑn
 maunche	mɑnt͡ʃ
-maundy	mɔndi
+maundy	mɔndi	mɑndi
 maupassant	moʊpəsɑnt
 maurist	mɔɹɪst
 maurya	maʊɹiə
@@ -25451,7 +25454,7 @@ melodramatist	mɛlədɹæmətɪst
 melodramatize	mɛlədɹəsaɪz
 meloid	mɛlɔɪd
 melolonthine	mɛləlɑnθaɪn
-melos	mɛlɑs
+melos	mɛlɑs	milɑs
 meltage	mɛltɪd͡ʒ
 melungeon	məlʌnd͡ʒən
 mem	mɛm
@@ -25713,7 +25716,7 @@ metion	mitiɑn
 metiscus	mɪtɪskəs
 metisse	meɪtis
 metius	meɪtiəs
-metol	mɛtɑl
+metol	mɛtɑl	mitoʊl
 metonymically	mɛtənɪmɪkəli
 metopic	mətɑpɪk
 metralgia	mɪtɹæld͡ʒiə
@@ -25894,7 +25897,7 @@ midleg	mɪdlɛɡ
 midlothian	mɪdloʊðiən
 midnightly	mɪdnaɪtli
 midnoon	mɪdnun
-midrash	mɪdɹɑʃ
+midrash	mɪdɹɑʃ	mɪdɹæʃ
 midrashic	mɪdɹæʃɪk
 midriff	mɪdɹɪf
 midshipmite	mɪdʃɪpmaɪt
@@ -26260,7 +26263,7 @@ moneta	moʊneɪtə
 moneybag	mʌnibæɡ
 moneybags	mʌnɪbæɡz
 mongolianism	mɑŋɡoʊliənɪzəm
-mongolism	mɑŋəlɪzəm
+mongolism	mɑŋəlɪzəm	mɑŋɡəlɪzəm
 mongrel	mʌŋɡɹəl
 mongrelise	mʌŋɡɹəlaɪz
 mongrelize	mʌŋɡɹəlaɪz
@@ -27087,7 +27090,7 @@ nepotic	nəpɑtɪk
 neptunist	nɛptjunɪst
 neral	niɹæl
 nerbudda	nɚbʌdə
-nereid	niɚiɪd
+nereid	niɚiɪd	niɹiɪd
 nerites	nɛɹɪtiz
 nerol	niɹɔl
 nerts	nɚts
@@ -27372,7 +27375,7 @@ nonincreasing	nɑnɪnkɹisɪŋ
 noninductive	nɑnɪndʌktɪv
 noninitial	nɑnɪnɪʃəl
 nonintercourse	nɑnɪntɚkɔɹs
-nonius	noʊniəs
+nonius	noʊniəs	nɑniəs
 nonjoinder	nɑnd͡ʒɔɪndɚ
 nonlegal	nɑnliɡəl
 nonlife	nɑnlaɪf
@@ -27573,7 +27576,7 @@ oaklyn	oʊklɪn
 oakmoss	oʊkmɔs
 oasean	oʊeɪsiən
 oaten	oʊtən
-ob	ɑb
+ob	ɑb	ɔp
 obafemi	ɔbɑfeɪmi
 obclavate	ɑbkleɪveɪt
 obcuneate	ɑbkjunieɪt
@@ -27679,7 +27682,7 @@ octantal	ɑktæntəl
 octarchy	ɑktɑɹki
 octastyle	ɑktəstaɪl
 octastylos	ɑktəstaɪlɑs
-octateuch	ɑktətuk
+octateuch	ɑktətuk	ɑktətjuk
 octaval	ɑkteɪvəl
 octavalent	ɑktəveɪlənt
 octavo	ɑkteɪvoʊ
@@ -28585,7 +28588,7 @@ palaeogene	peɪliəd͡ʒin
 palaeogenesis	peɪlioʊd͡ʒɛnɪsɪs
 palaeogeography	pælɪoʊd͡ʒɪɑɡɹəfi
 palaeography	pælɪɑɡɹəfi
-palaeolithic	pælɪoʊlɪθɪk
+palaeolithic	pælɪoʊlɪθɪk	peɪliəlɪθɪk
 palaeological	peɪliəlɑd͡ʒɪkəl
 palaeologus	peɪliɑləɡəs
 palaeology	peɪliɑləd͡ʒi
@@ -28602,7 +28605,7 @@ palaeozoology	peɪlioʊzoʊɑləd͡ʒi
 palafitte	pæləfɪt
 palatableness	pælətəbəlnɪs
 palatalized	pælətəlaɪzd
-palatinate	pəlætɪneɪt
+palatinate	pəlætɪneɪt	pəlætəneɪt
 palatium	pəleɪʃiəm
 palatka	pɑlɑtkə
 palatogram	pælətəɡɹæm
@@ -28753,7 +28756,7 @@ pansophism	pænsəfɪzəm
 pansophy	pænsəfi
 pantagraph	pæntəɡɹæf
 pantagruel	pæntæɡɹuɛl
-pantagruelism	pæntəɡɹuəlɪzəm
+pantagruelism	pæntəɡɹuəlɪzəm	pæntəɡɹuəlɪzeɪm
 pantechnicon	pæntɛknəkɑn
 pantelegraph	pæntɛləɡɹæf
 pantelegraphy	pæntəlɛɡɹəfi
@@ -29102,7 +29105,7 @@ pauperize	pɔpɚaɪz
 paur	paʊɹ
 pavan	pævən
 pavid	pævɪd
-pavin	pævən
+pavin	pævən	æpaɪvɪn
 paviotso	pɑvioʊtsoʊ
 pavis	pævɪs
 paviser	pævɪsɚ
@@ -29508,7 +29511,7 @@ perlie	pɚli
 perling	pɚlɪŋ
 perlitic	pɚlɪtɪk
 perlucidus	pɚlusɪdəs
-perm	pɚm
+perm	pɚm	pɛɹm
 permafrost	pɚməfɹɑst
 permalloy	pɚmælɔɪ
 permanganate	pɚmæŋɡəneɪt
@@ -30082,8 +30085,8 @@ pierian	paɪiɹiən
 pierides	paɪiɹɪdiz
 pierrette	piɚɛt
 pierrot	piɚoʊ
-pieta	pɪɛtɑ
-pietas	paɪətɑs
+pieta	pɪɛtɑ	pieɪtɑ
+pietas	paɪətɑs	paɪɪtæs
 piezoelectricity	paɪizoʊɪlɛktɹɪsɪti
 piezometer	paɪɪzɑmɪtɚ
 piezometric	paɪizəmɛtɹɪk
@@ -30172,7 +30175,7 @@ pinnulate	pɪnjəleɪt
 pinnule	pɪnjul
 pinny	pɪni
 pinochle	pinɑkəl
-pinole	pɪnoʊli
+pinole	pɪnoʊli	pinoʊl
 pinon	pɪnjən
 pinones	pinjɔnɛs
 pinsetter	pɪnsɛtɚ
@@ -30204,7 +30207,7 @@ pipy	paɪpi
 piqua	pɪkweɪ
 piquantly	pikəntli
 piquantness	pikəntnɪs
-piquet	pɪkɛt
+piquet	pɪkɛt	pɪkeɪ
 piragua	pɚɑɡwə
 pirarucu	pɚɚʊku
 piratically	paɪɹætɪkəli
@@ -30528,7 +30531,7 @@ poind	pɔɪnd
 poine	pɔɪnə
 pointal	pɔɪntəl
 pointel	pɔɪntəl
-pointillism	pwæntɪlɪzəm
+pointillism	pwæntɪlɪzəm	pwæntəlɪzəm
 pointsman	pɔɪntsmən
 poiser	pɔɪzɚ
 pokeberry	poʊkbɛɹi
@@ -32190,7 +32193,7 @@ rappite	ɹæpaɪt
 rapporteur	ɹæpɔɹtɚɹ
 raptured	ɹæptʃəd
 raptus	ɹæptəs
-rarebit	ɹɛɹbɪt
+rarebit	ɹɛɹbɪt	ɹæɚbət
 rarefactive	ɹɛɹəfæktɪv
 rarotonga	ɹæɹətɑŋɡə
 rasa	ɹʌsə
@@ -32345,7 +32348,7 @@ redeliver	ɹidɪlɪvɚ
 redemand	ɹidɪmænd
 redemptible	ɹɪdɛmptəbəl
 redemptioner	ɹɪdɛmpʃənɚ
-redemptorist	ɹɪdɛmptɚɪst
+redemptorist	ɹɪdɛmptɚɪst	ɹɪdɛmptɚist
 redemptory	ɹɪdɛmptɚi
 redhibition	ɹɛdɪbɪʃən
 redhibitory	ɹɛdhɪbɪtɔɹi
@@ -32512,7 +32515,7 @@ remscheid	ɹɛmʃaɪt
 remuneratively	ɹɪmjunɚeɪtɪvli
 renan	ɹɪnæn
 renardine	ɹɛnɚdɪn
-renascence	ɹinæsəns
+renascence	ɹinæsəns	ɹɪnæsəns
 renascent	ɹɪnæsənt
 rencounter	ɹɛnkaʊntɚ
 renegado	ɹɛnɪɡeɪdoʊ
@@ -32942,7 +32945,7 @@ rockweed	ɹɑkwid
 rodded	ɹɑdɪd
 rodomontade	ɹɑdəmɑnteɪd
 rodzinski	ɹəd͡ʒɪnski
-roentgen	ɹʌntjən
+roentgen	ɹʌntjən	ɹɛntɡən
 roentgenograph	ɹɛntɡənəɡɹæf
 roentgenologic	ɹɛntɡənəlɑd͡ʒɪk
 roentgenometer	ɹɛntɡənɑmɪtɚ
@@ -33004,7 +33007,7 @@ ropemanship	ɹoʊpmənʃɪp
 ropery	ɹoʊpɚi
 roquelaure	ɹoʊkəlɔɹ
 roris	ɹɔɹɪs
-rosaline	ɹoʊzəlin
+rosaline	ɹoʊzəlin	ɹoʊzəlɪn
 rosarian	ɹəzɛɹiən
 roscian	ɹɑʃiən
 roscoelite	ɹɑskoʊlaɪt
@@ -33218,7 +33221,7 @@ sacral	seɪkɹəl
 sacramentalist	sækɹəmɛntəlɪst
 sacramentally	sækɹəmɛntəli
 sacramentalness	sækɹəmɛntəlnɪs
-sacramentarian	sækɹəməntɛɹiən
+sacramentarian	sækɹəməntɛɹiən	sækɹəmɛntɛɹiən
 sacrilegiousness	sækɹəlɪd͡ʒəsnɪs
 sacrist	sækɹɪst
 sacristy	sækɹisti
@@ -33245,7 +33248,7 @@ safawid	sɑfɑwid
 safrol	sæfɹoʊl
 sagbut	sæɡbʌt
 saggar	sæɡɚ
-sagitta	sæd͡ʒɪtə
+sagitta	sæd͡ʒɪtə	səd͡ʒɪtə
 sagittary	sæd͡ʒɪtɛɹi
 saguache	səwæt͡ʃ
 sagunto	səɡuntoʊ
@@ -33518,9 +33521,9 @@ sattvic	sɑtvɪk
 saturable	sæt͡ʃɚəbəl
 saturant	sæt͡ʃɚənt
 saturator	sæt͡ʃɚeɪtɚ
-saturnalia	sætəneɪliə
+saturnalia	sætəneɪliə	sætɚneɪliə
 saturnism	sætənɪzəm
-satyagraha	sətjɑɡɹəhɑ
+satyagraha	sətjɑɡɹəhɑ	sʌtjəɡɹʌhə
 satyaloka	sʌtjəlɔkə
 satyr	seɪtɚ
 satyriasis	seɪtɚaɪəsɪs
@@ -33938,7 +33941,7 @@ seedtime	sidtaɪm
 seemer	simɚ
 seeress	siɹɪs
 seersucker	siɹsʌkɚ
-segni	seɪnji
+segni	seɪnji	sɛnji
 segno	seɪnjoʊ
 segre	səɡɹeɪ
 segreant	sɛɡɹiənt
@@ -34663,7 +34666,7 @@ sinistrorse	sɪnɪstɹɔɹs
 sinistrorsely	sɪnɪstɹɔɹsli
 sinistrous	sɪnɪstɹəs
 sinkiang	sɪnkjæŋ
-sinologue	saɪnəlɑɡ
+sinologue	saɪnəlɑɡ	saɪnəlɑd͡ʒɪkəl
 sinon	saɪnɑn
 sinoper	sɪnəpɚ
 sinopis	sɪnəpəs
@@ -35142,7 +35145,7 @@ sottishness	sɑtɪʃnɪs
 soudanese	sudəniz
 souderton	saʊdɚtən
 soufflot	suflɔ
-soufriere	sufɹiɛɹ
+soufriere	sufɹiɛɹ	saʊ
 soult	sult
 soundbox	saʊndbɑks
 soundingly	saʊndɪŋli
@@ -35857,7 +35860,7 @@ stormbound	stɔɹmbaʊnd
 stormless	stɔɹmlɪs
 stormlessly	stɔɹmlɪsli
 stormlessness	stɔɹmlɪsnɪs
-stoss	stoʊs
+stoss	stoʊs	ʃtoʊs
 stoting	stoʊtɪŋ
 stotinka	stɔtɪŋkɑ
 stound	staʊnd
@@ -36174,7 +36177,7 @@ successiveness	səksɛsɪvnɪs
 succinctorium	sʌksɪŋktɔɹiəm
 succinic	səksɪnɪk
 succory	sʌkɚi
-succoth	sukɔt
+succoth	sukɔt	sukəs
 succour	sʌkɚ
 succuba	sʌkjəbə
 suckfish	sʌkfɪʃ
@@ -36206,7 +36209,7 @@ suicidally	suɪsaɪdəli
 suimate	suaɪmeɪt
 suisei	suiseɪ
 sukkah	sukɑ
-sukkoth	sukɔt
+sukkoth	sukɔt	sʊkəs
 suleiman	suləmɑn
 sulfaguanidine	sʌlfəɡwænɪdin
 sulfamerazine	sʌlfəmɛɹəzin
@@ -36511,7 +36514,7 @@ swansdown	swɑnzdaʊn
 swansea	swɑnsi
 swanskin	swɑnskɪn
 swansong	swɑnsɑŋ
-swaraj	swɚɑd͡ʒ
+swaraj	swɚɑd͡ʒ	swɚɑɹd͡ʒ
 swarth	swɔɹθ
 swartzite	swɔɹtsaɪt
 swash	swɑʃ
@@ -36840,7 +36843,7 @@ tampan	tæmpæn
 tamponage	tæmpənɪd͡ʒ
 tampur	tɑmpʊɹ
 tamworth	tæmwɚθ
-tana	tɑnə
+tana	tɑnə	tɑnɑ
 tanach	tɑnɑk
 tanagra	tænəɡɹə
 tanagrine	tænəɡɹɪn
@@ -40450,7 +40453,7 @@ washrag	wɑʃɹæɡ
 washstand	wɑʃstænd
 washwoman	wɑʃwʊmən
 wassermann	wɑsɚmən
-wast	wɑst
+wast	wɑst	vɑst
 wastelot	weɪstlɑt
 wasteness	weɪstnɪs
 wastepile	weɪstpaɪl
