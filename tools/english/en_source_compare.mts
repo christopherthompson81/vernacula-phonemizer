@@ -142,6 +142,42 @@ export function mobyToArpabet(p: string): string[] | undefined {
  * ⚠ THE CONSONANT LOOKAHEAD IS LOAD-BEARING. `AH R` before a VOWEL is an onset `r` in the next syllable
  * (`around` = ə-ɹaʊnd), not a coda, and folding it would rewrite that as ɚ.
  */
+/**
+ * MOBY ROWS WHOSE BODY IS NOT THE HEADWORD'S READING. Not a pronunciation variant, not a notation
+ * difference — the pronunciation field carries a DIFFERENT WORD, or a fragment of one.
+ *
+ * ⚠ NOT A LINE OFFSET, WHICH WAS CHECKED FIRST because it would have been recoverable: the neighbours
+ * of every row below are correct (`shrunken`/`shuck` sit either side of `shtreimel`, `soleplate`/
+ * `Soleure` either side of `soleprint`). Each row is individually corrupt.
+ *
+ * Found three ways, and each way found rows the others missed: a first-phone plausibility test (a word
+ * spelled with an initial vowel cannot begin with /d͡ʒ/, a surname cannot be read as a given name), a
+ * phones-per-letter ratio (median 0.89, and these sit under 0.40 with six or more letters), and reading
+ * the Moby/gold disagreements. ⚠ THE RATIO TEST NEEDS THE LENGTH GATE: `awe` AO, `eau` OW, `err` ER and
+ * `aye` EY are all correct and all score low, and `thorough`, `though`, `borough`, `jacques`, `maugham`
+ * are correct with silent letters.
+ *
+ * ⚠ THEY ARE DROPPED, NOT REPAIRED. A repair would be a guess at what Moby meant; dropping leaves the
+ * word to the OOV tier, which is what happens for every other word Moby does not carry.
+ */
+export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
+    // A surname whose body is a GIVEN name — Moby's source evidently held "Surname, Firstname" rows.
+    ["carr", "body is 'Antoine'"], ["cordero", "body is 'Ángel'"], ["corrigan", "body is 'Mairead'"],
+    ["dunston", "body is 'Sean'"], ["frana", "body is 'Javier'"], ["gaston", "body is 'Cieto'"],
+    ["gorbachev", "body is 'Mikhail'"], ["frykowski", "body is 'Wojciech'"],
+    // The body is a DIFFERENT word entirely.
+    ["hodges", "body is 'canister'"], ["pathology", "body is 'pathomorphism'"],
+    ["terminology", "body is 'terminological'"], ["result", "body is 'resultive'"],
+    ["react", "body is 'reactor'"], ["soleprint", "body is 'solemn'"],
+    ["selfward", "body is 'selfwill'"], ["samuelson", "body is a fragment, 'SH EH L'"],
+    // Truncated or nonsense bodies, all six-plus letters and under 0.40 phones per letter.
+    ["workbasket", "truncated — the 'work' is missing"], ["freelance", "truncated — 'F R IY'"],
+    ["ninetieth", "truncated — 'N AY'"], ["shtreimel", "truncated — 'SH UW'"],
+    ["neanderthaloid", "nonsense — 'N IY P'"], ["passel", "nonsense — 'P S'"],
+    ["reiterate", "nonsense — 'R N'"], ["sleipnir", "nonsense — 'S N T'"],
+    ["wakayama", "nonsense — 'W EH P'"],
+]);
+
 export function modernise(a: string[]): string[] {
     const out: string[] = [];
     for (let i = 0; i < a.length; i++) {

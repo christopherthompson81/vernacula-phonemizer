@@ -616,3 +616,50 @@ removes a corruption rather than manufacturing an agreement.
     primary wikipron   62.0% (unchanged)  67.4%
     Moby lexicon       75.3% (unchanged)  82.0%
     Moby OOV           38.0% → 37.9%      45.2%
+
+## Run 19 — 2026-09-19 01:00 — the defective rows, marked
+
+Run 18 refused the single-source import but left two things it had surfaced. The first: the nonsense
+rows are defects and have to be recorded as such.
+
+⚠ **NOT A LINE OFFSET, WHICH WAS CHECKED FIRST** because an offset would have been recoverable — the
+whole block could have been shifted back. It is not: the NEIGHBOURS of every corrupt row are correct.
+
+    shrunken 'S r@Nk@n     shtreimel /S//u/       shuck /S//@/k
+    soleplate 'soUl,pleIt  soleprint s/O/'l/E/m   Soleure s/O/'l/y/R
+
+Each row is individually corrupt, so each has to be named.
+
+**Found three ways, and each found rows the others missed.** A first-phone plausibility test (a surname
+cannot be read as a given name); a phones-per-letter ratio (median 0.89, these sit under 0.40 with six
+or more letters); and reading the Moby/gold disagreements.
+⚠ THE RATIO TEST NEEDS THE LENGTH GATE, and without it flags only correct rows: `awe` AO, `eau` OW,
+`err` ER, `aye` EY all score low and are all right, as are `thorough`, `though`, `borough`, `jacques`
+and `maugham` with their silent letters.
+
+25 rows, in three shapes:
+
+    a surname whose body is a GIVEN name    carr→Antoine, cordero→Ángel, corrigan→Mairead,
+                                            dunston→Sean, frana→Javier, gaston→Cieto,
+                                            gorbachev→Mikhail, frykowski→Wojciech
+    the body is a DIFFERENT word            hodges→canister, pathology→pathomorphism,
+                                            terminology→terminological, result→resultive,
+                                            react→reactor, soleprint→solemn, selfward→selfwill
+    truncated or nonsense                   workbasket, freelance, ninetieth, shtreimel,
+                                            neanderthaloid, passel, reiterate, sleipnir, wakayama
+
+⚠ **THEY ARE DROPPED, NOT REPAIRED.** A repair would be a guess at what Moby meant; dropping leaves the
+word to the OOV tier, which is what already happens for every word Moby does not carry. Both the
+referee builder and the import tool read the same list, so a defective row can never arbitrate and can
+never be imported.
+
+    en.moby-lexicon.tsv   35,202 → 35,185
+    en.moby-oov.tsv       39,683 → 39,675
+
+### Still open: the non-rhotic tail belongs to en-GB, not to GenAm
+
+The 115 r-less rows that refused the import are not worthless — they are RP, and en-GB is the variety
+that wants them. en-GB today has ONE referee (`en-gb.wikipron-uk`, 76,284 rows), no secondary, and no
+declared `intentional` class at all, against a 51.7% score. A Moby-derived en-GB referee — or an en-GB
+import on the same two-source bar, with a non-rhotic gold — is the obvious next use for the half of
+this corpus GenAm cannot take. Not started.
