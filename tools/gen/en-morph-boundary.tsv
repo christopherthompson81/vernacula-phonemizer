@@ -31,7 +31,7 @@ aborn	1:prefix
 aborted	5:suffix
 abortionist	7:suffix
 abreact	2:prefix
-abreast	1:compound
+abreast	1:prefix
 abridgement	5:suffix
 abroad	1:prefix
 abruptness	6:suffix
@@ -81,13 +81,13 @@ acrobatically	7:suffix,9:suffix
 acrobatics	7:suffix
 acrocyanosis	4:prefix
 acropetally	9:suffix
-across	1:compound
+across	1:prefix
 actable	3:suffix
 acting	3:suffix
 actinism	5:confix
 actionable	5:suffix
-active	3:compound
-actively	3:compound,5:suffix
+active	3:suffix
+actively	3:suffix,5:suffix
 actor	3:suffix
 acuteness	5:suffix
 adamstown	4:prefix
@@ -268,7 +268,7 @@ alkaloidal	7:suffix
 allentown	4:compound
 alleyway	3:compound
 allheal	2:compound
-allotment	4:compound
+allotment	4:suffix
 allowable	3:suffix
 allowance	3:suffix
 allspice	2:compound
@@ -570,7 +570,7 @@ autosuggestion	3:prefix
 autotoxic	3:prefix
 autotransformer	3:prefix
 autoworker	3:compound
-autumnal	4:compound
+autumnal	4:suffix
 avoidable	4:suffix
 avoidance	4:suffix
 avowed	3:suffix
@@ -906,7 +906,7 @@ bigeye	3:compound
 bigfoot	3:compound
 bighead	3:compound
 bighorn	3:compound
-bigotry	5:compound
+bigotry	5:suffix
 bigram	2:confix
 bigtime	3:compound
 bigwig	3:compound
@@ -1106,8 +1106,8 @@ bloodbath	4:compound
 blooded	4:suffix
 bloodfin	4:compound
 bloodhound	4:compound
-bloodless	4:compound
-bloodlessness	4:compound,7:suffix
+bloodless	4:suffix
+bloodlessness	4:suffix,7:suffix
 bloodletting	4:compound
 bloodline	4:compound
 bloodmobile	4:suffix
@@ -1474,7 +1474,7 @@ burghal	3:suffix
 burgher	3:suffix
 burglarize	5:suffix
 burglarproof	5:suffix
-burglary	5:compound
+burglary	5:suffix
 burlington	5:suffix
 burman	4:suffix
 burnable	3:suffix
@@ -1666,7 +1666,7 @@ catfish	3:compound
 catharist	5:suffix
 cathead	3:compound
 cathouse	3:compound
-catkin	3:compound
+catkin	3:suffix
 catlike	3:suffix
 catmint	3:compound
 catnap	3:compound
@@ -1841,7 +1841,7 @@ clarinetist	8:suffix
 clarksburg	5:prefix
 clarkson	5:suffix
 clarksville	5:prefix
-classic	4:compound
+classic	4:suffix
 classify	4:suffix
 classless	4:suffix
 classman	4:suffix
@@ -2511,7 +2511,7 @@ daresay	3:compound
 darken	4:suffix
 darkie	4:suffix
 darkish	4:suffix
-darkling	4:compound
+darkling	4:suffix
 darkly	4:suffix
 darkness	4:suffix
 darkroom	4:compound
@@ -2757,7 +2757,7 @@ detectable	6:suffix
 detective	6:suffix
 detector	6:suffix
 determent	4:suffix
-detestable	6:compound
+detestable	6:suffix
 detoxicate	2:prefix
 detractive	7:suffix
 detrain	2:prefix
@@ -2845,15 +2845,15 @@ disbarment	3:prefix,6:suffix
 disbelief	3:prefix
 disbud	3:prefix
 disburden	3:prefix
-disburse	3:compound
-disbursement	3:compound,6:suffix
+disburse	3:prefix
+disbursement	3:prefix,6:suffix
 discalced	3:prefix
 discard	3:prefix
 discernible	5:suffix
 discernment	5:suffix
 discharge	3:prefix
 disclaimer	7:suffix
-disclose	3:compound
+disclose	3:prefix
 discoid	4:suffix
 discoloration	7:suffix
 discomfort	3:prefix
@@ -3149,7 +3149,7 @@ drawing	3:suffix
 drawknife	3:compound
 drawstring	3:compound
 drayman	3:suffix
-dreadful	4:compound
+dreadful	4:suffix
 dreadlocks	4:compound
 dreadnought	4:compound
 dreamboat	4:compound
@@ -3704,7 +3704,7 @@ featherly	4:suffix
 featherstitch	4:compound
 featherweight	4:compound
 featureless	4:suffix
-federalism	6:compound
+federalism	6:suffix
 federalist	6:suffix
 feedback	3:compound
 feeder	3:suffix
@@ -4083,7 +4083,7 @@ foreknowledge	3:prefix
 foreleg	3:prefix
 forelimb	3:prefix
 forelock	3:prefix
-foreman	3:compound
+foreman	3:prefix
 foremast	3:compound
 foremost	3:suffix
 forename	3:prefix
@@ -4144,7 +4144,7 @@ foully	3:compound
 foulness	3:suffix
 foundational	8:suffix
 founder	4:suffix
-foundling	4:compound
+foundling	4:suffix
 fountainhead	6:compound
 fourfold	3:suffix
 fourscore	3:compound
@@ -4204,7 +4204,7 @@ freetown	3:compound
 freeway	3:compound
 freightage	4:suffix
 frenchify	5:suffix
-frenchman	5:compound
+frenchman	5:suffix
 frenchwoman	5:suffix
 frenchy	5:suffix
 frequentation	8:suffix
@@ -4537,7 +4537,7 @@ governance	5:suffix
 government	5:suffix
 governor	5:suffix
 governorship	5:suffix,6:suffix
-graceful	4:compound
+graceful	4:suffix
 graceless	4:suffix
 graciously	6:suffix
 graciousness	6:suffix
@@ -4868,7 +4868,7 @@ harpist	4:suffix
 harrisburg	5:suffix
 harrodsburg	5:prefix
 harrower	4:suffix
-harrowing	4:compound
+harrowing	4:suffix
 harshness	4:suffix
 hartshorn	4:prefix
 hartsville	4:prefix
@@ -4882,8 +4882,8 @@ hatchback	3:compound
 hatcheck	3:compound
 hatcher	3:suffix
 hatchway	3:compound
-hateful	3:compound
-hatefulness	3:compound,6:suffix
+hateful	3:suffix
+hatefulness	3:suffix,6:suffix
 hatmaker	3:compound
 hatpin	3:compound
 hatrack	3:compound
@@ -5017,7 +5017,7 @@ hellaciously	3:suffix,7:suffix
 hellaciousness	3:suffix,7:suffix
 hellbender	3:compound
 hellcat	3:compound
-hellenistic	8:compound
+hellenistic	8:suffix
 hellfire	3:compound
 hellhound	3:compound
 hellish	3:suffix
@@ -5440,8 +5440,8 @@ impeachable	5:suffix
 impeachment	5:suffix
 impending	6:suffix
 impenetrable	2:prefix
-impenitent	2:compound
-impenitently	2:compound,10:suffix
+impenitent	2:prefix
+impenitently	2:prefix,10:suffix
 imperceptible	2:prefix
 imperfectly	8:suffix
 imperialism	8:suffix
@@ -5471,8 +5471,8 @@ imprinted	7:suffix
 imprison	2:prefix
 imprisonment	2:prefix,8:suffix
 improbable	2:prefix
-improper	2:compound
-improperly	2:compound,7:suffix
+improper	2:prefix
+improperly	2:prefix,7:suffix
 improvement	6:suffix
 improvisational	12:suffix
 impudicity	2:prefix
@@ -5532,7 +5532,7 @@ incommodiousness	2:prefix,10:suffix
 incommunicable	2:prefix
 incommunicableness	2:prefix,14:suffix
 incommutable	2:prefix
-incomparable	2:compound
+incomparable	2:prefix
 incompetence	2:prefix
 incompetent	2:prefix
 incomplete	2:prefix
@@ -5705,8 +5705,8 @@ inhabitation	7:suffix
 inharmonic	2:prefix
 inharmonious	2:prefix
 inheritable	7:suffix
-inheritance	7:compound
-inheritor	7:compound
+inheritance	7:suffix
+inheritor	7:suffix
 inhomogeneity	2:prefix
 inhomogeneous	2:prefix
 inhospitable	2:prefix
@@ -5778,7 +5778,7 @@ insipidness	7:suffix
 insistence	6:suffix
 insobriety	2:prefix
 insole	2:compound
-insoluble	2:compound
+insoluble	2:prefix
 insolvable	2:prefix
 insolvent	2:prefix
 inspan	2:compound
@@ -6119,7 +6119,7 @@ keelless	3:suffix
 keely	3:suffix
 keening	3:suffix
 keenly	3:suffix
-keeper	3:compound
+keeper	3:suffix
 keepsake	3:compound
 kellyanne	4:compound
 kelpfish	4:compound
@@ -6149,7 +6149,7 @@ kickstand	3:compound
 kidnap	3:compound
 kidskin	3:compound
 kieler	3:suffix
-killer	3:compound
+killer	3:suffix
 killing	3:suffix
 killjoy	3:compound
 kilobyte	4:prefix
@@ -6308,7 +6308,7 @@ latchford	3:compound
 latchkey	3:compound
 latecomer	3:compound
 lateness	3:suffix
-latinate	5:compound
+latinate	5:suffix
 latinism	5:suffix
 latinist	5:suffix
 latinize	5:suffix
@@ -6466,7 +6466,7 @@ limelight	3:compound
 limestone	3:compound
 limewash	3:compound
 limewater	3:compound
-limey	3:compound
+limey	3:suffix
 limitless	5:suffix
 limned	3:suffix
 limner	3:suffix
@@ -6665,7 +6665,7 @@ magnetite	6:suffix
 magniloquently	12:suffix
 maiden	3:suffix
 maidenhair	3:suffix,5:compound
-maidenhood	3:suffix,5:compound
+maidenhood	3:suffix,5:suffix
 maidie	3:suffix
 maidservant	3:compound
 mailable	3:suffix
@@ -6715,7 +6715,7 @@ maltase	4:suffix
 malter	4:suffix
 maltose	4:suffix
 maltreat	3:prefix
-maltreatment	3:prefix,7:compound
+maltreatment	3:prefix,7:suffix
 mammallike	5:suffix
 mammonism	5:suffix
 management	5:suffix
@@ -7093,7 +7093,7 @@ miscalculate	3:prefix
 miscalculation	3:prefix
 miscall	3:prefix
 miscarriage	3:prefix
-miscarry	3:compound
+miscarry	3:prefix
 miscast	3:prefix
 mischarge	3:prefix
 mischievously	8:suffix
@@ -7133,8 +7133,8 @@ misjudge	3:prefix
 misjudgment	3:prefix
 mislabel	3:prefix
 mislay	3:prefix
-mislead	3:compound
-misleading	3:compound,6:suffix
+mislead	3:prefix
+misleading	3:prefix,6:suffix
 mislike	3:prefix
 mismanage	3:prefix
 mismanagement	3:prefix
@@ -7229,7 +7229,7 @@ monkfish	4:compound
 monkshood	4:prefix
 monocularly	9:suffix
 monographic	8:suffix
-monolithic	7:compound
+monolithic	7:suffix
 monsoonal	6:suffix
 monthlong	4:suffix
 monthly	4:suffix
@@ -7264,7 +7264,7 @@ moralize	5:suffix
 morally	5:suffix
 moreover	3:compound
 mormonism	6:suffix
-morpheme	4:compound
+morpheme	4:suffix
 morphophonemics	5:prefix
 morristown	5:compound
 morrisville	5:suffix
@@ -7888,7 +7888,7 @@ opalescent	4:suffix
 opaline	4:suffix
 opaqueness	4:suffix
 opener	4:suffix
-openly	4:compound
+openly	4:suffix
 openness	4:suffix
 openwork	4:compound
 operational	7:suffix
@@ -7942,7 +7942,7 @@ outbrave	2:prefix
 outbreak	2:prefix
 outbreed	2:prefix
 outbuilding	2:compound
-outburst	2:compound
+outburst	2:prefix
 outcast	2:prefix
 outclass	2:prefix
 outcome	2:compound
@@ -7955,7 +7955,7 @@ outdoor	2:prefix
 outdoors	2:compound
 outdoorsman	2:compound,6:suffix
 outdoorsy	2:compound,6:suffix
-outdraw	2:compound
+outdraw	2:prefix
 outer	2:suffix
 outerwear	2:suffix,3:suffix
 outface	2:prefix
@@ -8140,7 +8140,7 @@ overlook	3:prefix
 overlooked	3:prefix
 overlord	3:prefix
 overlying	3:prefix
-overman	3:compound
+overman	3:prefix
 overmantel	3:prefix
 overmatch	3:prefix
 overmatched	3:prefix
@@ -8201,7 +8201,7 @@ overstaff	3:prefix
 overstate	3:prefix
 overstatement	3:prefix,7:suffix
 overstay	3:prefix
-overstep	3:compound
+overstep	3:prefix
 overstock	3:prefix
 overstrain	3:prefix
 overstretch	3:prefix
@@ -8479,7 +8479,7 @@ pensioner	6:suffix
 pensiveness	6:suffix
 pent	3:suffix
 pentachord	5:prefix
-pentad	3:suffix,4:compound
+pentad	3:suffix,4:confix
 pentadactyl	5:confix
 pentagram	5:prefix
 pentahedron	5:confix
@@ -8520,7 +8520,7 @@ permanently	8:suffix
 permissiveness	7:suffix
 peroxide	2:prefix
 perpetually	8:suffix
-perplexity	7:compound
+perplexity	7:suffix
 pers	2:suffix
 persistence	6:suffix
 persistent	6:suffix
@@ -8738,9 +8738,9 @@ podcasting	7:suffix
 pointer	4:suffix
 pointing	4:suffix
 pointingly	4:suffix,6:suffix
-pointless	4:compound
+pointless	4:suffix
 poisoning	5:suffix
-poisonous	5:compound
+poisonous	5:suffix
 pokeweed	3:compound
 polarize	4:suffix
 policeman	5:suffix
@@ -8783,7 +8783,7 @@ polynomial	4:prefix
 polynuclear	4:prefix
 polyolefin	4:prefix
 polypeptide	4:prefix
-polyphonic	4:compound
+polyphonic	4:confix
 polyphyletic	4:prefix
 polyploid	4:confix
 polypod	4:confix
@@ -8936,7 +8936,7 @@ preexposure	3:prefix
 prefabricate	3:prefix
 prefabricated	3:prefix
 prefabrication	3:prefix
-prefix	3:compound
+prefix	3:confix
 preflight	3:prefix
 preform	3:prefix
 prefrontal	3:prefix
@@ -9017,10 +9017,10 @@ priestly	5:suffix
 primetime	4:compound
 princeling	5:suffix
 princely	5:suffix
-principally	9:compound
+principally	9:suffix
 printable	5:suffix
 printer	5:suffix
-printing	5:compound
+printing	5:suffix
 printmaker	5:compound
 printmaking	5:compound
 prisoner	6:suffix
@@ -9031,7 +9031,7 @@ probationary	8:suffix
 probationer	8:suffix
 problematic	7:suffix
 problematical	7:suffix,11:suffix
-procaine	3:compound
+procaine	3:confix
 proceeding	6:suffix
 processing	6:suffix
 processional	8:suffix
@@ -9070,7 +9070,7 @@ propfan	4:compound
 prophase	3:prefix
 propitiousness	8:suffix
 proportionable	9:suffix
-proportionate	9:compound
+proportionate	9:suffix
 proprietorship	9:suffix
 prosimian	3:prefix
 prospector	8:suffix
@@ -9085,7 +9085,7 @@ protistology	7:suffix
 protoplasm	5:prefix
 prototype	5:confix
 protozoon	5:confix
-protract	3:compound
+protract	3:prefix
 provincetown	7:compound
 provincialism	9:suffix
 provisional	8:suffix
@@ -9432,7 +9432,7 @@ resounding	6:suffix
 resourceful	6:suffix
 resourcefulness	6:suffix,9:suffix
 respectful	7:suffix
-respective	7:compound
+respective	7:suffix
 respondence	7:suffix
 responsiveness	9:suffix
 restful	4:suffix
@@ -9648,7 +9648,7 @@ rubberize	4:suffix
 ruckman	3:suffix
 rudely	3:suffix
 rudeness	3:suffix
-rueful	2:compound
+rueful	2:suffix
 ruffer	3:suffix
 ruffianism	6:suffix
 ruination	4:suffix
@@ -10282,7 +10282,7 @@ slusher	4:suffix
 slushy	4:suffix
 slyboots	3:compound
 slyly	3:suffix
-slyness	3:compound
+slyness	3:suffix
 smacker	4:suffix
 smallen	4:suffix
 smallman	4:compound
@@ -10356,7 +10356,7 @@ snows	3:suffix
 snowshoe	3:compound
 snowslide	3:compound
 snowstorm	3:compound
-snowy	3:compound
+snowy	3:suffix
 snuffbox	4:compound
 snuffer	4:suffix
 snuffle	4:suffix
@@ -10532,7 +10532,7 @@ spirantize	7:suffix
 spiritedness	8:suffix
 spitball	4:compound
 spitballer	4:compound,7:suffix
-spiteful	4:compound
+spiteful	4:suffix
 spithead	4:compound
 splashback	5:compound
 splashboard	5:compound
@@ -10648,7 +10648,7 @@ starwort	4:compound
 statehood	4:suffix
 statehouse	4:compound
 stateless	4:suffix
-stately	4:compound
+stately	4:suffix
 statement	4:suffix
 stateroom	4:compound
 stateside	4:suffix
@@ -11224,7 +11224,7 @@ talkative	3:suffix
 talkativeness	3:suffix,7:suffix
 talker	3:suffix
 talkfest	3:suffix
-talking	3:compound
+talking	3:suffix
 talky	3:suffix
 tallie	3:suffix
 tamper	4:suffix
@@ -11383,7 +11383,7 @@ thistledown	5:compound
 thomasville	5:suffix
 thorium	3:suffix
 thornback	4:compound
-thorny	4:compound
+thorny	4:suffix
 thoroughbred	3:compound
 thoroughly	3:suffix
 thoroughness	3:suffix
@@ -11650,7 +11650,7 @@ tressy	4:suffix
 triacetate	3:prefix
 triad	3:prefix
 trialist	5:suffix
-triangle	3:compound
+triangle	3:confix
 triangular	3:prefix
 triangulate	3:prefix
 triathlon	3:confix
@@ -12023,10 +12023,10 @@ underinsure	4:prefix
 underinsured	4:prefix
 underlie	4:prefix
 underline	4:prefix
-underling	4:compound
+underling	4:suffix
 underlip	4:prefix
 underly	4:suffix
-underman	4:compound
+underman	4:confix
 undermost	4:suffix
 underneath	4:prefix
 undernourish	4:prefix
@@ -12107,7 +12107,7 @@ underwithhold	4:prefix
 underwood	4:prefix
 underwork	4:prefix
 underworld	4:prefix
-underwrite	4:compound
+underwrite	4:prefix
 undescended	2:prefix
 undeserving	2:prefix
 undesigned	2:prefix
@@ -12303,7 +12303,7 @@ unlawful	2:prefix
 unlawfully	2:prefix,7:suffix
 unlay	2:prefix
 unleaded	2:prefix
-unlearn	2:compound
+unlearn	2:prefix
 unlettered	2:prefix
 unleveraged	2:prefix
 unlicensed	2:prefix
@@ -12879,7 +12879,7 @@ wastewater	4:compound
 watchcase	3:compound
 watchfulness	6:suffix
 watchmaker	3:compound
-watchman	3:compound
+watchman	3:suffix
 watchtower	3:compound
 watchword	3:compound
 waterbed	4:compound
@@ -13087,7 +13087,7 @@ widowhood	4:suffix
 widthwise	4:suffix
 wieldy	4:suffix
 wifehood	3:suffix
-wifely	3:compound
+wifely	3:suffix
 wigwag	3:compound
 wildcard	4:compound
 wildcat	4:compound
@@ -13172,7 +13172,7 @@ wolfman	4:compound
 wolframite	7:suffix
 wolfsbane	4:prefix
 wolfskin	4:compound
-womanhood	5:compound
+womanhood	5:suffix
 womanish	5:suffix
 womanishly	5:suffix,7:suffix
 womanishness	5:suffix,7:suffix
@@ -13317,7 +13317,7 @@ yorkist	4:suffix
 yorkshire	4:compound
 yorktown	4:compound
 youngblood	3:compound
-youngling	3:compound
+youngling	3:suffix
 younglove	3:compound
 youngman	3:compound
 youngster	3:suffix

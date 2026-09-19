@@ -18,6 +18,13 @@ One-off tools that BUILD shipped data files (not eval). They read source corpora
 - `build-el-synizesis.ts` — Greek synizesis lexicon: words where the wikipron ∩ kaikki referees AGREE that
   the vowel sequence fully synizes (a lexical fact verified by two independent referees).
 - `build-za-sawndip.ts` — Zhuang Sawndip readings from the kaikki Zhuang dump.
+- `build-en-morph-boundary.mts` — English MORPHEME BOUNDARIES and their kind (compound / prefix /
+  suffix / confix) from the kaikki English etymology templates, `--kaikki <english.jsonl>`. ⚠ Emits to
+  `tools/gen/en-morph-boundary.tsv`, NOT to `data/` — it is CC-BY-SA with no runtime consumer, and the
+  English data directory is an otherwise public-domain stratum. See LICENSES/PROVENANCE.md §3.
+- `build-en-nasal-seam.mts` — English `en-nasal-seam.tsv`: which `N` before a `K`/`G` must not
+  assimilate to [ŋ]. Consumes the boundary table above (a `compound` boundary blocks; a prefix or
+  confix does not) and falls back to referee evidence where it has no coverage.
 - `build-nan-chhoetaigi.mts` / `build-nan-kaikki-chars.mts` — Min Nan word + single-char dictionaries from
   ChhoeTaigi's permissive components (CC BY-SA 4.0 / CC0) and kaikki Hokkien citations.
 - `build-cs-kaikki-dict.mts`, `build-cy-kaikki-dict.mts`, `build-da-lexicon.mts`, `build-de-*.mts`,

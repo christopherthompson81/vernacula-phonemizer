@@ -148,6 +148,16 @@ dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `englis
 **CC BY 3.0** (DAC / CSIR / NWU via SADiLaR); sidecar. Training input for the af tagger only — NOT a
 referee (96.6% identical to RCRL on their overlap, same lineage).
 
+**tools-only (en build input):** `tools/gen/en-morph-boundary.tsv` — 13,325 rows,
+`word<TAB><phone index>:<compound|prefix|suffix|confix>`, derived from the kaikki English extract by
+`tools/gen/build-en-morph-boundary.mts`. ETYMOLOGY TEMPLATE ARGUMENTS ONLY: the morpheme split and its
+kind, for words our own dictionary already carries. No definitions, no pronunciations. ⚠ **It is under
+`tools/`, not `data/`, deliberately.** It has no runtime consumer — only `build-en-nasal-seam.mts` reads
+it — and `data/languages/english/` is otherwise a CMUdict/public-domain stratum (§1), so shipping
+share-alike bytes into the `vernacula-phonemizer-data` package to feed one build script would change
+that directory's licence character for no distributable benefit. Same shape and same terms as the
+German row below.
+
 **tools-only (de build input):** `tools/gen/de-consonant-curated.tsv` — 84 rows, `word<TAB>ordinal+t͡s`,
 derived from the kaikki German extract by `tools/gen/build-de-c-affricate.mts` and merged into the shipped
 `german/consonant.tsv` (listed above, same CC-BY-SA terms and same source). It carries only the

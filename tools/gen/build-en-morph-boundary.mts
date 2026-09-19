@@ -23,8 +23,8 @@
  * already contains. No definitions, no pronunciations, nothing that could make this circular with a
  * referee. See en-morph-boundary.PROVENANCE.md.
  *
- *   KAIKKI=/mnt/data/kaikki-English.jsonl npx tsx tools/gen/build-en-morph-boundary.mts
- *   KAIKKI=… npx tsx tools/gen/build-en-morph-boundary.mts --write
+ *   npx tsx tools/gen/build-en-morph-boundary.mts --kaikki <english.jsonl>
+ *   npx tsx tools/gen/build-en-morph-boundary.mts --kaikki <english.jsonl> --write
  */
 import { createReadStream, readFileSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
@@ -33,8 +33,16 @@ import { fileURLToPath } from "node:url";
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const DATA = join(REPO, "data", "languages", "english");
-const KAIKKI = process.env["KAIKKI"] ?? "";
-if (!KAIKKI) throw new Error("set KAIKKI to a kaikki.org English jsonl path");
+/** ⚠ THE OUTPUT LIVES UNDER tools/, NOT data/. It is CC-BY-SA share-alike and has NO runtime consumer —
+ *  only `build-en-nasal-seam.mts` reads it — so shipping it inside the `vernacula-phonemizer-data`
+ *  package would put share-alike bytes in the runtime distributable and change the licence stratum of
+ *  an English data directory that is otherwise CMUdict/public-domain. Same shape as
+ *  `tools/gen/de-consonant-curated.tsv`. See LICENSES/PROVENANCE.md §3. */
+const OUT = join(REPO, "tools", "gen");
+// ⚠ `--kaikki <path>`, matching build-cs/cy/th-kaikki-dict.mts. The dump is 3.0 GB and is not in the repo.
+const kArg = process.argv.indexOf("--kaikki");
+const KAIKKI = kArg > 0 ? (process.argv[kArg + 1] ?? "") : "";
+if (!KAIKKI) throw new Error("pass --kaikki <kaikki.org-dictionary-English.jsonl>");
 const write = process.argv.includes("--write");
 
 /** Etymology templates that state a morpheme split. */
@@ -57,23 +65,44 @@ const isLangCode = (v: string) => v === "en";
  * decomposition, which made the `-ness`/`-ly` class look like a coverage hole needing its own rule when
  * it is fully present in the source. Only `:`/`+` control values and bare language codes are dropped.
  */
-function partsOf(t: { args?: Record<string, string> }): string[] {
+function partsOf(t: { args?: Record<string, string> }): { parts: string[]; stated?: Kind } {
     const a = t.args ?? {};
     const out: string[] = [];
+    let stated: Kind | undefined;
     for (let k = 1; k <= 8; k++) {
         const v = a[String(k)];
         if (!v || typeof v !== "string") continue;
-        if (v[0] === ":" || v[0] === "+") continue;
+        // ⚠ THE CONTROL ARG IS THE KIND, AND THROWING IT AWAY DEFAULTED EVERYTHING TO `compound`.
+        // `{{surf}}` states the kind in arg 1, BEFORE the language code — `incomparable` is
+        // `{1:'+pre', 2:'en', 3:'in', 4:'comparable'}` — and the split it gives is unhyphenated, so
+        // with the control dropped `kindOf` saw two bare morphemes and fell through to its default.
+        // 17 `+pre` rows and 46 `+suf` rows shipped as `compound`. `pancake` was right by luck.
+        if (v[0] === "+") { stated = STATED[v.slice(1)] ?? stated; continue; }
+        if (v[0] === ":") { stated = STATED[v.slice(1)] ?? stated; continue; }
         if (v.includes(":")) continue;              // `la:ātricapillus` — a cognate arg, not a part
         if (isLangCode(v)) continue;
         out.push(v);
     }
-    return out;
+    return { parts: out, ...(stated ? { stated } : {}) };
 }
+/** The kind a `+`/`:` control arg states outright, which always beats the hyphen heuristic. */
+const STATED: Record<string, Kind> = {
+    com: "compound", compound: "compound",
+    pre: "prefix", prefix: "prefix",
+    suf: "suffix", suffix: "suffix",
+    con: "confix", confix: "confix", af: "affix-unknown" as Kind,
+};
 
 type Kind = "compound" | "prefix" | "suffix" | "confix";
-const kindOf = (name: string, parts: string[]): Kind => {
-    if (name === "confix") return "confix";
+/**
+ * ⚠ `compound` IS THE DEFAULT AND THAT MAKES EVERY GAP HERE A FALSE COMPOUND — the one label that
+ * changes engine output. A stated control arg wins; then the template name; then the hyphens.
+ * ⚠ `con` IS THE `confix` SHORTCUT and was in the template set but not here, so `tri·angle` and
+ * `pre·fix` shipped as compounds.
+ */
+const kindOf = (name: string, parts: string[], stated?: Kind): Kind => {
+    if (stated && stated !== ("affix-unknown" as Kind)) return stated;
+    if (name === "confix" || name === "con") return "confix";
     if (name === "prefix" || parts.some((p) => p.replace(/<[^>]*>/gu, "").endsWith("-"))) return "prefix";
     if (name === "suffix" || parts.some((p) => p.replace(/<[^>]*>/gu, "").startsWith("-"))) return "suffix";
     return "compound";
@@ -103,9 +132,9 @@ for await (const line of rl) {
     considered++;
     for (const t of d.etymology_templates ?? []) {
         if (!t.name || !TPL.has(t.name)) continue;
-        const raw = partsOf(t);
+        const { parts: raw, stated } = partsOf(t);
         if (raw.length < 2) continue;
-        found.set(w, { parts: raw, kind: kindOf(t.name, raw) });
+        found.set(w, { parts: raw, kind: kindOf(t.name, raw, stated) });
         break;
     }
 }
@@ -168,6 +197,6 @@ const header = [
     "#",
     "# word <TAB> comma-separated <phone index>:<compound|prefix|suffix|confix>",
 ].join("\n");
-writeFileSync(join(DATA, "en-morph-boundary.tsv"),
+writeFileSync(join(OUT, "en-morph-boundary.tsv"),
     `${header}\n${rows.map(([w, b]) => `${w}\t${b.map(([i, k]) => `${i}:${k}`).join(",")}`).join("\n")}\n`);
 console.log(`\nwrote ${rows.length} rows`);

@@ -20,8 +20,9 @@
  * boundary at the site in `en-morph-boundary.tsv`. Wiktionary states the morpheme split AND its kind,
  * and the kind is what three home-grown discriminators could not recover — measured on the referee-
  * labelled sites, `compound` is 12 for 12 with no false positives and not one of the 17 known
- * assimilating words is a compound (`Anglo·phile`, `laryngo·scope`, `vanco·mycin` are confixes and
- * prefixes, and they assimilate; `pan·cake` and `corn·cob` are compounds and do not).
+ * assimilating words is a compound (`pan-chromatic` and `humankind` are a prefix and a
+ * suffix boundary and they assimilate; `pan·cake` and `corn·cob` are compounds and do not — the table
+ * carries 160 non-compound N+velar boundaries to be told apart from 4,036 compounds).
  * ⚠ IT IS A CASCADE AND NOT A REPLACEMENT. `vanguard`, `leningrad` and `cancan` are referee-confirmed
  * seams with NO Wiktionary template — from *avant-garde* in `vanguard`'s case, which is why no split
  * exists — so the referee evidence below stays as the recall patch. Neither source alone is the table.
@@ -137,7 +138,7 @@ const transparentCompound = (w: string): boolean => {
  */
 const compoundAt = new Map<string, Set<number>>();
 try {
-    for (const line of readFileSync(join(DATA, "en-morph-boundary.tsv"), "utf8").split("\n")) {
+    for (const line of readFileSync(join(dirname(fileURLToPath(import.meta.url)), "en-morph-boundary.tsv"), "utf8").split("\n")) {
         if (!line || line.startsWith("#")) continue;
         const tab = line.indexOf("\t");
         if (tab <= 0) continue;

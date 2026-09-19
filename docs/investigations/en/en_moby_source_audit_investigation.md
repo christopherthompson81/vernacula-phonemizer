@@ -1698,3 +1698,174 @@ during this run and passed in isolation and on re-run. It spawns child processes
 golden check against a serial one, and both failures in this session happened while something else was
 saturating the machine (a `dotnet` build here, a parallel suite earlier). It is contention, not flake,
 and the fix if it recurs is to serialise that test rather than to retry it.
+
+## Run 36 — 2026-09-19 — review of #1360: every number reproduces, and the KIND label has a mechanical hole
+
+A high-effort review of `feat/morph-boundary-table` against `origin/main`. Everything the branch
+claims about reproducibility is true; the finding is about the one field the design says is the whole
+point.
+
+### Reproduction — all three claims hold
+
+    KAIKKI=/mnt/data/kaikki-English.jsonl npx tsx tools/gen/build-en-morph-boundary.mts --write
+    → md5 73100b33b1570a9edb986fcf7e84e6a8, IDENTICAL to the committed table
+    kaikki lines 1492836 · carried 88631 · split 24368 · 6905/1175/2963 rejected · ROWS 13325
+    suffix 6048  compound 4115  prefix 3549  confix 115        ← every stated number, exactly
+
+    npx tsx tools/gen/build-en-nasal-seam.mts --write
+    → IDENTICAL to the committed 49-row table. 26 by compound boundary, 23 by referee.
+
+    (boundary table moved aside) npx tsx tools/gen/build-en-nasal-seam.mts --write
+    → "(no en-morph-boundary.tsv — referee evidence only)", 38 rows, BYTE-IDENTICAL to origin/main.
+
+Reordering the unanimous-[ŋ] check above the compound check is behaviour-preserving on the referee-only
+path, which is what that last run proves rather than argues.
+
+    eval en: primary 2531/4037 (62.7%) · Moby-lexicon 26522/35049 (75.7%)   — both as stated
+    check-goldens --jobs 8: 189 languages, 36495 rows, 0 stale
+    dotnet parity -c Release: 189 byte-identical, 0 differ; 5/5 accent variants
+    npx vitest run: 317 files, 6076 passed, 5 skipped, 0 failed (no contention flake this time)
+
+### The 11 new seam rows are all correct, and one is inert
+
+`greenkeeper machinegun(s) mankiller moonquake oceangoing stonecutter(s) suncoast turncock winegrower`
+— every one a transparent N|velar compound seam that GenAm citation speech keeps as [n], each with
+secondary stress on the second element in the dictionary row. Nothing here should assimilate.
+
+⚠ `oceangoing` CHANGES NOTHING. `accent-lexicon.tsv` reads `ˈoᶷʃn̩ɡˌoᶷɪŋ` — the nasal is already
+syllabic `n̩` from `en-syllabic.tsv`, so the velar rule never reached it. That is why the lexicon moved
+10 rows for 11 new seam rows, and the 10/11 discrepancy in Run 35 is explained rather than an error.
+
+Cross-check of the label against the referees on this axis, over the whole dictionary:
+
+    compound boundary at an N+velar site, referees UNANIMOUSLY [ŋ]:  0
+    compound boundary at an N+velar site, referees SPLIT:            0
+    compound boundary but the prefix guard catches it first:         4
+      downcomer  incomparable  ingoing  innkeeper
+
+Zero false positives that reach output. But `incomparable` in that list is the thread to pull.
+
+### ⚠ THE `+pre` / `+com` MARKER IS THE KIND, AND `partsOf` THROWS IT AWAY
+
+`{{surf}}` — 664 of the 13,325 rows — puts the kind in its FIRST POSITIONAL ARG, before the language
+code:
+
+    incomparable -> surf {1:'+pre', 2:'en', 3:'in',  4:'comparable'}
+    pancake      -> surf {1:'+com', 2:'en', 3:'pan', 4:'cake'}
+
+`partsOf` drops any arg starting with `+` as a control value and `kindOf` never sees it, so an unhyphenated
+`+pre` split falls through to the DEFAULT bucket, which is `compound`. `pancake` is right by luck; these are
+not. Recomputed over the shipped table, by marker against assigned kind:
+
+    +suf → compound   46      +pre → compound   17      +con → compound    1
+    +com → compound   24  ✓   +suf → suffix      1  ✓   +af  → pre/suf/com 5
+
+Eighteen shipped rows carry `compound` where the source explicitly says prefix or confix:
+
+    abreast across disburse disclose foreman impenitent improper incomparable insoluble
+    miscarry mislead outburst outdraw overman overstep pentad underwrite unlearn
+
+A second, independent instance of the same hole: **`con` is in `TPL` but missing from `kindOf`'s name
+switch.** `{{con}}` is the `{{confix}}` shortcut; 22 of its 27 matched entries are labelled `compound`,
+5 of which reach the table — `polyphonic prefix procaine triangle underman`, i.e. `tri·angle` and
+`pre·fix` are shipped as compounds. `com`→compound is fine only because compound is the default.
+
+⚠ THE POINT IS THAT `compound` IS THE DEFAULT BUCKET, NOT AN ASSERTION. The provenance says "a consumer
+decides which kinds it respects"; what the file actually offers is three positively-identified kinds and
+one residue. The velar consumer survives because its 26 compound hits happen to be clean and because
+`TRANSPARENT_PREFIX` catches `in-`/`un-`/`syn-` before the table is consulted. The three consumers Run 35
+names as "where the value is" have no such guard: compound FORE-STRESS reading `mis|lead`, `dis|close`,
+`un|learn`, `in|comparable`, `over|man`, `fore|man`, `french|man`, `dread|ful`, `grace|ful` and `act|ive`
+as compounds is `MIS-lead` and `FRENCH-man` with a full vowel. Fix before a second consumer lands:
+read the `+xx` marker in `partsOf`/`kindOf` instead of discarding it, and map `con`→confix.
+
+### Three named examples are not in the table
+
+`build-en-nasal-seam.mts` lines 22–24 and the provenance both say "`Anglo·phile`, `laryngo·scope`,
+`vanco·mycin` are confixes and prefixes, and they assimilate". They have NO ROW AT ALL —
+`anglo` is `AE1 NG G L OW0` against `anglophile`'s `AE1 N G L AH0 …` so the alignment gate rejects it,
+and `laryngo`/`vanco` are not in the dictionary. Their assimilation is preserved by ABSENCE, not by the
+kind distinction, which is a materially weaker claim than the comment makes. The table DOES carry the
+discriminating negative evidence, 160 non-compound boundaries at N+velar sites — `panchromatic`
+(prefix, and the one the test uses), `incombustible`/`syncarpous`/`synclinal` (confix),
+`humankind`/`irangate`/`stevengraph` (suffix) — so the comment should name words it actually contains.
+
+### Rot
+
+- ⚠ NOTHING LINKS THE TWO TABLES. `en-nasal-seam.tsv` is now derived from `en-morph-boundary.tsv`, and no
+  test asserts they agree. Regenerate either without the other and goldens, parity and the suite all stay
+  green, because the engine reads the committed seam table and never the boundary table.
+- The new gates fire on gross corruption — verified by mutation: a `99:compound` row and a `3:bogus` row
+  each fail their test. Neither catches the failure mode the comment itself names: an index that SHIFTS
+  but stays in bounds after an `--emit` moves a word's phones. The table stores no morpheme, so the test
+  cannot re-derive the boundary. Emitting the head morpheme as a third column would make the check exact.
+- The ENOENT fallback is silent on purpose, which also means a deleted table plus `--write` quietly drops
+  11 rows with one line of output. An explicit `--no-boundary` opt-in would make absence an error.
+- `considered` (printed as, and copied into the provenance as, "English entries whose headword we carry
+  88,631") is counted after `found.has(w)` skips, so it is neither entries nor distinct words.
+
+### Licence hygiene — the fence is incomplete
+
+`en-morph-boundary.tsv` is a CC-BY-SA 4.0 / GFDL derivative and IS distributed: `data/` is the
+`vernacula-phonemizer-data` workspace, whose `files` allowlist packs all of `languages/`. NOTICE.md's own
+closing rule is "any new data file lands with a `*.PROVENANCE.md` sidecar, a row in the provenance map,
+and — where attribution is owed — an entry here." The branch delivers the sidecar and neither of the
+other two:
+
+- `LICENSES/PROVENANCE.md` §3 "Shipped lexica/tables" does not list it. It would be the FIRST shipped
+  `english/` file in §3 — §1 currently declares the English data directory as CMUdict/public-domain, so
+  this is a stratum change for that language, not just one more row.
+- `NOTICE.md` §3 Wiktionary bullet is not extended.
+- The file is build-time-only: nothing in `src/` or `csharp/` reads it. Shipping 270 KB of share-alike
+  data in the runtime data package to feed one `tools/gen` script is worth questioning — `tools/` is
+  outside both packages and is where the referee corpora already live.
+- `tools/gen/README.md` enumerates every generator in that directory and gains neither new entry, and
+  the tool takes `KAIKKI=` where the three sibling kaikki builders take `$DUMPS`.
+
+## Run 37 — 2026-09-19 — review fixes, and the surname families measured
+
+Run 36's two mechanical holes were real and both defaulted to the one label that changes engine output.
+
+⚠ `partsOf` WAS THROWING AWAY THE KIND STATEMENT. `{{surf}}` states the kind in arg 1, BEFORE the
+language code — `incomparable` is `{1:'+pre', 2:'en', 3:'in', 4:'comparable'}` — and the `+` filter
+dropped it. The split it gives is unhyphenated, so `kindOf` saw two bare morphemes and fell through to
+its default, which is `compound`. `pancake` (`+com`) was right by luck. Also `con`, the `confix`
+shortcut, was in the template set but not in `kindOf`. Fixed: a stated control arg wins, then the
+template name, then the hyphens.
+
+    compound 4115 → 4036   suffix 6048 → 6099   prefix 3549 → 3571   confix 115 → 121
+
+79 false compounds removed. None reached engine output today — the velar consumer's prefix guard
+catches `in-`/`un-`/`syn-` first — but `mislead`, `frenchman`, `dreadful` and `active` as compounds
+would have given `MIS-lead` and `FRENCH-man` the moment the stress consumer landed.
+
+⚠ AND THE TABLE MOVED OUT OF `data/`. It is CC-BY-SA with no runtime consumer, and
+`data/languages/english/` is otherwise a CMUdict/public-domain stratum, so shipping it in the data
+package changed that directory's licence character to feed one build script. Now
+`tools/gen/en-morph-boundary.tsv`, the same shape as `tools/gen/de-consonant-curated.tsv`, with rows in
+LICENSES/PROVENANCE.md §3, NOTICE.md and tools/gen/README.md, and `--kaikki <path>` to match the
+sibling kaikki builders. Run 36 is also right that the three examples named in the seam builder's
+header — `Anglo·phile`, `laryngo·scope`, `vanco·mycin` — have no row at all, so their assimilation
+survives by absence; replaced with `pan-chromatic` and `humankind`, which are real non-compound rows.
+
+⚠ THE SURNAME QUESTION, MEASURED PROPERLY, because Run 35 waved at it. Of the 264 residual sites with
+no referee, only 16 appear in the RAW Moby file before any of our filtering, and not one of those 16 is
+a surname. So for surnames there is not a weak source being rejected — there is no source.
+
+But the surnames are not unstructured, and a recurring element reaches 121 of the 264: `-co` ×16,
+`-quist` ×12, `-cor` ×9, `-kamp` ×9, `-court` ×6, `-corp` ×6 on the right; `van-` ×11, `rosen-` ×8,
+`ban-` ×7, `fran-` ×7 on the left. That is the attestation density Run 27's mined morpheme list
+lacked — thirty morphemes with one attestation each. So: generalise from a family member that IS
+attested? Measured, and it splits by which side the element sits on:
+
+    RIGHT-hand element   `-court` ×8, two witnesses (agincourt, betancourt) → bettencourt,
+                         billancourt, jeancourt, rancourt — all French `-court`, all plainly [n]
+    LEFT-hand element    `pan-` ×10, witness `pancake` → reaches `panchromatic` and `pangloss`, both [ŋ]
+                         `man-` ×11, witness `mankind`  → reaches `mancala`, `mancha`, `mancusi`, [ŋ]
+
+Which is Run 27's failure again, and for the same reason: a left element is a prefix as often as it is
+a compound's first half, while a right element that recurs across surnames IS the morpheme. So the
+defensible rule is one witness per RIGHT-hand element, applied only to that element's family — and the
+big families have no witness at all (`-kamp`, `-quist`, `-corp`, `-co` are unattested by any referee).
+It would reach roughly 15 words today. Recorded as available and not taken: it is real, it is small,
+and it is a different mechanism from the boundary table, so it should not ride in on this PR.

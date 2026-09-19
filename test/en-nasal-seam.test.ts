@@ -73,7 +73,7 @@ describe("velar assimilation across a compound seam", () => {
  */
 describe("the morpheme boundary table", () => {
     const rows = new Map<string, [number, string][]>();
-    for (const l of readFileSync(join(EN, "en-morph-boundary.tsv"), "utf8").split("\n")) {
+    for (const l of readFileSync(join(EN, "..", "..", "..", "tools", "gen", "en-morph-boundary.tsv"), "utf8").split("\n")) {
         if (!l || l.startsWith("#")) continue;
         const t = l.indexOf("\t");
         if (t <= 0) continue;
