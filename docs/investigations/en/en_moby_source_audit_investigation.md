@@ -2448,3 +2448,45 @@ Also corrected: "every one stem-final ⟨l⟩ plus `-ly`" is the majority and no
 is "headword spelled `-lly`". And the carve-out's one honest cost is now recorded: `coolly` and
 `cruelly` are collapsed on the referee side too, so the referee can no longer disagree with our single
 /l/ there, though nothing regressed because our dictionary already committed to it.
+
+## Run 46 — 2026-09-19 — the consonant classes, and the class I did NOT fix
+
+The skeleton probe's remaining classes. An accent difference is a vowel or a rhotic; a spelling trap is
+a CONSONANT, which is what makes the en-GB referee admissible for a GenAm lexical fact. 433 dictionary
+words have a consonant skeleton both referees share and we do not; three classes come out of it clean:
+
+    ⟨ch⟩ = /k/     achaean ətʃiən → əkiən      stich stɪtʃ → stɪk
+    ⟨g⟩  = /d͡ʒ/    armiger ɑɹmɪɡəɹ → ɑɹmɪd͡ʒəɹ  gibberish ɡɪbəɹɪʃ → d͡ʒɪbəɹɪʃ  gaea  hemorrhagic
+    ⟨z⟩  = /ts/    mozart moʊzɑɹt → moʊtsɑɹt   mainz meɪnz → maɪnts  palazzo  piazza  paparazzi
+
+All eleven carry two or more INDEPENDENT sources; six carry three. `gibberish` is the one that should
+not have survived this long — an ordinary word, read with /ɡ/, with Moby, wikipron-UK and misaki gold
+all saying /d͡ʒ/.
+
+⚠ AND THE TEMPTATION WAS TO FIX THE CLASS RATHER THAN THE WORDS. The `-lly` block worked because the
+dictionary had an overwhelming internal majority to appeal to — 551 to 3. This one does not: our
+dictionary splits **41 to 67** on whether Italian `-zz-` is /ts/ or /z/, with `intermezzo` already
+carrying `T S` while `palazzo` carried `Z`. Inconsistent without being wrong in a direction, and the
+~108 Italian surnames in the class have no evidence either way. Per-word referee agreement is the only
+bar that holds here, so it is the only one used, and the class stays open.
+
+⚠ FOUR CANDIDATES WERE DROPPED BY THAT BAR, which is what it is for:
+- `reg` — both referees say `ɹɛd͡ʒ`, but American `reg` (regulation, regs) is /ɹɛɡ/ and gold has no row.
+- `hegemonic` — both referees say `hɛd͡ʒəmɑnɪk` and GOLD SAYS `hˌɛɡəmˈɑnɪk`. A live variant, not a defect.
+- `cham`, `ich` — the two referees disagree with each other, so there is nothing to agree with.
+`piazza` is the weakest row KEPT and is marked as such: Moby reads it `piæzə` with /z/, against the
+en-GB referee and gold. Two of three, and the two that agree are the independent pair.
+
+Plus `astilbe` — `əstɪbi`, a dropped /l/, three sources against it. Not a class, just a defect that
+turned up in the dropped-l bucket while looking for one.
+
+    Moby — words the dict carries   26,624 → 26,632 (76.0%)
+    Moby — OOV                      17,454 → 17,455
+    primary                         2,584 unmoved — none of the twelve is in the wikipron corpus
+    goldens 0 stale · parity 189 byte-identical · 6,076 tests
+
+⚠ THREE OF THE TWELVE ARE LIVE SPLITS AND JOIN `KNOWN_GAPS`. Held out of the dictionary, the OOV path
+reproduces the upstream shape for `gaea`, `mainz` and `piazza` — all source N, the n-gram tier reading
+a loanword spelling as English. There is no rule to key a fix on (the 41-to-67 split is exactly the
+absence of one), and the model has not been retrained since these corrections landed, so a retrain
+absorbs them for free the way #1341 did for `collaborative`.

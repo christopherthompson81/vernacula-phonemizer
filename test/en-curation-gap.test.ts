@@ -43,6 +43,16 @@ const KNOWN_GAPS = new Map<string, string>([
     // remedy is the same retrain, not a rule: there is no spelling that says whether `-ative` reduces.
     ["appreciative", "n-gram (source N): predicts the upstream EY2 from the `-ate` stem; the `-ative` reduction is lexical and closes on a retrain"],
 
+    // ⚠ THREE LOANWORD SPELLINGS THE n-GRAM READS AS ENGLISH, and they are here rather than fixed
+    // because the fix is not available to a rule. `gaea` wants ⟨g⟩ = /d͡ʒ/ before a front vowel,
+    // `mainz` and `piazza` want ⟨z⟩/⟨zz⟩ = /ts/ — and the dictionary itself splits 41 to 67 on the
+    // Italian `-zz-` class (`intermezzo` already has `T S`), so there is no majority for the model to
+    // have learnt and nothing to key a rule on. The model has also not been retrained since these
+    // corrections landed; a retrain absorbs them for free, as #1341 did for `collaborative`.
+    ["gaea", "n-gram (source N): reads ⟨g⟩ before a front vowel as /ɡ/; closes on a retrain"],
+    ["mainz", "n-gram (source N): reads German ⟨z⟩ as /z/ and ⟨ai⟩ as FACE; closes on a retrain"],
+    ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 41-to-67 on that class"],
+
     // ⚠ THE COMPOUND-SEAM GEMINATE, and the remedy for these five was MEASURED AND REJECTED — do not
     // "fix" it by turning off `collapseGeminates` on the compositional paths. The dict geminates a
     // compound seam (`bookkeeper` B UH1 K K IY2 P ER0, `misspell`, `coattail`, `lamppost` — 93 rows) and
