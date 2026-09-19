@@ -65,7 +65,10 @@ describe("the source converters", () => {
     test("a bare digraph is read by the rule its own class supports", () => {
         expect(mobyToArpabet("d/&/l'm/eI/sh/@/n", "dalmatian")).toEqual(["D", "AE0", "L", "M", "EY1", "SH", "AH0", "N"]);
         expect(mobyToArpabet("'m/I/s,h/&/p", "mishap")).toEqual(["M", "IH1", "S", "HH", "AE2", "P"]);
-        expect(mobyToArpabet("'w/I/p/@/t", "whippet")![0]).toBe("W");
+        // ⚠ THE REAL BODY, `'wh/I/p/I/t`. An earlier version of this line used `'w/I/p/@/t`, which has no
+        // `h` at all — the `wh` branch never fired and the assertion passed through `M_RAW`, so deleting
+        // the rule it claims to cover left the test green.
+        expect(mobyToArpabet("'wh/I/p/I/t", "whippet")).toEqual(["W", "IH1", "P", "IH0", "T"]);
         // ⚠ THE LOAD-BEARING PAIR. Same digraph, same adjacency, opposite readings — only the spelling
         // separates them, and getting this backwards would break a row that currently passes.
         expect(mobyToArpabet("'gh/i/z/@/", "giza")).toEqual(["G", "IY1", "Z", "AH0"]);

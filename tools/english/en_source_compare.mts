@@ -162,19 +162,35 @@ export function mobyToArpabet(p: string, w: string): string[] | undefined {
         // two above. Moby writes `Leghorn 'l/E/g,h/O/rn` and `leghorn 'l/E/gh/oU/rn` — THE SAME WORD,
         // both ways — so "adjacent means lapse" is false for `gh` by the file's own hand. Trusting the
         // separator would have broken `leghorn`, a row that is currently correct and passing.
-        // ⚠ THE HEADWORD'S SPELLING DOES ARBITRATE IT, exactly. All three genuine seams spell the ⟨gh⟩
-        // (`leghorn`, `lughole`, `Barghoorn`); not one of the thirty-three hard-/ɡ/ rows has an ⟨h⟩
-        // after its ⟨g⟩ at all — `Giza`, `Guillermo`, `Jauregui`, `Heintges`. And the seventeen
-        // SEPARATED rows all spell it too (`bighead`, `doghouse`, `froghopper`), so the spelling test
-        // and the separator agree wherever the separator is present and only the spelling covers the rest.
-        // ⚠ OUR OWN DICTIONARY CONFIRMS THE SPLIT INDEPENDENTLY, which is what took this from 34-of-37
-        // to exception-free: of the five members gold carries, `leghorn` is `L EH1 G HH AO0 R N` WITH
-        // the /h/ and `giza` `G IH1 Z AH0`, `guillermo` `G W IH0 L Y EH1 R M OW0`, `jauregui`
-        // `Y AW0 R EY1 G W IY0`, `gehrke` `JH EH1 R K` are all without it.
-        // ⚠ THE TEST IS "ANYWHERE IN THE HEADWORD", NOT "AT THIS POSITION", because nothing aligns the
-        // body to the spelling. It is safe only because the class is closed and small: all 37 `gh`
-        // occurrences in the file were enumerated and no word spells ⟨gh⟩ elsewhere while writing a
-        // hard-/ɡ/ `gh` here. A new source would need that re-checked, not assumed.
+        // ⚠ THE HEADWORD'S SPELLING DOES ARBITRATE IT, exactly. All three genuine seams spell the
+        // DIGRAPH ⟨gh⟩ (`leghorn`, `lughole`, `Barghoorn`); not one of the thirty-three hard-/ɡ/ rows
+        // does — `Giza`, `Guillermo`, `Jauregui`, `Heintges`. And the seventeen SEPARATED rows all
+        // spell it too (`bighead`, `doghouse`, `froghopper`), so the spelling test and the separator
+        // agree wherever the separator is present and only the spelling covers the rest.
+        // ⚠ THE TEST IS THE ADJACENT DIGRAPH AND NOTHING WEAKER. "An ⟨h⟩ somewhere after the ⟨g⟩" is a
+        // DIFFERENT AND FALSE property: `Gehrke`, `Gerhard`, `Gerhart` are hard-/ɡ/ rows with an ⟨h⟩
+        // two characters on. Anyone reimplementing this as `/g.*h/` flips `Gehrke` to a seam.
+        // ⚠ WHAT MAKES "ANYWHERE IN THE HEADWORD" SAFE is not that the class is small — nothing here
+        // aligns the body to the spelling, so the test cannot ask about THIS position. It is safe
+        // because Moby writes ORTHOGRAPHIC ⟨gh⟩=/ɡ/ as a plain `g`, without exception: `ghetto
+        // 'g/E/t/oU/`, `spaghetti sp/@/'g/E/t/i/`, `Ghana 'g/A/n/@/`, `Borghese b/O/R'g/E/z/E/`. The
+        // bare-`gh` convention is used ONLY where the spelling has no ⟨h⟩, so a word that spells ⟨gh⟩
+        // anywhere never writes a bare `gh` for a hard /ɡ/ elsewhere. ⚠ THE MARGIN IS THINNER THAN THE
+        // ENUMERATION LOOKS: several ⟨gh⟩-spelled hard-/ɡ/ names (`Ghiberti`, `Gheorghiu-Dej`) are
+        // declined today for UNRELATED reasons — Moby's French-scheme capitals — so they are not
+        // evidence this rule handles them. A new source needs the premise re-checked, not assumed.
+        // ⚠ THE DICTIONARY CONFIRMS THE SPLIT INDEPENDENTLY, which is what took this from 16-of-19 to
+        // exception-free. `data/languages/english/g2p-dict.tsv` — OUR ARPABET DICTIONARY, not misaki
+        // gold — carries five of these words, and none of the five is among its 17,831 Moby-imported
+        // rows, so the corroboration is not circular. `leghorn` is `L EH1 G HH AO0 R N` WITH the /h/;
+        // `giza G IH1 Z AH0`, `guillermo G W IH0 L Y EH1 R M OW0`, `jauregui Y AW0 R EY1 G W IY0`,
+        // `gehrke JH EH1 R K` are without it. ⚠ ONLY `leghorn` CONFIRMS A SEAM; the other four confirm
+        // an ABSENCE of /h/ on rows that disagree with Moby about other phones anyway (`gehrke` reads
+        // an initial /d͡ʒ/, `jauregui` inserts a /w/), so this is four absences and one positive, not
+        // five independent confirmations of the split.
+        // ⚠ ONE OF THE THIRTY-THREE IS A CORRUPT BODY: `Corporation 'b/U//N/gh/i/` transcribes *bungee*.
+        // Its `gh` does want the hard-/ɡ/ reading for the word the body actually encodes, so it does not
+        // break the count — but it is thirty-two real words plus a row that happens to agree.
         if (c === "g" && s[i + 1] === "h" && !w.includes("gh")) { out.push("G"); i += 2; continue; }
         if (M_RAW[c] !== undefined) { out.push(M_RAW[c]!); i++; continue; }
         return undefined;
