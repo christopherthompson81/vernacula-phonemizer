@@ -120,6 +120,28 @@ describe("the Moby referee corpora", () => {
         expect([lex.has("watergate"), oov.has("watergate")]).toEqual([false, false]);
     });
 
+    // ⚠ MOBY WRITES THE AFFRICATE TWO WAYS AND THE REFEREE USED TO PRESERVE BOTH — `/tS/` 7,519 times
+    // and a bare `t`+`/S/` 257 more, which reached the corpus as `t͡ʃ` and `tʃ`: the same Moby sound
+    // rendered two different ways depending on which notation the row happened to use. That is an
+    // internal inconsistency in the artifact whether or not the backbone fold currently hides it.
+    // ⚠ AND THE SEAMS MUST SURVIVE IT. Unlike bare `sh`, the adjacent side is MIXED — 14 real /t/+/ʃ/
+    // boundaries are written adjacent, so folding on adjacency alone would destroy them.
+    test("Moby's two spellings of the affricate agree, and a /t/+/ʃ/ seam is not one of them", () => {
+        for (const w of ["aquaculture", "belcher", "bicultural", "cheesy", "beechmast", "cesarevitch"])
+            expect([w, (lex.get(w) ?? oov.get(w))?.includes("t͡ʃ")]).toEqual([w, true]);
+        // a seam keeps two phones — spelled ⟨tsh⟩, ⟨tesh⟩, or separated in the body
+        for (const [w, ipa] of [["courtship", "kɔɹtʃɪp"], ["nutshell", "nʌtʃɛl"],
+            ["sweatshirt", "swɛtʃɚt"], ["wiltshire", "wɪltʃiɹ"], ["mateship", "meɪtʃɪp"],
+            ["associateship", "əsoʊʃiətʃɪp"], ["buteshire", "bjutʃiɹ"],
+            ["nightshade", "naɪtʃeɪd"], ["hotshot", "hɑtʃɑt"], ["outshine", "aʊtʃaɪn"]] as const)
+            expect([w, lex.get(w) ?? oov.get(w)]).toEqual([w, ipa]);
+        // ⚠ AND THE THREE THAT AN `sh`-ANYWHERE TEST GETS WRONG. Each spells ⟨sh⟩ somewhere ELSE while
+        // its `t/S/` is an ordinary affricate; they are the reason the rule tests the POSITION.
+        for (const [w, ipa] of [["pushchair", "pʊʃt͡ʃɛɹ"], ["shakuhachi", "ʃʌkʊhʌt͡ʃi"],
+            ["putsch", "pʊt͡ʃ"]] as const)
+            expect([w, lex.get(w) ?? oov.get(w)]).toEqual([w, ipa]);
+    });
+
     test("NOTATION is folded — Moby's two symbols become this engine's one", () => {
         expect(lex.get("general")).toBe("d͡ʒɛnɚəl");    // ə + r  → ɚ
         expect(lex.get("history")).toBe("hɪstɚi");
