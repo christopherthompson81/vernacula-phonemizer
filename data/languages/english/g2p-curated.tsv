@@ -2307,3 +2307,16 @@ sputniks	S P AH1 T N IH0 K S	S P UH1 T N IH0 K S	paradigm: matches the corrected
 uplinked	UW1 P L IH2 NG K D	UW1 P L IH2 NG K T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here
 woodlands	W UH1 D L AE2 N D Z	W UH1 D L AH0 N D Z	paradigm: matches the corrected `woodland`
 yelped	Y EH1 L P D	Y EH1 L P T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here
+antczak	AE1 N T CH AE0 K	AE1 N CH AE0 K	a redundant T before the affricate — Polish ⟨cz⟩ is /t͡ʃ/; 2 of 155 ⟨cz⟩ dict rows carry T CH, against `adamczak`, `barczak`
+bettcher	B EH1 T CH ER0	B EH1 CH ER0	a redundant T before the affricate — the same name as `boettcher B OW1 CH ER0`, which is plain CH; ⟨ttch⟩ is ⟨t⟩ + the digraph
+blotch	B L AA1 T CH	B L AA1 CH	a redundant T before the affricate — ⟨tch⟩ is the digraph for /t͡ʃ/; gold blˈɑʧ, Moby bl/A//tS/, en-GB blɒtʃ, and botch/crotch/notch are all plain CH
+blotched	B L AA1 T CH T	B L AA1 CH T	a redundant T before the affricate — paradigm: `blotch`
+blotches	B L AA1 T CH AH0 Z	B L AA1 CH AH0 Z	a redundant T before the affricate — paradigm: `blotch`
+blotchier	B L AA1 T CH IY0 ER0	B L AA1 CH IY0 ER0	a redundant T before the affricate — paradigm: `blotch`
+blotchiest	B L AA1 T CH IY0 AH0 S T	B L AA1 CH IY0 AH0 S T	a redundant T before the affricate — paradigm: `blotch`
+blotching	B L AA1 T CH IH0 NG	B L AA1 CH IH0 NG	a redundant T before the affricate — paradigm: `blotch`
+blotchy	B L AA1 T CH IY0	B L AA1 CH IY0	a redundant T before the affricate — paradigm: `blotch`; gold blˈɑʧi, Moby 'bl/A//tS//i/
+bottcher	B AA1 T CH ER0	B AA1 CH ER0	a redundant T before the affricate — see `bettcher`
+goettsch	G OW1 T CH	G OW1 CH	a redundant T before the affricate — German ⟨tsch⟩ is /t͡ʃ/; 1 of 81 ⟨tsch⟩ dict rows carries T CH, against `bartsch`, `bertsch`, `betsch`
+hutchins	HH AH1 T CH IH2 N Z	HH AH1 CH IH2 N Z	a redundant T before the affricate — ⟨tch⟩ digraph; Moby 'h/@//tS//I/nz and en-GB hʌt͡ʃɪnz both give a single affricate
+witczak	V IH1 T CH AE0 K	V IH1 CH AE0 K	a redundant T before the affricate — Polish ⟨cz⟩ is /t͡ʃ/; see `antczak`

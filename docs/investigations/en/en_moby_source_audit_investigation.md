@@ -3977,3 +3977,60 @@ block closes; that number belongs in the record rather than the adjective "safe"
     Moby — words the dict carries   26,710/35,027 (76.3%)  unchanged by this run
     Moby — OOV                      17,464/39,451 (44.3%)  unchanged by this run
     primary                         2,584/4,037 (64.0%)    unmoved
+
+## Run 64 — 2026-09-19 22:15
+
+The `T CH` dictionary defect Run 62 characterised and Run 63 corrected the count of. 13 rows, and
+the evidence turned out to be better than the spelling argument I had been going to use.
+
+⚠ THE DICTIONARY IS ITS OWN BEST WITNESS HERE, which I had not thought to ask. Rather than argue from
+⟨tch⟩ being a digraph, count how the SAME SPELLING CLASS is treated elsewhere in `g2p-dict.tsv`:
+
+    ⟨cz⟩    205 rows   153 plain CH   2 with T CH   → antczak, witczak
+    ⟨tsch⟩   91 rows    80 plain CH   1 with T CH   → goettsch
+    ⟨ttch⟩    3 rows     1 plain CH   2 with T CH   → bettcher, bottcher vs boettcher
+    ⟨tch⟩   397 rows   379 plain CH  17 with T CH   (the blotch family plus the real seams)
+
+⚠ AND THE SHARPEST ROW IS AN INTERNAL CONTRADICTION: `boettcher B OW1 CH ER0` is plain, while
+`bettcher B EH1 T CH ER0` and `bottcher B AA1 T CH ER0` are not — the same German name, three
+spellings, two disagreeing with the third. `betsch B EH1 CH` sits beside `bettcher` with the same
+first syllable and no T. No external source was needed for those.
+
+Three tiers of evidence, kept apart rather than pooled:
+  · `blotch` + 6 inflections — gold `blˈɑʧ`/`blˈɑʧi`, Moby `bl/A//tS/`, the en-GB referee `blɒtʃ`,
+    and the siblings `botch B AA1 CH`, `crotch K R AA1 CH`, `notch N AA1 CH`.
+  · `hutchins` — Moby `'h/@//tS//I/nz` and en-GB `hʌt͡ʃɪnz`, two independent sources.
+  · `antczak`, `witczak`, `goettsch`, `bettcher`, `bottcher` — NO external source at all; they rest
+    entirely on being 2-of-155, 1-of-81 and 2-of-3 outliers within their own spelling class.
+
+⚠ AND THE OOV PATH CONFIRMED TWO OF THE UNSOURCED ONES BY ACCIDENT. Held out, the engine predicts
+`antczak AE1 N CH AE0 K` and `goettsch G OW1 CH` — EXACTLY the corrected forms. The n-gram trains on
+the curated dict, so it has learned the ⟨cz⟩/⟨tsch⟩ pattern from the 153 and 80 rows that were
+already right, and the two dict rows were the outliers it was arguing against. That is a genuinely
+independent check and it was free; it is worth running on any correction whose only evidence is
+internal consistency.
+
+⚠ THE SEAMS ARE CONFIRMED FROM THE OTHER SIDE, not merely left alone. Moby marks them with its own
+separator — `chitchat '/tS//I/t,/tS//&/t`, `Christchurch 'kr/aI/st,/tS//[@]/r/tS/`, `hatcheck
+'h/&/t,/tS//E/k` — and gold keeps the /t/ in all of them (`ʧˈɪtʧˌæt`, `kɹˈIstʧˌɜɹʧ`, `hˈætʧˌɛk`,
+`ʃˌɔɹtʧˈAnʤ`). `westchester` is confirmed twice over: Moby `'w/E/st/tS//E/st/@/r` and en-GB
+`wɛstt͡ʃɛstə` both carry the /t/.
+⚠ ONE SEAM HAS NO EVIDENCE AND IS LEFT ALONE ON THAT BASIS: `whitchurch W IH1 T CH ER2 CH`. It has
+the same ⟨-church⟩ shape as the confirmed `christchurch`, but no source carries it, and unlike
+Christchurch its cluster would be /ttʃ/ rather than /stʃ/ — which usually reduces. Recorded as the
+one row in the seam group resting on analogy.
+
+⚠ ONLY THREE OF THE THIRTEEN ARE LIVE SPLITS, and which ones is the instructive part. `blotch` and
+`blotchy` are source N; `hutchins` is source C — surprising for a surname, and read from
+`decompose().source` rather than assumed. The five `blotch` INFLECTIONS are not splits at all: they
+decode through the stem (source M) and closed themselves the moment `blotch` was corrected, which is
+exactly what `STRUCTURAL_GAP`'s header predicts for a correction with a morphological handle. Nor
+are the five surnames, because the OOV path already agreed with the correction.
+
+    Moby — words the dict carries   26,710/35,027 (76.3%) → 26,713/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    goldens 0 stale · curated rows 65
+
++3 on a 13-row fix is the expected shape: most of the thirteen are surnames Moby does not carry, so
+they cannot score. The `blotch` family is where the movement is.
