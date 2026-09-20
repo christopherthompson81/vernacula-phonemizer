@@ -59,7 +59,8 @@ const GOLD_UNITS: [string, string][] = [
     ["m", "M"], ["n", "N"], ["p", "P"], ["s", "S"], ["t", "T"], ["v", "V"],
     ["w", "W"], ["z", "Z"], ["ʔ", "T"],
 ];
-const VOWELS = new Set(["EY", "AY", "OW", "AW", "OY", "IY", "UW", "AA", "AO", "AE", "EH", "IH", "UH", "AH", "ER"]);
+/** The ARPABET vowels. ⚠ EXPORTED so build-en-moby-referee.mts can share it rather than redeclare it. */
+export const VOWELS = new Set(["EY", "AY", "OW", "AW", "OY", "IY", "UW", "AA", "AO", "AE", "EH", "IH", "UH", "AH", "ER"]);
 
 /** misaki gold IPA → ARPABET. `undefined` when any symbol is unmappable — better no vote than a partial one. */
 export function goldToArpabet(g: string): string[] | undefined {
@@ -287,6 +288,11 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     ["photographer", "body is 'photograph' — f/@/'t/A/gr/@/f, and Moby carries that word separately"],
     ["quarsome", "body is 'quarrelsome' — 'kw/O/r/@/ls/@/m against its own `quarrelsome 'kw/A/r/@/ls/@/m`"],
     ["sharecropper", "nonsense — '/S//@/'r/E/t', four phones for twelve letters"],
+    // ⚠ TWO MORE THE SAME RULE SURFACED AND THE FIRST TRIAGE MISSED. Neither is RP: `Nornis` is
+    // 'Norris' with a phone lost, and `pardalote` transposes its ⟨rd⟩ to /dr/ — the rhotic is in the
+    // wrong syllable, not absent. Both were being dropped as non-rhotic by accident of the corruption.
+    ["nornis", "body is 'Norris' minus a phone — 'n/O/r/I/s"],
+    ["pardalote", "⟨rd⟩ transposed to /dr/ — 'p/A/dr/@/,l/oU/t"],
 ]);
 
 /**
