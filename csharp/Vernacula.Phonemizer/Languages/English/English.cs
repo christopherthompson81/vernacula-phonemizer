@@ -486,6 +486,8 @@ public static class EnglishFactory
                 Sibilants = manifest.G2pClasses.Sibilants,
                 StopPieces = manifest.G2pClasses.StopPieces,
                 StemStressPrefixes = manifest.G2pClasses.StemStressPrefixes,
+                // ⚠ From the manifest TOP LEVEL, not G2pClasses — the same key Normalize.cs spells with.
+                LetterNameExceptions = manifest.LetterNameExceptions,
                 Vowels = manifest.Arpabet.Vowels, // OOV G2P reuses arpabet.vowels (single source)
             });
 

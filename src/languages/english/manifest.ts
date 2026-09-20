@@ -44,6 +44,8 @@ export interface EnglishManifest {
         stopPieces: string[];
         stemStressPrefixes: string[];
     };
+    /** ⚠ ALSO INJECTED INTO THE OOV G2P as part of `G2pClasses`, so the splitter recognises an
+     *  initialism row. Declared once here; `normalize.ts` and `englishG2p.ts` read the same value. */
     /** ⚠ NOT a letter-name table — CMUdict already names all 26. Only the ⟨a⟩ exception is data. */
     letterNameExceptions: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
