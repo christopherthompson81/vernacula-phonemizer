@@ -2840,3 +2840,20 @@ yippee	Y IH2 P IY1	Y IH1 P IY2	stress placement (gold + moby)
 # #1382, which listed it as a word being spelled out and had the polarity reversed — it is the one
 # word in that sample that IS an initialism, and it was the one getting the phrase.
 fyi	F AO1 R Y AO1 R IH2 N F ER0 M EY1 SH AH0 N	EH1 F W AY1 AY1	initialism glossed as its expansion (wikipron-uk ɛfwaɪaɪ)
+
+# ⚠ SEVEN CONSONANT INTERJECTIONS CMUdict DOES NOT CARRY, added so the OOV net's own premise is
+# TRUE rather than nearly true. `englishG2p.ts` spells out an OOV reading with no vowel nucleus,
+# on the argument that every CORRECT vowelless English word is a recorded interjection and a
+# recorded word never takes the OOV path. That argument held for the 8 rows already here (`hm`,
+# `hmm`, `hmmm`, `mm`, `sh`, `shh`, `fs`, `ths`) and not for these: `tsk` came out "tee-ess-kay",
+# `brr` "bee-ar-ar", `pfft` "pee-eff-eff-tee". The elongation exemption cannot reach them —
+# `brrr` is exempt and `brr` is not — and widening it to a consonant set would also exempt `gpt`.
+# ⚠ THE UPSTREAM COLUMN IS EMPTY BECAUSE CMUdict HAS NO ROW: these are additions, not corrections,
+# and an empty upstream can never equal an OOV decode, so they open no curation gap by construction.
+brr		B R	consonant interjection CMUdict lacks; the OOV net would spell it out
+grr		G R	consonant interjection CMUdict lacks; the OOV net would spell it out
+hmph		HH M F	consonant interjection CMUdict lacks; the OOV net would spell it out
+pfft		F T	consonant interjection CMUdict lacks; the OOV net would spell it out
+psst		P S T	consonant interjection CMUdict lacks; the OOV net would spell it out
+pst		P S T	consonant interjection CMUdict lacks; the OOV net would spell it out
+tsk		T S K	consonant interjection CMUdict lacks; the OOV net would spell it out

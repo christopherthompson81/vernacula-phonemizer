@@ -265,6 +265,8 @@ export function createEnglishG2p(
               ? ["T"]
               : ["D"];
     };
+    /** The inflections an INITIALISM genuinely takes — see `morphDecode`. */
+    const PLURAL_SUFFIX = new Set(["s", "es", "sses"]);
     const SUFFIXES: [
         string,
         (w: string) => string[],
@@ -384,12 +386,31 @@ export function createEnglishG2p(
         }
         return [...sp.slice(0, -1), "R", ...suffix];
     }
-    function morphDecode(w: string): string[] | null {
+    /**
+     * ⚠ `asPiece` EXISTS BECAUSE THE INITIALISM GUARD BELONGS TO THE PIECE SITE, NOT TO THIS FUNCTION.
+     * Rejecting a letter-name STEM outright also blocks the CORRECT decode of an initialism's plural,
+     * which is the one morphological thing initialisms do: `mphs` became "em-pee-aitch-ESS" instead of
+     * "em-pee-aitch-ez", `lcds` and `crts` likewise. It also mis-fires on an ordinary row that merely
+     * coincides with its letter names — `ok` is `OW1 K EY1`, i.e. ⟨o⟩+⟨k⟩, so `oks` became "oaks".
+     * ⚠ AND THE EXEMPTION IS THE PLURAL SUFFIX, NOT A PROPERTY OF THE STEM, which is the opposite of
+     * what the obvious fix suggests. Gating on "the stem has no vowel letter" separates `mph`+`s` from
+     * `ba`+`s` — and then breaks fourteen genuine initialism plurals to save one. Measured over
+     * `dict ∪ referee`, words of the shape <letter-name row> + `s` number 15, and 14 of them have a
+     * VOWEL in the stem: `abcs`, `apis`, `suvs`, `ufos`, `urls`, `vips`, `duis`, `byus`, `csis`, `hbos`.
+     * The vowel says nothing; the SUFFIX does. Cost of exempting it: `bas`, `baas`, `clos`, `amas`,
+     * `mmes` — rows where the predicate has a false positive (`baa` really is `B IY EY EY`) — against
+     * thirteen common words read correctly. `bas` is two golden rows, in French place names delegated
+     * from Hakka and Min Nan.
+     * Only `compoundSplit` needs the rejection for everything else, for `treacher` = `tre` +
+     * `acher`→`ach`+`er`.
+     */
+    function morphDecode(w: string, asPiece = false): string[] | null {
         for (const [suf, stems, allo] of SUFFIXES) {
             if (!w.endsWith(suf) || w.length <= suf.length + 1) continue;
             for (const stem of stems(w)) {
                 if (stem.length < 2) continue;
-                if (isLetterNameRow(stem)) continue;   // `ach` + `er` is not how `acher` is read
+                // `ach` + `er` is not how `acher` is read — but `mph` + `s` IS how `mphs` is read.
+                if (isLetterNameRow(stem) && (asPiece || !PLURAL_SUFFIX.has(suf))) continue;
                 const sp = dict.get(stem);
                 if (!sp) continue;
                 return joinMorph(stem, sp, allo(sp));
@@ -427,7 +448,7 @@ export function createEnglishG2p(
                 // morphDecode fallback, so `acher` cannot smuggle `ach` in through the suffix table.
                 let phones = isLetterNameRow(piece) ? null : dict.get(piece) ?? null;
                 if (!phones && j === n && j - i >= 5) {
-                    const mp = morphDecode(piece);
+                    const mp = morphDecode(piece, true);
                     if (mp) phones = mp;
                 }
                 if (!phones) continue;
@@ -513,7 +534,7 @@ export function createEnglishG2p(
      * initialism the issue actually reported — `blt`, `frb`, `gpt`, `dwp`, `hdd`, `bdsm`, `kph` — is
      * three or more.
      *
-     * ⚠ AND FIVE GOLDEN ROWS GET WORSE, ALL OF ONE SHAPE, RECORDED RATHER THAN HIDDEN. A romanisation
+     * ⚠ AND FOUR GOLDEN ROWS GET WORSE, ALL OF ONE SHAPE, RECORDED RATHER THAN HIDDEN. A romanisation
      * fragment of three or more letters still reaches this net through foreign-run delegation and is
      * spelled out as English letters: `sch` in a Hakka romanisation, `Tsz` in a Cantonese one, `Plč` in
      * Czech, `zh` in Pinyin context, `trọ` in Vietnamese. They were unsayable clusters before and are
@@ -554,8 +575,14 @@ export function createEnglishG2p(
         const n = enforceSinglePrimary(collapseGeminates(ngramDecode(w), VOWEL), VOWEL);
         // The unsayable-output net — see the comment above `decomposeInner`.
         if (w.length >= 3 && !hasNucleus(n) && !isElongation(w)) {
-            const spelled = spellOutPhones(w);
-            if (spelled !== null) return { phones: enforceSinglePrimary(spelled, VOWEL), source: "N" };
+            // ⚠ A TRAILING `s` ON AN INITIALISM IS THE PLURAL, NOT THE LETTER ESS. `blts` was
+            // "bee-ell-tee-ESS" while `blt's` — which the clitic strip reaches first — was correctly
+            // "bee-ell-tees". The same word with and without an apostrophe must not disagree.
+            const plural = w.endsWith("s") && w.length >= 4 && !/[aeiouy]/u.test(w.slice(0, -1));
+            const spelled = spellOutPhones(plural ? w.slice(0, -1) : w);
+            if (spelled !== null) {
+                return { phones: enforceSinglePrimary(plural ? [...spelled, "Z"] : spelled, VOWEL), source: "N" };
+            }
         }
         return { phones: n, source: "N" };
     }

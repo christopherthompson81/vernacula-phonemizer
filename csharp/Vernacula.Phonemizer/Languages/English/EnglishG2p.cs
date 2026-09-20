@@ -281,7 +281,13 @@ public static class EnglishG2pFactory
             return sp.Take(sp.Count - 1).Append("R").Concat(suffix).ToList();
         }
 
-        private List<string>? MorphDecode(string w)
+        /// <summary>
+        /// <paramref name="asPiece"/> exists because the initialism guard belongs to the PIECE site, not
+        /// to this method: rejecting a letter-name stem outright also blocks the CORRECT decode of an
+        /// initialism's plural (`mphs` → "em-pee-aitch-ESS"), and mis-fires on an ordinary row that
+        /// coincides with its letter names (`ok` is `OW1 K EY1`, so `oks` became "oaks").
+        /// </summary>
+        private List<string>? MorphDecode(string w, bool asPiece = false)
         {
             foreach (var (suf, stems, allo) in SUFFIXES)
             {
@@ -289,7 +295,10 @@ public static class EnglishG2pFactory
                 foreach (var stem in stems(w))
                 {
                     if (stem.Length < 2) continue;
-                    if (IsLetterNameRow(stem)) continue;   // `ach` + `er` is not how `acher` is read
+                    // `ach`+`er` is not how `acher` is read — but `mph`+`s` IS how `mphs` is read. The
+                    // exemption is the PLURAL SUFFIX, not a property of the stem: gating on "the stem has
+                    // no vowel" breaks 14 genuine initialism plurals to save one row. See the TS twin.
+                    if (IsLetterNameRow(stem) && (asPiece || !PLURAL_SUFFIX.Contains(suf))) continue;
                     if (!_dict.TryGetValue(stem, out var sp)) continue;
                     return JoinMorph(stem, sp, allo(sp));
                 }
@@ -302,6 +311,8 @@ public static class EnglishG2pFactory
         /// <see cref="CompoundSplit"/> needs it and the phones cannot supply it: <c>dis</c> and
         /// <c>diss</c> decode alike, and a prefix is a fact about the morphology, not about the phones.
         /// </summary>
+        private sealed record SplitState(List<List<string>> Parts, string Head, int NParts, double MinLen, double Score);
+
         private List<string>? LetterPhones(char l)
         {
             var key = LETTER_NAME_EXCEPTIONS.TryGetValue(l.ToString(), out var n) ? n : l.ToString();
@@ -314,6 +325,9 @@ public static class EnglishG2pFactory
         /// measurement. Derived from the dictionary rather than listed, and deliberately NOT memoized:
         /// a cache keyed on a word is a cache keyed on `_dict`, which the hold-out tests mutate.
         /// </summary>
+        /// <summary>The inflections an INITIALISM genuinely takes — see MorphDecode.</summary>
+        private static readonly HashSet<string> PLURAL_SUFFIX = new(StringComparer.Ordinal) { "s", "es", "sses" };
+
         private bool IsLetterNameRow(string piece)
         {
             if (piece.Length < 2 || !_dict.TryGetValue(piece, out var phones)) return false;
@@ -336,8 +350,14 @@ public static class EnglishG2pFactory
             return false;
         }
 
-        /// <summary>Every letter after the last two is the same — `hmmmm`, `shhh`, `zzz`. A DOUBLED final
-        /// letter is ordinary English (`hdd`, `cnn` are initialisms); a tripled one is elongation.</summary>
+        /// <summary>The last THREE letters are the same — `hmmmm`, `shhh`, `zzz`. A doubled final letter
+        /// is ordinary English (`hdd` and `cnn` are initialisms); a tripled one is elongation.</summary>
+        private static bool HasVowelLetter(string w)
+        {
+            foreach (var c in w) if ("aeiouy".Contains(c)) return true;
+            return false;
+        }
+
         private static bool IsElongation(string w) =>
             w.Length >= 3 && w[^1] == w[^2] && w[^2] == w[^3];
 
@@ -353,7 +373,6 @@ public static class EnglishG2pFactory
             return outp.Count > 0 ? outp : null;
         }
 
-        private sealed record SplitState(List<List<string>> Parts, string Head, int NParts, double MinLen, double Score);
 
         private List<string>? CompoundSplit(string w)
         {
@@ -373,7 +392,7 @@ public static class EnglishG2pFactory
                     List<string>? phones = !IsLetterNameRow(piece) && _dict.TryGetValue(piece, out var dp) ? dp : null;
                     if (phones is null && j == n && j - i >= 5)
                     {
-                        var mp = MorphDecode(piece);
+                        var mp = MorphDecode(piece, true);
                         if (mp is not null) phones = mp;
                     }
                     if (phones is null) continue;
@@ -415,9 +434,15 @@ public static class EnglishG2pFactory
             // and a recorded word never reaches the OOV path.
             if (w.Length >= 3 && !HasNucleusIn(ng, VOWEL) && !IsElongation(w))
             {
-                var spelled = SpellOutPhones(w);
+                // A trailing `s` on an initialism is the PLURAL, not the letter ESS — `blts` must agree
+                // with `blt's`, which the clitic strip reaches first.
+                var plural = w.EndsWith('s') && w.Length >= 4 && !HasVowelLetter(w[..^1]);
+                var spelled = SpellOutPhones(plural ? w[..^1] : w);
                 if (spelled is not null)
+                {
+                    if (plural) spelled.Add("Z");
                     return new Decomposition { Phones = EnforceSinglePrimary(spelled, VOWEL), Source = "N" };
+                }
             }
             return new Decomposition { Phones = ng, Source = "N" };
         }

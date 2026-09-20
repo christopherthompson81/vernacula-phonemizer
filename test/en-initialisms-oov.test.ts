@@ -16,6 +16,14 @@ describe("an initialism row is not a compound piece", () => {
         expect(await phonemize("congregationalist", "en")).not.toMatch(/ˌeᶦtˌiːʲˌaᶦ/u);
     });
 
+    // ⚠ AND THE GUARD BELONGS TO THE PIECE SITE, NOT TO `morphDecode`. Rejecting a letter-name STEM
+    // outright also blocks the one morphological thing initialisms do — their plural — and mis-fires on
+    // an ordinary row that merely coincides with its letter names: `ok` is `OW1 K EY1`, i.e. ⟨o⟩+⟨k⟩.
+    test("an initialism's plural still decodes through its stem", async () => {
+        expect(await phonemize("mphs", "en")).toBe("ˌɛmpˌiːʲˈeᶦt͡ʃɪz");   // not "em-pee-aitch-ESS"
+        expect(await phonemize("oks", "en")).toBe("ˌoᶷkʰˈeᶦz");          // "okays", not "oaks"
+    });
+
     // ⚠ THE ROW ITSELF IS STILL RIGHT. The predicate rejects a PIECE, never a word — a recorded word
     // does not take the OOV path at all, so `abc` and `mph` keep their letter readings.
     test("the initialism itself still reads as letters", async () => {
@@ -41,6 +49,26 @@ describe("a reading with no vowel nucleus is not a pronunciation", () => {
         // pass giving up its separate tokens — neither is obviously right, so the difference is stated.
         expect(await phonemize("BLT", "en")).toBe("bˈiː ˈɛɫ tʰˈiː");
         expect(await phonemize("blt", "en")).toBe("bˌiːʲˌɛɫtˈiː");
+    });
+
+    // ⚠ A TRAILING `s` IS THE PLURAL, NOT THE LETTER ESS, and the apostrophe form proves it: `blt's`
+    // reaches the clitic strip first and was already right, so the same word without the apostrophe
+    // disagreeing with it was the tell.
+    test("a plural initialism takes the Z allomorph, agreeing with the clitic form", async () => {
+        expect(await phonemize("blts", "en")).toBe("bˌiːʲˌɛɫtˈiːz");
+        expect(await phonemize("blts", "en")).toBe(await phonemize("blt's", "en"));
+    });
+
+    // ⚠ THESE ARE DICTIONARY ROWS NOW, which is what makes the net's premise — "every correct vowelless
+    // word is recorded, and a recorded word never takes the OOV path" — TRUE rather than nearly true.
+    // It held for the 8 rows already there and not for these: `tsk` came out "tee-ess-kay". The
+    // elongation exemption cannot reach them (`brrr` is exempt, `brr` is not) and widening it to a
+    // consonant set would also exempt `gpt`.
+    test("a consonant interjection is recorded rather than spelled out", async () => {
+        for (const [w, want] of [["tsk", "tsk"], ["brr", "bɹ"], ["grr", "ɡɹ"], ["hmph", "hmf"],
+            ["pfft", "ft"], ["psst", "pst"], ["pst", "pst"]] as const) {
+            expect([w, await phonemize(w, "en")]).toEqual([w, want]);
+        }
     });
 
     // ⚠ A DOUBLED FINAL LETTER IS ORDINARY ENGLISH AND A TRIPLED ONE IS ELONGATION. The first version
