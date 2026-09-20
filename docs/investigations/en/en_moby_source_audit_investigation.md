@@ -4634,3 +4634,50 @@ in this audit that actually removes a candidate class in code rather than in pro
     Moby — words the dict carries   26,742/35,027 (76.3%) → see below
     candidates                      784 → 750 (17 fixed here, 17 removed by the new guard)
     rows corrected                  17 → 16, plus 2 paradigm rows
+
+## Run 74 — 2026-09-20 07:40
+
+Three things Run 73 recorded as owed, done. No large sweep — the value is that two prose claims
+became code and one candidate class turned out to be a heteronym.
+
+⚠ THE NEVER-A-DEFECT CLASSES ARE NOW A TABLE, NOT A PARAGRAPH. Run 72 adjudicated 24 rows in a
+commit message; nothing acted on it, no artifact said which rows they were, and the next pass would
+have re-read all of them. `NEVER_A_DEFECT` in `en_source_compare.mts` holds three predicates and the
+audit reports each count on every run:
+
+    source geminate   18     English has no phonemic geminate; both sources double at a morpheme
+                             seam because the SPELLING does (`coolly`, `unnerve`, `headdress`)
+    NG G / N G         4     the same sound, two ARPABET spellings
+    -ed adjective      2     our /t/ against their syllabic /ɪd/, both standard
+
+Candidates 750 → 726. ⚠ THE COUNTS NOW COME FROM THE PREDICATES, which is the point: Run 72's
+figures did not reproduce (a reviewer counted 21 and 6 against my 18 and 4) because they were
+eyeballed off a list. A number that cannot be re-derived is not a measurement.
+⚠ AND THE REJECTION IS OF THE CANDIDATE, NOT THE WORD. The row still counts as a `split`, because
+the two sources genuinely do read it differently — what is denied is only the claim that OUR row is
+the wrong one.
+
+⚠ `worsted` IS A HETERONYM AND THE AUDIT CANNOT SEE THAT SHAPE AT ALL. Gold `wˈʊstᵻd` and Moby both
+carry the FABRIC (from Worstead in Norfolk); CMUdict carries the past tense of `worst`, `wˈɝstᵻd`.
+Neither is wrong, so "both sources agree against us" is true and useless. Declared in
+`english.jsonc` rather than corrected in the dictionary; both senses now resolve by POS —
+`ʃiː wˈɔːɹ ə wˈʊstᵻd d͡ʒˈækət` against `hiː wˈɝstᵻd hɪz əpʰˈoᶷnənt`.
+
+⚠ `primate` IS THE SAME SHAPE AND IS NOT EXPRESSIBLE, which is worth recording because the obvious
+move is wrong. ˈpraɪmeɪt in zoology and ˈpraɪmət ecclesiastically — but BOTH ARE NOUNS, and the
+heteronym table keys on POS, so it cannot hold the distinction. Our row already has the
+overwhelmingly commoner zoological reading and `primates` agrees with it, so the candidate is
+REFUSED and the word stays out of the table. Applying it would have broken the common sense to win
+an audit row.
+
+    Moby — words the dict carries   26,742/35,027 (76.3%)  unmoved — no dictionary row changed
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    audit candidates                750 → 726
+
+STILL OPEN, unchanged: the loanword and proper-noun slice of the remaining 726 (Run 73 measured it
+near-100% defect and it is the highest-yield work left); the de-/re-/pre- prefix class, which is
+near-100% NOT a defect and should become a fourth `NEVER_A_DEFECT` predicate once its shape is
+pinned; the conservative yod (41 rows, refused once on measurement); the ~45–55 mixed-rhotic rows
+needing a positional referee test; the stress-digit rows deferred from #1369; and the A/B listen on
+`several` owed since #1372.

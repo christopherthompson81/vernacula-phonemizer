@@ -280,6 +280,13 @@
         "upset": { "default": "ˈʌpsɛt", "verb": "əpsˈɛt" },
         "uses": { "default": "jˈuːsᵻz", "verb": "jˈuːzᵻz" },
         "use": { "default": "jˈuːs", "verb": "jˈuːz" },
+        // ⚠ NOT A STRESS PAIR LIKE ITS NEIGHBOURS — a VOWEL pair, and the two senses are unrelated words.
+        // The fabric is wˈʊstᵻd (from Worstead in Norfolk); the past tense of `worst` is wˈɝstᵻd. CMUdict
+        // carries only the verb, so the fabric read wˈɝstᵻd in every text about textiles.
+        // ⚠ SURFACED BY THE #1374 AUDIT AS A "BOTH SOURCES AGREE AGAINST US" ROW, which it is not: gold
+        // and Moby carry the FABRIC and CMUdict the VERB, and neither is wrong. A candidate that is
+        // really a heteronym is the one shape the audit cannot tell from a defect.
+        "worsted": { "default": "wˈʊstᵻd", "verb": "wˈɝstᵻd" },
         "wind": { "default": "wˈɪnd", "verb": "wˈaᶦnd" },
         "wound": { "default": "wˈuːnd", "past": "wˈaᶷnd" },
     },
