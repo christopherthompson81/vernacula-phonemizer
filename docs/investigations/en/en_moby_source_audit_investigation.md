@@ -4264,3 +4264,125 @@ cannot see two sources agreeing about the one thing at issue.
 
     Moby — words the dict carries   26,725/35,027 (76.3%) → see below
     rows corrected                  18 → 24  (14 arbitrated, 10 paradigm)
+
+## Run 68 — 2026-09-20 01:30
+
+The extra-schwa class, 77 rows — the mirror of Run 66, where WE have a schwa the referee lacks. It
+is mostly a class where we are RIGHT, and the named syllabic-l candidate resolves the opposite way
+from the one I predicted.
+
+⚠ THREE ROWS, AND THAT IS THE HONEST YIELD. Whole-reading arbitration against gold: 57
+gold-differs-from-both, 16 no gold, 3 gold-backs-us, 1 gold-backs-Moby. Applying the POSITIONAL test
+Run 67 recorded as owed — compare only the segment at issue, in the same consonant frame, via the
+repo's own `goldToArpabet` — recovers one more, not the flood I expected: `serenely`,
+`motorcyclist`, and `motorcyclists` by paradigm.
+⚠ THE POSITIONAL TEST IS WORTH HAVING ANYWAY, and its first hand-rolled version was wrong in the
+usual way: I folded gold with my own regex and 50 of 77 came back "ambiguous" because gold writes
+`O`, `I` and `ɾ` in its own shorthand. Running it through `goldToArpabet` instead — the converter
+built for this — collapsed the ambiguity. Hand-folding a source the repo already has a converter for
+is the same class of error as measuring against a form the pipeline cannot emit.
+⚠ AND IT THREW A FALSE POSITIVE I NEARLY TOOK: `legged L EH1 G AH0 D` against gold `L EH1 G IH0 D`
+is a vowel-QUALITY difference, not a missing schwa; my test counted `AH0` only and so read one fewer
+reduced vowel.
+
+⚠ THE SYLLABIC-L CANDIDATE, CARRIED SINCE #1365, RESOLVES — AND NOT AS PREDICTED. I expected it to
+"fall the same way as the yod one", i.e. be refused because we are wrong to have the schwa. The
+opposite: GOLD HAS THE SCHWA TOO, written `ᵊ` — `babbling bˈæbᵊlɪŋ`, `juggler ʤˈʌɡᵊləɹ`, `fiddler
+fˈɪdᵊləɹ`, `cycling sˈIkᵊlɪŋ`. Moby is the outlier here, not us.
+⚠ WHAT IS REAL IS AN INCONSISTENCY ON OUR SIDE, IN THE OTHER DIRECTION. In the obstruent + L +
+`-er`/`-ing` environment our dictionary is split almost evenly — 503 rows WITH `AH0 L`, 576 with a
+bare `L` — while gold writes `ᵊ` throughout, including for the ones we leave bare (`tumbler
+tˈʌmbᵊləɹ`, `rambler ɹˈæmbᵊləɹ`, `sprinkler spɹˈɪŋkᵊləɹ`).
+⚠ AND IT IS NOT COSMETIC, which was the first thing I checked after #1368. The two encodings produce
+DIFFERENT OUTPUT: `juggler d͡ʒˈʌɡə̆lɚ` against `tumbler tʰˈʌmblɚ`. The reduced-slot machinery in
+`englishArpabet.ts` marks the schwa we have and can do nothing for the rows where CMUdict wrote a
+bare `L`, so the inconsistency reaches the audio.
+⚠ AND THE CODA/ONSET RULE DOES NOT SAY WHAT THIS PARAGRAPH CLAIMS — Run 69 retracts that too. What
+is true is only the per-word evidence:
+`motorcycle mˈOɾəɹsˌIkᵊl` keeps it because the L is word-final, `motorcyclist mˈOɾəɹsˌIklɪst` does
+not because the L onsets `-list`. Our `cyclist S AY1 K L IH0 S T` already had it right and
+`motorcyclist` did not — which is the third row taken here.
+
+RECORDED, NOT TAKEN — ⚠ AND RUN 69 SHOWS THIS FINDING IS WRONG AS STATED. It is not ~576 rows where
+gold marks `ᵊ`; It is not a Moby question at
+all — Moby sides against gold here — so it cannot be arbitrated by the two-source method this audit
+has been using, and at 576 rows it is a policy decision about aligning CMUdict's encoding with the
+training data rather than a defect sweep. The coda/onset rule above is the discriminator it would
+need, and `englishArpabet.ts` already implements that rule for the rows that carry the slot.
+
+    Moby — words the dict carries   26,726/35,027 (76.3%) → 26,728/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+
+STILL OWED from Run 67 and not done here: an A/B listen on `several`. No `kokoro` package is
+installed in any venv in this tree, so producing the WAVs is a setup task in the parent repo rather
+than something this block could fold in. Recorded rather than quietly dropped — and the judgement is
+the user's in any case, not mine.
+
+
+## Run 69 — 2026-09-20 02:40
+
+Review of Run 68. The three rows are right and the sweep for them is complete; the LARGE CLAIM the
+block recorded for the next one to build on is wrong, and so is the rule I cited for it.
+
+⚠ "GOLD WRITES `ᵊ` THROUGHOUT" IS FALSE, AND IT WAS THE LOAD-BEARING SENTENCE. Re-derived over the
+word-final population, checking gold POSITIONALLY (does the string end `ᵊləɹ`/`ᵊlɪŋ`) rather than
+for a `ᵊ` anywhere:
+
+    our `AH0 L`  454 rows · gold covers 131 · gold HAS ᵊ 107 · gold LACKS it  24
+    our bare `L` 497 rows · gold covers 113 · gold HAS ᵊ  45 · gold LACKS it  68
+
+On the very population the finding is about, GOLD SIDES WITH OUR BARE `L` on 60% of the rows it
+covers — `butler`, `antler`, `angler`, `seedling`, `duckling`, `sibling`, `burglar`, `chandler`,
+`cobbler`. The three words I quoted as proof (`tumbler`, `rambler`, `sprinkler`) are the 40%. Failure
+mode (b), on the largest claim in the audit: a sweep driven by it would have inserted a schwa into
+`butler` and `sibling` against gold.
+
+⚠ THE MORPHOLOGICAL DISCRIMINATOR OFFERED IN ITS PLACE ALSO FAILS, which is worth recording so the
+next attempt does not start there. "Gold marks when the L comes from a `-le` stem" is the obvious
+repair and it does not survive: every one of `tumbler ᵊ`, `juggler ᵊ`, `fiddler ᵊ` and `cobbler` no-ᵊ,
+`bungler` no-ᵊ, `coupler` no-ᵊ, `assembler` no-ᵊ is a `-le` deverbal. GOLD IS SIMPLY INCONSISTENT IN
+THIS ENVIRONMENT, and the honest statement of the finding is that OUR dictionary is split 454/497,
+gold covers only 244 of those rows and is itself split both ways, and NO DISCRIMINATOR TESTED
+SURVIVES. The class is not arbitrable by the two-source method at all — not because Moby sides
+against gold, which is what Run 68 said, but because gold does not have a position.
+
+⚠ AND THE CODA/ONSET RULE DOES THE OPPOSITE OF WHAT I CITED IT FOR. `englishArpabet.ts:404` says
+`ᵊ` IS A REDUCED SCHWA, NOT A SYLLABICITY MARK — both branches KEEP the schwa, one as a syllabic
+diacritic and one as an extra-short `ə̆`; neither deletes anything. Its onset test is
+`VOWELS.has(P[son+1])`, and in every row of this population the L is followed by `ER0` or `IH0`, so
+it classifies ALL of them as onsets and has zero discriminating power here. Applied as Run 68
+proposed it would strip the schwa from `juggler`, `babbling`, `cycling` and `fiddler` — the four rows
+that block cites as proof gold keeps it. Failure mode (c), and the curated note for `motorcyclist`
+carried the same false principle into a shipped file; it now states the three sources instead.
+⚠ GOLD UNDERCUTS THE ABSOLUTISM ANYWAY: `bicyclist bˈIsəkᵊlɪst` HAS the `ᵊ` where `cyclist`,
+`unicyclist` and `tricyclist` do not. The three rows taken are still right — on gold, Moby and our
+own `cyclist`, which is what the note should have said in the first place.
+
+⚠ A FOURTH CONSECUTIVE INCOMPLETE SWEEP, AND THIS TIME THE CAUSE IS DIAGNOSABLE. `determinedly
+D AH0 T ER1 M AH0 N AH0 D L IY0` is the one clean unarbitrated row left in this class
+dictionary-wide — gold `dətˈɜɹməndli`, Moby `d/I/'t/[@]/rm/I/ndl/i/`, and our own `determined
+D IH0 T ER1 M AH0 N D` contradicts it. It was missed because the arbitration iterates
+`g2p-common.txt`, the 40k FREQUENCY LIST, not the dictionary. Run 67 said the sweep must be driven
+from the stem family; the deeper fix is that it must be driven from `dict ∩ moby ∩ gold`. Taken.
+
+⚠ THE 77/57/16/3/1 TALLY IS NOT REPRODUCIBLE and I did not state its population or predicate. Three
+independent reconstructions over the repo's own converters give gold-backs-us at 80–90% and
+gold-backs-Moby at ZERO in every one. The reported tally UNDERSTATES this block's own conclusion.
+Worse, `serenely`, `motorcyclist` and `motorcyclists` are not in `g2p-common.txt` at all, so they
+cannot be members of a 77-row class derived from that audit — whatever population produced the 77 is
+not the one `audit()` uses. The qualitative finding ("mostly a class where we are right") stands and
+is stronger than reported; the numbers do not, and are withdrawn rather than patched.
+
+CHECKS OUT, verified independently: the three applied rows and their paradigms (`serene`/`serenely`
+complete, `-cyclist` family complete, `motorcycle` correctly untouched); "not cosmetic"
+(`d͡ʒˈʌɡə̆lɚ` against `tʰˈʌmblɚ` reproduces, and the pair is fair as evidence about OUR inconsistency
+even though it is not evidence about gold); and no regression — primary unmoved, in-dict 26,728,
+goldens 0 stale, 317 files / 6,087 tests.
+
+ONE ADJACENT GAP, pre-existing and not from this block: `motorcycling` and `bicycling` have no dict
+row and no syllabic slot, so we emit a full `ə` (`mˈoᶷt̬ɚsˌaᶦkəlɪŋ`) where gold has `ᵊ` and our own
+`cycling` correctly gets `sˈaᶦkə̆lɪŋ`.
+
+    Moby — words the dict carries   26,728/35,027 (76.3%)  unmoved by Run 69's row
+    rows corrected                  3 → 4
