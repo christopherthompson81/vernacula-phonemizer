@@ -117,3 +117,81 @@ delta and exiting 1. Wired as `npm run check:en-gb-sets`.
 ⚠ **AND IT IS VERIFIED TO FIRE, INCLUDING ITS EXIT CODE**, because a check that reports without failing
 is the #1388 bug wearing a different hat: appending one row gives
 `⚠ STALE … en-gb-bath.tsv: committed 680, builder 679 (+0 / -1)` and `exit=1`, against `exit=0` clean.
+
+## Run 5 — 2026-09-20 19:30 — review of #1389: PALM's edit runs the wrong way
+
+Six findings. One ships at scale and is fixed here; three are small and fixed here; two are pre-existing
+classes, measured and filed rather than bolted onto a rebuild.
+
+### ⚠ PALM IS THE ONE EDIT THAT RUNS *AWAY* FROM RP, AND THE CLAIM POLICY IS INVERTED FOR IT
+
+BATH, CLOTH and LOTR move toward the RP-diagnostic realisation (`ɑː`, `ɒ`, `ɒɹ`), which is why the
+builder's stated policy accepts a variant the referee merely lists. **PALM moves `ɒ → ɑː`, i.e. toward
+the GenAm LOT vowel** — and the eval fold strips LENGTH, so an American `fɹɑɡi` row is indistinguishable
+from an RP `fɹɑːɡi` one. The referee is known to carry American rows (#1383). So PALM claimed words on
+the strength of the American reading with the British one sitting beside it:
+
+    froggy     ref  fɹɑɡi | fɹɒɡi        shipped fɹˈɑːɡi   (main: fɹˈɒɡi)
+    oggle      ref  ɑɡəl  | ɒɡəl         shipped ˈɑːɡəɫ
+    thrombus   ref  θɹɑmbəs | θɹɒmbəs    shipped θɹˈɑːmbəs
+
+⚠ **THE DISCRIMINATOR IS THE UN-EDITED FORM, AND IT IS CLEAN.** A genuine PALM word has no `ɒ` reading
+at all — `father` is `fɑːðə`, `calm` is `kɑːm` — while a LOT word with an American row has both. PALM
+alone now requires that the referee does NOT also attest what we already produce. **PALM 567 → 543**,
+exactly the 24 the review identified, and `father`/`calm` are untouched.
+
+⚠ This is the same mechanism as the scorer bug in Run 3, one level down: **the fold that makes the
+comparison fair also destroys the distinction the claim depends on.**
+
+### Three small ones, fixed
+
+- `--check` read the committed file unguarded, but the runtime loads all five sets with
+  `{ optional: true }`, so an absent file is legitimate and the ritual died with an ENOENT trace — the
+  exact opposite of "say clearly which artifact disagrees with its source".
+- the `--check` diff built its "committed" set with a looser filter than every other reader (any line
+  with a tab), so a header comment carrying a tab would report a phantom `-1`.
+- the builder's LOTR probe was `/ɑːɹ/u` where the runtime's is `/[ɑɔ]ːɹ/u` — the same builder/runtime
+  drift the marry hunk exists to fix. Aligned. It changes nothing today (CLOTH is probed first and
+  produces the identical result for those words) and is aligned so a reordering cannot silently un-widen
+  the rule. The runtime's three comment blocks said LOTR "carries `sorry`"; it has not since this
+  rebuild, and they now say so.
+
+### ⚠ AND `barry` WAS DROPPED SILENTLY WHERE THE PRODUCT DELTA COULD NOT SEE IT
+
+Run 3 named `clara`, `dara`, `scarry` as the three regressions and `barry` as dropped "silently". That
+word is worth dwelling on: the referee attests BOTH `bæɹi` and `bɑːɹi`, so losing its BATH row still
+scored **HIT**, and the delta — the instrument this whole PR rests on — was blind to it. Only the
+runtime comment naming all four found it.
+
+**So the product delta measures agreement with the referee, not correctness**, and where the referee
+attests both variants it cannot see a change at all. That bound belongs on every number in Runs 2–4.
+
+### Two pre-existing classes, measured and filed
+
+⚠ **SET MEMBERSHIP IS PER SURFACE FORM, SO PARADIGMS SPLIT** — `transit` is BATH but `transits` is not,
+so one sentence can carry both vowels for one lemma. The review called this a widening; measured, it is
+not:
+
+    inflections whose lemma is in a set but which are not   main 754   this branch 732
+    paradigm pairs this rebuild SPLITS                       72
+    paradigm pairs this rebuild HEALS                        88
+
+Net −16, so the rebuild slightly improves paradigm consistency while introducing 72 new splits. The
+class exists at scale on `main` and the fix — propagating membership across regular inflections in the
+builder — is a real change with its own evaluation over ~732 rows. Filed, not bolted on.
+
+⚠ **AND BATH ADMITS WORDS THAT ARE LEXICALLY TRAP**, because the referee lists a conservative `ɑː`
+variant for them: `plasticity` (`plæstɪsɪti | plɑːstɪsɪti`), `blaspheme`, `allistic`, `aquacise`. Every
+one is WITHIN the builder's stated policy — prefer the RP-diagnostic realisation whenever attested — so
+this is a challenge to the policy, not a bug in applying it, and changing it moves a 679-row set. It is
+also the same referee-quality question #1383 raises from the other side. Filed.
+
+⚠ AND THE PALM GUARD FIXED A ROW THAT WAS ALREADY WRONG ON `main`. `socks` ships as `sˈɑːks` today —
+the American vowel, claimed into PALM off the referee's `sɑːks` row with `sɒks` sitting beside it — and
+is `sˈɒks` after. It appears twice in `csharp/goldens/en-GB.tsv`, so the guard's first visible effect is
+to correct a golden rather than to churn one.
+
+    PALM      567 → 543;  BATH/CLOTH/YOD/LOTR unchanged by the review fixes
+    goldens   3 rows vs main, all improvements: `transported` → tɹɑːnspˈɔːtᵻd (BATH, referee-attested)
+              and `socks` ×2 → sˈɒks (PALM guard dropping an American claim)
+    suite     6,128 tests;  parity 189 byte-identical;  `--check` fresh

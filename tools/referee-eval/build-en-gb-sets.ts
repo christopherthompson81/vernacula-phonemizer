@@ -6,7 +6,7 @@
  *
  *   npx tsx tools/referee-eval/build-en-gb-sets.ts
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -28,7 +28,13 @@ const bath: string[] = [], cloth: string[] = [], yod: string[] = [], palm: strin
 const edits: [string[], (s: string) => string][] = [
     [bath, (s) => s.replace(/æ/u, "ɑː")],
     [cloth, (s) => s.replace(/ɔː/u, "ɒ")],
-    [lotr, (s) => s.replace(/ɑːɹ/u, "ɒɹ")], // LOT before intervocalic r (sorry→sɒɹi; starry stays stɑːɹi → won't match)
+    // ⚠ THE SAME EDIT THE RUNTIME APPLIES, `[ɑɔ]ːɹ` AND NOT `ɑːɹ`. #1334 moved 7 of this set's words from
+    // ɑː to ɔː and the runtime was widened for them; this probe was not, so the builder and the rule it
+    // builds for had drifted — the same mismatch the marry hunk above exists to fix.
+    // ⚠ IT CHANGES NOTHING TODAY AND IS STILL WORTH ALIGNING: `cloth` is probed BEFORE `lotr` and its
+    // `ɔː → ɒ` produces the identical result for those words, so every one of them now lands in `cloth`
+    // and `lotr` is down to 6. Aligned so a future reordering cannot silently un-widen the rule.
+    [lotr, (s) => s.replace(/[ɑɔ]ːɹ/u, "ɒɹ")], // LOT before intervocalic r (sorry→sɒɹi; starry stays stɑːɹi)
     [palm, (s) => s.replace(/ɒ/u, "ɑː")], // LOT rule mis-fired on a PALM word → restore [ɑː]
 ];
 const CORONAL_YOD = /[tdnszθl]j/u; // a post-coronal yod glide (position marker, not a full match)
@@ -76,7 +82,19 @@ for (const row of rows) {
     }
     for (const [set, edit] of edits) {
         const e = edit(ours);
-        if (e !== ours && refFolded.includes(fold(e))) { set.push(w); claimed++; break }
+        if (e === ours || !refFolded.includes(fold(e))) continue;
+        // ⚠ PALM IS THE ONE EDIT THAT RUNS *AWAY* FROM RP, SO "ATTESTED" IS NOT ENOUGH FOR IT. BATH,
+        // CLOTH and LOTR move toward the RP-diagnostic realisation (ɑː, ɒ, ɒɹ), which is why the policy
+        // above accepts a variant the referee merely lists. PALM moves `ɒ → ɑː`, i.e. toward the GenAm
+        // LOT vowel — and the fold strips LENGTH, so an American `fɹɑɡi` row is indistinguishable from
+        // an RP `fɹɑːɡi` one. The referee is known to carry American rows (#1383), so on that policy
+        // PALM claimed a word on the strength of the American reading even when the British `ɒ` row was
+        // sitting beside it: `froggy` shipped as fɹˈɑːɡi with `fɹɒɡi` attested.
+        // ⚠ THE DISCRIMINATOR IS THE UN-EDITED FORM. A genuine PALM word has no `ɒ` reading at all
+        // (`father` fɑːðə, `calm` kɑːm); a LOT word contaminated by an American row has both. So PALM
+        // alone requires that the referee does NOT also attest what we already produce.
+        if (set === palm && refFolded.includes(fold(ours))) continue;
+        set.push(w); claimed++; break;
     }
 }
 
@@ -95,9 +113,16 @@ const write = (file: string, words: string[]): void => {
     const path = join(HERE, "..", "..", "data", "languages", "english-gb", file);
     const body = words.map((w) => `${w}\t1`).join("\n") + "\n";
     if (check) {
-        const have = readFileSync(path, "utf8");
+        // ⚠ AN ABSENT SET FILE IS LEGITIMATE — `english-gb.ts` loads all five with `{ optional: true }` —
+        // so this must REPORT it, not die with an ENOENT trace. A freshness check that crashes instead of
+        // naming the artifact that disagrees with its source is the opposite of the point.
+        const have = existsSync(path) ? readFileSync(path, "utf8") : "";
         if (have !== body) {
-            const had = new Set(have.split("\n").filter((l) => l.includes("\t")).map((l) => l.split("\t")[0]!));
+            // ⚠ THE SAME FILTER EVERY OTHER READER OF THESE FILES USES. Keeping any line with a tab
+            // counts a header comment as a member, inflating `committed N` and reporting a phantom `-1`
+            // that sends the reader hunting for a membership nothing ever lost.
+            const had = new Set(have.split("\n")
+                .filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!));
             const now = new Set(words);
             const gone = [...had].filter((w) => !now.has(w)), added = [...now].filter((w) => !had.has(w));
             stale.push(`  ${file}: committed ${had.size}, builder ${now.size}  (+${added.length} / -${gone.length})`);
