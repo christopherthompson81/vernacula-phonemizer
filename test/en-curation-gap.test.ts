@@ -175,6 +175,12 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
+    // ⚠ TWO ADDED BY THE #1372 SYNCOPE FIX, both source N. ⚠ AND MOST OF THAT BLOCK IS NOT HERE,
+    // which is the useful half: `several` and `differently` were NOT live splits, because the OOV
+    // path ALREADY predicted the corrected form — `differently` is source M and decodes through
+    // `different`, whose row already carried the schwa. The dictionary row was the outlier against
+    // our own morphology, not just against the two external sources.
+    "elbe", "indifferent",
     // ⚠ TWO ADDED BY THE #1371 ⟨tch⟩ FIX, both source N: the n-gram learned the upstream `B L AA1 T CH`
     // and reproduces it. ⚠ THE OTHER FIVE `blotch` ROWS ARE NOT HERE, but only TWO were
     // ever open: `blotched` and `blotching` predicted the upstream shape before the fix and closed

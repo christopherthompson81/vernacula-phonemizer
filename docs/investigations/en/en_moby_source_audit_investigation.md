@@ -4119,3 +4119,61 @@ And the running-text check I quoted shows `bˈoᶷt͡ʃɚ`, which is the unchang
     Moby — OOV                      17,464/39,451 (44.3%)  unmoved
     primary                         2,584/4,037 (64.0%)    unmoved
     rows corrected                  13 → 15
+
+## Run 66 — 2026-09-19 23:55
+
+The missing-schwa class, 88 rows — the largest of the length-differing buckets. Same outcome shape as
+Run 60: no fold available, a lexical slice taken. Two things in it were new.
+
+⚠ IT IS FOUR CLASSES, NOT ONE. `-ically` (`academically ækədɛmɪkli` against `ækədɛmɪkəli`), the
+`aɪə`/`aʊə` smoothing before ɹ (`desirable`, `dower`), pre-rhotic SYNCOPE (`several`, `emerald`,
+`temperament`), and a handful of one-offs (`elbe`, `brea`).
+
+⚠ TWO OF THEM LOOKED LIKE CLEAN CONVENTIONS AND WERE MEASUREMENT ARTIFACTS — THE THIRD TIME THIS
+AUDIT. `aʊəɹ`/`aʊɹ` read 2 against 44, and the syncope environment read a PERFECT 0 against 3,787,
+either of which would have justified a fold. The referee TSV stores `ɚ`; the eval's printout shows
+`əɹ`; I counted the printed form against the stored file. Re-measured after expanding `ɚ`→`əɹ` — the
+space the eval actually compares in — they are 81 against 44 and 1,362 against 3,832. All four
+sub-classes record both sides. Lexical, no fold.
+⚠ THE FIX IS PROCEDURAL AND IS NOW WRITTEN DOWN: any environment count over the referee must fold
+`ɚ`→`əɹ` FIRST. A perfect zero in a rhotic environment is evidence of this bug, not of a convention;
+it has now produced a false positive in Run 60, Run 62 and here.
+
+Arbitrating all 88 against misaki gold: 52 gold-differs-from-both, 15 gold-backs-Moby, 12 no gold,
+9 gold-backs-us. The 15 are almost all the SYNCOPE sub-class.
+
+⚠ AND THE DICTIONARY CONTRADICTS ITSELF ON FIVE STEMS, which is better evidence than the two external
+sources and is what turned 15 rows into 18:
+
+    differ D IH1 F ER0 / difference … ER0 / different … ER0   BUT  differently D IH1 F R …
+    indifference … ER0 …                                      BUT  indifferent … F R …
+    livery L IH1 V ER0 IY0                                    BUT  liveried L IH1 V R IY0 D
+    devil D EH1 V AH0 L                                       BUT  devilish D EH1 V L IH0 SH
+    surreal S ER0 IY1 AH0 L                                   BUT  surrealistic S ER0 IY2 L …
+
+The paradigm sweep that found those also caught six rows the arbitration alone would have missed —
+`emeralds`, `severally`, `temperamental`, `impoverishes`, `impoverishing`, `surrealistic`. Applying a
+lexicon correction without sweeping the paradigm has now been the defect in two blocks running
+(#1369's six half-applied paradigms); doing it first is cheaper than being told.
+
+⚠ ONE ROW FROM THE 15 WAS REFUSED: `tandoor T AE0 N D UW1 R`, where gold gives `tændˈʊəɹ`. The `ʊə`
+centring diphthong is an RP shape, GenAm has /tænˈdʊr/, and this is the one row in the set where
+gold and Moby could plausibly share a British-source error rather than independently agree. Left.
+
+⚠ THE OOV PATH CAME IN ON THE RIGHT SIDE THIS TIME, unlike Run 64 where I had to withdraw the
+argument. `several` and `differently` are NOT live splits because the path already predicted the
+corrected form, and `differently` is source M — it decodes through `different`, whose row already
+carried the schwa. So the dict row was an outlier against our own MORPHOLOGY as well as against the
+two external sources. That is not the circular check Run 64 made: the morph path reads a different
+dict row, it does not re-derive this one.
+
+⚠ FOUR GOLDENS MOVED AND WERE RE-RECORDED DELIBERATELY, across en, en-GB and en-IN — all `several`
+and `differently`. This needed a reason rather than a shrug, because both words are genuinely
+two-form in GenAm and Merriam-Webster lists the SYNCOPATED `ˈsev-rəl` first. The reason is the one
+this repo already uses for intentional classes: gold is what the downstream model was trained on, and
+our own dictionary was internally inconsistent. Recorded here so the re-record is auditable.
+
+    Moby — words the dict carries   26,713/35,027 (76.3%) → 26,725/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    rows corrected                  18 · live splits 2 (`elbe`, `indifferent`, both source N)
