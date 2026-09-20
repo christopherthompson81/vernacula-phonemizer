@@ -113,7 +113,7 @@ export interface LexSets {
     cloth: Set<string>; // ɔː → ɒ
     yod: Set<string>; // Cuː → Cjuː
     palm: Set<string>; // keep [ɑː] against the LOT rule
-    lotr: Set<string>; // ɑːɹ → ɒɹ before a vowel (sorry, borrow — LOT before intervocalic r; cf. starry which keeps ɑː)
+    lotr: Set<string>; // [ɑɔ]ːɹ → ɒɹ before a vowel (LOT before intervocalic r; cf. starry, which keeps ɑː)
     /**
      * ɛɹ → æɹ before a vowel: the marry–merry merger, UNDONE for RP.
      *
@@ -246,10 +246,15 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         if (lex.yod.has(w)) s = s.replace(/([tdnszθl])(ʰ?)([ˈˌ]?)uː/u, "$1$2j$3uː"); // yod-retention (glide after any aspiration, before the stressed vowel)
         // LOT before intervocalic r (the LOT rule's (?!ɹ) skipped it).
         // ⚠ EITHER GenAm REALIZATION, not just ɑː. #1334 aligned the parent's AA/AO assignment to misaki gold's
-        // consistent LOT–THOUGHT split, and 7 of this set's 13 words moved to ɔː with it (`sorry`, `sorrow`,
-        // `morrow`, `florist`, `categorical`…) — `sorry` is the US /ˈsɔːri/ vs RP /ˈsɒri/ split, where BOTH
-        // varieties are right and only the mapping between them was missing. Matching only ɑːɹ left the rule
-        // silently failing on over half its own list, with the set still listing the words.
+        // consistent LOT–THOUGHT split, and 7 of the set's then-13 words moved to ɔː with it — `sorry` is the
+        // US /ˈsɔːri/ vs RP /ˈsɒri/ split, where BOTH varieties are right and only the mapping between them was
+        // missing. Matching only ɑːɹ left the rule silently failing on over half its own list.
+        // ⚠ AND THOSE SEVEN ARE NOT IN THIS SET ANY MORE (#1381). Once they became ɔː, `cloth`s `ɔː → ɒ`
+        // claims them first and produces the identical result, so the #1381 rebuild moved `sorry`, `sorrow`,
+        // `sorrowful`, `morrow`, `overmorrow`, `florist` and `categorical` to `cloth` and left `lotr` with 6.
+        // Nothing regressed — `sorry` is still sˈɒɹi — but do not read the examples above as members: they
+        // document why the edit is WIDE, not who is in the set. The wide form is kept because the builder's
+        // probe is now the same expression, so a future reordering cannot silently un-widen it.
         if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
