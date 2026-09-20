@@ -476,12 +476,22 @@ const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => 
         i + 1 < t.length && bare(p) === bare(t[i + 1]!) && eq(t.slice(0, i).concat(t.slice(i + 1)), o))],
     // ⚠ `N G` AND `NG G` ARE THE SAME SOUND, two ARPABET spellings of [ŋɡ]. Neither is wrong.
     ["NG G / N G", (o, t) => ng(o) === ng(t)],
-    // ⚠ THE `-ed` ADJECTIVE. `accursed`, `cussed`, `worsted`: our /t/ against their syllabic /ɪd/,
-    // both standard, and the difference is grammatical rather than phonological.
-    ["-ed adjective", (o, t) => o.length > 1 && t.length > 2 && o[o.length - 1] === "T"
-        && bare(t[t.length - 2]!) === "AH" && t[t.length - 1] === "D" && eq(o.slice(0, -1), t.slice(0, -2))],
+    // ⚠ THE `-ed` ADJECTIVE IS DELIBERATELY *NOT* HERE, and it was in the first version of this table.
+    // `cussed` is our /t/ against a syllabic /ɪd/ — but that is the `worsted` shape exactly, a
+    // NOUN/ADJECTIVE against a PARTICIPLE, and unlike `primate` it IS expressible: the `adj` slot in
+    // english.jsonc's heteronym table exists and is live (`arithmetic`). Our dictionary simply carries
+    // only the participle for `cussed`, `blessed`, `aged`, `learned`, `dogged`, `crooked`. Rejecting
+    // the class here would close the door on the real fix three lines after opening it for `worsted`.
 ];
-const bare = (p: string): string => p.replace(/[0-2]$/u, "");
+// ⚠ THE PREDICATES MUST USE THE AUDIT'S OWN EQUIVALENCE, NOT A STRICTER ONE. `normalise` merges AH and
+// IH into ə as well as stripping stress; a first version of this table compared with stress-stripping
+// alone, so three rows whose only normalise-visible difference IS the geminate — `disservice`,
+// `levittown`, `dissatisfaction` — became candidates under one relation and were then judged under a
+// tighter one, and survived. The count printed 18 where the class is 21.
+const bare = (p: string): string => {
+    const b = p.replace(/[0-2]$/u, "");
+    return b === "AH" || b === "IH" ? "ə" : b;
+};
 const eq = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => bare(x) === bare(b[i]!));
 const ng = (a: string[]): string => a.map(bare).join(" ").replace(/NG G/gu, "N G");
 

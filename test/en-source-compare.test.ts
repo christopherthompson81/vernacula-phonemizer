@@ -173,4 +173,31 @@ describe("the source converters", () => {
         // list rather than a sorted copy, which is what an earlier version of this test compared.
         expect(r.candidates.map((c) => c.word)).toEqual(["offlist", "onlist"]);
     });
+
+    // ⚠ A REJECTION CLASS THAT IS NOT TESTED IS A PARAGRAPH AGAIN. #1376 moved three
+    // "never a defect" classes from a commit message into code precisely so the counts would be
+    // re-derivable — and shipped them with no test, so the FIRST version judged candidacy with
+    // `normalise` (which merges AH/IH into ə) and rejection with a stress-strip only. Three geminate
+    // rows slipped through the gap and the tool printed 18 for a class of 21.
+    // ⚠ `disservice` IS THE CASE THAT CATCHES IT: its `AH0`/`IH0` difference is invisible to the
+    // audit's own equivalence, so it is a candidate, and the geminate must still be seen.
+    test("a source geminate is rejected under the audit's OWN equivalence, not a stricter one", () => {
+        const dir = mkdtempSync(join(tmpdir(), "en-never-"));
+        const f = (n: string, body: string): string => {
+            const p = join(dir, n); writeFileSync(p, body); return p;
+        };
+        const dict = f("dict.tsv", "disservice\tD IH0 S ER1 V AH0 S\nreal\tR IY1 L\n");
+        const freq = f("freq.txt", "disservice\nreal\n");
+        // gold doubles the S at the `dis+service` seam AND differs in a reduced vowel; `real` is an
+        // ordinary one-phone disagreement and must survive as a candidate.
+        const gold = f("gold.json", JSON.stringify({ disservice: "dɪssˈɜɹvɪs", real: "ɹˈAl" }));
+        const moby = f("moby.unc", "disservice d/I/ss'/[@]/rv/I/s\rreal r/eI/l\r");
+        const r = audit(dict, freq, gold, moby);
+        expect(r.rejected.get("source geminate")).toBe(1);
+        expect(r.candidates.map((c) => c.word)).toEqual(["real"]);
+        // ⚠ AND THE REJECTED ROW IS COUNTED AS A SPLIT EXACTLY ONCE — the two sources really do read
+        // it differently; what is denied is only that OUR row is the wrong one.
+        expect(r.compared).toBe(r.agree + r.candidates.length + r.split);
+        expect(r.split).toBe(1);
+    });
 });
