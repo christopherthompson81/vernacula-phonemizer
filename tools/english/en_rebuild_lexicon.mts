@@ -107,6 +107,27 @@ if (addMissing) {
     console.log(`rows ADDED from the dict (--add-missing): ${added}`);
 }
 
+/**
+ * ⚠ "would change: 0" AND "there was nothing I could reach" LOOK IDENTICAL, AND THAT IS THE BUG THIS
+ * BLOCK EXISTS FOR. This tool walks the LEXICON and looks each row's ARPABET up, so a word added to
+ * `g2p-dict.tsv` and nowhere else is not merely unchanged — it is INVISIBLE, and the run reports a clean
+ * pass. #1386 added seven interjection rows to the dict, read `would change: 0`, and shipped nothing;
+ * the header above says exactly this in prose, and `--add-missing` already existed, and neither was
+ * discoverable at the moment it was needed. A success signal indistinguishable from a no-op is not a
+ * success signal.
+ * ⚠ THE STANDING VALUE IS ZERO, which is what makes this worth printing rather than noise: every row of
+ * `g2p-dict.tsv` has a lexicon row today, so a non-zero count here means somebody just added dictionary
+ * rows this run could not see. `test/en-lexicon-covers-dict.test.ts` asserts the same invariant, so the
+ * gate is red rather than merely chatty.
+ */
+const lexWords = new Set(out.filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!));
+const unreachable = [...arpabet.keys()].filter((w) => !lexWords.has(w));
+if (unreachable.length > 0) {
+    console.log(`\n⚠ ${unreachable.length} g2p-dict.tsv words have NO lexicon row, so this run could not`);
+    console.log(`  see them and the engine will not look them up: ${unreachable.slice(0, 12).join(" ")}`);
+    console.log(`  Re-run with --add-missing to bring them in.\n`);
+}
+
 const sourced = unchanged + regenerated;
 console.log(`rows with an ARPABET source: ${sourced}`);
 console.log(`  reproduce the committed IPA: ${unchanged}`);
