@@ -127,56 +127,66 @@ const KNOWN_GAPS = new Map<string, string>([
     // compound path finds `bar` + `bel` and reassembles the upstream EH2. Gold `bˈɑɹbᵊl` and our own
     // `barbels` both reduce it.
     ["barbel", "compound (source C): `bar` + `bel` rebuilds the upstream EH2"],
-    ["neolithic", "compound (source C): `neo` + `lithic` keeps neo's full OW and its own primary stress"],
     ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
 
-    // ⚠ THIRTY-TWO COMPOUND-PATH ROWS WITH ONE CAUSE, and it is a RULE IN THE ENGINE rather than 32 oddities.
-    // `compoundSplit` ends with `parts.flatMap((p, i) => (i === 0 ? p : stressDown(p)))` — every piece but
-    // the first is stressed down, UNCONDITIONALLY — so the path fore-stresses `over|come`, `under|take`,
-    // `back|yard` and `con|volution` by construction, which is exactly the placement gold and Moby
-    // together contradict on each of them. This is the refinement multi-primary Run 4 named ("PREFIXED,
-    // where the stem keeps the primary, versus COMPOUND, which is fore-stressed") and #1360 built
-    // `tools/gen/en-morph-boundary.tsv` to supply the label for.
-    // ⚠ AND THE LABEL IS NOT ENOUGH — MEASURED BEFORE WAIVING THESE, over the 233 candidates the stress
-    // audit reports. Keyed on that table's kind, a `prefix` boundary moves the primary LATER on 36 rows
-    // and EARLIER on 19; a `compound` boundary moves it EARLIER on 18 and LATER on 8. Two-thirds each
-    // way is not a rule — `over·come` and `pre·school` carry the same label and take opposite stress —
-    // so keying the path on it would trade one wrong answer for a different one, which is the same
-    // finding the `-land` note above records for a different class. The dictionary is the mechanism; the
-    // path's unconditional fore-stress is still worth replacing with the label, but not on this evidence.
-    ["backyard", "compound (source C): `back` + `yard` fore-stresses the seam; see the note above"],
-    ["convolution", "compound (source C): same unconditional fore-stress"],
-    ["overcome", "compound (source C): same unconditional fore-stress"],
-    ["overpay", "compound (source C): same unconditional fore-stress"],
-    ["overtake", "compound (source C): same unconditional fore-stress"],
-    ["psychosocial", "compound (source C): same unconditional fore-stress"],
-    ["undermine", "compound (source C): same unconditional fore-stress"],
-    ["underpin", "compound (source C): same unconditional fore-stress"],
-    ["undertake", "compound (source C): same unconditional fore-stress"],
-    ["alternation", "compound (source C): same unconditional fore-stress"],
-    ["archduke", "compound (source C): same unconditional fore-stress"],
-    ["countervail", "compound (source C): same unconditional fore-stress"],
-    ["evermore", "compound (source C): same unconditional fore-stress"],
-    ["headmistress", "compound (source C): same unconditional fore-stress"],
-    ["homestretch", "compound (source C): same unconditional fore-stress"],
-    ["midstream", "compound (source C): same unconditional fore-stress"],
-    ["miscue", "compound (source C): same unconditional fore-stress"],
-    ["nevermore", "compound (source C): same unconditional fore-stress"],
-    ["outsmart", "compound (source C): same unconditional fore-stress"],
-    ["overbuy", "compound (source C): same unconditional fore-stress"],
-    ["overfill", "compound (source C): same unconditional fore-stress"],
-    ["overreach", "compound (source C): same unconditional fore-stress"],
-    ["overrule", "compound (source C): same unconditional fore-stress"],
-    ["oversell", "compound (source C): same unconditional fore-stress"],
-    ["overstep", "compound (source C): same unconditional fore-stress"],
-    ["overstuff", "compound (source C): same unconditional fore-stress"],
-    ["overtax", "compound (source C): same unconditional fore-stress"],
-    ["stockade", "compound (source C): same unconditional fore-stress"],
-    ["undersell", "compound (source C): same unconditional fore-stress"],
-    ["undersized", "compound (source C): same unconditional fore-stress"],
-    ["understate", "compound (source C): same unconditional fore-stress"],
-    ["underweight", "compound (source C): same unconditional fore-stress"],
+    // ⚠ TWENTY-EIGHT COMPOUND-PATH ROWS WITH ONE CAUSE, AND THE CAUSE HAS SINCE BEEN NARROWED, NOT FIXED.
+    // `compoundSplit` used to end with `parts.flatMap((p, i) => (i === 0 ? p : stressDown(p)))` — every
+    // piece but the first stressed down, UNCONDITIONALLY — so the path fore-stressed `over|come`,
+    // `back|yard` and `con|volution` by construction. It now consults `stemStressPrefixes`, which is
+    // right on 84.0% of the 13,661 words the path decodes against 78.8% before, and that closed
+    // `miscue`, `neolithic`, `hypertrophy` and `psychosocial` off these lists.
+    // ⚠ `archduke` LEFT THIS LIST when `arch` cleared the floor on the validated measurement — the same
+    // row #1379 had to waive, closed by the rule rather than by a dictionary entry, which is the outcome
+    // the rule was for.
+    // ⚠ THE ROWS BELOW ARE WHAT THE LIST DELIBERATELY DOES NOT REACH. `over`, `under`, `super`, `multi`,
+    // `poly` and `post` measure 49–60% for the stem — they carry their own stress and behave like the
+    // first element of a compound as often as not — and `back`, `head`, `home`, `mid`, `arch`, `ever`
+    // and `never` are compound first elements, where fore-stress is right 96% of the time. A coin flip
+    // does not belong in a rule, so these stay dictionary rows.
+    ["backyard", "compound (source C): a compound first element, where fore-stress is right 96% of the time"],
+    ["convolution", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overcome", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overpay", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overtake", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["undermine", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["underpin", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["undertake", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["alternation", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["countervail", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["evermore", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["headmistress", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["homestretch", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["midstream", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["nevermore", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["outsmart", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overbuy", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overfill", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overreach", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overrule", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["oversell", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overstep", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overstuff", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["overtax", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["stockade", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["undersell", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["undersized", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["understate", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
+    ["underweight", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
     ["understaffed", "morph (source M): `understaff` + `ed`; the stem is not in the referees' intersection"],
+
+    // ⚠ TWO OPENED BY THE COMPOUND PATH'S NEW STRESS POLICY, and they are the honest price of it.
+    // `stemStressPrefixes` makes the path stem-stress a prefixed form, which is right 84% of the time and
+    // closed `archduke`, `miscue`, `neolithic` and `psychosocial` — four entries that used to be on these
+    // lists and are gone. It is wrong on these two.
+    // ⚠ `psycho` IS WRONG IN BOTH DIRECTIONS AT ONCE, which is the argument for the rule rather than
+    // against it: `psychosocial` ˌsaɪkoʊˈsoʊʃəl is stem-stressed and both referees say so, while
+    // `psychobabble` ˈsaɪkoʊˌbæbəl is fore-stressed and both referees say so. No setting of the list
+    // reaches both — which is why one of them is a dictionary row.
+    // ⚠ `extraordinary` IS NOT A STRESS ROW AT ALL. Its correction is segmental (`EH2 K S T R AH0 AO1` →
+    // `IH0 K S T R AO1`, a syllable the word does not have), and the new policy simply moved the OOV
+    // answer onto the upstream shape. A retrain reaches it; the other two cannot be reached by one.
+    ["psychobabble", "compound (source C): `psycho` is a stem-stress prefix and this word is fore-stressed"],
+    ["extraordinary", "compound (source C): a segmental correction the policy change exposed; closes on a retrain"],
     // ⚠ TWO MORPH-PATH ROWS WHOSE STEMS ARE DELIBERATELY NOT MOVED WITH THEM, and that is the whole
     // entry: correcting the stem is what closed `outdated` and `overpayment`, which were live in the
     // first cut of this block and are not here. These two cannot take that remedy.

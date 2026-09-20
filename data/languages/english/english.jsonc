@@ -440,6 +440,70 @@
             "ion",
             "per",
         ],
+
+        // THE COMPOUND SPLITTER'S STRESS DISCRIMINATOR. When the first piece of a split is one of these,
+        // the STEM keeps the primary (`dis·AGREE`, `mis·LEAD`, `inter·CEPT`); otherwise the compound path
+        // fore-stresses, which is right for a real compound (`BACK·yard`, `HEAD·mistress`).
+        //
+        // Scored against the dictionary over the 13,661 words the compound path decodes and whose
+        // segments already match their dict row:
+        //
+        //     fore-stress always (what shipped before)         78.8%
+        //     stem-stress always                               20.3%
+        //     keyed on en-morph-boundary.tsv's `prefix` label   83.1%
+        //     this list                                         84.0%    +712 words
+        //
+        // ⚠ THE LIST BEATS THE TABLE #1360 BUILT FOR THIS CONSUMER, and could not have been the table
+        // anyway: `tools/gen/en-morph-boundary.tsv` ships in neither package, and it cannot speak to a
+        // word Wiktionary does not carry — which is most of what reaches an OOV path. The table found the
+        // class; this is how the engine expresses it, and unlike the table it ports to C#.
+        //
+        // ⚠ THE RULE IS ONE STATED CRITERION WITH NO HAND-PICKED EXCEPTIONS: the dictionary puts the
+        // primary on the STEM for at least 74% of that piece's rows, over at least 12 rows. Per entry,
+        // that share and the net gain:
+        //
+        //     non 97% +133   dis 95% +166   mis 94% +76   extra 94% +15   radio 94% +14
+        //     neo 92%  +10   pre 89%  +81   trans 86% +15   photo 81% +10   psycho 81% +13
+        //     electro 78% +13   anti 77% +24   bio 77% +19   inter 76% +73   arch 75% +6
+        //
+        // ⚠ THE THREE PIECES THAT CLEAR THE CRITERION AND ARE STILL REFUSED ARE NOT PREFIXES. `van`
+        // (85%, n=73), `imp` (82%, n=22) and `outs` (88%) are the splitter cutting a surname
+        // (`van|derbilt`) or a fragment. Fitting them would fit the splitter's noise rather than English
+        // morphology, and no phonological statement covers them. Every entry above is a bound prefix.
+        //
+        // ⚠ `sub` MISSES THE FLOOR AT 73% AND THAT IS NOT AN ACCIDENT OF SAMPLING. `sub-` is genuinely
+        // two prefixes: the Latinate verbs are stem-stressed (sub·MIT, sub·TRACT) and the productive
+        // noun-former is not (SUB·way, SUB·set, SUB·reddit). An earlier version of this list admitted it
+        // on a "positive net" criterion and turned `subreddit` — pinned in `english.test.ts` since long
+        // before this rule — into sʌbˈɹɛdɪt. The productive kind is exactly what reaches an OOV path,
+        // which a dictionary-shaped population under-represents, so the floor is doing real work here.
+        //
+        // ⚠ AND THE STRESSED PREFIXES ARE ABSENT ON PRINCIPLE AND ON MEASUREMENT BOTH. `over`, `under`,
+        // `super`, `multi`, `poly`, `post` and `pro` measure around half — they carry their own stress
+        // and behave like the first element of a compound as often as not. `over·COME` stays a
+        // dictionary row and a documented curation gap because of it.
+        //
+        // ⚠ IT IS NOT LOSSLESS AND IS NOT MEANT TO BE. `psychobabble` ˈsaɪkoʊˌbæbəl is fore-stressed and
+        // both referees say so, while `psychosocial` ˌsaɪkoʊˈsoʊʃəl is stem-stressed and both referees
+        // say so. The same prefix, opposite answers — which is why those are dictionary rows and a
+        // curation gap, not an argument against a rule that is right 84% of the time.
+        "stemStressPrefixes": [
+            "anti",
+            "arch",
+            "bio",
+            "dis",
+            "electro",
+            "extra",
+            "inter",
+            "mis",
+            "neo",
+            "non",
+            "photo",
+            "pre",
+            "psycho",
+            "radio",
+            "trans",
+        ],
     },
 
     // REFERENCED statistical models — the part Hindi has no equivalent of. NOT inlined (megabytes of
