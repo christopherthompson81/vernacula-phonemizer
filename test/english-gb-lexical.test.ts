@@ -21,7 +21,9 @@ describe("en-GB lexical variants", () => {
 
     it("leaves the GenAm reading of the same spelling alone", () => {
         // The one-way-ness. `en` keeps CMUdict's row; only the accent variant overrides it.
-        expect(phonemize("aluminium", "en")).toBe(phonemize("aluminium", "en"));
+        // ⚠ THIS ASSERTED A VALUE AGAINST ITSELF and could never fail, so the test named for the GenAm
+        // reading pinned nothing about it. The literal is the point.
+        expect(phonemize("aluminium", "en")).toBe("əlˈuːmɪnəm");
         expect(phonemize("aluminium", "en")).not.toBe(phonemizeWord("aluminium"));
         expect(phonemize("aluminium", "en")).not.toContain("æljʊ");
     });
@@ -41,10 +43,42 @@ describe("en-GB lexical variants", () => {
         expect(phonemizeWord("lever")).toBe("lˈiːvə");   // lettER ɚ → ə
     });
 
-    it("lets a variant take a lexical-set membership like any other word", () => {
-        // tomato's British vowel is PALM, so it is in en-gb-palm.tsv; without that row the LOT rule
-        // would turn the ɑː this table supplies straight into ɒ.
-        expect(phonemizeWord("tomato")).toBe("təmˈɑːtəᶷ");
+    it("is exempt from the lexical-SET layer, so no set edit runs over its citation", () => {
+        // ⚠ THIS USED TO ASSERT THE OPPOSITE — that a variant "takes a lexical-set membership like any
+        // other word" — and bought tomato's ɑː back with a hand-added row in en-gb-palm.tsv, a GENERATED
+        // file. `build-en-gb-sets.ts` now skips table-owned words, so the next regeneration would have
+        // deleted that row and silently regressed the word to təmˈɒtəᶷ. It was never claimable anyway:
+        // the builder claims from the rules-only output, where tomato has no ɑː to preserve.
+        // The citation is written with the target in mind; a set edit derived for a DIFFERENT word has no
+        // business running over it. The PHONOLOGICAL rules still do — hence əᶷ, not oᶷ.
+        expect(phonemizeWord("tomato")).toBe("təmˈɑːtʰəᶷ");
+        expect(lexicalVariants().has("tomato")).toBe(true);
+    });
+
+    it("keeps the parent's allophony, which a hand-written citation has to carry itself", () => {
+        // ⚠ THE ROWS REPLACE THE CITATION WHOLESALE, so any allophonic detail the parent emits must be
+        // written into the row. Three of them dropped the aspiration diacritic and shipped an unaspirated
+        // stop where every comparable word aspirates.
+        expect(phonemizeWord("pasta")).toBe("pʰˈæstə");          // cf. passive pʰˈæsɪv
+        expect(phonemizeWord("tomato")).toBe("təmˈɑːtʰəᶷ");      // cf. potato pətʰˈeᶦtʰəᶷ
+        expect(phonemizeWord("lieutenant")).toBe("lɛftʰˈɛnənt"); // cf. tenant tʰˈɛnənt
+    });
+
+    it("owns a lemma's regular inflections, so one sentence cannot say both readings", () => {
+        // ⚠ BEFORE THE TABLE, `clerk` AND `clerks` WERE BOTH WRONG AND CONSISTENT. Keying the override on
+        // the exact surface word made one right and left the other wrong IN THE SAME SENTENCE, which is
+        // more audible than the defect it fixed — `herb`/`herbs` had the /h/ appearing and disappearing.
+        // ⚠ AN INFLECTION IS ENTAILED, NOT ATTESTED: the lemma's citation plus the suffix the PARENT
+        // produced for that form, so the suffix's voicing is the parent's. The referee covers only
+        // `clerks` and `figures` of the nine, and both agree with the entailment — a check, not a source.
+        for (const [one, many] of [["clerk", "clerks"], ["herb", "herbs"], ["lever", "levers"],
+            ["tomato", "tomatoes"], ["buoy", "buoys"], ["lieutenant", "lieutenants"],
+            ["figure", "figures"], ["vitamin", "vitamins"]] as const) {
+            expect([many, phonemizeWord(many)]).toEqual([many, `${phonemizeWord(one)}${phonemizeWord(many).slice(phonemizeWord(one).length)}`]);
+            expect([many, phonemizeWord(many).startsWith(phonemizeWord(one))]).toEqual([many, true]);
+        }
+        expect(phonemizeWord("clerks")).toBe("klˈɑːks");   // referee: klɑːks
+        expect(phonemizeWord("figures")).toBe("fˈɪɡəz");   // referee: fɪɡəz
     });
 
     it("owns every word it lists, so the set builder cannot claim one into an accent set", () => {

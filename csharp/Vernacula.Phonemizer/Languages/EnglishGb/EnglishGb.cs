@@ -147,7 +147,9 @@ public static class EnglishGb
         // so nothing in the parent's citation is worth keeping; everything below then treats the substitute
         // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee
         // eval, which must stay non-circular, exactly as the five sets are.
-        var citation = lex is not null && lex.Lexical.TryGetValue(w, out var variant) ? variant : genAm;
+        string? variant = null;
+        var owned = lex is not null && lex.Lexical.TryGetValue(w, out variant);
+        var citation = owned ? variant! : genAm;
         var s = FLAP_D.Replace(FLAP_T.Replace(citation, "t"), "d"); // un-flap the tapped coronal
         s = GOAT.Replace(s, "əᶷ");
         s = PALATAL.Replace(s, "");                              // drop the palatal on-glide (idea)
@@ -155,8 +157,11 @@ public static class EnglishGb
         s = NURSE.Replace(NURSE_PREVOCALIC.Replace(s, "ɜːɹ"), "ɜː");
         s = LETTER.Replace(LETTER_PREVOCALIC.Replace(s, "əɹ"), "ə");
         // LOT: GenAm [ɑː] not before /ɹ/ → [ɒ]; PALM words keep [ɑː].
-        if (!(lex is not null && lex.Palm.Contains(w))) s = LOT.Replace(s, "ɒ");
-        if (lex is not null)
+        // ⚠ AND A WORD THE LEXICAL TABLE OWNS IS EXEMPT FROM THIS AND EVERY SET BELOW — see the TS twin.
+        // The citation was written with the SSBE target in mind, so a set edit derived for a DIFFERENT
+        // word must not run over it. The PHONOLOGICAL rules above still do.
+        if (!owned && !(lex is not null && lex.Palm.Contains(w))) s = LOT.Replace(s, "ɒ");
+        if (lex is not null && !owned)
         {
             // ⚠ FIRST OCCURRENCE ONLY, mirroring the set builder, which validated a first-occurrence edit
             // against the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not

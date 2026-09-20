@@ -223,3 +223,87 @@ goldens fresh: 189 languages, 36495 rows, 0 stale
 
 ⚠ `check-goldens` also takes `--jobs`, added in #1349, and this run did not pass it. It cost
 nothing but wall-clock here; noted so the next one uses it.
+
+## Run 6 — 2026-09-20 16:20 — review of #1385: four findings, and the inflection one is a blocker
+
+Reviewed by the session that owns the GenAm side. Four findings, all confirmed by re-measurement, and
+two of them are defects that would have bitten after merge.
+
+### ⚠ THREE CITATIONS DROPPED THE PARENT'S ASPIRATION
+
+The rows replace the citation WHOLESALE, so every allophonic detail the parent emits has to be written
+into the row by hand — and three of them lost the aspiration diacritic:
+
+    pasta       en-GB pˈæstə        against  passive  pʰˈæsɪv
+    tomato      en-GB təmˈɑːtəᶷ     against  potato   pətʰˈeᶦtʰəᶷ
+    lieutenant  en-GB lɛftˈɛnənt    against  tenant   tʰˈɛnənt
+
+So en-GB shipped an unaspirated /p/ in `pasta` and an unaspirated /t/ in `tomato` and `lieutenant` while
+every comparable word aspirates. This is Run 5's own lesson — *store in the parent's alphabet so the
+delta still runs over it* — one level down, at the diacritic instead of the vowel. Now `pʰˈæstə`,
+`təmˈɑːtʰəᶷ`, `lɛftʰˈɛnənt`.
+
+### ⚠ THE `tomato` PALM ROW WAS A HAND EDIT IN A GENERATED FILE THAT THE GENERATOR WOULD DELETE
+
+`build-en-gb-sets.ts` rewrites `en-gb-palm.tsv` wholesale, and Run 5's own new guard —
+`if (owned.has(w)) continue;` — skips every word the lexical table owns, `tomato` included. The
+regenerated file contains **zero** `tomato` rows, so the next regeneration would silently regress the
+word to `təmˈɒtəᶷ` and break its test. The PR's design note ("a word needing a set membership joins that
+set as usual") describes a route the guard closes for exactly these words.
+
+⚠ **AND IT WAS NEVER CLAIMABLE ANYWAY**, which is the deeper point: the builder claims from the
+RULES-ONLY output, where `tomato` has no `ɑː` to preserve, so the palm edit never matched. It was always
+a hand-added row in a generated file; the guard only made that permanent.
+
+**The fix is not a palm exemption — it is to take the override out of the lexical-SET layer entirely.**
+A word the table owns now skips the LOT rule and the whole BATH/CLOTH/yod/LOTR/marry block. The citation
+was written with the SSBE target in mind, so a set edit derived for a DIFFERENT word has no business
+running over it. The accent's PHONOLOGICAL rules still do — non-rhoticity, GOAT, NURSE/lettER,
+un-flapping — which is why `tomato` is `təmˈɑːtʰəᶷ` and not `…oᶷ`.
+
+Blast radius checked: `tomato` is the only row with a bare `ɑː` (`clerk`/`derby` are `ɑːɹ`, which the LOT
+rule already skips), and none of the eleven lemmas is in any set. One word moves, and it is the one that
+needed it. `en-gb-palm.tsv` goes back to being purely generated.
+
+### ⚠ THE OVERRIDE WAS KEYED ON THE SURFACE WORD, SO ONE SENTENCE SAID BOTH READINGS
+
+    clerk   klˈɑːk      clerks     klˈɜːks
+    herb    hˈɜːb       herbs      ˈɜːbz        ← the /h/ appears and disappears
+    lever   lˈiːvə      levers     lˈɛvəz
+    tomato  təmˈɑːtəᶷ   tomatoes   təmˈeᶦtəᶷz
+
+Before the table both were wrong and CONSISTENT. The table made one right and left the other wrong in
+the same utterance, which is more audible for the plural-heavy members than the defect it fixed. **A
+change that introduces an inconsistency that did not previously exist does not merge on the promise of a
+follow-up.** The table now owns lemmas and their regular inflections — 11 lemmas, 13 inflections.
+
+⚠ **AND THE DISCIPLINE CANNOT BE "REFEREE-ATTESTED" HERE.** The referee has rows for **two** of them
+(`clerks klɑːks`, `figures fɪɡəz`); taking only those would leave the table lumpy with most of the
+inconsistency intact. So an inflected row's citation is **the lemma's citation plus the suffix the PARENT
+itself produced**, which makes the suffix's voicing the parent's rather than an opinion — `clerks` takes
+its /s/ from `klˈɝks`, `levers` its /z/ from `lˈɛvɚz`, `herbs` its /z/ from `ˈɝbz`. Both attested rows
+AGREE with the entailment, which is the evidence the entailment is sound; they are a check, not the
+source. The PROVENANCE file marks every row attested or entailed so the two are never confused later.
+
+⚠ **THE PREFIX TEST HAD TO IGNORE FLAPPING AND ASPIRATION**, and finding that out is what made
+`tomatoes` land. The parent aspirates the singular's /t/ (`təmˈeᶦtʰoᶷ`) and FLAPS the plural's
+(`təmˈeᶦt̬oᶷz`) — the same phoneme in two allophones — so a raw prefix test refuses the row. `toRP`
+un-flaps as its first act, so neither is a difference for this table.
+
+⚠ **FOUR FORMS ARE REFUSED RATHER THAN ENTAILED**, each for a stated reason, because the entailment is a
+rule and not a licence: `buoying` (the parent is SELF-INCONSISTENT — `buoy` is `bˈuːi` but `buoying` is
+`bˈɔᶦɪŋ` — and it already produces the British reading), `tomatos` (a CMUdict spelling variant whose
+parent adds a secondary stress), and `derbies`/`levered` (no parent row at all; `derbies` decodes as
+`dˈɝbiʲiz`, a doubled vowel the entailment would have propagated into the table). Dictionary membership
+is the guard, and this is what it is for.
+
+### A test that asserted a value against itself
+
+`expect(phonemize("aluminium","en")).toBe(phonemize("aluminium","en"))` can never fail, so the test
+titled "leaves the GenAm reading of the same spelling alone" pinned nothing about the GenAm reading. Now
+asserts the literal `əlˈuːmɪnəm`.
+
+    table        11 lemmas + 13 inflections = 24 rows
+    sets         en-gb-palm.tsv back to purely generated (−1 hand row)
+    suite        6,117 tests, 319 files;  goldens 189 / 36,495 / 0 stale;  parity 189 byte-identical
+    eval         en-GB unmoved at 52.0% folded backbone / 86.4% symbol, scored path `rules`

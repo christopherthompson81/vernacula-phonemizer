@@ -176,7 +176,8 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     // there is nothing in the parent's citation worth keeping; everything below then treats the substitute
     // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee eval,
     // which must stay non-circular, exactly as the five sets below are.
-    let s = (lex && lex.lexical.get(w)) ?? genAm;
+    const lexical = lex?.lexical.get(w);
+    let s = lexical ?? genAm;
     s = s.replace(/t̬/gu, "t").replace(/d̬/gu, "d"); // un-flap the tapped coronal
     // ⚠ THE CLOSING DIPHTHONGS KEEP THE PARENT'S SUPERSCRIPT OFFGLIDE (#1252), and the GOAT onset is the only
     // thing this line still changes. `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP and were never wrong — this is a
@@ -218,9 +219,20 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     s = s.replace(NURSE_PREVOCALIC, "ɜːɹ").replace(/ɝ/gu, "ɜː");
     s = s.replace(LETTER_PREVOCALIC, "əɹ").replace(/ɚ/gu, "ə");
     // LOT: GenAm [ɑː] not before /ɹ/ → [ɒ]; PALM words keep [ɑː].
-    if (!(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
-    // Lexical sets (shipped path only).
-    if (lex) {
+    // ⚠ AND A WORD THE LEXICAL TABLE OWNS IS EXEMPT FROM THIS AND FROM EVERY SET BELOW. The citation was
+    // written with the SSBE target in mind, so a set edit derived for a DIFFERENT word has no business
+    // running over it: `tomato`'s hand-written ɑː is the thing the table exists to supply, and the LOT
+    // rule ate it. The first version bought that back with a hand-added row in `en-gb-palm.tsv` — a
+    // generated file — and `build-en-gb-sets.ts` now skips table-owned words, so the next regeneration
+    // would have deleted it and silently regressed the word. Worse, `tomato` was never CLAIMABLE into
+    // palm: the builder claims from the rules-only output, where the word has no ɑː to preserve, so the
+    // edit never matched. Exempting here makes the runtime and the builder agree in both directions and
+    // lets `en-gb-palm.tsv` go back to being purely generated.
+    // ⚠ THE PHONOLOGICAL RULES STILL RUN — non-rhoticity, GOAT, the NURSE/lettER remapping, un-flapping.
+    // It is the WORD-LIST layer that is skipped, not the accent.
+    if (lexical === undefined && !(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
+    // Lexical sets (shipped path only, and never over a word the table owns).
+    if (lex && lexical === undefined) {
         // FIRST-occurrence only (no /g) — mirrors the set builder, which validated a first-occurrence edit against
         // the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not …mˌɑːθ); a global
         // replace would wrongly convert it. Words whose diagnostic vowel is NOT first never entered the set.

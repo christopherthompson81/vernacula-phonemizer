@@ -1,14 +1,34 @@
 # British lexical variants: word\tGenAm-alphabet citation this accent starts from.
-# See data/languages/english-gb/en-gb-lexical.PROVENANCE.md. Every row is checked against the
-# wikipron UK referee; the accent delta (non-rhoticity, GOAT, the lexical sets) still runs over it.
+# See data/languages/english-gb/en-gb-lexical.PROVENANCE.md. The accent's PHONOLOGICAL rules still run
+# over these (non-rhoticity, GOAT, NURSE/lettER, un-flapping); the lexical-SET layer does not — a set
+# edit derived for a different word has no business running over a citation written for this one.
+#
+# ⚠ A LEMMA IS REFEREE-ATTESTED. An INFLECTION is ENTAILED: the lemma's citation plus the suffix the
+# PARENT itself produced for that form, so the suffix's voicing is the parent's and not hand-invented
+# (`clerks` takes its /s/ from klˈɝks, `levers` its /z/ from lˈɛvɚz, `herbs` its /z/ from ˈɝbz).
+# Where the referee DOES attest an inflection it is a check, not the source, and both rows it has
+# agree with the entailment. The PROVENANCE file marks which each row is.
 aluminium	ˌæljʊmˈɪniəm
 buoy	bˈɔᶦ
+buoyed	bˈɔᶦd
+buoys	bˈɔᶦz
 clerk	klˈɑːɹk
+clerks	klˈɑːɹks
 derby	dˈɑːɹbi
 figure	fˈɪɡɚ
+figured	fˈɪɡɚd
+figures	fˈɪɡɚz
+figuring	fˈɪɡɚɪŋ
 herb	hˈɝb
+herbs	hˈɝbz
 lever	lˈiːvɚ
-lieutenant	lɛftˈɛnənt
-pasta	pˈæstə
-tomato	təmˈɑːtoᶷ
+levering	lˈiːvɚɪŋ
+levers	lˈiːvɚz
+lieutenant	lɛftʰˈɛnənt
+lieutenants	lɛftʰˈɛnənts
+pasta	pʰˈæstə
+pastas	pʰˈæstəz
+tomato	təmˈɑːtʰoᶷ
+tomatoes	təmˈɑːtʰoᶷz
 vitamin	vˈɪtəmɪn
+vitamins	vˈɪtəmɪnz
