@@ -1,9 +1,11 @@
 /**
- * FREQUENCY-RANKED TRIPLE-SOURCE AUDIT of the English dictionary.
+ * TRIPLE-SOURCE AUDIT of the English dictionary.
  *
- * The wikipron referee covers 1,439 of the 40,004 words in `g2p-common.txt` — 3.6%. The other 96% of the
- * words that actually occur in text have never been checked against anything. This compares every frequency
- * word against TWO sources with different ancestry, and flags where BOTH agree against us:
+ * The wikipron referee covers 1,439 of the 40,000 words in `g2p-common.txt` — 3.6%. The other 96% of the
+ * words that actually occur in text have never been checked against anything. This compares every word the
+ * DICTIONARY carries against TWO sources with different ancestry, and flags where BOTH agree against us:
+ * ⚠ IT WAS "EVERY FREQUENCY WORD" UNTIL #1374, and that was a bug, not a scope — see the population note
+ * on the comparison loop below.
  *
  *   • misaki `us_gold.json` — CMUdict plus heavy hand curation; the lexicon Kokoro was trained on (Apache-2.0)
  *   • Moby Pronunciator II  — independent of both CMUdict and Wiktionary; public domain by the author's
@@ -494,7 +496,7 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         if (a) (moby.get(w) ?? moby.set(w, []).get(w)!).push(a);
     }
     // ⚠ THE FREQUENCY LIST IS A RANKING, NOT THE POPULATION, AND FOR FOUR BLOCKS IT WAS BOTH. This loop
-    // used to be `freq.forEach`, so the audit compared only the 40,004 words in `g2p-common.txt` and was
+    // used to be `freq.forEach`, so the audit compared only the 40,000 words in `g2p-common.txt` and was
     // BLIND to every triple-sourced word outside it. `determinedly` — gold `dətˈɜɹməndli`, Moby
     // `d/I/'t/[@]/rm/I/ndl/i/`, and our own `determined` contradicting our row — was invisible to
     // #1369, #1371, #1372 and #1373, every one of which searched for exactly that shape. The population
@@ -515,9 +517,12 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         const o = normalise(ours), gg = normalise(ga);
         const ms = m.map((p) => normalise(modernise(p)));
         if (gg === o && ms.includes(o)) { agree++; continue; }
-        // ⚠ `rank` IS -1 FOR A WORD OFF THE FREQUENCY LIST, not 0 and not omitted. 0 would sort it to the
-        // top as if it were the commonest word in English, and omitting it would hide exactly the rows
-        // this change exists to surface.
+        // ⚠ `rank` IS -1 FOR A WORD OFF THE FREQUENCY LIST, not 0 and not omitted. 0 is a REAL rank
+        // (`the`), so a shared 0 would make an off-list row indistinguishable from the commonest word in
+        // English; -1 cannot collide with any rank and so stays legible and bucketable. ⚠ IT DOES NOT
+        // MOVE THE ROW DOWN — the report sorts ascending, so -1 prints FIRST, ahead of `the`. An earlier
+        // comment claimed the opposite. Omitting the rank would hide exactly the rows this exists to
+        // surface, which is the one thing that must not happen.
         if (gg !== o && ms.includes(gg)) { candidates.push({ rank: rank.get(w) ?? -1, word: w, ours, agreed: ga }); continue; }
         split++;
     }

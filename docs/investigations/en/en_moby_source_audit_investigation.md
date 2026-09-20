@@ -4395,8 +4395,9 @@ this fixes it, and the size of what was hidden is larger than the diagnosis sugg
     MOBY=… GOLD=… npx tsx tools/english/en_source_compare.mts     (before and after)
 
 ⚠ THE AUDIT WAS COMPARING 42% OF ITS POPULATION AND SEEING A THIRD OF ITS CANDIDATES.
-`audit()` ended in `freq.forEach(...)` — it iterated `g2p-common.txt`, the 40,004-word FREQUENCY
-LIST, and every triple-sourced word outside that list was invisible.
+`audit()` ended in `freq.forEach(...)` — it iterated `g2p-common.txt`, the 40,000-word FREQUENCY
+LIST (the file is 40,004 lines, four of them header), and every triple-sourced word outside that
+list was invisible.
 
     before   19,439 words compared   258 candidates
     after    46,062 words compared   784 candidates
@@ -4404,16 +4405,22 @@ LIST, and every triple-sourced word outside that list was invisible.
 526 rows where gold AND MOBY AGREE AGAINST OUR DICTIONARY had never been visible to the audit. Runs
 60, 64, 66 and 68 each searched for precisely that shape and could not see two thirds of it.
 
-⚠ THE BUG IS INVISIBLE FROM THE OUTPUT, which is why it survived. A smaller population reports
-smaller counts and a HIGHER agreement rate — 79.9% before against 81.4% after — so the report reads
-like a cleaner dictionary, not like a truncated search. Nothing in the numbers says rows are
-missing. That is the general shape worth remembering: a population bug does not look like an error,
-it looks like good news.
+⚠ THE BUG IS INVISIBLE FROM THE OUTPUT, which is why it survived — but the evidence I first gave for
+that was the WRONG NUMBER AND POINTED THE WRONG WAY. I wrote that the smaller population reported "a
+HIGHER agreement rate — 79.9% before against 81.4% after", which is self-contradictory: 79.9% IS the
+before, so the truncated report looked DIRTIER on that line, and on the split line too (18.7% against
+16.9%). The line that actually carries the point is the CANDIDATE RATE: 258 of 19,439 is 1.3%, and
+784 of 46,062 is 1.7%. The truncated search reported both fewer candidates and a lower candidate
+rate, so it read as less work outstanding. The general shape holds — a population bug does not look
+like an error, it looks like good news — but two of the three rate lines argue against it and I
+quoted one of those two as if it argued for it.
 
 ⚠ THE FREQUENCY LIST IS A RANKING AND WAS BEING USED AS A POPULATION. Those are different jobs and
 the fix separates them: the loop is now over `dict ∩ gold ∩ moby` and the rank is LOOKED UP.
-A word off the list ranks `-1`, not 0 — zero would sort it above every real word in the report,
-which is how an off-list row would be mistaken for the commonest word in English.
+A word off the list ranks `-1`, not 0, because 0 is a REAL rank (`the`) and a shared 0 would make an
+off-list row indistinguishable from the commonest word in English. ⚠ IT DOES NOT MOVE THE ROW DOWN,
+which an earlier version of this paragraph claimed: the report sorts ascending, so -1 prints FIRST,
+ahead of `the`. The value disambiguates; it does not demote.
 
 ⚠ PINNED WITH A TEST, and mutation-checked. The test builds four tiny fixture files with one on-list
 and one off-list word, both triple-sourced and both disagreeing with us, and asserts BOTH are
@@ -4429,8 +4436,10 @@ lexical sweep of its own and deserves a separate review:
     three phones          42
     four phones            9
 
-⚠ AND ONLY FIVE PARADIGM PAIRS SIT INSIDE THE SET (`deprave`/`depraved`, `wizen`/`wizened`,
-`creolize`/`creolized`, `ribald`/`ribaldry`, `phoenicia`/`phoenician`). That is the warning for
+⚠ AND ONLY TEN PARADIGM PAIRS SIT INSIDE THE 784 — `deprave`/`depraved`, `wizen`/`wizened`,
+`creolize`/`creolized`, `ribald`/`ribaldry`, `phoenicia`/`phoenician`, `ingratiate`/`ingratiating`,
+and the cross-bucket `decode`/`decoder`, `divert`/`diverting`, `dissect`/`dissected`, `err`/`erring`.
+(I first counted five, by matching within the off-list slice only.) That is the warning for
 whoever takes them: almost every one of the 526 has its inflections OUTSIDE the candidate list, so
 applying them straight from the audit output reproduces the half-applied-paradigm defect of #1369,
 #1371, #1372 and #1373 five hundred times over. The sweep has to be driven from the stem family —
@@ -4439,3 +4448,55 @@ which is now possible, because the population is finally the dictionary.
     Moby — words the dict carries   26,728/35,027 (76.3%)  unmoved — no dictionary row changed here
     Moby — OOV                      17,464/39,451 (44.3%)  unmoved
     primary                         2,584/4,037 (64.0%)    unmoved
+
+
+## Run 71 — 2026-09-20 04:15
+
+Review of Run 70. The change is validated — population, numbers, test and absence of regression all
+re-derived independently — and every finding is in the PROSE.
+
+⚠ MY EVIDENCE FOR "THE BUG LOOKS LIKE GOOD NEWS" POINTED THE WRONG WAY. I claimed the truncated
+report showed "a HIGHER agreement rate — 79.9% before against 81.4% after". 79.9% is the BEFORE, so
+the smaller population looked WORSE on that line, and worse on the split line too (18.7% against
+16.9%). Only the candidate rate supports the claim: 1.3% against 1.7%. The mechanism is real and the
+sentence was self-refuting on its own numbers. Corrected in four places.
+
+⚠ AND THE `rank: -1` RATIONALE WAS BACKWARDS. I wrote that 0 "would sort it above every real word".
+The report sorts ASCENDING, so -1 prints FIRST — all 526 off-list rows now head the output, ahead of
+`and` at rank 2. What -1 actually buys is DISAMBIGUATION: 0 is a real rank and -1 cannot collide
+with one. The behaviour is right and the reason was false, in the code comment and three prose
+locations.
+
+⚠ THE MODULE'S OWN HEADER STILL SAID "FREQUENCY-RANKED … compares every frequency word", which is
+precisely the behaviour this block removed. Leaving the stale framing in the headline doc of the
+file being changed is the most readable place to be wrong; fixed, along with the test file's header.
+
+Smaller: the frequency list is 40,000 WORDS in 40,004 lines, four of them header — I quoted the line
+count as a word count in four places. And the paradigm pairs inside the candidate set are TEN, not
+five: I matched only within the off-list slice, missing `ingratiate`/`ingratiating` (both off-list,
+so the narrower match missed it too) and four cross-bucket pairs. The error was conservative — it
+overstates the hazard the warning is about — but it was still wrong.
+
+⚠ THE TEST HAD A GAP I HAD NOT SEEN: it sorted the candidate words before comparing, so the
+`[...dict.keys()].sort()` that makes two audits diffable was not pinned at all. Now asserted on the
+raw list, and mutation-checked: removing the sort fails with
+`expected [ 'onlist', 'offlist' ] to deeply equal [ 'offlist', 'onlist' ]`.
+
+CONFIRMED BY THE REVIEW, and worth recording because they were the two things I most doubted:
+  · THE POPULATION IS RIGHT AND I HAD NOT OVER-CORRECTED. `g2p-common.txt` is a mechanical frequency
+    gate — "CMUdict entries in Norvig count_1w order" — and excludes nothing for quality. The
+    triple-source intersection is itself the filter: a junk dict row cannot enter unless gold AND
+    Moby both carry the word.
+  · THE 526 ARE MOSTLY REAL. Sampled 70 rows: ~4.4% mechanically bad (16 gemination artifacts at
+    morpheme boundaries, 4 `NG G`/`N G` equivalences, 3 `-ed` adjective homographs, one of which —
+    `worsted` — is an undeclared heteronym), against 0.8% on-list. Mildly enriched, not
+    disqualifying. And the set contains obvious corruption in OUR dictionary that nothing had seen:
+    `antigone AE0 T IH1 G…`, `antimatter`, `antinomy` all missing the N; `anglicize` missing the G;
+    `appendicitis …S AY1 T IH0 Z`; `chartres CH AA1 R T R IY0 Z`. The 74 proper nouns and loanwords
+    in the set are a HIGH-yield class, not a false-positive class.
+  · The change is strictly additive — 0 candidates lost, 526 gained, and the four on-list rank
+    buckets byte-identical across base and head.
+
+ONE HIDDEN DEPENDENCY RECORDED, harmless today: `audit()` reads the real
+`data/languages/english/english.jsonc` for its heteronym set even when run on fixtures, so a fixture
+word that ever collided with a declared heteronym would be silently skipped.

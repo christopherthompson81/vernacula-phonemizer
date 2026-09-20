@@ -3,7 +3,7 @@
  * candidates before it was right. Each wrong version would have produced hundreds of false "fixes" that
  * looked exactly like real ones, so every step is pinned here rather than left to a comment.
  *
- * tools/english/en_source_compare.mts — the frequency-ranked triple-source audit.
+ * tools/english/en_source_compare.mts — the triple-source audit over `dict ∩ gold ∩ moby`.
  */
 import { describe, expect, test } from "vitest";
 import { mkdtempSync, writeFileSync } from "node:fs";
@@ -163,9 +163,14 @@ describe("the source converters", () => {
         const r = audit(dict, freq, gold, moby);
         expect(r.compared).toBe(2);
         expect(r.candidates.map((c) => c.word).sort()).toEqual(["offlist", "onlist"]);
-        // ⚠ AND THE OFF-LIST ROW RANKS -1, not 0. Zero would sort it above every real word in the
-        // report, which is how an off-list row would get mistaken for the commonest word in English.
+        // ⚠ AND THE OFF-LIST ROW RANKS -1, not 0. Zero is a REAL rank (`the`), so sharing it would make
+        // an off-list row indistinguishable from the commonest word in English. (-1 prints FIRST in the
+        // ascending report, not last — it disambiguates, it does not demote.)
         expect(r.candidates.find((c) => c.word === "offlist")!.rank).toBe(-1);
         expect(r.candidates.find((c) => c.word === "onlist")!.rank).toBe(0);
+        // ⚠ AND THE ORDER IS STABLE. `dict` is insertion-ordered off a file whose order is not
+        // guaranteed, so the loop sorts; without it two audits cannot be diffed. Asserted on the raw
+        // list rather than a sorted copy, which is what an earlier version of this test compared.
+        expect(r.candidates.map((c) => c.word)).toEqual(["offlist", "onlist"]);
     });
 });
