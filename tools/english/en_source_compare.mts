@@ -457,8 +457,46 @@ export function normalise(a: string[]): string {
 
 export interface Candidate { rank: number; word: string; ours: string[]; agreed: string[] }
 
+/**
+ * CANDIDATE SHAPES THAT ARE NEVER A DEFECT IN US, rejected in code rather than adjudicated in prose.
+ *
+ * ⚠ #1375 ADJUDICATED THESE IN A COMMIT MESSAGE AND NOTHING ACTED ON IT. No artifact recorded which
+ * rows they were, its counts did not reproduce, and the next pass would have re-read all of them. A
+ * class that is "known not to be a defect" has to be expressible, or it is not known at all.
+ *
+ * ⚠ THESE REJECT THE CANDIDATE, NOT THE WORD. The row still counts as a `split`, because the two
+ * sources genuinely do read it differently from us — what is denied is only the claim that OUR row is
+ * the wrong one.
+ */
+const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => boolean])[] = [
+    // ⚠ ENGLISH HAS NO PHONEMIC GEMINATE. Both sources write one at a morpheme seam — `coolly`
+    // K UW1 L L IY0, `unnerve` AH2 N N ER1 V, `headdress` HH EH1 D D R EH2 S — because the SPELLING
+    // doubles. We collapse it, and we are right; `ˈkuːli` has one /l/.
+    ["source geminate", (o, t) => t.length === o.length + 1 && t.some((p, i) =>
+        i + 1 < t.length && bare(p) === bare(t[i + 1]!) && eq(t.slice(0, i).concat(t.slice(i + 1)), o))],
+    // ⚠ `N G` AND `NG G` ARE THE SAME SOUND, two ARPABET spellings of [ŋɡ]. Neither is wrong.
+    ["NG G / N G", (o, t) => ng(o) === ng(t)],
+    // ⚠ THE `-ed` ADJECTIVE IS DELIBERATELY *NOT* HERE, and it was in the first version of this table.
+    // `cussed` is our /t/ against a syllabic /ɪd/ — but that is the `worsted` shape exactly, a
+    // NOUN/ADJECTIVE against a PARTICIPLE, and unlike `primate` it IS expressible: the `adj` slot in
+    // english.jsonc's heteronym table exists and is live (`arithmetic`). Our dictionary simply carries
+    // only the participle for `cussed`, `blessed`, `aged`, `learned`, `dogged`, `crooked`. Rejecting
+    // the class here would close the door on the real fix three lines after opening it for `worsted`.
+];
+// ⚠ THE PREDICATES MUST USE THE AUDIT'S OWN EQUIVALENCE, NOT A STRICTER ONE. `normalise` merges AH and
+// IH into ə as well as stripping stress; a first version of this table compared with stress-stripping
+// alone, so three rows whose only normalise-visible difference IS the geminate — `disservice`,
+// `levittown`, `dissatisfaction` — became candidates under one relation and were then judged under a
+// tighter one, and survived. The count printed 18 where the class is 21.
+const bare = (p: string): string => {
+    const b = p.replace(/[0-2]$/u, "");
+    return b === "AH" || b === "IH" ? "ə" : b;
+};
+const eq = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => bare(x) === bare(b[i]!));
+const ng = (a: string[]): string => a.map(bare).join(" ").replace(/NG G/gu, "N G");
+
 export function audit(dictPath: string, freqPath: string, goldPath: string, mobyPath: string): {
-    compared: number; agree: number; candidates: Candidate[]; split: number;
+    compared: number; agree: number; candidates: Candidate[]; split: number; rejected: Map<string, number>;
 } {
     // ⚠ A DECLARED HETERONYM IS NOT COMPARABLE and must be skipped, for the same reason the audit skips
     // gold's POS-conditioned entries: the dict row is only the fallback, and english.jsonc `heteronyms`
@@ -505,6 +543,7 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
     readFileSync(freqPath, "utf8").split("\n").map((s) => s.trim())
         .filter((s) => s && !s.startsWith("#")).forEach((w, i) => { if (!rank.has(w)) rank.set(w, i); });
     let compared = 0, agree = 0, split = 0;
+    const rejected = new Map<string, number>();
     const candidates: Candidate[] = [];
     // ⚠ SORTED, so the output is stable across runs — `dict` is insertion-ordered off a file whose order
     // is not guaranteed, and an unstable candidate list makes two audits impossible to diff.
@@ -535,10 +574,14 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         // MOVE THE ROW DOWN — the report sorts ascending, so -1 prints FIRST, ahead of `the`. An earlier
         // comment claimed the opposite. Omitting the rank would hide exactly the rows this exists to
         // surface, which is the one thing that must not happen.
-        if (gg !== o && ms.includes(gg)) { candidates.push({ rank: rank.get(w) ?? -1, word: w, ours, agreed: ga }); continue; }
+        if (gg !== o && ms.includes(gg)) {
+            const never = NEVER_A_DEFECT.find(([, f]) => f(ours, ga));
+            if (never) { rejected.set(never[0], (rejected.get(never[0]) ?? 0) + 1); split++; continue; }
+            candidates.push({ rank: rank.get(w) ?? -1, word: w, ours, agreed: ga }); continue;
+        }
         split++;
     }
-    return { compared, agree, candidates, split };
+    return { compared, agree, candidates, split, rejected };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -552,6 +595,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.log(`  all three agree:                  ${r.agree} (${pc(r.agree)})`);
     console.log(`  gold AND Moby agree AGAINST us:   ${r.candidates.length} (${pc(r.candidates.length)})`);
     console.log(`  split / no majority:              ${r.split} (${pc(r.split)})`);
+    for (const [k, n] of [...r.rejected].sort((a, b) => b[1] - a[1]))
+        console.log(`    of which never-a-defect — ${k.padEnd(16)} ${n}`);
     for (const [lab, lo, hi] of [["off-list", -1, 0], ["top 1k", 0, 1000], ["1k–5k", 1000, 5000], ["5k–20k", 5000, 20000], ["20k–40k", 20000, Infinity]] as const)
         console.log(`    ${lab.padEnd(9)} ${r.candidates.filter((c) => c.rank >= lo && c.rank < hi).length}`);
     for (const c of r.candidates.sort((a, b) => a.rank - b.rank))

@@ -4634,3 +4634,102 @@ in this audit that actually removes a candidate class in code rather than in pro
     Moby — words the dict carries   26,742/35,027 (76.3%) → see below
     candidates                      784 → 750 (17 fixed here, 17 removed by the new guard)
     rows corrected                  17 → 16, plus 2 paradigm rows
+
+## Run 74 — 2026-09-20 07:40
+
+Three things Run 73 recorded as owed, done. No large sweep — the value is that two prose claims
+became code and one candidate class turned out to be a heteronym.
+
+⚠ THE NEVER-A-DEFECT CLASSES ARE NOW A TABLE, NOT A PARAGRAPH. Run 72 adjudicated 24 rows in a
+commit message; nothing acted on it, no artifact said which rows they were, and the next pass would
+have re-read all of them. `NEVER_A_DEFECT` in `en_source_compare.mts` holds three predicates and the
+audit reports each count on every run:
+
+    source geminate   21     English has no phonemic geminate; both sources double at a morpheme
+                             seam because the SPELLING does (`coolly`, `unnerve`, `headdress`)
+    NG G / N G         4     the same sound, two ARPABET spellings
+
+Candidates 750 → 724. ⚠ THE COUNTS NOW COME FROM THE PREDICATES, which is the point — but the first
+version of them printed 18 for a class of 21, and Run 75 explains why. My claim that a reviewer's
+21 "was eyeballed off a list" was BACKWARDS: their count was re-derivable and correct, and mine was
+the one frozen in code and printed as authoritative.
+⚠ AND THE REJECTION IS OF THE CANDIDATE, NOT THE WORD. The row still counts as a `split`, because
+the two sources genuinely do read it differently — what is denied is only the claim that OUR row is
+the wrong one.
+
+⚠ `worsted` IS A HETERONYM AND THE AUDIT CANNOT SEE THAT SHAPE AT ALL. Gold `wˈʊstᵻd` and Moby both
+carry the FABRIC (from Worstead in Norfolk); CMUdict carries the past tense of `worst`, `wˈɝstᵻd`.
+Neither is wrong, so "both sources agree against us" is true and useless. Declared in
+`english.jsonc` rather than corrected in the dictionary; both senses now resolve by POS —
+`ʃiː wˈɔːɹ ə wˈʊstᵻd d͡ʒˈækət` against `hiː wˈɝstᵻd hɪz əpʰˈoᶷnənt`.
+
+⚠ `primate` IS THE SAME SHAPE AND IS NOT EXPRESSIBLE, which is worth recording because the obvious
+move is wrong. ˈpraɪmeɪt in zoology and ˈpraɪmət ecclesiastically — but BOTH ARE NOUNS, and the
+heteronym table keys on POS, so it cannot hold the distinction. Our row already has the
+overwhelmingly commoner zoological reading and `primates` agrees with it, so the candidate is
+REFUSED and the word stays out of the table. Applying it would have broken the common sense to win
+an audit row.
+
+    Moby — words the dict carries   26,742/35,027 (76.3%)  unmoved — no dictionary row changed
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    audit candidates                750 → 726
+
+STILL OPEN, unchanged: the loanword and proper-noun slice of the remaining 726 (Run 73 measured it
+near-100% defect and it is the highest-yield work left); the de-/re-/pre- prefix class, which is
+near-100% NOT a defect and should become a fourth `NEVER_A_DEFECT` predicate once its shape is
+pinned; the conservative yod (41 rows, refused once on measurement); the ~45–55 mixed-rhotic rows
+needing a positional referee test; the stress-digit rows deferred from #1369; and the A/B listen on
+`several` owed since #1372.
+
+
+## Run 75 — 2026-09-20 08:30
+
+Review of Run 74. The table is right in kind and was wrong in three particulars, one of which is the
+exact failure the table was built to prevent.
+
+⚠ THE PREDICATES JUDGED CANDIDACY UNDER A STRICTER RELATION THAN THE AUDIT USES. `normalise` merges
+AH and IH into ə as well as stripping stress; my `bare()` stripped stress only. So a row could become
+a candidate under one relation and be judged for rejection under a tighter one, and three geminates
+survived — `disservice`, `levittown`, `dissatisfaction`, every one a textbook `dis+service` /
+`Levitt+town` seam. The tool printed 18 for a class of 21.
+⚠ AND I ACCUSED THE REVIEWER'S COUNT OF BEING THE EYEBALLED ONE. Run 74's commit message says their
+21 came "off a list" while mine came from code. Theirs was re-derivable and correct; mine was the
+guess, and putting it in code made it authoritative rather than right. Moving a number into code
+does not make it true — it makes it harder to question.
+⚠ AND THE PR HAD NO TEST FOR THE TABLE, in a block whose stated thesis is "a number that cannot be
+re-derived is not a measurement". One case would have caught it. There is one now, built on
+`disservice` precisely because its AH0/IH0 difference is invisible to the audit's equivalence;
+mutation-checked by reverting `bare()`, which fails with `expected undefined to be 1`.
+
+⚠ THE `-ed` ADJECTIVE CLASS IS REMOVED FROM THE TABLE, because it is not "never a defect" — it is
+the `worsted` shape, and unlike `primate` it IS expressible. `english.jsonc`'s heteronym table has a
+live `adj` slot (`arithmetic` uses it), and our dictionary simply carries only the participle for
+`cussed`, `blessed`, `aged`, `learned`, `dogged`, `crooked`. Rejecting the class in code would have
+closed the door on the real fix three lines after opening it for `worsted`. Of the three words the
+comment named, only `cussed` was even in the class: `accursed` differs in its first syllable too,
+and `worsted` is now heteronym-skipped before it reaches the predicate.
+
+⚠ "BOTH SENSES NOW RESOLVE BY POS" IS OVERSTATED, and the two sentences I quoted are the two that
+happen to work. The tagger reads `worsted` as VBN in most attributive contexts — `a grey worsted
+suit`, `the worsted yarn`, `Worsted wool is combed`, `two yards of worsted` all give the verb, and
+so does the bare word. The honest statement: the determiner-NN and attributive-JJ contexts now
+resolve, the rest still read the participle. Still a net gain — two contexts fixed, none broken,
+and `worsteds` correct — but the check I cited could not see the failure mode. Failure mode (e).
+
+⚠ AND `750 → 726` WAS STALE: adding the `worsted` heteronym drops it from `compared` (46,062 →
+46,061) and from the candidate list, which I never re-measured. With the predicate fix the figure is
+724.
+
+CHECKS OUT, verified independently and worth recording because two were close calls: `NG G / N G = 4`
+is right and the reviewer's 6 was wrong — the other four NG-adjacent rows are genuine defects
+(`anglicize` and `conger` missing a real /ɡ/, `bracingly` with a spurious one, `bengal` a vowel), and
+the predicate cannot over-reject because equality with no `NG G` present would imply `normalise`
+equality, which contradicts candidacy. No geminate is over-rejected; `unnerve`, `brazenness` and
+`ammeter` are the borderline ones and the phonemic argument holds. The `primate` refusal is right:
+`HeteronymEntry` is `{default, verb, noun, past, adj}` and no key can carry a noun/noun distinction.
+Arithmetic balances — 37,527 + 724 + 7,810 = 46,061 — and rejected rows take `split++` exactly once.
+
+    Moby — words the dict carries   26,742/35,027 (76.3%)  unmoved — no dictionary row changed
+    audit candidates                750 → 724
+    never-a-defect                  source geminate 21, NG G / N G 4
