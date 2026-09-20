@@ -36,14 +36,28 @@
  * forms (`B EY1 S B AO1 L`) — and the engine resolves them to the last. Taking the first instead
  * would score the engine against a reading nothing produces.
  *
- * ⚠ A ROW WITH NO PRIMARY AT ALL IS SCORED AT NUCLEUS 0, because `enforceSinglePrimary` promotes the
- * first vowel. 103 dict rows of two or more syllables carry no stress-1 (`accredit`
- * `AH0 K R EH2 D AH0 T` → `ˈəkɹˌɛd̬ᵻt`). That fallback is faithful to the engine, and it means such a
- * row is a candidate only when the referees put the primary somewhere OTHER than the first syllable.
- * ⚠ AND THE REFEREES REACH ALMOST NONE OF THEM: only 9 of the 103 are in the compared bucket at all, 3
- * are candidates and 6 have the fallback the referees want. The remaining 94 are NOT "right by
- * accident" — they are unadjudicated, and this instrument has nothing to say about them. They are
- * counted here so the class has a size, not so it has a verdict.
+ * ⚠ A ROW WITH NO PRIMARY AT ALL HAS NO PLACEMENT TO COMPARE, AND IT IS A DEFECT ON ITS OWN TERMS.
+ * 103 dict rows of two or more syllables carry no stress-1. A first version of this file scored them at
+ * nucleus 0 "because `enforceSinglePrimary` promotes the first vowel", and that model is WRONG in three
+ * ways at once, which is why it is written out here rather than quietly corrected:
+ *
+ *   1. `enforceSinglePrimary` DOES NOT RUN ON THE DICTIONARY PATH. Its four call sites are the tagger and
+ *      the compound / morph / n-gram decoders. Its own comment says the promotion half lives there
+ *      because "only a predictor can return zero primaries: a dictionary row always has one" — an
+ *      invariant 103 rows violate, which is the same shape as the multi-primary guard that was missing
+ *      from one of two paths in #1323.
+ *   2. WHAT ACTUALLY RESCUES SUCH A WORD IS `promoteFirstVowel` IN `english.ts`, and it is CLAUSE-scoped:
+ *      it fires only when the whole clause has no primary. In running text it usually does not fire, and
+ *      the word ships with no tonic — `the antipode of gold` → `ðə ˌæntɪpʰˌoᶷd ʌv ɡˈoᶷɫd`.
+ *   3. AND WHERE IT DOES FIRE IT IS NOT NUCLEUS 0. It inserts before the first IPA VOWEL CHARACTER, and
+ *      `ᵻ` is not one — `bespoken` takes the mark on nucleus 1 — and on a row whose first nucleus already
+ *      carries a secondary it emits the malformed pair `ˌˈ` (`antipode` → `ˌˈæntɪpʰˌoᶷd`).
+ *
+ * So `primaryNucleus` ABSTAINS on such a row, exactly as it does on a monosyllable, and the row is
+ * reported on the `malformed` track instead. Where both referees agree on a placement it is a candidate
+ * WHATEVER that placement is, because any tonic beats none — 9 of the 103 are reachable that way. The
+ * other 94 are not "right by accident"; they are unadjudicated and this instrument has nothing to say
+ * about them. They are counted so the class has a size, not so it has a verdict.
  *
  * ⚠ THE REFEREES MUST ACTUALLY CARRY A PRIMARY, and this guard is load-bearing ON THE MOBY SIDE.
  * The same nucleus-0 fallback applied to a source would INVENT evidence — "the source puts it on the
@@ -79,10 +93,18 @@ export function primaryNucleus(a: readonly string[]): number | undefined {
     const p = stressPattern(a);
     if (p.length < 2) return undefined;
     const i = p.lastIndexOf("1");
-    return i >= 0 ? i : 0;
+    return i >= 0 ? i : undefined;
 }
 
-/** The same, for a REFEREE: `undefined` unless the source actually marked a primary. See the header. */
+/** A row of two or more syllables carrying no stress-1 at all: no tonic, on any path. See the header. */
+export function malformed(a: readonly string[]): boolean {
+    const p = stressPattern(a);
+    return p.length >= 2 && !p.includes("1");
+}
+
+/** The same, for a REFEREE. Identical to {@link primaryNucleus} now that neither invents a placement;
+ *  kept as its own name because the two abstain for DIFFERENT reasons — ours because the engine emits no
+ *  tonic, a source's because it recorded none — and a future change to one must not silently move the other. */
 export function refereePrimary(a: readonly string[]): number | undefined {
     const p = stressPattern(a);
     if (p.length < 2) return undefined;
@@ -109,15 +131,40 @@ export function moveprimary(a: readonly string[], to: number): string[] {
     });
 }
 
+/**
+ * INFLECTIONAL SIBLINGS OF `w` THAT THE DICTIONARY CARRIES — the check that says whether correcting a
+ * lemma leaves it contradicting its own paradigm.
+ *
+ * ⚠ INFLECTION ONLY, AND THE LINE IS LOAD-BEARING. A DERIVATIONAL suffix may legitimately move the
+ * primary — `government` → `governmental` is the correct English alternation — so a first version that
+ * also enumerated `-ly`, `-ment`, `-al` and `-ness` reported 32 false alarms against 27 real ones.
+ *
+ * ⚠ AND E-ELISION IS NOT OPTIONAL. A first version concatenated the suffix and nothing else, so
+ * `overcome` + `ing` was looked up as `overcomeing`, found nothing, and reported the paradigm clean —
+ * while the dictionary carried `overcoming` fore-stressed against a corrected `over·COME`. Ten rows
+ * shipped that way, which is the very split the sweep exists to prevent. `-ed`/`-es` after an `e` take
+ * the same elision (`outpace` → `outpaced`, not `outpaceed`), and `-y` → `-ies`/`-ied` is here for the
+ * same reason even though no candidate has yet needed it.
+ */
+export function inflections(w: string): string[] {
+    const out = new Set<string>();
+    for (const suf of ["s", "es", "ed", "d", "ing"]) out.add(w + suf);
+    if (w.endsWith("e")) for (const suf of ["ing", "ed", "es"]) out.add(w.slice(0, -1) + suf);
+    if (w.endsWith("y") && w.length > 2 && !"aeiou".includes(w[w.length - 2]!))
+        for (const suf of ["ies", "ied"]) out.add(w.slice(0, -1) + suf);
+    out.delete(w);
+    return [...out];
+}
+
 export interface StressCandidate {
     rank: number; word: string; ours: string[]; want: string[]; at: number; to: number;
 }
 
 export function stressAudit(dictPath: string, freqPath: string, goldPath: string, mobyPath: string): {
     bucket: number; polysyllabic: number; candidates: StressCandidate[];
-    mobyBacksUs: number; mobySplit: number; goldSilent: number;
-    noPrimary: number; noPrimaryJudged: number; noPrimaryAgreed: number;
-    mobySilent: number;
+    allAgree: number; mobyBacksUs: number; mobyContradictsGold: number; mobySplit: number;
+    goldSilent: number; mobyAllSilent: number; mobySomeSilent: number;
+    noPrimary: number; noPrimaryJudged: number;
     secondaryGoldMore: number; secondarySame: number; secondaryUsMore: number;
 } {
     const het = new Set<string>(Object.keys(JSON.parse(
@@ -149,12 +196,19 @@ export function stressAudit(dictPath: string, freqPath: string, goldPath: string
         .filter((s) => s && !s.startsWith("#")).forEach((w, i) => { if (!rank.has(w)) rank.set(w, i); });
 
     const candidates: StressCandidate[] = [];
-    let bucket = 0, polysyllabic = 0, mobyBacksUs = 0, mobySplit = 0, goldSilent = 0;
-    let noPrimary = 0, noPrimaryJudged = 0, noPrimaryAgreed = 0, mobySilent = 0;
+    // ⚠ EVERY POLYSYLLABIC ROW IN THE BUCKET LANDS IN EXACTLY ONE OF THESE COUNTERS, and the report
+    // asserts that rather than assuming it. A first version printed four of them under a stated
+    // denominator they did not sum to: `mobySilent` overlapped every other bucket, rows dropped for
+    // having no Moby vote at all had no counter, and the rows where all three agree had none either.
+    // A breakdown that reads as a partition and is not one is failure mode (c) in the output itself.
+    let bucket = 0, polysyllabic = 0;
+    let allAgree = 0, mobyBacksUs = 0, mobyContradictsGold = 0, mobySplit = 0;
+    let goldSilent = 0, mobyAllSilent = 0, mobySomeSilent = 0;
+    let noPrimary = 0, noPrimaryJudged = 0;
     let secondaryGoldMore = 0, secondarySame = 0, secondaryUsMore = 0;
     for (const w of [...dict.keys()].sort()) {
         const ours = dict.get(w)!, g = goldOf(w), m = moby.get(w);
-        if (stressPattern(ours).length >= 2 && !stressPattern(ours).includes("1")) noPrimary++;
+        if (malformed(ours)) noPrimary++;
         if (!g || !m || het.has(w)) continue;
         const ga = goldToArpabet(g);
         if (!ga) continue;
@@ -166,30 +220,92 @@ export function stressAudit(dictPath: string, freqPath: string, goldPath: string
         const mm = m.map((p) => modernise(p)).filter((p) => normalise(p) === o);
         if (mm.length === 0) continue;
         bucket++;
-        const po = primaryNucleus(ours);
-        if (po === undefined) continue;
+        if (stressPattern(ours).length < 2) continue;      // a monosyllable has no placement
         polysyllabic++;
         const sg = stressPattern(ga).filter((x) => x === "2").length;
         const so = stressPattern(ours).filter((x) => x === "2").length;
         if (sg > so) secondaryGoldMore++; else if (sg === so) secondarySame++; else secondaryUsMore++;
+
         const pg = refereePrimary(ga);
         if (pg === undefined) { goldSilent++; continue; }
         const pms = mm.map(refereePrimary).filter((x): x is number => x !== undefined);
-        if (pms.length < mm.length) mobySilent++;
-        if (pms.length === 0) continue;
-        // The malformed rows the referees can actually speak to, and how the nucleus-0 fallback fares.
-        if (!stressPattern(ours).includes("1")) { noPrimaryJudged++; if (pg === 0 && pms.includes(0)) noPrimaryAgreed++; }
-        if (pg === po) { if (!pms.includes(po)) mobySplit++; continue; }
-        // ⚠ MOBY MUST NOT ALSO CARRY OUR OWN PLACEMENT — the same true-positive filter the segmental
-        // audit applies. A source that records our reading is not a source agreeing against us.
-        if (!pms.includes(pg) || pms.includes(po)) { mobyBacksUs++; continue; }
+        if (pms.length === 0) { mobyAllSilent++; continue; }
+        if (pms.length < mm.length) mobySomeSilent++;       // ⚠ REPORTED, NOT A BUCKET — it overlaps them all
+
+        // ⚠ A MALFORMED ROW IS A CANDIDATE WHATEVER PLACEMENT THE REFEREES AGREE ON, because it carries
+        // no tonic on any path (see the header). It has nothing to compare, so it does not pass through
+        // the three verdicts below.
+        if (malformed(ours)) {
+            noPrimaryJudged++;
+            if (pms.includes(pg)) candidates.push({ rank: rank.get(w) ?? -1, word: w, ours, want: moveprimary(ours, pg), at: -1, to: pg });
+            else mobyContradictsGold++;
+            continue;
+        }
+        const po = primaryNucleus(ours)!;
+        if (pg === po) { if (pms.includes(po)) allAgree++; else mobySplit++; continue; }
+        // ⚠ THESE ARE TWO DIFFERENT VERDICTS AND THEY WERE ONE COUNTER. `!pms.includes(pg) ||
+        // pms.includes(po)` fires both when Moby RECORDS OUR PLACEMENT and when Moby agrees with neither
+        // of us, and the report printed the sum under the first label — so a row where gold says 1, we
+        // say 0 and Moby says 2 was counted as Moby endorsing our row. The candidate set never depended
+        // on the split, which is exactly how a wrong number sat in the output of an instrument whose
+        // entire purpose is to be read.
+        if (pms.includes(po)) { mobyBacksUs++; continue; }
+        if (!pms.includes(pg)) { mobyContradictsGold++; continue; }
         candidates.push({ rank: rank.get(w) ?? -1, word: w, ours, want: moveprimary(ours, pg), at: po, to: pg });
     }
+    // ⚠ ASSERTED, NOT DOCUMENTED. The five verdicts plus the two abstentions plus the malformed track
+    // must account for every polysyllabic row, or a bucket has silently started overlapping another.
+    // ⚠ `noPrimaryJudged` ALREADY CONTAINS ITS OWN CANDIDATES, so only the PLACEMENT candidates are
+    // added here. Writing `candidates.length` counted the malformed ones twice and the assertion caught
+    // it on the first run, which is the argument for having written the assertion rather than a comment.
+    const accounted = allAgree + mobyBacksUs + mobyContradictsGold + mobySplit
+        + goldSilent + mobyAllSilent + noPrimaryJudged + candidates.filter((c) => c.at >= 0).length;
+    if (accounted !== polysyllabic) throw new Error(`buckets do not partition: ${accounted} vs ${polysyllabic}`);
     return {
-        bucket, polysyllabic, candidates, mobyBacksUs, mobySplit, goldSilent,
-        noPrimary, noPrimaryJudged, noPrimaryAgreed, mobySilent,
+        bucket, polysyllabic, candidates, allAgree, mobyBacksUs, mobyContradictsGold, mobySplit,
+        goldSilent, mobyAllSilent, mobySomeSilent, noPrimary, noPrimaryJudged,
         secondaryGoldMore, secondarySame, secondaryUsMore,
     };
+}
+
+/**
+ * THE PARADIGM SWEEP — which inflected rows a correction has left contradicting their own lemma.
+ *
+ * ⚠ THIS BELONGS IN THE REPO AND NOT IN A SCRATCH FILE, which is how it came to be wrong. The first
+ * version lived outside the tree, enumerated siblings by bare concatenation, and reported the paradigm
+ * clean while ten `-ing` forms sat fore-stressed against corrected lemmas. A check whose result gates a
+ * 321-row block has to be runnable by the next reader.
+ *
+ * ⚠ A SIBLING GOLD RECORDS AS A POS-CONDITIONED HETERONYM IS SKIPPED, and `undertaking` is why:
+ * gold carries `{DEFAULT: ˈʌndəɹtˌAkɪŋ, VERB: ˌʌndəɹtˈAkɪŋ}`, our row is the noun, and it is RIGHT.
+ * Propagating `under·TAKE` into it would have replaced a correct default with the verb reading — the
+ * same `override` / `overriding` shape the curation gate already records, and the sweep found it only
+ * because the heteronym check was added. The main audit skips these for the same reason.
+ */
+export function paradigmSweep(
+    dict: ReadonlyMap<string, string[]>,
+    before: ReadonlyMap<string, string[]>,
+    goldRaw: Readonly<Record<string, unknown>>,
+): { word: string; ours: string[]; want: string[]; of: string }[] {
+    const conditioned = (w: string): boolean => {
+        const v = goldRaw[w] ?? goldRaw[w[0]!.toUpperCase() + w.slice(1)];
+        return typeof v === "object" && v !== null;
+    };
+    const moved = new Set([...dict.keys()].filter(
+        (w) => before.has(w) && before.get(w)!.join(" ") !== dict.get(w)!.join(" ")));
+    const out: { word: string; ours: string[]; want: string[]; of: string }[] = [];
+    for (const w of [...moved].sort()) {
+        const to = primaryNucleus(dict.get(w)!), from = primaryNucleus(before.get(w)!);
+        if (to === undefined || from === undefined || to === from) continue;
+        for (const d of inflections(w)) {
+            const ph = dict.get(d);
+            if (ph === undefined || moved.has(d) || conditioned(d)) continue;
+            if (malformed(ph) || primaryNucleus(ph) !== from) continue;
+            if (to >= stressPattern(ph).length) continue;
+            out.push({ word: d, ours: ph, want: moveprimary(ph, to), of: w });
+        }
+    }
+    return out;
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -201,18 +317,21 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         "data/languages/english/g2p-dict.tsv", "data/languages/english/g2p-common.txt", gold, moby,
     );
     console.log(`segments already agree (the audit's \`agree\` bucket):  ${r.bucket}`);
-    console.log(`  of two or more syllables:                         ${r.polysyllabic}`);
-    console.log(`  gold marks no primary — dropped from the vote:    ${r.goldSilent}`);
-    console.log(`PRIMARY PLACEMENT, over the ${r.polysyllabic - r.goldSilent} the referees can vote on`);
-    console.log(`  gold AND Moby agree AGAINST us:                   ${r.candidates.length}`);
-    console.log(`  gold differs but Moby records our placement:      ${r.mobyBacksUs}`);
+    console.log(`  of two or more syllables:                         ${r.polysyllabic}   ← the denominator below`);
+    console.log(`PRIMARY PLACEMENT — these eight partition it, and the audit throws if they do not`);
+    console.log(`  all three agree:                                  ${r.allAgree}`);
+    console.log(`  gold AND Moby agree AGAINST us  (candidates):     ${r.candidates.length}`);
+    console.log(`  gold differs, Moby records OUR placement:         ${r.mobyBacksUs}`);
+    console.log(`  Moby agrees with neither of us:                   ${r.mobyContradictsGold}`);
     console.log(`  gold agrees with us, Moby differs:                ${r.mobySplit}`);
-    console.log(`  a matching Moby reading marks no primary:         ${r.mobySilent}`);
-    console.log(`MALFORMED ROWS (no stress-1 at all, two or more syllables)`);
+    console.log(`  gold marked no primary — abstains:                ${r.goldSilent}`);
+    console.log(`  every matching Moby reading is unmarked:          ${r.mobyAllSilent}`);
+    console.log(`  malformed and not a candidate:                    ${r.noPrimaryJudged - r.candidates.filter((c) => c.at < 0).length}`);
+    console.log(`  (SOME matching Moby reading unmarked:             ${r.mobySomeSilent} — overlaps the rows above, not a bucket)`);
+    console.log(`MALFORMED ROWS (no stress-1 at all, two or more syllables — no tonic on ANY path)`);
     console.log(`  in the whole dictionary:                          ${r.noPrimary}`);
     console.log(`  of those, ones both referees can vote on:         ${r.noPrimaryJudged}`);
-    console.log(`    whose nucleus-0 fallback is what they want:     ${r.noPrimaryAgreed}`);
-    console.log(`    a candidate (the fallback is wrong):            ${r.noPrimaryJudged - r.noPrimaryAgreed}`);
+    console.log(`    candidates (any tonic beats none):              ${r.candidates.filter((c) => c.at < 0).length}`);
     console.log(`SECONDARY MARKS — a convention gap, not adjudicated here`);
     console.log(`  gold marks more ${r.secondaryGoldMore}   same ${r.secondarySame}   we mark more ${r.secondaryUsMore}`);
     for (const [lab, lo, hi] of [["off-list", -1, 0], ["top 1k", 0, 1000], ["1k–5k", 1000, 5000], ["5k–20k", 5000, 20000], ["20k–40k", 20000, Infinity]] as const)

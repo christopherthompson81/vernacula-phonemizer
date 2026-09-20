@@ -4998,7 +4998,9 @@ class, which is the clearest and most rule-like part of the whole set. That is e
 #1374 fixed for the segmental audit ("THE FREQUENCY LIST IS A RANKING, NOT THE POPULATION, AND FOR FOUR
 BLOCKS IT WAS BOTH") and #1377 restated as "absence from a 40k list is not evidence". All 232 are applied.
 
-    dict rows changed   321 = 232 adjudicated + 89 paradigm
+    dict rows changed   321 = 232 adjudicated + 89 paradigm    ⚠ SUPERSEDED — see Run 82, which
+                        found 6 malformed rows this block wrongly cleared and 12 paradigm rows its
+                        sweep could not see. Final: 339 = 238 + 101.
     curated rows        +315 new, 6 existing rows amended in place (exon, governmental, retort,
                         amniotic, cotyledon, impolitic) — no word has two
     lexicon             rebuilt, 321 rows, round-trip 100.00%
@@ -5145,3 +5147,78 @@ load-bearing evidence that only stress moved is the direct one: over the 321 row
 phone strings are identical, every digit transition is one of the three the remedy licenses
 (1→2, 0→1, 2→1), no row is left multi-primary, and none is left with no primary at all. That was measured;
 the audit's silence is a corollary, not the proof.
+
+## Run 82 — 2026-09-20 10:00 — review of #1379, and the model underneath it was wrong
+
+Four findings, all four real, and the first two are the block's own claims failing.
+
+### ⚠ THE NO-PRIMARY MODEL WAS WRONG THREE TIMES OVER, AND IT WAS THE FIRST THING THE TOOL ASSERTED
+
+Run 78 says a row with no stress-1 is scored at nucleus 0 "because `enforceSinglePrimary` promotes the
+first vowel", calls that "faithful to the engine", and a test pinned it. Every clause of that is false:
+
+1. **`enforceSinglePrimary` DOES NOT RUN ON THE DICTIONARY PATH.** Its four call sites are the tagger and
+   the compound / morph / n-gram decoders. Its own comment says the promotion half lives there because
+   *"only a predictor can return zero primaries: a dictionary row always has one"* — **an invariant 103
+   rows violate.** That is the multi-primary defect of #1323 exactly, one path guarded and its twin not,
+   in the same function, found by reading the function instead of its name.
+2. **What can rescue such a word is `promoteFirstVowel` in `english.ts`, and it is CLAUSE-scoped** — it
+   fires only when the WHOLE clause has no primary. In running text it usually does not:
+
+       the antipode of gold      → ðə ˌæntɪpʰˌoᶷd ʌv ɡˈoᶷɫd      ← no tonic on the word
+       a bespoken suit arrived   → ə bᵻspoᶷkən sˈuːt ɚˈaᶦvd      ← no tonic
+3. **And where it does fire it is not nucleus 0.** It inserts before the first IPA vowel CHARACTER, and
+   `ᵻ` is not one, so `bespoken` takes the mark on nucleus 1; on a row whose first nucleus already carries
+   a secondary it emits the malformed pair — `antipode` in isolation is `ˌˈæntɪpʰˌoᶷd`.
+
+The consequence is not cosmetic. The six rows Run 78 reported as *"the fallback is what the referees
+want"* were **declared in agreement while shipping with no tonic at all**: `antipode`, `gasify`,
+`polyglot`, `tonsil`, `nympho` and **`rehab` at rank 8,050**. `primaryNucleus` now ABSTAINS on such a row,
+exactly as on a monosyllable, and a malformed row is a candidate wherever the referees agree it goes,
+because any tonic beats none. All six applied; malformed rows 103 → 94, and 0 of the remainder are
+referee-reachable.
+
+⚠ The general shape is worth keeping: **the instrument modelled the engine by reading a function's NAME
+and its docstring rather than its call sites**, and the docstring was itself asserting a false invariant.
+`grep` for the call sites was the whole cost.
+
+### ⚠ THE PARADIGM SWEEP HAD NO E-ELISION, AND IT LIVED IN A SCRATCH FILE
+
+`overcome` + `ing` was looked up as `overcomeing`, found nothing, and the sweep reported the paradigm
+clean — while the dictionary carried `overcoming` fore-stressed against a corrected `over·COME`. Twelve
+rows: `overcoming`, `overtaking`, `undermining`, `understating`, `overruling`, `outpacing`, `outsourcing`,
+`downgrading`, `procreating`, `overpaying`, plus `anchovies` and `rhinoplasties` on consonant + y → `-ies`.
+**That is precisely the split the sweep exists to prevent, produced by the sweep.**
+
+⚠ **AND THE SWEEP FOUND A ROW THE REVIEW DID NOT, WHICH IS WHY THE GUARD MATTERS.** `undertaking` is a
+POS-conditioned heteronym in gold — `{DEFAULT: ˈʌndəɹtˌAkɪŋ, VERB: ˌʌndəɹtˈAkɪŋ}` — our row is the NOUN
+and it is correct. Propagating `under·TAKE` into it would have replaced a right default with the verb
+reading: the `override`/`overriding` shape the gate already records. The sweep now skips any sibling gold
+records as conditioned, the same test the main audit applies to a headword.
+
+The enumerator and the sweep are now `inflections()` and `paradigmSweep()` **in the committed tool**, with
+the elision rule and the heteronym guard pinned by test. A check whose result gates a 339-row block cannot
+live in `/tmp`.
+
+### Two reporting defects, neither of which touched a decision
+
+- **`mobyBacksUs` was two verdicts in one counter.** `!pms.includes(pg) || pms.includes(po)` fires both
+  when Moby RECORDS OUR PLACEMENT and when Moby agrees with neither of us, and the report printed the sum
+  under the first label — so a row where gold says 1, we say 0 and Moby says 2 was counted as Moby
+  endorsing our row. Split into `mobyBacksUs` and `mobyContradictsGold`; the latter is **0**, which is the
+  Run 78 "three-way disagreement is never observed" result arriving a second way.
+- **The printed buckets did not partition their stated denominator.** `mobySilent` overlapped every other
+  bucket, the rows dropped for having no Moby vote had no counter, and neither did the rows where all
+  three agree. There are now eight and **the audit throws if they do not sum to `polysyllabic`** — which
+  fired on its first run, because `noPrimaryJudged` already contained its own candidates and they were
+  being added twice. An assertion rather than a comment, for exactly that reason.
+
+### After
+
+    dict rows        321 → 339  (238 adjudicated + 101 paradigm)
+    stress audit     1 candidate — `thereupon`, the standing refusal
+    paradigm sweep   clean but for `snafus`, the documented corrupt-row exclusion
+    malformed        103 → 94;  referee-reachable remainder 0
+    curation gate    unchanged at 71 / 173 — the 18 new rows open no split
+    invariants       339 rows, 0 segment changes, 0 illegal digit transitions,
+                     0 left multi-primary, 0 left primary-less

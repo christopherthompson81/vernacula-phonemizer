@@ -2439,7 +2439,7 @@ theseus	TH IY1 Z IY2 AH0 S	TH IY1 S IY0 AH0 S	proper noun: ⟨s⟩ is voiceless 
 viennese	V IY0 EH1 N IY2 S	V IY2 AH0 N IY1 Z	proper noun: ⟨-ese⟩ is stressed IY Z (gold + moby)
 waal	W AA1 L	V AA1 L	proper noun: Dutch ⟨w⟩ is V (gold + moby; M-W ˈväl)
 wiesbaden	W IY1 S B AA2 D AH0 N	V IY1 S B AA2 D AH0 N	proper noun: German ⟨w⟩ is V (gold + moby)
-# THE STRESS AXIS — 232 rows adjudicated by `tools/english/en_stress_compare.mts`, plus 89 taken so a
+# THE STRESS AXIS — 238 rows adjudicated by `tools/english/en_stress_compare.mts`, plus 101 taken so a
 # paradigm does not split. The segmental audit cannot see this class AT ALL: its `normalise()` strips
 # stress before comparing, so no pure stress error has ever been one of its candidates, and its own
 # `iə / jə` predicate says so in a comment about `eosinophilia`. This is the same two referees on the
@@ -2453,12 +2453,33 @@ wiesbaden	W IY1 S B AA2 D AH0 N	V IY1 S B AA2 D AH0 N	proper noun: German ⟨w�
 # not a defect class. #1377 earned this rule from the opposite direction, where a stress-BLIND
 # agreement moved the primary on 11 rows and got `mosel` wrong.
 #
-# ⚠ THE 89 PARADIGM ROWS HAVE NO REFEREE AND ARE TAKEN ANYWAY. `decade` is adjudicated and `decades`
+# ⚠ SIX OF THE 238 ARE MALFORMED ROWS RATHER THAN MISPLACED ONES — `antipode`, `gasify`, `polyglot`,
+# `tonsil`, `rehab` (rank 8,050) and `nympho` carried a secondary and NO primary, so they shipped with no
+# tonic at all: `the antipode of gold` → `ðə ˌæntɪpʰˌoᶷd ʌv ɡˈoᶷɫd`. A first version of the instrument
+# scored such a row at nucleus 0 "because `enforceSinglePrimary` promotes the first vowel" and so declared
+# these six in AGREEMENT with the referees. That function does not run on the dictionary path at all — its
+# own comment asserts "a dictionary row always has one", an invariant 103 rows violate — and the thing that
+# can rescue the word, `promoteFirstVowel` in `english.ts`, is CLAUSE-scoped and usually does not fire.
+# Any tonic beats none, so a malformed row is a candidate wherever the referees agree it goes.
+#
+# ⚠ THE 101 PARADIGM ROWS HAVE NO REFEREE AND ARE TAKEN ANYWAY. `decade` is adjudicated and `decades`
 # is not in the referees' intersection, so correcting only the lemma would ship `DEC-ade` against
 # `de-CADES` — the `bengals` split of #1377, silent and indistinguishable from an oversight.
 # INFLECTION never moves the primary, so the move is mechanical. DERIVATION can (`government` →
 # `governmental`), so derived forms are deliberately NOT propagated to; `handcraft` keeps its
 # fore-stress under a corrected `handcrafted` for exactly that reason.
+#
+# ⚠ AND THE SWEEP NEEDS E-ELISION, WHICH A FIRST VERSION DID NOT HAVE. Concatenating alone looks
+# `overcome` + `ing` up as `overcomeing`, finds nothing, and reports the paradigm clean — while the
+# dictionary carries `overcoming` fore-stressed against a corrected `over·COME`. Ten `-ing` rows plus
+# `anchovies` and `rhinoplasties` (consonant + y → -ies) were shipping that way. The enumerator and the
+# sweep now live in the tool, not in a scratch file, because a check that gates a 339-row block has to be
+# runnable by the next reader.
+#
+# ⚠ AND A SIBLING GOLD RECORDS AS A POS-CONDITIONED HETERONYM IS SKIPPED. `undertaking` is
+# `{DEFAULT: ˈʌndəɹtˌAkɪŋ, VERB: ˌʌndəɹtˈAkɪŋ}` in gold; our row is the NOUN and is right. Propagating
+# `under·TAKE` into it would have replaced a correct default with the verb reading — the `override` /
+# `overriding` shape the curation gate already records, caught only because the guard was added.
 #
 # ⚠ THE FREQUENCY LIST IS NOT THE POPULATION — 125 of the 233 candidates are off `g2p-common.txt`
 # entirely, and they hold the clearest defects in the set: the productive `-ation`/`-ic`/`-ician`
@@ -2481,7 +2502,9 @@ academe	AE1 K AH0 D IY2 M	AE2 K AH0 D IY1 M	stress placement (gold + moby)
 accredit	AH0 K R EH2 D AH0 T	AH0 K R EH1 D AH0 T	stress placement (gold + moby)
 alcatraz	AE2 L K AH0 T R AE1 Z	AE1 L K AH0 T R AE2 Z	stress placement (gold + moby)
 alternation	AO1 L T ER0 N EY2 SH AH0 N	AO2 L T ER0 N EY1 SH AH0 N	stress placement (gold + moby)
+anchovies	AE0 N CH OW1 V IY0 Z	AE1 N CH OW2 V IY0 Z	stress placement (paradigm of anchovy; no referee, taken so the paradigm does not split)
 anchovy	AE0 N CH OW1 V IY0	AE1 N CH OW2 V IY0	stress placement (gold + moby)
+antipode	AE2 N T IH0 P OW2 D	AE1 N T IH0 P OW2 D	stress placement (gold + moby; the row had NO primary at all)
 aquitaine	AE2 K W IH0 T EY1 N	AE1 K W IH0 T EY2 N	stress placement (gold + moby)
 arbitrageur	AA1 R B IH0 T R AA2 ZH ER0	AA2 R B IH0 T R AA2 ZH ER1	stress placement (gold + moby)
 archangel	AA2 R K EY1 N JH AH0 L	AA1 R K EY2 N JH AH0 L	stress placement (gold + moby)
@@ -2545,6 +2568,7 @@ downbeat	D AW0 N B IY1 T	D AW1 N B IY2 T	stress placement (gold + moby)
 downgrade	D AW1 N G R EY1 D	D AW1 N G R EY2 D	stress placement (gold + moby)
 downgraded	D AW1 N G R EY1 D AH0 D	D AW1 N G R EY2 D AH0 D	stress placement (paradigm of downgrade; no referee, taken so the paradigm does not split)
 downgrades	D AW1 N G R EY1 D Z	D AW1 N G R EY2 D Z	stress placement (paradigm of downgrade; no referee, taken so the paradigm does not split)
+downgrading	D AW1 N G R EY1 D IH0 NG	D AW1 N G R EY2 D IH0 NG	stress placement (paradigm of downgrade; no referee, taken so the paradigm does not split)
 downtrodden	D AW2 N T R AA1 D AH0 N	D AW1 N T R AA2 D AH0 N	stress placement (gold + moby)
 escrow	EH0 S K R OW1	EH1 S K R OW2	stress placement (gold + moby)
 evermore	EH1 V ER0 M AO2 R	EH2 V ER0 M AO1 R	stress placement (gold + moby)
@@ -2561,6 +2585,7 @@ fourfold	F AO2 R F OW1 L D	F AO1 R F OW2 L D	stress placement (gold + moby)
 freemason	F R IY1 M EY1 S AH0 N	F R IY1 M EY2 S AH0 N	stress placement (gold + moby)
 freemasonry	F R IY1 M EY1 S AH0 N R IY0	F R IY1 M EY2 S AH0 N R IY0	stress placement (gold + moby)
 freestanding	F R IY1 S T AE2 N D IH0 NG	F R IY2 S T AE1 N D IH0 NG	stress placement (gold + moby)
+gasify	G AE2 S AH0 F AY2	G AE1 S AH0 F AY2	stress placement (gold + moby; the row had NO primary at all)
 goddamn	G AA1 D D AE2 M	G AA2 D D AE1 M	stress placement (gold + moby)
 goddamned	G AA1 D D AE2 M D	G AA2 D D AE1 M D	stress placement (paradigm of goddamn; no referee, taken so the paradigm does not split)
 godown	G OW1 D AW2 N	G OW2 D AW1 N	stress placement (gold + moby)
@@ -2622,6 +2647,7 @@ midstream	M IH1 D S T R IY2 M	M IH2 D S T R IY1 M	stress placement (gold + moby)
 miscue	M IH1 S K Y UW2	M IH2 S K Y UW1	stress placement (gold + moby)
 miscues	M IH1 S K Y UW2 Z	M IH2 S K Y UW1 Z	stress placement (paradigm of miscue; no referee, taken so the paradigm does not split)
 nevermore	N EH1 V ER0 M AO2 R	N EH2 V ER0 M AO1 R	stress placement (gold + moby)
+nympho	N IH2 M F OW0	N IH1 M F OW0	stress placement (gold + moby; the row had NO primary at all)
 oblate	AA0 B L EY1 T	AA1 B L EY2 T	stress placement (gold + moby)
 obsolete	AA1 B S AH0 L IY2 T	AA2 B S AH0 L IY1 T	stress placement (gold + moby)
 offbeat	AO1 F B IY1 T	AO1 F B IY2 T	stress placement (gold + moby)
@@ -2651,6 +2677,7 @@ outlasts	AW1 T L AE2 S T S	AW2 T L AE1 S T S	stress placement (paradigm of outla
 outpace	AW1 T P EY2 S	AW2 T P EY1 S	stress placement (gold + moby)
 outpaced	AW1 T P EY2 S T	AW2 T P EY1 S T	stress placement (paradigm of outpace; no referee, taken so the paradigm does not split)
 outpaces	AW1 T P EY2 S IH0 Z	AW2 T P EY1 S IH0 Z	stress placement (paradigm of outpace; no referee, taken so the paradigm does not split)
+outpacing	AW1 T P EY2 S IH0 NG	AW2 T P EY1 S IH0 NG	stress placement (paradigm of outpace; no referee, taken so the paradigm does not split)
 outsmart	AW1 T S M AA2 R T	AW2 T S M AA1 R T	stress placement (gold + moby)
 outsmarted	AW1 T S M AA2 R T IH0 D	AW2 T S M AA1 R T IH0 D	stress placement (paradigm of outsmart; no referee, taken so the paradigm does not split)
 outsmarting	AW1 T S M AA2 R T IH0 NG	AW2 T S M AA1 R T IH0 NG	stress placement (paradigm of outsmart; no referee, taken so the paradigm does not split)
@@ -2658,6 +2685,7 @@ outsmarts	AW1 T S M AA2 R T S	AW2 T S M AA1 R T S	stress placement (paradigm of 
 outsource	AW2 T S AO1 R S	AW1 T S AO2 R S	stress placement (gold + moby)
 outsourced	AW2 T S AO1 R S T	AW1 T S AO2 R S T	stress placement (paradigm of outsource; no referee, taken so the paradigm does not split)
 outsources	AW2 T S AO1 R S IH0 Z	AW1 T S AO2 R S IH0 Z	stress placement (paradigm of outsource; no referee, taken so the paradigm does not split)
+outsourcing	AW2 T S AO1 R S IH0 NG	AW1 T S AO2 R S IH0 NG	stress placement (paradigm of outsource; no referee, taken so the paradigm does not split)
 outweigh	AW1 T W EY2	AW2 T W EY1	stress placement (gold + moby)
 outweighing	AW1 T W EY2 IH0 NG	AW2 T W EY1 IH0 NG	stress placement (paradigm of outweigh; no referee, taken so the paradigm does not split)
 outweighs	AW1 T W EY2 Z	AW2 T W EY1 Z	stress placement (paradigm of outweigh; no referee, taken so the paradigm does not split)
@@ -2666,8 +2694,10 @@ outwits	AW1 T W IH2 T S	AW2 T W IH1 T S	stress placement (paradigm of outwit; no
 overbuy	OW1 V ER0 B AY2	OW2 V ER0 B AY1	stress placement (gold + moby)
 overcome	OW1 V ER0 K AH2 M	OW2 V ER0 K AH1 M	stress placement (gold + moby)
 overcomes	OW1 V ER0 K AH2 M Z	OW2 V ER0 K AH1 M Z	stress placement (paradigm of overcome; no referee, taken so the paradigm does not split)
+overcoming	OW1 V ER0 K AH2 M IH0 NG	OW2 V ER0 K AH1 M IH0 NG	stress placement (paradigm of overcome; no referee, taken so the paradigm does not split)
 overfill	OW1 V ER0 F IH2 L	OW2 V ER0 F IH1 L	stress placement (gold + moby)
 overpay	OW1 V ER0 P EY2	OW2 V ER0 P EY1	stress placement (gold + moby; off the frequency list, taken because `overpayment` decodes through it)
+overpaying	OW1 V ER0 P EY2 IH0 NG	OW2 V ER0 P EY1 IH0 NG	stress placement (paradigm of overpay; no referee, taken so the paradigm does not split)
 overpayment	OW1 V ER0 P EY2 M AH0 N T	OW2 V ER0 P EY1 M AH0 N T	stress placement (gold + moby)
 overpayments	OW1 V ER0 P EY2 M AH0 N T S	OW2 V ER0 P EY1 M AH0 N T S	stress placement (paradigm of overpayment; no referee, taken so the paradigm does not split)
 overreach	OW1 V ER0 R IY2 CH	OW2 V ER0 R IY1 CH	stress placement (gold + moby)
@@ -2677,6 +2707,7 @@ overreaching	OW1 V ER0 R IY2 CH IH0 NG	OW2 V ER0 R IY1 CH IH0 NG	stress placemen
 overriding	OW1 V ER0 R AY2 D IH0 NG	OW2 V ER0 R AY1 D IH0 NG	stress placement (gold + moby)
 overrule	OW1 V ER0 R UW2 L	OW2 V ER0 R UW1 L	stress placement (gold + moby)
 overrules	OW1 V ER0 R UW2 L Z	OW2 V ER0 R UW1 L Z	stress placement (paradigm of overrule; no referee, taken so the paradigm does not split)
+overruling	OW1 V ER0 R UW2 L IH0 NG	OW2 V ER0 R UW1 L IH0 NG	stress placement (paradigm of overrule; no referee, taken so the paradigm does not split)
 oversee	OW1 V ER0 S IY2	OW2 V ER0 S IY1	stress placement (gold + moby)
 overseeing	OW1 V ER0 S IY2 IH0 NG	OW2 V ER0 S IY1 IH0 NG	stress placement (paradigm of oversee; no referee, taken so the paradigm does not split)
 oversees	OW1 V ER0 S IY2 Z	OW2 V ER0 S IY1 Z	stress placement (paradigm of oversee; no referee, taken so the paradigm does not split)
@@ -2687,12 +2718,14 @@ overstuff	OW1 V ER0 S T AH2 F	OW2 V ER0 S T AH1 F	stress placement (gold + moby)
 overstuffed	OW1 V ER0 S T AH2 F T	OW2 V ER0 S T AH1 F T	stress placement (paradigm of overstuff; no referee, taken so the paradigm does not split)
 overtake	OW1 V ER0 T EY2 K	OW2 V ER0 T EY1 K	stress placement (gold + moby)
 overtakes	OW1 V ER0 T EY2 K S	OW2 V ER0 T EY1 K S	stress placement (paradigm of overtake; no referee, taken so the paradigm does not split)
+overtaking	OW1 V ER0 T EY2 K IH0 NG	OW2 V ER0 T EY1 K IH0 NG	stress placement (paradigm of overtake; no referee, taken so the paradigm does not split)
 overtax	OW1 V ER0 T AE2 K S	OW2 V ER0 T AE1 K S	stress placement (gold + moby)
 pantaloon	P AE1 N T AH0 L UW2 N	P AE2 N T AH0 L UW1 N	stress placement (gold + moby)
 pantaloons	P AE1 N T AH0 L UW2 N Z	P AE2 N T AH0 L UW1 N Z	stress placement (paradigm of pantaloon; no referee, taken so the paradigm does not split)
 phantasm	F AE2 N T AE1 Z AH0 M	F AE1 N T AE2 Z AH0 M	stress placement (gold + moby)
 piccadilly	P IH1 K AH0 D IH2 L IY0	P IH2 K AH0 D IH1 L IY0	stress placement (gold + moby)
 polyandry	P AA2 L IY2 AE1 N D R IY0	P AA1 L IY2 AE2 N D R IY0	stress placement (gold + moby)
+polyglot	P AA2 L IY2 G L AA0 T	P AA1 L IY2 G L AA0 T	stress placement (gold + moby; the row had NO primary at all)
 poseur	P OW1 Z ER0	P OW2 Z ER1	stress placement (gold + moby)
 poseurs	P OW1 Z ER0 Z	P OW2 Z ER1 Z	stress placement (paradigm of poseur; no referee, taken so the paradigm does not split)
 preamble	P R IY0 AE1 M B AH0 L	P R IY1 AE2 M B AH0 L	stress placement (gold + moby)
@@ -2706,6 +2739,7 @@ preterm	P R IY1 T ER0 M	P R IY2 T ER1 M	stress placement (gold + moby)
 procreate	P R OW1 K R IY0 EY1 T	P R OW1 K R IY0 EY2 T	stress placement (gold + moby)
 procreated	P R OW1 K R IY0 EY1 T IH0 D	P R OW1 K R IY0 EY2 T IH0 D	stress placement (paradigm of procreate; no referee, taken so the paradigm does not split)
 procreates	P R OW1 K R IY0 EY1 T S	P R OW1 K R IY0 EY2 T S	stress placement (paradigm of procreate; no referee, taken so the paradigm does not split)
+procreating	P R OW1 K R IY0 EY1 T IH0 NG	P R OW1 K R IY0 EY2 T IH0 NG	stress placement (paradigm of procreate; no referee, taken so the paradigm does not split)
 propylene	P R OW0 P AH0 L IY1 N	P R OW1 P AH0 L IY2 N	stress placement (gold + moby)
 protean	P R OW0 T IY1 AH0 N	P R OW1 T IY2 AH0 N	stress placement (gold + moby)
 psychobabble	S AY2 K OW0 B AE1 B AH0 L	S AY1 K OW0 B AE2 B AH0 L	stress placement (gold + moby)
@@ -2722,7 +2756,9 @@ quicksilver	K W IH1 K S IH1 L V ER0	K W IH1 K S IH2 L V ER0	stress placement (go
 quintuple	K W IH1 N T UW0 P AH0 L	K W IH2 N T UW1 P AH0 L	stress placement (gold + moby)
 radioactivity	R EY1 D IY0 OW0 AE2 K T IH2 V AH0 T IY2	R EY2 D IY0 OW0 AE2 K T IH1 V AH0 T IY2	stress placement (gold + moby)
 reapply	R IY2 AH0 P L AY0	R IY2 AH0 P L AY1	stress placement (gold + moby)
+rehab	R IY0 HH AE0 B	R IY1 HH AE0 B	stress placement (gold + moby; the row had NO primary at all)
 rematch	R IY1 M AE1 CH	R IY1 M AE2 CH	stress placement (gold + moby)
+rhinoplasties	R AY2 N OW0 P L AE1 S T IY2 Z	R AY1 N OW0 P L AE2 S T IY2 Z	stress placement (paradigm of rhinoplasty; no referee, taken so the paradigm does not split)
 rhinoplasty	R AY2 N OW0 P L AE1 S T IY2	R AY1 N OW0 P L AE2 S T IY2	stress placement (gold + moby)
 roughshod	R AH1 F SH AA1 D	R AH1 F SH AA2 D	stress placement (gold + moby)
 rustproof	R AH1 S T P R UW1 F	R AH1 S T P R UW2 F	stress placement (gold + moby)
@@ -2758,6 +2794,7 @@ teletext	T EH1 L AH0 T EH1 K S T	T EH1 L AH0 T EH2 K S T	stress placement (gold 
 thereabouts	DH EH2 R AH0 B AW1 T S	DH EH1 R AH0 B AW2 T S	stress placement (gold + moby)
 tirade	T AY0 R EY1 D	T AY1 R EY2 D	stress placement (gold + moby)
 tirades	T AY0 R EY1 D Z	T AY1 R EY2 D Z	stress placement (paradigm of tirade; no referee, taken so the paradigm does not split)
+tonsil	T AA2 N S AH0 L	T AA1 N S AH0 L	stress placement (gold + moby; the row had NO primary at all)
 tormentor	T AO1 R M EH2 N T ER0	T AO2 R M EH1 N T ER0	stress placement (gold + moby)
 tormentors	T AO1 R M EH2 N T ER0 Z	T AO2 R M EH1 N T ER0 Z	stress placement (paradigm of tormentor; no referee, taken so the paradigm does not split)
 triplex	T R IH0 P L EH1 K S	T R IH1 P L EH2 K S	stress placement (gold + moby)
@@ -2767,6 +2804,7 @@ umpteenth	AH1 M P T IY2 N TH	AH2 M P T IY1 N TH	stress placement (gold + moby)
 unbolt	AH1 N B OW2 L T	AH2 N B OW1 L T	stress placement (gold + moby)
 unbolted	AH1 N B OW2 L T IH0 D	AH2 N B OW1 L T IH0 D	stress placement (gold + moby)
 undermine	AH1 N D ER0 M AY2 N	AH2 N D ER0 M AY1 N	stress placement (gold + moby)
+undermining	AH1 N D ER0 M AY2 N IH0 NG	AH2 N D ER0 M AY1 N IH0 NG	stress placement (paradigm of undermine; no referee, taken so the paradigm does not split)
 underpin	AH1 N D ER0 P IH2 N	AH2 N D ER0 P IH1 N	stress placement (gold + moby)
 undersell	AH1 N D ER0 S EH2 L	AH2 N D ER0 S EH1 L	stress placement (gold + moby)
 underselling	AH1 N D ER0 S EH2 L IH0 NG	AH2 N D ER0 S EH1 L IH0 NG	stress placement (paradigm of undersell; no referee, taken so the paradigm does not split)
@@ -2775,6 +2813,7 @@ understaffed	AH1 N D ER0 S T AE2 F T	AH2 N D ER0 S T AE1 F T	stress placement (g
 understate	AH1 N D ER0 S T EY2 T	AH2 N D ER0 S T EY1 T	stress placement (gold + moby)
 understated	AH1 N D ER0 S T EY2 T IH0 D	AH2 N D ER0 S T EY1 T IH0 D	stress placement (paradigm of understate; no referee, taken so the paradigm does not split)
 understates	AH1 N D ER0 S T EY2 T S	AH2 N D ER0 S T EY1 T S	stress placement (paradigm of understate; no referee, taken so the paradigm does not split)
+understating	AH1 N D ER0 S T EY2 T IH0 NG	AH2 N D ER0 S T EY1 T IH0 NG	stress placement (paradigm of understate; no referee, taken so the paradigm does not split)
 undertake	AH1 N D ER0 T EY2 K	AH2 N D ER0 T EY1 K	stress placement (gold + moby)
 undertakes	AH1 N D ER0 T EY2 K S	AH2 N D ER0 T EY1 K S	stress placement (paradigm of undertake; no referee, taken so the paradigm does not split)
 underweight	AH1 N D ER0 W EY2 T	AH2 N D ER0 W EY1 T	stress placement (gold + moby)

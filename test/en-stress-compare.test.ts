@@ -8,7 +8,7 @@
  * tools/english/en_stress_compare.mts — the stress axis of the triple-source audit.
  */
 import { describe, expect, test } from "vitest";
-import { moveprimary, primaryNucleus, refereePrimary, stressPattern } from "../tools/english/en_stress_compare.mts";
+import { inflections, malformed, moveprimary, primaryNucleus, refereePrimary, stressPattern } from "../tools/english/en_stress_compare.mts";
 
 describe("what counts as the primary", () => {
     test("the pattern is the nuclei's digits and nothing else", () => {
@@ -25,9 +25,17 @@ describe("what counts as the primary", () => {
         expect(primaryNucleus(["AA1", "R", "CH", "B", "IH1", "SH", "AH0", "P"])).toBe(1);
     });
 
-    // ⚠ NUCLEUS 0, BECAUSE `enforceSinglePrimary` PROMOTES THE FIRST VOWEL. `accredit` ships ˈəkɹˌɛd̬ᵻt.
-    test("a row with no primary is scored where the engine will put one", () => {
-        expect(primaryNucleus(["AH0", "K", "R", "EH2", "D", "AH0", "T"])).toBe(0);
+    // ⚠ THIS TEST USED TO ASSERT `toBe(0)`, "because `enforceSinglePrimary` promotes the first vowel",
+    // AND THAT MODEL IS WRONG THREE TIMES OVER — see the tool's header. `enforceSinglePrimary` does not
+    // run on the dictionary path at all; what can rescue such a word is `promoteFirstVowel` in
+    // `english.ts`, which is CLAUSE-scoped and usually does not fire; and where it does it inserts
+    // before the first IPA vowel CHARACTER, which is not the first nucleus. A row with no stress-1 has
+    // no tonic, so there is no placement to compare and the audit abstains.
+    test("a row with no primary has no placement, because the engine gives it none", () => {
+        expect(primaryNucleus(["AH0", "K", "R", "EH2", "D", "AH0", "T"])).toBeUndefined();
+        expect(malformed(["AH0", "K", "R", "EH2", "D", "AH0", "T"])).toBe(true);
+        expect(malformed(["AH0", "K", "R", "EH1", "D", "AH0", "T"])).toBe(false);
+        expect(malformed(["AH0", "V"])).toBe(false);          // a monosyllable is not malformed
     });
 
     test("a monosyllable has no placement to disagree about", () => {
@@ -45,7 +53,6 @@ describe("what counts as the primary", () => {
     // it happens not to change the answer.
     test("a referee that marked no primary abstains rather than defaulting to nucleus 0", () => {
         expect(refereePrimary(["AH0", "K", "R", "EH2", "D", "AH0", "T"])).toBeUndefined();
-        expect(primaryNucleus(["AH0", "K", "R", "EH2", "D", "AH0", "T"])).toBe(0);
         expect(refereePrimary(["AH0", "K", "R", "EH1", "D", "AH0", "T"])).toBe(1);
     });
 });
@@ -71,5 +78,32 @@ describe("the remedy moves the primary and nothing else", () => {
     test("a secondary that is not the vacated primary is left exactly as ours", () => {
         expect(moveprimary(["S", "ER1", "K", "Y", "AH0", "L", "EY2", "SH", "AH0", "N"], 2))
             .toEqual(["S", "ER2", "K", "Y", "AH0", "L", "EY1", "SH", "AH0", "N"]);
+    });
+});
+
+describe("the paradigm sweep's sibling enumerator", () => {
+    // ⚠ E-ELISION IS THE BUG THIS PINS. A version that only concatenated looked `overcome` + `ing` up as
+    // `overcomeing`, found nothing, and reported ten fore-stressed `-ing` rows as a clean paradigm.
+    test("an e-final stem elides before -ing/-ed/-es", () => {
+        expect(inflections("overcome")).toContain("overcoming");
+        expect(inflections("outpace")).toEqual(expect.arrayContaining(["outpaced", "outpaces", "outpacing"]));
+        expect(inflections("downgrade")).toContain("downgrading");
+    });
+
+    test("a consonant + y takes -ies/-ied", () => {
+        expect(inflections("anchovy")).toContain("anchovies");
+        expect(inflections("rhinoplasty")).toContain("rhinoplasties");
+    });
+
+    test("plain concatenation still holds for everything else", () => {
+        expect(inflections("overpay")).toEqual(expect.arrayContaining(["overpays", "overpaying", "overpayed"]));
+        expect(inflections("outbid")).toContain("outbids");
+    });
+
+    // ⚠ NOT DERIVATION. `government` → `governmental` legitimately moves the primary, and a version of
+    // the sweep that enumerated `-ly`/`-ment`/`-al`/`-ness` reported 32 false alarms against 27 real ones.
+    test("derivational suffixes are not siblings", () => {
+        const i = inflections("government");
+        for (const d of ["governmental", "governmentally", "governmentness"]) expect(i).not.toContain(d);
     });
 });
