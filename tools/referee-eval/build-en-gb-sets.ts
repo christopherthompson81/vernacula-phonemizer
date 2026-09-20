@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { phonemizeWordRules } from "../../src/languages/english-gb/english-gb.ts";
+import { lexicalVariants, phonemizeWordRules } from "../../src/languages/english-gb/english-gb.ts";
 import { CONFIG } from "./config.ts";
 import { makeFold } from "./eval.ts";
 
@@ -38,8 +38,17 @@ const CORONAL_U = /[tdnszθl]ʰ?[ˈˌ]?uː/u; // our coronal + (aspiration) + (s
 // un-split variant also appears. The BBC target prefers the RP-diagnostic realisation (njuː, ɑː, ɒ) whenever
 // it is attested, so yod-retention etc. apply to new/tune/duty even though the referee also lists nuː.
 let claimed = 0;
+// ⚠ A WORD THE LEXICAL TABLE OWNS IS NOT A LEXICAL-SET CANDIDATE, and `aluminium` is why this guard
+// exists. Its GenAm citation is the American WORD, so the coronal-yod probe below saw `luː` with no yod
+// where the referee attests one and filed it under yod-retention — an accent set claiming a word that
+// differs lexically. The set was then powerless (a yod cannot add the syllable RP has) and, worse, the
+// membership read as though the word had been accounted for. The override supplies the British citation
+// instead, so these words must be excluded here rather than claimed by whichever single edit happens to
+// move them closest.
+const owned = lexicalVariants();
 for (const row of rows) {
     const w = row[0]!;
+    if (owned.has(w)) continue;
     const refFolded = row.slice(1).map((r) => fold(r));
     const ours = phonemizeWordRules(w);
     // yod first, by POSITION: the referee attests a post-coronal yod that our GOOSE slot lacks (student, tune —

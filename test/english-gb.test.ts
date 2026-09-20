@@ -8,7 +8,14 @@
  *
  * DEFERRED, and so excluded from this gold:
  *   • yod-COALESCENCE after /t d/ (tube→t͡ʃuːb, duke→d͡ʒuːk) — a further modern-SSBE step beyond yod-retention.
- *   • idiosyncratic US/UK lexical vowel swaps (tomato→təˈmɑːtəʊ, pasta→ˈpæstə) — not a systematic set.
+ *   • the -ary/-ery/-ory weak vowel (secretary → sɛkɹətəɹi, not sɛkɹətˌɛɹi) — a productive RULE this accent
+ *     is still missing, and 7 of 7 of its members miss the referee the same way. Not a word list.
+ *
+ * NO LONGER DEFERRED — the lexical variants this note used to name. `tomato` and `pasta` were cited here as
+ * "not a systematic set", which was true and was the wrong conclusion: they are not a SET because they are
+ * not an accent phenomenon at all, and what they needed was somewhere to say the two varieties use different
+ * WORDS. That is `data/languages/english-gb/en-gb-lexical.tsv`; the eleven rows in it are referee-checked
+ * one at a time and the class is open rather than finished.
  */
 import { describe, expect, it } from "vitest";
 import { phonemizeWord } from "../src/languages/english-gb/english-gb.ts";

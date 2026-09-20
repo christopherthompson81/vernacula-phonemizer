@@ -1,0 +1,14 @@
+# British lexical variants: word\tGenAm-alphabet citation this accent starts from.
+# See data/languages/english-gb/en-gb-lexical.PROVENANCE.md. Every row is checked against the
+# wikipron UK referee; the accent delta (non-rhoticity, GOAT, the lexical sets) still runs over it.
+aluminium	ˌæljʊmˈɪniəm
+buoy	bˈɔᶦ
+clerk	klˈɑːɹk
+derby	dˈɑːɹbi
+figure	fˈɪɡɚ
+herb	hˈɝb
+lever	lˈiːvɚ
+lieutenant	lɛftˈɛnənt
+pasta	pˈæstə
+tomato	təmˈɑːtoᶷ
+vitamin	vˈɪtəmɪn
