@@ -4264,3 +4264,56 @@ cannot see two sources agreeing about the one thing at issue.
 
     Moby — words the dict carries   26,725/35,027 (76.3%) → see below
     rows corrected                  18 → 24  (14 arbitrated, 10 paradigm)
+
+## Run 68 — 2026-09-20 01:30
+
+The extra-schwa class, 77 rows — the mirror of Run 66, where WE have a schwa the referee lacks. It
+is mostly a class where we are RIGHT, and the named syllabic-l candidate resolves the opposite way
+from the one I predicted.
+
+⚠ THREE ROWS, AND THAT IS THE HONEST YIELD. Whole-reading arbitration against gold: 57
+gold-differs-from-both, 16 no gold, 3 gold-backs-us, 1 gold-backs-Moby. Applying the POSITIONAL test
+Run 67 recorded as owed — compare only the segment at issue, in the same consonant frame, via the
+repo's own `goldToArpabet` — recovers one more, not the flood I expected: `serenely`,
+`motorcyclist`, and `motorcyclists` by paradigm.
+⚠ THE POSITIONAL TEST IS WORTH HAVING ANYWAY, and its first hand-rolled version was wrong in the
+usual way: I folded gold with my own regex and 50 of 77 came back "ambiguous" because gold writes
+`O`, `I` and `ɾ` in its own shorthand. Running it through `goldToArpabet` instead — the converter
+built for this — collapsed the ambiguity. Hand-folding a source the repo already has a converter for
+is the same class of error as measuring against a form the pipeline cannot emit.
+⚠ AND IT THREW A FALSE POSITIVE I NEARLY TOOK: `legged L EH1 G AH0 D` against gold `L EH1 G IH0 D`
+is a vowel-QUALITY difference, not a missing schwa; my test counted `AH0` only and so read one fewer
+reduced vowel.
+
+⚠ THE SYLLABIC-L CANDIDATE, CARRIED SINCE #1365, RESOLVES — AND NOT AS PREDICTED. I expected it to
+"fall the same way as the yod one", i.e. be refused because we are wrong to have the schwa. The
+opposite: GOLD HAS THE SCHWA TOO, written `ᵊ` — `babbling bˈæbᵊlɪŋ`, `juggler ʤˈʌɡᵊləɹ`, `fiddler
+fˈɪdᵊləɹ`, `cycling sˈIkᵊlɪŋ`. Moby is the outlier here, not us.
+⚠ WHAT IS REAL IS AN INCONSISTENCY ON OUR SIDE, IN THE OTHER DIRECTION. In the obstruent + L +
+`-er`/`-ing` environment our dictionary is split almost evenly — 503 rows WITH `AH0 L`, 576 with a
+bare `L` — while gold writes `ᵊ` throughout, including for the ones we leave bare (`tumbler
+tˈʌmbᵊləɹ`, `rambler ɹˈæmbᵊləɹ`, `sprinkler spɹˈɪŋkᵊləɹ`).
+⚠ AND IT IS NOT COSMETIC, which was the first thing I checked after #1368. The two encodings produce
+DIFFERENT OUTPUT: `juggler d͡ʒˈʌɡə̆lɚ` against `tumbler tʰˈʌmblɚ`. The reduced-slot machinery in
+`englishArpabet.ts` marks the schwa we have and can do nothing for the rows where CMUdict wrote a
+bare `L`, so the inconsistency reaches the audio.
+⚠ THE ONE PLACE THE DISTINCTION IS PRINCIPLED is the coda/onset split the engine already documents:
+`motorcycle mˈOɾəɹsˌIkᵊl` keeps it because the L is word-final, `motorcyclist mˈOɾəɹsˌIklɪst` does
+not because the L onsets `-list`. Our `cyclist S AY1 K L IH0 S T` already had it right and
+`motorcyclist` did not — which is the third row taken here.
+
+RECORDED, NOT TAKEN, and it is the largest single finding left in this audit: ~576 dictionary rows
+where CMUdict wrote a bare `L` in an environment gold marks with `ᵊ`. It is not a Moby question at
+all — Moby sides against gold here — so it cannot be arbitrated by the two-source method this audit
+has been using, and at 576 rows it is a policy decision about aligning CMUdict's encoding with the
+training data rather than a defect sweep. The coda/onset rule above is the discriminator it would
+need, and `englishArpabet.ts` already implements that rule for the rows that carry the slot.
+
+    Moby — words the dict carries   26,726/35,027 (76.3%) → 26,728/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+
+STILL OWED from Run 67 and not done here: an A/B listen on `several`. No `kokoro` package is
+installed in any venv in this tree, so producing the WAVs is a setup task in the parent repo rather
+than something this block could fold in. Recorded rather than quietly dropped — and the judgement is
+the user's in any case, not mine.
