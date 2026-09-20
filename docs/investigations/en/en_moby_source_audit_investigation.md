@@ -5074,6 +5074,9 @@ on 7 words. So the `kilauea` remedy of #1377 — go find a third source rather t
 evidence, failure mode (f) — is not available for this class. Two referees is the whole of the evidence,
 which is why the paradigm and self-consistency checks above had to do the work a third source would.
 
+⚠ This paragraph was written after checking ONE file, and the general claim it makes needs all four.
+Run 81 checks them, finds the same answer, and finds the cause — which is not the corpora.
+
 ## Run 80 — 2026-09-20 09:45 — the goldens, read before they were regenerated
 
 46 findings across 8 languages, and **every one is a word this block moved** — which is the check working
@@ -5100,3 +5103,45 @@ PATTERN goes 120 → 175 of 311" — and this block does not move it.
 
     goldens   8 rewritten, 46 rows;  re-checked 189 languages / 36,495 rows / 0 stale
     package   ok — engine 735 files, data 371
+
+## Run 81 — 2026-09-20 09:55 — why this class survived 77 runs: nothing in the repo scores stress
+
+Run 79 recorded "no third source in this tree carries stress" after checking ONE file, the US wikipron
+referee. Checked properly, across every English referee corpus:
+
+    en.wikipron-eng-latn-us-broad.tsv   4,558 rows    0 stress marks
+    en-gb.wikipron-uk.tsv              76,284 rows    0 stress marks
+    en.moby-lexicon.tsv                35,032 rows    0 stress marks
+    en.moby-oov.tsv                    39,456 rows    0 stress marks
+
+⚠ **AND THE REASON IS NOT THAT THE SOURCES LACK IT — IT IS DECLARED IN `config.ts`.** The first line of
+the shared fold every scored comparison runs through is
+
+    export const BACKBONE: [RegExp, string][] = [
+        [/[ˈˌ]/gu, ""], // stress
+        …
+    ];
+    // Shared backbone: strip supra-segmental notation no broad referee reliably carries.
+
+So the referee eval is **stress-blind for all 189 languages, by design and by statement**, and the English
+corpora are generated stress-free to match. That is a scope decision and not a defect — the eval's own
+headline calls itself a SEGMENTAL backbone in its first sentence — but it has a consequence worth naming:
+
+**there is no scored metric anywhere in this repo that can see a stress placement.** Not the referee
+headline, not the backbone floors, not the held-out G2P accuracy. This block moves 321 rows, fixes
+`sometimes` at rank 1,711, and **cannot move a single published number.** The only artifact in the tree
+that can see it is `csharp/goldens/` — 36,495 rows of exact IPA — which is why the 46 findings there were
+the block's only feedback, and why each one was read rather than regenerated.
+
+That is the answer to "how did a class this large sit untouched for 77 runs of an audit that ran daily".
+It was not overlooked. **Every instrument pointed at it was built to remove it first**, including the one
+this investigation is named after, and each for a good local reason. A class that no instrument can score
+does not get smaller on its own.
+
+⚠ Interestingly this also bounds what the block can CLAIM. Run 78 says the segmental audit is
+byte-identical across all 321 rows and calls that proof the projections are orthogonal. True — but it is a
+weak test, because a stress-stripping instrument is *guaranteed* to be blind to a stress-only edit. The
+load-bearing evidence that only stress moved is the direct one: over the 321 rows, the stress-stripped
+phone strings are identical, every digit transition is one of the three the remedy licenses
+(1→2, 0→1, 2→1), no row is left multi-primary, and none is left with no primary at all. That was measured;
+the audit's silence is a corollary, not the proof.
