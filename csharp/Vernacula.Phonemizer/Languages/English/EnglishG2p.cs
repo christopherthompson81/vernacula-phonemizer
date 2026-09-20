@@ -35,6 +35,9 @@ public sealed class G2pClassSets
     public required IReadOnlyList<string> Voiceless { get; init; }
     public required IReadOnlyList<string> Sibilants { get; init; }
     public required IReadOnlyList<string> StopPieces { get; init; }
+
+    /// <summary>First pieces after which the STEM keeps the primary — see english.jsonc for the measurement.</summary>
+    public required IReadOnlyList<string> StemStressPrefixes { get; init; }
 }
 
 public sealed class Decomposition
@@ -118,7 +121,7 @@ public static class EnglishG2pFactory
         private readonly IReadOnlySet<string> _common;
         private readonly Func<IReadOnlyList<string>, string, string> _arpabetToIpa;
         private readonly Dictionary<string, List<string>> _gchunks;
-        private readonly IReadOnlySet<string> VOWEL_LETTER, VOWEL, VOICELESS, SIBILANT, STOP_PIECE;
+        private readonly IReadOnlySet<string> VOWEL_LETTER, VOWEL, VOICELESS, SIBILANT, STOP_PIECE, STEM_STRESS_PREFIX;
         private readonly List<(string Suf, Func<string, List<string>> Stems, Func<List<string>, List<string>> Allo)> SUFFIXES;
 
         internal EnglishG2pImpl(EnglishG2pModel model, IReadOnlyDictionary<string, List<string>> dict,
@@ -134,6 +137,7 @@ public static class EnglishG2pFactory
             VOICELESS = new HashSet<string>(classes.Voiceless, StringComparer.Ordinal);
             SIBILANT = new HashSet<string>(classes.Sibilants, StringComparer.Ordinal);
             STOP_PIECE = new HashSet<string>(classes.StopPieces, StringComparer.Ordinal);
+            STEM_STRESS_PREFIX = new HashSet<string>(classes.StemStressPrefixes, StringComparer.Ordinal);
 
             List<string> AllomorphS(List<string> stem)
             {
@@ -286,13 +290,18 @@ public static class EnglishG2pFactory
             return null;
         }
 
-        private sealed record SplitState(List<List<string>> Parts, int NParts, double MinLen, double Score);
+        /// <summary>
+        /// <c>Head</c> is the FIRST PIECE'S SPELLING, carried because the stress policy in
+        /// <see cref="CompoundSplit"/> needs it and the phones cannot supply it: <c>dis</c> and
+        /// <c>diss</c> decode alike, and a prefix is a fact about the morphology, not about the phones.
+        /// </summary>
+        private sealed record SplitState(List<List<string>> Parts, string Head, int NParts, double MinLen, double Score);
 
         private List<string>? CompoundSplit(string w)
         {
             var n = w.Length;
             var best = new SplitState?[n + 1];
-            best[0] = new SplitState(new List<List<string>>(), 0, double.PositiveInfinity, 0);
+            best[0] = new SplitState(new List<List<string>>(), "", 0, double.PositiveInfinity, 0);
             for (var i = 0; i < n; i++)
             {
                 if (best[i] is null) continue;
@@ -311,6 +320,7 @@ public static class EnglishG2pFactory
                     var b = best[i]!;
                     var cand = new SplitState(
                         new List<List<string>>(b.Parts) { phones },
+                        i == 0 ? piece : b.Head,
                         b.NParts + 1,
                         Math.Min(b.MinLen, j - i),
                         b.Score + (double)(j - i) * (j - i));
@@ -321,6 +331,13 @@ public static class EnglishG2pFactory
             }
             var full = best[n];
             if (full is null || full.NParts < 2) return null;
+            // This was unconditional fore-stress. It now consults `stemStressPrefixes`, which is right on
+            // 84.0% of the 13,661 words the path decodes against 78.8% before — see the TS twin's comment
+            // and english.jsonc for the measurement and for why the list is not the morpheme-boundary table.
+            // The STEM is piece 1, not the last piece — see the TS twin. `Count - 1` is the same thing
+            // only for a two-piece split, and on a three-piece one it stressed the final fragment.
+            if (STEM_STRESS_PREFIX.Contains(full.Head))
+                return full.Parts.SelectMany((p, idx) => idx == 1 ? p : StressDown(p)).ToList();
             return full.Parts.SelectMany((p, idx) => idx == 0 ? p : StressDown(p)).ToList();
         }
 

@@ -42,6 +42,7 @@ export interface EnglishManifest {
         voiceless: string[];
         sibilants: string[];
         stopPieces: string[];
+        stemStressPrefixes: string[];
     };
     /** ⚠ NOT a letter-name table — CMUdict already names all 26. Only the ⟨a⟩ exception is data. */
     letterNameExceptions: Record<string, string>;

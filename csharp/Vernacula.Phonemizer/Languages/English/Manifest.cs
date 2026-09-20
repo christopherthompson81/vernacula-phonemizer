@@ -31,6 +31,8 @@ public sealed class G2pClasses
     public IReadOnlyList<string> Voiceless { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Sibilants { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> StopPieces { get; init; } = Array.Empty<string>();
+
+    public IReadOnlyList<string> StemStressPrefixes { get; init; } = Array.Empty<string>();
 }
 
 public sealed class EnglishManifest

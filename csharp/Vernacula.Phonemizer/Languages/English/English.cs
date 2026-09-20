@@ -485,6 +485,7 @@ public static class EnglishFactory
                 Voiceless = manifest.G2pClasses.Voiceless,
                 Sibilants = manifest.G2pClasses.Sibilants,
                 StopPieces = manifest.G2pClasses.StopPieces,
+                StemStressPrefixes = manifest.G2pClasses.StemStressPrefixes,
                 Vowels = manifest.Arpabet.Vowels, // OOV G2P reuses arpabet.vowels (single source)
             });
 

@@ -81,6 +81,8 @@ export interface G2pClasses {
     voiceless: string[];
     sibilants: string[];
     stopPieces: string[];
+    /** First pieces after which the STEM keeps the primary — see english.jsonc for the measurement. */
+    stemStressPrefixes: string[];
 }
 
 export interface EnglishG2p {
@@ -115,6 +117,7 @@ export function createEnglishG2p(
     const VOICELESS = new Set(classes.voiceless);
     const SIBILANT = new Set(classes.sibilants);
     const STOP_PIECE = new Set(classes.stopPieces);
+    const STEM_STRESS_PREFIX = new Set(classes.stemStressPrefixes);
 
 
     // --- joint n-gram: stupid-backoff score + order matched (for the guessed-silence penalty) ---
@@ -349,11 +352,15 @@ export function createEnglishG2p(
         const n = w.length;
         const best: ({
             parts: string[][];
+            /** ⚠ THE FIRST PIECE'S SPELLING, carried because the STRESS POLICY below needs it and the
+             *  phones cannot supply it: `dis` and `diss` decode alike, and a prefix is a fact about the
+             *  morphology, not about the phones the piece happens to have. */
+            head: string;
             nparts: number;
             minLen: number;
             score: number;
         } | null)[] = new Array(n + 1).fill(null);
-        best[0] = { parts: [], nparts: 0, minLen: Infinity, score: 0 };
+        best[0] = { parts: [], head: "", nparts: 0, minLen: Infinity, score: 0 };
         for (let i = 0; i < n; i++) {
             if (!best[i]) continue;
             for (let j = i + MINPART; j <= n; j++) {
@@ -373,6 +380,7 @@ export function createEnglishG2p(
                 if (!phones) continue;
                 const cand = {
                     parts: [...best[i]!.parts, phones],
+                    head: i === 0 ? piece : best[i]!.head,
                     nparts: best[i]!.nparts + 1,
                     minLen: Math.min(best[i]!.minLen, j - i),
                     score: best[i]!.score + (j - i) * (j - i),
@@ -388,6 +396,36 @@ export function createEnglishG2p(
         }
         const full = best[n];
         if (!full || full.nparts < 2) return null;
+        /**
+         * ⚠ THIS USED TO BE UNCONDITIONAL FORE-STRESS — `(idx === 0 ? p : stressDown(p))` — and that is
+         * right for a COMPOUND (`BACK·yard`, `HEAD·mistress`) and wrong for a prefixed form, where the
+         * stem keeps the primary (`dis·AGREE`, `mis·LEAD`, `inter·CEPT`). #1379's stress audit made it
+         * visible: 32 of the 59 curation gaps it opened had this one cause.
+         *
+         * ⚠ AND #1379 MEASURED THE FIX AND REFUSED IT, ON THE WRONG POPULATION. It scored the
+         * discriminator over its own 233 CANDIDATES — by construction the rows where our placement was
+         * already wrong — got two-thirds each way, and called that "not a rule". Over the 13,661 words
+         * the path actually decodes, scored against the dictionary:
+         *
+         *     fore-stress always (as shipped)                 78.8%
+         *     stem-stress always                              20.3%
+         *     keyed on en-morph-boundary.tsv's `prefix` label  83.1%
+         *     this list                                        84.0%   ← +710 words
+         *
+         * ⚠ THE LIST BEATS THE TABLE, which is why the table is not a runtime dependency. It also could
+         * not be one: `tools/gen/en-morph-boundary.tsv` ships in neither package, and it cannot speak to
+         * a word Wiktionary does not carry — which is most of what reaches an OOV path. The table found
+         * the class; the list is how the engine expresses it, and it ports.
+         */
+        // ⚠ THE STEM IS PIECE 1, NOT THE LAST PIECE, and those are the same thing only for a two-piece
+        // split — which every example above is, which is why `parts.length - 1` read as correct. On a
+        // three-piece split it put the primary on the final FRAGMENT, normally a suffix English never
+        // stresses: `dis|pos|able` came out D IH2 S P AA2 S EY1 B AH0 L and `inter|cept|or`
+        // IH2 N T ER2 S EH2 P T AO1 R. Measured over the 65 validated three-plus-piece splits with a
+        // stem-stress head: primary on the LAST piece 12, on the FIRST (the old policy) 13, on the
+        // SECOND 35. The bug was worth −1 against the rule it replaced, on that subpopulation.
+        if (STEM_STRESS_PREFIX.has(full.head))
+            return full.parts.flatMap((p, idx) => (idx === 1 ? p : stressDown(p)));
         return full.parts.flatMap((p, idx) => (idx === 0 ? p : stressDown(p)));
     }
 
