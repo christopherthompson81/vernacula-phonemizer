@@ -4877,3 +4877,226 @@ is the stress AND the second vowel (`ˈbɛŋɡəl` → `bɛnˈɡɔl`).
     all three agree                  37,560 → 37,558
     dict rows changed by this block  33 — 31 verbatim, `mosel` consonant-only, `kilauea` from M-W
     structural gaps                  +3 (basle, showa, waal); salamis withdrawn
+
+## Run 78 — 2026-09-20 09:20 — the stress axis, which the instrument has never been able to see
+
+Queue item 1 of #1378. `en_source_compare.mts` strips stress in `normalise()` before comparing, and it
+has to — keeping it made the top-frequency hits almost entirely function words differing only in the
+digit. The price has been paid in full ever since: **no pure stress error has ever been a candidate in
+any run of this audit**, and the `iə / jə` predicate says so in a comment it wrote about
+`eosinophilia`, which it rejected as a glide variant while the row carried two primary stresses.
+
+So: `tools/english/en_stress_compare.mts`, the same two referees on the same population, projected the
+other way.
+
+    MOBY=… GOLD=… npx tsx tools/english/en_stress_compare.mts
+
+    segments already agree (the audit's `agree` bucket):  37,558
+      of two or more syllables:                           33,052
+    PRIMARY PLACEMENT
+      gold AND Moby agree AGAINST us:                        233
+      gold differs but Moby records our placement:           413
+      gold agrees with us, Moby differs:                     123
+      a matching Moby reading marks no primary:              156
+    MALFORMED ROWS (no stress-1 at all, two or more syllables)
+      in the whole dictionary:                               103
+      of those, ones both referees can vote on:                9
+        whose nucleus-0 fallback is what they want:            6
+    SECONDARY MARKS   gold more 2,942   same 28,839   we more 1,271
+
+### Four design decisions, each one a failure mode avoided
+
+**The population is the `agree` bucket, not the dictionary.** A stress difference on a word the sources
+READ differently is a symptom, not a finding. The multi-primary investigation made exactly this mistake
+once — its first cut was 17,188 for a class of 8,053 — and requiring the segments to agree first is what
+turns it into a stress question. Failure mode (b).
+
+**What is compared is the primary's POSITION, not the digit string.** The secondary is a convention gap
+and not a defect class: inside this bucket gold marks one we do not on 2,942 words against 1,271 the
+other way. And a secondary mark does not survive the pipeline intact anyway — the clash rule deletes a
+`2°` adjacent to the primary — so comparing digit strings would measure against a form the engine cannot
+emit. Failure mode (d).
+
+**"The primary" is the LAST stress-1, because that is the one `singlePrimary` keeps.** 289 rows in the
+bucket carry more than one. Taking the first instead would score the engine against a reading nothing
+produces.
+
+**A row with no primary is scored at nucleus 0, because `enforceSinglePrimary` promotes the first
+vowel** — `accredit` `AH0 K R EH2 D AH0 T` ships as `ˈəkɹˌɛd̬ᵻt`. That fallback is faithful, and it means
+such a row is a candidate only when the referees put the primary somewhere else.
+
+⚠ **AND THE REFEREES REACH ALMOST NONE OF THEM** — 9 of the 103 are in the compared bucket at all, 3 are
+candidates, 6 have the fallback the referees want. It is tempting to write "the other 94 are right by
+accident"; they are not, they are UNADJUDICATED, and this instrument has nothing to say about them. The
+count is a size for the class, not a verdict on it. Whether the first-vowel promotion is the right default
+for a malformed row is a separate question and needs a separate population.
+
+⚠ **AND THE SAME FALLBACK MUST NOT BE APPLIED TO A SOURCE**, which is the one place this instrument could
+have invented its own evidence. 28,646 of Moby's rows carry no `'` anywhere; 156 of them are inside this
+bucket. Defaulting those to "Moby says syllable 1" would have manufactured agreement on 156 rows. Gold,
+measured, always marks one — so the guard is live on the Moby side only, and saying it is load-bearing
+"for the referees" would be failure mode (c).
+
+### What the 233 are
+
+Overwhelmingly two shapes, and both are CMUdict declining to resolve something:
+
+    productive suffix       alternation  amniotic  beautician  circulation  truncation  convolution
+                            governmental  atavistic  sinusoidal  destitution  immolation
+    prefixed vs compound    over|come  under|take  out|bid  un|bolt  up|braid   (stem keeps it)
+                            pre|school  up|right  pre|fab  fore|taste  out|source  (fore-stressed)
+
+`sometimes` reads `S AH0 M T AY1 M Z` — "some-TIMES", at rank 1,711. `decade` is "de-CADE". `unite` is
+"YOO-nite". `baseball`, `lightweight`, `standby`, `upside`, `offbeat`, `lifelong` and `subcommittee` all
+carry two primaries, so keep-LAST ships `bˌeᶦsbˈɔːl` — which is the 106-row regression set multi-primary
+Run 4 named and could not resolve without "a morphological inventory this module does not have". Two
+referees supply the answer per row, and no inventory is needed.
+
+### The remedy moves ONLY the primary
+
+The `agreed` column is gold's row, and gold's row also carries gold's segments and gold's secondaries.
+Neither is adjudicated by this relation. #1377 earned this rule from the other side, where a stress-BLIND
+agreement moved the primary on 11 rows and `mosel` was wrong. So the applied form is OUR row with one
+digit promoted and the vacated primary demoted to a secondary — which is not a guess either: both
+referees write a `2` in that slot on 231 of the 233.
+
+### The paradigm, which is where this nearly went wrong
+
+Checking each candidate against its own INFLECTIONAL siblings in the shipped dict found **89 rows that
+would have been left contradicting the word they inflect**: `decade` corrected against `decades` not,
+`overcome` against `overcomes`, `outbid` against `outbids`. That is the `bengals` split of #1377 at 89×
+scale — silent, and indistinguishable from an oversight. The siblings carry the same CMUdict defect and
+are not candidates only because the referees' intersection does not reach them.
+
+⚠ **INFLECTION ONLY.** A DERIVATIONAL suffix may legitimately move the primary — `government` →
+`governmental` is the correct English alternation, not a split — so a first version of this check, which
+included `-ly`, `-ment`, `-al` and `-ness`, reported 32 false alarms against 27 real ones on the same
+slice. Derived forms are not propagated to: `handcraft` is a correctly fore-stressed noun and keeps its
+stress under a corrected `handcrafted`.
+
+### The refusal, and what refused it
+
+`thereupon` — both referees put the primary on `THERE`, and **gold contradicts itself one word away**:
+`whereupon` wˌɛɹəpˈɑn and `hereupon` hˌɪɹəpˈɑn are final-stressed in the same file. A source at odds with
+itself across a word-family is not evidence about that family.
+
+⚠ Gold's INFLECTIONAL self-consistency was then checked mechanically across all 233 candidates and is
+total — zero contradictions. So the check that would have caught `thereupon` automatically cannot see it:
+`whereupon` is a lexical sibling, not an inflected one. It was found by reading, and the mechanical
+version is recorded as not covering this.
+
+`snafus` is the other row dropped: it is a paradigm row whose dict entry is `S N AE1 F AH0 S` against a
+lemma of `S N AE1 F UW0`, so moving a primary onto it would write a stressed ʌ into a slot that is
+already wrong. That is a SEGMENTAL defect and belongs to the other audit.
+
+### And the frequency list is not the population — a mistake this block made and then undid
+
+The first cut stopped at the 108 candidates with a `g2p-common.txt` rank, applied them, and passed the
+gate. It would have shipped `beautician` as ˈbjuːtɪʃən, because `beautician` is off the 40k list — as are
+`alternation`, `amniotic`, `atavistic`, `syncopation`, `immolation` and the rest of the productive-suffix
+class, which is the clearest and most rule-like part of the whole set. That is exactly the instrument bug
+#1374 fixed for the segmental audit ("THE FREQUENCY LIST IS A RANKING, NOT THE POPULATION, AND FOR FOUR
+BLOCKS IT WAS BOTH") and #1377 restated as "absence from a 40k list is not evidence". All 232 are applied.
+
+    dict rows changed   321 = 232 adjudicated + 89 paradigm
+    curated rows        +315 new, 6 existing rows amended in place (exon, governmental, retort,
+                        amniotic, cotyledon, impolitic) — no word has two
+    lexicon             rebuilt, 321 rows, round-trip 100.00%
+    stress audit        233 candidates → 1 (the refused `thereupon`)
+    malformed rows      103 → 100, and the "fallback is wrong" subset 3 → 0
+
+⚠ **AND THE SEGMENTAL AUDIT IS BYTE-IDENTICAL ACROSS ALL 321 ROWS** — 46,061 compared, 37,558 agreeing,
+684 candidates, 7,819 split, the same never-a-defect counts. That is the proof the two projections are
+orthogonal and that nothing but a stress digit moved: an instrument that strips stress before comparing
+should not be able to see this block at all, and it cannot.
+
+⚠ One measurement that did NOT come out as expected, recorded because it was nearly asserted the other
+way: the abstain guard costs **no candidates**. Run with a silent source defaulted to nucleus 0 the count
+is still 233. What moves is 16 non-candidate rows' accounting (Moby-backs-us 421 → 413, Moby-differs
+131 → 123). The guard stays because a manufactured vote is wrong even when it happens not to change the
+answer — but "this is the difference between 233 and 389" was about to be written into a test comment
+and is simply false.
+
+## Run 79 — 2026-09-20 09:40 — the curation gate, and the engine rule underneath 32 of its 56 gaps
+
+Holding each corrected word out and asking the OOV path what it predicts opens **59 live splits**, and
+they are not 59 separate problems.
+
+    C (compound path)  32     M (morph)  3     N (n-gram)  24
+    KNOWN_GAPS      36 → 71  (the 32 C, with ONE shared cause, plus the 3 M)
+    STRUCTURAL_GAP 149 → 173 (the 24 N)
+
+**Thirty-two of them are ONE LINE OF ENGINE CODE.** `compoundSplit` ends with
+
+    full.parts.flatMap((p, idx) => (idx === 0 ? p : stressDown(p)))
+
+— every piece but the first is stressed down, **unconditionally**. So the path fore-stresses `over|come`,
+`under|take`, `back|yard`, `con|volution` and `head|mistress` by construction, which is precisely the
+placement both referees contradict on each of them. This is the refinement multi-primary Run 4 named
+(PREFIXED, where the stem keeps the primary, against COMPOUND, which is fore-stressed) and that #1360
+built `tools/gen/en-morph-boundary.tsv` to label.
+
+⚠ **AND THE LABEL IS NOT ENOUGH — MEASURED BEFORE WAIVING ANY OF THEM.** Cross-tabbing the 233
+candidates against that table's kind:
+
+    prefix    → primary moves LATER 36,  EARLIER 19
+    compound  → primary moves EARLIER 18, LATER 8
+    absent    → 73 / 70
+
+Two-thirds each way is not a rule. `over·come` and `pre·school` carry the same `prefix` label and take
+opposite stress, which is the `fore-MAN` hazard Run 39 recorded for this exact consumer, now with a
+number on it. Keying the path on the label trades one wrong answer for a different one — the same finding
+the `-land` note in the gate already records for a different class. **The dictionary is the mechanism.**
+Replacing the unconditional fore-stress with the label is still probably worth doing (65% beats a rule
+that is wrong whenever the boundary is a prefix), but not on this evidence and not in this block.
+
+⚠ **TWO MORPH GAPS WERE CLOSED RATHER THAN WAIVED, AND THAT IS THE USEFUL HALF.** `outdated` and
+`overpayment` were live in the first cut; both decode through a stem — `outdate`, `overpay` — that is
+itself a referee-backed candidate and was simply off the frequency list. Correcting the stem closed them,
+which is the #1334 behaviour the gate's own header describes. The three that remain cannot take that
+remedy: `handcraft` is a correctly fore-stressed noun; `override` is the noun/verb pair itself
+(ˈoʊvɚˌraɪd against ˌoʊvɚˈraɪd) carried on one dict row, so `overriding` decodes through the noun; and
+`understaffed`'s stem is not in the referees' intersection at all.
+
+⚠ **AND THE STRUCTURAL_GAP HEADER SAID 282 WHILE THE SET HELD 149.** That comment's entire claim is that
+the number is a MEASURE of the train/ship gap rather than a waiver pile — "if it instead keeps growing
+while nobody retrains, the gate is telling you the curated layer and the OOV path have drifted apart".
+A stale figure in that sentence defeats the only thing it is for. Corrected, and stated as 173.
+
+The 24 source-N rows are the list's stated purpose — the model learned CMUdict's placement for exactly
+these words, they have no morphological handle, and no spelling says which syllable an English word
+stresses. A retrain on the curated dict closes all 24, as #1341's closed 213.
+
+### Negative result: there is no third source in this tree for stress
+
+`en.wikipron-eng-latn-us-broad.tsv` carries **zero** stress marks (`grep -c ˈ` → 0) and overlaps the 233
+on 7 words. So the `kilauea` remedy of #1377 — go find a third source rather than refuse on weak
+evidence, failure mode (f) — is not available for this class. Two referees is the whole of the evidence,
+which is why the paradigm and self-consistency checks above had to do the work a third source would.
+
+## Run 80 — 2026-09-20 09:45 — the goldens, read before they were regenerated
+
+46 findings across 8 languages, and **every one is a word this block moved** — which is the check working
+rather than a surprise, and the reason each was read before `--write` was allowed near it. Three English
+goldens carry 13 each and the other five are English words reached through foreign-run delegation, the
+same path #1323's `DNA` came down.
+
+    downgraded    dˌaᶷnɡɹˈeᶦd̬ᵻd → dˈaᶷnɡɹeᶦd̬ᵻd      westminster  wɛstmˈɪnstɚ → wˈɛstmɪnstɚ   (km, lo)
+    sometimes     səmtˈaᶦmz     → sˈʌmtˌaᶦmz        bangkok      bæŋkˈɑːk    → bˈæŋkˌɑːk     (shn)
+    decades       dɛkʰˈeᶦdz     → dˈɛkʰˌeᶦdz        boathouse    bˌoᶷthˈaᶷs  → bˈoᶷthˌaᶷs    (syl)
+    upright       əpɹˈaᶦt       → ˈʌpɹˌaᶦt          archduke     ˈɑːɹt͡ʃdˌuːk → ɑːɹt͡ʃdˈuːk    (hmn)
+    undertake     ˈʌndɚtʰˌeᶦk   → ˌʌndɚtʰˈeᶦk
+
+⚠ **`archduke` IS THE ONE THAT SHOWS THE CLASH-RULE CEILING**, and it is worth stating because it is the
+shape a reviewer should expect on roughly half this block. The applied row is `AA2 R CH D UW1 K` — a
+secondary on `arch` and the primary on `duke`, which is what both referees write — and the engine emits
+`ɑːɹt͡ʃdˈuːk` with **no secondary at all**, because the demoted `2°` now sits adjacent to the primary and
+the clash rule deletes it. The primary lands where the evidence says, which is the audible thing and the
+thing this instrument adjudicates; the secondary is the convention axis it deliberately does not. Same
+story for `bˈæŋkˌɑːk` in the other direction, where the mark survives because it is not adjacent.
+
+That is the ceiling multi-primary Run 3 already named — "with the clash rule off, agreement on the stress
+PATTERN goes 120 → 175 of 311" — and this block does not move it.
+
+    goldens   8 rewritten, 46 rows;  re-checked 189 languages / 36,495 rows / 0 stale
+    package   ok — engine 735 files, data 371
