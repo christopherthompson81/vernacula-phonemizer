@@ -2371,20 +2371,42 @@ zircons	Z ER1 K AA0 N Z	Z ER1 K AA2 N Z	paradigm: `zircon`, whose gold zˈɜɹk�
 # where both independent referees agree against us on the CONSONANT SKELETON is an import defect, not an
 # accent. Derived mechanically, not by eye: of the 724 audit candidates, 158 have no lower-case Moby
 # headword at all (so Moby knows the word only as a name), and of those 158 exactly 38 differ from the
-# agreed reading once every vowel is dropped and ER is folded to R. 33 of the 38 are taken here.
-# ⚠ THE SKELETON TEST IS A SIEVE, NOT A VERDICT. Each of the 33 was adjudicated by hand against a third
-# source; five of the 38 were refused, and they are the reason the test cannot be run as a sweep:
+# agreed reading once every vowel is dropped and ER is folded to R. Of the 38: 31 are taken VERBATIM
+# from the agreed reading, `mosel` takes only its consonant, `kilauea` comes from a third source, and
+# five are refused. 31 rows therefore leave the candidate list; `mosel` and `kilauea` stay on it by
+# design, because agreeing with the referees was never the goal — being right was.
+# ⚠ THE SKELETON TEST IS A SIEVE, NOT A VERDICT. Each row was adjudicated by hand against a third
+# source, and the five refusals are the reason the test cannot be run as a sweep:
 #   `tours`   — the sources mean the French city; at rank 2095 running text means the plural of `tour`,
 #               and our T UH1 R Z is right for it. The same trap as `batman` in #1373.
+#   `salamis` — THE SAME TRAP, AND THE FIRST DRAFT OF THIS BLOCK FELL INTO IT. Moby and gold carry only
+#               `Salamis` the Greek island; running text means the plural of `salami`, which the OOV
+#               path already decodes correctly. Being off the frequency list is not evidence the plural
+#               is rare — `g2p-common.txt` carries `salami` and simply does not list its plural.
 #   `celtic`  — /s/ and /k/ are both live in GenAm and the /s/ is what the sports clubs carry.
 #   `julian`  — IY0 AH0 vs Y AH0 is the compression alternation, not a consonant defect; both standard.
-#   `kilauea` — the two referees agree with each other and BOTH disagree with M-W (kē-lə-ˈwā-ə) on the
-#               first vowel, where ours is right. Fixing the ⟨w⟩ alone would be hand-crafting a form no
-#               source carries; left for a row-level fix with a real third reading behind it.
 #   `deutschland` — the agreed final T is German devoicing, which English does not import here.
+# ⚠ THE AGREEMENT RELATION IS STRESS-BLIND, so a row applied VERBATIM imports GOLD'S stress on gold's
+# authority alone — `normalise` strips stress before comparing, so Moby never voted on it. 11 of the 33
+# move primary stress and ONE OF THE 11 WAS WRONG: `mosel` went to the final-stressed `moselle` reading,
+# making two distinct names byte-identical. Its row now takes the CONSONANT and keeps our stress, which
+# is the general rule this block should have started from — apply only what the agreement can see.
+# ⚠ `cointreau` KEEPS ITS FINAL STRESS ONLY BECAUSE IT ALREADY HAD IT. Moby's own body is initial
+# (`'kw/A/ntr/oU/`) and gold is final, so the sources are 1–1 and the audit could not tell; the applied
+# change is the ⟨oin⟩ glide, and the stress is untouched rather than adjudicated.
+# ⚠ `kilauea` IS THE ONE ROW NOT TAKEN FROM THE AGREED READING. Both referees agree with each other and
+# BOTH disagree with M-W (kē-lə-ˈwā-ə) on the first vowel, where OURS is right — so the agreed form
+# would have imported a wrong vowel to fix a right consonant. A first draft refused the row on the
+# grounds that "no source carries" the needed form, in the same sentence that cited M-W carrying it.
+# The row is M-W's complete reading; our old row disagreed with it in two places and agreed in one.
 # ⚠ `bengal` IS IN THE 38 ONLY INCIDENTALLY. Its skeleton difference is NG G vs N G, which the audit's
 # own never-a-defect predicate would reject — the predicate compares whole strings, and here the stress
-# and vowel differ too, so it did not fire. The defect being fixed is the stress, not the nasal.
+# and vowel differ too, so it did not fire. The defect being fixed is the stress AND the second vowel
+# (`ˈbɛŋɡəl` → `bɛnˈɡɔl`), not the nasal.
+# ⚠ `bengals` IS DELIBERATELY LEFT AT `B EH1 NG G AH0 L Z`, breaking the paradigm on purpose. Neither
+# referee carries it, so the audit never saw it and this is not two sources agreeing with us; it is a
+# judgement that running text means the NFL team, which is `ˈbɛŋɡəlz`. Stated because a silent paradigm
+# split is indistinguishable from an oversight.
 # ⚠ `brobdingnagian`, `cointreau` and `homs` ARE NOT BELOW. They already carry a curated row from the
 # LOT/THOUGHT block; their rows are updated in place, because no word may hold two curated rows.
 antigone	AE0 T IH1 G AH0 N IY0	AE0 N T IH1 G AH0 N IY0	proper noun: dropped ⟨n⟩ of ⟨ant-⟩ (gold + moby)
@@ -2401,16 +2423,16 @@ faustian	F AO1 S CH AH0 N	F AW1 S T IY0 AH0 N	proper noun: ⟨au⟩ is AW and �
 genoese	JH EH1 N OW0 S	JH EH2 N OW0 IY1 Z	proper noun: dropped the ⟨-ese⟩ IY and final Z (gold + moby)
 hispaniola	HH IH0 S P AA2 NG OW1 L AH0	HH IH2 S P AH0 N Y OW1 L AH0	proper noun: ⟨ni⟩ is N Y, not NG (gold + moby)
 kahului	K AH0 HH UW1 L W IY0	K AA2 HH UW0 L UW1 IY0	proper noun: ⟨-lui⟩ is L UW IY, not L W IY (gold + moby)
+kilauea	K IY2 L AW2 EY1 AH0	K IY2 L AH0 W EY1 AH0	proper noun: M-W kē-lə-ˈwā-ə — a THIRD-source row, not the agreed reading (both referees miss the first vowel)
 kyushu	K Y AH1 SH UW0	K IY0 UW1 SH UW0	proper noun: ⟨kyu⟩ is two syllables K IY UW (gold + moby; M-W kē-ˈü-shü)
 melchizedek	M EH2 K IY1 Z EH0 D EH2 K	M EH0 L K IH1 Z AH0 D EH2 K	proper noun: dropped ⟨l⟩ of ⟨mel-⟩ (gold + moby)
 methuselah	M AH0 TH Y UW1 Z AH0 L AH0	M AH0 TH UW1 Z AH0 L AH0	proper noun: spurious yod after ⟨th⟩ (gold + moby)
-mosel	M OW1 S AH0 L	M OW0 Z EH1 L	proper noun: German ⟨s⟩ is Z and the stress is final (gold + moby)
+mosel	M OW1 S AH0 L	M OW1 Z AH0 L	proper noun: German ⟨s⟩ is Z — the CONSONANT only; the referees' final stress is the `moselle` reading and is not imported (see the block header)
 obelia	OW0 B EH1 L IY0 AH0	OW0 B IY1 L Y AH0	proper noun: tense ⟨e⟩ and ⟨li⟩ compression (gold + moby)
 pathan	P AE1 TH AH0 N	P AH0 T AA1 N	proper noun: ⟨th⟩ is an aspirated T, not TH (gold + moby)
 pinot	P IH1 N AH0 T	P IY1 N OW0	proper noun: French ⟨-ot⟩ is silent (gold + moby)
 podunk	P OW1 T AH0 NG K	P OW1 D AH2 NG K	proper noun: ⟨d⟩ read as T (gold + moby)
 quebecois	K W EH1 B AH0 S W AA2	K EY0 B EH0 K W AA1	proper noun: ⟨qu⟩ is K and the ⟨oi⟩ glide is on ⟨c⟩ (gold + moby)
-salamis	S AH0 L AA1 M IY0 Z	S AE1 L AH0 M AH0 S	proper noun: final ⟨s⟩ is voiceless and unstressed (gold + moby)
 showa	SH OW1 AH0	SH OW1 W AA2	proper noun: dropped the ⟨w⟩ (gold + moby)
 sinhalese	S IH2 N AH0 L IY1 Z	S IH2 N HH AH0 L IY1 Z	proper noun: dropped the ⟨h⟩ (gold + moby)
 theseus	TH IY1 Z IY2 AH0 S	TH IY1 S IY0 AH0 S	proper noun: ⟨s⟩ is voiceless (gold + moby)

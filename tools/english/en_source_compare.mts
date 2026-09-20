@@ -479,7 +479,7 @@ const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => 
     // ⚠ /iə/ AND /jə/ ARE THE SAME SYLLABLE COMPRESSED OR NOT. `julian` JH UW1 L IY0 AH0 N against
     // JH UW1 L Y AH0 N, and `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`,
     // `leniency`, `pannier`, `valonia` — 9 of the 691, and the alternation runs BOTH WAYS across them
-    // (we are the compressed side on five, the full side on four), which is the tell that it is free
+    // (we are the compressed side on six, the full side on three), which is the tell that it is free
     // variation and not one source being consistently fuller than us.
     // ⚠ POST-CONSONANTAL AND UNSTRESSED ONLY. All 9 are a consonant + IY0 + vowel; an IY that carries
     // stress, or one after another vowel, is a syllable in its own right and its loss WOULD be a defect.

@@ -4788,8 +4788,8 @@ structural in a stronger sense than the other three.
 A THIRD NEVER-A-DEFECT PREDICATE. `julian`'s refusal is a class, so it was measured rather than
 left in prose: post-consonantal unstressed `IY` before a vowel, folded to the glide `Y`. **9 of the
 691** — `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`, `julian`, `leniency`,
-`pannier`, `valonia` — and the alternation runs BOTH ways (we are the compressed side on five, the
-full side on four), which is the tell that it is free variation rather than one source being
+`pannier`, `valonia` — and the alternation runs BOTH ways (we are the compressed side on six, the
+full side on three), which is the tell that it is free variation rather than one source being
 systematically fuller.
 
 ⚠ THE FIRST VERSION OF THE PREDICATE FIRED ON 1 OF THE 9. It asked "is the next phone a vowel" of the
@@ -4817,3 +4817,63 @@ That is a whole class this instrument is blind to by construction, and it wants 
 NEXT. The remaining 682 still hold the loanword slice proper — a name Moby DOES carry in lower case
 (so the slice above misses it) but whose reading is a loan. And the stress class above is new, cheap
 to build, and invisible to everything built so far.
+
+## Run 77 — 2026-09-20 08:20 — review of Run 76: the sieve caught a homograph, and the agreement is stress-blind
+
+Review re-derived every count in Run 76 independently — 158, 38, 33, 9, 682, +33, the one-row-per-word
+invariant, the lexicon rebuild — and all of them held. What it found instead were four judgements and
+two prose errors, and one of the judgements generalises past the row it was about.
+
+**THE SIEVE CAUGHT A HOMOGRAPH AND I APPLIED IT ANYWAY.** `salamis` is the `tours` trap exactly, and I
+had written the refutation myself: the waiver comment I added to `en-curation-gap.test.ts` said the OOV
+path decodes it as `salami` + `-s` "and is RIGHT to, for any word that is not this Greek island" — and
+then the dictionary row, which is the only thing running text consults, was changed to the island. I
+refused `tours` on rank and then let `salamis` through because it was off-list, when absence from a 40k
+list is not evidence: `g2p-common.txt` carries `salami` and simply does not list its plural. The row is
+reverted and the waiver deleted. **Waiving the OOV gap was the wrong remedy for a signal that the fix
+itself was wrong** — a structural-gap entry is an admission that the engine cannot generalise a row, and
+here the engine's generalisation was better than the row.
+
+**THE AGREEMENT RELATION IS STRESS-BLIND, SO "BOTH SOURCES AGREE" NEVER COVERED THE STRESS.**
+`normalise` strips stress before comparing, so two referees "agreeing" says nothing about where the
+primary went; the `agreed` column is gold's reading, and applying it verbatim imports GOLD'S stress on
+one source's authority. Measured over the 33:
+
+    11 of 33 moved primary stress   beaujolais caesarean genoese mosel pathan quebecois
+                                    salamis viennese bengal kyushu kahului
+
+Checked one by one against a third source, 9 of the 11 are right. `salamis` is reverted. **`mosel` was
+wrong**: it went to the final-stressed `mō-ˈzel`, which is `moselle` — both referees carry that reading
+for both spellings, and the applied row made two distinct names byte-identical in the dict. Its row now
+takes the CONSONANT the sieve actually adjudicated (⟨s⟩ → /z/) and keeps our stress.
+
+That is the rule the block should have started from: **apply only the part of the agreed form the
+agreement can see.** 31 rows are still taken verbatim, because for them nothing rode along; the point is
+that "verbatim" was a choice made silently, not a property of the evidence.
+
+⚠ `cointreau` IS THE NEAR MISS. Moby's raw body `'kw/A/ntr/oU/` is INITIAL-stressed and gold is final,
+so the sources are 1–1 and the audit cannot see the disagreement at all. The row survives review only
+because our old row was already final-stressed, so nothing moved. Recorded because next time it will
+not be a near miss.
+
+**AND `kilauea` WAS REFUSED ON FAILURE MODE (f) AGAIN — in the same sentence that cited the evidence.**
+Run 76 says fixing the ⟨w⟩ alone "would be hand-crafting a form no source carries", and then cites M-W
+`kē-lə-ˈwā-ə`, which is a complete reading carrying exactly the needed form. Our old row disagreed with
+M-W in TWO places (`AW2` for `lə`, and the missing /w/) and agreed in one, so the refusal preserved two
+errors to protect one right phone. This repo already accepts M-W-cited rows — `basle`, `waal` and
+`kyushu` all cite it in this very block. The row is now M-W's reading, and it STAYS a candidate,
+because agreeing with the two referees was never the goal.
+
+`bengals` is left at `B EH1 NG G AH0 L Z` against a now-final-stressed `bengal`, and that split is now
+stated in the file rather than silent: neither referee carries the plural, so the audit never saw it,
+and the judgement is that running text means the NFL team. A silent paradigm split is indistinguishable
+from an oversight.
+
+TWO PROSE ERRORS, both failure mode (c): the glide class is 6 compressed / 3 full, not 5/4 (the
+conclusion survives, the number did not); and `bengal`'s entry said the defect was "the stress" when it
+is the stress AND the second vowel (`ˈbɛŋɡəl` → `bɛnˈɡɔl`).
+
+    audit candidates                 682 → 684  (salamis and mosel return, by decision)
+    all three agree                  37,560 → 37,558
+    dict rows changed by this block  33 — 31 verbatim, `mosel` consonant-only, `kilauea` from M-W
+    structural gaps                  +3 (basle, showa, waal); salamis withdrawn
