@@ -4733,3 +4733,147 @@ Arithmetic balances — 37,527 + 724 + 7,810 = 46,061 — and rejected rows take
     Moby — words the dict carries   26,742/35,027 (76.3%)  unmoved — no dictionary row changed
     audit candidates                750 → 724
     never-a-defect                  source geminate 21, NG G / N G 4
+
+## Run 76 — 2026-09-20 08:00 — the proper-noun consonant skeleton
+
+QUESTION. The queue named the "loanword and proper-noun slice" as the highest-yield work left and
+recorded it as "measured near-100% defect". That measurement was never written down anywhere I can
+re-derive, so the first job was to build the slice mechanically and re-measure it rather than trust
+the claim.
+
+DEFINING THE SLICE. A word is known to Moby only as a name if the audit's lower-cased key has NO
+lower-case headword in `mobypron.unc`:
+
+    tr '\r' '\n' < mobypron.unc | cut -d' ' -f1 | sort -u > heads
+    awk 'NR==FNR{h[$0]=1;next} !($2 in h)' heads candidates.tsv
+
+158 of the 724 candidates. Then the consonant skeleton: drop every vowel, fold `ER` to `R` (so a
+rhotic spelt as a vowel does not read as a consonant change), compare. **38 of the 158.**
+
+WHY THE SKELETON. GenAm variation is overwhelmingly vocalic. A name where two independent referees
+agree against us on the CONSONANTS is an import defect, not an accent — and unlike the vowel classes
+this audit has refused four times, the class does not need a judgement about which variety is meant.
+
+RAW FINDING. 33 of the 38 are genuine defects and are applied verbatim from the agreed reading. The
+five refusals are the interesting part, because they are what stops this being runnable as a sweep:
+
+    tours        rank 2095. Both sources mean the French city; running text at that rank means the
+                 plural of `tour`, and our T UH1 R Z is right for it. The `batman` trap from #1373,
+                 caught only by looking at the rank.
+    celtic       /s/ and /k/ are both live in GenAm and the sports clubs carry /s/.
+    julian       IY0 AH0 vs Y AH0 — free compression, not a consonant defect. (Now in code; below.)
+    kilauea      the two referees agree with each other and BOTH disagree with M-W (kē-lə-ˈwā-ə) on
+                 the first vowel, where OURS is right. Applying the agreed form would import a wrong
+                 vowel to fix a right consonant; fixing the ⟨w⟩ alone would be inventing a reading no
+                 source carries. Left open.
+    deutschland  the agreed final T is German final devoicing; English does not import it here.
+
+So the measured rate is 33/38 = 87%, over the 70% bar this investigation set in Run 68 — but the bar
+is only meaningful because each of the 33 was checked by hand against a third source. **The skeleton
+test is a sieve, not a verdict.** Recording it that way matters: "near-100% defect" was the claim in
+the queue, and the real number on the mechanically-defined slice is 87%.
+
+⚠ `bengal` IS IN THE 38 ONLY INCIDENTALLY. Its skeleton difference is `NG G` vs `N G`, which the
+audit's own never-a-defect predicate would reject — the predicate compares whole strings, and here
+the stress and vowel differ too, so it never fired. The defect fixed is the stress.
+
+FOUR NEW LIVE SPLITS, and the useful half is that 29 of the 33 did NOT open one: a consonant repair
+on a name mostly propagates, because the spelling that was misread is the spelling the OOV path
+decodes. The four that stay open are `basle` (N), `showa` (N), `waal` (N) — foreign orthography with
+no English analogue, where any rule general enough to catch them wrecks `hassle`, `lower` and `wall`
+— and `salamis` (**source M**, the only one worth a second look): the OOV path decodes it as
+`salami` + `-s` and is RIGHT to for every word that is not this Greek island. A genuine homograph, so
+structural in a stronger sense than the other three.
+
+A THIRD NEVER-A-DEFECT PREDICATE. `julian`'s refusal is a class, so it was measured rather than
+left in prose: post-consonantal unstressed `IY` before a vowel, folded to the glide `Y`. **9 of the
+691** — `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`, `julian`, `leniency`,
+`pannier`, `valonia` — and the alternation runs BOTH ways (we are the compressed side on six, the
+full side on three), which is the tell that it is free variation rather than one source being
+systematically fuller.
+
+⚠ THE FIRST VERSION OF THE PREDICATE FIRED ON 1 OF THE 9. It asked "is the next phone a vowel" of the
+`bare` form, and `bare` rewrites AH and IH to `ə`, which is not in `VOWELS` — so the commonest
+following vowel in the class made the test unsatisfiable. Caught by the offline measurement saying 7
+and the tool saying 1, which is the whole reason to measure before encoding. The vowel tests now run
+on the stress-stripped base, and `julian` (whose glide is followed by `AH0`) is the test fixture
+precisely because it is the row the bug dropped.
+
+⚠ AND THE OFFLINE MEASUREMENT WAS ALSO WRONG, in the other direction: its regex required a word
+boundary before `IY0` and so missed `eosinophilia` and `insouciant`. 7 and 1 were both wrong; 9 is
+the number two independent implementations now agree on.
+
+A LEAD, NOT ACTED ON. `eosinophilia` carries TWO primary stresses in our row —
+`IY2 AH0 S IH1 N AH0 F IH1 L Y AH0`. The audit cannot see it, because `normalise` strips stress
+before comparing, so **no pure stress error has ever been a candidate in any run of this audit.**
+That is a whole class this instrument is blind to by construction, and it wants its own pass.
+
+    triple-sourced words             46,061   unchanged
+    all three agree                  37,527 → 37,560  (+33, exactly the rows applied)
+    audit candidates                 724 → 682
+    never-a-defect                   source geminate 21, iə/jə compression 9, NG G / N G 4
+    structural gaps                  +4 (basle, salamis, showa, waal)
+
+NEXT. The remaining 682 still hold the loanword slice proper — a name Moby DOES carry in lower case
+(so the slice above misses it) but whose reading is a loan. And the stress class above is new, cheap
+to build, and invisible to everything built so far.
+
+## Run 77 — 2026-09-20 08:20 — review of Run 76: the sieve caught a homograph, and the agreement is stress-blind
+
+Review re-derived every count in Run 76 independently — 158, 38, 33, 9, 682, +33, the one-row-per-word
+invariant, the lexicon rebuild — and all of them held. What it found instead were four judgements and
+two prose errors, and one of the judgements generalises past the row it was about.
+
+**THE SIEVE CAUGHT A HOMOGRAPH AND I APPLIED IT ANYWAY.** `salamis` is the `tours` trap exactly, and I
+had written the refutation myself: the waiver comment I added to `en-curation-gap.test.ts` said the OOV
+path decodes it as `salami` + `-s` "and is RIGHT to, for any word that is not this Greek island" — and
+then the dictionary row, which is the only thing running text consults, was changed to the island. I
+refused `tours` on rank and then let `salamis` through because it was off-list, when absence from a 40k
+list is not evidence: `g2p-common.txt` carries `salami` and simply does not list its plural. The row is
+reverted and the waiver deleted. **Waiving the OOV gap was the wrong remedy for a signal that the fix
+itself was wrong** — a structural-gap entry is an admission that the engine cannot generalise a row, and
+here the engine's generalisation was better than the row.
+
+**THE AGREEMENT RELATION IS STRESS-BLIND, SO "BOTH SOURCES AGREE" NEVER COVERED THE STRESS.**
+`normalise` strips stress before comparing, so two referees "agreeing" says nothing about where the
+primary went; the `agreed` column is gold's reading, and applying it verbatim imports GOLD'S stress on
+one source's authority. Measured over the 33:
+
+    11 of 33 moved primary stress   beaujolais caesarean genoese mosel pathan quebecois
+                                    salamis viennese bengal kyushu kahului
+
+Checked one by one against a third source, 9 of the 11 are right. `salamis` is reverted. **`mosel` was
+wrong**: it went to the final-stressed `mō-ˈzel`, which is `moselle` — both referees carry that reading
+for both spellings, and the applied row made two distinct names byte-identical in the dict. Its row now
+takes the CONSONANT the sieve actually adjudicated (⟨s⟩ → /z/) and keeps our stress.
+
+That is the rule the block should have started from: **apply only the part of the agreed form the
+agreement can see.** 31 rows are still taken verbatim, because for them nothing rode along; the point is
+that "verbatim" was a choice made silently, not a property of the evidence.
+
+⚠ `cointreau` IS THE NEAR MISS. Moby's raw body `'kw/A/ntr/oU/` is INITIAL-stressed and gold is final,
+so the sources are 1–1 and the audit cannot see the disagreement at all. The row survives review only
+because our old row was already final-stressed, so nothing moved. Recorded because next time it will
+not be a near miss.
+
+**AND `kilauea` WAS REFUSED ON FAILURE MODE (f) AGAIN — in the same sentence that cited the evidence.**
+Run 76 says fixing the ⟨w⟩ alone "would be hand-crafting a form no source carries", and then cites M-W
+`kē-lə-ˈwā-ə`, which is a complete reading carrying exactly the needed form. Our old row disagreed with
+M-W in TWO places (`AW2` for `lə`, and the missing /w/) and agreed in one, so the refusal preserved two
+errors to protect one right phone. This repo already accepts M-W-cited rows — `basle`, `waal` and
+`kyushu` all cite it in this very block. The row is now M-W's reading, and it STAYS a candidate,
+because agreeing with the two referees was never the goal.
+
+`bengals` is left at `B EH1 NG G AH0 L Z` against a now-final-stressed `bengal`, and that split is now
+stated in the file rather than silent: neither referee carries the plural, so the audit never saw it,
+and the judgement is that running text means the NFL team. A silent paradigm split is indistinguishable
+from an oversight.
+
+TWO PROSE ERRORS, both failure mode (c): the glide class is 6 compressed / 3 full, not 5/4 (the
+conclusion survives, the number did not); and `bengal`'s entry said the defect was "the stress" when it
+is the stress AND the second vowel (`ˈbɛŋɡəl` → `bɛnˈɡɔl`).
+
+    audit candidates                 682 → 684  (salamis and mosel return, by decision)
+    all three agree                  37,560 → 37,558
+    dict rows changed by this block  33 — 31 verbatim, `mosel` consonant-only, `kilauea` from M-W
+    structural gaps                  +3 (basle, showa, waal); salamis withdrawn

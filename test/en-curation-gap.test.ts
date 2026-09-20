@@ -179,6 +179,19 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
+    // ⚠ THREE ADDED BY THE #1377 PROPER-NOUN SKELETON FIX, and 29 of that block's 33 rows open no gap at
+    // all — a consonant repair on a name mostly propagates, because the spelling that was misread is the
+    // same spelling the OOV path decodes. (A fourth of the 33, `homs`, is on this list further down; it
+    // was already live before the block and its row changing did not close it.)
+    // These three are the ones no rule can reach. `basle` (N) and `waal` (N) are foreign orthography with
+    // no English analogue: a silent ⟨s⟩ before ⟨le⟩ and a Dutch ⟨w⟩ read as /v/. Any rule general enough
+    // to catch them would wreck `hassle` and `wall`. `showa` (N) is the ⟨ow⟩+vowel ambiguity English does
+    // not resolve by spelling — `lower` has no /w/ and `power` does.
+    // ⚠ `salamis` WAS HERE AND IS NOT ANY MORE, because the dictionary row was reverted instead. Its OOV
+    // answer is source M: `salami` + `-s`, which is right for every word that is not the Greek island —
+    // and running text means the plural. Waiving the gap was the wrong remedy; the sieve had simply
+    // caught a homograph, the same way it caught `tours`.
+    "basle", "showa", "waal",
     // ⚠ TWO ADDED BY THE #1375 AUDIT SWEEP, both source N: `khaki` (the n-gram learned CMUdict's
     // ˈkɑki) and `lech` (a three-letter word with nothing to decode through).
     "khaki", "lech",
