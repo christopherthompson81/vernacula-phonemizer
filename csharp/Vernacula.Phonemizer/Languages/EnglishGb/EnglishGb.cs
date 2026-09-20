@@ -34,6 +34,25 @@ public sealed class LexSets
     /// ⚠ A WORD LIST, NOT A RULE: a blanket ɛɹ→æɹ would wrongly convert `merry`, `very`, `ferry`, `error`,
     /// `America`, which are genuinely ɛ in BOTH varieties.
     public required IReadOnlySet<string> Marry { get; init; }
+
+    /// word → the GenAm-alphabet citation this accent starts from, REPLACING the parent's.
+    ///
+    /// ⚠ EVERY OTHER TABLE HERE IS AN ACCENT DELTA AND THIS ONE IS NOT. The five sets above say how the SAME
+    /// word is realised differently; this one says the two varieties do not use the same word. British
+    /// `aluminium` is /ˌæljʊˈmɪniəm/ against GenAm `aluminum` /əˈluːmɪnəm/ — five syllables against four,
+    /// stressed on a different one — and no phonological rule gets from one to the other. Nor should one
+    /// try: a transform able to insert a syllable and move the stress could do it to words that merely
+    /// sound different, which is the class this file exists to handle correctly.
+    ///
+    /// ⚠ AND THE PARENT IS NOT WRONG ABOUT ITS OWN WORD: CMUdict lists `aluminium AH0 L UW1 M IH0 N AH0 M`,
+    /// a GenAm reference deliberately reading the British SPELLING as the American WORD. This table is
+    /// additive and changes no GenAm reading.
+    ///
+    /// ⚠ THE VALUE IS IN THE PARENT'S ALPHABET, NOT SSBE, so the whole delta still runs over it. `clerk` is
+    /// stored `klˈɑːɹk` and START makes it `klˈɑːk`; storing the finished form would freeze a reading that
+    /// then stopped tracking every later rule change. A word needing a set membership joins that set as
+    /// usual — `tomato` is in en-gb-palm.tsv, because in RP it genuinely is a PALM word.
+    public required IReadOnlyDictionary<string, string> Lexical { get; init; }
 }
 
 public static class EnglishGb
@@ -72,7 +91,13 @@ public static class EnglishGb
         Palm = LoadSet("en-gb-palm.tsv"),
         Lotr = LoadSet("en-gb-lotr.tsv"),
         Marry = LoadSet("en-gb-marry.tsv"),
+        Lexical = LoadTsv.LoadTsvMap("languages/english-gb", "en-gb-lexical.tsv", optional: true),
     };
+
+    /// The words the lexical-variant table owns. The TS twin exports this for the set builder, which must
+    /// not claim one into an ACCENT set; kept here so the two ports declare the same surface.
+    public static IReadOnlySet<string> LexicalVariants() =>
+        new HashSet<string>(Sets().Lexical.Keys, StringComparer.Ordinal);
 
     private static readonly JsRe FLAP_T = JsRegex.Compile("t̬", "gu");
     private static readonly JsRe FLAP_D = JsRegex.Compile("d̬", "gu");
@@ -118,15 +143,25 @@ public static class EnglishGb
     public static string ToRP(string genAm, string word, LexSets? lex = null)
     {
         var w = Js.ToLowerCase(word);
-        var s = FLAP_D.Replace(FLAP_T.Replace(genAm, "t"), "d"); // un-flap the tapped coronal
+        // ⚠ FIRST, AND IT REPLACES THE INPUT RATHER THAN EDITING IT. A lexical variant is a different word,
+        // so nothing in the parent's citation is worth keeping; everything below then treats the substitute
+        // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee
+        // eval, which must stay non-circular, exactly as the five sets are.
+        string? variant = null;
+        var owned = lex is not null && lex.Lexical.TryGetValue(w, out variant);
+        var citation = owned ? variant! : genAm;
+        var s = FLAP_D.Replace(FLAP_T.Replace(citation, "t"), "d"); // un-flap the tapped coronal
         s = GOAT.Replace(s, "əᶷ");
         s = PALATAL.Replace(s, "");                              // drop the palatal on-glide (idea)
         // NURSE ɝ / lettER ɚ: before a vowel keep a LINKING /ɹ/; in coda non-rhotic.
         s = NURSE.Replace(NURSE_PREVOCALIC.Replace(s, "ɜːɹ"), "ɜː");
         s = LETTER.Replace(LETTER_PREVOCALIC.Replace(s, "əɹ"), "ə");
         // LOT: GenAm [ɑː] not before /ɹ/ → [ɒ]; PALM words keep [ɑː].
-        if (!(lex is not null && lex.Palm.Contains(w))) s = LOT.Replace(s, "ɒ");
-        if (lex is not null)
+        // ⚠ AND A WORD THE LEXICAL TABLE OWNS IS EXEMPT FROM THIS AND EVERY SET BELOW — see the TS twin.
+        // The citation was written with the SSBE target in mind, so a set edit derived for a DIFFERENT
+        // word must not run over it. The PHONOLOGICAL rules above still do.
+        if (!owned && !(lex is not null && lex.Palm.Contains(w))) s = LOT.Replace(s, "ɒ");
+        if (lex is not null && !owned)
         {
             // ⚠ FIRST OCCURRENCE ONLY, mirroring the set builder, which validated a first-occurrence edit
             // against the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not

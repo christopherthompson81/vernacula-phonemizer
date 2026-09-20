@@ -129,6 +129,31 @@ export interface LexSets {
      * the parent moved belong here.
      */
     marry: Set<string>;
+    /**
+     * word → the GenAm-alphabet citation this accent starts from, REPLACING the parent's.
+     *
+     * ⚠ EVERY OTHER TABLE HERE IS AN ACCENT DELTA AND THIS ONE IS NOT. The five sets above say how the
+     * SAME word is realised differently; this one says the two varieties do not use the same word. British
+     * `aluminium` is /ˌæljʊˈmɪniəm/ against GenAm `aluminum` /əˈluːmɪnəm` — five syllables against four,
+     * with the stress on a different one — and no phonological rule gets from one to the other. Nor should
+     * one try: a transform that could insert a syllable and move the stress would be able to do it to words
+     * that merely sound different, which is the whole class this file exists to handle correctly.
+     *
+     * ⚠ AND THE PARENT IS NOT WRONG ABOUT ITS OWN WORD. CMUdict lists `aluminium AH0 L UW1 M IH0 N AH0 M`
+     * — a GenAm reference deliberately reading the British SPELLING as the American WORD, which is right
+     * for `en` and is what `en` ships. The defect was only ever that `en-GB` inherited it with nowhere to
+     * say otherwise, so this table is additive: it changes no GenAm reading.
+     *
+     * ⚠ THE VALUE IS IN THE PARENT'S ALPHABET, NOT SSBE, so the whole delta still runs over it —
+     * non-rhoticity, GOAT, the lexical sets, all of it. `clerk` is stored `klˈɑːɹk` and START makes it
+     * `klˈɑːk`; storing the finished `klˈɑːk` would have frozen a reading that then silently stopped
+     * tracking every later rule change. A word needing a set membership joins that set as usual — `tomato`
+     * is a PALM word and is in `en-gb-palm.tsv`, because in RP it genuinely is one.
+     *
+     * Rows are hand-written and every one is checked against the wikipron UK referee; see
+     * docs/investigations/en-GB/engb_lexical_variants_investigation.md.
+     */
+    lexical: Map<string, string>;
 }
 const loadSet = (file: string): Set<string> =>
     new Set([...loadTsvMap(import.meta.url, file, (v) => v, { optional: true }).keys()]);
@@ -141,12 +166,18 @@ const sets = (): LexSets =>
         palm: loadSet("en-gb-palm.tsv"),
         lotr: loadSet("en-gb-lotr.tsv"),
         marry: loadSet("en-gb-marry.tsv"),
+        lexical: loadTsvMap(import.meta.url, "en-gb-lexical.tsv", (v) => v, { optional: true }),
     });
 
 /** GenAm citation IPA → SSBE. `lex` (present on the shipped path) supplies the lexical-set membership for `word`. */
 export function toRP(genAm: string, word: string, lex?: LexSets): string {
     const w = word.toLowerCase();
-    let s = genAm;
+    // ⚠ FIRST, AND IT REPLACES THE INPUT RATHER THAN EDITING IT. A lexical variant is a different word, so
+    // there is nothing in the parent's citation worth keeping; everything below then treats the substitute
+    // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee eval,
+    // which must stay non-circular, exactly as the five sets below are.
+    const lexical = lex?.lexical.get(w);
+    let s = lexical ?? genAm;
     s = s.replace(/t̬/gu, "t").replace(/d̬/gu, "d"); // un-flap the tapped coronal
     // ⚠ THE CLOSING DIPHTHONGS KEEP THE PARENT'S SUPERSCRIPT OFFGLIDE (#1252), and the GOAT onset is the only
     // thing this line still changes. `əʊ eɪ aɪ aʊ ɔɪ` are correct IPA for RP and were never wrong — this is a
@@ -188,9 +219,20 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     s = s.replace(NURSE_PREVOCALIC, "ɜːɹ").replace(/ɝ/gu, "ɜː");
     s = s.replace(LETTER_PREVOCALIC, "əɹ").replace(/ɚ/gu, "ə");
     // LOT: GenAm [ɑː] not before /ɹ/ → [ɒ]; PALM words keep [ɑː].
-    if (!(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
-    // Lexical sets (shipped path only).
-    if (lex) {
+    // ⚠ AND A WORD THE LEXICAL TABLE OWNS IS EXEMPT FROM THIS AND FROM EVERY SET BELOW. The citation was
+    // written with the SSBE target in mind, so a set edit derived for a DIFFERENT word has no business
+    // running over it: `tomato`'s hand-written ɑː is the thing the table exists to supply, and the LOT
+    // rule ate it. The first version bought that back with a hand-added row in `en-gb-palm.tsv` — a
+    // generated file — and `build-en-gb-sets.ts` now skips table-owned words, so the next regeneration
+    // would have deleted it and silently regressed the word. Worse, `tomato` was never CLAIMABLE into
+    // palm: the builder claims from the rules-only output, where the word has no ɑː to preserve, so the
+    // edit never matched. Exempting here makes the runtime and the builder agree in both directions and
+    // lets `en-gb-palm.tsv` go back to being purely generated.
+    // ⚠ THE PHONOLOGICAL RULES STILL RUN — non-rhoticity, GOAT, the NURSE/lettER remapping, un-flapping.
+    // It is the WORD-LIST layer that is skipped, not the accent.
+    if (lexical === undefined && !(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
+    // Lexical sets (shipped path only, and never over a word the table owns).
+    if (lex && lexical === undefined) {
         // FIRST-occurrence only (no /g) — mirrors the set builder, which validated a first-occurrence edit against
         // the referee. A BATH word may also carry a TRAP æ later (aftermath → ˈɑːftəmæθ, not …mˌɑːθ); a global
         // replace would wrongly convert it. Words whose diagnostic vowel is NOT first never entered the set.
@@ -225,6 +267,12 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
 
 let GB: EnglishPhonemizer | undefined;
 const eng = (): EnglishPhonemizer => (GB ??= createEnglish());
+
+/** The words the lexical-variant table owns, for the set builder — which must not claim one into an
+ *  ACCENT set (see build-en-gb-sets.ts). */
+export function lexicalVariants(): ReadonlySet<string> {
+    return new Set(sets().lexical.keys());
+}
 
 /** Bare word→SSBE IPA, SHIPPED path (rule delta + lexical sets). For the diagnostic gold and real text. */
 export function phonemizeWord(word: string): string {
