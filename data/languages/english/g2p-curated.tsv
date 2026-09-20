@@ -2297,3 +2297,13 @@ vestigial	V AH0 S T IH1 JH IY0 AH0 L	V EH0 S T IH1 JH IY0 AH0 L	unstressed vowel
 woodland	W UH1 D L AE2 N D	W UH1 D L AH0 N D	unstressed vowel: Moby and misaki gold agree against CMUdict (AE2 → AH0)
 woodsman	W UH1 D Z M AE0 N	W UH1 D Z M AH0 N	unstressed vowel: Moby and misaki gold agree against CMUdict (AE0 → AH0)
 ya	Y AA1	Y AH0	unstressed vowel: Moby and misaki gold agree against CMUdict (AA1 → AH0)
+croutons	K R UW1 T AH0 N Z	K R UW1 T AA2 N Z	paradigm: `crouton` was corrected to AA2 and the plural was left at AH0
+eloped	IH0 L OW1 P D	IH0 L OW1 P T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here
+infantrymen	IH1 N F AE0 N T R IY0 M AH0 N	IH1 N F AH0 N T R IY0 M AH0 N	paradigm: `infantry` is IH1 N F AH0 N T R IY0, so the AE0 was wrong on its own terms
+midlands	M IH1 D L AE2 N D Z	M IH1 D L AH0 N D Z	paradigm: matches the corrected `midland`; Moby has `Midlands 'm/I/dl/@/ndz`
+shellac	SH EH1 L AE2 K	SH AH0 L AE1 K	Moby /S//@/'l/&/k and gold ʃəlˈæk agree against CMUdict; the base of the corrected `shellacking`
+shellacked	SH EH2 L AE1 K D	SH AH0 L AE1 K T	gold ʃəlˈækt: the reduced vowel, and a voiceless-stop past tense cannot take D
+sputniks	S P AH1 T N IH0 K S	S P UH1 T N IH0 K S	paradigm: matches the corrected `sputnik`
+uplinked	UW1 P L IH2 NG K D	UW1 P L IH2 NG K T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here
+woodlands	W UH1 D L AE2 N D Z	W UH1 D L AH0 N D Z	paradigm: matches the corrected `woodland`
+yelped	Y EH1 L P D	Y EH1 L P T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here

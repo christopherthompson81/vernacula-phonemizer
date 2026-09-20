@@ -27340,7 +27340,7 @@ croustade	K R UW0 S T AA1 D
 crout	K R AW1 T
 crouthamel	K R AW1 TH AH0 M EH0 L
 crouton	K R UW1 T AA2 N
-croutons	K R UW1 T AH0 N Z
+croutons	K R UW1 T AA2 N Z
 crovitz	K R OW1 V IH0 T S
 crovl	K R OW1 V AH0 L
 crovls	K R OW1 V AH0 L Z
@@ -37478,7 +37478,7 @@ elongate	IH0 L AO1 NG G EY0 T
 elongated	IH0 L AO1 NG G EY0 T AH0 D
 elongation	IH0 L AO2 NG G EY1 SH AH0 N
 elope	IH0 L OW1 P
-eloped	IH0 L OW1 P D
+eloped	IH0 L OW1 P T
 elopes	IH0 L OW1 P S
 eloquence	EH1 L AH0 K W AH0 N S
 eloquent	EH1 L AH0 K W AH0 N T
@@ -59894,7 +59894,7 @@ infantine	IH1 N F AH0 N T AY2 N
 infantino	IH2 N F AA0 N T IY1 N OW2
 infantry	IH1 N F AH0 N T R IY0
 infantryman	IH1 N F AH0 N T R IY0 M AH0 N
-infantrymen	IH1 N F AE0 N T R IY0 M AH0 N
+infantrymen	IH1 N F AH0 N T R IY0 M AH0 N
 infants	IH1 N F AH0 N T S
 infarct	IH0 N F AA1 R K T
 infarction	IH2 N F AA1 R K SH AH0 N
@@ -78870,7 +78870,7 @@ midinette	M IH2 D AH0 N EH1 T
 midiron	M IH1 D AY2 ER0 N
 midkiff	M IH1 D K IH0 F
 midland	M IH1 D L AH0 N D
-midlands	M IH1 D L AE2 N D Z
+midlands	M IH1 D L AH0 N D Z
 midlantic	M IH0 D L AE1 N T IH0 K
 midler	M IH1 D L ER0
 midlevel	M IH1 D L AH0 V AH0 L
@@ -109669,9 +109669,9 @@ shelia	SH IH1 L Y AH0
 sheline	SH EH1 L AY0 N
 shell	SH EH1 L
 shellabarger	SH EH1 L AH0 B AA2 R G ER0
-shellac	SH EH1 L AE2 K
+shellac	SH AH0 L AE1 K
 shellack	SH EH2 L AE1 K
-shellacked	SH EH2 L AE1 K D
+shellacked	SH AH0 L AE1 K T
 shellacking	SH AH0 L AE1 K IH0 NG
 shellback	SH EH1 L B AE2 K
 shelled	SH EH1 L D
@@ -114554,7 +114554,7 @@ spurted	S P ER1 T IH0 D
 spurting	S P ER1 T IH0 NG
 spurts	S P ER1 T S
 sputnik	S P UH1 T N IH0 K
-sputniks	S P AH1 T N IH0 K S
+sputniks	S P UH1 T N IH0 K S
 sputter	S P AH1 T ER0
 sputtered	S P AH1 T ER0 D
 sputtering	S P AH1 T ER0 IH0 NG
@@ -126937,7 +126937,7 @@ uplifter	AH0 P L IH1 F T ER0
 uplifting	AH1 P L IH2 F T IH0 NG
 uplinger	UW1 P AH0 L IH0 NG ER0
 uplink	AH1 P L IH2 NG K
-uplinked	UW1 P L IH2 NG K D
+uplinked	UW1 P L IH2 NG K T
 uplinks	UW1 P L IH2 NG K S
 upload	AH1 P L OW2 D
 uploaded	AH1 P L OW2 D IH0 D
@@ -133122,7 +133122,7 @@ woodington	W UH1 D IH0 NG T AH0 N
 woodis	W UH1 D IH0 S
 woodke	W UH1 D K IY0
 woodland	W UH1 D L AH0 N D
-woodlands	W UH1 D L AE2 N D Z
+woodlands	W UH1 D L AH0 N D Z
 woodlark	W UH1 D L AA2 R K
 woodlawn	W UH1 D L AO2 N
 woodle	W UH1 D AH0 L
@@ -134068,7 +134068,7 @@ yellowthroat	Y EH1 L OW0 TH R OW2 T
 yellowwood	Y EH1 L OW0 W UH2 D
 yells	Y EH1 L Z
 yelp	Y EH1 L P
-yelped	Y EH1 L P D
+yelped	Y EH1 L P T
 yelping	Y EH1 L P IH0 NG
 yelton	Y EH1 L T AH0 N
 yeltsin	Y EH1 L T S AH0 N

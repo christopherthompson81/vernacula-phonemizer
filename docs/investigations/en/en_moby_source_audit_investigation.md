@@ -3687,3 +3687,121 @@ to the reduced vowel. The waiver was still CORRECT; its stated reason had quietl
 true. That is the failure mode the gate's own header warns about from the other direction ("a row
 JOINING it is a regression that must be argued for"), and it argues for re-reading the reason
 attached to any waiver a change touches, not just the list membership.
+
+## Run 61 — 2026-09-19 19:00
+
+Review of the Run 60 block. The refusal held under attack; the 42 edits had a defect class I had not
+looked for, and one of my measurements was distorted by a bug in the artifact I was measuring.
+
+⚠ SIX PARADIGMS HALF-APPLIED — the real defect in the 42, and none of them is a `batman`-shaped
+error. Each edit corrected one member of a paradigm whose other members are separate dict rows, so
+the engine read them differently IN ONE SENTENCE:
+
+    crouton kɹˈuːtʰˌɑːn   / croutons kɹˈuːt̬ənz
+    midland mˈɪdlənd      / midlands mˈɪdlˌændz
+    woodland wˈʊdlənd     / woodlands wˈʊdlˌændz
+    sputnik spˈʊtnɪk      / sputniks spˈʌtnɪks
+    infantryman ˈɪnfəntɹimən / infantrymen ˈɪnfæntɹimən
+    shellacking ʃəlˈækɪŋ  / shellacked ʃɛlˈækd
+
+Two are directly settled by this run's own rule rather than by consistency alone: Moby has `Midlands
+'m/I/dl/@/ndz`, and BOTH sources reduce `shellac` (gold `ʃəlˈæk`, Moby `/S//@/'l/&/k`) — I corrected
+the derived form and left its base. `infantrymen`'s `AE0` was wrong on its own terms, since
+`infantry` is `IH1 N F AH0 N T R IY0`. Seven rows added. ⚠ THE LESSON IS THE PROCEDURE, NOT THE ROWS:
+a per-word correction drawn from a lexicon has to be checked against the word's INFLECTIONS, because
+the lexicon lists them separately and the engine reads them in the same sentence.
+
+⚠ A SEPARATE FINDING, FIXED IN PASSING: four dict rows carried a phonetically impossible
+voiceless-stop + `D` past tense against 2,981 correct `T` rows — `eloped`, `shellacked`, `uplinked`,
+`yelped`. `shellacked` had to move anyway; the other three are the same one-character defect.
+
+⚠ THE ARTIFACT I WAS MEASURING HAD A BUG, AND IT IS THE TRAP THIS AUDIT NAMED ONE RUN EARLIER.
+`build-en-moby-referee.mts`'s `JOIN` entry `["AH","R","ER"]` was UNGUARDED, so the builder wrote `ɚ`
+wherever Moby's `/@/r` fell before a stressed vowel — `around ɚaʊnd`, `arabia ɚeɪbiə`, `arise ɚaɪz`,
+`aroma ɚoʊmə`, 317 rows. Its sibling `modernise` guards the identical fold and documents the guard as
+load-bearing; the builder reimplemented the rule and dropped it, which is how two copies of one fold
+drift apart.
+⚠ SCORE-NEUTRAL, WHICH IS WHY IT SURVIVED: the eval folds `ɚ`→`əɹ` on both sides, so the rows still
+matched. What it corrupts is any measurement taken by reading the TSV directly — which is exactly
+what Run 60's refusal table did.
+⚠ AND MY FIRST FIX FOR IT WAS WRONG IN THE OPPOSITE DIRECTION. I guarded on "followed by a vowel",
+copying `modernise` verbatim, and broke the rule's own headline cases: `general` and `history` have
+`/@/r` before a vowel too and there it IS our ɚ. The discriminator is the following vowel's STRESS,
+which Moby marks itself — `/@/'r` when the `r` opens a stressed syllable, `/@/r` when it closes an
+unstressed one. `modernise` can use the weaker guard because its input is CMUdict-shaped, where `ER`
+is already one phone; the builder sees Moby's two symbols and has to read stress.
+
+⚠ THE `ɔɹ` ROW OF RUN 60'S TABLE WAS A SYMPTOM OF THAT BUG, NOT A BAD COMPARISON. I recorded the
+4,025-vs-zero as my own error — "measuring a source against a form our own pipeline cannot emit" —
+and worked around it by comparing against `ɚ`. The design was right and the pipeline was broken: with
+the join guarded, `əɹ` appears 2,641 times and the direct comparison reads 4,025 vs 2,641. Same
+verdict, records both, lexical. Both the workaround and the original route now agree.
+
+REFUSAL TABLE, RESTATED on the corrected artifact, all figures OCCURRENCES (Run 60's silently mixed
+occurrence counts with row counts):
+
+    after /j/, at j_l      86  vs   562
+    final -man             70  vs   444
+    word-initial ^æ/^ə   3073  vs  2402
+    ɛ / ə anywhere      15680  vs 49722
+    ɔɹ / əɹ              4025  vs  2641
+
+⚠ THE `/j/` ROW WAS MEASURED ANYWHERE AFTER `/j/` AND SHOULD HAVE BEEN AT THE ENVIRONMENT. Every
+disagreeing word in that sub-class is `j_l` — `accusation`, `amputate`, `amputee`, `oculist`. At the
+environment it is 86 against 562, which still records both AND backs us. Failure mode (a), sixth
+occurrence, and the conclusion is unchanged either way.
+
+⚠ THE REFUSAL SURVIVED A DELIBERATE ATTEMPT TO BREAK IT. Scanning every (left-phone, right-phone)
+environment with n≥25 across both tiers for strict one-sidedness: every strict zero is
+phonotactically impossible rather than a convention, and the nearest approaches — `-ʃən` 1886/65,
+`-zəm` 812/36, `-ʃəs` 349/11 — all record both sides and fail the bar. No environment justifies a
+fold.
+
+⚠ "EACH EDIT CHANGES EXACTLY ONE ARPABET PHONE" IS NOT TRUE AS WRITTEN. 18 of the 42 also change the
+STRESS DIGIT on that slot, which for 17 is the mechanical `AH0` ↔ full-vowel-with-stress swap. The
+exception is `ya  Y AA1 → Y AH0`, the only edit that strips a word's sole primary stress; checked
+and harmless (`"Ya!"` → `jˈə`, the engine re-stresses an isolated stressless monosyllable), but it
+is not the same kind of change as the other 41.
+
+⚠ AND THE SKIP FILTER'S STATED REASON WAS WRONG FOR HALF THE BUCKET. I wrote that 26 rows were
+skipped because "gold's row differs from ours in more than one phone". Re-measured: the filter tested
+differing SLOTS, and a slot can differ by stress alone. Of the 26, only 14 differ in more than one
+SEGMENT; the other 12 differ in exactly one segment plus a stress digit — `hasid`, `kenaf`,
+`legroom`, `monadnock`, `mudra`, `orel`, `parliamentarianism`, `picturesque`, `primavera`, `qatar`,
+`shellac`, `wahoo`. Failure mode (c). `shellac` is applied here because its derived form forced it;
+the other 11 are deferred rather than swept in, because a stress change is a different kind of edit
+from a vowel-quality change and deserves its own arbitration.
+
+RECORDED, NOT TAKEN:
+  · The 11 stress-digit rows above, plus the genuinely multi-segment ones the review flagged as clear
+    defects — `flummox F L AH0 M AO1 K S` (we read fləˈmɔks), `sacramental` stressed on the wrong
+    syllable, `legroom`, `reprobate`, `unalloyed`, `unalienable`. A stress-and-vowel block of its own.
+  · `hellenic` is the one edit an in-repo source contradicts: en-GB wikipron has `həlɛnɪk`. KEPT,
+    because both GenAm sources (Moby `h/E/'l/E/n/I/k`, gold `hɛlˈɛnɪk`) agree and en-GB is a
+    different variety and out of scope. Recorded as the weakest of the 42.
+  · en-GB emits a word-final `ɒ` for CMUdict `AA`, which RP does not permit — `dah dˈɒ`, `gaga
+    ɡˈɒɡɒ`, `sabah sˈɒbɒ`. PRE-EXISTING and large: 362 of the 390 dict words ending in `AA*` already
+    do it. This run adds three to that pile and fixes none of it; en-GB is out of scope.
+
+⚠ THE RHOTIC-JOIN FIX IS FAR LARGER THAN MY FIRST ESTIMATE AND MOVES THE OOV TIER BY −2. I said 317
+rows; the real figure is 2,184 in the OOV corpus alone, because my grep matched only row-INITIAL `ɚ`.
+The eval folds `ɚ`→`əɹ` symmetrically, so most of those are score-neutral as expected — but 49 rows
+newly FAIL and 48 newly PASS, and both halves are the referee becoming ABLE TO JUDGE rather than a
+regression. The newly-failing rows are ones where our own reading is wrong and the referee could not
+previously say so: `cerastes` is /sɪˈræstiz/, the corpus now reads `sɪɹæstiz`, and we say
+`sˌɛɹəstˈɛs`. The newly-passing ones are the mirror: `derangement dɪɹeɪnd͡ʒmənt` against the old
+`dɚeɪnd͡ʒmənt`. A net of −2 is the right shape for a referee correction and the wrong thing to report
+as a loss.
+⚠ AND IT CAUGHT A DICTIONARY DEFECT ON OUR SIDE IN PASSING, recorded not fixed: the OOV path reads
+initial `ce-` before a stressed syllable as `t͡ʃɛ`/`sɛ` with odd stress — `cerography t͡ʃˌɛɹoᶷɡɹˌæfˈɪ`,
+`ceroma t͡ʃˌɛɹoᶷmˈæ`. That is a separate class and belongs in its own block.
+
+⚠ ONE TEST EXPECTATION WAS PINNING THE BUG. `en-moby-referee.test.ts` asserted `corporation
+kɔɹpɚeɪʃən`; Moby writes `,k/O/rp/@/'r/eI//S//@/n`, whose own stress mark puts the `r` at the head of
+the stressed syllable, so `kɔɹpəɹeɪʃən` is correct and the assertion had recorded the defect as the
+expected value. Updated with the reason attached.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%) → 26,710/35,047 (76.2%)
+    Moby — OOV                      17,466 → 17,464 (see above; 49 newly fail, 48 newly pass)
+    primary                         2,584/4,037 (64.0%)    unmoved
+    curated rows                    42 → 52

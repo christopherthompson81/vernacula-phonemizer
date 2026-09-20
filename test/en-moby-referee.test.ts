@@ -73,7 +73,11 @@ describe("the Moby referee corpora", () => {
     // class and a silent return.
     test("a headword's corrupt reading is dropped and its sound one kept", () => {
         for (const [w, keep, gone] of [
-            ["corporation", "kɔɹpɚeɪʃən", "bʊŋɡi"],      // body is 'Bungee'
+            // ⚠ `kɔɹpəɹeɪʃən`, NOT `kɔɹpɚeɪʃən`. Moby writes `,k/O/rp/@/'r/eI//S//@/n` — its own stress
+            // mark puts the `r` at the head of the stressed syllable, so it is that syllable's onset
+            // and not a rhotic nucleus. This read `ɚ` until the rhotic join was guarded; see the
+            // JOIN comment in build-en-moby-referee.mts.
+            ["corporation", "kɔɹpəɹeɪʃən", "bʊŋɡi"],     // body is 'Bungee'
             ["city", "sɪti", "boʊʒɚ"],                    // body is 'Bougère'
             ["county", "kaʊnti", "bəlɑhi"],               // Moby's own `Bellaghy`, byte-identical
             ["rouse", "ɹaʊz", "ɹɔss"],                    // Moby's own `Ross` with a doubled ⟨s⟩
@@ -93,7 +97,10 @@ describe("the Moby referee corpora", () => {
             ["began", "bɪɡæn", "biæn"],                   // the /ɡ/ dropped
             ["crises", "kɹaɪsiz", "kɹiz"],
             ["messieurs", "mɛsɚz", "mɛsjɚɹ"],             // a doubled ⟨rr⟩ coda
-            ["swaraj", "swɚɑd͡ʒ", "swɚɑɹd͡ʒ"],              // an intrusive /r/
+            // ⚠ `swəɹɑd͡ʒ` for the same reason as `corporation`: Moby's `sw/@/'r/A//dZ/` marks the `r`
+            // as the stressed syllable's onset. The dropped reading `sw/@/'r/A/r/dZ/` has a SECOND,
+            // intrusive /r/ after the vowel, which is what makes it the corrupt one.
+            ["swaraj", "swəɹɑd͡ʒ", "swəɹɑɹd͡ʒ"],
             ["duralumin", "dʊɹæljəmɪn", "dd͡ʒʊɚæljʊmɪn"],  // a stray `d/dZ/` onset
         ] as const) {
             const row = lex.get(w) ?? oov.get(w);

@@ -96,11 +96,16 @@ const KNOWN_GAPS = new Map<string, string>([
     // ⚠ THIS NOTE USED TO CITE `woodland` AS A WORD WHERE -land KEEPS THE FULL VOWEL. It no longer does:
     // #1369 corrected `woodland`, `midland` and `northland` to the reduced vowel on Moby+gold agreement, so
     // all four `-land` rows now reduce and the compound path gives all four the full vowel from `land`.
-    // ⚠ AND `-land` IS NOT A RULE — MEASURED BEFORE WAIVING THESE. Our dict reduces 257 of 330 `-land`
-    // compounds and keeps 73 full; misaki gold, on the same words, splits 39 reduced against 46 full. The
-    // line it splits on is COMPOUND TRANSPARENCY — `farmland`, `grassland`, `dreamland`, `heartland` keep
-    // the full vowel, opaque place names `ashland`, `auckland`, `boland` reduce — and no spelling predicts
-    // which a word is. A converter rule would be wrong roughly half the time; the dictionary is right.
+    // ⚠ AND `-land` IS NOT A RULE — MEASURED BEFORE WAIVING THESE. Each source stated on ITS OWN
+    // population, because they barely overlap: gold covers only 88 of our 330 `-land` rows (27%), so
+    // "gold on the same words" would be a quarter-sized subsample quoted against a full-population
+    // count. Our dict: 257 of 330 reduced, 73 full. Gold's own `-land` entries: 125, of which 49
+    // reduced and 71 full. Both split, and neither is near one-sided.
+    // The line is COMPOUND TRANSPARENCY — `Disneyland`, `Dixieland`, `Lapland`, `Basutoland` keep the
+    // full vowel; `England`, `Finland`, `Holland`, `Iceland`, `Auckland`, `Cleveland` reduce — and no
+    // spelling predicts which a word is. A rule would be wrong roughly half the time either way round.
+    // (Examples drawn from gold's list, not from ours: an earlier version of this note cited `ashland`
+    // and `boland`, which have no gold entry at all, immediately after quoting a gold figure.)
     ["lowland", "compound (source C): `low` + `land` takes the full vowel from the free-standing `land`"],
     ["midland", "compound (source C): same `-land` shape as lowland"],
     ["northland", "compound (source C): same `-land` shape as lowland"],
