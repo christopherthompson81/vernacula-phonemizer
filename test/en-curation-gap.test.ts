@@ -129,6 +129,62 @@ const KNOWN_GAPS = new Map<string, string>([
     ["barbel", "compound (source C): `bar` + `bel` rebuilds the upstream EH2"],
     ["neolithic", "compound (source C): `neo` + `lithic` keeps neo's full OW and its own primary stress"],
     ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
+
+    // ⚠ THIRTY-TWO COMPOUND-PATH ROWS WITH ONE CAUSE, and it is a RULE IN THE ENGINE rather than 32 oddities.
+    // `compoundSplit` ends with `parts.flatMap((p, i) => (i === 0 ? p : stressDown(p)))` — every piece but
+    // the first is stressed down, UNCONDITIONALLY — so the path fore-stresses `over|come`, `under|take`,
+    // `back|yard` and `con|volution` by construction, which is exactly the placement gold and Moby
+    // together contradict on each of them. This is the refinement multi-primary Run 4 named ("PREFIXED,
+    // where the stem keeps the primary, versus COMPOUND, which is fore-stressed") and #1360 built
+    // `tools/gen/en-morph-boundary.tsv` to supply the label for.
+    // ⚠ AND THE LABEL IS NOT ENOUGH — MEASURED BEFORE WAIVING THESE, over the 233 candidates the stress
+    // audit reports. Keyed on that table's kind, a `prefix` boundary moves the primary LATER on 36 rows
+    // and EARLIER on 19; a `compound` boundary moves it EARLIER on 18 and LATER on 8. Two-thirds each
+    // way is not a rule — `over·come` and `pre·school` carry the same label and take opposite stress —
+    // so keying the path on it would trade one wrong answer for a different one, which is the same
+    // finding the `-land` note above records for a different class. The dictionary is the mechanism; the
+    // path's unconditional fore-stress is still worth replacing with the label, but not on this evidence.
+    ["backyard", "compound (source C): `back` + `yard` fore-stresses the seam; see the note above"],
+    ["convolution", "compound (source C): same unconditional fore-stress"],
+    ["overcome", "compound (source C): same unconditional fore-stress"],
+    ["overpay", "compound (source C): same unconditional fore-stress"],
+    ["overtake", "compound (source C): same unconditional fore-stress"],
+    ["psychosocial", "compound (source C): same unconditional fore-stress"],
+    ["undermine", "compound (source C): same unconditional fore-stress"],
+    ["underpin", "compound (source C): same unconditional fore-stress"],
+    ["undertake", "compound (source C): same unconditional fore-stress"],
+    ["alternation", "compound (source C): same unconditional fore-stress"],
+    ["archduke", "compound (source C): same unconditional fore-stress"],
+    ["countervail", "compound (source C): same unconditional fore-stress"],
+    ["evermore", "compound (source C): same unconditional fore-stress"],
+    ["headmistress", "compound (source C): same unconditional fore-stress"],
+    ["homestretch", "compound (source C): same unconditional fore-stress"],
+    ["midstream", "compound (source C): same unconditional fore-stress"],
+    ["miscue", "compound (source C): same unconditional fore-stress"],
+    ["nevermore", "compound (source C): same unconditional fore-stress"],
+    ["outsmart", "compound (source C): same unconditional fore-stress"],
+    ["overbuy", "compound (source C): same unconditional fore-stress"],
+    ["overfill", "compound (source C): same unconditional fore-stress"],
+    ["overreach", "compound (source C): same unconditional fore-stress"],
+    ["overrule", "compound (source C): same unconditional fore-stress"],
+    ["oversell", "compound (source C): same unconditional fore-stress"],
+    ["overstep", "compound (source C): same unconditional fore-stress"],
+    ["overstuff", "compound (source C): same unconditional fore-stress"],
+    ["overtax", "compound (source C): same unconditional fore-stress"],
+    ["stockade", "compound (source C): same unconditional fore-stress"],
+    ["undersell", "compound (source C): same unconditional fore-stress"],
+    ["undersized", "compound (source C): same unconditional fore-stress"],
+    ["understate", "compound (source C): same unconditional fore-stress"],
+    ["underweight", "compound (source C): same unconditional fore-stress"],
+    ["understaffed", "morph (source M): `understaff` + `ed`; the stem is not in the referees' intersection"],
+    // ⚠ TWO MORPH-PATH ROWS WHOSE STEMS ARE DELIBERATELY NOT MOVED WITH THEM, and that is the whole
+    // entry: correcting the stem is what closed `outdated` and `overpayment`, which were live in the
+    // first cut of this block and are not here. These two cannot take that remedy.
+    // `handcraft` is a NOUN and fore-stressed correctly (ˈhændˌkræft); the participle `hand-crafted` is
+    // not, and no referee disputes the stem. `override` is the noun/verb pair itself — ˈoʊvɚˌraɪd against
+    // ˌoʊvɚˈraɪd — and the dict carries one row, so `overriding` decodes through the noun's placement.
+    ["handcrafted", "morph (source M): `handcraft` + `ed`; the stem is a correctly fore-stressed noun"],
+    ["overriding", "morph (source M): decodes through `override`, which the dict carries as the noun"],
 ]);
 
 /**
@@ -138,7 +194,8 @@ const KNOWN_GAPS = new Map<string, string>([
  * root, a proper noun, a loan — the OOV path has only the n-gram, and the n-gram learned the row we corrected.
  * It reproduces the upstream shape by construction, and no amount of curation can change that.
  *
- * ⚠ IT IS 282 WORDS AND THAT NUMBER IS THE POINT — it is a MEASURE of the train/ship gap, not a waiver pile.
+ * ⚠ IT IS 173 WORDS AND THAT NUMBER IS THE POINT — and it said 282 while the set held 149, which is
+ * the one thing a comment whose whole claim is "this number is a measurement" may not do — it is a MEASURE of the train/ship gap, not a waiver pile.
  * Every entry is a curated row whose correction the model cannot reproduce because the model learned the row we
  * corrected. When the remedy below is taken, this list should COLLAPSE, and that collapse is the test that the
  * retrain worked. If it instead keeps growing while nobody retrains, the gate is telling you the curated layer
@@ -192,6 +249,16 @@ const STRUCTURAL_GAP = new Set([
     // and running text means the plural. Waiving the gap was the wrong remedy; the sieve had simply
     // caught a homograph, the same way it caught `tours`.
     "basle", "showa", "waal",
+    // ⚠ TWENTY-FOUR ADDED BY THE STRESS BLOCK, all source N, and they are the class this list is a measure of:
+    // the model learned CMUdict's placement for exactly these words, so held out it reproduces it. They
+    // have no morphological handle the corrected dict could propagate through — `impasse`, `inverse`,
+    // `dictator`, `foment` and `truncation` are roots or opaque derivations — and there is no spelling that says
+    // which syllable an English word stresses, so no rule is available either. A retrain on the curated
+    // dict closes all 24, the same way #1341's closed 213.
+    "dictator", "foment", "immolation", "impasse", "inborn", "inbred",
+    "infiltrate", "inverse", "outbid", "outclass", "outflank", "outguess",
+    "outgun", "outlast", "outpace", "outsource", "outweigh", "outwit",
+    "roughshod", "slovene", "syncopation", "truncation", "twofold", "unbolt",
     // ⚠ TWO ADDED BY THE #1375 AUDIT SWEEP, both source N: `khaki` (the n-gram learned CMUdict's
     // ˈkɑki) and `lech` (a three-letter word with nothing to decode through).
     "khaki", "lech",
