@@ -3587,3 +3587,221 @@ comment now says it.
     referee rows changed            219 (220 less `altstoetter`, now retained as a seam)
     audit() frequency words freed   55
     import candidates unblocked     148
+
+## Run 60 — 2026-09-19 16:45
+
+The unstressed-vowel class, the largest thing left in the Moby residual. The answer is a REFUSAL plus
+a lexical slice — the fold is not available, and the rows have to be arbitrated one at a time.
+
+    npx tsx tools/referee-eval/eval.ts en --examples 12000
+
+⚠ FIRST, THE SHAPE OF THE WHOLE RESIDUAL, which nothing in this audit had measured. Of the 8,396
+in-dict failures: 4,811 (57%) differ in EXACTLY ONE SYMBOL at equal length, 1,025 in more than one,
+and 2,560 differ in LENGTH. The single-symbol half is almost entirely vowels, and the class count is
+nearly equal to the row count (8,261 classes for 8,396 rows) — these are one-off lexical
+disagreements, not a few big patterns. That alone argues against any further fold.
+
+Of the single-symbol rows, `ə`↔`ɪ` (2,031) is already declared intentional and `i`→`ɪ` before ɹ
+(351) likewise. What is LEFT and uncovered is the SCHWA-versus-FULL-VOWEL class: `ə` against
+`ɑ ɛ æ ʊ ɔ i` in both directions, 784 rows.
+
+⚠ IT FAILS THE REPO'S OWN BAR FOR AN INTENTIONAL CLASS, TWICE. The bar (set by the `i`→`ɪ` entry) is
+that the referee must NOT record the distinction — a one-sided notation choice — and that an
+independent source must back us. Measured across both referee tiers:
+
+    after /j/   jʊ  579   vs  jə  1043     records both -> lexical
+    -man        mæn  70   vs  mən  444     records both -> lexical
+    initial     ^æ  3073  vs  ^ə  2280     records both -> lexical
+                ɛ  15680  vs  ə  47081     records both -> lexical
+    before ɹ    ɔɹ 4025   vs  ɚ  15755     records both -> lexical
+
+Moby writes both sides of every environment I could name. It is making per-word judgements, not
+following a convention, so there is nothing here to fold.
+⚠ MY FIRST VERSION OF THAT TABLE COMPARED `ɔɹ` AGAINST `əɹ` AND GOT 4,025 vs ZERO — which reads as a
+perfect one-sided convention and would have justified a fold. It is an artifact of our own pipeline:
+Moby's `/@/r` folds to `ɚ`, so `əɹ` CANNOT appear in the corpus and the zero says nothing about Moby.
+Measuring a source against a form our own builder cannot emit is a new way to get a false positive
+and worth naming; the corrected figure is 4,025 vs 15,755, which is lexical like the rest.
+
+⚠ AND GOLD SPLITS, WITH NO ENVIRONMENT PREDICTING THE DIRECTION. Arbitrating all 784 against misaki:
+
+    gold backs US           138
+    gold backs MOBY          78
+    gold differs from BOTH  275
+    no gold entry           290
+
+Gold can arbitrate only 216 of 784 (28%), and every sub-class is mixed in both directions — `æ`/`ə`
+goes 9 for us and 15 for Moby, `ə`/`ʊ` goes 12 for us and 5 for Moby. That is exactly the ground the
+velar nasal was refused on: a lexical disagreement where neither side has been shown right. THE
+CLASS IS REFUSED as a fold. The 275 rows where gold agrees with neither are recorded and untouched —
+a third of the class has a problem beyond the one being studied.
+
+TAKEN INSTEAD, the 74 rows where TWO INDEPENDENT SOURCES agree against us. Minus `address` (already
+in the heteronym table, correctly) and `and` (a function word whose reduced form is deliberate), and
+minus 26 where gold's row differs from ours in more than one phone — those need fuller review than a
+vowel swap — and 3 that already carry a curated row, which may not have a second. 43 applied, each
+derived from gold through the repo's own `goldToArpabet` rather than by hand-mapping vowels.
+
+⚠ ONE OF THE 43 WAS WRONG, AND ONLY THE GOLDENS COULD SEE IT. `batman` went `B AE1 T M AE2 N` →
+`B AE1 T M AH0 N`, and a Hmong golden — an English loanword list — broke on `Batman los rau Joker`.
+Gold and Moby both mean the ARMY SERVANT, ˈbætmən; running text overwhelmingly means the SUPERHERO,
+ˈbætmæn. Two independent lexicons agreed and were both right about a lexeme that is not the one that
+appears in text.
+⚠ NO LEXICON TEST WOULD HAVE CAUGHT IT. I checked all 43 for words where gold carries both cases with
+different readings: none, `batman` included — gold has a single entry and it is the rarer sense. The
+goldens caught it because they are the only source here that reflects USAGE rather than lexicography.
+That is an argument for running them before believing an arbitration, not only before merging.
+Reverted; 42 stand.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%) → 26,693/35,047 (76.2%)
+    Moby — OOV                      17,466/39,484 (44.2%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved — no regression
+    goldens 0 stale after the revert
+
+WHAT IS LEFT OF THE RESIDUAL, now that it has been measured rather than estimated: 2,560 rows differ
+in LENGTH (insertion or deletion of a phone), which is the syllabic-l class and its relatives and is
+the next thing to look at; 1,025 differ in more than one symbol; and the single-symbol remainder is
+one-off lexical work of the kind this run did 42 of. There is no large systematic class left in the
+in-dict tier — the count of distinct classes being within 2% of the count of rows is the measurement
+that says so.
+
+⚠ AND TEN OF THE 42 ARE LIVE SPLITS, which the curation gate caught and I had not anticipated. A
+curated row whose held-out OOV prediction equals the upstream shape means the engine answers one way
+for the listed word and another for an unlisted word in the same environment. Sources, read from
+`decompose().source` rather than guessed:
+
+    N (n-gram)   adman chessman navarre sputnik      -> STRUCTURAL_GAP, the train/ship gap
+    C (compound) dextran midland northland woodland  -> KNOWN_GAPS
+    M (morph)    fistful shellacking                 -> KNOWN_GAPS
+
+⚠ BEFORE WAIVING THE `-land` CLUSTER I CHECKED WHETHER IT SHOULD BE A RULE, because four of the ten
+sharing a second element is exactly the shape that should be one. It should not. Our dict reduces
+257 of 330 `-land` compounds and keeps 73 full; misaki gold on the same words splits 39 reduced
+against 46 full. The line is COMPOUND TRANSPARENCY — `farmland`, `grassland`, `dreamland`,
+`heartland` keep the full vowel, opaque place names `ashland`, `auckland`, `boland` reduce — and no
+spelling predicts which a word is. A converter rule would be wrong about half the time.
+
+⚠ AND THE EXISTING `lowland` WAIVER'S REASON WAS MADE STALE BY THIS RUN. It read "-land gives the
+full vowel it keeps in woodland but not here" — and `woodland` is one of the three I just corrected
+to the reduced vowel. The waiver was still CORRECT; its stated reason had quietly stopped being
+true. That is the failure mode the gate's own header warns about from the other direction ("a row
+JOINING it is a regression that must be argued for"), and it argues for re-reading the reason
+attached to any waiver a change touches, not just the list membership.
+
+## Run 61 — 2026-09-19 19:00
+
+Review of the Run 60 block. The refusal held under attack; the 42 edits had a defect class I had not
+looked for, and one of my measurements was distorted by a bug in the artifact I was measuring.
+
+⚠ SIX PARADIGMS HALF-APPLIED — the real defect in the 42, and none of them is a `batman`-shaped
+error. Each edit corrected one member of a paradigm whose other members are separate dict rows, so
+the engine read them differently IN ONE SENTENCE:
+
+    crouton kɹˈuːtʰˌɑːn   / croutons kɹˈuːt̬ənz
+    midland mˈɪdlənd      / midlands mˈɪdlˌændz
+    woodland wˈʊdlənd     / woodlands wˈʊdlˌændz
+    sputnik spˈʊtnɪk      / sputniks spˈʌtnɪks
+    infantryman ˈɪnfəntɹimən / infantrymen ˈɪnfæntɹimən
+    shellacking ʃəlˈækɪŋ  / shellacked ʃɛlˈækd
+
+Two are directly settled by this run's own rule rather than by consistency alone: Moby has `Midlands
+'m/I/dl/@/ndz`, and BOTH sources reduce `shellac` (gold `ʃəlˈæk`, Moby `/S//@/'l/&/k`) — I corrected
+the derived form and left its base. `infantrymen`'s `AE0` was wrong on its own terms, since
+`infantry` is `IH1 N F AH0 N T R IY0`. Seven rows added. ⚠ THE LESSON IS THE PROCEDURE, NOT THE ROWS:
+a per-word correction drawn from a lexicon has to be checked against the word's INFLECTIONS, because
+the lexicon lists them separately and the engine reads them in the same sentence.
+
+⚠ A SEPARATE FINDING, FIXED IN PASSING: four dict rows carried a phonetically impossible
+voiceless-stop + `D` past tense against 2,981 correct `T` rows — `eloped`, `shellacked`, `uplinked`,
+`yelped`. `shellacked` had to move anyway; the other three are the same one-character defect.
+
+⚠ THE ARTIFACT I WAS MEASURING HAD A BUG, AND IT IS THE TRAP THIS AUDIT NAMED ONE RUN EARLIER.
+`build-en-moby-referee.mts`'s `JOIN` entry `["AH","R","ER"]` was UNGUARDED, so the builder wrote `ɚ`
+wherever Moby's `/@/r` fell before a stressed vowel — `around ɚaʊnd`, `arabia ɚeɪbiə`, `arise ɚaɪz`,
+`aroma ɚoʊmə`, 317 rows. Its sibling `modernise` guards the identical fold and documents the guard as
+load-bearing; the builder reimplemented the rule and dropped it, which is how two copies of one fold
+drift apart.
+⚠ SCORE-NEUTRAL, WHICH IS WHY IT SURVIVED: the eval folds `ɚ`→`əɹ` on both sides, so the rows still
+matched. What it corrupts is any measurement taken by reading the TSV directly — which is exactly
+what Run 60's refusal table did.
+⚠ AND MY FIRST FIX FOR IT WAS WRONG IN THE OPPOSITE DIRECTION. I guarded on "followed by a vowel",
+copying `modernise` verbatim, and broke the rule's own headline cases: `general` and `history` have
+`/@/r` before a vowel too and there it IS our ɚ. The discriminator is the following vowel's STRESS,
+which Moby marks itself — `/@/'r` when the `r` opens a stressed syllable, `/@/r` when it closes an
+unstressed one. `modernise` can use the weaker guard because its input is CMUdict-shaped, where `ER`
+is already one phone; the builder sees Moby's two symbols and has to read stress.
+
+⚠ THE `ɔɹ` ROW OF RUN 60'S TABLE WAS A SYMPTOM OF THAT BUG, NOT A BAD COMPARISON. I recorded the
+4,025-vs-zero as my own error — "measuring a source against a form our own pipeline cannot emit" —
+and worked around it by comparing against `ɚ`. The design was right and the pipeline was broken: with
+the join guarded, `əɹ` appears 2,641 times and the direct comparison reads 4,025 vs 2,641. Same
+verdict, records both, lexical. Both the workaround and the original route now agree.
+
+REFUSAL TABLE, RESTATED on the corrected artifact, all figures OCCURRENCES (Run 60's silently mixed
+occurrence counts with row counts):
+
+    after /j/, at j_l      86  vs   562
+    final -man             70  vs   444
+    word-initial ^æ/^ə   3073  vs  2402
+    ɛ / ə anywhere      15680  vs 49722
+    ɔɹ / əɹ              4025  vs  2641
+
+⚠ THE `/j/` ROW WAS MEASURED ANYWHERE AFTER `/j/` AND SHOULD HAVE BEEN AT THE ENVIRONMENT. Every
+disagreeing word in that sub-class is `j_l` — `accusation`, `amputate`, `amputee`, `oculist`. At the
+environment it is 86 against 562, which still records both AND backs us. Failure mode (a), sixth
+occurrence, and the conclusion is unchanged either way.
+
+⚠ THE REFUSAL SURVIVED A DELIBERATE ATTEMPT TO BREAK IT. Scanning every (left-phone, right-phone)
+environment with n≥25 across both tiers for strict one-sidedness: every strict zero is
+phonotactically impossible rather than a convention, and the nearest approaches — `-ʃən` 1886/65,
+`-zəm` 812/36, `-ʃəs` 349/11 — all record both sides and fail the bar. No environment justifies a
+fold.
+
+⚠ "EACH EDIT CHANGES EXACTLY ONE ARPABET PHONE" IS NOT TRUE AS WRITTEN. 18 of the 42 also change the
+STRESS DIGIT on that slot, which for 17 is the mechanical `AH0` ↔ full-vowel-with-stress swap. The
+exception is `ya  Y AA1 → Y AH0`, the only edit that strips a word's sole primary stress; checked
+and harmless (`"Ya!"` → `jˈə`, the engine re-stresses an isolated stressless monosyllable), but it
+is not the same kind of change as the other 41.
+
+⚠ AND THE SKIP FILTER'S STATED REASON WAS WRONG FOR HALF THE BUCKET. I wrote that 26 rows were
+skipped because "gold's row differs from ours in more than one phone". Re-measured: the filter tested
+differing SLOTS, and a slot can differ by stress alone. Of the 26, only 14 differ in more than one
+SEGMENT; the other 12 differ in exactly one segment plus a stress digit — `hasid`, `kenaf`,
+`legroom`, `monadnock`, `mudra`, `orel`, `parliamentarianism`, `picturesque`, `primavera`, `qatar`,
+`shellac`, `wahoo`. Failure mode (c). `shellac` is applied here because its derived form forced it;
+the other 11 are deferred rather than swept in, because a stress change is a different kind of edit
+from a vowel-quality change and deserves its own arbitration.
+
+RECORDED, NOT TAKEN:
+  · The 11 stress-digit rows above, plus the genuinely multi-segment ones the review flagged as clear
+    defects — `flummox F L AH0 M AO1 K S` (we read fləˈmɔks), `sacramental` stressed on the wrong
+    syllable, `legroom`, `reprobate`, `unalloyed`, `unalienable`. A stress-and-vowel block of its own.
+  · `hellenic` is the one edit an in-repo source contradicts: en-GB wikipron has `həlɛnɪk`. KEPT,
+    because both GenAm sources (Moby `h/E/'l/E/n/I/k`, gold `hɛlˈɛnɪk`) agree and en-GB is a
+    different variety and out of scope. Recorded as the weakest of the 42.
+  · en-GB emits a word-final `ɒ` for CMUdict `AA`, which RP does not permit — `dah dˈɒ`, `gaga
+    ɡˈɒɡɒ`, `sabah sˈɒbɒ`. PRE-EXISTING and large: 362 of the 390 dict words ending in `AA*` already
+    do it. This run adds three to that pile and fixes none of it; en-GB is out of scope.
+
+⚠ THE RHOTIC-JOIN FIX IS FAR LARGER THAN MY FIRST ESTIMATE AND MOVES THE OOV TIER BY −2. I said 317
+rows; the real figure is 2,184 in the OOV corpus alone, because my grep matched only row-INITIAL `ɚ`.
+The eval folds `ɚ`→`əɹ` symmetrically, so most of those are score-neutral as expected — but 49 rows
+newly FAIL and 48 newly PASS, and both halves are the referee becoming ABLE TO JUDGE rather than a
+regression. The newly-failing rows are ones where our own reading is wrong and the referee could not
+previously say so: `cerastes` is /sɪˈræstiz/, the corpus now reads `sɪɹæstiz`, and we say
+`sˌɛɹəstˈɛs`. The newly-passing ones are the mirror: `derangement dɪɹeɪnd͡ʒmənt` against the old
+`dɚeɪnd͡ʒmənt`. A net of −2 is the right shape for a referee correction and the wrong thing to report
+as a loss.
+⚠ AND IT CAUGHT A DICTIONARY DEFECT ON OUR SIDE IN PASSING, recorded not fixed: the OOV path reads
+initial `ce-` before a stressed syllable as `t͡ʃɛ`/`sɛ` with odd stress — `cerography t͡ʃˌɛɹoᶷɡɹˌæfˈɪ`,
+`ceroma t͡ʃˌɛɹoᶷmˈæ`. That is a separate class and belongs in its own block.
+
+⚠ ONE TEST EXPECTATION WAS PINNING THE BUG. `en-moby-referee.test.ts` asserted `corporation
+kɔɹpɚeɪʃən`; Moby writes `,k/O/rp/@/'r/eI//S//@/n`, whose own stress mark puts the `r` at the head of
+the stressed syllable, so `kɔɹpəɹeɪʃən` is correct and the assertion had recorded the defect as the
+expected value. Updated with the reason attached.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%) → 26,710/35,047 (76.2%)
+    Moby — OOV                      17,466 → 17,464 (see above; 49 newly fail, 48 newly pass)
+    primary                         2,584/4,037 (64.0%)    unmoved
+    curated rows                    42 → 52

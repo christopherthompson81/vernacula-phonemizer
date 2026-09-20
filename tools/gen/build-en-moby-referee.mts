@@ -103,6 +103,8 @@ const IPA: Record<string, string> = {
     M: "m", N: "n", NG: "ŋ", P: "p", R: "ɹ", S: "s", SH: "ʃ", T: "t", TH: "θ", V: "v",
     W: "w", Y: "j", Z: "z", ZH: "ʒ",
 };
+const VOWEL_SET = new Set(["AA","AE","AH","AO","AW","AY","EH","ER","EY","IH","IY","OW","OY","UH","UW"]);
+
 /** Two Moby symbols this engine writes as one. Applied on the ARPABET side, before IPA. */
 const JOIN: [string, string, string][] = [
     ["AH", "R", "ER"], ["IH", "R", "ER"],          // ə/ɪ + r is our single ɚ (general, history, different)
@@ -119,7 +121,25 @@ function fold(w: string, a: string[]): [string, string][] {
     const t = a.map((p) => [p.replace(/[0-2]$/u, ""), /[0-2]$/u.test(p) ? p.slice(-1) : ""] as [string, string]);
     const out: [string, string][] = [];
     for (let i = 0; i < t.length; i++) {
-        const j = JOIN.find(([x, y]) => t[i]![0] === x && t[i + 1]?.[0] === y);
+        // ⚠ THE RHOTIC JOIN NEEDS A GUARD AND DID NOT HAVE ONE. `AH R` / `IH R` before the STRESSED
+        // vowel of the next syllable is that syllable's ONSET `r`, not this one's coda — Moby writes
+        // `around /@/'r/AU/nd`, one schwa syllable then a stressed `raʊnd` — and joining it wrote
+        // `ɚaʊnd`, `ɚeɪbiə`, `ɚaɪz`, `ɚoʊmə` into the artifact across 317 rows.
+        // ⚠ THE DISCRIMINATOR IS THE FOLLOWING VOWEL'S STRESS, NOT MERELY THAT IT IS A VOWEL, and the
+        // first version of this guard used the latter and broke the rule's own headline cases: in
+        // `general '/dZ//E/n/@/r/@/l` and `history 'h/I/st/@/r/i/` the `/@/r` is followed by a vowel
+        // too, and there it IS our ɚ. Moby marks the difference with its stress mark — `/@/'r` when the
+        // `r` opens a stressed syllable, `/@/r` when it closes an unstressed one.
+        // ⚠ THIS IS NOT THE SAME GUARD `modernise` USES, although it guards the same fold. That one
+        // takes CMUdict-shaped input where `ER` is already a single phone, so a bare consonant
+        // lookahead suffices; here the input is Moby's two symbols and the lookahead has to read stress.
+        // ⚠ SCORE-NEUTRAL, AND THAT IS WHY IT SURVIVED — the eval folds `ɚ` to `əɹ` on both sides, so
+        // the rows still matched. What it corrupts is any measurement taken by reading the TSV
+        // directly, which is how the rhotic environment was counted in Run 60 of the investigation.
+        const onsetOfStressed = t[i + 2] !== undefined && VOWEL_SET.has(t[i + 2]![0])
+            && t[i + 2]![1] !== "" && t[i + 2]![1] !== "0";
+        const j = JOIN.find(([x, y]) => t[i]![0] === x && t[i + 1]?.[0] === y
+            && !(y === "R" && onsetOfStressed));
         if (j) { out.push([j[2], t[i]![1]]); i++; continue; }   // the joined nucleus keeps the FIRST stress
         // FORCE → NORTH: Moby keeps oʊɹ where GenAm merged to ɔɹ. Safe — CMUdict has no such distinction.
         // ⚠ SPELLED `owr` IS EXEMPT, because there the `r` is the NEXT syllable's ONSET, not this one's
