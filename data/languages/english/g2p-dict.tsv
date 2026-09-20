@@ -59093,10 +59093,10 @@ impoundment	IH2 M P AW1 N D M AH0 N T
 impoundments	IH2 M P AW1 N D M AH0 N T S
 impounds	IH2 M P AW1 N D Z
 impoverish	IH2 M P AA1 V ER0 IH0 SH
-impoverished	IH2 M P AA1 V R IH0 SH T
+impoverished	IH2 M P AA1 V ER0 IH0 SH T
 impoverishes	IH2 M P AA1 V ER0 IH0 SH AH0 Z
 impoverishing	IH2 M P AA1 V ER0 IH0 SH IH0 NG
-impoverishment	IH2 M P AA1 V R IH0 SH M AH0 N T
+impoverishment	IH2 M P AA1 V ER0 IH0 SH M AH0 N T
 impracticable	IH2 M P R AE1 K T IH0 K AH0 B AH0 L
 impractical	IH2 M P R AE1 K T AH0 K AH0 L
 imprecate	IH1 M P R AH0 K EY2 T
@@ -59646,7 +59646,7 @@ indie	IH1 N D IY0
 indies	IH1 N D IY0 Z
 indifference	IH2 N D IH1 F ER0 AH0 N S
 indifferent	IH2 N D IH1 F ER0 AH0 N T
-indifferently	IH2 N D IH1 F R AH0 N T L IY0
+indifferently	IH2 N D IH1 F ER0 AH0 N T L IY0
 indigence	IH1 N D IH0 JH AH0 N S
 indigene	IH1 N D IH0 JH IY2 N
 indigenize	IH0 N D IH1 JH IH0 N AY2 Z
@@ -118168,7 +118168,7 @@ surra	S UH1 R AH0
 surratt	S AO1 R AH0 T
 surreal	S ER0 IY1 AH0 L
 surrealism	S ER0 IY1 AH0 L IH0 Z AH0 M
-surrealisms	S ER0 IY1 L IH0 Z AH0 M Z
+surrealisms	S ER0 IY1 AH0 L IH0 Z AH0 M Z
 surrealistic	S ER0 IY2 AH0 L IH1 S T IH0 K
 surrebuttal	S ER1 IH0 B AH0 T AH0 L
 surrell	S AO1 R AH0 L
@@ -120385,8 +120385,8 @@ temper	T EH1 M P ER0
 tempera	T EH1 M P ER0 AH0
 temperament	T EH1 M P ER0 AH0 M AH0 N T
 temperamental	T EH2 M P ER0 AH0 M EH1 N T AH0 L
-temperamentally	T EH2 M P R AH0 M EH1 N T AH0 L IY0
-temperaments	T EH1 M P R AH0 M AH0 N T S
+temperamentally	T EH2 M P ER0 AH0 M EH1 N T AH0 L IY0
+temperaments	T EH1 M P ER0 AH0 M AH0 N T S
 temperance	T EH1 M P ER0 AH0 N S
 temperate	T EH1 M P R AH0 T
 temperature	T EH1 M P R AH0 CH ER0
