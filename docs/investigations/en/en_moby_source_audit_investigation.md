@@ -4119,3 +4119,148 @@ And the running-text check I quoted shows `bˈoᶷt͡ʃɚ`, which is the unchang
     Moby — OOV                      17,464/39,451 (44.3%)  unmoved
     primary                         2,584/4,037 (64.0%)    unmoved
     rows corrected                  13 → 15
+
+## Run 66 — 2026-09-19 23:55
+
+The missing-schwa class, 88 rows — the largest of the length-differing buckets. Same outcome shape as
+Run 60: no fold available, a lexical slice taken. Two things in it were new.
+
+⚠ IT IS FOUR CLASSES, NOT ONE. `-ically` (`academically ækədɛmɪkli` against `ækədɛmɪkəli`), the
+`aɪə`/`aʊə` smoothing before ɹ (`desirable`, `dower`), pre-rhotic SYNCOPE (`several`, `emerald`,
+`temperament`), and a handful of one-offs (`elbe`, `brea`).
+
+⚠ TWO OF THEM LOOKED LIKE CLEAN CONVENTIONS AND WERE MEASUREMENT ARTIFACTS — THE THIRD TIME THIS
+AUDIT. `aʊəɹ`/`aʊɹ` read 2 against 44, and the syncope environment read a PERFECT 0 against 3,787,
+either of which would have justified a fold. The referee TSV stores `ɚ`; the eval's printout shows
+`əɹ`; I counted the printed form against the stored file. Re-measured after expanding `ɚ`→`əɹ` — the
+space the eval actually compares in — they are 81 against 44 and 1,362 against 3,832. All four
+sub-classes record both sides. Lexical, no fold.
+⚠ THE FIX IS PROCEDURAL AND IS NOW WRITTEN DOWN: any environment count over the referee must fold
+`ɚ`→`əɹ` FIRST. A perfect zero in a rhotic environment is evidence of this bug, not of a convention;
+it has now produced a false positive in Run 60 and twice here. (⚠ Run 62 is NOT an instance and
+Run 67 removes it from this list: that block's false positive was a missing `excludeRows` rule, a
+different bug entirely. Two occurrences across two runs, not three.)
+
+Arbitrating all 88 against misaki gold: 52 gold-differs-from-both, 15 gold-backs-Moby, 12 no gold,
+9 gold-backs-us. The 15 are almost all the SYNCOPE sub-class.
+
+⚠ AND THE DICTIONARY CONTRADICTS ITSELF ON FIVE STEMS, which is better evidence than the two external
+sources and is what turned 15 rows into 18:
+
+    differ D IH1 F ER0 / difference … ER0 / different … ER0   BUT  differently D IH1 F R …
+    indifference … ER0 …                                      BUT  indifferent … F R …
+    livery L IH1 V ER0 IY0                                    BUT  liveried L IH1 V R IY0 D
+    devil D EH1 V AH0 L                                       BUT  devilish D EH1 V L IH0 SH
+    surreal S ER0 IY1 AH0 L                                   BUT  surrealistic S ER0 IY2 L …
+
+The paradigm sweep that found those also caught rows the arbitration alone would have missed.
+⚠ AND THE SWEEP WAS ITSELF INCOMPLETE — see Run 67, which adds six more and corrects this
+paragraph's arithmetic. `severally` was never a sweep-only find: Moby carries it, so it was in the
+arbitrated set all along.
+
+⚠ ONE ROW FROM THE 15 WAS REFUSED — AND A SECOND WAS DROPPED BY MISTAKE, see Run 67: `tandoor T AE0 N D UW1 R`, where gold gives `tændˈʊəɹ`. The `ʊə`
+centring diphthong is an RP shape, GenAm has /tænˈdʊr/, and this is the one row in the set where
+gold and Moby could plausibly share a British-source error rather than independently agree. Left.
+
+⚠ THE OOV PATH CAME IN ON THE RIGHT SIDE THIS TIME, unlike Run 64 where I had to withdraw the
+argument. `several` and `differently` are NOT live splits because the path already predicted the
+corrected form, and `differently` is source M — it decodes through `different`, whose row already
+carried the schwa. So the dict row was an outlier against our own MORPHOLOGY as well as against the
+two external sources. That is not the circular check Run 64 made: the morph path reads a different
+dict row, it does not re-derive this one.
+
+⚠ FOUR GOLDENS MOVED AND WERE RE-RECORDED DELIBERATELY, across en, en-GB and en-IN — all `several`
+and `differently`. This needed a reason rather than a shrug, because both words are genuinely
+two-form in GenAm and Merriam-Webster lists the SYNCOPATED `ˈsev-rəl` first. ⚠ THE REASON GIVEN HERE IS THE WRONG ONE AND RUN 67 REPLACES IT: "gold is what the downstream model
+was trained on" is scoped in `eval.ts` to a divergence measured to be a NOTATION CHOICE, and a
+syllable-count difference is not one.
+
+    Moby — words the dict carries   26,713/35,027 (76.3%) → 26,725/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    rows corrected                  18 · live splits 2 (`elbe`, `indifferent`, both source N)
+
+
+## Run 67 — 2026-09-20 00:40
+
+Review of the Run 66 block. The rows are right; the sweep I claimed to have pre-empted was itself
+incomplete, one row was dropped without being declared, and the justification for the golden
+re-record was borrowed from a clause that does not cover it.
+
+⚠ THE PARADIGM SWEEP MISSED SIX ROWS AND THE CHANGE CREATED THE CONTRADICTION IT WAS JUSTIFIED BY.
+Run 66's whole argument was that the dictionary disagreed with itself across a stem; after it,
+`impoverish` said `ER0` while `impoverished` and `impoverishment` still said `R`, in one sentence:
+
+    ɪndˈɪfɚənt … ɪndˈɪfɹəntli
+    ɪmpˈɑːvɚɪʃ , ɪmpˈɑːvɹɪʃt , ɪmpˈɑːvɚɪʃᵻz , ɪmpˈɑːvɚɪʃɪŋ , ɪmpˈɑːvɹɪʃmənt
+    tʰˈɛmpɚəmənt  tʰˈɛmpɹəmənts  tʰˌɛmpɚəmˈɛntɫ̩  tʰˌɛmpɹəmˈɛntəli
+
+Before Run 66 the `impoverish` family was at least MUTUALLY CONSISTENT. Six rows added:
+`impoverished`, `impoverishment`, `indifferently`, `temperaments`, `temperamentally`, `surrealisms`.
+This is the third block in which a per-word correction shipped without its paradigm; the sweep has
+to be driven from the STEM FAMILY, not from the arbitration output, because the arbitration only
+surfaces words the referee happens to carry.
+⚠ `surrealism's` HAS NO DICT ROW AT ALL — it is an accent-lexicon passthrough — so the apostrophe
+form is not fixed by any of this and is recorded rather than chased.
+
+⚠ `impoverished` WAS IN THE ARBITRATED FIFTEEN AND I DROPPED IT SILENTLY. Moby
+`/I/m'p/A/v/@/r/I//S/t`, gold `ɪmpˈɑvəɹɪʃt`, en-GB `ɪmpɒvəɹɪʃt | ɪmpɒvɹɪʃt` with the full form first
+— identical evidence to `impoverish`, which I did apply. "One row refused" was wrong: one was
+refused and one was lost. The arithmetic gives it away and I did not check it — 15 − 1 + 6 = 20, not
+the 18 I shipped. The true accounting is 15 arbitrated − `tandoor` refused − `impoverished` lost =
+13, plus 5 paradigm-only rows = 18. FIVE, not six: `severally` is in Moby and was in the arbitrated
+set all along.
+
+⚠ A FALSE CITATION IN A SHIPPED FILE. The curated note for `surrealistic` read "both Moby and misaki
+gold keep this schwa" — MOBY DOES NOT CARRY THE WORD, nor `surrealist`/`surrealists`. The row is
+still right (gold `səɹˌiəlˈɪstɪk`, and our own `surreal S ER0 IY1 AH0 L`), but the evidence line was
+invented by copying a sibling's. A curated row's reason is the only thing a later reader has.
+
+⚠ THE GOLDEN RE-RECORD IS RIGHT AND MY REASON FOR IT WAS NOT. I cited "gold is what the downstream
+model was trained on", which `eval.ts` scopes explicitly to *a divergence measured to be a NOTATION
+CHOICE rather than an error*. `ˈsɛvrəl` against `ˈsɛvərəl` is a lexical variant with a different
+SYLLABLE COUNT, not a notation choice. Borrowing the clause was a category shift, and as written it
+reads as a rationalisation.
+The justification that actually holds is measured over our own dictionary in the same environment:
+
+    keep the pre-rhotic schwa (13)   every, general, federal, camera, memory, average, liberal,
+                                     reference, beverage, nursery, grocery, favorite, history
+    syncopate (3)                    interest, temperature, laboratory
+
+and GOLD MAKES THE SAME PER-WORD SPLIT — `ˈɛvəɹi`, `ʤˈɛnəɹəl`, `kˈæməɹə` full against `ˈɪntɹəst`,
+`tˈɛmpɹəʧəɹ`, `lˈæbɹətˌɔɹi` syncopated. That it is per-word and not a blanket convention is what
+makes it evidence at all; a convention would have made it worthless. Two further supports I had not
+cited: the en-GB referee lists `several sɛvəɹəl | sɛvɹəl` and `differently dɪfəɹəntli | dɪfɹəntli`
+with the FULL form first, and the n-gram already predicts the corrected `several`.
+⚠ AND THERE IS A COUNTER-EXAMPLE I OMITTED. The PRIMARY referee — wikipron GenAm, the highest tier
+we have — gives `temperament t ɛ m p ɚ m ə n t`, syncopated, disagreeing with the new reading on one
+of the eighteen. `temperamental` is weaker still: MOBY ACTIVELY SYNCOPATES IT
+(`,t/E/mpr/@/'m/E/nt/@/l`), so that row rests on gold alone. Recorded rather than buried.
+⚠ THE MISSING EVIDENCE IS A LISTEN, not another lexicon. Both words are high-frequency and
+genuinely two-form, Merriam-Webster orders the syncopated form first, and this repo's own standing
+rule is that a TTS change wants A/B audio. The re-record stands on the lexical measurement above;
+the audio check is the thing that would settle it and has not been done.
+
+⚠ AND THE `ɚ` PROCEDURAL RULE WAS WRITTEN IN THE WRONG PLACE — a 4,000-line run log. It now sits in
+`en.jsonc` beside the `ɚ`→`əɹ` fold it is about, where anyone measuring against this referee will
+meet it. ⚠ ITS CLAIM IS ALSO NARROWED: Run 66 said the mistake had produced false positives in
+#1369, #1370 and here. #1370's false positive was a MISSING `excludeRows` RULE, a different bug
+entirely. Two occurrences across two runs.
+
+⚠ THE `tandoor` REFUSAL IS SOUND AND I ARGUED IT BADLY. "An RP centring diphthong, and the two
+sources could share a British-source error" is speculation. The checkable version: `ʊə` appears in
+51 of 90,201 gold entries and essentially all are `u`+`ə` hiatus (`influence`, `Papua`) — every CURE
+word is plain `ʊɹ` (`poor pˈʊɹ`, `tour tˈʊɹ`, `sure ʃˈʊɹ`, `cure kjˈʊɹ`). GOLD CONTRADICTS ITSELF ONE
+ROW LATER with `tandoori tændˈʊɹi`. And the two sources do not independently agree anyway: Moby has
+`'t/&/nd/U//@/r` with INITIAL stress against gold's final. The "two sources agree" test that
+qualified the other fourteen never held for this row.
+
+RECORDED, NOT TAKEN — and the reason is a gap in the method rather than a judgement. `opera
+AA1 P R AH0` and `desperate D EH1 S P R IH0 T` are the same class in the other direction (gold
+`ˈɑpəɹə`, `dˈɛspəɹət`; the en-GB referee lists `dɛspəɹət` first). They did not reach the arbitrated
+set because it matched WHOLE READINGS: Moby and gold both keep the schwa but differ on a DIFFERENT
+segment, so the row fell into "gold differs from both". An arbitration that compares whole strings
+cannot see two sources agreeing about the one thing at issue.
+
+    Moby — words the dict carries   26,725/35,027 (76.3%) → see below
+    rows corrected                  18 → 24  (14 arbitrated, 10 paradigm)

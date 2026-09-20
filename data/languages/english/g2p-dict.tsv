@@ -23926,7 +23926,7 @@ complections	K AH0 M P L EH1 K SH AH0 N Z
 complement	K AA1 M P L AH0 M AH0 N T
 complemental	K AA2 M P L AH0 M EH1 N T AH0 L
 complementarity	K AA2 M P L IH0 M EH0 N T EH1 R IH0 T IY0
-complementary	K AA2 M P L AH0 M EH1 N T R IY0
+complementary	K AA2 M P L AH0 M EH1 N T ER0 IY0
 complementation	K AA2 M P L AH0 M EH0 N T EY1 SH AH0 N
 complemented	K AA1 M P L AH0 M EH2 N T IH0 D
 complementing	K AA1 M P L AH0 M EH2 N T IH0 NG
@@ -31750,7 +31750,7 @@ devil	D EH1 V AH0 L
 devilbiss	D EH1 V IH0 L B IH0 S
 deviled	D EH1 V AH0 L D
 devilfish	D EH1 V AH0 L F IH2 SH
-devilish	D EH1 V L IH0 SH
+devilish	D EH1 V AH0 L IH0 SH
 devilishly	D EH1 V AH0 L IH0 SH L IY0
 devilishness	D EH1 V AH0 L IH0 SH N AH0 S
 deville	D AH0 V IH1 L
@@ -32293,7 +32293,7 @@ differentiated	D IH2 F ER0 EH1 N SH IY0 EY2 T IH0 D
 differentiates	D IH0 F ER0 EH1 N SH IY0 EY2 T S
 differentiating	D IH2 F ER0 EH1 N SH IY0 EY2 T IH0 NG
 differentiation	D IH0 F ER0 EH2 N SH IY0 EY1 SH AH0 N
-differently	D IH1 F R AH0 N T L IY0
+differently	D IH1 F ER0 AH0 N T L IY0
 differing	D IH1 F ER0 IH0 NG
 differs	D IH1 F ER0 Z
 difficult	D IH1 F AH0 K AH0 L T
@@ -37072,7 +37072,7 @@ elation	IH0 L EY1 SH AH0 N
 elayne	IH0 L EY1 N
 elba	EH1 L B AH0
 elbaum	EH1 L B AW2 M
-elbe	EH1 L B
+elbe	EH1 L B AH0
 elber	EH1 L B ER0
 elberson	EH1 L B ER0 S AH0 N
 elbert	EH1 L B ER0 T
@@ -37242,7 +37242,7 @@ elektrizitaetswerk	EH2 L IH0 K T R IH1 Z IH0 T AE2 T S W ER0 K
 elektron	IH0 L EH1 K T R AA0 N
 element	EH1 L AH0 M AH0 N T
 elemental	EH2 L AH0 M EH1 N T AH0 L
-elementary	EH2 L AH0 M EH1 N T R IY0
+elementary	EH2 L AH0 M EH1 N T ER0 IY0
 elements	EH1 L AH0 M AH0 N T S
 elemi	EH1 L AH0 M IY0
 elena	EH1 L AH0 N AA0
@@ -37734,8 +37734,8 @@ emend	IH0 M EH1 N D
 emendation	IY2 M AH0 N D EY1 SH AH0 N
 emens	EH1 M EH0 N Z
 emera	EH0 M EH1 R AH0
-emerald	EH1 M R AH0 L D
-emeralds	EH1 M R AH0 L D Z
+emerald	EH1 M ER0 AH0 L D
+emeralds	EH1 M ER0 AH0 L D Z
 emerant	EY0 M EH1 R AH0 N T
 emeraude	EH1 M ER0 AW2 D
 emerge	IH0 M ER1 JH
@@ -59092,11 +59092,11 @@ impounding	IH2 M P AW1 N D IH0 NG
 impoundment	IH2 M P AW1 N D M AH0 N T
 impoundments	IH2 M P AW1 N D M AH0 N T S
 impounds	IH2 M P AW1 N D Z
-impoverish	IH2 M P AA1 V R IH0 SH
-impoverished	IH2 M P AA1 V R IH0 SH T
-impoverishes	IH2 M P AA1 V R IH0 SH AH0 Z
-impoverishing	IH2 M P AA1 V R IH0 SH IH0 NG
-impoverishment	IH2 M P AA1 V R IH0 SH M AH0 N T
+impoverish	IH2 M P AA1 V ER0 IH0 SH
+impoverished	IH2 M P AA1 V ER0 IH0 SH T
+impoverishes	IH2 M P AA1 V ER0 IH0 SH AH0 Z
+impoverishing	IH2 M P AA1 V ER0 IH0 SH IH0 NG
+impoverishment	IH2 M P AA1 V ER0 IH0 SH M AH0 N T
 impracticable	IH2 M P R AE1 K T IH0 K AH0 B AH0 L
 impractical	IH2 M P R AE1 K T AH0 K AH0 L
 imprecate	IH1 M P R AH0 K EY2 T
@@ -59645,8 +59645,8 @@ indictments	IH2 N D AY1 T M AH0 N T S
 indie	IH1 N D IY0
 indies	IH1 N D IY0 Z
 indifference	IH2 N D IH1 F ER0 AH0 N S
-indifferent	IH2 N D IH1 F R AH0 N T
-indifferently	IH2 N D IH1 F R AH0 N T L IY0
+indifferent	IH2 N D IH1 F ER0 AH0 N T
+indifferently	IH2 N D IH1 F ER0 AH0 N T L IY0
 indigence	IH1 N D IH0 JH AH0 N S
 indigene	IH1 N D IH0 JH IY2 N
 indigenize	IH0 N D IH1 JH IH0 N AY2 Z
@@ -71427,7 +71427,7 @@ livened	L AY1 V AH0 N D
 livengood	L IH1 V IH0 N G UH0 D
 liver	L IH1 V ER0
 livergood	L IH1 V ER0 G UH2 D
-liveried	L IH1 V R IY0 D
+liveried	L IH1 V ER0 IY0 D
 liverman	L IH1 V ER0 M AH0 N
 livermore	L IH0 V ER0 M AO1 R
 livernois	L IH1 V ER0 N W AA2
@@ -109053,8 +109053,8 @@ seventieth	S EH1 V AH0 N T IY0 IH0 TH
 seventy	S EH1 V AH0 N T IY0
 sever	S EH1 V ER0
 severa	S EY0 V EH1 R AH0
-several	S EH1 V R AH0 L
-severally	S EH1 V R AH0 L IY0
+several	S EH1 V ER0 AH0 L
+severally	S EH1 V ER0 AH0 L IY0
 severance	S EH1 V ER2 AH0 N S
 severe	S AH0 V IH1 R
 severed	S EH1 V ER0 D
@@ -118167,9 +118167,9 @@ surprisingly	S ER0 P R AY1 Z IH0 NG L IY0
 surra	S UH1 R AH0
 surratt	S AO1 R AH0 T
 surreal	S ER0 IY1 AH0 L
-surrealism	S ER0 IY1 L IH0 Z AH0 M
-surrealisms	S ER0 IY1 L IH0 Z AH0 M Z
-surrealistic	S ER0 IY2 L IH1 S T IH0 K
+surrealism	S ER0 IY1 AH0 L IH0 Z AH0 M
+surrealisms	S ER0 IY1 AH0 L IH0 Z AH0 M Z
+surrealistic	S ER0 IY2 AH0 L IH1 S T IH0 K
 surrebuttal	S ER1 IH0 B AH0 T AH0 L
 surrell	S AO1 R AH0 L
 surrency	S AO1 R AH0 N S IY0
@@ -120383,10 +120383,10 @@ tempel	T EH1 M P AH0 L
 tempelsman	T EH1 M P AH0 L Z M AH0 N
 temper	T EH1 M P ER0
 tempera	T EH1 M P ER0 AH0
-temperament	T EH1 M P R AH0 M AH0 N T
-temperamental	T EH2 M P R AH0 M EH1 N T AH0 L
-temperamentally	T EH2 M P R AH0 M EH1 N T AH0 L IY0
-temperaments	T EH1 M P R AH0 M AH0 N T S
+temperament	T EH1 M P ER0 AH0 M AH0 N T
+temperamental	T EH2 M P ER0 AH0 M EH1 N T AH0 L
+temperamentally	T EH2 M P ER0 AH0 M EH1 N T AH0 L IY0
+temperaments	T EH1 M P ER0 AH0 M AH0 N T S
 temperance	T EH1 M P ER0 AH0 N S
 temperate	T EH1 M P R AH0 T
 temperature	T EH1 M P R AH0 CH ER0

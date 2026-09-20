@@ -156,7 +156,7 @@
         {
             "pattern": "ɚ",
             "replace": "əɹ",
-            "note": "r-coloured schwa ɚ vs referee ə + ɹ (the letter r written out)"
+            "note": "r-coloured schwa ɚ vs referee ə + ɹ (the letter r written out). ⚠ ANY HAND MEASUREMENT OVER A REFEREE TSV MUST APPLY THIS FOLD BEFORE COUNTING. The Moby corpus STORES ɚ and the eval PRINTS əɹ, so grepping a printed form against the stored file counts a sequence the file cannot contain. It has produced two false positives in the English audit, both of which looked like clean one-sided CONVENTIONS and would have justified a fold: `ɔɹ` against `əɹ` read 4,025 vs ZERO (#1369), and the pre-rhotic syncope environment read 0 vs 3,787 (#1372). Folded, they are 4,025 vs 2,641 and 1,362 vs 3,832 — both lexical. A perfect zero in a rhotic environment is evidence of this mistake, not of a convention."
         },
         {
             "pattern": "ʰ",
