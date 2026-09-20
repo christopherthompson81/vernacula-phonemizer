@@ -327,7 +327,11 @@ describe("the curated layer against the OOV path", () => {
     const common = new Set(
         readFileSync(join(EN, "g2p-common.txt"), "utf8").split("\n").map((s) => s.trim()).filter(Boolean),
     );
-    const classes = { ...MANIFEST.g2pClasses, vowels: MANIFEST.arpabet.vowels };
+    const classes = {
+        ...MANIFEST.g2pClasses,
+        vowels: MANIFEST.arpabet.vowels,
+        letterNameExceptions: MANIFEST.letterNameExceptions,
+    };
 
     const curated: { word: string; upstream: string; want: string }[] = [];
     for (const l of readFileSync(join(EN, "g2p-curated.tsv"), "utf8").split("\n")) {

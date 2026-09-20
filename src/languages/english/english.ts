@@ -556,7 +556,14 @@ export function createEnglish(): EnglishPhonemizer {
         g2pDict,
         g2pCommon,
         arpabetToIpa,
-        { ...manifest.g2pClasses, vowels: manifest.arpabet.vowels }, // OOV G2P reuses arpabet.vowels (single source)
+        // ⚠ `letterNameExceptions` comes from the manifest TOP LEVEL, not from `g2pClasses` — it is the
+        // same key `normalize.ts` spells initialism runs with, and the splitter needs it to recognise a
+        // dictionary row that is an initialism rather than a word.
+        {
+            ...manifest.g2pClasses,
+            vowels: manifest.arpabet.vowels, // OOV G2P reuses arpabet.vowels (single source)
+            letterNameExceptions: manifest.letterNameExceptions,
+        },
     );
 
     const tagger = new PosTagger(

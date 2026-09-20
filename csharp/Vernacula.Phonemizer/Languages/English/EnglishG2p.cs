@@ -38,6 +38,10 @@ public sealed class G2pClassSets
 
     /// <summary>First pieces after which the STEM keeps the primary — see english.jsonc for the measurement.</summary>
     public required IReadOnlyList<string> StemStressPrefixes { get; init; }
+
+    /// <summary>Letters whose NAME is not spelled by the letter (`a` → `ay`, `i` → `eye`) — lets the
+    /// splitter recognise a dictionary row that is an INITIALISM rather than a word.</summary>
+    public required IReadOnlyDictionary<string, string> LetterNameExceptions { get; init; }
 }
 
 public sealed class Decomposition
@@ -122,6 +126,7 @@ public static class EnglishG2pFactory
         private readonly Func<IReadOnlyList<string>, string, string> _arpabetToIpa;
         private readonly Dictionary<string, List<string>> _gchunks;
         private readonly IReadOnlySet<string> VOWEL_LETTER, VOWEL, VOICELESS, SIBILANT, STOP_PIECE, STEM_STRESS_PREFIX;
+        private readonly IReadOnlyDictionary<string, string> LETTER_NAME_EXCEPTIONS;
         private readonly List<(string Suf, Func<string, List<string>> Stems, Func<List<string>, List<string>> Allo)> SUFFIXES;
 
         internal EnglishG2pImpl(EnglishG2pModel model, IReadOnlyDictionary<string, List<string>> dict,
@@ -138,6 +143,7 @@ public static class EnglishG2pFactory
             SIBILANT = new HashSet<string>(classes.Sibilants, StringComparer.Ordinal);
             STOP_PIECE = new HashSet<string>(classes.StopPieces, StringComparer.Ordinal);
             STEM_STRESS_PREFIX = new HashSet<string>(classes.StemStressPrefixes, StringComparer.Ordinal);
+            LETTER_NAME_EXCEPTIONS = classes.LetterNameExceptions;
 
             List<string> AllomorphS(List<string> stem)
             {
@@ -283,6 +289,7 @@ public static class EnglishG2pFactory
                 foreach (var stem in stems(w))
                 {
                     if (stem.Length < 2) continue;
+                    if (IsLetterNameRow(stem)) continue;   // `ach` + `er` is not how `acher` is read
                     if (!_dict.TryGetValue(stem, out var sp)) continue;
                     return JoinMorph(stem, sp, allo(sp));
                 }
@@ -295,6 +302,57 @@ public static class EnglishG2pFactory
         /// <see cref="CompoundSplit"/> needs it and the phones cannot supply it: <c>dis</c> and
         /// <c>diss</c> decode alike, and a prefix is a fact about the morphology, not about the phones.
         /// </summary>
+        private List<string>? LetterPhones(char l)
+        {
+            var key = LETTER_NAME_EXCEPTIONS.TryGetValue(l.ToString(), out var n) ? n : l.ToString();
+            return _dict.TryGetValue(key, out var p) ? p : null;
+        }
+
+        /// <summary>
+        /// 210 rows of the dictionary are an INITIALISM spelled out, not a word (`abs` = EY1 B IY1 EH1 S).
+        /// Correct as whole words, catastrophic as PIECES of a longer one — see the TS twin for the
+        /// measurement. Derived from the dictionary rather than listed, and deliberately NOT memoized:
+        /// a cache keyed on a word is a cache keyed on `_dict`, which the hold-out tests mutate.
+        /// </summary>
+        private bool IsLetterNameRow(string piece)
+        {
+            if (piece.Length < 2 || !_dict.TryGetValue(piece, out var phones)) return false;
+            var want = new List<string>();
+            foreach (var l in piece)
+            {
+                var lp = LetterPhones(l);
+                if (lp is null) return false;
+                want.AddRange(lp);
+            }
+            if (want.Count != phones.Count) return false;
+            for (var i = 0; i < want.Count; i++)
+                if (DropStress(want[i]) != DropStress(phones[i])) return false;
+            return true;
+        }
+
+        private static bool HasNucleusIn(IReadOnlyList<string> ph, IReadOnlySet<string> vowels)
+        {
+            foreach (var p in ph) if (vowels.Contains(DropStress(p))) return true;
+            return false;
+        }
+
+        /// <summary>Every letter after the last two is the same — `hmmmm`, `shhh`, `zzz`. A DOUBLED final
+        /// letter is ordinary English (`hdd`, `cnn` are initialisms); a tripled one is elongation.</summary>
+        private static bool IsElongation(string w) =>
+            w.Length >= 3 && w[^1] == w[^2] && w[^2] == w[^3];
+
+        private List<string>? SpellOutPhones(string w)
+        {
+            var outp = new List<string>();
+            foreach (var l in w)
+            {
+                var lp = LetterPhones(l);
+                if (lp is null) return null;
+                outp.AddRange(lp);
+            }
+            return outp.Count > 0 ? outp : null;
+        }
+
         private sealed record SplitState(List<List<string>> Parts, string Head, int NParts, double MinLen, double Score);
 
         private List<string>? CompoundSplit(string w)
@@ -310,7 +368,9 @@ public static class EnglishG2pFactory
                     var piece = w[i..j];
                     if (STOP_PIECE.Contains(piece)) continue;
                     if (_common.Count > 0 && !_common.Contains(piece) && !(j == n && j - i >= 5)) continue;
-                    List<string>? phones = _dict.TryGetValue(piece, out var dp) ? dp : null;
+                    // An initialism row is not a piece — see IsLetterNameRow. Tested BEFORE the
+                    // morphDecode fallback, so `acher` cannot smuggle `ach` in through the suffix table.
+                    List<string>? phones = !IsLetterNameRow(piece) && _dict.TryGetValue(piece, out var dp) ? dp : null;
                     if (phones is null && j == n && j - i >= 5)
                     {
                         var mp = MorphDecode(piece);
@@ -349,11 +409,17 @@ public static class EnglishG2pFactory
             var m = MorphDecode(w);
             if (m is not null)
                 return new Decomposition { Phones = EnforceSinglePrimary(CollapseGeminates(m, VOWEL), VOWEL), Source = "M" };
-            return new Decomposition
+            var ng = EnforceSinglePrimary(CollapseGeminates(NgramDecode(w), VOWEL), VOWEL);
+            // A reading with no vowel nucleus is not a pronunciation — see the TS twin. `blt` came out
+            // `B L T`. Nothing correct is at risk: every vowelless English word is a recorded interjection
+            // and a recorded word never reaches the OOV path.
+            if (w.Length >= 3 && !HasNucleusIn(ng, VOWEL) && !IsElongation(w))
             {
-                Phones = EnforceSinglePrimary(CollapseGeminates(NgramDecode(w), VOWEL), VOWEL),
-                Source = "N",
-            };
+                var spelled = SpellOutPhones(w);
+                if (spelled is not null)
+                    return new Decomposition { Phones = EnforceSinglePrimary(spelled, VOWEL), Source = "N" };
+            }
+            return new Decomposition { Phones = ng, Source = "N" };
         }
 
         public bool KnownWord(string word) => _dict.ContainsKey(word);

@@ -2831,3 +2831,12 @@ westminster	W EH2 S T M IH1 N S T ER0	W EH1 S T M IH2 N S T ER0	stress placement
 wholehearted	HH OW1 L HH AA2 R T IH0 D	HH OW2 L HH AA1 R T IH0 D	stress placement (gold + moby)
 wholeheartedly	HH OW1 L HH AA0 R T IH0 D L IY0	HH OW2 L HH AA1 R T IH0 D L IY0	stress placement (gold + moby)
 yippee	Y IH2 P IY1	Y IH1 P IY2	stress placement (gold + moby)
+
+# ⚠ AN INITIALISM GLOSSED AS ITS EXPANSION, which is a DIFFERENT class from the abbreviation glosses
+# the letter-name block above deliberately leaves alone. `lb` [P AW1 N D], `hz`, `blvd`, `mt`, `dr`
+# are written short forms of a word that IS spoken — "pound", "hertz", "boulevard" — so the gloss is
+# the right reading. `fyi` is not: it is said as its letters. CMUdict gives it the phrase, so the
+# engine read `fyi` as "for your information" while the wikipron UK referee has ɛfwaɪaɪ. Found via
+# #1382, which listed it as a word being spelled out and had the polarity reversed — it is the one
+# word in that sample that IS an initialism, and it was the one getting the phrase.
+fyi	F AO1 R Y AO1 R IH2 N F ER0 M EY1 SH AH0 N	EH1 F W AY1 AY1	initialism glossed as its expansion (wikipron-uk ɛfwaɪaɪ)
