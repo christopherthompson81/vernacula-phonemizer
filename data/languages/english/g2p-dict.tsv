@@ -4488,7 +4488,7 @@ antarctica	AE2 N T AA1 R K T IH0 K AH0
 antares	AE0 N T EH1 R IY0 Z
 antaya	AA0 N T EY1 AH0
 antbird	AE1 N T B ER2 D
-antczak	AE1 N T CH AE0 K
+antczak	AE1 N CH AE0 K
 ante	AE1 N T IY0
 anteater	AE1 N T IY2 T ER0
 anteaters	AE1 N T IY2 T ER0 Z
@@ -11031,7 +11031,7 @@ betsill	B EH1 T S AH0 L
 betsy	B EH1 T S IY0
 bett	B EH1 T
 betta	B EH1 T AH0
-bettcher	B EH1 T CH ER0
+bettcher	B EH1 CH ER0
 bette	B EH1 T IY0
 betted	B EH1 T IH0 D
 betten	B EH1 T AH0 N
@@ -12593,13 +12593,13 @@ blossomed	B L AA1 S AH0 M D
 blossoming	B L AA1 S AH0 M IH0 NG
 blossoms	B L AA1 S AH0 M Z
 blot	B L AA1 T
-blotch	B L AA1 T CH
-blotched	B L AA1 T CH T
-blotches	B L AA1 T CH AH0 Z
-blotchier	B L AA1 T CH IY0 ER0
-blotchiest	B L AA1 T CH IY0 AH0 S T
-blotching	B L AA1 T CH IH0 NG
-blotchy	B L AA1 T CH IY0
+blotch	B L AA1 CH
+blotched	B L AA1 CH T
+blotches	B L AA1 CH AH0 Z
+blotchier	B L AA1 CH IY0 ER0
+blotchiest	B L AA1 CH IY0 AH0 S T
+blotching	B L AA1 CH IH0 NG
+blotchy	B L AA1 CH IY0
 blotnick	B L AA1 T N IH0 K
 blots	B L AA1 T S
 blotted	B L AA1 T AH0 D
@@ -13934,7 +13934,7 @@ botswana	B AA0 T S W AA1 N AH0
 bott	B AA1 T
 botta	B AA1 T AH0
 bottari	B OW0 T AA1 R IY0
-bottcher	B AA1 T CH ER0
+bottcher	B AA1 CH ER0
 bottecelli	B AO2 T AH0 CH EH1 L IY0
 bottel	B AA1 T AH0 L
 botten	B AA1 T AH0 N
@@ -49217,7 +49217,7 @@ goette	G EH1 T
 goettel	G OW1 T AH0 L
 goetting	G OW1 T IH0 NG
 goettl	G OW1 T AH0 L
-goettsch	G OW1 T CH
+goettsch	G OW1 CH
 goetz	G EH1 T S
 goetze	G OW1 T Z
 goetzinger	G OW1 T Z IH0 NG ER0
@@ -57877,7 +57877,7 @@ hutcheon	HH AH1 CH IY0 AH0 N
 hutcherson	HH AH1 CH ER0 S AH0 N
 hutcheson	HH AH1 CH IH0 S AH0 N
 hutchings	HH AH1 CH IH0 NG Z
-hutchins	HH AH1 T CH IH2 N Z
+hutchins	HH AH1 CH IH2 N Z
 hutchinson	HH AH1 CH IH0 N S AH0 N
 hutchison	HH AH1 CH IH0 S AH0 N
 huth	HH UW1 TH
@@ -114234,7 +114234,7 @@ splitter	S P L IH1 T ER0
 splitting	S P L IH1 T IH0 NG
 splodge	S P L AA0 JH
 splosh	S P L AA0 SH
-splotch	S P L AA0 CH
+splotch	S P L AA1 CH
 splurge	S P L ER1 JH
 splurged	S P L ER1 JH D
 splurges	S P L ER1 JH IH0 S
@@ -131717,7 +131717,7 @@ whitbeck	W IH1 T B EH2 K
 whitbread	W IH1 T B R EH2 D
 whitby	W IH1 T B IY0
 whitcher	W IH1 CH ER0
-whitchurch	W IH1 T CH ER2 CH
+whitchurch	W IH1 CH ER2 CH
 whitcomb	W IH1 T K AH0 M
 whitcraft	W IH1 T K R AE2 F T
 white	W AY1 T
@@ -132760,7 +132760,7 @@ witchhunt	W IH1 CH HH AH2 N T
 witching	W IH1 CH IH0 NG
 witchy	W IH1 CH IY0
 witco	W IH1 T K OW0
-witczak	V IH1 T CH AE0 K
+witczak	V IH1 CH AE0 K
 witek	V IH1 T EH0 K
 witenagemot	W IH1 T AH0 N AH0 G AH0 M OW2 T
 with	W IH1 DH

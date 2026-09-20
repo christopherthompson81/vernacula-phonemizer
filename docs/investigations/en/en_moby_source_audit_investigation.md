@@ -3977,3 +3977,145 @@ block closes; that number belongs in the record rather than the adjective "safe"
     Moby — words the dict carries   26,710/35,027 (76.3%)  unchanged by this run
     Moby — OOV                      17,464/39,451 (44.3%)  unchanged by this run
     primary                         2,584/4,037 (64.0%)    unmoved
+
+## Run 64 — 2026-09-19 22:15
+
+The `T CH` dictionary defect Run 62 characterised and Run 63 corrected the count of. 13 rows, and
+the evidence turned out to be better than the spelling argument I had been going to use.
+
+⚠ THE DICTIONARY IS ITS OWN BEST WITNESS HERE, which I had not thought to ask. Rather than argue from
+⟨tch⟩ being a digraph, count how the SAME SPELLING CLASS is treated elsewhere in `g2p-dict.tsv`:
+
+    ⟨cz⟩    205 rows   153 plain CH   2 with T CH   → antczak, witczak
+    ⟨tsch⟩   91 rows    80 plain CH   1 with T CH   → goettsch
+    ⟨ttch⟩    3 rows     1 plain CH   2 with T CH   → bettcher, bottcher vs boettcher
+    ⟨tch⟩   397 rows   379 plain CH  17 with T CH   (the blotch family plus the real seams)
+
+⚠ AND THE SHARPEST ROW IS AN INTERNAL CONTRADICTION: `boettcher B OW1 CH ER0` is plain, while
+`bettcher B EH1 T CH ER0` and `bottcher B AA1 T CH ER0` are not — the same German name, three
+spellings, two disagreeing with the third. `betsch B EH1 CH` sits beside `bettcher` with the same
+first syllable and no T. No external source was needed for those.
+
+Three tiers of evidence, kept apart rather than pooled:
+  · `blotch` + 6 inflections — gold `blˈɑʧ`/`blˈɑʧi`, Moby `bl/A//tS/`, the en-GB referee `blɒtʃ`,
+    and the siblings `botch B AA1 CH`, `crotch K R AA1 CH`, `notch N AA1 CH`.
+  · `hutchins` — Moby `'h/@//tS//I/nz` and en-GB `hʌt͡ʃɪnz`, two independent sources.
+  · `antczak`, `witczak`, `goettsch`, `bettcher`, `bottcher` — NO external source at all; they rest
+    entirely on being 2-of-155, 1-of-81 and 2-of-3 outliers within their own spelling class.
+
+⚠ AND THE OOV PATH "CONFIRMED" TWO OF THEM — BUT SEE RUN 65, WHERE THIS ARGUMENT IS WITHDRAWN AS
+CIRCULAR. Held out, the engine predicts
+`antczak AE1 N CH AE0 K` and `goettsch G OW1 CH` — EXACTLY the corrected forms. The n-gram trains on
+the curated dict, so it has learned the ⟨cz⟩/⟨tsch⟩ pattern from the 153 and 80 rows that were
+already right, and the two dict rows were the outliers it was arguing against. That is a genuinely
+independent check and it was free; it is worth running on any correction whose only evidence is
+internal consistency.
+
+⚠ THE SEAMS ARE CONFIRMED FROM THE OTHER SIDE, not merely left alone. Moby marks them with its own
+separator — `chitchat '/tS//I/t,/tS//&/t`, `Christchurch 'kr/aI/st,/tS//[@]/r/tS/`, `hatcheck
+'h/&/t,/tS//E/k` — and gold keeps the /t/ in all of them (`ʧˈɪtʧˌæt`, `kɹˈIstʧˌɜɹʧ`, `hˈætʧˌɛk`,
+`ʃˌɔɹtʧˈAnʤ`). `westchester` is confirmed twice over: Moby `'w/E/st/tS//E/st/@/r` and en-GB
+`wɛstt͡ʃɛstə` both carry the /t/.
+⚠ ONE SEAM LEFT ALONE HERE AND CORRECTED IN RUN 65, WHERE IT TURNS OUT TO HAVE SOURCES I DID NOT
+LOOK FOR: `whitchurch W IH1 T CH ER2 CH`. It has
+the same ⟨-church⟩ shape as the confirmed `christchurch`, but no source carries it, and unlike
+Christchurch its cluster would be /ttʃ/ rather than /stʃ/ — which usually reduces. Recorded as the
+one row in the seam group resting on analogy.
+
+⚠ ONLY THREE OF THE THIRTEEN ARE LIVE SPLITS, and which ones is the instructive part. `blotch` and
+`blotchy` are source N; `hutchins` is source C — surprising for a surname, and read from
+`decompose().source` rather than assumed. The five `blotch` INFLECTIONS are not splits at all: they
+decode through the stem (source M) and closed themselves the moment `blotch` was corrected, which is
+exactly what `STRUCTURAL_GAP`'s header predicts for a correction with a morphological handle. Nor
+are the five surnames, because the OOV path already agreed with the correction.
+
+    Moby — words the dict carries   26,710/35,027 (76.3%) → 26,713/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    goldens 0 stale · curated rows 65
+
++3 on a 13-row fix is the expected shape: most of the thirteen are surnames Moby does not carry, so
+they cannot score. The `blotch` family is where the movement is.
+
+
+## Run 65 — 2026-09-19 23:10
+
+Review of the Run 64 block. The thirteen corrections stand; one row I DECLINED to correct was wrong
+to decline, one of my three arguments was circular, and three claims about which rows the gate saw
+were false.
+
+⚠ `whitchurch` SHOULD HAVE BEEN FIXED, AND I HAD ASKED TO BE TOLD. Run 64 left it as a seam on
+analogy with `christchurch`, recording "no source carries it" — true of Moby, gold and the two
+wikipron referees, and I looked no further. Three lines of evidence exist:
+  · The dictionary's own nearest neighbour is plain: `whitcher W IH1 CH ER0`, the same ⟨whitch⟩
+    onset, four rows away in the same file.
+  · The en-GB referee carries `whitechurch waɪtt͡ʃɜːt͡ʃ` — the TRANSPARENT compound, which keeps its
+    /t/ — against an opaque `whitchurch` that does not. That is the minimal pair.
+  · External: /ˈwɪtʃɜːrtʃ/.
+⚠ AND THE DISCRIMINATOR ACROSS ALL EIGHT SEAMS IS COMPOUND TRANSPARENCY, NOT CLUSTER TYPE. `chitchat`,
+`hatcheck`, `shortchange`, `Christchurch`, `Westchester` are all still analysable; nobody parses
+`whit`. I had the right mechanism in the run — I wrote that /ttʃ/ "usually reduces" — and then used
+it as a reason NOT to act. An argument for a correction, deployed as an argument against it.
+⚠ THE SAME NEIGHBOURHOOD HELD ONE MORE: `splotch S P L AA0 CH`, a monosyllable carrying no stress
+where `blotch`, `botch`, `crotch`, `notch`, `scotch` all have `AA1`. Fixed.
+
+⚠ THE OOV-CONFIRMATION ARGUMENT IS CIRCULAR AND IS WITHDRAWN. I presented the held-out engine
+predicting `antczak AE1 N CH AE0 K` and `goettsch G OW1 CH` as "a genuinely independent check". The
+shipped model trains on a CMUdict-format re-emission of `g2p-dict.tsv` (#1341), so this reduces to
+"an n-gram fitted to this dictionary reproduces this dictionary's majority pattern" — the
+class-count argument again with smoothing in between, not a second witness. It is still worth
+running, because it says the majority outvoted the outlier row even in training; it is corroboration
+of internal consistency and must not be listed as a separate tier.
+⚠ AND IT FAILS ON THE TWO ROWS WITH THE LEAST OTHER EVIDENCE. Held out, `bettcher` predicts
+`B IH1 T CH ER0` and `bottcher` `B AA1 T SH EH2 R` — both KEEP the T. The control is worse: the
+uncorrected anchor `boettcher` OOV-predicts `B OW1 T CH EH1 R`, so the n-gram gets even the row I
+cited as the witness wrong. I quoted the two cases that agreed.
+
+⚠ "NOR ARE THE FIVE SURNAMES LIVE SPLITS, BECAUSE THE OOV PATH ALREADY AGREED" IS FALSE FOR THREE OF
+THEM. The gate's criterion is `prediction == upstream`. `witczak` differs from upstream in the
+INITIAL (W against our V), `bettcher` only in the VOWEL — it has the T CH and would have been a live
+split contradicting a correction that rests on nothing else — and `bottcher`'s prediction is
+unrelated. Three of five dodge the gate on segments that have nothing to do with the T. Failure mode
+(e): a check cited as verification when it cannot see the failure mode in question.
+
+⚠ "THE FIVE INFLECTIONS CLOSED THEMSELVES" — ONLY TWO WERE EVER OPEN. Against the pre-fix dict,
+`blotched` and `blotching` predicted the upstream shape and closed through the corrected stem;
+`blotches`, `blotchier` and `blotchiest` never matched upstream at all, for schwa and vowel reasons
+unrelated to the T. The claim reached the commit, the PR, this document AND a new `STRUCTURAL_GAP`
+comment. The behaviour I described is real and two rows show it; five was the number of rows in the
+paradigm, not the number that demonstrated anything.
+
+⚠ THE ⟨tcz⟩ ARGUMENT WAS CONFOUNDED, EXACTLY AS I SUSPECTED WHEN ASKING. The narrow class ⟨tcz⟩ has
+TWO members in the dictionary and both are the rows being changed, so "2 of 155 ⟨cz⟩ rows are
+outliers" is circular — they are outliers because they are the only members. The comparanda I cited
+(`adamczak`, `barczak`) are ⟨mcz⟩/⟨rcz⟩ spellings with no ⟨t⟩ letter to account for. Polish ⟨tcz⟩ is
+genuinely a long affricate, so the source language does not rescue it either.
+Both rows are still right, on evidence I did not use and have now substituted:
+  · `antczak` was the ONLY `N T CH` row in the whole 135k dictionary, against `lunch`/`bunch`/`hunch`
+    and the four sibling names `franczak`, `fronczak`, `janczak`, `stanczak`, all `N CH`.
+  · `witczak` against `witch W IH1 CH` and `wilczak V IH1 L CH AE0 K`.
+⚠ AND `goettsch` HAD A NEAR-MINIMAL PAIR I WALKED PAST. The narrow ⟨ttsch⟩ class is SEVEN rows and
+six of them are plain — `gottsch G AA1 CH`, `gottschalk`, `gottschall`, `brettschneider`,
+`kruttschnitt` — against `goettsch` alone. `gottsch` differs from `goettsch` by one vowel letter and
+is worth more than the 80-row bare-⟨tsch⟩ count I quoted instead.
+
+⚠ THE CLASSES DO NOT PARTITION, WHICH RUN 64 DID NOT SAY. Of 205 ⟨cz⟩ rows, 153 are plain CH, 2 were
+T CH — and 50 have no CH at all: `czar Z AA1 R`, `eczema EH1 K S AH0 M AH0`, `balcerowicz`, the
+`szcz-` names. ⟨cz⟩ is not uniformly /t͡ʃ/ in this dictionary, and a table with two columns implied
+it was. (The counts themselves reproduce: 153 + 2 = the "155" the curated rows cite.)
+
+⚠ "MOBY MARKS THEM WITH ITS OWN SEPARATOR" IS WRONG ABOUT THE MECHANISM. The `,` in `chitchat
+'/tS//I/t,/tS//&/t` is Moby's SECONDARY STRESS mark, as in `elevator '/E/l/@/,v/eI/t/@/r`. The tell
+was in my own paragraph: I cited `Westchester 'w/E/st/tS//E/st/@/r`, which has no comma, as evidence
+in the same breath. The real evidence is that Moby spells the segments `/t/` then `/tS/` — which is
+sound, and is what I should have written.
+
+Smaller: "gold keeps the /t/ in every one" of the eight seams — gold carries FOUR of the eight.
+"Curated rows 65" was this PR's 13 plus #1369's 52, labelled as a file total; the file has 2,324.
+And the running-text check I quoted shows `bˈoᶷt͡ʃɚ`, which is the unchanged `boettcher`, not
+`bottcher`.
+
+    Moby — words the dict carries   26,713/35,027 (76.3%)  unmoved by Run 65's two rows
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+    rows corrected                  13 → 15

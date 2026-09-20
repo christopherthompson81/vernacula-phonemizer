@@ -2307,3 +2307,18 @@ sputniks	S P AH1 T N IH0 K S	S P UH1 T N IH0 K S	paradigm: matches the corrected
 uplinked	UW1 P L IH2 NG K D	UW1 P L IH2 NG K T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here
 woodlands	W UH1 D L AE2 N D Z	W UH1 D L AH0 N D Z	paradigm: matches the corrected `woodland`
 yelped	Y EH1 L P D	Y EH1 L P T	a voiceless-stop past tense cannot take D; 2,981 dict rows have T here
+antczak	AE1 N T CH AE0 K	AE1 N CH AE0 K	a redundant T before the affricate — the only `N T CH` row in the dictionary, against `lunch`/`bunch`/`hunch` and the siblings `franczak`/`fronczak`/`janczak`/`stanczak`, all `N CH`
+bettcher	B EH1 T CH ER0	B EH1 CH ER0	a redundant T before the affricate — the same name as `boettcher B OW1 CH ER0`, which is plain CH; `betcher B EH1 CH ER0` and `birtcher B ER1 CH ER0` agree
+blotch	B L AA1 T CH	B L AA1 CH	a redundant T before the affricate — ⟨tch⟩ is the digraph for /t͡ʃ/; gold blˈɑʧ, Moby bl/A//tS/, en-GB blɒtʃ, and botch/crotch/notch are all plain CH
+blotched	B L AA1 T CH T	B L AA1 CH T	a redundant T before the affricate — paradigm: `blotch`
+blotches	B L AA1 T CH AH0 Z	B L AA1 CH AH0 Z	a redundant T before the affricate — paradigm: `blotch`
+blotchier	B L AA1 T CH IY0 ER0	B L AA1 CH IY0 ER0	a redundant T before the affricate — paradigm: `blotch`
+blotchiest	B L AA1 T CH IY0 AH0 S T	B L AA1 CH IY0 AH0 S T	a redundant T before the affricate — paradigm: `blotch`
+blotching	B L AA1 T CH IH0 NG	B L AA1 CH IH0 NG	a redundant T before the affricate — paradigm: `blotch`
+blotchy	B L AA1 T CH IY0	B L AA1 CH IY0	a redundant T before the affricate — paradigm: `blotch`; gold blˈɑʧi, Moby 'bl/A//tS//i/
+bottcher	B AA1 T CH ER0	B AA1 CH ER0	a redundant T before the affricate — see `bettcher`
+goettsch	G OW1 T CH	G OW1 CH	a redundant T before the affricate — the near-minimal pair `gottsch G AA1 CH`; the narrow ⟨ttsch⟩ class is 6 plain to 1 (`gottschalk`, `gottschall`, `brettschneider`, `kruttschnitt`)
+hutchins	HH AH1 T CH IH2 N Z	HH AH1 CH IH2 N Z	a redundant T before the affricate — ⟨tch⟩ digraph; Moby 'h/@//tS//I/nz and en-GB hʌt͡ʃɪnz both give a single affricate
+witczak	V IH1 T CH AE0 K	V IH1 CH AE0 K	a redundant T before the affricate — `witch W IH1 CH` and `wilczak V IH1 L CH AE0 K`; /ˈvɪtʃæk/ is what the corrected row emits
+splotch	S P L AA0 CH	S P L AA1 CH	a monosyllable carrying no stress; every sibling (`blotch`, `botch`, `crotch`, `notch`, `scotch`) has AA1
+whitchurch	W IH1 T CH ER2 CH	W IH1 CH ER2 CH	opaque compound: the dict's own `whitcher W IH1 CH ER0` shares the ⟨whitch⟩ onset, and the en-GB referee's `whitechurch waɪtt͡ʃɜːt͡ʃ` is the TRANSPARENT pair that keeps its /t/

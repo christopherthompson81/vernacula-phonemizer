@@ -113,6 +113,16 @@ const KNOWN_GAPS = new Map<string, string>([
     ["dextran", "compound (source C): decomposes to a free `-an` and takes its full vowel; the chemical suffix reduces"],
     ["fistful", "morph (source M): `fist` + `ful`, and the allomorph reduces where gold and Moby both keep ʊ"],
     ["shellacking", "morph (source M): `shellac` + `ing` keeps the stem's full ɛ; the derived form reduces it"],
+    // ⚠ SOURCE C, WHICH IS SURPRISING FOR A SURNAME and is why the source was read rather than assumed:
+    // `hutchins` decomposes on the compound path and reassembles the upstream `T CH`. Moby
+    // (`'h/@//tS//I/nz`) and the en-GB referee (`hʌt͡ʃɪnz`) both give a single affricate.
+    ["hutchins", "compound (source C): reassembles the upstream T CH across the seam it finds"],
+    // ⚠ THE SAME SHAPE, AND THE REASON THE COMPOUND PATH CANNOT ARBITRATE THIS CLASS: it splits
+    // `whit` + `church` mechanically and rebuilds the /t/, exactly as it does for the GENUINE seam
+    // `christchurch`. The path cannot tell an opaque compound from a transparent one, which is the
+    // distinction the correction turns on — en-GB carries `whitechurch waɪtt͡ʃɜːt͡ʃ` (transparent,
+    // keeps the /t/) against a reduced `whitchurch`.
+    ["whitchurch", "compound (source C): `whit` + `church` rebuilds the upstream T CH"],
     ["neolithic", "compound (source C): `neo` + `lithic` keeps neo's full OW and its own primary stress"],
     ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
 ]);
@@ -165,6 +175,13 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
+    // ⚠ TWO ADDED BY THE #1371 ⟨tch⟩ FIX, both source N: the n-gram learned the upstream `B L AA1 T CH`
+    // and reproduces it. ⚠ THE OTHER FIVE `blotch` ROWS ARE NOT HERE, but only TWO were
+    // ever open: `blotched` and `blotching` predicted the upstream shape before the fix and closed
+    // through the corrected stem, which is the behaviour this list's header describes. `blotches`,
+    // `blotchier` and `blotchiest` never matched upstream at all, for schwa and vowel reasons
+    // unrelated to the T. An earlier draft said all five closed themselves; three were never open.
+    "blotch", "blotchy",
     // ⚠ FOUR ADDED BY THE #1369 SCHWA ARBITRATION, all source N and all the same shape as the rest of this
     // list: the n-gram learned the upstream row, so it reproduces it by construction. `adman`/`chessman`
     // are the `-man` second element, which gold itself splits (`adman` æ, `guardsman` ə) with no spelling
