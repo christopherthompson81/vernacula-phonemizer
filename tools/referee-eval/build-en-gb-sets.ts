@@ -46,11 +46,29 @@ let claimed = 0;
 // instead, so these words must be excluded here rather than claimed by whichever single edit happens to
 // move them closest.
 const owned = lexicalVariants();
+/**
+ * ⚠ THE marry–merry SET IS APPLIED BEFORE PROBING, BECAUSE THE RULES PATH DOES NOT APPLY IT AND BATH
+ * CANNOT SEE PAST IT. `en-gb-marry.tsv` is a shipped-path set this builder does not write, and the
+ * runtime runs it FIRST for a documented reason (english-gb.ts): four words are in both sets, and the
+ * chain is ɛɹ → æɹ → ɑːɹ. `phonemizeWordRules` gives `klɛɹə`, so the BATH edit `æ → ɑː` matches nothing
+ * and the word cannot be claimed — the builder was structurally incapable of producing a membership the
+ * runtime documents as load-bearing.
+ * ⚠ FOUND BY REBUILDING AND DIFFING THE PRODUCT (#1381): of 1,033 words whose membership moved, 473 went
+ * MISS → HIT against the referee and exactly 3 went the other way — `clara`, `dara`, `scarry`, with
+ * `barry` silently dropped too. All four are the documented overlap. Without this, the rebuild would
+ * have had to be landed with a hand edit re-adding them to a GENERATED file, which is the hazard #1385
+ * and #1388 were both about.
+ */
+const marry = new Set(
+    readFileSync(join(HERE, "..", "..", "data", "languages", "english-gb", "en-gb-marry.tsv"), "utf8")
+        .split("\n").filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!),
+);
 for (const row of rows) {
     const w = row[0]!;
     if (owned.has(w)) continue;
     const refFolded = row.slice(1).map((r) => fold(r));
-    const ours = phonemizeWordRules(w);
+    const rules = phonemizeWordRules(w);
+    const ours = marry.has(w) ? rules.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ") : rules;
     // yod first, by POSITION: the referee attests a post-coronal yod that our GOOSE slot lacks (student, tune —
     // caught even when the rest of the word differs, e.g. our schwa vs the referee's syllabic n̩).
     if (CORONAL_U.test(ours) && !CORONAL_YOD.test(ours) && row.slice(1).some((r) => CORONAL_YOD.test(r.normalize("NFD")))) {
@@ -62,9 +80,32 @@ for (const row of rows) {
     }
 }
 
+/**
+ * ⚠ `--check` EXISTS BECAUSE THESE FILES WENT STALE FOR MONTHS AND NOTHING NOTICED (#1381). They are a
+ * GENERATED artifact committed to the repo, exactly like `csharp/goldens/`, and they had drifted by 1,031
+ * memberships against a dictionary that moved under them. The same failure mode as #1388's inert
+ * dictionary rows: the artifact and its source disagree and every gate is green.
+ * ⚠ IT IS A RITUAL, NOT A CI JOB, for the same reason `check-goldens` is: a run is minutes, and the
+ * referee and dictionary it reads are large. `npm run check:en-gb-sets` on `main`, like the goldens.
+ */
+const check = process.argv.includes("--check");
+const stale: string[] = [];
 const write = (file: string, words: string[]): void => {
     words.sort();
-    writeFileSync(join(HERE, "..", "..", "data", "languages", "english-gb", file), words.map((w) => `${w}\t1`).join("\n") + "\n");
+    const path = join(HERE, "..", "..", "data", "languages", "english-gb", file);
+    const body = words.map((w) => `${w}\t1`).join("\n") + "\n";
+    if (check) {
+        const have = readFileSync(path, "utf8");
+        if (have !== body) {
+            const had = new Set(have.split("\n").filter((l) => l.includes("\t")).map((l) => l.split("\t")[0]!));
+            const now = new Set(words);
+            const gone = [...had].filter((w) => !now.has(w)), added = [...now].filter((w) => !had.has(w));
+            stale.push(`  ${file}: committed ${had.size}, builder ${now.size}  (+${added.length} / -${gone.length})`);
+        }
+        console.log(`  ${file}: ${words.length}`);
+        return;
+    }
+    writeFileSync(path, body);
     console.log(`  ${file}: ${words.length}`);
 };
 write("en-gb-bath.tsv", bath);
@@ -73,3 +114,13 @@ write("en-gb-yod.tsv", yod);
 write("en-gb-palm.tsv", palm);
 write("en-gb-lotr.tsv", lotr);
 console.log(`lexical-set words claimed ${claimed} of ${rows.length}`);
+if (check) {
+    if (stale.length === 0) console.log("en-gb lexical sets are fresh — they reproduce from this builder");
+    else {
+        console.log("⚠ STALE: the committed lexical sets no longer reproduce from this builder");
+        for (const l of stale) console.log(l);
+        console.log("  Decide WHICH is wrong before regenerating — the sets follow the dictionary, and a");
+        console.log("  rebuild is a real change with a referee evaluation attached (see #1381).");
+        process.exitCode = 1;
+    }
+}

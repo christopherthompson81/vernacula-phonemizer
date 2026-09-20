@@ -21,6 +21,7 @@
     "typecheck": "tsc --noEmit",
     "check:package": "node tools/check-package-fence.mjs",
     "check:goldens": "tsx tools/check-goldens.mts",
+    "check:en-gb-sets": "tsx tools/referee-eval/build-en-gb-sets.ts --check",
     "ci": "npm run typecheck && npm test && npm run check:goldens && npm run check:package"
   },
   "optionalDependencies": {
