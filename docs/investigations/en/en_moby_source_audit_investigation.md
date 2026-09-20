@@ -4519,22 +4519,24 @@ The audit's criterion cannot distinguish "CMUdict is wrong" from "CMUdict picked
 variant" or "this is a homograph". Applying the 360 would have shipped a wrong reading for every one
 of the above. THE 784 ARE A WORKLIST, NOT A PATCH.
 
-⚠ AND EVERY AUTOMATED FILTER I BUILT FAILED INSPECTION, which is worth recording because the obvious
-ones look reasonable until you read their output. The internal-corroboration test that carried #1371
+⚠ AND EVERY AUTOMATED FILTER I BUILT FAILED INSPECTION — but "there is no cheap test here", below,
+is wrong and Run 73 withdraws it: a one-line test over the audit's own data removes 18 false
+candidates. What follows is true of the CORROBORATION filters only. The internal-corroboration test that carried #1371
 — does a morphological relative already have the target phone? — generated FALSE RELATIVES when
 allowed to truncate and re-suffix: `copra` from `cops`, `chary` from `charity` (unrelated
 etymologies), `cush` from `cushion`, `soldo` from `solder`. Restricting to strict suffixation of the
 whole word cut 62 to 34 and STILL admitted `and` from `andes`, `wilder` from `wilderness`, `hom`
 from `homes`, `shea` from `shealy`. There is no cheap test here; the rows need reading.
 
-TAKEN: 17 rows verified individually against gold, where our reading is not a standard variant —
+TAKEN: 16 rows verified individually against gold. ⚠ THE CRITERION IS "TWO SOURCES AGREE AND OUR OWN
+PARADIGM CORROBORATES", NOT "our reading is not a standard variant at all" — Run 73 corrects that,
+because four of these ARE two-form words where the correction picks the dominant form. The rows —
 `barbel`, `confidant`, `cossack`, `doer D UW1 R` (no schwa at all), `hoodlum`, `injudicious`,
 `jejune`, `jocose`, `khaki` (GenAm is ˈkæki), `lech L EH1 K` (a /k/ for an affricate), `leman`,
 `licentious` (CH for SH), `magnate` (ˈmæɡnət for ˈmæɡneɪt), `nauseating` (ZH for Z), `privatize`
 (ˈprɪvətaɪz), `sunni`, `zircon`.
-⚠ ZERO PARADIGM ROWS WERE NEEDED, and that is not luck: the inflections already carried the correct
-phone, which is exactly why they were the corroborating evidence. Where the paradigm is the
-evidence, the paradigm is already consistent.
+⚠ "ZERO PARADIGM ROWS WERE NEEDED" IS WRONG BY TWO, and Run 73 fixes them: the check asked whether
+the inflection carried the right PHONE and not whether it carried the same STRESS.
 
 ⚠ I HARDCODED THREE PHONE INDICES BY EYE AND GOT THEM WRONG. `confidant`, `licentious` and `magnate`
 came out as `K AA1 N F AH0 AE2 AA2 N T`-shaped corruption. The audit already reports the differing
@@ -4562,3 +4564,73 @@ cosmetic equivalences, 2 `-ed` adjectives where both readings are standard — o
 undeclared heteronym and worth its own row). The other ~740 need per-row reading. The productive
 filter is not automatable but it is describable: our reading is not a possible English pronunciation
 of that spelling, or our own inflections already contradict it.
+
+
+## Run 73 — 2026-09-20 06:30
+
+Review of Run 72. The refusal is CONFIRMED by independent sampling; one of the 17 rows was wrong,
+the criterion I stated for all of them was wrong, and the claim that no cheap filter exists was
+wrong in a way that had already cost a row.
+
+⚠ `leman` WAS NOT A CANDIDATE AT ALL, AND MOBY SAYS SO ITSELF. It carries BOTH readings under
+case-distinct headwords — `leman 'l/E/m/@/n` and `Leman 'l/i/m/@/n` — and the second IS our upstream
+`L IY1 M AH0 N`. The builder lower-cases the key and pushes every reading into one bucket, and the
+candidate rule then asks only `ms.includes(gg)`: does SOME Moby variant match gold. It never asks
+whether some Moby variant matches US. So the audit reported "both sources agree against us" about a
+source that explicitly records our reading as standard. Failure mode (a), in the audit's own
+comparison rule rather than in a measurement.
+⚠ AND THE COLLATERAL WAS REAL: `Lake Leman` read `lˈɛmən`. The dictionary key is case-insensitive and
+CMUdict is name-heavy, so `L IY1 M AH0 N` was almost certainly the lake and the surname, which are
+far commoner in running text than the archaic common noun. Reverted.
+
+⚠ THE GUARD IS ONE LINE AND IT REMOVES 18 OF 784. `if (ms.includes(o)) { split++; continue; }`, over
+data the audit already had. Run 72 said "there is no cheap test here"; that is withdrawn. It is
+NOT a general two-form detector and must not be mistaken for one — Moby only lists a second reading
+where it happens to have a case-variant headword, so `hoof`, `sloth` and `capo` are equally two-form
+and invisible to it. It is a cheap true-positive filter, and not trying it cost a shipped row.
+The other seventeen it removes: alameda, bourbon, buhl, burnet, canton, concord, cush, lawman, midi,
+moline, myrmidon, picayune, saros, sol, telamon, triton, vita.
+
+⚠ "OUR READING IS NOT A STANDARD VARIANT AT ALL" IS FALSE FOR FOUR OF THE ROWS, and that sentence is
+the PR's own thesis turned on its own output. `hoodlum` (M-W ˈhüd-ləm, ˈhu̇d-), `nauseating` (the
+whole `nausea-` family is listed -zē-, -zhē-, -sē-, -shē-), `confidant` (-ˌdant, -ˌdänt) and
+`khaki` (ˈkä- is a listed US variant) are all two-form. The OUTPUTS are still right — each picks the
+dominant form and each aligns the word with an inflection that already carried the target phone —
+but the honest criterion is TWO-SOURCE AGREEMENT PLUS PARADIGM CORROBORATION, which is what was
+applied, not the stronger thing I claimed. The other twelve are genuine defects.
+
+⚠ AND THE PARADIGM CHECK ASKED ABOUT THE PHONE AND NOT THE STRESS, so two rows shipped disagreeing
+with their own plural: `cossack kʰˈɑːsˌæk` against `cossacks kʰˈɑːsæks`, `zircon zˈɝkʰˌɑːn` against
+`zircons zˈɝkɑːnz` — the singular gaining a secondary stress and an aspirated /kʰ/ the plural lacks.
+Gold covers only the singulars and gives both the secondary stress, so the PLURALS were brought into
+line. "Zero paradigm rows were needed" was wrong by two, and wrong for the same anywhere-versus-
+position reason as everything else in this list.
+
+⚠ THE REFUSAL IS CONFIRMED, by a sample drawn independently of the examples I used to argue for it.
+Of 60 single-segment candidates adjudicated: ~27 genuine defects, ~33 valid variants, homographs or
+cosmetic differences — 45%, well under the 70% threshold I set for calling the refusal too
+conservative. Two sub-classes worth naming for the next pass, neither of which is the corroboration
+filter that failed: the unstressed de-/re-/pre- prefix class (`decentralize`, `declassify`,
+`premonition`, `reflate`) is mechanically separable and near-100% NON-defect; the loanword and
+proper-noun class (`boccia`, `soldo`, `thaler`, `dagon`, `czechoslovak`, `haik`) is near-100%
+defect.
+⚠ AND A SECOND UNDECLARED HETERONYM SURFACED IN THAT SAMPLE: `primate` is ˈpraɪmeɪt in zoology and
+ˈpraɪmət ecclesiastically, and applying its candidate would have broken the commoner sense — the
+same shape as `worsted`. Both belong in `english.jsonc`, not in the dictionary.
+
+CHECKS OUT, and I had asked specifically: the two folded curated rows are correct, with both
+`upstream` columns matching the dictionary's first commit exactly. A sweep of all 2,235 curated rows
+against that commit found ONE mismatch, pre-existing and not a chain (`thirty`, a stress digit), and
+no other duplicate headword anywhere. The `bo` golden re-record is right. `sunni`, `jejune`,
+`zircon` and mostly `khaki` — the rows I flagged as my own worries — are fine; the ones that were
+wrong are the ones I did not flag.
+
+Smaller, and all mine: the mechanical-rejection counts do not reproduce (21 source geminates and 6
+NG/N rows, not 18 and 4), "360 single-segment candidates" is 361, and "22 rows are mechanically
+rejectable AND NOW ARE" is false — nothing in that block rejected them, no artifact recorded which
+they were, and the next pass could not have skipped them. The guard added here is the first thing
+in this audit that actually removes a candidate class in code rather than in prose.
+
+    Moby — words the dict carries   26,742/35,027 (76.3%) → see below
+    candidates                      784 → 750 (17 fixed here, 17 removed by the new guard)
+    rows corrected                  17 → 16, plus 2 paradigm rows

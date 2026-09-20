@@ -517,6 +517,18 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         const o = normalise(ours), gg = normalise(ga);
         const ms = m.map((p) => normalise(modernise(p)));
         if (gg === o && ms.includes(o)) { agree++; continue; }
+        // ⚠ MOBY MUST NOT ALSO CARRY OUR OWN READING. The bucket holds EVERY reading Moby gives the
+        // lower-cased key, so a word with a case-distinct second headword contributes both: `leman
+        // 'l/E/m/@/n` AND `Leman 'l/i/m/@/n`, the second of which IS our row. Without this test the
+        // candidate rule below asks only "does SOME Moby variant match gold" and reports "both sources
+        // agree against us" about a source that explicitly records our reading as standard.
+        // ⚠ IT REMOVES 18 OF 784 AND #1375 APPLIED ONE OF THEM (`leman`), which is why this is a guard
+        // and not a report. The others: alameda, bourbon, buhl, burnet, canton, concord, cush, lawman,
+        // midi, moline, myrmidon, picayune, saros, sol, telamon, triton, vita.
+        // ⚠ IT IS NOT A GENERAL TWO-FORM DETECTOR and must not be mistaken for one: Moby lists a second
+        // reading only where it happens to have a case-variant headword. `hoof`, `sloth` and `capo` are
+        // equally two-form and this test cannot see them. It is a cheap TRUE-POSITIVE filter, nothing more.
+        if (ms.includes(o)) { split++; continue; }
         // ⚠ `rank` IS -1 FOR A WORD OFF THE FREQUENCY LIST, not 0 and not omitted. 0 is a REAL rank
         // (`the`), so a shared 0 would make an off-list row indistinguishable from the commonest word in
         // English; -1 cannot collide with any rank and so stays legible and bucketable. ⚠ IT DOES NOT

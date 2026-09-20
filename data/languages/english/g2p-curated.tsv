@@ -2358,10 +2358,12 @@ injudicious	IH2 N JH AH2 D IH1 SH AH0 S	IH2 N JH UW0 D IH1 SH AH0 S	audit candid
 jejune	JH EH2 JH UW1 N	JH AH0 JH UW1 N	audit candidate: gold and Moby agree against CMUdict (EH2 → AH0)
 khaki	K AA1 K IY0	K AE1 K IY0	audit candidate: gold and Moby agree against CMUdict (AA1 → AE1)
 lech	L EH1 K	L EH1 CH	audit candidate: gold and Moby agree against CMUdict (K → CH)
-leman	L IY1 M AH0 N	L EH1 M AH0 N	audit candidate: gold and Moby agree against CMUdict (IY1 → EH1)
 licentious	L AY0 S EH1 N CH AH0 S	L AY0 S EH1 N SH AH0 S	audit candidate: gold and Moby agree against CMUdict (CH → SH)
 magnate	M AE1 G N AH0 T	M AE1 G N EY2 T	audit candidate: gold and Moby agree against CMUdict (AH0 → EY2)
 nauseating	N AO1 ZH IY0 EY2 T IH0 NG	N AO1 Z IY0 EY2 T IH0 NG	audit candidate: gold and Moby agree against CMUdict (ZH → Z)
 privatize	P R IH1 V AH0 T AY2 Z	P R AY1 V AH0 T AY2 Z	audit candidate: gold and Moby agree against CMUdict (IH1 → AY1)
 sunni	S UW1 N IY0	S UH1 N IY0	audit candidate: gold and Moby agree against CMUdict (UW1 → UH1)
 zircon	Z ER1 K AH0 N	Z ER1 K AA2 N	audit candidate: gold and Moby agree against CMUdict (AH0 → AA2)
+
+cossacks	K AA1 S AE0 K S	K AA1 S AE2 K S	paradigm: `cossack`, whose gold kˈɑsˌæk carries the secondary stress; the plural has no gold entry
+zircons	Z ER1 K AA0 N Z	Z ER1 K AA2 N Z	paradigm: `zircon`, whose gold zˈɜɹkˌɑn carries the secondary stress; the plural has no gold entry
