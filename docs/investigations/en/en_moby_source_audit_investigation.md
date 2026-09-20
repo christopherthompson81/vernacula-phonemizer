@@ -4733,3 +4733,87 @@ Arithmetic balances — 37,527 + 724 + 7,810 = 46,061 — and rejected rows take
     Moby — words the dict carries   26,742/35,027 (76.3%)  unmoved — no dictionary row changed
     audit candidates                750 → 724
     never-a-defect                  source geminate 21, NG G / N G 4
+
+## Run 76 — 2026-09-20 08:00 — the proper-noun consonant skeleton
+
+QUESTION. The queue named the "loanword and proper-noun slice" as the highest-yield work left and
+recorded it as "measured near-100% defect". That measurement was never written down anywhere I can
+re-derive, so the first job was to build the slice mechanically and re-measure it rather than trust
+the claim.
+
+DEFINING THE SLICE. A word is known to Moby only as a name if the audit's lower-cased key has NO
+lower-case headword in `mobypron.unc`:
+
+    tr '\r' '\n' < mobypron.unc | cut -d' ' -f1 | sort -u > heads
+    awk 'NR==FNR{h[$0]=1;next} !($2 in h)' heads candidates.tsv
+
+158 of the 724 candidates. Then the consonant skeleton: drop every vowel, fold `ER` to `R` (so a
+rhotic spelt as a vowel does not read as a consonant change), compare. **38 of the 158.**
+
+WHY THE SKELETON. GenAm variation is overwhelmingly vocalic. A name where two independent referees
+agree against us on the CONSONANTS is an import defect, not an accent — and unlike the vowel classes
+this audit has refused four times, the class does not need a judgement about which variety is meant.
+
+RAW FINDING. 33 of the 38 are genuine defects and are applied verbatim from the agreed reading. The
+five refusals are the interesting part, because they are what stops this being runnable as a sweep:
+
+    tours        rank 2095. Both sources mean the French city; running text at that rank means the
+                 plural of `tour`, and our T UH1 R Z is right for it. The `batman` trap from #1373,
+                 caught only by looking at the rank.
+    celtic       /s/ and /k/ are both live in GenAm and the sports clubs carry /s/.
+    julian       IY0 AH0 vs Y AH0 — free compression, not a consonant defect. (Now in code; below.)
+    kilauea      the two referees agree with each other and BOTH disagree with M-W (kē-lə-ˈwā-ə) on
+                 the first vowel, where OURS is right. Applying the agreed form would import a wrong
+                 vowel to fix a right consonant; fixing the ⟨w⟩ alone would be inventing a reading no
+                 source carries. Left open.
+    deutschland  the agreed final T is German final devoicing; English does not import it here.
+
+So the measured rate is 33/38 = 87%, over the 70% bar this investigation set in Run 68 — but the bar
+is only meaningful because each of the 33 was checked by hand against a third source. **The skeleton
+test is a sieve, not a verdict.** Recording it that way matters: "near-100% defect" was the claim in
+the queue, and the real number on the mechanically-defined slice is 87%.
+
+⚠ `bengal` IS IN THE 38 ONLY INCIDENTALLY. Its skeleton difference is `NG G` vs `N G`, which the
+audit's own never-a-defect predicate would reject — the predicate compares whole strings, and here
+the stress and vowel differ too, so it never fired. The defect fixed is the stress.
+
+FOUR NEW LIVE SPLITS, and the useful half is that 29 of the 33 did NOT open one: a consonant repair
+on a name mostly propagates, because the spelling that was misread is the spelling the OOV path
+decodes. The four that stay open are `basle` (N), `showa` (N), `waal` (N) — foreign orthography with
+no English analogue, where any rule general enough to catch them wrecks `hassle`, `lower` and `wall`
+— and `salamis` (**source M**, the only one worth a second look): the OOV path decodes it as
+`salami` + `-s` and is RIGHT to for every word that is not this Greek island. A genuine homograph, so
+structural in a stronger sense than the other three.
+
+A THIRD NEVER-A-DEFECT PREDICATE. `julian`'s refusal is a class, so it was measured rather than
+left in prose: post-consonantal unstressed `IY` before a vowel, folded to the glide `Y`. **9 of the
+691** — `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`, `julian`, `leniency`,
+`pannier`, `valonia` — and the alternation runs BOTH ways (we are the compressed side on five, the
+full side on four), which is the tell that it is free variation rather than one source being
+systematically fuller.
+
+⚠ THE FIRST VERSION OF THE PREDICATE FIRED ON 1 OF THE 9. It asked "is the next phone a vowel" of the
+`bare` form, and `bare` rewrites AH and IH to `ə`, which is not in `VOWELS` — so the commonest
+following vowel in the class made the test unsatisfiable. Caught by the offline measurement saying 7
+and the tool saying 1, which is the whole reason to measure before encoding. The vowel tests now run
+on the stress-stripped base, and `julian` (whose glide is followed by `AH0`) is the test fixture
+precisely because it is the row the bug dropped.
+
+⚠ AND THE OFFLINE MEASUREMENT WAS ALSO WRONG, in the other direction: its regex required a word
+boundary before `IY0` and so missed `eosinophilia` and `insouciant`. 7 and 1 were both wrong; 9 is
+the number two independent implementations now agree on.
+
+A LEAD, NOT ACTED ON. `eosinophilia` carries TWO primary stresses in our row —
+`IY2 AH0 S IH1 N AH0 F IH1 L Y AH0`. The audit cannot see it, because `normalise` strips stress
+before comparing, so **no pure stress error has ever been a candidate in any run of this audit.**
+That is a whole class this instrument is blind to by construction, and it wants its own pass.
+
+    triple-sourced words             46,061   unchanged
+    all three agree                  37,527 → 37,560  (+33, exactly the rows applied)
+    audit candidates                 724 → 682
+    never-a-defect                   source geminate 21, iə/jə compression 9, NG G / N G 4
+    structural gaps                  +4 (basle, salamis, showa, waal)
+
+NEXT. The remaining 682 still hold the loanword slice proper — a name Moby DOES carry in lower case
+(so the slice above misses it) but whose reading is a loan. And the stress class above is new, cheap
+to build, and invisible to everything built so far.

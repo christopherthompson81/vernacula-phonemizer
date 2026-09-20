@@ -321,7 +321,7 @@ brainwashing	B R EY1 N W AA2 SH IH0 NG	B R EY1 N W AO2 SH IH0 NG	LOT/THOUGHT: al
 breeches	B R IY1 CH IH0 Z	B R IH1 CH AH0 Z	the garment is said britches (gold + moby)
 bridie	B R IH1 D IY0	B R AY1 D IY0	wikipron US+UK (two files)
 brisbane	B R IH1 Z B EY2 N	B R IH1 Z B AH0 N	wikipron+gold
-brobdingnagian	B R AO2 B D IH0 G N AE1 G IY0 AH0 N	B R AA2 B D IH0 G N AE1 G IY0 AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
+brobdingnagian	B R AO2 B D IH0 G N AE1 G IY0 AH0 N	B R AA2 B D IH0 NG N AE1 G IY0 AH0 N	LOT/THOUGHT: align AA/AO to gold's consistent system; proper noun: dropped NG of ⟨-dingn-⟩ (gold + moby)
 bronchial	B R AA1 N CH IY0 AH0 L	B R AA1 NG K IY0 AH0 L	⟨ch⟩ is /k/, cf. bronchitis (gold + moby)
 brontosaurus	B R AO2 N T AH0 S AO1 R AH0 S	B R AA2 N T AH0 S AO1 R AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 brookshire	B R UW1 K SH AY0 R	B R UW1 K SH AY0 ER0	the -ire rhyme is AY ER0 in this dict (fire, hire, tire, wire, desire, entire, require); gold 42/42
@@ -463,7 +463,7 @@ coarticulation	K OW2 AA0 R T IH1 K Y UW0 L EY0 SH AH0 N	K OW2 AA0 R T IH2 K Y AH
 coauthor	K OW1 AA1 TH ER0	K OW1 AO1 TH ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 cockamamie	K AO2 K AH0 M EY1 M IY0	K AA2 K AH0 M EY1 M IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 coffee	K AA1 F IY0	K AO1 F IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
-cointreau	K AO2 N T R OW1	K AA2 N T R OW1	LOT/THOUGHT: align AA/AO to gold's consistent system
+cointreau	K AO2 N T R OW1	K W AA0 N T R OW1	LOT/THOUGHT: align AA/AO to gold's consistent system; proper noun: ⟨oin⟩ is K W AA N (gold + moby)
 colas	K OW1 L AH0 S	K OW1 L AH0 Z	plural voicing after a voiced segment
 colchicine	K AO1 L CH AH0 S IY0 N	K AA1 L CH AH0 S IY0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 coleslaw	K OW1 L S L AA2	K OW1 L S L AO2	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1052,7 +1052,7 @@ homeopathy	HH OW2 M IY0 OW0 P AE1 TH IY0	HH OW2 M IY0 AA1 P AH0 TH IY0	gold + mo
 homeostasis	HH OW2 M IY0 OW0 S T EY1 S AH0 S	HH OW2 M IY0 AH0 S T EY1 S IH0 S	linking vowel reduces, cf. homeopathy (gold + moby)
 homogeneity	HH AA2 M AH0 JH AH0 N IY1 AH0 T IY0	HH OW2 M AH0 JH AH0 N IY1 AH0 T IY0	outlier against homogeneous (gold + moby)
 homonym	HH AO1 M AH0 N IH0 M	HH AA1 M AH0 N IH0 M	LOT/THOUGHT: align AA/AO to gold's consistent system
-homs	HH AA1 M Z	HH AO1 M Z	LOT/THOUGHT: align AA/AO to gold's consistent system
+homs	HH AA1 M Z	HH AO1 M S	LOT/THOUGHT: align AA/AO to gold's consistent system; proper noun: final ⟨s⟩ is voiceless in this loan name (gold + moby)
 hon	HH AA1 N	HH AH1 N	gold + moby; family consistency
 honcho	HH AO1 N CH OW0	HH AA1 N CH OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
 honda	HH AO1 N D AH0	HH AA1 N D AH0	wikipron US+UK (two files)
@@ -2367,3 +2367,53 @@ zircon	Z ER1 K AH0 N	Z ER1 K AA2 N	audit candidate: gold and Moby agree against 
 
 cossacks	K AA1 S AE0 K S	K AA1 S AE2 K S	paradigm: `cossack`, whose gold kˈɑsˌæk carries the secondary stress; the plural has no gold entry
 zircons	Z ER1 K AA0 N Z	Z ER1 K AA2 N Z	paradigm: `zircon`, whose gold zˈɜɹkˌɑn carries the secondary stress; the plural has no gold entry
+# A PROPER NOUN WHOSE CONSONANTS ARE WRONG. GenAm variation is overwhelmingly VOCALIC — a proper noun
+# where both independent referees agree against us on the CONSONANT SKELETON is an import defect, not an
+# accent. Derived mechanically, not by eye: of the 724 audit candidates, 158 have no lower-case Moby
+# headword at all (so Moby knows the word only as a name), and of those 158 exactly 38 differ from the
+# agreed reading once every vowel is dropped and ER is folded to R. 33 of the 38 are taken here.
+# ⚠ THE SKELETON TEST IS A SIEVE, NOT A VERDICT. Each of the 33 was adjudicated by hand against a third
+# source; five of the 38 were refused, and they are the reason the test cannot be run as a sweep:
+#   `tours`   — the sources mean the French city; at rank 2095 running text means the plural of `tour`,
+#               and our T UH1 R Z is right for it. The same trap as `batman` in #1373.
+#   `celtic`  — /s/ and /k/ are both live in GenAm and the /s/ is what the sports clubs carry.
+#   `julian`  — IY0 AH0 vs Y AH0 is the compression alternation, not a consonant defect; both standard.
+#   `kilauea` — the two referees agree with each other and BOTH disagree with M-W (kē-lə-ˈwā-ə) on the
+#               first vowel, where ours is right. Fixing the ⟨w⟩ alone would be hand-crafting a form no
+#               source carries; left for a row-level fix with a real third reading behind it.
+#   `deutschland` — the agreed final T is German devoicing, which English does not import here.
+# ⚠ `bengal` IS IN THE 38 ONLY INCIDENTALLY. Its skeleton difference is NG G vs N G, which the audit's
+# own never-a-defect predicate would reject — the predicate compares whole strings, and here the stress
+# and vowel differ too, so it did not fire. The defect being fixed is the stress, not the nasal.
+# ⚠ `brobdingnagian`, `cointreau` and `homs` ARE NOT BELOW. They already carry a curated row from the
+# LOT/THOUGHT block; their rows are updated in place, because no word may hold two curated rows.
+antigone	AE0 T IH1 G AH0 N IY0	AE0 N T IH1 G AH0 N IY0	proper noun: dropped ⟨n⟩ of ⟨ant-⟩ (gold + moby)
+basle	B AE1 S AH0 L	B AA1 L	proper noun: ⟨s⟩ is silent in this French spelling (gold + moby; M-W ˈbäl)
+beaujolais	B OW1 JH OW0 L EY2	B OW2 ZH AH0 L EY1	proper noun: French ⟨j⟩ is ZH not JH (gold + moby)
+bengal	B EH1 NG G AH0 L	B EH0 N G AO1 L	proper noun: stress is final and ⟨ng⟩ spans the syllable break (gold + moby)
+caesarean	K EY1 S ER0 IY2 N	S AH0 Z EH1 R IY0 AH0 N	proper noun: ⟨ae⟩ onset is S not K EY (gold + moby)
+chartres	CH AA1 R T R IY0 Z	SH AA1 R T R AH0	proper noun: French ⟨ch⟩ is SH; final ⟨es⟩ is not a plural (gold + moby)
+chippendale	CH IH1 P AH0 D EY2 L	CH IH1 P AH0 N D EY2 L	proper noun: dropped ⟨n⟩ of ⟨-pend-⟩ (gold + moby)
+darfur	D AA2 F UW1 R	D AA0 R F UH1 R	proper noun: dropped the rhotic of ⟨dar-⟩ (gold + moby)
+dniester	D N IY1 S T ER0	N IY1 S T ER0	proper noun: initial ⟨d⟩ is silent in English (gold + moby)
+elysium	IH0 L IH1 Z IY0 AH0 M	IH0 L IH1 ZH IY0 AH0 M	proper noun: ⟨si⟩ is ZH (gold + moby; M-W lists zh first)
+faustian	F AO1 S CH AH0 N	F AW1 S T IY0 AH0 N	proper noun: ⟨au⟩ is AW and ⟨ti⟩ is T IY, not CH (gold + moby)
+genoese	JH EH1 N OW0 S	JH EH2 N OW0 IY1 Z	proper noun: dropped the ⟨-ese⟩ IY and final Z (gold + moby)
+hispaniola	HH IH0 S P AA2 NG OW1 L AH0	HH IH2 S P AH0 N Y OW1 L AH0	proper noun: ⟨ni⟩ is N Y, not NG (gold + moby)
+kahului	K AH0 HH UW1 L W IY0	K AA2 HH UW0 L UW1 IY0	proper noun: ⟨-lui⟩ is L UW IY, not L W IY (gold + moby)
+kyushu	K Y AH1 SH UW0	K IY0 UW1 SH UW0	proper noun: ⟨kyu⟩ is two syllables K IY UW (gold + moby; M-W kē-ˈü-shü)
+melchizedek	M EH2 K IY1 Z EH0 D EH2 K	M EH0 L K IH1 Z AH0 D EH2 K	proper noun: dropped ⟨l⟩ of ⟨mel-⟩ (gold + moby)
+methuselah	M AH0 TH Y UW1 Z AH0 L AH0	M AH0 TH UW1 Z AH0 L AH0	proper noun: spurious yod after ⟨th⟩ (gold + moby)
+mosel	M OW1 S AH0 L	M OW0 Z EH1 L	proper noun: German ⟨s⟩ is Z and the stress is final (gold + moby)
+obelia	OW0 B EH1 L IY0 AH0	OW0 B IY1 L Y AH0	proper noun: tense ⟨e⟩ and ⟨li⟩ compression (gold + moby)
+pathan	P AE1 TH AH0 N	P AH0 T AA1 N	proper noun: ⟨th⟩ is an aspirated T, not TH (gold + moby)
+pinot	P IH1 N AH0 T	P IY1 N OW0	proper noun: French ⟨-ot⟩ is silent (gold + moby)
+podunk	P OW1 T AH0 NG K	P OW1 D AH2 NG K	proper noun: ⟨d⟩ read as T (gold + moby)
+quebecois	K W EH1 B AH0 S W AA2	K EY0 B EH0 K W AA1	proper noun: ⟨qu⟩ is K and the ⟨oi⟩ glide is on ⟨c⟩ (gold + moby)
+salamis	S AH0 L AA1 M IY0 Z	S AE1 L AH0 M AH0 S	proper noun: final ⟨s⟩ is voiceless and unstressed (gold + moby)
+showa	SH OW1 AH0	SH OW1 W AA2	proper noun: dropped the ⟨w⟩ (gold + moby)
+sinhalese	S IH2 N AH0 L IY1 Z	S IH2 N HH AH0 L IY1 Z	proper noun: dropped the ⟨h⟩ (gold + moby)
+theseus	TH IY1 Z IY2 AH0 S	TH IY1 S IY0 AH0 S	proper noun: ⟨s⟩ is voiceless (gold + moby)
+viennese	V IY0 EH1 N IY2 S	V IY2 AH0 N IY1 Z	proper noun: ⟨-ese⟩ is stressed IY Z (gold + moby)
+waal	W AA1 L	V AA1 L	proper noun: Dutch ⟨w⟩ is V (gold + moby; M-W ˈväl)
+wiesbaden	W IY1 S B AA2 D AH0 N	V IY1 S B AA2 D AH0 N	proper noun: German ⟨w⟩ is V (gold + moby)

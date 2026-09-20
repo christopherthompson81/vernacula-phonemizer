@@ -200,4 +200,25 @@ describe("the source converters", () => {
         expect(r.compared).toBe(r.agree + r.candidates.length + r.split);
         expect(r.split).toBe(1);
     });
+
+    // ⚠ THE FIXTURE IS `julian` BECAUSE THE GLIDE IS FOLLOWED BY `AH0`, which is the exact shape the
+    // first version of this predicate could not see: it asked "is the next phone a vowel" of the
+    // `bare` form, and `bare` rewrites AH and IH to `ə`, a symbol that is not in `VOWELS`. The class is
+    // 9 rows and it rejected 1. The vowel tests run on the stress-stripped base for that reason.
+    // ⚠ `noglide` IS THE OTHER HALF. Its `IY0` sits after a VOWEL, so it is a syllable of its own and
+    // losing it would be a real defect — the predicate must leave it a candidate.
+    test("iə/jə compression is rejected only after a consonant", () => {
+        const dir = mkdtempSync(join(tmpdir(), "en-glide-"));
+        const f = (n: string, body: string): string => {
+            const p = join(dir, n); writeFileSync(p, body); return p;
+        };
+        const dict = f("dict.tsv", "julian\tJH UW1 L IY0 AH0 N\nnoglide\tAA1 IY0 AH0 N\n");
+        const freq = f("freq.txt", "julian\nnoglide\n");
+        const gold = f("gold.json", JSON.stringify({ Julian: "\u02A4\u02C8ulj\u0259n", noglide: "\u02C8\u0251j\u0259n" }));
+        const moby = f("moby.unc", "Julian '/dZ//u/l/j//@/n\rnoglide '/A//j//@/n\r");
+        const r = audit(dict, freq, gold, moby);
+        expect(r.rejected.get("i\u0259 / j\u0259 compression")).toBe(1);
+        expect(r.candidates.map((c) => c.word)).toEqual(["noglide"]);
+        expect(r.compared).toBe(r.agree + r.candidates.length + r.split);
+    });
 });

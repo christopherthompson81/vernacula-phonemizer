@@ -476,6 +476,18 @@ const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => 
         i + 1 < t.length && bare(p) === bare(t[i + 1]!) && eq(t.slice(0, i).concat(t.slice(i + 1)), o))],
     // ⚠ `N G` AND `NG G` ARE THE SAME SOUND, two ARPABET spellings of [ŋɡ]. Neither is wrong.
     ["NG G / N G", (o, t) => ng(o) === ng(t)],
+    // ⚠ /iə/ AND /jə/ ARE THE SAME SYLLABLE COMPRESSED OR NOT. `julian` JH UW1 L IY0 AH0 N against
+    // JH UW1 L Y AH0 N, and `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`,
+    // `leniency`, `pannier`, `valonia` — 9 of the 691, and the alternation runs BOTH WAYS across them
+    // (we are the compressed side on five, the full side on four), which is the tell that it is free
+    // variation and not one source being consistently fuller than us.
+    // ⚠ POST-CONSONANTAL AND UNSTRESSED ONLY. All 9 are a consonant + IY0 + vowel; an IY that carries
+    // stress, or one after another vowel, is a syllable in its own right and its loss WOULD be a defect.
+    // ⚠ `eosinophilia` HAS A SECOND DEFECT THIS DOES NOT ABSOLVE — our row carries TWO primary stresses
+    // (`IH1 N ... F IH1 L`). The audit cannot see it, because `normalise` strips stress before comparing,
+    // so no pure stress error is ever a candidate. Rejecting the glide here is right; the stress is a
+    // separate class that needs its own pass over the whole dict.
+    ["iə / jə compression", (o, t) => glide(o) === glide(t)],
     // ⚠ THE `-ed` ADJECTIVE IS DELIBERATELY *NOT* HERE, and it was in the first version of this table.
     // `cussed` is our /t/ against a syllabic /ɪd/ — but that is the `worsted` shape exactly, a
     // NOUN/ADJECTIVE against a PARTICIPLE, and unlike `primate` it IS expressible: the `adj` slot in
@@ -494,6 +506,23 @@ const bare = (p: string): string => {
 };
 const eq = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => bare(x) === bare(b[i]!));
 const ng = (a: string[]): string => a.map(bare).join(" ").replace(/NG G/gu, "N G");
+/**
+ * Post-consonantal unstressed `IY` before a vowel folded to the glide `Y`, then the audit's own bare form.
+ * ⚠ THE VOWEL TESTS RUN ON THE STRESS-STRIPPED BASE, NOT ON `bare`. `bare` rewrites AH and IH to `ə`,
+ * which is not in `VOWELS`, so testing the folded form asked "is the next phone a vowel" of a symbol that
+ * can never be one and the predicate fired on 1 of its 7 rows instead of 7.
+ */
+const glide = (a: string[]): string => {
+    const base = a.map((p) => p.replace(/[0-2]$/u, ""));
+    const out: string[] = [];
+    for (let i = 0; i < a.length; i++) {
+        const prev = base[i - 1];
+        const onset = prev !== undefined && prev !== "Y" && !VOWELS.has(prev);
+        if (base[i] === "IY" && a[i]!.endsWith("0") && VOWELS.has(base[i + 1] ?? "") && onset) { out.push("Y"); continue; }
+        out.push(bare(a[i]!));
+    }
+    return out.join(" ");
+};
 
 export function audit(dictPath: string, freqPath: string, goldPath: string, mobyPath: string): {
     compared: number; agree: number; candidates: Candidate[]; split: number; rejected: Map<string, number>;

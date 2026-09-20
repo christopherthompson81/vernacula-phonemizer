@@ -4617,7 +4617,7 @@ antifungal	AE2 N T AY2 F AH1 NG G AH0 L
 antigay	AE2 N T AY2 G EY1
 antigen	AE1 N T AH0 JH AH0 N
 antigens	AE1 N T IH0 JH AH0 N Z
-antigone	AE0 T IH1 G AH0 N IY0
+antigone	AE0 N T IH1 G AH0 N IY0
 antigones	AE0 N T IH1 G AH0 N IY2 Z
 antigovernment	AE2 N T IY0 G AH1 V ER0 M AH0 N T
 antigravity	AE2 N T IY0 G R AE1 V IH0 T IY0
@@ -9067,7 +9067,7 @@ baskin	B AE1 S K IH0 N
 basking	B AE1 S K IH0 NG
 baskins	B AE1 S K IH0 N Z
 basks	B AE1 S K S
-basle	B AE1 S AH0 L
+basle	B AA1 L
 basler	B EY1 Z AH0 L ER0
 basner	B AE1 S N ER0
 basnett	B AE1 S N IH0 T
@@ -9589,7 +9589,7 @@ beaudry	B OW0 D R IY1
 beauford	B OW0 F AO1 R D
 beaufort	B OW1 F ER0 T
 beaufrere	B OW2 F R EH1 R
-beaujolais	B OW1 JH OW0 L EY2
+beaujolais	B OW2 ZH AH0 L EY1
 beaulac	B OW0 L AE1 K
 beaulieu	B OW2 L Y UH1
 beaumier	B OW1 M IY0 ER0
@@ -10424,7 +10424,7 @@ benezra	B EH1 N AH0 Z R AH0
 benfer	B EH1 N F ER0
 benfield	B EH1 N F IY0 L D
 benford	B EH1 N F ER0 D
-bengal	B EH1 NG G AH0 L
+bengal	B EH0 N G AO1 L
 bengali	B EH0 NG G AA1 L IY0
 bengaline	B EH1 NG G AH0 L IY2 N
 bengalis	B EH0 NG G AA1 L IY0 Z
@@ -15341,7 +15341,7 @@ broadview	B R AO1 D V Y UW2
 broadway	B R AO1 D W EY2
 broadwell	B R AO1 D W EH2 L
 broady	B R AO1 D IY0
-brobdingnagian	B R AA2 B D IH0 G N AE1 G IY0 AH0 N
+brobdingnagian	B R AA2 B D IH0 NG N AE1 G IY0 AH0 N
 brobdingnagians	B R AO2 B D IH0 G N AE1 G IY0 AH0 N Z
 brobeck	B R OW1 B EH2 K
 broberg	B R OW1 B ER0 G
@@ -17290,7 +17290,7 @@ caelum	S IY1 L AH0 M
 caen	K AA1 N
 caesar	S IY1 Z ER0
 caesarea	K EY2 S ER0 IY1 AH0
-caesarean	K EY1 S ER0 IY2 N
+caesarean	S AH0 Z EH1 R IY0 AH0 N
 caesareans	K EY1 S ER0 IY2 N Z
 caesars	S IY1 Z ER0 Z
 caesura	S IH0 ZH UH1 R AH0
@@ -20445,7 +20445,7 @@ chartist	CH AA1 R T IH0 S T
 chartists	CH AA1 R T IH0 S T S
 chartlet	CH AA1 R T L IH0 T
 chartrand	CH AA1 R T R AH0 N D
-chartres	CH AA1 R T R IY0 Z
+chartres	SH AA1 R T R AH0
 chartreuse	SH AA0 R T R UW1 Z
 charts	CH AA1 R T S
 chartwell	CH AA1 R T W EH2 L
@@ -21071,7 +21071,7 @@ chipmunks	CH IH1 P M AH0 NG K S
 chipote	CH IH0 P OW1 T
 chipotle	CH IH0 P OW1 T L IY2
 chipped	CH IH1 P T
-chippendale	CH IH1 P AH0 D EY2 L
+chippendale	CH IH1 P AH0 N D EY2 L
 chippendales	CH IH1 P AH0 D EY2 L
 chipper	CH IH1 P ER0
 chippewa	CH IH1 P AH0 W AA2
@@ -23118,7 +23118,7 @@ coiner	K OY1 N ER0
 coining	K OY1 N IH0 NG
 coins	K OY1 N Z
 coinsurance	K OW2 IH0 N SH ER1 AH0 N S
-cointreau	K AA2 N T R OW1
+cointreau	K W AA0 N T R OW1
 coipa	K OY1 P AH0
 coiro	K OY1 R OW0
 coit	K OY1 T
@@ -28850,7 +28850,7 @@ daren	D EH1 R IH0 N
 darensbourg	D EH1 R IH0 N S B ER0 G
 dares	D EH1 R Z
 daresay	D EH1 R S EY0
-darfur	D AA2 F UW1 R
+darfur	D AA0 R F UH1 R
 darga	D AA1 R G AH0
 dargan	D AA1 R G AH0 N
 dargis	D AA1 R G IH0 S
@@ -33772,7 +33772,7 @@ dna	D IY1 EH2 N EY1
 dnase	D IY1 EH2 N EY2 S
 dnc	D IY1 EH2 N S IY2
 dnieper	N IY1 P ER0
-dniester	D N IY1 S T ER0
+dniester	N IY1 S T ER0
 dns	D IY2 EH2 N EH1 S
 do	D UW1
 doable	D UW1 AH0 B AH0 L
@@ -37563,7 +37563,7 @@ elyse	EH1 L AY0 S
 elysee	EH1 L IH0 S IY2
 elysees	EH1 L IH0 S IY2 Z
 elysia	IH0 L IH1 ZH IY0 AH0
-elysium	IH0 L IH1 Z IY0 AH0 M
+elysium	IH0 L IH1 ZH IY0 AH0 M
 elytra	EH1 L IH0 T R AH0
 elytron	EH1 L IH0 T R AA2 N
 elza	EH1 L Z AH0
@@ -41629,7 +41629,7 @@ fausnaugh	F AO1 S N AO0
 fauss	F AO1 S
 faust	F AW1 S T
 fausta	F AO1 S T AH0
-faustian	F AO1 S CH AH0 N
+faustian	F AW1 S T IY0 AH0 N
 faustina	F AO2 S T IY1 N AH0
 faustine	F AW1 S T IY0 N
 faustino	F AO2 S T IY1 N OW0
@@ -47588,7 +47588,7 @@ genoa	JH EH1 N OW0 AH0
 genocidal	JH EH1 N AH0 S AY2 D AH0 L
 genocide	JH EH1 N AH0 S AY2 D
 genocides	JH EH1 N AH0 S AY2 D Z
-genoese	JH EH1 N OW0 S
+genoese	JH EH2 N OW0 IY1 Z
 genome	JH IY1 N OW2 M
 genomic	JH AH0 N OW1 M IH0 K
 genomics	JH IY2 N OW1 M IH0 K S
@@ -55762,7 +55762,7 @@ hislop	HH IH1 S L AH0 P
 hispanic	HH IH0 S P AE1 N IH0 K
 hispanicize	HH IH0 S P AE1 N IH0 S AY2 Z
 hispanics	HH IH0 S P AE1 N IH0 K S
-hispaniola	HH IH0 S P AA2 NG OW1 L AH0
+hispaniola	HH IH2 S P AH0 N Y OW1 L AH0
 hispanist	HH IH1 S P AH0 N IH0 S T
 hispano	HH IH0 S P AA1 N OW0
 hispanoil	HH IH1 S P AH0 N OY2 L
@@ -56562,7 +56562,7 @@ homosporous	HH OW2 M OW0 S P ER2 AH0 S
 homozygote	HH OW2 M OW0 Z AY1 G OW0 T
 homozygous	HH OW2 M OW0 Z AY1 G AH0 S
 homrich	HH AA1 M R IH0 K
-homs	HH AO1 M Z
+homs	HH AO1 M S
 homsey	HH AA1 M Z IY0
 homunculus	HH OW0 M AH1 NG K Y AH0 L AH0 S
 homuth	HH AA1 M UW0 TH
@@ -63647,7 +63647,7 @@ kahng	K AA1 NG
 kahr	K AA1 R
 kahre	K EH1 R
 kahrs	K AA1 R Z
-kahului	K AH0 HH UW1 L W IY0
+kahului	K AA2 HH UW0 L UW1 IY0
 kahuna	K AH0 HH UW1 N AH0
 kai	K AY1
 kaifu	K AY1 F UW2
@@ -67581,7 +67581,7 @@ kyte	K AY1 T
 kytril	K IH1 T R IH0 L
 kyu	K Y UW1
 kyung	K Y AH1 NG
-kyushu	K Y AH1 SH UW0
+kyushu	K IY0 UW1 SH UW0
 kyzar	K IH1 Z ER0
 kyzer	K AY1 Z ER0
 kyzyl	K IH0 Z IH1 L
@@ -77647,7 +77647,7 @@ melchert	M EH1 L CH ER0 T
 melching	M EH1 L CH IH0 NG
 melchior	M EY0 L CH IY1 ER0
 melchiorre	M EH0 L K IY0 AO1 R EY0
-melchizedek	M EH2 K IY1 Z EH0 D EH2 K
+melchizedek	M EH0 L K IH1 Z AH0 D EH2 K
 melchor	M EH1 L CH ER0
 meld	M EH1 L D
 melded	M EH1 L D AH0 D
@@ -78471,7 +78471,7 @@ methods	M EH1 TH AH0 D Z
 methot	M EH1 TH AH0 T
 methotrexate	M EH2 TH OW0 T R EH1 K S EY2 T
 methought	M IY2 TH AO1 T
-methuselah	M AH0 TH Y UW1 Z AH0 L AH0
+methuselah	M AH0 TH UW1 Z AH0 L AH0
 methvin	M EH1 TH V IH0 N
 methyl	M EH1 TH AH0 L
 methylate	M EH1 TH IH0 L EY2 T
@@ -81383,7 +81383,7 @@ moscow	M AA1 S K OW2
 moscowane	M AA1 S K OW0 W EY0 N
 moscowitz	M AA1 S K AH0 W IH0 T S
 mose	M OW1 Z
-mosel	M OW1 S AH0 L
+mosel	M OW0 Z EH1 L
 moseley	M OW1 Z L IY2
 moselle	M OW0 Z EH1 L
 mosely	M OW1 Z L IY0
@@ -85674,7 +85674,7 @@ obediently	OW0 B IY1 D IY0 AH0 N T L IY0
 obeid	OW0 B AY1 D
 obeirne	OW0 B ER1 R N
 obeisance	OW0 B EY1 S AH0 N S
-obelia	OW0 B EH1 L IY0 AH0
+obelia	OW0 B IY1 L Y AH0
 obelisk	AA1 B AH0 L IH0 S K
 obelize	AA1 B AH0 L AY2 Z
 obelus	AA1 B AH0 L AH0 S
@@ -89969,7 +89969,7 @@ patese	P AH0 T IY1 S IY0
 patey	P EY1 T IY0
 path	P AE1 TH
 pathak	P AH0 TH AA1 K
-pathan	P AE1 TH AH0 N
+pathan	P AH0 T AA1 N
 pathans	P AE1 TH AH0 N Z
 pathe	P AE1 TH
 pathetic	P AH0 TH EH1 T IH0 K
@@ -92764,7 +92764,7 @@ pino	P IY1 N OW0
 pinocchio	P IH0 N OW1 K IY0 OW0
 pinochet	P IH2 N AH0 SH EY1
 pinola	P IH0 N OW1 L AH0
-pinot	P IH1 N AH0 T
+pinot	P IY1 N OW0
 pinpoint	P IH1 N P OY2 N T
 pinpointed	P IH1 N P OY2 N T IH0 D
 pinpointing	P IH1 N P OY2 N T IH0 NG
@@ -93684,7 +93684,7 @@ podolsky	P AH0 D OW1 L S K IY0
 podrasky	P AH0 D R AE1 S K IY0
 podraza	P OW0 D R AA1 Z AH0
 pods	P AA1 D Z
-podunk	P OW1 T AH0 NG K
+podunk	P OW1 D AH2 NG K
 poduska	P OW0 D AH1 S K AH0
 podzol	P AA1 D Z AA0 L
 podzolize	P AA1 D Z AH0 L AY2 Z
@@ -97517,7 +97517,7 @@ queau	K W OW1
 quebec	K W AH0 B EH1 K
 quebecker	K W AH0 B EH1 K ER0
 quebeckers	K W EH1 B EH2 K ER0 Z
-quebecois	K W EH1 B AH0 S W AA2
+quebecois	K EY0 B EH0 K W AA1
 quebecoise	K EH1 B EH0 K W AA2
 quebecor	K W EH1 B IH0 K AO0 R
 quebedeaux	K W EH1 B IH0 D OW0
@@ -105097,7 +105097,7 @@ salamander	S AE2 L AH0 M AE1 N D ER0
 salamanders	S AE2 L AH0 M AE1 N D ER0 Z
 salameh	S AA1 L AA0 M EH0
 salami	S AH0 L AA1 M IY0
-salamis	S AH0 L AA1 M IY0 Z
+salamis	S AE1 L AH0 M AH0 S
 salamon	S AE1 L AH0 M AH0 N
 salamone	S AE1 L AH0 M OW2 N
 salant	S AE1 L AH0 N T
@@ -110288,7 +110288,7 @@ shoves	SH AH1 V Z
 shoving	SH AH1 V IH0 NG
 shovlin	SH AA1 V L IH0 N
 show	SH OW1
-showa	SH OW1 AH0
+showa	SH OW1 W AA2
 showalter	SH OW1 AH0 L T ER0
 showbiz	SH OW1 B IH0 Z
 showboat	SH OW1 B OW2 T
@@ -111171,7 +111171,7 @@ singularity	S IH1 NG G Y AH0 L EH1 R AH0 T IY0
 singularization	S IH2 NG G Y AH0 L ER0 IH0 Z EY1 SH AH0 N
 singularly	S IH1 NG G Y AH0 L ER0 L IY0
 sinha	S IH1 N HH AH0
-sinhalese	S IH2 N AH0 L IY1 Z
+sinhalese	S IH2 N HH AH0 L IY1 Z
 siniard	S IH1 N IY0 ER0 D
 sinibaldi	S IH0 N IH0 B AA1 L D IY0
 sinicize	S IH1 N IH0 S AY2 Z
@@ -121190,7 +121190,7 @@ thesauri	TH AH0 S AO1 R IY2
 thesaurus	TH AH0 S AO1 R AH0 S
 these	DH IY1 Z
 theses	TH IY1 S IY0 Z
-theseus	TH IY1 Z IY2 AH0 S
+theseus	TH IY1 S IY0 AH0 S
 thesing	DH IY1 Z IH0 NG
 thesis	TH IY1 S AH0 S
 thespian	TH EH1 S P IY0 AH0 N
@@ -128863,7 +128863,7 @@ vielma	V IY1 L M AH0
 vien	V IY1 N
 vienna	V IY0 EH1 N AH0
 vienneau	V AH0 N OW1
-viennese	V IY0 EH1 N IY2 S
+viennese	V IY2 AH0 N IY1 Z
 vienot	V IY1 N AA0 T
 viens	V IY1 N Z
 vientiane	V Y EH0 N T Y AA1 N
@@ -129746,7 +129746,7 @@ waack	W AA1 K
 waag	W AA1 G
 waage	W AA1 IH0 JH
 waah	W AA1
-waal	W AA1 L
+waal	V AA1 L
 waara	W AA1 R AH0
 waas	W AA1 Z
 wabash	W AO1 B AE0 SH
@@ -132066,7 +132066,7 @@ wiersma	V IH1 R S M AH0
 wierzba	V IH1 R Z B AH0
 wierzbicki	V IH0 R Z B IH1 T S K IY0
 wies	W AY1 Z
-wiesbaden	W IY1 S B AA2 D AH0 N
+wiesbaden	V IY1 S B AA2 D AH0 N
 wiese	W IY1 Z
 wiesel	W IY1 S AH0 L
 wieseler	W IY1 S AH0 L ER0
