@@ -167,14 +167,18 @@ sets, and the two edits this change actually needs were made by hand:
 
 The guard stays in the builder so that whoever does rebuild them gets the right answer.
 
-## Open, in priority order
+## Open, in priority order — all filed
 
-1. **The `-ary/-ery/-ory` weak vowel** — a productive rule, 7 of 7 in Run 3, the largest single win
-   available to this accent.
-2. **The en-GB lexical sets are stale** (Run 5) — rebuild with a referee evaluation of the delta.
-3. **`en` initialism handling** (Run 2) — two defects, both in the parent, neither British.
-4. More lexical rows as they are found. The class is open; eleven is where the referee's support
-   ran out, not where the language does. `schedule` is the obvious next one and needs a source.
+1. **#1380 — the `-ary/-ery/-ory` weak vowel.** A productive rule, re-verified at 8 of 9 on current
+   `main`, the largest single win available to this accent.
+2. **#1381 — the en-GB lexical sets no longer reproduce from their builder** (Run 5). Rebuild with a
+   referee evaluation of the delta; `cloth` and `lotr` shrinking is the interesting part.
+3. **#1382 — `en` reads initialisms as words and spells out words as initialisms** (Run 2). Two
+   defects, both in the parent, neither British; `fyi` does both and suggests one shared decision
+   point.
+4. **#1383 — the lexical-variant class is open.** Eleven rows is where the referee's support ran
+   out, not where the language does. The blocker is the source, not the curation: `schedule` has no
+   referee row at all, and `leisure`'s only row is rhotic.
 
 ## Run 6 — 2026-09-20 — measured with the repo's own instruments, which is what should have happened first
 
