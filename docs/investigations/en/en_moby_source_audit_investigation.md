@@ -3805,3 +3805,175 @@ expected value. Updated with the reason attached.
     Moby — OOV                      17,466 → 17,464 (see above; 49 newly fail, 48 newly pass)
     primary                         2,584/4,037 (64.0%)    unmoved
     curated rows                    42 → 52
+
+## Run 62 — 2026-09-19 20:15
+
+The length-differing rows, the last large structural bucket. Classified first, then the one class
+that turned out to be a REFEREE defect rather than a disagreement.
+
+    npx tsx tools/referee-eval/eval.ts en --examples 12000
+
+Of the 2,521 length-differing rows with an example, 639 are a single clean insertion or deletion and
+1,882 need more than one edit. The single-edit half breaks down as:
+
+    referee has a phone we lack      we have a phone the referee lacks
+      88  +ə  academically/-ically     78  -ə  hour aʊəɹ vs aʊɹ
+      41  +i  abbeville                58  -a  accessorize (-ize vs -ɪz)
+      41  +j  avenue (the yod)         47  -ɹ  adversarial ædvəɹsɛɹiəl vs ædvəsɛɹiəl
+      30  +a  anhydride                20  -t  blotch blɑttʃ vs blɑtʃ
+      12  +t  betti (gemination)       19  -d  biagi
+
+⚠ THE `-ɹ` CLASS IS NOT A DISAGREEMENT AT ALL — IT IS RP THE FILTER MISSED. `crackers kɹækəz`,
+`overdrive oʊvədɹaɪv`, `weatherproof wɛðəpɹuf`, `superscript supəskɹipt`, `adversarial ædvəsɛɹiəl`:
+every one
+spelled with a post-vocalic ⟨r⟩, transcribed without it, surviving because a `ɹ` sits elsewhere in
+the word before a vowel.
+
+⚠ AND THE FIX WAS ALREADY WRITTEN, IN THE OTHER REFEREE. `en.jsonc` has THREE `excludeRows` rules;
+the Moby builder implements two. Its own comment says "BOTH of the wikipron config's non-rhotic
+rules" — accurate and the problem. The third rule was added for exactly `perchlorate` and
+`weatherproof`, and `perchlorate` was sitting in the Moby corpus as a false disagreement the whole
+time. Second time in two runs that a rule existed in one copy and not the other: the rhotic JOIN in
+Run 61, the coda rule here. Two implementations of one idea, one of them maintained.
+
+⚠ THE FIRST VERSION DROPPED THREE ROWS IT SHOULD NOT HAVE, and the cause is a silent letter.
+`Berwick 'b/E/r/I/k`, `Norwich 'n/O/r/I//tS/` and `bladderwrack 'bl/&/d/@/,r/&/k` spell ⟨rw⟩ or ⟨wr⟩
+with the ⟨w⟩ SILENT, so the ⟨r⟩ onsets the next syllable and `bɛɹɪk`/`nɔɹɪt͡ʃ`/`blædəɹæk` are ordinary
+GenAm.
+⚠ I WROTE THAT THE SPELLING CARVE-OUT WOULD BE UNSAFE AND IT IS EQUIVALENT. See Run 63: the two
+produce byte-identical corpora, because the ⟨rw⟩ words the argument named are already dropped by
+RULE 1 and rule 3's carve-out never sees them. The reading test is kept on the narrower ground that
+it encodes the reason rather than the symptom.
+
+⚠ THREE MORE ROWS THE RULE DROPPED FOR THE RIGHT OUTCOME AND THE WRONG REASON, now declared in
+`MOBY_DEFECTIVE` instead: `photographer f/@/'t/A/gr/@/f` (the body is `photograph`, which Moby
+carries separately), `quarsome 'kw/O/r/@/ls/@/m` (the body is `quarrelsome`), `sharecropper
+/S//@/'r/E/t` (four phones for twelve letters). Leaving them to a rhotic rule means a later change to
+that rule hands them back.
+
+⚠ BOTH NUMERATORS ARE COMPLETELY UNMOVED, AND RUN 63 SHOWS THAT THIS PROVES FAR LESS THAN I CLAIMED.
+In-dict 26,710 of 35,047 → 26,710 of 35,027; OOV 17,464 of 39,484 → 17,464 of 39,451, and all 53
+removed rows were failing. What I wrote next — that an over-firing rule would have moved the
+numerator, so "unchanged" verifies the carve-outs — is FALSE. See Run 63.
+
+⚠ WHAT THE RULE STILL CANNOT REACH, pinned in the test rather than left to be rediscovered: a word
+Moby transcribes with a MIXED rhotic profile. `undercover ʌndəkʌvɚ` drops the ⟨r⟩ of `under-` and
+keeps the final one; `northern nɔɹðən` the reverse; `hindquarters haɪndkwɔɹtəz` likewise. All three
+rules ask whether a reading holds a rhotic ANYWHERE, so any surviving rhotic saves the row. These are
+still false disagreements and closing them needs a POSITIONAL test, which nothing here can do because
+no alignment exists between the spelling's ⟨r⟩ and the reading's phones. Under-firing is the safe
+direction and this is deliberate, not an oversight.
+
+    Moby — words the dict carries   26,710/35,047 (76.2%) → 26,710/35,027 (76.3%)
+    Moby — OOV                      17,464/39,484 (44.2%) → 17,464/39,451 (44.3%)
+    primary                         2,584/4,037 (64.0%)    unmoved
+    dropped as NON-RHOTIC           319 → 369
+    MOBY_DEFECTIVE                  35 → 38
+
+STILL OPEN in this bucket, and none of it is a referee defect: the `-ically` schwa (88 rows), the
+`-ə`-before-ɹ class (78, `hour aʊəɹ` against `aʊɹ`), the conservative yod (41, already refused once
+on measurement), and `blotch blɑttʃ`, which IS a dictionary defect and is
+characterised here so the next block can start from it.
+
+⚠ `T CH` IN THE DICTIONARY: 21 ROWS, AND THE SPLIT IS A MORPHEME BOUNDARY AGAIN. `blotch` is
+`B L AA1 T CH` where every sibling is plain `CH` — `botch B AA1 CH`, `crotch K R AA1 CH`,
+`notch N AA1 CH` — and Moby agrees with the siblings (`bl/A//tS/`). ⟨tch⟩ is a DIGRAPH for /t͡ʃ/, so
+a `T CH` on a word spelled ⟨tch⟩ is redundant. But 8 of the 21 are genuine /t/+/t͡ʃ/ SEAMS where the
+⟨t⟩ and the ⟨ch⟩ belong to different elements: `chitchat`, `shortchange`(+2 inflections), `hatcheck`,
+`christchurch`, `westchester`, `whitchurch`. The same discriminator as the bare-digraph work of
+#1365–#1368, applied to our own dictionary rather than to Moby's notation.
+⚠ AND THE TRIAGE IS 13 DEFECTS, NOT 10 — `antczak AE1 N T CH AE0 K`, `witczak V IH1 T CH AE0 K` and
+`goettsch G OW1 T CH` are Slavic and German ⟨cz⟩/⟨tcz⟩/⟨tsch⟩ spellings of a plain /t͡ʃ/, the same
+defect reached by a different spelling. The first pass partitioned on ⟨tch⟩ IN THE SPELLING and so
+could not see them: 18 + 3 = 21, and the three that fall outside the partition are not the residue,
+they are more of the same class. Failure mode (a) again, in a paragraph written to set up the next
+block.
+The remaining defects are `blotch` AND ITS SIX INFLECTIONS — `blotched`, `blotches`, `blotchier`,
+`blotchiest`, `blotching`, `blotchy` — plus the surnames `bettcher`, `bottcher`, `hutchins`. ⚠ THE
+INFLECTIONS ARE LISTED DELIBERATELY: Run 61 shipped six half-applied paradigms because a lexicon
+lists inflections separately and the engine reads them in one sentence. Ten rows, and the paradigm
+is the unit.
+
+## Run 63 — 2026-09-19 21:30
+
+Review of the Run 62 block. The rule is right and the corpora are unchanged by any of this; both of
+the ARGUMENTS I gave for it were wrong, and one of them was wrong in a way worth keeping.
+
+⚠ "NUMERATOR UNMOVED IS THE VERIFICATION" IS FALSE, AND MY OWN THREE FALSE POSITIVES REFUTE IT. I
+argued that because both numerators held while the denominators fell, no legitimate row could have
+been dropped. Scored against the base corpora:
+
+    berwick       ours bɝwɪk      ref bɛɹɪk     FAIL
+    norwich       ours nɔɹwɪt͡ʃ    ref nɔɹɪt͡ʃ    FAIL
+    bladderwrack  ours blædɚɹæk   ref blædəɹæk  FAIL
+
+All three were FAILING rows. Had the first version of the rule shipped — the one that wrongly dropped
+them — both numerators would have been exactly unmoved and the score identical. The test I cited as
+having ruled out those three false positives cannot see them.
+
+⚠ AND THE ASYMMETRY IS STRUCTURAL, NOT AN ACCIDENT OF THESE THREE. The numerator only moves when a
+PASSING row is removed. A row where the referee is right and WE are wrong — a true divergence, the
+most valuable thing in the corpus — can be destroyed with no numerator movement at all. That is
+precisely the class a rhotic filter is most likely to mis-drop, because a correct GenAm reading we
+get wrong looks exactly like an RP row from the filter's side. So "numerator unmoved" licenses only
+"no passing row was removed", which is the weaker and less interesting half.
+⚠ THE REAL VERIFICATION IS THE ONE I ALSO DID AND DESCRIBED AS SECONDARY: reading all 53 dropped rows
+against the raw Moby bodies by hand. That is what found the three silent-⟨w⟩ rows, and it is what
+found the two corrupt ones below. A score that cannot move is not evidence; the reading was.
+⚠ THIS GENERALISES PAST THIS RULE. Any change that REMOVES rows from a referee is invisible to the
+score in the direction that matters, and this audit has made three of them (`MOBY_DEFECTIVE`,
+`MOBY_DEFECTIVE_READING`, and now the coda rule). Each needs its dropped set read, not measured.
+
+⚠ THE SECOND ARGUMENT WAS EMPIRICALLY BACKWARDS. I wrote that a spelling-based silent-⟨w⟩ carve-out
+would be "the opposite of safe" because ⟨rw⟩ matches 205 headwords including `afterwards` and
+`airway`. Rebuilt with `!SILENT_W.test(w)` in place of the reading test: **byte-identical corpora**,
+369 dropped either way, ZERO rows readmitted. The ⟨rw⟩ words the argument named are already dropped
+by RULE 1, so rule 3's carve-out never reaches them. The 205 is the population of headwords MATCHING
+the pattern, not of the rows the rule drops — failure mode (b), and it was load-bearing: a paragraph
+each in the code comment, the commit message and Run 62 rested on it.
+The reading test is KEPT, on the narrower and honest ground that it encodes the reason (the ⟨w⟩ is
+silent) rather than the symptom, and so would survive a change to rule 1 that the spelling test would
+not. That is a much smaller claim than the one I made.
+
+⚠ TWO MORE CORRUPT BODIES AMONG THE 53, BY MY OWN STANDARD. `Nornis 'n/O/r/I/s` is `Norris` with a
+phone lost; `pardalote 'p/A/dr/@/,l/oU/t` transposes its ⟨rd⟩ to /dr/, so its rhotic is in the wrong
+syllable rather than absent. Neither is RP, and the coda rule drops them only as an accident of the
+corruption — the exact situation I declared `photographer`, `quarsome` and `sharecropper` for one
+paragraph earlier. Declared in `MOBY_DEFECTIVE`; non-rhotic 369 → 367, defective 38 → 40, corpora
+unchanged.
+
+⚠ THE COMMENT NAMED TWO WORDS THE RULE DOES NOT CATCH as its headline examples. `undercover` and
+`northern` led the list of rows rule 3 reaches — and the test fifteen lines below asserts both
+SURVIVE, because their profile is mixed. Worse for `northern nɔɹðən`, which IS transcribed with a
+post-vocalic ɹ, so the stated mechanism ("a ɹ elsewhere before a vowel") is wrong for it twice over.
+Also stale in that comment: "44 rows" where the marginal is 50.
+
+⚠ AND TWO OF THREE CARVE-OUT EXAMPLES DID NOT EXERCISE THE CARVE-OUT. I replaced en.jsonc's four
+worked examples with three of my own; `greensboro` and `colouring` have their ⟨r⟩ followed by a vowel
+LETTER, so the BASE lookahead rejects them and the ⟨r⟩ exclusion never runs. Only `underrate` was a
+real example. Restored to en.jsonc's own — `arrange`, `narrow`, `Barrett`, `terracotta`, `gonorrhea`
+— which are correct and were already argued.
+
+⚠ THE `T CH` TRIAGE FOR THE NEXT BLOCK IS 13, NOT 10. `antczak`, `witczak` and `goettsch` are Slavic
+and German ⟨cz⟩/⟨tcz⟩/⟨tsch⟩ spellings of a plain /t͡ʃ/ — the same defect reached by a different
+spelling. I partitioned on ⟨tch⟩ IN THE SPELLING and reported the three that fell outside as a
+separate residue, when they are more of the same class. Failure mode (a), in the paragraph written to
+set up the next block, where an error propagates instead of sitting still.
+
+⚠ A DUPLICATION I INTRODUCED WHILE FIXING ONE. Run 61 added a local `VOWEL_SET` to the builder with
+the same fifteen members as `VOWELS` in `en_source_compare.mts` — a second copy of one fact, added in
+the commit that fixed a bug caused by two copies of one fact. `VOWELS` is now exported and imported.
+A symbol-level sweep of the two modules finds no other shared NAME (only `REPO`), so the remaining
+overlap is all conceptual: the builder's `JOIN`/`fold` against the comparator's `modernise`, which
+now guard the same AH+R fold differently — justified, documented, and the third instance of this
+shape.
+
+CHECKS OUT, verified independently: the `CODA_RHOTIC` regex is byte-identical to en.jsonc's rule-3
+`ipaLacks` with no drift, and every vowel in the corpora's character inventory is in its lookahead
+set (the `ː`/`ˑ` members are inert here — zero occurrences — since the backbone strips length). The
+mixed-profile limit is real and its size is ~45–55 rows of 74,478, the same order as the 50 this
+block closes; that number belongs in the record rather than the adjective "safe".
+
+    Moby — words the dict carries   26,710/35,027 (76.3%)  unchanged by this run
+    Moby — OOV                      17,464/39,451 (44.3%)  unchanged by this run
+    primary                         2,584/4,037 (64.0%)    unmoved

@@ -86,7 +86,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MOBY_DEFECTIVE, MOBY_DEFECTIVE_READING, mobyToArpabet } from "../english/en_source_compare.mts";
+// ⚠ `VOWELS` IS IMPORTED, NOT REDECLARED. A local `VOWEL_SET` with the same 15 members lived here
+// briefly — added while fixing a bug caused by exactly this kind of duplication. Two copies of one
+// fact is how the rhotic JOIN and the coda rule each drifted from their siblings.
+import { MOBY_DEFECTIVE, MOBY_DEFECTIVE_READING, mobyToArpabet, VOWELS } from "../english/en_source_compare.mts";
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const MOBY = process.env["MOBY"];
@@ -103,8 +106,6 @@ const IPA: Record<string, string> = {
     M: "m", N: "n", NG: "ŋ", P: "p", R: "ɹ", S: "s", SH: "ʃ", T: "t", TH: "θ", V: "v",
     W: "w", Y: "j", Z: "z", ZH: "ʒ",
 };
-const VOWEL_SET = new Set(["AA","AE","AH","AO","AW","AY","EH","ER","EY","IH","IY","OW","OY","UH","UW"]);
-
 /** Two Moby symbols this engine writes as one. Applied on the ARPABET side, before IPA. */
 const JOIN: [string, string, string][] = [
     ["AH", "R", "ER"], ["IH", "R", "ER"],          // ə/ɪ + r is our single ɚ (general, history, different)
@@ -136,7 +137,7 @@ function fold(w: string, a: string[]): [string, string][] {
         // ⚠ SCORE-NEUTRAL, AND THAT IS WHY IT SURVIVED — the eval folds `ɚ` to `əɹ` on both sides, so
         // the rows still matched. What it corrupts is any measurement taken by reading the TSV
         // directly, which is how the rhotic environment was counted in Run 60 of the investigation.
-        const onsetOfStressed = t[i + 2] !== undefined && VOWEL_SET.has(t[i + 2]![0])
+        const onsetOfStressed = t[i + 2] !== undefined && VOWELS.has(t[i + 2]![0])
             && t[i + 2]![1] !== "" && t[i + 2]![1] !== "0";
         const j = JOIN.find(([x, y]) => t[i]![0] === x && t[i + 1]?.[0] === y
             && !(y === "R" && onsetOfStressed));
@@ -318,7 +319,7 @@ const RHOTIC = /[ɹɚɝɻr]/u;
 /** Our reading carries a rhotic. `R` and `ER` are the only ARPABET symbols that do. */
 const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
 /**
- * BOTH of the wikipron config's non-rhotic rules, because the first alone leaves the largest class.
+ * ALL THREE of the wikipron config's non-rhotic rules, because each earlier one leaves a class behind.
  *
  * ⚠ THE SECOND RULE IS NOT OPTIONAL, AND ITS ABSENCE WAS THE BUG. `[aeiouy]r(?![aeiouy])` rejects every
  * `-ered`/`-ored`/`-ured`/`-ared` word, because the ⟨e⟩ after the ⟨r⟩ is a vowel LETTER even though it
@@ -328,11 +329,55 @@ const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
  * ⚠ AND THE SECOND RULE LOOKS ONLY AT THE TAIL, because an ONSET /ɹ/ shields a non-rhotic coda: a
  * whole-string test keeps `particolored pɑɹtɪkʌləd` and `pilastered pɪləstɹeɪd`.
  */
+/**
+ * ⚠ AND THE THIRD RULE, MISSING UNTIL #1370, WHICH IS WHY RP KEPT LEAKING THROUGH. Rules 1 and 2 ask
+ * whether the string holds a rhotic AT ALL, or holds one in its last three symbols. Neither reaches a
+ * word whose only rhotic is some other syllable's ONSET: `crackers kɹækəz`, `overdrive oʊvədɹaɪv`,
+ * `adversarial ædvəsɛɹiəl`, `weatherproof wɛðəpɹuf`, `superscript supəskɹipt` are all spelled with a
+ * post-vocalic ⟨r⟩, transcribed without one, and survive because a `ɹ` sits elsewhere before a vowel.
+ * 50 marginal rows, every one a permanent false disagreement where the REFEREE was wrong.
+ * ⚠ `undercover` AND `northern` ARE NOT IN THIS CLASS and an earlier draft of this comment listed
+ * them first. They have a MIXED profile — `ʌndəkʌvɚ` keeps its final ɚ, `nɔɹðən` its first ɹ — so no
+ * rule here reaches them and the test asserts they survive. See the note below.
+ * ⚠ IT IS A PORT, NOT A NEW RULE. en.jsonc's third `excludeRows` entry has done this for the wikipron
+ * referee since the audit that found `perchlorate` and `weatherproof`; the Moby builder reimplemented
+ * the first two and stopped. The same divergence as the rhotic JOIN: two copies of one idea, one of
+ * them updated.
+ * ⚠ AND A SILENT ⟨w⟩ AFTER THE ⟨r⟩ MAKES IT AN ONSET, NOT A CODA. `Berwick 'b/E/r/I/k` and
+ * `Norwich 'n/O/r/I//tS/` are spelled ⟨rw⟩ but the ⟨w⟩ is silent, so the ⟨r⟩ is the next syllable's
+ * onset and the readings `bɛɹɪk`/`nɔɹɪt͡ʃ` are ordinary GenAm. `bladderwrack 'bl/&/d/@/,r/&/k` is the
+ * same with ⟨wr⟩. All three were dropped by the first version of this rule.
+ * ⚠ THE CARVE-OUT TESTS THE READING, AND A SPELLING TEST WOULD BE EQUIVALENT TODAY — measured, and
+ * an earlier draft of this comment claimed the opposite. Replacing this clause with a bare
+ * `!SILENT_W.test(w)` produces BYTE-IDENTICAL corpora: the ⟨rw⟩ words one would worry about
+ * (`afterwards`, `clearway`, `underwhelm`, `washerwoman`) are already dropped by RULE 1, so rule 3's
+ * carve-out never sees them. The earlier claim that a spelling test "readmits the largest RP class"
+ * counted the 205 headwords MATCHING ⟨rw⟩, not the rows this rule drops — a population the argument
+ * was never about.
+ * ⚠ IT IS KEPT AS A READING TEST ANYWAY, on the narrower ground that it encodes the REASON rather
+ * than the symptom: the ⟨w⟩ being silent is a fact about the pronunciation, and a spelling test that
+ * happens to agree today would stop agreeing the moment rule 1 changed.
+ * ⚠ THE SPELLING SIDE ALSO EXCLUDES A FOLLOWING ⟨r⟩ OR ⟨h⟩ and both carve-outs are load-bearing here.
+ * `r+` backtracks, so a geminate matches its own first half — without the ⟨r⟩ exclusion this drops
+ * `arrange əɹeɪnd͡ʒ`, `narrow næɹoʊ`, `Barrett bæɹɪt` and `terracotta tɛɹəkɑtə`, ordinary GenAm rows
+ * flagged for having an onset ɹ where no coda ⟨r⟩ exists at all. The ⟨h⟩ exclusion spares `gonorrhea
+ * ɡɑnəɹiə`, where the ɹ legitimately serves the spelled ⟨r⟩. ⚠ THESE ARE en.jsonc'S OWN EXAMPLES AND
+ * AN EARLIER DRAFT SWAPPED TWO OF THEM FOR WRONG ONES: `greensboro` and `colouring` have their ⟨r⟩
+ * followed by a vowel LETTER, so the base lookahead already rejects them and the ⟨r⟩ exclusion never
+ * runs. Only `underrate` of that trio actually exercises it.
+ */
 const SPELLED_R = /[aeiouy]r(?![aeiouy])/u;
 const FINAL_R = /[aeiouy]r(?:e|ed)?$/u;
+const CODA_R = /[aeiouy]r+(?![aeiouyrh])/u;
+/** ⟨rw⟩ in the spelling — a coda only if some reading actually has the /w/. See above. */
+const SILENT_W = /[aeiouy]r+w/u;
+/** A rhotic in CODA position: ɚ/ɝ, or ɹ/ɻ/r not followed by a vowel. */
+const CODA_RHOTIC = /[ɚɝ]|[ɹɻr](?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶːˑ])/u;
 const refereeIsNonRhotic = (w: string, reads: string[]): boolean =>
     (SPELLED_R.test(w) && reads.every((r) => !RHOTIC.test(r)))
-    || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))));
+    || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))))
+    || (CODA_R.test(w) && !(SILENT_W.test(w) && reads.every((r) => !/w/u.test(r)))
+        && reads.every((r) => !CODA_RHOTIC.test(r)));
 /**
  * ⚠ A SPELLING TEST CANNOT TELL RP FROM A LOANWORD, WHICH THE FIRST DRAFT ASSUMED IT COULD. `-ier`
  * looked reliably French and admits `pliers` (ours `P L AY1 ER0 Z`, rhotic) and `messier` — where Moby

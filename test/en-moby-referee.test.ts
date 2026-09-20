@@ -60,6 +60,42 @@ describe("the Moby referee corpora", () => {
             expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
     });
 
+    // ⚠ THE THIRD NON-RHOTIC RULE, MISSING UNTIL #1370. The first two ask whether a reading holds a
+    // rhotic AT ALL, or holds one in its last three symbols; neither reaches a word whose only rhotic
+    // is some other syllable's ONSET. 50 rows of RP survived on that, every one a permanent false
+    // disagreement where the REFEREE was wrong.
+    test("RP masked by an onset r elsewhere in the word is dropped too", () => {
+        for (const w of ["crackers", "overdrive", "adversarial", "weatherproof", "perchlorate",
+            "rubberneck", "superscript", "rightward", "afterwards"])
+            expect([w, lex.has(w), oov.has(w)]).toEqual([w, false, false]);
+    });
+
+    // ⚠ AND WHAT IT STILL DOES NOT REACH, pinned so the limit is not rediscovered as a bug. The rule
+    // asks whether a reading holds a coda rhotic ANYWHERE, so a word Moby transcribes with a MIXED
+    // profile — one ⟨r⟩ dropped, another kept — survives all three rules: `undercover ʌndəkʌvɚ` keeps
+    // its final ɚ, `northern nɔɹðən` its first ɹ, `hindquarters haɪndkwɔɹtəz` likewise. These are still
+    // false disagreements; they need a POSITIONAL test, which nothing here can do because no alignment
+    // exists between the spelling's ⟨r⟩ and the reading's phones. Under-firing is the safe direction.
+    test("a mixed rhotic profile is not reached, and that limit is deliberate", () => {
+        expect(lex.get("undercover") ?? oov.get("undercover")).toBe("ʌndəkʌvɚ");
+        expect(lex.get("northern") ?? oov.get("northern")).toBe("nɔɹðən");
+    });
+
+    // ⚠ AND A SILENT ⟨w⟩ AFTER THE ⟨r⟩ IS NOT A CODA. `Berwick`, `Norwich` and `bladderwrack` spell
+    // ⟨rw⟩/⟨wr⟩ with the ⟨w⟩ silent, so the ⟨r⟩ onsets the next syllable and the readings are ordinary
+    // GenAm. The first version of the rule above dropped all three.
+    // ⚠ THE CARVE-OUT IS ON THE READING, NOT THE SPELLING, and that distinction is the whole rule: 205
+    // headwords spell ⟨rw⟩ and a blanket spelling exemption would readmit `afterwards`, `airway` and
+    // `bitterweed` — the largest RP class in the corpus. If no reading has a /w/, the ⟨w⟩ is silent.
+    test("a silent w does not make an onset r look like a missing coda", () => {
+        expect(lex.get("berwick") ?? oov.get("berwick")).toBe("bɛɹɪk");
+        expect(lex.get("norwich") ?? oov.get("norwich")).toBe("nɔɹɪt͡ʃ");
+        expect(oov.get("bladderwrack") ?? lex.get("bladderwrack")).toBe("blædəɹæk");
+        // the ⟨w⟩ IS pronounced here, so these stay subject to the rule
+        expect(lex.get("airway") ?? oov.get("airway")).toBe("ɛɹweɪ");
+        expect([lex.has("afterwards"), oov.has("afterwards")]).toEqual([false, false]);
+    });
+
     // ⚠ A ROW WHOSE BODY IS A DIFFERENT WORD CANNOT ARBITRATE ANYTHING, so MOBY_DEFECTIVE drops it from
     // both corpora. Pinned because the list is hand-curated and silence is how it would rot.
     test("defective rows reach neither corpus", () => {

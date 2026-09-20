@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary carries (35047 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary carries (35027 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -493,7 +493,6 @@ adventurism	ædvɛnt͡ʃəɹɪzəm
 adventurous	ædvɛnt͡ʃɚəs
 adverb	ædvɚb
 adverbial	ædvɚbiəl
-adversarial	ædvəsɛɹiəl
 adversary	ædvɚsɛɹi
 adverse	ædvɚs
 adversely	ædvɚsli
@@ -1913,7 +1912,6 @@ arrangement	əɹeɪnd͡ʒmənt
 arrant	æɹənt
 array	əɹeɪ
 arrearage	əɹiɹɪd͡ʒ
-arrears	əɹiəz
 arrest	əɹɛst
 arresting	əɹɛstɪŋ
 arrhythmia	əɹɪðmiə
@@ -7724,7 +7722,6 @@ crackdown	kɹækdaʊn
 cracked	kɹækt
 cracker	kɹækɚ
 crackerjack	kɹækɚd͡ʒæk
-crackers	kɹækəz
 cracking	kɹækɪŋ
 crackle	kɹækəl
 crackling	kɹæklɪŋ
@@ -14796,7 +14793,6 @@ hairdresser	hɛɹdɹɛsɚ
 hairdressing	hɛɹdɹɛsɪŋ
 hairless	hɛɹlɪs
 hairline	hɛɹlaɪn
-hairspray	hɛspɹeɪ
 hairy	hɛɹi
 haiti	heɪti
 haitian	heɪʃən
@@ -23344,8 +23340,6 @@ overcrowd	oʊvɚkɹaʊd
 overdo	oʊvɚdu
 overdone	oʊvɚdʌn
 overdraft	oʊvɚdɹæft
-overdraw	oʊvədɹɑ
-overdrive	oʊvədɹaɪv
 overdue	oʊvɚdu
 overeager	oʊvəɹiɡɚ
 overeat	oʊvəɹit
@@ -23385,8 +23379,6 @@ overplay	oʊvɚpleɪ
 overpopulate	oʊvɚpɑpjəleɪt
 overpower	oʊvəpaʊɚ
 overpowering	oʊvɚpaʊɚɪŋ
-overprice	oʊvəpɹaɪs
-overproduce	oʊvəpɹədjus
 overran	oʊvɚɹæn
 overrate	oʊvɚɹeɪt
 overreach	oʊvɚɹit͡ʃ
@@ -24130,7 +24122,6 @@ perceptual	pɚsɛpt͡ʃuəl
 perceval	pɚsəvəl
 perch	pɚt͡ʃ
 perchance	pɚt͡ʃæns
-perchlorate	pəklɔɹeɪt
 perchloric	pɚklɔɹɪk
 percipient	pɚsɪpiənt
 percival	pɚsəvəl
@@ -24432,7 +24423,6 @@ photofinisher	foʊtoʊfɪnɪʃɚ
 photofinishing	foʊtoʊfɪnɪʃɪŋ
 photogenic	foʊtəd͡ʒɛnɪk
 photograph	fətɑɡɹəf
-photographer	fʌtəɡɹæf
 photographic	foʊtəɡɹæfɪk
 photography	fətɑɡɹəfi
 photometer	foʊtɑmɪtɚ
@@ -25331,7 +25321,6 @@ presentation	pɹɛzənteɪʃən
 presently	pɹɛzəntli
 presentment	pɹizɛntmənt
 preservation	pɹɛzɚveɪʃən
-preservationist	pɹɛzəveɪʃənɪst
 preservative	pɹɪzɚvətɪv
 preserve	pɹɪzɚv
 preset	pɹisɛt
@@ -27244,7 +27233,6 @@ rightly	ɹaɪtli
 rightness	ɹaɪtnɪs
 righto	ɹaɪtoʊ
 rights	ɹaɪts
-rightward	ɹaɪtwəd
 righty	ɹaɪti
 rigid	ɹɪd͡ʒɪd
 rigoletto	ɹɪɡəlɛtoʊ
@@ -27305,7 +27293,6 @@ riverbank	ɹɪvɚbæŋk
 riverdale	ɹɪvɚdeɪl
 riverhead	ɹɪvɚhɛd
 rivers	ɹɪvɚz
-riverside	ɹivəsaɪd
 rivest	ɹivɛst
 rivet	ɹɪvɪt
 riviera	ɹɪviɛɹə
@@ -28643,7 +28630,6 @@ shara	ʃɑɹə
 shard	ʃɑɹd
 share	ʃɛɹ
 sharecrop	ʃɛɹkɹɑp
-sharecropper	ʃəɹɛt
 shareholder	ʃɛhoʊldɚ
 shari	ʃɑɹi
 sharif	ʃəɹif
@@ -32219,7 +32205,6 @@ transference	tɹænsfɚəns
 transfix	tɹænsfɪks
 transform	tɹænsfɔɹm
 transformation	tɹænsfɚmeɪʃən
-transformational	tɹænsfəmeɪʃənəl
 transformer	tɹænsfɔɹmɚ
 transfuse	tɹænsfjuz
 transfusion	tɹænsfjuʒən
@@ -32862,7 +32847,6 @@ underpants	ʌndɚpænts
 underpin	ʌndɚpɪn
 underpinning	ʌndɚpɪnɪŋ
 underplay	ʌndɛɹpleɪ
-underprice	ʌndəpɹaɪs
 underprivileged	ʌndɚpɹɪvəlɪd͡ʒd
 underrate	ʌndəɹeɪt
 underscore	ʌndɚskɔɹ
@@ -32881,7 +32865,6 @@ understanding	ʌndɚstændɪŋ
 understate	ʌndɚsteɪt
 understood	ʌndɚstʊd
 understudy	ʌndɚstʌdi
-undersubscribed	ʌndəsəbskɹaɪbd
 undertake	ʌndɚteɪk
 undertaker	ʌndɚteɪkɚ
 undertaking	ʌndɚteɪkɪŋ
@@ -33257,7 +33240,6 @@ unsung	ənsʌŋ
 unsupportable	ʌnsəpɔɹtəbəl
 unsupported	ʌnsəpɔɹtɪd
 unsure	ənʃʊɚ
-unsurprising	ʌnsəpɹaɪzɪŋ
 unsuspected	ʌnsəspɛktɪd
 unsuspecting	ʌnsəspɛktɪŋ
 unsustainable	ʌnsəsteɪnəbəl
@@ -34183,7 +34165,6 @@ weathered	wɛðɚd
 weathering	wɛðɚɪŋ
 weatherly	wɛðɚli
 weatherman	wɛðɚmæn
-weatherproof	wɛðəpɹuf
 weave	wiv
 weaver	wivɚ
 web	wɛb
@@ -34558,7 +34539,6 @@ winooski	wɪnuski
 winslow	wɪnzloʊ
 winsome	wɪnsəm
 winter	wɪntɚ
-wintergreen	wɪntəɡɹin
 winterize	wɪntəɹaɪz
 winters	wɪntɚz
 wintertime	wɪntɚtaɪm
