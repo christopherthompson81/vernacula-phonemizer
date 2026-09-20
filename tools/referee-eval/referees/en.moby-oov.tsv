@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39484 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary does NOT carry — the OOV tier (39451 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -16315,7 +16315,6 @@ gippy	d͡ʒɪpi
 gipsy	d͡ʒɪpsi
 girafano	d͡ʒiɹɑfɑnoʊ
 girandola	d͡ʒɪɹændələ
-girardeau	d͡ʒəɹɑdoʊ
 girasol	d͡ʒɚəsɔl
 girasole	d͡ʒɚəsoʊl
 giraudoux	ʒiɹoʊdu
@@ -17352,7 +17351,6 @@ hailsham	heɪlʃʊm
 hainaut	ɛnoʊ
 haiphong	haɪfɑŋ
 hairbrained	hɛɹbɹeɪnd
-hairgrip	hɛɡɹip
 hairtail	hɛɹteɪl
 hairworm	hɛɹwɚm
 haise	heɪz
@@ -18759,7 +18757,6 @@ houssay	usaɪ
 houstonia	hustoʊniə
 houyhnhnm	huɪnəm
 hoverport	hɑvəpɔɹt
-hovertrain	hɑvətɹeɪn
 howdie	haʊdi
 howel	haʊəl
 howff	haʊf
@@ -19759,7 +19756,6 @@ imperiously	ɪmpiɹiəsli
 imperiousness	ɪmpiɹiəsnɪs
 imperium	ɪmpiɹiəm
 impermeableness	ɪmpɚmiəbəlnɪs
-imperscriptible	ɪmpəskɹiptɪbəl
 impersonalise	ɪmpɚsənəlaɪz
 impersonalism	ɪmpɚsənəlɪzəm
 impersonalize	ɪmpɚsənəlaɪz
@@ -25457,7 +25453,6 @@ mossbauer	mɔsbaʊɚ
 mossbunker	mɔsbʌŋkɚ
 moste	moʊst
 mosting	moʊstɪŋ
-mothercraft	mʌðəkɹæft
 motherwell	mʌðɚwəl
 mothproof	mɑθpɹuf
 mothy	mɔθi
@@ -26348,7 +26343,6 @@ normalise	nɔɹməlaɪz
 normanise	nɔɹmənaɪz
 normocyte	nɔɹməsaɪt
 normocytic	nɔɹməsɪtɪk
-nornis	nɔɹɪs
 norristown	nɔɹɪstaʊn
 northamptonshire	nɔɹθæmptənʃiɹ
 northants	nɔɹθænts
@@ -27230,14 +27224,11 @@ overarm	oʊvəɹɑɹm
 overawe	oʊvəɹɔ
 overbank	oʊvɚbæŋk
 overbreak	oʊvɚbɹeɪk
-overbrim	oʊvəbɹim
 overcapitalise	oʊvɚkæpɪtəlaɪz
 overcertify	oʊvɚsɚtəfaɪ
 overclothes	oʊvɚkloʊz
 overcoating	oʊvɚkoʊtɪŋ
 overcoil	oʊvɚkɔɪl
-overcrop	oʊvəkɹɑp
-overcrow	oʊvəkɹoʊ
 overcurious	oʊvɚkjʊɹiəs
 overdear	oʊvɚdiɹ
 overdelicacy	oʊvɚdɛləkəsi
@@ -27246,7 +27237,6 @@ overdelicately	oʊvɚdɛləkɪtli
 overdelicateness	oʊvɚdɛləkɪtnɪs
 overdoor	oʊvɚdɔɹ
 overdrawer	ɑvɚdɹɔɚ
-overdrink	oʊvədɹiŋk
 overeagerly	oʊvəɹiɡɚli
 overeagerness	oʊvəɹiɡɚnɪs
 overelaborate	oʊvɚɪlæbɚɪt
@@ -27255,10 +27245,8 @@ overenthusiasm	oʊvɚinθjuzɪæzəm
 overexert	oʊvɚɪɡzɚt
 overfamiliar	oʊvəfəmɪliɚ
 overflap	oʊvɚflæp
-overgeneralize	oʊvəd͡ʒɛnɹəlaɪz
 overgild	oʊvɚɡɪld
 overglance	oʊvɚɡlæns
-overground	oʊvəɡɹaʊnd
 overhappy	oʊvɚhæpi
 overhatted	oʊvɚhætɪd
 overijssel	oʊvəɹaɪsəl
@@ -27778,7 +27766,6 @@ parcener	pɑɹsɪnɚ
 parcheesi	pɑɹt͡ʃizi
 parchmentize	pɑɹt͡ʃməntaɪz
 pardah	pɚdə
-pardalote	pɑdɹəloʊt
 pardine	pɑɹdaɪn
 parecious	pəɹiʃəs
 paregmenon	pəɹɛɡmənɑn
@@ -27855,7 +27842,6 @@ participance	pɑɹtɪsəpəns
 participantly	pɑɹtɪsəpəntli
 participiality	pɑɹtɪsɪpiælɪti
 particularise	pɚtɪkjələɹaɪz
-particularism	pətɪkjʊləɹizəm
 particularize	pɚtɪkjələɹaɪz
 partis	pɑɹtɪs
 partlet	pɑɹtlɪt
@@ -28391,7 +28377,6 @@ perryton	pɛɹitən
 perryville	pɛɹivɪl
 perseid	pɚsiɪd
 perseity	pɚsiɪti
-perseverate	pəsɛvəɹeɪt
 persiennes	pɚsɪɛnz
 persius	pɚʃəs
 personalise	pɚsənəlaɪz
@@ -29947,7 +29932,6 @@ prismatoid	pɹɪzmətɔɪd
 prismoid	pɹizmɔɪd
 prithivi	pɹɪtivɪ
 privateer	pɹaɪvətiɚ
-privateersman	pɹaɪvətiəzmən
 privative	pɹɪvətɪv
 privatively	pɹɪvətɪvli
 prizeman	pɹaɪzmən
@@ -30624,7 +30608,6 @@ quarenden	kwɑɹəndən
 quarrian	kwɑɹiən
 quarrier	kwɔɹiɚ
 quarryman	kwɑɹimən
-quarsome	kwɔɹəlsəm
 quartation	kwɔɹteɪʃən
 quarterage	kwɔɹtɚɪd͡ʒ
 quartered	kwɔɹtɚd
@@ -30971,7 +30954,6 @@ reagency	ɹieɪd͡ʒənsi
 realising	ɹiəlaɪzɪŋ
 reallot	ɹiəlɑt
 rearguard	ɹiəɡɑɹd
-rearmost	ɹiəmoʊst
 rearward	ɹiɹwɚd
 rearwardness	ɹiɹwɚdnɪs
 reata	ɹiɑtə
@@ -31602,7 +31584,6 @@ rogatory	ɹɑɡətɔɹi
 roguery	ɹoʊɡɚi
 rok	ɹɑk
 roke	ɹoʊk
-rollerball	ɹoʊləbɑl
 rollicksome	ɹɑlɪksəm
 rollock	ɹɑlək
 rollway	ɹoʊlweɪ
@@ -31730,7 +31711,6 @@ rozi	ɹoʊzi
 rubaboo	ɹʌbəbu
 rubasse	ɹubæs
 rubberise	ɹʌbəɹaɪz
-rubberneck	ɹʌbənɛk
 rubbisy	ɹʌbɪʃi
 rubblework	ɹʌbəlwɚk
 rubbly	ɹʌbli
@@ -32965,7 +32945,6 @@ shend	ʃɛnd
 shensi	ʃɛnsi
 shenstone	ʃɛnstən
 sheol	ʃioʊl
-sherardize	ʃɛɹədaɪz
 sherbrooke	ʃɚbɹʊk
 sherd	ʃɚd
 sherif	ʃɛɹif
@@ -33056,7 +33035,6 @@ shouldst	ʃʊdst
 shovelhead	ʃʌvəlhɛd
 shoveller	ʃʌvəlɚ
 showbread	ʃoʊbɹɛd
-showerproof	ʃaʊəpɹuf
 showery	ʃaʊɚi
 showfolk	ʃoʊfoʊk
 showjumping	ʃoʊd͡ʒʌmpɪŋ
@@ -34861,7 +34839,6 @@ superfortress	supɚfɔɹtɹɪs
 superfuse	supɚfjuz
 superfusion	supɚfjuʒən
 supergalactic	supɚɡəlæktɪk
-supergrass	supəɡɹɑs
 superhive	supɚhaɪv
 superhumanity	supɚhjumænɪti
 superhumanness	supɚhjumənɪs
@@ -34898,7 +34875,6 @@ superregenerative	supɚɪd͡ʒɛnəɹeɪtɪv
 supersalesman	supɚseɪlzmən
 supersalesmanship	supɚseɪlzmənʃɪp
 supersaturate	supɚsæt͡ʃəɹeɪt
-superscript	supəskɹipt
 supersedure	supɚsid͡ʒɚ
 superseniority	supɚsinjɔɹɪti
 supersensible	supɚsɛnsəbəl
@@ -34911,12 +34887,8 @@ supersensuality	supɚsɛnʃuælɪti
 supersensually	supɚsɛnʃuəli
 superserviceable	supɚsɚvɪsəbəl
 superspeed	supɚspid
-superstratum	supəstɹɑtəm
 supersubtle	supɚsʌtəl
 supertemporal	supətɛmpɚəl
-superterranean	supətɛɹeɪniən
-superterrene	supətɛɹin
-superterrestrial	supətəɹɛstɹiəl
 supervenient	supɚvinjənt
 suppe	supeɪ
 suppedaneum	sʌpɪdeɪniəm
@@ -36594,7 +36566,6 @@ transmute	tɹænsmjut
 transnationally	tɹænsnæʃənəli
 transpadane	tɹænspədeɪn
 transpeptidation	tɹænspɛptɪdeɪʃən
-transpierce	tɹænspiəs
 transpiratory	tɹænspaɪɚətɔɹi
 transplanetary	tɹænsplænɪtɛɹi
 transponible	tɹænspoʊnəbəl
@@ -37381,14 +37352,12 @@ underdraft	ʌndɚdɹæft
 underdrainage	ʌndɚdɹeɪnɪd͡ʒ
 underdraw	ʌndɚdɹɔ
 underdrawers	ʌndɚdɹɔɹz
-underdress	ʌndədɹɛs
 underemphasis	ʌndəɹɛmfəsɪs
 underexpose	ʌndɚɪkspoʊz
 underexposure	ʌndɚɪkspoʊʒɚ
 underfired	ʌndɚfɪɚd
 underfloor	ʌndəflɔɹ
 undergird	ʌndəɡɚd
-undergraduette	ʌndəɡɹædjʊɛt
 undergrown	ʌndɚɡɹoʊn
 underinsurance	ʌndɚɪnʃʊɹəns
 underlap	ʌndɚlæp
@@ -37411,7 +37380,6 @@ undersparred	ʌndɚspɑɹd
 understandableness	ʌndɚstændəbəlnɪs
 understandingness	ʌndɚstændɪŋnɪs
 understeer	ʌndəstiɚ
-understorey	ʌndəstɔɹi
 understrapper	ʌndəstɹæpɚ
 undertakerly	ʌndɚteɪkɚli
 undertenant	ʌndɚtɛnənt
@@ -37451,7 +37419,6 @@ unemphatic	ʌnɪmfætɪk
 unendowed	ʌnɪndaʊd
 unendurable	ʌnɪndjʊɚəbəl
 unenjoyable	ʌnɪnd͡ʒɔɪəbəl
-unenterprising	ənɛntəpɹaɪzɪŋ
 unenvied	ənɛnvɪd
 unequalled	ənikwəld
 unequivocalness	ʌnɪkwɪvəkəlnɪs

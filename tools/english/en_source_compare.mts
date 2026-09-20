@@ -281,6 +281,12 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     // dropping is one referee row each, which is the cheaper error.
     ["geomorphological", "⟨ph⟩ as p+h where Moby's own `morphological` has /f/"],
     ["snapped", "a stray `h` in a `-ped` past tense: 'sn/&/p,h/E/d"],
+    // ⚠ THREE SURFACED BY THE CODA-RHOTIC RULE IN #1370, and they are here rather than left to it
+    // because being dropped as RP would be the RIGHT OUTCOME FOR THE WRONG REASON — a rhotic rule that
+    // later changed would hand them back. Each body is a different word, which is this table's remit.
+    ["photographer", "body is 'photograph' — f/@/'t/A/gr/@/f, and Moby carries that word separately"],
+    ["quarsome", "body is 'quarrelsome' — 'kw/O/r/@/ls/@/m against its own `quarrelsome 'kw/A/r/@/ls/@/m`"],
+    ["sharecropper", "nonsense — '/S//@/'r/E/t', four phones for twelve letters"],
 ]);
 
 /**

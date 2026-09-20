@@ -318,7 +318,7 @@ const RHOTIC = /[ɹɚɝɻr]/u;
 /** Our reading carries a rhotic. `R` and `ER` are the only ARPABET symbols that do. */
 const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
 /**
- * BOTH of the wikipron config's non-rhotic rules, because the first alone leaves the largest class.
+ * ALL THREE of the wikipron config's non-rhotic rules, because each earlier one leaves a class behind.
  *
  * ⚠ THE SECOND RULE IS NOT OPTIONAL, AND ITS ABSENCE WAS THE BUG. `[aeiouy]r(?![aeiouy])` rejects every
  * `-ered`/`-ored`/`-ured`/`-ared` word, because the ⟨e⟩ after the ⟨r⟩ is a vowel LETTER even though it
@@ -328,11 +328,44 @@ const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
  * ⚠ AND THE SECOND RULE LOOKS ONLY AT THE TAIL, because an ONSET /ɹ/ shields a non-rhotic coda: a
  * whole-string test keeps `particolored pɑɹtɪkʌləd` and `pilastered pɪləstɹeɪd`.
  */
+/**
+ * ⚠ AND THE THIRD RULE, MISSING UNTIL #1370, WHICH IS WHY RP KEPT LEAKING THROUGH. Rules 1 and 2 ask
+ * whether the string holds a rhotic AT ALL, or holds one in its last three symbols. Neither reaches a
+ * word whose only rhotic is some other syllable's ONSET: `undercover əndəkəvəɹ`, `northern nɔɹðən`,
+ * `crackers kɹækəz`, `overdrive oʊvədɹaɪv`, `adversarial ædvəsɛɹiəl` are all spelled with a
+ * post-vocalic ⟨r⟩, transcribed without one, and survive because a `ɹ` sits elsewhere before a vowel.
+ * 44 rows, every one of them a permanent false disagreement where the REFEREE was wrong.
+ * ⚠ IT IS A PORT, NOT A NEW RULE. en.jsonc's third `excludeRows` entry has done this for the wikipron
+ * referee since the audit that found `perchlorate` and `weatherproof`; the Moby builder reimplemented
+ * the first two and stopped. The same divergence as the rhotic JOIN: two copies of one idea, one of
+ * them updated.
+ * ⚠ AND A SILENT ⟨w⟩ AFTER THE ⟨r⟩ MAKES IT AN ONSET, NOT A CODA. `Berwick 'b/E/r/I/k` and
+ * `Norwich 'n/O/r/I//tS/` are spelled ⟨rw⟩ but the ⟨w⟩ is silent, so the ⟨r⟩ is the next syllable's
+ * onset and the readings `bɛɹɪk`/`nɔɹɪt͡ʃ` are ordinary GenAm. `bladderwrack 'bl/&/d/@/,r/&/k` is the
+ * same with ⟨wr⟩. All three were dropped by the first version of this rule.
+ * ⚠ THE CARVE-OUT CANNOT BE A SPELLING TEST — that was measured and it is the opposite of safe. 205
+ * headwords spell ⟨rw⟩, and they include `afterward`, `afterwards`, `airway` and `bitterweed`: a
+ * blanket ⟨rw⟩ exemption readmits the LARGEST RP class in the corpus, the one named at the top of
+ * this comment. The discriminator is the READING — if the spelling has ⟨rw⟩ and no reading contains
+ * a /w/ at all, the ⟨w⟩ is silent and the ⟨r⟩ is not a coda.
+ * ⚠ THE SPELLING SIDE ALSO EXCLUDES A FOLLOWING ⟨r⟩ OR ⟨h⟩ and both carve-outs are load-bearing here.
+ * `r+` backtracks, so a geminate matches its own first half — without the ⟨r⟩ exclusion this drops
+ * `underrate əndəɹeɪt`, `greensboro ɡɹinzbəɹoʊ` and `colouring kələɹɪŋ`, where the difference is a
+ * DOUBLED rhotic on our side and not a missing one on Moby's. The ⟨h⟩ exclusion spares the `rh`
+ * digraph, where the `ɹ` legitimately serves the spelled ⟨r⟩.
+ */
 const SPELLED_R = /[aeiouy]r(?![aeiouy])/u;
 const FINAL_R = /[aeiouy]r(?:e|ed)?$/u;
+const CODA_R = /[aeiouy]r+(?![aeiouyrh])/u;
+/** ⟨rw⟩ in the spelling — a coda only if some reading actually has the /w/. See above. */
+const SILENT_W = /[aeiouy]r+w/u;
+/** A rhotic in CODA position: ɚ/ɝ, or ɹ/ɻ/r not followed by a vowel. */
+const CODA_RHOTIC = /[ɚɝ]|[ɹɻr](?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶːˑ])/u;
 const refereeIsNonRhotic = (w: string, reads: string[]): boolean =>
     (SPELLED_R.test(w) && reads.every((r) => !RHOTIC.test(r)))
-    || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))));
+    || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))))
+    || (CODA_R.test(w) && !(SILENT_W.test(w) && reads.every((r) => !/w/u.test(r)))
+        && reads.every((r) => !CODA_RHOTIC.test(r)));
 /**
  * ⚠ A SPELLING TEST CANNOT TELL RP FROM A LOANWORD, WHICH THE FIRST DRAFT ASSUMED IT COULD. `-ier`
  * looked reliably French and admits `pliers` (ours `P L AY1 ER0 Z`, rhotic) and `messier` — where Moby
