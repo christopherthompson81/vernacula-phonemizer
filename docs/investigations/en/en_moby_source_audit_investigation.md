@@ -3587,3 +3587,103 @@ comment now says it.
     referee rows changed            219 (220 less `altstoetter`, now retained as a seam)
     audit() frequency words freed   55
     import candidates unblocked     148
+
+## Run 60 — 2026-09-19 16:45
+
+The unstressed-vowel class, the largest thing left in the Moby residual. The answer is a REFUSAL plus
+a lexical slice — the fold is not available, and the rows have to be arbitrated one at a time.
+
+    npx tsx tools/referee-eval/eval.ts en --examples 12000
+
+⚠ FIRST, THE SHAPE OF THE WHOLE RESIDUAL, which nothing in this audit had measured. Of the 8,396
+in-dict failures: 4,811 (57%) differ in EXACTLY ONE SYMBOL at equal length, 1,025 in more than one,
+and 2,560 differ in LENGTH. The single-symbol half is almost entirely vowels, and the class count is
+nearly equal to the row count (8,261 classes for 8,396 rows) — these are one-off lexical
+disagreements, not a few big patterns. That alone argues against any further fold.
+
+Of the single-symbol rows, `ə`↔`ɪ` (2,031) is already declared intentional and `i`→`ɪ` before ɹ
+(351) likewise. What is LEFT and uncovered is the SCHWA-versus-FULL-VOWEL class: `ə` against
+`ɑ ɛ æ ʊ ɔ i` in both directions, 784 rows.
+
+⚠ IT FAILS THE REPO'S OWN BAR FOR AN INTENTIONAL CLASS, TWICE. The bar (set by the `i`→`ɪ` entry) is
+that the referee must NOT record the distinction — a one-sided notation choice — and that an
+independent source must back us. Measured across both referee tiers:
+
+    after /j/   jʊ  579   vs  jə  1043     records both -> lexical
+    -man        mæn  70   vs  mən  444     records both -> lexical
+    initial     ^æ  3073  vs  ^ə  2280     records both -> lexical
+                ɛ  15680  vs  ə  47081     records both -> lexical
+    before ɹ    ɔɹ 4025   vs  ɚ  15755     records both -> lexical
+
+Moby writes both sides of every environment I could name. It is making per-word judgements, not
+following a convention, so there is nothing here to fold.
+⚠ MY FIRST VERSION OF THAT TABLE COMPARED `ɔɹ` AGAINST `əɹ` AND GOT 4,025 vs ZERO — which reads as a
+perfect one-sided convention and would have justified a fold. It is an artifact of our own pipeline:
+Moby's `/@/r` folds to `ɚ`, so `əɹ` CANNOT appear in the corpus and the zero says nothing about Moby.
+Measuring a source against a form our own builder cannot emit is a new way to get a false positive
+and worth naming; the corrected figure is 4,025 vs 15,755, which is lexical like the rest.
+
+⚠ AND GOLD SPLITS, WITH NO ENVIRONMENT PREDICTING THE DIRECTION. Arbitrating all 784 against misaki:
+
+    gold backs US           138
+    gold backs MOBY          78
+    gold differs from BOTH  275
+    no gold entry           290
+
+Gold can arbitrate only 216 of 784 (28%), and every sub-class is mixed in both directions — `æ`/`ə`
+goes 9 for us and 15 for Moby, `ə`/`ʊ` goes 12 for us and 5 for Moby. That is exactly the ground the
+velar nasal was refused on: a lexical disagreement where neither side has been shown right. THE
+CLASS IS REFUSED as a fold. The 275 rows where gold agrees with neither are recorded and untouched —
+a third of the class has a problem beyond the one being studied.
+
+TAKEN INSTEAD, the 74 rows where TWO INDEPENDENT SOURCES agree against us. Minus `address` (already
+in the heteronym table, correctly) and `and` (a function word whose reduced form is deliberate), and
+minus 26 where gold's row differs from ours in more than one phone — those need fuller review than a
+vowel swap — and 3 that already carry a curated row, which may not have a second. 43 applied, each
+derived from gold through the repo's own `goldToArpabet` rather than by hand-mapping vowels.
+
+⚠ ONE OF THE 43 WAS WRONG, AND ONLY THE GOLDENS COULD SEE IT. `batman` went `B AE1 T M AE2 N` →
+`B AE1 T M AH0 N`, and a Hmong golden — an English loanword list — broke on `Batman los rau Joker`.
+Gold and Moby both mean the ARMY SERVANT, ˈbætmən; running text overwhelmingly means the SUPERHERO,
+ˈbætmæn. Two independent lexicons agreed and were both right about a lexeme that is not the one that
+appears in text.
+⚠ NO LEXICON TEST WOULD HAVE CAUGHT IT. I checked all 43 for words where gold carries both cases with
+different readings: none, `batman` included — gold has a single entry and it is the rarer sense. The
+goldens caught it because they are the only source here that reflects USAGE rather than lexicography.
+That is an argument for running them before believing an arbitration, not only before merging.
+Reverted; 42 stand.
+
+    Moby — words the dict carries   26,651/35,047 (76.0%) → 26,693/35,047 (76.2%)
+    Moby — OOV                      17,466/39,484 (44.2%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved — no regression
+    goldens 0 stale after the revert
+
+WHAT IS LEFT OF THE RESIDUAL, now that it has been measured rather than estimated: 2,560 rows differ
+in LENGTH (insertion or deletion of a phone), which is the syllabic-l class and its relatives and is
+the next thing to look at; 1,025 differ in more than one symbol; and the single-symbol remainder is
+one-off lexical work of the kind this run did 42 of. There is no large systematic class left in the
+in-dict tier — the count of distinct classes being within 2% of the count of rows is the measurement
+that says so.
+
+⚠ AND TEN OF THE 42 ARE LIVE SPLITS, which the curation gate caught and I had not anticipated. A
+curated row whose held-out OOV prediction equals the upstream shape means the engine answers one way
+for the listed word and another for an unlisted word in the same environment. Sources, read from
+`decompose().source` rather than guessed:
+
+    N (n-gram)   adman chessman navarre sputnik      -> STRUCTURAL_GAP, the train/ship gap
+    C (compound) dextran midland northland woodland  -> KNOWN_GAPS
+    M (morph)    fistful shellacking                 -> KNOWN_GAPS
+
+⚠ BEFORE WAIVING THE `-land` CLUSTER I CHECKED WHETHER IT SHOULD BE A RULE, because four of the ten
+sharing a second element is exactly the shape that should be one. It should not. Our dict reduces
+257 of 330 `-land` compounds and keeps 73 full; misaki gold on the same words splits 39 reduced
+against 46 full. The line is COMPOUND TRANSPARENCY — `farmland`, `grassland`, `dreamland`,
+`heartland` keep the full vowel, opaque place names `ashland`, `auckland`, `boland` reduce — and no
+spelling predicts which a word is. A converter rule would be wrong about half the time.
+
+⚠ AND THE EXISTING `lowland` WAIVER'S REASON WAS MADE STALE BY THIS RUN. It read "-land gives the
+full vowel it keeps in woodland but not here" — and `woodland` is one of the three I just corrected
+to the reduced vowel. The waiver was still CORRECT; its stated reason had quietly stopped being
+true. That is the failure mode the gate's own header warns about from the other direction ("a row
+JOINING it is a regression that must be argued for"), and it argues for re-reading the reason
+attached to any waiver a change touches, not just the list membership.

@@ -93,7 +93,21 @@ const KNOWN_GAPS = new Map<string, string>([
     ["cloths", "morph (source M): `cloth` + `s`; the /θ/ → /ðz/ plural allomorph is not in the suffix table"],
     ["wreaths", "morph (source M): `wreath` + `s`; same missing /θ/ → /ðz/ allomorph as truths and cloths"],
     ["loathing", "morph (source M): decodes through the ADJECTIVE `loath` (voiceless) rather than the verb `loathe`"],
-    ["lowland", "compound (source C): `low` + `land` gives -land the full vowel it keeps in woodland but not here"],
+    // ⚠ THIS NOTE USED TO CITE `woodland` AS A WORD WHERE -land KEEPS THE FULL VOWEL. It no longer does:
+    // #1369 corrected `woodland`, `midland` and `northland` to the reduced vowel on Moby+gold agreement, so
+    // all four `-land` rows now reduce and the compound path gives all four the full vowel from `land`.
+    // ⚠ AND `-land` IS NOT A RULE — MEASURED BEFORE WAIVING THESE. Our dict reduces 257 of 330 `-land`
+    // compounds and keeps 73 full; misaki gold, on the same words, splits 39 reduced against 46 full. The
+    // line it splits on is COMPOUND TRANSPARENCY — `farmland`, `grassland`, `dreamland`, `heartland` keep
+    // the full vowel, opaque place names `ashland`, `auckland`, `boland` reduce — and no spelling predicts
+    // which a word is. A converter rule would be wrong roughly half the time; the dictionary is right.
+    ["lowland", "compound (source C): `low` + `land` takes the full vowel from the free-standing `land`"],
+    ["midland", "compound (source C): same `-land` shape as lowland"],
+    ["northland", "compound (source C): same `-land` shape as lowland"],
+    ["woodland", "compound (source C): same `-land` shape as lowland"],
+    ["dextran", "compound (source C): decomposes to a free `-an` and takes its full vowel; the chemical suffix reduces"],
+    ["fistful", "morph (source M): `fist` + `ful`, and the allomorph reduces where gold and Moby both keep ʊ"],
+    ["shellacking", "morph (source M): `shellac` + `ing` keeps the stem's full ɛ; the derived form reduces it"],
     ["neolithic", "compound (source C): `neo` + `lithic` keeps neo's full OW and its own primary stress"],
     ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
 ]);
@@ -146,6 +160,11 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
+    // ⚠ FOUR ADDED BY THE #1369 SCHWA ARBITRATION, all source N and all the same shape as the rest of this
+    // list: the n-gram learned the upstream row, so it reproduces it by construction. `adman`/`chessman`
+    // are the `-man` second element, which gold itself splits (`adman` æ, `guardsman` ə) with no spelling
+    // to key on; `navarre` and `sputnik` are a loan and a proper noun with no morphological handle at all.
+    "adman", "chessman", "navarre", "sputnik",
     "abba", "acuff", "atman", "babka", "baile", "bellini", "benne", "bes", "boche", "bog", "bridie", "calabria",
     "cana", "casual", "chomp", "coauthor", "conger", "conversely", "convex", "cost", "cruelty", "cutoff", "dacron",
     "dagenham", "dal", "drachma", "duce", "dulce", "eamon", "eh", "embargo", "embark", "embrace", "embroidery",
