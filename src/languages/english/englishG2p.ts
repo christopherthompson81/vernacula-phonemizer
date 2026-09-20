@@ -410,15 +410,22 @@ export function createEnglishG2p(
          *     fore-stress always (as shipped)                 78.8%
          *     stem-stress always                              20.3%
          *     keyed on en-morph-boundary.tsv's `prefix` label  83.1%
-         *     this list                                        84.0%   ← +712 words
+         *     this list                                        84.0%   ← +710 words
          *
          * ⚠ THE LIST BEATS THE TABLE, which is why the table is not a runtime dependency. It also could
          * not be one: `tools/gen/en-morph-boundary.tsv` ships in neither package, and it cannot speak to
          * a word Wiktionary does not carry — which is most of what reaches an OOV path. The table found
          * the class; the list is how the engine expresses it, and it ports.
          */
+        // ⚠ THE STEM IS PIECE 1, NOT THE LAST PIECE, and those are the same thing only for a two-piece
+        // split — which every example above is, which is why `parts.length - 1` read as correct. On a
+        // three-piece split it put the primary on the final FRAGMENT, normally a suffix English never
+        // stresses: `dis|pos|able` came out D IH2 S P AA2 S EY1 B AH0 L and `inter|cept|or`
+        // IH2 N T ER2 S EH2 P T AO1 R. Measured over the 65 validated three-plus-piece splits with a
+        // stem-stress head: primary on the LAST piece 12, on the FIRST (the old policy) 13, on the
+        // SECOND 35. The bug was worth −1 against the rule it replaced, on that subpopulation.
         if (STEM_STRESS_PREFIX.has(full.head))
-            return full.parts.flatMap((p, idx) => (idx === full.parts.length - 1 ? p : stressDown(p)));
+            return full.parts.flatMap((p, idx) => (idx === 1 ? p : stressDown(p)));
         return full.parts.flatMap((p, idx) => (idx === 0 ? p : stressDown(p)));
     }
 

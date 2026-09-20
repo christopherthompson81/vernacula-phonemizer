@@ -284,3 +284,71 @@ agree with the first two about what to do.
 **Every one of the three bad runs was internally consistent and looked exactly like the good one.** The
 only thing that separated them was checking the harness against the thing it was modelling, which Run 1
 did, Run 2 stopped doing, and Runs 4–5 had to reinstate twice.
+
+## Run 6 — 2026-09-20 14:10 — review of #1384: the stem is piece 1, and the harness was 800× too slow
+
+### ⚠ THE STEM-STRESS BRANCH KEPT THE **LAST** PIECE'S PRIMARY, AND THE STEM IS THE **SECOND**
+
+`idx === full.parts.length - 1` is "the stem" only for a two-piece split — and every example in the
+comment written to justify it (`dis·AGREE`, `mis·LEAD`, `inter·CEPT`) is two-piece, which is exactly why
+it read as correct. On a three-piece split it put the primary on the final fragment:
+
+    disposable    D IH2 S P AA2 S EY1 B AH0 L      ← on `-able`
+    dispensary    D IH2 S P EH2 N Z EH1 R IY0      ← on `-ary`
+    interceptor   IH2 N T ER2 S EH2 P T AO1 R      ← on `-tor`
+
+English does not stress those suffixes under any analysis. Fixed to `idx === 1` in both twins and in the
+trainer's duplicate.
+
+⚠ **AND THE EVIDENCE FOR IT IS NOT WHERE THE HEADLINE IS MEASURED**, which is worth stating rather than
+quietly taking the win. Over the 13,661-word scored population — the one that requires the split's
+SEGMENTS to already match the dict row — there are only **4** three-plus-piece splits with a listed head,
+and on those `last` gets 3 and `stem` 1. The fix is a two-word *regression* there. Drop the segment
+filter and the subpopulation is 65, where it is `first` 12, `last` 12, **`stem` 34**.
+
+The two populations answer different questions. The segment-filtered one asks "given the engine got the
+phones right, does it get the stress right" — and a three-piece split usually gets the phones wrong, so
+it excludes almost all of them. The unfiltered one asks "where does the mark land", on words that are
+mispronounced either way. **`idx === 1` is taken on the second plus the linguistics**, and the first is
+recorded as not supporting it. Headline, unchanged to one decimal:
+
+    A  first piece keeps the primary (before)   10,764   78.8%
+    S  the list, primary on the STEM            11,474   84.0%    +710 words
+
+### ⚠ THE HARNESS TOOK FIFTY MINUTES AND IT SHOULD HAVE TAKEN FOUR SECONDS
+
+That is the finding with the longest reach, because **it is why the validation kept getting dropped** —
+Run 2 skipped it for speed and scored fabricated splits, and Run 4 had to reinstate it. The cost was
+never the work; it was two avoidable things:
+
+1. a fresh `createEnglishG2p` closure per word. The closure captures `dict` BY REFERENCE, so one closure
+   plus a delete/restore around each call holds the word out identically.
+2. **and that was the smaller half.** `decompose` falls through to the n-gram BEAM SEARCH for every word
+   the compound and morph paths miss — about 80,000 of the 110,000 — and a word the copy cannot split
+   cannot be scored either way, so asking the engine about it buys nothing. Calling `decompose` only
+   when there is a split to validate removes it.
+
+    50 minutes → 3.6 seconds, same numbers to the word.
+
+The first diagnosis (the closure) was the wrong one and the second (the beam search) was right; both are
+recorded because the wrong one is the plausible one. A measurement that takes an hour gets run once and
+trusted; one that takes four seconds gets re-run whenever the tree changes, which is the whole reason
+Runs 2–5 went wrong.
+
+### The other five review findings, all real
+
+- **the trainer's duplicate `compoundSplit` still fore-stressed unconditionally.** Its `--comp` held-out
+  accuracy is quoted as the engine's, and the file's own `morphDecode` comment forbids exactly this:
+  "scoring it through a DIFFERENT join makes the number unfalsifiable." Now reads the same manifest key.
+- **the gate comment claimed the change closed `hypertrophy`.** It did not — `hyper` is not in the list
+  and the word is still in `STRUCTURAL_GAP`, four lines below a comment saying it had closed. That list
+  was Run 2's, which Run 4 discredited.
+- **the same comment named `arch` among the prefixes the list "deliberately does not reach"**, three
+  lines after crediting `arch` with closing `archduke`.
+- **"TWENTY-EIGHT COMPOUND-PATH ROWS" where the block holds 29** — the stale count the file's own
+  STRUCTURAL_GAP note calls the one thing a measurement-comment may not do.
+- **the population-bias argument used to refuse `sub` applies to `inter`, `photo` and `electro` too.**
+  Answered in `english.jsonc` rather than waved away: it is real but BOUNDED, because those words are
+  dict rows and are in the measured population — `inter` still clears the floor at 76% over 141 rows
+  with `interface` and `internet` counted against it. What no dictionary-shaped population can supply is
+  the rate at which each class appears in real OOV text, and that limits every figure here.

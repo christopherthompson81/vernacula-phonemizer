@@ -129,20 +129,25 @@ const KNOWN_GAPS = new Map<string, string>([
     ["barbel", "compound (source C): `bar` + `bel` rebuilds the upstream EH2"],
     ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
 
-    // ⚠ TWENTY-EIGHT COMPOUND-PATH ROWS WITH ONE CAUSE, AND THE CAUSE HAS SINCE BEEN NARROWED, NOT FIXED.
+    // ⚠ TWENTY-NINE COMPOUND-PATH ROWS WITH ONE CAUSE, AND THE CAUSE HAS SINCE BEEN NARROWED, NOT FIXED.
     // `compoundSplit` used to end with `parts.flatMap((p, i) => (i === 0 ? p : stressDown(p)))` — every
     // piece but the first stressed down, UNCONDITIONALLY — so the path fore-stressed `over|come`,
     // `back|yard` and `con|volution` by construction. It now consults `stemStressPrefixes`, which is
-    // right on 84.0% of the 13,661 words the path decodes against 78.8% before, and that closed
-    // `miscue`, `neolithic`, `hypertrophy` and `psychosocial` off these lists.
-    // ⚠ `archduke` LEFT THIS LIST when `arch` cleared the floor on the validated measurement — the same
-    // row #1379 had to waive, closed by the rule rather than by a dictionary entry, which is the outcome
-    // the rule was for.
+    // right on 84.1% of the 13,661 words the path decodes against 78.8% before, and that closed
+    // `archduke`, `miscue`, `neolithic` and `psychosocial` off these lists.
+    // ⚠ `hypertrophy` IS NOT ONE OF THEM, and a first version of this comment said it was. `hyper`
+    // measures 56% and does not clear the list's floor, so `hypertrophy` is still in STRUCTURAL_GAP
+    // below — four lines from a comment that claimed it had closed.
+    // ⚠ `archduke` LEFT THIS LIST BY RULE rather than by a dictionary entry — the same row #1379 had to
+    // waive — which is the outcome the rule was for.
     // ⚠ THE ROWS BELOW ARE WHAT THE LIST DELIBERATELY DOES NOT REACH. `over`, `under`, `super`, `multi`,
-    // `poly` and `post` measure 49–60% for the stem — they carry their own stress and behave like the
-    // first element of a compound as often as not — and `back`, `head`, `home`, `mid`, `arch`, `ever`
-    // and `never` are compound first elements, where fore-stress is right 96% of the time. A coin flip
-    // does not belong in a rule, so these stay dictionary rows.
+    // `poly` and `post` measure around half for the stem — they carry their own stress and behave like
+    // the first element of a compound as often as not — and `back`, `head`, `home`, `mid`, `ever` and
+    // `never` are compound first elements, where fore-stress is right 96% of the time. A coin flip does
+    // not belong in a rule, so these stay dictionary rows.
+    // ⚠ `arch` IS NOT IN THAT SENTENCE ANY MORE. It IS in `stemStressPrefixes` (75%, n=12), which is
+    // exactly what closed `archduke`, and an earlier version of this comment listed it among the
+    // compound first elements the list does not reach — contradicting its own previous paragraph.
     ["backyard", "compound (source C): a compound first element, where fore-stress is right 96% of the time"],
     ["convolution", "compound (source C): a prefix the stem-stress list deliberately does not reach"],
     ["overcome", "compound (source C): a prefix the stem-stress list deliberately does not reach"],

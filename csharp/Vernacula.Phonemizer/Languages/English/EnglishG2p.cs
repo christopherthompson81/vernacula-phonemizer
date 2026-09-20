@@ -334,8 +334,10 @@ public static class EnglishG2pFactory
             // This was unconditional fore-stress. It now consults `stemStressPrefixes`, which is right on
             // 84.0% of the 13,661 words the path decodes against 78.8% before — see the TS twin's comment
             // and english.jsonc for the measurement and for why the list is not the morpheme-boundary table.
+            // The STEM is piece 1, not the last piece — see the TS twin. `Count - 1` is the same thing
+            // only for a two-piece split, and on a three-piece one it stressed the final fragment.
             if (STEM_STRESS_PREFIX.Contains(full.Head))
-                return full.Parts.SelectMany((p, idx) => idx == full.Parts.Count - 1 ? p : StressDown(p)).ToList();
+                return full.Parts.SelectMany((p, idx) => idx == 1 ? p : StressDown(p)).ToList();
             return full.Parts.SelectMany((p, idx) => idx == 0 ? p : StressDown(p)).ToList();
         }
 

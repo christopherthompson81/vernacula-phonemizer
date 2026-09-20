@@ -409,15 +409,20 @@ const STOP_PIECE = new Set([
     "per",
 ]);
 const stressDown = (ph: string[]): string[] => ph.map((p) => p.replace(/1$/, "2")); // primary→secondary
+// ⚠ THE SAME STRESS POLICY AS THE SHIPPED ENGINE, and read from the SAME manifest key rather than
+// re-listed here. The rule this file already states for `morphDecode` applies verbatim: this tool's
+// `--comp` word accuracy is quoted as the engine's, so scoring it through a DIFFERENT join makes the
+// number unfalsifiable — it could not move whatever the rule did. The duplicate splitter below sat on
+// unconditional fore-stress for one commit after the engine stopped doing it, which is exactly that.
+const STEM_STRESS_PREFIX = new Set(MANIFEST.g2pClasses.stemStressPrefixes);
 function compoundSplit(w: string): string[] | null {
     const n = w.length;
     // best[i] = split of w[0..i]. Objective (lexicographic): maximize the MINIMUM piece length (so
     // situationship → situation+ship, NOT situations+hip whose spurious plural-z leaks into the seam), then
     // maximize sum of piece-length² (favor few long pieces). Min-piece-length kills tiny junk fragments.
-    const best: ({ parts: string[][]; nparts: number; minLen: number; score: number } | null)[] = new Array(n + 1).fill(
-        null,
-    );
-    best[0] = { parts: [], nparts: 0, minLen: Infinity, score: 0 };
+    const best: ({ parts: string[][]; head: string; nparts: number; minLen: number; score: number } | null)[] =
+        new Array(n + 1).fill(null);
+    best[0] = { parts: [], head: "", nparts: 0, minLen: Infinity, score: 0 };
     for (let i = 0; i < n; i++) {
         if (!best[i]) continue;
         for (let j = i + MINPART; j <= n; j++) {
@@ -434,6 +439,7 @@ function compoundSplit(w: string): string[] | null {
             if (!phones) continue;
             const cand = {
                 parts: [...best[i]!.parts, phones],
+                head: i === 0 ? piece : best[i]!.head,
                 nparts: best[i]!.nparts + 1,
                 minLen: Math.min(best[i]!.minLen, j - i),
                 score: best[i]!.score + (j - i) * (j - i),
@@ -445,6 +451,10 @@ function compoundSplit(w: string): string[] | null {
     }
     const full = best[n];
     if (!full || full.nparts < 2) return null; // need a genuine ≥2-piece compound
+    // The STEM is piece 1, not the last piece — see englishG2p.ts for the measurement and for why the
+    // discriminator is a prefix list and not `tools/gen/en-morph-boundary.tsv`.
+    if (STEM_STRESS_PREFIX.has(full.head))
+        return full.parts.flatMap((p, idx) => (idx === 1 ? p : stressDown(p)));
     return full.parts.flatMap((p, idx) => (idx === 0 ? p : stressDown(p)));
 }
 

@@ -451,7 +451,7 @@
         //     fore-stress always (what shipped before)         78.8%
         //     stem-stress always                               20.3%
         //     keyed on en-morph-boundary.tsv's `prefix` label   83.1%
-        //     this list                                         84.0%    +712 words
+        //     this list                                         84.0%    +710 words
         //
         // ⚠ THE LIST BEATS THE TABLE #1360 BUILT FOR THIS CONSUMER, and could not have been the table
         // anyway: `tools/gen/en-morph-boundary.tsv` ships in neither package, and it cannot speak to a
@@ -477,6 +477,16 @@
         // on a "positive net" criterion and turned `subreddit` — pinned in `english.test.ts` since long
         // before this rule — into sʌbˈɹɛdɪt. The productive kind is exactly what reaches an OOV path,
         // which a dictionary-shaped population under-represents, so the floor is doing real work here.
+        //
+        // ⚠ THE DICTIONARY-POPULATION BIAS APPLIES TO THE WHOLE LIST, NOT ONLY TO `sub`, AND IT IS
+        // BOUNDED RATHER THAN ABSENT. Held out from the dict, this rule reads `interface`, `internet`,
+        // `photocopy`, `presale` and `antibody` as stem-stressed, and all of them are fore-stressed
+        // nouns. What saves the number is that those words ARE in the measured population — they are
+        // dict rows, held out one at a time — so the 74% floor has already priced them in, and `inter`
+        // still clears it at 76% over 141 rows. What no dictionary-shaped population can supply is the
+        // RATE at which each class turns up in real OOV text, and that is a real limit on every figure
+        // in this comment. `sub` is called out separately because it is the one entry where the split
+        // between the two classes is even enough to put it under the floor on its own.
         //
         // ⚠ AND THE STRESSED PREFIXES ARE ABSENT ON PRINCIPLE AND ON MEASUREMENT BOTH. `over`, `under`,
         // `super`, `multi`, `poly`, `post` and `pro` measure around half — they carry their own stress
