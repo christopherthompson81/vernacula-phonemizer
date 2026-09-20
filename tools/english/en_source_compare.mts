@@ -493,21 +493,34 @@ export function audit(dictPath: string, freqPath: string, goldPath: string, moby
         const a = mobyToArpabet(line.slice(sp + 1), w);
         if (a) (moby.get(w) ?? moby.set(w, []).get(w)!).push(a);
     }
-    const freq = readFileSync(freqPath, "utf8").split("\n").map((s) => s.trim()).filter((s) => s && !s.startsWith("#"));
+    // ⚠ THE FREQUENCY LIST IS A RANKING, NOT THE POPULATION, AND FOR FOUR BLOCKS IT WAS BOTH. This loop
+    // used to be `freq.forEach`, so the audit compared only the 40,004 words in `g2p-common.txt` and was
+    // BLIND to every triple-sourced word outside it. `determinedly` — gold `dətˈɜɹməndli`, Moby
+    // `d/I/'t/[@]/rm/I/ndl/i/`, and our own `determined` contradicting our row — was invisible to
+    // #1369, #1371, #1372 and #1373, every one of which searched for exactly that shape. The population
+    // is `dict ∩ gold ∩ moby`; the ranking is a separate thing and is looked up, not iterated.
+    const rank = new Map<string, number>();
+    readFileSync(freqPath, "utf8").split("\n").map((s) => s.trim())
+        .filter((s) => s && !s.startsWith("#")).forEach((w, i) => { if (!rank.has(w)) rank.set(w, i); });
     let compared = 0, agree = 0, split = 0;
     const candidates: Candidate[] = [];
-    freq.forEach((w, rank) => {
+    // ⚠ SORTED, so the output is stable across runs — `dict` is insertion-ordered off a file whose order
+    // is not guaranteed, and an unstable candidate list makes two audits impossible to diff.
+    for (const w of [...dict.keys()].sort()) {
         const ours = dict.get(w), g = goldOf(w), m = moby.get(w);
-        if (!ours || !g || !m || het.has(w)) return;
+        if (!ours || !g || !m || het.has(w)) continue;
         const ga = goldToArpabet(g);
-        if (!ga) return;
+        if (!ga) continue;
         compared++;
         const o = normalise(ours), gg = normalise(ga);
         const ms = m.map((p) => normalise(modernise(p)));
-        if (gg === o && ms.includes(o)) { agree++; return; }
-        if (gg !== o && ms.includes(gg)) { candidates.push({ rank, word: w, ours, agreed: ga }); return; }
+        if (gg === o && ms.includes(o)) { agree++; continue; }
+        // ⚠ `rank` IS -1 FOR A WORD OFF THE FREQUENCY LIST, not 0 and not omitted. 0 would sort it to the
+        // top as if it were the commonest word in English, and omitting it would hide exactly the rows
+        // this change exists to surface.
+        if (gg !== o && ms.includes(gg)) { candidates.push({ rank: rank.get(w) ?? -1, word: w, ours, agreed: ga }); continue; }
         split++;
-    });
+    }
     return { compared, agree, candidates, split };
 }
 
@@ -518,11 +531,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (!gold) throw new Error("set GOLD to a misaki us_gold.json path");
     const r = audit("data/languages/english/g2p-dict.tsv", "data/languages/english/g2p-common.txt", gold, moby);
     const pc = (n: number): string => `${((100 * n) / r.compared).toFixed(1)}%`;
-    console.log(`triple-sourced frequency words: ${r.compared}`);
+    console.log(`triple-sourced words (dict ∩ gold ∩ moby): ${r.compared}`);
     console.log(`  all three agree:                  ${r.agree} (${pc(r.agree)})`);
     console.log(`  gold AND Moby agree AGAINST us:   ${r.candidates.length} (${pc(r.candidates.length)})`);
     console.log(`  split / no majority:              ${r.split} (${pc(r.split)})`);
-    for (const [lab, lo, hi] of [["top 1k", 0, 1000], ["1k–5k", 1000, 5000], ["5k–20k", 5000, 20000], ["20k–40k", 20000, Infinity]] as const)
+    for (const [lab, lo, hi] of [["off-list", -1, 0], ["top 1k", 0, 1000], ["1k–5k", 1000, 5000], ["5k–20k", 5000, 20000], ["20k–40k", 20000, Infinity]] as const)
         console.log(`    ${lab.padEnd(9)} ${r.candidates.filter((c) => c.rank >= lo && c.rank < hi).length}`);
     for (const c of r.candidates.sort((a, b) => a.rank - b.rank))
         console.log(`${c.rank}\t${c.word}\t${c.ours.join(" ")}\t${c.agreed.join(" ")}`);

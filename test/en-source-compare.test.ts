@@ -6,7 +6,10 @@
  * tools/english/en_source_compare.mts — the frequency-ranked triple-source audit.
  */
 import { describe, expect, test } from "vitest";
-import { normalise, goldToArpabet, mobyToArpabet, modernise,
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { normalise, goldToArpabet, mobyToArpabet, modernise, audit,
     MOBY_DEFECTIVE, MOBY_DEFECTIVE_READING, MOBY_DEFECTIVE_READING_WHY } from "../tools/english/en_source_compare.mts";
 
 describe("the triple-source comparison form", () => {
@@ -136,5 +139,33 @@ describe("the source converters", () => {
         for (const [w, bodies] of MOBY_DEFECTIVE_READING)
             for (const body of bodies)
                 expect([w, (MOBY_DEFECTIVE_READING_WHY.get(`${w}\t${body}`) ?? "").length > 8]).toEqual([w, true]);
+    });
+
+    // ⚠ THE AUDIT'S POPULATION IS `dict ∩ gold ∩ moby`, NOT THE FREQUENCY LIST, and this test exists
+    // because it was the frequency list for four blocks. `audit()` used to iterate `g2p-common.txt`,
+    // so it compared 19,439 words instead of 46,062 and surfaced 258 candidates instead of 784 — it
+    // was blind to 526 rows where gold AND Moby agree against our dictionary, and #1369, #1371, #1372
+    // and #1373 each searched for exactly that shape without being able to see them.
+    // ⚠ THE BUG IS INVISIBLE FROM THE OUTPUT: a smaller population reports smaller counts and looks
+    // like a cleaner dictionary. Nothing in the numbers says rows are missing, which is why this is
+    // pinned on behaviour rather than left to the report.
+    test("the audit compares a triple-sourced word that is NOT in the frequency list", () => {
+        const dir = mkdtempSync(join(tmpdir(), "en-audit-"));
+        const f = (n: string, body: string): string => {
+            const p = join(dir, n); writeFileSync(p, body); return p;
+        };
+        // `onlist` is in the frequency file; `offlist` is not. Both are in all three sources, and on
+        // both our reading disagrees with the two that agree — so both are candidates, or neither is.
+        const dict = f("dict.tsv", "onlist\tK AE1 T\nofflist\tK AE1 T\n");
+        const freq = f("freq.txt", "onlist\n");
+        const gold = f("gold.json", JSON.stringify({ onlist: "kˈɑt", offlist: "kˈɑt" }));
+        const moby = f("moby.unc", "onlist k/A/t\rofflist k/A/t\r");
+        const r = audit(dict, freq, gold, moby);
+        expect(r.compared).toBe(2);
+        expect(r.candidates.map((c) => c.word).sort()).toEqual(["offlist", "onlist"]);
+        // ⚠ AND THE OFF-LIST ROW RANKS -1, not 0. Zero would sort it above every real word in the
+        // report, which is how an off-list row would get mistaken for the commonest word in English.
+        expect(r.candidates.find((c) => c.word === "offlist")!.rank).toBe(-1);
+        expect(r.candidates.find((c) => c.word === "onlist")!.rank).toBe(0);
     });
 });

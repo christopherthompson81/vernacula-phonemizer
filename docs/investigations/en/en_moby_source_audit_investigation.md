@@ -4386,3 +4386,56 @@ row and no syllabic slot, so we emit a full `ə` (`mˈoᶷt̬ɚsˌaᶦkəlɪŋ`)
 
     Moby — words the dict carries   26,728/35,027 (76.3%)  unmoved by Run 69's row
     rows corrected                  3 → 4
+
+## Run 70 — 2026-09-20 03:30
+
+Infrastructure, not lexicon. Run 69 diagnosed why four consecutive blocks shipped incomplete sweeps;
+this fixes it, and the size of what was hidden is larger than the diagnosis suggested.
+
+    MOBY=… GOLD=… npx tsx tools/english/en_source_compare.mts     (before and after)
+
+⚠ THE AUDIT WAS COMPARING 42% OF ITS POPULATION AND SEEING A THIRD OF ITS CANDIDATES.
+`audit()` ended in `freq.forEach(...)` — it iterated `g2p-common.txt`, the 40,004-word FREQUENCY
+LIST, and every triple-sourced word outside that list was invisible.
+
+    before   19,439 words compared   258 candidates
+    after    46,062 words compared   784 candidates
+
+526 rows where gold AND MOBY AGREE AGAINST OUR DICTIONARY had never been visible to the audit. Runs
+60, 64, 66 and 68 each searched for precisely that shape and could not see two thirds of it.
+
+⚠ THE BUG IS INVISIBLE FROM THE OUTPUT, which is why it survived. A smaller population reports
+smaller counts and a HIGHER agreement rate — 79.9% before against 81.4% after — so the report reads
+like a cleaner dictionary, not like a truncated search. Nothing in the numbers says rows are
+missing. That is the general shape worth remembering: a population bug does not look like an error,
+it looks like good news.
+
+⚠ THE FREQUENCY LIST IS A RANKING AND WAS BEING USED AS A POPULATION. Those are different jobs and
+the fix separates them: the loop is now over `dict ∩ gold ∩ moby` and the rank is LOOKED UP.
+A word off the list ranks `-1`, not 0 — zero would sort it above every real word in the report,
+which is how an off-list row would be mistaken for the commonest word in English.
+
+⚠ PINNED WITH A TEST, and mutation-checked. The test builds four tiny fixture files with one on-list
+and one off-list word, both triple-sourced and both disagreeing with us, and asserts BOTH are
+compared and the off-list one ranks -1. Reverting the loop to the frequency list fails it with
+`expected 1 to be 2`. Behaviour, not report — because the report is exactly what cannot see this.
+
+WHAT THE 526 CONTAIN, characterised for the next block rather than swept here — 784 rows is a
+lexical sweep of its own and deserves a separate review:
+
+    one phone, segment   209      abrade AE0 B R EY1 D → AH0 …, anhydride … R IH0 D → R AY2 D
+    two phones           142
+    length differs       124
+    three phones          42
+    four phones            9
+
+⚠ AND ONLY FIVE PARADIGM PAIRS SIT INSIDE THE SET (`deprave`/`depraved`, `wizen`/`wizened`,
+`creolize`/`creolized`, `ribald`/`ribaldry`, `phoenicia`/`phoenician`). That is the warning for
+whoever takes them: almost every one of the 526 has its inflections OUTSIDE the candidate list, so
+applying them straight from the audit output reproduces the half-applied-paradigm defect of #1369,
+#1371, #1372 and #1373 five hundred times over. The sweep has to be driven from the stem family —
+which is now possible, because the population is finally the dictionary.
+
+    Moby — words the dict carries   26,728/35,027 (76.3%)  unmoved — no dictionary row changed here
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
