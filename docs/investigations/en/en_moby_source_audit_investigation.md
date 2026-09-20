@@ -4500,3 +4500,65 @@ CONFIRMED BY THE REVIEW, and worth recording because they were the two things I 
 ONE HIDDEN DEPENDENCY RECORDED, harmless today: `audit()` reads the real
 `data/languages/english/english.jsonc` for its heteronym set even when run on fixtures, so a fixture
 word that ever collided with a declared heteronym would be silently skipped.
+
+## Run 72 — 2026-09-20 05:20
+
+The first sweep of the 784 candidates #1374 made visible. It is a REFUSAL of the bulk and 17 rows
+taken by hand, and the refusal is the finding.
+
+⚠ TWO-SOURCE AGREEMENT IS NECESSARY AND NOT SUFFICIENT, which is the `batman` lesson at five hundred
+times the scale. Sampling the 360 single-segment candidates shows a large fraction are TWO-FORM
+WORDS AND HOMOGRAPHS, not defects:
+
+    hoof    /huːf/ and /hʊf/ both standard        sloth   /sloʊθ/ and /slɔːθ/ both standard
+    capo    ˈkeɪpoʊ the clamp, ˈkɑːpoʊ the rank   lima    ˈliːmə Peru, ˈlaɪmə the bean
+    apricot ˈeɪ- and ˈæ- both standard            showroom /rum/ and /rʊm/ both standard
+    mercantile -taɪl and -tiːl both standard      debacle dɪ- and deɪ- both standard
+
+The audit's criterion cannot distinguish "CMUdict is wrong" from "CMUdict picked a different valid
+variant" or "this is a homograph". Applying the 360 would have shipped a wrong reading for every one
+of the above. THE 784 ARE A WORKLIST, NOT A PATCH.
+
+⚠ AND EVERY AUTOMATED FILTER I BUILT FAILED INSPECTION, which is worth recording because the obvious
+ones look reasonable until you read their output. The internal-corroboration test that carried #1371
+— does a morphological relative already have the target phone? — generated FALSE RELATIVES when
+allowed to truncate and re-suffix: `copra` from `cops`, `chary` from `charity` (unrelated
+etymologies), `cush` from `cushion`, `soldo` from `solder`. Restricting to strict suffixation of the
+whole word cut 62 to 34 and STILL admitted `and` from `andes`, `wilder` from `wilderness`, `hom`
+from `homes`, `shea` from `shealy`. There is no cheap test here; the rows need reading.
+
+TAKEN: 17 rows verified individually against gold, where our reading is not a standard variant —
+`barbel`, `confidant`, `cossack`, `doer D UW1 R` (no schwa at all), `hoodlum`, `injudicious`,
+`jejune`, `jocose`, `khaki` (GenAm is ˈkæki), `lech L EH1 K` (a /k/ for an affricate), `leman`,
+`licentious` (CH for SH), `magnate` (ˈmæɡnət for ˈmæɡneɪt), `nauseating` (ZH for Z), `privatize`
+(ˈprɪvətaɪz), `sunni`, `zircon`.
+⚠ ZERO PARADIGM ROWS WERE NEEDED, and that is not luck: the inflections already carried the correct
+phone, which is exactly why they were the corroborating evidence. Where the paradigm is the
+evidence, the paradigm is already consistent.
+
+⚠ I HARDCODED THREE PHONE INDICES BY EYE AND GOT THEM WRONG. `confidant`, `licentious` and `magnate`
+came out as `K AA1 N F AH0 AE2 AA2 N T`-shaped corruption. The audit already reports the differing
+position; counting phones by hand when the tool hands you the index is gratuitous. Caught by reading
+the printout before writing the file, not by a gate.
+
+⚠ AND I CREATED TWO DUPLICATE CURATED ROWS, breaking a rule this audit has known since its first
+block: no word may have two, because the `upstream` columns chain. `cossack` already carried
+`K AO1 S AH0 K → K AA1 S AH0 K` from the LOT/THOUGHT work and `jocose` `JH AO2 K OW1 Z → …OW1 S`
+from the -ose family. My rows took those OUTPUTS as their inputs. Folded into one row each, running
+true-upstream to final. The gate caught it; I did not.
+
+⚠ ONE GOLDEN MOVED AND WAS RE-RECORDED: `Sunni` inside a Tibetan sentence, `sˈuːni` → `sˈʊni`. Unlike
+Run 60's `batman`, this one is right — Merriam-Webster gives ˈsu̇-nē — so the golden was stale in the
+correct direction. Three live splits waived: `khaki` and `lech` source N, `barbel` source C (the
+compound path finds `bar` + `bel`, which is why the source was read rather than assumed).
+
+    Moby — words the dict carries   26,728/35,027 (76.3%) → 26,742/35,027 (76.3%)
+    Moby — OOV                      17,464/39,451 (44.3%)  unmoved
+    primary                         2,584/4,037 (64.0%)    unmoved
+
+WHAT REMAINS OF THE 784, and how it should be approached: 22 rows are mechanically rejectable and
+now are (18 source geminates where English has no phonemic geminate and we are right, 4 `NG G`/`N G`
+cosmetic equivalences, 2 `-ed` adjectives where both readings are standard — one, `worsted`, is an
+undeclared heteronym and worth its own row). The other ~740 need per-row reading. The productive
+filter is not automatable but it is describable: our reading is not a possible English pronunciation
+of that spelling, or our own inflections already contradict it.

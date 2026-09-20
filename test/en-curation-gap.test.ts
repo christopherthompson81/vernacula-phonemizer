@@ -123,6 +123,10 @@ const KNOWN_GAPS = new Map<string, string>([
     // distinction the correction turns on — en-GB carries `whitechurch waɪtt͡ʃɜːt͡ʃ` (transparent,
     // keeps the /t/) against a reduced `whitchurch`.
     ["whitchurch", "compound (source C): `whit` + `church` rebuilds the upstream T CH"],
+    // ⚠ SOURCE C ON A SIX-LETTER WORD, which is why the source was read rather than assumed: the
+    // compound path finds `bar` + `bel` and reassembles the upstream EH2. Gold `bˈɑɹbᵊl` and our own
+    // `barbels` both reduce it.
+    ["barbel", "compound (source C): `bar` + `bel` rebuilds the upstream EH2"],
     ["neolithic", "compound (source C): `neo` + `lithic` keeps neo's full OW and its own primary stress"],
     ["breeches", "morph (source M): `breech` + `es`; the garment is said britches, the stem is not"],
 ]);
@@ -175,6 +179,9 @@ const KNOWN_GAPS = new Map<string, string>([
  * the referee floors all move), so it is deliberately NOT bundled into a manual-correction PR.
  */
 const STRUCTURAL_GAP = new Set([
+    // ⚠ TWO ADDED BY THE #1375 AUDIT SWEEP, both source N: `khaki` (the n-gram learned CMUdict's
+    // ˈkɑki) and `lech` (a three-letter word with nothing to decode through).
+    "khaki", "lech",
     // ⚠ TWO ADDED BY THE #1372 SYNCOPE FIX, both source N. ⚠ AND MOST OF THAT BLOCK IS NOT HERE,
     // which is the useful half: `several` and `differently` were NOT live splits, because the OOV
     // path ALREADY predicted the corrected form — `differently` is source M and decodes through

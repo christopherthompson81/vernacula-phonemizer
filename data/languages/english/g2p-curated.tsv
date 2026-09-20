@@ -497,7 +497,7 @@ cos	K AO1 S	K AA1 S	LOT/THOUGHT: align AA/AO to gold's consistent system
 cosmetically	K AO2 Z M EH1 T IH0 K L IY0	K AA2 Z M EH1 T IH0 K L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
 cosmodrome	K AO1 Z M AH0 D R OW2 M	K AA1 Z M AH0 D R OW2 M	LOT/THOUGHT: align AA/AO to gold's consistent system
 cosmology	K AO0 Z M AO1 L AH0 JH IY0	K AA0 Z M AA1 L AH0 JH IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
-cossack	K AO1 S AH0 K	K AA1 S AH0 K	LOT/THOUGHT: align AA/AO to gold's consistent system
+cossack	K AO1 S AH0 K	K AA1 S AE2 K	LOT/THOUGHT: align AA/AO to gold's consistent system; AND the audit candidate AH0 → AE2 (gold kˈɑsˌæk, Moby, and our own `cossacks`) — folded into one row because two curated rows would chain their upstream columns
 cost	K AA1 S T	K AO1 S T	family consistency (#1334 review)
 costa	K AO1 S T AA0	K AA1 S T AH0	frequency audit: gold+Moby agree
 costly	K AA1 S T L IY0	K AO1 S T L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
@@ -1141,7 +1141,7 @@ jarrod	JH AE1 R AH0	JH EH1 R AH0	marry–merry merger
 jarryd	JH AE1 R IH0 D	JH EH1 R IH0 D	marry–merry merger
 jaryl	JH AE1 R AH0 L	JH EH1 R AH0 L	marry–merry merger
 jfk	JH IY1 EH2 F K EY1	JH EY1 EH2 F K EY1	letter-name
-jocose	JH AO2 K OW1 Z	JH AO2 K OW1 S	-ose adjective family (S); found by the Moby re-check
+jocose	JH AO2 K OW1 Z	JH OW0 K OW1 S	-ose adjective family (S), found by the Moby re-check; AND the audit candidate AO2 → OW0 (gold ʤOkˈOs, Moby, and our own `jocosely`/`jocoseness`) — folded into one row because two curated rows would chain
 jodhpur	JH AO1 D P ER0	JH AA1 D P ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 jonesboro	JH OW1 N Z B AH0 R OW0	JH OW1 N Z B ER2 OW0	gold + moby; family consistency
 joseph	JH OW1 S AH0 F	JH OW1 Z AH0 F	intervocalic/voiced-context S→Z (gold)
@@ -2350,3 +2350,18 @@ motorcyclist	M OW1 T ER0 S AY2 K AH0 L IH0 S T	M OW1 T ER0 S AY2 K L IH0 S T	an 
 motorcyclists	M OW1 T ER0 S AY2 K AH0 L IH0 S T S	M OW1 T ER0 S AY2 K L IH0 S T S	an intrusive schwa — paradigm: `motorcyclist`
 serenely	S ER0 IY1 N AH0 L IY0	S ER0 IY1 N L IY0	an intrusive schwa — `serene S ER0 IY1 N` + `-ly`; the extra AH0 makes it four syllables. Moby səɹinli and gold səɹˈinli agree
 determinedly	D AH0 T ER1 M AH0 N AH0 D L IY0	D AH0 T ER1 M AH0 N D L IY0	an intrusive schwa — our own `determined D IH0 T ER1 M AH0 N D` has no vowel there; gold dətˈɜɹməndli and Moby d/I/'t/[@]/rm/I/ndl/i/ agree. ⚠ MISSED BY THE FIRST SWEEP, which iterated g2p-common.txt rather than the dictionary
+barbel	B AA1 R B EH2 L	B AA1 R B AH0 L	audit candidate: gold and Moby agree against CMUdict (EH2 → AH0)
+confidant	K AA1 N F AH0 D AA2 N T	K AA1 N F AH0 D AE2 N T	audit candidate: gold and Moby agree against CMUdict (AA2 → AE2)
+doer	D UW1 R	D UW1 ER0	audit candidate: gold and Moby agree against CMUdict (R → ER0)
+hoodlum	HH UH1 D L AH0 M	HH UW1 D L AH0 M	audit candidate: gold and Moby agree against CMUdict (UH1 → UW1)
+injudicious	IH2 N JH AH2 D IH1 SH AH0 S	IH2 N JH UW0 D IH1 SH AH0 S	audit candidate: gold and Moby agree against CMUdict (AH2 → UW0)
+jejune	JH EH2 JH UW1 N	JH AH0 JH UW1 N	audit candidate: gold and Moby agree against CMUdict (EH2 → AH0)
+khaki	K AA1 K IY0	K AE1 K IY0	audit candidate: gold and Moby agree against CMUdict (AA1 → AE1)
+lech	L EH1 K	L EH1 CH	audit candidate: gold and Moby agree against CMUdict (K → CH)
+leman	L IY1 M AH0 N	L EH1 M AH0 N	audit candidate: gold and Moby agree against CMUdict (IY1 → EH1)
+licentious	L AY0 S EH1 N CH AH0 S	L AY0 S EH1 N SH AH0 S	audit candidate: gold and Moby agree against CMUdict (CH → SH)
+magnate	M AE1 G N AH0 T	M AE1 G N EY2 T	audit candidate: gold and Moby agree against CMUdict (AH0 → EY2)
+nauseating	N AO1 ZH IY0 EY2 T IH0 NG	N AO1 Z IY0 EY2 T IH0 NG	audit candidate: gold and Moby agree against CMUdict (ZH → Z)
+privatize	P R IH1 V AH0 T AY2 Z	P R AY1 V AH0 T AY2 Z	audit candidate: gold and Moby agree against CMUdict (IH1 → AY1)
+sunni	S UW1 N IY0	S UH1 N IY0	audit candidate: gold and Moby agree against CMUdict (UW1 → UH1)
+zircon	Z ER1 K AH0 N	Z ER1 K AA2 N	audit candidate: gold and Moby agree against CMUdict (AH0 → AA2)
