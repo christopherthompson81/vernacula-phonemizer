@@ -46,7 +46,10 @@ describe("reported misreadings", () => {
     test("IR reads as infrared, and only in that exact casing", () => {
         expect(phonemize("IR spectroscopy", "en")).toBe("ˌɪnfɹɚˈɛd spɛktɹˈɑːskəpi");
         expect(phonemize("UV and IR light", "en")).toBe("jˌuːvˈiː ənd ˌɪnfɹɚˈɛd lˈaᶦt");
-        expect(phonemize("Ir", "en")).toBe("ˈɪɹ"); // iridium's symbol, left alone
+        // ⚠ THE VALUE IS THE g2p'S INVENTION AND IT MOVES WITH THE MODEL. It was ˈɪɹ until #1400's
+        // retrain and is what it is now; neither is a reading of anything. What this line pins is that
+        // the word is LEFT ALONE — not expanded to "infrared" — which is the case-sensitivity claim.
+        expect(phonemize("Ir", "en")).toBe("ˈaᶦɚ"); // iridium's symbol, left alone
     });
 });
 
@@ -308,7 +311,11 @@ describe("a two-letter caps run glued to digits is a code, not a word", () => {
     // ⚠ TWO LETTERS ONLY. A longer glued run is where the real words live, and this is the case that
     // says so: widening it to any length turns COVID19 into "C O V I D nineteen".
     test("a longer glued run is still a word", () => {
-        expect(phonemize("COVID19", "en")).toBe("koᶷvˈiːd nˌaᶦntˈiːn");
+        // ⚠ THE WORD IS IN THE DICTIONARY NOW (#1400). It was not, so this line pinned whatever the OOV
+        // model invented, and a reported misreading pinned to a model's invention moves every retrain.
+        // CMUdict predates the word; gold has `kˈOvˌɪd`. The claim here — a longer glued run is a WORD,
+        // not letters — is unchanged.
+        expect(phonemize("COVID19", "en")).toBe("kʰˈoᶷvɪd nˌaᶦntˈiːn");
     });
 
     // The cases that already worked, pinned so the new rule is shown not to have disturbed them.

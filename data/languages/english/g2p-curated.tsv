@@ -3126,3 +3126,11 @@ incongruity	IH2 NG K AO0 NG R UW1 IH0 T IY0	IH2 NG K AO0 NG G R UW1 IH0 T IY0	th
 # first-stressed `hasid`.
 hasids	HH AH0 S IH1 D Z	HH AA1 S IH0 D Z	the plural of the corrected `hasid` (#1378 item 5)
 flummoxed	F L AH0 M AO1 K S T	F L AH1 M AH0 K S T	the participle of the corrected `flummox` (#1378 item 5)
+#
+# ⚠ A WORD CMUdict PREDATES, surfaced by #1400's retrain. `COVID` is not in CMUdict at all, so both OOV
+# models invent it — the shipped n-gram said koᶷvˈiːd and the retrained one kʰˈɑːvɪd, and neither is
+# what speakers say. gold has it (`kˈOvˌɪd`), and a dictionary row makes the reading independent of
+# whichever model is shipped, which is the point: a reported misreading pinned to a MODEL's invention is
+# pinned to something that moves every retrain.
+covid		K OW1 V IH0 D	CMUdict predates the word; gold has kˈOvˌɪd (#1400)
+

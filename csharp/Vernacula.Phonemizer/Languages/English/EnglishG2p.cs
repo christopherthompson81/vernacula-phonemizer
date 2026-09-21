@@ -432,7 +432,7 @@ public static class EnglishG2pFactory
             // A reading with no vowel nucleus is not a pronunciation — see the TS twin. `blt` came out
             // `B L T`. Nothing correct is at risk: every vowelless English word is a recorded interjection
             // and a recorded word never reaches the OOV path.
-            if (w.Length >= 3 && !HasNucleusIn(ng, VOWEL) && !IsElongation(w))
+            if (w.Length >= 2 && !HasNucleusIn(ng, VOWEL) && !IsElongation(w))
             {
                 // A trailing `s` on an initialism is the PLURAL, not the letter ESS — `blts` must agree
                 // with `blt's`, which the clitic strip reaches first.
