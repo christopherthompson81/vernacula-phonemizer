@@ -1,4 +1,4 @@
-# en — MOBY PRONUNCIATOR II, words this dictionary carries (35027 rows)
+# en — MOBY PRONUNCIATOR II, words this dictionary carries (35001 rows)
 # Derived from Project Gutenberg #3205 (Grady Ward), PUBLIC DOMAIN by grant from the author, Jan 2001.
 # Built by tools/gen/build-en-moby-referee.mts — see that file for what is folded and what is not,
 # and data/LICENSES/PROVENANCE.md §5.3 for provenance. Broad IPA; a row may carry SEVERAL readings,
@@ -602,7 +602,6 @@ aftereffect	æftɚɪfɛkt
 afterglow	æftɚɡloʊ
 afterimage	æftəɹɪmɪd͡ʒ
 afterlife	æftɚlaɪf
-aftermarket	æftəmɚkɪt
 aftermath	æftɚmæθ
 afternoon	æftɚnun
 afternoons	æftɚnunz
@@ -5676,7 +5675,6 @@ chain	t͡ʃeɪn
 chair	t͡ʃɛɹ
 chairman	t͡ʃɛɹmən
 chairmanship	t͡ʃɛɹmənʃɪp
-chairperson	t͡ʃɛpɚsən
 chairwoman	t͡ʃɛɹwʊmən
 chaise	ʃeɪz
 chalcedony	kælsɛdəni
@@ -7609,7 +7607,6 @@ countenance	kaʊntənəns
 counter	kaʊntɚ
 counteract	kaʊntəɹækt
 counterattack	kaʊntɚətæk
-countercharge	kaʊntət͡ʃɑɹd͡ʒ
 counterclaim	kaʊntɚkleɪm
 counterclockwise	kaʊntɚklɑkwaɪz
 counterespionage	kaʊntəɹɛspiənɑʒ
@@ -15615,7 +15612,6 @@ hind	haɪnd
 hinder	haɪndɚ
 hindi	hɪndi
 hindquarter	haɪndkwɔɹtɚ
-hindquarters	haɪndkwɔɹtəz
 hindrance	hɪndɹəns
 hindsight	haɪndsaɪt
 hindu	hɪndu
@@ -16251,7 +16247,6 @@ hyperborean	haɪpəbɔɹiən	haɪpɚbɔɹiən
 hypercritical	haɪpɚkɹɪtɪkəl
 hyperion	haɪpiɹiən
 hyperkinetic	haɪpɚkɪnɛtɪk
-hypermarket	haɪpəmɚkɪt
 hyperopia	haɪpəɹoʊpiə
 hyperplasia	haɪpɚpleɪʒə
 hypersensitive	haɪpɚsɛnsɪtɪv
@@ -17265,7 +17260,6 @@ interfere	ɪntɚfiɹ
 interference	ɪntɚfiɹəns
 interferometer	ɪntɚfəɹɑmɪtɚ
 interferon	ɪntɚfiɹɑn
-intergovernmental	ɪntɚɡʌvənmɛntəl
 intergroup	ɪntɚɡɹup
 interim	ɪntɚɪm
 interior	ɪntiɹiɚ
@@ -22561,7 +22555,6 @@ northeasterner	nɔɹθistɚnɚ
 northeastward	nɔɹθistwɚd
 norther	nɔɹðɚ
 northerly	nɔɹðɚli
-northern	nɔɹðən
 northerner	nɔɹðənɚ	nɔɹðɚnɚ
 northernmost	nɔɹðɚnmoʊst
 northland	nɔɹθlənd
@@ -23273,7 +23266,6 @@ outmoded	aʊtmoʊdɪd
 outnumber	aʊtnʌmbɚ
 outpace	aʊtpeɪs
 outpatient	aʊtpeɪʃənt
-outperform	aʊtpəfɔɹm
 outplacement	aʊtpleɪsmənt
 outpost	aʊtpoʊst
 outpour	aʊtpɔɹ
@@ -23328,11 +23320,9 @@ overbearing	oʊvɚbɛɹɪŋ
 overblown	oʊvɚbloʊn
 overboard	oʊvɚbɔɹd
 overbought	oʊvɚbɔt
-overburden	oʊvəbɚdən
 overbuy	oʊvɚbaɪ
 overcame	oʊvɚkeɪm
 overcast	oʊvɚkæst
-overcharge	oʊvət͡ʃɑɹd͡ʒ
 overcoat	oʊvɚkoʊt
 overcome	oʊvɚkʌm
 overconfident	oʊvɚkɑnfɪdənt
@@ -23365,19 +23355,16 @@ overlap	oʊvɚlæp
 overlay	oʊvɚleɪ
 overload	oʊvɚloʊd
 overlook	oʊvɚlʊk
-overlord	oʊvəlɔɹd
 overly	oʊvɚli
 overlying	oʊvɚlaɪɪŋ
 overmatch	oʊvɚmæt͡ʃ
 overnight	oʊvɚnaɪt
-overnighter	oʊvənaɪtɚ
 overoptimism	oʊvəɹɑptəmɪzəm
 overpass	oʊvɚpæs
 overpay	oʊvɚpeɪ
 overpayment	oʊvɚpeɪmənt
 overplay	oʊvɚpleɪ
 overpopulate	oʊvɚpɑpjəleɪt
-overpower	oʊvəpaʊɚ
 overpowering	oʊvɚpaʊɚɪŋ
 overran	oʊvɚɹæn
 overrate	oʊvɚɹeɪt
@@ -23648,7 +23635,6 @@ paperback	peɪpɚbɑk
 paperboard	peɪpɚbɔɹd
 paperboy	peɪpɚbɔɪ
 paperweight	peɪpɚweɪt
-paperwork	pʌɪpəwɚk
 papery	peɪpɚi
 papilloma	pæpəloʊmə
 paprika	pæpɹikə
@@ -25961,7 +25947,6 @@ quarry	kwɔɹi
 quart	kwɔɹt
 quarter	kwɔɹtɚ
 quarterback	kwɔɹtɚbæk
-quarterdeck	kwɔɹtədɛk
 quarterly	kwɔɹtɚli
 quartermaster	kwɔɹtɚmæstɚ
 quartet	kwɔɹtɛt
@@ -30045,7 +30030,6 @@ staphylococcus	stæfələkɑkəs
 staple	steɪpəl
 stapler	steɪplɚ
 star	stɑɹ
-starboard	stɑɹbəd
 starch	stɑɹt͡ʃ
 starchy	stɑɹt͡ʃi
 stardom	stɑɹdəm
@@ -30053,7 +30037,6 @@ stardust	stɑɹdəst
 stare	stɛɹ
 starfish	stɑɹfɪʃ
 stark	stɑɹk
-starkers	stɚkəz
 starlet	stɑɹlɪt
 starlight	stɑɹlaɪt
 starlike	stɑɹlaɪk
@@ -30744,7 +30727,6 @@ superb	sʊpɚb
 superbly	sʊpɚbli
 supercharge	supɚt͡ʃɑɹd͡ʒ
 supercilious	supɚsɪliəs
-supercomputer	supəkəmpjutɚ
 superconductor	supɚkʌndəktɚ
 supercool	supɚkul
 superfamily	supɚfæməli
@@ -30766,7 +30748,6 @@ supernova	supɚnoʊvə
 superpower	supɚpaʊɚ
 supersede	supɚsid
 supersonic	supɚsɑnɪk
-superstar	supəstɑɹ
 superstition	supɚstɪʃən
 superstitious	supɚstɪʃəs
 superstore	supəstɔɹ
@@ -30839,7 +30820,6 @@ surtax	sɚtæks
 surveillance	sɚveɪləns
 survey	sɚveɪ
 surveying	sɚveɪɪŋ
-surveyor	səveɪɚ
 survival	sɚvaɪvəl
 survive	sɚvaɪv
 survivor	sɚvaɪvɚ
@@ -31623,7 +31603,6 @@ thermal	θɚmæl
 thermocouple	θɚmoʊkʌpəl
 thermodynamic	θɚmoʊdaɪnæmɪk
 thermodynamics	θɚmoʊdaɪnæmɪks
-thermometer	θɚməmɛtɹɪk
 thermonuclear	θɚmoʊnukliɚ
 thermoplastic	θɚməplæstɪk
 thermos	θɚməs
@@ -32820,7 +32799,6 @@ underbrush	ʌndɚbɹʌʃ
 undercapitalize	ʌndɚkæpɪtəlaɪz
 undercarriage	ʌndɚkæɹɪd͡ʒ
 undercoat	ʌndɚkoʊt
-undercover	ʌndəkʌvɚ
 undercurrent	ʌndɚkɚənt
 undercut	ʌndɚkʌt
 underdeveloped	ʌndɚdɪvɛləpt
@@ -32828,7 +32806,6 @@ underdog	ʌndɚdɔɡ
 underemployed	ʌndɚimplɔɪd
 underestimate	ʌndəɹɛstəmeɪt
 underfoot	ʌndɚfʊt
-undergarment	ʌndəɡɑɹmənt
 undergo	ʌndɚɡoʊ
 undergrad	ʌndɚɡɹæd
 undergraduate	ʌndɚɡɹæd͡ʒuɪt
@@ -32854,7 +32831,6 @@ undersea	ʌndɚsi
 underseas	ʌndɚsiz
 undersecretary	ʌndəsɛkɹətɚi
 undersell	ʌndɚsɛl
-undershirt	ʌndəʃɚt
 underside	ʌndɚsaɪd
 undersized	ʌndɚsaɪzd
 underspin	ʌndɚspɪn
@@ -32877,7 +32853,6 @@ underwear	ʌndɚwɛɹ
 underweight	ʌndɚweɪt
 underwent	ʌndɚwɛnt
 underwood	ʌndɚwʊd
-underworld	ʌndəwɚld
 underwrite	ʌndɚɹaɪt
 underwrote	ʌndɚɹoʊt
 undeserved	ʌndɪzɚvd
@@ -33107,7 +33082,6 @@ unpalatable	ənpælətəbəl
 unparalleled	ənpæɹəlɛld
 unpatriotic	ʌnpætɹiɑtɪk
 unpaved	ənpeɪvd
-unperturbed	ʌnpətɚbd
 unplaced	ənpleɪst
 unplanned	ənplænd
 unpleasant	ənplɛzənt

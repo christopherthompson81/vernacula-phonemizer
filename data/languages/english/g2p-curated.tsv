@@ -1090,8 +1090,8 @@ inappropriately	IH2 N AH0 P R AA1 P R IY0 AH0 T L IY0	IH2 N AH0 P R OW1 P R IY0 
 inchon	IH1 N CH AO0 N	IH1 N CH AA0 N	LOT/THOUGHT: align AA/AO to gold's consistent system
 incognito	IH2 N K AO0 G N IY1 T OW0	IH2 N K AA0 G N IY1 T OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
 incomprehensible	IH2 NG K AA2 M P R AH0 HH EH1 N S IH0 B AH0 L	IH2 N K AA2 M P R AH0 HH EH1 N S AH0 B AH0 L	⟨in⟩ before /k/ is N in this dict (gold + moby)
-incongruous	IH2 NG K AO1 NG R UW0 AH0 S	IH2 NG K AA1 NG R UW0 AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system
-incongruously	IH2 NG K AO1 NG R UW0 AH0 S L IY0	IH2 NG K AA1 NG R UW0 AH0 S L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+incongruous	IH2 NG K AO1 NG R UW0 AH0 S	IH2 NG K AA1 NG G R UW0 AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system; and the /ɡ/ of ⟨ngr⟩ dropped, which our own `congruous` carries (#1378 item 5)
+incongruously	IH2 NG K AO1 NG R UW0 AH0 S L IY0	IH2 NG K AA1 NG G R UW0 AH0 S L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system; and the /ɡ/ of ⟨ngr⟩ dropped, which our own `congruously` carries (#1378 item 5)
 incorrigible	IH2 N K AA1 R AH0 JH AH0 B AH0 L	IH2 N K AO1 R AH0 JH AH0 B AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 incubation	IH2 NG K Y UW0 B EY1 SH AH0 N	IH2 N K Y AH0 B EY1 SH AH0 N	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
 incubator	IH1 NG K Y AH0 B EY2 T ER0	IH1 N K Y AH0 B EY2 T ER0	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
@@ -3059,4 +3059,70 @@ revivals	R IY0 V AY1 V AH0 L Z	R IH0 V AY1 V AH0 L Z	the de-/re-/pre- prefix vow
 # and `pretense` are TENSE in Moby and gold against espeak (2 of 3, left alone). "Make the family
 # consistent" is not a rule that survives contact with this data, which is the caution #1397 needs.
 pretension	P R IY0 T EH1 N SH AH0 N	P R IH0 T EH1 N SH AH0 N	the de-/re-/pre- prefix vowel: Moby + espeak against us; gold dissents (#1378)
-
+#
+# THE STRESS-AND-VOWEL BLOCK DEFERRED FROM #1369, taken in #1378 queue item 5. These are the rows where
+# gold differs from us in one segment PLUS a stress digit — deferred at the time because "a stress change
+# is a different kind of edit from a vowel-quality change and deserves its own arbitration". It now has
+# one: espeak-ng en-us as a third source, independent of CMUdict, Moby and Wiktionary.
+#
+# ⚠ THREE ARE REFUSED AND THE REASONS DIFFER.
+# `wahoo` — MOBY ITSELF CARRIES BOTH PLACEMENTS (`W AA1 HH UW0` and `W AA0 HH UW1`), which is the tell
+#   for free variation rather than a defect.
+# `mudra` — espeak agrees with US on the stress, and gold and Moby disagree with EACH OTHER on the final
+#   syllable's digit. No majority to apply.
+# `qatar` — ⚠ APPLIED AND THEN REVERTED, ON EVIDENCE THE GOLDENS PRODUCED. All three sources place the
+#   primary on the first syllable, so it went in — and `syl`'s golden went stale on the sentence
+#   "FIFA World Cup Qatar 2022", which is exactly the broadcast register where /kəˈtɑːr/ is current.
+#   The three sources agree on PLACEMENT and disagree with each other on the vowels (K AA1 T AA2 R,
+#   K AA1 T AA0 R, kˈæɾɑːɹ), which is weak evidence that they describe one settled reading. Both
+#   readings are real; this is the speaker-variation class, and the golden is the only thing in the
+#   repo that showed the word in running text rather than in citation form.
+# `parliamentarianism` — ⚠ OUR ROW IS RIGHT AND THE DICTIONARY ALREADY PROVES IT. `parliamentary` has
+#   `EH1` because the primary lands on `-men-`; `parliamentarian` has `AH0` because it lands on `-tar-`
+#   and `-men-` reduces. Our `-ism` row follows `parliamentarian`, which is the correct alternation, and
+#   espeak reduces it too. Applying gold's `EH2` would have broken a consistent internal pattern to match
+#   a referee — the `herbal` call from #1393 arriving in the stress axis.
+hasid	HH AH0 S IH1 D	HH AA1 S IH0 D	stress on the wrong syllable; gold + Moby + espeak all first-stressed (#1378 item 5)
+kenaf	K EH1 N AE0 F	K AH0 N AE1 F	stress on the wrong syllable; gold + Moby agree (espeak reads it by letter rules) (#1378 item 5)
+legroom	L AH0 G R UW1 M	L EH1 G R UW2 M	a compound stressed on its second element; all three sources first-stressed (#1378 item 5)
+monadnock	M AA2 N AE1 D N AA0 K	M AH0 N AE1 D N AA0 K	the unstressed first vowel; Moby's row exactly, and the primary placement was already right (#1378 item 5)
+orel	AO1 R AH0 L	AO0 R EH1 L	read as `oral`; gold + Moby agree on R EH1 L (#1378 item 5)
+picturesque	P IH1 K CH ER0 AH0 S K	P IH2 K CH ER0 EH1 S K	the primary was on the FIRST syllable; all three sources put it on `-esque` (#1378 item 5)
+primavera	P R IY0 M AA0 V EH1 R AH0	P R IY2 M AH0 V EH1 R AH0	the unstressed second vowel; all three sources reduce it (#1378 item 5)
+flummox	F L AH0 M AO1 K S	F L AH1 M AH0 K S	read fləˈmɔks; all three sources first-stressed with a reduced second vowel (#1378 item 5)
+sacramental	S AE1 K R AH0 M AH0 N T AH0 L	S AE2 K R AH0 M EH1 N T AH0 L	stressed on the wrong syllable; all three sources agree (#1378 item 5)
+reprobate	R EH1 P R AO0 B EY0 T	R EH1 P R AH0 B EY2 T	the unstressed second vowel and the final secondary; all three sources agree (#1378 item 5)
+unalloyed	AH0 N AE1 L OY2 D	AH2 N AH0 L OY1 D	inherits the NOUN `alloy`'s stress; it is built on the VERB əˈlɔɪ, so gold + Moby put the primary on `-loyed` (#1378 item 5)
+unalienable	AH0 N EY1 L IY0 EH2 N AH0 B AH0 L	AH0 N EY1 L IY0 AH0 N AH0 B AH0 L	a full vowel where all three sources reduce; Moby's row exactly (#1378 item 5)
+#
+# THE CONSERVATIVE YOD, #1378 queue item 5 — AND THE REFUSAL STANDS FOR 58 OF ITS 67 ROWS.
+# Moby is pre-merger and keeps a yod GenAm drops after a CORONAL (`attitudinal`, `avenue`, `latitude`,
+# `mildew`, `neptune`, `costume`, `maneuver`): we are right and the class was correctly refused once.
+# ⚠ BUT THE REFUSAL WAS RIGHT FOR ONE ENVIRONMENT AND WAS APPLIED AS A BLANKET. GenAm drops the yod
+# after a coronal and KEEPS it after a labial or velar — `cute`, `music`, `few`, `huge`. Splitting the
+# 67 rows by the preceding consonant gives 58 coronal (refused) and 9 non-coronal, and two of the nine
+# are a real defect in a /k/ environment where no variety drops the yod.
+# ⚠ THE OTHER SEVEN ARE PROPER NAMES OR LOANWORDS WHERE MOBY IS ALONE (`beaufort`, `buchen`, `buena`,
+# `fuhr`, `elihu`, `hugel`, `mulatto`) and are left. `beaufort` is a genuine homograph: Beaufort SC is
+# "BYOO-fɚt" and the Beaufort scale is "BOH-fɚt".
+# ⚠ AND THE FIRST VERSION OF THE INSTRUMENT MISSED THE ROWS THAT SPELL THE YOD WITH A REDUCED GOOSE.
+# It asked whether our row contains `Y UW`, so `evacuate IH0 V AE1 K Y AH0 EY2 T` and `granule
+# G R AE1 N Y AH0 L` read as yod-less. Test the PHONE, not one spelling of its context — the same
+# defect this log records for the schwa count in Run 70.
+# ⚠ THE `-uous` SCAN THEN SURFACED A SECOND FAMILY, which is not a yod at all: `incongruous` and
+# `incongruity` drop the /ɡ/ that our own `congruous` carries. `incongruous` already had a curated row
+# for its vowel, so it is AMENDED IN PLACE rather than given a second — the `conger` case from #1393.
+inconspicuous	IH2 NG K AA1 N S P IH0 K W AH0 S	IH2 NG K AH0 N S P IH1 K Y UW0 AH0 S	the ⟨cu⟩ yod dropped in a VELAR environment and the primary on `con-`; our own `conspicuous` is K AH0 N S P IH1 K Y UW0 AH0 S and gold + Moby + espeak agree (#1378 item 5)
+promiscuous	P R OW1 M IH0 S K W AH0 S	P R AH0 M IH1 S K Y UW0 AH0 S	the same: our own `promiscuity` keeps the yod, and all three sources put the primary on `-mis-` (#1378 item 5)
+incongruity	IH2 NG K AO0 NG R UW1 IH0 T IY0	IH2 NG K AO0 NG G R UW1 IH0 T IY0	the same missing /ɡ/ on the derived form (the vowel is left alone: the sources do not agree on it) (#1378 item 5)
+#
+# ⚠ AND THEIR PARADIGM SIBLINGS. A derived form with its own dict row does not inherit its lemma's
+# correction, which is the third time this has had to be said in one session — so this block was SWEPT
+# rather than read off a review's list, and the sweep had a hole of its own: it stripped the `s` of
+# `-ous`, which hid `incongruously` until the stem rule was fixed to leave that suffix alone.
+# `incongruously` already carried a LOT/THOUGHT row and is AMENDED IN PLACE, like `incongruous`.
+# ⚠ `hasidic` AND `hasidim` ARE NOT SIBLINGS IN THIS SENSE and are left: English shifts the stress in
+# `-ic` derivatives (`Arab`/`Arabic`), so their second-syllable primary is correct beside a
+# first-stressed `hasid`.
+hasids	HH AH0 S IH1 D Z	HH AA1 S IH0 D Z	the plural of the corrected `hasid` (#1378 item 5)
+flummoxed	F L AH0 M AO1 K S T	F L AH1 M AH0 K S T	the participle of the corrected `flummox` (#1378 item 5)

@@ -70,15 +70,37 @@ describe("the Moby referee corpora", () => {
             expect([w, lex.has(w), oov.has(w)]).toEqual([w, false, false]);
     });
 
-    // ⚠ AND WHAT IT STILL DOES NOT REACH, pinned so the limit is not rediscovered as a bug. The rule
-    // asks whether a reading holds a coda rhotic ANYWHERE, so a word Moby transcribes with a MIXED
-    // profile — one ⟨r⟩ dropped, another kept — survives all three rules: `undercover ʌndəkʌvɚ` keeps
-    // its final ɚ, `northern nɔɹðən` its first ɹ, `hindquarters haɪndkwɔɹtəz` likewise. These are still
-    // false disagreements; they need a POSITIONAL test, which nothing here can do because no alignment
-    // exists between the spelling's ⟨r⟩ and the reading's phones. Under-firing is the safe direction.
-    test("a mixed rhotic profile is not reached, and that limit is deliberate", () => {
-        expect(lex.get("undercover") ?? oov.get("undercover")).toBe("ʌndəkʌvɚ");
-        expect(lex.get("northern") ?? oov.get("northern")).toBe("nɔɹðən");
+    // ⚠ THE MIXED PROFILE, WHICH THIS TEST PINNED AS UNREACHABLE UNTIL #1378 ITEM 5. Rules 1–3 ask
+    // whether a reading holds a rhotic ANYWHERE, so a word Moby transcribes with one ⟨r⟩ dropped and
+    // another kept survived all of them. The old comment here said the class "needs a POSITIONAL test,
+    // which nothing here can do because no alignment exists between the spelling's ⟨r⟩ and the
+    // reading's phones" — and that was the wrong shape of answer. **It needs a COUNT, not an
+    // alignment**: two coda ⟨r⟩ in the spelling against one coda rhotic in the reading means one was
+    // dropped, and which one does not matter. 26 rows left the corpus.
+    test("a mixed rhotic profile is now reached", () => {
+        for (const w of ["undercover", "northern", "hindquarters", "starboard", "overcharge", "surveyor"])
+            expect([w, lex.has(w), oov.has(w)]).toEqual([w, false, false]);
+    });
+
+    // ⚠ AND THE COUNT ALONE OVER-FIRES, WHICH IS WHY IT IS GATED ON OUR OWN READING. `Worcester` is
+    // "Wooster" — its first ⟨r⟩ is silent in GenAm too, so our `W UH1 S T ER0` carries one coda rhotic
+    // for two spelled ⟨r⟩ and Moby agreeing with us is not RP. `catercorner` is "cati-corner" the same
+    // way. Both match the count and both must survive; this is the discriminator the file's French note
+    // already named, used for a second purpose.
+    test("a spelled r that is silent in GenAm too is not RP", () => {
+        // ⚠ BOTH CASES MUST BE IN THE *LEXICON* CORPUS. `catercorner` was here first and proved nothing:
+        // it lives in the OOV file, where `ourArpabet.get(w)` is `undefined` by construction and rule 4
+        // never fires at all — so that assertion passed with the discriminator deleted. A test of a gate
+        // has to be a row the gate can actually reach.
+        expect(lex.get("worcester")).toBe("wʊstɚ");
+        expect(lex.has("worcester")).toBe(true);
+    });
+
+    // ⚠ AND ONE ROW THE COUNT WOULD HAVE DROPPED FOR THE WRONG REASON. `thermometer`'s only Moby body
+    // spells THERMOMETRIC; dropping it as RP would be the right outcome on a false premise, and a later
+    // change to the rhotic rule would hand it back. Declared in MOBY_DEFECTIVE instead.
+    test("a displaced body is declared, not left to the rhotic count", () => {
+        expect([lex.has("thermometer"), oov.has("thermometer")]).toEqual([false, false]);
     });
 
     // ⚠ AND A SILENT ⟨w⟩ AFTER THE ⟨r⟩ IS NOT A CODA. `Berwick`, `Norwich` and `bladderwrack` spell
@@ -99,7 +121,8 @@ describe("the Moby referee corpora", () => {
     // ⚠ A ROW WHOSE BODY IS A DIFFERENT WORD CANNOT ARBITRATE ANYTHING, so MOBY_DEFECTIVE drops it from
     // both corpora. Pinned because the list is hand-curated and silence is how it would rot.
     test("defective rows reach neither corpus", () => {
-        for (const w of ["gorbachev", "carr", "pathology", "workbasket", "sleipnir", "monosaccharide"])
+        for (const w of ["gorbachev", "carr", "pathology", "workbasket", "sleipnir", "monosaccharide",
+            "thermometer"])
             expect([lex.has(w), oov.has(w)]).toEqual([false, false]);
     });
 

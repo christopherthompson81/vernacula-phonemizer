@@ -338,7 +338,9 @@ const WE_ARE_RHOTIC = /(?:^|\s)(?:R|ER[0-2]?)(?:\s|$)/u;
  * 50 marginal rows, every one a permanent false disagreement where the REFEREE was wrong.
  * ⚠ `undercover` AND `northern` ARE NOT IN THIS CLASS and an earlier draft of this comment listed
  * them first. They have a MIXED profile — `ʌndəkʌvɚ` keeps its final ɚ, `nɔɹðən` its first ɹ — so no
- * rule here reaches them and the test asserts they survive. See the note below.
+ * rule HERE reaches them. ⚠ RULE 4 BELOW NOW DOES, and this note used to end "the test asserts they
+ * survive", which stopped being true when that rule landed. Kept because the point stands for rules
+ * 1–3: none of them can see a profile that is partly rhotic.
  * ⚠ IT IS A PORT, NOT A NEW RULE. en.jsonc's third `excludeRows` entry has done this for the wikipron
  * referee since the audit that found `perchlorate` and `weatherproof`; the Moby builder reimplemented
  * the first two and stopped. The same divergence as the rhotic JOIN: two copies of one idea, one of
@@ -372,12 +374,60 @@ const CODA_R = /[aeiouy]r+(?![aeiouyrh])/u;
 /** ⟨rw⟩ in the spelling — a coda only if some reading actually has the /w/. See above. */
 const SILENT_W = /[aeiouy]r+w/u;
 /** A rhotic in CODA position: ɚ/ɝ, or ɹ/ɻ/r not followed by a vowel. */
-const CODA_RHOTIC = /[ɚɝ]|[ɹɻr](?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶːˑ])/u;
+/**
+ * ⚠ ONE SOURCE FOR THE VOWEL CLASS, BECAUSE HAND-COPYING IT DIVERGED. Rule 4's `/g` twin was written
+ * out a second time and silently lost `æ` and corrupted `ɞ` to a Latin capital `Ȟ` — so an `ɹ` before
+ * `æ` counted as a CODA rhotic, inflating the referee's count and keeping a genuinely RP row. Latent on
+ * today's data (zero rows move either way) and exactly the two-copies-of-one-fact defect this file's
+ * header warns about for the rhotic JOIN and the coda rule.
+ */
+const NOT_A_VOWEL = "(?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶːˑ])";
+const CODA_RHOTIC = new RegExp(`[ɚɝ]|[ɹɻr]${NOT_A_VOWEL}`, "u");
+/**
+ * ⚠ A FOURTH RULE, FOR THE MIXED PROFILE THE OTHER THREE CANNOT REACH. `undercover ʌndəkʌvɚ` drops the
+ * ⟨r⟩ of `under-` and keeps the final one; `northern nɔɹðən` the reverse; `hindquarters
+ * haɪndkwɔɹtəz` likewise. All three rules above ask whether a rhotic is PRESENT — anywhere, in the tail,
+ * or in a coda — so any surviving rhotic saves the row, and these stayed as permanent false disagreements.
+ *
+ * ⚠ THE LOG RECORDED THIS AS NEEDING "A POSITIONAL TEST, WHICH NOTHING HERE CAN DO BECAUSE NO ALIGNMENT
+ * EXISTS BETWEEN THE SPELLING'S ⟨r⟩ AND THE READING'S PHONES." It needs no alignment. It needs a COUNT:
+ * a spelling with two coda-eligible ⟨r⟩ whose reading carries one coda rhotic has dropped one, and
+ * which one does not matter.
+ *
+ * ⚠ AND THE COUNT ALONE OVER-FIRES, so it is gated on OUR OWN READING — the discriminator this file's
+ * French note already names. `Worcester` is "Wooster": its first ⟨r⟩ is silent in GenAm too, our
+ * `W UH1 S T ER0` carries one coda rhotic for two spelled ⟨r⟩, and Moby agreeing with us is not RP.
+ * Same for `catercorner`, which is "cati-corner". Where we are short too, the row stays.
+ * ⚠ IT THEREFORE DOES NOT RUN ON THE OOV CORPUS AT ALL, where there is no second opinion: 34 rows
+ * match the count there and none is dropped. Under-firing is the documented safe direction.
+ */
+const CODA_R_ALL = /[aeiouy]r+(?![aeiouyrh])/gu;
+const CODA_RHOTIC_ALL = new RegExp(`[ɚɝ]|[ɹɻr]${NOT_A_VOWEL}`, "gu");
+const countOf = (s: string, re: RegExp): number => (s.match(re) ?? []).length;
+/** Our coda rhotics in ARPABET: every `ER`, plus an `R` not followed by a vowel. */
+function ourCodaRhotics(arpabet: string): number {
+    const p = arpabet.split(" ");
+    let n = 0;
+    for (let i = 0; i < p.length; i++) {
+        const b = p[i]!.replace(/[0-2]$/u, "");
+        if (b === "ER") { n++; continue; }
+        if (b === "R" && !VOWELS.has((p[i + 1] ?? "").replace(/[0-2]$/u, ""))) n++;
+    }
+    return n;
+}
+function refereeDropsSomeRhotics(w: string, reads: string[]): boolean {
+    const want = countOf(w, CODA_R_ALL);
+    if (want < 2) return false;                       // one coda ⟨r⟩ is what rules 1–3 already cover
+    if (!reads.every((r) => countOf(r, CODA_RHOTIC_ALL) < want)) return false;
+    const mine = ourArpabet.get(w);
+    return mine !== undefined && ourCodaRhotics(mine) >= want;
+}
 const refereeIsNonRhotic = (w: string, reads: string[]): boolean =>
     (SPELLED_R.test(w) && reads.every((r) => !RHOTIC.test(r)))
     || (FINAL_R.test(w) && reads.every((r) => !RHOTIC.test([...r].slice(-3).join(""))))
     || (CODA_R.test(w) && !(SILENT_W.test(w) && reads.every((r) => !/w/u.test(r)))
-        && reads.every((r) => !CODA_RHOTIC.test(r)));
+        && reads.every((r) => !CODA_RHOTIC.test(r)))
+    || refereeDropsSomeRhotics(w, reads);
 /**
  * ⚠ A SPELLING TEST CANNOT TELL RP FROM A LOANWORD, WHICH THE FIRST DRAFT ASSUMED IT COULD. `-ier`
  * looked reliably French and admits `pliers` (ours `P L AY1 ER0 Z`, rhotic) and `messier` — where Moby
