@@ -54,6 +54,18 @@ const KNOWN_GAPS = new Map<string, string>([
     ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 44-to-64 on that class"],
     ["cham", "n-gram (source N): reads ⟨ch⟩ as /t͡ʃ/, which is right for the English word and wrong for this title; closes on a retrain"],
 
+    // ⚠ THREE FROM #1378 QUEUE ITEM 2, AND THEY ARE THE PUREST FORM OF THIS CLASS: the n-gram reproduces
+    // the upstream row PHONE FOR PHONE, because the model is trained on upstream CMUdict and these words
+    // were in its training data with exactly the shape the correction removes. Nothing is being generalised
+    // wrongly — it is being recalled. That is the `collaborative` shape #1341 closed by retraining.
+    // ⚠ AND IN ALL THREE THE DICTIONARY ALREADY CARRIES THE TARGET SHAPE ON A SIBLING, which is what makes
+    // these gaps rather than reasons to revert: `exhaust`, `exhibit`, `exhort` and `exhilarate` are all
+    // /ɪɡz/ (the /ks/ of `exhale` and `exhibition` belongs to the UNSTRESSED second syllable, a rule the
+    // model has no way to state), and `misogamy` is already M IH0 S AA1 G AH0 M IY0.
+    ["exhume", "n-gram (source N): recalls the upstream ⟨x⟩ = /ks/ + yod; our own exhaust/exhibit/exhort are /ɪɡz/; closes on a retrain"],
+    ["misogyny", "n-gram (source N): recalls the upstream row verbatim; our own `misogamy` already has /mɪˈsɑ/; closes on a retrain"],
+    ["misogynist", "n-gram (source N): recalls the upstream row verbatim; same class as `misogyny`; closes on a retrain"],
+
     // ⚠ TWO ROOTS, AND THEIR DERIVED FORMS ARE NOT HERE, which is the shape to notice: `haphazardly`
     // and `upholstered` close through morphDecode the moment their stems are corrected, because that
     // path looks the stem up in the SHIPPED dict. Only the roots the n-gram must spell from letters

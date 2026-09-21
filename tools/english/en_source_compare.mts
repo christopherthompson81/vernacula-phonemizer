@@ -476,6 +476,19 @@ const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => 
         i + 1 < t.length && bare(p) === bare(t[i + 1]!) && eq(t.slice(0, i).concat(t.slice(i + 1)), o))],
     // ⚠ `N G` AND `NG G` ARE THE SAME SOUND, two ARPABET spellings of [ŋɡ]. Neither is wrong.
     ["NG G / N G", (o, t) => ng(o) === ng(t)],
+    // ⚠ `N K` / `NG K` IS DELIBERATELY *NOT* HERE, AND IT WAS, FOR ONE REVIEW ROUND. English has no
+    // [nk] — an ⟨n⟩ before /k/ assimilates — and our own rows sit on both sides of the disagreement,
+    // which reads exactly like the `NG G / N G` notation pair above. It is not one.
+    // ⚠ THE DICT SPELLING IS AN INPUT TO A RULE, AND THE RULE DOES NOT ALWAYS FIRE. `en-nasal-seam.tsv`
+    // plus a transparent-prefix guard decide [n] against [ŋ] at OUTPUT time: `drinkable` is written
+    // `N K` and ships [ŋk], while `pancake`, `income` and 637 of the 953 `N [KG]` rows keep their [n].
+    // So for those 637 the spelling DOES decide the shipped nasal, and a predicate that folds the pair
+    // scores a real difference as free — in the one place that would ever surface it, since nothing else
+    // in the repo compares this axis against an outside source. A fold that deletes the axis it is
+    // asked about is a blind spot, not a rejection class.
+    // ⚠ WHAT IS TRUE IS THAT THE AUDIT CANNOT SETTLE THEM, which is a different claim and does not
+    // belong in this table: the verdict depends on machinery the audit cannot see. The eight rows it
+    // surfaces are adjudicated at the output layer in the investigation log instead.
     // ⚠ /iə/ AND /jə/ ARE THE SAME SYLLABLE COMPRESSED OR NOT. `julian` JH UW1 L IY0 AH0 N against
     // JH UW1 L Y AH0 N, and `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`,
     // `leniency`, `pannier`, `valonia` — 9 of the 691, and the alternation runs BOTH WAYS across them
