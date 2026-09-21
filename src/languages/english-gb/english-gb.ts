@@ -257,6 +257,79 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // probe is now the same expression, so a future reordering cannot silently un-widen it.
         if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
     }
+    /**
+     * ⚠ THE `-ary / -ery / -ory` WEAK VOWEL (#1380) — A RULE, NOT A WORD LIST, because the suffix is
+     * PRODUCTIVE. GenAm carries a secondary-stressed full vowel there (`secretary` sˈɛkɹətʰˌɛɹi,
+     * `category` kʰˈætəɡˌɔːɹi) and SSBE does not. An unseen `-ary` word takes the reduction too, which a
+     * lexicon by construction cannot do — putting this family in `en-gb-lexical.tsv` would be the
+     * `aluminium` mistake in the other direction.
+     *
+     * ⚠ THE PARENT IS NOT WRONG HERE, WHICH IS WHY THIS IS AN ACCENT RULE. The dictionary distinguishes
+     * `secretary` S EH1 K R AH0 T EH2 R IY0 from `accessory` AE0 K S EH1 S ER0 IY0, and BOTH are correct
+     * GenAm — the first genuinely has the full vowel and the second genuinely reduces. 262 of our 703
+     * `-ary/-ery/-ory` words already come out reduced for that reason. Nothing upstream needs changing.
+     *
+     * ⚠ REDUCED `əɹi`, NOT THE SYNCOPE `ɹi`, AND THAT IS A REGISTER CALL RATHER THAN A CORRECTNESS ONE.
+     * Over the 774 referee headwords spelled this way: 662 attest the reduced form (418 of them ONLY the
+     * reduced form) against 284 attesting the syncope and 40 attesting ONLY the syncope. Both are real
+     * SSBE — the referee lists `sɛkɹətəɹi` AND `sɛkɹətɹi` for 244 words — so the choice is which register
+     * this accent targets, and the reduced form is the one the corpus supports. The syncope would have
+     * been defensible on `en-gb-yod`'s "prefer the RP-diagnostic realisation whenever attested" policy;
+     * it is not taken because it is attested for barely a third of the class.
+     *
+     * ⚠ AND THE SECONDARY STRESS MARK IS DROPPED, WHICH NOTHING IN THIS REPO CAN VERIFY. The referee
+     * carries no stress marks at all and the eval's fold strips them, so no instrument here witnesses
+     * this either way. It is taken on the phonology — a reduced vowel does not carry a secondary stress —
+     * and recorded as unverifiable rather than asserted as measured.
+     *
+     * ⚠ THE TRIGGER IS THE SPELLING **AND** A NON-PRIMARY SUFFIX VOWEL. Spelling alone would reach words
+     * whose suffix vowel is the tonic — `canary` is kənˈɛɹi and `actuary` ˌækt͡ʃuːˈɛɹi — where the full
+     * vowel is correct and reducing it would delete the stressed nucleus. Phone shape alone would reach
+     * words not spelled with the suffix at all.
+     *
+     * ⚠ ~65 WORDS RESIST IT AND ARE LEFT WRONG ON PURPOSE: 40 attest only the syncope (`monastery`
+     * mɒnəstɹi) and 25 keep a full vowel (`amatory` æmətɔːɹi). Each is one segment out, and an exception
+     * table would be another generated artifact to keep fresh — which is what #1381, #1385 and #1388 were
+     * all about. The residue is documented, not patched.
+     */
+    // ⚠ TWO PASSES AND NOT ONE OPTIONAL MARK. `/ˌ?(ɛ|ɔː)ɹi$/` reads as "an optional secondary" and is
+    // not: the primary mark sits BEFORE the vowel too, so it matches `ˈɛɹi` with the group empty and
+    // reduced `canary` kənˈɛɹi to kənˈəɹi and `actuary` to ˌækt͡ʃuːˈəɹi — deleting the tonic nucleus.
+    // The first pass takes a secondary mark AND DROPS IT; the second takes an unmarked suffix vowel and
+    // is blocked by a lookbehind on either mark.
+    //
+    // ⚠ THE INFLECTIONS COME TOO, AND ANCHORING ON `$` ALONE LEFT THEM OUT. A rule sold on being
+    // PRODUCTIVE that stops at the lemma is not one: `ðə sˈɛkɹətʰəɹi ənd ðə sˈɛkɹətʰˌɛɹiz` said the
+    // singular one way and the plural the other in a single utterance, which is the `clerk`/`clerks`
+    // split #1385 treated as a blocker and #1390 tracks for the sets. The dictionary alone holds 53
+    // `-aries/-ories` rows with the full vowel (`categories`, `dictionaries`, `cemeteries`).
+    //
+    // ⚠ AND `-story` COMPOUNDS ARE EXCLUDED, because the spelling cannot otherwise tell a weak suffix
+    // from a compound whose final element is the free noun `story`: `understory` AH1 N D ER0 S T AO2 R
+    // IY0, `multistory`, and the OOV `backstory` all keep a full THOUGHT vowel in SSBE. This is NOT the
+    // documented residue — the residue is a bounded list of words the rule gets wrong, while this class
+    // reaches unseen coinages through the very productivity the rule is sold on.
+    // ⚠ EXCLUDING THE WHOLE `story$` SPELLING COSTS NOTHING: the only other members are `history`,
+    // `protohistory` and `celestory`, and the parent already reduces all three (`HH IH1 S T ER0 IY0`),
+    // so the rule was never firing on them.
+    // ⚠ AND THE CLITIC, which the first fix for the inflections still missed: `secretary's` reaches here
+    // with the apostrophe intact and its phones already end `ɹiz`, so only the SPELLING guard was
+    // blocking it — the singular and its possessive disagreed for one more round.
+    // ⚠ AND IT IS EXEMPT FOR A WORD THE LEXICAL TABLE OWNS, like every rule above it. No
+    // `en-gb-lexical.tsv` row is spelled this way today, so this is latent — but that file exists
+    // precisely to hand-write forms the rules get wrong, and the first such row would otherwise be
+    // silently rewritten by the rule it was added to override.
+    // ⚠ THE SET BLOCK RUNS BEFORE THIS AND THE BUILDER PROBES AFTER IT — see english-gb-ary.test.ts for
+    // why that divergence is left in place and guarded rather than reordered.
+    // ⚠ `\W?` RATHER THAN A LITERAL APOSTROPHE CLASS, AND THAT IS ABOUT TOOLING, NOT MATCHING.
+    // `tools/extract_regexes.mts` scrapes pattern literals out of `src/` for the C# `JsRegex` harness,
+    // and its scraper mangles any pattern containing a literal `'` inside a character class — six
+    // patterns across hebrew, dutch, english, madurese and karakalpak are already dropped as
+    // "unparseable" for that reason, and `['’]` here made it seven. A dropped pattern is one the
+    // translator harness never replays, which is the one thing that file's header says must not happen.
+    if (lexical === undefined && /(ar|er|or)(y|ies)\W?s?$/u.test(w) && !/story\W?s?$/u.test(w)) {
+        s = s.replace(/ˌ(?:ɛ|ɔː)(ɹiz?)$/u, "ə$1").replace(/(?<![ˈˌ])(?:ɛ|ɔː)(ɹiz?)$/u, "ə$1");
+    }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
         .replace(IGLIDE_R, "ᶦə") // any ᶦ-glide + coda r: FACE, PRICE and CHOICE (ayr, fire, choir)

@@ -117,6 +117,13 @@ public static class EnglishGb
     private static readonly JsRe LETTER_PREVOCALIC = JsRegex.Compile($"ɚ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
     private static readonly JsRe LETTER = JsRegex.Compile("ɚ", "gu");
     private static readonly JsRe LOT = JsRegex.Compile("ɑː(?!ɹ)", "gu");
+    // `\W?` rather than a literal apostrophe class — see the TS twin: the regex-corpus extractor drops
+    // any pattern with a literal ' inside a character class, and a dropped pattern is one this engine's
+    // JsRegex translator is never tested against.
+    private static readonly JsRe ARY_SPELLED = JsRegex.Compile(@"(ar|er|or)(y|ies)\W?s?$", "u");
+    private static readonly JsRe ARY_STORY = JsRegex.Compile(@"story\W?s?$", "u");
+    private static readonly JsRe ARY_SECONDARY = JsRegex.Compile("ˌ(?:ɛ|ɔː)(ɹiz?)$", "u");
+    private static readonly JsRe ARY_UNMARKED = JsRegex.Compile("(?<![ˈˌ])(?:ɛ|ɔː)(ɹiz?)$", "u");
     // ⚠ FIRST-OCCURRENCE ONLY — no "g" flag. See the note at the call sites.
     private static readonly JsRe BATH_FIRST = JsRegex.Compile("æ", "u");
     private static readonly JsRe CLOTH_FIRST = JsRegex.Compile("ɔː", "u");
@@ -181,6 +188,19 @@ public static class EnglishGb
             // matching only ɑːɹ left the rule silently failing on over half its own list.
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
 
+        }
+        // ⚠ THE -ary/-ery/-ory WEAK VOWEL (#1380) — a RULE, not a word list, because the suffix is
+        // productive. GenAm carries a secondary-stressed full vowel there and SSBE does not. See the TS
+        // twin for the measurement (662 of 774 referee headwords attest the reduced form) and for why the
+        // secondary mark is dropped although nothing in this repo can verify that.
+        // ⚠ TWO PASSES AND NOT ONE OPTIONAL MARK: the PRIMARY mark also sits before the vowel, so
+        // `ˌ?(ɛ|ɔː)ɹi$` matches `ˈɛɹi` with the group empty and reduces the tonic away (`canary`).
+        // ⚠ Exempt for a table-owned word, like every rule above it; inflections and the clitic come too
+        // (`secretaries`, `secretary's`), and `-story` compounds are excluded — see the TS twin.
+        if (!owned && ARY_SPELLED.IsMatch(w) && !ARY_STORY.IsMatch(w))
+        {
+            s = ARY_SECONDARY.Replace(s, "ə$1");
+            s = ARY_UNMARKED.Replace(s, "ə$1");
         }
         // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
         s = IGLIDE_R.Replace(s, "ᶦə");  // any ᶦ-glide + coda r: FACE, PRICE, CHOICE (ayr, fire, choir)
