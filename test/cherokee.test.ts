@@ -226,7 +226,7 @@ describe("Cherokee text normalization", () => {
     test("REFUSED: km² passes through while its figure is still de-grouped", () => {
         expect(normalizeCherokee("ᏂᎬᎢ 243,610 km².")).toBe("ᏂᎬᎢ 243610 km².");
         expect(phonemize("ᏂᎬᎢ 243,610 km².", "chr"))
-            .toBe("nikə̃i tʰaliskohit͡sikʷa nə̃kisko t͡soi ijakajə̃li sutaliskohit͡sikʷa skohi kʰˈʌm skwˈɛɹd ."); // `km` through the English n-gram: *kʰˈʌm* since #1260 (was *ˈʊkm*) — a leak either way, which is the point
+            .toBe("nikə̃i tʰaliskohit͡sikʷa nə̃kisko t͡soi ijakajə̃li sutaliskohit͡sikʷa skohi kʰˌeᶦˈɛm skwˈɛɹd ."); // `km` through the English n-gram — a leak either way, which is the point. ⚠ *kʰˈʌm* since #1260; since #1400 the retrained model decodes `km` with NO nucleus, and the unsayable-output net spells it out rather than emitting bare letters
     });
 
     // REFUSAL. THE COLON IS NEVER A CLOCK HERE, ×31 and zero `\d:\d` — it introduces a list or a quotation

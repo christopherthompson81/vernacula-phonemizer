@@ -574,7 +574,7 @@ export function createEnglishG2p(
             };
         const n = enforceSinglePrimary(collapseGeminates(ngramDecode(w), VOWEL), VOWEL);
         // The unsayable-output net — see the comment above `decomposeInner`.
-        if (w.length >= 3 && !hasNucleus(n) && !isElongation(w)) {
+        if (w.length >= 2 && !hasNucleus(n) && !isElongation(w)) {
             // ⚠ A TRAILING `s` ON AN INITIALISM IS THE PLURAL, NOT THE LETTER ESS. `blts` was
             // "bee-ell-tee-ESS" while `blt's` — which the clitic strip reaches first — was correctly
             // "bee-ell-tees". The same word with and without an apostrophe must not disagree.

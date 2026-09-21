@@ -35,68 +35,56 @@ const KNOWN_GAPS = new Map<string, string>([
     // far past this word. Cheap to fix, not obviously right to fix.
     ["was", "morph (source M): `wa` + allomorph Z reconstructs the upstream W AA1 Z; see comment above"],
 
-    // ⚠ `-ative` AGAIN, AND IT IS THE CLASS #1341's RETRAIN WAS NAMED FOR. `collaborative` sat here for
-    // exactly this — the n-gram tier reads the suffix off the `-ate` verb and keeps its FACE vowel — and
-    // left when the model was retrained on the curated dict. It is back for a different word because the
-    // model has not been retrained since, so the shape `-ciative` was never in its training data with the
-    // reduced vowel. Source N confirmed by holding the word out and reading `decompose().source`. The
-    // remedy is the same retrain, not a rule: there is no spelling that says whether `-ative` reduces.
-    ["appreciative", "n-gram (source N): predicts the upstream EY2 from the `-ate` stem; the `-ative` reduction is lexical and closes on a retrain"],
+    // ⚠ THE MODEL WAS RETRAINED ON THE CORRECTED DICTIONARY IN #1400, AND THIS LIST IS WHAT SURVIVED.
+    // 70 gaps closed, 16 opened, live gaps 253 → 199 — source N 170 → 116, with M and C unchanged at 26
+    // and 57, which is the correct signature: those two tiers decode through the DICTIONARY, so only the
+    // n-gram can move when only the model changes.
+    //
+    // ⚠ AND FIVE ROWS PROMISED "CLOSES ON A RETRAIN" AND DID NOT CLOSE. That claim was written four
+    // separate times in this file, inherited from #1341's `collaborative`, and it was never testable
+    // until the retrain ran. `gaea`, `mainz`, `piazza` and `cham` want a LOANWORD spelling rule
+    // (⟨g⟩ = /d͡ʒ/, ⟨z⟩/⟨zz⟩ = /ts/, ⟨ch⟩ = /k/) that the dictionary has no majority for — the
+    // Italian `-zz-` class splits 41 to 67 — so there is nothing for the model to generalise FROM, no
+    // matter what it trains on. `destabilize` is the same: its family is four words against a
+    // dictionary-wide pattern that runs the other way. A retrain absorbs a row whose shape is ALREADY
+    // THE MAJORITY somewhere in the training data; it cannot invent one.
+    ["gaea", "n-gram (source N): reads ⟨g⟩ before a front vowel as /ɡ/; NOT closed by #1400's retrain — needs a loanword rule"],
+    ["mainz", "n-gram (source N): reads German ⟨z⟩ as /z/ and ⟨ai⟩ as FACE; NOT closed by #1400's retrain"],
+    ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 41-to-67 on that class, so there is no majority to learn"],
+    ["cham", "n-gram (source N): reads ⟨ch⟩ as /t͡ʃ/, right for the English word and wrong for this title; NOT closed by #1400's retrain"],
+    ["destabilize", "n-gram (source N): the `de-` prefix vowel; its family is four words against a dictionary-wide pattern running the other way, so the retrain did not reach it"],
 
-    // ⚠ THREE LOANWORD SPELLINGS THE n-GRAM READS AS ENGLISH, and they are here rather than fixed
-    // because the fix is not available to a rule. `gaea` wants ⟨g⟩ = /d͡ʒ/ before a front vowel,
-    // `mainz` and `piazza` want ⟨z⟩/⟨zz⟩ = /ts/ — and the dictionary itself splits 41 to 67 on the
-    // Italian `-zz-` class (`intermezzo` already has `T S`), so there is no majority for the model to
-    // have learnt and nothing to key a rule on. The model has also not been retrained since these
-    // corrections landed; a retrain absorbs them for free, as #1341 did for `collaborative`.
-    ["gaea", "n-gram (source N): reads ⟨g⟩ before a front vowel as /ɡ/; closes on a retrain"],
-    ["mainz", "n-gram (source N): reads German ⟨z⟩ as /z/ and ⟨ai⟩ as FACE; closes on a retrain"],
-    ["piazza", "n-gram (source N): reads Italian ⟨zz⟩ as /z/; the dict itself is 44-to-64 on that class"],
-    ["cham", "n-gram (source N): reads ⟨ch⟩ as /t͡ʃ/, which is right for the English word and wrong for this title; closes on a retrain"],
+    // ⚠ SIXTEEN ROWS THE RETRAIN OPENED, and they are the cost side of a 70-for-16 trade. The model now
+    // trains on the CORRECTED dictionary, so it generalises from corrected classes — and for these
+    // sixteen that generalisation lands on the shape the curated row removed. Every one is source N.
+    // ⚠ THEY ARE NOT THE SAME KIND OF ROW AS THE ONES ABOVE. A gap above is the model RECALLING an
+    // upstream row it memorised; these are the model GENERALISING from a class, and arriving at the
+    // upstream answer by a different route. Reverting any of them would put back a reading three
+    // outside sources disagree with, to satisfy a model that is now better on 70 other words.
+    ["brothel", "n-gram (source N): generalises ⟨o⟩ to LOT; opened by #1400's retrain"],
+    ["carcinogenic", "n-gram (source N): opened by #1400's retrain"],
+    ["clio", "n-gram (source N): opened by #1400's retrain"],
+    ["enhance", "n-gram (source N): opened by #1400's retrain"],
+    ["favela", "n-gram (source N): opened by #1400's retrain"],
+    ["foggy", "n-gram (source N): generalises ⟨o⟩ to LOT; opened by #1400's retrain"],
+    ["hoss", "n-gram (source N): opened by #1400's retrain"],
+    ["lorain", "n-gram (source N): opened by #1400's retrain"],
+    ["pretzel", "n-gram (source N): opened by #1400's retrain"],
+    ["saas", "n-gram (source N): opened by #1400's retrain"],
+    ["serologist", "n-gram (source N): opened by #1400's retrain"],
+    ["soprano", "n-gram (source N): opened by #1400's retrain"],
+    ["stich", "n-gram (source N): opened by #1400's retrain"],
+    ["stipend", "n-gram (source N): opened by #1400's retrain"],
+    ["unwanted", "n-gram (source N): opened by #1400's retrain"],
+    // ⚠ `ya` IS THE ONE THIS LOG ALREADY NAMED. #1369 recorded `ya Y AA1 → Y AH0` as "the only edit
+    // that strips a word's sole primary stress"; the model predicts the stressed form from two letters.
+    ["ya", "n-gram (source N): predicts Y AA1, the sole-primary row #1369 flagged; opened by #1400's retrain"],
 
-    // ⚠ THREE FROM #1378 QUEUE ITEM 2, AND THEY ARE THE PUREST FORM OF THIS CLASS: the n-gram reproduces
-    // the upstream row PHONE FOR PHONE, because the model is trained on upstream CMUdict and these words
-    // were in its training data with exactly the shape the correction removes. Nothing is being generalised
-    // wrongly — it is being recalled. That is the `collaborative` shape #1341 closed by retraining.
-    // ⚠ AND IN ALL THREE THE DICTIONARY ALREADY CARRIES THE TARGET SHAPE ON A SIBLING, which is what makes
-    // these gaps rather than reasons to revert: `exhaust`, `exhibit`, `exhort` and `exhilarate` are all
-    // /ɪɡz/ (the /ks/ of `exhale` and `exhibition` belongs to the UNSTRESSED second syllable, a rule the
-    // model has no way to state), and `misogamy` is already M IH0 S AA1 G AH0 M IY0.
-    ["exhume", "n-gram (source N): recalls the upstream ⟨x⟩ = /ks/ + yod; our own exhaust/exhibit/exhort are /ɪɡz/; closes on a retrain"],
-    ["misogyny", "n-gram (source N): recalls the upstream row verbatim; our own `misogamy` already has /mɪˈsɑ/; closes on a retrain"],
-    ["misogynist", "n-gram (source N): recalls the upstream row verbatim; same class as `misogyny`; closes on a retrain"],
-
-    // ⚠ SEVEN FROM #1378 QUEUE ITEM 4, AND THEY ARE THE SAME SHAPE AT SCALE: the `de-`/`re-`/`pre-`
-    // prefix vowel. The model is trained on UPSTREAM CMUdict, which is split inside its own paradigms on
-    // exactly this axis (`retrieve` R IH0 beside `retriever` R IY0), so the n-gram has learnt the
-    // inconsistency and recalls whichever spelling the upstream row happened to carry.
-    // ⚠ FIVE OF THE SEVEN HAVE THE TARGET ON AN UNCORRECTED SIBLING, which is what makes those gaps
-    // rather than reasons to revert: `repulsion`/`repulsive` are IH0 like the corrected `repulse`,
-    // `desensitized`/`desensitizing` are IY0 like the corrected `desensitize`. A retrain absorbs them.
-    // ⚠ `redoubt` AND `redoubtable` ARE THE EXCEPTION AND THE FIRST VERSION OF THIS NOTE CLAIMED THEM
-    // TOO. They are the ONLY two `redoub*` rows in the dictionary, both were corrected here, and both
-    // are listed below — so neither has an uncorrected sibling carrying the target, and their case
-    // rests on the three outside sources alone rather than on any internal evidence.
-    ["desensitize", "n-gram (source N): recalls the upstream IH0; the corrected family is IY0; closes on a retrain"],
-    ["destabilize", "n-gram (source N): recalls the upstream IH0; the corrected family is IY0; closes on a retrain"],
-    ["redoubt", "n-gram (source N): recalls the upstream IY0; the corrected family is IH0; closes on a retrain"],
-    ["redoubtable", "n-gram (source N): recalls the upstream IY0; same family as `redoubt`; closes on a retrain"],
-    ["repudiate", "n-gram (source N): recalls the upstream IY0; our own `repudiation` is IH0; closes on a retrain"],
-    ["repulse", "n-gram (source N): recalls the upstream IY0; our own `repulsion`/`repulsive` are IH0; closes on a retrain"],
-    ["revile", "n-gram (source N): recalls the upstream IY0; closes on a retrain"],
-
-    // ⚠ ONE FROM #1378 QUEUE ITEM 5, the same shape a third time: the n-gram recalls the upstream row
-    // verbatim, because the model trains on upstream CMUdict and `hasid` was in its training data with
-    // the stress on the second syllable. gold, Moby and espeak all put it on the first.
-    ["hasid", "n-gram (source N): recalls the upstream HH AH0 S IH1 D; closes on a retrain"],
-
-    // ⚠ TWO ROOTS, AND THEIR DERIVED FORMS ARE NOT HERE, which is the shape to notice: `haphazardly`
-    // and `upholstered` close through morphDecode the moment their stems are corrected, because that
-    // path looks the stem up in the SHIPPED dict. Only the roots the n-gram must spell from letters
-    // stay open, and it has no way to know that ⟨ph⟩ spans a seam in `up·holstery` but not in
-    // `morphology`. A retrain closes both.
-    ["upholstery", "n-gram (source N): reads ⟨ph⟩ across the up|holstery seam as /f/-less /p/; closes on a retrain"],
-    ["upholster", "n-gram (source N): as `upholstery`"],
+    // ⚠ `upholstery` AND `upholster` WERE HERE AND ARE GONE, which is this list working as designed.
+    // They read ⟨ph⟩ across the up·holstery seam as a /f/-less /p/, the note said "a retrain closes
+    // both", and #1400's retrain closed both. They are removed rather than left behind to mask the next
+    // row — the rule the `waiver may not rot` assertion below enforces, and the assertion is what
+    // caught them.
 
     // ⚠ THE COMPOUND-SEAM GEMINATE, and the remedy for these five was MEASURED AND REJECTED — do not
     // "fix" it by turning off `collapseGeminates` on the compositional paths. The dict geminates a
@@ -267,6 +255,15 @@ const KNOWN_GAPS = new Map<string, string>([
  * There is no phonological discriminator: it tracks how far the prefix has assimilated, which is lexis. A
  * converter rule would be wrong 43% of the time, so the dictionary is the right mechanism.
  *
+ * ⚠ AND TAKEN A SECOND TIME IN #1400, because 2,000 more corrections had landed since. Live gaps
+ * 253 → 199; THIS SET 173 → 116, with 57 rows closing. Source N 170 → 116; M and C unchanged at 26 and
+ * 57, the same signature as last time. 16 rows OPENED, listed individually in KNOWN_GAPS — a retrained
+ * model generalises from the corrected classes, and for those sixteen the generalisation lands on the
+ * shape the correction removed. A 70-for-16 trade on the n-gram tier.
+ * ⚠ AND FIVE ROWS THAT PROMISED "CLOSES ON A RETRAIN" DID NOT CLOSE. See KNOWN_GAPS: `gaea`, `mainz`,
+ * `piazza`, `cham` and `destabilize` need a majority in the training data that does not exist. The claim
+ * had been written four times in this file and was never testable until the retrain ran.
+ *
  * ⚠ THE REMEDY WAS TAKEN, AND THIS IS WHAT IT BOUGHT (#1341). The model now trains on the CURATED dict —
  * `en_g2p_ngram.ts` is given a CMUdict-format re-emission of `g2p-dict.tsv` instead of upstream — and the
  * set collapsed from 346 to 115, with 213 rows closing. Held-out exact went 48.90% → 49.43%, the whole gain
@@ -299,51 +296,57 @@ const STRUCTURAL_GAP = new Set([
     // answer is source M: `salami` + `-s`, which is right for every word that is not the Greek island —
     // and running text means the plural. Waiving the gap was the wrong remedy; the sieve had simply
     // caught a homograph, the same way it caught `tours`.
-    "basle", "showa", "waal",
+    // ⚠ AND `basle` IS GONE TOO, CLOSED BY #1400's RETRAIN — which is worth noticing, because the
+    // paragraph above calls it orthography "no rule can reach". No RULE can; a model trained on the
+    // corrected dictionary evidently can. `waal` and `showa` did not close.
+    "showa", "waal",
     // ⚠ TWENTY-FOUR ADDED BY THE STRESS BLOCK, all source N, and they are the class this list is a measure of:
     // the model learned CMUdict's placement for exactly these words, so held out it reproduces it. They
     // have no morphological handle the corrected dict could propagate through — `impasse`, `inverse`,
-    // `dictator`, `foment` and `truncation` are roots or opaque derivations — and there is no spelling that says
-    // which syllable an English word stresses, so no rule is available either. A retrain on the curated
-    // dict closes all 24, the same way #1341's closed 213.
-    "dictator", "foment", "immolation", "impasse", "inborn", "inbred",
-    "infiltrate", "inverse", "outbid", "outclass", "outflank", "outguess",
-    "outgun", "outlast", "outpace", "outsource", "outweigh", "outwit",
-    "roughshod", "slovene", "syncopation", "truncation", "twofold", "unbolt",
-    // ⚠ TWO ADDED BY THE #1375 AUDIT SWEEP, both source N: `khaki` (the n-gram learned CMUdict's
-    // ˈkɑki) and `lech` (a three-letter word with nothing to decode through).
-    "khaki", "lech",
-    // ⚠ TWO ADDED BY THE #1372 SYNCOPE FIX, both source N. ⚠ AND MOST OF THAT BLOCK IS NOT HERE,
+    // `dictator` and `truncation` are roots or opaque derivations — and there is no spelling that says
+    // which syllable an English word stresses, so no rule is available either.
+    // ⚠ "A RETRAIN ON THE CURATED DICT CLOSES ALL 24" IS WHAT THIS BLOCK USED TO SAY, AND #1400's
+    // RETRAIN DISPROVED IT: 18 closed and SIX did not — the six still listed below. `foment` is among
+    // the closed ones, so the prose example list above is also one word out of date and is corrected.
+    // The same correction is recorded for five KNOWN_GAPS rows; this is the bulk half of it. A retrain
+    // absorbs a row whose shape is already the majority somewhere in the training data, and stress
+    // placement on an opaque root has no such majority — which is why these six are the residue.
+    "dictator", "impasse", "inbred",
+    "inverse",
+    "truncation", "unbolt",
+    // ⚠ ONE OF THE TWO ADDED BY THE #1375 AUDIT SWEEP: `khaki`, where the n-gram learned CMUdict's
+    // ˈkɑki. `lech` was the other and closed on #1400's retrain.
+    "khaki",
+    // ⚠ ONE OF THE TWO ADDED BY THE #1372 SYNCOPE FIX (`indifferent` closed on #1400's retrain). ⚠ AND MOST OF THAT BLOCK IS NOT HERE,
     // which is the useful half: `several` and `differently` were NOT live splits, because the OOV
     // path ALREADY predicted the corrected form — `differently` is source M and decodes through
     // `different`, whose row already carried the schwa. The dictionary row was the outlier against
     // our own morphology, not just against the two external sources.
-    "elbe", "indifferent",
-    // ⚠ TWO ADDED BY THE #1371 ⟨tch⟩ FIX, both source N: the n-gram learned the upstream `B L AA1 T CH`
-    // and reproduces it. ⚠ THE OTHER FIVE `blotch` ROWS ARE NOT HERE, but only TWO were
-    // ever open: `blotched` and `blotching` predicted the upstream shape before the fix and closed
-    // through the corrected stem, which is the behaviour this list's header describes. `blotches`,
-    // `blotchier` and `blotchiest` never matched upstream at all, for schwa and vowel reasons
-    // unrelated to the T. An earlier draft said all five closed themselves; three were never open.
-    "blotch", "blotchy",
+    "elbe",
+    // ⚠ THE #1371 ⟨tch⟩ FIX HAD TWO ROWS HERE — `blotch` and `blotchy` — AND #1400's RETRAIN CLOSED
+    // BOTH, so this block now heads nothing and is kept only for what it records: of the seven `blotch`
+    // rows, only those two were ever open. `blotched` and `blotching` closed through the corrected stem
+    // when the fix landed; `blotches`, `blotchier` and `blotchiest` never matched upstream at all, for
+    // schwa and vowel reasons unrelated to the T.
     // ⚠ FOUR ADDED BY THE #1369 SCHWA ARBITRATION, all source N and all the same shape as the rest of this
     // list: the n-gram learned the upstream row, so it reproduces it by construction. `adman`/`chessman`
     // are the `-man` second element, which gold itself splits (`adman` æ, `guardsman` ə) with no spelling
-    // to key on; `navarre` and `sputnik` are a loan and a proper noun with no morphological handle at all.
-    "adman", "chessman", "navarre", "sputnik",
-    "abba", "acuff", "atman", "babka", "baile", "bellini", "benne", "bes", "boche", "bog", "bridie", "calabria",
-    "cana", "casual", "chomp", "coauthor", "conger", "conversely", "convex", "cost", "cruelty", "cutoff", "dacron",
-    "dagenham", "dal", "drachma", "duce", "dulce", "eamon", "eh", "embargo", "embark", "embrace", "embroidery",
-    "encode", "encompass", "endorse", "endow", "enjoyment", "enliven", "enmesh", "envisage", "envision", "escudo",
-    "esse", "evolve", "excoriate", "extort", "extortion", "extortionate", "extortionist", "fie", "finland",
+    // to key on; `sputnik` is a proper noun with no morphological handle at all. ⚠ `navarre` was the
+    // fourth and closed on #1400's retrain, so THREE of the four remain.
+    "adman", "chessman", "sputnik",
+    "acuff", "atman", "baile", "bellini", "bes", "boche", "bog", "bridie", "calabria",
+    "cana", "casual", "conger", "conversely", "convex", "cost", "cruelty", "cutoff", "dacron",
+    "dagenham", "dal", "drachma", "duce", "dulce", "eamon", "eh", "embargo", "embark", "embrace",
+    "encode", "encompass", "endorse", "endow", "enjoyment", "enliven", "enmesh", "envision",
+    "esse", "evolve", "fie", "finland",
     "forensic", "foster", "frog", "gala", "galloway", "genotype", "golf", "graben", "grana", "granum", "hadrian",
-    "hamm", "harring", "heifer", "hog", "homs", "hulme", "hypertrophy", "ideal", "insular", "joseph", "kana",
-    "kanji", "kersey", "kinda", "kingsport", "knockoff", "lachlan", "lough", "masochist", "mende", "mezzo",
-    "minke", "monarchy", "mulligatawny", "myre", "nerine", "olde", "on", "onset", "pedicure", "poor", "pravda",
-    "quahog", "rahway", "repression", "repressive", "repulsive", "retention", "reunite", "revolve", "riel",
-    "runoff", "sandhog", "sauternes", "schedule", "selene", "semi", "smyre", "soave", "sodom", "sodomize",
-    "soffit", "spawn", "splenic", "stanch", "stasi", "stomp", "strata", "stratus", "suggestive", "swanky", "thyme",
-    "turnoff", "ulm", "unencumbered", "unreal", "vela", "wank", "wat", "watchdog", "williamsport", "zaftig"
+    "hamm", "harring", "heifer", "homs", "hulme", "hypertrophy", "joseph", "kana",
+    "kanji", "kersey", "kinda", "kingsport", "knockoff", "lachlan", "lough", "mende",
+    "minke", "monarchy", "nerine", "olde", "on", "onset", "poor", "pravda",
+    "quahog", "rahway", "reunite", "revolve", "riel",
+    "runoff", "sandhog", "sauternes", "selene", "semi", "soave", "sodomize",
+    "soffit", "splenic", "stanch", "stasi", "strata", "stratus",
+    "turnoff", "ulm", "unencumbered", "unreal", "vela", "wank", "wat", "watchdog", "williamsport", "zaftig",
 ]);
 
 function dict(path: string): Map<string, string[]> {

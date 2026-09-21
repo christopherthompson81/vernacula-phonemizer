@@ -44,7 +44,9 @@ public class EnglishReportedMisreadingsTests
     [Theory]
     [InlineData("IR spectroscopy", "ˌɪnfɹɚˈɛd spɛktɹˈɑːskəpi")]
     [InlineData("UV and IR light", "jˌuːvˈiː ənd ˌɪnfɹɚˈɛd lˈaᶦt")]
-    [InlineData("Ir", "ˈɪɹ")]
+    // ⚠ The g2p's invention, and it moves with the model — see the TS twin. What is pinned
+    // is that the word is LEFT ALONE rather than expanded to "infrared".
+    [InlineData("Ir", "ˈaᶦɚ")]
     public void IrReadsAsInfraredAndOnlyInThatExactCasing(string text, string ipa)
         => Assert.Equal(ipa, Say(text));
 
@@ -139,7 +141,8 @@ public class EnglishReportedMisreadingsTests
     [InlineData("H2SO4", "ˈeᶦt͡ʃ tʰˈuː ˈɛs ˈoᶷ fˈɔːɹ")]
     [InlineData("AS400", "ˈeᶦ ˈɛs fˈɔːɹ hˈʌndɹəd")]
     // ⚠ TWO LETTERS ONLY — widening this turns COVID19 into "C O V I D nineteen".
-    [InlineData("COVID19", "koᶷvˈiːd nˌaᶦntˈiːn")]
+    // ⚠ The word is in the DICTIONARY now (#1400); this line used to pin a model invention.
+    [InlineData("COVID19", "kʰˈoᶷvɪd nˌaᶦntˈiːn")]
     // …and the ones that were already right, pinned as undisturbed.
     [InlineData("CH₄", "sˈiː ˈeᶦt͡ʃ fˈɔːɹ")]
     [InlineData("MP3", "ˈɛm pʰˈiː θɹˈiː")]
