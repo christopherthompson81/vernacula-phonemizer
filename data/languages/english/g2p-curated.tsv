@@ -2909,7 +2909,7 @@ gesundheit	G AH0 Z UH1 N D HH AY0 T	G AH0 Z UH1 N T HH AY2 T	the ⟨dh⟩ seam: 
 holdfast	HH OW1 L F AE2 S T	HH OW1 L D F AE2 S T	the /d/ dropped at the compound seam (triple-source + espeak, #1378)
 homage	AA1 M AH0 JH	HH AA1 M IH0 JH	h-less; unlike `herb` there is no h-less paradigm here to keep consistent (triple-source + espeak, #1378)
 hotshot	HH AA1 SH AA2 T	HH AA1 T SH AA2 T	the /t/ dropped at the compound seam — ⟨t⟩+⟨sh⟩ read as one /ʃ/ (triple-source + espeak, #1378)
-idiosyncrasy	IH2 D IY0 OW0 S IH1 N K R AH0 S IY2	IH2 D IY0 AH0 S IH1 NG K R AH0 S IY0	⟨io⟩ as /oʊ/ rather than schwa (triple-source + espeak, #1378)
+idiosyncrasy	IH2 D IY0 OW0 S IH1 N K R AH0 S IY2	IH2 D IY0 AH0 S IH1 N K R AH0 S IY0	⟨io⟩ as /oʊ/ rather than schwa — the VOWEL only: the agreed row also writes NG K, and this row is pinned in test/en-nasal-seam.test.ts as a NEGATIVE case (the dict writes N, the rule must supply the [ŋ]); spelling it NG here would make that assertion pass without exercising the rule (triple-source + espeak, #1378)
 indefeasible	IH2 D AH0 F IY1 Z AH0 B AH0 L	IH2 N D AH0 F IY1 Z AH0 B AH0 L	the /n/ dropped (triple-source + espeak, #1378)
 indicia	IH2 N D IH1 S Y AH0	IH0 N D IH1 SH IY0 AH0	⟨ci⟩ uncoalesced (triple-source + espeak, #1378)
 indivisible	IH2 N D IH0 V IH1 S IH0 B AH0 L	IH2 N D AH0 V IH1 Z AH0 B AH0 L	⟨s⟩ unvoiced; our own `divisible` has /z/ (triple-source + espeak, #1378)
@@ -2940,3 +2940,32 @@ ukase	Y UW1 K EY2 Z	Y UW0 K EY1 S	⟨se⟩ voiced (triple-source + espeak, #1378
 vaccinia	V AH0 CH IY1 N IY0 AH0	V AE0 K S IH1 N IY0 AH0	⟨cc⟩ as /tʃ/ — the /ks/ of `vaccine` is lost (triple-source + espeak, #1378)
 willowy	W IH1 L AH0 W IY0	W IH1 L OW0 IY0	⟨ow⟩ reduced to schwa plus an epenthetic /w/ (triple-source + espeak, #1378)
 windswept	W IH1 N S W EH2 P T	W IH1 N D S W EH2 P T	the /d/ dropped at the compound seam (triple-source + espeak, #1378)
+#
+# ⚠ AND THEIR DERIVED FORMS, WHICH DO NOT COME FOR FREE. Curation propagates through `morphDecode`
+# only for a word that has NO dict row of its own — that path looks the stem up in the shipped dict. A
+# derived form CMUdict lists separately keeps the defect, and the result is the split this block's own
+# `herbal` refusal was argued on: `misogynist` saying /məˈsɑdʒənɪst/ beside `misogynists` still saying
+# /mɪˈzædʒ.../, `homage` gaining its /h/ while `homages` stays h-less.
+# ⚠ SWEPT MECHANICALLY OVER ALL 62 LEMMAS rather than read off the list of the ones a reviewer spotted:
+# the sweep found `idiosyncrasies`, `outshining` and `reunified` as well, and it is the only way to know
+# the set is closed. `resounding` is here on a different footing — it does not carry `resound`'s upstream
+# row, it carries a THIRD reading, and it was already the odd one out against `resoundingly`.
+anglicized	AE1 NG L IH0 S AY2 Z D	AE1 NG G L AH0 S AY2 Z D	propagated from the corrected lemma (triple-source + espeak, #1378)
+aubergines	AO1 B ER0 JH IY2 N Z	OW1 B ER0 ZH IY2 N Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+deloused	D IY2 L AW1 Z D	D IY0 L AW1 S D	propagated from the corrected lemma (triple-source + espeak, #1378)
+desecrated	D EH0 Z AH0 K R EY1 T IH0 D	D EH1 S AH0 K R EY2 T IH0 D	propagated from the corrected lemma (triple-source + espeak, #1378)
+desecrates	D EH0 Z AH0 K R EY1 T S	D EH1 S AH0 K R EY2 T S	propagated from the corrected lemma (triple-source + espeak, #1378)
+exhumed	EH0 K S HH Y UW1 M D	IH0 G Z UW1 M D	propagated from the corrected lemma (triple-source + espeak, #1378)
+exhumes	EH0 K S HH Y UW1 M Z	IH0 G Z UW1 M Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+hotshots	HH AA1 SH AA2 T S	HH AA1 T SH AA2 T S	propagated from the corrected lemma (triple-source + espeak, #1378)
+idiosyncrasies	IH2 D IY0 OW0 S IH1 N K R AH0 S IY2 Z	IH2 D IY0 AH0 S IH1 N K R AH0 S IY0 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+misogynists	M IH1 Z AH0 JH IH0 N IH0 S T S	M AH0 S AA1 JH AH0 N IH0 S T S	propagated from the corrected lemma (triple-source + espeak, #1378)
+nightshirts	N AY1 CH ER2 T S	N AY1 T SH ER2 T S	propagated from the corrected lemma (triple-source + espeak, #1378)
+outshines	AW1 CH AY2 N Z	AW2 T SH AY1 N Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+outshining	AW1 CH AY2 N IH0 NG	AW2 T SH AY1 N IH0 NG	propagated from the corrected lemma (triple-source + espeak, #1378)
+paperboys	P EY1 P ER0 B AO2 Y Z	P EY1 P ER0 B OY2 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+potboilers	P AA2 B OY1 L ER0 Z	P AA1 T B OY2 L ER0 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+reunified	R IY0 UW1 N AH0 F AY2 D	R IY0 Y UW1 N AH0 F AY2 D	propagated from the corrected lemma (triple-source + espeak, #1378)
+thundershowers	TH AH1 N D ER0 SH AW2 W ER0 Z	TH AH1 N D ER0 SH AW2 ER0 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+homages	AA1 M AH0 JH AH0 Z	HH AA1 M IH0 JH AH0 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
+resounding	R IY0 S AW1 N D IH0 NG	R IH0 Z AW1 N D IH0 NG	propagated from the corrected lemma (triple-source + espeak, #1378)

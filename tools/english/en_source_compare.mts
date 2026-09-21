@@ -476,21 +476,19 @@ const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => 
         i + 1 < t.length && bare(p) === bare(t[i + 1]!) && eq(t.slice(0, i).concat(t.slice(i + 1)), o))],
     // ⚠ `N G` AND `NG G` ARE THE SAME SOUND, two ARPABET spellings of [ŋɡ]. Neither is wrong.
     ["NG G / N G", (o, t) => ng(o) === ng(t)],
-    // ⚠ AND `N K` / `NG K` IS THE SAME AXIS ONE PLACE FURTHER BACK. English has no [nk]: an ⟨n⟩ before
-    // /k/ assimilates, so `N K` is an UNDERSPECIFIED spelling of the same sound rather than a different
-    // one. It is not a handful of rows either — our own dictionary writes `N K` 776 times and `NG K`
-    // 1,610, and the audit finds our rows on BOTH sides of the disagreement (`bronchoscope`, `drinkable`,
-    // `punctate` write `N K` where the sources write `NG K`; `inculcate`, `incontrovertible`, `conquest`
-    // write `NG K` where they write `N K`). A both-directions split is the tell that this is notation.
-    // ⚠ AND THE AXIS IS ALREADY RESOLVED, ONE LAYER DOWN, WHICH IS WHY THE DICT MAY BE INCONSISTENT.
-    // `en-nasal-seam.tsv` plus a transparent-prefix guard decide [n] against [ŋ] at OUTPUT time:
-    // `drinkable` and `idiosyncrasy` are written `N K` here and ship [ŋk] (they are the pinned positive
-    // cases in test/en-nasal-seam.test.ts), while `pancake`, `income` and 637 of the 953 `N [KG]` rows
-    // keep their [n] deliberately. So the dict spelling is the RULE'S INPUT, not the shipped sound.
-    // ⚠ NORMALISING THE 953 ROWS WOULD BREAK THAT, not tidy it — a dict rewritten to `NG K` gives the
-    // rule nothing to hold back, and `pancake` and `income` lose the [n] the seam table exists to keep.
-    // The first draft of this comment proposed exactly that normalisation as follow-up work.
-    ["NG K / N K", (o, t) => nk(o) === nk(t)],
+    // ⚠ `N K` / `NG K` IS DELIBERATELY *NOT* HERE, AND IT WAS, FOR ONE REVIEW ROUND. English has no
+    // [nk] — an ⟨n⟩ before /k/ assimilates — and our own rows sit on both sides of the disagreement,
+    // which reads exactly like the `NG G / N G` notation pair above. It is not one.
+    // ⚠ THE DICT SPELLING IS AN INPUT TO A RULE, AND THE RULE DOES NOT ALWAYS FIRE. `en-nasal-seam.tsv`
+    // plus a transparent-prefix guard decide [n] against [ŋ] at OUTPUT time: `drinkable` is written
+    // `N K` and ships [ŋk], while `pancake`, `income` and 637 of the 953 `N [KG]` rows keep their [n].
+    // So for those 637 the spelling DOES decide the shipped nasal, and a predicate that folds the pair
+    // scores a real difference as free — in the one place that would ever surface it, since nothing else
+    // in the repo compares this axis against an outside source. A fold that deletes the axis it is
+    // asked about is a blind spot, not a rejection class.
+    // ⚠ WHAT IS TRUE IS THAT THE AUDIT CANNOT SETTLE THEM, which is a different claim and does not
+    // belong in this table: the verdict depends on machinery the audit cannot see. The eight rows it
+    // surfaces are adjudicated at the output layer in the investigation log instead.
     // ⚠ /iə/ AND /jə/ ARE THE SAME SYLLABLE COMPRESSED OR NOT. `julian` JH UW1 L IY0 AH0 N against
     // JH UW1 L Y AH0 N, and `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`,
     // `leniency`, `pannier`, `valonia` — 9 of the 691, and the alternation runs BOTH WAYS across them
@@ -521,7 +519,6 @@ const bare = (p: string): string => {
 };
 const eq = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => bare(x) === bare(b[i]!));
 const ng = (a: string[]): string => a.map(bare).join(" ").replace(/NG G/gu, "N G");
-const nk = (a: string[]): string => a.map(bare).join(" ").replace(/NG K/gu, "N K");
 /**
  * Post-consonantal unstressed `IY` before a vowel folded to the glide `Y`, then the audit's own bare form.
  * ⚠ THE VOWEL TESTS RUN ON THE STRESS-STRIPPED BASE, NOT ON `bare`. `bare` rewrites AH and IH to `ə`,

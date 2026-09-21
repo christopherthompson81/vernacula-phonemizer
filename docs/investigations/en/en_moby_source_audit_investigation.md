@@ -5400,3 +5400,100 @@ work. The 11 it backs neither on are the residue and are individually odd (`argo
 `mesdames`, `gesellschaft`, `xi`) — a hand slice, not a sweep. The `N K` axis at 776 rows is now a
 named piece of work rather than a thing the audit trips over five rows at a time.
 
+## Run 84 — 2026-09-20 21:40 — review of Run 83, and two of its findings are one failure mode
+
+Six findings. Two are the same defect twice, one retracts a predicate I argued for in Run 83, and one
+is the paradigm split this block's own refusal was argued on.
+
+### ⚠ AN INDEX INTO A ROW WHOSE LENGTH I CHANGED — TWICE, AND SILENTLY
+
+`en-syllabic.tsv` stores **phone indices into the shipped dict row**, not phone names. `buccal 4`
+pointed at the `AH0` of `B Y UW1 K AH0 L`; dropping the yod shortens the row by one and index 4 is now
+the `L`, so the slot became a no-op and `bjˈuːkɫ̩` shipped as `bˈʌkəɫ`. `recognizance 7` was the `AH0`
+before `N`; inserting the `G` pushed it to the `Z`, and `ɹᵻkʰˈɑːnəzn̩s` shipped as `ɹᵻkʰˈɑːɡnəzəns`.
+The vowel and consonant fixes are right; the syllabic consonant was collateral in both.
+
+⚠ **NOTHING GUARDS THESE THE WAY `en-nasal-seam.test.ts` GUARDS ITS INDICES**, which is why 6,135 tests
+stayed green. The class is general: *any* table keyed by position into a file this audit edits.
+`en-nasal-seam` and `en-gb-*` were checked and are unaffected.
+
+⚠ **AND REGENERATING THE TABLE IS NOT THE FIX HERE.** `en_build_syllabic.mts --write` produces **1,615
+more rows** than the committed file — the generated artifact is itself long stale, the `check:goldens`
+and `#1381` shape again. That is a real finding and its own piece of work; folding it into this block
+would bury 62 dictionary rows under 1,615 unrelated ones. The two indices were corrected by hand.
+
+⚠ **AND THE FIX DID NOT TAKE UNTIL THE LEXICON WAS REBUILT.** `accent-lexicon.tsv` is pre-rendered from
+the same table, so the first verification after the correction printed the OLD output and looked like
+the fix had failed. `en_rebuild_lexicon.mts` then reported `would change: 2` — the #1388 counter doing
+exactly what it was added for.
+
+### The paradigm split this block refused `herbal` over, committed on its own rows
+
+18 derived forms carry their own dict row, so `morphDecode`'s look-the-stem-up path never runs and they
+kept the defect just corrected on the base: `misogynist` saying /məˈsɑdʒənɪst/ beside `misogynists`
+still saying /mɪˈzædʒ.../, `homage` gaining its /h/ while `homages` stayed h-less. ⚠ **SWEPT
+MECHANICALLY OVER ALL 62 LEMMAS RATHER THAN OFF THE REVIEWER'S LIST**, which found three more
+(`idiosyncrasies`, `outshining`, `reunified`) and is the only way to know the set is closed.
+`resounding` is a 19th on a different footing: it carries neither `resound`'s old row nor its new one
+but a third reading, and was already the odd one out against `resoundingly`.
+
+### ⚠ A ROW THAT DEFANGED A TEST AND FALSIFIED A COMMENT WRITTEN IN THE SAME COMMIT
+
+`idiosyncrasy` is pinned in `test/en-nasal-seam.test.ts` as a **negative** case — the dict writes `N`,
+every source says [ŋ], and `toContain("ŋ")` therefore proves the assimilation rule FIRED. Applying the
+agreed row's `NG` makes that assertion pass without exercising the rule at all: deleting the rule would
+no longer be caught by this case. It also contradicted, word for word, the comment I had just written
+in `en_source_compare.mts` calling `idiosyncrasy` one of the rows "written `N K` here". The vowel half
+of the correction is kept; the `NG` half is reverted, and the curated row says why.
+
+### ⚠ RETRACTED: THE `NG K / N K` NEVER-A-DEFECT PREDICATE
+
+Run 83 added it and argued it from the nasal-seam rule. The argument defeats the predicate. If the
+rule always fired, the pair would be free notation — but it does not: 637 of the 953 `N [KG]` rows keep
+their [n] through the seam table and the prefix guard, and **for those the dict spelling decides the
+shipped nasal.** Folding the pair scores a real difference as free, in the one instrument that would
+ever surface it, since nothing else in the repo compares this axis against an outside source.
+
+⚠ **"THE AUDIT CANNOT SETTLE THIS" IS NOT "THIS IS NEVER A DEFECT", and only the second belongs in that
+table.** Removed. The eight rows it was hiding are adjudicated here instead, at the output layer:
+
+    bronchoscope  bɹˌɑːŋkəskˈoᶷp     drinkable         dɹˈɪŋkəbəɫ
+    punctate      pʰˈʌŋktˌeᶦt        idiosyncrasy      ˌɪd̬iʲəsˈɪŋkɹəsi   ← dict `N`, rule supplies [ŋ]
+    conquest      kʰˈɑːŋkwˌɛst       inculcate         ˈɪŋkəɫkˌeᶦt
+    incontrovertible  ˌɪŋkˌɑːntɹoᶷvˈɝt̬ᵻbəɫ
+    concubine     kʰˈɑːnkjəbˌaᶦn    ← the only one that differs from what the sources want
+
+`concubine` keeps [n] because `con-` is the same transparent prefix that gives `conclude`, `concord`,
+`concourse` and `concoct` theirs. Fixing it alone would make it the one `con-` word that assimilates.
+Candidates 615 → 624; the class is now visible rather than folded away.
+
+### Two smaller ones
+
+`exhume` lost its en-GB yod: the runtime restores `Cuː → Cjuː` only for words in `en-gb-yod.tsv`, and
+it had been getting /j/ incidentally from the WRONG `HH Y UW1` in the US row. The en-GB referee attests
+`ɪɡzjuːm`, so the set rebuild claims it properly. The same rebuild drops `manumission`'s now-dead yod
+row — its corrected US row has no `uː` left for the rule to match.
+
+⚠ AND THE SET REBUILD IS NOT OPTIONAL THIS TIME. `en-gb-palm.tsv` gains `sukiyaki`: its RP row is
+`suːkijɑːki`, and the PALM edit only produces a match now that the /j/ this block adds is in our form.
+The guard that blocks American-contaminated PALM claims releases correctly, because the word has no
+`ɒ` reading at all — which is the discriminator #1389 built it on.
+
+### After the review round
+
+    dict rows applied                62 lemmas + 19 derived forms + 2 syllabic indices
+    audit candidates                 684 → 624 (the NG K / N K predicate retracted, +9 back)
+    all three agree                  37,558 → 37,618
+    en-gb sets                       palm 543 → 544 (sukiyaki), yod 824 (+exhume, −manumission)
+    new guard                        test/en-index-tables-point-at-what-they-claim.test.ts,
+                                     with 9 pre-existing rotted indices waived by name (#1394)
+    suite 6,137 · goldens 189/36,495/0 stale · parity 189 byte-identical
+
+⚠ **AND THE REBUILD HAD TO BE DONE TWICE, BECAUSE TWO WRITERS WERE RACING ON IT.** The builder takes
+minutes, so several runs were started in parallel while other work went on — two of them WITHOUT
+`--check`, and the older one had been launched before the `idiosyncrasy` revert, so it would have
+written a product for a tree that no longer existed. Killing the parent `tsx` process left the node
+child still running and still holding the write; it had to be killed by PID. **A generated artifact
+whose builder takes minutes must be built once, at the end, from a settled tree** — the same discipline
+`check-goldens` documents for itself, learned here the other way round.
+

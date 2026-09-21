@@ -4177,7 +4177,7 @@ anglican	AE1 NG G L AH0 K AH0 N
 anglicans	AE1 NG G L IH0 K AH0 N Z
 anglicism	AE1 NG G L IH0 S IH2 Z AH0 M
 anglicize	AE1 NG G L AH0 S AY2 Z
-anglicized	AE1 NG L IH0 S AY2 Z D
+anglicized	AE1 NG G L AH0 S AY2 Z D
 anglim	AE1 NG G L IH0 M
 anglin	AE1 NG G L IH0 N
 angling	AE1 NG G L IH0 NG
@@ -6763,7 +6763,7 @@ aube	AO1 B
 aubel	AW1 B AH0 L
 auber	AO1 B ER0
 aubergine	OW1 B ER0 ZH IY2 N
-aubergines	AO1 B ER0 JH IY2 N Z
+aubergines	OW1 B ER0 ZH IY2 N Z
 auberry	AO1 B EH2 R IY0
 aubert	AO1 B ER0 T
 aubin	AO1 B IH0 N
@@ -30411,7 +30411,7 @@ delosreyes	D IH0 L AA1 S ER0 AY0 Z
 delossantos	D EY0 L OW0 S AA1 N T OW0 Z
 delouis	D EH2 L UW0 IY1 Z
 delouse	D IY0 L AW1 S
-deloused	D IY2 L AW1 Z D
+deloused	D IY0 L AW1 S D
 delozier	D EH1 L AH0 Z IY0 ER0
 delp	D EH1 L P
 delph	D EH1 L F
@@ -31321,8 +31321,8 @@ descriptor	D IH0 S K R IH1 P T ER2
 descriptors	D IH0 S K R IH1 P T ER2 Z
 descry	D AH0 S K R AY1
 desecrate	D EH1 S AH0 K R EY2 T
-desecrated	D EH0 Z AH0 K R EY1 T IH0 D
-desecrates	D EH0 Z AH0 K R EY1 T S
+desecrated	D EH1 S AH0 K R EY2 T IH0 D
+desecrates	D EH1 S AH0 K R EY2 T S
 desecration	D EH0 S AH0 K R EY1 SH AH0 N
 desecrations	D EH0 S AH0 K R EY1 SH AH0 N Z
 deseed	D IY0 S IY1 D
@@ -40297,8 +40297,8 @@ exhorting	IH0 G Z AO1 R T IH0 NG
 exhorts	IH0 G Z AO1 R T S
 exhumation	EH0 K S HH Y UW2 M EY1 SH AH0 N
 exhume	IH0 G Z UW1 M
-exhumed	EH0 K S HH Y UW1 M D
-exhumes	EH0 K S HH Y UW1 M Z
+exhumed	IH0 G Z UW1 M D
+exhumes	IH0 G Z UW1 M Z
 exide	EH1 K S AY2 D
 exigencies	EH2 K S IH1 JH AH0 N S IY0 Z
 exigency	EH2 K S IH1 JH AH0 N S IY0
@@ -56429,7 +56429,7 @@ hom	HH AA1 M
 homa	HH OW1 M AH0
 homac	HH OW1 M AE0 K
 homage	HH AA1 M IH0 JH
-homages	AA1 M AH0 JH AH0 Z
+homages	HH AA1 M IH0 JH AH0 Z
 homan	HH OW1 M AH0 N
 homann	HH OW1 M AH0 N
 homans	HH OW1 M AH0 N Z
@@ -57068,7 +57068,7 @@ hotmail	HH AA1 T M EY2 L
 hotpot	HH AA1 T P AO2 T
 hots	HH AA1 T S
 hotshot	HH AA1 T SH AA2 T
-hotshots	HH AA1 SH AA2 T S
+hotshots	HH AA1 T SH AA2 T S
 hotspot	HH AA1 T S P AA2 T
 hotspur	HH AA1 T S P ER2
 hott	HH AA1 T
@@ -58464,8 +58464,8 @@ idiopath	IH2 D IY0 OW0 P AE1 TH
 idiopathic	IH2 D IY0 AH0 P AE1 TH IH0 K
 idiopathy	IH2 D IY0 AA1 P AH0 TH IY0
 idiophone	IH1 D IY0 AH0 F OW2 N
-idiosyncrasies	IH2 D IY0 OW0 S IH1 N K R AH0 S IY2 Z
-idiosyncrasy	IH2 D IY0 AH0 S IH1 NG K R AH0 S IY0
+idiosyncrasies	IH2 D IY0 AH0 S IH1 N K R AH0 S IY0 Z
+idiosyncrasy	IH2 D IY0 AH0 S IH1 N K R AH0 S IY0
 idiosyncratic	IH2 D IY0 OW0 S IH2 N K R AE1 T IH0 K
 idiot	IH1 D IY2 AH0 T
 idiotic	IH2 D IY0 AA1 T IH0 K
@@ -79880,7 +79880,7 @@ miso	M IY1 S OW0
 misogamy	M IH0 S AA1 G AH0 M IY0
 misogyne	M IH1 Z AH0 JH IH0 N
 misogynist	M AH0 S AA1 JH AH0 N IH0 S T
-misogynists	M IH1 Z AH0 JH IH0 N IH0 S T S
+misogynists	M AH0 S AA1 JH AH0 N IH0 S T S
 misogyny	M AH0 S AA1 JH AH0 N IY0
 misperceive	M IH0 S P ER0 S IY1 V
 misperceived	M IH0 S P ER0 S IY1 V D
@@ -84265,7 +84265,7 @@ nightrider	N AY1 T R AY2 D ER0
 nights	N AY1 T S
 nightshade	N AY1 T SH EY2 D
 nightshirt	N AY1 T SH ER2 T
-nightshirts	N AY1 CH ER2 T S
+nightshirts	N AY1 T SH ER2 T S
 nightside	N AY1 T S AY2 D
 nightspot	N AY1 T S P AA2 T
 nightstage	N AY1 T S T EY2 JH
@@ -87891,8 +87891,8 @@ outsells	AW0 T S EH1 L Z
 outsert	AW1 T S ER2 T
 outset	AW1 T S EH2 T
 outshine	AW2 T SH AY1 N
-outshines	AW1 CH AY2 N Z
-outshining	AW1 CH AY2 N IH0 NG
+outshines	AW2 T SH AY1 N Z
+outshining	AW2 T SH AY1 N IH0 NG
 outshone	AW0 T SH OW1 N
 outshoot	AW0 T SH UW1 T
 outshout	AW2 T SH AW1 T
@@ -89244,7 +89244,7 @@ paperback	P EY1 P ER0 B AE2 K
 paperbacks	P EY1 P ER0 B AE2 K S
 paperboard	P EY1 P ER0 B AO2 R D
 paperboy	P EY1 P ER0 B OY2
-paperboys	P EY1 P ER0 B AO2 Y Z
+paperboys	P EY1 P ER0 B OY2 Z
 papered	P EY1 P ER0 D
 paperhanger	P EY1 P ER0 HH AE2 NG ER0
 papering	P EY1 P ER0 IH0 NG
@@ -94624,7 +94624,7 @@ potawatomi	P AA2 T AH0 W AA1 T AH0 M IY0
 potbaryoskin	P AA2 T B AA0 R Y AO1 S K AH0 N
 potbellied	P AA1 T B EH2 L IY0 D
 potboiler	P AA1 T B OY2 L ER0
-potboilers	P AA2 B OY1 L ER0 Z
+potboilers	P AA1 T B OY2 L ER0 Z
 pote	P OW1 T
 poteat	P OW0 T IY1 T
 poteet	P AA1 T IY0 T
@@ -101417,7 +101417,7 @@ resorted	R IH0 Z AO1 R T IH0 D
 resorting	R IH0 Z AO1 R T IH0 NG
 resorts	R IH0 Z AO1 R T S
 resound	R AH0 Z AW1 N D
-resounding	R IY0 S AW1 N D IH0 NG
+resounding	R IH0 Z AW1 N D IH0 NG
 resoundingly	R IH0 Z AW1 N D IH0 NG L IY0
 resource	R IY1 S AO0 R S
 resourceful	R IY0 S AO1 R S F AH0 L
@@ -101778,7 +101778,7 @@ reuland	R OY1 L AH0 N D
 reule	R UW1 L
 reum	R IY1 AH0 M
 reunification	R IY0 UW2 N AH0 F AH0 K EY1 SH AH0 N
-reunified	R IY0 UW1 N AH0 F AY2 D
+reunified	R IY0 Y UW1 N AH0 F AY2 D
 reunify	R IY0 Y UW1 N AH0 F AY2
 reunion	R IY0 Y UW1 N Y AH0 N
 reunions	R IY0 Y UW1 N Y AH0 N Z
@@ -121615,7 +121615,7 @@ thundering	TH AH1 N D ER0 IH0 NG
 thunderous	TH AH1 N D ER0 AH0 S
 thunders	TH AH1 N D ER0 Z
 thundershower	TH AH1 N D ER0 SH AW2 ER0
-thundershowers	TH AH1 N D ER0 SH AW2 W ER0 Z
+thundershowers	TH AH1 N D ER0 SH AW2 ER0 Z
 thunderstorm	TH AH1 N D ER0 S T AO2 R M
 thunderstorms	TH AH1 N D ER0 S T AO2 R M Z
 thunderstruck	TH AH1 N D ER0 S T R AH2 K
