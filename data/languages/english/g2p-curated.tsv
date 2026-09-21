@@ -3051,3 +3051,12 @@ reviled	R IY0 V AY1 L D	R IH0 V AY1 L D	the de-/re-/pre- prefix vowel: gold + Mo
 revisionism	R IY0 V IH1 ZH AH0 N IH2 Z AH0 M	R IH0 V IH1 ZH AH0 N IH2 Z AH0 M	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
 revivalist	R IY0 V AY1 V AH0 L IH0 S T	R IH0 V AY1 V AH0 L IH0 S T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
 revivals	R IY0 V AY1 V AH0 L Z	R IH0 V AY1 V AH0 L Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+# ⚠ AND ONE MORE FROM THE SAME GROUP, WHICH THE FAMILY KEY COULD NOT REACH. `pretend` and `pretens-`
+# stem differently, so no sweep in #1397 will ever see them as one paradigm — yet `pretension` sat at
+# IY0 beside the corrected `pretend`, rendering pɹitɛnʃən against pɹᵻtɛnd.
+# ⚠ AND THE GROUP IS NOT CORRECTED WHOLESALE, BECAUSE THE THREE SOURCES DISAGREE WORD BY WORD INSIDE
+# IT. `pretension` is reduced in Moby and espeak against gold's tense (2 of 3, applied); `pretentious`
+# and `pretense` are TENSE in Moby and gold against espeak (2 of 3, left alone). "Make the family
+# consistent" is not a rule that survives contact with this data, which is the caution #1397 needs.
+pretension	P R IY0 T EH1 N SH AH0 N	P R IH0 T EH1 N SH AH0 N	the de-/re-/pre- prefix vowel: Moby + espeak against us; gold dissents (#1378)
+

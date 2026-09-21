@@ -5696,15 +5696,48 @@ their own — they are the members that happen to be triple-sourced.
     de-/re-/pre- families with 2+ members and a reduced prefix vowel   602
       INTERNALLY SPLIT on tense vs reduced                              57   (210 words)
 
-⚠ **THE FAMILY KEY WAS WRONG TWICE AND BOTH WAYS WERE INSTRUCTIVE.** Stripping the prefix put `decant`
+⚠ **THE FAMILY KEY WAS WRONG FOUR TIMES, AND THE HEADLINE MOVED EVERY TIME — 86, 57, 77, 33.** Stripping the prefix put `decant`
 with `recant` and `deduct` with `reduction` — different words sharing a Latin stem — and reported their
 disagreement as an intra-paradigm split (86 families). Keeping the prefix but stemming in one pass split
 `precarious` from `precariousness` and `revival` from `revivals`, because a single strip lands on a
 different string depending on which suffix the word ends in. Stemming in a LOOP to a floor of prefix + 4
-and then matching by spelling prefix groups what a reader would call one paradigm — and at prefix + 3
-`revivalist` stems to `reviv` and reaches `revive`, `reviver` and `revivify`, which are different lemmas.
+and then matching by spelling prefix fixes both — and at prefix + 3 `revivalist` stems to `reviv` and
+reaches `revive`, `reviver` and `revivify`, which are different lemmas.
 
-### Applied: 27 seeds with their paradigms = 57 rows
+⚠ **AND THAT VERSION OVER-GROUPS, WHICH I ONLY FOUND BY RUNNING BOTH INSTRUMENTS AGAINST EACH OTHER
+AFTER THE ROWS WERE APPLIED.** A bare spelling-prefix match puts `debark` AND THE SURNAME `debartolo`
+in `debar`'s family and reports their disagreement as a paradigm split: 77 families, 443 words.
+Requiring the remainder after the stem to be a plausible inflection gives **33 families / 128 words**,
+and every family it prints reads as a real paradigm. A fifth defect surfaced in the same pass — two
+words of one paradigm can stem to the same string and each open a family, which counted `demobiliz`
+twice.
+
+⚠ **FOUR DEFINITIONS, FOUR HEADLINES: 86, 57, 77, 33.** The applied rows are unaffected — each of the
+57 was checked individually against a third source, and none of the over-grouped surnames is among them
+— but #1397 was FILED ON THE 57 AND HAS BEEN CORRECTED. Getting the family boundary right is part of
+that work rather than a preliminary to it, and the honest thing to record is that a plausible-looking
+grouping produced a confident headline three times running.
+
+### ⚠ TWO BOOKKEEPING DEFECTS THE REVIEW FOUND, AND ONE OF THEM EXPLAINS AN ODD NUMBER
+
+**`desegregation` is in the held-out list AND in the applied set.** The six rows excluded above for
+moving a stress digit include it (0 → 2) — and it is then applied anyway, as a paradigm sibling of
+`desegregate`, with its digit left at 0. That is right under "apply only the part the agreement can
+see", but the exclusion list reads as the record of what this class does not touch, so it has to say
+so. ⚠ **AND IT EXPLAINS THE OTHERWISE-ODD 621 → 593**, a drop of 28 against 27 seeds: correcting the
+vowel makes `desegregation` agree under `normalise`, so it leaves the candidate list **with its stress
+disagreement unaddressed**. One row that looks fixed in the headline and is not; it belongs to the
+stress axis, which is #1379's instrument, not this one.
+
+**And one member of the class is unreachable by any family key.** `pretension` sat at `IY0` beside the
+corrected `pretend`, rendering `pɹitɛnʃən` against `pɹᵻtɛnd` — and `pretend` and `pretens-` stem
+differently, so no sweep in #1397 will ever see them as one paradigm. ⚠ The group is NOT corrected
+wholesale, because **the three sources disagree word by word inside it**: `pretension` is reduced in
+Moby and espeak against gold's tense (2 of 3, applied); `pretentious` and `pretense` are tense in Moby
+and gold against espeak (2 of 3, left). "Make the family consistent" is not a rule that survives
+contact with this data.
+
+### Applied: 27 seeds with their paradigms = 57 rows, plus `pretension`
 
 Every non-seed sibling was checked against espeak independently and every one agrees with its family's
 target. The reduced spelling comes from the FAMILY, not from gold: `normalise` merges AH0 and IH0, so
@@ -5714,7 +5747,9 @@ would put a third spelling into a family that uses `IH0` (#1377's rule, a third 
     audit candidates    621 → 593
     all three agree     37,619 → 37,647
     curation gaps       +7, all source N — the model is trained on the upstream inconsistency and
-                        recalls it; every one has the target shape on a sibling already
+                        recalls it; five have the target on an UNCORRECTED sibling (`redoubt` and
+                        `redoubtable` are the only two `redoub*` rows and both were corrected, so
+                        their case rests on the outside sources alone)
     remaining class     57 families / 210 words, filed as #1397
     suite 6,145 · goldens 189/36,495/0 stale · en-gb sets fresh
     referee eval (en)   wikipron 64.0% / 91.3% UNCHANGED; moby-lexicon 26,816 → 26,843;

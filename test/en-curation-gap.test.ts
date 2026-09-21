@@ -70,9 +70,13 @@ const KNOWN_GAPS = new Map<string, string>([
     // prefix vowel. The model is trained on UPSTREAM CMUdict, which is split inside its own paradigms on
     // exactly this axis (`retrieve` R IH0 beside `retriever` R IY0), so the n-gram has learnt the
     // inconsistency and recalls whichever spelling the upstream row happened to carry.
-    // ⚠ IN EVERY CASE THE DICTIONARY NOW CARRIES THE TARGET ON THE SIBLINGS, which is what makes these
-    // gaps rather than reasons to revert: `repulsion`/`repulsive` are IH0 like the corrected `repulse`,
+    // ⚠ FIVE OF THE SEVEN HAVE THE TARGET ON AN UNCORRECTED SIBLING, which is what makes those gaps
+    // rather than reasons to revert: `repulsion`/`repulsive` are IH0 like the corrected `repulse`,
     // `desensitized`/`desensitizing` are IY0 like the corrected `desensitize`. A retrain absorbs them.
+    // ⚠ `redoubt` AND `redoubtable` ARE THE EXCEPTION AND THE FIRST VERSION OF THIS NOTE CLAIMED THEM
+    // TOO. They are the ONLY two `redoub*` rows in the dictionary, both were corrected here, and both
+    // are listed below — so neither has an uncorrected sibling carrying the target, and their case
+    // rests on the three outside sources alone rather than on any internal evidence.
     ["desensitize", "n-gram (source N): recalls the upstream IH0; the corrected family is IY0; closes on a retrain"],
     ["destabilize", "n-gram (source N): recalls the upstream IH0; the corrected family is IY0; closes on a retrain"],
     ["redoubt", "n-gram (source N): recalls the upstream IY0; the corrected family is IH0; closes on a retrain"],
