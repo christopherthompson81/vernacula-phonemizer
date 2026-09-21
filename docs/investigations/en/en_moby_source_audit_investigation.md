@@ -5855,3 +5855,61 @@ also landed. +13 of the numerator is the dictionary work, not the referee work.
     curation gaps       +1 (`hasid`, source N, the retrain class a fourth time)
     suite 6,147 · goldens 189/36,495/0 stale · parity 189 byte-identical
 
+## Run 89 — 2026-09-21 11:30 — the A/B listen on `several`, owed since #1372, and it does not discriminate
+
+DONE AT LAST. `kokoro` is not installed in this tree, but the parent repo has the exported ONNX model
+and the voice bank, so the clips were rendered from IPA directly rather than from text.
+
+⚠ **THE PHONEMES HAD TO COME FROM OUR ENGINE, NOT FROM THE TEXT.** Feeding kokoro the sentence would
+run misaki's own g2p and render whatever IT thinks `several` is — which is the thing under test. The
+carrier sentences were phonemised here and the ONE WORD substituted, so the two renders differ in
+`several` and in nothing else: same tonic, same de-accenting, same pauses.
+
+    A (shipped)      sˈɛvɚəɫ    three syllables   SEV-er-əl
+    B (syncopated)   sˈɛvɹəɫ     two              SEV-rəl
+
+    1  There were several reasons for the delay.
+    2  Several of them arrived late.
+    3  We tried several times.
+
+⚠ **TWO RENDERING CAVEATS, RECORDED BECAUSE THEY COULD HAVE COLOURED THE JUDGEMENT.** Our canonical
+IPA is not Kokoro's token set — `ɫ`, `ɝ` and `ᶦ` have no tokens — so an explicit fold (`ɫ`→`l`,
+`ɝ`→`ɚ`, `ᶦ`→`ɪ`) was written that FAILS LOUDLY on anything unmapped rather than dropping it
+silently. The dark-l and NURSE distinctions are lost in BOTH clips equally. And Kokoro indexes its
+voice vector by token count, so A and B take adjacent style rows — Kokoro's own behaviour, but it
+means the pair differs by a hair beyond the word.
+
+### THE VERDICT: NEITHER IS A MISPRONUNCIATION
+
+The maintainer's judgement, verbatim in substance: **neither sounds mispronounced, both variants are
+natural, and the syncopated form is *probably* more common.**
+
+⚠ **SO THE EAR DOES NOT SETTLE THIS ROW, AND THAT IS ITSELF THE RESULT.** The listen was owed because
+#1372 moved the row on two sources while Merriam-Webster lists the syncopated `ˈsev-rəl` FIRST — the
+worry being that we had shipped something that sounds wrong. It does not. This is a free-variation
+row, and it has to be resolved on something other than correctness.
+
+### KEPT ON THE PARADIGM, WHICH IS THE EVIDENCE THIS AUDIT WEIGHS HEAVIEST
+
+    sever  S EH1 V ER0        severed  S EH1 V ER0 D      severing  S EH1 V ER0 IH0 NG
+    severs S EH1 V ER0 Z      severance S EH1 V ER2 ...   severally S EH1 V ER0 AH0 L IY0
+
+Every member of the family keeps `ER0`. The shipped reading is the one that keeps `several` inside it
+— the same call made for `herbal` (#1393), `parliamentarianism` (#1399) and `pretension` (#1398), each
+time against a referee rather than for one. gold and Moby agree with it, and the OOV path already
+predicted it before the correction landed.
+
+⚠ **AND THE COUNTER-EVIDENCE IS RECORDED RATHER THAN DISMISSED**, because "more common" is a real
+claim and this decision does not answer it: M-W lists the syncopated form first, the en-GB referee
+lists both, and the maintainer's own impression is that the syncopated form is commoner. What is
+decided here is only that the shipped reading is NOT WRONG and is internally consistent. **If the
+frequency point is ever acted on, the whole paradigm moves together** — `sever`, `severed`,
+`severing`, `severs`, `severally` and `differently` — not `several` alone, which is how it got
+flagged in the first place.
+
+⚠ **NOTHING CHANGES AND THAT IS A RESULT, NOT A NO-OP.** Four goldens moved for this word in #1372,
+across en, en-GB and en-IN. Re-recording them a second time on "probably more common", against source
+agreement and an internally consistent paradigm, would be churn bought with nothing.
+
+#1378 item 6 is closed, and with it the queue.
+
