@@ -257,6 +257,49 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // probe is now the same expression, so a future reordering cannot silently un-widen it.
         if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
     }
+    /**
+     * ⚠ THE `-ary / -ery / -ory` WEAK VOWEL (#1380) — A RULE, NOT A WORD LIST, because the suffix is
+     * PRODUCTIVE. GenAm carries a secondary-stressed full vowel there (`secretary` sˈɛkɹətʰˌɛɹi,
+     * `category` kʰˈætəɡˌɔːɹi) and SSBE does not. An unseen `-ary` word takes the reduction too, which a
+     * lexicon by construction cannot do — putting this family in `en-gb-lexical.tsv` would be the
+     * `aluminium` mistake in the other direction.
+     *
+     * ⚠ THE PARENT IS NOT WRONG HERE, WHICH IS WHY THIS IS AN ACCENT RULE. The dictionary distinguishes
+     * `secretary` S EH1 K R AH0 T EH2 R IY0 from `accessory` AE0 K S EH1 S ER0 IY0, and BOTH are correct
+     * GenAm — the first genuinely has the full vowel and the second genuinely reduces. 262 of our 703
+     * `-ary/-ery/-ory` words already come out reduced for that reason. Nothing upstream needs changing.
+     *
+     * ⚠ REDUCED `əɹi`, NOT THE SYNCOPE `ɹi`, AND THAT IS A REGISTER CALL RATHER THAN A CORRECTNESS ONE.
+     * Over the 774 referee headwords spelled this way: 662 attest the reduced form (418 of them ONLY the
+     * reduced form) against 284 attesting the syncope and 40 attesting ONLY the syncope. Both are real
+     * SSBE — the referee lists `sɛkɹətəɹi` AND `sɛkɹətɹi` for 244 words — so the choice is which register
+     * this accent targets, and the reduced form is the one the corpus supports. The syncope would have
+     * been defensible on `en-gb-yod`'s "prefer the RP-diagnostic realisation whenever attested" policy;
+     * it is not taken because it is attested for barely a third of the class.
+     *
+     * ⚠ AND THE SECONDARY STRESS MARK IS DROPPED, WHICH NOTHING IN THIS REPO CAN VERIFY. The referee
+     * carries no stress marks at all and the eval's fold strips them, so no instrument here witnesses
+     * this either way. It is taken on the phonology — a reduced vowel does not carry a secondary stress —
+     * and recorded as unverifiable rather than asserted as measured.
+     *
+     * ⚠ THE TRIGGER IS THE SPELLING **AND** A NON-PRIMARY SUFFIX VOWEL. Spelling alone would reach words
+     * whose suffix vowel is the tonic — `canary` is kənˈɛɹi and `actuary` ˌækt͡ʃuːˈɛɹi — where the full
+     * vowel is correct and reducing it would delete the stressed nucleus. Phone shape alone would reach
+     * words not spelled with the suffix at all.
+     *
+     * ⚠ ~65 WORDS RESIST IT AND ARE LEFT WRONG ON PURPOSE: 40 attest only the syncope (`monastery`
+     * mɒnəstɹi) and 25 keep a full vowel (`amatory` æmətɔːɹi). Each is one segment out, and an exception
+     * table would be another generated artifact to keep fresh — which is what #1381, #1385 and #1388 were
+     * all about. The residue is documented, not patched.
+     */
+    // ⚠ TWO PASSES AND NOT ONE OPTIONAL MARK. `/ˌ?(ɛ|ɔː)ɹi$/` reads as "an optional secondary" and is
+    // not: the primary mark sits BEFORE the vowel too, so it matches `ˈɛɹi` with the group empty and
+    // reduced `canary` kənˈɛɹi to kənˈəɹi and `actuary` to ˌækt͡ʃuːˈəɹi — deleting the tonic nucleus.
+    // The first pass takes a secondary mark AND DROPS IT; the second takes an unmarked suffix vowel and
+    // is blocked by a lookbehind on either mark.
+    if (/(ary|ery|ory)$/u.test(w)) {
+        s = s.replace(/ˌ(?:ɛ|ɔː)(ɹi)$/u, "ə$1").replace(/(?<![ˈˌ])(?:ɛ|ɔː)(ɹi)$/u, "ə$1");
+    }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s
         .replace(IGLIDE_R, "ᶦə") // any ᶦ-glide + coda r: FACE, PRICE and CHOICE (ayr, fire, choir)
