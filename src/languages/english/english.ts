@@ -253,6 +253,20 @@ export class EnglishPhonemizer {
         // lost by refusing the predicative reading the tagger never gets right anyway.
         for (let i = 0; i < out.length; i++)
             if (out[i]!.adj && !(tags[i + 1] ?? "").startsWith("NN")) out[i] = { ...out[i]!, adj: false };
+        // ⚠ AND THE SAME CONSTRAINT PROMOTES, BECAUSE THE TAGGER MISSES THE `-ed` ADJECTIVE ENTIRELY.
+        // Measured over eight frames per word (#1378 item 3): this model tags `blessed`, `cursed`,
+        // `cussed`, `dogged`, `ragged`, `crooked` as JJ **predicatively** — "very blessed", "a truly
+        // blessed place" — and as VBN in exactly the ATTRIBUTIVE frame the demotion above requires:
+        // "the blessed man", "his dogged persistence", "a ragged edge" are all VBN. So an `adj` entry
+        // for any of them fired in the frames where the slot is switched off and not in the frames
+        // where it is switched on, which is an entry that looks live and is inert where it matters.
+        // ⚠ AN `-ed` FORM DIRECTLY BEFORE A NOUN IS ATTRIBUTIVE WHATEVER THE TAGGER CALLS IT, and
+        // that is the whole claim here — the same claim the demotion makes, read in the other
+        // direction. It can only change a word that HAS an `adj` slot, so `the painted wall` and every
+        // other ordinary participle is untouched; `past` is also tested BEFORE `adj` in the resolver,
+        // so an entry carrying a `past` slot still wins on its own terms.
+        for (let i = 0; i < out.length; i++)
+            if (tags[i] === "VBN" && (tags[i + 1] ?? "").startsWith("NN")) out[i] = { ...out[i]!, adj: true };
         if (
             out.length > 1 &&
             !out[0]!.verb &&

@@ -225,6 +225,12 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             if (outp[i]!.Adj && !(i + 1 < tags.Count && tags[i + 1].StartsWith("NN", StringComparison.Ordinal)))
                 outp[i] = new PosExpectation
                     { Verb = outp[i]!.Verb, Noun = outp[i]!.Noun, Past = outp[i]!.Past, Adj = false };
+        // ⚠ And the same constraint PROMOTES: this tagger calls the `-ed` adjective VBN in exactly the
+        // attributive frame the demotion above requires. See the TypeScript for the measurement.
+        for (var i = 0; i < outp.Count; i++)
+            if (tags[i] == "VBN" && i + 1 < tags.Count && tags[i + 1].StartsWith("NN", StringComparison.Ordinal))
+                outp[i] = new PosExpectation
+                    { Verb = outp[i]!.Verb, Noun = outp[i]!.Noun, Past = outp[i]!.Past, Adj = true };
         if (outp.Count > 1 && outp[0]!.Verb == false && Pos.HeadsObjectPhrase(tags.Count > 1 ? tags[1] : ""))
             // sentence-initial imperative ("Wind the clock")
             outp[0] = new PosExpectation { Verb = true, Noun = false, Past = false, Adj = false };
