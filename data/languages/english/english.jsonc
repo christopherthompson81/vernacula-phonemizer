@@ -310,11 +310,22 @@
         "cursed": { "default": "kʰˈɝst", "adj": "kʰˈɝsɪd" },
         "cussed": { "default": "kʰˈʌst", "adj": "kʰˈʌsɪd" },
         "dogged": { "default": "dˈɔːɡd", "adj": "dˈɔːɡɪd" },
-        "beloved": { "default": "bᵻlˈʌvd", "adj": "bᵻlˈʌvɪd" },
+        // ⚠ `beloved` ALSO TAKES A `noun` SLOT, and it is the only member that needs one: it is the one
+        // word here with a real plural, and `isVoicingHeteronym` builds the plural from `verb ?? noun ??
+        // past` and never looks at `adj` — so "my beloveds" took the PARTICIPLE as its base and read
+        // bᵻlˈʌvdz. The noun reading also stands alone ("my beloved"), which the `adj` slot cannot
+        // reach because that slot requires a following noun.
+        "beloved": { "default": "bᵻlˈʌvd", "adj": "bᵻlˈʌvɪd", "noun": "bᵻlˈʌvɪd" },
         // ⚠ NOT AN `-ed` ADJECTIVE AT ALL — A NOUN THE DICTIONARY COULD NOT REACH. `moped` is the vehicle
         // far more often than it is the past tense of `mope`, and CMUdict carries only the verb, so
         // "he rode a moped" came out mˈoᶷpt. Gold models it the same way round.
-        "moped": { "default": "mˈoᶷpʰˌɛd", "verb": "mˈoᶷpt" },
+        // ⚠ AND ITS VOWEL COMES FROM OUR OWN PLURAL ROW, NOT FROM GOLD. There is no `moped` NOUN row in
+        // CMUdict to copy, so the first draft invented `M OW1 P EH2 D` from gold's mˈOpˌɛd — which
+        // contradicted `mopeds M OW1 P EH0 D Z`, a row this dictionary already ships. The heteronym
+        // plural path runs BEFORE the lexicon lookup, so "the mopeds were parked" would have read
+        // mˈoᶷpʰˌɛdz against the engine's own mˈoᶷpɛdz for the same lexeme. `EH0` keeps the paradigm
+        // whole, which is the same call #1393 made for `herbal`.
+        "moped": { "default": "mˈoᶷpɛd", "verb": "mˈoᶷpt" },
         "wind": { "default": "wˈɪnd", "verb": "wˈaᶦnd" },
         "wound": { "default": "wˈuːnd", "past": "wˈaᶷnd" },
     },

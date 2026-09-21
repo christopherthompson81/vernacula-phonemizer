@@ -260,13 +260,30 @@ export class EnglishPhonemizer {
         // "the blessed man", "his dogged persistence", "a ragged edge" are all VBN. So an `adj` entry
         // for any of them fired in the frames where the slot is switched off and not in the frames
         // where it is switched on, which is an entry that looks live and is inert where it matters.
-        // ⚠ AN `-ed` FORM DIRECTLY BEFORE A NOUN IS ATTRIBUTIVE WHATEVER THE TAGGER CALLS IT, and
-        // that is the whole claim here — the same claim the demotion makes, read in the other
-        // direction. It can only change a word that HAS an `adj` slot, so `the painted wall` and every
-        // other ordinary participle is untouched; `past` is also tested BEFORE `adj` in the resolver,
-        // so an entry carrying a `past` slot still wins on its own terms.
+        //
+        // ⚠ A FOLLOWING NOUN IS NOT ENOUGH, AND THE FIRST VERSION OF THIS RULE SHIPPED WITHOUT THE REST.
+        // `The priest blessed bread and wine` tags NN + VBN + NN — an ordinary past-tense transitive
+        // verb with a BARE-NOUN object — and read `blˈɛsɪd`. The negative half of the test did not
+        // catch it because every case there puts a determiner after the verb ("He blessed the crowd"),
+        // which is the one shape the rule cannot fire on. **The separating signal is the LEFT context**:
+        // a real attributive is DT/PDT/PRP$/JJ + VBN + NN, and every misfire is NN/NNS + VBN + NN.
+        // ⚠ SENTENCE-INITIAL COUNTS AS A NOUN-PHRASE HEAD ("Blessed relief came"), because there is no
+        // left tag to head it — and the imperative recovery below deliberately does the same thing for
+        // the opposite case, so the two rules disagree about index 0 by design, not by accident.
+        //
+        // It can only change a word that HAS an `adj` slot, so `the painted wall` and every other
+        // ordinary participle is untouched.
+        // ⚠ AND IT CLEARS `verb`/`past`, WHICH IS THE HALF THAT MAKES IT REACH ANYTHING. `posExpectation`
+        // sets BOTH of those for VBN, and the resolver tests `past`, then `verb`, then `adj` — so on an
+        // entry carrying a `verb` slot the promotion was dead on arrival: `the moped rider` still read
+        // mˈoᶷpt, the vehicle as the past tense of `mope`, in the exact frame this rule exists for. A
+        // word in attributive position is not functioning as a verb, so clearing them is what the
+        // promotion MEANS rather than a convenience.
+        const headsNp = (t: string): boolean =>
+            t === "DT" || t === "PDT" || t === "PRP$" || t.startsWith("JJ");
         for (let i = 0; i < out.length; i++)
-            if (tags[i] === "VBN" && (tags[i + 1] ?? "").startsWith("NN")) out[i] = { ...out[i]!, adj: true };
+            if (tags[i] === "VBN" && (tags[i + 1] ?? "").startsWith("NN") && (i === 0 || headsNp(tags[i - 1] ?? "")))
+                out[i] = { ...out[i]!, verb: false, past: false, adj: true };
         if (
             out.length > 1 &&
             !out[0]!.verb &&

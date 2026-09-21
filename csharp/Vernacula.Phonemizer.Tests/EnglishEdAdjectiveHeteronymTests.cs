@@ -33,6 +33,17 @@ public class EnglishEdAdjectiveHeteronymTests
         Assert.Equal("ðə ɹᵻpʰˈɔːɹt̬ɚ dˈɔːɡd hˈɪm .", Say("The reporter dogged him ."));
     }
 
+    // ⚠ A following noun is not enough. NN + VBN + NN is a past-tense transitive verb with a bare-noun
+    // object, not an attributive, and the first version of this rule read all three as the adjective.
+    // The separating signal is the LEFT tag; sentence-initial counts as a noun-phrase head.
+    [Fact]
+    public void ABareNounObjectIsNotAnAttributive()
+    {
+        Assert.Equal("ðə pɹˈiːst blˈɛst bɹˈɛd ənd wˈaᶦn .", Say("The priest blessed bread and wine ."));
+        Assert.Equal("ðə kʰˈæptn̩ kʰˈɝst stˈɔːɹmz æt sˈiː .", Say("The captain cursed storms at sea ."));
+        Assert.Equal("blˈɛsɪd ɹᵻlˈiːf kʰˈeᶦm .", Say("Blessed relief came ."));
+    }
+
     [Fact]
     public void AnOrdinaryParticipleBeforeANounIsUntouched()
     {
@@ -47,8 +58,12 @@ public class EnglishEdAdjectiveHeteronymTests
         // `accursed` is not a heteronym — no live verb "to accurse" — so it is a dictionary fix.
         Assert.Equal("æn əkʰˈɝsɪd fˈeᶦt", Say("an accursed fate"));
         // `moped` is a NOUN CMUdict could not reach, not an -ed adjective.
-        Assert.Equal("hiː ɹˈoᶷd ə mˈoᶷpʰˌɛd .", Say("He rode a moped ."));
+        Assert.Equal("hiː ɹˈoᶷd ə mˈoᶷpɛd .", Say("He rode a moped ."));
         Assert.Equal("hiː mˈoᶷpt ɚˈaᶷnd .", Say("He moped around ."));
+        // ⚠ The promotion must clear Verb, or an entry with a Verb slot never reaches its Adj.
+        Assert.Equal("ðə mˈoᶷpɛd ɹˈaᶦd̬ɚ", Say("the moped rider"));
+        // ⚠ `beloved` also needs a Noun slot: the plural path never consults Adj.
+        Assert.Equal("maᶦ bᵻlˈʌvɪdz ˈɑːɹ hˈɪɹ .", Say("My beloveds are here ."));
     }
 
     [Fact]

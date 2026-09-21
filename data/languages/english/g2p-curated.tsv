@@ -2871,8 +2871,9 @@ tsk		T S K	consonant interjection CMUdict lacks; the OOV net would spell it out
 # ⚠ IT IS A WEAK ARBITER ON A LOANWORD, because it falls back to letter rules and so votes for the
 # spelling-predictable reading. Its vote is evidence about a DROPPED consonant, not about ⟨g⟩ = /ʒ/.
 #
-# ⚠ SIX OF THE 69 ARE REFUSED and are not below. `accursed` is the -ed adjective heteronym class, which
-# queue item 3 owns and which the dictionary row cannot express. `herbal` and `herbalist` are h-less
+# ⚠ SIX OF THE 69 ARE REFUSED here. `accursed` was deferred to the -ed adjective heteronym class, which
+# queue item 3 owns — and item 3 concluded it is NOT a heteronym (no live verb `to accurse`), so it IS
+# below now, in that item's own block at the end of this file. `herbal` and `herbalist` are h-less
 # because GenAm `herb` IS h-less, and our dict is already consistent across herb/herbs/herbal/herbalist
 # while keeping the /h/ of `herbaceous` and `herbicide` — applying them would have broken a correct
 # paradigm to match two British-leaning sources. `louis` at rank 2,095 is the `tours` trap: both sources
