@@ -76,8 +76,13 @@ public static class EnglishGb
     /** An /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic.
      *  ⚠ A RUN OF MARKS, NOT ONE (#1250): the parent emits `ˌˈ` together on five dict words (`greedier` is
      *  `ɡɹˌˈiːd̬iʲɚ`), where one optional mark could not see the vowel behind the pair and the ONSET cluster
-     *  `ɡɹ` lost its /ɹ/. */
-    private const string CODA = $"(?![ˈˌ]*[{VOWEL}])";
+     *  `ɡɹ` lost its /ɹ/.
+     *  ⚠ AND A SYLLABIC CONSONANT IS A NUCLEUS (#1403), which is the same defect with `n̩`/`ɫ̩`/`m̩` in
+     *  place of the stress run: the syllabic mark REMOVES the vowel that followed the /ɹ/, so the bare
+     *  vowel test read an onset cluster as a coda. `children` came out `t͡ʃˈɪɫdn̩`, `neutral` `njˈuːtɫ̩`,
+     *  `nostril` `nˈɒstɫ̩` — 34 words losing a cluster /ɹ/ RP pronounces. See the TS. */
+    private const string SYLLABIC = "\u0329";
+    private const string CODA = $"(?![ˈˌ]*(?:[{VOWEL}]|[nmɫlŋ]{SYLLABIC}))";
 
     private static IReadOnlySet<string> LoadSet(string file) =>
         new HashSet<string>(LoadTsv.LoadTsvMap("languages/english-gb", file, optional: true).Keys, StringComparer.Ordinal);

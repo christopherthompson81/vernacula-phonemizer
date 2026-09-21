@@ -827,8 +827,11 @@ describe("four lexical facts the dictionary had wrong or lacked", () => {
     // ⚠ THE OOV PATH PATTERNED IT ON `derivative`, which is the other stem: gold has derivative
     // dəɹˈɪvəɾɪv with the short vowel but derive dəɹˈIv and derivable dəɹˈIvəbᵊl with the long one.
     // Both golds agree, and the word was in no dictionary at all.
+    // ⚠ THE FINAL `l` IS SYLLABIC AS OF #1403's SYLLABIC-TABLE REBUILD, and gold is why — the comment
+    // above quotes it as `dəɹˈIvəbᵊl`, with the reduced-slot mark this table imports. The claim this
+    // test makes is about the VOWEL (aᶦ from `derive`, not ɪ from `derivative`) and is unchanged.
     test("derivable takes its stem's vowel, not derivative's", () => {
-        expect(say("derivable")).toBe("dɚˈaᶦvəbəɫ");
+        expect(say("derivable")).toBe("dɚˈaᶦvəbɫ̩");
         expect(say("derivative")).toBe("dɚˈɪvət̬ɪv");   // ⚠ the control: still short
     });
 

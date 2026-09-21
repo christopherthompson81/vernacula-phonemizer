@@ -46,20 +46,17 @@ describe("the position-indexed tables still point at the phones they claim", () 
     // L/N/M is really the sonorant carrying the syllable" — an index on a reduced vowel with no
     // sonorant after it is as rotted as one on a consonant, and `buccal`'s bad index landed on the L.
     /**
-     * ⚠ NINE ROWS WERE ALREADY ROTTED WHEN THIS CHECK WAS WRITTEN, and they are WAIVED rather than
-     * repaired, because repairing them here would be guessing. Every one is an off-by-one — the
-     * signature of a dict row that gained or lost a phone after the table was generated — and
-     * `en_build_syllabic.mts --write` produces 1,615 MORE rows than the committed file, so the table
-     * is long stale and regenerating it is its own piece of work with its own referee question.
-     * ⚠ AND ONE OF THE NINE IS GENUINELY AMBIGUOUS, which is the reason not to hand-fix the set:
-     * `unreasonable` (AH2 N R IY1 Z AH0 N AH0 B AH0 L) has TWO slots a reduced vowel before a sonorant
-     * could mean, index 5 and index 9, and the rotted 8 is one step from each.
+     * ⚠ THE NINE WAIVED ROWS ARE GONE, CLOSED BY #1403's REBUILD, and the waiver is deleted rather than
+     * left behind to mask the next one — which is what the second assertion below enforces and what
+     * caught them. They were `appreciable`, `departmental`, `extraordinary`, `forbidden`,
+     * `insignificance`, `methuselah`, `negotiable`, `unreasonable` and `vehicle`: every one an
+     * off-by-one, the signature of a dict row that gained or lost a phone after the table was generated.
+     * ⚠ AND `unreasonable` IS THE ONE THIS COMMENT SAID COULD NOT BE HAND-FIXED, because
+     * `AH2 N R IY1 Z AH0 N AH0 B AH0 L` has TWO slots a reduced vowel before a sonorant could mean and
+     * the rotted index sat one step from each. The generator settles it from gold (index 9), which is
+     * the argument for regenerating rather than repairing: the source knows, and a reader guessing
+     * does not.
      */
-    const PRE_EXISTING_ROT = new Set([
-        "appreciable", "departmental", "extraordinary", "forbidden", "insignificance",
-        "methuselah", "negotiable", "unreasonable", "vehicle",
-    ]);
-
     test("every en-syllabic.tsv index is a reduced vowel followed by L, N or M", () => {
         const bad: string[] = [];
         for (const [w, idx] of rows("en-syllabic.tsv")) {
@@ -71,12 +68,7 @@ describe("the position-indexed tables still point at the phones they claim", () 
                 if (next !== "L" && next !== "N" && next !== "M") bad.push(`${w}[${i}] → ${next ?? "(past end)"}`);
             }
         }
-        expect(bad.filter((x) => !PRE_EXISTING_ROT.has(x.split("[")[0]!))).toEqual([]);
-        // ⚠ AND THE WAIVER MAY NOT ROT EITHER. A row repaired by a future rebuild should leave this
-        // list, not sit in it masking the next one — the same rule en-curation-gap.test.ts applies to
-        // its known gaps, and the reason that test caught four stale waivers during #1334.
-        const stillBad = new Set(bad.map((x) => x.split("[")[0]!));
-        expect([...PRE_EXISTING_ROT].filter((w) => !stillBad.has(w))).toEqual([]);
+        expect(bad).toEqual([]);
     });
 
     test("every en-nasal-seam.tsv index is an N", () => {

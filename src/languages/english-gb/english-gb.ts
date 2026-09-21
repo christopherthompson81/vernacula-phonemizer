@@ -74,7 +74,17 @@ const PRE_VOWEL = `${VOWEL}ɚɝ`;
  * the ONSET CLUSTER `ɡɹ` lost its /ɹ/, exactly as the missing vowel did. `*` costs nothing: more marks
  * before a vowel still means "before a vowel".
  */
-const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic
+/**
+ * ⚠ A SYLLABIC CONSONANT IS A NUCLEUS, so an /ɹ/ before one is an ONSET and must not be dropped. This
+ * is the same defect the stress-run note above records, with `n̩`/`ɫ̩`/`m̩` in place of `ˌˈ`: the
+ * syllabic mark REMOVES the vowel that used to follow the /ɹ/, so the bare vowel test stopped seeing a
+ * nucleus and read an onset cluster as a coda. `children t͡ʃˈɪɫdɹn̩` came out `t͡ʃˈɪɫdn̩`, `neutral`
+ * `njˈuːtɫ̩`, `nostril` `nˈɒstɫ̩` — 34 words losing a CLUSTER /ɹ/ that RP pronounces.
+ * ⚠ IT GREW WITH THE SYLLABIC TABLE AND WAS NOT CAUSED BY IT: 22 of the 34 predate #1403's rebuild,
+ * which added 12 more. The trigger is the table; the bug is here.
+ */
+const SYLLABIC = "\u0329";
+const CODA = `(?![ˈˌ]*(?:[${VOWEL}]|[nmɫlŋ]${SYLLABIC}))`; // /ɹ/ before neither a vowel nor a syllabic consonant = coda
 
 /**
  * The eight rhotic patterns, HOISTED. `toRP` runs once per word and built every one of them from `VOWEL`
