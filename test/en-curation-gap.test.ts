@@ -85,6 +85,11 @@ const KNOWN_GAPS = new Map<string, string>([
     ["repulse", "n-gram (source N): recalls the upstream IY0; our own `repulsion`/`repulsive` are IH0; closes on a retrain"],
     ["revile", "n-gram (source N): recalls the upstream IY0; closes on a retrain"],
 
+    // ⚠ ONE FROM #1378 QUEUE ITEM 5, the same shape a third time: the n-gram recalls the upstream row
+    // verbatim, because the model trains on upstream CMUdict and `hasid` was in its training data with
+    // the stress on the second syllable. gold, Moby and espeak all put it on the first.
+    ["hasid", "n-gram (source N): recalls the upstream HH AH0 S IH1 D; closes on a retrain"],
+
     // ⚠ TWO ROOTS, AND THEIR DERIVED FORMS ARE NOT HERE, which is the shape to notice: `haphazardly`
     // and `upholstered` close through morphDecode the moment their stems are corrected, because that
     // path looks the stem up in the SHIPPED dict. Only the roots the n-gram must spell from letters

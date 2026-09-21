@@ -5763,3 +5763,88 @@ no coverage. Quoted to show the rows landed, not as validation. Same situation a
 
 NEXT. Item 4 produces no predicate, and the queue entry should be corrected rather than left for the
 next reader to act on. Items 5 and 6 remain.
+
+## Run 88 — 2026-09-21 08:00 — queue item 5: three sub-classes, and two refusals that were right for one environment
+
+Item 5 is three things recorded as "smaller, already scoped": the conservative yod (41 rows, refused
+once), the mixed-rhotic rows (~45–55, "needing a positional referee test the current machinery cannot
+do"), and the stress-digit rows deferred from #1369.
+
+### ⚠ THE MIXED RHOTIC NEEDED A COUNT, NOT AN ALIGNMENT
+
+The log and the test both recorded this class as unreachable: *"they need a POSITIONAL test, which
+nothing here can do because no alignment exists between the spelling's ⟨r⟩ and the reading's phones."*
+That is the wrong shape of answer. All three existing rules ask whether a rhotic is PRESENT — anywhere,
+in the tail, or in a coda — so any surviving rhotic saves a row. **Counting** the coda-eligible ⟨r⟩ in
+the spelling against the coda rhotics in the reading catches a row that dropped SOME of them, and which
+one it dropped does not matter.
+
+    referee headwords with 2+ coda ⟨r⟩ whose EVERY reading has fewer coda rhotics:  62
+
+⚠ **AND THE COUNT ALONE OVER-FIRES.** `Worcester` is "Wooster" — its first ⟨r⟩ is silent in GenAm too;
+`catercorner` is "cati-corner"; `charcutier` and `cartonnier` are French. Gated on OUR OWN READING —
+the discriminator the builder's French note already names, used for a second purpose — 62 becomes 26,
+and every one of the 26 is a genuine mixed-profile RP row. It does not run on the OOV corpus at all,
+where there is no second opinion: 34 rows match the count there and none is dropped.
+
+⚠ **ONE OF THE 26 WAS BEING DROPPED FOR THE WRONG REASON.** `thermometer`'s only Moby body spells
+THERMOMETRIC. Dropping it as RP is the right outcome on a false premise, and this log's own rule says a
+later change to the rhotic rule would hand it back. Declared in `MOBY_DEFECTIVE` instead.
+
+    moby-lexicon  26,844/35,027 (76.6%)  →  26,844/35,001 (76.7%)
+
+⚠ **THE NUMERATOR IS UNCHANGED, WHICH IS THE RESULT.** All 26 removed rows were FAILING: every one was
+a false disagreement, exactly as the class predicted. (A first reading of this looked like the numerator
+had RISEN by one; the baseline had been measured before the `pretension` row of #1398 landed.)
+
+### ⚠ THE YOD REFUSAL WAS RIGHT FOR ONE ENVIRONMENT AND APPLIED AS A BLANKET
+
+GenAm drops the yod after a CORONAL and KEEPS it after a labial or velar. Splitting the class by the
+preceding consonant:
+
+    coronal  (attitudinal, avenue, latitude, mildew, neptune, costume, maneuver)   58   refused, correctly
+    NON-coronal                                                                    9
+
+Seven of the nine are proper names or loanwords where Moby is alone (`beaufort` — a genuine homograph,
+Beaufort SC is "BYOO-fɚt" — `buchen`, `buena`, `fuhr`, `elihu`, `hugel`, `mulatto`). **Two are a real
+defect in a /k/ environment where no variety drops the yod**: `inconspicuous` read `ɪnkˈɑːnspɪkwəs` and
+`promiscuous` `pɹoᶷmɪskwəs`, both against our own `conspicuous`, `innocuous`, `vacuous`,
+`conspicuity` and `promiscuity`, all of which keep it, and against gold and espeak.
+
+⚠ **THE FIRST VERSION OF THE INSTRUMENT ASKED WHETHER OUR ROW CONTAINS `Y UW`**, which reads every row
+that spells the yod with a REDUCED GOOSE as yod-less — `evacuate IH0 V AE1 K Y AH0 EY2 T`, `granule
+G R AE1 N Y AH0 L`, `debutante`, `invaluable`, `genuine`. Test the PHONE, not one spelling of its
+context. The same defect this log records for the schwa count in Run 70, in a new place.
+
+⚠ **AND THE `-uous` SCAN SURFACED A SECOND FAMILY THAT IS NOT A YOD AT ALL.** `incongruous` and
+`incongruity` drop the /ɡ/ our own `congruous` carries, with gold, Moby and espeak all against us.
+`incongruous` already had a curated row for its vowel and is AMENDED IN PLACE — the `conger` case.
+
+### The stress-and-vowel block from #1369, with a third source it did not have
+
+13 applied: `hasid`, `kenaf`, `legroom`, `monadnock`, `orel`, `picturesque`, `primavera`, `flummox`,
+`sacramental`, `reprobate`, `unalloyed`, `unalienable`. Three refused, on three different grounds:
+
+    wahoo                 MOBY ITSELF CARRIES BOTH PLACEMENTS — the free-variation tell
+    mudra                 espeak agrees with US, and gold and Moby disagree with each other
+    parliamentarianism    ⚠ OUR ROW IS RIGHT AND THE DICTIONARY PROVES IT: `parliamentary` has EH1
+                          because the primary lands on `-men-`, `parliamentarian` AH0 because it lands
+                          on `-tar-` and `-men-` reduces. Our `-ism` row follows `parliamentarian`.
+                          Applying gold would have broken a correct alternation to match a referee.
+
+### ⚠ AND `qatar` WAS APPLIED AND THEN REVERTED, ON EVIDENCE A GOLDEN PRODUCED
+
+All three sources place its primary on the first syllable, so it went in — and `syl`'s golden went
+stale on the sentence **"FIFA World Cup Qatar 2022"**, which is exactly the broadcast register where
+/kəˈtɑːr/ is current. The three sources agree on PLACEMENT and disagree with each other on the vowels
+(`K AA1 T AA2 R`, `K AA1 T AA0 R`, `kˈæɾɑːɹ`), which is weak evidence that they describe one settled
+reading. **The golden was the only thing in the repo that showed the word in running text rather than
+in citation form**, and it was right. Reverted; the goldens then went fresh with no regeneration.
+
+    audit candidates    593 → 583          all three agree   37,647 → 37,657
+    moby-lexicon        26,844/35,027 → 26,857/35,001  (76.6% → 76.7%)
+    en-gb-palm          544 → 545  — `hasid`, whose RP row is hɑːsɪd and which the PALM edit can only
+                        match now that our vowel is right
+    curation gaps       +1 (`hasid`, source N, the retrain class a fourth time)
+    suite 6,147 · goldens 189/36,495/0 stale · parity 189 byte-identical
+

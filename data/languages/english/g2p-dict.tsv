@@ -43862,7 +43862,7 @@ flulike	F L UW1 L AY2 K
 flume	F L UW1 M
 flumenbaum	F L UW1 M AH0 N B AW2 M
 flumes	F L UW1 M Z
-flummox	F L AH0 M AO1 K S
+flummox	F L AH1 M AH0 K S
 flummoxed	F L AH0 M AO1 K S T
 flump	F L AH0 M P
 flung	F L AH1 NG
@@ -53332,7 +53332,7 @@ hashman	HH AE1 SH M AH0 N
 hashmark	HH AE1 SH M AA2 R K
 hashmi	HH AE1 SH M IY0
 hashtag	HH AE1 SH T AE2 G
-hasid	HH AH0 S IH1 D
+hasid	HH AA1 S IH0 D
 hasidic	HH AH0 S IH1 D IH0 K
 hasidim	HH AH0 S IH1 D IH0 M
 hasidism	HH AE1 S IH0 D IH2 Z AH0 M
@@ -59445,8 +59445,8 @@ inconclusive	IH2 N K AH0 N K L UW1 S IH0 V
 inconclusively	IH2 N K AA1 N K L UW0 S IH0 V L IY0
 inconclusiveness	IH2 N K AH0 N K L UW1 S IH0 V N AH0 S
 incongruent	IH0 N K AA1 NG G R UH0 AH0 N T
-incongruity	IH2 NG K AO0 NG R UW1 IH0 T IY0
-incongruous	IH2 NG K AA1 NG R UW0 AH0 S
+incongruity	IH2 NG K AO0 NG G R UW1 IH0 T IY0
+incongruous	IH2 NG K AA1 NG G R UW0 AH0 S
 incongruously	IH2 NG K AA1 NG R UW0 AH0 S L IY0
 inconnu	IH2 N K AH0 N UW1
 inconsequent	IH0 N K AA1 N S AH0 K W EH2 N T
@@ -59458,7 +59458,7 @@ inconsistently	IH2 N K AH0 N S IH1 S T AH0 N T L IY0
 inconsolable	IH2 N K AH0 N S OW1 L AH0 B AH0 L
 inconsonant	IH0 N K AA1 N S AH0 N AH0 N T
 inconsonantly	IH0 N K AA1 N S AH0 N AH0 N T L IY0
-inconspicuous	IH2 NG K AA1 N S P IH0 K W AH0 S
+inconspicuous	IH2 NG K AH0 N S P IH1 K Y UW0 AH0 S
 inconstancy	IH2 N K AA1 N S T AH0 N S IY0
 inconstant	IH0 N K AA1 N S T AH0 N T
 inconstantly	IH0 N K AA1 N S T AH0 N T L IY0
@@ -64598,7 +64598,7 @@ kempthorne	K EH1 M P TH AO0 R N
 kempton	K EH1 M P T AH0 N
 kemron	K EH1 M R AH0 N
 ken	K EH1 N
-kenaf	K EH1 N AE0 F
+kenaf	K AH0 N AE1 F
 kenagy	K EH1 N AH0 JH IY0
 kenai	K IY1 N AY0
 kenan	K IY1 N AH0 N
@@ -69678,7 +69678,7 @@ legore	L EH1 G AO2 R
 legrand	L EH1 G R AE0 N D
 legrande	L EH1 G R AE0 N D
 legree	L IH0 G R IY1
-legroom	L AH0 G R UW1 M
+legroom	L EH1 G R UW2 M
 legros	L EH1 G R OW0 Z
 legs	L EH1 G Z
 legume	L EH1 G Y UW2 M
@@ -80577,7 +80577,7 @@ monachino	M OW0 N AA0 K IY1 N OW0
 monaco	M AA1 N AH0 K OW2
 monad	M OW1 N AE0 D
 monadelphous	M AA2 N AH0 D EH1 L F AH0 S
-monadnock	M AA2 N AE1 D N AA0 K
+monadnock	M AH0 N AE1 D N AA0 K
 monagene	M AA1 N AH0 JH IY2 N
 monaghan	M AA1 N AH0 HH AE0 N
 monahan	M AA1 N AH0 HH AE0 N
@@ -87087,7 +87087,7 @@ oregon	AO1 R AH0 G AH0 N
 oregonian	AO2 R AH0 G OW1 N IY0 AH0 N
 oregonians	AO2 R AH0 G OW1 N IY0 AH0 N Z
 oreilly	AO1 R AH0 L IY0
-orel	AO1 R AH0 L
+orel	AO0 R EH1 L
 orela	AO0 R EH1 L AH0
 orelia	AO0 R EH1 L IY0 AH0
 orellana	AO0 R EH0 L AE1 N AH0
@@ -92396,7 +92396,7 @@ picts	P IH1 K T S
 picture	P IH1 K CH ER0
 pictured	P IH1 K CH ER0 D
 pictures	P IH1 K CH ER0 Z
-picturesque	P IH1 K CH ER0 AH0 S K
+picturesque	P IH2 K CH ER0 EH1 S K
 picturetel	P IH1 K CH ER2 T EH2 L
 picturing	P IH1 K CH ER0 IH0 NG
 pidcock	P IH1 D K AH0 K
@@ -95618,7 +95618,7 @@ primary	P R AY1 M EH2 R IY0
 primate	P R AY1 M EY2 T
 primates	P R AY1 M EY2 T S
 primatology	P R AY2 M AH0 T AA1 L AH0 JH IY0
-primavera	P R IY0 M AA0 V EH1 R AH0
+primavera	P R IY2 M AH0 V EH1 R AH0
 prime	P R AY1 M
 primeau	P R IH0 M OW1
 primeaux	P R IH0 M OW1
@@ -96087,7 +96087,7 @@ prominences	P R AA1 M AH0 N AH0 N S AH0 Z
 prominent	P R AA1 M AH0 N AH0 N T
 prominently	P R AA1 M AH0 N AH0 N T L IY0
 promiscuity	P R OW2 M IH0 S K Y UW1 AH0 T IY0
-promiscuous	P R OW1 M IH0 S K W AH0 S
+promiscuous	P R AH0 M IH1 S K Y UW0 AH0 S
 promise	P R AA1 M AH0 S
 promised	P R AA1 M AH0 S T
 promisee	P R AA2 M IH0 S IY1
@@ -101148,7 +101148,7 @@ reprise	R IH0 P R AY1 Z
 repro	R IY1 P R OW0
 reproach	R IH0 P R OW1 CH
 reproachful	R IH0 P R OW1 CH F AH0 L
-reprobate	R EH1 P R AO0 B EY0 T
+reprobate	R EH1 P R AH0 B EY2 T
 reprobation	R EH2 P R AH0 B EY1 SH AH0 N
 reprocess	R IY0 P R AA1 S EH0 S
 reprocessed	R IY0 P R AO1 S EH0 S T
@@ -104837,7 +104837,7 @@ sackville	S AE1 K V IH2 L
 saco	S EY1 K OW0
 sacra	S AE1 K R AH0
 sacrament	S AE1 K R AH0 M AH0 N T
-sacramental	S AE1 K R AH0 M AH0 N T AH0 L
+sacramental	S AE2 K R AH0 M EH1 N T AH0 L
 sacramentally	S AE2 K R AH0 M EH1 N T AH0 L IY0
 sacramento	S AE2 K R AH0 M EH1 N T OW0
 sacraments	S AE1 K R AH0 M AH0 N T S
@@ -125256,14 +125256,14 @@ unaffiliated	AH0 N AH0 F IH1 L IY0 EY2 T IH0 D
 unaffordable	AH0 N AH0 F AO1 R D AH0 B AH0 L
 unafraid	AH2 N AH0 F R EY1 D
 unaided	AH0 N EY1 D IH0 D
-unalienable	AH0 N EY1 L IY0 EH2 N AH0 B AH0 L
+unalienable	AH0 N EY1 L IY0 AH0 N AH0 B AH0 L
 unaligned	AH2 N AH0 L AY1 N D
 unalike	AH2 N AH0 L AY1 K
 unalleviated	AH2 N AH0 L IY1 V IY0 EY2 T AH0 D
 unallocate	AH0 N AE1 L AH0 K EY2 T
 unallocated	AH0 N AE1 L AH0 K EY2 T IH0 D
 unallowable	AH2 N AH0 L AW1 AH0 B AH0 L
-unalloyed	AH0 N AE1 L OY2 D
+unalloyed	AH2 N AH0 L OY1 D
 unalterable	AH0 N AO1 L T ER0 AH0 B AH0 L
 unalterably	AH0 N AO1 L T ER0 AH0 B L IY0
 unaltered	AH0 N AO1 L T ER0 D

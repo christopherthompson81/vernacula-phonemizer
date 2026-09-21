@@ -295,6 +295,11 @@ export const MOBY_DEFECTIVE: ReadonlyMap<string, string> = new Map([
     // wrong syllable, not absent. Both were being dropped as non-rhotic by accident of the corruption.
     ["nornis", "body is 'Norris' minus a phone — 'n/O/r/I/s"],
     ["pardalote", "⟨rd⟩ transposed to /dr/ — 'p/A/dr/@/,l/oU/t"],
+    // ⚠ SURFACED BY THE MIXED-RHOTIC COUNT IN #1378 ITEM 5, and declared here rather than left to it
+    // for the reason this table's header gives: the count would drop it as RP, which is the right
+    // outcome for the wrong reason, and a later change to that rule would hand it back. `thermometer`
+    // would be θɚmɑmɪtɚ; the body spells THERMOMETRIC, which Moby does not carry separately.
+    ["thermometer", "body is 'thermometric' — ',/T//[@]/rm/@/\'m/E/tr/I/k"],
 ]);
 
 /**
