@@ -1,0 +1,17 @@
+# `tools/english/en_g2p_bilstm.py` — the English BiLSTM OOV tagger.
+#
+#   python3 -m venv .venv                       # `.venv/` is gitignored
+#   .venv/bin/pip install -r tools/english/requirements-bilstm.txt
+#   EN_PRODUCTION=1 .venv/bin/python -u tools/english/en_g2p_bilstm.py
+#
+# ⚠ THE PINS ARE A RECORD, NOT A CONTRACT. A cuDNN LSTM's backward pass uses atomics, so the same
+# seeds on the same GPU can still diverge and different hardware certainly will — which is why
+# en-g2p-tagger.PROVENANCE.md records the environment of each shipped set of weights rather than
+# promising reproducibility. What these pins buy is that a re-run STARTS from the same place.
+# ⚠ AND THE TORCH BUILD MUST MATCH THE DRIVER. `+cu124` is what this machine's driver takes; install
+# the index-url line for the CUDA your driver supports rather than editing the version here.
+#
+# --extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0
+onnx==1.22.0
+onnxruntime==1.27.0

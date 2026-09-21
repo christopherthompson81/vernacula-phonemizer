@@ -9,9 +9,13 @@ per-position tag) on 90% of g2p-dict.tsv (117k words, public-domain CMUdict) and
 
     EN_PRODUCTION=1 <a torch+onnx venv>/bin/python -u tools/english/en_g2p_bilstm.py
 
-⚠ THERE IS NO `.venv` IN THIS CHECKOUT and this line used to name one. Any venv with torch (CUDA),
-onnx, onnxruntime and onnxscript will do; the one the shipped weights came from is recorded in
-data/languages/english/en-g2p-tagger.PROVENANCE.md. Without EN_PRODUCTION the script only reports the
+⚠ THERE IS A `.venv` AGAIN AS OF #1402, and it is gitignored:
+
+    python3 -m venv .venv && .venv/bin/pip install -r tools/english/requirements-bilstm.txt
+
+Any venv with torch (CUDA), onnx and onnxruntime will do — `onnxscript` is NOT needed, because the
+export below passes `dynamo=False` and so takes the legacy TorchScript path. The environment each set
+of shipped weights came from is recorded in data/languages/english/en-g2p-tagger.PROVENANCE.md. Without EN_PRODUCTION the script only reports the
 held-out split and writes nothing.
 """
 import os, sys, time, random, hashlib, json
