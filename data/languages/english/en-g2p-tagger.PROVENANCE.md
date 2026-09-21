@@ -18,6 +18,66 @@ the noisy wikipron referee couldn't even measure it. On a CLEAN CMUdict 90/10 he
 | current pipeline (compound→morph→n-gram) | 42.7% | 81.8% |
 | **BiLSTM tagger (this model)** | **71.5%** | **93.4%** (PER 6.6% vs 18.2% — 64% fewer phone errors) |
 
+⚠ **RETRAINED 2026-09-21 ON THE CORRECTED DICTIONARY (#1402), AND THE GAIN IS AGAIN ONLY IN THE TAIL.**
+~2,000 corrections landed between #1361 and this run — the loanword slice, the `-ed` adjectives, the
+prefix vowel, the yod/velar rows, the #1369 stress block. Scored on the SAME two populations the
+2026-09-19 entry below published, so the eras are directly comparable:
+
+| held-out population | stress-indep | incl. stress |
+|---|---|---|
+| words the #1341 dictionary also had (n=11,748) | 71.4% → **71.6%** | 66.4% → **66.4%** |
+| the Moby tail added in #1344/#1353 (n=1,780) | 65.7% → **67.7%** | 53.7% → **55.7%** |
+
+**+2.0pp on the obscure/foreign/proper-noun vocabulary the OOV tier exists for, and nothing on the
+established core** — the same narrow shape as the previous retrain's +6.1pp, and the correct one: the
+corrections were overwhelmingly to the tail.
+
+⚠ **AND THE STALENESS NUMBER IS MOSTLY MEMORISATION, WHICH THE FIRST DRAFT OF THIS ENTRY OVERSOLD.**
+Asked for each of the 2,764 curated words, the tagger emitted the UPSTREAM reading on 671 before and
+54 after. That confirms the export landed, and it is NOT a runtime gain: a curated word is IN the
+dictionary, so the lexicon answers and the tagger is never consulted for it. What a retrain actually
+buys is the generalisation above.
+
+    training environment (a `.venv` now exists and is gitignored; pins in
+    tools/english/requirements-bilstm.txt)
+    torch 2.6.0+cu124 · cuda 12.4 · onnx 1.22.0 · onnxruntime 1.27.0
+    python 3.12.3 · NVIDIA GeForce RTX 3090
+
+⚠ THAT IS A TORCH DOWNGRADE FROM THE 2026-09-19 WEIGHTS (2.11.0+cu128) AND IT WAS NOT A CHOICE: it is
+what the `.venv` in this checkout already carried. Recorded because the point of this block is to say
+where a set of weights came from, and an unexplained move backwards is exactly the thing a later
+reproduction attempt would waste time on.
+    split model: 65.0% exact / 71.1% stress-indep on n=13,531; 190s to measure, then a full-dict
+    retrain to export. 28 chars, 208 tags — the vocab is unchanged, so `.meta.json` is byte-identical.
+
+⚠ **40 GOLDEN LANGUAGES MOVED, 162 ROWS, AND IT IS CLOSE TO A WASH.** Enumerated rather than
+summarised, because "majority repairs" would bury the other half:
+
+    REPAIRS    ʹCrosbyʹ ɹˈɔːbi → ɹˈɔːsbi (12) · Santorini …ˈiːniː → …ˈiːni (10) · Bellingshausen
+               …ɪŋzh… → …ɪŋʃ… (6) · Saint-Saëns sˈiːnz → sˈɑːnz (9) · Xiang ʃjˈæŋ → ʃjˈɑːŋ (2)
+               NVDA ˈɛnvdə → ˌɛnvˌiːdˈeᶦ (2) · Hunanese huː… → hjˌuː… (2) · tahlequah, abbott
+    REGRESSIONS Panthera pʰˌænθˈɛɹə → pɑːnθˈɛɹə (14) · biorhythm, stress moved off the first
+               syllable (8) · `Eee` ˈiːʲi → ˌiːpləˈiː (8) · a ŋ lost in `langwithname` (5) · the romanised `uong` wˈɔːŋ →
+               uːˈɔːŋ (3) — ⚠ NOT the name `Wong`, which is in the dictionary and unaffected;
+               an earlier draft of this line said it was, which sends a reader at the lexicon path · resistivity ɹˌiːz… → ɹˌɛz… (3) · Zhen ʒˈɛn → zˈɛn (3)
+    COSMETIC   Aldwych and Gangnam gain or lose a secondary mark (10)
+
+⚠ **AND `rr` WAS FIXED AT THE ROOT RATHER THAN ACCEPTED**, which took the churn from 204 rows to 162.
+The 2026-09-19 entry records `ˌɑːɹˈɑːɹ` for a bare `rr` as a deliberate repair — and the sentence those 42
+rows come from is *about* distinguishing Spanish `r` from `rr`, so collapsing them to one `ˈɑːɹ` loses
+the point of the text. It is now a DICTIONARY row (`rr  AA1 R AA1 R`), which pins it in every path
+rather than in whichever model is shipped — the same remedy #1400 used for `COVID`.
+⚠ `Eee` WAS *NOT* GIVEN ONE, and the shipped reading is the tagger's `ˌiːpləˈiː` — which is plainly
+bad, inventing an `l` the spelling has no letter for. It is left because no source was found for any
+reading: the sync path says `ˈiː` (one syllable for three letters), the previous tagger said `ˈiːʲi`
+(two), and ASUS's own "Eee PC" is said both "e-e-e" and "triple-E". Inventing a dictionary row to
+protect a golden is the tail wagging the dog.
+⚠ AND A LEXICON ROW FOR IT DID EXIST BRIEFLY AND WAS REMOVED, which is worth recording because it
+nearly shipped: `--add-missing` wrote `eee  ˈiː` into `accent-lexicon.tsv` during an earlier attempt,
+the dict row behind it was then dropped, and a plain `--write` does not remove rows. The orphan was
+NOT inert — it was what produced `ˈiː`, so it would have silently pinned this regression while this
+paragraph claimed the word was left alone. The doc and the data now agree.
+
 ⚠ **RETRAINED 2026-09-19 ON THE MOBY-EXPANDED DICTIONARY (+15% data), AND THE HEADLINE IS THAT IT DID
 NOT MOVE THE ORIGINAL POPULATION.** The dictionary went 117,483 → 135,308 rows between #1341 and this
 run, almost entirely the Moby imports of #1344 and #1353. The md5 held-out split is deterministic, so
@@ -32,8 +92,10 @@ almost certainly will. The weights shipped 2026-09-19 were produced by
     torch 2.11.0+cu128 · cuda 12.8 · onnx 1.21.0 · onnxruntime 1.24.4
     python 3.12.3 · NVIDIA GeForce RTX 3090
 
-so a reproduction attempt that lands somewhere else knows why. There is no `requirements.txt` and no
-`.venv` in the checkout; the recipe above wants any venv carrying those four packages.
+so a reproduction attempt that lands somewhere else knows why. ⚠ THE "NO `requirements.txt` AND NO
+`.venv`" THIS PARAGRAPH USED TO END WITH IS OUT OF DATE as of #1402: `.venv/` is gitignored and
+`tools/english/requirements-bilstm.txt` records the pins. They are a record, not a contract — a cuDNN
+LSTM's backward pass uses atomics, so the same seeds on the same GPU can still diverge.
 
 ⚠ THESE ARE THE 90%-SPLIT MODEL'S NUMBERS, NOT THE SHIPPED ARTIFACT'S. The script trains a split model
 to measure, then retrains on the full dictionary to export. The shipped graph scores 99.1% on the rows

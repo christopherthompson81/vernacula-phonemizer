@@ -104090,6 +104090,7 @@ rozzell	R AA1 Z AH0 L
 rozzi	R AA1 Z IY0
 rpf	AA1 R P IY1 EH1 F
 rpm	AA1 R P IY1 EH1 M
+rr	AA1 R AA1 R
 rsvp	AA1 R EH1 S V IY1 P IY1
 rte	AA1 R T IY1 IY1
 ru	R UW1
