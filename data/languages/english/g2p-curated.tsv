@@ -3133,4 +3133,13 @@ flummoxed	F L AH0 M AO1 K S T	F L AH1 M AH0 K S T	the participle of the correcte
 # whichever model is shipped, which is the point: a reported misreading pinned to a MODEL's invention is
 # pinned to something that moves every retrain.
 covid		K OW1 V IH0 D	CMUdict predates the word; gold has kˈOvˌɪd (#1400)
+#
+# ⚠ A TOKEN UPSTREAM CMUdict DOES NOT CARRY, and it MUST be here rather than only in the dict. #1402
+# added `rr` to `g2p-dict.tsv` to stop the retrained tagger collapsing a bare `rr` to one `ˈɑːɹ` — and
+# `--emit` regenerates that file FROM $CMUDICT, which has no `rr`, so the row would have vanished on the
+# next n-gram retrain and 42 golden rows would have silently reverted. `covid` (#1400) is in both files;
+# this one was in neither until now. The header at the top of this file is the whole reason it exists.
+# ⚠ THE READING IS THE LETTER SPELLING, `AA1 R AA1 R`. The rows it protects come from a sentence about
+# distinguishing Spanish ⟨r⟩ from ⟨rr⟩, so collapsing the two to one `ˈɑːɹ` loses the point of the text.
+rr		AA1 R AA1 R	CMUdict has no `rr`; the letter spelling, so a bare ⟨rr⟩ is not read as a single ⟨r⟩ (#1402)
 

@@ -11,7 +11,10 @@
 # ⚠ AND THE TORCH BUILD MUST MATCH THE DRIVER. `+cu124` is what this machine's driver takes; install
 # the index-url line for the CUDA your driver supports rather than editing the version here.
 #
-# --extra-index-url https://download.pytorch.org/whl/cu124
-torch==2.6.0
+# ⚠ THE INDEX LINE IS NOT A COMMENT. Without it `pip install -r` resolves whatever default wheel PyPI
+# serves and you do NOT get the `+cu124` build this file claims to pin — which would make the "starts
+# from the same place" promise above false. Change BOTH lines together for a different CUDA.
+--extra-index-url https://download.pytorch.org/whl/cu124
+torch==2.6.0+cu124
 onnx==1.22.0
 onnxruntime==1.27.0

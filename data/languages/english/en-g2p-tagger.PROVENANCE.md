@@ -42,6 +42,11 @@ buys is the generalisation above.
     tools/english/requirements-bilstm.txt)
     torch 2.6.0+cu124 · cuda 12.4 · onnx 1.22.0 · onnxruntime 1.27.0
     python 3.12.3 · NVIDIA GeForce RTX 3090
+
+⚠ THAT IS A TORCH DOWNGRADE FROM THE 2026-09-19 WEIGHTS (2.11.0+cu128) AND IT WAS NOT A CHOICE: it is
+what the `.venv` in this checkout already carried. Recorded because the point of this block is to say
+where a set of weights came from, and an unexplained move backwards is exactly the thing a later
+reproduction attempt would waste time on.
     split model: 65.0% exact / 71.1% stress-indep on n=13,531; 190s to measure, then a full-dict
     retrain to export. 28 chars, 208 tags — the vocab is unchanged, so `.meta.json` is byte-identical.
 
@@ -52,8 +57,9 @@ summarised, because "majority repairs" would bury the other half:
                …ɪŋzh… → …ɪŋʃ… (6) · Saint-Saëns sˈiːnz → sˈɑːnz (9) · Xiang ʃjˈæŋ → ʃjˈɑːŋ (2)
                NVDA ˈɛnvdə → ˌɛnvˌiːdˈeᶦ (2) · Hunanese huː… → hjˌuː… (2) · tahlequah, abbott
     REGRESSIONS Panthera pʰˌænθˈɛɹə → pɑːnθˈɛɹə (14) · biorhythm, stress moved off the first
-               syllable (8) · `Eee` ˈiːʲi → ˈiː (8) · a ŋ lost in `langwithname` (5) · Wong wˈɔːŋ →
-               uːˈɔːŋ (3) · resistivity ɹˌiːz… → ɹˌɛz… (3) · Zhen ʒˈɛn → zˈɛn (3)
+               syllable (8) · `Eee` ˈiːʲi → ˌiːpləˈiː (8) · a ŋ lost in `langwithname` (5) · the romanised `uong` wˈɔːŋ →
+               uːˈɔːŋ (3) — ⚠ NOT the name `Wong`, which is in the dictionary and unaffected;
+               an earlier draft of this line said it was, which sends a reader at the lexicon path · resistivity ɹˌiːz… → ɹˌɛz… (3) · Zhen ʒˈɛn → zˈɛn (3)
     COSMETIC   Aldwych and Gangnam gain or lose a secondary mark (10)
 
 ⚠ **AND `rr` WAS FIXED AT THE ROOT RATHER THAN ACCEPTED**, which took the churn from 204 rows to 162.
@@ -61,9 +67,16 @@ The 2026-09-19 entry records `ˌɑːɹˈɑːɹ` for a bare `rr` as a deliberate 
 rows come from is *about* distinguishing Spanish `r` from `rr`, so collapsing them to one `ˈɑːɹ` loses
 the point of the text. It is now a DICTIONARY row (`rr  AA1 R AA1 R`), which pins it in every path
 rather than in whichever model is shipped — the same remedy #1400 used for `COVID`.
-⚠ `Eee` WAS *NOT* GIVEN ONE. The sync path reads it `ˈiː`, one syllable for three letters, and no source
-was found for any other reading; inventing a dictionary row to protect a golden would be the tail
-wagging the dog. Listed above as a regression instead.
+⚠ `Eee` WAS *NOT* GIVEN ONE, and the shipped reading is the tagger's `ˌiːpləˈiː` — which is plainly
+bad, inventing an `l` the spelling has no letter for. It is left because no source was found for any
+reading: the sync path says `ˈiː` (one syllable for three letters), the previous tagger said `ˈiːʲi`
+(two), and ASUS's own "Eee PC" is said both "e-e-e" and "triple-E". Inventing a dictionary row to
+protect a golden is the tail wagging the dog.
+⚠ AND A LEXICON ROW FOR IT DID EXIST BRIEFLY AND WAS REMOVED, which is worth recording because it
+nearly shipped: `--add-missing` wrote `eee  ˈiː` into `accent-lexicon.tsv` during an earlier attempt,
+the dict row behind it was then dropped, and a plain `--write` does not remove rows. The orphan was
+NOT inert — it was what produced `ˈiː`, so it would have silently pinned this regression while this
+paragraph claimed the word was left alone. The doc and the data now agree.
 
 ⚠ **RETRAINED 2026-09-19 ON THE MOBY-EXPANDED DICTIONARY (+15% data), AND THE HEADLINE IS THAT IT DID
 NOT MOVE THE ORIGINAL POPULATION.** The dictionary went 117,483 → 135,308 rows between #1341 and this
