@@ -476,6 +476,21 @@ const NEVER_A_DEFECT: readonly (readonly [string, (o: string[], t: string[]) => 
         i + 1 < t.length && bare(p) === bare(t[i + 1]!) && eq(t.slice(0, i).concat(t.slice(i + 1)), o))],
     // ⚠ `N G` AND `NG G` ARE THE SAME SOUND, two ARPABET spellings of [ŋɡ]. Neither is wrong.
     ["NG G / N G", (o, t) => ng(o) === ng(t)],
+    // ⚠ AND `N K` / `NG K` IS THE SAME AXIS ONE PLACE FURTHER BACK. English has no [nk]: an ⟨n⟩ before
+    // /k/ assimilates, so `N K` is an UNDERSPECIFIED spelling of the same sound rather than a different
+    // one. It is not a handful of rows either — our own dictionary writes `N K` 776 times and `NG K`
+    // 1,610, and the audit finds our rows on BOTH sides of the disagreement (`bronchoscope`, `drinkable`,
+    // `punctate` write `N K` where the sources write `NG K`; `inculcate`, `incontrovertible`, `conquest`
+    // write `NG K` where they write `N K`). A both-directions split is the tell that this is notation.
+    // ⚠ AND THE AXIS IS ALREADY RESOLVED, ONE LAYER DOWN, WHICH IS WHY THE DICT MAY BE INCONSISTENT.
+    // `en-nasal-seam.tsv` plus a transparent-prefix guard decide [n] against [ŋ] at OUTPUT time:
+    // `drinkable` and `idiosyncrasy` are written `N K` here and ship [ŋk] (they are the pinned positive
+    // cases in test/en-nasal-seam.test.ts), while `pancake`, `income` and 637 of the 953 `N [KG]` rows
+    // keep their [n] deliberately. So the dict spelling is the RULE'S INPUT, not the shipped sound.
+    // ⚠ NORMALISING THE 953 ROWS WOULD BREAK THAT, not tidy it — a dict rewritten to `NG K` gives the
+    // rule nothing to hold back, and `pancake` and `income` lose the [n] the seam table exists to keep.
+    // The first draft of this comment proposed exactly that normalisation as follow-up work.
+    ["NG K / N K", (o, t) => nk(o) === nk(t)],
     // ⚠ /iə/ AND /jə/ ARE THE SAME SYLLABLE COMPRESSED OR NOT. `julian` JH UW1 L IY0 AH0 N against
     // JH UW1 L Y AH0 N, and `alien`, `copiously`, `crocodilian`, `eosinophilia`, `insouciant`,
     // `leniency`, `pannier`, `valonia` — 9 of the 691, and the alternation runs BOTH WAYS across them
@@ -506,6 +521,7 @@ const bare = (p: string): string => {
 };
 const eq = (a: string[], b: string[]): boolean => a.length === b.length && a.every((x, i) => bare(x) === bare(b[i]!));
 const ng = (a: string[]): string => a.map(bare).join(" ").replace(/NG G/gu, "N G");
+const nk = (a: string[]): string => a.map(bare).join(" ").replace(/NG K/gu, "N K");
 /**
  * Post-consonantal unstressed `IY` before a vowel folded to the glide `Y`, then the audit's own bare form.
  * ⚠ THE VOWEL TESTS RUN ON THE STRESS-STRIPPED BASE, NOT ON `bare`. `bare` rewrites AH and IH to `ə`,

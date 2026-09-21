@@ -5222,3 +5222,181 @@ live in `/tmp`.
     curation gate    unchanged at 71 / 173 — the 18 new rows open no split
     invariants       339 rows, 0 segment changes, 0 illegal digit transitions,
                      0 left multi-primary, 0 left primary-less
+
+## Run 83 — 2026-09-20 20:30 — queue item 2: the same sieve on the words Moby carries in lower case
+
+QUESTION. #1378's item 2 asks for "the loanword slice proper — a loanword Moby DOES carry lower-cased,
+which Run 76's population filter misses". Run 76's population was *words Moby knows only as a name*; its
+SIEVE was the consonant skeleton, measured at 33/38 = 87%. The question here is whether the sieve
+survives being moved to the rest of the candidates, and whether the class it surfaces is in fact loanwords.
+
+    candidates                                684
+      Moby knows it ONLY as a name            126   (Run 76's population, worked out)
+      Moby carries a lower-case headword      558
+         of which consonant-skeleton mismatch 119
+
+⚠ **THE SLICE IS NOT MOSTLY LOANWORDS, AND THE QUEUE ITEM'S NAME IS WHAT MISLED ME FOR AN HOUR.** Of the
+119, the imports (`aubergine`, `bracero`, `siciliano`, `sukiyaki`, `peyote`, `gesundheit`,
+`ukase`, `sayyid`) are about a dozen. The bulk is something else and something better: **a dropped
+consonant at a compound seam**, over and over — `hotshot` HH AA1 SH AA2 T, `nightshirt` N AY1 CH ER2 T,
+`outshine` AW1 CH AY2 N, `potboiler` P AA2 B OY1 L ER0, `holdfast`, `windswept`, `palimpsest`,
+`antimatter`, `antinomy`, `convulsant`, `indefeasible`. The sieve is a defect-finder; the population
+label was a guess about what it would find.
+
+### The adjudicator had to be found rather than used
+
+Run 76 checked each surviving row by hand against a third source. That is the load-bearing step — the
+skeleton test is a sieve, not a verdict — and it does not automate here:
+
+    a third source (wikipron US) backs the AGREED form:   0
+    backs OUR form:                                       2
+    no wikipron row at all:                             117
+
+⚠ **117 OF 119.** wikipron covers 1,439 of 40,000 frequency words and this slice is almost entirely off
+the frequency list, so the repo's own referee is structurally silent on exactly the rows that need it.
+`en.moby-lexicon.tsv` and `en.moby-oov.tsv` are Moby-derived and cannot arbitrate a Moby claim.
+
+**espeak-ng's en-us voice is installed, and it is independent of CMUdict, of Moby and of Wiktionary.**
+
+    espeak-ng backs the AGREED skeleton:  73
+    backs OUR skeleton:                   35
+    backs neither:                        11
+
+⚠ **AND ITS VOTE IS EVIDENCE ABOUT A DROPPED CONSONANT, NOT ABOUT ⟨g⟩ = /ʒ/.** espeak falls back to
+letter rules, so on an import it votes for the spelling-predictable reading by construction. Where the
+disagreement is "is there a /t/ in `hotshot`" that is exactly the right witness; where it is "is
+`aubergine` /dʒ/ or /ʒ/" it is barely a witness at all. Recorded so the 73 is not read as 73 verdicts.
+
+### ⚠ THE FIRST SCORING OF IT WAS WRONG, AND THE BUG WAS IN THE ONE THING THE TOOL EXISTS TO SEE
+
+`--ipa=3` glues the parts of one phoneme with U+200D: `chair` is `t‍ʃ` WITH the joiner and `hotshot` is
+`tʃ` WITHOUT it. That distinction is the whole question for a third of this slice, so the tokeniser was
+written joiner-aware from the start. What it then got wrong is that **the joiner is not only the
+affricate** — espeak writes the syllabic consonant `bə‍l` and the r-coloured vowel `ɔ‍ɹ` with the same
+joiner, and a joined token that was not itself in the consonant table was dropped whole. That silently
+deleted the final /l/ of `herbal`, `drinkable`, `paschal`, `buccal`, `execrable`, `suggestible`,
+`indefeasible` and `incontrovertible`, and the /ɹ/ of `cortisone` — nine rows that then read as espeak
+backing NEITHER side. 66/30/23 before the fix, 73/35/11 after.
+
+### A fourth never-a-defect predicate, measured before it was encoded
+
+Five candidates were ours `N K` against the sources' `NG K`. English has no [nk] — an ⟨n⟩ before /k/
+assimilates — so `N K` is an underspecified spelling of the same sound. The tell that this is notation
+rather than defect is that **our own rows sit on both sides of it**: `bronchoscope`, `concubine`,
+`drinkable`, `punctate` write `N K` where the sources write `NG K`, and `inculcate`,
+`incontrovertible`, `conquest` write `NG K` where they write `N K`.
+
+    our dict:  N K  776 rows      NG K  1,610 rows
+               N G  178 rows      NG G    845 rows
+
+⚠ **AND MY FIRST RATIONALE FOR IT WAS WRONG IN A WAY WORTH KEEPING.** I wrote that normalising the
+axis was "its own piece of work with its own goldens", i.e. open work. It is not open at all: **the
+axis is already resolved one layer down**, by `en-nasal-seam.tsv` plus a transparent-prefix guard that
+decide [n] against [ŋ] at OUTPUT time. `drinkable` and `idiosyncrasy` are written `N K` in the dict and
+ship [ŋk] — they are the pinned positive cases in `test/en-nasal-seam.test.ts` — while `pancake`,
+`income` and **637 of the 953 `N [KG]` rows** keep their [n] deliberately. The dict spelling is the
+RULE'S INPUT, not the shipped sound, and normalising it to `NG K` would give the rule nothing to hold
+back and cost `pancake` and `income` the [n] the seam table exists to keep.
+
+⚠ **AND THAT CHANGES ONE ROW'S VERDICT.** `concubine` ships [n] where both sources want [ŋ] — so unlike
+`drinkable` the output really does differ, and for a moment that looked like a defect the predicate was
+hiding. It is not: `con-` is a transparent prefix, and the same guard gives `conclude`, `concord`,
+`concourse` and `concoct` their [n]. Fixing `concubine` alone would make it the one `con-` word in the
+dictionary that assimilates. Left alone, on consistency rather than on the predicate.
+
+Candidates 684 → 677; the slice 119 → 112.
+
+### Six refusals out of the 69, and two of them would have broken something correct
+
+    accursed     the -ed adjective heteronym class. Queue item 3 owns it and the dict row cannot
+                 express it — the same reasoning that kept `cussed` out of NEVER_A_DEFECT.
+    herbal       ⚠ OUR ROW IS RIGHT AND THE PARADIGM IS ALREADY CONSISTENT. GenAm `herb` is h-less,
+    herbalist    and the dict has herb / herbs / herbal / herbalist h-less while keeping the /h/ of
+                 `herbaceous` and `herbicide` — which is the actual American distribution. Both
+                 sources lean British here; espeak agrees with them and is wrong. Applying these two
+                 would have split a correct four-row paradigm to match a referee.
+    louis        rank 2,095 — the `tours` trap exactly. Both sources describe the French king; running
+                 text at that rank means the English name /ˈluːɪs/, which is our row.
+    bougie       two lexemes sharing a spelling. The /dʒ/ both sources carry is the medical instrument;
+                 the /ʒ/ our row has is the reading running text now carries.
+    titania      its whole skeleton difference IS the iə/jə glide, which is already a never-a-defect
+                 class — it only escaped the predicate because the vowels differ too, the `bengal`
+                 shape from Run 76. And its two readings belong to two different referents.
+
+`homage` was NOT refused, and the line between it and `herbal` is worth stating: h-less `homage` is
+real, but it is a singleton with no paradigm to keep consistent, and three sources carry the /h/.
+
+### ⚠ ONE OF THE 63 WAS A ROW THIS PROJECT HAD ALREADY ADJUDICATED AND REVERTED
+
+`zeitgeist`. Our `T S AY1 T ...` is the German affricate, both sources say `Z`, espeak says `Z`, and
+the full suite failed on a PINNED expectation: `tsˈaᶦtɡˌaᶦst`. The referee-audit investigation records
+the same correction being made and then **reverted**, because Merriam-Webster lists \ˈtsīt-ˌgīst\
+FIRST — an attested variant carrying a deliberate decision, the same call as `cafe` and `syrup`.
+
+⚠ **NOTHING IN THE AUDIT KNOWS THAT, AND NOTHING COULD HAVE.** The instrument compares three lexicons;
+a past refusal is not one of them, and the only thing standing between a re-application and the shipped
+dictionary was a test written for an unrelated reason (secondary stress on a final closed diphthong —
+the onset was incidental to it). The other 62 were checked against every investigation doc and test in
+the repo and none had been ruled on before. Reverted; 63 → 62 applied.
+
+### Applied: 61 new rows plus one amendment
+
+⚠ `conger` ALREADY HAD A CURATED ROW (the LOT/THOUGHT vowel) and this is a SECOND defect on the same
+word — the missing /ɡ/ of ⟨ng⟩+⟨er⟩. Amended in place. A second row would have chained its `upstream`
+column against the first row's output, which is the `chillicothe` failure the one-row-per-word
+invariant was written for.
+
+### ⚠ AND THE GOLDENS CAUGHT A ROW APPLIED VERBATIM WHERE ONLY PART OF IT WAS AGREED
+
+One of 189 languages went stale: `skr`, whose text embeds an English gloss containing *Sayyid Ahmad
+Shahid*. The row moved `sˈaᶦɪd` → `sˈɑːjɪd`, and the second half of that is wrong. Our `S AY1 IH0 D`
+is missing the /j/ — that is the consonant claim, and it is right — but the agreed row ALSO moves the
+vowel to PALM, and no English source carries /ˈsɑːjɪd/: the attested readings are /ˈsaɪjɪd/ and
+/ˈseɪjɪd/. This is Run 76's `kilauea` shape, where applying the agreed form would import a wrong vowel
+to fix a right consonant — except that here there is a third option, and #1377 already wrote the rule
+for it: **apply only the part of the agreed form the agreement can see.** Curated as
+`S AY1 Y IH0 D` — our vowel, their consonant — which is exactly the first Wikipedia reading.
+
+⚠ **THE SIEVE SELECTS ON CONSONANTS AND THE ROWS WERE APPLIED WHOLE**, so every row where a vowel also
+moved was re-read for this. 29 of the 61 change a vowel identity as well; 28 of them are unambiguous
+(`scythe` S IH1 TH is not a word, `buccal` had a yod the spelling has no letter for, `cupola` was
+missing its yod AND a syllable late), and `sayyid` was the one where our side of the vowel was the
+better one. Doing that check as a sweep rather than per row is what made it cheap.
+
+### THE CURATION GATE FAILED, AND ITS THREE ROWS ARE THE PUREST CASE OF ITS OWN CLASS
+
+`exhume`, `misogyny`, `misogynist` — held out, the OOV path reproduces the upstream reading **phone for
+phone**, all three source N. Nothing is being generalised wrongly here; it is being *recalled*, because
+the model is trained on upstream CMUdict and these rows were in its training data with exactly the
+shape the correction removes. That is `collaborative` from #1341, which a retrain closed.
+
+⚠ AND IN EACH CASE THE DICTIONARY ALREADY CARRIES THE TARGET SHAPE ON A SIBLING, which is what makes
+them gaps rather than reasons to revert (the queue's own rule: if the engine's generalisation is the
+better reading, revert the row instead of waiving the gap):
+
+    exhume      our own exhaust, exhibit, exhort, exhilarate are all /ɪɡz/. The /ks/ of `exhale` and
+                `exhibition` is the UNSTRESSED-second-syllable variant — a rule the model cannot state.
+    misogyny    our own `misogamy` is already M IH0 S AA1 G AH0 M IY0.
+
+    triple-sourced words             46,061   unchanged
+    all three agree                  37,558 → 37,620
+    audit candidates                 684 → 677 (−7 predicate) → 615 (−62 applied)
+    never-a-defect                   source geminate 21, iə/jə 9, NG K / N K 7, NG G / N G 4
+    known curation gaps              +3, all source N, all closing on the same retrain
+    suite                            6,135 pass · goldens 189/36,495/0 stale · parity 189 byte-identical
+    referee eval (en)                wikipron 64.0% / 91.3% unchanged;  epitran 44.3% / 87.4% unchanged;
+                                     moby-lexicon 76.4% → 76.6% (26,770 → 26,816)
+
+⚠ **AND THAT +46 IS VERY NEARLY A TAUTOLOGY, SO IT IS NOT VALIDATION.** `en.moby-lexicon.tsv` is built
+from Moby, and every row applied above moved toward Moby — of course it scores better. It is quoted
+only to show the rows landed. The two referees that WOULD be independent evidence are flat, and the
+reason is the same one that forced espeak into the adjudicator's seat: this slice is off the frequency
+list, where wikipron has almost no coverage. **A block of dictionary fixes that the honest metric
+cannot see is the normal case for this audit, not a disappointment** — the audit exists precisely
+because 96% of the dictionary has no referee.
+
+NEXT. The 35 espeak backs OUR side on are a refusal list with evidence behind it and want no further
+work. The 11 it backs neither on are the residue and are individually odd (`argot`, `lagniappe`,
+`mesdames`, `gesellschaft`, `xi`) — a hand slice, not a sweep. The `N K` axis at 776 rows is now a
+named piece of work rather than a thing the audit trips over five rows at a time.
+

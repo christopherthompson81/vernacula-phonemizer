@@ -480,7 +480,7 @@ comptroller	K AH0 M T R OW1 L ER0	K AH0 N T R OW1 L ER0	outlier against controll
 condemnation	K AA2 N D AH0 M N EY1 SH AH0 N	K AA2 N D EH0 M N EY1 SH AH0 N	unstressed vowel, cf. condemn (gold + moby)
 condensation	K AA2 N D AH0 N S EY1 SH AH0 N	K AA2 N D EH2 N S EY1 SH AH0 N	unstressed vowel, cf. condense (gold + moby)
 conga	K AO1 NG G AH0	K AA1 NG G AH0	LOT/THOUGHT: align AA/AO to gold's consistent system
-conger	K AO1 NG ER0	K AA1 NG ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
+conger	K AO1 NG ER0	K AA1 NG G ER0	LOT/THOUGHT: align AA/AO to gold's consistent system; and the /ɡ/ of ⟨ng⟩+⟨er⟩ dropped (triple-source #1378)
 congeries	K AO1 NG JH AH0 R IY2 Z	K AA1 NG JH AH0 R IY2 Z	LOT/THOUGHT: align AA/AO to gold's consistent system
 conquest	K AA1 NG K W EH0 S T	K AA1 NG K W EH2 S T	secondary stress on the second element (gold + moby)
 consonantal	K AA2 N S AH0 N AA1 N T AH0 L	K AA2 N S AH0 N AE1 N T AH0 L	TRAP not PALM (gold; common words only)
@@ -2857,3 +2857,86 @@ pfft		F T	consonant interjection CMUdict lacks; the OOV net would spell it out
 psst		P S T	consonant interjection CMUdict lacks; the OOV net would spell it out
 pst		P S T	consonant interjection CMUdict lacks; the OOV net would spell it out
 tsk		T S K	consonant interjection CMUdict lacks; the OOV net would spell it out
+#
+# THE CONSONANT-SKELETON SLICE, #1378 queue item 2. The triple-source audit's candidates were narrowed to
+# the rows where OUR CONSONANTS differ from the two sources' — GenAm variation is overwhelmingly vocalic,
+# so a consonant both referees agree on is an import defect rather than an accent. #1377 ran that sieve
+# over the words Moby knows only as NAMES; this is the same sieve over the words it carries in lower case.
+#
+# ⚠ THE SIEVE IS NOT THE VERDICT, and here it could not be checked the way #1377's was: wikipron covers
+# 2 of the 119 rows, so the hand-adjudication against a third source had to come from somewhere else.
+# espeak-ng's en-us voice is independent of CMUdict, of Moby and of Wiktionary, and it votes on consonants;
+# it backs the agreed skeleton on 69 of the 112 and OUR skeleton on 32, and every row below is one of the
+# 69. The 32 it backs are left alone — that is what a third source is for.
+# ⚠ IT IS A WEAK ARBITER ON A LOANWORD, because it falls back to letter rules and so votes for the
+# spelling-predictable reading. Its vote is evidence about a DROPPED consonant, not about ⟨g⟩ = /ʒ/.
+#
+# ⚠ SIX OF THE 69 ARE REFUSED and are not below. `accursed` is the -ed adjective heteronym class, which
+# queue item 3 owns and which the dictionary row cannot express. `herbal` and `herbalist` are h-less
+# because GenAm `herb` IS h-less, and our dict is already consistent across herb/herbs/herbal/herbalist
+# while keeping the /h/ of `herbaceous` and `herbicide` — applying them would have broken a correct
+# paradigm to match two British-leaning sources. `louis` at rank 2,095 is the `tours` trap: both sources
+# describe the French king and running text means the English name /ˈluːɪs/. `bougie` is two lexemes,
+# and the /ʒ/ reading is the one running text now carries. `titania` differs only by the iə/jə glide,
+# which is free variation, and its two readings belong to two different referents.
+analysand	AE0 N AE1 L IH0 Z AE2 N D	AH0 N AE1 L AH0 S AE2 N D	⟨s⟩ voiced to /z/; gold + Moby + espeak all /s/ (triple-source + espeak, #1378)
+anglicize	AE1 NG L IH0 S AY2 Z	AE1 NG G L AH0 S AY2 Z	the /ɡ/ of ⟨ngl⟩ dropped (triple-source + espeak, #1378)
+antimatter	AE0 T AY0 M AE1 T ER0	AE1 N T IY0 M AE2 T ER0	the /n/ of `anti-` dropped, and no primary stress in the row (triple-source + espeak, #1378)
+antinomy	AE0 T IH1 N OW0 M IY2	AE0 N T IH1 N AH0 M IY0	the /n/ of `anti-` dropped (triple-source + espeak, #1378)
+appendicitis	AH0 P EH2 N D IH2 S AY1 T IH0 Z	AH0 P EH2 N D AH0 S AY1 T AH0 S	`-itis` read as `-itiz` (triple-source + espeak, #1378)
+astrophysicist	AE2 S T R OW0 F IH1 S IH0 S IH0 S T	AE2 S T R OW0 F IH1 Z AH0 S IH0 S T	⟨s⟩ of `physic-` unvoiced; our own `physicist` has /z/ (triple-source + espeak, #1378)
+aubergine	AO1 B ER0 JH IY2 N	OW1 B ER0 ZH IY2 N	⟨g⟩ as /dʒ/ in a French import both sources read /ʒ/ (triple-source + espeak, #1378)
+blithely	B L AY1 TH L IY0	B L AY1 DH L IY0	⟨th⟩ unvoiced; our own `blithe` has /ð/ (triple-source + espeak, #1378)
+bracero	B R AA0 CH EH1 R OW0	B R AH0 S EH1 R OW0	⟨c⟩ read as Spanish /tʃ/ where the English reading is /s/ (triple-source + espeak, #1378)
+bracingly	B R EY1 S IH0 NG G L IY0	B R EY1 S IH0 NG L IY0	an inserted /ɡ/ after ⟨ng⟩ that the spelling has no letter for (triple-source + espeak, #1378)
+buccal	B Y UW1 K AH0 L	B AH1 K AH0 L	a yod the spelling has no letter for (triple-source + espeak, #1378)
+burgee	B ER1 G IY0	B ER2 JH IY1	⟨g⟩ hard before ⟨e⟩ (triple-source + espeak, #1378)
+calendula	K AH0 L EH1 JH AH0 L AH0	K AH0 L EH1 N JH AH0 L AH0	the /n/ dropped, and ⟨d⟩ affricated across it (triple-source + espeak, #1378)
+ceaselessly	S IY1 Z L AH0 S L IY0	S IY1 S L AH0 S L IY0	first ⟨s⟩ voiced; our own `ceaseless` has /s/ (triple-source + espeak, #1378)
+convulsant	K AH0 V AH1 L S AH0 N T	K AH0 N V AH1 L S AH0 N T	the /n/ dropped (triple-source + espeak, #1378)
+cortisone	K AO1 R T AH0 Z OW2 N	K AO1 R T AH0 S OW2 N	⟨s⟩ voiced; our own `cortisol` has /s/ (triple-source + espeak, #1378)
+cupola	K AH0 P OW1 L AH0	K Y UW1 P AH0 L AH0	the yod dropped and the stress one syllable late (triple-source + espeak, #1378)
+dais	D EY1 Z	D EY1 AH0 S	read as `days` — the second syllable is missing (triple-source + espeak, #1378)
+delouse	D IY2 L AW1 Z	D IY0 L AW1 S	⟨se⟩ voiced; our own `louse` has /s/ (triple-source + espeak, #1378)
+desecrate	D EH0 Z AH0 K R EY1 T	D EH1 S AH0 K R EY2 T	⟨s⟩ voiced, and the primary a syllable late (triple-source + espeak, #1378)
+enlarger	IH0 N L AA1 R G ER0	IH0 N L AA1 R JH ER0	⟨g⟩ hard before ⟨er⟩; our own `enlarge` has /dʒ/ (triple-source + espeak, #1378)
+esculent	EH0 S K UW1 L AH0 N T	EH1 S K Y AH0 L AH0 N T	the yod dropped and the vowel tensed (triple-source + espeak, #1378)
+excruciatingly	EH2 K S K R UW1 S IY0 EY2 T IH0 NG L IY0	IH0 K S K R UW1 SH IY0 EY2 T IH0 NG L IY0	⟨ci⟩ as /s/ where our own `excruciating` has /ʃ/ (triple-source + espeak, #1378)
+exhume	EH0 K S HH Y UW1 M	IH0 G Z UW1 M	⟨x⟩ as /ks/ + an epenthetic yod; the received GenAm reading is /ɪɡˈzuːm/ (triple-source + espeak, #1378)
+fraudulently	F R AO1 D UW0 L AH0 N T L IY0	F R AO1 JH AH0 L AH0 N T L IY0	⟨du⟩ as /duː/ where our own `fraudulent` has /dʒə/ (triple-source + espeak, #1378)
+fustian	F AH1 S T IY2 AH0 N	F AH1 S CH AH0 N	⟨ti⟩ uncoalesced (triple-source + espeak, #1378)
+gesundheit	G AH0 Z UH1 N D HH AY0 T	G AH0 Z UH1 N T HH AY2 T	the ⟨dh⟩ seam: German devoices it and English imports the /t/ (triple-source + espeak, #1378)
+holdfast	HH OW1 L F AE2 S T	HH OW1 L D F AE2 S T	the /d/ dropped at the compound seam (triple-source + espeak, #1378)
+homage	AA1 M AH0 JH	HH AA1 M IH0 JH	h-less; unlike `herb` there is no h-less paradigm here to keep consistent (triple-source + espeak, #1378)
+hotshot	HH AA1 SH AA2 T	HH AA1 T SH AA2 T	the /t/ dropped at the compound seam — ⟨t⟩+⟨sh⟩ read as one /ʃ/ (triple-source + espeak, #1378)
+idiosyncrasy	IH2 D IY0 OW0 S IH1 N K R AH0 S IY2	IH2 D IY0 AH0 S IH1 NG K R AH0 S IY0	⟨io⟩ as /oʊ/ rather than schwa (triple-source + espeak, #1378)
+indefeasible	IH2 D AH0 F IY1 Z AH0 B AH0 L	IH2 N D AH0 F IY1 Z AH0 B AH0 L	the /n/ dropped (triple-source + espeak, #1378)
+indicia	IH2 N D IH1 S Y AH0	IH0 N D IH1 SH IY0 AH0	⟨ci⟩ uncoalesced (triple-source + espeak, #1378)
+indivisible	IH2 N D IH0 V IH1 S IH0 B AH0 L	IH2 N D AH0 V IH1 Z AH0 B AH0 L	⟨s⟩ unvoiced; our own `divisible` has /z/ (triple-source + espeak, #1378)
+kinase	K AY1 N EY2 Z	K AY1 N EY2 S	⟨se⟩ voiced (triple-source + espeak, #1378)
+lachrymose	L AE1 K R IY0 M OW2 Z	L AE1 K R AH0 M OW2 S	⟨se⟩ voiced; the `-ose` adjectives take /s/ (triple-source + espeak, #1378)
+legalese	L EH1 G AH0 L IY2 S	L IY2 G AH0 L IY1 Z	⟨ese⟩ unvoiced and the stem vowel lax (triple-source + espeak, #1378)
+manumission	M AA2 N UW0 M IH1 SH AH0 N	M AE2 N Y AH0 M IH1 SH AH0 N	the yod dropped and the stem vowel PALM (triple-source + espeak, #1378)
+misogynist	M IH1 Z AH0 JH IH0 N IH0 S T	M AH0 S AA1 JH AH0 N IH0 S T	⟨s⟩ voiced and the stress a syllable early (triple-source + espeak, #1378)
+misogyny	M IH1 Z AH0 JH IH0 N IY0	M AH0 S AA1 JH AH0 N IY0	⟨s⟩ voiced and the stress a syllable early (triple-source + espeak, #1378)
+nightshirt	N AY1 CH ER2 T	N AY1 T SH ER2 T	the /t/ dropped at the compound seam — ⟨t⟩+⟨sh⟩ read as one /tʃ/ (triple-source + espeak, #1378)
+outshine	AW1 CH AY2 N	AW2 T SH AY1 N	the /t/ dropped at the compound seam — ⟨t⟩+⟨sh⟩ read as one /tʃ/ (triple-source + espeak, #1378)
+pachysandra	P AE2 CH IH0 S AE1 N D R AH0	P AE2 K IH0 S AE1 N D R AH0	⟨ch⟩ as /tʃ/ where this Greek ⟨ch⟩ is /k/ (triple-source + espeak, #1378)
+palimpsest	P AE1 L IH0 S EH2 S T	P AE1 L AH0 M P S EH2 S T	the /mp/ dropped (triple-source + espeak, #1378)
+paperboy	P EY1 P ER0 B AO2 Y	P EY1 P ER0 B OY2	⟨oy⟩ spelled AO+Y rather than the OY diphthong (triple-source + espeak, #1378)
+peyote	P IH0 Y AO1 T IY2	P EY0 OW1 T IY0	⟨ey⟩ as /ɪj/ rather than /eɪ/ (triple-source + espeak, #1378)
+potboiler	P AA2 B OY1 L ER0	P AA1 T B OY2 L ER0	the /t/ dropped at the compound seam (triple-source + espeak, #1378)
+recognizance	R IH0 K AA1 N AH0 Z AH0 N S	R AH0 K AA1 G N AH0 Z AH0 N S	the /ɡ/ dropped; our own `recognize` keeps it (triple-source + espeak, #1378)
+resound	R IY2 S AW1 N D	R AH0 Z AW1 N D	⟨s⟩ unvoiced; the word is /rɪˈzaʊnd/ (triple-source + espeak, #1378)
+reunify	R IY0 UW1 N AH0 F AY2	R IY0 Y UW1 N AH0 F AY2	the yod of `uni-` dropped (triple-source + espeak, #1378)
+sayyid	S AY1 IH0 D	S AY1 Y IH0 D	the /j/ dropped — the CONSONANT only: the agreed row also moves the vowel to PALM, which no English source carries (#1377's rule: apply only the part the agreement can see) (triple-source + espeak, #1378)
+scythe	S IH1 TH	S AY1 DH	read as `sith` — wrong vowel and an unvoiced ⟨the⟩ (triple-source + espeak, #1378)
+siciliano	S IY0 CH IY0 L IY0 AA1 N OW0	S AH0 S IH2 L IY0 AA1 N OW0	⟨ci⟩ read as Italian /tʃ/ where the English reading is /s/ (triple-source + espeak, #1378)
+simulcast	S AY1 M Y AH0 L K AE2 S T	S AY1 M AH0 L K AE2 S T	a yod the spelling has no letter for (triple-source + espeak, #1378)
+sukiyaki	S UW0 K IY0 AA1 K IY0	S UW2 K IY0 Y AA1 K IY0	the /j/ dropped (triple-source + espeak, #1378)
+thundershower	TH AH1 N D ER0 SH AW2 W ER0	TH AH1 N D ER0 SH AW2 ER0	an epenthetic /w/ between the diphthong and the rhotic (triple-source + espeak, #1378)
+turbot	T ER2 B OW1	T ER1 B AH0 T	the final ⟨t⟩ dropped and the word read as French (triple-source + espeak, #1378)
+ukase	Y UW1 K EY2 Z	Y UW0 K EY1 S	⟨se⟩ voiced (triple-source + espeak, #1378)
+vaccinia	V AH0 CH IY1 N IY0 AH0	V AE0 K S IH1 N IY0 AH0	⟨cc⟩ as /tʃ/ — the /ks/ of `vaccine` is lost (triple-source + espeak, #1378)
+willowy	W IH1 L AH0 W IY0	W IH1 L OW0 IY0	⟨ow⟩ reduced to schwa plus an epenthetic /w/ (triple-source + espeak, #1378)
+windswept	W IH1 N S W EH2 P T	W IH1 N D S W EH2 P T	the /d/ dropped at the compound seam (triple-source + espeak, #1378)
