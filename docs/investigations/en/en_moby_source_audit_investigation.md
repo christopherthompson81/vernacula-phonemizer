@@ -5642,3 +5642,89 @@ expectation did not.
     suite 6,145 · C# 6,697 · goldens 189/36,495/0 stale · parity 189 byte-identical
     heteronym table 124 → 130 entries
 
+## Run 87 — 2026-09-20 22:40 — queue item 4: the predicate the queue asked for should not exist
+
+QUESTION. #1378 item 4 asks for a `de-`/`re-`/`pre-` NEVER-A-DEFECT predicate, recording the class as
+"measured near-100% *not* a defect" and instructing: *pin the shape first — see #1377 for how measuring
+before encoding caught a predicate that fired on 1 of its 9 rows.* Pinning the shape is what killed it.
+
+### Pinning the shape, which is most of the work
+
+    candidates spelled de-/re-/pre-                 69
+      differ ONLY in the first vowel                45
+      differ in more than that (NOT this class)     24
+
+⚠ **THREE OF THE 45 ARE A DIFFERENT CLASS AND A NAIVE PREDICATE WOULD SWALLOW THEM.** `debacle` is
+AH → EY and `decor` IH → EY (a real vowel choice, not a reduction); `premonition` is EH → IY. A rule
+written as "the first vowel differs" rejects three live adjudications. Restricted to {IY, IH, AH}.
+
+⚠ **AND ONE OF THE REMAINING 42 MOVES THE PRIMARY STRESS.** `prelim` is `P R IH0 L IH1 M` against
+`P R IY1 L IH2 M` — the tonic moves to the prefix. Five more move a secondary (`declassify`, `decode`,
+`decoder`, `decongestant`, `desegregation`, 0 → 2) and one the other way (`deform`). `normalise` strips
+stress, so the audit cannot see any of it, and #1379's stress instrument scores PRIMARY placement, so
+the secondaries are witnessed by nothing. Restricting the class to a SAME STRESS DIGIT leaves 35.
+
+### ⚠ THE PREMISE IS REFUTED: THE CLASS IS ~80% A DEFECT, NOT ~100% NOT ONE
+
+The bidirectionality test — the tell that separates free variation from one source being systematically
+fuller — looked like it passed: 21 rows where we are the tense side, 14 where we are the reduced side.
+**It is not free variation. It is two subclasses each running one way**, and a third source says so:
+
+    same-digit prefix-vowel rows: 35
+      espeak-ng backs the AGREED form:  27
+      backs OURS:                        6
+      neither:                           2
+
+    reversative de-   deforest dehumanize dehydrate desegregate desensitize destabilize
+                      ours REDUCED, gold + Moby + espeak all TENSE
+    opaque re-/pre-   reprieve repulse repute retriever revile redoubt reprisal repudiate …
+                      ours TENSE, gold + Moby + espeak all REDUCED
+
+⚠ **AND THE DIFFERENCE SURVIVES TO THE OUTPUT**, which is the check #1393 taught: `ɹipɹˈiːv` against
+`ɹᵻpɹˈiːv`. This is not the AH0/IH0 notation pair — those both render `ᵻ`, which is exactly why
+`normalise` merges them, and no row applied below moves one to the other.
+
+### The decisive evidence is internal, and it is bigger than the audit can see
+
+    retrieve   R IH0   retriever R IY0   retrieved R IY0   retrieving R IY0   retrieval R IH0
+    repulse    R IY0   repulsion R IH0   repulsive R IH0
+    repudiate  R IY0   repudiation R IH0
+
+CMUdict is split INSIDE single paradigms on this axis. So the audit's candidates are not a class of
+their own — they are the members that happen to be triple-sourced.
+
+    de-/re-/pre- families with 2+ members and a reduced prefix vowel   602
+      INTERNALLY SPLIT on tense vs reduced                              57   (210 words)
+
+⚠ **THE FAMILY KEY WAS WRONG TWICE AND BOTH WAYS WERE INSTRUCTIVE.** Stripping the prefix put `decant`
+with `recant` and `deduct` with `reduction` — different words sharing a Latin stem — and reported their
+disagreement as an intra-paradigm split (86 families). Keeping the prefix but stemming in one pass split
+`precarious` from `precariousness` and `revival` from `revivals`, because a single strip lands on a
+different string depending on which suffix the word ends in. Stemming in a LOOP to a floor of prefix + 4
+and then matching by spelling prefix groups what a reader would call one paradigm — and at prefix + 3
+`revivalist` stems to `reviv` and reaches `revive`, `reviver` and `revivify`, which are different lemmas.
+
+### Applied: 27 seeds with their paradigms = 57 rows
+
+Every non-seed sibling was checked against espeak independently and every one agrees with its family's
+target. The reduced spelling comes from the FAMILY, not from gold: `normalise` merges AH0 and IH0, so
+the agreement that made these candidates cannot see which is meant, and applying gold's `AH0` verbatim
+would put a third spelling into a family that uses `IH0` (#1377's rule, a third time).
+
+    audit candidates    621 → 593
+    all three agree     37,619 → 37,647
+    curation gaps       +7, all source N — the model is trained on the upstream inconsistency and
+                        recalls it; every one has the target shape on a sibling already
+    remaining class     57 families / 210 words, filed as #1397
+    suite 6,145 · goldens 189/36,495/0 stale · en-gb sets fresh
+    referee eval (en)   wikipron 64.0% / 91.3% UNCHANGED; moby-lexicon 26,816 → 26,843;
+                        epitran 17,464 → 17,465
+
+⚠ **AND NEITHER MOVING REFEREE IS INDEPENDENT EVIDENCE HERE.** `en.moby-lexicon.tsv` is built from
+Moby, one of the two sources that made these candidates, and the eval's own footer says epitran
+eng-Latn is CMU-derived and therefore circular with our CMUdict-based g2p. The one referee that would
+be independent — wikipron — is flat, because these words are off the frequency list where it has almost
+no coverage. Quoted to show the rows landed, not as validation. Same situation as #1393.
+
+NEXT. Item 4 produces no predicate, and the queue entry should be corrected rather than left for the
+next reader to act on. Items 5 and 6 remain.
