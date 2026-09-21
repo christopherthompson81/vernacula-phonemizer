@@ -139,7 +139,10 @@ console.log(`round-trip fidelity on an unmodified tree: ${((100 * unchanged) / s
 if (showDiff) for (const c of changes) console.log("  ", c);
 
 if (write) {
-    writeFileSync(LEXICON, out.join("\n"));
+    // ⚠ TRAILING NEWLINE. `out.join("\n")` leaves the file without one, so every rebuild showed a
+    // spurious "\ No newline at end of file" in the diff — and a `>>` append (a hand-run
+    // `--add-missing`, say) would concatenate onto the last row instead of starting a new one.
+    writeFileSync(LEXICON, `${out.join("\n")}\n`);
     console.log(`\nwrote ${LEXICON}`);
 } else if (regenerated > 0) {
     console.log(`\n(${regenerated} rows would change — re-run with --write to apply, --diff to list)`);

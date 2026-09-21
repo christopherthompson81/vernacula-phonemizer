@@ -303,31 +303,36 @@ const STRUCTURAL_GAP = new Set([
     // ⚠ TWENTY-FOUR ADDED BY THE STRESS BLOCK, all source N, and they are the class this list is a measure of:
     // the model learned CMUdict's placement for exactly these words, so held out it reproduces it. They
     // have no morphological handle the corrected dict could propagate through — `impasse`, `inverse`,
-    // `dictator`, `foment` and `truncation` are roots or opaque derivations — and there is no spelling that says
-    // which syllable an English word stresses, so no rule is available either. A retrain on the curated
-    // dict closes all 24, the same way #1341's closed 213.
+    // `dictator` and `truncation` are roots or opaque derivations — and there is no spelling that says
+    // which syllable an English word stresses, so no rule is available either.
+    // ⚠ "A RETRAIN ON THE CURATED DICT CLOSES ALL 24" IS WHAT THIS BLOCK USED TO SAY, AND #1400's
+    // RETRAIN DISPROVED IT: 18 closed and SIX did not — the six still listed below. `foment` is among
+    // the closed ones, so the prose example list above is also one word out of date and is corrected.
+    // The same correction is recorded for five KNOWN_GAPS rows; this is the bulk half of it. A retrain
+    // absorbs a row whose shape is already the majority somewhere in the training data, and stress
+    // placement on an opaque root has no such majority — which is why these six are the residue.
     "dictator", "impasse", "inbred",
     "inverse",
     "truncation", "unbolt",
-    // ⚠ TWO ADDED BY THE #1375 AUDIT SWEEP, both source N: `khaki` (the n-gram learned CMUdict's
-    // ˈkɑki) and `lech` (a three-letter word with nothing to decode through).
+    // ⚠ ONE OF THE TWO ADDED BY THE #1375 AUDIT SWEEP: `khaki`, where the n-gram learned CMUdict's
+    // ˈkɑki. `lech` was the other and closed on #1400's retrain.
     "khaki",
-    // ⚠ TWO ADDED BY THE #1372 SYNCOPE FIX, both source N. ⚠ AND MOST OF THAT BLOCK IS NOT HERE,
+    // ⚠ ONE OF THE TWO ADDED BY THE #1372 SYNCOPE FIX (`indifferent` closed on #1400's retrain). ⚠ AND MOST OF THAT BLOCK IS NOT HERE,
     // which is the useful half: `several` and `differently` were NOT live splits, because the OOV
     // path ALREADY predicted the corrected form — `differently` is source M and decodes through
     // `different`, whose row already carried the schwa. The dictionary row was the outlier against
     // our own morphology, not just against the two external sources.
     "elbe",
-    // ⚠ TWO ADDED BY THE #1371 ⟨tch⟩ FIX, both source N: the n-gram learned the upstream `B L AA1 T CH`
-    // and reproduces it. ⚠ THE OTHER FIVE `blotch` ROWS ARE NOT HERE, but only TWO were
-    // ever open: `blotched` and `blotching` predicted the upstream shape before the fix and closed
-    // through the corrected stem, which is the behaviour this list's header describes. `blotches`,
-    // `blotchier` and `blotchiest` never matched upstream at all, for schwa and vowel reasons
-    // unrelated to the T. An earlier draft said all five closed themselves; three were never open.
+    // ⚠ THE #1371 ⟨tch⟩ FIX HAD TWO ROWS HERE — `blotch` and `blotchy` — AND #1400's RETRAIN CLOSED
+    // BOTH, so this block now heads nothing and is kept only for what it records: of the seven `blotch`
+    // rows, only those two were ever open. `blotched` and `blotching` closed through the corrected stem
+    // when the fix landed; `blotches`, `blotchier` and `blotchiest` never matched upstream at all, for
+    // schwa and vowel reasons unrelated to the T.
     // ⚠ FOUR ADDED BY THE #1369 SCHWA ARBITRATION, all source N and all the same shape as the rest of this
     // list: the n-gram learned the upstream row, so it reproduces it by construction. `adman`/`chessman`
     // are the `-man` second element, which gold itself splits (`adman` æ, `guardsman` ə) with no spelling
-    // to key on; `navarre` and `sputnik` are a loan and a proper noun with no morphological handle at all.
+    // to key on; `sputnik` is a proper noun with no morphological handle at all. ⚠ `navarre` was the
+    // fourth and closed on #1400's retrain, so THREE of the four remain.
     "adman", "chessman", "sputnik",
     "acuff", "atman", "baile", "bellini", "bes", "boche", "bog", "bridie", "calabria",
     "cana", "casual", "conger", "conversely", "convex", "cost", "cruelty", "cutoff", "dacron",
