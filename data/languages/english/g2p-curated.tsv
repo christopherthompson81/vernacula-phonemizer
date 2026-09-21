@@ -2977,4 +2977,86 @@ resounding	R IY0 S AW1 N D IH0 NG	R IH0 Z AW1 N D IH0 NG	propagated from the cor
 # is simply the wrong one. A `{default, adj}` entry would be modelling a distinction English does not
 # make here. gold has əkˈɜɹsəd as its ONLY reading; Moby agrees.
 accursed	AE2 K ER1 S T	AH0 K ER1 S IH0 D	no verb `to accurse` exists: the row was the participle of a word with no participle (#1378)
+#
+# THE `de-`/`re-`/`pre-` PREFIX VOWEL, #1378 queue item 4. The queue asked for a NEVER-A-DEFECT predicate
+# here, recording the class as "measured near-100% NOT a defect". That measurement was never written down
+# and it does not reproduce: on the 35 audit rows where the ONLY difference is the prefix vowel and the
+# stress digit is unchanged, a third source (espeak-ng en-us, independent of CMUdict, Moby and Wiktionary)
+# backs the AGREED form on 27 and ours on 6. The class is ~80% a defect, not ~100% not one.
+#
+# ⚠ AND THE DECISIVE EVIDENCE IS INTERNAL. CMUdict is split INSIDE single paradigms: `retrieve` R IH0
+# beside `retriever`/`retrieved`/`retrieving` R IY0; `repulse` R IY0 beside `repulsion`/`repulsive` R IH0;
+# `repudiate` R IY0 beside `repudiation` R IH0. 57 de-/re-/pre- families and 210 words are internally
+# split this way, so the audit's candidates are simply the members that happen to be triple-sourced.
+# The 27 seeds below are corrected WITH their own paradigms; the rest of the 57 families are #1397.
+#
+# ⚠ THE REDUCED SPELLING COMES FROM THE FAMILY, NOT FROM GOLD. `normalise` merges AH0 and IH0 — they
+# both render `ᵻ` — so the agreement that made these candidates cannot see which is meant, and applying
+# gold's `AH0` verbatim would put a third spelling into a family that uses `IH0`. #1377's rule: apply only
+# the part of the agreed form the agreement can see. For the same reason no row below moves AH0 to IH0.
+decapitate	D IY0 K AE1 P AH0 T EY2 T	D IH0 K AE1 P AH0 T EY2 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+decapitated	D IY0 K AE1 P AH0 T EY2 T IH0 D	D IH0 K AE1 P AH0 T EY2 T IH0 D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+deforest	D IH0 F AO1 R AH0 S T	D IY0 F AO1 R AH0 S T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+deforestation	D IH0 F AO2 R IH0 S T EY1 SH AH0 N	D IY0 F AO2 R IH0 S T EY1 SH AH0 N	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+dehumanize	D IH0 HH Y UW1 M AH0 N AY0 Z	D IY0 HH Y UW1 M AH0 N AY0 Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+dehumanized	D IH0 HH Y UW1 M AH0 N AY0 Z D	D IY0 HH Y UW1 M AH0 N AY0 Z D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+dehydrate	D IH0 HH AY1 D R EY0 T	D IY0 HH AY1 D R EY0 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+dehydrated	D IH0 HH AY1 D R EY0 T AH0 D	D IY0 HH AY1 D R EY0 T AH0 D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+deprave	D IY0 P R EY1 V	D IH0 P R EY1 V	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+depraved	D IY0 P R EY1 V D	D IH0 P R EY1 V D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+desegregate	D IH0 S EH1 G R AH0 G EY2 T	D IY0 S EH1 G R AH0 G EY2 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+desegregated	D IH0 S EH1 G R IH0 G EY2 T IH0 D	D IY0 S EH1 G R IH0 G EY2 T IH0 D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+desegregation	D IH0 S EH2 G R AH0 G EY1 SH AH0 N	D IY0 S EH2 G R AH0 G EY1 SH AH0 N	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+desensitize	D IH0 S EH1 N S AH0 T AY2 Z	D IY0 S EH1 N S AH0 T AY2 Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+desensitized	D IH0 S EH1 N S AH0 T AY2 Z D	D IY0 S EH1 N S AH0 T AY2 Z D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+desensitizing	D IH0 S EH1 N S AH0 T AY2 Z IH0 NG	D IY0 S EH1 N S AH0 T AY2 Z IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+destabilize	D IH0 S T EY1 B AH0 L AY2 Z	D IY0 S T EY1 B AH0 L AY2 Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+destabilized	D IH0 S T EY1 B AH0 L AY2 Z D	D IY0 S T EY1 B AH0 L AY2 Z D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+destabilizing	D IH0 S T EY1 B AH0 L AY2 Z IH0 NG	D IY0 S T EY1 B AH0 L AY2 Z IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+precarious	P R IY0 K EH1 R IY0 AH0 S	P R IH0 K EH1 R IY0 AH0 S	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+pretend	P R IY0 T EH1 N D	P R IH0 T EH1 N D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+pretended	P R IY0 T EH1 N D IH0 D	P R IH0 T EH1 N D IH0 D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+pretender	P R IY0 T EH1 N D ER0	P R IH0 T EH1 N D ER0	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+pretenders	P R IY0 T EH1 N D ER0 Z	P R IH0 T EH1 N D ER0 Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+pretending	P R IY0 T EH1 N D IH0 NG	P R IH0 T EH1 N D IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+pretends	P R IY0 T EH1 N D Z	P R IH0 T EH1 N D Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+redoubt	R IY0 D AW1 T	R IH0 D AW1 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+redoubtable	R IY0 D AW1 T AH0 B AH0 L	R IH0 D AW1 T AH0 B AH0 L	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+redound	R IY0 D AW1 N D	R IH0 D AW1 N D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+reflate	R IY0 F L EY1 T	R IH0 F L EY1 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+reflation	R IY0 F L EY1 SH AH0 N	R IH0 F L EY1 SH AH0 N	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+remiss	R IY0 M IH1 S	R IH0 M IH1 S	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+remisses	R IY0 M IH1 S IH0 Z	R IH0 M IH1 S IH0 Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+reprieve	R IY0 P R IY1 V	R IH0 P R IY1 V	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+reprisal	R IY0 P R AY1 Z AH0 L	R IH0 P R AY1 Z AH0 L	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+repudiate	R IY0 P Y UW1 D IY0 EY2 T	R IH0 P Y UW1 D IY0 EY2 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+repudiated	R IY0 P Y UW1 D IY0 EY2 T IH0 D	R IH0 P Y UW1 D IY0 EY2 T IH0 D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+repudiates	R IY0 P Y UW1 D IY0 EY2 T S	R IH0 P Y UW1 D IY0 EY2 T S	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+repudiating	R IY0 P Y UW1 D IY0 EY2 T IH0 NG	R IH0 P Y UW1 D IY0 EY2 T IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+repulse	R IY0 P AH1 L S	R IH0 P AH1 L S	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+repulsed	R IY0 P AH1 L S T	R IH0 P AH1 L S T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+repulsing	R IY0 P AH1 L S IH0 NG	R IH0 P AH1 L S IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+repute	R IY0 P Y UW1 T	R IH0 P Y UW1 T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+retrench	R IY0 T R EH1 N CH	R IH0 T R EH1 N CH	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+retrenched	R IY0 T R EH1 N CH T	R IH0 T R EH1 N CH T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+retrenching	R IY0 T R EH1 N CH IH0 NG	R IH0 T R EH1 N CH IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+retrenchment	R IY0 T R EH1 N CH M AH0 N T	R IH0 T R EH1 N CH M AH0 N T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+retrenchments	R IY0 T R EH1 N CH M AH0 N T S	R IH0 T R EH1 N CH M AH0 N T S	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+retrieved	R IY0 T R IY1 V D	R IH0 T R IY1 V D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+retriever	R IY0 T R IY1 V ER0	R IH0 T R IY1 V ER0	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+retrievers	R IY0 T R IY1 V ER0 Z	R IH0 T R IY1 V ER0 Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+retrieving	R IY0 T R IY1 V IH0 NG	R IH0 T R IY1 V IH0 NG	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+revile	R IY0 V AY1 L	R IH0 V AY1 L	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+reviled	R IY0 V AY1 L D	R IH0 V AY1 L D	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+revisionism	R IY0 V IH1 ZH AH0 N IH2 Z AH0 M	R IH0 V IH1 ZH AH0 N IH2 Z AH0 M	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+revivalist	R IY0 V AY1 V AH0 L IH0 S T	R IH0 V AY1 V AH0 L IH0 S T	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (#1378)
+revivals	R IY0 V AY1 V AH0 L Z	R IH0 V AY1 V AH0 L Z	the de-/re-/pre- prefix vowel: gold + Moby + espeak against us (paradigm sibling of the corrected lemma) (#1378)
+# ⚠ AND ONE MORE FROM THE SAME GROUP, WHICH THE FAMILY KEY COULD NOT REACH. `pretend` and `pretens-`
+# stem differently, so no sweep in #1397 will ever see them as one paradigm — yet `pretension` sat at
+# IY0 beside the corrected `pretend`, rendering pɹitɛnʃən against pɹᵻtɛnd.
+# ⚠ AND THE GROUP IS NOT CORRECTED WHOLESALE, BECAUSE THE THREE SOURCES DISAGREE WORD BY WORD INSIDE
+# IT. `pretension` is reduced in Moby and espeak against gold's tense (2 of 3, applied); `pretentious`
+# and `pretense` are TENSE in Moby and gold against espeak (2 of 3, left alone). "Make the family
+# consistent" is not a rule that survives contact with this data, which is the caution #1397 needs.
+pretension	P R IY0 T EH1 N SH AH0 N	P R IH0 T EH1 N SH AH0 N	the de-/re-/pre- prefix vowel: Moby + espeak against us; gold dissents (#1378)
 

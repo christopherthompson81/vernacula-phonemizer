@@ -66,6 +66,25 @@ const KNOWN_GAPS = new Map<string, string>([
     ["misogyny", "n-gram (source N): recalls the upstream row verbatim; our own `misogamy` already has /mɪˈsɑ/; closes on a retrain"],
     ["misogynist", "n-gram (source N): recalls the upstream row verbatim; same class as `misogyny`; closes on a retrain"],
 
+    // ⚠ SEVEN FROM #1378 QUEUE ITEM 4, AND THEY ARE THE SAME SHAPE AT SCALE: the `de-`/`re-`/`pre-`
+    // prefix vowel. The model is trained on UPSTREAM CMUdict, which is split inside its own paradigms on
+    // exactly this axis (`retrieve` R IH0 beside `retriever` R IY0), so the n-gram has learnt the
+    // inconsistency and recalls whichever spelling the upstream row happened to carry.
+    // ⚠ FIVE OF THE SEVEN HAVE THE TARGET ON AN UNCORRECTED SIBLING, which is what makes those gaps
+    // rather than reasons to revert: `repulsion`/`repulsive` are IH0 like the corrected `repulse`,
+    // `desensitized`/`desensitizing` are IY0 like the corrected `desensitize`. A retrain absorbs them.
+    // ⚠ `redoubt` AND `redoubtable` ARE THE EXCEPTION AND THE FIRST VERSION OF THIS NOTE CLAIMED THEM
+    // TOO. They are the ONLY two `redoub*` rows in the dictionary, both were corrected here, and both
+    // are listed below — so neither has an uncorrected sibling carrying the target, and their case
+    // rests on the three outside sources alone rather than on any internal evidence.
+    ["desensitize", "n-gram (source N): recalls the upstream IH0; the corrected family is IY0; closes on a retrain"],
+    ["destabilize", "n-gram (source N): recalls the upstream IH0; the corrected family is IY0; closes on a retrain"],
+    ["redoubt", "n-gram (source N): recalls the upstream IY0; the corrected family is IH0; closes on a retrain"],
+    ["redoubtable", "n-gram (source N): recalls the upstream IY0; same family as `redoubt`; closes on a retrain"],
+    ["repudiate", "n-gram (source N): recalls the upstream IY0; our own `repudiation` is IH0; closes on a retrain"],
+    ["repulse", "n-gram (source N): recalls the upstream IY0; our own `repulsion`/`repulsive` are IH0; closes on a retrain"],
+    ["revile", "n-gram (source N): recalls the upstream IY0; closes on a retrain"],
+
     // ⚠ TWO ROOTS, AND THEIR DERIVED FORMS ARE NOT HERE, which is the shape to notice: `haphazardly`
     // and `upholstered` close through morphDecode the moment their stems are corrected, because that
     // path looks the stem up in the SHIPPED dict. Only the roots the n-gram must spell from letters

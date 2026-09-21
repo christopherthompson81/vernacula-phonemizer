@@ -29456,8 +29456,8 @@ decane	D EH1 K EY0 N
 decant	D AH0 K AE1 N T
 decanter	D IH0 K AE1 N T ER0
 decanting	D AH0 K AE1 N T IH0 NG
-decapitate	D IY0 K AE1 P AH0 T EY2 T
-decapitated	D IY0 K AE1 P AH0 T EY2 T IH0 D
+decapitate	D IH0 K AE1 P AH0 T EY2 T
+decapitated	D IH0 K AE1 P AH0 T EY2 T IH0 D
 decapitation	D IH0 K AE2 P IH0 T EY1 SH AH0 N
 decapitations	D IH0 K AE2 P IH0 T EY1 SH AH0 N Z
 decapod	D EH1 K AH0 P AA2 D
@@ -29942,8 +29942,8 @@ defoor	D EH1 F UH0 R
 deforce	D IY0 F AO1 R S
 deford	D EH1 F ER0 D
 defore	D IY1 F AO0 R
-deforest	D IH0 F AO1 R AH0 S T
-deforestation	D IH0 F AO2 R IH0 S T EY1 SH AH0 N
+deforest	D IY0 F AO1 R AH0 S T
+deforestation	D IY0 F AO2 R IH0 S T EY1 SH AH0 N
 deforge	D EH1 F ER0 G
 deform	D IY2 F AO1 R M
 deformation	D IY2 F AO0 R M EY1 SH AH0 N
@@ -30071,15 +30071,15 @@ dehoff	D EH1 HH AO0 F
 dehorn	D IY0 HH AO1 R N
 dehoyos	D EH1 HH OY0 OW0 Z
 dehumanization	D IY2 HH Y UW2 M AH0 N AH0 Z EY1 SH AH0 N
-dehumanize	D IH0 HH Y UW1 M AH0 N AY0 Z
-dehumanized	D IH0 HH Y UW1 M AH0 N AY0 Z D
+dehumanize	D IY0 HH Y UW1 M AH0 N AY0 Z
+dehumanized	D IY0 HH Y UW1 M AH0 N AY0 Z D
 dehumanizing	D IY0 HH Y UW1 M AH0 N AY2 Z IH0 NG
 dehumidified	D IY0 HH Y UW0 M IH1 D AH0 F AY0 D
 dehumidifier	D IY0 HH Y UW0 M IH1 D AH0 F AY0 ER0
 dehumidifies	D IY0 HH Y UW0 M IH1 D AH0 F AY0 Z
 dehumidify	D IY0 HH Y UW0 M IH1 D AH0 F AY0
-dehydrate	D IH0 HH AY1 D R EY0 T
-dehydrated	D IH0 HH AY1 D R EY0 T AH0 D
+dehydrate	D IY0 HH AY1 D R EY0 T
+dehydrated	D IY0 HH AY1 D R EY0 T AH0 D
 dehydration	D IY2 HH AY0 D R EY1 SH AH0 N
 deibel	D AY1 B AH0 L
 deibert	D AY1 B ER0 T
@@ -31063,8 +31063,8 @@ depp	D EH1 P
 deppe	D EH1 P
 deppen	D EH1 P AH0 N
 depravation	D EH2 P R AH0 V EY1 SH AH0 N
-deprave	D IY0 P R EY1 V
-depraved	D IY0 P R EY1 V D
+deprave	D IH0 P R EY1 V
+depraved	D IH0 P R EY1 V D
 depravity	D IH0 P R AE1 V AH0 T IY0
 deprecate	D EH1 P R AH0 K EY2 T
 deprecated	D EH1 P R AH0 K EY2 T AH0 D
@@ -31326,14 +31326,14 @@ desecrates	D EH1 S AH0 K R EY2 T S
 desecration	D EH0 S AH0 K R EY1 SH AH0 N
 desecrations	D EH0 S AH0 K R EY1 SH AH0 N Z
 deseed	D IY0 S IY1 D
-desegregate	D IH0 S EH1 G R AH0 G EY2 T
-desegregated	D IH0 S EH1 G R IH0 G EY2 T IH0 D
-desegregation	D IH0 S EH2 G R AH0 G EY1 SH AH0 N
+desegregate	D IY0 S EH1 G R AH0 G EY2 T
+desegregated	D IY0 S EH1 G R IH0 G EY2 T IH0 D
+desegregation	D IY0 S EH2 G R AH0 G EY1 SH AH0 N
 deselect	D IY2 S IH0 L EH1 K T
 desena	D IH0 S EH1 N AH0
-desensitize	D IH0 S EH1 N S AH0 T AY2 Z
-desensitized	D IH0 S EH1 N S AH0 T AY2 Z D
-desensitizing	D IH0 S EH1 N S AH0 T AY2 Z IH0 NG
+desensitize	D IY0 S EH1 N S AH0 T AY2 Z
+desensitized	D IY0 S EH1 N S AH0 T AY2 Z D
+desensitizing	D IY0 S EH1 N S AH0 T AY2 Z IH0 NG
 deseret	D EH2 Z ER0 EH1 T
 desert	D EH1 Z ER0 T
 deserted	D IH0 Z ER1 T IH0 D
@@ -31477,9 +31477,9 @@ dessertspoon	D IH0 Z ER1 T S P UW2 N
 dessertspoonful	D IH0 Z ER1 T S P UW2 N F UH2 L
 dest	D EH1 S T
 destabilization	D IY0 S T EY2 B AH0 L AH0 Z EY1 SH AH0 N
-destabilize	D IH0 S T EY1 B AH0 L AY2 Z
-destabilized	D IH0 S T EY1 B AH0 L AY2 Z D
-destabilizing	D IH0 S T EY1 B AH0 L AY2 Z IH0 NG
+destabilize	D IY0 S T EY1 B AH0 L AY2 Z
+destabilized	D IY0 S T EY1 B AH0 L AY2 Z D
+destabilizing	D IY0 S T EY1 B AH0 L AY2 Z IH0 NG
 destec	D EH1 S T EH2 K
 destefanis	D IH0 S T IH0 F AA1 N IH0 S
 destefano	D IH0 S T EH0 F AA1 N OW0
@@ -94947,7 +94947,7 @@ preble	P R EH1 B AH0 L
 prebon	P R IY1 B AA0 N
 precambrian	P R IY0 K AE1 M B R IY0 AH0 N
 precancerous	P R IY0 K AE1 N S ER0 AH0 S
-precarious	P R IY0 K EH1 R IY0 AH0 S
+precarious	P R IH0 K EH1 R IY0 AH0 S
 precariously	P R IH0 K EH1 R IY0 AH0 S L IY0
 precariousness	P R AH0 K EH1 R IY0 AH0 S N AH0 S
 precast	P R IY0 K AE1 S T
@@ -95452,15 +95452,15 @@ pretax	P R IY1 T AE1 K S
 prete	P R IY1 T
 preteen	P R IY2 T IY1 N
 preteens	P R IY2 T IY1 N Z
-pretend	P R IY0 T EH1 N D
-pretended	P R IY0 T EH1 N D IH0 D
-pretender	P R IY0 T EH1 N D ER0
-pretenders	P R IY0 T EH1 N D ER0 Z
-pretending	P R IY0 T EH1 N D IH0 NG
-pretends	P R IY0 T EH1 N D Z
+pretend	P R IH0 T EH1 N D
+pretended	P R IH0 T EH1 N D IH0 D
+pretender	P R IH0 T EH1 N D ER0
+pretenders	P R IH0 T EH1 N D ER0 Z
+pretending	P R IH0 T EH1 N D IH0 NG
+pretends	P R IH0 T EH1 N D Z
 pretense	P R IY0 T EH1 N S
 pretenses	P R IY0 T EH1 N S IH0 Z
-pretension	P R IY0 T EH1 N SH AH0 N
+pretension	P R IH0 T EH1 N SH AH0 N
 pretensions	P R AH0 T EH1 N SH AH0 N Z
 pretentious	P R IY0 T EH1 N SH AH0 S
 preterm	P R IY2 T ER1 M
@@ -99740,9 +99740,9 @@ redone	R IY0 D AH1 N
 redouble	R IY0 D AH1 B AH0 L
 redoubled	R IY0 D AH1 B AH0 L D
 redoubling	R IY0 D AH1 B AH0 L IH0 NG
-redoubt	R IY0 D AW1 T
-redoubtable	R IY0 D AW1 T AH0 B AH0 L
-redound	R IY0 D AW1 N D
+redoubt	R IH0 D AW1 T
+redoubtable	R IH0 D AW1 T AH0 B AH0 L
+redound	R IH0 D AW1 N D
 redpath	R EH1 D P AE2 TH
 redpoll	R EH1 D P OW2 L
 redpolls	R EH1 D P OW2 L Z
@@ -99917,8 +99917,8 @@ refitting	R IY0 F IH1 T IH0 NG
 reflag	R IY0 F L AE1 G
 reflagged	R IY0 F L AE1 G D
 reflagging	R IY0 F L AE1 G IH0 NG
-reflate	R IY0 F L EY1 T
-reflation	R IY0 F L EY1 SH AH0 N
+reflate	R IH0 F L EY1 T
+reflation	R IH0 F L EY1 SH AH0 N
 reflect	R IH0 F L EH1 K T
 reflectance	R IH0 F L EH1 K T AH0 N S
 reflected	R IH0 F L EH1 K T IH0 D
@@ -100699,8 +100699,8 @@ reminiscent	R EH2 M AH0 N IH1 S AH0 N T
 reminisces	R EH2 M AH0 N IH1 S IH0 Z
 reminiscing	R EH2 M AH0 N IH1 S IH0 NG
 remis	R EY1 M IY0 Z
-remiss	R IY0 M IH1 S
-remisses	R IY0 M IH1 S IH0 Z
+remiss	R IH0 M IH1 S
+remisses	R IH0 M IH1 S IH0 Z
 remissible	R IH0 M IH1 S AH0 B AH0 L
 remission	R IH0 M IH1 SH AH0 N
 remissions	R IH0 M IH1 SH AH0 N Z
@@ -101134,7 +101134,7 @@ repressiveness	R AH0 P R EH1 S IH0 V N AH0 S
 reprice	R IY0 P R AY1 S
 repriced	R IY0 P R AY1 S T
 repricing	R IY0 P R AY1 S IH0 NG
-reprieve	R IY0 P R IY1 V
+reprieve	R IH0 P R IY1 V
 reprimand	R EH1 P R AH0 M AE2 N D
 reprimanded	R EH1 P R AH0 M AE2 N D IH0 D
 reprimands	R EH1 P R AH0 M AE2 N D Z
@@ -101142,7 +101142,7 @@ reprint	R IY0 P R IH1 N T
 reprinted	R IY0 P R IH1 N T IH0 D
 reprinting	R IY0 P R IH1 N T IH0 NG
 reprints	R IY0 P R IH1 N T S
-reprisal	R IY0 P R AY1 Z AH0 L
+reprisal	R IH0 P R AY1 Z AH0 L
 reprisals	R IH0 P R AY1 Z AH0 L Z
 reprise	R IH0 P R AY1 Z
 repro	R IY1 P R OW0
@@ -101189,16 +101189,16 @@ republicbank	R IY0 P AH1 B L IH0 K B AE2 NG K
 republics	R IH0 P AH1 B L IH0 K S
 republika	R IH0 P AH1 B L IH0 K AH0
 republish	R IY0 P AH1 B L IH0 SH
-repudiate	R IY0 P Y UW1 D IY0 EY2 T
-repudiated	R IY0 P Y UW1 D IY0 EY2 T IH0 D
-repudiates	R IY0 P Y UW1 D IY0 EY2 T S
-repudiating	R IY0 P Y UW1 D IY0 EY2 T IH0 NG
+repudiate	R IH0 P Y UW1 D IY0 EY2 T
+repudiated	R IH0 P Y UW1 D IY0 EY2 T IH0 D
+repudiates	R IH0 P Y UW1 D IY0 EY2 T S
+repudiating	R IH0 P Y UW1 D IY0 EY2 T IH0 NG
 repudiation	R IH0 P Y UW2 D IY0 EY1 SH AH0 N
 repugnance	R IH0 P AH1 G N AH0 N S
 repugnant	R IH0 P AH1 G N AH0 N T
-repulse	R IY0 P AH1 L S
-repulsed	R IY0 P AH1 L S T
-repulsing	R IY0 P AH1 L S IH0 NG
+repulse	R IH0 P AH1 L S
+repulsed	R IH0 P AH1 L S T
+repulsing	R IH0 P AH1 L S IH0 NG
 repulsion	R IH0 P AH1 L SH AH0 N
 repulsive	R IH0 P AH1 L S IH0 V
 repulsively	R IH0 P AH1 L S IH0 V L IY0
@@ -101210,7 +101210,7 @@ repurchasing	R IY0 P ER1 CH AH0 S IH0 NG
 reputable	R EH1 P Y AH0 T AH0 B AH0 L
 reputation	R EH2 P Y AH0 T EY1 SH AH0 N
 reputations	R EH2 P Y AH0 T EY1 SH AH0 N Z
-repute	R IY0 P Y UW1 T
+repute	R IH0 P Y UW1 T
 reputed	R IH0 P Y UW1 T IH0 D
 reputedly	R IH0 P Y UW1 T IH0 D L IY0
 requa	R EY1 K W AH0
@@ -101698,11 +101698,11 @@ retreat	R IY0 T R IY1 T
 retreated	R IY0 T R IY1 T AH0 D
 retreating	R IY0 T R IY1 T IH0 NG
 retreats	R IY0 T R IY1 T S
-retrench	R IY0 T R EH1 N CH
-retrenched	R IY0 T R EH1 N CH T
-retrenching	R IY0 T R EH1 N CH IH0 NG
-retrenchment	R IY0 T R EH1 N CH M AH0 N T
-retrenchments	R IY0 T R EH1 N CH M AH0 N T S
+retrench	R IH0 T R EH1 N CH
+retrenched	R IH0 T R EH1 N CH T
+retrenching	R IH0 T R EH1 N CH IH0 NG
+retrenchment	R IH0 T R EH1 N CH M AH0 N T
+retrenchments	R IH0 T R EH1 N CH M AH0 N T S
 retrial	R IY0 T R AY1 AH0 L
 retribution	R EH2 T R AH0 B Y UW1 SH AH0 N
 retributive	R IH0 T R IH1 B Y AH0 T IH0 V
@@ -101710,11 +101710,11 @@ retributory	R IH0 T R IH1 B Y AH0 T AO2 R IY0
 retried	R IY0 T R AY1 D
 retrieval	R IH0 T R IY1 V AH0 L
 retrieve	R IH0 T R IY1 V
-retrieved	R IY0 T R IY1 V D
-retriever	R IY0 T R IY1 V ER0
-retrievers	R IY0 T R IY1 V ER0 Z
+retrieved	R IH0 T R IY1 V D
+retriever	R IH0 T R IY1 V ER0
+retrievers	R IH0 T R IY1 V ER0 Z
 retrieves	R IH0 T R IY1 V Z
-retrieving	R IY0 T R IY1 V IH0 NG
+retrieving	R IH0 T R IY1 V IH0 NG
 retro	R EH1 T R OW0
 retroact	R EH1 T R OW0 AE2 K T
 retroaction	R EH2 T R OW0 AE1 K SH AH0 N
@@ -101898,8 +101898,8 @@ reviewers	R IH0 V Y UW1 ER0 Z
 reviewing	R IH0 V Y UW1 IH0 NG
 reviews	R IH0 V Y UW1 Z
 reviglio	R AH0 V IH1 G L IY0 OW0
-revile	R IY0 V AY1 L
-reviled	R IY0 V AY1 L D
+revile	R IH0 V AY1 L
+reviled	R IH0 V AY1 L D
 revilla	R EH0 V IH1 L AH0
 reville	R EH1 V IH2 L
 revis	R EH1 V IH0 S
@@ -101909,7 +101909,7 @@ revised	R IH0 V AY1 Z D
 revises	R IH0 V AY1 Z IH0 Z
 revising	R IH0 V AY1 Z IH0 NG
 revision	R IH0 V IH1 ZH AH0 N
-revisionism	R IY0 V IH1 ZH AH0 N IH2 Z AH0 M
+revisionism	R IH0 V IH1 ZH AH0 N IH2 Z AH0 M
 revisionist	R IH0 V IH1 ZH AH0 N IH0 S T
 revisionists	R IH0 V IH1 ZH AH0 N IH0 S T S
 revisions	R IH0 V IH1 ZH AH0 N Z
@@ -101923,8 +101923,8 @@ revitalized	R IY0 V AY1 T AH0 L AY2 Z D
 revitalizing	R IY0 V AY1 T AH0 L AY2 Z IH0 NG
 revival	R IH0 V AY1 V AH0 L
 revivalism	R IH0 V AY1 V AH0 L IH2 Z AH0 M
-revivalist	R IY0 V AY1 V AH0 L IH0 S T
-revivals	R IY0 V AY1 V AH0 L Z
+revivalist	R IH0 V AY1 V AH0 L IH0 S T
+revivals	R IH0 V AY1 V AH0 L Z
 revive	R IH0 V AY1 V
 revived	R IH0 V AY1 V D
 reviver	R AH0 V AY1 V ER0

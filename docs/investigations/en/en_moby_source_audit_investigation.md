@@ -5642,3 +5642,124 @@ expectation did not.
     suite 6,145 · C# 6,697 · goldens 189/36,495/0 stale · parity 189 byte-identical
     heteronym table 124 → 130 entries
 
+## Run 87 — 2026-09-20 22:40 — queue item 4: the predicate the queue asked for should not exist
+
+QUESTION. #1378 item 4 asks for a `de-`/`re-`/`pre-` NEVER-A-DEFECT predicate, recording the class as
+"measured near-100% *not* a defect" and instructing: *pin the shape first — see #1377 for how measuring
+before encoding caught a predicate that fired on 1 of its 9 rows.* Pinning the shape is what killed it.
+
+### Pinning the shape, which is most of the work
+
+    candidates spelled de-/re-/pre-                 69
+      differ ONLY in the first vowel                45
+      differ in more than that (NOT this class)     24
+
+⚠ **THREE OF THE 45 ARE A DIFFERENT CLASS AND A NAIVE PREDICATE WOULD SWALLOW THEM.** `debacle` is
+AH → EY and `decor` IH → EY (a real vowel choice, not a reduction); `premonition` is EH → IY. A rule
+written as "the first vowel differs" rejects three live adjudications. Restricted to {IY, IH, AH}.
+
+⚠ **AND ONE OF THE REMAINING 42 MOVES THE PRIMARY STRESS.** `prelim` is `P R IH0 L IH1 M` against
+`P R IY1 L IH2 M` — the tonic moves to the prefix. Five more move a secondary (`declassify`, `decode`,
+`decoder`, `decongestant`, `desegregation`, 0 → 2) and one the other way (`deform`). `normalise` strips
+stress, so the audit cannot see any of it, and #1379's stress instrument scores PRIMARY placement, so
+the secondaries are witnessed by nothing. Restricting the class to a SAME STRESS DIGIT leaves 35.
+
+### ⚠ THE PREMISE IS REFUTED: THE CLASS IS ~80% A DEFECT, NOT ~100% NOT ONE
+
+The bidirectionality test — the tell that separates free variation from one source being systematically
+fuller — looked like it passed: 21 rows where we are the tense side, 14 where we are the reduced side.
+**It is not free variation. It is two subclasses each running one way**, and a third source says so:
+
+    same-digit prefix-vowel rows: 35
+      espeak-ng backs the AGREED form:  27
+      backs OURS:                        6
+      neither:                           2
+
+    reversative de-   deforest dehumanize dehydrate desegregate desensitize destabilize
+                      ours REDUCED, gold + Moby + espeak all TENSE
+    opaque re-/pre-   reprieve repulse repute retriever revile redoubt reprisal repudiate …
+                      ours TENSE, gold + Moby + espeak all REDUCED
+
+⚠ **AND THE DIFFERENCE SURVIVES TO THE OUTPUT**, which is the check #1393 taught: `ɹipɹˈiːv` against
+`ɹᵻpɹˈiːv`. This is not the AH0/IH0 notation pair — those both render `ᵻ`, which is exactly why
+`normalise` merges them, and no row applied below moves one to the other.
+
+### The decisive evidence is internal, and it is bigger than the audit can see
+
+    retrieve   R IH0   retriever R IY0   retrieved R IY0   retrieving R IY0   retrieval R IH0
+    repulse    R IY0   repulsion R IH0   repulsive R IH0
+    repudiate  R IY0   repudiation R IH0
+
+CMUdict is split INSIDE single paradigms on this axis. So the audit's candidates are not a class of
+their own — they are the members that happen to be triple-sourced.
+
+    de-/re-/pre- families with 2+ members and a reduced prefix vowel   602
+      INTERNALLY SPLIT on tense vs reduced                              57   (210 words)
+
+⚠ **THE FAMILY KEY WAS WRONG FOUR TIMES, AND THE HEADLINE MOVED EVERY TIME — 86, 57, 77, 33.** Stripping the prefix put `decant`
+with `recant` and `deduct` with `reduction` — different words sharing a Latin stem — and reported their
+disagreement as an intra-paradigm split (86 families). Keeping the prefix but stemming in one pass split
+`precarious` from `precariousness` and `revival` from `revivals`, because a single strip lands on a
+different string depending on which suffix the word ends in. Stemming in a LOOP to a floor of prefix + 4
+and then matching by spelling prefix fixes both — and at prefix + 3 `revivalist` stems to `reviv` and
+reaches `revive`, `reviver` and `revivify`, which are different lemmas.
+
+⚠ **AND THAT VERSION OVER-GROUPS, WHICH I ONLY FOUND BY RUNNING BOTH INSTRUMENTS AGAINST EACH OTHER
+AFTER THE ROWS WERE APPLIED.** A bare spelling-prefix match puts `debark` AND THE SURNAME `debartolo`
+in `debar`'s family and reports their disagreement as a paradigm split: 77 families, 443 words.
+Requiring the remainder after the stem to be a plausible inflection gives **33 families / 128 words**,
+and every family it prints reads as a real paradigm. A fifth defect surfaced in the same pass — two
+words of one paradigm can stem to the same string and each open a family, which counted `demobiliz`
+twice.
+
+⚠ **FOUR DEFINITIONS, FOUR HEADLINES: 86, 57, 77, 33.** The applied rows are unaffected — each of the
+57 was checked individually against a third source, and none of the over-grouped surnames is among them
+— but #1397 was FILED ON THE 57 AND HAS BEEN CORRECTED. Getting the family boundary right is part of
+that work rather than a preliminary to it, and the honest thing to record is that a plausible-looking
+grouping produced a confident headline three times running.
+
+### ⚠ TWO BOOKKEEPING DEFECTS THE REVIEW FOUND, AND ONE OF THEM EXPLAINS AN ODD NUMBER
+
+**`desegregation` is in the held-out list AND in the applied set.** The six rows excluded above for
+moving a stress digit include it (0 → 2) — and it is then applied anyway, as a paradigm sibling of
+`desegregate`, with its digit left at 0. That is right under "apply only the part the agreement can
+see", but the exclusion list reads as the record of what this class does not touch, so it has to say
+so. ⚠ **AND IT EXPLAINS THE OTHERWISE-ODD 621 → 593**, a drop of 28 against 27 seeds: correcting the
+vowel makes `desegregation` agree under `normalise`, so it leaves the candidate list **with its stress
+disagreement unaddressed**. One row that looks fixed in the headline and is not; it belongs to the
+stress axis, which is #1379's instrument, not this one.
+
+**And one member of the class is unreachable by any family key.** `pretension` sat at `IY0` beside the
+corrected `pretend`, rendering `pɹitɛnʃən` against `pɹᵻtɛnd` — and `pretend` and `pretens-` stem
+differently, so no sweep in #1397 will ever see them as one paradigm. ⚠ The group is NOT corrected
+wholesale, because **the three sources disagree word by word inside it**: `pretension` is reduced in
+Moby and espeak against gold's tense (2 of 3, applied); `pretentious` and `pretense` are tense in Moby
+and gold against espeak (2 of 3, left). "Make the family consistent" is not a rule that survives
+contact with this data.
+
+### Applied: 27 seeds with their paradigms = 57 rows, plus `pretension`
+
+Every non-seed sibling was checked against espeak independently and every one agrees with its family's
+target. The reduced spelling comes from the FAMILY, not from gold: `normalise` merges AH0 and IH0, so
+the agreement that made these candidates cannot see which is meant, and applying gold's `AH0` verbatim
+would put a third spelling into a family that uses `IH0` (#1377's rule, a third time).
+
+    audit candidates    621 → 593
+    all three agree     37,619 → 37,647
+    curation gaps       +7, all source N — the model is trained on the upstream inconsistency and
+                        recalls it; five have the target on an UNCORRECTED sibling (`redoubt` and
+                        `redoubtable` are the only two `redoub*` rows and both were corrected, so
+                        their case rests on the outside sources alone)
+    remaining class     57 families / 210 words, filed as #1397
+    suite 6,145 · goldens 189/36,495/0 stale · en-gb sets fresh
+    referee eval (en)   wikipron 64.0% / 91.3% UNCHANGED; moby-lexicon 26,816 → 26,843;
+                        epitran 17,464 → 17,465
+
+⚠ **AND NEITHER MOVING REFEREE IS INDEPENDENT EVIDENCE HERE.** `en.moby-lexicon.tsv` is built from
+Moby, one of the two sources that made these candidates, and the eval's own footer says epitran
+eng-Latn is CMU-derived and therefore circular with our CMUdict-based g2p. The one referee that would
+be independent — wikipron — is flat, because these words are off the frequency list where it has almost
+no coverage. Quoted to show the rows landed, not as validation. Same situation as #1393.
+
+NEXT. Item 4 produces no predicate, and the queue entry should be corrected rather than left for the
+next reader to act on. Items 5 and 6 remain.
