@@ -287,6 +287,45 @@
         // and Moby carry the FABRIC and CMUdict the VERB, and neither is wrong. A candidate that is
         // really a heteronym is the one shape the audit cannot tell from a defect.
         "worsted": { "default": "wˈʊstᵻd", "verb": "wˈɝstᵻd" },
+
+        // THE `-ed` ADJECTIVE HETERONYMS (#1378 queue item 3). Our dictionary carries the PARTICIPLE and
+        // the adjective is a syllable longer — `blessed` /blɛst/ against /ˈblɛsɪd/. The `adj` slot plus
+        // the attributive constraint in english.ts is what expresses it.
+        // ⚠ THE SLOT ALONE WAS NOT ENOUGH AND THE QUEUE ITEM SAID IT WOULD BE. The tagger calls every one
+        // of these VBN in attributive position, so the entries were inert until the promotion rule landed
+        // beside them; see the comment on `posExpectations`.
+        // ⚠ `learned` AND `aged` ARE DELIBERATELY ABSENT, and they are the two the queue named first.
+        // They are the only members whose attributive reading is genuinely BOTH: "a learned professor"
+        // is /ˈlɜːnɪd/ but "learned behaviour" is /lɜːnd/, and "an aged man" is /ˈeɪdʒɪd/ but "aged
+        // cheese" is /eɪdʒd/. Attributive position does not imply the adjective for them, so the one
+        // test this mechanism has cannot separate their two readings and an entry would trade one error
+        // for another. They want a following-noun class (person vs substance), which is a different
+        // mechanism, not a slot.
+        // ⚠ EVERY STRING HERE IS THE ENGINE'S OWN RENDERING OF THE ARPABET ROW, not hand-written IPA.
+        // The first draft of this block was hand-written and was wrong three ways: no aspiration on
+        // `cursed`/`cussed`/`moped` (a heteronym value is literal and skips the aspiration rule the dict
+        // path applies), and `ᵻ` where `makeArpabetToIpa` gives `ɪ` for an `IH0` in this position.
+        // Derive with tools/english/en_rebuild_lexicon.mts's renderer, do not type them.
+        "blessed": { "default": "blˈɛst", "adj": "blˈɛsɪd" },
+        "cursed": { "default": "kʰˈɝst", "adj": "kʰˈɝsɪd" },
+        "cussed": { "default": "kʰˈʌst", "adj": "kʰˈʌsɪd" },
+        "dogged": { "default": "dˈɔːɡd", "adj": "dˈɔːɡɪd" },
+        // ⚠ `beloved` ALSO TAKES A `noun` SLOT, and it is the only member that needs one: it is the one
+        // word here with a real plural, and `isVoicingHeteronym` builds the plural from `verb ?? noun ??
+        // past` and never looks at `adj` — so "my beloveds" took the PARTICIPLE as its base and read
+        // bᵻlˈʌvdz. The noun reading also stands alone ("my beloved"), which the `adj` slot cannot
+        // reach because that slot requires a following noun.
+        "beloved": { "default": "bᵻlˈʌvd", "adj": "bᵻlˈʌvɪd", "noun": "bᵻlˈʌvɪd" },
+        // ⚠ NOT AN `-ed` ADJECTIVE AT ALL — A NOUN THE DICTIONARY COULD NOT REACH. `moped` is the vehicle
+        // far more often than it is the past tense of `mope`, and CMUdict carries only the verb, so
+        // "he rode a moped" came out mˈoᶷpt. Gold models it the same way round.
+        // ⚠ AND ITS VOWEL COMES FROM OUR OWN PLURAL ROW, NOT FROM GOLD. There is no `moped` NOUN row in
+        // CMUdict to copy, so the first draft invented `M OW1 P EH2 D` from gold's mˈOpˌɛd — which
+        // contradicted `mopeds M OW1 P EH0 D Z`, a row this dictionary already ships. The heteronym
+        // plural path runs BEFORE the lexicon lookup, so "the mopeds were parked" would have read
+        // mˈoᶷpʰˌɛdz against the engine's own mˈoᶷpɛdz for the same lexeme. `EH0` keeps the paradigm
+        // whole, which is the same call #1393 made for `herbal`.
+        "moped": { "default": "mˈoᶷpɛd", "verb": "mˈoᶷpt" },
         "wind": { "default": "wˈɪnd", "verb": "wˈaᶦnd" },
         "wound": { "default": "wˈuːnd", "past": "wˈaᶷnd" },
     },

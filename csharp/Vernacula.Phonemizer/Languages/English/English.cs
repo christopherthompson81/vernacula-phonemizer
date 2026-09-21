@@ -214,6 +214,10 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         return over;
     }
 
+    /** A tag that can HEAD a noun phrase, so that a following VBN + NN is attributive. See the TypeScript. */
+    private static bool HeadsNounPhrase(string tag) =>
+        tag == "DT" || tag == "PDT" || tag == "PRP$" || tag.StartsWith("JJ", StringComparison.Ordinal);
+
     /** POS expectations for a sentence's words (perceptron tags → verb/noun/past, + imperative recovery). */
     private List<PosExpectation?> PosExpectations(IReadOnlyList<string> words)
     {
@@ -225,6 +229,15 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             if (outp[i]!.Adj && !(i + 1 < tags.Count && tags[i + 1].StartsWith("NN", StringComparison.Ordinal)))
                 outp[i] = new PosExpectation
                     { Verb = outp[i]!.Verb, Noun = outp[i]!.Noun, Past = outp[i]!.Past, Adj = false };
+        // ⚠ And the same constraint PROMOTES: this tagger calls the `-ed` adjective VBN in exactly the
+        // attributive frame the demotion above requires. See the TypeScript for the measurement, for why
+        // the LEFT tag must head a noun phrase (NN + VBN + NN is a transitive verb with a bare-noun
+        // object, not an attributive), and for why Verb/Past are cleared rather than kept.
+        for (var i = 0; i < outp.Count; i++)
+            if (tags[i] == "VBN" && i + 1 < tags.Count && tags[i + 1].StartsWith("NN", StringComparison.Ordinal)
+                && (i == 0 || HeadsNounPhrase(tags[i - 1])))
+                outp[i] = new PosExpectation
+                    { Verb = false, Noun = outp[i]!.Noun, Past = false, Adj = true };
         if (outp.Count > 1 && outp[0]!.Verb == false && Pos.HeadsObjectPhrase(tags.Count > 1 ? tags[1] : ""))
             // sentence-initial imperative ("Wind the clock")
             outp[0] = new PosExpectation { Verb = true, Noun = false, Past = false, Adj = false };

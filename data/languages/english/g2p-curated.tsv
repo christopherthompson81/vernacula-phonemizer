@@ -2871,8 +2871,9 @@ tsk		T S K	consonant interjection CMUdict lacks; the OOV net would spell it out
 # ⚠ IT IS A WEAK ARBITER ON A LOANWORD, because it falls back to letter rules and so votes for the
 # spelling-predictable reading. Its vote is evidence about a DROPPED consonant, not about ⟨g⟩ = /ʒ/.
 #
-# ⚠ SIX OF THE 69 ARE REFUSED and are not below. `accursed` is the -ed adjective heteronym class, which
-# queue item 3 owns and which the dictionary row cannot express. `herbal` and `herbalist` are h-less
+# ⚠ SIX OF THE 69 ARE REFUSED here. `accursed` was deferred to the -ed adjective heteronym class, which
+# queue item 3 owns — and item 3 concluded it is NOT a heteronym (no live verb `to accurse`), so it IS
+# below now, in that item's own block at the end of this file. `herbal` and `herbalist` are h-less
 # because GenAm `herb` IS h-less, and our dict is already consistent across herb/herbs/herbal/herbalist
 # while keeping the /h/ of `herbaceous` and `herbicide` — applying them would have broken a correct
 # paradigm to match two British-leaning sources. `louis` at rank 2,095 is the `tours` trap: both sources
@@ -2969,3 +2970,11 @@ reunified	R IY0 UW1 N AH0 F AY2 D	R IY0 Y UW1 N AH0 F AY2 D	propagated from the 
 thundershowers	TH AH1 N D ER0 SH AW2 W ER0 Z	TH AH1 N D ER0 SH AW2 ER0 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
 homages	AA1 M AH0 JH AH0 Z	HH AA1 M IH0 JH AH0 Z	propagated from the corrected lemma (triple-source + espeak, #1378)
 resounding	R IY0 S AW1 N D IH0 NG	R IH0 Z AW1 N D IH0 NG	propagated from the corrected lemma (triple-source + espeak, #1378)
+#
+# ⚠ AND ONE MEMBER OF THE `-ed` ADJECTIVE CLASS THAT IS NOT A HETERONYM AT ALL (#1378 item 3). #1393
+# surfaced `accursed` on the consonant skeleton and refused it, deferring to the heteronym work — but
+# there is no live verb "to accurse", so the word has only the adjective reading and the dictionary row
+# is simply the wrong one. A `{default, adj}` entry would be modelling a distinction English does not
+# make here. gold has əkˈɜɹsəd as its ONLY reading; Moby agrees.
+accursed	AE2 K ER1 S T	AH0 K ER1 S IH0 D	no verb `to accurse` exists: the row was the participle of a word with no participle (#1378)
+

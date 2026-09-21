@@ -5497,3 +5497,148 @@ child still running and still holding the write; it had to be killed by PID. **A
 whose builder takes minutes must be built once, at the end, from a settled tree** — the same discipline
 `check-goldens` documents for itself, learned here the other way round.
 
+## Run 85 — 2026-09-20 21:45 — queue item 3: the `-ed` adjective, and the slot that was live but unreachable
+
+QUESTION. #1378 item 3 says `cussed`, `blessed`, `aged`, `learned`, `dogged`, `crooked` carry only the
+participle, and that the class is **expressible** because "the `adj` slot in english.jsonc's heteronym
+table is live (`arithmetic`)". The first job was to check that claim rather than build on it.
+
+### The class is smaller than the list, because most of it is already right
+
+    wicked  naked  wretched  rugged  jagged  ragged  crooked  deuced   ours = the adjective already
+    blessed cursed cussed dogged beloved aged learned                  ours = the participle only
+    accursed                                                           ours = a participle of a verb
+                                                                       that does not exist
+    moped                                                              not an -ed adjective at all
+
+⚠ **`ragged`, `jagged` AND `crooked` DO NOT WANT A `verb` SLOT EITHER**, which is the first thing that
+looked obvious and is wrong. gold models each as `{DEFAULT: adjective, VERB: participle}` — but `verb`
+is true for VBN as well as VBD, and the tagger calls `a ragged edge` VBN, so a `verb` slot would fire
+in the attributive frame and replace a correct default with the participle. Left alone.
+
+### ⚠ THE SLOT IS LIVE AND THE CLASS IS NOT REACHABLE THROUGH IT
+
+`english.ts` fires `adj` only when the tag is JJ **and** the next tag is NN — the attributive
+constraint, added for `arithmetic` because the tagger calls it an adjective standing alone. Measured
+over eight frames per word:
+
+    word       JJ rate   the frames it gets JJ in
+    blessed      4/8     "it was a blessed day", "very blessed indeed", "a truly blessed place"
+    cursed       4/8     the same three
+    dogged       6/8     …plus "a dogged thing"
+    rugged       4/8     the plain attributive "the rugged man" / "his rugged smile" is **VBN**
+
+⚠ **THE JJ FRAMES AND THE ATTRIBUTIVE FRAMES ARE ALMOST DISJOINT.** The tagger gets JJ
+*predicatively* — "very blessed", "the most blessed of all" — and VBN in exactly the plain attributive
+frame the constraint requires. "very blessed indeed" is JJ but the next tag is RB, so the constraint
+switches the slot back off. So an `adj` entry for any of these fires in the frames where the slot is
+disabled and not in the frames where it is enabled: **a table row that looks live and is inert where
+it matters.** None of the words is in the tagger's `tagdict`, so this is the model's `-ed` suffix
+feature, not a frozen lookup.
+
+THE FIX IS THE SAME CONSTRAINT READ THE OTHER WAY. An `-ed` form directly before a noun is attributive
+whatever the tagger calls it, so `posExpectations` now also PROMOTES: `VBN` + `NN*` sets `adj`. It can
+only change a word that HAS an `adj` slot, and `past` is still tested before `adj` in the resolver, so
+an entry carrying a `past` slot still wins on its own terms. **0 of 36,495 golden rows moved**, which
+is the evidence that it does not reach ordinary participles.
+
+### ⚠ `learned` AND `aged` REFUSED, AND THEY ARE THE TWO THE QUEUE NAMES FIRST
+
+They are the only members whose attributive reading is genuinely both:
+
+    a learned professor   /ˈlɜːnɪd/        learned behaviour   /lɜːnd/
+    an aged man           /ˈeɪdʒɪd/        aged cheese         /eɪdʒd/
+
+Attributive position does not imply the adjective for them, so the one test this mechanism has cannot
+separate the readings and an entry would trade one error for another. They want a following-noun class
+(person against substance), which is a different mechanism, not a slot. Pinned in the test so adding
+one is a decision rather than an oversight.
+
+### ⚠ `used` IS THE BIGGEST ROW IN THE CLASS AND IS NOT EXPRESSIBLE AT ALL
+
+Rank **125**. gold has `{DEFAULT: jˈuzd, VBD: jˈust}` and our dict has only `Y UW1 Z D`, so
+"I used to walk there" comes out jˈuːzd. But gold's own conditioning is wrong for the general case —
+"she used a hammer" is VBD and is /juːzd/ — and the /juːst/ reading belongs to the BIGRAM `used to` +
+infinitive, which no POS tag distinguishes from "the tool I used to open it". A following-word
+condition is machinery this table does not have. Left out and filed rather than guessed at.
+
+### Two things caught by rendering rather than by reading
+
+⚠ **A HETERONYM VALUE IS LITERAL IPA AND SKIPS THE RULES THE DICT PATH APPLIES.** The first draft was
+hand-written and lost the aspiration on `cursed`/`cussed`/`moped` — `ðə kʰˈɝst` became `ðə kˈɝst` in
+the very sentence the entry was added for. It also wrote `ᵻ` where `makeArpabetToIpa` gives `ɪ` for an
+`IH0` in this position. Every string in the block is now the engine's own rendering of the ARPABET row,
+derived with the lexicon renderer.
+
+⚠ **`accursed` IS NOT A HETERONYM.** #1393 surfaced it on the consonant skeleton and refused it,
+deferring to this item — correctly, but the conclusion is that there is no live verb "to accurse", so
+the word has only the adjective reading and the dict row was simply wrong. A `{default, adj}` entry
+would model a distinction English does not make. Fixed in `g2p-curated.tsv`.
+
+### A pre-existing C# failure, NOT from this work
+
+`LanguageBootstrapTests.AsyncPrewarmsAnEmbeddedLatinRunFromACOLDMemo` fails on `Maandag`
+(`mˈændæɡ` expected, `mˈɑːndæɡ` got — the BiLSTM path ran, only the first vowel differs). **Verified
+on a clean tree at `1c2a71da`: it fails there too.** This is the ONNX non-reproducibility PORTING.md
+documents for the 74 neural languages. Recorded here so the next person does not attribute it to this
+block; every other C# test passes (6,696).
+
+    suite 6,143 · C# 6,696 (+1 pre-existing) · goldens 189/36,495/0 stale · parity 189 byte-identical
+    heteronym table 124 → 130 entries
+
+## Run 86 — 2026-09-20 21:55 — review of Run 85: a following noun is not an attributive
+
+Six findings. One is a live regression against `main`, two are a heteronym entry contradicting the
+dictionary it sits beside, and the rest are ledger rot.
+
+### ⚠ THE PROMOTION FIRED ON AN ORDINARY TRANSITIVE VERB, AND MY OWN NEGATIVE TEST COULD NOT SEE IT
+
+    The priest blessed bread and wine .    → ðə pɹˈiːst blˈɛsɪd bɹˈɛd ənd wˈaᶦn .
+    The captain cursed storms at sea .     → ðə kʰˈæptn̩ kʰˈɝsɪd stˈɔːɹmz æt sˈiː .
+
+`NN + VBN + NN` is a past-tense transitive verb with a BARE-NOUN object — the attributive shape minus
+its left edge — and these are ordinary sentences, not contrived ones.
+
+⚠ **AND THE NEGATIVE HALF OF THE TEST WAS STRUCTURALLY BLIND TO IT.** Every case I wrote there puts a
+determiner after the verb (`He blessed the crowd .`, next tag DT), which is the ONE shape the rule
+cannot fire on. I had pinned the two readings in both directions and still tested only the frames that
+could not fail — failure mode (e) from #1378's own list, committed while writing a block about it.
+
+The separating signal is the LEFT tag: a real attributive is `DT/PDT/PRP$/JJ + VBN + NN`, every misfire
+is `NN/NNS + VBN + NN`. Gated on that, with sentence-initial counting as a noun-phrase head (`Blessed
+relief came`). All four positive assertions survive; all three misfires go.
+
+### ⚠ AND THE PROMOTION WAS DEAD FOR THE ONE ENTRY WITH A `verb` SLOT
+
+`posExpectation` sets `verb` AND `past` for VBN, and the resolver tests `past`, then `verb`, then
+`adj` — so `the moped rider` still read `mˈoᶷpt`, the vehicle as the past tense of `mope`, in exactly
+the frame the rule exists for. My comment noted the `past` ordering and missed that `verb` is the
+stronger trap. The promotion now CLEARS both: a word in attributive position is not functioning as a
+verb, so that is what the promotion means rather than a convenience.
+
+### ⚠ A HETERONYM ENTRY THAT CONTRADICTED THE DICTIONARY ROW BESIDE IT
+
+There is no `moped` NOUN row in CMUdict, so I invented `M OW1 P EH2 D` from gold's `mˈOpˌɛd`. But this
+dictionary already ships **`mopeds M OW1 P EH0 D Z`** — unstressed, unaspirated — and the heteronym
+plural path runs BEFORE the lexicon lookup, so "the mopeds were parked" read `mˈoᶷpʰˌɛdz` against the
+engine's own `mˈoᶷpɛdz` for the same lexeme. `EH0` keeps the paradigm whole. **Our own plural row is
+better evidence than gold for our own singular**, which is the call #1393 made for `herbal` arriving
+from the other direction.
+
+⚠ `isVoicingHeteronym` BUILDS THE PLURAL FROM `verb ?? noun ?? past` AND NEVER LOOKS AT `adj`, so
+`beloved` — the one member of the block with a real plural — took the PARTICIPLE as its base and "my
+beloveds" read `bᵻlˈʌvdz`. A `noun` slot fixes it and also reaches the standalone noun ("my beloved"),
+which the `adj` slot cannot, because that slot requires a following noun.
+
+### The test file's own lesson, twice
+
+⚠ **I TYPED THE EXPECTATIONS AND CORRUPTED THEM.** Splicing the new cases in through a Python heredoc
+turned `ᶦ` into `ᶜ` and `t͡ʃˈɪɭdn̩` into something else, in four assertions. Regenerated by PRINTING
+`phonemize()`'s output as TypeScript source — the same discipline the heteronym values themselves now
+follow, arrived at a second time in the same block because I did not apply it to the test.
+⚠ And the C# twin failed once on a stray `z` I typed into `ˈɑːɹz`. Both engines agreed; the
+expectation did not.
+
+    suite 6,145 · C# 6,697 · goldens 189/36,495/0 stale · parity 189 byte-identical
+    heteronym table 124 → 130 entries
+
