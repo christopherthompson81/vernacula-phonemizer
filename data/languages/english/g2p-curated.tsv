@@ -1091,7 +1091,7 @@ inchon	IH1 N CH AO0 N	IH1 N CH AA0 N	LOT/THOUGHT: align AA/AO to gold's consiste
 incognito	IH2 N K AO0 G N IY1 T OW0	IH2 N K AA0 G N IY1 T OW0	LOT/THOUGHT: align AA/AO to gold's consistent system
 incomprehensible	IH2 NG K AA2 M P R AH0 HH EH1 N S IH0 B AH0 L	IH2 N K AA2 M P R AH0 HH EH1 N S AH0 B AH0 L	⟨in⟩ before /k/ is N in this dict (gold + moby)
 incongruous	IH2 NG K AO1 NG R UW0 AH0 S	IH2 NG K AA1 NG G R UW0 AH0 S	LOT/THOUGHT: align AA/AO to gold's consistent system; and the /ɡ/ of ⟨ngr⟩ dropped, which our own `congruous` carries (#1378 item 5)
-incongruously	IH2 NG K AO1 NG R UW0 AH0 S L IY0	IH2 NG K AA1 NG R UW0 AH0 S L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system
+incongruously	IH2 NG K AO1 NG R UW0 AH0 S L IY0	IH2 NG K AA1 NG G R UW0 AH0 S L IY0	LOT/THOUGHT: align AA/AO to gold's consistent system; and the /ɡ/ of ⟨ngr⟩ dropped, which our own `congruously` carries (#1378 item 5)
 incorrigible	IH2 N K AA1 R AH0 JH AH0 B AH0 L	IH2 N K AO1 R AH0 JH AH0 B AH0 L	LOT/THOUGHT: align AA/AO to gold's consistent system
 incubation	IH2 NG K Y UW0 B EY1 SH AH0 N	IH2 N K Y AH0 B EY1 SH AH0 N	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
 incubator	IH1 NG K Y AH0 B EY2 T ER0	IH1 N K Y AH0 B EY2 T ER0	⟨in⟩ before /k/ is N in this dict (include, income, incubate); Y UW0→Y AH0 (gold + moby)
@@ -3115,3 +3115,14 @@ unalienable	AH0 N EY1 L IY0 EH2 N AH0 B AH0 L	AH0 N EY1 L IY0 AH0 N AH0 B AH0 L	
 inconspicuous	IH2 NG K AA1 N S P IH0 K W AH0 S	IH2 NG K AH0 N S P IH1 K Y UW0 AH0 S	the ⟨cu⟩ yod dropped in a VELAR environment and the primary on `con-`; our own `conspicuous` is K AH0 N S P IH1 K Y UW0 AH0 S and gold + Moby + espeak agree (#1378 item 5)
 promiscuous	P R OW1 M IH0 S K W AH0 S	P R AH0 M IH1 S K Y UW0 AH0 S	the same: our own `promiscuity` keeps the yod, and all three sources put the primary on `-mis-` (#1378 item 5)
 incongruity	IH2 NG K AO0 NG R UW1 IH0 T IY0	IH2 NG K AO0 NG G R UW1 IH0 T IY0	the same missing /ɡ/ on the derived form (the vowel is left alone: the sources do not agree on it) (#1378 item 5)
+#
+# ⚠ AND THEIR PARADIGM SIBLINGS. A derived form with its own dict row does not inherit its lemma's
+# correction, which is the third time this has had to be said in one session — so this block was SWEPT
+# rather than read off a review's list, and the sweep had a hole of its own: it stripped the `s` of
+# `-ous`, which hid `incongruously` until the stem rule was fixed to leave that suffix alone.
+# `incongruously` already carried a LOT/THOUGHT row and is AMENDED IN PLACE, like `incongruous`.
+# ⚠ `hasidic` AND `hasidim` ARE NOT SIBLINGS IN THIS SENSE and are left: English shifts the stress in
+# `-ic` derivatives (`Arab`/`Arabic`), so their second-syllable primary is correct beside a
+# first-stressed `hasid`.
+hasids	HH AH0 S IH1 D Z	HH AA1 S IH0 D Z	the plural of the corrected `hasid` (#1378 item 5)
+flummoxed	F L AH0 M AO1 K S T	F L AH1 M AH0 K S T	the participle of the corrected `flummox` (#1378 item 5)

@@ -5822,8 +5822,9 @@ context. The same defect this log records for the schwa count in Run 70, in a ne
 
 ### The stress-and-vowel block from #1369, with a third source it did not have
 
-13 applied: `hasid`, `kenaf`, `legroom`, `monadnock`, `orel`, `picturesque`, `primavera`, `flummox`,
-`sacramental`, `reprobate`, `unalloyed`, `unalienable`. Three refused, on three different grounds:
+**12 applied** — `hasid`, `kenaf`, `legroom`, `monadnock`, `orel`, `picturesque`, `primavera`,
+`flummox`, `sacramental`, `reprobate`, `unalloyed`, `unalienable`. ⚠ An earlier draft of this line and
+of the PR body said 13, counting `qatar`, which was applied and then reverted (below). Three refused:
 
     wahoo                 MOBY ITSELF CARRIES BOTH PLACEMENTS — the free-variation tell
     mudra                 espeak agrees with US, and gold and Moby disagree with each other
@@ -5843,6 +5844,12 @@ in citation form**, and it was right. Reverted; the goldens then went fresh with
 
     audit candidates    593 → 583          all three agree   37,647 → 37,657
     moby-lexicon        26,844/35,027 → 26,857/35,001  (76.6% → 76.7%)
+
+⚠ **TWO NUMERATORS APPEAR IN THIS RUN AND THEY ARE DIFFERENT MEASUREMENTS.** The rhotic section above
+reports 26,844 → **26,844**: that is the referee change ALONE, with the dictionary held fixed, and it is
+the number that carries the claim (all 26 removed rows were failing). The gates block reports 26,844 →
+**26,857**: that is the END STATE, after this run's 12 stress rows, 3 yod/velar rows and their siblings
+also landed. +13 of the numerator is the dictionary work, not the referee work.
     en-gb-palm          544 → 545  — `hasid`, whose RP row is hɑːsɪd and which the PALM edit can only
                         match now that our vowel is right
     curation gaps       +1 (`hasid`, source N, the retrain class a fourth time)

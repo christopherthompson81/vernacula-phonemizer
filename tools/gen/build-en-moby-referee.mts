@@ -374,7 +374,15 @@ const CODA_R = /[aeiouy]r+(?![aeiouyrh])/u;
 /** ⟨rw⟩ in the spelling — a coda only if some reading actually has the /w/. See above. */
 const SILENT_W = /[aeiouy]r+w/u;
 /** A rhotic in CODA position: ɚ/ɝ, or ɹ/ɻ/r not followed by a vowel. */
-const CODA_RHOTIC = /[ɚɝ]|[ɹɻr](?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶːˑ])/u;
+/**
+ * ⚠ ONE SOURCE FOR THE VOWEL CLASS, BECAUSE HAND-COPYING IT DIVERGED. Rule 4's `/g` twin was written
+ * out a second time and silently lost `æ` and corrupted `ɞ` to a Latin capital `Ȟ` — so an `ɹ` before
+ * `æ` counted as a CODA rhotic, inflating the referee's count and keeping a genuinely RP row. Latent on
+ * today's data (zero rows move either way) and exactly the two-copies-of-one-fact defect this file's
+ * header warns about for the rhotic JOIN and the coda rule.
+ */
+const NOT_A_VOWEL = "(?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶːˑ])";
+const CODA_RHOTIC = new RegExp(`[ɚɝ]|[ɹɻr]${NOT_A_VOWEL}`, "u");
 /**
  * ⚠ A FOURTH RULE, FOR THE MIXED PROFILE THE OTHER THREE CANNOT REACH. `undercover ʌndəkʌvɚ` drops the
  * ⟨r⟩ of `under-` and keeps the final one; `northern nɔɹðən` the reverse; `hindquarters
@@ -394,7 +402,7 @@ const CODA_RHOTIC = /[ɚɝ]|[ɹɻr](?![aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤ�
  * match the count there and none is dropped. Under-firing is the documented safe direction.
  */
 const CODA_R_ALL = /[aeiouy]r+(?![aeiouyrh])/gu;
-const CODA_RHOTIC_ALL = /[ɚɝ]|[ɹɻr](?![aeiouɑɒɔəɛɜɪʊʌyøœɐɨʉɯɤʏɘɵȞɶːˑ])/gu;
+const CODA_RHOTIC_ALL = new RegExp(`[ɚɝ]|[ɹɻr]${NOT_A_VOWEL}`, "gu");
 const countOf = (s: string, re: RegExp): number => (s.match(re) ?? []).length;
 /** Our coda rhotics in ARPABET: every `ER`, plus an `R` not followed by a vowel. */
 function ourCodaRhotics(arpabet: string): number {

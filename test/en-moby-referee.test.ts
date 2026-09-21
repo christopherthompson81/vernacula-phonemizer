@@ -88,8 +88,12 @@ describe("the Moby referee corpora", () => {
     // way. Both match the count and both must survive; this is the discriminator the file's French note
     // already named, used for a second purpose.
     test("a spelled r that is silent in GenAm too is not RP", () => {
-        expect(lex.get("worcester") ?? oov.get("worcester")).toBe("wʊstɚ");
-        expect((lex.get("catercorner") ?? oov.get("catercorner")) !== undefined).toBe(true);
+        // ⚠ BOTH CASES MUST BE IN THE *LEXICON* CORPUS. `catercorner` was here first and proved nothing:
+        // it lives in the OOV file, where `ourArpabet.get(w)` is `undefined` by construction and rule 4
+        // never fires at all — so that assertion passed with the discriminator deleted. A test of a gate
+        // has to be a row the gate can actually reach.
+        expect(lex.get("worcester")).toBe("wʊstɚ");
+        expect(lex.has("worcester")).toBe(true);
     });
 
     // ⚠ AND ONE ROW THE COUNT WOULD HAVE DROPPED FOR THE WRONG REASON. `thermometer`'s only Moby body
