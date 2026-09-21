@@ -5,8 +5,13 @@
  * `en-gb-lexical.tsv` would be the `aluminium` mistake in the other direction, so this is asserted as a
  * rule: an unseen `-ary` word must take it too.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, test } from "vitest";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { phonemizeWord as say } from "../src/languages/english-gb/english-gb.ts";
+
+const GB = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "languages", "english-gb");
 
 describe("the -ary/-ery/-ory weak vowel", () => {
     it("reduces the suffix vowel and drops the secondary stress", () => {
@@ -59,4 +64,25 @@ describe("the -ary/-ery/-ory weak vowel", () => {
     it("records amatory's BATH mis-claim, which is #1391 and not this rule", () => {
         expect(say("amatory")).toBe("ˈɑːmətʰəɹi");
     });
+});
+
+/**
+ * ⚠ THE BUILDER AND THE RUNTIME APPLY THIS RULE ON OPPOSITE SIDES OF THE SETS, AND THAT IS ONLY SAFE
+ * WHILE THIS IS EMPTY. `build-en-gb-sets.ts` probes set edits on top of `phonemizeWordRules`, i.e.
+ * AFTER the suffix rule; `toRP` applies the sets BEFORE it. For a `marry` word spelled `-ary` the
+ * runtime's `ɛ(ˈ|ˌ)?ɹ → æ$1ɹ` would consume the suffix `ɛɹ` first and block the reduction, shipping
+ * `…ˌæɹi`, while the builder scored `…əɹi`.
+ *
+ * ⚠ REORDERING IS THE WRONG REMEDY AND WAS MEASURED BEFORE BEING REFUSED: `cloth` has EIGHT members
+ * spelled this way (`corollary`, `coronary`, `offertory`, `oratory`, `glossary`, `orrery`, `flory`,
+ * `lory`) and its `ɔː → ɒ` is first-occurrence, so moving the suffix rule ahead of the set block would
+ * change those real words to remove a divergence that affects none. `marry` has zero.
+ *
+ * So the divergence is left in place and GUARDED instead. If a `marry` member spelled `-ary/-ery/-ory`
+ * is ever added, this fails and the ordering has to be settled then, on a word that exists.
+ */
+test("no marry-set word is spelled -ary/-ery/-ory, which is what makes the rule order safe", () => {
+    const marry = readFileSync(join(GB, "en-gb-marry.tsv"), "utf8").split("\n")
+        .filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!);
+    expect(marry.filter((w) => /(ar|er|or)(y|ies)$/u.test(w))).toEqual([]);
 });

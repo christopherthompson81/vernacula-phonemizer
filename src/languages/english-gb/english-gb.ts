@@ -297,8 +297,38 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     // reduced `canary` kənˈɛɹi to kənˈəɹi and `actuary` to ˌækt͡ʃuːˈəɹi — deleting the tonic nucleus.
     // The first pass takes a secondary mark AND DROPS IT; the second takes an unmarked suffix vowel and
     // is blocked by a lookbehind on either mark.
-    if (/(ary|ery|ory)$/u.test(w)) {
-        s = s.replace(/ˌ(?:ɛ|ɔː)(ɹi)$/u, "ə$1").replace(/(?<![ˈˌ])(?:ɛ|ɔː)(ɹi)$/u, "ə$1");
+    //
+    // ⚠ THE INFLECTIONS COME TOO, AND ANCHORING ON `$` ALONE LEFT THEM OUT. A rule sold on being
+    // PRODUCTIVE that stops at the lemma is not one: `ðə sˈɛkɹətʰəɹi ənd ðə sˈɛkɹətʰˌɛɹiz` said the
+    // singular one way and the plural the other in a single utterance, which is the `clerk`/`clerks`
+    // split #1385 treated as a blocker and #1390 tracks for the sets. The dictionary alone holds 53
+    // `-aries/-ories` rows with the full vowel (`categories`, `dictionaries`, `cemeteries`).
+    //
+    // ⚠ AND `-story` COMPOUNDS ARE EXCLUDED, because the spelling cannot otherwise tell a weak suffix
+    // from a compound whose final element is the free noun `story`: `understory` AH1 N D ER0 S T AO2 R
+    // IY0, `multistory`, and the OOV `backstory` all keep a full THOUGHT vowel in SSBE. This is NOT the
+    // documented residue — the residue is a bounded list of words the rule gets wrong, while this class
+    // reaches unseen coinages through the very productivity the rule is sold on.
+    // ⚠ EXCLUDING THE WHOLE `story$` SPELLING COSTS NOTHING: the only other members are `history`,
+    // `protohistory` and `celestory`, and the parent already reduces all three (`HH IH1 S T ER0 IY0`),
+    // so the rule was never firing on them.
+    // ⚠ AND THE CLITIC, which the first fix for the inflections still missed: `secretary's` reaches here
+    // with the apostrophe intact and its phones already end `ɹiz`, so only the SPELLING guard was
+    // blocking it — the singular and its possessive disagreed for one more round.
+    // ⚠ AND IT IS EXEMPT FOR A WORD THE LEXICAL TABLE OWNS, like every rule above it. No
+    // `en-gb-lexical.tsv` row is spelled this way today, so this is latent — but that file exists
+    // precisely to hand-write forms the rules get wrong, and the first such row would otherwise be
+    // silently rewritten by the rule it was added to override.
+    // ⚠ THE SET BLOCK RUNS BEFORE THIS AND THE BUILDER PROBES AFTER IT — see english-gb-ary.test.ts for
+    // why that divergence is left in place and guarded rather than reordered.
+    // ⚠ `\W?` RATHER THAN A LITERAL APOSTROPHE CLASS, AND THAT IS ABOUT TOOLING, NOT MATCHING.
+    // `tools/extract_regexes.mts` scrapes pattern literals out of `src/` for the C# `JsRegex` harness,
+    // and its scraper mangles any pattern containing a literal `'` inside a character class — six
+    // patterns across hebrew, dutch, english, madurese and karakalpak are already dropped as
+    // "unparseable" for that reason, and `['’]` here made it seven. A dropped pattern is one the
+    // translator harness never replays, which is the one thing that file's header says must not happen.
+    if (lexical === undefined && /(ar|er|or)(y|ies)\W?s?$/u.test(w) && !/story\W?s?$/u.test(w)) {
+        s = s.replace(/ˌ(?:ɛ|ɔː)(ɹiz?)$/u, "ə$1").replace(/(?<![ˈˌ])(?:ɛ|ɔː)(ɹiz?)$/u, "ə$1");
     }
     // Non-rhoticity: remap each vowel + coda /ɹ/, then drop any remaining coda /ɹ/.
     s = s

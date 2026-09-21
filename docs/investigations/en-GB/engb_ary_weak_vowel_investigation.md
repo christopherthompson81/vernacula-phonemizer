@@ -114,3 +114,75 @@ freshness check makes that automatic rather than remembered.
               `contemporary`), each matching a referee reading
     sets      bath 679 → 680, cloth 694 → 698
     suite     6,133 tests;  parity 189 byte-identical;  regex corpus re-extracted
+
+## Run 5 — 2026-09-20 21:40 — review of #1392: the rule stopped at the lemma
+
+Five findings, all real. Two were the rule not being the thing the PR claimed it was.
+
+### ⚠ A RULE SOLD ON BEING PRODUCTIVE THAT STOPPED AT THE LEMMA
+
+Both guards were `$`-anchored, so every inflection escaped:
+
+    ðə sˈɛkɹətʰəɹi ənd ðə sˈɛkɹətʰˌɛɹiz
+
+— the singular reduced, the plural keeping the American full vowel, in one utterance. That is the
+`clerk`/`clerks` split #1385 treated as a blocker and #1390 tracks for the sets, reintroduced by the fix
+for a different instance of it. The dictionary alone holds 53 `-aries/-ories` rows with the full vowel.
+Now `(ar|er|or)(y|ies)\W?s?$` against phones `(ɛ|ɔː)(ɹiz?)$`.
+
+⚠ **AND THE CLITIC SURVIVED ONE ROUND LONGER.** `secretary's` reaches the rule with the apostrophe
+intact and its phones already end `ɹiz`, so only the SPELLING guard was blocking it — the first fix for
+the inflections still left the singular and its possessive disagreeing.
+
+### ⚠ `-story` COMPOUNDS WERE FALSE POSITIVES, AND THEY ARE NOT THE DOCUMENTED RESIDUE
+
+`understory` AH1 N D ER0 S T AO2 R IY0 → ˈʌndəstəɹi, `multistory`, and the OOV `backstory`. The spelling
+cannot tell a weak suffix from a compound whose final element is the free noun `story`. Run 3 counted
+`understory` among "the predicted residue", which was wrong in kind: the residue is a bounded list of
+words the rule gets wrong, while this class reaches unseen coinages through the very productivity the
+rule is sold on.
+
+⚠ **EXCLUDING THE WHOLE `story$` SPELLING COSTS NOTHING**, which is what makes it a clean fix rather than
+a patch: the only other members are `history`, `protohistory` and `celestory`, and the parent already
+reduces all three, so the rule was never firing on them.
+
+### The rule was not exempt for table-owned words, unlike every rule above it
+
+`en-gb-lexical.tsv` exists precisely to hand-write forms the rules get wrong, and the first row spelled
+this way would have been silently rewritten by the rule it was added to override. Latent — no such row
+exists — and gated now.
+
+### ⚠ THE BUILDER AND THE RUNTIME APPLY THIS ON OPPOSITE SIDES OF THE SETS
+
+`build-en-gb-sets.ts` probes on top of `phonemizeWordRules`, i.e. AFTER the suffix rule; `toRP` applies
+the sets BEFORE it. For a `marry` word spelled `-ary` the runtime's `ɛɹ → æɹ` would consume the suffix
+first and block the reduction while the builder scored it reduced.
+
+⚠ **REORDERING WAS MEASURED AND REFUSED.** `cloth` has EIGHT members spelled this way — `corollary`,
+`coronary`, `offertory`, `oratory`, `glossary`, `orrery`, `flory`, `lory` — and its `ɔː → ɒ` is
+first-occurrence, so moving the suffix rule ahead of the set block would change those real words to
+remove a divergence that affects none. `marry` has zero. So the divergence is left and **guarded**: a
+test asserts no `marry` member is spelled this way, and if one is ever added the ordering gets settled
+then, on a word that exists.
+
+### ⚠ AND THE PATTERN WAS INVISIBLE TO THE C# TRANSLATOR HARNESS
+
+`tools/extract_regexes.mts` scrapes pattern literals out of `src/` for `regex-diff` to replay through
+`JsRegex`, and its scraper **mangles any pattern containing a literal `'` inside a character class**. My
+`['’]` made the count go 12 → 13 unparseable, and a dropped pattern is one the translator is never
+tested against — the one thing that file's own header says must not happen.
+
+⚠ **IT IS PRE-EXISTING AND NOT MINE**: hebrew, dutch, english, madurese and karakalpak are already in
+that list for the same reason. Written as `\W?` instead, which matches the same text and scrapes
+cleanly — 12 unparseable again, 2,371 → 2,372 patterns, and `story` now appears in the corpus.
+
+### `amatory` stays deferred, and now with evidence
+
+The obvious #1391 fix — reject a BATH claim supported only by a **length-less `ɑ`**, the discriminator
+that works for PALM — was measured and does not work here: **60 of 680 BATH members** are claimed that
+way, and they include `dramatize`, whose ONLY referee row is `d̠͡ɹ̠ɑmətaɪz` and which this codebase
+explicitly cites as a correct BATH member. wikipron is simply inconsistent about length, so for BATH —
+where the RP form genuinely IS `ɑː` — length carries no signal. Recorded on #1391.
+
+    goldens   1 more row (`monasteries`);  sets unchanged;  eval 52.2% / 86.5%
+    suite     6,135 tests;  parity 189 byte-identical;  regex corpus 12 unparseable (was 13)
