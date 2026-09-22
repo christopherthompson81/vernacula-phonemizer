@@ -182,6 +182,10 @@ depended on them.
   language ships no voice at all — closed as many sourcing questions as its positive entries.
   It is also the **instrument** behind `catalan/mid-vowels.tsv` and `bl-gl-geminate.tsv`: run over an
   externally-chosen frequency wordlist, one abstract feature per word retained (§5.1).
+  And since 2026-09-21 it is the **second UK source** behind three rows of
+  `english-gb/en-gb-lexical.tsv` — `schedule`, `leisure`, `ballet` — one British/American feature per
+  word, taken from a dictsource LINE rather than from the binary's output, with the shipped value
+  remaining the parent's own CMUdict row (§5.1 item 5).
   <https://github.com/espeak-ng/espeak-ng>
 - **epitran** — MIT (David R. Mortensen et al., CMU). The independent programmatic second opinion
   across 32 languages, and row-level corroboration for `mandarin/syllable-ipa.tsv`.

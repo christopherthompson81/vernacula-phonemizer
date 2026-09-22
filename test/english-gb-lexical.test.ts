@@ -127,6 +127,66 @@ describe("en-GB lexical variants", () => {
         expect(phonemize("the progress is good", "en-GB")).toContain("p\u0279\u02c8\u0259\u1db7\u0261\u0279\u025bs");
     });
 
+    it("takes the three lemmas the SECOND source unblocked, and nothing the binary merely guessed", () => {
+        // ⚠ espeak-ng's en-gb voice is admitted as a SECOND UK source, and the bar is a PER-WORD HUMAN
+        // DECISION in its dictionary sources — an en_list entry, or a VARIANT-CONDITIONAL en_rules line —
+        // not the bare output of the binary, which is a G2P guess of the kind this engine already makes.
+        // `schedule`: en_rules:5871 `?3  sch (ed → sk`, marking GENERAL AMERICAN as the exception.
+        expect(phonemizeWord("schedule")).toBe("ʃˈɛdjˌuːɫ");
+        // `leisure` and `ballet` are PER-WORD PAIRS — en_list:2407/2408 and en_list:1044/1045 — and for
+        // `ballet` the pair is the whole evidence: the base row carries NO stress mark, so only the `?3`
+        // companion moving it to the second syllable makes it a decision about THIS word.
+        expect(phonemizeWord("leisure")).toBe("lˈɛʒə");
+        expect(phonemizeWord("leisurely")).toBe("lˈɛʒəli");
+        expect(phonemizeWord("leisured")).toBe("lˈɛʒəd");
+        expect(phonemizeWord("ballet")).toBe("bˈæleᶦ");
+        expect(phonemizeWord("ballets")).toBe("bˈæleᶦz");   // and NOT espeak's bˈaleɪs: its
+        // inflections are rule-derived, so the entailment rule outranks the second source on the suffix.
+        // ...and `en` is untouched by all of it.
+        expect(phonemize("schedule", "en")).toBe("skˈɛd͡ʒˌuːɫ");
+        expect(phonemize("leisure", "en")).toBe("lˈiːʒɚ");
+        expect(phonemize("ballet", "en")).toBe("bælˈeᶦ");
+    });
+
+    it("takes the whole sched- FAMILY, because the evidence is a spelling rule and not a headword", () => {
+        // ⚠ `leisure`/`ballet` rest on en_list entries, which are per-word, so they stop at the lemma and
+        // its inflections. `schedule` rests on a rule over ⟨sch⟩ before ⟨ed⟩, which fires wherever that
+        // sequence appears — so the evidence covers these as fully as it covers the lemma, and stopping
+        // short would put "the schedule" beside "the scheduler" with the /ʃ/~/sk/ contrast flipping.
+        expect(phonemizeWord("scheduler")).toBe("ʃˈɛdjʊlə");
+        expect(phonemizeWord("schedulers")).toBe("ʃˈɛdjʊləz");
+        expect(phonemizeWord("unscheduled")).toBe("ənʃˈɛdjuːɫd");
+        expect(phonemizeWord("reschedule")).toBe("ɹiʃˈɛdjuːɫ");
+        expect(phonemizeWord("rescheduled")).toBe("ɹiʃˈɛdjuːɫd");
+        expect(phonemizeWord("rescheduling")).toBe("ɹiʃˈɛdjuːlɪŋ");
+        // ⚠ AND `scheduler` KEEPS THE WEAK VOWEL WHERE THE LEMMA HAS uː. Both sources say it really does
+        // reduce there — espeak ʃˈɛdjʊlə, wikipron skɛdjələ — so normalising the family to one stem
+        // vowel would have been a second wrong answer wearing the first one's clothes.
+        expect(phonemizeWord("scheduler")).toContain("ʊ");
+        expect(phonemizeWord("schedule")).toContain("uː");
+    });
+
+    it("keeps the parent's paradigm consistent rather than overriding it here", () => {
+        // ⚠ THE SPLIT WAS OURS. g2p-curated.tsv carried `schedule UH0 → UW2` and left the three inflections
+        // behind, so `en` ITSELF said skˈɛd͡ʒˌuːɫ beside skˈɛd͡ʒʊɫd — the wrong-within-one-sentence
+        // failure this table exists to prevent, in the PARENT, hidden by an en-GB override. Fixed in the
+        // curated layer, so every citation here is the parent's row with ONE rewrite and no stem override.
+        for (const w of ["scheduled", "schedules", "scheduling"])
+            expect([w, phonemize(w, "en").includes("uː")]).toEqual([w, true]);
+        expect(phonemize("scheduled", "en")).toBe("skˈɛd͡ʒˌuːɫd");
+        expect(phonemize("scheduling", "en")).toBe("skˈɛd͡ʒuːlɪŋ");
+        // ⚠ AND THE PREFIX ENTAILMENT IS RUN OVER THE PARENT'S OWN SUFFIX-CONDITIONED ALLOPHONY, which is
+        // now three separate things: FLAPPING (tomato/tomatoes, already documented), L-DARKNESS
+        // (\`scheduling\` lightens the prevocalic lateral) and SECONDARY STRESS (\`scheduling\` drops the
+        // lemma's ˌ as well). All three are the parent's, which is exactly what makes them not a
+        // difference for this table — but a raw \`startsWith\` cannot see any of them.
+        const bare = (s: string): string => s.replace(/ɫ/gu, "l").replace(/ˌ/gu, "");
+        for (const many of ["schedules", "scheduled", "scheduling"])
+            expect([many, bare(phonemizeWord(many)).startsWith(bare(phonemizeWord("schedule")))]).toEqual([many, true]);
+        for (const [one, many] of [["leisure", "leisurely"], ["leisure", "leisured"], ["ballet", "ballets"]] as const)
+            expect([many, phonemizeWord(many).startsWith(phonemizeWord(one))]).toEqual([many, true]);
+    });
+
     it("owns every word it lists, so the set builder cannot claim one into an accent set", () => {
         // aluminium was in en-gb-yod.tsv: the builder's coronal-yod probe saw `luː` with no yod where the
         // referee attests one and filed it under yod-retention. An accent set claiming a lexical variant

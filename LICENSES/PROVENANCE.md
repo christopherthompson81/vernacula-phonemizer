@@ -41,6 +41,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `vietnamese/rhymes.tsv` | exhaustive closed-class rhyme inventory | Facts |
 | `mandarin/syllable-ipa.tsv` | exhaustive pinyin-syllable inventory; row-level corroboration vs epitran (MIT) | Facts |
 | `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable); one feature per word, measured with espeak-ng 1.52 over an external wordlist (§5.1) | Facts |
+| `english-gb/en-gb-lexical.tsv` (3 of 38 rows) | one British/American feature per word for `schedule`, `leisure`, `ballet`, decided against espeak-ng's **dictsource** (§5.1); the shipped bytes are the parent's own CMUdict row with that one feature rewritten, so no espeak phoneme string is reproduced | Facts |
 | `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist | Facts |
 | `amharic/fidel.tsv`, `tigrinya/fidel.tsv` | hand-authored Ge'ez syllabary tables | Own work |
 | `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
@@ -272,6 +273,22 @@ no linkage, but worth stating rather than implying a blanket rule.) Four distinc
    that provable.
 4. **Coverage baseline.** The `espeak` column in `tools/language-catalogue/catalogue.tsv` (1 = a
    voice exists, 0 = none) is one of the inputs to picking the next language.
+5. **A second UK source for the en-GB lexical-variant table** (2026-09-21, #1383). Three rows of
+   `data/languages/english-gb/en-gb-lexical.tsv` — `schedule`, `leisure`, `ballet` — rest on a
+   per-word human decision in dictsource, read as plain files from a 1.52-series checkout
+   (`1.52.0-306-g7ebec3c1`): `en_list:1044 ballet baleI`, `en_list:2407 leisure lEZ3`, and
+   `en_rules:5871 ?3  sch (ed  sk`, whose `?3` marks GENERAL AMERICAN as the variant-conditional
+   case. ⚠ **THE BINARY WAS INVOKED, AS A SEARCH STEP ONLY** — `espeak-ng 1.51 -v en-gb -q --ipa`
+   to find candidates — and the table's own bar then REFUSES a reading that has no dictsource line
+   behind it, because rule output is a G2P guess of exactly the kind this engine already makes.
+   So nothing shipped rests on the binary; this is the second stated exception to the
+   never-invoke-it rule, alongside the Catalan build above, and the weaker of the two.
+   ⚠ **AND THIS DOES NOT MOVE espeak-ng INTO §4 FOR en-GB.** Unlike `pashto/lexicon.tsv`, where
+   95.4% of rows are reachable only from the GPL source and the file re-derives that compilation's
+   headword selection, this is THREE WORDS, one feature each, and the shipped value is the
+   parent's CMUdict row with that feature rewritten — the `catalan/mid-vowels.tsv` shape (§1,
+   Facts), not the Pashto one. `leisure` is independently attested by the CC-BY-SA wikipron
+   referee under `leisurely`, so one of the three is not even reachable-only-from-espeak.
 
 **It is a witness, never an oracle**, and that was measured rather than assumed: espeak is phonetic
 and cannot hand over orthography, so every spelling derived from it was round-tripped through this
