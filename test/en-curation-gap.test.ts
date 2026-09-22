@@ -401,12 +401,22 @@ describe("the curated layer against the OOV path", () => {
     });
 
     test("no curated row falls back to the upstream shape on the OOV path, beyond the known gaps", () => {
+        // ⚠ ONE DICT AND ONE G2P FOR THE WHOLE SWEEP, HELD OUT BY MUTATION. This used to clone `full`
+        // and rebuild the decoder once per curated row — `curated.length` copies of a 126k-entry Map,
+        // 2,765 of them — and it cost 120s, which was 19% of the SUITE's test time and, being one test,
+        // its wall-clock floor: no number of cores could finish the run sooner.
+        // ⚠ THE INVARIANT IS ALREADY A STATED CONTRACT, not an assumption made here: `createEnglishG2p`
+        // reads the dict only through `.get`/`.has` at decode time, and `isLetterNameRow` carries a
+        // comment saying it is deliberately NOT memoized *because this test mutates the dict*. So
+        // deleting the row and putting it back is the same held-out decode for ~1% of the work.
         const live: string[] = [];
+        const held = new Map(full);
+        const g2p = createEnglishG2p(model, held, common, (p: string[]) => p.join(" "), classes);
         for (const { word, upstream } of curated) {
-            const held = new Map(full);
+            const row = held.get(word);
             held.delete(word);
-            const g2p = createEnglishG2p(model, held, common, (p: string[]) => p.join(" "), classes);
             if (g2p.decompose(word).phones.join(" ") === upstream) live.push(word);
+            if (row !== undefined) held.set(word, row);
         }
         expect(live.filter((w) => !KNOWN_GAPS.has(w) && !STRUCTURAL_GAP.has(w))).toEqual([]);
         // ⚠ AND NEITHER WAIVER LIST MAY ROT. A gap that closes should be deleted, not left behind to mask
