@@ -117,9 +117,13 @@ public static class EnglishGb
      *  to this fleet: Welsh already writes it (`dəᶷˈɛdɔð`). See the TS. */
     private static readonly JsRe GOAT = JsRegex.Compile("oᶷ", "gu");
     private static readonly JsRe PALATAL = JsRegex.Compile("ʲ", "gu");
-    private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
+    /** ⚠ The syllabic nucleus belongs here too — these are the same test one step earlier, and the first
+     *  version of the CODA fix missed them, so an `ɚ`/`ɝ` before a syllabic consonant fell through to the
+     *  unconditional `ɚ→ə` and the onset /ɹ/ vanished (`natural`, `mineral`, `squirrel`). See the TS. */
+    private const string PRE_NUCLEUS = $"(?=[ˈˌ]*(?:[{PRE_VOWEL}]|[nmɫlŋ]{SYLLABIC}))";
+    private static readonly JsRe NURSE_PREVOCALIC = JsRegex.Compile($"ɝ{PRE_NUCLEUS}", "gu");
     private static readonly JsRe NURSE = JsRegex.Compile("ɝ", "gu");
-    private static readonly JsRe LETTER_PREVOCALIC = JsRegex.Compile($"ɚ(?=[ˈˌ]*[{PRE_VOWEL}])", "gu");
+    private static readonly JsRe LETTER_PREVOCALIC = JsRegex.Compile($"ɚ{PRE_NUCLEUS}", "gu");
     private static readonly JsRe LETTER = JsRegex.Compile("ɚ", "gu");
     private static readonly JsRe LOT = JsRegex.Compile("ɑː(?!ɹ)", "gu");
     // `\W?` rather than a literal apostrophe class — see the TS twin: the regex-corpus extractor drops

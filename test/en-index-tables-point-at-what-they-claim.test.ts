@@ -47,8 +47,9 @@ describe("the position-indexed tables still point at the phones they claim", () 
     // sonorant after it is as rotted as one on a consonant, and `buccal`'s bad index landed on the L.
     /**
      * ⚠ THE NINE WAIVED ROWS ARE GONE, CLOSED BY #1403's REBUILD, and the waiver is deleted rather than
-     * left behind to mask the next one — which is what the second assertion below enforces and what
-     * caught them. They were `appreciable`, `departmental`, `extraordinary`, `forbidden`,
+     * left behind to mask the next one. ⚠ THE ASSERTION THAT CAUGHT THEM WENT WITH THEM: with the
+     * waiver empty there is nothing for a `may not rot` check to iterate, and `expect(bad).toEqual([])`
+     * below is now the whole guard. Re-add both together if a row ever has to be waived again. They were `appreciable`, `departmental`, `extraordinary`, `forbidden`,
      * `insignificance`, `methuselah`, `negotiable`, `unreasonable` and `vehicle`: every one an
      * off-by-one, the signature of a dict row that gained or lost a phone after the table was generated.
      * ⚠ AND `unreasonable` IS THE ONE THIS COMMENT SAID COULD NOT BE HAND-FIXED, because

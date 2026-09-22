@@ -94,8 +94,17 @@ const CODA = `(?![ˈˌ]*(?:[${VOWEL}]|[nmɫlŋ]${SYLLABIC}))`; // /ɹ/ before ne
  * ⚠ EVERY ONE IS USED WITH `.replace` ONLY. A `/g` regex hoisted to module scope carries `lastIndex`, so the
  * same move under `.test()` or `.exec()` would be a stateful bug; `replace` resets it.
  */
-const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
-const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
+/**
+ * ⚠ THE SYLLABIC NUCLEUS BELONGS HERE TOO, AND THE FIRST VERSION OF THE `CODA` FIX MISSED THESE TWO.
+ * They are the same test one step earlier, so an `ɚ`/`ɝ` before a syllabic consonant failed the linking
+ * test, fell through to the unconditional `ɚ→ə` / `ɝ→ɜː`, and the onset /ɹ/ vanished — exactly the
+ * `caterer` defect the `PRE_VOWEL` note above records, reached by a different missing nucleus.
+ * 13 words: `natural nˈæt͡ʃɚɫ̩` came out `nˈæt͡ʃəɫ̩` against RP /ˈnætʃ(ə)rəl/, and `mineral`,
+ * `pastoral`, `squirrel`, `mayoral`, `operant`, `photocurrent` with it.
+ */
+const PRE_NUCLEUS = `(?=[ˈˌ]*(?:[${PRE_VOWEL}]|[nmɫlŋ]${SYLLABIC}))`;
+const NURSE_PREVOCALIC = new RegExp(`ɝ${PRE_NUCLEUS}`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ${PRE_NUCLEUS}`, "gu");
 /**
  * ⚠ THE OFFGLIDE TRIPHTHONGS, AND WITHOUT THEM #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS. Until that
  * change the generic offglide map rewrote `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` FIRST, so `NEAR` and `CURE` fired on the

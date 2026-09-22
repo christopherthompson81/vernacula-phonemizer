@@ -1,6 +1,6 @@
 # `en-syllabic.tsv` — provenance
 
-**What it is.** For 3,231 English dictionary words, which of their `AH0`/`IH0` phones before an
+**What it is.** For 4,835 English dictionary words, which of their `AH0`/`IH0` phones before an
 `L`/`N`/`M` is a REDUCED slot: a syllabic consonant, or an extra-short schwa. CMUdict does not mark
 this — `able` and `normal` are both `AH0 L` — so it cannot be derived from our own source.
 
@@ -25,7 +25,7 @@ learned misaki's convention, so matching it is copying it; no rule and no second
 reconstruct an arbitrary choice. This file is therefore openly a convention import.
 
 **What that costs, declared.** It makes any comparison against misaki's lexicon CIRCULAR for this
-feature. It covers 3,231 of our 117,482 dictionary words — the ones the two lexicons share, which
+feature. It covers 4,835 of our 135,313 dictionary words — the ones the two lexicons share, which
 are the common ones — and the OOV tagger has no syllabicity to predict, so unrecorded words keep a
 plain schwa.
 

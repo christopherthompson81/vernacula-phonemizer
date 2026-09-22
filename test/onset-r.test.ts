@@ -42,8 +42,18 @@ const WORDS = readFileSync("data/languages/english/g2p-dict.tsv", "utf8")
  * the instrument spells the whole parent alphabet rather than the part that seemed reachable.
  */
 const GENAM_VOWEL = "iɪeɛæəɐɑɔʌʊuoaᵻɚɝᶦᶷ";
-/** `ɹ` before a (possibly stress-marked) vowel, and the r-coloured vowels, which are a /r/ before one. */
-const ONSET_R = new RegExp(`(?:ɹ(?=[ˈˌ]*[${GENAM_VOWEL}])|[ɚɝ](?=[ˈˌ]*[${GENAM_VOWEL}]))`, "gu");
+/**
+ * ⚠ AND A SYLLABIC CONSONANT IS A NUCLEUS, which this instrument did NOT spell and is why the class it
+ * exists to guard went unnoticed for 34 words. `en-syllabic.tsv` marks the vowel of `children` as the
+ * syllabic `n̩`, so the parent emits `t͡ʃˈɪɫdɹn̩` — an onset `ɹ` with a nucleus after it that is not in
+ * `GENAM_VOWEL`. en-GB dropped that `ɹ` and this audit reported clean, in exactly the shape the note
+ * above describes for `ɚɚ`: "which is exactly what was said about `ɚ` before another `ɚ` until it was
+ * measured". Spelled now, so the instrument matches its own stated principle.
+ */
+const SYLLABIC_NUCLEUS = "[nmɫlŋ]\u0329";
+const NUCLEUS = `(?:[${GENAM_VOWEL}]|${SYLLABIC_NUCLEUS})`;
+/** `ɹ` before a (possibly stress-marked) nucleus, and the r-coloured vowels, which are a /r/ before one. */
+const ONSET_R = new RegExp(`(?:ɹ(?=[ˈˌ]*${NUCLEUS})|[ɚɝ](?=[ˈˌ]*${NUCLEUS}))`, "gu");
 
 const count = (s: string, re: RegExp): number => [...s.matchAll(re)].length;
 
