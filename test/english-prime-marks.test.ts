@@ -61,6 +61,46 @@ describe("a prime is a foot and a double prime an inch", () => {
     test.each([["5°C", "5 degrees Celsius"], ["5°", "5 degrees"], ["40°26", "40 degrees 26"]])(
         "%s is left to the unit rule", (text, expected) => expect(normalizeEnglish(text)).toBe(expected));
 
+    /**
+     * ⚠ THE TIGHT SPELLING IS THE COMMON ONE, AND IT WAS CORRUPTED. `UNIT_RE`'s exponent group ate the
+     * inches digit the moment ⟨′⟩ became a unit key: `6′2″` read "6 SQUARE FEET" with the inches
+     * stranded, `6′3″` "6 cubic feet". That is the defect #1434 fixed for ⟨°⟩, reintroduced one
+     * symbol over — and the SPACED form was always fine, which is exactly why the first tests missed it.
+     * Guarding the exponent alone was not enough either: it left the ⟨″⟩ behind, dropped ("6 feet 2").
+     * The pair has to be consumed whole.
+     */
+    test.each([
+        ["6\u20322\u2033", "6 feet 2 inches"],
+        ["6\u20323\u2033", "6 feet 3 inches"],
+        ["5\u20322\u2033 tall", "5 feet 2 inches tall"],
+        ["4\u203233\u2033", "4 feet 33 inches"],
+        ["1\u20321\u2033", "1 foot 1 inch"],
+        ["12\u20333", "12 inches 3"],
+    ])("%s reads whole", (text, expected) => expect(normalizeEnglish(text)).toBe(expected));
+
+    // ⚠ NBSP IS A SEPARATOR TOO. Typeset and pasted coordinates routinely use it, and with ⟨′⟩⟨″⟩
+    // now unit keys the fallthrough is a CONFIDENT WRONG READING rather than a drop: arcminutes as feet.
+    test("a coordinate separated by NBSP is still a coordinate", () => {
+        expect(normalizeEnglish("40\u00b0\u00a026\u2032\u00a046\u2033\u00a0N"))
+            .toBe("40 degrees 26 minutes 46 seconds north");
+    });
+
+    // ⚠ AN INTERCARDINAL BEARING IS ORDINARY on plans and surveys, and the single-letter group cannot
+    // claim it — the letter-boundary lookahead correctly refuses `N` before `W`, which left the bearing
+    // to FUSE into the last word ("… secondsNW").
+    test("an intercardinal bearing is read, and nothing fuses into the last word", () => {
+        expect(normalizeEnglish("40\u00b026\u203246\u2033NW")).toBe("40 degrees 26 minutes 46 seconds northwest");
+        expect(normalizeEnglish("40\u00b026\u203246\u2033n")).toBe("40 degrees 26 minutes 46 seconds n");
+    });
+
+    // ⚠ COUNT AGREEMENT USES THE SAME NUMERIC TEST THE UNIT RULE USES, not a string compare — or the
+    // two disagree on the same surface inside one sentence.
+    test("agreement matches the unit rule", () => {
+        expect(normalizeEnglish("1.0\u00b0")).toBe("1.0 degree");
+        expect(normalizeEnglish("1.0\u00b01.0\u2032")).toBe("1.0 degree 1.0 minute");
+        expect(normalizeEnglish("01\u00b001\u2032")).toBe("01 degree 01 minute");
+    });
+
     // ⚠ A PRIME WITH NO NUMBER IN FRONT IS NOT A UNIT — the mathematical prime is the common case.
     test.each(["f′(x)", "x′", "′″", "″"])("%s is untouched", (w) =>
         expect(normalizeEnglish(w)).toBe(w));

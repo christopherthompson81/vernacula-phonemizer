@@ -347,7 +347,7 @@ function asciiExponentIsCodeDigit(unit: string, exponent: string | undefined): b
 }
 
 /**
- * Is this ASCII `2`/`3` a COORDINATE'S MINUTES rather than an exponent? ⟨°⟩ only (#1434).
+ * Is this ASCII `2`/`3` the NEXT PART OF A COMPOUND MEASURE rather than an exponent? (#1434, #1435)
  *
  * ⚠ THIS CASE CORRUPTS RATHER THAN DROPS, which is why it is worth its own predicate. A latitude is
  * written unspaced — `40°26′46″N` — so the minutes digit sits exactly where an exponent would:
@@ -363,9 +363,21 @@ function asciiExponentIsCodeDigit(unit: string, exponent: string | undefined): b
  * `°2`. The SUPERSCRIPT is untouched, so someone who types `°²` still gets it — the same split the
  * code-slot rule makes, and for the same reason.
  */
-function asciiExponentIsCoordinateMinutes(unit: string, exponent: string | undefined): boolean {
-    return (exponent === "2" || exponent === "3") && unit === "°";
+function asciiExponentIsCompoundPart(unit: string, exponent: string | undefined): boolean {
+    return (exponent === "2" || exponent === "3") && COMPOUND_MEASURE.has(unit);
 }
+
+/**
+ * The symbols that take a FOLLOWING NUMBER in a compound measurement, so an ASCII `2`/`3` after them is
+ * that number and not a power: degrees-minutes-seconds and feet-inches.
+ *
+ * ⚠ ⟨′⟩ AND ⟨″⟩ JOINED THIS LIST THE MOMENT THEY BECAME UNITS, and forgetting them turned a drop
+ * into a CORRUPTION in the commonest spelling there is: `6′2″` read "6 SQUARE FEET" with the inches
+ * stranded, `6′3″` "6 cubic feet", `5′2″ tall` "five square feet tall". That is the same defect
+ * #1434 fixed for ⟨°⟩, reintroduced one symbol over by adding keys without extending the guard — and
+ * the spaced form `6′ 2″` was always fine, which is exactly why the first tests missed it.
+ */
+const COMPOUND_MEASURE: ReadonlySet<string> = new Set(["°", "′", "″"]);
 
 /** The Unicode relational operators, none of which were read at all. Ordered longest-first is not needed
  *  — no sign is a prefix of another — but the ASCII `<`/`>` are deliberately NOT here: they are handled
@@ -1312,11 +1324,23 @@ export function normalizeEnglish(input: string): string {
     //     sees is unambiguously a foot or an inch, which is what lets ⟨′⟩ and ⟨″⟩ be plain keys.
     //     ⚠ Measured before: the primes were DROPPED OUTRIGHT and the coordinate read "40 degrees 26
     //     46 N" — two bare numbers with nothing to say what they were.
+    //     ⚠ `at` AND `whole` ARE POSITIONAL, and safe only because this pattern's group count is fixed
+    //     at four. Put any future group at the END.
+    //     ⚠ AND THE TRAILING SPACE IS NOT COSMETIC: the replacement ends in a word, so an unclaimed
+    //     letter after the match FUSES into it — `40°26′46″n` read "… secondsn". Emitted only when
+    //     one actually follows, so an ordinary coordinate gains no stray space.
     s = rewrite(s, DMS_COORDINATE,
-        (_m: string, deg: string, min: string, sec: string | undefined, dir: string | undefined) =>
+        (_m: string, deg: string, min: string, sec: string | undefined, dir: string | undefined,
+         at: number, whole: string) =>
             `${counted(deg, "degree", "degrees")} ${counted(min, "minute", "minutes")}`
             + `${sec === undefined ? "" : ` ${counted(sec, "second", "seconds")}`}`
-            + `${dir === undefined ? "" : ` ${HEMISPHERE[dir]}`}`);
+            + `${dir === undefined ? "" : ` ${HEMISPHERE[dir]}`}`
+            + (/^[\p{L}\p{M}]/u.test(whole.slice(at + _m.length)) ? " " : ""));
+
+    // 5c) FEET AND INCHES WRITTEN TIGHT — `6′2″`. Consumed whole for the same reason the coordinate
+    //     is: the unit rule's exponent group would otherwise eat the inches digit. AFTER the DMS rule.
+    s = rewrite(s, FEET_INCHES, (_m: string, ft: string, inch: string) =>
+        `${counted(ft, "foot", "feet")} ${counted(inch, "inch", "inches")}`);
 
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = rewrite(s, UNIT_RE,
@@ -1334,7 +1358,7 @@ export function normalizeEnglish(input: string): string {
             // governs the noun: "one cubic meter", not "one cubic meters".
             // ⚠ A COORDINATE'S MINUTES, NOT A POWER — the unit still expands and the digit is handed
             // back, because declining outright would drop the ⟨°⟩ itself. See the predicate.
-            const minutes = asciiExponentIsCoordinateMinutes(u, exp);
+            const minutes = asciiExponentIsCompoundPart(u, exp);
             const measure = minutes ? ""
                 : exp === "²" || exp === "2" ? "square " : exp === "³" || exp === "3" ? "cubic " : "";
             // ⚠ A magnitude forces the PLURAL: "2.2 million square kilometres", never "…kilometre". The
@@ -1726,13 +1750,36 @@ const LEADING_DECIMAL_POINT = new RegExp(
  * is left to it. Seconds and the hemisphere letter are optional.
  */
 const DMS_COORDINATE =
-    /(\d+(?:\.\d+)?)°[ \t]?(\d+(?:\.\d+)?)′(?:[ \t]?(\d+(?:\.\d+)?)″)?(?:[ \t]?([NSEW])(?![\p{L}\p{M}]))?/gu;
+    /(\d+(?:\.\d+)?)°[ \t ]?(\d+(?:\.\d+)?)′(?:[ \t ]?(\d+(?:\.\d+)?)″)?(?:[ \t ]?((?:[NS][EW]|[NSEW]))(?![\p{L}\p{M}]))?/gu;  // space, tab, NBSP
 
-/** The hemisphere letters, spoken. */
-const HEMISPHERE: Readonly<Record<string, string>> = { N: "north", S: "south", E: "east", W: "west" };
+/**
+ * FEET AND INCHES WRITTEN TIGHT — `6′2″`, the commonest spelling of a height (#1435).
+ *
+ * ⚠ IT EXISTS FOR THE SAME REASON AS `DMS_COORDINATE`: a compound measurement has to be consumed
+ * WHOLE, or `UNIT_RE`'s exponent group eats the second number. With ⟨′⟩ a unit key, `6′2″` read
+ * "6 SQUARE FEET" with the inches stranded; adding ⟨′⟩⟨″⟩ to the compound-measure guard stopped the
+ * corruption but left the ⟨″⟩ behind, dropped — "6 feet 2". Matching the pair is the only spelling
+ * that keeps both numbers AND both units.
+ *
+ * ⚠ IT RUNS AFTER `DMS_COORDINATE`, which has already consumed any `…°26′46″`, so an arcminute
+ * pair can never reach this rule.
+ */
+const FEET_INCHES = /(\d+(?:\.\d+)?)′[ \t\u00a0]?(\d+(?:\.\d+)?)″/gu;  // space, tab, NBSP
+
+/** The hemisphere letters, spoken. ⚠ THE INTERCARDINALS ARE HERE because `NW`/`SE` after a DMS is
+ *  ordinary on plans and surveys, and the single-letter group cannot claim them — the letter-boundary
+ *  lookahead correctly refuses `N` before `W`, which left the bearing to fuse into the last word. */
+const HEMISPHERE: Readonly<Record<string, string>> = {
+    N: "north", S: "south", E: "east", W: "west",
+    NE: "northeast", NW: "northwest", SE: "southeast", SW: "southwest",
+};
+
+/** Is this number exactly one, for count agreement? ⚠ THE SAME NUMERIC TEST THE UNIT RULE USES, not a
+ *  string compare: `1.0°` is "1.0 degree" there, so `1.0°1.0′` must not be "1.0 degrees" here. */
+const isOne = (n: string): boolean => /^0*1(?:\.0+)?$/.test(n.replace(/,/gu, ""));
 
 /** `n` of `unit`, with count agreement — "1 degree", "40 degrees". */
-const counted = (n: string, sg: string, pl: string): string => `${n} ${n === "1" ? sg : pl}`;
+const counted = (n: string, sg: string, pl: string): string => `${n} ${isOne(n) ? sg : pl}`;
 
 /**
  * Letter names. English needs almost no data here: CMUdict carries all 26 single letters with their

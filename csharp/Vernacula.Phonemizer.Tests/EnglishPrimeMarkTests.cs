@@ -76,6 +76,47 @@ public class EnglishPrimeMarkTests
     public void ItIsLeftToTheUnitRule(string text, string expected)
         => Assert.Equal(expected, Norm(text));
 
+    /// <summary>
+    /// ⚠ THE TIGHT SPELLING IS THE COMMON ONE, AND IT WAS CORRUPTED. `UNIT_RE`'s exponent group ate the
+    /// inches digit the moment ⟨′⟩ became a unit key: `6′2″` read "6 SQUARE FEET". That is the defect
+    /// #1434 fixed for ⟨°⟩, one symbol over — and the SPACED form was always fine, which is why the
+    /// first tests missed it. Guarding the exponent alone left the ⟨″⟩ behind, dropped.
+    /// </summary>
+    [Theory]
+    [InlineData("6\u20322\u2033", "6 feet 2 inches")]
+    [InlineData("6\u20323\u2033", "6 feet 3 inches")]
+    [InlineData("5\u20322\u2033 tall", "5 feet 2 inches tall")]
+    [InlineData("4\u203233\u2033", "4 feet 33 inches")]
+    [InlineData("1\u20321\u2033", "1 foot 1 inch")]
+    [InlineData("12\u20333", "12 inches 3")]
+    public void TheTightFeetInchesSpellingReadsWhole(string text, string expected)
+        => Assert.Equal(expected, Norm(text));
+
+    /// <summary>⚠ NBSP is a separator too, and the fallthrough reads arcminutes as FEET.</summary>
+    [Fact]
+    public void ACoordinateSeparatedByNbspIsStillACoordinate()
+        => Assert.Equal("40 degrees 26 minutes 46 seconds north",
+                        Norm("40\u00b0\u00a026\u2032\u00a046\u2033\u00a0N"));
+
+    /// <summary>
+    /// ⚠ An intercardinal bearing is ordinary on plans and surveys, and the single-letter group cannot
+    /// claim it — the letter-boundary lookahead correctly refuses `N` before `W`, which left the
+    /// bearing to FUSE into the last word.
+    /// </summary>
+    [Theory]
+    [InlineData("40\u00b026\u203246\u2033NW", "40 degrees 26 minutes 46 seconds northwest")]
+    [InlineData("40\u00b026\u203246\u2033n", "40 degrees 26 minutes 46 seconds n")]
+    public void AnIntercardinalBearingIsReadAndNothingFuses(string text, string expected)
+        => Assert.Equal(expected, Norm(text));
+
+    /// <summary>⚠ Agreement uses the same NUMERIC test the unit rule uses, not a string compare.</summary>
+    [Theory]
+    [InlineData("1.0\u00b0", "1.0 degree")]
+    [InlineData("1.0\u00b01.0\u2032", "1.0 degree 1.0 minute")]
+    [InlineData("01\u00b001\u2032", "01 degree 01 minute")]
+    public void AgreementMatchesTheUnitRule(string text, string expected)
+        => Assert.Equal(expected, Norm(text));
+
     /// <summary>⚠ A prime with no number in front is not a unit — the mathematical prime is common.</summary>
     [Theory]
     [InlineData("f′(x)")]

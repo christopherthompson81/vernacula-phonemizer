@@ -2072,5 +2072,40 @@ makes them safe. Asserted so it reads as a decision.
 .002–.005″   ->  "0.002 to 0.005 inches"
 ```
 
-**Gates.** 6266 TS · 6868 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6275 TS · 6880 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex-diff 144,698 probes identical.
+
+**Review of Run 31 — the new unit keys walked into Run 29's defect, one symbol over.**
+
+⚠ **`6′2″` READ "6 SQUARE FEET".** The moment ⟨′⟩ became a `UNITS` key, `UNIT_RE`'s exponent group
+`([²³23])?` started eating the inches digit: `6′2″` → "6 square feet″", `6′3″` → "6 cubic feet″",
+`5′2″ tall` → *five square feet tall*. That is **exactly the defect Run 29 fixed for ⟨°⟩**, reintroduced
+one symbol over by adding keys without extending the guard — and `6′2″` is the commonest spelling of a
+height, so this traded a drop for a corruption in the dominant case.
+
+⚠ **AND THE SPACED FORM WAS ALWAYS FINE**, which is why the first tests missed it entirely: every
+feet-inches case written in Run 31 used `5′ 6″`. A guard whose failure depends on a space needs both
+spellings asserted, and only one was.
+
+⚠ **Extending the exponent guard was NOT sufficient**, which is the more interesting half. With ⟨′⟩⟨″⟩
+added to the compound-measure set the corruption stopped — and left `6 feet 2` with the ⟨″⟩ stranded and
+dropped, because the match had consumed past it and no number then preceded the mark. A compound
+measurement has to be consumed WHOLE, so `FEET_INCHES` now mirrors `DMS_COORDINATE` exactly. The guard
+is still needed for the leftovers (`12″3` → "12 inches 3").
+
+Three more, all real:
+
+- ⚠ **NBSP was not a separator.** `DMS_COORDINATE` used `[ \t]?` where the rest of the file writes
+  `[ \t\u00a0]`. A typeset coordinate fell straight through to the unit rule and read its arcminutes as
+  **feet** — the precise ambiguity the rule exists to remove, and now a confident wrong reading rather
+  than a drop.
+- ⚠ **An intercardinal bearing fused into the last word.** `40°26′46″NW` → "… seconds**NW**". The
+  letter-boundary lookahead correctly refuses `N` before `W`, so the group could not claim it and the
+  replacement ended in a word with a letter against it. Fixed both ways: the table gained NE/NW/SE/SW,
+  and a space is emitted when any other letter follows.
+- ⚠ **Count agreement disagreed with the unit rule on the same surface.** `counted` compared `n === "1"`
+  while the unit rule tests numerically, so `1.0°` was "1.0 degree" and `1.0°1.0′` "1.0 degrees".
+  Now the same numeric test.
+
+**Gates.** 6275 TS · 6880 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,814 probes identical.
