@@ -69,5 +69,34 @@ a **fresh dictionary per round** so the cold memo is repeatable.
 also asserts that every thread agrees on the value, which is what licenses the "factory may run twice"
 argument rather than assuming it.
 
+### ⚠ Review: `Parallel.For` does not guarantee concurrency, so the proof was weaker than it looked
+
+The first version of the test used `Parallel.For(0, 32, …)`. The TPL partitions by available
+parallelism, so on a one- or two-core CI container — or a box already saturated by xUnit's own class
+parallelism — the 32 iterations can run as ONE sequential range: the first warms the memo and the other
+31 are cache hits. **The test would then pass against the buggy version on exactly the constrained
+machines where the race matters**, and the "proved by reverting" check had been run on this dev box
+only. Replaced with explicit threads meeting at a `Barrier`, so every thread arrives at a cold memo at
+the same instant.
+
+⚠ **AND THE LIMIT THAT REMAINS IS STATED RATHER THAN PAPERED OVER.** Measured under `taskset -c 0`
+against the check-then-act version: it **passes**. On one usable core the race cannot be won, because
+after the barrier releases, one thread runs the short critical section to completion before another is
+scheduled — and lengthening that section to 40,000 keys did not change it. The barrier removes the
+scheduler-partition hole; it cannot manufacture parallelism the machine does not have. The test detects
+the bug on any machine with two or more usable cores, and that is what it claims.
+
+### Two comments that had gone out of date
+
+⚠ The `InternalsVisibleTo` note in the csproj read *"For LanguageBootstrapTests ONLY, and for one
+reason"* — an invariant this change falsified by adding a second consumer. In a codebase this
+comment-rigorous that note is what the next person widening an `internal` reads as the gate on doing so,
+so it now carries both reasons.
+
+⚠ And the note that this run's whole narrative turns on — *"TS uses a WeakMap"* — was sitting
+twenty-eight lines away from `MaxWordFor`, above an unrelated `Number.isSafeInteger` helper. A reader
+following the argument would not have found it attached to anything relevant, and the correspondence had
+ended up stated in two places. Moved onto the function it describes and merged with the new block.
+
 **Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.

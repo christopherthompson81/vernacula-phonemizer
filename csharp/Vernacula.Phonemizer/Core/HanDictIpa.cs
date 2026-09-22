@@ -148,14 +148,20 @@ public static class HanDictIpa
     private static string SpellDigits(string s) =>
         string.Concat(Js.CodePoints(s).Select(c => c.Length == 1 && c[0] >= '0' && c[0] <= '9' ? DIGITS[c[0] - '0'] : c));
 
-    // The greedy-segmentation window = the longest dict key, in CODE POINTS. Cached per dict instance so it is
-    // scanned once (the eval sweeps thousands of words through one dict). TS uses a WeakMap.
     /** JS `Number.isSafeInteger`. The fleet spells this out per language; one copy here for the shared core. */
     private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
 
     private static readonly ConditionalWeakTable<object, object> MAX_WORD_CACHE = new();
 
     /**
+     * THE GREEDY-SEGMENTATION WINDOW = the longest dict key, in CODE POINTS. Cached per dict instance so
+     * it is scanned once (the eval sweeps thousands of words through one dict). The TypeScript memoises
+     * with a `WeakMap`.
+     *
+     * ⚠ THAT NOTE USED TO SIT TWENTY-EIGHT LINES AWAY, above an unrelated `Number.isSafeInteger`
+     * helper, which is why the WeakMap correspondence below could be written as if it were new. Moved
+     * onto the function it describes.
+     *
      * ⚠ `GetValue(key, factory)`, NEVER `TryGetValue` THEN `Add` — and the difference THROWS from a
      * shipped `Phonemize()` rather than merely wasting work (#1442). `ConditionalWeakTable.Add` is
      * documented to throw on a duplicate key, so a check-then-act memo loses the race: two threads both

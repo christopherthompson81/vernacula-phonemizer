@@ -36,11 +36,37 @@ public class HanDictMemoRaceTests
 
             var thrown = new List<Exception>();
             var seen = new System.Collections.Concurrent.ConcurrentBag<int>();
-            Parallel.For(0, 32, _ =>
+
+            // ⚠ EXPLICIT THREADS AND A BARRIER, NOT `Parallel.For`. The TPL partitions by available
+            // parallelism, so on a one- or two-core CI container — or a box already saturated by
+            // xUnit's own class parallelism — 32 iterations can run as one sequential range: the first
+            // warms the memo and the other 31 are cache hits. The test would then PASS against the
+            // check-then-act version on exactly the constrained machines where the race matters, which
+            // is a guard that stops guarding without saying so. The barrier makes every thread arrive
+            // at a COLD memo at the same instant, so the collision is deterministic rather than
+            // scheduler-dependent.
+            //
+            // ⚠ AND THE LIMIT THAT REMAINS IS STATED RATHER THAN PAPERED OVER: on a machine with ONE
+            // usable core this cannot fail, because after the barrier releases, one thread runs the
+            // short critical section to completion before another is scheduled. Verified under
+            // `taskset -c 0` against the check-then-act version — it passes, and a longer critical
+            // section (40,000 keys) did not change that. The barrier removes the SCHEDULER-PARTITION
+            // hole, which is the one that bites a busy multi-core CI box; it cannot manufacture
+            // parallelism that the machine does not have.
+            const int threads = 32;
+            using var gate = new Barrier(threads);
+            var workers = new Thread[threads];
+            for (var t = 0; t < threads; t++)
             {
-                try { seen.Add(HanDictIpa.MaxWordFor(dict)); }
-                catch (Exception e) { lock (thrown) thrown.Add(e); }
-            });
+                workers[t] = new Thread(() =>
+                {
+                    gate.SignalAndWait();
+                    try { seen.Add(HanDictIpa.MaxWordFor(dict)); }
+                    catch (Exception e) { lock (thrown) thrown.Add(e); }
+                });
+                workers[t].Start();
+            }
+            foreach (var w in workers) w.Join();
 
             Assert.Empty(thrown);
             // ⚠ AND EVERY THREAD MUST AGREE. The factory may run more than once under contention, which
