@@ -601,6 +601,21 @@ public static class Normalize
     private static readonly JsRe SPACE_GROUP = JsRegex.Compile(
         $"(?<!(?:{MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{{0,2}}(?:[ \u00a0\u202f\u2009]\\d{{3}})+(?![\\d])", "giu");
     private static readonly JsRe SPACE_GROUP_SEPS = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
+
+    /**
+     * A LEADING-POINT DECIMAL GETS ITS ZERO — `.002` → `0.002` (#1437).
+     * Ported from src/languages/english/normalize.ts — see that file for the measurements.
+     *
+     * ⚠ THE TOKEN WAS NEVER A NUMBER AT ALL, so every downstream rule declined it in turn and one
+     * insertion fixes a cascade rather than a reading: `.5 kg` read "five KING", `.002 mm` "two m",
+     * `.002` "two" — a value wrong by a factor of 500 and entirely fluent.
+     *
+     * ⚠ THE LOOKBEHIND CARRIES THE WHOLE GUARD. A point preceded by a LETTER is an abbreviation
+     * (`Fig.2`), by a DIGIT a version or an address (`v1.002`, `192.168.1.1`), and by another POINT an
+     * ellipsis. A sentence-final period is followed by a space, which the digit lookahead excludes.
+     */
+    private static readonly JsRe LEADING_DECIMAL_POINT =
+        JsRegex.Compile("(?<![\\d\\p{L}.])\\.(?=\\d)", "gu");
     private static readonly JsRe SCI_EXPONENT = JsRegex.Compile(
         "(?<=[×x·]\\s?)(10)\\s?(\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+|-\\d+)", "gu");
     private static readonly JsRe NEGATIVE = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");
@@ -820,6 +835,10 @@ public static class Normalize
         });
 
         s = Rewrite(s, SPACE_GROUP, m => SPACE_GROUP_SEPS.Replace(m.Value, ""));
+
+        // A leading-point decimal gets its zero, BEFORE the numeric tier and after the abbreviation
+        // dots, so currency, units and the range all see an ordinary decimal. See LEADING_DECIMAL_POINT.
+        s = Rewrite(s, LEADING_DECIMAL_POINT, "0.");
 
         s = Rewrite(s, SCI_EXPONENT, m =>
         {

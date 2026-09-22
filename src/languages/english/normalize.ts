@@ -966,6 +966,31 @@ export function normalizeEnglish(input: string): string {
         `(?<!(?:${MONTH_ALT})[ \u00a0\u202f\u2009])(?<![\\d.,])[1-9]\\d{0,2}(?:[ \u00a0\u202f\u2009]\\d{3})+(?![\\d])`, "giu");  // space, NBSP, NNBSP, thin space
     s = rewrite(s, SPACE_GROUP, (m0) => m0.replace(/[ \u00a0\u202f\u2009]/gu, ""));  // space, NBSP, NNBSP, thin space
 
+    // 0d2) A LEADING-POINT DECIMAL GETS ITS ZERO — `.002` → `0.002` (#1437).
+    //      ⚠ THE TOKEN WAS NEVER A NUMBER AT ALL, and every downstream rule then declined it in turn, so
+    //      one insertion here fixes a cascade rather than a reading. Measured before:
+    //          .002 mm    → "two m"            the unit left bare, reaching the g2p as a letter
+    //          .5 kg      → "five KING"        ⟨kg⟩ read as a word
+    //          .25 L      → "twenty five el"
+    //          .5–.75 mm → "five . seventy five m"   the dash surviving as a phrase break
+    //          .002       → "two"              the leading zeros dropped as insignificant — a value
+    //                                            wrong by a factor of 500, and entirely fluent
+    //      Every one of them is already correct when the zero is written, so nothing new is asserted
+    //      about how a decimal reads: the unit rule's `NOT_VERSION` lookbehind refuses a digit preceded
+    //      by `.`, and the range rule at step 8 is digit-gated on both sides. Both see an ordinary
+    //      decimal now.
+    //      ⚠ IT MUST RUN BEFORE THE NUMERIC TIER and after the abbreviation dots at 0b, which is what
+    //      this position buys: `Fig.` and `u.s.` have already been resolved, and currency (1), units (6)
+    //      and the range (8) are all still to come.
+    //      ⚠ THE LOOKBEHIND CARRIES THE WHOLE GUARD. A point preceded by a LETTER is an abbreviation
+    //      (`Fig.2`), by a DIGIT a version or an address (`v1.002`, `192.168.1.1`), and by another POINT
+    //      an ellipsis. A sentence-final period is followed by a space, so the digit lookahead excludes
+    //      it without needing to know anything about sentences.
+    //      ⚠ READING NOTE: this yields "zero point zero zero two", which is what `0.002` produces
+    //      today. The reporter's register omits it — "point zero zero two" — and both are real; see
+    //      docs/investigations/en/en_reported_misreadings_investigation.md, Run 30.
+    s = rewrite(s, /(?<![\d\p{L}.])\.(?=\d)/gu, "0.");
+
     // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.
     //     A superscript sits BETWEEN the number and its unit (`9.11 × 10⁻³¹ kg`), which breaks the adjacency
