@@ -2187,3 +2187,103 @@ hardcoded version could not have done.
 
 **Gates.** 6304 TS · 6912 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.
+
+## Run 33 — 2026-09-22 15:50 — the one letter of twenty-six
+
+**Report.** *"(a), (b), etc. — enumerated list type lead-in. `(a)` is currently read as the indefinite
+article. Needs a pause too."*
+
+**Raw finding, and it is narrower than the report suggests.** Sweeping every letter in a bracket,
+lower and upper agree for all 26 and only ⟨a⟩ is wrong:
+
+```
+(a) -> ˈə        (b) -> bˈiː      (s) -> ˈɛs      (x) -> ˈɛks     …
+```
+
+CMUdict carries the other 25 with letter-NAME pronunciations and records `a` as the reduced article
+AH0. So this is a **CLAIMING problem, not a naming one** — `letterNameExceptions` already held `a`→ay
+and nothing was asking it. `RUN_OR_CODE` claims all-caps runs of 2+ and caps glued before digits; a lone
+bracketed letter is neither.
+
+⚠ **AND THE COST WAS NOT ONLY IN READING ALOUD.** This one gap contaminated the MEASUREMENT of #1422
+twice over: a sweep that built its expected column from `phonemize("I O S")` reported **91** failures
+instead of 50, and the test written for that fix walked into the same trap. A defect in the reading of
+one letter became a defect in the instrument used to find other defects.
+
+**Two rules, and they differ only in the pause:** a lead-in at a line start gets the letter name AND a
+comma (this file's existing spelling for a prosodic break); a bracketed letter anywhere else is a
+REFERENCE to a list item and gets the name alone.
+
+```
+(a) the first item  ->  "ay, the first item"       See (a) and (b).  ->  "See (ay) and (b)."
+a) foo              ->  "ay, foo"                  P(A) = 1          ->  "P(ay) equals 1"
+```
+
+⚠ **The article is untouched**, which is the assertion that keeps it honest: both rules require a
+bracket or a closing `)`, which an article never has. `a bird sang` still reduces.
+
+### ⚠ The same gap in an alphanumeric code, and a measured blast radius
+
+`K1A 0B1` read "kay one **UH** zero bee one". The shared pass claimed a caps run BEFORE digits and not
+one AFTER them, so a code's last letter fell to the OOV g2p — where ⟨A⟩ alone reads as a word. The third
+alternative is the exact mirror of the second.
+
+⚠ **It is a change to shared core, so the blast radius was measured rather than argued:** zero golden
+rows move in any of the **189** languages, and no unit is taken with it — the unit rules run BEFORE this
+pass, so `a 5L jug` is already "a 5 liters jug" and no ⟨L⟩ remains to claim.
+
+### ⚠ Roman markers are deliberately not claimed
+
+`(ii)` reads ˈɪɪ today, which is wrong — but the fix is not obviously "two". A letter series that
+reaches `(i)` would then read "one" while `(ii)` read "two", and a roman series whose `(i)` read "eye"
+is no better. Either uniform choice is defensible and the **mixed** one is worse than the defect, so it
+is left for a decision rather than guessed at. Pinned as a test so it reads that way.
+
+**Gates.** 6330 TS · 6938 C# · goldens 189/36495 fresh, 0 stale · parity 189 byte-identical · trace-cold
+189 of 189, no poisons · regex-diff 144,930 probes identical.
+
+**Review of Run 33 — the rule destroyed case, which is the hazard the file already defends against.**
+
+⚠ **`LETTER_NAME(l.toLowerCase())` IS NOT A NO-OP FOR THE OTHER 24 LETTERS.** It returns the LOWERCASED
+input, so the rule silently lowercased a capital — and the initialism pass decides whether a document is
+SHOUTING with `!/\p{Ll}/.test(text)`, so ONE injected lowercase flips the verdict for the whole
+document:
+
+```
+SEE (B) OF US ARMY   →  SEE (b) OF US ARMY   →  `US` SPELLED OUT rather than read as the word
+(X) IT AND US        →  x, IT AND US         →  "eye-tee … you-ess"
+```
+
+That is the **identical hazard the `re-` prefix rule three steps above documents at length** and defends
+against by echoing the matched case (Run 28). Written, measured, documented — and then walked into
+again, in the same file, two runs later. Both rules now echo the case, and the ⟨a⟩/⟨i⟩ substitution
+echoes it too (`(A)` → `AY`), so an all-caps document stays exactly as shouty as it was.
+
+⚠ **AND MY OWN COMMENT CLAIMED A CLEANLINESS THE CODE DID NOT HAVE.** It said roman markers were
+"deliberately not claimed" while the code claimed every single-character one, including ⟨i⟩ — so
+`See (i) and (ii) below.` produced exactly the MIXED reading the comment called worse than the defect.
+The tests pinned `(i) one` in isolation and never a `(i)`/`(ii)` PAIR, and **a test on one member cannot
+see a seam between two**.
+
+Resolved by making the comment true rather than contorting the rule: a single character is treated as a
+LETTER, including ⟨i⟩⟨v⟩⟨x⟩⟨c⟩, because half the alphabet is also a roman numeral and refusing the
+roman-shaped ones would cost `(c)` — the third item of every lettered list — to protect a reading
+nothing produces anyway (`(i)` already read ˈaᶦ, which IS the letter name). The seam that remains, a
+pause on `(i)` and none on `(ii)`, is now stated and pinned on the pair.
+
+Two more: the `]` branch of `LIST_MARKER`'s close class was unreachable because the open class was only
+`\(?`, so `[a] foo` got the name but no pause and `[1] foo` nothing at all; and the C# steps ran BEFORE
+the formula rule where the TypeScript runs them after — benign today only because `FORMULA_READING` has
+no single-letter key, and a divergence waiting for one. Both fixed.
+
+### Found in passing, filed not fixed (#1442)
+
+A full C# run failed once in three on `GroupingSpaceTests(lang: "gan")` with
+`ConditionalWeakTable.Add: An item with the same key has already been added`. It is not a test defect —
+the throw is from `HanDictIpa.MaxWordFor`, a check-then-act memo reached from shipped `Phonemize()`.
+⚠ **It is PORT-INTRODUCED**: the TypeScript uses a `WeakMap` and JS is single-threaded, so the hazard
+exists only in C#, and the comment recording the correspondence does not mention thread-safety. Shared
+core, so every Han-dict language (gan, hak, jin, xiang) can throw under concurrent use.
+
+**Gates.** 6330 TS · 6938 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,930 probes identical.

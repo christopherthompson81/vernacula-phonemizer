@@ -51,7 +51,12 @@ public static class Initialisms
     /** An all-caps run, or a caps run glued to digits (`A380`), bounded by letters and Latin diacritics. */
     private static readonly JsRe RUN_OR_CODE = JsRegex.Compile(
         "(?<![\\p{L}" + LATIN_MARK + "])\\p{Lu}{2,}(?![\\p{L}" + LATIN_MARK + "])"
-        + "|(?<![\\p{L}" + LATIN_MARK + "])\\p{Lu}+(?=\\d)", "gu");
+        + "|(?<![\\p{L}" + LATIN_MARK + "])\\p{Lu}+(?=\\d)"
+        // ⚠ THE MIRROR OF THE ALTERNATIVE ABOVE: a caps run BEFORE digits was claimed and one AFTER
+        // them was not, so the last letter of an alphanumeric code fell to the OOV g2p — and ⟨A⟩ is
+        // the one letter that reads as a WORD there, the reduced article (`K1A 0B1` → "kay one UH
+        // zero bee one", #1423). The unit rules run BEFORE this pass, so no unit is taken with it.
+        + "|(?<=\\d)\\p{Lu}(?![\\p{L}" + LATIN_MARK + "\\d])", "gu");
     /** PERSONAL INITIALS — `J. R. R.` — where each dotted letter is read by name. */
     private static readonly JsRe INITIAL_RUN =
         JsRegex.Compile("(?<![\\p{L}" + LATIN_MARK + "])(?:\\p{Lu}\\.[ \\u00a0]*){2,}", "gu");  // space, NBSP

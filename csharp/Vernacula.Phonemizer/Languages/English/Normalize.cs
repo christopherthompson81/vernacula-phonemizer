@@ -464,6 +464,39 @@ public static class Normalize
         "(?<![\\p{L}\\p{M}\\d])(?<!\\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\\p{L})", "giu");
 
     /**
+     * AN ENUMERATED LIST LEAD-IN — `(a) the first item`, `b) the second` (#1423).
+     * Ported from src/languages/english/normalize.ts — see that file for the measurements.
+     *
+     * ⚠ THE LETTER WAS READ AS THE INDEFINITE ARTICLE, and ⟨a⟩ is the ONLY letter of 26 it happens
+     * to: the other 25 already give their letter name, because CMUdict carries them with letter-NAME
+     * pronunciations and records `a` as the reduced article AH0. A CLAIMING problem, not a naming one.
+     *
+     * ⚠ A PAUSE IS PART OF THE REPORT, and the comma is this file's existing spelling for one.
+     */
+    private static readonly JsRe LIST_MARKER =
+        JsRegex.Compile("(?<=^|\\n)([ \\t]*)[([]?([A-Za-z]|\\d{1,2})[)\\]](?=[ \\t]+\\S)", "gu");
+
+    /** A LONE LETTER INSIDE BRACKETS — a REFERENCE to a list item, so the letter name but NO pause. */
+    private static readonly JsRe BRACKETED_LETTER =
+        JsRegex.Compile("(?<=[([{])([A-Za-z])(?=[)\\]}])", "gu");
+
+    /**
+     * A MARKER LETTER AS THE PASS WOULD SAY IT, WITHOUT DESTROYING ITS CASE (#1423).
+     *
+     * ⚠ `LetterName(l.ToLowerInvariant())` IS NOT A NO-OP for the other 24 letters — it returns the
+     * LOWERCASED input, so a rule written that way silently lowercases a capital, and the initialism
+     * pass decides SHOUTING by looking for any lowercase letter. One injected lowercase flipped the
+     * verdict for a whole document: `SEE (B) OF US ARMY` spelled out `US`. See the TypeScript.
+     */
+    private static string SayLetter(string l) =>
+        Manifest.MANIFEST.LetterNameExceptions.TryGetValue(l.ToLowerInvariant(), out var name)
+            ? (l == l.ToUpperInvariant() ? name.ToUpperInvariant() : name)
+            : l;
+
+    /** Digits only, for telling a numbered marker from a lettered one. */
+    private static readonly JsRe ALL_DIGITS = JsRegex.Compile("^[0-9]+$", "u");
+
+    /**
      * A DEGREES-MINUTES-SECONDS COORDINATE — `40°26′46″N` (#1435).
      * Ported from src/languages/english/normalize.ts — see that file for the reasoning.
      *
@@ -875,6 +908,19 @@ public static class Normalize
         // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`:
         //      a case-SENSITIVE list of tokens read wrong, not a formula parser.
         s = Rewrite(s, FORMULA_TOKEN, m => FORMULA_READING.TryGetValue(m.Value, out var r) ? r : m.Value);
+
+        // 0b7) An enumerated list lead-in — the letter name AND a pause. See LIST_MARKER.
+        // ⚠ Roman markers are deliberately not claimed; see the TypeScript for why a MIXED choice
+        // would be worse than the defect.
+        s = Rewrite(s, LIST_MARKER, m =>
+        {
+            var mark = m.Groups[2].Value;
+            var said = ALL_DIGITS.IsMatch(mark) ? mark : SayLetter(mark);
+            return m.Groups[1].Value + said + ",";
+        });
+
+        // 0b8) A lone letter in brackets elsewhere — a reference, so no pause. See BRACKETED_LETTER.
+        s = Rewrite(s, BRACKETED_LETTER, m => SayLetter(m.Value));
 
         // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
         s = Rewrite(s, MONTH_RANGE, m =>
