@@ -1427,3 +1427,99 @@ postcode and not a count.
 
 **Gates.** 6045 TS, 6687 C#, goldens 189/36495 fresh, parity 189 byte-identical, regex-diff 144164
 probes identical, plus a 20-shape cross-engine diff.
+
+## Run 24 — 2026-09-22 09:51 — four reports, and the one that only reproduces in C#
+
+**Report.** Four readings, from a listener running the reader over technical prose:
+
+1. `TSO` is pronounced as a word, should be letter-spelled.
+2. A Canadian postal code "still gets *liters* on the ⟨L⟩"; wants alternating letter/digit spelling.
+3. `(a)`, `(b)` list lead-ins: `(a)` reads as the indefinite article, and there is no pause.
+4. `CoCr` reads as *cocker*; it is a binary alloy formula, "cobalt-chrome".
+
+**Question.** Which reproduce, and in which engine?
+
+**Raw finding — three of four reproduce in TypeScript, and the postal code does NOT:**
+
+```
+"TSO"                      -> tsˈoᶷ
+"(a) the first item"       -> ə ðə fˈɝst ˈaᶦt̬əm
+"CoCr"                     -> kʰˈɑːkɹ
+"T2G 0L1"                  -> tʰˈiː tʰˈuː d͡ʒˈiː zˈɪɹoᶷ ˈɛɫ wˈʌn      ← already correct
+```
+
+The litre collision was fixed in TypeScript, and `UNIT_RE` carries three guards for it whose comments
+name `V6L 2T5` and `L4W 5M1` verbatim. A sweep of **64,000 generated `A#A #A#` codes** over the ten
+letters that can collide with a one-letter unit found **zero** leaks. So the report is either stale or
+about the other engine.
+
+**It is the other engine.** `csharp/.../English/Normalize.cs`'s `UNIT_RE` is the TypeScript pattern
+with all three guards absent — the code-slot lookbehind, the trailing-digit guard, and
+`asciiExponentIsCodeDigit` (which has no C# counterpart at all). Every case the TypeScript comment
+names as fixed still leaks in C#:
+
+```
+T2G 0L1   -> … zˈɪɹoᶷ lˈiːt̬ɚz wˈʌn          zero LITRES one
+V6L 2T5   -> vˈiː sˈɪks lˈiːt̬ɚz tʰˈuː …     vee six LITRES two
+L4W 5N6   -> ˈɛɫ fˈɔːɹ wˈɑːts fˈaᶦv …        el four WATTS five
+T2G 0L2   -> … zˈɪɹoᶷ skwˈɛɹ lˈiːt̬ɚz         zero SQUARE LITRES
+```
+
+⚠ **AND THE PARITY GATE SAYS 189 BYTE-IDENTICAL WHILE THIS IS TRUE.** It is golden-driven, and no
+golden row contains a postal code — so the divergence is not "missed by a weak check", it is outside
+what the check ranges over. This is the same shape as the memo *parity covers the IPA string, not the
+trace*: the headline answers a narrower question than it sounds like. A fix has to add the row, not
+just the guard.
+
+**Found while probing, not reported — ⟨A⟩ is the only letter that fails in a code slot.** Sweeping all
+26 in `1X 1` and `K1X`, twenty-five give their letter name and one does not:
+
+```
+1A 1 -> wˈʌn ə wˈʌn        K1A -> kʰˈeᶦ wˈʌn ˈə        ← the article
+1B 1 -> wˈʌn bˈiː wˈʌn     K1B -> kʰˈeᶦ wˈʌn bˈiː
+```
+
+That is the same root as report 3: a lone ⟨a⟩ or ⟨A⟩ that no rule claims falls to the g2p, which reads
+it as the article. `(A) foo` reads "ə foo" too, so this is not confined to lowercase list markers.
+`(ii)` -> ˈɪɪ is a third instance — Roman-numeral markers are unclaimed as well.
+
+**Implication for the next step.** These are four separate defects of three different sizes, and they
+do not belong in one change:
+
+- the C# guard port is bounded and confirmed, and additionally needs a golden row so the gate can see it;
+- `TSO` is one `acronymLetters` entry — `tso` is recorded in CMUdict as `T S OW1` (General Tso), so
+  `isRecorded` hands it to the dictionary; the capitalised form is never the name;
+- the list-marker class is a rule plus a pause, and is wider than the report (uppercase and Roman too);
+- the alloy formula needs an element-symbol table and a rule for when a mixed-case run is a formula
+  at all, which is the only one of the four with a real design question in it.
+
+⚠ **Postal codes in fixtures are held to the general case.** The examples committed here are the ones
+already present in the source comments (`V6L 2T5`, `L4W 5N6`) and the documentation placeholder
+`A1A 1A1`, not the code from the report — a full Canadian code resolves to a block-sized delivery unit,
+so it is treated as quasi-identifying and kept out of the repo.
+
+**Fix for #1421 — the three guards, ported, and the mirror test that did not exist.**
+
+The TypeScript half of this block has a test, `test/english-normalize.test.ts`'s "a unit symbol may not
+be a slot in an alphanumeric code", and it has been green since the guards landed. There was no C#
+mirror. That is a sharper statement of the hole than "no golden row": the class was covered on one
+side and uncovered on the other, and the parity gate cannot see the difference because it ranges over
+goldens, not over tests.
+
+⚠ **Proved by reverting, not by passing.** With `Normalize.cs` reverted and the new
+`EnglishCodeSlotUnitTests` kept, **6 of its 18 cases fail**. A cross-engine sweep over 64,233 rows —
+64,000 generated `A#A #A#` codes plus the unit idioms the guards must not damage — is byte-identical
+after the fix and diverges on **23,044 rows (35.9%)** with the guards reverted:
+
+```
+litres   12,803    (9,603 plural + 3,200 singular)
+watts    12,801
+square    3,202
+```
+
+The legitimate readings the guards must not touch survive unchanged in both engines: `5 L of water`
+→ *liters*, `19,500 km2` → *square kilometers*, `2x3m rug` → "2 by 3 meters", `he is 5ft11` → *feet*,
+`5 µg2` → *square micrograms*.
+
+**Gates.** 6170 TS · 6726 C# · goldens 189/36495 fresh, 0 stale · parity 189 byte-identical, 0 differ ·
+trace-cold 189 of 189, no poisons.
