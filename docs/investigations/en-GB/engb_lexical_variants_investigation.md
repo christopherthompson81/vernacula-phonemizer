@@ -317,30 +317,43 @@ not just this table."*
 opposite problem (RP rows in a GenAm corpus); the UK config had nothing for US rows in a UK corpus.
 
     en-GB referee headwords                                      76,284
-      EVERY reading rhotic — an r-coloured ɚ/ɝ, or a coda ɹ      1,468
+      EVERY reading rhotic — an r-coloured ɚ/ɝ, or a coda ɹ      1,441
       SOME reading rhotic beside a clean one                       3,779   ← KEPT
 
 The all-variants criterion is the machinery's own: the scorer credits any variant, so a row with one
 clean reading is still evidence. Only a row that cannot arbitrate at all is dropped.
 
-⚠ **AND WE PASS 0 OF THE 1,468.** Not 3, not 1 — zero. They are guaranteed failures sitting in the
+⚠ **AND WE PASS 0 OF THE 1,441.** Not 3, not 1 — zero. They are guaranteed failures sitting in the
 denominator, so removing them takes out false disagreements and costs no credit:
 
-    folded backbone   40,363 / 76,284 (52.9%)  →  40,363 / 74,816 (53.9%)
+    folded backbone   40,363 / 76,284 (52.9%)  →  40,363 / 74,843 (53.9%)
     symbol accuracy   87.0%                    →  87.3%
 
 **The numerator does not move**, which is the same signature the Moby non-rhotic rules produced on
 `en` and is the whole evidence that this is a referee defect rather than a scoring gift.
 
-### ⚠ THE NUCLEUS TEST TOOK FOUR ATTEMPTS AND EVERY FAILURE WAS THE SAME BUG
+### ⚠ THE NUCLEUS TEST TOOK SIX ATTEMPTS, AND REVIEW FOUND THE LAST TWO
 
     1. `[ɹ](?![vowel])`                     — counted `aaronite eəɹn̩aɪt` as a coda: `n̩` IS a nucleus
     2. + syllabic consonants                  — missed `dramatize d̠͡ɹ̠ɑ...`: a combining mark sits
                                                  between the /ɹ/ and its vowel
     3. strip ALL combining marks first        — broke case 1 again, because U+0329 is IN the range
                                                  stripped, so `ɹl̩` became `ɹl`
-    4. skip other marks but NOT U+0329        — correct, and verified against eight fixtures in BOTH
-                                                 directions before being believed
+    4. skip other marks but NOT U+0329        — fixed 1 and 2, and I called it done
+    5. — review —                             — 5 MORE ONSET SHAPES still dropped: a GLIDE in the cluster
+                                                 (`ryukyuan ɹjuːkjuːən`, `yprois iːpɹwɑː`), a PARENTHESISED
+                                                 optional segment (`oleksandrivka …ndɹ⁽ʲ⁾iʌ̯kɐ`), a GEMINATE
+                                                 `ɹɹ` (`acrasial`), our own weak vowel `ᵻ`
+                                                 (`prevenient pɹᵻviːniənt`), and five PRECOMPOSED vowels
+                                                 — the corpus is NOT NFD and the exclusion runs on the raw
+                                                 string while the scorer normalises (`petitgrain pətiɡɹã`)
+    6. all of the above                       — 1,468 → 1,441, and STILL 0 passing
+
+⚠ **AND THE CLAIM "VERIFIED AGAINST EIGHT FIXTURES IN BOTH DIRECTIONS" WAS TRUE OF MY SCRATCH SCRIPT
+AND OF NOTHING IN THE REPO.** `test/referee-exclude-rows.test.ts` exists precisely because "`excludeRows`
+DROPS EVIDENCE, so its semantics are pinned here", and it pinned only `en`'s five rules. A rule whose
+first four drafts each dropped onsets shipped with no fixture at all. All thirteen are pinned there now,
+in both directions, each naming the draft it caught.
 
 That is the third time this session a nucleus test forgot that a syllabic consonant is one (#1403 has
 the other two, in the engine and in its own guard). **Write the nucleus definition once and test it

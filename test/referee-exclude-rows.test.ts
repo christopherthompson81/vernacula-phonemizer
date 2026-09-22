@@ -10,6 +10,48 @@ import { CONFIG } from "../tools/referee-eval/config.ts";
 
 describe("referee row exclusion", () => {
     const en = CONFIG["en"]!.referees[0]!;
+    const enGb = CONFIG["en-GB"]!.referees[0]!;
+
+    /**
+     * ⚠ THE en-GB RULE IS THE MIRROR OF en's AND ITS FIRST FOUR DRAFTS EACH DROPPED ONSETS. The corpus is
+     * a UK one with US rows in it, so the test is "is this reading rhotic" — and a /ɹ/ is an ONSET, not
+     * contamination, in five shapes that a bare `ɹ not before a vowel` misses. Every row below was a real
+     * false positive of a real draft, so they are pinned in BOTH directions: a detector verified only on
+     * the rows it is meant to catch will happily take onsets with it, which is exactly how three of those
+     * four drafts passed their author's own spot-check.
+     */
+    test("en-GB drops a rhotic row and never an onset", () => {
+        const ipa = enGb.excludeRows![0]!.ipa!;
+        // ONSETS — must NOT match. Each names the draft that got it wrong.
+        for (const [why, reading] of [
+            ["a syllabic consonant is a nucleus", "æbɔːɹl̩"],              // aboral
+            ["… including after a schwa", "mətɜːtəɹl̩"],                     // materteral
+            ["a combining mark before the vowel", "d̠͡ɹ̠ɑmətaɪz"],          // dramatize
+            ["a glide in the cluster", "ɹjuːkjuːən"],                       // ryukyuan
+            ["… and the labial one", "iːpɹwɑː"],                                // yprois
+            ["a parenthesised optional segment", "olɛksɑndɹ⁽ʲ⁾iʌ̯kɐ"],  // oleksandrivka
+            ["a geminate ɹ", "əkɹɹeɪzɪəl"],                                 // acrasial
+            ["our own weak vowel ᵻ", "pɹᵻviːniənt"],                        // prevenient
+            ["a PRECOMPOSED vowel — the corpus is not NFD", "pətiɡɹã"],      // petitgrain
+        ] as const) expect([why, ipa.test(reading)]).toEqual([why, false]);
+        // RHOTIC — must match.
+        for (const [why, reading] of [
+            ["an r-coloured vowel is not an RP symbol", "æbɚ"],                 // aber
+            ["… nor is it word-internally", "æfɹɪkɑːnɚ"],                   // afrikaner
+            ["a coda ɹ before a consonant", "eɪkɑɹs"],                          // acars
+            ["… and at a syllable boundary", "ɑɹpə"],                           // arpa
+        ] as const) expect([why, ipa.test(reading)]).toEqual([why, true]);
+    });
+
+    // ⚠ AND THE ROW-LEVEL CRITERION IS ALL-VARIANTS, which is what keeps a usable row alive: `asdr` is
+    // `eɪɛsdiːɑː` BESIDE `eɪɛsdiːɑːɹ`, so the British reading carries it. The scorer credits any
+    // variant, so dropping the row for its US reading would throw away good evidence.
+    test("a row with one clean reading survives its rhotic one", () => {
+        const ipa = enGb.excludeRows![0]!.ipa!;
+        expect(ipa.test("eɪɛsdiːɑː")).toBe(false);
+        expect(ipa.test("eɪɛsdiːɑːɹ")).toBe(true);
+    });
+
 
     test("en declares exactly the five validated rules", () => {
         expect(en.excludeRows).toHaveLength(5);
