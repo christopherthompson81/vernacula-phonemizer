@@ -54,15 +54,17 @@ describe("the -ary/-ery/-ory weak vowel", () => {
         expect(say("monastery")).toBe("mˈɒnəstəɹi");     // referee mɒnəstɹi — syncope-only word
     });
 
-    // ⚠ `amatory` IS A SECOND-ORDER CASUALTY AND BELONGS TO #1391, NOT TO THIS RULE. Reducing its suffix
-    // made it claimable into BATH, and the row it was claimed on is the referee's `ɑmətəɹi` — a
-    // LENGTH-LESS `ɑ` in a non-rhotic corpus, i.e. an American transcription. RP is ˈæmətəɹi. The rule
-    // did not cause it; it exposed it, by making the rest of the word match.
-    // ⚠ PINNED AS-IS SO THE REGRESSION IS VISIBLE rather than discovered later: when #1391 tightens
-    // BATH's claim test this assertion should go back to `ˈæmətʰəɹi`, and this test failing is the
-    // signal that it worked.
-    it("records amatory's BATH mis-claim, which is #1391 and not this rule", () => {
-        expect(say("amatory")).toBe("ˈɑːmətʰəɹi");
+    // ⚠ `amatory` WAS A SECOND-ORDER CASUALTY BELONGING TO #1391, AND THIS ASSERTION HAS NOW FLIPPED.
+    // Reducing its suffix made it claimable into BATH, on the referee's `ɑmətəɹi` — a LENGTH-LESS `ɑ`
+    // in a non-rhotic corpus, i.e. the other variety's convention. The rule did not cause it; it exposed
+    // it, by making the rest of the word match.
+    // ⚠ THE OLD COMMENT SAID "when #1391 tightens BATH's claim test this assertion should go back to
+    // ˈæmətʰəɹi, and this test failing is the signal that it worked". IT FIRED, exactly as written,
+    // when the length tell landed — a BATH claim may no longer rest SOLELY on a length-less ɑ row, and
+    // `amatory`'s only supporting row was one. espeak-ng's en-gb voice reads it `ˈamətəɹi`, TRAP,
+    // which is the independent confirmation. Kept as a pin on the resolved state, with its own history.
+    it("no longer mis-claims amatory into BATH — #1391's length tell fixed it", () => {
+        expect(say("amatory")).toBe("ˈæmətʰəɹi");
     });
 });
 

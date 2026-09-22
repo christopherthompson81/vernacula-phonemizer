@@ -124,7 +124,8 @@ for (const row of delegating ? [] : rows) {
     if (rowIndex % shardN !== shardI) continue;
     const w = row[0]!;
     if (owned.has(w)) continue;
-    const refFolded = row.slice(1).map((r) => fold(r));
+    const refRaw = row.slice(1);
+    const refFolded = refRaw.map((r) => fold(r));
     const rules = phonemizeWordRules(w);
     const ours = marry.has(w) ? rules.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ") : rules;
     // yod first, by POSITION: the referee attests a post-coronal yod that our GOOSE slot lacks (student, tune —
@@ -153,6 +154,26 @@ for (const row of delegating ? [] : rows) {
         // is how it was found. `ə`, `ɪ` and `ᵻ` are one slot for this comparison — the same equivalence
         // the `ᵻ → ɪ` fold in en-GB.jsonc already asserts, one symbol short.
         if (set === palm && refFolded.some((r) => weak(r) === weak(fold(ours)))) continue;
+        // ⚠ A BATH CLAIM MAY NOT REST SOLELY ON A LENGTH-LESS ɑ ROW (#1391). The backbone strips LENGTH,
+        // so an American `plɑtfɔːm` is indistinguishable from an RP `plɑːtfɔːm` once folded — and this
+        // corpus writes `ɑː` for 5,024 headwords against a length-less `ɑ` for 1,130, so the two are
+        // CONVENTIONS, not free variation. 58 BATH members were claimed with every supporting row written
+        // the short way, and they are overwhelmingly foreign proper nouns and loanwords (`nanjing`,
+        // `taqueria`, `plattdeutsch`, `zemlyanka`) plus a handful of ordinary English words the claim gets
+        // audibly wrong: `platform`, `fang`, `dramatize` and `dan`, all shipped with the long vowel.
+        // ⚠ THE TEST IS NOT POSITIONAL, unlike the yod probe above, and that is an APPROXIMATION: it asks
+        // whether the row spells a long ɑ ANYWHERE, not whether the segment this edit produced is the one
+        // spelled long. A row with two back vowels could satisfy it on the unrelated one. Measured on this
+        // tree the only BATH member whose matching row mixes both spellings is `parang` (`pɑɹɑːŋ`), where
+        // the long vowel IS the edited one — so the approximation is latent, not live, and is written down
+        // rather than left for someone to discover.
+        // ⚠ IT IS THE SAME SHAPE AS #1383's RHOTIC TELL and the same remedy: a row written in the other
+        // variety's convention is not evidence about this one. #1391 names this as the prerequisite.
+        // ⚠ AND IT IS "SOLELY", NOT "AT ALL". `chance`, `path` and `bath` itself all have a length-less or
+        // TRAP row BESIDE a proper `ɑː` one, and they are real BATH words — the policy of preferring the
+        // RP-diagnostic realisation whenever it is ATTESTED is unchanged. Only claims with no properly
+        // spelled support at all are refused.
+        if (set === bath && !refRaw.some((r, i) => refFolded[i] === fold(e) && /ɑː/u.test(r))) continue;
         set.push(w); claimed++; break;
     }
 }
@@ -293,10 +314,28 @@ for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i
                 if (explain) console.log(`  INERT ${name.padEnd(5)} ${lemma} -> ${w}   ours ${ours}`);
                 continue;   // the edit has nothing to bite on
             }
-            const refFolded = (refOf.get(w) ?? []).map((r) => fold(r));
+            const refRaw2 = refOf.get(w) ?? [];
+            const refFolded = refRaw2.map((r) => fold(r));
             // ⚠ THE SAME WEAK-VOWEL FOLD AS THE CLAIM GUARD ABOVE, and it was missing here for one review
             // round — the exact defect `comet` exposed, one page away, in the pass that AMPLIFIES it.
             const attestsOurs = refFolded.some((r) => weak(r) === weak(fold(ours)));
+            // ⚠ AND BATH'S LENGTH TELL IS MIRRORED HERE FOR THE SAME REASON PALM'S STRICTER RULE IS. The
+            // veto below only fires when the referee attests our UN-EDITED form — and an inflection whose
+            // rows all spell the length-less `ɑ` does not attest it, so without this it would propagate in
+            // exactly the evidence the claim loop refuses. The residue is 0 on this tree, which makes it a
+            // hole rather than a defect; a dictionary change is all it would take to make it a defect.
+            // ⚠ IT VETOES ON "THE SUPPORTING ROWS ARE ALL SHORT", NOT ON "NO ROW SUPPORTS US". The first
+            // draft conflated the two and rejected `frances`, whose referee rows (`fɹænsɪz`, `fɹɑːnsɪz`)
+            // are the plural of `france` while OUR row is the NAME Frances, `fɹˈɑːnsɪs` — nothing matched,
+            // for a reason that has nothing to do with vowel length. The claim loop reaches its tell only
+            // AFTER `refFolded.includes(fold(e))`, so the tell is additive there; here that precondition
+            // has to be written out or the mirror becomes a much stronger rule wearing the tell's name.
+            const supporting = refRaw2.filter((r, i) => refFolded[i] === fold(e));
+            if (name === "bath" && supporting.length > 0 && !supporting.some((r) => /ɑː/u.test(r))) {
+                vetoed++;
+                if (explain) console.log(`  VETO  bath  ${lemma} -> ${w}   supporting rows all short: ${supporting.join(" | ")}`);
+                continue;
+            }
             if (refFolded.length > 0 && attestsOurs &&
                 (name === "palm" || !refFolded.some((r) => weak(r) === weak(fold(e))))) {
                 vetoed++;

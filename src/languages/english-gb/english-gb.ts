@@ -141,7 +141,11 @@ export interface LexSets {
      * was INCOHERENT about it — `arrogate` æ beside `arrogance` ɛ, `arrow` beside `arrowroot`, 208 rows one
      * way and 147 the other in the same environment — and was made consistently merged against misaki gold
      * (66 of 66, no counterexamples). That change would otherwise cost this accent ~50 referee rows, so the
-     * mapping back lives here, exactly as `lotr` carries `sorry` and `bath` carries `dramatize`.
+     * mapping back lives here, exactly as `lotr` carries `borrow` and `bath` carries `chance`.
+     * ⚠ THOSE TWO EXAMPLES ARE CHECKED BY test/english-gb-set-examples.test.ts, because the pair this
+     * sentence USED to name had gone stale in both halves: `sorry` is not in `en-gb-lotr.tsv` and
+     * `dramatize` left `en-gb-bath.tsv` at #1391. A comment naming a membership is a claim about a
+     * GENERATED file, and generated files move.
      *
      * ⚠ IT IS A WORD LIST AND NOT A RULE, deliberately: a blanket ɛɹ→æɹ would wrongly convert the words that
      * are GENUINELY ɛ in both varieties — `merry`, `very`, `ferry`, `error`, `herald`, `America`. Only words
