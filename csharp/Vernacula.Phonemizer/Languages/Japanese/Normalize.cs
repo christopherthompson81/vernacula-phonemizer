@@ -16,8 +16,21 @@ public static class Normalize
     /** Hiragana → katakana. Counter and digit readings are injected as KATAKANA throughout this engine so
      *  segmentText's hiragana-specific は→わ particle heuristic cannot corrupt an internal は — はち would
      *  otherwise surface as わち. Same reason japanese.ts folds readCounter's output. */
+    /**
+     * ⚠ UNTRACKED, AND THAT IS THE WHOLE OF #1408. This helper's only caller is the DIGIT_KANA table
+     * below, which a static constructor builds — and a static constructor runs LAZILY, on first use, which
+     * for this class is inside `NormalizeJapanese`, which is inside the traced window. Going through the
+     * `Rewrite` seam therefore called `Provenance.StartTrack("れい")` while the tracked string was the
+     * caller's whole sentence; the mismatch rule correctly refused it and POISONED the mapping, so the
+     * FIRST `PhonemizeTrace` of `ja` in a process returned every `InputSpan` null and every call after it
+     * returned them populated. Correct the second time you look, which is the worst shape a defect has.
+     * ⚠ THE SEAM IS FOR NORMALIZER STEPS ON THE PIPELINE STRING, and Provenance's own header names this
+     * exact hazard — "the method is also how a STATIC CONSTRUCTOR BUILDS A LOOKUP TABLE". The TypeScript
+     * twin uses a plain `s.replace` here, and so does `Japanese.cs`'s own copy of this helper; this was the
+     * one place in the port that did not, which is why TS was clean and C# was not.
+     */
     private static string ToKatakana(string s) =>
-        Rewrite(s, HIRAGANA_RANGE, c => char.ConvertFromUtf32(Js.CodePointAt0(c.Value) + 0x60));
+        HIRAGANA_RANGE.Replace(s, c => char.ConvertFromUtf32(Js.CodePointAt0(c.Value) + 0x60));
 
     /** Digit → its katakana name, for the places Japanese reads digits ONE AT A TIME rather than composing a
      *  cardinal: the fractional part of a decimal (6.34 is ろくてん*さんよん*, never ろくてんさんじゅうよん).

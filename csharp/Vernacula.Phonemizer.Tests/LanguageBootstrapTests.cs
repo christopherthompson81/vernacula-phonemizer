@@ -320,8 +320,18 @@ public class LanguageBootstrapTests
         // dictionary and agree far more often — on `Wolaytta` they now agree exactly (wˈoᶷɫtə either way),
         // which would have left this asserting nothing while still passing. Swept 400 OOV tokens from the
         // goldens: 6 still discriminate. `Maandag` is one, and the gap is unmistakable.
+        // ⚠ AND THE ASYNC EXPECTATION WENT STALE AT #1402's BiLSTM RETRAIN AND NOBODY NOTICED FOR THIRTEEN
+        // MERGES. This file is not in the gate ritual — `npm test`, `check:goldens`, `check:en-gb-sets` and
+        // the parity harness are, and `dotnet test` was only ever run with a `--filter` — so a RED C# unit
+        // test sat through a whole session's work. Both ports agree on the new reading (TypeScript gives
+        // the identical pair), so this was never a port divergence; it was an un-run gate.
+        // ⚠ AND THE DISCRIMINATION HAS NARROWED, WHICH IS THE THING TO WATCH. The two tiers used to differ
+        // from the first vowel (mˈændæɡ against mˈɑːndəɡ); they now agree through `mˈɑːnd` and differ only
+        // in the final syllable. The comment above explains why that matters: after enough retrains a
+        // discriminating word stops discriminating and this test asserts nothing WHILE STILL PASSING. When
+        // the two readings converge entirely, pick another from the 6 the #1341 sweep found.
         Foreign.ClearForeignOov();
-        Assert.Equal("ʔab mˈændæɡ zɨbl", await Phonemizer.PhonemizeAsync("ኣብ Maandag ዝብል", "ti"));
+        Assert.Equal("ʔab mˈɑːndˌæɡ zɨbl", await Phonemizer.PhonemizeAsync("ኣብ Maandag ዝብል", "ti"));
         // …and the n-gram reading it must NOT be. ⚠ THE CLEAR IS REQUIRED: the foreign-OOV memo is
         // PROCESS-WIDE, so without it this reads back what the async call above just warmed and passes
         // for the wrong reason.
