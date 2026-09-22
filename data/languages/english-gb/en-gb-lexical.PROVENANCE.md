@@ -32,6 +32,14 @@ lexical sets are built from). A candidate enters only when:
 1. the shipped en-GB render currently matches **no** attested variant under the eval's own fold, and
 2. the citation written here makes it match one, after the full delta has run.
 
+⚠ **AND CRITERION (2) CANNOT BE MET FOR A STRESS ROW, WHICH IS NOT A REASON TO REFUSE ONE.** The eval's
+backbone STRIPS STRESS before comparing, and this referee carries no stress marks anyway, so a row whose
+only change is which syllable is stressed is invisible to the measurement in both directions. `ballet`
+folds to `bæleɪ` before the row and after it, against the referee's `baleɪ`; it was a miss before and is
+a miss after, and the æ/a is a NOTATION difference this variety does not fold. **A row admitted on the
+second source below is therefore exempt from criterion (2) where the primary source cannot arbitrate what
+the row changes** — and the reason is written on the row, so the exemption cannot be claimed silently.
+
 A word the referee does not list, or lists only in a form that looks like US contamination, was
 left out rather than guessed at. **That is no longer the last word — see the second source below.**
 
@@ -65,11 +73,27 @@ Inflected rows keep coming from the lemma's citation plus the PARENT's own suffi
 
 | word | what the second source actually says | verdict |
 |---|---|---|
-| `schedule` | `en_rules` carries `?3  sch (ed  →  sk` — a variant-conditional rule marking GENERAL AMERICAN as the exception. The British /ʃ/ is the default someone left in place while writing `school`, `scheme` and `schizoid` out of it. | **admitted** |
-| `leisure` | `en_list` has `leisure  lEZ3` = /ˈlɛʒə/. And the PRIMARY source corroborates it sideways: wikipron's `leisure` row is the contaminated `liʒɚ`, but its **`leisurely` row is `lɛʒɜli`** — the DRESS vowel was in the referee all along, under a different headword. | **admitted** |
-| `ballet` | `en_list` has `ballet  baleI` — stress on the FIRST syllable. This is the "stress decision" #1383 deferred it for, and wikipron carries no stress marks, so the primary source could never have settled it. | **admitted** |
+| `schedule` | `en_rules:5871` carries `?3  sch (ed  →  sk` — a variant-conditional rule marking GENERAL AMERICAN as the exception (`?3` = dictrules 3, set by `lang/gmw/en-US` and no other `en` voice). The British /ʃ/ is the default someone left in place while writing `school`, `scheme` and `schizoid` out of it. | **admitted** |
+| `leisure` | a PER-WORD PAIR: `en_list:2407 leisure lEZ3` and `en_list:2408 ?3 leisure li:Z3`. And the PRIMARY source corroborates it sideways: wikipron's `leisure` row is the contaminated `liʒɚ`, but its **`leisurely` row is `lɛʒɜli`** — the DRESS vowel was in the referee all along, under a different headword. | **admitted** |
+| `ballet` | a PER-WORD PAIR: `en_list:1044 ballet baleI` and `en_list:1045 ?3 ballet bal'eI`. ⚠ **THE PAIR IS THE EVIDENCE, NOT THE BASE ENTRY** — the base row carries NO stress mark at all, so quoting it alone would leave "espeak's default stress rule put the accent on the first syllable" wide open; it is the `?3` companion, which moves the mark to the second syllable FOR GENERAL AMERICAN, that makes it a decision about this word. wikipron carries no stress marks, so the primary source could never have settled it. | **admitted** |
 | `oregano`, `laboratory` | `en_list` entries, corroborating wikipron exactly. | still blocked, and NOT by the sources — see below |
 | `hertford` | attested by both. A PROPER NOUN, which is a much larger door and stays shut deliberately. | left out |
+
+⚠ **THE `schedule` ROW IS A FAMILY, NOT A LEMMA, AND THE EVIDENCE IS WHY.** `leisure` and `ballet` rest on
+`en_list` entries, which are per-word, so they take their lemma and its regular inflections and stop.
+`schedule` rests on a SPELLING RULE over `sch` before `ed`, which fires wherever that sequence appears — so
+the evidence itself covers `scheduler`, `unscheduled` and `reschedul*` exactly as it covers `schedule`, and
+espeak reads all ten with /ʃ/ against /sk/. Stopping at the three inflections would have put "the schedule"
+beside "the scheduler" in one sentence with the most audible contrast in the word class flipping between
+them. All ten are here.
+⚠ **AND EXTENDING TO THE FAMILY IS WHAT FOUND THE PRIMARY SOURCE'S ONLY ROW FOR THE CLASS.** `reschedule`
+is a HIT under the eval's own fold — wikipron lists `ɹiːʃɛdjuːl` beside `ɹiːskɛdjuːl` — so the /ʃ/ reading
+this whole family rests on is directly attested by the PRIMARY referee after all, at a headword the lemma
+sweep never reached. `scheduler`/`schedulers` are listed with both readings too, and miss only on the weak
+vowel (our `ʊ` against its `ə`), which is a different question from the one these rows answer.
+⚠ **`reschedulings` IS DELIBERATELY ABSENT.** Its dictionary row is `R IY0 SH K EH1 JH UW0 L IH0 NG Z` —
+an `SH K` cluster no one says, a defect in the PARENT that predates this work. A row here would bake it in.
+Recorded rather than fixed in passing: it wants the triple-source audit like any other curated row.
 
 ⚠ **`oregano` AND `laboratory` ARE BLOCKED BY THIS FILE'S OWN EXEMPTION, NOT BY EVIDENCE.** Both British
 readings need **ɒ** — /ˌɒrɪˈɡɑːnəʊ/, /ləˈbɒrətri/ — and a table-owned word is exempt from the LOT rule
@@ -102,7 +126,7 @@ row the LOT rule turns its /ɑː/ into /ɒ/.
 | ballet | stress on the FIRST syllable in British, the second in GenAm — a stress difference no accent rule makes |
 | leisure | /ˈlɛʒə/ against /ˈliːʒɚ/ — DRESS against FLEECE |
 | pasta | TRAP in British, PALM in GenAm |
-| schedule | /ˈʃɛdjuːl/ against /ˈskɛdʒuːl/ — a different first consonant AND a yod |
+| schedule | /ˈʃɛdjuːl/ against /ˈskɛdʒuːl/ — a different first consonant AND a yod; the whole `sched` family, see below |
 | process | GOAT in British, LOT in GenAm — /ˈprəʊsɛs/ against /ˈprɑːsɛs/; no rule turns LOT into GOAT |
 | progress | the same LOT/GOAT swap, in the NOUN only — see below |
 | tomato | PALM in British, FACE in GenAm |
@@ -143,6 +167,13 @@ entailment, which is the evidence the entailment is sound.
 | `leisure` | attested — SECOND SOURCE, and the primary corroborates it via `leisurely` |
 | `schedule` | attested — SECOND SOURCE only; the primary has no row at all |
 | `ballets` | entailed from `ballets` |
+| `leisured` | entailed from `leisured` |
+| `scheduler` | family — the `?3 sch (ed` rule covers it; both sources read /ʃ/, and both keep the weak vowel |
+| `schedulers` | family — as `scheduler`, plus the parent's own `z` |
+| `unscheduled` | family — the `?3 sch (ed` rule covers it |
+| `reschedule` | family — and **attested by the PRIMARY referee**, `ɹiːʃɛdjuːl` beside `ɹiːskɛdjuːl` |
+| `rescheduled` | family — entailed from `rescheduled` |
+| `rescheduling` | family — entailed from `rescheduling` |
 | `leisurely` | attested AND entailed — they agree |
 | `scheduled` | entailed from `scheduled` |
 | `schedules` | entailed from `schedules` |
@@ -213,15 +244,24 @@ that is what it turned out to be.
 cannot be entailed from: `derbies` decodes as `dˈɝbiʲiz`, with a doubled vowel the entailment would
 propagate straight into the table. The guard is dictionary membership, and this is what it is for.
 
-⚠ **AND CMUdict'S OWN `schedule` PARADIGM IS INTERNALLY INCONSISTENT** — `UW2` in the lemma, `UH0` in all
-three inflections — so the inflected citations take the LEMMA's stem vowel. That is the parent's
-inconsistency about its own word, not a British/American difference, and propagating it would have shipped
-`ʃˈɛdjuːl` beside `ʃˈɛdjʊld` in one sentence. The second source reads all four with `uː`.
+⚠ **THE `schedule` PARADIGM SPLIT WAS OURS, NOT CMUdict'S, AND IT IS FIXED IN THE PARENT RATHER THAN
+PAPERED OVER HERE.** An earlier draft of this file blamed CMUdict for `UW2` in the lemma against `UH0` in
+the inflections, and had the inflected citations override the stem vowel to compensate. The blame was
+backwards: `g2p-curated.tsv` reads `schedule / S K EH1 JH UH0 L / S K EH1 JH UW2 L / frequency audit:
+gold+Moby agree` — **upstream was `UH0` throughout, and our own curated layer changed the lemma and left
+the three inflections behind.** So `en` itself said `skˈɛd͡ʒˌuːɫ` beside `skˈɛd͡ʒʊɫd`, which is the
+wrong-within-one-sentence failure this table exists to prevent, in the PARENT, hidden by an en-GB override.
+Three curated rows now carry the lemma's `UW2` into `scheduled`, `schedules` and `scheduling`, and every
+citation here is once again the parent's own row with ONE rewrite and no stem-vowel override.
+⚠ **AND `scheduler`/`schedulers` KEEP `UH0`, WHICH IS NOT THE SAME DEFECT.** Both sources say the vowel
+really does reduce there — espeak `ʃˈɛdjʊlə`, wikipron `skɛdjələ` → `ʃɛdjələ` — so normalising the whole
+family to `UW2` would have been a second wrong answer wearing the first one's clothes.
 
-⚠ **THE PREFIX TEST ALSO IGNORES L-DARKNESS.** `scheduling` is `ʃˈɛdjˌuːlɪŋ` with a PLAIN /l/ where the
-other three have `ɹ`-dark `ɫ`, because the parent's own rule lightens a prevocalic lateral. Same shape as
-the flapping case below: the row carries the parent's allophony, and the parent's allophone depends on the
-suffix.
+⚠ **THE PREFIX TEST ALSO IGNORES L-DARKNESS AND SECONDARY STRESS.** `scheduling` is `ʃˈɛdjuːlɪŋ`: a
+PLAIN /l/ where the other three have dark `ɫ`, because the parent lightens a prevocalic lateral, AND no
+`ˌ` where the lemma has one, because the parent drops it in that environment. Same shape as the flapping
+case below and the same reason — the row carries the parent's allophony, and the parent's allophone depends
+on the suffix. Three separate things the raw prefix test cannot see, so it is run over the folded strings.
 
 ⚠ **THE PREFIX TEST IGNORES FLAPPING AND ASPIRATION.** `tomato` is `təmˈeᶦtʰoᶷ` and `tomatoes`
 `təmˈeᶦt̬oᶷz` — the same /t/ in two allophones — and comparing them raw refuses the row. `toRP` un-flaps

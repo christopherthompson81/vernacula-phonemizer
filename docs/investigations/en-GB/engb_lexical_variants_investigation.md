@@ -475,7 +475,7 @@ All six read the way the class says they should. **But the binary's output is no
 a G2P guess of exactly the kind this engine already makes, and a guess from another engine is not
 evidence about a word. The line that matters is a PER-WORD HUMAN DECISION in `dictsource/`:
 
-    grep -hP "^(leisure|ballet|oregano|laboratory|premier)\s" dictsource/en_list
+    grep -hP "^(leisure|ballet|oregano|laboratory|premier)\s" dictsource/en_list   ⚠ THE ANCHOR AT COLUMN 0 HID THE HALF THAT MATTERS — see Run 9
     leisure    lEZ3        ballet    baleI        oregano  0rIg'A:noU
     laboratory la#b'0r@tri premier   prEmI3
     grep -n "sched" dictsource/en_rules  →  (nothing)
@@ -522,3 +522,97 @@ run over the darkness-folded strings for that one pair.
 
 Result: 30 rows → 38. `oregano`/`laboratory` stay blocked by the LOT exemption from Run 6 — the sources
 corroborate them exactly; the blocker was never evidence.
+
+## Run 9 — 2026-09-21 20:20
+
+**Question: review on #1406, five findings. Do they hold?**
+
+All five. Two of them say the PR was wrong rather than thin, and one of those is a defect in the
+PARENT that this PR was quietly papering over.
+
+### ⚠ 1. THE `schedule` PARADIGM SPLIT WAS OURS, AND I BLAMED CMUdict FOR IT
+
+    sed -n 1773p data/languages/english/g2p-curated.tsv
+    schedule   S K EH1 JH UH0 L   S K EH1 JH UW2 L   frequency audit: gold+Moby agree
+
+The columns are `word / upstream / curated`. **Upstream CMUdict had `UH0` throughout and OUR OWN
+curated layer changed the lemma and left the three inflections behind.** I wrote "CMUdict's own
+paradigm is inconsistent" and had the en-GB citations override the stem vowel to compensate — so `en`
+itself was saying `skˈɛd͡ʒˌuːɫ` beside `skˈɛd͡ʒʊɫd`, the wrong-within-one-sentence failure this
+table exists to prevent, IN THE PARENT, hidden behind an accent-variant override.
+
+Fixed where the defect is: three curated rows carry the lemma's `UW2` into `scheduled`, `schedules`
+and `scheduling`. `en_rebuild_lexicon.mts --diff` then reported **exactly 3 rows would change**, which
+is the confirmation that nothing else moved.
+
+⚠ **AND NOT `scheduler`/`schedulers`, WHICH LOOK LIKE THE SAME DEFECT AND ARE NOT.** Both sources say
+the vowel really does reduce there — espeak `ʃˈɛdjʊlə`, wikipron `skɛdjələ` — so normalising the whole
+family to `UW2` would have been a second wrong answer wearing the first one's clothes. The paradigm is
+inconsistent in the dictionary for a REASON in two of its six members.
+
+Every en-GB citation in the family is now the parent's own row with ONE rewrite and no stem override.
+
+### ⚠ 2. THE GREP I LOGGED IN RUN 8 FILTERED OUT THE STRONGEST EVIDENCE
+
+    grep -hP "^(leisure|ballet)\s" dictsource/en_list      ← anchored at column 0
+
+    en_list:1044 ballet     baleI          en_list:2407 leisure    lEZ3
+    en_list:1045 ?3 ballet  bal'eI         en_list:2408 ?3 leisure li:Z3
+
+The `?3` companions sit on the very next line and the anchor hid them. **They are PER-WORD PAIRS**, not
+bare entries — someone wrote down both varieties for these two words — and for `ballet` the pair is the
+entire argument: the base row carries **no stress mark at all**, so the bare citation leaves "espeak's
+default stress rule put the accent on the first syllable" wide open. It is the `?3` companion moving the
+mark to the second syllable that makes it a decision about this word. `?3` confirmed as en-US:
+`espeak-ng-data/lang/gmw/en-US:9 dictrules 3 6`, and no other `en` voice sets 3.
+
+### ⚠ 3. `ballet` FAILS THIS FILE'S OWN ADMISSION CRITERION, AND THAT IS NOT A REASON TO REFUSE IT
+
+Under `makeFold(CONFIG["en-GB"])` the pre-PR render `bælˈeᶦ` and the new `bˈæleᶦ` **both fold to
+`bæleɪ`**, against the referee's `baleɪ`/`balɪ`. Criterion (2) says the citation must make it match, and
+it does not: it was a miss before and is a miss after, on the æ/a this variety does not fold. The row is
+invisible to every en-GB measurement in BOTH directions.
+
+That is a property of the instrument, not of the row: **the backbone strips stress and this referee
+carries no stress marks**, so no stress row can ever satisfy criterion (2). The bar now carries the
+carve-out explicitly, limited to rows the primary source cannot arbitrate, and the reason goes on the row
+so the exemption cannot be claimed silently.
+
+### ⚠ 4. THE FAMILY BOUNDARY WAS UNSTATED, AND DRAWING IT FOUND THE PRIMARY SOURCE'S ONLY ROW FOR THE CLASS
+
+`leisure`/`ballet` rest on `en_list` entries, which are per-word — lemma plus regular inflections, stop.
+`schedule` rests on a SPELLING RULE over `sch` before `ed`, which fires wherever that sequence appears,
+so the evidence covers `scheduler`, `unscheduled` and `reschedul*` exactly as it covers the lemma. Left at
+three inflections, "the schedule" would have sat beside "the scheduler" with the most audible contrast in
+the word class flipping between them. All ten are in.
+
+    npx tsx … attest.mts reschedule
+    reschedule   HIT  mine=ɹiʃɛdjul   ref=ɹiskɛdjul | ɹiskɛdʒul | ɹiʃɛdjul | ɹiʃɛdʒul
+
+⚠ **THE PRIMARY REFEREE DOES ATTEST THE /ʃ/ READING FOR THIS FAMILY** — at a headword the lemma sweep
+never reached. `schedule` has no row, `reschedule` has four, and two of them are ours. `scheduler` and
+`schedulers` list both readings too and miss only on the weak vowel (`ʊ` against `ə`). **A class whose
+lemma the referee is silent on may still be attested one derivation away**, which is the same shape as
+`leisure`/`leisurely` in Run 8 — twice in two runs, so it is a search move and not a coincidence.
+
+### 5. `leisured` was simply missing
+
+In the dictionary, a regular `-ed` inflection of a newly admitted lemma, and left reading `lˈiːʒəd`
+beside `lˈɛʒə` and `lˈɛʒəli`. Exactly the `clerk`/`clerks` split the inflection rows exist to close,
+reintroduced by not sweeping the paradigm. Added.
+
+### Found, not fixed
+
+`reschedulings` is `R IY0 SH K EH1 JH UW0 L IH0 NG Z` in the dictionary — an `SH K` cluster no one says.
+A pre-existing parent defect, and an en-GB row would have baked it in, so the word is deliberately absent
+from the family. It wants the triple-source audit like any other curated row.
+
+Result: 38 rows → 49, plus 3 curated rows in the parent. Goldens unaffected (none of these words is in
+the golden corpus); suite 6,155; C# 189 byte-identical.
+
+### ⚠ AND THE PREFIX ENTAILMENT NOW FOLDS THREE THINGS, NOT ONE
+
+`scheduling` is `ʃˈɛdjuːlɪŋ`: a plain /l/ where the rest of the paradigm has dark `ɫ`, AND no `ˌ` where
+the lemma has one. Both are the PARENT's own suffix-conditioned behaviour, which is what makes them not a
+difference for this table — and a raw `startsWith` can see neither. With flapping (`tomato`/`tomatoes`,
+recorded at Run 2) that is three, and the test now runs folded.
