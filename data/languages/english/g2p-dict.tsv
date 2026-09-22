@@ -29946,7 +29946,7 @@ defore	D IY1 F AO0 R
 deforest	D IY0 F AO1 R AH0 S T
 deforestation	D IY0 F AO2 R IH0 S T EY1 SH AH0 N
 deforge	D EH1 F ER0 G
-deform	D IY2 F AO1 R M
+deform	D IH0 F AO1 R M
 deformation	D IY2 F AO0 R M EY1 SH AH0 N
 deformed	D IH0 F AO1 R M D
 deformities	D IH0 F AO1 R M AH0 T IY0 Z
@@ -31613,7 +31613,7 @@ detoured	D IY1 T UH0 R D
 detours	D IH0 T UH1 R Z
 detox	D IY1 T AA2 K S
 detoxicate	D IY0 T AA1 K S AH0 K EY2 T
-detoxication	D IH0 T AA2 K S AH0 K EY1 SH AH0 N
+detoxication	D IY0 T AA2 K S AH0 K EY1 SH AH0 N
 detoxification	D IH0 T AA2 K S IH0 F IH0 K EY1 SH AH0 N
 detoxify	D IH0 T AA1 K S AH0 F AY2
 detract	D IH0 T R AE1 K T
@@ -31621,7 +31621,7 @@ detracted	D IH0 T R AE1 K T IH0 D
 detracting	D IH0 T R AE1 K T IH0 NG
 detraction	D IH0 T R AE1 K SH AH0 N
 detractive	D IH0 T R AE1 K T IH0 V
-detractor	D IY0 T R AE1 K T ER0
+detractor	D IH0 T R AE1 K T ER0
 detractors	D IH0 T R AE1 K T ER0 Z
 detracts	D IH0 T R AE1 K T S
 detrain	D IY0 T R EY1 N
@@ -31681,9 +31681,9 @@ devadasi	D EY2 V AH0 D AA1 S IY0
 deval	D IH0 V AA1 L
 devall	D EY0 V AA1 L
 devalle	D IH0 V AE1 L
-devaluate	D IH0 V AE1 L Y UW0 EY2 T
-devaluated	D IH0 V AE1 L Y UW0 EY2 T IH0 D
-devaluation	D IH0 V AE2 L Y UW0 EY1 SH AH0 N
+devaluate	D IY0 V AE1 L Y UW0 EY2 T
+devaluated	D IY0 V AE1 L Y UW0 EY2 T IH0 D
+devaluation	D IY0 V AE2 L Y UW0 EY1 SH AH0 N
 devaluations	D IY2 V AE0 L Y UW0 EY1 SH AH0 N Z
 devalue	D IH0 V AE1 L Y UW2
 devalued	D IH0 V AE1 L Y UW2 D
@@ -94971,9 +94971,9 @@ precept	P R IY1 S EH2 P T
 preceptive	P R IH0 S EH1 P T IH0 V
 preceptorial	P R IY2 S EH0 P T AO1 R IY0 AH0 L
 precepts	P R IY1 S EH2 P T S
-precess	P R AH0 S EH1 S
+precess	P R IY0 S EH1 S
 precession	P R IY0 S EH1 SH AH0 N
-precessional	P R AH0 S EH1 SH AH0 N AH0 L
+precessional	P R IY0 S EH1 SH AH0 N AH0 L
 precht	P R EH1 K T
 prechter	P R EH1 K T ER0
 prechtl	P R EH1 K T AH0 L
@@ -94995,8 +94995,8 @@ precipitating	P R IH0 S IH1 P AH0 T EY2 T IH0 NG
 precipitation	P R IH0 S IH2 P IH0 T EY1 SH AH0 N
 precipitin	P R IH0 S IH1 P IH0 T IH0 N
 precipitous	P R IH0 S IH1 P IH0 T AH0 S
-precipitously	P R IY2 S IH1 P IH0 T AH0 S L IY0
-precipitousness	P R IY0 S IH1 P AH0 T AH0 S N AH0 S
+precipitously	P R IH0 S IH1 P IH0 T AH0 S L IY0
+precipitousness	P R IH0 S IH1 P AH0 T AH0 S N AH0 S
 precis	P R EY1 S IY2
 precise	P R IH0 S AY1 S
 precisely	P R IH0 S AY1 S L IY0
@@ -95324,10 +95324,10 @@ prescribing	P R IY0 S K R AY1 B IH0 NG
 prescript	P R IY1 S K R IH2 P T
 prescription	P R AH0 S K R IH1 P SH AH0 N
 prescriptions	P R AH0 S K R IH1 P SH AH0 N Z
-prescriptive	P R IY0 S K R IH1 P T IH0 V
-prescriptively	P R IY0 S K R IH1 P T IH0 V L IY0
-prescriptiveness	P R IY0 S K R IH1 P T IH0 V N IH0 S
-prescriptivist	P R IY0 S K R IH1 P T AH0 V IH0 S T
+prescriptive	P R IH0 S K R IH1 P T IH0 V
+prescriptively	P R IH0 S K R IH1 P T IH0 V L IY0
+prescriptiveness	P R IH0 S K R IH1 P T IH0 V N IH0 S
+prescriptivist	P R IH0 S K R IH1 P T AH0 V IH0 S T
 preseason	P R IY2 S IY1 Z AH0 N
 preselect	P R IY2 S IH0 L EH1 K T
 preselector	P R IY2 S IH0 L EH1 K T ER0
@@ -95354,8 +95354,8 @@ preservative	P R AH0 Z ER1 V AH0 T IH0 V
 preservatives	P R AH0 Z ER1 V AH0 T IH0 V Z
 preserve	P R AH0 Z ER1 V
 preserved	P R AH0 Z ER1 V D
-preserver	P R IY0 Z ER1 V ER0
-preservers	P R IY0 Z ER1 V ER0 Z
+preserver	P R IH0 Z ER1 V ER0
+preservers	P R IH0 Z ER1 V ER0 Z
 preserves	P R AH0 Z ER1 V Z
 preserving	P R AH0 Z ER1 V IH0 NG
 preset	P R IY0 S EH1 T
@@ -95440,8 +95440,8 @@ presumes	P R AH0 Z UW1 M Z
 presuming	P R IH0 Z UW1 M IH0 NG
 presumption	P R IH0 Z AH1 M P SH AH0 N
 presumptions	P R IH0 Z AH1 M P SH AH0 N Z
-presumptive	P R IY0 Z AH1 M P T IH0 V
-presumptively	P R IY0 Z AH1 M P T IH0 V L IY0
+presumptive	P R IH0 Z AH1 M P T IH0 V
+presumptively	P R IH0 Z AH1 M P T IH0 V L IY0
 presumptuous	P R IH0 Z AH1 M P CH AH0 W AH0 S
 presuppose	P R IY2 S AH0 P OW1 Z
 presupposes	P R IY2 S AH0 P OW1 Z IH0 Z
@@ -95496,7 +95496,7 @@ prevaricated	P R AH0 V EH1 R AH0 K EY0 T IH0 D
 prevaricates	P R AH0 V EH1 R AH0 K EY0 T S
 prevaricating	P R AH0 V EH1 R AH0 K EY0 T IH0 NG
 prevarication	P R AH0 V EH2 R AH0 K EY1 SH AH0 N
-prevaricator	P R IY0 V EH1 R AH0 K EY2 T ER0
+prevaricator	P R IH0 V EH1 R AH0 K EY2 T ER0
 prevatt	P R IH0 V AE1 T
 prevatte	P R IH0 V AE1 T
 prevent	P R IH0 V EH1 N T
@@ -101603,7 +101603,7 @@ retaliate	R IH0 T AE1 L IY0 EY2 T
 retaliated	R IH0 T AE1 L IY0 EY2 T IH0 D
 retaliating	R IH0 T AE1 L IY0 EY2 T IH0 NG
 retaliation	R IH0 T AE2 L IY0 EY1 SH AH0 N
-retaliatory	R IY0 T AE1 L Y AH0 T AO2 R IY0
+retaliatory	R IH0 T AE1 L Y AH0 T AO2 R IY0
 retana	R EH0 T AE1 N AH0
 retard	R IH0 T AA1 R D
 retardant	R IY0 T AA1 R D AH0 N T
@@ -101658,7 +101658,7 @@ retinue	R EH1 T AH0 N UW2
 retinyl	R EH1 T IH0 N AH0 L
 retire	R IH0 T AY1 ER0
 retired	R IH0 T AY1 ER0 D
-retiree	R IY0 T AY1 R IY1
+retiree	R IH0 T AY1 R IY1
 retirees	R IH0 T AY1 R IY1 Z
 retirement	R IH0 T AY1 ER0 M AH0 N T
 retirements	R IH0 T AY1 ER0 M AH0 N T S
@@ -101946,7 +101946,7 @@ revolt	R IH0 V OW1 L T
 revolted	R IH0 V OW1 L T IH0 D
 revolting	R IH0 V OW1 L T IH0 NG
 revoltingly	R IH0 V OW1 L T IH0 NG L IY0
-revolts	R IY0 V OW1 L T S
+revolts	R IH0 V OW1 L T S
 revolucion	R EH2 V OW0 L UW2 S IY0 OW1 N
 revolucionario	R EH2 V OW0 L UW2 S IY0 AH0 N EH1 R IY0 OW0
 revolute	R EH1 V AH0 L UW2 T
@@ -101959,12 +101959,12 @@ revolutionize	R EH2 V AH0 L UW1 SH AH0 N AY2 Z
 revolutionized	R EH2 V AH0 L UW1 SH AH0 N AY2 Z D
 revolutionizing	R EH2 V AH0 L UW1 SH AH0 N AY2 Z IH0 NG
 revolutions	R EH2 V AH0 L UW1 SH AH0 N Z
-revolve	R IY0 V AO1 L V
-revolved	R IY0 V AA1 L V D
+revolve	R IH0 V AO1 L V
+revolved	R IH0 V AA1 L V D
 revolver	R IH0 V AO1 L V ER0
 revolvers	R IH0 V AA1 L V ER0 Z
-revolves	R IY0 V AA1 L V Z
-revolving	R IY0 V AA1 L V IH0 NG
+revolves	R IH0 V AA1 L V Z
+revolving	R IH0 V AA1 L V IH0 NG
 revord	R IH0 V AO1 R D
 revs	R EH1 V Z
 revson	R EH1 V S AH0 N
