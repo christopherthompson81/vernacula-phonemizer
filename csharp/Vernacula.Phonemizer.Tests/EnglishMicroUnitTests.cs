@@ -7,6 +7,7 @@
  * A dose read as grams when the page says micrograms is off by a thousand, and nothing in the stream
  * looks wrong.
  */
+using Vernacula.Phonemizer.Languages.English;
 using Xunit;
 
 namespace Vernacula.Phonemizer.Tests;
@@ -65,6 +66,44 @@ public class EnglishMicroUnitTests
         Assert.Contains("mˈaᶦkɹoᶷsˌiːmənz", Say("5 \u00b5S conductance"));
         Assert.Contains("mˈaᶦkɹoᶷsˌɛkəndz", Say("5 \u00b5s delay"));
         Assert.Contains("mˈaᶦkɹoᶷ lˈiːt̬ɚz", Say("2 \u00b5L sample"));
+    }
+
+    /// <summary>
+    /// ⚠ ⟨µin⟩ IS A WHOLE KEY BECAUSE ⟨in⟩ CANNOT BE ONE — the bare inch is the English PREPOSITION.
+    /// Reported as `µin` → "in", the sign DROPPED and the preposition read. The preposition assertions
+    /// are the half that keeps the fix honest.
+    /// </summary>
+    [Theory]
+    [InlineData("5 \u00b5in", "5 microinches")]
+    [InlineData("1 \u00b5in", "1 microinch")]
+    [InlineData("5 \u03bcin", "5 microinches")]
+    [InlineData("5 in the morning", "5 in the morning")]
+    [InlineData("6 in x 4 in", "6 in x 4 in")]
+    public void AMicroInchReadsAndThePrepositionIsUntouched(string text, string expected)
+        => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
+
+    /// <summary>
+    /// ⚠ THE REPORT ARRIVED BARE — a surface-finish spec column, the same shape that made the slashed
+    /// rates need their own arm. A micro sign glued to letters can never be a word.
+    /// </summary>
+    [Theory]
+    [InlineData("\u00b5in", "microinch")]
+    [InlineData("Finish: \u00b5in", "Finish: microinch")]
+    [InlineData("\u00b5g", "microgram")]
+    [InlineData("\u00b5M", "micromolar")]
+    [InlineData("\u00b5m", "micro meter")]
+    public void AMicroPrefixedUnitStandingAloneReads(string text, string expected)
+        => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
+
+    /// <summary>
+    /// ⚠ A LONE MU IS STILL THE GREEK LETTER. The bare arm consults the KEY SET rather than matching
+    /// `µ\w+`, so the letter standing on its own is not claimed.
+    /// </summary>
+    [Fact]
+    public void ALoneMuIsNotAUnit()
+    {
+        Assert.Equal("\u00b5 is a Greek letter", Normalize.NormalizeEnglish("\u00b5 is a Greek letter"));
+        Assert.Equal("micrometer", Normalize.NormalizeEnglish("micrometer"));
     }
 
     /// <summary>A bare mu is still the Greek letter — the gate is the preceding number.</summary>

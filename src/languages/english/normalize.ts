@@ -95,6 +95,16 @@ const UNITS: Record<string, [string, string]> = {
     "\u00b5mol": ["micromole", "micromoles"], "\u03bcmol": ["micromole", "micromoles"],
     "\u00b5m": ["micro meter", "micro meters"], "\u03bcm": ["micro meter", "micro meters"],
     "\u00b5l": ["micro liter", "micro liters"], "\u03bcl": ["micro liter", "micro liters"],
+    // ⚠ ⟨µin⟩ IS A WHOLE KEY BECAUSE ⟨in⟩ CANNOT BE ONE. The bare inch is the English PREPOSITION,
+    // so declaring it would read `5 in the morning` as "5 inches the morning" — and the exponent guard
+    // below records the same refusal from the other side. The prefixed form has no such collision, which
+    // is the whole reason this micro block is a list of WHOLE keys rather than a prefix plus a table.
+    // Reported: a surface finish in micro-inches read as a bare preposition (`5 µin` → "five in"), with
+    // the sign DROPPED — the wrong-unit class this file ranks worst, and silent in every gate.
+    // ⚠ ONE WORD, UNLIKE ⟨µm⟩ AND ⟨µl⟩ ABOVE, and measured rather than assumed: `microinch` reads
+    // mˈaᵢkɹoᵑˌɪnt͡ʃ — one token, one primary stress, which is the better prosody the module header
+    // prefers. Those two are split only because their single-word spellings read WRONG.
+    "\u00b5in": ["microinch", "microinches"], "\u03bcin": ["microinch", "microinches"],
     // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS, not sloppy spellings of the two above — µM is
     // MICROMOLAR and µS is MICROSIEMENS. This is the case rule the ⟨W⟩ comment below names, and it has
     // teeth here: `resolveUnitSymbol` consults the declared table with the EXACT written form before it
@@ -350,6 +360,24 @@ const RELATIONAL: ReadonlyArray<readonly [string, string]> = [
  *  these signs is a regex metacharacter, so the interpolation that built them per call bought nothing. */
 const RELATIONAL_RE: readonly RegExp[] = RELATIONAL.map(
     ([sign]) => new RegExp(`[ \\t]*${sign}[ \\t]*`, "gu"),
+);
+
+/**
+ * THE MICRO-PREFIXED unit keys, for the bare arm at 6a4 — a unit standing with NO number in front of it.
+ *
+ * ⚠ SAME ARGUMENT AS THE SLASHED KEYS BELOW, AND THE SAME REPORTED SHAPE. `BARE_RATE_RE` exists because
+ * a rate arrived as a COLUMN HEADER (`BTU/hr/sf`), where a slash inside a token can never be a word; a
+ * MICRO SIGN glued to letters can never be one either. `µin` was reported in exactly that bare form — a
+ * surface-finish spec column — and read as the preposition *in*, with the sign dropped.
+ *
+ * ⚠ DERIVED FROM `UNITS`, not a second list, so a new micro unit needs no second declaration.
+ * ⚠ AND IT REQUIRES THE LETTERS: a LONE mu is the Greek letter and must stay one ("μ is a Greek
+ * letter"), which is why the key set is consulted rather than a `µ\w+` pattern.
+ */
+const BARE_MICRO_RE = new RegExp(
+    `(?<![\\p{L}\\d])(${Object.keys(UNITS).filter((k) => /^[\u00b5\u03bc]./u.test(k))
+        .sort((a, b) => b.length - a.length).join("|")})(?![\\p{L}\\d])`,
+    "gu",  // ⚠ NO `i`: ⟨µM⟩ is micromolar and ⟨µm⟩ a micro metre — see the UNITS block.
 );
 
 /** The SLASHED unit keys only (`km/h`, `m/s`, `btu/hr/sf`), for the bare-rate arm — see step 6a2. */
@@ -1203,6 +1231,14 @@ export function normalizeEnglish(input: string): string {
     //      ⚠ THE LOOKAROUNDS ARE WHAT KEEP URLS OUT: `example.com/s/page` contains `m/s`, and without the
     //      letter lookbehind it reads as "meters per second" mid-path.
     s = rewrite(s, BARE_RATE_RE, (m0: string) => {
+        const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, m0);
+        return forms === undefined ? m0 : forms[0];
+    });
+
+    // 6a4) A MICRO-PREFIXED UNIT STANDING ALONE, with no number in front of it — the shape `µin` was
+    //      reported in (a surface-finish spec column). Ordered after the numbered arm so count
+    //      agreement survives; the lookarounds keep it out of words. See BARE_MICRO_RE.
+    s = rewrite(s, BARE_MICRO_RE, (m0: string) => {
         const forms = resolveUnitSymbol(UNITS, UNITS_FOLDED, m0);
         return forms === undefined ? m0 : forms[0];
     });

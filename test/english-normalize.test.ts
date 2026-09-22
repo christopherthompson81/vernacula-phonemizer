@@ -568,6 +568,34 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
     // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
     // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
     // the ⟨µg⟩ entry in UNITS was added to fix.
+    // ⚠ ⟨µin⟩ IS A WHOLE KEY BECAUSE ⟨in⟩ CANNOT BE ONE — the bare inch is the English PREPOSITION.
+    // Reported as `µin` → "in", the sign DROPPED and the preposition read: the wrong-unit class this
+    // file ranks worst. The preposition assertions are the half that keeps the fix honest.
+    test("a micro inch reads, and the bare preposition is untouched", () => {
+        expect(normalizeEnglish("5 µin")).toBe("5 microinches");
+        expect(normalizeEnglish("1 µin")).toBe("1 microinch");
+        expect(normalizeEnglish("5 μin")).toBe("5 microinches");   // the Greek mu spelling too
+        expect(normalizeEnglish("5 in the morning")).toBe("5 in the morning");
+        expect(normalizeEnglish("6 in x 4 in")).toBe("6 in x 4 in");
+    });
+
+    // ⚠ THE REPORT ARRIVED BARE — a surface-finish spec column, the same shape that made the slashed
+    // rates need their own arm. A micro sign glued to letters can never be a word.
+    test("a micro-prefixed unit standing alone reads", () => {
+        expect(normalizeEnglish("µin")).toBe("microinch");
+        expect(normalizeEnglish("Finish: µin")).toBe("Finish: microinch");
+        expect(normalizeEnglish("µg")).toBe("microgram");
+        expect(normalizeEnglish("µM")).toBe("micromolar");        // case survives: not micro metre
+        expect(normalizeEnglish("µm")).toBe("micro meter");
+    });
+
+    // ⚠ A LONE MU IS STILL THE GREEK LETTER. The bare arm consults the KEY SET rather than matching
+    // `µ\w+`, so the letter standing on its own is not claimed.
+    test("a lone mu is not a unit", () => {
+        expect(normalizeEnglish("µ is a Greek letter")).toBe("µ is a Greek letter");
+        expect(normalizeEnglish("micrometer")).toBe("micrometer");
+    });
+
     test("a micro- unit with an ASCII exponent still reads, sign and all", () => {
         expect(normalizeEnglish("5 \u00b5g2")).toBe("5 square micrograms");
         expect(normalizeEnglish("5 \u00b5m2")).not.toContain("\u00b5");

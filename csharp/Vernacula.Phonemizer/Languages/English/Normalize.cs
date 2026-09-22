@@ -52,6 +52,11 @@ public static class Normalize
         ["\u00b5mol"] = new[] { "micromole", "micromoles" }, ["\u03bcmol"] = new[] { "micromole", "micromoles" },
         ["\u00b5m"] = new[] { "micro meter", "micro meters" }, ["\u03bcm"] = new[] { "micro meter", "micro meters" },
         ["\u00b5l"] = new[] { "micro liter", "micro liters" }, ["\u03bcl"] = new[] { "micro liter", "micro liters" },
+        // ⚠ ⟨µin⟩ IS A WHOLE KEY BECAUSE ⟨in⟩ CANNOT BE ONE: the bare inch is the English PREPOSITION,
+        // so declaring it would read `5 in the morning` as "5 inches the morning". ONE word, unlike
+        // ⟨µm⟩/⟨µl⟩ above — measured, not assumed: `microinch` reads as one token with one primary
+        // stress. See the TypeScript.
+        ["\u00b5in"] = new[] { "microinch", "microinches" }, ["\u03bcin"] = new[] { "microinch", "microinches" },
         // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS — µM is MICROMOLAR, µS is MICROSIEMENS, not sloppy
         // spellings of µm/µs. ResolveUnitSymbol consults the declared table with the EXACT written form
         // before folding, so declaring them is what stops `25 µM` folding to `µm` and reading "micro
@@ -192,6 +197,22 @@ public static class Normalize
 
     /** The SLASHED unit keys only, for the bare-rate arm — a slash inside a token can never be a word,
      *  so these need no number in front of them. See the TS for the URL guard. */
+    /**
+     * THE MICRO-PREFIXED unit keys, for the bare arm — a unit standing with NO number in front of it.
+     *
+     * ⚠ SAME ARGUMENT AS THE SLASHED KEYS BELOW, AND THE SAME REPORTED SHAPE. `BARE_RATE_RE` exists
+     * because a rate arrived as a COLUMN HEADER, where a slash inside a token can never be a word; a
+     * MICRO SIGN glued to letters can never be one either. `µin` was reported in exactly that bare
+     * form and read as the preposition *in*, with the sign dropped. See the TypeScript.
+     *
+     * ⚠ AND IT REQUIRES THE LETTERS: a LONE mu is the Greek letter and must stay one.
+     */
+    private static readonly JsRe BARE_MICRO_RE = JsRegex.Compile(
+        "(?<![\\p{L}\\d])(" + string.Join("|", UNITS.Keys
+            .Where(k => k.Length > 1 && (k[0] == '\u00b5' || k[0] == '\u03bc'))
+            .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d])",
+        "gu");  // ⚠ NO `i`: ⟨µM⟩ is micromolar and ⟨µm⟩ a micro metre.
+
     private static readonly JsRe BARE_RATE_RE = JsRegex.Compile(
         "(?<![\\p{L}\\d])(" + string.Join("|", UNITS.Keys.Where(k => k.Contains('/'))
             .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d])",
@@ -878,6 +899,14 @@ public static class Normalize
         // A slashed rate standing alone, with no number. ⚠ Ordered AFTER the arm above so count
         // agreement survives; the lookarounds keep it out of URLs. See the TS.
         s = Rewrite(s, BARE_RATE_RE, m =>
+        {
+            var forms = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, m.Value);
+            return forms is null ? m.Value : forms[0];
+        });
+
+        // A micro-prefixed unit standing alone, with no number — the shape `µin` was reported in.
+        // Ordered after the numbered arm so count agreement survives. See BARE_MICRO_RE.
+        s = Rewrite(s, BARE_MICRO_RE, m =>
         {
             var forms = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, m.Value);
             return forms is null ? m.Value : forms[0];
