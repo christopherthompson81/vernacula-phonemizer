@@ -12,6 +12,11 @@
  * check ranges over. A cross-engine sweep of 64,233 generated `A#A #A#` codes and unit idioms was
  * byte-identical after the fix and diverged on 23,044 rows (35.9%) with the guards reverted, which is
  * the measurement that says these assertions are load-bearing rather than decorative.
+ *
+ * ⚠ THE POSITIVE CONTROLS BELOW ARE HALF THE POINT OF THE FILE. Every failure the TypeScript guard's
+ * comments record came from a looser spelling that refused a REAL unit — ⟨mm⟩ in `A4 210mm`, ⟨m⟩ in
+ * `2x3m`, ⟨ft⟩ in `5ft11`. A mirror that kept only the postal-code cases would go green for a C# guard
+ * narrowed until it ate `a 5L jug`, which is the same class of defect in the other direction.
  */
 using Xunit;
 
@@ -86,6 +91,30 @@ public class EnglishCodeSlotUnitTests
     [InlineData("he is 5ft11")]
     [InlineData("6ft0 tall")]
     public void FeetAndInchesKeepsItsUnit(string text) => Assert.Contains("feet", Norm(text));
+
+    /// <summary>
+    /// …and a one-letter unit still reads wherever it is NOT in a code — glued to its number included.
+    /// </summary>
+    [Theory]
+    [InlineData("100W bulb", "100 watts bulb")]
+    [InlineData("a 5L jug", "a 5 liters jug")]
+    [InlineData("12km run", "12 kilometers run")]
+    [InlineData("500ml bottle", "500 milliliters bottle")]
+    public void AGluedOneLetterUnitStillReads(string text, string expected)
+        => Assert.Equal(expected, Norm(text));
+
+    /// <summary>
+    /// …and none of it costs the real units, including the ASCII exponent on the lengths that take one.
+    /// </summary>
+    [Theory]
+    [InlineData("5 L of water", "5 liters of water")]
+    [InlineData("a 100 W bulb", "a 100 watts bulb")]
+    [InlineData("3 m2 of floor", "3 square meters of floor")]
+    [InlineData("19,500 km2", "19,500 square kilometers")]
+    [InlineData("19,500 km\u00b2", "19,500 square kilometers")]
+    [InlineData("1 L", "1 liter")]
+    public void TheUnitsThemselvesStillRead(string text, string expected)
+        => Assert.Equal(expected, Norm(text));
 
     /// <summary>
     /// ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it

@@ -1468,8 +1468,8 @@ T2G 0L2   -> … zˈɪɹoᶷ skwˈɛɹ lˈiːt̬ɚz         zero SQUARE LITRES
 ⚠ **AND THE PARITY GATE SAYS 189 BYTE-IDENTICAL WHILE THIS IS TRUE.** It is golden-driven, and no
 golden row contains a postal code — so the divergence is not "missed by a weak check", it is outside
 what the check ranges over. This is the same shape as the memo *parity covers the IPA string, not the
-trace*: the headline answers a narrower question than it sounds like. A fix has to add the row, not
-just the guard.
+trace*: the headline answers a narrower question than it sounds like. A fix has to add cover for the
+class, not just the guard — see the review note below for why that cover is NOT a golden row.
 
 **Found while probing, not reported — ⟨A⟩ is the only letter that fails in a code slot.** Sweeping all
 26 in `1X 1` and `K1X`, twenty-five give their letter name and one does not:
@@ -1486,7 +1486,7 @@ it as the article. `(A) foo` reads "ə foo" too, so this is not confined to lowe
 **Implication for the next step.** These are four separate defects of three different sizes, and they
 do not belong in one change:
 
-- the C# guard port is bounded and confirmed, and additionally needs a golden row so the gate can see it;
+- the C# guard port is bounded and confirmed, and additionally needs cover so the gate can see the class;
 - `TSO` is one `acronymLetters` entry — `tso` is recorded in CMUdict as `T S OW1` (General Tso), so
   `isRecorded` hands it to the dictionary; the capitalised form is never the name;
 - the list-marker class is a rule plus a pause, and is wider than the report (uppercase and Roman too);
@@ -1523,3 +1523,28 @@ The legitimate readings the guards must not touch survive unchanged in both engi
 
 **Gates.** 6170 TS · 6726 C# · goldens 189/36495 fresh, 0 stale · parity 189 byte-identical, 0 differ ·
 trace-cold 189 of 189, no poisons.
+
+**Review of Run 24 — a comment claiming a gate that was not there.**
+
+⚠ **The fix's own comment said "`csharp/goldens/en.tsv` now carries a code row". It did not.** No golden
+was touched by the branch, and both Run 23 and Run 24 report the same `189/36495`. This is the memo *a
+comment claiming an invariant* — check whether anything establishes it — written during this very
+session and then walked into again, in the commit that exists because a different unchecked claim held
+for thirteen merges.
+
+⚠ **AND ADDING THE ROW WOULD HAVE BEEN THE WRONG FIX, which is the more useful half.** The goldens are
+GENERATED. A hand-added row passes `check:goldens`, which only asks whether the recorded IPA is still
+what the engine says, and is then silently dropped the next time `gen_parity_goldens.mts` runs for `en`
+— the write-once drift that generator's own comments warn about at length. It would leave a gate that
+looks present and is not, which is strictly worse than the honest absence. The real asymmetry was
+narrower than "no golden row" anyway: the TypeScript half of this block has had a test since the guards
+landed, and the C# mirror was never written. The cover is `EnglishCodeSlotUnitTests`.
+
+⚠ **The mirror was also missing its positive controls.** It carried the postal-code refusals and dropped
+"a glued one-letter unit still reads" (`100W bulb`, `a 5L jug`, `12km run`, `500ml bottle`) and "the
+units themselves still read". Those are the cases that catch an OVER-BROAD guard, and every failure the
+TypeScript comments record is exactly that: a looser spelling that refused a real unit — ⟨mm⟩ in
+`A4 210mm`, ⟨m⟩ in `2x3m`, ⟨ft⟩ in `5ft11`. A mirror holding only the refusals would go green for a C#
+guard narrowed until it ate `a 5L jug`. Restored: 18 cases → 28.
+
+Also corrected: the comment cited `L4W 5N6` where the TypeScript names `L4W 5M1`.

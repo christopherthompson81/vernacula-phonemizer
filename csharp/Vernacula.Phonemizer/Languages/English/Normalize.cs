@@ -152,10 +152,18 @@ public static class Normalize
      * symbols resolve case-SENSITIVELY (#763) — uppercase ⟨G⟩/⟨T⟩/⟨M⟩ are not gram/ton/metre.
      *
      * ⚠ AND THEY WERE MISSING HERE WHILE THE PARITY GATE READ 189 BYTE-IDENTICAL (#1421). The gate is
-     * golden-driven and no golden row carried a postal code, so this was not a check that was too weak
-     * — it was outside what the check ranged over. `csharp/goldens/en.tsv` now carries a code row.
-     * Measured before the fix: `V6L 2T5` read "vee six LITRES two tee five" and `L4W 5N6` "el four
-     * WATTS five en six", the two spellings the TypeScript comment names verbatim as already fixed.
+     * golden-driven and no golden row carries a postal code, so this was not a check that was too weak
+     * — it is outside what the check ranges over. Measured before the fix: `V6L 2T5` read "vee six
+     * LITRES two tee five" and `L4W 5M1` "el four WATTS five em one", the two spellings the TypeScript
+     * comment names verbatim as already fixed.
+     *
+     * ⚠ THE COVER IS `EnglishCodeSlotUnitTests`, NOT A GOLDEN ROW, and the difference is worth stating
+     * because the obvious fix is the wrong one. The goldens are GENERATED (`tools/gen_parity_goldens.mts`);
+     * a hand-added row survives `check:goldens`, which only asks whether the recorded IPA is still what
+     * the engine says, and is then silently dropped the next time the generator runs for `en`. That is
+     * the write-once drift the generator's own comments warn about, and it would leave a gate that looks
+     * present and is not. The real asymmetry was narrower anyway: the TypeScript half of this block has
+     * had a test since the guards landed and the C# mirror was simply never written.
      */
     private static readonly JsRe UNIT_RE = JsRegex.Compile(
         NOT_VERSION + "(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?"
