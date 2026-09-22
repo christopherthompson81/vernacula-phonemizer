@@ -155,14 +155,36 @@ public static class HanDictIpa
 
     private static readonly ConditionalWeakTable<object, object> MAX_WORD_CACHE = new();
 
-    private static int MaxWordFor(IReadOnlyDictionary<string, string> dict)
-    {
-        if (MAX_WORD_CACHE.TryGetValue(dict, out var cached)) return (int)cached;
-        var m = 0;
-        foreach (var k in dict.Keys) m = Math.Max(m, Js.CodePoints(k).Count());
-        MAX_WORD_CACHE.Add(dict, m);
-        return m;
-    }
+    /**
+     * ⚠ `GetValue(key, factory)`, NEVER `TryGetValue` THEN `Add` — and the difference THROWS from a
+     * shipped `Phonemize()` rather than merely wasting work (#1442). `ConditionalWeakTable.Add` is
+     * documented to throw on a duplicate key, so a check-then-act memo loses the race: two threads both
+     * miss the lookup, both compute, and the second `Add` raises
+     * `ArgumentException: An item with the same key has already been added`.
+     *
+     * ⚠ IT IS REACHABLE ON THE FIRST CONCURRENT CALL, which is the production shape rather than an
+     * exotic one — a cold memo means EVERY thread misses at once. Measured before the fix: 32 threads
+     * on a fresh engine, 16 threw on the first attempt.
+     *
+     * ⚠ AND IT IS PORT-INTRODUCED. The TypeScript memoises with a `WeakMap` and JS is single-threaded,
+     * so the hazard does not exist there; the note recording that correspondence said nothing about
+     * thread-safety, which is exactly where this class of bug lands. `Hakka/Pfs.cs`'s `INDEX` already
+     * uses the `GetValue` form — this was the only site that did not.
+     *
+     * The factory may run more than once under contention, which is harmless: the value is a pure
+     * function of the dictionary and only one result is published.
+     */
+    // ⚠ `internal`, SO THE RACE CAN BE TESTED AT ALL. Through the public path the memo can only be cold
+    // ONCE per process, so a test there passes trivially whenever another test ran first — it would
+    // assert nothing. A FRESH dictionary per iteration is what makes a cold memo repeatable.
+    internal static int MaxWordFor(IReadOnlyDictionary<string, string> dict) =>
+        (int)MAX_WORD_CACHE.GetValue(dict, key =>
+        {
+            var m = 0;
+            foreach (var k in ((IReadOnlyDictionary<string, string>)key).Keys)
+                m = Math.Max(m, Js.CodePoints(k).Count());
+            return m;
+        });
 
     private sealed class Engine : ILanguage
     {
