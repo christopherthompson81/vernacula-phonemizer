@@ -2109,3 +2109,64 @@ Three more, all real:
 
 **Gates.** 6275 TS · 6880 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex-diff 144,814 probes identical.
+
+## Run 32 — 2026-09-22 15:20 — `TSO`, and the sweep behind it
+
+**Report.** `TSO` is pronounced as a word; it should be letter-spelled.
+
+**Cause.** `data/languages/english/g2p-dict.tsv` carries `tso  T S OW1` — General Tso. The initialism
+pass's `isRecorded` arm therefore fires and hands the token to the dictionary, which is the documented
+architecture: *the dictionary cannot express the case-keyed pair.* That is what `acronymLetters` is for,
+and the pass already consults it BEFORE `isRecorded`.
+
+### The sweep, and why gold could not arbitrate it
+
+espeak-ng's `dictsource/en_list` carries a curated `$abbrev` set — 155 entries of 2–6 letters. Each
+candidate below fails **two** independent tests: espeak names it, AND the engine's own reading is an
+invented word rather than a letter sequence. **50 of 155** fail that way.
+
+⚠ **MISAKI'S GOLD CANNOT ARBITRATE THIS CLASS**, which is worth recording because it is the usual
+referee here. It is keyed LOWERCASE, so it answers about the word and says nothing about the all-caps
+form: it gives `ado` ədˈu, `la` lˌɑ, `os` ˈɑs — the readings this list exists to *leave alone*. Asking
+it would have looked like agreement with the defect. espeak is usable precisely because it flags case:
+`ado`, `eg`, `gi` and `la` are marked `$allcaps` there, which is the same gate `acronymLetters` applies.
+Two sources reaching the same gate independently is the strongest evidence in this run.
+
+⚠ **FOUR ESPEAK ROWS ARE DELIBERATELY ABSENT**, because the reading here is ALREADY right — the sweep
+finds them only because it compares against the spelled form:
+
+```
+AAA   tɹˌɪpəlˈeᶦ        "triple-A", which is what people say
+ESPN  ˌiːʲˌɛspˌiːʲˈɛn   a FUSED letter reading — one token, one stress, which the module prefers
+LAPD  ˌɛlˌeᶦpʰˌiːdˈiː   likewise
+DR    dɹˈaᶦv            `dr` has its own considered rule in normalize.ts, which runs BEFORE this pass
+```
+
+`MYA` is out too: whether it is "M-Y-A" or "mya" is genuinely contested, and a wrong pick is worse.
+
+### ⚠ The obvious test helper is contaminated by #1423
+
+Asserting against `phonemize("I O S")` gives a WRONG EXPECTATION, because bare ⟨A⟩ reads as the
+indefinite article and bare ⟨I⟩ loses its stress. That is the same trap that made the first measurement
+of this class report **91** failures instead of 50 — and it was walked into a second time while writing
+the test for it. The helper applies `letterNameExceptions` first, as the pass itself does.
+
+### ⚠ The change reached two OTHER languages, which is the useful surprise
+
+`hmn` and `si` goldens went stale — English did not. A Latin run inside a non-Latin script is delegated
+to English, so this list reaches the whole fleet. Both rows are improvements, and both are exactly the
+kind of text the sweep was aimed at:
+
+```
+hmn   "… IPA: [kaŋnam sɯtʰail] …"        ˈaᶦpə  →  ˈaᶦ pʰˈiː ˈeᶦ     a phonetic-transcription label
+si    "… Garden City, NY: Doubleday …"   nˈaᶦ   →  ˈɛn wˈaᶦ          New York
+```
+
+### ⚠ A shouting document still wins, and that is the documented trade
+
+The pass returns early when the text has no lowercase at all, BEFORE this list is consulted, because
+capitals carry no signal there. So `TSO NOTICE BOARD LIST` still reads *tsˈoᶷ*. Pinned as a test so it
+reads as the trade and not as a gap.
+
+**Gates.** 6304 TS · 6912 C# · goldens 189/36495 fresh (2 regenerated) · parity 189 byte-identical ·
+trace-cold 189 of 189, no poisons.

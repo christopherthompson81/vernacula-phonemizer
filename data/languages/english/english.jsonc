@@ -653,6 +653,37 @@
         // first field as the invented word [jˈiːʲiʲi]. DD needs no entry — it is unrecorded and
         // unpronounceable, so the OOV rule already spells it.
         "yyyy",
+
+        // ⟨TSO⟩ AND THE ESPEAK SWEEP (#1422). Reported: `TSO` read as a word. CMUdict records `tso`
+        // [T S OW1] — General Tso — so `isRecorded` hands it to the dictionary, which is the documented
+        // architecture: the dictionary cannot express a case-keyed pair. The capitalised form is never
+        // the dish, and this list is case-gated, so the lowercase entry is untouched.
+        "tso",
+        // ⚠ THE REST CAME FROM A SWEEP, NOT FROM GUESSING, and every row has TWO signals behind it.
+        // espeak-ng's `dictsource/en_list` carries a curated `$abbrev` set — 155 entries of 2–6 letters
+        // — and each row below ALSO fails a measurement here: the engine's reading is an invented word
+        // rather than a letter sequence. Built by comparing the all-caps reading against what the pass
+        // would emit if it spelled the token out.
+        //
+        // ⚠ MISAKI'S GOLD CANNOT ARBITRATE THIS CLASS, which is worth stating because it is the usual
+        // referee. It is keyed LOWERCASE, so it answers about the word and says nothing about the
+        // all-caps form: it gives `ado` ədˈu, `la` lˌɑ, `os` ˈɑs — the readings this list exists to
+        // leave alone. espeak is usable precisely because it flags case: `ado`, `eg`, `gi` and `la` are
+        // marked `$allcaps` there, which is the same gate as this list.
+        //
+        // ⚠ AND FOUR ESPEAK ROWS ARE DELIBERATELY ABSENT, because the reading here is ALREADY right:
+        //     AAA   tɹˌɪpəlˈeᶦ        "triple-A", which is what people say
+        //     ESPN  ˌiːʲˌɛspˌiːʲˈɛn    a FUSED letter reading, one token, one stress — the module prefers it
+        //     LAPD  ˌɛlˌeᶦpʰˌiːdˈiː     likewise
+        //     DR    dɹˈaᶦv              `dr` has its own considered rule in normalize.ts (drive vs
+        //                                doctor), which runs BEFORE this pass and already owns it
+        // `MYA` is absent too: whether it is said "M-Y-A" or "mya" is genuinely contested, and a wrong
+        // pick is worse than the current one.
+        "acsi", "ado", "ae", "aes", "aj", "aph", "byod", "ces", "cet", "diy", "doj",
+        "eff", "efi", "eg", "ept", "esrb", "est", "evga", "exe", "gi",
+        "iis", "iiuc", "imo", "inlb", "ios", "ipa", "irc", "isp",
+        "la", "ny", "nyse", "nyt", "oic", "os", "otoh", "psu", "riaa", "sae", "sla",
+        "ueb", "uefi", "uia", "uuid", "wuxga", "xy",
     ],
 
     "unstressedWords": [
