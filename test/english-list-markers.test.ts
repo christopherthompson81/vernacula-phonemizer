@@ -21,7 +21,8 @@ describe("an enumerated list lead-in", () => {
         ["(a) the first item", "ay, the first item"],
         ["(b) second", "b, second"],
         ["a) foo", "ay, foo"],
-        ["(A) foo", "ay, foo"],
+        ["(A) foo", "AY, foo"],       // ⚠ the substitution echoes the case it replaced
+        ["(a) foo", "ay, foo"],
         ["  (c) indented", "  c, indented"],
         ["(1) one", "1, one"],
     ])("%s", (text, expected) => expect(normalizeEnglish(text)).toBe(expected));
@@ -36,7 +37,8 @@ describe("an enumerated list lead-in", () => {
     test("a reference mid-sentence gets the name and no pause", () => {
         expect(normalizeEnglish("See (a) and (b).")).toBe("See (ay) and (b).");
         expect(phonemize("See (a) and (b).", "en")).toContain("ˈeᶦ");
-        expect(normalizeEnglish("P(A) = 1")).toBe("P(ay) equals 1");
+        expect(normalizeEnglish("P(A) = 1")).toBe("P(AY) equals 1");
+        expect(normalizeEnglish("P(a) = 1")).toBe("P(ay) equals 1");
     });
 
     /**
@@ -74,19 +76,48 @@ describe("an enumerated list lead-in", () => {
     });
 
     /**
-     * ⚠ ROMAN MARKERS ARE DELIBERATELY NOT CLAIMED, and this is pinned so it reads as a decision.
-     * `(ii)` is wrong today, but the fix is not obviously "two": a letter series reaching `(i)` would
-     * then read "one" while `(ii)` read "two", and a roman series whose `(i)` read "eye" is no better.
-     * Either uniform choice is defensible; the MIXED one is worse than the defect.
+     * ⚠ THE CASE MUST SURVIVE, AND THIS IS THE FINDING THAT NEARLY SHIPPED. `LETTER_NAME(l.toLowerCase())`
+     * is NOT a no-op for the other 24 letters — it returns the LOWERCASED input — and the initialism
+     * pass decides SHOUTING with `!/\p{Ll}/.test(text)`, so one injected lowercase flips the verdict for
+     * the WHOLE document. Measured: `SEE (B) OF US ARMY` became `SEE (b) OF US ARMY` and `US` was then
+     * spelled out; `(X) IT AND US` read "eye-tee … you-ess". It is the identical hazard the `re-` rule
+     * three steps above defends against by echoing the matched case.
      */
-    test("a roman marker is left as it was", () => {
-        expect(normalizeEnglish("(ii) two")).toBe("(ii) two");
-        expect(normalizeEnglish("(iv) four")).toBe("(iv) four");
+    test("an all-caps document keeps its case", () => {
+        expect(normalizeEnglish("SEE (B) OF US ARMY")).toBe("SEE (B) OF US ARMY");
+        expect(phonemize("SEE (B) OF US ARMY", "en")).toContain("\u02c8\u028cs");        // `US` the word
+        expect(normalizeEnglish("(X) IT AND US")).toBe("X, IT AND US");
+        expect(normalizeEnglish("(B) THE SECOND")).toBe("B, THE SECOND");
     });
 
-    // ⚠ A SINGLE ⟨i⟩ IS CLAIMED as a letter, because it is a one-character marker like any other —
-    // the roman reading is what is declined, not the letter.
-    test("a single letter marker is claimed even when it looks roman", () => {
-        expect(normalizeEnglish("(i) one")).toBe("eye, one");
+    // ⚠ AND THE SUBSTITUTION ECHOES THE CASE IT REPLACED, so ⟨A⟩ does not lowercase the document either.
+    test("the exception echoes the case it replaced", () => {
+        expect(normalizeEnglish("(A) FOO BAR")).toBe("AY, FOO BAR");
+        expect(normalizeEnglish("(a) foo bar")).toBe("ay, foo bar");
+        expect(phonemize("(A) FOO BAR", "en")).toBe(phonemize("(a) foo bar", "en"));
+    });
+
+    // ⚠ THE SQUARE BRACKET IS A LIST STYLE TOO. The close class accepted `]` while the open class did
+    // not, so `[a] foo` got the name but no pause and `[1] foo` nothing at all.
+    test.each([["[a] foo", "ay, foo"], ["[1] foo", "1, foo"], ["[b] bar", "b, bar"]])(
+        "%s", (text, expected) => expect(normalizeEnglish(text)).toBe(expected));
+
+    /**
+     * ⚠ A SINGLE CHARACTER IS A LETTER, INCLUDING ⟨i⟩, ⟨v⟩, ⟨x⟩ AND ⟨c⟩ — half the alphabet is also
+     * a roman numeral, so refusing the roman-shaped ones would cost `(c)`, the third item of every
+     * lettered list. `(i)` already read ˈaᶦ, which IS the letter name, so claiming it changes the
+     * prosody and not the phones.
+     *
+     * ⚠ A MULTI-CHARACTER ROMAN MARKER IS LEFT ALONE, and the SEAM that leaves is pinned here on a
+     * PAIR rather than on `(i)` alone — a test on one member cannot see a seam between two. An earlier
+     * draft of the comment claimed roman markers were "deliberately not claimed", which the code
+     * contradicted for the single-character case.
+     */
+    test("the roman seam is where it is said to be", () => {
+        expect(normalizeEnglish("(i) one")).toBe("eye, one");        // claimed: a single character
+        expect(normalizeEnglish("(ii) two")).toBe("(ii) two");       // left alone: multi-character
+        expect(normalizeEnglish("See (i) and (ii) below.")).toBe("See (eye) and (ii) below.");
+        // ⚠ and the PHONES of the single-character case are unchanged — only the prosody moves
+        expect(phonemize("See (i) and (ii) below.", "en")).toContain("\u02c8a\u1da6");
     });
 });

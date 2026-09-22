@@ -2239,5 +2239,51 @@ reaches `(i)` would then read "one" while `(ii)` read "two", and a roman series 
 is no better. Either uniform choice is defensible and the **mixed** one is worse than the defect, so it
 is left for a decision rather than guessed at. Pinned as a test so it reads that way.
 
-**Gates.** 6325 TS · 6934 C# · goldens 189/36495 fresh, 0 stale · parity 189 byte-identical · trace-cold
+**Gates.** 6330 TS · 6938 C# · goldens 189/36495 fresh, 0 stale · parity 189 byte-identical · trace-cold
 189 of 189, no poisons · regex-diff 144,930 probes identical.
+
+**Review of Run 33 — the rule destroyed case, which is the hazard the file already defends against.**
+
+⚠ **`LETTER_NAME(l.toLowerCase())` IS NOT A NO-OP FOR THE OTHER 24 LETTERS.** It returns the LOWERCASED
+input, so the rule silently lowercased a capital — and the initialism pass decides whether a document is
+SHOUTING with `!/\p{Ll}/.test(text)`, so ONE injected lowercase flips the verdict for the whole
+document:
+
+```
+SEE (B) OF US ARMY   →  SEE (b) OF US ARMY   →  `US` SPELLED OUT rather than read as the word
+(X) IT AND US        →  x, IT AND US         →  "eye-tee … you-ess"
+```
+
+That is the **identical hazard the `re-` prefix rule three steps above documents at length** and defends
+against by echoing the matched case (Run 28). Written, measured, documented — and then walked into
+again, in the same file, two runs later. Both rules now echo the case, and the ⟨a⟩/⟨i⟩ substitution
+echoes it too (`(A)` → `AY`), so an all-caps document stays exactly as shouty as it was.
+
+⚠ **AND MY OWN COMMENT CLAIMED A CLEANLINESS THE CODE DID NOT HAVE.** It said roman markers were
+"deliberately not claimed" while the code claimed every single-character one, including ⟨i⟩ — so
+`See (i) and (ii) below.` produced exactly the MIXED reading the comment called worse than the defect.
+The tests pinned `(i) one` in isolation and never a `(i)`/`(ii)` PAIR, and **a test on one member cannot
+see a seam between two**.
+
+Resolved by making the comment true rather than contorting the rule: a single character is treated as a
+LETTER, including ⟨i⟩⟨v⟩⟨x⟩⟨c⟩, because half the alphabet is also a roman numeral and refusing the
+roman-shaped ones would cost `(c)` — the third item of every lettered list — to protect a reading
+nothing produces anyway (`(i)` already read ˈaᶦ, which IS the letter name). The seam that remains, a
+pause on `(i)` and none on `(ii)`, is now stated and pinned on the pair.
+
+Two more: the `]` branch of `LIST_MARKER`'s close class was unreachable because the open class was only
+`\(?`, so `[a] foo` got the name but no pause and `[1] foo` nothing at all; and the C# steps ran BEFORE
+the formula rule where the TypeScript runs them after — benign today only because `FORMULA_READING` has
+no single-letter key, and a divergence waiting for one. Both fixed.
+
+### Found in passing, filed not fixed (#1442)
+
+A full C# run failed once in three on `GroupingSpaceTests(lang: "gan")` with
+`ConditionalWeakTable.Add: An item with the same key has already been added`. It is not a test defect —
+the throw is from `HanDictIpa.MaxWordFor`, a check-then-act memo reached from shipped `Phonemize()`.
+⚠ **It is PORT-INTRODUCED**: the TypeScript uses a `WeakMap` and JS is single-threaded, so the hazard
+exists only in C#, and the comment recording the correspondence does not mention thread-safety. Shared
+core, so every Han-dict language (gan, hak, jin, xiang) can throw under concurrent use.
+
+**Gates.** 6330 TS · 6938 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,930 probes identical.

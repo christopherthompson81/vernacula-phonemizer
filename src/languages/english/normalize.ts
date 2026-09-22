@@ -954,17 +954,26 @@ export function normalizeEnglish(input: string): string {
 
     // 0b7) AN ENUMERATED LIST LEAD-IN — `(a) the first item` → "ay, the first item". See LIST_MARKER:
     //      the letter name AND a pause, both of which the report asked for.
-    //      ⚠ ROMAN MARKERS ARE DELIBERATELY NOT CLAIMED. `(ii)` reads ˈɪɪ today, which is wrong, but
-    //      the fix is not obviously "two": a letter series that reaches `(i)` would then read "one"
-    //      while `(ii)` read "two", and a roman series whose `(i)` read "eye" is no better. Either
-    //      uniform choice is defensible and the MIXED one is worse than the defect, so it is left for
-    //      a decision rather than guessed at here.
+    //      ⚠ A SINGLE CHARACTER IS TREATED AS A LETTER, INCLUDING ⟨i⟩, ⟨v⟩, ⟨x⟩ AND ⟨c⟩. Half the
+    //      alphabet is also a roman numeral, so refusing the roman-shaped ones would cost `(c)` — the
+    //      third item of every lettered list — to protect a reading nothing here produces anyway: `(i)`
+    //      already read ˈaᶦ, which IS the letter name, so claiming it changes the prosody and not the
+    //      phones.
+    //      ⚠ A MULTI-CHARACTER ROMAN MARKER IS LEFT ALONE, and `(ii)` reads ˈɪɪ today, which is wrong.
+    //      The fix is not obviously "two": a letter series reaching `(i)` would then read "one", and a
+    //      roman series whose `(i)` read "eye" is no better. Either uniform choice is defensible, so it
+    //      is left for a decision rather than guessed at.
+    //      ⚠ THE SEAM THAT LEAVES, STATED RATHER THAN HIDDEN: a roman list gets a pause on `(i)` and
+    //      none on `(ii)`. An earlier draft of this comment claimed roman markers were "deliberately
+    //      not claimed", which the code contradicted for the single-character case — a comment
+    //      asserting a cleanliness the code did not have. Pinned as a test on the PAIR, not on `(i)`
+    //      alone, because a test on one member cannot see a seam between two.
     s = rewrite(s, LIST_MARKER, (_m: string, indent: string, mark: string) =>
-        `${indent}${/^\d+$/u.test(mark) ? mark : LETTER_NAME(mark.toLowerCase()) ?? mark},`);
+        `${indent}${/^\d+$/u.test(mark) ? mark : sayLetter(mark)},`);
 
     // 0b8) A LONE LETTER IN BRACKETS elsewhere — a REFERENCE to a list item, which takes the letter
     //      name but no pause. See BRACKETED_LETTER.
-    s = rewrite(s, BRACKETED_LETTER, (l: string) => LETTER_NAME(l.toLowerCase()) ?? l);
+    s = rewrite(s, BRACKETED_LETTER, (l: string) => sayLetter(l));
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".
@@ -1759,7 +1768,7 @@ const LEADING_DECIMAL_POINT = new RegExp(
  * runs straight into the item. The comma is this file's existing spelling for a prosodic break — the
  * unit table writes `b t u per hour, per square foot` for the same reason.
  */
-const LIST_MARKER = /(?<=^|\n)([ \t]*)\(?([A-Za-z]|\d{1,2})[)\]](?=[ \t]+\S)/gu;
+const LIST_MARKER = /(?<=^|\n)([ \t]*)[([]?([A-Za-z]|\d{1,2})[)\]](?=[ \t]+\S)/gu;
 
 /**
  * A LONE LETTER INSIDE BRACKETS, anywhere — `See (a) and (b)`, `P(A)`, `f(x)`.
@@ -1831,6 +1840,26 @@ const counted = (n: string, sg: string, pl: string): string => `${n} ${isOne(n) 
  */
 const LETTER_NAME = (l: string): string | undefined =>
     /^[a-z]$/u.test(l) ? (MANIFEST.letterNameExceptions[l] ?? l) : undefined;
+
+/**
+ * A MARKER LETTER AS THE PASS WOULD SAY IT, WITHOUT DESTROYING ITS CASE (#1423).
+ *
+ * ⚠ `LETTER_NAME(l.toLowerCase())` IS NOT A NO-OP FOR THE OTHER 24 LETTERS — it returns the
+ * LOWERCASED input, so a rule written that way silently lowercases a capital. The initialism pass
+ * decides whether a document is SHOUTING with `!/\p{Ll}/.test(text)`, so ONE injected lowercase flips
+ * the verdict for the whole document: `SEE (B) OF US ARMY` became `SEE (b) OF US ARMY` and `US` was
+ * then spelled out, and `(X) IT AND US` read "eye-tee … you-ess". That is the identical hazard the
+ * `re-` prefix rule three steps above documents and defends against by echoing the matched case — and
+ * it was walked into again here, in the same file.
+ *
+ * Only ⟨a⟩ and ⟨i⟩ have an exception to substitute; every other letter is returned UNCHANGED, case
+ * and all, and the substitution itself echoes the case it replaced.
+ */
+function sayLetter(l: string): string {
+    const name = MANIFEST.letterNameExceptions[l.toLowerCase()];
+    if (name === undefined) return l;
+    return l === l.toUpperCase() ? name.toUpperCase() : name;
+}
 
 /**
  * A LETTER RUN AS ITS LETTER NAMES, space-separated. Declared here beside `LETTER_NAME` rather than beside

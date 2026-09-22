@@ -21,7 +21,8 @@ public class EnglishListMarkerTests
     [InlineData("(a) the first item", "ay, the first item")]
     [InlineData("(b) second", "b, second")]
     [InlineData("a) foo", "ay, foo")]
-    [InlineData("(A) foo", "ay, foo")]
+    [InlineData("(A) foo", "AY, foo")]   // ⚠ the substitution echoes the case it replaced
+    [InlineData("(a) foo", "ay, foo")]
     [InlineData("  (c) indented", "  c, indented")]
     [InlineData("(1) one", "1, one")]
     public void AListLeadInGetsItsNameAndAPause(string text, string expected)
@@ -40,7 +41,8 @@ public class EnglishListMarkerTests
     public void AReferenceGetsTheNameAndNoPause()
     {
         Assert.Equal("See (ay) and (b).", Norm("See (a) and (b)."));
-        Assert.Equal("P(ay) equals 1", Norm("P(A) = 1"));
+        Assert.Equal("P(AY) equals 1", Norm("P(A) = 1"));
+        Assert.Equal("P(ay) equals 1", Norm("P(a) = 1"));
     }
 
     /// <summary>
@@ -83,13 +85,45 @@ public class EnglishListMarkerTests
     }
 
     /// <summary>
-    /// ⚠ ROMAN MARKERS ARE DELIBERATELY NOT CLAIMED, pinned so it reads as a decision: a letter series
-    /// reaching `(i)` would read "one" while `(ii)` read "two", and the MIXED choice is worse than the
-    /// defect. A single ⟨i⟩ IS claimed, as a one-character marker like any other.
+    /// ⚠ THE CASE MUST SURVIVE. `LetterName(l.ToLowerInvariant())` is NOT a no-op for the other 24
+    /// letters — it returns the LOWERCASED input — and the initialism pass decides SHOUTING by looking
+    /// for any lowercase letter, so one injected lowercase flips the verdict for the WHOLE document:
+    /// `SEE (B) OF US ARMY` spelled out `US`.
     /// </summary>
+    [Fact]
+    public void AnAllCapsDocumentKeepsItsCase()
+    {
+        Assert.Equal("SEE (B) OF US ARMY", Norm("SEE (B) OF US ARMY"));
+        Assert.Contains("\u02c8\u028cs", Say("SEE (B) OF US ARMY"));
+        Assert.Equal("X, IT AND US", Norm("(X) IT AND US"));
+        Assert.Equal("B, THE SECOND", Norm("(B) THE SECOND"));
+    }
+
+    /// <summary>⚠ And the substitution echoes the case it replaced.</summary>
+    [Fact]
+    public void TheExceptionEchoesTheCaseItReplaced()
+    {
+        Assert.Equal("AY, FOO BAR", Norm("(A) FOO BAR"));
+        Assert.Equal(Say("(a) foo bar"), Say("(A) FOO BAR"));
+    }
+
+    /// <summary>⚠ The square bracket is a list style too; the open class did not accept it.</summary>
     [Theory]
-    [InlineData("(ii) two", "(ii) two")]
-    [InlineData("(iv) four", "(iv) four")]
-    [InlineData("(i) one", "eye, one")]
-    public void RomanMarkers(string text, string expected) => Assert.Equal(expected, Norm(text));
+    [InlineData("[a] foo", "ay, foo")]
+    [InlineData("[1] foo", "1, foo")]
+    [InlineData("[b] bar", "b, bar")]
+    public void SquareBracketedMarkers(string text, string expected) => Assert.Equal(expected, Norm(text));
+
+    /// <summary>
+    /// ⚠ A single character is a LETTER, including ⟨i⟩ — half the alphabet is also a roman numeral, so
+    /// refusing the roman-shaped ones would cost `(c)`. A MULTI-character roman marker is left alone,
+    /// and the SEAM is pinned on a PAIR: a test on one member cannot see a seam between two.
+    /// </summary>
+    [Fact]
+    public void TheRomanSeamIsWhereItIsSaidToBe()
+    {
+        Assert.Equal("eye, one", Norm("(i) one"));
+        Assert.Equal("(ii) two", Norm("(ii) two"));
+        Assert.Equal("See (eye) and (ii) below.", Norm("See (i) and (ii) below."));
+    }
 }

@@ -474,11 +474,24 @@ public static class Normalize
      * ⚠ A PAUSE IS PART OF THE REPORT, and the comma is this file's existing spelling for one.
      */
     private static readonly JsRe LIST_MARKER =
-        JsRegex.Compile("(?<=^|\\n)([ \\t]*)\\(?([A-Za-z]|\\d{1,2})[)\\]](?=[ \\t]+\\S)", "gu");
+        JsRegex.Compile("(?<=^|\\n)([ \\t]*)[([]?([A-Za-z]|\\d{1,2})[)\\]](?=[ \\t]+\\S)", "gu");
 
     /** A LONE LETTER INSIDE BRACKETS — a REFERENCE to a list item, so the letter name but NO pause. */
     private static readonly JsRe BRACKETED_LETTER =
         JsRegex.Compile("(?<=[([{])([A-Za-z])(?=[)\\]}])", "gu");
+
+    /**
+     * A MARKER LETTER AS THE PASS WOULD SAY IT, WITHOUT DESTROYING ITS CASE (#1423).
+     *
+     * ⚠ `LetterName(l.ToLowerInvariant())` IS NOT A NO-OP for the other 24 letters — it returns the
+     * LOWERCASED input, so a rule written that way silently lowercases a capital, and the initialism
+     * pass decides SHOUTING by looking for any lowercase letter. One injected lowercase flipped the
+     * verdict for a whole document: `SEE (B) OF US ARMY` spelled out `US`. See the TypeScript.
+     */
+    private static string SayLetter(string l) =>
+        Manifest.MANIFEST.LetterNameExceptions.TryGetValue(l.ToLowerInvariant(), out var name)
+            ? (l == l.ToUpperInvariant() ? name.ToUpperInvariant() : name)
+            : l;
 
     /** Digits only, for telling a numbered marker from a lettered one. */
     private static readonly JsRe ALL_DIGITS = JsRegex.Compile("^[0-9]+$", "u");
@@ -892,22 +905,22 @@ public static class Normalize
             string.Join(" ", m.Groups[1].Value.ToCharArray())
             + (m.Groups[3].Success ? " " + string.Join(" ", m.Groups[3].Value.ToCharArray()) : ""));
 
-        // An enumerated list lead-in — the letter name AND a pause. See LIST_MARKER.
+        // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`:
+        //      a case-SENSITIVE list of tokens read wrong, not a formula parser.
+        s = Rewrite(s, FORMULA_TOKEN, m => FORMULA_READING.TryGetValue(m.Value, out var r) ? r : m.Value);
+
+        // 0b7) An enumerated list lead-in — the letter name AND a pause. See LIST_MARKER.
         // ⚠ Roman markers are deliberately not claimed; see the TypeScript for why a MIXED choice
         // would be worse than the defect.
         s = Rewrite(s, LIST_MARKER, m =>
         {
             var mark = m.Groups[2].Value;
-            var said = ALL_DIGITS.IsMatch(mark) ? mark : LetterName(mark.ToLowerInvariant()) ?? mark;
+            var said = ALL_DIGITS.IsMatch(mark) ? mark : SayLetter(mark);
             return m.Groups[1].Value + said + ",";
         });
 
-        // A lone letter in brackets elsewhere — a reference, so no pause. See BRACKETED_LETTER.
-        s = Rewrite(s, BRACKETED_LETTER, m => LetterName(m.Value.ToLowerInvariant()) ?? m.Value);
-
-        // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`:
-        //      a case-SENSITIVE list of tokens read wrong, not a formula parser.
-        s = Rewrite(s, FORMULA_TOKEN, m => FORMULA_READING.TryGetValue(m.Value, out var r) ? r : m.Value);
+        // 0b8) A lone letter in brackets elsewhere — a reference, so no pause. See BRACKETED_LETTER.
+        s = Rewrite(s, BRACKETED_LETTER, m => SayLetter(m.Value));
 
         // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
         s = Rewrite(s, MONTH_RANGE, m =>
