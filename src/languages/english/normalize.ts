@@ -345,6 +345,27 @@ function asciiExponentIsCodeDigit(unit: string, exponent: string | undefined): b
     return /^[A-Za-z]$/u.test(unit) && unit.toLowerCase() !== "m";
 }
 
+/**
+ * Is this ASCII `2`/`3` a COORDINATE'S MINUTES rather than an exponent? ⟨°⟩ only (#1434).
+ *
+ * ⚠ THIS CASE CORRUPTS RATHER THAN DROPS, which is why it is worth its own predicate. A latitude is
+ * written unspaced — `40°26′46″N` — so the minutes digit sits exactly where an exponent would:
+ * `40°26` read "40 SQUARE DEGREES6", the wrong unit AND a digit silently eaten, and `51°30′N` gave
+ * "cubic degrees". The spaced form was always fine; the unspaced one is the usual spelling.
+ *
+ * ⚠ AND IT MUST NOT DECLINE THE WHOLE MATCH, which the code-slot rule above does and which was the
+ * first attempt here. Declining leaves the raw ⟨°⟩ to reach the g2p, where it is DROPPED — trading a
+ * corruption for a silent loss, the class this file ranks worst. The unit is expanded and the digit
+ * handed back instead.
+ *
+ * ⚠ DECLINING THE EXPONENT COSTS NOTHING REAL: a solid angle is written `deg²` or `sq deg`, never
+ * `°2`. The SUPERSCRIPT is untouched, so someone who types `°²` still gets it — the same split the
+ * code-slot rule makes, and for the same reason.
+ */
+function asciiExponentIsCoordinateMinutes(unit: string, exponent: string | undefined): boolean {
+    return (exponent === "2" || exponent === "3") && unit === "°";
+}
+
 /** The Unicode relational operators, none of which were read at all. Ordered longest-first is not needed
  *  — no sign is a prefix of another — but the ASCII `<`/`>` are deliberately NOT here: they are handled
  *  above under a digit gate, because they can be markup and these cannot. */
@@ -1264,11 +1285,15 @@ export function normalizeEnglish(input: string): string {
             const [sg, pl] = forms;
             // English puts the measure word BEFORE the unit — "square kilometers" — and the COUNT still
             // governs the noun: "one cubic meter", not "one cubic meters".
-            const measure = exp === "²" || exp === "2" ? "square " : exp === "³" || exp === "3" ? "cubic " : "";
+            // ⚠ A COORDINATE'S MINUTES, NOT A POWER — the unit still expands and the digit is handed
+            // back, because declining outright would drop the ⟨°⟩ itself. See the predicate.
+            const minutes = asciiExponentIsCoordinateMinutes(u, exp);
+            const measure = minutes ? ""
+                : exp === "²" || exp === "2" ? "square " : exp === "³" || exp === "3" ? "cubic " : "";
             // ⚠ A magnitude forces the PLURAL: "2.2 million square kilometres", never "…kilometre". The
             // singular test looks at the digits alone, so without this `1 million km` reads "kilometre".
             const one = mag === undefined && /^1(?:\.0+)?$/.test(num.replace(/,/g, ""));
-            return `${num}${mag ?? ""} ${measure}${one ? sg : pl}`;
+            return `${num}${mag ?? ""} ${measure}${one ? sg : pl}${minutes ? ` ${exp}` : ""}`;
         });
 
     // 6a2) A SLASHED RATE STANDING ALONE, with no number in front of it — `BTU/hr/sf` as a column
