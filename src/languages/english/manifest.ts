@@ -17,21 +17,37 @@ import type { ArpabetDef } from "./englishArpabet.ts";
  * `to`. Counted over the 101 `used to` tokens in the UD English treebanks, scored with THIS tagger:
  *
  *     41%  today (always juːzd)          81%  tag is VBD
- *     59%  next word is `to` (flat)       85%  tag is VBD, OR the next tag is IN
+ *     59%  next word is `to` (flat)       86%  what shipped (see BeforeAlternative)
  *
- * so the condition is BOTH a word and a tag test: `tags` selects the marked reading, and `nextTags`
- * selects it too — the second is what reaches "be/get used to <noun|gerund>", where `to` is a
- * PREPOSITION (IN) rather than the infinitive marker (TO) and the reading is /juːst/ as well.
- * ⚠ A FLAT BIGRAM WOULD HAVE BEEN NET POSITIVE AND IS NOT WHAT SHIPPED: 59% beats 41%, and 85% beats
- * both. The issue proposed the flat form; the corpus said the tags were worth another 26 points.
+ * so the condition is a word test AND a list of tag alternatives. ⚠ IT MUST NOT READ ACROSS A CLAUSE
+ * BOUNDARY: the word stream carries no punctuation, and unguarded "He used, to my surprise, a hammer"
+ * read /juːst/ — the plain-past failure this exists to avoid, one clause to the left.
+ * ⚠ A FLAT BIGRAM WOULD HAVE BEEN NET POSITIVE AND IS NOT WHAT SHIPPED: 59% beats 41%, and 86% beats
+ * both. The issue proposed the flat form; the corpus said the tags were worth another 27 points.
+ * ⚠ AND THE RESIDUE IS 14 OF THE 101, NOT THE 3 AN EARLIER DRAFT CLAIMED — the largest group is the
+ * HABITUAL TAGGED VBN, which that draft had not named at all. All three classes are pinned AS WRONG in
+ * test/en-used-to.test.ts so this number stays honest.
  */
+export interface BeforeAlternative {
+    /** Tags of THIS word that select the marked reading. Absent = any. */
+    tags?: string[];
+    /** Tags of the FOLLOWING word. Absent = any. */
+    nextTags?: string[];
+    /**
+     * Words that must appear somewhere in the PRECEDING three, lower-cased. Absent = no left condition.
+     * ⚠ THE LEFT GATE IS NOT DECORATION. Without it `nextTags: ["IN"]` fires on any participle before a
+     * prepositional `to` — "the funds were used to that end", "energy used to the limit", "the data used
+     * to date" all read /juːst/ and all are /juːzd/. The accustomed sense needs a be/get head, and the
+     * VBN-attributive promotion beside this one already applies exactly that discipline with `headsNp`.
+     */
+    afterWords?: string[];
+}
+
 export interface BeforeCondition {
     /** The following surface word, lower-cased. */
     word: string;
-    /** Tags of THIS word that select the marked reading. */
-    tags?: string[];
-    /** Tags of the FOLLOWING word that select it, independently of `tags`. */
-    nextTags?: string[];
+    /** Any one of these selects the marked reading. An empty alternative matches on the word alone. */
+    when: BeforeAlternative[];
     /** Which slot the condition drives. The slot is true exactly when the condition fires. */
     slot: "verb" | "noun" | "past" | "adj";
 }

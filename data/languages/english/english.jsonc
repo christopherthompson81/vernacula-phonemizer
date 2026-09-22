@@ -290,7 +290,20 @@
         // is 3 of the 101. See docs/investigations/en/en_used_to_investigation.md.
         "used": {
             "default": "jˈuːzd", "past": "jˈuːst",
-            "before": { "word": "to", "tags": ["VBD"], "nextTags": ["IN"], "slot": "past" }
+            "before": {
+                "word": "to", "slot": "past",
+                "when": [
+                    { "tags": ["VBD"] },
+                    // ⚠ THE ACCUSTOMED SENSE NEEDS A be/get HEAD. Without the left gate this fires on any
+                    // participle before a prepositional `to` — "the funds were used to that end", "energy
+                    // used to the limit", "the data used to date" — all /juːzd/.
+                    { "nextTags": ["IN"], "afterWords": [
+                        "am", "is", "are", "was", "were", "be", "been", "being",
+                        "get", "gets", "got", "gotten", "getting",
+                        "become", "becomes", "became", "becoming", "feel", "feels", "felt"
+                    ] }
+                ]
+            }
         },
         // ⚠ NOT A STRESS PAIR LIKE ITS NEIGHBOURS — a VOWEL pair, and the two senses are unrelated words.
         // The fabric is wˈʊstᵻd (from Worstead in Norfolk); the past tense of `worst` is wˈɝstᵻd. CMUdict

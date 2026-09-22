@@ -219,7 +219,23 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         tag == "DT" || tag == "PDT" || tag == "PRP$" || tag.StartsWith("JJ", StringComparison.Ordinal);
 
     /** POS expectations for a sentence's words (perceptron tags → verb/noun/past, + imperative recovery). */
-    private List<PosExpectation?> PosExpectations(IReadOnlyList<string> words)
+    /** The left gate: one of `words` in the preceding three, with no clause boundary between. */
+    private static bool LeftGate(IReadOnlyList<string> words, IReadOnlyList<bool>? breakAfter, int i,
+        IReadOnlyList<string> want)
+    {
+        var from = Math.Max(0, i - 3);
+        for (var k = from; k < i; k++)
+        {
+            if (!want.Contains(Js.ToLowerCase(words[k]))) continue;
+            var blocked = false;
+            for (var j = k; j < i; j++)
+                if (breakAfter is not null && j < breakAfter.Count && breakAfter[j]) { blocked = true; break; }
+            if (!blocked) return true;
+        }
+        return false;
+    }
+
+    private List<PosExpectation?> PosExpectations(IReadOnlyList<string> words, IReadOnlyList<bool>? breakAfter = null)
     {
         var tags = _tagger.Tag(words);
         var outp = tags.Select(t => (PosExpectation?)Pos.PosExpectationOf(t)).ToList();
@@ -237,10 +253,15 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         {
             if (!_heteronyms.TryGetValue(Js.ToLowerCase(words[i]), out var hetB) || hetB.Before is null) continue;
             var b = hetB.Before;
+            // ⚠ AND IT MUST NOT READ ACROSS A CLAUSE BOUNDARY. The word stream carries no punctuation, so
+            // `words[i + 1]` is the next WORD however many commas lie between. See the TypeScript.
             var nextWord = i + 1 < words.Count ? Js.ToLowerCase(words[i + 1]) : "";
             var nextTag = i + 1 < tags.Count ? tags[i + 1] : "";
-            var fires = nextWord == b.Word
-                && ((b.Tags?.Contains(tags[i]) ?? false) || (b.NextTags?.Contains(nextTag) ?? false));
+            var broken = breakAfter is not null && i < breakAfter.Count && breakAfter[i];
+            var fires = nextWord == b.Word && !broken && b.When.Any(alt =>
+                (alt.Tags is null || alt.Tags.Contains(tags[i]))
+                && (alt.NextTags is null || alt.NextTags.Contains(nextTag))
+                && (alt.AfterWords is null || LeftGate(words, breakAfter, i, alt.AfterWords)));
             outp[i] = new PosExpectation
             {
                 Verb = b.Slot == "verb" ? fires : outp[i]!.Verb,
@@ -377,8 +398,19 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             }
         }
 
-        var allWords = units.SelectMany(u => u.Words.Select(w => w.Text)).ToList();
-        var expect = PosExpectations(allWords);
+        var allWords = new List<string>();
+        /** `true` when a CLAUSE unit follows this word — the punctuation the word stream drops. */
+        var breakAfter = new List<bool>();
+        foreach (var u in units)
+        {
+            if (u.Words.Count == 0)
+            {
+                if (u.Clause is not null && breakAfter.Count > 0) breakAfter[^1] = true;
+                continue;
+            }
+            foreach (var w in u.Words) { allWords.Add(w.Text); breakAfter.Add(false); }
+        }
+        var expect = PosExpectations(allWords, breakAfter);
         var wi = 0;
         var clauses = new List<ClauseAcc> { new() };
         foreach (var u in units)

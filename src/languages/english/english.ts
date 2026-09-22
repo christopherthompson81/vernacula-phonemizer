@@ -242,7 +242,7 @@ export class EnglishPhonemizer {
     }
 
     /** POS expectations for a sentence's words (perceptron tags → verb/noun/past, + imperative recovery). */
-    private posExpectations(words: string[]): (PosExpectation | undefined)[] {
+    private posExpectations(words: string[], breakAfter: boolean[] = []): (PosExpectation | undefined)[] {
         const tags = this.tagger.tag(words);
         const out = tags.map((t) => posExpectation(t));
         // ⚠ AN ATTRIBUTIVE ADJECTIVE MODIFIES SOMETHING, and the tagger does not hold that line: it
@@ -260,8 +260,20 @@ export class EnglishPhonemizer {
         for (let i = 0; i < out.length; i++) {
             const before = this.heteronyms.get(words[i]!.toLowerCase())?.before;
             if (before === undefined) continue;
-            const fires = (words[i + 1] ?? "").toLowerCase() === before.word
-                && ((before.tags ?? []).includes(tags[i]!) || (before.nextTags ?? []).includes(tags[i + 1] ?? ""));
+            // ⚠ AND IT MUST NOT READ ACROSS A CLAUSE BOUNDARY. The word stream has no punctuation in it —
+            // clause units contribute no words — so `words[i + 1]` is the next WORD however many commas or
+            // full stops lie between. Unguarded, "He used, to my surprise, a hammer" and "… the tool he
+            // used. To be fair, it worked" both read jˈuːst: the tagger cannot see the punctuation either,
+            // so it obligingly tags the bare stream VBD IN and BOTH tests pass. That is the plain-past
+            // failure this condition exists to avoid, reintroduced one clause to the left.
+            const fires = (words[i + 1] ?? "").toLowerCase() === before.word && breakAfter[i] !== true
+                && before.when.some((alt) =>
+                    (alt.tags === undefined || alt.tags.includes(tags[i]!))
+                    && (alt.nextTags === undefined || alt.nextTags.includes(tags[i + 1] ?? ""))
+                    // the left gate looks back three words, and not past a clause boundary either
+                    && (alt.afterWords === undefined || words.slice(Math.max(0, i - 3), i).some((w, k) =>
+                        alt.afterWords!.includes(w.toLowerCase())
+                        && !breakAfter.slice(Math.max(0, i - 3) + k, i).includes(true))));
             out[i] = { ...out[i]!, [before.slot]: fires };
         }
         // ⚠ AND THE SAME CONSTRAINT PROMOTES, BECAUSE THE TAGGER MISSES THE `-ed` ADJECTIVE ENTIRELY.
@@ -415,8 +427,17 @@ export class EnglishPhonemizer {
         // Tag word-by-word across the whole utterance (START/END padded), resolve each to CITATION IPA, then
         // de-accent: unstressed function words lose their primary; a clause left with no primary promotes its
         // last word back to the nuclear tonic. Clause boundaries are the pause marks.
-        const allWords = units.flatMap((u) => u.words.map((w) => w.text));
-        const expect = this.posExpectations(allWords);
+        const allWords: string[] = [];
+        /** `true` when a CLAUSE unit follows this word — the punctuation the word stream drops. */
+        const breakAfter: boolean[] = [];
+        for (const u of units) {
+            if (u.words.length === 0) {
+                if (u.clause !== undefined && breakAfter.length > 0) breakAfter[breakAfter.length - 1] = true;
+                continue;
+            }
+            for (const w of u.words) { allWords.push(w.text); breakAfter.push(false); }
+        }
+        const expect = this.posExpectations(allWords, breakAfter);
         let wi = 0;
         interface Item {
             word: string;

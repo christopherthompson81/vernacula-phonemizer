@@ -26,14 +26,22 @@ public sealed class HeteronymEntry
  * The second test is what reaches "be/get used to &lt;noun|gerund&gt;", where `to` is a PREPOSITION (IN)
  * rather than the infinitive marker (TO) and the reading is /juːst/ as well. See the TypeScript.
  */
+public sealed class BeforeAlternative
+{
+    /** Tags of THIS word that select the marked reading. Null = any. */
+    public IReadOnlyList<string>? Tags { get; init; }
+    /** Tags of the FOLLOWING word. Null = any. */
+    public IReadOnlyList<string>? NextTags { get; init; }
+    /** Words that must appear in the preceding three. Null = no left condition. See the TypeScript. */
+    public IReadOnlyList<string>? AfterWords { get; init; }
+}
+
 public sealed class BeforeCondition
 {
     /** The following surface word, lower-cased. */
     public string Word { get; init; } = "";
-    /** Tags of THIS word that select the marked reading. */
-    public IReadOnlyList<string>? Tags { get; init; }
-    /** Tags of the FOLLOWING word that select it, independently of `Tags`. */
-    public IReadOnlyList<string>? NextTags { get; init; }
+    /** Any one of these selects the marked reading. An empty alternative matches on the word alone. */
+    public IReadOnlyList<BeforeAlternative> When { get; init; } = Array.Empty<BeforeAlternative>();
     /** Which slot the condition drives. The slot is true exactly when the condition fires. */
     public string Slot { get; init; } = "";
 }

@@ -90,3 +90,62 @@ The same device `english-gb-ary.test.ts` used for `amatory`, which fired as desi
 ⚠ **AND THE PARITY GOLDEN CANNOT SEE ANY OF THIS** — `used to` is in no golden row, so the C# twin's
 assertions in `EnglishEdAdjectiveHeteronymTests.cs` are the only thing holding the two ports together
 here, exactly as that file's own header says of the `-ed` class.
+
+
+## Run 3 — 2026-09-22 — review round: I shipped a regression and understated the residue by 11
+
+### ⚠ THE CONDITION READ ACROSS PUNCTUATION, SO IT BROKE THE PLAIN PAST IT WAS BUILT TO PROTECT
+
+    "He used, to my surprise, a hammer."                      → jˈuːst   (main: jˈuːzd)
+    "…which tool he used. To be fair, it worked."             → jˈuːst   (main: jˈuːzd)
+
+`allWords` is `units.flatMap(u => u.words…)` and **clause units contribute no words**, so `words[i+1]`
+is the next WORD however many commas or full stops lie between. And the tagger cannot see the
+punctuation either, so it obligingly tags the bare stream `he used to my surprise` as `VBD IN` and
+**both halves of the disjunction fire**. A new regression, in exactly the `she used a hammer` frame the
+cleared slot was supposed to make impossible — one clause to the left.
+
+Fixed by building a `breakAfter` map alongside the word stream and refusing to look past a `true`. The
+left gate honours it too.
+
+### ⚠ AND THE RESIDUE IS 14, NOT 3 — I QUOTED THE GOLD CLASSES AND CALLED THEM THE RULE'S ERRORS
+
+Scoring the shipped rule and printing every miss, rather than assuming the 3-token instrumental class
+was the whole of it:
+
+    SHIPPED: 87/101 = 86%
+
+      ~6  HABITUAL TAGGED VBN — "Car repair used to be a knowledge commons",
+          "Poverty and wealth used to depend more on means of livelihood",
+          "There were – or used to be – leopards on the outskirts"
+       3  INSTRUMENTAL — "a trick that I used to tame them"
+      ~4  ACCUSTOMED at the edges of the left gate, or where the UD-derived gold is itself wrong
+          ("Get your chickens used to humans" is accustomed; my classifier called it passive)
+
+**The VBN-habitual class is the biggest single group of errors and I had not named it at all.** Worse,
+the test pinned `"The aircraft used to fly there"` under the heading *"leaves the passive and the
+participle"* — that sentence is habitual in isolation, so a whole missed class was recorded as correct
+behaviour and a future fix would have looked like a regression. All three classes are now pinned AS
+WRONG, with the usual "this test failing is the signal" marker.
+
+### ⚠ AND THE LEFT GATE DOES NOT RESCUE THE CLASS IT WAS ADDED FOR
+
+Review's `nextTags: ["IN"]` finding is right: any participle before a prepositional `to` flips to
+/juːst/. A `be`/`get` gate fixes two of the four counterexamples (`energy used to the limit`, `the data
+used to date` — no head) and **not** the other two, because *"the funds were used to that end"* has
+`were` and *"He used to great effect a simple trick"* is VBD and matches the first alternative outright.
+
+    `used` + PREPOSITIONAL `to` in the corpus: 15 — and all 15 are the ACCUSTOMED sense.
+
+**So the corpus is silent on the class review found**, and the measurement cannot defend that branch
+beyond the sample. The gate ships because it strictly removes errors and adds none; the rest is written
+into the test header as a class the 86% does not cover. ⚠ **A measured number is only evidence about
+what the sample contains**, which is the same limit that made the `garage`/PALM trade defensible at
+#1411 and is worth saying twice.
+
+### And the no-tag-lists form was a silent no-op
+
+`(tags ?? []).includes(…) || (nextTags ?? []).includes(…)` is `false` when both are absent, so a
+word-only condition — the flat-bigram form these very comments hold up as the 59% baseline — would have
+permanently *cleared* its slot instead of setting it. The shape is now a list of alternatives, and an
+empty alternative matches on the word alone.

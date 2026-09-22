@@ -83,7 +83,8 @@ public class EnglishUsedToTests
      * ⚠ `used to` IS THE ONLY HETERONYM WITH A FOLLOWING-WORD CONDITION, and both ports read the SAME
      * manifest field, so this is the C# half of a contract the parity golden cannot see — `used to` is
      * in no golden row. Measured over the 101 `used to` tokens in the UD English treebanks with this
-     * tagger: 41% today, 59% for a flat bigram, 81% for VBD alone, 85% for VBD-or-next-tag-IN. #1395.
+     * tagger: 41% today, 59% for a flat bigram, 81% for VBD alone, 86% for what shipped. The 14-token
+     * residue is named in the TypeScript test and pinned there AS WRONG. #1395.
      */
     [Fact]
     public void ReadsTheHabitualAsJuust()
@@ -101,10 +102,19 @@ public class EnglishUsedToTests
     }
 
     [Fact]
-    public void LeavesThePassiveAndTheParticipleAsJuuzd()
+    public void LeavesThePassiveAsJuuzd()
     {
         Assert.Contains("j\u02c8u\u02d0zd", Say("This date will be used to determine it"));
-        Assert.Contains("j\u02c8u\u02d0zd", Say("The aircraft used to fly there"));
+    }
+
+    [Fact]
+    public void DoesNotReadAcrossAClauseBoundary()
+    {
+        // ⚠ The word stream carries NO punctuation, so the next WORD may be a clause away. Unguarded,
+        // both of these read /ju\u02d0st/ — the tagger cannot see the comma either, so it tags the bare
+        // stream VBD IN and both halves of the condition pass. See the TypeScript.
+        Assert.Contains("j\u02c8u\u02d0zd", Say("He used, to my surprise, a hammer."));
+        Assert.Contains("j\u02c8u\u02d0zd", Say("I do not know which tool he used. To be fair, it worked."));
     }
 
     [Fact]
