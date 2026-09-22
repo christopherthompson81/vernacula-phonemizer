@@ -12,7 +12,7 @@
  * English at all.
  */
 
-import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { LATIN_MARK, makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
 import { COLLISIONS as ROMAN_COLLISIONS, romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -421,6 +421,50 @@ const SLASH_ABBREV: Readonly<Record<string, string>> = {
     "r/w": "read write",
 };
 
+/**
+ * CONCATENATED ELEMENT-SYMBOL FORMULAE with a fixed reading — `CoCr` is "cobalt chromium", not the word
+ * *cocker*, which is what the g2p invents when the whole run reaches it as one token.
+ *
+ * ⚠ A LIST, NOT A FORMULA PARSER, AND THE DISTINCTION IS THE POINT. A rule that tiled any token into
+ * element symbols was built and thrown away: it reads `CoCo` as "cobalt cobalt", and the only reason it
+ * did not was an ad-hoc "a repeated two-letter symbol is a name" guard — a heuristic standing in for
+ * chemistry knowledge this engine does not have. Deciding that `CoCo` is not a compound needs valency
+ * and stoichiometry, not a spelling test, so the general mechanism had the SHAPE of understanding
+ * without the substance. Listing the tokens that are actually read wrong claims only what is true.
+ *
+ * ⚠ THE LOOKUP IS CASE-SENSITIVE, which is the whole signal and costs nothing to keep. An element
+ * symbol is `[A-Z]` or `[A-Z][a-z]`, so ⟨Co⟩ is cobalt and ⟨CO⟩ is carbon monoxide — and case alone
+ * separates a formula from the recorded word it spells, which the dictionary cannot do: `sic`, `tin`
+ * and `nan` are all real entries.
+ *
+ * ⚠ SAME BAR AS `SLASH_ABBREV` ABOVE: a row needs a SINGLE DOMINANT READING, because the failure mode
+ * of guessing is a wrong word inserted into prose. Rows are added on report, not by enumeration.
+ */
+const FORMULA_READING: Readonly<Record<string, string>> = {
+    CoCr: "cobalt chromium", CoCrMo: "cobalt chromium molybdenum",
+    // ⚠ THE HYPHENATED SPELLINGS OF A LISTED ALLOY BELONG WITH IT, or the row HALF-EXPANDS: the
+    // boundary deliberately does not exclude ⟨-⟩ (so `CoCr-based` reads "cobalt chromium-based",
+    // which is right), and without these rows `CoCr-Mo` matched `CoCr` and stranded a bare ⟨Mo⟩ —
+    // "cobalt chromium-Mo", the exact leak longest-first ordering exists to prevent, reached
+    // through a separator instead of concatenation.
+    "CoCr-Mo": "cobalt chromium molybdenum", "Co-Cr-Mo": "cobalt chromium molybdenum",
+    "Co-Cr": "cobalt chromium",
+};
+
+/**
+ * ⚠ NO `i` FLAG — see `FORMULA_READING`: the capitalisation IS the signal. Longest-first so `CoCrMo`
+ * is not claimed as `CoCr` plus a stranded tail.
+ *
+ * ⚠ AND A FOLLOWING HYPHENATED CAPITAL REFUSES THE WHOLE MATCH, which is where a LIST has to stop
+ * honestly. `Co-Cr-Mo-W` is a real alloy that is not listed; without this it matched the listed
+ * `Co-Cr-Mo` and read "cobalt chromium molybdenum-W", stranding a bare ⟨W⟩ — a half-expansion, the
+ * worst outcome, because it sounds finished. A lowercase tail is the opposite case and must still
+ * pass: `CoCr-based` is "cobalt chromium-based", which is exactly right.
+ */
+const FORMULA_TOKEN = new RegExp(
+    `(?<![\\p{L}${LATIN_MARK}\\d])(${Object.keys(FORMULA_READING).sort((a, b) => b.length - a.length).join("|")})`
+    + `(?![\\p{L}${LATIN_MARK}\\d])(?!-\\p{Lu})`, "gu");
+
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
  *  the word "no". */
 const PLAIN_ABBREV: Readonly<Record<string, string>> = {
@@ -792,6 +836,10 @@ export function normalizeEnglish(input: string): string {
     //      ⚠ AFTER the rule above, because it keys on the state NAME that rule just produced.
     s = rewrite(s, ADDRESS_ZIP, (_m0, zip: string, _dash: string | undefined, plus4: string | undefined) =>
         [...zip].join(" ") + (plus4 === undefined ? "" : ` ${[...plus4].join(" ")}`));
+
+    // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`: a
+    //      case-SENSITIVE list of tokens read wrong, not a formula parser.
+    s = rewrite(s, FORMULA_TOKEN, (tok: string) => FORMULA_READING[tok] ?? tok);
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".

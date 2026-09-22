@@ -392,6 +392,48 @@ public static class Normalize
         $"\\b({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?[ \\t ]*([-‐-―])[ \\t ]*"
         + $"({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?", "giu");
 
+    /**
+     * CONCATENATED ELEMENT-SYMBOL FORMULAE with a fixed reading — `CoCr` is "cobalt chromium", not the
+     * word *cocker*. Ported from src/languages/english/normalize.ts — see that file for the reasoning.
+     *
+     * ⚠ A LIST, NOT A FORMULA PARSER. A rule that tiled any token into element symbols was built and
+     * thrown away: it reads `CoCo` as "cobalt cobalt", and only an ad-hoc "a repeated two-letter symbol
+     * is a name" guard stopped it — a heuristic standing in for chemistry knowledge this engine does
+     * not have. Listing the tokens actually read wrong claims only what is true.
+     *
+     * ⚠ THE LOOKUP IS CASE-SENSITIVE (Ordinal, and no `i` flag on the regex): an element symbol is
+     * `[A-Z]` or `[A-Z][a-z]`, and case alone separates a formula from the recorded word it spells —
+     * `sic`, `tin` and `nan` are all real dictionary entries.
+     */
+    private static readonly IReadOnlyDictionary<string, string> FORMULA_READING =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["CoCr"] = "cobalt chromium",
+            ["CoCrMo"] = "cobalt chromium molybdenum",
+            // ⚠ THE HYPHENATED SPELLINGS OF A LISTED ALLOY BELONG WITH IT, or the row HALF-EXPANDS:
+            // the boundary deliberately does not exclude ⟨-⟩ (so `CoCr-based` reads "cobalt
+            // chromium-based", which is right), and without these `CoCr-Mo` matched `CoCr` and
+            // stranded a bare ⟨Mo⟩.
+            ["CoCr-Mo"] = "cobalt chromium molybdenum",
+            ["Co-Cr-Mo"] = "cobalt chromium molybdenum",
+            ["Co-Cr"] = "cobalt chromium",
+        };
+
+    /**
+     * ⚠ No `i` flag — the capitalisation IS the signal. Longest-first so `CoCrMo` is not claimed as
+     * `CoCr` plus a stranded tail.
+     *
+     * ⚠ AND A FOLLOWING HYPHENATED CAPITAL REFUSES THE WHOLE MATCH, which is where a LIST has to stop
+     * honestly. `Co-Cr-Mo-W` is a real alloy that is not listed; without this it matched the listed
+     * `Co-Cr-Mo` and read "cobalt chromium molybdenum-W", stranding a bare ⟨W⟩ — a half-expansion,
+     * the worst outcome, because it sounds finished. A lowercase tail must still pass: `CoCr-based`
+     * is "cobalt chromium-based".
+     */
+    private static readonly JsRe FORMULA_TOKEN = JsRegex.Compile(
+        "(?<![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])("
+        + string.Join("|", FORMULA_READING.Keys.OrderByDescending(k => k.Length))
+        + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])(?!-\\p{Lu})", "gu");
+
     /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
      *  spelled out here rather than emitted as "5th" because the ordinal-suffix path has no plural form and
      *  "2/5" needs "fifths". Beyond 20 a fraction is vanishingly rare in prose and is left as digits. */
@@ -677,6 +719,10 @@ public static class Normalize
         s = Rewrite(s, ADDRESS_ZIP, m =>
             string.Join(" ", m.Groups[1].Value.ToCharArray())
             + (m.Groups[3].Success ? " " + string.Join(" ", m.Groups[3].Value.ToCharArray()) : ""));
+
+        // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`:
+        //      a case-SENSITIVE list of tokens read wrong, not a formula parser.
+        s = Rewrite(s, FORMULA_TOKEN, m => FORMULA_READING.TryGetValue(m.Value, out var r) ? r : m.Value);
 
         // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
         s = Rewrite(s, MONTH_RANGE, m =>
