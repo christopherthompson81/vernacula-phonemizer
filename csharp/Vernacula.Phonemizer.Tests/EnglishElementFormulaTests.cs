@@ -54,6 +54,30 @@ public class EnglishElementFormulaTests
     [InlineData("Nano")]
     public void AnUnlistedTokenIsUntouched(string w) => Assert.Equal(w, Norm(w));
 
+    /// <summary>
+    /// ⚠ THE HYPHENATED SPELLINGS ARE ROWS, NOT AN ACCIDENT. The boundary deliberately does not exclude
+    /// ⟨-⟩, so `CoCr-based` reads correctly — but that also meant `CoCr-Mo` matched `CoCr` and stranded
+    /// a bare ⟨Mo⟩. A half-expansion is the worst outcome available, because it sounds finished.
+    /// </summary>
+    [Theory]
+    [InlineData("CoCr-Mo", "cobalt chromium molybdenum")]
+    [InlineData("Co-Cr-Mo", "cobalt chromium molybdenum")]
+    [InlineData("Co-Cr", "cobalt chromium")]
+    [InlineData("CoCr-based", "cobalt chromium-based")]
+    [InlineData("a CoCr-based alloy", "a cobalt chromium-based alloy")]
+    public void AHyphenatedSpellingOfAListedAlloyDoesNotHalfExpand(string text, string expected)
+        => Assert.Equal(expected, Norm(text));
+
+    /// <summary>
+    /// ⚠ AND AN UNLISTED LONGER ALLOY IS REFUSED WHOLE. `Co-Cr-Mo-W` is real and not listed; matching
+    /// the listed prefix would read "cobalt chromium molybdenum-W". Declining is where a list stops
+    /// honestly — it claims only what it knows.
+    /// </summary>
+    [Theory]
+    [InlineData("Co-Cr-Mo-W")]
+    [InlineData("CoCr-X")]
+    public void AnUnlistedLongerAlloyIsRefusedRatherThanHalfRead(string w) => Assert.Equal(w, Norm(w));
+
     [Theory]
     [InlineData("XCoCr")]
     [InlineData("CoCr2")]

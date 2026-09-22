@@ -377,6 +377,21 @@ public static class Normalize
     /** ⚠ A US ZIP is a DIGIT STRING, not a quantity — once the state is a name the five digits after
      *  it reach the number rules and are read as one. Scoped to a ZIP directly after a state name this
      *  pass just produced. See the TypeScript. */
+    private static readonly JsRe ADDRESS_ZIP = JsRegex.Compile(
+        "(?<=\\b(?:" + string.Join("|", REGION_CODE.Values.Distinct().OrderByDescending(v => v.Length))
+        + ")[ \u00a0])(\\d{5})(-(\\d{4}))?(?![\\w-])",  // NBSP
+        "gu");
+
+    /** `Re:` is "regarding", not the note of the scale. The colon is consumed for the reason every
+     *  abbreviation dot is: left in place it becomes a phrase break. */
+    private static readonly JsRe RE_REGARDING = JsRegex.Compile("(?<![\\p{L}\\p{M}])[Rr][Ee]:[ \\t]*", "gu");
+
+    /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
+    private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
+        // space, tab, NBSP; hyphen through horizontal bar (U+2010-U+2015)
+        $"\\b({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?[ \\t ]*([-‐-―])[ \\t ]*"
+        + $"({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?", "giu");
+
     /**
      * CONCATENATED ELEMENT-SYMBOL FORMULAE with a fixed reading — `CoCr` is "cobalt chromium", not the
      * word *cocker*. Ported from src/languages/english/normalize.ts — see that file for the reasoning.
@@ -395,29 +410,29 @@ public static class Normalize
         {
             ["CoCr"] = "cobalt chromium",
             ["CoCrMo"] = "cobalt chromium molybdenum",
+            // ⚠ THE HYPHENATED SPELLINGS OF A LISTED ALLOY BELONG WITH IT, or the row HALF-EXPANDS:
+            // the boundary deliberately does not exclude ⟨-⟩ (so `CoCr-based` reads "cobalt
+            // chromium-based", which is right), and without these `CoCr-Mo` matched `CoCr` and
+            // stranded a bare ⟨Mo⟩.
+            ["CoCr-Mo"] = "cobalt chromium molybdenum",
+            ["Co-Cr-Mo"] = "cobalt chromium molybdenum",
+            ["Co-Cr"] = "cobalt chromium",
         };
 
-    /** ⚠ No `i` flag — the capitalisation IS the signal. Longest-first so `CoCrMo` is not claimed as
-     *  `CoCr` plus a stranded tail. */
+    /**
+     * ⚠ No `i` flag — the capitalisation IS the signal. Longest-first so `CoCrMo` is not claimed as
+     * `CoCr` plus a stranded tail.
+     *
+     * ⚠ AND A FOLLOWING HYPHENATED CAPITAL REFUSES THE WHOLE MATCH, which is where a LIST has to stop
+     * honestly. `Co-Cr-Mo-W` is a real alloy that is not listed; without this it matched the listed
+     * `Co-Cr-Mo` and read "cobalt chromium molybdenum-W", stranding a bare ⟨W⟩ — a half-expansion,
+     * the worst outcome, because it sounds finished. A lowercase tail must still pass: `CoCr-based`
+     * is "cobalt chromium-based".
+     */
     private static readonly JsRe FORMULA_TOKEN = JsRegex.Compile(
         "(?<![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])("
         + string.Join("|", FORMULA_READING.Keys.OrderByDescending(k => k.Length))
-        + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])", "gu");
-
-    private static readonly JsRe ADDRESS_ZIP = JsRegex.Compile(
-        "(?<=\\b(?:" + string.Join("|", REGION_CODE.Values.Distinct().OrderByDescending(v => v.Length))
-        + ")[ \u00a0])(\\d{5})(-(\\d{4}))?(?![\\w-])",  // NBSP
-        "gu");
-
-    /** `Re:` is "regarding", not the note of the scale. The colon is consumed for the reason every
-     *  abbreviation dot is: left in place it becomes a phrase break. */
-    private static readonly JsRe RE_REGARDING = JsRegex.Compile("(?<![\\p{L}\\p{M}])[Rr][Ee]:[ \\t]*", "gu");
-
-    /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
-    private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
-        // space, tab, NBSP; hyphen through horizontal bar (U+2010-U+2015)
-        $"\\b({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?[ \\t ]*([-‐-―])[ \\t ]*"
-        + $"({MONTH_ABBREV_ALT}|{MONTH_ALT})\\b\\.?", "giu");
+        + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])(?!-\\p{Lu})", "gu");
 
     /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
      *  spelled out here rather than emitted as "5th" because the ordinal-suffix path has no plural form and

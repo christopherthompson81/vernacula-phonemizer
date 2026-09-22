@@ -1600,5 +1600,34 @@ what is true. `CoCo`, `NaCl` and `SiC` are simply not listed, and nothing preten
 The 118-symbol table and the tiling measurements are recorded here rather than in the tree; if a formula
 reader is ever wanted, this run is its starting evidence and its warning.
 
-**Gates.** 6176 TS · 6753 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6178 TS · 6760 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.
+
+**Review of Run 25 — a comment reassigned to the wrong declaration, in both ports.**
+
+⚠ **The new block was wedged BETWEEN an existing doc comment and the declaration it documents.** In the
+TypeScript it landed between `SLASH_ABBREV`'s comment and `SLASH_ABBREV`, so the long rationale ending
+"⚠ AND `i/o` IS ABSENT ON PURPOSE…" read as documentation for `FORMULA_READING`, and `SLASH_ABBREV` was
+left bare. The C# had the identical defect with `ADDRESS_ZIP`'s "a US ZIP is a DIGIT STRING" comment. In
+a file where the comments ARE the artifact this silently reassigns an invariant to the wrong table — and
+the new block's own cross-reference, "same bar as `SLASH_ABBREV` BELOW", pointed at a table whose
+rationale was now above it. Both moved after the declarations they displaced; the cross-reference now
+reads ABOVE.
+
+⚠ **And the row half-expanded through a separator.** The boundary does not exclude ⟨-⟩ — deliberately,
+because `CoCr-based` must read "cobalt chromium-based" — but that also meant `CoCr-Mo` matched the
+listed `CoCr` and stranded a bare ⟨Mo⟩: *"cobalt chromium-Mo"*. **A half-expansion is the worst outcome
+available, because it sounds finished.** It is the same leak the longest-first ordering exists to
+prevent, reached through a separator instead of concatenation, and the `the longer token wins` test
+claimed the design prevented it while pinning only the concatenated spelling.
+
+Fixed two ways, and the second is the more honest one:
+
+- the hyphenated spellings of a listed alloy are now rows beside it (`CoCr-Mo`, `Co-Cr-Mo`, `Co-Cr`);
+- a match followed by a hyphenated CAPITAL is refused whole. `Co-Cr-Mo-W` is a real alloy that is not
+  listed, and matching its listed prefix would read "cobalt chromium molybdenum-W". Declining is where
+  a list stops honestly — it claims only what it knows. A lowercase tail still passes, so `CoCr-based`
+  is untouched by the refusal.
+
+**Gates.** 6178 TS · 6760 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189
+of 189, no poisons.

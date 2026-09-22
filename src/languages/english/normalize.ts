@@ -410,6 +410,17 @@ const SLASH_ELIDED: ReadonlySet<string> = new Set(
  * ⚠ AND `i/o` IS ABSENT ON PURPOSE. It has one reading, but that reading IS the letters — "I O" — so
  * the fall-through already produces it and a row would only be a second place to maintain it.
  */
+const SLASH_ABBREV: Readonly<Record<string, string>> = {
+    "w/o": "without", "c/o": "care of", "n/a": "not applicable",
+    "w/out": "without",
+    "a/d": "analog to digital", "d/a": "digital to analog", "y/n": "yes no",
+    // ⚠ `r/w` IS THE ONE ROW THAT DOES NOT FULLY MEET THE BAR ABOVE, recorded rather than hidden.
+    // Read/write is the dominant reading and the one asked for, but RIGHT-OF-WAY is live in civil and
+    // property text — `R/W easement` now reads "read write easement", which is wrong there. Kept
+    // because computing text is far the commoner context; delete this row if that stops being true.
+    "r/w": "read write",
+};
+
 /**
  * CONCATENATED ELEMENT-SYMBOL FORMULAE with a fixed reading — `CoCr` is "cobalt chromium", not the word
  * *cocker*, which is what the g2p invents when the whole run reaches it as one token.
@@ -426,29 +437,33 @@ const SLASH_ELIDED: ReadonlySet<string> = new Set(
  * separates a formula from the recorded word it spells, which the dictionary cannot do: `sic`, `tin`
  * and `nan` are all real entries.
  *
- * ⚠ SAME BAR AS `SLASH_ABBREV` BELOW: a row needs a SINGLE DOMINANT READING, because the failure mode
+ * ⚠ SAME BAR AS `SLASH_ABBREV` ABOVE: a row needs a SINGLE DOMINANT READING, because the failure mode
  * of guessing is a wrong word inserted into prose. Rows are added on report, not by enumeration.
  */
 const FORMULA_READING: Readonly<Record<string, string>> = {
     CoCr: "cobalt chromium", CoCrMo: "cobalt chromium molybdenum",
+    // ⚠ THE HYPHENATED SPELLINGS OF A LISTED ALLOY BELONG WITH IT, or the row HALF-EXPANDS: the
+    // boundary deliberately does not exclude ⟨-⟩ (so `CoCr-based` reads "cobalt chromium-based",
+    // which is right), and without these rows `CoCr-Mo` matched `CoCr` and stranded a bare ⟨Mo⟩ —
+    // "cobalt chromium-Mo", the exact leak longest-first ordering exists to prevent, reached
+    // through a separator instead of concatenation.
+    "CoCr-Mo": "cobalt chromium molybdenum", "Co-Cr-Mo": "cobalt chromium molybdenum",
+    "Co-Cr": "cobalt chromium",
 };
 
-/** ⚠ NO `i` FLAG — see `FORMULA_READING`: the capitalisation IS the signal. Longest-first so `CoCrMo`
- *  is not claimed as `CoCr` plus a stranded tail. */
+/**
+ * ⚠ NO `i` FLAG — see `FORMULA_READING`: the capitalisation IS the signal. Longest-first so `CoCrMo`
+ * is not claimed as `CoCr` plus a stranded tail.
+ *
+ * ⚠ AND A FOLLOWING HYPHENATED CAPITAL REFUSES THE WHOLE MATCH, which is where a LIST has to stop
+ * honestly. `Co-Cr-Mo-W` is a real alloy that is not listed; without this it matched the listed
+ * `Co-Cr-Mo` and read "cobalt chromium molybdenum-W", stranding a bare ⟨W⟩ — a half-expansion, the
+ * worst outcome, because it sounds finished. A lowercase tail is the opposite case and must still
+ * pass: `CoCr-based` is "cobalt chromium-based", which is exactly right.
+ */
 const FORMULA_TOKEN = new RegExp(
     `(?<![\\p{L}${LATIN_MARK}\\d])(${Object.keys(FORMULA_READING).sort((a, b) => b.length - a.length).join("|")})`
-    + `(?![\\p{L}${LATIN_MARK}\\d])`, "gu");
-
-const SLASH_ABBREV: Readonly<Record<string, string>> = {
-    "w/o": "without", "c/o": "care of", "n/a": "not applicable",
-    "w/out": "without",
-    "a/d": "analog to digital", "d/a": "digital to analog", "y/n": "yes no",
-    // ⚠ `r/w` IS THE ONE ROW THAT DOES NOT FULLY MEET THE BAR ABOVE, recorded rather than hidden.
-    // Read/write is the dominant reading and the one asked for, but RIGHT-OF-WAY is live in civil and
-    // property text — `R/W easement` now reads "read write easement", which is wrong there. Kept
-    // because computing text is far the commoner context; delete this row if that stops being true.
-    "r/w": "read write",
-};
+    + `(?![\\p{L}${LATIN_MARK}\\d])(?!-\\p{Lu})`, "gu");
 
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
  *  the word "no". */

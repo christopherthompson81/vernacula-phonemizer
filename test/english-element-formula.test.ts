@@ -40,6 +40,26 @@ describe("a listed element-symbol formula reads as its element names", () => {
             expect(normalizeEnglish(w)).toBe(w);
     });
 
+    // ⚠ THE HYPHENATED SPELLINGS ARE ROWS, NOT AN ACCIDENT. The boundary deliberately does not
+    // exclude ⟨-⟩, so `CoCr-based` reads correctly — but that also meant `CoCr-Mo` matched `CoCr` and
+    // stranded a bare ⟨Mo⟩. A half-expansion is the worst outcome available, because it sounds
+    // finished.
+    test("a hyphenated spelling of a listed alloy does not half-expand", () => {
+        expect(normalizeEnglish("CoCr-Mo")).toBe("cobalt chromium molybdenum");
+        expect(normalizeEnglish("Co-Cr-Mo")).toBe("cobalt chromium molybdenum");
+        expect(normalizeEnglish("Co-Cr")).toBe("cobalt chromium");
+        expect(normalizeEnglish("CoCr-based")).toBe("cobalt chromium-based");
+        expect(normalizeEnglish("a CoCr-based alloy")).toBe("a cobalt chromium-based alloy");
+    });
+
+    // ⚠ AND AN UNLISTED LONGER ALLOY IS REFUSED WHOLE. `Co-Cr-Mo-W` is real and not listed; matching
+    // the listed prefix would read "cobalt chromium molybdenum-W". Declining is where a list stops
+    // honestly — it claims only what it knows.
+    test("an unlisted longer alloy is refused rather than half-read", () => {
+        expect(normalizeEnglish("Co-Cr-Mo-W")).toBe("Co-Cr-Mo-W");
+        expect(normalizeEnglish("CoCr-X")).toBe("CoCr-X");
+    });
+
     test("the token is bounded", () => {
         expect(normalizeEnglish("XCoCr")).toBe("XCoCr");
         expect(normalizeEnglish("CoCr2")).toBe("CoCr2");
