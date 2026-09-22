@@ -51,6 +51,14 @@ distinction is the whole safeguard:
 - **anything else is the binary's letter-to-sound rules**, which is a G2P guess of exactly the kind
   this engine already makes. A guess from another engine is not evidence about a word.
 
+⚠ **THE DICTSOURCE-NOT-BINARY BAR IS ALSO WHAT KEEPS THIS FILE OUT OF THE GPL FENCE.** espeak-ng is
+GPL-3.0 and `data/LICENSES/PROVENANCE.md` §5.1 reads its dictsource **as plain files**, consulted and not
+shipped. Three rows here rest on one decision each and the shipped value is the parent's own CMUdict row
+with that one feature rewritten — no espeak phoneme string is reproduced — which is the
+`catalan/mid-vowels.tsv` shape (§1, Facts), not `pashto/lexicon.tsv`'s (§4, per-file GPL fence, where
+95.4% of rows are reachable only from the GPL source). Exact citations, and the note that the binary was
+a SEARCH step only, are in §5.1 item 5.
+
 ⚠ **AND THE SECOND SOURCE DOES NOT OUTRANK THE ENTAILMENT RULE FOR INFLECTIONS.** espeak reads
 `ballets` as `bˈaleɪs`, with a voiceless /s/ that is simply wrong; its inflections are rule-derived.
 Inflected rows keep coming from the lemma's citation plus the PARENT's own suffix, as before.
