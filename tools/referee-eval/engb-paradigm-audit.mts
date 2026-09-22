@@ -21,12 +21,14 @@ const words = (f: string): string[] =>
         .filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!);
 
 const SETS = ["bath", "cloth", "yod", "palm", "lotr"] as const;
-const set = new Map(SETS.map((s) => [s, new Set(words(`en-gb-${s}.tsv`))]));
 
-const dict = new Set(
-    readFileSync(join(HERE, "..", "..", "data", "languages", "english", "g2p-dict.tsv"), "utf8")
-        .split("\n").filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!),
-);
+/**
+ * ⚠ NOTHING HERE MAY READ A FILE AT MODULE SCOPE. `build-en-gb-sets.ts` imports `lemmaCandidates` from
+ * this module, and that builder is what GENERATES the five set files — it documents that "AN ABSENT SET
+ * FILE IS LEGITIMATE … so this must REPORT it, not die with an ENOENT trace". A module-scope
+ * `readFileSync` of the sets made merely importing the helper crash the generator on a tree where one of
+ * its own outputs is missing, before any of its code ran.
+ */
 
 /** Candidate LEMMAS for a surface form, by stripping ONE regular inflectional suffix. Over-generates on
  *  purpose — the dictionary filters. Deliberately no -er/-est: agentive -er is DERIVATIONAL and may
@@ -44,7 +46,12 @@ export function lemmaCandidates(w: string): string[] {
     if (w.endsWith("s")) push(w.slice(0, -1));
     if (w.endsWith("ed")) { push(w.slice(0, -2)); push(w.slice(0, -1)); dbl(w.slice(0, -2)); }
     if (w.endsWith("ing")) { push(w.slice(0, -3)); push(`${w.slice(0, -3)}e`); dbl(w.slice(0, -3)); }
-    return out;
+    // ⚠ DEDUPED, BECAUSE THE `-es` RULES OVERLAP: `causes` proposes `caus`, `cause` and `cause` again.
+    // The audit `break`s on the first hit so it never noticed, but the builder indexes EVERY candidate into
+    // `inflectionsOf`, so a duplicate made the propagation loop visit that word twice — harmless for the
+    // membership (`inSomeSet` catches it) and NOT harmless for the counters, which double-reported every
+    // `-es` word that was vetoed or declined.
+    return [...new Set(out)];
 }
 
 /**
@@ -66,6 +73,10 @@ const DIAGNOSTIC: Record<string, (lemma: string, infl: string) => boolean> = {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const { phonemizeWord } = await import("../../src/languages/english-gb/english-gb.ts");
+    const dict = new Set(
+        readFileSync(join(HERE, "..", "..", "data", "languages", "english", "g2p-dict.tsv"), "utf8")
+            .split("\n").filter((l) => l.includes("\t") && !l.startsWith("#")).map((l) => l.split("\t")[0]!),
+    );
     const listing = process.argv.includes("--list") ? process.argv[process.argv.indexOf("--list") + 1] : undefined;
     let members = 0, product = 0;
     for (const s of SETS) {

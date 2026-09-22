@@ -192,3 +192,58 @@ cannot double-claim.
 
 The sort stays — `--explain` output is read in order when adjudicating a veto — but the comment now says
 what it is for. A comment a test contradicts is worse than no comment.
+
+## Run 5 — 2026-09-22 — review round on #1409: nine findings, and two are the same bug twice
+
+### ⚠ IMPORTING THE AUDIT HELPER CRASHED THE GENERATOR OF THE FILES IT READS
+
+`engb-paradigm-audit.mts` read all five `en-gb-*.tsv` **at module scope**, and `build-en-gb-sets.ts`
+imports `lemmaCandidates` from it. So merely importing the helper made the tool that *generates* those
+files die with ENOENT on a tree where one of its own outputs is missing — directly contradicting the
+invariant the builder documents four lines from its own `--check` ("AN ABSENT SET FILE IS LEGITIMATE …
+so this must REPORT it, not die with an ENOENT trace"). The module-level map was also dead: every use
+shadowed it. Reads moved inside the main block; verified by moving `en-gb-palm.tsv` aside and running.
+
+### ⚠ THE PROPAGATION VETO NEVER GOT THE WEAK-VOWEL FIX THE CLAIM GUARD JUST RECEIVED
+
+Run 3 fixed the PALM claim guard because `comet`'s British row `kɒmɪt` and our `kɒmət` differ on the
+reduced vowel alone. **The propagation veto one page below still used exact match** — so the pass that
+AMPLIFIES a bad membership was the one still vulnerable to the defect that motivated the whole fix.
+Latent today (only `grandfathering` of the newly propagated PALM words has a referee row at all), which
+is precisely why it would have sat there.
+
+### ⚠ AND THE `-es` DUPLICATE WAS INFLATING EVERY DIAGNOSTIC I HAD BEEN READING
+
+`lemmaCandidates("causes")` returned `caus`, `cause`, `cause` — the `-es` and `-s` rules overlap. The
+audit `break`s on the first hit so it never noticed; the builder indexes EVERY candidate, so those words
+were visited twice and counted twice. Deduped, and the numbers move exactly as predicted:
+
+    memberships  +598  →  +598      (unchanged — `inSomeSet` had always caught the second visit)
+    vetoed         22  →   19
+    not-the-lemma 134  →  127
+
+**The membership result was never wrong; the counters I had been quoting were.** A diagnostic that
+over-counts in one class is the kind of thing that survives indefinitely because nothing depends on it.
+
+### Four more, each real
+
+- **`process.exit(0)` straight after `process.stdout.write`** — stdout is a PIPE for both the shard
+  payload and `--dump`, so it is asynchronous and `exit` does not flush. Past what libuv hands the
+  kernel in one go the tail is dropped and the parent fails in `JSON.parse`, on a payload that grows
+  with the sets. Now `writeSync(1, …)`.
+- **`buf += d.toString()` per chunk** decodes a code point straddling a read boundary as two halves.
+  ASCII headwords today; `setEncoding("utf8")` now.
+- **⚠ THE SHARD TEST WAS VACUOUS ON A ONE-CORE RUNNER.** `jobs` is clamped to the core count, so
+  `--jobs 3` there is the serial path and the equivalence test compares serial against serial — green
+  for exactly the bug it exists to catch. The builder now reports `[jobs] effective N` on stderr, the
+  test asserts it really sharded, and skips below two cores.
+- **⚠ AND THE WRITE-GUARD TEST'S FAILURE MODE WAS CLOBBERING FIVE COMMITTED FILES**, while `.toThrow()`
+  accepted any non-zero exit — a typo in the path would have passed it. Now asserts the message and
+  snapshots/restores the five sets. Proved by removing the guard: the test fails, and
+  `check:en-gb-sets` still reports fresh afterwards, so the restore works.
+
+### On the cost of the new test
+
+Review flagged two 300s timeouts as a large fixed cost. Measured: **~19s of CPU and ~0 of wall clock** —
+the suite's wall time is set by its longest file (`onset-r`, ~47s) and this runs beside it. The floor is
+engine load plus the dict-wide inflection index, which `--limit` cannot reduce. Kept in the suite.

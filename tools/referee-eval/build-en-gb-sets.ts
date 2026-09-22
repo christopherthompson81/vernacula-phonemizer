@@ -6,7 +6,7 @@
  *
  *   npx tsx tools/referee-eval/build-en-gb-sets.ts
  */
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, writeSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,7 +47,13 @@ const edits: [string[], (s: string) => string][] = [
     [lotr, (s) => s.replace(/[ɑɔ]ːɹ/u, "ɒɹ")], // LOT before intervocalic r (sorry→sɒɹi; starry stays stɑːɹi)
     [palm, (s) => s.replace(/ɒ/u, "ɑː")], // LOT rule mis-fired on a PALM word → restore [ɑː]
 ];
-/** One reduced-vowel slot, for comparisons where the referee and this engine may spell it differently. */
+/**
+ * One reduced-vowel slot, for comparisons where the referee and this engine may spell it differently.
+ * ⚠ NO STRESS GUARD, UNLIKE `bare()` BELOW, AND THE TWO ARE NOT IN CONFLICT: `weak` is only ever applied
+ * to strings the BACKBONE has already been through, which strips every stress mark, so there is nothing
+ * left to gate on. `bare` runs on raw engine output, where a stressed vowel is exactly what tells `past`
+ * from `paste`.
+ */
 const weak = (x: string): string => x.replace(/[əɪᵻ]/gu, "ə");
 const CORONAL_YOD = /[tdnszθl]j/u; // a post-coronal yod glide (position marker, not a full match)
 const CORONAL_U = /[tdnszθl]ʰ?[ˈˌ]?uː/u; // our coronal + (aspiration) + (stress) + GOOSE, the yod-eligible slot
@@ -152,10 +158,19 @@ for (const row of delegating ? [] : rows) {
 }
 
 if (shardArg >= 0) {
-    process.stdout.write(JSON.stringify({ bath, cloth, yod, palm, lotr, claimed }));
+    // ⚠ `writeSync` TO FD 1, NOT `process.stdout.write` + `process.exit`. stdout is a PIPE here (the
+    // parent spawns with `stdio: [..., "pipe", ...]`), so it is asynchronous, and `process.exit` does not
+    // flush pending writes — past whatever libuv hands the kernel in one go the tail is simply dropped and
+    // the parent fails in `JSON.parse` on a payload that grows with the sets.
+    writeSync(1, JSON.stringify({ bath, cloth, yod, palm, lotr, claimed }));
     process.exit(0);
 }
 
+// ⚠ REPORTED ON STDERR SO THE SHARD TEST CAN PROVE IT ACTUALLY SHARDED. `jobs` is CLAMPED to the core
+// count, so on a one-core runner `--jobs 3` silently becomes the serial path and an equivalence test
+// comparing it against `--jobs 1` passes while exercising nothing — green for exactly the bug it exists
+// to catch.
+console.error(`[jobs] effective ${jobs}`);
 if (jobs > 1) {
     const { spawn } = await import("node:child_process");
     const parts = await Promise.all(Array.from({ length: jobs }, (_, i) => new Promise<{
@@ -164,8 +179,12 @@ if (jobs > 1) {
         const child = spawn("npx", ["tsx", fileURLToPath(import.meta.url), "--shard", `${i}/${jobs}`,
             ...(limit === Infinity ? [] : ["--limit", String(limit)])],
             { stdio: ["ignore", "pipe", "inherit"] });
+        // ⚠ `setEncoding`, NOT `d.toString()` PER CHUNK — a code point straddling a read boundary would be
+        // decoded as two halves and become U+FFFD. The headwords are ASCII today; the payload is not the
+        // place to rely on that.
         let buf = "";
-        child.stdout.on("data", (d: Buffer) => { buf += d.toString(); });
+        child.stdout.setEncoding("utf8");
+        child.stdout.on("data", (d: string) => { buf += d; });
         child.on("error", rej);
         child.on("close", (code) => {
             if (code !== 0) { rej(new Error(`shard ${i} exited ${code}`)); return; }
@@ -275,8 +294,11 @@ for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i
                 continue;   // the edit has nothing to bite on
             }
             const refFolded = (refOf.get(w) ?? []).map((r) => fold(r));
-            if (refFolded.length > 0 && refFolded.includes(fold(ours)) &&
-                (name === "palm" || !refFolded.includes(fold(e)))) {
+            // ⚠ THE SAME WEAK-VOWEL FOLD AS THE CLAIM GUARD ABOVE, and it was missing here for one review
+            // round — the exact defect `comet` exposed, one page away, in the pass that AMPLIFIES it.
+            const attestsOurs = refFolded.some((r) => weak(r) === weak(fold(ours)));
+            if (refFolded.length > 0 && attestsOurs &&
+                (name === "palm" || !refFolded.some((r) => weak(r) === weak(fold(e))))) {
                 vetoed++;
                 if (explain) console.log(`  VETO  ${name.padEnd(5)} ${lemma} -> ${w}   ours ${fold(ours)}  edit ${fold(e)}  ref ${refFolded.join(" | ")}`);
                 continue;   // the referee vetoes
@@ -300,7 +322,7 @@ if (process.argv.includes("--dump")) {
     const out: string[] = [];
     for (const [name, words] of [["bath", bath], ["cloth", cloth], ["yod", yod], ["palm", palm], ["lotr", lotr]] as [string, string[]][])
         for (const w of [...words].sort()) out.push(`${name}\t${w}`);
-    process.stdout.write(`${out.join("\n")}\n`);
+    writeSync(1, `${out.join("\n")}\n`);   // synchronous, for the same reason as the shard payload above
     process.exit(0);
 }
 const check = process.argv.includes("--check");
