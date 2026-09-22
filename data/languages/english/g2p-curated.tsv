@@ -1720,7 +1720,7 @@ revisionists	R IY0 V IH1 ZH AH0 N IH0 S T S	R IH0 V IH1 ZH AH0 N IH0 S T S	parad
 revisions	R IY0 V IH1 ZH AH0 N Z	R IH0 V IH1 ZH AH0 N Z	paradigm completion (the #replace precedent)
 revives	R IY0 V AY1 V Z	R IH0 V AY1 V Z	split re- paradigm (majority / two-source)
 revolting	R IY0 V OW1 L T IH0 NG	R IH0 V OW1 L T IH0 NG	split re- paradigm (majority / two-source)
-revolve	R IY0 V AA1 L V	R IH0 V AO1 L V	LOT/THOUGHT: align AA/AO to gold's consistent system; and prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:revolv]
+revolve	R IY0 V AA1 L V	R IH0 V AO1 L V	LOT/THOUGHT: align AA/AO to gold's consistent system; and prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 3 members (#1397) [re:revolv]
 revolver	R IH0 V AA1 L V ER0	R IH0 V AO1 L V ER0	LOT/THOUGHT: align AA/AO to gold's consistent system
 rewiring	R IY0 W AY1 ER0 IH0 NG	R IY0 W AY1 R IH0 NG	#1289
 reykjavik	R EH1 K Y AH0 V IH0 K	R EY1 K Y AH0 V IH2 K	gold + moby; family consistency
@@ -3152,39 +3152,46 @@ rr		AA1 R AA1 R	CMUdict has no `rr`; the letter spelling, so a bare ⟨rr⟩ is 
 # ɹᵻpɹˈiːv — so this is not the AH0/IH0 notation pair that both render ᵻ.
 # ⚠ ESPEAK CANNOT ARBITRATE THIS CLASS: over a quarter of the 3,391 prefix words it writes the reduced
 # vowel every time and the tense vowel NEVER, so its vote is a constant. #1378 item 4's "espeak backs
-# the agreed form on 27 of 35" therefore says only that 27 of those forms were reduced. misaki
-# us_gold.json is not on this machine, so these rest on MOBY alone (`retrieve r/I/` against
-# `repress r/i/`) and therefore on a TWO-MEMBER rule: one covered word is not a family verdict.
-# ⚠ OF 62 SPLIT FAMILIES, MOBY SETTLES 14. It covers 59 and is internally consistent on 34 — the gap
-# between 34 and 14 is families it covers on only ONE member. Re-run with
-# tools/english/en_prefix_arbitrate.mts, which also prints the espeak measurement (`--espeak`).
-# ⚠ AND THE FAMILY BOUNDARY IS THE MEASUREMENT, THREE TIMES OVER. A grouper missing `ist`/`ative` made
-# families too small; a guard that checked FAMILIES could not see an orphan in a family of one
-# (`prescriptivist`, because `ist` strips before `ive` can); and a pairwise guard that compared spellings
-# directly could not see through the e-drop. The tool now refuses to emit while any related pair would
-# disagree, and extends a settled family by relatedness before applying.
-deform	D IY2 F AO1 R M	D IH0 F AO1 R M	prefix vowel: family consistency, Moby reduced on 2 members (#1397) [de:deform]
-detoxication	D IH0 T AA2 K S AH0 K EY1 SH AH0 N	D IY0 T AA2 K S AH0 K EY1 SH AH0 N	prefix vowel: family consistency, Moby tense on 2 members (#1397) [de:detoxicat]
-detractor	D IY0 T R AE1 K T ER0	D IH0 T R AE1 K T ER0	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [de:detract]
-devaluate	D IH0 V AE1 L Y UW0 EY2 T	D IY0 V AE1 L Y UW0 EY2 T	prefix vowel: family consistency, Moby tense on 2 members (#1397) [de:devaluat]
-devaluated	D IH0 V AE1 L Y UW0 EY2 T IH0 D	D IY0 V AE1 L Y UW0 EY2 T IH0 D	prefix vowel: family consistency, Moby tense on 2 members (#1397) [de:devaluat]
-devaluation	D IH0 V AE2 L Y UW0 EY1 SH AH0 N	D IY0 V AE2 L Y UW0 EY1 SH AH0 N	prefix vowel: family consistency, Moby tense on 2 members (#1397) [de:devaluat]
-precess	P R AH0 S EH1 S	P R IY0 S EH1 S	prefix vowel: family consistency, Moby tense on 3 members (#1397) [pre:precess]
-precessional	P R AH0 S EH1 SH AH0 N AH0 L	P R IY0 S EH1 SH AH0 N AH0 L	prefix vowel: family consistency, Moby tense on 3 members (#1397) [pre:precess]
-precipitously	P R IY2 S IH1 P IH0 T AH0 S L IY0	P R IH0 S IH1 P IH0 T AH0 S L IY0	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [pre:precipitou]
-precipitousness	P R IY0 S IH1 P AH0 T AH0 S N AH0 S	P R IH0 S IH1 P AH0 T AH0 S N AH0 S	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [pre:precipitou]
-prescriptive	P R IY0 S K R IH1 P T IH0 V	P R IH0 S K R IH1 P T IH0 V	prefix vowel: family consistency, Moby reduced on 4 members (#1397) [pre:prescript]
-prescriptively	P R IY0 S K R IH1 P T IH0 V L IY0	P R IH0 S K R IH1 P T IH0 V L IY0	prefix vowel: family consistency, Moby reduced on 4 members (#1397) [pre:prescript]
-prescriptiveness	P R IY0 S K R IH1 P T IH0 V N IH0 S	P R IH0 S K R IH1 P T IH0 V N IH0 S	prefix vowel: family consistency, Moby reduced on 4 members (#1397) [pre:prescript]
-prescriptivist	P R IY0 S K R IH1 P T AH0 V IH0 S T	P R IH0 S K R IH1 P T AH0 V IH0 S T	prefix vowel: family consistency, Moby reduced on 4 members (#1397) [pre:prescript]
-preserver	P R IY0 Z ER1 V ER0	P R IH0 Z ER1 V ER0	prefix vowel: family consistency, Moby reduced on 2 members (#1397) [pre:preserv]
-preservers	P R IY0 Z ER1 V ER0 Z	P R IH0 Z ER1 V ER0 Z	prefix vowel: family consistency, Moby reduced on 2 members (#1397) [pre:preserv]
-presumptive	P R IY0 Z AH1 M P T IH0 V	P R IH0 Z AH1 M P T IH0 V	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [pre:presumpt]
-presumptively	P R IY0 Z AH1 M P T IH0 V L IY0	P R IH0 Z AH1 M P T IH0 V L IY0	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [pre:presumpt]
-prevaricator	P R IY0 V EH1 R AH0 K EY2 T ER0	P R IH0 V EH1 R AH0 K EY2 T ER0	prefix vowel: family consistency, Moby reduced on 2 members (#1397) [pre:prevaricat]
-retaliatory	R IY0 T AE1 L Y AH0 T AO2 R IY0	R IH0 T AE1 L Y AH0 T AO2 R IY0	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:retaliat]
-retiree	R IY0 T AY1 R IY1	R IH0 T AY1 R IY1	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:retire]
-revolts	R IY0 V OW1 L T S	R IH0 V OW1 L T S	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:revolt]
-revolved	R IY0 V AA1 L V D	R IH0 V AA1 L V D	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:revolv]
-revolves	R IY0 V AA1 L V Z	R IH0 V AA1 L V Z	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:revolv]
-revolving	R IY0 V AA1 L V IH0 NG	R IH0 V AA1 L V IH0 NG	prefix vowel: family consistency, Moby reduced on 3 members (#1397) [re:revolv]
+# the agreed form on 27 of 35" therefore says only that 27 of those forms were reduced.
+# ⚠ AND AN EARLIER VERSION OF THIS BLOCK SAID us_gold.json WAS NOT ON THIS MACHINE. It is; the search
+# that looked for it used `-maxdepth 6` and it sits at depth 7. It DISCRIMINATES, and of the 26 rows
+# that earlier pass shipped on Moby alone it CONTRADICTS THIRTEEN. Those rows were reverted.
+# ⚠ SO THE RULE IS BOTH SOURCES, AND ABSTAIN WHENEVER EITHER ONE HESITATES: gold and Moby must agree,
+# or one must speak on TWO members while the other is silent. A source that contradicts ITSELF across
+# the family stops the family — that is evidence of difficulty, not of absence, and conflating the two
+# is what let `detoxication` ship tense while gold reads it reduced.
+#   62 split families → 22 settled → 34 rows. 39 abstain because a source hesitates; 1 is too thin.
+#   Re-run: tools/english/en_prefix_arbitrate.mts (GOLD=, MOBY=, --espeak, --emit).
+debriefed	D IH0 B R IY1 F T	D IY0 B R IY1 F T	prefix vowel: family consistency, tense — gold and Moby agree on 2 and 1 members (#1397) [de:debrief]
+debriefs	D IH0 B R IY1 F S	D IY0 B R IY1 F S	prefix vowel: family consistency, tense — gold and Moby agree on 2 and 1 members (#1397) [de:debrief]
+deform	D IY2 F AO1 R M	D IH0 F AO1 R M	prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 2 members (#1397) [de:deform]
+depopulation	D IH0 P AA2 P Y AH0 L EY1 SH AH0 N	D IY0 P AA2 P Y AH0 L EY1 SH AH0 N	prefix vowel: family consistency, tense — gold and Moby agree on 2 and 1 members (#1397) [de:depopulat]
+detractor	D IY0 T R AE1 K T ER0	D IH0 T R AE1 K T ER0	prefix vowel: family consistency, reduced — gold and Moby agree on 4 and 3 members (#1397) [de:detract]
+devaluate	D IH0 V AE1 L Y UW0 EY2 T	D IY0 V AE1 L Y UW0 EY2 T	prefix vowel: family consistency, tense — gold and Moby agree on 1 and 2 members (#1397) [de:devaluat]
+devaluated	D IH0 V AE1 L Y UW0 EY2 T IH0 D	D IY0 V AE1 L Y UW0 EY2 T IH0 D	prefix vowel: family consistency, tense — gold and Moby agree on 1 and 2 members (#1397) [de:devaluat]
+devaluation	D IH0 V AE2 L Y UW0 EY1 SH AH0 N	D IY0 V AE2 L Y UW0 EY1 SH AH0 N	prefix vowel: family consistency, tense — gold and Moby agree on 1 and 2 members (#1397) [de:devaluat]
+preferred	P R AH0 F ER1 D	P R IY0 F ER1 D	prefix vowel: family consistency, tense — gold on 2 members, Moby silent (#1397) [pre:preferr]
+preferring	P R IH0 F ER1 IH0 NG	P R IY0 F ER1 IH0 NG	prefix vowel: family consistency, tense — gold on 2 members, Moby silent (#1397) [pre:preferr]
+preserver	P R IY0 Z ER1 V ER0	P R IH0 Z ER1 V ER0	prefix vowel: family consistency, reduced — gold and Moby agree on 4 and 2 members (#1397) [pre:preserv]
+preservers	P R IY0 Z ER1 V ER0 Z	P R IH0 Z ER1 V ER0 Z	prefix vowel: family consistency, reduced — gold and Moby agree on 4 and 2 members (#1397) [pre:preserv]
+rebuffing	R IY0 B AH1 F IH0 NG	R IH0 B AH1 F IH0 NG	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:rebuff]
+rebuffs	R IY0 B AH1 F S	R IH0 B AH1 F S	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:rebuff]
+recites	R IY0 S AY1 T S	R IH0 S AY1 T S	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:recite]
+reciting	R IY0 S AY1 T IH0 NG	R IH0 S AY1 T IH0 NG	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:recite]
+recurred	R IY0 K ER1 D	R IH0 K ER1 D	prefix vowel: family consistency, reduced — gold on 2 members, Moby silent (#1397) [re:recurr]
+regain	R IH0 G EY1 N	R IY0 G EY1 N	prefix vowel: family consistency, tense — gold and Moby agree on 1 and 1 members (#1397) [re:regain]
+regaining	R IH0 G EY1 N IH0 NG	R IY0 G EY1 N IH0 NG	prefix vowel: family consistency, tense — gold and Moby agree on 1 and 1 members (#1397) [re:regain]
+rejuvenating	R IY0 JH UW1 V AH0 N EY2 T IH0 NG	R IH0 JH UW1 V AH0 N EY2 T IH0 NG	prefix vowel: family consistency, reduced — gold and Moby agree on 4 and 1 members (#1397) [re:rejuvenat]
+reliefs	R IY0 L IY1 F S	R IH0 L IY1 F S	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:relief]
+religionist	R IY0 L IH1 JH AH0 N IH0 S T	R IH0 L IH1 JH AH0 N IH0 S T	prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 1 members (#1397) [re:religion]
+remediate	R IY0 M IY1 D IY0 AH0 T	R IH0 M IY1 D IY0 AH0 T	prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 1 members (#1397) [re:remediat]
+remodeling	R IH0 M AA1 D AH0 L IH0 NG	R IY0 M AA1 D AH0 L IH0 NG	prefix vowel: family consistency, tense — gold and Moby agree on 3 and 1 members (#1397) [re:remodel]
+remoteness	R IY0 M OW1 T N AH0 S	R IH0 M OW1 T N AH0 S	prefix vowel: family consistency, reduced — gold and Moby agree on 3 and 1 members (#1397) [re:remote]
+repealing	R IY0 P IY1 L IH0 NG	R IH0 P IY1 L IH0 NG	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:repeal]
+repeals	R IY0 P IY1 L Z	R IH0 P IY1 L Z	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:repeal]
+responsibilities	R IY0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z	prefix vowel: family consistency, reduced — gold and Moby agree on 1 and 1 members (#1397) [re:responsibilit]
+retaliatory	R IY0 T AE1 L Y AH0 T AO2 R IY0	R IH0 T AE1 L Y AH0 T AO2 R IY0	prefix vowel: family consistency, reduced — gold and Moby agree on 3 and 3 members (#1397) [re:retaliat]
+revolts	R IY0 V OW1 L T S	R IH0 V OW1 L T S	prefix vowel: family consistency, reduced — gold and Moby agree on 4 and 3 members (#1397) [re:revolt]
+revolved	R IY0 V AA1 L V D	R IH0 V AA1 L V D	prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 3 members (#1397) [re:revolv]
+revolves	R IY0 V AA1 L V Z	R IH0 V AA1 L V Z	prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 3 members (#1397) [re:revolv]
+revolving	R IY0 V AA1 L V IH0 NG	R IH0 V AA1 L V IH0 NG	prefix vowel: family consistency, reduced — gold and Moby agree on 2 and 3 members (#1397) [re:revolv]

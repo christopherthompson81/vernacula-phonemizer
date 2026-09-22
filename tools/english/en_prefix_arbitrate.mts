@@ -21,6 +21,30 @@ import { familyKey, isTense, loadPrefixWords, orphansAfter, relatedForms, type W
 
 const MOBY = process.env["MOBY"] ?? "/mnt/data/moby/mobypron.unc";
 
+/**
+ * misaki `us_gold.json` — CMUdict plus heavy hand curation, the lexicon Kokoro was trained on.
+ * ⚠ IT IS ON THIS MACHINE AND AN EARLIER RUN OF THIS INVESTIGATION SAID IT WAS NOT. The `find` that
+ * looked for it used `-maxdepth 6` and the file sits at depth 7 inside a site-packages tree; the claim
+ * "of the three sources #1397 names, one is uninformative and one is absent" went into the curated
+ * file's comment block and into the log on the strength of a depth-limited search reported as a fact.
+ * ⚠ AND IT MATTERS, BECAUSE IT DISCRIMINATES AND IT DISAGREES WITH MOBY. Of the 26 rows the first pass
+ * shipped on Moby alone, gold contradicts THIRTEEN — `prescriptive*` and `presumptive*` it reads TENSE
+ * where Moby said reduced, `precess*` reduced where Moby said tense. Moby alone was not a sound basis.
+ */
+const GOLD = process.env["GOLD"]
+    ?? "/home/chris/base/lib/python3.12/site-packages/misaki/data/us_gold.json";
+function goldVowels(): Map<string, "T" | "R"> {
+    const out = new Map<string, "T" | "R">();
+    if (!existsSync(GOLD)) return out;
+    const d = JSON.parse(readFileSync(GOLD, "utf8")) as Record<string, unknown>;
+    for (const [w, v] of Object.entries(d)) {
+        if (typeof v !== "string") continue;                       // gold stores POS pairs as objects
+        const m = /^(?:p?ɹ|d)([iəɪ])/u.exec(v.replace(/[ˈˌ]/gu, ""));
+        if (m) out.set(w, m[1] === "i" ? "T" : "R");
+    }
+    return out;
+}
+
 /** Moby writes `/i/` for FLEECE (tense) and `/I/` for KIT (reduced); the prefix vowel is the first. */
 function mobyVowels(): Map<string, "T" | "R"> {
     const out = new Map<string, "T" | "R">();
@@ -47,6 +71,7 @@ export function families(words: Word[]): Map<string, Word[]> {
 const words = loadPrefixWords();
 const fams = families(words);
 const moby = mobyVowels();
+const gold = goldVowels();
 
 if (process.argv.includes("--espeak")) {
     const sample = words.filter((_, i) => i % 4 === 0);
@@ -65,25 +90,47 @@ if (process.argv.includes("--espeak")) {
     console.log(t === 0 ? "⚠ ZERO TENSE — espeak's vote is a constant and cannot arbitrate this class." : "");
 }
 
-// ⚠ TWO INDEPENDENT MEMBERS MUST AGREE. Many families are covered by ONE Moby row, and a single word's
-// vote generalised to a six-word family is not a family verdict — `re:rebuff` is covered on 1 of 4.
+/**
+ * ⚠ TWO SOURCES, AND THEY MUST NOT CONTRADICT EACH OTHER. #1397 asks for a majority of espeak + gold +
+ * Moby; espeak's vote is a constant (`--espeak` proves it), so the majority is gold and Moby, and a
+ * majority of two is agreement. Where they split the family ABSTAINS — measured, they split often.
+ * ⚠ AND THE TWO-MEMBER RULE STILL APPLIES TO A LONE SOURCE. A family the other source is silent on is
+ * settled only if the speaking one covers TWO members: one covered word is not a family verdict, which
+ * is what made `re:rebuff` (1 of 4) look settled in the first pass.
+ */
+/**
+ * ⚠ "SILENT" AND "SPLIT WITHIN ITSELF" ARE DIFFERENT STATES AND CONFLATING THEM LETS THE OTHER SOURCE
+ * WIN AN ARGUMENT IT WAS NOT IN. A first version returned `undefined` for both, so a family gold
+ * disagrees with ITSELF about fell through to Moby and shipped as "gold silent" — `detoxication` went
+ * out tense that way while gold reads it `dətˌɑksəkˈAʃən`, reduced. A source that speaks and
+ * contradicts itself is evidence of DIFFICULTY, not of absence.
+ */
+type Verdict = { kind: "silent" } | { kind: "split" } | { kind: "says"; v: "T" | "R"; n: number };
+const verdict = (m: Word[], src: Map<string, "T" | "R">): Verdict => {
+    const votes = m.map((x) => src.get(x.word)).filter((v) => v !== undefined) as ("T" | "R")[];
+    if (votes.length === 0) return { kind: "silent" };
+    if (new Set(votes).size > 1) return { kind: "split" };
+    return { kind: "says", v: votes[0]!, n: votes.length };
+};
 const rows: [string, string, string, string][] = [];
 const after = new Map<string, string>();
-let split = 0, covered = 0, consistent = 0, settled = 0;
+let split = 0, settled = 0, contradicted = 0, thin = 0;
 for (const [k, m] of fams) {
     if (m.length < 2 || new Set(m.map((x) => (isTense(x.vowel) ? "T" : "R"))).size < 2) continue;
     split++;
-    const votes = m.map((x) => moby.get(x.word)).filter((v) => v !== undefined) as ("T" | "R")[];
-    if (votes.length > 0) covered++;
-    if (votes.length > 0 && new Set(votes).size === 1) consistent++;
-    if (votes.length < 2 || new Set(votes).size > 1) continue;
+    const g = verdict(m, gold), mo = verdict(m, moby);
+    // ⚠ A SOURCE THAT CONTRADICTS ITSELF ACROSS THE FAMILY STOPS THE FAMILY, rather than handing the
+    // decision to the other one. That is the whole point of arbitrating per family.
+    if (g.kind === "split" || mo.kind === "split") { contradicted++; continue; }
+    let want: "T" | "R" | undefined;
+    let why = "";
+    if (g.kind === "says" && mo.kind === "says") {
+        if (g.v !== mo.v) { contradicted++; continue; }                    // the sources disagree — abstain
+        want = g.v; why = `gold and Moby agree on ${g.n} and ${mo.n} members`;
+    } else if (g.kind === "says" && g.n >= 2) { want = g.v; why = `gold on ${g.n} members, Moby silent`; }
+    else if (mo.kind === "says" && mo.n >= 2) { want = mo.v; why = `Moby on ${mo.n} members, gold silent`; }
+    else { thin++; continue; }
     settled++;
-    const want = votes[0]!;
-    // ⚠ THE FAMILY IS EXTENDED BY RELATEDNESS BEFORE APPLYING, because the KEY can strand a member.
-    // `prescriptivist` keys to `pre:prescriptiv` — `ist` strips before `ive` can — so it sits in a
-    // family of one and the family verdict never reaches it. Applying to the key's members alone left
-    // it tense beside a reduced `prescriptive`: a split INTRODUCED under a note reading "family
-    // consistency". The orphan guard below is what caught that, and this is the fix it forced.
     const extended = [...m, ...words.filter((o) => !m.includes(o) && o.prefix === m[0]!.prefix
         && m.some((x) => relatedForms(o.word, x.word)))];
     for (const x of extended) {
@@ -93,12 +140,13 @@ for (const [k, m] of fams) {
         to[vi] = want === "T" ? "IY0" : "IH0";
         after.set(x.word, to[vi]!);
         rows.push([x.word, x.phones.join(" "), to.join(" "),
-            `prefix vowel: family consistency, Moby ${want === "T" ? "tense" : "reduced"} on ${votes.length} members (#1397) [${k}]`]);
+            `prefix vowel: family consistency, ${want === "T" ? "tense" : "reduced"} — ${why} (#1397) [${k}]`]);
     }
 }
-console.log(`split families ${split}   Moby covers ≥1 ${covered}   internally consistent ${consistent}   ⚠ settled on ≥2 ${settled}`);
+console.log(`split families ${split}   ⚠ settled ${settled}   sources CONTRADICT ${contradicted}   too thin ${thin}`);
 
-// ⚠ THE GUARD. A fix whose note says "family consistency" must not LEAVE a family split.
+// ⚠ THE GUARD, over PAIRS not families — see orphansAfter. A fix whose note says "family
+// consistency" must not leave a related pair disagreeing anywhere.
 const bad = orphansAfter(words, after);
 if (bad.length > 0) {
     console.log(`\u26a0 ORPHANS \u2014 these pairs would disagree after the change:\n   ${bad.join("\n   ")}`);

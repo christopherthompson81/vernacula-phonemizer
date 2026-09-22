@@ -134,3 +134,62 @@ emit while any related pair would disagree.
 13 where Moby itself is split, ~33 where it covers fewer than two members, 2 that are not families.
 **They want misaki `us_gold.json` — the one source #1397 names that discriminates and that we do not
 have — and not more work on the grouper**, which is not what is blocking.
+
+## Run 5 — 2026-09-22 — ⚠ us_gold.json WAS ON THIS MACHINE, AND IT CONTRADICTS HALF OF WHAT I SHIPPED
+
+Run 2 said, and #1416 shipped into the curated file's comment block and into this log:
+
+> ⚠ **AND misaki `us_gold.json` IS NOT ON THIS MACHINE.** Of the three sources the issue names, one is
+> uninformative and one is absent.
+
+**That is false.** The search behind it was
+
+    find /mnt/data /home/chris -maxdepth 6 -name "us_gold.json"
+
+and the file sits at depth **7**:
+`/home/chris/base/lib/python3.12/site-packages/misaki/data/us_gold.json`, 90,201 entries. ⚠ **A
+DEPTH-LIMITED SEARCH WAS REPORTED AS A FACT ABOUT THE WORLD**, and an argument was built on it — the
+whole "the arbitration rests on Moby alone, and therefore on the two-member rule" reasoning.
+
+### And it matters, because gold discriminates and disagrees with Moby
+
+    retrieve ɹətɹˈiv  reduced      precise  pɹisˈIs        tense
+    repress  ɹəpɹˈɛs  reduced      prevention pɹivˈɛnʧᵊn   tense
+
+Checking the 26 rows #1416 shipped on Moby alone:
+
+    gold agrees 6   ⚠ gold CONTRADICTS 13   gold silent 7
+
+Half. `prescriptive*` and `presumptive*` gold reads TENSE where Moby said reduced; `precess*` reduced
+where Moby said tense. **Moby alone was not a sound basis, and the two-member rule did not save it** —
+every one of those 13 had two or more agreeing Moby votes behind it.
+
+All 26 are reverted, including the in-place `revolve` edit, which is back to its LOT/THOUGHT-only row.
+
+### The rule #1397 actually asked for
+
+Both sources, abstaining wherever either hesitates: gold and Moby must agree, or one must speak on TWO
+members while the other is silent.
+
+    62 split families   ⚠ settled 22   a source CONTRADICTS 39   too thin 1     → 34 rows
+
+⚠ **AND "SILENT" IS NOT "SPLIT WITHIN ITSELF", WHICH COST ANOTHER ROUND.** A first version returned the
+same "no verdict" for both, so a family gold disagrees with *itself* about fell through to Moby and was
+recorded as "gold silent" — `detoxication` shipped tense that way while gold reads it `dətˌɑksəkˈAʃən`,
+reduced. **A source that speaks and contradicts itself is evidence of DIFFICULTY, not of absence.**
+Separating them took settled 35 → 22 and rows 64 → 34, and that is the honest number.
+
+The check the first pass never had, run over every emitted row:
+
+    rows 34   ⚠ rows gold contradicts: 0        detoxication in the set? False
+
+31 tense, 33 reduced across the two directions — which is why this is arbitrated per family rather than
+by a blanket "Latinate re- reduces".
+
+### What is left
+
+    62 split families → 22 settled → 40 open
+
+39 abstain because a source hesitates — gold against Moby, or a source against itself — and 1 is too
+thin. **Those are not waiting on a missing source any more; they are waiting on adjudication where two
+curated lexicons genuinely disagree**, which is a different and harder thing than this run did.

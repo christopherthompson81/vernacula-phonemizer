@@ -29385,9 +29385,9 @@ debraudwick	D IH0 B R AA1 D W IH0 K
 debrecen	D EH1 B R EH1 T S IH0 N
 debridement	D IH0 B R IY1 D M AH0 N T
 debrief	D IY0 B R IY1 F
-debriefed	D IH0 B R IY1 F T
+debriefed	D IY0 B R IY1 F T
 debriefing	D IY0 B R IY1 F IH0 NG
-debriefs	D IH0 B R IY1 F S
+debriefs	D IY0 B R IY1 F S
 debris	D AH0 B R IY1
 debrosse	D EH1 B R AH0 S
 debruhl	D EH1 B R AH0 L
@@ -31034,7 +31034,7 @@ depolo	D IH0 P OW1 L OW0
 deponent	D IH0 P OW1 N AH0 N T
 deponte	D IH0 P OW1 N T IY0
 depopulate	D IY0 P AA1 P Y AH0 L EY2 T
-depopulation	D IH0 P AA2 P Y AH0 L EY1 SH AH0 N
+depopulation	D IY0 P AA2 P Y AH0 L EY1 SH AH0 N
 deport	D IH0 P AO1 R T
 deportation	D IY2 P AO0 R T EY1 SH AH0 N
 deportations	D IY2 P AO0 R T EY1 SH AH0 N Z
@@ -31613,7 +31613,7 @@ detoured	D IY1 T UH0 R D
 detours	D IH0 T UH1 R Z
 detox	D IY1 T AA2 K S
 detoxicate	D IY0 T AA1 K S AH0 K EY2 T
-detoxication	D IY0 T AA2 K S AH0 K EY1 SH AH0 N
+detoxication	D IH0 T AA2 K S AH0 K EY1 SH AH0 N
 detoxification	D IH0 T AA2 K S IH0 F IH0 K EY1 SH AH0 N
 detoxify	D IH0 T AA1 K S AH0 F AY2
 detract	D IH0 T R AE1 K T
@@ -94971,9 +94971,9 @@ precept	P R IY1 S EH2 P T
 preceptive	P R IH0 S EH1 P T IH0 V
 preceptorial	P R IY2 S EH0 P T AO1 R IY0 AH0 L
 precepts	P R IY1 S EH2 P T S
-precess	P R IY0 S EH1 S
+precess	P R AH0 S EH1 S
 precession	P R IY0 S EH1 SH AH0 N
-precessional	P R IY0 S EH1 SH AH0 N AH0 L
+precessional	P R AH0 S EH1 SH AH0 N AH0 L
 precht	P R EH1 K T
 prechter	P R EH1 K T ER0
 prechtl	P R EH1 K T AH0 L
@@ -94995,8 +94995,8 @@ precipitating	P R IH0 S IH1 P AH0 T EY2 T IH0 NG
 precipitation	P R IH0 S IH2 P IH0 T EY1 SH AH0 N
 precipitin	P R IH0 S IH1 P IH0 T IH0 N
 precipitous	P R IH0 S IH1 P IH0 T AH0 S
-precipitously	P R IH0 S IH1 P IH0 T AH0 S L IY0
-precipitousness	P R IH0 S IH1 P AH0 T AH0 S N AH0 S
+precipitously	P R IY2 S IH1 P IH0 T AH0 S L IY0
+precipitousness	P R IY0 S IH1 P AH0 T AH0 S N AH0 S
 precis	P R EY1 S IY2
 precise	P R IH0 S AY1 S
 precisely	P R IH0 S AY1 S L IY0
@@ -95136,9 +95136,9 @@ preferences	P R EH1 F ER0 AH0 N S IH0 Z
 preferential	P R EH2 F ER0 EH1 N SH AH0 L
 preferentially	P R EH2 F ER0 EH1 N SH AH0 L IY0
 preferment	P R IY0 F ER1 M AH0 N T
-preferred	P R AH0 F ER1 D
+preferred	P R IY0 F ER1 D
 preferreds	P R IY0 F ER1 AH0 D Z
-preferring	P R IH0 F ER1 IH0 NG
+preferring	P R IY0 F ER1 IH0 NG
 prefers	P R AH0 F ER1 Z
 prefix	P R IY1 F IH0 K S
 preflight	P R IY1 F L AY0 T
@@ -95324,10 +95324,10 @@ prescribing	P R IY0 S K R AY1 B IH0 NG
 prescript	P R IY1 S K R IH2 P T
 prescription	P R AH0 S K R IH1 P SH AH0 N
 prescriptions	P R AH0 S K R IH1 P SH AH0 N Z
-prescriptive	P R IH0 S K R IH1 P T IH0 V
-prescriptively	P R IH0 S K R IH1 P T IH0 V L IY0
-prescriptiveness	P R IH0 S K R IH1 P T IH0 V N IH0 S
-prescriptivist	P R IH0 S K R IH1 P T AH0 V IH0 S T
+prescriptive	P R IY0 S K R IH1 P T IH0 V
+prescriptively	P R IY0 S K R IH1 P T IH0 V L IY0
+prescriptiveness	P R IY0 S K R IH1 P T IH0 V N IH0 S
+prescriptivist	P R IY0 S K R IH1 P T AH0 V IH0 S T
 preseason	P R IY2 S IY1 Z AH0 N
 preselect	P R IY2 S IH0 L EH1 K T
 preselector	P R IY2 S IH0 L EH1 K T ER0
@@ -95440,8 +95440,8 @@ presumes	P R AH0 Z UW1 M Z
 presuming	P R IH0 Z UW1 M IH0 NG
 presumption	P R IH0 Z AH1 M P SH AH0 N
 presumptions	P R IH0 Z AH1 M P SH AH0 N Z
-presumptive	P R IH0 Z AH1 M P T IH0 V
-presumptively	P R IH0 Z AH1 M P T IH0 V L IY0
+presumptive	P R IY0 Z AH1 M P T IH0 V
+presumptively	P R IY0 Z AH1 M P T IH0 V L IY0
 presumptuous	P R IH0 Z AH1 M P CH AH0 W AH0 S
 presuppose	P R IY2 S AH0 P OW1 Z
 presupposes	P R IY2 S AH0 P OW1 Z IH0 Z
@@ -95496,7 +95496,7 @@ prevaricated	P R AH0 V EH1 R AH0 K EY0 T IH0 D
 prevaricates	P R AH0 V EH1 R AH0 K EY0 T S
 prevaricating	P R AH0 V EH1 R AH0 K EY0 T IH0 NG
 prevarication	P R AH0 V EH2 R AH0 K EY1 SH AH0 N
-prevaricator	P R IH0 V EH1 R AH0 K EY2 T ER0
+prevaricator	P R IY0 V EH1 R AH0 K EY2 T ER0
 prevatt	P R IH0 V AE1 T
 prevatte	P R IH0 V AE1 T
 prevent	P R IH0 V EH1 N T
@@ -99218,8 +99218,8 @@ rebstock	R EH1 B S T AA2 K
 rebuck	R EH1 B AH0 K
 rebuff	R IH0 B AH1 F
 rebuffed	R IH0 B AH1 F T
-rebuffing	R IY0 B AH1 F IH0 NG
-rebuffs	R IY0 B AH1 F S
+rebuffing	R IH0 B AH1 F IH0 NG
+rebuffs	R IH0 B AH1 F S
 rebuild	R IY0 B IH1 L D
 rebuilder	R IY0 B IH1 L D ER0
 rebuilders	R IY0 B IH1 L D ER0 Z
@@ -99360,8 +99360,8 @@ recitatives	R EH2 S AH0 T AH0 T IY1 V Z
 recitativo	R EH2 S IH0 T AH0 T IY1 V OW0
 recite	R AH0 S AY1 T
 recited	R AH0 S AY1 T IH0 D
-recites	R IY0 S AY1 T S
-reciting	R IY0 S AY1 T IH0 NG
+recites	R IH0 S AY1 T S
+reciting	R IH0 S AY1 T IH0 NG
 reck	R EH1 K
 reckard	R EH1 K ER0 D
 recker	R EH1 K ER0
@@ -99570,7 +99570,7 @@ recuperation	R IH0 K UW2 P ER0 EY1 SH AH0 N
 recuperative	R IH0 K UW1 P ER0 AH0 T IH0 V
 recupero	R EY0 K UW0 P EH1 R OW0
 recur	R IH0 K ER1
-recurred	R IY0 K ER1 D
+recurred	R IH0 K ER1 D
 recurrence	R IH0 K ER1 AH0 N S
 recurrent	R IH0 K ER1 AH0 N T
 recurring	R IH0 K ER1 IH0 NG
@@ -100036,9 +100036,9 @@ refutes	R IH0 F Y UW1 T S
 refuting	R IH0 F Y UW1 T IH0 NG
 reg	R EH1 G
 rega	R IY1 G AH0
-regain	R IH0 G EY1 N
+regain	R IY0 G EY1 N
 regained	R IY0 G EY1 N D
-regaining	R IH0 G EY1 N IH0 NG
+regaining	R IY0 G EY1 N IH0 NG
 regains	R IY0 G EY1 N Z
 regal	R IY1 G AH0 L
 regalado	R EY0 G AA0 L AA1 D OW0
@@ -100482,7 +100482,7 @@ rejoins	R IY0 JH OY1 N Z
 rejuvenate	R IH0 JH UW1 V AH0 N EY2 T
 rejuvenated	R IH0 JH UW1 V AH0 N EY2 T IH0 D
 rejuvenates	R IH0 JH UW1 V IH0 N EY2 T S
-rejuvenating	R IY0 JH UW1 V AH0 N EY2 T IH0 NG
+rejuvenating	R IH0 JH UW1 V AH0 N EY2 T IH0 NG
 rejuvenation	R IH0 JH UW2 V AH0 N EY1 SH AH0 N
 rekenthaler	R EH1 K AH0 N T AA2 L ER0
 reker	R IY1 K ER0
@@ -100561,7 +100561,7 @@ relics	R EH1 L IH0 K S
 relict	R EH1 L IH0 K T
 relied	R IH0 L AY1 D
 relief	R IH0 L IY1 F
-reliefs	R IY0 L IY1 F S
+reliefs	R IH0 L IY1 F S
 relies	R IH0 L AY1 Z
 relieve	R IH0 L IY1 V
 relieved	R IH0 L IY1 V D
@@ -100574,7 +100574,7 @@ relig	R IH0 L IH1 JH
 religion	R IH0 L IH1 JH AH0 N
 religione	R IH0 L IH2 JH IY0 OW1 N IY0
 religionism	R AH0 L IH1 JH AH0 N IH2 Z AH0 M
-religionist	R IY0 L IH1 JH AH0 N IH0 S T
+religionist	R IH0 L IH1 JH AH0 N IH0 S T
 religions	R IH0 L IH1 JH AH0 N Z
 religiose	R IH0 L IH2 JH IY0 OW1 S
 religiosity	R IH0 L IH2 JH IY0 AA1 S AH0 T IY0
@@ -100657,7 +100657,7 @@ remco	R EH1 M K OW0
 remeasure	R IY0 M EH1 ZH ER0
 remediable	R IH0 M IY1 D IY0 AH0 B AH0 L
 remedial	R IH0 M IY1 D IY0 AH0 L
-remediate	R IY0 M IY1 D IY0 AH0 T
+remediate	R IH0 M IY1 D IY0 AH0 T
 remediation	R IH0 M IY2 D IY0 EY1 SH AH0 N
 remedied	R EH1 M AH0 D IY0 D
 remedies	R EH1 M AH0 D IY0 Z
@@ -100728,7 +100728,7 @@ remnick	R EH1 M N IH0 K
 remo	R EH1 M OW0
 remodel	R IY0 M AA1 D AH0 L
 remodeled	R IY0 M AA1 D AH0 L D
-remodeling	R IH0 M AA1 D AH0 L IH0 NG
+remodeling	R IY0 M AA1 D AH0 L IH0 NG
 remold	R IY0 M OW1 L D
 remolded	R IY0 M OW1 L D IH0 D
 remonetize	R IY0 M AA1 N IH0 T AY2 Z
@@ -100746,7 +100746,7 @@ remorselessness	R AH0 M AO1 R S L AH0 S N AH0 S
 remortgage	R IY0 M AO1 R G IH0 JH
 remote	R IH0 M OW1 T
 remotely	R IH0 M OW1 T L IY0
-remoteness	R IY0 M OW1 T N AH0 S
+remoteness	R IH0 M OW1 T N AH0 S
 remotest	R IH0 M OW1 T AH0 S T
 remoulded	R IY0 M OW1 L D IH0 D
 removable	R IH0 M UW1 V AH0 B AH0 L
@@ -100990,8 +100990,8 @@ repayments	R IY0 P EY1 M AH0 N T S
 repays	R IY2 P EY1 Z
 repeal	R IH0 P IY1 L
 repealed	R IH0 P IY1 L D
-repealing	R IY0 P IY1 L IH0 NG
-repeals	R IY0 P IY1 L Z
+repealing	R IH0 P IY1 L IH0 NG
+repeals	R IH0 P IY1 L Z
 repeat	R IH0 P IY1 T
 repeatable	R IH0 P IY1 T AH0 B AH0 L
 repeated	R IH0 P IY1 T IH0 D
@@ -101461,7 +101461,7 @@ responds	R IH0 S P AA1 N D Z
 responsa	R IH0 S P AA1 N S AH0
 response	R IH0 S P AA1 N S
 responses	R IH0 S P AA1 N S IH0 Z
-responsibilities	R IY0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z
+responsibilities	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z
 responsibility	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0
 responsible	R IH0 S P AA1 N S AH0 B AH0 L
 responsibly	R IH0 S P AA1 N S AH0 B L IY0
@@ -101658,7 +101658,7 @@ retinue	R EH1 T AH0 N UW2
 retinyl	R EH1 T IH0 N AH0 L
 retire	R IH0 T AY1 ER0
 retired	R IH0 T AY1 ER0 D
-retiree	R IH0 T AY1 R IY1
+retiree	R IY0 T AY1 R IY1
 retirees	R IH0 T AY1 R IY1 Z
 retirement	R IH0 T AY1 ER0 M AH0 N T
 retirements	R IH0 T AY1 ER0 M AH0 N T S

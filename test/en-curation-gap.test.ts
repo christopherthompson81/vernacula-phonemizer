@@ -82,15 +82,17 @@ const KNOWN_GAPS = new Map<string, string>([
 
     // ⚠ TWO ADDED BY #1397's PREFIX-VOWEL FAMILIES, and they are the cost the issue predicted in advance:
     // "the model is trained on upstream and recalls the inconsistency". The curated row moves the prefix
-    // vowel on the strength of Moby agreeing across two or more members of the family; held out, the
-    // n-gram reproduces the upstream form it was trained on. Source N, closing on the next retrain.
-    // ⚠ AND THE PAIR MOVES IN OPPOSITE DIRECTIONS, which is the point of arbitrating per family rather
-    // than applying a blanket "Latinate re- reduces": `prescriptive` goes tense → reduced and `devaluate`
-    // reduced → TENSE, because Moby says so for each. A third, `prevention`, was listed here for one
-    // review round and is gone — the corrected family boundary stopped that family being settled at all,
-    // and the waiver-may-not-rot assertion is what caught the stale entry.
-    ["prescriptive", "n-gram (source N): recalls upstream's tense P R IY0; the family is reduced (#1397)"],
+    // vowel on the strength of gold and Moby agreeing across the family; held out, the n-gram reproduces
+    // the upstream form it was trained on. Source N, closing on the next retrain.
+    // ⚠ AND THEY MOVE IN OPPOSITE DIRECTIONS, which is the point of arbitrating per family rather
+    // than applying a blanket "Latinate re- reduces": `regain` goes tense → reduced while `preferred`
+    // and `devaluate` go reduced → TENSE, because both sources say so for each.
+    // ⚠ AND `prescriptive` AND `prevention` WERE LISTED HERE FOR ONE ROUND EACH AND ARE GONE. The first pass settled their families on MOBY ALONE; gold contradicts Moby on 13 of those 26
+    // rows, so they were reverted and those families now abstain. The waiver-may-not-rot assertion is
+    // what caught each stale entry.
     ["devaluate", "n-gram (source N): recalls upstream's reduced D IH0; the family is TENSE (#1397)"],
+    ["preferred", "n-gram (source N): recalls upstream's reduced P R IH0; the family is TENSE (#1397)"],
+    ["regain", "n-gram (source N): recalls upstream's tense R IY0; the family is reduced (#1397)"],
 
     // ⚠ `upholstery` AND `upholster` WERE HERE AND ARE GONE, which is this list working as designed.
     // They read ⟨ph⟩ across the up·holstery seam as a /f/-less /p/, the note said "a retrain closes
