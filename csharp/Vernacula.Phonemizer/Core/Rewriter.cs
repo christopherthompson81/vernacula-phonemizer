@@ -72,7 +72,12 @@ public static class Rewriter
         {
             if (piece.From != cursor || piece.To < piece.From) { Provenance.PoisonExternally(s, outText); return outText; }
             cursor = piece.To;
-            track.Stamp(piece.From, piece.To - piece.From, piece.Text.Length);
+            // ⚠ THE SAME IDENTITY CARRY AS THE REGEX PATH, AND IT IS THE COMMON CASE HERE: a segmenter
+            // that only INSERTS separators (ja's bunsetsu spaces, km's U+200B) hands back every other
+            // piece unchanged, and collapsing each onto its whole span is the same known-looking answer
+            // to an unknown question. Only identity carries.
+            track.StampOrCarry(piece.From, piece.To - piece.From,
+                s[piece.From..piece.To], piece.Text);
             count += piece.Text.Length;
         }
         if (cursor != s.Length || count != outText.Length) { Provenance.PoisonExternally(s, outText); return outText; }
@@ -122,6 +127,12 @@ public static class Rewriter
         {
             var piece = Js.Normalize(m.Value, form); // the pieces are slices of `s`, so equally untrusted
             rebuilt.Append(piece);
+            // ⚠ `Stamp`, NOT `StampOrCarry`, AND A CANONICAL BLOCK IS WHY. The identity carry-through is
+            // right for a REGEX MATCH, whose characters are independent; a canonical block is a UNIT by
+            // construction — base plus combining marks, or a surrogate pair — so carrying per code UNIT
+            // inside one hands out `[i,i+1)` for half an astral code point, a defect class this module's
+            // own comments name twice. It also silently diverged from the TypeScript twin, which never
+            // carried here: `가Xé` under NFD gave TS [0,2],[0,2],… and C# [0,1],[1,2],…
             track.Stamp(at, m.Value.Length, piece.Length);
             at += m.Value.Length;
         }

@@ -98,6 +98,25 @@ public static class Provenance
             for (var i = at; i < at + len; i++) next.Add(source[i]);
         }
 
+        /**
+         * ⚠ A REPLACEMENT IDENTICAL TO THE MATCH CARRIES THE ORIGINAL PER-CHARACTER MAPPING THROUGH, and
+         * collapsing it instead was a real defect for every NON-SPACING SCRIPT. `normalizeRomans` runs a
+         * `\p{L}+` rewrite over every language and its evaluator returns the token UNCHANGED whenever it is
+         * not a numeral — which for Japanese is the whole clause, because a non-spacing script has no word
+         * breaks for `\p{L}+` to stop at. Every character of `PDFファイルを開いてください` then mapped to
+         * [0,15) and all three tokens reported the WHOLE INPUT as their InputSpan.
+         * ⚠ IT IS WORSE THAN A NULL, WHICH IS WHY IT SURVIVED. `InputSpan`'s contract is "absent means NOT
+         * KNOWN, never identical", and a consumer degrades correctly on absent — a whole-input span is a
+         * known-LOOKING answer to an unknown question and passes every count and tiling check.
+         * ⚠ AND ONLY IDENTITY IS SAFE: an equal-LENGTH but different replacement has no guaranteed
+         * character correspondence, so the carry-through is gated on the replacement equalling the match.
+         */
+        public void StampOrCarry(int at, int len, string matched, string piece)
+        {
+            if (piece == matched) { Copy(at, len); return; }
+            Stamp(at, len, piece.Length);
+        }
+
         /// <summary>Stamp the whole match's span across `outLen` characters of replacement.</summary>
         public void Stamp(int at, int len, int outLen)
         {

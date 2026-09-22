@@ -138,7 +138,7 @@ public sealed class JsRe
         if (track is not null)
         {
             track.Copy(0, m.Index);
-            track.Stamp(m.Index, m.Length, piece.Length);
+            track.StampOrCarry(m.Index, m.Length, m.Value, piece);
             track.Copy(m.Index + m.Length, input.Length - m.Index - m.Length);
             track.Commit(result);
         }
@@ -156,7 +156,7 @@ public sealed class JsRe
             track?.Copy(copied, m.Index - copied);
             var piece = evaluator(m);
             sb.Append(piece);
-            track?.Stamp(m.Index, m.Length, piece.Length);
+            track?.StampOrCarry(m.Index, m.Length, m.Value, piece);
             copied = m.Index + m.Length;
         }
         sb.Append(input, copied, input.Length - copied);

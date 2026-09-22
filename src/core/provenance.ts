@@ -42,7 +42,16 @@
  * `rewrite` would stamp input offsets across output characters and silently corrupt the mapping. The shape is
  * identical; the meaning is not. A post-assembly rewrite reports itself through `noteRewrite` instead.
  *
- * ⚠ AND SPAN GRANULARITY IS WHAT MAKES IT WORK. A replacement's provenance is the whole match's span, not a
+ * ⚠ AND SPAN GRANULARITY IS WHAT MAKES IT WORK. A replacement's provenance is the whole match's span,
+ * not a character correspondence — EXCEPT when the replacement IS the match, where the original
+ * per-character mapping carries through unchanged. That exception is not a refinement: without it
+ * `normalizeRomans`, which rewrites `\p{L}+` over every language and returns most tokens untouched,
+ * collapsed the whole clause of any NON-SPACING SCRIPT onto every character under it, and all of a
+ * sentence's tokens reported the WHOLE INPUT as their `inputSpan`. Only IDENTITY carries: an
+ * equal-LENGTH but different replacement has no guaranteed correspondence.
+ * ⚠ AND IT DOES NOT APPLY TO A CANONICAL BLOCK. `renormalize` works on units — base plus combining
+ * marks, or a surrogate pair — so a per-character carry there would hand out half an astral code
+ * point. The C# twin had it for one review round and diverged from this file as a result.
  * character correspondence. Normalizers reorder INSIDE a match — Luganda reads `1 244.7 km²` as
  * *kiromita eza kyebiriga 1244 7*, the unit ahead of the figure it followed — and a span mapping absorbs
  * that. Measured over 27,286 golden rows across 140 normalizers: zero non-monotonic once every step reports.
@@ -263,6 +272,11 @@ export function rebuilt(s: string, pieces: readonly Piece[]): string {
     for (const [text, from, to] of pieces) {
         if (from !== cursor || to < from) { poisonSink?.(s, out); poison(); return out; }
         cursor = to;
+        // ⚠ THE SAME IDENTITY CARRY AS `rewrite`, AND IT IS THE COMMON CASE HERE. A segmenter that only
+        // INSERTS separators — ja's bunsetsu spaces, km's U+200B — hands back every other piece unchanged,
+        // and collapsing each one onto its whole span is the same "known-looking answer to an unknown
+        // question". Only identity carries, for the same reason as `rewrite`.
+        if (text === s.slice(from, to)) { for (let i = 0; i < text.length; i++) next.push(p[from + i]!); continue; }
         const sp = span(p, from, to - from);
         for (let i = 0; i < text.length; i++) next.push(sp);
     }
@@ -382,12 +396,30 @@ export function rewrite(s: string, re: RegExp | string, rep: Replacer): string {
                       ...(m.groups === undefined ? [] : [m.groups]),
                   )
                 : expand(rep, m, at, s);
+        // ⚠ A REPLACEMENT IDENTICAL TO THE MATCH CARRIES THE ORIGINAL PER-CHARACTER MAPPING THROUGH,
+        // AND COLLAPSING IT INSTEAD WAS A REAL DEFECT FOR EVERY NON-SPACING SCRIPT. `normalizeRomans`
+        // runs `rewrite(text, /\p{L}+/gu, …)` over every language, and its evaluator returns the token
+        // UNCHANGED whenever it is not a numeral — which for Japanese is the whole clause, because a
+        // non-spacing script has no word breaks for `\p{L}+` to stop at. Every character of
+        // `PDFファイルを開いてください` then mapped to [0,15), so all three tokens reported the WHOLE
+        // INPUT as their `inputSpan` and a downstream segmenter lit 15 characters per token.
+        // ⚠ IT IS WORSE THAN A NULL, WHICH IS WHY IT SURVIVED. `inputSpan`'s contract is "absent means NOT
+        // KNOWN, never identical", and a consumer degrades correctly on absent. A whole-input span is a
+        // known-LOOKING answer to an unknown question: it passes every count and tiling check, so nothing
+        // downstream can tell it from a real one. Reported by a consumer measuring highlight granularity.
+        // ⚠ AND ONLY IDENTITY IS SAFE. An equal-LENGTH but different replacement has no guaranteed
+        // character correspondence — `へ`→`え` is one character for one and the origin does carry, but a
+        // transliteration of the same length need not — so the carry-through is gated on `piece === m[0]`.
+        const unchanged = piece === m[0];
         const sp = span(p, at, m[0].length);
         // ⚠ CODE UNITS AGAIN: `for (const ch of piece)` yields code POINTS, so an astral character in a
         // replacement pushed one entry where the string grew by two.
         for (let i = 0; i < piece.length; i++) {
             out.push(piece[i]!);
-            next.push(sp);
+            if (!unchanged) { next.push(sp); continue; }
+            const q = p[at + i];
+            if (q === undefined) { poison(); return s.replace(re, rep as string); }
+            next.push(q);
         }
         cursor = at + m[0].length;
         if (m[0].length === 0 && cursor < s.length) {
