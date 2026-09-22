@@ -14,6 +14,36 @@ public sealed class HeteronymEntry
     public string? Past { get; init; }
     /** The ADJECTIVE reading, where it differs from the default. See the TypeScript. */
     public string? Adj { get; init; }
+    /** A FOLLOWING-WORD CONDITION, for the pairs no POS tag separates. See the TypeScript. */
+    public BeforeCondition? Before { get; init; }
+}
+
+/**
+ * ⚠ `used to` IS THE CASE THIS EXISTS FOR AND THE MEASUREMENT IS THE WHOLE JUSTIFICATION. `used` is
+ * rank 125, and the habitual /juːst/ and the passive /juːzd/ are both VBD-or-VBN before an infinitival
+ * `to`. Counted over the 101 `used to` tokens in the UD English treebanks, scored with THIS tagger:
+ * 41% today (always juːzd), 59% for a flat bigram, 81% for VBD alone, 85% for VBD-or-next-tag-IN.
+ * The second test is what reaches "be/get used to &lt;noun|gerund&gt;", where `to` is a PREPOSITION (IN)
+ * rather than the infinitive marker (TO) and the reading is /juːst/ as well. See the TypeScript.
+ */
+public sealed class BeforeAlternative
+{
+    /** Tags of THIS word that select the marked reading. Null = any. */
+    public IReadOnlyList<string>? Tags { get; init; }
+    /** Tags of the FOLLOWING word. Null = any. */
+    public IReadOnlyList<string>? NextTags { get; init; }
+    /** Words that must appear in the preceding three. Null = no left condition. See the TypeScript. */
+    public IReadOnlyList<string>? AfterWords { get; init; }
+}
+
+public sealed class BeforeCondition
+{
+    /** The following surface word, lower-cased. */
+    public string Word { get; init; } = "";
+    /** Any one of these selects the marked reading. An empty alternative matches on the word alone. */
+    public IReadOnlyList<BeforeAlternative> When { get; init; } = Array.Empty<BeforeAlternative>();
+    /** Which slot the condition drives. The slot is true exactly when the condition fires. */
+    public string Slot { get; init; } = "";
 }
 
 public sealed class EnglishNumbersDef
