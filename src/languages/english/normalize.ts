@@ -952,6 +952,20 @@ export function normalizeEnglish(input: string): string {
     //      case-SENSITIVE list of tokens read wrong, not a formula parser.
     s = rewrite(s, FORMULA_TOKEN, (tok: string) => FORMULA_READING[tok] ?? tok);
 
+    // 0b7) AN ENUMERATED LIST LEAD-IN — `(a) the first item` → "ay, the first item". See LIST_MARKER:
+    //      the letter name AND a pause, both of which the report asked for.
+    //      ⚠ ROMAN MARKERS ARE DELIBERATELY NOT CLAIMED. `(ii)` reads ˈɪɪ today, which is wrong, but
+    //      the fix is not obviously "two": a letter series that reaches `(i)` would then read "one"
+    //      while `(ii)` read "two", and a roman series whose `(i)` read "eye" is no better. Either
+    //      uniform choice is defensible and the MIXED one is worse than the defect, so it is left for
+    //      a decision rather than guessed at here.
+    s = rewrite(s, LIST_MARKER, (_m: string, indent: string, mark: string) =>
+        `${indent}${/^\d+$/u.test(mark) ? mark : LETTER_NAME(mark.toLowerCase()) ?? mark},`);
+
+    // 0b8) A LONE LETTER IN BRACKETS elsewhere — a REFERENCE to a list item, which takes the letter
+    //      name but no pause. See BRACKETED_LETTER.
+    s = rewrite(s, BRACKETED_LETTER, (l: string) => LETTER_NAME(l.toLowerCase()) ?? l);
+
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".
     s = rewrite(s, /\b(BCE|BC|CE|AD)\b/g,
@@ -1727,6 +1741,34 @@ const LEADING_DECIMAL_POINT = new RegExp(
     `(?<![\\d\\p{L}\\p{M}.])(?<!\\b(?:batting|hitting|slugging|averaging)[ \\t\\u00a0])`  // space, tab, NBSP
     + `\\.(?=\\d)(?!\\d+[ \\t\\u00a0-]*(?:cal|calibre|caliber|acp|magnum|mag|special|spl|auto`  // space, tab, NBSP
     + `|lr|win|winchester|rem|remington|luger|s&w)\\b)`, "giu");
+
+/**
+ * AN ENUMERATED LIST LEAD-IN — `(a) the first item`, `b) the second` (#1423).
+ *
+ * ⚠ THE LETTER WAS READ AS THE INDEFINITE ARTICLE, and ⟨a⟩ is the ONLY letter of 26 it happens to:
+ * sweeping every letter in a bracket, the other 25 already give their letter name, because CMUdict
+ * carries them with letter-NAME pronunciations and records `a` as the reduced article AH0. So this is
+ * a CLAIMING problem, not a naming one — `letterNameExceptions` already has the right value, and
+ * nothing was asking it.
+ *
+ * ⚠ AND THE COST OF THAT ONE GAP IS NOT CONFINED TO READING ALOUD. It contaminated the MEASUREMENT of
+ * #1422 twice: a sweep that built its expected column from `phonemize("I O S")` reported 91 failures
+ * instead of 50, and the test written for the fix walked into the same trap.
+ *
+ * ⚠ A PAUSE IS PART OF THE REPORT. A lead-in is prosodically a boundary, and without one the marker
+ * runs straight into the item. The comma is this file's existing spelling for a prosodic break — the
+ * unit table writes `b t u per hour, per square foot` for the same reason.
+ */
+const LIST_MARKER = /(?<=^|\n)([ \t]*)\(?([A-Za-z]|\d{1,2})[)\]](?=[ \t]+\S)/gu;
+
+/**
+ * A LONE LETTER INSIDE BRACKETS, anywhere — `See (a) and (b)`, `P(A)`, `f(x)`.
+ *
+ * ⚠ A REFERENCE TO A LIST ITEM IS NOT A LEAD-IN, so it gets the letter name and NO pause. Only ⟨a⟩
+ * changes in practice; `LETTER_NAME` returns the other 25 unchanged, so this asserts nothing new about
+ * them.
+ */
+const BRACKETED_LETTER = /(?<=[([{])([A-Za-z])(?=[)\]}])/gu;
 
 /**
  * A DEGREES-MINUTES-SECONDS COORDINATE — `40°26′46″N` (#1435).

@@ -100,10 +100,22 @@ export const LATIN_MARK = "\\u0300-\\u036F\\u1AB0-\\u1AFF\\u1DC0-\\u1DFF\\uFE20-
  * sentence-opening function words, which is language-specific lexical knowledge and does not belong in shared
  * code — a language that finds this costly can pre-empt it in its own normalize.ts.
  */
-/** An all-caps run, or a caps run glued to digits (`A380`), bounded by letters and Latin diacritics only. */
+/**
+ * An all-caps run, or a caps run glued to digits (`A380`), bounded by letters and Latin diacritics only.
+ *
+ * ⚠ THE THIRD ALTERNATIVE IS THE MIRROR OF THE SECOND, and its absence had a narrow but real cost. A
+ * caps run BEFORE digits was claimed and one AFTER them was not, so the last letter of an alphanumeric
+ * code fell through to the OOV g2p — and ⟨A⟩ is the one letter that reads as a WORD there, the reduced
+ * article: `K1A 0B1` read "kay one UH zero bee one" (#1423). Every other letter already gave its name,
+ * which is why this was invisible until the ⟨a⟩ case was looked at directly.
+ * ⚠ IT CANNOT TAKE A UNIT WITH IT: the language's unit rules run BEFORE this pass, so `5L` is already
+ * "5 liters" by the time the pattern is applied and no `L` remains to claim. Measured fleet-wide: zero
+ * golden rows move in any of the 189 languages.
+ */
 const RUN_OR_CODE = new RegExp(
     `(?<![\\p{L}${LATIN_MARK}])\\p{Lu}{2,}(?![\\p{L}${LATIN_MARK}])`
-    + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`, "gu");
+    + `|(?<![\\p{L}${LATIN_MARK}])\\p{Lu}+(?=\\d)`
+    + `|(?<=\\d)\\p{Lu}(?![\\p{L}${LATIN_MARK}\\d])`, "gu");
 /** Two or more capitals in a row, for counting the WORDS of a shouting document. Not global: it is
  *  used with `.test` per word, and a global regex carries `lastIndex` between calls. See `shouting`. */
 const CAPS_RUN = /\p{Lu}{2,}/u;

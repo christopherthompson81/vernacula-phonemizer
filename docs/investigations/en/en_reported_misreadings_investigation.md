@@ -2187,3 +2187,57 @@ hardcoded version could not have done.
 
 **Gates.** 6304 TS · 6912 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.
+
+## Run 33 — 2026-09-22 15:50 — the one letter of twenty-six
+
+**Report.** *"(a), (b), etc. — enumerated list type lead-in. `(a)` is currently read as the indefinite
+article. Needs a pause too."*
+
+**Raw finding, and it is narrower than the report suggests.** Sweeping every letter in a bracket,
+lower and upper agree for all 26 and only ⟨a⟩ is wrong:
+
+```
+(a) -> ˈə        (b) -> bˈiː      (s) -> ˈɛs      (x) -> ˈɛks     …
+```
+
+CMUdict carries the other 25 with letter-NAME pronunciations and records `a` as the reduced article
+AH0. So this is a **CLAIMING problem, not a naming one** — `letterNameExceptions` already held `a`→ay
+and nothing was asking it. `RUN_OR_CODE` claims all-caps runs of 2+ and caps glued before digits; a lone
+bracketed letter is neither.
+
+⚠ **AND THE COST WAS NOT ONLY IN READING ALOUD.** This one gap contaminated the MEASUREMENT of #1422
+twice over: a sweep that built its expected column from `phonemize("I O S")` reported **91** failures
+instead of 50, and the test written for that fix walked into the same trap. A defect in the reading of
+one letter became a defect in the instrument used to find other defects.
+
+**Two rules, and they differ only in the pause:** a lead-in at a line start gets the letter name AND a
+comma (this file's existing spelling for a prosodic break); a bracketed letter anywhere else is a
+REFERENCE to a list item and gets the name alone.
+
+```
+(a) the first item  ->  "ay, the first item"       See (a) and (b).  ->  "See (ay) and (b)."
+a) foo              ->  "ay, foo"                  P(A) = 1          ->  "P(ay) equals 1"
+```
+
+⚠ **The article is untouched**, which is the assertion that keeps it honest: both rules require a
+bracket or a closing `)`, which an article never has. `a bird sang` still reduces.
+
+### ⚠ The same gap in an alphanumeric code, and a measured blast radius
+
+`K1A 0B1` read "kay one **UH** zero bee one". The shared pass claimed a caps run BEFORE digits and not
+one AFTER them, so a code's last letter fell to the OOV g2p — where ⟨A⟩ alone reads as a word. The third
+alternative is the exact mirror of the second.
+
+⚠ **It is a change to shared core, so the blast radius was measured rather than argued:** zero golden
+rows move in any of the **189** languages, and no unit is taken with it — the unit rules run BEFORE this
+pass, so `a 5L jug` is already "a 5 liters jug" and no ⟨L⟩ remains to claim.
+
+### ⚠ Roman markers are deliberately not claimed
+
+`(ii)` reads ˈɪɪ today, which is wrong — but the fix is not obviously "two". A letter series that
+reaches `(i)` would then read "one" while `(ii)` read "two", and a roman series whose `(i)` read "eye"
+is no better. Either uniform choice is defensible and the **mixed** one is worse than the defect, so it
+is left for a decision rather than guessed at. Pinned as a test so it reads that way.
+
+**Gates.** 6325 TS · 6934 C# · goldens 189/36495 fresh, 0 stale · parity 189 byte-identical · trace-cold
+189 of 189, no poisons · regex-diff 144,930 probes identical.
