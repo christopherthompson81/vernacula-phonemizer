@@ -12,108 +12,125 @@ pair, which both render `ᵻ` and which `normalise` therefore merges.
 ## Run 1 — 2026-09-22 — the family boundary, printed rather than counted
 
 #1397 is explicit that the boundary is part of the work: four definitions gave 86, 57, 77 and 33
-families, **and the issue was filed on one of the wrong ones**. Implementing the fourth (keep the
-prefix; stem in a loop with a floor of prefix + 4; require the remainder to be a plausible suffix
-chain):
+families, **and the issue was filed on one of the wrong ones.** Implementing the fourth (keep the
+prefix; stem in a loop with a floor of prefix + 4; require the remainder to be a plausible suffix chain)
+and printing the groups rather than reconciling the count:
 
-    de-/re-/pre- words with an unstressed prefix vowel   2,979
-    families with 2+ members                              560
-    ⚠ INTERNALLY SPLIT on tense vs reduced                 51   (209 words)
+    de-/re-/pre- words with an unstressed prefix vowel   3,391
+    families with 2+ members                               646
+    ⚠ INTERNALLY SPLIT on tense vs reduced                  62   (209 words)
 
-⚠ **51, NOT THE ISSUE'S 33** — and rather than reconcile the numbers I printed the groups, which is the
-standing rule for this class. Most read as real paradigms (`revolve/revolved/revolver/revolving`,
-`retire/retiree/retirement`). **Two do not:**
-
-    re:rehear    rehear rehearing rehearings  +  rehearsal rehearse rehearsed rehearses rehearsing
-    re:reformat  reformat reformative  +  reformatories reformatory
-
-`rehearse` is not an inflection of `rehear`, and `reformatory` is not one of `reformat`. My remainder
-check accepted them because `se` decomposes into the suffixes `s` + `e`. **A suffix-based grouper
-cannot know that `reformat` and `reformatory` are different words**, so rather than chase a perfect
-grouper I made the ARBITRATION the decider and let a false family abstain — which is what happened:
-neither survived the agreement test below.
+Most read as real paradigms. **Two do not:** `rehear` swallows `rehearse`, and `reformat` swallows
+`reformatory` — the remainder `se` decomposes into the suffixes `s` + `e`. A suffix grouper cannot know
+those are different words, so the ARBITRATION is the decider and a false family abstains; neither
+survived the agreement test.
 
 ## Run 2 — ⚠ ESPEAK CANNOT ARBITRATE THIS CLASS, AND A RECORDED MEASUREMENT RESTS ON THE ASSUMPTION THAT IT CAN
 
-#1397's step 2 is "take espeak + gold + Moby and pick the majority". Measured over 745 of the 2,979
-prefix words:
+#1397's step 2 is "take espeak + gold + Moby and pick the majority".
 
-    espeak en-us:   tense (ɹi…)  0      reduced (ɹᵻ/ɹɪ…)  611      neither  134
+    espeak en-us over 848 words:  tense 0   reduced 658   neither 190
 
-    where OUR dict says IY0 (tense):   espeak tense 0   reduced 145
-    where OUR dict says IH0/AH0:       espeak tense 0   reduced 466
-
-**espeak never writes the tense vowel. Its vote is a constant.** It has no tense/reduced distinction
-for this prefix, so it cannot corroborate a choice between them — it agrees with any reduced answer and
-disagrees with any tense one, whatever the word.
+**espeak never writes the tense vowel. Its vote is a constant.** It has no tense/reduced distinction for
+this prefix, so it agrees with any reduced answer and disagrees with any tense one, whatever the word.
 
 ⚠ **THAT BEARS ON A NUMBER ALREADY IN THE REPO.** #1378 item 4 recorded that espeak "backs the agreed
-form on 27 of 35 rows", and #1397 repeats it. All 104 prefix rows the curated layer has applied move
-**tense → reduced**. So "espeak backs it on 27 of 35" says only that 27 of those 35 agreed forms were
-reduced; it is not independent corroboration and should not be read as any. The APPLIED rows are
-unaffected — their notes cite `gold+Moby`, not espeak — but the plan built on that number is.
+form on 27 of 35 rows", and #1397 repeats it. All 104 prefix rows the curated layer had applied move
+**tense → reduced**, so that statement says only that 27 of those agreed forms were reduced. The APPLIED
+rows are unaffected — their notes cite `gold+Moby` — but the plan built on the number is.
 
-⚠ **AND misaki `us_gold.json` IS NOT ON THIS MACHINE**, so of the three sources the issue names, one is
-uninformative and one is absent. **The arbitration rests on Moby alone**, which does discriminate:
+⚠ **AND misaki `us_gold.json` IS NOT ON THIS MACHINE.** Of the three sources the issue names, one is
+uninformative and one is absent. The arbitration rests on **Moby alone**, which does discriminate:
 `retrieve r/I/` reduced against `repress r/i/` tense.
 
 ## Run 3 — what one source can honestly settle
 
-    split families                        51
-      Moby covers at least one member     48
-      and is INTERNALLY CONSISTENT        35
-      Moby itself split                   13
+    split families                        62
+      Moby covers at least one member     59
+      and is INTERNALLY CONSISTENT        34
+      ⚠ settled on TWO OR MORE members    14      → 26 rows
 
-⚠ **35 IS NOT THE SHIPPABLE NUMBER.** Many rest on ONE covered member generalised to a six-word family
-— `re:rebuff` on 1 of 4, `de:debrief` on 1 of 4. A single word's vote is not a family verdict. Requiring
-**two independent members to agree**:
+⚠ **34 IS NOT THE SHIPPABLE NUMBER.** The gap between 34 and 14 is families Moby covers on ONE member —
+`re:rebuff` on 1 of 4, `de:debrief` on 1 of 4. A single word's vote is not a family verdict.
 
-    families settled by Moby on 2+ members   14
-    rows changed                             22
+⚠ **AND THE TWO DIRECTIONS BOTH OCCUR, which is why this is arbitrated per family rather than by a
+blanket "Latinate re- reduces" rule**: `prescriptive*` and `preserver*` go tense → reduced, while
+`devaluate*` and `precess*` go reduced → TENSE, because Moby says so for each.
 
-Shipped: `revolve`/`revolved`/`revolves`/`revolving` → reduced (matching `revolver`/`revolvers`, which
-already were), `prevention`/`preventer`, `prescriptive*`, `presumptive*`, `retiree`, `reflexively`,
-`retaliatory`, `detractor`, `denominative`, `prevaricator`, `precipitousness`; and to TENSE:
-`precess`/`precessional` (Moby 3/3) and `detoxication` (2/2).
+### ⚠ AND THE FIX UNLOCKED A CORRECT en-GB MEMBERSHIP, WHICH IS CORROBORATION FROM OUTSIDE THE ARGUMENT
 
-⚠ **AND `revolve` WAS ALREADY CURATED, FOR A DIFFERENT REASON.** Appending a second row would have
-CHAINED — the new row's `upstream` would have been the old row's output — which is #1334's defect and
-exactly what `en-curation-gap.test.ts`'s "no word has two curated rows" exists to catch. Its existing
-LOT/THOUGHT row was edited in place and its note now carries both reasons.
-
-### The predicted cost, arriving as predicted
-
-    expected [ 'prescriptive', 'prevention' ] to deeply equal []
-
-#1397 said in advance: *"Expect new KNOWN_GAPS in en-curation-gap.test.ts: the model is trained on
-upstream and recalls the inconsistency."* Two, both source N, both closing on the next retrain with the
-rest of that tier.
-
-### What is left, and what it needs
-
-    51 split families → 14 settled → 37 open
-
-- **13** where Moby itself is split across the family.
-- **~21** where Moby covers fewer than two members.
-- **2** that are not families at all (`rehear`/`rehearse`, `reformat`/`reformatory`).
-
-⚠ **The remaining 37 cannot be settled by the sources on this machine.** They want misaki `us_gold.json`
-— the one source the issue names that actually discriminates and that we do not have — and not more
-work on the grouper, which is not what is blocking.
-
-### ⚠ AND THE FIX UNLOCKED A CORRECT en-GB MEMBERSHIP, WHICH IS INDEPENDENT CORROBORATION
-
-Rebuilding the en-GB lexical sets after the change: `en-gb-cloth.tsv` 898 → 899, and the new member is
-**`revolve`**.
+`en-gb-cloth.tsv` gains `revolve`:
 
     referee   revolve  ɹɪvɒlv
     before    ɹivˈɔːɫv   — tense prefix, so the CLOTH edit ɔː→ɒ produced ɹivɒlv and matched nothing
     after     ɹᵻvˈɒɫv    — reduced prefix, folds to ɹɪvɒlv, and the referee attests it
 
-**A third source that was never consulted about the prefix vowel now agrees with us on this word, and
-could not before.** The wikipron UK referee plays no part in the arbitration above — it is a different
-variety and was not asked — so this is corroboration arriving from outside the argument.
+The wikipron UK referee plays no part in the arbitration — different variety, never asked — so a source
+outside the argument now agrees with us on a word it could not before.
 
-⚠ **AND THE SAME FAMILY IS STILL INCONSISTENT ON A DIFFERENT AXIS**: `revolver R IH0 V AO1 L V ER0`
-against `revolvers R IH0 V AA1 L V ER0 Z`, AO against AA. That is the LOT/THOUGHT class — 161 rows by
-the #1387 paradigm sweep — and is deliberately not touched here.
+### The predicted cost, arriving as predicted
+
+#1397 said in advance: *"Expect new KNOWN_GAPS in en-curation-gap.test.ts: the model is trained on
+upstream and recalls the inconsistency."* Two: `prescriptive` and `devaluate`, moving in **opposite**
+directions, both source N, both closing on the next retrain.
+
+## Run 4 — 2026-09-22 — review round: I destroyed 339 lines of irreplaceable prose
+
+### ⚠ THE RE-SORT DELETED THE CURATED FILE'S ENTIRE COMMENTARY
+
+Applying the rows by rebuilding the file as `header + sorted(data rows)` dropped **339 comment lines**,
+369 → 30. Review checked them against the rest of the tree: **315 of 315 exist nowhere else in the
+repo.** Lost blocks included the velar-nasal measurement, the `-lly` geminate's 708-to-5, the
+two-referee selection rule, and — most costly — every record of a DELIBERATE ABSENCE: `bancroft`
+("recorded here so the next reader does not spend the edit a second time"), `unnaturally`, `ia`,
+`bengals`, `cham`, the dropped `-zz-` candidates.
+
+**The concrete failure is not the missing prose, it is that the next sweep re-derives `bancroft` from
+the referee evidence, adds the row the comment says would be INERT, and nothing in the tree contradicts
+it.** The file's own header calls itself "the record that makes that loss visible and recoverable",
+which the deletion falsified. Restored from `main` and the new rows appended as a block, the way
+`covid` and `rr` were: 43 insertions, 2 deletions.
+
+### ⚠ AND THE GUARD AGAINST ORPHANS TOOK THREE VERSIONS, EACH DEFEATED BY THE FAMILY BOUNDARY AGAIN
+
+Review found that the first pass moved `prescriptive`, `prescriptively` and `prescriptiveness` to
+reduced and **left `prescriptivist` tense** — a change whose every note reads "family consistency",
+INTRODUCING a split that did not exist before it. Fixing it took three goes:
+
+1. **add the missing suffixes** (`ist`, `ative`, `ivity`, `ology`) — necessary, not sufficient;
+2. **check each FAMILY stays internally consistent** — cannot see it: `prescriptivist` keys to
+   `pre:prescriptiv`, a family of ONE, because `ist` strips before `ive` can, and **a one-member family
+   cannot be inconsistent**;
+3. **check PAIRS** — still cannot see it, because `prescriptivist` does not `startsWith` `prescriptive`:
+   the e-drop. Both forms are now tried with a trailing `e` removed.
+
+Only then did the tool report `prescriptive R vs prescriptivist T`, and the fix it forced was to extend
+a settled family by relatedness before applying. **Three iterations, all of them the same lesson this
+class keeps teaching: the boundary is the measurement.**
+
+⚠ **AND `IY2` WAS BEING DROPPED SILENTLY.** `loadPrefixWords` loaded only `IY0`, so
+`precipitously P R IY2` was invisible while `precipitous`/`precipitousness` were "fixed" — the family
+stayed split and the tool could not report it. A secondary-stressed tense prefix is the same contrast
+wearing a different digit. `IY1` stays out: a primary-stressed prefix is a different word shape.
+
+⚠ **AND `isPlausibleInflection` COULD NEVER FIRE AS CALLED.** Its comment claimed to be "the fourth
+definition's whole content"; measured, **0 of 2,979 words were filtered**, because the stem is derived
+from the word by stripping that same list in that same order. What actually keeps `debar` from
+swallowing `debark` is the `prefix + 4` FLOOR. The comment said so wrongly, and the investigation
+inherited the misattribution — both corrected, because someone relaxing the floor on the belief that
+the check is the backstop would get false families back silently.
+
+### And the arbitration is a committed tool now
+
+`tools/english/en_prefix_arbitrate.mts`. Review's point is exactly right: **this PR's whole argument is
+that an unaudited source was being trusted, so the arbitration step is the one that most needs to be
+re-runnable.** It prints the espeak measurement under `--espeak`, the Moby verdicts, and refuses to
+emit while any related pair would disagree.
+
+### What is left, and what it needs
+
+    62 split families → 14 settled → 48 open
+
+13 where Moby itself is split, ~33 where it covers fewer than two members, 2 that are not families.
+**They want misaki `us_gold.json` — the one source #1397 names that discriminates and that we do not
+have — and not more work on the grouper**, which is not what is blocking.

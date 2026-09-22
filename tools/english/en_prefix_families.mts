@@ -26,8 +26,16 @@ const DICT = join(HERE, "..", "..", "data", "languages", "english", "g2p-dict.ts
 
 export const PREFIXES = ["pre", "de", "re"] as const;   // `pre` first: it is a superset spelling of `re`
 /** The prefix vowel as CMUdict writes it, immediately after the prefix consonant(s). */
-const TENSE = "IY0";
+/**
+ * ⚠ `IY2` COUNTS TOO, AND LEAVING IT OUT HID FAMILY MEMBERS ON THE VERY AXIS UNDER REPAIR. `precipitous`
+ * and `precipitousness` are reduced while `precipitously` is `P R IY2` — a SECONDARY-stressed tense
+ * prefix, which is the same tense/reduced contrast wearing a different digit. A first pass loaded only
+ * `IY0` and therefore reported `pre:precipitou` as fixed while the third member stayed split.
+ * ⚠ `IY1` IS NOT HERE: a PRIMARY-stressed prefix is a different word shape (`preface`), not this class.
+ */
+const TENSE = new Set(["IY0", "IY2"]);
 const REDUCED = new Set(["IH0", "AH0"]);
+export const isTense = (v: string): boolean => TENSE.has(v);
 
 export interface Word { word: string; phones: string[]; prefix: string; vowel: string }
 
@@ -44,7 +52,7 @@ export function loadPrefixWords(): Word[] {
         const vi = phones.findIndex((p) => /\d$/u.test(p));
         if (vi < 0) continue;
         const v = phones[vi]!;
-        if (v !== TENSE && !REDUCED.has(v)) continue;
+        if (!TENSE.has(v) && !REDUCED.has(v)) continue;
         out.push({ word: w!, phones, prefix, vowel: v });
     }
     return out;
@@ -52,7 +60,15 @@ export function loadPrefixWords(): Word[] {
 
 /** ⚠ A LOOP WITH A FLOOR OF prefix + 4. One strip lands elsewhere depending on the suffix, which is what
  *  split `precarious` from `precariousness`; and without the floor `revivalist` reaches `revivify`. */
-const SUFFIXES = ["ness", "ment", "ions", "ing", "ers", "est", "ion", "ive", "ial", "ies", "ed", "es",
+/**
+ * ⚠ A MISSING SUFFIX ORPHANS A PARADIGM MEMBER, AND AN ORPHAN IS WORSE THAN A MISS. Without `ist` and
+ * `ative` the first pass moved `prescriptive`, `prescriptively` and `prescriptiveness` to reduced and
+ * left `prescriptivist` tense — so a change whose every note reads "family consistency" INTRODUCED a
+ * split that did not exist before it. Same for `preventative`/`preventatives` against `prevent`.
+ * The `familiesStayConsistent` check below is the guard that now makes that impossible to ship.
+ */
+const SUFFIXES = ["ativeness", "atives", "ative", "ists", "ivity", "ology", "ness", "ment", "ions",
+    "ing", "ers", "est", "ion", "ive", "ial", "ist", "ies", "ed", "es",
     "er", "or", "al", "ly", "ic", "s", "e", "y"];
 export function familyKey(w: string, prefix: string): string {
     const floor = prefix.length + 4;
@@ -66,9 +82,16 @@ export function familyKey(w: string, prefix: string): string {
     return `${prefix}:${s}`;
 }
 
-/** ⚠ AND THE MEMBER MUST BE THE KEY PLUS A PLAUSIBLE SUFFIX CHAIN. This is the fourth definition's whole
- *  content: without it `debar` swallows `debark` and the surname `debartolo`, which stem to the same key
- *  but are different WORDS. Re-deriving the key from the member is not enough — the remainder is. */
+/**
+ * ⚠ THIS CANNOT FIRE WHEN CALLED ON A WORD'S OWN STEM, AND AN EARLIER COMMENT HERE CLAIMED IT WAS "the
+ * fourth definition's whole content". Measured: 0 of 2,979 words are filtered, because `familyKey`
+ * derives the stem from the word by stripping exactly this suffix list in exactly this order, so the
+ * remainder always strips back to "". **What actually keeps `debar` from swallowing `debark` is the
+ * `prefix + 4` FLOOR in `familyKey`** — they key to `de:debar` and `de:debark` and never meet.
+ * ⚠ SO DO NOT RELAX THE FLOOR ON THE BELIEF THAT THIS IS THE BACKSTOP. It is kept because it is the
+ * right test for a member against a DIFFERENT word's stem, which is how the family validation below
+ * uses it — comparing every member against the family's shortest member rather than against itself.
+ */
 export function isPlausibleInflection(member: string, stem: string): boolean {
     if (member === stem) return true;
     if (!member.startsWith(stem)) return false;
@@ -82,6 +105,43 @@ export function isPlausibleInflection(member: string, stem: string): boolean {
     return rest === "";
 }
 
+/**
+ * ⚠ THE GUARD, AND IT CHECKS PAIRS RATHER THAN FAMILIES BECAUSE FAMILIES HAVE A HOLE. A first version
+ * asked only that every family with 2+ members stay internally consistent — and `prescriptivist` keys to
+ * a family of ONE (`pre:prescriptiv`, because `ist` strips before `ive` can), so it could never be
+ * reported as split while `prescriptive`/`prescriptively`/`prescriptiveness` moved away from it. A
+ * one-member family cannot be inconsistent, which is exactly how an orphan hides.
+ *
+ * So the test is over PAIRS: for every word this change touches, any other prefix word that is a
+ * plausible inflection of it — or of which it is one — must end on the same side of the contrast.
+ * A change whose every note reads "family consistency" must not create a split anywhere.
+ */
+/**
+ * ⚠ AND IT HAS TO SEE THROUGH THE e-DROP, WHICH DEFEATED THE FIRST THREE VERSIONS OF THIS CHECK.
+ * `prescriptivist` is `prescriptiv` + `ist`, so it does NOT start with `prescriptive` — a bare
+ * `startsWith` reports them unrelated and the orphan goes on hiding. Both forms are tried with a
+ * trailing `e` removed, which is the same allowance `familyKey` makes when it strips one.
+ */
+export function relatedForms(a: string, b: string): boolean {
+    const cut = (x: string): string[] => (x.endsWith("e") ? [x, x.slice(0, -1)] : [x]);
+    for (const x of cut(a)) for (const y of cut(b))
+        if (isPlausibleInflection(x, y) || isPlausibleInflection(y, x)) return true;
+    return false;
+}
+
+export function orphansAfter(words: Word[], after: Map<string, string>): string[] {
+    const bad: string[] = [];
+    const val = (w: Word): "T" | "R" => (isTense(after.get(w.word) ?? w.vowel) ? "T" : "R");
+    const touched = words.filter((w) => after.has(w.word));
+    for (const c of touched)
+        for (const o of words) {
+            if (o.word === c.word || o.prefix !== c.prefix) continue;
+            const related = relatedForms(o.word, c.word);
+            if (related && val(o) !== val(c)) bad.push(`${c.word} ${val(c)} vs ${o.word} ${val(o)}`);
+        }
+    return [...new Set(bad)];
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const words = loadPrefixWords();
     const fams = new Map<string, Word[]>();
@@ -92,7 +152,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
         { const at = fams.get(key); if (at) at.push(w); else fams.set(key, [w]); }
     }
     const multi = [...fams].filter(([, m]) => m.length >= 2);
-    const split = multi.filter(([, m]) => new Set(m.map((x) => (x.vowel === TENSE ? "T" : "R"))).size > 1);
+    const split = multi.filter(([, m]) => new Set(m.map((x) => (isTense(x.vowel) ? "T" : "R"))).size > 1);
     console.log(`de-/re-/pre- words with an unstressed prefix vowel   ${words.length}`);
     console.log(`families with 2+ members                            ${multi.length}`);
     console.log(`⚠ INTERNALLY SPLIT on tense vs reduced               ${split.length}  (${split.reduce((n, [, m]) => n + m.length, 0)} words)`);

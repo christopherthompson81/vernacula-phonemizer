@@ -29946,7 +29946,7 @@ defore	D IY1 F AO0 R
 deforest	D IY0 F AO1 R AH0 S T
 deforestation	D IY0 F AO2 R IH0 S T EY1 SH AH0 N
 deforge	D EH1 F ER0 G
-deform	D IY2 F AO1 R M
+deform	D IH0 F AO1 R M
 deformation	D IY2 F AO0 R M EY1 SH AH0 N
 deformed	D IH0 F AO1 R M D
 deformities	D IH0 F AO1 R M AH0 T IY0 Z
@@ -30845,7 +30845,7 @@ denomination	D IH0 N AA2 M AH0 N EY1 SH AH0 N
 denominational	D IH0 N AA2 M AH0 N EY1 SH AH0 N AH0 L
 denominationalism	D IH0 N AA2 M AH0 N EY1 SH AH0 N AH0 L IH2 Z AH0 M
 denominations	D IH0 N AO2 M AH0 N EY1 SH AH0 N Z
-denominative	D IH0 N AA1 M AH0 N EY2 T IH0 V
+denominative	D IY0 N AA1 M AH0 N EY2 T IH0 V
 denominator	D IH0 N AA1 M AH0 N EY2 T ER0
 denomme	D EH1 N AH0 M
 denosse	D IH0 N OW1 S
@@ -31681,9 +31681,9 @@ devadasi	D EY2 V AH0 D AA1 S IY0
 deval	D IH0 V AA1 L
 devall	D EY0 V AA1 L
 devalle	D IH0 V AE1 L
-devaluate	D IH0 V AE1 L Y UW0 EY2 T
-devaluated	D IH0 V AE1 L Y UW0 EY2 T IH0 D
-devaluation	D IH0 V AE2 L Y UW0 EY1 SH AH0 N
+devaluate	D IY0 V AE1 L Y UW0 EY2 T
+devaluated	D IY0 V AE1 L Y UW0 EY2 T IH0 D
+devaluation	D IY0 V AE2 L Y UW0 EY1 SH AH0 N
 devaluations	D IY2 V AE0 L Y UW0 EY1 SH AH0 N Z
 devalue	D IH0 V AE1 L Y UW2
 devalued	D IH0 V AE1 L Y UW2 D
@@ -94995,7 +94995,7 @@ precipitating	P R IH0 S IH1 P AH0 T EY2 T IH0 NG
 precipitation	P R IH0 S IH2 P IH0 T EY1 SH AH0 N
 precipitin	P R IH0 S IH1 P IH0 T IH0 N
 precipitous	P R IH0 S IH1 P IH0 T AH0 S
-precipitously	P R IY2 S IH1 P IH0 T AH0 S L IY0
+precipitously	P R IH0 S IH1 P IH0 T AH0 S L IY0
 precipitousness	P R IH0 S IH1 P AH0 T AH0 S N AH0 S
 precis	P R EY1 S IY2
 precise	P R IH0 S AY1 S
@@ -95327,7 +95327,7 @@ prescriptions	P R AH0 S K R IH1 P SH AH0 N Z
 prescriptive	P R IH0 S K R IH1 P T IH0 V
 prescriptively	P R IH0 S K R IH1 P T IH0 V L IY0
 prescriptiveness	P R IH0 S K R IH1 P T IH0 V N IH0 S
-prescriptivist	P R IY0 S K R IH1 P T AH0 V IH0 S T
+prescriptivist	P R IH0 S K R IH1 P T AH0 V IH0 S T
 preseason	P R IY2 S IY1 Z AH0 N
 preselect	P R IY2 S IH0 L EH1 K T
 preselector	P R IY2 S IH0 L EH1 K T ER0
@@ -95354,8 +95354,8 @@ preservative	P R AH0 Z ER1 V AH0 T IH0 V
 preservatives	P R AH0 Z ER1 V AH0 T IH0 V Z
 preserve	P R AH0 Z ER1 V
 preserved	P R AH0 Z ER1 V D
-preserver	P R IY0 Z ER1 V ER0
-preservers	P R IY0 Z ER1 V ER0 Z
+preserver	P R IH0 Z ER1 V ER0
+preservers	P R IH0 Z ER1 V ER0 Z
 preserves	P R AH0 Z ER1 V Z
 preserving	P R AH0 Z ER1 V IH0 NG
 preset	P R IY0 S EH1 T
@@ -95504,9 +95504,9 @@ preventable	P R IH0 V EH1 N T AH0 B AH0 L
 preventative	P R IY0 V EH1 N T AH0 T IH0 V
 preventatives	P R IY0 V EH1 N T AH0 T IH0 V Z
 prevented	P R IH0 V EH1 N T IH0 D
-preventer	P R IH0 V EH1 N T ER0
+preventer	P R IY0 V EH1 N T ER0
 preventing	P R IH0 V EH1 N T IH0 NG
-prevention	P R IH0 V EH1 N SH AH0 N
+prevention	P R IY0 V EH1 N SH AH0 N
 preventive	P R IH0 V EH1 N T IH0 V
 prevents	P R IH0 V EH1 N T S
 prevette	P R IH0 V EH1 T
@@ -99937,7 +99937,7 @@ reflex	R IY1 F L EH0 K S
 reflexes	R IY1 F L EH0 K S AH0 Z
 reflexible	R AH0 F L EH1 K S AH0 B AH0 L
 reflexive	R AH0 F L EH1 K S IH0 V
-reflexively	R IH0 F L EH1 K S IH0 V L IY0
+reflexively	R IY0 F L EH1 K S IH0 V L IY0
 reflexiveness	R AH0 F L EH1 K S IH0 V N IH0 S
 reflexivity	R IY2 F L EH2 K S IH1 V IH0 T IY0
 reflexology	R IY2 F L EH0 K S AA1 L AH0 JH IY0
