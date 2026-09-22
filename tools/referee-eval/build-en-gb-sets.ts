@@ -124,7 +124,8 @@ for (const row of delegating ? [] : rows) {
     if (rowIndex % shardN !== shardI) continue;
     const w = row[0]!;
     if (owned.has(w)) continue;
-    const refFolded = row.slice(1).map((r) => fold(r));
+    const refRaw = row.slice(1);
+    const refFolded = refRaw.map((r) => fold(r));
     const rules = phonemizeWordRules(w);
     const ours = marry.has(w) ? rules.replace(/ɛ(ˈ|ˌ)?ɹ/u, "æ$1ɹ") : rules;
     // yod first, by POSITION: the referee attests a post-coronal yod that our GOOSE slot lacks (student, tune —
@@ -153,6 +154,20 @@ for (const row of delegating ? [] : rows) {
         // is how it was found. `ə`, `ɪ` and `ᵻ` are one slot for this comparison — the same equivalence
         // the `ᵻ → ɪ` fold in en-GB.jsonc already asserts, one symbol short.
         if (set === palm && refFolded.some((r) => weak(r) === weak(fold(ours)))) continue;
+        // ⚠ A BATH CLAIM MAY NOT REST SOLELY ON A LENGTH-LESS ɑ ROW (#1391). The backbone strips LENGTH,
+        // so an American `plɑtfɔːm` is indistinguishable from an RP `plɑːtfɔːm` once folded — and this
+        // corpus writes `ɑː` for 5,024 headwords against a length-less `ɑ` for 1,130, so the two are
+        // CONVENTIONS, not free variation. 58 BATH members were claimed with every supporting row written
+        // the short way, and they are overwhelmingly foreign proper nouns and loanwords (`nanjing`,
+        // `taqueria`, `plattdeutsch`, `zemlyanka`) plus a handful of ordinary English words the claim gets
+        // audibly wrong: `platform` shipped as plˈɑːtfˌɔ˜m, `fang`, `dramatize`, `dan`.
+        // ⚠ IT IS THE SAME SHAPE AS #1383's RHOTIC TELL and the same remedy: a row written in the other
+        // variety's convention is not evidence about this one. #1391 names this as the prerequisite.
+        // ⚠ AND IT IS "SOLELY", NOT "AT ALL". `chance`, `path` and `bath` itself all have a length-less or
+        // TRAP row BESIDE a proper `ɑː` one, and they are real BATH words — the policy of preferring the
+        // RP-diagnostic realisation whenever it is ATTESTED is unchanged. Only claims with no properly
+        // spelled support at all are refused.
+        if (set === bath && !refRaw.some((r, i) => refFolded[i] === fold(e) && /ɑː/u.test(r))) continue;
         set.push(w); claimed++; break;
     }
 }
