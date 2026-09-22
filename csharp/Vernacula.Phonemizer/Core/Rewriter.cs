@@ -122,7 +122,7 @@ public static class Rewriter
         {
             var piece = Js.Normalize(m.Value, form); // the pieces are slices of `s`, so equally untrusted
             rebuilt.Append(piece);
-            track.Stamp(at, m.Value.Length, piece.Length);
+            track.StampOrCarry(at, m.Value.Length, m.Value, piece);
             at += m.Value.Length;
         }
         // ⚠ VERIFIED, NOT ASSUMED. If the blocks do not reassemble into what `Normalize` actually produced,

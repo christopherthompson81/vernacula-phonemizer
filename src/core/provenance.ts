@@ -382,12 +382,30 @@ export function rewrite(s: string, re: RegExp | string, rep: Replacer): string {
                       ...(m.groups === undefined ? [] : [m.groups]),
                   )
                 : expand(rep, m, at, s);
+        // ⚠ A REPLACEMENT IDENTICAL TO THE MATCH CARRIES THE ORIGINAL PER-CHARACTER MAPPING THROUGH,
+        // AND COLLAPSING IT INSTEAD WAS A REAL DEFECT FOR EVERY NON-SPACING SCRIPT. `normalizeRomans`
+        // runs `rewrite(text, /\p{L}+/gu, …)` over every language, and its evaluator returns the token
+        // UNCHANGED whenever it is not a numeral — which for Japanese is the whole clause, because a
+        // non-spacing script has no word breaks for `\p{L}+` to stop at. Every character of
+        // `PDFファイルを開いてください` then mapped to [0,15), so all three tokens reported the WHOLE
+        // INPUT as their `inputSpan` and a downstream segmenter lit 15 characters per token.
+        // ⚠ IT IS WORSE THAN A NULL, WHICH IS WHY IT SURVIVED. `inputSpan`'s contract is "absent means NOT
+        // KNOWN, never identical", and a consumer degrades correctly on absent. A whole-input span is a
+        // known-LOOKING answer to an unknown question: it passes every count and tiling check, so nothing
+        // downstream can tell it from a real one. Reported by a consumer measuring highlight granularity.
+        // ⚠ AND ONLY IDENTITY IS SAFE. An equal-LENGTH but different replacement has no guaranteed
+        // character correspondence — `へ`→`え` is one character for one and the origin does carry, but a
+        // transliteration of the same length need not — so the carry-through is gated on `piece === m[0]`.
+        const unchanged = piece === m[0];
         const sp = span(p, at, m[0].length);
         // ⚠ CODE UNITS AGAIN: `for (const ch of piece)` yields code POINTS, so an astral character in a
         // replacement pushed one entry where the string grew by two.
         for (let i = 0; i < piece.length; i++) {
             out.push(piece[i]!);
-            next.push(sp);
+            if (!unchanged) { next.push(sp); continue; }
+            const q = p[at + i];
+            if (q === undefined) { poison(); return s.replace(re, rep as string); }
+            next.push(q);
         }
         cursor = at + m[0].length;
         if (m[0].length === 0 && cursor < s.length) {
