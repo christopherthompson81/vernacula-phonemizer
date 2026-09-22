@@ -1,4 +1,10 @@
-# ja: the first PhonemizeTrace in a process returns every InputSpan null (#1408)
+# core/trace: a static initializer poisons the FIRST PhonemizeTrace of a language (#1408)
+
+⚠ **FILED UNDER `core/` RATHER THAN `ja/` BECAUSE THE DURABLE HALF IS THE SEAM.** `ja` is where it bit,
+and the fix is one line in the Japanese normalizer — but the hazard is any static initializer anywhere
+reaching the tracked rewrite seam, the gate is fleet-wide, and the finding that **the trace has no gate
+at all** is about `core`, not about Japanese. `docs/investigations/README.md` lists `core/` as "engine
+seams — registry, async path, browser, **trace**".
 
 Reported by a downstream consumer using the trace to segment non-spacing scripts. C# only; TypeScript is
 correct cold and warm.
@@ -99,3 +105,39 @@ through `mˈɑːnd` and differ only in the final syllable. Recorded in the test,
 pick another of the six the #1341 sweep found when they converge entirely.
 
     C# suite 6,706 passed (first green run of this session) · trace-cold 189 languages, no poisons
+
+## Run 4 — 2026-09-22 — review round: the gate's own process handling was three bugs
+
+All in the test that spawns the tool, none in the fix:
+
+- ⚠ **A CLASSIC PIPE DEADLOCK.** `StandardOutput.ReadToEnd()` was drained to completion before stderr
+  was read at all, so the moment the child filled the ~64KB stderr buffer it would block writing while
+  the parent blocked reading. `dotnet run` is the child — a restore or build failure is the concrete
+  trigger. Both pipes are read concurrently now.
+- ⚠ **AND THE TIMEOUT WAS INERT.** `WaitForExit(600_000)` sat *after* two blocking reads, which had
+  already waited forever, so it could never fire and `Assert.True(p.HasExited, …)` could never be
+  false. A hung child would have hung the whole `dotnet test` run rather than failing at ten minutes.
+  The timeout is on the READ now, with a kill.
+- **The repo path resolved against the working directory** rather than `AppContext.BaseDirectory`,
+  which is what every other test in the assembly anchors on. VSTest happens to set CWD conveniently;
+  a runner that does not would have resolved five levels above the repo and reported a provenance
+  defect that was not there.
+
+And two in the tool:
+
+- ⚠ **A BARE `catch` WAS SILENTLY REMOVING LANGUAGES FROM THE GUARD.** `traced` was printed and never
+  compared against anything, so a regression making 50 languages throw would leave it printing
+  `traced 139 languages / no poisons` and exiting 0 — **green, and three quarters of a guard**. It now
+  names what it skipped and fails outright if coverage collapses.
+- The non-zero exit message blamed a "cold-trace defect" for *any* failure, including exit 2 ("goldens
+  not found") and a build failure. Exit 1 is the defect; anything else is the harness.
+
+⚠ **AND THE LOG WAS IN THE WRONG PLACE — MY OWN RECORDED CONVENTION.** It sat at the flat root of
+`docs/investigations/` while the README says one folder per language and per cross-cutting topic, and
+the index was not updated, so it was unreachable. Moved to `core/` — `ja` is where it bit, but the
+durable half is the seam, the gate is fleet-wide, and "the trace has no gate at all" is a `core`
+finding. Index bumped 5 → 6.
+
+Re-proved after all of it: reverting the one-line fix fails the test with `⚠ POISONED` naming `ja`.
+
+    trace-cold  traced 189 of 189 languages · no poisons · ~13s

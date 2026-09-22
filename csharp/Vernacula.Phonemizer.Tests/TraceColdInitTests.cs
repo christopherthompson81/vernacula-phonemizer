@@ -29,16 +29,35 @@ public class TraceColdInitTests
     [Fact]
     public void NoLanguagePoisonsItsProvenanceOnTheFirstTrace()
     {
-        var repo = Path.GetFullPath(Path.Combine("..", "..", "..", "..", ".."));
-        var psi = new ProcessStartInfo("dotnet",
-            $"run --project csharp/tools/trace-cold -c Release -- csharp/goldens")
+        // ⚠ ANCHORED ON THE ASSEMBLY, NOT THE WORKING DIRECTORY, like every other test here
+        // (TraceTests, LanguageInitializationTests, Core/DataPath). VSTest happens to set CWD to
+        // bin/<cfg>/<tfm> today; a runner that leaves it at the repo root would resolve five levels
+        // ABOVE the repo, the child would not find csharp/goldens, and the failure would be reported
+        // as a provenance defect that is not there.
+        var repo = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+        var psi = new ProcessStartInfo("dotnet", "run --project csharp/tools/trace-cold -c Release -- csharp/goldens")
         { WorkingDirectory = repo, RedirectStandardOutput = true, RedirectStandardError = true };
         using var p = Process.Start(psi)!;
-        var stdout = p.StandardOutput.ReadToEnd();
-        var stderr = p.StandardError.ReadToEnd();
-        p.WaitForExit(600_000);
-        Assert.True(p.HasExited, "trace-cold did not finish");
-        Assert.True(p.ExitCode == 0, $"trace-cold reported a cold-trace defect:\n{stdout}\n{stderr}");
+        // ⚠ BOTH PIPES ARE READ CONCURRENTLY, AND THE TIMEOUT IS ON THE READ. Draining stdout to
+        // completion first deadlocks the moment the child fills the ~64KB stderr buffer — a restore or
+        // build failure from `dotnet run` is the concrete trigger. And a `WaitForExit(n)` placed AFTER
+        // two blocking reads is inert: the reads have already waited forever, so the timeout could
+        // never fire and a hung child would hang the whole `dotnet test` run instead of failing.
+        var outTask = p.StandardOutput.ReadToEndAsync();
+        var errTask = p.StandardError.ReadToEndAsync();
+        if (!Task.WhenAll(outTask, errTask).Wait(TimeSpan.FromMinutes(10)))
+        {
+            try { p.Kill(entireProcessTree: true); } catch { /* already gone */ }
+            Assert.Fail("trace-cold did not finish within 10 minutes");
+        }
+        p.WaitForExit();
+        var stdout = outTask.Result;
+        var stderr = errTask.Result;
+        // ⚠ EXIT 1 IS THE DEFECT; ANYTHING ELSE IS THE HARNESS. Exit 2 is "goldens not found", and a
+        // build or restore failure exits non-zero too — reporting those as a provenance bug sends the
+        // next reader after something that is not there.
+        Assert.True(p.ExitCode is 0 or 1, $"trace-cold could not run (exit {p.ExitCode}):\n{stdout}\n{stderr}");
+        Assert.True(p.ExitCode == 0, $"trace-cold reported a cold-trace defect:\n{stdout}");
         Assert.Contains("no poisons", stdout);
     }
 }
