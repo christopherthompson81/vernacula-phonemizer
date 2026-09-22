@@ -32,10 +32,44 @@ lexical sets are built from). A candidate enters only when:
 1. the shipped en-GB render currently matches **no** attested variant under the eval's own fold, and
 2. the citation written here makes it match one, after the full delta has run.
 
-A word the referee does not list, or lists only in a form that looks like US contamination, is
-left out rather than guessed at. `schedule` — the famous /ˈʃɛdjuːl/ — is absent for exactly that
-reason: the referee has no row for it, so there is nothing to check against. `leisure` is absent
-because the only row it has is `liʒɚ`, which is rhotic and therefore not a British reading at all.
+A word the referee does not list, or lists only in a form that looks like US contamination, was
+left out rather than guessed at. **That is no longer the last word — see the second source below.**
+
+## The second source: espeak-ng's en-gb dictionary
+
+#1383 named the wikipron UK referee's coverage as the actual blocker: it is dominated by rare, proper
+and foreign words, so it is weakest on exactly the common vocabulary this class lives in. `schedule`
+was the proof — the best-known member of the class and no row at all.
+
+**espeak-ng's en-gb voice is admitted as a SECOND source, and the bar is a PER-WORD HUMAN DECISION in
+its dictionary sources, not the bare output of the binary.** Those are different things and the
+distinction is the whole safeguard:
+
+- an entry in `dictsource/en_list` — someone wrote that word's reading down;
+- a VARIANT-CONDITIONAL line in `dictsource/en_rules` — someone wrote down that the two varieties
+  differ here, and which one is marked;
+- **anything else is the binary's letter-to-sound rules**, which is a G2P guess of exactly the kind
+  this engine already makes. A guess from another engine is not evidence about a word.
+
+⚠ **AND THE SECOND SOURCE DOES NOT OUTRANK THE ENTAILMENT RULE FOR INFLECTIONS.** espeak reads
+`ballets` as `bˈaleɪs`, with a voiceless /s/ that is simply wrong; its inflections are rule-derived.
+Inflected rows keep coming from the lemma's citation plus the PARENT's own suffix, as before.
+
+| word | what the second source actually says | verdict |
+|---|---|---|
+| `schedule` | `en_rules` carries `?3  sch (ed  →  sk` — a variant-conditional rule marking GENERAL AMERICAN as the exception. The British /ʃ/ is the default someone left in place while writing `school`, `scheme` and `schizoid` out of it. | **admitted** |
+| `leisure` | `en_list` has `leisure  lEZ3` = /ˈlɛʒə/. And the PRIMARY source corroborates it sideways: wikipron's `leisure` row is the contaminated `liʒɚ`, but its **`leisurely` row is `lɛʒɜli`** — the DRESS vowel was in the referee all along, under a different headword. | **admitted** |
+| `ballet` | `en_list` has `ballet  baleI` — stress on the FIRST syllable. This is the "stress decision" #1383 deferred it for, and wikipron carries no stress marks, so the primary source could never have settled it. | **admitted** |
+| `oregano`, `laboratory` | `en_list` entries, corroborating wikipron exactly. | still blocked, and NOT by the sources — see below |
+| `hertford` | attested by both. A PROPER NOUN, which is a much larger door and stays shut deliberately. | left out |
+
+⚠ **`oregano` AND `laboratory` ARE BLOCKED BY THIS FILE'S OWN EXEMPTION, NOT BY EVIDENCE.** Both British
+readings need **ɒ** — /ˌɒrɪˈɡɑːnəʊ/, /ləˈbɒrətri/ — and a table-owned word is exempt from the LOT rule
+(see the last section). Getting the ɒ would mean hand-writing it into a citation this file documents as
+being in the parent's GenAm alphabet, i.e. re-implementing LOT inside the table and freezing it there;
+and it would not even suffice for `oregano`, whose `ɔːɹ` is NORTH and was never LOT's to touch. They need
+a finer exemption — phonological rules yes, set rules no, with LOT on the phonological side — which is a
+design change and not a row.
 
 ## Why the value is in the parent's alphabet
 
@@ -57,7 +91,10 @@ row the LOT rule turns its /ɑː/ into /ɒ/.
 | herb | British keeps the /h/; GenAm drops it |
 | lever | /ˈliːvə/ against /ˈlɛvɚ/ — FLEECE against DRESS |
 | lieutenant | /lɛfˈtɛnənt/ against /luːˈtɛnənt/ — a consonant no rule inserts |
+| ballet | stress on the FIRST syllable in British, the second in GenAm — a stress difference no accent rule makes |
+| leisure | /ˈlɛʒə/ against /ˈliːʒɚ/ — DRESS against FLEECE |
 | pasta | TRAP in British, PALM in GenAm |
+| schedule | /ˈʃɛdjuːl/ against /ˈskɛdʒuːl/ — a different first consonant AND a yod |
 | process | GOAT in British, LOT in GenAm — /ˈprəʊsɛs/ against /ˈprɑːsɛs/; no rule turns LOT into GOAT |
 | progress | the same LOT/GOAT swap, in the NOUN only — see below |
 | tomato | PALM in British, FACE in GenAm |
@@ -94,6 +131,14 @@ entailment, which is the evidence the entailment is sound.
 | `pasta` | attested |
 | `tomato` | attested |
 | `vitamin` | attested |
+| `ballet` | attested — SECOND SOURCE (stress; the primary carries no stress marks) |
+| `leisure` | attested — SECOND SOURCE, and the primary corroborates it via `leisurely` |
+| `schedule` | attested — SECOND SOURCE only; the primary has no row at all |
+| `ballets` | entailed from `ballets` |
+| `leisurely` | attested AND entailed — they agree |
+| `scheduled` | entailed from `scheduled` |
+| `schedules` | entailed from `schedules` |
+| `scheduling` | entailed from `scheduling` |
 | `process` | attested |
 | `progress` | attested — GUARDED on the noun reading |
 | `processed` | attested AND entailed — they agree |
@@ -159,6 +204,16 @@ that is what it turned out to be.
 ⚠ **`derbies` AND `levered` ARE ABSENT BECAUSE THE PARENT HAS NO ROW FOR THEM**, and their OOV readings
 cannot be entailed from: `derbies` decodes as `dˈɝbiʲiz`, with a doubled vowel the entailment would
 propagate straight into the table. The guard is dictionary membership, and this is what it is for.
+
+⚠ **AND CMUdict'S OWN `schedule` PARADIGM IS INTERNALLY INCONSISTENT** — `UW2` in the lemma, `UH0` in all
+three inflections — so the inflected citations take the LEMMA's stem vowel. That is the parent's
+inconsistency about its own word, not a British/American difference, and propagating it would have shipped
+`ʃˈɛdjuːl` beside `ʃˈɛdjʊld` in one sentence. The second source reads all four with `uː`.
+
+⚠ **THE PREFIX TEST ALSO IGNORES L-DARKNESS.** `scheduling` is `ʃˈɛdjˌuːlɪŋ` with a PLAIN /l/ where the
+other three have `ɹ`-dark `ɫ`, because the parent's own rule lightens a prevocalic lateral. Same shape as
+the flapping case below: the row carries the parent's allophony, and the parent's allophone depends on the
+suffix.
 
 ⚠ **THE PREFIX TEST IGNORES FLAPPING AND ASPIRATION.** `tomato` is `təmˈeᶦtʰoᶷ` and `tomatoes`
 `təmˈeᶦt̬oᶷz` — the same /t/ in two allophones — and comparing them raw refuses the row. `toRP` un-flaps

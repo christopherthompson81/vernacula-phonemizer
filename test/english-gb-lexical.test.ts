@@ -127,6 +127,43 @@ describe("en-GB lexical variants", () => {
         expect(phonemize("the progress is good", "en-GB")).toContain("p\u0279\u02c8\u0259\u1db7\u0261\u0279\u025bs");
     });
 
+    it("takes the three rows the SECOND source unblocked, and nothing the binary merely guessed", () => {
+        // ⚠ espeak-ng's en-gb voice is admitted as a SECOND UK source, and the bar is a PER-WORD HUMAN
+        // DECISION in its dictionary sources — an en_list entry, or a VARIANT-CONDITIONAL en_rules line —
+        // not the bare output of the binary, which is a G2P guess of the kind this engine already makes.
+        // `schedule`: en_rules carries `?3  sch (ed → sk`, marking GENERAL AMERICAN as the exception.
+        expect(phonemizeWord("schedule")).toBe("ʃˈɛdjˌuːɫ");
+        // `leisure`: en_list `leisure lEZ3`, and the PRIMARY source corroborates it under `leisurely`,
+        // whose wikipron row is lɛʒɜli while the lemma's only row is the US-contaminated liʒɚ.
+        expect(phonemizeWord("leisure")).toBe("lˈɛʒə");
+        expect(phonemizeWord("leisurely")).toBe("lˈɛʒəli");
+        // `ballet`: en_list `ballet baleI` — FIRST-syllable stress. The primary referee carries no stress
+        // marks at all, so it could never have settled the one thing that changes here.
+        expect(phonemizeWord("ballet")).toBe("bˈæleᶦ");
+        // ...and `en` is untouched by all of it.
+        expect(phonemize("schedule", "en")).toBe("skˈɛd͡ʒˌuːɫ");
+        expect(phonemize("leisure", "en")).toBe("lˈiːʒɚ");
+        expect(phonemize("ballet", "en")).toBe("bælˈeᶦ");
+    });
+
+    it("keeps the parent's l-darkness across the schedule paradigm, which the prefix test cannot see", () => {
+        // ⚠ TWO THINGS THE ENTAILMENT HAD TO CARRY. CMUdict's own paradigm is inconsistent — UW2 in the
+        // lemma, UH0 in all three inflections — so the citations take the LEMMA's stem vowel; propagating
+        // the parent's would have shipped ʃˈɛdjuːl beside ʃˈɛdjʊld in one sentence. And `scheduling` has a
+        // PLAIN /l/ where the others have dark ɫ, because the parent lightens a prevocalic lateral — the
+        // row carries the parent's allophony, and the allophone depends on the suffix.
+        expect(phonemizeWord("schedules")).toBe("ʃˈɛdjˌuːɫz");
+        expect(phonemizeWord("scheduled")).toBe("ʃˈɛdjˌuːɫd");
+        expect(phonemizeWord("scheduling")).toBe("ʃˈɛdjˌuːlɪŋ");
+        expect(phonemizeWord("ballets")).toBe("bˈæleᶦz");   // and NOT espeak's bˈaleɪs: its
+        // inflections are rule-derived, so the entailment rule outranks the second source on the suffix.
+        for (const [one, many] of [["schedule", "schedules"], ["schedule", "scheduled"],
+            ["leisure", "leisurely"], ["ballet", "ballets"]] as const)
+            expect([many, phonemizeWord(many).startsWith(phonemizeWord(one))]).toEqual([many, true]);
+        const light = (s: string): string => s.replace(/ɫ/gu, "l");
+        expect(light(phonemizeWord("scheduling")).startsWith(light(phonemizeWord("schedule")))).toBe(true);
+    });
+
     it("owns every word it lists, so the set builder cannot claim one into an accent set", () => {
         // aluminium was in en-gb-yod.tsv: the builder's coronal-yod probe saw `luː` with no yod where the
         // referee attests one and filed it under yod-retention. An accent set claiming a lexical variant

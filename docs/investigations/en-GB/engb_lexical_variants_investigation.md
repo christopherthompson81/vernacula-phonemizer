@@ -462,3 +462,63 @@ makes that a data question instead of a silent regression.
 the review's list would have shipped half of it. The test therefore sweeps `MANIFEST.heteronyms` against
 every table row rather than asserting the two words by name, and it was proved by reverting: stripping
 the guard fields fails it with `expected [ 'progress', 'progresses' ] to deeply equal []`.
+
+## Run 8 — 2026-09-21 19:30
+
+**Question: #1383's move 1 — a second UK source was approved. What does espeak-ng's en-gb voice
+actually attest, and does `schedule` come with it?**
+
+    espeak-ng -v en-gb -q --ipa "schedule leisure ballet oregano laboratory premier"
+    → ʃˈɛdjuːl lˈɛʒə bˈaleɪ ˌɒɹɪɡˈɑːnəʊ lɐbˈɒɹətɹi pɹˈɛmɪə
+
+All six read the way the class says they should. **But the binary's output is not the source** — it is
+a G2P guess of exactly the kind this engine already makes, and a guess from another engine is not
+evidence about a word. The line that matters is a PER-WORD HUMAN DECISION in `dictsource/`:
+
+    grep -hP "^(leisure|ballet|oregano|laboratory|premier)\s" dictsource/en_list
+    leisure    lEZ3        ballet    baleI        oregano  0rIg'A:noU
+    laboratory la#b'0r@tri premier   prEmI3
+    grep -n "sched" dictsource/en_rules  →  (nothing)
+
+### ⚠ `schedule` IS NOT IN THE DICTIONARY AND IT IS STILL ATTESTED
+
+I nearly refused it on the grep above. The rule block is where it lives:
+
+    _) sch        S          // word-initial sch → /ʃ/
+    ?3  sch (ed   sk         // ?3 = GENERAL AMERICAN
+
+`?3` is espeak's variant-conditional marker. **Someone wrote down that the two varieties differ here
+and that General American is the marked one** — while writing `school`, `scheme` and `schizoid` out of
+the /ʃ/ rule and leaving `schedule` in. That is a decision about this word, in a British-based
+dictionary, with the American case explicit. It clears the bar; the bare `espeak-ng` invocation would
+not have.
+
+### What the second source settles that the first could not
+
+| word | primary (wikipron UK) | second source | outcome |
+|---|---|---|---|
+| `schedule` | **no row at all** | `?3 sch (ed → sk` | admitted |
+| `leisure` | `liʒɚ` — the US-contaminated row #1383 names | `en_list lEZ3` | admitted |
+| `ballet` | `baleɪ` \| `balɪ` — **no stress marks** | `en_list baleI`, first-syllable stress | admitted |
+
+⚠ **AND THE PRIMARY SOURCE HAD `leisure` ALL ALONG, UNDER A DIFFERENT HEADWORD.** Its `leisurely` row
+is `lɛʒɜli` — the DRESS vowel, attested, in the corpus that was supposed to be blocking this. The
+lemma's row is contaminated and the derived form's is not. Worth remembering as a search move: when a
+headword's only reading looks like contamination, **the paradigm may not be contaminated.**
+
+⚠ **AND THE SECOND SOURCE IS WRONG ABOUT INFLECTIONS.** espeak reads `ballets` as `bˈaleɪs`, with a
+voiceless /s/. Its inflections are rule-derived, so the entailment rule — the lemma's citation plus the
+PARENT's own suffix — stays the authority, and the new source is admitted for LEMMAS only. That is
+written into the PROVENANCE bar rather than left as a habit.
+
+### Two things the entailment had to carry for `schedule`
+
+CMUdict's own paradigm is inconsistent: `UW2` in the lemma, `UH0` in all three inflections. Propagating
+that would have shipped `ʃˈɛdjuːl` beside `ʃˈɛdjʊld` in one sentence, so the citations take the LEMMA's
+stem vowel — the parent's inconsistency about its own word is not a British/American difference. And
+`scheduling` keeps a PLAIN /l/ where the other three have dark `ɫ`, because the parent lightens a
+prevocalic lateral. **The prefix test cannot see that**, the same way it cannot see flapping, so it is
+run over the darkness-folded strings for that one pair.
+
+Result: 30 rows → 38. `oregano`/`laboratory` stay blocked by the LOT exemption from Run 6 — the sources
+corroborate them exactly; the blocker was never evidence.
