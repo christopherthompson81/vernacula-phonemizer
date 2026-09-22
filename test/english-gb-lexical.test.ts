@@ -81,6 +81,28 @@ describe("en-GB lexical variants", () => {
         expect(phonemizeWord("figures")).toBe("fˈɪɡəz");   // referee: fɪɡəz
     });
 
+    it("swaps LOT for GOAT in process/progress, which no accent rule can do", () => {
+        // British /ˈprəʊsɛs/ against GenAm /ˈprɑːsɛs/. The LOT rule turns ɑː into ɒ and there is no rule
+        // anywhere that turns either into GOAT, so this is the aluminium case with a smaller footprint.
+        // ⚠ THE CITATION IS THE PARENT'S OWN ROW WITH ONE VOWEL SWAPPED — stress, aspiration and the suffix
+        // are all the parent's, never hand-invented; see the PROVENANCE file.
+        expect(phonemizeWord("process")).toBe("pɹˈəᶷsˌɛs");
+        expect(phonemizeWord("progress")).toBe("pɹˈəᶷɡɹɛs");
+        expect(phonemize("process", "en")).toBe("pɹˈɑːsˌɛs");   // and `en` is untouched
+        expect(phonemize("progress", "en")).toBe("pɹˈɑːɡɹɛs");
+    });
+
+    it("refuses progressed/progressing, because the parent already reads them as verbs", () => {
+        // ⚠ ENTAILING THESE WOULD HAVE MANUFACTURED A DIFFERENCE RATHER THAN RECORDED ONE. CMUdict stresses
+        // the noun on the first syllable and the participles on the second, so the syllable this row's
+        // LOT/GOAT swap lives in does not exist in these forms — both varieties say pɹəɡɹˈɛst. The referee
+        // has no row for either, which is the check agreeing rather than the reason.
+        expect(lexicalVariants().has("progressed")).toBe(false);
+        expect(lexicalVariants().has("progressing")).toBe(false);
+        expect(phonemizeWord("progressed")).toBe("pɹəɡɹˈɛst");
+        expect(phonemizeWord("progressed")).toBe(phonemizeWordRules("progressed"));
+    });
+
     it("owns every word it lists, so the set builder cannot claim one into an accent set", () => {
         // aluminium was in en-gb-yod.tsv: the builder's coronal-yod probe saw `luː` with no yod where the
         // referee attests one and filed it under yod-retention. An accent set claiming a lexical variant

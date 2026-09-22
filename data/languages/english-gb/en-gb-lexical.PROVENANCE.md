@@ -58,6 +58,8 @@ row the LOT rule turns its /ɑː/ into /ɒ/.
 | lever | /ˈliːvə/ against /ˈlɛvɚ/ — FLEECE against DRESS |
 | lieutenant | /lɛfˈtɛnənt/ against /luːˈtɛnənt/ — a consonant no rule inserts |
 | pasta | TRAP in British, PALM in GenAm |
+| process | GOAT in British, LOT in GenAm — /ˈprəʊsɛs/ against /ˈprɑːsɛs/; no rule turns LOT into GOAT |
+| progress | the same LOT/GOAT swap, in the NOUN only — see below |
 | tomato | PALM in British, FACE in GenAm |
 | vitamin | KIT in British, PRICE in GenAm |
 
@@ -92,6 +94,12 @@ entailment, which is the evidence the entailment is sound.
 | `pasta` | attested |
 | `tomato` | attested |
 | `vitamin` | attested |
+| `process` | attested |
+| `progress` | attested |
+| `processed` | attested AND entailed — they agree |
+| `processes` | attested AND entailed — they agree |
+| `processing` | attested AND entailed — they agree |
+| `progresses` | entailed from `progresses` |
 | `buoyed` | entailed from `buoyed` |
 | `buoys` | entailed from `buoys` |
 | `clerks` | attested AND entailed — they agree |
@@ -111,6 +119,20 @@ right and left the inflection wrong IN THE SAME SENTENCE — `clerk` klˈɑːk b
 `herb`/`herbs` with the /h/ appearing and disappearing. Before the table both were wrong and CONSISTENT.
 A change that introduces an inconsistency which did not previously exist is not an improvement on the
 promise of a follow-up.
+
+⚠ **`progressed` AND `progressing` ARE REFUSED BECAUSE THE PARENT ALREADY READS THEM AS VERBS.** CMUdict
+stresses the noun `progress` on the first syllable (`P R AA1 G R EH2 S`) and the participles on the second
+(`P R AH0 G R EH1 S T`), so `progressed` is `pɹəɡɹˈɛst` in BOTH varieties and there is no lexical difference to
+record. The LOT/GOAT swap this row exists for lives in the STRESSED first syllable, which those forms do not
+have. The referee has no row for either, and entailing one from the noun would have MANUFACTURED a difference
+rather than recorded one — the mirror of the `buoying` case below. `progresses` keeps the noun's stress in the
+parent, so it is entailed in the ordinary way.
+
+⚠ **AND `premier` IS NOT HERE, THOUGH THE ISSUE LISTED IT.** Its referee rows (`pɹɛmiə`, `pɹɛmjə`, …) look
+like a miss against our `pɹɛmˈɪə`, but espeak-ng's en-gb voice reads it `pɹˈɛmɪə` — segment-for-segment ours.
+The disagreement is the referee writing `i` where we write `ɪ`, i.e. NOTATION, and a lexical row would freeze
+a reading that is already correct. #1383's table listed it under "the referee writes a different symbol", and
+that is what it turned out to be.
 
 ⚠ **TWO INFLECTIONS ARE REFUSED RATHER THAN ENTAILED**, because the entailment does not hold:
 

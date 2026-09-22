@@ -34,6 +34,20 @@ public class EnglishGbTests
     }
 
     [Fact]
+    public void TheLexicalVariantTableIsLoadedToo()
+    {
+        // ⚠ SAME SILENT FAILURE AS THE FIVE SETS ABOVE — `Lexical` is also `optional: true`, so a missing
+        // file leaves en-GB answering with the parent's American WORD in plausible RP phonology. `process`
+        // is the cheapest probe: LOT in GenAm, GOAT in British, and no accent rule travels between them,
+        // so the əᶷ can only have come from the table.
+        Assert.Contains("əᶷ", Say("process"));
+        Assert.Contains("əᶷ", Say("progress"));
+        Assert.Contains("aluminium", EnglishGb.LexicalVariants());
+        // ...and NOT the participles, which the parent already reads as verbs — see the PROVENANCE file.
+        Assert.DoesNotContain("progressed", EnglishGb.LexicalVariants());
+    }
+
+    [Fact]
     public void BathAppliesToTheFirstOccurrenceOnly()
     {
         // ⚠ THE WHOLE REASON THESE FOUR REPLACEMENTS OMIT THE "g" FLAG. `aftermath` is a BATH word whose

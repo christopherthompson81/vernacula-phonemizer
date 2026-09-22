@@ -374,3 +374,57 @@ checked:
 ⚠ **THAT IS A POLICY CHANGE, NOT A DATA ADDITION**, and is deliberately not made here: the table's
 PROVENANCE sets the bar at "attested by the wikipron UK referee", and admitting a second source is a
 decision about the bar rather than about a row. Scoped, not taken.
+
+## Run 6 — 2026-09-21 18:40
+
+**Question: #1383's move 3 — the five rows deferred as "attested and genuinely different, but each
+needs a second lexical-set membership or a stress decision to land". Which of them actually land?**
+
+    for w in oregano premier process progress laboratory; do grep -P "^$w\t" \
+        tools/referee-eval/referees/en-gb.wikipron-uk.tsv; done
+
+| word | referee | ours (en-GB) | verdict |
+|---|---|---|---|
+| `process` | `pɹəsɛs` \| `pɹəʊsɛs` | `pɹˈɒsˌɛs` | **lands** |
+| `progress` | `pɹəɡɹɛs` \| `pɹəʊɡɹɛs` | `pɹˈɒɡɹɛs` | **lands** |
+| `premier` | `pɹɛmiə` \| `pɹɛmjə` \| … | `pɹɛmˈɪə` | NOT A MISS — see below |
+| `oregano` | `ɒɹɪɡɑːnəʊ` | `ɔːɹˈɛɡənˌəᶷ` | blocked, and I now know why |
+| `laboratory` | `ləbɒɹətəɹi` \| `ləbɒɹətɹi` | `lˈæbɹətʰəɹi` | blocked, same reason |
+
+**Two of the five are the SAME defect and it is the cheapest one in the table's history.** British
+/ˈprəʊsɛs/ against GenAm /ˈprɑːsɛs/ — LOT against GOAT. The citation is the parent's own row with one
+vowel swapped, `ɑː` → `oᶷ`, and the accent's GOAT rule does the rest: `pɹˈoᶷsˌɛs` → `pɹˈəᶷsˌɛs`. No
+stress decision, no set membership, nothing hand-invented. Six rows with the inflections; five of the
+six are directly attested and the sixth (`progresses`) is entailed.
+
+### ⚠ `progressed` AND `progressing` ARE A TRAP THE ENTAILMENT RULE WOULD HAVE WALKED INTO
+
+CMUdict stresses the noun on the first syllable and the participles on the second — `progress
+P R AA1 G R EH2 S` beside `progressed P R AH0 G R EH1 S T` — so both varieties already say
+`pɹəɡɹˈɛst`. **The syllable this row's swap lives in does not exist in those forms.** Entailing them
+from the lemma would have MANUFACTURED a difference rather than recorded one, which is the exact
+mirror of the `buoying` refusal in Run 2. The referee has no row for either; that is the check
+agreeing, not the reason.
+
+### ⚠ AND `premier` WAS NEVER A MISS — THE REFEREE JUST SPELLS IT DIFFERENTLY
+
+espeak-ng's en-gb voice reads it `pɹˈɛmɪə`, segment-for-segment ours. The referee writes `i` where we
+write `ɪ`; that is NOTATION, and the "second lexical-set membership" the issue thought it needed was
+a phantom. **A lexical row here would have frozen a reading that is already correct** — the thing the
+PROVENANCE file warns about for `klˈɑːk`. One of the five deferred rows was not a defect at all.
+
+### ⚠ `oregano` AND `laboratory` ARE BLOCKED BY THE TABLE'S OWN EXEMPTION, WHICH I DID NOT EXPECT
+
+Both British readings need **ɒ** — `ɒɹɪɡɑːnəʊ`, `ləbɒɹətəɹi` — and `english-gb.ts:252` reads
+
+    if (lexical === undefined && !(lex && lex.palm.has(w))) s = s.replace(/ɑː(?!ɹ)/gu, "ɒ");
+
+so **a table-owned word is exempt from the LOT rule**, deliberately, since Run 4. The only way to get
+the ɒ is to hand-write it into a citation the file documents as being in the parent's GenAm alphabet
+— i.e. to re-implement the LOT rule inside the table, for two words, and freeze it there. And it
+would not even suffice for `oregano`, whose `ɔːɹ` is NORTH and would not have been touched by LOT in
+the first place. These two need a finer exemption (phonological rules yes, set rules no, with LOT on
+the phonological side) and that is a design change, not a row. **Left out, with the reason now
+specific rather than "needs a decision".**
+
+Result: 24 rows → 30. `npm test`, goldens and C# parity below.
