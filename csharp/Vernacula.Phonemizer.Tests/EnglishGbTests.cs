@@ -34,6 +34,32 @@ public class EnglishGbTests
     }
 
     [Fact]
+    public void TheLexicalVariantTableIsLoadedToo()
+    {
+        // ⚠ SAME SILENT FAILURE AS THE FIVE SETS ABOVE — `Lexical` is also `optional: true`, so a missing
+        // file leaves en-GB answering with the parent's American WORD in plausible RP phonology. `process`
+        // is the cheapest probe: LOT in GenAm, GOAT in British, and no accent rule travels between them,
+        // so the əᶷ can only have come from the table.
+        Assert.Contains("əᶷ", Say("process"));
+        Assert.Contains("əᶷ", Say("progress"));
+        Assert.Contains("aluminium", EnglishGb.LexicalVariants());
+        // ...and NOT the participles, which the parent already reads as verbs — see the PROVENANCE file.
+        Assert.DoesNotContain("progressed", EnglishGb.LexicalVariants());
+    }
+
+    [Fact]
+    public void ALexicalRowGuardedOnAReadingLeavesTheOtherSenseAlone()
+    {
+        // ⚠ THE SUBSTITUTION IS POS-BLIND AND THE PARENT IS NOT. `progress` is pɹˈɑːɡɹɛs as a noun and
+        // pɹəɡɹˈɛs as a verb; unguarded, the row put the NOUN's citation into a VERB frame. The row
+        // names the GenAm reading it replaces, so it fires on one sense and not the other — and this is
+        // the C# half of that contract, since both ports read the same file.
+        Assert.Equal(Phonemizer.Phonemize("we progress quickly", "en"), Say("we progress quickly"));
+        Assert.Equal(Phonemizer.Phonemize("she progresses well", "en"), Say("she progresses well"));
+        Assert.Contains("əᶷ", Say("the progress is good"));
+    }
+
+    [Fact]
     public void BathAppliesToTheFirstOccurrenceOnly()
     {
         // ⚠ THE WHOLE REASON THESE FOUR REPLACEMENTS OMIT THE "g" FLAG. `aftermath` is a BATH word whose

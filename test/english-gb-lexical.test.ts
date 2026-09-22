@@ -10,7 +10,8 @@
 import { describe, expect, it } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { lexicalVariants, phonemizeWord, phonemizeWordRules } from "../src/languages/english-gb/english-gb.ts";
+import { MANIFEST } from "../src/languages/english/manifest.ts";
+import { lexicalRows, lexicalVariants, phonemizeWord, phonemizeWordRules } from "../src/languages/english-gb/english-gb.ts";
 
 describe("en-GB lexical variants", () => {
     it("reads aluminium as the British word, not the American one", () => {
@@ -79,6 +80,51 @@ describe("en-GB lexical variants", () => {
         }
         expect(phonemizeWord("clerks")).toBe("klˈɑːks");   // referee: klɑːks
         expect(phonemizeWord("figures")).toBe("fˈɪɡəz");   // referee: fɪɡəz
+    });
+
+    it("swaps LOT for GOAT in process/progress, which no accent rule can do", () => {
+        // British /ˈprəʊsɛs/ against GenAm /ˈprɑːsɛs/. The LOT rule turns ɑː into ɒ and there is no rule
+        // anywhere that turns either into GOAT, so this is the aluminium case with a smaller footprint.
+        // ⚠ THE CITATION IS THE PARENT'S OWN ROW WITH ONE VOWEL SWAPPED — stress, aspiration and the suffix
+        // are all the parent's, never hand-invented; see the PROVENANCE file.
+        expect(phonemizeWord("process")).toBe("pɹˈəᶷsˌɛs");
+        expect(phonemizeWord("progress")).toBe("pɹˈəᶷɡɹɛs");
+        expect(phonemize("process", "en")).toBe("pɹˈɑːsˌɛs");   // and `en` is untouched
+        expect(phonemize("progress", "en")).toBe("pɹˈɑːɡɹɛs");
+    });
+
+    it("refuses progressed/progressing, because the parent already reads them as verbs", () => {
+        // ⚠ ENTAILING THESE WOULD HAVE MANUFACTURED A DIFFERENCE RATHER THAN RECORDED ONE. CMUdict stresses
+        // the noun on the first syllable and the participles on the second, so the syllable this row's
+        // LOT/GOAT swap lives in does not exist in these forms — both varieties say pɹəɡɹˈɛst. The referee
+        // has no row for either, which is the check agreeing rather than the reason.
+        expect(lexicalVariants().has("progressed")).toBe(false);
+        expect(lexicalVariants().has("progressing")).toBe(false);
+        expect(phonemizeWord("progressed")).toBe("pɹəɡɹˈɛst");
+        expect(phonemizeWord("progressed")).toBe(phonemizeWordRules("progressed"));
+    });
+
+    it("guards every row the parent resolves by POS, so a verb frame keeps its verb reading", () => {
+        // ⚠ THE SUBSTITUTION IS POS-BLIND AND THE PARENT IS NOT. `progress` is pɹˈɑːɡɹɛs as a noun and
+        // pɹəɡɹˈɛs as a verb, and the unguarded row put the NOUN's citation into "we progress quickly"
+        // — wrong within one sentence, which is the failure the inflection rows exist to prevent, arriving
+        // through the lemma instead. A row may name the GenAm reading it replaces and then applies only
+        // when the parent produced it.
+        //
+        // ⚠ AND THIS SWEEPS RATHER THAN LISTING, because review found `progress` and the SWEEP found
+        // `progresses`: english.ts resolves a heteronym's regular -s/-es plural through the SAME entry, so
+        // the plural row had the identical defect one word away from the one that was reported.
+        const het = MANIFEST.heteronyms;
+        const marked = (w: string): boolean => {
+            const e = het[w] ?? (w.endsWith("es") ? het[w.slice(0, -2)] : undefined) ?? (w.endsWith("s") ? het[w.slice(0, -1)] : undefined);
+            return e !== undefined && (e.verb ?? e.noun ?? e.past ?? e.adj) !== undefined;
+        };
+        const unguarded = [...lexicalRows()].filter(([w, r]) => marked(w) && r.from === undefined).map(([w]) => w);
+        expect(unguarded).toEqual([]);
+        // ...and the guard is live, not merely present.
+        expect(phonemize("we progress quickly", "en-GB")).toBe(phonemize("we progress quickly", "en"));
+        expect(phonemize("she progresses well", "en-GB")).toBe(phonemize("she progresses well", "en"));
+        expect(phonemize("the progress is good", "en-GB")).toContain("p\u0279\u02c8\u0259\u1db7\u0261\u0279\u025bs");
     });
 
     it("owns every word it lists, so the set builder cannot claim one into an accent set", () => {
