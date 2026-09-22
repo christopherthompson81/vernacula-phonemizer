@@ -99218,8 +99218,8 @@ rebstock	R EH1 B S T AA2 K
 rebuck	R EH1 B AH0 K
 rebuff	R IH0 B AH1 F
 rebuffed	R IH0 B AH1 F T
-rebuffing	R IH0 B AH1 F IH0 NG
-rebuffs	R IH0 B AH1 F S
+rebuffing	R IY0 B AH1 F IH0 NG
+rebuffs	R IY0 B AH1 F S
 rebuild	R IY0 B IH1 L D
 rebuilder	R IY0 B IH1 L D ER0
 rebuilders	R IY0 B IH1 L D ER0 Z
@@ -99360,8 +99360,8 @@ recitatives	R EH2 S AH0 T AH0 T IY1 V Z
 recitativo	R EH2 S IH0 T AH0 T IY1 V OW0
 recite	R AH0 S AY1 T
 recited	R AH0 S AY1 T IH0 D
-recites	R IH0 S AY1 T S
-reciting	R IH0 S AY1 T IH0 NG
+recites	R IY0 S AY1 T S
+reciting	R IY0 S AY1 T IH0 NG
 reck	R EH1 K
 reckard	R EH1 K ER0 D
 recker	R EH1 K ER0
@@ -100036,9 +100036,9 @@ refutes	R IH0 F Y UW1 T S
 refuting	R IH0 F Y UW1 T IH0 NG
 reg	R EH1 G
 rega	R IY1 G AH0
-regain	R IY0 G EY1 N
+regain	R IH0 G EY1 N
 regained	R IY0 G EY1 N D
-regaining	R IY0 G EY1 N IH0 NG
+regaining	R IH0 G EY1 N IH0 NG
 regains	R IY0 G EY1 N Z
 regal	R IY1 G AH0 L
 regalado	R EY0 G AA0 L AA1 D OW0
@@ -100561,7 +100561,7 @@ relics	R EH1 L IH0 K S
 relict	R EH1 L IH0 K T
 relied	R IH0 L AY1 D
 relief	R IH0 L IY1 F
-reliefs	R IH0 L IY1 F S
+reliefs	R IY0 L IY1 F S
 relies	R IH0 L AY1 Z
 relieve	R IH0 L IY1 V
 relieved	R IH0 L IY1 V D
@@ -100990,8 +100990,8 @@ repayments	R IY0 P EY1 M AH0 N T S
 repays	R IY2 P EY1 Z
 repeal	R IH0 P IY1 L
 repealed	R IH0 P IY1 L D
-repealing	R IH0 P IY1 L IH0 NG
-repeals	R IH0 P IY1 L Z
+repealing	R IY0 P IY1 L IH0 NG
+repeals	R IY0 P IY1 L Z
 repeat	R IH0 P IY1 T
 repeatable	R IH0 P IY1 T AH0 B AH0 L
 repeated	R IH0 P IY1 T IH0 D
@@ -101461,7 +101461,7 @@ responds	R IH0 S P AA1 N D Z
 responsa	R IH0 S P AA1 N S AH0
 response	R IH0 S P AA1 N S
 responses	R IH0 S P AA1 N S IH0 Z
-responsibilities	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z
+responsibilities	R IY0 S P AA2 N S AH0 B IH1 L AH0 T IY0 Z
 responsibility	R IH0 S P AA2 N S AH0 B IH1 L AH0 T IY0
 responsible	R IH0 S P AA1 N S AH0 B AH0 L
 responsibly	R IH0 S P AA1 N S AH0 B L IY0

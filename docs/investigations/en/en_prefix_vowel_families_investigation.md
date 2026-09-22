@@ -168,28 +168,50 @@ All 26 are reverted, including the in-place `revolve` edit, which is back to its
 
 ### The rule #1397 actually asked for
 
-Both sources, abstaining wherever either hesitates: gold and Moby must agree, or one must speak on TWO
-members while the other is silent.
+Both sources, abstaining wherever either hesitates: gold and Moby must agree, or one must speak while
+the other is silent — and **either way two distinct members of the family must be covered**.
 
-    62 split families   ⚠ settled 22   a source CONTRADICTS 39   too thin 1     → 34 rows
+    62 split families   ⚠ settled 16   a source CONTRADICTS 35   too thin 11     → 24 rows
 
-⚠ **AND "SILENT" IS NOT "SPLIT WITHIN ITSELF", WHICH COST ANOTHER ROUND.** A first version returned the
-same "no verdict" for both, so a family gold disagrees with *itself* about fell through to Moby and was
+⚠ **AND "SILENT" IS NOT "SPLIT WITHIN ITSELF", WHICH COST A ROUND.** A first version returned the same
+"no verdict" for both, so a family gold disagrees with *itself* about fell through to Moby and was
 recorded as "gold silent" — `detoxication` shipped tense that way while gold reads it `dətˌɑksəkˈAʃən`,
 reduced. **A source that speaks and contradicts itself is evidence of DIFFICULTY, not of absence.**
-Separating them took settled 35 → 22 and rows 64 → 34, and that is the honest number.
 
-The check the first pass never had, run over every emitted row:
+⚠ **AND A SECOND VERSION DROPPED THE TWO-MEMBER FLOOR WHENEVER BOTH SOURCES SPOKE**, which is worse
+than it sounds. 12 of its 34 rows read `agree on 1 and 1 members`, and **in every case the covered word
+was the BASE FORM — the member that already agreed with the dictionary — while the members actually
+being CHANGED had no attestation at all.** `re:rebuff` shipped that way: the exact family the earlier
+comment had named as the counterexample ("covered on 1 of 4"). **Two sources agreeing about one word is
+still one word.** Restoring the floor over DISTINCT covered members took settled 22 → 16, rows 34 → 24.
 
-    rows 34   ⚠ rows gold contradicts: 0        detoxication in the set? False
+### Three more the same review found, each the same shape one level down
 
-31 tense, 33 reduced across the two directions — which is why this is arbitrated per family rather than
-by a blanket "Latinate re- reduces".
+- ⚠ **`goldVowels()` FAILED OPEN.** An absent gold file returned an empty map silently, so every family
+  reported "gold silent", the Moby branch took over, and the emitted notes were **indistinguishable
+  from a genuine silence** — #1416's defect reproducing itself on any machine where the venv moved. It
+  exits 2 now.
+- ⚠ **AND THE GOLD READER SCORED SPEECH AS SILENCE TWICE.** `ᵻ` — misaki's IH0/AH0 merge vowel, 13
+  prefix entries including the whole `deduce`/`deduct` family — was missing from the reduced class; and
+  142 POS-keyed entries (`precipitate`, `deviate`, `degenerate`) were discarded for not being strings
+  rather than read through their `DEFAULT`. **The same silent-vs-speaks conflation the abstain rule is
+  about, one level down in the reader.**
+- ⚠ **AND THE VERDICT WAS COMPUTED OVER THE KEY'S MEMBERS AND APPLIED TO THE EXTENDED SET**, so a word
+  stranded by `familyKey` — the very case the extension exists for — could be overwritten even where a
+  source gives it the opposite value, because the split detection never looked at it. Latent (0 of the
+  shipped rows), now re-tested over the extended set.
+
+### The check the first pass never had
+
+    rows 24   ⚠ rows gold contradicts: 0   `agree on 1 and 1`: 0   9 tense, 15 reduced
+
+⚠ **AND THE "31 tense, 33 reduced" IN AN EARLIER DRAFT OF THIS SECTION DESCRIBED 64 ROWS**, the count of
+the superseded pass, not the 34 it was printed beside. The figures above are counted from the diff.
 
 ### What is left
 
-    62 split families → 22 settled → 40 open
+    62 split families → 16 settled → 46 open
 
-39 abstain because a source hesitates — gold against Moby, or a source against itself — and 1 is too
-thin. **Those are not waiting on a missing source any more; they are waiting on adjudication where two
-curated lexicons genuinely disagree**, which is a different and harder thing than this run did.
+35 abstain because a source hesitates — gold against Moby, or a source against itself — and 11 are too
+thin to meet the two-member floor. **They are not waiting on a missing source; they are waiting on
+adjudication where two curated lexicons genuinely disagree**, which is a different and harder thing.

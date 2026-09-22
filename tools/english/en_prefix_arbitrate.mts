@@ -8,12 +8,11 @@
  * ⚠ ESPEAK CANNOT ARBITRATE THIS CLASS, and `--espeak` is how you check that rather than take it on
  * trust. Measured over a quarter of the 3,391 prefix words, it writes the reduced vowel every time and
  * the tense vowel never — its vote is a CONSTANT. #1378 item 4's "espeak backs the agreed form on 27
- * of 35 rows" therefore says only that 27 of those agreed forms were reduced; every one of the 104
- * prefix rows the curated layer has applied moves TENSE → REDUCED.
+ * of 35 rows" therefore says only that 27 of those agreed forms were reduced.
  *
- * ⚠ AND misaki `us_gold.json` IS NOT ON THIS MACHINE, so of the three sources #1397 names, one is
- * uninformative and one is absent. The verdicts below rest on MOBY ALONE, which does discriminate
- * (`retrieve r/I/` reduced against `repress r/i/` tense) — and therefore on the two-member rule.
+ * ⚠ AN EARLIER VERSION OF THIS HEADER SAID us_gold.json WAS NOT ON THIS MACHINE AND THAT THE VERDICTS
+ * RESTED ON MOBY ALONE. Both were false and the second shipped 26 rows, 13 of which gold contradicts.
+ * The arbitration is gold AND Moby, abstaining wherever either hesitates.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
@@ -35,11 +34,29 @@ const GOLD = process.env["GOLD"]
     ?? "/home/chris/base/lib/python3.12/site-packages/misaki/data/us_gold.json";
 function goldVowels(): Map<string, "T" | "R"> {
     const out = new Map<string, "T" | "R">();
-    if (!existsSync(GOLD)) return out;
+    // ⚠ NEVER FAIL OPEN. An absent gold file used to return an empty map silently, which makes every
+    // family report "gold silent", hands the decision to the `Moby on 2 members` branch, and emits
+    // Moby-alone rows whose NOTE TEXT is indistinguishable from a genuine silence. That is #1416's
+    // defect reproducing itself on any machine where the venv moved.
+    if (!existsSync(GOLD)) {
+        console.error(`⚠ us_gold.json not found at ${GOLD} — refusing to arbitrate on one source.`);
+        console.error("  Set GOLD=/path/to/misaki/data/us_gold.json. See #1397/#1418.");
+        process.exit(2);
+    }
     const d = JSON.parse(readFileSync(GOLD, "utf8")) as Record<string, unknown>;
     for (const [w, v] of Object.entries(d)) {
-        if (typeof v !== "string") continue;                       // gold stores POS pairs as objects
-        const m = /^(?:p?ɹ|d)([iəɪ])/u.exec(v.replace(/[ˈˌ]/gu, ""));
+        // ⚠ A POS-KEYED ENTRY IS NOT SILENCE. gold stores heteronyms as `{DEFAULT, VERB, …}`, and 142
+        // prefix words are shaped that way (`precipitate`, `deviate`, `degenerate`); discarding them
+        // scored gold as silent and handed those families to Moby alone — the same silent-vs-speaks
+        // conflation this tool's own abstain rule is about, one level down in the reader.
+        const p = typeof v === "string" ? v
+            : (typeof v === "object" && v !== null && typeof (v as Record<string, unknown>)["DEFAULT"] === "string"
+                ? (v as Record<string, string>)["DEFAULT"]! : undefined);
+        if (p === undefined) continue;
+        // ⚠ AND `ᵻ` IS REDUCED, NOT ABSENT. It is misaki's IH0/AH0 merge vowel and 13 prefix entries use
+        // it (`dᵻdˈʌkt` and the rest of the deduce/deduct family). Omitting it from the class scored
+        // gold as silent where gold SPEAKS, reduced.
+        const m = /^(?:p?ɹ|d)([iəɪᵻ])/u.exec(p.replace(/[ˈˌ]/gu, ""));
         if (m) out.set(w, m[1] === "i" ? "T" : "R");
     }
     return out;
@@ -122,17 +139,39 @@ for (const [k, m] of fams) {
     // ⚠ A SOURCE THAT CONTRADICTS ITSELF ACROSS THE FAMILY STOPS THE FAMILY, rather than handing the
     // decision to the other one. That is the whole point of arbitrating per family.
     if (g.kind === "split" || mo.kind === "split") { contradicted++; continue; }
+    // ⚠ THE TWO-MEMBER FLOOR IS OVER DISTINCT WORDS, NOT PER SOURCE, AND DROPPING IT WAS THE WHOLE
+    // DEFECT OF THE FIRST TWO-SOURCE PASS. "gold and Moby agree" was allowed to settle a family on ONE
+    // covered word, so 12 of 34 rows read "agree on 1 and 1 members" — and in every case the covered
+    // word was the BASE FORM, the member that already agrees with the dictionary, while the members
+    // actually being CHANGED had no attestation at all. `re:rebuff` shipped that way: the exact family
+    // the previous comment named as the counterexample ("covered on 1 of 4"). Two sources agreeing
+    // about one word is still one word.
+    const covered = new Set([...m.filter((x) => gold.has(x.word)), ...m.filter((x) => moby.has(x.word))]
+        .map((x) => x.word));
     let want: "T" | "R" | undefined;
     let why = "";
+    if (covered.size < 2) { thin++; continue; }
     if (g.kind === "says" && mo.kind === "says") {
         if (g.v !== mo.v) { contradicted++; continue; }                    // the sources disagree — abstain
-        want = g.v; why = `gold and Moby agree on ${g.n} and ${mo.n} members`;
-    } else if (g.kind === "says" && g.n >= 2) { want = g.v; why = `gold on ${g.n} members, Moby silent`; }
-    else if (mo.kind === "says" && mo.n >= 2) { want = mo.v; why = `Moby on ${mo.n} members, gold silent`; }
+        want = g.v; why = `gold and Moby agree, ${covered.size} members covered`;
+    } else if (g.kind === "says") { want = g.v; why = `gold on ${g.n} members, Moby silent`; }
+    else if (mo.kind === "says") { want = mo.v; why = `Moby on ${mo.n} members, gold silent`; }
     else { thin++; continue; }
     settled++;
+    // ⚠ THE FAMILY IS EXTENDED BY RELATEDNESS BEFORE APPLYING, because the KEY can strand a member:
+    // `prescriptivist` keys to `pre:prescriptiv` — `ist` strips before `ive` can — so it sits in a
+    // family of one and the verdict never reaches it. (This comment was deleted in one review round
+    // while the code it justifies was kept; it is back.)
     const extended = [...m, ...words.filter((o) => !m.includes(o) && o.prefix === m[0]!.prefix
         && m.some((x) => relatedForms(o.word, x.word)))];
+    // ⚠ AND THE VERDICT MUST BE RE-TESTED OVER THE EXTENDED SET. It was computed over the KEY's members
+    // only, so a stranded word — the very case the extension exists for — could be overwritten even
+    // where a source gives it the OPPOSITE value, because the split detection never looked at it.
+    const ext = verdict(extended, gold), extMo = verdict(extended, moby);
+    if (ext.kind === "split" || extMo.kind === "split"
+        || (ext.kind === "says" && ext.v !== want) || (extMo.kind === "says" && extMo.v !== want)) {
+        contradicted++; settled--; continue;
+    }
     for (const x of extended) {
         if ((isTense(x.vowel) ? "T" : "R") === want) continue;
         const vi = x.phones.findIndex((p) => /\d$/u.test(p));
