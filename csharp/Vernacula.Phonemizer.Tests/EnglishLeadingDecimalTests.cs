@@ -77,6 +77,39 @@ public class EnglishLeadingDecimalTests
         => Assert.Equal(expected, Norm(text));
 
     /// <summary>
+    /// ⚠ A LEADING POINT IS NOT ALWAYS A DECIMAL, and this was a REGRESSION the first draft introduced.
+    /// A firearm CALIBER and a batting AVERAGE are integer labels written with a point, and all of these
+    /// were ALREADY CORRECT before the rule existed. No shape separates them from a decimal, so the gate
+    /// is lexical: a cue word after the digits, or `batting`/`hitting` before the point.
+    /// </summary>
+    [Theory]
+    [InlineData(".50 caliber")]
+    [InlineData(".45 ACP")]
+    [InlineData(".38 Special")]
+    [InlineData(".22 LR")]
+    [InlineData(".223 Remington")]
+    [InlineData(".308 Winchester")]
+    [InlineData("batting .300")]
+    [InlineData("hitting .350")]
+    public void ACaliberOrAverageIsNotADecimal(string w)
+    {
+        Assert.Equal(w, Norm(w));
+        Assert.DoesNotContain("p\u02b0\u0254\u1da6nt", Say(w));
+    }
+
+    /// <summary>
+    /// ⚠ KNOWN AND ACCEPTED COST, pinned so it is a decision: a BARE caliber with no cue has nothing to
+    /// key on and becomes a decimal.
+    /// </summary>
+    [Fact]
+    public void ABareCaliberHasNoCue() => Assert.Equal("he carried a 0.45", Norm("he carried a .45"));
+
+    /// <summary>⚠ A decomposed accent ends in a combining MARK, not a letter.</summary>
+    [Fact]
+    public void ADecomposedAccentIsStillALetterBoundary()
+        => Assert.Equal("cafe\u0301.5 kg", Norm("cafe\u0301.5 kg"));
+
+    /// <summary>
     /// ⚠ The ASCII hyphen is still not a range, and that is the documented decision, not a gap: it is a
     /// date, a phone number and a score far more often than a span.
     /// </summary>

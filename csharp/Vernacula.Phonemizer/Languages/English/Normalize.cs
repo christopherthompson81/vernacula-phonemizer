@@ -610,12 +610,20 @@ public static class Normalize
      * insertion fixes a cascade rather than a reading: `.5 kg` read "five KING", `.002 mm` "two m",
      * `.002` "two" — a value wrong by a factor of 500 and entirely fluent.
      *
-     * ⚠ THE LOOKBEHIND CARRIES THE WHOLE GUARD. A point preceded by a LETTER is an abbreviation
-     * (`Fig.2`), by a DIGIT a version or an address (`v1.002`, `192.168.1.1`), and by another POINT an
-     * ellipsis. A sentence-final period is followed by a space, which the digit lookahead excludes.
+     * ⚠ THE LOOKBEHIND CARRIES THE STRUCTURAL GUARD. A point preceded by a LETTER is an abbreviation
+     * (`Fig.2`), by a MARK the same (a decomposed accent ends in a combining mark, not a letter), by a
+     * DIGIT a version or an address (`v1.002`, `192.168.1.1`), and by another POINT an ellipsis. A
+     * sentence-final period is followed by a space, which the digit lookahead excludes.
+     *
+     * ⚠ AND THE TWO CUE LOOKAROUNDS CARRY THE LEXICAL ONE. A firearm CALIBER and a batting AVERAGE
+     * are integer labels written with a point, and no shape separates them from a decimal, so they are
+     * named: a cue word after the digits (`.50 caliber`, `.45 ACP`, `.22 LR`), or `batting`/`hitting`
+     * before the point. All of them read correctly before this rule existed and would have regressed.
      */
-    private static readonly JsRe LEADING_DECIMAL_POINT =
-        JsRegex.Compile("(?<![\\d\\p{L}.])\\.(?=\\d)", "gu");
+    private static readonly JsRe LEADING_DECIMAL_POINT = JsRegex.Compile(
+        "(?<![\\d\\p{L}\\p{M}.])(?<!\\b(?:batting|hitting|slugging|averaging)[ \\t\\u00a0])"
+        + "\\.(?=\\d)(?!\\d+[ \\t\\u00a0-]*(?:cal|calibre|caliber|acp|magnum|mag|special|spl|auto"
+        + "|lr|win|winchester|rem|remington|luger|s&w)\\b)", "giu");
     private static readonly JsRe SCI_EXPONENT = JsRegex.Compile(
         "(?<=[×x·]\\s?)(10)\\s?(\\u207b?[\\u2070\\u00b9\\u00b2\\u00b3\\u2074-\\u2079]+|-\\d+)", "gu");
     private static readonly JsRe NEGATIVE = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");

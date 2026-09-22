@@ -1975,5 +1975,42 @@ the memo this log already carries about speaker variation. The cascade fix does 
 choice, so it is not held up by it; suppressing the zero for the bare-point SPELLING specifically would
 be a separate, small change if wanted.
 
-**Gates.** 6232 TS · 6834 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6241 TS · 6844 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex corpus re-extracted (one new pattern).
+
+**Review of Run 30 — the rule regressed the class it most resembles.**
+
+⚠ **A LEADING POINT IS NOT ALWAYS A DECIMAL.** A firearm CALIBER and a batting AVERAGE are integer
+labels written with a point, and every one of them was ALREADY CORRECT before this rule existed.
+Verified against `main`:
+
+```
+.50 caliber      fˈɪfti kʰˈæləbɚ              →  zˈɪɹoᵑ pʰɔᶦnt fˈaᶦv zˈɪɹoᵑ …
+.45 ACP          fˈɔːɹt̬i fˈaᶦv                →  zˈɪɹoᵑ pʰɔᶦnt fˈɔːɹ fˈaᶦv
+batting .300     bˈæt̬ɪŋ . θɹˈiː hˈʌndɹəd        →  … zˈɪɹoᵑ pʰɔᶦnt θɹˈiː zˈɪɹoᵑ zˈɪɹoᵑ
+```
+
+That is **the same wrong-magnitude failure this rule exists to fix, pointed the other way** — and Run
+30's only documented cost was the ASCII hyphen, so nothing recorded it. No SHAPE separates `.300` the
+average from `.300` the decimal, so the gate is lexical: a cue word after the digits
+(`caliber`, `cal`, `ACP`, `Magnum`, `Special`, `Auto`, `LR`, `Win`/`Winchester`, `Rem`/`Remington`,
+`Luger`, `S&W`), or `batting`/`hitting`/`slugging` before the point. All eight restored and asserted.
+
+⚠ **KNOWN AND ACCEPTED COST, now pinned as a test:** a BARE caliber with no cue (`he carried a .45`)
+has nothing to key on and becomes a decimal. That is the residue of a genuinely ambiguous spelling.
+⚠ `.30-06` also changed — `θˈɚrt̬i sˈɪks` before, a decimal after — but neither is *thirty-aught-six*,
+so it is recorded as different-and-still-wrong rather than claimed as fixed.
+
+⚠ **The lookbehind omitted `\p{M}`**, unlike its sibling in the same file: a decomposed accent ends in
+a combining mark, not a letter, so NFD `café.5 kg` glued the inserted `0` onto the word. Added.
+
+⚠ **And the new corpus row has no POSITIVE probe.** `PROBES` in `tools/extract_regexes.mts` contains no
+string with a dot immediately before a digit at an unguarded position, so the JS↔.NET dialect gate
+exercises this pattern only negatively. Adding a probe would regenerate match lists for all 2,373
+patterns, which is a sweeping change to a shared artifact inside a decimals fix — so instead the concern
+was answered directly with the tool that exists for it: `csharp/tools/regex-diff` reports **144,640
+probe results identical, 0 differ, 0 threw**, and the two ports carry 27 TS and 32 C# assertions over
+the same inputs. A positive probe for this class is worth adding to `PROBES` on its own.
+
+**Gates.** 6241 TS · 6844 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,640 probes identical.

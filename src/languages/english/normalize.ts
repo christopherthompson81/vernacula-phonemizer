@@ -986,10 +986,20 @@ export function normalizeEnglish(input: string): string {
     //      (`Fig.2`), by a DIGIT a version or an address (`v1.002`, `192.168.1.1`), and by another POINT
     //      an ellipsis. A sentence-final period is followed by a space, so the digit lookahead excludes
     //      it without needing to know anything about sentences.
+    //      ⚠ AND A LEADING POINT IS NOT ALWAYS A DECIMAL, which review caught as a REGRESSION this
+    //      rule introduced: a firearm CALIBER and a batting AVERAGE are integer labels written with a
+    //      point, and both were already read correctly. `.50 caliber` was "fifty caliber" and became
+    //      "zero point five zero caliber"; `.45 ACP`, `.38 Special`, `.22 LR`, `.223 Remington` and
+    //      `batting .300` all went the same way — the same wrong-magnitude failure this rule exists to
+    //      fix, pointed the other way. No SHAPE separates `.300` the average from `.300` the decimal,
+    //      so the gate is lexical: a cue word after the digits, or `batting`/`hitting` before the point.
+    //      ⚠ KNOWN AND ACCEPTED COST: a BARE caliber with no cue (`he carried a .45`) has nothing to
+    //      key on and becomes a decimal. That is the residue of a genuinely ambiguous spelling, and the
+    //      cued forms are the overwhelming majority of the ones that appear in prose.
     //      ⚠ READING NOTE: this yields "zero point zero zero two", which is what `0.002` produces
     //      today. The reporter's register omits it — "point zero zero two" — and both are real; see
     //      docs/investigations/en/en_reported_misreadings_investigation.md, Run 30.
-    s = rewrite(s, /(?<![\d\p{L}.])\.(?=\d)/gu, "0.");
+    s = rewrite(s, LEADING_DECIMAL_POINT, "0.");
 
     // 0e) SCIENTIFIC NOTATION'S EXPONENT, resolved before BOTH the sign rule and the unit rule — ⚠ AND THE
     //     ORDERING IS THE WHOLE REASON THIS IS SEPARATE FROM 6b rather than the same rule.
@@ -1663,6 +1673,24 @@ export const isUnreadableEnglish = makeUnreadableTest({
  * stay structurally identical rather than one growing a callback.
  */
 const RE_PREFIX = /(?<![\p{L}\p{M}\d])(?<!\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\p{L})/giu;
+
+/**
+ * A LEADING-POINT DECIMAL'S POINT — the `.` of `.002`, which gets a `0` in front of it (#1437).
+ *
+ * ⚠ THE LOOKBEHIND CARRIES THE STRUCTURAL GUARD: a point preceded by a LETTER is an abbreviation
+ * (`Fig.2`), by a MARK the same (a decomposed accent ends in a combining mark, not a letter — the
+ * sibling rule at the unit tier spells `[\p{L}\p{M}]` for exactly this reason), by a DIGIT a version
+ * or an address (`v1.002`, `192.168.1.1`), and by another POINT an ellipsis.
+ *
+ * ⚠ AND THE TWO CUE LOOKAROUNDS CARRY THE LEXICAL ONE. A firearm CALIBER and a batting AVERAGE are
+ * integer labels written with a point and no shape separates them from a decimal, so they are named:
+ * a cue word after the digits (`.50 caliber`, `.45 ACP`, `.22 LR`), or `batting`/`hitting` before the
+ * point. Both read correctly before this rule existed and would otherwise have regressed.
+ */
+const LEADING_DECIMAL_POINT = new RegExp(
+    `(?<![\\d\\p{L}\\p{M}.])(?<!\\b(?:batting|hitting|slugging|averaging)[ \\t\\u00a0])`  // space, tab, NBSP
+    + `\\.(?=\\d)(?!\\d+[ \\t\\u00a0-]*(?:cal|calibre|caliber|acp|magnum|mag|special|spl|auto`  // space, tab, NBSP
+    + `|lr|win|winchester|rem|remington|luger|s&w)\\b)`, "giu");
 
 /**
  * Letter names. English needs almost no data here: CMUdict carries all 26 single letters with their

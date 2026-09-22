@@ -59,6 +59,26 @@ describe("a leading-point decimal is a number", () => {
         expect(normalizeEnglish("£.75")).toBe("75 pence");
     });
 
+    /**
+     * ⚠ A LEADING POINT IS NOT ALWAYS A DECIMAL, and this was a REGRESSION the first draft introduced.
+     * A firearm CALIBER and a batting AVERAGE are integer labels written with a point, and all of these
+     * were ALREADY CORRECT before the rule existed — `.50 caliber` read "fifty caliber" and became
+     * "zero point five zero caliber". That is the same wrong-magnitude failure this rule exists to fix,
+     * pointed the other way. No shape separates `.300` the average from `.300` the decimal, so the gate
+     * is lexical: a cue word after the digits, or `batting`/`hitting` before the point.
+     */
+    test.each([".50 caliber", ".45 ACP", ".38 Special", ".22 LR", ".223 Remington", ".308 Winchester",
+        "batting .300", "hitting .350"])("%s is not a decimal", (w) => {
+        expect(normalizeEnglish(w)).toBe(w);
+        expect(phonemize(w, "en")).not.toContain("pʰɔᶦnt");
+    });
+
+    // ⚠ KNOWN AND ACCEPTED COST, pinned so it is a decision: a BARE caliber with no cue has nothing
+    // to key on and becomes a decimal. That is the residue of a genuinely ambiguous spelling.
+    test("a bare caliber has no cue and is read as a decimal", () => {
+        expect(normalizeEnglish("he carried a .45")).toBe("he carried a 0.45");
+    });
+
     // ⚠ THE ASCII HYPHEN IS STILL NOT A RANGE, and that is the documented decision, not a gap: it is a
     // date, a phone number and a score far more often than a span, so `5-10` does not say "to" either.
     test("the ASCII hyphen is left as it was", () => {
