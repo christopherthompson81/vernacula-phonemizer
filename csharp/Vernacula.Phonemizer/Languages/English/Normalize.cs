@@ -197,25 +197,35 @@ public static class Normalize
 
     /** The SLASHED unit keys only, for the bare-rate arm — a slash inside a token can never be a word,
      *  so these need no number in front of them. See the TS for the URL guard. */
+    private static readonly JsRe BARE_RATE_RE = JsRegex.Compile(
+        "(?<![\\p{L}\\d])(" + string.Join("|", UNITS.Keys.Where(k => k.Contains('/'))
+            .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d])",
+        "giu");
+
     /**
      * THE MICRO-PREFIXED unit keys, for the bare arm — a unit standing with NO number in front of it.
      *
-     * ⚠ SAME ARGUMENT AS THE SLASHED KEYS BELOW, AND THE SAME REPORTED SHAPE. `BARE_RATE_RE` exists
+     * ⚠ SAME ARGUMENT AS THE SLASHED KEYS ABOVE, AND THE SAME REPORTED SHAPE. `BARE_RATE_RE` exists
      * because a rate arrived as a COLUMN HEADER, where a slash inside a token can never be a word; a
      * MICRO SIGN glued to letters can never be one either. `µin` was reported in exactly that bare
      * form and read as the preposition *in*, with the sign dropped. See the TypeScript.
      *
      * ⚠ AND IT REQUIRES THE LETTERS: a LONE mu is the Greek letter and must stay one.
+     *
+     * ⚠ THE SLASH IS EXCLUDED ON BOTH SIDES, and leaving it out was a REGRESSION: this arm runs before
+     * the rate arm, so it claimed the NUMERATOR of every micro rate whose full key the table does not
+     * enumerate and stripped the plural — `µg/kg` read "microgram per kilogram" for "micrograms per
+     * kilogram". The lookBEHIND carries it too, for the URL path segment (`…/µm/…`).
+     *
+     * ⚠ `i`, LIKE THE SLASHED ARM ABOVE. Case-sensitivity is `ResolveUnitSymbol`'s job, not the
+     * pattern's — it consults the declared table with the EXACT written form before folding, so ⟨µM⟩
+     * stays micromolar and ⟨µm⟩ a micro metre either way. Without the flag ⟨µL⟩, the DOMINANT
+     * printed spelling of the microlitre, never matched at all and put a raw µ into the g2p.
      */
     private static readonly JsRe BARE_MICRO_RE = JsRegex.Compile(
-        "(?<![\\p{L}\\d])(" + string.Join("|", UNITS.Keys
+        "(?<![\\p{L}\\d/])(" + string.Join("|", UNITS.Keys
             .Where(k => k.Length > 1 && (k[0] == '\u00b5' || k[0] == '\u03bc'))
-            .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d])",
-        "gu");  // ⚠ NO `i`: ⟨µM⟩ is micromolar and ⟨µm⟩ a micro metre.
-
-    private static readonly JsRe BARE_RATE_RE = JsRegex.Compile(
-        "(?<![\\p{L}\\d])(" + string.Join("|", UNITS.Keys.Where(k => k.Contains('/'))
-            .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d])",
+            .OrderByDescending(k => k.Length)) + ")(?![\\p{L}\\d/])",
         "giu");
 
     /** The Unicode relational operators. The ASCII `<`/`>` are NOT here — they keep a digit gate above

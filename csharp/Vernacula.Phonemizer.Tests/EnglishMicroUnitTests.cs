@@ -106,6 +106,33 @@ public class EnglishMicroUnitTests
         Assert.Equal("micrometer", Normalize.NormalizeEnglish("micrometer"));
     }
 
+    /// <summary>
+    /// ⚠ ⟨µL⟩ IS THE DOMINANT PRINTED SPELLING of the microlitre and is declared only as ⟨µl⟩, so a
+    /// case-SENSITIVE bare arm never matched it and put a raw µ into the g2p. Case is
+    /// `ResolveUnitSymbol`'s job, not the pattern's — it reads the EXACT written form before folding,
+    /// which is why ⟨µM⟩ and ⟨µm⟩ still part company with the flag on.
+    /// </summary>
+    [Theory]
+    [InlineData("\u00b5L", "micro liter")]
+    [InlineData("Volume: \u00b5L", "Volume: micro liter")]
+    [InlineData("\u00b5M", "micromolar")]
+    [InlineData("\u00b5m", "micro meter")]
+    public void ABareMicroUnitFoldsCaseButTheCapitalKeysKeepTheirOwnReading(string text, string expected)
+        => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
+
+    /// <summary>
+    /// ⚠ THE BARE ARM MUST NOT EAT A RATE'S NUMERATOR. It runs before the slash rule, so without a
+    /// slash in its lookarounds it claimed the numerator of every micro rate the table does not
+    /// enumerate and STRIPPED THE PLURAL that rule documents as load-bearing.
+    /// </summary>
+    [Theory]
+    [InlineData("\u00b5g/kg", "micrograms per kilogram")]
+    [InlineData("\u00b5m/s", "micro meters per second")]
+    [InlineData("\u00b5g/day", "micrograms per day")]
+    [InlineData("5 \u00b5g/kg", "5 micrograms per kilogram")]
+    public void AMicroRateKeepsItsNumeratorPlural(string text, string expected)
+        => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
+
     /// <summary>A bare mu is still the Greek letter — the gate is the preceding number.</summary>
     [Fact]
     public void ABareMuIsUntouched()

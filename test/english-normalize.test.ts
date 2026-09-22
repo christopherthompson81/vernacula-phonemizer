@@ -568,6 +568,9 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
     // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
     // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
     // the ⟨µg⟩ entry in UNITS was added to fix.
+    // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
+    // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
+    // the ⟨µg⟩ entry in UNITS was added to fix.
     // ⚠ ⟨µin⟩ IS A WHOLE KEY BECAUSE ⟨in⟩ CANNOT BE ONE — the bare inch is the English PREPOSITION.
     // Reported as `µin` → "in", the sign DROPPED and the preposition read: the wrong-unit class this
     // file ranks worst. The preposition assertions are the half that keeps the fix honest.
@@ -599,6 +602,29 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
     test("a micro- unit with an ASCII exponent still reads, sign and all", () => {
         expect(normalizeEnglish("5 \u00b5g2")).toBe("5 square micrograms");
         expect(normalizeEnglish("5 \u00b5m2")).not.toContain("\u00b5");
+    });
+
+
+
+    // ⚠ ⟨µL⟩ IS THE DOMINANT PRINTED SPELLING of the microlitre and is declared only as ⟨µl⟩, so a
+    // case-SENSITIVE bare arm never matched it and put a raw µ into the g2p. Case is
+    // `resolveUnitSymbol`'s job, not the pattern's — it reads the EXACT written form before folding,
+    // which is why ⟨µM⟩ and ⟨µm⟩ still part company with the flag on.
+    test("a bare micro unit folds case, but the capital keys keep their own reading", () => {
+        expect(normalizeEnglish("\u00b5L")).toBe("micro liter");
+        expect(normalizeEnglish("Volume: \u00b5L")).toBe("Volume: micro liter");
+        expect(normalizeEnglish("\u00b5M")).toBe("micromolar");
+        expect(normalizeEnglish("\u00b5m")).toBe("micro meter");
+    });
+
+    // ⚠ THE BARE ARM MUST NOT EAT A RATE'S NUMERATOR. It runs before the slash rule, so without a
+    // slash in its lookarounds it claimed the numerator of every micro rate the table does not
+    // enumerate and STRIPPED THE PLURAL that rule documents as load-bearing.
+    test("a micro rate keeps its numerator plural", () => {
+        expect(normalizeEnglish("\u00b5g/kg")).toBe("micrograms per kilogram");
+        expect(normalizeEnglish("\u00b5m/s")).toBe("micro meters per second");
+        expect(normalizeEnglish("\u00b5g/day")).toBe("micrograms per day");
+        expect(normalizeEnglish("5 \u00b5g/kg")).toBe("5 micrograms per kilogram");
     });
 
     // …and a one-letter unit still reads wherever it is NOT in a code — glued to its number included.

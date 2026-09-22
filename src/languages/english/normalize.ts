@@ -375,9 +375,20 @@ const RELATIONAL_RE: readonly RegExp[] = RELATIONAL.map(
  * letter"), which is why the key set is consulted rather than a `µ\w+` pattern.
  */
 const BARE_MICRO_RE = new RegExp(
-    `(?<![\\p{L}\\d])(${Object.keys(UNITS).filter((k) => /^[\u00b5\u03bc]./u.test(k))
-        .sort((a, b) => b.length - a.length).join("|")})(?![\\p{L}\\d])`,
-    "gu",  // ⚠ NO `i`: ⟨µM⟩ is micromolar and ⟨µm⟩ a micro metre — see the UNITS block.
+    // ⚠ THE SLASH IS EXCLUDED ON BOTH SIDES, and leaving it out was a REGRESSION. This arm runs before
+    // 6a3, so it claimed the NUMERATOR of every micro rate whose full key the table does not enumerate,
+    // stripping the plural 6a3 documents as load-bearing: `µg/kg` went from "microgRAMS per kilogram"
+    // to "microgram per kilogram", and `µm/s`, `µg/dL`, `µg/day` with it. The lookBEHIND carries it
+    // too, for the URL path segment `BARE_RATE_RE`'s own guard calls out (`…/µm/…`).
+    `(?<![\\p{L}\\d/])(${Object.keys(UNITS).filter((k) => /^[\u00b5\u03bc]./u.test(k))
+        .sort((a, b) => b.length - a.length).join("|")})(?![\\p{L}\\d/])`,
+    // ⚠ `i`, LIKE THE SLASHED ARM BELOW — an earlier draft dropped it for a reason that does not hold.
+    // Case-sensitivity is `resolveUnitSymbol`'s job, not the pattern's: it consults the declared table
+    // with the EXACT written form before folding, so ⟨µM⟩ stays micromolar and ⟨µm⟩ a micro metre
+    // either way. Without the flag ⟨µL⟩ never matched at all — the form the UNITS block calls the
+    // DOMINANT printed spelling of the microlitre, declared only as ⟨µl⟩ — putting a raw µ into the
+    // g2p, which is the precise drop class this arm exists to remove.
+    "giu",
 );
 
 /** The SLASHED unit keys only (`km/h`, `m/s`, `btu/hr/sf`), for the bare-rate arm — see step 6a2. */

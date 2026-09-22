@@ -1682,5 +1682,39 @@ micro family, derived from `UNITS` so a new micro unit needs no second declarati
 ⚠ **It consults the KEY SET, not `µ\w+`**, so a lone mu is still the Greek letter, and it carries no
 `i` flag, so ⟨µM⟩ stays micromolar rather than folding to a micro metre.
 
-**Gates.** 6181 TS · 6771 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6183 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons.
+
+**Review of Run 26 — the bare arm was both too narrow and too wide.**
+
+⚠ **Too narrow: it was compiled without `i`, so ⟨µL⟩ never matched.** That is the spelling the UNITS
+block itself calls the DOMINANT printed form of the microlitre, and it is declared only as ⟨µl⟩ — so
+`Volume: µL` still put a raw µ into the g2p, the precise drop class the arm was added to remove. The
+stated reason for dropping the flag does not hold: case-sensitivity is `resolveUnitSymbol`'s job, not
+the pattern's, since it consults the declared table with the EXACT written form before folding. That is
+why the sibling `BARE_RATE_RE` carries `giu` and still resolves case-sensitive keys correctly. With the
+flag on, ⟨µM⟩ is still micromolar and ⟨µm⟩ still a micro metre.
+
+⚠ **Too wide: it ate the numerator of a micro RATE, and that was a regression I introduced.** The arm
+runs before 6a3, and its lookarounds excluded letters and digits but not the slash, so it claimed the
+numerator of every micro rate whose full key the table does not enumerate and stripped the plural 6a3
+documents as load-bearing. Measured main → branch:
+
+```
+µg/kg    micrograms per kilogram   →  microgram per kilogram
+µm/s     micro meters per second   →  micro meter per second
+µg/day   micrograms per day        →  microgram per day
+```
+
+Excluded on BOTH sides, the lookbehind too, for the URL path segment `BARE_RATE_RE`'s own guard names.
+
+⚠ **And the same insertion defect as Run 25, twice more.** The new C# declaration landed between
+`BARE_RATE_RE`'s doc comment and `BARE_RATE_RE`; the new tests landed between the
+"⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE" comment and the test it was written for. That is four
+instances across two consecutive PRs, every one found by review. It is invisible in a diff read as a
+diff — the added lines are correct and nothing is removed — and shows only when the file is read top to
+bottom. Recorded as a working rule: anchor an insertion on the START of a doc comment, or after the end
+of the whole block, never on the declaration.
+
+**Gates.** 6183 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.
