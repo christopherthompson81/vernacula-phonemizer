@@ -145,10 +145,50 @@ public static class Normalize
 
     private const string NOT_VERSION = "(?<![\\d.,])(?!802[.,]11\\w)(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
 
+    /**
+     * ⚠ THE TWO CODE GUARDS ARE NOT DECORATION — see the TypeScript's `UNIT_RE`, which carries the full
+     * reasoning. A one-letter unit symbol glued behind a digit is ambiguous with the letter slot of an
+     * alphanumeric CODE, and ⟨L⟩ and ⟨W⟩ are the only two that can collide, because one-letter
+     * symbols resolve case-SENSITIVELY (#763) — uppercase ⟨G⟩/⟨T⟩/⟨M⟩ are not gram/ton/metre.
+     *
+     * ⚠ AND THEY WERE MISSING HERE WHILE THE PARITY GATE READ 189 BYTE-IDENTICAL (#1421). The gate is
+     * golden-driven and no golden row carries a postal code, so this was not a check that was too weak
+     * — it is outside what the check ranges over. Measured before the fix: `V6L 2T5` read "vee six
+     * LITRES two tee five" and `L4W 5M1` "el four WATTS five em one", the two spellings the TypeScript
+     * comment names verbatim as already fixed.
+     *
+     * ⚠ THE COVER IS `EnglishCodeSlotUnitTests`, NOT A GOLDEN ROW, and the difference is worth stating
+     * because the obvious fix is the wrong one. The goldens are GENERATED (`tools/gen_parity_goldens.mts`);
+     * a hand-added row survives `check:goldens`, which only asks whether the recorded IPA is still what
+     * the engine says, and is then silently dropped the next time the generator runs for `en`. That is
+     * the write-once drift the generator's own comments warn about, and it would leave a gate that looks
+     * present and is not. The real asymmetry was narrower anyway: the TypeScript half of this block has
+     * had a test since the guards landed and the C# mirror was simply never written.
+     */
     private static readonly JsRe UNIT_RE = JsRegex.Compile(
-        NOT_VERSION + "(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?("
-        + string.Join("|", UNITS.Keys.OrderByDescending(k => k.Length)) + ")([²³23])?(?![\\p{L}\\p{M}])",
+        NOT_VERSION + "(\\d[\\d,]*(?:\\.\\d+)?)(\\s+(?:hundred|thousand|million|billion|trillion))?\\s?"
+        // A token-initial letter, ONE digit, then a one-letter unit: that is a code slot, not a unit.
+        + "(?!(?<=(?<![\\p{L}\\d])\\p{L}\\d)\\p{L}(?!\\p{L}))("
+        + string.Join("|", UNITS.Keys.OrderByDescending(k => k.Length)) + ")([²³23])?(?![\\p{L}\\p{M}])"
+        // A one-letter unit FOLLOWED by a digit is likewise a code slot — the `0L1` half of `A1A 0L1`.
+        + "(?!(?<=(?<!\\p{L})\\p{L})\\d)",
         "giu");
+
+    /**
+     * Is this ASCII `2`/`3` a CODE'S DIGIT rather than an exponent? The mirror of the TypeScript's
+     * `asciiExponentIsCodeDigit`, which carries the reasoning.
+     *
+     * ⚠ WITHOUT IT THE EXPONENT SWALLOWS THE CODE'S LAST DIGIT, so the trailing-digit guard above never
+     * sees it and the match ends at the token boundary quite legitimately: `A1A 0L2` read "zero SQUARE
+     * LITRES". A square litre is not a thing that could be meant — the litre is already a volume — so a
+     * length is the only unit an exponent says anything about, and ⟨m⟩ is the only one-letter ASCII
+     * length. The superscripts are NOT restricted: nobody writes a code with a ².
+     */
+    private static bool AsciiExponentIsCodeDigit(string unit, string? exponent)
+    {
+        if (exponent != "2" && exponent != "3") return false; // ²/³ can never be a code's digit
+        return unit.Length == 1 && char.IsAsciiLetter(unit[0]) && !unit.Equals("m", StringComparison.OrdinalIgnoreCase);
+    }
 
     /** The SLASHED unit keys only, for the bare-rate arm — a slash inside a token can never be a word,
      *  so these need no number in front of them. See the TS for the URL guard. */
@@ -782,6 +822,8 @@ public static class Normalize
             var exp = m.Groups[4].Success ? m.Groups[4].Value : null;
             var forms = NormalizeSymbols.ResolveUnitSymbol(UNITS, UNITS_FOLDED, u);
             if (forms is null) return m.Value; // unresolvable → leave the text alone
+            // An ASCII exponent on a one-letter unit that is not ⟨m⟩ is a code's digit, not an exponent.
+            if (AsciiExponentIsCodeDigit(u, exp)) return m.Value;
             var measure = exp == "²" || exp == "2" ? "square " : exp == "³" || exp == "3" ? "cubic " : "";
             var one = mag is null && ONE_EXACT.IsMatch(JsRegex.Replace(num, COMMAS, ""));
             return $"{num}{mag ?? ""} {measure}{(one ? forms[0] : forms[1])}";
