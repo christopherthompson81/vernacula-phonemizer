@@ -17,9 +17,12 @@ public class EnglishAcronymLettersTests
     /// <summary>
     /// What the pass EMITS when it spells a token out — the letters with `letterNameExceptions` applied.
     /// ⚠ Phonemizing the BARE letters is contaminated by #1423: ⟨A⟩ reads as the indefinite article.
+    /// ⚠ And it READS THE MANIFEST rather than a copy — a hand-typed table here would make "derived"
+    /// false, and would have to be kept in lockstep with the TypeScript helper by hand.
     /// </summary>
     private static string Letters(string w) => Say(string.Join(" ", w.ToLowerInvariant()
-        .Select(c => c == 'a' ? "ay" : c == 'i' ? "eye" : c.ToString())));
+        .Select(c => Languages.English.Manifest.MANIFEST.LetterNameExceptions
+            .TryGetValue(c.ToString(), out var name) ? name : c.ToString())));
 
     /// <summary>⚠ The reported case, and the pair the dictionary cannot hold.</summary>
     [Fact]

@@ -8,19 +8,25 @@
  */
 import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
+import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 /**
  * What the pass EMITS when it spells a token out: the letters, with the manifest's
  * `letterNameExceptions` applied.
+ *
+ * ⚠ AND IT READS THE MANIFEST, NOT A COPY OF IT. A hand-typed `{ a: "ay", i: "eye" }` here would make
+ * the word "derived" false in the only way that matters: adding a third exception to english.jsonc
+ * would fail every case containing that letter while the engine was in fact correct, and removing one
+ * would leave the test asserting a string the pass can never emit.
  *
  * ⚠ THE OBVIOUS HELPER IS CONTAMINATED BY #1423 and gives a wrong expectation. Phonemizing the bare
  * letters (`"I O S"`) reads ⟨A⟩ as the indefinite article and drops ⟨I⟩'s stress, so the "expected"
  * column would be wrong rather than the engine — which is exactly how the first measurement of this
  * class reported 91 failures instead of 50.
  */
-const EXCEPTIONS: Record<string, string> = { a: "ay", i: "eye" };
 const letters = (w: string): string =>
-    phonemize([...w.toLowerCase()].map((l) => EXCEPTIONS[l] ?? l).join(" "), "en");
+    phonemize([...w.toLowerCase()]
+        .map((l) => MANIFEST.letterNameExceptions[l] ?? l).join(" "), "en");
 
 describe("an all-caps run that is letters, not a word", () => {
     // ⚠ THE REPORTED CASE, and the pair the dictionary cannot hold: the capitalised form is the dish.

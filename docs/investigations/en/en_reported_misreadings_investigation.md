@@ -2170,3 +2170,20 @@ reads as the trade and not as a gap.
 
 **Gates.** 6304 TS · 6912 C# · goldens 189/36495 fresh (2 regenerated) · parity 189 byte-identical ·
 trace-cold 189 of 189, no poisons.
+
+**Review of Run 32 — "derived" from a hand-typed copy is not derived.**
+
+⚠ The test helper that builds the expected letter-spelling hardcoded its own
+`{ a: "ay", i: "eye" }` instead of reading `MANIFEST.letterNameExceptions`, and the C# mirror
+duplicated it a third time as a ternary chain. The docstring said the expectation was DERIVED, which is
+the property that makes it trustworthy — and it was derived from a hand-typed copy of the data the pass
+reads. Adding a third exception to `english.jsonc` would have failed every case containing that letter
+while the engine was correct; removing one would have left the test asserting a string the pass can
+never emit; and the two copies had to be edited in lockstep or the ports would silently diverge.
+
+Both helpers now read the manifest. **Proved rather than assumed**: with a third exception
+(`"w": "double u"`) temporarily added to `english.jsonc`, the suite still passes — which the
+hardcoded version could not have done.
+
+**Gates.** 6304 TS · 6912 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons.
