@@ -12,7 +12,7 @@
  * English at all.
  */
 
-import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
+import { LATIN_MARK, makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
 import { COLLISIONS as ROMAN_COLLISIONS, romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -410,6 +410,35 @@ const SLASH_ELIDED: ReadonlySet<string> = new Set(
  * ⚠ AND `i/o` IS ABSENT ON PURPOSE. It has one reading, but that reading IS the letters — "I O" — so
  * the fall-through already produces it and a row would only be a second place to maintain it.
  */
+/**
+ * CONCATENATED ELEMENT-SYMBOL FORMULAE with a fixed reading — `CoCr` is "cobalt chromium", not the word
+ * *cocker*, which is what the g2p invents when the whole run reaches it as one token.
+ *
+ * ⚠ A LIST, NOT A FORMULA PARSER, AND THE DISTINCTION IS THE POINT. A rule that tiled any token into
+ * element symbols was built and thrown away: it reads `CoCo` as "cobalt cobalt", and the only reason it
+ * did not was an ad-hoc "a repeated two-letter symbol is a name" guard — a heuristic standing in for
+ * chemistry knowledge this engine does not have. Deciding that `CoCo` is not a compound needs valency
+ * and stoichiometry, not a spelling test, so the general mechanism had the SHAPE of understanding
+ * without the substance. Listing the tokens that are actually read wrong claims only what is true.
+ *
+ * ⚠ THE LOOKUP IS CASE-SENSITIVE, which is the whole signal and costs nothing to keep. An element
+ * symbol is `[A-Z]` or `[A-Z][a-z]`, so ⟨Co⟩ is cobalt and ⟨CO⟩ is carbon monoxide — and case alone
+ * separates a formula from the recorded word it spells, which the dictionary cannot do: `sic`, `tin`
+ * and `nan` are all real entries.
+ *
+ * ⚠ SAME BAR AS `SLASH_ABBREV` BELOW: a row needs a SINGLE DOMINANT READING, because the failure mode
+ * of guessing is a wrong word inserted into prose. Rows are added on report, not by enumeration.
+ */
+const FORMULA_READING: Readonly<Record<string, string>> = {
+    CoCr: "cobalt chromium", CoCrMo: "cobalt chromium molybdenum",
+};
+
+/** ⚠ NO `i` FLAG — see `FORMULA_READING`: the capitalisation IS the signal. Longest-first so `CoCrMo`
+ *  is not claimed as `CoCr` plus a stranded tail. */
+const FORMULA_TOKEN = new RegExp(
+    `(?<![\\p{L}${LATIN_MARK}\\d])(${Object.keys(FORMULA_READING).sort((a, b) => b.length - a.length).join("|")})`
+    + `(?![\\p{L}${LATIN_MARK}\\d])`, "gu");
+
 const SLASH_ABBREV: Readonly<Record<string, string>> = {
     "w/o": "without", "c/o": "care of", "n/a": "not applicable",
     "w/out": "without",
@@ -792,6 +821,10 @@ export function normalizeEnglish(input: string): string {
     //      ⚠ AFTER the rule above, because it keys on the state NAME that rule just produced.
     s = rewrite(s, ADDRESS_ZIP, (_m0, zip: string, _dash: string | undefined, plus4: string | undefined) =>
         [...zip].join(" ") + (plus4 === undefined ? "" : ` ${[...plus4].join(" ")}`));
+
+    // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`: a
+    //      case-SENSITIVE list of tokens read wrong, not a formula parser.
+    s = rewrite(s, FORMULA_TOKEN, (tok: string) => FORMULA_READING[tok] ?? tok);
 
     // 0c) ERA MARKERS. Spelled out, not expanded to words: "B C" is how they are read aloud, and "AD" must
     //     not be read as the word "ad".

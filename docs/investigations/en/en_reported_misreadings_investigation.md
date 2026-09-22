@@ -1548,3 +1548,57 @@ TypeScript comments record is exactly that: a looser spelling that refused a rea
 guard narrowed until it ate `a 5L jug`. Restored: 18 cases → 28.
 
 Also corrected: the comment cited `L4W 5N6` where the TypeScript names `L4W 5M1`.
+
+## Run 25 — 2026-09-22 10:40 — a formula reader built, measured, and thrown away
+
+**Report, refined by the reporter.** `CoCr` reads *cocker*; it is cobalt-chrome. Two follow-ups:
+
+> *"Isn't #1424 CoCr a normalization issue, exact capitalization matching?"*
+> *"I'm OK with 'cobalt chromium' instead of cobalt-chrome."*
+
+Both land. **Exact capitalisation is the signal** — a symbol is `[A-Z]` or `[A-Z][a-z]`, so ⟨Co⟩ is
+cobalt, ⟨CO⟩ is carbon monoxide and ⟨co⟩ is not a symbol at all. And with the per-alloy spoken
+shorthand explicitly not wanted, the reading is just the element names.
+
+**What was built, and what it measured.** A rule that tiles any token completely into element symbols,
+from a 118-symbol table, guarded by: at least one lowercase letter, an all-caps-plus-plural-⟨s⟩
+refusal, and a listed exception set. It worked, and the measurements are worth keeping:
+
+- **Zero of 135,314 capitalised dictionary words tile.** An interior LOWERCASE letter can never begin a
+  segment, so a sentence-initial capital is structurally safe. This is the strongest result of the run.
+- English prose (every `.md` in the tree, the `en*` goldens, the mined `en` corpus): **10 hits in 40,031
+  distinct tokens**, six of them one shape — an all-caps abbreviation with a plural ⟨s⟩ (`CDs`, `IPAs`,
+  `NFCs`, `NFDs`, `NSTs`, `PCs`).
+- ⚠ **An earlier sweep reported 41 hits in 222,420 and the corpus was wrong**: it spanned all 163 mined
+  corpora, so `MdB` (*Mitglied des Bundestages*), `PaK` (*Panzerabwehrkanone*) and assorted
+  foreign-corpus noise were counted as English false positives. Scoring an English-only rule against 163
+  languages inflates its error rate with tokens it will never see.
+- ⚠ **`InDesign` and `CoPilot` do NOT tile** — ⟨Gn⟩ and ⟨Lo⟩ are not symbols. That was the objection
+  the issue predicted the rule would founder on, and it was wrong; it is recorded as a correction on
+  the issue.
+- ⚠ **`Pb` cannot emit `lead`.** It is a heteronym and the reader takes the LEASH branch in every frame
+  tested (`lead oxide` → *lˈiːd*). The spelling `led` (recorded `L EH1 D`) reads correctly.
+
+**And then it was thrown away, on the reporter's objection:**
+
+> *"I didn't really ask for a generalized chemistry shorthand reader mechanism. Things like CoCo would
+> only get rejected if such a system understood that it's not a valid chemical formula, so the timing of
+> such a feature is out-of-step."*
+
+⚠ **That is correct, and it is the finding of this run.** `CoCo` tiles to "cobalt cobalt", and the only
+thing stopping it was an ad-hoc guard — *a repeated two-letter symbol is a name, because chemistry
+writes a repeat as a subscript*. That guard is a spelling heuristic standing in for knowledge the engine
+does not have: deciding `CoCo` is not a compound needs valency and stoichiometry. The mechanism had the
+SHAPE of chemistry understanding with none of the substance, and every future false positive would have
+been answered by another such guard.
+
+**What shipped instead.** `FORMULA_READING`, a case-sensitive list of tokens known to read wrong, seeded
+with `CoCr` and `CoCrMo` — the same idiom and the same stated bar as `SLASH_ABBREV` next to it: *a row
+needs a single dominant reading*, and rows are added on report rather than by enumeration. It claims only
+what is true. `CoCo`, `NaCl` and `SiC` are simply not listed, and nothing pretends to know why.
+
+The 118-symbol table and the tiling measurements are recorded here rather than in the tree; if a formula
+reader is ever wanted, this run is its starting evidence and its warning.
+
+**Gates.** 6176 TS · 6753 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons.

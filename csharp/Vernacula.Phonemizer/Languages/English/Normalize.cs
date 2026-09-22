@@ -377,6 +377,33 @@ public static class Normalize
     /** ⚠ A US ZIP is a DIGIT STRING, not a quantity — once the state is a name the five digits after
      *  it reach the number rules and are read as one. Scoped to a ZIP directly after a state name this
      *  pass just produced. See the TypeScript. */
+    /**
+     * CONCATENATED ELEMENT-SYMBOL FORMULAE with a fixed reading — `CoCr` is "cobalt chromium", not the
+     * word *cocker*. Ported from src/languages/english/normalize.ts — see that file for the reasoning.
+     *
+     * ⚠ A LIST, NOT A FORMULA PARSER. A rule that tiled any token into element symbols was built and
+     * thrown away: it reads `CoCo` as "cobalt cobalt", and only an ad-hoc "a repeated two-letter symbol
+     * is a name" guard stopped it — a heuristic standing in for chemistry knowledge this engine does
+     * not have. Listing the tokens actually read wrong claims only what is true.
+     *
+     * ⚠ THE LOOKUP IS CASE-SENSITIVE (Ordinal, and no `i` flag on the regex): an element symbol is
+     * `[A-Z]` or `[A-Z][a-z]`, and case alone separates a formula from the recorded word it spells —
+     * `sic`, `tin` and `nan` are all real dictionary entries.
+     */
+    private static readonly IReadOnlyDictionary<string, string> FORMULA_READING =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["CoCr"] = "cobalt chromium",
+            ["CoCrMo"] = "cobalt chromium molybdenum",
+        };
+
+    /** ⚠ No `i` flag — the capitalisation IS the signal. Longest-first so `CoCrMo` is not claimed as
+     *  `CoCr` plus a stranded tail. */
+    private static readonly JsRe FORMULA_TOKEN = JsRegex.Compile(
+        "(?<![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])("
+        + string.Join("|", FORMULA_READING.Keys.OrderByDescending(k => k.Length))
+        + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])", "gu");
+
     private static readonly JsRe ADDRESS_ZIP = JsRegex.Compile(
         "(?<=\\b(?:" + string.Join("|", REGION_CODE.Values.Distinct().OrderByDescending(v => v.Length))
         + ")[ \u00a0])(\\d{5})(-(\\d{4}))?(?![\\w-])",  // NBSP
@@ -677,6 +704,10 @@ public static class Normalize
         s = Rewrite(s, ADDRESS_ZIP, m =>
             string.Join(" ", m.Groups[1].Value.ToCharArray())
             + (m.Groups[3].Success ? " " + string.Join(" ", m.Groups[3].Value.ToCharArray()) : ""));
+
+        // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`:
+        //      a case-SENSITIVE list of tokens read wrong, not a formula parser.
+        s = Rewrite(s, FORMULA_TOKEN, m => FORMULA_READING.TryGetValue(m.Value, out var r) ? r : m.Value);
 
         // A range is a date frame too, and the digit gate cannot see it. Runs FIRST. See the TypeScript.
         s = Rewrite(s, MONTH_RANGE, m =>
