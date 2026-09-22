@@ -235,7 +235,9 @@ The disagreement is the referee writing `i` where we write `ɪ`, i.e. NOTATION, 
 a reading that is already correct. #1383's table listed it under "the referee writes a different symbol", and
 that is what it turned out to be.
 
-⚠ **TWO INFLECTIONS ARE REFUSED RATHER THAN ENTAILED**, because the entailment does not hold:
+⚠ **ONE INFLECTION IS REFUSED RATHER THAN ENTAILED**, because the entailment does not hold. It was TWO
+until #1387; the struck-through entry below is kept because the reason it stopped being refused is worth
+more than the tidiness of deleting it:
 
 - ~~`buoying`~~ — **THIS REFUSAL WAS CORRECT AND IS NOW OBSOLETE, AND THE REASON IS THE INTERESTING
   PART.** It read: *"the parent is self-inconsistent: `buoy` is `bˈuːi` but `buoying` is `bˈɔᶦɪŋ`, so

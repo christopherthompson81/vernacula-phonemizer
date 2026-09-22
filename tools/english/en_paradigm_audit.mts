@@ -41,8 +41,24 @@ for (const l of readFileSync(DICT, "utf8").split("\n")) {
  * AE1 B D IH0 K EY2 T IH0 NG`, `accredited`, `adjudicated` — which is this repo's own weak-vowel
  * question (#1282) and a class of its own. Unfolded it drowns the signal this sweep is for.
  */
-const bare = (ph: string[]): string =>
-    ph.map((p) => p.replace(/\d$/u, "")).map((p) => (p === "IH" ? "AH" : p)).join(" ");
+/** Stress digits off. A suffix may legitimately move the stress, so the skeleton is what is compared. */
+const skeleton = (ph: string[]): string[] => ph.map((p) => p.replace(/\d$/u, ""));
+
+/**
+ * Are these two phones the same slot?
+ *
+ * ⚠ `AH` AND `IH` ARE ONE SLOT ONLY WHEN BOTH ARE UNSTRESSED, and this has to be a PAIRWISE test
+ * rather than a canonical spelling. CMUdict writes the same reduced vowel both ways within a paradigm
+ * (`abdicate AH0 K` beside `abdicating IH0 K`), which is this repo's own weak-vowel question (#1282) and
+ * drowns the signal unfolded — but a canonical `IH → AH` map is wrong in both directions at once:
+ * applied AFTER the digits come off it merges a STRESSED `IH1` with `AH1`, and applied BEFORE it makes
+ * `IH0` and `IH1` different phones, which is worse. Only the pair knows.
+ */
+const sameSlot = (a: string, b: string): boolean => {
+    if (a.replace(/\d$/u, "") === b.replace(/\d$/u, "")) return true;
+    const reduced = /0$/u.test(a) && /0$/u.test(b);
+    return reduced && ["AH", "IH"].includes(a.slice(0, -1)) && ["AH", "IH"].includes(b.slice(0, -1));
+};
 
 /**
  * ⚠ EVERY CANDIDATE LEMMA IS TRIED, AND ONE MATCH CLEARS THE WORD. Taking the FIRST dictionary-backed
@@ -55,34 +71,51 @@ const split: { lemma: string; infl: string; l: string; i: string }[] = [];
 for (const [w, ph] of dict) {
     const cands = lemmaCandidates(w).map((l) => [l, dict.get(l)] as const).filter(([, p]) => p !== undefined);
     if (cands.length === 0) continue;
-    if (cands.some(([, lp]) => bare(ph).startsWith(bare(lp!)))) continue;
+    // ⚠ PHONE-WISE, NOT A JOINED-STRING `startsWith`. `N` is a string prefix of `NG`, `S` of `SH`, `T`
+    // of `TH`, `D` of `DH`, `Z` of `ZH` — so a joined comparison clears `S AH N` against `S AH NG …` as
+    // a match and the row silently never gets flagged. No such row exists in the dict today; it is a
+    // false NEGATIVE waiting on a dict edit, which is the kind this sweep would never report.
+    const isPrefix = (a: string[], b: string[]): boolean =>
+        a.length <= b.length && a.every((p, k) => sameSlot(p, b[k]!));
+    if (cands.some(([, lp]) => isPrefix(lp!, ph))) continue;
     const [l, lp] = cands[0]!;
     split.push({ lemma: l, infl: w, l: lp!.join(" "), i: ph.join(" ") });
 }
 /**
- * ⚠ THE RAW COUNT IS NOT THE DEFECT COUNT, AND MOST OF IT IS SOMEONE ELSE'S ISSUE. Three classes come
- * out of this sweep and only the third is what #1387 is about:
- *   PREFIX   the disagreement is confined to UNSTRESSED vowels — `abhor AE0` beside `abhorred AH0`,
- *            `adhere AH0` beside `adhered AE0`. That is #1397's de-/re-/pre- class, wider than that
- *            issue's 57 families, and it dwarfs everything else.
- *   STRESS   the two rows carry different stress PATTERNS — `accent`/`accents`, `address`/`addressed`.
- *            Normally CORRECT: the lemma row is the verb and the inflection the noun, or the reverse.
- *   OTHER    a consonant or a STRESSED vowel differs — `accost AO1` beside `accosted AA1`, and `buoy`.
- *            This is the class that cannot be explained away, and it is the smallest.
+ * ⚠ THE RAW COUNT IS NOT THE DEFECT COUNT, AND MOST OF IT IS SOMEONE ELSE'S ISSUE. The classes:
+ *   PREFIX   the disagreement is confined to UNSTRESSED vowels — `abhor AE0` beside `abhorred AH0`.
+ *            That is #1397's de-/re-/pre- class, wider than that issue's 57 families.
+ *   LOT/THOUGHT  AA~AO only — `accost AO1` beside `accosted AA1`. The curated layer's own class.
+ *   VOICING  S~Z, F~V, TH~DH only — `abuse`/`abused`, correct noun/verb pairs.
+ *   SHORTER  the inflection's skeleton is SHORTER than the lemma's, so the difference is past the
+ *            overlap — `corp K AO1 R P` against `corps K AO1 R`. Not a vowel question at all.
+ *   ⚠ OTHER  a consonant or a STRESSED vowel differs, and nothing above explains it. `buoy` lived here.
+ *
+ * ⚠ THERE IS NO `STRESS` CLASS AND THERE CANNOT BE ONE. An earlier version had one, and it was wrong in
+ * both directions at once: `skeleton()` strips stress digits BEFORE the prefix test, so a row differing
+ * only in stress is cleared and never reaches this function — the bucket was empty by construction —
+ * while the `stressDiffers ? "STRESS" : "OTHER"` it ended with could only be reached once a REAL segment
+ * difference had been found, so it captured 182 rows that belong in OTHER and hid them from the listing.
+ * `antipode OW2` against `antipodes AH0`, `ambon AA0` against `ambones OW1`. **That is exactly the
+ * "a defect gets filed under a heading and stops being looked at" failure the rule below warns about,
+ * committed in the function that states the rule.** Stress-only splits are invisible to this instrument;
+ * finding them needs a comparison that keeps the digits, and that is a different sweep.
  */
 const VOWEL = /^(?:AA|AE|AH|AO|AW|AY|EH|ER|EY|IH|IY|OW|OY|UH|UW)/u;
 /** The two classes this repo already tracks by name, so they are counted rather than left in the residue. */
 const LOT_THOUGHT = new Set(["AA AO", "AO AA"]);
 const VOICED_SEAM = new Set(["S Z", "Z S", "F V", "V F", "TH DH", "DH TH"]);
-type Cls = "PREFIX" | "STRESS" | "LOT/THOUGHT" | "VOICING" | "OTHER";
-const classify = (l: string[], i: string[]): Cls => {
-    const n = Math.min(l.length, i.length);
-    let stressDiffers = false, onlyUnstressedVowels = true, sawLot = false, sawVoice = false, sawElse = false;
-    for (let k = 0; k < n; k++) {
-        const [a, b] = [l[k]!, i[k]!];
-        if (a === b) continue;
-        const [ab, bb] = [a.replace(/\d$/u, ""), b.replace(/\d$/u, "")];
-        if (ab === bb) { stressDiffers = true; continue; }          // same phone, different stress
+type Cls = "PREFIX" | "LOT/THOUGHT" | "VOICING" | "SHORTER" | "OTHER";
+const classify = (lRaw: string[], iRaw: string[]): Cls => {
+    const [l, i] = [skeleton(lRaw), skeleton(iRaw)];
+    // ⚠ A SHORTER INFLECTION IS ITS OWN ANSWER. Otherwise the overlap shows no difference at all and the
+    // row lands in PREFIX, where nothing unstressed differs — `corp`/`corps` was reported that way.
+    if (i.length < l.length) return "SHORTER";
+    let onlyUnstressedVowels = true, sawLot = false, sawVoice = false, sawElse = false;
+    for (let k = 0; k < l.length; k++) {
+        const [a, b] = [lRaw[k]!, iRaw[k]!];
+        const [ab, bb] = [l[k]!, i[k]!];
+        if (sameSlot(a, b)) continue;                              // same slot (stress may differ)
         const unstressed = /0$/u.test(a) && /0$/u.test(b);
         if (VOWEL.test(ab) && VOWEL.test(bb) && unstressed) continue;
         onlyUnstressedVowels = false;
@@ -97,9 +130,9 @@ const classify = (l: string[], i: string[]): Cls => {
     // and stops being looked at.
     if (!sawElse && sawLot && !sawVoice) return "LOT/THOUGHT";
     if (!sawElse && sawVoice && !sawLot) return "VOICING";
-    return stressDiffers ? "STRESS" : "OTHER";
+    return "OTHER";
 };
-const counts: Record<Cls, number> = { PREFIX: 0, STRESS: 0, "LOT/THOUGHT": 0, VOICING: 0, OTHER: 0 };
+const counts: Record<Cls, number> = { PREFIX: 0, "LOT/THOUGHT": 0, VOICING: 0, SHORTER: 0, OTHER: 0 };
 const other: typeof split = [];
 for (const s of split) {
     const c = classify(s.l.split(" "), s.i.split(" "));
@@ -107,12 +140,12 @@ for (const s of split) {
     if (c === "OTHER") other.push(s);
 }
 console.log(`dictionary words ${dict.size}`);
-console.log(`⚠ INFLECTIONS WHOSE PHONE SKELETON IS NOT THE LEMMA'S PLUS A SUFFIX: ${split.length}`);
-console.log(`   PREFIX (unstressed vowels only — #1397's class, wider) ${counts.PREFIX}`);
-console.log(`   STRESS (a different stress PATTERN — usually a POS pair) ${counts.STRESS}`);
-console.log(`   LOT/THOUGHT (AA~AO only — the curated layer's own class)  ${counts["LOT/THOUGHT"]}`);
-console.log(`   VOICING (S~Z, F~V, TH~DH only — noun/verb pairs)          ${counts.VOICING}`);
-console.log(`   ⚠ OTHER (a consonant or a STRESSED vowel differs)        ${counts.OTHER}`);
+console.log(`\u26a0 INFLECTIONS WHOSE PHONE SKELETON IS NOT THE LEMMA'S PLUS A SUFFIX: ${split.length}`);
+console.log(`   PREFIX (unstressed vowels only \u2014 #1397's class, wider)  ${counts.PREFIX}`);
+console.log(`   LOT/THOUGHT (AA~AO only \u2014 the curated layer's class)     ${counts["LOT/THOUGHT"]}`);
+console.log(`   VOICING (S~Z, F~V, TH~DH only \u2014 noun/verb pairs)         ${counts.VOICING}`);
+console.log(`   SHORTER (the inflection is shorter than the lemma)      ${counts.SHORTER}`);
+console.log(`   \u26a0 OTHER (a consonant or a STRESSED vowel differs)       ${counts.OTHER}`);
 const limIdx = process.argv.indexOf("--limit");
 const limit = limIdx >= 0 ? Number(process.argv[limIdx + 1]) : 60;
 for (const s of other.slice(0, limit)) console.log(`   ${s.lemma.padEnd(15)} ${s.l.padEnd(26)} ${s.infl.padEnd(17)} ${s.i}`);
