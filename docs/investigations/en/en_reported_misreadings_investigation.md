@@ -1785,3 +1785,58 @@ not is a real gap, noted and not pursued here.)
 **Gates.** 6190 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons. Plus `en-index-tables-point-at-what-they-claim` and `en-curation-gap`, the two the
 dictionary-edit memo names.
+
+## Run 28 — 2026-09-22 12:20 — a hyphenated `re-` is the prefix, not the note
+
+**Report.** *"re-\<something\>, like re-machined or re-measured -> 'ray-machined', should be
+'ree-machined' in GenAm."*
+
+**Raw finding.** Systematic — every hyphenated `re-` word, both engines. The hyphen makes `re` a token
+of its own and CMUdict records the bare word as `R EY1`, the note of the scale and Latin *in re*.
+
+⚠ **THE UNHYPHENATED FORMS WERE ALREADY RIGHT** — `rerun` ɹˌiːɹˈʌn, `remeasured` ɹimˈɛʒɚd — which is
+what says this is one lexical collision rather than a gap in how prefixes are read. The rest of the
+family was swept in the same frame (`X-tested`) and reads plausibly standing alone: `pre`, `de`, `co`,
+`non`, `sub`, `post`, `mid`, `self`, `cross`, `un`, `bi`, `tri`. Noted but not filed: `inter-` stresses
+`ɪntˈɝ`, `over-`/`under-` lose their primary, and `anti-` is contested between /ˈæntiː/ and /ˈæntaɪ/
+where a wrong pick is worse than the current one.
+
+⚠ **AND THE SAME COLLISION IS ALREADY IN THE FILE**, one rule up: step 0b4 turns `Re:` into "regarding"
+and its comment says *"not the note of the scale. Reported reading as ray at the head of a memo"*. Same
+word, same wrong vowel, reached through a colon instead of a hyphen. The new rule sits directly beside it.
+
+**The fix is a SPELLING**, this file's idiom whenever a word's own spelling reads wrong
+(`letterNameExceptions` a→ay, the unit table's `micro liter`, ⟨Pb⟩→`led`): `ree` is read ɹˈiː by the
+lexicon, so the rule asserts no pronunciation of its own. Vowel only — the primary stays on the prefix
+where it already was, so this fixes what was reported and nothing else.
+
+### ⚠ The case has to be echoed, and that was found by measuring rather than reasoning
+
+The obvious form emits a lowercase `ree`. The initialism pass decides whether a document is SHOUTING
+with `!/\p{Ll}/.test(text)`, so a lowercase `ree` injected into an all-caps document flips that test and
+changes how **every other run in it** is read. Measured before and after:
+
+```
+RE-WORK ORDER NHS         ˌɛnˌeᶦt͡ʃˈɛs  →  ˈɛn ˈeᶦt͡ʃ ˈɛs
+RE-TESTED WD 40 SAMPLES   dˌʌbəɫjuːdˈiː →  dˈʌbɫ̩juː dˈiː
+```
+
+The fused, one-stress readings are the ones the initialism module explicitly prefers. Echoing the
+matched case (`RE-` → `REE-`, `Re-` → `Ree-`) leaves the document exactly as shouty as it was, and the
+before/after diff then contains nothing but the intended ɹˈeᶦ → ɹˈiː.
+
+### Two existing tests pinned the defect, and three golden rows recorded it
+
+`test/english-reported-misreadings.test.ts` asserted `re-enter the code` → `ɹˈeᶦ ˈɛntɚ …`. That test is
+about the JOINER — a hyphenated compound must not gain a pause — and it still passes on that point; it
+had incidentally frozen the wrong vowel. A second asserted `a re-entry` was untouched, which was about
+the COLON rule's scope; that intent is preserved with an explicit `not.toContain("regarding")`.
+
+⚠ **A first attempt to identify the stale goldens compared against `phonemize`, and the goldens are
+`phonemizeAsync` OUTPUT.** That showed `Daesh` as an extra changed row — a sync/async artifact, not a
+regression, and exactly the phantom the parity runner's own header warns about ("467 of 2,400 rows
+changed, none of them real"). Re-run on the async path, the change is 3 rows, all the same sentence,
+all one word: `re-established`, ɹˈeᶦ → ɹˈiː (ɾˈeː → ɾˈiː in en-IN). Regenerated on that basis.
+
+**Gates.** 6206 TS · 6795 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex corpus re-extracted (one new pattern).

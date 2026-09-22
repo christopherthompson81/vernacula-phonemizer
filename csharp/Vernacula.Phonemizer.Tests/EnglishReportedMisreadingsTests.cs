@@ -215,7 +215,10 @@ public class EnglishReportedMisreadingsTests
     [InlineData("Bose–Einstein condensate", "bˈoᶷz ˈaᶦnstaᶦn kʰˈɑːndənsˌeᶦt")]
     [InlineData("a well-known case", "ə wˈɛɫ nˈoᶷn kʰˈeᶦs")]
     [InlineData("state-of-the-art design", "stˈeᶦt ʌv ðə ˈɑːɹt dᵻzˈaᶦn")]
-    [InlineData("re-enter the code", "ɹˈeᶦ ˈɛntɚ ðə kʰˈoᶷd")]
+    // ⚠ THE VOWEL HERE MOVED IN #1430, NOT THE PAUSE. This case is about the JOINER — a hyphenated
+    // compound must not gain a break — and it still does not. It incidentally pinned the
+    // note-of-the-scale reading of a hyphenated `re-`, which was the defect #1430 fixed.
+    [InlineData("re-enter the code", "ɹˈiː ˈɛntɚ ðə kʰˈoᶷd")]
     [InlineData("pages 5–15", "pʰˈeᶦd͡ʒᵻz fˈaᶦv tʰuː fɪftˈiːn")]
     public void TheJoinerAndTheSpanAreUntouched(string t, string ipa) => Assert.Equal(ipa, Say(t));
 
