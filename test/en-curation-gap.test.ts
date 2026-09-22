@@ -80,6 +80,14 @@ const KNOWN_GAPS = new Map<string, string>([
     // that strips a word's sole primary stress"; the model predicts the stressed form from two letters.
     ["ya", "n-gram (source N): predicts Y AA1, the sole-primary row #1369 flagged; opened by #1400's retrain"],
 
+    // ⚠ TWO ADDED BY #1397's PREFIX-VOWEL FAMILIES, and they are the cost the issue predicted in advance:
+    // "the model is trained on upstream and recalls the inconsistency". The curated row moves the prefix
+    // vowel from tense to reduced on the strength of Moby agreeing across two or more members of the
+    // family; held out, the n-gram reproduces the upstream tense form it was trained on. Source N, and
+    // they close on the next retrain like the rest of that tier.
+    ["prescriptive", "n-gram (source N): recalls upstream's tense P R IY0; the family is reduced (#1397)"],
+    ["prevention", "n-gram (source N): recalls upstream's tense P R IY0; the family is reduced (#1397)"],
+
     // ⚠ `upholstery` AND `upholster` WERE HERE AND ARE GONE, which is this list working as designed.
     // They read ⟨ph⟩ across the up·holstery seam as a /f/-less /p/, the note said "a retrain closes
     // both", and #1400's retrain closed both. They are removed rather than left behind to mask the next
