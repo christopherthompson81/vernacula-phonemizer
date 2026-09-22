@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ⚠ NOT in the solution, like csharp/tools/parity: these are harnesses, not shipped code. This one
+       exists because its check CANNOT live in the test assembly — the defect it guards is once per
+       process, so a shared test process has already warmed every language before any test runs. -->
+  <!-- ⚠ NEVER set InvariantGlobalization here. It makes string.Normalize a SILENT NO-OP, so every
+       NFC/NFD fold in the engine stops working; the engine refuses to start in that mode. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Vernacula.Phonemizer/Vernacula.Phonemizer.csproj" />
+  </ItemGroup>
+</Project>

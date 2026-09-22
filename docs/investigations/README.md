@@ -7,7 +7,7 @@ registry code) and one per cross-cutting topic; a new log goes in the folder of 
 ## Topics
 
 - [`asr-align/`](asr-align/) — the wav2vec2 alignment QC harness and its folds (3)
-- [`core/`](core/) — engine seams — registry, async path, browser, trace (5)
+- [`core/`](core/) — engine seams — registry, async path, browser, trace (6)
 - [`corpus/`](corpus/) — corpus sourcing, mining, attestation and the goldens (10)
 - [`csharp-port/`](csharp-port/) — findings from the C# porting sweep (1)
 - [`normalization/`](normalization/) — cross-language normalization sweeps (Latin runs, silent deletions, initialisms, stress) (26)
