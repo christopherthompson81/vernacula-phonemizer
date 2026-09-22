@@ -16,6 +16,24 @@ therefore rot whenever the dictionary moves under them. Every one of those ten w
 whose TypeScript twin had been updated in an earlier PR — the C# engine was right in all ten. See
 [`csharp/PORTING.md`](csharp/PORTING.md) for the rule that closes the hole.
 
+The two CROSS-PORT gates run outside both suites, and each is a separate command because each needs its
+own cold process:
+
+```
+dotnet run --project csharp/tools/parity          # the two engines agree on the IPA, over the goldens
+npm run check:trace-parity                        # …and on the TRACE: tokens, span, inputSpan, ipaSpan
+```
+
+⚠ **`parity` COMPARES IPA STRINGS AND NOTHING ELSE**, which is narrower than it sounds. `PhonemizeTrace`
+was in no gate at all until #1419, and that is how #1408 got out: the first trace of `ja` in a C# process
+returned every `inputSpan` null while TypeScript was correct, it reached a downstream consumer, and parity
+stayed green throughout — correctly, because the readings never differed. A wrong span is worse than a
+missing one, because a null is legible and a bad offset is not.
+
+⚠ **`check:trace-parity` IS TWO PROCESSES ON PURPOSE.** It dumps the TypeScript traces in one `tsx`
+process and compares in one `dotnet` process, because the cold-init class it guards is once per process —
+a check living inside `dotnet test` is VACUOUS against it, which #1408 demonstrated twice.
+
 There is no build step — `exports` points at `src/index.ts` and the package ships TypeScript source.
 `onnxruntime-node` is an optional dependency; every neural path degrades to a rule or lexicon path
 without it, so the suite passes on a machine that has no ONNX runtime.

@@ -10,7 +10,7 @@
     "!src/**/*.log",
     "!src/**/__pycache__"
   ],
-  "description": "Canonical-IPA phonemizer \u2014 native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
+  "description": "Canonical-IPA phonemizer — native, rule- and lexicon-based. Hindi, English, Mandarin, Spanish, Arabic.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -22,6 +22,8 @@
     "check:package": "node tools/check-package-fence.mjs",
     "check:goldens": "tsx tools/check-goldens.mts",
     "check:en-gb-sets": "tsx tools/referee-eval/build-en-gb-sets.ts --check",
+    "dump:traces": "tsx tools/dump-traces.mts .trace-parity/ts.tsv",
+    "check:trace-parity": "npm run dump:traces && dotnet run -c Release --project csharp/tools/trace-parity -- .trace-parity/ts.tsv",
     "ci": "npm run typecheck && npm test && npm run check:goldens && npm run check:package"
   },
   "optionalDependencies": {

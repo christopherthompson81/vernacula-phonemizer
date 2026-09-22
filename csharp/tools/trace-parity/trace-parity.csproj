@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ⚠ NOT in the solution, like csharp/tools/parity and csharp/tools/trace-cold: these are harnesses,
+       not shipped code. This one exists OUTSIDE the test assembly for the same reason trace-cold does —
+       the trace's cold-init behaviour is once per process, so a shared test process has already warmed
+       every language before any test runs, and an assembly-resident check is vacuous against it. -->
+  <!-- ⚠ NEVER set InvariantGlobalization here. It makes string.Normalize a SILENT NO-OP, so every
+       NFC/NFD fold in the engine stops working; the engine refuses to start in that mode. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Vernacula.Phonemizer/Vernacula.Phonemizer.csproj" />
+  </ItemGroup>
+</Project>

@@ -141,3 +141,98 @@ finding. Index bumped 5 → 6.
 Re-proved after all of it: reverting the one-line fix fails the test with `⚠ POISONED` naming `ja`.
 
     trace-cold  traced 189 of 189 languages · no poisons · ~13s
+
+## Run N+1 — 2026-09-22 17:20 — the cross-port trace gate (#1419)
+
+`trace-cold` closed the COLD-INIT half: every language traced once in a fresh process, failing on a
+poisoned mapping or an all-null span set. It says nothing about whether the two ports **agree** on spans
+they both produce. This closes that half.
+
+### ⚠ The invariant the issue proposed is half false, and measuring is what found it
+
+#1419 proposed asserting that the spans "tile the input without overlapping". Measured over all 36,495
+golden rows:
+
+```
+exactly tile `normalized`:        1,723
+leave gaps (whitespace etc.):    34,772      ← "tiling" would have failed almost everywhere
+a token pair OVERLAPS:                0
+a token pair SHARES a `span`:         0
+a `span` goes backwards:              0      out of bounds: 0   inverted: 0
+```
+
+So **disjoint and strictly ascending is true; tiling is not.** Asserting the proposed form would have
+produced a gate that fails on 95% of the corpus on day one.
+
+⚠ **AND `inputSpan` BEHAVES DIFFERENTLY FROM `span`**, which matters because the natural instinct is to
+assert the same thing about both:
+
+```
+rows with ANY inputSpan:                     36,495
+rows where only SOME tokens have one:             0      ← all-or-nothing per row
+adjacent pair SHARES an inputSpan:           12,103      ← sharing is ORDINARY, not an error
+a token spanning the WHOLE input:                 0      ← this is the real defect shape (#1420)
+```
+
+Sharing an `inputSpan` is correct whenever the normalizer collapsed several tokens out of one stretch of
+source. #1420 is exactly where asserting distinctness was the wrong call, and "no token spans the whole
+input" was the property that actually held — so that is what this gate asserts.
+
+### The shape
+
+Nothing is committed: a full dump is ~18 MiB. `tools/dump-traces.mts` writes the TypeScript side in one
+`tsx` process; `csharp/tools/trace-parity` computes its own in one `dotnet` process and diffs. The
+expected values are the other port's, not a recorded artifact that could rot.
+
+⚠ **ONE PROCESS PER SIDE, COLD, AND NEITHER CHECK MAY LIVE IN A TEST ASSEMBLY.** This run's own history
+is the argument: a poison sweep over 189 languages AND a direct span assertion both passed inside
+`dotnet test` with #1408 fully present, because a shared test process had already warmed every language.
+
+### ⚠ Proved by injecting the defect, not by passing
+
+A gate that is green on the day it is written has demonstrated nothing. Two perturbations of the C#
+`Trace.cs`, each reverted after:
+
+```
+every InputSpan null   (the #1408 shape)              36,495 of 36,495 rows differ
+InputSpan.Start off by one, in range and ordered      35,021 rows differ
+restored                                              identical, 0 differ
+```
+
+The second is the one worth having: it is **in range, ordered, and structurally valid**, so no
+per-port check can see it — it is only visible as a disagreement between the ports. That is the
+silently-wrong-highlighting case #1419 was filed about, and it is caught.
+
+**Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · **trace-parity 189 languages, 36,495 rows, traces identical**.
+
+**Review of the trace gate — a gate whose success signal matched its no-op.**
+
+⚠ **NEITHER HALF CLEARED THE PROCESS-WIDE FOREIGN-OOV MEMO**, which every other golden-driven tool in
+the repo does (`gen_parity_goldens`, `check-goldens`, the parity runner). The measurement is already
+recorded in `check-goldens.mts`: without the clear, **38 rows go stale in 6 languages** (mi, vi, nan,
+hak, hmn, sat). It matters MORE here than anywhere else, because the memo's CONTENT is port-specific —
+a language whose foreign engine is still `PortPending` never populates it on the C# side — so an
+uncleared memo can report a divergence on a row whose real cause is a different language, or let two
+contaminations cancel and hide a real one. A gate that manufactures its own false positives is worse
+than none.
+
+⚠ **AND THE SUCCESS SENTENCE PRINTED WHEN ZERO ROWS WERE COMPARED.** Every row is skipped when the dump
+does not cover it, and nothing asserted a floor — so a stale `.trace-parity/ts.tsv` from an earlier
+subset dump, an empty dump, or goldens regenerated since, all printed *"traces identical across ports"*
+and exited 0. That is the memo *a success signal that matches the no-op*, in a tool written to close a
+hole of exactly that kind. `check-goldens.mts` states the rule ten lines from where the memo clear
+lives: **an empty golden is a failure, not a pass.** Both a zero floor and a PARTIAL-dump check now
+fail with exit 2, and the subset case is allowed only when `[codes…]` was asked for explicitly.
+
+Three more: the C# side had no `[codes…]` filter, so a one-language repro had TypeScript reach `hak`
+COLD while C# reached it after a hundred other languages — with a shared memo, precisely the condition
+that manufactures a false diff, and it still paid for a full 36,495-row pass; a malformed dump crashed
+with an index exception instead of saying "rerun the dump"; and the all-or-nothing `inputSpan` check
+fired after a `break`, double-counting one defect and naming a shape the corpus has zero instances of.
+
+**Proved again after the changes**, not assumed: injected offset error → 35,021 rows differ, exit 1;
+restored → identical, exit 0; empty, partial and malformed dumps → exit 2 each.
+
+**Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189 · trace-parity 189 languages, 36,495 of 36,495 rows walked, identical.
