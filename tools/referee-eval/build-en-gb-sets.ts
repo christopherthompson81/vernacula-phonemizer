@@ -175,10 +175,13 @@ for (const row of delegating ? [] : rows) {
         // spelled support at all are refused.
         // ⚠ AND PALM TAKES THE SAME TELL (#1411). Its edit produces `ɑː` exactly as BATH's does, so it is
         // exposed to the identical ambiguity — and worse, because PALM is the edit that runs AWAY from RP,
-        // so a length-less row is not merely weak evidence but positively the other variety's. 113 of its
-        // 605 members were claimed with no properly spelled support, and they include very ordinary
-        // British vocabulary: `conservation` shipped as kʰˌɑːnsəvˈeᶦʃən, `bobsled`, `beatbox`,
-        // `contrabass`, `chiffon`. espeak-ng reads every one of them with `ɒ`.
+        // so a length-less row is not merely weak evidence but positively the other variety's. It removes
+        // 121 of its 605 members: 114 refused here, plus 7 propagated inflections that leave with their
+        // lemma (`bobsledding`, `drachmas`, `garages`, `mailboxes`, `pogroms`, `polyesters`, `regattas`).
+        // ⚠ 113 WAS THE FORECAST AND 121 IS THE OUTCOME — the forecast counted members with no properly
+        // spelled row ANYWHERE, the rule asks whether the rows that SUPPORT THIS CLAIM are all short.
+        // They include very ordinary British vocabulary: `conservation` shipped as kʰˌɑːnsəvˈeᶦʃən,
+        // `bobsled`, `beatbox`, `contrabass`. espeak-ng reads those four with `ɒ`.
         // ⚠ IT IS A SECOND, INDEPENDENT FILTER ON A SET THAT ALREADY HAS ONE. The guard above refuses a
         // PALM claim when the referee also attests our UN-EDITED form; `comet` slipped past it on a weak
         // vowel and was caught by that guard being widened (#1409). This catches the same class by a

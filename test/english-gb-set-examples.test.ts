@@ -38,8 +38,11 @@ describe("the set memberships that documentation names", () => {
         // ⚠ PALM IS THE EDIT THAT RUNS *AWAY* FROM RP (ɒ → ɑː, toward the GenAm LOT vowel), so a
         // length-less row there is not merely weak evidence but positively the other variety's. 121
         // members were claimed with no properly spelled support, including very ordinary British
-        // vocabulary — `conservation` shipped as kʰˌɑːnsəvˈeᶦʃən. espeak-ng reads 107 of the 121
-        // WITHOUT ɑː, against 64% of the words the tell keeps: a 5× discrimination. #1411.
+        // vocabulary — `conservation` shipped as kʰˌɑːnsəvˈeᶦʃən.
+        // ⚠ MEASURED ON THE SAME POSITIVE AXIS FOR BOTH SIDES: espeak reads ɑː for 64% of the members the
+        // tell KEEPS and 11% of the ones it DROPS — 5.8× — and ɒ for 4% against 47%. An earlier version
+        // scored "espeak does not say ɑː" as agreement with ɒ, which is a different claim and was not
+        // like for like against a kept side scored on a positive. #1411.
         const palm = members("palm");
         for (const w of ["conservation", "bobsled", "beatbox", "contrabass", "chiffon"])
             expect([w, palm.has(w)]).toEqual([w, false]);

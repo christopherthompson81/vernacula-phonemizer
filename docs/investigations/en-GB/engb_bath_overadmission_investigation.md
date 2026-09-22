@@ -165,22 +165,45 @@ length-less row there is not merely weak evidence; it is positively the other va
 ⚠ **AND UNLIKE BATH'S, THIS LIST IS ORDINARY BRITISH VOCABULARY.** What we were shipping:
 
     conservation  kʰˌɑːnsəvˈeᶦʃən       bobsled     bˈɑːbslˌɛd      beatbox   bˈiːtbˌɑːks
-    contrabass    kʰˈɑːntɹəbˌeᶦs        chiffon     ʃɪfˈɑːn         bobsleigh bˈɑːbslˌeᶦ
+    contrabass    kʰˈɑːntɹəbˌeᶦs        bobsleigh   bˈɑːbslˌeᶦ
 
-`conservation` is not a rare loanword. espeak-ng reads every one of those with `ɒ`.
+`conservation` is not a rare loanword. espeak-ng reads those four with `ɒ`.
 
-### The second source, measured mechanically in BOTH directions
+⚠ **121 IS THE OUTCOME AND 113 WAS THE FORECAST IN RUN 3**, and the difference is the rule being sharper
+than the estimate: the forecast counted members with no properly spelled row ANYWHERE, while the rule asks
+whether the rows that SUPPORT THIS CLAIM are all short. 114 are refused at the claim, and 7 are propagated
+inflections that leave with their lemma (`bobsledding`, `drachmas`, `garages`, `mailboxes`, `pogroms`,
+`polyesters`, `regattas`).
 
-    DROPPED  121   espeak says ɑː:  14   AGREES WITH THE DROP: 107 (88%)
-    KEPT     484   espeak says ɑː: 314   AGREES WITH KEEPING:  314 (64%)
+### ⚠ THE FIRST VERSION OF THIS MEASUREMENT FOLDED AWAY THE AXIS IT CLAIMED TO MEASURE
 
-**A 5× discrimination**: 12% of the dropped set draws an `ɑː` from the second source against 64% of the
-kept set. The KEPT figure is not higher because espeak's inventory and ours differ on plenty of words
-for reasons that have nothing to do with this tell — what matters is the gap, not either number alone.
+It reported "espeak AGREES WITH THE DROP: 107 of 121 (88%)" — scoring *"espeak does not say `ɑː`"* as
+agreement with `ɒ`. Those are not the same claim, and the kept side was scored on a POSITIVE `ɑː`, so the
+two halves were not even like for like. The three-way rubric, which is the one to cite:
 
-⚠ **THE 14 ARE THE HONEST RESIDUE**: `bambara`, `courante`, `guan`, `gymkhana`, `haaf`, `hawaiiana`,
-`kwanzaa`, `legato`, `nalani`, `padre`, `victoriana`, `waag`, `wana`, `zawa`. Loanwords and proper nouns
-where a long vowel is plausible and the referee simply wrote it short. Listed rather than counted.
+                  ɑː (endorses PALM)     ɒ (endorses LOT)     neither
+    DROPPED  121        14  11%              57  47%            50  41%
+    KEPT     484       314  64%              21   4%           149  30%
+
+**Both axes agree and the honest numbers are stronger than the folded one.** On the same positive axis,
+the `ɑː` rate is 64% among kept members against 11% among dropped — **5.8×** — and the `ɒ` rate runs the
+other way, 4% against 47%. The 30% "neither" on the KEPT side is the base rate for two inventories
+disagreeing, which is what makes the DROPPED side's 41% readable rather than alarming.
+
+### ⚠ AND THE "NEITHER" COLUMN IS A REAL LIMIT ON THIS REMEDY, NOT NOISE
+
+Of the 50, espeak reads **41 with TRAP** — `drachma dɹˈatʃmə`, `regatta ɹɪɡˈatə`, `natasha nɐtˈaʃə`,
+`antipasto ˌantɪpˈastəʊ`, `aquavit ˈakwɐvˌɪt` — and we now ship `ɒ` for them. RP for those really is
+/ˈdrækmə/, /rɪˈætə/, /nəˈtæʃə/. **Dropping them from PALM moved them from one wrong vowel to another.**
+
+The defence is narrow and worth stating as such: `ɒ` is what the accent's ORDINARY LOT rule produces, so
+those words are now handled by the general path instead of by a specific wrong assertion — a smaller
+claim, in the right place, and visible to whatever fixes the TRAP question. It is not a fix for them.
+The other 9 are further away still (`caen kˈiːn`, `chiffon tʃˈɪfən`, `coif kˈɔɪf`).
+
+⚠ **`chiffon` WAS ONE OF THE FIVE SPECIMENS I NAMED AS "espeak reads every one with `ɒ`", AND IT DOES
+NOT** — `tʃˈɪfən`, no back vowel at all, a different onset and a different stress. The other four hold.
+Five was a list I read off rather than measured; the table above is measured.
 
 ### The cost, and how it differs from BATH's
 
