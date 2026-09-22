@@ -2014,3 +2014,63 @@ the same inputs. A positive probe for this class is worth adding to `PROBES` on 
 
 **Gates.** 6241 TS · 6844 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex-diff 144,640 probes identical.
+
+## Run 31 — 2026-09-22 14:30 — the prime marks, and the ambiguity that had to be removed first
+
+**The other half of #1435**, after #1437 took the leading-decimal half.
+
+```
+0.015″      ->  zˈɪɹoᶷ pʰɔᶦnt zˈɪɹoᶷ wˈʌn fˈaᶦv       the mark DROPPED
+5′ 6″ tall  ->  fˈaᶦv sˈɪks tʰˈɔːɫ                    a height with no units at all
+12″ pipe    ->  twˈɛɫv pʰˈaᶦp
+```
+
+**Adding ⟨′⟩ and ⟨″⟩ as ordinary `UNITS` keys is the whole fix**, and count agreement comes free
+(`1″` → "1 inch", `12″` → "12 inches"). The obstacle is that it is not always true.
+
+### ⚠ A degree sign changes what the marks mean
+
+After ⟨°⟩ they are ARCMINUTES and ARCSECONDS. As plain unit keys, `40° 26′ 46″ N` read
+"40 degrees 26 FEET 46 INCHES N" — a regression introduced by the fix itself.
+
+**Two designs, and the first one was abandoned after being written:** a backward scan from the match for
+a preceding ⟨°⟩. It has to admit a decimal (`40°26.5′`) and interior spaces (`40° 26′ 46″`), and once it
+admits both it also matches a SENTENCE END — *"the angle is 90°. 5″ of travel"* reads its `5″` as an
+arcsecond. Three attempts at the character class each fixed one case and broke another.
+
+**What shipped instead consumes the whole coordinate first**, before the unit rule, so every prime the
+unit rule then sees is unambiguously a foot or an inch. The edge disappears rather than being guarded:
+
+```
+40°26′46″N     ->  "40 degrees 26 minutes 46 seconds north"   (was "40 degrees 26 46 N")
+40°26.5′N      ->  "40 degrees 26.5 minutes north"
+1°1′           ->  "1 degree 1 minute"
+90°. 5″        ->  "90 degrees. 5 inches"                     the sentence end, correct
+```
+
+⚠ **Minutes are REQUIRED in that rule**, so it claims nothing the unit rule already handles: `5°`, `5°C`
+and `40°26` (Run 29's case) are all left to it.
+
+### ⚠ Two repo conventions caught this, both by a test rather than by review
+
+- **Invisible characters must be NAMED** in a comment on the line or the one above
+  (`test/invisible-characters.test.ts`). The NBSP in #1437's pattern was not.
+- **`\b` is never the letter boundary** (`test/letter-boundary.test.ts`). The hemisphere letter ended on
+  `([NSEW])\b`, and JS defines `\b` on ASCII `\w`, so it finds a boundary between `N` and a non-ASCII
+  letter: `40°26′Nörd` read "…minutes **northörd**". That is exactly the defect that read German
+  `25°Cölner` as "Grad Celsius" plus "ölner" (#949) — the reason `src/core/boundaries.ts` exists. The
+  fleet-wide test caught a fresh instance of a shipped defect class, which is what it is for.
+
+**Left alone on purpose:** the ASCII `"` and `'`. They are quotation marks and apostrophes far more often
+than units, and `5'` in prose is usually a quote — the same reasoning that keeps ⟨in⟩ out of the unit
+table while ⟨µin⟩ is a whole key (#1427). U+2032 and U+2033 are only ever prime marks, which is what
+makes them safe. Asserted so it reads as a decision.
+
+**The reported case, end to end** — it needed all three of #1437, the range rule and this one:
+
+```
+.002–.005″   ->  "0.002 to 0.005 inches"
+```
+
+**Gates.** 6266 TS · 6868 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,698 probes identical.

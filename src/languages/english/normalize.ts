@@ -105,6 +105,7 @@ const UNITS: Record<string, [string, string]> = {
     // mˈaᵢkɹoᵑˌɪnt͡ʃ — one token, one primary stress, which is the better prosody the module header
     // prefers. Those two are split only because their single-word spellings read WRONG.
     "\u00b5in": ["microinch", "microinches"], "\u03bcin": ["microinch", "microinches"],
+    "\u2032": ["foot", "feet"], "\u2033": ["inch", "inches"],   // PRIME, DOUBLE PRIME
     // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS, not sloppy spellings of the two above — µM is
     // MICROMOLAR and µS is MICROSIEMENS. This is the case rule the ⟨W⟩ comment below names, and it has
     // teeth here: `resolveUnitSymbol` consults the declared table with the EXACT written form before it
@@ -1306,6 +1307,17 @@ export function normalizeEnglish(input: string): string {
         (_m, mon: string, day: string, y: string) => `${mon}${day} ${yearWords(Number(y))}`,
     );
 
+    // 5b) A DMS COORDINATE, BEFORE THE UNIT RULE — `40°26′46″N` → "40 degrees 26 minutes 46
+    //     seconds north". See DMS_COORDINATE: this runs first so that every prime the unit rule then
+    //     sees is unambiguously a foot or an inch, which is what lets ⟨′⟩ and ⟨″⟩ be plain keys.
+    //     ⚠ Measured before: the primes were DROPPED OUTRIGHT and the coordinate read "40 degrees 26
+    //     46 N" — two bare numbers with nothing to say what they were.
+    s = rewrite(s, DMS_COORDINATE,
+        (_m: string, deg: string, min: string, sec: string | undefined, dir: string | undefined) =>
+            `${counted(deg, "degree", "degrees")} ${counted(min, "minute", "minutes")}`
+            + `${sec === undefined ? "" : ` ${counted(sec, "second", "seconds")}`}`
+            + `${dir === undefined ? "" : ` ${HEMISPHERE[dir]}`}`);
+
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = rewrite(s, UNIT_RE,
         (_m: string, num: string, mag: string | undefined, u: string, exp: string | undefined) => {
@@ -1691,6 +1703,36 @@ const LEADING_DECIMAL_POINT = new RegExp(
     `(?<![\\d\\p{L}\\p{M}.])(?<!\\b(?:batting|hitting|slugging|averaging)[ \\t\\u00a0])`  // space, tab, NBSP
     + `\\.(?=\\d)(?!\\d+[ \\t\\u00a0-]*(?:cal|calibre|caliber|acp|magnum|mag|special|spl|auto`  // space, tab, NBSP
     + `|lr|win|winchester|rem|remington|luger|s&w)\\b)`, "giu");
+
+/**
+ * A DEGREES-MINUTES-SECONDS COORDINATE — `40°26′46″N` (#1435).
+ *
+ * ⚠ IT EXISTS TO REMOVE AN AMBIGUITY, NOT ONLY TO READ A COORDINATE. ⟨′⟩ and ⟨″⟩ are feet and
+ * inches in ordinary prose and ARCMINUTES and ARCSECONDS after a degree sign, and nothing about the
+ * marks themselves says which. Consuming the coordinate FIRST leaves every surviving prime
+ * unambiguously a foot or an inch, which is what lets them be plain `UNITS` keys.
+ *
+ * ⚠ THE ALTERNATIVE WAS A BACKWARD SCAN for a preceding ⟨°⟩, and it is fragile in a way worth
+ * recording: the run has to admit a decimal (`40°26.5′`) and interior spaces (`40° 26′ 46″`), and
+ * once it admits both it also matches a SENTENCE END — "the angle is 90°. 5″ of travel" reads its
+ * `5″` as an arcsecond. Matching the whole coordinate has no such edge.
+ *
+ * ⚠ THE HEMISPHERE LETTER ENDS ON `(?![\p{L}\p{M}])`, NOT `\b`. JS defines `\b` on ASCII `\w`, so it
+ * finds a boundary between `N` and a non-ASCII letter: `40°26′Nörd` read "…minutes northörd". That is
+ * the defect that read German `25°Cölner` as "Grad Celsius" plus "ölner" (#949), and the reason
+ * `src/core/boundaries.ts` exists — `test/letter-boundary.test.ts` pins the spelling fleet-wide.
+ *
+ * ⚠ MINUTES ARE REQUIRED, so this claims nothing the unit rule already handles: a bare `5°` or `5°C`
+ * is left to it. Seconds and the hemisphere letter are optional.
+ */
+const DMS_COORDINATE =
+    /(\d+(?:\.\d+)?)°[ \t]?(\d+(?:\.\d+)?)′(?:[ \t]?(\d+(?:\.\d+)?)″)?(?:[ \t]?([NSEW])(?![\p{L}\p{M}]))?/gu;
+
+/** The hemisphere letters, spoken. */
+const HEMISPHERE: Readonly<Record<string, string>> = { N: "north", S: "south", E: "east", W: "west" };
+
+/** `n` of `unit`, with count agreement — "1 degree", "40 degrees". */
+const counted = (n: string, sg: string, pl: string): string => `${n} ${n === "1" ? sg : pl}`;
 
 /**
  * Letter names. English needs almost no data here: CMUdict carries all 26 single letters with their

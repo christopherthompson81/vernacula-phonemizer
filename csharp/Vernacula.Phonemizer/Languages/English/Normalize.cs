@@ -57,6 +57,7 @@ public static class Normalize
         // ⟨µm⟩/⟨µl⟩ above — measured, not assumed: `microinch` reads as one token with one primary
         // stress. See the TypeScript.
         ["\u00b5in"] = new[] { "microinch", "microinches" }, ["\u03bcin"] = new[] { "microinch", "microinches" },
+        ["\u2032"] = new[] { "foot", "feet" }, ["\u2033"] = new[] { "inch", "inches" },   // PRIME, DOUBLE PRIME
         // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS — µM is MICROMOLAR, µS is MICROSIEMENS, not sloppy
         // spellings of µm/µs. ResolveUnitSymbol consults the declared table with the EXACT written form
         // before folding, so declaring them is what stops `25 µM` folding to `µm` and reading "micro
@@ -451,6 +452,33 @@ public static class Normalize
      */
     private static readonly JsRe RE_PREFIX = JsRegex.Compile(
         "(?<![\\p{L}\\p{M}\\d])(?<!\\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\\p{L})", "giu");
+
+    /**
+     * A DEGREES-MINUTES-SECONDS COORDINATE — `40°26′46″N` (#1435).
+     * Ported from src/languages/english/normalize.ts — see that file for the reasoning.
+     *
+     * ⚠ IT EXISTS TO REMOVE AN AMBIGUITY, NOT ONLY TO READ A COORDINATE. ⟨′⟩ and ⟨″⟩ are feet and
+     * inches in ordinary prose and ARCMINUTES and ARCSECONDS after a degree sign. Consuming the
+     * coordinate FIRST leaves every surviving prime unambiguously a foot or an inch, which is what
+     * lets them be plain UNITS keys.
+     *
+     * ⚠ THE HEMISPHERE LETTER ENDS ON `(?![\p{L}\p{M}])`, NOT `\b` — JS defines `\b` on ASCII `\w`,
+     * so `40°26′Nörd` read "…minutes northörd", the defect class of #949.
+     *
+     * ⚠ MINUTES ARE REQUIRED, so this claims nothing the unit rule already handles: a bare `5°` or
+     * `5°C` is left to it. Seconds and the hemisphere letter are optional.
+     */
+    private static readonly JsRe DMS_COORDINATE = JsRegex.Compile(
+        "(\\d+(?:\\.\\d+)?)°[ \\t]?(\\d+(?:\\.\\d+)?)′(?:[ \\t]?(\\d+(?:\\.\\d+)?)″)?(?:[ \\t]?([NSEW])(?![\\p{L}\\p{M}]))?",
+        "gu");
+
+    /** The hemisphere letters, spoken. */
+    private static readonly IReadOnlyDictionary<string, string> HEMISPHERE =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        { ["N"] = "north", ["S"] = "south", ["E"] = "east", ["W"] = "west" };
+
+    /** `n` of `unit`, with count agreement — "1 degree", "40 degrees". */
+    private static string Counted(string n, string sg, string pl) => $"{n} {(n == "1" ? sg : pl)}";
 
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
@@ -958,6 +986,16 @@ public static class Normalize
         });
         s = Rewrite(s, YEAR_MONTH, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value} {YearWords(Js.Number(m.Groups[3].Value))}");
+
+        // A DMS coordinate, BEFORE the unit rule, so every prime the unit rule then sees is
+        // unambiguously a foot or an inch. See DMS_COORDINATE.
+        s = Rewrite(s, DMS_COORDINATE, m =>
+        {
+            var sec = m.Groups[3].Success ? " " + Counted(m.Groups[3].Value, "second", "seconds") : "";
+            var dir = m.Groups[4].Success ? " " + HEMISPHERE[m.Groups[4].Value] : "";
+            return Counted(m.Groups[1].Value, "degree", "degrees")
+                 + " " + Counted(m.Groups[2].Value, "minute", "minutes") + sec + dir;
+        });
 
         s = Rewrite(s, UNIT_RE, m =>
         {
