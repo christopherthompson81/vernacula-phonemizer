@@ -74,3 +74,45 @@ public class EnglishEdAdjectiveHeteronymTests
         Assert.Equal("æn ˈeᶦd͡ʒd mˈæn", Say("an aged man"));
     }
 }
+
+public class EnglishUsedToTests
+{
+    private static string Say(string s) => Phonemizer.Phonemize(s, "en");
+
+    /**
+     * ⚠ `used to` IS THE ONLY HETERONYM WITH A FOLLOWING-WORD CONDITION, and both ports read the SAME
+     * manifest field, so this is the C# half of a contract the parity golden cannot see — `used to` is
+     * in no golden row. Measured over the 101 `used to` tokens in the UD English treebanks with this
+     * tagger: 41% today, 59% for a flat bigram, 81% for VBD alone, 85% for VBD-or-next-tag-IN. #1395.
+     */
+    [Fact]
+    public void ReadsTheHabitualAsJuust()
+    {
+        Assert.Contains("j\u02c8u\u02d0st", Say("I used to walk there"));
+        Assert.Contains("j\u02c8u\u02d0st", Say("a website I used to run"));
+    }
+
+    [Fact]
+    public void ReadsBeUsedToGerundAsJuustViaTheNextTag()
+    {
+        // Here `used` is VBN and `to` is a PREPOSITION, not the infinitive marker — 10 of the 101.
+        Assert.Contains("j\u02c8u\u02d0st", Say("He was used to walking briskly"));
+        Assert.Contains("j\u02c8u\u02d0st", Say("Get used to using it yourself"));
+    }
+
+    [Fact]
+    public void LeavesThePassiveAndTheParticipleAsJuuzd()
+    {
+        Assert.Contains("j\u02c8u\u02d0zd", Say("This date will be used to determine it"));
+        Assert.Contains("j\u02c8u\u02d0zd", Say("The aircraft used to fly there"));
+    }
+
+    [Fact]
+    public void LeavesAPlainPastAlone()
+    {
+        // ⚠ THE SLOT MUST BE CLEARED, NOT MERELY SET: `used` is VBD here too and the `past` slot exists
+        // only for this condition, so an unconditional VBD would reach it.
+        Assert.Contains("j\u02c8u\u02d0zd", Say("She used a hammer"));
+        Assert.Contains("j\u02c8u\u02d0zd", Say("They used it yesterday"));
+    }
+}

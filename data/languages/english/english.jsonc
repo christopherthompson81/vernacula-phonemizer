@@ -280,6 +280,18 @@
         "upset": { "default": "ˈʌpsɛt", "verb": "əpsˈɛt" },
         "uses": { "default": "jˈuːsᵻz", "verb": "jˈuːzᵻz" },
         "use": { "default": "jˈuːs", "verb": "jˈuːz" },
+        // ⚠ `used to` — THE ONLY ENTRY WITH A FOLLOWING-WORD CONDITION, and the only one measured before
+        // it was built. `used` is rank 125 and the habitual /juːst/ was simply wrong. No POS tag separates
+        // it from the passive "will be used to determine", so the condition tests the tag TOO: VBD picks
+        // the habitual, and a following IN picks "be/get used to <noun|gerund>", where `to` is a
+        // preposition. Scored over the 101 `used to` tokens in the UD English treebanks with this
+        // tagger: 41% today → 59% for a flat bigram → 85% for this. The residue is the instrumental
+        // "a trick that I used to tame them", which is VBD before an infinitive like the habitual and
+        // is 3 of the 101. See docs/investigations/en/en_used_to_investigation.md.
+        "used": {
+            "default": "jˈuːzd", "past": "jˈuːst",
+            "before": { "word": "to", "tags": ["VBD"], "nextTags": ["IN"], "slot": "past" }
+        },
         // ⚠ NOT A STRESS PAIR LIKE ITS NEIGHBOURS — a VOWEL pair, and the two senses are unrelated words.
         // The fabric is wˈʊstᵻd (from Worstead in Norfolk); the past tense of `worst` is wˈɝstᵻd. CMUdict
         // carries only the verb, so the fabric read wˈɝstᵻd in every text about textiles.

@@ -253,6 +253,17 @@ export class EnglishPhonemizer {
         // lost by refusing the predicative reading the tagger never gets right anyway.
         for (let i = 0; i < out.length; i++)
             if (out[i]!.adj && !(tags[i + 1] ?? "").startsWith("NN")) out[i] = { ...out[i]!, adj: false };
+        // ⚠ A FOLLOWING-WORD CONDITION, FOR THE PAIRS NO TAG SEPARATES. An entry carrying `before` has the
+        // named slot set EXACTLY when the condition fires and cleared otherwise — cleared matters as much
+        // as set, because `used` is VBD in "she used a hammer" too and would otherwise reach the `past`
+        // slot that exists only for "used to". See BeforeCondition for the measurement.
+        for (let i = 0; i < out.length; i++) {
+            const before = this.heteronyms.get(words[i]!.toLowerCase())?.before;
+            if (before === undefined) continue;
+            const fires = (words[i + 1] ?? "").toLowerCase() === before.word
+                && ((before.tags ?? []).includes(tags[i]!) || (before.nextTags ?? []).includes(tags[i + 1] ?? ""));
+            out[i] = { ...out[i]!, [before.slot]: fires };
+        }
         // ⚠ AND THE SAME CONSTRAINT PROMOTES, BECAUSE THE TAGGER MISSES THE `-ed` ADJECTIVE ENTIRELY.
         // Measured over eight frames per word (#1378 item 3): this model tags `blessed`, `cursed`,
         // `cussed`, `dogged`, `ragged`, `crooked` as JJ **predicatively** — "very blessed", "a truly

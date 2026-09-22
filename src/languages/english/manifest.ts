@@ -9,6 +9,33 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { ArpabetDef } from "./englishArpabet.ts";
 
+/**
+ * A FOLLOWING-WORD CONDITION on a heteronym slot, for the pairs no POS tag separates.
+ *
+ * ⚠ `used to` IS THE CASE THIS EXISTS FOR AND THE MEASUREMENT IS THE WHOLE JUSTIFICATION. `used` is
+ * rank 125, and the habitual /juːst/ and the passive /juːzd/ are both VBD-or-VBN before an infinitival
+ * `to`. Counted over the 101 `used to` tokens in the UD English treebanks, scored with THIS tagger:
+ *
+ *     41%  today (always juːzd)          81%  tag is VBD
+ *     59%  next word is `to` (flat)       85%  tag is VBD, OR the next tag is IN
+ *
+ * so the condition is BOTH a word and a tag test: `tags` selects the marked reading, and `nextTags`
+ * selects it too — the second is what reaches "be/get used to <noun|gerund>", where `to` is a
+ * PREPOSITION (IN) rather than the infinitive marker (TO) and the reading is /juːst/ as well.
+ * ⚠ A FLAT BIGRAM WOULD HAVE BEEN NET POSITIVE AND IS NOT WHAT SHIPPED: 59% beats 41%, and 85% beats
+ * both. The issue proposed the flat form; the corpus said the tags were worth another 26 points.
+ */
+export interface BeforeCondition {
+    /** The following surface word, lower-cased. */
+    word: string;
+    /** Tags of THIS word that select the marked reading. */
+    tags?: string[];
+    /** Tags of the FOLLOWING word that select it, independently of `tags`. */
+    nextTags?: string[];
+    /** Which slot the condition drives. The slot is true exactly when the condition fires. */
+    slot: "verb" | "noun" | "past" | "adj";
+}
+
 export interface HeteronymEntry {
     default: string;
     verb?: string;
@@ -17,6 +44,8 @@ export interface HeteronymEntry {
     /** The ADJECTIVE reading, where it differs from the default — `arithmetic` the property versus
      *  arithmetic the subject. See `PosExpectation.adj`. */
     adj?: string;
+    /** See {@link BeforeCondition}. */
+    before?: BeforeCondition;
 }
 
 export interface EnglishManifest {

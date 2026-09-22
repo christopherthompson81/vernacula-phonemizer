@@ -229,6 +229,26 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             if (outp[i]!.Adj && !(i + 1 < tags.Count && tags[i + 1].StartsWith("NN", StringComparison.Ordinal)))
                 outp[i] = new PosExpectation
                     { Verb = outp[i]!.Verb, Noun = outp[i]!.Noun, Past = outp[i]!.Past, Adj = false };
+        // ⚠ A FOLLOWING-WORD CONDITION, FOR THE PAIRS NO TAG SEPARATES. An entry carrying `Before` has the
+        // named slot set EXACTLY when the condition fires and cleared otherwise — cleared matters as much
+        // as set, because `used` is VBD in "she used a hammer" too and would otherwise reach the `Past`
+        // slot that exists only for "used to". See BeforeCondition for the measurement.
+        for (var i = 0; i < outp.Count; i++)
+        {
+            if (!_heteronyms.TryGetValue(Js.ToLowerCase(words[i]), out var hetB) || hetB.Before is null) continue;
+            var b = hetB.Before;
+            var nextWord = i + 1 < words.Count ? Js.ToLowerCase(words[i + 1]) : "";
+            var nextTag = i + 1 < tags.Count ? tags[i + 1] : "";
+            var fires = nextWord == b.Word
+                && ((b.Tags?.Contains(tags[i]) ?? false) || (b.NextTags?.Contains(nextTag) ?? false));
+            outp[i] = new PosExpectation
+            {
+                Verb = b.Slot == "verb" ? fires : outp[i]!.Verb,
+                Noun = b.Slot == "noun" ? fires : outp[i]!.Noun,
+                Past = b.Slot == "past" ? fires : outp[i]!.Past,
+                Adj = b.Slot == "adj" ? fires : outp[i]!.Adj,
+            };
+        }
         // ⚠ And the same constraint PROMOTES: this tagger calls the `-ed` adjective VBN in exactly the
         // attributive frame the demotion above requires. See the TypeScript for the measurement, for why
         // the LEFT tag must head a noun phrase (NN + VBN + NN is a transitive verb with a bare-noun
