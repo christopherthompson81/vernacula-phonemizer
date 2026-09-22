@@ -1631,3 +1631,90 @@ Fixed two ways, and the second is the more honest one:
 
 **Gates.** 6178 TS · 6760 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189
 of 189, no poisons.
+
+## Run 26 — 2026-09-22 11:15 — three more reports, and only one reproduces where it was aimed
+
+**Reports.** `µin` → "in"; `superalloy` → *superalley*; `profilometry` with *prof-* rather than *proh-*.
+
+**Raw finding — they live in three different places, and two are not where the report points:**
+
+| report | sync TS | async / neural | C# | verdict |
+|---|---|---|---|---|
+| `µin` → "in" | ✗ | ✗ | ✗ | reproduces everywhere |
+| `profilometry` | correct | ✗ `pɹˌɑːfəl…` | correct | **neural path only** |
+| `superalloy` | `…ˌælˌɔᶦ` | `…ˈælɔᶦ` | `…ˌælˌɔᶦ` | **does not reproduce** |
+
+⚠ **`profilometry` is a two-entry-point disagreement, and the sibling is the diagnostic.** The neural
+path reads `profilometer` as `pɹˌoᶷfəlˈɑːmɪt̬ɚ` — with the ⟨o⟩ the `-metry` form loses. Same stem, same
+prefix, one suffix apart, two different first vowels, so this is not a gap in what the model knows about
+the prefix but about the `-metry` form specifically. Filed as #1428; it needs a curated row.
+
+⚠ **`superalloy` could not be reproduced on any path.** Every one gives the ⟨ɔᶦ⟩ the report says is
+missing. `superalloy` is OOV (only `alloy` is recorded, `AE1 L OY2`) so the reading is g2p-derived, but
+it is derived correctly. What the paths DO disagree about is stress: the rule path puts the primary on
+*super* with two following secondaries (`sˈuːpɚˌælˌɔᶦ`) and the neural path puts it on *al*
+(`sˌuːpɚˈælɔᶦ`). A fully destressed final syllable is the most plausible route to hearing "alley", but
+that is a hypothesis about a downstream voice, not a measurement of this engine — recorded, not filed.
+
+### `µin` — two code points, two different failures (#1427)
+
+```
+µin    -> ˈɪn        U+00B5 DROPPED, the bare `in` read as the PREPOSITION
+μin    -> mi ˈɪn     U+03BC read as *mi*
+```
+
+⚠ **The fix is a whole key, not ⟨in⟩ in the unit table.** The bare inch is the English preposition, so
+declaring it would read `5 in the morning` as "5 inches the morning" — and `UNIT_RE`'s exponent guard
+already records the same refusal from the other side. That is exactly why the micro block is a list of
+WHOLE keys: the prefixed form has no collision where the bare unit does.
+
+⚠ **ONE word, and measured rather than assumed.** `µm` and `µl` are split into two words only because
+their single-word spellings read wrong (the caliper; "lit-rays"). `microinch` reads `mˈaᶦkɹoᶷˌɪnt͡ʃ` —
+one token, one primary stress, the better prosody the module header prefers — so it stays one word.
+
+⚠ **AND THE REPORT ARRIVED BARE**, which the numbered arm alone would not have fixed. `UNIT_RE` requires
+a number in front, so `µin` as a surface-finish spec column heading still read "in". This is precisely
+the shape that made the slashed rates need `BARE_RATE_RE` — *"a column header or an axis label, which is
+the shape the report arrived in"* — and the same argument licenses it: a slash inside a token can never
+be a word, and neither can a micro sign glued to letters. A `BARE_MICRO_RE` arm now covers the whole
+micro family, derived from `UNITS` so a new micro unit needs no second declaration.
+
+⚠ **It consults the KEY SET, not `µ\w+`**, so a lone mu is still the Greek letter, and it carries no
+`i` flag, so ⟨µM⟩ stays micromolar rather than folding to a micro metre.
+
+**Gates.** 6183 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons.
+
+**Review of Run 26 — the bare arm was both too narrow and too wide.**
+
+⚠ **Too narrow: it was compiled without `i`, so ⟨µL⟩ never matched.** That is the spelling the UNITS
+block itself calls the DOMINANT printed form of the microlitre, and it is declared only as ⟨µl⟩ — so
+`Volume: µL` still put a raw µ into the g2p, the precise drop class the arm was added to remove. The
+stated reason for dropping the flag does not hold: case-sensitivity is `resolveUnitSymbol`'s job, not
+the pattern's, since it consults the declared table with the EXACT written form before folding. That is
+why the sibling `BARE_RATE_RE` carries `giu` and still resolves case-sensitive keys correctly. With the
+flag on, ⟨µM⟩ is still micromolar and ⟨µm⟩ still a micro metre.
+
+⚠ **Too wide: it ate the numerator of a micro RATE, and that was a regression I introduced.** The arm
+runs before 6a3, and its lookarounds excluded letters and digits but not the slash, so it claimed the
+numerator of every micro rate whose full key the table does not enumerate and stripped the plural 6a3
+documents as load-bearing. Measured main → branch:
+
+```
+µg/kg    micrograms per kilogram   →  microgram per kilogram
+µm/s     micro meters per second   →  micro meter per second
+µg/day   micrograms per day        →  microgram per day
+```
+
+Excluded on BOTH sides, the lookbehind too, for the URL path segment `BARE_RATE_RE`'s own guard names.
+
+⚠ **And the same insertion defect as Run 25, twice more.** The new C# declaration landed between
+`BARE_RATE_RE`'s doc comment and `BARE_RATE_RE`; the new tests landed between the
+"⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE" comment and the test it was written for. That is four
+instances across two consecutive PRs, every one found by review. It is invisible in a diff read as a
+diff — the added lines are correct and nothing is removed — and shows only when the file is read top to
+bottom. Recorded as a working rule: anchor an insertion on the START of a doc comment, or after the end
+of the whole block, never on the declaration.
+
+**Gates.** 6183 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons.
