@@ -1923,5 +1923,5 @@ document, which was left bare. That is the Run 25/26 insertion defect a third ti
 repair itself introduced it, in the commit that claimed to fix it. The test suite stayed green
 throughout, because a misplaced comment is invisible to every gate. De-duplicated and re-attached here.
 
-**Gates.** 6214 TS · 6810 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6214 TS · 6812 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.

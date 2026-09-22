@@ -145,6 +145,17 @@ public class EnglishMicroUnitTests
     public void ACoordinateKeepsItsMinutes(string text, string expected)
         => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
 
+    /// <summary>The full DMS form, which is where the report came from. Mirrors the TypeScript.</summary>
+    [Theory]
+    [InlineData("40\u00b026\u203246\u2033N", "40 degrees 26")]
+    [InlineData("51\u00b030\u2032N", "51 degrees 30")]
+    public void TheFullDmsFormKeepsItsMinutes(string text, string expected)
+    {
+        Assert.Contains(expected, Normalize.NormalizeEnglish(text));
+        Assert.DoesNotContain("square", Normalize.NormalizeEnglish(text));
+        Assert.DoesNotContain("cubic", Normalize.NormalizeEnglish(text));
+    }
+
     /// <summary>
     /// ⚠ AND IT MUST NOT DECLINE THE WHOLE MATCH, which is what the code-slot rule does. Declining
     /// leaves the raw ⟨°⟩ to reach the g2p, where it is DROPPED — trading a corruption for a silent
