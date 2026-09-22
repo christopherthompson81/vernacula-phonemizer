@@ -173,7 +173,18 @@ for (const row of delegating ? [] : rows) {
         // TRAP row BESIDE a proper `ɑː` one, and they are real BATH words — the policy of preferring the
         // RP-diagnostic realisation whenever it is ATTESTED is unchanged. Only claims with no properly
         // spelled support at all are refused.
-        if (set === bath && !refRaw.some((r, i) => refFolded[i] === fold(e) && /ɑː/u.test(r))) continue;
+        // ⚠ AND PALM TAKES THE SAME TELL (#1411). Its edit produces `ɑː` exactly as BATH's does, so it is
+        // exposed to the identical ambiguity — and worse, because PALM is the edit that runs AWAY from RP,
+        // so a length-less row is not merely weak evidence but positively the other variety's. 113 of its
+        // 605 members were claimed with no properly spelled support, and they include very ordinary
+        // British vocabulary: `conservation` shipped as kʰˌɑːnsəvˈeᶦʃən, `bobsled`, `beatbox`,
+        // `contrabass`, `chiffon`. espeak-ng reads every one of them with `ɒ`.
+        // ⚠ IT IS A SECOND, INDEPENDENT FILTER ON A SET THAT ALREADY HAS ONE. The guard above refuses a
+        // PALM claim when the referee also attests our UN-EDITED form; `comet` slipped past it on a weak
+        // vowel and was caught by that guard being widened (#1409). This catches the same class by a
+        // different route, which is the argument for having both.
+        if ((set === bath || set === palm)
+            && !refRaw.some((r, i) => refFolded[i] === fold(e) && /ɑː/u.test(r))) continue;
         set.push(w); claimed++; break;
     }
 }
@@ -331,9 +342,10 @@ for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i
             // AFTER `refFolded.includes(fold(e))`, so the tell is additive there; here that precondition
             // has to be written out or the mirror becomes a much stronger rule wearing the tell's name.
             const supporting = refRaw2.filter((r, i) => refFolded[i] === fold(e));
-            if (name === "bath" && supporting.length > 0 && !supporting.some((r) => /ɑː/u.test(r))) {
+            if ((name === "bath" || name === "palm") && supporting.length > 0
+                && !supporting.some((r) => /ɑː/u.test(r))) {
                 vetoed++;
-                if (explain) console.log(`  VETO  bath  ${lemma} -> ${w}   supporting rows all short: ${supporting.join(" | ")}`);
+                if (explain) console.log(`  VETO  ${name.padEnd(5)} ${lemma} -> ${w}   supporting rows all short: ${supporting.join(" | ")}`);
                 continue;
             }
             if (refFolded.length > 0 && attestsOurs &&

@@ -153,3 +153,51 @@ row in a GENERATED artifact is exactly the kind of claim no gate covers. Two liv
   whether the segment this edit produced is the one spelled long. The only BATH member whose matching row
   mixes both spellings is `parang` (`pɑɹɑːŋ`), where the long vowel IS the edited one, so the
   approximation is latent. Written down rather than left to be discovered.
+
+## Run 4 — 2026-09-22 — the same tell for PALM (#1411), where it matters more
+
+PALM's edit produces `ɑː` exactly as BATH's does, so it has the identical ambiguity — **and worse**,
+because PALM is the one edit that runs *away* from RP (`ɒ → ɑː`, toward the GenAm LOT vowel). A
+length-less row there is not merely weak evidence; it is positively the other variety's.
+
+    PALM members 605   with referee rows 550   claimed with no properly-spelled ɑː support  121
+
+⚠ **AND UNLIKE BATH'S, THIS LIST IS ORDINARY BRITISH VOCABULARY.** What we were shipping:
+
+    conservation  kʰˌɑːnsəvˈeᶦʃən       bobsled     bˈɑːbslˌɛd      beatbox   bˈiːtbˌɑːks
+    contrabass    kʰˈɑːntɹəbˌeᶦs        chiffon     ʃɪfˈɑːn         bobsleigh bˈɑːbslˌeᶦ
+
+`conservation` is not a rare loanword. espeak-ng reads every one of those with `ɒ`.
+
+### The second source, measured mechanically in BOTH directions
+
+    DROPPED  121   espeak says ɑː:  14   AGREES WITH THE DROP: 107 (88%)
+    KEPT     484   espeak says ɑː: 314   AGREES WITH KEEPING:  314 (64%)
+
+**A 5× discrimination**: 12% of the dropped set draws an `ɑː` from the second source against 64% of the
+kept set. The KEPT figure is not higher because espeak's inventory and ours differ on plenty of words
+for reasons that have nothing to do with this tell — what matters is the gap, not either number alone.
+
+⚠ **THE 14 ARE THE HONEST RESIDUE**: `bambara`, `courante`, `guan`, `gymkhana`, `haaf`, `hawaiiana`,
+`kwanzaa`, `legato`, `nalani`, `padre`, `victoriana`, `waag`, `wana`, `zawa`. Loanwords and proper nouns
+where a long vowel is plausible and the referee simply wrote it short. Listed rather than counted.
+
+### The cost, and how it differs from BATH's
+
+    referee agreement on the 121:   114/114 HIT  →  0/114 HIT
+    of the 114 losses, with a properly-spelled ɑː row anywhere:  1  (`garage`)
+
+BATH's equivalent was 0 of 31. Here it is 1 of 114, and that one is instructive.
+
+⚠ **`garage` IS WRONG BEFORE AND AFTER, AND NEEDS A LEXICAL ROW RATHER THAN A SET MEMBERSHIP.** Its rows
+are `ɡæɹɑːdʒ | ɡæɹɑːʒ | ɡæɹɪdʒ | ɡəɹɑdʒ | ɡəɹɑʒ | ɡɹɑdʒ | ɡɹɑʒ` — RP is /ˈɡærɑːʒ/ or /ˈɡærɪdʒ/, stressed
+on the FIRST syllable, and espeak reads `ɡˈaɹɪdʒ`. We said `ɡəɹˈɑːʒ` (the American reading) and now say
+`ɡəɹˈɒʒ`, which is a different wrong answer. The properly-spelled `ɑː` rows are the ones we do NOT match,
+on stress; the ones we match are the short American pair. So the "1 of 114" is not a counterexample to
+the tell — it is a word whose problem is stress, recorded for the lexical table rather than patched here.
+
+### Result
+
+    palm 605 → 484        bath/cloth/yod/lotr unchanged
+    goldens              0 stale — none of these words is in the golden corpus
+    suite 6,160 · C# 189 byte-identical · sets reproduce from the builder
