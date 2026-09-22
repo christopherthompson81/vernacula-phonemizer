@@ -307,3 +307,57 @@ asserts the literal `əlˈuːmɪnəm`.
     sets         en-gb-palm.tsv back to purely generated (−1 hand row)
     suite        6,117 tests, 319 files;  goldens 189 / 36,495 / 0 stale;  parity 189 byte-identical
     eval         en-GB unmoved at 52.0% folded backbone / 86.4% symbol, scored path `rules`
+
+## Run 5 — 2026-09-21 — the US-contamination sweep (#1383, move 2)
+
+#1383 names three moves. This is the second: *"a cheap pass that improves every en-GB measurement,
+not just this table."*
+
+⚠ **THE en-GB REFEREE HAD NO `excludeRows` AT ALL.** `en.jsonc` carries three non-rhotic rules for the
+opposite problem (RP rows in a GenAm corpus); the UK config had nothing for US rows in a UK corpus.
+
+    en-GB referee headwords                                      76,284
+      EVERY reading rhotic — an r-coloured ɚ/ɝ, or a coda ɹ      1,468
+      SOME reading rhotic beside a clean one                       3,779   ← KEPT
+
+The all-variants criterion is the machinery's own: the scorer credits any variant, so a row with one
+clean reading is still evidence. Only a row that cannot arbitrate at all is dropped.
+
+⚠ **AND WE PASS 0 OF THE 1,468.** Not 3, not 1 — zero. They are guaranteed failures sitting in the
+denominator, so removing them takes out false disagreements and costs no credit:
+
+    folded backbone   40,363 / 76,284 (52.9%)  →  40,363 / 74,816 (53.9%)
+    symbol accuracy   87.0%                    →  87.3%
+
+**The numerator does not move**, which is the same signature the Moby non-rhotic rules produced on
+`en` and is the whole evidence that this is a referee defect rather than a scoring gift.
+
+### ⚠ THE NUCLEUS TEST TOOK FOUR ATTEMPTS AND EVERY FAILURE WAS THE SAME BUG
+
+    1. `[ɹ](?![vowel])`                     — counted `aaronite eəɹn̩aɪt` as a coda: `n̩` IS a nucleus
+    2. + syllabic consonants                  — missed `dramatize d̠͡ɹ̠ɑ...`: a combining mark sits
+                                                 between the /ɹ/ and its vowel
+    3. strip ALL combining marks first        — broke case 1 again, because U+0329 is IN the range
+                                                 stripped, so `ɹl̩` became `ɹl`
+    4. skip other marks but NOT U+0329        — correct, and verified against eight fixtures in BOTH
+                                                 directions before being believed
+
+That is the third time this session a nucleus test forgot that a syllabic consonant is one (#1403 has
+the other two, in the engine and in its own guard). **Write the nucleus definition once and test it
+against known-good rows as well as known-bad ones** — a detector verified only on positives will
+happily take an onset with it.
+
+### What this does NOT do
+
+The eleven-row lexical-variant table is unchanged. `leisure` is now excluded from the referee rather
+than contradicting it, which removes a false disagreement but does not attest the British reading —
+`schedule` still has no row at all. That is move 1, and it now has a candidate: **espeak-ng's `en-gb`
+voice is installed and independent of wikipron**, and it gives the readings the issue says cannot be
+checked:
+
+    schedule ʃˈɛdjuːl   leisure lˈɛʒə   oregano ˌɒɹɪɡˈɑːnəʊ   premier pɹˈɛmɪə
+    laboratory lɐbˈɒɹətɹi
+
+⚠ **THAT IS A POLICY CHANGE, NOT A DATA ADDITION**, and is deliberately not made here: the table's
+PROVENANCE sets the bar at "attested by the wikipron UK referee", and admitting a second source is a
+decision about the bar rather than about a row. Scoped, not taken.

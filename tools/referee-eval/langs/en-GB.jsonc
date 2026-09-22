@@ -4,7 +4,12 @@
 // stress); we fold aspiration (our kʰ/tʰ vs the referee's unmarked stops) and unify the NURSE/STRUT central vowels.
 {
     "referees": [
-        { "file": "en-gb.wikipron-uk.tsv", "source": "wikipron eng_latn_uk (human, narrow)", "role": "primary" }
+        {
+            "file": "en-gb.wikipron-uk.tsv", "source": "wikipron eng_latn_uk (human, narrow)", "role": "primary",
+            "excludeRows": [
+                { "ipa": "[ɚɝ]|[ɹɻr](?![\\u0300-\\u0328\\u032a-\\u036f\\u0361\\u0362]*(?:[aeiouɑɒɔəɛɜɪʊʌæyøœɐɨʉɯɤʏɘɵɞɶ]|[nmlŋr]\\u0329|ː))", "note": "US CONTAMINATION. This file is a UK corpus and 1,468 of its 76,284 headwords have EVERY reading rhotic — either an r-coloured ɚ/ɝ, which is not an RP symbol at all, or a coda ɹ. A non-rhotic engine cannot match one, and the measurement bears that out: WE PASS 0 OF THE 1,468. They are 1,468 guaranteed failures in the denominator, so this removes false disagreements and costs no credit — 52.9% → 53.9% with the numerator UNCHANGED, the same signature the Moby non-rhotic rules produced on en. #1383 names this sweep as the cheap pass that improves every en-GB measurement. ⚠ THE EXCLUSION IS ALL-VARIANTS, which the machinery already enforces: 3,779 further headwords have SOME contaminated reading beside a clean one and are kept, because the scorer credits any variant and the clean one is still evidence. ⚠ AND THE NUCLEUS TEST TOOK FOUR ATTEMPTS, all the same bug: a /ɹ/ before a SYLLABIC consonant is an ONSET (`aboral æbɔːɹl̩`, `abhorrence əbhɒɹn̩s`), and a narrow transcription can put another combining mark between the /ɹ/ and its vowel (`dramatize d̠͡ɹ̠ɑmətaɪz`). Both are onsets and neither is contamination; the lookahead skips other marks but NOT U+0329, which is what makes the syllabic case an onset. Verified against eight fixtures in both directions." }
+            ]
+        }
     ],
     // ⚠ BEFORE THE BACKBONE, which strips combining marks — the syllabic one has to become a vowel first,
     // not be deleted. Same rule and same reason as en.jsonc; this engine is the same engine. It is
