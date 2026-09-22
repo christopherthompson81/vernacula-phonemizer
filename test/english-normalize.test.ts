@@ -565,12 +565,6 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
         expect(normalizeEnglish("6ft0 tall")).toContain("feet");
     });
 
-    // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
-    // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
-    // the ⟨µg⟩ entry in UNITS was added to fix.
-    // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
-    // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
-    // the ⟨µg⟩ entry in UNITS was added to fix.
     // ⚠ ⟨µin⟩ IS A WHOLE KEY BECAUSE ⟨in⟩ CANNOT BE ONE — the bare inch is the English PREPOSITION.
     // Reported as `µin` → "in", the sign DROPPED and the preposition read: the wrong-unit class this
     // file ranks worst. The preposition assertions are the half that keeps the fix honest.
@@ -599,12 +593,47 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
         expect(normalizeEnglish("micrometer")).toBe("micrometer");
     });
 
+    // ⚠ AND THE EXPONENT RULE TESTS THE UNIT'S SHAPE, NOT A LIST OF LENGTHS. Spelled as a length list it
+    // declined the whole match for every other unit, putting a RAW µ into the g2p — the precise defect
+    // the ⟨µg⟩ entry in UNITS was added to fix.
     test("a micro- unit with an ASCII exponent still reads, sign and all", () => {
         expect(normalizeEnglish("5 \u00b5g2")).toBe("5 square micrograms");
         expect(normalizeEnglish("5 \u00b5m2")).not.toContain("\u00b5");
     });
 
+    // ⚠ A COORDINATE'S MINUTES ARE NOT AN EXPONENT, AND THIS CASE CORRUPTS RATHER THAN DROPS (#1434).
+    // A latitude is written unspaced, so the minutes digit sits exactly where an exponent would:
+    // `40°26` read "40 SQUARE DEGREES6" — the wrong unit AND a digit silently eaten.
+    test("a coordinate keeps its minutes", () => {
+        expect(normalizeEnglish("40\u00b026")).toBe("40 degrees 26");
+        expect(normalizeEnglish("40\u00b036")).toBe("40 degrees 36");
+        expect(normalizeEnglish("40\u00b026\u203246\u2033N")).toContain("40 degrees 26");
+        expect(normalizeEnglish("51\u00b030\u2032N")).toContain("51 degrees 30");
+        for (const c of ["40\u00b026", "40\u00b036", "51\u00b030\u2032N"]) {
+            expect(normalizeEnglish(c)).not.toContain("square");
+            expect(normalizeEnglish(c)).not.toContain("cubic");
+        }
+    });
 
+    // ⚠ AND IT MUST NOT DECLINE THE WHOLE MATCH, which is what the code-slot rule does and what the
+    // first attempt here did. Declining leaves the raw ⟨°⟩ to reach the g2p, where it is DROPPED —
+    // trading a corruption for a silent loss. The degree must still be SAID.
+    test("declining the exponent does not drop the degree sign", () => {
+        expect(normalizeEnglish("40\u00b026")).toContain("degrees");
+        expect(normalizeEnglish("40\u00b026")).not.toContain("\u00b0");
+        expect(phonemize("40\u00b026", "en")).toBe(phonemize("40 degrees 26", "en"));
+    });
+
+    // ⚠ THE SUPERSCRIPT IS UNTOUCHED and the real exponents must survive — the length-list spelling of
+    // this guard is what broke those, and the code slot must still decline the match WHOLE.
+    test("real exponents and the code slot are unaffected", () => {
+        expect(normalizeEnglish("19,500 km2")).toBe("19,500 square kilometers");
+        expect(normalizeEnglish("3 m2 of floor")).toBe("3 square meters of floor");
+        expect(normalizeEnglish("5 \u00b5g2")).toBe("5 square micrograms");
+        expect(normalizeEnglish("5\u00b0C")).toBe("5 degrees Celsius");
+        expect(normalizeEnglish("Suite 5L2")).toBe("Suite 5L2");
+        expect(normalizeEnglish("T2G 0L2")).toBe("T2G 0L2");
+    });
 
     // ⚠ ⟨µL⟩ IS THE DOMINANT PRINTED SPELLING of the microlitre and is declared only as ⟨µl⟩, so a
     // case-SENSITIVE bare arm never matched it and put a raw µ into the g2p. Case is

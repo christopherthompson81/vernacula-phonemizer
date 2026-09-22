@@ -133,6 +133,45 @@ public class EnglishMicroUnitTests
     public void AMicroRateKeepsItsNumeratorPlural(string text, string expected)
         => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
 
+    /// <summary>
+    /// ⚠ A COORDINATE'S MINUTES ARE NOT AN EXPONENT, AND THIS CASE CORRUPTS RATHER THAN DROPS (#1434).
+    /// A latitude is written unspaced, so the minutes digit sits exactly where an exponent would:
+    /// `40°26` read "40 SQUARE DEGREES6" — the wrong unit AND a digit silently eaten.
+    /// </summary>
+    [Theory]
+    [InlineData("40\u00b026", "40 degrees 26")]
+    [InlineData("40\u00b036", "40 degrees 36")]
+    [InlineData("40\u00b0 26", "40 degrees 26")]
+    public void ACoordinateKeepsItsMinutes(string text, string expected)
+        => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
+
+    /// <summary>
+    /// ⚠ AND IT MUST NOT DECLINE THE WHOLE MATCH, which is what the code-slot rule does. Declining
+    /// leaves the raw ⟨°⟩ to reach the g2p, where it is DROPPED — trading a corruption for a silent
+    /// loss. The degree must still be SAID.
+    /// </summary>
+    [Fact]
+    public void DecliningTheExponentDoesNotDropTheDegreeSign()
+    {
+        Assert.Contains("degrees", Normalize.NormalizeEnglish("40\u00b026"));
+        Assert.DoesNotContain("\u00b0", Normalize.NormalizeEnglish("40\u00b026"));
+        Assert.Equal(Say("40 degrees 26"), Say("40\u00b026"));
+    }
+
+    /// <summary>
+    /// ⚠ The superscript is untouched and the real exponents must survive; the code slot must still
+    /// decline the match WHOLE.
+    /// </summary>
+    [Theory]
+    [InlineData("19,500 km2", "19,500 square kilometers")]
+    [InlineData("3 m2 of floor", "3 square meters of floor")]
+    [InlineData("5 \u00b5g2", "5 square micrograms")]
+    [InlineData("5\u00b0C", "5 degrees Celsius")]
+    [InlineData("Suite 5L2", "Suite 5L2")]
+    [InlineData("T2G 0L2", "T2G 0L2")]
+    public void RealExponentsAndTheCodeSlotAreUnaffected(string text, string expected)
+        => Assert.Equal(expected, Normalize.NormalizeEnglish(text));
+
     /// <summary>A bare mu is still the Greek letter — the gate is the preceding number.</summary>
     [Fact]
     public void ABareMuIsUntouched()

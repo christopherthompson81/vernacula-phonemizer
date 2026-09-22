@@ -1867,3 +1867,61 @@ both engines support, so the two ports stay structurally identical.
 
 **Gates.** 6211 TS · 6800 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex corpus re-extracted.
+
+## Run 29 — 2026-09-22 12:55 — a coordinate loses a digit to the exponent rule
+
+**Found while reproducing the prime-mark report (#1435), not reported.** This one **corrupts** rather
+than drops, which is why it went first:
+
+```
+40°26        ->  "40 square degrees6"        ⚠ the 2 eaten as an exponent, the 6 stranded
+40°36        ->  "40 cubic degrees6"
+40°26′46″N   ->  "40 square degrees6′46″N"
+51°30′N      ->  "51 cubic degrees0′N"
+```
+
+A latitude reads as an **area**, and a digit is silently lost. `UNIT_RE` allows `([²³23])?` after any
+unit key and ⟨°⟩ is a key, while `asciiExponentIsCodeDigit` — the guard that stops an ASCII `2`/`3`
+being read as a power — fires only for a ONE-LETTER ASCII unit, so ⟨°⟩ was never covered. The spaced
+form `40° 26` was always fine; the unspaced one is the usual spelling.
+
+### ⚠ The first attempt traded a corruption for a DROP
+
+Extending the existing predicate to return true for ⟨°⟩ makes the callback `return _m` — decline the
+whole match — which is right for a code slot (`Suite 5L2` must stay as written) and wrong here:
+
+```
+40°26   ->  "40°26"      the raw ⟨°⟩ then reaches the g2p and is DROPPED
+```
+
+That is the silent-loss class this file ranks worst, reached while fixing a corruption. The two cases
+want **different actions**, so they get different predicates: a code slot declines the match whole, a
+coordinate expands the unit and hands the digit back. `asciiExponentIsCoordinateMinutes` is the second.
+
+```
+40°26        ->  "40 degrees 26"
+40°26′46″N   ->  "40 degrees 26′46″N"     (the ′″ drop is #1435, untouched here)
+```
+
+Declining the exponent on ⟨°⟩ costs nothing real: a solid angle is written `deg²` or `sq deg`, never
+`°2`, and the SUPERSCRIPT is left alone — the same split the code-slot rule makes.
+
+**Checked and unaffected:** `19,500 km2`, `3 m2 of floor`, `5 µg2`, `5°C`, `Suite 5L2`, `T2G 0L2`.
+**Checked and fine as-is:** `40°46` normalizes to `40 degrees46` with the digits glued, and reads
+`fˈɔːɹt̬i dᵻɡɹˈiːz fˈɔːɹt̬i sˈɪks` — the tokenizer splits letter from digit, so no space is needed.
+
+**Found in passing, NOT fixed:** `40°N` drops the degree sign outright (`fˈɔːɹt̬i ˈɛn`), and so does
+`51°S`. Verified pre-existing on `main`, so not caused by this change. It is a different guard — the
+unit's trailing `(?![\p{L}\p{M}])` lookahead, which exists so a unit cannot be part of a longer word —
+and unpicking it is not this fix's business. Recorded so it is not rediscovered as new.
+
+### ⚠ And a comment I "fixed" in Run 26's review shipped DUPLICATED
+
+`test/english-normalize.test.ts` carried two identical copies of the `⚠ AND THE EXPONENT RULE TESTS THE
+UNIT'S SHAPE` block, both sitting above the `µin` test rather than above the exponent test they
+document, which was left bare. That is the Run 25/26 insertion defect a third time — and this time the
+repair itself introduced it, in the commit that claimed to fix it. The test suite stayed green
+throughout, because a misplaced comment is invisible to every gate. De-duplicated and re-attached here.
+
+**Gates.** 6214 TS · 6810 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons.

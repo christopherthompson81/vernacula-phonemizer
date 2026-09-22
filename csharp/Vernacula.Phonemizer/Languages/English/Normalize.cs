@@ -195,6 +195,21 @@ public static class Normalize
         return unit.Length == 1 && char.IsAsciiLetter(unit[0]) && !unit.Equals("m", StringComparison.OrdinalIgnoreCase);
     }
 
+    /**
+     * Is this ASCII `2`/`3` a COORDINATE'S MINUTES rather than an exponent? ⟨°⟩ only (#1434).
+     * Ported from src/languages/english/normalize.ts — see that file for the measurements.
+     *
+     * ⚠ THIS CASE CORRUPTS RATHER THAN DROPS. A latitude is written unspaced — `40°26′46″N` — so the
+     * minutes digit sits exactly where an exponent would: `40°26` read "40 SQUARE DEGREES6", the wrong
+     * unit AND a digit silently eaten. The spaced form was always fine; the unspaced one is usual.
+     *
+     * ⚠ AND IT MUST NOT DECLINE THE WHOLE MATCH, which the code-slot rule above does. Declining leaves
+     * the raw ⟨°⟩ to reach the g2p, where it is DROPPED — trading a corruption for a silent loss. The
+     * unit is expanded and the digit handed back instead.
+     */
+    private static bool AsciiExponentIsCoordinateMinutes(string unit, string? exponent) =>
+        (exponent == "2" || exponent == "3") && unit == "°";
+
     /** The SLASHED unit keys only, for the bare-rate arm — a slash inside a token can never be a word,
      *  so these need no number in front of them. See the TS for the URL guard. */
     private static readonly JsRe BARE_RATE_RE = JsRegex.Compile(
@@ -927,9 +942,13 @@ public static class Normalize
             if (forms is null) return m.Value; // unresolvable → leave the text alone
             // An ASCII exponent on a one-letter unit that is not ⟨m⟩ is a code's digit, not an exponent.
             if (AsciiExponentIsCodeDigit(u, exp)) return m.Value;
-            var measure = exp == "²" || exp == "2" ? "square " : exp == "³" || exp == "3" ? "cubic " : "";
+            // ⚠ A coordinate's minutes, not a power — the unit still expands and the digit is handed
+            // back, because declining outright would drop the ⟨°⟩ itself. See the predicate.
+            var minutes = AsciiExponentIsCoordinateMinutes(u, exp);
+            var measure = minutes ? ""
+                : exp == "²" || exp == "2" ? "square " : exp == "³" || exp == "3" ? "cubic " : "";
             var one = mag is null && ONE_EXACT.IsMatch(JsRegex.Replace(num, COMMAS, ""));
-            return $"{num}{mag ?? ""} {measure}{(one ? forms[0] : forms[1])}";
+            return $"{num}{mag ?? ""} {measure}{(one ? forms[0] : forms[1])}{(minutes ? " " + exp : "")}";
         });
 
         // A slashed rate standing alone, with no number. ⚠ Ordered AFTER the arm above so count
