@@ -8,6 +8,12 @@
 # (`clerks` takes its /s/ from klˈɝks, `levers` its /z/ from lˈɛvɚz, `herbs` its /z/ from ˈɝbz).
 # Where the referee DOES attest an inflection it is a check, not the source, and both rows it has
 # agree with the entailment. The PROVENANCE file marks which each row is.
+#
+# ⚠ AN OPTIONAL THIRD FIELD IS THE GenAm READING THE ROW MAY REPLACE, and the row then applies only when
+# the parent actually produced it. The substitution is POS-BLIND and the parent is not: `progress` is
+# `pɹˈɑːɡɹɛs` as a noun and `pɹəɡɹˈɛs` as a verb, and without the guard "we progress quickly" got the
+# NOUN's citation — wrong within one sentence, the failure the inflection rows exist to prevent. A row
+# WITHOUT the field is unconditional, which is right for the words that have one reading.
 aluminium	ˌæljʊmˈɪniəm
 buoy	bˈɔᶦ
 buoyed	bˈɔᶦd
@@ -32,8 +38,8 @@ process	pɹˈoᶷsˌɛs
 processed	pɹˈoᶷsɛst
 processes	pɹˈoᶷsɛsᵻz
 processing	pɹˈoᶷsɛsɪŋ
-progress	pɹˈoᶷɡɹɛs
-progresses	pɹˈoᶷɡɹɛsᵻz
+progress	pɹˈoᶷɡɹɛs	pɹˈɑːɡɹɛs
+progresses	pɹˈoᶷɡɹɛsᵻz	pɹˈɑːɡɹɛsᵻz
 tomato	təmˈɑːtʰoᶷ
 tomatoes	təmˈɑːtʰoᶷz
 vitamin	vˈɪtəmɪn

@@ -52,6 +52,13 @@ public sealed class LexSets
     /// stored `klˈɑːɹk` and START makes it `klˈɑːk`; storing the finished form would freeze a reading that
     /// then stopped tracking every later rule change. A word needing a set membership joins that set as
     /// usual — `tomato` is in en-gb-palm.tsv, because in RP it genuinely is a PALM word.
+    ///
+    /// ⚠ AN OPTIONAL SECOND FIELD IN THE VALUE (`to\tfrom`) IS THE GenAm READING THE ROW MAY REPLACE, and
+    /// the row then applies only when the parent actually produced it. The substitution is POS-BLIND and the
+    /// parent is not: `progress` is `pɹˈɑːɡɹɛs` as a noun and `pɹəɡɹˈɛs` as a verb, and unguarded it put
+    /// the NOUN's citation into a VERB frame — "we progress quickly" — which is the wrong-within-one-sentence
+    /// failure the inflection rows exist to prevent, arriving through the lemma. A row without the field is
+    /// unconditional, which is right for a word with one reading.
     public required IReadOnlyDictionary<string, string> Lexical { get; init; }
 }
 
@@ -163,8 +170,18 @@ public static class EnglishGb
         // so nothing in the parent's citation is worth keeping; everything below then treats the substitute
         // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee
         // eval, which must stay non-circular, exactly as the five sets are.
+        string? row = null;
+        var owned = lex is not null && lex.Lexical.TryGetValue(w, out row);
         string? variant = null;
-        var owned = lex is not null && lex.Lexical.TryGetValue(w, out variant);
+        if (owned)
+        {
+            // ⚠ `to` or `to\tfrom` — a row naming the reading it replaces applies only when the parent
+            // produced it, so a POS heteronym keeps its other sense. See LexSets.Lexical.
+            var tab = row!.IndexOf('\t');
+            if (tab < 0) variant = row;
+            else if (string.Equals(row.Substring(tab + 1), genAm, StringComparison.Ordinal)) variant = row.Substring(0, tab);
+            owned = variant is not null;
+        }
         var citation = owned ? variant! : genAm;
         var s = FLAP_D.Replace(FLAP_T.Replace(citation, "t"), "d"); // un-flap the tapped coronal
         s = GOAT.Replace(s, "əᶷ");

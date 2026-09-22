@@ -428,3 +428,37 @@ the phonological side) and that is a design change, not a row. **Left out, with 
 specific rather than "needs a decision".**
 
 Result: 24 rows → 30. `npm test`, goldens and C# parity below.
+
+## Run 7 — 2026-09-21 19:20
+
+**Question: review on #1405 — does the `progress` row survive contact with the parent's POS tagger?**
+
+    npx tsx … 'we progress quickly'  →  en: pɹəɡɹˈɛs   en-GB: pɹˈəᶷɡɹɛs
+
+**No. It was clobbering the verb.** `progress` is the FIRST word this table has taken that the parent
+resolves by part of speech, and `toRP` does `lex?.lexical.get(w)` — an unconditional, POS-blind
+replacement of whatever the parent produced. So the noun's citation went into the verb frame and en-GB
+said `pɹˈəᶷɡɹɛs`, **which is not RP, not GenAm, and not any speaker.** RP reads the verb
+/prəˈɡrɛs/, same as GenAm.
+
+⚠ **THIS IS THE EXACT FAILURE THE PR'S OWN TEXT REFUSES `progressed`/`progressing` FOR**, and the same
+class as the `clerk`/`clerks` rationale the table was built on — arriving through the lemma instead of
+the inflection. Both new tests missed it because both call the BARE word, which resolves to `default`.
+
+### The fix is a guard field, not a deletion
+
+A row may now carry an optional THIRD field: the GenAm reading it is allowed to replace. It applies only
+when the parent produced that reading. 28 rows have one reading and stay unconditional; `progress` names
+`pɹˈɑːɡɹɛs` and passes the verb straight through. Deferring the row would also have been clean, but the
+guard is worth more than the row: **any of the other 28 could gain a second sense later**, and the field
+makes that a data question instead of a silent regression.
+
+### ⚠ AND THE SWEEP FOUND A SECOND ONE THE REVIEW DID NOT
+
+    'she progresses well'  →  en: pɹəɡɹˈɛsᵻz   en-GB: pɹˈəᶷɡɹɛsᵻz
+
+`english.ts:173-185` resolves a heteronym's regular `-s`/`-es` plural through the SAME entry, so
+`progresses` had the identical defect ONE WORD AWAY from the one that was reported. Reading the fix off
+the review's list would have shipped half of it. The test therefore sweeps `MANIFEST.heteronyms` against
+every table row rather than asserting the two words by name, and it was proved by reverting: stripping
+the guard fields fails it with `expected [ 'progress', 'progresses' ] to deeply equal []`.

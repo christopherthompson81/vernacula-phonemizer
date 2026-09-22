@@ -95,11 +95,11 @@ entailment, which is the evidence the entailment is sound.
 | `tomato` | attested |
 | `vitamin` | attested |
 | `process` | attested |
-| `progress` | attested |
+| `progress` | attested — GUARDED on the noun reading |
 | `processed` | attested AND entailed — they agree |
 | `processes` | attested AND entailed — they agree |
 | `processing` | attested AND entailed — they agree |
-| `progresses` | entailed from `progresses` |
+| `progresses` | entailed from `progresses` — GUARDED on the noun reading |
 | `buoyed` | entailed from `buoyed` |
 | `buoys` | entailed from `buoys` |
 | `clerks` | attested AND entailed — they agree |
@@ -119,6 +119,22 @@ right and left the inflection wrong IN THE SAME SENTENCE — `clerk` klˈɑːk b
 `herb`/`herbs` with the /h/ appearing and disappearing. Before the table both were wrong and CONSISTENT.
 A change that introduces an inconsistency which did not previously exist is not an improvement on the
 promise of a follow-up.
+
+⚠ **A ROW MAY NAME THE READING IT REPLACES, AND `progress` IS WHY.** The substitution is POS-BLIND and the
+parent is not: `english.jsonc` ships `progress` as `pɹˈɑːɡɹɛs` for the noun and `pɹəɡɹˈɛs` for the verb,
+and an unconditional replacement put the NOUN's citation into a VERB frame — *"we progress quickly"* read
+`pɹˈəᶷɡɹɛs`, which is not RP, not GenAm and not any speaker. **That is the wrong-within-one-sentence failure
+the inflection rows exist to prevent, arriving through the lemma instead.**
+
+So a row may carry an optional THIRD FIELD — the GenAm reading it is allowed to replace — and applies only
+when the parent actually produced it. A row without the field is unconditional, which is correct for the
+words that have exactly one reading; a word that GAINS a second one later is why the guard is a field rather
+than a note here.
+
+⚠ **AND `progresses` HAD THE SAME DEFECT ONE WORD AWAY.** `english.ts` resolves a heteronym's regular
+`-s`/`-es` plural through the SAME entry, so the plural row was clobbering the verb too. Review found the
+lemma; the SWEEP found the plural, and the sweep is now the test — every row whose word (or whose `-s`/`-es`
+base) has a marked sense must carry the guard.
 
 ⚠ **`progressed` AND `progressing` ARE REFUSED BECAUSE THE PARENT ALREADY READS THEM AS VERBS.** CMUdict
 stresses the noun `progress` on the first syllable (`P R AA1 G R EH2 S`) and the participles on the second

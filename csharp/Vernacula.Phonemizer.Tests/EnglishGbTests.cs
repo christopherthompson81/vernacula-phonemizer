@@ -48,6 +48,18 @@ public class EnglishGbTests
     }
 
     [Fact]
+    public void ALexicalRowGuardedOnAReadingLeavesTheOtherSenseAlone()
+    {
+        // ⚠ THE SUBSTITUTION IS POS-BLIND AND THE PARENT IS NOT. `progress` is pɹˈɑːɡɹɛs as a noun and
+        // pɹəɡɹˈɛs as a verb; unguarded, the row put the NOUN's citation into a VERB frame. The row
+        // names the GenAm reading it replaces, so it fires on one sense and not the other — and this is
+        // the C# half of that contract, since both ports read the same file.
+        Assert.Equal(Phonemizer.Phonemize("we progress quickly", "en"), Say("we progress quickly"));
+        Assert.Equal(Phonemizer.Phonemize("she progresses well", "en"), Say("she progresses well"));
+        Assert.Contains("əᶷ", Say("the progress is good"));
+    }
+
+    [Fact]
     public void BathAppliesToTheFirstOccurrenceOnly()
     {
         // ⚠ THE WHOLE REASON THESE FOUR REPLACEMENTS OMIT THE "g" FLAG. `aftermath` is a BATH word whose

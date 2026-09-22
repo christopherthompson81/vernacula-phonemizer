@@ -172,8 +172,33 @@ export interface LexSets {
      * Rows are hand-written and every one is checked against the wikipron UK referee; see
      * docs/investigations/en-GB/engb_lexical_variants_investigation.md.
      */
-    lexical: Map<string, string>;
+    lexical: Map<string, LexicalRow>;
 }
+/**
+ * One row of `en-gb-lexical.tsv`: the British citation, and OPTIONALLY the GenAm reading it is allowed to
+ * replace.
+ *
+ * ⚠ THE GUARD EXISTS BECAUSE THE SUBSTITUTION IS POS-BLIND AND THE PARENT IS NOT. `progress` is the first
+ * row here that the parent resolves by part of speech — `english.jsonc` ships `pɹˈɑːɡɹɛs` for the noun and
+ * `pɹəɡɹˈɛs` for the verb — and an unconditional replacement put the NOUN's citation into a VERB frame:
+ * "we progress quickly" read `pɹˈəᶷɡɹɛs`, which is not RP, not GenAm, and not any speaker. That is the same
+ * wrong-within-one-sentence failure the inflection rows exist to prevent, arriving through the lemma.
+ *
+ * So a row may name the reading it replaces, and applies only when the parent actually produced it. A row
+ * WITHOUT the field is unconditional, which is correct for the 24 words that have exactly one reading — and
+ * a word that GAINS a second one later is the reason the field is here rather than a note in a doc.
+ */
+export interface LexicalRow {
+    /** The British citation, in the PARENT's alphabet, that replaces the parent's reading. */
+    readonly to: string;
+    /** The GenAm reading this row may replace. Absent = any, i.e. the word has one reading. */
+    readonly from?: string;
+}
+/** `to` or `to\tfrom` — the optional second field is the GenAm reading the row is allowed to replace. */
+const parseLexicalRow = (v: string): LexicalRow => {
+    const tab = v.indexOf("\t");
+    return tab < 0 ? { to: v } : { to: v.slice(0, tab), from: v.slice(tab + 1) };
+};
 const loadSet = (file: string): Set<string> =>
     new Set([...loadTsvMap(import.meta.url, file, (v) => v, { optional: true }).keys()]);
 let SETS: LexSets | undefined;
@@ -185,7 +210,7 @@ const sets = (): LexSets =>
         palm: loadSet("en-gb-palm.tsv"),
         lotr: loadSet("en-gb-lotr.tsv"),
         marry: loadSet("en-gb-marry.tsv"),
-        lexical: loadTsvMap(import.meta.url, "en-gb-lexical.tsv", (v) => v, { optional: true }),
+        lexical: loadTsvMap(import.meta.url, "en-gb-lexical.tsv", parseLexicalRow, { optional: true }),
     });
 
 /** GenAm citation IPA → SSBE. `lex` (present on the shipped path) supplies the lexical-set membership for `word`. */
@@ -195,7 +220,10 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     // there is nothing in the parent's citation worth keeping; everything below then treats the substitute
     // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee eval,
     // which must stay non-circular, exactly as the five sets below are.
-    const lexical = lex?.lexical.get(w);
+    const row = lex?.lexical.get(w);
+    // ⚠ A ROW MAY NAME THE READING IT REPLACES, and then applies only when the parent produced it — see
+    // LexicalRow. Without that, a POS heteronym gets the noun's citation in a verb frame.
+    const lexical = row !== undefined && (row.from === undefined || row.from === genAm) ? row.to : undefined;
     let s = lexical ?? genAm;
     s = s.replace(/t̬/gu, "t").replace(/d̬/gu, "d"); // un-flap the tapped coronal
     // ⚠ THE CLOSING DIPHTHONGS KEEP THE PARENT'S SUPERSCRIPT OFFGLIDE (#1252), and the GOAT onset is the only
@@ -364,6 +392,11 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
 
 let GB: EnglishPhonemizer | undefined;
 const eng = (): EnglishPhonemizer => (GB ??= createEnglish());
+
+/** The lexical-variant rows themselves, for the guard sweep in test/english-gb-lexical.test.ts. */
+export function lexicalRows(): ReadonlyMap<string, LexicalRow> {
+    return sets().lexical;
+}
 
 /** The words the lexical-variant table owns, for the set builder — which must not claim one into an
  *  ACCENT set (see build-en-gb-sets.ts). */

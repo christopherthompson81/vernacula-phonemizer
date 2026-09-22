@@ -10,7 +10,8 @@
 import { describe, expect, it } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { lexicalVariants, phonemizeWord, phonemizeWordRules } from "../src/languages/english-gb/english-gb.ts";
+import { MANIFEST } from "../src/languages/english/manifest.ts";
+import { lexicalRows, lexicalVariants, phonemizeWord, phonemizeWordRules } from "../src/languages/english-gb/english-gb.ts";
 
 describe("en-GB lexical variants", () => {
     it("reads aluminium as the British word, not the American one", () => {
@@ -101,6 +102,29 @@ describe("en-GB lexical variants", () => {
         expect(lexicalVariants().has("progressing")).toBe(false);
         expect(phonemizeWord("progressed")).toBe("pɹəɡɹˈɛst");
         expect(phonemizeWord("progressed")).toBe(phonemizeWordRules("progressed"));
+    });
+
+    it("guards every row the parent resolves by POS, so a verb frame keeps its verb reading", () => {
+        // ⚠ THE SUBSTITUTION IS POS-BLIND AND THE PARENT IS NOT. `progress` is pɹˈɑːɡɹɛs as a noun and
+        // pɹəɡɹˈɛs as a verb, and the unguarded row put the NOUN's citation into "we progress quickly"
+        // — wrong within one sentence, which is the failure the inflection rows exist to prevent, arriving
+        // through the lemma instead. A row may name the GenAm reading it replaces and then applies only
+        // when the parent produced it.
+        //
+        // ⚠ AND THIS SWEEPS RATHER THAN LISTING, because review found `progress` and the SWEEP found
+        // `progresses`: english.ts resolves a heteronym's regular -s/-es plural through the SAME entry, so
+        // the plural row had the identical defect one word away from the one that was reported.
+        const het = MANIFEST.heteronyms;
+        const marked = (w: string): boolean => {
+            const e = het[w] ?? (w.endsWith("es") ? het[w.slice(0, -2)] : undefined) ?? (w.endsWith("s") ? het[w.slice(0, -1)] : undefined);
+            return e !== undefined && (e.verb ?? e.noun ?? e.past ?? e.adj) !== undefined;
+        };
+        const unguarded = [...lexicalRows()].filter(([w, r]) => marked(w) && r.from === undefined).map(([w]) => w);
+        expect(unguarded).toEqual([]);
+        // ...and the guard is live, not merely present.
+        expect(phonemize("we progress quickly", "en-GB")).toBe(phonemize("we progress quickly", "en"));
+        expect(phonemize("she progresses well", "en-GB")).toBe(phonemize("she progresses well", "en"));
+        expect(phonemize("the progress is good", "en-GB")).toContain("p\u0279\u02c8\u0259\u1db7\u0261\u0279\u025bs");
     });
 
     it("owns every word it lists, so the set builder cannot claim one into an accent set", () => {
