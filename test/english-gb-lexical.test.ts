@@ -72,8 +72,13 @@ describe("en-GB lexical variants", () => {
         // ⚠ AN INFLECTION IS ENTAILED, NOT ATTESTED: the lemma's citation plus the suffix the PARENT
         // produced for that form, so the suffix's voicing is the parent's. The referee covers only
         // `clerks` and `figures` of the nine, and both agree with the entailment — a check, not a source.
+        // ⚠ `buoying` IS HERE BECAUSE IT WAS THE ONE ROW #1387 ADDED AND THE ONE THE ARGUMENT RESTS ON.
+        // It was REFUSED for months on the grounds that the parent was self-inconsistent and en-GB
+        // "already produces the British reading" — true, and true because the word was WRONG in `en`.
+        // Fixing the parent removed that accident and split the paradigm; without a pin here, a later
+        // edit to `buoy`'s citation or to the ʲ-stripping rule could re-split it unnoticed.
         for (const [one, many] of [["clerk", "clerks"], ["herb", "herbs"], ["lever", "levers"],
-            ["tomato", "tomatoes"], ["buoy", "buoys"], ["lieutenant", "lieutenants"],
+            ["tomato", "tomatoes"], ["buoy", "buoys"], ["buoy", "buoying"], ["lieutenant", "lieutenants"],
             ["figure", "figures"], ["vitamin", "vitamins"]] as const) {
             expect([many, phonemizeWord(many)]).toEqual([many, `${phonemizeWord(one)}${phonemizeWord(many).slice(phonemizeWord(one).length)}`]);
             expect([many, phonemizeWord(many).startsWith(phonemizeWord(one))]).toEqual([many, true]);

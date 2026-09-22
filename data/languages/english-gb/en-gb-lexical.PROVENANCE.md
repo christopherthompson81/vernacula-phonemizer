@@ -185,6 +185,7 @@ entailment, which is the evidence the entailment is sound.
 | `processing` | attested AND entailed — they agree |
 | `progresses` | entailed from `progresses` — GUARDED on the noun reading |
 | `buoyed` | entailed from `buoyed` |
+| `buoying` | entailed from `buoying` — see the struck-through refusal below (#1387) |
 | `buoys` | entailed from `buoys` |
 | `clerks` | attested AND entailed — they agree |
 | `figured` | entailed from `figured` |
@@ -234,10 +235,20 @@ The disagreement is the referee writing `i` where we write `ɪ`, i.e. NOTATION, 
 a reading that is already correct. #1383's table listed it under "the referee writes a different symbol", and
 that is what it turned out to be.
 
-⚠ **TWO INFLECTIONS ARE REFUSED RATHER THAN ENTAILED**, because the entailment does not hold:
+⚠ **ONE INFLECTION IS REFUSED RATHER THAN ENTAILED**, because the entailment does not hold. It was TWO
+until #1387; the struck-through entry below is kept because the reason it stopped being refused is worth
+more than the tidiness of deleting it:
 
-- `buoying` — the parent is **self-inconsistent**: `buoy` is `bˈuːi` but `buoying` is `bˈɔᶦɪŋ`, so the
-  inflected form is not the lemma's form plus a suffix. It also already produces the British reading.
+- ~~`buoying`~~ — **THIS REFUSAL WAS CORRECT AND IS NOW OBSOLETE, AND THE REASON IS THE INTERESTING
+  PART.** It read: *"the parent is self-inconsistent: `buoy` is `bˈuːi` but `buoying` is `bˈɔᶦɪŋ`, so
+  the inflected form is not the lemma's form plus a suffix. It also already produces the British
+  reading."* Both halves were true, and the second is why nobody looked further: **the word was WRONG in
+  `en` and accidentally RIGHT in en-GB**, so the British side had no symptom. #1387 fixed the parent
+  (`buoying B OY1 IH0 NG → B UW1 IY0 IH0 NG`, the paradigm's own majority, with Moby's `buoyage` on the
+  same side), which removed the accident and split the en-GB paradigm for the first time. The row exists
+  now, entailed in the ordinary way. ⚠ **A REFUSAL JUSTIFIED BY AN ACCIDENT ELSEWHERE DOES NOT SURVIVE
+  THE ACCIDENT BEING FIXED**, and nothing would have told us — the note is kept struck through rather
+  than deleted so the next one is recognisable.
 - `tomatos` — a CMUdict spelling variant whose parent adds a secondary stress (`təmˈeᶦtʰˌoᶷz`).
 
 ⚠ **`derbies` AND `levered` ARE ABSENT BECAUSE THE PARENT HAS NO ROW FOR THEM**, and their OOV readings
