@@ -23,6 +23,10 @@ describe("a recorded word reads the same on both entry points", () => {
         ["superalloys", "sˈuːpɚˌælˌɔᶦz"],
         ["profilometry", "pɹˌoᶷfəlˈɑːmətɹi"],
         ["profilometer", "pɹˌoᶷfəlˈɑːmət̬ɚ"],
+        // ⚠ THE PLURAL WAS MISSING FROM THE FIRST DRAFT and still read *prof-* on the async path — the
+        // exact split this change closes for the singular, and one no gate could have caught, since an
+        // ADDITION has no upstream column for `en-curation-gap` to compare against.
+        ["profilometers", "pɹˌoᶷfəlˈɑːmət̬ɚz"],
     ])("%s", async (word, expected) => {
         expect(phonemize(word, "en")).toBe(expected);
         expect(await phonemizeAsync(word, "en")).toBe(expected);

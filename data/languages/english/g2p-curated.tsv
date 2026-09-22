@@ -3198,12 +3198,17 @@ revolving	R IY0 V AA1 L V IH0 NG	R IH0 V AA1 L V IH0 NG	prefix vowel: family con
 # Kokoro path both use — gave sˌuːpɐˈælɔᴦ with the final diphthong unmarked, and an unstressed final
 # diphthong is what reduces to *-ley*. Reported as "superalloy -> superalley".
 # ⚠ `profilometry` IS THE SAME SHAPE FROM THE OTHER SIDE: the neural path read pɹˌɑːfəlˈɑːmɪtɹi
-# (*prof-*) where the rule path read pɹˌoᵑfaᵢlˈɑːmɪtɹi (*proh-* but unreduced). Neither was right; gold's
+# (*prof-*) where the rule path read pɹˌoᶷfaᶦlˈɑːmɪtɹi (*proh-* but unreduced). Neither was right; gold's
 # siblings settle it — `goniometry` ɡˌOniˈɑmətɹi and `interferometry` ˌɪntəɹfəɹˈɑmətɹi both take
 # `AA1 M AH0 T R IY0`, and `goniometer`/`interferometer` both take `AA1 M AH0 T ER0`.
 # ⚠ THE PARADIGM NEIGHBOURS ARE HERE TOO, which is this file's own standard ("family consistency"): a
-# listed word and an unlisted one in the same environment answering differently is the LIVE SPLIT the
-# gate exists to catch.
+# listed word and an unlisted one in the same environment answering differently is a LIVE SPLIT.
+# ⚠ AND NOTHING GATES THAT HERE, which is worth saying plainly rather than implying otherwise.
+# `en-curation-gap.test.ts` finds a live split by comparing the held-out OOV decode against the row's
+# UPSTREAM column; these rows are ADDITIONS with an empty upstream, so the comparison can never fire
+# on them — exactly as for the interjection rows above. The neighbours are a judgement call, and it
+# was already proved necessary: review caught `profilometers` missing from the first draft of this
+# block, still reading *prof-* on the async path, and no gate had anything to say about it.
 # ⚠ AND A DICT ROW ALONE CHANGES NOTHING. `accent-lexicon.tsv` is the PRIMARY lexicon and is consulted
 # first; it must be rebuilt (`tools/english/en_rebuild_lexicon.mts --write --add-missing`) or the fix
 # looks like it silently failed — measured here, a control row of `Z Z Z AA1` on `profiling` changed
@@ -3212,3 +3217,4 @@ superalloy		S UW1 P ER0 AE2 L OY2	not in CMUdict; gold sˈupəɹˌælˌY — the
 superalloys		S UW1 P ER0 AE2 L OY2 Z	not in CMUdict; inflection of the row above, family consistency (#1431)
 profilometry		P R OW2 F AH0 L AA1 M AH0 T R IY0	not in CMUdict; tail from goniometry/interferometry, both AA1 M AH0 T R IY0 (#1428)
 profilometer		P R OW2 F AH0 L AA1 M AH0 T ER0	not in CMUdict; tail from goniometer/interferometer, both AA1 M AH0 T ER0 (#1428)
+profilometers		P R OW2 F AH0 L AA1 M AH0 T ER0 Z	not in CMUdict; inflection of the row above, family consistency (#1428)

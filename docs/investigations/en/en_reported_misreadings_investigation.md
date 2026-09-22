@@ -1751,18 +1751,30 @@ does not carry — which is why a NEW word appeared to work (it fell through) wh
 not. The rebuild step is the fix, and `en_rebuild_lexicon.mts` reports the round trip as it goes:
 
 ```
-rows with an ARPABET source: 135314   reproduce the committed IPA: 135314   would change: 0
+rows with an ARPABET source: 135318   reproduce the committed IPA: 135318   would change: 0
 ```
 
-Byte-stable, so the four added rows are the entire diff.
+Byte-stable, so the five added rows are the entire diff.
+
+⚠ **The first draft of this entry quoted that census as `135314`** — the run taken BEFORE the rows were
+inserted, i.e. evidence that did not describe the tree it was certifying. The conclusion happened to
+survive a re-run, which is exactly why it was worth catching: a census pinned in a log is a claim about
+a specific tree, and the count is the part that says which one.
 
 ### The rows, derived rather than typed
 
 `profilometry` was wrong on both paths in different ways — neural `pɹˌɑːfəlˈɑːmɪtɹi` (*prof-*), rule
 `pɹˌoᶷfaᶦlˈɑːmɪtɹi` (*proh-* but unreduced). Gold's siblings settle it: `goniometry` and
 `interferometry` both take `AA1 M AH0 T R IY0`, the `-ometer` pair `AA1 M AH0 T ER0`. The paradigm
-neighbours (`superalloys`, `profilometer`) are included on this file's own standard — a listed word and
-an unlisted one in the same environment answering differently is the LIVE SPLIT the gate exists to catch.
+neighbours (`superalloys`, `profilometer`, `profilometers`) are included on this file's own standard — a
+listed word and an unlisted one in the same environment answering differently is a live split.
+
+⚠ **And nothing gates that, which review had to point out twice over.** `en-curation-gap.test.ts`
+finds a live split by comparing the held-out OOV decode against a row's UPSTREAM column; these rows are
+ADDITIONS with an empty upstream, so it can never fire on them. The first draft both credited that gate
+and left `profilometers` out — and the plural still read `pɹˌɑːfəlˈɑːmət̬ɚz` on the async path, the
+very split the sentence claimed was covered. The neighbours are a judgement call and have to be
+enumerated by hand; saying so is more use than naming a gate that will not run.
 
 ⚠ **And one test assertion was typed rather than checked.** It pinned `goniometry` as the "recorded
 sibling"; gold has it but OUR dict does not, so it is OOV and renders `ɡˌoᶷniʲˈɑːmɪtɹi`. Asserting
@@ -1770,6 +1782,6 @@ against it would have frozen an OOV guess as a recorded fact. Retargeted to `opt
 genuinely recorded with that tail. (That gold carries `goniometry`/`interferometry` and the dict does
 not is a real gap, noted and not pursued here.)
 
-**Gates.** 6189 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6190 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons. Plus `en-index-tables-point-at-what-they-claim` and `en-curation-gap`, the two the
 dictionary-edit memo names.
