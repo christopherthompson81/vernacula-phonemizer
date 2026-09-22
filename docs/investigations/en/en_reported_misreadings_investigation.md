@@ -2014,3 +2014,98 @@ the same inputs. A positive probe for this class is worth adding to `PROBES` on 
 
 **Gates.** 6241 TS · 6844 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex-diff 144,640 probes identical.
+
+## Run 31 — 2026-09-22 14:30 — the prime marks, and the ambiguity that had to be removed first
+
+**The other half of #1435**, after #1437 took the leading-decimal half.
+
+```
+0.015″      ->  zˈɪɹoᶷ pʰɔᶦnt zˈɪɹoᶷ wˈʌn fˈaᶦv       the mark DROPPED
+5′ 6″ tall  ->  fˈaᶦv sˈɪks tʰˈɔːɫ                    a height with no units at all
+12″ pipe    ->  twˈɛɫv pʰˈaᶦp
+```
+
+**Adding ⟨′⟩ and ⟨″⟩ as ordinary `UNITS` keys is the whole fix**, and count agreement comes free
+(`1″` → "1 inch", `12″` → "12 inches"). The obstacle is that it is not always true.
+
+### ⚠ A degree sign changes what the marks mean
+
+After ⟨°⟩ they are ARCMINUTES and ARCSECONDS. As plain unit keys, `40° 26′ 46″ N` read
+"40 degrees 26 FEET 46 INCHES N" — a regression introduced by the fix itself.
+
+**Two designs, and the first one was abandoned after being written:** a backward scan from the match for
+a preceding ⟨°⟩. It has to admit a decimal (`40°26.5′`) and interior spaces (`40° 26′ 46″`), and once it
+admits both it also matches a SENTENCE END — *"the angle is 90°. 5″ of travel"* reads its `5″` as an
+arcsecond. Three attempts at the character class each fixed one case and broke another.
+
+**What shipped instead consumes the whole coordinate first**, before the unit rule, so every prime the
+unit rule then sees is unambiguously a foot or an inch. The edge disappears rather than being guarded:
+
+```
+40°26′46″N     ->  "40 degrees 26 minutes 46 seconds north"   (was "40 degrees 26 46 N")
+40°26.5′N      ->  "40 degrees 26.5 minutes north"
+1°1′           ->  "1 degree 1 minute"
+90°. 5″        ->  "90 degrees. 5 inches"                     the sentence end, correct
+```
+
+⚠ **Minutes are REQUIRED in that rule**, so it claims nothing the unit rule already handles: `5°`, `5°C`
+and `40°26` (Run 29's case) are all left to it.
+
+### ⚠ Two repo conventions caught this, both by a test rather than by review
+
+- **Invisible characters must be NAMED** in a comment on the line or the one above
+  (`test/invisible-characters.test.ts`). The NBSP in #1437's pattern was not.
+- **`\b` is never the letter boundary** (`test/letter-boundary.test.ts`). The hemisphere letter ended on
+  `([NSEW])\b`, and JS defines `\b` on ASCII `\w`, so it finds a boundary between `N` and a non-ASCII
+  letter: `40°26′Nörd` read "…minutes **northörd**". That is exactly the defect that read German
+  `25°Cölner` as "Grad Celsius" plus "ölner" (#949) — the reason `src/core/boundaries.ts` exists. The
+  fleet-wide test caught a fresh instance of a shipped defect class, which is what it is for.
+
+**Left alone on purpose:** the ASCII `"` and `'`. They are quotation marks and apostrophes far more often
+than units, and `5'` in prose is usually a quote — the same reasoning that keeps ⟨in⟩ out of the unit
+table while ⟨µin⟩ is a whole key (#1427). U+2032 and U+2033 are only ever prime marks, which is what
+makes them safe. Asserted so it reads as a decision.
+
+**The reported case, end to end** — it needed all three of #1437, the range rule and this one:
+
+```
+.002–.005″   ->  "0.002 to 0.005 inches"
+```
+
+**Gates.** 6275 TS · 6880 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,698 probes identical.
+
+**Review of Run 31 — the new unit keys walked into Run 29's defect, one symbol over.**
+
+⚠ **`6′2″` READ "6 SQUARE FEET".** The moment ⟨′⟩ became a `UNITS` key, `UNIT_RE`'s exponent group
+`([²³23])?` started eating the inches digit: `6′2″` → "6 square feet″", `6′3″` → "6 cubic feet″",
+`5′2″ tall` → *five square feet tall*. That is **exactly the defect Run 29 fixed for ⟨°⟩**, reintroduced
+one symbol over by adding keys without extending the guard — and `6′2″` is the commonest spelling of a
+height, so this traded a drop for a corruption in the dominant case.
+
+⚠ **AND THE SPACED FORM WAS ALWAYS FINE**, which is why the first tests missed it entirely: every
+feet-inches case written in Run 31 used `5′ 6″`. A guard whose failure depends on a space needs both
+spellings asserted, and only one was.
+
+⚠ **Extending the exponent guard was NOT sufficient**, which is the more interesting half. With ⟨′⟩⟨″⟩
+added to the compound-measure set the corruption stopped — and left `6 feet 2` with the ⟨″⟩ stranded and
+dropped, because the match had consumed past it and no number then preceded the mark. A compound
+measurement has to be consumed WHOLE, so `FEET_INCHES` now mirrors `DMS_COORDINATE` exactly. The guard
+is still needed for the leftovers (`12″3` → "12 inches 3").
+
+Three more, all real:
+
+- ⚠ **NBSP was not a separator.** `DMS_COORDINATE` used `[ \t]?` where the rest of the file writes
+  `[ \t\u00a0]`. A typeset coordinate fell straight through to the unit rule and read its arcminutes as
+  **feet** — the precise ambiguity the rule exists to remove, and now a confident wrong reading rather
+  than a drop.
+- ⚠ **An intercardinal bearing fused into the last word.** `40°26′46″NW` → "… seconds**NW**". The
+  letter-boundary lookahead correctly refuses `N` before `W`, so the group could not claim it and the
+  replacement ended in a word with a letter against it. Fixed both ways: the table gained NE/NW/SE/SW,
+  and a space is emitted when any other letter follows.
+- ⚠ **Count agreement disagreed with the unit rule on the same surface.** `counted` compared `n === "1"`
+  while the unit rule tests numerically, so `1.0°` was "1.0 degree" and `1.0°1.0′` "1.0 degrees".
+  Now the same numeric test.
+
+**Gates.** 6275 TS · 6880 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,814 probes identical.

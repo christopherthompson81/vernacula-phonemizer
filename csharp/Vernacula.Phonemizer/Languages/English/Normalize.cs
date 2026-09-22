@@ -57,6 +57,7 @@ public static class Normalize
         // ⟨µm⟩/⟨µl⟩ above — measured, not assumed: `microinch` reads as one token with one primary
         // stress. See the TypeScript.
         ["\u00b5in"] = new[] { "microinch", "microinches" }, ["\u03bcin"] = new[] { "microinch", "microinches" },
+        ["\u2032"] = new[] { "foot", "feet" }, ["\u2033"] = new[] { "inch", "inches" },   // PRIME, DOUBLE PRIME
         // ⚠ CAPITALS ⟨M⟩ AND ⟨S⟩ ARE DIFFERENT UNITS — µM is MICROMOLAR, µS is MICROSIEMENS, not sloppy
         // spellings of µm/µs. ResolveUnitSymbol consults the declared table with the EXACT written form
         // before folding, so declaring them is what stops `25 µM` folding to `µm` and reading "micro
@@ -196,7 +197,7 @@ public static class Normalize
     }
 
     /**
-     * Is this ASCII `2`/`3` a COORDINATE'S MINUTES rather than an exponent? ⟨°⟩ only (#1434).
+     * Is this ASCII `2`/`3` the NEXT PART OF A COMPOUND MEASURE rather than an exponent? (#1434, #1435)
      * Ported from src/languages/english/normalize.ts — see that file for the measurements.
      *
      * ⚠ THIS CASE CORRUPTS RATHER THAN DROPS. A latitude is written unspaced — `40°26′46″N` — so the
@@ -207,8 +208,18 @@ public static class Normalize
      * the raw ⟨°⟩ to reach the g2p, where it is DROPPED — trading a corruption for a silent loss. The
      * unit is expanded and the digit handed back instead.
      */
-    private static bool AsciiExponentIsCoordinateMinutes(string unit, string? exponent) =>
-        (exponent == "2" || exponent == "3") && unit == "°";
+    private static bool AsciiExponentIsCompoundPart(string unit, string? exponent) =>
+        (exponent == "2" || exponent == "3") && COMPOUND_MEASURE.Contains(unit);
+
+    /**
+     * The symbols that take a FOLLOWING NUMBER in a compound measurement, so an ASCII `2`/`3` after
+     * them is that number and not a power: degrees-minutes-seconds and feet-inches.
+     *
+     * ⚠ ⟨′⟩ AND ⟨″⟩ JOINED THIS LIST THE MOMENT THEY BECAME UNITS — `6′2″` read "6 SQUARE FEET"
+     * with the inches stranded. The same defect #1434 fixed for ⟨°⟩, one symbol over.
+     */
+    private static readonly HashSet<string> COMPOUND_MEASURE =
+        new(new[] { "°", "′", "″" }, StringComparer.Ordinal);
 
     /** The SLASHED unit keys only, for the bare-rate arm — a slash inside a token can never be a word,
      *  so these need no number in front of them. See the TS for the URL guard. */
@@ -451,6 +462,52 @@ public static class Normalize
      */
     private static readonly JsRe RE_PREFIX = JsRegex.Compile(
         "(?<![\\p{L}\\p{M}\\d])(?<!\\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\\p{L})", "giu");
+
+    /**
+     * A DEGREES-MINUTES-SECONDS COORDINATE — `40°26′46″N` (#1435).
+     * Ported from src/languages/english/normalize.ts — see that file for the reasoning.
+     *
+     * ⚠ IT EXISTS TO REMOVE AN AMBIGUITY, NOT ONLY TO READ A COORDINATE. ⟨′⟩ and ⟨″⟩ are feet and
+     * inches in ordinary prose and ARCMINUTES and ARCSECONDS after a degree sign. Consuming the
+     * coordinate FIRST leaves every surviving prime unambiguously a foot or an inch, which is what
+     * lets them be plain UNITS keys.
+     *
+     * ⚠ THE HEMISPHERE LETTER ENDS ON `(?![\p{L}\p{M}])`, NOT `\b` — JS defines `\b` on ASCII `\w`,
+     * so `40°26′Nörd` read "…minutes northörd", the defect class of #949.
+     *
+     * ⚠ MINUTES ARE REQUIRED, so this claims nothing the unit rule already handles: a bare `5°` or
+     * `5°C` is left to it. Seconds and the hemisphere letter are optional.
+     */
+    private static readonly JsRe DMS_COORDINATE = JsRegex.Compile(
+        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)′(?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″)?"
+        + "(?:[ \\t\\u00a0]?((?:[NS][EW]|[NSEW]))(?![\\p{L}\\p{M}]))?",   // space, tab, NBSP
+        "gu");
+
+    /** The hemisphere letters, spoken. */
+    private static readonly IReadOnlyDictionary<string, string> HEMISPHERE =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["N"] = "north", ["S"] = "south", ["E"] = "east", ["W"] = "west",
+            ["NE"] = "northeast", ["NW"] = "northwest", ["SE"] = "southeast", ["SW"] = "southwest",
+        };
+
+    /** Is this number exactly one? ⚠ THE SAME NUMERIC TEST THE UNIT RULE USES, not a string compare. */
+    private static readonly JsRe DMS_ONE = JsRegex.Compile("^0*1(?:\\.0+)?$", "u");
+
+    /** `n` of `unit`, with count agreement — "1 degree", "40 degrees". */
+    private static string Counted(string n, string sg, string pl) =>
+        $"{n} {(DMS_ONE.IsMatch(JsRegex.Replace(n, COMMAS, "")) ? sg : pl)}";
+
+    /**
+     * FEET AND INCHES WRITTEN TIGHT — `6′2″`, the commonest spelling of a height (#1435).
+     * ⚠ Consumed WHOLE for the same reason the coordinate is: the unit rule's exponent group would
+     * otherwise eat the inches digit. Runs AFTER the DMS rule. See the TypeScript.
+     */
+    /** A letter immediately after a DMS match, which would otherwise fuse into the last word. */
+    private static readonly JsRe DMS_TRAILING_LETTER = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
+
+    private static readonly JsRe FEET_INCHES =
+        JsRegex.Compile("(\\d+(?:\\.\\d+)?)′[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″", "gu");  // space, tab, NBSP
 
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
@@ -959,6 +1016,24 @@ public static class Normalize
         s = Rewrite(s, YEAR_MONTH, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value} {YearWords(Js.Number(m.Groups[3].Value))}");
 
+        // A DMS coordinate, BEFORE the unit rule, so every prime the unit rule then sees is
+        // unambiguously a foot or an inch. See DMS_COORDINATE.
+        var beforeDms = s;
+        s = Rewrite(s, DMS_COORDINATE, m =>
+        {
+            var sec = m.Groups[3].Success ? " " + Counted(m.Groups[3].Value, "second", "seconds") : "";
+            var dir = m.Groups[4].Success ? " " + HEMISPHERE[m.Groups[4].Value] : "";
+            // ⚠ The trailing space is not cosmetic: the replacement ends in a word, so an unclaimed
+            // letter after the match FUSES into it — `40°26′46″n` read "… secondsn".
+            var glue = DMS_TRAILING_LETTER.IsMatch(beforeDms[(m.Index + m.Length)..]) ? " " : "";
+            return Counted(m.Groups[1].Value, "degree", "degrees")
+                 + " " + Counted(m.Groups[2].Value, "minute", "minutes") + sec + dir + glue;
+        });
+
+        // Feet and inches written tight, AFTER the DMS rule. See FEET_INCHES.
+        s = Rewrite(s, FEET_INCHES, m =>
+            Counted(m.Groups[1].Value, "foot", "feet") + " " + Counted(m.Groups[2].Value, "inch", "inches"));
+
         s = Rewrite(s, UNIT_RE, m =>
         {
             var num = m.Groups[1].Value;
@@ -971,7 +1046,7 @@ public static class Normalize
             if (AsciiExponentIsCodeDigit(u, exp)) return m.Value;
             // ⚠ A coordinate's minutes, not a power — the unit still expands and the digit is handed
             // back, because declining outright would drop the ⟨°⟩ itself. See the predicate.
-            var minutes = AsciiExponentIsCoordinateMinutes(u, exp);
+            var minutes = AsciiExponentIsCompoundPart(u, exp);
             var measure = minutes ? ""
                 : exp == "²" || exp == "2" ? "square " : exp == "³" || exp == "3" ? "cubic " : "";
             var one = mag is null && ONE_EXACT.IsMatch(JsRegex.Replace(num, COMMAS, ""));
