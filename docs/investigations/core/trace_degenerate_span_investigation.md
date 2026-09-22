@@ -70,3 +70,46 @@ decline it` pattern: the check has to be on the thing that would differ, not on 
 
 And #1419 stands: parity compares IPA strings, neither port's readings changed, and no gate here could
 have caught this either.
+
+## Run 2 — 2026-09-22 — review round: I introduced a port divergence fixing a port-invisible bug
+
+### ⚠ THE CARRY WENT INTO C#'s `Renormalize` AND NOT INTO TYPESCRIPT'S
+
+Applying `StampOrCarry` at every `Stamp` call site included `Renormalize`, whose TypeScript twin was
+untouched. Verified empirically on `가Xé` under NFD — a jamo run NFD leaves unchanged beside an `é`
+that decomposes, so the whole-string no-op short-circuit does not fire:
+
+    TS  [0,2],[0,2],[2,3],[3,4],[3,4]
+    C#  [0,1],[1,2],[2,3],[3,4],[3,4]
+
+⚠ **AND THE C# SIDE WAS THE WRONG ONE, NOT MERELY THE DIFFERENT ONE.** The identity carry is right for a
+REGEX MATCH, whose characters are independent. A **canonical block is a unit by construction** — base
+plus combining marks, or a surrogate pair — so carrying per code UNIT inside one hands out `[i,i+1)` for
+**half an astral code point**, which this module's own comments name as a defect class twice. Reverted
+to `Stamp`, with the reason on the line.
+
+**Nothing would have caught it**: parity compares IPA strings, and no reading changed. Exactly the gap
+#1419 is about, hit while fixing a bug that came through the same gap.
+
+### And the same class was still live one primitive over
+
+`rebuilt` / `Rebuilt` collapses a `Piece` onto its whole span even when the piece's text equals its
+source slice — **the common case for a segmenter that only INSERTS separators** (ja's bunsetsu spaces,
+km's U+200B). Symmetric across both ports, so not a parity bug, but the same known-looking answer. Given
+the identical proof, it is fixed here rather than noted:
+
+    fleet rows where two tokens share a span:  4,639 → 4,262 (rewrite) → 4,217 (rebuilt)
+
+ja is unchanged at 3 — its residue is overlap, not collapse.
+
+### ⚠ AND THE TEST ASSERTED AN INVARIANT THIS VERY DOCUMENT CALLS FALSE
+
+It required **every token span to be distinct**, two paragraphs below the note that two tokens sharing a
+span is often *correct* and that 4,217 golden rows do it legitimately. It held for this one string and
+would have mis-fired as a "regression" the moment that string gained a number. Retargeted to the
+property actually at stake: **no token spans the whole input.**
+
+⚠ **THE CONSUMER HAD WRITTEN THE SAME MISTAKE INTO THEIR OWN RECOMMENDATION** — their investigation doc
+advised declining the measured tier whenever two spans coincide — and withdrew it when given these
+numbers. They had not implemented it, so the code was right and the prose was wrong, **which is the more
+dangerous way round: the prose reads more confident than the diff.**

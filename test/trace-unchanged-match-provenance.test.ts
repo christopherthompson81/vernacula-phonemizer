@@ -33,13 +33,22 @@ describe("provenance through an unchanged match", () => {
         expect(t.tokens.map((_, i) => at(i))).toEqual(["PDF", "ファイルを", "開いてください", "。"]);
     });
 
-    it("gives every token a DISTINCT span, which a count check cannot tell from a degenerate one", () => {
-        // ⚠ THE CONSUMER'S OWN GATE COULD NOT SEE THIS. It declines its measured tier when the group
-        // count and the map count disagree — and here they AGREED, every entry pointing at the same
-        // span. Being degenerate is invisible to a count check in the same way being one-out is.
-        const t = phonemizeTrace("PDFファイルを開いてください。", "ja");
-        const spans = t.tokens.map((k) => k.inputSpan).filter((x) => x !== undefined) as [number, number][];
-        expect(new Set(spans.map((x) => `${x[0]},${x[1]}`)).size).toBe(spans.length);
+    it("gives no token the WHOLE INPUT, which is the property actually at stake", () => {
+        // ⚠ THIS USED TO ASSERT THAT EVERY SPAN IS DISTINCT, WHICH IS NOT TRUE IN GENERAL AND THIS FILE
+        // SAYS SO TWO PARAGRAPHS UP: a numeral expansion legitimately produces several tokens from ONE
+        // source span, and 4,262 golden rows share a span correctly. The assertion happened to hold for
+        // this string and would have mis-fired as a "regression" the moment it gained a number.
+        // ⚠ THE CONSUMER'S OWN GATE COULD NOT SEE THE DEFECT EITHER. It declines its measured tier when
+        // the group count and the map count disagree — and here they AGREED, every entry pointing at the
+        // same span. Being degenerate is invisible to a count check in the same way being one-out is,
+        // which is why the gate has to be on the thing that would differ.
+        const s = "PDF\u30d5\u30a1\u30a4\u30eb\u3092\u958b\u3044\u3066\u304f\u3060\u3055\u3044\u3002";
+        const t = phonemizeTrace(s, "ja");
+        for (const k of t.tokens) {
+            const sp = k.inputSpan;
+            expect([k.surface, sp !== undefined]).toEqual([k.surface, true]);
+            expect([k.surface, sp![1] - sp![0] < s.length]).toEqual([k.surface, true]);
+        }
     });
 
     it("leaves a pure-kana sentence alone, which is where the fast path already worked", () => {

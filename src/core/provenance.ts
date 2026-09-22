@@ -42,7 +42,16 @@
  * `rewrite` would stamp input offsets across output characters and silently corrupt the mapping. The shape is
  * identical; the meaning is not. A post-assembly rewrite reports itself through `noteRewrite` instead.
  *
- * ⚠ AND SPAN GRANULARITY IS WHAT MAKES IT WORK. A replacement's provenance is the whole match's span, not a
+ * ⚠ AND SPAN GRANULARITY IS WHAT MAKES IT WORK. A replacement's provenance is the whole match's span,
+ * not a character correspondence — EXCEPT when the replacement IS the match, where the original
+ * per-character mapping carries through unchanged. That exception is not a refinement: without it
+ * `normalizeRomans`, which rewrites `\p{L}+` over every language and returns most tokens untouched,
+ * collapsed the whole clause of any NON-SPACING SCRIPT onto every character under it, and all of a
+ * sentence's tokens reported the WHOLE INPUT as their `inputSpan`. Only IDENTITY carries: an
+ * equal-LENGTH but different replacement has no guaranteed correspondence.
+ * ⚠ AND IT DOES NOT APPLY TO A CANONICAL BLOCK. `renormalize` works on units — base plus combining
+ * marks, or a surrogate pair — so a per-character carry there would hand out half an astral code
+ * point. The C# twin had it for one review round and diverged from this file as a result.
  * character correspondence. Normalizers reorder INSIDE a match — Luganda reads `1 244.7 km²` as
  * *kiromita eza kyebiriga 1244 7*, the unit ahead of the figure it followed — and a span mapping absorbs
  * that. Measured over 27,286 golden rows across 140 normalizers: zero non-monotonic once every step reports.
@@ -263,6 +272,11 @@ export function rebuilt(s: string, pieces: readonly Piece[]): string {
     for (const [text, from, to] of pieces) {
         if (from !== cursor || to < from) { poisonSink?.(s, out); poison(); return out; }
         cursor = to;
+        // ⚠ THE SAME IDENTITY CARRY AS `rewrite`, AND IT IS THE COMMON CASE HERE. A segmenter that only
+        // INSERTS separators — ja's bunsetsu spaces, km's U+200B — hands back every other piece unchanged,
+        // and collapsing each one onto its whole span is the same "known-looking answer to an unknown
+        // question". Only identity carries, for the same reason as `rewrite`.
+        if (text === s.slice(from, to)) { for (let i = 0; i < text.length; i++) next.push(p[from + i]!); continue; }
         const sp = span(p, from, to - from);
         for (let i = 0; i < text.length; i++) next.push(sp);
     }

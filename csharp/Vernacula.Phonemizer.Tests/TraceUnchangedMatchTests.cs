@@ -33,13 +33,18 @@ public class TraceUnchangedMatchTests
     }
 
     [Fact]
-    public void EveryTokenGetsADistinctSpan()
+    public void NoTokenSpansTheWholeInput()
     {
-        // ⚠ The consumer's own gate declined on a count mismatch — and here the counts AGREED, every
-        // entry pointing at the same span. Degeneracy is invisible to a count check.
+        // ⚠ This used to assert every span is DISTINCT, which is not true in general — a numeral
+        // expansion legitimately produces several tokens from one source span. The property actually at
+        // stake is that no token claims the whole input.
+        // ⚠ And the consumer's own gate could not see the defect either: it declines on a count
+        // mismatch, and here the counts AGREED with every entry pointing at the same span.
         var t = Phonemizer.PhonemizeTrace(Mixed, "ja");
-        var spans = t.Tokens.Where(k => k.InputSpan is not null)
-            .Select(k => $"{k.InputSpan!.Value.Start},{k.InputSpan.Value.End}").ToList();
-        Assert.Equal(spans.Count, spans.Distinct().Count());
+        Assert.All(t.Tokens, k =>
+        {
+            Assert.NotNull(k.InputSpan);
+            Assert.True(k.InputSpan!.Value.End - k.InputSpan.Value.Start < Mixed.Length, k.Surface);
+        });
     }
 }
