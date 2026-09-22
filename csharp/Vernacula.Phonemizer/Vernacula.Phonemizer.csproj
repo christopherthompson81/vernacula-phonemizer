@@ -10,9 +10,14 @@
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" />
   </ItemGroup>
   <ItemGroup>
-    <!-- ⚠ For LanguageBootstrapTests ONLY, and for one reason: with every routed code now ported, the
-         "engine with no factory" state is unreachable through the public API, so the invariant that a
-         missing engine is a NAMED failure could otherwise only be tested by leaving a language unported. -->
+    <!-- ⚠ TWO CONSUMERS, AND EACH NEEDS ITS REASON RECORDED HERE, because this comment is what the next
+         person widening an `internal` reads as the gate on doing so.
+         1. LanguageBootstrapTests: with every routed code now ported, the "engine with no factory" state
+            is unreachable through the public API, so the invariant that a missing engine is a NAMED
+            failure could otherwise only be tested by leaving a language unported.
+         2. HanDictMemoRaceTests (#1442): the greedy-window memo can be COLD only once per process, so a
+            test through `Phonemize()` passes trivially whenever another test ran first — it would assert
+            nothing. Reaching `HanDictIpa.MaxWordFor` directly lets each round use a fresh dictionary. -->
     <InternalsVisibleTo Include="Vernacula.Phonemizer.Tests" />
   </ItemGroup>
 </Project>
