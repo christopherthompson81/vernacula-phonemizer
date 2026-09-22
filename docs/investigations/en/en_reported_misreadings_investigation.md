@@ -1925,3 +1925,92 @@ throughout, because a misplaced comment is invisible to every gate. De-duplicate
 
 **Gates.** 6214 TS · 6812 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.
+
+## Run 30 — 2026-09-22 13:45 — a leading-point decimal is not a number, and everything downstream declines it
+
+**Report.** *"`.002–.005″` -> reads as 'two \<pause\> five', should read as 'point zero zero two to point
+zero zero five inches'."* Filed onto #1435 (the prime-mark drop) and split out as #1437, because the
+prime is only the last of three defects in it.
+
+**Raw finding — the leading point is the dominant cause, and it CASCADES:**
+
+```
+.002        ->  tʰˈuː                  "two"             ⚠ wrong by a factor of 500
+.002 mm     ->  tʰˈuː m                "two m"           the unit left bare
+.5 kg       ->  fˈaᶦv kʰˈɪŋ            "five KING"
+.25 L       ->  twˈɛnti fˈaᶦv ˈɛɫ
+.5–.75 mm   ->  fˈaᶦv . sˈɛvənti fˈaᶦv m
+```
+
+Every one is already correct the moment the zero is written (`0.5 kg` → "zero point five kilograms"), so
+this is not a question about how decimals read. The token is simply never a NUMBER, and each rule then
+declines it for its own reason:
+
+- the unit rule's `NOT_VERSION` lookbehind refuses a digit preceded by `.`, so the unit is never claimed
+  and reaches the g2p as letters — ⟨kg⟩ as *king*;
+- the range rule is digit-gated on both sides, so the dash is never "to" and survives as a phrase break,
+  which is the *\<pause\>* in the report;
+- the leading zeros are then dropped as insignificant, which is what makes `.002` into *two*.
+
+⚠ **A WRONG MAGNITUDE IS WORSE THAN A DROP.** A clearance read as *two* where the page says *point zero
+zero two* is off by 500 and sounds entirely fluent — nothing downstream can tell.
+
+**Fixed with one insertion before the numeric tier:** `.002` → `0.002`. Nothing else changed, and the
+whole cascade resolves because every rule now sees an ordinary decimal. `$.50` → "50 cents" and
+`£.75` → "75 pence" fall out for free, since the currency rule was declining the same token.
+
+⚠ **The lookbehind carries the whole guard**, and it is three cases rather than a list: a point preceded
+by a LETTER is an abbreviation (`Fig.2`), by a DIGIT a version or an address (`v1.002`, `192.168.1.1`),
+by another POINT an ellipsis. A sentence-final period is followed by a space, so the digit lookahead
+excludes it without the rule needing to know anything about sentences. All asserted.
+
+⚠ **The ASCII-hyphen form is still not a range** — `.002-.005` → `0.002-0.005`, no "to". That is the
+documented decision rather than a gap: `2024-01-15` is a date, `555-1234` a phone number and `3-2` a
+score, so `5-10` does not say "to" either. Left alone and asserted so it reads as a decision.
+
+⚠ **READING NOTE, and it is a real choice.** This yields *"zero point zero zero two"*, which is what
+`0.002` produces today; the reporter's register omits the zero — *"point zero zero two"*. Both are real
+readings, the bare form being the machinist one and the leading-zero form the news-anchor one, which is
+the memo this log already carries about speaker variation. The cascade fix does not depend on the
+choice, so it is not held up by it; suppressing the zero for the bare-point SPELLING specifically would
+be a separate, small change if wanted.
+
+**Gates.** 6241 TS · 6844 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex corpus re-extracted (one new pattern).
+
+**Review of Run 30 — the rule regressed the class it most resembles.**
+
+⚠ **A LEADING POINT IS NOT ALWAYS A DECIMAL.** A firearm CALIBER and a batting AVERAGE are integer
+labels written with a point, and every one of them was ALREADY CORRECT before this rule existed.
+Verified against `main`:
+
+```
+.50 caliber      fˈɪfti kʰˈæləbɚ              →  zˈɪɹoᵑ pʰɔᶦnt fˈaᶦv zˈɪɹoᵑ …
+.45 ACP          fˈɔːɹt̬i fˈaᶦv                →  zˈɪɹoᵑ pʰɔᶦnt fˈɔːɹ fˈaᶦv
+batting .300     bˈæt̬ɪŋ . θɹˈiː hˈʌndɹəd        →  … zˈɪɹoᵑ pʰɔᶦnt θɹˈiː zˈɪɹoᵑ zˈɪɹoᵑ
+```
+
+That is **the same wrong-magnitude failure this rule exists to fix, pointed the other way** — and Run
+30's only documented cost was the ASCII hyphen, so nothing recorded it. No SHAPE separates `.300` the
+average from `.300` the decimal, so the gate is lexical: a cue word after the digits
+(`caliber`, `cal`, `ACP`, `Magnum`, `Special`, `Auto`, `LR`, `Win`/`Winchester`, `Rem`/`Remington`,
+`Luger`, `S&W`), or `batting`/`hitting`/`slugging` before the point. All eight restored and asserted.
+
+⚠ **KNOWN AND ACCEPTED COST, now pinned as a test:** a BARE caliber with no cue (`he carried a .45`)
+has nothing to key on and becomes a decimal. That is the residue of a genuinely ambiguous spelling.
+⚠ `.30-06` also changed — `θˈɚrt̬i sˈɪks` before, a decimal after — but neither is *thirty-aught-six*,
+so it is recorded as different-and-still-wrong rather than claimed as fixed.
+
+⚠ **The lookbehind omitted `\p{M}`**, unlike its sibling in the same file: a decomposed accent ends in
+a combining mark, not a letter, so NFD `café.5 kg` glued the inserted `0` onto the word. Added.
+
+⚠ **And the new corpus row has no POSITIVE probe.** `PROBES` in `tools/extract_regexes.mts` contains no
+string with a dot immediately before a digit at an unguarded position, so the JS↔.NET dialect gate
+exercises this pattern only negatively. Adding a probe would regenerate match lists for all 2,373
+patterns, which is a sweeping change to a shared artifact inside a decimals fix — so instead the concern
+was answered directly with the tool that exists for it: `csharp/tools/regex-diff` reports **144,640
+probe results identical, 0 differ, 0 threw**, and the two ports carry 27 TS and 32 C# assertions over
+the same inputs. A positive probe for this class is worth adding to `PROBES` on its own.
+
+**Gates.** 6241 TS · 6844 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex-diff 144,640 probes identical.
