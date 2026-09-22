@@ -1718,3 +1718,58 @@ of the whole block, never on the declaration.
 
 **Gates.** 6183 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons.
+
+## Run 27 — 2026-09-22 11:50 — `superalloy` DOES reproduce, and Run 17's mistake repeated
+
+**The reporter supplied the missing fact:** *"superalloy is via kokoro in vernacula."*
+
+⚠ **Run 26 called this "does not reproduce" and that was wrong.** Every path emits the ⟨ɔᶦ⟩ the report
+said was missing, so the IPA looked right and the report was set aside. Run 17 did exactly this to
+`horsepower` and Run 20 corrected it in terms that apply verbatim here: *"the IPA is right about the
+phones and wrong about the beat."* Two runs later, with that correction written in this same file, the
+same triage was repeated — checking the phones is what lets this class through.
+
+**Measured against misaki `us_gold`, the lexicon Kokoro was trained on:**
+
+```
+gold                superalloy   sˈupəɹˌælˌY     ← THREE marks: ˈu  ˌæl  ˌY
+ours, rule path                  sˈuːpɚˌælˌɔᶦ    ← matches gold
+ours, phonemizeAsync             sˌuːpɚˈælɔᶦ     ← the final diphthong carries NO mark
+```
+
+`Y` is Kokoro's /ɔɪ/. Gold gives it a **secondary stress**; the neural path leaves it bare and moves the
+primary to `æl`. An unstressed final diphthong is what reduces, and a reduced `-oy` is audibly *-ley*.
+Run 1 established that the app and the Kokoro path both use `phonemizeAsync` — so the reading the
+reporter hears is the wrong one, and the path checked first was the right one.
+
+### ⚠ A dict row alone changes nothing — `accent-lexicon.tsv` is the primary lexicon
+
+Inserting `profilometry` into `g2p-dict.tsv` did not alter the output at all. A control proved it was
+not an editing failure: rewriting the EXISTING `profiling` row to `Z Z Z AA1`, verified on disk, also
+changed nothing. `english.ts` loads `accent-lexicon.tsv` first and consults the dict only for words it
+does not carry — which is why a NEW word appeared to work (it fell through) while an existing one did
+not. The rebuild step is the fix, and `en_rebuild_lexicon.mts` reports the round trip as it goes:
+
+```
+rows with an ARPABET source: 135314   reproduce the committed IPA: 135314   would change: 0
+```
+
+Byte-stable, so the four added rows are the entire diff.
+
+### The rows, derived rather than typed
+
+`profilometry` was wrong on both paths in different ways — neural `pɹˌɑːfəlˈɑːmɪtɹi` (*prof-*), rule
+`pɹˌoᶷfaᶦlˈɑːmɪtɹi` (*proh-* but unreduced). Gold's siblings settle it: `goniometry` and
+`interferometry` both take `AA1 M AH0 T R IY0`, the `-ometer` pair `AA1 M AH0 T ER0`. The paradigm
+neighbours (`superalloys`, `profilometer`) are included on this file's own standard — a listed word and
+an unlisted one in the same environment answering differently is the LIVE SPLIT the gate exists to catch.
+
+⚠ **And one test assertion was typed rather than checked.** It pinned `goniometry` as the "recorded
+sibling"; gold has it but OUR dict does not, so it is OOV and renders `ɡˌoᶷniʲˈɑːmɪtɹi`. Asserting
+against it would have frozen an OOV guess as a recorded fact. Retargeted to `optometry`, which is
+genuinely recorded with that tail. (That gold carries `goniometry`/`interferometry` and the dict does
+not is a real gap, noted and not pursued here.)
+
+**Gates.** 6189 TS · 6779 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons. Plus `en-index-tables-point-at-what-they-claim` and `en-curation-gap`, the two the
+dictionary-edit memo names.
