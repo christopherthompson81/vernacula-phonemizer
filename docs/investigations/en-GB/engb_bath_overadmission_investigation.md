@@ -110,3 +110,46 @@ identified the cause as "a LENGTH-LESS `ɑ` in a non-rhotic corpus, i.e. an Amer
 which is the detector this run arrived at independently. **The diagnosis was sitting in the test file the
 whole time; what was missing was the measurement that a length-less `ɑ` is a CONVENTION (1,130 against
 5,024) rather than one row's quirk.** Flipped to the resolved value, with its history kept.
+
+## Run 3 — 2026-09-22 — review round: four findings, and the "latent" one was not
+
+### ⚠ THE PROPAGATION PASS CARRIED NO BATH TELL, AND MIRRORING IT CAUGHT ME TWICE
+
+Review noted that PALM's stricter rule was deliberately mirrored into the propagation pass and BATH's
+new one was not — so an inflection whose referee rows all spell the short `ɑ` would propagate in exactly
+the evidence the claim loop refuses. Measured residue: 0, so a hole rather than a defect.
+
+My first mirror **dropped one word**, which looked like the reviewer's measurement being wrong. It was my
+mirror being wrong:
+
+    frances   referee  fɹænsɪz | fɹɑːnsɪz        ours  fɹˈɑːnsɪs
+
+The referee's rows are the **plural of `france`**; ours is the NAME *Frances*, which ends in /s/. Nothing
+matched, for a reason that has nothing to do with vowel length — and my condition vetoed on "no row
+supports us" rather than on "the supporting rows are all short". **The claim loop only reaches its tell
+after `refFolded.includes(fold(e))`, so the tell is additive there; in the propagation pass that
+precondition has to be written out, or the mirror becomes a much stronger rule wearing the tell's name.**
+Corrected, and the residue is 0 exactly as measured.
+
+⚠ **`frances` IS A REAL DEFECT FOUND AND NOT FIXED.** It is a proper name that the suffix-stripper
+proposed as the plural of `france`, and the phonology check passed because `fɹænsɪs` does begin with
+`fɹæns`. espeak-ng reads it `fɹˈansɪs`, TRAP. That belongs to the lemma-identification class in #1390's
+propagation, not to this tell, and is recorded rather than patched here.
+
+### A comment that was stale in BOTH halves
+
+`english-gb.ts` said the marry mapping lives in a word list "exactly as `lotr` carries `sorry` and `bath`
+carries `dramatize`". **`sorry` is not in `en-gb-lotr.tsv` at all**, and `dramatize` left `en-gb-bath.tsv`
+in Run 2 of this very investigation. Neither half was true and nothing had noticed — a comment naming a
+row in a GENERATED artifact is exactly the kind of claim no gate covers. Two live examples now, and
+`test/english-gb-set-examples.test.ts` pins them, along with both directions of the tell.
+
+### And two smaller ones
+
+- ⚠ **A HAND-TYPED IPA STRING IN THE ONE COMMENT THAT DOCUMENTS THE TELL** had `ɔ˜m` (U+02DC MODIFIER
+  SMALL TILDE) where the length mark U+02D0 belongs. The standing rule here is *derive IPA, never type
+  it*; the example is now prose rather than a transcription, so there is nothing to get wrong.
+- **The tell is not positional** — `/ɑː/.test(r)` asks whether the row spells a long `ɑ` anywhere, not
+  whether the segment this edit produced is the one spelled long. The only BATH member whose matching row
+  mixes both spellings is `parang` (`pɑɹɑːŋ`), where the long vowel IS the edited one, so the
+  approximation is latent. Written down rather than left to be discovered.
