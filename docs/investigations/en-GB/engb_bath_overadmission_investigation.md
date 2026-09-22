@@ -153,3 +153,74 @@ row in a GENERATED artifact is exactly the kind of claim no gate covers. Two liv
   whether the segment this edit produced is the one spelled long. The only BATH member whose matching row
   mixes both spellings is `parang` (`pɑɹɑːŋ`), where the long vowel IS the edited one, so the
   approximation is latent. Written down rather than left to be discovered.
+
+## Run 4 — 2026-09-22 — the same tell for PALM (#1411), where it matters more
+
+PALM's edit produces `ɑː` exactly as BATH's does, so it has the identical ambiguity — **and worse**,
+because PALM is the one edit that runs *away* from RP (`ɒ → ɑː`, toward the GenAm LOT vowel). A
+length-less row there is not merely weak evidence; it is positively the other variety's.
+
+    PALM members 605   with referee rows 550   claimed with no properly-spelled ɑː support  121
+
+⚠ **AND UNLIKE BATH'S, THIS LIST IS ORDINARY BRITISH VOCABULARY.** What we were shipping:
+
+    conservation  kʰˌɑːnsəvˈeᶦʃən       bobsled     bˈɑːbslˌɛd      beatbox   bˈiːtbˌɑːks
+    contrabass    kʰˈɑːntɹəbˌeᶦs        bobsleigh   bˈɑːbslˌeᶦ
+
+`conservation` is not a rare loanword. espeak-ng reads those four with `ɒ`.
+
+⚠ **121 IS THE OUTCOME AND 113 WAS THE FORECAST IN RUN 3**, and the difference is the rule being sharper
+than the estimate: the forecast counted members with no properly spelled row ANYWHERE, while the rule asks
+whether the rows that SUPPORT THIS CLAIM are all short. 114 are refused at the claim, and 7 are propagated
+inflections that leave with their lemma (`bobsledding`, `drachmas`, `garages`, `mailboxes`, `pogroms`,
+`polyesters`, `regattas`).
+
+### ⚠ THE FIRST VERSION OF THIS MEASUREMENT FOLDED AWAY THE AXIS IT CLAIMED TO MEASURE
+
+It reported "espeak AGREES WITH THE DROP: 107 of 121 (88%)" — scoring *"espeak does not say `ɑː`"* as
+agreement with `ɒ`. Those are not the same claim, and the kept side was scored on a POSITIVE `ɑː`, so the
+two halves were not even like for like. The three-way rubric, which is the one to cite:
+
+                  ɑː (endorses PALM)     ɒ (endorses LOT)     neither
+    DROPPED  121        14  11%              57  47%            50  41%
+    KEPT     484       314  64%              21   4%           149  30%
+
+**Both axes agree and the honest numbers are stronger than the folded one.** On the same positive axis,
+the `ɑː` rate is 64% among kept members against 11% among dropped — **5.8×** — and the `ɒ` rate runs the
+other way, 4% against 47%. The 30% "neither" on the KEPT side is the base rate for two inventories
+disagreeing, which is what makes the DROPPED side's 41% readable rather than alarming.
+
+### ⚠ AND THE "NEITHER" COLUMN IS A REAL LIMIT ON THIS REMEDY, NOT NOISE
+
+Of the 50, espeak reads **41 with TRAP** — `drachma dɹˈatʃmə`, `regatta ɹɪɡˈatə`, `natasha nɐtˈaʃə`,
+`antipasto ˌantɪpˈastəʊ`, `aquavit ˈakwɐvˌɪt` — and we now ship `ɒ` for them. RP for those really is
+/ˈdrækmə/, /rɪˈætə/, /nəˈtæʃə/. **Dropping them from PALM moved them from one wrong vowel to another.**
+
+The defence is narrow and worth stating as such: `ɒ` is what the accent's ORDINARY LOT rule produces, so
+those words are now handled by the general path instead of by a specific wrong assertion — a smaller
+claim, in the right place, and visible to whatever fixes the TRAP question. It is not a fix for them.
+The other 9 are further away still (`caen kˈiːn`, `chiffon tʃˈɪfən`, `coif kˈɔɪf`).
+
+⚠ **`chiffon` WAS ONE OF THE FIVE SPECIMENS I NAMED AS "espeak reads every one with `ɒ`", AND IT DOES
+NOT** — `tʃˈɪfən`, no back vowel at all, a different onset and a different stress. The other four hold.
+Five was a list I read off rather than measured; the table above is measured.
+
+### The cost, and how it differs from BATH's
+
+    referee agreement on the 121:   114/114 HIT  →  0/114 HIT
+    of the 114 losses, with a properly-spelled ɑː row anywhere:  1  (`garage`)
+
+BATH's equivalent was 0 of 31. Here it is 1 of 114, and that one is instructive.
+
+⚠ **`garage` IS WRONG BEFORE AND AFTER, AND NEEDS A LEXICAL ROW RATHER THAN A SET MEMBERSHIP.** Its rows
+are `ɡæɹɑːdʒ | ɡæɹɑːʒ | ɡæɹɪdʒ | ɡəɹɑdʒ | ɡəɹɑʒ | ɡɹɑdʒ | ɡɹɑʒ` — RP is /ˈɡærɑːʒ/ or /ˈɡærɪdʒ/, stressed
+on the FIRST syllable, and espeak reads `ɡˈaɹɪdʒ`. We said `ɡəɹˈɑːʒ` (the American reading) and now say
+`ɡəɹˈɒʒ`, which is a different wrong answer. The properly-spelled `ɑː` rows are the ones we do NOT match,
+on stress; the ones we match are the short American pair. So the "1 of 114" is not a counterexample to
+the tell — it is a word whose problem is stress, recorded for the lexical table rather than patched here.
+
+### Result
+
+    palm 605 → 484        bath/cloth/yod/lotr unchanged
+    goldens              0 stale — none of these words is in the golden corpus
+    suite 6,160 · C# 189 byte-identical · sets reproduce from the builder

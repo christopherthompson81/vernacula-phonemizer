@@ -34,6 +34,21 @@ describe("the set memberships that documentation names", () => {
         for (const w of ["bath", "chance", "path", "banana"]) expect([w, bath.has(w)]).toEqual([w, true]);
     });
 
+    it("applies the same length tell to PALM, in both directions", () => {
+        // ⚠ PALM IS THE EDIT THAT RUNS *AWAY* FROM RP (ɒ → ɑː, toward the GenAm LOT vowel), so a
+        // length-less row there is not merely weak evidence but positively the other variety's. 121
+        // members were claimed with no properly spelled support, including very ordinary British
+        // vocabulary — `conservation` shipped as kʰˌɑːnsəvˈeᶦʃən.
+        // ⚠ MEASURED ON THE SAME POSITIVE AXIS FOR BOTH SIDES: espeak reads ɑː for 64% of the members the
+        // tell KEEPS and 11% of the ones it DROPS — 5.8× — and ɒ for 4% against 47%. An earlier version
+        // scored "espeak does not say ɑː" as agreement with ɒ, which is a different claim and was not
+        // like for like against a kept side scored on a positive. #1411.
+        const palm = members("palm");
+        for (const w of ["conservation", "bobsled", "beatbox", "contrabass", "chiffon"])
+            expect([w, palm.has(w)]).toEqual([w, false]);
+        for (const w of ["father", "spa", "drama", "calm"]) expect([w, palm.has(w)]).toEqual([w, true]);
+    });
+
     it("drops the words #1391's length tell was written to remove", () => {
         // ⚠ BOTH DIRECTIONS, because a detector verified only on positives takes good rows with it —
         // the lesson #1404's exclusion regex learned across four drafts.
