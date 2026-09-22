@@ -417,6 +417,26 @@ public static class Normalize
      *  abbreviation dot is: left in place it becomes a phrase break. */
     private static readonly JsRe RE_REGARDING = JsRegex.Compile("(?<![\\p{L}\\p{M}])[Rr][Ee]:[ \\t]*", "gu");
 
+    /**
+     * A HYPHENATED `re-` IS THE PREFIX, NOT THE NOTE — the same collision as `RE_REGARDING` above,
+     * reached through a hyphen instead of a colon. The hyphen makes `re` a token of its own and CMUdict
+     * records the bare word as `R EY1`, so `re-machined` read *RAY-machined*. See the TypeScript.
+     *
+     * ⚠ THE NOTE IS PROTECTED LEXICALLY, NOT POSITIONALLY. Refusing any preceding HYPHEN keeps
+     * `do-re-mi` as the note but also suppresses the fix wherever `re-` legitimately follows one —
+     * `non-re-entrant` and `pre-re-heat` kept reading *ray*. Asking whether the PRECEDING
+     * hyphen-segment is a solfège syllable keeps the note and releases both. It is the PRECEDING
+     * segment and not the following one because `re-do` is an ordinary prefixed word whose second
+     * element is a solfège syllable.
+     * ⚠ KNOWN COST: a sequence that OPENS on the note (`re-mi-fa-sol`) and the rhenium–osmium pair
+     * `Re-Os` still read *ree*. Both are far rarer than the prefix and neither is separable by shape.
+     * ⚠ AND THE REPLACEMENT ECHOES THE MATCHED CASE, which is not cosmetic — the initialism pass
+     * decides whether a document is SHOUTING by looking for any lowercase letter, so a lowercase `ree`
+     * in an all-caps document changes how every OTHER run in it is read.
+     */
+    private static readonly JsRe RE_PREFIX = JsRegex.Compile(
+        "(?<![\\p{L}\\p{M}\\d])(?<!\\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\\p{L})", "giu");
+
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
         // space, tab, NBSP; hyphen through horizontal bar (U+2010-U+2015)
@@ -734,6 +754,12 @@ public static class Normalize
 
         // ⚠ The weekday rule runs AFTER the two month rules — its gate reads the names they emit.
         s = Rewrite(s, RE_REGARDING, "regarding ");
+        // A hyphenated `re-` is the prefix, not the note. See RE_PREFIX.
+        s = Rewrite(s, RE_PREFIX, m =>
+        {
+            var e = m.Groups[2].Value;
+            return m.Groups[1].Value + e + (e == e.ToUpperInvariant() ? "E" : "e");
+        });
         // A province or state code in an address. See ADDRESS_CODE for why the gate is this narrow.
         var beforeCodes = s;
         s = Rewrite(s, ADDRESS_CODE, m =>

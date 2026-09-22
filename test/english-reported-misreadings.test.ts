@@ -451,7 +451,10 @@ describe("a space-guarded dash is a parenthetical break", () => {
     test("hyphenated compounds are untouched", () => {
         expect(say("a well-known case")).toBe("ə wˈɛɫ nˈoᶷn kʰˈeᶦs");
         expect(say("state-of-the-art design")).toBe("stˈeᶦt ʌv ðə ˈɑːɹt dᵻzˈaᶦn");
-        expect(say("re-enter the code")).toBe("ɹˈeᶦ ˈɛntɚ ðə kʰˈoᶷd");
+        // ⚠ THE VOWEL HERE MOVED IN #1430, NOT THE PAUSE. This case is about the JOINER — a hyphenated
+        // compound must not gain a break — and it still does not. It incidentally pinned `ɹˈeᶦ`, the
+        // note-of-the-scale reading of a hyphenated `re-`, which was the defect #1430 fixed.
+        expect(say("re-enter the code")).toBe("ɹˈiː ˈɛntɚ ðə kʰˈoᶷd");
     });
 
     // ⚠ A LIST MARKER OPENING A LINE HAS NO WORD BEFORE IT, which is why the left guard is a
@@ -969,6 +972,10 @@ describe("a spelled letter, an adjective, a state code and a subject line", () =
     test("a subject-line Re is regarding", () => {
         expect(norm("Re: the meeting")).toBe("regarding the meeting");
         expect(norm("RE: your note")).toBe("regarding your note");
-        expect(norm("a re-entry")).toBe("a re-entry");
+        // ⚠ CHANGED BY #1430, AND NOT BY THIS RULE LOOSENING. The point here is that the COLON rule is
+        // scoped to a colon, and it still is — `ree-` comes from the separate hyphenated-prefix rule
+        // beside it. A bare `re-entry` must never read as "regarding".
+        expect(norm("a re-entry")).toBe("a ree-entry");
+        expect(norm("a re-entry")).not.toContain("regarding");
     });
 });
