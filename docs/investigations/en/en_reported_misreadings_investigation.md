@@ -1838,5 +1838,32 @@ regression, and exactly the phantom the parity runner's own header warns about (
 changed, none of them real"). Re-run on the async path, the change is 3 rows, all the same sentence,
 all one word: `re-established`, ɹˈeᶦ → ɹˈiː (ɾˈeː → ɾˈiː in en-IN). Regenerated on that basis.
 
-**Gates.** 6206 TS · 6795 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+**Gates.** 6211 TS · 6800 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · regex corpus re-extracted (one new pattern).
+
+**Review of Run 28 — the hyphen guard was positional, and it left the reported defect standing.**
+
+⚠ **Refusing any preceding HYPHEN protects `do-re-mi` and also suppresses the fix wherever `re-`
+legitimately follows one.** Measured on the first draft: `non-re-entrant` → `nˈɑːn ɹˈeᶦ ˈɛntɹənt`
+and `pre-re-heat` → `pɹˈiː ɹˈeᶦ hˈiːt` — both still *ray*, i.e. the reported defect unfixed, in a
+shape the rule was supposed to cover. The comment presented the lookbehind purely as "the guard that
+matters" and recorded no cost, which is how it would have been rediscovered later as a fresh report.
+
+**Made LEXICAL instead of positional:** the guard now asks whether the preceding hyphen-segment is a
+solfège syllable. `do-re-mi`, `Do-Re-Mi` and `sol-re-mi` keep the note; `non-re-entrant` and
+`pre-re-heat` are released.
+
+⚠ **AND IT IS THE PRECEDING SEGMENT, NOT THE FOLLOWING ONE**, which looks like the arbitrary half of
+the choice and is not: `re-do` is an ordinary prefixed word whose SECOND element is a solfège syllable,
+so a following-segment test would have read it as the note. Pinned.
+
+⚠ **Known and accepted cost, pinned as a test so it is a decision rather than a surprise:** a sequence
+that OPENS on the note (`re-mi-fa-sol`, `sing re-mi`) and the rhenium–osmium pair `Re-Os` still read
+*ree*. Both are far rarer than the hyphenated prefix and neither is separable from it by shape —
+deciding `Re-Os` is a formula needs chemistry this engine does not have (#1424).
+
+The whole decision now lives in one pattern rather than a callback, using the variable-length lookbehind
+both engines support, so the two ports stay structurally identical.
+
+**Gates.** 6211 TS · 6800 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189, no poisons · regex corpus re-extracted.

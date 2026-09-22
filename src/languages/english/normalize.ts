@@ -877,9 +877,20 @@ export function normalizeEnglish(input: string): string {
     //       ⚠ A SPELLING, NOT AN IPA VALUE, which is this file's idiom whenever a word's own spelling
     //       reads wrong — `letterNameExceptions` a→ay, the unit table's `micro liter`. `ree` is read
     //       ɹˈiː by the lexicon, so nothing here asserts a pronunciation of its own.
-    //       ⚠ AND THE LOOKBEHIND REFUSES A PRECEDING HYPHEN, which is the guard that matters: in
-    //       `do-re-mi` the `re` IS the note, and it sits between two hyphens. Refusing a preceding
-    //       letter likewise keeps the rule off the `re` inside `pre-`, `core-`, `genre-`.
+    //       ⚠ THE NOTE IS PROTECTED LEXICALLY, NOT POSITIONALLY, and the first draft got this wrong.
+    //       Refusing any preceding HYPHEN keeps `do-re-mi` as the note, but it also suppressed the fix
+    //       wherever `re-` legitimately follows one: `non-re-entrant` and `pre-re-heat` still read
+    //       *ray*, which is the reported defect left standing. Asking instead whether the PRECEDING
+    //       HYPHEN-SEGMENT is a solfège syllable keeps `do-re-mi` and releases both of those.
+    //       ⚠ AND IT IS THE PRECEDING SEGMENT, NOT THE FOLLOWING ONE, which looks like the arbitrary
+    //       half of the choice and is not: `re-do` is an ordinary prefixed word whose SECOND element is
+    //       a solfège syllable, so a following-segment test would read it as the note.
+    //       Refusing a preceding letter likewise keeps the rule off `pre-`, `core-`, `genre-`.
+    //       ⚠ KNOWN AND ACCEPTED COST: the note is protected only when a solfège syllable PRECEDES it,
+    //       so a sequence that opens on it (`re-mi-fa-sol`, `sing re-mi`) and the rhenium–osmium pair
+    //       `Re-Os` still read *ree*. Both are far rarer than the hyphenated prefix, and neither is
+    //       separable from it by shape — deciding `Re-Os` is a formula needs chemistry this engine does
+    //       not have (#1424).
     //       ⚠ VOWEL ONLY. The primary stress stays on the prefix exactly where it already was, so this
     //       fixes what was reported and nothing else; whether `re-machined` should be ˌriːməˈʃiːnd is a
     //       compound-stress question about the whole hyphenated-prefix family, not about `re`.
@@ -889,7 +900,7 @@ export function normalizeEnglish(input: string): string {
     //       measured: `RE-WORK ORDER NHS` went from ˌɛnˌeᵡt͡ʃˈɛs, the fused one-stress reading the
     //       initialism module prefers, to three separate letter tokens. Echoing the matched case leaves
     //       the document exactly as shouty as it was.
-    s = rewrite(s, /(?<![\p{L}\p{M}\d-])([Rr])([Ee])(?=-\p{L})/gu,
+    s = rewrite(s, RE_PREFIX,
         (_m: string, r: string, e: string) => `${r}${e}${e === e.toUpperCase() ? "E" : "e"}`);
 
     // 0b5) A PROVINCE OR STATE CODE IN AN ADDRESS. See ADDRESS_CODE for why the gate is this narrow:
@@ -1593,6 +1604,15 @@ export const isUnreadableEnglish = makeUnreadableTest({
     legalOnsets: new Set(MANIFEST.phonotactics.onsets),
     legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
+
+/**
+ * A hyphenated `re-` that is the PREFIX — see step 0b4a for the reasoning and the measurements.
+ *
+ * ⚠ THE SOLFÈGE LOOKBEHIND IS THE GUARD, and it is LEXICAL rather than positional. Both engines
+ * support a variable-length lookbehind, so the whole decision lives in the pattern and the two ports
+ * stay structurally identical rather than one growing a callback.
+ */
+const RE_PREFIX = /(?<![\p{L}\p{M}\d])(?<!\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\p{L})/giu;
 
 /**
  * Letter names. English needs almost no data here: CMUdict carries all 26 single letters with their

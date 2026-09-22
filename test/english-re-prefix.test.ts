@@ -20,13 +20,36 @@ describe("a hyphenated re- is the prefix", () => {
         expect(normalizeEnglish("a re-machined part")).toBe("a ree-machined part");
     });
 
-    // ⚠ THE GUARD THAT MATTERS: in `do-re-mi` the `re` IS the note, and it sits between two hyphens, so
-    // the lookbehind refuses a preceding hyphen as well as a preceding letter.
+    // ⚠ THE NOTE IS PROTECTED LEXICALLY, NOT POSITIONALLY — the guard asks whether the PRECEDING
+    // hyphen-segment is a solfège syllable, not merely whether a hyphen precedes.
     test("the note of the scale is untouched", () => {
         expect(normalizeEnglish("do-re-mi")).toBe("do-re-mi");
+        expect(normalizeEnglish("Do-Re-Mi")).toBe("Do-Re-Mi");
+        expect(normalizeEnglish("sol-re-mi")).toBe("sol-re-mi");
         expect(phonemize("do-re-mi", "en")).toContain("ɹˈeᶦ");
         expect(normalizeEnglish("re")).toBe("re");
         expect(normalizeEnglish("Re: subject")).toBe("regarding subject");  // 0b4 still owns this
+    });
+
+    // ⚠ A POSITIONAL HYPHEN GUARD LEFT THE REPORTED DEFECT STANDING HERE. Refusing any preceding
+    // hyphen kept `do-re-mi` but also suppressed the fix wherever `re-` legitimately follows one —
+    // both of these read *ray* until the guard became lexical.
+    test.each(["non-re-entrant", "pre-re-heat"])("%s is still the prefix", (w) => {
+        expect(phonemize(w, "en")).toContain("ɹˈiː");
+        expect(phonemize(w, "en")).not.toContain("ɹˈeᶦ");
+    });
+
+    // ⚠ THE PRECEDING SEGMENT, NOT THE FOLLOWING ONE, and this is the case that decides it: `re-do`
+    // is an ordinary prefixed word whose SECOND element is a solfège syllable, so a following-segment
+    // test would have read it as the note.
+    test.each(["re-do", "re-mix"])("%s is the prefix, not the note", (w) =>
+        expect(phonemize(w, "en")).toContain("ɹˈiː"));
+
+    // ⚠ THE ACCEPTED COST, PINNED SO IT IS A DECISION AND NOT A SURPRISE: the note is protected only
+    // when a solfège syllable PRECEDES it, so a sequence that opens on it still reads *ree*. Far rarer
+    // than the hyphenated prefix, and not separable from it by shape.
+    test("a solfege sequence that OPENS on re is not protected", () => {
+        expect(normalizeEnglish("re-mi-fa-sol")).toBe("ree-mi-fa-sol");
     });
 
     // ⚠ A LETTER BEFORE IT IS SOMEONE ELSE'S `re`.

@@ -422,13 +422,20 @@ public static class Normalize
      * reached through a hyphen instead of a colon. The hyphen makes `re` a token of its own and CMUdict
      * records the bare word as `R EY1`, so `re-machined` read *RAY-machined*. See the TypeScript.
      *
-     * ⚠ THE LOOKBEHIND REFUSES A PRECEDING HYPHEN: in `do-re-mi` the `re` IS the note.
+     * ⚠ THE NOTE IS PROTECTED LEXICALLY, NOT POSITIONALLY. Refusing any preceding HYPHEN keeps
+     * `do-re-mi` as the note but also suppresses the fix wherever `re-` legitimately follows one —
+     * `non-re-entrant` and `pre-re-heat` kept reading *ray*. Asking whether the PRECEDING
+     * hyphen-segment is a solfège syllable keeps the note and releases both. It is the PRECEDING
+     * segment and not the following one because `re-do` is an ordinary prefixed word whose second
+     * element is a solfège syllable.
+     * ⚠ KNOWN COST: a sequence that OPENS on the note (`re-mi-fa-sol`) and the rhenium–osmium pair
+     * `Re-Os` still read *ree*. Both are far rarer than the prefix and neither is separable by shape.
      * ⚠ AND THE REPLACEMENT ECHOES THE MATCHED CASE, which is not cosmetic — the initialism pass
      * decides whether a document is SHOUTING by looking for any lowercase letter, so a lowercase `ree`
      * in an all-caps document changes how every OTHER run in it is read.
      */
-    private static readonly JsRe RE_PREFIX =
-        JsRegex.Compile("(?<![\\p{L}\\p{M}\\d-])([Rr])([Ee])(?=-\\p{L})", "gu");
+    private static readonly JsRe RE_PREFIX = JsRegex.Compile(
+        "(?<![\\p{L}\\p{M}\\d])(?<!\\b(?:do|re|mi|fa|sol|la|ti|si|ut)-)([Rr])([Ee])(?=-\\p{L})", "giu");
 
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(

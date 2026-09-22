@@ -40,10 +40,42 @@ public class EnglishRePrefixTests
     public void TheNoteOfTheScaleIsUntouched()
     {
         Assert.Equal("do-re-mi", Norm("do-re-mi"));
+        Assert.Equal("Do-Re-Mi", Norm("Do-Re-Mi"));
+        Assert.Equal("sol-re-mi", Norm("sol-re-mi"));
         Assert.Contains("ɹˈeᶦ", Say("do-re-mi"));
         Assert.Equal("re", Norm("re"));
         Assert.Equal("regarding subject", Norm("Re: subject"));   // the colon rule still owns this
     }
+
+    /// <summary>
+    /// ⚠ A POSITIONAL HYPHEN GUARD LEFT THE REPORTED DEFECT STANDING HERE. Refusing any preceding
+    /// hyphen kept `do-re-mi` but also suppressed the fix wherever `re-` legitimately follows one.
+    /// </summary>
+    [Theory]
+    [InlineData("non-re-entrant")]
+    [InlineData("pre-re-heat")]
+    public void AReAfterAnotherHyphenIsStillThePrefix(string w)
+    {
+        Assert.Contains("\u0279\u02c8i\u02d0", Say(w));
+        Assert.DoesNotContain("\u0279\u02c8e\u1da6", Say(w));
+    }
+
+    /// <summary>
+    /// ⚠ THE PRECEDING SEGMENT, NOT THE FOLLOWING ONE: `re-do` is an ordinary prefixed word whose
+    /// SECOND element is a solfège syllable, so a following-segment test would read it as the note.
+    /// </summary>
+    [Theory]
+    [InlineData("re-do")]
+    [InlineData("re-mix")]
+    public void ThePrefixNotTheNote(string w) => Assert.Contains("\u0279\u02c8i\u02d0", Say(w));
+
+    /// <summary>
+    /// ⚠ THE ACCEPTED COST, pinned so it is a decision and not a surprise: a solfège sequence that
+    /// OPENS on the note is not protected. Far rarer than the prefix, and not separable by shape.
+    /// </summary>
+    [Fact]
+    public void ASolfegeSequenceThatOpensOnReIsNotProtected()
+        => Assert.Equal("ree-mi-fa-sol", Norm("re-mi-fa-sol"));
 
     /// <summary>⚠ A letter before it is someone else's `re`.</summary>
     [Theory]
