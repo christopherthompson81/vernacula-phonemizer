@@ -402,9 +402,9 @@ const VOWELS = new Set(def.vowels);
             const nextIsR = i + 1 < P.length && P[i + 1]!.base === "R";
             const nextIsV = i + 1 < P.length && VOWELS.has(P[i + 1]!.base);
             // REDUCED SLOT — misaki writes `ᵊ` here and we write one of TWO things, because `ᵊ` is
-            // not one phonological fact. Measured over the 3,264 slots this table marks: in 2,647
-            // (81%) the sonorant is in the CODA and genuinely carries the syllable (`able`, EY1 B
-            // AH0 L, [ˈeɪbl̩]); in 617 (19%) it is the ONSET of the next syllable and cannot be
+            // not one phonological fact. Measured over the 4,891 slots this table marks: in 3,912
+            // (80%) the sonorant is in the CODA and genuinely carries the syllable (`able`, EY1 B
+            // AH0 L, [ˈeɪbl̩]); in 979 (20%) it is the ONSET of the next syllable and cannot be
             // syllabic at all (`accompany`, gold `əkˈʌmpᵊni`, where the n starts `ni`).
             //
             // ⚠ SO `ᵊ` IS A REDUCED SCHWA, NOT A SYLLABICITY MARK, and conflating the two would put

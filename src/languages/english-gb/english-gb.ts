@@ -74,7 +74,17 @@ const PRE_VOWEL = `${VOWEL}ɚɝ`;
  * the ONSET CLUSTER `ɡɹ` lost its /ɹ/, exactly as the missing vowel did. `*` costs nothing: more marks
  * before a vowel still means "before a vowel".
  */
-const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stressed) vowel = coda → non-rhotic
+/**
+ * ⚠ A SYLLABIC CONSONANT IS A NUCLEUS, so an /ɹ/ before one is an ONSET and must not be dropped. This
+ * is the same defect the stress-run note above records, with `n̩`/`ɫ̩`/`m̩` in place of `ˌˈ`: the
+ * syllabic mark REMOVES the vowel that used to follow the /ɹ/, so the bare vowel test stopped seeing a
+ * nucleus and read an onset cluster as a coda. `children t͡ʃˈɪɫdɹn̩` came out `t͡ʃˈɪɫdn̩`, `neutral`
+ * `njˈuːtɫ̩`, `nostril` `nˈɒstɫ̩` — 34 words losing a CLUSTER /ɹ/ that RP pronounces.
+ * ⚠ IT GREW WITH THE SYLLABIC TABLE AND WAS NOT CAUSED BY IT: 22 of the 34 predate #1403's rebuild,
+ * which added 12 more. The trigger is the table; the bug is here.
+ */
+const SYLLABIC = "\u0329";
+const CODA = `(?![ˈˌ]*(?:[${VOWEL}]|[nmɫlŋ]${SYLLABIC}))`; // /ɹ/ before neither a vowel nor a syllabic consonant = coda
 
 /**
  * The eight rhotic patterns, HOISTED. `toRP` runs once per word and built every one of them from `VOWEL`
@@ -84,8 +94,17 @@ const CODA = `(?![ˈˌ]*[${VOWEL}])`; // an /ɹ/ NOT before a (optionally stress
  * ⚠ EVERY ONE IS USED WITH `.replace` ONLY. A `/g` regex hoisted to module scope carries `lastIndex`, so the
  * same move under `.test()` or `.exec()` would be a stateful bug; `replace` resets it.
  */
-const NURSE_PREVOCALIC = new RegExp(`ɝ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
-const LETTER_PREVOCALIC = new RegExp(`ɚ(?=[ˈˌ]*[${PRE_VOWEL}])`, "gu");
+/**
+ * ⚠ THE SYLLABIC NUCLEUS BELONGS HERE TOO, AND THE FIRST VERSION OF THE `CODA` FIX MISSED THESE TWO.
+ * They are the same test one step earlier, so an `ɚ`/`ɝ` before a syllabic consonant failed the linking
+ * test, fell through to the unconditional `ɚ→ə` / `ɝ→ɜː`, and the onset /ɹ/ vanished — exactly the
+ * `caterer` defect the `PRE_VOWEL` note above records, reached by a different missing nucleus.
+ * 13 words: `natural nˈæt͡ʃɚɫ̩` came out `nˈæt͡ʃəɫ̩` against RP /ˈnætʃ(ə)rəl/, and `mineral`,
+ * `pastoral`, `squirrel`, `mayoral`, `operant`, `photocurrent` with it.
+ */
+const PRE_NUCLEUS = `(?=[ˈˌ]*(?:[${PRE_VOWEL}]|[nmɫlŋ]${SYLLABIC}))`;
+const NURSE_PREVOCALIC = new RegExp(`ɝ${PRE_NUCLEUS}`, "gu");
+const LETTER_PREVOCALIC = new RegExp(`ɚ${PRE_NUCLEUS}`, "gu");
 /**
  * ⚠ THE OFFGLIDE TRIPHTHONGS, AND WITHOUT THEM #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS. Until that
  * change the generic offglide map rewrote `ᶦ`/`ᶷ` to full `ɪ`/`ʊ` FIRST, so `NEAR` and `CURE` fired on the
