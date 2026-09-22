@@ -20,6 +20,7 @@
  */
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
+import { clearForeignOov } from "../src/core/foreign.ts";
 import { phonemizeTrace } from "../src/index.ts";
 
 const out = process.argv[2];
@@ -35,6 +36,15 @@ for (const f of readdirSync("csharp/goldens").sort()) {
     if (!f.endsWith(".tsv")) continue;
     const code = f.slice(0, -4);
     if (only.size > 0 && !only.has(code)) continue;
+    // ⚠ PER LANGUAGE, as check-goldens.mts and the parity runner both do: the foreign-OOV memo is
+    // PROCESS-WIDE and survives across languages, so without this a row's trace is a function of what
+    // ran before it rather than of its own input. Measured there over the whole fleet: WITHOUT the
+    // clear, 38 rows go stale in 6 languages (mi, vi, nan, hak, hmn, sat); WITH it, 0.
+    // ⚠ IT MATTERS MORE HERE THAN ANYWHERE ELSE, because the memo's CONTENT is port-specific — a
+    // language whose foreign engine is still `PortPending` never populates it on the C# side — so an
+    // uncleared memo can report a divergence on one row whose real cause is a different language, or
+    // let two contaminations cancel and hide a real one.
+    clearForeignOov();
     let row = 0;
     for (const line of readFileSync(`csharp/goldens/${f}`, "utf8").split("\n")) {
         const text = line.split("\t")[0];

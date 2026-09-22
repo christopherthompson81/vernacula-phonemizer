@@ -205,3 +205,34 @@ silently-wrong-highlighting case #1419 was filed about, and it is caught.
 
 **Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189, no poisons · **trace-parity 189 languages, 36,495 rows, traces identical**.
+
+**Review of the trace gate — a gate whose success signal matched its no-op.**
+
+⚠ **NEITHER HALF CLEARED THE PROCESS-WIDE FOREIGN-OOV MEMO**, which every other golden-driven tool in
+the repo does (`gen_parity_goldens`, `check-goldens`, the parity runner). The measurement is already
+recorded in `check-goldens.mts`: without the clear, **38 rows go stale in 6 languages** (mi, vi, nan,
+hak, hmn, sat). It matters MORE here than anywhere else, because the memo's CONTENT is port-specific —
+a language whose foreign engine is still `PortPending` never populates it on the C# side — so an
+uncleared memo can report a divergence on a row whose real cause is a different language, or let two
+contaminations cancel and hide a real one. A gate that manufactures its own false positives is worse
+than none.
+
+⚠ **AND THE SUCCESS SENTENCE PRINTED WHEN ZERO ROWS WERE COMPARED.** Every row is skipped when the dump
+does not cover it, and nothing asserted a floor — so a stale `.trace-parity/ts.tsv` from an earlier
+subset dump, an empty dump, or goldens regenerated since, all printed *"traces identical across ports"*
+and exited 0. That is the memo *a success signal that matches the no-op*, in a tool written to close a
+hole of exactly that kind. `check-goldens.mts` states the rule ten lines from where the memo clear
+lives: **an empty golden is a failure, not a pass.** Both a zero floor and a PARTIAL-dump check now
+fail with exit 2, and the subset case is allowed only when `[codes…]` was asked for explicitly.
+
+Three more: the C# side had no `[codes…]` filter, so a one-language repro had TypeScript reach `hak`
+COLD while C# reached it after a hundred other languages — with a shared memo, precisely the condition
+that manufactures a false diff, and it still paid for a full 36,495-row pass; a malformed dump crashed
+with an index exception instead of saying "rerun the dump"; and the all-or-nothing `inputSpan` check
+fired after a `break`, double-counting one defect and naming a shape the corpus has zero instances of.
+
+**Proved again after the changes**, not assumed: injected offset error → 35,021 rows differ, exit 1;
+restored → identical, exit 0; empty, partial and malformed dumps → exit 2 each.
+
+**Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189 · trace-parity 189 languages, 36,495 of 36,495 rows walked, identical.
