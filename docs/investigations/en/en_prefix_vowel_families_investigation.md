@@ -134,3 +134,84 @@ emit while any related pair would disagree.
 13 where Moby itself is split, ~33 where it covers fewer than two members, 2 that are not families.
 **They want misaki `us_gold.json` — the one source #1397 names that discriminates and that we do not
 have — and not more work on the grouper**, which is not what is blocking.
+
+## Run 5 — 2026-09-22 — ⚠ us_gold.json WAS ON THIS MACHINE, AND IT CONTRADICTS HALF OF WHAT I SHIPPED
+
+Run 2 said, and #1416 shipped into the curated file's comment block and into this log:
+
+> ⚠ **AND misaki `us_gold.json` IS NOT ON THIS MACHINE.** Of the three sources the issue names, one is
+> uninformative and one is absent.
+
+**That is false.** The search behind it was
+
+    find /mnt/data /home/chris -maxdepth 6 -name "us_gold.json"
+
+and the file sits at depth **7**:
+`/home/chris/base/lib/python3.12/site-packages/misaki/data/us_gold.json`, 90,201 entries. ⚠ **A
+DEPTH-LIMITED SEARCH WAS REPORTED AS A FACT ABOUT THE WORLD**, and an argument was built on it — the
+whole "the arbitration rests on Moby alone, and therefore on the two-member rule" reasoning.
+
+### And it matters, because gold discriminates and disagrees with Moby
+
+    retrieve ɹətɹˈiv  reduced      precise  pɹisˈIs        tense
+    repress  ɹəpɹˈɛs  reduced      prevention pɹivˈɛnʧᵊn   tense
+
+Checking the 26 rows #1416 shipped on Moby alone:
+
+    gold agrees 6   ⚠ gold CONTRADICTS 13   gold silent 7
+
+Half. `prescriptive*` and `presumptive*` gold reads TENSE where Moby said reduced; `precess*` reduced
+where Moby said tense. **Moby alone was not a sound basis, and the two-member rule did not save it** —
+every one of those 13 had two or more agreeing Moby votes behind it.
+
+All 26 are reverted, including the in-place `revolve` edit, which is back to its LOT/THOUGHT-only row.
+
+### The rule #1397 actually asked for
+
+Both sources, abstaining wherever either hesitates: gold and Moby must agree, or one must speak while
+the other is silent — and **either way two distinct members of the family must be covered**.
+
+    62 split families   ⚠ settled 16   a source CONTRADICTS 35   too thin 11     → 24 rows
+
+⚠ **AND "SILENT" IS NOT "SPLIT WITHIN ITSELF", WHICH COST A ROUND.** A first version returned the same
+"no verdict" for both, so a family gold disagrees with *itself* about fell through to Moby and was
+recorded as "gold silent" — `detoxication` shipped tense that way while gold reads it `dətˌɑksəkˈAʃən`,
+reduced. **A source that speaks and contradicts itself is evidence of DIFFICULTY, not of absence.**
+
+⚠ **AND A SECOND VERSION DROPPED THE TWO-MEMBER FLOOR WHENEVER BOTH SOURCES SPOKE**, which is worse
+than it sounds. 12 of its 34 rows read `agree on 1 and 1 members`, and **in every case the covered word
+was the BASE FORM — the member that already agreed with the dictionary — while the members actually
+being CHANGED had no attestation at all.** `re:rebuff` shipped that way: the exact family the earlier
+comment had named as the counterexample ("covered on 1 of 4"). **Two sources agreeing about one word is
+still one word.** Restoring the floor over DISTINCT covered members took settled 22 → 16, rows 34 → 24.
+
+### Three more the same review found, each the same shape one level down
+
+- ⚠ **`goldVowels()` FAILED OPEN.** An absent gold file returned an empty map silently, so every family
+  reported "gold silent", the Moby branch took over, and the emitted notes were **indistinguishable
+  from a genuine silence** — #1416's defect reproducing itself on any machine where the venv moved. It
+  exits 2 now.
+- ⚠ **AND THE GOLD READER SCORED SPEECH AS SILENCE TWICE.** `ᵻ` — misaki's IH0/AH0 merge vowel, 13
+  prefix entries including the whole `deduce`/`deduct` family — was missing from the reduced class; and
+  142 POS-keyed entries (`precipitate`, `deviate`, `degenerate`) were discarded for not being strings
+  rather than read through their `DEFAULT`. **The same silent-vs-speaks conflation the abstain rule is
+  about, one level down in the reader.**
+- ⚠ **AND THE VERDICT WAS COMPUTED OVER THE KEY'S MEMBERS AND APPLIED TO THE EXTENDED SET**, so a word
+  stranded by `familyKey` — the very case the extension exists for — could be overwritten even where a
+  source gives it the opposite value, because the split detection never looked at it. Latent (0 of the
+  shipped rows), now re-tested over the extended set.
+
+### The check the first pass never had
+
+    rows 24   ⚠ rows gold contradicts: 0   `agree on 1 and 1`: 0   9 tense, 15 reduced
+
+⚠ **AND THE "31 tense, 33 reduced" IN AN EARLIER DRAFT OF THIS SECTION DESCRIBED 64 ROWS**, the count of
+the superseded pass, not the 34 it was printed beside. The figures above are counted from the diff.
+
+### What is left
+
+    62 split families → 16 settled → 46 open
+
+35 abstain because a source hesitates — gold against Moby, or a source against itself — and 11 are too
+thin to meet the two-member floor. **They are not waiting on a missing source; they are waiting on
+adjudication where two curated lexicons genuinely disagree**, which is a different and harder thing.
