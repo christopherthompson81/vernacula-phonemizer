@@ -93,7 +93,6 @@ const KNOWN_GAPS = new Map<string, string>([
     // went when gold contradicted the Moby-alone pass that added them; `regain` went when the floor was
     // restored. The waiver-may-not-rot assertion caught all three.
     ["devaluate", "n-gram (source N): recalls upstream's reduced D IH0; the family is TENSE (#1397)"],
-    ["preferred", "n-gram (source N): recalls upstream's reduced P R AH0; the family is TENSE (#1397)"],
 
     // ⚠ `upholstery` AND `upholster` WERE HERE AND ARE GONE, which is this list working as designed.
     // They read ⟨ph⟩ across the up·holstery seam as a /f/-less /p/, the note said "a retrain closes
