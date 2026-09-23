@@ -719,7 +719,11 @@ public static class Normalize
         };
 
     /** ⚠ NO `i` FLAG — the capitalisation IS the signal, as in FORMULA_TOKEN. Longest-first so a future
-     *  row that prefixes another cannot claim it and strand the tail. */
+     *  row that prefixes another cannot claim it and strand the tail.
+     *  ⚠ IT DELIBERATELY DROPS FORMULA_TOKEN's `(?!-\p{Lu})` TAIL — the one place the two differ. With the
+     *  tail, `316L-Grade` is left unclaimed and falls through to the unit pass as "316 LITERS-Grade", the
+     *  wrong-unit outcome this rule exists to prevent. The accepted cost is `Ti64-Al` → "titanium
+     *  sixty-four-Al". See the TS twin for the full reasoning. */
     private static readonly JsRe DESIGNATION_TOKEN = JsRegex.Compile(
         "(?<![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])("
         + string.Join("|", DESIGNATION_READING.Keys.OrderByDescending(k => k.Length))

@@ -40,4 +40,32 @@ public class EnglishDesignationTests
     [Fact]
     public void TheNearNeighboursAreDeliberatelyAbsent() =>
         Assert.Equal("304 liters pipe", Norm("304L pipe"));
+
+    /// ⚠ THE ONE PLACE DESIGNATION_TOKEN DIVERGES FROM FORMULA_TOKEN: it drops the `(?!-\p{Lu})` tail.
+    /// WITH the tail, `316L-Grade` would be left unclaimed and the UNIT PASS would take it — an unclaimed
+    /// designation falls back to a WRONG UNIT, not to "harmlessly spelled out". `317L-Grade` is the
+    /// unlisted control that shows what that fallback does. The accepted cost is the `Ti64-Al` row.
+    [Theory]
+    [InlineData("317L-Grade", "317 liters-Grade")]
+    [InlineData("316L-Grade", "three sixteen L-Grade")]
+    [InlineData("Ti64-Al", "titanium sixty-four-Al")]
+    public void AHyphenHeadIsClaimedBecauseUnclaimedWouldInventAUnit(string input, string expected) =>
+        Assert.Equal(expected, Norm(input));
+
+    /// MIXED-CASE ABBREVIATIONS (#1460) — `DoE` read "doe", and it reaches no initialism rule at all
+    /// because that pass claims ALL-CAPS runs.
+    [Fact]
+    public void AMixedCaseAbbreviationIsExpanded() =>
+        Assert.Equal("the design of experiments matrix", Norm("the DoE matrix"));
+
+    /// ⚠ THE EXACT CASE IS THE ENTIRE SAFETY PROPERTY OF THAT TABLE, and nothing else pins it: the
+    /// goldens contain no `DoE`, so parity would not catch a drift either. `doe` is a common noun and
+    /// `DOE` is the US Department of Energy — neither may be claimed.
+    [Theory]
+    [InlineData("a doe in the field")]
+    [InlineData("the DOE budget")]
+    [InlineData("aDoE")]
+    [InlineData("DoEs")]
+    public void OnlyTheExactMixedCaseSpellingIsClaimed(string s) =>
+        Assert.DoesNotContain("design of experiments", Norm(s));
 }

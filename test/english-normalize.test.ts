@@ -901,6 +901,20 @@ describe("material designations (#1458)", () => {
         expect(normalizeEnglish("316LX")).toBe("316LX");
     });
 
+    test("⚠ a hyphen head is CLAIMED, because unclaimed would invent a unit", () => {
+        // ⚠ THIS IS THE ONE PLACE `DESIGNATION_TOKEN` DIVERGES FROM `FORMULA_TOKEN`: it drops the
+        // `(?!-\p{Lu})` tail. Review proposed copying the tail for consistency; this assertion is why
+        // that is backwards. WITH the tail, `316L-Grade` is left unclaimed and the UNIT PASS takes it:
+        expect(normalizeEnglish("317L-Grade")).toBe("317 liters-Grade"); // an unlisted grade, today
+        // …so an unclaimed designation does not fall back to "harmlessly spelled out", it falls back to a
+        // WRONG UNIT — the outcome this rule exists to prevent. Claimed, it cannot:
+        expect(normalizeEnglish("316L-Grade")).toBe("three sixteen L-Grade");
+        // ⚠ THE COST IS ACCEPTED AND PINNED: the half-expansion `FORMULA_TOKEN`'s tail avoids. Neither
+        // branch reads this string right ("titanium sixty-four aluminium" is the wanted reading), so the
+        // choice is between two wrong readings and the one that invents no unit wins.
+        expect(normalizeEnglish("Ti64-Al")).toBe("titanium sixty-four-Al");
+    });
+
     test("⚠ the rows are the REPORTED ones — the near neighbours are deliberately absent", () => {
         // `FORMULA_READING`'s bar: rows are added on report, not by enumeration. These misread today and
         // are left alone, because the risk of a list is a CLAIMED TOKEN that was never a grade, and the

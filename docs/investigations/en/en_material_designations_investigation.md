@@ -107,9 +107,16 @@ Re-run with --add-missing."*
 ⚠ **NO ACRONYM PLURAL IS CLAIMED AT ALL.** The initialism pass matches an all-caps run and a trailing
 lowercase `s` ends it: `AIs`, `CTs`, `SUVs`, `UFOs`, `TSOs` all reach the word layer whole. It only
 MISREADS for the rows in `acronymLetters` — `SUVs` → `ˌɛsjuːvˈiːz` and `UFOs` → `jˌuːɛfˈoᶷz` are right,
-because the OOV path spells a token the dictionary does not know, while `AIs` → `ˈaᶦz` ("eyes") and
-`CTs` → `kʰˌɔːɹtˈɛs` are wrong for exactly the reason their singulars were. **The plural gap is the same
-defect one inflection over, for every hand-added row in that list.** Pinned as known-wrong.
+because the OOV path spells a token the dictionary does not know, while `AIs` → `ˈaᶦz` ("eyes"),
+`CTs` → `kʰˈɔːɹts` ("courts") and `TSOs` → `tsˈoᶷz` (the dish) are wrong for exactly the reason their
+singulars were: the lowercase form is a real word, so the plural simply INFLECTS THAT WORD. **The plural
+gap is the same defect one inflection over, for every hand-added row in that list.** Pinned positively.
+
+⚠ **THE FIRST WRITE-UP OF THIS PARAGRAPH GUESSED `CTs` → `kʰˌɔːɹtˈɛs`** — "court-ess", as though the
+`s` were spelled out separately — and review caught it. The engine emits plain `kʰˈɔːɹts`. The claim was
+never measured; it was inferred from the shape of the defect, and it was wrong in the one direction that
+mattered, because the whole point of the paragraph is to record the MEASURED state of the gap. Every
+reading in it is now a copy of engine output.
 
 ⚠ **`DOE` ALL-CAPS STILL READS "doe"** — the Department of Energy. Unreported, and adding `doe` to
 `acronymLetters` would claim it; left alone rather than decided in passing.

@@ -3234,6 +3234,7 @@ superalloy		S UW1 P ER0 AE2 L OY2	not in CMUdict; gold sˈupəɹˌælˌY — the
 superalloys		S UW1 P ER0 AE2 L OY2 Z	not in CMUdict; inflection of the row above, family consistency (#1431)
 profilometry		P R OW2 F AH0 L AA1 M AH0 T R IY0	not in CMUdict; tail from goniometry/interferometry, both AA1 M AH0 T R IY0 (#1428)
 profilometer		P R OW2 F AH0 L AA1 M AH0 T ER0	not in CMUdict; tail from goniometer/interferometer, both AA1 M AH0 T ER0 (#1428)
+profilometers		P R OW2 F AH0 L AA1 M AH0 T ER0 Z	not in CMUdict; inflection of the row above, family consistency (#1428)
 # ⚠ THE `un-` FORMS OF A STEM THE DICT ALREADY HAS RIGHT (#1461). `unmachinable` read ˌʌnmət͡ʃˈiːnəbəɫ —
 # /t͡ʃ/ — while `machinable` M AH0 SH IY1 N AH0 B AH0 L has the /ʃ/ correct. The un- form is not a dict row,
 # so it went OOV and the NEURAL TAGGER re-derived `ch` from spelling. ⚠ The SYNC path reads it correctly:
@@ -3249,4 +3250,3 @@ profilometer		P R OW2 F AH0 L AA1 M AH0 T ER0	not in CMUdict; tail from goniomet
 # READING, and there is none here.
 unmachinable		AH2 N M AH0 SH IY1 N AH0 B AH0 L	un- + machinable (dict); the tagger re-derived `ch` as /t͡ʃ/ (#1461)
 unmachined		AH2 N M AH0 SH IY1 N D	un- + machined (dict); same class, same derivation (#1461)
-profilometers		P R OW2 F AH0 L AA1 M AH0 T ER0 Z	not in CMUdict; inflection of the row above, family consistency (#1428)

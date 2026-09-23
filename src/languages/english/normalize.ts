@@ -598,6 +598,16 @@ const DESIGNATION_READING: Readonly<Record<string, string>> = {
 /**
  * ⚠ NO `i` FLAG — the capitalisation IS the signal, exactly as in `FORMULA_TOKEN`. Lowercase `316l` is
  * far likelier to be a sloppy volume than a grade, and `ti64` is not a designation at all.
+ *
+ * ⚠ IT DELIBERATELY DROPS `FORMULA_TOKEN`'s `(?!-\p{Lu})` TAIL, and that is the one place the two differ.
+ * Copying it would leave a hyphen-joined head UNCLAIMED, and unclaimed is not neutral here — measured,
+ * `316L-Grade` then falls through to the unit pass and reads "316 LITERS-Grade". That is the WRONG-UNIT
+ * outcome this whole rule exists to prevent, and this file ranks it worse than the half-expansion the
+ * tail is there to avoid. `FORMULA_TOKEN` can afford the tail because a formula that is not claimed is
+ * merely spelled out; a designation that is not claimed is actively mis-measured.
+ * ⚠ The cost is real and accepted: `Ti64-Al` reads "titanium sixty-four-Al". Neither branch reads that
+ * string correctly (it would want "titanium sixty-four aluminium"), so the choice is between two wrong
+ * readings, and the one that does not invent a UNIT wins.
  * ⚠ LONGEST-FIRST, so a future row that is a prefix of another cannot claim it and strand the tail —
  * the half-expansion `FORMULA_TOKEN` documents as the worst outcome, because it sounds finished.
  */

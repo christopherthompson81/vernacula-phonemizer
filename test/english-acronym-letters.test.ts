@@ -44,12 +44,19 @@ describe("an all-caps run that is letters, not a word", () => {
         // The initialism pass matches an ALL-CAPS run, and a trailing lowercase `s` ends it. Measured, no
         // acronym plural is claimed — `AIs`, `CTs`, `SUVs`, `UFOs`, `TSOs` all reach the word layer whole.
         // ⚠ IT ONLY MISREADS FOR THE ROWS IN THIS LIST: `SUVs` → ˌɛsjuːvˈiːz and `UFOs` → jˌuːɛfˈoᶷz are
-        // right, because the OOV path spells a token the dictionary does not know. `AIs` → ˈaᶦz ("eyes")
-        // and `CTs` → kʰˌɔːɹtˈɛs are wrong for exactly the reason the singulars were — the lowercase form
-        // is a real word. So the plural gap is the same defect one inflection over, for every hand-added
-        // row here. Pinned as KNOWN-WRONG so a fix registers as a change rather than a surprise.
+        // right, because the OOV path spells a token the dictionary does not know. `AIs` → ˈaᶦz ("eyes"),
+        // `CTs` → kʰˈɔːɹts ("courts") and `TSOs` → tsˈoᶷz (the dish) are wrong for exactly the reason the
+        // singulars were — the lowercase form is a real word, so the plural INFLECTS THAT WORD. The plural
+        // gap is the same defect one inflection over, for every hand-added row here.
+        // ⚠ PINNED POSITIVELY, not as `not.toBe(<the right answer>)`. A negative pin passes for ANY output
+        // that is not the correct one, so a regression to a THIRD wrong reading would keep it green — it
+        // would assert nothing about the defect it names. The exact wrong string makes both a fix and an
+        // unrelated regression register as a change.
         expect(phonemize("two SUVs", "en")).toBe("tʰˈuː ˌɛsjuːvˈiːz");
-        expect(phonemize("two CTs", "en")).not.toBe("tʰˈuː sˈiː tʰˈiː ˈɛs");
+        expect(phonemize("two UFOs", "en")).toBe("tʰˈuː jˌuːɛfˈoᶷz");
+        expect(phonemize("two CTs", "en")).toBe("tʰˈuː kʰˈɔːɹts");
+        expect(phonemize("two AIs", "en")).toBe("tʰˈuː ˈaᶦz");
+        expect(phonemize("two TSOs", "en")).toBe("tʰˈuː tsˈoᶷz");
     });
 
     test("TSO is letters and Tso is the dish", () => {
