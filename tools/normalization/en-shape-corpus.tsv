@@ -1,0 +1,42 @@
+# en — SHAPE CORPUS for the normalizer's text→words axis. Read by en-shape-equivalence.mts.
+#
+# ⚠ SYNTHETIC AND GENERIC BY CONSTRUCTION. Every line here is invented to exercise a SHAPE — a
+# measurement with a unit, a range, an enumerated list, an alphanumeric code — and carries no real
+# content of any kind. The shapes come from the defects reported at #1421–#1437.
+#
+# kind  name                       a                      b
+#   eq        — `a` and `b` are two spellings of the SAME thing and MUST normalize identically.
+#              ⚠ `a` IS ALWAYS THE ASCII SPELLING, deliberately: the Unicode one is what gets noticed
+#              and fixed, so the ASCII one is where the unfixed defect lives, and it is what real
+#              documents contain.
+#   survive   — `b` is a regex that must NOT match the normalized output of `a`.
+#
+# === UNITS BEHIND A PRIME / QUOTE (#1434, #1435) ===
+eq	inch, double-prime	0.015" total	0.015″ total
+eq	inch, plain integer	a 2" pipe	a 2″ pipe
+eq	foot+inch compound	he is 6' 2" tall	he is 6′ 2″ tall
+eq	foot alone	a 6' span	a 6′ span
+eq	DMS coordinate	40°26'46"N	40°26′46″N
+# === THE MICRO PREFIX, ASCII (#1427) ===
+eq	micron, ASCII u	a 5 um layer	a 5 µm layer
+eq	microinch, ASCII u	a 5 uin finish	a 5 µin finish
+eq	microsecond, ASCII u	a 5 us delay	a 5 µs delay
+eq	micro sign vs Greek mu	a 5 µm layer	a 5 μm layer
+# === RANGES (#1437) ===
+eq	hyphen range with unit	2-5 inches	2–5 inches
+eq	hyphen range, decimals	.002-.005 inches	.002–.005 inches
+# === SYMBOLS THAT MUST NOT REACH THE WORD LAYER ===
+survive	ohm sign	set 5 Ω now	Ω
+survive	micro sign	a 5 µm layer	µ
+survive	prime	a 6′ span	′
+survive	double prime	0.015″ total	″
+survive	degree sign	it is 20°C	°
+survive	ellipsis	wait… then go	…
+survive	multiplication sign	a 3 × 4 grid	×
+survive	plus-minus	5 ± 1 mm	±
+survive	superscript two	5 m² floor	²
+survive	fraction one-half	½ cup	½
+survive	en dash range	2–5 inches	–
+# === CASE AND CODES (#1421, #1422) ===
+eq	postal code, spaced	ship to V6L 2T5	ship to v6l 2t5
+eq	initialism in a sentence	contact TSO today	contact T.S.O. today
