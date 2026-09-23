@@ -35,7 +35,16 @@ if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
 // false diff. It also kept a one-language repro paying for a full 36,495-row pass.
 var only = args.Where(a => !a.StartsWith('-')).Skip(1).ToHashSet(StringComparer.Ordinal);
 
-/** One token as `span:inputSpan:ipaSpan`, each `a-b`, empty when the span is absent. */
+/** The TS spelling of a `TokenSource` — lower-case, and empty for `None`, so the two dumps agree. */
+static string SourceName(Vernacula.Phonemizer.Core.TokenSource s) => s switch
+{
+    Vernacula.Phonemizer.Core.TokenSource.None => "",
+    Vernacula.Phonemizer.Core.TokenSource.G2p => "g2p",
+    _ => s.ToString().ToLowerInvariant(),
+};
+
+/** One token as `span:inputSpan:ipaSpan:source`, each span `a-b` and empty when absent; `source` empty
+ *  when the engine does not report a tier (#1453). See the TS dumper for why it is in the gate. */
 static string Pair((int Start, int End)? s) => s is null ? "" : $"{s.Value.Start}-{s.Value.End}";
 
 // ── the expected side, read once ────────────────────────────────────────────────────────────────────
@@ -99,7 +108,7 @@ foreach (var path in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(p => p, 
         {
             var t = Phonemizer.PhonemizeTrace(text, code);
             var toks = string.Join(" ", t.Tokens.Select(k =>
-                $"{k.Start}-{k.End}:{Pair(k.InputSpan)}:{Pair(k.IpaSpan)}"));
+                $"{k.Start}-{k.End}:{Pair(k.InputSpan)}:{Pair(k.IpaSpan)}:{SourceName(k.Source)}"));
             got = $"{(t.Traced ? "T" : "F")}\t{t.Tokens.Count}\t{toks}";
 
             // ── structural, this side only ──────────────────────────────────────────────────────────

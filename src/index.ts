@@ -21,7 +21,7 @@ const MIXED_LATIN = (text: string): boolean =>
     /\p{Script=Latin}/u.test(text) && /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Devanagari}\p{Script=Tamil}\p{Script=Ethiopic}\p{Script=Hebrew}\p{Script=Bengali}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Sinhala}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}\p{Script=Georgian}\p{Script=Armenian}\p{Script=Greek}\p{Script=Tibetan}\p{Script=Oriya}\p{Script=Thaana}\p{Script=Syriac}\p{Script=Cherokee}]/u.test(text);
 
 export { getPhonemizer, type Phonemizer } from "./registry.ts";
-export type { TraceRewrite, TraceToken } from "./core/trace.ts";
+export type { TokenSource, TraceRewrite, TraceToken } from "./core/trace.ts";
 
 /** Phonemize `text` in language `lang` to canonical IPA (SYNCHRONOUS). Throws for an unregistered language.
  *  This is the simple path: a complete rule/lexicon engine for every language. Two caveats it does NOT cover —

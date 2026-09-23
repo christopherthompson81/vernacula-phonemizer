@@ -27,7 +27,11 @@ const out = process.argv[2];
 if (out === undefined) throw new Error("usage: dump-traces.mts <out.tsv> [codes…]");
 const only = new Set(process.argv.slice(3));
 
-/** One token as `span:inputSpan:ipaSpan`, each `a-b`, empty when the span is absent. */
+/** One token as `span:inputSpan:ipaSpan:source`, each span `a-b` and empty when absent; `source` empty
+ *  when the engine does not report a tier. ⚠ THE SOURCE IS IN THE GATE BECAUSE OTHERWISE IT IS IN NO GATE
+ *  (#1453): it is a new field on the public trace surface, present in both ports, and neither
+ *  `check-goldens` nor `parity` compares anything but the IPA string — which is exactly how #1408's null
+ *  `InputSpan` got out. */
 const pair = (s: readonly [number, number] | undefined): string => (s === undefined ? "" : `${s[0]}-${s[1]}`);
 
 const lines: string[] = [];
@@ -55,7 +59,7 @@ for (const f of readdirSync("csharp/goldens").sort()) {
         // agree on; swallowing it would let one engine throw and the other not, silently.
         try { t = phonemizeTrace(text, code); }
         catch { lines.push(`${code}\t${row}\tTHREW`); rows++; continue; }
-        const toks = t.tokens.map((k) => `${pair(k.span)}:${pair(k.inputSpan)}:${pair(k.ipaSpan)}`).join(" ");
+        const toks = t.tokens.map((k) => `${pair(k.span)}:${pair(k.inputSpan)}:${pair(k.ipaSpan)}:${k.source ?? ""}`).join(" ");
         lines.push(`${code}\t${row}\t${t.traced ? "T" : "F"}\t${t.tokens.length}\t${toks}`);
         rows++;
     }

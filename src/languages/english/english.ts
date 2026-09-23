@@ -9,7 +9,7 @@
  */
 import { readForeignRun } from "../../core/foreign.ts";
 import { FOREIGN_RUN } from "../../core/clauses.ts";
-import { enterEngine, noteAssembled, noteToken } from "../../core/trace.ts";
+import { enterEngine, noteAssembled, noteToken, type TokenSource } from "../../core/trace.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
 import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
@@ -163,7 +163,7 @@ export class EnglishPhonemizer {
     /** One orthographic word → canonical IPA, given its POS expectation. `oovOverride` (async neural path only,
      *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram engine —
      *  the sync path passes nothing, so behaviour is byte-identical. */
-    private resolveWord(word: string, e: PosExpectation | undefined, oovOverride?: (g2pKey: string) => string | undefined): string {
+    private resolveWord(word: string, e: PosExpectation | undefined, oovOverride?: (g2pKey: string) => string | undefined): { ipa: string; source: TokenSource } {
         // Fold Latin diacritics before any lookup: the lexicon and the n-gram G2P are ASCII-keyed
         // (CMUdict has `cafe`/`naive`/`jalapeno`, never the accented spellings), and the curly
         // apostrophe is normalised so "don’t" resolves like "don't".
@@ -199,7 +199,7 @@ export class EnglishPhonemizer {
                 (e?.noun && het.noun) ||
                 het.default;
             if (pluralAllomorph) ipa += sibilantAllomorph(ipa);
-            return ipa;
+            return { ipa, source: "heteronym" };
         }
 
         // Possessive / genitive clitic: X's → base + allomorph; Xs' → base.
@@ -229,16 +229,21 @@ export class EnglishPhonemizer {
                 : undefined;
             if (american !== undefined) over = this.lexicon.get(american);
         }
+        // ⚠ THE TIER IS RECORDED WHERE IT IS DECIDED, not inferred afterwards. #1453: a reading's tier is
+        // the one question a wrong reading raises that the trace could not answer, and the only place that
+        // knows it is the branch that produced the string.
+        let source: TokenSource = "lexicon";
         if (over === undefined) {
             // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
             // so contractions/loanwords G2P their letters).
             const g2pKey = lookupKey.replace(/'/g, "");
-            over =
-                oovOverride?.(g2pKey) ??
-                (/^[a-z]+$/.test(g2pKey) ? this.g2p.g2p(g2pKey) : g2pKey);
+            const tagged = oovOverride?.(g2pKey);
+            if (tagged !== undefined) { over = tagged; source = "tagger"; }
+            else if (/^[a-z]+$/.test(g2pKey)) { over = this.g2p.g2p(g2pKey); source = "g2p"; }
+            else { over = g2pKey; source = "passthrough"; }
         }
         if (possAllomorph) over += sibilantAllomorph(over);
-        return over;
+        return { ipa: over, source };
     }
 
     /** POS expectations for a sentence's words (perceptron tags → verb/noun/past, + imperative recovery). */
@@ -446,6 +451,8 @@ export class EnglishPhonemizer {
             display: string;
             /** The source token this reading came from — carried for the #1150 trace only. */
             src?: { span: Span; surface: string };
+            /** WHICH TIER produced `citation` — carried for the #1453 trace only. */
+            tier?: TokenSource;
         }
         const clauses: { items: Item[]; mark: string | null }[] = [
             { items: [], mark: null },
@@ -461,19 +468,20 @@ export class EnglishPhonemizer {
             }
             if (u.foreign !== undefined) {
                 clauses[clauses.length - 1]!.items.push({
-                    word: "", citation: u.foreign, reduced: false, display: u.foreign,
+                    word: "", citation: u.foreign, reduced: false, display: u.foreign, tier: "foreign",
                     src: u.span !== undefined && u.surface !== undefined ? { span: u.span, surface: u.surface } : undefined,
                 });
                 continue;
             }
             for (const w of u.words) {
-                const citation = this.resolveWord(w.text, expect[wi], oovOverride);
+                const { ipa: citation, source } = this.resolveWord(w.text, expect[wi], oovOverride);
                 wi++;
                 if (citation === "") continue;
                 const lw = w.text.toLowerCase();
                 clauses[clauses.length - 1]!.items.push({
                     word: lw,
                     citation,
+                    tier: source,
                     reduced: (w.reduced ?? false) || this.unstressed.has(lw),
                     display: citation,
                     src: u.span !== undefined && u.surface !== undefined ? { span: u.span, surface: u.surface } : undefined,
@@ -482,7 +490,7 @@ export class EnglishPhonemizer {
         }
 
         const parts: string[] = [];
-        const traced = new Map<string, { span: Span; surface: string; emitted: string[]; parts: number[] }>();
+        const traced = new Map<string, { span: Span; surface: string; emitted: string[]; parts: number[]; tier?: TokenSource; disagreed: boolean }>();
         for (const c of clauses) {
             // A CLAUSE-INITIAL COORDINATOR IS NOT IN A REDUCTION ENVIRONMENT. `and` is an unstressed
             // function word and reduces to `ənd` wherever it stands — but a coordinator that RESUMES
@@ -550,8 +558,20 @@ export class EnglishPhonemizer {
                     // into lets the offsets be computed exactly, below, rather than guessed by searching the
                     // reading for a substring that may occur more than once.
                     const bucket = traced.get(key);
-                    if (bucket) { bucket.emitted.push(rendered); bucket.parts.push(parts.length - 1); }
-                    else traced.set(key, { span: it.src.span, surface: it.src.surface, emitted: [rendered], parts: [parts.length - 1] });
+                    // ⚠ A TOKEN WHOSE READINGS COME FROM DIFFERENT TIERS REPORTS NONE (#1453). One source
+                    // token can yield many readings — a numeral becomes words — and reporting the first
+                    // would be a confident wrong answer to a question with no single answer. `disagreed`
+                    // is sticky, so a later match back to the first tier does not un-poison it.
+                    if (bucket) {
+                        bucket.emitted.push(rendered);
+                        bucket.parts.push(parts.length - 1);
+                        if (bucket.tier !== it.tier) { bucket.tier = undefined; bucket.disagreed = true; }
+                    } else {
+                        traced.set(key, {
+                            span: it.src.span, surface: it.src.surface, emitted: [rendered],
+                            parts: [parts.length - 1], tier: it.tier, disagreed: false,
+                        });
+                    }
                 }
             }
             if (c.mark !== null) parts.push(c.mark);
@@ -575,7 +595,7 @@ export class EnglishPhonemizer {
                 if (at[i]! < lo) lo = at[i]!;
                 if (at[i]! + parts[i]!.length > hi) hi = at[i]! + parts[i]!.length;
             }
-            noteToken(t.span, t.surface, t.emitted, undefined, [lo, hi]);
+            noteToken(t.span, t.surface, t.emitted, undefined, [lo, hi], t.disagreed ? undefined : t.tier);
         }
         const assembled = parts.join(" ");
         // ⚠ DECLARED SO IT CAN BE DISBELIEVED, exactly as `clauseSink.finish` does: the offsets above index

@@ -28,6 +28,46 @@
 import { hostDepth } from "./foreign.ts";
 import { beginProvenance, endProvenance, inputSpan, provenanceFor } from "./provenance.ts";
 
+/**
+ * HOW A TOKEN'S READING WAS RESOLVED — which TIER answered, not where the answer came from in the text.
+ *
+ * ⚠ THIS EXISTS BECAUSE TWO IDENTICAL NORMALIZED STRINGS READ DIFFERENTLY AND NOTHING COULD SAY WHY.
+ * `the τ value` and `the tau value` normalize to the same 13 code points and phonemize differently
+ * (#1452 — the neural pre-pass scans the RAW text, so a word the normalizer creates never reaches the
+ * tagger). Finding that took a hex dump, an order-dependence test, a sync/async comparison and reading
+ * the neural entry point. `span` says where a reading came from and `ipaSpan` where it landed; the
+ * question a wrong reading actually raises — WHICH TIER PRODUCED THIS — had no answer at all.
+ *
+ * ⚠ AND IT MAKES #1452 CHECKABLE BY A GATE RATHER THAN BY A PERSON: "the same normalized string resolved
+ * by two different tiers" is a property a test can assert once the tier is reported.
+ */
+export type TokenSource =
+    /** A dictionary/lexicon row answered. */
+    | "lexicon"
+    /** A heteronym entry answered — the reading depended on the POS expectation. */
+    | "heteronym"
+    /**
+     * The neural OOV tagger answered.
+     *
+     * ⚠ PRODUCED BY THE ENGINE, NOT OBSERVABLE THROUGH `phonemizeTrace`, and the reason is architectural
+     * rather than an oversight. `phonemizeTrace` wraps the SYNC `phonemize`, which never consults the
+     * tagger; a traced ASYNC entry was written for this and REMOVED, because the recorder is a module
+     * global and holding it across an `await` lets any unrelated `phonemize` call in the process write
+     * into the open recording — measured, a traced English call returned `normalized: "bonjour monsieur"`
+     * with two French tokens in it. Scoping the recorder to one call needs an async context, and `src/`
+     * carries no `node:` imports by design, so `AsyncLocalStorage` is not available to it.
+     * ⚠ IT IS REACHABLE AND TESTED by driving the recorder around `phonemizeEnNeural` directly, which is
+     * safe in a single-threaded test and is not safe to offer as an API. See
+     * `test/trace-token-source.test.ts`.
+     */
+    | "tagger"
+    /** The rule/n-gram OOV g2p answered — no lexicon row and no tagger reading. */
+    | "g2p"
+    /** A foreign run, read by another language's engine. */
+    | "foreign"
+    /** The key was not alphabetic, so it passed through unresolved. */
+    | "passthrough";
+
 /** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
 export interface TraceToken {
     /** `[start, end)` into the trace's `normalized` text — NOT into the caller's original input. */
@@ -51,6 +91,23 @@ export interface TraceToken {
      * reads *ɣˈato*. This is the token's contribution, not its surviving output.
      */
     emitted: string[];
+    /**
+     * WHICH TIER produced this token's CITATION. See `TokenSource`.
+     *
+     * ⚠ THE CITATION, NOT NECESSARILY THE EMITTED STRING, and the distinction is real. Prosody rewrites a
+     * reading after the tier has answered — the clause-initial coordinator in `it was built, and tested`
+     * emits `ˈænd` from `clauseInitialStressed`, and `wordTransform` (the en-GB accent delta) replaces the
+     * string outright — and neither is a TIER, so neither changes this. It answers "what looked the word
+     * up", which is the question a wrong reading raises; `emitted` is what the token actually contributed.
+     *
+     * ⚠ ABSENT MEANS "NOT REPORTED", NEVER "UNKNOWN TIER" — the same rule `inputSpan` and `ipaSpan` carry,
+     * and for the same reason: most engines route through `assembleClauses` and report nothing here, so an
+     * absent field is the common case rather than a signal.
+     * ⚠ AND IT IS ABSENT WHEN ONE TOKEN'S READINGS DISAGREE ABOUT IT. A numeral becomes many words and a
+     * token can accumulate several readings; where they do not all come from the same tier, reporting the
+     * first would be a confident wrong answer to a question with no single answer.
+     */
+    source?: TokenSource;
     /**
      * `[start, end)` into the trace's `ipa` — where this token's contribution ENDED UP (#1150 stage 3).
      *
@@ -120,6 +177,13 @@ let recording: Recording | null = null;
 const active = (): boolean => recording !== null && hostDepth() <= 1;
 
 export function startTrace(input: string): void {
+    // ⚠ AN OVERWRITE, AND THAT IS DELIBERATE — A THROW HERE WAS TRIED AND REVERTED (#1453). Refusing
+    // re-entry sounds safer and removes the recorder's SELF-HEALING property: a recording left open by a
+    // `stopTrace` that threw, or by an abandoned call, would then be stuck for the process lifetime and
+    // every later `phonemizeTrace` would throw. Three tools (`ipa-span-coverage`, `provenance-coverage`,
+    // `provenance-poison`) wrap the call in `catch { continue; }`, so that state reports a CLEAN RUN WITH
+    // ZERO ROWS rather than a failure — the success-signal-that-matches-the-no-op shape this repo keeps
+    // being bitten by. Overwriting means the next call always recovers.
     recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0, spans: new Map(), assembled: null };
     beginProvenance(input);
 }
@@ -242,10 +306,12 @@ export function noteToken(
     emitted: string[],
     nativised?: string,
     ipaSpan?: [number, number],
+    source?: TokenSource,
 ): void {
     if (!active() || recording === null || !recording.traced) return;
     const t: TraceToken = { span, surface, emitted: emitted.filter((x) => x !== "") };
     if (nativised !== undefined && nativised !== surface) t.nativised = nativised;
+    if (source !== undefined) t.source = source;
     // ⚠ THE TWO-PHASE ENGINES MUST PASS THIS THEMSELVES. They never open a token while its reading is being
     // made, so `noteEmit`'s offset never reaches them; what they DO know is which slot of their own parts
     // list each reading went into, which is the same fact one step earlier.

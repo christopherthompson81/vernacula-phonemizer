@@ -153,7 +153,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     /** One orthographic word → canonical IPA, given its POS expectation. `oovOverride` (async neural path only,
      *  enNeural.ts) resolves a genuinely-OOV g2pKey to the BiLSTM tagger's reading BEFORE the sync n-gram
      *  engine — the sync path passes nothing, so behaviour is byte-identical. */
-    private string ResolveWord(string word, PosExpectation? e, Func<string, string?>? oovOverride)
+    private (string Ipa, TokenSource Source) ResolveWord(string word, PosExpectation? e, Func<string, string?>? oovOverride)
     {
         var lower = CURLY_APOSTROPHE.Replace(Unicode.FoldLatinDiacritics(Js.ToLowerCase(word)), "'");
 
@@ -182,7 +182,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                 : (e?.Noun == true && !string.IsNullOrEmpty(het.Noun)) ? het.Noun!
                 : het.Default;
             if (pluralAllomorph) ipa += SibilantAllomorph(ipa);
-            return ipa;
+            return (ipa, TokenSource.Heteronym);
         }
 
         var lookupKey = lower;
@@ -205,13 +205,18 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                 : null;
             if (american is not null) over = _lexicon.TryGetValue(american, out var us) ? us : null;
         }
+        // ⚠ THE TIER IS RECORDED WHERE IT IS DECIDED, not inferred afterwards (#1453). See the TS twin.
+        var source = TokenSource.Lexicon;
         if (over is null)
         {
             var g2pKey = APOSTROPHES.Replace(lookupKey, "");
-            over = oovOverride?.Invoke(g2pKey) ?? (ASCII_WORD.IsMatch(g2pKey) ? _g2p.G2p(g2pKey) : g2pKey);
+            var tagged = oovOverride?.Invoke(g2pKey);
+            if (tagged is not null) { over = tagged; source = TokenSource.Tagger; }
+            else if (ASCII_WORD.IsMatch(g2pKey)) { over = _g2p.G2p(g2pKey); source = TokenSource.G2p; }
+            else { over = g2pKey; source = TokenSource.Passthrough; }
         }
         if (possAllomorph) over += SibilantAllomorph(over);
-        return over;
+        return (over, source);
     }
 
     /** A tag that can HEAD a noun phrase, so that a following VBN + NN is attributive. See the TypeScript. */
@@ -308,6 +313,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         public required bool Reduced { get; init; }
         public required string Display { get; set; }
         public Src? Source { get; init; }
+        /** WHICH TIER produced `Citation` — carried for the #1453 trace only. */
+        public TokenSource Tier { get; init; } = TokenSource.None;
     }
 
     private sealed class ClauseAcc
@@ -427,12 +434,12 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             }
             if (u.Foreign is not null)
             {
-                clauses[^1].Items.Add(new Item { Word = "", Citation = u.Foreign, Reduced = false, Display = u.Foreign, Source = u.Source });
+                clauses[^1].Items.Add(new Item { Word = "", Citation = u.Foreign, Reduced = false, Display = u.Foreign, Source = u.Source, Tier = TokenSource.Foreign });
                 continue;
             }
             foreach (var w in u.Words)
             {
-                var citation = ResolveWord(w.Text, wi < expect.Count ? expect[wi] : null, oovOverride);
+                var (citation, tier) = ResolveWord(w.Text, wi < expect.Count ? expect[wi] : null, oovOverride);
                 wi++;
                 if (citation == "") continue;
                 var lw = Js.ToLowerCase(w.Text);
@@ -443,6 +450,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                     Reduced = w.Reduced || _unstressed.Contains(lw),
                     Display = citation,
                     Source = u.Source,
+                    Tier = tier,
                 });
             }
         }
@@ -450,7 +458,7 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var parts = new List<string>();
         // ⚠ RECORDED AFTER RENDERING (#1150): this pipeline is two-phase, so no token is ever "open" while
         // its reading is produced. One source token can yield many readings, so they accumulate per span.
-        var traced = new Dictionary<string, (Src Src, List<string> Emitted, List<int> Parts)>();
+        var traced = new Dictionary<string, (Src Src, List<string> Emitted, List<int> Parts, TokenSource Tier)>();
         foreach (var c in clauses)
         {
             // A clause-initial coordinator takes its STRONG form — see the TS for the A/B evidence and
@@ -487,8 +495,15 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
                     // went into lets the offsets be computed exactly below, rather than guessed by searching
                     // the reading for a substring that may occur more than once.
                     var key = $"{it.Source.Start}:{it.Source.End}";
-                    if (traced.TryGetValue(key, out var b)) { b.Emitted.Add(rendered); b.Parts.Add(parts.Count - 1); }
-                    else traced[key] = (it.Source, new List<string> { rendered }, new List<int> { parts.Count - 1 });
+                    // ⚠ A TOKEN WHOSE READINGS COME FROM DIFFERENT TIERS REPORTS NONE (#1453) — a numeral
+                    // becomes many words, and the first would be a confident wrong answer. Sticky.
+                    if (traced.TryGetValue(key, out var b))
+                    {
+                        b.Emitted.Add(rendered);
+                        b.Parts.Add(parts.Count - 1);
+                        if (b.Tier != it.Tier) traced[key] = (b.Src, b.Emitted, b.Parts, TokenSource.None);
+                    }
+                    else traced[key] = (it.Source, new List<string> { rendered }, new List<int> { parts.Count - 1 }, it.Tier);
                 }
             }
             if (c.Mark is not null) parts.Add(c.Mark);
@@ -499,11 +514,11 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         var at = new int[parts.Count];
         var cursor = 0;
         for (var i = 0; i < parts.Count; i++) { at[i] = cursor; cursor += parts[i].Length + 1; }
-        foreach (var (src, emitted, slots) in traced.Values)
+        foreach (var (src, emitted, slots, tier) in traced.Values)
         {
             var lo = slots.Min(i => at[i]);
             var hi = slots.Max(i => at[i] + parts[i].Length);
-            Core.Trace.NoteToken(src.Start, src.End, src.Surface, emitted, null, (lo, hi));
+            Core.Trace.NoteToken(src.Start, src.End, src.Surface, emitted, null, (lo, hi), tier);
         }
         var assembled = string.Join(" ", parts);
         // ⚠ DECLARED SO IT CAN BE DISBELIEVED, exactly as `ClauseSink.Finish` does.
