@@ -13,7 +13,25 @@ import { createEnglish } from "./english.ts";
 import { addForeignOov, lookupForeignOov, withHost } from "../../core/foreign.ts";
 import { createEnglishTagger, type EnglishTagger } from "./englishTagger.ts";
 
+/** A word to consider tagging. What is EXCLUDED is `DIGIT_ORDINAL`'s business, not this pattern's. */
 const WORD = /[A-Za-z][A-Za-z']*/gu;
+
+/**
+ * An ORDINAL SUFFIX glued to a digit — `23rd`, `1st`, `2nd`, `4th`.
+ *
+ * ⚠ SCANNING THE NORMALIZED TEXT SURFACES FRAGMENTS THE RAW TEXT NEVER HAD (#1452). `2026-09-23`
+ * normalizes to `september 23rd`, where `WORD` matches the bare `rd` and hands the tagger a nonsense key.
+ * The resolver never asks for it — the tokenizer reads `23rd` whole — so the tagged entry is dead, and an
+ * ONNX call is the most expensive thing in that loop.
+ *
+ * ⚠ AND THE FIRST VERSION OF THIS GUARD WAS A BLANKET "NOT ADJACENT TO A DIGIT", WHICH THE GOLDENS
+ * REFUSED. It excluded a large legitimate class — pinyin with a tone number (`zhong1`, `zhi3`, `guai2`),
+ * unit abbreviations (`600Mbit`), identifiers (`35px`) — where the LETTERS are a real word the tagger
+ * reads well and the n-gram does not: `zhong1` went `ʒˈɔːŋ` → `ʒˈɑːnd͡ʒ`, `Mbit` went `ˌɛmbˈɪt` → `mbˈʌt`.
+ * SIX golden rows across five languages, every one a regression. That is trading CORRECTNESS for one
+ * ONNX call, which is the wrong trade — so the guard names the four ordinal suffixes and nothing else.
+ */
+const DIGIT_ORDINAL = /^[0-9](?:st|nd|rd|th)$/iu;
 let taggerP: Promise<EnglishTagger | undefined> | undefined;
 let engine: ReturnType<typeof createEnglish> | undefined;
 const enEngine = (): ReturnType<typeof createEnglish> => (engine ??= createEnglish());
@@ -50,6 +68,14 @@ export async function prewarmForeignEnglish(text: string): Promise<void> {
     if (!tagger) return;
     const E = enEngine();
     const done = new Set<string>();
+    // ⚠ THE RAW TEXT HERE, AND THAT IS NOT THE #1452 DEFECT REPEATED — IT WAS TRIED AND REVERTED.
+    // `phonemizeEnNeural` receives one language's text and normalizes ALL of it, so scanning the normalized
+    // string is right there. This function receives the HOST's text, which is not English, and the English
+    // normalizer run over it expands things the English resolver will never see that way: `600Mbit/s`
+    // inside Khmer became `600 megabits per second`, so `Mbit` — which `textWithOov` DOES ask for, because
+    // `core/foreign.ts` hands it the embedded RUN and normalizes that — stopped being prewarmed. One golden
+    // row and the parity gate caught it. Normalizing per-run would be the real fix and this function does
+    // not know the run boundaries; the raw scan is a superset of the run's own words, which is why it works.
     for (const m of text.matchAll(WORD)) {
         const w = m[0];
         if (E.knownWord(w) !== undefined) continue; // dict / heteronym → the sync path is authoritative
@@ -89,9 +115,29 @@ export async function phonemizeEnNeural(
     // served authoritatively by the sync path; genuinely-OOV pure-alpha words go to the BiLSTM. An empty tag ("")
     // means the tagger DECLINED (an out-of-vocab letter) → leave it out so the sync n-gram engine handles the word.
     const tagged = new Map<string, string>();
-    for (const m of text.matchAll(WORD)) {
+    // ⚠ THE NORMALIZED TEXT, NOT THE CALLER'S (#1452). This scanned `text` — the RAW input — so a word the
+    // NORMALIZER creates was never in it, never tagged, and fell silently to the weaker n-gram path:
+    // `τ` → `tau`, `µin` → `microinch`, `5 Ω` → `ohms`, `ξ` → `zye`. Those are exactly the
+    // normalizer-introduced words that are also OOV, i.e. the ones with no dictionary row to fall back on.
+    // ⚠ IT WAS INVISIBLE BECAUSE THE TWO PATHS AGREED ON EVERYTHING ELSE: `phonemize` and `phonemizeAsync`
+    // returned different IPA for BYTE-IDENTICAL normalized text, and nothing in the trace said why until
+    // #1453 added the tier.
+    // ⚠ NORMALIZED ONCE, HERE, AND HANDED ON — not normalized again inside `text()`. The measured reason is
+    // cost: two passes are 0.583 → 0.947 ms/call, +62% on this path.
+    // ⚠ AND A SECOND REASON THAT IS NOT LIVE YET, STATED AS SUCH. A repeat pass from the raw input is the
+    // shape `rewrite` refuses (`tracked !== s`), which POISONS the mapping and withholds every
+    // `inputSpan`. It cannot bite today, because provenance is only seeded by `startTrace` and its only
+    // caller `phonemizeTrace` is SYNCHRONOUS — this path never runs under a recording. #1453 adds
+    // `phonemizeTraceAsync`, which does, and makes the hazard real. Recorded now so the one-pass shape is
+    // not "simplified" back before then.
+    const normalized = E.normalizedFor(text);
+    for (const m of normalized.matchAll(WORD)) {
         const w = m[0];
-        if (E.knownWord(w) !== undefined) continue; // dict / heteronym → sync path
+        // ⚠ An ordinal suffix glued to a digit is a FRAGMENT, not a word — see DIGIT_ORDINAL.
+        if (m.index > 0 && DIGIT_ORDINAL.test(normalized.slice(m.index - 1, m.index + w.length))) continue;
+        // ⚠ THE PREDICATE, NOT `knownWord` — see `hasWord`. Building the citation for every scanned word
+        // is most of the cost, and this scan now walks the EXPANDED text where a date is a dozen words.
+        if (E.hasWord(w)) continue; // dict / heteronym → sync path
         const key = g2pKeyOf(w);
         if (tagged.has(key) || !/^[a-z]+$/u.test(key)) continue;
         const ipa = await tagger.tag(key);
@@ -101,5 +147,5 @@ export async function phonemizeEnNeural(
     // (numbers, heteronym POS, possessives, punctuation) is the sync path, so only OOV word readings differ.
     // `withHost` — this engine is built here, not by the registry, so nothing else pushes the host and a
     // foreign run would be dropped for want of one (core/foreign.ts). Synchronous, as that stack requires.
-    return withHost(host, () => E.text(text, variant?.wordTransform, (g2pKey) => tagged.get(g2pKey)));
+    return withHost(host, () => E.text(normalized, variant?.wordTransform, (g2pKey) => tagged.get(g2pKey), true));
 }

@@ -48,15 +48,21 @@ describe("TraceToken.source (#1453)", () => {
         expect(sources(phonemizeTrace("λόγος here", "en"))["λόγος"]).toBe("foreign");
     });
 
-    it("⚠ answers #1452 in one call — the same normalized string, two tiers", async () => {
-        // ⚠ THE NORMALIZED TEXT IS BYTE-IDENTICAL. That is the whole point: nothing else in the trace
-        // distinguishes these two, and the readings differ.
+    it("⚠ #1452 IS FIXED, and this is the assertion that used to pin the defect", async () => {
+        // ⚠ THIS TEST ASSERTED THE DIVERGENCE AND #1452 REMOVED IT. It read `expect(a.ipa).not.toBe(b.ipa)`
+        // with `tau/tagger` against `tau/g2p` — the signature of the pre-pass scanning the RAW text, so a
+        // word the normalizer created never reached the tagger. Both branches were green in isolation and
+        // this failed the moment they were rebased together, which is the whole reason for re-running the
+        // suite on the combined state rather than merging two green PRs.
+        // ⚠ THE NORMALIZED TEXT IS BYTE-IDENTICAL, which is what made the old divergence a defect at all:
+        // nothing else in the trace distinguished the two, and that is what `source` was added to show.
         const a = await traceNeural("the tau value");
         const b = await traceNeural("the τ value");
         expect(a.normalized).toBe(b.normalized);
-        expect(a.ipa).not.toBe(b.ipa);
+        expect(a.ipa).toBe(b.ipa);
+        // …and BOTH now reach the tagger, which is the fix stated as a property rather than as a string.
         expect(sources(a)["tau"]).toBe("tagger");
-        expect(sources(b)["tau"]).toBe("g2p");
+        expect(sources(b)["tau"]).toBe("tagger");
     });
 
     it("⚠ the SYNC trace cannot reach `tagger` — it is produced, but not observable through the API", () => {

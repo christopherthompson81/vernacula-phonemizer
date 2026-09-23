@@ -130,6 +130,20 @@ export class EnglishPhonemizer {
         private readonly clauseInitialStressed: Record<string, string>,
     ) {}
 
+    /**
+     * Does the lexicon or the heteronym table answer this word? The PREDICATE behind `knownWord`.
+     *
+     * ⚠ THE NEURAL PRE-PASS ONLY NEEDS THE BOOLEAN, AND BUILDING THE CITATION IS MOST OF THE COST.
+     * `knownWord` runs `CreoleCitation` — two regex replaces — on every hit, and since #1452 the pre-pass
+     * scans the NORMALIZED text, where a number or a date has expanded into many words. Measured on
+     * number-heavy text: 0.448 → 0.824 ms/call with `knownWord`, and back to 0.50 with this.
+     */
+    hasWord(word: string): boolean {
+        const lower = word.toLowerCase();
+        if (this.lexicon.has(lower) || this.heteronyms.has(lower)) return true;
+        return americanSpelling(lower, (w) => this.lexicon.has(w)) !== undefined;
+    }
+
     /** Dict-only lookup for creoles (e.g. Naija) that NATIVISE English-etymological words: the CMUdict-derived
      *  citation IPA if `word` is known English, else undefined (an OOV word — likely a substrate loan — for the
      *  caller to handle differently). No OOV G2P and no clause/stress processing — the raw pronunciation to remap. */
@@ -146,6 +160,19 @@ export class EnglishPhonemizer {
         if (american === undefined) return undefined;
         const folded = this.lexicon.get(american);
         return folded === undefined ? undefined : CreoleCitation(folded);
+    }
+
+    /**
+     * The text as the TOKENIZER will see it — every normalization pass, and nothing after.
+     *
+     * ⚠ THE NEURAL PRE-PASS NEEDS THIS AND USED THE RAW TEXT INSTEAD (#1452). A word the NORMALIZER
+     * creates — `τ` → `tau`, `µin` → `microinch`, `5 Ω` → `ohms` — is not in the caller's string, so it was
+     * never tagged and fell silently to the weaker n-gram path. Exposed here rather than duplicated in
+     * `englishNeural.ts` so the two cannot drift: this is the same expression `text()` runs, and a
+     * normalizer pass added to one would otherwise have to be remembered in the other.
+     */
+    normalizedFor(input: string): string {
+        return normalizeEnglishInitialisms(normalizeEnglish(input), (w) => this.lexicon.has(w));
     }
 
     /** `text` with an `oovOverride`, for the registry's FOREIGN reader (core/foreign.ts) — the path that reads an
@@ -330,11 +357,26 @@ export class EnglishPhonemizer {
         input: string,
         wordTransform?: (ipa: string, word: string) => string,
         oovOverride?: (g2pKey: string) => string | undefined,
+        /**
+         * `input` has ALREADY been through `normalizedFor` — skip it rather than run it twice.
+         *
+         * ⚠ IT EXISTS FOR THE NEURAL PRE-PASS AND FOR PROVENANCE, NOT AS AN OPTIMISATION ALONE (#1452).
+         * That pre-pass has to SEE the normalized text to know which words the tagger will be asked for,
+         * and it is async, so it cannot run inside this method. Normalizing again here was measured at
+         * **0.583 → 0.947 ms/call, +62%** on the neural path.
+         * ⚠ AND THE SECOND PASS WOULD ALSO HAVE POISONED THE TRACE. `rewrite` refuses a string the mapping
+         * does not describe (`tracked !== s`), which is exactly what a repeat pass from the raw input looks
+         * like, and poisoning withholds every `inputSpan`. Normalizing ONCE — in the caller, under the same
+         * recording — keeps the mapping correct and costs nothing.
+         * ⚠ PASSING `true` WITH UNNORMALIZED TEXT IS A SILENT WRONG READING, not an error: numbers, units
+         * and initialisms would reach the tokenizer raw. Only `englishNeural.ts` sets it.
+         */
+        preNormalized = false,
     ): string {
         // Text normalization: %, $, units, dates, times, years, romans. ⚠ INITIALISMS run after, so
         // the Roman-numeral rules get first refusal on all-caps letter runs — run earlier, this spells
         // "Louis XIV" as EX-EYE-VEE.
-        input = normalizeEnglishInitialisms(normalizeEnglish(input), (w) => this.lexicon.has(w));
+        if (!preNormalized) input = this.normalizedFor(input);
         enterEngine(input);
         const tokens: Token[] = [];
         let m: RegExpExecArray | null;

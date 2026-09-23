@@ -325,12 +325,42 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
 
     public string Text(string input) => Text(input, null, null);
 
+    /**
+     * The text as the TOKENIZER will see it — every normalization pass, and nothing after.
+     * ⚠ THE NEURAL PRE-PASS NEEDS THIS AND USED THE RAW TEXT INSTEAD (#1452): a word the NORMALIZER
+     * creates (`τ` → `tau`, `µin` → `microinch`) is not in the caller's string, so it was never tagged.
+     * Exposed here rather than duplicated so the two cannot drift. See the TS twin.
+     */
+    public string NormalizedFor(string input) =>
+        Normalize.NormalizeEnglishInitialisms(Normalize.NormalizeEnglish(input), w => _lexicon.ContainsKey(w));
+
+    /** Does the lexicon or the heteronym table answer this word? The PREDICATE behind `KnownWord`.
+     *  ⚠ The neural pre-pass only needs the boolean, and building the citation is most of the cost — since
+     *  #1452 that scan walks the NORMALIZED text, where a date has expanded into many words. */
+    public bool HasWord(string word)
+    {
+        var lower = Js.ToLowerCase(word);
+        if (_lexicon.ContainsKey(lower) || _heteronyms.ContainsKey(lower)) return true;
+        return SpellingVariants.AmericanSpelling(lower, w => _lexicon.ContainsKey(w)) is not null;
+    }
+
     /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
      *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this
      *  engine's full number/heteronym/prosody context. Clause pause marks are not passed through it. */
-    public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride)
+    public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride) =>
+        Text(input, wordTransform, oovOverride, false);
+
+    /**
+     * `preNormalized` — `input` has ALREADY been through `NormalizedFor`, so skip it rather than run twice.
+     * ⚠ FOR THE NEURAL PRE-PASS AND FOR PROVENANCE, not as an optimisation alone (#1452). That pre-pass is
+     * async and must SEE the normalized text; normalizing again here was measured at +62% on that path, and
+     * a second pass would POISON the trace (`Rewrite` refuses a string the mapping does not describe),
+     * withholding every InputSpan. ⚠ PASSING `true` WITH UNNORMALIZED TEXT IS A SILENT WRONG READING.
+     */
+    public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride,
+        bool preNormalized)
     {
-        input = Normalize.NormalizeEnglishInitialisms(Normalize.NormalizeEnglish(input), w => _lexicon.ContainsKey(w));
+        if (!preNormalized) input = NormalizedFor(input);
         Core.Trace.EnterEngine(input);
         var tokens = new List<Token>();
         var gapCursor = 0;
