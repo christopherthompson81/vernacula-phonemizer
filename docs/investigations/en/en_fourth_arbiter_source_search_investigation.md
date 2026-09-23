@@ -186,7 +186,7 @@ first run.** Three issues filed:
 |---|---|---|
 | **#1448** | Greek letters read as MODERN GREEK — 24 letters, **7 emit `ɣ`/`ɾ`/`ç`, phones `english.jsonc` does not declare** | a foreign-phoneme leak; a Kokoro backend REFUSES a stream with an unknown symbol, so one `ɣ` kills the utterance |
 | **#1449** | ASCII `"`/`'` prime units — `0.015"` **silently drops the unit**, `6' 2"` reads "six two" | the drop produces a fluent, complete, wrong sentence |
-| **#1450** | ASCII micro prefix — `5 um` reads as the filler **"um"**, `5 us` as the pronoun **"us"** | ⚠ sounds like DISFLUENCY, not like an error, so a listener never reports it |
+| ~~#1450~~ | ASCII micro prefix — `5 um` reads as the filler **"um"**, `5 us` as the pronoun **"us"** | ⚠ **CLOSED NOT-PLANNED** — see below |
 
 ### ⚠ THE COMMON SHAPE ACROSS ALL THREE, AND THE REASON THIS AXIS STAYED INVISIBLE
 
@@ -198,3 +198,72 @@ sentence**.
 
 The probe exits 0 even when failing. It is a queue to read, not a gate to go green; a class graduates
 into `test/english-reported-misreadings.test.ts`, which IS a gate, once it is settled.
+
+### Run 3a — review of the probe, and the guard it did not have
+
+⚠ **THE PROBE COULD HAVE REPORTED A CLEAN RUN WHILE SEEING NOTHING.** `stopTrace` returns
+`normalized: ""` when no engine reaches the traced seam — a condition `trace.ts` documents as having
+broken before. Measured by exhibiting it rather than reasoning about it:
+
+```
+blind trace (normalized === "") would report  0 FAILING of 24
+```
+
+**Indistinguishable from "every defect is fixed"**, for a tool whose only job is to surface defects.
+Now guarded three ways: `traced` must be true, `normalized` must be non-empty for non-empty input, and a
+CANARY runs before any row (`0.015″ total` → `0.015 inches total`) and aborts the report if the one
+normalization this tool is most certain about stops happening. Verified the canary fires by breaking it.
+
+⚠ **AND THE `as unknown as { normalized: string }` CAST WAS THE ENABLER.** `phonemizeTrace` already
+returns a typed `PhonemeTrace` carrying both fields, so the cast bought nothing and only suppressed the
+compile error a field rename would have raised — after which every row compares `undefined === undefined`
+and reports 0 failing. Removed.
+
+Three more, each verified by exhibiting the failure:
+
+- `filter(c => c.length >= 3)` admitted a row that lost its last tab; `"anything".includes("")` is **true**,
+  so such a `survive` row reported a defect forever regardless of the normalizer. Now `>= 4`.
+- The survival column was compiled as a regex. The next rows this section wants are `+`, `(`, `*`, `?` —
+  **all four throw** as patterns, killing the run partway with a nonzero exit, contradicting the documented
+  exit-0 contract. Now a literal `includes`, which also settles the drift where the TSV called the column a
+  regex and the code called it a character class.
+- An unknown row kind fell through to the survival branch. Now throws.
+
+### ⚠ THE ASCII INVARIANT TOOK THREE DRAFTS, AND THE FIRST TWO FAILED ON THE FIRST RUN
+
+The header claims `a` is always the ASCII spelling. Enforcing that literally rejected **correct** rows:
+
+1. *"`a` must be pure ASCII"* → rejected `40°26'46"N`, whose `°` is shared context with no ASCII spelling;
+   the feature under test there is `'`/`"` against `′`/`″`.
+2. *"`a` must have strictly fewer non-ASCII characters"* → rejected the case rows (`V6L 2T5` against
+   `v6l 2t5`), which are not spelling pairs at all and have nothing to compare.
+3. **"where the two sides differ in ASCII-ness, `a` is the more-ASCII one"** — catches the real error, a
+   SWAPPED pair, and is vacuous everywhere it should be.
+
+Each wrong draft announced itself immediately, which is the argument for writing the check rather than
+trusting the header. The header now states the narrower claim.
+
+### ⚠ ONE OF THE THREE WAS DECLINED, AND THE REASON GENERALISES
+
+#1450 (ASCII `um`/`us`) was closed not-planned. The reading really is wrong — `a 5 um layer` really does
+say the hesitation filler — but:
+
+- `um`/`us` are an **ASCII-fallback convention from systems that could not encode `µ`**. They persist in
+  CSV exports and plain-text fields; they are not what documents contain, and documents are the input.
+- ⚠ **AND THE FIX IS UNUSUALLY DANGEROUS FOR THE INCIDENCE.** `us` is a pronoun and `um` an interjection.
+  Any rule fires on high-frequency tokens and is held off them only by a numeric left-context guard —
+  exactly the shape that produced the `.50 caliber` and `6′2″` regressions in this normalizer already.
+
+**Low incidence against regression risk on two very common words is a bad trade**, and that is a sharper
+test than "is the reading wrong", which was the only question the probe itself could answer.
+
+⚠ **THE PROBE MEASURES WRONGNESS, NOT WORTH-FIXING, AND THIS IS THE FIRST PLACE THE TWO CAME APART.** It
+found a real defect and the right call was still to decline. A detector's output is a queue to adjudicate,
+which is why this one is deliberately not a gate.
+
+⚠ **AND THE DECLINE DOES NOT GENERALISE TO #1449, THOUGH IT LOOKS LIKE THE SAME CLASS.** ASCII `"` and `'`
+are what keyboards produce *today* — not a legacy encoding workaround — and `0.015"` drops the unit
+*silently*, leaving a fluent wrong sentence rather than a visible artefact. The rows stay.
+
+The three `u`-prefix rows are removed from the corpus with the refusal written into the file, so the probe
+does not re-surface them as unexplained failures. **21 rows, 9 failing.**
