@@ -129,3 +129,60 @@ pinned on the cases that earn it rather than on two that do not.
 tests and the shape probe were both green — the third time this session a prior decision surfaced as a
 test failure rather than as something I looked for. `grep` for the shape I am about to claim, before
 claiming it, is the cheap move I keep not making.
+
+## Run 5 — 2026-09-23 — ⚠ REVIEW: THE CORPUS COULD NOT CONTAIN THE COUNTEREXAMPLES
+
+The decimal-point guard was justified by "all six closing quotes in the corpus end an INTEGER". Review
+pointed out what that count could not see: **FLEURS `en_us` is read NEWS SPEECH.** It has essentially no
+version numbers, prices, scores or markup attributes — which is exactly where a closing quote follows a
+decimal. Measured on the branch:
+
+```
+he called it "Web 2.0"     ->  'he called it "Web 2.0 inches'
+rated "4.5" overall        ->  'rated "4.5 inches overall'
+the price was "3.50"       ->  'the price was "3.50 inches'
+width="1.5" height="2.0"   ->  'width equals "1.5 inches height equals "2.0 inches'
+```
+
+⚠ **A wrong unit AND an orphaned opening quote** — the trade Run 1 argued against, arrived at by the
+remedy Run 1 chose. **"Zero counterexamples" was a fact about the corpus, not about English**, and Run 1
+stated it as though it were the second. That is the error: not the count, which was right, but the
+inference from a corpus whose composition I never examined.
+
+### ⚠ AND A BALANCE TEST DOES NOT WORK EITHER, WHICH IS WHY THE PREDICATE IS ALL-OR-NOTHING
+
+The obvious fix — fire only when an even number of `"` precedes — **is poisoned by the marks it is
+classifying**: an inch mark IS an unpaired quote, so after the first measurement every later one looks
+like it sits inside a quotation.
+
+```
+a 0.015" and a 0.020" shim   ->  balance test claims the first and REFUSES the second
+```
+
+Repeated measurements in one sentence are the normal case in a specification, so that is not a viable
+guard. What works is a **whole-text predicate**: *is every `"` immediately preceded by a decimal?* If so
+they are all inch marks and none opens anything; if even one is not, the text contains real quotation and
+none is claimed.
+
+```
+0.015" total                 ✓      he called it "Web 2.0"      ✗
+a 0.015" and a 0.020" shim   ✓      rated "4.5" overall         ✗
+tolerance 0.005" to 0.010"   ✓      width="1.5" height="2.0"    ✗
+```
+
+⚠ **CONSERVATIVE BY DESIGN**: `he said "ok" then 0.015" gap` is refused — one real quotation anywhere
+disables the rule for the whole text. A dropped unit is the acceptable failure. And it is computed on the
+STRING rather than in the pattern, so both ports run identical logic; .NET's `MatchEvaluator` not exposing
+the input is what ruled out doing it inside the match.
+
+### Two more from the same review
+
+⚠ **A MIXED quote pair was half-normalized.** `DMS_COORDINATE` took `[′']`/`[″"]` per position but the
+feet/inches rule still required both marks in the same style — which is what an editor's smart quotes
+break, converting one and not the other. `6′ 2"` stranded the inch mark and `6' 2″` left `6'` to reach
+the g2p as a bare apostrophe. One rule now, both styles per position, plus `''` as the third spelling of
+the seconds/inches mark (without it `40°26'46''N` matched the minutes and GLUED the rest: "26 minutes46''N").
+
+⚠ **The `°` guards against quotation but not against `N's`.** The minutes branch has no self-guarding
+pair behind it, so `turn 90° 5's worth` read "90 degrees 5 minutes s worth" — a stranded `s` as its own
+token. `(?!s)` closes it at no cost.

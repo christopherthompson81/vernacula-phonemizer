@@ -1391,15 +1391,14 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, FEET_INCHES, (_m: string, ft: string, inch: string) =>
         `${counted(ft, "foot", "feet")} ${counted(inch, "inch", "inches")}`);
 
-    // 5c2) THE SAME TWO SHAPES IN ASCII — `6' 2"` and `0.015"` (#1449). See FEET_INCHES_ASCII and
-    //      INCH_DECIMAL_ASCII for why these two shapes and no others: measured over 3,643 corpus lines,
-    //      EVERY digit+quote occurrence is an apostrophe or a closing quotation mark, so the bare `N'`
-    //      and the bare integer + `"` are refused outright.
-    //      ⚠ THE COMPOUND RUNS FIRST, or the decimal rule would claim the inches of `6' 2.5"` on its own
-    //      and strand the feet — the same ordering DMS_COORDINATE and FEET_INCHES already have.
-    s = rewrite(s, FEET_INCHES_ASCII, (_m: string, ft: string, inch: string) =>
-        `${counted(ft, "foot", "feet")} ${counted(inch, "inch", "inches")}`);
-    s = rewrite(s, INCH_DECIMAL_ASCII, (_m: string, n: string) => counted(n, "inch", "inches"));
+    // 5c2) A DECIMAL FOLLOWED BY AN ASCII `"` — `0.015"` (#1449), the defect the issue is named for.
+    //      ⚠ GATED ON `everyQuoteIsAnInch`, NOT ON THE DECIMAL POINT ALONE. See the predicate: the decimal
+    //      guard was measured on a corpus that could not contain its counterexamples, and claiming it
+    //      unguarded read `"Web 2.0"` as `"Web 2.0 inches` — a wrong unit AND an orphaned opening quote.
+    //      ⚠ AFTER `FEET_INCHES`, which has already consumed the `"` of a `6' 2"` compound — so that
+    //      compound does not have to satisfy the predicate, and the inches of `6' 2.5"` cannot be
+    //      claimed alone with the feet stranded.
+    if (everyQuoteIsAnInch(s)) s = rewrite(s, INCH_DECIMAL_ASCII, (_m: string, n: string) => counted(n, "inch", "inches"));
 
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = rewrite(s, UNIT_RE,
@@ -1882,9 +1881,15 @@ const BRACKETED_LETTER = /(?<=[([{])([A-Za-z])(?=[)\]}])/gu;
  * shape probe caught it, not a test.
  * ⚠ THE `°` IS WHAT MAKES THE ASCII FORM SAFE HERE, while a bare `6' 2"` needs the pair to self-guard: a
  * degree sign followed by digits and a quote is not a shape English punctuation produces.
+ * ⚠ THE DOUBLED APOSTROPHE IS A THIRD SPELLING OF THE SECONDS MARK — `40°26'46''N` is what a keyboard
+ * with no `″` produces. Without it the rule matched the minutes and stopped, GLUING the leftover to the
+ * minutes word: "26 minutes46''N". Same alternation on the feet/inches pair, which is pair-guarded.
+ * ⚠ EXCEPT AGAINST `N's`, WHICH THE `°` DOES NOT GUARD. The minutes branch has no self-guarding pair
+ * behind it, so `turn 90° 5's worth` read "90 degrees 5 minutes s worth" — a stranded `s` as its own
+ * token. `(?!s)` closes it at no cost, since an arcminute is never followed by a letter.
  */
 const DMS_COORDINATE =
-    /(\d+(?:\.\d+)?)°[ \t ]?(\d+(?:\.\d+)?)[′'](?:[ \t ]?(\d+(?:\.\d+)?)[″"])?(?:[ \t ]?((?:[NS][EW]|[NSEW]))(?![\p{L}\p{M}]))?/gu;  // space, tab, NBSP
+    /(\d+(?:\.\d+)?)°[ \t ]?(\d+(?:\.\d+)?)[′'](?!s)(?:[ \t ]?(\d+(?:\.\d+)?)(?:[″"]|''))?(?:[ \t ]?((?:[NS][EW]|[NSEW]))(?![\p{L}\p{M}]))?/gu;  // space, tab, NBSP
 
 /**
  * FEET AND INCHES WRITTEN TIGHT — `6′2″`, the commonest spelling of a height (#1435).
@@ -1897,26 +1902,18 @@ const DMS_COORDINATE =
  *
  * ⚠ IT RUNS AFTER `DMS_COORDINATE`, which has already consumed any `…°26′46″`, so an arcminute
  * pair can never reach this rule.
+ *
+ * ⚠ BOTH QUOTE STYLES, INDEPENDENTLY PER POSITION (#1449). `6' 2"` is what a keyboard produces, and a
+ * MIXED pair is what an editor's smart quotes produce when they convert one mark and not the other —
+ * `6′ 2"` and `6' 2″`. Two same-style rules half-normalized those and stranded the other mark, and
+ * `6'` surviving into the g2p as a bare apostrophe is the louder half.
+ * ⚠ THE PAIR IS WHAT MAKES THE ASCII FORM SAFE. `'` and `"` are overwhelmingly an apostrophe and a
+ * quotation mark — measured over FLEURS `en_us`, 3,643 lines, every one of the ten digit+quote
+ * occurrences is a false positive (`7's rugby` ×4 and six CLOSING QUOTES) — but no English punctuation
+ * produces `digit ' digit "`, and that corpus has zero occurrences of the shape. A BARE `N'` is refused
+ * outright for the same reason: `the 90's`, `7's`.
  */
-const FEET_INCHES = /(\d+(?:\.\d+)?)′[ \t\u00a0]?(\d+(?:\.\d+)?)″/gu;  // space, tab, NBSP
-
-/**
- * THE SAME COMPOUND IN ASCII — `6' 2"`, which is what a keyboard produces (#1449).
- *
- * ⚠ ONLY THE COMPOUND, AND THE CORPUS IS WHY. `'` and `"` are overwhelmingly an apostrophe and a
- * quotation mark, and digit-adjacency is NOT enough of a guard: measured over FLEURS `en_us`, 3,643
- * lines, every one of the ten digit+quote occurrences is a false positive — `7's rugby` ×4, and six
- * CLOSING QUOTES (`"cosmonaut No. 11"`, `a decal reading "18"`, `"…July 1, 2020"`, `"…4th July 1776"`).
- * A rule keyed on the digit alone would have fired ten times and been wrong every time, turning a silent
- * drop into an audible corruption — the worse trade, and the same class as `6′2″` reading "6 SQUARE FEET".
- *
- * ⚠ THE PAIR IS SELF-GUARDING. No English punctuation produces `digit ' digit "`, so this shape needs no
- * further evidence — and the same corpus has zero occurrences of it, i.e. nothing to lose.
- *
- * ⚠ A BARE `N'` IS REFUSED OUTRIGHT and that is deliberate: `the 90's`, `7's`. There is no foot mark in
- * the corpus to weigh against them.
- */
-const FEET_INCHES_ASCII = /(\d+(?:\.\d+)?)'[ \t\u00a0]?(\d+(?:\.\d+)?)"/gu;  // space, tab, NBSP
+const FEET_INCHES = /(\d+(?:\.\d+)?)[′'][ \t\u00a0]?(\d+(?:\.\d+)?)(?:[″"]|'')/gu;  // space, tab, NBSP
 
 /**
  * A DECIMAL FOLLOWED BY AN ASCII DOUBLE QUOTE — `0.015"`, the defect #1449 is named for.
@@ -1931,7 +1928,44 @@ const FEET_INCHES_ASCII = /(\d+(?:\.\d+)?)'[ \t\u00a0]?(\d+(?:\.\d+)?)"/gu;  // 
  * (`offset`, `string`); .NET's `MatchEvaluator` does not expose the input at all, and a port-divergent
  * guard is worse than a narrower one. Recorded as the way to widen this later.
  */
-const INCH_DECIMAL_ASCII = /(\d+\.\d+)"/gu;
+const INCH_DECIMAL_ASCII = /(\d+\.\d+)"(?!\p{L})/gu;
+
+/**
+ * IS EVERY `"` IN THIS TEXT AN INCH MARK? True only when each one is immediately preceded by a decimal.
+ *
+ * ⚠ THE DECIMAL POINT ALONE IS NOT A GUARD, AND MY MEASUREMENT SAID IT WAS BECAUSE THE CORPUS COULD NOT
+ * CONTAIN THE COUNTEREXAMPLES. FLEURS `en_us` is read NEWS SPEECH: it has essentially no version numbers,
+ * prices, scores or markup attributes, which is exactly where a closing quote follows a decimal. Claiming
+ * on the decimal alone read `he called it "Web 2.0"` as `"Web 2.0 inches` — a wrong unit AND an orphaned
+ * opening quote, which is the trade this file ranks worst. "Zero counterexamples" was a fact about the
+ * corpus, not about English.
+ *
+ * ⚠ AND A BALANCE TEST DOES NOT WORK, because an inch mark IS an unpaired quote: counting `"` left to
+ * right makes the SECOND measurement in `a 0.015" and a 0.020" shim` look like it sits inside a quotation.
+ * Any parity reasoning is poisoned by the very marks it is trying to classify.
+ *
+ * ⚠ THE PREDICATE IS ALL-OR-NOTHING FOR THAT REASON. If every `"` is preceded by a decimal they are all
+ * inch marks and none of them opens anything; if even one is not, the text contains real quotation and
+ * none of them is claimed. It is computed on the string rather than in the pattern, so both ports run the
+ * identical logic — .NET's `MatchEvaluator` does not expose the input, which is what ruled out doing this
+ * inside the match.
+ *
+ *   0.015" total                  ✓     he called it "Web 2.0"        ✗
+ *   a 0.015" and a 0.020" shim    ✓     rated "4.5" overall           ✗
+ *   tolerance 0.005" to 0.010"    ✓     width="1.5" height="2.0"      ✗
+ *
+ * ⚠ IT IS CONSERVATIVE BY DESIGN: `he said "ok" then 0.015" gap` is refused, because one real quotation
+ * anywhere in the text disables the rule for all of it. A dropped unit is the acceptable failure here.
+ */
+function everyQuoteIsAnInch(t: string): boolean {
+    let any = false;
+    for (let i = 0; i < t.length; i++) {
+        if (t[i] !== "\"") continue;
+        any = true;
+        if (!/\d\.\d+$/u.test(t.slice(0, i))) return false;
+    }
+    return any;
+}
 
 /** The hemisphere letters, spoken. ⚠ THE INTERCARDINALS ARE HERE because `NW`/`SE` after a DMS is
  *  ordinary on plans and surveys, and the single-letter group cannot claim them — the letter-boundary

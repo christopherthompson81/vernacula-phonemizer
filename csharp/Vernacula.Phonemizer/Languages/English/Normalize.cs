@@ -583,7 +583,10 @@ public static class Normalize
         // ⚠ BOTH QUOTE STYLES (#1449): once FEET_INCHES_ASCII existed, this rule was the only thing between
         // it and `40°26'46"N` — the ASCII compound claimed `26'46"` and read "26 FEET 46 INCHES". The `°`
         // is what makes the ASCII form safe here. See the TypeScript twin.
-        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)[′'](?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)[″\"])?"
+        // ⚠ `(?!s)` — the `°` guards against QUOTATION but not against `N's`: `turn 90° 5's worth` read
+        // "90 degrees 5 minutes s worth". ⚠ And `''` is a third spelling of the seconds mark, or the rule
+        // matched the minutes and GLUED the leftover: "26 minutes46''N". See the TS twin.
+        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)[′'](?!s)(?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)(?:[″\"]|''))?"
         + "(?:[ \\t\\u00a0]?((?:[NS][EW]|[NSEW]))(?![\\p{L}\\p{M}]))?",   // space, tab, NBSP
         "gu");
 
@@ -610,20 +613,42 @@ public static class Normalize
     /** A letter immediately after a DMS match, which would otherwise fuse into the last word. */
     private static readonly JsRe DMS_TRAILING_LETTER = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
 
+    /** ⚠ BOTH QUOTE STYLES, INDEPENDENTLY PER POSITION (#1449): an editor's smart quotes convert one mark
+     *  and not the other, and two same-style rules stranded the other — `6'` surviving as a bare
+     *  apostrophe is the louder half. The PAIR is what makes the ASCII form safe. See the TS twin. */
     private static readonly JsRe FEET_INCHES =
-        JsRegex.Compile("(\\d+(?:\\.\\d+)?)′[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″", "gu");  // space, tab, NBSP
-
-    /** THE SAME COMPOUND IN ASCII — `6' 2"` (#1449). ⚠ ONLY THE COMPOUND: measured over 3,643 corpus
-     *  lines, EVERY digit+quote occurrence is an apostrophe or a closing quotation mark (`7's rugby`,
-     *  `"cosmonaut No. 11"`, `a decal reading "18"`), so digit-adjacency alone is not a guard. The PAIR is
-     *  self-guarding — no English punctuation produces `digit ' digit "`. See the TypeScript twin. */
-    private static readonly JsRe FEET_INCHES_ASCII =
-        JsRegex.Compile("(\\d+(?:\\.\\d+)?)'[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)\"", "gu");  // space, tab, NBSP
+        JsRegex.Compile("(\\d+(?:\\.\\d+)?)[′'][ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)(?:[″\"]|'')", "gu");  // space, tab, NBSP
 
     /** A DECIMAL followed by an ASCII double quote — `0.015"`. ⚠ THE DECIMAL POINT IS THE GUARD: all six
      *  closing quotes in the corpus end an INTEGER. A bare integer + `"` is refused, which costs
      *  `a 2" pipe` — taken at six counterexamples to zero. See the TypeScript twin. */
-    private static readonly JsRe INCH_DECIMAL_ASCII = JsRegex.Compile("(\\d+\\.\\d+)\"", "gu");
+    private static readonly JsRe INCH_DECIMAL_ASCII = JsRegex.Compile("(\\d+\\.\\d+)\"(?!\\p{L})", "gu");
+
+    /**
+     * IS EVERY `"` IN THIS TEXT AN INCH MARK? True only when each is immediately preceded by a decimal.
+     *
+     * ⚠ THE DECIMAL POINT ALONE IS NOT A GUARD, and the measurement that said it was came from a corpus
+     * that could not contain the counterexamples: FLEURS en_us is read NEWS SPEECH, with essentially no
+     * version numbers, prices, scores or markup. Unguarded, `he called it "Web 2.0"` read `"Web 2.0
+     * inches` — a wrong unit AND an orphaned opening quote.
+     * ⚠ A BALANCE TEST DOES NOT WORK: an inch mark IS an unpaired quote, so counting left to right makes
+     * the SECOND measurement in `a 0.015" and a 0.020" shim` look like it sits inside a quotation.
+     * ⚠ ALL-OR-NOTHING, and computed on the STRING so both ports run identical logic — .NET's
+     * MatchEvaluator does not expose the input, which is what ruled out doing it inside the match.
+     */
+    private static bool EveryQuoteIsAnInch(string t)
+    {
+        var any = false;
+        for (var i = 0; i < t.Length; i++)
+        {
+            if (t[i] != '"') continue;
+            any = true;
+            if (!DECIMAL_BEFORE_QUOTE.IsMatch(t[..i])) return false;
+        }
+        return any;
+    }
+
+    private static readonly JsRe DECIMAL_BEFORE_QUOTE = JsRegex.Compile("\\d\\.\\d+$", "u");
 
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
@@ -1163,11 +1188,10 @@ public static class Normalize
         s = Rewrite(s, FEET_INCHES, m =>
             Counted(m.Groups[1].Value, "foot", "feet") + " " + Counted(m.Groups[2].Value, "inch", "inches"));
 
-        // The same two shapes in ASCII (#1449). ⚠ THE COMPOUND RUNS FIRST, or the decimal rule claims the
-        // inches of `6' 2.5"` alone and strands the feet — the ordering DMS/FEET_INCHES already have.
-        s = Rewrite(s, FEET_INCHES_ASCII, m =>
-            Counted(m.Groups[1].Value, "foot", "feet") + " " + Counted(m.Groups[2].Value, "inch", "inches"));
-        s = Rewrite(s, INCH_DECIMAL_ASCII, m => Counted(m.Groups[1].Value, "inch", "inches"));
+        // A decimal followed by an ASCII `"` — `0.015"` (#1449). ⚠ GATED ON EveryQuoteIsAnInch, not on the
+        // decimal point alone. AFTER FEET_INCHES, which has already consumed the `"` of a `6' 2"` compound.
+        if (EveryQuoteIsAnInch(s))
+            s = Rewrite(s, INCH_DECIMAL_ASCII, m => Counted(m.Groups[1].Value, "inch", "inches"));
 
         s = Rewrite(s, UNIT_RE, m =>
         {

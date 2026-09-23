@@ -799,6 +799,43 @@ describe("the ASCII prime units (#1449)", () => {
         expect(normalizeEnglish(`a 6' 2.5" board`)).toBe("a 6 feet 2.5 inches board");
     });
 
+    test("⚠ the DECIMAL POINT ALONE IS NOT A GUARD — the corpus could not contain the counterexamples", () => {
+        // ⚠ FLEURS `en_us` IS READ NEWS SPEECH. It has essentially no version numbers, prices, scores or
+        // markup attributes — exactly where a closing quote follows a decimal — so "zero counterexamples"
+        // was a fact about the CORPUS, not about English. Unguarded, these read as inches AND orphaned
+        // their opening quote, which is the trade this file ranks worst.
+        expect(normalizeEnglish('he called it "Web 2.0"')).toBe('he called it "Web 2.0"');
+        expect(normalizeEnglish('rated "4.5" overall')).toBe('rated "4.5" overall');
+        expect(normalizeEnglish('the price was "3.50"')).toBe('the price was "3.50"');
+        expect(normalizeEnglish('width="1.5" height="2.0"')).toBe('width equals "1.5" height equals "2.0"');
+        expect(normalizeEnglish('chapter 2.5"s')).toBe('chapter 2.5"s');
+    });
+
+    test("⚠ and a BALANCE test does not work, because an inch mark IS an unpaired quote", () => {
+        // Counting `"` left to right makes the SECOND measurement look like it sits inside a quotation.
+        // The predicate is ALL-OR-NOTHING instead: every `"` preceded by a decimal, or none is claimed.
+        expect(normalizeEnglish('a 0.015" and a 0.020" shim')).toBe("a 0.015 inches and a 0.020 inches shim");
+        expect(normalizeEnglish('tolerance 0.005" to 0.010"')).toBe("tolerance 0.005 inches to 0.010 inches");
+        // ⚠ CONSERVATIVE BY DESIGN: one real quotation anywhere disables the rule for the whole text.
+        expect(normalizeEnglish('he said "ok" then 0.015" gap')).toBe('he said "ok" then 0.015" gap');
+    });
+
+    test("a MIXED quote pair still reads, and the doubled apostrophe too", () => {
+        // ⚠ An editor's smart quotes convert one mark and not the other. Two same-style rules
+        // half-normalized these and stranded the other — `6'` surviving as a bare apostrophe is the
+        // louder half. `''` is a third spelling of the seconds/inches mark on a keyboard without `″`.
+        expect(normalizeEnglish(`he is 6′ 2" tall`)).toBe("he is 6 feet 2 inches tall");
+        expect(normalizeEnglish(`he is 6' 2″ tall`)).toBe("he is 6 feet 2 inches tall");
+        expect(normalizeEnglish(`he is 6'2'' tall`)).toBe("he is 6 feet 2 inches tall");
+        expect(normalizeEnglish(`40°26'46''N`)).toBe("40 degrees 26 minutes 46 seconds north");
+    });
+
+    test("⚠ the DMS minutes are not a possessive", () => {
+        // The `°` guards against QUOTATION but not against `N's`, and the minutes branch has no
+        // self-guarding pair behind it: `turn 90° 5's worth` read "90 degrees 5 minutes s worth".
+        expect(normalizeEnglish(`turn 90° 5's worth`)).toBe("turn 90 degrees 5's worth");
+    });
+
     test("⚠ every digit+quote in the corpus is a FALSE POSITIVE and must not move", () => {
         // These are the actual corpus lines, and they are the reason the rule is this narrow.
         expect(normalizeEnglish(`a perfect day for 7's rugby`)).toBe("a perfect day for 7's rugby");
