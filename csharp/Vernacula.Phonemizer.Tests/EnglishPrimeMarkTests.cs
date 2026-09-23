@@ -126,12 +126,23 @@ public class EnglishPrimeMarkTests
     public void APrimeWithNoNumberIsUntouched(string w) => Assert.Equal(w, Norm(w));
 
     /// <summary>
-    /// ⚠ THE ASCII QUOTES ARE DELIBERATELY NOT CLAIMED. `"` and `'` are quotation marks and apostrophes
-    /// far more often than units — the same reasoning that keeps ⟨in⟩ out of the unit table while
-    /// ⟨µin⟩ is a whole key (#1427). U+2032 and U+2033 are only ever prime marks.
+    /// ⚠ THE ASCII QUOTES ARE NOT CLAIMED AS A CLASS, AND THE REASONING STILL HOLDS — `"` and `'` are
+    /// quotation marks and apostrophes far more often than units, the same reasoning that keeps ⟨in⟩ out
+    /// of the unit table while ⟨µin⟩ is a whole key (#1427).
+    /// ⚠ IT WAS OVER-BROAD ON TWO SHAPES, AND #1449 MEASURED WHICH: over 3,643 corpus lines every
+    /// digit+quote occurrence is a false positive, so the class refusal is now EVIDENCE — but a DECIMAL
+    /// before `"` and the COMPOUND `N' M"` carry no ambiguity and are claimed. See the TS twin.
     /// </summary>
     [Theory]
-    [InlineData("0.015\"")]
     [InlineData("5'")]
+    [InlineData("a 2\" pipe")]
+    [InlineData("the 90's")]
     public void TheAsciiQuotesAreLeftAlone(string w) => Assert.Equal(w, Norm(w));
+
+    /// <summary>The two shapes the corpus clears — the defect #1449 is named for.</summary>
+    [Theory]
+    [InlineData("0.015\"", "0.015 inches")]
+    [InlineData("5' 6\"", "5 feet 6 inches")]
+    public void TheDecimalAndTheCompoundAreClaimed(string input, string expected) =>
+        Assert.Equal(expected, Norm(input));
 }

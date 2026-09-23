@@ -104,19 +104,19 @@ public static class Normalize
     /**
      * THE GREEK ALPHABET AS ENGLISH WORDS (#1448) — the name an English speaker says for the letter.
      * ⚠ THE NAMES ARE ENGLISH, NOT TRANSLITERATIONS: `β` is "beta", not the Modern Greek "vita". That
-     * difference IS the defect. Both cases map to one name; `ξ`/`Ξ` is `ksi` rather than `xi` because the
-     * lexicon's `xi` is the Chinese SURNAME. See the TypeScript twin.
+     * difference IS the defect. Both cases map to one name; `ξ`/`Ξ` is the phonetic respelling `zye` (/zaɪ/)
+     * because the lexicon's `xi` is the Chinese SURNAME and no lexicon edit can fix a homograph. See the TypeScript twin.
      */
     private static readonly IReadOnlyDictionary<string, string> GREEK_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["α"] = "alpha", ["β"] = "beta", ["γ"] = "gamma", ["δ"] = "delta", ["ε"] = "epsilon", ["ζ"] = "zeta",
         ["η"] = "eta", ["θ"] = "theta", ["ι"] = "iota", ["κ"] = "kappa", ["λ"] = "lambda", ["μ"] = "mu",
-        ["ν"] = "nu", ["ξ"] = "ksi", ["ο"] = "omicron", ["π"] = "pi", ["ρ"] = "rho", ["σ"] = "sigma",
+        ["ν"] = "nu", ["ξ"] = "zye", ["ο"] = "omicron", ["π"] = "pi", ["ρ"] = "rho", ["σ"] = "sigma",
         ["ς"] = "sigma", ["τ"] = "tau", ["υ"] = "upsilon", ["φ"] = "phi", ["χ"] = "chi", ["ψ"] = "psi",
         ["ω"] = "omega",
         ["Α"] = "alpha", ["Β"] = "beta", ["Γ"] = "gamma", ["Δ"] = "delta", ["Ε"] = "epsilon", ["Ζ"] = "zeta",
         ["Η"] = "eta", ["Θ"] = "theta", ["Ι"] = "iota", ["Κ"] = "kappa", ["Λ"] = "lambda", ["Μ"] = "mu",
-        ["Ν"] = "nu", ["Ξ"] = "ksi", ["Ο"] = "omicron", ["Π"] = "pi", ["Ρ"] = "rho", ["Σ"] = "sigma",
+        ["Ν"] = "nu", ["Ξ"] = "zye", ["Ο"] = "omicron", ["Π"] = "pi", ["Ρ"] = "rho", ["Σ"] = "sigma",
         ["Τ"] = "tau", ["Υ"] = "upsilon", ["Φ"] = "phi", ["Χ"] = "chi", ["Ψ"] = "psi", ["Ω"] = "omega",
         // ⚠ U+2126 OHM SIGN is a second code point for the same letter and needs its own key, exactly as
         // UNITS declares it separately — without it the bare character fell through to the Greek reader and
@@ -580,7 +580,13 @@ public static class Normalize
      * `5°C` is left to it. Seconds and the hemisphere letter are optional.
      */
     private static readonly JsRe DMS_COORDINATE = JsRegex.Compile(
-        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)′(?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″)?"
+        // ⚠ BOTH QUOTE STYLES (#1449): once FEET_INCHES_ASCII existed, this rule was the only thing between
+        // it and `40°26'46"N` — the ASCII compound claimed `26'46"` and read "26 FEET 46 INCHES". The `°`
+        // is what makes the ASCII form safe here. See the TypeScript twin.
+        // ⚠ `(?!s)` — the `°` guards against QUOTATION but not against `N's`: `turn 90° 5's worth` read
+        // "90 degrees 5 minutes s worth". ⚠ And `''` is a third spelling of the seconds mark, or the rule
+        // matched the minutes and GLUED the leftover: "26 minutes46''N". See the TS twin.
+        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)[′'](?!s)(?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)(?:[″\"]|''))?"
         + "(?:[ \\t\\u00a0]?((?:[NS][EW]|[NSEW]))(?![\\p{L}\\p{M}]))?",   // space, tab, NBSP
         "gu");
 
@@ -607,8 +613,42 @@ public static class Normalize
     /** A letter immediately after a DMS match, which would otherwise fuse into the last word. */
     private static readonly JsRe DMS_TRAILING_LETTER = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
 
+    /** ⚠ BOTH QUOTE STYLES, INDEPENDENTLY PER POSITION (#1449): an editor's smart quotes convert one mark
+     *  and not the other, and two same-style rules stranded the other — `6'` surviving as a bare
+     *  apostrophe is the louder half. The PAIR is what makes the ASCII form safe. See the TS twin. */
     private static readonly JsRe FEET_INCHES =
-        JsRegex.Compile("(\\d+(?:\\.\\d+)?)′[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″", "gu");  // space, tab, NBSP
+        JsRegex.Compile("(\\d+(?:\\.\\d+)?)[′'][ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)(?:[″\"]|'')", "gu");  // space, tab, NBSP
+
+    /** A DECIMAL followed by an ASCII double quote — `0.015"`. ⚠ THE DECIMAL POINT IS THE GUARD: all six
+     *  closing quotes in the corpus end an INTEGER. A bare integer + `"` is refused, which costs
+     *  `a 2" pipe` — taken at six counterexamples to zero. See the TypeScript twin. */
+    private static readonly JsRe INCH_DECIMAL_ASCII = JsRegex.Compile("(\\d+\\.\\d+)\"(?!\\p{L})", "gu");
+
+    /**
+     * IS EVERY `"` IN THIS TEXT AN INCH MARK? True only when each is immediately preceded by a decimal.
+     *
+     * ⚠ THE DECIMAL POINT ALONE IS NOT A GUARD, and the measurement that said it was came from a corpus
+     * that could not contain the counterexamples: FLEURS en_us is read NEWS SPEECH, with essentially no
+     * version numbers, prices, scores or markup. Unguarded, `he called it "Web 2.0"` read `"Web 2.0
+     * inches` — a wrong unit AND an orphaned opening quote.
+     * ⚠ A BALANCE TEST DOES NOT WORK: an inch mark IS an unpaired quote, so counting left to right makes
+     * the SECOND measurement in `a 0.015" and a 0.020" shim` look like it sits inside a quotation.
+     * ⚠ ALL-OR-NOTHING, and computed on the STRING so both ports run identical logic — .NET's
+     * MatchEvaluator does not expose the input, which is what ruled out doing it inside the match.
+     */
+    private static bool EveryQuoteIsAnInch(string t)
+    {
+        var any = false;
+        for (var i = 0; i < t.Length; i++)
+        {
+            if (t[i] != '"') continue;
+            any = true;
+            if (!DECIMAL_BEFORE_QUOTE.IsMatch(t[..i])) return false;
+        }
+        return any;
+    }
+
+    private static readonly JsRe DECIMAL_BEFORE_QUOTE = JsRegex.Compile("\\d\\.\\d+$", "u");
 
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
@@ -1147,6 +1187,11 @@ public static class Normalize
         // Feet and inches written tight, AFTER the DMS rule. See FEET_INCHES.
         s = Rewrite(s, FEET_INCHES, m =>
             Counted(m.Groups[1].Value, "foot", "feet") + " " + Counted(m.Groups[2].Value, "inch", "inches"));
+
+        // A decimal followed by an ASCII `"` — `0.015"` (#1449). ⚠ GATED ON EveryQuoteIsAnInch, not on the
+        // decimal point alone. AFTER FEET_INCHES, which has already consumed the `"` of a `6' 2"` compound.
+        if (EveryQuoteIsAnInch(s))
+            s = Rewrite(s, INCH_DECIMAL_ASCII, m => Counted(m.Groups[1].Value, "inch", "inches"));
 
         s = Rewrite(s, UNIT_RE, m =>
         {
