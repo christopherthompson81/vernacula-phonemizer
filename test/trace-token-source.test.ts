@@ -9,9 +9,33 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { phonemizeTrace, phonemizeTraceAsync } from "../src/index.ts";
+import { startTrace, stopTrace } from "../src/core/trace.ts";
+import { phonemizeEnNeural } from "../src/languages/english/englishNeural.ts";
+import { phonemizeTrace } from "../src/index.ts";
 
-const sources = (t: { tokens: { surface: string; source?: string }[] }): Record<string, string> =>
+/**
+ * A traced run of the NEURAL path, by driving the recorder directly.
+ *
+ * ⚠ THERE IS NO PUBLIC ASYNC TRACE, AND THAT IS ARCHITECTURAL. One was written for this PR and REMOVED:
+ * the recorder is a module global, so holding it across an `await` lets any unrelated `phonemize` call in
+ * the process write into the open recording — measured, a traced English call came back with
+ * `normalized: "bonjour monsieur"` and two French tokens. Scoping it to one call needs an async context,
+ * and `src/` carries no `node:` imports by design, so `AsyncLocalStorage` is unavailable.
+ * ⚠ IT IS SAFE HERE AND ONLY HERE: this test is single-threaded and nothing else phonemizes during it.
+ * That is exactly the contract a library cannot ask its callers to keep, which is why it is not an API.
+ */
+const traceNeural = async (text: string): Promise<{ normalized: string; ipa: string; tokens: readonly { surface: string; source?: string }[] }> => {
+    startTrace(text);
+    try {
+        const ipa = await phonemizeEnNeural(text);
+        const { normalized, tokens } = stopTrace(ipa);
+        return { normalized, ipa, tokens };
+    } finally {
+        stopTrace();
+    }
+};
+
+const sources = (t: { tokens: readonly { surface: string; source?: string }[] }): Record<string, string> =>
     Object.fromEntries(t.tokens.map((k) => [k.surface, k.source ?? ""]));
 
 describe("TraceToken.source (#1453)", () => {
@@ -27,19 +51,19 @@ describe("TraceToken.source (#1453)", () => {
     it("⚠ answers #1452 in one call — the same normalized string, two tiers", async () => {
         // ⚠ THE NORMALIZED TEXT IS BYTE-IDENTICAL. That is the whole point: nothing else in the trace
         // distinguishes these two, and the readings differ.
-        const a = await phonemizeTraceAsync("the tau value", "en");
-        const b = await phonemizeTraceAsync("the τ value", "en");
+        const a = await traceNeural("the tau value");
+        const b = await traceNeural("the τ value");
         expect(a.normalized).toBe(b.normalized);
         expect(a.ipa).not.toBe(b.ipa);
         expect(sources(a)["tau"]).toBe("tagger");
         expect(sources(b)["tau"]).toBe("g2p");
     });
 
-    it("⚠ the SYNC trace cannot reach `tagger`, which is why the async entry exists", async () => {
-        // `phonemizeTrace` calls `phonemize`, which never consults the OOV tagger — so `tagger` was a
-        // declared value nothing could produce, and it is the value the field was added for.
+    it("⚠ the SYNC trace cannot reach `tagger` — it is produced, but not observable through the API", () => {
+        // `phonemizeTrace` wraps `phonemize`, which never consults the OOV tagger. The value is real and is
+        // covered above by driving the recorder directly; it is not offered as an API because the recorder
+        // cannot safely span an `await`. See `traceNeural`.
         expect(sources(phonemizeTrace("the tau value", "en"))["tau"]).toBe("g2p");
-        expect(sources(await phonemizeTraceAsync("the tau value", "en"))["tau"]).toBe("tagger");
     });
 
     it("⚠ a token whose readings come from different tiers reports NOTHING", () => {
@@ -50,13 +74,11 @@ describe("TraceToken.source (#1453)", () => {
         for (const k of t.tokens) expect([k.surface, k.source]).toEqual([k.surface, "lexicon"]);
     });
 
-    it("⚠ a trace cannot overlap another, and says so rather than clobbering", async () => {
-        // The recorder is AMBIENT. Before this, a second `startTrace` overwrote the first and both calls
-        // returned a trace stitched from the two — a corrupted result that looks valid.
-        const running = phonemizeTraceAsync("the tau value", "en");
-        expect(() => phonemizeTrace("hello", "en")).toThrow(/already in progress/u);
-        await running;
-        // …and the recorder is clean afterwards, so the next call works.
+    it("⚠ the recorder SELF-HEALS, which a re-entrancy throw would have removed", () => {
+        // A throw on re-entry was tried and reverted: a recording left open by a `stopTrace` that threw
+        // would then be stuck for the process lifetime, and three tools wrap `phonemizeTrace` in
+        // `catch { continue; }` — so that state reports a clean run with ZERO ROWS rather than a failure.
+        startTrace("stranded");            // simulate an abandoned recording
         expect(sources(phonemizeTrace("hello", "en"))["hello"]).toBe("lexicon");
     });
 });

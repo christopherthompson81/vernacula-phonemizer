@@ -8,7 +8,6 @@ namespace Vernacula.Phonemizer.Core;
  * render, and the parity tool runs languages concurrently.
  */
 
-/** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
 /**
  * HOW A TOKEN'S READING WAS RESOLVED — which TIER answered, not where the answer came from in the text.
  *
@@ -29,6 +28,7 @@ public enum TokenSource
     Passthrough,
 }
 
+/** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
 public sealed class TraceToken
 {
     public int Start { get; init; }
@@ -61,7 +61,9 @@ public sealed class TraceToken
     public List<string> Emitted { get; } = new();
 
     /**
-     * WHICH TIER produced this token's reading. See `TokenSource`.
+     * WHICH TIER produced this token's CITATION. See `TokenSource`.
+     * ⚠ THE CITATION, NOT NECESSARILY THE EMITTED STRING: prosody and `wordTransform` rewrite a reading
+     * after the tier has answered, and neither is a tier. See the TS twin.
      * ⚠ `None` MEANS "NOT REPORTED", NEVER "UNKNOWN TIER" — the same rule `InputSpan` and `IpaSpan` carry.
      * ⚠ AND IT IS `None` WHEN ONE TOKEN'S READINGS DISAGREE ABOUT IT: a numeral becomes many words, and
      * reporting the first would be a confident wrong answer to a question with no single answer.

@@ -93,31 +93,6 @@ export function phonemizeTrace(text: string, lang: string): PhonemeTrace {
     }
 }
 
-/**
- * {@link phonemizeTrace} over the NEURAL path — the only way to see a `tagger` reading.
- *
- * ⚠ THE SYNC TRACE CANNOT REACH ONE OF ITS OWN TIERS. `phonemizeTrace` calls `phonemize`, which never
- * consults the OOV tagger, so `TokenSource.tagger` was a declared value nothing could produce. That is
- * also the value the field was ADDED for: #1452 is two inputs whose normalized text is byte-identical
- * resolving through different tiers, and the sync trace shows `g2p` for both.
- *
- * ⚠ IT HOLDS AN AMBIENT RECORDING ACROSS AN `await`, WHICH `core/trace.ts` WARNS AGAINST. The warning is
- * about CONCURRENCY, not about async as such: the recorder is a module global, so two overlapping traces
- * would interleave. `startTrace` now THROWS on re-entry rather than overwriting, so an overlap is a loud
- * failure instead of a trace silently stitched from two calls. Do not call this concurrently with itself
- * or with `phonemizeTrace`.
- */
-export async function phonemizeTraceAsync(text: string, lang: string): Promise<PhonemeTrace> {
-    startTrace(text);
-    try {
-        const ipa = await phonemizeAsync(text, lang);
-        const { normalized, tokens, rewrites, traced } = stopTrace(ipa);
-        return { ipa, normalized, traced, tokens, rewrites };
-    } finally {
-        stopTrace();
-    }
-}
-
 /** Phonemize real-world text to canonical IPA — the UNIFIED best-output entry. Identical to `phonemize` for the
  *  bulk, but routes each language to its best available path (neuralRegistry.ts): the unpointed ABJADS restore
  *  their unwritten vowels from BARE input (Arabic `ar`+dialects via the neural diacritizer), and the

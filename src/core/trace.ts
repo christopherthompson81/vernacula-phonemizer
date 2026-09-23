@@ -46,7 +46,20 @@ export type TokenSource =
     | "lexicon"
     /** A heteronym entry answered — the reading depended on the POS expectation. */
     | "heteronym"
-    /** The neural OOV tagger answered (async path only). */
+    /**
+     * The neural OOV tagger answered.
+     *
+     * ⚠ PRODUCED BY THE ENGINE, NOT OBSERVABLE THROUGH `phonemizeTrace`, and the reason is architectural
+     * rather than an oversight. `phonemizeTrace` wraps the SYNC `phonemize`, which never consults the
+     * tagger; a traced ASYNC entry was written for this and REMOVED, because the recorder is a module
+     * global and holding it across an `await` lets any unrelated `phonemize` call in the process write
+     * into the open recording — measured, a traced English call returned `normalized: "bonjour monsieur"`
+     * with two French tokens in it. Scoping the recorder to one call needs an async context, and `src/`
+     * carries no `node:` imports by design, so `AsyncLocalStorage` is not available to it.
+     * ⚠ IT IS REACHABLE AND TESTED by driving the recorder around `phonemizeEnNeural` directly, which is
+     * safe in a single-threaded test and is not safe to offer as an API. See
+     * `test/trace-token-source.test.ts`.
+     */
     | "tagger"
     /** The rule/n-gram OOV g2p answered — no lexicon row and no tagger reading. */
     | "g2p"
@@ -79,7 +92,13 @@ export interface TraceToken {
      */
     emitted: string[];
     /**
-     * WHICH TIER produced this token's reading. See `TokenSource`.
+     * WHICH TIER produced this token's CITATION. See `TokenSource`.
+     *
+     * ⚠ THE CITATION, NOT NECESSARILY THE EMITTED STRING, and the distinction is real. Prosody rewrites a
+     * reading after the tier has answered — the clause-initial coordinator in `it was built, and tested`
+     * emits `ˈænd` from `clauseInitialStressed`, and `wordTransform` (the en-GB accent delta) replaces the
+     * string outright — and neither is a TIER, so neither changes this. It answers "what looked the word
+     * up", which is the question a wrong reading raises; `emitted` is what the token actually contributed.
      *
      * ⚠ ABSENT MEANS "NOT REPORTED", NEVER "UNKNOWN TIER" — the same rule `inputSpan` and `ipaSpan` carry,
      * and for the same reason: most engines route through `assembleClauses` and report nothing here, so an
@@ -158,12 +177,13 @@ let recording: Recording | null = null;
 const active = (): boolean => recording !== null && hostDepth() <= 1;
 
 export function startTrace(input: string): void {
-    // ⚠ RE-ENTRANCY IS A THROW, NOT AN OVERWRITE (#1453). The recorder is AMBIENT — the module header's whole
-    // argument for that is that `text()` is SYNCHRONOUS, so nothing can run between start and stop. The async
-    // trace entry breaks that assumption by design: it awaits an ONNX pass with a recording open, and two
-    // overlapping calls would previously have clobbered each other silently and returned a trace stitched
-    // from both. Failing loudly is the only honest answer, because the corrupted result looks valid.
-    if (recording !== null) throw new Error("trace: a recording is already in progress (traces are ambient and cannot overlap)");
+    // ⚠ AN OVERWRITE, AND THAT IS DELIBERATE — A THROW HERE WAS TRIED AND REVERTED (#1453). Refusing
+    // re-entry sounds safer and removes the recorder's SELF-HEALING property: a recording left open by a
+    // `stopTrace` that threw, or by an abandoned call, would then be stuck for the process lifetime and
+    // every later `phonemizeTrace` would throw. Three tools (`ipa-span-coverage`, `provenance-coverage`,
+    // `provenance-poison`) wrap the call in `catch { continue; }`, so that state reports a CLEAN RUN WITH
+    // ZERO ROWS rather than a failure — the success-signal-that-matches-the-no-op shape this repo keeps
+    // being bitten by. Overwriting means the next call always recovers.
     recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0, spans: new Map(), assembled: null };
     beginProvenance(input);
 }

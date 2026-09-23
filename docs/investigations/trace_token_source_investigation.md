@@ -16,7 +16,7 @@ hex dump, an order-dependence test, a sync-vs-async comparison, and reading the 
 reach the answer that one went to the tagger and the other to the n-gram (#1452). A `source` field
 answers it in one call.
 
-## Run 2 — ⚠ THE VALUE THE FIELD WAS ADDED FOR WAS UNREACHABLE
+## Run 2 — ⚠ THE VALUE THE FIELD WAS ADDED FOR IS NOT OBSERVABLE THROUGH THE API
 
 `phonemizeTrace` calls the SYNC `phonemize`, which never consults the OOV tagger. So `tagger` was a
 declared union member **nothing could produce through the public API** — and it is precisely the value
@@ -74,3 +74,52 @@ already carry. 188 engines report nothing here.
 accumulates several readings; where they do not all come from the same tier, reporting the first would be
 a confident wrong answer to a question with no single answer. The flag is sticky, so a later reading
 matching the first does not un-poison it.
+
+## Run 4 — 2026-09-23 — ⚠ REVIEW: THE ASYNC TRACE ENTRY COULD NOT BE MADE SAFE, AND IS GONE
+
+`phonemizeTraceAsync` held the ambient recorder across an `await`. I added a re-entrancy throw to
+`startTrace` and believed that closed it. **It closed half.** The throw guards trace-against-trace; it
+does nothing about a plain, untraced `phonemize()` running in the await window, which writes straight
+into the open recording:
+
+```
+const p = phonemizeTraceAsync("the tau value", "en");
+await Promise.resolve();
+phonemize("bonjour monsieur", "fr");
+await p
+  ->  normalized: "bonjour monsieur"
+      ipa:        ðə tʰˈaᶷ vˈæɫjuː
+      tokens:     bonjour/  monsieur/  the/lexicon  tau/tagger  value/lexicon
+```
+
+**A trace claiming another utterance's normalized text, carrying two French tokens whose spans index a
+string the caller never passed.** Exactly the "corrupted result that looks valid" my own comment claimed
+to have closed.
+
+⚠ **AND IT CANNOT BE FIXED IN THIS ARCHITECTURE.** Scoping an ambient recorder to one call needs an async
+context — `AsyncLocalStorage` — and **`src/` carries no `node:` imports by design** (verified: zero). A
+library cannot ask its callers to guarantee that nothing else phonemizes during an await, so the entry is
+REMOVED rather than documented.
+
+`TokenSource.tagger` therefore stays in the union as a value the ENGINE produces and the API does not
+expose. It is reachable and tested by driving the recorder directly around `phonemizeEnNeural`, which is
+safe in a single-threaded test and is precisely the contract that cannot be offered publicly.
+
+### ⚠ AND THE RE-ENTRANCY THROW WAS ITSELF A REGRESSION, SO IT IS REVERTED TOO
+
+`startTrace` used to overwrite unconditionally, which made the recorder SELF-HEALING: a recording left
+open by a `stopTrace` that threw, or by an abandoned call, was cleared by the next call. With the throw,
+that state is permanent for the process, and **three tools — `ipa-span-coverage`, `provenance-coverage`,
+`provenance-poison` — wrap `phonemizeTrace` in `catch { continue; }`**, so a stuck recorder reports a
+CLEAN RUN WITH ZERO ROWS instead of a failure. The success-signal-that-matches-the-no-op shape, installed
+by a guard meant to prevent corruption. Reverted, and the test now pins the self-healing.
+
+### One more: the field describes the CITATION
+
+`source` names the tier that resolved the word. Prosody rewrites the reading afterwards — the
+clause-initial coordinator in `it was built, and tested` emits `ˈænd` from `clauseInitialStressed`, and
+`wordTransform` replaces the string outright — and neither is a TIER. The public doc said "produced this
+token's reading", which oversells it; it now says CITATION and names the two rewrites that do not change
+it. `emitted` remains what the token actually contributed.
+
+**Net: this PR is now the `source` field and its cross-port gate, and nothing else.**
