@@ -125,7 +125,6 @@ row the LOT rule turns its /ɑː/ into /ɒ/.
 | lieutenant | /lɛfˈtɛnənt/ against /luːˈtɛnənt/ — a consonant no rule inserts |
 | ballet | stress on the FIRST syllable in British, the second in GenAm — a stress difference no accent rule makes |
 | leisure | /ˈlɛʒə/ against /ˈliːʒɚ/ — DRESS against FLEECE |
-| pasta | TRAP in British, PALM in GenAm |
 | schedule | /ˈʃɛdjuːl/ against /ˈskɛdʒuːl/ — a different first consonant AND a yod; the whole `sched` family, see below |
 | process | GOAT in British, LOT in GenAm — /ˈprəʊsɛs/ against /ˈprɑːsɛs/; no rule turns LOT into GOAT |
 | progress | the same LOT/GOAT swap, in the NOUN only — see below |
@@ -160,7 +159,6 @@ entailment, which is the evidence the entailment is sound.
 | `herb` | attested |
 | `lever` | attested |
 | `lieutenant` | attested |
-| `pasta` | attested |
 | `tomato` | attested |
 | `vitamin` | attested |
 | `ballet` | attested — SECOND SOURCE (stress; the primary carries no stress marks) |
@@ -195,7 +193,6 @@ entailment, which is the evidence the entailment is sound.
 | `levering` | entailed from `levering` |
 | `levers` | entailed from `levers` |
 | `lieutenants` | entailed from `lieutenants` |
-| `pastas` | entailed from `pastas` |
 | `tomatoes` | entailed from `tomatoes` |
 | `vitamins` | entailed from `vitamins` |
 
@@ -277,6 +274,16 @@ on the suffix. Three separate things the raw prefix test cannot see, so it is ru
 ⚠ **THE PREFIX TEST IGNORES FLAPPING AND ASPIRATION.** `tomato` is `təmˈeᶦtʰoᶷ` and `tomatoes`
 `təmˈeᶦt̬oᶷz` — the same /t/ in two allophones — and comparing them raw refuses the row. `toRP` un-flaps
 as its first act, so neither is a difference for this table; the citation keeps its own aspiration.
+
+⚠ **`pasta` AND `pastas` LEFT THIS TABLE AT #1414, AND THE REASON IS THIS FILE'S OWN BAR.** The row read
+"TRAP in British, PALM in GenAm" — which is a description of ONE WORD WITH TWO ACCENT REALISATIONS, i.e.
+exactly what the opening section says does NOT belong here. It was admitted anyway because there was no set
+that expressed `ɑː → æ`: BATH is `æ → ɑː` and PALM is `ɒ → ɑː`, both the other way. #1414 built that set
+(`en-gb-trap.tsv`, the FOREIGN (a) class — `taco`, `drachma`, `regatta`, `dacha`, `salsa`, `piazza`), and
+`pasta` is a generated member of it. **The reading it produces is byte-identical, `pʰˈæstə`.**
+⚠ **A ROW ADMITTED BECAUSE THERE WAS NOWHERE ELSE TO PUT IT IS A ROW TO RE-EXAMINE WHEN SOMEWHERE ELSE
+APPEARS**, and nothing would have prompted that on its own — the word was right, the table was green, and
+the only tell was a justification that contradicted the file's own first paragraph.
 
 ## The lexical-SET layer does not run over these rows
 

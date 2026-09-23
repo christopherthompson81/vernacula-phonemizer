@@ -12,7 +12,9 @@
  *     /ɫ/ stays (folded ɫ~l in the eval).
  *   • LOT ɑː→ɒ (un-does GenAm's father-bother merger); un-flap the tapped /t̬/→[t].
  *   • THE LEXICAL SETS (GenAm doesn't carry these splits → word lists): BATH æ→ɑː (grass, dance), CLOTH ɔː→ɒ (off,
- *     dog), yod-retention Cuː→Cjuː (new→njuː), and PALM (exceptions kept [ɑː] against the LOT rule: father, spa).
+ *     dog), yod-retention Cuː→Cjuː (new→njuː), PALM (exceptions kept [ɑː] against the LOT rule: father, spa),
+ *     and TRAP ɒ→æ — the FOREIGN (a) set (pasta, taco, drachma), where GenAm nativises a foreign /a/ as LOT and RP
+ *     as TRAP. It is the one set whose input the LOT rule itself created.
  *     Applied on the SHIPPED path only; the eval uses phonemizeWordRules → non-circular.
  */
 import { createEnglish, type EnglishPhonemizer } from "../english/english.ts";
@@ -134,6 +136,21 @@ export interface LexSets {
     palm: Set<string>; // keep [ɑː] against the LOT rule
     lotr: Set<string>; // [ɑɔ]ːɹ → ɒɹ before a vowel (LOT before intervocalic r; cf. starry, which keeps ɑː)
     /**
+     * ɒ → æ: the FOREIGN (a) set — a foreign /a/ that GenAm nativises as LOT and RP as TRAP (#1414).
+     *
+     * ⚠ IT IS THE ONLY SET WHOSE INPUT THE LOT RULE ITSELF CREATED. `pasta`, `taco`, `drachma`, `regatta`,
+     * `dacha`, `salsa`, `piazza`, `goulash`, `falafel` are `ɑː` in the parent (CMUdict `AA`), the LOT rule
+     * turns every un-exempted `ɑː` into `ɒ`, and RP has `æ`. There was no set expressing that direction —
+     * BATH is `æ → ɑː` and PALM is `ɒ → ɑː`, both the other way — which is why #1411's PALM drop moved 41
+     * words from one wrong vowel to another rather than fixing them.
+     *
+     * ⚠ AND `pasta` USED TO BE IN `en-gb-lexical.tsv`, WHICH WAS THE WRONG FILE. That table's own bar is
+     * that the two varieties do not use the SAME WORD; `pasta` is one word with two accent realisations,
+     * and its PROVENANCE row said as much — "TRAP in British, PALM in GenAm". It was there because there
+     * was nowhere else to put it.
+     */
+    trap: Set<string>;
+    /**
      * ɛɹ → æɹ before a vowel: the marry–merry merger, UNDONE for RP.
      *
      * ⚠ THIS SET EXISTS BECAUSE THE PARENT MERGED AND BRITISH DID NOT. GenAm (and Canadian) has
@@ -155,7 +172,7 @@ export interface LexSets {
     /**
      * word → the GenAm-alphabet citation this accent starts from, REPLACING the parent's.
      *
-     * ⚠ EVERY OTHER TABLE HERE IS AN ACCENT DELTA AND THIS ONE IS NOT. The five sets above say how the
+     * ⚠ EVERY OTHER TABLE HERE IS AN ACCENT DELTA AND THIS ONE IS NOT. The six sets above say how the
      * SAME word is realised differently; this one says the two varieties do not use the same word. British
      * `aluminium` is /ˌæljʊˈmɪniəm/ against GenAm `aluminum` /əˈluːmɪnəm` — five syllables against four,
      * with the stress on a different one — and no phonological rule gets from one to the other. Nor should
@@ -189,8 +206,13 @@ export interface LexSets {
  * wrong-within-one-sentence failure the inflection rows exist to prevent, arriving through the lemma.
  *
  * So a row may name the reading it replaces, and applies only when the parent actually produced it. A row
- * WITHOUT the field is unconditional, which is correct for the 24 words that have exactly one reading — and
- * a word that GAINS a second one later is the reason the field is here rather than a note in a doc.
+ * WITHOUT the field is unconditional, which is correct for the 42 words that have exactly one reading; a word
+ * that GAINS a second one later is the reason the field is here rather than a note in a doc.
+ *
+ * ⚠ THAT COUNT SAID 24 AND HAD BEEN STALE FOR SOME TIME. #1414 removed two rows from the table, which made
+ * it 42 — and it was 44 before that removal, so the comment had never tracked the file it describes. A
+ * number in prose about a data file is a claim like any other; corrected rather than dropped, because the
+ * count is the only thing here that says how much of the table the guard does NOT cover.
  */
 export interface LexicalRow {
     /** The British citation, in the PARENT's alphabet, that replaces the parent's reading. */
@@ -213,6 +235,7 @@ const sets = (): LexSets =>
         yod: loadSet("en-gb-yod.tsv"),
         palm: loadSet("en-gb-palm.tsv"),
         lotr: loadSet("en-gb-lotr.tsv"),
+        trap: loadSet("en-gb-trap.tsv"),
         marry: loadSet("en-gb-marry.tsv"),
         lexical: loadTsvMap(import.meta.url, "en-gb-lexical.tsv", parseLexicalRow, { optional: true }),
     });
@@ -223,7 +246,7 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
     // ⚠ FIRST, AND IT REPLACES THE INPUT RATHER THAN EDITING IT. A lexical variant is a different word, so
     // there is nothing in the parent's citation worth keeping; everything below then treats the substitute
     // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee eval,
-    // which must stay non-circular, exactly as the five sets below are.
+    // which must stay non-circular, exactly as the six sets below are.
     const row = lex?.lexical.get(w);
     // ⚠ A ROW MAY NAME THE READING IT REPLACES, and then applies only when the parent produced it — see
     // LexicalRow. Without that, a POS heteronym gets the noun's citation in a verb frame.
@@ -307,6 +330,19 @@ export function toRP(genAm: string, word: string, lex?: LexSets): string {
         // document why the edit is WIDE, not who is in the set. The wide form is kept because the builder's
         // probe is now the same expression, so a future reordering cannot silently un-widen it.
         if (lex.lotr.has(w)) s = s.replace(/[ɑɔ]ːɹ/u, "ɒɹ");
+        // FOREIGN (a) — see LexSets.trap. The `ɒ` this edit consumes is the LOT rule's own output, so
+        // unlike the four above it is not undoing something the parent wrote; it is naming the words where
+        // LOT should never have fired in the first place.
+        // ⚠ IT CANNOT COLLIDE WITH BATH, CLOTH, yod, PALM OR LOTR, AND THAT IS A PROPERTY OF THE BUILDER
+        // RATHER THAN AN ACCIDENT: its claim loop `break`s on the first set that claims a word, so the six
+        // generated lists are disjoint by construction. Measured on this tree, all five intersections are 0.
+        // ⚠ BUT `marry` IS BUILT SEPARATELY AND DOES OVERLAP, ON ONE WORD, AND IT CHAINS. `ararat` is in
+        // both sets: rules-only gives `ˈɛɹəɹˌɒt`, marry takes the `ɛɹ` to `æɹ` (`ˈæɹəɹˌɒt`), and TRAP then
+        // takes the `ɒ` to `æ` — `ˈæɹəɹˌæt`, which is the referee's `æɹəɹæt` exactly. The builder probes
+        // with marry applied FIRST, so this is the order the claim was validated under; the same shape as
+        // marry→BATH two rules up, and found by MEASURING the intersections rather than assuming there
+        // were none.
+        if (lex.trap.has(w)) s = s.replace(/ɒ/u, "æ");
     }
     /**
      * ⚠ THE `-ary / -ery / -ory` WEAK VOWEL (#1380) — A RULE, NOT A WORD LIST, because the suffix is
@@ -418,7 +454,7 @@ export function phonemizeWordRules(word: string): string {
 }
 
 /** Build the British-English phonemizer (GenAm engine + the RP lexical-set delta). The delta rides on the
- *  engine's per-word output hook so each word gets its lexical-set membership (BATH/CLOTH/yod/PALM/LOTR) while
+ *  engine's per-word output hook so each word gets its lexical-set membership (BATH/CLOTH/yod/PALM/LOTR/TRAP) while
  *  reusing the full number/heteronym/prosody context. Linking-r ACROSS words is deferred (per-word scope). */
 export function createEnglishGB(): { text(input: string): string } {
     const e = createEnglish();

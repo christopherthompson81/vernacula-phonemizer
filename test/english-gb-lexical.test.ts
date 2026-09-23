@@ -30,7 +30,7 @@ describe("en-GB lexical variants", () => {
     });
 
     it("is off on the rule-only path, so the referee eval stays non-circular", () => {
-        // Same contract the five lexical sets have: phonemizeWordRules is the honest signal, and a table
+        // Same contract the six lexical sets have: phonemizeWordRules is the honest signal, and a table
         // mined from the referee must not be able to flatter a score measured against it.
         expect(phonemizeWordRules("aluminium")).not.toBe(phonemizeWord("aluminium"));
     });
@@ -60,7 +60,10 @@ describe("en-GB lexical variants", () => {
         // ⚠ THE ROWS REPLACE THE CITATION WHOLESALE, so any allophonic detail the parent emits must be
         // written into the row. Three of them dropped the aspiration diacritic and shipped an unaspirated
         // stop where every comparable word aspirates.
-        expect(phonemizeWord("pasta")).toBe("pʰˈæstə");          // cf. passive pʰˈæsɪv
+        // ⚠ `pasta` USED TO BE THE THIRD EXAMPLE HERE AND HAS LEFT THIS TABLE ALTOGETHER (#1414). It was
+        // never a lexical VARIANT — one word, two accent realisations, which this file's own bar excludes
+        // — and it was here only because no set expressed `ɑː → æ`. It is a TRAP member now, and
+        // english-gb-set-examples.test.ts pins it there; the reading it produces is unchanged.
         expect(phonemizeWord("tomato")).toBe("təmˈɑːtʰəᶷ");      // cf. potato pətʰˈeᶦtʰəᶷ
         expect(phonemizeWord("lieutenant")).toBe("lɛftʰˈɛnənt"); // cf. tenant tʰˈɛnənt
     });

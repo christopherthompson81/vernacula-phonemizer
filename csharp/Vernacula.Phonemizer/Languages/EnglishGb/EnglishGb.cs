@@ -5,7 +5,7 @@
  * Ported from src/languages/english-gb/english-gb.ts — see that file for the delta in full and for the referee
  * (wikipron eng_latn_uk, 76k).
  *
- * ⚠ THIS IS THE ONE VARIANT THAT NEEDS THE WORD, not just the IPA. Four of the five lexical sets cannot be
+ * ⚠ THIS IS THE ONE VARIANT THAT NEEDS THE WORD, not just the IPA. Five of the six lexical sets cannot be
  * derived from GenAm output at all — GenAm does not carry the BATH/TRAP or CLOTH/THOUGHT splits, so membership
  * is a word list. That is why the delta rides the engine's per-word hook with `(ipa, word)`, and why no
  * declarative variant key could ever have expressed it.
@@ -18,7 +18,7 @@ using Vernacula.Phonemizer.Languages.English;
 
 namespace Vernacula.Phonemizer.Languages.EnglishGb;
 
-/** The five lexical sets. Membership is a WORD LIST because GenAm output cannot supply it. */
+/** The six lexical sets. Membership is a WORD LIST because GenAm output cannot supply it. */
 public sealed class LexSets
 {
     public required IReadOnlySet<string> Bath { get; init; }   // æ → ɑː
@@ -27,6 +27,13 @@ public sealed class LexSets
     public required IReadOnlySet<string> Palm { get; init; }   // keep [ɑː] against the LOT rule
     /** ɑːɹ → ɒɹ before a vowel (sorry, borrow — LOT before intervocalic r; cf. starry, which keeps ɑː). */
     public required IReadOnlySet<string> Lotr { get; init; }
+
+    /// ɒ → æ: the FOREIGN (a) set — a foreign /a/ GenAm nativises as LOT and RP as TRAP (#1414). The TS twin
+    /// carries the reasoning: `pasta`, `taco`, `drachma`, `regatta`, `dacha`, `salsa`, `piazza`, `goulash`.
+    /// ⚠ THE ONLY SET WHOSE INPUT THE LOT RULE ITSELF CREATED, so it is not undoing something the parent
+    /// wrote — it names the words where LOT should never have fired. BATH is `æ → ɑː` and PALM is `ɒ → ɑː`,
+    /// both the other way, which is why there was no set expressing this direction at all.
+    public required IReadOnlySet<string> Trap { get; init; }
 
     /// ɛɹ → æɹ before a vowel: the marry–merry merger, UNDONE for RP. The TS twin carries the reasoning —
     /// GenAm (and Canadian) has marry = merry = Mary, SSBE keeps them apart, and the parent's dictionary was
@@ -37,7 +44,7 @@ public sealed class LexSets
 
     /// word → the GenAm-alphabet citation this accent starts from, REPLACING the parent's.
     ///
-    /// ⚠ EVERY OTHER TABLE HERE IS AN ACCENT DELTA AND THIS ONE IS NOT. The five sets above say how the SAME
+    /// ⚠ EVERY OTHER TABLE HERE IS AN ACCENT DELTA AND THIS ONE IS NOT. The six sets above say how the SAME
     /// word is realised differently; this one says the two varieties do not use the same word. British
     /// `aluminium` is /ˌæljʊˈmɪniəm/ against GenAm `aluminum` /əˈluːmɪnəm/ — five syllables against four,
     /// stressed on a different one — and no phonological rule gets from one to the other. Nor should one
@@ -102,6 +109,7 @@ public static class EnglishGb
         Yod = LoadSet("en-gb-yod.tsv"),
         Palm = LoadSet("en-gb-palm.tsv"),
         Lotr = LoadSet("en-gb-lotr.tsv"),
+        Trap = LoadSet("en-gb-trap.tsv"),
         Marry = LoadSet("en-gb-marry.tsv"),
         Lexical = LoadTsv.LoadTsvMap("languages/english-gb", "en-gb-lexical.tsv", optional: true),
     };
@@ -145,6 +153,7 @@ public static class EnglishGb
     private static readonly JsRe CLOTH_FIRST = JsRegex.Compile("ɔː", "u");
     private static readonly JsRe YOD_FIRST = JsRegex.Compile("([tdnszθl])(ʰ?)([ˈˌ]?)uː", "u");
     private static readonly JsRe LOTR_FIRST = JsRegex.Compile("[ɑɔ]ːɹ", "u");
+    private static readonly JsRe TRAP_FIRST = JsRegex.Compile("ɒ", "u");
 
     private static readonly JsRe MARRY_FIRST = JsRegex.Compile("ɛ(ˈ|ˌ)?ɹ", "u");
     /** The OFFGLIDE TRIPHTHONGS. ⚠ WITHOUT THESE #1252 WOULD HAVE DELETED A SCHWA IN 238 WORDS: the generic
@@ -169,7 +178,7 @@ public static class EnglishGb
         // ⚠ FIRST, AND IT REPLACES THE INPUT RATHER THAN EDITING IT. A lexical variant is a different word,
         // so nothing in the parent's citation is worth keeping; everything below then treats the substitute
         // as though the dictionary had produced it. Shipped path only — `lex` is absent for the referee
-        // eval, which must stay non-circular, exactly as the five sets are.
+        // eval, which must stay non-circular, exactly as the six sets are.
         string? row = null;
         var owned = lex is not null && lex.Lexical.TryGetValue(w, out row);
         string? variant = null;
@@ -213,6 +222,13 @@ public static class EnglishGb
             // to gold's consistent LOT–THOUGHT split and 7 of this set's 13 words moved from ɑː to ɔː, so
             // matching only ɑːɹ left the rule silently failing on over half its own list.
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
+            // FOREIGN (a) — see LexSets.Trap. The `ɒ` this consumes is the LOT rule's own output.
+            // ⚠ IT CANNOT COLLIDE WITH BATH/CLOTH/yod/LOTR — the builder's claim loop `break`s on the first
+            // set that claims a word, so those five lists are disjoint by construction (measured: 0, 0, 0, 0).
+            // ⚠ BUT `marry` IS BUILT SEPARATELY AND OVERLAPS ON ONE WORD, AND IT CHAINS: `ararat` is in both,
+            // and marry→TRAP gives `ˈæɹəɹˌæt`, the referee's reading. The builder probed with marry applied
+            // first, so this order is the one the claim was validated under. See the TS twin.
+            if (lex.Trap.Contains(w)) s = TRAP_FIRST.Replace(s, "æ");
 
         }
         // ⚠ THE -ary/-ery/-ory WEAK VOWEL (#1380) — a RULE, not a word list, because the suffix is

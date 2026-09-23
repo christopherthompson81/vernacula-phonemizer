@@ -7,7 +7,7 @@
  * Neither half was true when a review checked them, and nothing had noticed, because a comment naming
  * a row in a GENERATED artifact is exactly the kind of claim no gate covers.
  *
- * ⚠ IT IS DELIBERATELY TINY. The five sets have their own freshness ritual (`npm run check:en-gb-sets`)
+ * ⚠ IT IS DELIBERATELY TINY. The six sets have their own freshness ritual (`npm run check:en-gb-sets`)
  * and their own product goldens; this pins ONLY the handful of memberships that documentation points
  * at by name, so the prose and the data cannot drift apart silently.
  */
@@ -47,6 +47,26 @@ describe("the set memberships that documentation names", () => {
         for (const w of ["conservation", "bobsled", "beatbox", "contrabass", "chiffon"])
             expect([w, palm.has(w)]).toEqual([w, false]);
         for (const w of ["father", "spa", "drama", "calm"]) expect([w, palm.has(w)]).toEqual([w, true]);
+    });
+
+    it("keeps TRAP's discriminator honest in both directions", () => {
+        // ⚠ TRAP (#1414) IS THE SET THAT FIXES #1411's RESIDUE: dropping 121 words from PALM moved 41 of
+        // them from one wrong vowel to another, because no set expressed `ɑː → æ`. These are the words
+        // whose TRAP reading the primary referee attests with a properly-spelled `æ` row — which #1414
+        // said it could not do, and which is the premise that turned out to be wrong.
+        const trap = members("trap");
+        for (const w of ["pasta", "taco", "drachma", "regatta", "natasha", "salsa", "dacha", "piazza"])
+            expect([w, trap.has(w)]).toEqual([w, true]);
+        // ⚠ AND THE DISCRIMINATOR IS THE HALF THAT WOULD BREAK QUIETLY. A referee that attests our
+        // UN-EDITED `ɒ` as well is saying the LOT reading is real, and on these our current output is
+        // simply right — `squad skwɒd`, `wan wɒn`, `guam ɡwɒm`, `aquatic əkwɒtɪk`. It refuses 14 of 189
+        // claims, TEN OF THEM THE /w/ ENVIRONMENT, so it is doing phonological work and not filtering
+        // noise. Without it the set would regress 7.4% of what it touches.
+        for (const w of ["squad", "wan", "guam", "aquatic", "taiwan", "genealogy", "wandle", "rwanda"])
+            expect([w, trap.has(w)]).toEqual([w, false]);
+        // `antipasto` is refused for a THIRD reason and is the positional check: its referee TRAP vowel
+        // (`æntipɑstəʊ`) is in the first syllable and the segment the LOT rule produced is in the third.
+        expect([...trap]).not.toContain("antipasto");
     });
 
     it("drops the words #1391's length tell was written to remove", () => {
