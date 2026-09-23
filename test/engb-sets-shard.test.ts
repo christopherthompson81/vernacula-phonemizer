@@ -55,7 +55,7 @@ describe("build-en-gb-sets --jobs", () => {
         }, 300_000);
 
     it("refuses to write the shipped sets while --limit is set", () => {
-        // ⚠ THIS TEST'S FAILURE MODE IS CLOBBERING FIVE COMMITTED FILES, so it snapshots them and puts
+        // ⚠ THIS TEST'S FAILURE MODE IS CLOBBERING SIX COMMITTED FILES, so it snapshots them and puts
         // them back. Without `--dump`/`--check` the run reaches `write()`, which is the point — and if
         // the guard is ever removed, the six sets would be overwritten with ~95%-truncated memberships
         // before the assertion had anything to say.

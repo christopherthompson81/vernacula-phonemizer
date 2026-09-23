@@ -214,3 +214,72 @@ trap ∩ yod   0     trap ∩ marry 1   ← ararat
 The builder probes with marry applied first, so the shipped order is the one the claim was validated
 under — the same shape as the documented marry→BATH chain. **The comment was corrected before the
 measurement contradicted it only because the measurement was run.**
+
+## Run 4 — 2026-09-22 — two review findings, measured and declined
+
+Review proposed two changes to the discriminator. Both are reasonable on their face and both are
+**worse than the defect they target**; the measurements are here so the next person does not re-propose
+them from the same reasoning.
+
+### ⚠ WIDENING THE GUARD TO TREAT `ɑ` AS EVIDENCE FOR OUR `ɒ` WOULD DELETE THE PR'S OWN SPECIMENS
+
+The finding: no fold unifies `ɑ` with `ɒ`, so `wamble` (referee `wæmbəl | wɑmbəl`) is claimed although a
+back-vowel reading is attested. Proposed remedy: unify `ɑː`/`ɑ`/`ɒ` for the "attests ours" test.
+
+Measured over the 192 members — 14 would be refused:
+
+```
+amoy aquavit bianca drachma dramatist fukang kampong manuel
+muhammad natasha piazza regatta victoriana wamble
+```
+
+**`drachma`, `regatta`, `natasha` and `aquavit` are four of the five words #1414 names as the target of
+the whole issue.** The remedy deletes the class it was built to fix.
+
+⚠ **THE REASON IS #1411's OWN FINDING, RUNNING THE OTHER WAY.** For a loanword the length-less `ɑ` row
+IS the American reading, and the American reading is the thing being corrected. Verified against the
+parent's own citation rather than inferred:
+
+```
+drachma  GenAm dɹˈɑːkmə   referee dɹækmə | dɹɑkmə   ← `dɹɑkmə` IS our GenAm row, folded
+wamble   GenAm wˈɑːmbɫ̩   referee wæmbəl | wɑmbəl   ← `wɑmbəl` IS our GenAm row, folded
+```
+
+⚠ **AND THAT IS ALSO WHY `wamble` CANNOT BE SEPARATED FROM `drachma` ON THE EVIDENCE.** The two rows have
+the same shape, the same relationship to the parent, and the same referee support. I have private reason
+to think `wamble` is RP /ˈwɒmbl̩/ — but **no admissible source says so**: it has no `en_list` entry and no
+variant-conditional `en_rules` line, so espeak contributes nothing the PROVENANCE would accept, and the
+primary referee attests `wæmbəl` outright. Recorded as a suspected single miss rather than acted on from
+unsourced recall.
+
+### ⚠ A /w/-ENVIRONMENT EXCLUSION WOULD DROP TWO WORDS THAT ARE RIGHT
+
+The finding: ~17 members sit in the environment this PR's own comment calls dangerous, on single-row
+evidence. Measured with `w[ˈˌ]?ɒ` against the rules-only output, it is **18**:
+
+```
+kwangtung qualgo sasquatch squacco swammy swass twat twats twattery
+waa wadder waf waff wamble wambulance wangus wap wapanese
+```
+
+Two of them are positively correct and an exclusion would break both:
+
+- **`twat`** — RP is /twæt/, and it is the referee's ONLY row. Dropping it re-introduces a wrong vowel.
+- **`sasquatch`** — our edit takes the FIRST `ɒ` (`sɒskwˈɒt͡ʃ` → `sæskwˈɒt͡ʃ`), which is the referee's
+  `sæskwɒt͡ʃ` variant **exactly**; the second `ɒ` is left alone, correctly. The word is in the /w/
+  environment and the rule never touches that slot.
+
+Of the other 16, most are recent coinages and slang (`swass`, `wap`, `wambulance`, `wapanese`,
+`wangus`) where the /w/-rounding that produced `want`/`watch`/`swan` never applied, plus loanwords
+(`kwangtung`). **No admissible source contradicts any of the 18.** An exclusion would trade one
+suspected miss for two certain ones and fourteen unevidenced ones.
+
+**Kept as written.** The /w/ note at the guard already records this as where the residual risk sits;
+what this run adds is that the obvious remedy costs more than the risk.
+
+### The five findings that were real
+
+All documentation, all fixed: `falafel` named as a member when the discriminator refused it (now pinned
+on the REFUSED side of the test — review caught the prose, not a gate, which is the very failure that
+test file exists for, in the comment introducing the set); the PROVENANCE's set-layer exemption list;
+three stale "five"s that should have been six.

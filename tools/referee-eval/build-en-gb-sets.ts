@@ -407,7 +407,7 @@ const write = (file: string, words: string[]): void => {
     const path = join(HERE, "..", "..", "data", "languages", "english-gb", file);
     const body = words.map((w) => `${w}\t1`).join("\n") + "\n";
     if (check) {
-        // ⚠ AN ABSENT SET FILE IS LEGITIMATE — `english-gb.ts` loads all five with `{ optional: true }` —
+        // ⚠ AN ABSENT SET FILE IS LEGITIMATE — `english-gb.ts` loads all six with `{ optional: true }` —
         // so this must REPORT it, not die with an ENOENT trace. A freshness check that crashes instead of
         // naming the artifact that disagrees with its source is the opposite of the point.
         const have = existsSync(path) ? readFileSync(path, "utf8") : "";

@@ -223,8 +223,9 @@ public static class EnglishGb
             // matching only ɑːɹ left the rule silently failing on over half its own list.
             if (lex.Lotr.Contains(w)) s = LOTR_FIRST.Replace(s, "ɒɹ");
             // FOREIGN (a) — see LexSets.Trap. The `ɒ` this consumes is the LOT rule's own output.
-            // ⚠ IT CANNOT COLLIDE WITH BATH/CLOTH/yod/LOTR — the builder's claim loop `break`s on the first
-            // set that claims a word, so those five lists are disjoint by construction (measured: 0, 0, 0, 0).
+            // ⚠ IT CANNOT COLLIDE WITH BATH, CLOTH, yod, PALM OR LOTR — the builder's claim loop `break`s on
+            // the first set that claims a word, so the six generated lists are disjoint by construction
+            // (measured: all five intersections are 0).
             // ⚠ BUT `marry` IS BUILT SEPARATELY AND OVERLAPS ON ONE WORD, AND IT CHAINS: `ararat` is in both,
             // and marry→TRAP gives `ˈæɹəɹˌæt`, the referee's reading. The builder probed with marry applied
             // first, so this order is the one the claim was validated under. See the TS twin.

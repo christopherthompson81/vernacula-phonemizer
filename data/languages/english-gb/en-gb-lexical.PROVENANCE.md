@@ -287,7 +287,7 @@ the only tell was a justification that contradicted the file's own first paragra
 
 ## The lexical-SET layer does not run over these rows
 
-⚠ A word this table owns is exempt from the LOT rule and from BATH/CLOTH/yod/LOTR/marry. The citation is
+⚠ A word this table owns is exempt from the LOT rule and from BATH/CLOTH/yod/LOTR/marry/TRAP. The citation is
 written with the SSBE target in mind, so a set edit derived for a DIFFERENT word has no business running
 over it. The accent's PHONOLOGICAL rules still do — non-rhoticity, GOAT, NURSE/lettER, un-flapping.
 

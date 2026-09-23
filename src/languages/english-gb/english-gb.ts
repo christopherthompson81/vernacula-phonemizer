@@ -139,8 +139,13 @@ export interface LexSets {
      * ɒ → æ: the FOREIGN (a) set — a foreign /a/ that GenAm nativises as LOT and RP as TRAP (#1414).
      *
      * ⚠ IT IS THE ONLY SET WHOSE INPUT THE LOT RULE ITSELF CREATED. `pasta`, `taco`, `drachma`, `regatta`,
-     * `dacha`, `salsa`, `piazza`, `goulash`, `falafel` are `ɑː` in the parent (CMUdict `AA`), the LOT rule
-     * turns every un-exempted `ɑː` into `ɒ`, and RP has `æ`. There was no set expressing that direction —
+     * `dacha`, `salsa`, `piazza`, `goulash` are `ɑː` in the parent (CMUdict `AA`), the LOT rule turns every
+     * un-exempted `ɑː` into `ɒ`, and RP has `æ`.
+     * ⚠ AND `falafel` IS NOT ONE OF THEM, THOUGH IT READS LIKE ONE — an earlier draft of this list named it
+     * and it is NOT a member, which is the stale-comment-about-a-generated-file failure
+     * `test/english-gb-set-examples.test.ts` exists to catch, in the comment introducing the set. The
+     * referee lists `fəlɒfəl` beside `fəlæfəl`, so the discriminator below refused the claim and the word
+     * still ships `fəlˈɒfɫ̩`. It is pinned in that test now, on the REFUSED side. There was no set expressing that direction —
      * BATH is `æ → ɑː` and PALM is `ɒ → ɑː`, both the other way — which is why #1411's PALM drop moved 41
      * words from one wrong vowel to another rather than fixing them.
      *

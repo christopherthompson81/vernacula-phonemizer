@@ -62,8 +62,13 @@ describe("the set memberships that documentation names", () => {
         // simply right — `squad skwɒd`, `wan wɒn`, `guam ɡwɒm`, `aquatic əkwɒtɪk`. It refuses 14 of 189
         // claims, TEN OF THEM THE /w/ ENVIRONMENT, so it is doing phonological work and not filtering
         // noise. Without it the set would regress 7.4% of what it touches.
-        for (const w of ["squad", "wan", "guam", "aquatic", "taiwan", "genealogy", "wandle", "rwanda"])
-            expect([w, trap.has(w)]).toEqual([w, false]);
+        for (const w of ["squad", "wan", "guam", "aquatic", "taiwan", "genealogy", "wandle", "rwanda",
+            "falafel"]) expect([w, trap.has(w)]).toEqual([w, false]);
+        // ⚠ `falafel` IS IN THAT LIST BECAUSE A COMMENT NAMED IT AS A MEMBER AND IT IS NOT ONE. The referee
+        // lists `fəlɒfəl` beside `fəlæfəl`, so the discriminator refused the claim and the word still ships
+        // `fəlˈɒfɫ̩` — review caught the prose, not a gate, which is the exact failure this FILE exists for
+        // showing up in the comment that introduces the set. Pinned on the refused side so it cannot drift
+        // back into a list of members.
         // `antipasto` is refused for a THIRD reason and is the positional check: its referee TRAP vowel
         // (`æntipɑstəʊ`) is in the first syllable and the segment the LOT rule produced is in the third.
         expect([...trap]).not.toContain("antipasto");
