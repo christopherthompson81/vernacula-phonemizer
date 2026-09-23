@@ -129,16 +129,63 @@ const verdict = (m: Word[], src: Map<string, "T" | "R">): Verdict => {
     if (new Set(votes).size > 1) return { kind: "split" };
     return { kind: "says", v: votes[0]!, n: votes.length };
 };
+/**
+ * Families a LISTENER has ruled on against the sources (#1397).
+ *
+ * ⚠ A COMMENT IN THE CURATED FILE DOES NOT STOP THIS TOOL. The first attempt at reverting `preferred`
+ * recorded the reason there and said "so the next sweep does not re-derive them" — and the very next
+ * run re-derived them, because nothing read that comment. The refusal has to live where the decision is
+ * made.
+ *
+ * ⚠ AND THE SOURCE IS NOT WRONG ABOUT THE SOUND — it is wrong about the ANALYSIS. gold reads `prefer`
+ * pɹifˈɜɹ with a tense ⟨i⟩, and for a PRODUCTIVE prefix that is right: `depopulation`, `devaluation`
+ * and `remodeling` all shipped tense on the same evidence and are correct, because `de-`/`re-` there
+ * mean "undo" and "again" and the prefix is a separable morpheme keeping its full vowel. `prefer` is
+ * not `pre` + `fer`; the prefix is lexicalised into the root, and a lexicalised prefix reduces. No
+ * per-family vote can see that difference, which is why gold and Moby "disagree" so often here: they
+ * are not disagreeing about the sound.
+ */
+const LISTENER_RULED: ReadonlySet<string> = new Set(["pre:preferr"]);
+// ⚠ DORMANT WHILE THE DICT IS CONSISTENT, AND THAT IS NOT THE SAME AS DEAD. Once `preferred`,
+// `preferring` and `preferreds` all read reduced the family is no longer SPLIT, so the loop skips it
+// before reaching this set. It fires again the moment the split returns — which an `--emit` produces
+// directly, since `preferreds` upstream is tense while the other two upstream values are already right.
+
 const rows: [string, string, string, string][] = [];
 const after = new Map<string, string>();
+/**
+ * The families that abstain, for `--adjudicate` (#1397).
+ *
+ * ⚠ THEY ARE NOT WAITING ON A MISSING SOURCE. 35 of the 46 abstain because gold and Moby genuinely
+ * DISAGREE, or because one of them disagrees with itself; 11 are under the two-member floor. No further
+ * lexicon settles those — what settles them is a listener, which is what this dump is for.
+ */
+const open: { key: string; why: string; members: string[]; gold: string; moby: string }[] = [];
+const show = (v: Verdict): string =>
+    v.kind === "says" ? `${v.v === "T" ? "tense" : "reduced"} (${v.n})` : v.kind;
 let split = 0, settled = 0, contradicted = 0, thin = 0;
 for (const [k, m] of fams) {
     if (m.length < 2 || new Set(m.map((x) => (isTense(x.vowel) ? "T" : "R"))).size < 2) continue;
     split++;
+    // ⚠ COUNTED AS A SPLIT, THEN SKIPPED — and the order is the point. Placed BEFORE `split++` this
+    // `continue` hid the family from both the counters and `--adjudicate`, so the tool reported a clean
+    // 46 over data that is not clean: `pre:preferr` is genuinely split in the dict and simply ruled on.
+    // A gate that stops counting what it stops emitting is a success signal that matches its no-op.
+    if (LISTENER_RULED.has(k)) {
+        open.push({ key: k, why: "a listener has ruled — see LISTENER_RULED",
+            members: m.map((x) => `${x.word}:${isTense(x.vowel) ? "T" : "R"}`),
+            gold: show(verdict(m, gold)), moby: show(verdict(m, moby)) });
+        continue;
+    }
     const g = verdict(m, gold), mo = verdict(m, moby);
     // ⚠ A SOURCE THAT CONTRADICTS ITSELF ACROSS THE FAMILY STOPS THE FAMILY, rather than handing the
     // decision to the other one. That is the whole point of arbitrating per family.
-    if (g.kind === "split" || mo.kind === "split") { contradicted++; continue; }
+    if (g.kind === "split" || mo.kind === "split") {
+        contradicted++;
+        open.push({ key: k, why: g.kind === "split" ? "gold contradicts ITSELF" : "Moby contradicts ITSELF",
+            members: m.map((x) => `${x.word}:${isTense(x.vowel) ? "T" : "R"}`), gold: show(g), moby: show(mo) });
+        continue;
+    }
     // ⚠ THE TWO-MEMBER FLOOR IS OVER DISTINCT WORDS, NOT PER SOURCE, AND DROPPING IT WAS THE WHOLE
     // DEFECT OF THE FIRST TWO-SOURCE PASS. "gold and Moby agree" was allowed to settle a family on ONE
     // covered word, so 12 of 34 rows read "agree on 1 and 1 members" — and in every case the covered
@@ -150,13 +197,28 @@ for (const [k, m] of fams) {
         .map((x) => x.word));
     let want: "T" | "R" | undefined;
     let why = "";
-    if (covered.size < 2) { thin++; continue; }
+    if (covered.size < 2) {
+        thin++;
+        open.push({ key: k, why: `under the two-member floor (${covered.size} covered)`,
+            members: m.map((x) => `${x.word}:${isTense(x.vowel) ? "T" : "R"}`), gold: show(g), moby: show(mo) });
+        continue;
+    }
     if (g.kind === "says" && mo.kind === "says") {
-        if (g.v !== mo.v) { contradicted++; continue; }                    // the sources disagree — abstain
+        if (g.v !== mo.v) {
+            contradicted++;
+            open.push({ key: k, why: "gold and Moby DISAGREE",
+                members: m.map((x) => `${x.word}:${isTense(x.vowel) ? "T" : "R"}`), gold: show(g), moby: show(mo) });
+            continue;                                                          // the sources disagree — abstain
+        }
         want = g.v; why = `gold and Moby agree, ${covered.size} members covered`;
     } else if (g.kind === "says") { want = g.v; why = `gold on ${g.n} members, Moby silent`; }
     else if (mo.kind === "says") { want = mo.v; why = `Moby on ${mo.n} members, gold silent`; }
-    else { thin++; continue; }
+    else {
+        thin++;
+        open.push({ key: k, why: "neither source speaks",
+            members: m.map((x) => `${x.word}:${isTense(x.vowel) ? "T" : "R"}`), gold: show(g), moby: show(mo) });
+        continue;
+    }
     settled++;
     // ⚠ THE FAMILY IS EXTENDED BY RELATEDNESS BEFORE APPLYING, because the KEY can strand a member:
     // `prescriptivist` keys to `pre:prescriptiv` — `ist` strips before `ive` can — so it sits in a
@@ -193,3 +255,16 @@ if (bad.length > 0) {
 } else console.log(`no orphan pairs (${rows.length} rows)`);
 
 if (process.argv.includes("--emit")) for (const r of rows) console.log(r.join("\t"));
+
+/**
+ * ⚠ THE OPEN FAMILIES, FOR A LISTENER. Every other tier has been exhausted: espeak's vote is a
+ * constant, gold and Moby are the only two curated sources, and where they disagree no third lexicon
+ * exists to break the tie. `T` is the tense prefix vowel (`riː-`), `R` the reduced one (`rɪ-`/`rə-`).
+ *
+ *   npx tsx tools/english/en_prefix_arbitrate.mts --adjudicate
+ */
+if (process.argv.includes("--adjudicate")) {
+    console.log();
+    for (const o of open.sort((a, b) => a.key.localeCompare(b.key)))
+        console.log(`${o.key}\t${o.why}\tgold=${o.gold}\tmoby=${o.moby}\t${o.members.join(" ")}`);
+}

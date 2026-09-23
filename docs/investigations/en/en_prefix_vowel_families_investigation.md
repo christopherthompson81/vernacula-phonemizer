@@ -215,3 +215,86 @@ the superseded pass, not the 34 it was printed beside. The figures above are cou
 35 abstain because a source hesitates — gold against Moby, or a source against itself — and 11 are too
 thin to meet the two-member floor. **They are not waiting on a missing source; they are waiting on
 adjudication where two curated lexicons genuinely disagree**, which is a different and harder thing.
+
+## The listener's verdict — the premise, not the arbitration, was wrong
+
+The 46 open families were put to a listener with A/B audio (espeak, prefix vowel forced each way) and
+the family membership written out. The answer was not a list of T/R picks:
+
+> *"In the family column I couldn't find an improperly labelled one. They really do split like that."*
+
+⚠ **SO "A FAMILY SHOULD BE CONSISTENT" IS NOT TRUE OF THIS DATA**, and the 46 need no change. The issue
+title — *CMUdict is split inside its own paradigms* — described the split accurately and diagnosed it
+wrongly: the split is the language, not the dictionary.
+
+### ⚠ And that cast doubt on what had already shipped, which is where the real defect was
+
+The same listener confirmed `preferred` should be REDUCED. It shipped TENSE. Reverted, with
+`preferring`.
+
+**The error class is exact, and checkable rather than a hunch.** Every gold ⟨i⟩ that shipped tense and
+is CORRECT is a **productive** prefix — `depopulation` dˌipˌɑpjəlˈAʃən, `devaluation`, `remodeling`
+ɹimˈɑdlɪŋ — where `de-`/`re-` mean "undo"/"again", the prefix is a separable morpheme, and it keeps its
+full vowel. `prefer` is not `pre` + `fer`: the prefix is lexicalised into the root, and a lexicalised
+prefix reduces. Of everything shipped tense, `preferred`/`preferring` are **the only lexicalised pair**,
+and the only two wrong. Everything shipped reduced is lexicalised, so all of it is right.
+
+⚠ **gold IS NOT WRONG ABOUT THE SOUND — IT IS WRONG ABOUT THE ANALYSIS.** It reads `prefer` as pɹifˈɜɹ,
+and on the same evidence it reads the productive cases correctly. **No per-family vote can see
+morphological transparency**, which is why gold and Moby "disagree" in 35 of 46 families: they are not
+disagreeing about the vowel, they are disagreeing about whether the prefix is a morpheme.
+
+### ⚠ Two of my own outputs were wrong in the same direction
+
+- **The `mine` column of the adjudication sheet is unreliable and was withdrawn.** It was computed as
+  "follow whichever source speaks with more members" — the rule that produced the `preferred` error. Of
+  the 7 families where it disagreed with the current value, 6 were wrong, every one pulling a
+  LEXICALISED prefix toward tense (`precipitate`, `predict`, `prescribe`, `prevaricate`, `prevent`).
+- ⚠ **A comment claiming an invariant, again.** The revert first recorded its reason in
+  `g2p-curated.tsv` — *"so the next sweep does not re-derive them"* — and the very next run re-derived
+  them, because nothing reads that comment. The refusal now lives in the tool (`LISTENER_RULED`), where
+  the decision is made.
+
+**Found in passing:** `recount` is not a family split at all but a HETERONYM — ɹɪ-COUNT (tell) against
+ɹiː-COUNT (count again). No single family value is correct for it.
+
+**And a separate, larger finding, filed as #1445.** A second report — *"determine sounds tense"* — is
+not this issue: our IPA is already reduced on both paths. We render the reduced prefix vowel as ⟨ᵻ⟩
+where gold writes ⟨ə⟩, in **2,201 words**; of the 1,172 gold covers, gold writes ⟨ə⟩ 1,057 times and
+⟨ᵻ⟩ seven. Kokoro was trained on gold.
+
+**Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189 · en-curation-gap and en-index-tables both green.
+
+**Review of the revert — reverting the base and not its inflection re-opened the split.**
+
+⚠ **`preferreds` WAS LEFT TENSE.** With `preferred` and `preferring` reduced, the family read
+`pɹᵻfˈɝd` beside `pɹifˈɝədz` — audibly inconsistent inside one paradigm, and `relatedForms` calls the
+pair related, so it is exactly the orphan class `orphansAfter` exists to forbid. That guard only missed
+it because it inspects words the run TOUCHED, and a run that emits nothing touches nothing. Fixing the
+base without its inflections is a smaller version of the same mistake the issue is about.
+
+⚠ **AND `preferreds` NEEDED A CURATED ROW WHERE THE OTHER TWO DID NOT**, which is the asymmetry that
+nearly got missed. `preferred` and `preferring` were reverted TO their upstream values, so an `--emit`
+restores them for free. `preferreds` upstream is TENSE — so without a row, an `--emit` puts the split
+straight back, with the inflection on the wrong side of a base form that is right.
+
+⚠ **AND THE REFUSAL HID THE FAMILY INSTEAD OF RULING ON IT.** `LISTENER_RULED` was placed before
+`split++`, so `pre:preferr` vanished from the counters and from `--adjudicate`: the tool reported a
+clean 46 over data that was not clean. A gate that stops COUNTING what it stops EMITTING is a success
+signal that matches its own no-op — the third time that shape has appeared in this session's work.
+Counted first, recorded in the open list with `why: "a listener has ruled"`, and skipped only for emit.
+
+⚠ **The set is now DORMANT, which is not the same as dead.** With all three members reduced the family
+is no longer split, so the loop skips it before the set is consulted. It fires again the moment the
+split returns — which an `--emit` produces directly, since `preferreds` upstream is tense.
+
+**Found in passing, NOT fixed:** `preferment` is `P R IY0 F ER1 M AH0 N T`, tense, against `prefer`
+`P R AH0 F ER1`, reduced. `relatedForms("preferment","prefer")` is true, so it is an orphan pair by the
+same test — but it keys to its own family (`pre:preferment`) and is PRE-EXISTING rather than created
+here. The morphological argument applies to it verbatim, which is precisely why it is being flagged
+rather than decided: this session's record on that judgement is one confirmed wrong call and six wrong
+leans, and the listener has not been asked about this word.
+
+**Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189 · en-curation-gap green.

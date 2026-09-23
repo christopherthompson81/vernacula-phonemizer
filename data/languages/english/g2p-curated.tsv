@@ -3172,8 +3172,25 @@ detractor	D IY0 T R AE1 K T ER0	D IH0 T R AE1 K T ER0	prefix vowel: family consi
 devaluate	D IH0 V AE1 L Y UW0 EY2 T	D IY0 V AE1 L Y UW0 EY2 T	prefix vowel: family consistency, tense — gold and Moby agree, 2 members covered (#1397) [de:devaluat]
 devaluated	D IH0 V AE1 L Y UW0 EY2 T IH0 D	D IY0 V AE1 L Y UW0 EY2 T IH0 D	prefix vowel: family consistency, tense — gold and Moby agree, 2 members covered (#1397) [de:devaluat]
 devaluation	D IH0 V AE2 L Y UW0 EY1 SH AH0 N	D IY0 V AE2 L Y UW0 EY1 SH AH0 N	prefix vowel: family consistency, tense — gold and Moby agree, 2 members covered (#1397) [de:devaluat]
-preferred	P R AH0 F ER1 D	P R IY0 F ER1 D	prefix vowel: family consistency, tense — gold on 2 members, Moby silent (#1397) [pre:preferr]
-preferring	P R IH0 F ER1 IH0 NG	P R IY0 F ER1 IH0 NG	prefix vowel: family consistency, tense — gold on 2 members, Moby silent (#1397) [pre:preferr]
+# ⚠ `preferred`, `preferring` AND `preferreds` WERE SHIPPED TENSE AND ARE REVERTED — the listener says
+# reduced, and the upstream values are restored. gold genuinely reads `pɹifˈɜɹd`, so the tool read its
+# source correctly and the SOURCE is what does not transfer.
+# ⚠ THIS BLOCK IS THE RECORD, NOT THE REFUSAL, AND THE DIFFERENCE WAS LEARNED THE HARD WAY. An earlier
+# version of this comment said the rows were "recorded here as a deliberate absence so the next sweep
+# does not re-derive them" — and the very next run re-derived them, because nothing reads this file's
+# comments. The refusal lives in `LISTENER_RULED` in tools/english/en_prefix_arbitrate.mts. Anyone
+# adding a deliberate absence here must add it there too, or it is a note and not a guard.
+# ⚠ AND `preferreds` NEEDS A ROW WHERE THE OTHER TWO DO NOT, which is the asymmetry that nearly got
+# missed. `preferred` and `preferring` are reverted TO their upstream values, so an --emit restores them
+# for free; `preferreds` upstream is TENSE, so without this row an --emit puts the split straight back —
+# with `preferreds` on the wrong side of a base form that is right.
+preferreds	P R IY0 F ER1 AH0 D Z	P R AH0 F ER1 AH0 D Z	prefix vowel: follows its base `preferred`, which a listener ruled REDUCED; the prefix is lexicalised (#1397)
+# ⚠ THE DISTINCTION IS MORPHOLOGICAL TRANSPARENCY, WHICH NO PER-FAMILY VOTE CAN SEE. Every gold ⟨i⟩
+# that shipped correctly is a PRODUCTIVE prefix meaning "un-do" or "again" — `depopulation`
+# dˌiapˌɑpjəlˈAʃən, `devaluation`, `remodeling` ɹimˈɑdlɪŋ — where the prefix is a separable morpheme
+# and keeps its full vowel. `prefer` is not `pre` + `fer`; the prefix is lexicalised into the root, and
+# a lexicalised prefix reduces. gold and Moby are not disagreeing about the SOUND in these families,
+# they are disagreeing about the ANALYSIS, which is why a majority-of-two never settles them.
 preserver	P R IY0 Z ER1 V ER0	P R IH0 Z ER1 V ER0	prefix vowel: family consistency, reduced — gold and Moby agree, 4 members covered (#1397) [pre:preserv]
 preservers	P R IY0 Z ER1 V ER0 Z	P R IH0 Z ER1 V ER0 Z	prefix vowel: family consistency, reduced — gold and Moby agree, 4 members covered (#1397) [pre:preserv]
 recurred	R IY0 K ER1 D	R IH0 K ER1 D	prefix vowel: family consistency, reduced — gold on 2 members, Moby silent (#1397) [re:recurr]
