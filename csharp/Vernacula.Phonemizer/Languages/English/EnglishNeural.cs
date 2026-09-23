@@ -51,6 +51,10 @@ public static class EnglishNeural
         if (tagger is null) return;
         var E = EnEngine();
         var done = new HashSet<string>(StringComparer.Ordinal);
+        // ⚠ THE RAW TEXT HERE, AND THAT IS NOT THE #1452 DEFECT REPEATED — IT WAS TRIED AND REVERTED. This
+        // function receives the HOST's text, not English, and the English normalizer run over it expands
+        // what the English resolver never sees that way: `600Mbit/s` inside Khmer became
+        // `600 megabits per second`, so `Mbit` stopped being prewarmed. See the TS twin.
         foreach (Match m in WORD.Matches(text))
         {
             var w = m.Value;
@@ -77,8 +81,10 @@ public static class EnglishNeural
         var tagged = new Dictionary<string, string>(StringComparer.Ordinal);
         // ⚠ THE NORMALIZED TEXT, NOT THE CALLER'S (#1452). This scanned the RAW input, so a word the
         // NORMALIZER creates was never in it, never tagged, and fell silently to the weaker n-gram path.
-        // ⚠ NORMALIZED ONCE AND HANDED ON — two passes cost +62% here and the second would POISON the
-        // trace. See the TS twin.
+        // ⚠ NORMALIZED ONCE AND HANDED ON. The measured reason is cost: two passes are +62% on this path.
+        // The trace argument in the TS twin is a FUTURE hazard rather than a live one here and does not
+        // apply to this port at all — `Rewriter`'s seam ignores a string it does not recognise rather than
+        // poisoning. Stated so nobody carries the TS reasoning across unchecked.
         var normalized = E.NormalizedFor(text);
         foreach (Match m in WORD.Matches(normalized))
         {

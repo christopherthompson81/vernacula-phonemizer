@@ -13,17 +13,7 @@ import { createEnglish } from "./english.ts";
 import { addForeignOov, lookupForeignOov, withHost } from "../../core/foreign.ts";
 import { createEnglishTagger, type EnglishTagger } from "./englishTagger.ts";
 
-/**
- * A word to consider tagging.
- *
- * ⚠ NOT ADJACENT TO A DIGIT, AND THAT GUARD ARRIVED WITH #1452. Scanning the NORMALIZED text surfaces
- * letter runs that are fragments of a number rather than words: `2026-09-23` normalizes to
- * `september 23rd`, where a bare `[A-Za-z]+` matches the `rd` of `23rd` and hands the tagger a nonsense
- * key. The raw text had no such fragment, so the old scan never saw one.
- * ⚠ IT COSTS AN ONNX CALL EACH, WHICH IS WHAT MAKES IT WORTH GUARDING rather than tolerating: measured on
- * number-heavy text, that one junk key was the difference between 0.682 and 0.50 ms/call. The resolver
- * never asks for the fragment either, so the tagged entry was dead as well as expensive.
- */
+/** A word to consider tagging. What is EXCLUDED is `DIGIT_ORDINAL`'s business, not this pattern's. */
 const WORD = /[A-Za-z][A-Za-z']*/gu;
 
 /**
@@ -78,6 +68,14 @@ export async function prewarmForeignEnglish(text: string): Promise<void> {
     if (!tagger) return;
     const E = enEngine();
     const done = new Set<string>();
+    // ⚠ THE RAW TEXT HERE, AND THAT IS NOT THE #1452 DEFECT REPEATED — IT WAS TRIED AND REVERTED.
+    // `phonemizeEnNeural` receives one language's text and normalizes ALL of it, so scanning the normalized
+    // string is right there. This function receives the HOST's text, which is not English, and the English
+    // normalizer run over it expands things the English resolver will never see that way: `600Mbit/s`
+    // inside Khmer became `600 megabits per second`, so `Mbit` — which `textWithOov` DOES ask for, because
+    // `core/foreign.ts` hands it the embedded RUN and normalizes that — stopped being prewarmed. One golden
+    // row and the parity gate caught it. Normalizing per-run would be the real fix and this function does
+    // not know the run boundaries; the raw scan is a superset of the run's own words, which is why it works.
     for (const m of text.matchAll(WORD)) {
         const w = m[0];
         if (E.knownWord(w) !== undefined) continue; // dict / heteronym → the sync path is authoritative
@@ -124,10 +122,14 @@ export async function phonemizeEnNeural(
     // ⚠ IT WAS INVISIBLE BECAUSE THE TWO PATHS AGREED ON EVERYTHING ELSE: `phonemize` and `phonemizeAsync`
     // returned different IPA for BYTE-IDENTICAL normalized text, and nothing in the trace said why until
     // #1453 added the tier.
-    // ⚠ NORMALIZED ONCE, HERE, AND HANDED ON — not normalized again inside `text()`. Two passes cost
-    // 0.583 → 0.947 ms/call (+62%) on this path, and the second would POISON the trace: `rewrite` refuses
-    // a string the mapping does not describe, and a repeat pass from the raw input is exactly that shape,
-    // which withholds every `inputSpan`. One pass under the same recording keeps the mapping correct.
+    // ⚠ NORMALIZED ONCE, HERE, AND HANDED ON — not normalized again inside `text()`. The measured reason is
+    // cost: two passes are 0.583 → 0.947 ms/call, +62% on this path.
+    // ⚠ AND A SECOND REASON THAT IS NOT LIVE YET, STATED AS SUCH. A repeat pass from the raw input is the
+    // shape `rewrite` refuses (`tracked !== s`), which POISONS the mapping and withholds every
+    // `inputSpan`. It cannot bite today, because provenance is only seeded by `startTrace` and its only
+    // caller `phonemizeTrace` is SYNCHRONOUS — this path never runs under a recording. #1453 adds
+    // `phonemizeTraceAsync`, which does, and makes the hazard real. Recorded now so the one-pass shape is
+    // not "simplified" back before then.
     const normalized = E.normalizedFor(text);
     for (const m of normalized.matchAll(WORD)) {
         const w = m[0];

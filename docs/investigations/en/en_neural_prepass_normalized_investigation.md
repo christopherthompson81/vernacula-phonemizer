@@ -70,3 +70,42 @@ No perf cost, no golden movement, and the four normalizer-introduced classes now
 text contains a normalizer-introduced OOV word. The coverage is `test/en-neural-prepass.test.ts`, which
 asserts the PREMISE (the two spellings normalize alike) before the conclusion, so the test cannot go
 vacuous by the normalizer changing underneath it.
+
+## Run 3 — 2026-09-23 — review, and a finding I accepted without checking its premise
+
+Review's strongest finding was that **the targeted test did not cover the class it named**. It asserted
+`not.toEqual([w, ""])` and `toContain("ʒ")` — **both of which hold for the n-gram too** — so restoring the
+rejected blanket guard left every test green. A test that names the one regression class the goldens
+caught and does not cover it is worse than no test. It now asserts the exact tagger readings.
+
+⚠ **AND MY FIRST ATTEMPT TO PROVE THE FIXED TEST USED A WEAKER GUARD THAN THE ONE I REJECTED.** I restored
+a left-side-only stand-in and got 2 of 4 red, which looked like partial coverage. The real rejected guard
+is `(?<![0-9])…(?![0-9])` inside `WORD`; against that, **all four go red** and all four are green with the
+fix. Proving a guard means restoring the ACTUAL thing it guards against.
+
+### ⚠ AND ONE FINDING WAS WRONG — OR MY IMPLEMENTATION OF IT WAS — AND A GOLDEN CAUGHT IT AGAIN
+
+Review reported that `prewarmForeignEnglish` has the same defect one function below: it scans raw text,
+and the words it prewarms are consumed by `textWithOov`, which normalizes. I applied the same fix. **The
+premise does not hold**, and the reasoning is worth keeping:
+
+- `phonemizeEnNeural` receives ONE language's text and normalizes all of it, so scanning the normalized
+  string is exactly right there.
+- `prewarmForeignEnglish` receives the **HOST's** text, which is not English. `core/foreign.ts` hands
+  `textWithOov` the embedded **RUN** and normalizes *that* — a different string from the host text put
+  through the English normalizer.
+
+Measured, the English normalizer over Khmer:
+
+```
+ល្បឿន 802.11n មានល្បឿន 600Mbit/s។   ->   … 600 megabits per second។
+```
+
+So `Mbit` — which `textWithOov` **does** ask for — stopped being prewarmed, and the golden row went
+`ˌɛmbˈɪt` → `mbˈʌt`. One golden row and the parity gate caught it. **Reverted, with the reason written at
+the call site** so the next reader does not "fix" it back.
+
+⚠ **I ACCEPTED A REVIEW FINDING WITHOUT CHECKING ITS PREMISE**, and the check was one line —
+`E.normalizedFor(khmerText)`. The memo-level evidence I gathered (`microinches` now recorded) was real and
+pointed the wrong way: it showed a key being ADDED without showing the key being LOST. Normalizing
+per-run would be the real fix, and this function does not know the run boundaries.

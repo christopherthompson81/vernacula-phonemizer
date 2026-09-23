@@ -325,9 +325,6 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
 
     public string Text(string input) => Text(input, null, null);
 
-    /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
-     *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this
-     *  engine's full number/heteronym/prosody context. Clause pause marks are not passed through it. */
     /**
      * The text as the TOKENIZER will see it — every normalization pass, and nothing after.
      * ⚠ THE NEURAL PRE-PASS NEEDS THIS AND USED THE RAW TEXT INSTEAD (#1452): a word the NORMALIZER
@@ -347,6 +344,9 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         return SpellingVariants.AmericanSpelling(lower, w => _lexicon.ContainsKey(w)) is not null;
     }
 
+    /** `wordTransform`, if given, post-processes each resolved word's IPA with its (lowercased) source word —
+     *  the hook the en-GB accent variant uses to apply its per-word lexical-set delta while reusing this
+     *  engine's full number/heteronym/prosody context. Clause pause marks are not passed through it. */
     public string Text(string input, Func<string, string, string>? wordTransform, Func<string, string?>? oovOverride) =>
         Text(input, wordTransform, oovOverride, false);
 
