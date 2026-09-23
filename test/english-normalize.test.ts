@@ -867,3 +867,81 @@ describe("the ASCII prime units (#1449)", () => {
         expect(normalizeEnglish("40\u00b026\u203246\u2033N")).toBe("40 degrees 26 minutes 46 seconds north");
     });
 });
+
+/**
+ * ALPHANUMERIC MATERIAL DESIGNATIONS (#1458).
+ *
+ * ⚠ THE `L` OF `316L` RESOLVED AS LITRES — `316L tubing` read "three hundred sixteen LITERS tubing". A
+ * WRONG UNIT, which this file ranks worse than a missing word, and the same leak as #1421's postal code
+ * reached from the other side: that guard needs a TOKEN-INITIAL LETTER then one digit (`V6L`), and `316L`
+ * has no leading letter.
+ */
+describe("material designations (#1458)", () => {
+    test("the two reported designations read as they are SAID", () => {
+        // ⚠ THE SPOKEN FORM, NOT A GLOSS — the user's call. "three sixteen L", never "…austenitic
+        // stainless steel"; a spec naming the grade forty times would gain four words at every mention.
+        expect(normalizeEnglish("316L tubing")).toBe("three sixteen L tubing");
+        expect(normalizeEnglish("a Ti64 part")).toBe("a titanium sixty-four part");
+        // ⚠ AND `Ti64` IS THE SAME PRINCIPLE FROM THE OTHER SIDE: it is read "titanium sixty-four",
+        // never "titanium six aluminium four vanadium". Reading the designation, not defining it.
+    });
+
+    test("⚠ a GENUINE glued volume still reads — there is no shape-based rule here", () => {
+        // `316L` and `5L` differ only in the digits, and a `500L` tank is real. This assertion is the
+        // reason the fix is a LIST: any rule that claimed `316L` by shape would claim this too.
+        expect(normalizeEnglish("a 5L jug")).toBe("a 5 liters jug");
+        expect(normalizeEnglish("500L tank")).toBe("500 liters tank");
+    });
+
+    test("⚠ the capitalisation IS the signal, and the boundary is exact", () => {
+        // No `i` flag: lowercase `316l` is likelier a sloppy volume than a grade.
+        expect(normalizeEnglish("316l")).not.toContain("three sixteen");
+        // …and a designation inside a longer token is not one.
+        expect(normalizeEnglish("A316LX")).toBe("A316LX");
+        expect(normalizeEnglish("316LX")).toBe("316LX");
+    });
+
+    test("⚠ a hyphen head is CLAIMED, because unclaimed would invent a unit", () => {
+        // ⚠ THIS IS THE ONE PLACE `DESIGNATION_TOKEN` DIVERGES FROM `FORMULA_TOKEN`: it drops the
+        // `(?!-\p{Lu})` tail. Review proposed copying the tail for consistency; this assertion is why
+        // that is backwards. WITH the tail, `316L-Grade` is left unclaimed and the UNIT PASS takes it:
+        expect(normalizeEnglish("317L-Grade")).toBe("317 liters-Grade"); // an unlisted grade, today
+        // …so an unclaimed designation does not fall back to "harmlessly spelled out", it falls back to a
+        // WRONG UNIT — the outcome this rule exists to prevent. Claimed, it cannot:
+        expect(normalizeEnglish("316L-Grade")).toBe("three sixteen L-Grade");
+        // ⚠ THE COST IS ACCEPTED AND PINNED: the half-expansion `FORMULA_TOKEN`'s tail avoids. Neither
+        // branch reads this string right ("titanium sixty-four aluminium" is the wanted reading), so the
+        // choice is between two wrong readings and the one that invents no unit wins.
+        expect(normalizeEnglish("Ti64-Al")).toBe("titanium sixty-four-Al");
+    });
+
+    test("⚠ the rows are the REPORTED ones — the near neighbours are deliberately absent", () => {
+        // `FORMULA_READING`'s bar: rows are added on report, not by enumeration. These misread today and
+        // are left alone, because the risk of a list is a CLAIMED TOKEN that was never a grade, and the
+        // grade-list option was offered and declined.
+        expect(normalizeEnglish("304L pipe")).toBe("304 liters pipe");
+    });
+});
+
+/**
+ * MIXED-CASE ABBREVIATIONS (#1460).
+ *
+ * ⚠ `DoE` READ "doe" AND REACHED NO INITIALISM RULE AT ALL. The initialism pass claims ALL-CAPS runs, so
+ * a mixed-case token is never a candidate — measured, forcing that pass's dictionary gate BOTH ways left
+ * `DoE matrix` unchanged either time. That is what separates it from `CT` (#1459), which the gate
+ * DECLINES and which the acronym list therefore fixes. Two reports, two mechanisms.
+ */
+describe("mixed-case abbreviations (#1460)", () => {
+    test("`DoE` expands", () => {
+        expect(normalizeEnglish("the DoE matrix")).toBe("the design of experiments matrix");
+    });
+
+    test("⚠ the CASING IS THE WHOLE GUARD — both decoys are untouched", () => {
+        // `doe` is a common noun and `DOE` is the US Department of Energy. Only the exact mixed case is
+        // claimed, which is why this cannot live in `PLAIN_ABBREV` (case-insensitive, and needs a dot).
+        expect(normalizeEnglish("a doe in the field")).toBe("a doe in the field");
+        expect(normalizeEnglish("the DOE budget")).toBe("the DOE budget");
+        // …and the token boundary is exact.
+        expect(normalizeEnglish("aDoE")).toBe("aDoE");
+    });
+});

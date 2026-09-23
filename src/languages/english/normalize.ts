@@ -564,6 +564,86 @@ const FORMULA_TOKEN = new RegExp(
     `(?<![\\p{L}${LATIN_MARK}\\d])(${Object.keys(FORMULA_READING).sort((a, b) => b.length - a.length).join("|")})`
     + `(?![\\p{L}${LATIN_MARK}\\d])(?!-\\p{Lu})`, "gu");
 
+/**
+ * ALPHANUMERIC MATERIAL DESIGNATIONS — a grade or alloy name that is not an element-symbol formula (#1458).
+ *
+ * ⚠ THE `L` OF `316L` RESOLVED AS LITRES, which is the defect this exists for and is a WRONG UNIT rather
+ * than a missing word: `316L tubing` read "three hundred sixteen LITERS tubing". It is the same leak as
+ * #1421's postal code (`V6L 2T5` → "vee six LITRES two"), and that fix does not reach it — the code-slot
+ * lookbehind matches a TOKEN-INITIAL LETTER, one digit, then a one-letter unit (`V6L`), and `316L` has no
+ * leading letter.
+ *
+ * ⚠ AND NO SHAPE-BASED RULE CAN SEPARATE THEM. `a 5L jug` → "5 liters" is correct and is pinned in the
+ * suite; `316L` and `5L` differ only in the digits, and a `500L` tank is a real thing. The discriminator
+ * is knowledge about which numbers name a grade, which is what a list carries and a regex cannot — the
+ * lesson #1424 records after a general chemistry reader was built for `CoCr` and rejected.
+ *
+ * ⚠ THE SPOKEN FORM, NOT A GLOSS, and that was the user's call when asked. `316L` is "three sixteen L",
+ * not "three sixteen austenitic stainless steel": the material description is a DEFINITION, and a spec
+ * naming the grade forty times would gain four words of gloss at every mention. `Ti64` is the same
+ * principle from the other side — it is read "titanium sixty-four", never "titanium six aluminium four
+ * vanadium". `FORMULA_READING` above reads the SYMBOLS for the same reason; it does not gloss either.
+ *
+ * ⚠ ROWS ARE ADDED ON REPORT, NOT BY ENUMERATION — `FORMULA_READING`'s bar, and it applies here with more
+ * force. The reading of a grade is mechanical, so the risk is not a wrong reading but a CLAIMED TOKEN
+ * that was never a grade, and every extra row widens that. `304L`, `321`, `410` and `17-4PH` all misread
+ * today and are deliberately absent: they were not reported, and the user declined the grade-list option
+ * when it was offered.
+ */
+const DESIGNATION_READING: Readonly<Record<string, string>> = {
+    "316L": "three sixteen L",
+    Ti64: "titanium sixty-four",
+};
+
+/**
+ * ⚠ NO `i` FLAG — the capitalisation IS the signal, exactly as in `FORMULA_TOKEN`. Lowercase `316l` is
+ * far likelier to be a sloppy volume than a grade, and `ti64` is not a designation at all.
+ *
+ * ⚠ IT DELIBERATELY DROPS `FORMULA_TOKEN`'s `(?!-\p{Lu})` TAIL, and that is the one place the two differ.
+ * Copying it would leave a hyphen-joined head UNCLAIMED, and unclaimed is not neutral here — measured,
+ * `316L-Grade` then falls through to the unit pass and reads "316 LITERS-Grade". That is the WRONG-UNIT
+ * outcome this whole rule exists to prevent, and this file ranks it worse than the half-expansion the
+ * tail is there to avoid. `FORMULA_TOKEN` can afford the tail because a formula that is not claimed is
+ * merely spelled out; a designation that is not claimed is actively mis-measured.
+ * ⚠ The cost is real and accepted: `Ti64-Al` reads "titanium sixty-four-Al". Neither branch reads that
+ * string correctly (it would want "titanium sixty-four aluminium"), so the choice is between two wrong
+ * readings, and the one that does not invent a UNIT wins.
+ * ⚠ LONGEST-FIRST, so a future row that is a prefix of another cannot claim it and strand the tail —
+ * the half-expansion `FORMULA_TOKEN` documents as the worst outcome, because it sounds finished.
+ */
+const DESIGNATION_TOKEN = new RegExp(
+    `(?<![\\p{L}${LATIN_MARK}\\d])(${Object.keys(DESIGNATION_READING).sort((a, b) => b.length - a.length).join("|")})`
+    + `(?![\\p{L}${LATIN_MARK}\\d])`, "gu");
+
+/**
+ * MIXED-CASE ABBREVIATIONS — expanded, and claimed on EXACT CASE ONLY (#1460).
+ *
+ * ⚠ `DoE` READ "doe". It reaches no initialism rule at all, and that is the point: the initialism pass
+ * claims ALL-CAPS runs, so a mixed-case token is never even a candidate. Measured, driving the pass with
+ * its dictionary gate forced BOTH ways leaves `DoE matrix` unchanged either time — unlike `CT` (#1459),
+ * which the gate DECLINES and which the same list therefore fixes. Two reports, two mechanisms.
+ *
+ * ⚠ AND `PLAIN_ABBREV` CANNOT HOLD IT, for two reasons at once: that table requires a DOT (`Rev.`), and
+ * it is matched case-INSENSITIVELY. Both are wrong here — there is no dot, and the CASING IS THE WHOLE
+ * GUARD: `doe` is a common noun and `DOE` is the US Department of Energy. Only the exact `DoE` may be
+ * claimed. The ohm keys (#1449) are declared exactly for the same reason — case IS the distinction.
+ *
+ * ⚠ ONE ROW, AND `PoC` IS WHY THE NEIGHBOURS ARE NOT HERE. `DoD`, `QoS`, `IoT` and `CoC` share the shape
+ * and were all considered; `PoC` is the proof that enumerating it is unsafe, because it has TWO common
+ * expansions ("proof of concept", "person of colour") and a table row would have to pick one silently.
+ * `SLASH_ABBREV`'s bar applies unchanged: a row needs a SINGLE DOMINANT READING, and rows are added on
+ * report rather than by enumeration.
+ */
+const MIXED_CASE_ABBREV: Readonly<Record<string, string>> = {
+    DoE: "design of experiments",
+};
+
+/** ⚠ NO `i` FLAG — see above: the mixed casing is the only thing separating the abbreviation from the
+ *  noun and from the all-caps agency. Longest-first so a future row cannot be claimed as a shorter one. */
+const MIXED_CASE_TOKEN = new RegExp(
+    `(?<![\\p{L}${LATIN_MARK}\\d])(${Object.keys(MIXED_CASE_ABBREV).sort((a, b) => b.length - a.length).join("|")})`
+    + `(?![\\p{L}${LATIN_MARK}\\d])`, "gu");
+
 /** Dotted abbreviations with a single fixed reading (no neighbour test needed). `No.` otherwise reads as
  *  the word "no". */
 const PLAIN_ABBREV: Readonly<Record<string, string>> = {
@@ -977,6 +1057,15 @@ export function normalizeEnglish(input: string): string {
     // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`: a
     //      case-SENSITIVE list of tokens read wrong, not a formula parser.
     s = rewrite(s, FORMULA_TOKEN, (tok: string) => FORMULA_READING[tok] ?? tok);
+
+    // 0b6b) A LISTED MATERIAL DESIGNATION — `316L` → "three sixteen L". See `DESIGNATION_READING`.
+    //       ⚠ IT MUST RUN BEFORE THE UNIT RULE, which is the whole point: left to step 6 the `L` of
+    //       `316L` resolves as LITRES, and a wrong unit is the outcome this file ranks worst.
+    s = rewrite(s, DESIGNATION_TOKEN, (tok: string) => DESIGNATION_READING[tok] ?? tok);
+
+    // 0b6c) A MIXED-CASE ABBREVIATION — `DoE` → "design of experiments". See `MIXED_CASE_ABBREV`: the
+    //       initialism pass never sees this token, because it claims ALL-CAPS runs.
+    s = rewrite(s, MIXED_CASE_TOKEN, (tok: string) => MIXED_CASE_ABBREV[tok] ?? tok);
 
     // 0b7) AN ENUMERATED LIST LEAD-IN — `(a) the first item` → "ay, the first item". See LIST_MARKER:
     //      the letter name AND a pause, both of which the report asked for.

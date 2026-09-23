@@ -659,6 +659,16 @@
         // architecture: the dictionary cannot express a case-keyed pair. The capitalised form is never
         // the dish, and this list is case-gated, so the lowercase entry is untouched.
         "tso",
+        // ⚠ ⟨CT⟩ IS THE SAME SHAPE AS `tso` AND THE SWEEP BELOW COULD NOT HAVE FOUND IT. `CT scan` read
+        // "COURT scan": `ct` is a lexicon word, so `isRecorded` hands the token to the dictionary and the
+        // pass declines — driving it with the gate forced off gives "c t scan", which is the wanted
+        // reading. Case-gated like the rest, so lowercase `ct` is untouched.
+        // ⚠ THE SWEEP IS ANCHORED ON espeak's `$abbrev` SET, AND ⟨ct⟩ IS NOT IN IT — measured against
+        // `dictsource/en_list`: 160 `$abbrev` rows, 156 unique lowercase-alphabetic, no ⟨ct⟩ among them.
+        // That is a SOURCE-COVERAGE gap, not a predicate gap: no tuning of the sweep's second signal
+        // reaches a token its first signal never proposes. Worth knowing before the next report in this
+        // class is assumed to be a sweep miss.
+        "ct",
         // ⚠ THE REST CAME FROM A SWEEP, NOT FROM GUESSING, and every row has TWO signals behind it.
         // espeak-ng's `dictsource/en_list` carries a curated `$abbrev` set — 155 entries of 2–6 letters
         // — and each row below ALSO fails a measurement here: the engine's reading is an invented word
