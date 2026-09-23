@@ -9,6 +9,26 @@ namespace Vernacula.Phonemizer.Core;
  */
 
 /** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
+/**
+ * HOW A TOKEN'S READING WAS RESOLVED — which TIER answered, not where the answer came from in the text.
+ *
+ * ⚠ IT EXISTS BECAUSE TWO IDENTICAL NORMALIZED STRINGS READ DIFFERENTLY AND NOTHING COULD SAY WHY (#1453):
+ * `the τ value` and `the tau value` normalize to the same 13 code points and phonemize differently (#1452).
+ * `Span` says where a reading came from and `IpaSpan` where it landed; WHICH TIER PRODUCED IT had no answer.
+ * See the TypeScript twin.
+ */
+public enum TokenSource
+{
+    /** Absent — "not reported", NEVER "unknown tier". Most engines report nothing here. */
+    None = 0,
+    Lexicon,
+    Heteronym,
+    Tagger,
+    G2p,
+    Foreign,
+    Passthrough,
+}
+
 public sealed class TraceToken
 {
     public int Start { get; init; }
@@ -39,6 +59,14 @@ public sealed class TraceToken
     public string? Nativised { get; set; }
     /** What this token EMITTED — not necessarily a substring of the final reading; see TraceRewrite. */
     public List<string> Emitted { get; } = new();
+
+    /**
+     * WHICH TIER produced this token's reading. See `TokenSource`.
+     * ⚠ `None` MEANS "NOT REPORTED", NEVER "UNKNOWN TIER" — the same rule `InputSpan` and `IpaSpan` carry.
+     * ⚠ AND IT IS `None` WHEN ONE TOKEN'S READINGS DISAGREE ABOUT IT: a numeral becomes many words, and
+     * reporting the first would be a confident wrong answer to a question with no single answer.
+     */
+    public TokenSource Source { get; set; } = TokenSource.None;
 }
 
 /** A whole-string rewrite applied to an assembled reading, or to the input before tokenizing. */
@@ -164,10 +192,11 @@ public static class Trace
      * parts list each reading went into, which is the same fact one step earlier.
      */
     public static void NoteToken(int start, int end, string surface, IEnumerable<string> emitted,
-        string? nativised = null, (int Start, int End)? ipaSpan = null)
+        string? nativised = null, (int Start, int End)? ipaSpan = null,
+        TokenSource source = TokenSource.None)
     {
         if (!Active || recording == null || !recording.Result.Traced) return;
-        var t = new TraceToken { Start = start, End = end, Surface = surface };
+        var t = new TraceToken { Start = start, End = end, Surface = surface, Source = source };
         foreach (var e in emitted) if (e.Length > 0) t.Emitted.Add(e);
         if (nativised != null && nativised != surface) t.Nativised = nativised;
         if (ipaSpan is not null) recording.Spans[t] = ipaSpan;

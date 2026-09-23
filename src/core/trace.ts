@@ -28,6 +28,33 @@
 import { hostDepth } from "./foreign.ts";
 import { beginProvenance, endProvenance, inputSpan, provenanceFor } from "./provenance.ts";
 
+/**
+ * HOW A TOKEN'S READING WAS RESOLVED — which TIER answered, not where the answer came from in the text.
+ *
+ * ⚠ THIS EXISTS BECAUSE TWO IDENTICAL NORMALIZED STRINGS READ DIFFERENTLY AND NOTHING COULD SAY WHY.
+ * `the τ value` and `the tau value` normalize to the same 13 code points and phonemize differently
+ * (#1452 — the neural pre-pass scans the RAW text, so a word the normalizer creates never reaches the
+ * tagger). Finding that took a hex dump, an order-dependence test, a sync/async comparison and reading
+ * the neural entry point. `span` says where a reading came from and `ipaSpan` where it landed; the
+ * question a wrong reading actually raises — WHICH TIER PRODUCED THIS — had no answer at all.
+ *
+ * ⚠ AND IT MAKES #1452 CHECKABLE BY A GATE RATHER THAN BY A PERSON: "the same normalized string resolved
+ * by two different tiers" is a property a test can assert once the tier is reported.
+ */
+export type TokenSource =
+    /** A dictionary/lexicon row answered. */
+    | "lexicon"
+    /** A heteronym entry answered — the reading depended on the POS expectation. */
+    | "heteronym"
+    /** The neural OOV tagger answered (async path only). */
+    | "tagger"
+    /** The rule/n-gram OOV g2p answered — no lexicon row and no tagger reading. */
+    | "g2p"
+    /** A foreign run, read by another language's engine. */
+    | "foreign"
+    /** The key was not alphabetic, so it passed through unresolved. */
+    | "passthrough";
+
 /** One token as the tokenizer matched it, with what happened to it on the way to IPA. */
 export interface TraceToken {
     /** `[start, end)` into the trace's `normalized` text — NOT into the caller's original input. */
@@ -51,6 +78,17 @@ export interface TraceToken {
      * reads *ɣˈato*. This is the token's contribution, not its surviving output.
      */
     emitted: string[];
+    /**
+     * WHICH TIER produced this token's reading. See `TokenSource`.
+     *
+     * ⚠ ABSENT MEANS "NOT REPORTED", NEVER "UNKNOWN TIER" — the same rule `inputSpan` and `ipaSpan` carry,
+     * and for the same reason: most engines route through `assembleClauses` and report nothing here, so an
+     * absent field is the common case rather than a signal.
+     * ⚠ AND IT IS ABSENT WHEN ONE TOKEN'S READINGS DISAGREE ABOUT IT. A numeral becomes many words and a
+     * token can accumulate several readings; where they do not all come from the same tier, reporting the
+     * first would be a confident wrong answer to a question with no single answer.
+     */
+    source?: TokenSource;
     /**
      * `[start, end)` into the trace's `ipa` — where this token's contribution ENDED UP (#1150 stage 3).
      *
@@ -120,6 +158,12 @@ let recording: Recording | null = null;
 const active = (): boolean => recording !== null && hostDepth() <= 1;
 
 export function startTrace(input: string): void {
+    // ⚠ RE-ENTRANCY IS A THROW, NOT AN OVERWRITE (#1453). The recorder is AMBIENT — the module header's whole
+    // argument for that is that `text()` is SYNCHRONOUS, so nothing can run between start and stop. The async
+    // trace entry breaks that assumption by design: it awaits an ONNX pass with a recording open, and two
+    // overlapping calls would previously have clobbered each other silently and returned a trace stitched
+    // from both. Failing loudly is the only honest answer, because the corrupted result looks valid.
+    if (recording !== null) throw new Error("trace: a recording is already in progress (traces are ambient and cannot overlap)");
     recording = { input, normalized: "", tokens: [], rewrites: [], current: null, traced: false, tokenDepth: 0, spans: new Map(), assembled: null };
     beginProvenance(input);
 }
@@ -242,10 +286,12 @@ export function noteToken(
     emitted: string[],
     nativised?: string,
     ipaSpan?: [number, number],
+    source?: TokenSource,
 ): void {
     if (!active() || recording === null || !recording.traced) return;
     const t: TraceToken = { span, surface, emitted: emitted.filter((x) => x !== "") };
     if (nativised !== undefined && nativised !== surface) t.nativised = nativised;
+    if (source !== undefined) t.source = source;
     // ⚠ THE TWO-PHASE ENGINES MUST PASS THIS THEMSELVES. They never open a token while its reading is being
     // made, so `noteEmit`'s offset never reaches them; what they DO know is which slot of their own parts
     // list each reading went into, which is the same fact one step earlier.
