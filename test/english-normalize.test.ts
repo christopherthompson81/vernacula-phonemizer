@@ -744,6 +744,16 @@ describe("a lone Greek letter is a symbol (#1448)", () => {
         expect(normalizeEnglish("the Ω value")).toBe("the omega value");
     });
 
+    test("⚠ `ξ` is a PHONETIC RESPELLING, because its own name is a homograph", () => {
+        // The letter is /zaɪ/ in English mathematics, and `xi` is the CHINESE SURNAME in this lexicon
+        // (`ʃˈiː`) — correct for that word. Both readings are nouns, so the POS-heteronym mechanism
+        // cannot split them. The table emits what READS right, the same idiom as `btu: ["b t u"]`.
+        // ⚠ `zye` RATHER THAN `zai`: both read `zˈaᴦ` today, but `-ye` is a settled English spelling of
+        // /aɪ/ (rye, dye, lye) and `-ai` is not, so `zye` is the one that survives an OOV retrain.
+        expect(normalizeEnglish("the ξ value")).toBe("the zye value");
+        expect(normalizeEnglish("the Ξ term")).toBe("the zye term");
+    });
+
     test("the ohm PREFIXES are declared, so nothing is stranded", () => {
         // ⚠ WITHOUT THE PREFIXED KEYS the longest-first sort matches the bare `Ω` and leaves the `k`
         // behind to reach the g2p as a letter — the stranded-remainder defect `km²` records.
@@ -765,5 +775,58 @@ describe("a lone Greek letter is a symbol (#1448)", () => {
         // …and the bare sign is a LETTER too, not only a unit, so it needs a GREEK_NAME key of its own.
         expect(normalizeEnglish("the Ω value")).toBe("the omega value");
         expect(normalizeEnglish("Ω²")).toBe("omega squared");
+    });
+});
+
+/**
+ * THE ASCII SPELLINGS OF THE PRIME UNITS (#1449).
+ *
+ * ⚠ THE CORPUS INVERTED THE OBVIOUS FIX. `'` and `"` are overwhelmingly an apostrophe and a quotation
+ * mark, and digit-adjacency is NOT a sufficient guard: measured over FLEURS `en_us`, 3,643 lines, EVERY
+ * ONE of the ten digit+quote occurrences is a false positive — `7's rugby` ×4 and six CLOSING QUOTES.
+ * A rule keyed on the digit alone would have fired ten times and been wrong every time, turning a silent
+ * drop into an audible corruption, which is the worse trade.
+ */
+describe("the ASCII prime units (#1449)", () => {
+    test("the two shapes the corpus says are safe", () => {
+        // A DECIMAL + `"` — the defect the issue is named for. The decimal point is the guard: all six
+        // closing quotes in the corpus end an INTEGER.
+        expect(normalizeEnglish('0.015" total')).toBe("0.015 inches total");
+        // The COMPOUND is self-guarding — no English punctuation produces `digit \' digit "`.
+        expect(normalizeEnglish(`he is 6' 2" tall`)).toBe("he is 6 feet 2 inches tall");
+        expect(normalizeEnglish(`6'2"`)).toBe("6 feet 2 inches");
+        // ⚠ THE COMPOUND RUNS FIRST, or the decimal rule claims the inches alone and strands the feet.
+        expect(normalizeEnglish(`a 6' 2.5" board`)).toBe("a 6 feet 2.5 inches board");
+    });
+
+    test("⚠ every digit+quote in the corpus is a FALSE POSITIVE and must not move", () => {
+        // These are the actual corpus lines, and they are the reason the rule is this narrow.
+        expect(normalizeEnglish(`a perfect day for 7's rugby`)).toBe("a perfect day for 7's rugby");
+        expect(normalizeEnglish(`a decal reading "18" and`)).toBe('a decal reading "18" and');
+        expect(normalizeEnglish(`"5" is the answer`)).toBe('"5" is the answer');
+        expect(normalizeEnglish("the 90's")).toBe("the 90's");
+        // ⚠ AND THE COST IS NAMED: a bare integer + `"` is refused, so this does NOT read. Six
+        // counterexamples to zero. The rule that would claim it is a BALANCE TEST (fire only on an even
+        // count of preceding `"`), which needs the whole string at the callback — the TS has it, .NET's
+        // MatchEvaluator does not expose the input, and a port-divergent guard is worse than a narrow one.
+        expect(normalizeEnglish(`a 2" pipe`)).toBe(`a 2" pipe`);
+    });
+
+    test("⚠ the ASCII DMS coordinate, which the compound rule would otherwise claim", () => {
+        // ⚠ A REGRESSION THE SHAPE PROBE CAUGHT, NOT A TEST. Once FEET_INCHES_ASCII existed, the ASCII
+        // coordinate had nothing in front of it: the compound claimed `26'46"` and `40°26'46"N` read
+        // "40 degrees 26 FEET 46 INCHES N" — WORSE than the half-normalized string it replaced, because a
+        // wrong unit is louder than a surviving symbol. DMS_COORDINATE takes both quote styles now.
+        // ⚠ THE `°` IS WHAT MAKES THE ASCII FORM SAFE HERE, while a bare `6' 2"` needs the pair to
+        // self-guard: a degree sign followed by digits and a quote is not English punctuation.
+        expect(normalizeEnglish(`40°26'46"N`)).toBe("40 degrees 26 minutes 46 seconds north");
+        expect(normalizeEnglish(`40°26'N`)).toBe("40 degrees 26 minutes north");
+        expect(normalizeEnglish(`40°26'46"N`)).toBe(normalizeEnglish("40°26′46″N"));
+    });
+
+    test("the typographic forms are untouched", () => {
+        expect(normalizeEnglish("0.015\u2033 total")).toBe("0.015 inches total");
+        expect(normalizeEnglish("he is 6\u2032 2\u2033 tall")).toBe("he is 6 feet 2 inches tall");
+        expect(normalizeEnglish("40\u00b026\u203246\u2033N")).toBe("40 degrees 26 minutes 46 seconds north");
     });
 });

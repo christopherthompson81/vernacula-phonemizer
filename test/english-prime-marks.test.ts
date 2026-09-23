@@ -106,11 +106,27 @@ describe("a prime is a foot and a double prime an inch", () => {
         expect(normalizeEnglish(w)).toBe(w));
 
     /**
-     * ⚠ THE ASCII QUOTES ARE DELIBERATELY NOT CLAIMED. `"` and `'` are quotation marks and apostrophes
-     * far more often than they are units, and `5'` in prose is usually a quote — the same reasoning
-     * that keeps ⟨in⟩ out of the unit table while ⟨µin⟩ is a whole key (#1427). U+2032 and U+2033 are
-     * only ever prime marks, which is what makes them safe.
+     * ⚠ THE ASCII QUOTES ARE NOT CLAIMED AS A CLASS, AND THE REASONING BELOW STILL HOLDS — `"` and `'`
+     * are quotation marks and apostrophes far more often than they are units, the same reasoning that
+     * keeps ⟨in⟩ out of the unit table while ⟨µin⟩ is a whole key (#1427). U+2032 and U+2033 are only
+     * ever prime marks, which is what makes them safe.
+     *
+     * ⚠ IT WAS OVER-BROAD ON TWO SHAPES, AND #1449 MEASURED WHICH. Over FLEURS `en_us`, 3,643 lines,
+     * every one of the ten digit+quote occurrences is a false positive — `7's rugby` ×4 and six CLOSING
+     * QUOTES — so the class-level refusal is RIGHT and is now evidence rather than reasoning. But the same
+     * count says two sub-shapes carry no ambiguity at all: a DECIMAL before `"` (all six corpus quotes end
+     * an INTEGER) and the COMPOUND `N' M"` (no English punctuation produces `digit ' digit "`). Those two
+     * are claimed; everything else in the class is still refused.
      */
-    test.each(['0.015"', "5'", `5' 6"`])("%s is left alone", (w) =>
+    test.each(["5'", `a 2" pipe`, "the 90's", `a decal reading "18" and`])("%s is left alone", (w) =>
         expect(normalizeEnglish(w)).toBe(w));
+
+    /**
+     * ⚠ THE TWO SHAPES THE CORPUS CLEARS, and they are the defect #1449 is named for: `0.015"` dropped
+     * the unit SILENTLY, leaving a fluent, complete, wrong sentence.
+     */
+    test("the decimal and the compound ARE claimed (#1449)", () => {
+        expect(normalizeEnglish('0.015"')).toBe("0.015 inches");
+        expect(normalizeEnglish(`5' 6"`)).toBe("5 feet 6 inches");
+    });
 });

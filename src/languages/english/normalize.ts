@@ -1391,6 +1391,16 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, FEET_INCHES, (_m: string, ft: string, inch: string) =>
         `${counted(ft, "foot", "feet")} ${counted(inch, "inch", "inches")}`);
 
+    // 5c2) THE SAME TWO SHAPES IN ASCII — `6' 2"` and `0.015"` (#1449). See FEET_INCHES_ASCII and
+    //      INCH_DECIMAL_ASCII for why these two shapes and no others: measured over 3,643 corpus lines,
+    //      EVERY digit+quote occurrence is an apostrophe or a closing quotation mark, so the bare `N'`
+    //      and the bare integer + `"` are refused outright.
+    //      ⚠ THE COMPOUND RUNS FIRST, or the decimal rule would claim the inches of `6' 2.5"` on its own
+    //      and strand the feet — the same ordering DMS_COORDINATE and FEET_INCHES already have.
+    s = rewrite(s, FEET_INCHES_ASCII, (_m: string, ft: string, inch: string) =>
+        `${counted(ft, "foot", "feet")} ${counted(inch, "inch", "inches")}`);
+    s = rewrite(s, INCH_DECIMAL_ASCII, (_m: string, n: string) => counted(n, "inch", "inches"));
+
     // 6) UNITS: number + known abbreviation. Count agreement from the number.
     s = rewrite(s, UNIT_RE,
         (_m: string, num: string, mag: string | undefined, u: string, exp: string | undefined) => {
@@ -1864,9 +1874,17 @@ const BRACKETED_LETTER = /(?<=[([{])([A-Za-z])(?=[)\]}])/gu;
  *
  * ⚠ MINUTES ARE REQUIRED, so this claims nothing the unit rule already handles: a bare `5°` or `5°C`
  * is left to it. Seconds and the hemisphere letter are optional.
+ *
+ * ⚠ BOTH QUOTE STYLES, AND THE ASCII ONE IS NOT OPTIONAL (#1449). `40°26'46"N` is what a keyboard
+ * produces, and once `FEET_INCHES_ASCII` existed this rule was the only thing between it and the
+ * coordinate: the ASCII compound claimed `26'46"` and read "40 degrees 26 FEET 46 INCHES N" — WORSE than
+ * the half-normalized string it replaced, because a wrong unit is louder than a surviving symbol. The
+ * shape probe caught it, not a test.
+ * ⚠ THE `°` IS WHAT MAKES THE ASCII FORM SAFE HERE, while a bare `6' 2"` needs the pair to self-guard: a
+ * degree sign followed by digits and a quote is not a shape English punctuation produces.
  */
 const DMS_COORDINATE =
-    /(\d+(?:\.\d+)?)°[ \t ]?(\d+(?:\.\d+)?)′(?:[ \t ]?(\d+(?:\.\d+)?)″)?(?:[ \t ]?((?:[NS][EW]|[NSEW]))(?![\p{L}\p{M}]))?/gu;  // space, tab, NBSP
+    /(\d+(?:\.\d+)?)°[ \t ]?(\d+(?:\.\d+)?)[′'](?:[ \t ]?(\d+(?:\.\d+)?)[″"])?(?:[ \t ]?((?:[NS][EW]|[NSEW]))(?![\p{L}\p{M}]))?/gu;  // space, tab, NBSP
 
 /**
  * FEET AND INCHES WRITTEN TIGHT — `6′2″`, the commonest spelling of a height (#1435).
@@ -1881,6 +1899,39 @@ const DMS_COORDINATE =
  * pair can never reach this rule.
  */
 const FEET_INCHES = /(\d+(?:\.\d+)?)′[ \t\u00a0]?(\d+(?:\.\d+)?)″/gu;  // space, tab, NBSP
+
+/**
+ * THE SAME COMPOUND IN ASCII — `6' 2"`, which is what a keyboard produces (#1449).
+ *
+ * ⚠ ONLY THE COMPOUND, AND THE CORPUS IS WHY. `'` and `"` are overwhelmingly an apostrophe and a
+ * quotation mark, and digit-adjacency is NOT enough of a guard: measured over FLEURS `en_us`, 3,643
+ * lines, every one of the ten digit+quote occurrences is a false positive — `7's rugby` ×4, and six
+ * CLOSING QUOTES (`"cosmonaut No. 11"`, `a decal reading "18"`, `"…July 1, 2020"`, `"…4th July 1776"`).
+ * A rule keyed on the digit alone would have fired ten times and been wrong every time, turning a silent
+ * drop into an audible corruption — the worse trade, and the same class as `6′2″` reading "6 SQUARE FEET".
+ *
+ * ⚠ THE PAIR IS SELF-GUARDING. No English punctuation produces `digit ' digit "`, so this shape needs no
+ * further evidence — and the same corpus has zero occurrences of it, i.e. nothing to lose.
+ *
+ * ⚠ A BARE `N'` IS REFUSED OUTRIGHT and that is deliberate: `the 90's`, `7's`. There is no foot mark in
+ * the corpus to weigh against them.
+ */
+const FEET_INCHES_ASCII = /(\d+(?:\.\d+)?)'[ \t\u00a0]?(\d+(?:\.\d+)?)"/gu;  // space, tab, NBSP
+
+/**
+ * A DECIMAL FOLLOWED BY AN ASCII DOUBLE QUOTE — `0.015"`, the defect #1449 is named for.
+ *
+ * ⚠ THE DECIMAL POINT IS THE GUARD, and it is what separates this from the six closing quotes in the
+ * corpus: every one of them ends an INTEGER (`"18"`, `"…11"`, `"…2020"`, `"…1776"`). A quotation that
+ * ends in a decimal fraction is vanishingly rare, and the corpus has none.
+ *
+ * ⚠ A BARE INTEGER + `"` IS REFUSED, which costs `a 2" pipe`. That is a real loss, taken at six
+ * counterexamples to zero. The rule that would claim it is a BALANCE TEST — fire only when an even
+ * number of `"` precedes — which needs the whole string at the callback. The TypeScript has it
+ * (`offset`, `string`); .NET's `MatchEvaluator` does not expose the input at all, and a port-divergent
+ * guard is worse than a narrower one. Recorded as the way to widen this later.
+ */
+const INCH_DECIMAL_ASCII = /(\d+\.\d+)"/gu;
 
 /** The hemisphere letters, spoken. ⚠ THE INTERCARDINALS ARE HERE because `NW`/`SE` after a DMS is
  *  ordinary on plans and surveys, and the single-letter group cannot claim them — the letter-boundary
@@ -1946,9 +1997,17 @@ function spellLetters(run: string): string {
  * (`Δ`, `Σ`, `Ω`, `Π`, `Φ`, `Λ`), and several lowercase forms are Latin lookalikes that would otherwise
  * never be typed as Greek at all.
  *
- * ⚠ `ξ`/`Ξ` IS `ksi` RATHER THAN `xi`, and the reason is a homograph rather than orthography — see the
- * rule that uses this table. Three names are NOT lexicon words (`omicron`, `tau`, `upsilon`) and reach the
- * OOV path; measured, it reads them `ˈɑːmɪkɹˌɑːn`, `tʰˈaᶷ` and `ˈʌpsələn`, which are acceptable.
+ * ⚠ `ξ`/`Ξ` IS SPELLED `zye`, WHICH IS NOT A WORD, AND THAT IS THE POINT. The letter is /zaɪ/ in English
+ * mathematics, and the spelling that names it — `xi` — is a HOMOGRAPH: this lexicon's `xi` is the Chinese
+ * SURNAME, `ʃˈiː`, which is correct for that word. No lexicon edit can fix that (both readings are nouns,
+ * so the POS-heteronym mechanism does not apply), so the table emits a PHONETIC RESPELLING instead. That
+ * is this file's standing idiom — `btu: ["b t u"]` and `micro meters` are the same move: emit what READS
+ * right rather than what is spelled right.
+ * ⚠ `zye` RATHER THAN `zai`, and the difference is how load-bearing the OOV model is. Both read `zˈaᶦ`
+ * today, but `-ye` is a settled English spelling of /aɪ/ (rye, dye, lye) while `-ai` is not, so `zye` is
+ * the one that survives an OOV retrain. ⚠ IT IS STILL AN OOV WORD, so #1452 applies to it.
+ * ⚠ Three more names are not lexicon words (`omicron`, `tau`, `upsilon`) and reach the OOV path; measured,
+ * it reads them `ˈɑːmɪkɹˌɑːn`, `tʰˈaᶷ` and `ˈʌpsələn`, which are acceptable.
  *
  * ⚠ FINAL SIGMA `ς` IS HERE TOO. It is a positional variant of `σ` and never a symbol in English text, but
  * a lone one would otherwise fall through to the Greek engine — the exact route this rule exists to close.
@@ -1956,11 +2015,11 @@ function spellLetters(run: string): string {
 const GREEK_NAME: Readonly<Record<string, string>> = {
     "α": "alpha", "β": "beta", "γ": "gamma", "δ": "delta", "ε": "epsilon", "ζ": "zeta",
     "η": "eta", "θ": "theta", "ι": "iota", "κ": "kappa", "λ": "lambda", "μ": "mu",
-    "ν": "nu", "ξ": "ksi", "ο": "omicron", "π": "pi", "ρ": "rho", "σ": "sigma", "ς": "sigma",
+    "ν": "nu", "ξ": "zye", "ο": "omicron", "π": "pi", "ρ": "rho", "σ": "sigma", "ς": "sigma",
     "τ": "tau", "υ": "upsilon", "φ": "phi", "χ": "chi", "ψ": "psi", "ω": "omega",
     "Α": "alpha", "Β": "beta", "Γ": "gamma", "Δ": "delta", "Ε": "epsilon", "Ζ": "zeta",
     "Η": "eta", "Θ": "theta", "Ι": "iota", "Κ": "kappa", "Λ": "lambda", "Μ": "mu",
-    "Ν": "nu", "Ξ": "ksi", "Ο": "omicron", "Π": "pi", "Ρ": "rho", "Σ": "sigma",
+    "Ν": "nu", "Ξ": "zye", "Ο": "omicron", "Π": "pi", "Ρ": "rho", "Σ": "sigma",
     "Τ": "tau", "Υ": "upsilon", "Φ": "phi", "Χ": "chi", "Ψ": "psi", "Ω": "omega",
     // ⚠ U+2126 OHM SIGN IS A SECOND CODE POINT FOR THE SAME LETTER and needs its own key, exactly as the
     // UNITS table declares it separately. Without it the bare compatibility character missed this table,

@@ -104,19 +104,19 @@ public static class Normalize
     /**
      * THE GREEK ALPHABET AS ENGLISH WORDS (#1448) — the name an English speaker says for the letter.
      * ⚠ THE NAMES ARE ENGLISH, NOT TRANSLITERATIONS: `β` is "beta", not the Modern Greek "vita". That
-     * difference IS the defect. Both cases map to one name; `ξ`/`Ξ` is `ksi` rather than `xi` because the
-     * lexicon's `xi` is the Chinese SURNAME. See the TypeScript twin.
+     * difference IS the defect. Both cases map to one name; `ξ`/`Ξ` is the phonetic respelling `zye` (/zaɪ/)
+     * because the lexicon's `xi` is the Chinese SURNAME and no lexicon edit can fix a homograph. See the TypeScript twin.
      */
     private static readonly IReadOnlyDictionary<string, string> GREEK_NAME = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["α"] = "alpha", ["β"] = "beta", ["γ"] = "gamma", ["δ"] = "delta", ["ε"] = "epsilon", ["ζ"] = "zeta",
         ["η"] = "eta", ["θ"] = "theta", ["ι"] = "iota", ["κ"] = "kappa", ["λ"] = "lambda", ["μ"] = "mu",
-        ["ν"] = "nu", ["ξ"] = "ksi", ["ο"] = "omicron", ["π"] = "pi", ["ρ"] = "rho", ["σ"] = "sigma",
+        ["ν"] = "nu", ["ξ"] = "zye", ["ο"] = "omicron", ["π"] = "pi", ["ρ"] = "rho", ["σ"] = "sigma",
         ["ς"] = "sigma", ["τ"] = "tau", ["υ"] = "upsilon", ["φ"] = "phi", ["χ"] = "chi", ["ψ"] = "psi",
         ["ω"] = "omega",
         ["Α"] = "alpha", ["Β"] = "beta", ["Γ"] = "gamma", ["Δ"] = "delta", ["Ε"] = "epsilon", ["Ζ"] = "zeta",
         ["Η"] = "eta", ["Θ"] = "theta", ["Ι"] = "iota", ["Κ"] = "kappa", ["Λ"] = "lambda", ["Μ"] = "mu",
-        ["Ν"] = "nu", ["Ξ"] = "ksi", ["Ο"] = "omicron", ["Π"] = "pi", ["Ρ"] = "rho", ["Σ"] = "sigma",
+        ["Ν"] = "nu", ["Ξ"] = "zye", ["Ο"] = "omicron", ["Π"] = "pi", ["Ρ"] = "rho", ["Σ"] = "sigma",
         ["Τ"] = "tau", ["Υ"] = "upsilon", ["Φ"] = "phi", ["Χ"] = "chi", ["Ψ"] = "psi", ["Ω"] = "omega",
         // ⚠ U+2126 OHM SIGN is a second code point for the same letter and needs its own key, exactly as
         // UNITS declares it separately — without it the bare character fell through to the Greek reader and
@@ -580,7 +580,10 @@ public static class Normalize
      * `5°C` is left to it. Seconds and the hemisphere letter are optional.
      */
     private static readonly JsRe DMS_COORDINATE = JsRegex.Compile(
-        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)′(?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″)?"
+        // ⚠ BOTH QUOTE STYLES (#1449): once FEET_INCHES_ASCII existed, this rule was the only thing between
+        // it and `40°26'46"N` — the ASCII compound claimed `26'46"` and read "26 FEET 46 INCHES". The `°`
+        // is what makes the ASCII form safe here. See the TypeScript twin.
+        "(\\d+(?:\\.\\d+)?)°[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)[′'](?:[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)[″\"])?"
         + "(?:[ \\t\\u00a0]?((?:[NS][EW]|[NSEW]))(?![\\p{L}\\p{M}]))?",   // space, tab, NBSP
         "gu");
 
@@ -609,6 +612,18 @@ public static class Normalize
 
     private static readonly JsRe FEET_INCHES =
         JsRegex.Compile("(\\d+(?:\\.\\d+)?)′[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)″", "gu");  // space, tab, NBSP
+
+    /** THE SAME COMPOUND IN ASCII — `6' 2"` (#1449). ⚠ ONLY THE COMPOUND: measured over 3,643 corpus
+     *  lines, EVERY digit+quote occurrence is an apostrophe or a closing quotation mark (`7's rugby`,
+     *  `"cosmonaut No. 11"`, `a decal reading "18"`), so digit-adjacency alone is not a guard. The PAIR is
+     *  self-guarding — no English punctuation produces `digit ' digit "`. See the TypeScript twin. */
+    private static readonly JsRe FEET_INCHES_ASCII =
+        JsRegex.Compile("(\\d+(?:\\.\\d+)?)'[ \\t\\u00a0]?(\\d+(?:\\.\\d+)?)\"", "gu");  // space, tab, NBSP
+
+    /** A DECIMAL followed by an ASCII double quote — `0.015"`. ⚠ THE DECIMAL POINT IS THE GUARD: all six
+     *  closing quotes in the corpus end an INTEGER. A bare integer + `"` is refused, which costs
+     *  `a 2" pipe` — taken at six counterexamples to zero. See the TypeScript twin. */
+    private static readonly JsRe INCH_DECIMAL_ASCII = JsRegex.Compile("(\\d+\\.\\d+)\"", "gu");
 
     /** A month range is a date frame the digit gate cannot see — `Oct-Dec 2024`. See the TypeScript. */
     private static readonly JsRe MONTH_RANGE = JsRegex.Compile(
@@ -1147,6 +1162,12 @@ public static class Normalize
         // Feet and inches written tight, AFTER the DMS rule. See FEET_INCHES.
         s = Rewrite(s, FEET_INCHES, m =>
             Counted(m.Groups[1].Value, "foot", "feet") + " " + Counted(m.Groups[2].Value, "inch", "inches"));
+
+        // The same two shapes in ASCII (#1449). ⚠ THE COMPOUND RUNS FIRST, or the decimal rule claims the
+        // inches of `6' 2.5"` alone and strands the feet — the ordering DMS/FEET_INCHES already have.
+        s = Rewrite(s, FEET_INCHES_ASCII, m =>
+            Counted(m.Groups[1].Value, "foot", "feet") + " " + Counted(m.Groups[2].Value, "inch", "inches"));
+        s = Rewrite(s, INCH_DECIMAL_ASCII, m => Counted(m.Groups[1].Value, "inch", "inches"));
 
         s = Rewrite(s, UNIT_RE, m =>
         {

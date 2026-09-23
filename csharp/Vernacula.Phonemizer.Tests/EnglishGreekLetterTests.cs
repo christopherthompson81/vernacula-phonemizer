@@ -21,6 +21,10 @@ public class EnglishGreekLetterTests
 
     [Theory]
     [InlineData("the β value", "the beta value")]
+    // ⚠ `ξ` is the PHONETIC RESPELLING `zye` (/zaɪ/): `xi` is the Chinese SURNAME in this lexicon, a
+    // homograph no lexicon edit can split. `zye` over `zai` because `-ye` is a settled spelling of /aɪ/.
+    [InlineData("the ξ value", "the zye value")]
+    [InlineData("the Ξ term", "the zye term")]
     [InlineData("α and Ω", "alpha and omega")]
     [InlineData("a σ of 3", "a sigma of 3")]
     public void ALoneLetterBecomesItsEnglishName(string input, string expected) =>
