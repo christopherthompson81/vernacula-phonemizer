@@ -1,0 +1,55 @@
+# en — SHAPE CORPUS for the normalizer's text→words axis. Read by en-shape-equivalence.mts.
+#
+# ⚠ SYNTHETIC AND GENERIC BY CONSTRUCTION. Every line here is invented to exercise a SHAPE — a
+# measurement with a unit, a range, an enumerated list, an alphanumeric code — and carries no real
+# content of any kind. The shapes come from the defects reported at #1421–#1437.
+#
+# kind  name                       a                      b
+#   eq        — `a` and `b` are two spellings of the SAME thing and MUST normalize identically.
+#              ⚠ `a` IS THE ASCII SPELLING, deliberately: the Unicode one is what gets noticed and fixed,
+#              so the ASCII one is where the unfixed defect lives, and it is what real documents contain.
+#              The probe ENFORCES it WHERE IT HAS CONTENT — if the two sides differ in how many non-ASCII
+#              characters they carry, `a` must be the more-ASCII one, because that convention is what tells
+#              a reader which side of a reported DIFF to prioritise. Where they do not differ the row is a
+#              case/punctuation variant (`V6L 2T5` vs `v6l 2t5`) or a two-Unicode class (`µ` vs `μ`, named
+#              `unicode-pair:…` for the reader) and there is nothing to compare.
+#              ⚠ SHARED NON-ASCII CONTEXT IS FINE on the `a` side: `40°26'46"N` is the ASCII member of its
+#              pair — the feature under test is `'`/`"` — and the `°` has no ASCII spelling either way.
+#   survive   — `b` is a LITERAL string that must NOT appear in the normalized output of `a`. Not a regex:
+#              the next rows this section wants are `+`, `(`, `*`, and those do not survive compilation.
+#
+# === UNITS BEHIND A PRIME / QUOTE (#1434, #1435) ===
+eq	inch, double-prime	0.015" total	0.015″ total
+eq	inch, plain integer	a 2" pipe	a 2″ pipe
+eq	foot+inch compound	he is 6' 2" tall	he is 6′ 2″ tall
+eq	foot alone	a 6' span	a 6′ span
+eq	DMS coordinate	40°26'46"N	40°26′46″N
+# === THE MICRO PREFIX (#1427) ===
+# ⚠ THE ASCII-`u` ROWS ARE DELIBERATELY ABSENT (#1450, closed not-planned). `a 5 um layer` really does read
+# as the hesitation filler and `a 5 us delay` as the pronoun — the probe found both — and they are NOT
+# being fixed. `um`/`us` are an ASCII-fallback convention from systems that could not encode `µ`; they
+# survive in CSV exports and plain-text fields but are not what documents contain, and this engine's input
+# is documents. ⚠ AND THE FIX WOULD BE UNUSUALLY DANGEROUS FOR THE INCIDENCE: `us` is a pronoun and `um`
+# an interjection, so the rule fires on high-frequency tokens and is held off them only by a numeric
+# left-context guard — the shape that produced the `.50 caliber` and `6′2″` regressions already.
+# ⚠ THIS IS NOT THE SAME JUDGEMENT AS THE PRIME ROWS ABOVE. ASCII `"` and `'` are what keyboards produce
+# today, not an antiquity, and `0.015"` drops the unit silently. Those rows stay.
+eq	unicode-pair: micro sign vs Greek mu	a 5 µm layer	a 5 μm layer
+# === RANGES (#1437) ===
+eq	hyphen range with unit	2-5 inches	2–5 inches
+eq	hyphen range, decimals	.002-.005 inches	.002–.005 inches
+# === SYMBOLS THAT MUST NOT REACH THE WORD LAYER ===
+survive	ohm sign	set 5 Ω now	Ω
+survive	micro sign	a 5 µm layer	µ
+survive	prime	a 6′ span	′
+survive	double prime	0.015″ total	″
+survive	degree sign	it is 20°C	°
+survive	ellipsis	wait… then go	…
+survive	multiplication sign	a 3 × 4 grid	×
+survive	plus-minus	5 ± 1 mm	±
+survive	superscript two	5 m² floor	²
+survive	fraction one-half	½ cup	½
+survive	en dash range	2–5 inches	–
+# === CASE AND CODES (#1421, #1422) ===
+eq	postal code, spaced	ship to V6L 2T5	ship to v6l 2t5
+eq	initialism in a sentence	contact TSO today	contact T.S.O. today
