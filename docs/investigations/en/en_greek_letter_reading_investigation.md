@@ -170,3 +170,65 @@ five. The cap's reasoning does not apply to a Greek base: nobody footnotes a lon
 Ω²       ->  "omega squared"
 χ² test  ->  "chi squared test"    ← the name of the test, and the `²` was previously dropped
 ```
+
+## Run 6 — 2026-09-23 — review, and the neighbour case I claimed in a comment and never checked
+
+Six findings. Five were real; the sixth was wrong and is recorded with the evidence.
+
+### ⚠ 1. THE RULE GLUED THE NAME ONTO ITS NEIGHBOUR, AND MY OWN COMMENT SAID IT DID NOT
+
+```
+Δx is small  ->  "deltax is small"  ->  dˈɛɫtˌæks ɪz smˈɔːɫ
+Δt           ->  "deltat"           ->  dˈɛɫtˌæt
+Σx           ->  "sigmax"
+```
+
+The comment read *"IT ACCEPTS A LATIN NEIGHBOUR ON PURPOSE: `Δx`, `μm` and `5Ω`"*. ⚠ **The two that
+worked, `μm` and `5Ω`, work because the UNIT pass claims them at step 6 — not because of this rule. So
+every case this rule actually reached with a Latin neighbour was broken**, and `Δx`/`Δt` are the
+commonest Greek-symbol shape in technical prose. The test only covered the spaced `the Δ x term`, which
+is why it passed. The neighbours are captured and re-emitted with a space now.
+
+This is the third time in this session a comment asserted a property nothing established. The tell was
+cheap and I did not spend it: the comment named three shapes and I checked none of them.
+
+### ⚠ 2–3. U+2126 OHM SIGN WAS HALF-DECLARED, AND THE MISSING HALF INVERTED A MAGNITUDE BY 10⁹
+
+The UNITS table gained `Ω` on the grounds that it "still appears in older documents". The
+letter-name table did not, so `the Ω(U+2126) value` still reached the Greek reader and came back
+`omeɣa` — the `ɣ` this whole rule exists to remove, surviving in the one spelling nobody checked.
+
+Worse, the PREFIXED keys were declared only against U+03A9:
+
+```
+a 5 mΩ shunt   ->  "a 5 MEGA ohms shunt"     ✗
+a 5 mΩ shunt        ->  "a 5 milli ohms shunt"    ✓
+```
+
+`mΩ` misses the exact table, falls through to the FOLDED index, and `"mΩ".toLowerCase()` is
+`"mω"` — the slot `MΩ` already occupies. ⚠ **A milliohm read as a megaohm, by the exact mechanism the
+comment above the keys says the exact declarations prevent.** That comment was true only of the spelling
+I happened to test. All nine spellings are declared now.
+
+### ⚠ 4. AN OPTIONAL GROUP BACKTRACKS PAST ITS OWN GUARD
+
+`α²β` → `alpha²beta`. The lookahead failed with the `²` consumed, the engine retried with the group
+empty, and the lookahead then succeeded against the `²` itself — stranding a raw superscript, which is
+dropped downstream. **Widening the trailing guard alone was not enough**: the `β` then matched with the
+`²` as its LEFT neighbour and gave `α² beta`. Both guards refuse a superscript now, and `\p{Nd}` replaced
+`\p{N}` in the neighbour captures because a superscript is `No` and was being captured as a neighbour.
+
+### ⚠ 5. DECLINED — the test DOES exercise the `\p{M}` guard
+
+The finding was that `normalizeEnglish("ά")` passes because U+03AC has no `GREEK_NAME` entry rather than
+because of the lookaround, and that deleting `\p{M}` would leave the test green. **Tested by deleting it:
+the test goes RED.** The assertion that carries it is the DECOMPOSED `α` + U+0301, which was already
+there. The finding is right that the precomposed line proves nothing — that is now written on the line,
+so the load-bearing one cannot be deleted as redundant.
+
+### 6. C# had no coverage for the class
+
+True. `EnglishGreekLetterTests.cs`, 26 cases, covering every half of this: the names, the run-length
+threshold, the neighbour spacing, the accent guard, the unit precedence, all nine ohm spellings, the
+exponent, and the backtracking case. No golden carries a Greek code point either, so trace-parity does
+not reach this — the ports agreed when checked by hand and nothing would have said so had they stopped.

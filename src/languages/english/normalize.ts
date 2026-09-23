@@ -87,6 +87,16 @@ const UNITS: Record<string, [string, string]> = {
     // `megaohm` `mˈɛɡɑːm`, `milliohm` `mˈɪɫjəm`. The vowel-vowel seam at `o|o` is what breaks them, and
     // none of the three is a lexicon word, so nothing authoritative rescues the spelling.
     "kΩ": ["kilo ohm", "kilo ohms"], "MΩ": ["mega ohm", "mega ohms"], "mΩ": ["milli ohm", "milli ohms"],
+    // ⚠ EVERY SPELLING OF THE PREFIXED FORMS IS DECLARED, AND THE ONES BELOW ARE NOT REDUNDANT — leaving
+    // them out INVERTED THE MAGNITUDE BY 10⁹. `mΩ` written with U+2126 (or with a lowercase omega) misses
+    // the exact table, falls through to the FOLDED index, and `"m\u2126".toLowerCase()` is `"mω"` — the
+    // slot `MΩ` already occupies there. Measured before this: `a 5 m\u2126 shunt` read "a 5 MEGA ohms
+    // shunt" against `a 5 mΩ shunt` reading "milli". A milliohm shunt read as a megaohm is the same class
+    // of error as the µg/g dose note below, and the comment above claiming the exact declarations prevent
+    // it was true only of the spelling I happened to test.
+    // ⚠ THE FOLDED INDEX CANNOT CARRY THEM: case IS the distinction, so the fix has to be exact keys.
+    "k\u2126": ["kilo ohm", "kilo ohms"], "M\u2126": ["mega ohm", "mega ohms"], "m\u2126": ["milli ohm", "milli ohms"],
+    "kω": ["kilo ohm", "kilo ohms"], "Mω": ["mega ohm", "mega ohms"], "mω": ["milli ohm", "milli ohms"],
     // ⚠ MICRO IS TWO CODE POINTS AND THE GREEK ONE DOMINATES. U+00B5 MICRO SIGN is what the key labelled
     // "micro" produces, but U+03BC GREEK SMALL LETTER MU is what typesetting and copy-paste produce, and
     // across the mined corpora it outnumbers it 490 to 14. Neither folds to the other — `toLowerCase`
@@ -1611,10 +1621,13 @@ export function normalizeEnglish(input: string): string {
     //     ⚠ AFTER THE UNIT RULES, DELIBERATELY. `μ` and `Ω` are unit symbols before they are letter names:
     //     `5 μm` is micrometers and `5 Ω` is ohms, and both are claimed at step 6. Running this earlier
     //     turns them into "mu" and "omega" and the unit is lost.
-    s = rewrite(s, GREEK_LETTER, (m0: string, ch: string, exp: string | undefined) => {
-        const name = GREEK_NAME[ch];
-        return name === undefined ? m0 : name + (exp === undefined ? "" : GREEK_EXPONENT[exp]!);
-    });
+    s = rewrite(s, GREEK_LETTER,
+        (m0: string, lead: string | undefined, ch: string, exp: string | undefined, tail: string | undefined) => {
+            const name = GREEK_NAME[ch];
+            if (name === undefined) return m0;
+            const body = name + (exp === undefined ? "" : GREEK_EXPONENT[exp]!);
+            return `${lead === undefined ? "" : `${lead} `}${body}${tail === undefined ? "" : ` ${tail}`}`;
+        });
 
     // 8) THE AMPERSAND AND THE SIGN CLASSES. A dropped sign is inaudible, the one outcome that cannot be
     //    right: `College of Arts & Sciences` read *Arts Sciences*, `B&Bs` read *bee bees*.
@@ -1949,6 +1962,11 @@ const GREEK_NAME: Readonly<Record<string, string>> = {
     "Η": "eta", "Θ": "theta", "Ι": "iota", "Κ": "kappa", "Λ": "lambda", "Μ": "mu",
     "Ν": "nu", "Ξ": "ksi", "Ο": "omicron", "Π": "pi", "Ρ": "rho", "Σ": "sigma",
     "Τ": "tau", "Υ": "upsilon", "Φ": "phi", "Χ": "chi", "Ψ": "psi", "Ω": "omega",
+    // ⚠ U+2126 OHM SIGN IS A SECOND CODE POINT FOR THE SAME LETTER and needs its own key, exactly as the
+    // UNITS table declares it separately. Without it the bare compatibility character missed this table,
+    // fell through to the Greek reader and came back `omeɣa` — the `ɣ` that english.jsonc does not declare,
+    // i.e. precisely the failure this rule exists to remove, surviving in the one spelling nobody checked.
+    "\u2126": "omega",
 };
 
 /**
@@ -1964,7 +1982,28 @@ const GREEK_NAME: Readonly<Record<string, string>> = {
  * ⚠ IT ACCEPTS A LATIN NEIGHBOUR ON PURPOSE: `Δx`, `μm` and `5Ω` are a Greek symbol beside host text, not
  * Greek words, and those are exactly the shapes this must claim.
  */
-const GREEK_LETTER = /(?<![\p{Script=Greek}\p{M}])(\p{Script=Greek})([²³])?(?![\p{Script=Greek}\p{M}])/gu;
+/**
+ * ⚠ THE NEIGHBOURS ARE CAPTURED AND RE-EMITTED WITH A SPACE, and the first version of this rule did not do
+ * that — it spliced the name straight in and glued it to whatever was beside it. `Δx is small` became
+ * `deltax is small` and read `dˈɛɫtˌæks`; `Δt` → `deltat`; `Σx` → `sigmax`. ⚠ AND THE COMMENT ABOVE CLAIMED
+ * `Δx` AS A SHAPE THE RULE HANDLED. The two neighbour cases it also named — `μm`, `5Ω` — do work, but they
+ * work because the UNIT pass claimed them at step 6, so the only cases this rule actually reached with a
+ * Latin neighbour were the broken ones. `Δx`/`Δt` are the commonest Greek-symbol shape in technical prose.
+ *
+ * ⚠ AND THE TRAILING GUARD REFUSES A SUPERSCRIPT AS WELL AS A GREEK LETTER, because an optional group
+ * BACKTRACKS. With `(?![\p{Script=Greek}\p{M}])` alone, `α²β` failed the lookahead with the `²` consumed,
+ * retried with the group empty, and then SUCCEEDED against the `²` itself — emitting `alpha²beta` and
+ * stranding a raw superscript that is dropped downstream. A run of two Greek letters is not a lone letter,
+ * so the right answer is to decline the whole match, which is what the added `²³` produces.
+ * ⚠ AND THE LOOKBEHIND REFUSES A SUPERSCRIPT FOR THE SAME REASON, ONE LETTER LATER. With only the trailing
+ * guard widened, `α²β` declined the `α` and then matched the `β` — whose preceding character is the `²` —
+ * emitting `α² beta` and stranding the superscript after all. Refusing both sides leaves the whole
+ * expression to the router, which is what a Greek run of more than one letter already gets.
+ * ⚠ `\p{Nd}` AND NOT `\p{N}` IN THE NEIGHBOUR CAPTURES: a superscript is `No`, so `\p{N}` captured the `²`
+ * ITSELF as a neighbour to be spaced off — the same stranding by a different route.
+ */
+const GREEK_LETTER =
+    /([\p{L}\p{Nd}])?(?<![\p{Script=Greek}\p{M}²³])(\p{Script=Greek})([²³])?(?![\p{Script=Greek}\p{M}²³])([\p{L}\p{Nd}])?/gu;
 
 /**
  * ⚠ THE SUPERSCRIPT IS CONSUMED HERE AND NOWHERE ELSE, and the reason is the base. Step 6b's bare-exponent

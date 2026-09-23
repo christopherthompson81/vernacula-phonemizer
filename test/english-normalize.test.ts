@@ -700,12 +700,38 @@ describe("a lone Greek letter is a symbol (#1448)", () => {
         expect(normalizeEnglish("Ελλάδα is Greece")).toBe("Ελλάδα is Greece");
     });
 
+    test("the name is SPACED OFF a Latin neighbour", () => {
+        // ⚠ THE FIRST VERSION SPLICED THE NAME IN AND GLUED IT: `Δx is small` became `deltax is small`
+        // and read `dˈɛɫtˌæks`. ⚠ AND THE RULE'S OWN COMMENT CLAIMED `Δx` AS A SHAPE IT HANDLED — the
+        // two other neighbours it named, `μm` and `5Ω`, work because the UNIT pass claims them at step 6,
+        // so the only cases this rule actually reached with a Latin neighbour were the broken ones.
+        // `Δx`/`Δt` are the commonest Greek-symbol shape in technical prose.
+        expect(normalizeEnglish("Δx is small")).toBe("delta x is small");
+        expect(normalizeEnglish("Δt")).toBe("delta t");
+        expect(normalizeEnglish("Σx")).toBe("sigma x");
+    });
+
+    test("a superscript between two Greek letters strands nothing", () => {
+        // ⚠ AN OPTIONAL GROUP BACKTRACKS. With only `(?![\p{Script=Greek}\p{M}])` as the trailing guard,
+        // `α²β` failed the lookahead with the `²` consumed, retried with the group empty, and SUCCEEDED
+        // against the `²` itself — emitting `alpha²beta` and stranding a raw superscript that is dropped
+        // downstream. Widening the trailing guard alone was not enough either: the `β` then matched with
+        // the `²` as its left neighbour and gave `α² beta`. Both guards refuse a superscript.
+        expect(normalizeEnglish("α²β")).toBe("α²β");
+        expect(normalizeEnglish("Ω²Ω")).toBe("Ω²Ω");
+        // …and a LATIN base beside one still reads, because step 6b claims that exponent before this runs.
+        expect(normalizeEnglish("x²Ω")).toBe("x squared omega");
+    });
+
     test("an ACCENTED letter is part of a word even when it looks lone", () => {
         // ⚠ THE COMBINING MARKS ARE IN THE GUARD. A decomposed accented Greek vowel is a letter plus
         // `\p{M}`, so a guard written over letters alone sees a lone `α` and turns the first letter of a
         // Greek word into "alpha".
+        // ⚠ THE SECOND ASSERTION IS THE LOAD-BEARING ONE. The precomposed `ά` (U+03AC) passes because it
+        // has no GREEK_NAME entry at all, not because of the guard; only the DECOMPOSED form reaches it.
+        // Verified by deleting `\p{M}` from both lookarounds — this test goes red, and only on that line.
         expect(normalizeEnglish("άλφα")).toBe("άλφα");
-        expect(normalizeEnglish("ά")).toBe("ά");
+        expect(normalizeEnglish("ά")).toBe("ά");   // ← the one that proves the guard
     });
 
     test("the UNIT reading wins over the letter name", () => {
@@ -731,5 +757,13 @@ describe("a lone Greek letter is a symbol (#1448)", () => {
         expect(normalizeEnglish("a 5 mΩ shunt")).not.toBe("a 5 mega ohms shunt");
         // U+2126 OHM SIGN is a second code point for the same unit, like ℃ beside °c.
         expect(normalizeEnglish("5 Ω total")).toBe("5 ohms total");
+        // ⚠ AND EVERY SPELLING OF THE PREFIX IS DECLARED, WHICH IS A 10⁹ QUESTION. `mΩ` written with
+        // U+2126 or a lowercase omega missed the exact table and fell to the FOLDED index, where
+        // `"m\u2126".toLowerCase()` is `"mω"` — the slot `MΩ` occupies. It read "mega ohms".
+        expect(normalizeEnglish("a 5 mΩ shunt")).toBe("a 5 milli ohms shunt");
+        expect(normalizeEnglish("a 5 mω shunt")).toBe("a 5 milli ohms shunt");
+        // …and the bare sign is a LETTER too, not only a unit, so it needs a GREEK_NAME key of its own.
+        expect(normalizeEnglish("the Ω value")).toBe("the omega value");
+        expect(normalizeEnglish("Ω²")).toBe("omega squared");
     });
 });
