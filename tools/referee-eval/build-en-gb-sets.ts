@@ -1,7 +1,7 @@
 /**
- * Build the en-GB lexical-set word lists (BATH/CLOTH/yod/PALM) from the wikipron UK referee. For each referee
- * word, run the RULE-ONLY GenAm→RP transform; where a single lexical-set edit (æ→ɑː, ɔː→ɒ, Cuː→Cjuː, or keeping
- * [ɑː] against the LOT rule) turns a folded MISS into a folded MATCH, that word joins the set. This is the
+ * Build the en-GB lexical-set word lists (BATH/CLOTH/yod/PALM/LOTR/TRAP) from the wikipron UK referee. For each referee
+ * word, run the RULE-ONLY GenAm→RP transform; where a single lexical-set edit (æ→ɑː, ɔː→ɒ, Cuː→Cjuː, ɒ→æ, or
+ * keeping [ɑː] against the LOT rule) turns a folded MISS into a folded MATCH, that word joins the set. This is the
  * SHIPPED refinement — the honest eval stays on phonemizeWordRules (no sets) so the headline % is non-circular.
  *
  *   npx tsx tools/referee-eval/build-en-gb-sets.ts
@@ -33,8 +33,8 @@ const rows = readFileSync(join(HERE, "referees", "en-gb.wikipron-uk.tsv"), "utf8
     .filter((a) => a.length >= 2 && a[0] && a[1])
     .slice(0, limit === Infinity ? undefined : limit);
 
-const bath: string[] = [], cloth: string[] = [], yod: string[] = [], palm: string[] = [], lotr: string[] = [];
-// BATH/CLOTH/PALM/LOTR: a single edit whose folded form must match a referee variant OUTRIGHT.
+const bath: string[] = [], cloth: string[] = [], yod: string[] = [], palm: string[] = [], lotr: string[] = [], trap: string[] = [];
+// BATH/CLOTH/LOTR/PALM/TRAP: a single edit whose folded form must match a referee variant OUTRIGHT.
 const edits: [string[], (s: string) => string][] = [
     [bath, (s) => s.replace(/æ/u, "ɑː")],
     [cloth, (s) => s.replace(/ɔː/u, "ɒ")],
@@ -46,6 +46,11 @@ const edits: [string[], (s: string) => string][] = [
     // and `lotr` is down to 6. Aligned so a future reordering cannot silently un-widen the rule.
     [lotr, (s) => s.replace(/[ɑɔ]ːɹ/u, "ɒɹ")], // LOT before intervocalic r (sorry→sɒɹi; starry stays stɑːɹi)
     [palm, (s) => s.replace(/ɒ/u, "ɑː")], // LOT rule mis-fired on a PALM word → restore [ɑː]
+    // ⚠ TRAP IS LAST, AND THAT IS WHAT MAKES IT PURELY ADDITIVE (#1414). The loop `break`s on the first
+    // set that claims, so appending an edit cannot move a word out of BATH, CLOTH, LOTR or PALM — it can
+    // only take what they left. The rebuild that introduced it is therefore provable as a pure `+N` diff,
+    // which is the property #1381 had to establish the hard way after these files went stale.
+    [trap, (s) => s.replace(/ɒ/u, "æ")], // FOREIGN (a): GenAm nativises it as LOT, RP as TRAP (pasta, taco, drachma)
 ];
 /**
  * One reduced-vowel slot, for comparisons where the referee and this engine may spell it differently.
@@ -153,7 +158,19 @@ for (const row of delegating ? [] : rows) {
         // `main`, and #1390's propagation then carried the error into `comets` and into the golden, which
         // is how it was found. `ə`, `ɪ` and `ᵻ` are one slot for this comparison — the same equivalence
         // the `ᵻ → ɪ` fold in en-GB.jsonc already asserts, one symbol short.
-        if (set === palm && refFolded.some((r) => weak(r) === weak(fold(ours)))) continue;
+        // ⚠ AND TRAP TAKES THE SAME GUARD FOR A DIFFERENT REASON (#1414). PALM needs it because the fold
+        // strips LENGTH, so an American row is indistinguishable from an RP one; `æ` and `ɒ` are distinct
+        // symbols in both conventions, so TRAP has no such ambiguity. What it has instead is GENUINE
+        // VARIATION: a referee that attests our un-edited `ɒ` as well is saying the LOT reading is real,
+        // and on those our current output is simply right. Measured, it refuses 14 of 189 claims — 7.4% —
+        // and they are not marginal: `squad skwɒd`, `wan wɒn`, `guam ɡwɒm`, `aquatic əkwɒtɪk`, `taiwan`,
+        // `genealogy dʒiːniɒlədʒi`. TEN OF THE FOURTEEN ARE THE /w/ ENVIRONMENT, where RP genuinely has
+        // `ɒ`, so the guard is doing phonological work rather than filtering noise.
+        // ⚠ IT ONLY FIRES WHEN THE REFEREE HAPPENS TO LIST BOTH, which for a rare single-row headword it
+        // does not — `wap`, `waff`, `swass`, `wangus` survive into the set on one row each, in the very
+        // environment the refused fourteen say is dangerous. That is this builder's standing policy for
+        // every set rather than a new exposure, and it is where TRAP's residual risk sits.
+        if ((set === palm || set === trap) && refFolded.some((r) => weak(r) === weak(fold(ours)))) continue;
         // ⚠ A BATH CLAIM MAY NOT REST SOLELY ON A LENGTH-LESS ɑ ROW (#1391). The backbone strips LENGTH,
         // so an American `plɑtfɔːm` is indistinguishable from an RP `plɑːtfɔːm` once folded — and this
         // corpus writes `ɑː` for 5,024 headwords against a length-less `ɑ` for 1,130, so the two are
@@ -197,7 +214,7 @@ if (shardArg >= 0) {
     // parent spawns with `stdio: [..., "pipe", ...]`), so it is asynchronous, and `process.exit` does not
     // flush pending writes — past whatever libuv hands the kernel in one go the tail is simply dropped and
     // the parent fails in `JSON.parse` on a payload that grows with the sets.
-    writeSync(1, JSON.stringify({ bath, cloth, yod, palm, lotr, claimed }));
+    writeSync(1, JSON.stringify({ bath, cloth, yod, palm, lotr, trap, claimed }));
     process.exit(0);
 }
 
@@ -209,7 +226,7 @@ console.error(`[jobs] effective ${jobs}`);
 if (jobs > 1) {
     const { spawn } = await import("node:child_process");
     const parts = await Promise.all(Array.from({ length: jobs }, (_, i) => new Promise<{
-        bath: string[]; cloth: string[]; yod: string[]; palm: string[]; lotr: string[]; claimed: number;
+        bath: string[]; cloth: string[]; yod: string[]; palm: string[]; lotr: string[]; trap: string[]; claimed: number;
     }>((res, rej) => {
         const child = spawn("npx", ["tsx", fileURLToPath(import.meta.url), "--shard", `${i}/${jobs}`,
             ...(limit === Infinity ? [] : ["--limit", String(limit)])],
@@ -226,10 +243,10 @@ if (jobs > 1) {
             try { res(JSON.parse(buf)); } catch (e) { rej(e as Error); }
         });
     })));
-    bath.length = 0; cloth.length = 0; yod.length = 0; palm.length = 0; lotr.length = 0; claimed = 0;
+    bath.length = 0; cloth.length = 0; yod.length = 0; palm.length = 0; lotr.length = 0; trap.length = 0; claimed = 0;
     for (const part of parts) {
         bath.push(...part.bath); cloth.push(...part.cloth); yod.push(...part.yod);
-        palm.push(...part.palm); lotr.push(...part.lotr); claimed += part.claimed;
+        palm.push(...part.palm); lotr.push(...part.lotr); trap.push(...part.trap); claimed += part.claimed;
     }
 }
 // ⚠ THIS SORT IS FOR REPRODUCIBLE `--explain` OUTPUT, AND IT IS *NOT* WHAT MAKES `--jobs N` SAFE. The
@@ -238,7 +255,7 @@ if (jobs > 1) {
 // order-independent within a set and the order across sets is fixed in the loop above. Kept because the
 // `--explain` lines are read in order when adjudicating a veto, corrected because a comment a test
 // contradicts is worse than no comment.
-for (const set of [bath, cloth, yod, palm, lotr]) set.sort();
+for (const set of [bath, cloth, yod, palm, lotr, trap]) set.sort();
 
 /**
  * PROPAGATE MEMBERSHIP ACROSS REGULAR INFLECTIONS (#1390).
@@ -297,7 +314,7 @@ const bare = (x: string): string =>
         .replace(/ɫ/gu, "l").replace(/t̬/gu, "t").replace(/d̬/gu, "d");
 /** `--explain` prints the two classes the propagation does NOT take, which is where its judgement lives. */
 const explain = process.argv.includes("--explain");
-const inSomeSet = new Set<string>([...bath, ...cloth, ...yod, ...palm, ...lotr]);
+const inSomeSet = new Set<string>([...bath, ...cloth, ...yod, ...palm, ...lotr, ...trap]);
 const refOf = new Map(rows.map((r) => [r[0]!, r.slice(1)]));
 /**
  * ⚠ THE YOD EDIT IS SPELLED OUT HERE BECAUSE THE VETO NEEDS SOMETHING TO TEST, and the first draft left it
@@ -308,7 +325,7 @@ const refOf = new Map(rows.map((r) => [r[0]!, r.slice(1)]));
  * This is the SAME replace the runtime applies at english-gb.ts:293, so the veto tests what will ship.
  */
 const YOD_EDIT = (x: string): string => x.replace(/([tdnszθl])(ʰ?)([ˈˌ]?)uː/u, "$1$2j$3uː");
-for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i) => [s, e, ["bath", "cloth", "lotr", "palm"][i]!])] as [string[], ((s: string) => string) | undefined, string][]) {
+for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i) => [s, e, ["bath", "cloth", "lotr", "palm", "trap"][i]!])] as [string[], ((s: string) => string) | undefined, string][]) {
     for (const lemma of [...set]) {
         for (const w of inflectionsOf.get(lemma) ?? []) {
             if (owned.has(w) || inSomeSet.has(w)) continue;
@@ -351,8 +368,12 @@ for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i
                 if (explain) console.log(`  VETO  ${name.padEnd(5)} ${lemma} -> ${w}   supporting rows all short: ${supporting.join(" | ")}`);
                 continue;
             }
+            // ⚠ TRAP VETOES ON THE SAME "ATTESTS OURS AT ALL" RULE AS PALM, and for the reason written at
+            // the claim guard above: the referee attesting `ɒ` for an inflection means the LOT reading is
+            // real there, not that our evidence is ambiguous. Leaving TRAP on the weaker rule would let a
+            // lemma carry `squad`-shaped words in through the back door, one paradigm at a time.
             if (refFolded.length > 0 && attestsOurs &&
-                (name === "palm" || !refFolded.some((r) => weak(r) === weak(fold(e))))) {
+                (name === "palm" || name === "trap" || !refFolded.some((r) => weak(r) === weak(fold(e))))) {
                 vetoed++;
                 if (explain) console.log(`  VETO  ${name.padEnd(5)} ${lemma} -> ${w}   ours ${fold(ours)}  edit ${fold(e)}  ref ${refFolded.join(" | ")}`);
                 continue;   // the referee vetoes
@@ -374,7 +395,7 @@ for (const [set, edit, name] of [[yod, YOD_EDIT, "yod"], ...edits.map(([s, e], i
  *  than on counts — two different merges can agree on five totals and disagree on who is in them. */
 if (process.argv.includes("--dump")) {
     const out: string[] = [];
-    for (const [name, words] of [["bath", bath], ["cloth", cloth], ["yod", yod], ["palm", palm], ["lotr", lotr]] as [string, string[]][])
+    for (const [name, words] of [["bath", bath], ["cloth", cloth], ["yod", yod], ["palm", palm], ["lotr", lotr], ["trap", trap]] as [string, string[]][])
         for (const w of [...words].sort()) out.push(`${name}\t${w}`);
     writeSync(1, `${out.join("\n")}\n`);   // synchronous, for the same reason as the shard payload above
     process.exit(0);
@@ -386,7 +407,7 @@ const write = (file: string, words: string[]): void => {
     const path = join(HERE, "..", "..", "data", "languages", "english-gb", file);
     const body = words.map((w) => `${w}\t1`).join("\n") + "\n";
     if (check) {
-        // ⚠ AN ABSENT SET FILE IS LEGITIMATE — `english-gb.ts` loads all five with `{ optional: true }` —
+        // ⚠ AN ABSENT SET FILE IS LEGITIMATE — `english-gb.ts` loads all six with `{ optional: true }` —
         // so this must REPORT it, not die with an ENOENT trace. A freshness check that crashes instead of
         // naming the artifact that disagrees with its source is the opposite of the point.
         const have = existsSync(path) ? readFileSync(path, "utf8") : "";
@@ -412,6 +433,7 @@ write("en-gb-cloth.tsv", cloth);
 write("en-gb-yod.tsv", yod);
 write("en-gb-palm.tsv", palm);
 write("en-gb-lotr.tsv", lotr);
+write("en-gb-trap.tsv", trap);
 console.log(`lexical-set words claimed ${claimed} of ${rows.length}`);
 console.log(`paradigm propagation: +${propagated} inflections  (${vetoed} vetoed by the referee, ${notTheLemma} where the proposed lemma is not the real one, ${inert} with nothing for the edit to bite on)`);
 if (check) {

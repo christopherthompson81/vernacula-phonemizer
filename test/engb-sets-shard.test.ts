@@ -21,7 +21,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { describe, expect, it } from "vitest";
 
-const SETS = ["bath", "cloth", "yod", "palm", "lotr"] as const;
+// ⚠ EVERY SET THE BUILDER WRITES MUST BE LISTED, and `trap` was the sixth (#1414). This array is what the
+// clobber test snapshots and restores; a set missing from it is a file the test would destroy and not put
+// back if the `--limit` guard ever regressed — the failure mode is silent because the assertion below is
+// about the throw, not about the files.
+const SETS = ["bath", "cloth", "yod", "palm", "lotr", "trap"] as const;
 const setPath = (s: string): string => `data/languages/english-gb/en-gb-${s}.tsv`;
 
 /** stdout AND stderr — stderr carries `[jobs] effective N`, which is how a sharded run proves it was
@@ -51,9 +55,9 @@ describe("build-en-gb-sets --jobs", () => {
         }, 300_000);
 
     it("refuses to write the shipped sets while --limit is set", () => {
-        // ⚠ THIS TEST'S FAILURE MODE IS CLOBBERING FIVE COMMITTED FILES, so it snapshots them and puts
+        // ⚠ THIS TEST'S FAILURE MODE IS CLOBBERING SIX COMMITTED FILES, so it snapshots them and puts
         // them back. Without `--dump`/`--check` the run reaches `write()`, which is the point — and if
-        // the guard is ever removed, the five sets would be overwritten with ~95%-truncated memberships
+        // the guard is ever removed, the six sets would be overwritten with ~95%-truncated memberships
         // before the assertion had anything to say.
         const before = SETS.map((s) => [setPath(s), readFileSync(setPath(s), "utf8")] as const);
         try {
