@@ -265,3 +265,36 @@ where gold writes ⟨ə⟩, in **2,201 words**; of the 1,172 gold covers, gold w
 
 **Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
 189 · en-curation-gap and en-index-tables both green.
+
+**Review of the revert — reverting the base and not its inflection re-opened the split.**
+
+⚠ **`preferreds` WAS LEFT TENSE.** With `preferred` and `preferring` reduced, the family read
+`pɹᵻfˈɝd` beside `pɹifˈɝədz` — audibly inconsistent inside one paradigm, and `relatedForms` calls the
+pair related, so it is exactly the orphan class `orphansAfter` exists to forbid. That guard only missed
+it because it inspects words the run TOUCHED, and a run that emits nothing touches nothing. Fixing the
+base without its inflections is a smaller version of the same mistake the issue is about.
+
+⚠ **AND `preferreds` NEEDED A CURATED ROW WHERE THE OTHER TWO DID NOT**, which is the asymmetry that
+nearly got missed. `preferred` and `preferring` were reverted TO their upstream values, so an `--emit`
+restores them for free. `preferreds` upstream is TENSE — so without a row, an `--emit` puts the split
+straight back, with the inflection on the wrong side of a base form that is right.
+
+⚠ **AND THE REFUSAL HID THE FAMILY INSTEAD OF RULING ON IT.** `LISTENER_RULED` was placed before
+`split++`, so `pre:preferr` vanished from the counters and from `--adjudicate`: the tool reported a
+clean 46 over data that was not clean. A gate that stops COUNTING what it stops EMITTING is a success
+signal that matches its own no-op — the third time that shape has appeared in this session's work.
+Counted first, recorded in the open list with `why: "a listener has ruled"`, and skipped only for emit.
+
+⚠ **The set is now DORMANT, which is not the same as dead.** With all three members reduced the family
+is no longer split, so the loop skips it before the set is consulted. It fires again the moment the
+split returns — which an `--emit` produces directly, since `preferreds` upstream is tense.
+
+**Found in passing, NOT fixed:** `preferment` is `P R IY0 F ER1 M AH0 N T`, tense, against `prefer`
+`P R AH0 F ER1`, reduced. `relatedForms("preferment","prefer")` is true, so it is an orphan pair by the
+same test — but it keys to its own family (`pre:preferment`) and is PRE-EXISTING rather than created
+here. The morphological argument applies to it verbatim, which is precisely why it is being flagged
+rather than decided: this session's record on that judgement is one confirmed wrong call and six wrong
+leans, and the listener has not been asked about this word.
+
+**Gates.** 6330 TS · 6939 C# · goldens 189/36495 fresh · parity 189 byte-identical · trace-cold 189 of
+189 · en-curation-gap green.

@@ -146,6 +146,10 @@ const verdict = (m: Word[], src: Map<string, "T" | "R">): Verdict => {
  * are not disagreeing about the sound.
  */
 const LISTENER_RULED: ReadonlySet<string> = new Set(["pre:preferr"]);
+// ⚠ DORMANT WHILE THE DICT IS CONSISTENT, AND THAT IS NOT THE SAME AS DEAD. Once `preferred`,
+// `preferring` and `preferreds` all read reduced the family is no longer SPLIT, so the loop skips it
+// before reaching this set. It fires again the moment the split returns — which an `--emit` produces
+// directly, since `preferreds` upstream is tense while the other two upstream values are already right.
 
 const rows: [string, string, string, string][] = [];
 const after = new Map<string, string>();
@@ -162,8 +166,17 @@ const show = (v: Verdict): string =>
 let split = 0, settled = 0, contradicted = 0, thin = 0;
 for (const [k, m] of fams) {
     if (m.length < 2 || new Set(m.map((x) => (isTense(x.vowel) ? "T" : "R"))).size < 2) continue;
-    if (LISTENER_RULED.has(k)) continue;   // ⚠ a listener has overruled both sources — see the set
     split++;
+    // ⚠ COUNTED AS A SPLIT, THEN SKIPPED — and the order is the point. Placed BEFORE `split++` this
+    // `continue` hid the family from both the counters and `--adjudicate`, so the tool reported a clean
+    // 46 over data that is not clean: `pre:preferr` is genuinely split in the dict and simply ruled on.
+    // A gate that stops counting what it stops emitting is a success signal that matches its no-op.
+    if (LISTENER_RULED.has(k)) {
+        open.push({ key: k, why: "a listener has ruled — see LISTENER_RULED",
+            members: m.map((x) => `${x.word}:${isTense(x.vowel) ? "T" : "R"}`),
+            gold: show(verdict(m, gold)), moby: show(verdict(m, moby)) });
+        continue;
+    }
     const g = verdict(m, gold), mo = verdict(m, moby);
     // ⚠ A SOURCE THAT CONTRADICTS ITSELF ACROSS THE FAMILY STOPS THE FAMILY, rather than handing the
     // decision to the other one. That is the whole point of arbitrating per family.
