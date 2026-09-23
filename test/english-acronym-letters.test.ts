@@ -30,6 +30,28 @@ const letters = (w: string): string =>
 
 describe("an all-caps run that is letters, not a word", () => {
     // ⚠ THE REPORTED CASE, and the pair the dictionary cannot hold: the capitalised form is the dish.
+    test("⚠ CT is letters and `court` is untouched (#1459)", () => {
+        // `CT scan` read "COURT scan": `ct` is a lexicon word, so `isRecorded` hands the token to the
+        // dictionary and the initialism pass declines. Driving the pass with the gate forced OFF gives
+        // "c t scan", which is what identified the mechanism.
+        expect(phonemize("a CT scan", "en")).toBe("ə sˈiː tʰˈiː skˈæn");
+        // ⚠ CASE-GATED, so the word is untouched — the property every row in this list depends on.
+        expect(phonemize("the ct of it", "en")).toContain("kʰˈɔːɹt");
+        expect(phonemize("court order", "en")).toContain("kʰˈɔːɹt");
+    });
+
+    test("⚠ the PLURAL is NOT claimed, and that is pre-existing rather than new", () => {
+        // The initialism pass matches an ALL-CAPS run, and a trailing lowercase `s` ends it. Measured, no
+        // acronym plural is claimed — `AIs`, `CTs`, `SUVs`, `UFOs`, `TSOs` all reach the word layer whole.
+        // ⚠ IT ONLY MISREADS FOR THE ROWS IN THIS LIST: `SUVs` → ˌɛsjuːvˈiːz and `UFOs` → jˌuːɛfˈoᶷz are
+        // right, because the OOV path spells a token the dictionary does not know. `AIs` → ˈaᶦz ("eyes")
+        // and `CTs` → kʰˌɔːɹtˈɛs are wrong for exactly the reason the singulars were — the lowercase form
+        // is a real word. So the plural gap is the same defect one inflection over, for every hand-added
+        // row here. Pinned as KNOWN-WRONG so a fix registers as a change rather than a surprise.
+        expect(phonemize("two SUVs", "en")).toBe("tʰˈuː ˌɛsjuːvˈiːz");
+        expect(phonemize("two CTs", "en")).not.toBe("tʰˈuː sˈiː tʰˈiː ˈɛs");
+    });
+
     test("TSO is letters and Tso is the dish", () => {
         expect(phonemize("TSO", "en")).toBe("tʰˈiː ˈɛs ˈoᶷ");
         expect(phonemize("The TSO issued a notice.", "en")).toContain("tʰˈiː ˈɛs ˈoᶷ");

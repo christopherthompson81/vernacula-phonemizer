@@ -698,6 +698,53 @@ public static class Normalize
         + string.Join("|", FORMULA_READING.Keys.OrderByDescending(k => k.Length))
         + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])(?!-\\p{Lu})", "gu");
 
+    /**
+     * ALPHANUMERIC MATERIAL DESIGNATIONS — a grade or alloy name that is not an element-symbol formula (#1458).
+     *
+     * ⚠ THE `L` OF `316L` RESOLVED AS LITRES — a WRONG UNIT, not a missing word. It is #1421's leak
+     * (`V6L 2T5` → "vee six LITRES two") reached from the other side: that guard needs a TOKEN-INITIAL
+     * LETTER then one digit, and `316L` has no leading letter.
+     * ⚠ AND NO SHAPE-BASED RULE SEPARATES IT FROM `a 5L jug` → "5 liters", which is correct and pinned.
+     * The discriminator is which numbers name a grade — knowledge a list carries and a regex cannot.
+     * ⚠ THE SPOKEN FORM, NOT A GLOSS (the user's call): "three sixteen L", never "…austenitic stainless
+     * steel". `Ti64` is the same principle from the other side. See the TS twin.
+     * ⚠ ROWS ON REPORT, NOT BY ENUMERATION: `304L`, `321`, `410`, `17-4PH` all misread today and are
+     * deliberately absent.
+     */
+    private static readonly IReadOnlyDictionary<string, string> DESIGNATION_READING =
+        new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["316L"] = "three sixteen L",
+            ["Ti64"] = "titanium sixty-four",
+        };
+
+    /** ⚠ NO `i` FLAG — the capitalisation IS the signal, as in FORMULA_TOKEN. Longest-first so a future
+     *  row that prefixes another cannot claim it and strand the tail. */
+    private static readonly JsRe DESIGNATION_TOKEN = JsRegex.Compile(
+        "(?<![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])("
+        + string.Join("|", DESIGNATION_READING.Keys.OrderByDescending(k => k.Length))
+        + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])", "gu");
+
+    /**
+     * MIXED-CASE ABBREVIATIONS — expanded, claimed on EXACT CASE ONLY (#1460).
+     *
+     * ⚠ `DoE` READ "doe", and it reaches no initialism rule at all: that pass claims ALL-CAPS runs, so a
+     * mixed-case token is never a candidate. Measured, forcing the pass's dictionary gate BOTH ways leaves
+     * `DoE matrix` unchanged either time — unlike `CT` (#1459), which the gate DECLINES.
+     * ⚠ AND `PLAIN_ABBREV` CANNOT HOLD IT: that table needs a DOT and is matched case-INSENSITIVELY. The
+     * CASING IS THE WHOLE GUARD — `doe` is a noun, `DOE` is the Department of Energy.
+     * ⚠ ONE ROW, AND `PoC` IS WHY: it has TWO common expansions, so enumerating this shape is unsafe.
+     * See the TS twin.
+     */
+    private static readonly IReadOnlyDictionary<string, string> MIXED_CASE_ABBREV =
+        new Dictionary<string, string>(StringComparer.Ordinal) { ["DoE"] = "design of experiments" };
+
+    /** ⚠ NO `i` FLAG — the mixed casing is the only thing separating it from the noun and the agency. */
+    private static readonly JsRe MIXED_CASE_TOKEN = JsRegex.Compile(
+        "(?<![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])("
+        + string.Join("|", MIXED_CASE_ABBREV.Keys.OrderByDescending(k => k.Length))
+        + ")(?![\\p{L}" + Core.Initialisms.LATIN_MARK + "\\d])", "gu");
+
     /** Fraction denominators. 2/3/4 are suppletive (half, third, quarter); the rest are the ordinal word,
      *  spelled out here rather than emitted as "5th" because the ordinal-suffix path has no plural form and
      *  "2/5" needs "fifths". Beyond 20 a fraction is vanishingly rare in prose and is left as digits. */
@@ -1016,6 +1063,13 @@ public static class Normalize
         // 0b6) A LISTED ELEMENT-SYMBOL FORMULA — `CoCr` → "cobalt chromium". See `FORMULA_READING`:
         //      a case-SENSITIVE list of tokens read wrong, not a formula parser.
         s = Rewrite(s, FORMULA_TOKEN, m => FORMULA_READING.TryGetValue(m.Value, out var r) ? r : m.Value);
+
+        // 0b6b) A LISTED MATERIAL DESIGNATION — `316L` → "three sixteen L". See DESIGNATION_READING.
+        //       ⚠ BEFORE THE UNIT RULE, which is the point: left to step 6 the `L` resolves as LITRES.
+        s = Rewrite(s, DESIGNATION_TOKEN, m => DESIGNATION_READING.TryGetValue(m.Value, out var d) ? d : m.Value);
+
+        // 0b6c) A MIXED-CASE ABBREVIATION — `DoE` → "design of experiments". See MIXED_CASE_ABBREV.
+        s = Rewrite(s, MIXED_CASE_TOKEN, m => MIXED_CASE_ABBREV.TryGetValue(m.Value, out var a) ? a : m.Value);
 
         // 0b7) An enumerated list lead-in — the letter name AND a pause. See LIST_MARKER.
         // ⚠ Roman markers are deliberately not claimed; see the TypeScript for why a MIXED choice
