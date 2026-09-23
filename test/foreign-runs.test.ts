@@ -71,10 +71,20 @@ describe("embedded foreign (Latin) runs", () => {
         // Cyrillic inside Greek was read as English (so: dropped, since English cannot claim it).
         expect(phonemize("Ο Πούτιν και ο Владимир", "el")).toContain("vɫɐdʲ");
         // A lone Greek letter in another script is far more likely MATHEMATICS than a Greek word, so it is
-        // read as its NAME rather than for its sound — and the name is a GREEK word, so the Greek reader
-        // speaks it (*alfa*, not English *ˈaɫfa*). See GREEK_LETTER_NAME in core/scripts.ts.
-        expect(phonemize("The value is α", "en")).toContain("alfa");
-        expect(phonemize("The value is α", "en")).not.toContain("ˈaɫfa");
+        // read as its NAME rather than for its sound. The name is a GREEK word, so the GREEK reader speaks
+        // it (*alfa*). See GREEK_LETTER_NAME in core/scripts.ts.
+        // ⚠ ENGLISH NOW NAMES THE LETTER ITSELF, BEFORE THE ROUTER EVER SEES IT (#1448), and that is a
+        // deliberate change to what this test used to assert. `normalize.ts`'s GREEK_NAME rewrites a lone
+        // letter to the ENGLISH name as text, so `α` is read `ˈæɫfə` — an English word with English stress
+        // — rather than the Greek `alfa`. The fleet-wide mechanism is untouched and is what every OTHER
+        // host still uses; English overrides it because "alpha", "beta", "omega" are ordinary English
+        // words, which is not true of most hosts and is why scripts.ts declined a per-host table.
+        expect(phonemize("The value is α", "en")).toContain("ˈæɫfə");
+        expect(phonemize("The value is α", "en")).not.toContain("alfa");
+        // ⚠ THE FLEET MECHANISM MUST STILL FIRE FOR A HOST THAT HAS NO NAME OF ITS OWN — this is the half
+        // that would break silently if the English rule were ever generalised to the router.
+        expect(phonemize("La valeur est α", "fr")).toContain("alf");
+        expect(phonemize("Значение α", "ru")).toContain("alfa");
         // ⚠ AND IT IS NOT ROUTED AS GREEK TEXT: `α` alone would be /a/, a phone where a word belongs.
         expect(phonemize("The value is α", "en")).not.toMatch(/ɪz ˈ?a$/u);
     });

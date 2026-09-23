@@ -56,12 +56,20 @@ describe("English's local exponent pass and the shared tier agree (#1086)", () =
     // ⚠ THE KNOWN DIFFERENCES, PINNED. Neither is an exponent-arm disagreement, and pinning them is what
     // keeps this test honest: an assertion list that quietly excluded them would report agreement it has
     // not earned. If either changes, that is news either way.
-    test("⚠ the base class differs, and that is a real choice rather than an accident", () => {
+    test("⚠ the base class differs, and English now answers the question this pin used to leave open", () => {
         // Core admits any letter base (`[\p{L}\p{M}]{1,3}`); English admits ASCII only (`[A-Za-z]{1,3}`).
-        // Which is right for English is its own question — a Greek-letter base is a physics variable, and
-        // English's OOV path may serve it better than a spoken "omega squared".
+        // ⚠ THIS PIN USED TO READ `normalizeEnglish("Ω²") === "Ω²"` and to say the question was open —
+        // "a Greek-letter base is a physics variable, and English's OOV path may serve it better than a
+        // spoken 'omega squared'". It did not: the `Ω` went to the GREEK reader (`omeɣa`, with a phone
+        // English does not declare) and the `²` was DROPPED outright. #1448 answered it — the lone letter
+        // is named in English and the exponent is read.
+        // ⚠ THE EXPONENT IS CONSUMED BY THE GREEK RULE, NOT BY 6b, and that is why the two still differ:
+        // 6b caps a LETTER base at three characters because `Smith¹` is a footnote, and `omega` is five.
+        // The cap's reasoning does not apply to a Greek base — no one footnotes a lone Greek letter.
         expect(asEnglish("Ω²")).toBe("Ω squared");
-        expect(normalizeEnglish("Ω²")).toBe("Ω²");
+        expect(normalizeEnglish("Ω²")).toBe("omega squared");
+        // …and the reading a person actually hears, which is the point of the whole exercise.
+        expect(normalizeEnglish("χ² test")).toBe("chi squared test");
     });
 
     test("⚠ `=` is an English-only feature, not an exponent disagreement", () => {

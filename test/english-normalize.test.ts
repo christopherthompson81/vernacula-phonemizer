@@ -674,3 +674,62 @@ describe("a unit symbol may not be a slot in an alphanumeric code", () => {
         expect(normalizeEnglish("1 L")).toBe("1 liter");
     });
 });
+
+/**
+ * A LONE GREEK LETTER IS A SYMBOL, NOT GREEK TEXT (#1448).
+ *
+ * ⚠ BEFORE THIS, EVERY GREEK LETTER IN ENGLISH WAS READ IN MODERN GREEK. English's tokenizer matches
+ * Latin only, so a Greek character fell into the gap pass and `readForeignRun` handed it to the Greek
+ * engine: `the β value` read `ðə vita vˈæɫjuː`, `Ω` read `omeɣa`, and SEVEN of the 24 letters emitted
+ * `ɣ`, `ɾ` or `ç` — phones `english.jsonc` does not declare for English at all.
+ */
+describe("a lone Greek letter is a symbol (#1448)", () => {
+    test("a single letter becomes its ENGLISH name", () => {
+        // ⚠ THE NAMES ARE ENGLISH, NOT TRANSLITERATIONS — "beta", not the Modern Greek "vita".
+        expect(normalizeEnglish("the β value")).toBe("the beta value");
+        expect(normalizeEnglish("the Δ x term")).toBe("the delta x term");
+        expect(normalizeEnglish("α and Ω")).toBe("alpha and omega");
+        expect(normalizeEnglish("a σ of 3")).toBe("a sigma of 3");
+    });
+
+    test("a RUN of two or more stays Greek, for the foreign reader", () => {
+        // ⚠ THE DISCRIMINATOR IS RUN LENGTH. A Greek WORD embedded in English is read as Greek, which is
+        // what `readForeignRun` exists for; only a run of exactly one is a symbol. Without this the rule
+        // would dismantle every Greek word into letter names.
+        expect(normalizeEnglish("the word λόγος means word")).toBe("the word λόγος means word");
+        expect(normalizeEnglish("Ελλάδα is Greece")).toBe("Ελλάδα is Greece");
+    });
+
+    test("an ACCENTED letter is part of a word even when it looks lone", () => {
+        // ⚠ THE COMBINING MARKS ARE IN THE GUARD. A decomposed accented Greek vowel is a letter plus
+        // `\p{M}`, so a guard written over letters alone sees a lone `α` and turns the first letter of a
+        // Greek word into "alpha".
+        expect(normalizeEnglish("άλφα")).toBe("άλφα");
+        expect(normalizeEnglish("ά")).toBe("ά");
+    });
+
+    test("the UNIT reading wins over the letter name", () => {
+        // ⚠ `μ` AND `Ω` ARE UNIT SYMBOLS BEFORE THEY ARE LETTER NAMES, which is why this rule runs after
+        // the unit rules. Earlier, `5 μm` becomes "5 mu m" and the unit is lost.
+        expect(normalizeEnglish("a 5 μm layer")).toBe("a 5 micro meters layer");
+        expect(normalizeEnglish("set 5 Ω now")).toBe("set 5 ohms now");
+        expect(normalizeEnglish("a 1 Ω load")).toBe("a 1 ohm load");
+        // …and with no number in front, it is the letter after all.
+        expect(normalizeEnglish("the Ω value")).toBe("the omega value");
+    });
+
+    test("the ohm PREFIXES are declared, so nothing is stranded", () => {
+        // ⚠ WITHOUT THE PREFIXED KEYS the longest-first sort matches the bare `Ω` and leaves the `k`
+        // behind to reach the g2p as a letter — the stranded-remainder defect `km²` records.
+        // ⚠ AND THEY ARE TWO WORDS because the glued spellings are mangled by the OOV g2p at the `o|o`
+        // seam: `kiloohm` came out `kʰˈɪləm` ("killum").
+        expect(normalizeEnglish("a 5 kΩ resistor")).toBe("a 5 kilo ohms resistor");
+        expect(normalizeEnglish("a 5 MΩ resistor")).toBe("a 5 mega ohms resistor");
+        expect(normalizeEnglish("a 5 mΩ shunt")).toBe("a 5 milli ohms shunt");
+        // ⚠ `mΩ` MILLI vs `MΩ` MEGA is a factor of 10⁹ and `toLowerCase` makes them one key, which is why
+        // all three are declared EXACTLY rather than folded.
+        expect(normalizeEnglish("a 5 mΩ shunt")).not.toBe("a 5 mega ohms shunt");
+        // U+2126 OHM SIGN is a second code point for the same unit, like ℃ beside °c.
+        expect(normalizeEnglish("5 Ω total")).toBe("5 ohms total");
+    });
+});

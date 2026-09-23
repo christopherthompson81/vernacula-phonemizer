@@ -71,6 +71,22 @@ const UNITS: Record<string, [string, string]> = {
     // reads as bare "twenty" — the whole unit gone, not merely the sign.
     "℃": ["degree Celsius", "degrees Celsius"], "℉": ["degree Fahrenheit", "degrees Fahrenheit"],
     "°": ["degree", "degrees"],
+    // ⚠ OHM IS DECLARED EXACTLY AND NOT CASE-FOLDED, unlike most of this table. `resolveUnitSymbol` only
+    // folds a key of length > 1, so the bare sign has to be declared to be reachable at all — and the
+    // PREFIXED forms must be declared too, because folding them destroys the distinction that matters:
+    // `mΩ` is a MILLIohm and `MΩ` a MEGAohm, a factor of 10⁹ apart, and `toLowerCase` makes them one key.
+    // ⚠ AND THE PREFIXES ARE HERE SO NOTHING IS STRANDED. `UNIT_RE` sorts its keys longest-first, so with
+    // only the bare sign declared `5 kΩ` would match the `Ω` and leave the `k` behind to reach the g2p as
+    // a letter — the stranded-remainder defect the `km²` note above this table records.
+    // ⚠ TWO CODE POINTS, the same shape as ℃ and as micro below: U+03A9 GREEK CAPITAL OMEGA is what a
+    // keyboard and most text produce, U+2126 OHM SIGN is the compatibility character that still appears in
+    // older documents. Neither folds to the other.
+    "Ω": ["ohm", "ohms"], "\u2126": ["ohm", "ohms"],
+    // ⚠ TWO WORDS, for the reason the micro entries below give: the table's idiom is to emit what READS
+    // right, and the glued forms are mangled by the OOV g2p — `kiloohm` came out `kʰˈɪləm` ("killum"),
+    // `megaohm` `mˈɛɡɑːm`, `milliohm` `mˈɪɫjəm`. The vowel-vowel seam at `o|o` is what breaks them, and
+    // none of the three is a lexicon word, so nothing authoritative rescues the spelling.
+    "kΩ": ["kilo ohm", "kilo ohms"], "MΩ": ["mega ohm", "mega ohms"], "mΩ": ["milli ohm", "milli ohms"],
     // ⚠ MICRO IS TWO CODE POINTS AND THE GREEK ONE DOMINATES. U+00B5 MICRO SIGN is what the key labelled
     // "micro" produces, but U+03BC GREEK SMALL LETTER MU is what typesetting and copy-paste produce, and
     // across the mined corpora it outnumbers it 490 to 14. Neither folds to the other — `toLowerCase`
@@ -1564,6 +1580,42 @@ export function normalizeEnglish(input: string): string {
             return `${prev} the ${n}${suf}`;
         });
 
+    // 7c) A LONE GREEK LETTER IS A SYMBOL, NOT GREEK TEXT (#1448).
+    //
+    //     ⚠ WITHOUT THIS THE LETTER IS READ IN MODERN GREEK. `english.ts`'s tokenizer matches Latin only,
+    //     so a Greek character falls into the GAP pass, `FOREIGN_RUN` claims it and `readForeignRun` hands
+    //     it to the Greek engine — which is exactly right for `λόγος` and wrong for `β`. Measured before
+    //     the fix: `the β value` read `ðə vita vˈæɫjuː` ("vita", the Modern Greek name), `Ω` read `omeɣa`,
+    //     and SEVEN of the 24 letters emitted `ɣ`, `ɾ` or `ç` — phones `english.jsonc` does not declare for
+    //     English at all. A Kokoro backend REFUSES a supplied stream carrying an unknown symbol rather than
+    //     dropping it, so one `ɣ` takes out synthesis for the whole utterance on that path.
+    //
+    //     ⚠ THE DISCRIMINATOR IS RUN LENGTH: ONE letter is a symbol, TWO OR MORE is a word. A Greek word
+    //     embedded in English stays Greek and must — `the word λόγος means word` reads `loɣos`, which is
+    //     the intended behaviour and is not what this rule is about. The lookarounds are what enforce it:
+    //     a letter with another Greek letter on either side is left alone.
+    //
+    //     ⚠ IT EMITS THE ENGLISH NAME AS TEXT rather than an IPA citation, which is the whole reason it
+    //     lives in the normalizer. 21 of the 24 names are already lexicon words, so the ordinary dictionary
+    //     path supplies the reading AND THE STRESS — and the stress is the tell for what was wrong before:
+    //     not one of the 24 Greek readings carried a stress mark, because none of them was being read as an
+    //     English word.
+    //
+    //     ⚠ `ξ` IS SPELLED `ksi`, NOT `xi`, AND THAT IS A COLLISION AND NOT A PREFERENCE. The lexicon's
+    //     `xi` is the CHINESE SURNAME — `ʃˈiː` — which is correct for that word, so emitting the letter's
+    //     own name would inherit a right reading of a different word. It is a HOMOGRAPH, so it cannot be
+    //     fixed by editing the row, and the POS-heteronym mechanism does not apply because the split is not
+    //     by part of speech. `ksi` reads `ksˈiː`, which is attested for the letter; ⚠ /zaɪ/ is commoner in
+    //     mathematics and this rule does NOT produce it. Recorded rather than guessed at — see #1448.
+    //
+    //     ⚠ AFTER THE UNIT RULES, DELIBERATELY. `μ` and `Ω` are unit symbols before they are letter names:
+    //     `5 μm` is micrometers and `5 Ω` is ohms, and both are claimed at step 6. Running this earlier
+    //     turns them into "mu" and "omega" and the unit is lost.
+    s = rewrite(s, GREEK_LETTER, (m0: string, ch: string, exp: string | undefined) => {
+        const name = GREEK_NAME[ch];
+        return name === undefined ? m0 : name + (exp === undefined ? "" : GREEK_EXPONENT[exp]!);
+    });
+
     // 8) THE AMPERSAND AND THE SIGN CLASSES. A dropped sign is inaudible, the one outcome that cannot be
     //    right: `College of Arts & Sciences` read *Arts Sciences*, `B&Bs` read *bee bees*.
     //    ⚠ LAST, deliberately. Every rule above matches on digits or letters adjacent to a symbol — the
@@ -1869,6 +1921,65 @@ function sayLetter(l: string): string {
 function spellLetters(run: string): string {
     return [...run.toLowerCase()].map((l) => LETTER_NAME(l) ?? l).join(" ");
 }
+
+/**
+ * THE GREEK ALPHABET AS ENGLISH WORDS (#1448) — the name an English speaker says for the letter.
+ *
+ * ⚠ THE NAMES ARE ENGLISH, NOT TRANSLITERATIONS. `β` is "beta" /ˈbeɪtə/, not the Modern Greek "vita";
+ * `χ` is "chi" /kaɪ/, not "khi"; `ω` is "omega". That difference IS the defect this table fixes.
+ *
+ * ⚠ BOTH CASES MAP TO THE SAME NAME, because English does not distinguish them when speaking: `Δ` and `δ`
+ * are both "delta". The uppercase forms are the ones that actually appear in English technical prose
+ * (`Δ`, `Σ`, `Ω`, `Π`, `Φ`, `Λ`), and several lowercase forms are Latin lookalikes that would otherwise
+ * never be typed as Greek at all.
+ *
+ * ⚠ `ξ`/`Ξ` IS `ksi` RATHER THAN `xi`, and the reason is a homograph rather than orthography — see the
+ * rule that uses this table. Three names are NOT lexicon words (`omicron`, `tau`, `upsilon`) and reach the
+ * OOV path; measured, it reads them `ˈɑːmɪkɹˌɑːn`, `tʰˈaᶷ` and `ˈʌpsələn`, which are acceptable.
+ *
+ * ⚠ FINAL SIGMA `ς` IS HERE TOO. It is a positional variant of `σ` and never a symbol in English text, but
+ * a lone one would otherwise fall through to the Greek engine — the exact route this rule exists to close.
+ */
+const GREEK_NAME: Readonly<Record<string, string>> = {
+    "α": "alpha", "β": "beta", "γ": "gamma", "δ": "delta", "ε": "epsilon", "ζ": "zeta",
+    "η": "eta", "θ": "theta", "ι": "iota", "κ": "kappa", "λ": "lambda", "μ": "mu",
+    "ν": "nu", "ξ": "ksi", "ο": "omicron", "π": "pi", "ρ": "rho", "σ": "sigma", "ς": "sigma",
+    "τ": "tau", "υ": "upsilon", "φ": "phi", "χ": "chi", "ψ": "psi", "ω": "omega",
+    "Α": "alpha", "Β": "beta", "Γ": "gamma", "Δ": "delta", "Ε": "epsilon", "Ζ": "zeta",
+    "Η": "eta", "Θ": "theta", "Ι": "iota", "Κ": "kappa", "Λ": "lambda", "Μ": "mu",
+    "Ν": "nu", "Ξ": "ksi", "Ο": "omicron", "Π": "pi", "Ρ": "rho", "Σ": "sigma",
+    "Τ": "tau", "Υ": "upsilon", "Φ": "phi", "Χ": "chi", "Ψ": "psi", "Ω": "omega",
+};
+
+/**
+ * ONE Greek letter with no Greek letter on either side — i.e. a run of exactly one.
+ *
+ * ⚠ THE LOOKAROUNDS ARE THE WHOLE RULE. `\p{Script=Greek}` matches a letter inside `λόγος` just as
+ * happily as a lone `β`; what separates a SYMBOL from a WORD here is that a symbol stands alone. Greek
+ * text keeps its Greek reading, which is what `readForeignRun` is for.
+ * ⚠ THE COMBINING MARKS ARE IN THE GUARD, not just the letters. A decomposed accented Greek vowel is a
+ * letter followed by `\p{M}`, so a guard written over letters alone would see `ά` as a lone `α` and turn
+ * the first letter of a Greek word into "alpha". Accents are also a tell in their own right — symbol usage
+ * is unaccented — but the guard does not rely on that.
+ * ⚠ IT ACCEPTS A LATIN NEIGHBOUR ON PURPOSE: `Δx`, `μm` and `5Ω` are a Greek symbol beside host text, not
+ * Greek words, and those are exactly the shapes this must claim.
+ */
+const GREEK_LETTER = /(?<![\p{Script=Greek}\p{M}])(\p{Script=Greek})([²³])?(?![\p{Script=Greek}\p{M}])/gu;
+
+/**
+ * ⚠ THE SUPERSCRIPT IS CONSUMED HERE AND NOWHERE ELSE, and the reason is the base. Step 6b's bare-exponent
+ * rule CAPS a letter base at three characters, deliberately: a superscript on an ordinary word is a
+ * FOOTNOTE marker far more often than an exponent (`Smith¹` is a citation). `omega` is five letters, so
+ * that rule cannot claim `Ω²` even after this one has named the letter — and the `²` was then dropped
+ * outright, which is the silent content loss this file ranks worst.
+ * ⚠ THE CAP'S REASONING DOES NOT APPLY TO A GREEK BASE. `Ω²`, `σ²`, `χ²` are unambiguously mathematics —
+ * no one footnotes a lone Greek letter — so the ambiguity the cap protects against does not exist here and
+ * the exponent can be read with confidence. `χ² test` now reads "chi squared test", which is the name of
+ * the test.
+ * ⚠ THE PREDICATE, NOT THE MODIFIER: English says *chi SQUARED*, not *cubic chi*. Same distinction step 6b
+ * records — `square kilometres` but `twenty squared`.
+ */
+const GREEK_EXPONENT: Readonly<Record<string, string>> = { "²": " squared", "³": " cubed" };
 
 /** LEXICAL: acronyms spelled out although their lowercase form is a dictionary word. Authored in
  *  english.jsonc alongside the language's other hand-authored facts, not here. */
