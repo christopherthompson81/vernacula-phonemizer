@@ -10,7 +10,10 @@ use super::manifest::{T, try_manifest};
 use super::normalize::normalize_japanese;
 use super::numbers::number_to_kana;
 use super::pitch::{accent_nucleus, place_downstep, try_lex};
+use std::sync::OnceLock;
+
 use crate::core::clauses::assemble_clauses;
+use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::js_string::{JsString, js_number};
 use crate::core::provenance::rewrite_with;
 use crate::js_re;
@@ -27,18 +30,34 @@ fn token() -> &'static crate::core::js_regex::JsRegex {
     js_re!(r"([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])", "gu")
 }
 
-/// TODO(#1463, makeSymbolNormalizer): the shared symbol tier is ported on `rust-lang-es` and cherry-picked
-/// here; until then this is the identity, and rows carrying %, a currency sign, a unit, an exponent, & or
-/// a multiplication sign are expected to differ.
-fn symbols(input: &JsString) -> JsString {
-    input.clone()
+/// The shared symbol tier over `symbolTier`'s eight fields, exactly the ones japanese.ts passes.
+fn symbol_tier() -> Result<&'static SymbolNormalizer, String> {
+    static S: OnceLock<Result<SymbolNormalizer, String>> = OnceLock::new();
+    S.get_or_init(|| {
+        let t = &try_manifest()?.symbol_tier;
+        make_symbol_normalizer(&SymbolData {
+            percent: Some(t.percent.clone()),
+            currency: Some(t.currency.clone()),
+            units: Some(t.units.clone()),
+            exponent_words: Some(t.exponent_words.clone()),
+            bare_exponent: Some(t.bare_exponent.clone()),
+            unspaced_script: Some(t.unspaced_script),
+            ampersand: Some(t.ampersand.clone()),
+            multiply: Some(t.multiply.clone()),
+            ..Default::default()
+        })
+    })
+    .as_ref()
+    .map_err(Clone::clone)
 }
 
-pub struct JapanesePhonemizer;
+pub struct JapanesePhonemizer {
+    symbols: &'static SymbolNormalizer,
+}
 
 impl JapanesePhonemizer {
     pub fn text(&self, input: &JsString) -> JsString {
-        let input = normalize_japanese(&symbols(input));
+        let input = normalize_japanese(&self.symbols.apply(input));
         let input = rewrite_with(&input, js_re!(r"[０-９]", "gu"), |m, s| {
             from_code_point(m.value(s).code_point_at(0).unwrap() - 0xfee0)
         });
@@ -115,7 +134,7 @@ pub fn phonemize_word_segmental(word: &JsString) -> JsString {
 /// Build the Japanese phonemizer; its manifest must load (the TS reads it at import).
 pub fn create_japanese() -> Result<JapanesePhonemizer, String> {
     try_manifest()?;
-    Ok(JapanesePhonemizer)
+    Ok(JapanesePhonemizer { symbols: symbol_tier()? })
 }
 
 #[cfg(test)]

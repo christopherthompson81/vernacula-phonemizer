@@ -151,3 +151,28 @@ dumps are re-run.
 **Port-pending rows (symbol tier):** golden 5 of 200. Over the 3,685 golden+FLEURS+probe texts: 83 sync,
 83 best, 84 trace. No row is port-pending on a foreign engine: the only embedded runs are Latin, and English
 is ported.
+
+## Run 6 — 2026-10-09 18:10 (symbol tier cherry-picked: the golden closes)
+
+**Question.** With the real `makeSymbolNormalizer` (es commit 9aceb875, cherry-picked) over `symbolTier`'s
+eight fields replacing the stub, do the golden, the end-to-end dumps and the trace close?
+
+**Command.** `git cherry-pick 9aceb875` (clean). `japanese.rs::symbol_tier()` builds `SymbolData` from the
+now typed `manifest::SymbolTier`. Then `cargo run --release -p parity` (all languages) and
+`.probe/ja/replay.sh` for the module dumps and for `phonemize-sync`, `phonemize-best` and `trace`. The TS
+dumps from Runs 2–3 were reused; the TS tree has not changed since.
+
+**Raw finding.**
+```
+en: 200/200 identical, 0 differ
+en-GB: 200/200 identical, 0 differ
+ja: 200/200 identical, 0 differ
+phonemize-sync: 3685 identical, 0 DIFFER
+phonemize-best: 3685 identical, 0 DIFFER
+trace: 3685 identical, 0 DIFFER
+```
+The seven module dumps are unchanged at 0 DIFFER. `cargo build --workspace` gives 0 warnings, and
+`cargo test --workspace` passes.
+
+**Implication.** ja is done. Nothing is port-pending. The two TS defects of Run 4 remain, and Rust
+reproduces both, until the TS-first fix batch lands.

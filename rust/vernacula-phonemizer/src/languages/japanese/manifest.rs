@@ -10,6 +10,7 @@ use serde::Deserialize;
 
 use crate::core::js_string::JsString;
 use crate::core::load_manifest::load_manifest;
+use crate::core::normalize_symbols::{BareExponent, CountForms, ExponentWords, Multiply};
 
 pub const DIR: &str = "languages/japanese";
 
@@ -51,8 +52,21 @@ pub struct JapaneseManifest {
     pub clause_punctuation: IndexMap<String, String>,
     pub numbers: Numbers,
     pub pitch_strip: PitchStrip,
-    /// The shared symbol tier's data, handed to `make_symbol_normalizer`.
-    pub symbol_tier: serde_json::Value,
+    pub symbol_tier: SymbolTier,
+}
+
+/// The shared symbol tier's data (`symbolTier`), every field the TS interface requires.
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SymbolTier {
+    pub percent: CountForms,
+    pub currency: IndexMap<String, CountForms>,
+    pub units: IndexMap<String, CountForms>,
+    pub unspaced_script: bool,
+    pub ampersand: String,
+    pub multiply: Multiply,
+    pub exponent_words: ExponentWords,
+    pub bare_exponent: BareExponent,
 }
 
 /// The manifest's string tables as `JsString` lookups, built once.
@@ -151,7 +165,7 @@ mod tests {
         assert_eq!(m.numbers.ones.len(), 10);
         assert_eq!(m.nasal_assimilation.len(), 3);
         assert_eq!(m.pitch_strip.copula.len(), 6);
-        assert!(m.symbol_tier.get("units").is_some());
+        assert!(m.symbol_tier.units.contains_key("L"));
         assert_eq!(T.vowel_values.len(), 5);
     }
 }
