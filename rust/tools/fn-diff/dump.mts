@@ -725,6 +725,21 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ text: units(text), lang: "cmn", op: "ipa" }, phonemize(text, "cmn"));
         }
     },
+    // phonemizeTrace for LANGS, serialized: normalized, then one line per token (span, inputSpan, surface,
+    // nativised, emitted, source, ipaSpan), then the rewrites' stages. "-" is an absent field.
+    async "phonemize-trace"() {
+        const { phonemizeTrace } = await import("../../../src/index.ts");
+        const sp = (s?: [number, number]): string => (s ? `${s[0]},${s[1]}` : "-");
+        for (const lang of LANGS)
+            for (const text of langTexts(lang)) {
+                const t = phonemizeTrace(text, lang);
+                const lines = [`${t.traced}`, t.ipa, t.normalized];
+                for (const k of t.tokens)
+                    lines.push([sp(k.span), sp(k.inputSpan), k.surface, k.nativised ?? "-", k.emitted.join("+"), k.source ?? "-", sp(k.ipaSpan)].join("|"));
+                for (const r of t.rewrites) lines.push(`rewrite ${r.stage}`);
+                emit({ text: units(text), lang }, lines.join("\n"));
+            }
+    },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
     async "fr-normalize"() {

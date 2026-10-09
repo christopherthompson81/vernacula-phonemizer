@@ -648,6 +648,32 @@ fn main() {
                 ),
             }
         }),
+        "phonemize-trace" => Box::new(|input| {
+            let text = units(&input["text"]).to_string_lossy();
+            let t = vernacula_phonemizer::phonemize_trace(&text, input["lang"].as_str().unwrap())
+                .unwrap();
+            let sp = |s: Option<(usize, usize)>| s.map_or("-".to_string(), |(a, b)| format!("{a},{b}"));
+            let mut out = JsString::from(format!("{}\n{}\n", t.trace.traced, t.ipa));
+            out.push_str(&t.trace.normalized);
+            for k in &t.trace.tokens {
+                let emitted: Vec<JsString> = k.emitted.clone();
+                out.push_str(&JsString::from(format!("\n{}|{}|", sp(Some(k.span)), sp(k.input_span))));
+                out.push_str(&k.surface);
+                out.push_str(&JsString::from("|"));
+                out.push_str(&k.nativised.clone().unwrap_or_else(|| JsString::from("-")));
+                out.push_str(&JsString::from("|"));
+                out.push_str(&JsString::join(&emitted, &JsString::from("+")));
+                out.push_str(&JsString::from(format!(
+                    "|{}|{}",
+                    k.source.map_or("-", |s| s.as_str()),
+                    sp(k.ipa_span)
+                )));
+            }
+            for r in &t.trace.rewrites {
+                out.push_str(&JsString::from(format!("\nrewrite {}", r.stage)));
+            }
+            out
+        }),
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
