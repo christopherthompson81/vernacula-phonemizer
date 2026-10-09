@@ -179,6 +179,22 @@ impl JsString {
         }
     }
 
+    /// `[...s]`: one string per code point (a lone surrogate is its own item).
+    pub fn code_point_strings(&self) -> Vec<JsString> {
+        let mut out = Vec::new();
+        let mut i = 0;
+        while i < self.0.len() {
+            let w = if self.code_point_at(i).unwrap() > 0xFFFF {
+                2
+            } else {
+                1
+            };
+            out.push(JsString::from_units(&self.0[i..i + w]));
+            i += w;
+        }
+        out
+    }
+
     /// `s.toLowerCase()`: full Unicode mapping, context-sensitive final sigma included. A lone surrogate
     /// passes through unchanged.
     pub fn to_lower_case(&self) -> JsString {

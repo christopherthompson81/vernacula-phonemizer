@@ -26,7 +26,7 @@ use crate::js_re;
 
 fn sibilant_allomorph(ipa: &JsString) -> &'static str {
     let nfc = normalize(ipa, Form::Nfc);
-    let chars: Vec<JsString> = code_point_strings(&nfc);
+    let chars: Vec<JsString> = nfc.code_point_strings();
     let mut i = chars.len() as isize - 1;
     while i >= 0 && js_re!("[̀-ͯːˈˌ‿ᶦᶷʰʲ]", "u").test(&chars[i as usize]) {
         i -= 1;
@@ -44,22 +44,6 @@ fn sibilant_allomorph(ipa: &JsString) -> &'static str {
         return "s";
     }
     "z"
-}
-
-/// `[...s]`: one string per code point.
-fn code_point_strings(s: &JsString) -> Vec<JsString> {
-    let mut out = Vec::new();
-    let mut i = 0;
-    while i < s.len() {
-        let w = if s.code_point_at(i).unwrap() > 0xFFFF {
-            2
-        } else {
-            1
-        };
-        out.push(JsString::from_units(&s.0[i..i + w]));
-        i += w;
-    }
-    out
 }
 
 fn is_voicing_heteronym(het: &HeteronymEntry) -> bool {
@@ -502,7 +486,7 @@ impl EnglishPhonemizer {
                                 text: js("point"),
                                 reduced: true,
                             });
-                            for d in code_point_strings(&text.slice((dot + 1) as isize, None)) {
+                            for d in text.slice((dot + 1) as isize, None).code_point_strings() {
                                 let first = number_to_words(&BigNat::parse(&digits(&d)).unwrap())
                                     .swap_remove(0);
                                 w.push(NumWord {

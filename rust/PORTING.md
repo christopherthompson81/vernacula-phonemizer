@@ -59,3 +59,18 @@ Read that file first. Below are only the Rust dialect rules.
   one onto libm. docs/investigations/rust-port/rust_neural_runtime_investigation.md has the counts.
 - Check a change with `.venv/bin/python -I rust/tools/onnx-diff/gen_refs.py` (ORT references into the
   gitignored `.probe/neural/`), then `cd rust && cargo run --release -p onnx-diff`. Every row must stay exact.
+
+## Adding a language (the checklist every port follows)
+1. Port the language's TS directory one module per file under `src/languages/<dir>/` (snake_case names),
+   plus any core module it needs that is not ported yet, into its own mirrored `src/core/` file.
+2. Implement `registry::Engine` for it (`text`, and `neural` if `src/neuralRegistry.ts` lists the language).
+   Add one arm to `registry::build`, one to `registry::roman_policy` if `ROMAN_POLICIES` (registry.ts) names it,
+   and its code to `registry::LANGUAGES`. Nothing else in the registry changes.
+3. A manifest struct names every field the TS interface does, with no `#[serde(default)]` on required fields.
+   A table built from a TS object literal is GENERATED from that object (key order preserved), never hand-typed.
+4. Prove each module with `tools/fn-diff` (a `dump.mts` entry plus its Rust replay), then the language end to end:
+   the `phonemize-sync`/`phonemize-best` dumps take a language list, plus FLEURS text (column 3!) and an
+   off-golden probe list (`tools/fn-diff/probes/<lang>.txt`, synthetic text only).
+5. The golden gate: `cargo run --release -p parity -- <lang>` must be byte-identical on the generating machine.
+   A row that needs an unported engine for a foreign run is port-pending, not a pass; list it.
+6. Findings in the TS are reported, not fixed in Rust (the bidirectional rule in csharp/PORTING.md).
