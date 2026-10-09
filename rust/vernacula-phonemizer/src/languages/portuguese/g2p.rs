@@ -91,13 +91,25 @@ fn push_v(segs: &mut Vec<Seg>, ch: &JsString, nasal: bool) {
     });
 }
 fn push_glide(segs: &mut Vec<Seg>, ph: &str, nasal: bool) {
-    segs.push(Seg { ph: js(ph), nucleus: false, accent: false, raw: JsString::new(), nasal });
+    segs.push(Seg {
+        ph: js(ph),
+        nucleus: false,
+        accent: false,
+        raw: JsString::new(),
+        nasal,
+    });
 }
 fn push_c(segs: &mut Vec<Seg>, ph: &str) {
     push_c_js(segs, js(ph));
 }
 fn push_c_js(segs: &mut Vec<Seg>, ph: JsString) {
-    segs.push(Seg { ph, nucleus: false, accent: false, raw: JsString::new(), nasal: false });
+    segs.push(Seg {
+        ph,
+        nucleus: false,
+        accent: false,
+        raw: JsString::new(),
+        nasal: false,
+    });
 }
 
 /// `w[i] ?? ""`: one UTF-16 code unit.
@@ -142,8 +154,13 @@ fn fold_foreign_letters(w: &JsString) -> JsString {
             continue;
         }
         let b = js_re!(r"\p{M}+", "gu").replace(&normalize(&c, Form::Nfd), &JsString::new());
-        let r = foreign_letter(&b)
-            .unwrap_or_else(|| if b.len() == 1 && T.known_letters.contains(&b) { b } else { c });
+        let r = foreign_letter(&b).unwrap_or_else(|| {
+            if b.len() == 1 && T.known_letters.contains(&b) {
+                b
+            } else {
+                c
+            }
+        });
         out.push_str(&r);
     }
     out
@@ -205,18 +222,32 @@ pub fn to_segments(word: &JsString, dialect: Dialect) -> Vec<Seg> {
                 let acc = T.acute_grave.includes(&c);
                 let is_e = c == "e" || c == "é";
                 segs.push(Seg {
-                    ph: js(if is_e && dialect == Dialect::Bp { "e" } else { "ɐ" }),
+                    ph: js(if is_e && dialect == Dialect::Bp {
+                        "e"
+                    } else {
+                        "ɐ"
+                    }),
                     nucleus: true,
                     accent: acc,
                     raw: js(if is_e { "e" } else { "a" }),
                     nasal: true,
                 });
-                push_glide(&mut segs, if c == "a" || c == "á" { "w̃" } else { "j̃" }, true);
+                push_glide(
+                    &mut segs,
+                    if c == "a" || c == "á" { "w̃" } else { "j̃" },
+                    true,
+                );
                 i += 2;
                 continue;
             }
             if c == "o" && nx == "u" && !nasal {
-                segs.push(Seg { ph: js("o"), nucleus: true, accent: false, raw: JsString::new(), nasal: false });
+                segs.push(Seg {
+                    ph: js("o"),
+                    nucleus: true,
+                    accent: false,
+                    raw: JsString::new(),
+                    nasal: false,
+                });
                 i += 2;
                 continue;
             }
@@ -245,7 +276,8 @@ pub fn to_segments(word: &JsString, dialect: Dialect) -> Vec<Seg> {
             }
             let g = at(&w, i);
             let after = at(&w, i + 1);
-            let hiatus = !after.is_empty() && after != "s" && !is_v(&after) && at(&w, i + 2).is_empty();
+            let hiatus =
+                !after.is_empty() && after != "s" && !is_v(&after) && at(&w, i + 2).is_empty();
             let accented_next = !after.is_empty() && T.accented_next.includes(&after);
             if (g == "i" || g == "u") && !hiatus && !accented_next {
                 push_glide(&mut segs, if g == "i" { "j" } else { "w" }, false);
@@ -265,25 +297,54 @@ pub fn to_segments(word: &JsString, dialect: Dialect) -> Vec<Seg> {
             "h" => {}
             "j" => push_c(&mut segs, "ʒ"),
             "k" => push_c(&mut segs, "k"),
-            "l" => push_c(&mut segs, if nx.is_empty() || !is_v(&nx) { "ɫ" } else { "l" }),
+            "l" => push_c(
+                &mut segs,
+                if nx.is_empty() || !is_v(&nx) {
+                    "ɫ"
+                } else {
+                    "l"
+                },
+            ),
             "m" => push_c(&mut segs, "m"),
             "n" => push_c(&mut segs, "n"),
             "p" => push_c(&mut segs, "p"),
             "q" => push_c(&mut segs, "k"),
             "r" => {
-                let prev = if i == 0 { JsString::new() } else { at(&w, i - 1) };
+                let prev = if i == 0 {
+                    JsString::new()
+                } else {
+                    at(&w, i - 1)
+                };
                 let strong = i == 0 || prev == "n" || prev == "l" || prev == "s";
                 push_c(&mut segs, if strong { "ʁ" } else { "ɾ" });
             }
-            "s" => segs.push(Seg { ph: js("s"), nucleus: false, accent: false, raw: js("s"), nasal: false }),
+            "s" => segs.push(Seg {
+                ph: js("s"),
+                nucleus: false,
+                accent: false,
+                raw: js("s"),
+                nasal: false,
+            }),
             "t" => push_c(&mut segs, "t"),
             "v" => push_c(&mut segs, "v"),
             "w" => push_c(&mut segs, "v"),
-            "x" => segs.push(Seg { ph: js("ʃ"), nucleus: false, accent: false, raw: js("x"), nasal: false }),
+            "x" => segs.push(Seg {
+                ph: js("ʃ"),
+                nucleus: false,
+                accent: false,
+                raw: js("x"),
+                nasal: false,
+            }),
             "z" => push_c(&mut segs, "z"),
             // A lone surrogate's lossy form is U+FFFD, which matches no arm; `c` itself goes to the table.
             _ => {
-                if let Some(ph) = latin_phone(&c, PhoneOpts { initial: i == 0, include_h: false }) {
+                if let Some(ph) = latin_phone(
+                    &c,
+                    PhoneOpts {
+                        initial: i == 0,
+                        include_h: false,
+                    },
+                ) {
                     push_c_js(&mut segs, ph);
                 }
             }
@@ -300,7 +361,11 @@ fn is_vowel_ph(ph: &JsString) -> bool {
 /// `sibilants(segs, dialect)`: intervocalic single s → z; a coda s/z → the dialect's coda sibilant, voiced
 /// before a voiced consonant.
 pub fn sibilants(segs: &mut [Seg], dialect: Dialect) {
-    let (coda, coda_voiced) = if dialect == Dialect::Bp { ("s", "z") } else { ("ʃ", "ʒ") };
+    let (coda, coda_voiced) = if dialect == Dialect::Bp {
+        ("s", "z")
+    } else {
+        ("ʃ", "ʒ")
+    };
     for i in 0..segs.len() {
         if segs[i].ph != "s" && segs[i].ph != "z" {
             continue;

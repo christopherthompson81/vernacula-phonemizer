@@ -110,7 +110,9 @@ pub struct CmnManifest {
 /// The manifest, or why it could not be loaded. Cached once loaded; a failure is retried on the next call.
 pub fn try_manifest() -> Result<&'static CmnManifest, String> {
     static M: OnceLock<CmnManifest> = OnceLock::new();
-    load_once(&M, || load_manifest(DIR, "cmn.jsonc").map_err(|e| e.to_string()))
+    load_once(&M, || {
+        load_manifest(DIR, "cmn.jsonc").map_err(|e| e.to_string())
+    })
 }
 
 /// The manifest for code that runs after `try_manifest` has succeeded (`create_mandarin` checks it first).
@@ -128,8 +130,14 @@ mod tests {
         assert_eq!(m.numbers.digits.len(), 10);
         assert_eq!(m.numbers.big_units.len(), 4);
         assert_eq!(m.letter_names.get("W").map(String::as_str), Some("大布留"));
-        assert_eq!(m.clause_punctuation.get("。").map(String::as_str), Some("."));
+        assert_eq!(
+            m.clause_punctuation.get("。").map(String::as_str),
+            Some(".")
+        );
         assert!(m.symbol_tier.units.contains_key("km"));
-        assert_eq!(m.symbol_tier.exponent_words.position, Some(ExponentPosition::Compound));
+        assert_eq!(
+            m.symbol_tier.exponent_words.position,
+            Some(ExponentPosition::Compound)
+        );
     }
 }

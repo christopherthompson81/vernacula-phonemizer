@@ -33,7 +33,9 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 10] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr"];
+pub const LANGUAGES: [&str; 10] = [
+    "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr",
+];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -75,9 +77,11 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "pt" => create_portuguese(Dialect::Ep, None).map(|e| e as Arc<dyn Engine>),
         "pt-BR" => create_portuguese_br().map(|e| e as Arc<dyn Engine>),
         "hi" => crate::languages::hindi::hindi::engine(),
-        "cmn" => crate::languages::mandarin::mandarin::create_mandarin(Some(Arc::new(read_as_english)))
-            .map(|m| Arc::new(m) as Arc<dyn Engine>)
-            .map_err(PhonemizeError::Data),
+        "cmn" => {
+            crate::languages::mandarin::mandarin::create_mandarin(Some(Arc::new(read_as_english)))
+                .map(|m| Arc::new(m) as Arc<dyn Engine>)
+                .map_err(PhonemizeError::Data)
+        }
         "fr" => crate::languages::french::french::create_french()
             .map(|fr| Arc::new(FrenchEngine(fr)) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
@@ -380,8 +384,13 @@ impl Engine for FrenchEngine {
     }
 
     fn neural(&self, pre_passed: &JsString) -> Option<Result<JsString, PhonemizeError>> {
-        use crate::languages::french::{french_neural::phonemize_fr_neural, french_tagger::french_tagger};
-        Some(phonemize_fr_neural(&self.0, french_tagger(), pre_passed).map_err(PhonemizeError::Neural))
+        use crate::languages::french::{
+            french_neural::phonemize_fr_neural, french_tagger::french_tagger,
+        };
+        Some(
+            phonemize_fr_neural(&self.0, french_tagger(), pre_passed)
+                .map_err(PhonemizeError::Neural),
+        )
     }
 
     fn has_neural(&self) -> bool {

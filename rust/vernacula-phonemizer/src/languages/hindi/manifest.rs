@@ -62,7 +62,9 @@ pub struct HindiDef {
 /// The manifest, or why it could not be loaded. Cached only on success.
 pub fn try_manifest() -> Result<&'static HindiDef, String> {
     static M: OnceLock<HindiDef> = OnceLock::new();
-    load_once(&M, || load_manifest(DIR, "hindi.jsonc").map_err(|e| e.to_string()))
+    load_once(&M, || {
+        load_manifest(DIR, "hindi.jsonc").map_err(|e| e.to_string())
+    })
 }
 
 #[cfg(test)]
@@ -74,8 +76,19 @@ mod tests {
     /// `HindiDef` is shared: every family manifest must load through it.
     #[test]
     fn family_manifests_load_as_hindi_def() {
-        for dir in ["marathi", "nepali", "awadhi", "bhojpuri", "maithili", "magahi", "chhattisgarhi", "rangpuri", "gujarati"] {
-            let r: Result<HindiDef, _> = load_manifest(&format!("languages/{dir}"), &format!("{dir}.jsonc"));
+        for dir in [
+            "marathi",
+            "nepali",
+            "awadhi",
+            "bhojpuri",
+            "maithili",
+            "magahi",
+            "chhattisgarhi",
+            "rangpuri",
+            "gujarati",
+        ] {
+            let r: Result<HindiDef, _> =
+                load_manifest(&format!("languages/{dir}"), &format!("{dir}.jsonc"));
             assert!(r.is_ok(), "{dir}: {}", r.err().unwrap());
         }
     }
@@ -83,18 +96,47 @@ mod tests {
     /// Every key the file declares is one the struct names, or one the TS never reads.
     #[test]
     fn manifest_claims_every_key() {
-        let v: serde_json::Value = parse_jsonc(&read_data_text("languages/hindi/hindi.jsonc").unwrap()).unwrap();
+        let v: serde_json::Value =
+            parse_jsonc(&read_data_text("languages/hindi/hindi.jsonc").unwrap()).unwrap();
         let claimed = [
-            "language", "inherentVowel", "consonants", "independentVowels", "vowelSigns", "signs",
-            "nasalVowelsAreShort", "postRules", "finalRules", "numbers", "schwaDeletion", "clausePunctuation",
-            "symbols", "stripSymbols", "symbolTier", "irregularOrdinals", "ordinalSuffixes",
+            "language",
+            "inherentVowel",
+            "consonants",
+            "independentVowels",
+            "vowelSigns",
+            "signs",
+            "nasalVowelsAreShort",
+            "postRules",
+            "finalRules",
+            "numbers",
+            "schwaDeletion",
+            "clausePunctuation",
+            "symbols",
+            "stripSymbols",
+            "symbolTier",
+            "irregularOrdinals",
+            "ordinalSuffixes",
         ];
         let doc_only = ["name", "script", "provenance"];
         for k in v.as_object().unwrap().keys() {
-            assert!(claimed.contains(&k.as_str()) || doc_only.contains(&k.as_str()), "unclaimed key {k}");
+            assert!(
+                claimed.contains(&k.as_str()) || doc_only.contains(&k.as_str()),
+                "unclaimed key {k}"
+            );
         }
-        let tier = ["percent", "currency", "units", "rateDenominators", "unitPer", "magnitudes",
-            "magnitudeConnective", "ampersand", "multiply", "exponentWords", "bareExponent"];
+        let tier = [
+            "percent",
+            "currency",
+            "units",
+            "rateDenominators",
+            "unitPer",
+            "magnitudes",
+            "magnitudeConnective",
+            "ampersand",
+            "multiply",
+            "exponentWords",
+            "bareExponent",
+        ];
         for k in v["symbolTier"].as_object().unwrap().keys() {
             assert!(tier.contains(&k.as_str()), "unclaimed symbolTier key {k}");
         }

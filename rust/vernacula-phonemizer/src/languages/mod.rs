@@ -1,10 +1,10 @@
 pub mod english;
 pub mod english_gb;
-pub mod japanese;
+pub mod french;
+pub mod hindi;
 pub mod italian;
-pub mod spanish;
+pub mod japanese;
+pub mod mandarin;
 pub mod portuguese;
 pub mod portuguese_br;
-pub mod hindi;
-pub mod mandarin;
-pub mod french;
+pub mod spanish;

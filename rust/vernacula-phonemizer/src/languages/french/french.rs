@@ -9,9 +9,11 @@ use indexmap::IndexMap;
 
 use super::g2p::to_ipa_loaded;
 use super::manifest::{DIR, MANIFEST, try_manifest};
-use super::normalize::{normalize_french_loaded, normalize_french_initialisms_loaded};
+use super::normalize::{normalize_french_initialisms_loaded, normalize_french_loaded};
 use super::numbers::number_to_words_loaded;
-use super::ordinals::{normalize_french_ordinal_digits_loaded, normalize_french_ordinal_romans_loaded};
+use super::ordinals::{
+    normalize_french_ordinal_digits_loaded, normalize_french_ordinal_romans_loaded,
+};
 use crate::core::clauses::foreign_run;
 use crate::core::foreign::read_foreign_run;
 use crate::core::js_regex::JsRegex;
@@ -28,13 +30,38 @@ use crate::js_re;
 /// `OovResolver`: lowercased word → IPA, or `None` to defer to the rule g2p (the neural path only).
 pub type OovResolver<'a> = &'a dyn Fn(&JsString) -> Option<JsString>;
 
-const CLITIC: [&str; 13] =
-    ["ne", "se", "me", "te", "nous", "vous", "le", "la", "les", "lui", "leur", "y", "en"];
+const CLITIC: [&str; 13] = [
+    "ne", "se", "me", "te", "nous", "vous", "le", "la", "les", "lui", "leur", "y", "en",
+];
 
 const NUMBER_WORD: [&str; 27] = [
-    "zéro", "un", "une", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix",
-    "onze", "douze", "treize", "quatorze", "quinze", "seize", "vingt", "trente", "quarante",
-    "cinquante", "soixante", "cent", "mille", "million", "milliard",
+    "zéro",
+    "un",
+    "une",
+    "deux",
+    "trois",
+    "quatre",
+    "cinq",
+    "six",
+    "sept",
+    "huit",
+    "neuf",
+    "dix",
+    "onze",
+    "douze",
+    "treize",
+    "quatorze",
+    "quinze",
+    "seize",
+    "vingt",
+    "trente",
+    "quarante",
+    "cinquante",
+    "soixante",
+    "cent",
+    "mille",
+    "million",
+    "milliard",
 ];
 
 fn among(list: &[impl AsRef<str>], w: &JsString) -> bool {
@@ -42,7 +69,10 @@ fn among(list: &[impl AsRef<str>], w: &JsString) -> bool {
 }
 
 /// `heteronymIpa(word, prev, prev2, next)`. The neighbours are built only for a word that has an entry.
-fn heteronym_ipa(word: &JsString, neighbour: &dyn Fn(isize) -> Option<JsString>) -> Option<JsString> {
+fn heteronym_ipa(
+    word: &JsString,
+    neighbour: &dyn Fn(isize) -> Option<JsString>,
+) -> Option<JsString> {
     let entry = MANIFEST.heteronyms.get(&word.to_string_lossy())?;
     let (prev, prev2, next) = (neighbour(-1), neighbour(-2), neighbour(1));
     let (prev, prev2, next) = (prev.as_ref(), prev2.as_ref(), next.as_ref());
@@ -77,8 +107,15 @@ fn accent_final(tokens: &mut [JsString]) {
         if !vowel_ipa().test(t) {
             continue;
         }
-        let last = js_re!("[aeiouyɛɔøœəɑ]", "g").match_all(t).last().unwrap().index();
-        tokens[k] = t.slice(0, Some(last as isize)).concat(&js("ˈ")).concat(&t.slice(last as isize, None));
+        let last = js_re!("[aeiouyɛɔøœəɑ]", "g")
+            .match_all(t)
+            .last()
+            .unwrap()
+            .index();
+        tokens[k] = t
+            .slice(0, Some(last as isize))
+            .concat(&js("ˈ"))
+            .concat(&t.slice(last as isize, None));
         return;
     }
 }
@@ -87,12 +124,16 @@ static H_ASPIRE: LazyLock<HashSet<JsString>> =
     LazyLock::new(|| MANIFEST.h_aspire.iter().map(|w| js(w)).collect());
 
 fn liaison_onto(prev: &JsString, next: &JsString) -> JsString {
-    let Some(c) = MANIFEST.liaison.get(&prev.to_lower_case().to_string_lossy()).filter(|c| !c.is_empty())
+    let Some(c) = MANIFEST
+        .liaison
+        .get(&prev.to_lower_case().to_string_lossy())
+        .filter(|c| !c.is_empty())
     else {
         return JsString::new();
     };
     let nx = next.to_lower_case();
-    let aspire = H_ASPIRE.contains(&nx) || H_ASPIRE.contains(&js_re!("s$").replace(&nx, &JsString::new()));
+    let aspire =
+        H_ASPIRE.contains(&nx) || H_ASPIRE.contains(&js_re!("s$").replace(&nx, &JsString::new()));
     if js_re!("^[aeiouyàâäéèêëîïôöûüùœæh]", "i").test(&nx) && !aspire {
         js(c)
     } else {
@@ -107,11 +148,18 @@ fn strip_latent(ipa: &JsString, c: &JsString) -> JsString {
         "n" => js_re!("n$"),
         _ => return ipa.clone(),
     };
-    if re.test(ipa) { ipa.slice(0, Some(-1)) } else { ipa.clone() }
+    if re.test(ipa) {
+        ipa.slice(0, Some(-1))
+    } else {
+        ipa.clone()
+    }
 }
 
 fn token_re() -> &'static JsRegex {
-    js_re!(r"([a-zà-ÿœæ]+(?:[-'’][a-zà-ÿœæ]+)*)|(\d+(?:[.,]\d+)?)|([.!?…,;:])", "giu")
+    js_re!(
+        r"([a-zà-ÿœæ]+(?:[-'’][a-zà-ÿœæ]+)*)|(\d+(?:[.,]\d+)?)|([.!?…,;:])",
+        "giu"
+    )
 }
 
 #[derive(Clone)]
@@ -149,9 +197,13 @@ pub fn create_french() -> Result<FrenchPhonemizer, String> {
     try_manifest()?;
     let lexicon =
         load_tsv_strings(DIR, "lexicon.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
-    let supplement =
-        load_tsv_strings(DIR, "supplement.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
-    Ok(FrenchPhonemizer { lexicon, supplement, symbols: build_symbols()? })
+    let supplement = load_tsv_strings(DIR, "supplement.tsv", TsvOptions::default())
+        .map_err(|e| e.to_string())?;
+    Ok(FrenchPhonemizer {
+        lexicon,
+        supplement,
+        symbols: build_symbols()?,
+    })
 }
 
 impl FrenchPhonemizer {
@@ -174,10 +226,14 @@ impl FrenchPhonemizer {
             return d;
         }
         if lower.includes(&js("-")) {
-            let parts: Vec<JsString> =
-                lower.split(&js("-")).into_iter().filter(|p| !p.is_empty()).collect();
+            let parts: Vec<JsString> = lower
+                .split(&js("-"))
+                .into_iter()
+                .filter(|p| !p.is_empty())
+                .collect();
             if parts.len() > 1 {
-                let read: Vec<JsString> = parts.iter().map(|p| self.phonemize_word(p, oov)).collect();
+                let read: Vec<JsString> =
+                    parts.iter().map(|p| self.phonemize_word(p, oov)).collect();
                 return JsString::join(&read, &JsString::new());
             }
         }
@@ -186,7 +242,10 @@ impl FrenchPhonemizer {
 
     fn normalize_numerals(&self, text: &JsString) -> JsString {
         let s = normalize_french_ordinal_romans_loaded(text, &|w| self.lexicon.contains_key(w));
-        normalize_romans(&normalize_french_ordinal_digits_loaded(&s), &RomanPolicy::default())
+        normalize_romans(
+            &normalize_french_ordinal_digits_loaded(&s),
+            &RomanPolicy::default(),
+        )
     }
 
     /// `text(input, oovOverride?)`.
@@ -210,7 +269,10 @@ impl FrenchPhonemizer {
                     if let Some(ipa) = ipa.filter(|i| !i.is_empty()) {
                         items.push(Item {
                             kind: Kind::Ipa(ipa),
-                            src: Some(Src { span: (at, at + surface.len()), surface }),
+                            src: Some(Src {
+                                span: (at, at + surface.len()),
+                                surface,
+                            }),
                         });
                     }
                 }
@@ -221,18 +283,32 @@ impl FrenchPhonemizer {
             claim_gap(m.index(), &mut gap_cursor, &mut items);
             let tok_at = m.index();
             gap_cursor = m.end();
-            let src = Src { span: (tok_at, gap_cursor), surface: m.value(&input) };
-            let word = |w: JsString| Item { kind: Kind::Word(w), src: Some(src.clone()) };
+            let src = Src {
+                span: (tok_at, gap_cursor),
+                surface: m.value(&input),
+            };
+            let word = |w: JsString| Item {
+                kind: Kind::Word(w),
+                src: Some(src.clone()),
+            };
             if let Some(w) = m.group(1, &input).filter(|g| !g.is_empty()) {
                 items.push(word(w));
             } else if let Some(num) = m.group(2, &input).filter(|g| !g.is_empty()) {
                 // `m[2].split(/[.,]/)`: the class matches one separator at most.
-                let sep = num.0.iter().position(|&u| u == b'.' as u16 || u == b',' as u16);
+                let sep = num
+                    .0
+                    .iter()
+                    .position(|&u| u == b'.' as u16 || u == b',' as u16);
                 let (int_part, frac) = match sep {
                     None => (num.clone(), None),
-                    Some(p) => (num.slice(0, Some(p as isize)), Some(num.slice(p as isize + 1, None))),
+                    Some(p) => (
+                        num.slice(0, Some(p as isize)),
+                        Some(num.slice(p as isize + 1, None)),
+                    ),
                 };
-                for w in number_to_words_loaded(js_number(&int_part), Some(&int_part)).split(&js(" ")) {
+                for w in
+                    number_to_words_loaded(js_number(&int_part), Some(&int_part)).split(&js(" "))
+                {
                     items.push(word(w));
                 }
                 if let Some(frac) = frac {
@@ -243,7 +319,9 @@ impl FrenchPhonemizer {
                     } else {
                         frac.code_point_strings()
                             .iter()
-                            .flat_map(|d| number_to_words_loaded(js_number(d), None).split(&js(" ")))
+                            .flat_map(|d| {
+                                number_to_words_loaded(js_number(d), None).split(&js(" "))
+                            })
                             .collect()
                     };
                     for w in parts {
@@ -251,8 +329,15 @@ impl FrenchPhonemizer {
                     }
                 }
             } else if let Some(p) = m.group(3, &input).filter(|g| !g.is_empty()) {
-                if let Some(mk) = MANIFEST.clause_punctuation.get(&p.to_string_lossy()).filter(|k| !k.is_empty()) {
-                    items.push(Item { kind: Kind::Pause(js(mk)), src: Some(src.clone()) });
+                if let Some(mk) = MANIFEST
+                    .clause_punctuation
+                    .get(&p.to_string_lossy())
+                    .filter(|k| !k.is_empty())
+                {
+                    items.push(Item {
+                        kind: Kind::Pause(js(mk)),
+                        src: Some(src.clone()),
+                    });
                 }
             }
         }
@@ -283,7 +368,12 @@ impl FrenchPhonemizer {
                         None => {
                             traced.insert(
                                 sc.span,
-                                Traced { span: sc.span, surface: sc.surface.clone(), emitted: vec![piece.clone()], at },
+                                Traced {
+                                    span: sc.span,
+                                    surface: sc.surface.clone(),
+                                    emitted: vec![piece.clone()],
+                                    at,
+                                },
                             );
                         }
                     }
@@ -329,7 +419,11 @@ impl FrenchPhonemizer {
                     let read = het.clone().unwrap_or_else(|| self.phonemize_word(w, oov));
                     let mut ipa = carry.concat(&read);
                     carry = JsString::new();
-                    if let Some(Item { kind: Kind::Word(nw), .. }) = items.get(k + 1) {
+                    if let Some(Item {
+                        kind: Kind::Word(nw),
+                        ..
+                    }) = items.get(k + 1)
+                    {
                         if het.is_none() {
                             carry = liaison_onto(w, nw);
                             if !carry.is_empty() {

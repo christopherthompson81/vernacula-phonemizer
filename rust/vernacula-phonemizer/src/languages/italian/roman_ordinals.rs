@@ -52,7 +52,9 @@ const ORDINAL_AFTER: &str = r"^(secolo|secoli|anniversario|congresso|convegno|si
 pub fn roman_policy() -> RomanPolicy {
     RomanPolicy {
         exclude: Vec::new(),
-        ordinal: Some(Box::new(|n| try_manifest().ok().and_then(|m| ordinal_with(m, n as f64)))),
+        ordinal: Some(Box::new(|n| {
+            try_manifest().ok().and_then(|m| ordinal_with(m, n as f64))
+        })),
         ordinal_before: Some(JsRegex::new(ORDINAL_BEFORE, "iu").unwrap()),
         ordinal_after: Some(JsRegex::new(ORDINAL_AFTER, "iu").unwrap()),
     }

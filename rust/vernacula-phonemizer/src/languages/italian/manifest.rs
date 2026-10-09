@@ -134,7 +134,10 @@ pub fn try_manifest() -> Result<&'static ItalianManifest, String> {
         let n = &m.numbers;
         for (name, v) in [("units", &n.units), ("teens", &n.teens), ("tens", &n.tens)] {
             if v.len() < 10 {
-                return Err(format!("italian.jsonc: numbers.{name} has {} entries, needs 10", v.len()));
+                return Err(format!(
+                    "italian.jsonc: numbers.{name} has {} entries, needs 10",
+                    v.len()
+                ));
             }
         }
         for k in ["n", "s", "e", "w"] {

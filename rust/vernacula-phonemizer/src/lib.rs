@@ -11,7 +11,9 @@ pub mod core;
 pub mod languages;
 pub mod registry;
 
-pub use registry::{LANGUAGES, PhonemizeError, french_tagger_unavailable_reason, tagger_unavailable_reason};
+pub use registry::{
+    LANGUAGES, PhonemizeError, french_tagger_unavailable_reason, tagger_unavailable_reason,
+};
 
 use core::js_string::JsString;
 

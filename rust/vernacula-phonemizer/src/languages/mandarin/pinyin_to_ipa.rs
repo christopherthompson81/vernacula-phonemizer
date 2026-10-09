@@ -41,11 +41,17 @@ fn normalize_u(base: &JsString) -> JsString {
 fn parse_syllable(token: &JsString) -> Syllable {
     let re = js_re!(r"^([a-zü:]+?)([1-5])?$", "i");
     let Some(m) = re.exec(token) else {
-        return Syllable { base: token.to_lower_case(), tone: 5.0 };
+        return Syllable {
+            base: token.to_lower_case(),
+            tone: 5.0,
+        };
     };
     Syllable {
         base: normalize_u(&m.group(1, token).unwrap().to_lower_case()),
-        tone: m.group(2, token).filter(|t| !t.is_empty()).map_or(5.0, |t| js_number(&t)),
+        tone: m
+            .group(2, token)
+            .filter(|t| !t.is_empty())
+            .map_or(5.0, |t| js_number(&t)),
     }
 }
 
@@ -100,7 +106,11 @@ impl PinyinToIpa {
             match self.tables.syllable_ipa.get(&syl.base) {
                 None => out.push(tokens[i].clone()),
                 Some(seg) => {
-                    let tone = self.tables.tones.get(&js_number_to_string(realized[i])).map_or("", String::as_str);
+                    let tone = self
+                        .tables
+                        .tones
+                        .get(&js_number_to_string(realized[i]))
+                        .map_or("", String::as_str);
                     out.push(seg.concat(&js(tone)));
                 }
             }

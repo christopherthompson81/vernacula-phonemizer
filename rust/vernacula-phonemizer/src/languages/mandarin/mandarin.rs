@@ -16,8 +16,8 @@ use crate::core::clauses::ClauseSink;
 use crate::core::data_source::load_once;
 use crate::core::foreign::{ForeignPhonemizer, read_foreign_run};
 use crate::core::js_string::{JsString, js, js_number};
-use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map, load_tsv_strings};
+use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::provenance::{Piece, rebuilt, tracing};
 use crate::core::trace::{begin_token, end_token, enter_engine};
 use crate::js_re;
@@ -55,7 +55,12 @@ impl MandarinPhonemizer {
         self.pinyin_to_ipa.convert(&JsString::join(&py, &js(" ")))
     }
 
-    fn append_number(cp: &mut Vec<JsString>, exempt: &mut Vec<bool>, num: &JsString, after: Option<&JsString>) {
+    fn append_number(
+        cp: &mut Vec<JsString>,
+        exempt: &mut Vec<bool>,
+        num: &JsString,
+        after: Option<&JsString>,
+    ) {
         let mut push = |text: &JsString, ex: bool| {
             for c in text.code_point_strings() {
                 cp.push(c);
@@ -77,7 +82,11 @@ impl MandarinPhonemizer {
             None => num.clone(),
             Some(d) => JsString::from_units(&num.0[..d]),
         };
-        let int_n = js_number(&if int_str.is_empty() { js("0") } else { int_str.clone() });
+        let int_n = js_number(&if int_str.is_empty() {
+            js("0")
+        } else {
+            int_str.clone()
+        });
         if is_safe_integer(int_n) {
             push(&integer_to_chinese(int_n), false);
         } else {
@@ -86,7 +95,10 @@ impl MandarinPhonemizer {
         if let Some(d) = dot {
             if d < num.len() - 1 {
                 push(&js(&m.numbers.decimal_point), true);
-                push(&digits_to_chinese(&JsString::from_units(&num.0[d + 1..])), true);
+                push(
+                    &digits_to_chinese(&JsString::from_units(&num.0[d + 1..])),
+                    true,
+                );
             }
         }
     }
@@ -98,7 +110,11 @@ impl MandarinPhonemizer {
         let mut exempt: Vec<bool> = Vec::new();
         let rec = tracing();
         let mut pieces: Vec<Piece> = Vec::new();
-        let copy = |from: usize, to: usize, cp: &mut Vec<JsString>, exempt: &mut Vec<bool>, pieces: &mut Vec<Piece>| {
+        let copy = |from: usize,
+                    to: usize,
+                    cp: &mut Vec<JsString>,
+                    exempt: &mut Vec<bool>,
+                    pieces: &mut Vec<Piece>| {
             let mut at = from;
             for c in JsString::from_units(&input.0[from..to]).code_point_strings() {
                 let n = c.len();
@@ -116,11 +132,17 @@ impl MandarinPhonemizer {
                 copy(last, m.index(), &mut cp, &mut exempt, &mut pieces);
             }
             let rest = JsString::from_units(&input.0[m.end()..]);
-            let after = js_re!(r"^\s*(\S)", "u").exec(&rest).and_then(|a| a.group(1, &rest));
+            let after = js_re!(r"^\s*(\S)", "u")
+                .exec(&rest)
+                .and_then(|a| a.group(1, &rest));
             let before = cp.len();
             Self::append_number(&mut cp, &mut exempt, &m.value(input), after.as_ref());
             if rec {
-                pieces.push((JsString::join(&cp[before..], &JsString::new()), m.index(), m.end()));
+                pieces.push((
+                    JsString::join(&cp[before..], &JsString::new()),
+                    m.index(),
+                    m.end(),
+                ));
             }
             last = m.end();
         }
@@ -141,7 +163,11 @@ impl MandarinPhonemizer {
         let (cp, exempt, pieces) = self.substitute_numbers(&input);
         let mut sink = ClauseSink::new();
         // ⚠ Keyed on the pieces, not on a second `tracing()` call, as the TS.
-        let trace_text = if !pieces.is_empty() { rebuilt(&input, &pieces) } else { JsString::join(&cp, &JsString::new()) };
+        let trace_text = if !pieces.is_empty() {
+            rebuilt(&input, &pieces)
+        } else {
+            JsString::join(&cp, &JsString::new())
+        };
         // Code-point index → UTF-16 offset into `normalized`.
         let mut off: Vec<usize> = vec![0];
         for c in &cp {
@@ -158,7 +184,10 @@ impl MandarinPhonemizer {
                 while j < cp.len() && is_han(&cp[j]) {
                     j += 1;
                 }
-                begin_token((off[i], off[j]), &JsString::join(&cp[i..j], &JsString::new()));
+                begin_token(
+                    (off[i], off[j]),
+                    &JsString::join(&cp[i..j], &JsString::new()),
+                );
                 sink.emit(&self.han_run(&cp[i..j], &exempt[i..j]));
                 end_token();
                 i = j;
@@ -169,7 +198,12 @@ impl MandarinPhonemizer {
                 }
                 let run = JsString::join(&cp[i..j], &JsString::new());
                 begin_token((off[i], off[j]), &run);
-                sink.emit(&self.foreign.as_ref().map_or_else(JsString::new, |f| f(&run)));
+                sink.emit(
+                    &self
+                        .foreign
+                        .as_ref()
+                        .map_or_else(JsString::new, |f| f(&run)),
+                );
                 end_token();
                 i = j;
             } else if is_foreign_char(ch) {
@@ -227,7 +261,8 @@ fn third_tone_sandhi() -> ThirdToneSandhi {
 /// The pinyin → IPA tables, as `createMandarin` builds them.
 pub fn load_mandarin_tables() -> Result<MandarinTables, String> {
     try_manifest()?;
-    let syllable_ipa = load_tsv_strings(DIR, "syllable-ipa.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
+    let syllable_ipa = load_tsv_strings(DIR, "syllable-ipa.tsv", TsvOptions::default())
+        .map_err(|e| e.to_string())?;
     Ok(MandarinTables {
         syllable_ipa,
         tones: MANIFEST.tones.clone(),
@@ -239,10 +274,18 @@ pub fn load_mandarin_tables() -> Result<MandarinTables, String> {
 pub fn load_pinyin_tables() -> Result<&'static PinyinTables, String> {
     static T: OnceLock<PinyinTables> = OnceLock::new();
     load_once(&T, || {
-        let chars = load_tsv_map(DIR, "chars.tsv", |v, _| Some(v.split(&js(","))), TsvOptions::default())
+        let chars = load_tsv_map(
+            DIR,
+            "chars.tsv",
+            |v, _| Some(v.split(&js(","))),
+            TsvOptions::default(),
+        )
+        .map_err(|e| e.to_string())?;
+        let phrases = load_tsv_strings(DIR, "phrases.tsv", TsvOptions::default())
             .map_err(|e| e.to_string())?;
-        let phrases = load_tsv_strings(DIR, "phrases.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
-        let max_phrase = phrases.keys().fold(2, |m, k| m.max(k.code_points().count()));
+        let max_phrase = phrases
+            .keys()
+            .fold(2, |m, k| m.max(k.code_points().count()));
         Ok(PinyinTables {
             chars: chars.into_iter().collect::<HashMap<_, _>>(),
             phrases: phrases.into_iter().collect::<HashMap<_, _>>(),

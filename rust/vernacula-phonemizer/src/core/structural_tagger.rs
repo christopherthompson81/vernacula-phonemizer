@@ -117,7 +117,12 @@ impl TaggerTables {
                 tags[i] = Some(v.clone());
             }
         }
-        Ok(TaggerTables { char_id, permitted, tags, n_tags })
+        Ok(TaggerTables {
+            char_id,
+            permitted,
+            tags,
+            n_tags,
+        })
     }
 
     /// `meta.src[ch]`; `None` for a lone surrogate (`char::from_u32` fails) or an out-of-vocabulary symbol.
@@ -141,7 +146,11 @@ impl TaggerTables {
         if logits.len() == t * self.n_tags {
             Ok(())
         } else {
-            Err(format!("logits length {} for T={t} × {} tags", logits.len(), self.n_tags))
+            Err(format!(
+                "logits length {} for T={t} × {} tags",
+                logits.len(),
+                self.n_tags
+            ))
         }
     }
 }
@@ -186,7 +195,9 @@ pub struct WordStructuralTagger {
 }
 
 /// `createWordStructuralTagger`: `Err` (why) where the TS resolves `undefined`.
-pub fn create_word_structural_tagger(opts: WordTaggerOptions) -> Result<WordStructuralTagger, String> {
+pub fn create_word_structural_tagger(
+    opts: WordTaggerOptions,
+) -> Result<WordStructuralTagger, String> {
     let (meta, model) = load_tagger(opts.dir, &opts.basename, &opts.model_file)?;
     WordStructuralTagger::new(&meta, model, opts.preprocess, opts.postprocess)
 }
@@ -198,7 +209,12 @@ impl WordStructuralTagger {
         preprocess: fn(&JsString) -> JsString,
         postprocess: Option<fn(&JsString) -> JsString>,
     ) -> Result<WordStructuralTagger, String> {
-        Ok(WordStructuralTagger { tables: TaggerTables::new(meta)?, model, preprocess, postprocess })
+        Ok(WordStructuralTagger {
+            tables: TaggerTables::new(meta)?,
+            model,
+            preprocess,
+            postprocess,
+        })
     }
 
     /// `tag(word)`: preprocess → decline on an out-of-vocabulary code point → one forward pass → masked

@@ -40,13 +40,22 @@ pub fn segment(chars: &[JsString], t: &PinyinTables, exempt: &[bool]) -> Vec<Tok
     while i < chars.len() {
         let ch = &chars[i];
         if !is_han(ch) {
-            out.push(Token { py: ch.clone(), src: None });
+            out.push(Token {
+                py: ch.clone(),
+                src: None,
+            });
             i += 1;
             continue;
         }
         if *ch == yi && out.last().and_then(|t| t.src.as_ref()) == Some(&di) {
-            let py = t.chars.get(&yi).map_or_else(|| yi.clone(), |r| r[0].clone());
-            out.push(Token { py, src: Some(yi.clone()) });
+            let py = t
+                .chars
+                .get(&yi)
+                .map_or_else(|| yi.clone(), |r| r[0].clone());
+            out.push(Token {
+                py,
+                src: Some(yi.clone()),
+            });
             i += 1;
             continue;
         }
@@ -70,7 +79,11 @@ pub fn segment(chars: &[JsString], t: &PinyinTables, exempt: &[bool]) -> Vec<Tok
             continue;
         }
         let py = t.chars.get(ch).map_or_else(|| ch.clone(), |r| r[0].clone());
-        let src = if exempt.get(i).copied().unwrap_or(false) { None } else { Some(ch.clone()) };
+        let src = if exempt.get(i).copied().unwrap_or(false) {
+            None
+        } else {
+            Some(ch.clone())
+        };
         out.push(Token { py, src });
         i += 1;
     }

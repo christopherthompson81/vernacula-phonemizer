@@ -78,7 +78,11 @@ pub fn make_abugida_g2p(def: &AbugidaDef, phon: &Phonology) -> AbugidaG2p {
         iv: table(&def.independent_vowels),
         vs: table(&def.vowel_signs),
         place_keys,
-        homorganic: phon.homorganic_nasal.iter().map(|(k, v)| (js(k), js(v))).collect(),
+        homorganic: phon
+            .homorganic_nasal
+            .iter()
+            .map(|(k, v)| (js(k), js(v)))
+            .collect(),
         vir: js(&def.signs.virama.char),
         an: js(&def.signs.anusvara.char),
         ch: js(&def.signs.chandrabindu.char),
@@ -117,7 +121,10 @@ impl AbugidaG2p {
                 self.nasalize(out);
                 if s[*i] == self.an || (s[*i] == self.ch && self.ch_homorganic) {
                     let nc = s.get(*i + 1).and_then(|nx| {
-                        self.c.get(nx).cloned().or_else(|| self.c.get(&nx.concat(&self.nk)).cloned())
+                        self.c
+                            .get(nx)
+                            .cloned()
+                            .or_else(|| self.c.get(&nx.concat(&self.nk)).cloned())
                     });
                     if let Some(nc) = nc.filter(|n| !n.is_empty()) {
                         if let Some(hn) = self.homorganic.get(&self.place(&nc)) {
