@@ -1,0 +1,89 @@
+# French (fr) off-golden probes — SYNTHETIC text only, written for the Rust port (#1463).
+# One line per arm of normalize.ts / ordinals.ts / french.ts, followed by the neighbour that arm must decline.
+# `\n` and `\u{XXXX}` escapes are decoded by dump.mts.
+#
+# 0) digit grouping (space, NBSP, NNBSP, thin space); declines a non-3-digit block and a leading-zero group
+Il y a 5 000 ans et 1 234 567 habitants.
+Il y a 5\u{a0}000 ans, 12\u{202f}500 euros et 3\u{2009}000 km.
+Les numéros 30 9 et 0 123 restent séparés.
+La valeur 1,5 000 reste et 12 3456 aussi.
+# era markers; declines av. as a street abbreviation (the era rule claims it first)
+En 52 av. J.-C. puis en 33 apr. J.-C. et en 300 avant J-C.
+Il habite 12 av. Foch.
+# spaced degree sign; declines a bearing and n°
+Il fait 32 ° C et 70 °F aujourd'hui.
+Cap au 270 ° nord et le n° 5.
+# numéro; declines n° not before a digit
+Le n° 11 et le nº 7 gagnent, pas le n° rouge.
+# dotted abbreviations, continuing and phrase-final; DOT_ONLY; the long s (#1122)
+M. Dupont et Mme Curie avec Dr. House et St. Louis, etc. et le chap. 3.
+Voir p. 12, pp. 4 et vol. 2, art. 5 ; cf. le tél.
+Il est arrivé avec Mmes Martin et MM. Durand etc.
+C'est fini, etc.
+La ſt. Louis et la ſte. Anne.
+# undotted abbreviations; declines a word containing dr/pr
+Le Dr Martin et le Pr Dupont parlent au drap près du prix.
+# name initials; declines a single letter at a sentence end
+J. R. R. Tolkien et n. wayne hale et le plan B.
+# money with centimes, both orders; 00 centimes; declines three decimals
+Ça coûte 2,50 € ou €3,99 ou 1,00 $ ou £1,05 et ¥12,30.
+Le prix est 2,505 € et 3,5 €.
+# plus, ±; declines a hyphen word
+Le fuseau utc+1 et +5 degrés, ±3 et 2+2.
+# negatives; declines a range and a score
+Il fait -5 degrés, (−3) et –7 ; la période 1918-1939 et le score 2-1.
+# relational and division signs
+Si 7 = 3 + 4 alors 2 < 3 et 5 > 1 et 10 ÷ 2.
+# fractions; declines a date and a unit ratio
+Il mange 1/2 gâteau, 3/4 de tarte, 2/3 des parts, 1/5 et 7/100.
+Le 14/07/1789 et 130 km/h et 1/1 et 2/0.
+# times, h form and colon form; feminine une; declines a race time and a letter-glued h
+Rendez-vous à 11 h 20, à 1 h 15, à 21h, à 0 h 30 et à 20h30.
+À 4:41 ou 1:01 ou 21:31 ; le chrono 4:41.20 ; le code 12hx.
+Il est 23 h 59 et 24 h.
+# dates; declines month 13 and day 32
+Le 14/07/1789, le 1.1.2000, le 01/05/2020 et le 1 janvier, le 1 Mai.
+Le 32/01/2020 et le 12/13/2020 et 00/00/0000.
+# digit ordinals; seconde only at 2; declines 3d and a spaced suffix
+Le 1er, la 1re, la 1ère, les 1ers, le 2e, le 2ème, le 37e, le 190e, le 100e, les 3es.
+Le 2d, la 2de, les 2ds, le 3d et 5 ans et le 21e et 80e et 1000000e.
+# Roman ordinals; declines lexicon homographs (de, le, ville, siècle) and the stoplist
+Au XVIIe siècle, au XIe, au Ve et au LVIIIe, au IIème et la Ire.
+Le livre de la ville, la Cie et cive, clive, des CIe.
+# bare Romans (shared pass); declines dix, mi, ml
+Louis XIV et Henri IV, le chapitre xii, Jean-Paul II, dix mi ml.
+# initialisms: spelled, acronym read as a word, recorded word, shouting
+La RATP, l'EDF, la TVA, l'ONU, l'UNESCO et la SNCF.
+LA RATP ET LA SNCF SONT EN GRÈVE.
+L'OTAN et le PIB des USA.
+# heteronyms: plus before a number, tous before a determiner, os after a plural determiner, -ent verbs past a clitic
+Il ajoute plus un et plus deux mais pas plus loin.
+Tous les jours, tous ces gens, ils sont tous là.
+Les os et un os, le sens et ils sens.
+Ils content une histoire et ils ne content pas ; elles se couvent.
+Le président et ils président ; un excellent vin et ils excellent.
+# liaison: z/n/t, h aspiré, plural h aspiré, citation-realised final consonant, heteronym as left member
+Les amis, les héros, les haricots, les hommes, deux ans, six enfants, dix euros, un ami, cet homme.
+C'est un grand homme, quand il vient, tout à fait, très important, vous avez, ils ont.
+Les huit enfants, les onze joueurs, les yaourts, les ouistitis.
+# numbers in the tokenizer: decimals as a number, a leading zero and four digits digit by digit
+Il mesure 1,75 m et 1,05 m et 3,14159 et 2.5 et 0,5.
+Il y a 99999999999999999999 grains et 1000000000 étoiles.
+# hyphenated compounds: lexicon compound, per-part concatenation, dash between words
+Quarante-et-un, peut-être, dix-septième, Jésus-Christ, porte-avions-xyz.
+Paris — Lyon et Paris-Lyon.
+# apostrophes and elision
+L'homme, l’ami, c'est, qu'il, aujourd'hui, jusqu’à.
+# OOV words for the rule g2p and the tagger
+Les abolissent, aboiement, abrier, Málaga, Taínos, Cañitas, Zürich et Øresund.
+# foreign scripts in the gaps (en, ru, el, ja)
+Il a dit Владимир et Αθήνα et 東京 en passant.
+Il a dit hello world et the quick brown fox.
+# punctuation and pauses
+Oui ! Non ? Peut-être… Bon ; d'accord : fini.
+...Et alors ?
+# Object.prototype keys as words
+Le constructor et toString et hasOwnProperty et __proto__.
+# empty-ish
+.
+—

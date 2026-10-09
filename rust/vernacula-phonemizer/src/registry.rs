@@ -33,7 +33,7 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 9] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn"];
+pub const LANGUAGES: [&str; 10] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -77,6 +77,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "hi" => crate::languages::hindi::hindi::engine(),
         "cmn" => crate::languages::mandarin::mandarin::create_mandarin(Some(Arc::new(read_as_english)))
             .map(|m| Arc::new(m) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "fr" => crate::languages::french::french::create_french()
+            .map(|fr| Arc::new(FrenchEngine(fr)) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         _ => return None,
     })
@@ -361,4 +364,23 @@ fn build_english_tagger() -> Result<EnglishTagger, String> {
     let (meta, bytes) = load_english_tagger_files("en-g2p-tagger")?;
     let model = crate::core::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;
     EnglishTagger::new(meta, Box::new(model))
+}
+
+// ── French ───────────────────────────────────────────────────────────────────────────────────────────
+
+struct FrenchEngine(crate::languages::french::french::FrenchPhonemizer);
+
+impl Engine for FrenchEngine {
+    fn text(&self, input: &JsString) -> Result<JsString, PhonemizeError> {
+        Ok(self.0.text(input, None))
+    }
+
+    fn neural(&self, pre_passed: &JsString) -> Option<Result<JsString, PhonemizeError>> {
+        use crate::languages::french::{french_neural::phonemize_fr_neural, french_tagger::french_tagger};
+        Some(phonemize_fr_neural(&self.0, french_tagger(), pre_passed).map_err(PhonemizeError::Neural))
+    }
+
+    fn has_neural(&self) -> bool {
+        true
+    }
 }

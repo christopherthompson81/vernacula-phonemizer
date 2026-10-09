@@ -648,6 +648,53 @@ fn main() {
                 ),
             }
         }),
+        "fr-normalize" => {
+            use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
+            use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
+            let fr = vernacula_phonemizer::languages::french::french::create_french().unwrap();
+            Box::new(move |input| {
+                let is_word = |w: &JsString| fr.lexicon_has(w);
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => n::normalize_french(&t, &is_word),
+                    "numerals" => normalize_romans(
+                        &o::normalize_french_ordinal_digits(&o::normalize_french_ordinal_romans(&t, &is_word)),
+                        &RomanPolicy::default(),
+                    ),
+                    _ => n::normalize_french_initialisms(&t, &is_word),
+                }
+            })
+        }
+        "fr-g2p" => Box::new(|input| {
+            vernacula_phonemizer::languages::french::g2p::to_ipa(&units(&input["word"]))
+        }),
+        "fr-numbers" => Box::new(|input| {
+            let raw = input.get("raw").map(units);
+            vernacula_phonemizer::languages::french::numbers::number_to_words(
+                input["n"].as_f64().unwrap(),
+                raw.as_ref(),
+            )
+        }),
+        "fr-ordinals" => {
+            use vernacula_phonemizer::languages::french::ordinals as o;
+            let fr = vernacula_phonemizer::languages::french::french::create_french().unwrap();
+            Box::new(move |input| match input["op"].as_str() {
+                Some("digits") => o::normalize_french_ordinal_digits(&units(&input["text"])),
+                Some(_) => o::normalize_french_ordinal_romans(&units(&input["text"]), &|w| fr.lexicon_has(w)),
+                None => o::ordinal(
+                    input["n"].as_f64().unwrap(),
+                    input["feminine"].as_bool().unwrap(),
+                    input["plural"].as_bool().unwrap(),
+                )
+                .unwrap_or_else(|| JsString::from("\u{0}none")),
+            })
+        }
+        "fr-tagger" => {
+            let tagger =
+                vernacula_phonemizer::languages::french::french_tagger::create_french_tagger("fr-g2p-tagger")
+                    .unwrap();
+            Box::new(move |input| tagger.tag(&units(&input["word"])).unwrap())
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
