@@ -323,6 +323,91 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const raw of ["12345678901234567890", "9007199254740993", "000", "1000000000000000000", "999999999999999999"])
             emit({ n: String(Number(raw)), raw, op: "words" }, numberToWords(Number(raw), raw));
     },
+    // Hindi's normalizer (makeHindiNormalizer with Hindi's own data) over every hi text: golden, FLEURS hi_in
+    // (columns 3 and 4) and probes/hi.txt.
+    async "hi-normalize"() {
+        const { makeHindiNormalizer } = await import("../../../src/languages/hindi/normalize.ts");
+        const { MANIFEST: HI } = await import("../../../src/languages/hindi/manifest.ts");
+        const norm = makeHindiNormalizer(HI.numbers, HI);
+        for (const [t, src] of textsFor(["hi"], "hi_in", ["hi.txt"])) emit({ text: units(t), src }, norm(t));
+    },
+    // The word level: the raw abugida g2p, wordRules and number(), over every Devanagari run in the
+    // Devanagari-script goldens + hi FLEURS + hi probes, every consonant x matra/virama/sign combination, and
+    // digit strings (ASCII, Devanagari, grouped, decimal, past 2^53).
+    async "hi-word"() {
+        const { makeAbugidaG2P } = await import("../../../src/core/abugida.ts");
+        const { loadSharedPhonology } = await import("../../../src/core/phonology.ts");
+        const { makeNativeHindi } = await import("../../../src/languages/hindi/hindi.ts");
+        const { MANIFEST: HI } = await import("../../../src/languages/hindi/manifest.ts");
+        const g2p = makeAbugidaG2P(HI, loadSharedPhonology());
+        const H = makeNativeHindi(HI);
+        const words = new Set<string>();
+        const texts = textsFor(["hi", "mr", "ne", "awa", "bho", "hne", "mai", "mag"].filter((g) => {
+            try { readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url)); return true; } catch { return false; }
+        }), "hi_in", ["hi.txt"]);
+        for (const t of texts.keys()) for (const m of t.normalize("NFC").matchAll(/[ऀ-ॣॲ-ॿ]+/gu)) words.add(m[0]);
+        const s = HI.signs;
+        const tails = ["", s.virama.char, s.anusvara.char, s.chandrabindu.char, s.visarga.char, s.nukta.char,
+            ...Object.keys(HI.vowelSigns), ...Object.keys(HI.vowelSigns).map((v) => v + s.anusvara.char),
+            ...Object.keys(HI.vowelSigns).map((v) => v + s.chandrabindu.char), "‍", "‌", "ऽ"];
+        const cons = Object.keys(HI.consonants);
+        for (const c of cons) for (const t of tails) { words.add(c + t); words.add(c + t + "क"); words.add("अ" + c + t + "ता"); }
+        for (const c of cons) for (const d of ["क", "ग", "च", "ट", "त", "प", "म", "र", "ह"]) words.add(c + s.virama.char + d + "ा");
+        for (const v of Object.keys(HI.independentVowels)) for (const t of ["", s.anusvara.char, s.chandrabindu.char, s.visarga.char]) { words.add(v + t); words.add(v + t + "ब"); }
+        for (const w of words) {
+            emit({ op: "g2p", word: units(w) }, g2p(w));
+            emit({ op: "rules", word: units(w) }, H.wordRules(w));
+        }
+        const nums = new Set<string>();
+        for (let n = 0; n <= 3000; n++) nums.add(String(n));
+        for (let e = 4; e <= 22; e++) { nums.add("1" + "0".repeat(e)); nums.add("9".repeat(e)); nums.add("12345678901234567890123".slice(0, e)); }
+        for (const x of ["0.5", "3.14", "12.05", ".5", "0.0", "१२३", "१,२३४", "१.५", "1,00,000", "9,000", "0,001", "10,0", "9007199254740993", "9007199254740993.25", "123456789012345678901.5"]) nums.add(x);
+        for (const x of nums) emit({ op: "number", word: units(x) }, H.number(x));
+    },
+    // The new core modules through representative calls: deleteMedialSchwa (both schwas), applyWeightStress,
+    // tokenizeIpa, heavyFinalCoda, over g2p outputs and every hi/mr golden IPA line; postposedSign over hi texts.
+    async "abugida-core"() {
+        const { makeAbugidaG2P } = await import("../../../src/core/abugida.ts");
+        const { loadSharedPhonology } = await import("../../../src/core/phonology.ts");
+        const { deleteMedialSchwa } = await import("../../../src/core/schwa.ts");
+        const { applyWeightStress, tokenizeIpa } = await import("../../../src/core/weightStress.ts");
+        const { postposedSign } = await import("../../../src/core/postposedSign.ts");
+        const { heavyFinalCoda } = await import("../../../src/languages/hindi/hindi.ts");
+        const { MANIFEST: HI } = await import("../../../src/languages/hindi/manifest.ts");
+        const g2p = makeAbugidaG2P(HI, loadSharedPhonology());
+        const ipas = new Set<string>();
+        const texts = textsFor(["hi"], "hi_in", ["hi.txt"]);
+        for (const t of texts.keys()) for (const m of t.normalize("NFC").matchAll(/[ऀ-ॣॲ-ॿ]+/gu)) ipas.add(g2p(m[0]));
+        for (const g of ["hi", "mr", "bn", "gu", "ne"])
+            for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n")) {
+                const ipa = row.split("\t")[1];
+                if (ipa) { ipas.add(ipa); for (const w of ipa.split(" ")) ipas.add(w); }
+            }
+        for (const x of ["", " ", "ə", "kəməl", "kə məl\tkəɾ", "ˈkəməl", "kːəmə", "t͡ʃəlnaː", "ɔkɔɾɔ", "a͡", "ə̃kəɽ", "bʱaːɾət̪", "d͡zd͡z", "aːɡʱ"]) ipas.add(x);
+        for (const x of ipas) {
+            emit({ op: "schwa", ipa: units(x) }, deleteMedialSchwa(x));
+            emit({ op: "schwa-o", ipa: units(x) }, deleteMedialSchwa(x, "ɔ"));
+            emit({ op: "stress", ipa: units(x) }, applyWeightStress(x));
+            emit({ op: "tokenize", ipa: units(x) }, tokenizeIpa(x).join("|"));
+            emit({ op: "heavy", ipa: units(x) }, String(heavyFinalCoda(x)));
+        }
+        for (const t of texts.keys())
+            for (const [sign, words] of [["<", "से कम"], [">", "से अधिक"], ["÷", "ने भागणे"], ["\\+", "जमा"]] as const)
+                emit({ op: "postposed", ipa: units(t), sign, words }, postposedSign(t, sign, words));
+        for (const t of ["a < b", "a<b<c", "यह 5 < 6, और वह", "x > y।", "< 5", "5 <", "a < b) c", "p ÷ q", "1 + 2 + 3", "$ < £"])
+            for (const [sign, words] of [["<", "से कम"], [">", "से अधिक"], ["÷", "ने भागणे"], ["\\+", "जमा $&"]] as const)
+                emit({ op: "postposed", ipa: units(t), sign, words }, postposedSign(t, sign, words));
+    },
+    // Devanagari inside ENGLISH text (probes/hi-in-en.txt), through the script reader. Replayed by the
+    // `phonemize-sync` / `phonemize-best` arms (BEST=1 for the second).
+    async "hi-in-en"() {
+        const { phonemize, phonemizeAsync } = await import("../../../src/index.ts");
+        for (const line of readFileSync(new URL("./probes/hi-in-en.txt", import.meta.url), "utf8").split("\n")) {
+            if (line === "" || line.startsWith("#")) continue;
+            for (const lang of ["en", "en-GB"])
+                emit({ text: units(line), lang }, process.env.BEST ? await phonemizeAsync(line, lang) : phonemize(line, lang));
+        }
+    },
     numbers() {
         const ns: bigint[] = [];
         for (let i = 0n; i <= 20000n; i++) ns.push(i);

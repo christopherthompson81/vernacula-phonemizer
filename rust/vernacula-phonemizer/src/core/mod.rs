@@ -1,3 +1,4 @@
+pub mod abugida;
 pub mod boundaries;
 pub mod clauses;
 pub mod data_path;
@@ -18,9 +19,13 @@ pub mod markup;
 pub mod neural;
 pub mod normalize_symbols;
 pub mod numbers;
+pub mod phonology;
+pub mod postposed_sign;
 pub mod provenance;
 pub mod roman;
+pub mod schwa;
 pub mod scripts;
 pub mod structural_tagger;
 pub mod trace;
 pub mod unicode;
+pub mod weight_stress;

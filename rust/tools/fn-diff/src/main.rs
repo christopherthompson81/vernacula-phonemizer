@@ -552,6 +552,51 @@ fn main() {
             let raw = input.get("raw").map(|r| JsString::from(r.as_str().unwrap()));
             vernacula_phonemizer::languages::portuguese::numbers::number_to_words(n, d, raw.as_ref())
         }),
+        "hi-normalize" => {
+            use vernacula_phonemizer::languages::hindi::{manifest::try_manifest, normalize::*};
+            let hi = try_manifest().unwrap();
+            let own = OwnOrdinals {
+                irregular_ordinals: hi.irregular_ordinals.as_ref(),
+                ordinal_suffixes: hi.ordinal_suffixes.as_ref(),
+            };
+            let norm = make_hindi_normalizer(&hi.numbers, own).unwrap();
+            Box::new(move |input| norm(&units(&input["text"])))
+        }
+        "hi-word" => {
+            use vernacula_phonemizer::core::{abugida::make_abugida_g2p, phonology::load_shared_phonology};
+            use vernacula_phonemizer::languages::hindi::{hindi::*, manifest::try_manifest};
+            let hi = try_manifest().unwrap();
+            let phon = load_shared_phonology().unwrap();
+            let g2p = make_abugida_g2p(&hi.abugida, phon);
+            let h = make_native_hindi(hi, phon, None, AbugidaScript::default(), None, Overrides::default())
+                .unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "g2p" => g2p.g2p(&w),
+                    "rules" => h.word_rules(&w),
+                    _ => h.number(&w),
+                }
+            })
+        }
+        "abugida-core" => Box::new(|input| {
+            use vernacula_phonemizer::core::{postposed_sign::postposed_sign, schwa::delete_medial_schwa};
+            use vernacula_phonemizer::core::weight_stress::{apply_weight_stress, tokenize_ipa};
+            use vernacula_phonemizer::languages::hindi::hindi::heavy_final_coda;
+            let x = units(&input["ipa"]);
+            match input["op"].as_str().unwrap() {
+                "schwa" => delete_medial_schwa(&x, None),
+                "schwa-o" => delete_medial_schwa(&x, Some(&JsString::from("ɔ"))),
+                "stress" => apply_weight_stress(&x),
+                "tokenize" => JsString::join(&tokenize_ipa(&x), &JsString::from("|")),
+                "heavy" => JsString::from(heavy_final_coda(&x).to_string()),
+                _ => postposed_sign(
+                    &x,
+                    input["sign"].as_str().unwrap(),
+                    &JsString::from(input["words"].as_str().unwrap()),
+                ),
+            }
+        }),
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
