@@ -101,3 +101,24 @@ alone. Every arm has at least one probe line.
 
 **Implication.** Port complete except the symbol tier. Commit, then wait for the es agent's
 `make_symbol_normalizer` commit.
+
+## Run 4 — 2026-10-09 17:20
+
+**Question.** Which rows are port-pending, not wrong, and what will the symbol-tier hand-over need?
+
+**Raw finding.** Port-pending: the seven foreign-script probes, each dropped because `read_foreign_run` reached an
+unported engine. `port_pending()` after each, cumulative:
+`這個詞 Ελλάδα 意即` → el · `泰语 เด็กๆ 和 คนอ้วน ๆ` → th · `俄语 Москва 是首都` → ru · `印地语 नमस्ते` → hi ·
+`日语 ひらがな 和 カタカナ` → ja · `韩语 한국어` → ko · `α` → el (the lone-Greek-letter name). The FLEURS corpus and
+the golden have none (no non-Latin foreign run anywhere in them). The ja and hi rows should clear once those
+ports merge: re-check them then.
+
+`rust-lang-es` holds only `5de81514 wip symbols`. The coordinator says do not cherry-pick it. Its API, read
+for the hand-over: `SymbolData` (serde, camelCase, every field `Option`) + `make_symbol_normalizer(&SymbolData)
+-> Result<SymbolNormalizer, String>` + `.apply(&JsString)`. cmn's `symbolTier` names exactly the nine fields
+mandarin.ts passes (percent, currency, units, exponentWords, bareExponent, magnitudes, unspacedScript,
+multiply, percentPrefix), and none of its currency/units keys is integer-like, so the JS object order is
+insertion order: `serde_json::from_value::<SymbolData>` of the manifest value is the faithful build.
+
+**Implication.** Waiting on the final es hash; then swap the stub, regenerate all dumps (the probe file gained
+the FRACTION-asymmetry lines after Run 2's dumps), and re-run every gate.
