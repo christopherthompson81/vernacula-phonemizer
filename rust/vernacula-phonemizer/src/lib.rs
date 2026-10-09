@@ -34,6 +34,18 @@ pub struct PhonemeTrace {
 }
 
 pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, PhonemizeError> {
+    let (ipa, trace) = phonemize_trace_js(&JsString::from(text), lang)?;
+    Ok(PhonemeTrace {
+        ipa: ipa.to_string_lossy(),
+        trace,
+    })
+}
+
+/// `phonemize_trace` on a `JsString`, which can carry what a `&str` cannot (a lone surrogate half).
+pub fn phonemize_trace_js(
+    input: &JsString,
+    lang: &str,
+) -> Result<(JsString, core::trace::Trace), PhonemizeError> {
     /// Clears the thread's recording if the engine unwinds, as the TS `finally` does; a panic caught by the
     /// caller must not leave a recording that every later `phonemize` on this thread feeds.
     struct Clear(bool);
@@ -44,18 +56,14 @@ pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, Phonemize
             }
         }
     }
-    let input = JsString::from(text);
-    core::trace::start_trace(&input);
+    core::trace::start_trace(input);
     let mut guard = Clear(true);
-    let result = registry::phonemize_in(lang, &input);
+    let result = registry::phonemize_in(lang, input);
     guard.0 = false;
     match result {
         Ok(ipa) => {
             let trace = core::trace::stop_trace(Some(&ipa));
-            Ok(PhonemeTrace {
-                ipa: ipa.to_string_lossy(),
-                trace,
-            })
+            Ok((ipa, trace))
         }
         Err(e) => {
             core::trace::stop_trace(None);
