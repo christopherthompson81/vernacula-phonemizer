@@ -5,6 +5,7 @@
  * Jyutping syllable → IPA: initial + final (the aː/ɐ long/short split, checked -p̚/-t̚/-k̚ codas) + one of the SIX
  * Cantonese tones as Chao contour letters. Direct Jyutping input (with tone digits) is also accepted.
  */
+import { own } from "../../core/own.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -33,8 +34,7 @@ const JYUTPING = /^[a-z]+[1-6](?:\s+[a-z]+[1-6])*$/u;
 // INHERITED constructor and concatenated the function's source into the phoneme stream:
 // phonemize("constructor1", "yue") returned "function Object() { [native code] }˥". Found while porting wuu,
 // which carried the same shape; the Han path cannot reach it, so no golden row ever did.
-const own = (table: Record<string, string>, key: string): string | undefined =>
-    Object.hasOwn(table, key) ? table[key] : undefined;
+// (core/own.ts)
 
 /** One Jyutping syllable (e.g. "hoeng1") → IPA. */
 function syllableToIpa(syl: string): string {

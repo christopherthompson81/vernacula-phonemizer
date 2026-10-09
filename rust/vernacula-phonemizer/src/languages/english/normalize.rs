@@ -195,48 +195,11 @@ static UNITS: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| {
         .map(|(k, sg, pl)| (js(k), (js(sg), js(pl))))
         .collect()
 });
-/// `Object.fromEntries(entries.map(lower).reverse())`: the FIRST-declared key keeps a folded slot.
+/// Core `folded_index`: the first-declared key keeps a slot, and a slot whose declared keys disagree is left out.
 static UNITS_FOLDED: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| folded_index(&UNITS));
 
 fn unit_forms(written: &JsString) -> Option<&'static Forms> {
     resolve_unit_symbol(Some(&*UNITS), &UNITS_FOLDED, written, false)
-}
-
-/// ⚠ JS OBJECT LOOKUP SEES `Object.prototype`. `UNITS[w]` and `TIME_PERIOD[w]` are plain-object reads, so a
-/// letter run naming an inherited property (`constructor`, `toString`, …) is "defined" there. Only the slash
-/// rule (6a3) can reach these with arbitrary text; it is reproduced as the TypeScript behaves (#1463 report).
-const OBJECT_PROTO: [&str; 7] = [
-    "constructor",
-    "hasOwnProperty",
-    "isPrototypeOf",
-    "propertyIsEnumerable",
-    "toString",
-    "valueOf",
-    "toLocaleString",
-];
-fn is_proto_key(k: &JsString) -> bool {
-    OBJECT_PROTO.iter().any(|p| *k == *p)
-}
-
-/// `resolveUnitSymbol(UNITS, UNITS_FOLDED, w)` for ARBITRARY `w`: `Err(())` is a prototype hit, which is not
-/// `undefined` but has no `[0]`/`[1]`.
-fn unit_forms_any(written: &JsString) -> Option<Result<&'static Forms, ()>> {
-    if let Some(f) = UNITS.get(written) {
-        return Some(Ok(f));
-    }
-    if is_proto_key(written) {
-        return Some(Err(()));
-    }
-    if written.len() > 1 {
-        let low = written.to_lower_case();
-        if let Some(f) = UNITS_FOLDED.get(&low) {
-            return Some(Ok(f));
-        }
-        if is_proto_key(&low) {
-            return Some(Err(()));
-        }
-    }
-    None
 }
 
 const CURRENCY: [(&str, &str, &str); 4] = [
@@ -461,13 +424,9 @@ const TIME_PERIOD: &[(&str, &str)] = &[
     ("annum", "annum"),
     ("capita", "capita"),
 ];
-/// `TIME_PERIOD[k]` for a LOWERCASED `k`, prototype included: `TIME_PERIOD["constructor"]` is `Object`, and
-/// the template literal stringifies it. (No other inherited name is all-lowercase.)
+/// `TIME_PERIOD[k]` for a LOWERCASED `k`.
 fn time_period(k: &JsString) -> Option<JsString> {
-    if let Some(v) = lookup2(TIME_PERIOD, k) {
-        return Some(js(v));
-    }
-    (*k == "constructor").then(|| js("function Object() { [native code] }"))
+    lookup2(TIME_PERIOD, k).map(js)
 }
 
 const SLASH_ELIDED: [&str; 7] = [
@@ -781,8 +740,18 @@ fn ordinal_suffix(n: u32) -> &'static str {
     "th"
 }
 
+/// Days in `month` (1-12) of `year`, Gregorian.
+fn days_in_month(year: u32, month: u32) -> u32 {
+    match month {
+        2 if (year % 4 == 0 && year % 100 != 0) || year % 400 == 0 => 29,
+        2 => 28,
+        4 | 6 | 9 | 11 => 30,
+        _ => 31,
+    }
+}
+
 fn iso_date(year: u32, month: u32, day: u32) -> Option<JsString> {
-    if !(1..=12).contains(&month) || !(1..=31).contains(&day) {
+    if !(1..=12).contains(&month) || day < 1 || day > days_in_month(year, month) {
         return None;
     }
     Some(js(&format!(
@@ -1772,8 +1741,8 @@ pub fn normalize_english(input: &JsString) -> JsString {
             if left.len() < 2 && right.len() < 2 {
                 return m0;
             }
-            let num = unit_forms_any(&left);
-            let den = unit_forms_any(&right);
+            let num = unit_forms(&left);
+            let den = unit_forms(&right);
             let period = time_period(&right.to_lower_case());
             let rate = period.is_some()
                 || num.is_some()
@@ -1781,15 +1750,9 @@ pub fn normalize_english(input: &JsString) -> JsString {
                 || UNIT_WORDS.contains(&left.to_lower_case())
                 || UNIT_WORDS.contains(&right.to_lower_case());
             if rate {
-                // `num?.[1] ?? left` / `period ?? den?.[0] ?? right`; a prototype hit has neither index.
-                let n = match num {
-                    Some(Ok(f)) => f.1.clone(),
-                    _ => left,
-                };
-                let d = period.unwrap_or_else(|| match den {
-                    Some(Ok(f)) => f.0.clone(),
-                    _ => right,
-                });
+                // `num?.[1] ?? left` / `period ?? den?.[0] ?? right`.
+                let n = num.map_or(left, |f| f.1.clone());
+                let d = period.unwrap_or_else(|| den.map_or(right, |f| f.0.clone()));
                 return jcat!(n, " per ", d);
             }
             let label = left == left.to_upper_case() && right == right.to_upper_case();
@@ -2061,7 +2024,8 @@ mod tests {
             re.test(&js(""));
         }
         assert_eq!(UNITS.len(), 78);
-        assert_eq!(UNITS_FOLDED.len(), 65);
+        // 65 folded keys, minus the 5 whose declared spellings disagree (mω, µs, μs, µm, μm).
+        assert_eq!(UNITS_FOLDED.len(), 60);
     }
 
     #[test]
@@ -2075,13 +2039,11 @@ mod tests {
     }
 
     #[test]
-    fn slash_rule_reads_the_prototype_as_ts_does() {
-        // A TS defect, reproduced: `TIME_PERIOD["constructor"]` is `Object`.
-        assert_eq!(
-            n("litres/constructor"),
-            "litres per function Object() { [native code] }"
-        );
-        assert_eq!(n("toString/apples"), "toString per apples");
+    fn slash_rule_does_not_read_the_prototype() {
+        // This pinned the TS defect (`TIME_PERIOD["constructor"]` is `Object`) while the engines agreed on it.
+        // The TS now reads own keys only, so neither side is a rate and the plain prose slash stays as written.
+        assert_eq!(n("litres/constructor"), "litres/constructor");
+        assert_eq!(n("toString/apples"), "toString/apples");
     }
 
     #[test]
@@ -2092,5 +2054,59 @@ mod tests {
         assert!(!is_unreadable_english(&js("nasa")));
         let out = normalize_english_initialisms(&js("the NHS and NASA"), &rec);
         assert_eq!(out.to_string_lossy(), "the n h s and NASA");
+    }
+}
+
+/// Twins of test/rust-port-findings.test.ts (#1463).
+#[cfg(test)]
+mod port_findings {
+    use super::*;
+
+    fn n(s: &str) -> String {
+        normalize_english(&js(s)).to_string_lossy()
+    }
+
+    #[test]
+    fn slash_rate_ignores_inherited_members() {
+        assert_eq!(n("litres/constructor"), "litres/constructor");
+        assert_eq!(n("toString/apples"), "toString/apples");
+        assert_eq!(n("litres/day"), "litres per day");
+    }
+
+    #[test]
+    fn ambiguous_micro_fold_declines() {
+        assert_eq!(n("25 \u{39c}M"), "25 mu M");
+        assert_eq!(n("5 \u{39c}S"), "5 mu S");
+        assert_eq!(n("25 µM"), "25 micromolar");
+        assert_eq!(n("4 µm"), "4 micro meters");
+        assert_eq!(n("3 \u{39c}G"), "3 micrograms");
+        assert_eq!(n("10 MΩ and 10 mΩ"), "10 mega ohms and 10 milli ohms");
+    }
+
+    #[test]
+    fn impossible_dates_are_not_dates() {
+        for t in [
+            "2024-02-31",
+            "2/30/2024",
+            "2024-04-31",
+            "2023-02-29",
+            "1900-02-29",
+        ] {
+            assert_eq!(n(t), t, "not a date: left as written");
+        }
+        for (t, want) in [
+            ("2024-02-29", "february 29th"),
+            ("2000-02-29", "february 29th"),
+            ("2024-12-31", "december 31st"),
+        ] {
+            assert!(n(t).contains(want), "{t}");
+        }
+    }
+
+    #[test]
+    fn entity_named_like_a_prototype_member_stays_literal() {
+        use crate::core::markup::strip_markup;
+        assert_eq!(strip_markup(&js("a &constructor; b")), "a &constructor; b");
+        assert_eq!(strip_markup(&js("a &amp; b")), "a & b");
     }
 }

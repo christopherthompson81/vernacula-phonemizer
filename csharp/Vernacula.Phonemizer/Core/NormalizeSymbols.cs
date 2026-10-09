@@ -400,18 +400,27 @@ public static class NormalizeSymbols
      * A case-folded INDEX of a unit map. Folding the lookup STRING instead is asymmetric: it rescues `KM`→`km`
      * but not `kw`→`kW`. First declaration wins; the EXACT lookup runs first, so a real ⟨Mb⟩/⟨MB⟩ pair never
      * reaches this.
+     * ⚠ A SLOT WHOSE DECLARED KEYS DISAGREE IS LEFT OUT (µm/µM, µs/µS, mΩ/MΩ): only an undeclared case variant
+     * reaches the fold, and it has no case to decide by — `ΜM` (U+039C) read micro meters for micromolar.
      */
-    private static Dictionary<string, V> FoldedIndex<V>(IReadOnlyDictionary<string, V>? map)
+    internal static Dictionary<string, V> FoldedIndex<V>(IReadOnlyDictionary<string, V>? map)
     {
         var outp = new Dictionary<string, V>(StringComparer.Ordinal);
         if (map is null) return outp;
+        var ambiguous = new HashSet<string>(StringComparer.Ordinal);
         foreach (var (k, v) in map)
         {
             var lk = k.ToLowerInvariant();
-            if (!outp.ContainsKey(lk)) outp[lk] = v;
+            if (!outp.TryGetValue(lk, out var have)) outp[lk] = v;
+            else if (!SameValue(have, v)) ambiguous.Add(lk);
         }
+        foreach (var lk in ambiguous) outp.Remove(lk);
         return outp;
     }
+
+    /** Structural equality for fold values: word lists compare element-wise (the TS compares `JSON.stringify`). */
+    private static bool SameValue<V>(V a, V b) =>
+        a is IEnumerable<string> x && b is IEnumerable<string> y ? x.SequenceEqual(y) : Equals(a, b);
 
     /**
      * Resolve a WRITTEN unit symbol to its declared forms: `kw` → `kW` → the caller's spoken word.

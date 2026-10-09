@@ -256,3 +256,54 @@ machine; rust_neural_runtime_investigation.md) and wired in as the English tagge
 TS over the goldens. The only known gap is a foreign script run inside English text that the TS hands to a
 not-yet-ported engine. The usual caveat applies: the neural path is exact against THIS CPU's ORT kernels
 (AVX2 without VNNI). Elsewhere the Rust output stays deterministic, but the TS's may not.
+
+## Run 8 — 2026-10-09 (the four port findings, fixed TS-first)
+
+**Question.** Fix the four defects the port reproduced (Runs 4–5) in the TS first, with tests that fail on the
+old code, then bring C# and Rust onto the fixed behaviour. Does anything else move?
+
+**Changes.**
+1. `stripMarkup` entity lookup reads own keys only (`Object.hasOwn`).
+2. `resolveUnitSymbol` (core) and English's `TIME_PERIOD` read own keys only. C# already behaved this way,
+   because a `Dictionary` has no prototype.
+3. English `UNITS_FOLDED` leaves out every slot whose declared keys disagree. There are five: `mω` (milli/mega
+   ohm), `µs`/`μs` (microsecond/microsiemens) and `µm`/`μm` (micro meter/micromolar). `25 ΜM` (U+039C) now
+   reads *mu M* rather than *micro meters*. This is a choice: a case-stripped symbol cannot say which unit it
+   was, and a wrong unit is the failure the micro block exists to prevent. Declared forms are unchanged.
+4. `isoDate` checks days per month, Gregorian leap years included. `2024-02-31` is no longer a date, and
+   1900-02-29 is rejected while 2000-02-29 is accepted.
+
+**Raw finding.**
+- New test/rust-port-findings.test.ts: 7 pass. With `src/` reverted, 6 fail (the 7th pins unchanged
+  behaviour, so it passes both ways).
+- `npm run check:goldens`: `189 languages, 36495 rows, 0 stale`, so no golden moves.
+- TS suite: 6,375 passed. C# full suite: 7,033 passed (new RustPortFindingsTests, 11).
+- Rust: 39 passed before the rebase onto the #1464 review fixes, 40 after (the extra one is load_tsv's line
+  splitter test). One existing test PINNED the old defect (`slash_rule_reads_the_prototype_as_ts_does`) and
+  failed; it is updated with the reason. `fn-diff normalize`/`initialisms`: 4,146 identical each. Golden gate
+  200/200 for en and en-GB.
+
+**Implication.** The PAIRED-FIX PENDING marker in core/markup.rs and the prototype emulation in
+normalize.rs are deleted, and the three engines agree on the fixed behaviour.
+
+## Run 9 — 2026-10-09 (#1465 review round)
+
+**Findings acted on.**
+- The C# `DaysInMonth` was inserted between `IsoDate` and its doc comment (the orphaned-comment pattern
+  again). Moved.
+- `isUnitKey` (core) still did bare plain-object lookups. It now uses `own()`.
+- The ambiguous-fold rule lived only in English, three times over. It moves into core `foldedIndex`
+  (TS, null-prototype now), `FoldedIndex` (C#) and `folded_index` (Rust), and English uses the core one.
+- One own-key helper, `src/core/own.ts`, replaces the inline `Object.hasOwn` sites and the two private copies
+  in wu.ts and cantonese.ts.
+- `resolveUnitSymbol` simplified: no lowercasing on the path that can never fold.
+- The tests pin the chosen readings exactly (`25 mu M`; an impossible date left as written) instead of
+  only asserting what they are not.
+
+**Not acted on.** Making every English lookup table null-prototype. `own()` at text-keyed sites fixes the
+class where it is reachable today; a wholesale table conversion is a separate change.
+
+**Raw finding.**
+- `check:goldens`: 189 languages, 36,495 rows, 0 stale, so the core fold rule moves no language.
+- TS 6,377 passed. C# 7,033 passed. Rust 40 passed.
+- `fn-diff normalize`/`initialisms`: 4,146 identical each. Golden gate 200/200.
