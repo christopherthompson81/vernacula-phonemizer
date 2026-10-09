@@ -3,7 +3,7 @@
 
 use super::g2p::Dialect;
 use super::manifest::MANIFEST;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
 
 fn small(i: f64, dialect: Dialect) -> Option<String> {
     let n = &MANIFEST.numbers;
@@ -55,24 +55,6 @@ fn below1000(n: u64, d: Dialect) -> String {
     }
 }
 
-/// `String(Math.abs(n))` for the digit fallback without `raw`. Unreachable from the engine (every caller
-/// without `raw` passes a small integer), so only the integral and non-finite shapes are spelled as JS does.
-fn js_abs_string(n: f64) -> String {
-    let a = n.abs();
-    if a.is_nan() {
-        "NaN".into()
-    } else if a.is_infinite() {
-        "Infinity".into()
-    } else if a.fract() == 0.0 && a < 1e21 {
-        format!("{}", a as u128)
-    } else if a >= 1e21 {
-        // Shortest round-trip digits with JS's explicit `+` on the exponent.
-        format!("{a:e}").replace('e', "e+")
-    } else {
-        format!("{a}")
-    }
-}
-
 /// `numberToWords(n, dialect, raw?)`: a non-negative safe integer below 10⁹ in words; anything else digit by
 /// digit over `raw` (or `String(Math.abs(n))`), a non-digit kept as itself.
 pub fn number_to_words(n: f64, dialect: Dialect, raw: Option<&JsString>) -> JsString {
@@ -82,7 +64,7 @@ pub fn number_to_words(n: f64, dialect: Dialect, raw: Option<&JsString>) -> JsSt
 fn number_to_words_str(n: f64, d: Dialect, raw: Option<&JsString>) -> String {
     let safe = n.is_finite() && n.fract() == 0.0 && n.abs() <= 9_007_199_254_740_991.0;
     if !safe || n < 0.0 || n >= 1e9 {
-        let digits = raw.cloned().unwrap_or_else(|| js(&js_abs_string(n)));
+        let digits = raw.cloned().unwrap_or_else(|| js(&js_number_to_string(n.abs())));
         let parts: Vec<String> = digits
             .code_point_strings()
             .into_iter()

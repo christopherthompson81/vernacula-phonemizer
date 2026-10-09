@@ -4,6 +4,8 @@
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
+use indexmap::IndexMap;
+
 use super::manifest::MANIFEST;
 use crate::core::js_string::{JsString, js};
 use crate::core::latin_phones::{PhoneOpts, latin_phone};
@@ -28,20 +30,22 @@ pub struct Seg {
 }
 
 struct Tables {
-    accented: Vec<(JsString, JsString)>,
+    accented: IndexMap<JsString, JsString>,
     acute_grave: JsString,
     circumflex: JsString,
     tilde: JsString,
     vowels: JsString,
     front: JsString,
-    vowel_ipa: Vec<(JsString, JsString)>,
+    vowel_ipa: IndexMap<JsString, JsString>,
+    /// The accented vowels that make a following i/u a hiatus nucleus (`"áàâãéêíóôõúü".includes(after)`).
+    accented_next: JsString,
     known_letters: HashSet<JsString>,
     voiced: HashSet<JsString>,
 }
 
 static T: LazyLock<Tables> = LazyLock::new(|| {
     let m = &*MANIFEST;
-    let pairs = |t: &indexmap::IndexMap<String, String>| t.iter().map(|(k, v)| (js(k), js(v))).collect();
+    let pairs = |t: &IndexMap<String, String>| t.iter().map(|(k, v)| (js(k), js(v))).collect();
     let vowels = js(&m.vowel_letters);
     // `new Set([...VOWELS, ..."bcçdfghjklmnñpqrstvwxz"])`: code points.
     let known_letters = m
@@ -58,14 +62,11 @@ static T: LazyLock<Tables> = LazyLock::new(|| {
         vowels,
         front: js(&m.front_letters),
         vowel_ipa: pairs(&m.vowel_ipa),
+        accented_next: js("áàâãéêíóôõúü"),
         known_letters,
         voiced: m.voiced_consonants.iter().map(|s| js(s)).collect(),
     }
 });
-
-fn lookup<'a>(t: &'a [(JsString, JsString)], k: &JsString) -> Option<&'a JsString> {
-    t.iter().find(|(key, _)| key == k).map(|(_, v)| v)
-}
 
 fn is_v(c: &JsString) -> bool {
     !c.is_empty() && T.vowels.includes(c)
@@ -74,10 +75,10 @@ fn is_front(c: &JsString) -> bool {
     !c.is_empty() && T.front.includes(c)
 }
 fn base(c: &JsString) -> JsString {
-    lookup(&T.accented, c).cloned().unwrap_or_else(|| c.clone())
+    T.accented.get(c).cloned().unwrap_or_else(|| c.clone())
 }
 fn vowel_ipa(ch: &JsString) -> JsString {
-    lookup(&T.vowel_ipa, ch).cloned().unwrap_or_else(|| ch.clone())
+    T.vowel_ipa.get(ch).cloned().unwrap_or_else(|| ch.clone())
 }
 
 fn push_v(segs: &mut Vec<Seg>, ch: &JsString, nasal: bool) {
@@ -245,7 +246,7 @@ pub fn to_segments(word: &JsString, dialect: Dialect) -> Vec<Seg> {
             let g = at(&w, i);
             let after = at(&w, i + 1);
             let hiatus = !after.is_empty() && after != "s" && !is_v(&after) && at(&w, i + 2).is_empty();
-            let accented_next = !after.is_empty() && js("áàâãéêíóôõúü").includes(&after);
+            let accented_next = !after.is_empty() && T.accented_next.includes(&after);
             if (g == "i" || g == "u") && !hiatus && !accented_next {
                 push_glide(&mut segs, if g == "i" { "j" } else { "w" }, false);
                 i += 1;

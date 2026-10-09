@@ -161,12 +161,12 @@ pub struct PortugueseManifest {
     pub symbol_tier: SymbolTier,
 }
 
-/// The manifest, or why it could not be loaded. Loaded once; a failure is cached, not retried.
+/// The manifest, or why it could not be loaded. Cached once loaded; a failure is retried on the next call.
 pub fn try_manifest() -> Result<&'static PortugueseManifest, String> {
-    static M: OnceLock<Result<PortugueseManifest, String>> = OnceLock::new();
-    M.get_or_init(|| load_manifest(DIR, "portuguese.jsonc").map_err(|e| e.to_string()))
-        .as_ref()
-        .map_err(Clone::clone)
+    static M: OnceLock<PortugueseManifest> = OnceLock::new();
+    crate::core::data_source::load_once(&M, || {
+        load_manifest(DIR, "portuguese.jsonc").map_err(|e| e.to_string())
+    })
 }
 
 /// The manifest for code that runs only after the engine's build has checked `try_manifest`.

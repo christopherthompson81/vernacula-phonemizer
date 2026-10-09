@@ -133,3 +133,75 @@ it. Then `cargo run --release -p parity` (every registered language), the `phone
 **Implication.** pt and pt-BR are done: golden byte-identical, and every corpus row (goldens + FLEURS
 pt_br) identical on both paths. The only open rows are port-pending (ru, el, cmn), not port defects. No
 golden or FLEURS row needs a foreign engine.
+
+## Run 7 — 2026-10-09 17:32 (review round: rebase onto c64801a5, and the review's fixes)
+
+**Question.** After rebasing onto main (#1467 ja + the symbol tier, #1468 cross-cutting fixes) and applying
+the review, do all the gates still hold? And would the pt-numbers probes have caught the formatter the
+review flagged?
+
+**Command.** `git rebase origin/main`. The shared lists conflicted (registry `LANGUAGES` and `build`,
+`languages/mod.rs`, fn-diff `dump.mts`/`main.rs`) and were resolved by keeping both sides. Git had factored
+the shared closing `},` / `}),` out of the dump/replay hunks, so it was re-inserted between them. I then
+checked every arm by hand: `LANGUAGES` is `[en, en-GB, ja, pt, pt-BR]`, with build arms for all five and
+Roman arms for pt and pt-BR. The cherry-picked symbol commit was skipped (superseded by main's). Review
+fixes:
+- every `OnceLock<Result<…>>` (manifest, lexicon, open/close lexicon, symbol tier) is now `load_once`;
+- `portuguese::phonemize_word`, `portuguese_br::{phonemize_word, phonemize_word_rules, open_close}` return
+  `Result`. The engine holds its loaded tables (`lexicon`, `symbols`, and the BP open/close closure), so
+  `text()` has no panic path once `create_*` has succeeded;
+- `js_abs_string` was replaced by `core::js_string::js_number_to_string`, and `abbrev_alt` by
+  `normalize_symbols::{sorted_by_length_desc, alternation}` (no `esc`: the TS joins the keys unescaped);
+- g2p's accent→base and vowel→IPA tables are `IndexMap`s, and the hiatus accent set is built once in the
+  static table;
+- pt-numbers gained 2^54..2^70 (non-exact neighbours and /7), ±2^60, 2^64, 1e20, 1.5e21, 1e300,
+  `MAX_VALUE`, 1e-7, 1.5e-7, 5e-324, 0.1+0.2, 1/3, 2/3, 1e9+0.5, -0.5, -0.
+
+Gates: parity (every registered language), the five pt dumps re-generated and replayed, `cargo test
+--workspace`, and `cargo build` (dev and release). Guard check: I re-ran pt-numbers with the old
+formatter's integer branch (`a as u128`, Rust `{a}` for fractions) patched back in, then restored the fix.
+
+**Raw finding.**
+- parity: en, en-GB, ja, pt and pt-BR each `200/200 identical, 0 differ`.
+- `pt-numbers: 101973 identical, 0 DIFFER`. With the old formatter swapped back in: `101901 identical,
+  72 DIFFER`. So the new rows catch it: `String(2**60)` is `1152921504606847000`, not the exact
+  `…846976`, and the small fractions print in exponent form.
+- `pt-normalize: 11913 / 0`, `pt-g2p: 75625 / 0`, `phonemize-sync: 7932 / 6`, `phonemize-best: 7932 / 6`.
+  The 6 rows are the same port-pending mixed-script probes (ru, el, cmn; `東京` reads as Mandarin, so it
+  stays pending even though ja is ported).
+- tests: 48 + 1 passed; 0 warnings in either profile.
+
+**Implication.** The review round is closed with nothing moved. The probe extension is load-bearing:
+proven by reverting the fix, not merely green after it.
+
+## Run 8 — 2026-10-09 17:36 (rebase onto Italian, cd2492a8)
+
+**Question.** Does the branch stay whole on top of #1469 (Italian)?
+
+**Command.** `git rebase origin/main`, keeping both sides of `LANGUAGES`, `build`, `roman_policy`,
+`languages/mod.rs`, `dump.mts` and `main.rs`. The `dump.mts` hunk had lost the `},` closing Italian's last
+dump, so it was re-inserted. Then parity (every registered language), the five pt dumps re-generated and
+replayed, `cargo test --workspace`, and `cargo build` (dev and release).
+
+**Raw finding.** `LANGUAGES` = `[en, en-GB, ja, it, pt, pt-BR]`, with build arms for all six and Roman arms
+for it, pt and pt-BR; `dump.mts` lists it-normalize/it-g2p/it-roman and pt-normalize/pt-g2p/pt-numbers.
+Parity: en, en-GB, ja, it, pt and pt-BR each `200/200 identical`. pt-numbers 101973 / 0, pt-normalize
+11913 / 0, pt-g2p 75625 / 0, phonemize-sync and -best 7932 / 6 (the same port-pending ru/el/cmn probes).
+Tests 51 + 1 passed; 0 warnings.
+
+**Implication.** Nothing moved; ready to merge.
+
+## Run 9 — 2026-10-09 17:39 (rebase onto Spanish, 2b59b0a5)
+
+**Question.** Does the branch stay whole on top of #1470 (Spanish)?
+
+**Command.** `git rebase origin/main`. The conflicts were in `LANGUAGES`, `build`, `roman_policy` and
+`languages/mod.rs`, with both sides kept; fn-diff merged cleanly. Then parity (every registered language),
+the five pt dumps re-generated and replayed, `cargo test --workspace`, and `cargo build` (dev and release).
+
+**Raw finding.** `LANGUAGES` = `[en, en-GB, ja, it, es, pt, pt-BR]`, with build arms for all seven and Roman
+arms for it, es, pt and pt-BR; `dump.mts` lists the es-*, it-* and pt-* dumps. Parity: all seven
+`200/200 identical`. pt-numbers 101973 / 0, pt-normalize 11913 / 0, pt-g2p 75625 / 0, phonemize-sync and
+-best 7932 / 6 (port-pending ru/el/cmn probes). Tests 54 + 1 passed; 0 warnings.
+
+**Implication.** Nothing moved; ready to merge.

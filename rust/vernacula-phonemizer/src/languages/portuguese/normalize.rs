@@ -13,6 +13,7 @@ use super::roman_ordinals::portuguese_ordinal;
 use crate::core::initialisms::{InitialismData, PhonotacticsData, make_initialism_normalizer, make_unreadable_test};
 use crate::core::js_regex::{JsMatch, JsRegex};
 use crate::core::js_string::{JsString, js, js_number};
+use crate::core::normalize_symbols::{alternation, sorted_by_length_desc};
 use crate::core::provenance::{rewrite, rewrite_with};
 use crate::js_re;
 
@@ -32,13 +33,6 @@ fn degree_word(n: &JsString) -> &'static str {
     if js_number(&t) == 1.0 { &d.singular } else { &d.plural }
 }
 
-/// `Object.keys(t).sort((a, b) => b.length - a.length).join("|")`: STABLE, equal lengths keep table order.
-fn abbrev_alt() -> String {
-    let mut v: Vec<&str> = MANIFEST.dotted_abbrev.keys().map(String::as_str).collect();
-    v.sort_by_key(|k| std::cmp::Reverse(k.encode_utf16().count()));
-    v.join("|")
-}
-
 struct Res {
     group_space: JsRegex,
     abbrev_continue: JsRegex,
@@ -50,7 +44,8 @@ struct Res {
 
 static R: LazyLock<Res> = LazyLock::new(|| {
     let m = &*MANIFEST;
-    let alt = abbrev_alt();
+    // `Object.keys(t).sort((a, b) => b.length - a.length).join("|")`: unescaped, as the TS builds it.
+    let alt = alternation(&sorted_by_length_desc(m.dotted_abbrev.keys().map(|k| js(k))));
     Res {
         group_space: JsRegex::new(&format!(r"(?<=\d)(?<!(?<![\d\.,])0)[{GROUP_SPACE}](?=\d{{3}}(?!\d))"), "gu").unwrap(),
         abbrev_continue: JsRegex::new(&format!(r"\b({alt})\.(\s+)(?=\p{{L}})"), "giu").unwrap(),

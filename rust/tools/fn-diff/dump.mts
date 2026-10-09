@@ -530,6 +530,11 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 5; e <= 12; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 10 ** e + 100, 10 ** e + 1001, 123456789 % 10 ** e + 10 ** e);
         for (let n = 1e6; n <= 1e9; n += 7_777_777) ns.push(n);
         ns.push(-1, 1.5, 2 ** 53, 2 ** 53 + 2, 1e21, NaN, Infinity);
+        // Past 2^53 and below 1: no `raw`, so the fallback spells String(Math.abs(n)) — shortest round-trip
+        // digits, zero-padded integers, exponent forms.
+        ns.push(2 ** 60, -(2 ** 60), 2 ** 64, 2 ** 53 * 3 + 4, 123456789012345680000, 1e20, 1.5e21, 1e300, Number.MAX_VALUE,
+            1e-7, 1.5e-7, 1e-6, 5e-324, 0.1 + 0.2, 1 / 3, 2 / 3, 1e9 + 0.5, 4.35, 0.000001234, -0.5, -0);
+        for (let e = 54; e <= 70; e++) ns.push(2 ** e + 2 ** (e - 52) * 3, 2 ** e / 7);
         for (const n of ns)
             for (const d of ["ep", "bp"] as const) {
                 emit({ n: String(n), d }, ptWords(n, d));

@@ -12,6 +12,7 @@ use super::manifest::{DIR, MANIFEST, try_manifest};
 use super::normalize::{normalize_portuguese, normalize_portuguese_initialisms};
 use super::numbers::number_to_words;
 use crate::core::clauses::assemble_clauses;
+use crate::core::data_source::load_once;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map};
@@ -44,8 +45,8 @@ fn parse_corr(cell: &JsString) -> Corr {
 }
 
 fn try_lexicon() -> Result<&'static IndexMap<JsString, Corr>, String> {
-    static L: OnceLock<Result<IndexMap<JsString, Corr>, String>> = OnceLock::new();
-    L.get_or_init(|| {
+    static L: OnceLock<IndexMap<JsString, Corr>> = OnceLock::new();
+    load_once(&L, || {
         let opts = || TsvOptions { optional: true, ..Default::default() };
         let mut lex = load_tsv_map(DIR, "lexicon.tsv", |v, _| Some(parse_corr(v)), opts())
             .map_err(|e| e.to_string())?;
@@ -56,12 +57,6 @@ fn try_lexicon() -> Result<&'static IndexMap<JsString, Corr>, String> {
         }
         Ok(lex)
     })
-    .as_ref()
-    .map_err(Clone::clone)
-}
-
-fn lexicon() -> &'static IndexMap<JsString, Corr> {
-    try_lexicon().unwrap_or_else(|e| panic!("{e}"))
 }
 
 struct Tables {
@@ -251,9 +246,19 @@ fn bp_consonants(ipa: &JsString) -> JsString {
     js_re!("ɫ", "gu").replace(&s, &js("w"))
 }
 
-/// `phonemizeWord(word, dialect)`: the rule engine plus the shared correction lexicon.
-pub fn phonemize_word(word: &JsString, dialect: Dialect) -> JsString {
-    render_word(word, lexicon().get(&word.to_lower_case()), dialect)
+type Lexicon = IndexMap<JsString, Corr>;
+
+/// The word path with the lexicon already loaded.
+pub(crate) fn phonemize_word_with(lex: &Lexicon, word: &JsString, dialect: Dialect) -> JsString {
+    render_word(word, lex.get(&word.to_lower_case()), dialect)
+}
+
+/// `phonemizeWord(word, dialect)`: the rule engine plus the shared correction lexicon. Errors when the data
+/// cannot be loaded.
+pub fn phonemize_word(word: &JsString, dialect: Dialect) -> Result<JsString, PhonemizeError> {
+    try_manifest().map_err(PhonemizeError::Data)?;
+    let lex = try_lexicon().map_err(PhonemizeError::Data)?;
+    Ok(phonemize_word_with(lex, word, dialect))
 }
 
 fn token() -> &'static JsRegex {
@@ -274,8 +279,8 @@ fn number_token_to_words(tok: &JsString, dialect: Dialect) -> JsString {
     words
 }
 
-/// The per-word IPA refinement hook (`postWord`): the BP open/close lexicon.
-pub type PostWord = fn(&JsString, &JsString) -> JsString;
+/// The per-word IPA refinement hook (`postWord`): the BP open/close lexicon, `(ipa, lowercased word)`.
+pub type PostWord = Arc<dyn Fn(&JsString, &JsString) -> JsString + Send + Sync>;
 
 /// `s.replace("ˈ", "")`: the first occurrence only.
 fn drop_first_stress(ipa: &JsString) -> JsString {
@@ -290,21 +295,12 @@ fn drop_first_stress(ipa: &JsString) -> JsString {
     }
 }
 
-fn word_ipa(word: &JsString, dialect: Dialect, post_word: Option<PostWord>) -> JsString {
-    let mut ipa = phonemize_word(word, dialect);
-    let lower = word.to_lower_case();
-    if let Some(pw) = post_word {
-        ipa = pw(&ipa, &lower);
-    }
-    if T.function_words.contains(&lower) { drop_first_stress(&ipa) } else { ipa }
-}
-
 /// `SYMBOLS`: the shared tier with Portuguese's words (manifest `symbolTier`, and `signWords` for × and &).
 fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
-    static S: OnceLock<Result<SymbolNormalizer, String>> = OnceLock::new();
-    S.get_or_init(|| {
-        let t = &try_manifest()?.symbol_tier;
-        let sign = &MANIFEST.sign_words;
+    static S: OnceLock<SymbolNormalizer> = OnceLock::new();
+    load_once(&S, || {
+        let m = try_manifest()?;
+        let (t, sign) = (&m.symbol_tier, &m.sign_words);
         make_symbol_normalizer(&SymbolData {
             multiply: Some(Multiply { times: sign.times.clone(), by: None }),
             ampersand: Some(sign.ampersand.clone()),
@@ -327,34 +323,43 @@ fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
             ..Default::default()
         })
     })
-    .as_ref()
-    .map_err(Clone::clone)
 }
 
+/// The engine, holding its loaded tables: `text()` cannot fail once `create_portuguese` has succeeded.
 pub struct PortuguesePhonemizer {
     dialect: Dialect,
     post_word: Option<PostWord>,
+    lexicon: &'static Lexicon,
+    symbols: &'static SymbolNormalizer,
 }
 
 impl PortuguesePhonemizer {
     /// The normalized text `text()` tokenizes.
     pub fn normalized_for(&self, input: &JsString) -> JsString {
-        let symbols = try_symbols().unwrap_or_else(|e| panic!("{e}"));
-        symbols.apply(&normalize_portuguese_initialisms(&normalize_portuguese(input, self.dialect == Dialect::Bp)))
+        let bp = self.dialect == Dialect::Bp;
+        self.symbols.apply(&normalize_portuguese_initialisms(&normalize_portuguese(input, bp)))
+    }
+
+    fn word_ipa(&self, word: &JsString) -> JsString {
+        let mut ipa = phonemize_word_with(self.lexicon, word, self.dialect);
+        let lower = word.to_lower_case();
+        if let Some(pw) = self.post_word.as_ref() {
+            ipa = pw(&ipa, &lower);
+        }
+        if T.function_words.contains(&lower) { drop_first_stress(&ipa) } else { ipa }
     }
 
     pub fn text(&self, input: &JsString) -> JsString {
-        let (d, pw) = (self.dialect, self.post_word);
         let normalized = self.normalized_for(input);
         assemble_clauses(&normalized, token(), |m, s, sink| {
             let nonempty = |i| m.group(i, s).filter(|g: &JsString| !g.is_empty());
             if let Some(w) = nonempty(1) {
-                sink.emit(&word_ipa(&w, d, pw));
+                sink.emit(&self.word_ipa(&w));
             } else if let Some(n) = nonempty(2) {
-                let words: Vec<JsString> = number_token_to_words(&n, d)
+                let words: Vec<JsString> = number_token_to_words(&n, self.dialect)
                     .split(&js(" "))
                     .iter()
-                    .map(|w| word_ipa(w, d, pw))
+                    .map(|w| self.word_ipa(w))
                     .collect();
                 sink.emit(&JsString::join(&words, &js(" ")));
             } else if let Some(p) = nonempty(3) {
@@ -372,11 +377,14 @@ impl Engine for PortuguesePhonemizer {
     }
 }
 
-/// `createPortuguese(dialect, postWord?)`. Checks the manifest and the lexicons up front, so a missing data
-/// root is an error here rather than a panic mid-sentence.
-pub fn create_portuguese(dialect: Dialect, post_word: Option<PostWord>) -> Result<Arc<PortuguesePhonemizer>, PhonemizeError> {
+/// `createPortuguese(dialect, postWord?)`. Loads the manifest, the lexicons and the symbol tier up front, so
+/// a missing data root is an error here rather than a panic mid-sentence.
+pub fn create_portuguese(
+    dialect: Dialect,
+    post_word: Option<PostWord>,
+) -> Result<Arc<PortuguesePhonemizer>, PhonemizeError> {
     try_manifest().map_err(PhonemizeError::Data)?;
-    try_lexicon().map_err(PhonemizeError::Data)?;
-    try_symbols().map_err(PhonemizeError::Data)?;
-    Ok(Arc::new(PortuguesePhonemizer { dialect, post_word }))
+    let lexicon = try_lexicon().map_err(PhonemizeError::Data)?;
+    let symbols = try_symbols().map_err(PhonemizeError::Data)?;
+    Ok(Arc::new(PortuguesePhonemizer { dialect, post_word, lexicon, symbols }))
 }

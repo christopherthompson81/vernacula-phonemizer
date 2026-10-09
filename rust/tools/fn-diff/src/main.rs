@@ -534,9 +534,9 @@ fn main() {
             use vernacula_phonemizer::languages::portuguese::portuguese::{phonemize_word, render_word};
             let w = units(&input["word"]);
             match input["op"].as_str().unwrap() {
-                "ep" => phonemize_word(&w, Dialect::Ep),
-                "bp" => phonemize_word(&w, Dialect::Bp),
-                "br" => vernacula_phonemizer::languages::portuguese_br::portuguese_br::phonemize_word(&w),
+                "ep" => phonemize_word(&w, Dialect::Ep).unwrap(),
+                "bp" => phonemize_word(&w, Dialect::Bp).unwrap(),
+                "br" => vernacula_phonemizer::languages::portuguese_br::portuguese_br::phonemize_word(&w).unwrap(),
                 "render-ep" => render_word(&w, None, Dialect::Ep),
                 _ => render_word(&w, None, Dialect::Bp),
             }
