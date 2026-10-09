@@ -1,0 +1,35 @@
+# Synthetic probes for core makeSymbolNormalizer, applied through EVERY recorded tier (dump `symbols`).
+# One line per arm, plus the neighbour it must decline. `\u{XXXX}` escapes are decoded.
+# ampersand, its entity, the fullwidth form, and glued initialisms
+B&B and Arts & Sciences
+bed&amp;breakfast and A\u{ff06}B
+# unit power before a unit noun, and the same shape before a non-unit word
+3540² km and 500 ² m and 20² apples
+# currency: before/after, magnitudes, compound key seam, already-said suppression, fusing tail
+$5 million and €20 and 30€ and £1.5 billion
+US$30 and US $30 and AUD$45 and $100 dollars and $5abc
+5 millones $ and $ 5 millones de dólares
+miliyoni 14 $ and miliyari 290 Frw and $ miliyoni 5
+¥1000 and ₹500 and ¢50 and 12,50 € and 1.234,56 €
+# percent, prefix and postfix, the arabic and fullwidth signs, already-said
+40% and %40 and 40 % and 3,5% and 12٪ and 7％ and 40% percent
+# multiplication: by/times, unspaced ASCII, unit after
+6 × 6 cm and 4x4 and 5 × 5 and 4 × 100 and 56×56 mm and 2 x 3
+# units: plain, folded case, single letter, exponents, rates, stranded denominators, magnitudes
+10 km and 10 KM and 5 Kg and 3 m and 3 M and 2 g and 1 l and 1 L
+5 km² and 5 km2 and 3 m³ and 3 m3 and 10 cm 2 and 2 km ²
+100 km/h and 100 KM/H and 5 m/s and 3 m/s² and 9,8 m/s2 and 2 km²/h
+50 mg/kg and 10 kg/m³ and 3 km/xyz and 4 kg/ha
+5 million km and 3 millones de km and 1,5 km and 1.500 km and 3 850 km and 3\u{2009}850 km and 3\u{a0}850 km
+802.11n and 802,11ac and 2.4 GHz and 5 kW and 5 kw and 100 W and 50 Hz
+5°C and 5 °C and 35° and 20 °F and -3 °c
+10 km's and 10 km’s and 76s and Il-76s
+# bare units (standalone, vowel-less), and the declines
+the km is long and mm/dd/yyyy and km.t and the kg 2 and a cm²
+km and kg. And mm, then
+# bare exponents: digit and letter bases, the lone marks, prime chains, nuclides, negatives
+E = mc² and 20² and 2³ and 2¹⁰ and 10⁶ and 10⁶km and 10⁻³¹ and 2⁻⁵
+6⁰03 and 79⁰ 51 and 110⁰04¹05¹ and 110⁰04¹05¹¹ and 10¹⁰ 10¹¹
+0,708 ¹⁸⁰Hf and 2,137 ⁶³Cu and 10¹⁰Ω and x² and abcd²
+# numbers that are not quantities
+version 2.0 and 1/2 and 3:45 and 1e5

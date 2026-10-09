@@ -262,6 +262,22 @@ fn main() {
                 })
             })
         }
+        "symbols" => {
+            use vernacula_phonemizer::core::normalize_symbols::{
+                CountForm, SymbolData, SymbolNormalizer, make_symbol_normalizer,
+            };
+            let mut tiers: std::collections::HashMap<u64, SymbolNormalizer> = Default::default();
+            for line in text.lines().filter(|l| l.starts_with("{\"def\"")) {
+                let row: Value = serde_json::from_str(line).unwrap();
+                let mut data: SymbolData = serde_json::from_value(row["data"].clone()).unwrap();
+                let sig = row["countForm"].as_str().unwrap();
+                data.count_form = Some(count_form(sig).unwrap_or_else(|| {
+                    panic!("{}: no Rust twin for countForm {sig}", row["dir"])
+                }) as CountForm);
+                tiers.insert(row["def"].as_u64().unwrap(), make_symbol_normalizer(&data).unwrap());
+            }
+            Box::new(move |input| tiers[&input["def"].as_u64().unwrap()].apply(&units(&input["text"])))
+        }
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
             let words = if input["ordinal"].as_bool().unwrap() {
@@ -368,6 +384,9 @@ fn main() {
     let mut by_src: IndexMap<String, [usize; 2]> = IndexMap::new();
     for line in text.lines() {
         let row: Value = serde_json::from_str(line).unwrap();
+        if row.get("def").is_some() {
+            continue; // a `symbols` definition row, read by its arm
+        }
         let want = units(&row["output"]);
         let got = run(&row["input"]);
         let tally = row["input"]["src"]
@@ -397,4 +416,56 @@ fn main() {
     }
     println!("{name}: {same} identical, {differ} DIFFER");
     std::process::exit(if differ == 0 { 0 } else { 1 });
+}
+
+/// The `symbols` dump's countForm signatures: `default`, `slavic`, or a language's own (esbuild-minified)
+/// arrow source, each with its Rust twin in JS number semantics (`%` is fmod in both).
+fn count_form(sig: &str) -> Option<std::sync::Arc<dyn Fn(f64) -> f64 + Send + Sync>> {
+    use vernacula_phonemizer::core::normalize_symbols::{default_count_form, slavic_count_form};
+    let is_int = |n: f64| n.is_finite() && n.trunc() == n;
+    let b = |c: bool, t: f64, f: f64| if c { t } else { f };
+    Some(match sig {
+        "default" | "n=>n===1?0:1" => std::sync::Arc::new(default_count_form),
+        "slavic" => std::sync::Arc::new(slavic_count_form),
+        "()=>0" => std::sync::Arc::new(|_| 0.0),
+        "n=>Number.isInteger(n)?slavicCountForm(n):3" => {
+            std::sync::Arc::new(move |n| if is_int(n) { slavic_count_form(n) } else { 3.0 })
+        }
+        "n=>n%10===1&&n%100!==11?0:1" => std::sync::Arc::new(move |n: f64| b(n % 10.0 == 1.0 && n % 100.0 != 11.0, 0.0, 1.0)),
+        "n=>{const m=Math.abs(n)%100;return m%10===1&&m!==11?0:1}" => std::sync::Arc::new(move |n: f64| {
+            let m = n.abs() % 100.0;
+            b(m % 10.0 == 1.0 && m != 11.0, 0.0, 1.0)
+        }),
+        "n=>n===1||n>=11&&n%1===0?0:1" => {
+            std::sync::Arc::new(move |n: f64| b(n == 1.0 || (n >= 11.0 && n % 1.0 == 0.0), 0.0, 1.0))
+        }
+        "n=>n===1?0:n===2||n===3||n===4?1:2" => {
+            std::sync::Arc::new(move |n: f64| if n == 1.0 { 0.0 } else { b(n == 2.0 || n == 3.0 || n == 4.0, 1.0, 2.0) })
+        }
+        "n=>!Number.isInteger(n)?4:n===1?0:n===2?1:n>=3&&n<=4?2:3" => std::sync::Arc::new(move |n: f64| {
+            if !is_int(n) { 4.0 } else if n == 1.0 { 0.0 } else if n == 2.0 { 1.0 } else { b(n >= 3.0 && n <= 4.0, 2.0, 3.0) }
+        }),
+        "n=>{if(n===1)return 0;const m100=Math.abs(n)%100;if(m100>=12&&m100<=14)return 2;const m10=m100%10;return m10>=2&&m10<=4?1:2}" => {
+            std::sync::Arc::new(move |n: f64| czech_polish(n, false))
+        }
+        "n=>{if(n===1)return 0;if(!Number.isInteger(n))return 3;const m100=Math.abs(n)%100;if(m100>=12&&m100<=14)return 2;const m10=m100%10;return m10>=2&&m10<=4?1:2}" => {
+            std::sync::Arc::new(move |n: f64| czech_polish(n, true))
+        }
+        _ => return None,
+    })
+}
+
+fn czech_polish(n: f64, fraction_is_3: bool) -> f64 {
+    if n == 1.0 {
+        return 0.0;
+    }
+    if fraction_is_3 && !(n.is_finite() && n.trunc() == n) {
+        return 3.0;
+    }
+    let m100 = n.abs() % 100.0;
+    if (12.0..=14.0).contains(&m100) {
+        return 2.0;
+    }
+    let m10 = m100 % 10.0;
+    if (2.0..=4.0).contains(&m10) { 1.0 } else { 2.0 }
 }

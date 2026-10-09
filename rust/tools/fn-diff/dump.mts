@@ -227,6 +227,55 @@ const dumps: Record<string, () => void | Promise<void>> = {
             for (const digits of ["0", "07", "1234567890", "x9y"]) emit({ kind, digits }, spellDigits(digits, d, (w: string) => w));
         }
     },
+    // core makeSymbolNormalizer, for EVERY language that builds one: symbols-hook.mjs swaps in a recording
+    // wrapper, the public sync entry runs over every golden (and FLEURS where FLEURS_DIR names it), and each
+    // recorded SymbolData is emitted once as a `def` row followed by the (input, output) pairs it saw. es, fr
+    // and hi also get their RAW texts through their own tier, and every tier gets probes/symbols.txt.
+    // `SYMBOLS_LANGS=es,fr` narrows the run.
+    async symbols() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { slavicCountForm } = await import("../../../src/core/normalizeSymbols.ts");
+        const { phonemize } = await import("../../../src/index.ts");
+        const { readdirSync } = await import("node:fs");
+        const all = readdirSync(new URL("../../../csharp/goldens/", import.meta.url)).filter((f) => f.endsWith(".tsv")).map((f) => f.slice(0, -4));
+        const langs = process.env.SYMBOLS_LANGS ? process.env.SYMBOLS_LANGS.split(",") : all;
+        const raw = new Map<string, string[]>();
+        for (const lang of langs) {
+            const texts = [...textsFor([lang], Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined, []).keys()];
+            raw.set(lang, texts);
+            for (const t of texts) { try { phonemize(t, lang); } catch { /* the engine's own failure; not this dump's */ } }
+        }
+        const dirOf = (stack: string): string => /src\/languages\/([^/]+)\//u.exec(stack.split("\n").slice(2).join("\n"))?.[1] ?? "core";
+        const RAW_DIR: Record<string, string> = { spanish: "es", french: "fr", hindi: "hi" };
+        // A countForm is a function: named by identity when shared, else by its (esbuild-minified) source,
+        // which the replay maps onto a Rust twin and refuses when it has none.
+        const sigOf = (cf: unknown): string =>
+            cf === undefined ? "default" : cf === slavicCountForm ? "slavic" : String(cf).replace(/\s+/gu, " ");
+        const probes = [...textsFor([], undefined, ["symbols.txt"]).keys()];
+        const seen = new Map<string, number>();
+        records.forEach((rec, i) => {
+            const dir = dirOf(rec.stack);
+            const sig = sigOf(rec.data.countForm);
+            const key = `${dir}\u0000${sig}\u0000${JSON.stringify(rec.data)}`;
+            let id = seen.get(key);
+            if (id === undefined) {
+                id = i;
+                seen.set(key, id);
+                process.stdout.write(JSON.stringify({ def: id, dir, countForm: sig, data: rec.data }) + "\n");
+                // The synthetic arm probes, through every distinct tier.
+                for (const t of probes) emit({ def: id, text: units(t), src: "probe" }, rec.apply(t));
+            }
+            const lang = Object.hasOwn(RAW_DIR, dir) ? RAW_DIR[dir]! : undefined;
+            const inputs = new Map(rec.calls);
+            for (const [text, out] of inputs) emit({ def: id, text: units(text), src: dir }, out);
+            if (lang !== undefined && raw.has(lang))
+                // The raw texts too: the tier must also be right on input its own normalizer did not shape.
+                for (const t of raw.get(lang)!) if (!inputs.has(t)) emit({ def: id, text: units(t), src: `${dir}-raw` }, rec.apply(t));
+        });
+        process.stderr.write(`symbols: ${records.length} normalizers recorded, ${seen.size} distinct\n`);
+    },
     numbers() {
         const ns: bigint[] = [];
         for (let i = 0n; i <= 20000n; i++) ns.push(i);
