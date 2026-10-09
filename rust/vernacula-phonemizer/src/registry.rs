@@ -170,6 +170,9 @@ pub enum PhonemizeError {
     /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
     Neural(String),
+    /// The TS engine THROWS on this input, so the port returns an error rather than a reading: e.g. Hindi's
+    /// ordinal rule on a 309-digit run, `Infinity`, whose recursion is a `RangeError` in the TS.
+    Input(String),
 }
 
 impl std::fmt::Display for PhonemizeError {
@@ -178,6 +181,7 @@ impl std::fmt::Display for PhonemizeError {
             PhonemizeError::UnknownLanguage(l) => write!(f, "no engine for language: {l}"),
             PhonemizeError::Data(e) => write!(f, "phonemizer data unavailable: {e}"),
             PhonemizeError::Neural(e) => write!(f, "neural OOV model failed: {e}"),
+            PhonemizeError::Input(e) => write!(f, "input the engine cannot read: {e}"),
         }
     }
 }

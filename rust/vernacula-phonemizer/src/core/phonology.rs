@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 
 use super::data_path::data_file;
-use super::data_source::read_data_text;
+use super::data_source::{load_once, read_data_text};
 use super::jsonc::parse_jsonc;
 
 /// Both tables keep the file's key order: `placeOfArticulation` is sorted by key length with a STABLE
@@ -19,15 +19,12 @@ pub struct Phonology {
     pub homorganic_nasal: IndexMap<String, String>,
 }
 
-/// `loadSharedPhonology()`: memoized, and a failure is cached too.
+/// `loadSharedPhonology()`: memoized on success only (a failed load is retried on the next call).
 pub fn load_shared_phonology() -> Result<&'static Phonology, String> {
-    static CACHED: OnceLock<Result<Phonology, String>> = OnceLock::new();
-    CACHED
-        .get_or_init(|| {
-            let key = data_file("core", "phonology.jsonc");
-            let text = read_data_text(&key).map_err(|e| e.to_string())?;
-            parse_jsonc(&text).map_err(|e| format!("{key}: {e}"))
-        })
-        .as_ref()
-        .map_err(Clone::clone)
+    static CACHED: OnceLock<Phonology> = OnceLock::new();
+    load_once(&CACHED, || {
+        let key = data_file("core", "phonology.jsonc");
+        let text = read_data_text(&key).map_err(|e| e.to_string())?;
+        parse_jsonc(&text).map_err(|e| format!("{key}: {e}"))
+    })
 }

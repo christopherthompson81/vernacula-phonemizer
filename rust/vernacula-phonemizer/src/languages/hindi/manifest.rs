@@ -8,6 +8,7 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 
 use crate::core::abugida::AbugidaDef;
+use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 use crate::core::normalize_symbols::SymbolData;
 use crate::core::numbers::NumbersDef;
@@ -58,12 +59,10 @@ pub struct HindiDef {
     pub ordinal_suffixes: Option<OrdinalSuffixes>,
 }
 
-/// The manifest, or why it could not be loaded. Loaded once; a failure is cached.
+/// The manifest, or why it could not be loaded. Cached only on success.
 pub fn try_manifest() -> Result<&'static HindiDef, String> {
-    static M: OnceLock<Result<HindiDef, String>> = OnceLock::new();
-    M.get_or_init(|| load_manifest(DIR, "hindi.jsonc").map_err(|e| e.to_string()))
-        .as_ref()
-        .map_err(Clone::clone)
+    static M: OnceLock<HindiDef> = OnceLock::new();
+    load_once(&M, || load_manifest(DIR, "hindi.jsonc").map_err(|e| e.to_string()))
 }
 
 #[cfg(test)]

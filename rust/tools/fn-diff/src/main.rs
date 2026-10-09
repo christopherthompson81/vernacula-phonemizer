@@ -560,7 +560,7 @@ fn main() {
                 ordinal_suffixes: hi.ordinal_suffixes.as_ref(),
             };
             let norm = make_hindi_normalizer(&hi.numbers, own).unwrap();
-            Box::new(move |input| norm(&units(&input["text"])))
+            Box::new(move |input| norm(&units(&input["text"])).unwrap())
         }
         "hi-word" => {
             use vernacula_phonemizer::core::{abugida::make_abugida_g2p, phonology::load_shared_phonology};
@@ -568,14 +568,15 @@ fn main() {
             let hi = try_manifest().unwrap();
             let phon = load_shared_phonology().unwrap();
             let g2p = make_abugida_g2p(&hi.abugida, phon);
-            let h = make_native_hindi(hi, phon, None, AbugidaScript::default(), None, Overrides::default())
-                .unwrap();
+            // `makeNativeHindi(MANIFEST)`: Hindi's own manifest, so its `symbolTier` is Hindi's.
+            let overrides = Overrides { symbol_tier_is_hindis: true, ..Default::default() };
+            let h = make_native_hindi(hi, phon, None, AbugidaScript::default(), None, overrides).unwrap();
             Box::new(move |input| {
                 let w = units(&input["word"]);
                 match input["op"].as_str().unwrap() {
                     "g2p" => g2p.g2p(&w),
                     "rules" => h.word_rules(&w),
-                    _ => h.number(&w),
+                    _ => h.number(&w).unwrap(),
                 }
             })
         }

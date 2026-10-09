@@ -138,3 +138,36 @@ twelve symbol-tier lines to probes/hi.txt (units with powers and rates, bare exp
 - `cargo test --workspace --release`: all green; `cargo build` and `cargo build --release`: 0 warnings.
 
 **Implication.** Hindi is done. No row is port-pending: the only foreign reader Hindi calls is `en`, which is ported.
+
+## Run 8 — 2026-10-09 17:34 (review round, on main c64801a5)
+
+**Question.** After rebasing onto main (#1467 ja + the symbol tier, #1468 cross-cutting fixes) and applying the
+review, is every gate still byte-identical?
+
+**What changed.**
+- Rebased onto `origin/main`; dropped the cherry-picked symbol commit (main carries the reviewed version). The
+  shared lists conflicted with ja and were resolved keeping both sides. ⚠ git had factored a shared closing `},`
+  out of the dump.mts hunk, which left `symbols()` unterminated (`dump.mts` failed to parse). Restored it, then
+  counted the arms: dump.mts has 27 entries (23 on main + 4) and main.rs has 27 (24 + 3).
+- `OnceLock<Result<…>>` became `core::data_source::load_once` (manifest, phonology, and the new once-built `SYMBOLS`).
+- New `PhonemizeError::Input`: the TS throws on this input. A 309+-digit ordinal now returns
+  `Err(Input("RangeError: …"))` instead of panicking. `TextFn` (normalize and symbol overrides) returns `Result`.
+- `number()` reads `units` with `.get` and returns `Err(Data)` when the table is short.
+- The `std::ptr::eq` own-tier check became an explicit `Overrides::symbol_tier_is_hindis`, set by `create_hindi`.
+  The fn-diff `hi-word` replay at first panicked on the guard (it built Hindi with `Overrides::default()`), which
+  shows the flag is live. It now sets the flag, as `makeNativeHindi(MANIFEST)` means.
+- Core helpers in place of local copies: `is_safe_integer`/`MAX_SAFE_INTEGER`, `js_number_to_string` for the
+  `IRREGULAR_L[n]` key, and `provenance::escape` in `alt()`.
+- `schwa.rs`: the per-unit `/[̀-ͯ]/u` regex became `(0x0300..=0x036F).contains`.
+
+**Command.** All dumps regenerated from main's TS, then: `parity -- hi en en-GB ja`; `fn-diff` for `phonemize-sync`,
+`phonemize-best`, `hi-normalize`, `hi-word`, `abugida-core` and `hi-in-en` (sync and best); `cargo test --workspace`;
+`cargo build` debug and release. Guard proof for the schwa change: narrowed the range to `0x0300..=0x0302`, replayed
+`abugida-core`, then restored it.
+
+**Raw finding.** parity: `hi 200/200`, `en 200/200`, `en-GB 200/200`, `ja 200/200`. `phonemize-sync 3597/0`,
+`phonemize-best 3597/0`, `hi-normalize 3597/0` (golden 132, fleurs 3306, probe 159), `hi-word 43098/0`,
+`abugida-core 85798/0`, `hi-in-en 14/0` on both paths. With the narrowed range: `abugida-core: 85288 identical,
+510 DIFFER`; restored, 0. Tests: 53 + 1 passed. Warnings: 0 and 0.
+
+**Implication.** Done. The schwa check is load-bearing and proven, and the panic paths are gone.

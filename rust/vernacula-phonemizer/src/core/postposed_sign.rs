@@ -7,7 +7,9 @@ use super::js_string::{JsString, js};
 use super::provenance::{rewrite, rewrite_with};
 use crate::js_re;
 
-/// `postposedSign(s, sign, words)`; `sign` is a regex SOURCE string, escaped by the caller.
+/// `postposedSign(s, sign, words)`; `sign` is a regex SOURCE string, escaped by the caller. It is a code
+/// literal at every call site (never data), so an invalid one is a programming error and panics, as `js_re!`
+/// does.
 pub fn postposed_sign(s: &JsString, sign: &str, words: &JsString) -> JsString {
     let trailing = js_re!(r#"^(.*?)([,;।॥!?)\]"'’、。]*)$"#, "su");
     let pair = JsRegex::new(&format!(r"(\S+)\s*{sign}\s*(\S+)"), "gu").expect("postposedSign pattern");

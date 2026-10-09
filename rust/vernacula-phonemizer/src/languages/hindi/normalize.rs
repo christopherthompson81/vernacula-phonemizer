@@ -6,11 +6,12 @@ use indexmap::IndexMap;
 
 use super::manifest::{OrdinalSuffixes, try_manifest};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, MAX_SAFE_INTEGER, js, js_number, js_number_to_string};
 use crate::core::numbers::{NumbersDef, indic_number_words};
 use crate::core::postposed_sign::postposed_sign;
-use crate::core::provenance::{rewrite, rewrite_with};
+use crate::core::provenance::{escape, rewrite, rewrite_with};
 use crate::js_re;
+use crate::registry::PhonemizeError;
 
 // Generated from the TS object literals by .probe/hi/gen_tables.mts (key order preserved).
 const UNIT_WORD: [(&str, &str); 8] = [
@@ -33,8 +34,6 @@ const ABBREV: [(&str, &str); 7] = [
     ("अध्या", "अध्याय"),
 ];
 
-const MAX_SAFE: f64 = 9_007_199_254_740_991.0;
-
 /// Keys sorted longest first (UTF-16 length, a stable sort as V8's is), joined with `|`.
 fn by_length(keys: &[&str]) -> Vec<String> {
     let mut k: Vec<&str> = keys.to_vec();
@@ -44,20 +43,7 @@ fn by_length(keys: &[&str]) -> Vec<String> {
 
 /// `alt(keys)`: longest first, regex metacharacters escaped.
 fn alt(keys: &[&str]) -> String {
-    by_length(keys)
-        .iter()
-        .map(|k| {
-            let mut out = String::new();
-            for c in k.chars() {
-                if ".*+?^${}()|[]\\".contains(c) {
-                    out.push('\\');
-                }
-                out.push(c);
-            }
-            out
-        })
-        .collect::<Vec<_>>()
-        .join("|")
+    by_length(keys).iter().map(|k| escape(k)).collect::<Vec<_>>().join("|")
 }
 
 /// A JS object's own-key order: canonical array-index keys first, ascending, then the rest in insertion
@@ -74,32 +60,34 @@ fn js_key_order<V>(m: &IndexMap<String, V>) -> Vec<(&String, &V)> {
     out
 }
 
-/// `String(n)` for a non-negative integer that may be a table key; `None` where no small key could match.
-fn int_key(n: f64) -> Option<String> {
-    (n.fract() == 0.0 && (0.0..=MAX_SAFE).contains(&n)).then(|| (n as u64).to_string())
-}
-
 /// `indicNumberWords(n, numbers).map((w) => w ?? "")`, for the `Number(...)` of a digit run.
 ///
 /// ⚠ ABOVE 2^53 THE TS COMPOSES THE FLOAT: the crore arm splits `Math.floor(n / 1e7)` and `n % 1e7` in
 /// doubles, so a long ordinal reads a quantity the text did not write. Reproduced here (only that arm is
 /// reachable above 2^53); below it the shared u64 composer is exact and identical. A digit run of 309 or more
-/// digits is `Infinity` and the TS recursion overflows the stack (a RangeError out of `phonemize`); that
-/// throw is reproduced as a panic.
-fn cardinal(n: f64, d: &NumbersDef) -> Vec<String> {
-    if n <= MAX_SAFE {
-        return indic_number_words(n as u64, d).into_iter().map(|w| w.unwrap_or_default()).collect();
+/// digits is `Infinity`, and the TS recursion overflows the stack: a `RangeError` out of `phonemize`, returned
+/// here as `PhonemizeError::Input`.
+fn cardinal(n: f64, d: &NumbersDef) -> Result<Vec<String>, PhonemizeError> {
+    if n <= MAX_SAFE_INTEGER {
+        return Ok(indic_number_words(n as u64, d).into_iter().map(|w| w.unwrap_or_default()).collect());
     }
     if !n.is_finite() {
-        panic!("RangeError: Maximum call stack size exceeded (indicNumberWords(Infinity), as in the TS)");
+        return Err(PhonemizeError::Input(
+            "RangeError: Maximum call stack size exceeded (an ordinal of 309+ digits is Infinity, as in the TS)".into(),
+        ));
     }
     let (c, r) = ((n / 10_000_000.0).floor(), n % 10_000_000.0);
-    let mut out = cardinal(c, d);
+    let mut out = cardinal(c, d)?;
     out.push(d.magnitudes.crore.clone().unwrap_or_default());
     if r != 0.0 {
-        out.extend(cardinal(r, d));
+        out.extend(cardinal(r, d)?);
     }
-    out
+    Ok(out)
+}
+
+/// `cardinal` for a value the pattern bounds below 1000 (clock fields, fraction terms): it cannot fail.
+fn small_cardinal(n: f64, d: &NumbersDef) -> Vec<String> {
+    indic_number_words(n as u64, d).into_iter().map(|w| w.unwrap_or_default()).collect()
 }
 
 fn join(words: &[String]) -> String {
@@ -113,7 +101,8 @@ pub struct OwnOrdinals<'a> {
     pub ordinal_suffixes: Option<&'a OrdinalSuffixes>,
 }
 
-pub type TextFn = Box<dyn Fn(&JsString) -> JsString + Send + Sync>;
+/// A text pass that may fail as its TS twin may throw.
+pub type TextFn = Box<dyn Fn(&JsString) -> Result<JsString, PhonemizeError> + Send + Sync>;
 
 /// `makeHindiNormalizer(numbers, own)`.
 pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<TextFn, String> {
@@ -129,14 +118,18 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
     let numbers = numbers.clone();
 
     let suffix_keys: Vec<&str> = js_key_order(&suffix_form).into_iter().map(|(k, _)| k.as_str()).collect();
-    let ordinal_re = (!suffix_form.is_empty()).then(|| {
-        JsRegex::new(
-            &format!(r"(?<![\d.,])(\d+)\s?({})(?![\p{{L}}\p{{M}}])", alt(&suffix_keys)),
-            "gu",
-        )
-        .expect("ordinal pattern")
-    });
-    let suppletive_re = (!suppletive.is_empty()).then(|| {
+    let pattern_error = |what: &str, e: crate::core::js_regex::JsRegexError| format!("hindi {what} pattern: {e}");
+    let ordinal_re = (!suffix_form.is_empty())
+        .then(|| {
+            JsRegex::new(
+                &format!(r"(?<![\d.,])(\d+)\s?({})(?![\p{{L}}\p{{M}}])", alt(&suffix_keys)),
+                "gu",
+            )
+            .map_err(|e| pattern_error("ordinal", e))
+        })
+        .transpose()?;
+    let suppletive_re = (!suppletive.is_empty())
+        .then(|| {
         let mut cons: Vec<&str> = Vec::new();
         for (_, v) in js_key_order(&suppletive) {
             if !cons.contains(&v.as_str()) {
@@ -148,29 +141,32 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
             &format!(r"(?<![\d.,])(\d)({})({})(?![\p{{L}}\p{{M}}])", alt(&cons), alt(&vowels)),
             "gu",
         )
-        .expect("suppletive pattern")
-    });
+        .map_err(|e| pattern_error("suppletive", e))
+        })
+        .transpose()?;
     let abbrev_alt = by_length(&ABBREV.map(|(k, _)| k)).join("|");
     let abbrev_re = JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}])({abbrev_alt})\.?(\s+)(?=[\p{{L}}])"), "gu")
-        .expect("abbreviation pattern");
+        .map_err(|e| pattern_error("abbreviation", e))?;
     let unit_alt = by_length(&UNIT_WORD.map(|(k, _)| k)).join("|");
-    let unit_re = JsRegex::new(&format!(r"(\d)\s?({unit_alt})(?![\p{{L}}\p{{M}}])"), "gu").expect("unit pattern");
+    let unit_re = JsRegex::new(&format!(r"(\d)\s?({unit_alt})(?![\p{{L}}\p{{M}}])"), "gu")
+        .map_err(|e| pattern_error("unit", e))?;
 
-    Ok(Box::new(move |input: &JsString| -> JsString {
+    Ok(Box::new(move |input: &JsString| -> Result<JsString, PhonemizeError> {
         let d = &numbers;
-        let irregular_at = |n: f64| -> Option<&Vec<String>> { int_key(n).and_then(|k| irregular.get(&k)) };
-        let card = |n: f64| cardinal(n, d);
-        let ordinal = |n: f64, form: usize, suffix: &str| -> Option<String> {
+        // `IRREGULAR_L[n]`: the key is `String(n)`.
+        let irregular_at = |n: f64| -> Option<&Vec<String>> { irregular.get(&js_number_to_string(n)) };
+        let card = |n: f64| small_cardinal(n, d);
+        let ordinal = |n: f64, form: usize, suffix: &str| -> Result<Option<String>, PhonemizeError> {
             if let Some(irr) = irregular_at(n) {
-                return irr.get(form).cloned();
+                return Ok(irr.get(form).cloned());
             }
-            let mut words = card(n);
+            let mut words = cardinal(n, d)?;
             if words.is_empty() || words.iter().any(|w| w.is_empty()) {
-                return None;
+                return Ok(None);
             }
             let last = words.len() - 1;
             words[last] = format!("{}{suffix}", words[last]);
-            Some(join(&words))
+            Ok(Some(join(&words)))
         };
         let mut s = input.clone();
 
@@ -180,20 +176,31 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
 
         // 2) Ordinal suffixes.
         if let Some(re) = &ordinal_re {
+            // The TS throws out of the replace callback; the first error is carried out of it here.
+            let mut failed: Option<PhonemizeError> = None;
             s = rewrite_with(&s, re, |m, full| {
-                let digits = m.group(1, full).unwrap();
-                let suffix = m.group(2, full).unwrap().to_string_lossy();
-                let form = suffix_form[suffix.as_str()];
-                ordinal(js_number(&digits), form, &suffix).map_or_else(|| m.value(full), |o| js(&o))
+                let digits = m.group(1, full).unwrap_or_default();
+                let suffix = m.group(2, full).unwrap_or_default().to_string_lossy();
+                let Some(&form) = suffix_form.get(suffix.as_str()) else { return m.value(full) };
+                match ordinal(js_number(&digits), form, &suffix) {
+                    Ok(o) => o.map_or_else(|| m.value(full), |o| js(&o)),
+                    Err(e) => {
+                        failed.get_or_insert(e);
+                        m.value(full)
+                    }
+                }
             });
+            if let Some(e) = failed {
+                return Err(e);
+            }
         }
 
         // 2b) Suppletive spellings.
         if let Some(re) = &suppletive_re {
             s = rewrite_with(&s, re, |m, full| {
-                let dg = m.group(1, full).unwrap().to_string_lossy();
-                let cons = m.group(2, full).unwrap().to_string_lossy();
-                let vowel = m.group(3, full).unwrap().to_string_lossy();
+                let dg = m.group(1, full).unwrap_or_default().to_string_lossy();
+                let cons = m.group(2, full).unwrap_or_default().to_string_lossy();
+                let vowel = m.group(3, full).unwrap_or_default().to_string_lossy();
                 if suppletive.get(&dg) != Some(&cons) {
                     return m.value(full);
                 }
@@ -206,22 +213,22 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
 
         // 3) Abbreviations.
         s = rewrite_with(&s, &abbrev_re, |m, full| {
-            let ab = m.group(1, full).unwrap().to_string_lossy();
-            let word = ABBREV.iter().find(|(k, _)| *k == ab).map(|(_, v)| *v).unwrap();
-            js(word).concat(&m.group(2, full).unwrap())
+            let ab = m.group(1, full).unwrap_or_default().to_string_lossy();
+            let Some(word) = ABBREV.iter().find(|(k, _)| *k == ab).map(|(_, v)| *v) else { return m.value(full) };
+            js(word).concat(&m.group(2, full).unwrap_or_default())
         });
 
         // 4) Devanagari unit abbreviations.
         s = rewrite_with(&s, &unit_re, |m, full| {
-            let u = m.group(2, full).unwrap().to_string_lossy();
-            let word = UNIT_WORD.iter().find(|(k, _)| *k == u).map(|(_, v)| *v).unwrap();
-            m.group(1, full).unwrap().concat(&js(&format!(" {word}")))
+            let u = m.group(2, full).unwrap_or_default().to_string_lossy();
+            let Some(word) = UNIT_WORD.iter().find(|(k, _)| *k == u).map(|(_, v)| *v) else { return m.value(full) };
+            m.group(1, full).unwrap_or_default().concat(&js(&format!(" {word}")))
         });
 
         // 5) Degrees: coordinates, then ℃/℉, then °C/°F, then the bare sign.
         s = rewrite_with(&s, js_re!(r#"(\d)\s?[°º]\s?(\d+)\s?[´′'](?:\s?(\d+)\s?[″"])?"#, "gu"), |m, full| {
-            let deg = m.group(1, full).unwrap().to_string_lossy();
-            let min = m.group(2, full).unwrap().to_string_lossy();
+            let deg = m.group(1, full).unwrap_or_default().to_string_lossy();
+            let min = m.group(2, full).unwrap_or_default().to_string_lossy();
             let sec = m.group(3, full).map(|x| format!(" {} सेकंड", x.to_string_lossy())).unwrap_or_default();
             js(&format!("{deg} डिग्री {min} मिनट{sec}"))
         });
@@ -233,8 +240,8 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
 
         // 6) Times.
         s = rewrite_with(&s, js_re!(r"(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(\s*बजे)?", "gu"), |m, full| {
-            let h = m.group(1, full).unwrap();
-            let min = m.group(2, full).unwrap();
+            let h = m.group(1, full).unwrap_or_default();
+            let min = m.group(2, full).unwrap_or_default();
             let hw = join(&card(js_number(&h)));
             if js_number(&min) == 0.0 {
                 let baje = m.group(3, full).map_or_else(|| " बजे".to_string(), |b| b.to_string_lossy());
@@ -272,8 +279,8 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
 
         // 8) Fractions.
         s = rewrite_with(&s, js_re!(r"(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"), |m, full| {
-            let num = js_number(&m.group(1, full).unwrap());
-            let den = js_number(&m.group(2, full).unwrap());
+            let num = js_number(&m.group(1, full).unwrap_or_default());
+            let den = js_number(&m.group(2, full).unwrap_or_default());
             if num == 1.0 && den == 2.0 {
                 return js("आधा");
             }
@@ -287,6 +294,6 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
             if nw.is_empty() || dw.is_empty() { m.value(full) } else { js(&format!("{nw} बटा {dw}")) }
         });
 
-        s
+        Ok(s)
     }))
 }

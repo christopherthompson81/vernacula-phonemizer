@@ -4,15 +4,16 @@
 //! see that file for the corpus evidence.
 
 use std::collections::HashMap;
-use std::sync::{Arc, LazyLock};
+use std::sync::{Arc, LazyLock, OnceLock};
 
 use super::manifest::{HindiDef, try_manifest};
 use super::normalize::{OwnOrdinals, TextFn, make_hindi_normalizer};
 use crate::core::abugida::{AbugidaG2p, make_abugida_g2p};
 use crate::core::clauses::assemble_clauses;
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
-use crate::core::normalize_symbols::{SymbolData, make_symbol_normalizer};
+use crate::core::data_source::load_once;
+use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
+use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::numbers::{indic_number_words, render_number, spell_digits};
 use crate::core::phonology::{Phonology, load_shared_phonology};
 use crate::core::provenance::{Form, normalize};
@@ -28,12 +29,6 @@ pub type ForeignPhonemizer = Arc<dyn Fn(&JsString) -> JsString + Send + Sync>;
 static VOWEL_G: LazyLock<JsRegex> = LazyLock::new(|| JsRegex::new(&format!("[{IPA_VOWELS}]"), "g").unwrap());
 static LONG_CONSONANT_END: LazyLock<JsRegex> =
     LazyLock::new(|| JsRegex::new(&format!("[^{IPA_VOWELS}]ː$"), "").unwrap());
-
-const MAX_SAFE: f64 = 9_007_199_254_740_991.0;
-
-fn is_safe_integer(n: f64) -> bool {
-    n.is_finite() && n.fract() == 0.0 && n.abs() <= MAX_SAFE
-}
 
 /// `heavyFinalCoda(body)`: does the coda (final schwa already removed) end in a cluster or a geminate?
 pub fn heavy_final_coda(body: &JsString) -> bool {
@@ -79,6 +74,10 @@ impl Default for AbugidaScript {
 pub struct Overrides {
     pub normalize: Option<TextFn>,
     pub symbols: Option<TextFn>,
+    /// The def's `symbolTier` IS Hindi's own block, so inheriting Hindi's tier is not a silent no-op: the TS
+    /// `def.symbolTier === MANIFEST.symbolTier`, which only `createHindi` satisfies. Explicit rather than a
+    /// pointer comparison, which a clone of the manifest would break.
+    pub symbol_tier_is_hindis: bool,
 }
 
 struct Rule {
@@ -153,12 +152,7 @@ pub fn make_native_hindi(
             },
         )?,
     };
-    let manifest = try_manifest()?;
-    let own_tier = match (&def.symbol_tier, &manifest.symbol_tier) {
-        (Some(a), Some(b)) => std::ptr::eq(a, b),
-        _ => false,
-    };
-    if def.symbol_tier.is_some() && overrides.symbols.is_none() && !own_tier {
+    if def.symbol_tier.is_some() && overrides.symbols.is_none() && !overrides.symbol_tier_is_hindis {
         return Err("makeNativeHindi: this manifest declares its own `symbolTier`, but no `overrides.symbols` was \
                     passed — the block would be silently ignored and Hindi's symbol words used instead. Build a \
                     normalizer from it with makeSymbolNormalizer and pass it as `overrides.symbols` (see \
@@ -167,7 +161,10 @@ pub fn make_native_hindi(
     }
     let symbol_tier = match overrides.symbols {
         Some(f) => f,
-        None => hindi_symbols()?,
+        None => {
+            let tier = hindi_symbols()?;
+            Box::new(move |s: &JsString| Ok(tier.apply(s)))
+        }
     };
 
     Ok(NativeHindi {
@@ -189,20 +186,24 @@ pub fn make_native_hindi(
 
 /// `SYMBOLS`: `makeSymbolNormalizer` over Hindi's `symbolTier`.
 ///
-/// Built from HINDI's manifest whatever `def` is, as the TS module-level constant is; only these six fields.
-fn hindi_symbols() -> Result<TextFn, String> {
-    let sym = try_manifest()?.symbol_tier.as_ref().ok_or("hindi.jsonc declares no `symbolTier`")?;
-    let d = SymbolData {
-        percent: sym.percent.clone(),
-        currency: sym.currency.clone(),
-        units: sym.units.clone(),
-        exponent_words: sym.exponent_words.clone(),
-        bare_exponent: sym.bare_exponent.clone(),
-        multiply: sym.multiply.clone(),
-        ..Default::default()
-    };
-    let tier = make_symbol_normalizer(&d)?;
-    Ok(Box::new(move |s: &JsString| tier.apply(s)))
+/// Built ONCE, from HINDI's manifest whatever `def` is, as the TS module-level constant is; only these six
+/// fields. Cached on success only.
+fn hindi_symbols() -> Result<Arc<SymbolNormalizer>, String> {
+    static SYMBOLS: OnceLock<Arc<SymbolNormalizer>> = OnceLock::new();
+    load_once(&SYMBOLS, || {
+        let sym = try_manifest()?.symbol_tier.as_ref().ok_or("hindi.jsonc declares no `symbolTier`")?;
+        let d = SymbolData {
+            percent: sym.percent.clone(),
+            currency: sym.currency.clone(),
+            units: sym.units.clone(),
+            exponent_words: sym.exponent_words.clone(),
+            bare_exponent: sym.bare_exponent.clone(),
+            multiply: sym.multiply.clone(),
+            ..Default::default()
+        };
+        make_symbol_normalizer(&d).map(Arc::new)
+    })
+    .cloned()
 }
 
 impl NativeHindi {
@@ -210,7 +211,7 @@ impl NativeHindi {
     pub fn word_rules(&self, w: &JsString) -> JsString {
         let sd = &self.def.schwa_deletion;
         let mut x = self.g2p.g2p(w);
-        let avagraha = self.retain_on_avagraha && w.ends_with(self.script.avagraha.as_ref().unwrap());
+        let avagraha = self.retain_on_avagraha && self.script.avagraha.as_ref().is_some_and(|a| w.ends_with(a));
         for r in &self.post {
             x = r.re.replace(&x, &r.to);
         }
@@ -243,8 +244,9 @@ impl NativeHindi {
         self.word(&js(w)).to_string_lossy()
     }
 
-    /// `number(digits)`.
-    pub fn number(&self, digits: &JsString) -> JsString {
+    /// `number(digits)`. ⚠ A `units` table without the digit is an error: the TS reads `units[d]!` as
+    /// `undefined` and the g2p then throws on it.
+    pub fn number(&self, digits: &JsString) -> Result<JsString, PhonemizeError> {
         let mut ascii = JsString::new();
         for d in digits.code_point_strings() {
             if d == js(",") {
@@ -268,22 +270,28 @@ impl NativeHindi {
             };
             let mut parts = vec![head, word(decimal_word)];
             for d in ascii.slice(dot as isize + 1, None).code_point_strings() {
-                let i = js_number(&d) as usize;
-                parts.push(word(&numbers.units[i]));
+                let i = js_number(&d);
+                let unit = (i.fract() == 0.0 && i >= 0.0).then(|| numbers.units.get(i as usize)).flatten();
+                let Some(unit) = unit else {
+                    return Err(PhonemizeError::Data(format!("numbers.units has no word for digit {d}")));
+                };
+                parts.push(word(unit));
             }
-            return js(&parts.join(" "));
+            return Ok(js(&parts.join(" ")));
         }
         let n = js_number(&ascii);
         if !is_safe_integer(n) {
-            return js(&spell_digits(&ascii.to_string_lossy(), numbers, &word));
+            return Ok(js(&spell_digits(&ascii.to_string_lossy(), numbers, &word)));
         }
-        js(&render_number(n as u64, numbers, &word, indic_number_words))
+        Ok(js(&render_number(n as u64, numbers, &word, indic_number_words)))
     }
 
     /// `text(input)`.
-    pub fn text(&self, input: &JsString) -> JsString {
-        let prepared = (self.symbol_tier)(&(self.normalize)(input));
-        assemble_clauses(&prepared, &self.token_re, |m, s, sink| {
+    pub fn text(&self, input: &JsString) -> Result<JsString, PhonemizeError> {
+        let prepared = (self.symbol_tier)(&(self.normalize)(input)?)?;
+        // The TS throws out of the token callback; the first error is carried out of it here.
+        let mut failed: Option<PhonemizeError> = None;
+        let out = assemble_clauses(&prepared, &self.token_re, |m, s, sink| {
             if let Some(w) = m.group(1, s) {
                 sink.emit(&self.word(&w));
             } else if let Some(latin) = m.group(2, s) {
@@ -291,7 +299,12 @@ impl NativeHindi {
                     sink.emit(&f(&latin));
                 }
             } else if let Some(d) = m.group(3, s) {
-                sink.emit(&self.number(&d));
+                match self.number(&d) {
+                    Ok(ipa) => sink.emit(&ipa),
+                    Err(e) => {
+                        failed.get_or_insert(e);
+                    }
+                }
             } else if let Some(p) = m.group(4, s) {
                 if let Some(mk) = self.def.clause_punctuation.get(&p.to_string_lossy()) {
                     if !mk.is_empty() {
@@ -305,19 +318,24 @@ impl NativeHindi {
                     }
                 }
             }
-        })
+        });
+        match failed {
+            Some(e) => Err(e),
+            None => Ok(out),
+        }
     }
 }
 
 /// `createHindi(foreign)`.
 pub fn create_hindi(foreign: Option<ForeignPhonemizer>) -> Result<NativeHindi, String> {
     let def = try_manifest()?;
-    make_native_hindi(def, load_shared_phonology()?, foreign, AbugidaScript::default(), None, Overrides::default())
+    let overrides = Overrides { symbol_tier_is_hindis: true, ..Default::default() };
+    make_native_hindi(def, load_shared_phonology()?, foreign, AbugidaScript::default(), None, overrides)
 }
 
 impl Engine for NativeHindi {
     fn text(&self, input: &JsString) -> Result<JsString, PhonemizeError> {
-        Ok(NativeHindi::text(self, input))
+        NativeHindi::text(self, input)
     }
 }
 
@@ -365,6 +383,15 @@ mod tests {
         crate::core::provenance::on_poison(None);
         assert!(n > 300);
         assert_eq!(hits.get(), 0);
+    }
+
+    /// A 309+-digit ordinal is `Infinity` in the TS, whose recursion throws a RangeError: an `Err` here, not a
+    /// panic.
+    #[test]
+    fn an_infinite_ordinal_is_an_error_not_a_panic() {
+        let text = format!("{}वाँ", "1".repeat(400));
+        assert!(matches!(phonemize(&text, "hi"), Err(crate::PhonemizeError::Input(_))));
+        assert_eq!(phonemize("9007199254740993वाँ", "hi").unwrap().is_empty(), false);
     }
 
     /// A Devanagari run inside English reaches this engine through the script reader.

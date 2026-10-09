@@ -43,7 +43,8 @@ fn segment_units(ipa: &JsString) -> Vec<Unit> {
                 i += 2;
                 continue;
             }
-            if js_re!("[̀-ͯ]", "u").test(&JsString(vec![n])) || has_unit(MOD, n) {
+            // `/[̀-ͯ]/u` on one code unit: the combining-diacritics block.
+            if (0x0300..=0x036F).contains(&n) || has_unit(MOD, n) {
                 unit.push(n);
                 i += 1;
                 continue;
