@@ -511,6 +511,9 @@ function foldedIndex<V>(map: Record<string, V> | undefined): Record<string, V> {
  * official for the litre, so the languages that declare it declare both spellings and the exact branch
  * resolves either. The rule is about symbols whose two cases are DIFFERENT units, not about case as such.
  *
+ * ⚠ OWN KEYS ONLY, in both tables. They are plain objects, so a bare index also finds `Object.prototype`, and
+ * an inherited method counted as a unit: English's slash rule read `toString/apples` as *toString per apples*.
+ *
  * Returns `undefined` when neither step resolves, and what a caller does then depends on WHICH half failed.
  * An unresolvable HEAD unit leaves the text alone — there is no reading to give. An unresolvable
  * DENOMINATOR reads the numerator and strands the rest (#1249): declining there spent a reading the
@@ -522,8 +525,9 @@ export function resolveUnitSymbol<V>(
     written: string,
     foldSingle = false,
 ): V | undefined {
-    if (declared?.[written] !== undefined) return declared[written];
-    return written.length > 1 || foldSingle ? folded[written.toLowerCase()] : undefined;
+    if (declared !== undefined && Object.hasOwn(declared, written) && declared[written] !== undefined) return declared[written];
+    const lower = written.toLowerCase();
+    return (written.length > 1 || foldSingle) && Object.hasOwn(folded, lower) ? folded[lower] : undefined;
 }
 
 /**

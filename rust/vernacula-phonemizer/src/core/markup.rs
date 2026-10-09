@@ -54,11 +54,6 @@ const NAMED: [(&str, &str); 46] = [
     ("ograve", "ò"),
 ];
 
-/// PAIRED-FIX PENDING (TS: `NAMED` is a plain object literal, so `NAMED["constructor"]` is
-/// `Object.prototype.constructor` and `&constructor;` is replaced by the function's source text, which the
-/// engine then reads aloud). Reproduced here so the engines agree. Delete with the TS fix.
-const PROTOTYPE_CONSTRUCTOR: &str = "function Object() { [native code] }";
-
 fn sup(c: u32) -> Option<&'static str> {
     Some(match char::from_u32(c)? {
         '0' => "\u{2070}",
@@ -141,9 +136,6 @@ pub fn strip_markup(text: &JsString) -> JsString {
                 };
             }
             let lower = body.to_lower_case();
-            if lower == "constructor" {
-                return js(PROTOTYPE_CONSTRUCTOR);
-            }
             NAMED
                 .iter()
                 .find(|(k, _)| lower == *k)

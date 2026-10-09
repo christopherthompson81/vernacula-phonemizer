@@ -138,10 +138,9 @@ const UNITS: Record<string, [string, string]> = {
     // folds, so declaring them is what stops `25 µM` folding to `µm` and reading "twenty-five micro
     // METERS" — a wrong unit, which is the failure this whole block exists to remove, reintroduced by
     // the fix for it. ⟨L⟩ needs no twin: µL and µl are the same unit, as ⟨L⟩/⟨l⟩ are below.
-    // ⚠ DECLARED AFTER their lower-case twins, which is defensive rather than load-bearing: both exact
-    // forms are declared, so nothing REACHES the folded slot for `µm`/`µs` today. UNITS_FOLDED reverses
-    // before `Object.fromEntries`, so first-declared wins that slot, and this ordering leaves it holding
-    // the commoner meaning if a future case-variant ever does fold into it.
+    // ⚠ AND THE FOLDED SLOT THEY SHARE WITH ⟨µm⟩/⟨µs⟩ IS DELIBERATELY EMPTY. An undeclared case variant
+    // does reach it: `ΜM`, the upper-cased form of both, with U+039C GREEK CAPITAL MU. It cannot say which of
+    // the two it was, so UNITS_FOLDED leaves out every slot whose declared keys disagree (see there).
     "\u00b5M": ["micromolar", "micromolar"], "\u03bcM": ["micromolar", "micromolar"],
     "\u00b5S": ["microsiemens", "microsiemens"], "\u03bcS": ["microsiemens", "microsiemens"],
     "\u00b5g/g": ["microgram per gram", "micrograms per gram"], "\u03bcg/g": ["microgram per gram", "micrograms per gram"],
@@ -166,10 +165,24 @@ const UNITS: Record<string, [string, string]> = {
     ghz: ["gigahertz", "gigahertz"], kb: ["kilobyte", "kilobytes"], mb: ["megabyte", "megabytes"],
     gb: ["gigabyte", "gigabytes"], tb: ["terabyte", "terabytes"], kw: ["kilowatt", "kilowatts"],
 };
-/** The case-folded index for step 1 (see resolveUnitSymbol) — built once, beside the table it indexes. */
-const UNITS_FOLDED: Record<string, [string, string]> = Object.fromEntries(
-    Object.entries(UNITS).map(([k, v]) => [k.toLowerCase(), v] as const).reverse(),
-);
+/** The case-folded index for step 1 (see resolveUnitSymbol) — built once, beside the table it indexes.
+ *
+ * ⚠ A SLOT WHOSE DECLARED KEYS DISAGREE IS LEFT OUT. µm/µM (micro meter, micromolar), µs/µS (microsecond,
+ * microsiemens) and mΩ/MΩ (milli, mega) fold onto one lowercase key with two readings, and the exact branch
+ * is what tells them apart. Only an UNDECLARED case variant ever reaches the fold, and it carries no case to
+ * decide by: an upper-cased document writes both µm and µM as `ΜM` (U+039C GREEK CAPITAL MU), which used to
+ * read *micro meters* for a micromolar concentration. Declining gives no unit, which is better than a wrong one. */
+const UNITS_FOLDED: Record<string, [string, string]> = (() => {
+    const out: Record<string, [string, string]> = Object.create(null);
+    const ambiguous = new Set<string>();
+    for (const [k, v] of Object.entries(UNITS)) {
+        const lk = k.toLowerCase();
+        if (lk in out && (out[lk]![0] !== v[0] || out[lk]![1] !== v[1])) ambiguous.add(lk);
+        else if (!(lk in out)) out[lk] = v;
+    }
+    for (const lk of ambiguous) delete out[lk];
+    return out;
+})();
 
 const CURRENCY: Record<string, [string, string]> = {
     $: ["dollar", "dollars"], "£": ["pound", "pounds"], "€": ["euro", "euros"], "¥": ["yen", "yen"],
@@ -804,10 +817,16 @@ function ordinalSuffix(n: number): string {
     return "th";
 }
 
+/** Days in `month` (1-12) of `year`, Gregorian. A range check of 1-31 let `2024-02-31` through as a date. */
+function daysInMonth(year: number, month: number): number {
+    if (month === 2) return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0 ? 29 : 28;
+    return month === 4 || month === 6 || month === 9 || month === 11 ? 30 : 31;
+}
+
 /** A numeric date → "march 14th 2011", the word order English speaks and the shape the date/year rules
  *  below already handle. `undefined` if the fields are not a real date, so the caller leaves it alone. */
 function isoDate(year: number, month: number, day: number): string | undefined {
-    if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+    if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month)) return undefined;
     return `${MONTHS[month - 1]} ${day}${ordinalSuffix(day)} ${year}`;
 }
 
@@ -1577,7 +1596,10 @@ export function normalizeEnglish(input: string): string {
             // ("kilograms per metre"), the denominator SINGULAR, which is how a rate is said.
             const num = resolveUnitSymbol(UNITS, UNITS_FOLDED, left);
             const den = resolveUnitSymbol(UNITS, UNITS_FOLDED, right);
-            const period = TIME_PERIOD[right.toLowerCase()];
+            // ⚠ OWN KEYS ONLY: `TIME_PERIOD[...]` also finds `Object.prototype`, and `litres/constructor`
+            // read *litres per function Object() { [native code] }*.
+            const rl = right.toLowerCase();
+            const period = Object.hasOwn(TIME_PERIOD, rl) ? TIME_PERIOD[rl] : undefined;
             const rate = period !== undefined || num !== undefined || den !== undefined
                 || UNIT_WORDS.has(left.toLowerCase()) || UNIT_WORDS.has(right.toLowerCase());
             if (rate) return `${num?.[1] ?? left} per ${period ?? den?.[0] ?? right}`;

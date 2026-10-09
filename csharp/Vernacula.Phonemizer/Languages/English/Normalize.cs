@@ -148,10 +148,19 @@ public static class Normalize
 
     private static readonly IReadOnlyDictionary<string, string[]> UNITS_FOLDED = BuildFolded();
 
+    /** First-declared wins a slot, and a slot whose declared keys DISAGREE (µm/µM, µs/µS, mΩ/MΩ) is left out:
+     *  only an undeclared case variant reaches the fold, and it has no case to decide by. */
     private static Dictionary<string, string[]> BuildFolded()
     {
         var d = new Dictionary<string, string[]>(StringComparer.Ordinal);
-        foreach (var kv in UNITS.Reverse()) d[kv.Key.ToLowerInvariant()] = kv.Value;
+        var ambiguous = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var kv in UNITS)
+        {
+            var lk = kv.Key.ToLowerInvariant();
+            if (!d.TryGetValue(lk, out var have)) d[lk] = kv.Value;
+            else if (!have.SequenceEqual(kv.Value)) ambiguous.Add(lk);
+        }
+        foreach (var lk in ambiguous) d.Remove(lk);
         return d;
     }
 
@@ -791,9 +800,15 @@ public static class Normalize
 
     /** A numeric date → "march 14th 2011", the word order English speaks and the shape the date/year rules
      *  below already handle. Null if the fields are not a real date, so the caller leaves it alone. */
+    private static double DaysInMonth(double year, double month)
+    {
+        if (month == 2) return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0 ? 29 : 28;
+        return month == 4 || month == 6 || month == 9 || month == 11 ? 30 : 31;
+    }
+
     private static string? IsoDate(double year, double month, double day)
     {
-        if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+        if (month < 1 || month > 12 || day < 1 || day > DaysInMonth(year, month)) return null;
         return $"{MONTHS[(int)month - 1]} {Js.NumberToString(day)}{OrdinalSuffix(day)} {Js.NumberToString(year)}";
     }
 

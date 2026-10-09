@@ -232,6 +232,9 @@ export function stripMarkup(text: string): string {
             // replacement character, so nothing is silently invented.
             return Number.isFinite(cp) && cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : whole;
         }
-        return NAMED[body.toLowerCase()] ?? whole; // an unknown entity stays literal
+        // ⚠ OWN KEYS ONLY. `NAMED` is an object literal, so a bare index also finds `Object.prototype`:
+        // `&constructor;` became the text `function Object() { [native code] }`, which the engine then read aloud.
+        const name = body.toLowerCase();
+        return Object.hasOwn(NAMED, name) ? NAMED[name]! : whole; // an unknown entity stays literal
     });
 }
