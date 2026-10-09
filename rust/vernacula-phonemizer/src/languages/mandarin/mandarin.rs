@@ -14,6 +14,7 @@ use super::yi_bu_sandhi::apply_yi_bu_sandhi;
 use crate::core::clauses::ClauseSink;
 use crate::core::foreign::{ForeignPhonemizer, read_foreign_run};
 use crate::core::js_string::{JsString, js, js_number};
+use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map, load_tsv_strings};
 use crate::core::provenance::{Piece, rebuilt, tracing};
 use crate::core::trace::{begin_token, end_token, enter_engine};
@@ -33,15 +34,9 @@ fn is_foreign_char(s: &JsString) -> bool {
     js_re!(r"[\p{L}\p{M}]", "u").test(s)
 }
 
-/// The shared symbol tier (`makeSymbolNormalizer` over `MANIFEST.symbolTier`).
-/// TODO(symbol tier): PORT-PENDING — `core::normalize_symbols::make_symbol_normalizer` is not ported yet (the
-/// es port owns it). Until it lands this is the identity, so every row with a currency sign, unit, percent,
-/// exponent or `NxN` multiply diverges from the TS.
-fn symbols(s: &JsString) -> JsString {
-    s.clone()
-}
-
 pub struct MandarinPhonemizer {
+    /// The shared symbol tier over `MANIFEST.symbolTier` (百分之 precedes the number; units follow).
+    symbols: SymbolNormalizer,
     pinyin_to_ipa: PinyinToIpa,
     pinyin: PinyinTables,
     foreign: Option<ForeignPhonemizer>,
@@ -145,7 +140,7 @@ impl MandarinPhonemizer {
     }
 
     pub fn text(&self, input: &JsString) -> JsString {
-        let input = spell_initialisms(&symbols(&normalize_mandarin(input)));
+        let input = spell_initialisms(&self.symbols.apply(&normalize_mandarin(input)));
         if !is_han(&input)
             && js_re!(r"[1-5]").test(&input)
             && js_re!(r"^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$", "u").test(&input)
@@ -269,8 +264,12 @@ pub fn create_pinyin_phonemizer() -> Result<PinyinToIpa, String> {
 
 /// `createMandarin(foreign)`.
 pub fn create_mandarin(foreign: Option<ForeignPhonemizer>) -> Result<MandarinPhonemizer, String> {
+    let tables = load_mandarin_tables()?; // checks the manifest first
+    let tier: SymbolData =
+        serde_json::from_value(MANIFEST.symbol_tier.clone()).map_err(|e| format!("cmn symbolTier: {e}"))?;
     Ok(MandarinPhonemizer {
-        pinyin_to_ipa: PinyinToIpa::new(load_mandarin_tables()?),
+        symbols: make_symbol_normalizer(&tier)?,
+        pinyin_to_ipa: PinyinToIpa::new(tables),
         pinyin: load_pinyin_tables()?,
         foreign,
     })

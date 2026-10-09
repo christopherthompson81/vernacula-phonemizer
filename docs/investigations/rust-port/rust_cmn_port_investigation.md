@@ -122,3 +122,29 @@ insertion order: `serde_json::from_value::<SymbolData>` of the manifest value is
 
 **Implication.** Waiting on the final es hash; then swap the stub, regenerate all dumps (the probe file gained
 the FRACTION-asymmetry lines after Run 2's dumps), and re-run every gate.
+
+## Run 5 — 2026-10-09 17:50
+
+**Context.** `git cherry-pick 9aceb875` (core `makeSymbolNormalizer`, from the es port), clean. Stub removed:
+`create_mandarin` deserializes `MANIFEST.symbol_tier` into `SymbolData` and builds the normalizer once (after
+the manifest check, so a missing manifest is a `Data` error, not a panic). Every dump regenerated from this
+tree (the probe list now carries the FRACTION-asymmetry lines).
+
+**Question.** With the real symbol tier, is cmn byte-identical everywhere?
+
+**Commands.** `cargo run --release -p parity -- cmn`; `fn-diff <name> .probe/cmn/<name>.jsonl` for each dump;
+`.probe/cmn/lister` over sync and best; `cargo test --workspace --release`; `cargo build --workspace` (debug and
+release) for warnings; `parity en en-GB` for the regression check.
+
+**Raw finding.**
+- golden: `cmn: 200/200 identical, 0 differ` (en 200/200, en-GB 200/200 unchanged)
+- `cmn-normalize: 12537 identical, 0 DIFFER` · `cmn-segment: 16716 identical, 0 DIFFER` ·
+  `cmn-pinyin: 54919 identical, 0 DIFFER` · `cmn-numbers: 20608 identical, 0 DIFFER`
+- `phonemize-sync: 4165 identical, 7 DIFFER` · `phonemize-best: 4165 identical, 7 DIFFER` ·
+  `trace: 4172 identical, 7 DIFFER`
+- The 7 are exactly Run 4's port-pending foreign-script probes (el, th, ru, hi, ja, ko). All 43 symbol-tier rows
+  from Run 2 now agree, ipa and trace alike.
+- Tests: 46 + 1 passed, 0 failed. Build: no warnings.
+
+**Implication.** Done per the checklist. Port-pending: 7 probe rows, none in the golden or FLEURS. Re-check
+ja and hi after those ports merge.
