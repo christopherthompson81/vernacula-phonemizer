@@ -15,5 +15,6 @@ pub mod markup;
 pub mod normalize_symbols;
 pub mod provenance;
 pub mod roman;
+pub mod structural_tagger;
 pub mod trace;
 pub mod unicode;
