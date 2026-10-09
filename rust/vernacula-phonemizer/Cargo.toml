@@ -8,7 +8,7 @@ publish = false
 
 [dependencies]
 regress = { version = "0.12", default-features = false, features = ["std", "utf16"] }
-indexmap = "2"
+indexmap = { version = "2", features = ["serde"] }
 unicode-normalization = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }

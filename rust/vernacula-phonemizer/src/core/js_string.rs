@@ -328,3 +328,82 @@ mod tests {
         assert_eq!(js("\u{FEFF} x \u{85}").trim(), "x \u{85}");
     }
 }
+
+/// `Number(s)`: ECMAScript StringToNumber. Whitespace-trimmed; empty is 0; decimal with optional sign and
+/// exponent, `Infinity`, or unsigned `0x`/`0o`/`0b`; anything else NaN. (Rust's `f64` parse also accepts
+/// `inf`/`nan`/`infinity` in any case, which JS does not.)
+pub fn js_number(s: &JsString) -> f64 {
+    let t = s.trim().to_string_lossy();
+    if t.is_empty() {
+        return 0.0;
+    }
+    let radix = |digits: &str, r: u32| -> f64 {
+        if digits.is_empty() || !digits.chars().all(|c| c.is_digit(r)) {
+            return f64::NAN;
+        }
+        digits.chars().fold(0.0, |acc, c| acc * r as f64 + c.to_digit(r).unwrap() as f64)
+    };
+    let lower2 = t.get(..2).map(|p| p.to_ascii_lowercase());
+    match lower2.as_deref() {
+        Some("0x") => return radix(&t[2..], 16),
+        Some("0o") => return radix(&t[2..], 8),
+        Some("0b") => return radix(&t[2..], 2),
+        _ => {}
+    }
+    let (sign, body) = match t.as_bytes()[0] {
+        b'+' => (1.0, &t[1..]),
+        b'-' => (-1.0, &t[1..]),
+        _ => (1.0, &t[..]),
+    };
+    if body == "Infinity" {
+        return sign * f64::INFINITY;
+    }
+    // StrUnsignedDecimalLiteral: digits [. digits] [e[+-]digits] | . digits [exponent].
+    let b = body.as_bytes();
+    let mut i = 0;
+    let int_digits = b.iter().take_while(|c| c.is_ascii_digit()).count();
+    i += int_digits;
+    let mut frac_digits = 0;
+    if b.get(i) == Some(&b'.') {
+        i += 1;
+        frac_digits = b[i..].iter().take_while(|c| c.is_ascii_digit()).count();
+        i += frac_digits;
+    }
+    if int_digits + frac_digits == 0 {
+        return f64::NAN;
+    }
+    if matches!(b.get(i), Some(b'e') | Some(b'E')) {
+        let mut j = i + 1;
+        if matches!(b.get(j), Some(b'+') | Some(b'-')) {
+            j += 1;
+        }
+        let exp_digits = b[j.min(b.len())..].iter().take_while(|c| c.is_ascii_digit()).count();
+        if exp_digits == 0 {
+            return f64::NAN;
+        }
+        i = j + exp_digits;
+    }
+    if i != b.len() {
+        return f64::NAN;
+    }
+    sign * body.parse::<f64>().unwrap_or(f64::NAN)
+}
+
+#[cfg(test)]
+mod number_tests {
+    use super::*;
+
+    #[test]
+    fn js_number_semantics() {
+        assert_eq!(js_number(&js("")), 0.0);
+        assert_eq!(js_number(&js(" 5 ")), 5.0);
+        assert_eq!(js_number(&js("0x1F")), 31.0);
+        assert_eq!(js_number(&js("1e3")), 1000.0);
+        assert_eq!(js_number(&js(".5")), 0.5);
+        assert_eq!(js_number(&js("5.")), 5.0);
+        assert_eq!(js_number(&js("-Infinity")), f64::NEG_INFINITY);
+        assert!(js_number(&js("inf")).is_nan());
+        assert!(js_number(&js("1,5")).is_nan());
+        assert!(js_number(&js("-0x5")).is_nan());
+    }
+}
