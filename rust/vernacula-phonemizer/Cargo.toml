@@ -1,0 +1,10 @@
+[package]
+name = "vernacula-phonemizer"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "Canonical-IPA phonemizer: a port of the vernacula-phonemizer TypeScript engine"
+publish = false
+
+[dependencies]
+regress = { version = "0.12", default-features = false, features = ["std", "utf16"] }
