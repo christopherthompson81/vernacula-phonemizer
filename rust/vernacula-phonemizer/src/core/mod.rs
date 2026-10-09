@@ -8,6 +8,7 @@ pub mod js_regex;
 pub mod js_string;
 pub mod load_manifest;
 pub mod load_tsv;
+pub mod neural;
 pub mod provenance;
 pub mod trace;
 pub mod unicode;

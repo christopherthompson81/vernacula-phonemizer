@@ -1,5 +1,5 @@
 [workspace]
-members = ["vernacula-phonemizer", "tools/regex-diff"]
+members = ["vernacula-phonemizer", "tools/regex-diff", "tools/onnx-diff"]
 resolver = "3"
 
 [workspace.package]
