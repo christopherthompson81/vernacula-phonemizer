@@ -120,7 +120,9 @@ trace dump filtered to texts containing `pH`.
    `s.replaceAll(k, v)` rather than `rewrite`, so the provenance mapping is poisoned. In the trace dump,
    exactly 3 of 3,685 rows have tokens without `inputSpan`. All 3 are the `pH` rows, and in each of them
    EVERY token lacks it (13/13, 10/10, 2/2). Kokoro builds word spans from `input_span`, so those rows get
-   none. (`replaceAll` also matches inside a longer Latin word. That is a smaller issue.)
+   none. Minimal repro: `phonemizeTrace("pHの値", "ja")`, where both tokens lack `inputSpan`. (`replaceAll`
+   also matches inside a longer Latin word. That is a smaller issue.)
+   Minimal repro of 1: `phonemize("あっお", "ja")` → `äoo̞` (expected `äʔo̞`).
 3. **Unreachable arms on the shipped path.** normalize.ts's full-width digit and Latin folds never fire
    through `phonemize`, because the registry's fold pre-pass has already folded them. Its `digit × digit`
    rule (9b) never fires either, because the symbol tier's `multiply` runs first and claims every case. Both
@@ -134,3 +136,18 @@ trace dump filtered to texts containing `pH`.
 
 **Implication.** The Rust port reproduces 1 and 2 byte-for-byte, as the bidirectional rule requires (no fix in
 Rust alone). Both are reported for a TS-first fix. 2 matters for the Kokoro word spans.
+
+## Run 5 — 2026-10-09 17:50 (state at hand-off)
+
+**Question.** What is left once everything except the symbol tier is done?
+
+**Finding.** Both TS defects from Run 4 are logged for the TS-first fix batch. The Rust port reproduces the
+current behaviour of each byte-for-byte (`ja-kana` and `trace` are 0 DIFFER on those rows). The only open
+item is `makeSymbolNormalizer`, from the es port. Its WIP commit on `rust-lang-es` was deliberately NOT
+cherry-picked: the coordinator sends the final hash once es is green. Then `japanese.rs::symbols` is replaced
+by `make_symbol_normalizer` over `MANIFEST.symbolTier`'s 8 fields, and the parity, sync, best and trace
+dumps are re-run.
+
+**Port-pending rows (symbol tier):** golden 5 of 200. Over the 3,685 golden+FLEURS+probe texts: 83 sync,
+83 best, 84 trace. No row is port-pending on a foreign engine: the only embedded runs are Latin, and English
+is ported.
