@@ -208,6 +208,50 @@ g2p is right and the tagger is wrong on all three. Moving the pre-pass onto the 
 did for English would REGRESS these readings unless the letter names are added to `supplement.tsv` first.
 Reported, not changed (the Rust reproduces the TS).
 
+## Run 10 — 2026-10-09 17:35 (review round)
+
+**Question:** after the review fixes and a rebase onto `origin/main` c64801a5 (#1467 ja + the symbol tier,
+#1468 cross-cutting fixes), does every gate still hold?
+
+**What changed:**
+- **Rebase.** My cherry-pick of the symbol commit was dropped (`git rebase --skip`), because main carries its
+  reviewed version. In the shared lists I kept both sides: LANGUAGES is now `en, en-GB, ja, fr`, and the
+  `build` arms are ja then fr, each with its own `.map_err` line, which git had factored out of the hunk. For
+  dump.mts I put ja's `trace` closing `},` back before the fr entries, and I re-inserted my distinct
+  `phonemize-trace` dump and its replay arm by hand.
+- **Loading.** `try_manifest` and the shipped tagger now go through `core::data_source::load_once`, so only
+  a successful load is cached.
+- **No panic on missing data.** `to_ipa`, `normalize_french`, `normalize_french_initialisms`,
+  `is_unreadable_french`, `number_to_words`, `ordinal` and the two ordinal normalizers are now public
+  `Result` wrappers that check `try_manifest` first. The engine calls the `pub(crate)` `*_loaded` forms, which
+  run only after `create_french` has checked the manifest.
+- **Core helpers instead of private copies.** `js_number_to_string` replaced my Number.toString port, and
+  `ABBREV_ALT` is built with `sorted_by_length_desc` + `alternation`.
+- **Tagger surface.** `french_tagger_unavailable_reason` is exported from the registry and from `lib`.
+- **Shared tagger code.** `core::structural_tagger::{TaggerTables, load_tagger}` now holds the meta
+  validation (charTags bounds, logits length) and the file and graph load. Both `EnglishTagger` and
+  `WordStructuralTagger` use them. TaggerTables re-keys the meta once (code point → id, a Vec of permitted
+  ids indexed by id, a Vec of tag chunks), so `tag()` no longer formats an id string per position.
+  ⚠ The re-keyed lookup accepts only the CANONICAL decimal key (`String(n)`), which is what a JS property
+  lookup hits. English's old `parse()` would also have taken `"01"`. The shipped metas have no such key.
+- **Heteronyms.** The heteronym entry is looked up before any neighbour string is built.
+- **Dead parameter.** `_is_word` is kept and commented as unused, pending the TS fix.
+
+**Commands:** every fr dump regenerated from the rebased dump.mts and replayed; `parity -- fr ja en en-GB`;
+`parity -- --sync fr`; `LANGS=en,en-GB,ja phonemize-best` as a control for the English tagger refactor;
+`cargo test --workspace`; `cargo build`.
+
+**Raw finding:**
+- parity: fr 200/200, ja 200/200, en 200/200, en-GB 200/200. fr `--sync`: 157/200.
+- fn-diff: fr-normalize 12,126/0, fr-g2p 139,485/0, fr-numbers 20,084/0, fr-ordinals 20,116/0,
+  fr-tagger 15,006/0.
+- phonemize-sync, -best and -trace are each 4,041/4,042. The failing row is the ru/el/cmn port-pending probe.
+- en+en-GB+ja best: 11,975/11,977. The 2 failing rows are the Greek probe `α²β and λόγος…` in en and en-GB,
+  port-pending on el, as before this change.
+- `cargo test --workspace`: 49 + 1 passed. `cargo build`: 0 warnings.
+
+**Implication:** the review changes are behaviour-neutral on every instrument.
+
 ## Findings in the TS (reported, not fixed in Rust)
 
 1. **`normalizeFrench(input, isWord)` never reads `isWord`.** Its docstring says the parameter "decides

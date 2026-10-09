@@ -7,13 +7,14 @@ use std::collections::HashSet;
 use std::sync::{Arc, LazyLock};
 
 use super::manifest::MANIFEST;
-use super::numbers::number_to_words;
-use super::ordinals::ordinal;
+use super::numbers::number_to_words_loaded;
+use super::ordinals::ordinal_loaded;
 use crate::core::initialisms::{
     InitialismData, LetterName, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
 };
 use crate::core::js_regex::{JsMatch, JsRegex};
 use crate::core::js_string::{JsString, js, js_number};
+use crate::core::normalize_symbols::{alternation, sorted_by_length_desc};
 use crate::core::provenance::{rewrite, rewrite_with};
 use crate::js_re;
 
@@ -93,7 +94,7 @@ static IS_UNREADABLE: LazyLock<Arc<dyn Fn(&JsString) -> bool + Send + Sync>> = L
 });
 
 /// `isUnreadableFrench`: the phonotactic test the initialism pass consults.
-pub fn is_unreadable_french(word: &JsString) -> bool {
+pub(crate) fn is_unreadable_french_loaded(word: &JsString) -> bool {
     IS_UNREADABLE(word)
 }
 
@@ -101,7 +102,7 @@ static ACRONYM_LETTERS: LazyLock<HashSet<JsString>> =
     LazyLock::new(|| MANIFEST.acronym_letters.iter().map(|w| js(w)).collect());
 
 fn feminine_words(n: f64) -> JsString {
-    js_re!(r"(^|[-\s])un$", "u").replace(&number_to_words(n, None), &js("$1une"))
+    js_re!(r"(^|[-\s])un$", "u").replace(&number_to_words_loaded(n, None), &js("$1une"))
 }
 
 fn time_words(h: f64, min: Option<f64>) -> JsString {
@@ -121,7 +122,7 @@ fn fraction_words(num: f64, den: f64) -> Option<JsString> {
         4.0 => Some(js("quart")),
         _ => None,
     };
-    let base = suppletive.or_else(|| ordinal(den, false, false))?;
+    let base = suppletive.or_else(|| ordinal_loaded(den, false, false))?;
     if den < 2.0 {
         return None;
     }
@@ -130,15 +131,14 @@ fn fraction_words(num: f64, den: f64) -> Option<JsString> {
     } else {
         base
     };
-    Some(number_to_words(num, None).concat(&js(" ")).concat(&plural))
+    Some(number_to_words_loaded(num, None).concat(&js(" ")).concat(&plural))
 }
 
-/// `[...Object.keys(DOTTED_ABBREV), ...DOT_ONLY].sort((a, b) => b.length - a.length).join("|")`: a STABLE
-/// sort by UTF-16 length, so equal lengths keep their order.
+/// `[...Object.keys(DOTTED_ABBREV), ...DOT_ONLY].sort((a, b) => b.length - a.length).join("|")`.
 static ABBREV_ALT: LazyLock<String> = LazyLock::new(|| {
-    let mut keys: Vec<&str> = DOTTED_ABBREV.iter().map(|(k, _)| *k).chain(DOT_ONLY).collect();
-    keys.sort_by_key(|k| std::cmp::Reverse(k.encode_utf16().count()));
-    keys.join("|")
+    alternation(&sorted_by_length_desc(
+        DOTTED_ABBREV.iter().map(|(k, _)| js(k)).chain(DOT_ONLY.iter().map(|k| js(k))),
+    ))
 });
 
 static DIGIT_GROUP: LazyLock<JsRegex> = LazyLock::new(|| {
@@ -179,7 +179,10 @@ fn money(int: &JsString, cents: &JsString, sym: &JsString) -> JsString {
 }
 
 /// `normalizeFrench(input, isWord)`. Pure text→text.
-pub fn normalize_french(input: &JsString, _is_word: &dyn Fn(&JsString) -> bool) -> JsString {
+///
+/// `_is_word` mirrors the TS signature and is UNUSED there too (its docstring describes a decision that moved to
+/// `normalizeFrenchInitialisms`); kept until the TS drops it, reported in rust_fr_port_investigation.md.
+pub(crate) fn normalize_french_loaded(input: &JsString, _is_word: &dyn Fn(&JsString) -> bool) -> JsString {
     let mut s = input.clone();
 
     // 0) digit grouping (twice: millions), then the remaining no-break spaces.
@@ -282,11 +285,11 @@ pub fn normalize_french(input: &JsString, _is_word: &dyn Fn(&JsString) -> bool) 
         let Some(month) = month.filter(|_| (1.0..=31.0).contains(&dn)) else {
             return m.value(x);
         };
-        let day = if dn == 1.0 { ordinal(1.0, false, false).unwrap() } else { d };
+        let day = if dn == 1.0 { ordinal_loaded(1.0, false, false).unwrap() } else { d };
         day.concat(&js(&format!(" {month} "))).concat(&y)
     });
     s = rewrite_with(&s, &FIRST_OF_MONTH, |m, x| {
-        ordinal(1.0, false, false).unwrap().concat(&js(" ")).concat(&g(m, 1, x))
+        ordinal_loaded(1.0, false, false).unwrap().concat(&js(" ")).concat(&g(m, 1, x))
     });
 
     s
@@ -298,7 +301,7 @@ static LETTER_NAME: LazyLock<LetterName> = LazyLock::new(|| {
 
 /// `normalizeFrenchInitialisms(text, isRecorded)`: runs after the numeral passes, claiming only what they
 /// declined.
-pub fn normalize_french_initialisms(text: &JsString, is_recorded: &dyn Fn(&JsString) -> bool) -> JsString {
+pub(crate) fn normalize_french_initialisms_loaded(text: &JsString, is_recorded: &dyn Fn(&JsString) -> bool) -> JsString {
     make_initialism_normalizer(
         InitialismData {
             letter_name: LETTER_NAME.clone(),
@@ -309,4 +312,25 @@ pub fn normalize_french_initialisms(text: &JsString, is_recorded: &dyn Fn(&JsStr
         },
         true,
     )(text)
+}
+
+/// `normalizeFrench(input, isWord)`, or why the manifest is unavailable.
+pub fn normalize_french(input: &JsString, is_word: &dyn Fn(&JsString) -> bool) -> Result<JsString, String> {
+    super::manifest::try_manifest()?;
+    Ok(normalize_french_loaded(input, is_word))
+}
+
+/// `normalizeFrenchInitialisms(text, isRecorded)`, or why the manifest is unavailable.
+pub fn normalize_french_initialisms(
+    text: &JsString,
+    is_recorded: &dyn Fn(&JsString) -> bool,
+) -> Result<JsString, String> {
+    super::manifest::try_manifest()?;
+    Ok(normalize_french_initialisms_loaded(text, is_recorded))
+}
+
+/// `isUnreadableFrench(word)`, or why the manifest is unavailable.
+pub fn is_unreadable_french(word: &JsString) -> Result<bool, String> {
+    super::manifest::try_manifest()?;
+    Ok(is_unreadable_french_loaded(word))
 }

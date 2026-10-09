@@ -2,7 +2,7 @@
 //! word. Ported from src/languages/french/numbers.ts — see that file for why the hyphens are load-bearing.
 
 use super::manifest::MANIFEST;
-use crate::core::js_string::{JsString, js};
+use crate::core::js_string::{JsString, js, js_number_to_string};
 use crate::core::numbers::digit_index;
 
 /// `Number.isSafeInteger(n)`.
@@ -71,11 +71,11 @@ fn below1000(n: u64) -> String {
 
 /// `numberToWords(n, raw?)`: a non-negative integer below 10⁹ → words; anything else digit by digit (from
 /// `raw` when given, else `String(Math.abs(n))`).
-pub fn number_to_words(n: f64, raw: Option<&JsString>) -> JsString {
+pub(crate) fn number_to_words_loaded(n: f64, raw: Option<&JsString>) -> JsString {
     if !is_safe_integer(n) || n < 0.0 || n >= 1e9 {
         let digits = match raw {
             Some(r) => r.clone(),
-            None => js(&js_integer_string(n.abs())),
+            None => js(&js_number_to_string(n.abs())),
         };
         let words: Vec<JsString> = digits
             .code_point_strings()
@@ -124,32 +124,8 @@ fn words_safe(n: u64) -> String {
     }
 }
 
-/// `String(x)` (Number::toString) for a non-negative `x`: the shortest round-trip digits, laid out by the
-/// ECMAScript rules (plain up to 21 digits, exponent form beyond). Only safe integers ≥ 10⁹ reach it from
-/// the engine (an ordinal); the rest is exercised by the differential.
-fn js_integer_string(x: f64) -> String {
-    if x == 0.0 {
-        return "0".into();
-    }
-    if !x.is_finite() {
-        return if x.is_nan() { "NaN".into() } else { "Infinity".into() };
-    }
-    let sci = format!("{x:e}");
-    let (mant, exp) = sci.split_once('e').unwrap();
-    let digits: String = mant.chars().filter(|c| c.is_ascii_digit()).collect();
-    let k = digits.len() as i32;
-    let n = exp.parse::<i32>().unwrap() + 1;
-    if k <= n && n <= 21 {
-        format!("{digits}{}", "0".repeat((n - k) as usize))
-    } else if 0 < n && n <= 21 {
-        format!("{}.{}", &digits[..n as usize], &digits[n as usize..])
-    } else if -6 < n && n <= 0 {
-        format!("0.{}{digits}", "0".repeat((-n) as usize))
-    } else {
-        let e = n - 1;
-        let sign = if e < 0 { "-" } else { "+" };
-        let rest = if k > 1 { format!(".{}", &digits[1..]) } else { String::new() };
-        format!("{}{rest}e{sign}{}", &digits[..1], e.abs())
-    }
+/// `numberToWords(n, raw?)`, or why the manifest is unavailable.
+pub fn number_to_words(n: f64, raw: Option<&JsString>) -> Result<JsString, String> {
+    super::manifest::try_manifest()?;
+    Ok(number_to_words_loaded(n, raw))
 }
-

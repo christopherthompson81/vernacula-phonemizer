@@ -361,12 +361,16 @@ pub fn tagger_unavailable_reason() -> Option<String> {
 }
 
 fn build_english_tagger() -> Result<EnglishTagger, String> {
-    let (meta, bytes) = load_english_tagger_files("en-g2p-tagger")?;
-    let model = crate::core::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;
-    EnglishTagger::new(meta, Box::new(model))
+    let (meta, model) = load_english_tagger_files("en-g2p-tagger")?;
+    EnglishTagger::new(meta, model)
 }
 
 // ── French ───────────────────────────────────────────────────────────────────────────────────────────
+
+/// Why the French BiLSTM OOV tagger is unavailable (the fr best path then serves the sync reading), or `None`.
+pub fn french_tagger_unavailable_reason() -> Option<String> {
+    crate::languages::french::french_tagger::french_tagger_unavailable_reason()
+}
 
 struct FrenchEngine(crate::languages::french::french::FrenchPhonemizer);
 

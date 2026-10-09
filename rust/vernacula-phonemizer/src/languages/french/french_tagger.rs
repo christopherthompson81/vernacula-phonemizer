@@ -4,6 +4,7 @@
 use std::sync::OnceLock;
 
 use super::manifest::DIR;
+use crate::core::data_source::load_once;
 use crate::core::js_string::JsString;
 use crate::core::provenance::{Form, normalize};
 use crate::core::structural_tagger::{
@@ -27,21 +28,20 @@ pub fn create_french_tagger(basename: &str) -> Result<FrenchTagger, String> {
     })
 }
 
-static TAGGER: OnceLock<Result<FrenchTagger, String>> = OnceLock::new();
-
-fn shipped() -> &'static Result<FrenchTagger, String> {
-    TAGGER.get_or_init(|| create_french_tagger("fr-g2p-tagger"))
+fn shipped() -> Result<&'static FrenchTagger, String> {
+    static TAGGER: OnceLock<FrenchTagger> = OnceLock::new();
+    load_once(&TAGGER, || create_french_tagger("fr-g2p-tagger"))
 }
 
-/// The shipped tagger, built once; `None` when its files are unreadable or its graph unsupported (the best
-/// path then degrades to the sync engine, as the TS does without onnxruntime).
+/// The shipped tagger, cached once built; `None` when its files are unreadable or its graph unsupported (the
+/// best path then degrades to the sync engine, as the TS does without onnxruntime). A failure is retried.
 pub fn french_tagger() -> Option<&'static FrenchTagger> {
-    shipped().as_ref().ok()
+    shipped().ok()
 }
 
 /// Why `french_tagger()` is `None`, if it is.
 pub fn french_tagger_unavailable_reason() -> Option<String> {
-    shipped().as_ref().err().cloned()
+    shipped().err()
 }
 
 #[cfg(test)]

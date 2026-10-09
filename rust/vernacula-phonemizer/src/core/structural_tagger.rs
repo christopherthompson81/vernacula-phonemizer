@@ -56,6 +56,114 @@ impl CharLogits for super::neural::OnnxModel {
     }
 }
 
+/// A tagger's meta, re-keyed once for the per-position loop: code point → id, id → permitted tag ids, tag id
+/// → IPA chunk. Built by `TaggerTables::new`, which also refuses a meta that does not fit its tag table.
+pub struct TaggerTables {
+    char_id: HashMap<char, i64>,
+    /// Indexed by symbol id; empty where `charTags` has no (or an empty) entry, which `masked_argmax` declines.
+    permitted: Vec<Vec<usize>>,
+    /// Indexed by tag id; `None` where `tags` has no entry (the TS `?? ""`).
+    tags: Vec<Option<String>>,
+    pub n_tags: usize,
+}
+
+/// The key `String(n)` gives a non-negative integer: a JS property lookup only ever hits that spelling.
+fn canonical_id(key: &str) -> Option<usize> {
+    let n: usize = key.parse().ok()?;
+    (n.to_string() == key).then_some(n)
+}
+
+impl TaggerTables {
+    /// ⚠ A `charTags` id outside the tag table is refused: `masked_argmax` would read a neighbouring row (or
+    /// past the end), which is a meta.json that does not belong to this model.
+    pub fn new(meta: &TaggerMeta) -> Result<TaggerTables, String> {
+        let n_tags = meta.tags.len();
+        if let Some((c, bad)) = meta
+            .char_tags
+            .iter()
+            .find_map(|(c, ids)| ids.iter().find(|&&t| t >= n_tags).map(|t| (c, *t)))
+        {
+            return Err(format!(
+                "tagger meta: charTags[{c}] names tag {bad}, but there are only {n_tags} tags"
+            ));
+        }
+        // `meta.src[ch]` is a lookup by one code point, so a key of any other length is unreachable.
+        let char_id: HashMap<char, i64> = meta
+            .src
+            .iter()
+            .filter_map(|(k, &id)| {
+                let mut cs = k.chars();
+                match (cs.next(), cs.next()) {
+                    (Some(c), None) => Some((c, id)),
+                    _ => None,
+                }
+            })
+            .collect();
+        let mut permitted: Vec<Vec<usize>> = Vec::new();
+        for (k, ids) in &meta.char_tags {
+            if let Some(i) = canonical_id(k) {
+                if permitted.len() <= i {
+                    permitted.resize(i + 1, Vec::new());
+                }
+                permitted[i] = ids.clone();
+            }
+        }
+        let mut tags: Vec<Option<String>> = vec![None; n_tags];
+        for (k, v) in &meta.tags {
+            if let Some(i) = canonical_id(k) {
+                if tags.len() <= i {
+                    tags.resize(i + 1, None);
+                }
+                tags[i] = Some(v.clone());
+            }
+        }
+        Ok(TaggerTables { char_id, permitted, tags, n_tags })
+    }
+
+    /// `meta.src[ch]`; `None` for a lone surrogate (`char::from_u32` fails) or an out-of-vocabulary symbol.
+    pub fn id_of(&self, cp: u32) -> Option<i64> {
+        self.char_id.get(&char::from_u32(cp)?).copied()
+    }
+
+    /// `maskedArgmax(logits, k · nTags, meta.charTags[String(id)])`: `None` when nothing is permitted.
+    pub fn best(&self, logits: &[f32], k: usize, id: i64) -> Option<usize> {
+        let valid = usize::try_from(id).ok().and_then(|i| self.permitted.get(i));
+        masked_argmax(logits, k * self.n_tags, valid)
+    }
+
+    /// `meta.tags[String(best)] ?? ""`.
+    pub fn tag(&self, best: usize) -> &str {
+        self.tags.get(best).and_then(|t| t.as_deref()).unwrap_or("")
+    }
+
+    /// The model returned `T · nTags` logits, or the graph does not match this meta.
+    pub fn check_logits(&self, logits: &[f32], t: usize) -> Result<(), String> {
+        if logits.len() == t * self.n_tags {
+            Ok(())
+        } else {
+            Err(format!("logits length {} for T={t} × {} tags", logits.len(), self.n_tags))
+        }
+    }
+}
+
+/// A tagger's files from `dir`: `<basename>.meta.json` and `model_file`, the graph loaded by the pure-Rust
+/// runtime. `Err` (why) where the TS resolves `undefined`: unreadable files, or a graph the runtime does not
+/// reproduce.
+pub fn load_tagger(
+    dir: &str,
+    basename: &str,
+    model_file: &str,
+) -> Result<(TaggerMeta, Box<dyn CharLogits>), String> {
+    use super::data_source::{read_data, read_data_text};
+    let meta_key = format!("{dir}/{basename}.meta.json");
+    let meta: TaggerMeta =
+        serde_json::from_str(&read_data_text(&meta_key).map_err(|e| e.to_string())?)
+            .map_err(|e| format!("{meta_key}: {e}"))?;
+    let bytes = read_data(&format!("{dir}/{model_file}")).map_err(|e| e.to_string())?;
+    let model = super::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;
+    Ok((meta, Box::new(model)))
+}
+
 /// `WordTaggerOptions`, less what the pure-Rust runtime does not need (the ORT context string and the
 /// execution-provider env var).
 pub struct WordTaggerOptions {
@@ -71,47 +179,26 @@ pub struct WordTaggerOptions {
 
 /// A bare word → canonical IPA, or empty to defer to the rule engine (`WordStructuralTagger`).
 pub struct WordStructuralTagger {
-    meta: TaggerMeta,
-    n_tags: usize,
+    tables: TaggerTables,
     model: Box<dyn CharLogits>,
     preprocess: fn(&JsString) -> JsString,
     postprocess: Option<fn(&JsString) -> JsString>,
 }
 
-/// `createWordStructuralTagger`: `Err` (why) where the TS resolves `undefined` — unreadable files, or a
-/// graph the runtime does not reproduce.
+/// `createWordStructuralTagger`: `Err` (why) where the TS resolves `undefined`.
 pub fn create_word_structural_tagger(opts: WordTaggerOptions) -> Result<WordStructuralTagger, String> {
-    use super::data_source::{read_data, read_data_text};
-    let meta_key = format!("{}/{}.meta.json", opts.dir, opts.basename);
-    let meta: TaggerMeta =
-        serde_json::from_str(&read_data_text(&meta_key).map_err(|e| e.to_string())?)
-            .map_err(|e| format!("{meta_key}: {e}"))?;
-    let bytes =
-        read_data(&format!("{}/{}", opts.dir, opts.model_file)).map_err(|e| e.to_string())?;
-    let model = super::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;
-    WordStructuralTagger::new(meta, Box::new(model), opts.preprocess, opts.postprocess)
+    let (meta, model) = load_tagger(opts.dir, &opts.basename, &opts.model_file)?;
+    WordStructuralTagger::new(&meta, model, opts.preprocess, opts.postprocess)
 }
 
 impl WordStructuralTagger {
-    /// ⚠ A `charTags` id outside the tag table is refused: the TS would read a neighbouring row, which is a
-    /// meta.json that does not belong to this model.
     pub fn new(
-        meta: TaggerMeta,
+        meta: &TaggerMeta,
         model: Box<dyn CharLogits>,
         preprocess: fn(&JsString) -> JsString,
         postprocess: Option<fn(&JsString) -> JsString>,
     ) -> Result<WordStructuralTagger, String> {
-        let n_tags = meta.tags.len();
-        if let Some((c, bad)) = meta
-            .char_tags
-            .iter()
-            .find_map(|(c, ids)| ids.iter().find(|&&t| t >= n_tags).map(|t| (c, *t)))
-        {
-            return Err(format!(
-                "tagger meta: charTags[{c}] names tag {bad}, but there are only {n_tags} tags"
-            ));
-        }
-        Ok(WordStructuralTagger { meta, n_tags, model, preprocess, postprocess })
+        Ok(WordStructuralTagger { tables: TaggerTables::new(meta)?, model, preprocess, postprocess })
     }
 
     /// `tag(word)`: preprocess → decline on an out-of-vocabulary code point → one forward pass → masked
@@ -120,12 +207,8 @@ impl WordStructuralTagger {
         let pre = (self.preprocess)(word);
         let mut ids = Vec::new();
         for cp in pre.code_points() {
-            // A lone surrogate is its own element of `[...s]`, and no vocabulary key.
-            let Some(ch) = char::from_u32(cp) else {
-                return Ok(JsString::new());
-            };
-            match self.meta.src.get(ch.to_string().as_str()) {
-                Some(&id) => ids.push(id),
+            match self.tables.id_of(cp) {
+                Some(id) => ids.push(id),
                 None => return Ok(JsString::new()),
             }
         }
@@ -133,24 +216,13 @@ impl WordStructuralTagger {
             return Ok(JsString::new());
         }
         let logits = self.model.logits(&ids)?;
-        if logits.len() != ids.len() * self.n_tags {
-            return Err(format!(
-                "logits length {} for T={} × {} tags",
-                logits.len(),
-                ids.len(),
-                self.n_tags
-            ));
-        }
+        self.tables.check_logits(&logits, ids.len())?;
         let mut out = JsString::new();
-        for (k, id) in ids.iter().enumerate() {
-            let Some(best) =
-                masked_argmax(&logits, k * self.n_tags, self.meta.char_tags.get(&id.to_string()))
-            else {
+        for (k, &id) in ids.iter().enumerate() {
+            let Some(best) = self.tables.best(&logits, k, id) else {
                 return Ok(JsString::new());
             };
-            if let Some(t) = self.meta.tags.get(&best.to_string()) {
-                out.push_str(&JsString::from(t.as_str()));
-            }
+            out.0.extend(self.tables.tag(best).encode_utf16());
         }
         Ok(match self.postprocess {
             Some(p) => p(&out),

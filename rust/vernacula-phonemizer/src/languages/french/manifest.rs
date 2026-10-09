@@ -106,15 +106,16 @@ pub struct FrenchManifest {
     pub symbol_tier: SymbolTier,
 }
 
-/// The manifest, or why it could not be loaded. Loaded once; a failure is cached.
+/// The manifest, or why it could not be loaded. Cached once loaded; a failure is retried on the next call.
 pub fn try_manifest() -> Result<&'static FrenchManifest, String> {
-    static M: OnceLock<Result<FrenchManifest, String>> = OnceLock::new();
-    M.get_or_init(|| load_manifest(DIR, "french.jsonc").map_err(|e| e.to_string()))
-        .as_ref()
-        .map_err(Clone::clone)
+    static M: OnceLock<FrenchManifest> = OnceLock::new();
+    crate::core::data_source::load_once(&M, || {
+        load_manifest(DIR, "french.jsonc").map_err(|e| e.to_string())
+    })
 }
 
-/// The manifest for code that runs only after `create_french` has succeeded (which checks it first).
+/// The manifest for code that runs only after `try_manifest` has succeeded: `create_french` and every public
+/// entry point of this module check it first, so this never panics on missing data.
 pub static MANIFEST: LazyLock<&'static FrenchManifest> =
     LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 

@@ -130,7 +130,7 @@ struct Seg {
 }
 
 /// `toIpa(word)`: a French word → broad IPA, no stress.
-pub fn to_ipa(word: &JsString) -> JsString {
+pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
     let w = word.to_lower_case();
     let n = w.len();
     let mut seg: Vec<Seg> = Vec::new();
@@ -423,4 +423,10 @@ fn simple(ch: char, nx: Option<u16>, prev: Option<u16>) -> Option<&'static str> 
         'œ' => "œ",
         _ => return None,
     })
+}
+
+/// `toIpa(word)`, or why the manifest is unavailable.
+pub fn to_ipa(word: &JsString) -> Result<JsString, String> {
+    super::manifest::try_manifest()?;
+    Ok(to_ipa_loaded(word))
 }

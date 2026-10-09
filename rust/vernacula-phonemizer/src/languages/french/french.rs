@@ -7,11 +7,11 @@ use std::sync::LazyLock;
 
 use indexmap::IndexMap;
 
-use super::g2p::to_ipa;
+use super::g2p::to_ipa_loaded;
 use super::manifest::{DIR, MANIFEST, try_manifest};
-use super::normalize::{normalize_french, normalize_french_initialisms};
-use super::numbers::number_to_words;
-use super::ordinals::{normalize_french_ordinal_digits, normalize_french_ordinal_romans};
+use super::normalize::{normalize_french_loaded, normalize_french_initialisms_loaded};
+use super::numbers::number_to_words_loaded;
+use super::ordinals::{normalize_french_ordinal_digits_loaded, normalize_french_ordinal_romans_loaded};
 use crate::core::clauses::foreign_run;
 use crate::core::foreign::read_foreign_run;
 use crate::core::js_regex::JsRegex;
@@ -41,13 +41,11 @@ fn among(list: &[impl AsRef<str>], w: &JsString) -> bool {
     list.iter().any(|x| *w == x.as_ref())
 }
 
-fn heteronym_ipa(
-    word: &JsString,
-    prev: Option<&JsString>,
-    prev2: Option<&JsString>,
-    next: Option<&JsString>,
-) -> Option<JsString> {
+/// `heteronymIpa(word, prev, prev2, next)`. The neighbours are built only for a word that has an entry.
+fn heteronym_ipa(word: &JsString, neighbour: &dyn Fn(isize) -> Option<JsString>) -> Option<JsString> {
     let entry = MANIFEST.heteronyms.get(&word.to_string_lossy())?;
+    let (prev, prev2, next) = (neighbour(-1), neighbour(-2), neighbour(1));
+    let (prev, prev2, next) = (prev.as_ref(), prev2.as_ref(), next.as_ref());
     for c in &entry.cases {
         if c.next_is_number == Some(true) && next.is_some_and(|n| among(&NUMBER_WORD, n)) {
             return Some(js(&c.ipa));
@@ -183,19 +181,19 @@ impl FrenchPhonemizer {
                 return JsString::join(&read, &JsString::new());
             }
         }
-        to_ipa(word)
+        to_ipa_loaded(word)
     }
 
     fn normalize_numerals(&self, text: &JsString) -> JsString {
-        let s = normalize_french_ordinal_romans(text, &|w| self.lexicon.contains_key(w));
-        normalize_romans(&normalize_french_ordinal_digits(&s), &RomanPolicy::default())
+        let s = normalize_french_ordinal_romans_loaded(text, &|w| self.lexicon.contains_key(w));
+        normalize_romans(&normalize_french_ordinal_digits_loaded(&s), &RomanPolicy::default())
     }
 
     /// `text(input, oovOverride?)`.
     pub fn text(&self, input: &JsString, oov: Option<OovResolver>) -> JsString {
         let is_word = |w: &JsString| self.lexicon.contains_key(w);
-        let input = self.symbols.apply(&normalize_french_initialisms(
-            &self.normalize_numerals(&normalize_french(input, &is_word)),
+        let input = self.symbols.apply(&normalize_french_initialisms_loaded(
+            &self.normalize_numerals(&normalize_french_loaded(input, &is_word)),
             &is_word,
         ));
         enter_engine(&input);
@@ -234,18 +232,18 @@ impl FrenchPhonemizer {
                     None => (num.clone(), None),
                     Some(p) => (num.slice(0, Some(p as isize)), Some(num.slice(p as isize + 1, None))),
                 };
-                for w in number_to_words(js_number(&int_part), Some(&int_part)).split(&js(" ")) {
+                for w in number_to_words_loaded(js_number(&int_part), Some(&int_part)).split(&js(" ")) {
                     items.push(word(w));
                 }
                 if let Some(frac) = frac {
                     items.push(word(js(&MANIFEST.numbers.decimal_separator)));
                     let as_number = frac.len() <= 3 && !frac.starts_with(&js("0"));
                     let parts: Vec<JsString> = if as_number {
-                        number_to_words(js_number(&frac), Some(&frac)).split(&js(" "))
+                        number_to_words_loaded(js_number(&frac), Some(&frac)).split(&js(" "))
                     } else {
                         frac.code_point_strings()
                             .iter()
-                            .flat_map(|d| number_to_words(js_number(d), None).split(&js(" ")))
+                            .flat_map(|d| number_to_words_loaded(js_number(d), None).split(&js(" ")))
                             .collect()
                     };
                     for w in parts {
@@ -327,13 +325,7 @@ impl FrenchPhonemizer {
                 }
                 Kind::Word(w) => {
                     let w_lower = w.to_lower_case();
-                    let ki = k as isize;
-                    let het = heteronym_ipa(
-                        &w_lower,
-                        neighbour(ki - 1).as_ref(),
-                        neighbour(ki - 2).as_ref(),
-                        neighbour(ki + 1).as_ref(),
-                    );
+                    let het = heteronym_ipa(&w_lower, &|d| neighbour(k as isize + d));
                     let read = het.clone().unwrap_or_else(|| self.phonemize_word(w, oov));
                     let mut ipa = carry.concat(&read);
                     carry = JsString::new();

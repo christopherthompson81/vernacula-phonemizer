@@ -4,7 +4,7 @@
 
 use std::sync::LazyLock;
 
-use super::numbers::{is_safe_integer, number_to_words};
+use super::numbers::{is_safe_integer, number_to_words_loaded};
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::provenance::rewrite_with;
@@ -32,8 +32,8 @@ fn to_ieme(word: &JsString) -> JsString {
     stem.concat(&js("ième"))
 }
 
-/// `ordinal(n, { feminine, plural })`: `None` for 0 and for non-integers.
-pub fn ordinal(n: f64, feminine: bool, plural: bool) -> Option<JsString> {
+/// `ordinal_loaded(n, { feminine, plural })`: `None` for 0 and for non-integers.
+pub(crate) fn ordinal_loaded(n: f64, feminine: bool, plural: bool) -> Option<JsString> {
     if !is_safe_integer(n) || n < 1.0 {
         return None;
     }
@@ -41,7 +41,7 @@ pub fn ordinal(n: f64, feminine: bool, plural: bool) -> Option<JsString> {
     if n == 1.0 {
         return Some(js(&format!("{}{s}", if feminine { "première" } else { "premier" })));
     }
-    let mut words = number_to_words(n, None).split(&js(" "));
+    let mut words = number_to_words_loaded(n, None).split(&js(" "));
     let mut parts = words.pop().unwrap().split(&js("-"));
     let k = parts.len() - 1;
     parts[k] = to_ieme(&parts[k]);
@@ -64,7 +64,7 @@ static DIGIT_NOTATION: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(&format!("(?<![{L}\\d])(\\d+)({SUFFIXES})(?![{L}\\d])"), "gi").unwrap()
 });
 
-pub fn normalize_french_ordinal_digits(text: &JsString) -> JsString {
+pub(crate) fn normalize_french_ordinal_digits_loaded(text: &JsString) -> JsString {
     if !js_re!(r"\d").test(text) {
         return text.clone();
     }
@@ -80,7 +80,7 @@ pub fn normalize_french_ordinal_digits(text: &JsString) -> JsString {
             let base = if suf.starts_with(&js("de")) { "seconde" } else { "second" };
             return js(&format!("{base}{}", if plural { "s" } else { "" }));
         }
-        ordinal(n, feminine_suffix().test(&suf), plural).unwrap_or(whole)
+        ordinal_loaded(n, feminine_suffix().test(&suf), plural).unwrap_or(whole)
     })
 }
 
@@ -90,7 +90,7 @@ static ROMAN_NOTATION: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(&format!("(?<![{L}\\d])([ivxlcdm]+)({SUFFIXES})(?![{L}\\d])"), "gi").unwrap()
 });
 
-pub fn normalize_french_ordinal_romans(text: &JsString, is_word: &dyn Fn(&JsString) -> bool) -> JsString {
+pub(crate) fn normalize_french_ordinal_romans_loaded(text: &JsString, is_word: &dyn Fn(&JsString) -> bool) -> JsString {
     if !js_re!("[ivxlcdm]", "i").test(text) {
         return text.clone();
     }
@@ -104,6 +104,27 @@ pub fn normalize_french_ordinal_romans(text: &JsString, is_word: &dyn Fn(&JsStri
             return whole;
         };
         let suf = m.group(2, s).unwrap().to_lower_case();
-        ordinal(n as f64, feminine_suffix().test(&suf), suf.ends_with(&js("s"))).unwrap_or(whole)
+        ordinal_loaded(n as f64, feminine_suffix().test(&suf), suf.ends_with(&js("s"))).unwrap_or(whole)
     })
+}
+
+/// `ordinal(n, { feminine, plural })` (`None` for 0 and non-integers), or why the manifest is unavailable.
+pub fn ordinal(n: f64, feminine: bool, plural: bool) -> Result<Option<JsString>, String> {
+    super::manifest::try_manifest()?;
+    Ok(ordinal_loaded(n, feminine, plural))
+}
+
+/// `normalizeFrenchOrdinalDigits(text)`, or why the manifest is unavailable.
+pub fn normalize_french_ordinal_digits(text: &JsString) -> Result<JsString, String> {
+    super::manifest::try_manifest()?;
+    Ok(normalize_french_ordinal_digits_loaded(text))
+}
+
+/// `normalizeFrenchOrdinalRomans(text, isWord)`, or why the manifest is unavailable.
+pub fn normalize_french_ordinal_romans(
+    text: &JsString,
+    is_word: &dyn Fn(&JsString) -> bool,
+) -> Result<JsString, String> {
+    super::manifest::try_manifest()?;
+    Ok(normalize_french_ordinal_romans_loaded(text, is_word))
 }
