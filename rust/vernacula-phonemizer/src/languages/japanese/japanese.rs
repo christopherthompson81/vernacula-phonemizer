@@ -5,23 +5,28 @@
 use std::sync::OnceLock;
 
 use super::counters::read_counter;
-use super::{from_code_point, load_once, strip_non_kana, to_katakana};
 use super::kana::{kana_to_ipa, segments_to_morae};
-use super::kanji::{apply_reading_segments, apply_readings, heads_compound, segment_text, try_readings};
+use super::kanji::{
+    apply_reading_segments, apply_readings, heads_compound, segment_text, try_readings,
+};
 use super::manifest::{T, try_manifest};
 use super::normalize::normalize_japanese;
 use super::numbers::number_to_kana;
 use super::pitch::{accent_nucleus, place_downstep, try_lex};
+use super::{from_code_point, load_once, strip_non_kana, to_katakana};
 
 use crate::core::clauses::assemble_clauses;
-use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::js_string::{JsString, js_number};
+use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::provenance::rewrite_with;
 use crate::js_re;
 use crate::registry::{Engine, PhonemizeError};
 
 fn token() -> &'static crate::core::js_regex::JsRegex {
-    js_re!(r"([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])", "gu")
+    js_re!(
+        r"([㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+)|(\d+)|([。．.！!？?、，,])",
+        "gu"
+    )
 }
 
 /// The shared symbol tier over `symbolTier`'s eight fields, exactly the ones japanese.ts passes.
@@ -63,18 +68,22 @@ impl JapanesePhonemizer {
         let input = rewrite_with(&input, js_re!(r"[０-９]", "gu"), |m, s| {
             from_code_point(m.value(s).code_point_at(0).unwrap() - 0xfee0)
         });
-        let input = rewrite_with(&input, js_re!(r"(\d+)(\p{Script=Han}|つ)", "gu"), |m, s| {
-            let m0 = m.value(s);
-            let num = m.group(1, s).unwrap();
-            let ctr = m.group(2, s).unwrap();
-            if heads_compound(&JsString::from_units(&s.0[m.index() + num.len()..])) {
-                return m0;
-            }
-            match read_counter(js_number(&num), &ctr) {
-                None => m0,
-                Some(r) => to_katakana(&r),
-            }
-        });
+        let input = rewrite_with(
+            &input,
+            js_re!(r"(\d+)(\p{Script=Han}|つ)", "gu"),
+            |m, s| {
+                let m0 = m.value(s);
+                let num = m.group(1, s).unwrap();
+                let ctr = m.group(2, s).unwrap();
+                if heads_compound(&JsString::from_units(&s.0[m.index() + num.len()..])) {
+                    return m0;
+                }
+                match read_counter(js_number(&num), &ctr) {
+                    None => m0,
+                    Some(r) => to_katakana(&r),
+                }
+            },
+        );
         assemble_clauses(&segment_text(&input), token(), |m, s, sink| {
             if let Some(run) = m.group(1, s).filter(|g| !g.is_empty()) {
                 let segments = reading_segments(&run);
@@ -135,7 +144,9 @@ pub fn phonemize_word_segmental(word: &JsString) -> Result<JsString, PhonemizeEr
 /// Build the Japanese phonemizer; its manifest must load (the TS reads it at import).
 pub fn create_japanese() -> Result<JapanesePhonemizer, String> {
     try_manifest()?;
-    Ok(JapanesePhonemizer { symbols: symbol_tier()? })
+    Ok(JapanesePhonemizer {
+        symbols: symbol_tier()?,
+    })
 }
 
 #[cfg(test)]

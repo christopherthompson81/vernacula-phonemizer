@@ -7,24 +7,10 @@ pub mod normalize;
 pub mod numbers;
 pub mod pitch;
 
-use std::sync::OnceLock;
-
 use crate::core::js_string::JsString;
 use crate::js_re;
 
-/// A load cached ONLY on success: a failure is returned and the next call retries, as the TS `readings()` /
-/// `lex()` do (they assign only after the load returned) and as the registry's Data-error contract requires.
-/// Two racing first calls may both load; the first to finish is kept.
-pub(crate) fn load_once<T: Send + Sync>(
-    cell: &'static OnceLock<T>,
-    load: impl FnOnce() -> Result<T, String>,
-) -> Result<&'static T, String> {
-    if let Some(v) = cell.get() {
-        return Ok(v);
-    }
-    let v = load()?;
-    Ok(cell.get_or_init(|| v))
-}
+pub(crate) use crate::core::data_source::load_once;
 
 /// `String.fromCodePoint(cp)`.
 pub(crate) fn from_code_point(cp: u32) -> JsString {
@@ -46,7 +32,11 @@ pub(crate) fn first_unit(s: &JsString) -> Option<JsString> {
 fn shift_range(s: &JsString, lo: u32, hi: u32, delta: i32) -> JsString {
     let mut out = JsString::new();
     for c in s.code_points() {
-        let c = if (lo..=hi).contains(&c) { (c as i32 + delta) as u32 } else { c };
+        let c = if (lo..=hi).contains(&c) {
+            (c as i32 + delta) as u32
+        } else {
+            c
+        };
         out.push_str(&from_code_point(c));
     }
     out

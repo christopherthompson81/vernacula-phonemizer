@@ -36,11 +36,15 @@ fn cp_len(s: &JsString) -> usize {
 
 fn load() -> Result<Readings, String> {
     let e = |e: crate::core::data_source::DataError| e.to_string();
-    let map: HashMap<JsString, JsString> =
-        load_tsv_map(DIR, "readings.tsv", |v, _| Some(v.clone()), TsvOptions::default())
-            .map_err(e)?
-            .into_iter()
-            .collect();
+    let map: HashMap<JsString, JsString> = load_tsv_map(
+        DIR,
+        "readings.tsv",
+        |v, _| Some(v.clone()),
+        TsvOptions::default(),
+    )
+    .map_err(e)?
+    .into_iter()
+    .collect();
     let fallback = load_tsv_map(
         DIR,
         "fallback.tsv",
@@ -55,10 +59,19 @@ fn load() -> Result<Readings, String> {
     .map_err(e)?
     .into_iter()
     .collect();
-    let adverbs: HashSet<JsString> = load_lines(DIR, "adverbs.txt", false).map_err(e)?.into_iter().collect();
+    let adverbs: HashSet<JsString> = load_lines(DIR, "adverbs.txt", false)
+        .map_err(e)?
+        .into_iter()
+        .collect();
     let max_key_length = map.keys().map(cp_len).max().unwrap_or(0);
     let max_unit_length = adverbs.iter().map(cp_len).fold(max_key_length, usize::max);
-    Ok(Readings { map, max_key_length, fallback, adverbs, max_unit_length })
+    Ok(Readings {
+        map,
+        max_key_length,
+        fallback,
+        adverbs,
+        max_unit_length,
+    })
 }
 
 /// The reading tables, or why they could not be loaded. Cached once loaded; a failure is retried.
@@ -83,7 +96,8 @@ const KANJI: &[(u32, u32)] = &[(0x3400, 0x9fff), (0x20000, 0x2a6df), (0x3005, 0x
 const KANA: &[(u32, u32)] = &[(0x3041, 0x3096), (0x30a1, 0x30ff), (0x30fc, 0x30fc)];
 
 fn any_cp(ch: &JsString, class: &[(u32, u32)]) -> bool {
-    ch.code_points().any(|c| class.iter().any(|&(lo, hi)| (lo..=hi).contains(&c)))
+    ch.code_points()
+        .any(|c| class.iter().any(|&(lo, hi)| (lo..=hi).contains(&c)))
 }
 
 fn is_hiragana(ch: &JsString) -> bool {
@@ -115,7 +129,11 @@ impl Cps {
             at += c.len();
         }
         starts.push(at);
-        Cps { units: s.0.clone(), chars, starts }
+        Cps {
+            units: s.0.clone(),
+            chars,
+            starts,
+        }
     }
 
     fn len(&self) -> usize {
@@ -225,7 +243,9 @@ pub fn apply_reading_segments(word: &JsString) -> Vec<JsString> {
             i += 1;
             continue;
         }
-        if let Some((unit, len)) = longest_key_match(&chars, i, r.max_key_length, 1, |k| r.map.contains_key(k)) {
+        if let Some((unit, len)) =
+            longest_key_match(&chars, i, r.max_key_length, 1, |k| r.map.contains_key(k))
+        {
             let mut reading = r.map[&unit].clone();
             let single = len == 1 && is_kanji(&unit);
             if single && prev_was_kanji {
@@ -237,7 +257,11 @@ pub fn apply_reading_segments(word: &JsString) -> Vec<JsString> {
                     }
                 }
             }
-            let parts = if single { None } else { align_compound_reading(&unit, &reading, &r.fallback) };
+            let parts = if single {
+                None
+            } else {
+                align_compound_reading(&unit, &reading, &r.fallback)
+            };
             match parts {
                 None => push_reading(&mut segs, &mut kana_run, reading.clone()),
                 Some(parts) => {
@@ -256,7 +280,11 @@ pub fn apply_reading_segments(word: &JsString) -> Vec<JsString> {
                 (Some(rd), true) => rd.clone(),
                 _ => {
                     let want_kun = chars.chars.get(i + 1).is_some_and(is_hiragana);
-                    let pick = if want_kun { fb.kun.as_ref().or(fb.on.as_ref()) } else { fb.on.as_ref().or(fb.kun.as_ref()) };
+                    let pick = if want_kun {
+                        fb.kun.as_ref().or(fb.on.as_ref())
+                    } else {
+                        fb.on.as_ref().or(fb.kun.as_ref())
+                    };
                     pick.cloned().unwrap_or_else(|| ch.clone())
                 }
             };
@@ -332,7 +360,9 @@ pub fn segment_text(text: &JsString) -> JsString {
         });
         let mut unit = m.as_ref().map_or_else(|| ch.clone(), |(u, _)| u.clone());
         let mut forced_particle = false;
-        let prev_content = prev.as_ref().is_some_and(|p| is_kanji(p) || katakana.test(p));
+        let prev_content = prev
+            .as_ref()
+            .is_some_and(|p| is_kanji(p) || katakana.test(p));
         if m.is_none() {
             if prev_content {
                 for mp in MULTI_PARTICLES {
@@ -344,7 +374,9 @@ pub fn segment_text(text: &JsString) -> JsString {
                     }
                 }
             }
-            if !forced_particle && (prev.is_none() || prev_particle || out.is_empty() || out.ends_with(&space)) {
+            if !forced_particle
+                && (prev.is_none() || prev_particle || out.is_empty() || out.ends_with(&space))
+            {
                 for dm in DEMONSTRATIVES {
                     let dm = js(dm);
                     if chars.join(i, dm.len()) == dm {
@@ -384,7 +416,8 @@ pub fn segment_text(text: &JsString) -> JsString {
             }
         }
         let next1 = chars.chars.get(i + 1);
-        let copula_de = unit == "で" && next1.is_some_and(|n| *n == "す" || *n == "し" || *n == "き");
+        let copula_de =
+            unit == "で" && next1.is_some_and(|n| *n == "す" || *n == "し" || *n == "き");
         let particle = forced_particle
             || (prev_particle && chained_particle)
             || (u.len() == 1

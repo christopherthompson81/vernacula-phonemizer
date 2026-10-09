@@ -49,6 +49,25 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let (name, path) = (args.get(1).expect("name"), args.get(2).expect("jsonl"));
     let text = std::fs::read_to_string(path).expect("dump");
+    if name == "numstr" {
+        // Lines of `<x bits hex> <String(x)>`: core::js_string::js_number_to_string against V8.
+        let (mut ok, mut bad) = (0, 0);
+        for line in text.lines() {
+            let (bits, want) = line.split_once(' ').unwrap();
+            let x = f64::from_bits(u64::from_str_radix(bits, 16).unwrap());
+            let got = vernacula_phonemizer::core::js_string::js_number_to_string(x);
+            if got == want {
+                ok += 1
+            } else {
+                bad += 1;
+                if bad <= 10 {
+                    println!("  {x:e}: js {want} rust {got}");
+                }
+            }
+        }
+        println!("numstr: {ok} identical, {bad} DIFFER");
+        std::process::exit(if bad == 0 { 0 } else { 1 });
+    }
     if name == "log" {
         // Lines of `<x bits hex> <Math.log(x) bits hex>`; compare the fdlibm port and f64::ln.
         let (mut port_ok, mut port_bad, mut ln_bad, mut ngram_ln_bad) = (0, 0, 0, 0);
@@ -271,12 +290,18 @@ fn main() {
                 let row: Value = serde_json::from_str(line).unwrap();
                 let mut data: SymbolData = serde_json::from_value(row["data"].clone()).unwrap();
                 let sig = row["countForm"].as_str().unwrap();
-                data.count_form = Some(count_form(sig).unwrap_or_else(|| {
-                    panic!("{}: no Rust twin for countForm {sig}", row["dir"])
-                }) as CountForm);
-                tiers.insert(row["def"].as_u64().unwrap(), make_symbol_normalizer(&data).unwrap());
+                data.count_form =
+                    Some(count_form(sig).unwrap_or_else(|| {
+                        panic!("{}: no Rust twin for countForm {sig}", row["dir"])
+                    }) as CountForm);
+                tiers.insert(
+                    row["def"].as_u64().unwrap(),
+                    make_symbol_normalizer(&data).unwrap(),
+                );
             }
-            Box::new(move |input| tiers[&input["def"].as_u64().unwrap()].apply(&units(&input["text"])))
+            Box::new(move |input| {
+                tiers[&input["def"].as_u64().unwrap()].apply(&units(&input["text"]))
+            })
         }
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
@@ -311,20 +336,34 @@ fn main() {
             })
         }
         "ja-normalize" => Box::new(|input| {
-            vernacula_phonemizer::languages::japanese::normalize::normalize_japanese(&units(&input["text"]))
+            vernacula_phonemizer::languages::japanese::normalize::normalize_japanese(&units(
+                &input["text"],
+            ))
         }),
         "ja-kana" => Box::new(|input| {
-            use vernacula_phonemizer::languages::japanese::kana::{kana_to_morae, segments_to_morae};
+            use vernacula_phonemizer::languages::japanese::kana::{
+                kana_to_morae, segments_to_morae,
+            };
             let m = if input["op"] == "morae" {
                 kana_to_morae(&units(&input["word"]))
             } else {
-                let segs: Vec<JsString> = input["segs"].as_array().unwrap().iter().map(units).collect();
+                let segs: Vec<JsString> = input["segs"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(units)
+                    .collect();
                 segments_to_morae(&segs)
             };
-            m.map_or_else(|| JsString::from("\u{0}none"), |m| JsString::join(&m, &JsString::from("|")))
+            m.map_or_else(
+                || JsString::from("\u{0}none"),
+                |m| JsString::join(&m, &JsString::from("|")),
+            )
         }),
         "ja-kanji" => Box::new(|input| {
-            use vernacula_phonemizer::languages::japanese::kanji::{apply_reading_segments, heads_compound};
+            use vernacula_phonemizer::languages::japanese::kanji::{
+                apply_reading_segments, heads_compound,
+            };
             let w = units(&input["word"]);
             if input["op"] == "segments" {
                 JsString::join(&apply_reading_segments(&w), &JsString::from("|"))
@@ -333,34 +372,56 @@ fn main() {
             }
         }),
         "ja-segment" => Box::new(|input| {
-            use vernacula_phonemizer::languages::japanese::{kanji::segment_text, normalize::normalize_japanese};
+            use vernacula_phonemizer::languages::japanese::{
+                kanji::segment_text, normalize::normalize_japanese,
+            };
             let t = units(&input["text"]);
-            if input["op"] == "raw" { segment_text(&t) } else { segment_text(&normalize_japanese(&t)) }
+            if input["op"] == "raw" {
+                segment_text(&t)
+            } else {
+                segment_text(&normalize_japanese(&t))
+            }
         }),
         "ja-counters" => Box::new(|input| {
             let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
-            vernacula_phonemizer::languages::japanese::counters::read_counter(n, &units(&input["ctr"]))
-                .unwrap_or_else(|| JsString::from("\u{0}none"))
+            vernacula_phonemizer::languages::japanese::counters::read_counter(
+                n,
+                &units(&input["ctr"]),
+            )
+            .unwrap_or_else(|| JsString::from("\u{0}none"))
         }),
         "ja-numbers" => Box::new(|input| {
             let raw = JsString::from(input["raw"].as_str().unwrap());
-            vernacula_phonemizer::languages::japanese::numbers::number_to_kana(js_number(&raw), Some(&raw))
+            vernacula_phonemizer::languages::japanese::numbers::number_to_kana(
+                js_number(&raw),
+                Some(&raw),
+            )
         }),
         "ja-pitch" => Box::new(|input| {
-            use vernacula_phonemizer::languages::japanese::{japanese::phonemize_word, pitch::accent_nucleus};
+            use vernacula_phonemizer::languages::japanese::{
+                japanese::phonemize_word, pitch::accent_nucleus,
+            };
             let s = units(&input["surface"]);
             if input["op"] == "nucleus" {
                 let n = accent_nucleus(&s, &units(&input["reading"]));
-                JsString::from(if n == 0.0 { "0".to_string() } else { format!("{}", n) })
+                JsString::from(if n == 0.0 {
+                    "0".to_string()
+                } else {
+                    format!("{}", n)
+                })
             } else {
                 phonemize_word(&s).unwrap()
             }
         }),
         "trace" => Box::new(|input| {
             let text = units(&input["text"]).to_string_lossy();
-            let t = vernacula_phonemizer::phonemize_trace(&text, input["lang"].as_str().unwrap()).unwrap().trace;
+            let t = vernacula_phonemizer::phonemize_trace(&text, input["lang"].as_str().unwrap())
+                .unwrap()
+                .trace;
             let u = |s: &JsString| serde_json::json!(s.0);
-            let span = |s: Option<(usize, usize)>| s.map_or(Value::Null, |(a, b)| serde_json::json!([a, b]));
+            let span = |s: Option<(usize, usize)>| {
+                s.map_or(Value::Null, |(a, b)| serde_json::json!([a, b]))
+            };
             let tokens: Vec<Value> = t
                 .tokens
                 .iter()
@@ -402,7 +463,12 @@ fn main() {
             if let Some(t) = tally {
                 t[1] += 1
             }
-            if differ <= std::env::var("FN_DIFF_SHOW").ok().and_then(|v| v.parse().ok()).unwrap_or(15) {
+            if differ
+                <= std::env::var("FN_DIFF_SHOW")
+                    .ok()
+                    .and_then(|v| v.parse().ok())
+                    .unwrap_or(15)
+            {
                 let shown = match row["input"].get("text") {
                     Some(t) => format!("{:?}", units(t)),
                     None => row["input"].to_string(),
@@ -431,20 +497,38 @@ fn count_form(sig: &str) -> Option<std::sync::Arc<dyn Fn(f64) -> f64 + Send + Sy
         "n=>Number.isInteger(n)?slavicCountForm(n):3" => {
             std::sync::Arc::new(move |n| if is_int(n) { slavic_count_form(n) } else { 3.0 })
         }
-        "n=>n%10===1&&n%100!==11?0:1" => std::sync::Arc::new(move |n: f64| b(n % 10.0 == 1.0 && n % 100.0 != 11.0, 0.0, 1.0)),
-        "n=>{const m=Math.abs(n)%100;return m%10===1&&m!==11?0:1}" => std::sync::Arc::new(move |n: f64| {
-            let m = n.abs() % 100.0;
-            b(m % 10.0 == 1.0 && m != 11.0, 0.0, 1.0)
-        }),
-        "n=>n===1||n>=11&&n%1===0?0:1" => {
-            std::sync::Arc::new(move |n: f64| b(n == 1.0 || (n >= 11.0 && n % 1.0 == 0.0), 0.0, 1.0))
+        "n=>n%10===1&&n%100!==11?0:1" => {
+            std::sync::Arc::new(move |n: f64| b(n % 10.0 == 1.0 && n % 100.0 != 11.0, 0.0, 1.0))
         }
-        "n=>n===1?0:n===2||n===3||n===4?1:2" => {
-            std::sync::Arc::new(move |n: f64| if n == 1.0 { 0.0 } else { b(n == 2.0 || n == 3.0 || n == 4.0, 1.0, 2.0) })
+        "n=>{const m=Math.abs(n)%100;return m%10===1&&m!==11?0:1}" => {
+            std::sync::Arc::new(move |n: f64| {
+                let m = n.abs() % 100.0;
+                b(m % 10.0 == 1.0 && m != 11.0, 0.0, 1.0)
+            })
         }
-        "n=>!Number.isInteger(n)?4:n===1?0:n===2?1:n>=3&&n<=4?2:3" => std::sync::Arc::new(move |n: f64| {
-            if !is_int(n) { 4.0 } else if n == 1.0 { 0.0 } else if n == 2.0 { 1.0 } else { b(n >= 3.0 && n <= 4.0, 2.0, 3.0) }
+        "n=>n===1||n>=11&&n%1===0?0:1" => std::sync::Arc::new(move |n: f64| {
+            b(n == 1.0 || (n >= 11.0 && n % 1.0 == 0.0), 0.0, 1.0)
         }),
+        "n=>n===1?0:n===2||n===3||n===4?1:2" => std::sync::Arc::new(move |n: f64| {
+            if n == 1.0 {
+                0.0
+            } else {
+                b(n == 2.0 || n == 3.0 || n == 4.0, 1.0, 2.0)
+            }
+        }),
+        "n=>!Number.isInteger(n)?4:n===1?0:n===2?1:n>=3&&n<=4?2:3" => {
+            std::sync::Arc::new(move |n: f64| {
+                if !is_int(n) {
+                    4.0
+                } else if n == 1.0 {
+                    0.0
+                } else if n == 2.0 {
+                    1.0
+                } else {
+                    b(n >= 3.0 && n <= 4.0, 2.0, 3.0)
+                }
+            })
+        }
         "n=>{if(n===1)return 0;const m100=Math.abs(n)%100;if(m100>=12&&m100<=14)return 2;const m10=m100%10;return m10>=2&&m10<=4?1:2}" => {
             std::sync::Arc::new(move |n: f64| czech_polish(n, false))
         }

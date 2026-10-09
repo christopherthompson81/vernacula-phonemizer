@@ -117,7 +117,24 @@ pub fn roman_pass(lang: &str, input: &JsString) -> JsString {
     if ROMAN_NATIVE.contains(&lang) {
         return input.clone();
     }
-    normalize_romans(input, &roman_policy(lang))
+    normalize_romans(input, &cached_roman_policy(lang))
+}
+
+/// `roman_policy(lang)`, built once per language: a policy compiles its context regexes, and the TS builds
+/// `ROMAN_POLICIES` once at module load.
+fn cached_roman_policy(lang: &str) -> Arc<RomanPolicy> {
+    static CACHE: Mutex<Option<HashMap<String, Arc<RomanPolicy>>>> = Mutex::new(None);
+    if let Some(p) = CACHE.lock().unwrap().as_ref().and_then(|c| c.get(lang)) {
+        return p.clone();
+    }
+    let built = Arc::new(roman_policy(lang));
+    CACHE
+        .lock()
+        .unwrap()
+        .get_or_insert_with(HashMap::new)
+        .entry(lang.to_string())
+        .or_insert(built)
+        .clone()
 }
 
 /// `prePass` (registry.ts): what the neural entries receive.

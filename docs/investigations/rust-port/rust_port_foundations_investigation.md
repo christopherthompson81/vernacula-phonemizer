@@ -95,3 +95,29 @@ forced full scan.
 
 **Implication.** Fixed for the 2,119 patterns that cannot start mid-pair. The ~110 that may still scan are
 quadratic in the worst case, but no longer dominate.
+
+## Run 4 — 2026-10-09 (cross-cutting fixes from the seven language reviews; JS Number.prototype.toString)
+
+**Question.** Several language reviews found the same shared defects. Fix them once, in core, before the
+branches rebase.
+
+**Changes.**
+- `core::data_source::load_once` (lifted from the Japanese port) caches a load only on SUCCESS. English's
+  manifest moves onto it, and every language port will use it. Before, each port's `OnceLock<Result<…>>` kept a
+  failure for good, against the registry's documented retry contract.
+- The registry caches each language's Roman policy, which used to be compiled again on every call.
+- Public now: `normalize_symbols::{esc, sorted_by_length_desc, alternation}` and `provenance::escape`.
+- `core::js_string::{js_number_to_string, is_safe_integer, MAX_SAFE_INTEGER}`. es and pt had each written a partial
+  private version.
+
+**Command.** Node dumps `String(x)` for 1,199,532 doubles (special values, 1M random bit patterns, 200k scaled
+decimals). `fn-diff numstr` replays them.
+
+**Raw finding.**
+- First version: `1199306 identical, 226 DIFFER`, all in the 17th significant digit, e.g. 131112559132079.12
+  (JS) against …079.13 (Rust). When more than one shortest digit string round-trips, the spec picks the CLOSEST,
+  and Rust's shortest output does not always.
+- Now: the shortest length from `{:e}`, then the correctly rounded string at that length, kept when it still
+  round-trips. Result: `1199532 identical, 0 DIFFER`.
+- Gates: parity en/en-GB/ja 200/200; sync and best for en/en-GB/ja 11,975 identical, with the 2 known Greek
+  port-pending rows; 47 tests; 0 warnings.
