@@ -124,6 +124,10 @@ fn main() {
             let text = units(&input["text"]).to_string_lossy();
             JsString::from(vernacula_phonemizer::phonemize(&text, input["lang"].as_str().unwrap()).unwrap())
         }),
+        "phonemize-best" => Box::new(|input| {
+            let text = units(&input["text"]).to_string_lossy();
+            JsString::from(vernacula_phonemizer::phonemize_best(&text, input["lang"].as_str().unwrap()).unwrap())
+        }),
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
             let words = if input["ordinal"].as_bool().unwrap() { ordinal_to_words(&n) } else { number_to_words(&n) };

@@ -151,6 +151,12 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const lang of ["en", "en-GB"])
             for (const text of englishTexts().keys()) emit({ text: units(text), lang }, phonemize(text, lang));
     },
+    // The best path (phonemizeAsync: registry pre-passes + the BiLSTM OOV tagger), for en and en-GB.
+    async "phonemize-best"() {
+        const { phonemizeAsync } = await import("../../../src/index.ts");
+        for (const lang of ["en", "en-GB"])
+            for (const text of englishTexts().keys()) emit({ text: units(text), lang }, await phonemizeAsync(text, lang));
+    },
     numbers() {
         const ns: bigint[] = [];
         for (let i = 0n; i <= 20000n; i++) ns.push(i);

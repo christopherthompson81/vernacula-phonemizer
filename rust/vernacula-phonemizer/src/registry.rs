@@ -18,7 +18,7 @@ use crate::core::unicode::{
 };
 use crate::languages::english::english::{EnglishPhonemizer, create_english};
 use crate::languages::english::english_neural::phonemize_en_neural;
-use crate::languages::english::english_tagger::EnglishTagger;
+use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagger_files};
 use crate::languages::english_gb::english_gb::rp_word_transform;
 
 /// `CYRILLIC_HOSTS` (core/scripts.ts).
@@ -109,12 +109,23 @@ pub fn phonemize_in(lang: &str, input: &JsString) -> Result<JsString, UnknownLan
     }
 }
 
-/// The English BiLSTM OOV tagger, or `None` when its model cannot be built (the best path then degrades to
-/// the sync engine, as the TS does without onnxruntime). TODO(#1463): built from `core::neural` once the
-/// runtime lands; until then there is no runtime and this is always `None`.
+/// The English BiLSTM OOV tagger, or `None` when its files are unreadable or its graph unsupported (the best
+/// path then degrades to the sync engine, as the TS does without onnxruntime). `tagger_unavailable_reason`
+/// says why.
 pub fn english_tagger() -> Option<&'static EnglishTagger> {
-    static TAGGER: OnceLock<Option<EnglishTagger>> = OnceLock::new();
-    TAGGER.get_or_init(|| None).as_ref()
+    TAGGER.get_or_init(build_english_tagger).as_ref().ok()
+}
+
+static TAGGER: OnceLock<Result<EnglishTagger, String>> = OnceLock::new();
+
+pub fn tagger_unavailable_reason() -> Option<String> {
+    TAGGER.get_or_init(build_english_tagger).as_ref().err().cloned()
+}
+
+fn build_english_tagger() -> Result<EnglishTagger, String> {
+    let (meta, bytes) = load_english_tagger_files("en-g2p-tagger")?;
+    let model = crate::core::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;
+    Ok(EnglishTagger::new(meta, Box::new(model)))
 }
 
 /// `phonemizeAsync(text, lang)`: the best available path. For English, the neural OOV tagger.

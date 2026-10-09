@@ -236,3 +236,23 @@ dump (148,356 words), then restore.
 `sabin` *sˈæbənə* → *sˈæbɪn* and a `…neck` word *nˈɛk* → *nˈʌk*.
 
 **Implication.** The port is load-bearing. Nine words is a small number, and no golden would have caught it.
+
+## Run 7 — 2026-10-09 (neural runtime merged; English best path; the golden gate)
+
+**Question.** With `core::neural` merged from `rust-neural-runtime` (bit-exact against ORT 1.27.0 on this
+machine; rust_neural_runtime_investigation.md) and wired in as the English tagger's `CharLogits`, does
+`phonemize_best` reproduce the goldens, which `phonemizeAsync` generated?
+
+**Command.** `cargo run --release -p parity` (csharp/goldens/{en,en-GB}.tsv). Then `dump.mts phonemize-best`
+(TS `phonemizeAsync` over all 4,146 texts × {en, en-GB}) and `fn-diff phonemize-best`.
+
+**Raw finding.**
+- `en: 200/200 identical`, `en-GB: 200/200 identical`. In `--sync` mode it is 181/200 each, the same 19 rows
+  the TS's own sync path misses, so the tagger is what closes them.
+- `phonemize-best: 8290 identical, 2 DIFFER`: only the Greek-run probe from Run 6 (port-pending `el`).
+- `cargo test --workspace` green, 0 warnings.
+
+**Implication.** English (en, en-GB) meets #1463's definition of done on this machine: byte-identical to the
+TS over the goldens. The only known gap is a foreign script run inside English text that the TS hands to a
+not-yet-ported engine. The usual caveat applies: the neural path is exact against THIS CPU's ORT kernels
+(AVX2 without VNNI). Elsewhere the Rust output stays deterministic, but the TS's may not.
