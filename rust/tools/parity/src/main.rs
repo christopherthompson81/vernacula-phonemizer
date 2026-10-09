@@ -10,17 +10,31 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let sync = args.iter().any(|a| a == "--sync");
     let langs: Vec<String> = {
-        let named: Vec<String> = args.iter().filter(|a| !a.starts_with("--")).cloned().collect();
-        if named.is_empty() { LANGUAGES.iter().map(|s| s.to_string()).collect() } else { named }
+        let named: Vec<String> = args
+            .iter()
+            .filter(|a| !a.starts_with("--"))
+            .cloned()
+            .collect();
+        if named.is_empty() {
+            LANGUAGES.iter().map(|s| s.to_string()).collect()
+        } else {
+            named
+        }
     };
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../csharp/goldens");
     let mut total_bad = 0;
     for lang in &langs {
-        let text = std::fs::read_to_string(root.join(format!("{lang}.tsv"))).unwrap_or_else(|e| panic!("{lang}: {e}"));
+        let text = std::fs::read_to_string(root.join(format!("{lang}.tsv")))
+            .unwrap_or_else(|e| panic!("{lang}: {e}"));
         let (mut ok, mut bad) = (0, 0);
         for line in text.lines().filter(|l| !l.is_empty()) {
             let (input, want) = line.split_once('\t').expect("text<TAB>ipa");
-            let got = if sync { phonemize(input, lang) } else { phonemize_best(input, lang) }.unwrap();
+            let got = if sync {
+                phonemize(input, lang)
+            } else {
+                phonemize_best(input, lang)
+            }
+            .unwrap();
             if got == want {
                 ok += 1;
             } else {

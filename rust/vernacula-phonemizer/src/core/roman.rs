@@ -7,13 +7,25 @@ use super::provenance::rewrite_with;
 use crate::js_re;
 
 const VALUES: [(&str, u32); 13] = [
-    ("m", 1000), ("cm", 900), ("d", 500), ("cd", 400), ("c", 100), ("xc", 90),
-    ("l", 50), ("xl", 40), ("x", 10), ("ix", 9), ("v", 5), ("iv", 4), ("i", 1),
+    ("m", 1000),
+    ("cm", 900),
+    ("d", 500),
+    ("cd", 400),
+    ("c", 100),
+    ("xc", 90),
+    ("l", 50),
+    ("xl", 40),
+    ("x", 10),
+    ("ix", 9),
+    ("v", 5),
+    ("iv", 4),
+    ("i", 1),
 ];
 
 pub fn roman_to_int(token: &JsString) -> Option<u32> {
     let s = token.to_lower_case();
-    if s.is_empty() || !js_re!("^m{0,4}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$").test(&s) {
+    if s.is_empty() || !js_re!("^m{0,4}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$").test(&s)
+    {
         return None;
     }
     let mut n = 0;
@@ -26,7 +38,9 @@ pub fn roman_to_int(token: &JsString) -> Option<u32> {
             continue;
         }
         let one = s.char_at(i);
-        let (_, v) = VALUES.iter().find(|(sym, _)| sym.len() == 1 && one == *sym)?;
+        let (_, v) = VALUES
+            .iter()
+            .find(|(sym, _)| sym.len() == 1 && one == *sym)?;
         n += v;
         i += 1;
     }
@@ -34,17 +48,13 @@ pub fn roman_to_int(token: &JsString) -> Option<u32> {
 }
 
 pub const COLLISIONS: [&str; 29] = [
-    "mm", "cm", "ml", "dl", "cl", "cc",
-    "xl", "xxl",
-    "cd", "dc", "dv", "dx", "lv", "mv", "mc", "md", "cv", "ccc",
-    "mi", "di", "ci", "li", "vi", "xi",
-    "mix", "div", "civ", "liv", "dix",
+    "mm", "cm", "ml", "dl", "cl", "cc", "xl", "xxl", "cd", "dc", "dv", "dx", "lv", "mv", "mc",
+    "md", "cv", "ccc", "mi", "di", "ci", "li", "vi", "xi", "mix", "div", "civ", "liv", "dix",
 ];
 
 const LOWERCASE_SAFE: [&str; 25] = [
-    "ii", "iii", "iv", "vii", "viii", "ix",
-    "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii", "xix", "xx",
-    "xxi", "xxii", "xxiii", "xxiv", "xxv", "xxvi", "xxvii", "xxviii", "xxix", "xxx",
+    "ii", "iii", "iv", "vii", "viii", "ix", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii",
+    "xix", "xx", "xxi", "xxii", "xxiii", "xxiv", "xxv", "xxvi", "xxvii", "xxviii", "xxix", "xxx",
 ];
 
 #[derive(Default)]
@@ -88,14 +98,24 @@ pub fn normalize_romans(text: &JsString, policy: &RomanPolicy) -> JsString {
         if digit_at(text, offset.checked_sub(1)) || digit_at(text, Some(offset + tok.len())) {
             return tok;
         }
-        let Some(n) = roman_to_int(&tok) else { return tok };
+        let Some(n) = roman_to_int(&tok) else {
+            return tok;
+        };
         let all_caps = is_upper(&tok);
         let before = text.slice(0, Some(offset as isize));
         let after = text.slice((offset + tok.len()) as isize, None);
-        let prev_w = js_re!(r"(\p{L}+)[^\p{L}]*$", "u").exec(&before).and_then(|m| m.group(1, &before));
-        let next_w = js_re!(r"^[^\p{L}]*(\p{L}+)", "u").exec(&after).and_then(|m| m.group(1, &after));
-        let in_context = prev_w.as_ref().is_some_and(|w| policy.ordinal_before.as_ref().is_some_and(|re| re.test(w)))
-            || next_w.as_ref().is_some_and(|w| policy.ordinal_after.as_ref().is_some_and(|re| re.test(w)));
+        let prev_w = js_re!(r"(\p{L}+)[^\p{L}]*$", "u")
+            .exec(&before)
+            .and_then(|m| m.group(1, &before));
+        let next_w = js_re!(r"^[^\p{L}]*(\p{L}+)", "u")
+            .exec(&after)
+            .and_then(|m| m.group(1, &after));
+        let in_context = prev_w
+            .as_ref()
+            .is_some_and(|w| policy.ordinal_before.as_ref().is_some_and(|re| re.test(w)))
+            || next_w
+                .as_ref()
+                .is_some_and(|w| policy.ordinal_after.as_ref().is_some_and(|re| re.test(w)));
         let single_cap = |w: Option<&JsString>| w.is_some_and(|w| w.len() == 1 && is_upper(w));
         if single_cap(Some(&tok)) && (single_cap(prev_w.as_ref()) || single_cap(next_w.as_ref())) {
             return tok;

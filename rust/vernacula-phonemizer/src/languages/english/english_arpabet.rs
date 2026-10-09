@@ -60,11 +60,18 @@ fn split(phone: &str) -> Phone {
     let b = phone.as_bytes();
     let letters = b.iter().take_while(|c| c.is_ascii_uppercase()).count();
     let rest = &b[letters..];
-    let ok = letters > 0 && (rest.is_empty() || (rest.len() == 1 && (b'0'..=b'2').contains(&rest[0])));
+    let ok =
+        letters > 0 && (rest.is_empty() || (rest.len() == 1 && (b'0'..=b'2').contains(&rest[0])));
     if !ok {
-        return Phone { base: phone.to_string(), stress: -1 };
+        return Phone {
+            base: phone.to_string(),
+            stress: -1,
+        };
     }
-    Phone { base: phone[..letters].to_string(), stress: rest.first().map_or(-1, |d| (d - b'0') as i32) }
+    Phone {
+        base: phone[..letters].to_string(),
+        stress: rest.first().map_or(-1, |d| (d - b'0') as i32),
+    }
 }
 
 const SIBILANT: [&str; 6] = ["S", "Z", "SH", "ZH", "CH", "JH"];
@@ -75,7 +82,12 @@ fn is_barred_i(word: &JsString, p: &[Phone], vi: usize, ni: usize, nuclei_count:
         return false;
     }
     let last_nucleus = ni + 1 == nuclei_count;
-    if js_re!("(ed|es)$").test(word) && last_nucleus && vi + 1 < p.len() && vi > 0 && (p[vi - 1].base == "T" || p[vi - 1].base == "D") {
+    if js_re!("(ed|es)$").test(word)
+        && last_nucleus
+        && vi + 1 < p.len()
+        && vi > 0
+        && (p[vi - 1].base == "T" || p[vi - 1].base == "D")
+    {
         return true;
     }
     if js_re!("es$").test(word)
@@ -96,7 +108,9 @@ fn is_barred_i(word: &JsString, p: &[Phone], vi: usize, ni: usize, nuclei_count:
     {
         return true;
     }
-    if js_re!("(it|iti|ities|ety|ities)y?$").test(word) && p.get(vi + 1).is_some_and(|x| x.base == "T") {
+    if js_re!("(it|iti|ities|ety|ities)y?$").test(word)
+        && p.get(vi + 1).is_some_and(|x| x.base == "T")
+    {
         return true;
     }
     if js_re!("ibl[ey]?$").test(word) && vi + 1 < p.len() && p[vi + 1].base == "B" {
@@ -108,9 +122,14 @@ fn is_barred_i(word: &JsString, p: &[Phone], vi: usize, ni: usize, nuclei_count:
 fn rebase_suffix_ih(p: &mut [Phone], word: &JsString) {
     let n = p.len() as isize;
     let at = |p: &[Phone], i: isize| -> String {
-        if i < 0 { String::new() } else { p.get(i as usize).map_or(String::new(), |x| x.base.clone()) }
+        if i < 0 {
+            String::new()
+        } else {
+            p.get(i as usize).map_or(String::new(), |x| x.base.clone())
+        }
     };
-    let unstressed_vowel = |p: &[Phone], i: isize| i >= 0 && p.get(i as usize).is_some_and(|x| x.stress == 0);
+    let unstressed_vowel =
+        |p: &[Phone], i: isize| i >= 0 && p.get(i as usize).is_some_and(|x| x.stress == 0);
     let mut vi: isize = -1;
     if js_re!("ists?$").test(word) {
         if at(p, n - 2) == "S" && at(p, n - 1) == "T" {
@@ -174,12 +193,20 @@ pub fn make_arpabet_to_ipa(
     syllabic: IndexMap<JsString, Vec<usize>>,
     nasal_seam: IndexMap<JsString, Vec<usize>>,
 ) -> ArpabetToIpa {
-    ArpabetToIpa { def: def.clone(), syllabic, nasal_seam }
+    ArpabetToIpa {
+        def: def.clone(),
+        syllabic,
+        nasal_seam,
+    }
 }
 
 impl ArpabetToIpa {
     fn mapped(&self, base: &str) -> String {
-        self.def.map.get(base).cloned().unwrap_or_else(|| base.to_string())
+        self.def
+            .map
+            .get(base)
+            .cloned()
+            .unwrap_or_else(|| base.to_string())
     }
 
     pub fn convert(&self, phones: &[String], word: &JsString) -> JsString {
@@ -220,29 +247,47 @@ impl ArpabetToIpa {
                 if stress == 2
                     && !demoted[i]
                     && primary_ni.is_some_and(|pn| ni.abs_diff(pn) == 1)
-                    && !(ni == nuclei_idx.len() - 1 && (i < p.len() - 1 || STRONG_OPEN_FINAL.contains(&base.as_str())))
+                    && !(ni == nuclei_idx.len() - 1
+                        && (i < p.len() - 1 || STRONG_OPEN_FINAL.contains(&base.as_str())))
                     && !(R_OFFGLIDE_DIPHTHONG.contains(&base.as_str())
-                        && p.get(i + 1).is_some_and(|x| x.base == "ER" && x.stress == 0))
+                        && p.get(i + 1)
+                            .is_some_and(|x| x.base == "ER" && x.stress == 0))
                 {
                     mark = "";
                 }
                 out.push_str(mark);
-                if (base == "AH" || base == "IH") && is_barred_i(word, &p, i, ni, nuclei_idx.len()) {
+                if (base == "AH" || base == "IH") && is_barred_i(word, &p, i, ni, nuclei_idx.len())
+                {
                     out.push('ᵻ');
                 } else if base == "AH" {
-                    out.push_str(if stress <= 0 { &cv.ah.unstressed } else { &cv.ah.stressed });
-                } else if base == "ER" {
-                    out.push_str(if stress <= 0 { &cv.er.unstressed } else { &cv.er.stressed });
-                } else if base == "IY" {
-                    out.push_str(if next_is_r && !js_re!("^(?:copy|deoxy|re|pre|de)(?:r|wr)", "u").test(word) {
-                        &cv.iy.before_r
-                    } else if stress <= 0 {
-                        &cv.iy.unstressed
+                    out.push_str(if stress <= 0 {
+                        &cv.ah.unstressed
                     } else {
-                        &cv.iy.stressed
+                        &cv.ah.stressed
                     });
+                } else if base == "ER" {
+                    out.push_str(if stress <= 0 {
+                        &cv.er.unstressed
+                    } else {
+                        &cv.er.stressed
+                    });
+                } else if base == "IY" {
+                    out.push_str(
+                        if next_is_r && !js_re!("^(?:copy|deoxy|re|pre|de)(?:r|wr)", "u").test(word)
+                        {
+                            &cv.iy.before_r
+                        } else if stress <= 0 {
+                            &cv.iy.unstressed
+                        } else {
+                            &cv.iy.stressed
+                        },
+                    );
                 } else if base == "UW" {
-                    out.push_str(if next_is_r { &cv.uw.before_r } else { &cv.uw.default });
+                    out.push_str(if next_is_r {
+                        &cv.uw.before_r
+                    } else {
+                        &cv.uw.default
+                    });
                 } else {
                     out.push_str(&self.mapped(&base));
                 }
@@ -253,14 +298,23 @@ impl ArpabetToIpa {
             }
             if pending_syllabic {
                 pending_syllabic = false;
-                out.push_str(&if base == "L" { "ɫ".to_string() } else { self.mapped(&base) });
+                out.push_str(&if base == "L" {
+                    "ɫ".to_string()
+                } else {
+                    self.mapped(&base)
+                });
                 out.push('\u{0329}');
                 continue;
             }
             if base == "N"
                 && i + 1 < p.len()
                 && (p[i + 1].base == "K" || p[i + 1].base == "G")
-                && !(i <= 6 && js_re!("^(?:dis|re|mis|over|under|pre|post)?(?:un|in|non|con|en|syn|down|trans)", "u").test(word))
+                && !(i <= 6
+                    && js_re!(
+                        "^(?:dis|re|mis|over|under|pre|post)?(?:un|in|non|con|en|syn|down|trans)",
+                        "u"
+                    )
+                    .test(word))
                 && !self.nasal_seam.get(word).is_some_and(|s| s.contains(&i))
             {
                 out.push('ŋ');
@@ -268,7 +322,10 @@ impl ArpabetToIpa {
             }
             if (base == "T" || base == "D") && i > 0 && i + 1 < p.len() {
                 let (prev, next) = (&p[i - 1], &p[i + 1]);
-                if (is_vowel(&prev.base) || prev.base == "R") && is_vowel(&next.base) && next.stress == 0 {
+                if (is_vowel(&prev.base) || prev.base == "R")
+                    && is_vowel(&next.base)
+                    && next.stress == 0
+                {
                     out.push_str(if base == "T" { "t̬" } else { "d̬" });
                     continue;
                 }
@@ -277,7 +334,10 @@ impl ArpabetToIpa {
                 let prev_base = if i > 0 { p[i - 1].base.as_str() } else { "#" };
                 let next = p.get(i + 1);
                 let onset = i == 0 || is_vowel(prev_base);
-                if prev_base != "S" && onset && next.is_some_and(|n| is_vowel(&n.base) && n.stress >= 1) {
+                if prev_base != "S"
+                    && onset
+                    && next.is_some_and(|n| is_vowel(&n.base) && n.stress >= 1)
+                {
                     out.push_str(match base.as_str() {
                         "P" => "pʰ",
                         "T" => "tʰ",

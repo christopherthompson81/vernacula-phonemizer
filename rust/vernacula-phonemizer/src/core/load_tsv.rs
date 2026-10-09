@@ -65,10 +65,17 @@ pub fn load_tsv_map<V: Clone>(
 }
 
 /// `load_tsv_map` with the value kept as the raw string.
-pub fn load_tsv_strings(dir: &str, filename: &str, opts: TsvOptions) -> Result<IndexMap<JsString, JsString>, DataError> {
+pub fn load_tsv_strings(
+    dir: &str,
+    filename: &str,
+    opts: TsvOptions,
+) -> Result<IndexMap<JsString, JsString>, DataError> {
     load_tsv_map(dir, filename, |v, _| Some(v.clone()), opts)
 }
 
 pub fn load_lines(dir: &str, filename: &str, optional: bool) -> Result<Vec<JsString>, DataError> {
-    Ok(read_data_lines(dir, filename, optional)?.iter().map(|l| JsString::from(l.as_str())).collect())
+    Ok(read_data_lines(dir, filename, optional)?
+        .iter()
+        .map(|l| JsString::from(l.as_str()))
+        .collect())
 }

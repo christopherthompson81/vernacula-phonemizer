@@ -61,7 +61,11 @@ pub fn quant_params_u8(data: &[f32]) -> (f32, u8) {
     }
     let min = min.min(0.0);
     let max = max.max(0.0);
-    let scale = if max == min { 1.0f32 } else { (max - min) / 255.0f32 };
+    let scale = if max == min {
+        1.0f32
+    } else {
+        (max - min) / 255.0f32
+    };
     let initial_zero_point = 0.0f32 - min / scale;
     let clamped = 0.0f32.max(255.0f32.min(initial_zero_point));
     (scale, round_half_to_even(clamped) as u8)
@@ -157,7 +161,15 @@ impl QWeights {
                 }
             }
         }
-        QWeights { k, n, k4, signed, quads, pairs, colsum }
+        QWeights {
+            k,
+            n,
+            k4,
+            signed,
+            quads,
+            pairs,
+            colsum,
+        }
     }
 
     /// `MlasGemm` over quantized A [M, K] (u8, zero point `za`) and this B: the int32 result
@@ -187,7 +199,13 @@ impl QWeights {
             for q in 0..nq {
                 let brow = &self.quads[q * n * 4..(q + 1) * n * 4];
                 for mm in 0..m {
-                    accumulate_quads_u8s8(aquads[mm * nq + q], brow, n, saturate, &mut out[mm * n..(mm + 1) * n]);
+                    accumulate_quads_u8s8(
+                        aquads[mm * nq + q],
+                        brow,
+                        n,
+                        saturate,
+                        &mut out[mm * n..(mm + 1) * n],
+                    );
                 }
             }
             let za = i32::from(za);
@@ -198,7 +216,13 @@ impl QWeights {
             }
         } else {
             let np = self.k4 / 2;
-            let at = |mm: usize, i: usize| if i < k { i32::from(a[mm * k + i]) - i32::from(za) } else { 0 };
+            let at = |mm: usize, i: usize| {
+                if i < k {
+                    i32::from(a[mm * k + i]) - i32::from(za)
+                } else {
+                    0
+                }
+            };
             for p in 0..np {
                 let brow = &self.pairs[p * n..(p + 1) * n];
                 for mm in 0..m {
@@ -228,10 +252,21 @@ fn accumulate_quads_u8s8(aq: u32, brow: &[i8], n: usize, saturate: bool, acc: &m
 }
 
 fn accumulate_quads_u8s8_scalar(aq: u32, brow: &[i8], n: usize, saturate: bool, acc: &mut [i32]) {
-    let sat = |s: i32| if saturate { s.clamp(i16::MIN as i32, i16::MAX as i32) } else { s };
+    let sat = |s: i32| {
+        if saturate {
+            s.clamp(i16::MIN as i32, i16::MAX as i32)
+        } else {
+            s
+        }
+    };
     let a = aq.to_le_bytes().map(i32::from);
     for (c, b) in acc[..n].iter_mut().zip(brow.as_chunks::<4>().0) {
-        let (b0, b1, b2, b3) = (i32::from(b[0]), i32::from(b[1]), i32::from(b[2]), i32::from(b[3]));
+        let (b0, b1, b2, b3) = (
+            i32::from(b[0]),
+            i32::from(b[1]),
+            i32::from(b[2]),
+            i32::from(b[3]),
+        );
         *c += sat(a[0] * b0 + a[1] * b1) + sat(a[2] * b2 + a[3] * b3);
     }
 }
@@ -252,7 +287,10 @@ unsafe fn accumulate_quads_u8s8_avx2(aq: u32, brow: &[i8], n: usize, acc: &mut [
             let b = _mm256_loadu_si256(brow.as_ptr().add(4 * j) as *const __m256i);
             let s = _mm256_madd_epi16(_mm256_maddubs_epi16(av, b), ones);
             let c = _mm256_loadu_si256(acc.as_ptr().add(j) as *const __m256i);
-            _mm256_storeu_si256(acc.as_mut_ptr().add(j) as *mut __m256i, _mm256_add_epi32(c, s));
+            _mm256_storeu_si256(
+                acc.as_mut_ptr().add(j) as *mut __m256i,
+                _mm256_add_epi32(c, s),
+            );
         }
         j += 8;
     }
@@ -274,7 +312,11 @@ fn accumulate_pairs_u8u8(ap: i32, brow: &[i32], acc: &mut [i32]) {
 /// `MLAS_QGEMM_SCALE_BIAS_OUTPUT_PROCESSOR` in ZeroMode, without bias: `out = float(acc) · scale`, the scale
 /// per matrix (`scale.len() == 1`) or per column. `acc` and `out` are [M, N].
 pub fn dequant(acc: &[i32], scale: &[f32], out: &mut [f32]) {
-    let n = if scale.len() == 1 { out.len() } else { scale.len() };
+    let n = if scale.len() == 1 {
+        out.len()
+    } else {
+        scale.len()
+    };
     for (orow, arow) in out.chunks_exact_mut(n).zip(acc.chunks_exact(n)) {
         if scale.len() == 1 {
             let s = scale[0];
@@ -293,11 +335,19 @@ pub fn dequant(acc: &[i32], scale: &[f32], out: &mut [f32]) {
 /// build `MlasMultiplyAddFloat32x4` is SSE2 `_mm_add_ps(_mm_mul_ps(..))` — two roundings, not an FMA.
 pub fn dequant_accumulate(acc: &[i32], scale: &[f32], out: &mut [f32]) {
     let fma = on(knobs::FMA_ACCUMULATE);
-    let n = if scale.len() == 1 { out.len() } else { scale.len() };
+    let n = if scale.len() == 1 {
+        out.len()
+    } else {
+        scale.len()
+    };
     for (orow, arow) in out.chunks_exact_mut(n).zip(acc.chunks_exact(n)) {
         for (j, (o, &a)) in orow.iter_mut().zip(arow).enumerate() {
             let s = if scale.len() == 1 { scale[0] } else { scale[j] };
-            *o = if fma { (a as f32).mul_add(s, *o) } else { a as f32 * s + *o };
+            *o = if fma {
+                (a as f32).mul_add(s, *o)
+            } else {
+                a as f32 * s + *o
+            };
         }
     }
 }
@@ -471,7 +521,8 @@ pub fn sum_exp(input: &[f32], neg_max: f32, out: &mut [f32]) -> f32 {
         p = p.mul_add(x, P56);
         p = p.mul_add(x, P56);
         // vpslld 23 then vpaddd the exponent bias: integer arithmetic on the biased float's bits.
-        let scale = f32::from_bits(((biased.to_bits() << 23) as i32).wrapping_add(MAXIMUM_EXPONENT) as u32);
+        let scale =
+            f32::from_bits(((biased.to_bits() << 23) as i32).wrapping_add(MAXIMUM_EXPONENT) as u32);
         p * scale
     };
     let mut acc = [0f32; 8];
@@ -706,7 +757,11 @@ mod tests {
         logistic(&mut v);
         tanh(&mut t);
         for i in 0..x.len() {
-            assert!((v[i] - 1.0 / (1.0 + (-x[i]).exp())).abs() < 1e-6, "logistic({})", x[i]);
+            assert!(
+                (v[i] - 1.0 / (1.0 + (-x[i]).exp())).abs() < 1e-6,
+                "logistic({})",
+                x[i]
+            );
             assert!((t[i] - x[i].tanh()).abs() < 1e-6, "tanh({})", x[i]);
         }
     }

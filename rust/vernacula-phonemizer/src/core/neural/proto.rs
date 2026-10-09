@@ -28,7 +28,10 @@ impl<'a> Reader<'a> {
     fn varint(&mut self) -> Result<u64, NeuralError> {
         let mut v = 0u64;
         for shift in (0..64).step_by(7) {
-            let b = *self.buf.get(self.pos).ok_or_else(|| err("truncated varint"))?;
+            let b = *self
+                .buf
+                .get(self.pos)
+                .ok_or_else(|| err("truncated varint"))?;
             self.pos += 1;
             v |= u64::from(b & 0x7f) << shift;
             if b & 0x80 == 0 {
@@ -39,7 +42,11 @@ impl<'a> Reader<'a> {
     }
 
     fn take(&mut self, n: usize) -> Result<&'a [u8], NeuralError> {
-        let end = self.pos.checked_add(n).filter(|&e| e <= self.buf.len()).ok_or_else(|| err("truncated field"))?;
+        let end = self
+            .pos
+            .checked_add(n)
+            .filter(|&e| e <= self.buf.len())
+            .ok_or_else(|| err("truncated field"))?;
         let s = &self.buf[self.pos..end];
         self.pos = end;
         Ok(s)
@@ -63,7 +70,11 @@ impl<'a> Reader<'a> {
                 Value::Bytes(self.take(n)?)
             }
             5 => Value::Fixed32(u32::from_le_bytes(self.take(4)?.try_into().unwrap())),
-            w => return Err(NeuralError::Parse(format!("unsupported wire type {w} (field {num})"))),
+            w => {
+                return Err(NeuralError::Parse(format!(
+                    "unsupported wire type {w} (field {num})"
+                )));
+            }
         };
         Ok(Some((num, v)))
     }
@@ -71,7 +82,9 @@ impl<'a> Reader<'a> {
 
 fn string(v: &Value) -> Result<String, NeuralError> {
     match v {
-        Value::Bytes(b) => String::from_utf8(b.to_vec()).map_err(|_| err("string field is not UTF-8")),
+        Value::Bytes(b) => {
+            String::from_utf8(b.to_vec()).map_err(|_| err("string field is not UTF-8"))
+        }
         _ => Err(err("expected a length-delimited string")),
     }
 }

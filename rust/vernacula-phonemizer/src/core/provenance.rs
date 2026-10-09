@@ -120,7 +120,9 @@ pub fn rebuilt(s: &JsString, pieces: &[Piece]) -> JsString {
     for (text, _, _) in pieces {
         out.push_str(text);
     }
-    let Some((p, tracked)) = snapshot() else { return out };
+    let Some((p, tracked)) = snapshot() else {
+        return out;
+    };
     if tracked.as_ref() != Some(s) {
         poison(Some((&tracked.unwrap_or_default(), s)));
         return out;
@@ -150,7 +152,10 @@ pub fn rebuilt(s: &JsString, pieces: &[Piece]) -> JsString {
 
 /// `[ᄀ-ᇿꥠ-꥿ힰ-퟿]+|[\uD800-\uDBFF][\uDC00-\uDFFF]\p{M}*|[\s\S]\p{M}*`, gu.
 fn canonical_block() -> &'static JsRegex {
-    crate::js_re!(r"[ᄀ-ᇿꥠ-꥿ힰ-퟿]+|[\uD800-\uDBFF][\uDC00-\uDFFF]\p{M}*|[\s\S]\p{M}*", "gu")
+    crate::js_re!(
+        r"[ᄀ-ᇿꥠ-꥿ힰ-퟿]+|[\uD800-\uDBFF][\uDC00-\uDFFF]\p{M}*|[\s\S]\p{M}*",
+        "gu"
+    )
 }
 
 #[derive(Clone, Copy)]
@@ -195,7 +200,9 @@ pub fn normalize(s: &JsString, form: Form) -> JsString {
 /// `s.normalize(form)` on the pipeline string, carrying the mapping block by block.
 pub fn renormalize(s: &JsString, form: Form) -> JsString {
     let whole = normalize(s, form);
-    let Some((p, tracked)) = snapshot() else { return whole };
+    let Some((p, tracked)) = snapshot() else {
+        return whole;
+    };
     if whole == *s {
         return whole;
     }
@@ -203,7 +210,11 @@ pub fn renormalize(s: &JsString, form: Form) -> JsString {
         poison(Some((&tracked.unwrap_or_default(), s)));
         return whole;
     }
-    let blocks: Vec<JsString> = canonical_block().match_all(s).iter().map(|m| m.value(s)).collect();
+    let blocks: Vec<JsString> = canonical_block()
+        .match_all(s)
+        .iter()
+        .map(|m| m.value(s))
+        .collect();
     let mut next = Vec::new();
     let mut at = 0;
     let mut joined = JsString::new();
@@ -246,14 +257,24 @@ fn escape(lit: &str) -> String {
 }
 
 /// `s.replace(re, (m, …) => …)` on the pipeline string.
-pub fn rewrite_with(s: &JsString, re: &JsRegex, mut f: impl FnMut(&JsMatch, &JsString) -> JsString) -> JsString {
-    let Some((p, tracked)) = snapshot() else { return re.replace_with(s, f) };
+pub fn rewrite_with(
+    s: &JsString,
+    re: &JsRegex,
+    mut f: impl FnMut(&JsMatch, &JsString) -> JsString,
+) -> JsString {
+    let Some((p, tracked)) = snapshot() else {
+        return re.replace_with(s, f);
+    };
     if tracked.as_ref() != Some(s) {
         poison(Some((&tracked.unwrap_or_default(), s)));
         return re.replace_with(s, f);
     }
     let all = re.match_all(s);
-    let matches: &[JsMatch] = if re.global { &all } else { &all[..all.len().min(1)] };
+    let matches: &[JsMatch] = if re.global {
+        &all
+    } else {
+        &all[..all.len().min(1)]
+    };
     let mut out = JsString::new();
     let mut next: Vec<Span> = Vec::with_capacity(s.len());
     let mut cursor = 0;

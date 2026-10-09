@@ -20,14 +20,21 @@ pub trait DataSource: Send + Sync {
 pub enum DataError {
     /// No source is installed: a configuration error, never treated as an optional file's absence.
     NoSource(String),
-    Missing { key: String, detail: String },
+    Missing {
+        key: String,
+        detail: String,
+    },
 }
 
 impl std::fmt::Display for DataError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DataError::NoSource(key) => write!(f, "No data source installed — cannot read \"{key}\"."),
-            DataError::Missing { key, detail } => write!(f, "data key \"{key}\" not readable: {detail}"),
+            DataError::NoSource(key) => {
+                write!(f, "No data source installed — cannot read \"{key}\".")
+            }
+            DataError::Missing { key, detail } => {
+                write!(f, "data key \"{key}\" not readable: {detail}")
+            }
         }
     }
 }
@@ -41,8 +48,10 @@ pub struct FsDataSource {
 
 impl DataSource for FsDataSource {
     fn read(&self, key: &str) -> Result<Vec<u8>, DataError> {
-        std::fs::read(self.root.join(key))
-            .map_err(|e| DataError::Missing { key: key.to_string(), detail: format!("{} ({e})", self.root.join(key).display()) })
+        std::fs::read(self.root.join(key)).map_err(|e| DataError::Missing {
+            key: key.to_string(),
+            detail: format!("{} ({e})", self.root.join(key).display()),
+        })
     }
 }
 
@@ -63,7 +72,8 @@ fn current() -> Option<Arc<dyn DataSource>> {
     DEFAULTED.call_once(|| {
         let mut s = SOURCE.write().unwrap();
         if s.is_none() {
-            *s = resolve_data_root().map(|root| Arc::new(FsDataSource { root }) as Arc<dyn DataSource>);
+            *s = resolve_data_root()
+                .map(|root| Arc::new(FsDataSource { root }) as Arc<dyn DataSource>);
         }
     });
     SOURCE.read().unwrap().clone()

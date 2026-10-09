@@ -19,13 +19,19 @@ impl std::fmt::Display for ManifestError {
 
 impl std::error::Error for ManifestError {}
 
-pub fn load_manifest<T: serde::de::DeserializeOwned>(dir: &str, filename: &str) -> Result<T, ManifestError> {
+pub fn load_manifest<T: serde::de::DeserializeOwned>(
+    dir: &str,
+    filename: &str,
+) -> Result<T, ManifestError> {
     let key = data_file(dir, filename);
     let text = read_data_text(&key).map_err(|e| ManifestError(e.to_string()))?;
     parse_jsonc(&text).map_err(|e| ManifestError(format!("{key}: {e}")))
 }
 
-pub fn load_json<T: serde::de::DeserializeOwned>(dir: &str, filename: &str) -> Result<T, ManifestError> {
+pub fn load_json<T: serde::de::DeserializeOwned>(
+    dir: &str,
+    filename: &str,
+) -> Result<T, ManifestError> {
     let key = data_file(dir, filename);
     let text = read_data_text(&key).map_err(|e| ManifestError(e.to_string()))?;
     serde_json::from_str(&text).map_err(|e| ManifestError(format!("{key}: {e}")))

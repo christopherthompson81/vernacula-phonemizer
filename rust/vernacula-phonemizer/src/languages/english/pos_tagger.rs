@@ -24,10 +24,19 @@ pub fn normalize_token(word: &JsString) -> JsString {
 }
 
 /// The feature strings, in the TS insertion order (a later duplicate key overwrites, so order is first-seen).
-pub fn extract_features(i: usize, word: &JsString, context: &[JsString], prev: &JsString, prev2: &JsString) -> Vec<JsString> {
+pub fn extract_features(
+    i: usize,
+    word: &JsString,
+    context: &[JsString],
+    prev: &JsString,
+    prev2: &JsString,
+) -> Vec<JsString> {
     let mut feats: Vec<JsString> = Vec::new();
     let mut add = |parts: &[&JsString]| {
-        let f = JsString::join(&parts.iter().map(|p| (*p).clone()).collect::<Vec<_>>(), &js(" "));
+        let f = JsString::join(
+            &parts.iter().map(|p| (*p).clone()).collect::<Vec<_>>(),
+            &js(" "),
+        );
         if !feats.contains(&f) {
             feats.push(f);
         }
@@ -112,18 +121,27 @@ impl PosTagger {
             .map(|(f, w)| {
                 // `for (idx in w)` visits integer keys ascending; the sums are of integers, so order is
                 // immaterial, but keep it anyway.
-                let mut v: Vec<(usize, f64)> = w.into_iter().map(|(k, x)| (k.parse().unwrap(), x)).collect();
+                let mut v: Vec<(usize, f64)> = w
+                    .into_iter()
+                    .map(|(k, x)| (k.parse().unwrap(), x))
+                    .collect();
                 v.sort_by_key(|(k, _)| *k);
                 (js(&f), v)
             })
             .collect();
-        PosTagger { classes: model.classes, tagdict, weights }
+        PosTagger {
+            classes: model.classes,
+            tagdict,
+            weights,
+        }
     }
 
     fn predict(&self, features: &[JsString]) -> String {
         let mut scores = vec![0.0f64; self.classes.len()];
         for feat in features {
-            let Some(w) = self.weights.get(feat) else { continue };
+            let Some(w) = self.weights.get(feat) else {
+                continue;
+            };
             for &(ci, x) in w {
                 if ci < scores.len() {
                     scores[ci] += x;
@@ -138,7 +156,10 @@ impl PosTagger {
                 best = k;
             }
         }
-        self.classes.get(best).cloned().unwrap_or_else(|| "NN".into())
+        self.classes
+            .get(best)
+            .cloned()
+            .unwrap_or_else(|| "NN".into())
     }
 
     pub fn tag(&self, words: &[JsString]) -> Vec<String> {

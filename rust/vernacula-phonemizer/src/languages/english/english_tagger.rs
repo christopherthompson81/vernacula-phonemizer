@@ -48,12 +48,20 @@ pub struct EnglishTagger {
 impl EnglishTagger {
     pub fn new(meta: TaggerMeta, model: Box<dyn CharLogits>) -> EnglishTagger {
         let n_tags = meta.tags.len();
-        let tag_by_id = meta.tags.iter().filter_map(|(k, v)| k.parse().ok().map(|i| (i, v.clone()))).collect();
+        let tag_by_id = meta
+            .tags
+            .iter()
+            .filter_map(|(k, v)| k.parse().ok().map(|i| (i, v.clone())))
+            .collect();
         EnglishTagger {
             meta,
             n_tags,
             model,
-            arpabet_to_ipa: make_arpabet_to_ipa(&MANIFEST.arpabet, IndexMap::new(), IndexMap::new()),
+            arpabet_to_ipa: make_arpabet_to_ipa(
+                &MANIFEST.arpabet,
+                IndexMap::new(),
+                IndexMap::new(),
+            ),
             vowels: MANIFEST.arpabet.vowels.iter().cloned().collect(),
             tag_by_id,
         }
@@ -63,7 +71,10 @@ impl EnglishTagger {
     /// permitted tag, or no phones at all): empty means "defer to the rule engine".
     pub fn tag(&self, word: &JsString) -> Result<JsString, String> {
         let lower = word.to_lower_case();
-        let chars: Vec<String> = lower.code_points().map(|cp| char::from_u32(cp).map_or_else(String::new, |c| c.to_string())).collect();
+        let chars: Vec<String> = lower
+            .code_points()
+            .map(|cp| char::from_u32(cp).map_or_else(String::new, |c| c.to_string()))
+            .collect();
         let t = chars.len();
         if t == 0 {
             return Ok(JsString::new());
@@ -77,13 +88,21 @@ impl EnglishTagger {
         }
         let logits = self.model.logits(&ids)?;
         if logits.len() != t * self.n_tags {
-            return Err(format!("logits length {} for T={t} × {} tags", logits.len(), self.n_tags));
+            return Err(format!(
+                "logits length {} for T={t} × {} tags",
+                logits.len(),
+                self.n_tags
+            ));
         }
         let vowel_letter = |c: &str| js_re!("^[aeiouy]$", "u").test(&js(c));
         let mut phones: Vec<String> = Vec::new();
         let mut last_from_char: isize = -2;
         for k in 0..t {
-            let Some(best) = masked_argmax(&logits, k * self.n_tags, self.meta.char_tags.get(&ids[k].to_string())) else {
+            let Some(best) = masked_argmax(
+                &logits,
+                k * self.n_tags,
+                self.meta.char_tags.get(&ids[k].to_string()),
+            ) else {
                 return Ok(JsString::new());
             };
             let chunk = self.tag_by_id.get(&best).cloned().unwrap_or_default();
@@ -113,7 +132,8 @@ impl EnglishTagger {
         if phones.is_empty() {
             return Ok(JsString::new());
         }
-        let finished = enforce_single_primary(&collapse_geminates(&phones, &self.vowels), &self.vowels);
+        let finished =
+            enforce_single_primary(&collapse_geminates(&phones, &self.vowels), &self.vowels);
         Ok(self.arpabet_to_ipa.convert(&finished, word))
     }
 }
@@ -121,8 +141,9 @@ impl EnglishTagger {
 /// The tagger's files: `(meta, model bytes)`, or why they are unreadable.
 pub fn load_english_tagger_files(basename: &str) -> Result<(TaggerMeta, Vec<u8>), String> {
     let meta_key = format!("{DIR}/{basename}.meta.json");
-    let meta: TaggerMeta = serde_json::from_str(&read_data_text(&meta_key).map_err(|e| e.to_string())?)
-        .map_err(|e| format!("{meta_key}: {e}"))?;
+    let meta: TaggerMeta =
+        serde_json::from_str(&read_data_text(&meta_key).map_err(|e| e.to_string())?)
+            .map_err(|e| format!("{meta_key}: {e}"))?;
     let bytes = read_data(&format!("{DIR}/{basename}.int8.onnx")).map_err(|e| e.to_string())?;
     Ok((meta, bytes))
 }

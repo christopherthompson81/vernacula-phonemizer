@@ -21,7 +21,11 @@ impl BigNat {
             return None;
         }
         let stripped = t.trim_start_matches('0');
-        Some(BigNat(if stripped.is_empty() { "0".into() } else { stripped.into() }))
+        Some(BigNat(if stripped.is_empty() {
+            "0".into()
+        } else {
+            stripped.into()
+        }))
     }
 
     pub fn from_u128(n: u128) -> BigNat {

@@ -16,7 +16,8 @@ fn g2p_key_of(word: &JsString) -> JsString {
     let mut lookup = lower.clone();
     if lower.ends_with(&js("'s")) && lower.len() > 2 {
         lookup = lower.slice(0, Some(-2));
-    } else if lower.ends_with(&js("'")) && lower.len() > 2 && lower.char_at(lower.len() - 2) == "s" {
+    } else if lower.ends_with(&js("'")) && lower.len() > 2 && lower.char_at(lower.len() - 2) == "s"
+    {
         lookup = lower.slice(0, Some(-1));
     }
     js_re!("'", "gu").replace(&lookup, &JsString::new())
@@ -27,7 +28,11 @@ fn word_re() -> &'static crate::core::js_regex::JsRegex {
 }
 
 /// Tag the OOV words of a foreign Latin run into the process-wide memo the delegated reader consults.
-pub fn prewarm_foreign_english(e: &EnglishPhonemizer, tagger: Option<&EnglishTagger>, text: &JsString) -> Result<(), String> {
+pub fn prewarm_foreign_english(
+    e: &EnglishPhonemizer,
+    tagger: Option<&EnglishTagger>,
+    text: &JsString,
+) -> Result<(), String> {
     let Some(tagger) = tagger else { return Ok(()) };
     let mut done = std::collections::HashSet::new();
     for m in word_re().match_all(text) {
@@ -60,14 +65,19 @@ pub fn phonemize_en_neural(
     word_transform: Option<WordTransform>,
 ) -> Result<JsString, String> {
     let Some(tagger) = tagger else {
-        return Ok(with_host(&js(host), || e.text_full(text, word_transform, None, false)));
+        return Ok(with_host(&js(host), || {
+            e.text_full(text, word_transform, None, false)
+        }));
     };
     let mut tagged: HashMap<JsString, JsString> = HashMap::new();
     let normalized = e.normalized_for(text);
     for m in word_re().match_all(&normalized) {
         let w = m.value(&normalized);
         if m.index() > 0 {
-            let around = normalized.slice((m.index() - 1) as isize, Some((m.index() + w.len()) as isize));
+            let around = normalized.slice(
+                (m.index() - 1) as isize,
+                Some((m.index() + w.len()) as isize),
+            );
             if js_re!("^[0-9](?:st|nd|rd|th)$", "iu").test(&around) {
                 continue;
             }
@@ -84,5 +94,12 @@ pub fn phonemize_en_neural(
             tagged.insert(key, ipa);
         }
     }
-    Ok(with_host(&js(host), || e.text_full(&normalized, word_transform, Some(&|k| tagged.get(k).cloned()), true)))
+    Ok(with_host(&js(host), || {
+        e.text_full(
+            &normalized,
+            word_transform,
+            Some(&|k| tagged.get(k).cloned()),
+            true,
+        )
+    }))
 }

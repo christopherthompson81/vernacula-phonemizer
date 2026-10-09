@@ -11,7 +11,11 @@ const PINNED: &[(&str, usize, u64)] = &[
     ("cat", 624, 0x8db10baa11e212fc),
     ("phonemizer", 2080, 0x45176dce296eb78c),
     ("tokenization", 2496, 0x9ba427caedb48b7a),
-    ("supercalifragilisticexpialidocious", 7072, 0xd80e5ce219853d00),
+    (
+        "supercalifragilisticexpialidocious",
+        7072,
+        0xd80e5ce219853d00,
+    ),
     ("bellingshausen", 2912, 0x919e49f5fe290dec),
     ("strengths", 1872, 0xcc74afee46cdb6b8),
     ("xylophone", 1872, 0xce1f1fa7011b2dff),
@@ -29,10 +33,14 @@ fn fnv1a64(bytes: impl Iterator<Item = u8>) -> u64 {
 }
 
 fn english_ids(word: &str) -> Vec<i64> {
-    let meta: serde_json::Value =
-        serde_json::from_str(&crate::core::data_source::read_data_text("languages/english/en-g2p-tagger.meta.json").unwrap())
-            .unwrap();
-    word.chars().map(|c| meta["src"][c.to_string()].as_i64().unwrap()).collect()
+    let meta: serde_json::Value = serde_json::from_str(
+        &crate::core::data_source::read_data_text("languages/english/en-g2p-tagger.meta.json")
+            .unwrap(),
+    )
+    .unwrap();
+    word.chars()
+        .map(|c| meta["src"][c.to_string()].as_i64().unwrap())
+        .collect()
 }
 
 #[test]
@@ -43,11 +51,19 @@ fn english_tagger_matches_pinned_ort_logits() {
     for &(word, n, hash) in PINNED {
         let ids = english_ids(word);
         let t = ids.len();
-        let out = model.run(&[("chars", Tensor::i64(vec![1, t], ids).unwrap())]).unwrap();
+        let out = model
+            .run(&[("chars", Tensor::i64(vec![1, t], ids).unwrap())])
+            .unwrap();
         let logits = &out[0].1;
         assert_eq!(logits.shape, vec![1, t, 208], "{word}");
         assert_eq!(logits.len(), n, "{word}");
-        let got = fnv1a64(logits.as_f32().unwrap().iter().flat_map(|v| v.to_le_bytes()));
+        let got = fnv1a64(
+            logits
+                .as_f32()
+                .unwrap()
+                .iter()
+                .flat_map(|v| v.to_le_bytes()),
+        );
         assert_eq!(got, hash, "{word}: logits differ from ONNX Runtime");
     }
 }
@@ -55,7 +71,9 @@ fn english_tagger_matches_pinned_ort_logits() {
 #[test]
 fn batch_two_is_refused_not_approximated() {
     let model = load_model("languages/english/en-g2p-tagger.int8.onnx").unwrap();
-    let err = model.run(&[("chars", Tensor::i64(vec![2, 1], vec![2, 3]).unwrap())]).unwrap_err();
+    let err = model
+        .run(&[("chars", Tensor::i64(vec![2, 1], vec![2, 3]).unwrap())])
+        .unwrap_err();
     assert!(matches!(err, NeuralError::Unsupported(_)), "{err}");
 }
 
@@ -70,7 +88,8 @@ fn every_shipped_model_loads() {
             if p.is_dir() {
                 stack.push(p);
             } else if p.extension().is_some_and(|x| x == "onnx") {
-                OnnxModel::from_bytes(&std::fs::read(&p).unwrap()).unwrap_or_else(|e| panic!("{}: {e}", p.display()));
+                OnnxModel::from_bytes(&std::fs::read(&p).unwrap())
+                    .unwrap_or_else(|e| panic!("{}: {e}", p.display()));
                 n += 1;
             }
         }
@@ -135,16 +154,25 @@ fn one_node_model(op_type: &str, attrs: &[(&str, i64)]) -> Vec<u8> {
 #[test]
 fn a_supported_one_node_model_runs() {
     let m = OnnxModel::from_bytes(&one_node_model("Softmax", &[("axis", -1)])).unwrap();
-    let out = m.run(&[("x", Tensor::f32(vec![1, 2], vec![0.0, 0.0]).unwrap())]).unwrap();
+    let out = m
+        .run(&[("x", Tensor::f32(vec![1, 2], vec![0.0, 0.0]).unwrap())])
+        .unwrap();
     assert_eq!(out[0].1.as_f32().unwrap(), &[0.5, 0.5]);
 }
 
 #[test]
 fn unknown_ops_and_attributes_fail_at_load() {
     let e = OnnxModel::from_bytes(&one_node_model("Erf", &[])).unwrap_err();
-    assert!(matches!(e, NeuralError::Unsupported(ref m) if m.contains("Erf")), "{e}");
-    let e = OnnxModel::from_bytes(&one_node_model("Softmax", &[("axis", -1), ("bogus", 1)])).unwrap_err();
-    assert!(matches!(e, NeuralError::Unsupported(ref m) if m.contains("bogus")), "{e}");
+    assert!(
+        matches!(e, NeuralError::Unsupported(ref m) if m.contains("Erf")),
+        "{e}"
+    );
+    let e = OnnxModel::from_bytes(&one_node_model("Softmax", &[("axis", -1), ("bogus", 1)]))
+        .unwrap_err();
+    assert!(
+        matches!(e, NeuralError::Unsupported(ref m) if m.contains("bogus")),
+        "{e}"
+    );
     let e = OnnxModel::from_bytes(&[0x0a, 0x05, 0x01]).unwrap_err();
     assert!(matches!(e, NeuralError::Parse(_)), "{e}");
 }

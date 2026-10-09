@@ -49,8 +49,22 @@ impl<'a> Rd<'a> {
         let shape: Vec<usize> = (0..nd).map(|_| self.i64() as usize).collect();
         let n: usize = shape.iter().product();
         let data = match code {
-            1 => Data::F32(self.take(4 * n).as_chunks::<4>().0.iter().map(|c| f32::from_le_bytes(*c)).collect()),
-            7 => Data::I64(self.take(8 * n).as_chunks::<8>().0.iter().map(|c| i64::from_le_bytes(*c)).collect()),
+            1 => Data::F32(
+                self.take(4 * n)
+                    .as_chunks::<4>()
+                    .0
+                    .iter()
+                    .map(|c| f32::from_le_bytes(*c))
+                    .collect(),
+            ),
+            7 => Data::I64(
+                self.take(8 * n)
+                    .as_chunks::<8>()
+                    .0
+                    .iter()
+                    .map(|c| i64::from_le_bytes(*c))
+                    .collect(),
+            ),
             2 => Data::U8(self.take(n).to_vec()),
             9 => Data::Bool(self.take(n).iter().map(|&b| b != 0).collect()),
             c => panic!("dtype {c} in reference file"),
@@ -142,7 +156,11 @@ fn main() {
         }
         // A single-op probe model sits beside its reference; a shipped model is found under data/.
         let beside = f.with_extension("onnx");
-        let Some(model_path) = (if beside.exists() { Some(beside) } else { find_model(&data, &stem) }) else {
+        let Some(model_path) = (if beside.exists() {
+            Some(beside)
+        } else {
+            find_model(&data, &stem)
+        }) else {
             println!("{stem}: no model under data/");
             continue;
         };
@@ -158,7 +176,11 @@ fn main() {
         let mut failed = 0;
         let t0 = Instant::now();
         for case in &cases {
-            let ins: Vec<(&str, Tensor)> = case.inputs.iter().map(|(n, t)| (n.as_str(), t.clone())).collect();
+            let ins: Vec<(&str, Tensor)> = case
+                .inputs
+                .iter()
+                .map(|(n, t)| (n.as_str(), t.clone()))
+                .collect();
             let got = match model.run(&ins) {
                 Ok(g) => g,
                 Err(e) => {
@@ -173,7 +195,9 @@ fn main() {
                 let st = stats.entry(name.clone()).or_default();
                 let have = &got.iter().find(|(n, _)| n == name).expect("output").1;
                 assert_eq!(have.shape, want.shape, "{stem} {name} shape");
-                let (Data::F32(h), Data::F32(w)) = (&have.data, &want.data) else { panic!("non-float output") };
+                let (Data::F32(h), Data::F32(w)) = (&have.data, &want.data) else {
+                    panic!("non-float output")
+                };
                 let width = *want.shape.last().unwrap_or(&1);
                 let mut case_exact = true;
                 for (hr, wr) in h.chunks(width.max(1)).zip(w.chunks(width.max(1))) {
@@ -208,7 +232,11 @@ fn main() {
                 s.max_abs,
                 s.argmax_flips,
                 dt,
-                if failed > 0 { format!(", {failed} runs FAILED") } else { String::new() }
+                if failed > 0 {
+                    format!(", {failed} runs FAILED")
+                } else {
+                    String::new()
+                }
             );
         }
     }

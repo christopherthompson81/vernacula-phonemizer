@@ -86,7 +86,8 @@ mod tests {
 
     #[test]
     fn strips_comments_and_trailing_commas() {
-        let v: serde_json::Value = parse_jsonc("{ \"a\": \"//not\", // c\n \"b\": [1, 2, /* x */ ], }").unwrap();
+        let v: serde_json::Value =
+            parse_jsonc("{ \"a\": \"//not\", // c\n \"b\": [1, 2, /* x */ ], }").unwrap();
         assert_eq!(v, serde_json::json!({"a": "//not", "b": [1, 2]}));
     }
 }

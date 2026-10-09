@@ -16,7 +16,9 @@ fn decode(s: &str) -> Vec<u16> {
         if c == '\0' && b.get(i + 1) == Some(&b'S') && i + 6 <= s.len() {
             if let Ok(v) = u16::from_str_radix(&s[i + 2..i + 6], 16) {
                 out.push(v);
-                for _ in 0..5 { it.next(); }
+                for _ in 0..5 {
+                    it.next();
+                }
                 continue;
             }
         }
@@ -31,7 +33,9 @@ fn show(s: &[u16]) -> String {
 }
 
 fn main() {
-    let path = std::env::args().nth(1).unwrap_or_else(|| "../csharp/regex-corpus.jsonl".into());
+    let path = std::env::args()
+        .nth(1)
+        .unwrap_or_else(|| "../csharp/regex-corpus.jsonl".into());
     let text = std::fs::read_to_string(&path).expect("corpus");
     let (mut ok, mut differ, mut refused) = (0usize, 0usize, 0usize);
     let mut refusals: BTreeMap<String, usize> = BTreeMap::new();
@@ -48,23 +52,36 @@ fn main() {
             Err(e) => {
                 refused += 1;
                 *refusals.entry(e.to_string()).or_default() += 1;
-                if examples.len() < 40 { examples.push(format!("  REFUSED /{pattern}/{flags} — {e}\n    {file}")); }
+                if examples.len() < 40 {
+                    examples.push(format!("  REFUSED /{pattern}/{flags} — {e}\n    {file}"));
+                }
                 continue;
             }
         };
         for pair in doc["matches"].as_array().unwrap() {
             let input = decode(pair[0].as_str().unwrap());
-            let want: Vec<Vec<u16>> = pair[1].as_array().unwrap().iter().map(|x| decode(x.as_str().unwrap())).collect();
+            let want: Vec<Vec<u16>> = pair[1]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| decode(x.as_str().unwrap()))
+                .collect();
             let subject = JsString(input.clone());
             let got: Vec<Vec<u16>> = if global {
-                re.match_all(&subject).iter().map(|m| m.value(&subject).0).collect()
+                re.match_all(&subject)
+                    .iter()
+                    .map(|m| m.value(&subject).0)
+                    .collect()
             } else {
                 vec![match re.exec(&subject) {
                     Some(m) => m.value(&subject).0,
                     None => decode(NULL),
                 }]
             };
-            if got == want { ok += 1; continue; }
+            if got == want {
+                ok += 1;
+                continue;
+            }
             differ += 1;
             *differ_by_flags.entry(flags.to_string()).or_default() += 1;
             if examples.len() < 40 {
@@ -80,6 +97,8 @@ fn main() {
     println!("{ok} probe results identical, {differ} DIFFER, {refused} patterns refused");
     println!("differ by flags: {differ_by_flags:?}");
     println!("refusals: {refusals:?}");
-    for e in &examples { println!("{e}"); }
+    for e in &examples {
+        println!("{e}");
+    }
     std::process::exit(if differ + refused == 0 { 0 } else { 1 });
 }

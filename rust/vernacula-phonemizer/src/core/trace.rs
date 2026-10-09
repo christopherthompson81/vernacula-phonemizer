@@ -131,7 +131,12 @@ pub fn stop_trace(ipa: Option<&JsString>) -> Trace {
         }
     }
     end_provenance();
-    Trace { normalized: r.normalized, tokens: r.tokens, rewrites: r.rewrites, traced: r.traced }
+    Trace {
+        normalized: r.normalized,
+        tokens: r.tokens,
+        rewrites: r.rewrites,
+        traced: r.traced,
+    }
 }
 
 pub fn note_rewrite(stage: &str, before: &JsString, after: &JsString, positional: bool) {
@@ -139,7 +144,11 @@ pub fn note_rewrite(stage: &str, before: &JsString, after: &JsString, positional
         return;
     }
     with_active(|r| {
-        r.rewrites.push(TraceRewrite { stage: stage.to_string(), before: before.clone(), after: after.clone() });
+        r.rewrites.push(TraceRewrite {
+            stage: stage.to_string(),
+            before: before.clone(),
+            after: after.clone(),
+        });
         if positional && before.len() == after.len() && r.assembled.as_ref() == Some(before) {
             r.assembled = Some(after.clone());
         }
@@ -178,7 +187,15 @@ pub fn begin_token(span: Span, surface: &JsString) {
         if r.token_depth > 1 {
             return;
         }
-        let i = push_token(r, TraceToken { span, surface: surface.clone(), ..Default::default() }, None);
+        let i = push_token(
+            r,
+            TraceToken {
+                span,
+                surface: surface.clone(),
+                ..Default::default()
+            },
+            None,
+        );
         r.current = Some(i);
     });
 }
@@ -241,7 +258,9 @@ pub fn note_emit(ipa: &JsString, at: Option<usize>) {
             (None, _) => Some(IpaSpan::Withheld),
             (Some(_), Some(IpaSpan::Withheld)) => Some(IpaSpan::Withheld),
             (Some(at), None) => Some(IpaSpan::Known((at, at + ipa.len()))),
-            (Some(at), Some(IpaSpan::Known(cur))) => Some(IpaSpan::Known((cur.0.min(at), cur.1.max(at + ipa.len())))),
+            (Some(at), Some(IpaSpan::Known(cur))) => {
+                Some(IpaSpan::Known((cur.0.min(at), cur.1.max(at + ipa.len()))))
+            }
         };
     });
 }

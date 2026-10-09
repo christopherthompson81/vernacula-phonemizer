@@ -15,7 +15,11 @@ pub struct TaggerMeta {
 
 /// Argmax over only the permitted tag ids of one position; `None` when none is permitted. Ties keep the
 /// FIRST permitted id, as the TS's strict `>` does.
-pub fn masked_argmax(logits: &[f32], row_offset: usize, valid: Option<&Vec<usize>>) -> Option<usize> {
+pub fn masked_argmax(
+    logits: &[f32],
+    row_offset: usize,
+    valid: Option<&Vec<usize>>,
+) -> Option<usize> {
     let valid = valid.filter(|v| !v.is_empty())?;
     let mut best = valid[0];
     let mut best_lo = logits[row_offset + best];
@@ -37,9 +41,13 @@ pub trait CharLogits: Send + Sync {
 /// A tagger graph run by the pure-Rust runtime: input `chars`, output `logits`.
 impl CharLogits for super::neural::OnnxModel {
     fn logits(&self, ids: &[i64]) -> Result<Vec<f32>, String> {
-        let input = super::neural::Tensor::i64(vec![1, ids.len()], ids.to_vec()).map_err(|e| e.to_string())?;
+        let input = super::neural::Tensor::i64(vec![1, ids.len()], ids.to_vec())
+            .map_err(|e| e.to_string())?;
         let out = self.run(&[("chars", input)]).map_err(|e| e.to_string())?;
-        let (_, logits) = out.into_iter().find(|(n, _)| n == "logits").ok_or("model has no `logits` output")?;
+        let (_, logits) = out
+            .into_iter()
+            .find(|(n, _)| n == "logits")
+            .ok_or("model has no `logits` output")?;
         Ok(logits.as_f32().map_err(|e| e.to_string())?.to_vec())
     }
 }

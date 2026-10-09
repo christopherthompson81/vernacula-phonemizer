@@ -41,7 +41,15 @@ pub fn drop_stress(p: &str) -> &str {
 }
 
 fn stress_down(ph: &[String]) -> Vec<String> {
-    ph.iter().map(|p| if let Some(b) = p.strip_suffix('1') { format!("{b}2") } else { p.clone() }).collect()
+    ph.iter()
+        .map(|p| {
+            if let Some(b) = p.strip_suffix('1') {
+                format!("{b}2")
+            } else {
+                p.clone()
+            }
+        })
+        .collect()
 }
 
 pub fn collapse_geminates(ph: &[String], vowels: &HashSet<String>) -> Vec<String> {
@@ -169,20 +177,67 @@ fn i_to_y(w: JsString) -> JsString {
 }
 
 const SUFFIXES: [(&str, StemFn, Allo); 17] = [
-    ("ies", |w| vec![plus(cut(w, 3), "y")], Allo::Fixed(&["IY0", "Z"])),
+    (
+        "ies",
+        |w| vec![plus(cut(w, 3), "y")],
+        Allo::Fixed(&["IY0", "Z"]),
+    ),
     ("ied", |w| vec![plus(cut(w, 3), "y")], Allo::Fixed(&["D"])),
     ("sses", |w| vec![cut(w, 2)], Allo::S),
-    ("ing", |w| vec![cut(w, 3), plus(cut(w, 3), "e"), cut(w, 4)], Allo::Fixed(&["IH0", "NG"])),
-    ("ings", |w| vec![cut(w, 4), plus(cut(w, 4), "e")], Allo::Fixed(&["IH0", "NG", "Z"])),
-    ("edly", |w| vec![cut(w, 4), plus(cut(w, 4), "e")], Allo::Fixed(&["IH0", "D", "L", "IY0"])),
-    ("ness", |w| vec![cut(w, 4), i_to_y(cut(w, 4))], Allo::Fixed(&["N", "AH0", "S"])),
+    (
+        "ing",
+        |w| vec![cut(w, 3), plus(cut(w, 3), "e"), cut(w, 4)],
+        Allo::Fixed(&["IH0", "NG"]),
+    ),
+    (
+        "ings",
+        |w| vec![cut(w, 4), plus(cut(w, 4), "e")],
+        Allo::Fixed(&["IH0", "NG", "Z"]),
+    ),
+    (
+        "edly",
+        |w| vec![cut(w, 4), plus(cut(w, 4), "e")],
+        Allo::Fixed(&["IH0", "D", "L", "IY0"]),
+    ),
+    (
+        "ness",
+        |w| vec![cut(w, 4), i_to_y(cut(w, 4))],
+        Allo::Fixed(&["N", "AH0", "S"]),
+    ),
     ("less", |w| vec![cut(w, 4)], Allo::Fixed(&["L", "AH0", "S"])),
-    ("ment", |w| vec![cut(w, 4)], Allo::Fixed(&["M", "AH0", "N", "T"])),
+    (
+        "ment",
+        |w| vec![cut(w, 4)],
+        Allo::Fixed(&["M", "AH0", "N", "T"]),
+    ),
     ("ful", |w| vec![cut(w, 3)], Allo::Fixed(&["F", "AH0", "L"])),
-    ("est", |w| vec![cut(w, 3), plus(cut(w, 3), "e"), i_to_y(cut(w, 3))], Allo::Fixed(&["IH0", "S", "T"])),
-    ("ers", |w| vec![cut(w, 3), plus(cut(w, 3), "e"), cut(w, 4)], Allo::Fixed(&["ER0", "Z"])),
-    ("er", |w| vec![cut(w, 2), plus(cut(w, 2), "e"), cut(w, 3), i_to_y(cut(w, 2))], Allo::Fixed(&["ER0"])),
-    ("ly", |w| vec![cut(w, 2), i_to_y(cut(w, 2)), plus(cut(w, 2), "le")], Allo::Fixed(&["L", "IY0"])),
+    (
+        "est",
+        |w| vec![cut(w, 3), plus(cut(w, 3), "e"), i_to_y(cut(w, 3))],
+        Allo::Fixed(&["IH0", "S", "T"]),
+    ),
+    (
+        "ers",
+        |w| vec![cut(w, 3), plus(cut(w, 3), "e"), cut(w, 4)],
+        Allo::Fixed(&["ER0", "Z"]),
+    ),
+    (
+        "er",
+        |w| {
+            vec![
+                cut(w, 2),
+                plus(cut(w, 2), "e"),
+                cut(w, 3),
+                i_to_y(cut(w, 2)),
+            ]
+        },
+        Allo::Fixed(&["ER0"]),
+    ),
+    (
+        "ly",
+        |w| vec![cut(w, 2), i_to_y(cut(w, 2)), plus(cut(w, 2), "le")],
+        Allo::Fixed(&["L", "IY0"]),
+    ),
     ("ed", |w| vec![cut(w, 2), cut(w, 1), cut(w, 3)], Allo::Ed),
     ("es", |w| vec![cut(w, 2), cut(w, 1)], Allo::S),
     ("s", |w| vec![cut(w, 1)], Allo::S),
@@ -192,7 +247,11 @@ const PLURAL_SUFFIX: [&str; 3] = ["s", "es", "sses"];
 
 /// One code point of `s` at `i`, and its width.
 fn code_point_str(s: &JsString, i: usize) -> (JsString, usize) {
-    let w = if s.code_point_at(i).unwrap() > 0xFFFF { 2 } else { 1 };
+    let w = if s.code_point_at(i).unwrap() > 0xFFFF {
+        2
+    } else {
+        1
+    };
     (JsString::from_units(&s.0[i..i + w]), w)
 }
 
@@ -224,7 +283,10 @@ impl EnglishG2p {
             let (o, ctx) = k.split_once('|').expect("ngram key is order|context");
             let o: usize = o.parse().expect("ngram order");
             let toks = split_context(ctx);
-            assert!(toks.len() == o && o <= 4, "ngram key {k:?} does not parse into {o} tokens");
+            assert!(
+                toks.len() == o && o <= 4,
+                "ngram key {k:?} does not parse into {o} tokens"
+            );
             let mut key = [NO_TOKEN; 4];
             for (slot, t) in key[4 - o..].iter_mut().zip(&toks) {
                 *slot = intern(t, &mut token_ids);
@@ -245,7 +307,11 @@ impl EnglishG2p {
             sibilant: set(&classes.sibilants),
             stop_piece: jset(&classes.stop_pieces),
             stem_stress_prefix: jset(&classes.stem_stress_prefixes),
-            letter_name_exceptions: classes.letter_name_exceptions.iter().map(|(k, v)| (js(k), js(v))).collect(),
+            letter_name_exceptions: classes
+                .letter_name_exceptions
+                .iter()
+                .map(|(k, v)| (js(k), js(v)))
+                .collect(),
             model,
             dict,
             common,
@@ -254,11 +320,14 @@ impl EnglishG2p {
     }
 
     fn letter_phones(&self, l: &JsString) -> Option<&Vec<String>> {
-        self.dict.get(self.letter_name_exceptions.get(l).unwrap_or(l))
+        self.dict
+            .get(self.letter_name_exceptions.get(l).unwrap_or(l))
     }
 
     fn is_letter_name_row(&self, piece: &JsString) -> bool {
-        let Some(phones) = self.dict.get(piece) else { return false };
+        let Some(phones) = self.dict.get(piece) else {
+            return false;
+        };
         if piece.len() < 2 {
             return false;
         }
@@ -266,11 +335,17 @@ impl EnglishG2p {
         let mut i = 0;
         while i < piece.len() {
             let (l, w) = code_point_str(piece, i);
-            let Some(lp) = self.letter_phones(&l) else { return false };
+            let Some(lp) = self.letter_phones(&l) else {
+                return false;
+            };
             want.extend(lp.iter().cloned());
             i += w;
         }
-        want.len() == phones.len() && want.iter().zip(phones).all(|(x, y)| drop_stress(x) == drop_stress(y))
+        want.len() == phones.len()
+            && want
+                .iter()
+                .zip(phones)
+                .all(|(x, y)| drop_stress(x) == drop_stress(y))
     }
 
     fn token_id(&self, tok: &str) -> u32 {
@@ -285,7 +360,11 @@ impl EnglishG2p {
             key[4 - o..].copy_from_slice(&last[4 - o..]);
             if let Some(e) = self.contexts.get(&(o as u8, key)) {
                 if let Some(count) = e.counts.get(&tok) {
-                    return (js_math::log(count / e.total) + (order - 1 - o) as f64 * js_math::log(self.model.alpha), o as i64);
+                    return (
+                        js_math::log(count / e.total)
+                            + (order - 1 - o) as f64 * js_math::log(self.model.alpha),
+                        o as i64,
+                    );
                 }
             }
         }
@@ -294,14 +373,21 @@ impl EnglishG2p {
 
     fn ngram_decode(&self, w: &JsString) -> Vec<String> {
         use std::rc::Rc;
-        assert!(self.model.order <= 5, "the decoder keeps four tokens of history");
+        assert!(
+            self.model.order <= 5,
+            "the decoder keeps four tokens of history"
+        );
         struct Hyp {
             last: [u32; 4],
             back: Option<Rc<Back>>,
             score: f64,
         }
         let start = self.token_id(START);
-        let mut beam = vec![Hyp { last: [start; 4], back: None, score: 0.0 }];
+        let mut beam = vec![Hyp {
+            last: [start; 4],
+            back: None,
+            score: 0.0,
+        }];
         let empty = vec![String::new()];
         for i in 0..w.len() {
             let c = w.char_at(i);
@@ -328,9 +414,20 @@ impl EnglishG2p {
                     })
                     .collect()
             };
-            let chunks: Vec<&String> = if filtered.is_empty() { raw.iter().collect() } else { filtered };
-            let toks: Vec<(u32, Rc<str>)> =
-                chunks.iter().map(|chunk| (self.token_id(&format!("{cs}:{chunk}")), Rc::from(chunk.as_str()))).collect();
+            let chunks: Vec<&String> = if filtered.is_empty() {
+                raw.iter().collect()
+            } else {
+                filtered
+            };
+            let toks: Vec<(u32, Rc<str>)> = chunks
+                .iter()
+                .map(|chunk| {
+                    (
+                        self.token_id(&format!("{cs}:{chunk}")),
+                        Rc::from(chunk.as_str()),
+                    )
+                })
+                .collect();
             let mut next: Vec<Hyp> = Vec::with_capacity(beam.len() * toks.len());
             for h in &beam {
                 for (tok, chunk) in &toks {
@@ -348,13 +445,24 @@ impl EnglishG2p {
                     let back = if chunk.is_empty() {
                         h.back.clone()
                     } else {
-                        Some(Rc::new(Back { chunk: chunk.clone(), prev: h.back.clone() }))
+                        Some(Rc::new(Back {
+                            chunk: chunk.clone(),
+                            prev: h.back.clone(),
+                        }))
                     };
-                    next.push(Hyp { last, back, score: s });
+                    next.push(Hyp {
+                        last,
+                        back,
+                        score: s,
+                    });
                 }
             }
             // `sort((a, b) => b.score - a.score)`: stable, descending.
-            next.sort_by(|a, b| b.score.partial_cmp(&a.score).unwrap_or(std::cmp::Ordering::Equal));
+            next.sort_by(|a, b| {
+                b.score
+                    .partial_cmp(&a.score)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
             next.truncate(BEAM);
             beam = next;
         }
@@ -364,7 +472,11 @@ impl EnglishG2p {
             chunks.push(b.chunk.clone());
             cur = b.prev.clone();
         }
-        chunks.iter().rev().flat_map(|c| c.split(' ').map(String::from).collect::<Vec<_>>()).collect()
+        chunks
+            .iter()
+            .rev()
+            .flat_map(|c| c.split(' ').map(String::from).collect::<Vec<_>>())
+            .collect()
     }
 
     fn allomorph(&self, allo: Allo, stem: &[String]) -> Vec<String> {
@@ -394,7 +506,12 @@ impl EnglishG2p {
         if keep {
             return sp.iter().cloned().chain(suffix).collect();
         }
-        sp[..sp.len() - 1].iter().cloned().chain(std::iter::once("R".to_string())).chain(suffix).collect()
+        sp[..sp.len() - 1]
+            .iter()
+            .cloned()
+            .chain(std::iter::once("R".to_string()))
+            .chain(suffix)
+            .collect()
     }
 
     fn morph_decode(&self, w: &JsString, as_piece: bool) -> Option<Vec<String>> {
@@ -409,7 +526,9 @@ impl EnglishG2p {
                 if self.is_letter_name_row(&stem) && (as_piece || !PLURAL_SUFFIX.contains(&suf)) {
                     continue;
                 }
-                let Some(sp) = self.dict.get(&stem) else { continue };
+                let Some(sp) = self.dict.get(&stem) else {
+                    continue;
+                };
                 return Some(self.join_morph(&stem, sp, self.allomorph(allo, sp)));
             }
         }
@@ -419,7 +538,13 @@ impl EnglishG2p {
     fn compound_split(&self, w: &JsString) -> Option<Vec<String>> {
         let n = w.len();
         let mut best: Vec<Option<Best>> = (0..=n).map(|_| None).collect();
-        best[0] = Some(Best { parts: Vec::new(), head: JsString::new(), nparts: 0, min_len: usize::MAX, score: 0 });
+        best[0] = Some(Best {
+            parts: Vec::new(),
+            head: JsString::new(),
+            nparts: 0,
+            min_len: usize::MAX,
+            score: 0,
+        });
         for i in 0..n {
             if best[i].is_none() {
                 continue;
@@ -429,11 +554,17 @@ impl EnglishG2p {
                 if self.stop_piece.contains(&piece) {
                     continue;
                 }
-                if !self.common.is_empty() && !self.common.contains(&piece) && !(j == n && j - i >= 5) {
+                if !self.common.is_empty()
+                    && !self.common.contains(&piece)
+                    && !(j == n && j - i >= 5)
+                {
                     continue;
                 }
-                let mut phones: Option<Vec<String>> =
-                    if self.is_letter_name_row(&piece) { None } else { self.dict.get(&piece).cloned() };
+                let mut phones: Option<Vec<String>> = if self.is_letter_name_row(&piece) {
+                    None
+                } else {
+                    self.dict.get(&piece).cloned()
+                };
                 if phones.is_none() && j == n && j - i >= 5 {
                     if let Some(mp) = self.morph_decode(&piece, true) {
                         phones = Some(mp);
@@ -452,7 +583,10 @@ impl EnglishG2p {
                 };
                 let replace = match &best[j] {
                     None => true,
-                    Some(cur) => cand.min_len > cur.min_len || (cand.min_len == cur.min_len && cand.score > cur.score),
+                    Some(cur) => {
+                        cand.min_len > cur.min_len
+                            || (cand.min_len == cur.min_len && cand.score > cur.score)
+                    }
                 };
                 if replace {
                     best[j] = Some(cand);
@@ -464,12 +598,22 @@ impl EnglishG2p {
             return None;
         }
         // The stressed part keeps its primary; the rest are stepped down.
-        let keep = if self.stem_stress_prefix.contains(&full.head) { 1 } else { 0 };
+        let keep = if self.stem_stress_prefix.contains(&full.head) {
+            1
+        } else {
+            0
+        };
         Some(
             full.parts
                 .iter()
                 .enumerate()
-                .flat_map(|(idx, p)| if idx == keep { p.clone() } else { stress_down(p) })
+                .flat_map(|(idx, p)| {
+                    if idx == keep {
+                        p.clone()
+                    } else {
+                        stress_down(p)
+                    }
+                })
                 .collect(),
         )
     }
@@ -490,23 +634,52 @@ impl EnglishG2p {
     }
 
     pub fn decompose(&self, w: &JsString) -> Decomposed {
-        let finish = |ph: Vec<String>| enforce_single_primary(&collapse_geminates(&ph, &self.vowel), &self.vowel);
+        let finish = |ph: Vec<String>| {
+            enforce_single_primary(&collapse_geminates(&ph, &self.vowel), &self.vowel)
+        };
         if let Some(c) = self.compound_split(w) {
-            return Decomposed { phones: finish(c), source: DecomposeSource::Compound };
+            return Decomposed {
+                phones: finish(c),
+                source: DecomposeSource::Compound,
+            };
         }
         if let Some(m) = self.morph_decode(w, false) {
-            return Decomposed { phones: finish(m), source: DecomposeSource::Morph };
+            return Decomposed {
+                phones: finish(m),
+                source: DecomposeSource::Morph,
+            };
         }
         let n = finish(self.ngram_decode(w));
-        let is_elongation = w.len() >= 3 && w.0[w.len() - 1] == w.0[w.len() - 2] && w.0[w.len() - 2] == w.0[w.len() - 3];
+        let is_elongation = w.len() >= 3
+            && w.0[w.len() - 1] == w.0[w.len() - 2]
+            && w.0[w.len() - 2] == w.0[w.len() - 3];
         if w.len() >= 2 && !self.has_nucleus(&n) && !is_elongation {
-            let plural = w.ends_with(&js("s")) && w.len() >= 4 && !js_re!("[aeiouy]", "u").test(&w.slice(0, Some(-1)));
-            if let Some(spelled) = self.spell_out_phones(&if plural { w.slice(0, Some(-1)) } else { w.clone() }) {
-                let ph = if plural { spelled.into_iter().chain(std::iter::once("Z".into())).collect() } else { spelled };
-                return Decomposed { phones: enforce_single_primary(&ph, &self.vowel), source: DecomposeSource::Ngram };
+            let plural = w.ends_with(&js("s"))
+                && w.len() >= 4
+                && !js_re!("[aeiouy]", "u").test(&w.slice(0, Some(-1)));
+            if let Some(spelled) = self.spell_out_phones(&if plural {
+                w.slice(0, Some(-1))
+            } else {
+                w.clone()
+            }) {
+                let ph = if plural {
+                    spelled
+                        .into_iter()
+                        .chain(std::iter::once("Z".into()))
+                        .collect()
+                } else {
+                    spelled
+                };
+                return Decomposed {
+                    phones: enforce_single_primary(&ph, &self.vowel),
+                    source: DecomposeSource::Ngram,
+                };
             }
         }
-        Decomposed { phones: n, source: DecomposeSource::Ngram }
+        Decomposed {
+            phones: n,
+            source: DecomposeSource::Ngram,
+        }
     }
 
     pub fn known_word(&self, w: &JsString) -> bool {
@@ -515,7 +688,11 @@ impl EnglishG2p {
 
     pub fn g2p(&self, word: &JsString) -> JsString {
         let d = self.decompose(word);
-        let w = if d.source == DecomposeSource::Compound { JsString::new() } else { word.clone() };
+        let w = if d.source == DecomposeSource::Compound {
+            JsString::new()
+        } else {
+            word.clone()
+        };
         self.arpabet_to_ipa.convert(&d.phones, &w)
     }
 

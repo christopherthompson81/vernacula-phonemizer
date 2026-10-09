@@ -107,7 +107,10 @@ impl Tensor {
     pub fn new(shape: Vec<usize>, data: Data) -> Result<Tensor, NeuralError> {
         let n: usize = shape.iter().product();
         if n != data.len() {
-            return Err(NeuralError::Run(format!("shape {shape:?} holds {n} elements, data has {}", data.len())));
+            return Err(NeuralError::Run(format!(
+                "shape {shape:?} holds {n} elements, data has {}",
+                data.len()
+            )));
         }
         Ok(Tensor { shape, data })
     }
@@ -131,14 +134,20 @@ impl Tensor {
     pub fn as_f32(&self) -> Result<&[f32], NeuralError> {
         match &self.data {
             Data::F32(v) => Ok(v),
-            d => Err(NeuralError::Run(format!("expected float32, got {}", d.type_name()))),
+            d => Err(NeuralError::Run(format!(
+                "expected float32, got {}",
+                d.type_name()
+            ))),
         }
     }
 
     pub fn as_i64(&self) -> Result<&[i64], NeuralError> {
         match &self.data {
             Data::I64(v) => Ok(v),
-            d => Err(NeuralError::Run(format!("expected int64, got {}", d.type_name()))),
+            d => Err(NeuralError::Run(format!(
+                "expected int64, got {}",
+                d.type_name()
+            ))),
         }
     }
 
@@ -147,27 +156,54 @@ impl Tensor {
         match &self.data {
             Data::I64(v) => Ok(v.clone()),
             Data::I32(v) => Ok(v.iter().map(|&x| i64::from(x)).collect()),
-            d => Err(NeuralError::Run(format!("expected an integer tensor, got {}", d.type_name()))),
+            d => Err(NeuralError::Run(format!(
+                "expected an integer tensor, got {}",
+                d.type_name()
+            ))),
         }
     }
 
     pub fn from_proto(t: &TensorProto) -> Result<Tensor, NeuralError> {
         if t.external {
-            return Err(NeuralError::Unsupported(format!("tensor {} uses external data", t.name)));
+            return Err(NeuralError::Unsupported(format!(
+                "tensor {} uses external data",
+                t.name
+            )));
         }
         let shape: Vec<usize> = t
             .dims
             .iter()
-            .map(|&d| usize::try_from(d).map_err(|_| NeuralError::Parse(format!("negative dim in {}", t.name))))
+            .map(|&d| {
+                usize::try_from(d)
+                    .map_err(|_| NeuralError::Parse(format!("negative dim in {}", t.name)))
+            })
             .collect::<Result<_, _>>()?;
         let n: usize = shape.iter().product();
         let raw = &t.raw_data;
         let data = match t.data_type {
-            FLOAT if !raw.is_empty() => Data::F32(raw.as_chunks::<4>().0.iter().map(|c| f32::from_le_bytes(*c)).collect()),
+            FLOAT if !raw.is_empty() => Data::F32(
+                raw.as_chunks::<4>()
+                    .0
+                    .iter()
+                    .map(|c| f32::from_le_bytes(*c))
+                    .collect(),
+            ),
             FLOAT => Data::F32(t.float_data.clone()),
-            INT64 if !raw.is_empty() => Data::I64(raw.as_chunks::<8>().0.iter().map(|c| i64::from_le_bytes(*c)).collect()),
+            INT64 if !raw.is_empty() => Data::I64(
+                raw.as_chunks::<8>()
+                    .0
+                    .iter()
+                    .map(|c| i64::from_le_bytes(*c))
+                    .collect(),
+            ),
             INT64 => Data::I64(t.int64_data.clone()),
-            INT32 if !raw.is_empty() => Data::I32(raw.as_chunks::<4>().0.iter().map(|c| i32::from_le_bytes(*c)).collect()),
+            INT32 if !raw.is_empty() => Data::I32(
+                raw.as_chunks::<4>()
+                    .0
+                    .iter()
+                    .map(|c| i32::from_le_bytes(*c))
+                    .collect(),
+            ),
             INT32 => Data::I32(t.int32_data.iter().map(|&x| x as i32).collect()),
             // int32_data carries the small integer types when raw_data is absent (onnx.proto).
             UINT8 if !raw.is_empty() => Data::U8(raw.clone()),
@@ -176,10 +212,20 @@ impl Tensor {
             INT8 => Data::I8(t.int32_data.iter().map(|&x| x as i8).collect()),
             BOOL if !raw.is_empty() => Data::Bool(raw.iter().map(|&b| b != 0).collect()),
             BOOL => Data::Bool(t.int32_data.iter().map(|&x| x != 0).collect()),
-            other => return Err(NeuralError::Unsupported(format!("tensor {} has element type {other}", t.name))),
+            other => {
+                return Err(NeuralError::Unsupported(format!(
+                    "tensor {} has element type {other}",
+                    t.name
+                )));
+            }
         };
         if data.len() != n {
-            return Err(NeuralError::Parse(format!("tensor {} has {} elements for shape {:?}", t.name, data.len(), shape)));
+            return Err(NeuralError::Parse(format!(
+                "tensor {} has {} elements for shape {:?}",
+                t.name,
+                data.len(),
+                shape
+            )));
         }
         Ok(Tensor { shape, data })
     }

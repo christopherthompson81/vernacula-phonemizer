@@ -29,5 +29,9 @@ pub fn resolve_unit_symbol<'a, V>(
     if let Some(v) = declared.and_then(|d| d.get(written)) {
         return Some(v);
     }
-    if written.len() > 1 || fold_single { folded.get(&written.to_lower_case()) } else { None }
+    if written.len() > 1 || fold_single {
+        folded.get(&written.to_lower_case())
+    } else {
+        None
+    }
 }

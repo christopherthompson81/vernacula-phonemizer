@@ -10,7 +10,9 @@ use super::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
 use super::manifest::{DIR, HeteronymEntry, MANIFEST};
 use super::normalize::{normalize_english, normalize_english_initialisms};
 use super::numbers::{BigNat, number_to_words, ordinal_to_words};
-use super::pos_tagger::{PosExpectation, PosModel, PosTagger, heads_object_phrase, pos_expectation};
+use super::pos_tagger::{
+    PosExpectation, PosModel, PosTagger, heads_object_phrase, pos_expectation,
+};
 use super::spelling_variants::american_spelling;
 use crate::core::clauses::foreign_run;
 use crate::core::foreign::read_foreign_run;
@@ -29,7 +31,11 @@ fn sibilant_allomorph(ipa: &JsString) -> &'static str {
     while i >= 0 && js_re!("[̀-ͯːˈˌ‿ᶦᶷʰʲ]", "u").test(&chars[i as usize]) {
         i -= 1;
     }
-    let last = if i >= 0 { chars[i as usize].clone() } else { JsString::new() };
+    let last = if i >= 0 {
+        chars[i as usize].clone()
+    } else {
+        JsString::new()
+    };
     // `"szʃʒ".includes(last)`: true for the empty string.
     if js("szʃʒ").includes(&last) {
         return "ᵻz";
@@ -45,7 +51,11 @@ fn code_point_strings(s: &JsString) -> Vec<JsString> {
     let mut out = Vec::new();
     let mut i = 0;
     while i < s.len() {
-        let w = if s.code_point_at(i).unwrap() > 0xFFFF { 2 } else { 1 };
+        let w = if s.code_point_at(i).unwrap() > 0xFFFF {
+            2
+        } else {
+            1
+        };
         out.push(JsString::from_units(&s.0[i..i + w]));
         i += w;
     }
@@ -53,19 +63,32 @@ fn code_point_strings(s: &JsString) -> Vec<JsString> {
 }
 
 fn is_voicing_heteronym(het: &HeteronymEntry) -> bool {
-    let Some(marked) = het.verb.as_ref().or(het.noun.as_ref()).or(het.past.as_ref()) else { return false };
+    let Some(marked) = het
+        .verb
+        .as_ref()
+        .or(het.noun.as_ref())
+        .or(het.past.as_ref())
+    else {
+        return false;
+    };
     let strip = |s: &str| {
         let d = js_re!("[̀-ͯ]", "gu").replace(&normalize(&js(s), Form::Nfd), &JsString::new());
         js_re!("[ˈˌː]", "g").replace(&d, &JsString::new())
     };
     let (a, b) = (strip(&het.default), strip(marked));
-    a.len() == b.len() && !a.is_empty() && a.slice(0, Some(-1)) == b.slice(0, Some(-1)) && a.slice(-1, None) != b.slice(-1, None)
+    a.len() == b.len()
+        && !a.is_empty()
+        && a.slice(0, Some(-1)) == b.slice(0, Some(-1))
+        && a.slice(-1, None) != b.slice(-1, None)
 }
 
 fn promote_first_vowel(ipa: &JsString) -> JsString {
     match js_re!("[aeiouɪʊɛɔəɐæɑɒʌɝɚɜɨʉ]", "u").exec(ipa) {
         None => ipa.clone(),
-        Some(m) => ipa.slice(0, Some(m.index() as isize)).concat(&js("ˈ")).concat(&ipa.slice(m.index() as isize, None)),
+        Some(m) => ipa
+            .slice(0, Some(m.index() as isize))
+            .concat(&js("ˈ"))
+            .concat(&ipa.slice(m.index() as isize, None)),
     }
 }
 
@@ -75,10 +98,24 @@ fn creole_citation(ipa: &JsString) -> JsString {
 }
 
 enum Token {
-    Word { text: JsString, span: Span },
-    Number { text: JsString, ordinal: bool, span: Span },
-    Clause { text: JsString, span: Span },
-    Foreign { ipa: JsString, span: Span, surface: JsString },
+    Word {
+        text: JsString,
+        span: Span,
+    },
+    Number {
+        text: JsString,
+        ordinal: bool,
+        span: Span,
+    },
+    Clause {
+        text: JsString,
+        span: Span,
+    },
+    Foreign {
+        ipa: JsString,
+        span: Span,
+        surface: JsString,
+    },
 }
 
 fn token_re() -> &'static crate::core::js_regex::JsRegex {
@@ -152,7 +189,11 @@ impl EnglishPhonemizer {
 
     pub fn known_word(&self, word: &JsString) -> Option<JsString> {
         let lower = word.to_lower_case();
-        let direct = self.lexicon.get(&lower).cloned().or_else(|| self.heteronyms.get(&lower).map(|h| js(&h.default)));
+        let direct = self
+            .lexicon
+            .get(&lower)
+            .cloned()
+            .or_else(|| self.heteronyms.get(&lower).map(|h| js(&h.default)));
         if let Some(d) = direct {
             return Some(creole_citation(&d));
         }
@@ -172,14 +213,25 @@ impl EnglishPhonemizer {
         self.text_full(input, None, None, false)
     }
 
-    fn resolve_word(&self, word: &JsString, e: Option<&PosExpectation>, oov: Option<OovOverride>) -> (JsString, TokenSource) {
-        let lower = js_re!("’", "gu").replace(&fold_latin_diacritics(&word.to_lower_case()), &js("'"));
+    fn resolve_word(
+        &self,
+        word: &JsString,
+        e: Option<&PosExpectation>,
+        oov: Option<OovOverride>,
+    ) -> (JsString, TokenSource) {
+        let lower =
+            js_re!("’", "gu").replace(&fold_latin_diacritics(&word.to_lower_case()), &js("'"));
         let mut het = self.heteronyms.get(&lower);
         let mut plural_allomorph = false;
         if het.is_none() {
-            let base = if lower.ends_with(&js("es")) && self.heteronyms.contains_key(&lower.slice(0, Some(-2))) {
+            let base = if lower.ends_with(&js("es"))
+                && self.heteronyms.contains_key(&lower.slice(0, Some(-2)))
+            {
                 Some(lower.slice(0, Some(-2)))
-            } else if lower.ends_with(&js("s")) && lower.len() > 1 && self.heteronyms.contains_key(&lower.slice(0, Some(-1))) {
+            } else if lower.ends_with(&js("s"))
+                && lower.len() > 1
+                && self.heteronyms.contains_key(&lower.slice(0, Some(-1)))
+            {
                 Some(lower.slice(0, Some(-1)))
             } else {
                 None
@@ -193,8 +245,19 @@ impl EnglishPhonemizer {
         }
         if let Some(het) = het {
             // `(e?.past && het.past) || …`: an empty reading is falsy and falls through.
-            let pick = |want: bool, v: &Option<String>| if want { v.clone().filter(|s| !s.is_empty()) } else { None };
-            let e = e.copied().unwrap_or(PosExpectation { verb: false, noun: false, past: false, adj: false });
+            let pick = |want: bool, v: &Option<String>| {
+                if want {
+                    v.clone().filter(|s| !s.is_empty())
+                } else {
+                    None
+                }
+            };
+            let e = e.copied().unwrap_or(PosExpectation {
+                verb: false,
+                noun: false,
+                past: false,
+                adj: false,
+            });
             let mut ipa = js(&pick(e.past, &het.past)
                 .or_else(|| pick(e.verb, &het.verb))
                 .or_else(|| pick(e.adj, &het.adj))
@@ -211,12 +274,17 @@ impl EnglishPhonemizer {
         if lower.ends_with(&js("'s")) && lower.len() > 2 {
             lookup_key = lower.slice(0, Some(-2));
             poss_allomorph = true;
-        } else if lower.ends_with(&js("'")) && lower.len() > 2 && lower.char_at(lower.len() - 2) == "s" {
+        } else if lower.ends_with(&js("'"))
+            && lower.len() > 2
+            && lower.char_at(lower.len() - 2) == "s"
+        {
             lookup_key = lower.slice(0, Some(-1));
         }
         let mut over = self.lexicon.get(&lookup_key).cloned();
         if over.is_none() && js_re!("^[a-z']+$").test(&lookup_key) {
-            if let Some(american) = american_spelling(&lookup_key, &|w| self.lexicon.contains_key(w)) {
+            if let Some(american) =
+                american_spelling(&lookup_key, &|w| self.lexicon.contains_key(w))
+            {
                 over = self.lexicon.get(&american).cloned();
             }
         }
@@ -254,14 +322,27 @@ impl EnglishPhonemizer {
             }
         }
         for i in 0..out.len() {
-            let Some(before) = self.heteronyms.get(&words[i].to_lower_case()).and_then(|h| h.before.as_ref()) else { continue };
-            let next = words.get(i + 1).map_or_else(JsString::new, |w| w.to_lower_case());
+            let Some(before) = self
+                .heteronyms
+                .get(&words[i].to_lower_case())
+                .and_then(|h| h.before.as_ref())
+            else {
+                continue;
+            };
+            let next = words
+                .get(i + 1)
+                .map_or_else(JsString::new, |w| w.to_lower_case());
             let lo = i.saturating_sub(3);
             let fires = next == before.word.as_str()
                 && break_after.get(i) != Some(&true)
                 && before.when.iter().any(|alt| {
-                    alt.tags.as_ref().is_none_or(|t| t.iter().any(|x| x == tag_at(i)))
-                        && alt.next_tags.as_ref().is_none_or(|t| t.iter().any(|x| x == tag_at(i + 1)))
+                    alt.tags
+                        .as_ref()
+                        .is_none_or(|t| t.iter().any(|x| x == tag_at(i)))
+                        && alt
+                            .next_tags
+                            .as_ref()
+                            .is_none_or(|t| t.iter().any(|x| x == tag_at(i + 1)))
                         && alt.after_words.as_ref().is_none_or(|aw| {
                             words[lo..i].iter().enumerate().any(|(k, w)| {
                                 let lw = w.to_lower_case();
@@ -280,19 +361,42 @@ impl EnglishPhonemizer {
         }
         let heads_np = |t: &str| t == "DT" || t == "PDT" || t == "PRP$" || t.starts_with("JJ");
         for i in 0..out.len() {
-            if tag_at(i) == "VBN" && tag_at(i + 1).starts_with("NN") && (i == 0 || heads_np(tag_at(i - 1))) {
-                out[i] = PosExpectation { verb: false, past: false, adj: true, ..out[i] };
+            if tag_at(i) == "VBN"
+                && tag_at(i + 1).starts_with("NN")
+                && (i == 0 || heads_np(tag_at(i - 1)))
+            {
+                out[i] = PosExpectation {
+                    verb: false,
+                    past: false,
+                    adj: true,
+                    ..out[i]
+                };
             }
         }
         if out.len() > 1 && !out[0].verb && heads_object_phrase(tag_at(1)) {
-            out[0] = PosExpectation { verb: true, noun: false, past: false, adj: false };
+            out[0] = PosExpectation {
+                verb: true,
+                noun: false,
+                past: false,
+                adj: false,
+            };
         }
         out
     }
 
     /// `text(input, wordTransform?, oovOverride?, preNormalized?)`.
-    pub fn text_full(&self, input: &JsString, word_transform: Option<WordTransform>, oov: Option<OovOverride>, pre_normalized: bool) -> JsString {
-        let input = if pre_normalized { input.clone() } else { self.normalized_for(input) };
+    pub fn text_full(
+        &self,
+        input: &JsString,
+        word_transform: Option<WordTransform>,
+        oov: Option<OovOverride>,
+        pre_normalized: bool,
+    ) -> JsString {
+        let input = if pre_normalized {
+            input.clone()
+        } else {
+            self.normalized_for(input)
+        };
         enter_engine(&input);
         let mut tokens: Vec<Token> = Vec::new();
         let mut gap_cursor = 0;
@@ -304,7 +408,11 @@ impl EnglishPhonemizer {
                     let ipa = read_foreign_run(&surface);
                     let at = *gap_cursor + g.index();
                     if let Some(ipa) = ipa.filter(|i| !i.is_empty()) {
-                        tokens.push(Token::Foreign { ipa, span: (at, at + surface.len()), surface });
+                        tokens.push(Token::Foreign {
+                            ipa,
+                            span: (at, at + surface.len()),
+                            surface,
+                        });
                     }
                 }
             }
@@ -316,7 +424,11 @@ impl EnglishPhonemizer {
             gap_cursor = m.end();
             let span = (m.index(), m.end());
             if let Some(t) = m.group(1, &input) {
-                tokens.push(Token::Number { text: t, ordinal: m.group(2, &input).is_some(), span });
+                tokens.push(Token::Number {
+                    text: t,
+                    ordinal: m.group(2, &input).is_some(),
+                    span,
+                });
             } else if let Some(t) = m.group(3, &input) {
                 tokens.push(Token::Word { text: t, span });
             } else if let Some(t) = m.group(4, &input) {
@@ -325,42 +437,101 @@ impl EnglishPhonemizer {
         }
         claim_gap(input.len(), &mut gap_cursor, &mut tokens);
 
-        let words_of = |n: Vec<String>| n.into_iter().map(|w| NumWord { text: js(&w), reduced: false }).collect::<Vec<_>>();
+        let words_of = |n: Vec<String>| {
+            n.into_iter()
+                .map(|w| NumWord {
+                    text: js(&w),
+                    reduced: false,
+                })
+                .collect::<Vec<_>>()
+        };
         let mut units: Vec<Unit> = Vec::new();
         for t in tokens {
             match t {
                 Token::Clause { text, span } => {
                     if let Some(mk) = self.clause_punctuation.get(&text).filter(|m| !m.is_empty()) {
-                        units.push(Unit { words: Vec::new(), span, surface: text, clause: Some(mk.clone()), foreign: None });
+                        units.push(Unit {
+                            words: Vec::new(),
+                            span,
+                            surface: text,
+                            clause: Some(mk.clone()),
+                            foreign: None,
+                        });
                     }
                 }
                 Token::Foreign { ipa, span, surface } => {
-                    units.push(Unit { words: Vec::new(), span, surface, clause: None, foreign: Some(ipa) });
+                    units.push(Unit {
+                        words: Vec::new(),
+                        span,
+                        surface,
+                        clause: None,
+                        foreign: Some(ipa),
+                    });
                 }
                 Token::Word { text, span } => {
-                    units.push(Unit { words: vec![NumWord { text: text.clone(), reduced: false }], span, surface: text, clause: None, foreign: None });
+                    units.push(Unit {
+                        words: vec![NumWord {
+                            text: text.clone(),
+                            reduced: false,
+                        }],
+                        span,
+                        surface: text,
+                        clause: None,
+                        foreign: None,
+                    });
                 }
-                Token::Number { text, ordinal, span } => {
+                Token::Number {
+                    text,
+                    ordinal,
+                    span,
+                } => {
                     let digits = |s: &JsString| s.to_string_lossy();
                     let dot = text.index_of(&js("."), 0);
                     let words = match dot {
                         Some(dot) => {
-                            let int_part = js_re!(",", "g").replace(&text.slice(0, Some(dot as isize)), &JsString::new());
-                            let int_part = if int_part.is_empty() { js("0") } else { int_part };
-                            let mut w = words_of(number_to_words(&BigNat::parse(&digits(&int_part)).unwrap()));
-                            w.push(NumWord { text: js("point"), reduced: true });
+                            let int_part = js_re!(",", "g")
+                                .replace(&text.slice(0, Some(dot as isize)), &JsString::new());
+                            let int_part = if int_part.is_empty() {
+                                js("0")
+                            } else {
+                                int_part
+                            };
+                            let mut w = words_of(number_to_words(
+                                &BigNat::parse(&digits(&int_part)).unwrap(),
+                            ));
+                            w.push(NumWord {
+                                text: js("point"),
+                                reduced: true,
+                            });
                             for d in code_point_strings(&text.slice((dot + 1) as isize, None)) {
-                                let first = number_to_words(&BigNat::parse(&digits(&d)).unwrap()).swap_remove(0);
-                                w.push(NumWord { text: js(&first), reduced: false });
+                                let first = number_to_words(&BigNat::parse(&digits(&d)).unwrap())
+                                    .swap_remove(0);
+                                w.push(NumWord {
+                                    text: js(&first),
+                                    reduced: false,
+                                });
                             }
                             w
                         }
                         None => {
-                            let n = BigNat::parse(&digits(&js_re!("[,.]", "g").replace(&text, &JsString::new()))).unwrap();
-                            words_of(if ordinal { ordinal_to_words(&n) } else { number_to_words(&n) })
+                            let n = BigNat::parse(&digits(
+                                &js_re!("[,.]", "g").replace(&text, &JsString::new()),
+                            ))
+                            .unwrap();
+                            words_of(if ordinal {
+                                ordinal_to_words(&n)
+                            } else {
+                                number_to_words(&n)
+                            })
                         }
                     };
-                    units.push(Unit { words, span, surface: text, clause: None, foreign: None });
+                    units.push(Unit {
+                        words,
+                        span,
+                        surface: text,
+                        clause: None,
+                        foreign: None,
+                    });
                 }
             }
         }
@@ -388,13 +559,19 @@ impl EnglishPhonemizer {
             items: Vec<Item>,
             mark: Option<JsString>,
         }
-        let mut clauses = vec![Clause { items: Vec::new(), mark: None }];
+        let mut clauses = vec![Clause {
+            items: Vec::new(),
+            mark: None,
+        }];
         for u in &units {
             if let Some(c) = &u.clause {
                 let cur = clauses.last_mut().unwrap();
                 if !cur.items.is_empty() {
                     cur.mark = Some(c.clone());
-                    clauses.push(Clause { items: Vec::new(), mark: None });
+                    clauses.push(Clause {
+                        items: Vec::new(),
+                        mark: None,
+                    });
                 }
                 continue;
             }
@@ -433,7 +610,11 @@ impl EnglishPhonemizer {
         let mut parts: Vec<JsString> = Vec::new();
         let mut traced: IndexMap<Span, Traced> = IndexMap::new();
         for c in clauses.iter_mut() {
-            let strong = c.items.first().and_then(|h| self.clause_initial_stressed.get(&h.word)).cloned();
+            let strong = c
+                .items
+                .first()
+                .and_then(|h| self.clause_initial_stressed.get(&h.word))
+                .cloned();
             let resumes = strong.is_some();
             for (idx, it) in c.items.iter_mut().enumerate() {
                 if idx == 0 {
@@ -449,13 +630,27 @@ impl EnglishPhonemizer {
                 }
             }
             if !c.items.is_empty() {
-                let terminal = c.mark.as_ref().is_none_or(|m| *m == "." || *m == "?" || *m == "!");
+                let terminal = c
+                    .mark
+                    .as_ref()
+                    .is_none_or(|m| *m == "." || *m == "?" || *m == "!");
                 let primary = js("ˈ");
-                let has_primary = c.items.iter().enumerate().any(|(idx, it)| !(idx == 0 && resumes) && it.display.includes(&primary));
+                let has_primary = c
+                    .items
+                    .iter()
+                    .enumerate()
+                    .any(|(idx, it)| !(idx == 0 && resumes) && it.display.includes(&primary));
                 let last = c.items.last_mut().unwrap();
-                let promote = !has_primary || (terminal && !last.display.includes(&primary) && !self.non_tonic_final.contains(&last.word));
+                let promote = !has_primary
+                    || (terminal
+                        && !last.display.includes(&primary)
+                        && !self.non_tonic_final.contains(&last.word));
                 if promote {
-                    last.display = if last.citation.includes(&primary) { last.citation.clone() } else { promote_first_vowel(&last.citation) };
+                    last.display = if last.citation.includes(&primary) {
+                        last.citation.clone()
+                    } else {
+                        promote_first_vowel(&last.citation)
+                    };
                 }
             }
             for it in &c.items {
@@ -476,7 +671,14 @@ impl EnglishPhonemizer {
                     None => {
                         traced.insert(
                             it.span,
-                            Traced { span: it.span, surface: it.surface.clone(), emitted: vec![rendered], parts: vec![parts.len() - 1], tier: Some(it.tier), disagreed: false },
+                            Traced {
+                                span: it.span,
+                                surface: it.surface.clone(),
+                                emitted: vec![rendered],
+                                parts: vec![parts.len() - 1],
+                                tier: Some(it.tier),
+                                disagreed: false,
+                            },
                         );
                     }
                 }
@@ -493,8 +695,20 @@ impl EnglishPhonemizer {
         }
         for t in traced.values() {
             let lo = t.parts.iter().map(|&i| at[i]).min().unwrap();
-            let hi = t.parts.iter().map(|&i| at[i] + parts[i].len()).max().unwrap();
-            note_token(t.span, &t.surface, &t.emitted, None, Some((lo, hi)), if t.disagreed { None } else { t.tier });
+            let hi = t
+                .parts
+                .iter()
+                .map(|&i| at[i] + parts[i].len())
+                .max()
+                .unwrap();
+            note_token(
+                t.span,
+                &t.surface,
+                &t.emitted,
+                None,
+                Some((lo, hi)),
+                if t.disagreed { None } else { t.tier },
+            );
         }
         let assembled = JsString::join(&parts, &js(" "));
         note_assembled(&assembled);
@@ -528,18 +742,34 @@ pub fn create_english() -> EnglishPhonemizer {
     )
     .unwrap_or_else(|e| panic!("{e}"));
     let m = &*MANIFEST;
-    let heteronyms = m.heteronyms.iter().map(|(k, v)| (js(k), v.clone())).collect();
-    let syllabic = load_tsv_map(DIR, "en-syllabic.tsv", slot_list, TsvOptions::default()).unwrap_or_else(|e| panic!("{e}"));
-    let nasal = load_tsv_map(DIR, "en-nasal-seam.tsv", slot_list, TsvOptions::default()).unwrap_or_else(|e| panic!("{e}"));
+    let heteronyms = m
+        .heteronyms
+        .iter()
+        .map(|(k, v)| (js(k), v.clone()))
+        .collect();
+    let syllabic = load_tsv_map(DIR, "en-syllabic.tsv", slot_list, TsvOptions::default())
+        .unwrap_or_else(|e| panic!("{e}"));
+    let nasal = load_tsv_map(DIR, "en-nasal-seam.tsv", slot_list, TsvOptions::default())
+        .unwrap_or_else(|e| panic!("{e}"));
     let arpabet_to_ipa = make_arpabet_to_ipa(&m.arpabet, syllabic, nasal);
     let g2p_dict = load_tsv_map(
         DIR,
         "g2p-dict.tsv",
-        |v, _| Some(v.split(&js(" ")).iter().map(|p| p.to_string_lossy()).collect::<Vec<String>>()),
+        |v, _| {
+            Some(
+                v.split(&js(" "))
+                    .iter()
+                    .map(|p| p.to_string_lossy())
+                    .collect::<Vec<String>>(),
+            )
+        },
         TsvOptions::default(),
     )
     .unwrap_or_else(|e| panic!("{e}"));
-    let common = load_lines(DIR, "g2p-common.txt", false).unwrap_or_else(|e| panic!("{e}")).into_iter().collect();
+    let common = load_lines(DIR, "g2p-common.txt", false)
+        .unwrap_or_else(|e| panic!("{e}"))
+        .into_iter()
+        .collect();
     let classes = G2pClasses {
         vowel_letters: m.g2p_classes.vowel_letters.clone(),
         vowels: m.arpabet.vowels.clone(),
@@ -556,9 +786,15 @@ pub fn create_english() -> EnglishPhonemizer {
         arpabet_to_ipa,
         classes,
     );
-    let tagger = PosTagger::new(load_json::<PosModel>(DIR, "pos-model.json").unwrap_or_else(|e| panic!("{e}")));
+    let tagger = PosTagger::new(
+        load_json::<PosModel>(DIR, "pos-model.json").unwrap_or_else(|e| panic!("{e}")),
+    );
     let set = |v: &[String]| v.iter().map(|s| js(s)).collect::<HashSet<JsString>>();
-    let map = |v: &IndexMap<String, String>| v.iter().map(|(k, x)| (js(k), js(x))).collect::<IndexMap<JsString, JsString>>();
+    let map = |v: &IndexMap<String, String>| {
+        v.iter()
+            .map(|(k, x)| (js(k), js(x)))
+            .collect::<IndexMap<JsString, JsString>>()
+    };
     EnglishPhonemizer {
         lexicon,
         heteronyms,

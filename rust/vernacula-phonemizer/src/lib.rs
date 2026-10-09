@@ -38,7 +38,10 @@ pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, UnknownLa
     match registry::phonemize_in(lang, &input) {
         Ok(ipa) => {
             let trace = core::trace::stop_trace(Some(&ipa));
-            Ok(PhonemeTrace { ipa: ipa.to_string_lossy(), trace })
+            Ok(PhonemeTrace {
+                ipa: ipa.to_string_lossy(),
+                trace,
+            })
         }
         Err(e) => {
             core::trace::stop_trace(None);

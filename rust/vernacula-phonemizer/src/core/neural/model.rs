@@ -12,27 +12,47 @@ use super::tensor::{self, Data, Tensor};
 
 #[derive(Debug)]
 enum Op {
-    Gather { axis: i64 },
+    Gather {
+        axis: i64,
+    },
     DequantizeLinear,
-    Transpose { perm: Option<Vec<usize>> },
-    Shape { start: i64, end: Option<i64> },
+    Transpose {
+        perm: Option<Vec<usize>>,
+    },
+    Shape {
+        start: i64,
+        end: Option<i64>,
+    },
     Unsqueeze,
     Squeeze,
-    Concat { axis: i64 },
-    ConstantOfShape { value: Tensor },
+    Concat {
+        axis: i64,
+    },
+    ConstantOfShape {
+        value: Tensor,
+    },
     Slice,
-    Reshape { allowzero: bool },
+    Reshape {
+        allowzero: bool,
+    },
     DynamicQuantizeLstm(Box<Lstm>),
     DynamicQuantizeLinear,
     /// B constant, prepared at load.
     MatMulInteger(Box<QWeights>),
-    Cast { to: i32 },
+    Cast {
+        to: i32,
+    },
     Mul,
     Add,
     Not,
-    ReduceSum { keepdims: bool, noop_with_empty_axes: bool },
+    ReduceSum {
+        keepdims: bool,
+        noop_with_empty_axes: bool,
+    },
     Where,
-    Softmax { axis: i64 },
+    Softmax {
+        axis: i64,
+    },
     MatMul,
 }
 
@@ -56,14 +76,20 @@ pub struct OnnxModel {
 }
 
 fn attr<'a>(n: &'a NodeProto, name: &str) -> Option<&'a AttrValue> {
-    n.attributes.iter().find(|a| a.name == name).map(|a| &a.value)
+    n.attributes
+        .iter()
+        .find(|a| a.name == name)
+        .map(|a| &a.value)
 }
 
 fn attr_int(n: &NodeProto, name: &str, default: i64) -> Result<i64, NeuralError> {
     match attr(n, name) {
         None => Ok(default),
         Some(AttrValue::Int(i)) => Ok(*i),
-        Some(_) => Err(NeuralError::Unsupported(format!("{} attribute {name} is not an int", n.op_type))),
+        Some(_) => Err(NeuralError::Unsupported(format!(
+            "{} attribute {name} is not an int",
+            n.op_type
+        ))),
     }
 }
 
@@ -71,7 +97,10 @@ fn attr_int(n: &NodeProto, name: &str, default: i64) -> Result<i64, NeuralError>
 fn only_attrs(n: &NodeProto, allowed: &[&str]) -> Result<(), NeuralError> {
     for a in &n.attributes {
         if !allowed.contains(&a.name.as_str()) {
-            return Err(NeuralError::Unsupported(format!("{} node {:?}: attribute {:?} is not supported", n.op_type, n.name, a.name)));
+            return Err(NeuralError::Unsupported(format!(
+                "{} node {:?}: attribute {:?} is not supported",
+                n.op_type, n.name, a.name
+            )));
         }
     }
     Ok(())
@@ -81,7 +110,9 @@ fn norm_axis(axis: i64, rank: usize) -> Result<usize, NeuralError> {
     let r = rank as i64;
     let a = if axis < 0 { axis + r } else { axis };
     if a < 0 || a >= r.max(1) {
-        return Err(NeuralError::Run(format!("axis {axis} out of range for rank {rank}")));
+        return Err(NeuralError::Run(format!(
+            "axis {axis} out of range for rank {rank}"
+        )));
     }
     Ok(a as usize)
 }
@@ -125,7 +156,13 @@ fn broadcast_index(shape: &[usize], out: &[usize]) -> Vec<usize> {
     let off = out.len() - shape.len();
     let in_strides = strides(shape);
     let step: Vec<i64> = (0..out.len())
-        .map(|d| if d < off || shape[d - off] == 1 { 0 } else { in_strides[d - off] as i64 })
+        .map(|d| {
+            if d < off || shape[d - off] == 1 {
+                0
+            } else {
+                in_strides[d - off] as i64
+            }
+        })
         .collect();
     strided_indices(out, 0, &step)
 }
@@ -134,13 +171,25 @@ fn broadcast_shape(a: &[usize], b: &[usize]) -> Result<Vec<usize>, NeuralError> 
     let r = a.len().max(b.len());
     let mut out = vec![0; r];
     for i in 0..r {
-        let da = if i + a.len() >= r { a[i + a.len() - r] } else { 1 };
-        let db = if i + b.len() >= r { b[i + b.len() - r] } else { 1 };
+        let da = if i + a.len() >= r {
+            a[i + a.len() - r]
+        } else {
+            1
+        };
+        let db = if i + b.len() >= r {
+            b[i + b.len() - r]
+        } else {
+            1
+        };
         out[i] = match (da, db) {
             (x, y) if x == y => x,
             (1, y) => y,
             (x, 1) => x,
-            _ => return Err(NeuralError::Run(format!("cannot broadcast {a:?} with {b:?}"))),
+            _ => {
+                return Err(NeuralError::Run(format!(
+                    "cannot broadcast {a:?} with {b:?}"
+                )));
+            }
         };
     }
     Ok(out)
@@ -149,17 +198,26 @@ fn broadcast_shape(a: &[usize], b: &[usize]) -> Result<Vec<usize>, NeuralError> 
 fn binary_f32(a: &Tensor, b: &Tensor, f: impl Fn(f32, f32) -> f32) -> Result<Tensor, NeuralError> {
     let (av, bv) = (a.as_f32()?, b.as_f32()?);
     if a.shape == b.shape {
-        return Tensor::f32(a.shape.clone(), av.iter().zip(bv).map(|(&x, &y)| f(x, y)).collect());
+        return Tensor::f32(
+            a.shape.clone(),
+            av.iter().zip(bv).map(|(&x, &y)| f(x, y)).collect(),
+        );
     }
     let out = broadcast_shape(&a.shape, &b.shape)?;
     let ia = broadcast_index(&a.shape, &out);
     let ib = broadcast_index(&b.shape, &out);
-    Tensor::f32(out, ia.iter().zip(&ib).map(|(&i, &j)| f(av[i], bv[j])).collect())
+    Tensor::f32(
+        out,
+        ia.iter().zip(&ib).map(|(&i, &j)| f(av[i], bv[j])).collect(),
+    )
 }
 
 fn transpose(x: &Tensor, perm: &[usize]) -> Result<Tensor, NeuralError> {
     if perm.len() != x.shape.len() || perm.iter().any(|&p| p >= perm.len()) {
-        return Err(NeuralError::Run(format!("Transpose perm {perm:?} for shape {:?}", x.shape)));
+        return Err(NeuralError::Run(format!(
+            "Transpose perm {perm:?} for shape {:?}",
+            x.shape
+        )));
     }
     let out: Vec<usize> = perm.iter().map(|&p| x.shape[p]).collect();
     let in_strides = strides(&x.shape);
@@ -171,7 +229,9 @@ fn transpose(x: &Tensor, perm: &[usize]) -> Result<Tensor, NeuralError> {
 fn scalar_f32(t: &Tensor, what: &str) -> Result<f32, NeuralError> {
     match &t.data {
         Data::F32(v) if v.len() == 1 => Ok(v[0]),
-        _ => Err(NeuralError::Unsupported(format!("{what}: expected a float scalar (per-tensor quantization)"))),
+        _ => Err(NeuralError::Unsupported(format!(
+            "{what}: expected a float scalar (per-tensor quantization)"
+        ))),
     }
 }
 
@@ -187,7 +247,9 @@ impl OnnxModel {
                 _ => false,
             };
             if !ok {
-                return Err(NeuralError::Unsupported(format!("opset {domain:?} version {version}")));
+                return Err(NeuralError::Unsupported(format!(
+                    "opset {domain:?} version {version}"
+                )));
             }
         }
         let g = &m.graph;
@@ -212,13 +274,41 @@ impl OnnxModel {
 
         let mut nodes = Vec::new();
         for n in &g.nodes {
-            let ins: Vec<Option<usize>> =
-                n.inputs.iter().map(|i| if i.is_empty() { None } else { Some(slot(i, &mut constants)) }).collect();
-            let outs: Vec<Option<usize>> =
-                n.outputs.iter().map(|o| if o.is_empty() { None } else { Some(slot(o, &mut constants)) }).collect();
-            let konst = |i: usize| -> Option<Arc<Tensor>> { ins.get(i).copied().flatten().and_then(|s| constants[s].clone()) };
+            let ins: Vec<Option<usize>> = n
+                .inputs
+                .iter()
+                .map(|i| {
+                    if i.is_empty() {
+                        None
+                    } else {
+                        Some(slot(i, &mut constants))
+                    }
+                })
+                .collect();
+            let outs: Vec<Option<usize>> = n
+                .outputs
+                .iter()
+                .map(|o| {
+                    if o.is_empty() {
+                        None
+                    } else {
+                        Some(slot(o, &mut constants))
+                    }
+                })
+                .collect();
+            let konst = |i: usize| -> Option<Arc<Tensor>> {
+                ins.get(i)
+                    .copied()
+                    .flatten()
+                    .and_then(|s| constants[s].clone())
+            };
             let domain = n.domain.as_str();
-            let unsupported = || NeuralError::Unsupported(format!("op {}::{} (node {:?})", domain, n.op_type, n.name));
+            let unsupported = || {
+                NeuralError::Unsupported(format!(
+                    "op {}::{} (node {:?})",
+                    domain, n.op_type, n.name
+                ))
+            };
             if !(domain.is_empty() || domain == "ai.onnx" || domain == "com.microsoft") {
                 return Err(unsupported());
             }
@@ -226,14 +316,18 @@ impl OnnxModel {
             let op = match (ms, n.op_type.as_str()) {
                 (false, "Constant") => {
                     only_attrs(n, &["value"])?;
-                    let Some(AttrValue::Tensor(t)) = attr(n, "value") else { return Err(unsupported()) };
+                    let Some(AttrValue::Tensor(t)) = attr(n, "value") else {
+                        return Err(unsupported());
+                    };
                     let s = outs[0].ok_or_else(unsupported)?;
                     constants[s] = Some(Arc::new(Tensor::from_proto(t)?));
                     continue;
                 }
                 (false, "Gather") => {
                     only_attrs(n, &["axis"])?;
-                    Op::Gather { axis: attr_int(n, "axis", 0)? }
+                    Op::Gather {
+                        axis: attr_int(n, "axis", 0)?,
+                    }
                 }
                 (false, "DequantizeLinear") => {
                     only_attrs(n, &["axis"])?;
@@ -255,7 +349,10 @@ impl OnnxModel {
                         Some(AttrValue::Int(e)) => Some(*e),
                         Some(_) => return Err(unsupported()),
                     };
-                    Op::Shape { start: attr_int(n, "start", 0)?, end }
+                    Op::Shape {
+                        start: attr_int(n, "start", 0)?,
+                        end,
+                    }
                 }
                 (false, "Unsqueeze") => {
                     only_attrs(n, &[])?;
@@ -267,7 +364,9 @@ impl OnnxModel {
                 }
                 (false, "Concat") => {
                     only_attrs(n, &["axis"])?;
-                    Op::Concat { axis: attr_int(n, "axis", 0)? }
+                    Op::Concat {
+                        axis: attr_int(n, "axis", 0)?,
+                    }
                 }
                 (false, "ConstantOfShape") => {
                     only_attrs(n, &["value"])?;
@@ -287,7 +386,9 @@ impl OnnxModel {
                 }
                 (false, "Reshape") => {
                     only_attrs(n, &["allowzero"])?;
-                    Op::Reshape { allowzero: attr_int(n, "allowzero", 0)? != 0 }
+                    Op::Reshape {
+                        allowzero: attr_int(n, "allowzero", 0)? != 0,
+                    }
                 }
                 (false, "Cast") => {
                     only_attrs(n, &["to", "saturate"])?;
@@ -322,7 +423,9 @@ impl OnnxModel {
                 }
                 (false, "Softmax") => {
                     only_attrs(n, &["axis"])?;
-                    Op::Softmax { axis: attr_int(n, "axis", -1)? }
+                    Op::Softmax {
+                        axis: attr_int(n, "axis", -1)?,
+                    }
                 }
                 (false, "MatMul") => {
                     only_attrs(n, &[])?;
@@ -334,28 +437,50 @@ impl OnnxModel {
                 }
                 (false, "MatMulInteger") => {
                     only_attrs(n, &[])?;
-                    let b = konst(1).ok_or_else(|| NeuralError::Unsupported(format!("MatMulInteger {:?}: B must be an initializer", n.name)))?;
+                    let b = konst(1).ok_or_else(|| {
+                        NeuralError::Unsupported(format!(
+                            "MatMulInteger {:?}: B must be an initializer",
+                            n.name
+                        ))
+                    })?;
                     let (k, nn) = match b.shape.as_slice() {
                         [k, nn] => (*k, *nn),
-                        s => return Err(NeuralError::Unsupported(format!("MatMulInteger B shape {s:?}"))),
+                        s => {
+                            return Err(NeuralError::Unsupported(format!(
+                                "MatMulInteger B shape {s:?}"
+                            )));
+                        }
                     };
                     let zp = konst(3);
                     let w = match (&b.data, zp.as_deref().map(|t| &t.data)) {
                         (Data::I8(v), None) => QWeights::new_s8(v, k, nn),
-                        (Data::I8(v), Some(Data::I8(z))) if z.len() == 1 && z[0] == 0 => QWeights::new_s8(v, k, nn),
+                        (Data::I8(v), Some(Data::I8(z))) if z.len() == 1 && z[0] == 0 => {
+                            QWeights::new_s8(v, k, nn)
+                        }
                         (Data::U8(v), None) => QWeights::new_u8(v, k, nn, 0),
-                        (Data::U8(v), Some(Data::U8(z))) if z.len() == 1 => QWeights::new_u8(v, k, nn, z[0]),
-                        _ => return Err(NeuralError::Unsupported(format!("MatMulInteger {:?}: B type / zero point", n.name))),
+                        (Data::U8(v), Some(Data::U8(z))) if z.len() == 1 => {
+                            QWeights::new_u8(v, k, nn, z[0])
+                        }
+                        _ => {
+                            return Err(NeuralError::Unsupported(format!(
+                                "MatMulInteger {:?}: B type / zero point",
+                                n.name
+                            )));
+                        }
                     };
                     if ins.len() > 3 && ins[3].is_some() && zp.is_none() {
-                        return Err(NeuralError::Unsupported("MatMulInteger: non-constant B zero point".into()));
+                        return Err(NeuralError::Unsupported(
+                            "MatMulInteger: non-constant B zero point".into(),
+                        ));
                     }
                     Op::MatMulInteger(Box::new(w))
                 }
                 (true, "DynamicQuantizeLSTM") => {
                     only_attrs(n, &["direction", "hidden_size", "input_forget", "clip"])?;
                     if attr_int(n, "input_forget", 0)? != 0 {
-                        return Err(NeuralError::Unsupported("DynamicQuantizeLSTM input_forget=1".into()));
+                        return Err(NeuralError::Unsupported(
+                            "DynamicQuantizeLSTM input_forget=1".into(),
+                        ));
                     }
                     let direction = match attr(n, "direction") {
                         None => Direction::Forward,
@@ -376,11 +501,17 @@ impl OnnxModel {
                     // sequence_lens (4) and peepholes (7) are not implemented: refuse them rather than ignore them.
                     for i in [4usize, 7] {
                         if ins.get(i).copied().flatten().is_some() {
-                            return Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM input {i} (sequence_lens/P)")));
+                            return Err(NeuralError::Unsupported(format!(
+                                "DynamicQuantizeLSTM input {i} (sequence_lens/P)"
+                            )));
                         }
                     }
                     let need = |i: usize, what: &str| -> Result<Arc<Tensor>, NeuralError> {
-                        konst(i).ok_or_else(|| NeuralError::Unsupported(format!("DynamicQuantizeLSTM {what} must be an initializer")))
+                        konst(i).ok_or_else(|| {
+                            NeuralError::Unsupported(format!(
+                                "DynamicQuantizeLSTM {what} must be an initializer"
+                            ))
+                        })
                     };
                     let lstm = Lstm::new(
                         direction,
@@ -397,10 +528,24 @@ impl OnnxModel {
                 }
                 _ => return Err(unsupported()),
             };
-            nodes.push(Node { op, name: n.name.clone(), inputs: ins, outputs: outs });
+            nodes.push(Node {
+                op,
+                name: n.name.clone(),
+                inputs: ins,
+                outputs: outs,
+            });
         }
-        let outputs: Vec<(String, usize)> = g.outputs.iter().map(|n| (n.clone(), slot(n, &mut constants))).collect();
-        Ok(OnnxModel { inputs, outputs, constants, nodes })
+        let outputs: Vec<(String, usize)> = g
+            .outputs
+            .iter()
+            .map(|n| (n.clone(), slot(n, &mut constants)))
+            .collect();
+        Ok(OnnxModel {
+            inputs,
+            outputs,
+            constants,
+            nodes,
+        })
     }
 
     pub fn input_names(&self) -> impl Iterator<Item = &str> {
@@ -427,8 +572,11 @@ impl OnnxModel {
             }
         }
         for node in &self.nodes {
-            let args: Vec<Option<Arc<Tensor>>> =
-                node.inputs.iter().map(|s| s.and_then(|s| values[s].clone())).collect();
+            let args: Vec<Option<Arc<Tensor>>> = node
+                .inputs
+                .iter()
+                .map(|s| s.and_then(|s| values[s].clone()))
+                .collect();
             let results = run_node(node, &args).map_err(|e| match e {
                 NeuralError::Run(m) => NeuralError::Run(format!("node {:?}: {m}", node.name)),
                 e => e,
@@ -442,15 +590,22 @@ impl OnnxModel {
         self.outputs
             .iter()
             .map(|(name, s)| {
-                let t = values[*s].take().ok_or_else(|| NeuralError::Run(format!("output {name:?} was never produced")))?;
-                Ok((name.clone(), Arc::try_unwrap(t).unwrap_or_else(|a| (*a).clone())))
+                let t = values[*s].take().ok_or_else(|| {
+                    NeuralError::Run(format!("output {name:?} was never produced"))
+                })?;
+                Ok((
+                    name.clone(),
+                    Arc::try_unwrap(t).unwrap_or_else(|a| (*a).clone()),
+                ))
             })
             .collect()
     }
 }
 
 fn arg(args: &[Option<Arc<Tensor>>], i: usize) -> Result<&Tensor, NeuralError> {
-    args.get(i).and_then(|a| a.as_deref()).ok_or_else(|| NeuralError::Run(format!("input {i} missing")))
+    args.get(i)
+        .and_then(|a| a.as_deref())
+        .ok_or_else(|| NeuralError::Run(format!("input {i} missing")))
 }
 
 fn opt(args: &[Option<Arc<Tensor>>], i: usize) -> Option<&Tensor> {
@@ -472,7 +627,9 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
                 for &i in &idx {
                     let i = if i < 0 { i + dim as i64 } else { i };
                     if i < 0 || i >= dim as i64 {
-                        return Err(NeuralError::Run(format!("Gather index {i} out of range {dim}")));
+                        return Err(NeuralError::Run(format!(
+                            "Gather index {i} out of range {dim}"
+                        )));
                     }
                     let base = (o * dim + i as usize) * inner;
                     src.extend(base..base + inner);
@@ -492,25 +649,43 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
                     let z = match zp {
                         None => 0,
                         Some(Data::U8(z)) if z.len() == 1 => i32::from(z[0]),
-                        _ => return Err(NeuralError::Unsupported("DequantizeLinear zero point".into())),
+                        _ => {
+                            return Err(NeuralError::Unsupported(
+                                "DequantizeLinear zero point".into(),
+                            ));
+                        }
                     };
-                    v.iter().map(|&q| (i32::from(q) - z) as f32 * scale).collect()
+                    v.iter()
+                        .map(|&q| (i32::from(q) - z) as f32 * scale)
+                        .collect()
                 }
                 (Data::I8(v), zp) => {
                     let z = match zp {
                         None => 0,
                         Some(Data::I8(z)) if z.len() == 1 => i32::from(z[0]),
-                        _ => return Err(NeuralError::Unsupported("DequantizeLinear zero point".into())),
+                        _ => {
+                            return Err(NeuralError::Unsupported(
+                                "DequantizeLinear zero point".into(),
+                            ));
+                        }
                     };
-                    v.iter().map(|&q| (i32::from(q) - z) as f32 * scale).collect()
+                    v.iter()
+                        .map(|&q| (i32::from(q) - z) as f32 * scale)
+                        .collect()
                 }
-                _ => return Err(NeuralError::Unsupported("DequantizeLinear input type".into())),
+                _ => {
+                    return Err(NeuralError::Unsupported(
+                        "DequantizeLinear input type".into(),
+                    ));
+                }
             };
             vec![Tensor::f32(x.shape.clone(), out)?]
         }
         Op::Transpose { perm } => {
             let x = arg(args, 0)?;
-            let p: Vec<usize> = perm.clone().unwrap_or_else(|| (0..x.shape.len()).rev().collect());
+            let p: Vec<usize> = perm
+                .clone()
+                .unwrap_or_else(|| (0..x.shape.len()).rev().collect());
             vec![transpose(x, &p)?]
         }
         Op::Shape { start, end } => {
@@ -525,7 +700,10 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let x = arg(args, 0)?;
             let axes = arg(args, 1)?.to_i64s()?;
             let r = x.shape.len() + axes.len();
-            let mut ax: Vec<usize> = axes.iter().map(|&a| norm_axis(a, r)).collect::<Result<_, _>>()?;
+            let mut ax: Vec<usize> = axes
+                .iter()
+                .map(|&a| norm_axis(a, r))
+                .collect::<Result<_, _>>()?;
             ax.sort();
             let mut shape = x.shape.clone();
             for a in ax {
@@ -538,27 +716,43 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let shape: Vec<usize> = match opt(args, 1) {
                 None => x.shape.iter().copied().filter(|&d| d != 1).collect(),
                 Some(a) => {
-                    let ax: Vec<usize> =
-                        a.to_i64s()?.iter().map(|&v| norm_axis(v, x.shape.len())).collect::<Result<_, _>>()?;
+                    let ax: Vec<usize> = a
+                        .to_i64s()?
+                        .iter()
+                        .map(|&v| norm_axis(v, x.shape.len()))
+                        .collect::<Result<_, _>>()?;
                     for &i in &ax {
                         if x.shape[i] != 1 {
-                            return Err(NeuralError::Run(format!("Squeeze axis {i} has size {}", x.shape[i])));
+                            return Err(NeuralError::Run(format!(
+                                "Squeeze axis {i} has size {}",
+                                x.shape[i]
+                            )));
                         }
                     }
-                    x.shape.iter().enumerate().filter(|(i, _)| !ax.contains(i)).map(|(_, &d)| d).collect()
+                    x.shape
+                        .iter()
+                        .enumerate()
+                        .filter(|(i, _)| !ax.contains(i))
+                        .map(|(_, &d)| d)
+                        .collect()
                 }
             };
             vec![Tensor::new(shape, x.data.clone())?]
         }
         Op::Concat { axis } => {
-            let parts: Vec<&Tensor> = (0..args.len()).map(|i| arg(args, i)).collect::<Result<_, _>>()?;
+            let parts: Vec<&Tensor> = (0..args.len())
+                .map(|i| arg(args, i))
+                .collect::<Result<_, _>>()?;
             let rank = parts[0].shape.len();
             let ax = norm_axis(*axis, rank)?;
             let outer: usize = parts[0].shape[..ax].iter().product();
             let mut shape = parts[0].shape.clone();
             shape[ax] = parts.iter().map(|p| p.shape[ax]).sum();
             for p in &parts {
-                if p.shape.len() != rank || p.shape[..ax] != shape[..ax] || p.shape[ax + 1..] != shape[ax + 1..] {
+                if p.shape.len() != rank
+                    || p.shape[..ax] != shape[..ax]
+                    || p.shape[ax + 1..] != shape[ax + 1..]
+                {
                     return Err(NeuralError::Run("Concat shape mismatch".into()));
                 }
             }
@@ -577,7 +771,10 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let dims = arg(args, 0)?.to_i64s()?;
             let shape: Vec<usize> = dims.iter().map(|&d| d as usize).collect();
             let n: usize = shape.iter().product();
-            vec![Tensor::new(shape, value.data.select(std::iter::repeat_n(0, n)))?]
+            vec![Tensor::new(
+                shape,
+                value.data.select(std::iter::repeat_n(0, n)),
+            )?]
         }
         Op::Slice => {
             let x = arg(args, 0)?;
@@ -585,7 +782,11 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let ends = arg(args, 2)?.to_i64s()?;
             let r = x.shape.len();
             let axes: Vec<usize> = match opt(args, 3) {
-                Some(a) => a.to_i64s()?.iter().map(|&v| norm_axis(v, r)).collect::<Result<_, _>>()?,
+                Some(a) => a
+                    .to_i64s()?
+                    .iter()
+                    .map(|&v| norm_axis(v, r))
+                    .collect::<Result<_, _>>()?,
                 None => (0..starts.len()).collect(),
             };
             let steps = match opt(args, 4) {
@@ -605,9 +806,16 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
                 let (s, e) = if st > 0 {
                     (fix(starts[j]).clamp(0, d), fix(ends[j]).clamp(0, d))
                 } else {
-                    (fix(starts[j]).clamp(-1, d - 1), fix(ends[j]).clamp(-1, d - 1))
+                    (
+                        fix(starts[j]).clamp(-1, d - 1),
+                        fix(ends[j]).clamp(-1, d - 1),
+                    )
                 };
-                let len = if st > 0 { (e - s + st - 1).div_euclid(st) } else { (s - e + (-st) - 1).div_euclid(-st) };
+                let len = if st > 0 {
+                    (e - s + st - 1).div_euclid(st)
+                } else {
+                    (s - e + (-st) - 1).div_euclid(-st)
+                };
                 shape[a] = len.max(0) as usize;
                 lo[a] = s;
                 step[a] = st;
@@ -631,15 +839,27 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
                         }
                         shape.push(1);
                     }
-                    0 if !allowzero => shape.push(*x.shape.get(i).ok_or_else(|| NeuralError::Run("Reshape 0 past rank".into()))?),
+                    0 if !allowzero => shape.push(
+                        *x.shape
+                            .get(i)
+                            .ok_or_else(|| NeuralError::Run("Reshape 0 past rank".into()))?,
+                    ),
                     s if s >= 0 => shape.push(s as usize),
                     _ => return Err(NeuralError::Run(format!("Reshape dim {s}"))),
                 }
             }
             if let Some(i) = infer {
-                let known: usize = shape.iter().enumerate().filter(|(j, _)| *j != i).map(|(_, &d)| d).product();
+                let known: usize = shape
+                    .iter()
+                    .enumerate()
+                    .filter(|(j, _)| *j != i)
+                    .map(|(_, &d)| d)
+                    .product();
                 if known == 0 || x.len() % known != 0 {
-                    return Err(NeuralError::Run(format!("Reshape {:?} to {spec:?}", x.shape)));
+                    return Err(NeuralError::Run(format!(
+                        "Reshape {:?} to {spec:?}",
+                        x.shape
+                    )));
                 }
                 shape[i] = x.len() / known;
             }
@@ -664,16 +884,28 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
         Op::MatMulInteger(w) => {
             let a = arg(args, 0)?;
             let Data::U8(av) = &a.data else {
-                return Err(NeuralError::Unsupported("MatMulInteger: A must be uint8".into()));
+                return Err(NeuralError::Unsupported(
+                    "MatMulInteger: A must be uint8".into(),
+                ));
             };
             let za = match opt(args, 2).map(|t| &t.data) {
                 None => 0,
                 Some(Data::U8(z)) if z.len() == 1 => z[0],
-                _ => return Err(NeuralError::Unsupported("MatMulInteger: A zero point must be a uint8 scalar".into())),
+                _ => {
+                    return Err(NeuralError::Unsupported(
+                        "MatMulInteger: A zero point must be a uint8 scalar".into(),
+                    ));
+                }
             };
-            let k = *a.shape.last().ok_or_else(|| NeuralError::Run("MatMulInteger: scalar A".into()))?;
+            let k = *a
+                .shape
+                .last()
+                .ok_or_else(|| NeuralError::Run("MatMulInteger: scalar A".into()))?;
             if k != w.k {
-                return Err(NeuralError::Run(format!("MatMulInteger: A has K={k}, B has K={}", w.k)));
+                return Err(NeuralError::Run(format!(
+                    "MatMulInteger: A has K={k}, B has K={}",
+                    w.k
+                )));
             }
             let m = a.len() / k;
             let mut out = Vec::new();
@@ -687,19 +919,33 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let data = match (&x.data, *to) {
                 (Data::I32(v), tensor::FLOAT) => Data::F32(v.iter().map(|&i| i as f32).collect()),
                 (Data::I64(v), tensor::FLOAT) => Data::F32(v.iter().map(|&i| i as f32).collect()),
-                (Data::Bool(v), tensor::FLOAT) => Data::F32(v.iter().map(|&b| if b { 1.0 } else { 0.0 }).collect()),
-                (Data::Bool(v), tensor::INT64) => Data::I64(v.iter().map(|&b| i64::from(b)).collect()),
-                (Data::I32(v), tensor::INT64) => Data::I64(v.iter().map(|&i| i64::from(i)).collect()),
+                (Data::Bool(v), tensor::FLOAT) => {
+                    Data::F32(v.iter().map(|&b| if b { 1.0 } else { 0.0 }).collect())
+                }
+                (Data::Bool(v), tensor::INT64) => {
+                    Data::I64(v.iter().map(|&b| i64::from(b)).collect())
+                }
+                (Data::I32(v), tensor::INT64) => {
+                    Data::I64(v.iter().map(|&i| i64::from(i)).collect())
+                }
                 (Data::F32(v), tensor::FLOAT) => Data::F32(v.clone()),
                 (Data::I64(v), tensor::INT64) => Data::I64(v.clone()),
                 (Data::Bool(v), tensor::BOOL) => Data::Bool(v.clone()),
-                (d, to) => return Err(NeuralError::Unsupported(format!("Cast {} to {to}", d.type_name()))),
+                (d, to) => {
+                    return Err(NeuralError::Unsupported(format!(
+                        "Cast {} to {to}",
+                        d.type_name()
+                    )));
+                }
             };
             vec![Tensor::new(x.shape.clone(), data)?]
         }
         Op::Mul => vec![binary_f32(arg(args, 0)?, arg(args, 1)?, |a, b| a * b)?],
         Op::Add => vec![binary_f32(arg(args, 0)?, arg(args, 1)?, |a, b| a + b)?],
-        Op::ReduceSum { keepdims, noop_with_empty_axes } => {
+        Op::ReduceSum {
+            keepdims,
+            noop_with_empty_axes,
+        } => {
             // Only the shape the models use and ORT's `FastReduceKR` serves: float, reducing a run of TRAILING
             // axes, each kept row summed by Eigen. Anything else is refused rather than summed in another order.
             let x = arg(args, 0)?;
@@ -707,8 +953,11 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let r = x.shape.len();
             let axes: Vec<usize> = match opt(args, 1) {
                 Some(a) if !a.is_empty() => {
-                    let mut ax: Vec<usize> =
-                        a.to_i64s()?.iter().map(|&v| norm_axis(v, r)).collect::<Result<_, _>>()?;
+                    let mut ax: Vec<usize> = a
+                        .to_i64s()?
+                        .iter()
+                        .map(|&v| norm_axis(v, r))
+                        .collect::<Result<_, _>>()?;
                     ax.sort();
                     ax.dedup();
                     ax
@@ -718,12 +967,15 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             };
             let first = axes[0];
             if axes != (first..r).collect::<Vec<_>>() {
-                return Err(NeuralError::Unsupported(format!("ReduceSum over axes {axes:?} of rank {r} (only trailing axes)")));
+                return Err(NeuralError::Unsupported(format!(
+                    "ReduceSum over axes {axes:?} of rank {r} (only trailing axes)"
+                )));
             }
             let inner: usize = x.shape[first..].iter().product();
             let outer: usize = x.shape[..first].iter().product();
-            let out: Vec<f32> =
-                (0..outer).map(|o| mlas::eigen_sum(&v[o * inner..(o + 1) * inner], (o * inner) % 4)).collect();
+            let out: Vec<f32> = (0..outer)
+                .map(|o| mlas::eigen_sum(&v[o * inner..(o + 1) * inner], (o * inner) % 4))
+                .collect();
             let mut shape = x.shape[..first].to_vec();
             if *keepdims {
                 shape.extend(std::iter::repeat_n(1, r - first));
@@ -733,19 +985,28 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
         Op::Where => {
             let c = arg(args, 0)?;
             let (a, b) = (arg(args, 1)?, arg(args, 2)?);
-            let Data::Bool(cv) = &c.data else { return Err(NeuralError::Run("Where condition must be bool".into())) };
+            let Data::Bool(cv) = &c.data else {
+                return Err(NeuralError::Run("Where condition must be bool".into()));
+            };
             let (av, bv) = (a.as_f32()?, b.as_f32()?);
             let out = broadcast_shape(&broadcast_shape(&c.shape, &a.shape)?, &b.shape)?;
-            let (ic, ia, ib) =
-                (broadcast_index(&c.shape, &out), broadcast_index(&a.shape, &out), broadcast_index(&b.shape, &out));
-            let v: Vec<f32> = (0..ic.len()).map(|i| if cv[ic[i]] { av[ia[i]] } else { bv[ib[i]] }).collect();
+            let (ic, ia, ib) = (
+                broadcast_index(&c.shape, &out),
+                broadcast_index(&a.shape, &out),
+                broadcast_index(&b.shape, &out),
+            );
+            let v: Vec<f32> = (0..ic.len())
+                .map(|i| if cv[ic[i]] { av[ia[i]] } else { bv[ib[i]] })
+                .collect();
             vec![Tensor::f32(out, v)?]
         }
         Op::Softmax { axis } => {
             let x = arg(args, 0)?;
             let r = x.shape.len();
             if norm_axis(*axis, r)? != r - 1 {
-                return Err(NeuralError::Unsupported("Softmax over a non-last axis".into()));
+                return Err(NeuralError::Unsupported(
+                    "Softmax over a non-last axis".into(),
+                ));
             }
             let d = x.shape[r - 1];
             let mut v = x.as_f32()?.to_vec();
@@ -768,18 +1029,30 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
             let (m, k) = (a.shape[ra - 2], a.shape[ra - 1]);
             let (kb, n) = (b.shape[rb - 2], b.shape[rb - 1]);
             if k != kb {
-                return Err(NeuralError::Run(format!("MatMul {:?} x {:?}", a.shape, b.shape)));
+                return Err(NeuralError::Run(format!(
+                    "MatMul {:?} x {:?}",
+                    a.shape, b.shape
+                )));
             }
             if m != 1 {
-                return Err(NeuralError::Unsupported(format!("MatMul with M = {m} (only M = 1 is reproduced)")));
+                return Err(NeuralError::Unsupported(format!(
+                    "MatMul with M = {m} (only M = 1 is reproduced)"
+                )));
             }
             if a.shape[..ra - 2] != b.shape[..rb - 2] {
-                return Err(NeuralError::Unsupported("MatMul with broadcast batch dims".into()));
+                return Err(NeuralError::Unsupported(
+                    "MatMul with broadcast batch dims".into(),
+                ));
             }
             let batch: usize = a.shape[..ra - 2].iter().product();
             let mut out = vec![0f32; batch * n];
             for bi in 0..batch {
-                mlas::sgemm_m1(&av[bi * k..(bi + 1) * k], &bv[bi * k * n..(bi + 1) * k * n], n, &mut out[bi * n..(bi + 1) * n]);
+                mlas::sgemm_m1(
+                    &av[bi * k..(bi + 1) * k],
+                    &bv[bi * k * n..(bi + 1) * k * n],
+                    n,
+                    &mut out[bi * n..(bi + 1) * n],
+                );
             }
             let mut shape = a.shape.clone();
             shape[ra - 1] = n;
@@ -787,8 +1060,13 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
         }
         Op::Not => {
             let x = arg(args, 0)?;
-            let Data::Bool(v) = &x.data else { return Err(NeuralError::Run("Not of a non-bool".into())) };
-            vec![Tensor::new(x.shape.clone(), Data::Bool(v.iter().map(|b| !b).collect()))?]
+            let Data::Bool(v) = &x.data else {
+                return Err(NeuralError::Run("Not of a non-bool".into()));
+            };
+            vec![Tensor::new(
+                x.shape.clone(),
+                Data::Bool(v.iter().map(|b| !b).collect()),
+            )?]
         }
     })
 }

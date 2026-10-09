@@ -33,32 +33,53 @@ pub struct Lstm {
     input_size: usize,
 }
 
-fn scales_for(t: &Tensor, d: usize, nd: usize, h4: usize, what: &str) -> Result<Vec<f32>, NeuralError> {
+fn scales_for(
+    t: &Tensor,
+    d: usize,
+    nd: usize,
+    h4: usize,
+    what: &str,
+) -> Result<Vec<f32>, NeuralError> {
     let v = t.as_f32()?;
     match t.shape.as_slice() {
         [n] if *n == nd => Ok(vec![v[d]]),
         [n, c] if *n == nd && *c == h4 => Ok(v[d * h4..(d + 1) * h4].to_vec()),
-        s => Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM {what} scale shape {s:?}"))),
+        s => Err(NeuralError::Unsupported(format!(
+            "DynamicQuantizeLSTM {what} scale shape {s:?}"
+        ))),
     }
 }
 
-fn weights_for(t: &Tensor, zp: &Tensor, d: usize, k: usize, h4: usize, what: &str) -> Result<QWeights, NeuralError> {
+fn weights_for(
+    t: &Tensor,
+    zp: &Tensor,
+    d: usize,
+    k: usize,
+    h4: usize,
+    what: &str,
+) -> Result<QWeights, NeuralError> {
     let per = k * h4;
     match (&t.data, &zp.data) {
         (Data::I8(w), Data::I8(z)) => {
             if z.iter().any(|&x| x != 0) {
-                return Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM {what}: int8 weights need zero point 0")));
+                return Err(NeuralError::Unsupported(format!(
+                    "DynamicQuantizeLSTM {what}: int8 weights need zero point 0"
+                )));
             }
             Ok(QWeights::new_s8(&w[d * per..(d + 1) * per], k, h4))
         }
         (Data::U8(w), Data::U8(z)) => {
             let z0 = z[0];
             if z.iter().any(|&x| x != z0) {
-                return Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM {what}: uint8 zero point must be constant")));
+                return Err(NeuralError::Unsupported(format!(
+                    "DynamicQuantizeLSTM {what}: uint8 zero point must be constant"
+                )));
             }
             Ok(QWeights::new_u8(&w[d * per..(d + 1) * per], k, h4, z0))
         }
-        _ => Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM {what}: weight/zero-point types"))),
+        _ => Err(NeuralError::Unsupported(format!(
+            "DynamicQuantizeLSTM {what}: weight/zero-point types"
+        ))),
     }
 }
 
@@ -76,11 +97,23 @@ impl Lstm {
         r_scale: &Tensor,
         r_zp: &Tensor,
     ) -> Result<Lstm, NeuralError> {
-        let nd = if direction == Direction::Bidirectional { 2 } else { 1 };
+        let nd = if direction == Direction::Bidirectional {
+            2
+        } else {
+            1
+        };
         let h4 = 4 * hidden;
         let (input_size, rk) = match (w.shape.as_slice(), r.shape.as_slice()) {
-            ([a, i, n], [b, hh, m]) if *a == nd && *b == nd && *n == h4 && *m == h4 && *hh == hidden => (*i, *hh),
-            (ws, rs) => return Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM weight shapes {ws:?} / {rs:?}"))),
+            ([a, i, n], [b, hh, m])
+                if *a == nd && *b == nd && *n == h4 && *m == h4 && *hh == hidden =>
+            {
+                (*i, *hh)
+            }
+            (ws, rs) => {
+                return Err(NeuralError::Unsupported(format!(
+                    "DynamicQuantizeLSTM weight shapes {ws:?} / {rs:?}"
+                )));
+            }
         };
         let mut dirs = Vec::new();
         for d in 0..nd {
@@ -91,7 +124,13 @@ impl Lstm {
                 r_scale: scales_for(r_scale, d, nd, h4, "R")?,
             });
         }
-        Ok(Lstm { direction, hidden, clip, dirs, input_size })
+        Ok(Lstm {
+            direction,
+            hidden,
+            clip,
+            dirs,
+            input_size,
+        })
     }
 
     /// X [T, 1, I]; B [D, 8H]; initial h/c [D, 1, H]. Returns Y [T, D, 1, H], Y_h [D, 1, H], Y_c [D, 1, H].
@@ -107,26 +146,40 @@ impl Lstm {
         let nd = self.dirs.len();
         let (t_len, batch, isz) = match x.shape.as_slice() {
             [t, b, i] => (*t, *b, *i),
-            s => return Err(NeuralError::Run(format!("DynamicQuantizeLSTM input X must be 3-D, got {s:?}"))),
+            s => {
+                return Err(NeuralError::Run(format!(
+                    "DynamicQuantizeLSTM input X must be 3-D, got {s:?}"
+                )));
+            }
         };
         if batch != 1 {
-            return Err(NeuralError::Unsupported(format!("DynamicQuantizeLSTM batch {batch}: only batch 1 is ORT-reproducible")));
+            return Err(NeuralError::Unsupported(format!(
+                "DynamicQuantizeLSTM batch {batch}: only batch 1 is ORT-reproducible"
+            )));
         }
         if isz != self.input_size {
-            return Err(NeuralError::Run(format!("DynamicQuantizeLSTM input size {isz}, weights expect {}", self.input_size)));
+            return Err(NeuralError::Run(format!(
+                "DynamicQuantizeLSTM input size {isz}, weights expect {}",
+                self.input_size
+            )));
         }
         let xs = x.as_f32()?;
         let bias = bias.map(|b| b.as_f32()).transpose()?;
         if let Some(b) = bias
             && b.len() != nd * 8 * h
         {
-            return Err(NeuralError::Run("DynamicQuantizeLSTM bias must be [D, 8H]".into()));
+            return Err(NeuralError::Run(
+                "DynamicQuantizeLSTM bias must be [D, 8H]".into(),
+            ));
         }
         let state = |t: Option<&Tensor>, what: &str| -> Result<Option<Vec<f32>>, NeuralError> {
             match t {
                 None => Ok(None),
                 Some(t) if t.len() == nd * h => Ok(Some(t.as_f32()?.to_vec())),
-                Some(t) => Err(NeuralError::Run(format!("DynamicQuantizeLSTM {what} shape {:?}", t.shape))),
+                Some(t) => Err(NeuralError::Run(format!(
+                    "DynamicQuantizeLSTM {what} shape {:?}",
+                    t.shape
+                ))),
             }
         };
         let init_h = state(init_h, "initial_h")?;
@@ -138,10 +191,14 @@ impl Lstm {
         let mut q = Vec::new();
         let mut acc = Vec::new();
         for (d, dw) in self.dirs.iter().enumerate() {
-            let reverse = self.direction == Direction::Reverse || (self.direction == Direction::Bidirectional && d == 1);
+            let reverse = self.direction == Direction::Reverse
+                || (self.direction == Direction::Bidirectional && d == 1);
             // `ReverseSequence` over the full length (no sequence_lens).
             let input: Vec<f32> = if reverse {
-                (0..t_len).rev().flat_map(|t| xs[t * isz..(t + 1) * isz].iter().copied()).collect()
+                (0..t_len)
+                    .rev()
+                    .flat_map(|t| xs[t * isz..(t + 1) * isz].iter().copied())
+                    .collect()
             } else {
                 xs.to_vec()
             };
@@ -161,8 +218,14 @@ impl Lstm {
                 mlas::dequant(&acc, &mult, &mut iofc);
             }
 
-            let mut hp: Vec<f32> = init_h.as_ref().map(|v| v[d * h..(d + 1) * h].to_vec()).unwrap_or_else(|| vec![0.0; h]);
-            let mut cp: Vec<f32> = init_c.as_ref().map(|v| v[d * h..(d + 1) * h].to_vec()).unwrap_or_else(|| vec![0.0; h]);
+            let mut hp: Vec<f32> = init_h
+                .as_ref()
+                .map(|v| v[d * h..(d + 1) * h].to_vec())
+                .unwrap_or_else(|| vec![0.0; h]);
+            let mut cp: Vec<f32> = init_c
+                .as_ref()
+                .map(|v| v[d * h..(d + 1) * h].to_vec())
+                .unwrap_or_else(|| vec![0.0; h]);
             let mut outs = vec![0f32; t_len * h];
             let mut tmp = vec![0f32; h];
             for t in 0..t_len {
@@ -207,7 +270,8 @@ impl Lstm {
             }
             for t in 0..t_len {
                 let src = if reverse { t_len - 1 - t } else { t };
-                y[(t * nd + d) * h..(t * nd + d + 1) * h].copy_from_slice(&outs[src * h..(src + 1) * h]);
+                y[(t * nd + d) * h..(t * nd + d + 1) * h]
+                    .copy_from_slice(&outs[src * h..(src + 1) * h]);
             }
             y_h[d * h..(d + 1) * h].copy_from_slice(&hp);
             y_c[d * h..(d + 1) * h].copy_from_slice(&cp);

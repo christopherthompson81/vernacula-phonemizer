@@ -74,10 +74,18 @@ pub struct LexSets {
 }
 
 fn load_set(file: &str) -> HashSet<JsString> {
-    load_tsv_map(DIR, file, |v, _| Some(v.clone()), TsvOptions { optional: true, ..Default::default() })
-        .unwrap_or_else(|e| panic!("{e}"))
-        .into_keys()
-        .collect()
+    load_tsv_map(
+        DIR,
+        file,
+        |v, _| Some(v.clone()),
+        TsvOptions {
+            optional: true,
+            ..Default::default()
+        },
+    )
+    .unwrap_or_else(|e| panic!("{e}"))
+    .into_keys()
+    .collect()
 }
 
 pub static SETS: LazyLock<LexSets> = LazyLock::new(|| LexSets {
@@ -93,11 +101,20 @@ pub static SETS: LazyLock<LexSets> = LazyLock::new(|| LexSets {
         "en-gb-lexical.tsv",
         |v, _| {
             Some(match v.index_of(&js("\t"), 0) {
-                None => LexicalRow { to: v.clone(), from: None },
-                Some(tab) => LexicalRow { to: v.slice(0, Some(tab as isize)), from: Some(v.slice((tab + 1) as isize, None)) },
+                None => LexicalRow {
+                    to: v.clone(),
+                    from: None,
+                },
+                Some(tab) => LexicalRow {
+                    to: v.slice(0, Some(tab as isize)),
+                    from: Some(v.slice((tab + 1) as isize, None)),
+                },
             })
         },
-        TsvOptions { optional: true, ..Default::default() },
+        TsvOptions {
+            optional: true,
+            ..Default::default()
+        },
     )
     .unwrap_or_else(|e| panic!("{e}")),
 });
@@ -105,7 +122,9 @@ pub static SETS: LazyLock<LexSets> = LazyLock::new(|| LexSets {
 pub fn to_rp(gen_am: &JsString, word: &JsString, lex: Option<&LexSets>) -> JsString {
     let w = word.to_lower_case();
     let row = lex.and_then(|l| l.lexical.get(&w));
-    let lexical = row.filter(|r| r.from.as_ref().is_none_or(|f| f == gen_am)).map(|r| r.to.clone());
+    let lexical = row
+        .filter(|r| r.from.as_ref().is_none_or(|f| f == gen_am))
+        .map(|r| r.to.clone());
     let none = JsString::new();
     let mut s = lexical.clone().unwrap_or_else(|| gen_am.clone());
     s = js_re!("t̬", "gu").replace(&s, &js("t"));
@@ -139,7 +158,10 @@ pub fn to_rp(gen_am: &JsString, word: &JsString, lex: Option<&LexSets>) -> JsStr
             s = js_re!("ɒ", "u").replace(&s, &js("æ"));
         }
     }
-    if lexical.is_none() && js_re!(r"(ar|er|or)(y|ies)\W?s?$", "u").test(&w) && !js_re!(r"story\W?s?$", "u").test(&w) {
+    if lexical.is_none()
+        && js_re!(r"(ar|er|or)(y|ies)\W?s?$", "u").test(&w)
+        && !js_re!(r"story\W?s?$", "u").test(&w)
+    {
         s = js_re!("ˌ(?:ɛ|ɔː)(ɹiz?)$", "u").replace(&s, &js("ə$1"));
         s = js_re!("(?<![ˈˌ])(?:ɛ|ɔː)(ɹiz?)$", "u").replace(&s, &js("ə$1"));
     }
@@ -173,7 +195,8 @@ pub struct EnglishGb {
 
 impl EnglishGb {
     pub fn text(&self, input: &JsString) -> JsString {
-        self.e.text_full(input, Some(&rp_word_transform), None, false)
+        self.e
+            .text_full(input, Some(&rp_word_transform), None, false)
     }
 
     pub fn engine(&self) -> &EnglishPhonemizer {
@@ -182,5 +205,7 @@ impl EnglishGb {
 }
 
 pub fn create_english_gb() -> EnglishGb {
-    EnglishGb { e: create_english() }
+    EnglishGb {
+        e: create_english(),
+    }
 }

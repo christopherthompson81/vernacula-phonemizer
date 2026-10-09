@@ -55,7 +55,10 @@ impl JsMatch {
         if i == 0 {
             return Some(self.value(s));
         }
-        self.groups.get(i - 1)?.as_ref().map(|r| JsString::from_units(&s.0[r.clone()]))
+        self.groups
+            .get(i - 1)?
+            .as_ref()
+            .map(|r| JsString::from_units(&s.0[r.clone()]))
     }
 }
 
@@ -93,12 +96,17 @@ impl JsRegex {
                     engine_flags.push(f);
                 }
                 'm' | 's' => engine_flags.push(f),
-                _ => return Err(JsRegexError::Syntax(format!("unknown flag '{f}' in /{pattern}/{flags}"))),
+                _ => {
+                    return Err(JsRegexError::Syntax(format!(
+                        "unknown flag '{f}' in /{pattern}/{flags}"
+                    )));
+                }
             }
         }
         let legacy_icase = icase && !unicode;
         if legacy_icase {
-            legacy_fold_guard(pattern).map_err(|e| JsRegexError::Unsupported(format!("/{pattern}/{flags}: {e}")))?;
+            legacy_fold_guard(pattern)
+                .map_err(|e| JsRegexError::Unsupported(format!("/{pattern}/{flags}: {e}")))?;
         }
         let re = regress::Regex::with_flags(pattern, engine_flags.as_str())
             .map_err(|e| JsRegexError::Syntax(format!("/{pattern}/{flags}: {e}")))?;
@@ -118,7 +126,11 @@ impl JsRegex {
     /// The subject as the engine should see it (see `ASCII_FOLDERS`).
     fn subject<'a>(&self, s: &'a [u16]) -> std::borrow::Cow<'a, [u16]> {
         if self.legacy_icase && s.iter().any(|u| ASCII_FOLDERS.contains(u)) {
-            std::borrow::Cow::Owned(s.iter().map(|&u| if ASCII_FOLDERS.contains(&u) { INERT } else { u }).collect())
+            std::borrow::Cow::Owned(
+                s.iter()
+                    .map(|&u| if ASCII_FOLDERS.contains(&u) { INERT } else { u })
+                    .collect(),
+            )
         } else {
             std::borrow::Cow::Borrowed(s)
         }
@@ -154,7 +166,10 @@ impl JsRegex {
     }
 
     fn to_match(m: regress::Match) -> JsMatch {
-        JsMatch { range: m.range(), groups: m.captures.clone() }
+        JsMatch {
+            range: m.range(),
+            groups: m.captures.clone(),
+        }
     }
 
     /// `re.exec(s)` from index 0 (or `lastIndex` = `from`), ignoring `g`. Sticky patterns must match at `from`.
@@ -187,11 +202,17 @@ impl JsRegex {
         let mut out = Vec::new();
         let mut pos = 0;
         while pos <= subject.len() {
-            let Some(m) = self.search(&subject, pos) else { break };
+            let Some(m) = self.search(&subject, pos) else {
+                break;
+            };
             if self.sticky && m.start() != pos {
                 break;
             }
-            pos = if m.end() > m.start() { m.end() } else { advance(&subject, m.start(), self.unicode) };
+            pos = if m.end() > m.start() {
+                m.end()
+            } else {
+                advance(&subject, m.start(), self.unicode)
+            };
             out.push(Self::to_match(m));
         }
         out
@@ -212,8 +233,16 @@ impl JsRegex {
     }
 
     /// `s.replace(re, (m, …groups) => …)`.
-    pub fn replace_with(&self, s: &JsString, mut f: impl FnMut(&JsMatch, &JsString) -> JsString) -> JsString {
-        let matches = if self.global { self.match_all(s) } else { self.exec(s).into_iter().collect() };
+    pub fn replace_with(
+        &self,
+        s: &JsString,
+        mut f: impl FnMut(&JsMatch, &JsString) -> JsString,
+    ) -> JsString {
+        let matches = if self.global {
+            self.match_all(s)
+        } else {
+            self.exec(s).into_iter().collect()
+        };
         if matches.is_empty() {
             return s.clone();
         }
@@ -236,13 +265,22 @@ impl JsRegex {
 
 /// ECMAScript GetSubstitution: `$$`, `$&`, `` $` ``, `$'`, `$n`/`$nn`, `$<name>`. `names` empty means
 /// the pattern has no named groups, and `$<` is then literal.
-pub fn get_substitution(m: &JsMatch, s: &JsString, replacement: &JsString, names: &[(String, usize)]) -> JsString {
+pub fn get_substitution(
+    m: &JsMatch,
+    s: &JsString,
+    replacement: &JsString,
+    names: &[(String, usize)],
+) -> JsString {
     let r = &replacement.0;
     let ncap = m.groups.len();
     let mut out = JsString::new();
     let mut i = 0;
     let dollar = b'$' as u16;
-    let digit = |u: u16| (b'0' as u16..=b'9' as u16).contains(&u).then(|| (u - b'0' as u16) as usize);
+    let digit = |u: u16| {
+        (b'0' as u16..=b'9' as u16)
+            .contains(&u)
+            .then(|| (u - b'0' as u16) as usize)
+    };
     while i < r.len() {
         if r[i] != dollar || i + 1 >= r.len() {
             out.0.push(r[i]);
@@ -276,7 +314,12 @@ pub fn get_substitution(m: &JsMatch, s: &JsString, replacement: &JsString, names
                     }
                     Some(c) => {
                         let name = String::from_utf16_lossy(&r[i + 2..i + 2 + c]);
-                        if let Some(g) = names.iter().find(|(n, _)| *n == name).map(|(_, i)| *i).and_then(|g| m.group(g, s)) {
+                        if let Some(g) = names
+                            .iter()
+                            .find(|(n, _)| *n == name)
+                            .map(|(_, i)| *i)
+                            .and_then(|g| m.group(g, s))
+                        {
                             out.push_str(&g);
                         }
                         i += 2 + c + 1;
@@ -313,7 +356,11 @@ pub fn get_substitution(m: &JsMatch, s: &JsString, replacement: &JsString, names
 
 /// AdvanceStringIndex: one code point under `u`, one code unit otherwise.
 fn advance(s: &[u16], i: usize, unicode: bool) -> usize {
-    if unicode && i + 1 < s.len() && is_high(s[i]) && is_low(s[i + 1]) { i + 2 } else { i + 1 }
+    if unicode && i + 1 < s.len() && is_high(s[i]) && is_low(s[i + 1]) {
+        i + 2
+    } else {
+        i + 1
+    }
 }
 
 /// `(?<name>` groups, numbered by their opening parenthesis among the capturing ones.
@@ -328,7 +375,9 @@ fn named_groups(pattern: &str) -> Vec<(String, usize)> {
             '(' if !in_class => {
                 if p.get(i + 1) != Some(&'?') {
                     n += 1;
-                } else if p.get(i + 2) == Some(&'<') && !matches!(p.get(i + 3), Some('=') | Some('!')) {
+                } else if p.get(i + 2) == Some(&'<')
+                    && !matches!(p.get(i + 3), Some('=') | Some('!'))
+                {
                     n += 1;
                     let name: String = p[i + 3..].iter().take_while(|&&c| c != '>').collect();
                     out.push((name, n));
@@ -344,7 +393,11 @@ fn named_groups(pattern: &str) -> Vec<(String, usize)> {
 /// A legacy-`/i` pattern may run with `ASCII_FOLDERS` remapped to `INERT` only if nothing in it can tell
 /// them apart: no literal, `\u` escape or class range touches any of the four code points.
 fn legacy_fold_guard(pattern: &str) -> Result<(), String> {
-    let watched: Vec<u32> = ASCII_FOLDERS.iter().chain(std::iter::once(&INERT)).map(|&u| u as u32).collect();
+    let watched: Vec<u32> = ASCII_FOLDERS
+        .iter()
+        .chain(std::iter::once(&INERT))
+        .map(|&u| u as u32)
+        .collect();
     let p: Vec<char> = pattern.chars().collect();
     // Decode one atom at i: (code point, width), or None for an escape that names a class.
     let atom = |i: usize| -> Option<(u32, usize)> {
@@ -389,10 +442,13 @@ fn legacy_fold_guard(pattern: &str) -> Result<(), String> {
             if watched.contains(&lo) {
                 return Err(format!("literal U+{lo:04X} under legacy /i"));
             }
-            if in_class && p.get(i + w) == Some(&'-') && i + w + 1 < p.len() && p[i + w + 1] != ']' {
+            if in_class && p.get(i + w) == Some(&'-') && i + w + 1 < p.len() && p[i + w + 1] != ']'
+            {
                 if let Some((hi, w2)) = atom(i + w + 1) {
                     if let Some(c) = watched.iter().find(|&&c| lo <= c && c <= hi) {
-                        return Err(format!("range U+{lo:04X}-U+{hi:04X} spans U+{c:04X} under legacy /i"));
+                        return Err(format!(
+                            "range U+{lo:04X}-U+{hi:04X} spans U+{c:04X} under legacy /i"
+                        ));
                     }
                     i += w + 1 + w2;
                     continue;
@@ -409,9 +465,11 @@ fn legacy_fold_guard(pattern: &str) -> Result<(), String> {
 #[macro_export]
 macro_rules! js_re {
     ($pattern:expr, $flags:expr) => {{
-        static RE: ::std::sync::OnceLock<$crate::core::js_regex::JsRegex> = ::std::sync::OnceLock::new();
+        static RE: ::std::sync::OnceLock<$crate::core::js_regex::JsRegex> =
+            ::std::sync::OnceLock::new();
         RE.get_or_init(|| {
-            $crate::core::js_regex::JsRegex::new($pattern, $flags).unwrap_or_else(|e| panic!("js_re!: {e}"))
+            $crate::core::js_regex::JsRegex::new($pattern, $flags)
+                .unwrap_or_else(|e| panic!("js_re!: {e}"))
         })
     }};
     ($pattern:expr) => {
@@ -446,7 +504,10 @@ mod tests {
     fn substitution_patterns() {
         let re = JsRegex::new(r"(\w+)\s(?<b>\w+)", "").unwrap();
         let s = js("hello world!");
-        assert_eq!(re.replace(&s, &js("$2 $1 [$&] $<b> $$ $3")), "world hello [hello world] world $ $3!");
+        assert_eq!(
+            re.replace(&s, &js("$2 $1 [$&] $<b> $$ $3")),
+            "world hello [hello world] world $ $3!"
+        );
     }
 
     #[test]

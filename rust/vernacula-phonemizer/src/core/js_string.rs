@@ -64,7 +64,11 @@ impl JsString {
         let clamp = |i: isize| if i < 0 { (len + i).max(0) } else { i.min(len) } as usize;
         let from = clamp(start);
         let to = end.map_or(self.0.len(), clamp);
-        if from >= to { JsString::new() } else { JsString(self.0[from..to].to_vec()) }
+        if from >= to {
+            JsString::new()
+        } else {
+            JsString(self.0[from..to].to_vec())
+        }
     }
 
     /// `s.substring(start, end)`: negatives clamp to 0 and the bounds swap if reversed.
@@ -96,7 +100,9 @@ impl JsString {
         if n.len() > h.len() {
             return None;
         }
-        (0..=h.len() - n.len()).rev().find(|&i| h[i..i + n.len()] == n[..])
+        (0..=h.len() - n.len())
+            .rev()
+            .find(|&i| h[i..i + n.len()] == n[..])
     }
 
     /// `s.includes(needle)`: true for the empty needle, as in JS.
@@ -158,13 +164,19 @@ impl JsString {
     pub fn trim(&self) -> JsString {
         let v = &self.0;
         let start = v.iter().position(|&u| !is_js_space(u)).unwrap_or(v.len());
-        let end = v.iter().rposition(|&u| !is_js_space(u)).map_or(start, |e| e + 1);
+        let end = v
+            .iter()
+            .rposition(|&u| !is_js_space(u))
+            .map_or(start, |e| e + 1);
         JsString(v[start..end].to_vec())
     }
 
     /// Code points, as `for (const ch of s)` yields them (a lone half is its own item).
     pub fn code_points(&self) -> CodePoints<'_> {
-        CodePoints { units: &self.0, pos: 0 }
+        CodePoints {
+            units: &self.0,
+            pos: 0,
+        }
     }
 
     /// `s.toLowerCase()`: full Unicode mapping, context-sensitive final sigma included. A lone surrogate
@@ -186,7 +198,9 @@ impl JsString {
         while let Some(cp) = cps.next() {
             if (0xD800..=0xDFFF).contains(&cp) {
                 if !run.is_empty() {
-                    out.push_str(&JsString::from(f(&String::from_utf16(&run).unwrap()).as_str()));
+                    out.push_str(&JsString::from(
+                        f(&String::from_utf16(&run).unwrap()).as_str(),
+                    ));
                     run.clear();
                 }
                 out.0.push(cp as u16);
@@ -196,7 +210,9 @@ impl JsString {
             }
         }
         if !run.is_empty() {
-            out.push_str(&JsString::from(f(&String::from_utf16(&run).unwrap()).as_str()));
+            out.push_str(&JsString::from(
+                f(&String::from_utf16(&run).unwrap()).as_str(),
+            ));
         }
         out
     }
@@ -324,7 +340,10 @@ mod tests {
 
     #[test]
     fn split_and_trim() {
-        assert_eq!(js("a\tb\t").split(&js("\t")), vec![js("a"), js("b"), js("")]);
+        assert_eq!(
+            js("a\tb\t").split(&js("\t")),
+            vec![js("a"), js("b"), js("")]
+        );
         assert_eq!(js("\u{FEFF} x \u{85}").trim(), "x \u{85}");
     }
 }
@@ -341,7 +360,9 @@ pub fn js_number(s: &JsString) -> f64 {
         if digits.is_empty() || !digits.chars().all(|c| c.is_digit(r)) {
             return f64::NAN;
         }
-        digits.chars().fold(0.0, |acc, c| acc * r as f64 + c.to_digit(r).unwrap() as f64)
+        digits
+            .chars()
+            .fold(0.0, |acc, c| acc * r as f64 + c.to_digit(r).unwrap() as f64)
     };
     let lower2 = t.get(..2).map(|p| p.to_ascii_lowercase());
     match lower2.as_deref() {
@@ -377,7 +398,10 @@ pub fn js_number(s: &JsString) -> f64 {
         if matches!(b.get(j), Some(b'+') | Some(b'-')) {
             j += 1;
         }
-        let exp_digits = b[j.min(b.len())..].iter().take_while(|c| c.is_ascii_digit()).count();
+        let exp_digits = b[j.min(b.len())..]
+            .iter()
+            .take_while(|c| c.is_ascii_digit())
+            .count();
         if exp_digits == 0 {
             return f64::NAN;
         }

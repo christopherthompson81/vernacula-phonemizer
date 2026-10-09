@@ -7,19 +7,45 @@ use crate::core::js_string::{JsString, js};
 use crate::js_re;
 
 const DIGRAPH_STEMS: [(&str, &str); 34] = [
-    ("anae", "ane"), ("aemia", "emia"), ("aemic", "emic"), ("archaeo", "archeo"), ("judaeo", "judeo"),
-    ("caesar", "cesar"), ("rrhoea", "rrhea"), ("rrhoid", "rrhoid"), ("paedi", "pedi"), ("paedia", "pedia"),
-    ("faec", "fec"), ("foet", "fet"), ("gynaec", "gynec"), ("haem", "hem"), ("homoeo", "homeo"),
-    ("oedema", "edema"), ("oesophag", "esophag"), ("oestr", "estr"), ("orthopaed", "orthoped"),
-    ("palaeo", "paleo"), ("mediaeval", "medieval"), ("primaeval", "primeval"), ("aeon", "eon"),
-    ("aetiolog", "etiolog"), ("caesium", "cesium"), ("chimaera", "chimera"), ("daemon", "demon"),
-    ("hyaena", "hyena"), ("onomatopoeia", "onomatopeia"), ("manoeuvr", "maneuvr"), ("amoeb", "ameb"),
-    ("coeliac", "celiac"), ("oenolog", "enolog"), ("praes", "pres"),
+    ("anae", "ane"),
+    ("aemia", "emia"),
+    ("aemic", "emic"),
+    ("archaeo", "archeo"),
+    ("judaeo", "judeo"),
+    ("caesar", "cesar"),
+    ("rrhoea", "rrhea"),
+    ("rrhoid", "rrhoid"),
+    ("paedi", "pedi"),
+    ("paedia", "pedia"),
+    ("faec", "fec"),
+    ("foet", "fet"),
+    ("gynaec", "gynec"),
+    ("haem", "hem"),
+    ("homoeo", "homeo"),
+    ("oedema", "edema"),
+    ("oesophag", "esophag"),
+    ("oestr", "estr"),
+    ("orthopaed", "orthoped"),
+    ("palaeo", "paleo"),
+    ("mediaeval", "medieval"),
+    ("primaeval", "primeval"),
+    ("aeon", "eon"),
+    ("aetiolog", "etiolog"),
+    ("caesium", "cesium"),
+    ("chimaera", "chimera"),
+    ("daemon", "demon"),
+    ("hyaena", "hyena"),
+    ("onomatopoeia", "onomatopeia"),
+    ("manoeuvr", "maneuvr"),
+    ("amoeb", "ameb"),
+    ("coeliac", "celiac"),
+    ("oenolog", "enolog"),
+    ("praes", "pres"),
 ];
 
 const NOT_OUR: [&str; 16] = [
-    "our", "hour", "four", "your", "sour", "pour", "tour", "dour", "flour", "scour",
-    "amour", "velour", "detour", "contour", "devour", "paramour",
+    "our", "hour", "four", "your", "sour", "pour", "tour", "dour", "flour", "scour", "amour",
+    "velour", "detour", "contour", "devour", "paramour",
 ];
 
 /// `s.split(a).join(b)`: every occurrence.
@@ -42,8 +68,16 @@ fn step(word: &JsString, known: &dyn Fn(&JsString) -> bool) -> Vec<JsString> {
         let skip = !rest.is_empty()
             && !js_re!("^(s|'s|d|ed|eds|ing|ings|er|ers|ies|y|ly|al|ally|ation|ations|less|ful|fully|ness|ite|ites|itism|able|ably|ist|ists|ism|hood|hoods)$").test(&rest)
             && !(rest.len() > 2 && known(&rest));
-        if !skip && !NOT_OUR.iter().any(|w| word.slice(0, Some((a + 3) as isize)) == *w) {
-            push(word.slice(0, Some(a as isize)).concat(&js("or")).concat(&rest));
+        if !skip
+            && !NOT_OUR
+                .iter()
+                .any(|w| word.slice(0, Some((a + 3) as isize)) == *w)
+        {
+            push(
+                word.slice(0, Some(a as isize))
+                    .concat(&js("or"))
+                    .concat(&rest),
+            );
         }
         at = word.index_of(&our, a + 1);
     }

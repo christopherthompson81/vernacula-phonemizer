@@ -88,14 +88,22 @@ pub fn emit_unclaimed(gap: &JsString, sink: &mut ClauseSink, base: usize) {
 
 /// Walk `input` by `token` (a `g` regex), handing each match to `handle` and the gaps between to
 /// `emit_unclaimed`.
-pub fn assemble_clauses(input: &JsString, token: &JsRegex, mut handle: impl FnMut(&JsMatch, &JsString, &mut ClauseSink)) -> JsString {
+pub fn assemble_clauses(
+    input: &JsString,
+    token: &JsRegex,
+    mut handle: impl FnMut(&JsMatch, &JsString, &mut ClauseSink),
+) -> JsString {
     let mut sink = ClauseSink::new();
     enter_engine(input);
     let mut cursor = 0;
     for m in token.match_all(input) {
         let at = m.index();
         if at > cursor {
-            emit_unclaimed(&JsString::from_units(&input.0[cursor..at]), &mut sink, cursor);
+            emit_unclaimed(
+                &JsString::from_units(&input.0[cursor..at]),
+                &mut sink,
+                cursor,
+            );
         }
         begin_token((at, m.end()), &m.value(input));
         handle(&m, input, &mut sink);

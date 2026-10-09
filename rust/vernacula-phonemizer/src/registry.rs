@@ -13,8 +13,9 @@ use crate::core::foreign::{lookup_foreign_oov, set_default_foreign, with_host};
 use crate::core::js_string::{JsString, js};
 use crate::core::markup::strip_markup;
 use crate::core::unicode::{
-    fold_caret_exponents, fold_cyrillic_confusables, fold_cyrillic_stress_marks, fold_fullwidth_latin, fold_latin_confusables,
-    fold_native_digits, fold_spaced_dash, fold_squared_degrees, fold_subscript_digits, fold_vulgar_fractions, repair_double_encoded,
+    fold_caret_exponents, fold_cyrillic_confusables, fold_cyrillic_stress_marks,
+    fold_fullwidth_latin, fold_latin_confusables, fold_native_digits, fold_spaced_dash,
+    fold_squared_degrees, fold_subscript_digits, fold_vulgar_fractions, repair_double_encoded,
 };
 use crate::languages::english::english::{EnglishPhonemizer, create_english};
 use crate::languages::english::english_neural::phonemize_en_neural;
@@ -22,10 +23,13 @@ use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagg
 use crate::languages::english_gb::english_gb::rp_word_transform;
 
 /// `CYRILLIC_HOSTS` (core/scripts.ts).
-const CYRILLIC_HOSTS: [&str; 15] = ["ab", "ba", "be", "bg", "chv", "kk", "ky", "mk", "mn", "nog", "ru", "sr", "tg", "tt", "uk"];
+const CYRILLIC_HOSTS: [&str; 15] = [
+    "ab", "ba", "be", "bg", "chv", "kk", "ky", "mk", "mn", "nog", "ru", "sr", "tg", "tt", "uk",
+];
 const FOLD_OPT_OUT: [&str; 1] = ["te"];
 const SPACED_DASH_OPT_OUT: [&str; 6] = ["en", "en-GB", "en-IN", "hmn", "kaa", "ug"];
-const VULGAR_FOLD_OPT_OUT: [&str; 10] = ["az", "bs", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz"];
+const VULGAR_FOLD_OPT_OUT: [&str; 10] =
+    ["az", "bs", "ca", "el", "ga", "hr", "kn", "mk", "te", "uz"];
 
 /// The registry's fold pre-pass for `lang`.
 pub fn fold_pass(lang: &str, input: &JsString) -> JsString {
@@ -37,10 +41,22 @@ pub fn fold_pass(lang: &str, input: &JsString) -> JsString {
     let s = fold_latin_confusables(&s);
     let s = fold_caret_exponents(&s);
     let folded = fold_cyrillic_stress_marks(&s);
-    let pre = if VULGAR_FOLD_OPT_OUT.contains(&lang) { folded } else { fold_vulgar_fractions(&folded) };
+    let pre = if VULGAR_FOLD_OPT_OUT.contains(&lang) {
+        folded
+    } else {
+        fold_vulgar_fractions(&folded)
+    };
     let subs = fold_subscript_digits(&pre);
-    let digits = if FOLD_OPT_OUT.contains(&lang) { subs } else { fold_native_digits(&subs) };
-    if SPACED_DASH_OPT_OUT.contains(&lang) { digits } else { fold_spaced_dash(&digits) }
+    let digits = if FOLD_OPT_OUT.contains(&lang) {
+        subs
+    } else {
+        fold_native_digits(&subs)
+    };
+    if SPACED_DASH_OPT_OUT.contains(&lang) {
+        digits
+    } else {
+        fold_spaced_dash(&digits)
+    }
 }
 
 /// The languages this build can phonemize.
@@ -77,7 +93,9 @@ pub fn port_pending() -> Vec<String> {
 /// `readAsEnglish`: a Latin run inside another language, read by the English engine in English's scope.
 pub fn read_as_english(text: &JsString) -> JsString {
     let en = english();
-    with_host(&js("en"), || en.text_with_oov(&fold_pass("en", text), &|k| lookup_foreign_oov(k)))
+    with_host(&js("en"), || {
+        en.text_with_oov(&fold_pass("en", text), &|k| lookup_foreign_oov(k))
+    })
 }
 
 fn install_foreign_readers() {
@@ -92,7 +110,8 @@ fn install_foreign_readers() {
 
 /// `getPhonemizer(lang).text(input)`.
 pub fn phonemize_in(lang: &str, input: &JsString) -> Result<JsString, UnknownLanguage> {
-    let run = |f: &dyn Fn(&JsString) -> JsString| with_host(&js(lang), || f(&fold_pass(lang, input)));
+    let run =
+        |f: &dyn Fn(&JsString) -> JsString| with_host(&js(lang), || f(&fold_pass(lang, input)));
     match lang {
         "en" => {
             let en = english();
@@ -100,7 +119,9 @@ pub fn phonemize_in(lang: &str, input: &JsString) -> Result<JsString, UnknownLan
         }
         "en-GB" => {
             let en = english();
-            Ok(run(&|s| en.text_full(s, Some(&rp_word_transform), None, false)))
+            Ok(run(&|s| {
+                en.text_full(s, Some(&rp_word_transform), None, false)
+            }))
         }
         other => {
             PENDING.lock().unwrap().insert(other.to_string());
@@ -119,7 +140,11 @@ pub fn english_tagger() -> Option<&'static EnglishTagger> {
 static TAGGER: OnceLock<Result<EnglishTagger, String>> = OnceLock::new();
 
 pub fn tagger_unavailable_reason() -> Option<String> {
-    TAGGER.get_or_init(build_english_tagger).as_ref().err().cloned()
+    TAGGER
+        .get_or_init(build_english_tagger)
+        .as_ref()
+        .err()
+        .cloned()
 }
 
 fn build_english_tagger() -> Result<EnglishTagger, String> {
@@ -134,7 +159,8 @@ pub fn phonemize_best_in(lang: &str, input: &JsString) -> Result<JsString, Unkno
     let tagger = english_tagger();
     let render = |host: &str, wt: Option<crate::languages::english::english::WordTransform>| {
         // A tagger error rejects phonemizeAsync in the TS; it is not swallowed into the sync reading here either.
-        phonemize_en_neural(&en, tagger, &fold_pass(host, input), host, wt).unwrap_or_else(|e| panic!("English tagger: {e}"))
+        phonemize_en_neural(&en, tagger, &fold_pass(host, input), host, wt)
+            .unwrap_or_else(|e| panic!("English tagger: {e}"))
     };
     match lang {
         "en" => Ok(render("en", None)),

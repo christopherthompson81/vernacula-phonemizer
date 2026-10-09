@@ -34,19 +34,36 @@ static RUN_OR_CODE: LazyLock<JsRegex> = LazyLock::new(|| {
     .unwrap()
 });
 static INITIAL_RUN: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!("(?<![\\p{{L}}{LATIN_MARK}])(?:\\p{{Lu}}\\.[ \u{a0}]*){{2,}}"), "gu").unwrap()
+    JsRegex::new(
+        &format!("(?<![\\p{{L}}{LATIN_MARK}])(?:\\p{{Lu}}\\.[ \u{a0}]*){{2,}}"),
+        "gu",
+    )
+    .unwrap()
 });
 
 fn lone_initial() -> &'static JsRegex {
-    js_re!(r"(?<=^|\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})", "gu")
+    js_re!(
+        r"(?<=^|\p{Lu}\p{L}*[  ])(\p{Lu})\.(?=[  ]+\p{Lu}\p{Ll})",
+        "gu"
+    )
 }
 
 /// The normalizer. `on_pipeline` false keeps its replaces off the provenance seam (a nested use).
-pub fn make_initialism_normalizer<R: Fn(&JsString) -> bool>(d: InitialismData<R>, on_pipeline: bool) -> impl Fn(&JsString) -> JsString {
+pub fn make_initialism_normalizer<R: Fn(&JsString) -> bool>(
+    d: InitialismData<R>,
+    on_pipeline: bool,
+) -> impl Fn(&JsString) -> JsString {
     let d = Arc::new(d);
     move |raw: &JsString| {
-        let rw = |x: &JsString, re: &JsRegex, f: &mut dyn FnMut(&JsMatch, &JsString) -> JsString| -> JsString {
-            if on_pipeline { rewrite_with(x, re, f) } else { re.replace_with(x, f) }
+        let rw = |x: &JsString,
+                  re: &JsRegex,
+                  f: &mut dyn FnMut(&JsMatch, &JsString) -> JsString|
+         -> JsString {
+            if on_pipeline {
+                rewrite_with(x, re, f)
+            } else {
+                re.replace_with(x, f)
+            }
         };
         let lower = |s: &JsString| d.lower.as_ref().map_or_else(|| s.to_lower_case(), |f| f(s));
         let spell_initials = |run: &JsString| {
@@ -60,7 +77,9 @@ pub fn make_initialism_normalizer<R: Fn(&JsString) -> bool>(d: InitialismData<R>
                 .collect();
             JsString::join(&parts, &js(" "))
         };
-        let text = rw(raw, &INITIAL_RUN, &mut |m, s| spell_initials(&m.value(s)).concat(&js(" ")));
+        let text = rw(raw, &INITIAL_RUN, &mut |m, s| {
+            spell_initials(&m.value(s)).concat(&js(" "))
+        });
         let text = rw(&text, lone_initial(), &mut |m, s| {
             let letter = m.group(1, s).unwrap();
             (d.letter_name)(&lower(&letter)).unwrap_or(letter)
@@ -106,7 +125,11 @@ fn spell_out(lower: &JsString, letter_name: &LetterName) -> Option<JsString> {
     let mut names = Vec::new();
     let mut i = 0;
     while i < lower.len() {
-        let w = if lower.code_point_at(i).unwrap() > 0xFFFF { 2 } else { 1 };
+        let w = if lower.code_point_at(i).unwrap() > 0xFFFF {
+            2
+        } else {
+            1
+        };
         names.push(letter_name(&JsString::from_units(&lower.0[i..i + w]))?);
         i += w;
     }
@@ -127,14 +150,20 @@ pub fn liquids() -> &'static JsRegex {
 
 /// ⚠ `vowels.test` is called repeatedly; a `g`/`y` vowels regex would carry `lastIndex` in the TS. None does.
 pub fn make_unreadable_test(d: PhonotacticsData) -> impl Fn(&JsString) -> bool + Send + Sync {
-    assert!(!d.vowels.global && !d.vowels.sticky, "stateful vowels regex: port lastIndex explicitly");
+    assert!(
+        !d.vowels.global && !d.vowels.sticky,
+        "stateful vowels regex: port lastIndex explicitly"
+    );
     let inner = js_re!(r"^\[|\]$", "g").replace(&js(&d.vowels.source), &JsString::new());
-    let consonant_run = JsRegex::new(&format!("[^{}]{{3,}}", inner.to_string_lossy()), "u").unwrap();
+    let consonant_run =
+        JsRegex::new(&format!("[^{}]{{3,}}", inner.to_string_lossy()), "u").unwrap();
     move |word: &JsString| {
         let is_consonant = |ch: &JsString| js_re!(r"\p{L}", "u").test(ch) && !d.vowels.test(ch);
         let has_digraph = |s: &JsString| d.digraphs.as_ref().is_some_and(|g| g.contains(s));
         let collapse = |w: &JsString| -> JsString {
-            let Some(g) = d.digraphs.as_ref().filter(|g| !g.is_empty()) else { return w.clone() };
+            let Some(g) = d.digraphs.as_ref().filter(|g| !g.is_empty()) else {
+                return w.clone();
+            };
             let mut out = JsString::new();
             let mut i = 0;
             'outer: while i < w.len() {
@@ -156,16 +185,31 @@ pub fn make_unreadable_test(d: PhonotacticsData) -> impl Fn(&JsString) -> bool +
         }
         let collapsed = collapse(&w);
         if let Some(run) = consonant_run.exec(&collapsed) {
-            if !d.liquids.as_ref().unwrap_or(liquids()).test(&run.value(&collapsed)) {
+            if !d
+                .liquids
+                .as_ref()
+                .unwrap_or(liquids())
+                .test(&run.value(&collapsed))
+            {
                 return true;
             }
         }
         let head = w.slice(0, Some(2));
-        if w.len() >= 2 && is_consonant(&w.char_at(0)) && is_consonant(&w.char_at(1)) && !d.legal_onsets.contains(&head) && !has_digraph(&head) {
+        if w.len() >= 2
+            && is_consonant(&w.char_at(0))
+            && is_consonant(&w.char_at(1))
+            && !d.legal_onsets.contains(&head)
+            && !has_digraph(&head)
+        {
             return true;
         }
         let tail = w.slice(-2, None);
-        if tail.len() == 2 && is_consonant(&tail.char_at(0)) && is_consonant(&tail.char_at(1)) && !d.legal_codas.contains(&tail) && !has_digraph(&tail) {
+        if tail.len() == 2
+            && is_consonant(&tail.char_at(0))
+            && is_consonant(&tail.char_at(1))
+            && !d.legal_codas.contains(&tail)
+            && !has_digraph(&tail)
+        {
             return true;
         }
         false
