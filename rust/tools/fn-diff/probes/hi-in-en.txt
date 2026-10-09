@@ -1,0 +1,8 @@
+# Devanagari runs inside ENGLISH text: the script reader routes them to the Hindi engine. SYNTHETIC text.
+I said नमस्ते to them
+The word भारत means India
+She wrote ज्ञान, then विज्ञान.
+Call him डॉ. शर्मा tomorrow
+It was १२३४ rupees
+नमस्ते
+A mix: नमस्ते, hello, और goodbye

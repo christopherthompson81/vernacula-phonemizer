@@ -33,7 +33,7 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 7] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR"];
+pub const LANGUAGES: [&str; 8] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -74,6 +74,7 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map_err(PhonemizeError::Data),
         "pt" => create_portuguese(Dialect::Ep, None).map(|e| e as Arc<dyn Engine>),
         "pt-BR" => create_portuguese_br().map(|e| e as Arc<dyn Engine>),
+        "hi" => crate::languages::hindi::hindi::engine(),
         _ => return None,
     })
 }
@@ -169,6 +170,9 @@ pub enum PhonemizeError {
     /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
     Neural(String),
+    /// The TS engine THROWS on this input, so the port returns an error rather than a reading: e.g. Hindi's
+    /// ordinal rule on a 309-digit run, `Infinity`, whose recursion is a `RangeError` in the TS.
+    Input(String),
 }
 
 impl std::fmt::Display for PhonemizeError {
@@ -177,6 +181,7 @@ impl std::fmt::Display for PhonemizeError {
             PhonemizeError::UnknownLanguage(l) => write!(f, "no engine for language: {l}"),
             PhonemizeError::Data(e) => write!(f, "phonemizer data unavailable: {e}"),
             PhonemizeError::Neural(e) => write!(f, "neural OOV model failed: {e}"),
+            PhonemizeError::Input(e) => write!(f, "input the engine cannot read: {e}"),
         }
     }
 }
