@@ -94,6 +94,7 @@ fn main() {
             }
         }
     }
+    soundness(&text);
     println!("{ok} probe results identical, {differ} DIFFER, {refused} patterns refused");
     println!("differ by flags: {differ_by_flags:?}");
     println!("refusals: {refusals:?}");
@@ -101,4 +102,63 @@ fn main() {
         println!("{e}");
     }
     std::process::exit(if differ + refused == 0 { 0 } else { 1 });
+}
+
+/// `may_start_mid_pair` may only SKIP work: for every `u` pattern, over astral-heavy subjects, the result must
+/// equal the full mid-pair scan's.
+fn soundness(text: &str) {
+    let astral: Vec<Vec<u16>> = [
+        "𠀁𫝀😀",
+        "😀😀a😀",
+        "a𝒜b𝒜",
+        "x 😀 y",
+        "𠀁 𫝀. 😀, a",
+        "ab😀cd😀😀ef",
+        "😀",
+    ]
+    .iter()
+    .map(|s| s.encode_utf16().collect())
+    .collect();
+    let (mut checked, mut skipping, mut unsound) = (0, 0, 0);
+    for line in text.lines().filter(|l| !l.trim().is_empty()) {
+        let doc: serde_json::Value = serde_json::from_str(line).unwrap();
+        let (pattern, flags) = (
+            doc["pattern"].as_str().unwrap(),
+            doc["flags"].as_str().unwrap(),
+        );
+        if !flags.contains('u') {
+            continue;
+        }
+        let (Ok(fast), Ok(full)) = (JsRegex::new(pattern, flags), JsRegex::new(pattern, flags))
+        else {
+            continue;
+        };
+        let full = full.with_full_scan();
+        if !fast.scans_mid_pair() {
+            skipping += 1;
+        }
+        let mut subjects: Vec<Vec<u16>> = astral.clone();
+        for pair in doc["matches"].as_array().unwrap() {
+            let s = decode(pair[0].as_str().unwrap());
+            subjects.push(s.iter().flat_map(|&u| [u, 0xD83D, 0xDE00]).collect());
+        }
+        for subj in subjects {
+            let s = JsString(subj);
+            checked += 1;
+            let a: Vec<_> = fast.match_all(&s).iter().map(|m| m.range.clone()).collect();
+            let b: Vec<_> = full.match_all(&s).iter().map(|m| m.range.clone()).collect();
+            if a != b {
+                unsound += 1;
+                if unsound <= 5 {
+                    println!("  UNSOUND /{pattern}/{flags} on {}", show(&s.0));
+                }
+            }
+        }
+    }
+    println!(
+        "mid-pair analysis: skips the scan for {skipping} u-patterns; {checked} astral subjects, {unsound} UNSOUND"
+    );
+    if unsound > 0 {
+        std::process::exit(1);
+    }
 }

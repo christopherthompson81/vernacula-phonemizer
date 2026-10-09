@@ -26,6 +26,8 @@ pub struct JsRegex {
     pub sticky: bool,
     unicode: bool,
     legacy_icase: bool,
+    /// Whether a match could START inside a surrogate pair (see `may_start_mid_pair`); `false` skips the scan.
+    mid_pair: bool,
     names: Vec<(String, usize)>,
 }
 
@@ -119,6 +121,7 @@ impl JsRegex {
             sticky,
             unicode,
             legacy_icase,
+            mid_pair: unicode && may_start_mid_pair(pattern),
             names,
         })
     }
@@ -149,7 +152,7 @@ impl JsRegex {
     /// because a failed attempt advances one code unit.
     fn search(&self, s: &[u16], from: usize) -> Option<regress::Match> {
         let candidate = self.raw_from(s, from);
-        if !self.unicode {
+        if !self.mid_pair {
             return candidate;
         }
         let limit = candidate.as_ref().map_or(s.len(), |m| m.start());
@@ -220,6 +223,18 @@ impl JsRegex {
 
     pub fn names(&self) -> &[(String, usize)] {
         &self.names
+    }
+
+    /// Whether the mid-pair scan runs for this pattern (for the soundness check in tools/regex-diff).
+    pub fn scans_mid_pair(&self) -> bool {
+        self.mid_pair
+    }
+
+    /// The same pattern with the mid-pair scan forced on: the reference `may_start_mid_pair` is checked
+    /// against.
+    pub fn with_full_scan(mut self) -> JsRegex {
+        self.mid_pair = self.unicode;
+        self
     }
 
     /// The group number for `(?<name>…)`.
@@ -352,6 +367,253 @@ pub fn get_substitution(
         }
     }
     out
+}
+
+/// Could a `u` pattern match starting at a LONE LOW SURROGATE, i.e. inside a surrogate pair? Only then does
+/// V8's code-unit step after a failed attempt find anything `regress` would not, so only then is the costly
+/// mid-pair scan in `search` run. Without this, a `u` pattern over n astral characters cost O(n²): 0.34 s for
+/// one failed test over 8,000 emoji, and a `phonemize` call over 4,000 took 48 s.
+///
+/// ⚠ CONSERVATIVE: `false` must mean "cannot", and anything unrecognised is "may". A match there must be
+/// zero-width, or begin by consuming that surrogate. So the leading assertions are skipped, and the answer is
+/// whether the first consuming atom can match a lone low surrogate (`.`, a negated class, `\S`, a range over
+/// U+DC00–U+DFFF, a group or backreference that may) or can be skipped (a `*`/`?`/`{0,}` atom).
+fn may_start_mid_pair(pattern: &str) -> bool {
+    let p: Vec<char> = pattern.chars().collect();
+    let mut i = 0;
+    alternation_may(&p, &mut i)
+}
+
+/// An alternation up to `)` or the end; `i` is left on the `)`.
+fn alternation_may(p: &[char], i: &mut usize) -> bool {
+    let mut may = false;
+    loop {
+        may |= sequence_may(p, i);
+        if *i < p.len() && p[*i] == '|' {
+            *i += 1;
+            continue;
+        }
+        return may;
+    }
+}
+
+/// One branch: `true` if it may match zero-width or begin with a lone low surrogate. Consumes the branch.
+fn sequence_may(p: &[char], i: &mut usize) -> bool {
+    let mut decided: Option<bool> = None;
+    while *i < p.len() && p[*i] != '|' && p[*i] != ')' {
+        let (atom, zero_width) = atom_may(p, i);
+        let min_zero = quantifier_min_zero(p, i);
+        if decided.is_some() {
+            continue;
+        }
+        if zero_width {
+            continue; // an assertion consumes nothing: the next atom decides
+        }
+        if atom {
+            decided = Some(true);
+        } else if !min_zero {
+            decided = Some(false);
+        }
+    }
+    decided.unwrap_or(true) // every atom skippable or zero-width: a zero-width match is possible
+}
+
+/// Parse one atom at `i`: (may match a lone low surrogate, is a zero-width assertion).
+fn atom_may(p: &[char], i: &mut usize) -> (bool, bool) {
+    let c = p[*i];
+    *i += 1;
+    match c {
+        '^' | '$' => (false, true),
+        '.' => (true, false),
+        '[' => (class_may(p, i), false),
+        '(' => {
+            let mut lookaround = false;
+            if p.get(*i) == Some(&'?') {
+                match (p.get(*i + 1), p.get(*i + 2)) {
+                    (Some(':'), _) => *i += 2,
+                    (Some('='), _) | (Some('!'), _) => {
+                        *i += 2;
+                        lookaround = true;
+                    }
+                    (Some('<'), Some('=')) | (Some('<'), Some('!')) => {
+                        *i += 3;
+                        lookaround = true;
+                    }
+                    (Some('<'), _) => {
+                        while *i < p.len() && p[*i] != '>' {
+                            *i += 1;
+                        }
+                        *i += 1;
+                    }
+                    _ => {}
+                }
+            }
+            let inner = alternation_may(p, i);
+            *i += 1; // ')'
+            if lookaround {
+                (false, true)
+            } else {
+                (inner, false)
+            }
+        }
+        '\\' => escape_may(p, i, false),
+        _ => (false, false), // a literal: never a lone surrogate (an astral one starts at a pair start)
+    }
+}
+
+/// After a `\`: (may match a lone low surrogate, is zero-width).
+fn escape_may(p: &[char], i: &mut usize, in_class: bool) -> (bool, bool) {
+    let Some(&c) = p.get(*i) else {
+        return (true, false);
+    };
+    *i += 1;
+    match c {
+        'b' | 'B' if !in_class => (false, true),
+        'd' | 'w' | 's' => (false, false),
+        'D' | 'W' | 'S' => (true, false),
+        'p' | 'P' => {
+            let mut body = String::new();
+            if p.get(*i) == Some(&'{') {
+                *i += 1;
+                while *i < p.len() && p[*i] != '}' {
+                    body.push(p[*i]);
+                    *i += 1;
+                }
+                *i += 1;
+            }
+            // \P{..} or a property that holds surrogates may; the letter/mark/number/script classes cannot.
+            let surrogate_free = !body.contains("Cs")
+                && !body.contains("Surrogate")
+                && body != "C"
+                && body != "Other"
+                && body != "Any"
+                && !body.contains("Unknown")
+                && !body.contains("Zzzz");
+            (c == 'P' || !surrogate_free, false)
+        }
+        'u' => {
+            if p.get(*i) == Some(&'{') {
+                let mut hex = String::new();
+                *i += 1;
+                while *i < p.len() && p[*i] != '}' {
+                    hex.push(p[*i]);
+                    *i += 1;
+                }
+                *i += 1;
+                let v = u32::from_str_radix(&hex, 16).unwrap_or(0xDC00);
+                return ((0xDC00..=0xDFFF).contains(&v), false);
+            }
+            let hex: String = p.iter().skip(*i).take(4).collect();
+            *i += hex.len();
+            let v = u32::from_str_radix(&hex, 16).unwrap_or(0xDC00);
+            // A high surrogate escape followed by a low one is one pair in `u` mode: it starts at a pair start.
+            ((0xDC00..=0xDFFF).contains(&v), false)
+        }
+        'k' | '1'..='9' => (true, false), // a backreference may be empty or anything
+        _ => (false, false), // \t, \n, \x41, \., \/ … : one fixed non-surrogate character
+    }
+}
+
+/// A character class from after its `[` through its `]`.
+fn class_may(p: &[char], i: &mut usize) -> bool {
+    let negated = p.get(*i) == Some(&'^');
+    if negated {
+        *i += 1;
+    }
+    let mut may = false;
+    let mut prev: Option<u32> = None;
+    while *i < p.len() && p[*i] != ']' {
+        let c = p[*i];
+        if c == '-' && prev.is_some() && p.get(*i + 1).is_some_and(|&n| n != ']') {
+            *i += 1;
+            let hi = class_char(p, i, &mut may);
+            if let (Some(lo), Some(hi)) = (prev, hi) {
+                if lo <= 0xDFFF && hi >= 0xDC00 {
+                    may = true;
+                }
+            }
+            prev = None;
+            continue;
+        }
+        prev = class_char(p, i, &mut may);
+    }
+    *i += 1; // ']'
+    negated || may
+}
+
+/// One class member: its code point, or `None` for a class escape (whose answer goes into `may`).
+fn class_char(p: &[char], i: &mut usize, may: &mut bool) -> Option<u32> {
+    let c = p[*i];
+    *i += 1;
+    if c != '\\' {
+        return Some(c as u32);
+    }
+    match p.get(*i) {
+        Some('u') if p.get(*i + 1) != Some(&'{') => {
+            let hex: String = p.iter().skip(*i + 1).take(4).collect();
+            *i += 1 + hex.len();
+            u32::from_str_radix(&hex, 16).ok()
+        }
+        Some('u') => {
+            *i += 2;
+            let mut hex = String::new();
+            while *i < p.len() && p[*i] != '}' {
+                hex.push(p[*i]);
+                *i += 1;
+            }
+            *i += 1;
+            u32::from_str_radix(&hex, 16).ok()
+        }
+        Some('x') => {
+            let hex: String = p.iter().skip(*i + 1).take(2).collect();
+            *i += 1 + hex.len();
+            u32::from_str_radix(&hex, 16).ok()
+        }
+        Some(_) => {
+            let (m, _) = escape_may(p, i, true);
+            *may |= m;
+            None
+        }
+        None => None,
+    }
+}
+
+/// Consume a quantifier after an atom; `true` if it allows zero repetitions.
+fn quantifier_min_zero(p: &[char], i: &mut usize) -> bool {
+    let zero = match p.get(*i) {
+        Some('*') | Some('?') => {
+            *i += 1;
+            true
+        }
+        Some('+') => {
+            *i += 1;
+            false
+        }
+        Some('{') => {
+            let start = *i;
+            let mut j = *i + 1;
+            let mut digits = String::new();
+            while j < p.len() && p[j].is_ascii_digit() {
+                digits.push(p[j]);
+                j += 1;
+            }
+            let rest_ok = matches!(p.get(j), Some('}') | Some(','));
+            if digits.is_empty() || !rest_ok {
+                return false; // a literal `{`, consumed as its own atom next time round
+            }
+            while j < p.len() && p[j] != '}' {
+                j += 1;
+            }
+            *i = j + 1;
+            let _ = start;
+            digits.parse::<u64>().map_or(true, |n| n == 0)
+        }
+        _ => return false,
+    };
+    if p.get(*i) == Some(&'?') {
+        *i += 1; // lazy
+    }
+    zero
 }
 
 /// AdvanceStringIndex: one code point under `u`, one code unit otherwise.

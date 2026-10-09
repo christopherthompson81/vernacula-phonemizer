@@ -18,7 +18,7 @@ use crate::core::unicode::{
     fold_squared_degrees, fold_subscript_digits, fold_vulgar_fractions, repair_double_encoded,
 };
 use crate::languages::english::english::{EnglishPhonemizer, create_english};
-use crate::languages::english::english_neural::phonemize_en_neural;
+use crate::languages::english::english_neural::{phonemize_en_neural, prewarm_foreign_english};
 use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagger_files};
 use crate::languages::english_gb::english_gb::rp_word_transform;
 
@@ -142,10 +142,8 @@ pub fn phonemize_in(lang: &str, input: &JsString) -> Result<JsString, PhonemizeE
                 en.text_full(s, Some(&rp_word_transform), None, false)
             }))
         }
-        other => {
-            PENDING.lock().unwrap().insert(other.to_string());
-            Err(PhonemizeError::UnknownLanguage(other.to_string()))
-        }
+        // Not recorded in `port_pending`: that names what a FOREIGN RUN asked for, not a caller's code.
+        other => Err(PhonemizeError::UnknownLanguage(other.to_string())),
     }
 }
 
@@ -169,10 +167,20 @@ pub fn tagger_unavailable_reason() -> Option<String> {
 fn build_english_tagger() -> Result<EnglishTagger, String> {
     let (meta, bytes) = load_english_tagger_files("en-g2p-tagger")?;
     let model = crate::core::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;
-    Ok(EnglishTagger::new(meta, Box::new(model)))
+    EnglishTagger::new(meta, Box::new(model))
 }
 
 /// `phonemizeAsync(text, lang)`: the best available path. For English, the neural OOV tagger.
+/// `MIXED_LATIN` (index.ts): a Latin run inside a non-Latin script, which the host will delegate to English.
+fn mixed_latin(text: &JsString) -> bool {
+    crate::js_re!(r"\p{Script=Latin}", "u").test(text)
+        && crate::js_re!(
+            r"[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Arabic}\p{Script=Cyrillic}\p{Script=Devanagari}\p{Script=Tamil}\p{Script=Ethiopic}\p{Script=Hebrew}\p{Script=Bengali}\p{Script=Telugu}\p{Script=Kannada}\p{Script=Malayalam}\p{Script=Gujarati}\p{Script=Gurmukhi}\p{Script=Sinhala}\p{Script=Khmer}\p{Script=Lao}\p{Script=Myanmar}\p{Script=Georgian}\p{Script=Armenian}\p{Script=Greek}\p{Script=Tibetan}\p{Script=Oriya}\p{Script=Thaana}\p{Script=Syriac}\p{Script=Cherokee}]",
+            "u"
+        )
+        .test(text)
+}
+
 pub fn phonemize_best_in(lang: &str, input: &JsString) -> Result<JsString, PhonemizeError> {
     let (host, wt): (
         &str,
@@ -183,6 +191,11 @@ pub fn phonemize_best_in(lang: &str, input: &JsString) -> Result<JsString, Phone
         other => return phonemize_in(other, input),
     };
     let en = english()?;
+    // FOREIGN RUNS FIRST (index.ts): every host but `en` prewarms the foreign-OOV memo from a mixed-script
+    // text, on the raw text, and a failure never takes the utterance down.
+    if lang != "en" && mixed_latin(input) {
+        let _ = prewarm_foreign_english(&en, english_tagger(), input);
+    }
     // A tagger error rejects phonemizeAsync in the TS; it is not swallowed into the sync reading here either.
     phonemize_en_neural(&en, english_tagger(), &fold_pass(host, input), host, wt)
         .map_err(PhonemizeError::Neural)

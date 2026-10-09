@@ -34,9 +34,22 @@ pub struct PhonemeTrace {
 }
 
 pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, PhonemizeError> {
+    /// Clears the thread's recording if the engine unwinds, as the TS `finally` does; a panic caught by the
+    /// caller must not leave a recording that every later `phonemize` on this thread feeds.
+    struct Clear(bool);
+    impl Drop for Clear {
+        fn drop(&mut self) {
+            if self.0 {
+                core::trace::stop_trace(None);
+            }
+        }
+    }
     let input = JsString::from(text);
     core::trace::start_trace(&input);
-    match registry::phonemize_in(lang, &input) {
+    let mut guard = Clear(true);
+    let result = registry::phonemize_in(lang, &input);
+    guard.0 = false;
+    match result {
         Ok(ipa) => {
             let trace = core::trace::stop_trace(Some(&ipa));
             Ok(PhonemeTrace {
@@ -57,7 +70,13 @@ mod tests {
 
     #[test]
     fn unknown_language_is_an_error_not_a_panic() {
-        assert_eq!(phonemize("x", "xx-unported"), Err(PhonemizeError::UnknownLanguage("xx-unported".into())));
-        assert_eq!(phonemize_best("x", "xx-unported"), Err(PhonemizeError::UnknownLanguage("xx-unported".into())));
+        assert_eq!(
+            phonemize("x", "xx-unported"),
+            Err(PhonemizeError::UnknownLanguage("xx-unported".into()))
+        );
+        assert_eq!(
+            phonemize_best("x", "xx-unported"),
+            Err(PhonemizeError::UnknownLanguage("xx-unported".into()))
+        );
     }
 }

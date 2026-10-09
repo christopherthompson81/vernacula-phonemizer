@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 
 use super::english_arpabet::make_arpabet_to_ipa;
 use super::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
-use super::manifest::{DIR, HeteronymEntry, try_manifest};
+use super::manifest::{DIR, HeteronymEntry, Slot, try_manifest};
 use super::normalize::{normalize_english, normalize_english_initialisms};
 use super::numbers::{BigNat, number_to_words, ordinal_to_words};
 use super::pos_tagger::{
@@ -351,12 +351,11 @@ impl EnglishPhonemizer {
                             })
                         })
                 });
-            match before.slot.as_str() {
-                "verb" => out[i].verb = fires,
-                "noun" => out[i].noun = fires,
-                "past" => out[i].past = fires,
-                "adj" => out[i].adj = fires,
-                other => panic!("heteronym slot {other:?}"),
+            match before.slot {
+                Slot::Verb => out[i].verb = fires,
+                Slot::Noun => out[i].noun = fires,
+                Slot::Past => out[i].past = fires,
+                Slot::Adj => out[i].adj = fires,
             }
         }
         let heads_np = |t: &str| t == "DT" || t == "PDT" || t == "PRP$" || t.starts_with("JJ");
@@ -785,7 +784,7 @@ pub fn create_english() -> Result<EnglishPhonemizer, String> {
         common,
         arpabet_to_ipa,
         classes,
-    );
+    )?;
     let tagger =
         PosTagger::new(load_json::<PosModel>(DIR, "pos-model.json").map_err(|e| e.to_string())?);
     let set = |v: &[String]| v.iter().map(|s| js(s)).collect::<HashSet<JsString>>();

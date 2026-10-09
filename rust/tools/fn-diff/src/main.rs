@@ -165,7 +165,8 @@ fn main() {
                 common,
                 conv,
                 classes,
-            );
+            )
+            .unwrap();
             Box::new(move |input| g2p.g2p(&units(&input["word"])))
         }
         "english-pre" => {

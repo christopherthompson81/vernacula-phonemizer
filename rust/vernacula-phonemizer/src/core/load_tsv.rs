@@ -13,13 +13,34 @@ fn read_data_lines(dir: &str, filename: &str, optional: bool) -> Result<Vec<Stri
         Err(DataError::Missing { .. }) if optional => return Ok(Vec::new()),
         Err(e) => return Err(e),
     };
-    // `split(/\r?\n/)`: a lone `\r` is NOT a separator.
-    Ok(text
-        .split('\n')
-        .map(|l| l.strip_suffix('\r').unwrap_or(l))
+    Ok(data_lines(&text))
+}
+
+/// `text.split(/\r?\n/).filter(l => l !== "" && !l.startsWith("#"))`. The separator is `\r?\n`, so a CR is
+/// dropped only where a LF follows it: a lone `\r`, or one ending a file with no final LF, is kept.
+fn data_lines(text: &str) -> Vec<String> {
+    text.split_inclusive('\n')
+        .map(|l| {
+            l.strip_suffix("\r\n")
+                .or_else(|| l.strip_suffix('\n'))
+                .unwrap_or(l)
+        })
         .filter(|l| !l.is_empty() && !l.starts_with('#'))
         .map(str::to_string)
-        .collect())
+        .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::data_lines;
+
+    #[test]
+    fn separator_is_optional_cr_then_lf() {
+        assert_eq!(
+            data_lines("a\tb\r\n# c\n\nd\re\nf\tg\r"),
+            ["a\tb", "d\re", "f\tg\r"]
+        );
+    }
 }
 
 #[derive(Default)]

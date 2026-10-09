@@ -22,11 +22,22 @@ pub struct BeforeAlternative {
     pub after_words: Option<Vec<String>>,
 }
 
+/// The reading a `before` condition selects. An unknown slot fails the manifest load (`PhonemizeError::Data`),
+/// where the TS would set a property nothing reads.
+#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum Slot {
+    Verb,
+    Noun,
+    Past,
+    Adj,
+}
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct BeforeCondition {
     pub word: String,
     pub when: Vec<BeforeAlternative>,
-    pub slot: String,
+    pub slot: Slot,
 }
 
 #[derive(Debug, Deserialize, Clone)]

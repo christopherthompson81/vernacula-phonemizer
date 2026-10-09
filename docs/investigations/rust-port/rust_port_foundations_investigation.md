@@ -68,3 +68,30 @@ The C#-style translator is unnecessary. Known limits, recorded rather than fixed
 - The proper fix for class 1 belongs in regress: the spec's `Canonicalize` rule for non-unicode `/i`,
   applied both in `fold_code_point` and in class construction (`add_icase_code_points` folds through the
   Unicode table in every mode). Worth an upstream report, after which the remap can go.
+
+## Run 3 — 2026-10-09 (#1464 review: the mid-pair scan was quadratic)
+
+**Question.** The review measured `JsRegex::new("x","u").test()` at 336 ms on 8,000 emoji, and `phonemize` on
+4,000 emoji at 48 s. Run 2's "measure it if astral text turns out slow" came due. Can the scan run only when a
+mid-pair match is possible at all?
+
+**What V8 does, measured.** Over `😀😀a😀`, no tested `u` pattern (`[^a]`, `\S`, `.`, `x*`, `\B`, `(?<![\p{L}])`,
+lone-surrogate escapes and classes) matched mid-pair. Mid-pair positions are tried only after a FAILED attempt
+at a pair start (C#'s JsRe note), and a match there must be zero-width or consume a lone low surrogate.
+
+**Change.** `may_start_mid_pair(pattern)` is a conservative scan of the leading atoms. Assertions are
+skipped; the first consuming atom decides; anything unrecognised counts as "may".
+
+**Command.** `cargo run --release -p regex-diff`, which now also runs a SOUNDNESS pass: every `u` corpus pattern
+over astral-heavy subjects (fixed probes, plus each corpus input with an emoji interleaved), fast path against
+forced full scan.
+
+**Raw finding.**
+- `mid-pair analysis: skips the scan for 2119 u-patterns; 150377 astral subjects, 0 UNSOUND`. Node corpus still
+  `145140 identical, 0 DIFFER`.
+- With the analysis forced to "never scan": `188 UNSOUND`, so the soundness pass can see a wrong skip.
+- `phonemize("😀"×4000 + " a", "en")`: 48 s → 1.9 s, including ~0.8 s of one-time engine load
+  (examples/astral_timing.rs).
+
+**Implication.** Fixed for the 2,119 patterns that cannot start mid-pair. The ~110 that may still scan are
+quadratic in the worst case, but no longer dominate.

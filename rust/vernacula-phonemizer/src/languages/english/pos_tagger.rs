@@ -120,10 +120,10 @@ impl PosTagger {
             .into_iter()
             .map(|(f, w)| {
                 // `for (idx in w)` visits integer keys ascending; the sums are of integers, so order is
-                // immaterial, but keep it anyway.
+                // immaterial, but keep it anyway. A non-integer key is `scores[NaN]` in the TS, a no-op.
                 let mut v: Vec<(usize, f64)> = w
                     .into_iter()
-                    .map(|(k, x)| (k.parse().unwrap(), x))
+                    .filter_map(|(k, x)| k.parse().ok().map(|k| (k, x)))
                     .collect();
                 v.sort_by_key(|(k, _)| *k);
                 (js(&f), v)

@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 
 use super::english_arpabet::{ArpabetToIpa, make_arpabet_to_ipa};
 use super::english_g2p::{collapse_geminates, enforce_single_primary};
-use super::manifest::{DIR, MANIFEST};
+use super::manifest::{DIR, try_manifest};
 use crate::core::data_source::{read_data, read_data_text};
 use crate::core::js_string::{JsString, js};
 use crate::core::structural_tagger::{CharLogits, TaggerMeta, masked_argmax};
@@ -46,25 +46,37 @@ pub struct EnglishTagger {
 }
 
 impl EnglishTagger {
-    pub fn new(meta: TaggerMeta, model: Box<dyn CharLogits>) -> EnglishTagger {
+    /// ⚠ A `charTags` id outside the tag table is refused here: `masked_argmax` would otherwise read the NEXT
+    /// position's row (or past the end), which is a meta.json that does not belong to this model.
+    pub fn new(meta: TaggerMeta, model: Box<dyn CharLogits>) -> Result<EnglishTagger, String> {
+        let manifest = try_manifest()?;
         let n_tags = meta.tags.len();
+        if let Some((c, bad)) = meta
+            .char_tags
+            .iter()
+            .find_map(|(c, ids)| ids.iter().find(|&&t| t >= n_tags).map(|t| (c, *t)))
+        {
+            return Err(format!(
+                "tagger meta: charTags[{c}] names tag {bad}, but there are only {n_tags} tags"
+            ));
+        }
         let tag_by_id = meta
             .tags
             .iter()
             .filter_map(|(k, v)| k.parse().ok().map(|i| (i, v.clone())))
             .collect();
-        EnglishTagger {
+        Ok(EnglishTagger {
             meta,
             n_tags,
             model,
             arpabet_to_ipa: make_arpabet_to_ipa(
-                &MANIFEST.arpabet,
+                &manifest.arpabet,
                 IndexMap::new(),
                 IndexMap::new(),
             ),
-            vowels: MANIFEST.arpabet.vowels.iter().cloned().collect(),
+            vowels: manifest.arpabet.vowels.iter().cloned().collect(),
             tag_by_id,
-        }
+        })
     }
 
     /// The reading, or empty when the tagger declines (an out-of-vocabulary grapheme, a position with no

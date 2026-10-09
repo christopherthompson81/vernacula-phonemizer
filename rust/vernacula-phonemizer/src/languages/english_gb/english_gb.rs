@@ -11,7 +11,6 @@ use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map};
 use crate::js_re;
-use crate::languages::english::english::{EnglishPhonemizer, create_english};
 
 pub const DIR: &str = "languages/english-gb";
 
@@ -175,38 +174,7 @@ pub fn to_rp(gen_am: &JsString, word: &JsString, lex: Option<&LexSets>) -> JsStr
     P.coda_r.replace(&s, &none)
 }
 
-static GB: LazyLock<EnglishPhonemizer> =
-    LazyLock::new(|| create_english().unwrap_or_else(|e| panic!("{e}")));
-
-pub fn phonemize_word(word: &JsString) -> JsString {
-    to_rp(&GB.text(word), word, Some(&SETS))
-}
-
-pub fn phonemize_word_rules(word: &JsString) -> JsString {
-    to_rp(&GB.text(word), word, None)
-}
-
+/// en-GB as the registry runs it: the shared English engine with this as its word transform.
 pub fn rp_word_transform(ipa: &JsString, word: &JsString) -> JsString {
     to_rp(ipa, word, Some(&SETS))
-}
-
-pub struct EnglishGb {
-    e: EnglishPhonemizer,
-}
-
-impl EnglishGb {
-    pub fn text(&self, input: &JsString) -> JsString {
-        self.e
-            .text_full(input, Some(&rp_word_transform), None, false)
-    }
-
-    pub fn engine(&self) -> &EnglishPhonemizer {
-        &self.e
-    }
-}
-
-pub fn create_english_gb() -> Result<EnglishGb, String> {
-    Ok(EnglishGb {
-        e: create_english()?,
-    })
 }

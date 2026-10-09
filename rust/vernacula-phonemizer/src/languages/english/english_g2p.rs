@@ -270,7 +270,13 @@ impl EnglishG2p {
         common: HashSet<JsString>,
         arpabet_to_ipa: ArpabetToIpa,
         classes: G2pClasses,
-    ) -> EnglishG2p {
+    ) -> Result<EnglishG2p, String> {
+        if model.order > 5 {
+            return Err(format!(
+                "g2p-model.json: order {} (the decoder keeps four tokens of history)",
+                model.order
+            ));
+        }
         let set = |v: &[String]| v.iter().cloned().collect::<HashSet<String>>();
         let jset = |v: &[String]| v.iter().map(|s| js(s)).collect::<HashSet<JsString>>();
         let mut token_ids: HashMap<String, u32> = HashMap::new();
@@ -280,13 +286,17 @@ impl EnglishG2p {
         };
         let mut contexts = HashMap::new();
         for (k, e) in &model.ngram {
-            let (o, ctx) = k.split_once('|').expect("ngram key is order|context");
-            let o: usize = o.parse().expect("ngram order");
+            let bad = || {
+                format!(
+                    "g2p-model.json: ngram key {k:?} is not order|context with that many tokens"
+                )
+            };
+            let (o, ctx) = k.split_once('|').ok_or_else(bad)?;
+            let o: usize = o.parse().map_err(|_| bad())?;
             let toks = split_context(ctx);
-            assert!(
-                toks.len() == o && o <= 4,
-                "ngram key {k:?} does not parse into {o} tokens"
-            );
+            if toks.len() != o || o > 4 {
+                return Err(bad());
+            }
             let mut key = [NO_TOKEN; 4];
             for (slot, t) in key[4 - o..].iter_mut().zip(&toks) {
                 *slot = intern(t, &mut token_ids);
@@ -298,7 +308,7 @@ impl EnglishG2p {
             }
             contexts.insert((o as u8, key), Context { total: e.t, counts });
         }
-        EnglishG2p {
+        Ok(EnglishG2p {
             contexts,
             token_ids,
             vowel_letter: set(&classes.vowel_letters),
@@ -316,7 +326,7 @@ impl EnglishG2p {
             dict,
             common,
             arpabet_to_ipa,
-        }
+        })
     }
 
     fn letter_phones(&self, l: &JsString) -> Option<&Vec<String>> {
@@ -373,10 +383,6 @@ impl EnglishG2p {
 
     fn ngram_decode(&self, w: &JsString) -> Vec<String> {
         use std::rc::Rc;
-        assert!(
-            self.model.order <= 5,
-            "the decoder keeps four tokens of history"
-        );
         struct Hyp {
             last: [u32; 4],
             back: Option<Rc<Back>>,
