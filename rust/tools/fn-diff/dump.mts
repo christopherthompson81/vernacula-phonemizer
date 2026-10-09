@@ -12,7 +12,32 @@ import { americanSpelling } from "../../../src/languages/english/spellingVariant
 import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
 import { createEnglishG2p, type EnglishG2pModel } from "../../../src/languages/english/englishG2p.ts";
 
+import { normalizeEnglish, normalizeEnglishInitialisms } from "../../../src/languages/english/normalize.ts";
+
 const units = (s: string): number[] => Array.from({ length: s.length }, (_, i) => s.charCodeAt(i));
+
+// The English normalizer's inputs, deduplicated, each tagged with the first source it came from: every golden
+// sentence, every FLEURS en_us utterance (⚠ COLUMNS 3 AND 4 — column 2 is a WAV filename), and the
+// off-golden probes in probes/en-normalize.txt (`\n` and `\u{XXXX}` escapes decoded).
+const FLEURS = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/en_us";
+function englishTexts(): Map<string, string> {
+    const out = new Map<string, string>();
+    const add = (t: string, src: string): void => { if (t !== "" && !out.has(t)) out.set(t, src); };
+    for (const g of ["en", "en-GB", "en-IN"])
+        for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n"))
+            add(row.split("\t")[0] ?? "", "golden");
+    for (const split of ["train", "dev", "test"])
+        for (const row of readFileSync(`${FLEURS}/${split}.tsv`, "utf8").split("\n")) {
+            const cols = row.split("\t");
+            add(cols[2] ?? "", "fleurs");
+            add(cols[3] ?? "", "fleurs");
+        }
+    for (const line of readFileSync(new URL("./probes/en-normalize.txt", import.meta.url), "utf8").split("\n")) {
+        if (line === "" || line.startsWith("#")) continue;
+        add(line.replace(/\\n/g, "\n").replace(/\\u\{([0-9a-fA-F]+)\}/g, (_m, h: string) => String.fromCodePoint(parseInt(h, 16))), "probe");
+    }
+    return out;
+}
 const emit = (input: unknown, output: string): void => {
     process.stdout.write(JSON.stringify({ input, output: units(output) }) + "\n");
 };
@@ -78,6 +103,19 @@ const dumps: Record<string, () => void> = {
         const take = process.env.G2P_LIMIT ? Number(process.env.G2P_LIMIT) : Infinity;
         let n = 0;
         for (const w of words) { if (n++ >= take) break; emit({ word: units(w) }, g2p.g2p(w)); }
+    },
+    normalize() {
+        for (const [t, src] of englishTexts()) emit({ text: units(t), src }, normalizeEnglish(t));
+    },
+    // normalizeEnglishInitialisms(normalizeEnglish(t), lexicon.has), the lexicon parsed as createEnglish() does.
+    initialisms() {
+        const lexicon = loadTsvMap(ENGLISH, "accent-lexicon.tsv", (rest) => {
+            const fields = rest.split("\t");
+            const ipa = fields[1]?.trim();
+            return fields.length >= 2 && ipa ? ipa : undefined;
+        });
+        for (const [t, src] of englishTexts())
+            emit({ text: units(t), src }, normalizeEnglishInitialisms(normalizeEnglish(t), (w) => lexicon.has(w)));
     },
     numbers() {
         const ns: bigint[] = [];

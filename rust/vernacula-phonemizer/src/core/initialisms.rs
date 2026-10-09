@@ -11,15 +11,17 @@ use crate::js_re;
 
 pub type LetterName = Arc<dyn Fn(&JsString) -> Option<JsString> + Send + Sync>;
 
-pub struct InitialismData {
+/// `R` is the `isRecorded` predicate's type, so a caller may lend a borrowed one (English builds the pass
+/// per call around its lexicon, as the TS does); with a `Send + Sync` predicate the normalizer is too.
+pub struct InitialismData<R: Fn(&JsString) -> bool> {
     pub letter_name: LetterName,
     pub lower: Option<Arc<dyn Fn(&JsString) -> JsString + Send + Sync>>,
     pub acronym_letters: Arc<dyn Fn(&JsString) -> bool + Send + Sync>,
-    pub is_recorded: Arc<dyn Fn(&JsString) -> bool + Send + Sync>,
+    pub is_recorded: R,
     pub is_unreadable: Arc<dyn Fn(&JsString) -> bool + Send + Sync>,
 }
 
-pub const LATIN_MARK: &str = r"̀-ͯ᪰-᫿᷀-᷿︠-︯";
+pub const LATIN_MARK: &str = r"\u0300-\u036F\u1AB0-\u1AFF\u1DC0-\u1DFF\uFE20-\uFE2F";
 
 static RUN_OR_CODE: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
@@ -40,7 +42,7 @@ fn lone_initial() -> &'static JsRegex {
 }
 
 /// The normalizer. `on_pipeline` false keeps its replaces off the provenance seam (a nested use).
-pub fn make_initialism_normalizer(d: InitialismData, on_pipeline: bool) -> impl Fn(&JsString) -> JsString + Send + Sync {
+pub fn make_initialism_normalizer<R: Fn(&JsString) -> bool>(d: InitialismData<R>, on_pipeline: bool) -> impl Fn(&JsString) -> JsString {
     let d = Arc::new(d);
     move |raw: &JsString| {
         let rw = |x: &JsString, re: &JsRegex, f: &mut dyn FnMut(&JsMatch, &JsString) -> JsString| -> JsString {
