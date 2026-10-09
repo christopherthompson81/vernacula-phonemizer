@@ -484,6 +484,67 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { ROMAN_POLICY } = await import("../../../src/languages/italian/romanOrdinals.ts");
         for (const [t, src] of textsFor(["it"], "it_it", ["it.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
+    // Portuguese normalize.ts over both goldens, FLEURS pt_br and probes/pt-BR.txt: EP and BP, and the
+    // initialism pass over the BP output.
+    async "pt-normalize"() {
+        const { normalizePortuguese, normalizePortugueseInitialisms } = await import("../../../src/languages/portuguese/normalize.ts");
+        for (const [t, src] of textsFor(["pt-BR", "pt"], "pt_br", ["pt-BR.txt"])) {
+            emit({ text: units(t), src, op: "ep" }, normalizePortuguese(t));
+            emit({ text: units(t), src, op: "bp" }, normalizePortuguese(t, true));
+            emit({ text: units(t), src, op: "initialisms" }, normalizePortugueseInitialisms(normalizePortuguese(t, true)));
+        }
+    },
+    // Portuguese word g2p: every correction-lexicon and open/close key, every word token of the normalized
+    // goldens/FLEURS/probes, and synthetic corners (foreign letters, a lone surrogate, astral letters).
+    async "pt-g2p"() {
+        const pt = await import("../../../src/languages/portuguese/portuguese.ts");
+        const br = await import("../../../src/languages/portuguese-br/portuguese-br.ts");
+        const { normalizePortuguese } = await import("../../../src/languages/portuguese/normalize.ts");
+        const PT = new URL("../../../src/languages/portuguese/portuguese.ts", import.meta.url).href;
+        const BR = new URL("../../../src/languages/portuguese-br/portuguese-br.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const f of ["lexicon.tsv", "lexicon-manual.tsv"]) for (const l of loadLines(PT, f)) words.add(l.split("\t")[0]!);
+        for (const l of loadLines(BR, "pt-br-openclose.tsv")) words.add(l.split("\t")[0]!);
+        for (const t of textsFor(["pt-BR", "pt"], "pt_br", ["pt-BR.txt"]).keys())
+            for (const m of normalizePortuguese(t, true).matchAll(/([a-zà-ÿ]+)/giu)) words.add(m[1]!);
+        for (const w of ["naïve", "Klöcker", "Vichy", "curry", "Madhya", "Cañitas", "señor", "Straße", "Æsir", "ðe", "þorn",
+            "yoga", "ý", "ÿ", "x\uD800y", "a\uDC00", "𝐚bc", "ação", "mãe", "põe", "tem", "homem", "também", "bom", "sim",
+            "um", "ouvir", "raiz", "sair", "mais", "dois", "juiz", "miúdo", "piano", "água", "criança", "real", "beato",
+            "moeda", "dia", "tia", "gente", "cidade", "sal", "Brasil", "fácil", "útil", "soldado", "abandona", "acena",
+            "afónica", "s", "ss", "h", "", "x", "qu", "gue", "queijo", "guerra", "quatro", "×", "÷", "K", "ſol", "İstanbul"])
+            words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "ep" }, pt.phonemizeWord(w));
+            emit({ word: units(w), op: "bp" }, pt.phonemizeWord(w, "bp"));
+            emit({ word: units(w), op: "br" }, br.phonemizeWord(w));
+            emit({ word: units(w), op: "render-ep" }, pt.renderWord(w));
+            emit({ word: units(w), op: "render-bp" }, pt.renderWord(w, undefined, "bp"));
+        }
+    },
+    // Portuguese numberToWords (EP and BP, with and without the raw digits) and portugueseOrdinal.
+    async "pt-numbers"() {
+        const { numberToWords: ptWords } = await import("../../../src/languages/portuguese/numbers.ts");
+        const { portugueseOrdinal } = await import("../../../src/languages/portuguese/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let n = 0; n <= 25000; n++) ns.push(n);
+        for (let e = 5; e <= 12; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 10 ** e + 100, 10 ** e + 1001, 123456789 % 10 ** e + 10 ** e);
+        for (let n = 1e6; n <= 1e9; n += 7_777_777) ns.push(n);
+        ns.push(-1, 1.5, 2 ** 53, 2 ** 53 + 2, 1e21, NaN, Infinity);
+        // Past 2^53 and below 1: no `raw`, so the fallback spells String(Math.abs(n)) — shortest round-trip
+        // digits, zero-padded integers, exponent forms.
+        ns.push(2 ** 60, -(2 ** 60), 2 ** 64, 2 ** 53 * 3 + 4, 123456789012345680000, 1e20, 1.5e21, 1e300, Number.MAX_VALUE,
+            1e-7, 1.5e-7, 1e-6, 5e-324, 0.1 + 0.2, 1 / 3, 2 / 3, 1e9 + 0.5, 4.35, 0.000001234, -0.5, -0);
+        for (let e = 54; e <= 70; e++) ns.push(2 ** e + 2 ** (e - 52) * 3, 2 ** e / 7);
+        for (const n of ns)
+            for (const d of ["ep", "bp"] as const) {
+                emit({ n: String(n), d }, ptWords(n, d));
+                emit({ n: String(n), d, raw: "0" + String(n) }, ptWords(n, d, "0" + String(n)));
+            }
+        for (const raw of ["0001234567890", "12x4", "99999999999999999999", "1 6"])
+            for (const d of ["ep", "bp"] as const) emit({ n: raw, d, raw }, ptWords(Number(raw), d, raw));
+        for (let n = -1; n <= 1002; n++) emit({ n: String(n), ordinal: true }, portugueseOrdinal(n) ?? "\u0000none");
+        emit({ n: "2.5", ordinal: true }, portugueseOrdinal(2.5) ?? "\u0000none");
+    },
 };
 
 
