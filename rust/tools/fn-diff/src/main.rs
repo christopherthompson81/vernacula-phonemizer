@@ -9,6 +9,7 @@ use vernacula_phonemizer::core::load_tsv::{TsvOptions, load_tsv_map};
 use vernacula_phonemizer::languages::english::english_arpabet::make_arpabet_to_ipa;
 use vernacula_phonemizer::core::load_manifest::load_json;
 use vernacula_phonemizer::languages::english::manifest::{DIR, MANIFEST};
+use vernacula_phonemizer::languages::english::english::create_english;
 use vernacula_phonemizer::languages::english::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
 use vernacula_phonemizer::core::load_tsv::load_lines;
 use vernacula_phonemizer::languages::english::numbers::{BigNat, number_to_words, ordinal_to_words};
@@ -104,6 +105,10 @@ fn main() {
             };
             let g2p = EnglishG2p::new(load_json::<EnglishG2pModel>(DIR, "g2p-model.json").unwrap(), dict, common, conv, classes);
             Box::new(move |input| g2p.g2p(&units(&input["word"])))
+        }
+        "english-pre" => {
+            let e = create_english();
+            Box::new(move |input| e.text_full(&units(&input["normalized"]), None, None, true))
         }
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();

@@ -73,3 +73,24 @@ the first 14,000 rows were checked while the rest generates.
 **Implication.** The G2P is correct on the first 14k, and the full-dump result is pending. `perf` cannot run
 in this session: `perf_event_paranoid` is 4, so unprivileged `perf_event_open` fails even outside the
 sandbox. The hot path was found by counting allocations instead.
+
+## Run 4 — 2026-10-09 (english.ts on pre-normalized text; markup.ts)
+
+**Question.** Does `english.rs`, the engine minus `normalize.ts`, match `EnglishPhonemizer.text`?
+The comparison uses the TS's own `preNormalized` path: TS normalizes, and both engines read the
+normalized string.
+
+**Command.** `dump.mts english-pre` (every golden sentence of en/en-GB/en-IN plus every FLEURS en_us
+utterance, column 3; 1,977 distinct texts), then `fn-diff english-pre`.
+
+**Raw finding.** `english-pre: 1977 identical, 0 DIFFER` on the first run.
+
+**Also found while porting `core/markup.ts` (a TS defect, not fixed here).** `stripMarkup`'s `NAMED` entity
+table is a plain object literal, so `NAMED["constructor"]` is `Object.prototype.constructor`.
+`&constructor;` (any case) is replaced by `function Object() { [native code] }`, and
+`phonemize("Use &constructor; here.", "en")` reads *jˈuːz fˈʌŋkʃən ˈɑːbd͡ʒɛkt nˈeᶦt̬ɪv kʰˈoᶷd hˈɪɹ .*
+The Rust port reproduces it under a PAIRED-FIX PENDING marker (core/markup.rs). The fix belongs in the TS
+first: `Object.hasOwn`, or a null-prototype table, after which the C# twin should be checked too.
+
+**Implication.** The English engine body is done, and `normalize.ts` is the remaining sync piece (its port is
+running on `rust-en-normalize`). Next: en-GB, the registry's `foldPass` for en, and the public `phonemize`.

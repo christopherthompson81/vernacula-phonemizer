@@ -10,6 +10,7 @@ import { loadJson } from "../../../src/core/loadManifest.ts";
 import { PosTagger, type PosModel } from "../../../src/languages/english/posTagger.ts";
 import { americanSpelling } from "../../../src/languages/english/spellingVariants.ts";
 import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
+import { createEnglish } from "../../../src/languages/english/english.ts";
 import { createEnglishG2p, type EnglishG2pModel } from "../../../src/languages/english/englishG2p.ts";
 
 const units = (s: string): number[] => Array.from({ length: s.length }, (_, i) => s.charCodeAt(i));
@@ -79,6 +80,15 @@ const dumps: Record<string, () => void> = {
         let n = 0;
         for (const w of words) { if (n++ >= take) break; emit({ word: units(w) }, g2p.g2p(w)); }
     },
+    // The engine on PRE-NORMALIZED text (normalize.ts runs on the TS side only): every golden sentence and
+    // every FLEURS en_us utterance (column 3 is the text; column 2 is a WAV filename).
+    "english-pre"() {
+        const E = createEnglish();
+        for (const text of englishTexts()) {
+            const normalized = E.normalizedFor(text);
+            emit({ normalized: units(normalized) }, E.text(normalized, undefined, undefined, true));
+        }
+    },
     numbers() {
         const ns: bigint[] = [];
         for (let i = 0n; i <= 20000n; i++) ns.push(i);
@@ -89,6 +99,25 @@ const dumps: Record<string, () => void> = {
         }
     },
 };
+
+function englishTexts(): string[] {
+    const out = new Set<string>();
+    for (const g of ["en", "en-GB", "en-IN"])
+        for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n")) {
+            const t = row.split("\t")[0] ?? "";
+            if (t !== "") out.add(t);
+        }
+    const FLEURS = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/en_us";
+    for (const split of ["train", "dev", "test"]) {
+        let text: string;
+        try { text = readFileSync(`${FLEURS}/${split}.tsv`, "utf8"); } catch { continue; }
+        for (const row of text.split("\n")) {
+            const t = row.split("\t")[2] ?? "";
+            if (t !== "") out.add(t);
+        }
+    }
+    return [...out];
+}
 
 const name = process.argv[2] ?? "";
 const run = dumps[name];

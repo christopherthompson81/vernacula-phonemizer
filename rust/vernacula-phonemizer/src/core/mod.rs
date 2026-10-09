@@ -11,6 +11,7 @@ pub mod js_regex;
 pub mod js_string;
 pub mod load_manifest;
 pub mod load_tsv;
+pub mod markup;
 pub mod normalize_symbols;
 pub mod provenance;
 pub mod roman;
