@@ -5,11 +5,12 @@
 //! (`language`, `name`, `script`, `provenance`) are documentation and are ignored. Maps are `IndexMap`
 //! because the TS iterates `dottedAbbrev`'s keys to build a pattern.
 
-use std::sync::{LazyLock, OnceLock};
+use std::sync::OnceLock;
 
 use indexmap::IndexMap;
 use serde::Deserialize;
 
+use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/italian";
@@ -122,17 +123,28 @@ pub struct ItalianManifest {
     pub symbol_tier: SymbolTier,
 }
 
-/// The manifest, or why it could not be loaded. Loaded once; a failure is cached, not retried.
+/// The manifest, or why it could not be loaded or is unusable. Cached once loaded; a failure is retried.
+///
+/// Validated here so nothing downstream indexes a short table: the compositor indexes `units`, `teens` and
+/// `tens` by digit, and the compass arm looks up each of `n s e w`.
 pub fn try_manifest() -> Result<&'static ItalianManifest, String> {
-    static M: OnceLock<Result<ItalianManifest, String>> = OnceLock::new();
-    M.get_or_init(|| load_manifest(DIR, "italian.jsonc").map_err(|e| e.to_string()))
-        .as_ref()
-        .map_err(Clone::clone)
+    static M: OnceLock<ItalianManifest> = OnceLock::new();
+    load_once(&M, || {
+        let m: ItalianManifest = load_manifest(DIR, "italian.jsonc").map_err(|e| e.to_string())?;
+        let n = &m.numbers;
+        for (name, v) in [("units", &n.units), ("teens", &n.teens), ("tens", &n.tens)] {
+            if v.len() < 10 {
+                return Err(format!("italian.jsonc: numbers.{name} has {} entries, needs 10", v.len()));
+            }
+        }
+        for k in ["n", "s", "e", "w"] {
+            if !m.compass.contains_key(k) {
+                return Err(format!("italian.jsonc: compass.{k} missing"));
+            }
+        }
+        Ok(m)
+    })
 }
-
-/// The manifest for code that runs only after `create_italian` has succeeded (which checks it first).
-pub static MANIFEST: LazyLock<&'static ItalianManifest> =
-    LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 
 #[cfg(test)]
 mod tests {
@@ -140,7 +152,7 @@ mod tests {
 
     #[test]
     fn manifest_loads_with_every_block() {
-        let m = &*MANIFEST;
+        let m = try_manifest().unwrap();
         assert_eq!(m.numbers.units.len(), 10);
         assert_eq!(m.ordinals.get("10").map(String::as_str), Some("decimo"));
         assert_eq!(m.consonants.get("h").map(String::as_str), Some(""));

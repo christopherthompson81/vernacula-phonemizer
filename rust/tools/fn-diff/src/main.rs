@@ -442,17 +442,20 @@ fn main() {
             use vernacula_phonemizer::languages::italian::normalize as n;
             let t = units(&input["text"]);
             match input["op"].as_str().unwrap() {
-                "normalize" => n::normalize_italian(&t),
-                "initialisms" => n::normalize_italian_initialisms(&n::normalize_italian(&t)),
-                _ => n::normalize_italian_decimals(&t),
+                "normalize" => n::normalize_italian(&t).unwrap(),
+                "initialisms" => {
+                    n::normalize_italian_initialisms(&n::normalize_italian(&t).unwrap()).unwrap()
+                }
+                _ => n::normalize_italian_decimals(&t).unwrap(),
             }
         }),
         "it-g2p" => Box::new(|input| {
             use vernacula_phonemizer::languages::italian::{italian as i, roman_ordinals as r};
             match input["op"].as_str().unwrap() {
-                "word" => i::phonemize_word(&units(&input["word"])),
-                "cardinal" => i::number_words(input["n"].as_f64().unwrap()),
+                "word" => i::phonemize_word(&units(&input["word"])).unwrap(),
+                "cardinal" => i::number_words(input["n"].as_f64().unwrap()).unwrap(),
                 _ => r::italian_ordinal(input["n"].as_f64().unwrap())
+                    .unwrap()
                     .unwrap_or_else(|| JsString::from("\u{0}none")),
             }
         }),

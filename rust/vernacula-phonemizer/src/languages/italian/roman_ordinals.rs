@@ -3,26 +3,27 @@
 //! that file for the Treccani evidence and the agreement limitation.
 
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js};
+use crate::core::js_string::{JsString, js, js_number_to_string};
 use crate::core::roman::RomanPolicy;
 use crate::js_re;
 
-use super::italian::number_words;
-use super::manifest::MANIFEST;
+use super::italian::number_words_with;
+use super::manifest::{ItalianManifest, try_manifest};
 
-/// Italian masculine ordinal for `n`, or `None` where the TS declines to guess. `n` is a JS number
-/// (normalize.ts passes `Number(digits)`, which may be fractional-free but far past u32).
-pub fn italian_ordinal(n: f64) -> Option<JsString> {
+/// `italianOrdinal(n)`: the masculine ordinal, or `None` where the TS declines to guess. `n` is a JS number
+/// (normalize.ts passes `Number(digits)`, unbounded). Errs only if the manifest cannot be loaded.
+pub fn italian_ordinal(n: f64) -> Result<Option<JsString>, String> {
+    Ok(ordinal_with(try_manifest()?, n))
+}
+
+pub(crate) fn ordinal_with(m: &ItalianManifest, n: f64) -> Option<JsString> {
     if !(n.is_finite() && n.fract() == 0.0) || n < 1.0 {
         return None;
     }
-    // `IRREGULAR[String(n)]`: the keys are "1".."10", so only an integer in that range can hit.
-    if n <= 10.0 {
-        if let Some(irr) = MANIFEST.ordinals.get(&format!("{}", n as u64)) {
-            return Some(js(irr));
-        }
+    if let Some(irr) = m.ordinals.get(&js_number_to_string(n)) {
+        return Some(js(irr));
     }
-    let card = number_words(n);
+    let card = number_words_with(&m.numbers, n);
     if card.includes(&js(" ")) {
         return None;
     }
@@ -45,11 +46,13 @@ const ORDINAL_BEFORE: &str = r"^(secolo|secoli|capitolo|capitoli|libro|volume|to
 
 const ORDINAL_AFTER: &str = r"^(secolo|secoli|anniversario|congresso|convegno|simposio|campionato|festival|premio|concorso|raduno|torneo|centenario|capitolo|volume|libro|tomo|canto|atto|articolo|emendamento|reggimento|governo)$";
 
-/// `ROMAN_POLICY` (registry.ts's `romanIt`). It declares no `exclude`.
+/// `ROMAN_POLICY` (registry.ts's `romanIt`); it declares no `exclude`. The registry runs the Roman pass only
+/// after `create_italian` has loaded the manifest, so the ordinal's manifest miss (`None`: the numeral keeps
+/// its cardinal digits) is unreachable from `phonemize`.
 pub fn roman_policy() -> RomanPolicy {
     RomanPolicy {
         exclude: Vec::new(),
-        ordinal: Some(Box::new(|n| italian_ordinal(n as f64))),
+        ordinal: Some(Box::new(|n| try_manifest().ok().and_then(|m| ordinal_with(m, n as f64)))),
         ordinal_before: Some(JsRegex::new(ORDINAL_BEFORE, "iu").unwrap()),
         ordinal_after: Some(JsRegex::new(ORDINAL_AFTER, "iu").unwrap()),
     }

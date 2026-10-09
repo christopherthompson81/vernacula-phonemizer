@@ -127,3 +127,58 @@ too. So no foreign run is routed to an unported engine, and the script-reader pa
 Latin TOKEN class and never reach the foreign reader.
 
 **Implication.** Italian is done by the checklist.
+
+## Run 6 — 2026-10-09 17:40 (review round: rebase onto c64801a5, no panics on data)
+
+**Question.** After rebasing onto main (#1467 ja + the symbol tier, #1468 cross-cutting fixes) and
+addressing the review, is every gate still byte-identical? And is Run 5's claim, that a bad manifest
+fails `create_italian` and never panics later, now true? It was NOT true when Run 5 wrote it. Only the
+symbol tier had moved into the engine. `MANIFEST` was still a panicking `LazyLock`, and
+ABBREV_CONT/ABBREV_END, CURRENCY_WORD and the unreadable vowel class were `LazyLock`s that `.unwrap()`ed
+inside `text()`. `m.compass[...]` and the compositor's `units[n]` could also panic on a short table.
+
+**Changes.**
+- **Rebase.** I dropped my cherry-pick of the symbol commit, which main supersedes. The shared lists were
+  resolved by keeping both sides, and each arm was checked whole: git had factored the shared
+  `.map(...)/.map_err(...)` tail out of the `build` hunk and the closing `},` out of the dump.mts hunk.
+  `LANGUAGES` is now `["en", "en-GB", "ja", "it"]`.
+- **Manifest loading.** `try_manifest` goes through `core::data_source::load_once`, so it caches only on
+  success. It validates `numbers.{units,teens,tens}` (≥ 10 each) and `compass.{n,s,e,w}`. The panicking
+  `MANIFEST` static is gone.
+- **Normalizer data.** Everything normalize.ts builds at module load is now one `NormalizeData`: the
+  abbreviation map and patterns, CURRENCY_WORD, the unreadable test and the initialism normalizer. It is
+  built through `load_once`, with every runtime-built pattern compiled with `?`. `create_italian` builds it,
+  together with the g2p `Tables` and the symbol tier, so a bad manifest is a `PhonemizeError::Data` at build
+  time.
+- **Fallible public functions.** `phonemize_word`, `number_words`, `italian_ordinal`, `normalize_italian`,
+  `normalize_italian_initialisms`, `normalize_italian_decimals` and `is_unreadable_italian` return
+  `Result`. The engine calls `pub(crate)` versions that take the tables it already holds.
+- **Core helpers.** I now use `sorted_by_length_desc` + `alternation` (ABBREV_ALT), `js_number_to_string`
+  (`String(n)` for the ordinal, denominator and numerator keys) and `is_safe_integer`. `esc` and
+  `provenance::escape` do not apply: the TS joins `dottedAbbrev` keys and `currencyStems` UNESCAPED, and
+  the port keeps that.
+- **CURRENCY / magnitude alternation.** normalize.ts HARD-CODES both: `export const CURRENCY` beside the
+  manifest's `symbolTier.currency`, and the literal `(?:miliardi|miliardo|milioni|milione|mila)` in step 10.
+  The port stays faithful, with a comment pointing at the TS. The duplication itself is a TS cleanup
+  candidate. It is not a divergence: today the two tables agree.
+- **Roman policy.** The ordinal closure reads the manifest through `try_manifest().ok()`. The registry now
+  caches policies, and the Roman pass runs only after `create_italian` has succeeded.
+
+**Commands.** I regenerated all five dumps on the new main and replayed them. Then I ran
+`parity it en en-GB ja`, `parity --sync it`, `cargo test --workspace --release` and
+`cargo build --workspace --all-targets`. For the manifest check I used two broken data roots under
+`.probe/it/` (core symlinked): `currencyStems` with an unbalanced `(`, and `compass` without `n`. Each ran
+through `examples/missing_data.rs`, which I pointed at `it` temporarily and then reverted.
+
+**Raw finding.**
+- `it-normalize 12093/12093` (golden 324 / fleurs 11556 / probe 213), `it-g2p 138257/138257`,
+  `it-roman 4031/4031`, `phonemize-sync 4031/4031`, `phonemize-best 4031/4031`, all 0 DIFFER.
+- `it 200/200`, `en 200/200`, `en-GB 200/200`, `ja 200/200`, `--sync it 200/200`.
+- 50 tests passed, 0 warnings.
+- Broken roots: `Err(Data("italian.jsonc: pattern ^\s*(?:di\s+)?(?:(dollar|…: … Unbalanced parenthesis"))`,
+  `Err(Data("italian.jsonc: compass.n missing"))`, and a missing root gives `Err(Data("data key
+  \"languages/italian/italian.jsonc\" not readable: …"))`. No panic in any of them.
+
+**Implication.** Run 5's claim now holds. The `unwrap`s left in the Italian sources fall into two kinds.
+Some are compile-time-constant patterns (era markers, numero, the Roman context regexes). The others read
+capture groups that always take part in a match, or index digit tables already validated to length 10.
