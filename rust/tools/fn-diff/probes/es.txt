@@ -1,0 +1,67 @@
+# Synthetic Spanish probes (no corpus text): one line per arm of src/languages/spanish/normalize.ts plus the
+# neighbour each arm must decline, then the symbol tier, the tokenizer and the g2p corners.
+# `\u{XXXX}` escapes are decoded.
+# 0) digit grouping with a space (and NBSP / NNBSP / thin), and the declines: four digits, a lone leading 0
+Hay 5 000 años y 1 000 000 de personas.
+Mide 3\u{a0}850 km, 3\u{202f}850 km y 3\u{2009}850 km.
+El código 10 0001 y el número 0 500 no se agrupan, pero 2,0 500 sí.
+# 0b) a dot with one or two digits is a decimal; three digits, a letter after, a colon before decline
+Son 2.3 millones de galones y 4.25 metros.
+Hay 17.000 islas, el estándar 802.11n, 2.4Ghz y un tiempo de 4:41.30.
+La versión 1.2.3 salió en 2.10.
+# 1) era markers
+En 356 a. C. y en 356 a.C. y en 50 a. de C. y en 200 d. C. y en 300 d.C.
+La forma a.C sin punto final y el ad. C. no son eras.
+# 2) EE. UU.
+Viajó a EE. UU. y a EE.UU. y a ee. uu. y a EE. UU sin punto.
+Las siglas EEUU se deletrean.
+# 2b) a. m. / p. m.
+A las 10:08 p. m. y a las 7 a.m. y a las 9 P. M.
+Las letras a. b. no son una hora.
+# 3) número
+Vive en el n.º 5, el nº 6, el n° 7, el n. 8, el No. 9 y el no. 10.
+Dijo que no 5 veces y no. cinco tampoco.
+# 4) dotted abbreviations, continuing and phrase-final, and the fold miss
+El Sr. Pérez, la Sra. García, la Srta. Ruiz y el Dr. López llegaron.
+Ver págs. 5 y 6, pág. 3, cap. 2, art. 4, vol. 1 y núm. 7.
+Trajo libros, cuadernos, etc., y también lápices etc.
+Ud. es amable y Uds. también, como Vd. y Vds.
+El ſr. López y la avda. Libertad y la Cía. Telefónica.
+Llegó el Sr.
+Vive en la Av. Central, Sto. Domingo y Sta. Fe, aprox. a 3 km del dpto. 4.
+# 5) ordinal indicators, and the degree sign that is not one
+Es el 1º, la 1ª, el 1er, el 3er y el 1.º de la lista.
+La 21ª edición, el 100º aniversario, el 1000º y el 1001º.
+Hace 20 °C, 35° y 2º piso.
+# 6) signs
+Un error de ±5, 5+3, +5, 5 + 3, -5 grados, (−3) y –4.
+La clave a-5 no lleva signo.
+# 6b) relational and division signs
+Si 2 = 2 y 3<4 y 5 > 4, entonces 10 ÷ 2 es 5.
+# 7) fractions, and the declines: den < 2, num < 1, a date, four digits
+Comió 1/2, 3/4, 2/3, 1/5 y 5/12 de la tarta.
+Pero 1/1, 0/5, 12/05/2020 y 1/1000 no son fracciones.
+# 8) times, and the declines
+A las 11:00, a la 1:15, a las 21:30 y a las 0:05.
+Las 24:00, las 12:60 y las 10:30:00 no son horas.
+# 9) the first of the month, and the declines
+El 1 de enero, el 1º de mayo, el 1.º de junio y el 1 de setiembre.
+El 11 de enero y el 1 de lunes no cambian.
+# symbol tier
+Cuesta $5 millones, 20 €, 30€, £1.5 y ¥1000; sube un 40% y un 3,5%.
+Mide 6 × 6 cm, un 4x4, 5 × 5, 100 km/h, 5 m/s, 5 km², 3 m³ y 20 °F.
+Pesa 5 Kg, 2 g, 1 L, 50 kW, 3 Hz, 4 GB y 10 mm; la fórmula E = mc² y 2³ y 10⁶ y 10⁻³.
+Arts & Sciences y B&B y bed&amp;breakfast.
+# tokenizer: thousands dots, decimal comma, leading zero, a long digit run
+Hay 1.500 personas, 3,14 metros, 0.5 litros, 1.000.000 de euros y 12345678901234567890 granos.
+El 007 y el 0.123 y el 1.5.6 y 3,14,15.
+# roman numerals through the registry seam
+En el siglo XVIII, el XL aniversario, el L congreso, Carlos III y el capítulo IV.
+# initialisms
+La ONU, el ADN, un CD, la OTAN, el FBI, la UE y la NASA.
+# g2p corners
+Qué Qatar güero pingüino guerra rosa honra Israel xenón examen muy buey hoy y ñandú.
+Kalaallit Würzburg Ångström Œuvre cafe\u{301} ARCHIVO CRISIS EXAMEN Qing Xiaomi.
+whisky hámster jazz zigzag kiwi wifi yogur cuyo ley rey Uruguay ahí aún reúne.
+# foreign scripts: routed to the el / ru / cmn engines (port-pending until those are ported)
+La letra α, la palabra слово y el carácter 中 en una frase.
