@@ -10,6 +10,7 @@ use vernacula_phonemizer::languages::english::english_arpabet::make_arpabet_to_i
 use vernacula_phonemizer::core::load_manifest::load_json;
 use vernacula_phonemizer::languages::english::manifest::{DIR, MANIFEST};
 use vernacula_phonemizer::languages::english::english::create_english;
+use vernacula_phonemizer::languages::english_gb::english_gb::{SETS, rp_word_transform, to_rp};
 use vernacula_phonemizer::languages::english::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
 use vernacula_phonemizer::core::load_tsv::load_lines;
 use vernacula_phonemizer::languages::english::numbers::{BigNat, number_to_words, ordinal_to_words};
@@ -110,6 +111,14 @@ fn main() {
             let e = create_english();
             Box::new(move |input| e.text_full(&units(&input["normalized"]), None, None, true))
         }
+        "english-gb-pre" => {
+            let e = create_english();
+            Box::new(move |input| e.text_full(&units(&input["normalized"]), Some(&rp_word_transform), None, true))
+        }
+        "torp" => Box::new(|input| {
+            let (w, ipa) = (units(&input["word"]), units(&input["ipa"]));
+            if input.get("bare").is_some() { to_rp(&ipa, &w, None) } else { to_rp(&ipa, &w, Some(&SETS)) }
+        }),
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
             let words = if input["ordinal"].as_bool().unwrap() { ordinal_to_words(&n) } else { number_to_words(&n) };

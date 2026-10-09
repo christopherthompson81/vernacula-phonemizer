@@ -10,6 +10,7 @@ import { loadJson } from "../../../src/core/loadManifest.ts";
 import { PosTagger, type PosModel } from "../../../src/languages/english/posTagger.ts";
 import { americanSpelling } from "../../../src/languages/english/spellingVariants.ts";
 import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
+import { rpWordTransform, toRP } from "../../../src/languages/english-gb/english-gb.ts";
 import { createEnglish } from "../../../src/languages/english/english.ts";
 import { createEnglishG2p, type EnglishG2pModel } from "../../../src/languages/english/englishG2p.ts";
 
@@ -87,6 +88,23 @@ const dumps: Record<string, () => void> = {
         for (const text of englishTexts()) {
             const normalized = E.normalizedFor(text);
             emit({ normalized: units(normalized) }, E.text(normalized, undefined, undefined, true));
+        }
+    },
+    "english-gb-pre"() {
+        const E = createEnglish();
+        for (const text of englishTexts()) {
+            const normalized = E.normalizedFor(text);
+            emit({ normalized: units(normalized) }, E.text(normalized, rpWordTransform(), undefined, true));
+        }
+    },
+    // toRP alone over every lexicon reading (word + GenAm IPA), with and without the lexical sets.
+    torp() {
+        const lex = loadTsvMap(ENGLISH, "accent-lexicon.tsv", (rest) => { const f = rest.split("\t"); const ipa = f[1]?.trim(); return f.length >= 2 && ipa ? ipa : undefined; });
+        const T = rpWordTransform();
+        let i = 0;
+        for (const [w, ipa] of lex) {
+            emit({ word: units(w), ipa: units(ipa) }, T(ipa, w));
+            if (i++ % 7 === 0) emit({ word: units(w), ipa: units(ipa), bare: true }, toRP(ipa, w));
         }
     },
     numbers() {
