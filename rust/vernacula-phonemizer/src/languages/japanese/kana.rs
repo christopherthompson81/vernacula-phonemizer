@@ -107,7 +107,9 @@ pub fn assimilate_moraic_n(mut morae: Vec<JsString>) -> Vec<JsString> {
         if morae[k] != "ɴ" {
             continue;
         }
-        let Some(o) = morae.get(k + 1).and_then(first_unit) else { continue };
+        let Some(o) = morae.get(k + 1).and_then(first_unit) else {
+            continue;
+        };
         for (onsets, nasal) in &t.nasal {
             if onsets.includes(&o) {
                 morae[k] = nasal.clone();

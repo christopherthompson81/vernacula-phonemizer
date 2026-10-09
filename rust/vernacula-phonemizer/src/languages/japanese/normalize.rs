@@ -22,16 +22,46 @@ static DIGIT_KANA: LazyLock<Vec<JsString>> = LazyLock::new(|| {
 });
 
 const LETTER_KANA: [(&str, &str); 26] = [
-    ("A", "エー"), ("B", "ビー"), ("C", "シー"), ("D", "ディー"), ("E", "イー"), ("F", "エフ"), ("G", "ジー"),
-    ("H", "エイチ"), ("I", "アイ"), ("J", "ジェー"), ("K", "ケー"), ("L", "エル"), ("M", "エム"), ("N", "エヌ"),
-    ("O", "オー"), ("P", "ピー"), ("Q", "キュー"), ("R", "アール"), ("S", "エス"), ("T", "ティー"), ("U", "ユー"),
-    ("V", "ブイ"), ("W", "ダブリュー"), ("X", "エックス"), ("Y", "ワイ"), ("Z", "ゼット"),
+    ("A", "エー"),
+    ("B", "ビー"),
+    ("C", "シー"),
+    ("D", "ディー"),
+    ("E", "イー"),
+    ("F", "エフ"),
+    ("G", "ジー"),
+    ("H", "エイチ"),
+    ("I", "アイ"),
+    ("J", "ジェー"),
+    ("K", "ケー"),
+    ("L", "エル"),
+    ("M", "エム"),
+    ("N", "エヌ"),
+    ("O", "オー"),
+    ("P", "ピー"),
+    ("Q", "キュー"),
+    ("R", "アール"),
+    ("S", "エス"),
+    ("T", "ティー"),
+    ("U", "ユー"),
+    ("V", "ブイ"),
+    ("W", "ダブリュー"),
+    ("X", "エックス"),
+    ("Y", "ワイ"),
+    ("Z", "ゼット"),
 ];
 
 /// In the TS object's key order (the mixed-case pass iterates it).
 const WORD_ACRONYM: [(&str, &str); 11] = [
-    ("NASA", "ナサ"), ("NATO", "ナトー"), ("UNESCO", "ユネスコ"), ("UNICEF", "ユニセフ"), ("ASEAN", "アセアン"),
-    ("OPEC", "オペック"), ("JAXA", "ジャクサ"), ("JICA", "ジャイカ"), ("AIDS", "エイズ"), ("FIFA", "フィファ"),
+    ("NASA", "ナサ"),
+    ("NATO", "ナトー"),
+    ("UNESCO", "ユネスコ"),
+    ("UNICEF", "ユニセフ"),
+    ("ASEAN", "アセアン"),
+    ("OPEC", "オペック"),
+    ("JAXA", "ジャクサ"),
+    ("JICA", "ジャイカ"),
+    ("AIDS", "エイズ"),
+    ("FIFA", "フィファ"),
     ("pH", "ピーエイチ"),
 ];
 
@@ -46,7 +76,11 @@ static DECLARED_RUBY: LazyLock<JsRegex> = LazyLock::new(|| {
 });
 
 static PARENTHESISED_RUBY: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!(r"(\p{{Script=Han}}+)(?:（({RUBY})）|\(({RUBY})\))"), "gu").unwrap()
+    JsRegex::new(
+        &format!(r"(\p{{Script=Han}}+)(?:（({RUBY})）|\(({RUBY})\))"),
+        "gu",
+    )
+    .unwrap()
 });
 
 fn shift(m: &crate::core::js_regex::JsMatch, s: &JsString) -> JsString {
@@ -64,56 +98,103 @@ pub fn normalize_japanese(input: &JsString) -> JsString {
     s = rewrite_with(&s, js_re!(r"[Ａ-Ｚａ-ｚ]", "gu"), shift);
 
     s = rewrite_with(&s, &DECLARED_RUBY, |m, s| {
-        m.group(2, s).or_else(|| m.group(4, s)).or_else(|| m.group(1, s)).unwrap_or_default()
+        m.group(2, s)
+            .or_else(|| m.group(4, s))
+            .or_else(|| m.group(1, s))
+            .unwrap_or_default()
     });
 
     s = rewrite_with(&s, &PARENTHESISED_RUBY, |m, s| {
         let base = m.group(1, s).unwrap_or_default();
         let ruby = m.group(2, s).or_else(|| m.group(3, s)).unwrap_or_default();
-        if to_hiragana(&ruby) == apply_readings(&base) { base } else { m.value(s) }
+        if to_hiragana(&ruby) == apply_readings(&base) {
+            base
+        } else {
+            m.value(s)
+        }
     });
 
     let mut prev = JsString::new();
     while prev != s {
         prev = s.clone();
-        s = rewrite(&s, js_re!(r"(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))", "gu"), &JsString::new());
+        s = rewrite(
+            &s,
+            js_re!(r"(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))", "gu"),
+            &JsString::new(),
+        );
     }
 
     s = rewrite(&s, js_re!(r"(\d)分の(?=\d)", "gu"), &js("$1ブンノ"));
-    s = rewrite(&s, js_re!(r"(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"), &js("$2ブンノ$1"));
+    s = rewrite(
+        &s,
+        js_re!(r"(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"),
+        &js("$2ブンノ$1"),
+    );
 
-    s = rewrite_with(&s, js_re!(r"(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])", "gu"), |m, s| {
-        let (h, min) = (m.group(1, s).unwrap(), m.group(2, s).unwrap());
-        if js_number(&min) == 0.0 {
-            js(&format!("{}時", num_str(&h)))
-        } else {
-            js(&format!("{}時{}分", num_str(&h), num_str(&min)))
-        }
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])", "gu"),
+        |m, s| {
+            let (h, min) = (m.group(1, s).unwrap(), m.group(2, s).unwrap());
+            if js_number(&min) == 0.0 {
+                js(&format!("{}時", num_str(&h)))
+            } else {
+                js(&format!("{}時{}分", num_str(&h), num_str(&min)))
+            }
+        },
+    );
 
-    s = rewrite_with(&s, js_re!(r"(?<![\d.])(\d+)\.(\d+)(?![\d.])", "gu"), |m, s| {
-        let (int, frac) = (m.group(1, s).unwrap(), m.group(2, s).unwrap());
-        let mut out = int.concat(&js("点"));
-        // `digitIndex(d)` takes one ASCII digit, a single code unit here (`\d` is ASCII).
-        for &d in &frac.0 {
-            out.push_str(&DIGIT_KANA[digit_index(d) as usize]);
-        }
-        out
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d.])(\d+)\.(\d+)(?![\d.])", "gu"),
+        |m, s| {
+            let (int, frac) = (m.group(1, s).unwrap(), m.group(2, s).unwrap());
+            let mut out = int.concat(&js("点"));
+            // `digitIndex(d)` takes one ASCII digit, a single code unit here (`\d` is ASCII).
+            for &d in &frac.0 {
+                out.push_str(&DIGIT_KANA[digit_index(d) as usize]);
+            }
+            out
+        },
+    );
 
-    s = rewrite(&s, js_re!(r"(?<=[\d\p{Script=Han}\p{sc=Katakana}])[〜～~](?=\d)", "gu"), &js("から"));
+    s = rewrite(
+        &s,
+        js_re!(r"(?<=[\d\p{Script=Han}\p{sc=Katakana}])[〜～~](?=\d)", "gu"),
+        &js("から"),
+    );
 
-    s = rewrite(&s, js_re!(r"(\d)\s?(?:℃|°\s?C)(?![\p{sc=Latn}])", "gui"), &js("$1度"));
-    s = rewrite(&s, js_re!(r"(\d)\s?(?:℉|°\s?F)(?![\p{sc=Latn}])", "gui"), &js("華氏$1度"));
+    s = rewrite(
+        &s,
+        js_re!(r"(\d)\s?(?:℃|°\s?C)(?![\p{sc=Latn}])", "gui"),
+        &js("$1度"),
+    );
+    s = rewrite(
+        &s,
+        js_re!(r"(\d)\s?(?:℉|°\s?F)(?![\p{sc=Latn}])", "gui"),
+        &js("華氏$1度"),
+    );
     s = rewrite(&s, js_re!(r"(\d)\s?°", "gu"), &js("$1度"));
 
-    s = rewrite(&s, js_re!(r"(^|[\s(（])[-−–](\d)", "gu"), &js("$1マイナス$2"));
+    s = rewrite(
+        &s,
+        js_re!(r"(^|[\s(（])[-−–](\d)", "gu"),
+        &js("$1マイナス$2"),
+    );
     s = rewrite(&s, js_re!(r"±", "gu"), &js(" プラスマイナス "));
     s = rewrite(&s, js_re!(r"(^|[\s(（])\+\s?(\d)", "gu"), &js("$1プラス$2"));
     s = rewrite(&s, js_re!(r"(\S)\+\s?(\d)", "gu"), &js("$1プラス$2"));
 
-    s = rewrite(&s, js_re!(r"(\d)\s?<\s?(\d)", "gu"), &js("$1は$2より小さい"));
-    s = rewrite(&s, js_re!(r"(\d)\s?>\s?(\d)", "gu"), &js("$1は$2より大きい"));
+    s = rewrite(
+        &s,
+        js_re!(r"(\d)\s?<\s?(\d)", "gu"),
+        &js("$1は$2より小さい"),
+    );
+    s = rewrite(
+        &s,
+        js_re!(r"(\d)\s?>\s?(\d)", "gu"),
+        &js("$1は$2より大きい"),
+    );
     s = rewrite(&s, js_re!(r"\s?=\s?", "gu"), &js("イコール"));
     s = rewrite(&s, js_re!(r"\s?÷\s?", "gu"), &js("わる"));
 
@@ -177,7 +258,9 @@ fn spell(run: &JsString) -> JsString {
     }
     let mut out = JsString::new();
     for ch in run.code_point_strings() {
-        let Some((_, kana)) = LETTER_KANA.iter().find(|(k, _)| ch == *k) else { continue };
+        let Some((_, kana)) = LETTER_KANA.iter().find(|(k, _)| ch == *k) else {
+            continue;
+        };
         let kana = js(kana);
         let prev = final_vowel(&out);
         if !out.is_empty() && prev.is_some() && initial_vowel(&kana) == prev {
@@ -185,5 +268,9 @@ fn spell(run: &JsString) -> JsString {
         }
         out.push_str(&kana);
     }
-    if out.is_empty() { run.clone() } else { js(" ").concat(&out).concat(&js(" ")) }
+    if out.is_empty() {
+        run.clone()
+    } else {
+        js(" ").concat(&out).concat(&js(" "))
+    }
 }

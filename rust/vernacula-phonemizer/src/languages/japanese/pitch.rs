@@ -7,8 +7,8 @@
 use std::collections::HashMap;
 use std::sync::{LazyLock, OnceLock};
 
-use super::to_hiragana;
 use super::manifest::{DIR, MANIFEST};
+use super::to_hiragana;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, is_js_space, js};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map};
@@ -84,7 +84,11 @@ static STRIPS: LazyLock<[JsRegex; 2]> = LazyLock::new(|| {
     [
         JsRegex::new(&format!("[{}]+$", ps.particles), "u").expect("pitchStrip.particles"),
         JsRegex::new(
-            &format!("(?:{})(?:[{}])?$", ps.copula.join("|"), ps.copula_final_particles),
+            &format!(
+                "(?:{})(?:[{}])?$",
+                ps.copula.join("|"),
+                ps.copula_final_particles
+            ),
             "u",
         )
         .expect("pitchStrip.copula"),
@@ -92,8 +96,30 @@ static STRIPS: LazyLock<[JsRegex; 2]> = LazyLock::new(|| {
 });
 
 const PARTICLE_TOKENS: [&str; 24] = [
-    "は", "が", "を", "に", "で", "と", "の", "も", "や", "へ", "わ", "え",
-    "から", "まで", "など", "には", "では", "でわ", "とは", "とわ", "への", "からの", "までの", "にわ",
+    "は",
+    "が",
+    "を",
+    "に",
+    "で",
+    "と",
+    "の",
+    "も",
+    "や",
+    "へ",
+    "わ",
+    "え",
+    "から",
+    "まで",
+    "など",
+    "には",
+    "では",
+    "でわ",
+    "とは",
+    "とわ",
+    "への",
+    "からの",
+    "までの",
+    "にわ",
 ];
 
 /// The accent nucleus (mora index, 0 = heiban) for a bunsetsu: surface first, then the stripped stems, then

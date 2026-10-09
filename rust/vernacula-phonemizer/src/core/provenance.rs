@@ -245,7 +245,7 @@ pub fn rewrite_lit(s: &JsString, lit: &str, rep: &JsString) -> JsString {
 }
 
 /// `[.*+?^${}()|[\]\\]` → `\$&`.
-fn escape(lit: &str) -> String {
+pub fn escape(lit: &str) -> String {
     let mut out = String::with_capacity(lit.len());
     for c in lit.chars() {
         if ".*+?^${}()|[]\\".contains(c) {

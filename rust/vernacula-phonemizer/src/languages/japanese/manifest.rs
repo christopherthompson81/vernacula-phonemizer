@@ -14,7 +14,9 @@ use serde::Deserialize;
 
 use crate::core::js_string::JsString;
 use crate::core::load_manifest::load_manifest;
-use crate::core::normalize_symbols::{BareExponent, CountForms, ExponentWords, Multiply, PositionDecl};
+use crate::core::normalize_symbols::{
+    BareExponent, CountForms, ExponentWords, Multiply, PositionDecl,
+};
 
 pub const DIR: &str = "languages/japanese";
 
@@ -174,7 +176,11 @@ pub static T: LazyLock<Tables> = LazyLock::new(|| {
         u: v("u"),
         e: v("e"),
         o: v("o"),
-        vowel_values: m.vowels.values().map(|s| JsString::from(s.as_str())).collect(),
+        vowel_values: m
+            .vowels
+            .values()
+            .map(|s| JsString::from(s.as_str()))
+            .collect(),
         mora: table(&m.mora),
         youon_onset: table(&m.youon_onset),
         small_y: table(&m.small_y),
@@ -183,7 +189,12 @@ pub static T: LazyLock<Tables> = LazyLock::new(|| {
         nasal: m
             .nasal_assimilation
             .iter()
-            .map(|c| (JsString::from(c.onsets.as_str()), JsString::from(c.nasal.as_str())))
+            .map(|c| {
+                (
+                    JsString::from(c.onsets.as_str()),
+                    JsString::from(c.nasal.as_str()),
+                )
+            })
             .collect(),
         clause: table(&m.clause_punctuation),
         ones: list(&m.numbers.ones),

@@ -232,7 +232,11 @@ fn pick(forms: &[JsString], n: f64, cf: &CountForm) -> JsString {
     let c = cf(n);
     let hi = forms.len() as f64 - 1.0;
     // Math.min / Math.max propagate NaN; f64::min/max do not.
-    let i = if c.is_nan() { f64::NAN } else { c.min(hi).max(0.0) };
+    let i = if c.is_nan() {
+        f64::NAN
+    } else {
+        c.min(hi).max(0.0)
+    };
     if i.is_finite() && i.fract() == 0.0 && (i as usize) < forms.len() {
         forms[i as usize].clone()
     } else {
@@ -240,8 +244,22 @@ fn pick(forms: &[JsString], n: f64, cf: &CountForm) -> JsString {
     }
 }
 
-fn with_magnitude(forms: &[JsString], mag: Option<&JsString>, n: f64, cf: &CountForm, magnitude_count: f64) -> JsString {
-    pick(forms, if mag.is_some_and(|m| !m.is_empty()) { magnitude_count } else { n }, cf)
+fn with_magnitude(
+    forms: &[JsString],
+    mag: Option<&JsString>,
+    n: f64,
+    cf: &CountForm,
+    magnitude_count: f64,
+) -> JsString {
+    pick(
+        forms,
+        if mag.is_some_and(|m| !m.is_empty()) {
+            magnitude_count
+        } else {
+            n
+        },
+        cf,
+    )
 }
 
 fn assert_forms(field: &str, forms: &CountForms) -> Result<(), String> {
@@ -260,7 +278,8 @@ fn num_value(num: &JsString) -> f64 {
     let Some(m) = js_re!(r"^(\d+(?:[.,]\d{3})*)(?:[.,](\d+))?$").exec(&cleaned) else {
         return f64::NAN;
     };
-    let int = js_number(&js_re!("[.,]", "g").replace(&m.group(1, &cleaned).unwrap(), &JsString::new()));
+    let int =
+        js_number(&js_re!("[.,]", "g").replace(&m.group(1, &cleaned).unwrap(), &JsString::new()));
     match m.group(2, &cleaned) {
         Some(f) if f.len() != 3 => int + 0.5,
         _ => int,
@@ -276,18 +295,18 @@ pub fn is_bare_unit_key(key: &JsString) -> bool {
 }
 
 /// `[.*+?^${}()|[\]\\]` → `\$&` (escapeKey's class adds `$`, which this one already holds).
-fn esc(t: &JsString) -> JsString {
+pub fn esc(t: &JsString) -> JsString {
     js_re!(r"[.*+?^${}()|[\]\\]", "gu").replace(t, &js("\\$&"))
 }
 
 /// `.sort((a, b) => b.length - a.length)`: stable, as Array.prototype.sort; lengths in code units.
-fn sorted_by_length_desc(keys: impl IntoIterator<Item = JsString>) -> Vec<JsString> {
+pub fn sorted_by_length_desc(keys: impl IntoIterator<Item = JsString>) -> Vec<JsString> {
     let mut v: Vec<JsString> = keys.into_iter().collect();
     v.sort_by(|a, b| b.len().cmp(&a.len()));
     v
 }
 
-fn alternation(keys: &[JsString]) -> String {
+pub fn alternation(keys: &[JsString]) -> String {
     JsString::join(keys, &js("|")).to_string_lossy()
 }
 
@@ -319,7 +338,12 @@ pub fn make_bare_unit_normalizer(
 }
 
 /// `spacedDigits`: the digit reading of a bare power, or `None` where no honest one exists.
-fn spaced_digits(base: &JsString, digits: &JsString, all: &JsString, end: usize) -> Option<JsString> {
+fn spaced_digits(
+    base: &JsString,
+    digits: &JsString,
+    all: &JsString,
+    end: usize,
+) -> Option<JsString> {
     if !js_re!(r"^\p{Nd}", "u").test(base) {
         return None;
     }
@@ -338,7 +362,10 @@ fn superscript_digits(sup: &JsString) -> JsString {
     let mut out = JsString::new();
     for cp in sup.code_points() {
         let c = char::from_u32(cp).map(String::from).unwrap_or_default();
-        let (_, d) = SUPERSCRIPT.iter().find(|(k, _)| *k == c).expect("SUPERSCRIPT_RUN matched it");
+        let (_, d) = SUPERSCRIPT
+            .iter()
+            .find(|(k, _)| *k == c)
+            .expect("SUPERSCRIPT_RUN matched it");
         out.push_str(&js(d));
     }
     out
@@ -354,11 +381,13 @@ fn declines_bare_exponent(m: &JsMatch, all: &JsString) -> bool {
         return true;
     }
     if js_re!("^¹+$", "u").test(&sup)
-        && js_re!(r"\p{Nd}+⁰\p{Nd}+¹$", "u").test(&all.slice(at.saturating_sub(24) as isize, Some(at as isize)))
+        && js_re!(r"\p{Nd}+⁰\p{Nd}+¹$", "u")
+            .test(&all.slice(at.saturating_sub(24) as isize, Some(at as isize)))
     {
         return true;
     }
-    js_re!(r"\s", "u").test(&whole) && js_re!(r"^[\p{L}\p{M}]", "u").test(&all.slice(m.end() as isize, None))
+    js_re!(r"\s", "u").test(&whole)
+        && js_re!(r"^[\p{L}\p{M}]", "u").test(&all.slice(m.end() as isize, None))
 }
 
 /// `spacedBareExponent`: a bare digit-base power → its digits, spaced off.
@@ -382,7 +411,11 @@ fn map_js<V, W>(m: &IndexMap<String, V>, f: impl Fn(&V) -> W) -> IndexMap<JsStri
     m.iter().map(|(k, v)| (js(k), f(v))).collect()
 }
 
-type ExponentForms = (Option<Vec<JsString>>, Option<Vec<JsString>>, Option<PositionDecl>);
+type ExponentForms = (
+    Option<Vec<JsString>>,
+    Option<Vec<JsString>>,
+    Option<PositionDecl>,
+);
 
 /// A built symbol normalizer, `makeSymbolNormalizer(d)`; `apply` is the returned closure.
 pub struct SymbolNormalizer {
@@ -421,7 +454,10 @@ pub struct SymbolNormalizer {
 fn said_after(forms: &[JsString], connective: Option<&JsString>) -> JsRegex {
     let conn = match connective {
         None => String::new(),
-        Some(c) => format!("(?:{}[ \u{a0}\u{202f}\u{2009}]+)?", esc(c).to_string_lossy()),
+        Some(c) => format!(
+            "(?:{}[ \u{a0}\u{202f}\u{2009}]+)?",
+            esc(c).to_string_lossy()
+        ),
     };
     let alt = alternation(&forms.iter().map(esc).collect::<Vec<_>>());
     JsRegex::new(&format!("^[ \u{a0}\u{202f}\u{2009}]*{conn}(?:{alt})"), "iu").unwrap()
@@ -476,16 +512,32 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
             assert_forms("exponentWords.cubed", f)?;
         }
     }
-    let cf: CountForm = d.count_form.clone().unwrap_or_else(|| Arc::new(default_count_form));
+    let cf: CountForm = d
+        .count_form
+        .clone()
+        .unwrap_or_else(|| Arc::new(default_count_form));
     let units = d.units.as_ref().map(|u| map_js(u, forms_js));
     let rate_denominators = d.rate_denominators.as_ref().map(|r| map_js(r, |v| js(v)));
     let units_folded = units.as_ref().map(folded_index).unwrap_or_default();
-    let denom_folded = rate_denominators.as_ref().map(folded_index).unwrap_or_default();
+    let denom_folded = rate_denominators
+        .as_ref()
+        .map(folded_index)
+        .unwrap_or_default();
     let unspaced = d.unspaced_script == Some(true);
-    let opt_sep = if unspaced { "[\\s\u{200b}\u{200c}]?" } else { "\\s?" };
+    let opt_sep = if unspaced {
+        "[\\s\u{200b}\u{200c}]?"
+    } else {
+        "\\s?"
+    };
     let mag_list: Vec<JsString> = d.magnitudes.iter().flatten().map(|m| js(m)).collect();
-    let mag_prefix_hazard = mag_list.iter().any(|a| mag_list.iter().any(|b| b != a && b.starts_with(a)));
-    let mag_end = if mag_prefix_hazard { "(?![\\p{L}\\p{M}])" } else { "" };
+    let mag_prefix_hazard = mag_list
+        .iter()
+        .any(|a| mag_list.iter().any(|b| b != a && b.starts_with(a)));
+    let mag_end = if mag_prefix_hazard {
+        "(?![\\p{L}\\p{M}])"
+    } else {
+        ""
+    };
     let mag_sorted = alternation(&sorted_by_length_desc(mag_list.iter().cloned()));
     let mag_alt = if !mag_list.is_empty() {
         format!("(\\s*(?:{mag_sorted}){mag_end})?")
@@ -496,7 +548,9 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
     let mag_alt_u = match (&connective, mag_list.is_empty()) {
         (Some(c), false) => format!(
             "(\\s*(?:{mag_sorted}){mag_end}(?:\\s+{})?)?",
-            js_re!(r"[.*+?^${}()|[\]\\]", "gu").replace(c, &js("\\$&")).to_string_lossy()
+            js_re!(r"[.*+?^${}()|[\]\\]", "gu")
+                .replace(c, &js("\\$&"))
+                .to_string_lossy()
         ),
         _ => mag_alt.clone(),
     };
@@ -513,15 +567,29 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
     let currency = d.currency.as_ref().map(|c| map_js(c, forms_js));
     let cur_keys: String = currency
         .as_ref()
-        .map(|c| sorted_by_length_desc(c.keys().cloned()).iter().map(cur_key).collect::<Vec<_>>().join("|"))
+        .map(|c| {
+            sorted_by_length_desc(c.keys().cloned())
+                .iter()
+                .map(cur_key)
+                .collect::<Vec<_>>()
+                .join("|")
+        })
         .unwrap_or_default();
     let word_cont = if unspaced { "\\p{sc=Latn}" } else { "\\p{L}" };
     let mark_cont = if unspaced { "" } else { "\\p{M}" };
     let cur = format!("(?<![{word_cont}{mark_cont}])(?:{cur_keys})(?![{word_cont}{mark_cont}])");
     let has_cur = currency.is_some();
     let re = |p: String, f: &str| JsRegex::new(&p, f).map_err(|e| e.to_string());
-    let cur_before = if has_cur { Some(re(format!("({cur}){opt_sep}({NUM}){mag_alt}"), "gu")?) } else { None };
-    let cur_after = if has_cur { Some(re(format!("({NUM}){mag_alt}{opt_sep}({cur})"), "gu")?) } else { None };
+    let cur_before = if has_cur {
+        Some(re(format!("({cur}){opt_sep}({NUM}){mag_alt}"), "gu")?)
+    } else {
+        None
+    };
+    let cur_after = if has_cur {
+        Some(re(format!("({NUM}){mag_alt}{opt_sep}({cur})"), "gu")?)
+    } else {
+        None
+    };
     let mag_word = if !mag_list.is_empty() {
         format!("(?<![{word_cont}{mark_cont}])(?:{mag_sorted}){mag_end}")
     } else {
@@ -529,12 +597,18 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
     };
     let mag_first = has_cur && d.magnitude_precedes == Some(true) && !mag_word.is_empty();
     let mag_first_after = if mag_first {
-        Some(re(format!("({mag_word})\\s+({NUM}){opt_sep}({cur})"), "gu")?)
+        Some(re(
+            format!("({mag_word})\\s+({NUM}){opt_sep}({cur})"),
+            "gu",
+        )?)
     } else {
         None
     };
     let mag_first_before = if mag_first {
-        Some(re(format!("({mag_word}){opt_sep}({cur}){opt_sep}({NUM})"), "gu")?)
+        Some(re(
+            format!("({mag_word}){opt_sep}({cur}){opt_sep}({NUM})"),
+            "gu",
+        )?)
     } else {
         None
     };
@@ -562,13 +636,25 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
     let bare_readings: Vec<(JsString, JsString)> = if unspaced {
         Vec::new()
     } else {
-        units.iter().flatten().map(|(k, forms)| (k.clone(), pick(forms, 1.0, &cf))).collect()
+        units
+            .iter()
+            .flatten()
+            .map(|(k, forms)| (k.clone(), pick(forms, 1.0, &cf)))
+            .collect()
     };
     let bare_unit = Box::new(make_bare_unit_normalizer(bare_readings));
     let pct = "[%\u{66a}\u{ff05}]";
     let percent = d.percent.as_ref().map(forms_js);
-    let pct_re = if percent.is_some() { Some(re(format!("({NUM}){opt_sep}{pct}"), "gu")?) } else { None };
-    let pct_pre_re = if percent.is_some() { Some(re(format!("(?<!\\d){pct}\\s?({NUM})"), "gu")?) } else { None };
+    let pct_re = if percent.is_some() {
+        Some(re(format!("({NUM}){opt_sep}{pct}"), "gu")?)
+    } else {
+        None
+    };
+    let pct_pre_re = if percent.is_some() {
+        Some(re(format!("(?<!\\d){pct}\\s?({NUM})"), "gu")?)
+    } else {
+        None
+    };
     let pct_after = percent.as_ref().map(|p| said_after(p, connective.as_ref()));
     let pct_before = percent.as_ref().map(|p| said_before(p));
     let cur_said = currency
@@ -585,12 +671,18 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
         rate_denominators,
         denom_folded,
         unit_per: d.unit_per.clone(),
-        exponent_words: d
-            .exponent_words
-            .as_ref()
-            .map(|e| (e.squared.as_ref().map(forms_js), e.cubed.as_ref().map(forms_js), e.position.clone())),
+        exponent_words: d.exponent_words.as_ref().map(|e| {
+            (
+                e.squared.as_ref().map(forms_js),
+                e.cubed.as_ref().map(forms_js),
+                e.position.clone(),
+            )
+        }),
         bare_exponent: d.bare_exponent.clone(),
-        multiply: d.multiply.as_ref().map(|m| (js(&m.times), js(m.by.as_ref().unwrap_or(&m.times)))),
+        multiply: d
+            .multiply
+            .as_ref()
+            .map(|m| (js(&m.times), js(m.by.as_ref().unwrap_or(&m.times)))),
         connective,
         magnitude_count: d.magnitude_count,
         percent_prefix: d.percent_prefix == Some(true),
@@ -627,7 +719,9 @@ impl SymbolNormalizer {
             let lk = k.to_lower_case();
             d.units.as_ref().is_some_and(|u| u.contains_key(k))
                 || d.units_folded.contains_key(&lk)
-                || d.rate_denominators.as_ref().is_some_and(|r| r.contains_key(k))
+                || d.rate_denominators
+                    .as_ref()
+                    .is_some_and(|r| r.contains_key(k))
                 || d.denom_folded.contains_key(&lk)
         };
         s = rewrite_with(&s, unit_power_before(), |m, all| {
@@ -645,7 +739,11 @@ impl SymbolNormalizer {
                 _ => JsString::new(),
             }
         };
-        let money = |num: &JsString, mag: Option<&JsString>, sym: &JsString, rest: &JsString, mag_first: bool| {
+        let money = |num: &JsString,
+                     mag: Option<&JsString>,
+                     sym: &JsString,
+                     rest: &JsString,
+                     mag_first: bool| {
             let cur = d.currency.as_ref().unwrap();
             // ⚠ `d.currency![sym] ?? d.currency![stripped]!` throws in the TS on a double miss. Unreachable: the
             // pattern is the table's own keys, at most with a separator inserted at the seam.
@@ -664,10 +762,23 @@ impl SymbolNormalizer {
             if already.test(rest) {
                 return body;
             }
-            let w = with_magnitude(forms, mag, num_value(num), &d.cf, d.magnitude_count.unwrap_or(MANY));
-            let tail = if js_re!(r"^[\p{L}\p{M}]", "u").test(rest) { sp.clone() } else { JsString::new() };
+            let w = with_magnitude(
+                forms,
+                mag,
+                num_value(num),
+                &d.cf,
+                d.magnitude_count.unwrap_or(MANY),
+            );
+            let tail = if js_re!(r"^[\p{L}\p{M}]", "u").test(rest) {
+                sp.clone()
+            } else {
+                JsString::new()
+            };
             if d.currency_prefix {
-                js_re!(r"\s+", "gu").replace(&cat(&[&w, mag.unwrap_or(&empty), &sp, &join(mag), num, &tail]), &sp)
+                js_re!(r"\s+", "gu").replace(
+                    &cat(&[&w, mag.unwrap_or(&empty), &sp, &join(mag), num, &tail]),
+                    &sp,
+                )
             } else {
                 cat(&[&body, &sp, &join(mag), &w, &tail])
             }
@@ -677,35 +788,67 @@ impl SymbolNormalizer {
         if let Some(re) = &d.mag_first_after {
             s = rewrite_with(&s, re, |m, full| {
                 let mag = cat(&[&sp, &g(m, 1, full)]);
-                money(&g(m, 2, full), Some(&mag), &g(m, 3, full), &rest_of(m, full), true)
+                money(
+                    &g(m, 2, full),
+                    Some(&mag),
+                    &g(m, 3, full),
+                    &rest_of(m, full),
+                    true,
+                )
             });
         }
         if let Some(re) = &d.mag_first_before {
             s = rewrite_with(&s, re, |m, full| {
                 let mag = cat(&[&sp, &g(m, 1, full)]);
-                money(&g(m, 3, full), Some(&mag), &g(m, 2, full), &rest_of(m, full), true)
+                money(
+                    &g(m, 3, full),
+                    Some(&mag),
+                    &g(m, 2, full),
+                    &rest_of(m, full),
+                    true,
+                )
             });
         }
         if let Some(re) = &d.cur_before {
             s = rewrite_with(&s, re, |m, full| {
-                money(&g(m, 2, full), m.group(3, full).as_ref(), &g(m, 1, full), &rest_of(m, full), false)
+                money(
+                    &g(m, 2, full),
+                    m.group(3, full).as_ref(),
+                    &g(m, 1, full),
+                    &rest_of(m, full),
+                    false,
+                )
             });
         }
         if let Some(re) = &d.cur_after {
             s = rewrite_with(&s, re, |m, full| {
-                money(&g(m, 1, full), m.group(2, full).as_ref(), &g(m, 3, full), &rest_of(m, full), false)
+                money(
+                    &g(m, 1, full),
+                    m.group(2, full).as_ref(),
+                    &g(m, 3, full),
+                    &rest_of(m, full),
+                    false,
+                )
             });
         }
-        if let (Some(forms), Some(pct_re), Some(pct_pre_re), Some(after_re), Some(before_re)) =
-            (&d.percent, &d.pct_re, &d.pct_pre_re, &d.pct_after, &d.pct_before)
-        {
+        if let (Some(forms), Some(pct_re), Some(pct_pre_re), Some(after_re), Some(before_re)) = (
+            &d.percent,
+            &d.pct_re,
+            &d.pct_pre_re,
+            &d.pct_after,
+            &d.pct_before,
+        ) {
             let pct = |m: &JsMatch, full: &JsString| -> JsString {
                 let num = g(m, 1, full);
                 let before = full.slice(0, Some(m.index() as isize));
                 let after = full.slice(m.end() as isize, None);
                 let w = pick(forms, num_value(&num), &d.cf);
                 if d.percent_prefix {
-                    if before_re.test(&before) { num } else { cat(&[&w, &sp, &num]) }
+                    if before_re.test(&before) {
+                        num
+                    } else {
+                        cat(&[&w, &sp, &num])
+                    }
                 } else if after_re.test(&after) {
                     num
                 } else {
@@ -716,14 +859,22 @@ impl SymbolNormalizer {
             s = rewrite_with(&s, pct_re, pct);
         }
         if let Some((times, by)) = &d.multiply {
-            s = rewrite_with(&s, js_re!(r"(\p{Nd})\s*(×|x)\s*(?=\p{Nd})", "gu"), |m, full| {
-                let whole = m.value(full);
-                let spaced = js_re!(r"\s", "u").test(&whole);
-                let tail = full.slice(m.end() as isize, None);
-                let has_unit = js_re!(r"^\p{Nd}[\d.,]*\s?\p{L}", "u").test(&tail);
-                let word = if has_unit || (g(m, 2, full) == "x" && !spaced) { by } else { times };
-                cat(&[&g(m, 1, full), &sp, word, &sp])
-            });
+            s = rewrite_with(
+                &s,
+                js_re!(r"(\p{Nd})\s*(×|x)\s*(?=\p{Nd})", "gu"),
+                |m, full| {
+                    let whole = m.value(full);
+                    let spaced = js_re!(r"\s", "u").test(&whole);
+                    let tail = full.slice(m.end() as isize, None);
+                    let has_unit = js_re!(r"^\p{Nd}[\d.,]*\s?\p{L}", "u").test(&tail);
+                    let word = if has_unit || (g(m, 2, full) == "x" && !spaced) {
+                        by
+                    } else {
+                        times
+                    };
+                    cat(&[&g(m, 1, full), &sp, word, &sp])
+                },
+            );
         }
 
         if let Some(unit_re) = &d.unit_re {
@@ -733,7 +884,9 @@ impl SymbolNormalizer {
         s = (d.bare_unit)(&s);
 
         if let Some(be) = &d.bare_exponent {
-            s = rewrite_with(&s, bare_exponent_glued(), |m, full| cat(&[&m.value(full), &sp]));
+            s = rewrite_with(&s, bare_exponent_glued(), |m, full| {
+                cat(&[&m.value(full), &sp])
+            });
             s = rewrite_with(&s, bare_exponent(), |m, all| {
                 let whole = m.value(all);
                 if declines_bare_exponent(m, all) {
@@ -741,9 +894,14 @@ impl SymbolNormalizer {
                 }
                 let base = g(m, 1, all);
                 let digits = superscript_digits(&g(m, 2, all));
-                let fallback = || spaced_digits(&base, &digits, all, m.end()).unwrap_or_else(|| whole.clone());
+                let fallback =
+                    || spaced_digits(&base, &digits, all, m.end()).unwrap_or_else(|| whole.clone());
                 let neg = digits.starts_with(&js("-"));
-                let mag = if neg { digits.slice(1, None) } else { digits.clone() };
+                let mag = if neg {
+                    digits.slice(1, None)
+                } else {
+                    digits.clone()
+                };
                 let tpl = if neg {
                     &be.power
                 } else if mag == "2" {
@@ -776,11 +934,23 @@ impl SymbolNormalizer {
         let num = m.group(1, full).unwrap();
         let mag = m.group(2, full);
         let u = m.group(3, full).unwrap();
-        let (num_exp, denom, denom_exp, exp) =
-            (m.group(4, full), m.group(5, full), m.group(6, full), m.group(7, full));
+        let (num_exp, denom, denom_exp, exp) = (
+            m.group(4, full),
+            m.group(5, full),
+            m.group(6, full),
+            m.group(7, full),
+        );
         let has_mag = mag.as_ref().is_some_and(|g| !g.is_empty());
-        let q = if has_mag { cat(&[&num, mag.as_ref().unwrap()]) } else { num.clone() };
-        let n = if has_mag { d.magnitude_count.unwrap_or(MANY) } else { num_value(&num) };
+        let q = if has_mag {
+            cat(&[&num, mag.as_ref().unwrap()])
+        } else {
+            num.clone()
+        };
+        let n = if has_mag {
+            d.magnitude_count.unwrap_or(MANY)
+        } else {
+            num_value(&num)
+        };
         let Some(forms) = resolve_unit_symbol(d.units.as_ref(), &d.units_folded, &u, false) else {
             return whole;
         };
@@ -793,9 +963,18 @@ impl SymbolNormalizer {
         let power_mark = |power: &str| js(if power == "cubed" { "\u{b3}" } else { "\u{b2}" });
         if let Some(denom) = denom {
             let dl = denom.to_lower_case();
-            let d_word: Option<JsString> = resolve_unit_symbol(d.units.as_ref(), &d.units_folded, &denom, true)
-                .map(|f| f[0].clone())
-                .or_else(|| resolve_unit_symbol(d.rate_denominators.as_ref(), &d.denom_folded, &denom, true).cloned());
+            let d_word: Option<JsString> =
+                resolve_unit_symbol(d.units.as_ref(), &d.units_folded, &denom, true)
+                    .map(|f| f[0].clone())
+                    .or_else(|| {
+                        resolve_unit_symbol(
+                            d.rate_denominators.as_ref(),
+                            &d.denom_folded,
+                            &denom,
+                            true,
+                        )
+                        .cloned()
+                    });
             let per: Option<JsString> = match &d.unit_per {
                 Some(UnitPer::All(w)) => Some(js(w)),
                 Some(UnitPer::ByDenominator(r)) => {
@@ -822,13 +1001,21 @@ impl SymbolNormalizer {
                     None => head.clone(),
                     Some(e) => with_power(&head, e),
                 };
-                let said = if d.unit_prefix { cat(&[&head_only, &sp, &q]) } else { cat(&[&q, &sp, &head_only]) };
+                let said = if d.unit_prefix {
+                    cat(&[&head_only, &sp, &q])
+                } else {
+                    cat(&[&q, &sp, &head_only])
+                };
                 let tail = whole.slice(cut as isize, None);
                 let stranded = js_re!(
                     r"^\s?\/\s?[bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ]{1,3}(?:²|³|[23])?$",
                     "u"
                 );
-                return if stranded.test(&tail) { said } else { cat(&[&said, &tail]) };
+                return if stranded.test(&tail) {
+                    said
+                } else {
+                    cat(&[&said, &tail])
+                };
             };
             let d_phrase = match &denom_exp {
                 Some(e) => with_power(&d_word, e),
@@ -848,13 +1035,25 @@ impl SymbolNormalizer {
             let power = if is_cubed(&exp) { "cubed" } else { "squared" };
             let Some(e_forms) = (if power == "cubed" { cubed } else { squared }) else {
                 let back = power_mark(power);
-                return if d.unit_prefix { cat(&[&head, &back, &sp, &q]) } else { cat(&[&q, &sp, &head, &back]) };
+                return if d.unit_prefix {
+                    cat(&[&head, &back, &sp, &q])
+                } else {
+                    cat(&[&q, &sp, &head, &back])
+                };
             };
             let word = pick(e_forms, n, &d.cf);
             let phrase = place(position_for(decl, power), &word, &head);
-            return if d.unit_prefix { cat(&[&phrase, &sp, &q]) } else { cat(&[&q, &sp, &phrase]) };
+            return if d.unit_prefix {
+                cat(&[&phrase, &sp, &q])
+            } else {
+                cat(&[&q, &sp, &phrase])
+            };
         }
-        if d.unit_prefix { cat(&[&head, &sp, &q]) } else { cat(&[&q, &sp, &head]) }
+        if d.unit_prefix {
+            cat(&[&head, &sp, &q])
+        } else {
+            cat(&[&q, &sp, &head])
+        }
     }
 }
 
@@ -874,7 +1073,10 @@ mod tests {
         );
         let ap = |s: &str| t.apply(&js(s)).to_string_lossy();
         assert_eq!(ap("$5 millones"), "5 millones de dólares");
-        assert_eq!(ap("40% y 1 km y 5 km²"), "40 por ciento y 1 kilómetro y 5 kilómetros cuadrados");
+        assert_eq!(
+            ap("40% y 1 km y 5 km²"),
+            "40 por ciento y 1 kilómetro y 5 kilómetros cuadrados"
+        );
         // No bareExponent declared: the floor spaces a digit-base power out, and declines a lone ⁰ mark.
         assert_eq!(ap("10⁶ y 79⁰"), "10 6 y 79⁰");
     }

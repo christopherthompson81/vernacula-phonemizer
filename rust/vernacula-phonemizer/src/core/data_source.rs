@@ -116,3 +116,18 @@ pub fn record_data_keys<T>(f: impl FnOnce() -> T) -> (T, Vec<String>) {
     }
     (result, own.into_iter().collect())
 }
+
+/// A load cached ONLY on success: a failure is returned and the next call retries. That is the registry's
+/// `PhonemizeError::Data` contract (a fixed data root takes effect on the next call), and the TS shape, which
+/// assigns a lazily loaded table only after its load returned. Two racing first calls may both load; the first
+/// to finish is kept.
+pub fn load_once<T: Send + Sync>(
+    cell: &'static std::sync::OnceLock<T>,
+    load: impl FnOnce() -> Result<T, String>,
+) -> Result<&'static T, String> {
+    if let Some(v) = cell.get() {
+        return Ok(v);
+    }
+    let v = load()?;
+    Ok(cell.get_or_init(|| v))
+}

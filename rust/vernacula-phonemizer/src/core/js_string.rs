@@ -447,3 +447,65 @@ mod number_tests {
         assert!(js_number(&js("-0x5")).is_nan());
     }
 }
+
+/// `Number.MAX_SAFE_INTEGER`: 2^53 − 1.
+pub const MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
+
+/// `Number.isSafeInteger(n)`.
+pub fn is_safe_integer(n: f64) -> bool {
+    n.is_finite() && n.fract() == 0.0 && n.abs() <= MAX_SAFE_INTEGER
+}
+
+/// `String(n)` / `Number.prototype.toString()` (radix 10), the ECMAScript algorithm: the shortest digits that
+/// round-trip (which Rust's float formatting also produces), placed by the spec's rules, with exponent form
+/// for n ≥ 1e21 or n < 1e-6. Rust's `{}` differs on both (`1e21` is `1000000000000000000000` there).
+pub fn js_number_to_string(x: f64) -> String {
+    if x.is_nan() {
+        return "NaN".into();
+    }
+    if x == 0.0 {
+        return "0".into();
+    }
+    if x < 0.0 {
+        return format!("-{}", js_number_to_string(-x));
+    }
+    if x.is_infinite() {
+        return "Infinity".into();
+    }
+    // `{:e}` gives the shortest round-trip LENGTH. The spec then wants, among the digit strings of that length
+    // that round-trip, the one CLOSEST to x, which is the correctly rounded one (`{:.p$e}`) whenever it still
+    // round-trips. Rust's shortest output can be a different, farther string (226 of 1.2M random doubles).
+    let shortest = format!("{x:e}");
+    let k0 = shortest
+        .split_once('e')
+        .unwrap()
+        .0
+        .chars()
+        .filter(|c| c.is_ascii_digit())
+        .count();
+    let rounded = format!("{x:.*e}", k0 - 1);
+    let e = if rounded.parse::<f64>() == Ok(x) {
+        rounded
+    } else {
+        shortest
+    };
+    let (mant, exp) = e.split_once('e').unwrap();
+    let digits: String = mant.chars().filter(|c| *c != '.').collect();
+    let k = digits.len() as i32;
+    let n = exp.parse::<i32>().unwrap() + 1;
+    if k <= n && n <= 21 {
+        format!("{digits}{}", "0".repeat((n - k) as usize))
+    } else if 0 < n && n <= 21 {
+        format!("{}.{}", &digits[..n as usize], &digits[n as usize..])
+    } else if -6 < n && n <= 0 {
+        format!("0.{}{digits}", "0".repeat((-n) as usize))
+    } else {
+        let sign = if n - 1 < 0 { "-" } else { "+" };
+        let e = (n - 1).abs();
+        if k == 1 {
+            format!("{digits}e{sign}{e}")
+        } else {
+            format!("{}.{}e{sign}{e}", &digits[..1], &digits[1..])
+        }
+    }
+}
