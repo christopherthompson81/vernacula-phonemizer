@@ -7,7 +7,7 @@
 //! differently from "wrong".
 
 use std::collections::BTreeSet;
-use std::sync::{Arc, LazyLock, Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use crate::core::foreign::{lookup_foreign_oov, set_default_foreign, with_host};
 use crate::core::js_string::{JsString, js};
@@ -63,24 +63,40 @@ pub fn fold_pass(lang: &str, input: &JsString) -> JsString {
 pub const LANGUAGES: [&str; 2] = ["en", "en-GB"];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct UnknownLanguage(pub String);
+pub enum PhonemizeError {
+    /// No engine for this code in this build (see `LANGUAGES`).
+    UnknownLanguage(String),
+    /// The language's data could not be read or parsed (a missing or wrong data root). Cached: the engine is
+    /// built once per process, so fix the root before the first call (`core::data_source::set_data_root`).
+    Data(String),
+    /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
+    /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
+    Neural(String),
+}
 
-impl std::fmt::Display for UnknownLanguage {
+impl std::fmt::Display for PhonemizeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "no engine for language: {}", self.0)
+        match self {
+            PhonemizeError::UnknownLanguage(l) => write!(f, "no engine for language: {l}"),
+            PhonemizeError::Data(e) => write!(f, "phonemizer data unavailable: {e}"),
+            PhonemizeError::Neural(e) => write!(f, "neural OOV model failed: {e}"),
+        }
     }
 }
 
-impl std::error::Error for UnknownLanguage {}
+impl std::error::Error for PhonemizeError {}
 
 /// en and en-GB share one immutable engine (the TS builds two identical ones).
-static ENGLISH: LazyLock<Arc<EnglishPhonemizer>> = LazyLock::new(|| {
-    install_foreign_readers();
-    Arc::new(create_english())
-});
+static ENGLISH: OnceLock<Result<Arc<EnglishPhonemizer>, String>> = OnceLock::new();
 
-pub fn english() -> Arc<EnglishPhonemizer> {
-    ENGLISH.clone()
+pub fn english() -> Result<Arc<EnglishPhonemizer>, PhonemizeError> {
+    ENGLISH
+        .get_or_init(|| {
+            install_foreign_readers();
+            create_english().map(Arc::new)
+        })
+        .clone()
+        .map_err(PhonemizeError::Data)
 }
 
 static PENDING: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
@@ -91,8 +107,11 @@ pub fn port_pending() -> Vec<String> {
 }
 
 /// `readAsEnglish`: a Latin run inside another language, read by the English engine in English's scope.
+/// Without English data, a delegated run reads as nothing (the TS would have failed to start).
 pub fn read_as_english(text: &JsString) -> JsString {
-    let en = english();
+    let Ok(en) = english() else {
+        return JsString::new();
+    };
     with_host(&js("en"), || {
         en.text_with_oov(&fold_pass("en", text), &|k| lookup_foreign_oov(k))
     })
@@ -109,23 +128,23 @@ fn install_foreign_readers() {
 }
 
 /// `getPhonemizer(lang).text(input)`.
-pub fn phonemize_in(lang: &str, input: &JsString) -> Result<JsString, UnknownLanguage> {
+pub fn phonemize_in(lang: &str, input: &JsString) -> Result<JsString, PhonemizeError> {
     let run =
         |f: &dyn Fn(&JsString) -> JsString| with_host(&js(lang), || f(&fold_pass(lang, input)));
     match lang {
         "en" => {
-            let en = english();
+            let en = english()?;
             Ok(run(&|s| en.text(s)))
         }
         "en-GB" => {
-            let en = english();
+            let en = english()?;
             Ok(run(&|s| {
                 en.text_full(s, Some(&rp_word_transform), None, false)
             }))
         }
         other => {
             PENDING.lock().unwrap().insert(other.to_string());
-            Err(UnknownLanguage(other.to_string()))
+            Err(PhonemizeError::UnknownLanguage(other.to_string()))
         }
     }
 }
@@ -154,17 +173,17 @@ fn build_english_tagger() -> Result<EnglishTagger, String> {
 }
 
 /// `phonemizeAsync(text, lang)`: the best available path. For English, the neural OOV tagger.
-pub fn phonemize_best_in(lang: &str, input: &JsString) -> Result<JsString, UnknownLanguage> {
-    let en = english();
-    let tagger = english_tagger();
-    let render = |host: &str, wt: Option<crate::languages::english::english::WordTransform>| {
-        // A tagger error rejects phonemizeAsync in the TS; it is not swallowed into the sync reading here either.
-        phonemize_en_neural(&en, tagger, &fold_pass(host, input), host, wt)
-            .unwrap_or_else(|e| panic!("English tagger: {e}"))
+pub fn phonemize_best_in(lang: &str, input: &JsString) -> Result<JsString, PhonemizeError> {
+    let (host, wt): (
+        &str,
+        Option<crate::languages::english::english::WordTransform>,
+    ) = match lang {
+        "en" => ("en", None),
+        "en-GB" => ("en-GB", Some(&rp_word_transform)),
+        other => return phonemize_in(other, input),
     };
-    match lang {
-        "en" => Ok(render("en", None)),
-        "en-GB" => Ok(render("en-GB", Some(&rp_word_transform))),
-        other => phonemize_in(other, input),
-    }
+    let en = english()?;
+    // A tagger error rejects phonemizeAsync in the TS; it is not swallowed into the sync reading here either.
+    phonemize_en_neural(&en, english_tagger(), &fold_pass(host, input), host, wt)
+        .map_err(PhonemizeError::Neural)
 }

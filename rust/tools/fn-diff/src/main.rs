@@ -169,11 +169,11 @@ fn main() {
             Box::new(move |input| g2p.g2p(&units(&input["word"])))
         }
         "english-pre" => {
-            let e = create_english();
+            let e = create_english().unwrap();
             Box::new(move |input| e.text_full(&units(&input["normalized"]), None, None, true))
         }
         "english-gb-pre" => {
-            let e = create_english();
+            let e = create_english().unwrap();
             Box::new(move |input| {
                 e.text_full(
                     &units(&input["normalized"]),

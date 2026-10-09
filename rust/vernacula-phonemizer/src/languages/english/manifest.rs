@@ -4,7 +4,7 @@
 //! fails the load instead of reading as empty. Keys the TS does not read (`convention`, `models`, …) are
 //! documentation and are ignored.
 
-use std::sync::LazyLock;
+use std::sync::{LazyLock, OnceLock};
 
 use indexmap::IndexMap;
 use serde::Deserialize;
@@ -82,8 +82,17 @@ pub struct EnglishManifest {
     pub phonotactics: Phonotactics,
 }
 
-pub static MANIFEST: LazyLock<EnglishManifest> =
-    LazyLock::new(|| load_manifest(DIR, "english.jsonc").unwrap_or_else(|e| panic!("{e}")));
+/// The manifest, or why it could not be loaded. Loaded once; a failure is cached, not retried.
+pub fn try_manifest() -> Result<&'static EnglishManifest, String> {
+    static M: OnceLock<Result<EnglishManifest, String>> = OnceLock::new();
+    M.get_or_init(|| load_manifest(DIR, "english.jsonc").map_err(|e| e.to_string()))
+        .as_ref()
+        .map_err(Clone::clone)
+}
+
+/// The manifest for code that runs only after `create_english` has succeeded (which checks it first).
+pub static MANIFEST: LazyLock<&'static EnglishManifest> =
+    LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 
 #[cfg(test)]
 mod tests {

@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 
 use super::english_arpabet::make_arpabet_to_ipa;
 use super::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
-use super::manifest::{DIR, HeteronymEntry, MANIFEST};
+use super::manifest::{DIR, HeteronymEntry, try_manifest};
 use super::normalize::{normalize_english, normalize_english_initialisms};
 use super::numbers::{BigNat, number_to_words, ordinal_to_words};
 use super::pos_tagger::{
@@ -727,8 +727,9 @@ fn slot_list(v: &JsString, _: &JsString) -> Option<Vec<usize>> {
     )
 }
 
-/// Load the English data and build the phonemizer.
-pub fn create_english() -> EnglishPhonemizer {
+/// Load the English data and build the phonemizer, or say which file is missing or malformed.
+pub fn create_english() -> Result<EnglishPhonemizer, String> {
+    let m = try_manifest()?;
     // accent-lexicon.tsv is word<TAB>?<TAB>ipa; the value is the post-first-tab remainder.
     let lexicon = load_tsv_map(
         DIR,
@@ -740,17 +741,16 @@ pub fn create_english() -> EnglishPhonemizer {
         },
         TsvOptions::default(),
     )
-    .unwrap_or_else(|e| panic!("{e}"));
-    let m = &*MANIFEST;
+    .map_err(|e| e.to_string())?;
     let heteronyms = m
         .heteronyms
         .iter()
         .map(|(k, v)| (js(k), v.clone()))
         .collect();
     let syllabic = load_tsv_map(DIR, "en-syllabic.tsv", slot_list, TsvOptions::default())
-        .unwrap_or_else(|e| panic!("{e}"));
+        .map_err(|e| e.to_string())?;
     let nasal = load_tsv_map(DIR, "en-nasal-seam.tsv", slot_list, TsvOptions::default())
-        .unwrap_or_else(|e| panic!("{e}"));
+        .map_err(|e| e.to_string())?;
     let arpabet_to_ipa = make_arpabet_to_ipa(&m.arpabet, syllabic, nasal);
     let g2p_dict = load_tsv_map(
         DIR,
@@ -765,9 +765,9 @@ pub fn create_english() -> EnglishPhonemizer {
         },
         TsvOptions::default(),
     )
-    .unwrap_or_else(|e| panic!("{e}"));
+    .map_err(|e| e.to_string())?;
     let common = load_lines(DIR, "g2p-common.txt", false)
-        .unwrap_or_else(|e| panic!("{e}"))
+        .map_err(|e| e.to_string())?
         .into_iter()
         .collect();
     let classes = G2pClasses {
@@ -780,22 +780,21 @@ pub fn create_english() -> EnglishPhonemizer {
         letter_name_exceptions: m.letter_name_exceptions.clone(),
     };
     let g2p = EnglishG2p::new(
-        load_json::<EnglishG2pModel>(DIR, "g2p-model.json").unwrap_or_else(|e| panic!("{e}")),
+        load_json::<EnglishG2pModel>(DIR, "g2p-model.json").map_err(|e| e.to_string())?,
         g2p_dict,
         common,
         arpabet_to_ipa,
         classes,
     );
-    let tagger = PosTagger::new(
-        load_json::<PosModel>(DIR, "pos-model.json").unwrap_or_else(|e| panic!("{e}")),
-    );
+    let tagger =
+        PosTagger::new(load_json::<PosModel>(DIR, "pos-model.json").map_err(|e| e.to_string())?);
     let set = |v: &[String]| v.iter().map(|s| js(s)).collect::<HashSet<JsString>>();
     let map = |v: &IndexMap<String, String>| {
         v.iter()
             .map(|(k, x)| (js(k), js(x)))
             .collect::<IndexMap<JsString, JsString>>()
     };
-    EnglishPhonemizer {
+    Ok(EnglishPhonemizer {
         lexicon,
         heteronyms,
         g2p,
@@ -805,5 +804,5 @@ pub fn create_english() -> EnglishPhonemizer {
         non_tonic_final: set(&m.non_tonic_final),
         wh_secondary: set(&m.wh_secondary),
         clause_initial_stressed: map(&m.clause_initial_stressed),
-    }
+    })
 }

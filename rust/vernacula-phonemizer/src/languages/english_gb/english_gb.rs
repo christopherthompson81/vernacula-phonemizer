@@ -175,7 +175,8 @@ pub fn to_rp(gen_am: &JsString, word: &JsString, lex: Option<&LexSets>) -> JsStr
     P.coda_r.replace(&s, &none)
 }
 
-static GB: LazyLock<EnglishPhonemizer> = LazyLock::new(create_english);
+static GB: LazyLock<EnglishPhonemizer> =
+    LazyLock::new(|| create_english().unwrap_or_else(|e| panic!("{e}")));
 
 pub fn phonemize_word(word: &JsString) -> JsString {
     to_rp(&GB.text(word), word, Some(&SETS))
@@ -204,8 +205,8 @@ impl EnglishGb {
     }
 }
 
-pub fn create_english_gb() -> EnglishGb {
-    EnglishGb {
-        e: create_english(),
-    }
+pub fn create_english_gb() -> Result<EnglishGb, String> {
+    Ok(EnglishGb {
+        e: create_english()?,
+    })
 }

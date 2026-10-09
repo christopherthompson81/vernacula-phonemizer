@@ -11,18 +11,19 @@ pub mod core;
 pub mod languages;
 pub mod registry;
 
-pub use registry::{LANGUAGES, UnknownLanguage};
+pub use registry::{LANGUAGES, PhonemizeError, tagger_unavailable_reason};
 
 use core::js_string::JsString;
 
-/// Phonemize `text` in `lang` to canonical IPA (synchronous). Errors for a language this build lacks.
-pub fn phonemize(text: &str, lang: &str) -> Result<String, UnknownLanguage> {
+/// Phonemize `text` in `lang` to canonical IPA (synchronous). Errors for a language this build lacks, or
+/// when that language's data cannot be loaded.
+pub fn phonemize(text: &str, lang: &str) -> Result<String, PhonemizeError> {
     registry::phonemize_in(lang, &JsString::from(text)).map(|s| s.to_string_lossy())
 }
 
 /// Phonemize real-world text by the best available path: `phonemizeAsync`'s twin (synchronous here). For
 /// English that is the BiLSTM OOV tagger; without a usable model it is exactly `phonemize`.
-pub fn phonemize_best(text: &str, lang: &str) -> Result<String, UnknownLanguage> {
+pub fn phonemize_best(text: &str, lang: &str) -> Result<String, PhonemizeError> {
     registry::phonemize_best_in(lang, &JsString::from(text)).map(|s| s.to_string_lossy())
 }
 
@@ -32,7 +33,7 @@ pub struct PhonemeTrace {
     pub trace: core::trace::Trace,
 }
 
-pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, UnknownLanguage> {
+pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, PhonemizeError> {
     let input = JsString::from(text);
     core::trace::start_trace(&input);
     match registry::phonemize_in(lang, &input) {
@@ -47,5 +48,16 @@ pub fn phonemize_trace(text: &str, lang: &str) -> Result<PhonemeTrace, UnknownLa
             core::trace::stop_trace(None);
             Err(e)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unknown_language_is_an_error_not_a_panic() {
+        assert_eq!(phonemize("x", "xx-unported"), Err(PhonemizeError::UnknownLanguage("xx-unported".into())));
+        assert_eq!(phonemize_best("x", "xx-unported"), Err(PhonemizeError::UnknownLanguage("xx-unported".into())));
     }
 }
