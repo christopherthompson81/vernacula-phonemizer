@@ -520,6 +520,38 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "pt-normalize" => Box::new(|input| {
+            use vernacula_phonemizer::languages::portuguese::normalize::*;
+            let t = units(&input["text"]);
+            match input["op"].as_str().unwrap() {
+                "ep" => normalize_portuguese(&t, false),
+                "bp" => normalize_portuguese(&t, true),
+                _ => normalize_portuguese_initialisms(&normalize_portuguese(&t, true)),
+            }
+        }),
+        "pt-g2p" => Box::new(|input| {
+            use vernacula_phonemizer::languages::portuguese::g2p::Dialect;
+            use vernacula_phonemizer::languages::portuguese::portuguese::{phonemize_word, render_word};
+            let w = units(&input["word"]);
+            match input["op"].as_str().unwrap() {
+                "ep" => phonemize_word(&w, Dialect::Ep),
+                "bp" => phonemize_word(&w, Dialect::Bp),
+                "br" => vernacula_phonemizer::languages::portuguese_br::portuguese_br::phonemize_word(&w),
+                "render-ep" => render_word(&w, None, Dialect::Ep),
+                _ => render_word(&w, None, Dialect::Bp),
+            }
+        }),
+        "pt-numbers" => Box::new(|input| {
+            use vernacula_phonemizer::languages::portuguese::g2p::Dialect;
+            let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+            if input.get("ordinal").is_some() {
+                return vernacula_phonemizer::languages::portuguese::roman_ordinals::portuguese_ordinal(n)
+                    .unwrap_or_else(|| JsString::from("\u{0}none"));
+            }
+            let d = if input["d"] == "bp" { Dialect::Bp } else { Dialect::Ep };
+            let raw = input.get("raw").map(|r| JsString::from(r.as_str().unwrap()));
+            vernacula_phonemizer::languages::portuguese::numbers::number_to_words(n, d, raw.as_ref())
+        }),
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

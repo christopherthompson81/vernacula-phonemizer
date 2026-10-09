@@ -1,0 +1,102 @@
+# Synthetic Portuguese probes (pt-BR, also read by the pt dumps): one line per normalize.ts arm plus the
+# neighbour it must decline, then g2p/number/initialism/Roman corners. Fabricated text only. `\u{XXXX}` and
+# `\n` are decoded by dump.mts.
+# 0) digit grouping with a space (NBSP, NNBSP, thin space), and the space fold
+Custa 1 000 reais hoje
+Custa 1\u{a0}000 reais hoje
+Foram 1\u{202f}000\u{2009}000 pessoas
+Foram 10 000 votos
+Foram 1 0000 votos
+Foram 0 000 votos
+Ficou 1,5 000 metros
+a\u{a0}b\u{2009}c
+# 1) era markers
+Em 300 a.C. e 200 d. C. houve guerras
+Era na.C. outro dia
+Em 50 A.C. tudo mudou
+# 2) número only before a digit
+Moro no nº 5 da rua
+O n.º 12 e o n° 3 e o no 7 e o núm. 4
+Moro no centro da cidade
+# 3) dotted abbreviations, sentence continues / phrase end / fold near-miss
+O Sr. Silva chegou com a Dra. Ana
+Chegou o Dr.
+Comprou pão, leite etc. e foi embora
+Comprou pão, leite etc.
+O \u{17f}r. Silva chegou
+O Sr.Silva chegou
+Os Srs. Lima e a PROF. Rosa
+Leia o cap. dois, pág. 5 e o vol. três
+# 4) ordinal indicators
+Ficou em 1º lugar na 5ª série
+O 37º e o 21ª edição
+Seu 1.000º selo
+O 2.500º visitante e o 1.000.000º
+O 0º caso
+Fazia 35° ontem
+# 5) R$, 5b) dollar codes
+Custou R$ 10,50 e R$1.000
+O R$ abc
+Vendidas por US$ 11.000 a onça
+Custa AUD$ 5 e US$\u{a0}3
+Preços em US$ hoje
+O BUS$ 5 chegou
+# 6) degrees
+Fazia 25 °C e 1 °C e 21°C
+Mediu 1,0 °F e 1.000 °C
+Estava a 30° hoje
+Em 25°Cölner rua
+Fazia 25 °Celsius
+# 7) clock
+Chegou às 07h19 e saiu à 1h
+Abriu às 13h00 e fechou às 9h30min
+Às 12:45 ou à 1:00
+Às 24:00 ou 12:45:30 ou 25h
+Às 16h17 em ponto
+# 8) signs
+Fez -5 graus e (−3) e –2
+Mede ±5 metros
+Somou a+5 e +3 e x + 4
+O a-5 e o C++ ficam
+# 8b) relational and division
+Se x = 5 e 3<4 e 5 > 2
+Dez é 10 ÷ 2 mais nada
+# 9) fractions
+Comeu 1/2 e 2/3 e 3/4 e 5/10
+Comeu 7/999 bolos
+Em 12/05/2020 e 1/1001 e 0/5 e 3/1
+# 10) BP first of the month
+No dia 1 de julho e 1 de Março
+No dia 1º de maio
+No dia 11 de julho e 1 de julhos
+# initialisms
+Os EUA e a TV e o IPTU
+A BBC e a CNN e o XYZ chegaram
+O ABC123 e a U.S.A. hoje
+Falou com J. Silva Santos
+TUDO EM CAIXA ALTA AQUI
+# Roman numerals (pt's policy)
+No século XV e no XL aniversário
+O XXV congresso e Luís XIV e o IV festival
+O capítulo III e o Papa Bento XVI
+# numbers through the tokenizer
+Pi é 3,14 e custa 1.500 e 0.5
+Os números 16 17 19 e 1000000 e 2000000001 e 00012
+O 1.000.000 e o 12.345,678
+# g2p corners
+Uma naïve Klöcker em Vichy com curry
+O Cañitas, o señor e a Straße
+O Æsir e þorn e ðe
+O 𝐚bc e ×
+Gente, cidade, tia e dia no Brasil
+Fácil, útil, soldado, abandona e acena
+Também homem bom sim um
+Raiz, sair, mais, dois, juiz, miúdo
+# symbol tier (needs makeSymbolNormalizer)
+Subiu 50% e custa € 20 e 5 km
+Mede 3 m² e o B&B e 2 × 3
+# mixed script (foreign runs, the best path's English prewarm)
+O nome Москва e Tokyo
+O grego λόγος aqui
+Visitou 東京 com a amiga
+O show de rock foi cool

@@ -26,9 +26,14 @@ use crate::languages::english::english::{EnglishPhonemizer, WordTransform, creat
 use crate::languages::english::english_neural::{phonemize_en_neural, prewarm_foreign_english};
 use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagger_files};
 use crate::languages::english_gb::english_gb::rp_word_transform;
+use crate::languages::portuguese::g2p::Dialect;
+use crate::languages::portuguese::portuguese::create_portuguese;
+use crate::languages::portuguese::roman_ordinals::roman_policy as pt_roman_policy;
+use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
+use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 5] = ["en", "en-GB", "ja", "it", "es"];
+pub const LANGUAGES: [&str; 7] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -67,6 +72,8 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "es" => crate::languages::spanish::spanish::create_spanish(false)
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "pt" => create_portuguese(Dialect::Ep, None).map(|e| e as Arc<dyn Engine>),
+        "pt-BR" => create_portuguese_br().map(|e| e as Arc<dyn Engine>),
         _ => return None,
     })
 }
@@ -77,6 +84,8 @@ fn roman_policy(lang: &str) -> RomanPolicy {
     match lang {
         "it" => crate::languages::italian::roman_ordinals::roman_policy(),
         "es" => crate::languages::spanish::roman_ordinals::roman_policy(),
+        "pt" => pt_roman_policy(),
+        "pt-BR" => pt_br_roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
             ..Default::default()
