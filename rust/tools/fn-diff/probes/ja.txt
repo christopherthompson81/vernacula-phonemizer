@@ -1,0 +1,128 @@
+# Japanese off-golden probes: synthetic text only. One line per arm of normalize.ts and japanese.ts, then
+# the neighbour that arm must decline. `\n` and `\u{XXXX}` escapes are decoded by dump.mts.
+# 0) width folds
+３個のりんごを買った
+ＮＡＳＡとＦＢＩ
+ｗｉｆｉの設定
+# 0a) declared ruby (interlinear annotation, aozora); neighbour: a bare ｜ with no 《》
+\u{FFF9}日本\u{FFFA}にっぽん\u{FFFB}の話
+｜日本《にっぽん》の話
+｜日本の話
+｜日本《ニッポン》の話
+# 0b) parenthesised ruby: equal reading dropped; gloss, alternate reading and katakana gloss kept
+漢字（かんじ）を書く
+漢字(かんじ)を書く
+日本（にほんじん）
+日本（にっぽん）
+会議（ミーティング）
+漢字（カンジ）を書く
+# 1) comma-grouped thousands; neighbours 1,2 / 1,2345 / 0,500
+人口は3,850人です
+1,000,000円の予算
+比率は1,2です
+番号1,2345
+0,500と書く
+# 3) 分の between digits; neighbours 自分の / 7時30分の
+3分の1が残った
+自分の本
+7時30分の電車
+# 4) slash fractions; neighbours a date and a path
+1/2のケーキ
+2024/10/09に会う
+a/b/cのパス
+1234/5の値
+# 5) clock; neighbours a ratio and a degree class
+11:00に始まる
+7:30に起きる
+3:2で勝った
+24:00は無効
+# 6) decimals; neighbours a version string and a trailing point
+1.5キロ
+6.34点
+3.14159は円周率
+1.2.3の版
+5.で終わる
+# 7) ranges; neighbour a tilde not before a digit
+2～3回
+1894年〜1895年
+10~20人
+東京〜大阪
+# 8) degrees; neighbours °Cm and a bare °
+20℃です
+20℃を超えた
+30 °Cの日
+華氏 70°F
+70℉の朝
+5°Cm
+45°の角度
+# 9) signs
+-5度の朝
+（−3）と書く
+±2の誤差
++3の変化
+x+3を計算
+# 9aa) relational and division; neighbour non-digit operands
+3<7です
+7>3です
+a<bの場合
+1+1=2
+6÷2は3
+# 9b) the dimension sign; neighbour a non-digit
+6×6 cmの写真
+56 × 56の板
+A×Bの行列
+# 10) initialisms and word acronyms; neighbours mixed case, São, isolated capital, hyphenated
+FBIとCIAの捜査
+CEOが来た
+NATOとUNESCO
+XDR-TBの患者
+pHの値
+Appleの新製品
+São Pauloに行く
+Aランク
+ISISに捕らえられた
+# counters with numbers (japanese.ts fusion), and the heads-compound guard
+1本のペン
+3本の木
+6本と8本と10本
+100本の花
+1000本の線
+3階に住む
+1000階はない
+4月と7月と9月
+4時と7時と9時
+1日と2日と20日と24日
+1人と2人と4人
+3分と4分
+2泊3日
+1つ2つ3つ10つ
+3時間かかる
+3年生です
+5は大きい
+7は3より小さい
+20歳の誕生日
+21本の木
+300頭の牛
+# numbers: zero, large, unsafe
+0と100と10000
+123456789012
+12345678901234567890
+# mixed kana / kanji / Latin, long vowels, sokuon, moraic ん
+東京タワーとTokyo Tower
+コーヒーとケーキ
+おおさかときょうと
+けいいを払う
+きっぷとがっこう
+しんぶんとてんき
+ファイルとティーとデュエット
+ヴァイオリン
+そのうちに行く
+きのこのスープ
+学生です
+増減できます
+私は東京へ行く
+東京から大阪まで
+奈々と時々
+𠮟る先生
+カタカナ、ひらがな。漢字！
+これは?それは!
