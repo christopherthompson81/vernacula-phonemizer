@@ -2,9 +2,14 @@
 // in src/main.rs. Strings are encoded as arrays of UTF-16 code units so a lone surrogate survives.
 //
 //   npx tsx rust/tools/fn-diff/dump.mts <name> > .probe/rust/<name>.jsonl
+import { readFileSync } from "node:fs";
 import { MANIFEST } from "../../../src/languages/english/manifest.ts";
 import { makeArpabetToIpa } from "../../../src/languages/english/englishArpabet.ts";
-import { loadTsvMap } from "../../../src/core/loadTsv.ts";
+import { loadTsvMap, loadLines } from "../../../src/core/loadTsv.ts";
+import { loadJson } from "../../../src/core/loadManifest.ts";
+import { PosTagger, type PosModel } from "../../../src/languages/english/posTagger.ts";
+import { americanSpelling } from "../../../src/languages/english/spellingVariants.ts";
+import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
 
 const units = (s: string): number[] => Array.from({ length: s.length }, (_, i) => s.charCodeAt(i));
 const emit = (input: unknown, output: string): void => {
@@ -24,6 +29,40 @@ const dumps: Record<string, () => void> = {
         // Also with no word (the tagger's call shape: makeArpabetToIpa(MANIFEST.arpabet)(phones)).
         const bare = makeArpabetToIpa(MANIFEST.arpabet);
         for (const [, phones] of [...dict].slice(0, 5000)) emit({ word: [], phones, bare: true }, bare(phones));
+    },
+    // Whitespace-split sentences of every English golden, through the POS tagger (tags joined by spaces).
+    pos() {
+        const tagger = new PosTagger(loadJson<PosModel>(ENGLISH, "pos-model.json"));
+        for (const g of ["en", "en-GB", "en-IN"]) {
+            const rows = readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n");
+            for (const row of rows) {
+                const text = row.split("\t")[0] ?? "";
+                if (text === "") continue;
+                const words = text.split(/\s+/u).filter((w) => w !== "");
+                emit({ words: words.map(units) }, tagger.tag(words).join(" "));
+            }
+        }
+    },
+    // Every word of the en-GB lexical-set tables and the lexicon, against lexicon membership as `known`.
+    spelling() {
+        const dict = loadTsvMap(ENGLISH, "g2p-dict.tsv", (v) => v);
+        const known = (w: string): boolean => dict.has(w);
+        const words = new Set<string>();
+        const GB = new URL("../../../src/languages/english-gb/english-gb.ts", import.meta.url).href;
+        for (const f of ["en-gb-lexical.tsv", "en-gb-bath.tsv", "en-gb-trap.tsv", "en-gb-lotr.tsv", "en-gb-cloth.tsv", "en-gb-palm.tsv", "en-gb-marry.tsv", "en-gb-yod.tsv"])
+            for (const l of loadLines(GB, f)) words.add(l.split("\t")[0]!);
+        for (const k of dict.keys()) words.add(k);
+        for (const w of ["colour", "honourable", "favourite", "centre", "theatre", "realise", "organisations", "analyse", "travelled", "jewellery", "fulfilment", "anaesthetic", "manoeuvre", "catalogue", "programme", "sulphur", "connexion", "hourly", "ourselves", "flavourful", "labourer", "neighbourhoods", "paediatrician", "oestrogen", "haemorrhage", "cancelled", "modelling"]) words.add(w);
+        for (const w of words) emit({ word: units(w) }, americanSpelling(w, known) ?? "\u0000none");
+    },
+    numbers() {
+        const ns: bigint[] = [];
+        for (let i = 0n; i <= 20000n; i++) ns.push(i);
+        for (let e = 3n; e <= 36n; e++) { ns.push(10n ** e); ns.push(10n ** e - 1n); ns.push(10n ** e + 7n); ns.push(123456789n * 10n ** (e - 3n) + 42n); }
+        for (const n of ns) {
+            emit({ n: n.toString(), ordinal: false }, numberToWords(n).join(" "));
+            emit({ n: n.toString(), ordinal: true }, ordinalToWords(n).join(" "));
+        }
     },
 };
 
