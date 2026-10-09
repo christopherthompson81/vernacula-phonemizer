@@ -332,6 +332,31 @@ mod tests {
         assert_eq!(phonemize("São Paulo में", "hi").unwrap(), "sˈaᶷ pʰˈɔːloᶷ mˈeː̃");
     }
 
+    /// Every `rewrite` is on the pipeline string: no probe or golden line poisons the mapping (the TS
+    /// `tools/provenance-poison.mts hi` reports 0 sites as well).
+    #[test]
+    fn hindi_rewrites_never_poison_the_mapping() {
+        use std::{cell::Cell, rc::Rc};
+        let hits = Rc::new(Cell::new(0));
+        let h = hits.clone();
+        crate::core::provenance::on_poison(Some(Box::new(move |_, _| h.set(h.get() + 1))));
+        let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
+        let probes = std::fs::read_to_string(format!("{root}/rust/tools/fn-diff/probes/hi.txt")).unwrap();
+        let golden = std::fs::read_to_string(format!("{root}/csharp/goldens/hi.tsv")).unwrap();
+        let lines = probes
+            .lines()
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+            .chain(golden.lines().filter_map(|r| r.split('\t').next()));
+        let mut n = 0;
+        for l in lines {
+            crate::phonemize_trace(l, "hi").unwrap();
+            n += 1;
+        }
+        crate::core::provenance::on_poison(None);
+        assert!(n > 300);
+        assert_eq!(hits.get(), 0);
+    }
+
     /// A Devanagari run inside English reaches this engine through the script reader.
     #[test]
     fn devanagari_inside_english_is_read_by_hindi() {
