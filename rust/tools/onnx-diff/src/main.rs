@@ -49,8 +49,8 @@ impl<'a> Rd<'a> {
         let shape: Vec<usize> = (0..nd).map(|_| self.i64() as usize).collect();
         let n: usize = shape.iter().product();
         let data = match code {
-            1 => Data::F32(self.take(4 * n).chunks_exact(4).map(|c| f32::from_le_bytes(c.try_into().unwrap())).collect()),
-            7 => Data::I64(self.take(8 * n).chunks_exact(8).map(|c| i64::from_le_bytes(c.try_into().unwrap())).collect()),
+            1 => Data::F32(self.take(4 * n).as_chunks::<4>().0.iter().map(|c| f32::from_le_bytes(*c)).collect()),
+            7 => Data::I64(self.take(8 * n).as_chunks::<8>().0.iter().map(|c| i64::from_le_bytes(*c)).collect()),
             2 => Data::U8(self.take(n).to_vec()),
             9 => Data::Bool(self.take(n).iter().map(|&b| b != 0).collect()),
             c => panic!("dtype {c} in reference file"),
@@ -140,7 +140,9 @@ fn main() {
         if !only.is_empty() && !only.contains(&stem) {
             continue;
         }
-        let Some(model_path) = find_model(&data, &stem) else {
+        // A single-op probe model sits beside its reference; a shipped model is found under data/.
+        let beside = f.with_extension("onnx");
+        let Some(model_path) = (if beside.exists() { Some(beside) } else { find_model(&data, &stem) }) else {
             println!("{stem}: no model under data/");
             continue;
         };

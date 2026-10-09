@@ -64,6 +64,7 @@ fn weights_for(t: &Tensor, zp: &Tensor, d: usize, k: usize, h4: usize, what: &st
 
 impl Lstm {
     /// `w`, `r` [D, K, 4H]; scales [D] or [D, 4H]; zero points the same shape as their scales.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         direction: Direction,
         hidden: usize,

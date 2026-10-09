@@ -8,6 +8,8 @@ pub mod mlas;
 mod model;
 mod proto;
 pub mod tensor;
+#[cfg(test)]
+mod tests;
 
 pub use model::OnnxModel;
 pub use tensor::{Data, Tensor};

@@ -52,3 +52,10 @@ Read that file first. Below are only the Rust dialect rules.
 - Pure Rust, in this crate: no `ort` and no native library (#1463). Its output is held to ONNX Runtime on
   the machine that generated the goldens. That means exact integer arithmetic, plus MLAS's
   dynamic-quantization rounding and its sigmoid/tanh approximations.
+- It is `core::neural`: `load_model(key)` / `OnnxModel::from_bytes`, then `run(&[(name, Tensor)])`. An op,
+  attribute or layout it does not reproduce exactly fails at LOAD. Batch 1 only.
+- ⚠ Every MLAS/Eigen detail it copies is load-bearing, measured by reverting it (the knobs in `neural::mlas`):
+  the u8s8 int16 pair saturation alone breaks 99% of English words. Do not "fix" one as a bug or "simplify"
+  one onto libm. docs/investigations/rust-port/rust_neural_runtime_investigation.md has the counts.
+- Check a change with `.venv/bin/python -I rust/tools/onnx-diff/gen_refs.py` (ORT references into the
+  gitignored `.probe/neural/`), then `cd rust && cargo run --release -p onnx-diff`. Every row must stay exact.

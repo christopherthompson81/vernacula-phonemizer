@@ -110,3 +110,158 @@ weights use the full int8 range and dynamically quantized activations reach 255.
 the saturation as an overflow bug would be wrong on 99% of words. The float-side details each move 30–55% of
 words and flip a handful of argmaxes — the same order as the cross-microarchitecture divergence recorded in
 csharp/PORTING.md (#1287), which is why "close" was never going to be good enough.
+
+## Run 5 — 2026-10-09 14:40 (speed: where 4.8 ms per word went)
+
+**Question.** The first build took 31 s for 6,450 English words (4.8 ms/word), and a first full fleet run
+did not finish in 10 minutes. What is slow? (`perf` is not permitted on this machine, so by timers.)
+
+**Command.** `cargo run --release --example neural_bench` (new: one T=10 English call ×2000, plus each
+primitive in isolation), then `onnx-diff --model en-g2p-tagger.int8` after each change.
+
+**Raw finding**, in order of the fixes:
+- A column-per-column scalar GEMM vectorised over N (`[K][N]` rows): SLOWER, 55 s. Baseline x86-64 has no
+  vector `pmulld`, so i32 multiplies stay scalar.
+- AVX2 `pmaddwd` over packed i16 K-pairs, runtime-detected: 20 s.
+- The MLAS kernel itself (`vpmaddubsw` + `vpmaddwd` with ones over K-quads, one byte per weight): 14 s.
+  Integer results identical to the scalar path (unit test `simd_and_scalar_quad_kernels_agree`).
+- Primitives in isolation then showed `activations 1024: 19.75 us` against `gemm 1x256x1024: 5.95 us`:
+  `f32::mul_add` without the `fma` target feature is a CALL to libm `fmaf`. Compiled under
+  `#[target_feature(enable = "avx2,fma")]` (runtime-detected): `0.32 us`. FMA is exactly rounded either way,
+  so the bits cannot move (`fma3_build_matches_portable_build`).
+- Transpose/Slice/broadcast index maps rebuilt as an odometer instead of a div/mod per element, the GEMM's K
+  loop hoisted outside its M loop (one quad-row of B serves every row of A from L1), the per-element knob
+  checks hoisted out of the dequantize loops: 5.8 s, ~0.9 ms/word.
+
+Every step was re-run against the reference: 6450/6450 exact throughout.
+
+**Implication.** Fast enough for the engine (the tagger runs only on OOV words). ORT itself is faster still;
+the remaining cost is the input projection streaming W (512 KB per direction) and the per-step R (256 KB,
+just over this core's 256 KB L2). Not pursued further.
+
+## Run 6 — 2026-10-09 15:00 (the whole fleet)
+
+**Question.** Does the same interpreter reproduce every other model?
+
+**Command.** `.venv/bin/python -I rust/tools/onnx-diff/gen_refs.py --n 2000` (taggers: 2,000 random id
+sequences from each model's own embedding vocabulary, T = 1..48; restorers: 200 encoder runs of T = 1..40 and
+6 greedy decoder steps each), English regenerated at `--n 5000`; then `cargo run --release -p onnx-diff`.
+
+**Raw finding.**
+```
+af-g2p-tagger.int8 [logits]: cases 2000/2000 exact, rows 48547/48547 exact, max|diff| 0e0, argmax flips 0
+bn-g2p-tagger.int8 [logits]: cases 2000/2000 exact, rows 48563/48563 exact, max|diff| 0e0, argmax flips 0
+ckb-bizroke-tagger.int8 [logits]: cases 2000/2000 exact, rows 48901/48901 exact, max|diff| 0e0, argmax flips 0
+da-g2p-tagger.int8 [logits]: cases 2000/2000 exact, rows 49901/49901 exact, max|diff| 0e0, argmax flips 0
+diacritizer-egy [logits]: cases 2000/2000 exact, rows 47911/47911 exact, max|diff| 0e0, argmax flips 0
+diacritizer [logits]: cases 2000/2000 exact, rows 49064/49064 exact, max|diff| 0e0, argmax flips 0
+en-g2p-tagger.int8 [logits]: cases 6450/6450 exact, rows 57056/57056 exact, max|diff| 0e0, argmax flips 0
+fa-context-restorer.dec: LOAD FAILED: unsupported ONNX model: op ::ReduceSum (node "/ReduceSum")
+fa-context-restorer.enc [enc_o]: cases 200/200 exact, rows 4339/4339 exact, max|diff| 0e0, argmax flips 0
+fa-tagger.int8 [logits]: cases 2000/2000 exact, rows 49876/49876 exact, max|diff| 0e0, argmax flips 0
+fa-vowel-restorer.dec: LOAD FAILED: unsupported ONNX model: op ::ReduceSum (node "/ReduceSum")
+fa-vowel-restorer.enc [enc_o]: cases 200/200 exact, rows 4068/4068 exact, max|diff| 0e0, argmax flips 0
+fr-g2p-tagger.int8 [logits]: cases 2000/2000 exact, rows 49166/49166 exact, max|diff| 0e0, argmax flips 0
+he-tagger.int8 [logits]: cases 2000/2000 exact, rows 47953/47953 exact, max|diff| 0e0, argmax flips 0
+km-segmenter.int8 [logits]: cases 2000/2000 exact, rows 48708/48708 exact, max|diff| 0e0, argmax flips 0
+nb-g2p-tagger.int8 [logits]: cases 2000/2000 exact, rows 49137/49137 exact, max|diff| 0e0, argmax flips 0
+riderDiacritizer [logits]: cases 2000/2000 exact, rows 48472/48472 exact, max|diff| 0e0, argmax flips 0
+sd-g2p-tagger.int8 [logits]: cases 2000/2000 exact, rows 48828/48828 exact, max|diff| 0e0, argmax flips 0
+```
+af/da/fr/nb have a u8 head weight (the u8u8 kernel, exact in int32); the other heads are s8 (u8s8, saturating).
+Both kernels are exercised and both are exact. 2m30s for the fleet.
+
+**Implication.** All 15 family-(a) models and both Persian encoders: bit-identical. The two decoders fail
+loudly at load, as designed: they need `ReduceSum`, `Where`, `Softmax`, float `MatMul` and `Squeeze`, which are
+float reductions whose summation order is ORT's (Eigen and MLAS), not arithmetic. Next: read those.
+
+## Run 7 — 2026-10-09 15:30 (the Persian decoders: float reductions)
+
+**Question.** The decoders add attention: `Mul → ReduceSum(−1) → Where(mask, ·, −1e9) → Softmax → MatMul(enc_o)`.
+What does ORT execute for each, and does reproducing it close the decoders?
+
+**ORT/Eigen source read.**
+- ORT's optimized decoder graph fuses both heads into `DynamicQuantizeMatMul` (same arithmetic as Run 1) and
+  folds `Not → Cast → Where` into `Where` with swapped branches (a select: exact either way).
+- `ReduceSum` over the last axis is `FastReduceKR`: per row, `Eigen::Map<VectorXf>(row).sum()`. ORT pins Eigen
+  at commit 1d8b82b0 (cmake/deps.txt). Its `redux_impl<LinearVectorizedTraversal, NoUnrolling>` with SSE
+  `Packet4f` (ORT's C++ is built for baseline x86-64): two packet accumulators over the 16-byte-aligned body,
+  `predux` = `(a0+a2)+(a1+a3)`, then the unaligned head and the tail added one by one. The head depends on the
+  row's ADDRESS, so a row at float offset `o` (ORT buffers are 64-byte aligned) starts its body at
+  `(4 − o%4) % 4`.
+- `Softmax` → `MlasComputeSoftmax`: max (exact), `MlasComputeSumExpF32KernelFma3` (an exp of its own: clamp at
+  −88.376, range-reduce by `round(x/ln2)` via the 12582912 rounding-bias trick, a degree-6 FMA polynomial, the
+  2^m scale built by integer adds on the bits; the sum in 8 lane accumulators, then `vhaddps`×2 and the two
+  128-bit halves added), then every element × `1/sum`.
+- `MatMul` [1,1,T]×[1,T,512] → `MlasGemmBatch` → M = 1 → `MlasSgemmKernelM1Avx`: K in groups of 4 (then 2,
+  then 1), each group's products summed left to right with `vmulps`/`vaddps` (no FMA) and only then added to C.
+
+**Command.** Implemented as `mlas::{eigen_sum, sum_exp, softmax_row, sgemm_m1}`;
+`onnx-diff --model fa-vowel-restorer.dec --model fa-context-restorer.dec`.
+
+**Raw finding.** Both decoders, every output (`logits`, `h_out`, `c_out`): `cases 1200/1200 exact` (200 encoder
+runs × 6 greedy steps, a random half with a partial mask).
+
+Reverting each piece (knob, `logits` rows exact of 1,200; context / vowel):
+
+| K | replaced | context | vowel |
+|---|---|---|---|
+| 128 | Eigen sum + M1 grouping → sequential sums | 1,134 | 1,122 |
+| 256 | MLAS softmax → libm exp, sequential sum | 1,199 | 1,200 |
+| 1 | u8s8 saturation | 1,017 | 1,070 |
+| 2 / 4 | MLAS logistic / tanh | 886 / 912 | 1,143 / 1,134 |
+| 8 | post-processor FMA | 1,127 | 1,183 |
+| 16 / 32 | quantize reciprocal / round-away | 1,175 / 757 | 1,192 / 1,172 |
+| 64 | polynomials without FMA | 802 | 1,109 |
+
+**Implication.** The softmax is a WEAK witness here: switching it to libm moves 1 row of 2,400, because the next
+op (`DynamicQuantizeLinear` of the concat) absorbs sub-ulp differences. That is "flat may mean blind", not
+proof that the MLAS softmax is unnecessary. So: test the three float ops in isolation (Run 8).
+
+## Run 8 — 2026-10-09 15:45 (single-op probes for the float reductions)
+
+**Question.** Are `ReduceSum`, `Softmax` and `MatMul` exact on their own, where nothing downstream rounds the
+difference away?
+
+**Command.** `gen_refs.py --n 3000 ops` (new: writes one-node models `op-softmax`, `op-reducesum`, `op-matmul`
+into `.probe/neural/` with ORT outputs — softmax rows of 1–64 with 15% masked to −1e9 at three logit scales;
+ReduceSum rows of 512 and of 1, 3, 7, 37, 130, 513; MatMul K = 1–64 (every residue mod 4), N = 512, 37, 8, 3),
+then `onnx-diff --model op-softmax --model op-reducesum --model op-matmul --knobs K`.
+
+**Raw finding** (cases exact of 3,000):
+
+| | shipped | K=128 sequential sums | K=256 libm softmax | alignment-blind Eigen sum (temporary edit) |
+|---|---|---|---|---|
+| op-softmax | 3,000 | 3,000 | **286** | — |
+| op-reducesum | 3,000 | **834** | 3,000 | **1,611** |
+| op-matmul | 3,000 | **261** | 3,000 | — |
+
+**Implication.** In isolation each reproduction is load-bearing: the MLAS softmax (2,714 of 3,000 differ
+without it), Eigen's packet order (2,166), the address-dependent unaligned head (1,389 — only odd row
+lengths; the decoders' 512 never trigger it), and the M1 kernel's grouping (2,739). All exact as shipped.
+Every model under `data/` is now bit-identical. A `PINNED` table of 11 English words' logit hashes, generated
+by `gen_refs.py --pin`, guards it in `cargo test`; reverting the saturation (knob 1) or the post-processor
+(knob 8) by editing the knob default makes that test fail, so the guard sees both the large and a small
+regression.
+
+## Run 9 — 2026-10-09 16:10 (final fleet, thread count, and Node again)
+
+**Question.** After the decoder ops and the clippy clean-up, is everything still exact; does the ORT
+reference depend on its thread count; and is Python's ORT still Node's ORT for the newly covered ops?
+
+**Command.** `cargo run --release -p onnx-diff` (all 21 reference files); `gen_refs.py --threads 1` into a
+scratch directory and `cmp` against the default-thread English file; the Node replay script on
+fa-vowel-restorer.dec, riderDiacritizer and op-softmax.
+
+**Raw finding.** Every line of the fleet run reads `… exact, max|diff| 0e0, argmax flips 0` (2m23s):
+15 taggers/diacritizers, both encoders, both decoders (`logits`, `h_out`, `c_out`), three op probes. The
+one-thread English reference is byte-identical to the default-thread one. Node:
+`3600/3600`, `2000/2000`, `3000/3000 outputs bit-identical to the Python reference`.
+
+**Implication.** Done for every model under `data/` on this machine. Known limits, all refused loudly rather
+than approximated: batch > 1 (ORT splits the batch over threads, and each split quantizes its own rows);
+`sequence_lens`, peepholes, `input_forget`, non-default LSTM activations; per-axis `DequantizeLinear`;
+`ReduceSum` over non-trailing axes; `Softmax` over a non-last axis; float `MatMul` with M > 1 (MLAS's blocked
+SGEMM order is not reproduced). The reproduction is of THIS dispatch (AVX2 + FMA3, no AVX-VNNI/AVX512): on a
+VNNI machine MLAS uses `vpdpbusd`, which does not saturate, so the saturation emulation would be wrong there —
+consistent with csharp/PORTING.md's "on one machine" contract (#1287), and not detected at run time.

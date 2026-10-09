@@ -103,7 +103,7 @@ fn push_floats(out: &mut Vec<f32>, v: &Value) -> Result<(), NeuralError> {
     match v {
         Value::Fixed32(x) => out.push(f32::from_bits(*x)),
         Value::Bytes(b) if b.len() % 4 == 0 => {
-            out.extend(b.chunks_exact(4).map(|c| f32::from_le_bytes(c.try_into().unwrap())))
+            out.extend(b.as_chunks::<4>().0.iter().map(|c| f32::from_le_bytes(*c)))
         }
         _ => return Err(err("expected a repeated float")),
     }

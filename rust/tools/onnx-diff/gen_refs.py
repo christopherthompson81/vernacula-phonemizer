@@ -139,15 +139,104 @@ def run_restorer(enc_path, dec_path, out, n, rng, steps=6):
                     write_tensor(f, k, v)
 
 
+def op_probes(out_dir, n, rng):
+    """Single-op models for the float reductions the Persian decoders use, run through ORT in isolation: inside
+    the decoder their rounding is mostly absorbed by the next DynamicQuantizeLinear, so the whole-model replay is
+    a weak witness for them. Writes op-<name>.onnx beside op-<name>.ref."""
+    from onnx import TensorProto, helper
+
+    nrng = np.random.default_rng(1463)
+
+    def build(name, node, inputs, outputs):
+        g = helper.make_graph([node], name, inputs, outputs)
+        m = helper.make_model(g, opset_imports=[helper.make_opsetid("", 17)])
+        m.ir_version = 8
+        path = os.path.join(out_dir, f"op-{name}.onnx")
+        onnx.save(m, path)
+        return path
+
+    f32 = TensorProto.FLOAT
+    probes = {}
+    # Softmax over the last axis, rows of 1..64, with masked (-1e9) entries as the decoders produce.
+    sm = build("softmax", helper.make_node("Softmax", ["x"], ["y"], axis=-1),
+               [helper.make_tensor_value_info("x", f32, [1, "T"])], [helper.make_tensor_value_info("y", f32, [1, "T"])])
+
+    def softmax_case():
+        T = rng.randint(1, 64)
+        x = (nrng.standard_normal((1, T)) * rng.choice([0.5, 3.0, 20.0])).astype(np.float32)
+        x[nrng.random((1, T)) < 0.15] = np.float32(-1e9)
+        return {"x": x}
+    probes["softmax"] = (sm, softmax_case)
+    # ReduceSum over the last axis, keepdims 0: inner sizes the decoders use (512) and odd ones that exercise
+    # Eigen's unaligned head and scalar tail.
+    rs = build("reducesum", helper.make_node("ReduceSum", ["x", "axes"], ["y"], keepdims=0),
+               [helper.make_tensor_value_info("x", f32, [1, "T", "D"]), helper.make_tensor_value_info("axes", TensorProto.INT64, [1])],
+               [helper.make_tensor_value_info("y", f32, [1, "T"])])
+    def reducesum_case():
+        T, D = rng.randint(1, 40), rng.choice([512, 512, 1, 3, 7, 37, 130, 513])
+        return {"x": (nrng.standard_normal((1, T, D)) * 0.3).astype(np.float32), "axes": np.array([-1], np.int64)}
+    probes["reducesum"] = (rs, reducesum_case)
+    # MatMul [1,1,K] x [1,K,N], the attention read-out: K of every residue mod 4, N = 512 and an odd N.
+    mm = build("matmul", helper.make_node("MatMul", ["a", "b"], ["y"]),
+               [helper.make_tensor_value_info("a", f32, [1, 1, "K"]), helper.make_tensor_value_info("b", f32, [1, "K", "N"])],
+               [helper.make_tensor_value_info("y", f32, [1, 1, "N"])])
+    def matmul_case():
+        K, N = rng.randint(1, 64), rng.choice([512, 512, 37, 8, 3])
+        a = nrng.random((1, 1, K)).astype(np.float32)
+        a /= a.sum()
+        return {"a": a, "b": nrng.standard_normal((1, K, N)).astype(np.float32)}
+    probes["matmul"] = (mm, matmul_case)
+
+    for name, (path, make) in probes.items():
+        s = session(path)
+        with open(os.path.join(out_dir, f"op-{name}.ref"), "wb") as f:
+            f.write(b"ONNXREF1")
+            f.write(struct.pack("<I", n))
+            for _ in range(n):
+                feeds = make()
+                ys = s.run(None, feeds)
+                f.write(struct.pack("<I", len(feeds)))
+                for k, v in feeds.items():
+                    write_tensor(f, k, v)
+                f.write(struct.pack("<I", len(ys)))
+                for o, y in zip(s.get_outputs(), ys):
+                    write_tensor(f, o.name, y)
+        print("wrote op probe", name, n, "cases", file=sys.stderr)
+
+
+def fnv1a64(b):
+    h = 0xCBF29CE484222325
+    for x in b:
+        h = ((h ^ x) * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return h
+
+
+def pin(words):
+    """Print ORT's English logits for `words` as (word, element count, FNV-1a-64 of the raw f32 bytes), the
+    rows of the PINNED table in rust/vernacula-phonemizer/src/core/neural/tests.rs."""
+    meta = json.load(open("data/languages/english/en-g2p-tagger.meta.json"))
+    s = session("data/languages/english/en-g2p-tagger.int8.onnx")
+    for w in words:
+        x = np.array([[meta["src"][c] for c in w]], dtype=np.int64)
+        (y,) = s.run(None, {"chars": x})
+        b = np.ascontiguousarray(y, dtype="<f4").tobytes()
+        print(f'    ("{w}", {y.size}, 0x{fnv1a64(b):016x}),')
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "--pin":
+        pin(sys.argv[2:])
+        return
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=".probe/neural")
     ap.add_argument("--n", type=int, default=3000, help="cases per tagger (English: dictionary words)")
     ap.add_argument("--threads", type=int, default=None, help="intra-op threads (default: ORT's default)")
-    ap.add_argument("models", nargs="*", help="model stems to run (default: all)")
+    ap.add_argument("models", nargs="*", help="model stems to run, or `ops` for the single-op probes (default: all)")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     print("onnxruntime", ort.__version__, file=sys.stderr)
+    if not a.models or "ops" in a.models:
+        op_probes(a.out, a.n, random.Random(1463))
     for path in sorted(glob.glob("data/**/*.onnx", recursive=True)):
         stem = os.path.basename(path)[: -len(".onnx")]
         if a.models and stem not in a.models:

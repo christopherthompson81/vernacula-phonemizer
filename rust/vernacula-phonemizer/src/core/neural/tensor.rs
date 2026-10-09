@@ -163,11 +163,11 @@ impl Tensor {
         let n: usize = shape.iter().product();
         let raw = &t.raw_data;
         let data = match t.data_type {
-            FLOAT if !raw.is_empty() => Data::F32(raw.chunks_exact(4).map(|c| f32::from_le_bytes(c.try_into().unwrap())).collect()),
+            FLOAT if !raw.is_empty() => Data::F32(raw.as_chunks::<4>().0.iter().map(|c| f32::from_le_bytes(*c)).collect()),
             FLOAT => Data::F32(t.float_data.clone()),
-            INT64 if !raw.is_empty() => Data::I64(raw.chunks_exact(8).map(|c| i64::from_le_bytes(c.try_into().unwrap())).collect()),
+            INT64 if !raw.is_empty() => Data::I64(raw.as_chunks::<8>().0.iter().map(|c| i64::from_le_bytes(*c)).collect()),
             INT64 => Data::I64(t.int64_data.clone()),
-            INT32 if !raw.is_empty() => Data::I32(raw.chunks_exact(4).map(|c| i32::from_le_bytes(c.try_into().unwrap())).collect()),
+            INT32 if !raw.is_empty() => Data::I32(raw.as_chunks::<4>().0.iter().map(|c| i32::from_le_bytes(*c)).collect()),
             INT32 => Data::I32(t.int32_data.iter().map(|&x| x as i32).collect()),
             // int32_data carries the small integer types when raw_data is absent (onnx.proto).
             UINT8 if !raw.is_empty() => Data::U8(raw.clone()),

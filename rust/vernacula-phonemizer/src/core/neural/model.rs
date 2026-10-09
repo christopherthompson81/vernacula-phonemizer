@@ -30,6 +30,10 @@ enum Op {
     Mul,
     Add,
     Not,
+    ReduceSum { keepdims: bool, noop_with_empty_axes: bool },
+    Where,
+    Softmax { axis: i64 },
+    MatMul,
 }
 
 #[derive(Debug)]
@@ -304,6 +308,25 @@ impl OnnxModel {
                 (false, "Not") => {
                     only_attrs(n, &[])?;
                     Op::Not
+                }
+                (false, "ReduceSum") => {
+                    only_attrs(n, &["keepdims", "noop_with_empty_axes"])?;
+                    Op::ReduceSum {
+                        keepdims: attr_int(n, "keepdims", 1)? != 0,
+                        noop_with_empty_axes: attr_int(n, "noop_with_empty_axes", 0)? != 0,
+                    }
+                }
+                (false, "Where") => {
+                    only_attrs(n, &[])?;
+                    Op::Where
+                }
+                (false, "Softmax") => {
+                    only_attrs(n, &["axis"])?;
+                    Op::Softmax { axis: attr_int(n, "axis", -1)? }
+                }
+                (false, "MatMul") => {
+                    only_attrs(n, &[])?;
+                    Op::MatMul
                 }
                 (false, "DynamicQuantizeLinear") => {
                     only_attrs(n, &[])?;
@@ -669,12 +692,99 @@ fn run_node(node: &Node, args: &[Option<Arc<Tensor>>]) -> Result<Vec<Tensor>, Ne
                 (Data::I32(v), tensor::INT64) => Data::I64(v.iter().map(|&i| i64::from(i)).collect()),
                 (Data::F32(v), tensor::FLOAT) => Data::F32(v.clone()),
                 (Data::I64(v), tensor::INT64) => Data::I64(v.clone()),
+                (Data::Bool(v), tensor::BOOL) => Data::Bool(v.clone()),
                 (d, to) => return Err(NeuralError::Unsupported(format!("Cast {} to {to}", d.type_name()))),
             };
             vec![Tensor::new(x.shape.clone(), data)?]
         }
         Op::Mul => vec![binary_f32(arg(args, 0)?, arg(args, 1)?, |a, b| a * b)?],
         Op::Add => vec![binary_f32(arg(args, 0)?, arg(args, 1)?, |a, b| a + b)?],
+        Op::ReduceSum { keepdims, noop_with_empty_axes } => {
+            // Only the shape the models use and ORT's `FastReduceKR` serves: float, reducing a run of TRAILING
+            // axes, each kept row summed by Eigen. Anything else is refused rather than summed in another order.
+            let x = arg(args, 0)?;
+            let v = x.as_f32()?;
+            let r = x.shape.len();
+            let axes: Vec<usize> = match opt(args, 1) {
+                Some(a) if !a.is_empty() => {
+                    let mut ax: Vec<usize> =
+                        a.to_i64s()?.iter().map(|&v| norm_axis(v, r)).collect::<Result<_, _>>()?;
+                    ax.sort();
+                    ax.dedup();
+                    ax
+                }
+                _ if *noop_with_empty_axes => return Ok(vec![x.clone()]),
+                _ => (0..r).collect(),
+            };
+            let first = axes[0];
+            if axes != (first..r).collect::<Vec<_>>() {
+                return Err(NeuralError::Unsupported(format!("ReduceSum over axes {axes:?} of rank {r} (only trailing axes)")));
+            }
+            let inner: usize = x.shape[first..].iter().product();
+            let outer: usize = x.shape[..first].iter().product();
+            let out: Vec<f32> =
+                (0..outer).map(|o| mlas::eigen_sum(&v[o * inner..(o + 1) * inner], (o * inner) % 4)).collect();
+            let mut shape = x.shape[..first].to_vec();
+            if *keepdims {
+                shape.extend(std::iter::repeat_n(1, r - first));
+            }
+            vec![Tensor::f32(shape, out)?]
+        }
+        Op::Where => {
+            let c = arg(args, 0)?;
+            let (a, b) = (arg(args, 1)?, arg(args, 2)?);
+            let Data::Bool(cv) = &c.data else { return Err(NeuralError::Run("Where condition must be bool".into())) };
+            let (av, bv) = (a.as_f32()?, b.as_f32()?);
+            let out = broadcast_shape(&broadcast_shape(&c.shape, &a.shape)?, &b.shape)?;
+            let (ic, ia, ib) =
+                (broadcast_index(&c.shape, &out), broadcast_index(&a.shape, &out), broadcast_index(&b.shape, &out));
+            let v: Vec<f32> = (0..ic.len()).map(|i| if cv[ic[i]] { av[ia[i]] } else { bv[ib[i]] }).collect();
+            vec![Tensor::f32(out, v)?]
+        }
+        Op::Softmax { axis } => {
+            let x = arg(args, 0)?;
+            let r = x.shape.len();
+            if norm_axis(*axis, r)? != r - 1 {
+                return Err(NeuralError::Unsupported("Softmax over a non-last axis".into()));
+            }
+            let d = x.shape[r - 1];
+            let mut v = x.as_f32()?.to_vec();
+            if d > 0 {
+                for row in v.chunks_exact_mut(d) {
+                    mlas::softmax_row(row);
+                }
+            }
+            vec![Tensor::f32(x.shape.clone(), v)?]
+        }
+        Op::MatMul => {
+            // Float MatMul with one row per batch (M = 1): MLAS's M1 kernel. Larger M takes MLAS's blocked SGEMM,
+            // whose summation order is not reproduced here, so it is refused.
+            let (a, b) = (arg(args, 0)?, arg(args, 1)?);
+            let (av, bv) = (a.as_f32()?, b.as_f32()?);
+            let (ra, rb) = (a.shape.len(), b.shape.len());
+            if ra < 2 || rb < 2 {
+                return Err(NeuralError::Unsupported("MatMul of a 1-D operand".into()));
+            }
+            let (m, k) = (a.shape[ra - 2], a.shape[ra - 1]);
+            let (kb, n) = (b.shape[rb - 2], b.shape[rb - 1]);
+            if k != kb {
+                return Err(NeuralError::Run(format!("MatMul {:?} x {:?}", a.shape, b.shape)));
+            }
+            if m != 1 {
+                return Err(NeuralError::Unsupported(format!("MatMul with M = {m} (only M = 1 is reproduced)")));
+            }
+            if a.shape[..ra - 2] != b.shape[..rb - 2] {
+                return Err(NeuralError::Unsupported("MatMul with broadcast batch dims".into()));
+            }
+            let batch: usize = a.shape[..ra - 2].iter().product();
+            let mut out = vec![0f32; batch * n];
+            for bi in 0..batch {
+                mlas::sgemm_m1(&av[bi * k..(bi + 1) * k], &bv[bi * k * n..(bi + 1) * k * n], n, &mut out[bi * n..(bi + 1) * n]);
+            }
+            let mut shape = a.shape.clone();
+            shape[ra - 1] = n;
+            vec![Tensor::f32(shape, out)?]
+        }
         Op::Not => {
             let x = arg(args, 0)?;
             let Data::Bool(v) = &x.data else { return Err(NeuralError::Run("Not of a non-bool".into())) };

@@ -3,6 +3,11 @@
 //! The source each function follows is named on it; docs/investigations/rust-port/rust_neural_runtime_investigation.md
 //! records what each one is worth, measured by switching it off (`knobs`).
 
+// The MLAS constants are kept digit for digit as the C source spells them; they round to the same f32.
+#![allow(clippy::excessive_precision, clippy::approx_constant)]
+// `x.max(lo).min(hi)` spells out the kernels' maxps-then-minps order.
+#![allow(clippy::manual_clamp)]
+
 use std::sync::atomic::{AtomicU32, Ordering};
 
 /// Switches that replace one MLAS behaviour with the "obvious" one, so a differential run can measure what the
@@ -24,6 +29,10 @@ pub mod knobs {
     pub const QUANT_ROUND_AWAY: u32 = 32;
     /// The polynomials evaluated with separate multiply and add instead of FMA.
     pub const POLY_NO_FMA: u32 = 64;
+    /// Float reductions (ReduceSum, the MatMul dot products) as one sequential left-to-right sum.
+    pub const NAIVE_FLOAT_REDUCTIONS: u32 = 128;
+    /// Softmax with libm `exp` and a sequential sum, instead of MLAS's exp polynomial and lane sums.
+    pub const LIBM_SOFTMAX: u32 = 256;
 
     pub(crate) static KNOBS: AtomicU32 = AtomicU32::new(0);
 
@@ -221,7 +230,7 @@ fn accumulate_quads_u8s8(aq: u32, brow: &[i8], n: usize, saturate: bool, acc: &m
 fn accumulate_quads_u8s8_scalar(aq: u32, brow: &[i8], n: usize, saturate: bool, acc: &mut [i32]) {
     let sat = |s: i32| if saturate { s.clamp(i16::MIN as i32, i16::MAX as i32) } else { s };
     let a = aq.to_le_bytes().map(i32::from);
-    for (c, b) in acc[..n].iter_mut().zip(brow.chunks_exact(4)) {
+    for (c, b) in acc[..n].iter_mut().zip(brow.as_chunks::<4>().0) {
         let (b0, b1, b2, b3) = (i32::from(b[0]), i32::from(b[1]), i32::from(b[2]), i32::from(b[3]));
         *c += sat(a[0] * b0 + a[1] * b1) + sat(a[2] * b2 + a[3] * b3);
     }
@@ -427,6 +436,169 @@ pub fn tanh(v: &mut [f32]) {
     }
 }
 
+/// A C hex-float literal `0x1.<frac24>p<exp>` (6 hex digits = 24 bits, the last of which must be 0).
+const fn hexf(frac24: u32, exp: i32) -> f32 {
+    assert!(frac24 & 1 == 0);
+    f32::from_bits((((127 + exp) as u32) << 23) | (frac24 >> 1))
+}
+
+/// `MlasComputeSumExpF32KernelFma3` (mlas/lib/x86_64/TransKernelFma3.S, constants `MlasExpConstants` in
+/// compute.cpp): writes `exp(x + neg_max)` for each element and returns their sum, accumulated as the kernel
+/// does — eight lane accumulators, then `vhaddps`×2 within each 128-bit half and the two halves added.
+pub fn sum_exp(input: &[f32], neg_max: f32, out: &mut [f32]) -> f32 {
+    const LOWER_RANGE_SUM_EXP: f32 = -88.3762626647949;
+    const ROUNDING_BIAS: f32 = 12582912.0;
+    const LOG2_RECIPROCAL: f32 = 1.44269504088896341;
+    const LOG2_HIGH: f32 = -6.93145752e-1;
+    const LOG2_LOW: f32 = -1.42860677e-6;
+    const P0: f32 = hexf(0x694000, -10);
+    const P1: f32 = hexf(0x125edc, -7);
+    const P2: f32 = hexf(0x555b5a, -5);
+    const P3: f32 = hexf(0x555450, -3);
+    const P4: f32 = hexf(0xfffff6, -2);
+    const P56: f32 = hexf(0x000000, 0);
+    const MAXIMUM_EXPONENT: i32 = 0x3F800000;
+    let exp1 = |v: f32| -> f32 {
+        let x = (neg_max + v).max(LOWER_RANGE_SUM_EXP);
+        let biased = x.mul_add(LOG2_RECIPROCAL, ROUNDING_BIAS);
+        let m = biased - ROUNDING_BIAS;
+        let x = m.mul_add(LOG2_HIGH, x);
+        let x = m.mul_add(LOG2_LOW, x);
+        let mut p = P0.mul_add(x, P1);
+        p = p.mul_add(x, P2);
+        p = p.mul_add(x, P3);
+        p = p.mul_add(x, P4);
+        p = p.mul_add(x, P56);
+        p = p.mul_add(x, P56);
+        // vpslld 23 then vpaddd the exponent bias: integer arithmetic on the biased float's bits.
+        let scale = f32::from_bits(((biased.to_bits() << 23) as i32).wrapping_add(MAXIMUM_EXPONENT) as u32);
+        p * scale
+    };
+    let mut acc = [0f32; 8];
+    // The 24-wide loop adds three vectors in order, the 8-wide loop one; lane-wise that is one add per element
+    // in input order, so a single pass reproduces both. A partial last vector adds 0.0 in its unused lanes.
+    for (i, (&v, o)) in input.iter().zip(out.iter_mut()).enumerate() {
+        let e = exp1(v);
+        *o = e;
+        acc[i % 8] += e;
+    }
+    let lo = (acc[0] + acc[1]) + (acc[2] + acc[3]);
+    let hi = (acc[4] + acc[5]) + (acc[6] + acc[7]);
+    hi + lo
+}
+
+/// `MlasComputeSoftmax` for one row (compute.cpp): the maximum, `sum_exp`, then every element multiplied by
+/// `1 / sum` (`MlasComputeSoftmaxOutputF32KernelAvx`).
+pub fn softmax_row(row: &mut [f32]) {
+    let max = row.iter().copied().fold(f32::MIN, f32::max);
+    if on(knobs::LIBM_SOFTMAX) {
+        let mut sum = 0.0f32;
+        for v in row.iter_mut() {
+            *v = (*v - max).exp();
+            sum += *v;
+        }
+        for v in row.iter_mut() {
+            *v /= sum;
+        }
+        return;
+    }
+    let input = row.to_vec();
+    let sum = sum_exp(&input, -max, row);
+    let scale = 1.0f32 / sum;
+    for v in row.iter_mut() {
+        *v *= scale;
+    }
+}
+
+/// Eigen 3.4's `Map<VectorXf>::sum()` (Redux.h, `LinearVectorizedTraversal`) with SSE `Packet4f`, as ORT's
+/// `ReduceSum` computes a contiguous row: two packet accumulators over the 16-byte-aligned body, the
+/// unaligned head and the tail added afterwards one by one. `align_offset` is the row's start in floats from
+/// a 16-byte boundary (ORT buffers are 64-byte aligned, so a row at element offset `o` has `o % 4`).
+pub fn eigen_sum(x: &[f32], align_offset: usize) -> f32 {
+    let size = x.len();
+    if size == 0 {
+        return 0.0;
+    }
+    if on(knobs::NAIVE_FLOAT_REDUCTIONS) {
+        return x.iter().fold(0.0f32, |a, &v| a + v);
+    }
+    let aligned_start = ((4 - align_offset % 4) % 4).min(size);
+    let aligned_size2 = (size - aligned_start) / 8 * 8;
+    let aligned_size = (size - aligned_start) / 4 * 4;
+    let aligned_end2 = aligned_start + aligned_size2;
+    let aligned_end = aligned_start + aligned_size;
+    let load = |i: usize| [x[i], x[i + 1], x[i + 2], x[i + 3]];
+    let add = |a: [f32; 4], b: [f32; 4]| [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]];
+    if aligned_size == 0 {
+        let mut res = x[0];
+        for &v in &x[1..] {
+            res += v;
+        }
+        return res;
+    }
+    let mut p0 = load(aligned_start);
+    if aligned_size > 4 {
+        let mut p1 = load(aligned_start + 4);
+        let mut i = aligned_start + 8;
+        while i < aligned_end2 {
+            p0 = add(p0, load(i));
+            p1 = add(p1, load(i + 4));
+            i += 8;
+        }
+        p0 = add(p0, p1);
+        if aligned_end > aligned_end2 {
+            p0 = add(p0, load(aligned_end2));
+        }
+    }
+    // predux<Packet4f>: tmp = a + movehl(a) = [a0+a2, a1+a3, ..]; tmp0 + tmp1.
+    let mut res = (p0[0] + p0[2]) + (p0[1] + p0[3]);
+    for &v in &x[..aligned_start] {
+        res += v;
+    }
+    for &v in &x[aligned_end..] {
+        res += v;
+    }
+    res
+}
+
+/// `MlasSgemmKernelM1Avx` (mlas/lib/x86_64/SgemmKernelM1Avx.S), beta = 0: `c = a · B` for one row `a` [K] and
+/// B [K, N]. K is consumed in groups of 4, then a group of 2, then 1; each group's products are summed left to
+/// right (`vmulps` then `vaddps`, no FMA) and only then added to C, which is 0.0 for the first group.
+pub fn sgemm_m1(a: &[f32], b: &[f32], n: usize, c: &mut [f32]) {
+    let k = a.len();
+    assert_eq!(b.len(), k * n);
+    let mut first = true;
+    let mut kk = 0;
+    if on(knobs::NAIVE_FLOAT_REDUCTIONS) {
+        for j in 0..n {
+            c[j] = (0..k).fold(0.0f32, |acc, kk| acc + a[kk] * b[kk * n + j]);
+        }
+        return;
+    }
+    let group = |kk: usize, g: usize, first: bool, c: &mut [f32]| {
+        for j in 0..n {
+            let mut t = a[kk] * b[kk * n + j];
+            for i in 1..g {
+                t += a[kk + i] * b[(kk + i) * n + j];
+            }
+            c[j] = t + if first { 0.0 } else { c[j] };
+        }
+    };
+    while kk + 4 <= k {
+        group(kk, 4, first, c);
+        first = false;
+        kk += 4;
+    }
+    if k - kk >= 2 {
+        group(kk, 2, first, c);
+        first = false;
+        kk += 2;
+    }
+    if k - kk == 1 {
+        group(kk, 1, first, c);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -495,6 +667,34 @@ mod tests {
         for i in 0..x.len() {
             assert_eq!(a[i].to_bits(), logistic1(x[i], true).to_bits());
             assert_eq!(b[i].to_bits(), tanh1(x[i], true).to_bits());
+        }
+    }
+
+    #[test]
+    fn hex_float_constants() {
+        assert_eq!(hexf(0x000000, 0), 1.0);
+        assert_eq!(hexf(0x800000, -1), 0.75);
+    }
+
+    #[test]
+    fn softmax_and_sums_are_close_to_exact() {
+        let mut row: Vec<f32> = (0..37).map(|i| (i as f32 * 0.37).sin() * 4.0).collect();
+        let x = row.clone();
+        softmax_row(&mut row);
+        let m = x.iter().copied().fold(f32::MIN, f32::max);
+        let z: f64 = x.iter().map(|&v| ((v - m) as f64).exp()).sum();
+        for (r, &v) in row.iter().zip(&x) {
+            assert!((*r as f64 - ((v - m) as f64).exp() / z).abs() < 1e-6);
+        }
+        let s: f32 = x.iter().sum();
+        assert!((eigen_sum(&x, 0) - s).abs() < 1e-4);
+        assert!((eigen_sum(&x, 3) - s).abs() < 1e-4);
+        let b: Vec<f32> = (0..37 * 5).map(|i| i as f32 * 0.01).collect();
+        let mut c = vec![0f32; 5];
+        sgemm_m1(&x, &b, 5, &mut c);
+        for j in 0..5 {
+            let e: f32 = (0..37).map(|kk| x[kk] * b[kk * 5 + j]).sum();
+            assert!((c[j] - e).abs() < 1e-3);
         }
     }
 
