@@ -13,6 +13,7 @@ use vernacula_phonemizer::languages::english::english::create_english;
 use vernacula_phonemizer::languages::english_gb::english_gb::{SETS, rp_word_transform, to_rp};
 use vernacula_phonemizer::languages::english::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
 use vernacula_phonemizer::core::load_tsv::load_lines;
+use vernacula_phonemizer::languages::english::normalize::{normalize_english, normalize_english_initialisms};
 use vernacula_phonemizer::languages::english::numbers::{BigNat, number_to_words, ordinal_to_words};
 use vernacula_phonemizer::languages::english::pos_tagger::{PosModel, PosTagger};
 use vernacula_phonemizer::languages::english::spelling_variants::american_spelling;
@@ -119,26 +120,57 @@ fn main() {
             let (w, ipa) = (units(&input["word"]), units(&input["ipa"]));
             if input.get("bare").is_some() { to_rp(&ipa, &w, None) } else { to_rp(&ipa, &w, Some(&SETS)) }
         }),
+        "phonemize-sync" => Box::new(|input| {
+            let text = units(&input["text"]).to_string_lossy();
+            JsString::from(vernacula_phonemizer::phonemize(&text, input["lang"].as_str().unwrap()).unwrap())
+        }),
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
             let words = if input["ordinal"].as_bool().unwrap() { ordinal_to_words(&n) } else { number_to_words(&n) };
             JsString::from(words.join(" "))
         }),
+        "normalize" => Box::new(|input| normalize_english(&units(&input["text"]))),
+        "initialisms" => {
+            let lexicon = load_tsv_map(
+                DIR,
+                "accent-lexicon.tsv",
+                |rest, _| {
+                    let fields = rest.split(&JsString::from("\t"));
+                    let ipa = fields.get(1).map(|f| f.trim());
+                    (fields.len() >= 2).then_some(()).and(ipa.filter(|i| !i.is_empty()))
+                },
+                TsvOptions::default(),
+            )
+            .unwrap();
+            Box::new(move |input| {
+                let is_recorded = |w: &JsString| lexicon.contains_key(w);
+                normalize_english_initialisms(&normalize_english(&units(&input["text"])), &is_recorded)
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
+    // Per `input.src` (when the dump tags one): [identical, differ].
+    let mut by_src: IndexMap<String, [usize; 2]> = IndexMap::new();
     for line in text.lines() {
         let row: Value = serde_json::from_str(line).unwrap();
         let want = units(&row["output"]);
         let got = run(&row["input"]);
+        let tally = row["input"]["src"].as_str().map(|s| by_src.entry(s.to_string()).or_default());
         if got == want {
             same += 1;
+            if let Some(t) = tally { t[0] += 1 }
         } else {
             differ += 1;
+            if let Some(t) = tally { t[1] += 1 }
             if differ <= 15 {
-                println!("  {}\n    ts   {want}\n    rust {got}", row["input"]);
+                let shown = match row["input"].get("text") { Some(t) => format!("{:?}", units(t)), None => row["input"].to_string() };
+                println!("  {shown}\n    ts   {want}\n    rust {got}");
             }
         }
+    }
+    for (src, [s, d]) in &by_src {
+        println!("  {src}: {s} identical, {d} DIFFER");
     }
     println!("{name}: {same} identical, {differ} DIFFER");
     std::process::exit(if differ == 0 { 0 } else { 1 });
