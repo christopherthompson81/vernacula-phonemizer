@@ -171,3 +171,20 @@ review, is every gate still byte-identical?
 510 DIFFER`; restored, 0. Tests: 53 + 1 passed. Warnings: 0 and 0.
 
 **Implication.** Done. The schwa check is load-bearing and proven, and the panic paths are gone.
+
+## Run 9 — 2026-10-09 17:42 (final rebase onto main 2f7e3628)
+
+**Question.** After one rebase onto main with ja, it, es, pt and pt-BR merged, is every list whole and every gate
+still byte-identical?
+
+**Command.** `git rebase origin/main`. Conflicts arose only in the shared lists (`registry.rs`, `core/mod.rs`,
+`languages/mod.rs`, fn-diff `dump.mts` and `main.rs`), resolved keeping both sides. Then: `parity -- en en-GB ja it es
+pt pt-BR hi`, every hi dump regenerated and replayed, `cargo test --workspace`, `cargo build` debug and release.
+
+**Raw finding.** Entry counts: dump.mts 33 (main 29 + 4), main.rs replay arms 33 (main 30 + 3), and `core/mod.rs` and
+`languages/mod.rs` hold main's modules plus hi's. `LANGUAGES` = en, en-GB, ja, it, es, pt, pt-BR, hi. `build` and
+`roman_policy` arms are intact, and `PhonemizeError::Input` is kept. parity: all eight at 200/200. `phonemize-sync
+3597/0`, `phonemize-best 3597/0`, `hi-normalize 3597/0`, `hi-word 43098/0`, `abugida-core 85798/0`, `hi-in-en 14/0`
+on both paths. Tests: 60 + 1 passed. Warnings: 0 and 0.
+
+**Implication.** Ready to merge.
