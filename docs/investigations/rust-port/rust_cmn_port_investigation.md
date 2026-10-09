@@ -1,14 +1,14 @@
 # Rust port: Mandarin (`cmn`) — investigation log
 
-Branch `rust-lang-cmn`, off `origin/rust-kokoro-core` (PR #1466). Scope: `src/languages/mandarin/*.ts` →
-`rust/vernacula-phonemizer/src/languages/mandarin/*.rs`. Contract: `rust/PORTING.md` + `csharp/PORTING.md`.
+Branch `rust-lang-cmn`, now on `origin/main` c64801a5 (first cut on `origin/rust-kokoro-core`, PR #1466). Scope:
+`src/languages/mandarin/*.ts` → `rust/vernacula-phonemizer/src/languages/mandarin/*.rs`. Contract:
+`rust/PORTING.md` + `csharp/PORTING.md`.
 
-Import closure of `mandarin.ts`, checked against `rust/vernacula-phonemizer/src/core/`:
-`clauses` (ClauseSink: ported), `trace` (begin/end/enter: ported), `foreign` (readForeignRun: ported),
-`loadTsv` (ported), `provenance` (`rebuilt`, `tracing`, `rewrite`: ported), `numbers` (`digitIndex`: ported),
-`loadManifest` (ported). **`normalizeSymbols.makeSymbolNormalizer` is NOT ported** — the es port owns it and
-the coordinator will hand over a commit to cherry-pick. Until then `symbols()` in `mandarin.rs` is a marked
-identity stub.
+Import closure of `mandarin.ts`, checked against `rust/vernacula-phonemizer/src/core/`: `clauses`, `trace`,
+`foreign`, `loadTsv`, `provenance` (`rebuilt`, `tracing`, `rewrite`), `numbers` (`digitIndex`) and
+`loadManifest` were ported already. `normalizeSymbols.makeSymbolNormalizer` was not: Runs 1–4 ran with a marked
+identity stub, Run 5 cherry-picked the es port's version, and since the Run 6 rebase it is main's (#1467).
+`create_mandarin` builds it from exactly the nine `symbolTier` fields mandarin.ts passes.
 
 ## Run 1 — 2026-10-09 16:05
 
@@ -148,3 +148,50 @@ release) for warnings; `parity en en-GB` for the regression check.
 
 **Implication.** Done per the checklist. Port-pending: 7 probe rows, none in the golden or FLEURS. Re-check
 ja and hi after those ports merge.
+
+## Run 6 — 2026-10-09 19:10 (review round)
+
+**Context.** Rebased onto `origin/main` c64801a5 (#1467 ja + the symbol tier, #1468 cross-cutting fixes);
+`git rebase --skip` dropped the cherry-picked symbol commit (88ae5cee), superseded by main's. Conflicts in
+`registry.rs` / `languages/mod.rs` / fn-diff resolved keeping both sides. ⚠ git had factored ja's closing
+`.map_err(PhonemizeError::Data),` out of the hunk; both arms checked complete by hand.
+
+Review changes:
+- `trace` collided with main's (ja's JSON form). Switched to main's `trace`; its serializer is now one function
+  each side (`traceJson` in dump.mts, `trace_json` in main.rs), and the lone-surrogate texts moved to a new
+  `cmn-trace-extras` dump (main's trace serializer plus each text's reading). The Rust `trace` replay now goes
+  through a new guarded `phonemize_trace_js` (lib.rs; `phonemize_trace` shares it), so it carries a JsString.
+- `manifest.rs`: `load_once`, not `OnceLock<Result>`, so a failure is retried. `symbolTier` is typed with the nine
+  fields mandarin.ts passes, and `create_mandarin` hands `make_symbol_normalizer` exactly those: an extra key in
+  cmn.jsonc can no longer move the Rust alone.
+- Symbol tier and pinyin tables cached with `load_once` (once per process, not per engine build).
+- Deduped: `JsString::join(parts, "")`, one `is_han` (segment.rs), `js_number_to_string` for `String(tone)`.
+  No escape helper applies: the TS builds `^一十` from data UNescaped, and so does the port.
+- Public entry points: every data read goes through `try_manifest` / `load_once` before `MANIFEST` is touched, so
+  `phonemize*` returns `PhonemizeError::Data` on missing data instead of panicking.
+
+**Question.** Are all gates still green on the rebased tree, and do the ja port-pending rows clear?
+
+**Commands.** All dumps regenerated from this tree (`cmn-normalize`, `cmn-segment`, `cmn-pinyin`, `cmn-numbers`,
+`cmn-trace-extras`; `LANGS=cmn` `phonemize-sync`, `phonemize-best`, `trace`; `LANGS=ja trace`), replayed by
+`rust/target/release/fn-diff`; `parity cmn en en-GB ja`; `cargo test --workspace --release`;
+`cargo build --workspace` (debug and release); `.probe/cmn/lister` for the full list of differing rows.
+
+**Raw finding.**
+- parity: `cmn 200/200`, `en 200/200`, `en-GB 200/200`, `ja 200/200`.
+- `cmn-normalize 12537/0` · `cmn-segment 16716/0` · `cmn-pinyin 54919/0` · `cmn-numbers 20608/0` ·
+  `cmn-trace-extras 14/0`.
+- `phonemize-sync 4166 identical, 6 DIFFER` · `phonemize-best 4166, 6` · `trace (cmn) 4166, 6` ·
+  `trace (ja) 3685 identical, 0 DIFFER` (the JsString-level replay did not move ja).
+- **The ja row cleared:** `日语 ひらがな 和 カタカナ` now matches in sync, best and trace. The 6 left are the
+  remaining port-pending probes: el ×2 (`Ελλάδα`, lone `α`), th, ru, hi, ko.
+- The tiling mutation from Run 3, re-applied against main's JSON serializer: `trace: 3210 identical, 962 DIFFER`;
+  reverted → 4166/6. The serializer switch did not blind the instrument.
+- Tests: 50 + 1 passed, 0 failed. Build: 0 warnings, debug and release.
+
+**Implication.** Done. Port-pending: 6 synthetic probe rows (el, th, ru, hi, ko), none in the golden or FLEURS;
+the hi row should clear when hi merges.
+
+**One more TS note, from typing the manifest.** `CmnManifest.symbolTier.exponentWords.position` is typed
+`"before" | "after"` in manifest.ts, but cmn.jsonc says `"compound"`, which the shared tier reads; the jsonc is
+untyped at runtime, so only the TS type is wrong.

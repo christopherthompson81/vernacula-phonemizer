@@ -27,7 +27,7 @@ pub struct Token {
     pub src: Option<JsString>,
 }
 
-fn is_han(ch: &JsString) -> bool {
+pub(super) fn is_han(ch: &JsString) -> bool {
     js_re!(r"\p{Script=Han}", "u").test(ch)
 }
 

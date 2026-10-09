@@ -4,7 +4,7 @@
 
 use indexmap::IndexMap;
 
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
 use crate::js_re;
 
 /// The third-tone sandhi rule as tone NUMBERS (`Number(…)` of the manifest's strings, so possibly NaN).
@@ -72,15 +72,6 @@ fn split_whitespace_runs(s: &JsString) -> Vec<JsString> {
     out
 }
 
-/// `String(n)` for the tone numbers this module produces.
-fn number_key(n: f64) -> String {
-    if n.is_finite() && n.fract() == 0.0 && n.abs() < 1e21 {
-        format!("{}", n as i64)
-    } else {
-        format!("{n}")
-    }
-}
-
 /// `makePinyinToIpa(tables)`.
 pub struct PinyinToIpa {
     tables: MandarinTables,
@@ -109,7 +100,7 @@ impl PinyinToIpa {
             match self.tables.syllable_ipa.get(&syl.base) {
                 None => out.push(tokens[i].clone()),
                 Some(seg) => {
-                    let tone = self.tables.tones.get(&number_key(realized[i])).map_or("", String::as_str);
+                    let tone = self.tables.tones.get(&js_number_to_string(realized[i])).map_or("", String::as_str);
                     out.push(seg.concat(&js(tone)));
                 }
             }

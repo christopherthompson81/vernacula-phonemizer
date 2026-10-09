@@ -4,14 +4,16 @@
 //! evidence.
 
 use std::collections::HashMap;
+use std::sync::OnceLock;
 
 use super::manifest::{DIR, MANIFEST, try_manifest};
 use super::normalize::{normalize_mandarin, spell_initialisms};
 use super::numbers::{digits_to_chinese, integer_to_chinese};
 use super::pinyin_to_ipa::{MandarinTables, PinyinToIpa, ThirdToneSandhi};
-use super::segment::{PinyinTables, segment};
+use super::segment::{PinyinTables, is_han, segment};
 use super::yi_bu_sandhi::apply_yi_bu_sandhi;
 use crate::core::clauses::ClauseSink;
+use crate::core::data_source::load_once;
 use crate::core::foreign::{ForeignPhonemizer, read_foreign_run};
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
@@ -21,9 +23,6 @@ use crate::core::trace::{begin_token, end_token, enter_engine};
 use crate::js_re;
 use crate::registry::{Engine, PhonemizeError};
 
-fn is_han(s: &JsString) -> bool {
-    js_re!(r"\p{Script=Han}", "u").test(s)
-}
 fn is_latin(s: &JsString) -> bool {
     js_re!(r"\p{Script=Latin}", "u").test(s)
 }
@@ -36,18 +35,10 @@ fn is_foreign_char(s: &JsString) -> bool {
 
 pub struct MandarinPhonemizer {
     /// The shared symbol tier over `MANIFEST.symbolTier` (百分之 precedes the number; units follow).
-    symbols: SymbolNormalizer,
+    symbols: &'static SymbolNormalizer,
     pinyin_to_ipa: PinyinToIpa,
-    pinyin: PinyinTables,
+    pinyin: &'static PinyinTables,
     foreign: Option<ForeignPhonemizer>,
-}
-
-fn join(parts: &[JsString]) -> JsString {
-    let mut out = JsString::new();
-    for p in parts {
-        out.push_str(p);
-    }
-    out
 }
 
 /// `Number.isSafeInteger(n)`.
@@ -129,7 +120,7 @@ impl MandarinPhonemizer {
             let before = cp.len();
             Self::append_number(&mut cp, &mut exempt, &m.value(input), after.as_ref());
             if rec {
-                pieces.push((join(&cp[before..]), m.index(), m.end()));
+                pieces.push((JsString::join(&cp[before..], &JsString::new()), m.index(), m.end()));
             }
             last = m.end();
         }
@@ -150,7 +141,7 @@ impl MandarinPhonemizer {
         let (cp, exempt, pieces) = self.substitute_numbers(&input);
         let mut sink = ClauseSink::new();
         // ⚠ Keyed on the pieces, not on a second `tracing()` call, as the TS.
-        let trace_text = if !pieces.is_empty() { rebuilt(&input, &pieces) } else { join(&cp) };
+        let trace_text = if !pieces.is_empty() { rebuilt(&input, &pieces) } else { JsString::join(&cp, &JsString::new()) };
         // Code-point index → UTF-16 offset into `normalized`.
         let mut off: Vec<usize> = vec![0];
         for c in &cp {
@@ -167,7 +158,7 @@ impl MandarinPhonemizer {
                 while j < cp.len() && is_han(&cp[j]) {
                     j += 1;
                 }
-                begin_token((off[i], off[j]), &join(&cp[i..j]));
+                begin_token((off[i], off[j]), &JsString::join(&cp[i..j], &JsString::new()));
                 sink.emit(&self.han_run(&cp[i..j], &exempt[i..j]));
                 end_token();
                 i = j;
@@ -176,7 +167,7 @@ impl MandarinPhonemizer {
                 while j < cp.len() && is_latin_run(&cp[j]) {
                     j += 1;
                 }
-                let run = join(&cp[i..j]);
+                let run = JsString::join(&cp[i..j], &JsString::new());
                 begin_token((off[i], off[j]), &run);
                 sink.emit(&self.foreign.as_ref().map_or_else(JsString::new, |f| f(&run)));
                 end_token();
@@ -195,7 +186,7 @@ impl MandarinPhonemizer {
                     }
                     break;
                 }
-                let run = join(&cp[i..j]);
+                let run = JsString::join(&cp[i..j], &JsString::new());
                 begin_token((off[i], off[j]), &run);
                 if let Some(routed) = read_foreign_run(&run) {
                     if !routed.is_empty() {
@@ -244,16 +235,39 @@ pub fn load_mandarin_tables() -> Result<MandarinTables, String> {
     })
 }
 
-/// The Hanzi → pinyin tables (≈1.7 MB of TSV), loaded once per engine build.
-pub fn load_pinyin_tables() -> Result<PinyinTables, String> {
-    let chars = load_tsv_map(DIR, "chars.tsv", |v, _| Some(v.split(&js(","))), TsvOptions::default())
-        .map_err(|e| e.to_string())?;
-    let phrases = load_tsv_strings(DIR, "phrases.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
-    let max_phrase = phrases.keys().fold(2, |m, k| m.max(k.code_points().count()));
-    Ok(PinyinTables {
-        chars: chars.into_iter().collect::<HashMap<_, _>>(),
-        phrases: phrases.into_iter().collect::<HashMap<_, _>>(),
-        max_phrase,
+/// The Hanzi → pinyin tables (≈1.7 MB of TSV): loaded once per process, on first use, and only cached once loaded.
+pub fn load_pinyin_tables() -> Result<&'static PinyinTables, String> {
+    static T: OnceLock<PinyinTables> = OnceLock::new();
+    load_once(&T, || {
+        let chars = load_tsv_map(DIR, "chars.tsv", |v, _| Some(v.split(&js(","))), TsvOptions::default())
+            .map_err(|e| e.to_string())?;
+        let phrases = load_tsv_strings(DIR, "phrases.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
+        let max_phrase = phrases.keys().fold(2, |m, k| m.max(k.code_points().count()));
+        Ok(PinyinTables {
+            chars: chars.into_iter().collect::<HashMap<_, _>>(),
+            phrases: phrases.into_iter().collect::<HashMap<_, _>>(),
+            max_phrase,
+        })
+    })
+}
+
+/// The shared symbol tier over `symbolTier`'s nine fields, exactly the ones mandarin.ts passes.
+fn symbol_tier() -> Result<&'static SymbolNormalizer, String> {
+    static S: OnceLock<SymbolNormalizer> = OnceLock::new();
+    load_once(&S, || {
+        let t = &try_manifest()?.symbol_tier;
+        make_symbol_normalizer(&SymbolData {
+            percent: Some(t.percent.clone()),
+            currency: Some(t.currency.clone()),
+            units: Some(t.units.clone()),
+            exponent_words: Some(t.exponent_words.to_shared()),
+            bare_exponent: Some(t.bare_exponent.to_shared()),
+            magnitudes: Some(t.magnitudes.clone()),
+            unspaced_script: Some(t.unspaced_script),
+            multiply: Some(t.multiply.clone()),
+            percent_prefix: Some(t.percent_prefix),
+            ..Default::default()
+        })
     })
 }
 
@@ -265,10 +279,8 @@ pub fn create_pinyin_phonemizer() -> Result<PinyinToIpa, String> {
 /// `createMandarin(foreign)`.
 pub fn create_mandarin(foreign: Option<ForeignPhonemizer>) -> Result<MandarinPhonemizer, String> {
     let tables = load_mandarin_tables()?; // checks the manifest first
-    let tier: SymbolData =
-        serde_json::from_value(MANIFEST.symbol_tier.clone()).map_err(|e| format!("cmn symbolTier: {e}"))?;
     Ok(MandarinPhonemizer {
-        symbols: make_symbol_normalizer(&tier)?,
+        symbols: symbol_tier()?,
         pinyin_to_ipa: PinyinToIpa::new(tables),
         pinyin: load_pinyin_tables()?,
         foreign,
