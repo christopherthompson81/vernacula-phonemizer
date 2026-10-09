@@ -28,7 +28,7 @@ use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagg
 use crate::languages::english_gb::english_gb::rp_word_transform;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 4] = ["en", "en-GB", "ja", "it"];
+pub const LANGUAGES: [&str; 5] = ["en", "en-GB", "ja", "it", "es"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -64,6 +64,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "it" => crate::languages::italian::italian::create_italian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "es" => crate::languages::spanish::spanish::create_spanish(false)
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -73,6 +76,7 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
 fn roman_policy(lang: &str) -> RomanPolicy {
     match lang {
         "it" => crate::languages::italian::roman_ordinals::roman_policy(),
+        "es" => crate::languages::spanish::roman_ordinals::roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
             ..Default::default()

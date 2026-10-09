@@ -249,21 +249,27 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         const dirOf = (stack: string): string => /src\/languages\/([^/]+)\//u.exec(stack.split("\n").slice(2).join("\n"))?.[1] ?? "core";
         const RAW_DIR: Record<string, string> = { spanish: "es", french: "fr", hindi: "hi" };
-        // A countForm is a function: named by identity when shared, else by its (esbuild-minified) source,
-        // which the replay maps onto a Rust twin and refuses when it has none.
-        const sigOf = (cf: unknown): string =>
-            cf === undefined ? "default" : cf === slavicCountForm ? "slavic" : String(cf).replace(/\s+/gu, " ");
+        // A countForm is a function, so it travels by NAME: `default`, `slavic` (by identity), or
+        // `custom:<language dir>` for a language's own selector. The replay maps the name onto a Rust twin and
+        // checks the twin against `COUNT_PROBE`, the TS selector's values on a fixed vector, so a selector that
+        // changes in the TS fails the replay loudly instead of being replayed with stale arithmetic.
+        const sigOf = (cf: unknown, dir: string): string =>
+            cf === undefined ? "default" : cf === slavicCountForm ? "slavic" : `custom:${dir}`;
+        const COUNT_PROBE = [0, 1, 2, 3, 4, 5, 10, 11, 12, 13, 14, 15, 20, 21, 22, 25, 100, 101, 102, 111, 112, 121,
+            1001, 0.5, 1.5, 2.5, -1, -2, -21, NaN, Infinity];
+        const countProbe = (cf: ((n: number) => number) | undefined): [string, string][] =>
+            COUNT_PROBE.map((n) => [String(n), String((cf ?? ((x: number) => (x === 1 ? 0 : 1)))(n))]);
         const probes = [...textsFor([], undefined, ["symbols.txt"]).keys()];
         const seen = new Map<string, number>();
         records.forEach((rec, i) => {
             const dir = dirOf(rec.stack);
-            const sig = sigOf(rec.data.countForm);
+            const sig = sigOf(rec.data.countForm, dir);
             const key = `${dir}\u0000${sig}\u0000${JSON.stringify(rec.data)}`;
             let id = seen.get(key);
             if (id === undefined) {
                 id = i;
                 seen.set(key, id);
-                process.stdout.write(JSON.stringify({ def: id, dir, countForm: sig, data: rec.data }) + "\n");
+                process.stdout.write(JSON.stringify({ def: id, dir, countForm: sig, countProbe: countProbe(rec.data.countForm), data: rec.data }) + "\n");
                 // The synthetic arm probes, through every distinct tier.
                 for (const t of probes) emit({ def: id, text: units(t), src: "probe" }, rec.apply(t));
             }
@@ -275,6 +281,47 @@ const dumps: Record<string, () => void | Promise<void>> = {
                 for (const t of raw.get(lang)!) if (!inputs.has(t)) emit({ def: id, text: units(t), src: `${dir}-raw` }, rec.apply(t));
         });
         process.stderr.write(`symbols: ${records.length} normalizers recorded, ${seen.size} distinct\n`);
+    },
+    // Spanish normalize.ts over the es golden, FLEURS es_419 and probes/es.txt: normalizeSpanish (both
+    // varieties) and the initialism pass after it.
+    async "es-normalize"() {
+        const { normalizeSpanish, normalizeSpanishInitialisms } = await import("../../../src/languages/spanish/normalize.ts");
+        for (const [t, src] of textsFor(["es"], FLEURS_DIR.es, ["es.txt"])) {
+            const n = normalizeSpanish(t);
+            emit({ text: units(t), src, op: "normalize" }, n);
+            emit({ text: units(t), src, op: "americas" }, normalizeSpanish(t, { americas: true }));
+            emit({ text: units(t), src, op: "initialisms" }, normalizeSpanishInitialisms(n));
+        }
+    },
+    // Spanish g2p: every distinct letter run of the es texts (as written and lowercased) plus every one- to
+    // three-letter string over the Spanish letters and a few foreign ones, through phonemizeWord and toSegments.
+    async "es-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/spanish/spanish.ts");
+        const { toSegments } = await import("../../../src/languages/spanish/g2p.ts");
+        const words = new Set<string>();
+        for (const t of textsFor(["es"], FLEURS_DIR.es, ["es.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const letters = [..."abcdefghijklmnopqrstuvwxyzáéíóúüñçàèœ"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of "aeiouyáíúü") words.add(a + b + c); } }
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.accent ? 1 : 0}`).join(" "));
+        }
+    },
+    // Spanish numberToWords (with and without `raw`) and spanishOrdinal.
+    async "es-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/spanish/numbers.ts");
+        const { spanishOrdinal } = await import("../../../src/languages/spanish/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 19; e++) { ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 1234567 * 10 ** (e - 4) + 42); }
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 2 ** 53 + 2, 999999999999999, 1e21, 1.5, -1, NaN, Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+            emit({ n: String(n), raw: null, op: "ordinal" }, spanishOrdinal(n) ?? "\u0000none");
+        }
+        for (const raw of ["12345678901234567890", "9007199254740993", "000", "1000000000000000000", "999999999999999999"])
+            emit({ n: String(Number(raw)), raw, op: "words" }, numberToWords(Number(raw), raw));
     },
     numbers() {
         const ns: bigint[] = [];
