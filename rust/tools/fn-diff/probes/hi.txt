@@ -139,6 +139,18 @@ R & D विभाग
 ₹500
 यह है। वह है॥ और?
 क्या! हाँ; ठीक: अच्छा,
+# the shared symbol tier with Hindi's data (makeSymbolNormalizer)
+35 mm का लेंस
+5 km² क्षेत्र
+3 m³ पानी
+10 kg/m
+10² और 2¹⁰ और 10⁻³
+E = mc²
+$5 मिलियन और €20 और £3 और ¥100 और 5¢
+US$ 30
+4x4 गाड़ी और 5 × 5
+6 x 6 cm
+100 % और ५० ٪
 # tokenizer: embedded Latin, through the English reader
 São Paulo में
 AOL और PBS

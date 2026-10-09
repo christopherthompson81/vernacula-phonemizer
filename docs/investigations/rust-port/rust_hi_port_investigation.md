@@ -106,3 +106,35 @@ of the 11 carries a symbol-tier trigger: `$` ×3, `£` ×2, `¥` ×6 (some rows 
   family manifest is tested to load through `HindiDef`.
 - Object.prototype reachability: every plain-object lookup indexes with a single character, a matched own key or a
   numeric string, so none can reach `Object.prototype`. Nothing to reproduce.
+
+## Run 6 — 2026-10-09 16:00 (provenance seam)
+
+**Question.** Is every `rewrite` in the Hindi path on the pipeline string, and would the check notice if one were not?
+
+**Command.** `npx tsx tools/provenance-poison.mts hi` (TS); the Rust test `hindi_rewrites_never_poison_the_mapping`
+(`phonemize_trace` over probes/hi.txt + the hi golden, counting `on_poison` hits). Guard proof: changed step 7c's
+`=` rewrite to a bare `JsRegex::replace`, ran the test, reverted.
+
+**Raw finding.** TS: `distinct poison sites: 0`. Rust: 0 hits over 300+ lines; with the reverted site, `left: 3,
+right: 0` (FAILED); green again after restoring it.
+
+**Implication.** The seam matches the TS, and the test detects a desync.
+
+## Run 7 — 2026-10-09 16:03 (after cherry-picking makeSymbolNormalizer, 9aceb875)
+
+**Question.** With the real symbol tier wired in (the stub dropped), is everything byte-identical?
+
+**Command.** `git cherry-pick 9aceb875` (dump.mts conflicted only by adjacency; both sides kept). `HindiDef.symbolTier`
+is now the core `SymbolData`, and `SYMBOLS` is built from Hindi's manifest with the six fields the TS passes. Added
+twelve symbol-tier lines to probes/hi.txt (units with powers and rates, bare exponents, every currency, `US$`, `x`/`×`,
+`%`/`٪`), regenerated every dump, replayed.
+
+**Raw finding.**
+- `cargo run --release -p parity -- en en-GB hi`: `en 200/200`, `en-GB 200/200`, `hi: 200/200 identical, 0 differ`.
+- `phonemize-sync: 3597 identical, 0 DIFFER`; `phonemize-best: 3597 identical, 0 DIFFER` (golden + FLEURS hi_in
+  columns 3 and 4 + 159 probe lines).
+- `hi-normalize: 3597 identical, 0 DIFFER` (golden 132, fleurs 3306, probe 159); `hi-word: 43098 identical, 0`;
+  `abugida-core: 85798 identical, 0`; `hi-in-en` (en, en-GB): 14 identical, 0 on both paths.
+- `cargo test --workspace --release`: all green; `cargo build` and `cargo build --release`: 0 warnings.
+
+**Implication.** Hindi is done. No row is port-pending: the only foreign reader Hindi calls is `en`, which is ported.

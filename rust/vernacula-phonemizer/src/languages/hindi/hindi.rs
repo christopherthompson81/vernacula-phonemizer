@@ -12,6 +12,7 @@ use crate::core::abugida::{AbugidaG2p, make_abugida_g2p};
 use crate::core::clauses::assemble_clauses;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
+use crate::core::normalize_symbols::{SymbolData, make_symbol_normalizer};
 use crate::core::numbers::{indic_number_words, render_number, spell_digits};
 use crate::core::phonology::{Phonology, load_shared_phonology};
 use crate::core::provenance::{Form, normalize};
@@ -166,7 +167,7 @@ pub fn make_native_hindi(
     }
     let symbol_tier = match overrides.symbols {
         Some(f) => f,
-        None => hindi_symbols(),
+        None => hindi_symbols()?,
     };
 
     Ok(NativeHindi {
@@ -188,11 +189,20 @@ pub fn make_native_hindi(
 
 /// `SYMBOLS`: `makeSymbolNormalizer` over Hindi's `symbolTier`.
 ///
-/// TODO(#1463, PORT-PENDING): `makeSymbolNormalizer` is being ported on `rust-lang-es`. Until that commit
-/// is cherry-picked this is an IDENTITY stub, so `%`, currency signs, units, `×`/`x` and superscripts are
-/// not yet read. Drop the stub once it lands.
-fn hindi_symbols() -> TextFn {
-    Box::new(|s: &JsString| s.clone())
+/// Built from HINDI's manifest whatever `def` is, as the TS module-level constant is; only these six fields.
+fn hindi_symbols() -> Result<TextFn, String> {
+    let sym = try_manifest()?.symbol_tier.as_ref().ok_or("hindi.jsonc declares no `symbolTier`")?;
+    let d = SymbolData {
+        percent: sym.percent.clone(),
+        currency: sym.currency.clone(),
+        units: sym.units.clone(),
+        exponent_words: sym.exponent_words.clone(),
+        bare_exponent: sym.bare_exponent.clone(),
+        multiply: sym.multiply.clone(),
+        ..Default::default()
+    };
+    let tier = make_symbol_normalizer(&d)?;
+    Ok(Box::new(move |s: &JsString| tier.apply(s)))
 }
 
 impl NativeHindi {

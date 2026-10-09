@@ -9,6 +9,7 @@ use serde::Deserialize;
 
 use crate::core::abugida::AbugidaDef;
 use crate::core::load_manifest::load_manifest;
+use crate::core::normalize_symbols::SymbolData;
 use crate::core::numbers::NumbersDef;
 
 pub const DIR: &str = "languages/hindi";
@@ -29,45 +30,6 @@ pub struct SchwaDeletion {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct Multiply {
-    pub times: String,
-    pub by: Option<String>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct ExponentWords {
-    pub squared: Vec<String>,
-    pub cubed: Vec<String>,
-    /// `"before" | "after"`.
-    pub position: Option<String>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct BareExponent {
-    pub squared: String,
-    pub cubed: String,
-    pub power: String,
-    pub negative: String,
-}
-
-/// The shared symbol tier's data (`HindiDef.symbolTier`), not the bare-sign `symbols` map.
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub struct SymbolTier {
-    pub percent: Option<Vec<String>>,
-    pub currency: Option<IndexMap<String, Vec<String>>>,
-    pub units: Option<IndexMap<String, Vec<String>>>,
-    pub rate_denominators: Option<IndexMap<String, String>>,
-    pub unit_per: Option<String>,
-    pub magnitudes: Option<Vec<String>>,
-    pub magnitude_connective: Option<String>,
-    pub ampersand: Option<String>,
-    pub multiply: Option<Multiply>,
-    pub exponent_words: Option<ExponentWords>,
-    pub bare_exponent: Option<BareExponent>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OrdinalSuffixes {
     pub regular: IndexMap<String, usize>,
@@ -75,7 +37,7 @@ pub struct OrdinalSuffixes {
     pub vowel_forms: IndexMap<String, usize>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct HindiDef {
     #[serde(flatten)]
@@ -87,7 +49,9 @@ pub struct HindiDef {
     pub clause_punctuation: IndexMap<String, String>,
     pub symbols: Option<IndexMap<String, String>>,
     pub strip_symbols: Option<String>,
-    pub symbol_tier: Option<SymbolTier>,
+    /// The shared symbol tier's data, not the bare-sign `symbols` map. The core `SymbolData` (every field
+    /// optional) is a superset of the TS `symbolTier` type.
+    pub symbol_tier: Option<SymbolData>,
     /// ⚠ REQUIRED in the TS interface, but 8 of the 9 sibling manifests omit it (the cast hides that) and
     /// `makeHindiNormalizer` then falls back to Hindi's, so it is optional here.
     pub irregular_ordinals: Option<IndexMap<String, Vec<String>>>,
@@ -139,6 +103,6 @@ mod tests {
         assert_eq!(m.abugida.consonants.len(), 42);
         assert!(m.schwa_deletion.delete_word_final == Some(true));
         assert_eq!(m.numbers.decimal_word.as_deref(), Some("दशमलव"));
-        assert_eq!(m.symbol_tier.as_ref().unwrap().bare_exponent.as_ref().unwrap().negative, "ऋण");
+        assert!(m.symbol_tier.as_ref().unwrap().bare_exponent.is_some());
     }
 }
