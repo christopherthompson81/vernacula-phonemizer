@@ -10,6 +10,7 @@ import { loadJson } from "../../../src/core/loadManifest.ts";
 import { PosTagger, type PosModel } from "../../../src/languages/english/posTagger.ts";
 import { americanSpelling } from "../../../src/languages/english/spellingVariants.ts";
 import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
+import { createEnglishG2p, type EnglishG2pModel } from "../../../src/languages/english/englishG2p.ts";
 
 const units = (s: string): number[] => Array.from({ length: s.length }, (_, i) => s.charCodeAt(i));
 const emit = (input: unknown, output: string): void => {
@@ -54,6 +55,29 @@ const dumps: Record<string, () => void> = {
         for (const k of dict.keys()) words.add(k);
         for (const w of ["colour", "honourable", "favourite", "centre", "theatre", "realise", "organisations", "analyse", "travelled", "jewellery", "fulfilment", "anaesthetic", "manoeuvre", "catalogue", "programme", "sulphur", "connexion", "hourly", "ourselves", "flavourful", "labourer", "neighbourhoods", "paediatrician", "oestrogen", "haemorrhage", "cancelled", "modelling"]) words.add(w);
         for (const w of words) emit({ word: units(w) }, americanSpelling(w, known) ?? "\u0000none");
+    },
+    // The OOV G2P, built exactly as createEnglish() builds it, over every accent-lexicon word plus
+    // lexicon words with OOV-making edits (doubled letters, suffixes, glued pairs).
+    g2p() {
+        const slots = (v: string): number[] => v.split(",").map(Number).filter((n) => Number.isInteger(n));
+        const conv = makeArpabetToIpa(MANIFEST.arpabet, loadTsvMap(ENGLISH, "en-syllabic.tsv", slots), loadTsvMap(ENGLISH, "en-nasal-seam.tsv", slots));
+        const dict = loadTsvMap(ENGLISH, "g2p-dict.tsv", (v) => v.split(" "));
+        const g2p = createEnglishG2p(loadJson<EnglishG2pModel>(ENGLISH, "g2p-model.json"), dict,
+            new Set(loadLines(ENGLISH, "g2p-common.txt")), conv,
+            { ...MANIFEST.g2pClasses, vowels: MANIFEST.arpabet.vowels, letterNameExceptions: MANIFEST.letterNameExceptions });
+        const words = new Set<string>();
+        for (const l of loadLines(ENGLISH, "accent-lexicon.tsv")) words.add(l.split("\t")[0]!);
+        const base = [...words].filter((w) => /^[a-z]+$/u.test(w));
+        for (let i = 0; i + 1 < base.length; i += 97) {
+            words.add(base[i]! + base[i + 1]!);
+            words.add(base[i]! + "ishness");
+            words.add(base[i]! + "ings");
+            words.add(base[i]!.replace(/([aeiou])/u, "$1$1"));
+        }
+        for (const w of ["xkcd", "brrr", "zzzz", "mmmhmm", "tsktsk", "pfft", "hmms", "crwth", "nth", "cwm", "q", "zz", "bbc", "cnn", "llms"]) words.add(w);
+        const take = process.env.G2P_LIMIT ? Number(process.env.G2P_LIMIT) : Infinity;
+        let n = 0;
+        for (const w of words) { if (n++ >= take) break; emit({ word: units(w) }, g2p.g2p(w)); }
     },
     numbers() {
         const ns: bigint[] = [];

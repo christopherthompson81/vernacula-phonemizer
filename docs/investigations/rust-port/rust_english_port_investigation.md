@@ -38,3 +38,38 @@ each. The spelling probe is not vacuous: 297 rows found a respelling, the rest c
 - the `our` loop's early exit at index ≤ 1 is kept;
 - BigInt becomes a canonical digit string (`BigNat`), so the > 33-digit branch stays reachable;
 - POS feature duplicates count once, as the TS object's keys do.
+
+## Run 3 — 2026-10-09 (Math.log, and the n-gram G2P)
+
+**Question 1.** Does `f64::ln` (glibc) agree with V8's `Math.log` (fdlibm port)? The n-gram beam ranks
+by sums of logs.
+
+**Command.** Node dumps `Math.log` bit patterns for 2M random positive doubles, 2M random count ratios and
+every count ratio in `g2p-model.json` (4,149,804 inputs). `fn-diff log` compares them against both
+`core::js_math::log` (an fdlibm `e_log.c` port) and `f64::ln`.
+
+**Raw finding.** `fdlibm port 4149804 identical, 0 DIFFER; f64::ln differs on 155865 (5586 of them
+n-gram ratios)`.
+
+**Implication.** `Math.log` must be `js_math::log`. `f64::ln` is off in the last bit on 3.8% of inputs,
+including 5,586 of the model's own ratios. (Not yet shown at the word level. Do that once the full g2p
+dump exists: swap in `f64::ln` and count changed words.)
+
+**Question 2.** Does `english_g2p.rs` match `createEnglishG2p` as `createEnglish()` builds it?
+
+**Command.** `dump.mts g2p` (every accent-lexicon word plus synthetic OOVs: glued pairs, `-ishness`,
+`-ings`, doubled vowels, consonant-only strings) and `fn-diff g2p`. The TS dump runs at ~13 ms/word, so
+the first 14,000 rows were checked while the rest generates.
+
+**Raw finding, in order.**
+- First port: `14000 identical, 0 DIFFER`, but 95 s for 14k words (≈6.8 ms/word in Rust).
+- Indexing each context's count list: still 60 s.
+- Interning tokens, a 4-slot history, back-pointers for phones: `11840 identical, 2160 DIFFER`. The bug:
+  model keys were parsed by splitting on spaces, but a token's chunk can hold spaces (`n:AH0 N`).
+- Parsing keys by token shape (every token starts `<letter>:` or is `^`; a load-time assert checks that
+  every key parses into exactly `order` tokens): `14000 identical, 0 DIFFER`, 11.6 s with model load
+  (~0.8 ms/word).
+
+**Implication.** The G2P is correct on the first 14k, and the full-dump result is pending. `perf` cannot run
+in this session: `perf_event_paranoid` is 4, so unprivileged `perf_event_open` fails even outside the
+sandbox. The hot path was found by counting allocations instead.

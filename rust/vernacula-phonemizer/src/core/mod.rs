@@ -5,6 +5,7 @@ pub mod env;
 pub mod foreign;
 pub mod initialisms;
 pub mod ipa;
+pub mod js_math;
 pub mod jsonc;
 pub mod js_regex;
 pub mod js_string;
