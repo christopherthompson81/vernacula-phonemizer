@@ -40,6 +40,37 @@ function englishTexts(): Map<string, string> {
     }
     return out;
 }
+/** The FLEURS transcript directory for a language code (column 3 is the text, column 2 a WAV filename). */
+const FLEURS_DIR: Record<string, string> = {
+    en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn",
+};
+/** Every distinct text for `lang`: its golden, its FLEURS transcripts (columns 3 and 4) and
+ *  `probes/<lang>.txt` when present. English keeps `englishTexts()`. */
+function langTexts(lang: string): string[] {
+    if (lang === "en" || lang === "en-GB") return [...englishTexts().keys()];
+    const out = new Set<string>();
+    const add = (t: string): void => { if (t !== "") out.add(t); };
+    try {
+        for (const row of readFileSync(new URL(`../../../csharp/goldens/${lang}.tsv`, import.meta.url), "utf8").split("\n"))
+            add(row.split("\t")[0] ?? "");
+    } catch { /* no golden */ }
+    const dir = Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined;
+    if (dir !== undefined)
+        for (const split of ["train", "dev", "test"]) {
+            let text = "";
+            try { text = readFileSync(`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/${dir}/${split}.tsv`, "utf8"); } catch { continue; }
+            for (const row of text.split("\n")) { const c = row.split("\t"); add(c[2] ?? ""); add(c[3] ?? ""); }
+        }
+    try {
+        for (const line of readFileSync(new URL(`./probes/${lang}.txt`, import.meta.url), "utf8").split("\n"))
+            if (line !== "" && !line.startsWith("#")) add(line.replace(/\\n/g, "\n").replace(/\\u\{([0-9a-fA-F]+)\}/g, (_m, h: string) => String.fromCodePoint(parseInt(h, 16))));
+    } catch { /* no probes */ }
+    return [...out];
+}
+/** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
+const LANGS = (process.env.LANGS ?? "en,en-GB").split(",").filter((l) => l !== "");
+
 const emit = (input: unknown, output: string): void => {
     process.stdout.write(JSON.stringify({ input, output: units(output) }) + "\n");
 };
@@ -148,14 +179,38 @@ const dumps: Record<string, () => void | Promise<void>> = {
     // The public sync entry, end to end (registry pre-passes + normalize + engine), for en and en-GB.
     async "phonemize-sync"() {
         const { phonemize } = await import("../../../src/index.ts");
-        for (const lang of ["en", "en-GB"])
-            for (const text of englishTexts().keys()) emit({ text: units(text), lang }, phonemize(text, lang));
+        for (const lang of LANGS)
+            for (const text of langTexts(lang)) emit({ text: units(text), lang }, phonemize(text, lang));
     },
     // The best path (phonemizeAsync: registry pre-passes + the BiLSTM OOV tagger), for en and en-GB.
     async "phonemize-best"() {
         const { phonemizeAsync } = await import("../../../src/index.ts");
-        for (const lang of ["en", "en-GB"])
-            for (const text of englishTexts().keys()) emit({ text: units(text), lang }, await phonemizeAsync(text, lang));
+        for (const lang of LANGS)
+            for (const text of langTexts(lang)) emit({ text: units(text), lang }, await phonemizeAsync(text, lang));
+    },
+    // readerFor(run, host) over one run per script plus Greek lone-letter cases, against every override host.
+    async reader() {
+        const { readerFor } = await import("../../../src/core/scripts.ts");
+        const runs = ["word", "слово", "λόγος", "α", "ά", "Ω", "ξ²", "ϐ", "かな", "カナ", "漢字", "한글", "كلمة", "מילה",
+            "शब्द", "শব্দ", "சொல்", "คำ", "ቃል", "բառ", "სიტყვა", "စကား", "పదం", "ಪದ", "വാക്ക്", "શબ્દ", "ਸ਼ਬਦ",
+            "ଶବ୍ଦ", "වචනය", "ពាក្យ", "ຄຳ", "ཚིག", "ⵜⴰⵡⴰⵍⵜ", "ᏣᎳᎩ", "ᱥᱟᱱᱛᱟᱲᱤ", "𞤀𞤣𞤤𞤢𞤥", "ߒߞߏ", "ꠍꠤꠟꠐꠤ", "ꦗꦮ", "ᮞᮥᮔ᮪ᮓ", "123", "μ-", "γ-"];
+        for (const host of ["en", "ja", "ko", "yue", "uk", "sr", "fa", "ur", "mr", "ne", "el", "hi", "ru", "cmn"])
+            for (const run of runs) {
+                const r = readerFor(run, host);
+                emit({ run: units(run), host }, r === undefined ? "\u0000none" : `${r.target}|${r.text}`);
+            }
+    },
+    // latinPhone (both option sets) and foldLatinToBase over every BMP letter and a few clusters.
+    async latin() {
+        const { latinPhone } = await import("../../../src/core/latinPhones.ts");
+        const { foldLatinToBase } = await import("../../../src/core/hostWord.ts");
+        const items: string[] = ["é", "e\u0301", "ǆ", "ﬁ", "İ"];
+        for (let cp = 0x41; cp < 0x3000; cp++) { const c = String.fromCodePoint(cp); if (/\p{L}/u.test(c)) items.push(c); }
+        for (const c of items) {
+            emit({ c: units(c), op: "phone" }, latinPhone(c) ?? "\u0000none");
+            emit({ c: units(c), op: "phone-ih" }, latinPhone(c, { initial: true, includeH: true }) ?? "\u0000none");
+            emit({ c: units(c), op: "fold" }, foldLatinToBase(c));
+        }
     },
     numbers() {
         const ns: bigint[] = [];

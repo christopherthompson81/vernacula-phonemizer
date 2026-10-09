@@ -205,6 +205,23 @@ fn main() {
                     .unwrap(),
             )
         }),
+        "reader" => Box::new(|input| {
+            let run = units(&input["run"]);
+            match vernacula_phonemizer::core::scripts::reader_for(&run, input["host"].as_str().unwrap()) {
+                None => JsString::from("\u{0}none"),
+                Some((t, text)) => JsString::from(format!("{t}|")).concat(&text),
+            }
+        }),
+        "latin" => Box::new(|input| {
+            use vernacula_phonemizer::core::latin_phones::{PhoneOpts, latin_phone};
+            let c = units(&input["c"]);
+            let none = || JsString::from("\u{0}none");
+            match input["op"].as_str().unwrap() {
+                "phone" => latin_phone(&c, PhoneOpts::default()).unwrap_or_else(none),
+                "phone-ih" => latin_phone(&c, PhoneOpts { initial: true, include_h: true }).unwrap_or_else(none),
+                _ => vernacula_phonemizer::core::host_word::fold_latin_to_base(&c),
+            }
+        }),
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
             let words = if input["ordinal"].as_bool().unwrap() {
