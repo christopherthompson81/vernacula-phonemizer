@@ -7,7 +7,7 @@
 use std::collections::HashMap;
 use std::sync::{LazyLock, OnceLock};
 
-use super::from_code_point;
+use super::to_hiragana;
 use super::manifest::{DIR, MANIFEST};
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, is_js_space, js};
@@ -55,10 +55,10 @@ fn load() -> Result<HashMap<JsString, f64>, String> {
     .collect())
 }
 
-/// The pitch lexicon, or why it could not be loaded. Loaded once; a failure is cached.
+/// The pitch lexicon, or why it could not be loaded. Cached once loaded; a failure is retried.
 pub fn try_lex() -> Result<&'static HashMap<JsString, f64>, String> {
-    static L: OnceLock<Result<HashMap<JsString, f64>, String>> = OnceLock::new();
-    L.get_or_init(load).as_ref().map_err(Clone::clone)
+    static L: OnceLock<HashMap<JsString, f64>> = OnceLock::new();
+    super::load_once(&L, load)
 }
 
 fn lex() -> &'static HashMap<JsString, f64> {
@@ -71,10 +71,7 @@ fn get(k: &JsString) -> Option<f64> {
     if let Some(&n) = m.get(k) {
         return Some(n);
     }
-    let folded = js_re!(r"[ァ-ヶ]", "gu").replace_with(k, |mm, s| {
-        from_code_point(mm.value(s).code_point_at(0).unwrap() - 0x60)
-    });
-    m.get(&folded).copied()
+    m.get(&to_hiragana(k)).copied()
 }
 
 /// Whether the pitch lexicon has an entry for a surface/reading key (with the fold `get` applies).

@@ -1,6 +1,10 @@
 //! Japanese's hand-authored tables, from `japanese.jsonc`. Ported from src/languages/japanese/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`). Maps keep the file's key order.
+//! Every field the TS interface (`JapaneseManifest`) names is REQUIRED here (no `#[serde(default)]`), down to
+//! the symbol tier's `exponentWords.squared/cubed` and the four `bareExponent` words: those blocks have
+//! ja-local structs with required fields, converted to the shared tier's all-optional types. Only the
+//! fields the TS interface itself marks optional (`exponentWords.position`, `multiply.by`) are `Option`.
+//! Maps keep the file's key order.
 
 use std::collections::HashMap;
 use std::sync::{LazyLock, OnceLock};
@@ -10,7 +14,7 @@ use serde::Deserialize;
 
 use crate::core::js_string::JsString;
 use crate::core::load_manifest::load_manifest;
-use crate::core::normalize_symbols::{BareExponent, CountForms, ExponentWords, Multiply};
+use crate::core::normalize_symbols::{BareExponent, CountForms, ExponentWords, Multiply, PositionDecl};
 
 pub const DIR: &str = "languages/japanese";
 
@@ -65,8 +69,46 @@ pub struct SymbolTier {
     pub unspaced_script: bool,
     pub ampersand: String,
     pub multiply: Multiply,
-    pub exponent_words: ExponentWords,
-    pub bare_exponent: BareExponent,
+    pub exponent_words: JaExponentWords,
+    pub bare_exponent: JaBareExponent,
+}
+
+/// `exponentWords: { squared: CountForms; cubed: CountForms; position?: … }`.
+#[derive(Debug, Deserialize)]
+pub struct JaExponentWords {
+    pub squared: CountForms,
+    pub cubed: CountForms,
+    pub position: Option<PositionDecl>,
+}
+
+/// `bareExponent: { squared: string; cubed: string; power: string; negative: string }`.
+#[derive(Debug, Deserialize)]
+pub struct JaBareExponent {
+    pub squared: String,
+    pub cubed: String,
+    pub power: String,
+    pub negative: String,
+}
+
+impl JaExponentWords {
+    pub fn to_shared(&self) -> ExponentWords {
+        ExponentWords {
+            squared: Some(self.squared.clone()),
+            cubed: Some(self.cubed.clone()),
+            position: self.position.clone(),
+        }
+    }
+}
+
+impl JaBareExponent {
+    pub fn to_shared(&self) -> BareExponent {
+        BareExponent {
+            squared: Some(self.squared.clone()),
+            cubed: Some(self.cubed.clone()),
+            power: Some(self.power.clone()),
+            negative: Some(self.negative.clone()),
+        }
+    }
 }
 
 /// The manifest's string tables as `JsString` lookups, built once.
@@ -104,10 +146,10 @@ fn list(v: &[String]) -> Vec<JsString> {
     v.iter().map(|s| JsString::from(s.as_str())).collect()
 }
 
-/// The manifest, or why it could not be loaded. Loaded once; a failure is cached.
+/// The manifest, or why it could not be loaded. Cached once loaded; a failure is retried on the next call.
 pub fn try_manifest() -> Result<&'static JapaneseManifest, String> {
-    static M: OnceLock<Result<JapaneseManifest, String>> = OnceLock::new();
-    M.get_or_init(|| {
+    static M: OnceLock<JapaneseManifest> = OnceLock::new();
+    super::load_once(&M, || {
         let m: JapaneseManifest =
             load_manifest(DIR, "japanese.jsonc").map_err(|e| e.to_string())?;
         for v in ["a", "i", "u", "e", "o"] {
@@ -117,8 +159,6 @@ pub fn try_manifest() -> Result<&'static JapaneseManifest, String> {
         }
         Ok(m)
     })
-    .as_ref()
-    .map_err(Clone::clone)
 }
 
 /// The manifest for code that runs after `try_manifest` has succeeded (the registry's build checks it).

@@ -2,21 +2,8 @@
 //! Ported from src/languages/japanese/kana.ts — see that file for the corpus evidence.
 
 use super::manifest::T;
-use super::{first_unit, from_code_point};
+use super::{first_unit, to_hiragana};
 use crate::core::js_string::{JsString, js};
-
-/// Fold katakana ァ..ヶ to hiragana; everything else (the long mark included) is left alone.
-fn to_hiragana(w: &JsString) -> JsString {
-    let mut out = JsString::new();
-    for c in w.code_points() {
-        if (0x30a1..=0x30f6).contains(&c) {
-            out.push_str(&from_code_point(c - 0x60));
-        } else {
-            out.push_str(&from_code_point(c));
-        }
-    }
-    out
-}
 
 fn is_vowel_char(ph: &JsString) -> bool {
     let t = &*T;

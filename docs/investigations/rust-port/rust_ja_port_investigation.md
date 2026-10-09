@@ -176,3 +176,43 @@ The seven module dumps are unchanged at 0 DIFFER. `cargo build --workspace` give
 
 **Implication.** ja is done. Nothing is port-pending. The two TS defects of Run 4 remain, and Rust
 reproduces both, until the TS-first fix batch lands.
+
+## Run 7 — 2026-10-09 (review fixes for #1467, all gates re-run)
+
+**Question.** After the eight review fixes, are the gates still byte-identical?
+
+**The fixes.**
+1. The inherent `JapanesePhonemizer::text` is now private `render`, so every path goes through `Engine::text`.
+   `Engine::text` and the public `phonemize_word{,_segmental}` (now `Result`) call `ensure_lexica()` first.
+2. `try_manifest`, `try_readings`, `try_lex` and the symbol tier cache SUCCESS only (`japanese::load_once`
+   over a `OnceLock<T>`). A failed load returns the error and the next call retries, which matches the TS
+   assign-after-load and the registry's Data-error contract.
+3. The manifest claim is now true. `symbolTier.exponentWords` and `bareExponent` deserialize into ja-local
+   structs whose fields are required where the TS interface requires them, then convert to the shared
+   all-optional types. Only `exponentWords.position` and `multiply.by`, which the TS marks optional, are
+   `Option`.
+4. `PositionDecl::Per` is now a named struct `PerPower` with `#[serde(deny_unknown_fields)]`. serde rejects
+   the attribute on an enum variant, which was the first compile error.
+5. `money()` reads a `saidAfter` regex precompiled per currency key (`cur_said`), as `pct_after` already was.
+6. `is_kanji`, `is_kana` and `is_hiragana` are code-point range tables. `re.test(ch)` under `u` means "some
+   code point is in the class", so `any_cp` is exact for any input, not only single characters. A unit test
+   checks each table against its verbatim pattern over all 0x110000 code points, lone surrogates included.
+7. One copy each of `to_katakana`, `to_hiragana` (code-point shifts, unit-tested against their TS regexes over
+   U+3000–U+30FF plus an astral and a lone surrogate) and `strip_non_kana`, in `japanese/mod.rs`.
+8. The unreachable `digit × digit` arm keeps its port, with a one-line comment.
+
+**Command.** `cargo run --release -p parity`, `.probe/ja/replay.sh` (every module dump plus sync, best and
+trace; the TS tree is unchanged since the dumps), `npx tsx rust/tools/fn-diff/dump.mts symbols` replayed with
+`fn-diff symbols`, `cargo test --workspace`, and `cargo build --workspace` in both profiles.
+
+**Raw finding.**
+```
+en: 200/200   en-GB: 200/200   ja: 200/200
+ja-normalize 3685 · ja-kana 384626 · ja-kanji 228294 · ja-segment 7370 · ja-counters 36894
+ja-numbers 20059 · ja-pitch 276242 · phonemize-sync 3685 · phonemize-best 3685 · trace 3685   (all 0 DIFFER)
+cargo test: 47 + 1 passed; build: 0 warnings (debug and release)
+```
+symbols: 131 normalizers recorded, 130 distinct; fn-diff symbols: 50750 identical, 0 DIFFER
+```
+**Implication.** Every fleet tier still deserializes under `deny_unknown_fields`: a misspelt `position`
+record would have failed the replay's load. No reading moved. ja stays done.

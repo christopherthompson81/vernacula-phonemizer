@@ -6,25 +6,12 @@ use std::sync::LazyLock;
 
 use super::kanji::apply_readings;
 use super::manifest::T;
-use super::{first_unit, from_code_point};
+use super::{first_unit, from_code_point, to_hiragana, to_katakana};
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::numbers::digit_index;
 use crate::core::provenance::{rewrite, rewrite_with};
 use crate::js_re;
-
-/// Hiragana → katakana (not on the pipeline string).
-fn to_katakana(s: &JsString) -> JsString {
-    js_re!(r"[ぁ-ゖ]", "gu").replace_with(s, |m, s| {
-        from_code_point(m.value(s).code_point_at(0).unwrap() + 0x60)
-    })
-}
-
-fn to_hiragana(s: &JsString) -> JsString {
-    js_re!(r"[ァ-ヶ]", "gu").replace_with(s, |m, s| {
-        from_code_point(m.value(s).code_point_at(0).unwrap() - 0x60)
-    })
-}
 
 /// `[zero, ...ones.slice(1)].map(toKatakana)`.
 static DIGIT_KANA: LazyLock<Vec<JsString>> = LazyLock::new(|| {
@@ -130,6 +117,7 @@ pub fn normalize_japanese(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"\s?=\s?", "gu"), &js("イコール"));
     s = rewrite(&s, js_re!(r"\s?÷\s?", "gu"), &js("わる"));
 
+    // Unreachable through `phonemize`: the symbol tier's `multiply` (run first) claims every digit×digit.
     s = rewrite(&s, js_re!(r"(\d)\s*×\s*(?=\d)", "gu"), &js("$1かける"));
 
     s = rewrite_with(

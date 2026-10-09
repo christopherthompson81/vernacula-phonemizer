@@ -126,10 +126,17 @@ pub enum ExponentPosition {
 #[serde(untagged)]
 pub enum PositionDecl {
     All(ExponentPosition),
-    Per {
-        squared: Option<ExponentPosition>,
-        cubed: Option<ExponentPosition>,
-    },
+    Per(PerPower),
+}
+
+/// The per-power `position` record. ⚠ `deny_unknown_fields`: both fields are optional, so under `untagged`
+/// a misspelt key would otherwise load as an empty record and silently fall back to the default position.
+/// (serde takes the attribute on a struct, not on an enum variant, hence the named struct.)
+#[derive(Debug, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PerPower {
+    pub squared: Option<ExponentPosition>,
+    pub cubed: Option<ExponentPosition>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -405,6 +412,8 @@ pub struct SymbolNormalizer {
     pct_pre_re: Option<JsRegex>,
     pct_after: Option<JsRegex>,
     pct_before: Option<JsRegex>,
+    /// `saidAfter(forms)` per currency key, compiled once.
+    cur_said: IndexMap<JsString, JsRegex>,
     bare_unit: Box<dyn Fn(&JsString) -> JsString + Send + Sync>,
 }
 
@@ -427,7 +436,7 @@ fn said_before(forms: &[JsString]) -> JsRegex {
 fn position_for(decl: Option<&PositionDecl>, power: &str) -> ExponentPosition {
     match decl {
         Some(PositionDecl::All(p)) => Some(*p),
-        Some(PositionDecl::Per { squared, cubed }) => {
+        Some(PositionDecl::Per(PerPower { squared, cubed })) => {
             if power == "cubed" {
                 *cubed
             } else {
@@ -562,6 +571,11 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
     let pct_pre_re = if percent.is_some() { Some(re(format!("(?<!\\d){pct}\\s?({NUM})"), "gu")?) } else { None };
     let pct_after = percent.as_ref().map(|p| said_after(p, connective.as_ref()));
     let pct_before = percent.as_ref().map(|p| said_before(p));
+    let cur_said = currency
+        .iter()
+        .flatten()
+        .map(|(k, forms)| (k.clone(), said_after(forms, connective.as_ref())))
+        .collect();
     Ok(SymbolNormalizer {
         ampersand: d.ampersand.as_ref().map(|a| js(a)),
         percent,
@@ -592,6 +606,7 @@ pub fn make_symbol_normalizer(d: &SymbolData) -> Result<SymbolNormalizer, String
         pct_pre_re,
         pct_after,
         pct_before,
+        cur_said,
         bare_unit,
     })
 }
@@ -634,10 +649,13 @@ impl SymbolNormalizer {
             let cur = d.currency.as_ref().unwrap();
             // ⚠ `d.currency![sym] ?? d.currency![stripped]!` throws in the TS on a double miss. Unreachable: the
             // pattern is the table's own keys, at most with a separator inserted at the seam.
-            let forms = cur
-                .get(sym)
-                .unwrap_or_else(|| &cur[&js_re!(r"[\s​‌]+", "gu").replace(sym, &JsString::new())]);
-            let already = said_after(forms, d.connective.as_ref());
+            let key = if cur.contains_key(sym) {
+                sym.clone()
+            } else {
+                js_re!(r"[\s​‌]+", "gu").replace(sym, &JsString::new())
+            };
+            let forms = &cur[&key];
+            let already = &d.cur_said[&key];
             let body = if mag_first {
                 cat(&[&mag.unwrap_or(&empty).trim(), &sp, num])
             } else {

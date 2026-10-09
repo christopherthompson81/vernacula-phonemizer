@@ -353,7 +353,7 @@ fn main() {
                 let n = accent_nucleus(&s, &units(&input["reading"]));
                 JsString::from(if n == 0.0 { "0".to_string() } else { format!("{}", n) })
             } else {
-                phonemize_word(&s)
+                phonemize_word(&s).unwrap()
             }
         }),
         "trace" => Box::new(|input| {

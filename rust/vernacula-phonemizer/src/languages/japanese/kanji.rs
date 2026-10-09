@@ -61,10 +61,10 @@ fn load() -> Result<Readings, String> {
     Ok(Readings { map, max_key_length, fallback, adverbs, max_unit_length })
 }
 
-/// The reading tables, or why they could not be loaded. Loaded once; a failure is cached.
+/// The reading tables, or why they could not be loaded. Cached once loaded; a failure is retried.
 pub fn try_readings() -> Result<&'static Readings, String> {
-    static R: OnceLock<Result<Readings, String>> = OnceLock::new();
-    R.get_or_init(load).as_ref().map_err(Clone::clone)
+    static R: OnceLock<Readings> = OnceLock::new();
+    super::load_once(&R, load)
 }
 
 /// The tables for code that runs after `try_readings` has succeeded (the engine checks it per call).
@@ -72,16 +72,30 @@ fn readings() -> &'static Readings {
     try_readings().unwrap_or_else(|e| panic!("{e}"))
 }
 
+// The TS classes as code-point ranges. `re.test(ch)` under `u` is "some code point of `ch` is in the class",
+// with a lone surrogate its own code point (in no range), which is exactly `any_cp`. The `tests` module
+// checks each against its verbatim pattern over every code point.
+/// `/[ぁ-ゖ]/u`
+const HIRAGANA: &[(u32, u32)] = &[(0x3041, 0x3096)];
+/// `/[㐀-鿿\u{20000}-\u{2a6df}々]/u`
+const KANJI: &[(u32, u32)] = &[(0x3400, 0x9fff), (0x20000, 0x2a6df), (0x3005, 0x3005)];
+/// `/[ぁ-ゖァ-ヿー]/u` (ー U+30FC lies inside ァ-ヿ)
+const KANA: &[(u32, u32)] = &[(0x3041, 0x3096), (0x30a1, 0x30ff), (0x30fc, 0x30fc)];
+
+fn any_cp(ch: &JsString, class: &[(u32, u32)]) -> bool {
+    ch.code_points().any(|c| class.iter().any(|&(lo, hi)| (lo..=hi).contains(&c)))
+}
+
 fn is_hiragana(ch: &JsString) -> bool {
-    js_re!(r"[ぁ-ゖ]", "u").test(ch)
+    any_cp(ch, HIRAGANA)
 }
 
 pub(crate) fn is_kanji(ch: &JsString) -> bool {
-    js_re!(r"[㐀-鿿\u{20000}-\u{2a6df}々]", "u").test(ch)
+    any_cp(ch, KANJI)
 }
 
 fn is_kana(ch: &JsString) -> bool {
-    js_re!(r"[ぁ-ゖァ-ヿー]", "u").test(ch)
+    any_cp(ch, KANA)
 }
 
 /// A string's code points, with their unit offsets so a run of them can be sliced without re-joining.
@@ -398,4 +412,31 @@ pub fn segment_text(text: &JsString) -> JsString {
         i += u.len();
     }
     if rec { rebuilt(text, &pieces) } else { out }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::js_regex::JsRegex;
+
+    /// Each range table equals its verbatim TS pattern on every code point, lone surrogates included.
+    #[test]
+    fn classes_match_their_ts_patterns() {
+        let cases: [(&str, fn(&JsString) -> bool); 3] = [
+            (r"[ぁ-ゖ]", is_hiragana),
+            (r"[㐀-鿿\u{20000}-\u{2a6df}々]", is_kanji),
+            (r"[ぁ-ゖァ-ヿー]", is_kana),
+        ];
+        for (pat, f) in cases {
+            let re = JsRegex::new(pat, "u").unwrap();
+            for cp in 0..0x110000u32 {
+                let s = if (0xd800..0xe000).contains(&cp) {
+                    JsString(vec![cp as u16])
+                } else {
+                    super::super::from_code_point(cp)
+                };
+                assert_eq!(f(&s), re.test(&s), "{pat} at U+{cp:04X}");
+            }
+        }
+    }
 }
