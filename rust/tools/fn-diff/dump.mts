@@ -725,6 +725,87 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ text: units(text), lang: "cmn", op: "ipa" }, phonemize(text, "cmn"));
         }
     },
+    // phonemizeTrace for LANGS, serialized: normalized, then one line per token (span, inputSpan, surface,
+    // nativised, emitted, source, ipaSpan), then the rewrites' stages. "-" is an absent field.
+    async "phonemize-trace"() {
+        const { phonemizeTrace } = await import("../../../src/index.ts");
+        const sp = (s?: [number, number]): string => (s ? `${s[0]},${s[1]}` : "-");
+        for (const lang of LANGS)
+            for (const text of langTexts(lang)) {
+                const t = phonemizeTrace(text, lang);
+                const lines = [`${t.traced}`, t.ipa, t.normalized];
+                for (const k of t.tokens)
+                    lines.push([sp(k.span), sp(k.inputSpan), k.surface, k.nativised ?? "-", k.emitted.join("+"), k.source ?? "-", sp(k.ipaSpan)].join("|"));
+                for (const r of t.rewrites) lines.push(`rewrite ${r.stage}`);
+                emit({ text: units(text), lang }, lines.join("\n"));
+            }
+    },
+    // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
+    // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
+    async "fr-normalize"() {
+        const N = await import("../../../src/languages/french/normalize.ts");
+        const O = await import("../../../src/languages/french/ordinals.ts");
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const lex = loadTsvMap(new URL("../../../src/languages/french/french.ts", import.meta.url).href, "lexicon.tsv");
+        const isWord = (w: string): boolean => lex.has(w);
+        for (const [t, src] of textsFor(["fr"], "fr_fr", ["fr.txt"])) {
+            const a = N.normalizeFrench(t, isWord);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = normalizeRomans(O.normalizeFrenchOrdinalDigits(O.normalizeFrenchOrdinalRomans(a, isWord)));
+            emit({ text: units(a), src, op: "numerals" }, b);
+            emit({ text: units(b), src, op: "initialisms" }, N.normalizeFrenchInitialisms(b, isWord));
+        }
+    },
+    // The rule g2p over every Lexique word, every word of the texts, and OOV-making edits of lexicon words.
+    async "fr-g2p"() {
+        const { toIpa } = await import("../../../src/languages/french/g2p.ts");
+        const lex = loadTsvMap(new URL("../../../src/languages/french/french.ts", import.meta.url).href, "lexicon.tsv");
+        const words = new Set<string>(lex.keys());
+        for (const t of textsFor(["fr"], "fr_fr", ["fr.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) words.add(m[0]);
+        const base = [...lex.keys()];
+        for (let i = 0; i + 1 < base.length; i += 53) {
+            words.add(base[i]! + base[i + 1]!);
+            words.add(base[i]! + "ent");
+            words.add(base[i]!.toUpperCase());
+            words.add("ill" + base[i]!);
+        }
+        for (const w of ["", "h", "ill", "illégal", "Málaga", "Taínos", "Cañitas", "𝔞b", "\ud835x", "c'", "c’est", "qu'", "ﬁn", "İle", "straße", "øre", "x", "ex", "eux", "euille", "aill", "œuf", "bœufs"]) words.add(w);
+        for (const w of words) emit({ word: units(w) }, toIpa(w));
+    },
+    async "fr-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/french/numbers.ts");
+        for (let n = 0; n <= 20000; n++) emit({ n }, numberToWords(n));
+        for (let e = 4; e <= 21; e++) for (const n of [10 ** e, 10 ** e - 1, 10 ** e + 7, 123456789 * 10 ** (e - 4) + 42]) emit({ n }, numberToWords(n));
+        for (const n of [999999999, 1e9, 2 ** 53 - 1, 2 ** 53, 1.5, -3]) emit({ n }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "123456789012345678901234"]) emit({ n: Number(raw), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    async "fr-ordinals"() {
+        const { ordinal, normalizeFrenchOrdinalDigits, normalizeFrenchOrdinalRomans } = await import("../../../src/languages/french/ordinals.ts");
+        const lex = loadTsvMap(new URL("../../../src/languages/french/french.ts", import.meta.url).href, "lexicon.tsv");
+        const ns = [0, 1.5, -1, 1e9, 1e6, 2e6, 1e12, 2 ** 53];
+        for (let n = 1; n <= 3000; n++) ns.push(n);
+        for (const n of ns)
+            for (const [feminine, plural] of [[false, false], [true, false], [false, true], [true, true]] as const)
+                emit({ n, feminine, plural }, ordinal(n, { feminine, plural }) ?? "\u0000none");
+        for (const t of textsFor(["fr"], "fr_fr", ["fr.txt"]).keys()) {
+            emit({ text: units(t), op: "digits" }, normalizeFrenchOrdinalDigits(t));
+            emit({ text: units(t), op: "romans" }, normalizeFrenchOrdinalRomans(t, (w) => lex.has(w)));
+        }
+    },
+    // The OOV tagger over every distinct word the neural pre-pass would offer it, plus a lexicon sample.
+    async "fr-tagger"() {
+        const { createFrenchTagger } = await import("../../../src/languages/french/frenchTagger.ts");
+        const tagger = await createFrenchTagger();
+        if (!tagger) throw new Error("fr tagger unavailable");
+        const lex = loadTsvMap(new URL("../../../src/languages/french/french.ts", import.meta.url).href, "lexicon.tsv");
+        const words = new Set<string>();
+        for (const t of textsFor(["fr"], "fr_fr", ["fr.txt"]).keys())
+            for (const m of t.matchAll(/[a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?/giu)) words.add(m[0].toLowerCase());
+        let i = 0;
+        for (const w of lex.keys()) if (i++ % 25 === 0) words.add(w);
+        for (const w of words) emit({ word: units(w) }, await tagger.tag(w));
+    },
 };
 
 
