@@ -9,11 +9,11 @@ use indexmap::IndexMap;
 use serde::Deserialize;
 
 use crate::core::load_manifest::load_manifest;
+use crate::core::normalize_symbols::{ExponentPosition, Multiply};
 
 pub const DIR: &str = "languages/french";
 
-/// `CountForms` (core/normalizeSymbols.ts): the forms a count selects between.
-pub type CountForms = Vec<String>;
+pub use crate::core::normalize_symbols::CountForms;
 
 #[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -57,16 +57,10 @@ pub struct Phonotactics {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Multiply {
-    pub times: String,
-    pub by: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
-    pub position: Option<String>,
+    pub position: Option<ExponentPosition>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -43,3 +43,17 @@ pub fn french_tagger() -> Option<&'static FrenchTagger> {
 pub fn french_tagger_unavailable_reason() -> Option<String> {
     shipped().as_ref().err().cloned()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The shipped graph loads in the pure-Rust runtime: without it the best path silently serves the sync
+    /// reading (the golden then fails on 43 of 200 rows).
+    #[test]
+    fn shipped_tagger_loads() {
+        assert_eq!(french_tagger_unavailable_reason(), None);
+        // An out-of-vocabulary code point declines the word rather than guessing.
+        assert_eq!(french_tagger().unwrap().tag(&JsString::from("a☃b")).unwrap(), JsString::new());
+    }
+}

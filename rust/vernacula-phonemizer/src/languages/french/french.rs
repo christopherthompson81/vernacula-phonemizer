@@ -17,6 +17,9 @@ use crate::core::foreign::read_foreign_run;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::load_tsv::{TsvOptions, load_tsv_strings};
+use crate::core::normalize_symbols::{
+    BareExponent, ExponentWords, PositionDecl, SymbolData, SymbolNormalizer, make_symbol_normalizer,
+};
 use crate::core::provenance::Span;
 use crate::core::roman::{RomanPolicy, normalize_romans};
 use crate::core::trace::{enter_engine, note_assembled, note_token};
@@ -140,6 +143,7 @@ struct Traced {
 pub struct FrenchPhonemizer {
     lexicon: IndexMap<JsString, JsString>,
     supplement: IndexMap<JsString, JsString>,
+    symbols: SymbolNormalizer,
 }
 
 /// `createFrench()`: loads the manifest, the Lexique lexicon and the supplement, or says why it cannot.
@@ -149,7 +153,7 @@ pub fn create_french() -> Result<FrenchPhonemizer, String> {
         load_tsv_strings(DIR, "lexicon.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
     let supplement =
         load_tsv_strings(DIR, "supplement.tsv", TsvOptions::default()).map_err(|e| e.to_string())?;
-    Ok(FrenchPhonemizer { lexicon, supplement })
+    Ok(FrenchPhonemizer { lexicon, supplement, symbols: build_symbols()? })
 }
 
 impl FrenchPhonemizer {
@@ -190,7 +194,7 @@ impl FrenchPhonemizer {
     /// `text(input, oovOverride?)`.
     pub fn text(&self, input: &JsString, oov: Option<OovResolver>) -> JsString {
         let is_word = |w: &JsString| self.lexicon.contains_key(w);
-        let input = symbols(&normalize_french_initialisms(
+        let input = self.symbols.apply(&normalize_french_initialisms(
             &self.normalize_numerals(&normalize_french(input, &is_word)),
             &is_word,
         ));
@@ -357,9 +361,28 @@ impl FrenchPhonemizer {
     }
 }
 
-/// TODO(fr, symbol tier): `SYMBOLS = makeSymbolNormalizer(MANIFEST.symbolTier)` (%, currency, units,
-/// exponents, magnitudes, ×, &). The shared `makeSymbolNormalizer` port is owned by the es branch and is
-/// cherry-picked in; until then this is the IDENTITY, so every row the tier rewrites differs.
-fn symbols(text: &JsString) -> JsString {
-    text.clone()
+/// `SYMBOLS`: the shared tier configured from `MANIFEST.symbolTier`, with exactly the fields french.ts passes.
+fn build_symbols() -> Result<SymbolNormalizer, String> {
+    let t = &MANIFEST.symbol_tier;
+    make_symbol_normalizer(&SymbolData {
+        percent: Some(t.percent.clone()),
+        currency: Some(t.currency.clone()),
+        units: Some(t.units.clone()),
+        exponent_words: Some(ExponentWords {
+            squared: Some(t.exponent_words.squared.clone()),
+            cubed: Some(t.exponent_words.cubed.clone()),
+            position: t.exponent_words.position.map(PositionDecl::All),
+        }),
+        bare_exponent: Some(BareExponent {
+            squared: Some(t.bare_exponent.squared.clone()),
+            cubed: Some(t.bare_exponent.cubed.clone()),
+            power: Some(t.bare_exponent.power.clone()),
+            negative: Some(t.bare_exponent.negative.clone()),
+        }),
+        magnitudes: Some(t.magnitudes.clone()),
+        magnitude_connective: Some(t.magnitude_connective.clone()),
+        ampersand: Some(t.ampersand.clone()),
+        multiply: Some(t.multiply.clone()),
+        ..Default::default()
+    })
 }
