@@ -28,7 +28,7 @@ use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagg
 use crate::languages::english_gb::english_gb::rp_word_transform;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 3] = ["en", "en-GB", "ja"];
+pub const LANGUAGES: [&str; 4] = ["en", "en-GB", "ja", "it"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -61,6 +61,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "ja" => crate::languages::japanese::japanese::create_japanese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "it" => crate::languages::italian::italian::create_italian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -69,6 +72,7 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
 /// rather than a table, because a policy holds a compiled regex and an ordinal closure, which no `const` can.
 fn roman_policy(lang: &str) -> RomanPolicy {
     match lang {
+        "it" => crate::languages::italian::roman_ordinals::roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
             ..Default::default()

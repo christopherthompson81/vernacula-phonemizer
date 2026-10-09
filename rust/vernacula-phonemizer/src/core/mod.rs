@@ -1,3 +1,4 @@
+pub mod boundaries;
 pub mod clauses;
 pub mod data_path;
 pub mod data_source;

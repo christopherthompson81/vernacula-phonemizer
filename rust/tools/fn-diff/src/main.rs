@@ -438,6 +438,30 @@ fn main() {
             let out = serde_json::json!({ "traced": t.traced, "normalized": u(&t.normalized), "tokens": tokens });
             JsString::from(serde_json::to_string(&out).unwrap())
         }),
+        "it-normalize" => Box::new(|input| {
+            use vernacula_phonemizer::languages::italian::normalize as n;
+            let t = units(&input["text"]);
+            match input["op"].as_str().unwrap() {
+                "normalize" => n::normalize_italian(&t),
+                "initialisms" => n::normalize_italian_initialisms(&n::normalize_italian(&t)),
+                _ => n::normalize_italian_decimals(&t),
+            }
+        }),
+        "it-g2p" => Box::new(|input| {
+            use vernacula_phonemizer::languages::italian::{italian as i, roman_ordinals as r};
+            match input["op"].as_str().unwrap() {
+                "word" => i::phonemize_word(&units(&input["word"])),
+                "cardinal" => i::number_words(input["n"].as_f64().unwrap()),
+                _ => r::italian_ordinal(input["n"].as_f64().unwrap())
+                    .unwrap_or_else(|| JsString::from("\u{0}none")),
+            }
+        }),
+        "it-roman" => {
+            let policy = vernacula_phonemizer::languages::italian::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
