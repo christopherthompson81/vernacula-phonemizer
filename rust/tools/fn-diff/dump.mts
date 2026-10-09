@@ -70,6 +70,29 @@ function langTexts(lang: string): string[] {
 /** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
 const LANGS = (process.env.LANGS ?? "en,en-GB").split(",").filter((l) => l !== "");
 
+// ── Mandarin helpers ──────────────────────────────────────────────────────────────────────────────────
+const MANDARIN = new URL("../../../src/languages/mandarin/mandarin.ts", import.meta.url).href;
+/** The pinyin tables exactly as createMandarin() builds them. */
+function cmnPinyinTables(): { chars: Map<string, string[]>; phrases: Map<string, string>; maxPhrase: number } {
+    const chars = loadTsvMap(MANDARIN, "chars.tsv", (v) => v.split(","));
+    const phrases = loadTsvMap(MANDARIN, "phrases.tsv");
+    const maxPhrase = [...phrases.keys()].reduce((m, k) => Math.max(m, Array.from(k).length), 2);
+    return { chars, phrases, maxPhrase };
+}
+/** Synthetic texts only a JsString-level replay can carry: lone surrogate halves (the public &str API cannot). */
+const CMN_EXTRAS = ["\uD842", "\uDFB7你", "你好\uD842", "𠮷\uD842", "1\uDC00年", "A\uD800B", "气温-\uD8005度"];
+/** The `trace` dump's serializer: traced, normalized, and per token
+ *  [span, inputSpan|null, ipaSpan|null, surface units, source|null], as JSON. */
+function traceJson(t: {
+    traced: boolean; normalized: string;
+    tokens: { span: [number, number]; inputSpan?: [number, number]; ipaSpan?: [number, number]; surface: string; source?: string }[];
+}): string {
+    return JSON.stringify({
+        traced: t.traced,
+        normalized: units(t.normalized),
+        tokens: t.tokens.map((k) => [k.span, k.inputSpan ?? null, k.ipaSpan ?? null, units(k.surface), k.source ?? null]),
+    });
+}
 const emit = (input: unknown, output: string): void => {
     process.stdout.write(JSON.stringify({ input, output: units(output) }) + "\n");
 };
@@ -525,12 +548,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { phonemizeTrace } = await import("../../../src/index.ts");
         for (const lang of LANGS)
             for (const text of langTexts(lang)) {
-                const t = phonemizeTrace(text, lang);
-                emit({ text: units(text), lang }, JSON.stringify({
-                    traced: t.traced,
-                    normalized: units(t.normalized),
-                    tokens: t.tokens.map((k) => [k.span, k.inputSpan ?? null, k.ipaSpan ?? null, units(k.surface), k.source ?? null]),
-                }));
+                emit({ text: units(text), lang }, traceJson(phonemizeTrace(text, lang)));
             }
     },
     // Italian: normalize.ts's three exported passes over the golden, FLEURS it_it (columns 3 and 4) and
@@ -629,6 +647,83 @@ const dumps: Record<string, () => void | Promise<void>> = {
             for (const d of ["ep", "bp"] as const) emit({ n: raw, d, raw }, ptWords(Number(raw), d, raw));
         for (let n = -1; n <= 1002; n++) emit({ n: String(n), ordinal: true }, portugueseOrdinal(n) ?? "\u0000none");
         emit({ n: "2.5", ordinal: true }, portugueseOrdinal(2.5) ?? "\u0000none");
+    },
+    // ── Mandarin (cmn). Texts are langTexts("cmn") (golden, FLEURS cmn_hans_cn columns 3 and 4, probes/cmn.txt)
+    // plus CMN_EXTRAS. normalizeMandarin and spellInitialisms alone, and chained as mandarin.ts chains them
+    // (without the symbol tier between them).
+    async "cmn-normalize"() {
+        const { normalizeMandarin, spellInitialisms } = await import("../../../src/languages/mandarin/normalize.ts");
+        for (const t of [...langTexts("cmn"), ...CMN_EXTRAS]) {
+            emit({ text: units(t), op: "normalize" }, normalizeMandarin(t));
+            emit({ text: units(t), op: "initialisms" }, spellInitialisms(t));
+            emit({ text: units(t), op: "both" }, spellInitialisms(normalizeMandarin(t)));
+        }
+    },
+    // segment() over each text's code points (no mask, and a mask exempting every third), before and after
+    // applyYiBuSandhi. Tokens as `py\u0001src` (src absent → \u0000) joined by \u0002.
+    async "cmn-segment"() {
+        const { segment } = await import("../../../src/languages/mandarin/segment.ts");
+        const { applyYiBuSandhi } = await import("../../../src/languages/mandarin/yiBuSandhi.ts");
+        const t = cmnPinyinTables();
+        const ser = (toks: { py: string; src?: string }[]): string =>
+            toks.map((k) => `${k.py}\u0001${k.src ?? "\u0000"}`).join("\u0002");
+        for (const text of [...langTexts("cmn"), ...CMN_EXTRAS]) {
+            const cps = Array.from(text);
+            for (const masked of [false, true]) {
+                const exempt = masked ? cps.map((_c, i) => i % 3 === 0) : [];
+                const toks = segment(cps, t, exempt);
+                emit({ text: units(text), masked, sandhi: false }, ser(toks));
+                applyYiBuSandhi(toks);
+                emit({ text: units(text), masked, sandhi: true }, ser(toks));
+            }
+        }
+    },
+    // createPinyinPhonemizer() over: each text's segmented + sandhied Han pinyin, each raw text, every phrases.tsv
+    // value, every syllable with each tone digit (and none, and out-of-range), every chars.tsv reading, and corners.
+    async "cmn-pinyin"() {
+        const { segment } = await import("../../../src/languages/mandarin/segment.ts");
+        const { applyYiBuSandhi } = await import("../../../src/languages/mandarin/yiBuSandhi.ts");
+        const { createPinyinPhonemizer } = await import("../../../src/languages/mandarin/mandarin.ts");
+        const conv = createPinyinPhonemizer();
+        const t = cmnPinyinTables();
+        const items = new Set<string>();
+        for (const text of langTexts("cmn")) {
+            const toks = segment(Array.from(text).filter((c) => /\p{Script=Han}/u.test(c)), t);
+            applyYiBuSandhi(toks);
+            items.add(toks.map((k) => k.py).join(" "));
+            items.add(text);
+        }
+        for (const v of t.phrases.values()) items.add(v);
+        for (const k of loadTsvMap(MANDARIN, "syllable-ipa.tsv").keys())
+            for (const tone of ["", "1", "2", "3", "4", "5", "6", "0"]) items.add(k + tone);
+        for (const r of t.chars.values()) for (const p of r) items.add(p);
+        for (const x of ["lv3", "nv3", "lve4", "nve4", "lu:e4", "nu:3", "LV3", "Ni3 HAO3", "MP3", "", "   ", " ni3  hao3 ",
+            "ni3\thao3\nma", "xyz9", "ni3hao3", "ü", "u:", "a1 a3 a3 a3", "ni3 ni3 ni3", "ma5 ma", "er2", "r5", "ng2", "hm",
+            "n2", "ê", "yo1", "lo5", "Ü3", "lÜ3", "ſi3", "K3"]) items.add(x);
+        for (const x of items) emit({ text: units(x) }, conv(x));
+    },
+    // integerToChinese over 0..20000, myriad edges and up to MAX_SAFE_INTEGER; digitsToChinese over digit strings.
+    async "cmn-numbers"() {
+        const { integerToChinese, digitsToChinese } = await import("../../../src/languages/mandarin/numbers.ts");
+        const ns = new Set<number>();
+        for (let i = 0; i <= 20000; i++) ns.add(i);
+        for (let e = 4; e <= 15; e++)
+            for (const k of [1, 2, 3, 7, 10, 20, 22, 99, 101, 1001, 2002])
+                for (const d of [0, 2, 20, -1, 2000, 10001]) ns.add(k * 10 ** e + d);
+        for (let x = 1; x < 9e15; x = x * 7 + 3) ns.add(x);
+        for (const x of [Number.MAX_SAFE_INTEGER, 9007199254739999, 20000000000002, 200020002, 2000200020002]) ns.add(x);
+        for (const n of ns) if (Number.isSafeInteger(n)) emit({ n, op: "int" }, integerToChinese(n));
+        for (const d of ["0", "2009", "2024", "1999", "3", "14", "000", "1234567890", "99999999999999999999", "5x", "１", "٣", "𝟗", ""])
+            emit({ digits: units(d), op: "digits" }, digitsToChinese(d));
+    },
+    // The lone-surrogate CMN_EXTRAS through main's `trace` serializer (traceJson), plus each one's reading: the
+    // `trace` and `phonemize-sync` dumps go through the &str API on the Rust side and cannot carry them.
+    async "cmn-trace-extras"() {
+        const { phonemize, phonemizeTrace } = await import("../../../src/index.ts");
+        for (const text of CMN_EXTRAS) {
+            emit({ text: units(text), lang: "cmn", op: "trace" }, traceJson(phonemizeTrace(text, "cmn")));
+            emit({ text: units(text), lang: "cmn", op: "ipa" }, phonemize(text, "cmn"));
+        }
     },
 };
 

@@ -45,6 +45,29 @@ fn slots(v: &JsString, _: &JsString) -> Option<Vec<usize>> {
     )
 }
 
+/// dump.mts's `traceJson`: traced, normalized, and per token [span, inputSpan|null, ipaSpan|null, surface
+/// units, source|null]. JsString level, through the guarded `phonemize_trace_js`.
+fn trace_json(text: &JsString, lang: &str) -> JsString {
+    let t = vernacula_phonemizer::phonemize_trace_js(text, lang).unwrap().1;
+    let u = |s: &JsString| serde_json::json!(s.0);
+    let span = |s: Option<(usize, usize)>| s.map_or(Value::Null, |(a, b)| serde_json::json!([a, b]));
+    let tokens: Vec<Value> = t
+        .tokens
+        .iter()
+        .map(|k| {
+            serde_json::json!([
+                [k.span.0, k.span.1],
+                span(k.input_span),
+                span(k.ipa_span),
+                u(&k.surface),
+                k.source.map_or(Value::Null, |s| Value::from(s.as_str())),
+            ])
+        })
+        .collect();
+    let out = serde_json::json!({ "traced": t.traced, "normalized": u(&t.normalized), "tokens": tokens });
+    JsString::from(serde_json::to_string(&out).unwrap())
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let (name, path) = (args.get(1).expect("name"), args.get(2).expect("jsonl"));
@@ -468,30 +491,57 @@ fn main() {
                 phonemize_word(&s).unwrap()
             }
         }),
-        "trace" => Box::new(|input| {
-            let text = units(&input["text"]).to_string_lossy();
-            let t = vernacula_phonemizer::phonemize_trace(&text, input["lang"].as_str().unwrap())
-                .unwrap()
-                .trace;
-            let u = |s: &JsString| serde_json::json!(s.0);
-            let span = |s: Option<(usize, usize)>| {
-                s.map_or(Value::Null, |(a, b)| serde_json::json!([a, b]))
-            };
-            let tokens: Vec<Value> = t
-                .tokens
-                .iter()
-                .map(|k| {
-                    serde_json::json!([
-                        [k.span.0, k.span.1],
-                        span(k.input_span),
-                        span(k.ipa_span),
-                        u(&k.surface),
-                        k.source.map_or(Value::Null, |s| Value::from(s.as_str())),
-                    ])
-                })
-                .collect();
-            let out = serde_json::json!({ "traced": t.traced, "normalized": u(&t.normalized), "tokens": tokens });
-            JsString::from(serde_json::to_string(&out).unwrap())
+        "trace" => Box::new(|input| trace_json(&units(&input["text"]), input["lang"].as_str().unwrap())),
+        // ── Mandarin (cmn) ──
+        "cmn-normalize" => Box::new(|input| {
+            use vernacula_phonemizer::languages::mandarin::normalize::{normalize_mandarin, spell_initialisms};
+            let t = units(&input["text"]);
+            match input["op"].as_str().unwrap() {
+                "normalize" => normalize_mandarin(&t),
+                "initialisms" => spell_initialisms(&t),
+                _ => spell_initialisms(&normalize_mandarin(&t)),
+            }
+        }),
+        "cmn-segment" => {
+            use vernacula_phonemizer::languages::mandarin::{mandarin::load_pinyin_tables, segment::segment};
+            use vernacula_phonemizer::languages::mandarin::yi_bu_sandhi::apply_yi_bu_sandhi;
+            let t = load_pinyin_tables().unwrap();
+            Box::new(move |input| {
+                let cps = units(&input["text"]).code_point_strings();
+                let exempt: Vec<bool> = if input["masked"].as_bool().unwrap() {
+                    (0..cps.len()).map(|i| i % 3 == 0).collect()
+                } else {
+                    Vec::new()
+                };
+                let mut toks = segment(&cps, &t, &exempt);
+                if input["sandhi"].as_bool().unwrap() {
+                    apply_yi_bu_sandhi(&mut toks);
+                }
+                let parts: Vec<JsString> = toks
+                    .iter()
+                    .map(|k| k.py.concat(&JsString::from("\u{1}")).concat(&k.src.clone().unwrap_or_else(|| JsString::from("\u{0}"))))
+                    .collect();
+                JsString::join(&parts, &JsString::from("\u{2}"))
+            })
+        }
+        "cmn-pinyin" => {
+            let conv = vernacula_phonemizer::languages::mandarin::mandarin::create_pinyin_phonemizer().unwrap();
+            Box::new(move |input| conv.convert(&units(&input["text"])))
+        }
+        "cmn-numbers" => Box::new(|input| {
+            use vernacula_phonemizer::languages::mandarin::numbers::{digits_to_chinese, integer_to_chinese};
+            match input["op"].as_str().unwrap() {
+                "int" => integer_to_chinese(input["n"].as_f64().unwrap()),
+                _ => digits_to_chinese(&units(&input["digits"])),
+            }
+        }),
+        // The lone-surrogate texts: the `trace` serializer, and the reading, both at the JsString level.
+        "cmn-trace-extras" => Box::new(|input| {
+            let (text, lang) = (units(&input["text"]), input["lang"].as_str().unwrap());
+            match input["op"].as_str().unwrap() {
+                "trace" => trace_json(&text, lang),
+                _ => vernacula_phonemizer::registry::phonemize_in(lang, &text).unwrap(),
+            }
         }),
         "it-normalize" => Box::new(|input| {
             use vernacula_phonemizer::languages::italian::normalize as n;

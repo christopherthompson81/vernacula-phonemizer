@@ -6,3 +6,4 @@ pub mod spanish;
 pub mod portuguese;
 pub mod portuguese_br;
 pub mod hindi;
+pub mod mandarin;

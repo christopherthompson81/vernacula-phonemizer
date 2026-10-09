@@ -33,7 +33,7 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 8] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi"];
+pub const LANGUAGES: [&str; 9] = ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -75,6 +75,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "pt" => create_portuguese(Dialect::Ep, None).map(|e| e as Arc<dyn Engine>),
         "pt-BR" => create_portuguese_br().map(|e| e as Arc<dyn Engine>),
         "hi" => crate::languages::hindi::hindi::engine(),
+        "cmn" => crate::languages::mandarin::mandarin::create_mandarin(Some(Arc::new(read_as_english)))
+            .map(|m| Arc::new(m) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
