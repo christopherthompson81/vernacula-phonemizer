@@ -207,7 +207,10 @@ fn main() {
         }),
         "reader" => Box::new(|input| {
             let run = units(&input["run"]);
-            match vernacula_phonemizer::core::scripts::reader_for(&run, input["host"].as_str().unwrap()) {
+            match vernacula_phonemizer::core::scripts::reader_for(
+                &run,
+                input["host"].as_str().unwrap(),
+            ) {
                 None => JsString::from("\u{0}none"),
                 Some((t, text)) => JsString::from(format!("{t}|")).concat(&text),
             }
@@ -218,10 +221,47 @@ fn main() {
             let none = || JsString::from("\u{0}none");
             match input["op"].as_str().unwrap() {
                 "phone" => latin_phone(&c, PhoneOpts::default()).unwrap_or_else(none),
-                "phone-ih" => latin_phone(&c, PhoneOpts { initial: true, include_h: true }).unwrap_or_else(none),
+                "phone-ih" => latin_phone(
+                    &c,
+                    PhoneOpts {
+                        initial: true,
+                        include_h: true,
+                    },
+                )
+                .unwrap_or_else(none),
                 _ => vernacula_phonemizer::core::host_word::fold_latin_to_base(&c),
             }
         }),
+        "core-numbers" => {
+            use vernacula_phonemizer::core::numbers::{
+                NumbersDef, indic_number_words, render_number, spell_digits, western_number_words,
+            };
+            let def = |dir: &str| -> NumbersDef {
+                let m: serde_json::Value =
+                    vernacula_phonemizer::core::load_manifest::load_manifest(
+                        &format!("languages/{dir}"),
+                        &format!("{dir}.jsonc"),
+                    )
+                    .unwrap();
+                serde_json::from_value(m["numbers"].clone()).unwrap()
+            };
+            let (hi, hy) = (def("hindi"), def("armenian"));
+            Box::new(move |input| {
+                let (d, compose): (
+                    &NumbersDef,
+                    vernacula_phonemizer::core::numbers::NumberComposer,
+                ) = if input["kind"] == "indic" {
+                    (&hi, indic_number_words)
+                } else {
+                    (&hy, western_number_words)
+                };
+                let id = |w: &str| w.to_string();
+                JsString::from(match input.get("digits") {
+                    Some(dg) => spell_digits(dg.as_str().unwrap(), d, &id),
+                    None => render_number(input["n"].as_u64().unwrap(), d, &id, compose),
+                })
+            })
+        }
         "numbers" => Box::new(|input| {
             let n = BigNat::parse(input["n"].as_str().unwrap()).unwrap();
             let words = if input["ordinal"].as_bool().unwrap() {

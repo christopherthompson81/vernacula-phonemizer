@@ -40,12 +40,20 @@ pub trait Engine: Send + Sync {
     fn neural(&self, _pre_passed: &JsString) -> Option<Result<JsString, PhonemizeError>> {
         None
     }
+
+    /// Whether `neural` is implemented: the best path pre-passes the text only for an engine that uses it.
+    fn has_neural(&self) -> bool {
+        false
+    }
 }
 
 /// `build(lang)`: one arm per ported language.
 fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
     let english = |variant: EnglishVariant| -> Result<Arc<dyn Engine>, PhonemizeError> {
-        Ok(Arc::new(EnglishEngine { en: english()?, variant }))
+        Ok(Arc::new(EnglishEngine {
+            en: english()?,
+            variant,
+        }))
     };
     Some(match lang {
         "en" => english(EnglishVariant::Us),
@@ -54,10 +62,14 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
     })
 }
 
-/// `ROMAN_POLICIES[lang] ?? { exclude: ROMAN_EXCLUSIONS[lang] }`. One arm per language with its own.
+/// `ROMAN_POLICIES[lang] ?? { exclude: ROMAN_EXCLUSIONS[lang] }`. One arm per language with its own: a `match`
+/// rather than a table, because a policy holds a compiled regex and an ordinal closure, which no `const` can.
 fn roman_policy(lang: &str) -> RomanPolicy {
     match lang {
-        _ => RomanPolicy { exclude: roman_exclusions(lang), ..Default::default() },
+        _ => RomanPolicy {
+            exclude: roman_exclusions(lang),
+            ..Default::default()
+        },
     }
 }
 
@@ -114,8 +126,8 @@ pub fn pre_pass(lang: &str, input: &JsString) -> JsString {
 pub enum PhonemizeError {
     /// No engine for this code in this build (see `LANGUAGES`).
     UnknownLanguage(String),
-    /// The language's data could not be read or parsed (a missing or wrong data root). Cached: the engine is
-    /// built once per process, so fix the root before the first call (`core::data_source::set_data_root`).
+    /// The language's data could not be read or parsed (a missing or wrong data root). Not cached: a later
+    /// call retries the build, as the TS `getPhonemizer` does when `build` throws.
     Data(String),
     /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
@@ -134,16 +146,25 @@ impl std::fmt::Display for PhonemizeError {
 
 impl std::error::Error for PhonemizeError {}
 
-/// `getPhonemizer(lang)`'s cache: each engine is built once, and a build failure is cached too.
+/// `getPhonemizer(lang)`'s cache. Only a BUILT engine is cached: an unknown code or a failed build is not,
+/// so a caller's bad codes cannot grow it and a fixed data root takes effect on the next call (the TS caches
+/// nothing when `build` throws).
 fn engine(lang: &str) -> Result<Arc<dyn Engine>, PhonemizeError> {
-    static CACHE: Mutex<Option<HashMap<String, Result<Arc<dyn Engine>, PhonemizeError>>>> = Mutex::new(None);
+    static CACHE: Mutex<Option<HashMap<String, Arc<dyn Engine>>>> = Mutex::new(None);
     install_foreign_readers();
     if let Some(hit) = CACHE.lock().unwrap().as_ref().and_then(|c| c.get(lang)) {
-        return hit.clone();
+        return Ok(hit.clone());
     }
     // Built OUTSIDE the lock: an engine's build may phonemize through another engine.
-    let built = build(lang).unwrap_or_else(|| Err(PhonemizeError::UnknownLanguage(lang.to_string())));
-    CACHE.lock().unwrap().get_or_insert_with(HashMap::new).entry(lang.to_string()).or_insert(built).clone()
+    let built =
+        build(lang).unwrap_or_else(|| Err(PhonemizeError::UnknownLanguage(lang.to_string())))?;
+    Ok(CACHE
+        .lock()
+        .unwrap()
+        .get_or_insert_with(HashMap::new)
+        .entry(lang.to_string())
+        .or_insert(built)
+        .clone())
 }
 
 static PENDING: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
@@ -156,7 +177,9 @@ pub fn port_pending() -> Vec<String> {
 /// `readAsEnglish`: a Latin run inside another language, read by the English engine in English's scope.
 /// Without English data, a delegated run reads as nothing (the TS would have failed to start).
 pub fn read_as_english(text: &JsString) -> JsString {
-    let Ok(en) = english() else { return JsString::new() };
+    let Ok(en) = english() else {
+        return JsString::new();
+    };
     with_host(&js("en"), || {
         en.text_with_oov(&fold_pass("en", text), &|k| lookup_foreign_oov(k))
     })
@@ -204,30 +227,32 @@ fn mixed_latin(text: &JsString) -> bool {
 
 /// `phonemizeAsync(text, lang)`: the best available path.
 pub fn phonemize_best_in(lang: &str, input: &JsString) -> Result<JsString, PhonemizeError> {
-    let e = engine(lang)?;
     // FOREIGN RUNS FIRST (index.ts): every host but `en` prewarms the foreign-OOV memo from a mixed-script
-    // text, on the raw text, and a failure never takes the utterance down.
+    // text, on the raw text, and a failure never takes the utterance down. Before the engine is resolved, as
+    // in the TS, where an unknown language throws only after the prewarm.
     if lang != "en" && mixed_latin(input) {
         if let Ok(en) = english() {
             let _ = prewarm_foreign_english(&en, english_tagger(), input);
         }
     }
-    match e.neural(&pre_pass(lang, input)) {
-        Some(result) => result,
-        None => phonemize_in(lang, input),
+    let e = engine(lang)?;
+    if !e.has_neural() {
+        return phonemize_in(lang, input);
     }
+    e.neural(&pre_pass(lang, input))
+        .unwrap_or_else(|| phonemize_in(lang, input))
 }
 
 // ── English ──────────────────────────────────────────────────────────────────────────────────────────
 
-/// en and en-GB share one immutable engine (the TS builds two identical ones).
-static ENGLISH: OnceLock<Result<Arc<EnglishPhonemizer>, String>> = OnceLock::new();
-
+/// en and en-GB share one immutable engine (the TS builds two identical ones). A failed build is retried.
 pub fn english() -> Result<Arc<EnglishPhonemizer>, PhonemizeError> {
-    ENGLISH
-        .get_or_init(|| create_english().map(Arc::new))
-        .clone()
-        .map_err(PhonemizeError::Data)
+    static ENGLISH: Mutex<Option<Arc<EnglishPhonemizer>>> = Mutex::new(None);
+    if let Some(en) = ENGLISH.lock().unwrap().as_ref() {
+        return Ok(en.clone());
+    }
+    let built = Arc::new(create_english().map_err(PhonemizeError::Data)?);
+    Ok(ENGLISH.lock().unwrap().get_or_insert(built).clone())
 }
 
 #[derive(Clone, Copy)]
@@ -256,10 +281,17 @@ impl Engine for EnglishEngine {
         Ok(self.en.text_full(input, wt, None, false))
     }
 
+    fn has_neural(&self) -> bool {
+        true
+    }
+
     fn neural(&self, pre_passed: &JsString) -> Option<Result<JsString, PhonemizeError>> {
         let (host, wt) = self.host_and_transform();
         // A tagger error rejects phonemizeAsync in the TS; it is not swallowed into the sync reading here either.
-        Some(phonemize_en_neural(&self.en, english_tagger(), pre_passed, host, wt).map_err(PhonemizeError::Neural))
+        Some(
+            phonemize_en_neural(&self.en, english_tagger(), pre_passed, host, wt)
+                .map_err(PhonemizeError::Neural),
+        )
     }
 }
 
@@ -273,7 +305,11 @@ pub fn english_tagger() -> Option<&'static EnglishTagger> {
 static TAGGER: OnceLock<Result<EnglishTagger, String>> = OnceLock::new();
 
 pub fn tagger_unavailable_reason() -> Option<String> {
-    TAGGER.get_or_init(build_english_tagger).as_ref().err().cloned()
+    TAGGER
+        .get_or_init(build_english_tagger)
+        .as_ref()
+        .err()
+        .cloned()
 }
 
 fn build_english_tagger() -> Result<EnglishTagger, String> {

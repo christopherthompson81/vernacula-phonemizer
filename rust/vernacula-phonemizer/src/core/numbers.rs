@@ -9,10 +9,14 @@ use std::sync::Arc;
 
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize, Clone)]
+/// ⚠ EVERY FIELD IS OPTIONAL, THOUGH THE TS INTERFACE REQUIRES SOME, because the data does not satisfy it:
+/// Armenian, Polish, Czech and others declare no `hundred` (the Western composer reads `hundreds`), and Lao,
+/// Shan, Tibetan and Slovenian declare no `thousand` either. A required field would refuse those manifests.
+/// A missing magnitude a composer reaches renders "?", as a `null` slot does.
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct Magnitudes {
-    pub hundred: String,
-    pub thousand: String,
+    pub hundred: Option<String>,
+    pub thousand: Option<String>,
     pub lakh: Option<String>,
     pub crore: Option<String>,
     pub million: Option<String>,
@@ -26,7 +30,8 @@ pub struct NumbersDef {
     pub teens: Option<Vec<String>>,
     pub tens: HashMap<String, String>,
     pub hundreds: Option<Vec<String>>,
-    pub magnitudes: Option<Magnitudes>,
+    #[serde(default)]
+    pub magnitudes: Magnitudes,
     pub compound: Option<HashMap<String, String>>,
     pub compound_order: Option<String>,
     pub bare_magnitude: Option<bool>,
@@ -57,7 +62,7 @@ fn tens(d: &NumbersDef, t: u64) -> Word {
 }
 
 fn magnitudes(d: &NumbersDef) -> &Magnitudes {
-    d.magnitudes.as_ref().expect("NumbersDef.magnitudes")
+    &d.magnitudes
 }
 
 pub fn indic_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
@@ -125,12 +130,12 @@ pub fn indic_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
         } else {
             vec![unit(d, h)]
         };
-        out.push(Some(magnitudes(d).hundred.clone()));
+        out.push(magnitudes(d).hundred.clone());
         out.extend(rest(r));
         return out;
     }
     if n < 100_000 {
-        return group(n / 1000, n % 1000, Some(magnitudes(d).thousand.clone()));
+        return group(n / 1000, n % 1000, magnitudes(d).thousand.clone());
     }
     if n < 10_000_000 {
         return group(n / 100_000, n % 100_000, magnitudes(d).lakh.clone());
@@ -142,7 +147,7 @@ pub fn western_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
     let mag = |key: &str, count: u64| -> Word {
         let m = magnitudes(d);
         let base = match key {
-            "thousand" => Some(m.thousand.clone()),
+            "thousand" => m.thousand.clone(),
             "million" => m.million.clone(),
             _ => m.billion.clone(),
         };
@@ -227,7 +232,8 @@ pub fn western_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
 pub type NumberComposer = fn(u64, &NumbersDef) -> Vec<Word>;
 
 /// `renderNumber`: each word through `word`, a `null` slot as "?". ⚠ A MISSING table entry (the TS's
-/// `undefined`, from a `!` lookup) is a data error here, not a word.
+/// `undefined` from a `!` lookup, which it would pass to `word`) also renders as "?": both are gaps in the
+/// language's table, and the per-language fn-diff over its number range is what catches one.
 pub fn render_number(
     n: u64,
     d: &NumbersDef,

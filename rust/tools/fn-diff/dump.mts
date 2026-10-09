@@ -18,55 +18,54 @@ import { normalizeEnglish, normalizeEnglishInitialisms } from "../../../src/lang
 
 const units = (s: string): number[] => Array.from({ length: s.length }, (_, i) => s.charCodeAt(i));
 
-// The English normalizer's inputs, deduplicated, each tagged with the first source it came from: every golden
-// sentence, every FLEURS en_us utterance (⚠ COLUMNS 3 AND 4 — column 2 is a WAV filename), and the
-// off-golden probes in probes/en-normalize.txt (`\n` and `\u{XXXX}` escapes decoded).
-const FLEURS = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/en_us";
-function englishTexts(): Map<string, string> {
-    const out = new Map<string, string>();
-    const add = (t: string, src: string): void => { if (t !== "" && !out.has(t)) out.set(t, src); };
-    for (const g of ["en", "en-GB", "en-IN"])
-        for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n"))
-            add(row.split("\t")[0] ?? "", "golden");
-    for (const split of ["train", "dev", "test"])
-        for (const row of readFileSync(`${FLEURS}/${split}.tsv`, "utf8").split("\n")) {
-            const cols = row.split("\t");
-            add(cols[2] ?? "", "fleurs");
-            add(cols[3] ?? "", "fleurs");
-        }
-    for (const line of readFileSync(new URL("./probes/en-normalize.txt", import.meta.url), "utf8").split("\n")) {
-        if (line === "" || line.startsWith("#")) continue;
-        add(line.replace(/\\n/g, "\n").replace(/\\u\{([0-9a-fA-F]+)\}/g, (_m, h: string) => String.fromCodePoint(parseInt(h, 16))), "probe");
-    }
-    return out;
-}
-/** The FLEURS transcript directory for a language code (column 3 is the text, column 2 a WAV filename). */
+const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+/** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
     "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn",
 };
-/** Every distinct text for `lang`: its golden, its FLEURS transcripts (columns 3 and 4) and
- *  `probes/<lang>.txt` when present. English keeps `englishTexts()`. */
+
+/**
+ * A language's inputs, deduplicated, each tagged with the first source it came from: its goldens' text column,
+ * its FLEURS transcripts (⚠ COLUMNS 3 AND 4 — column 2 is a WAV filename) and its probe files (`\n` and
+ * `\u{XXXX}` escapes decoded).
+ * ⚠ LOUD ON A MISSING SOURCE. A golden or FLEURS file that is named but absent throws, and so does a language
+ * with neither: a dump of zero rows replays as "0 DIFFER" and proves nothing. Only a probe file may be absent.
+ */
+function textsFor(goldens: readonly string[], fleursDir: string | undefined, probes: readonly string[]): Map<string, string> {
+    const out = new Map<string, string>();
+    const add = (t: string, src: string): void => { if (t !== "" && !out.has(t)) out.set(t, src); };
+    for (const g of goldens)
+        for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n"))
+            add(row.split("\t")[0] ?? "", "golden");
+    if (fleursDir !== undefined)
+        for (const split of ["train", "dev", "test"])
+            for (const row of readFileSync(`${FLEURS_ROOT}/${fleursDir}/${split}.tsv`, "utf8").split("\n")) {
+                const cols = row.split("\t");
+                add(cols[2] ?? "", "fleurs");
+                add(cols[3] ?? "", "fleurs");
+            }
+    for (const file of probes) {
+        let text: string;
+        try { text = readFileSync(new URL(`./probes/${file}`, import.meta.url), "utf8"); } catch { process.stderr.write(`note: no probes/${file}\n`); continue; }
+        for (const line of text.split("\n")) {
+            if (line === "" || line.startsWith("#")) continue;
+            add(line.replace(/\\n/g, "\n").replace(/\\u\{([0-9a-fA-F]+)\}/g, (_m, h: string) => String.fromCodePoint(parseInt(h, 16))), "probe");
+        }
+    }
+    if (out.size === 0) throw new Error(`no input text for goldens=${goldens.join(",")} fleurs=${fleursDir}`);
+    return out;
+}
+
+/** English's normalizer inputs: all three English goldens, FLEURS en_us and the normalizer probes. */
+function englishTexts(): Map<string, string> {
+    return textsFor(["en", "en-GB", "en-IN"], "en_us", ["en-normalize.txt"]);
+}
+
+/** Every distinct text for `lang` (English keeps `englishTexts()`). A language needs a golden. */
 function langTexts(lang: string): string[] {
     if (lang === "en" || lang === "en-GB") return [...englishTexts().keys()];
-    const out = new Set<string>();
-    const add = (t: string): void => { if (t !== "") out.add(t); };
-    try {
-        for (const row of readFileSync(new URL(`../../../csharp/goldens/${lang}.tsv`, import.meta.url), "utf8").split("\n"))
-            add(row.split("\t")[0] ?? "");
-    } catch { /* no golden */ }
-    const dir = Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined;
-    if (dir !== undefined)
-        for (const split of ["train", "dev", "test"]) {
-            let text = "";
-            try { text = readFileSync(`/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data/${dir}/${split}.tsv`, "utf8"); } catch { continue; }
-            for (const row of text.split("\n")) { const c = row.split("\t"); add(c[2] ?? ""); add(c[3] ?? ""); }
-        }
-    try {
-        for (const line of readFileSync(new URL(`./probes/${lang}.txt`, import.meta.url), "utf8").split("\n"))
-            if (line !== "" && !line.startsWith("#")) add(line.replace(/\\n/g, "\n").replace(/\\u\{([0-9a-fA-F]+)\}/g, (_m, h: string) => String.fromCodePoint(parseInt(h, 16))));
-    } catch { /* no probes */ }
-    return [...out];
+    return [...textsFor([lang], Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined, [`${lang}.txt`]).keys()];
 }
 /** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
 const LANGS = (process.env.LANGS ?? "en,en-GB").split(",").filter((l) => l !== "");
@@ -210,6 +209,22 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ c: units(c), op: "phone" }, latinPhone(c) ?? "\u0000none");
             emit({ c: units(c), op: "phone-ih" }, latinPhone(c, { initial: true, includeH: true }) ?? "\u0000none");
             emit({ c: units(c), op: "fold" }, foldLatinToBase(c));
+        }
+    },
+    // core/numbers composers over the Hindi (indic) and Armenian (western) manifest tables: 0..120000 plus
+    // powers of ten and mixed values to 10^12, then renderNumber with an identity word function.
+    async "core-numbers"() {
+        const { indicNumberWords, westernNumberWords, renderNumber, spellDigits } = await import("../../../src/core/numbers.ts");
+        const { loadManifest } = await import("../../../src/core/loadManifest.ts");
+        const at = (dir: string) => new URL(`../../../src/languages/${dir}/${dir}.ts`, import.meta.url).href;
+        const defs = [["indic", (loadManifest(at("hindi"), "hindi.jsonc") as any).numbers], ["western", (loadManifest(at("armenian"), "armenian.jsonc") as any).numbers]] as const;
+        const ns: number[] = [];
+        for (let n = 0; n <= 120000; n++) ns.push(n);
+        for (let e = 5; e <= 12; e++) { ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 123456789 % 10 ** e + 10 ** e); }
+        for (const [kind, d] of defs) {
+            const compose = kind === "indic" ? indicNumberWords : westernNumberWords;
+            for (const n of ns) emit({ kind, n }, renderNumber(n, d, (w: string) => w, compose));
+            for (const digits of ["0", "07", "1234567890", "x9y"]) emit({ kind, digits }, spellDigits(digits, d, (w: string) => w));
         }
     },
     numbers() {

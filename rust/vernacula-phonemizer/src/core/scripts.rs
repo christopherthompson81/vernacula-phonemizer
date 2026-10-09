@@ -45,61 +45,133 @@ const SCRIPTS: [(&str, &str); 34] = [
     ("Sundanese", r"\p{Script=Sundanese}"),
 ];
 
-static SCRIPT_TESTS: LazyLock<Vec<(&'static str, JsRegex)>> =
-    LazyLock::new(|| SCRIPTS.iter().map(|(n, p)| (*n, JsRegex::new(p, "u").unwrap())).collect());
+static SCRIPT_TESTS: LazyLock<Vec<(&'static str, JsRegex)>> = LazyLock::new(|| {
+    SCRIPTS
+        .iter()
+        .map(|(n, p)| (*n, JsRegex::new(p, "u").unwrap()))
+        .collect()
+});
 
 pub const DEFAULT_READER: [(&str, &str); 34] = [
-    ("Greek", "el"), ("Hangul", "ko"), ("Thai", "th"), ("Hebrew", "he"), ("Armenian", "hy"), ("Georgian", "ka"),
-    ("Myanmar", "my"), ("Ethiopic", "am"), ("Kana", "ja"), ("Latin", "en"), ("Cyrillic", "ru"), ("Arabic", "ar"),
-    ("Devanagari", "hi"), ("Bengali", "bn"), ("Tamil", "ta"), ("Han", "cmn"), ("Telugu", "te"), ("Kannada", "kn"),
-    ("Malayalam", "ml"), ("Gujarati", "gu"), ("Gurmukhi", "pa"), ("Oriya", "or"), ("Sinhala", "si"), ("Khmer", "km"),
-    ("Lao", "lo"), ("Tibetan", "bo"), ("Tifinagh", "shi"), ("Cherokee", "chr"), ("Ol_Chiki", "sat"), ("Adlam", "ff"),
-    ("Nko", "bm"), ("Syloti_Nagri", "syl"), ("Javanese", "jv"), ("Sundanese", "su"),
+    ("Greek", "el"),
+    ("Hangul", "ko"),
+    ("Thai", "th"),
+    ("Hebrew", "he"),
+    ("Armenian", "hy"),
+    ("Georgian", "ka"),
+    ("Myanmar", "my"),
+    ("Ethiopic", "am"),
+    ("Kana", "ja"),
+    ("Latin", "en"),
+    ("Cyrillic", "ru"),
+    ("Arabic", "ar"),
+    ("Devanagari", "hi"),
+    ("Bengali", "bn"),
+    ("Tamil", "ta"),
+    ("Han", "cmn"),
+    ("Telugu", "te"),
+    ("Kannada", "kn"),
+    ("Malayalam", "ml"),
+    ("Gujarati", "gu"),
+    ("Gurmukhi", "pa"),
+    ("Oriya", "or"),
+    ("Sinhala", "si"),
+    ("Khmer", "km"),
+    ("Lao", "lo"),
+    ("Tibetan", "bo"),
+    ("Tifinagh", "shi"),
+    ("Cherokee", "chr"),
+    ("Ol_Chiki", "sat"),
+    ("Adlam", "ff"),
+    ("Nko", "bm"),
+    ("Syloti_Nagri", "syl"),
+    ("Javanese", "jv"),
+    ("Sundanese", "su"),
 ];
 
 /// (host, script, reader)
 pub const OVERRIDES: [(&str, &str, &str); 9] = [
-    ("ja", "Han", "ja"), ("ko", "Han", "ko"), ("yue", "Han", "yue"), ("uk", "Cyrillic", "uk"), ("sr", "Cyrillic", "sr"),
-    ("fa", "Arabic", "fa"), ("ur", "Arabic", "ur"), ("mr", "Devanagari", "mr"), ("ne", "Devanagari", "ne"),
+    ("ja", "Han", "ja"),
+    ("ko", "Han", "ko"),
+    ("yue", "Han", "yue"),
+    ("uk", "Cyrillic", "uk"),
+    ("sr", "Cyrillic", "sr"),
+    ("fa", "Arabic", "fa"),
+    ("ur", "Arabic", "ur"),
+    ("mr", "Devanagari", "mr"),
+    ("ne", "Devanagari", "ne"),
 ];
 
 pub const MANIFESTLESS_SCRIPTS: [(&str, &[&str]); 20] = [
-    ("acm", &["Arabic"]), ("acw", &["Arabic"]), ("afb", &["Arabic"]), ("ajp", &["Arabic"]), ("apc", &["Arabic"]),
-    ("apd", &["Arabic"]), ("ary", &["Arabic"]), ("arz", &["Arabic"]), ("ayl", &["Arabic"]),
-    ("en-GB", &["Latin"]), ("en-IN", &["Latin"]), ("es-419", &["Latin"]), ("fr-CA", &["Latin"]), ("pt-BR", &["Latin"]),
-    ("ms", &["Latin"]), ("zsm", &["Latin"]), ("bgc", &["Devanagari"]), ("pnb", &["Arabic"]), ("skr", &["Arabic"]),
+    ("acm", &["Arabic"]),
+    ("acw", &["Arabic"]),
+    ("afb", &["Arabic"]),
+    ("ajp", &["Arabic"]),
+    ("apc", &["Arabic"]),
+    ("apd", &["Arabic"]),
+    ("ary", &["Arabic"]),
+    ("arz", &["Arabic"]),
+    ("ayl", &["Arabic"]),
+    ("en-GB", &["Latin"]),
+    ("en-IN", &["Latin"]),
+    ("es-419", &["Latin"]),
+    ("fr-CA", &["Latin"]),
+    ("pt-BR", &["Latin"]),
+    ("ms", &["Latin"]),
+    ("zsm", &["Latin"]),
+    ("bgc", &["Devanagari"]),
+    ("pnb", &["Arabic"]),
+    ("skr", &["Arabic"]),
     ("pbt", &["Arabic"]),
 ];
 
-pub const CYRILLIC_HOSTS: [&str; 15] = ["ab", "ba", "be", "bg", "chv", "kk", "ky", "mk", "mn", "nog", "ru", "sr", "tg", "tt", "uk"];
+pub const CYRILLIC_HOSTS: [&str; 15] = [
+    "ab", "ba", "be", "bg", "chv", "kk", "ky", "mk", "mn", "nog", "ru", "sr", "tg", "tt", "uk",
+];
 
 pub fn script_of(run: &JsString) -> Option<&'static str> {
-    SCRIPT_TESTS.iter().find(|(_, re)| re.test(run)).map(|(n, _)| *n)
+    SCRIPT_TESTS
+        .iter()
+        .find(|(_, re)| re.test(run))
+        .map(|(n, _)| *n)
 }
 
 const GREEK_LETTER_NAME: [(&str, &str); 25] = [
-    ("α", "άλφα"), ("β", "βήτα"), ("γ", "γάμμα"), ("δ", "δέλτα"), ("ε", "έψιλον"), ("ζ", "ζήτα"), ("η", "ήτα"),
-    ("θ", "θήτα"), ("ι", "ιώτα"), ("κ", "κάππα"), ("λ", "λάμδα"), ("μ", "μι"), ("ν", "νι"), ("ξ", "ξι"),
-    ("ο", "όμικρον"), ("π", "πι"), ("ρ", "ρο"), ("σ", "σίγμα"), ("ς", "σίγμα"), ("τ", "ταυ"), ("υ", "ύψιλον"),
-    ("φ", "φι"), ("χ", "χι"), ("ψ", "ψι"), ("ω", "ωμέγα"),
+    ("α", "άλφα"),
+    ("β", "βήτα"),
+    ("γ", "γάμμα"),
+    ("δ", "δέλτα"),
+    ("ε", "έψιλον"),
+    ("ζ", "ζήτα"),
+    ("η", "ήτα"),
+    ("θ", "θήτα"),
+    ("ι", "ιώτα"),
+    ("κ", "κάππα"),
+    ("λ", "λάμδα"),
+    ("μ", "μι"),
+    ("ν", "νι"),
+    ("ξ", "ξι"),
+    ("ο", "όμικρον"),
+    ("π", "πι"),
+    ("ρ", "ρο"),
+    ("σ", "σίγμα"),
+    ("ς", "σίγμα"),
+    ("τ", "ταυ"),
+    ("υ", "ύψιλον"),
+    ("φ", "φι"),
+    ("χ", "χι"),
+    ("ψ", "ψι"),
+    ("ω", "ωμέγα"),
 ];
-
-/// `[...s]`: one string per code point.
-fn code_points(s: &JsString) -> Vec<JsString> {
-    let mut out = Vec::new();
-    let mut i = 0;
-    while i < s.len() {
-        let w = if s.code_point_at(i).unwrap() > 0xFFFF { 2 } else { 1 };
-        out.push(JsString::from_units(&s.0[i..i + w]));
-        i += w;
-    }
-    out
-}
 
 fn lone_greek_letter_name(run: &JsString) -> Option<(JsString, JsString)> {
     let greek = js_re!(r"\p{Script=Greek}", "u");
     let mark = js_re!(r"\p{M}", "u");
-    let letters: Vec<JsString> = code_points(run).into_iter().filter(|c| greek.test(c) && !mark.test(c)).collect();
+    let letters: Vec<JsString> = run
+        .code_point_strings()
+        .into_iter()
+        .filter(|c| greek.test(c) && !mark.test(c))
+        .collect();
     if letters.len() != 1 {
         return None;
     }
@@ -118,17 +190,32 @@ fn lone_greek_letter_name(run: &JsString) -> Option<(JsString, JsString)> {
 pub fn reader_for(run: &JsString, host: &str) -> Option<(&'static str, JsString)> {
     let script = script_of(run)?;
     let mut text = run.clone();
-    if script == "Greek" && code_points(run).iter().filter(|c| js_re!(r"\p{Script=Greek}", "u").test(c)).count() < 2 {
+    if script == "Greek"
+        && run
+            .code_point_strings()
+            .iter()
+            .filter(|c| js_re!(r"\p{Script=Greek}", "u").test(c))
+            .count()
+            < 2
+    {
         let (letter, name) = lone_greek_letter_name(run)?;
         // `run.replace(letter, name)`: the FIRST occurrence.
         if let Some(at) = text.index_of(&letter, 0) {
-            text = text.slice(0, Some(at as isize)).concat(&name).concat(&text.slice((at + letter.len()) as isize, None));
+            text = text
+                .slice(0, Some(at as isize))
+                .concat(&name)
+                .concat(&text.slice((at + letter.len()) as isize, None));
         }
     }
     let target = OVERRIDES
         .iter()
         .find(|(h, s, _)| *h == host && *s == script)
         .map(|(_, _, r)| *r)
-        .or_else(|| DEFAULT_READER.iter().find(|(s, _)| *s == script).map(|(_, r)| *r))?;
+        .or_else(|| {
+            DEFAULT_READER
+                .iter()
+                .find(|(s, _)| *s == script)
+                .map(|(_, r)| *r)
+        })?;
     (target != host).then_some((target, text))
 }
