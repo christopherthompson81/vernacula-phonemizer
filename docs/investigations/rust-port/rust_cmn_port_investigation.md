@@ -195,3 +195,27 @@ the hi row should clear when hi merges.
 **One more TS note, from typing the manifest.** `CmnManifest.symbolTier.exponentWords.position` is typed
 `"before" | "after"` in manifest.ts, but cmn.jsonc says `"compound"`, which the shared tier reads; the jsonc is
 untyped at runtime, so only the TS type is wrong.
+
+## Run 7 — 2026-10-09 21:30 (rebase onto f663b714)
+
+**Context.** `git rebase origin/main` (f663b714: ja, it, es, pt, pt-BR, hi merged). Conflicts in
+`registry.rs`, `languages/mod.rs` and `dump.mts`, resolved keeping both sides. Two traps, both caught by checking:
+- git factored the last pt dump entry's closing `},` out of the hunk, leaving `pt-numbers` unclosed in front
+  of `cmn-normalize`; restored by hand, and `dump.mts nosuch` lists every entry (it parses).
+- my own resolver script truncated `languages/mod.rs` to 0 bytes (`open(p, "w")` evaluated before the read);
+  rewritten as main's list + `mandarin`, compared against `git show origin/main:…`.
+`LANGUAGES` = en, en-GB, ja, it, es, pt, pt-BR, hi, cmn. The new `PhonemizeError::Input` needs nothing in cmn:
+its `text` has no input it refuses.
+
+**Question.** Is everything still green, and does the hi port-pending row clear?
+
+**Raw finding.**
+- parity (all registered): en, en-GB, ja, it, es, pt, pt-BR, hi, cmn each `200/200 identical, 0 differ`.
+- `cmn-normalize 12537/0` · `cmn-segment 16716/0` · `cmn-pinyin 54919/0` · `cmn-numbers 20608/0` ·
+  `cmn-trace-extras 14/0` · `trace (ja) 3685/0`.
+- `phonemize-sync 4167 identical, 5 DIFFER` · `phonemize-best 4167, 5` · `trace (cmn) 4167, 5`.
+- **The hi row cleared** (`印地语 नमस्ते`). The 5 left are port-pending: el ×2 (`Ελλάδα`, lone `α`), th, ru, ko.
+- `cargo test --workspace --release`: 63 + 1 passed. `cargo build --workspace`: 0 warnings, debug and release.
+  (`cargo fmt --check` already fails on main; left alone as instructed.)
+
+**Implication.** Done. Port-pending: 5 synthetic probe rows needing el, th, ru, ko.
