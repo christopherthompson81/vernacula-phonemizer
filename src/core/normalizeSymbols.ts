@@ -10,6 +10,7 @@
  * times, years and romans, which are NOT shared — their rules are language-specific by nature). The
  * contract everywhere: emit plain words and digits the language's EXISTING pipeline already speaks.
  */
+import { own } from "./own.ts";
 import { rewrite } from "./provenance.ts";
 
 /** Word forms for one countable noun. Index 0 = singular; further indices per the language's
@@ -476,13 +477,22 @@ const NUM = "\\d+(?:[ \u00a0\u202f\u2009]\\d{3}(?!\\d)|[.,]\\d+)*";  // space, N
  * upper-case text against a lower-case key (`KM` → `km`) but not lower-case text against a correctly
  * capitalised one (`kw` → `kW`), so declaring SI case properly would have broken the sloppy spellings.
  * First declaration wins; the EXACT lookup runs first, so a real pair like ⟨Mb⟩/⟨MB⟩ never reaches this.
+ *
+ * ⚠ BUT A SLOT WHOSE DECLARED KEYS DISAGREE IS LEFT OUT. Only an UNDECLARED case variant ever reaches the
+ * fold, and it has no case to decide by. English declares µm (micro meter) and µM (micromolar); an
+ * upper-cased document writes both as `ΜM` (U+039C GREEK CAPITAL MU), which "first declaration wins" read as
+ * micro meters for a micromolar concentration. No unit is better than a wrong one. Null-prototype, so a lookup
+ * cannot find `Object.prototype` either.
  */
-function foldedIndex<V>(map: Record<string, V> | undefined): Record<string, V> {
-    const out: Record<string, V> = {};
+export function foldedIndex<V>(map: Readonly<Record<string, V>> | undefined): Record<string, V> {
+    const out: Record<string, V> = Object.create(null);
+    const ambiguous = new Set<string>();
     for (const [k, v] of Object.entries(map ?? {})) {
         const lk = k.toLowerCase();
         if (!(lk in out)) out[lk] = v;
+        else if (JSON.stringify(out[lk]) !== JSON.stringify(v)) ambiguous.add(lk);
     }
+    for (const lk of ambiguous) delete out[lk];
     return out;
 }
 
@@ -525,9 +535,10 @@ export function resolveUnitSymbol<V>(
     written: string,
     foldSingle = false,
 ): V | undefined {
-    if (declared !== undefined && Object.hasOwn(declared, written) && declared[written] !== undefined) return declared[written];
-    const lower = written.toLowerCase();
-    return (written.length > 1 || foldSingle) && Object.hasOwn(folded, lower) ? folded[lower] : undefined;
+    const exact = own(declared, written);
+    if (exact !== undefined) return exact;
+    if (written.length <= 1 && !foldSingle) return undefined;
+    return own(folded, written.toLowerCase());
 }
 
 /**
@@ -1107,10 +1118,10 @@ const DESIGNATIONS = ["802[.,]11"];
             text = rewrite(rewrite(text, /&amp;/giu, "&"), /[ \t]*[&\uff06][ \t]*/gu, ` ${d.ampersand} `);
         let s = text;
         const isUnitKey = (k: string): boolean =>
-            d.units?.[k] !== undefined ||
-            unitsFolded[k.toLowerCase()] !== undefined ||
-            d.rateDenominators?.[k] !== undefined ||
-            denomFolded[k.toLowerCase()] !== undefined;
+            own(d.units, k) !== undefined ||
+            own(unitsFolded, k.toLowerCase()) !== undefined ||
+            own(d.rateDenominators, k) !== undefined ||
+            own(denomFolded, k.toLowerCase()) !== undefined;
         // A SQUARE OR CUBE STANDING BEFORE A UNIT NOUN — `3540² км`, `5,23² км`, `0,5 ² км`, all Abkhaz —
         // IS THE UNIT'S POWER, and it is dropped here, deliberately and explicitly.
         //

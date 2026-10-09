@@ -15,7 +15,7 @@ use crate::core::initialisms::{
 };
 use crate::core::js_regex::{JsMatch, JsRegex};
 use crate::core::js_string::{JsString, js, js_number};
-use crate::core::normalize_symbols::resolve_unit_symbol;
+use crate::core::normalize_symbols::{folded_index, resolve_unit_symbol};
 use crate::core::provenance::{rewrite, rewrite_with};
 use crate::core::roman::{COLLISIONS as ROMAN_COLLISIONS, roman_to_int};
 use crate::js_re;
@@ -195,26 +195,8 @@ static UNITS: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| {
         .map(|(k, sg, pl)| (js(k), (js(sg), js(pl))))
         .collect()
 });
-/// The FIRST-declared key keeps a folded slot, and a slot whose declared keys disagree (µm/µM, µs/µS,
-/// mΩ/MΩ) is left out: only an undeclared case variant reaches the fold, and it has no case to decide by.
-static UNITS_FOLDED: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| {
-    let mut out: IndexMap<JsString, Forms> = IndexMap::new();
-    let mut ambiguous = Vec::new();
-    for (k, v) in UNITS.iter() {
-        let lk = k.to_lower_case();
-        match out.get(&lk) {
-            None => {
-                out.insert(lk, v.clone());
-            }
-            Some(have) if have != v => ambiguous.push(lk),
-            Some(_) => {}
-        }
-    }
-    for lk in ambiguous {
-        out.shift_remove(&lk);
-    }
-    out
-});
+/// Core `folded_index`: the first-declared key keeps a slot, and a slot whose declared keys disagree is left out.
+static UNITS_FOLDED: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| folded_index(&UNITS));
 
 fn unit_forms(written: &JsString) -> Option<&'static Forms> {
     resolve_unit_symbol(Some(&*UNITS), &UNITS_FOLDED, written, false)
@@ -2086,15 +2068,15 @@ mod port_findings {
 
     #[test]
     fn slash_rate_ignores_inherited_members() {
-        assert!(!n("litres/constructor").contains("function"));
-        assert!(!n("toString/apples").contains(" per "));
+        assert_eq!(n("litres/constructor"), "litres/constructor");
+        assert_eq!(n("toString/apples"), "toString/apples");
         assert_eq!(n("litres/day"), "litres per day");
     }
 
     #[test]
     fn ambiguous_micro_fold_declines() {
-        assert!(!n("25 \u{39c}M").contains("micro meter"));
-        assert!(!n("5 \u{39c}S").contains("microsecond"));
+        assert_eq!(n("25 \u{39c}M"), "25 mu M");
+        assert_eq!(n("5 \u{39c}S"), "5 mu S");
         assert_eq!(n("25 µM"), "25 micromolar");
         assert_eq!(n("4 µm"), "4 micro meters");
         assert_eq!(n("3 \u{39c}G"), "3 micrograms");
@@ -2103,14 +2085,14 @@ mod port_findings {
 
     #[test]
     fn impossible_dates_are_not_dates() {
-        for (t, month) in [
-            ("2024-02-31", "february"),
-            ("2/30/2024", "february"),
-            ("2024-04-31", "april"),
-            ("2023-02-29", "february"),
-            ("1900-02-29", "february"),
+        for t in [
+            "2024-02-31",
+            "2/30/2024",
+            "2024-04-31",
+            "2023-02-29",
+            "1900-02-29",
         ] {
-            assert!(!n(t).contains(month), "{t}");
+            assert_eq!(n(t), t, "not a date: left as written");
         }
         for (t, want) in [
             ("2024-02-29", "february 29th"),

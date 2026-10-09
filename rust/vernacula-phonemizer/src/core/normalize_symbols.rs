@@ -9,11 +9,24 @@ use indexmap::IndexMap;
 
 use super::js_string::JsString;
 
-/// `foldedIndex`: the lowercase key → value index; the FIRST key to fold onto a slot keeps it.
-pub fn folded_index<V: Clone>(map: &IndexMap<JsString, V>) -> IndexMap<JsString, V> {
-    let mut out = IndexMap::new();
+/// `foldedIndex`: the lowercase key → value index; the FIRST key to fold onto a slot keeps it, and a slot whose
+/// declared keys DISAGREE is left out (µm/µM, µs/µS, mΩ/MΩ): only an undeclared case variant reaches the fold,
+/// and it has no case to decide by.
+pub fn folded_index<V: Clone + PartialEq>(map: &IndexMap<JsString, V>) -> IndexMap<JsString, V> {
+    let mut out: IndexMap<JsString, V> = IndexMap::new();
+    let mut ambiguous = Vec::new();
     for (k, v) in map {
-        out.entry(k.to_lower_case()).or_insert_with(|| v.clone());
+        let lk = k.to_lower_case();
+        match out.get(&lk) {
+            None => {
+                out.insert(lk, v.clone());
+            }
+            Some(have) if have != v => ambiguous.push(lk),
+            Some(_) => {}
+        }
+    }
+    for lk in ambiguous {
+        out.shift_remove(&lk);
     }
     out
 }

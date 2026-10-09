@@ -9,6 +9,7 @@
  * ⚠ ORDER: tags are stripped BEFORE entities are decoded. The other way round, `&lt;i&gt;` — an author writing
  * ABOUT a tag, which must stay literal — would decode to `<i>` and then be stripped as markup.
  */
+import { own } from "./own.ts";
 import { rewrite } from "./provenance.ts";
 
 /** The named entities that actually occur, plus the handful any text realistically carries. */
@@ -232,9 +233,7 @@ export function stripMarkup(text: string): string {
             // replacement character, so nothing is silently invented.
             return Number.isFinite(cp) && cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : whole;
         }
-        // ⚠ OWN KEYS ONLY. `NAMED` is an object literal, so a bare index also finds `Object.prototype`:
-        // `&constructor;` became the text `function Object() { [native code] }`, which the engine then read aloud.
-        const name = body.toLowerCase();
-        return Object.hasOwn(NAMED, name) ? NAMED[name]! : whole; // an unknown entity stays literal
+        // ⚠ OWN KEYS ONLY (core/own.ts): `&constructor;` used to become `function Object() { [native code] }`.
+        return own(NAMED, body.toLowerCase()) ?? whole; // an unknown entity stays literal
     });
 }

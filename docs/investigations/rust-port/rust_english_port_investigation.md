@@ -278,9 +278,32 @@ old code, then bring C# and Rust onto the fixed behaviour. Does anything else mo
   behaviour, so it passes both ways).
 - `npm run check:goldens`: `189 languages, 36495 rows, 0 stale`, so no golden moves.
 - TS suite: 6,375 passed. C# full suite: 7,033 passed (new RustPortFindingsTests, 11).
-- Rust: 39 passed. One existing test PINNED the old defect (`slash_rule_reads_the_prototype_as_ts_does`) and
+- Rust: 39 passed before the rebase onto the #1464 review fixes, 40 after (the extra one is load_tsv's line
+  splitter test). One existing test PINNED the old defect (`slash_rule_reads_the_prototype_as_ts_does`) and
   failed; it is updated with the reason. `fn-diff normalize`/`initialisms`: 4,146 identical each. Golden gate
   200/200 for en and en-GB.
 
 **Implication.** The PAIRED-FIX PENDING marker in core/markup.rs and the prototype emulation in
 normalize.rs are deleted, and the three engines agree on the fixed behaviour.
+
+## Run 9 — 2026-10-09 (#1465 review round)
+
+**Findings acted on.**
+- The C# `DaysInMonth` was inserted between `IsoDate` and its doc comment (the orphaned-comment pattern
+  again). Moved.
+- `isUnitKey` (core) still did bare plain-object lookups. It now uses `own()`.
+- The ambiguous-fold rule lived only in English, three times over. It moves into core `foldedIndex`
+  (TS, null-prototype now), `FoldedIndex` (C#) and `folded_index` (Rust), and English uses the core one.
+- One own-key helper, `src/core/own.ts`, replaces the inline `Object.hasOwn` sites and the two private copies
+  in wu.ts and cantonese.ts.
+- `resolveUnitSymbol` simplified: no lowercasing on the path that can never fold.
+- The tests pin the chosen readings exactly (`25 mu M`; an impossible date left as written) instead of
+  only asserting what they are not.
+
+**Not acted on.** Making every English lookup table null-prototype. `own()` at text-keyed sites fixes the
+class where it is reachable today; a wholesale table conversion is a separate change.
+
+**Raw finding.**
+- `check:goldens`: 189 languages, 36,495 rows, 0 stale, so the core fold rule moves no language.
+- TS 6,377 passed. C# 7,033 passed. Rust 40 passed.
+- `fn-diff normalize`/`initialisms`: 4,146 identical each. Golden gate 200/200.

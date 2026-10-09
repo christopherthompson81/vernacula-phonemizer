@@ -13,7 +13,8 @@
  */
 
 import { LATIN_MARK, makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
-import { resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
+import { foldedIndex, resolveUnitSymbol } from "../../core/normalizeSymbols.ts";
+import { own } from "../../core/own.ts";
 import { COLLISIONS as ROMAN_COLLISIONS, romanToInt } from "../../core/roman.ts";
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
@@ -140,7 +141,7 @@ const UNITS: Record<string, [string, string]> = {
     // the fix for it. ⟨L⟩ needs no twin: µL and µl are the same unit, as ⟨L⟩/⟨l⟩ are below.
     // ⚠ AND THE FOLDED SLOT THEY SHARE WITH ⟨µm⟩/⟨µs⟩ IS DELIBERATELY EMPTY. An undeclared case variant
     // does reach it: `ΜM`, the upper-cased form of both, with U+039C GREEK CAPITAL MU. It cannot say which of
-    // the two it was, so UNITS_FOLDED leaves out every slot whose declared keys disagree (see there).
+    // the two it was, so `foldedIndex` leaves out every slot whose declared keys disagree.
     "\u00b5M": ["micromolar", "micromolar"], "\u03bcM": ["micromolar", "micromolar"],
     "\u00b5S": ["microsiemens", "microsiemens"], "\u03bcS": ["microsiemens", "microsiemens"],
     "\u00b5g/g": ["microgram per gram", "micrograms per gram"], "\u03bcg/g": ["microgram per gram", "micrograms per gram"],
@@ -166,23 +167,8 @@ const UNITS: Record<string, [string, string]> = {
     gb: ["gigabyte", "gigabytes"], tb: ["terabyte", "terabytes"], kw: ["kilowatt", "kilowatts"],
 };
 /** The case-folded index for step 1 (see resolveUnitSymbol) — built once, beside the table it indexes.
- *
- * ⚠ A SLOT WHOSE DECLARED KEYS DISAGREE IS LEFT OUT. µm/µM (micro meter, micromolar), µs/µS (microsecond,
- * microsiemens) and mΩ/MΩ (milli, mega) fold onto one lowercase key with two readings, and the exact branch
- * is what tells them apart. Only an UNDECLARED case variant ever reaches the fold, and it carries no case to
- * decide by: an upper-cased document writes both µm and µM as `ΜM` (U+039C GREEK CAPITAL MU), which used to
- * read *micro meters* for a micromolar concentration. Declining gives no unit, which is better than a wrong one. */
-const UNITS_FOLDED: Record<string, [string, string]> = (() => {
-    const out: Record<string, [string, string]> = Object.create(null);
-    const ambiguous = new Set<string>();
-    for (const [k, v] of Object.entries(UNITS)) {
-        const lk = k.toLowerCase();
-        if (lk in out && (out[lk]![0] !== v[0] || out[lk]![1] !== v[1])) ambiguous.add(lk);
-        else if (!(lk in out)) out[lk] = v;
-    }
-    for (const lk of ambiguous) delete out[lk];
-    return out;
-})();
+ *  ⚠ core `foldedIndex` leaves out the slots whose declared keys disagree (µm/µM, µs/µS, mΩ/MΩ): see there. */
+const UNITS_FOLDED: Record<string, [string, string]> = foldedIndex(UNITS);
 
 const CURRENCY: Record<string, [string, string]> = {
     $: ["dollar", "dollars"], "£": ["pound", "pounds"], "€": ["euro", "euros"], "¥": ["yen", "yen"],
@@ -1596,10 +1582,8 @@ export function normalizeEnglish(input: string): string {
             // ("kilograms per metre"), the denominator SINGULAR, which is how a rate is said.
             const num = resolveUnitSymbol(UNITS, UNITS_FOLDED, left);
             const den = resolveUnitSymbol(UNITS, UNITS_FOLDED, right);
-            // ⚠ OWN KEYS ONLY: `TIME_PERIOD[...]` also finds `Object.prototype`, and `litres/constructor`
-            // read *litres per function Object() { [native code] }*.
-            const rl = right.toLowerCase();
-            const period = Object.hasOwn(TIME_PERIOD, rl) ? TIME_PERIOD[rl] : undefined;
+            // ⚠ OWN KEYS ONLY (core/own.ts): `litres/constructor` read *litres per function Object() …*.
+            const period = own(TIME_PERIOD, right.toLowerCase());
             const rate = period !== undefined || num !== undefined || den !== undefined
                 || UNIT_WORDS.has(left.toLowerCase()) || UNIT_WORDS.has(right.toLowerCase());
             if (rate) return `${num?.[1] ?? left} per ${period ?? den?.[0] ?? right}`;

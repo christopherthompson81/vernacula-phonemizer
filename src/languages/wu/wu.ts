@@ -11,6 +11,7 @@
  * IPA: [initial] + final + one of the tones as Chao contour letters. The dict is the rime-wugniu zaonhe schema;
  * the Wugniu→IPA back-end is authored here.
  */
+import { own } from "../../core/own.ts";
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses, clauseSink } from "../../core/clauses.ts";
 import { LATIN_RUN } from "../../core/hostWord.ts";
@@ -45,8 +46,7 @@ const SYLLABIC: Record<string, string> = { m: "m̩", n: "n̩", ng: "ŋ̍", mh: "
 // phonemize("constructor1", "wuu") returned "function Object() { [native code] }˥˧". Reachable from the
 // whole-string Wugniu fast path in `text()` and from `phonemizeWord`, which is the eval's entry point.
 // (The Han path cannot reach it — dict readings are real Wugniu — which is why 200 golden rows never saw it.)
-const own = (table: Record<string, string>, key: string): string | undefined =>
-    Object.hasOwn(table, key) ? table[key] : undefined;
+// (core/own.ts)
 
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
