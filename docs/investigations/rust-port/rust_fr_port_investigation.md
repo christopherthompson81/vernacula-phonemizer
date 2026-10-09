@@ -252,6 +252,33 @@ Reported, not changed (the Rust reproduces the TS).
 
 **Implication:** the review changes are behaviour-neutral on every instrument.
 
+## Run 11 — 2026-10-09 17:51 (final rebase, French merges last)
+
+**Question:** rebased once onto `origin/main` 5dd93a1c (ja, it, es, pt, pt-BR, hi and cmn merged), are the
+shared lists whole and do all ten languages still pass?
+
+**Resolution:**
+- LANGUAGES is `en, en-GB, ja, it, es, pt, pt-BR, hi, cmn, fr`.
+- The `build` arms are whole. Git had factored the shared `.map_err(PhonemizeError::Data),` out of the cmn/fr
+  hunk, so I put it back on the cmn arm.
+- `languages/mod.rs` keeps both sides.
+- In dump.mts I restored the closing `},` of `cmn-trace-extras` before the fr entries, and re-inserted
+  `phonemize-trace` by hand (the replay arm auto-merged).
+- `PhonemizeError::Input` comes from main and needed nothing from French.
+- `TaggerTables` applied as-is. No merged language added a tagger.
+- `src/`, `data/` and `csharp/goldens` are unchanged between c64801a5 and 5dd93a1c, so I replayed the previous
+  round's dumps.
+
+**Raw finding:**
+- parity: every one of en, en-GB, ja, it, es, pt, pt-BR, hi, cmn and fr is 200/200. fr `--sync`: 157/200.
+- fn-diff: fr-normalize 12,126/0, fr-g2p 139,485/0, fr-numbers 20,084/0, fr-ordinals 20,116/0, fr-tagger 15,006/0.
+- phonemize-sync, -best and -trace are each 4,041/4,042. The probe row now reads `東京` through the merged cmn
+  engine (`tʊŋ˥˥ t͡ɕiŋ˥˥`, as in the TS), so it is port-pending on **ru and el** only.
+- English best-path control (en, en-GB, ja): 11,975/11,977. Both failing rows are the Greek probe, port-pending
+  on el.
+- `cargo test --workspace`: 65 + 1 passed. `cargo build`: 0 warnings. `cargo fmt --check` was left alone, since
+  it already fails on main.
+
 ## Findings in the TS (reported, not fixed in Rust)
 
 1. **`normalizeFrench(input, isWord)` never reads `isWord`.** Its docstring says the parameter "decides
@@ -268,6 +295,6 @@ Reported, not changed (the Rust reproduces the TS).
 
 ## Port-pending
 
-- The synthetic probe `Il a dit Владимир et Αθήνα et 東京 en passant.` needs **ru, el, cmn** (the script
-  reader's targets for Cyrillic, Greek and Han under host fr). It is the only failing row in all three
+- The synthetic probe `Il a dit Владимир et Αθήνα et 東京 en passant.` needs **ru and el** (the script
+  reader's targets for Cyrillic and Greek under host fr). cmn, the target for Han, has merged (Run 11). It is the only failing row in all three
   end-to-end differentials. No golden row and no FLEURS row is port-pending.
