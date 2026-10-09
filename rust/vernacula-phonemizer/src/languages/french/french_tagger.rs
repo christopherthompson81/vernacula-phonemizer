@@ -54,6 +54,12 @@ mod tests {
     fn shipped_tagger_loads() {
         assert_eq!(french_tagger_unavailable_reason(), None);
         // An out-of-vocabulary code point declines the word rather than guessing.
-        assert_eq!(french_tagger().unwrap().tag(&JsString::from("a☃b")).unwrap(), JsString::new());
+        assert_eq!(
+            french_tagger()
+                .unwrap()
+                .tag(&JsString::from("a☃b"))
+                .unwrap(),
+            JsString::new()
+        );
     }
 }

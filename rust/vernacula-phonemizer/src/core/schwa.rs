@@ -26,7 +26,11 @@ fn segment_units(ipa: &JsString) -> Vec<Unit> {
     while i < s.len() {
         let c = s[i];
         if c == 'ˈ' as u16 || c == 'ˌ' as u16 {
-            units.push(Unit { text: JsString(vec![c]), is_stress: true, is_vowel: false });
+            units.push(Unit {
+                text: JsString(vec![c]),
+                is_stress: true,
+                is_vowel: false,
+            });
             i += 1;
             continue;
         }
@@ -52,7 +56,11 @@ fn segment_units(ipa: &JsString) -> Vec<Unit> {
             break;
         }
         let is_vowel = has_unit(HI_VOWEL_BASES, unit[0]);
-        units.push(Unit { text: JsString(unit), is_stress: false, is_vowel });
+        units.push(Unit {
+            text: JsString(unit),
+            is_stress: false,
+            is_vowel,
+        });
     }
     units
 }

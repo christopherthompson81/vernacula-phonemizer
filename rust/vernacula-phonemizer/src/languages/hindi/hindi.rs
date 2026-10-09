@@ -10,8 +10,8 @@ use super::manifest::{HindiDef, try_manifest};
 use super::normalize::{OwnOrdinals, TextFn, make_hindi_normalizer};
 use crate::core::abugida::{AbugidaG2p, make_abugida_g2p};
 use crate::core::clauses::assemble_clauses;
-use crate::core::js_regex::JsRegex;
 use crate::core::data_source::load_once;
+use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
 use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::numbers::{indic_number_words, render_number, spell_digits};
@@ -26,7 +26,8 @@ use crate::registry::{Engine, PhonemizeError, read_as_english};
 /// Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry.
 pub type ForeignPhonemizer = Arc<dyn Fn(&JsString) -> JsString + Send + Sync>;
 
-static VOWEL_G: LazyLock<JsRegex> = LazyLock::new(|| JsRegex::new(&format!("[{IPA_VOWELS}]"), "g").unwrap());
+static VOWEL_G: LazyLock<JsRegex> =
+    LazyLock::new(|| JsRegex::new(&format!("[{IPA_VOWELS}]"), "g").unwrap());
 static LONG_CONSONANT_END: LazyLock<JsRegex> =
     LazyLock::new(|| JsRegex::new(&format!("[^{IPA_VOWELS}]ː$"), "").unwrap());
 
@@ -36,7 +37,8 @@ pub fn heavy_final_coda(body: &JsString) -> bool {
         return true;
     }
     let collapsed = js_re!("t͡ʃ|d͡ʒ|t͡s|d͡z", "g").replace(body, &js("Ç"));
-    let collapsed = js_re!("[̀-ͯʰ-ʱːˈˌ]", "g").replace(&normalize(&collapsed, Form::Nfd), &JsString::new());
+    let collapsed =
+        js_re!("[̀-ͯʰ-ʱːˈˌ]", "g").replace(&normalize(&collapsed, Form::Nfd), &JsString::new());
     let vowels = js(IPA_VOWELS);
     let mut n = 0;
     for c in collapsed.code_point_strings().iter().rev() {
@@ -122,24 +124,36 @@ pub fn make_native_hindi(
     overrides: Overrides,
 ) -> Result<NativeHindi, String> {
     let g2p = make_abugida_g2p(&def.abugida, phon);
-    let digit_class: String =
-        std::iter::once("0-9".to_string()).chain(script.digits.iter().map(|(k, _)| k.to_string_lossy())).collect();
+    let digit_class: String = std::iter::once("0-9".to_string())
+        .chain(script.digits.iter().map(|(k, _)| k.to_string_lossy()))
+        .collect();
     let post = rules(&def.post_rules)?;
     let fin = rules(&def.final_rules)?;
     let symbol_map = def.symbols.clone().unwrap_or_default();
     let strip = def.strip_symbols.clone().unwrap_or_default();
-    let symbol_class: String = symbol_map.keys().map(String::as_str).chain(std::iter::once(strip.as_str())).collect();
+    let symbol_class: String = symbol_map
+        .keys()
+        .map(String::as_str)
+        .chain(std::iter::once(strip.as_str()))
+        .collect();
     let dc = &digit_class;
     let pattern = format!(
         r"([{}]+)|(\p{{Script=Latin}}[\p{{Script=Latin}}\p{{M}}]*)|([{dc}]+(?:(?<!(?<![{dc}])0),[{dc}]+)*(?:\.[{dc}]+)?)|([।॥.?!,;:]){}",
         script.word,
-        if symbol_class.is_empty() { String::new() } else { format!("|([{symbol_class}])") },
+        if symbol_class.is_empty() {
+            String::new()
+        } else {
+            format!("|([{symbol_class}])")
+        },
     );
     let token_re = JsRegex::new(&pattern, "gu").map_err(|e| format!("token pattern: {e}"))?;
 
     let retain_on_avagraha = def.schwa_deletion.retain_on_avagraha == Some(true);
     if retain_on_avagraha && script.avagraha.is_none() {
-        return Err("schwaDeletion.retainOnAvagraha is set but this script declares no `avagraha` sign".into());
+        return Err(
+            "schwaDeletion.retainOnAvagraha is set but this script declares no `avagraha` sign"
+                .into(),
+        );
     }
 
     let normalize = match overrides.normalize {
@@ -152,7 +166,8 @@ pub fn make_native_hindi(
             },
         )?,
     };
-    if def.symbol_tier.is_some() && overrides.symbols.is_none() && !overrides.symbol_tier_is_hindis {
+    if def.symbol_tier.is_some() && overrides.symbols.is_none() && !overrides.symbol_tier_is_hindis
+    {
         return Err("makeNativeHindi: this manifest declares its own `symbolTier`, but no `overrides.symbols` was \
                     passed — the block would be silently ignored and Hindi's symbol words used instead. Build a \
                     normalizer from it with makeSymbolNormalizer and pass it as `overrides.symbols` (see \
@@ -191,7 +206,10 @@ pub fn make_native_hindi(
 fn hindi_symbols() -> Result<Arc<SymbolNormalizer>, String> {
     static SYMBOLS: OnceLock<Arc<SymbolNormalizer>> = OnceLock::new();
     load_once(&SYMBOLS, || {
-        let sym = try_manifest()?.symbol_tier.as_ref().ok_or("hindi.jsonc declares no `symbolTier`")?;
+        let sym = try_manifest()?
+            .symbol_tier
+            .as_ref()
+            .ok_or("hindi.jsonc declares no `symbolTier`")?;
         let d = SymbolData {
             percent: sym.percent.clone(),
             currency: sym.currency.clone(),
@@ -211,7 +229,12 @@ impl NativeHindi {
     pub fn word_rules(&self, w: &JsString) -> JsString {
         let sd = &self.def.schwa_deletion;
         let mut x = self.g2p.g2p(w);
-        let avagraha = self.retain_on_avagraha && self.script.avagraha.as_ref().is_some_and(|a| w.ends_with(a));
+        let avagraha = self.retain_on_avagraha
+            && self
+                .script
+                .avagraha
+                .as_ref()
+                .is_some_and(|a| w.ends_with(a));
         for r in &self.post {
             x = r.re.replace(&x, &r.to);
         }
@@ -234,7 +257,11 @@ impl NativeHindi {
 
     /// `word(w)`: the whole-word lexicon, then the rule engine.
     pub fn word(&self, w: &JsString) -> JsString {
-        if let Some(hit) = self.lexicon.as_ref().and_then(|l| l.get(&normalize(w, Form::Nfc))) {
+        if let Some(hit) = self
+            .lexicon
+            .as_ref()
+            .and_then(|l| l.get(&normalize(w, Form::Nfc)))
+        {
             return hit.clone();
         }
         self.word_rules(w)
@@ -262,7 +289,11 @@ impl NativeHindi {
         let dot = ascii.index_of(&js("."), 0);
         if let (Some(dot), Some(decimal_word)) = (dot, numbers.decimal_word.as_ref()) {
             let int_part = ascii.slice(0, Some(dot as isize));
-            let int_n = if int_part.is_empty() { js_number(&js("0")) } else { js_number(&int_part) };
+            let int_n = if int_part.is_empty() {
+                js_number(&js("0"))
+            } else {
+                js_number(&int_part)
+            };
             let head = if is_safe_integer(int_n) {
                 render_number(int_n as u64, numbers, &word, indic_number_words)
             } else {
@@ -271,9 +302,13 @@ impl NativeHindi {
             let mut parts = vec![head, word(decimal_word)];
             for d in ascii.slice(dot as isize + 1, None).code_point_strings() {
                 let i = js_number(&d);
-                let unit = (i.fract() == 0.0 && i >= 0.0).then(|| numbers.units.get(i as usize)).flatten();
+                let unit = (i.fract() == 0.0 && i >= 0.0)
+                    .then(|| numbers.units.get(i as usize))
+                    .flatten();
                 let Some(unit) = unit else {
-                    return Err(PhonemizeError::Data(format!("numbers.units has no word for digit {d}")));
+                    return Err(PhonemizeError::Data(format!(
+                        "numbers.units has no word for digit {d}"
+                    )));
                 };
                 parts.push(word(unit));
             }
@@ -283,7 +318,12 @@ impl NativeHindi {
         if !is_safe_integer(n) {
             return Ok(js(&spell_digits(&ascii.to_string_lossy(), numbers, &word)));
         }
-        Ok(js(&render_number(n as u64, numbers, &word, indic_number_words)))
+        Ok(js(&render_number(
+            n as u64,
+            numbers,
+            &word,
+            indic_number_words,
+        )))
     }
 
     /// `text(input)`.
@@ -329,8 +369,18 @@ impl NativeHindi {
 /// `createHindi(foreign)`.
 pub fn create_hindi(foreign: Option<ForeignPhonemizer>) -> Result<NativeHindi, String> {
     let def = try_manifest()?;
-    let overrides = Overrides { symbol_tier_is_hindis: true, ..Default::default() };
-    make_native_hindi(def, load_shared_phonology()?, foreign, AbugidaScript::default(), None, overrides)
+    let overrides = Overrides {
+        symbol_tier_is_hindis: true,
+        ..Default::default()
+    };
+    make_native_hindi(
+        def,
+        load_shared_phonology()?,
+        foreign,
+        AbugidaScript::default(),
+        None,
+        overrides,
+    )
 }
 
 impl Engine for NativeHindi {
@@ -342,7 +392,9 @@ impl Engine for NativeHindi {
 /// The registry's `hi` arm: `createHindi(readAsEnglish)`.
 pub fn engine() -> Result<Arc<dyn Engine>, PhonemizeError> {
     let foreign: ForeignPhonemizer = Arc::new(read_as_english);
-    Ok(Arc::new(create_hindi(Some(foreign)).map_err(PhonemizeError::Data)?))
+    Ok(Arc::new(
+        create_hindi(Some(foreign)).map_err(PhonemizeError::Data)?,
+    ))
 }
 
 #[cfg(test)]
@@ -357,7 +409,10 @@ mod tests {
             phonemize("16वीं सदी, 10:30 बजे", "hi").unwrap(),
             "soːlˈəɦʋiː̃ sˈəd̪iː , d̪ˈəs bˈəd͡ʒkəɾ t̪ˈiːs mˈɪnəʈ"
         );
-        assert_eq!(phonemize("São Paulo में", "hi").unwrap(), "sˈaᶷ pʰˈɔːloᶷ mˈeː̃");
+        assert_eq!(
+            phonemize("São Paulo में", "hi").unwrap(),
+            "sˈaᶷ pʰˈɔːloᶷ mˈeː̃"
+        );
     }
 
     /// Every `rewrite` is on the pipeline string: no probe or golden line poisons the mapping (the TS
@@ -369,7 +424,8 @@ mod tests {
         let h = hits.clone();
         crate::core::provenance::on_poison(Some(Box::new(move |_, _| h.set(h.get() + 1))));
         let root = concat!(env!("CARGO_MANIFEST_DIR"), "/../..");
-        let probes = std::fs::read_to_string(format!("{root}/rust/tools/fn-diff/probes/hi.txt")).unwrap();
+        let probes =
+            std::fs::read_to_string(format!("{root}/rust/tools/fn-diff/probes/hi.txt")).unwrap();
         let golden = std::fs::read_to_string(format!("{root}/csharp/goldens/hi.tsv")).unwrap();
         let lines = probes
             .lines()
@@ -390,14 +446,23 @@ mod tests {
     #[test]
     fn an_infinite_ordinal_is_an_error_not_a_panic() {
         let text = format!("{}वाँ", "1".repeat(400));
-        assert!(matches!(phonemize(&text, "hi"), Err(crate::PhonemizeError::Input(_))));
-        assert_eq!(phonemize("9007199254740993वाँ", "hi").unwrap().is_empty(), false);
+        assert!(matches!(
+            phonemize(&text, "hi"),
+            Err(crate::PhonemizeError::Input(_))
+        ));
+        assert_eq!(
+            phonemize("9007199254740993वाँ", "hi").unwrap().is_empty(),
+            false
+        );
     }
 
     /// A Devanagari run inside English reaches this engine through the script reader.
     #[test]
     fn devanagari_inside_english_is_read_by_hindi() {
-        assert_eq!(phonemize("I said नमस्ते to them", "en").unwrap(), "aᶦ sˈɛd nəmˈəst̪eː tʰuː ðˈɛm");
+        assert_eq!(
+            phonemize("I said नमस्ते to them", "en").unwrap(),
+            "aᶦ sˈɛd nəmˈəst̪eː tʰuː ðˈɛm"
+        );
         assert!(crate::registry::port_pending().iter().all(|p| p != "hi"));
     }
 }

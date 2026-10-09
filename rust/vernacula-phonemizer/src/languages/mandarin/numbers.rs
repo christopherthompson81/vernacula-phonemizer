@@ -92,7 +92,11 @@ pub fn digits_to_chinese(digits: &JsString) -> JsString {
             continue;
         }
         // `digitIndex(d)` compares a STRING: only a one-unit string can be a digit.
-        let idx = if d.len() == 1 { digit_index(d.0[0]) } else { -1 };
+        let idx = if d.len() == 1 {
+            digit_index(d.0[0])
+        } else {
+            -1
+        };
         match usize::try_from(idx).ok().and_then(|i| num.digits.get(i)) {
             Some(w) => out.push_str(&js(w)),
             None => out.push_str(&d),

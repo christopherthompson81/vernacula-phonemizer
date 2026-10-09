@@ -122,6 +122,8 @@ impl EnglishTagger {
 }
 
 /// The tagger's files: its meta and its graph loaded by the pure-Rust runtime, or why they are unusable.
-pub fn load_english_tagger_files(basename: &str) -> Result<(TaggerMeta, Box<dyn CharLogits>), String> {
+pub fn load_english_tagger_files(
+    basename: &str,
+) -> Result<(TaggerMeta, Box<dyn CharLogits>), String> {
     load_tagger(DIR, basename, &format!("{basename}.int8.onnx"))
 }

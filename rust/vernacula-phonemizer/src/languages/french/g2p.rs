@@ -52,7 +52,11 @@ fn is(c: Option<u16>, ch: char) -> bool {
 }
 
 fn at(w: &JsString, k: isize) -> Option<u16> {
-    if k < 0 { None } else { w.0.get(k as usize).copied() }
+    if k < 0 {
+        None
+    } else {
+        w.0.get(k as usize).copied()
+    }
 }
 
 fn silent_tail(w: &JsString, k: isize) -> bool {
@@ -146,14 +150,20 @@ pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
 
         for (g, ipa) in &T.yod_double {
             if starts_at(&w, i, g) {
-                seg.push(Seg { ph: ipa.clone(), s: i });
+                seg.push(Seg {
+                    ph: ipa.clone(),
+                    s: i,
+                });
                 i += g.len();
                 continue 'scan;
             }
         }
         for (g, ipa) in &T.yod_final {
             if starts_at(&w, i, g) && i + g.len() >= n {
-                seg.push(Seg { ph: ipa.clone(), s: i });
+                seg.push(Seg {
+                    ph: ipa.clone(),
+                    s: i,
+                });
                 i += g.len();
                 continue 'scan;
             }
@@ -165,7 +175,10 @@ pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
                 let doubled = (g.ends_with(&js("n")) && is(after, 'n'))
                     || (g.ends_with(&js("m")) && is(after, 'm'));
                 if !is_v(after) && !doubled {
-                    seg.push(Seg { ph: ipa.clone(), s: i });
+                    seg.push(Seg {
+                        ph: ipa.clone(),
+                        s: i,
+                    });
                     i += g.len();
                     continue 'scan;
                 }
@@ -188,7 +201,8 @@ pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
             continue;
         }
 
-        if starts_at(&w, i, &js("eu")) || starts_at(&w, i, &js("œu")) || starts_at(&w, i, &js("eû")) {
+        if starts_at(&w, i, &js("eu")) || starts_at(&w, i, &js("œu")) || starts_at(&w, i, &js("eû"))
+        {
             let g = 2; // "œu", "eû" and "eu" are each two units
             let ph = if eu_closed(&w, ii(i + g)) { "œ" } else { "ø" };
             push(&mut seg, ph, i);
@@ -207,7 +221,10 @@ pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
 
         for (g, ipa) in &T.vowel_groups {
             if starts_at(&w, i, g) {
-                seg.push(Seg { ph: ipa.clone(), s: i });
+                seg.push(Seg {
+                    ph: ipa.clone(),
+                    s: i,
+                });
                 i += g.len();
                 continue 'scan;
             }
@@ -249,7 +266,11 @@ pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
             continue;
         }
         // `"ll".includes(nx)` and `"mtv".includes(at(i - 1))` are both true for the TS's `""`.
-        if is(c, 'i') && includes("ll", nx) && is(at(&w, ii(i) + 2), 'l') && !includes("mtv", at(&w, ii(i) - 1)) {
+        if is(c, 'i')
+            && includes("ll", nx)
+            && is(at(&w, ii(i) + 2), 'l')
+            && !includes("mtv", at(&w, ii(i) - 1))
+        {
             push(&mut seg, "ij", i);
             i += 3;
             continue;
@@ -312,7 +333,13 @@ pub(crate) fn to_ipa_loaded(word: &JsString) -> JsString {
                 i += 1;
             }
             _ => {
-                let ph = latin_phone(&JsString(vec![cu]), PhoneOpts { initial: i == 0, ..Default::default() });
+                let ph = latin_phone(
+                    &JsString(vec![cu]),
+                    PhoneOpts {
+                        initial: i == 0,
+                        ..Default::default()
+                    },
+                );
                 if let Some(ph) = ph {
                     seg.push(Seg { ph, s: i });
                 }
@@ -378,7 +405,11 @@ fn hiatus(dedup: Vec<Seg>, ends_vowel: &dyn Fn(&Seg) -> bool) -> Vec<Seg> {
             true
         })
         .collect();
-    dedup.into_iter().zip(keep).filter_map(|(s, k)| k.then_some(s)).collect()
+    dedup
+        .into_iter()
+        .zip(keep)
+        .filter_map(|(s, k)| k.then_some(s))
+        .collect()
 }
 
 /// The single-letter consonant cases of the switch.

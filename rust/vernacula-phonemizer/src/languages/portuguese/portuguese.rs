@@ -47,11 +47,19 @@ fn parse_corr(cell: &JsString) -> Corr {
 fn try_lexicon() -> Result<&'static IndexMap<JsString, Corr>, String> {
     static L: OnceLock<IndexMap<JsString, Corr>> = OnceLock::new();
     load_once(&L, || {
-        let opts = || TsvOptions { optional: true, ..Default::default() };
+        let opts = || TsvOptions {
+            optional: true,
+            ..Default::default()
+        };
         let mut lex = load_tsv_map(DIR, "lexicon.tsv", |v, _| Some(parse_corr(v)), opts())
             .map_err(|e| e.to_string())?;
-        for (k, v) in load_tsv_map(DIR, "lexicon-manual.tsv", |v, _| Some(parse_corr(v)), opts())
-            .map_err(|e| e.to_string())?
+        for (k, v) in load_tsv_map(
+            DIR,
+            "lexicon-manual.tsv",
+            |v, _| Some(parse_corr(v)),
+            opts(),
+        )
+        .map_err(|e| e.to_string())?
         {
             lex.insert(k, v);
         }
@@ -92,7 +100,10 @@ fn stressed_nucleus(word: &JsString, segs: &[Seg]) -> isize {
         return nuclei[0] as isize;
     }
     let w = js_re!("s$", "").replace(&word.to_lower_case(), &JsString::new());
-    let last = w.len().checked_sub(1).map_or_else(JsString::new, |i| w.char_at(i));
+    let last = w
+        .len()
+        .checked_sub(1)
+        .map_or_else(JsString::new, |i| w.char_at(i));
     // `"lrzx".includes(last)`: true for the empty string, as JS's is.
     let oxytone = last.is_empty()
         || js("lrzx").includes(&last)
@@ -120,7 +131,9 @@ fn onglides(segs: &mut [Seg], stress: isize) {
         if !s.nucleus || i as isize == stress || (s.raw != "i" && s.raw != "u" && s.raw != "e") {
             continue;
         }
-        let Some(next) = segs.get(i + 1) else { continue };
+        let Some(next) = segs.get(i + 1) else {
+            continue;
+        };
         if !next.nucleus {
             continue;
         }
@@ -165,7 +178,10 @@ fn realize(segs: &[Seg], stress: isize, dialect: Dialect) -> JsString {
                     } else {
                         &[("a", "a"), ("e", "e"), ("o", "o")]
                     };
-                    table.iter().find(|(k, _)| *k == r).map_or(ph, |(_, v)| js(v))
+                    table
+                        .iter()
+                        .find(|(k, _)| *k == r)
+                        .map_or(ph, |(_, v)| js(v))
                 };
             } else {
                 ph = if before_dark_l && s.raw == "a" {
@@ -179,7 +195,8 @@ fn realize(segs: &[Seg], stress: isize, dialect: Dialect) -> JsString {
                 };
             }
         }
-        if dialect == Dialect::Bp && is_stress && !s.accent && !s.nasal && (ph == "ɔ" || ph == "ɛ") {
+        if dialect == Dialect::Bp && is_stress && !s.accent && !s.nasal && (ph == "ɔ" || ph == "ɛ")
+        {
             if let Some(nx) = next {
                 if !nx.nucleus && (nx.ph == "m" || nx.ph == "n" || nx.ph == "ɲ") {
                     ph = js(if ph == "ɔ" { "o" } else { "e" });
@@ -237,7 +254,11 @@ pub fn render_word(word: &JsString, corr: Option<&Corr>, dialect: Dialect) -> Js
         correct(&mut segs, stress, c);
     }
     let ipa = realize(&segs, stress, dialect);
-    if dialect == Dialect::Bp { bp_consonants(&ipa) } else { ipa }
+    if dialect == Dialect::Bp {
+        bp_consonants(&ipa)
+    } else {
+        ipa
+    }
 }
 
 fn bp_consonants(ipa: &JsString) -> JsString {
@@ -262,7 +283,10 @@ pub fn phonemize_word(word: &JsString, dialect: Dialect) -> Result<JsString, Pho
 }
 
 fn token() -> &'static JsRegex {
-    js_re!(r"([a-zà-ÿ]+)|(\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?)|([.!?…,;:])", "giu")
+    js_re!(
+        r"([a-zà-ÿ]+)|(\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?)|([.!?…,;:])",
+        "giu"
+    )
 }
 
 fn number_token_to_words(tok: &JsString, dialect: Dialect) -> JsString {
@@ -302,7 +326,10 @@ fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
         let m = try_manifest()?;
         let (t, sign) = (&m.symbol_tier, &m.sign_words);
         make_symbol_normalizer(&SymbolData {
-            multiply: Some(Multiply { times: sign.times.clone(), by: None }),
+            multiply: Some(Multiply {
+                times: sign.times.clone(),
+                by: None,
+            }),
             ampersand: Some(sign.ampersand.clone()),
             percent: Some(t.percent.clone()),
             currency: Some(t.currency.clone()),
@@ -337,7 +364,10 @@ impl PortuguesePhonemizer {
     /// The normalized text `text()` tokenizes.
     pub fn normalized_for(&self, input: &JsString) -> JsString {
         let bp = self.dialect == Dialect::Bp;
-        self.symbols.apply(&normalize_portuguese_initialisms(&normalize_portuguese(input, bp)))
+        self.symbols
+            .apply(&normalize_portuguese_initialisms(&normalize_portuguese(
+                input, bp,
+            )))
     }
 
     fn word_ipa(&self, word: &JsString) -> JsString {
@@ -346,7 +376,11 @@ impl PortuguesePhonemizer {
         if let Some(pw) = self.post_word.as_ref() {
             ipa = pw(&ipa, &lower);
         }
-        if T.function_words.contains(&lower) { drop_first_stress(&ipa) } else { ipa }
+        if T.function_words.contains(&lower) {
+            drop_first_stress(&ipa)
+        } else {
+            ipa
+        }
     }
 
     pub fn text(&self, input: &JsString) -> JsString {
@@ -386,5 +420,10 @@ pub fn create_portuguese(
     try_manifest().map_err(PhonemizeError::Data)?;
     let lexicon = try_lexicon().map_err(PhonemizeError::Data)?;
     let symbols = try_symbols().map_err(PhonemizeError::Data)?;
-    Ok(Arc::new(PortuguesePhonemizer { dialect, post_word, lexicon, symbols }))
+    Ok(Arc::new(PortuguesePhonemizer {
+        dialect,
+        post_word,
+        lexicon,
+        symbols,
+    }))
 }

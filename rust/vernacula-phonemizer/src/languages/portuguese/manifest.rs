@@ -183,7 +183,10 @@ mod tests {
         assert_eq!(m.numbers.small.len(), 20);
         assert_eq!(m.ordinals.units.len(), 10);
         assert_eq!(m.accents.to_base.get("ã").map(String::as_str), Some("a"));
-        assert_eq!(m.fractions.denominators.get("3").map(String::as_str), Some("terço"));
+        assert_eq!(
+            m.fractions.denominators.get("3").map(String::as_str),
+            Some("terço")
+        );
         assert!(m.symbol_tier.units.contains_key("km/h"));
     }
 }

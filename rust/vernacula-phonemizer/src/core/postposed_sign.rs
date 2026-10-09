@@ -12,13 +12,20 @@ use crate::js_re;
 /// does.
 pub fn postposed_sign(s: &JsString, sign: &str, words: &JsString) -> JsString {
     let trailing = js_re!(r#"^(.*?)([,;।॥!?)\]"'’、。]*)$"#, "su");
-    let pair = JsRegex::new(&format!(r"(\S+)\s*{sign}\s*(\S+)"), "gu").expect("postposedSign pattern");
+    let pair =
+        JsRegex::new(&format!(r"(\S+)\s*{sign}\s*(\S+)"), "gu").expect("postposedSign pattern");
     let out = rewrite_with(s, &pair, |m, full| {
         let a = m.group(1, full).unwrap_or_default();
         let b = m.group(2, full).unwrap_or_default();
         let split = trailing.exec(&b);
-        let operand = split.as_ref().and_then(|x| x.group(1, &b)).unwrap_or_else(|| b.clone());
-        let marks = split.as_ref().and_then(|x| x.group(2, &b)).unwrap_or_default();
+        let operand = split
+            .as_ref()
+            .and_then(|x| x.group(1, &b))
+            .unwrap_or_else(|| b.clone());
+        let marks = split
+            .as_ref()
+            .and_then(|x| x.group(2, &b))
+            .unwrap_or_default();
         let mut r = a;
         r.push_str(&js(" "));
         r.push_str(&operand);

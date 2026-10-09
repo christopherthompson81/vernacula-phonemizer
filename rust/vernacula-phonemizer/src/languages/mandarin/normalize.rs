@@ -44,7 +44,10 @@ fn signs() -> [(&'static JsRegex, &'static str); 7] {
 }
 
 fn letter_name(c: &JsString) -> Option<&'static str> {
-    MANIFEST.letter_names.get(&c.to_string_lossy()).map(String::as_str)
+    MANIFEST
+        .letter_names
+        .get(&c.to_string_lossy())
+        .map(String::as_str)
 }
 
 /// ` ${[...run].map((c) => letterNames[c] ?? c).join(" ")} `.
@@ -53,7 +56,9 @@ fn spell_letters(run: &JsString) -> JsString {
     for c in run.code_point_strings() {
         parts.push(letter_name(&c).map_or(c, js));
     }
-    js(" ").concat(&JsString::join(&parts, &js(" "))).concat(&js(" "))
+    js(" ")
+        .concat(&JsString::join(&parts, &js(" ")))
+        .concat(&js(" "))
 }
 
 /// `normalizeMandarin(input)`.
@@ -71,7 +76,11 @@ pub fn normalize_mandarin(input: &JsString) -> JsString {
     for (re, word) in signs() {
         s = rewrite(&s, re, &js(word));
     }
-    s = rewrite(&s, js_re!(r"(?<=[A-Za-z])\s?[&＆]\s?(?=[A-Za-z])", "gu"), &js(" and "));
+    s = rewrite(
+        &s,
+        js_re!(r"(?<=[A-Za-z])\s?[&＆]\s?(?=[A-Za-z])", "gu"),
+        &js(" and "),
+    );
     s = rewrite(&s, js_re!(r"\s?[&＆]\s?", "gu"), &js("和"));
     rewrite_with(&s, js_re!(r"(?<=\d)([²³])", "gu"), |m, s| {
         let e = m.group(1, s).unwrap();

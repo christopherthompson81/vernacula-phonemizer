@@ -28,7 +28,11 @@ fn to_ieme(word: &JsString) -> JsString {
     if w == "neuf" {
         return js("neuvième");
     }
-    let stem = if w.ends_with(&js("e")) { w.slice(0, Some(-1)) } else { w };
+    let stem = if w.ends_with(&js("e")) {
+        w.slice(0, Some(-1))
+    } else {
+        w
+    };
     stem.concat(&js("ième"))
 }
 
@@ -39,7 +43,10 @@ pub(crate) fn ordinal_loaded(n: f64, feminine: bool, plural: bool) -> Option<JsS
     }
     let s = if plural { "s" } else { "" };
     if n == 1.0 {
-        return Some(js(&format!("{}{s}", if feminine { "première" } else { "premier" })));
+        return Some(js(&format!(
+            "{}{s}",
+            if feminine { "première" } else { "premier" }
+        )));
     }
     let mut words = number_to_words_loaded(n, None).split(&js(" "));
     let mut parts = words.pop().unwrap().split(&js("-"));
@@ -61,7 +68,11 @@ const SUFFIXES: &str = "ers|er|res|re|ères|ère|eres|ere|èmes|ème|emes|eme|es
 const L: &str = "a-zà-ÿœæ";
 
 static DIGIT_NOTATION: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!("(?<![{L}\\d])(\\d+)({SUFFIXES})(?![{L}\\d])"), "gi").unwrap()
+    JsRegex::new(
+        &format!("(?<![{L}\\d])(\\d+)({SUFFIXES})(?![{L}\\d])"),
+        "gi",
+    )
+    .unwrap()
 });
 
 pub(crate) fn normalize_french_ordinal_digits_loaded(text: &JsString) -> JsString {
@@ -77,7 +88,11 @@ pub(crate) fn normalize_french_ordinal_digits_loaded(text: &JsString) -> JsStrin
             if n != 2.0 {
                 return whole;
             }
-            let base = if suf.starts_with(&js("de")) { "seconde" } else { "second" };
+            let base = if suf.starts_with(&js("de")) {
+                "seconde"
+            } else {
+                "second"
+            };
             return js(&format!("{base}{}", if plural { "s" } else { "" }));
         }
         ordinal_loaded(n, feminine_suffix().test(&suf), plural).unwrap_or(whole)
@@ -87,10 +102,17 @@ pub(crate) fn normalize_french_ordinal_digits_loaded(text: &JsString) -> JsStrin
 const ROMAN_WORD_STOPLIST: [&str; 6] = ["cie", "cies", "cive", "cives", "clive", "clives"];
 
 static ROMAN_NOTATION: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!("(?<![{L}\\d])([ivxlcdm]+)({SUFFIXES})(?![{L}\\d])"), "gi").unwrap()
+    JsRegex::new(
+        &format!("(?<![{L}\\d])([ivxlcdm]+)({SUFFIXES})(?![{L}\\d])"),
+        "gi",
+    )
+    .unwrap()
 });
 
-pub(crate) fn normalize_french_ordinal_romans_loaded(text: &JsString, is_word: &dyn Fn(&JsString) -> bool) -> JsString {
+pub(crate) fn normalize_french_ordinal_romans_loaded(
+    text: &JsString,
+    is_word: &dyn Fn(&JsString) -> bool,
+) -> JsString {
     if !js_re!("[ivxlcdm]", "i").test(text) {
         return text.clone();
     }
@@ -104,7 +126,12 @@ pub(crate) fn normalize_french_ordinal_romans_loaded(text: &JsString, is_word: &
             return whole;
         };
         let suf = m.group(2, s).unwrap().to_lower_case();
-        ordinal_loaded(n as f64, feminine_suffix().test(&suf), suf.ends_with(&js("s"))).unwrap_or(whole)
+        ordinal_loaded(
+            n as f64,
+            feminine_suffix().test(&suf),
+            suf.ends_with(&js("s")),
+        )
+        .unwrap_or(whole)
     })
 }
 

@@ -23,8 +23,15 @@ type OpenCloseLexicon = IndexMap<JsString, JsString>;
 fn try_lex() -> Result<&'static OpenCloseLexicon, PhonemizeError> {
     static L: OnceLock<OpenCloseLexicon> = OnceLock::new();
     load_once(&L, || {
-        load_tsv_strings(DIR, "pt-br-openclose.tsv", TsvOptions { optional: true, ..Default::default() })
-            .map_err(|e| e.to_string())
+        load_tsv_strings(
+            DIR,
+            "pt-br-openclose.tsv",
+            TsvOptions {
+                optional: true,
+                ..Default::default()
+            },
+        )
+        .map_err(|e| e.to_string())
     })
     .map_err(PhonemizeError::Data)
 }
@@ -44,7 +51,10 @@ pub fn open_close(ipa: &JsString, word: &JsString) -> Result<JsString, Phonemize
 
 /// `phonemizeWord(word)`: the shipped path (rules in BP mode + the open/close lexicon).
 pub fn phonemize_word(word: &JsString) -> Result<JsString, PhonemizeError> {
-    open_close(&phonemize_word_pt(word, Dialect::Bp)?, &word.to_lower_case())
+    open_close(
+        &phonemize_word_pt(word, Dialect::Bp)?,
+        &word.to_lower_case(),
+    )
 }
 
 /// `phonemizeWordRules(word)`: rule-only, the referee eval's non-circular path.
@@ -55,5 +65,10 @@ pub fn phonemize_word_rules(word: &JsString) -> Result<JsString, PhonemizeError>
 /// `createPortugueseBR()`.
 pub fn create_portuguese_br() -> Result<Arc<PortuguesePhonemizer>, PhonemizeError> {
     let lex = try_lex()?;
-    create_portuguese(Dialect::Bp, Some(Arc::new(move |ipa: &JsString, word: &JsString| open_close_with(lex, ipa, word))))
+    create_portuguese(
+        Dialect::Bp,
+        Some(Arc::new(move |ipa: &JsString, word: &JsString| {
+            open_close_with(lex, ipa, word)
+        })),
+    )
 }

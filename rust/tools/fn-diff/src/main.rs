@@ -48,9 +48,12 @@ fn slots(v: &JsString, _: &JsString) -> Option<Vec<usize>> {
 /// dump.mts's `traceJson`: traced, normalized, and per token [span, inputSpan|null, ipaSpan|null, surface
 /// units, source|null]. JsString level, through the guarded `phonemize_trace_js`.
 fn trace_json(text: &JsString, lang: &str) -> JsString {
-    let t = vernacula_phonemizer::phonemize_trace_js(text, lang).unwrap().1;
+    let t = vernacula_phonemizer::phonemize_trace_js(text, lang)
+        .unwrap()
+        .1;
     let u = |s: &JsString| serde_json::json!(s.0);
-    let span = |s: Option<(usize, usize)>| s.map_or(Value::Null, |(a, b)| serde_json::json!([a, b]));
+    let span =
+        |s: Option<(usize, usize)>| s.map_or(Value::Null, |(a, b)| serde_json::json!([a, b]));
     let tokens: Vec<Value> = t
         .tokens
         .iter()
@@ -64,7 +67,8 @@ fn trace_json(text: &JsString, lang: &str) -> JsString {
             ])
         })
         .collect();
-    let out = serde_json::json!({ "traced": t.traced, "normalized": u(&t.normalized), "tokens": tokens });
+    let out =
+        serde_json::json!({ "traced": t.traced, "normalized": u(&t.normalized), "tokens": tokens });
     JsString::from(serde_json::to_string(&out).unwrap())
 }
 
@@ -491,10 +495,14 @@ fn main() {
                 phonemize_word(&s).unwrap()
             }
         }),
-        "trace" => Box::new(|input| trace_json(&units(&input["text"]), input["lang"].as_str().unwrap())),
+        "trace" => {
+            Box::new(|input| trace_json(&units(&input["text"]), input["lang"].as_str().unwrap()))
+        }
         // ── Mandarin (cmn) ──
         "cmn-normalize" => Box::new(|input| {
-            use vernacula_phonemizer::languages::mandarin::normalize::{normalize_mandarin, spell_initialisms};
+            use vernacula_phonemizer::languages::mandarin::normalize::{
+                normalize_mandarin, spell_initialisms,
+            };
             let t = units(&input["text"]);
             match input["op"].as_str().unwrap() {
                 "normalize" => normalize_mandarin(&t),
@@ -503,8 +511,10 @@ fn main() {
             }
         }),
         "cmn-segment" => {
-            use vernacula_phonemizer::languages::mandarin::{mandarin::load_pinyin_tables, segment::segment};
             use vernacula_phonemizer::languages::mandarin::yi_bu_sandhi::apply_yi_bu_sandhi;
+            use vernacula_phonemizer::languages::mandarin::{
+                mandarin::load_pinyin_tables, segment::segment,
+            };
             let t = load_pinyin_tables().unwrap();
             Box::new(move |input| {
                 let cps = units(&input["text"]).code_point_strings();
@@ -519,17 +529,24 @@ fn main() {
                 }
                 let parts: Vec<JsString> = toks
                     .iter()
-                    .map(|k| k.py.concat(&JsString::from("\u{1}")).concat(&k.src.clone().unwrap_or_else(|| JsString::from("\u{0}"))))
+                    .map(|k| {
+                        k.py.concat(&JsString::from("\u{1}"))
+                            .concat(&k.src.clone().unwrap_or_else(|| JsString::from("\u{0}")))
+                    })
                     .collect();
                 JsString::join(&parts, &JsString::from("\u{2}"))
             })
         }
         "cmn-pinyin" => {
-            let conv = vernacula_phonemizer::languages::mandarin::mandarin::create_pinyin_phonemizer().unwrap();
+            let conv =
+                vernacula_phonemizer::languages::mandarin::mandarin::create_pinyin_phonemizer()
+                    .unwrap();
             Box::new(move |input| conv.convert(&units(&input["text"])))
         }
         "cmn-numbers" => Box::new(|input| {
-            use vernacula_phonemizer::languages::mandarin::numbers::{digits_to_chinese, integer_to_chinese};
+            use vernacula_phonemizer::languages::mandarin::numbers::{
+                digits_to_chinese, integer_to_chinese,
+            };
             match input["op"].as_str().unwrap() {
                 "int" => integer_to_chinese(input["n"].as_f64().unwrap()),
                 _ => digits_to_chinese(&units(&input["digits"])),
@@ -579,18 +596,22 @@ fn main() {
                 _ => normalize_portuguese_initialisms(&normalize_portuguese(&t, true)),
             }
         }),
-        "pt-g2p" => Box::new(|input| {
-            use vernacula_phonemizer::languages::portuguese::g2p::Dialect;
-            use vernacula_phonemizer::languages::portuguese::portuguese::{phonemize_word, render_word};
-            let w = units(&input["word"]);
-            match input["op"].as_str().unwrap() {
+        "pt-g2p" => {
+            Box::new(|input| {
+                use vernacula_phonemizer::languages::portuguese::g2p::Dialect;
+                use vernacula_phonemizer::languages::portuguese::portuguese::{
+                    phonemize_word, render_word,
+                };
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
                 "ep" => phonemize_word(&w, Dialect::Ep).unwrap(),
                 "bp" => phonemize_word(&w, Dialect::Bp).unwrap(),
                 "br" => vernacula_phonemizer::languages::portuguese_br::portuguese_br::phonemize_word(&w).unwrap(),
                 "render-ep" => render_word(&w, None, Dialect::Ep),
                 _ => render_word(&w, None, Dialect::Bp),
             }
-        }),
+            })
+        }
         "pt-numbers" => Box::new(|input| {
             use vernacula_phonemizer::languages::portuguese::g2p::Dialect;
             let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
@@ -598,9 +619,19 @@ fn main() {
                 return vernacula_phonemizer::languages::portuguese::roman_ordinals::portuguese_ordinal(n)
                     .unwrap_or_else(|| JsString::from("\u{0}none"));
             }
-            let d = if input["d"] == "bp" { Dialect::Bp } else { Dialect::Ep };
-            let raw = input.get("raw").map(|r| JsString::from(r.as_str().unwrap()));
-            vernacula_phonemizer::languages::portuguese::numbers::number_to_words(n, d, raw.as_ref())
+            let d = if input["d"] == "bp" {
+                Dialect::Bp
+            } else {
+                Dialect::Ep
+            };
+            let raw = input
+                .get("raw")
+                .map(|r| JsString::from(r.as_str().unwrap()));
+            vernacula_phonemizer::languages::portuguese::numbers::number_to_words(
+                n,
+                d,
+                raw.as_ref(),
+            )
         }),
         "hi-normalize" => {
             use vernacula_phonemizer::languages::hindi::{manifest::try_manifest, normalize::*};
@@ -613,14 +644,20 @@ fn main() {
             Box::new(move |input| norm(&units(&input["text"])).unwrap())
         }
         "hi-word" => {
-            use vernacula_phonemizer::core::{abugida::make_abugida_g2p, phonology::load_shared_phonology};
+            use vernacula_phonemizer::core::{
+                abugida::make_abugida_g2p, phonology::load_shared_phonology,
+            };
             use vernacula_phonemizer::languages::hindi::{hindi::*, manifest::try_manifest};
             let hi = try_manifest().unwrap();
             let phon = load_shared_phonology().unwrap();
             let g2p = make_abugida_g2p(&hi.abugida, phon);
             // `makeNativeHindi(MANIFEST)`: Hindi's own manifest, so its `symbolTier` is Hindi's.
-            let overrides = Overrides { symbol_tier_is_hindis: true, ..Default::default() };
-            let h = make_native_hindi(hi, phon, None, AbugidaScript::default(), None, overrides).unwrap();
+            let overrides = Overrides {
+                symbol_tier_is_hindis: true,
+                ..Default::default()
+            };
+            let h = make_native_hindi(hi, phon, None, AbugidaScript::default(), None, overrides)
+                .unwrap();
             Box::new(move |input| {
                 let w = units(&input["word"]);
                 match input["op"].as_str().unwrap() {
@@ -631,8 +668,10 @@ fn main() {
             })
         }
         "abugida-core" => Box::new(|input| {
-            use vernacula_phonemizer::core::{postposed_sign::postposed_sign, schwa::delete_medial_schwa};
             use vernacula_phonemizer::core::weight_stress::{apply_weight_stress, tokenize_ipa};
+            use vernacula_phonemizer::core::{
+                postposed_sign::postposed_sign, schwa::delete_medial_schwa,
+            };
             use vernacula_phonemizer::languages::hindi::hindi::heavy_final_coda;
             let x = units(&input["ipa"]);
             match input["op"].as_str().unwrap() {
@@ -652,12 +691,17 @@ fn main() {
             let text = units(&input["text"]).to_string_lossy();
             let t = vernacula_phonemizer::phonemize_trace(&text, input["lang"].as_str().unwrap())
                 .unwrap();
-            let sp = |s: Option<(usize, usize)>| s.map_or("-".to_string(), |(a, b)| format!("{a},{b}"));
+            let sp =
+                |s: Option<(usize, usize)>| s.map_or("-".to_string(), |(a, b)| format!("{a},{b}"));
             let mut out = JsString::from(format!("{}\n{}\n", t.trace.traced, t.ipa));
             out.push_str(&t.trace.normalized);
             for k in &t.trace.tokens {
                 let emitted: Vec<JsString> = k.emitted.clone();
-                out.push_str(&JsString::from(format!("\n{}|{}|", sp(Some(k.span)), sp(k.input_span))));
+                out.push_str(&JsString::from(format!(
+                    "\n{}|{}|",
+                    sp(Some(k.span)),
+                    sp(k.input_span)
+                )));
                 out.push_str(&k.surface);
                 out.push_str(&JsString::from("|"));
                 out.push_str(&k.nativised.clone().unwrap_or_else(|| JsString::from("-")));
@@ -684,7 +728,10 @@ fn main() {
                 match input["op"].as_str().unwrap() {
                     "normalize" => n::normalize_french(&t, &is_word).unwrap(),
                     "numerals" => normalize_romans(
-                        &o::normalize_french_ordinal_digits(&o::normalize_french_ordinal_romans(&t, &is_word).unwrap()).unwrap(),
+                        &o::normalize_french_ordinal_digits(
+                            &o::normalize_french_ordinal_romans(&t, &is_word).unwrap(),
+                        )
+                        .unwrap(),
                         &RomanPolicy::default(),
                     ),
                     _ => n::normalize_french_initialisms(&t, &is_word).unwrap(),
@@ -706,8 +753,13 @@ fn main() {
             use vernacula_phonemizer::languages::french::ordinals as o;
             let fr = vernacula_phonemizer::languages::french::french::create_french().unwrap();
             Box::new(move |input| match input["op"].as_str() {
-                Some("digits") => o::normalize_french_ordinal_digits(&units(&input["text"])).unwrap(),
-                Some(_) => o::normalize_french_ordinal_romans(&units(&input["text"]), &|w| fr.lexicon_has(w)).unwrap(),
+                Some("digits") => {
+                    o::normalize_french_ordinal_digits(&units(&input["text"])).unwrap()
+                }
+                Some(_) => o::normalize_french_ordinal_romans(&units(&input["text"]), &|w| {
+                    fr.lexicon_has(w)
+                })
+                .unwrap(),
                 None => o::ordinal(
                     input["n"].as_f64().unwrap(),
                     input["feminine"].as_bool().unwrap(),
@@ -719,8 +771,10 @@ fn main() {
         }
         "fr-tagger" => {
             let tagger =
-                vernacula_phonemizer::languages::french::french_tagger::create_french_tagger("fr-g2p-tagger")
-                    .unwrap();
+                vernacula_phonemizer::languages::french::french_tagger::create_french_tagger(
+                    "fr-g2p-tagger",
+                )
+                .unwrap();
             Box::new(move |input| tagger.tag(&units(&input["word"])).unwrap())
         }
         _ => panic!("unknown function {name}"),

@@ -67,7 +67,10 @@ const DOTTED_ABBREV: [(&str, &str); 26] = [
 const DOT_ONLY: [&str; 5] = ["etc", "mme", "mmes", "mlle", "mlles"];
 
 fn dotted(key: &JsString) -> Option<&'static str> {
-    DOTTED_ABBREV.iter().find(|(k, _)| key == *k).map(|(_, v)| *v)
+    DOTTED_ABBREV
+        .iter()
+        .find(|(k, _)| key == *k)
+        .map(|(_, v)| *v)
 }
 
 fn dot_only(key: &JsString) -> bool {
@@ -82,16 +85,17 @@ fn undotted(key: &JsString) -> Option<&'static str> {
     }
 }
 
-static IS_UNREADABLE: LazyLock<Arc<dyn Fn(&JsString) -> bool + Send + Sync>> = LazyLock::new(|| {
-    let p = &MANIFEST.phonotactics;
-    Arc::new(make_unreadable_test(PhonotacticsData {
-        vowels: JsRegex::new(&format!("[{}]", p.vowels), "u").unwrap(),
-        legal_onsets: p.onsets.iter().map(|o| js(o)).collect(),
-        legal_codas: p.codas.iter().map(|c| js(c)).collect(),
-        liquids: None,
-        digraphs: None,
-    }))
-});
+static IS_UNREADABLE: LazyLock<Arc<dyn Fn(&JsString) -> bool + Send + Sync>> =
+    LazyLock::new(|| {
+        let p = &MANIFEST.phonotactics;
+        Arc::new(make_unreadable_test(PhonotacticsData {
+            vowels: JsRegex::new(&format!("[{}]", p.vowels), "u").unwrap(),
+            legal_onsets: p.onsets.iter().map(|o| js(o)).collect(),
+            legal_codas: p.codas.iter().map(|c| js(c)).collect(),
+            liquids: None,
+            digraphs: None,
+        }))
+    });
 
 /// `isUnreadableFrench`: the phonotactic test the initialism pass consults.
 pub(crate) fn is_unreadable_french_loaded(word: &JsString) -> bool {
@@ -131,13 +135,20 @@ fn fraction_words(num: f64, den: f64) -> Option<JsString> {
     } else {
         base
     };
-    Some(number_to_words_loaded(num, None).concat(&js(" ")).concat(&plural))
+    Some(
+        number_to_words_loaded(num, None)
+            .concat(&js(" "))
+            .concat(&plural),
+    )
 }
 
 /// `[...Object.keys(DOTTED_ABBREV), ...DOT_ONLY].sort((a, b) => b.length - a.length).join("|")`.
 static ABBREV_ALT: LazyLock<String> = LazyLock::new(|| {
     alternation(&sorted_by_length_desc(
-        DOTTED_ABBREV.iter().map(|(k, _)| js(k)).chain(DOT_ONLY.iter().map(|k| js(k))),
+        DOTTED_ABBREV
+            .iter()
+            .map(|(k, _)| js(k))
+            .chain(DOT_ONLY.iter().map(|k| js(k))),
     ))
 });
 
@@ -152,12 +163,16 @@ static ABBREV_CONTINUED: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(&format!(r"\b({})\.(\s+)(?=\p{{L}})", *ABBREV_ALT), "giu").unwrap()
 });
 static ABBREV_FINAL: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!(r"\b({})\.(?=\s*(?:[.,;:!?»)]|$))", *ABBREV_ALT), "giu").unwrap()
+    JsRegex::new(
+        &format!(r"\b({})\.(?=\s*(?:[.,;:!?»)]|$))", *ABBREV_ALT),
+        "giu",
+    )
+    .unwrap()
 });
 static NUMERIC_DATE: LazyLock<JsRegex> =
     LazyLock::new(|| JsRegex::new(r"\b(\d{1,2})[/.](\d{1,2})[/.](\d{4})\b", "gu").unwrap());
 static FIRST_OF_MONTH: LazyLock<JsRegex> =
-    LazyLock::new(|| JsRegex::new(&format!(r"\b1\s+({MONTHS})\b", ), "giu").unwrap());
+    LazyLock::new(|| JsRegex::new(&format!(r"\b1\s+({MONTHS})\b",), "giu").unwrap());
 
 fn g(m: &JsMatch, i: usize, s: &JsString) -> JsString {
     m.group(i, s).expect("participating group")
@@ -182,7 +197,10 @@ fn money(int: &JsString, cents: &JsString, sym: &JsString) -> JsString {
 ///
 /// `_is_word` mirrors the TS signature and is UNUSED there too (its docstring describes a decision that moved to
 /// `normalizeFrenchInitialisms`); kept until the TS drops it, reported in rust_fr_port_investigation.md.
-pub(crate) fn normalize_french_loaded(input: &JsString, _is_word: &dyn Fn(&JsString) -> bool) -> JsString {
+pub(crate) fn normalize_french_loaded(
+    input: &JsString,
+    _is_word: &dyn Fn(&JsString) -> bool,
+) -> JsString {
     let mut s = input.clone();
 
     // 0) digit grouping (twice: millions), then the remaining no-break spaces.
@@ -191,11 +209,23 @@ pub(crate) fn normalize_french_loaded(input: &JsString, _is_word: &dyn Fn(&JsStr
     s = rewrite(&s, js_re!(r"[   ]", "gu"), &js(" "));
 
     // 1) era markers.
-    s = rewrite(&s, js_re!(r"\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?", "giu"), &js("avant Jésus-Christ"));
-    s = rewrite(&s, js_re!(r"\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?", "giu"), &js("après Jésus-Christ"));
+    s = rewrite(
+        &s,
+        js_re!(r"\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?", "giu"),
+        &js("avant Jésus-Christ"),
+    );
+    s = rewrite(
+        &s,
+        js_re!(r"\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?", "giu"),
+        &js("après Jésus-Christ"),
+    );
 
     // 1b) the spaced degree sign.
-    s = rewrite(&s, js_re!(r"(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))", "gui"), &js("$1°"));
+    s = rewrite(
+        &s,
+        js_re!(r"(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))", "gui"),
+        &js("$1°"),
+    );
 
     // 2) numéro.
     s = rewrite(&s, js_re!(r"\bn[°º]\s*(?=\d)", "giu"), &js("numéro "));
@@ -231,13 +261,20 @@ pub(crate) fn normalize_french_loaded(input: &JsString, _is_word: &dyn Fn(&JsStr
     });
 
     // 4) name initials.
-    s = rewrite_with(&s, js_re!(r"\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])", "giu"), |m, x| {
-        let (ltr, sp) = (g(m, 1, x), g(m, 2, x));
-        match MANIFEST.letter_names.get(&ltr.to_lower_case().to_string_lossy()) {
-            None => m.value(x),
-            Some(name) => js(name).concat(&sp),
-        }
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])", "giu"),
+        |m, x| {
+            let (ltr, sp) = (g(m, 1, x), g(m, 2, x));
+            match MANIFEST
+                .letter_names
+                .get(&ltr.to_lower_case().to_string_lossy())
+            {
+                None => m.value(x),
+                Some(name) => js(name).concat(&sp),
+            }
+        },
+    );
 
     // 4b) money with centimes, both orders.
     s = rewrite_with(&s, js_re!(r"(\d+),(\d{2})\s?([€$£¥])", "gu"), |m, x| {
@@ -262,46 +299,75 @@ pub(crate) fn normalize_french_loaded(input: &JsString, _is_word: &dyn Fn(&JsStr
     s = rewrite(&s, js_re!(r"\s?÷\s?", "gu"), &js(" divisé par "));
 
     // 6) fractions.
-    s = rewrite_with(&s, js_re!(r"\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d)", "gu"), |m, x| {
-        fraction_words(js_number(&g(m, 1, x)), js_number(&g(m, 2, x))).unwrap_or_else(|| m.value(x))
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d)", "gu"),
+        |m, x| {
+            fraction_words(js_number(&g(m, 1, x)), js_number(&g(m, 2, x)))
+                .unwrap_or_else(|| m.value(x))
+        },
+    );
 
     // 7) times: the `h` form, then the colon form (declining a fractional part).
     s = rewrite_with(
         &s,
-        js_re!(r"\b([01]?\d|2[0-3])\s*[hH]\s*([0-5]\d)?(?![\p{L}\p{M}\d])", "gu"),
+        js_re!(
+            r"\b([01]?\d|2[0-3])\s*[hH]\s*([0-5]\d)?(?![\p{L}\p{M}\d])",
+            "gu"
+        ),
         |m, x| time_words(js_number(&g(m, 1, x)), m.group(2, x).map(|v| js_number(&v))),
     );
-    s = rewrite_with(&s, js_re!(r"\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)", "gu"), |m, x| {
-        time_words(js_number(&g(m, 1, x)), Some(js_number(&g(m, 2, x))))
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!\.\d)", "gu"),
+        |m, x| time_words(js_number(&g(m, 1, x)), Some(js_number(&g(m, 2, x)))),
+    );
 
     // 8) dates: numeric day-first, then the 1st before a month name.
     s = rewrite_with(&s, &NUMERIC_DATE, |m, x| {
         let (d, mo, y) = (g(m, 1, x), g(m, 2, x), g(m, 3, x));
         let mi = js_number(&mo) - 1.0;
-        let month = if mi >= 0.0 { MONTHS.split('|').nth(mi as usize) } else { None };
+        let month = if mi >= 0.0 {
+            MONTHS.split('|').nth(mi as usize)
+        } else {
+            None
+        };
         let dn = js_number(&d);
         let Some(month) = month.filter(|_| (1.0..=31.0).contains(&dn)) else {
             return m.value(x);
         };
-        let day = if dn == 1.0 { ordinal_loaded(1.0, false, false).unwrap() } else { d };
+        let day = if dn == 1.0 {
+            ordinal_loaded(1.0, false, false).unwrap()
+        } else {
+            d
+        };
         day.concat(&js(&format!(" {month} "))).concat(&y)
     });
     s = rewrite_with(&s, &FIRST_OF_MONTH, |m, x| {
-        ordinal_loaded(1.0, false, false).unwrap().concat(&js(" ")).concat(&g(m, 1, x))
+        ordinal_loaded(1.0, false, false)
+            .unwrap()
+            .concat(&js(" "))
+            .concat(&g(m, 1, x))
     });
 
     s
 }
 
 static LETTER_NAME: LazyLock<LetterName> = LazyLock::new(|| {
-    Arc::new(|l: &JsString| MANIFEST.letter_names.get(&l.to_string_lossy()).map(|n| js(n)))
+    Arc::new(|l: &JsString| {
+        MANIFEST
+            .letter_names
+            .get(&l.to_string_lossy())
+            .map(|n| js(n))
+    })
 });
 
 /// `normalizeFrenchInitialisms(text, isRecorded)`: runs after the numeral passes, claiming only what they
 /// declined.
-pub(crate) fn normalize_french_initialisms_loaded(text: &JsString, is_recorded: &dyn Fn(&JsString) -> bool) -> JsString {
+pub(crate) fn normalize_french_initialisms_loaded(
+    text: &JsString,
+    is_recorded: &dyn Fn(&JsString) -> bool,
+) -> JsString {
     make_initialism_normalizer(
         InitialismData {
             letter_name: LETTER_NAME.clone(),
@@ -315,7 +381,10 @@ pub(crate) fn normalize_french_initialisms_loaded(text: &JsString, is_recorded: 
 }
 
 /// `normalizeFrench(input, isWord)`, or why the manifest is unavailable.
-pub fn normalize_french(input: &JsString, is_word: &dyn Fn(&JsString) -> bool) -> Result<JsString, String> {
+pub fn normalize_french(
+    input: &JsString,
+    is_word: &dyn Fn(&JsString) -> bool,
+) -> Result<JsString, String> {
     super::manifest::try_manifest()?;
     Ok(normalize_french_loaded(input, is_word))
 }

@@ -6,9 +6,11 @@ use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, LazyLock, OnceLock};
 
 use crate::core::boundaries::NOT_LETTER_BEFORE;
-use crate::core::initialisms::{InitialismData, PhonotacticsData, make_initialism_normalizer, make_unreadable_test};
-use crate::core::js_regex::JsRegex;
 use crate::core::data_source::load_once;
+use crate::core::initialisms::{
+    InitialismData, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
+};
+use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
 use crate::core::normalize_symbols::{alternation, sorted_by_length_desc};
 use crate::core::provenance::{rewrite, rewrite_with};
@@ -45,7 +47,9 @@ fn build(m: &'static ItalianManifest) -> Result<NormalizeData, String> {
         JsRegex::new(&pattern, flags).map_err(|e| format!("italian.jsonc: pattern {pattern}: {e}"))
     };
     // `Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|")`, unescaped as in the TS.
-    let alt = alternation(&sorted_by_length_desc(m.dotted_abbrev.keys().map(|k| js(k))));
+    let alt = alternation(&sorted_by_length_desc(
+        m.dotted_abbrev.keys().map(|k| js(k)),
+    ));
     let p = &m.phonotactics;
     let unreadable: Pred = Arc::new(make_unreadable_test(PhonotacticsData {
         vowels: re(format!("[{}]", p.vowels), "u")?,
@@ -54,7 +58,8 @@ fn build(m: &'static ItalianManifest) -> Result<NormalizeData, String> {
         liquids: None,
         digraphs: None,
     }));
-    let names: HashMap<JsString, JsString> = m.letter_names.iter().map(|(k, v)| (js(k), js(v))).collect();
+    let names: HashMap<JsString, JsString> =
+        m.letter_names.iter().map(|(k, v)| (js(k), js(v))).collect();
     let acronyms: HashSet<JsString> = m.acronym_letters.iter().map(|s| js(s)).collect();
     let u = unreadable.clone();
     let initialisms: Normalizer = Box::new(make_initialism_normalizer(
@@ -69,11 +74,27 @@ fn build(m: &'static ItalianManifest) -> Result<NormalizeData, String> {
     ));
     Ok(NormalizeData {
         m,
-        abbrev: m.dotted_abbrev.iter().map(|(k, v)| (js(k), js(v))).collect(),
-        abbrev_cont: re(format!(r"{NOT_LETTER_BEFORE}({alt})\.(\s+)(?=[\p{{L}}\p{{N}}])"), "giu")?,
-        abbrev_end: re(format!(r"{NOT_LETTER_BEFORE}({alt})\.(?=\s*(?:[.,;:!?»)\]]|$))"), "giu")?,
+        abbrev: m
+            .dotted_abbrev
+            .iter()
+            .map(|(k, v)| (js(k), js(v)))
+            .collect(),
+        abbrev_cont: re(
+            format!(r"{NOT_LETTER_BEFORE}({alt})\.(\s+)(?=[\p{{L}}\p{{N}}])"),
+            "giu",
+        )?,
+        abbrev_end: re(
+            format!(r"{NOT_LETTER_BEFORE}({alt})\.(?=\s*(?:[.,;:!?»)\]]|$))"),
+            "giu",
+        )?,
         // `CURRENCY_WORD`: the stems joined unescaped, as the TS joins them.
-        currency_word: re(format!(r"^\s*(?:di\s+)?(?:{})", m.symbol_tier.currency_stems.join("|")), "iu")?,
+        currency_word: re(
+            format!(
+                r"^\s*(?:di\s+)?(?:{})",
+                m.symbol_tier.currency_stems.join("|")
+            ),
+            "iu",
+        )?,
         unreadable,
         initialisms,
     })
@@ -121,7 +142,11 @@ static ERA_BC: LazyLock<JsRegex> =
 static ERA_AD: LazyLock<JsRegex> =
     LazyLock::new(|| JsRegex::new(&format!(r"{NOT_LETTER_BEFORE}d\.\s?C\."), "gu").unwrap());
 static NUMERO: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!(r"{NOT_LETTER_BEFORE}(?:n\.º|n\.|nr\.|nº)\s?(?=\d)"), "giu").unwrap()
+    JsRegex::new(
+        &format!(r"{NOT_LETTER_BEFORE}(?:n\.º|n\.|nr\.|nº)\s?(?=\d)"),
+        "giu",
+    )
+    .unwrap()
 });
 
 impl NormalizeData {
@@ -137,15 +162,26 @@ impl NormalizeData {
             Some(b) => js(b),
             None => self.ordinal(den)?,
         };
-        let head = if num == 1.0 { js(&self.m.apocopated_one) } else { js(&js_number_to_string(num)) };
-        let noun = if num > 1.0 { js_re!("o$", "u").replace(&base, &js("i")) } else { base };
+        let head = if num == 1.0 {
+            js(&self.m.apocopated_one)
+        } else {
+            js(&js_number_to_string(num))
+        };
+        let noun = if num > 1.0 {
+            js_re!("o$", "u").replace(&base, &js("i"))
+        } else {
+            base
+        };
         Some(head.concat(&js(" ")).concat(&noun))
     }
 
     fn degrees(&self, n: &JsString) -> JsString {
         let first_comma = js_re!(",", "").replace(n, &js("."));
         if js_number(&first_comma) == 1.0 {
-            js(&format!("{} {}", self.m.apocopated_one, self.m.degree.singular))
+            js(&format!(
+                "{} {}",
+                self.m.apocopated_one, self.m.degree.singular
+            ))
         } else {
             n.concat(&js(&format!(" {}", self.m.degree.plural)))
         }
@@ -157,7 +193,11 @@ impl NormalizeData {
 
     /// The decimal comma, applied AFTER the symbol tier (italian.ts's order).
     pub(crate) fn decimals(&self, input: &JsString) -> JsString {
-        rewrite(input, js_re!(r"(\d),(\d)", "gu"), &js(&format!("$1 {} $2", self.m.decimal_word)))
+        rewrite(
+            input,
+            js_re!(r"(\d),(\d)", "gu"),
+            &js(&format!("$1 {} $2", self.m.decimal_word)),
+        )
     }
 
     /// Normalize one Italian input string (before the shared symbol tier; the decimal comma is separate).
@@ -167,8 +207,16 @@ impl NormalizeData {
         let mut s = input.clone();
 
         // 1) digit de-grouping, twice.
-        s = rewrite(&s, js_re!(r"(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))", "gu"), &JsString::new());
-        s = rewrite(&s, js_re!(r"(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))", "gu"), &JsString::new());
+        s = rewrite(
+            &s,
+            js_re!(r"(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))", "gu"),
+            &JsString::new(),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))", "gu"),
+            &JsString::new(),
+        );
 
         // 2) era markers.
         s = rewrite(&s, &ERA_BC, &js(&m.era_markers.before_christ));
@@ -195,20 +243,37 @@ impl NormalizeData {
         });
 
         // 5) the degree sign: temperature, then coordinate.
-        s = rewrite_with(&s, js_re!(r"(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])", "gui"), |mt, s| {
-            self.degrees(&mt.group(1, s).unwrap()).concat(&js(&format!(" {}", m.degree.celsius)))
-        });
-        s = rewrite_with(&s, js_re!(r"(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])", "gui"), |mt, s| {
-            self.degrees(&mt.group(1, s).unwrap()).concat(&js(&format!(" {}", m.degree.fahrenheit)))
-        });
         s = rewrite_with(
             &s,
-            js_re!(r"(\d+(?:[.,]\d+)?)\s?°(?:([nsewNSEW])|\s+([NSEW]))(?![\p{L}\p{M}])", "gu"),
+            js_re!(r"(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])", "gui"),
+            |mt, s| {
+                self.degrees(&mt.group(1, s).unwrap())
+                    .concat(&js(&format!(" {}", m.degree.celsius)))
+            },
+        );
+        s = rewrite_with(
+            &s,
+            js_re!(r"(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])", "gui"),
+            |mt, s| {
+                self.degrees(&mt.group(1, s).unwrap())
+                    .concat(&js(&format!(" {}", m.degree.fahrenheit)))
+            },
+        );
+        s = rewrite_with(
+            &s,
+            js_re!(
+                r"(\d+(?:[.,]\d+)?)\s?°(?:([nsewNSEW])|\s+([NSEW]))(?![\p{L}\p{M}])",
+                "gu"
+            ),
             |mt, s| {
                 let letter = mt.group(2, s).or_else(|| mt.group(3, s)).unwrap();
                 // `try_manifest` checked that `n s e w` are all present.
-                let point = m.compass.get(&letter.to_lower_case().to_string_lossy()).map_or("", String::as_str);
-                self.degrees(&mt.group(1, s).unwrap()).concat(&js(&format!(" {point}")))
+                let point = m
+                    .compass
+                    .get(&letter.to_lower_case().to_string_lossy())
+                    .map_or("", String::as_str);
+                self.degrees(&mt.group(1, s).unwrap())
+                    .concat(&js(&format!(" {point}")))
             },
         );
 
@@ -218,49 +283,118 @@ impl NormalizeData {
             let Some(masc) = self.ordinal(js_number(&mt.group(1, s).unwrap())) else {
                 return whole;
             };
-            if js_re!("ª", "u").test(&whole) { feminine(&masc) } else { masc }
+            if js_re!("ª", "u").test(&whole) {
+                feminine(&masc)
+            } else {
+                masc
+            }
         });
 
         // 7) the clock: colon, then period after an hour cue.
-        s = rewrite_with(&s, js_re!(r"(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])", "gu"), |mt, s| {
-            let (h, min) = (mt.group(1, s).unwrap(), mt.group(2, s).unwrap());
-            if js_number(&min) == 0.0 { h } else { h.concat(&js(" e ")).concat(&min) }
-        });
         s = rewrite_with(
             &s,
-            js_re!(r"((?:all[e'’]|alle ore|ore|dalle|verso le|le)\s?)([01]?\d|2[0-3])\.([0-5]\d)(?![\d.])", "giu"),
+            js_re!(r"(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])", "gu"),
             |mt, s| {
-                let (cue, h, min) = (mt.group(1, s).unwrap(), mt.group(2, s).unwrap(), mt.group(3, s).unwrap());
-                let time = if js_number(&min) == 0.0 { h } else { h.concat(&js(" e ")).concat(&min) };
+                let (h, min) = (mt.group(1, s).unwrap(), mt.group(2, s).unwrap());
+                if js_number(&min) == 0.0 {
+                    h
+                } else {
+                    h.concat(&js(" e ")).concat(&min)
+                }
+            },
+        );
+        s = rewrite_with(
+            &s,
+            js_re!(
+                r"((?:all[e'’]|alle ore|ore|dalle|verso le|le)\s?)([01]?\d|2[0-3])\.([0-5]\d)(?![\d.])",
+                "giu"
+            ),
+            |mt, s| {
+                let (cue, h, min) = (
+                    mt.group(1, s).unwrap(),
+                    mt.group(2, s).unwrap(),
+                    mt.group(3, s).unwrap(),
+                );
+                let time = if js_number(&min) == 0.0 {
+                    h
+                } else {
+                    h.concat(&js(" e ")).concat(&min)
+                };
                 cue.concat(&time)
             },
         );
 
         // 8) signs.
-        s = rewrite(&s, js_re!("±", "gu"), &js(&format!(" {} ", sign.plus_minus)));
-        s = rewrite(&s, js_re!(r"(\S)\+\s?(\d)", "gu"), &js(&format!("$1 {} $2", sign.plus)));
-        s = rewrite(&s, js_re!(r"(^|\s)\+\s?(\d)", "gu"), &js(&format!("$1{} $2", sign.plus)));
-        s = rewrite(&s, js_re!(r"(^|[\s(])[-−–](\d)", "gu"), &js(&format!("$1{} $2", sign.minus)));
+        s = rewrite(
+            &s,
+            js_re!("±", "gu"),
+            &js(&format!(" {} ", sign.plus_minus)),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"(\S)\+\s?(\d)", "gu"),
+            &js(&format!("$1 {} $2", sign.plus)),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"(^|\s)\+\s?(\d)", "gu"),
+            &js(&format!("$1{} $2", sign.plus)),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"(^|[\s(])[-−–](\d)", "gu"),
+            &js(&format!("$1{} $2", sign.minus)),
+        );
 
         // 8b) relational and division signs.
-        s = rewrite(&s, js_re!(r"\s?=\s?", "gu"), &js(&format!(" {} ", sign.equals)));
-        s = rewrite(&s, js_re!(r"\s?<\s?", "gu"), &js(&format!(" {} ", sign.less_than)));
-        s = rewrite(&s, js_re!(r"\s?>\s?", "gu"), &js(&format!(" {} ", sign.greater_than)));
-        s = rewrite(&s, js_re!(r"\s?÷\s?", "gu"), &js(&format!(" {} ", sign.divided_by)));
+        s = rewrite(
+            &s,
+            js_re!(r"\s?=\s?", "gu"),
+            &js(&format!(" {} ", sign.equals)),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"\s?<\s?", "gu"),
+            &js(&format!(" {} ", sign.less_than)),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"\s?>\s?", "gu"),
+            &js(&format!(" {} ", sign.greater_than)),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"\s?÷\s?", "gu"),
+            &js(&format!(" {} ", sign.divided_by)),
+        );
 
         // 9) fractions.
-        s = rewrite_with(&s, js_re!(r"(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"), |mt, s| {
-            self.fraction_words(js_number(&mt.group(1, s).unwrap()), js_number(&mt.group(2, s).unwrap()))
+        s = rewrite_with(
+            &s,
+            js_re!(r"(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"),
+            |mt, s| {
+                self.fraction_words(
+                    js_number(&mt.group(1, s).unwrap()),
+                    js_number(&mt.group(2, s).unwrap()),
+                )
                 .unwrap_or_else(|| mt.value(s))
-        });
+            },
+        );
 
         // 9b) the plus as a word-joiner.
-        s = rewrite(&s, js_re!(r"(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])", "gu"), &js(&format!(" {} ", sign.plus)));
+        s = rewrite(
+            &s,
+            js_re!(r"(?<=[\p{L}\p{M}])\+(?=[\p{L}\p{M}])", "gu"),
+            &js(&format!(" {} ", sign.plus)),
+        );
 
         // 10) currency written before the amount.
         s = rewrite_with(
             &s,
-            js_re!(r"([€$£¥])\s?(\d[\d.,]*)(\s+(?:miliardi|miliardo|milioni|milione|mila))?", "gu"),
+            js_re!(
+                r"([€$£¥])\s?(\d[\d.,]*)(\s+(?:miliardi|miliardo|milioni|milione|mila))?",
+                "gu"
+            ),
             |mt, whole| {
                 let sign = mt.group(1, whole).unwrap();
                 let num = mt.group(2, whole).unwrap();
@@ -276,9 +410,14 @@ impl NormalizeData {
                 let plural = mag.is_some()
                     || js_number(&js_re!("[.,]", "gu").replace(&num, &JsString::new())) != 1.0;
                 let word = if plural { forms[1] } else { forms[0] };
-                let tail = if js_re!(r"^[\p{L}\p{M}]", "u").test(&after) { " " } else { "" };
+                let tail = if js_re!(r"^[\p{L}\p{M}]", "u").test(&after) {
+                    " "
+                } else {
+                    ""
+                };
                 let di = if mag.is_none() { "" } else { "di " };
-                num.concat(&mag_s).concat(&js(&format!(" {di}{word}{tail}")))
+                num.concat(&mag_s)
+                    .concat(&js(&format!(" {di}{word}{tail}")))
             },
         );
 

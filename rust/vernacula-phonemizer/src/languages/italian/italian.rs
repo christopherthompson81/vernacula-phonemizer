@@ -6,9 +6,9 @@ use std::collections::HashMap;
 use std::sync::OnceLock;
 
 use crate::core::clauses::assemble_clauses;
+use crate::core::data_source::load_once;
 use crate::core::host_word::{LATIN_RUN, make_nativiser};
 use crate::core::js_regex::JsRegex;
-use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
 use crate::core::normalize_symbols::{
     BareExponent, ExponentWords, Multiply, SymbolData, SymbolNormalizer, make_symbol_normalizer,
@@ -66,22 +66,22 @@ pub(crate) fn tables() -> Result<&'static Tables, String> {
     static T: OnceLock<Tables> = OnceLock::new();
     let m = try_manifest()?;
     load_once(&T, || {
-    let by_cp = |m: &indexmap::IndexMap<String, String>| -> HashMap<u32, JsString> {
-        m.iter()
-            .filter_map(|(k, v)| {
-                let mut cs = k.chars();
-                match (cs.next(), cs.next()) {
-                    (Some(c), None) => Some((c as u32, js(v))),
-                    _ => None,
-                }
-            })
-            .collect()
-    };
-    Ok(Tables {
-        consonants: by_cp(&m.consonants),
-        vowels: by_cp(&m.vowels),
-        accented: by_cp(&m.accented),
-    })
+        let by_cp = |m: &indexmap::IndexMap<String, String>| -> HashMap<u32, JsString> {
+            m.iter()
+                .filter_map(|(k, v)| {
+                    let mut cs = k.chars();
+                    match (cs.next(), cs.next()) {
+                        (Some(c), None) => Some((c as u32, js(v))),
+                        _ => None,
+                    }
+                })
+                .collect()
+        };
+        Ok(Tables {
+            consonants: by_cp(&m.consonants),
+            vowels: by_cp(&m.vowels),
+            accented: by_cp(&m.accented),
+        })
     })
 }
 
@@ -94,9 +94,15 @@ fn cp_str(c: u32) -> JsString {
 
 fn vowel_seg(t: &Tables, c: u32) -> Seg {
     if let Some(acc) = t.accented.get(&c) {
-        return Seg { ph: acc.clone(), accent: true };
+        return Seg {
+            ph: acc.clone(),
+            accent: true,
+        };
     }
-    Seg { ph: t.vowels.get(&c).cloned().unwrap_or_else(|| cp_str(c)), accent: false }
+    Seg {
+        ph: t.vowels.get(&c).cloned().unwrap_or_else(|| cp_str(c)),
+        accent: false,
+    }
 }
 
 fn ch(c: char) -> u32 {
@@ -109,9 +115,13 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
     let n = s.len();
     let at = |i: usize| s.get(i).copied();
     let mut segs: Vec<Seg> = Vec::new();
-    let prev_is_vowel = |segs: &Vec<Seg>| segs.last().is_some_and(|sg| starts_with_vowel_ph(&sg.ph));
+    let prev_is_vowel =
+        |segs: &Vec<Seg>| segs.last().is_some_and(|sg| starts_with_vowel_ph(&sg.ph));
     fn push(segs: &mut Vec<Seg>, ph: &str) {
-        segs.push(Seg { ph: js(ph), accent: false });
+        segs.push(Seg {
+            ph: js(ph),
+            accent: false,
+        });
     }
     let push_gem = |segs: &mut Vec<Seg>, ph: &str, next_vowel: bool| {
         if prev_is_vowel(segs) && next_vowel {
@@ -155,7 +165,11 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             continue;
         }
         if c == ch('c') || c == ch('g') {
-            let (hard, soft) = if c == ch('c') { ("k", "t͡ʃ") } else { ("ɡ", "d͡ʒ") };
+            let (hard, soft) = if c == ch('c') {
+                ("k", "t͡ʃ")
+            } else {
+                ("ɡ", "d͡ʒ")
+            };
             let doubled = nx == Some(c);
             let follow = if doubled { nn } else { nx };
             let rest = if doubled { at(i + 3) } else { nn };
@@ -224,14 +238,20 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
         // `DEF.consonants[c]` must be truthy: ⟨h⟩ maps to "" and falls through to the single-letter arm.
         if is_cons_letter(c) && nx == Some(c) && cons.is_some_and(|p| !p.is_empty()) {
             let ph = cons.unwrap().clone();
-            segs.push(Seg { ph: ph.clone(), accent: false });
+            segs.push(Seg {
+                ph: ph.clone(),
+                accent: false,
+            });
             segs.push(Seg { ph, accent: false });
             i += 2;
             continue;
         }
         if let Some(ph) = cons {
             if !ph.is_empty() {
-                segs.push(Seg { ph: ph.clone(), accent: false });
+                segs.push(Seg {
+                    ph: ph.clone(),
+                    accent: false,
+                });
             }
             i += 1;
             continue;
@@ -255,8 +275,12 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
 }
 
 fn stress_index(segs: &[Seg]) -> Option<usize> {
-    let nuclei: Vec<usize> =
-        segs.iter().enumerate().filter(|(_, sg)| starts_with_vowel_ph(&sg.ph)).map(|(i, _)| i).collect();
+    let nuclei: Vec<usize> = segs
+        .iter()
+        .enumerate()
+        .filter(|(_, sg)| starts_with_vowel_ph(&sg.ph))
+        .map(|(i, _)| i)
+        .collect();
     if nuclei.is_empty() {
         return None;
     }
@@ -318,8 +342,17 @@ fn under1000(num: &ItalianNumbers, n: f64) -> String {
     }
     let h = (n / 100.0).floor();
     let r = n % 100.0;
-    let hundreds = if h > 1.0 { num.units[h as usize].clone() } else { String::new() } + &num.hundred;
-    hundreds + &if r != 0.0 { under1000(num, r) } else { String::new() }
+    let hundreds = if h > 1.0 {
+        num.units[h as usize].clone()
+    } else {
+        String::new()
+    } + &num.hundred;
+    hundreds
+        + &if r != 0.0 {
+            under1000(num, r)
+        } else {
+            String::new()
+        }
 }
 
 /// Spoken Italian for a non-negative integer: thousands fused, millions split into words.
@@ -372,7 +405,10 @@ fn build_symbols(m: &ItalianManifest) -> Result<SymbolNormalizer, String> {
     let t = &m.symbol_tier;
     let b = &t.bare_exponent;
     make_symbol_normalizer(&SymbolData {
-        multiply: Some(Multiply { times: m.sign_words.times.clone(), by: None }),
+        multiply: Some(Multiply {
+            times: m.sign_words.times.clone(),
+            by: None,
+        }),
         ampersand: Some(m.sign_words.ampersand.clone()),
         percent: Some(t.percent.clone()),
         currency: Some(t.currency.clone()),
@@ -446,10 +482,15 @@ pub fn create_italian() -> Result<ItalianPhonemizer, String> {
         m,
         tables: tables()?,
         norm: normalize_data()?,
-        token: JsRegex::new(&format!(r"({})|(\d+)|([.?!,;:])", *LATIN_RUN), "gu").map_err(|e| e.to_string())?,
+        token: JsRegex::new(&format!(r"({})|(\d+)|([.?!,;:])", *LATIN_RUN), "gu")
+            .map_err(|e| e.to_string())?,
         nat: Box::new(make_nativiser(NATIVE_CLASS, "u")),
         symbols: build_symbols(m)?,
-        clause_mark: m.clause_punctuation.iter().map(|(k, v)| (js(k), js(v))).collect(),
+        clause_mark: m
+            .clause_punctuation
+            .iter()
+            .map(|(k, v)| (js(k), js(v)))
+            .collect(),
     })
 }
 

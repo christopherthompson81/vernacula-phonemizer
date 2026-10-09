@@ -60,7 +60,12 @@ fn below1000(n: u64) -> String {
     let hundred = if h == 1 {
         mag.hundred.clone()
     } else {
-        format!("{} {}{}", small(h), mag.hundred, if r == 0 { "s" } else { "" })
+        format!(
+            "{} {}{}",
+            small(h),
+            mag.hundred,
+            if r == 0 { "s" } else { "" }
+        )
     };
     if r != 0 {
         format!("{hundred} {}", below100(r))
@@ -81,7 +86,11 @@ pub(crate) fn number_to_words_loaded(n: f64, raw: Option<&JsString>) -> JsString
             .code_point_strings()
             .into_iter()
             .map(|ch| {
-                let d = if ch.len() == 1 { digit_index(ch.0[0]) } else { -1 };
+                let d = if ch.len() == 1 {
+                    digit_index(ch.0[0])
+                } else {
+                    -1
+                };
                 if d >= 0 { js(small(d as u64)) } else { ch }
             })
             .collect();

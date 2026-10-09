@@ -35,7 +35,11 @@ fn below100(n: u64, d: Dialect) -> String {
     if u == 0 {
         tens.clone()
     } else {
-        format!("{tens} {} {}", MANIFEST.numbers.connector, small(u as f64, d).unwrap())
+        format!(
+            "{tens} {} {}",
+            MANIFEST.numbers.connector,
+            small(u as f64, d).unwrap()
+        )
     }
 }
 
@@ -64,7 +68,9 @@ pub fn number_to_words(n: f64, dialect: Dialect, raw: Option<&JsString>) -> JsSt
 fn number_to_words_str(n: f64, d: Dialect, raw: Option<&JsString>) -> String {
     let safe = n.is_finite() && n.fract() == 0.0 && n.abs() <= 9_007_199_254_740_991.0;
     if !safe || n < 0.0 || n >= 1e9 {
-        let digits = raw.cloned().unwrap_or_else(|| js(&js_number_to_string(n.abs())));
+        let digits = raw
+            .cloned()
+            .unwrap_or_else(|| js(&js_number_to_string(n.abs())));
         let parts: Vec<String> = digits
             .code_point_strings()
             .into_iter()
@@ -103,7 +109,11 @@ fn number_to_words_str(n: f64, d: Dialect, raw: Option<&JsString>) -> String {
         return million;
     }
     if r < 100 || r % 100 == 0 {
-        format!("{million} {} {}", num.connector, number_to_words_str(r as f64, d, None))
+        format!(
+            "{million} {} {}",
+            num.connector,
+            number_to_words_str(r as f64, d, None)
+        )
     } else {
         format!("{million} {}", number_to_words_str(r as f64, d, None))
     }
