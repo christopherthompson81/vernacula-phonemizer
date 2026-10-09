@@ -111,3 +111,25 @@ so a count approximates what reaches that step).
 **Implication.** Eleven arms rest on synthetic lines, each with its declining neighbour in the same file
 (`1 0000`, `0 000`, `R$ abc`, `25°Cölner`, `a-5`, `C++`, `11 de julho`, `1 de julhos`, …). All are inside
 `pt-normalize: 11913 identical, 0 DIFFER`.
+
+## Run 6 — 2026-10-09 16:01 (the symbol tier wired: golden gate and end to end)
+
+**Question.** With the es port's `makeSymbolNormalizer` cherry-picked (9aceb875) and the stub commit
+dropped, do the goldens close, and do the 204 end-to-end differences of Run 3 all go away?
+
+**Command.** `SYMBOLS` is built from `symbolTier` + `signWords` (multiply, ampersand) as portuguese.ts builds
+it. Then `cargo run --release -p parity` (every registered language), the `phonemize-sync` and
+`phonemize-best` dumps re-generated for `LANGS=pt-BR,pt` and replayed, and the three module replays re-run.
+
+**Raw finding.**
+- parity: `en 200/200`, `en-GB 200/200`, `pt 200/200`, `pt-BR 200/200`, 0 differ.
+- `phonemize-sync: 7932 identical, 6 DIFFER`; `phonemize-best: 7932 identical, 6 DIFFER`. The 6 rows are 3
+  probe lines × 2 languages, and each has a foreign run in an UNPORTED script: `Москва` (TS *mɐskvˈa*, via
+  ru), `λόγος` (*loɣos*, via el), `東京` (*tʊŋ˥˥ t͡ɕiŋ˥˥*, via cmn). Rust drops the run, and the registry
+  records the target as port-pending. The Latin run beside it (`Tokyo` → *tukˈiu*) is identical.
+- module replays unchanged: normalize 11913 / g2p 75625 / numbers 101753 identical, 0 differ.
+- `cargo test --workspace` green; `cargo build` 0 warnings.
+
+**Implication.** pt and pt-BR are done: golden byte-identical, and every corpus row (goldens + FLEURS
+pt_br) identical on both paths. The only open rows are port-pending (ru, el, cmn), not port defects. No
+golden or FLEURS row needs a foreign engine.

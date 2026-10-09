@@ -15,6 +15,9 @@ use crate::core::clauses::assemble_clauses;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map};
+use crate::core::normalize_symbols::{
+    BareExponent, ExponentWords, Multiply, SymbolData, SymbolNormalizer, make_symbol_normalizer,
+};
 use crate::js_re;
 use crate::registry::{Engine, PhonemizeError};
 
@@ -296,6 +299,38 @@ fn word_ipa(word: &JsString, dialect: Dialect, post_word: Option<PostWord>) -> J
     if T.function_words.contains(&lower) { drop_first_stress(&ipa) } else { ipa }
 }
 
+/// `SYMBOLS`: the shared tier with Portuguese's words (manifest `symbolTier`, and `signWords` for × and &).
+fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
+    static S: OnceLock<Result<SymbolNormalizer, String>> = OnceLock::new();
+    S.get_or_init(|| {
+        let t = &try_manifest()?.symbol_tier;
+        let sign = &MANIFEST.sign_words;
+        make_symbol_normalizer(&SymbolData {
+            multiply: Some(Multiply { times: sign.times.clone(), by: None }),
+            ampersand: Some(sign.ampersand.clone()),
+            percent: Some(t.percent.clone()),
+            currency: Some(t.currency.clone()),
+            units: Some(t.units.clone()),
+            exponent_words: Some(ExponentWords {
+                squared: Some(t.exponent_words.squared.clone()),
+                cubed: Some(t.exponent_words.cubed.clone()),
+                position: None,
+            }),
+            bare_exponent: Some(BareExponent {
+                squared: Some(t.bare_exponent.squared.clone()),
+                cubed: Some(t.bare_exponent.cubed.clone()),
+                power: Some(t.bare_exponent.power.clone()),
+                negative: Some(t.bare_exponent.negative.clone()),
+            }),
+            magnitudes: Some(t.magnitudes.clone()),
+            magnitude_connective: Some(t.magnitude_connective.clone()),
+            ..Default::default()
+        })
+    })
+    .as_ref()
+    .map_err(Clone::clone)
+}
+
 pub struct PortuguesePhonemizer {
     dialect: Dialect,
     post_word: Option<PostWord>,
@@ -304,7 +339,8 @@ pub struct PortuguesePhonemizer {
 impl PortuguesePhonemizer {
     /// The normalized text `text()` tokenizes.
     pub fn normalized_for(&self, input: &JsString) -> JsString {
-        normalize_portuguese_initialisms(&normalize_portuguese(input, self.dialect == Dialect::Bp))
+        let symbols = try_symbols().unwrap_or_else(|e| panic!("{e}"));
+        symbols.apply(&normalize_portuguese_initialisms(&normalize_portuguese(input, self.dialect == Dialect::Bp)))
     }
 
     pub fn text(&self, input: &JsString) -> JsString {
@@ -341,5 +377,6 @@ impl Engine for PortuguesePhonemizer {
 pub fn create_portuguese(dialect: Dialect, post_word: Option<PostWord>) -> Result<Arc<PortuguesePhonemizer>, PhonemizeError> {
     try_manifest().map_err(PhonemizeError::Data)?;
     try_lexicon().map_err(PhonemizeError::Data)?;
+    try_symbols().map_err(PhonemizeError::Data)?;
     Ok(Arc::new(PortuguesePhonemizer { dialect, post_word }))
 }
