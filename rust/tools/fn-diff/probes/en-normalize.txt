@@ -1,0 +1,232 @@
+# Off-golden probes for src/languages/english/normalize.ts: one line per arm, plus the neighbour each arm must
+# decline. Synthetic text only. Escapes, decoded by dump.mts: \n is a newline, \u{XXXX} a code point.
+# Lines starting with # and blank lines are skipped.
+# ── 0) st./dr./mt./mr./mrs. ──
+St. James is near the river.
+the shop on Main St. in town
+Dr. Who is a show.
+dr. smith arrived and dr. in the house
+Mt. Everest is tall and Mr. Brown met Mrs. Green.
+turn left at Main St.
+the clinic on Elm Dr., then north
+st petersburg is cold but main st in dublin is not
+ST. LOUIS and st. émile and ST. the
+# ── 0a2) Rev. ──
+Rev. B, 2025-10-21
+Rev. 3 of the drawing and Rev 4
+Rev. Smith spoke, then Rev. J. Smith, then Rev. AB.
+# ── 0b) dotted and bare abbreviations ──
+Prof. Adams and Sgt. Pepper, Jr. and Sr. arrived.
+see Fig. 4 and Vol. 2 and Ch. one
+No. 5 and Nos. 6 to 9, and no. of items
+Smith vs Jones, Smith vs. Jones, VS code
+approx 40 people, dept heads, univ campus, blvd lights, approximately
+it ended, etc. and so on, see ibid. and cf. the note, viz. the rest
+the meeting is at the Ave. Then go to the Rd.
+Gen. Lee and Col. Mustard and Lt. Dan
+the \u{17f}r. king and Pro\u{17f}. x
+the ed. said and no. no.
+# ── TY, IR, max, et al., circa, number ──
+TY2024 and TY 2023 and ty 2024 and TYPE 2024
+IR sensor and Ir element and an IRS form
+max. 40 characters and set it to max now
+max it out and max out the card, Max said so.
+Smith et al. found that, as did Jones et al.
+built c. 1850 and ca. 950 and c. elegans and c. 12345
+No.5 and no. 12 and nos. 3
+# ── e.g., i.e., a.m./p.m., dotted initialisms ──
+e.g. apples, i.e. fruit
+fruit e.g., and i.e.
+i.e. 0 or 1 and e.g. 5
+at 5 a.m. and 6 p.m. and 7 A.M. and 8 P. M.
+the U.S. and the u.k. and U.S.A. and a.b.c.d.e.f. long
+# ── 0b2) month and weekday abbreviations ──
+Oct-Dec 2024 and Jan–Mar and Jan - March
+Jan 5 and 5 Jan. 2020 and 12 Sept 2001
+Jan said so and Mar the surface
+Sept 12, Sep 3, Dec. 25
+Mon, 02 Jan 2006 15:04:05 -0700
+they wed May 5 and Wed May 7
+Sat. January 5 and Thurs., 4 March and Tues 3 June
+he sat 5 metres away and the sun 3 times
+Jan\u{a0}5 and 5\u{a0}Feb
+# ── 0b3) section dot, 0b4) Re:, 0b4a) re- ──
+Section G.2 and Appendix B.3 and clause D.11
+U.S.2 and v1.2 and ask B. 42 times
+Re: the meeting and RE: budget and genre: rock
+re-machined parts and re-entry and Re-test
+do-re-mi and non-re-entrant and pre-re-heat and pre-heat
+RE-WORK ORDER NHS
+sing re-mi and Re-Os
+# ── 0b5) region codes and ZIPs ──
+Portland, OR, is closed.
+Austin, TX 78701
+Toronto, ON M5V 2T6 and Toronto, ON, Canada
+Smith, MD reviewed it. Baltimore, MD 21201
+he lives in, or near, Boston
+Vancouver BC and the BC era
+Washington, DC 20001-1234 and Halifax, NS
+Denver, CO\nnext line
+Ottawa, ON K1A\u{a0}0B1
+Dallas, TX 7570 and Reno, NV 89501x
+# ── 0b6) formulae, designations, mixed-case ──
+a CoCr alloy and CoCrMo and Co-Cr-Mo and Co-Cr-Mo-W
+CoCr-based implants and CoCr-Mo and Co-Cr and coco and COCR
+316L tubing and Ti64 parts and 316l and 316L-Grade and Ti64-Al
+DoE matrix and doe and DOE and DoEs
+# ── 0b7) list markers, 0b8) bracketed letters ──
+(a) the first item
+b) the second
+(ii) item\n(i) item
+1) step one\n  (B) INDENTED ITEM
+[c] third and (C) fourth
+See (a) and (b), P(A), f(x) and {z}
+SEE (B) OF US ARMY
+(X) IT AND US
+# ── 0c) eras ──
+500 BC and 200 AD, 100 BCE, 50 CE
+an AD campaign and ADS
+# ── 0d) SI grouping ──
+1 356 people and 2 008 400 units
+the 2008 400 richest americans
+july 21 356 bce
+1\u{a0}356 and 1\u{202f}356 and 1\u{2009}356 and 12 3456
+# ── 0d2) leading-point decimal ──
+.002 mm and .5 kg and .25 L and .5–.75 mm
+.50 caliber and .45 ACP and .22 LR and .223 Remington and batting .300
+v1.002 and 192.168.1.1 and ...5 and Fig.2
+he carried a .45
+# ── 0e) scientific exponent ──
+9.11 × 10⁻³¹ kg
+9.1093837 × 10 -31 kg
+3 x 10⁸ m/s and 2·10³
+10 - 31 and 5 × 10 - 3
+# ── 0e2) UTC offsets ──
+15:04:05 -0700 and 15:04:05+0530
+2026-09-11T08:30:00+05:30
+09:00-1200 and 10:15-1130
+12:30-14:00
+15:04:05Z and 08:30Z
+10:15 +0000 and 08:30 -1500 and 08:30 +0100
+15:04:05 −07:00
+# ── 0f) negatives and ± ──
+-5 degrees and (−3) and –4
+1418 – 1450 and 1418 -1450
+± 5 and ±0.2 and a±b
+# ── 0f0) numeric dates ──
+2026-09-11T08:30:00Z
+2024-13-45 and 2024-01-15x and 2024-01-15-3
+12/25/2024 and 13/40/2024 and 1/2/2000
+# ── 0f1) money with cents ──
+$3.14 and £2.50 and €0.99 and ¥3.50
+$1.00 and $0.50 and $1.01 and $0.01
+$5.50 million and $3.499 pump and $1.50é and $1.50a
+$1,234.05 and $ 2.10 and $0.00
+$1.50% and $2.50° and $1.50/kg
+# ── 0f2) plus ──
+C7+ and 18+ and 100+ people and A+ and C++ and Na+
+UTC+1 and +5 and 3 + 4 and 3+4
+a + b and the + sign
+items:\n+ first\n+ second
+# ── 0g) 24/7 and fractions ──
+24/7 service and 124/7 and 24/75
+3/4 cup and 2/5 and 1/2 and 7/16 and 5/21 and 0/4 and 3/1
+3/14/2011 and 1/2/3 and 1/2 km and 007/2
+# ── 1) currency ──
+$5 million and $1.5m and £2.3m and $2bn and £700k and $7.32B and $178k and £1M
+$2.5tn and $2.5bnx and $3Bn and $4BN
+$1 and $1.0 and $1,000 and €1 and ¥100
+$ 125 mîlyon and $500 mílíọ̀nù
+# ── 2) percent ──
+40% and 5 % and 0.5%
+# ── 3) times ──
+3:00 pm and 3:05 and 3:45 and 15:04:05 and 08:30:00 and 8:30:45 pm and 12:00:01
+25:99 and 3:60 and 10:30am
+# ── 4) dates ──
+february 16 and March 1 and may 2 and june 31 and july 32 and april 3rd
+November 22 percent and May 0 and Dec 11 and Jan 12 and Aug 13
+# ── 5) years ──
+guru nanak 1469–1539
+pp. 1234-1256 and room 1200-1300 and p. 1300-1400
+from 2011-2015 and call 1800-1234
+in 1998 and in a 1998 book and since the 2015 report and in 2011 people
+january 2017 and March 3rd, 1905 and in 2000 and in 2007 and in 1900
+1998 -1999 and 2000-2005 km and 1998-1998
+the year 1066 and in 1100 and of 2099 and by 2100
+# ── 5b) DMS ──
+40°26′46″N 79°58′56″W
+40°26'46"N and 40°26'46''N
+51°30′N and 40°26′Nörd and 40°26′46″n
+turn 90° 5's worth
+40° 26′ 46″ NW and 1.0°1.0′
+the angle is 90°. 5″ of travel
+# ── 5c) feet and inches, 5c2) decimal inch ──
+6′2″ tall and 6' 2" and 6′ 2" and 5'2''
+the 90's and 7's rugby
+a 0.015" shim
+a 0.015" and a 0.020" shim
+he called it "Web 2.0"
+tolerance 0.005" to 0.010"
+width="1.5" height="2.0"
+# ── 6) units ──
+40 km and 1 km and 2.2 million km2 of ocean and 19,500 km² and 5 m3
+20℃ and 20 °C and 5°F and 1.0° and 90°
+5 kΩ and 5 MΩ and a 5 mΩ shunt and a 5 m\u{2126} shunt and 5 Ω and 5 \u{2126} and 5 mω and 5 Mω
+5 µg and 5 μg and 25 µM and 5 µS and 5 µin and 5 µm and 5 µL and 5 µg/mL and 5 μmol/L and 5 µg2
+6′ and 2″ and 1′
+100 m and he ran 100m and 1,854 m and a 5L jug and a 500L tank and a 2 W bulb and 2 w
+V6L 2T5 and L4W 5M1 and T2G 0L2 and Suite 5L2
+802.11g and 802.11ah and 100.5 m and v2.5g
+6x6 cm and 2x3m rug and A4 210mm
+40°26 and 51°30′N and 5°2
+5 in the morning
+12,700,000 ha
+250 BTU and 50 BTU/hr/sf and 10 btu/hr and 3 BTU/SF
+1 million km and 1 thousand m
+H2O and CO2
+5 \u{212a}g and 5 \u{212a}m
+4 mph and 60 km/h and 3 m/s and 100 mbit/s and 1 km/h
+1 lb and 2 lbs and 3 oz and 6 ft and 2 mi and 1 mi
+5 GHz and 100 hz and 16 GB and 1 TB and 2 kW and 3 kb
+5 KM and 2 Mg and 3 T and 4 G and 5 l and 6 L
+# Greek CAPITAL mu (what `µ`.toUpperCase() gives) folds onto the micro keys and reaches UNITS_FOLDED:
+25 \u{39c}M and 5 \u{39c}S and 5 \u{39c}G and 5 K\u{3a9} and 5 \u{39c}L
+# ── 6a2) bare rate, 6a4) bare micro ──
+BTU/hr/sf header and km/h limit and MILES/HOUR
+example.com/s/page and the /m/s/ path
+µin column and µM reading and μ is a Greek letter and µg/kg and µm/s
+# ── w/ and 6a3) slashes ──
+coffee w/ milk and w/o sugar and the /w/ path and W/
+litres/day and visits/week and doses/hour and kg/m and m³/hr
+FREQUENCY/CRITERIA and to/from the airport and the cluster/group
+and/or he/she s/he either/or his/her
+A/D converter and R/W and O/S and g/L and a/c
+w/out and c/o and n/a and y/n and d/a
+litres/constructor and toString/apples and valueOf/thing
+km/day and per/annum and grams/capita
+# ── 6b) bare exponents ──
+E = mc² and x³ and 2⁵ and 2⁻⁵ and 10⁶km and I²C
+Smith¹ and 360⁰ and 110⁰04¹05¹ and 0,708 ¹⁸⁰Hf and 10¹⁰Ω and 10¹¹
+# ── 7a) all-caps romans, 7b) closed lowercase set ──
+Super Bowl LVIII and WrestleMania XL and Louis XVI and Apollo XI
+Washington DC and Sony CD and size XL and a CD and Detroit MI
+WORLD WAR II
+henry viii and world war ii and chapter iv and pope xvi and the vi editor and xi
+# ── 7c) lone Greek letters ──
+the β value and Δx is small and 5 Ω and χ² test and σ²
+α²β and λόγος and ά and \u{2126} and ξ and ϐ
+# ── 8) ampersand and signs ──
+R&D and AT&T and S&P and B&Bs and LAW&ORDER and MOM&POP and A&E and SR&O
+R&amp;D and R&AMP;D and Arts & Sciences and Johnson &amp; Johnson
+6x6 and 4x4 and 5 × 5 and 6 × 6 cm and 2x3m
+10 ÷ 2 and x = y and 5<6 and 7>3 and <b>bold</b>
+5–15% and 2019–2020 and 5—15 and 5‒6
+16 → 28 h and a → b
+May–June 2025 and Monday - Friday and May – June
+the result — 15 — was high and well-known and a - b and 1990 - 1995 and x -- y
+list:\n- item
+the answer—a long one—arrived and Bose–Einstein
+≥30% and ≤ 5 and a ≠ b and 5 ± 0.2 and ≈ 3
+# ── mixed / encoding ──
+😀 5 km and 𝐀 3 m
+ALL CAPS DOCUMENT WITH NHS AND 5 KM
