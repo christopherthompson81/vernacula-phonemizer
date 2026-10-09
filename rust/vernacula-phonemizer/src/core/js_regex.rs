@@ -197,6 +197,10 @@ impl JsRegex {
         out
     }
 
+    pub fn names(&self) -> &[(String, usize)] {
+        &self.names
+    }
+
     /// The group number for `(?<name>…)`.
     pub fn group_index(&self, name: &str) -> Option<usize> {
         self.names.iter().find(|(n, _)| n == name).map(|(_, i)| *i)
@@ -224,81 +228,87 @@ impl JsRegex {
         out
     }
 
-    /// ECMAScript GetSubstitution: `$$`, `$&`, `` $` ``, `$'`, `$n`/`$nn`, `$<name>`.
+    /// ECMAScript GetSubstitution for this pattern's groups.
     pub fn substitute(&self, m: &JsMatch, s: &JsString, replacement: &JsString) -> JsString {
-        let r = &replacement.0;
-        let ncap = m.groups.len();
-        let mut out = JsString::new();
-        let mut i = 0;
-        let dollar = b'$' as u16;
-        let digit = |u: u16| (b'0' as u16..=b'9' as u16).contains(&u).then(|| (u - b'0' as u16) as usize);
-        while i < r.len() {
-            if r[i] != dollar || i + 1 >= r.len() {
-                out.0.push(r[i]);
-                i += 1;
-                continue;
+        get_substitution(m, s, replacement, &self.names)
+    }
+}
+
+/// ECMAScript GetSubstitution: `$$`, `$&`, `` $` ``, `$'`, `$n`/`$nn`, `$<name>`. `names` empty means
+/// the pattern has no named groups, and `$<` is then literal.
+pub fn get_substitution(m: &JsMatch, s: &JsString, replacement: &JsString, names: &[(String, usize)]) -> JsString {
+    let r = &replacement.0;
+    let ncap = m.groups.len();
+    let mut out = JsString::new();
+    let mut i = 0;
+    let dollar = b'$' as u16;
+    let digit = |u: u16| (b'0' as u16..=b'9' as u16).contains(&u).then(|| (u - b'0' as u16) as usize);
+    while i < r.len() {
+        if r[i] != dollar || i + 1 >= r.len() {
+            out.0.push(r[i]);
+            i += 1;
+            continue;
+        }
+        let next = r[i + 1];
+        match next {
+            0x24 => {
+                out.0.push(dollar);
+                i += 2;
             }
-            let next = r[i + 1];
-            match next {
-                0x24 => {
-                    out.0.push(dollar);
-                    i += 2;
-                }
-                0x26 => {
-                    out.push_units(&s.0[m.range.clone()]);
-                    i += 2;
-                }
-                0x60 => {
-                    out.push_units(&s.0[..m.index()]);
-                    i += 2;
-                }
-                0x27 => {
-                    out.push_units(&s.0[m.end()..]);
-                    i += 2;
-                }
-                0x3C if !self.names.is_empty() => {
-                    let close = r[i + 2..].iter().position(|&u| u == b'>' as u16);
-                    match close {
-                        None => {
-                            out.0.push(dollar);
-                            i += 1;
-                        }
-                        Some(c) => {
-                            let name = String::from_utf16_lossy(&r[i + 2..i + 2 + c]);
-                            if let Some(g) = self.group_index(&name).and_then(|g| m.group(g, s)) {
-                                out.push_str(&g);
-                            }
-                            i += 2 + c + 1;
-                        }
-                    }
-                }
-                _ => match digit(next) {
-                    Some(d1) => {
-                        let two = r.get(i + 2).copied().and_then(digit).map(|d2| d1 * 10 + d2);
-                        if let Some(nn) = two.filter(|&nn| nn >= 1 && nn <= ncap) {
-                            if let Some(g) = m.group(nn, s) {
-                                out.push_str(&g);
-                            }
-                            i += 3;
-                        } else if d1 >= 1 && d1 <= ncap {
-                            if let Some(g) = m.group(d1, s) {
-                                out.push_str(&g);
-                            }
-                            i += 2;
-                        } else {
-                            out.0.push(dollar);
-                            i += 1;
-                        }
-                    }
+            0x26 => {
+                out.push_units(&s.0[m.range.clone()]);
+                i += 2;
+            }
+            0x60 => {
+                out.push_units(&s.0[..m.index()]);
+                i += 2;
+            }
+            0x27 => {
+                out.push_units(&s.0[m.end()..]);
+                i += 2;
+            }
+            0x3C if !names.is_empty() => {
+                let close = r[i + 2..].iter().position(|&u| u == b'>' as u16);
+                match close {
                     None => {
                         out.0.push(dollar);
                         i += 1;
                     }
-                },
+                    Some(c) => {
+                        let name = String::from_utf16_lossy(&r[i + 2..i + 2 + c]);
+                        if let Some(g) = names.iter().find(|(n, _)| *n == name).map(|(_, i)| *i).and_then(|g| m.group(g, s)) {
+                            out.push_str(&g);
+                        }
+                        i += 2 + c + 1;
+                    }
+                }
             }
+            _ => match digit(next) {
+                Some(d1) => {
+                    let two = r.get(i + 2).copied().and_then(digit).map(|d2| d1 * 10 + d2);
+                    if let Some(nn) = two.filter(|&nn| nn >= 1 && nn <= ncap) {
+                        if let Some(g) = m.group(nn, s) {
+                            out.push_str(&g);
+                        }
+                        i += 3;
+                    } else if d1 >= 1 && d1 <= ncap {
+                        if let Some(g) = m.group(d1, s) {
+                            out.push_str(&g);
+                        }
+                        i += 2;
+                    } else {
+                        out.0.push(dollar);
+                        i += 1;
+                    }
+                }
+                None => {
+                    out.0.push(dollar);
+                    i += 1;
+                }
+            },
         }
-        out
     }
+    out
 }
 
 /// AdvanceStringIndex: one code point under `u`, one code unit otherwise.
