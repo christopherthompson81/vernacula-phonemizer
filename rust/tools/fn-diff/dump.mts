@@ -401,6 +401,42 @@ const dumps: Record<string, () => void | Promise<void>> = {
                 }));
             }
     },
+    // Italian: normalize.ts's three exported passes over the golden, FLEURS it_it (columns 3 and 4) and
+    // probes/it.txt (the symbol tier is covered end to end by phonemize-sync/best).
+    async "it-normalize"() {
+        const N = await import("../../../src/languages/italian/normalize.ts");
+        for (const [t, src] of textsFor(["it"], "it_it", ["it.txt"])) {
+            emit({ text: units(t), op: "normalize", src }, N.normalizeItalian(t));
+            emit({ text: units(t), op: "initialisms", src }, N.normalizeItalianInitialisms(N.normalizeItalian(t)));
+            emit({ text: units(t), op: "decimals", src }, N.normalizeItalianDecimals(t));
+        }
+    },
+    // Italian phonemizeWord over every letter run of the texts, every 1-3 letter string of the inventory and
+    // every 4-letter string of the context letters; numberWords and the Roman ordinal over 0..20000 and beyond.
+    async "it-g2p"() {
+        const I = await import("../../../src/languages/italian/italian.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/italian/romanOrdinals.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("it")) for (const w of t.match(/\p{L}[\p{L}\p{M}]*/gu) ?? []) words.add(w);
+        const inv = [..."abcdefghijklmnopqrstuvwxyzàèéìíîòóùú"];
+        for (const a of inv) { words.add(a); for (const b of inv) { words.add(a + b); for (const c of inv) words.add(a + b + c); } }
+        const ctx = [..."aeiouìcgshlnqz"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of words) emit({ word: units(w), op: "word" }, I.phonemizeWord(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 21; e++) { ns.push(10 ** e); ns.push(10 ** e - 1); ns.push(3 * 10 ** e + 23); ns.push(1234567 * 10 ** (e - 4)); }
+        for (const n of ns) {
+            emit({ n, op: "cardinal" }, I.numberWords(n));
+            emit({ n, op: "ordinal" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        }
+    },
+    // normalizeRomans with Italian's policy (registry.ts romanIt) over the Italian texts.
+    async "it-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/italian/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["it"], "it_it", ["it.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
 };
 
 

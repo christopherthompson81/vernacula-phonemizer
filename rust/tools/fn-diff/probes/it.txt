@@ -1,0 +1,89 @@
+# Italian off-golden probes: one line per normalize.ts arm plus the neighbour it must decline, the Roman
+# policy in its ordinal contexts, and g2p corners. Synthetic text only. `\n` and `\u{XXXX}` are decoded.
+# 1) digit de-grouping
+La superficie è di 19.500 km² circa.
+Ha 5.000.000 di abitanti.
+Lo standard 802.11a è vecchio.
+Il valore 0.500 non cambia.
+Il valore 3.14 è un decimale inglese.
+Il codice 1.2345 resta.
+# 2) era markers
+Nel 44 a.C. Cesare morì.
+Nel 33 d. C. circa.
+la.C. non è un'era.
+# 3) numero
+Abita al n. 11 della via.
+Il nr. 5 e il nº 3 e il n.º 7.
+Sono arrivati in n. alla fine.
+# 4) dotted abbreviations
+Il dott. Rossi vede il prof. Bianchi.
+Vedi art. 5 e pag. 12, poi pagg. 3 e artt. 7.
+Il Sig. Verdi, la Sigra. Neri, ecc.
+Frutta, verdura, ecc., poi altro.
+Era una scelta storica. Poi cambiò.
+Il \u{17F}ig. Rossi è arrivato.
+Il DOTT. ROSSI è qui.
+# 5) degree sign
+Fa 30°C oggi e 90 °F domani.
+Fa 1 °C, poi 1,0 °C, poi 21 °C.
+Si trova a 35°W e 12°N, poi 35°w, poi 35° W.
+Il 1° e il 2° posto.
+Il 25°Cölner è strano.
+Il 30°Ca non è una temperatura.
+# 6) ordinal indicators
+Dell'11º piano e la 3ª volta, il 60° gol, il 1° gennaio.
+L'11.º capitolo e lo 0° grado.
+Il 12345678901234567890° tentativo.
+La 10ª edizione e il 21º secolo e il 23° e il 26° e il 1000° e il 2000°.
+# 7) clock
+Alle 11:20 e alle 11:00 e alle 24:00.
+La classe di voto 2:2 resta.
+Alle 12.00 GMT, ore 9.30, verso le 7.05, all'8.15, dalle 10.45.
+Lo standard 802.11 e il valore 6.34.
+# 8) signs
+Errore ±5 gradi.
+Il fuso UTC+1 e +3 gradi, poi -5 gradi e (−3) e –7.
+Gli anni 1894-1895 e il punteggio 26 - 00.
+# 8b) relational and division
+Se a = b e 3 < 5 e 5 > 3 allora 10 ÷ 2.
+# 9) fractions
+Un 1/5 e 3/4 e 1/2 e 2/2 e 1/1 e 0/5.
+Il 12/2020 e 1/2/3 e 5/1000 e 7/10 e 2/3.
+# 9b) plus as a word joiner
+Pacchetti combinati volo+hotel.
+# 10) preposed currency
+Costa $5 milioni e $5 milioni di dollari.
+Costa €1 e € 1.000 e £2 e ¥100.
+Il valore di $110m e $1,5 miliardi e $1.
+Banconote da 5 $ e 2.500 ¥.
+Costa €3euro e $2 dollari.
+# decimal comma
+Va a 1,5 km/s e 14,7 miliardi.
+Nel 1990, 1995 e 2000.
+# initialisms
+La chiave USB e la NASA e l'OPEC e l'ISIS e il COVID.
+L'IA e l'HIV e l'IP.
+Il XI secolo e il CD e il DVD.
+Gli U.S.A. e A. Rossi e J. R. Tolkien.
+IL FILM È BELLO E LUNGO.
+# Roman numerals, ordinal contexts and their neighbours
+Il XIX secolo e nel secolo XIX.
+Papa Giovanni XXIII e Vittorio Emanuele II e Paolo VI.
+Il XL anniversario e il L anniversario e il XXV congresso.
+La II Guerra mondiale ed Elisabetta II.
+Il capitolo XIV e l'atto II e Luigi XIV e Carlo V.
+Nel MMXX e il MM secolo e il MMM secolo e il MCM secolo.
+Il IV secolo e il VI secolo e il XXI secolo e il XXVI secolo e il XXVIII secolo e il XXIII secolo.
+Il CD e DI e MI e il volume III.
+Lo zar Nicola II e il re Umberto I.
+xix secolo in minuscolo e papa giovanni xxiii.
+# g2p corners
+Gnocchi, figlio, figli, sciare, scienza, chiesa, ghiaccio, acqua, quando.
+Magn, gas, autobus, virus, pizza, mozzarella, jazz, yacht, xilofono.
+Città, perché, aiuola, uomo, buono, aura, mai, via, bugia.
+São Paulo e Müller e Øresund e Dvořák.
+Qu e q e hh e gli e gn e sci e cc e gg e ch.
+Accciaio, oggi, faccia, ciao, giorno, cielo, gelato, scena, sciame.
+Il numero 123456789012345678901234567890 è lungo.
+Il numero 9007199254740993 e 9007199254740991 e 1000000 e 2000000 e 1001001.
+ISTANBUL İstanbul e ǅemal.
