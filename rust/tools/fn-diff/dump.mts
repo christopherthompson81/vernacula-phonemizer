@@ -236,6 +236,122 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: n.toString(), ordinal: true }, ordinalToWords(n).join(" "));
         }
     },
+    // ── Japanese (ja) ──────────────────────────────────────────────────────────────────────────────────
+    // normalizeJapanese over every ja text (golden, FLEURS ja_jp columns 3+4, probes/ja.txt).
+    async "ja-normalize"() {
+        const { normalizeJapanese } = await import("../../../src/languages/japanese/normalize.ts");
+        for (const [t, src] of textsFor(["ja"], "ja_jp", ["ja.txt"])) emit({ text: units(t), src }, normalizeJapanese(t));
+    },
+    // kanaToMorae (joined by "|", or \0none) over every kana reading in readings.tsv / fallback.tsv, every
+    // kana-only pitch key, every single kana and every ordered pair of kana and marks.
+    async "ja-kana"() {
+        const { kanaToMorae, segmentsToMorae } = await import("../../../src/languages/japanese/kana.ts");
+        const J = new URL("../../../src/languages/japanese/japanese.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const v of loadTsvMap(J, "readings.tsv").values()) words.add(v);
+        for (const v of loadTsvMap(J, "fallback.tsv").values()) for (const r of v.split("\t")) if (r) words.add(r);
+        for (const k of loadTsvMap(J, "pitch-accent.tsv").keys()) if (/^[ぁ-ゖァ-ヺー]+$/u.test(k)) words.add(k);
+        const singles: string[] = ["ー", "ｰ", "ッ", "ゝ", "a", "漢", "\u{20b9f}", "\ud842"];
+        for (let c = 0x3041; c <= 0x3096; c++) singles.push(String.fromCodePoint(c));
+        for (let c = 0x30a1; c <= 0x30fa; c++) singles.push(String.fromCodePoint(c));
+        for (const a of singles) { words.add(a); for (const b of singles) words.add(a + b); }
+        for (const w of ["っ", "あっ", "っか", "っきゃ", "っう", "んあ", "ん", "けいい", "おおさか", "ーあ", "きゅう"]) words.add(w);
+        for (const w of words) {
+            const m = kanaToMorae(w);
+            emit({ word: units(w), op: "morae" }, m === null ? "\u0000none" : m.join("|"));
+        }
+        // segmentsToMorae over split readings: each word cut at every interior code point.
+        let n = 0;
+        for (const w of words) {
+            if (n++ % 13 !== 0) continue;
+            const cps = [...w];
+            for (let k = 1; k < cps.length; k++) {
+                const segs = [cps.slice(0, k).join(""), cps.slice(k).join("")];
+                const m = segmentsToMorae(segs);
+                emit({ segs: segs.map(units), op: "segments" }, m === null ? "\u0000none" : m.join("|"));
+            }
+        }
+    },
+    // The kanji reading path: applyReadingSegments (joined by "|") and headsCompound over every readings.tsv
+    // key, every fallback kanji, every key with a counter/digit-ish prefix and every TOKEN run of the ja texts.
+    async "ja-kanji"() {
+        const { applyReadingSegments, headsCompound } = await import("../../../src/languages/japanese/kanji.ts");
+        const J = new URL("../../../src/languages/japanese/japanese.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const k of loadTsvMap(J, "readings.tsv").keys()) words.add(k);
+        for (const k of loadTsvMap(J, "fallback.tsv").keys()) { words.add(k); words.add(k + "々"); words.add(k + "の"); words.add(k + "る"); }
+        for (const t of textsFor(["ja"], "ja_jp", ["ja.txt"]).keys())
+            for (const m of t.matchAll(/[㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+/gu)) words.add(m[0]);
+        for (const w of ["々", "〻", "奈々", "時々", "人々", "\u{20b9f}", "\u{20b9f}る", "𠮟る", "ｱ", "abc", "日本ゴ", "\ud842"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "segments" }, applyReadingSegments(w).join("|"));
+            emit({ word: units(w), op: "heads" }, String(headsCompound(w)));
+        }
+    },
+    // segmentText over every ja text after normalizeJapanese (its real input).
+    async "ja-segment"() {
+        const { segmentText } = await import("../../../src/languages/japanese/kanji.ts");
+        const { normalizeJapanese } = await import("../../../src/languages/japanese/normalize.ts");
+        for (const [t, src] of textsFor(["ja"], "ja_jp", ["ja.txt"])) {
+            emit({ text: units(t), src, op: "raw" }, segmentText(t));
+            emit({ text: units(t), src, op: "normalized" }, segmentText(normalizeJapanese(t)));
+        }
+    },
+    // readCounter(n, ctr) (or \0none) for n in 0..1100 plus large and unsafe values, every counter and some
+    // non-counter neighbours.
+    async "ja-counters"() {
+        const { readCounter } = await import("../../../src/languages/japanese/counters.ts");
+        const ctrs = ["つ", "月", "時", "円", "年", "人", "日", "分", "本", "匹", "杯", "泊", "個", "回", "階", "軒", "歳", "冊", "足",
+            "枚", "番", "度", "台", "名", "秒", "羽", "頭", "着", "丁", "間", "生", "の", "\u{20b9f}"];
+        const ns: number[] = [];
+        for (let n = 0; n <= 1100; n++) ns.push(n);
+        for (const n of [2000, 3000, 6000, 8000, 10000, 10001, 13000, 30000, 100000, 1000000, 12345678, 2 ** 53 - 1, 2 ** 53, 1e21, -1, 1.5, NaN]) ns.push(n);
+        for (const c of ctrs) for (const n of ns) emit({ n: String(n), ctr: units(c) }, readCounter(n, c) ?? "\u0000none");
+    },
+    // numberToKana(n, raw) for 0..20000, powers and mixed values to 10^16, and unsafe digit strings via raw.
+    async "ja-numbers"() {
+        const { numberToKana } = await import("../../../src/languages/japanese/numbers.ts");
+        const raws: string[] = [];
+        for (let n = 0; n <= 20000; n++) raws.push(String(n));
+        for (let e = 4; e <= 16; e++) raws.push(String(10 ** e), String(10 ** e - 1), String(10 ** e + 7), String(123456789 % 10 ** e + 10 ** e));
+        for (const r of ["9007199254740991", "9007199254740992", "12345678901234567890", "0000", "007", "100000000000000000000000"]) raws.push(r);
+        for (const r of raws) emit({ raw: r }, numberToKana(Number(r), r));
+    },
+    // accentNucleus(surface, reading) and phonemizeWord over every readings.tsv row, the stripped-affix shapes
+    // (word + particle/copula) and every TOKEN run of the ja texts with its computed reading.
+    async "ja-pitch"() {
+        const { accentNucleus } = await import("../../../src/languages/japanese/pitch.ts");
+        const { phonemizeWord } = await import("../../../src/languages/japanese/japanese.ts");
+        const { applyReadings } = await import("../../../src/languages/japanese/kanji.ts");
+        const J = new URL("../../../src/languages/japanese/japanese.ts", import.meta.url).href;
+        const pairs = new Map<string, string>();
+        let i = 0;
+        for (const [k, v] of loadTsvMap(J, "readings.tsv")) {
+            pairs.set(k, v);
+            if (i++ % 5 === 0) for (const a of ["を", "は", "です", "ですね", "だった", "には"]) pairs.set(k + a, v + a);
+        }
+        for (const t of textsFor(["ja"], "ja_jp", ["ja.txt"]).keys())
+            for (const m of t.matchAll(/[㐀-鿿\u{20000}-\u{2a6df}々〻ぁ-ゖァ-ヺー゛゜]+/gu)) pairs.set(m[0], applyReadings(m[0]));
+        for (const p of ["は", "から", "までの", "", "ハシ", "はしを"]) pairs.set(p, p);
+        for (const [s, r] of pairs) {
+            emit({ surface: units(s), reading: units(r), op: "nucleus" }, String(accentNucleus(s, r)));
+            emit({ surface: units(s), op: "word" }, phonemizeWord(s));
+        }
+    },
+    // phonemizeTrace(text, lang) per LANGS text: traced, normalized, and per token
+    // [span, inputSpan|null, ipaSpan|null, surface units, source|null], as JSON.
+    async trace() {
+        const { phonemizeTrace } = await import("../../../src/index.ts");
+        for (const lang of LANGS)
+            for (const text of langTexts(lang)) {
+                const t = phonemizeTrace(text, lang);
+                emit({ text: units(text), lang }, JSON.stringify({
+                    traced: t.traced,
+                    normalized: units(t.normalized),
+                    tokens: t.tokens.map((k) => [k.span, k.inputSpan ?? null, k.ipaSpan ?? null, units(k.surface), k.source ?? null]),
+                }));
+            }
+    },
 };
 
 

@@ -28,7 +28,7 @@ use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagg
 use crate::languages::english_gb::english_gb::rp_word_transform;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 2] = ["en", "en-GB"];
+pub const LANGUAGES: [&str; 3] = ["en", "en-GB", "ja"];
 
 /// A language engine, as the registry holds it.
 pub trait Engine: Send + Sync {
@@ -58,6 +58,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
     Some(match lang {
         "en" => english(EnglishVariant::Us),
         "en-GB" => english(EnglishVariant::Gb),
+        "ja" => crate::languages::japanese::japanese::create_japanese()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
