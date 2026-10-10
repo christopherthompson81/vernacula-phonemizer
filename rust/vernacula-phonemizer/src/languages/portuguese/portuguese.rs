@@ -287,8 +287,21 @@ fn token() -> &'static JsRegex {
 }
 
 fn number_token_to_words(tok: &JsString, dialect: Dialect) -> JsString {
-    let (int_digits, frac) = split_number_token(tok);
+    let (int_digits, dotted, frac) = split_number_token(tok);
     let mut words = number_to_words(js_number(&int_digits), dialect, Some(&int_digits));
+    // ⚠ A SPOKEN DOT READS THE GROUP AFTER IT AS A NUMBER (#1490): `802.11` is *ponto onze*. A group with a
+    // leading zero, or of three or more digits, is spelled out (`15.00` → *ponto zero zero*).
+    for grp in &dotted {
+        words.push_str(&js(&format!(" {} ", MANIFEST.numbers.dot_connector)));
+        if js_re!(r"^[1-9]\d?$", "u").test(grp) {
+            words.push_str(&number_to_words(js_number(grp), dialect, None));
+        } else {
+            let digits: Vec<JsString> = (0..grp.len())
+                .map(|i| number_to_words(js_number(&grp.char_at(i)), dialect, None))
+                .collect();
+            words.push_str(&JsString::join(&digits, &js(" ")));
+        }
+    }
     if let Some(frac) = frac {
         words.push_str(&js(&format!(" {} ", MANIFEST.numbers.decimal_connector)));
         let digits: Vec<JsString> = (0..frac.len())

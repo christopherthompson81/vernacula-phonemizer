@@ -231,16 +231,27 @@ export function phonemizeWord(word: string, dialect: Dialect = "ep"): string {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-// Word / number / clause-punctuation. Portuguese numbers: dot = thousands (1.500), comma = decimal (3,14).
+// Word / number / clause-punctuation. Portuguese numbers: dot = thousands (1.500), comma = decimal (3,14), and
+// any other dot is spoken (802.11) — see numbers.ts `splitNumberToken`.
 const TOKEN = new RegExp(`([a-zà-ÿ]+)|(${NUMBER_TOKEN.source})|([.!?…,;:])`, "giu");
 
-/** A number token (thousands-dots / decimal-comma) → spoken words. `dialect` selects the BP teen forms (16/17/19
- *  dez-e- vs the EP dez-a-). */
+/** A number token (thousands-dots / decimal-comma / spoken dots) → spoken words. `dialect` selects the BP teen
+ *  forms (16/17/19 dez-e- vs the EP dez-a-). */
 function numberTokenToWords(tok: string, dialect: Dialect): string {
     // ⚠ THE DOT-STRIPPED STRING IS PASSED AS `raw` (#1095): Portuguese writes thousands with periods, so
     // the fallback must see the digits without them, not the double they were parsed into.
-    const { intDigits, frac } = splitNumberToken(tok);
+    const { intDigits, dotted, frac } = splitNumberToken(tok);
     let words = numberToWords(Number(intDigits), dialect, intDigits);
+    // ⚠ A SPOKEN DOT READS THE GROUP AFTER IT AS A NUMBER, NOT DIGIT BY DIGIT (#1490): every non-grouping
+    // dot in the corpus is a designation or a version-like figure (`802.11`, `1.1`, `5.0`), and those are
+    // said *oitocentos e dois ponto onze*, never *ponto um um*. A group with a leading zero, or of three or
+    // more digits, has no such reading and is spelled out (`15.00` → *quinze ponto zero zero*).
+    for (const g of dotted)
+        words +=
+            ` ${MANIFEST.numbers.dotConnector} ` +
+            (/^[1-9]\d?$/u.test(g)
+                ? numberToWords(Number(g), dialect)
+                : [...g].map((d) => numberToWords(Number(d), dialect)).join(" "));
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +

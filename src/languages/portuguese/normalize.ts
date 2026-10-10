@@ -36,16 +36,17 @@ const DEG = MANIFEST.degree;
 function degreeWord(n: string): string {
     // ⚠ READ THE COUNT THE WAY THE NUMBER TOKENIZER WILL SAY IT: `n` is a whole NUMBER_TOKEN, split by the
     // tokenizer's own rule. `Number("1.000")` is 1, so `1.000 °C` was *mil grau* in the singular. A decimal
-    // part is SPOKEN (*um vírgula zero*), and a spoken fraction takes the plural: `1,0 °C` is *graus*.
-    const { intDigits, frac } = splitNumberToken(n);
-    return frac === undefined && Number(intDigits) === 1 ? DEG.singular : DEG.plural;
+    // part is SPOKEN (*um vírgula zero*), and a spoken fraction takes the plural: `1,0 °C` is *graus*. So is
+    // a spoken dot (#1490): `1.5 °C` is *um ponto cinco graus*, and only a whole 1 is singular.
+    const { intDigits, dotted, frac } = splitNumberToken(n);
+    return frac === undefined && dotted.length === 0 && Number(intDigits) === 1 ? DEG.singular : DEG.plural;
 }
 
 /**
  * The three degree rules. ⚠ THE COUNT IS THE TOKENIZER'S WHOLE NUMBER TOKEN, NOT A ONE-SEPARATOR
  * APPROXIMATION OF IT: `\d+(?:[.,]\d+)?` matched only the TAIL of a multi-group number, so `2.000.001°` and
  * `1.000.001 °C` were counted as 1 and read *grau*. Sharing NUMBER_TOKEN also means the count is exactly what
- * the tokenizer then says, including its lone-0 rule (`0.1 °C` is *zero . um grau*).
+ * the tokenizer then says, including its dot rule (`0.1 °C` is *zero ponto um graus*, #1490).
  */
 const DEGREE_C = new RegExp(`(${NUMBER_TOKEN.source})\\s?°\\s?C(?![\\p{L}\\p{M}])`, "giu");
 const DEGREE_F = new RegExp(`(${NUMBER_TOKEN.source})\\s?°\\s?F(?![\\p{L}\\p{M}])`, "giu");
@@ -64,6 +65,19 @@ const DOTTED_ABBREV = MANIFEST.dottedAbbrev;
 const SIGN = MANIFEST.signWords;
 
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+
+/**
+ * ⚠ A UNICODE-AWARE WORD EDGE, because JS `\b` IS ASCII-ONLY EVEN UNDER THE `u` FLAG — French's finding
+ * (#1480), and this file had it too. `\b` sees a boundary between `é` and `c` in `Grécia`, so the
+ * abbreviation rule took the word's tail `cia.` for the abbreviation of *companhia* and `Grécia.` read
+ * *Grécompanhia* (pt_br FLEURS: `Grécia.` and `Escócia.`, the only two edge-violating matches of the
+ * letter-edged rules over the goldens, FLEURS and the ledger). "No letter, mark, digit or underscore on that
+ * side" is `\b`'s own ASCII behaviour, extended to every script. Used by the template patterns; the literal
+ * patterns in `normalizePortuguese` write the same lookbehind (and its lookahead twin) out in full, so each
+ * stays a LITERAL that tools/extract_regexes.mts — and so regex-diff — can see.
+ */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+const WORD_END = "(?![\\p{L}\\p{M}\\d_])";
 
 /** Portuguese phonotactics, for the OOV rule in core/initialisms.ts. */
 export const isUnreadablePortuguese = makeUnreadableTest({
@@ -129,15 +143,16 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first — `a.` is
     //    8 of the 19 dotted abbreviations in the corpus and every one is `a.C.`.
-    s = rewrite(s, /\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
-    s = rewrite(s, /\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
+    //    The `(?<![\p{L}\p{M}\d_])` edges below are WORD_START written out (see its comment).
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])a\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])d\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
 
     // 2) NÚMERO, only before a digit: bare "no" is the contraction em+o and is everywhere.
-    s = rewrite(s, /\b(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
 
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -145,7 +160,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -165,8 +180,8 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //      `2.500º`  worse, because the tail IS an ordinal: it matched `500º` → *quingentésimo* and stranded
     //                `2.`, so the reading was *dois PONTO quingentésimo* — two point five-hundredth.
     //    Step 0 deliberately leaves dot-grouping to the number tokenizer, so this rule has to accept it
-    //    itself. The grouped alternative comes FIRST so it wins over the bare `\d+` on `1.000º`, and the dots
-    //    are stripped before Number() rather than by a separate pass, which would change what step 0 hands on.
+    //    itself — by matching the tokenizer's own NUMBER_TOKEN (below) — and the dots are stripped before
+    //    Number() rather than by a separate pass, which would change what step 0 hands on.
     //    ⚠ WHEN NO ORDINAL WORD IS AVAILABLE THE INDICATOR IS STRIPPED, NOT KEPT. `portugueseOrdinal` is
     //    bounded to 1–1000, so `2.500º` and `1.000.000º` have no word — and returning the match unchanged put
     //    a raw `º` in the phoneme string, which is the very thing this rule exists to prevent and the worst of
@@ -175,8 +190,22 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
     //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
     //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
-    s = rewrite(s, /\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
-        const n = Number(digits.replace(/\./gu, ""));
+    //    ⚠ AND THE DIGITS ARE THE TOKENIZER'S WHOLE NUMBER_TOKEN, CLASSIFIED BY ITS OWN `splitNumberToken`
+    //    (#1490). The rule used to carry its own grouped-or-bare alternation, which agreed with the tokenizer
+    //    on `1.000º` and on nothing else: on `1.5º` and `1,5º` it matched the TAIL `5º` and left
+    //    *um . quinto* / *um , quinto*. Only a whole number has an ordinal.
+    //    ⚠ AFTER A NON-WHOLE NUMBER THE INDICATOR CANNOT BE ONE, AND IT READS AS ITS BASE LETTER — ª → the
+    //    name of `a`, º → the name of `o`, from the manifest's own `letterNames`. Stripping it lost real
+    //    information: every corpus instance of an indicator after a dotted or decimal number is `802.11ª` ×3
+    //    (FLEURS pt_br's normalized column), the standard designation `802.11a` written with the ordinal
+    //    glyph, and it now reads exactly as `802.11a` does. `º` after a decimal has 0 instances, so there is
+    //    no evidence that it is a stray degree sign and it is not treated differently (`1.5º` → *um ponto
+    //    cinco ó*). A whole number with no ordinal word (`2.500º`) still drops the indicator, as above.
+    s = rewrite(s, new RegExp(`\\b(${NUMBER_TOKEN.source})\\.?(º|ª)`, "gu"), (whole, digits: string, ind: string) => {
+        const { intDigits, dotted, frac } = splitNumberToken(digits);
+        if (dotted.length > 0 || frac !== undefined)
+            return `${digits} ${MANIFEST.letterNames[ind === "ª" ? "a" : "o"]!}`;
+        const n = Number(intDigits);
         const masc = portugueseOrdinal(n);
         if (masc === undefined) return digits;
         return /ª/u.test(whole) ? feminineOrdinal(masc) : masc;
@@ -281,7 +310,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //     this is dialect-gated like the Spanish equivalent: Brazil says *primeiro de julho*, Portugal
     //     normally *um de julho*. An EXPLICIT `1º` is honoured in both, because there the writer marked it.
     if (brazilian)
-        s = rewrite(s, new RegExp(`\\b1\\s+de\\s+(${MONTHS})\\b`, "giu"), (_m, mon: string) => `${MANIFEST.ordinals.units[1]!} de ${mon}`);
+        s = rewrite(s, new RegExp(`${WORD_START}1\\s+de\\s+(${MONTHS})${WORD_END}`, "giu"), (_m, mon: string) => `${MANIFEST.ordinals.units[1]!} de ${mon}`);
 
     return s;
 }

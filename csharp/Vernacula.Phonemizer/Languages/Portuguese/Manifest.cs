@@ -25,6 +25,7 @@ public sealed class PortugueseNumberData
     public string MillionPlural { get; init; } = "";
     public string Connector { get; init; } = "";
     public string DecimalConnector { get; init; } = "";
+    public string DotConnector { get; init; } = "";
 }
 
 public sealed class PortugueseManifest

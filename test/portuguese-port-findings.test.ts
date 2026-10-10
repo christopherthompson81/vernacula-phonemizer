@@ -1,5 +1,5 @@
 /**
- * Three Portuguese defects the Rust port found by reading (#1463), fixed TS-first.
+ * Portuguese defects the Rust port found by reading (#1463), fixed TS-first.
  *
  * Expectations are the fixed engine's own output (words from `normalizePortuguese`, IPA from `phonemize`),
  * never hand-typed.
@@ -67,14 +67,71 @@ describe("the degree noun counts dot-grouped thousands", () => {
         expect(phonemize("Mediu 1,0 °C", "pt-BR")).toBe("med͡ʒˈiw ũ vˈiɾɡulɐ zˈɛɾu ɡɾˈaws sewsˈiws");
     });
     test("the count is the tokenizer's token", () => {
-        // `0.1` is *zero . um* (a dot after a lone 0 is no group), so the noun agrees with *um*.
-        expect(normalizePortuguese("Mediu 0.1 °C")).toBe("Mediu 0.1 grau Celsius");
+        // `0.1` is *zero ponto um* (a dot after a lone 0 is no group, #1490), and a spoken dot is not a
+        // whole one, so the noun is plural — as it is after a spoken decimal comma.
+        expect(normalizePortuguese("Mediu 0.1 °C")).toBe("Mediu 0.1 graus Celsius");
         expect(normalizePortuguese("Mediu 21.1 °C")).toBe("Mediu 21.1 graus Celsius");
     });
     test("the singular and the plain decimal comma are unchanged", () => {
         expect(normalizePortuguese("Mediu 1 °C")).toBe("Mediu 1 grau Celsius");
         expect(normalizePortuguese("Mediu 1,5 °C")).toBe("Mediu 1,5 graus Celsius");
-        // A dot after a lone 0 is not a group in the tokenizer either (`zero . cinco`).
+        // A dot after a lone 0 is not a group in the tokenizer either (`zero ponto cinco`).
         expect(normalizePortuguese("Mediu 0.5 °C")).toBe("Mediu 0.5 graus Celsius");
+    });
+});
+
+describe("a dot is a thousands separator only in the thousands shape (#1490)", () => {
+    test("non-grouping dots are spoken, each group read as a number", () => {
+        // Each of these was read as ONE integer: *oitenta mil duzentos e onze*, *vinte e quatro*,
+        // *cinquenta*, *onze*.
+        expect(phonemize("O padrão 802.11n", "pt-BR")).toBe("o padɾˈɐ̃w̃ ojtosˈẽtus e dˈojs pˈõtu ˈõzi n");
+        expect(phonemize("a 2.4 GHz", "pt-BR")).toBe("a dˈojs pˈõtu kwˈatɾu ɡs");
+        expect(phonemize("a 5.0 GHz", "pt")).toBe("a sˈĩku pˈõtu zˈɛɾu ɡʃ");
+        expect(phonemize("ver Figura 1.1.", "pt-BR")).toBe("vˈeɾ fiɡˈuɾɐ ũ pˈõtu ũ .");
+    });
+    test("a group with a leading zero, or of three or more digits, is spelled out", () => {
+        expect(phonemize("2.05", "pt")).toBe("dˈojʃ pˈõtu zˈɛɾu sˈĩku");
+        expect(phonemize("1.0000", "pt")).toBe("ũ pˈõtu zˈɛɾu zˈɛɾu zˈɛɾu zˈɛɾu");
+        // The zero-head guard (#1015): `0.500` is not five hundred.
+        expect(phonemize("0.500", "pt")).toBe("zˈɛɾu pˈõtu sˈĩku zˈɛɾu zˈɛɾu");
+    });
+    test("true thousands groups are unchanged", () => {
+        expect(phonemize("17.000 ilhas", "pt-BR")).toBe("dezesˈɛt͡ʃi mˈiw ˈiʎɐs");
+        expect(phonemize("5.000.000 visitantes", "pt-BR")).toBe("sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis");
+    });
+    test("the ordinal indicator reads the tokenizer's whole token", () => {
+        // The old rule matched the TAIL `5º` and left *um . quinto* / *um , quinto*. After a non-whole
+        // number the indicator cannot be an ordinal and reads as its base letter's name.
+        expect(normalizePortuguese("o 1.5º lugar")).toBe("o 1.5 ó lugar");
+        expect(normalizePortuguese("o 1,5º lugar")).toBe("o 1,5 ó lugar");
+        expect(normalizePortuguese("a 1.5ª vez")).toBe("a 1.5 a vez");
+        expect(phonemize("o 1.5º lugar", "pt")).toBe("o ũ pˈõtu sˈĩku ˈɔ luɡˈaɾ");
+        // The corpus's one shape: a designation's letter suffix written with the ordinal glyph reads
+        // exactly as the letter does.
+        expect(phonemize("o 802.11ª", "pt-BR")).toBe(phonemize("o 802.11a", "pt-BR"));
+        expect(phonemize("o 802.11ª", "pt-BR")).toBe("o ojtosˈẽtus e dˈojs pˈõtu ˈõzi a");
+        // Grouped and plain ordinals are unchanged.
+        expect(normalizePortuguese("o 1.000º selo")).toBe("o milésimo selo");
+        expect(normalizePortuguese("o 2.500º selo")).toBe("o 2.500 selo");
+    });
+    test("a spoken dot takes the plural degree noun", () => {
+        expect(normalizePortuguese("Mediu 1.5 °C")).toBe("Mediu 1.5 graus Celsius");
+        expect(phonemize("Mediu 1.5 °C", "pt-BR")).toBe("med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws");
+    });
+});
+
+describe("the abbreviation rules use a Unicode word edge, not JS's ASCII \\b", () => {
+    // Synthetic sentences. `\b` saw a boundary between `é` and `c`, so `cia.` was claimed as *companhia*.
+    test("an accented word ending in an abbreviation key is not expanded", () => {
+        expect(normalizePortuguese("Visitou a Grécia.")).toBe("Visitou a Grécia.");
+        expect(normalizePortuguese("Visitou a Escócia.")).toBe("Visitou a Escócia.");
+        expect(normalizePortuguese("Ficou na Grécia. Depois")).toBe("Ficou na Grécia. Depois");
+        expect(phonemize("Visitou a Grécia.", "pt-BR")).toBe("vizitˈo a ɡɾˈɛsjɐ .");
+    });
+    test("a real abbreviation still expands", () => {
+        expect(normalizePortuguese("A Cia. Ltda. abriu")).toBe("A companhia limitada abriu");
+        expect(normalizePortuguese("Visitou a Grécia, etc.")).toBe("Visitou a Grécia, etcétera.");
+        expect(normalizePortuguese("Fundada em 300 a.C. por")).toBe("Fundada em 300 antes de Cristo por");
+        expect(normalizePortuguese("Em 1 de julho", true)).toBe("Em primeiro de julho");
     });
 });

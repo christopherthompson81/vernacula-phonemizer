@@ -316,3 +316,151 @@ tree.
 
 **Implication.** All six items are closed and no golden moves. The lax tokenizer grouping (`5.0`, `2.4` read as
 integers) is a separate, golden-moving finding, and I am reporting it, not fixing it.
+
+## Run 12 — 2026-10-09 21:26 (#1490: the number tokenizer's dot rule)
+
+**Question.** Run 11 left one finding open: the tokenizer takes any digits after a dot as a thousands group.
+Step 4 takes only exact 3-digit groups. Which dots in the text are really thousands separators? What should
+the others read as? And does the fix move a golden?
+
+**Command.** A scratch probe (not committed) lists every `\d+(\.\d+)+` token, with any glued suffix. It reads
+the pt and pt-BR goldens, FLEURS pt_br (train/dev/test, column 3, the raw transcript), the ledger's pt_br `read_text` (2,793
+rows) and `tools/corpus/mined/pt.jsonc`. It classifies each number as thousands-shaped
+(`^[1-9]\d{0,2}(?:\.\d{3})+$`) or OTHER, and prints the current pt-BR reading. It ran before and after the
+fix. Then `gen_parity_goldens.mts pt pt-BR`, `check:goldens`, the fn-diff re-dumps, and the gates.
+
+**Raw finding.**
+- 39 distinct dotted numbers. 34 are thousands-shaped, and every one of them is a real group (`1.000 libras`,
+  `5.000.000`, `104.500`, `1.000º` …). The other 5:
+
+  | number | what it is | before | after |
+  |---|---|---|---|
+  | `802.11` (+`a`/`b`/`g`/`n`) | a standard designation | *oitenta mil duzentos e onze* | *oitocentos e dois ponto onze* |
+  | `2.4` (`2.4Ghz`) | a clock-speed spec | *vinte e quatro* | *dois ponto quatro* |
+  | `5.0` (`5.0Ghz`) | the same | *cinquenta* | *cinco ponto zero* |
+  | `1.1` | a figure number | *onze* | *um ponto um* |
+  | `15.00` | a dotted clock time (an hour against UTC) | *mil e quinhentos* | *quinze ponto zero zero* |
+
+  None is a group. The reading after the fix was taken from the same probe. All 34 thousands rows are
+  byte-identical before and after.
+- The dotted numbers in the goldens are all thousands-shaped. The 5 OTHER numbers appear only in FLEURS, the
+  ledger and the mined text. So no golden moves: `gen_parity_goldens.mts pt pt-BR` wrote no diff, and
+  `check:goldens` reports `189 languages, 36495 rows, 0 stale`. Run 11 expected this fix to move golden rows,
+  and it does not.
+- The rule: a dot is a thousands separator only when the head is 1–3 digits with a non-zero first digit and
+  every later group is exactly 3 digits. That is step 4's own shape. The non-zero head restates #1015's
+  zero-head guard, so the old `(?<!(?<!\d)0)` lookbehind could go. `0.5` now reads *zero ponto cinco*, where
+  it used to read *zero . cinco* with a pause.
+- The reading of a non-grouping dot: *ponto*, a new `numbers.dotConnector` in the manifest. The group after
+  it is read as a cardinal when it is `[1-9]\d?`, and digit by digit otherwise. A version or a designation
+  is said *ponto onze*, not *ponto um um*. A group with a leading zero (`15.00`, `2.05`) or of 3+ digits
+  (`1.0000`, `0.500`) has no cardinal reading. I rejected *vírgula*: it is the comma's word, and
+  *oitocentos e dois vírgula onze* is wrong for a designation. The siblings ca/gl/es rewrite a dot followed
+  by 1–2 digits to the comma decimal. gl records `802.11n` as the known exposure of doing that. All 5 corpus
+  instances here are designation- or version-like, which is why *ponto* is the right reading for this text.
+- Step 4 now matches `\b(NUMBER_TOKEN)\.?[ºª]` and classifies the match with `splitNumberToken`. Only a whole
+  number gets an ordinal. A spoken dot or a decimal comma keeps its number and loses the indicator.
+  `1.5º`: *um . quinto* → *um ponto cinco*. `1,5º`: *um , quinto* → *um vírgula cinco*. `1.000º` and
+  `2.500º` are unchanged.
+- The degree count is plural unless the token is a whole 1. `0.1 °C`: *grau* → *graus*. This reverses Run
+  11's agreement with the *um* that was spoken after the pause, because the token is now read whole
+  (*zero ponto um graus*).
+- Residuals, recorded and not fixed:
+  - `15.00 do Tempo Universal` is a clock time. It reads *quinze ponto zero zero*, and an anchor would say
+    *quinze horas*. Reading `HH.MM` as a clock needs context (UTC, *horas*). One instance does not license
+    that, and `2.40` could be a price.
+  - (Closed in Run 13.) FLEURS column 4 (the normalized transcript, which fn-diff reads) writes `802.11a` as `802.11ª` ×3. It now reads *oitocentos e dois ponto onze*: the
+    indicator is stripped and the letter is lost. Before, it read *oitocentos e dois . décima primeira*.
+  - `2.4Ghz` reads its unit as *ɡs*. That is the symbol tier, and it is untouched.
+- Proved by revert:
+  - TS: with the three src files reverted, 5 of the 16 tests in `portuguese-port-findings.test.ts` fail.
+    That is every new #1490 test except the thousands guard, plus the edited `0.1 °C` row.
+  - C#: with Numbers/Portuguese/Normalize.cs reverted, 13 of 40 `PortuguesePortFindingsTests` cases fail.
+  - Rust: with numbers/portuguese/normalize.rs reverted and only the tests re-applied, 3 of 8 portuguese
+    tests fail.
+- Regex corpus re-extracted with `tools/extract_regexes.mts`. Two rows went: step 4's alternation and the
+  old NUMBER_TOKEN. Three came in: the new NUMBER_TOKEN, `THOUSANDS_GROUPED` and the `[1-9]\d?` group test.
+  That makes 2,384 patterns. C# regex-diff and Rust regex-diff: `145276 identical, 0 DIFFER`.
+- pt-BR.txt gained three probe lines (pt.txt is a symlink to it): designations, a dotted ordinal/decimal ordinal, and dotted
+  degree counts with the edge shapes.
+- Gates on the final tree:
+  - fn-diff, re-dumped from the fixed TS: pt-normalize `11937 / 0` (probe 267), pt-numbers `101973 / 0`,
+    pt-g2p `75630 / 0`, phonemize-sync and -best `7950 / 4` each. The 4 are the same port-pending ru and el
+    probes as before.
+  - Rust parity: all ten languages `200/200`.
+  - `cargo test --workspace`: 91 + 1.
+  - C# parity pt/pt-BR: `400 rows ok, 0 differ`.
+  - vitest, full: 347 files, 6,517 passed, 5 skipped. `node_modules/.bin` was linked for the run and
+    unlinked after. Without the link, `check-goldens-jobs.test.ts` fails 7 tests on a missing `tsx`.
+  - `dotnet test`, full: 7,195 passed.
+  - `check:goldens`: 0 stale.
+
+**Implication.** The tokenizer, the degree count and the ordinal indicator now share one predicate. No golden
+moved. What remains is the dotted clock time, which needs a context rule and evidence for one.
+
+## Run 13 — 2026-10-09 21:58 (review on Run 12: the indicator as a letter; the ASCII `\b`; rebased onto 0c6a70c2)
+
+**Question.** Review raised two items on Run 12, and a rebase.
+
+1. After a non-whole number, Run 12 stripped the `º`/`ª`, which loses `802.11ª`'s letter. Should the
+   indicator read as its base letter instead? Is there evidence that `º` after a decimal is a stray degree
+   sign?
+2. French found (#1494) that JS `\b` is ASCII-only even under `u`. Do pt's letter-edged rules have the same
+   defect?
+3. Rebase onto 0c6a70c2 (past d1fdb503) and re-extract the regex corpus.
+
+**Command.**
+- A grep for `\d+[.,]\d+\.?\s?[ºª°]` over FLEURS pt_br (all columns), the ledger, the mined pt text and both
+  goldens.
+- A scratch audit (not committed). For each letter-edged `\b` rule (the two era markers, *número*, the two
+  abbreviation rules, the first-of-month rule), it counts the matches over the pt/pt-BR goldens, FLEURS
+  columns 3 and 4 and the ledger: 3,923 unique texts. It flags every match whose edge-side neighbour is a
+  letter, mark, digit or `_`.
+- Rebased onto origin/main (first d1fdb503, then 0c6a70c2; both clean). `extract_regexes.mts` re-run on the
+  combined tree, then `gen_parity_goldens.mts pt pt-BR` and the gates.
+
+**Raw finding.**
+- Item 1, the indicator after a non-whole number:
+  - Instances: `802.11ª` ×3, every one the designation `802.11a`. `º` after a dotted or decimal number has
+    0 instances, and `°` after one also has 0. So there is no evidence that it is a stray degree sign, and
+    º is not treated differently.
+  - The rule: the indicator reads as its letter's name from the manifest's `letterNames`. ª is `a` →
+    *a*; º is `o` → *ó*.
+  - `802.11ª` now reads byte-identically to `802.11a` (*… ponto ˈõzi a*); the test asserts the equality.
+  - `1.5º` → *um ponto cinco ó*. `1,5º` → *um vírgula cinco ó*. `1.5ª` → *um ponto cinco a*.
+  - How `802.11n` reads: the engine reads the glued letter as a bare WORD (*n*), not as its letter name
+    (*ene*). For `a` the two coincide, because letterNames' `a` is the word *a*, which is why `802.11ª`
+    and `802.11a` agree exactly. For `º` they differ: the letter name *ó* [ˈɔ] against the bare word *o*,
+    the unstressed article [u]. *ó* is what review asked for.
+  - Whole numbers are unchanged: `1.000º`, `7ª`, `1.º`, and `2.500º` (no ordinal word, indicator dropped).
+- Item 2, the ASCII `\b`:
+  - 36 matches. Two are edge-violating, both in `abbrev-end`, and both are the same shape: `Grécia.` and
+    `Escócia.`. `\b` sits between `é`/`ó` and `c`, so `cia.` matched as *companhia*. `Grécia.` read
+    *ɡɾˈɛkõpɐɲjɐ*.
+  - Every other rule had 0 violations.
+  - The fix is #1494's: `(?<![\p{L}\p{M}\d_])` / `(?![\p{L}\p{M}\d_])`. It is written out as a literal in
+    the three literal rules (era markers, *número*) and held as `WORD_START`/`WORD_END` for the three
+    template rules (the two abbreviation rules, first-of-month).
+  - The digit-led rules (ordinal indicator, clock, fraction) keep `\b`: a digit is ASCII `\w`, so `\b`
+    before it is already correct on the digit side. No violation was measured.
+- Goldens: `pt` 2 stale, one sentence that appears twice. Only the token moved: `Grécia.` *ɡɾˈɛkõpɐɲjɐ* →
+  *ɡɾˈɛsjɐ*. I regenerated it; pt-BR's golden does not contain the word. The ª change moved no golden.
+- Regex corpus: 3 rows replaced (the era markers and *número* now carry the Unicode lookbehind). 2,385
+  patterns. The template rules are composed, so they are not extracted.
+- Proved by revert, each engine with only that item's src change undone:
+  - Indicator letter: TS 1 of 16 fails; C# 6 of 42; Rust 2 of 8.
+  - Word edge: TS 1 of 18 fails; C# 3 of 49; Rust 1 of 9.
+- Probes: pt-BR.txt gained two word-edge lines; `802.11ª` was already a probe.
+- Gates on the final tree (0c6a70c2 + this branch):
+  - `check:goldens`: 0 stale.
+  - vitest, full: 6,546 passed, 5 skipped. `.bin` linked for the run, unlinked after.
+  - `dotnet test`, full: 7,232 passed.
+  - C# parity pt/pt-BR: 400 ok, 0 differ.
+  - C# regex-diff and Rust regex-diff: 145,206 identical, 0 differ.
+  - `cargo test --workspace`: 94 + 1.
+  - Rust parity: all ten languages 200/200.
+  - fn-diff, re-dumped: pt-normalize `11943 / 0`, pt-numbers `101973 / 0`, pt-g2p `75625 / 0`,
+    phonemize-sync and -best `7954 / 4` each. The 4 are the port-pending ru and el probes.
+
+**Implication.** Both review items are closed. One golden token moved, and it moved toward correct. What
+remains is Run 12's dotted clock time.

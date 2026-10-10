@@ -12,14 +12,25 @@ pub enum Dialect {
     Bp,
 }
 
-/// The number token (TS `NUMBER_TOKEN`): one source for the tokenizer and the degree count.
-pub const NUMBER_TOKEN: &str = r"\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?";
+/// The number token (TS `NUMBER_TOKEN`): one source for the tokenizer, the degree count and the ordinal
+/// indicator. It spans every dot; what a dot MEANS is decided once, by `split_number_token`.
+pub const NUMBER_TOKEN: &str = r"\d+(?:\.\d+)*(?:,\d+)?";
 
-/// `splitNumberToken`: the integer digits (thousands dots removed) and the decimal digits, if any.
-pub fn split_number_token(tok: &JsString) -> (JsString, Option<JsString>) {
+/// `splitNumberToken`: the integer digits, the groups after any NON-thousands dot (spoken *ponto*), and the
+/// comma decimal. ⚠ A dot is a thousands separator only in the thousands shape (#1490) — a 1–3-digit
+/// non-zero head, then groups of exactly three; see numbers.ts `THOUSANDS_GROUPED`. A whole number exactly
+/// when `dotted` is empty and `frac` is `None`.
+pub fn split_number_token(tok: &JsString) -> (JsString, Vec<JsString>, Option<JsString>) {
     let parts = tok.split(&js(","));
-    let int_digits = js_re!(r"\.", "g").replace(&parts[0], &JsString::new());
-    (int_digits, parts.get(1).cloned())
+    let int_raw = &parts[0];
+    let frac = parts.get(1).cloned();
+    if !js_re!(r"\.", "u").test(int_raw) || js_re!(r"^[1-9]\d{0,2}(?:\.\d{3})+$", "u").test(int_raw) {
+        let int_digits = js_re!(r"\.", "g").replace(int_raw, &JsString::new());
+        return (int_digits, Vec::new(), frac);
+    }
+    let mut groups = int_raw.split(&js("."));
+    let head = groups.remove(0);
+    (head, groups, frac)
 }
 
 fn small(i: f64, dialect: Dialect) -> Option<String> {
