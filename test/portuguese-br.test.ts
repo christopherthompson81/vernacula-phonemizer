@@ -137,7 +137,9 @@ describe("portuguese normalization", () => {
     test("clock: both written forms were broken", () => {
         // The h form (×28) dropped its marker entirely and the colon form (×17) made the colon a PAUSE
         // with a spurious "zero" at :00. `hora` is feminine, so 1 takes *uma*.
-        expect(phonemize("07h19", "pt-BR")).toBe("sˈɛt͡ʃi ˈɔɾɐs e dezanˈovi");
+        // *dezenove*, the BP teen: this pinned the European *dezanove*, which the clock read in pt-BR because
+        // it called numberToWords without the dialect (#1463; test/portuguese-port-findings.test.ts).
+        expect(phonemize("07h19", "pt-BR")).toBe("sˈɛt͡ʃi ˈɔɾɐs e dezenˈɔvi");
         expect(phonemize("10 h", "pt-BR")).toBe("dˈɛs ˈɔɾɐs");
         expect(phonemize("8:46", "pt-BR")).toBe("ˈojtu ˈɔɾɐs e kwaɾˈẽtɐ e sˈejs");
         expect(phonemize("11:00", "pt-BR")).toBe("ˈõzi ˈɔɾɐs");

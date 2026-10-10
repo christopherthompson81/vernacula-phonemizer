@@ -44,6 +44,7 @@ O BUS$ 5 chegou
 # 6) degrees
 Fazia 25 °C e 1 °C e 21°C
 Mediu 1,0 °F e 1.000 °C
+Mediu 1.000° e 1.000 °F e 0.5 °C e 1.5 °C e 00.5° e 1.000.000 °C
 Estava a 30° hoje
 Em 25°Cölner rua
 Fazia 25 °Celsius
@@ -53,6 +54,7 @@ Abriu às 13h00 e fechou às 9h30min
 Às 12:45 ou à 1:00
 Às 24:00 ou 12:45:30 ou 25h
 Às 16h17 em ponto
+Às 19:16 e às 1:19 e às 17h01
 # 8) signs
 Fez -5 graus e (−3) e –2
 Mede ±5 metros
@@ -65,6 +67,7 @@ Dez é 10 ÷ 2 mais nada
 Comeu 1/2 e 2/3 e 3/4 e 5/10
 Comeu 7/999 bolos
 Em 12/05/2020 e 1/1001 e 0/5 e 3/1
+Comeu 17/19 e 2/21 e 1/19 e 3/100 e 16/17
 # 10) BP first of the month
 No dia 1 de julho e 1 de Março
 No dia 1º de maio

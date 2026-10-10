@@ -34,7 +34,11 @@ const DEG = MANIFEST.degree;
  * ukrainian/normalize.ts, which hit it first.
  */
 function degreeWord(n: string): string {
-    return Number(n.replace(",", ".")) === 1 ? DEG.singular : DEG.plural; // a numeral string
+    // ⚠ READ THE COUNT THE WAY THE NUMBER TOKENIZER WILL SAY IT (portuguese.ts TOKEN): a dot is a thousands
+    // separator, except after a lone 0, and a comma is the decimal point. `Number("1.000")` is 1, so `1.000 °C`
+    // was *mil grau* in the singular.
+    const count = Number(n.replace(/(?<!(?<!\d)0)\./gu, "").replace(",", "."));
+    return count === 1 ? DEG.singular : DEG.plural; // a numeral string
 }
 
 const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
@@ -78,27 +82,35 @@ function feminineOrdinal(masc: string): string {
     return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
 }
 
-/** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
-function feminineCardinal(n: number): string {
-    return numberToWords(n).replace(new RegExp(`${MANIFEST.numbers.small[1]!}$`, "u"), MANIFEST.feminineOne);
+type Dialect = "ep" | "bp";
+
+/** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora).
+ *  ⚠ `dialect` IS REQUIRED: without it pt-BR read its clock in the European teens (*dezasseis horas e
+ *  dezassete*) while the number tokenizer in the same sentence said *dezessete*. */
+function feminineCardinal(n: number, dialect: Dialect): string {
+    return numberToWords(n, dialect).replace(new RegExp(`${MANIFEST.numbers.small[1]!}$`, "u"), MANIFEST.feminineOne);
 }
 
 /** Suppletive fraction denominators (portuguese.jsonc `fractions`); the rest take the ordinal. */
 const DENOMINATOR = MANIFEST.fractions.denominators;
 
-function fractionWords(num: number, den: number): string | undefined {
+/** `num/den` → *dois terços*, *três quintos*. A plural numerator pluralizes EVERY word of the denominator,
+ *  as a compound ordinal inflects throughout: 17/19 is *dezassete décimos nonos*, not *décimo nonos*. */
+function fractionWords(num: number, den: number, dialect: Dialect): string | undefined {
     if (den < 2 || num < 1) return undefined;
     const base = DENOMINATOR[String(den)] ?? portugueseOrdinal(den);
     if (base === undefined) return undefined;
-    return `${numberToWords(num)} ${num > 1 ? `${base}s` : base}`;
+    return `${numberToWords(num, dialect)} ${num > 1 ? base.split(" ").map((w) => `${w}s`).join(" ") : base}`;
 }
 
 /**
  * Normalize one Portuguese input string. Pure text→text.
  *
- * `brazilian` selects the one place the varieties genuinely differ in this layer: the first of the month.
+ * `brazilian` selects the varieties' two differences in this layer: the first of the month, and the BP teens
+ * (*dezesseis*, *dezessete*, *dezenove*) in the number words this layer writes itself (clock, fractions).
  */
 export function normalizePortuguese(input: string, brazilian = false): string {
+    const dialect: Dialect = brazilian ? "bp" : "ep";
     let s = input;
 
     // 0) DIGIT GROUPING with a space. The dot form (1.000) is already in the number tokenizer; the SI space
@@ -215,9 +227,9 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    ("07h19" → "sete dezenove") and the colon form (×17) turned the colon into a PAUSE with a
     //    spurious "zero" at :00. `hora` is feminine, so 1 takes *uma*.
     s = rewrite(s, /\b([01]?\d|2[0-3])\s?h\s?([0-5]\d)?(?![\p{L}\p{M}\d])/gu,
-        (_m, h: string, min?: string) => clockWords(Number(h), min === undefined ? undefined : Number(min)));
+        (_m, h: string, min?: string) => clockWords(Number(h), min === undefined ? undefined : Number(min), dialect));
     s = rewrite(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])/gu,
-        (_m, h: string, min: string) => clockWords(Number(h), Number(min)));
+        (_m, h: string, min: string) => clockWords(Number(h), Number(min), dialect));
 
     // 8) SIGNS. Neither occurs in this corpus, but a dropped sign is silent content loss wherever it does.
     s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, `$1${SIGN.minus} $2`);
@@ -257,7 +269,7 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides.
     s = rewrite(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) =>
-        fractionWords(Number(a), Number(b)) ?? m0);
+        fractionWords(Number(a), Number(b), dialect) ?? m0);
 
     // 10) DATES. The day is a plain cardinal, except the first of the month — and the varieties DIFFER, so
     //     this is dialect-gated like the Spanish equivalent: Brazil says *primeiro de julho*, Portugal
@@ -269,9 +281,9 @@ export function normalizePortuguese(input: string, brazilian = false): string {
 }
 
 /** An hour/minute pair → "sete horas e dezenove" / "uma hora". */
-function clockWords(h: number, min: number | undefined): string {
-    const head = `${feminineCardinal(h)} ${h === 1 ? MANIFEST.clock.hour : MANIFEST.clock.hours}`;
+function clockWords(h: number, min: number | undefined, dialect: Dialect): string {
+    const head = `${feminineCardinal(h, dialect)} ${h === 1 ? MANIFEST.clock.hour : MANIFEST.clock.hours}`;
     return min === undefined || min === 0
         ? head
-        : `${head} ${MANIFEST.clock.connector} ${feminineCardinal(min)}`;
+        : `${head} ${MANIFEST.clock.connector} ${feminineCardinal(min, dialect)}`;
 }

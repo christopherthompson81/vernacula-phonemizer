@@ -28,7 +28,10 @@ public static class Normalize
      * Ukrainian/Normalize.cs, which hit it first.
      */
     private static string DegreeWord(string n) =>
-        Js.Number(Js.ReplaceFirst(n, ",", ".")) == 1 ? DEGREE.Singular : DEGREE.Plural;
+        Js.Number(Js.ReplaceFirst(Rewrite(n, DEGREE_GROUP_DOT, ""), ",", ".")) == 1 ? DEGREE.Singular : DEGREE.Plural;
+
+    // The number tokenizer's thousands dot (Portuguese.cs TOKEN): every dot except one after a lone 0.
+    private static readonly JsRe DEGREE_GROUP_DOT = JsRegex.Compile("(?<!(?<!\\d)0)\\.", "gu");
 
     /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare
      *  "no" is an extremely common Portuguese contraction (em + o), so only `nº`/`n.º`/`no` before a DIGIT
@@ -74,17 +77,18 @@ public static class Normalize
         string.Join(" ", masc.Split(' ').Select(w => Rewrite(w, FINAL_O, "a")));
 
     /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora). */
-    private static string FeminineCardinal(double n) => FINAL_UM.Replace(Numbers.NumberToWords(n), DEF.FeminineOne);
+    private static string FeminineCardinal(double n, string dialect) =>
+        FINAL_UM.Replace(Numbers.NumberToWords(n, dialect), DEF.FeminineOne);
 
     /** Suppletive fraction denominators (portuguese.jsonc `fractions`); the rest take the ordinal. */
     private static readonly IReadOnlyDictionary<string, string> DENOMINATOR = DEF.Fractions.Denominators;
 
-    private static string? FractionWords(int num, int den)
+    private static string? FractionWords(int num, int den, string dialect)
     {
         if (den < 2 || num < 1) return null;
         var baseWord = DENOMINATOR.GetValueOrDefault(Js.NumberToString(den)) ?? RomanOrdinals.PortugueseOrdinal(den);
         if (baseWord is null) return null;
-        return $"{Numbers.NumberToWords(num)} {(num > 1 ? $"{baseWord}s" : baseWord)}";
+        return $"{Numbers.NumberToWords(num, dialect)} {(num > 1 ? string.Join(" ", baseWord.Split(' ').Select(w => $"{w}s")) : baseWord)}";
     }
 
     private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
@@ -123,6 +127,7 @@ public static class Normalize
     /** Normalize one Portuguese input string. */
     public static string NormalizePortuguese(string input, bool brazilian = false)
     {
+        var dialect = brazilian ? "bp" : "ep";
         var s = input;
 
         s = Rewrite(s, GROUP_SPACE_RE, "");
@@ -168,8 +173,8 @@ public static class Normalize
 
         s = Rewrite(s, CLOCK_H, m => ClockWords(
             Js.Number(m.Groups[1].Value),
-            m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? Js.Number(m.Groups[2].Value) : null));
-        s = Rewrite(s, CLOCK_COLON, m => ClockWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value)));
+            m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? Js.Number(m.Groups[2].Value) : null, dialect));
+        s = Rewrite(s, CLOCK_COLON, m => ClockWords(Js.Number(m.Groups[1].Value), Js.Number(m.Groups[2].Value), dialect));
 
         s = Rewrite(s, MINUS, $"$1{SIGN.Minus} $2");
         // ± is a single character (U+00B1), not a `+`, so no `+` rule can ever match inside it.
@@ -183,7 +188,7 @@ public static class Normalize
         s = Rewrite(s, DIVIDE, $" {SIGN.DividedBy} ");
 
         s = Rewrite(s, FRACTION, m =>
-            FractionWords((int)Js.Number(m.Groups[1].Value), (int)Js.Number(m.Groups[2].Value)) ?? m.Value);
+            FractionWords((int)Js.Number(m.Groups[1].Value), (int)Js.Number(m.Groups[2].Value), dialect) ?? m.Value);
 
         if (brazilian)
             s = Rewrite(s, FIRST_OF_MONTH, m => $"{DEF.Ordinals.Units[1]} de {m.Groups[1].Value}");
@@ -192,9 +197,9 @@ public static class Normalize
     }
 
     /** An hour/minute pair → "sete horas e dezenove" / "uma hora". */
-    private static string ClockWords(double h, double? min)
+    private static string ClockWords(double h, double? min, string dialect)
     {
-        var head = $"{FeminineCardinal(h)} {(h == 1 ? DEF.Clock.Hour : DEF.Clock.Hours)}";
-        return min is null || min == 0 ? head : $"{head} {DEF.Clock.Connector} {FeminineCardinal(min.Value)}";
+        var head = $"{FeminineCardinal(h, dialect)} {(h == 1 ? DEF.Clock.Hour : DEF.Clock.Hours)}";
+        return min is null || min == 0 ? head : $"{head} {DEF.Clock.Connector} {FeminineCardinal(min.Value, dialect)}";
     }
 }
