@@ -305,3 +305,36 @@ csharp/tools/parity -- cmn cdo`; all dumps regenerated from the fixed TS (`.prob
 
 **Implication.** The four findings are closed in all three engines. The cdo golden needs regenerating (3 rows, each
 only the dropped 𡅏) once the drop decision is accepted.
+
+## Run 9 — 2026-10-09 18:55 (decision accepted; cdo regenerated)
+
+**Context.** The coordinator accepted the Run 8 decision (fold, 々 repeats, drop the rest). The trace consequence is
+safe for Kokoro: its `FromTrace` splits a Han run per hanzi ONLY when the group count equals the hanzi count, so a
+dropped character makes it fall back to one span for the whole run, never to a misaligned per-hanzi split. The two
+sibling findings (urdu's fraction guard, cdo's Latin passthrough) are being filed as issues by the coordinator.
+
+**Commands.** `npx tsx tools/gen_parity_goldens.mts cdo`; a row-by-row check against the committed cdo.tsv (text
+column equal, and the IPA column equal to the old one with every ` 𡅏` removed); `dotnet run -c Release
+--project csharp/tools/parity -- cdo cmn`; `npm run check:goldens`.
+
+**Raw finding.** `csharp/goldens/cdo.tsv`: 3 lines changed (168, 174, 190), 5 `𡅏` removed (3 + 1 + 1), text columns
+unchanged, and each new IPA is exactly the old one minus ` 𡅏`. Nothing else moved. C# parity: `cdo OK 200 rows`,
+`cmn OK 200 rows`. `check:goldens`: `goldens fresh: 189 languages, 36495 rows, 0 stale`.
+
+**Implication.** Goldens fresh fleet-wide on this branch. Next: rebase onto main (Italian fixes, #1479) and re-gate.
+
+## Run 10 — 2026-10-09 19:20 (rebase onto 944b4940)
+
+**Commands.** `git rebase origin/main` (clean, no conflicts, regex-corpus.jsonl included); `npx tsx tools/extract_regexes.mts`
+(2,382 patterns, no diff: the merged corpus is fresh); `npm run check:goldens`; `npx vitest run`; `dotnet test` (full);
+C# `regex-diff` and `parity -- cdo cmn it`; Rust `parity` (all), `regex-diff`, `.probe/cmn/dumps.sh`,
+`cargo test --workspace --release`, `cargo build --workspace`.
+
+**Raw finding.** Goldens: `fresh: 189 languages, 36495 rows, 0 stale`; vs main only `csharp/goldens/cdo.tsv` differs
+(the 3 rows). TS `6390 passed, 5 skipped, 0 failed` (340 files). C# `7057 passed, 0 failed`. regex-diff C#
+`145198 identical, 0 DIFFER`, Rust `145198 identical, 0 DIFFER, 0 refused`. C# parity cdo/cmn/it 200/200. Rust parity
+all 10 languages 200/200. Dumps: cmn-normalize 12588/0, cmn-segment 16784/0, cmn-pinyin 54940/0, cmn-numbers 20608/0,
+cmn-trace-extras 14/0, phonemize-sync/best/trace 4184 / 5 (the port-pending el ×2, th, ru, ko). Rust tests 70 + 1,
+0 warnings.
+
+**Implication.** Ready for review.
