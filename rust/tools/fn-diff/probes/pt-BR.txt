@@ -45,6 +45,8 @@ O BUS$ 5 chegou
 Fazia 25 °C e 1 °C e 21°C
 Mediu 1,0 °F e 1.000 °C
 Mediu 1.000° e 1.000 °F e 0.5 °C e 1.5 °C e 00.5° e 1.000.000 °C
+Mediu 2.000.001° e 1.000.001 °C e 1.001 °F e 21.1 °C e 0.1 °C
+Mediu 1,0 °C e 1,000 °C e 1.000,1° e 01 °C e 0,0 °F
 Estava a 30° hoje
 Em 25°Cölner rua
 Fazia 25 °Celsius

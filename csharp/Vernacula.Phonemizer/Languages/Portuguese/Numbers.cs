@@ -20,6 +20,18 @@ public static class Numbers
         [19] = "dezenove",
     };
 
+    /** The number token (TS `NUMBER_TOKEN`): one source for the tokenizer and the degree count. */
+    public const string NUMBER_TOKEN = "\\d+(?:(?<!(?<!\\d)0)\\.\\d+)*(?:,\\d+)?";
+
+    private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "g");
+
+    /** A number token → its integer digits (thousands dots removed) and its decimal digits, if any. */
+    public static (string IntDigits, string? Frac) SplitNumberToken(string tok)
+    {
+        var split = tok.Split(',');
+        return (DOT_G.Replace(split[0], ""), split.Length > 1 ? split[1] : null);
+    }
+
     private static string Small(int i, string dialect) =>
         (dialect == "bp" ? SMALL_BP.GetValueOrDefault(i) : null) ?? N.Small[i];
 
@@ -40,9 +52,9 @@ public static class Numbers
         return r != 0 ? $"{HUNDREDS[h]} {E} {Below100(r, dialect)}" : HUNDREDS[h];
     }
 
-    /** Non-negative integer (< 10⁹) → Portuguese words (`dialect`: European default, Brazilian teens for "bp");
-     *  larger / non-finite → digit-by-digit. */
-    public static string NumberToWords(double n, string dialect = "ep", string? raw = null)
+    /** Non-negative integer (< 10⁹) → Portuguese words (`dialect`: Brazilian teens for "bp"); larger /
+     *  non-finite → digit-by-digit. ⚠ `dialect` has no default, as in the TS: every caller chooses (#1463). */
+    public static string NumberToWords(double n, string dialect, string? raw = null)
     {
         if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1e9)
             return string.Join(" ", (raw ?? Js.NumberToString(Math.Abs(n)))

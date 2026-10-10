@@ -6,6 +6,7 @@
  * No lexicon (yet).
  */
 
+import type { Dialect } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { latinPhone } from "../../core/latinPhones.ts";
 
@@ -115,7 +116,7 @@ function foldForeignLetters(w: string): string {
 
 /** Scan a lowercased word into segments (consonants realized in place; vowels get stressed-quality IPA).
  *  `dialect` only affects the word-final -em nucleus (EP [ɐ̃j̃] vs BP [ẽj̃]); everything else is shared. */
-export function toSegments(word: string, dialect: "ep" | "bp" = "ep"): Seg[] {
+export function toSegments(word: string, dialect: Dialect = "ep"): Seg[] {
     const w = foldForeignLetters(word.toLowerCase());
     const n = w.length;
     const segs: Seg[] = [];
@@ -348,7 +349,7 @@ const isVowelPh = (ph: string): boolean => /[aɐɛeiɔouɨ]/.test(ph);
  *  and do not voice. The coda sibilant is postalveolar ʃ/ʒ in EP but ALVEOLAR s/z in (standard/paulistano) BP
  *  (luz → EP luʃ / BP lus; mesmo → EP meʒmu / BP mezmu) — the `dialect` selects the pair. */
 const VOICED = new Set(MANIFEST.voicedConsonants);
-export function sibilants(segs: Seg[], dialect: "ep" | "bp" = "ep"): void {
+export function sibilants(segs: Seg[], dialect: Dialect = "ep"): void {
     const [coda, codaVoiced] = dialect === "bp" ? ["s", "z"] : ["ʃ", "ʒ"];
     for (let i = 0; i < segs.length; i++) {
         const s = segs[i]!;

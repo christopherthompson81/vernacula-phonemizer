@@ -27,11 +27,12 @@ public static class Normalize
      * capture, since `21 °C` would have matched the `1` and said *grau*. The same trap is recorded in
      * Ukrainian/Normalize.cs, which hit it first.
      */
-    private static string DegreeWord(string n) =>
-        Js.Number(Js.ReplaceFirst(Rewrite(n, DEGREE_GROUP_DOT, ""), ",", ".")) == 1 ? DEGREE.Singular : DEGREE.Plural;
-
-    // The number tokenizer's thousands dot (Portuguese.cs TOKEN): every dot except one after a lone 0.
-    private static readonly JsRe DEGREE_GROUP_DOT = JsRegex.Compile("(?<!(?<!\\d)0)\\.", "gu");
+    private static string DegreeWord(string n)
+    {
+        // `n` is a whole number token; a spoken decimal part takes the plural (`1,0 °C` is *graus*).
+        var (intDigits, frac) = Numbers.SplitNumberToken(n);
+        return frac is null && Js.Number(intDigits) == 1 ? DEGREE.Singular : DEGREE.Plural;
+    }
 
     /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare
      *  "no" is an extremely common Portuguese contraction (em + o), so only `nº`/`n.º`/`no` before a DIGIT
@@ -108,9 +109,10 @@ public static class Normalize
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
     // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See
     // src/languages/*/normalize.ts, which carries the finding.
-    private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?C(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe DEG_F = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°\\s?F(?![\\p{L}\\p{M}])", "giu");
-    private static readonly JsRe DEG = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?°", "gu");
+    // The count is the tokenizer's whole number token, never its tail (`2.000.001°` counted 1).
+    private static readonly JsRe DEG_C = JsRegex.Compile($"({Numbers.NUMBER_TOKEN})\\s?°\\s?C(?![\\p{{L}}\\p{{M}}])", "giu");
+    private static readonly JsRe DEG_F = JsRegex.Compile($"({Numbers.NUMBER_TOKEN})\\s?°\\s?F(?![\\p{{L}}\\p{{M}}])", "giu");
+    private static readonly JsRe DEG = JsRegex.Compile($"({Numbers.NUMBER_TOKEN})\\s?°", "gu");
     private static readonly JsRe CLOCK_H = JsRegex.Compile("\\b([01]?\\d|2[0-3])\\s?h\\s?([0-5]\\d)?(?![\\p{L}\\p{M}\\d])", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("\\b([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-−–](\\d)", "gu");

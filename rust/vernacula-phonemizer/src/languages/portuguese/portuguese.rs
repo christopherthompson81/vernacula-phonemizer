@@ -7,10 +7,10 @@ use std::sync::{Arc, LazyLock, OnceLock};
 
 use indexmap::IndexMap;
 
-use super::g2p::{Dialect, Seg, sibilants, to_segments};
+use super::g2p::{Seg, sibilants, to_segments};
 use super::manifest::{DIR, MANIFEST, try_manifest};
 use super::normalize::{normalize_portuguese, normalize_portuguese_initialisms};
-use super::numbers::number_to_words;
+use super::numbers::{Dialect, NUMBER_TOKEN, number_to_words, split_number_token};
 use crate::core::clauses::assemble_clauses;
 use crate::core::data_source::load_once;
 use crate::core::js_regex::JsRegex;
@@ -283,17 +283,13 @@ pub fn phonemize_word(word: &JsString, dialect: Dialect) -> Result<JsString, Pho
 }
 
 fn token() -> &'static JsRegex {
-    js_re!(
-        r"([a-zà-ÿ]+)|(\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?)|([.!?…,;:])",
-        "giu"
-    )
+    js_re!(&format!("([a-zà-ÿ]+)|({NUMBER_TOKEN})|([.!?…,;:])"), "giu")
 }
 
 fn number_token_to_words(tok: &JsString, dialect: Dialect) -> JsString {
-    let parts = tok.split(&js(","));
-    let int_digits = js_re!(r"\.", "g").replace(&parts[0], &JsString::new());
+    let (int_digits, frac) = split_number_token(tok);
     let mut words = number_to_words(js_number(&int_digits), dialect, Some(&int_digits));
-    if let Some(frac) = parts.get(1) {
+    if let Some(frac) = frac {
         words.push_str(&js(&format!(" {} ", MANIFEST.numbers.decimal_connector)));
         let digits: Vec<JsString> = (0..frac.len())
             .map(|i| number_to_words(js_number(&frac.char_at(i)), dialect, None))

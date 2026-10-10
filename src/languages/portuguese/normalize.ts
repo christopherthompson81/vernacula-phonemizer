@@ -18,7 +18,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
-import { numberToWords } from "./numbers.ts";
+import { NUMBER_TOKEN, numberToWords, splitNumberToken, type Dialect } from "./numbers.ts";
 import { portugueseOrdinal } from "./romanOrdinals.ts";
 import { rewrite } from "../../core/provenance.ts";
 
@@ -34,12 +34,22 @@ const DEG = MANIFEST.degree;
  * ukrainian/normalize.ts, which hit it first.
  */
 function degreeWord(n: string): string {
-    // ⚠ READ THE COUNT THE WAY THE NUMBER TOKENIZER WILL SAY IT (portuguese.ts TOKEN): a dot is a thousands
-    // separator, except after a lone 0, and a comma is the decimal point. `Number("1.000")` is 1, so `1.000 °C`
-    // was *mil grau* in the singular.
-    const count = Number(n.replace(/(?<!(?<!\d)0)\./gu, "").replace(",", "."));
-    return count === 1 ? DEG.singular : DEG.plural; // a numeral string
+    // ⚠ READ THE COUNT THE WAY THE NUMBER TOKENIZER WILL SAY IT: `n` is a whole NUMBER_TOKEN, split by the
+    // tokenizer's own rule. `Number("1.000")` is 1, so `1.000 °C` was *mil grau* in the singular. A decimal
+    // part is SPOKEN (*um vírgula zero*), and a spoken fraction takes the plural: `1,0 °C` is *graus*.
+    const { intDigits, frac } = splitNumberToken(n);
+    return frac === undefined && Number(intDigits) === 1 ? DEG.singular : DEG.plural;
 }
+
+/**
+ * The three degree rules. ⚠ THE COUNT IS THE TOKENIZER'S WHOLE NUMBER TOKEN, NOT A ONE-SEPARATOR
+ * APPROXIMATION OF IT: `\d+(?:[.,]\d+)?` matched only the TAIL of a multi-group number, so `2.000.001°` and
+ * `1.000.001 °C` were counted as 1 and read *grau*. Sharing NUMBER_TOKEN also means the count is exactly what
+ * the tokenizer then says, including its lone-0 rule (`0.1 °C` is *zero . um grau*).
+ */
+const DEGREE_C = new RegExp(`(${NUMBER_TOKEN.source})\\s?°\\s?C(?![\\p{L}\\p{M}])`, "giu");
+const DEGREE_F = new RegExp(`(${NUMBER_TOKEN.source})\\s?°\\s?F(?![\\p{L}\\p{M}])`, "giu");
+const DEGREE_BARE = new RegExp(`(${NUMBER_TOKEN.source})\\s?°`, "gu");
 
 const GROUP_SPACE = "    ";  // NBSP, NNBSP, thin space
 const MONTHS = MANIFEST.months.join("|");
@@ -81,8 +91,6 @@ export function normalizePortugueseInitialisms(text: string): string {
 function feminineOrdinal(masc: string): string {
     return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
 }
-
-type Dialect = "ep" | "bp";
 
 /** Non-negative integer → words with the final *um* feminized (hora and minuto agreement: uma hora).
  *  ⚠ `dialect` IS REQUIRED: without it pt-BR read its clock in the European teens (*dezasseis horas e
@@ -217,11 +225,9 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     // NON-ASCII letter counts as a boundary and this rule fired when it must not: `25°Cölner` ate the ⟨C⟩
     // as Celsius and left "ölner" behind. Invisible to any ASCII fixture, and this language's own
     // orthography is what supplies the accented letter. 71 other engines already guard it this way.
-    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])/giu,
-        (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.celsius}`);
-    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])/giu,
-        (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.fahrenheit}`);
-    s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?°/gu, (_m, n: string) => `${n} ${degreeWord(n)}`);
+    s = rewrite(s, DEGREE_C, (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.celsius}`);
+    s = rewrite(s, DEGREE_F, (_m, n: string) => `${n} ${degreeWord(n)} ${DEG.fahrenheit}`);
+    s = rewrite(s, DEGREE_BARE, (_m, n: string) => `${n} ${degreeWord(n)}`);
 
     // 7) CLOCK. Two forms occur and BOTH were broken: the `h` form (×28) dropped its marker entirely
     //    ("07h19" → "sete dezenove") and the colon form (×17) turned the colon into a PAUSE with a

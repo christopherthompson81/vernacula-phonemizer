@@ -12,12 +12,8 @@ use crate::core::latin_phones::{PhoneOpts, latin_phone};
 use crate::core::provenance::{Form, normalize};
 use crate::js_re;
 
-/// `"ep" | "bp"`.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
-pub enum Dialect {
-    Ep,
-    Bp,
-}
+/// Defined in numbers.rs (numbers.ts exports the one `Dialect` type); re-exported for existing paths.
+pub use super::numbers::Dialect;
 
 #[derive(Clone, Debug)]
 pub struct Seg {

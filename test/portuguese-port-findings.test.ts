@@ -15,11 +15,17 @@ describe("the clock and fractions read the dialect's teens", () => {
         expect(phonemize("Às 16h17 em ponto", "pt-BR")).toBe("ˈas dezesˈejs ˈɔɾɐs e dezesˈɛt͡ʃi ẽj̃ pˈõtu");
     });
     test("the clock agrees with the number tokenizer in the same language", () => {
+        // Both halves: the HOUR (*dezesseis horas*) and the minutes (*dezessete*).
+        expect(phonemize("16h17", "pt-BR")).toContain(phonemize("16 horas", "pt-BR"));
         expect(phonemize("16h17", "pt-BR")).toContain(phonemize("17", "pt-BR"));
+        expect(phonemize("16h17", "pt")).toContain(phonemize("16 horas", "pt"));
         expect(phonemize("16h17", "pt")).toContain(phonemize("17", "pt"));
+        expect(normalizePortuguese("Às 16h", true)).toBe("Às dezesseis horas");
+        expect(phonemize("Às 16h", "pt-BR")).toBe("ˈas dezesˈejs ˈɔɾɐs");
     });
     test("pt keeps the European teens", () => {
         expect(normalizePortuguese("Às 16h17 em ponto")).toBe("Às dezasseis horas e dezassete em ponto");
+        expect(normalizePortuguese("Às 16h")).toBe("Às dezasseis horas");
         expect(normalizePortuguese("Às 19:16")).toBe("Às dezanove horas e dezasseis");
     });
     test("pt-BR fraction numerator says dezessete", () => {
@@ -47,7 +53,25 @@ describe("the degree noun counts dot-grouped thousands", () => {
         expect(normalizePortuguese("Mediu 1.000°")).toBe("Mediu 1.000 graus");
         expect(phonemize("Mediu 1.000 °C", "pt-BR")).toBe("med͡ʒˈiw mˈiw ɡɾˈaws sewsˈiws");
     });
-    test("the singular and the decimal comma are unchanged", () => {
+    test("a multi-group number is counted whole, not by its tail", () => {
+        // The tail of each is 1; the one-separator capture counted only it and said *grau*.
+        expect(normalizePortuguese("Mediu 2.000.001°")).toBe("Mediu 2.000.001 graus");
+        expect(normalizePortuguese("Mediu 1.000.001 °C")).toBe("Mediu 1.000.001 graus Celsius");
+        expect(normalizePortuguese("Mediu 1.001 °F")).toBe("Mediu 1.001 graus Fahrenheit");
+        expect(phonemize("Mediu 1.000.001 °C", "pt")).toBe("mɨdˈiw ũ miʎˈɐ̃w̃ e ũ ɡɾˈawʃ sɛɫsˈiwʃ");
+    });
+    test("a spoken decimal part takes the plural", () => {
+        // The tokenizer reads the comma as a decimal point (*um vírgula zero*), so the count is not one.
+        expect(normalizePortuguese("Mediu 1,0 °C")).toBe("Mediu 1,0 graus Celsius");
+        expect(normalizePortuguese("Mediu 1,000 °C")).toBe("Mediu 1,000 graus Celsius");
+        expect(phonemize("Mediu 1,0 °C", "pt-BR")).toBe("med͡ʒˈiw ũ vˈiɾɡulɐ zˈɛɾu ɡɾˈaws sewsˈiws");
+    });
+    test("the count is the tokenizer's token", () => {
+        // `0.1` is *zero . um* (a dot after a lone 0 is no group), so the noun agrees with *um*.
+        expect(normalizePortuguese("Mediu 0.1 °C")).toBe("Mediu 0.1 grau Celsius");
+        expect(normalizePortuguese("Mediu 21.1 °C")).toBe("Mediu 21.1 graus Celsius");
+    });
+    test("the singular and the plain decimal comma are unchanged", () => {
         expect(normalizePortuguese("Mediu 1 °C")).toBe("Mediu 1 grau Celsius");
         expect(normalizePortuguese("Mediu 1,5 °C")).toBe("Mediu 1,5 graus Celsius");
         // A dot after a lone 0 is not a group in the tokenizer either (`zero . cinco`).

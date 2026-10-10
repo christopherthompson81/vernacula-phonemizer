@@ -6,9 +6,8 @@
 use std::collections::HashSet;
 use std::sync::{Arc, LazyLock};
 
-use super::g2p::Dialect;
 use super::manifest::MANIFEST;
-use super::numbers::number_to_words;
+use super::numbers::{Dialect, NUMBER_TOKEN, number_to_words, split_number_token};
 use super::roman_ordinals::portuguese_ordinal;
 use crate::core::initialisms::{
     InitialismData, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
@@ -26,14 +25,10 @@ fn g(m: &JsMatch, i: usize, s: &JsString) -> JsString {
 }
 
 fn degree_word(n: &JsString) -> &'static str {
-    // The tokenizer's thousands dots go first (every dot but one after a lone 0), then
-    // `.replace(",", ".")`: the first comma only.
-    let mut t = js_re!(r"(?<!(?<!\d)0)\.", "gu").replace(n, &JsString::new());
-    if let Some(i) = t.index_of(&js(","), 0) {
-        t.0[i] = '.' as u16;
-    }
+    // `n` is a whole number token; a spoken decimal part takes the plural (`1,0 °C` is *graus*).
+    let (int_digits, frac) = split_number_token(n);
     let d = &MANIFEST.degree;
-    if js_number(&t) == 1.0 {
+    if frac.is_none() && js_number(&int_digits) == 1.0 {
         &d.singular
     } else {
         &d.plural
@@ -260,7 +255,10 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     // 6) Degrees.
     s = rewrite_with(
         &s,
-        js_re!(r"(\d+(?:[.,]\d+)?)\s?°\s?C(?![\p{L}\p{M}])", "giu"),
+        js_re!(
+            &format!(r"({NUMBER_TOKEN})\s?°\s?C(?![\p{{L}}\p{{M}}])"),
+            "giu"
+        ),
         |mm, s| {
             let n = g(mm, 1, s);
             n.concat(&js(&format!(" {} {}", degree_word(&n), deg.celsius)))
@@ -268,16 +266,23 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     );
     s = rewrite_with(
         &s,
-        js_re!(r"(\d+(?:[.,]\d+)?)\s?°\s?F(?![\p{L}\p{M}])", "giu"),
+        js_re!(
+            &format!(r"({NUMBER_TOKEN})\s?°\s?F(?![\p{{L}}\p{{M}}])"),
+            "giu"
+        ),
         |mm, s| {
             let n = g(mm, 1, s);
             n.concat(&js(&format!(" {} {}", degree_word(&n), deg.fahrenheit)))
         },
     );
-    s = rewrite_with(&s, js_re!(r"(\d+(?:[.,]\d+)?)\s?°", "gu"), |mm, s| {
-        let n = g(mm, 1, s);
-        n.concat(&js(&format!(" {}", degree_word(&n))))
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(&format!(r"({NUMBER_TOKEN})\s?°"), "gu"),
+        |mm, s| {
+            let n = g(mm, 1, s);
+            n.concat(&js(&format!(" {}", degree_word(&n))))
+        },
+    );
 
     // 7) Clock.
     s = rewrite_with(
@@ -385,6 +390,8 @@ mod port_findings {
             "Às dezesseis horas e dezessete em ponto"
         );
         assert_eq!(n("Às 19:16", true), "Às dezenove horas e dezesseis");
+        assert_eq!(n("Às 16h", true), "Às dezesseis horas");
+        assert_eq!(n("Às 16h", false), "Às dezasseis horas");
         assert_eq!(
             n("Às 16h17 em ponto", false),
             "Às dezasseis horas e dezassete em ponto"
@@ -418,5 +425,23 @@ mod port_findings {
         assert_eq!(n("Mediu 1 °C", false), "Mediu 1 grau Celsius");
         assert_eq!(n("Mediu 1,5 °C", false), "Mediu 1,5 graus Celsius");
         assert_eq!(n("Mediu 0.5 °C", false), "Mediu 0.5 graus Celsius");
+    }
+
+    #[test]
+    fn multi_group_count_is_whole_not_its_tail() {
+        assert_eq!(n("Mediu 2.000.001°", false), "Mediu 2.000.001 graus");
+        assert_eq!(
+            n("Mediu 1.000.001 °C", false),
+            "Mediu 1.000.001 graus Celsius"
+        );
+        assert_eq!(n("Mediu 1.001 °F", false), "Mediu 1.001 graus Fahrenheit");
+        assert_eq!(n("Mediu 0.1 °C", false), "Mediu 0.1 grau Celsius");
+        assert_eq!(n("Mediu 21.1 °C", false), "Mediu 21.1 graus Celsius");
+    }
+
+    #[test]
+    fn spoken_decimal_part_takes_the_plural() {
+        assert_eq!(n("Mediu 1,0 °C", false), "Mediu 1,0 graus Celsius");
+        assert_eq!(n("Mediu 1,000 °C", false), "Mediu 1,000 graus Celsius");
     }
 }
