@@ -117,8 +117,9 @@ public static class Normalize
     private static readonly JsRe NUMERIC_DATE = JsRegex.Compile("\\b(\\d{1,2})[/.](\\d{1,2})[/.](\\d{4})\\b", "gu");
     private static readonly JsRe FIRST_OF_MONTH = JsRegex.Compile($"\\b1\\s+({MONTHS})\\b", "giu");
 
-    /** Normalize one French input string. */
-    public static string NormalizeFrench(string input, Func<string, bool> isWord)
+    /** Normalize one French input string. It takes no lexicon: the acronym-or-initialism decision belongs to
+     *  NormalizeFrenchInitialisms (#1463). */
+    public static string NormalizeFrench(string input)
     {
         var s = input;
 

@@ -193,14 +193,9 @@ fn money(int: &JsString, cents: &JsString, sym: &JsString) -> JsString {
     }
 }
 
-/// `normalizeFrench(input, isWord)`. Pure text→text.
-///
-/// `_is_word` mirrors the TS signature and is UNUSED there too (its docstring describes a decision that moved to
-/// `normalizeFrenchInitialisms`); kept until the TS drops it, reported in rust_fr_port_investigation.md.
-pub(crate) fn normalize_french_loaded(
-    input: &JsString,
-    _is_word: &dyn Fn(&JsString) -> bool,
-) -> JsString {
+/// `normalizeFrench(input)`. Pure text→text, and it takes no lexicon: the acronym-or-initialism decision is
+/// `normalizeFrenchInitialisms`'s (#1463).
+pub(crate) fn normalize_french_loaded(input: &JsString) -> JsString {
     let mut s = input.clone();
 
     // 0) digit grouping (twice: millions), then the remaining no-break spaces.
@@ -380,13 +375,10 @@ pub(crate) fn normalize_french_initialisms_loaded(
     )(text)
 }
 
-/// `normalizeFrench(input, isWord)`, or why the manifest is unavailable.
-pub fn normalize_french(
-    input: &JsString,
-    is_word: &dyn Fn(&JsString) -> bool,
-) -> Result<JsString, String> {
+/// `normalizeFrench(input)`, or why the manifest is unavailable.
+pub fn normalize_french(input: &JsString) -> Result<JsString, String> {
     super::manifest::try_manifest()?;
-    Ok(normalize_french_loaded(input, is_word))
+    Ok(normalize_french_loaded(input))
 }
 
 /// `normalizeFrenchInitialisms(text, isRecorded)`, or why the manifest is unavailable.

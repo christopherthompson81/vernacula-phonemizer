@@ -279,7 +279,101 @@ shared lists whole and do all ten languages still pass?
 - `cargo test --workspace`: 65 + 1 passed. `cargo build`: 0 warnings. `cargo fmt --check` was left alone, since
   it already fails on main.
 
+## Run 12 — 2026-10-09 18:00 (the TS findings, fixed TS-first, branch `fix/fr-port-findings`)
+
+**Question:** can findings 1–3 below be fixed on both sides without regressing a reading? In particular, finding 2
+(the pre-pass scans the raw text) is protective today (Run 9). What does moving it change, and in what order
+must the change go in?
+
+**Instruments** (all in the gitignored `.probe/fr/`):
+- `corpus.mts OUT` reads every fr text: the fr and fr-CA golden text columns, FLEURS fr_fr columns 3+4, and
+  probes/fr.txt (4,042 distinct texts). For each it records `phonemizeAsync(fr)`, `phonemize(fr)` and
+  `phonemize(fr-CA)`. `diff.mts A B` compares two such runs.
+- `letters.mts` reads every word `letterNames` emits four ways: Lexique, supplement, rule g2p, tagger.
+- `emitted.mts` is the audit. It collects every word the normalizer can EMIT: the manifest's symbolTier,
+  letterNames and numbers blocks, `numberToWords`/`ordinal` for 0–2000, the string literals of normalize.ts, and
+  every word of `normalizedFor(t)` over the corpus that is absent from the raw `t`. It keeps the words that
+  neither Lexique nor the supplement answers and that pass IN_VOCAB, and compares the g2p with the tagger on each.
+- `emit-letter-rows.mts` / `emit-rows.mts` print supplement rows with `toIpa`'s own value, so no IPA is typed.
+
+**Raw findings, in order:**
+1. `letters.mts`: Lexique lacks 10 letter-name words (cé effe gé ji emme enne pé ku vé zède). The tagger
+   disagrees with the g2p on 3 of them: effe ɛf/**ef**, ji ʒi/**dʒi**, emme ɛm/**ɑ̃m**. The g2p is right on
+   all 10.
+2. Baseline `corpus.mts` → base.jsonl. After adding the 10 rows to supplement.tsv (with the g2p value):
+   **best 0, sync 0, fr-CA 0 changed.** That is expected, because the rows equal what the g2p already said.
+3. Pre-pass moved onto `normalizedFor(text)`, with `frenchHasWord` (Lexique ∪ supplement) as the skip test:
+   **best 0, sync 0, fr-CA 0 changed** over the 4,042 texts.
+4. Counterfactual: the pre-pass moved WITHOUT the supplement rows (nosup.jsonl). **best changed on 18 FLEURS +
+   2 probe texts, sync 0, fr-CA 0.** Every one is a letter name, and every one regressed: `ɛʁ ɛm` → `ɛʁ ɑ̃m`
+   (×11 emme), `dy ɛf be` → `dy ef be` (×6 effe), `aʃ ʒi ɛʁ` → `aʃ dʒi ɛʁ` (×1 ji), and the two probe rows
+   (`ʒi` → `dʒi`, `ˈɛf` → `ˈef`). This is Run 9's 18 texts, so the order of the fix was load-bearing.
+5. Audit, first pass: **261 emitted words, 35 miss Lexique+supplement, 16 where g2p ≠ tagger.** Classified:
+
+   | word | source | g2p | tagger | class |
+   |---|---|---|---|---|
+   | kilooctet, kilooctets | symbolTier (`ko`) | kilɔɔktɛ | kilɔktɛ | **REAL regression**: drops kilo's vowel. `un fichier de 5 ko` read sync `kilɔɔktˈɛ`, async `kilɔktˈɛ` |
+   | unióenne | corpus-normalized | ynioɛn | "" (declined) | no change: a declined tag falls to the g2p (and see the defect below) |
+   | mlles, mmes | DOT_ONLY keys | mlə / mə | ̃l / mamam | no change from the fix: the dot-stripped word was already in the RAW text, so the old scan offered it too |
+   | st | DOTTED_ABBREV key | "" | st | not emitted: `st.` is expanded to saint, and a bare `st` is raw text |
+   | av | DOTTED_ABBREV key | a | av | not emitted: the expansion is avenue |
+   | cetera | comment in normalize.ts | sətəʁa | setəʁa | not emitted (DOT_ONLY exists so it is never expanded) |
+   | also, eight, nineteen, numbers, initialisms, manifest, wayne, ts | comments / identifiers in normalize.ts | | | not emitted: a literal-scrape artifact |
+
+   The 19 agreeing words: cuisinéesse, mélangéesse, prononcéesse (corpus-normalized), vingts, centilitre,
+   décilitres, gigaoctet, mégaoctet, mégaoctets, millilitres, after, plus the literal-scrape artifacts (and, core,
+   eighty, giu, gu, h, james, ordinals).
+6. I stopped and reported the kilooctet regression. The coordinator approved the same remedy as for the letter names:
+   `kilooctet` and `kilooctets` went into supplement.tsv with the g2p value (kilɔɔktɛ). Re-audit:
+   **261 emitted, 33 miss, 14 differ**, and all 14 are the no-change / not-emitted rows above. 0 real disagreements
+   remain. `corpus.mts` → fix2.jsonl: **best 0, sync 0, fr-CA 0 changed.** `5 ko` is `kilɔɔktˈɛ` on both paths.
+
+**Pre-existing defects the audit surfaced (NOT fixed here, outside this change):**
+- **The name-initial rule fires after a non-ASCII letter.** `Unión.` → `Unióenne` and `cuisinés.` →
+  `cuisinéesse`, on the SYNC path too: the final `n.`/`s.` is read as a name initial (`enne`/`esse`), and the
+  sentence break is lost. It looks like an ASCII `\b` boundary between `ó`/`é` and the letter. It is visible in
+  FLEURS.
+- **`Mlles` reads `̃l` on the best path** (a lone combining tilde from the tagger) and `mlə` on the sync path.
+  `Mmes` reads `dø miljɛm` (the Roman-numeral path takes `MM`). Both predate this change.
+
+**Gates (pre-rebase):**
+- `npx vitest run`: 6,384 passed, 5 skipped (339 files). An earlier run had 7 `check-goldens-jobs` failures:
+  the worktree had no `node_modules/.bin/tsx`, which is environmental, and the tests pass once it is linked.
+- `npm run check:goldens`: 189 languages, 36,495 rows, **0 stale**, so no golden is regenerated (fr and fr-CA did not move).
+- `npx tsx tools/extract_regexes.mts` re-extracted: 1 row changed, the IN_VOCAB pattern without the hyphen.
+  The C# regex-diff gives 145,140 identical, 0 DIFFER.
+- `dotnet test csharp` (full): **7,039 passed**. No C# test pinned an old reading.
+- fn-diff from the fixed TS: fr-normalize 12,126/0, fr-g2p 139,485/0, fr-tagger 15,006/0. phonemize-sync,
+  -best and -trace (LANGS=fr) are each **4,041/4,042**. The one differing row is the ru/el port-pending probe,
+  unchanged from Run 11.
+- `cargo run --release -p parity`: all ten languages 200/200. fr `--sync`: 157/200 (unchanged).
+  `cargo test --workspace`: 67 + 1 passed. `cargo build` (debug and release): 0 warnings. `cargo fmt --check`: clean.
+
+**Each test proved by reverting its fix:**
+- Scan back on the raw text: the "normalizer-created word is offered" test goes red in TS, C# and Rust.
+- Skip test back to Lexique-only: the 4 "supplement word not offered" cases go red in TS, C# and Rust.
+- Supplement rows removed: the same 4 go red in TS.
+- `isWord` parameter restored: the arity test goes red in TS and C#. In Rust the compiler enforces the signature.
+
+⚠ The first TS test used `vi.mock` on frenchTagger.ts. It passed alone and failed in the full suite, because
+vitest runs `isolate: false` here: another file had already memoized an unwrapped tagger in `taggerP`. Replaced by
+an exported seam, `frenchPrepassWith(tagger, text)`, which C# (`PrepassWith`, internal) and Rust (`prepass_with`)
+mirror.
+
+**Gates after rebasing onto `origin/main` 944b4940 (#1479, the Italian fixes):** the rebase was clean, and the
+re-extracted regex corpus matches the committed one. check:goldens 0 stale. vitest 6,388 passed, 5 skipped (340
+files). dotnet test 7,043 passed. regex-diff 145,198 identical, 0 DIFFER. fn-diff unchanged (fr-normalize,
+fr-g2p and fr-tagger all 0 DIFFER; phonemize-sync, -best and -trace each 4,041/4,042, the ru/el probe). parity:
+all ten languages 200/200, fr `--sync` 157/200. cargo test 68 + 1. 0 warnings, fmt clean.
+
+**Implication:** findings 1–3 are fixed on all three engines with no reading moved on any instrument. What the
+fix buys is coverage: a normalizer-created OOV word now gets the tagger reading. On today's data every such word
+either agrees with the g2p or is a supplement row, so the gain is latent until the normalizer emits a new word.
+The audit is the check to re-run when it does.
+
 ## Findings in the TS (reported, not fixed in Rust)
+
+**Status: 1–3 are FIXED TS-first, with C# and Rust following (Run 12).**
 
 1. **`normalizeFrench(input, isWord)` never reads `isWord`.** Its docstring says the parameter "decides
    whether an all-caps run is an acronym to be read as a word or an initialism to be spelled out", but that

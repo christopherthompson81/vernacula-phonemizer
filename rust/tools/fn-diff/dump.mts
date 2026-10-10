@@ -751,7 +751,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const lex = loadTsvMap(new URL("../../../src/languages/french/french.ts", import.meta.url).href, "lexicon.tsv");
         const isWord = (w: string): boolean => lex.has(w);
         for (const [t, src] of textsFor(["fr"], "fr_fr", ["fr.txt"])) {
-            const a = N.normalizeFrench(t, isWord);
+            const a = N.normalizeFrench(t);
             emit({ text: units(t), src, op: "normalize" }, a);
             const b = normalizeRomans(O.normalizeFrenchOrdinalDigits(O.normalizeFrenchOrdinalRomans(a, isWord)));
             emit({ text: units(a), src, op: "numerals" }, b);

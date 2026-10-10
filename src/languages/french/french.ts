@@ -36,7 +36,12 @@ function lexicon(): Map<string, string> {
  * final ⟨s⟩ that French sounds in this Latin loan ([sɛlsjys], not [sɛlsjy]).
  *
  * Audited rather than guessed: every word the normalizer can emit was checked against Lexique, and only the
- * ones actually wrong are listed — which is why this is three lines and not twenty-two.
+ * ones actually wrong are listed.
+ *
+ * ⚠ SINCE THE NEURAL PRE-PASS SCANS THE NORMALIZED TEXT (#1463), "WRONG" ALSO MEANS WRONG IN THE TAGGER. A
+ * normalizer-emitted word that misses Lexique is now offered to the tagger, which reads some of them worse
+ * than the rule g2p: the letter names `effe`, `emme`, `ji` and the unit word `kilooctet`. Those rows carry
+ * the g2p's own reading, so the sync path does not move; the file's comments say why each one exists.
  *
  * ⚠ DELIBERATE NON-ENTRY: `Jésus-Christ`. The g2p gives [ʒezykʁist] and the traditional dictionary form is
  * [ʒezykʁi], but both are current in speech, so the existing reading is a legitimate variant rather than a
@@ -52,6 +57,17 @@ function supplement(): Map<string, string> {
  *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
 export function frenchLexicon(): Map<string, string> {
     return lexicon();
+}
+
+/**
+ * Does Lexique or the SUPPLEMENT answer this lowercased word? The neural pre-pass's skip test.
+ *
+ * ⚠ THE SUPPLEMENT TOO, NOT LEXIQUE ALONE. `phonemizeWord` consults the supplement BEFORE the tagger's
+ * override, so a supplement word that reached the tagger was an ONNX call whose answer was thrown away. Since
+ * the pre-pass scans the NORMALIZED text (#1463) that is every letter name an initialism spells out.
+ */
+export function frenchHasWord(lower: string): boolean {
+    return lexicon().has(lower) || supplement().has(lower);
 }
 
 const VOWEL_IPA = /[aeiouyɛɔøœəɑ]/;
@@ -192,15 +208,38 @@ function normalizeFrenchNumerals(text: string): string {
 class FrenchPhonemizer implements Phonemizer {
     constructor(private readonly foreign?: (latin: string) => string) {}
 
-    // `oovOverride` (neural path only, frNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
-    // path omits it, so tokenizer / numbers / liaison / accentuation are byte-identical to phonemize(text, "fr").
-    text(input: string, oovOverride?: OovResolver): string {
+    /**
+     * The text as the TOKENIZER will see it — every normalization pass, and nothing after.
+     *
+     * ⚠ THE NEURAL PRE-PASS NEEDS THIS AND USED THE RAW TEXT INSTEAD (#1463, English's #1452). A word the
+     * NORMALIZER creates — a number word, an expanded abbreviation, a unit, a spelled-out letter — is not in
+     * the caller's string, so it was never offered to the tagger. Exposed here rather than duplicated in
+     * frenchNeural.ts so the two cannot drift: this is the expression `text()` runs.
+     */
+    normalizedFor(input: string): string {
         const isWord = (w: string): boolean => lexicon().has(w);
         // NORMALIZATION ORDER: general text normalization (abbreviations, era markers, numéro,
         // digit degrouping) → NUMERALS (roman ordinals, digit ordinals, bare romans) → INITIALISMS, which
         // must see the all-caps runs the numeral pass declined → SYMBOLS (%, currency, units) last, since
         // the time rule upstream has already claimed the hour marker.
-        input = SYMBOLS(normalizeFrenchInitialisms(normalizeFrenchNumerals(normalizeFrench(input, isWord)), isWord));
+        return SYMBOLS(normalizeFrenchInitialisms(normalizeFrenchNumerals(normalizeFrench(input)), isWord));
+    }
+
+    // `oovOverride` (neural path only, frNeural.ts) resolves OOV words between the lexicon and the rule g2p; the sync
+    // path omits it, so tokenizer / numbers / liaison / accentuation are byte-identical to phonemize(text, "fr").
+    text(
+        input: string,
+        oovOverride?: OovResolver,
+        /**
+         * `input` has ALREADY been through `normalizedFor` — skip it rather than run it twice. The neural
+         * pre-pass has to SEE the normalized text, and it is async, so it normalizes in the caller and hands
+         * the result on. Running the passes again over their own output would cost a second pass and is not
+         * known to be the identity, so the engine trusts the flag instead.
+         * ⚠ PASSING `true` WITH UNNORMALIZED TEXT IS A SILENT WRONG READING. Only frenchNeural.ts sets it.
+         */
+        preNormalized = false,
+    ): string {
+        if (!preNormalized) input = this.normalizedFor(input);
         enterEngine(input);
         // Flatten to a sequence of word strings / pause marks (numbers expand to their spelled words), so liaison
         // can look one word ahead across the whole stream (incl. spelled numbers: "2 ans" → deux → dø zˈɑ̃).
@@ -343,6 +382,6 @@ class FrenchPhonemizer implements Phonemizer {
  *  (lexicon → oovOverride → rule g2p); still assignable to Phonemizer. */
 export function createFrench(
     foreign?: (latin: string) => string,
-): { text(input: string, oovOverride?: OovResolver): string } {
+): { text(input: string, oovOverride?: OovResolver, preNormalized?: boolean): string; normalizedFor(input: string): string } {
     return new FrenchPhonemizer(foreign);
 }

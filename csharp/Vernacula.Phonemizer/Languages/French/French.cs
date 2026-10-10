@@ -25,6 +25,11 @@ public static class FrenchPhonemizer
      *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
     public static IReadOnlyDictionary<string, string> FrenchLexicon() => Lexicon();
 
+    /** Does Lexique or the SUPPLEMENT answer this lowercased word? The neural pre-pass's skip test: the
+     *  supplement is consulted before the tagger's override, so a supplement word that reached the tagger was
+     *  an ONNX call whose answer was thrown away (#1463). */
+    public static bool FrenchHasWord(string lower) => Lexicon().ContainsKey(lower) || Supplement().ContainsKey(lower);
+
     private static readonly JsRe VOWEL_IPA = JsRegex.Compile("[aeiouyɛɔøœəɑ]", "");
 
     /** One French word → IPA: lexicon lookup first, then the neural tagger (oovOverride, async path only), then the g2p
@@ -161,11 +166,21 @@ public static class FrenchPhonemizer
 
         public string Text(string input) => Text(input, null);
 
-        public string Text(string input, Func<string, string?>? oovOverride)
+        /** The text as the TOKENIZER will see it: every normalization pass, and nothing after. The neural
+         *  pre-pass scans this, not the raw text, so a word the normalizer creates is offered to the tagger
+         *  (#1463, English's #1452). */
+        public string NormalizedFor(string input)
         {
             bool IsWord(string w) => Lexicon().ContainsKey(w);
-            input = SYMBOLS(Normalize.NormalizeFrenchInitialisms(
-                NormalizeFrenchNumerals(Normalize.NormalizeFrench(input, IsWord)), IsWord));
+            return SYMBOLS(Normalize.NormalizeFrenchInitialisms(
+                NormalizeFrenchNumerals(Normalize.NormalizeFrench(input)), IsWord));
+        }
+
+        /** `preNormalized`: `input` has ALREADY been through NormalizedFor (the neural path only). Passing true
+         *  with unnormalized text is a silent wrong reading. */
+        public string Text(string input, Func<string, string?>? oovOverride, bool preNormalized = false)
+        {
+            if (!preNormalized) input = NormalizedFor(input);
             Core.Trace.EnterEngine(input);
             var items = new List<Item>();
             var gapCursor = 0;

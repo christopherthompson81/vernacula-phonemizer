@@ -3,3 +3,29 @@ confer	kɔ̃fɛʁ
 covid	kɔvid
 kilowatt	kilowat
 opep	ɔpɛp
+# LETTER NAMES (#1463). Every word french.jsonc's `letterNames` emits that Lexique lacks, so an initialism
+# the normalizer spells out (FM → effe emme, J. → ji) is a lexicon hit and never reaches the neural tagger.
+# Each value is the rule g2p's own reading, emitted by a script rather than typed, so the sync path is
+# byte-identical with or without these rows. They exist for the ASYNC path: once its pre-pass scans the
+# NORMALIZED text, the tagger is offered these words, and it reads three of them wrong (effe → ef,
+# ji → dʒi, emme → ɑ̃m). It reads the other seven right today; they are listed anyway so that spelling a
+# letter never depends on a model retrain.
+# ⚠ DELIBERATELY ABSENT: the names Lexique attests (a bé dé e ache i ka elle o erre esse té u ixe, double,
+# grec). Lexique is authoritative for those and is consulted first.
+cé	se
+effe	ɛf
+gé	ʒe
+ji	ʒi
+emme	ɛm
+enne	ɛn
+pé	pe
+ku	ky
+vé	ve
+zède	zɛd
+# UNIT WORDS (#1463). The symbol tier reads `ko` as kilooctet(s), a word Lexique lacks and the tagger misreads
+# once the pre-pass scans the normalized text: kilooctet → kilɔktɛ, dropping kilo's vowel (kilo-octet keeps
+# both). The value is the rule g2p's own reading, emitted by a script, so the sync path is unchanged. Found by
+# auditing every word the normalizer can emit against Lexique, the g2p and the tagger. ⚠ gigaoctet and
+# mégaoctet are deliberately absent: the tagger and the g2p agree on them.
+kilooctet	kilɔɔktɛ
+kilooctets	kilɔɔktɛ

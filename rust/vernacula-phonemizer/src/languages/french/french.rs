@@ -212,6 +212,11 @@ impl FrenchPhonemizer {
         self.lexicon.contains_key(lower)
     }
 
+    /// `frenchHasWord(lower)`: Lexique or the supplement, the neural pre-pass's skip test (#1463).
+    pub fn has_word(&self, lower: &JsString) -> bool {
+        self.lexicon.contains_key(lower) || self.supplement.contains_key(lower)
+    }
+
     /// `phonemizeWord(word, oovOverride?)`: lexicon, supplement, the override, then a hyphenated compound
     /// part by part, then the rule g2p.
     pub fn phonemize_word(&self, word: &JsString, oov: Option<OovResolver>) -> JsString {
@@ -248,13 +253,23 @@ impl FrenchPhonemizer {
         )
     }
 
+    /// `normalizedFor(input)`: every normalization pass, and nothing after.
+    pub fn normalized_for(&self, input: &JsString) -> JsString {
+        let is_word = |w: &JsString| self.lexicon.contains_key(w);
+        self.symbols.apply(&normalize_french_initialisms_loaded(
+            &self.normalize_numerals(&normalize_french_loaded(input)),
+            &is_word,
+        ))
+    }
+
     /// `text(input, oovOverride?)`.
     pub fn text(&self, input: &JsString, oov: Option<OovResolver>) -> JsString {
-        let is_word = |w: &JsString| self.lexicon.contains_key(w);
-        let input = self.symbols.apply(&normalize_french_initialisms_loaded(
-            &self.normalize_numerals(&normalize_french_loaded(input, &is_word)),
-            &is_word,
-        ));
+        self.text_normalized(&self.normalized_for(input), oov)
+    }
+
+    /// `text(input, oovOverride, preNormalized: true)`: `input` has already been through `normalized_for`.
+    pub fn text_normalized(&self, input: &JsString, oov: Option<OovResolver>) -> JsString {
+        let input = input.clone();
         enter_engine(&input);
 
         let mut items: Vec<Item> = Vec::new();
