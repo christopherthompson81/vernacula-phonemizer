@@ -46,7 +46,7 @@
  */
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
-import { foldHanCompatibility } from "../../core/unicode.ts";
+import { foldHanCompatibility, repeatHanIterationMarks } from "../../core/unicode.ts";
 
 /**
  * Western fraction notation → the Chinese order, still in digits: `a/b` → `b分之a`. Guarded against dates
@@ -131,9 +131,6 @@ const AMP_ELSEWHERE = /\s?[&＆]\s?/gu;
  * counting-two used before a measure word, never the two of an ordinal or a power (二次方). Writing 平方/立方
  * puts the reading beyond reach of any numeral rule, and reuses a word already attested for this language.
  */
-/** An iteration mark after a Han character: 々 (U+3005) and its vertical form 〻 (U+303B). */
-const ITERATION = /(\p{Script=Han})[々〻]/gu;
-
 const BARE_EXPONENT = /(?<=\d)([²³])/gu;
 const POWER: Readonly<Record<string, string>> = { "²": "平方", "³": "立方" };
 
@@ -158,10 +155,10 @@ export function normalizeMandarin(input: string): string {
     s = rewrite(s, BARE_EXPONENT, (_m, e: string) => `的${POWER[e]!}`);
     // 5) Han compatibility forms → their unified ideograph (⼀ → 一), so the dict can read them (core fold).
     s = foldHanCompatibility(s);
-    // 6) The iteration marks 々 / 〻 repeat the Han character before them (人々 → 人人), as wu/normalize.ts and
-    //    japanese/kanji.ts read them. After the fold, so a folded radical is what gets repeated. A mark with no
+    // 6) The iteration marks 々 / 〻 repeat the Han character before them (人々 → 人人) — core, shared with the
+    //    other Sinitic hosts (#1481). After the fold, so a folded radical is what gets repeated. A mark with no
     //    Han before it is left alone, and the converter drops it.
-    s = rewrite(s, ITERATION, "$1$1");
+    s = repeatHanIterationMarks(s);
     return s;
 }
 

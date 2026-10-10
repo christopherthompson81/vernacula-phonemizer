@@ -645,7 +645,7 @@ public static class Registry
             case "bar":
                 return Create("bavarian");
             case "cdo":
-                return Create("mindong");
+                return Create("mindong"); // TS: createMinDong(readAsEnglish) — non-BUC Latin → English (#1478)
             case "hmn":
                 return Create("hmong");
             case "shi":

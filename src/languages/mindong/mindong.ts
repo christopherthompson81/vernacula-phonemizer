@@ -87,6 +87,32 @@ function syllableParts(syl: string): { seg: string; tone: string } | null {
     return { seg, tone };
 }
 
+/** A syllable's toneless, lower-cased base — the same strip `syllableParts` does, so the two cannot disagree. */
+function toneless(syl: string): string {
+    return [...syl.normalize("NFD")].filter((c) => !(c in DEF.toneMark)).join("").normalize("NFC").toLowerCase();
+}
+
+/** Does this syllable PARSE as BUC — a syllabic nasal, or [initial] + a rime the converter has (either register),
+ *  by exactly the split `baseToIpa` makes? A part that does not is not a Min Dong syllable. */
+export function bucSyllable(syl: string): boolean {
+    const base = toneless(syl);
+    if (!base) return false;
+    if (Object.hasOwn(SYLLABIC_NASAL, base)) return true;
+    const validRime = (r: string) => Object.hasOwn(DEF.rimes, r) || Object.hasOwn(DEF.rimesLoose, r) || IO_RIMES.has(r);
+    for (const k of INITIALS) if (base.startsWith(k)) return validRime(base.slice(k.length)) || validRime(base);
+    return validRime(base);
+}
+
+/** The Latin letters BUC never writes — no initial or rime in `mindong.jsonc` contains one. */
+const NON_BUC_LETTER = /[fjqrvwxyz]/iu;
+
+/** Does this syllable carry a BUC tone diacritic — the orthography's own evidence that it is BUC — and no letter
+ *  BUC never writes? The letter test is what keeps `Québec`, `être`, `légèrté` off the converter: an acute or
+ *  grave is a tone mark here and an accent in French, and only the alphabet tells them apart. */
+export function bucToned(syl: string): boolean {
+    return !NON_BUC_LETTER.test(syl) && [...syl.normalize("NFD")].some((c) => c in DEF.toneMark);
+}
+
 /** A BUC word (hyphen/space-joined syllables) → IPA. each syllable keeps its CITATION tone (sandhi
  *  deferred), so syllables convert independently and join with a space. */
 function bucToIpa(word: string): string {
@@ -187,7 +213,48 @@ export function numberToBucWords(n: number, raw?: string): string[] {
     return out;
 }
 
+/**
+ * Split a Latin run into maximal BUC / foreign stretches (#1478) — the instrument that tells a BUC word from an
+ * embedded foreign one, since both are Latin and the tokenizer claims both.
+ *
+ * ⚠ BEFORE THIS, EVERY LATIN RUN WAS READ AS BUC — the state nan was in before #1048. `（IUPAC）` read *iupac˥˥*,
+ * `Harry Potter` *harry˥˥ potter˥˥*: the raw letters leaked into the IPA with a tone letter appended, because
+ * `baseToIpa` returns the base when it cannot parse a rime. Every other Sinitic host already hands such a run
+ * to the injected English reader.
+ *
+ * A part is BUC when it PARSES (`bucSyllable` — a syllabic nasal, or [initial] + a rime the converter has) or
+ * carries a BUC TONE DIACRITIC and no letter BUC never writes (`bucToned`). The tone arm keeps a real BUC
+ * syllable the rime table lacks (`bĭh`, `bá̤ek`) on the converter, which is what it got before — routing a
+ * toned syllable to English would trade a raw leak for a confident misreading. Measured on the cdo golden + mined rows (Run 3 of
+ * docs/investigations/sinitic/sinitic_fold_investigation.md): 14,496 runs parse and are toned, 343 parse
+ * untoned (`gah`, `nguok`, `Ge̤ng`), 1,358 parse nowhere (`County`, `ISBN`, `Harry`, `and`, lone `C`/`s`).
+ *
+ * ⚠ A MIXED RUN FOLLOWS nan's RULE. Inside a run that mixes the classes, only a TONED part is BUC: a foreign
+ * stem plus a native morpheme writes the morpheme with its tone (`Kavalan-cŭk`, `Kazakh-ngṳ̄`), while an
+ * untoned part that merely parses (`sung` in `Il-sung`, `SA` in `BY-SA`) is the foreign word's own syllable.
+ * A mixed run with no toned part is foreign whole.
+ */
+export function latinParts(run: string): { text: string; native: boolean }[] {
+    const parts = run.split(/(?<=[-·])|(?=[-·])/u).filter((p) => p !== "");
+    const words = parts.filter((p) => p !== "-" && p !== "·");
+    const native = (p: string): boolean => bucToned(p) || bucSyllable(p);
+    if (words.length === 0) return [{ text: run, native: true }];
+    const allNative = words.every(native);
+    if (allNative || !words.some(native)) return [{ text: run, native: allNative }];
+    if (!words.some(bucToned)) return [{ text: run, native: false }];
+    const out: { text: string; native: boolean }[] = [];
+    for (const p of parts) {
+        const nat = p === "-" || p === "·" ? (out.at(-1)?.native ?? false) : bucToned(p);
+        if (out.length > 0 && out.at(-1)!.native === nat) out[out.length - 1]!.text += p;
+        else out.push({ text: p, native: nat });
+    }
+    return out;
+}
+
+export type ForeignPhonemizer = (latin: string) => string;
+
 class MinDongPhonemizer implements Phonemizer {
+    constructor(private foreign?: ForeignPhonemizer) {}
     text(input: string): string {
         // NFD so a syllable is a base letter + trailing combining marks (tone diacritics U+0300–036F + the quality
         // diaeresis-below U+0324) — robust to NFC input, where precomposed vowels (ā, and esp. ṳ = U+1E73) are single
@@ -204,7 +271,14 @@ class MinDongPhonemizer implements Phonemizer {
         // means a word this layer inserts is tokenized exactly like one the corpus wrote.
         const nfd = renormalize(normalizeMinDong(input), "NFD");
         return assembleClauses(nfd, tok, (m, sink) => {
-            if (m[1]) sink.emit(bucToIpa(m[1]));
+            if (m[1]) {
+                // A foreign part goes to the injected reader in NFC — the NFD fold above is this engine's
+                // own tokenization device, not something the English reader should have to undo.
+                for (const part of latinParts(m[1]))
+                    sink.emit(part.native || this.foreign === undefined
+                        ? bucToIpa(part.text)
+                        : this.foreign(part.text.normalize("NFC")));
+            }
             else if (m[2]) sink.emit(bucToIpa(numberToBucWords(Number(m[2]), m[2]).join("-")));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -214,9 +288,10 @@ class MinDongPhonemizer implements Phonemizer {
     }
 }
 
-/** Build the Min Dong (Fuzhou) phonemizer — BUC → IPA (segmental + citation tone; Han front-end deferred). */
-export function createMinDong(): Phonemizer {
-    return new MinDongPhonemizer();
+/** Build the Min Dong (Fuzhou) phonemizer — BUC → IPA (segmental + citation tone; Han front-end deferred).
+ *  `foreign` reads an embedded Latin run that is not BUC (see `latinParts`). */
+export function createMinDong(foreign?: ForeignPhonemizer): Phonemizer {
+    return new MinDongPhonemizer(foreign);
 }
 
 /** Bare BUC word → IPA (tests / referee eval). */

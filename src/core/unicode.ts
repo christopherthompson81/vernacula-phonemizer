@@ -750,8 +750,40 @@ export function foldHanCompatibility(s: string): string {
     HAN_COMPAT.lastIndex = 0;
     if (!HAN_COMPAT.test(s)) return s;
     HAN_COMPAT.lastIndex = 0;
-    return rewrite(s, HAN_COMPAT, (c) => {
-        const f = c.normalize("NFKC");
-        return HAN_ONE.test(f) ? f : c;
-    });
+    return rewrite(s, HAN_COMPAT, foldHanChar);
+}
+function foldHanChar(c: string): string {
+    const f = c.normalize("NFKC");
+    return HAN_ONE.test(f) ? f : c;
+}
+
+/**
+ * `foldHanCompatibility` for a DICTIONARY KEY at load time — the same fold, UNTRACED.
+ *
+ * ⚠ THE TRACED FOLD MUST NOT RUN ON A KEY. A dict is loaded lazily, i.e. inside the first `text()` call that
+ * needs it — and under `phonemizeTrace` that call has a trace open, so a traced `rewrite` over a dict key is
+ * recorded as a rewrite OF THE UTTERANCE. Measured (#1481): wuu's first golden row lost every source span in
+ * the TS trace while the C# kept them, because wu's loader folded its keys through the traced function. A key
+ * is not the pipeline string, so it takes the plain `String.replace`.
+ */
+export function foldHanCompatibilityKey(key: string): string {
+    // `String.replace` with a global regex starts from lastIndex 0 and leaves it there, so sharing HAN_COMPAT
+    // with the traced fold is safe — and one literal means one pattern for the regex corpus to replay.
+    return key.replace(HAN_COMPAT, foldHanChar);
+}
+
+/**
+ * THE HAN ITERATION MARKS — 々 (U+3005) and its vertical form 〻 (U+303B) — repeat the Han character before them
+ * (人々 → 人人, 時々刻々 → 時時刻刻). CJK-wide: Sinitic text meets them inside Japanese names quoted in Chinese
+ * prose (佐々木), and every Sinitic dictionary is keyed on the repeated form, so unrewritten the mark reads as
+ * nothing and a whole syllable of the name is deleted. Shared by cmn and the other Sinitic hosts (#1481) — it
+ * began in cmn's normalize.ts and wu's (which knew only 々), and moved here so there is one copy.
+ *
+ * ⚠ RUN IT AFTER `foldHanCompatibility`, so a folded radical is what gets repeated (⼈々 → 人人). A mark with no
+ * Han character before it is left alone, and each engine's tokenizer then drops it. Japanese reads the marks
+ * itself, per kanji reading (`japanese/kanji.ts`), and does not call this. Traced.
+ */
+const HAN_ITERATION = /(\p{Script=Han})[々〻]/gu;
+export function repeatHanIterationMarks(s: string): string {
+    return rewrite(s, HAN_ITERATION, "$1$1");
 }

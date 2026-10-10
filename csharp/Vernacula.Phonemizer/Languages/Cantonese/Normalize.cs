@@ -95,6 +95,10 @@ public static class Normalize
         if (measureWords != "")
             s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,])2(?=\\s*[{measureWords}])", "gu"), _ => "兩");
 
+
+        // LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+        // point (#1481). See the TS for why.
+        s = Unicode.RepeatHanIterationMarks(Unicode.FoldHanCompatibility(s));
         return s;
     }
 }

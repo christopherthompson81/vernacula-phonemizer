@@ -33,9 +33,11 @@ public static class WuPhonemizer
 
     private static Dictionary<string, string>? DICT;
     private static readonly object GATE = new();
+    // ⚠ KEYS ARE FOLDED AT LOAD (#1481): the input is folded before lookup, so a compatibility-ideograph key
+    // (U+F995, gni6 — its unified twin is not a key) would otherwise be unreachable. The UNTRACED key fold: this load runs inside a traced Text(). See the TS.
     private static Dictionary<string, string> Dict()
     {
-        lock (GATE) return DICT ??= LoadTsv.LoadTsvMap("languages/wu", "dict.tsv");
+        lock (GATE) return DICT ??= LoadTsv.LoadTsvMap<string>("languages/wu", "dict.tsv", (v, _) => v, fold: Unicode.FoldHanCompatibilityKey);
     }
     private const int MAX_WORD = 8; // greedy segmentation window
 

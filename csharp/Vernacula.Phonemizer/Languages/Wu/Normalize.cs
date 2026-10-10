@@ -63,7 +63,6 @@ public static class Normalize
         "(\\d+(?:\\.\\d+)?)\\s*(人?)\\s*\\/\\s*km\\s*(?:²|2)(?![\\p{sc=Latn}\\d])", "giu");
     private static readonly JsRe PERMILLE = JsRegex.Compile("(?<![\\d.,])(\\d+(?:\\.\\d+)?)\\s*‰", "gu");
     private static readonly JsRe DECIMAL_RE = JsRegex.Compile("(?<![\\d.:])(\\d+)\\.(\\d+)(?![\\d.])", "gu");
-    private static readonly JsRe ITERATION = JsRegex.Compile("(\\p{Script=Han})々", "gu");
     private static readonly JsRe LETTER_SOLO = JsRegex.Compile(
         "(?<=\\p{Script=Han})([A-Z])(?![\\p{sc=Latn}\\d])|(?<![\\p{sc=Latn}\\d])([A-Z])(?=\\p{Script=Han})", "gu");
     private static readonly JsRe LETTER_RUN = JsRegex.Compile(
@@ -116,7 +115,8 @@ public static class Normalize
         if (measureWords != "")
             s = Rewrite(s, JsRegex.Compile($"(?<![\\d.,第])2(?=\\s*[{measureWords}])", "gu"), _ => "两");
 
-        s = Rewrite(s, ITERATION, m => m.Groups[1].Value + m.Groups[1].Value);
+        // 13. Han compatibility forms, then the iteration marks 々 / 〻 — the shared core pair (#1481).
+        s = Unicode.RepeatHanIterationMarks(Unicode.FoldHanCompatibility(s));
 
         if (letterNames is not null)
         {

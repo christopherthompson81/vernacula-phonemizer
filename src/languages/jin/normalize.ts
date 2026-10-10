@@ -49,6 +49,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, reorderFraction, spellYears } from "../../core/sinitic.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { foldHanCompatibility, repeatHanIterationMarks } from "../../core/unicode.ts";
 
 /**
  * ⚠ `unspacedScript`, because a sign in Han prose is flanked by Han and the tier's letter-boundary guard
@@ -121,5 +122,12 @@ export function normalizeJin(input: string): string {
             /\p{sc=Latn}[\s\p{sc=Latn}]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a}到${b}`,
     );
 
+
+    // ── LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+    // point (#1481). A Kangxi radical (⼈) or a CJK compatibility ideograph folds to its unified ideograph,
+    // which is what dict.tsv is keyed on — unfolded it read as nothing. Then 々 / 〻 repeat the Han character
+    // before them (佐々木 → 佐佐木), after the fold so a folded radical is what gets repeated; dropped, the
+    // mark deleted a whole syllable from the name.
+    s = repeatHanIterationMarks(foldHanCompatibility(s));
     return s;
 }

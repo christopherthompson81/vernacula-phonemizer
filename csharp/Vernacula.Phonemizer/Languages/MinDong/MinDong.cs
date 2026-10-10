@@ -100,6 +100,76 @@ public static class MinDongPhonemizer
         return (seg, tone);
     }
 
+    /** A syllable's toneless, lower-cased base — the same strip `SyllableParts` does. */
+    private static string Toneless(string syl)
+    {
+        var kept = new List<string>();
+        foreach (var ch in Js.CodePoints(Js.Normalize(syl, NormalizationForm.FormD)))
+            if (!DEF.ToneMark.ContainsKey(ch)) kept.Add(ch);
+        return Js.ToLowerCase(Js.Normalize(string.Join("", kept), NormalizationForm.FormC));
+    }
+
+    /** Does this syllable PARSE as BUC — a syllabic nasal, or [initial] + a rime the converter has (either
+     *  register), by exactly the split `BaseToIpa` makes? (#1478; see the TS `bucSyllable`.) */
+    public static bool BucSyllable(string syl)
+    {
+        var b = Toneless(syl);
+        if (b == "") return false;
+        if (SYLLABIC_NASAL.ContainsKey(b)) return true;
+        bool ValidRime(string r) =>
+            DEF.Rimes.ContainsKey(r) || DEF.RimesLoose.ContainsKey(r) || IO_RIMES.Contains(r);
+        foreach (var k in INITIALS)
+            if (b.StartsWith(k, StringComparison.Ordinal)) return ValidRime(b[k.Length..]) || ValidRime(b);
+        return ValidRime(b);
+    }
+
+    /** The Latin letters BUC never writes — no initial or rime in `mindong.jsonc` contains one. */
+    private static readonly JsRe NON_BUC_LETTER = JsRegex.Compile("[fjqrvwxyz]", "iu");
+
+    /** A BUC tone diacritic and no letter BUC never writes (an acute is a tone here, an accent in French). */
+    public static bool BucToned(string syl)
+    {
+        if (NON_BUC_LETTER.IsMatch(syl)) return false;
+        foreach (var ch in Js.CodePoints(Js.Normalize(syl, NormalizationForm.FormD)))
+            if (DEF.ToneMark.ContainsKey(ch)) return true;
+        return false;
+    }
+
+    public sealed record LatinPart(string Text, bool Native);
+
+    /** A Latin run → maximal BUC / foreign stretches (#1478). See the TS `latinParts` for the census. */
+    public static List<LatinPart> LatinParts(string run)
+    {
+        // `run.split(/(?<=[-·])|(?=[-·])/u)` in the TS: each separator becomes its own element.
+        var parts = new List<string>();
+        var buf = new StringBuilder();
+        foreach (var ch in run)
+        {
+            if (ch == '-' || ch == '·')
+            {
+                if (buf.Length > 0) { parts.Add(buf.ToString()); buf.Clear(); }
+                parts.Add(ch.ToString());
+            }
+            else buf.Append(ch);
+        }
+        if (buf.Length > 0) parts.Add(buf.ToString());
+        static bool Sep(string p) => p == "-" || p == "·";
+        var words = parts.Where(p => !Sep(p)).ToList();
+        bool Native(string p) => BucToned(p) || BucSyllable(p);
+        if (words.Count == 0) return new List<LatinPart> { new(run, true) };
+        var allNative = words.All(Native);
+        if (allNative || !words.Any(Native)) return new List<LatinPart> { new(run, allNative) };
+        if (!words.Any(BucToned)) return new List<LatinPart> { new(run, false) };
+        var outp = new List<LatinPart>();
+        foreach (var p in parts)
+        {
+            var nat = Sep(p) ? (outp.Count > 0 && outp[^1].Native) : BucToned(p);
+            if (outp.Count > 0 && outp[^1].Native == nat) outp[^1] = outp[^1] with { Text = outp[^1].Text + p };
+            else outp.Add(new LatinPart(p, nat));
+        }
+        return outp;
+    }
+
     private static readonly JsRe SYL_SPLIT = JsRegex.Compile("[-\\s·]+", "gu");
 
     /** A BUC word (hyphen/space-joined syllables) → IPA; each syllable keeps its CITATION tone and the
@@ -212,6 +282,9 @@ public static class MinDongPhonemizer
 
     private sealed class Engine : ILanguage
     {
+        private readonly Func<string, string>? _foreign;
+        internal Engine(Func<string, string>? foreign) => _foreign = foreign;
+
         public string Text(string input)
         {
             // NFD so a syllable is a base letter + trailing combining marks — robust to NFC input, where
@@ -221,7 +294,14 @@ public static class MinDongPhonemizer
             var nfd = Renormalize(Normalize.NormalizeMinDong(input), NormalizationForm.FormD);
             return Clauses.AssembleClauses(nfd, TOKEN, (m, sink) =>
             {
-                if (m.Groups[1].Success) sink.Emit(BucToIpa(m.Groups[1].Value));
+                if (m.Groups[1].Success)
+                {
+                    // A foreign part goes to the injected reader in NFC (#1478).
+                    foreach (var part in LatinParts(m.Groups[1].Value))
+                        sink.Emit(part.Native || _foreign is null
+                            ? BucToIpa(part.Text)
+                            : _foreign(Js.Normalize(part.Text, NormalizationForm.FormC)));
+                }
                 else if (m.Groups[2].Success)
                 {
                     var n = Js.Number(m.Groups[2].Value);
@@ -236,11 +316,12 @@ public static class MinDongPhonemizer
         }
     }
 
-    /** Build the Min Dong (Fuzhou) phonemizer — BUC → IPA (segmental + citation tone). */
-    public static ILanguage CreateMinDong() => new Engine();
+    /** Build the Min Dong (Fuzhou) phonemizer — BUC → IPA (segmental + citation tone). `foreign` reads an
+     *  embedded Latin run that is not BUC (see `LatinParts`). */
+    public static ILanguage CreateMinDong(Func<string, string>? foreign = null) => new Engine(foreign);
 
     /** Bare BUC word → IPA (tests / referee eval). */
     public static string PhonemizeWord(string word) => BucToIpa(word);
 
-    internal static void RegisterSelf() => Registry.Register("mindong", () => CreateMinDong());
+    internal static void RegisterSelf() => Registry.Register("mindong", () => CreateMinDong(Registry.ReadAsEnglish));
 }

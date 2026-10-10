@@ -57,6 +57,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { foldHanCompatibility, repeatHanIterationMarks } from "../../core/unicode.ts";
 
 /** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here. wu.ts imports it FROM HERE
  *  so its cardinal composition and this file's digit-string reading cannot drift apart; the re-export keeps
@@ -293,14 +294,18 @@ export function normalizeWu(
     if (measureWords !== "")
         s = rewrite(s, new RegExp(`(?<![\\d.,第])2(?=\\s*[${measureWords}])`, "gu"), "两");
 
-    // ── 13. the iteration mark ───────────────────────────────────────────────────────────────────
+    // ── 13. Han compatibility forms, then the iteration mark ─────────────────────────────────────
     // 々 repeats the preceding character, and the corpus carries it inside Japanese names quoted in Wu prose
     // (佐々木, 多々良氏, 九々蜃) — `iteration: 11`. Dropped, it deletes a whole SYLLABLE from a name: 佐々木 read
     // *t͡su˧˦ moʔ˩˨*, two syllables for three. Doubling the character is the reading Wu gives it, and costs
     // nothing since the doubled character was already in the dict by definition.
-    // LAST, because it is the one rule whose input is a Han character rather than a digit or a sign, so
+    // ⚠ NOW THE SHARED CORE PAIR (#1481), which cmn runs at the same point: a Kangxi radical or a CJK
+    // compatibility ideograph folds to its unified ideograph first (⼈ → 人 — dict.tsv is keyed on the unified
+    // form, so unfolded it read as nothing), and the iteration rewrite then also covers the VERTICAL mark 〻,
+    // which this step's own copy did not. Fold first, so a folded radical is what gets repeated.
+    // LAST, because these are the rules whose input is a Han character rather than a number or a sign, so
     // nothing above can consume it and nothing below depends on it.
-    s = rewrite(s, /(\p{Script=Han})々/gu, "$1$1");
+    s = repeatHanIterationMarks(foldHanCompatibility(s));
 
     // ── 14. Latin initialisms → their letter names, spelled in Han ───────────────────────────────
     // ⚠ WHY THIS IS NOT LEFT ON THE ENGLISH PHONEMIZER, which is what cmn and yue do. `中国GDP总量` read

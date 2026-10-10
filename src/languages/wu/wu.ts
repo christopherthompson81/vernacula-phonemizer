@@ -18,6 +18,7 @@ import { LATIN_RUN } from "../../core/hostWord.ts";
 import { spellHanDigits } from "../../core/sinitic.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
+import { foldHanCompatibilityKey } from "../../core/unicode.ts";
 
 import { DIGITS, normalizeWu } from "./normalize.ts";
 
@@ -48,9 +49,15 @@ const SYLLABIC: Record<string, string> = { m: "m̩", n: "n̩", ng: "ŋ̍", mh: "
 // (The Han path cannot reach it — dict readings are real Wugniu — which is why 200 golden rows never saw it.)
 // (core/own.ts)
 
+// ⚠ KEYS ARE FOLDED AT LOAD (#1481), because the INPUT now is: `normalizeWu` step 13 folds every CJK
+// compatibility ideograph to its unified form before lookup, so a dict key spelled with one could never be
+// matched again. One key is: U+F995 (the compatibility twin of 秊, gni6), whose unified form is not otherwise a
+// key — without the alias the fold would have turned a reading into a silence. An unfolded key already in the
+// file still wins (loadTsv's rule), so no reading the dict resolves today can change. ⚠ The UNTRACED key fold:
+// this load runs lazily inside a traced `text()`, and the traced fold would write the keys into the trace.
 let DICT: Map<string, string> | undefined;
 function dict(): Map<string, string> {
-    return (DICT ??= loadTsvMap(import.meta.url, "dict.tsv"));
+    return (DICT ??= loadTsvMap(import.meta.url, "dict.tsv", undefined, { fold: foldHanCompatibilityKey }));
 }
 const MAX_WORD = 8; // greedy segmentation window
 
