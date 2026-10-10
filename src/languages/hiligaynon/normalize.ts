@@ -151,6 +151,12 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
+/** ⚠ A UNICODE-AWARE START OF WORD for the abbreviation templates (#1480's shape). JS `\b` is ASCII-only even
+ *  under the `u` flag, so after an accented letter it sees a boundary and a table key matched the END of a
+ *  longer word. "No letter, mark, digit or underscore before" is `\b`'s own ASCII behaviour, extended to
+ *  every script. */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
 /** Every rule emits DIGITS where a number is involved and lets the engine's own number path speak them. */
 export function normalizeHiligaynon(input: string): string {
     let s = input;
@@ -230,7 +236,7 @@ export function normalizeHiligaynon(input: string): string {
     s = rewrite(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 6. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.`, "giu"), (m0, ab: string) => {
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.`, "giu"), (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.

@@ -29,6 +29,8 @@ J. R. R. Tolkien et n. wayne hale et le plan B.
 Le syndicat Unión. Il part, les plats cuisinés. Ils mangent, et Čáp. Puis (J. Martin).
 # #1480: plural honorifics, bare, dotted, all caps, phrase-final; declines bare MM (the unit)
 Mmes Dupont et Mlles Martin, MMES. Durand, bonjour Mlles. Et 10 MM.
+# Mr / Mr. before a capitalized word is monsieur; declines all-caps MR (an initialism) and lowercased mr
+Mr Dupont et Mr. Martin, la région (MR) et mr dupont.
 # money with centimes, both orders; 00 centimes; declines three decimals
 Ça coûte 2,50 € ou €3,99 ou 1,00 $ ou £1,05 et ¥12,30.
 Le prix est 2,505 € et 3,5 €.

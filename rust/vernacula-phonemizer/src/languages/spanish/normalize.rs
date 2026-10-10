@@ -33,11 +33,19 @@ static GROUP_RE: LazyLock<JsRegex> = LazyLock::new(|| {
 });
 static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     let alt = alt_by_length_desc(MANIFEST.dotted_abbrev.keys());
-    JsRegex::new(&format!(r"\b({alt})\.(\s+)(?=\p{{L}})"), "giu").unwrap()
+    JsRegex::new(
+        &format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(\s+)(?=\p{{L}})"),
+        "giu",
+    )
+    .unwrap()
 });
 static ABBREV_ENDS: LazyLock<JsRegex> = LazyLock::new(|| {
     let alt = alt_by_length_desc(MANIFEST.dotted_abbrev.keys());
-    JsRegex::new(&format!(r"\b({alt})\.(?=\s*(?:[.,;:!?»)]|$))"), "giu").unwrap()
+    JsRegex::new(
+        &format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(?=\s*(?:[.,;:!?»)]|$))"),
+        "giu",
+    )
+    .unwrap()
 });
 static DATE_FIRST: LazyLock<JsRegex> = LazyLock::new(|| {
     let months = MANIFEST.months.join("|");
@@ -170,33 +178,54 @@ pub(crate) fn normalize_spanish(input: &JsString, americas: bool) -> JsString {
     // 1) era markers, before the generic abbreviation rule.
     s = rewrite(
         &s,
-        js_re!(r"\ba\.\s?de\s?C\.|\ba\.\s?C\.", "giu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])a\.\s?de\s?C\.|(?<![\p{L}\p{M}\d_])a\.\s?C\.",
+            "giu"
+        ),
         &js(&m.era_markers.before_christ),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bd\.\s?de\s?C\.|\bd\.\s?C\.", "giu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])d\.\s?de\s?C\.|(?<![\p{L}\p{M}\d_])d\.\s?C\.",
+            "giu"
+        ),
         &js(&m.era_markers.after_christ),
     );
 
     // 2) EE. UU.
-    s = rewrite(&s, js_re!(r"\bEE\.\s?UU\.?", "gu"), &js(&m.united_states));
-    s = rewrite(&s, js_re!(r"\bee\.\s?uu\.?", "gu"), &js(&m.united_states));
+    s = rewrite(
+        &s,
+        js_re!(r"(?<![\p{L}\p{M}\d_])EE\.\s?UU\.?", "gu"),
+        &js(&m.united_states),
+    );
+    s = rewrite(
+        &s,
+        js_re!(r"(?<![\p{L}\p{M}\d_])ee\.\s?uu\.?", "gu"),
+        &js(&m.united_states),
+    );
 
     // 2b) a. m. / p. m., as the letter names.
-    s = rewrite_with(&s, js_re!(r"\b([ap])\.\s?m\.", "giu"), |mm, t| {
-        let ap = mm.group(1, t).unwrap().to_lower_case();
-        js(&format!(
-            "{} {}",
-            m.letter_names[&ap.to_string_lossy()],
-            m.letter_names["m"]
-        ))
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\p{L}\p{M}\d_])([ap])\.\s?m\.", "giu"),
+        |mm, t| {
+            let ap = mm.group(1, t).unwrap().to_lower_case();
+            js(&format!(
+                "{} {}",
+                m.letter_names[&ap.to_string_lossy()],
+                m.letter_names["m"]
+            ))
+        },
+    );
 
     // 3) número, only before a digit.
     s = rewrite(
         &s,
-        js_re!(r"\b(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)", "giu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)",
+            "giu"
+        ),
         &js(&format!("{} ", m.number_sign)),
     );
 
@@ -320,4 +349,30 @@ pub(crate) fn normalize_spanish(input: &JsString, americas: bool) -> JsString {
     });
 
     s
+}
+
+/// The dotted-abbreviation rules start at a Unicode word edge, not an ASCII `\b` (#1480's shape). Each pair:
+/// the abbreviation alone (the rule fires) and glued after a non-ASCII letter (it declines). Ported from
+/// test/abbrev-word-edge.test.ts; every word is synthetic.
+#[cfg(test)]
+mod word_edge {
+    use super::*;
+
+    #[test]
+    fn an_abbreviation_glued_after_a_non_ascii_letter_is_not_one() {
+        let n = |s: &str| normalize_spanish(&js(s), false).to_string_lossy();
+        for (fires, declines) in [
+            ("Es la sta. María.", "Es un taoísta. María."),
+            ("Vino la sta.", "Era un taoísta."),
+            ("En 300 a. C. hubo", "En 300 Ña. C. hubo"),
+            ("En 300 d. C. hubo", "En 300 Ñd. C. hubo"),
+            ("Los EE. UU. ganan", "Los ÑEE. UU. ganan"),
+            ("los ee. uu. ganan", "los ñee. uu. ganan"),
+            ("a las 10 p. m. hoy", "a las 10 Ñp. m. hoy"),
+            ("el n.º 5 gana", "el Ñn.º 5 gana"),
+        ] {
+            assert_ne!(n(fires), fires, "{fires}");
+            assert_eq!(n(declines), declines, "{declines}");
+        }
+    }
 }

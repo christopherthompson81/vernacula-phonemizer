@@ -95,21 +95,25 @@ public static class Normalize
             Rewrite(input, DECADE_RE, m => $"{YearWords(Js.Number(m.Groups[1].Value))}{m.Groups[2].Value}"), YEAR_RE,
             m => YearWords(Js.Number(m.Groups[1].Value)));
 
-    private static readonly JsRe ERA_BC = JsRegex.Compile("\\bv\\.\\s?Chr\\.", "giu");
-    private static readonly JsRe ERA_AD = JsRegex.Compile("\\bn\\.\\s?Chr\\.", "giu");
-    private static readonly JsRe ZB = JsRegex.Compile("\\bz\\.\\s?B\\.", "gu");
-    private static readonly JsRe DH = JsRegex.Compile("\\bd\\.\\s?h\\.", "gu");
-    private static readonly JsRe UA = JsRegex.Compile("\\bu\\.\\s?a\\.", "gu");
-    private static readonly JsRe UAE = JsRegex.Compile("\\bu\\.\\s?Ä\\.", "gu");
+    /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
+     *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
+    private static readonly JsRe ERA_BC = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])v\\.\\s?Chr\\.", "giu");
+    private static readonly JsRe ERA_AD = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])n\\.\\s?Chr\\.", "giu");
+    private static readonly JsRe ZB = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])z\\.\\s?B\\.", "gu");
+    private static readonly JsRe DH = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])d\\.\\s?h\\.", "gu");
+    private static readonly JsRe UA = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])u\\.\\s?a\\.", "gu");
+    private static readonly JsRe UAE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])u\\.\\s?Ä\\.", "gu");
     private static readonly JsRe ORD = JsRegex.Compile("(?:(\\p{L}+)(\\s+))?(\\d{1,4})\\.(?=\\s+(\\p{L}+))", "gu");
     private static readonly JsRe ORDINAL_NOUN_RE = JsRegex.Compile($"^(?:{ORDINAL_NOUN})$", "iu");
     private static readonly JsRe UPPER_START = JsRegex.Compile("^\\p{Lu}", "u");
     private static readonly JsRe BARE_DAY_MONTH =
         JsRegex.Compile($"(?:(\\p{{L}}+)(\\s+))?(\\d{{1,2}})(\\s+)(?=(?:{MONTHS})(?![\\p{{L}}\\p{{M}}]))", "giu");
     private static readonly JsRe ABBREV_MID =
-        JsRegex.Compile($"(?<!\\p{{Lu}}\\.[ \u00a0])\\b({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d])", "giu");
+        JsRegex.Compile($"(?<!\\p{{Lu}}\\.[ \u00a0]){WORD_START}({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d])", "giu");
     private static readonly JsRe ABBREV_END =
-        JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
+        JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     private static readonly JsRe CLOCK = JsRegex.Compile("\\b([01]?\\d|2[0-3])[:.]([0-5]\\d)\\b(?!\\.?\\d)(\\s*Uhr)?", "giu");
     private static readonly JsRe KMH = JsRegex.Compile("(\\d)\\s?km\\/h\\b", "gu");
     private static readonly JsRe MS = JsRegex.Compile("(\\d)\\s?m\\/s\\b", "gu");

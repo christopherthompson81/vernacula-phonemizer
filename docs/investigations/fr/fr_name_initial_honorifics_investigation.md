@@ -167,3 +167,55 @@ Gates, one at a time, on the final tree:
 | `cargo test --workspace` | 92 passed, 0 failed |
 | Rust parity (en, en-GB, ja, it, es, pt, pt-BR, hi, cmn, fr) | 2000/2000 identical |
 | fn-diff, fr dumps regenerated from the fixed TS | fr-normalize 12132, fr-ordinals 20120, fr-g2p 139488, fr-numbers 20084, fr-tagger 15009: all identical. phonemize-sync/best/trace 4043/4044 — the one row is the existing probe that needs ru + el, unported in Rust (recorded in the Rust fr port log). |
+
+## Run 7 — 2026-10-09 22:10 — the tagger's bare combining mark (`Mr` → `̃ʁ`)
+
+Question: where is best-path output accepted, and should the stray tilde be fixed with data (an
+abbreviation row), a guard, or both?
+
+Commands: read `wordLevelNeuralPrepass` (core/structuralTagger.ts) and `frenchPrepassWith`; grep Lexique and
+the supplement for `mr`, `mrs`, `monsieur`, `mister`; count `M.`/`Mr`/`Mrs` before a capital in FLEURS fr_fr;
+scratch `leadmark.mts` over the fn-diff `fr-tagger` dump (15009 words: every word of the fr golden, FLEURS
+fr_fr and the probes, plus a lexicon sample), counting tagger outputs that start with `\p{M}`.
+
+Raw findings:
+
+- Output is accepted in one place: `wordLevelNeuralPrepass` stores any non-empty `tag()` result as the word's
+  reading; `""` means "declined, leave it to the rule g2p". Nothing checks the reading's shape.
+- Lexique: `monsieur` [məsjø], `messieurs`, `mister` [mistœʁ]; no `mr`, `mrs`, `missis` or `mistress` row.
+- `M.` is already Monsieur (step 3, `DOTTED_ABBREV`): 18 `M.` before a capital in FLEURS, all expanded.
+  `Mr`/`Mrs` before a name: 0. Bare `mr` appears twice, as the all-caps initialism `(MR)` (an organisation's
+  acronym) in the cased text and `mr` in the lowercased column.
+- 9 of 15009 tagger outputs start with a combining mark, and **all 9 are OOV words that really reach the
+  tagger**: two names with a word-initial `Mc`/`M`+consonant, a Bantu place name with `Ng`, a `Mb-` unit,
+  three lowercased acronyms (`nsa`, `npws`, `mph`), `mr`, and `mlles` (already fixed in Run 4). Every one is
+  `m`/`n` + consonant at the start of the word: the tagger gives that `m`/`n` the bare nasalization tilde it
+  emits after a vowel.
+
+Decision — both, for different reasons:
+
+1. **Data, for `Mr`.** It is a real abbreviation of Monsieur in French text (the anglicized form, non-standard
+   beside `M.` but common), so it gets a normalizer rule that reads Lexique's own `monsieur`. ⚠ Case-sensitive
+   and only before a capitalized word, because all-caps `MR` is an initialism in this corpus and lowercased
+   `mr` cannot be told from it. Not added to the case-insensitive `DOTTED_ABBREV` table for the same reason.
+2. **Guard, for the output shape.** No IPA reading of any word can begin with a combining mark, so a reading
+   that does is wrong whatever the word was. The 9 hits are real words (names, acronyms), so this is not a
+   case of junk input. The guard declines the reading (`""`) and the rule g2p reads the word, which is
+   exactly the sync path's reading. It sits in `frenchPrepassWith`, not in the shared
+   `wordLevelNeuralPrepass`: the shared function serves af, bn, ckb, da, nb and sd as well, and moving their
+   goldens was out of scope here.
+3. **`Mrs` is left to the guard.** It is English (Mistress), Lexique has no reading to derive from, and
+   FLEURS has none. With the guard it reads as the rule g2p does (`mʁ`) — not right, but no longer a stray
+   mark. Recorded as a residual.
+
+Golden movement: `check:goldens` reported fr 2 stale. Both are one FLEURS text whose `Mc`-name had been
+recorded as `̃kɔʁ` (a bare tilde after a space) and now reads `mkɔʁ`, the rule g2p's reading and the sync
+path's. The old row recorded the defect, so it was regenerated (`gen_parity_goldens.mts fr fr-CA`: fr.tsv
+2 lines; fr-CA unchanged — it has no neural path).
+
+Tests: `test/fr-neural-prepass.test.ts` (a stub tagger that answers `̃x` gives the sync reading; one
+that answers `QQ` is still used; the real tagger on the 9 shapes leaves no bare mark) and `test/french.test.ts`
+(`Mr`/`Mr.` read as `monsieur`, on sync and best, for fr and fr-CA; `(MR)` and `mr dupont` unchanged). With
+origin/main's `normalize.ts` and `frenchNeural.ts`: 3 fail. The fourth, "an ordinary reading is still used",
+passes before and after by design. The same tests are in C# (`FrenchNeuralPrepassTests`,
+`FrenchNameInitialTests`) and Rust (`french_neural.rs`, `french/normalize.rs`).

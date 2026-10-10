@@ -56,7 +56,11 @@ public static class Normalize
         "(?<!\\b(?:hasta|asta|tubtob|tubtub|halin sa|halin)\\s)(?<![\\d.,\\p{L}-])(\\d[\\d,]*(?:\\.\\d+)?)\\s?[-–]\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?![\\d,-]|\\.\\d)",
         "gu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d{1,2})(?![\\d.,])", "gu");
-    private static readonly JsRe ABBREV = JsRegex.Compile($"\\b({ABBREV_ALT})\\.", "giu");
+    /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
+     *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
+    private static readonly JsRe ABBREV = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.", "giu");
     private static readonly JsRe IKA_LINKER = JsRegex.Compile("(?<![\\p{L}\\p{M}])(ika-\\d+)ng(?![\\p{L}\\p{M}])", "giu");
     // Lower case only, and bounded against dot, slash, colon and hyphen — the collisions are in upper case.
     private static readonly JsRe SG = JsRegex.Compile("(?<![\\p{L}\\p{M}\\p{Nd}.:/-])sg(?![\\p{L}\\p{M}\\p{Nd}.:/-])", "gu");

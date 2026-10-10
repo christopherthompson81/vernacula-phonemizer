@@ -663,6 +663,13 @@ const PLAIN_ABBREV: Readonly<Record<string, string>> = {
 };
 const PLAIN_ABBREV_ALT = Object.keys(PLAIN_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
+/** ⚠ A UNICODE-AWARE START OF WORD for the abbreviation templates (#1480's shape). JS `\b` is ASCII-only even
+ *  under the `u` flag, so after an accented letter it sees a boundary and a table key matched the END of a
+ *  longer word. "No letter, mark, digit or underscore before" is `\b`'s own ASCII behaviour, extended to
+ *  every script. The literal patterns in this file write the same lookbehind out, so the regex extractor
+ *  sees them. */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
 /**
  * THE KEYS ABOVE THAT MAY BE EXPANDED WITHOUT THEIR DOT. Deliberately tiny: a key qualifies only if its
  * bare form is NOT an English word, so no sentence can lose one. `vs` is the reported case and the one
@@ -846,11 +853,16 @@ export function normalizeEnglish(input: string): string {
     //    undotted saint pattern ("st petersburg"). An undotted "st" before a function word stays as-is: the
     //    dict's street reading is correct there ("main st in dublin"). A dotted abbreviation at phrase end
     //    is the trailing use (street/drive), keeping the punctuation that follows it.
-    s = rewrite(s, /\b(st|dr|mt|mr|mrs)\.\s+([a-zà-ÿ']+)/gi,
-        (_m, abbr: string, next: string) => `${DOTTED_ABBREV[abbr.toLowerCase()]!(next)} ${next}`);
-    s = rewrite(s, /\b(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))/gi,
-        (_m, abbr: string) => ({ st: "street", dr: "drive", mt: "mount" })[abbr.toLowerCase()]!);
-    s = rewrite(s, /\bst\s+([a-z']+)/gi,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])(st|dr|mt|mr|mrs)\.\s+([a-zà-ÿ']+)/giu,
+        (m0, abbr: string, next: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) now that the pattern carries `iu`: `ſt.` matches.
+            const f = DOTTED_ABBREV[abbr.toLowerCase()];
+            return f === undefined ? m0 : `${f(next)} ${next}`;
+        });
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))/giu,
+        (m0, abbr: string) =>
+            ({ st: "street", dr: "drive", mt: "mount" } as Record<string, string>)[abbr.toLowerCase()] ?? m0);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])st\s+([a-z']+)/giu,
         (m0, next: string) => (ABBREV_FUNCTION_NEXT.test(next) ? m0 : `saint ${next}`));
 
     // 0a2) `Rev.` IS "revision" BEFORE A DESIGNATOR AND "reverend" BEFORE A NAME. It is in the
@@ -869,12 +881,12 @@ export function normalizeEnglish(input: string): string {
     //      lookahead matches UPPERCASE too, so `(?![a-z.])` rejected a following capital and the
     //      designator test quietly inverted itself — `Rev. AB` fell through to "reverend". The flag
     //      has to stay off for the two letter classes here to mean what they say.
-    s = rewrite(s, /\b[Rr][Ee][Vv]\.?\s+(?=(?:[A-Z](?![a-z.])|\d))/gu, "revision ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])[Rr][Ee][Vv]\.?\s+(?=(?:[A-Z](?![a-z.])|\d))/gu, "revision ");
 
     // 0b) MORE DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
     //     phrase break, and kept at a phrase end where it really is the sentence end — the same discipline
     //     as the st./dr. rule above, and the shape every arm in this step repeats.
-    s = rewrite(s, new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -891,7 +903,7 @@ export function normalizeEnglish(input: string): string {
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${BARE_ABBREV_ALT})(?![\\p{L}\\p{M}.])`, "giu"),
         (m0, ab: string) => PLAIN_ABBREV[ab.toLowerCase()] ?? m0);
 
-    s = rewrite(s, new RegExp(`\\b(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -930,30 +942,30 @@ export function normalizeEnglish(input: string): string {
     //     ⚠ RESIDUAL, both unavoidable at this stage and both rare: a lowercase name ("max said so")
     //     expands, and a particle-less verb ("max the settings") expands. A sentence-initial "Max 40
     //     characters" does NOT expand, because it cannot be told from the name.
-    s = rewrite(s, /\bmax\.(\s+)(?=[\p{L}\p{N}])/gu, "maximum$1");
-    s = rewrite(s, /\bmax\b(?!\.?\s+(?:\w+\s+)?out\b)/gu, "maximum");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])max\.(\s+)(?=[\p{L}\p{N}])/gu, "maximum$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])max(?![\p{L}\p{M}\d_])(?!\.?\s+(?:\w+\s+)?out\b)/gu, "maximum");
 
     //     `et al.` is TWO tokens, so it needs its own arm after the single-token rule above has run.
-    s = rewrite(s, /\bet\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
-    s = rewrite(s, /\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])et\s+al\.(\s+)(?=\p{L})/giu, "et al$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])et\s+al\.(?=\s*(?:[.,;:!?)]|$))/giu, "et al.");
     //     `c.`/`ca.` is circa ONLY before a year — a bare `c.` is the letter (or an initial) and must be
     //     left to the initials rule, so the digit lookahead is what makes this safe.
-    s = rewrite(s, /\bca?\.\s*(?=\d{3,4}(?!\d))/gi, "circa ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])ca?\.\s*(?=\d{3,4}(?!\d))/giu, "circa ");
     //     `No.` before a DIGIT is the number sign; the rule above needs a following letter.
-    s = rewrite(s, /\bnos?\.\s*(?=\d)/gi, "number ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])nos?\.\s*(?=\d)/giu, "number ");
     //     `e.g.` and `i.e.` take the ENGLISH GLOSS, which is a CHOICE: readers genuinely disagree three ways
     //     (letter names, "for example", omitting it outright), so there is no single correct target here.
     //     Both must be handled before the generic dot-stripping below, which would leave "eg"/"ie" to be
     //     read as words.
     //     ⚠ The lookahead admits a DIGIT — "i.e. 0 or 1" occurs, and a letter-only lookahead lets it fall
     //     through to the dot-stripping, which reads the bare "ie" as the word [iː].
-    s = rewrite(s, /\be\.\s?g\.(\s+)(?=[\p{L}\d])/giu, "for example$1");
-    s = rewrite(s, /\be\.\s?g\.(?=\s*(?:[,;:!?)]|$))/giu, "for example.");
-    s = rewrite(s, /\bi\.\s?e\.(\s+)(?=[\p{L}\d])/giu, "that is$1");
-    s = rewrite(s, /\bi\.\s?e\.(?=\s*(?:[,;:!?)]|$))/giu, "that is.");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])e\.\s?g\.(\s+)(?=[\p{L}\d])/giu, "for example$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])e\.\s?g\.(?=\s*(?:[,;:!?)]|$))/giu, "for example.");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])i\.\s?e\.(\s+)(?=[\p{L}\d])/giu, "that is$1");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])i\.\s?e\.(?=\s*(?:[,;:!?)]|$))/giu, "that is.");
     //     a.m./p.m. likewise: dot-stripping alone leaves lowercase "am", which reads as the verb. The
     //     initialism pass cannot rescue it because that pass only claims all-caps runs.
-    s = rewrite(s, /\b([ap])\.\s?m\./gi, (_m, ap: string) => (ap.toLowerCase() === "a" ? "ay em" : "pee em"));
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])([ap])\.\s?m\./giu, (_m, ap: string) => (ap.toLowerCase() === "a" ? "ay em" : "pee em"));
     //     Other dotted initialisms (U.S., U.K.) — strip the interior dots so they cannot become pause marks,
     //     leaving the letters for the initialism pass or the dictionary.
     //     ⚠ AND UPPERCASED, because a contiguous dotted letter run IS an initialism by construction, while
@@ -962,7 +974,7 @@ export function normalizeEnglish(input: string): string {
     //     corpus audit caught — the reader said "U-S". (`u.k.` escaped only because "uk" is not a word,
     //     which is why this never showed up before.) Uppercasing is safe here precisely because the dots
     //     have already proved what the run is.
-    s = rewrite(s, /\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/g, (m0) => m0.replace(/\./g, "").toUpperCase());
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)/gu, (m0) => m0.replace(/\./g, "").toUpperCase());
 
     // 0b2) MONTH AND WEEKDAY ABBREVIATIONS → the full name. BEFORE steps 3-5, whose date machinery all keys
     //      on the spelled-out month: the ordinal day (`january 5` → `january 5th`) and the pair-wise year

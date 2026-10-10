@@ -338,7 +338,7 @@ public static class Normalize
     /** `Rev.` is "revision" before a designator and "reverend" before a name. ⚠ NO "i" FLAG — with it
      *  the `[a-z]` in the lookahead matches uppercase and the test inverts. See the TS. */
     private static readonly JsRe REV_REVISION =
-        JsRegex.Compile("\\b[Rr][Ee][Vv]\\.?\\s+(?=(?:[A-Z](?![a-z.])|\\d))", "gu");
+        JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])[Rr][Ee][Vv]\\.?\\s+(?=(?:[A-Z](?![a-z.])|\\d))", "gu");
 
     private static readonly JsRe NUMBER_RANGE = JsRegex.Compile("(\\d)[\\u2012\\u2013\\u2014](?=\\d)", "gu");
 
@@ -821,27 +821,31 @@ public static class Normalize
         ["⁵"] = "5", ["⁶"] = "6", ["⁷"] = "7", ["⁸"] = "8", ["⁹"] = "9",
     };
 
+    /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
+     *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
     // Compiled once rather than per call — the TS builds several of these with `new RegExp` inside the pass.
-    private static readonly JsRe TITLE_ABBREV = JsRegex.Compile("\\b(st|dr|mt|mr|mrs)\\.\\s+([a-zà-ÿ']+)", "gi");
-    private static readonly JsRe TITLE_ABBREV_END = JsRegex.Compile("\\b(st|dr|mt)\\.(?=\\s*(?:[.,;:!?]|$))", "gi");
-    private static readonly JsRe SAINT_UNDOTTED = JsRegex.Compile("\\bst\\s+([a-z']+)", "gi");
-    private static readonly JsRe PLAIN_MID = JsRegex.Compile($"\\b({PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
-    private static readonly JsRe PLAIN_END = JsRegex.Compile($"\\b({PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
+    private static readonly JsRe TITLE_ABBREV = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])(st|dr|mt|mr|mrs)\\.\\s+([a-zà-ÿ']+)", "giu");
+    private static readonly JsRe TITLE_ABBREV_END = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])(st|dr|mt)\\.(?=\\s*(?:[.,;:!?]|$))", "giu");
+    private static readonly JsRe SAINT_UNDOTTED = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])st\\s+([a-z']+)", "giu");
+    private static readonly JsRe PLAIN_MID = JsRegex.Compile($"{WORD_START}({PLAIN_ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe PLAIN_END = JsRegex.Compile($"{WORD_START}({PLAIN_ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
     // ⚠ CASE-SENSITIVE ON PURPOSE (no "i"): `IR` is the initialism, `Ir` the iridium symbol; `Max` is
     // a name. See the TS for the full reasoning.
     private static readonly JsRe IR_GLOSS = JsRegex.Compile("\\bIR\\b", "gu");
-    private static readonly JsRe MAX_DOT = JsRegex.Compile("\\bmax\\.(\\s+)(?=[\\p{L}\\p{N}])", "gu");
-    private static readonly JsRe MAX_BARE = JsRegex.Compile("\\bmax\\b(?!\\.?\\s+(?:\\w+\\s+)?out\\b)", "gu");
-    private static readonly JsRe ET_AL_MID = JsRegex.Compile("\\bet\\s+al\\.(\\s+)(?=\\p{L})", "giu");
-    private static readonly JsRe ET_AL_END = JsRegex.Compile("\\bet\\s+al\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
-    private static readonly JsRe CIRCA = JsRegex.Compile("\\bca?\\.\\s*(?=\\d{3,4}(?!\\d))", "gi");
-    private static readonly JsRe NUMBER_SIGN = JsRegex.Compile("\\bnos?\\.\\s*(?=\\d)", "gi");
-    private static readonly JsRe EG_MID = JsRegex.Compile("\\be\\.\\s?g\\.(\\s+)(?=[\\p{L}\\d])", "giu");
-    private static readonly JsRe EG_END = JsRegex.Compile("\\be\\.\\s?g\\.(?=\\s*(?:[,;:!?)]|$))", "giu");
-    private static readonly JsRe IE_MID = JsRegex.Compile("\\bi\\.\\s?e\\.(\\s+)(?=[\\p{L}\\d])", "giu");
-    private static readonly JsRe IE_END = JsRegex.Compile("\\bi\\.\\s?e\\.(?=\\s*(?:[,;:!?)]|$))", "giu");
-    private static readonly JsRe AM_PM = JsRegex.Compile("\\b([ap])\\.\\s?m\\.", "gi");
-    private static readonly JsRe DOTTED_INITIALS = JsRegex.Compile("\\b([A-Za-z](?:\\.[A-Za-z]){1,4})\\.(?!\\w)", "g");
+    private static readonly JsRe MAX_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])max\\.(\\s+)(?=[\\p{L}\\p{N}])", "gu");
+    private static readonly JsRe MAX_BARE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])max(?![\\p{L}\\p{M}\\d_])(?!\\.?\\s+(?:\\w+\\s+)?out\\b)", "gu");
+    private static readonly JsRe ET_AL_MID = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])et\\s+al\\.(\\s+)(?=\\p{L})", "giu");
+    private static readonly JsRe ET_AL_END = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])et\\s+al\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
+    private static readonly JsRe CIRCA = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])ca?\\.\\s*(?=\\d{3,4}(?!\\d))", "giu");
+    private static readonly JsRe NUMBER_SIGN = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])nos?\\.\\s*(?=\\d)", "giu");
+    private static readonly JsRe EG_MID = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])e\\.\\s?g\\.(\\s+)(?=[\\p{L}\\d])", "giu");
+    private static readonly JsRe EG_END = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])e\\.\\s?g\\.(?=\\s*(?:[,;:!?)]|$))", "giu");
+    private static readonly JsRe IE_MID = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])i\\.\\s?e\\.(\\s+)(?=[\\p{L}\\d])", "giu");
+    private static readonly JsRe IE_END = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])i\\.\\s?e\\.(?=\\s*(?:[,;:!?)]|$))", "giu");
+    private static readonly JsRe AM_PM = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])([ap])\\.\\s?m\\.", "giu");
+    private static readonly JsRe DOTTED_INITIALS = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])([A-Za-z](?:\\.[A-Za-z]){1,4})\\.(?!\\w)", "gu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "g");
     private static readonly JsRe MONTH_ABBREV_BEFORE_NUM =
         JsRegex.Compile($"\\b({MONTH_ABBREV_ALT})\\b\\.?(?=[ \u00a0]+\\d)", "giu");  // space, NBSP
@@ -1007,7 +1011,7 @@ public static class Normalize
         });
         s = Rewrite(s, TITLE_ABBREV_END, m => m.Groups[1].Value.ToLowerInvariant() switch
         {
-            "st" => "street", "dr" => "drive", _ => "mount",
+            "st" => "street", "dr" => "drive", "mt" => "mount", _ => m.Value,  // ⚠ reachable miss under `iu` (#1122)
         });
         s = Rewrite(s, SAINT_UNDOTTED, m =>
         {

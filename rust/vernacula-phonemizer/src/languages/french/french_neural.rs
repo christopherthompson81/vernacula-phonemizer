@@ -38,7 +38,16 @@ pub fn prepass_with(
         js_re!("[a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?", "giu"),
         &|w| w.to_lower_case(),
         &|lower| e.has_word(lower) || !js_re!("^[a-zà-ÿœæ]+$", "u").test(lower),
-        tag,
+        // ⚠ A READING THAT STARTS WITH A COMBINING MARK IS DECLINED ("" → the rule g2p): the tagger can give a
+        // word-initial m/n the bare nasal tilde (`Mr` read `̃ʁ`), and no IPA reading can begin with a mark.
+        &|lower| {
+            let out = tag(lower)?;
+            Ok(if js_re!(r"^\p{M}", "u").test(&out) {
+                JsString::new()
+            } else {
+                out
+            })
+        },
         &|t, oov| with_host(&js("fr"), || e.text_normalized(t, Some(oov))),
     )
 }
@@ -106,5 +115,18 @@ mod tests {
             .filter(|w| !e.has_word(&js(w).to_lower_case()))
             .collect();
         assert!(missing.is_empty(), "unanswered letter names: {missing:?}");
+    }
+
+    /// A tagger reading that starts with a combining mark (`Mr` read `̃ʁ`) is declined, so the rule g2p reads
+    /// the word: the sync reading. An ordinary reading is still used.
+    #[test]
+    fn a_reading_starting_with_a_combining_mark_is_declined() {
+        let e = create_french().unwrap();
+        let t = "Il vit à Ngorongoro avec McCord.";
+        let best = prepass_with(&e, &|_| Ok(js("\u{303}x")), &js(t)).unwrap();
+        let sync = with_host(&js("fr"), || e.text(&js(t), None));
+        assert_eq!(best, sync);
+        let used = prepass_with(&e, &|_| Ok(js("QQ")), &js("Ngorongoro")).unwrap();
+        assert!(used.to_string_lossy().contains("QQ"));
     }
 }

@@ -291,9 +291,9 @@ fn is_name(next: &JsString) -> bool {
     js_re!(r"^\p{Lu}", "u").test(next)
 }
 /// `DOTTED_ABBREV[key]!(next)`; the key is always one of the five (the pattern is legacy `/i`, ASCII only).
-fn dotted_abbrev(key: &JsString, next: &JsString) -> &'static str {
+fn dotted_abbrev(key: &JsString, next: &JsString) -> Option<&'static str> {
     let function_next = || !is_name(next) && abbrev_function_next().test(next);
-    match key.to_string_lossy().as_str() {
+    Some(match key.to_string_lossy().as_str() {
         "st" => {
             if function_next() {
                 "street"
@@ -311,8 +311,8 @@ fn dotted_abbrev(key: &JsString, next: &JsString) -> &'static str {
         "mt" => "mount",
         "mr" => "mister",
         "mrs" => "missus",
-        k => panic!("DOTTED_ABBREV[{k:?}] is not a function"),
-    }
+        _ => return None,
+    })
 }
 
 const NOT_VERSION: &str = "(?<![\\d.,])(?!802[.,]11\\w)(?!\\d+[.,]\\d+[a-zA-Z](?![a-zA-Z\\d]))";
@@ -803,7 +803,12 @@ fn int(s: &JsString) -> u32 {
 // ── Patterns built at module load in the TS, or per call there and hoisted here ─────────────────────
 static PLAIN_DOT_NEXT: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        &["\\b(", &PLAIN_ABBREV_ALT, ")\\.(\\s+)(?=\\p{L})"].concat(),
+        &[
+            "(?<![\\p{L}\\p{M}\\d_])(",
+            &PLAIN_ABBREV_ALT,
+            ")\\.(\\s+)(?=\\p{L})",
+        ]
+        .concat(),
         "giu",
     )
     .unwrap()
@@ -822,7 +827,12 @@ static BARE_ABBREV: LazyLock<JsRegex> = LazyLock::new(|| {
 });
 static PLAIN_DOT_END: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        &["\\b(", &PLAIN_ABBREV_ALT, ")\\.(?=\\s*(?:[.,;:!?)]|$))"].concat(),
+        &[
+            "(?<![\\p{L}\\p{M}\\d_])(",
+            &PLAIN_ABBREV_ALT,
+            ")\\.(?=\\s*(?:[.,;:!?)]|$))",
+        ]
+        .concat(),
         "giu",
     )
     .unwrap()
@@ -1172,36 +1182,51 @@ pub fn normalize_english(input: &JsString) -> JsString {
     // 0) Abbreviations.
     s = rewrite_with(
         &s,
-        js_re!(r"\b(st|dr|mt|mr|mrs)\.\s+([a-zà-ÿ']+)", "gi"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])(st|dr|mt|mr|mrs)\.\s+([a-zà-ÿ']+)",
+            "giu"
+        ),
         |m, w| {
             let (abbr, next) = (g(m, 1, w), g(m, 2, w));
-            jcat!(dotted_abbrev(&abbr.to_lower_case(), &next), " ", next)
+            // ⚠ reachable miss (#1122) now that the pattern carries `iu`: `ſt.` matches the alternation.
+            match dotted_abbrev(&abbr.to_lower_case(), &next) {
+                None => m.value(w),
+                Some(word) => jcat!(word, " ", next),
+            }
         },
     );
     s = rewrite_with(
         &s,
-        js_re!(r"\b(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))", "gi"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])(st|dr|mt)\.(?=\s*(?:[.,;:!?]|$))",
+            "giu"
+        ),
         |m, w| {
             let abbr = g(m, 1, w).to_lower_case();
-            js(
-                lookup2(&[("st", "street"), ("dr", "drive"), ("mt", "mount")], &abbr)
-                    .expect("st|dr|mt"),
-            )
+            lookup2(&[("st", "street"), ("dr", "drive"), ("mt", "mount")], &abbr)
+                .map_or_else(|| m.value(w), js) // ⚠ reachable miss under `iu` (#1122)
         },
     );
-    s = rewrite_with(&s, js_re!(r"\bst\s+([a-z']+)", "gi"), |m, w| {
-        let next = g(m, 1, w);
-        if abbrev_function_next().test(&next) {
-            m.value(w)
-        } else {
-            jcat!("saint ", next)
-        }
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\p{L}\p{M}\d_])st\s+([a-z']+)", "giu"),
+        |m, w| {
+            let next = g(m, 1, w);
+            if abbrev_function_next().test(&next) {
+                m.value(w)
+            } else {
+                jcat!("saint ", next)
+            }
+        },
+    );
 
     // 0a2) `Rev.` before a designator.
     s = rewrite(
         &s,
-        js_re!(r"\b[Rr][Ee][Vv]\.?\s+(?=(?:[A-Z](?![a-z.])|\d))", "gu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])[Rr][Ee][Vv]\.?\s+(?=(?:[A-Z](?![a-z.])|\d))",
+            "gu"
+        ),
         &js("revision "),
     );
 
@@ -1226,60 +1251,77 @@ pub fn normalize_english(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"\bIR\b", "gu"), &js("infrared"));
     s = rewrite(
         &s,
-        js_re!(r"\bmax\.(\s+)(?=[\p{L}\p{N}])", "gu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])max\.(\s+)(?=[\p{L}\p{N}])", "gu"),
         &js("maximum$1"),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bmax\b(?!\.?\s+(?:\w+\s+)?out\b)", "gu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])max(?![\p{L}\p{M}\d_])(?!\.?\s+(?:\w+\s+)?out\b)",
+            "gu"
+        ),
         &js("maximum"),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bet\s+al\.(\s+)(?=\p{L})", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])et\s+al\.(\s+)(?=\p{L})", "giu"),
         &js("et al$1"),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bet\s+al\.(?=\s*(?:[.,;:!?)]|$))", "giu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])et\s+al\.(?=\s*(?:[.,;:!?)]|$))",
+            "giu"
+        ),
         &js("et al."),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bca?\.\s*(?=\d{3,4}(?!\d))", "gi"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])ca?\.\s*(?=\d{3,4}(?!\d))", "giu"),
         &js("circa "),
     );
-    s = rewrite(&s, js_re!(r"\bnos?\.\s*(?=\d)", "gi"), &js("number "));
     s = rewrite(
         &s,
-        js_re!(r"\be\.\s?g\.(\s+)(?=[\p{L}\d])", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])nos?\.\s*(?=\d)", "giu"),
+        &js("number "),
+    );
+    s = rewrite(
+        &s,
+        js_re!(r"(?<![\p{L}\p{M}\d_])e\.\s?g\.(\s+)(?=[\p{L}\d])", "giu"),
         &js("for example$1"),
     );
     s = rewrite(
         &s,
-        js_re!(r"\be\.\s?g\.(?=\s*(?:[,;:!?)]|$))", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])e\.\s?g\.(?=\s*(?:[,;:!?)]|$))", "giu"),
         &js("for example."),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bi\.\s?e\.(\s+)(?=[\p{L}\d])", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])i\.\s?e\.(\s+)(?=[\p{L}\d])", "giu"),
         &js("that is$1"),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bi\.\s?e\.(?=\s*(?:[,;:!?)]|$))", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])i\.\s?e\.(?=\s*(?:[,;:!?)]|$))", "giu"),
         &js("that is."),
     );
-    s = rewrite_with(&s, js_re!(r"\b([ap])\.\s?m\.", "gi"), |m, w| {
-        js(if g(m, 1, w).to_lower_case() == "a" {
-            "ay em"
-        } else {
-            "pee em"
-        })
-    });
     s = rewrite_with(
         &s,
-        js_re!(r"\b([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)", "g"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])([ap])\.\s?m\.", "giu"),
+        |m, w| {
+            js(if g(m, 1, w).to_lower_case() == "a" {
+                "ay em"
+            } else {
+                "pee em"
+            })
+        },
+    );
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])([A-Za-z](?:\.[A-Za-z]){1,4})\.(?!\w)",
+            "gu"
+        ),
         |m, w| {
             js_re!(r"\.", "g")
                 .replace(&m.value(w), &JsString::new())
@@ -2108,5 +2150,41 @@ mod port_findings {
         use crate::core::markup::strip_markup;
         assert_eq!(strip_markup(&js("a &constructor; b")), "a &constructor; b");
         assert_eq!(strip_markup(&js("a &amp; b")), "a & b");
+    }
+}
+
+/// The dotted-abbreviation rules start at a Unicode word edge, not an ASCII `\b` (#1480's shape). Each pair:
+/// the abbreviation alone (the rule fires) and glued after a non-ASCII letter (it declines). Ported from
+/// test/abbrev-word-edge.test.ts; every word is synthetic.
+#[cfg(test)]
+mod word_edge {
+    use super::*;
+
+    #[test]
+    fn an_abbreviation_glued_after_a_non_ascii_letter_is_not_one() {
+        let n = |s: &str| normalize_english(&js(s)).to_string_lossy();
+        for (fires, declines) in [
+            ("They met Mr. smith", "They met Ømr. smith"),
+            ("on Main St.", "on Main Øst."),
+            ("see Rev. 3 here", "see Žrev. 3 here"),
+            ("the Nos. Then", "the Taínos. Then"),
+            ("counted the nos.", "They met the Taínos."),
+            ("up to max. 5 more", "up to Ømax. 5 more"),
+            ("up to max 5 more", "up to Ømax 5 more"),
+            ("up to max 5 more", "up to maxé 5 more"),
+            ("they saw st louis", "they saw Øst louis"),
+            ("Smith et al. said", "Smith Øet al. said"),
+            ("built ca. 1900 here", "built Ýca. 1900 here"),
+            ("see No. 5 here", "see Taíno. 5 here"),
+            ("fruit, e.g. apples", "fruit, Øe.g. apples"),
+            ("fruit, i.e. apples", "fruit, Øi.e. apples"),
+            ("at 10 a.m. today", "at 10 Øa.m. today"),
+            ("the U.S. army", "the ØU.S. army"),
+        ] {
+            assert_ne!(n(fires), fires, "{fires}");
+            assert_eq!(n(declines), declines, "{declines}");
+        }
+        // ⚠ the `iu` fold reaches `ſt.` now; the miss branch returns it unchanged rather than panicking.
+        assert_eq!(n("the \u{17f}t. louis"), "the \u{17f}t. louis");
     }
 }

@@ -102,14 +102,18 @@ public static class Normalize
     private static readonly JsRe SPACE_GROUP_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<![\\d.,:])(?<!:\\d\\d)(\\d+)\\.(\\d{1,2})(?![\\d.,\\p{L}])", "gu");
-    private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?de\\s?C\\.|\\ba\\.\\s?C\\.", "giu");
-    private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?de\\s?C\\.|\\bd\\.\\s?C\\.", "giu");
-    private static readonly JsRe EEUU_UPPER = JsRegex.Compile("\\bEE\\.\\s?UU\\.?", "gu");
-    private static readonly JsRe EEUU_LOWER = JsRegex.Compile("\\bee\\.\\s?uu\\.?", "gu");
-    private static readonly JsRe AM_PM = JsRegex.Compile("\\b([ap])\\.\\s?m\\.", "giu");
-    private static readonly JsRe NUMERO_SIGN = JsRegex.Compile("\\b(?:n\\.º|nº|n°|n\\.|no\\.)\\s?(?=\\d)", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
-    private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
+    /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
+     *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
+    private static readonly JsRe ERA_BC = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])a\\.\\s?de\\s?C\\.|(?<![\\p{L}\\p{M}\\d_])a\\.\\s?C\\.", "giu");
+    private static readonly JsRe ERA_AD = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])d\\.\\s?de\\s?C\\.|(?<![\\p{L}\\p{M}\\d_])d\\.\\s?C\\.", "giu");
+    private static readonly JsRe EEUU_UPPER = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])EE\\.\\s?UU\\.?", "gu");
+    private static readonly JsRe EEUU_LOWER = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])ee\\.\\s?uu\\.?", "gu");
+    private static readonly JsRe AM_PM = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])([ap])\\.\\s?m\\.", "giu");
+    private static readonly JsRe NUMERO_SIGN = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])(?:n\\.º|nº|n°|n\\.|no\\.)\\s?(?=\\d)", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe ABBREV_END = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     private static readonly JsRe ORDINAL_IND = JsRegex.Compile("\\b(\\d+)\\.?(?:er\\b|º|ª)", "gu");
     private static readonly JsRe DIGITS_IN = JsRegex.Compile("\\d+");
     private static readonly JsRe HAS_FEM = JsRegex.Compile("ª", "u");
