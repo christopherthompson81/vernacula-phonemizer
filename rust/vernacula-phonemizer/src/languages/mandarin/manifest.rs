@@ -39,8 +39,7 @@ pub struct Numbers {
     pub zero_digit: String,
 }
 
-/// `exponentWords: { squared; cubed; position? }`. ⚠ The TS interface types `position` as `"before" | "after"`,
-/// but cmn.jsonc says `"compound"`, which the shared tier reads; the jsonc is untyped at runtime, so the data wins.
+/// `exponentWords: { squared; cubed; position? }`; cmn.jsonc says `"compound"`.
 #[derive(Debug, Deserialize)]
 pub struct CmnExponentWords {
     pub squared: CountForms,

@@ -7,7 +7,7 @@
  */
 
 import { loadManifest } from "../../core/loadManifest.ts";
-import type { CountForms } from "../../core/normalizeSymbols.ts";
+import type { CountForms, ExponentPosition } from "../../core/normalizeSymbols.ts";
 
 export interface CmnManifest {
     tones: Record<string, string>;
@@ -33,7 +33,7 @@ export interface CmnManifest {
         unspacedScript: boolean;
         percentPrefix: boolean;
         multiply: { times: string; by?: string };
-        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        exponentWords: { squared: CountForms; cubed: CountForms; position?: ExponentPosition };
         bareExponent: { squared: string; cubed: string; power: string; negative: string };
     };
 }

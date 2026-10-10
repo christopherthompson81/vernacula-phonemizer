@@ -8,7 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
+import { makePinyinToIpa, makeStrictPinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
 import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
@@ -64,6 +64,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class MandarinPhonemizer implements Phonemizer {
     private readonly pinyinToIpa: (pinyin: string) => string;
+    private readonly strictPinyinToIpa: (pinyin: string) => string | null;
 
     constructor(
         tables: MandarinTables,
@@ -71,6 +72,7 @@ class MandarinPhonemizer implements Phonemizer {
         private readonly foreign?: ForeignPhonemizer,
     ) {
         this.pinyinToIpa = makePinyinToIpa(tables);
+        this.strictPinyinToIpa = makeStrictPinyinToIpa(tables);
     }
 
     /** A Han run (with a per-char sandhi-exempt mask): segment → 一/不 sandhi → pinyin → IPA (3-3 within run). */
@@ -181,8 +183,17 @@ class MandarinPhonemizer implements Phonemizer {
         // ⟨C⟩ of `20°C` before it runs destroys the unit. See the note on that function.
         input = spellInitialisms(SYMBOLS(normalizeMandarin(input)));
         // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
-        if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))
-            return this.pinyinToIpa(input);
+        // ⚠ ALL OR NOTHING: EVERY TOKEN MUST BE A SYLLABLE (or erhua `r`). The shape alone admitted any lowercase
+        // alphanumeric — `mp3`, `ipv4`, `web3`, `a4 paper` — and the converter has no reading for `mp` or `paper`.
+        // Declined, the text takes the scanner below like any embedded Latin: letters to English, digits to a
+        // numeral. A stray token declines the WHOLE text rather than being read per token: every pinyin-shaped
+        // text in the fleet's goldens and FLEURS (11 distinct) is lowercase prose in another language
+        // (`… motor f1`), none of it pinyin, and per token up to 11 of a text's 33 words (`ni na wa ya`) would
+        // have read as Mandarin syllables.
+        if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input)) {
+            const ipa = this.strictPinyinToIpa(input);
+            if (ipa !== null) return ipa;
+        }
 
         const { cp, exempt, pieces } = this.substituteNumbers(input);
         // Code-point run scanner (Han / Latin / punctuation), not a single regex — so it drives clauseSink()

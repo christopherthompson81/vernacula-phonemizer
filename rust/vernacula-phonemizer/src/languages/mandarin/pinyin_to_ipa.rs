@@ -88,33 +88,69 @@ impl PinyinToIpa {
         Self { tables }
     }
 
+    /// `makePinyinToIpa(tables)`: an unknown token is dropped.
     pub fn convert(&self, pinyin: &JsString) -> JsString {
+        self.run(pinyin, false).unwrap()
+    }
+
+    /// `makeStrictPinyinToIpa(tables)`: `None` when a token is neither a table syllable nor erhua.
+    pub fn convert_strict(&self, pinyin: &JsString) -> Option<JsString> {
+        self.run(pinyin, true)
+    }
+
+    /// The converter. Erhua: a bare `r` is the rhotic suffix of the syllable before it, outside the tone
+    /// sequence; the rhotic is `er`'s own reading after its nucleus (`ər` → `r`). With no syllable before it,
+    /// it is `er`.
+    fn run(&self, pinyin: &JsString, strict: bool) -> Option<JsString> {
         let tokens: Vec<JsString> = split_whitespace_runs(&pinyin.trim())
             .into_iter()
             .filter(|t| !t.is_empty())
             .collect();
         if tokens.is_empty() {
-            return JsString::new();
+            return Some(JsString::new());
         }
-        let syls: Vec<Syllable> = tokens.iter().map(parse_syllable).collect();
+        let ipa = &self.tables.syllable_ipa;
+        let rhotic = ipa.get(&js("er")).map(|er| {
+            let cps = er.code_point_strings();
+            JsString::join(&cps[1.min(cps.len())..], &js(""))
+        });
+        let mut heads: Vec<(Syllable, JsString)> = Vec::new();
+        for tok in &tokens {
+            let syl = parse_syllable(tok);
+            if let (true, Some(r)) = (syl.base == "r", rhotic.as_ref()) {
+                match heads.last_mut() {
+                    Some((_, suffix)) => suffix.push_str(r),
+                    None => heads.push((
+                        Syllable {
+                            base: js("er"),
+                            tone: syl.tone,
+                        },
+                        JsString::new(),
+                    )),
+                }
+                continue;
+            }
+            if strict && !ipa.contains_key(&syl.base) {
+                return None;
+            }
+            heads.push((syl, JsString::new()));
+        }
         let realized = apply_third_tone_sandhi(
-            &syls.iter().map(|s| s.tone).collect::<Vec<_>>(),
+            &heads.iter().map(|(s, _)| s.tone).collect::<Vec<_>>(),
             self.tables.third_tone_sandhi,
         );
-        let mut out: Vec<JsString> = Vec::with_capacity(syls.len());
-        for (i, syl) in syls.iter().enumerate() {
-            match self.tables.syllable_ipa.get(&syl.base) {
-                None => out.push(tokens[i].clone()),
-                Some(seg) => {
-                    let tone = self
-                        .tables
-                        .tones
-                        .get(&js_number_to_string(realized[i]))
-                        .map_or("", String::as_str);
-                    out.push(seg.concat(&js(tone)));
-                }
+        let mut out: Vec<JsString> = Vec::with_capacity(heads.len());
+        for (i, (syl, suffix)) in heads.iter().enumerate() {
+            // An unknown token is dropped, keeping its slot in the tone sequence.
+            if let Some(seg) = ipa.get(&syl.base) {
+                let tone = self
+                    .tables
+                    .tones
+                    .get(&js_number_to_string(realized[i]))
+                    .map_or("", String::as_str);
+                out.push(seg.concat(suffix).concat(&js(tone)));
             }
         }
-        JsString::join(&out, &js(" "))
+        Some(JsString::join(&out, &js(" ")))
     }
 }

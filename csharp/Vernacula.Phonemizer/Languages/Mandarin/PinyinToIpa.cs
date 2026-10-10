@@ -51,26 +51,43 @@ public static class PinyinToIpa
         return outp;
     }
 
-    /** Build the pinyin→IPA converter from the data tables. */
-    public static Func<string, string> MakePinyinToIpa(MandarinTables tables)
+    /** Erhua: a bare `r` is the rhotic suffix of the syllable before it, outside the tone sequence; the
+     *  rhotic is `er`'s own reading after its nucleus (ər → r). With no syllable before it, it is `er`. */
+    private const string ERHUA = "r";
+
+    /** The converter; `strict` returns null on a token that is neither a table syllable nor erhua. */
+    private static string? Convert(MandarinTables tables, string pinyin, bool strict)
     {
-        return pinyin =>
+        var tokens = WHITESPACE.Re.Split(pinyin.Trim()).Where(t => t.Length > 0).ToList();
+        if (tokens.Count == 0) return "";
+        string? rhotic = tables.SyllableIpa.TryGetValue("er", out var er) ? string.Concat(Js.CodePoints(er).Skip(1)) : null;
+        var heads = new List<(string Base, int Tone, string Suffix)>();
+        foreach (var tok in tokens)
         {
-            var tokens = WHITESPACE.Re.Split(pinyin.Trim()).Where(t => t.Length > 0).ToList();
-            if (tokens.Count == 0) return "";
-            var syls = tokens.Select(ParseSyllable).ToList();
-            var realized = ApplyThirdToneSandhi(syls.Select(s => s.Tone).ToList(), tables.ThirdToneSandhi);
-            var outp = new List<string>();
-            for (var i = 0; i < syls.Count; i++)
+            var syl = ParseSyllable(tok);
+            if (syl.Base == ERHUA && rhotic is not null)
             {
-                if (!tables.SyllableIpa.TryGetValue(syls[i].Base, out var seg))
-                {
-                    outp.Add(tokens[i]); // unknown syllable: pass through
-                    continue;
-                }
-                outp.Add(seg + (tables.Tones.TryGetValue(Js.NumberToString(realized[i]), out var tone) ? tone : ""));
+                if (heads.Count > 0) heads[^1] = heads[^1] with { Suffix = heads[^1].Suffix + rhotic };
+                else heads.Add(("er", syl.Tone, ""));
+                continue;
             }
-            return string.Join(" ", outp);
-        };
+            if (strict && !tables.SyllableIpa.ContainsKey(syl.Base)) return null;
+            heads.Add((syl.Base, syl.Tone, ""));
+        }
+        var realized = ApplyThirdToneSandhi(heads.Select(h => h.Tone).ToList(), tables.ThirdToneSandhi);
+        var outp = new List<string>();
+        for (var i = 0; i < heads.Count; i++)
+        {
+            // An unknown token is DROPPED, not passed through as text; it keeps its slot in the tone sequence.
+            if (!tables.SyllableIpa.TryGetValue(heads[i].Base, out var seg)) continue;
+            outp.Add(seg + heads[i].Suffix + (tables.Tones.TryGetValue(Js.NumberToString(realized[i]), out var tone) ? tone : ""));
+        }
+        return string.Join(" ", outp);
     }
+
+    /** Build the pinyin→IPA converter from the data tables. An unknown token is dropped. */
+    public static Func<string, string> MakePinyinToIpa(MandarinTables tables) => pinyin => Convert(tables, pinyin, false)!;
+
+    /** The same converter, but null when any token is neither a table syllable nor erhua. */
+    public static Func<string, string?> MakeStrictPinyinToIpa(MandarinTables tables) => pinyin => Convert(tables, pinyin, true);
 }

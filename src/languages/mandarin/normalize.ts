@@ -46,14 +46,25 @@
  */
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { foldHanCompatibility } from "../../core/unicode.ts";
 
 /**
  * Western fraction notation → the Chinese order, still in digits: `a/b` → `b分之a`. Guarded against dates
- * and unit ratios by requiring digits on both sides and nothing numeric adjacent. `\b` is unusable here —
- * it is defined on ASCII word characters and finds no boundary against Han script — so the boundaries are
- * explicit lookarounds, the same discipline the Hindi pass needed.
+ * and unit ratios by requiring digits on both sides. `\b` is unusable here — it is defined on ASCII word
+ * characters and finds no boundary against Han script — so the boundaries are explicit lookarounds, the same
+ * discipline the Hindi pass needed.
+ *
+ * ⚠ THE TWO SIDES ARE MIRRORS. Exactly what each side refuses next to the fraction:
+ *   · a digit or a `/` (a longer number, a date, a chain);
+ *   · `.` with a digit beyond it — a decimal: `1.5/2` and `1/2.5` are both declined;
+ *   · `,` with exactly three digits beyond it, on the number side — a thousands group: `1/1,000,000` and
+ *     `5,000/10,000` are declined (the fleet's goldens write both; cmn's own corpus has no `,` beside a fraction).
+ * Any other `,` is a LIST SEPARATOR, so `1/2,3/4` reads both fractions, `3/4,5` reads 4分之3 then 5,
+ * `3,4/5` reads 3 then 5分之4, and `好,1/2` reads. A sentence-final `1/2.` reads.
+ * The right side used to refuse only a digit or `/`, while the left also refused any `.` and `,`: `1/2.5` read
+ * 2分之1.5 and `1/2,3/4` read neither fraction.
  */
-const FRACTION = /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu;
+const FRACTION = /(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,4})\/(\d{1,4})(?![\d/]|\.\d|,\d{3}(?!\d))/gu;
 
 /**
  * THE TWO LEFT GUARDS, and why they differ — measured, not reasoned.
@@ -120,6 +131,9 @@ const AMP_ELSEWHERE = /\s?[&＆]\s?/gu;
  * counting-two used before a measure word, never the two of an ordinal or a power (二次方). Writing 平方/立方
  * puts the reading beyond reach of any numeral rule, and reuses a word already attested for this language.
  */
+/** An iteration mark after a Han character: 々 (U+3005) and its vertical form 〻 (U+303B). */
+const ITERATION = /(\p{Script=Han})[々〻]/gu;
+
 const BARE_EXPONENT = /(?<=\d)([²³])/gu;
 const POWER: Readonly<Record<string, string>> = { "²": "平方", "³": "立方" };
 
@@ -142,6 +156,12 @@ export function normalizeMandarin(input: string): string {
     s = rewrite(s, AMP_ELSEWHERE, "和");
     // 4) A bare exponent, after the signs so nothing above can strand it.
     s = rewrite(s, BARE_EXPONENT, (_m, e: string) => `的${POWER[e]!}`);
+    // 5) Han compatibility forms → their unified ideograph (⼀ → 一), so the dict can read them (core fold).
+    s = foldHanCompatibility(s);
+    // 6) The iteration marks 々 / 〻 repeat the Han character before them (人々 → 人人), as wu/normalize.ts and
+    //    japanese/kanji.ts read them. After the fold, so a folded radical is what gets repeated. A mark with no
+    //    Han before it is left alone, and the converter drops it.
+    s = rewrite(s, ITERATION, "$1$1");
     return s;
 }
 

@@ -732,3 +732,26 @@ export function foldFullwidthLatin(s: string): string {
     FULLWIDTH.lastIndex = 0;
     return rewrite(s, FULLWIDTH, (c) => String.fromCodePoint(c.codePointAt(0)! - 0xFEE0));
 }
+
+/**
+ * HAN COMPATIBILITY FORMS → the unified ideograph they stand for: a Kangxi radical (U+2F00 ⼀ → 一), a CJK
+ * radical-supplement form, a Hangzhou numeral (〸 → 十) or a CJK compatibility ideograph (U+F900 block,
+ * U+2F800 block). These are the Han code points NFKC changes — 1,221 of them, every one folding to a single
+ * unified Han character — and a reader's dictionary is keyed on the unified form, so unfolded they read as
+ * nothing. Measured for cmn (#1463): 1,141 of the 1,219 that chars.tsv lacks fold to one it has.
+ *
+ * Only these blocks, and only where the fold is a single Han character (true of all 1,221 today; checked, not
+ * assumed, so a future Unicode mapping cannot fold one into something else). NOT NFKC wholesale, for the reason
+ * `foldFullwidthLatin` gives. Traced: it runs on the pipeline string.
+ */
+const HAN_COMPAT = /[⺀-⿟〸-〺豈-﫿\u{2F800}-\u{2FA1F}]/gu;
+const HAN_ONE = /^\p{Script=Han}$/u;
+export function foldHanCompatibility(s: string): string {
+    HAN_COMPAT.lastIndex = 0;
+    if (!HAN_COMPAT.test(s)) return s;
+    HAN_COMPAT.lastIndex = 0;
+    return rewrite(s, HAN_COMPAT, (c) => {
+        const f = c.normalize("NFKC");
+        return HAN_ONE.test(f) ? f : c;
+    });
+}
