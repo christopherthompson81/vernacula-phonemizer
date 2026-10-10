@@ -163,4 +163,38 @@ mod tests {
             assert_eq!(crate::phonemize(text, "ja").unwrap(), want, "{text}");
         }
     }
+
+    /// The two TS-first fixes (#1463), end to end. Expectations come from the engine's own phones.
+    #[test]
+    fn sokuon_glottal_stop_and_ph_spans() {
+        use super::super::kana::{GLOTTAL, kana_to_morae};
+        use super::super::manifest::T;
+        use crate::core::js_string::{JsString, js};
+        let joined = |w: &str| {
+            let mut out = JsString::new();
+            for m in kana_to_morae(&js(w)).unwrap() {
+                out.push_str(&m);
+            }
+            out.to_string()
+        };
+        assert_eq!(crate::phonemize("あっお", "ja").unwrap(), joined("あっお"));
+        assert!(
+            crate::phonemize("あっお", "ja")
+                .unwrap()
+                .contains(&format!("{}{GLOTTAL}{}", T.a, T.o))
+        );
+        assert!(
+            crate::phonemize("うわっうそ", "ja")
+                .unwrap()
+                .contains(&format!("{GLOTTAL}{}", T.u))
+        );
+        for text in ["pHの値", "水のpHは", "pH7の水", "pHpHの値"] {
+            let tr = crate::phonemize_trace(text, "ja").unwrap();
+            assert!(!tr.trace.tokens.is_empty(), "{text}");
+            assert!(
+                tr.trace.tokens.iter().all(|k| k.input_span.is_some()),
+                "{text}"
+            );
+        }
+    }
 }

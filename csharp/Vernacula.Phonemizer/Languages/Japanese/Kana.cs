@@ -33,16 +33,47 @@ public static class Kana
         return @out;
     }
 
-    private static bool IsVowelChar(string ph) => ph == A || ph == I || ph == U || ph == E || ph == O;
+    /** The five vowel phonemes, in the order `VowelOf` must test them (ɯᵝ/o̞/e̞ before their bases). */
+    private static string[] VOWELS => [U, O, E, A, I];
 
     /** The vowel phoneme a mora ends in (ɯᵝ/o̞/e̞ before their bases), or "" for ん/っ/onset-only. */
     private static string VowelOf(string ms)
     {
-        foreach (var v in new[] { U, O, E, A, I })
+        foreach (var v in VOWELS)
             if (ms.EndsWith(v, StringComparison.Ordinal))
                 return v;
         return "";
     }
+
+    /** The glottal stop a っ reads as when nothing follows it that can geminate. */
+    public const string GLOTTAL = "ʔ";
+
+    /**
+     * The consonant phones, as the first character of every onset the manifest declares: the onset of each
+     * consonant+vowel mora in `mora` and `foreign`, plus every `youonOnset`. Derived, never listed by hand.
+     */
+    private static readonly HashSet<string> CONSONANTS = BuildConsonants();
+
+    private static HashSet<string> BuildConsonants()
+    {
+        var @out = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var ms in MORA.Values.Concat(FOREIGN.Values))
+        {
+            var v = VowelOf(ms);
+            if (v != "" && ms.Length > v.Length) @out.Add(First(ms));
+        }
+        foreach (var on in YOUON_ONSET.Values)
+            if (on != "") @out.Add(First(on));
+        return @out;
+    }
+
+    /**
+     * Whether a っ before this mora geminates it: the mora must be a full syllable, a CONSONANT onset plus a
+     * vowel. Stated positively. A "not a vowel" test also geminated ー (あっー → *äːː*), ん (あっん → *äɴɴ*)
+     * and an earlier geminate (あっっか), and a first-character vowel test missed ɯᵝ/e̞/o̞ (あっお → *äoo̞*).
+     * Each of those is a glottal stop.
+     */
+    private static bool GeminatesBefore(string mora) => CONSONANTS.Contains(First(mora)) && VowelOf(mora) != "";
 
     /** First CODE POINT of a mora string — the TS `ms[0]` reads a UTF-16 unit, and every onset here is BMP. */
     private static string First(string s) => s.Length == 0 ? "" : Js.CodePoints(s)[0];
@@ -79,13 +110,17 @@ public static class Kana
             }
             if (c == "っ" || c == "ッ")
             {
+                // The next MORA exactly as the loop will read it (foreign first, then youon, then a single kana),
+                // so this and GeminateSokuon judge the same mora: ッウィ geminates the w of ウィ.
                 var nx2 = At(i + 2);
                 string? next;
-                if (SMALL_Y.TryGetValue(nx2, out var sy2) && sy2.Length > 0
+                if (FOREIGN.TryGetValue(nx + nx2, out var fo2) && fo2.Length > 0)
+                    next = fo2;
+                else if (SMALL_Y.TryGetValue(nx2, out var sy2) && sy2.Length > 0
                     && YOUON_ONSET.TryGetValue(nx, out var yo2) && yo2.Length > 0)
                     next = yo2 + sy2;
                 else next = MORA.GetValueOrDefault(nx);
-                morae.Add(!string.IsNullOrEmpty(next) && !IsVowelChar(First(next)) ? First(next) : "ʔ");
+                morae.Add(next is not null && GeminatesBefore(next) ? First(next) : GLOTTAL);
                 lastVowel = "";
                 i++;
                 continue;
@@ -111,16 +146,18 @@ public static class Kana
     }
 
     /**
-     * Sokuon っ geminates the FOLLOWING mora's initial consonant. Idempotent, and split out so it can run a
-     * second time over CONCATENATED segments — a segment-final っ cannot see the next segment's onset.
+     * Sokuon っ geminates the FOLLOWING mora's initial consonant. Split out so it can run a second time over
+     * CONCATENATED segments — a segment-final っ cannot see the next segment's onset. It applies the same
+     * `GeminatesBefore` rule as KanaToMorae, so GeminateSokuon(KanaToMorae(x)) equals KanaToMorae(x).
      */
     public static List<string> GeminateSokuon(List<string> morae)
     {
         for (var k = 0; k < morae.Count; k++)
         {
-            if (morae[k] != "ʔ") continue;
-            var onset = k + 1 < morae.Count ? First(morae[k + 1]) : "";
-            if (onset != "" && !IsVowelChar(onset)) morae[k] = onset;
+            if (morae[k] != GLOTTAL) continue;
+            // Only a consonant+vowel next mora geminates; before a vowel, ー, ん or another っ it stays ʔ.
+            var next = k + 1 < morae.Count ? morae[k + 1] : "";
+            if (GeminatesBefore(next)) morae[k] = First(next);
         }
         return morae;
     }

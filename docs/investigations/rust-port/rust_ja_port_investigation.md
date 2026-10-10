@@ -216,3 +216,128 @@ symbols: 131 normalizers recorded, 130 distinct; fn-diff symbols: 50750 identica
 ```
 **Implication.** Every fleet tier still deserializes under `deny_unknown_fields`: a misspelt `position`
 record would have failed the replay's load. No reading moved. ja stays done.
+
+## Run 8 — 2026-10-09 18:45 (the two Run 4 defects, fixed TS-first)
+
+**Question.** With the two Run 4 defects fixed in the TS first, do the goldens move, and do C# and Rust close
+over the fixed behaviour?
+
+**The fixes.**
+1. kana.ts: `isVowelChar(next[0])` (one code unit) became `startsWithVowel(mora)`, which compares whole
+   phonemes, at both sites (the sokuon branch of `kanaToMorae` and `geminateSokuon`). The geminate itself is
+   still `next[0]`, the first code unit of a consonant onset. No other site uses the idiom:
+   `assimilateMoraicN` compares `morae[k+1][0]` against `nasalAssimilation`'s onsets, which are all one unit.
+2. normalize.ts: the mixed-case `WORD_ACRONYM` keys (`pH`) are applied through `rewrite`, each as a
+   Latin-bounded regex (the same lookarounds as the all-caps initialism rule), so they no longer poison
+   provenance or match inside a longer Latin word. The key is spliced verbatim, with a load-time check that it
+   is ASCII letters. A first version escaped it with a regex literal, which added a row to
+   `csharp/regex-corpus.jsonl` (`regex-corpus-fresh` failed). The letter check needs no new literal, so the
+   shared corpus stays unchanged.
+
+**Readings, from the fixed engine (`npx tsx .probe/ja/fix.mts`, before → after).**
+```
+あっう  äɯɯᵝ → äʔɯᵝ      あっえ  äee̞ → äʔe̞      あっお  äoo̞ → äʔo̞      (あっあ / あっい already äʔä / äʔi)
+うわっうそ  ɯᵝwäɯɯᵝso̞ → ɯᵝwäʔɯᵝso̞        ちょっえ  t͡ɕo̞ee̞ → t͡ɕo̞ʔe̞        かった  kättäꜜ (unchanged)
+pHの値   inputSpan [null,null] → [[0,3],[3,4]]          (IPA unchanged: piːe̞ːt͡ɕino̞ ätäi)
+pH7の水  [null×4] → [[0,2],[2,3],[3,4],[4,5]]           水のpHは  [null×2] → [[0,2],[2,5]]
+DepHiは  Deピーエイチiは (dˈiː piːe̞ꜜːt͡ɕi ˈaᶦ hä) → DepHiは (dˈɛfɪ hä)
+ApHは    Aピーエイチは → ApHは (ˈʌf hä)    pHDは / pHéは  likewise now stay Latin
+```
+
+**Tests.** `test/japanese-rust-port-findings.test.ts` (10 tests): with the src fix reverted, 7 fail (あっう,
+あっえ, あっお, the repro, geminateSokuon across a segment, pH spans, pH inside a Latin word). C#
+`JapaneseRustPortFindingsTests` (16 cases): with the C# fix reverted, 14 fail (the 2 that pass are あ and い).
+Rust `japanese::tests::sokuon_before_a_vowel_and_ph_spans`. No existing test in any engine pinned the old
+reading.
+
+**Commands and raw counts.**
+- `npm run check:goldens`: `goldens fresh: 189 languages, 36495 rows, 0 stale`. **No golden row moved** in ja or
+  in any other language, so nothing was regenerated. No golden text has っ before a vowel, and the 3 `pH` rows
+  are FLEURS/probe text, not golden.
+- `npx vitest run`: first run 6384 passed, 3 failed: `regex-corpus-fresh` (the escape literal, now removed)
+  and two 5 s timeouts (`foreign-runs` th neural, `trace-token-source` #1452) while `dotnet test` and the dumps
+  ran at the same time. All three pass on a rerun of those files (7 files, 108 tests). The final full run, on the settled tree
+  after the dumps: `339 files passed, 6387 passed | 5 skipped`, and `check:goldens` is still 0 stale.
+- `cd csharp && dotnet test` (full): `Passed: 7049, Failed: 0` (7033 + 16 new).
+- `.probe/ja/replay.sh` (all ten ja dumps regenerated from the fixed TS, then replayed): every one 0 DIFFER
+  (ja-normalize 3685, ja-kana 384626, ja-kanji 228294, ja-segment 7370, ja-counters 36894, ja-numbers 20059,
+  ja-pitch 276242, phonemize-sync 3685, phonemize-best 3685, trace 3685).
+- **The dumps see the fix.** With the Rust fix reverted against the new dumps: `ja-kana 30 DIFFER`,
+  `ja-pitch 128 DIFFER`, `trace 3 DIFFER` (the three pH rows). `ja-normalize` and `phonemize-sync` stayed 0:
+  no corpus text has a `pH` inside a Latin word or っ before a vowel, so those two dumps cannot witness either
+  fix. The unit tests cover them.
+- `cargo run --release -p parity`: en, en-GB, ja, it, es, pt, pt-BR, hi, cmn, fr all 200/200.
+- `cargo test --workspace`: 66 + 1 passed. `cargo build --workspace` (debug and release): 0 warnings.
+  `cargo fmt --check` is clean.
+
+**Implication.** Both Run 4 defects are closed in all three engines, and no golden moved. Rust's reproduction
+notes (the `next[0]` comment in kana.rs and the "`replaceAll`, NOT the provenance seam" note in normalize.rs)
+are gone, along with the local `replace_all` helper.
+
+## Run 9 — 2026-10-09 19:15 (review round on the Run 8 fixes, rebased onto main 944b4940)
+
+**Question.** The review found the Run 8 sokuon predicate was still wrong ("not a vowel" instead of "a
+consonant"), that kanaToMorae and geminateSokuon disagreed on っっ, that `pHpH` had stopped being read, that
+the tests typed IPA, and that the load-time key check could take the normalizer down. With all of that fixed in
+all three engines, are the gates still green, and do the dumps see the change?
+
+**The fixes.**
+1. `geminatesBefore(mora)` is now stated positively: the mora's first code unit is in `CONSONANTS` AND the mora
+   ends in a vowel. `CONSONANTS` is derived from the manifest: the first unit of the onset of every
+   consonant+vowel mora in `mora`/`foreign`, plus every `youonOnset`. It gives
+   `k ɡ s ɕ z d t n h ç ɸ b p m j ɾ w v`. Both sites use the predicate. Under the old rule ー, ん and an
+   earlier geminate counted as consonants: `あっー` read äːː through phonemize but äʔː through kanaToMorae, and
+   `あっん` read äɴɴ. Both now give ʔ.
+2. The "ends in a vowel" half makes the two paths agree on っっ. A sokuon's own geminate (`k`) and an
+   assimilated ん (`n`) are lone consonants, so a ʔ before them stays ʔ. `segmentsToMorae(["あっ","っか"])` and
+   `kanaToMorae("あっっか")` are both [ä,ʔ,k,kä].
+3. kanaToMorae's sokuon branch now reads the next mora the way the loop does: foreign, then youon, then a
+   single kana. Without that, `あっうぃ` was ʔ there but w in geminateSokuon. Now both give äwwi.
+4. `pH` matches `(?:pH)+` between the Latin boundaries and is replaced once per repeat, so `pHpH` →
+   ピーエイチピーエイチ again (`pH pH` too). `pHp` stays Latin.
+5. The key is escaped character by character, with no regex literal, so building the pattern cannot throw. Rust
+   `filter_map`s a pattern that does not compile instead of panicking, and a unit test in each engine
+   iterates the table's mixed-case keys. `WORD_ACRONYM` is exported for that test. No regex-corpus row was
+   added: `regex-corpus-fresh` passes.
+6. One `VOWELS` list (`[U,O,E,A,I]` from the manifest) is shared by `vowelOf` and the old `startsWithVowel`,
+   which is gone. `GLOTTAL` is exported.
+7. Tests derive every IPA expectation from `kanaToMorae`, `MANIFEST.vowels` and `GLOTTAL`. Each engine has an
+   idempotence test: `geminateSokuon(kanaToMorae(x)) == kanaToMorae(x)`. In TS the inputs are the ja-kana dump
+   inputs plus っ + every pair (>100k words). In C# and Rust they are the singles, the pairs and っ + every
+   pair.
+
+**The new tests catch the old code** (`bash .probe/ja/mutate.sh`, `.probe/ja/mutate_cs.sh`). Against the TS,
+each mutation applied alone:
+| mutation | TS fails (of 15) |
+|---|---|
+| M1 Run 8 predicate (not a vowel) | 5: あっー, あっん, あっっか, segment っ/っ, idempotence |
+| M2 original code-unit predicate | 9 |
+| M3 no foreign lookup in the sokuon branch | 2: foreign geminate, idempotence |
+| M4 no adjacent repeat | 1: the table-keys test |
+| M5 original replaceAll | 2: spans, inside a Latin word |
+
+C# (25 cases): C1 (not a vowel) fails 5, and C2 (no repeat) fails 1.
+
+**Readings that moved since Run 8.** These are only in the ja-kana dump: the Rust kana.rs of e4b41d54 against
+the new dumps gives `ja-kana 9 DIFFER`. All 9 rows are っ before ん: `っん`/`ッン`/`っン`/`ッん` were ɴ|ɴ and
+are now ʔ|ɴ. The rest are one pitch-accent.tsv key, a colloquial emphatic spelling of a common adverb
+(ぜ+っ+ん+ぜ+ん). It read `ze̞|ɴ|n|ze̞|ɴ` through kanaToMorae and `ze̞|n|n|ze̞|ɴ` through some segment splits,
+and it now reads `ze̞|ʔ|n|ze̞|ɴ` on every path. Against origin/main's kana.rs/normalize.rs: `ja-kana 39`,
+`ja-pitch 128`, `trace 3` DIFFER. `ja-normalize`, `phonemize-sync` and `phonemize-best` are 0 in both, since no
+corpus text exercises these cases.
+
+**Gates on the rebased tree.**
+- `git rebase origin/main` (944b4940, the it fixes): clean, no regex-corpus conflict.
+- `npm run check:goldens`: `goldens fresh: 189 languages, 36495 rows, 0 stale`. No golden row moved in any
+  language.
+- `npx vitest run`: `340 files passed; 6396 passed | 5 skipped`.
+- `cd csharp && dotnet test`: `Passed: 7062, Failed: 0`.
+- `.probe/ja/replay.sh` (dumps regenerated from the fixed TS): all ten at 0 DIFFER (ja-normalize 3685,
+  ja-kana 384626, ja-kanji 228294, ja-segment 7370, ja-counters 36894, ja-numbers 20059, ja-pitch 276242,
+  phonemize-sync 3685, phonemize-best 3685, trace 3685).
+- `cargo run --release -p parity`: en, en-GB, ja, it, es, pt, pt-BR, hi, cmn, fr all 200/200.
+- `cargo test --workspace`: 70 + 1 passed. Build warnings: 0 (debug and release). `cargo fmt --check` is
+  clean.
+
+**Implication.** The sokuon rule is now one positive predicate in each engine, applied identically on the
+one-word and per-segment paths, and the idempotence test holds it there.

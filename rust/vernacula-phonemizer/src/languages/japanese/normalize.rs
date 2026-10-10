@@ -209,27 +209,41 @@ pub fn normalize_japanese(input: &JsString) -> JsString {
         ),
         |m, s| spell(&m.value(s)),
     );
-    // ⚠ `replaceAll`, NOT the provenance seam, exactly as the TS: a `pH` hit desyncs the mapping.
-    for (k, v) in WORD_ACRONYM {
-        if js_re!(r"[a-z]", "u").test(&js(k)) {
-            s = replace_all(&s, &js(k), &js(v));
-        }
+    for (re, k, v) in MIXED_CASE_ACRONYM.iter() {
+        s = rewrite_with(&s, re, |m, s| {
+            let mut out = JsString::new();
+            for _ in 0..m.value(s).len() / k.len() {
+                out.push_str(v);
+            }
+            out
+        });
     }
     s
 }
 
-/// `s.replaceAll(lit, rep)` with a `$`-free replacement: every non-overlapping occurrence, left to right.
-fn replace_all(s: &JsString, lit: &JsString, rep: &JsString) -> JsString {
-    let mut out = JsString::new();
-    let mut at = 0;
-    while let Some(i) = s.index_of(lit, at) {
-        out.push_units(&s.0[at..i]);
-        out.push_str(rep);
-        at = i + lit.len();
-    }
-    out.push_units(&s.0[at..]);
-    out
-}
+/// The mixed-case `WORD_ACRONYM` keys (`pH`), each Latin-bounded like the initialism rule, matching a run of
+/// adjacent repeats (`pHpH`). The key is escaped char by char, so the pattern is always valid. A key whose
+/// pattern did not compile would be skipped, not panic; a unit test checks that every key is present.
+static MIXED_CASE_ACRONYM: LazyLock<Vec<(JsRegex, JsString, JsString)>> = LazyLock::new(|| {
+    WORD_ACRONYM
+        .iter()
+        .filter(|(k, _)| js_re!(r"[a-z]", "u").test(&js(k)))
+        .filter_map(|(k, v)| {
+            let lit: String = k
+                .chars()
+                .flat_map(|c| {
+                    let esc = "^$\\.*+?()[]{}|/".contains(c);
+                    esc.then_some('\\').into_iter().chain([c])
+                })
+                .collect();
+            let pattern = format!(
+                r"(?<![\p{{Script=Latin}}\p{{M}}])(?:{lit})+(?![\p{{Script=Latin}}\p{{M}}])"
+            );
+            let re = JsRegex::new(&pattern, "gu").ok()?;
+            Some((re, js(k), js(v)))
+        })
+        .collect()
+});
 
 /// The five vowels, longest first (stable, so ties keep key order).
 static VOWEL_IPA: LazyLock<Vec<JsString>> = LazyLock::new(|| {
@@ -272,5 +286,31 @@ fn spell(run: &JsString) -> JsString {
         run.clone()
     } else {
         js(" ").concat(&out).concat(&js(" "))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Every mixed-case key compiles, is read as its acronym (adjacent repeats too), and stays Latin inside a
+    /// longer Latin word.
+    #[test]
+    fn mixed_case_acronym_keys() {
+        let n = |t: &str| normalize_japanese(&js(t)).to_string();
+        let keys: Vec<_> = WORD_ACRONYM
+            .iter()
+            .filter(|(k, _)| k.chars().any(|c| c.is_ascii_lowercase()))
+            .collect();
+        assert!(!keys.is_empty());
+        assert_eq!(MIXED_CASE_ACRONYM.len(), keys.len());
+        for (k, v) in keys {
+            assert_eq!(n(&format!("{k}の値")), format!("{v}の値"));
+            assert_eq!(n(&format!("{k}{k}の値")), format!("{v}{v}の値"));
+            assert_eq!(n(&format!("{k} {k}")), format!("{v} {v}"));
+        }
+        for w in ["DepHiは", "ApHは", "pHDは", "pHéは", "pHpは"] {
+            assert_eq!(n(w), w);
+        }
     }
 }
