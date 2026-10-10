@@ -21,6 +21,7 @@ import { toSegments as deSegments } from "../src/languages/german/g2p.ts";
 import { phonemizeWordRules as no } from "../src/languages/norwegian/norwegian.ts";
 import { phonemizeWord as sl } from "../src/languages/slovenian/slovenian.ts";
 import { phonemizeWord as sw } from "../src/languages/swahili/swahili.ts";
+import { glideOnset as wuGlide } from "../src/languages/wu/wu.ts";
 import { phonemizeWord as yo } from "../src/languages/yoruba/yoruba.ts";
 
 describe("a word edge is not a vowel (#1476)", () => {
@@ -69,6 +70,16 @@ describe("a word edge is not a vowel (#1476)", () => {
         // a suffix with INITIAL stress, so the penultimate fallback the old count fell through to cannot coincide
         expect(sl("vrbabicami").endsWith(sl("babicami"))).toBe(true);
     });
+
+    // ⚠ INERT IN OUTPUT TODAY (no final keys `""`, and `y` is a whole-body final), so the predicate is what is
+    // pinned: a one-letter body has no second letter, and `includes("")` must not stand in for a vowel.
+    test("Wu: a one-letter body `y`/`w` is not a glide onset", () => {
+        expect(wuGlide("w")).toBe(false);
+        expect(wuGlide("y")).toBe(false);
+        expect(wuGlide("wa")).toBe(true);
+        expect(wuGlide("yi")).toBe(true);
+        expect(wuGlide("wng")).toBe(false);
+    });
 });
 
 /**
@@ -80,8 +91,7 @@ describe("a word edge is not a vowel (#1476)", () => {
  * predicate that refuses the empty string: `const isV = (c: string) => c !== "" && VOWELS.includes(c)`.
  */
 const ALLOWED: readonly { file: string; why: string }[] = [
-    // The Sinitic engines are being worked on separately; wu's site is tracked on #1476.
-    { file: "src/languages/wu/wu.ts", why: "Sinitic engines owned by a separate change (#1476)" },
+    // Empty: wu was the last entry, closed in #1476's follow-up (wu.ts `glideOnset`).
 ];
 
 function sources(dir: string, out: string[] = []): string[] {

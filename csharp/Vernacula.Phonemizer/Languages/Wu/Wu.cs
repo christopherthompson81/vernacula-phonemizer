@@ -26,6 +26,12 @@ public static class WuPhonemizer
     private static readonly IReadOnlyList<string> INITIALS = DEF.Initials.Keys.OrderByDescending(k => k.Length).ToList();
     private const string VOWEL = "aeiouy";
 
+    /** ⟨y⟩/⟨w⟩ + a vowel letter. ⚠ The second letter must EXIST (#1476): this was `VOWEL.Contains(second)` with
+     *  `second = ""` for a one-letter body, and .NET's `Contains("")` is true exactly like JS's `includes("")`.
+     *  Inert in output today (see the TS); fixed so the branch no longer rests on `finals` lacking `""`. */
+    public static bool GlideOnset(string body) =>
+        body.Length > 1 && (body[0] == 'y' || body[0] == 'w') && VOWEL.Contains(body[1]);
+
     private static readonly IReadOnlyDictionary<string, string> SYLLABIC = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["m"] = "m̩", ["n"] = "n̩", ["ng"] = "ŋ̍", ["mh"] = "ʔm̩", ["nh"] = "ʔn̩", ["ngh"] = "ʔŋ̍",
@@ -59,10 +65,7 @@ public static class WuPhonemizer
             if (DEF.Finals.TryGetValue(body[ini.Length..], out var final)) return DEF.Initials[ini] + final + tone;
         }
         if (DEF.Finals.TryGetValue(body, out var whole)) return whole + tone;
-        // ⚠ JS `VOWEL.includes(body[1] ?? "")` is TRUE for a one-letter body — `"".includes` of the empty
-        // string. Reproduced: the branch is then harmless because `finals[""]` is undefined either way.
-        var second = body.Length > 1 ? body[1].ToString() : "";
-        if ((body.Length > 0 && (body[0] == 'y' || body[0] == 'w')) && VOWEL.Contains(second, StringComparison.Ordinal))
+        if (GlideOnset(body))
             if (DEF.Finals.TryGetValue(body[1..], out var rest))
                 return (body[0] == 'y' ? "j" : "w") + rest + tone;
         if (SYLLABIC.TryGetValue(body, out var syllabic)) return syllabic + tone;

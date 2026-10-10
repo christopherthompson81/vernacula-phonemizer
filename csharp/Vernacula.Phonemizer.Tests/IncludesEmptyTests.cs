@@ -11,6 +11,7 @@ using NorwegianEngine = Vernacula.Phonemizer.Languages.Norwegian.NorwegianPhonem
 using SlovenianEngine = Vernacula.Phonemizer.Languages.Slovenian.SlovenianPhonemizer;
 using SwahiliEngine = Vernacula.Phonemizer.Languages.Swahili.SwahiliPhonemizer;
 using YorubaEngine = Vernacula.Phonemizer.Languages.Yoruba.YorubaPhonemizer;
+using WuEngine = Vernacula.Phonemizer.Languages.Wu.WuPhonemizer;
 using Xunit;
 
 namespace Vernacula.Phonemizer.Tests;
@@ -72,4 +73,14 @@ public class IncludesEmptyTests
     [InlineData("vrabeceda", "abeceda")]
     public void SlovenianSuffixStressCountsNucleiInWholeWordContext(string word, string suffix) =>
         Assert.EndsWith(SlovenianEngine.PhonemizeWord(suffix), SlovenianEngine.PhonemizeWord(word));
+
+    // ⚠ INERT IN OUTPUT TODAY — see the TS test — so the predicate is what is pinned.
+    [Theory]
+    [InlineData("w", false)]
+    [InlineData("y", false)]
+    [InlineData("wa", true)]
+    [InlineData("yi", true)]
+    [InlineData("wng", false)]
+    public void WuOneLetterBodyIsNotAGlideOnset(string body, bool glide) =>
+        Assert.Equal(glide, WuEngine.GlideOnset(body));
 }

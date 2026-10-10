@@ -35,6 +35,20 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 // Initials tried longest-first so digraphs win (tsh>ts>t, ngh>ng>n>g, gh>g, sh>s …).
 const INITIALS = Object.keys(DEF.initials).sort((a, b) => b.length - a.length);
 const VOWEL = "aeiouy";
+/**
+ * Does `body` open with a GLIDE ONSET — ⟨y⟩/⟨w⟩ followed by a vowel letter (yi → ji, wa → wa)?
+ *
+ * ⚠ THE SECOND LETTER MUST EXIST (#1476). This was `VOWEL.includes(body[1] ?? "")`, and `includes("")` is true,
+ * so a one-letter body `y` or `w` passed as if a vowel followed. Measured INERT today: `y` is a whole-body final
+ * and returns before this test, and for `w` the remainder is `""`, which no final keys — 0 of the dict's
+ * 224,129 reading syllables and 0 raw Wugniu tokens in the wuu golden + mined text have a one-letter y/w body.
+ * Fixed anyway, because the branch's correctness rested on `finals` never gaining a key it has no reason to
+ * lack. EXPORTED for the test.
+ */
+export function glideOnset(body: string): boolean {
+    const next = body[1];
+    return (body[0] === "y" || body[0] === "w") && next !== undefined && VOWEL.includes(next);
+}
 // ⚠ THE GLOTTALIZED SYLLABIC NASALS ARE SEPARATE ENTRIES, not the plain ones with an onset. A bare ⟨mh⟩ finds
 // the ⟨mh⟩ initial and then an EMPTY rime, which is no final, so it fell through to the romanization-visible
 // fallback: 姆 (mh4) leaked `mh4` into the phoneme stream, and 姆妈 — [ʔm̩ma], one of the most ordinary words
@@ -85,7 +99,7 @@ function syllableToIpa(syl: string): string {
     // glide onsets ⟨y⟩/⟨w⟩ + vowel (yi→ji, wa→wa), then a syllabic nasal.
     const whole = own(DEF.finals, body);
     if (whole !== undefined) return whole + tone;
-    if ((body[0] === "y" || body[0] === "w") && VOWEL.includes(body[1] ?? "")) {
+    if (glideOnset(body)) {
         const rest = own(DEF.finals, body.slice(1));
         if (rest !== undefined) return (body[0] === "y" ? "j" : "w") + rest + tone;
     }
