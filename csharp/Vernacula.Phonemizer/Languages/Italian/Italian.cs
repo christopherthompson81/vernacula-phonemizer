@@ -97,15 +97,23 @@ public static class ItalianPhonemizer
     private const string VOWEL_LETTERS = "aeiouàèéìíîòóùú";
     private const string FRONT = "eièéìí"; // c/g soften and ⟨sc⟩→ʃ before these
     private const string VOWEL_PH = "aeɛioɔu";
-    // ⚠ NO `c != ""` GUARD, AND THE GOLDEN PROVES IT. The TS is `VOWEL_LETTERS.includes(c)`, and JS
-    // `String.includes("")` is TRUE — so every caller that passes `next ?? ""` at end of word gets `true`.
-    // That is load-bearing for the ⟨s⟩ voicing rule: word-final ⟨s⟩ after a vowel VOICES, so `james` is
-    // *jˈamez*. .NET's `Contains("")` is true as well, so the bare call reproduces the JS exactly. Third
-    // instance of this shape in the port (German, Swahili, here).
-    private static bool IsVowelLetter(string c) => VOWEL_LETTERS.Contains(c, StringComparison.Ordinal);
+    // ⚠ A MISSING LETTER IS NOT A VOWEL. This used to reproduce the TS's `VOWEL_LETTERS.includes(next ?? "")`,
+    // where `includes("")` is TRUE, so "no next letter" counted as a vowel at the end of a word: a final ⟨s⟩
+    // after a vowel voiced (gas ɡˈaz, autobus awtˈobuz, james jˈamez), a final ⟨gn⟩ geminated and a final
+    // ⟨qu⟩ glided. Fixed TS-first (#1463); every caller now passes the raw neighbour and this decides.
+    private static bool IsVowelLetter(string? c) => !string.IsNullOrEmpty(c) && VOWEL_LETTERS.Contains(c, StringComparison.Ordinal);
     private static bool IsFront(string? c) => c is not null && FRONT.Contains(c, StringComparison.Ordinal);
     private static readonly JsRe ASCII_LOWER = JsRegex.Compile("[a-z]", "u");
     private static bool IsConsLetter(string c) => ASCII_LOWER.IsMatch(c) && !IsVowelLetter(c);
+    /** Does this segment's IPA open with a vowel? (A segment is never empty.) */
+    private static bool IsVowelSeg(Seg sg) =>
+        Js.CodePoints(sg.Ph) is var cp && cp.Count > 0 && VOWEL_PH.Contains(cp[0], StringComparison.Ordinal);
+    /**
+     * The -esimo family (ordinals: ventesimo, ventunesimo, millesimo; and -esimo nouns: cristianesimo,
+     * medesimo) is stressed on the suffix's ⟨e⟩, the ANTEPENULT, which the default penultimate rule cannot
+     * reach. The stem must be non-empty (the verb form *esimi* is not this suffix).
+     */
+    private static readonly JsRe ESIMO = JsRegex.Compile(".esim[oaie]$", "u");
 
     private sealed class Seg
     {
@@ -131,7 +139,7 @@ public static class ItalianPhonemizer
         var segs = new List<Seg>();
         string? At(int k) => k >= 0 && k < n ? s[k] : null;
         bool PrevIsVowel() =>
-            segs.Count > 0 && VOWEL_PH.Contains(Js.CodePoints(segs[^1].Ph) is var cp && cp.Count > 0 ? cp[0] : "", StringComparison.Ordinal);
+            segs.Count > 0 && IsVowelSeg(segs[^1]);
         void Push(string ph) => segs.Add(new Seg { Ph = ph, Accent = false });
         /** Push a consonant that geminates (emits twice) when it sits between vowels. */
         void PushGem(string ph, bool nextVowel)
@@ -162,7 +170,7 @@ public static class ItalianPhonemizer
             }
             if (c == "g" && nx == "n")
             {
-                PushGem("ɲ", IsVowelLetter(nn ?? ""));
+                PushGem("ɲ", IsVowelLetter(nn));
                 i += 2;
                 continue;
             }
@@ -232,7 +240,7 @@ public static class ItalianPhonemizer
             if (c == "q")
             {
                 Push("k");
-                if (nx == "u" && IsVowelLetter(nn ?? ""))
+                if (nx == "u" && IsVowelLetter(nn))
                 {
                     Push("w");
                     i += 2;
@@ -250,7 +258,7 @@ public static class ItalianPhonemizer
                     continue;
                 }
                 var nextVoiced = nx is not null && "bdglmnrvz".Contains(nx, StringComparison.Ordinal);
-                var voiced = (PrevIsVowel() && IsVowelLetter(nx ?? "")) || nextVoiced;
+                var voiced = (PrevIsVowel() && IsVowelLetter(nx)) || nextVoiced;
                 Push(voiced ? "z" : "s");
                 i += 1;
                 continue;
@@ -298,25 +306,28 @@ public static class ItalianPhonemizer
     }
 
     /**
-     * Stressed nucleus index: the written accent if any, else penultimate vowel (or the only/last nucleus).
+     * Stressed nucleus index: the written accent if any, else the -esimo antepenult, else penultimate vowel
+     * (or the only/last nucleus). `word` is the lowercased spelling `segs` was scanned from.
      */
-    private static int StressIndex(IReadOnlyList<Seg> segs)
+    private static int StressIndex(IReadOnlyList<Seg> segs, string word)
     {
         var nuclei = segs
-            .Select((sg, i) => VOWEL_PH.Contains(Js.CodePoints(sg.Ph) is var cp && cp.Count > 0 ? cp[0] : "", StringComparison.Ordinal) ? i : -1)
+            .Select((sg, i) => IsVowelSeg(sg) ? i : -1)
             .Where(i => i >= 0).ToList();
         if (nuclei.Count == 0) return -1;
         foreach (var i in nuclei) if (segs[i].Accent) return i;
         if (nuclei.Count == 1) return nuclei[0];
+        if (nuclei.Count >= 3 && ESIMO.IsMatch(word)) return nuclei[^3]; // ventunˈesimo
         return nuclei[^2]; // default penultimate (antepenult is lexical/unmarked)
     }
 
     /** One Italian word → canonical IPA. */
     public static string PhonemizeWord(string word)
     {
-        var segs = Scan(word.ToLowerInvariant());
+        var lower = word.ToLowerInvariant();
+        var segs = Scan(lower);
         if (segs.Count == 0) return "";
-        var stress = StressIndex(segs);
+        var stress = StressIndex(segs, lower);
         var outp = "";
         for (var i = 0; i < segs.Count; i++)
         {

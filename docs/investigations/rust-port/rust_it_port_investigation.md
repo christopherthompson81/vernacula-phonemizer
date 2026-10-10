@@ -182,3 +182,74 @@ through `examples/missing_data.rs`, which I pointed at `it` temporarily and then
 **Implication.** Run 5's claim now holds. The `unwrap`s left in the Italian sources fall into two kinds.
 Some are compile-time-constant patterns (era markers, numero, the Roman context regexes). The others read
 capture groups that always take part in a match, or index digit tables already validated to length 10.
+
+## Run 7 — 2026-10-09 18:30 (Run 4's TS findings 1 and 2, fixed TS-first)
+
+**Question.** Fix the word-final `?? ""` idiom and the -esimo stress in the TypeScript, then carry both to C#
+and Rust. Which layer should own the ordinal stress, and what does each fix move over FLEURS?
+
+**Choice of layer for the stress.** The investigation suggested an accented `-ésimo` in the normalizer's
+generated words. I put the rule in the g2p's `stressIndex` instead: a word matching `/.esim[oaie]$/u` with
+no written accent and ≥ 3 nuclei is stressed on its antepenult nucleus. The reasons:
+- `test/italian-manifest-lifted.test.ts` holds the invariant that a generated ordinal reads like the typed
+  word (`say("XI secolo")` contains `say("undicesimo")`). A normalizer-only accent breaks it, because the
+  typed word would still read penultimate.
+- The typed family has the same defect. FLEURS writes `cristianesimo` ×7, `medesimo` ×3, `undicesimo`,
+  `sedicesimo`, `quindicesimo` ×3 each and so on: 34 tokens, every one proparoxytone.
+- The stem must be non-empty, so the verb form *esimi* is left alone. The rule keeps the default close
+  ⟨e⟩. Wikipron ita gives -esimo as e in 130 rows and ɛ in 128 (one of each per word), and the eval folds
+  ɛ→e, so the quality is not something this run measures. Wikipron carries no stress marks at all (0 rows
+  with ˈ), and the eval strips stress. **The referee is blind to both fixes.** Its folded backbone is
+  87675/89608 (97.8%) before the change.
+
+**Final-⟨s⟩ evidence.** Of the wikipron ita headwords ending in vowel + ⟨s⟩, 107 end in s and 1 in z
+(`awk` over `it.wikipron-ita-broad.tsv`). `gas`, `autobus`, `virus`, `lapis` and `coronavirus` are all s.
+
+**Commands.**
+- I phonemized every distinct FLEURS it_it text (columns 3 and 4, 3,956 texts) before and after
+  (scratch `fleurs.mts`) and classified the word diffs (scratch `diff.py`).
+- To prove each new test, I reverted each fix separately and ran `npx vitest run test/italian-port-findings.test.ts`.
+- Then `npm run check:goldens`, `npx tsx tools/gen_parity_goldens.mts it`, `npx vitest run`, `npm run typecheck`,
+  `npx tsx tools/extract_regexes.mts` (+1 pattern, `.esim[oaie]$`), and the regex-diff on both sides.
+- `cd csharp && dotnet test`.
+- I regenerated all five Rust dumps from the fixed TS (`it-normalize`, `it-g2p`, `it-roman`, and
+  `LANGS=it phonemize-sync`/`phonemize-best`) and replayed them. Then `cargo run --release -p parity`,
+  `cargo test --workspace` and `cargo fmt --check`.
+
+**Raw finding.**
+- FLEURS: **294 of 3,956 texts moved**, with 0 changes outside the two classes.
+  - 218 texts are final ⟨s⟩: awtˈobuz→awtˈobus ×22, vˈiruz→vˈirus ×14, ɡalapˈaɡoz ×12, ɡˈaz ×12, jˈamez ×10,
+    tˈeksaz, kˈarlez, lˈaz/lˈoz, stˈatuz, koronavˈiruz and so on.
+  - 78 texts are -esimo stress: sedit͡ʃezˈimo→sedit͡ʃˈezimo ×12, kwindit͡ʃ- ×12, dit͡ʃottezˈimo ×8,
+    kristjanezˈimo→kristjanˈezimo ×6, medezˈimo→medˈezimo and so on. By source: 44 come through the Roman
+    pass, 26 are typed -esim words, and 8 come from the º/°/ª indicator or a fraction.
+  - 4 word changes are a final ⟨gn⟩: `design` dˈeziɲɲ→dˈeziɲ. No final ⟨qu⟩ occurs in FLEURS.
+- Repros: `gas` ɡˈaz→ɡˈas, `autobus` awtˈobuz→awtˈobus, `virus` vˈiruz→vˈirus, `magn` mˈaɲɲ→mˈaɲ, `qu`
+  kw→kˈu. `il XXI secolo` ˈil ventunezˈimo→ˈil ventunˈezimo, `XXIII` ventitreezˈimo→ventitreˈezimo, `MMM`
+  tremillezˈimo→tremillˈezimo, `21°` →ventunˈezimo, `21ª` →ventunˈezima, `3/20` ventezˈimi→ventˈezimi.
+  `casa` kˈaza and `magno` mˈaɲɲo are unchanged.
+- Each new test fails with its fix reverted: 2 failed / 2 passed for each revert.
+- `check:goldens`: `it 200 rows 8 stale`, 1 of 189 languages, so no other language moved. The 8 rows are 4
+  texts, each in 2 rows: t͡ʃentezˈimo→t͡ʃentˈezimo (×2), stˈatuz→stˈatus, erˈektuz→erˈektus (×2),
+  ɡalapˈaɡoz→ɡalapˈaɡos, versˈajllez→versˈajlles (×2). Every one is an intended change. I regenerated `it` only.
+- Pinned old readings I updated in TS: `test/italian.test.ts` ×8 and `test/roman.test.ts` ×2. One of them,
+  `not.toContain("trentat͡ʃinkwezˈimo")` for `35°W`, would have passed VACUOUSLY under the new stress, so it is
+  now the stress-agnostic `not.toMatch(/zˈ?imo/u)`. No C# test pinned either reading. The Rust
+  `js_empty_includes_is_reproduced` test pinned `gas` ɡˈaz, `magn` mˈaɲɲ and `qu` kw. It is now
+  `a_missing_next_letter_is_not_a_vowel`, plus an -esimo test.
+- TS 6,381 passed / 5 skipped. C# 7,037 passed. Rust fn-diff: it-normalize 12093, it-g2p 138257, it-roman
+  4031, phonemize-sync 4031, phonemize-best 4031, all identical with 0 DIFFER. Rust parity: all 10 languages
+  200/200. Regex-diff: 0 DIFFER on both sides.
+
+**Implication.** Both findings are closed in all three engines. Run 1's "reproduced on purpose" bullet for
+`VOWEL_LETTERS.includes(x ?? "")` no longer holds: the helpers now take the raw neighbour and return false
+when it is missing (`isVowelLetter` / `IsVowelLetter` / `is_vowel_opt`, and `isVowelSeg` for the `ph[0]`
+site, whose behaviour does not change because a segment is never empty).
+
+**Left open (not in scope, reported):**
+- The irregular ordinals `settimo` and `decimo` (italian.jsonc `ordinals`) are also proparoxytone, and they
+  still read penultimate: `10ª` → det͡ʃˈima.
+- The same `x ?? ""` + `includes` idiom appears outside Italian: `swahili.ts:81`, `yoruba.ts:98`,
+  `slovenian.ts:108`, `swedish/g2p.ts:48`, `wu.ts:81` and `latvian/g2p.ts:60`, plus `ph[0] ?? ""` sites in
+  tagalog/cebuano/hiligaynon/totontepecmixe/dutch and `germanicMorphology.ts:53`. C#'s Italian comment named
+  German and Swahili as earlier instances. None of them is checked here.

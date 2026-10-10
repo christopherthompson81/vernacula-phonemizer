@@ -23,10 +23,24 @@ const NUM = DEF.numbers;
 const VOWEL_LETTERS = "aeiouàèéìíîòóùú";
 const FRONT = "eièéìí"; // c/g soften and ⟨sc⟩→ʃ before these
 const VOWEL_PH = "aeɛioɔu";
-const isVowelLetter = (c: string): boolean => VOWEL_LETTERS.includes(c);
+// ⚠ A MISSING LETTER IS NOT A VOWEL. These took `next ?? ""`, and JS `"…".includes("")` is TRUE, so "no next
+// letter" counted as a vowel at the end of a word: a final ⟨s⟩ after a vowel voiced (gas ɡˈaz, autobus
+// awtˈobuz, virus vˈiruz — wikipron writes the final ⟨s⟩ as s in 107 of 108 such words), a final ⟨gn⟩
+// geminated (magn mˈaɲɲ) and a final ⟨qu⟩ took its glide. Every caller passes the raw neighbour; this decides.
+const isVowelLetter = (c: string | undefined): boolean => c !== undefined && c !== "" && VOWEL_LETTERS.includes(c);
 const isFront = (c: string | undefined): boolean => c !== undefined && FRONT.includes(c);
 const isConsLetter = (c: string): boolean =>
     /[a-z]/u.test(c) && !isVowelLetter(c);
+/** Does this segment's IPA open with a vowel? (Its first UTF-16 unit; a segment is never empty.) */
+const isVowelSeg = (sg: Seg): boolean => sg.ph !== "" && VOWEL_PH.includes(sg.ph[0]!);
+/**
+ * The -esimo family (ordinals: ventesimo, ventunesimo, millesimo; and -esimo nouns: cristianesimo, medesimo,
+ * battesimo, cresima) is stressed on the suffix's ⟨e⟩, the ANTEPENULT, which the default penultimate rule
+ * cannot reach: ventunesimo read ventunezˈimo. normalize.ts and the Roman pass generate these words for every
+ * composed ordinal (XXI secolo, 21°, 1/20), so the stress is decided here, where a typed and a generated
+ * ordinal read alike. The stem must be non-empty (the verb form *esimi* is not this suffix).
+ */
+const ESIMO = /.esim[oaie]$/u;
 
 interface Seg {
     ph: string;
@@ -46,7 +60,7 @@ function scan(word: string): Seg[] {
     const n = s.length;
     const segs: Seg[] = [];
     const prevIsVowel = (): boolean =>
-        segs.length > 0 && VOWEL_PH.includes(segs[segs.length - 1]!.ph[0] ?? "");
+        segs.length > 0 && isVowelSeg(segs[segs.length - 1]!);
     const push = (ph: string): void => {
         segs.push({ ph, accent: false });
     };
@@ -75,7 +89,7 @@ function scan(word: string): Seg[] {
         }
         // ⟨gn⟩ → ɲ (intervocalic geminate).
         if (c === "g" && nx === "n") {
-            pushGem("ɲ", isVowelLetter(nn ?? ""));
+            pushGem("ɲ", isVowelLetter(nn));
             i += 2;
             continue;
         }
@@ -143,7 +157,7 @@ function scan(word: string): Seg[] {
         // ⟨qu⟩ → kw; ⟨q⟩ alone → k.
         if (c === "q") {
             push("k");
-            if (nx === "u" && isVowelLetter(nn ?? "")) {
+            if (nx === "u" && isVowelLetter(nn)) {
                 push("w");
                 i += 2;
             } else i += 1;
@@ -161,7 +175,7 @@ function scan(word: string): Seg[] {
             }
             const nextVoiced =
                 nx !== undefined && "bdglmnrvz".includes(nx);
-            const voiced = (prevIsVowel() && isVowelLetter(nx ?? "")) || nextVoiced;
+            const voiced = (prevIsVowel() && isVowelLetter(nx)) || nextVoiced;
             push(voiced ? "z" : "s");
             i += 1;
             continue;
@@ -215,23 +229,26 @@ function scan(word: string): Seg[] {
     return segs;
 }
 
-/** Stressed nucleus index: the written accent if any, else penultimate vowel (or the only/last nucleus). */
-function stressIndex(segs: Seg[]): number {
+/** Stressed nucleus index: the written accent if any, else the -esimo antepenult, else penultimate vowel (or
+ *  the only/last nucleus). `word` is the lowercased spelling `segs` was scanned from. */
+function stressIndex(segs: Seg[], word: string): number {
     const nuclei = segs
-        .map((sg, i) => (VOWEL_PH.includes(sg.ph[0] ?? "") ? i : -1))
+        .map((sg, i) => (isVowelSeg(sg) ? i : -1))
         .filter((i) => i >= 0);
     if (nuclei.length === 0) return -1;
     const accented = nuclei.find((i) => segs[i]!.accent);
     if (accented !== undefined) return accented;
     if (nuclei.length === 1) return nuclei[0]!;
+    if (nuclei.length >= 3 && ESIMO.test(word)) return nuclei[nuclei.length - 3]!; // ventunˈesimo
     return nuclei[nuclei.length - 2]!; // default penultimate (antepenult is lexical/unmarked)
 }
 
 /** One Italian word → canonical IPA. */
 export function phonemizeWord(word: string): string {
-    const segs = scan(word.toLowerCase());
+    const lower = word.toLowerCase();
+    const segs = scan(lower);
     if (segs.length === 0) return "";
-    const stress = stressIndex(segs);
+    const stress = stressIndex(segs, lower);
     let out = "";
     for (let i = 0; i < segs.length; i++) {
         if (i === stress) out += "ˈ";
