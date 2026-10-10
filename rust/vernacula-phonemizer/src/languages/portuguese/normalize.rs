@@ -57,8 +57,8 @@ static R: LazyLock<Res> = LazyLock::new(|| {
             "gu",
         )
         .unwrap(),
-        abbrev_continue: JsRegex::new(&format!(r"\b({alt})\.(\s+)(?=\p{{L}})"), "giu").unwrap(),
-        abbrev_end: JsRegex::new(&format!(r"\b({alt})\.(?=\s*(?:[.,;:!?»)]|$))"), "giu").unwrap(),
+        abbrev_continue: JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(\s+)(?=\p{{L}})"), "giu").unwrap(),
+        abbrev_end: JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(?=\s*(?:[.,;:!?»)]|$))"), "giu").unwrap(),
         dollar_codes: JsRegex::new(
             &format!(
                 "(?<![\\p{{L}}\\p{{M}}])(?:{})\\$(?=[ \u{a0}]?\\d)",
@@ -67,7 +67,7 @@ static R: LazyLock<Res> = LazyLock::new(|| {
             "gu",
         )
         .unwrap(),
-        date_first: JsRegex::new(&format!(r"\b1\s+de\s+({})\b", m.months.join("|")), "giu")
+        date_first: JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}\d_])1\s+de\s+({})(?![\p{{L}}\p{{M}}\d_])", m.months.join("|")), "giu")
             .unwrap(),
         feminine_one: JsRegex::new(&format!("{}$", m.numbers.small[1]), "u").unwrap(),
     }
@@ -192,19 +192,21 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     // 1) Era markers.
     s = rewrite(
         &s,
-        js_re!(r"\ba\.\s?C\.", "giu"),
+        // ⚠ `(?<![\p{L}\p{M}\d_])`, not JS's ASCII-only `\b` (`Grécia.` read *Grécompanhia*); see
+        // normalize.ts WORD_START.
+        js_re!(r"(?<![\p{L}\p{M}\d_])a\.\s?C\.", "giu"),
         &js(&m.era_markers.before_christ),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bd\.\s?C\.", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])d\.\s?C\.", "giu"),
         &js(&m.era_markers.after_christ),
     );
 
     // 2) Número, only before a digit.
     s = rewrite(
         &s,
-        js_re!(r"\b(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)", "giu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)", "giu"),
         &js(&format!("{} ", m.number_sign)),
     );
 
@@ -226,16 +228,20 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     });
 
     // 4) Ordinal indicators. The digits are the tokenizer's whole NUMBER_TOKEN, classified by its own
-    //    `split_number_token` (#1490): only a whole number has an ordinal, and a spoken dot or a decimal
-    //    comma keeps its number and loses the indicator (`1.5º` → *um ponto cinco*).
+    //    `split_number_token` (#1490): only a whole number has an ordinal. After a spoken dot or a decimal
+    //    comma the indicator cannot be one and reads as its base letter's name (`802.11ª` reads as
+    //    `802.11a`, `1.5º` as *um ponto cinco ó*; see normalize.ts step 4 for the measurement).
     s = rewrite_with(
         &s,
-        js_re!(&format!(r"\b({NUMBER_TOKEN})\.?(?:º|ª)"), "gu"),
+        js_re!(&format!(r"\b({NUMBER_TOKEN})\.?(º|ª)"), "gu"),
         |mm, s| {
             let (whole, digits) = (mm.value(s), g(mm, 1, s));
             let (int_digits, dotted, frac) = split_number_token(&digits);
             if !dotted.is_empty() || frac.is_some() {
-                return digits;
+                let letter = if g(mm, 2, s) == js("ª") { "a" } else { "o" };
+                let mut out = digits;
+                out.push_str(&js(&format!(" {}", MANIFEST.letter_names[letter])));
+                return out;
             }
             let n = js_number(&int_digits);
             match portuguese_ordinal(n) {
@@ -457,9 +463,9 @@ mod port_findings {
     /// #1490: the ordinal indicator reads the tokenizer's whole token; only a whole number has an ordinal.
     #[test]
     fn ordinal_indicator_reads_the_whole_token() {
-        assert_eq!(n("o 1.5º lugar", false), "o 1.5 lugar");
-        assert_eq!(n("o 1,5º lugar", false), "o 1,5 lugar");
-        assert_eq!(n("a 1.5ª vez", false), "a 1.5 vez");
+        assert_eq!(n("o 1.5º lugar", false), "o 1.5 ó lugar");
+        assert_eq!(n("o 1,5º lugar", false), "o 1,5 ó lugar");
+        assert_eq!(n("a 1.5ª vez", false), "a 1.5 a vez");
         assert_eq!(n("o 1.000º selo", false), "o milésimo selo");
         assert_eq!(n("o 2.500º selo", false), "o 2.500 selo");
     }
@@ -477,7 +483,21 @@ mod port_findings {
         assert_eq!(p("0.500", "pt"), "zˈɛɾu pˈõtu sˈĩku zˈɛɾu zˈɛɾu");
         assert_eq!(p("17.000 ilhas", "pt-BR"), "dezesˈɛt͡ʃi mˈiw ˈiʎɐs");
         assert_eq!(p("5.000.000 visitantes", "pt-BR"), "sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis");
-        assert_eq!(p("o 1.5º lugar", "pt"), "o ũ pˈõtu sˈĩku luɡˈaɾ");
+        assert_eq!(p("o 1.5º lugar", "pt"), "o ũ pˈõtu sˈĩku ˈɔ luɡˈaɾ");
+        assert_eq!(p("o 802.11ª", "pt-BR"), p("o 802.11a", "pt-BR"));
+        assert_eq!(p("o 802.11ª", "pt-BR"), "o ojtosˈẽtus e dˈojs pˈõtu ˈõzi a");
         assert_eq!(p("Mediu 1.5 °C", "pt-BR"), "med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws");
+    }
+
+    /// JS `\b` is ASCII-only: `Grécia.` matched `cia.` and read *Grécompanhia*. Synthetic sentences.
+    #[test]
+    fn abbreviations_use_a_unicode_word_edge() {
+        assert_eq!(n("Visitou a Grécia.", false), "Visitou a Grécia.");
+        assert_eq!(n("Visitou a Escócia.", false), "Visitou a Escócia.");
+        assert_eq!(n("Ficou na Grécia. Depois", false), "Ficou na Grécia. Depois");
+        assert_eq!(n("A Cia. Ltda. abriu", false), "A companhia limitada abriu");
+        assert_eq!(n("Visitou a Grécia, etc.", false), "Visitou a Grécia, etcétera.");
+        assert_eq!(n("Fundada em 300 a.C. por", false), "Fundada em 300 antes de Cristo por");
+        assert_eq!(n("Em 1 de julho", true), "Em primeiro de julho");
     }
 }

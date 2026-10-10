@@ -369,7 +369,7 @@ fix. Then `gen_parity_goldens.mts pt pt-BR`, `check:goldens`, the fn-diff re-dum
   - `15.00 do Tempo Universal` is a clock time. It reads *quinze ponto zero zero*, and an anchor would say
     *quinze horas*. Reading `HH.MM` as a clock needs context (UTC, *horas*). One instance does not license
     that, and `2.40` could be a price.
-  - FLEURS column 4 (the normalized transcript, which fn-diff reads) writes `802.11a` as `802.11ª` ×3. It now reads *oitocentos e dois ponto onze*: the
+  - (Closed in Run 13.) FLEURS column 4 (the normalized transcript, which fn-diff reads) writes `802.11a` as `802.11ª` ×3. It now reads *oitocentos e dois ponto onze*: the
     indicator is stripped and the letter is lost. Before, it read *oitocentos e dois . décima primeira*.
   - `2.4Ghz` reads its unit as *ɡs*. That is the symbol tier, and it is untouched.
 - Proved by revert:
@@ -397,3 +397,70 @@ fix. Then `gen_parity_goldens.mts pt pt-BR`, `check:goldens`, the fn-diff re-dum
 
 **Implication.** The tokenizer, the degree count and the ordinal indicator now share one predicate. No golden
 moved. What remains is the dotted clock time, which needs a context rule and evidence for one.
+
+## Run 13 — 2026-10-09 21:58 (review on Run 12: the indicator as a letter; the ASCII `\b`; rebased onto 0c6a70c2)
+
+**Question.** Review raised two items on Run 12, and a rebase.
+
+1. After a non-whole number, Run 12 stripped the `º`/`ª`, which loses `802.11ª`'s letter. Should the
+   indicator read as its base letter instead? Is there evidence that `º` after a decimal is a stray degree
+   sign?
+2. French found (#1494) that JS `\b` is ASCII-only even under `u`. Do pt's letter-edged rules have the same
+   defect?
+3. Rebase onto 0c6a70c2 (past d1fdb503) and re-extract the regex corpus.
+
+**Command.**
+- A grep for `\d+[.,]\d+\.?\s?[ºª°]` over FLEURS pt_br (all columns), the ledger, the mined pt text and both
+  goldens.
+- A scratch audit (not committed). For each letter-edged `\b` rule (the two era markers, *número*, the two
+  abbreviation rules, the first-of-month rule), it counts the matches over the pt/pt-BR goldens, FLEURS
+  columns 3 and 4 and the ledger: 3,923 unique texts. It flags every match whose edge-side neighbour is a
+  letter, mark, digit or `_`.
+- Rebased onto origin/main (first d1fdb503, then 0c6a70c2; both clean). `extract_regexes.mts` re-run on the
+  combined tree, then `gen_parity_goldens.mts pt pt-BR` and the gates.
+
+**Raw finding.**
+- Item 1, the indicator after a non-whole number:
+  - Instances: `802.11ª` ×3, every one the designation `802.11a`. `º` after a dotted or decimal number has
+    0 instances, and `°` after one also has 0. So there is no evidence that it is a stray degree sign, and
+    º is not treated differently.
+  - The rule: the indicator reads as its letter's name from the manifest's `letterNames`. ª is `a` →
+    *a*; º is `o` → *ó*.
+  - `802.11ª` now reads byte-identically to `802.11a` (*… ponto ˈõzi a*); the test asserts the equality.
+  - `1.5º` → *um ponto cinco ó*. `1,5º` → *um vírgula cinco ó*. `1.5ª` → *um ponto cinco a*.
+  - How `802.11n` reads: the engine reads the glued letter as a bare WORD (*n*), not as its letter name
+    (*ene*). For `a` the two coincide, because letterNames' `a` is the word *a*, which is why `802.11ª`
+    and `802.11a` agree exactly. For `º` they differ: the letter name *ó* [ˈɔ] against the bare word *o*,
+    the unstressed article [u]. *ó* is what review asked for.
+  - Whole numbers are unchanged: `1.000º`, `7ª`, `1.º`, and `2.500º` (no ordinal word, indicator dropped).
+- Item 2, the ASCII `\b`:
+  - 36 matches. Two are edge-violating, both in `abbrev-end`, and both are the same shape: `Grécia.` and
+    `Escócia.`. `\b` sits between `é`/`ó` and `c`, so `cia.` matched as *companhia*. `Grécia.` read
+    *ɡɾˈɛkõpɐɲjɐ*.
+  - Every other rule had 0 violations.
+  - The fix is #1494's: `(?<![\p{L}\p{M}\d_])` / `(?![\p{L}\p{M}\d_])`. It is written out as a literal in
+    the three literal rules (era markers, *número*) and held as `WORD_START`/`WORD_END` for the three
+    template rules (the two abbreviation rules, first-of-month).
+  - The digit-led rules (ordinal indicator, clock, fraction) keep `\b`: a digit is ASCII `\w`, so `\b`
+    before it is already correct on the digit side. No violation was measured.
+- Goldens: `pt` 2 stale, one sentence that appears twice. Only the token moved: `Grécia.` *ɡɾˈɛkõpɐɲjɐ* →
+  *ɡɾˈɛsjɐ*. I regenerated it; pt-BR's golden does not contain the word. The ª change moved no golden.
+- Regex corpus: 3 rows replaced (the era markers and *número* now carry the Unicode lookbehind). 2,385
+  patterns. The template rules are composed, so they are not extracted.
+- Proved by revert, each engine with only that item's src change undone:
+  - Indicator letter: TS 1 of 16 fails; C# 6 of 42; Rust 2 of 8.
+  - Word edge: TS 1 of 18 fails; C# 3 of 49; Rust 1 of 9.
+- Probes: pt-BR.txt gained two word-edge lines; `802.11ª` was already a probe.
+- Gates on the final tree (0c6a70c2 + this branch):
+  - `check:goldens`: 0 stale.
+  - vitest, full: 6,546 passed, 5 skipped. `.bin` linked for the run, unlinked after.
+  - `dotnet test`, full: 7,232 passed.
+  - C# parity pt/pt-BR: 400 ok, 0 differ.
+  - C# regex-diff and Rust regex-diff: 145,206 identical, 0 differ.
+  - `cargo test --workspace`: 94 + 1.
+  - Rust parity: all ten languages 200/200.
+  - fn-diff, re-dumped: pt-normalize `11943 / 0`, pt-numbers `101973 / 0`, pt-g2p `75625 / 0`,
+    phonemize-sync and -best `7954 / 4` each. The 4 are the port-pending ru and el probes.
+
+**Implication.** Both review items are closed. One golden token moved, and it moved toward correct. What
+remains is Run 12's dotted clock time.

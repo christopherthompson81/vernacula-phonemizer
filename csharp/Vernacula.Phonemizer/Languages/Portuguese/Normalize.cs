@@ -95,15 +95,17 @@ public static class Normalize
 
     private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe THIN_SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
-    private static readonly JsRe ERA_BC = JsRegex.Compile("\\ba\\.\\s?C\\.", "giu");
-    private static readonly JsRe ERA_AD = JsRegex.Compile("\\bd\\.\\s?C\\.", "giu");
-    private static readonly JsRe NUMERO = JsRegex.Compile("\\b(?:n\\.º|nº|n°|no|núm\\.)\\s?(?=\\d)", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
-    private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
+    // ⚠ `(?<![\p{L}\p{M}\d_])`, NOT `\b`, on every letter-edged rule: JS `\b` is ASCII-only, so `Grécia.`
+    // matched `cia.` and read *Grécompanhia*. See normalize.ts WORD_START.
+    private static readonly JsRe ERA_BC = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])a\\.\\s?C\\.", "giu");
+    private static readonly JsRe ERA_AD = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])d\\.\\s?C\\.", "giu");
+    private static readonly JsRe NUMERO = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])(?:n\\.º|nº|n°|no|núm\\.)\\s?(?=\\d)", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}\\d_])({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}\\d_])({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     // The digits are the tokenizer's whole NUMBER_TOKEN, classified by its own SplitNumberToken (#1490): a
     // narrower run matched only the tail of `1.000º`, `1.5º` and `1,5º`. ° (U+00B0 DEGREE SIGN) is
     // deliberately not an ordinal indicator here: "35°" is a temperature.
-    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile($"\\b({Numbers.NUMBER_TOKEN})\\.?(?:º|ª)", "gu");
+    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile($"\\b({Numbers.NUMBER_TOKEN})\\.?(º|ª)", "gu");
     private static readonly JsRe FEMININE_MARK = JsRegex.Compile("ª", "u");
     private static readonly JsRe REAIS = JsRegex.Compile("R\\$\\s?(\\d[\\d.,]*)", "gu");
     private static readonly JsRe DOLLAR_CODE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])(?:{string.Join("|", DEF.DollarCodes)})\\$(?=[ \\u00a0]?\\d)", "gu");  // space, NBSP
@@ -125,7 +127,7 @@ public static class Normalize
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
     private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})/(\\d{1,3})\\b(?!\\s*[/\\d])", "gu");
-    private static readonly JsRe FIRST_OF_MONTH = JsRegex.Compile($"\\b1\\s+de\\s+({MONTHS})\\b", "giu");
+    private static readonly JsRe FIRST_OF_MONTH = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}\\d_])1\\s+de\\s+({MONTHS})(?![\\p{{L}}\\p{{M}}\\d_])", "giu");
 
     /** Normalize one Portuguese input string. */
     public static string NormalizePortuguese(string input, bool brazilian = false)
@@ -157,9 +159,11 @@ public static class Normalize
         s = Rewrite(s, ORDINAL_INDICATOR, m =>
         {
             var digits = m.Groups[1].Value;
-            // Only a whole number has an ordinal; a spoken dot or a decimal comma keeps its number.
+            // Only a whole number has an ordinal. After a spoken dot or a decimal comma the indicator cannot be
+            // one and reads as its base letter's name (`802.11ª` reads as `802.11a`; see normalize.ts step 4).
             var (intDigits, dotted, frac) = Numbers.SplitNumberToken(digits);
-            if (dotted.Count > 0 || frac is not null) return digits;
+            if (dotted.Count > 0 || frac is not null)
+                return $"{digits} {DEF.LetterNames[m.Groups[2].Value == "ª" ? "a" : "o"]}";
             var n = Js.Number(intDigits);
             var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.PortugueseOrdinal((int)n) : null;
             if (masc is null) return digits;

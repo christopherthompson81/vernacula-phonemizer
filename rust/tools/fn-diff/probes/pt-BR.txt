@@ -27,6 +27,9 @@ O \u{17f}r. Silva chegou
 O Sr.Silva chegou
 Os Srs. Lima e a PROF. Rosa
 Leia o cap. dois, pág. 5 e o vol. três
+# the word edge is Unicode, not the ASCII-only JS word boundary: an accented word ending in an abbreviation key is not one
+Visitou a Grécia. Depois foi à Escócia.
+A Grécia, etc. e o Sr. Silva
 # 4) ordinal indicators
 Ficou em 1º lugar na 5ª série
 O 37º e o 21ª edição

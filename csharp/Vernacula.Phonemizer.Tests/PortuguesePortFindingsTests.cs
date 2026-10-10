@@ -86,16 +86,33 @@ public class PortuguesePortFindingsTests
     [InlineData("0.500", "pt", "zˈɛɾu pˈõtu sˈĩku zˈɛɾu zˈɛɾu")]
     [InlineData("17.000 ilhas", "pt-BR", "dezesˈɛt͡ʃi mˈiw ˈiʎɐs")]
     [InlineData("5.000.000 visitantes", "pt-BR", "sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis")]
-    [InlineData("o 1.5º lugar", "pt", "o ũ pˈõtu sˈĩku luɡˈaɾ")]
+    [InlineData("o 1.5º lugar", "pt", "o ũ pˈõtu sˈĩku ˈɔ luɡˈaɾ")]
+    [InlineData("o 802.11ª", "pt-BR", "o ojtosˈẽtus e dˈojs pˈõtu ˈõzi a")]
     [InlineData("Mediu 1.5 °C", "pt-BR", "med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws")]
     public void NonGroupingDotIsSpoken(string text, string lang, string want) =>
         Assert.Equal(want, Phonemizer.Phonemize(text, lang));
 
     [Theory]
-    [InlineData("o 1.5º lugar", "o 1.5 lugar")]
-    [InlineData("o 1,5º lugar", "o 1,5 lugar")]
-    [InlineData("a 1.5ª vez", "a 1.5 vez")]
+    [InlineData("o 1.5º lugar", "o 1.5 ó lugar")]
+    [InlineData("o 1,5º lugar", "o 1,5 ó lugar")]
+    [InlineData("a 1.5ª vez", "a 1.5 a vez")]
     [InlineData("o 1.000º selo", "o milésimo selo")]
     [InlineData("o 2.500º selo", "o 2.500 selo")]
     public void OrdinalIndicatorReadsTheWholeToken(string text, string want) => Assert.Equal(want, Norm(text));
+
+    // The designation's letter suffix written with the ordinal glyph reads exactly as the letter does.
+    [Fact]
+    public void IndicatorAfterADottedNumberReadsAsItsLetter() =>
+        Assert.Equal(Phonemizer.Phonemize("o 802.11a", "pt-BR"), Phonemizer.Phonemize("o 802.11ª", "pt-BR"));
+
+    // JS `\b` is ASCII-only: `Grécia.` matched `cia.` and read *Grécompanhia*. Synthetic sentences.
+    [Theory]
+    [InlineData("Visitou a Grécia.", false, "Visitou a Grécia.")]
+    [InlineData("Visitou a Escócia.", false, "Visitou a Escócia.")]
+    [InlineData("Ficou na Grécia. Depois", false, "Ficou na Grécia. Depois")]
+    [InlineData("A Cia. Ltda. abriu", false, "A companhia limitada abriu")]
+    [InlineData("Visitou a Grécia, etc.", false, "Visitou a Grécia, etcétera.")]
+    [InlineData("Fundada em 300 a.C. por", false, "Fundada em 300 antes de Cristo por")]
+    [InlineData("Em 1 de julho", true, "Em primeiro de julho")]
+    public void AbbreviationsUseAUnicodeWordEdge(string text, bool br, string want) => Assert.Equal(want, Norm(text, br));
 }

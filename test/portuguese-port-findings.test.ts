@@ -100,11 +100,16 @@ describe("a dot is a thousands separator only in the thousands shape (#1490)", (
         expect(phonemize("5.000.000 visitantes", "pt-BR")).toBe("sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis");
     });
     test("the ordinal indicator reads the tokenizer's whole token", () => {
-        // The old rule matched the TAIL `5º` and left *um . quinto* / *um , quinto*.
-        expect(normalizePortuguese("o 1.5º lugar")).toBe("o 1.5 lugar");
-        expect(normalizePortuguese("o 1,5º lugar")).toBe("o 1,5 lugar");
-        expect(normalizePortuguese("a 1.5ª vez")).toBe("a 1.5 vez");
-        expect(phonemize("o 1.5º lugar", "pt")).toBe("o ũ pˈõtu sˈĩku luɡˈaɾ");
+        // The old rule matched the TAIL `5º` and left *um . quinto* / *um , quinto*. After a non-whole
+        // number the indicator cannot be an ordinal and reads as its base letter's name.
+        expect(normalizePortuguese("o 1.5º lugar")).toBe("o 1.5 ó lugar");
+        expect(normalizePortuguese("o 1,5º lugar")).toBe("o 1,5 ó lugar");
+        expect(normalizePortuguese("a 1.5ª vez")).toBe("a 1.5 a vez");
+        expect(phonemize("o 1.5º lugar", "pt")).toBe("o ũ pˈõtu sˈĩku ˈɔ luɡˈaɾ");
+        // The corpus's one shape: a designation's letter suffix written with the ordinal glyph reads
+        // exactly as the letter does.
+        expect(phonemize("o 802.11ª", "pt-BR")).toBe(phonemize("o 802.11a", "pt-BR"));
+        expect(phonemize("o 802.11ª", "pt-BR")).toBe("o ojtosˈẽtus e dˈojs pˈõtu ˈõzi a");
         // Grouped and plain ordinals are unchanged.
         expect(normalizePortuguese("o 1.000º selo")).toBe("o milésimo selo");
         expect(normalizePortuguese("o 2.500º selo")).toBe("o 2.500 selo");
@@ -112,5 +117,21 @@ describe("a dot is a thousands separator only in the thousands shape (#1490)", (
     test("a spoken dot takes the plural degree noun", () => {
         expect(normalizePortuguese("Mediu 1.5 °C")).toBe("Mediu 1.5 graus Celsius");
         expect(phonemize("Mediu 1.5 °C", "pt-BR")).toBe("med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws");
+    });
+});
+
+describe("the abbreviation rules use a Unicode word edge, not JS's ASCII \\b", () => {
+    // Synthetic sentences. `\b` saw a boundary between `é` and `c`, so `cia.` was claimed as *companhia*.
+    test("an accented word ending in an abbreviation key is not expanded", () => {
+        expect(normalizePortuguese("Visitou a Grécia.")).toBe("Visitou a Grécia.");
+        expect(normalizePortuguese("Visitou a Escócia.")).toBe("Visitou a Escócia.");
+        expect(normalizePortuguese("Ficou na Grécia. Depois")).toBe("Ficou na Grécia. Depois");
+        expect(phonemize("Visitou a Grécia.", "pt-BR")).toBe("vizitˈo a ɡɾˈɛsjɐ .");
+    });
+    test("a real abbreviation still expands", () => {
+        expect(normalizePortuguese("A Cia. Ltda. abriu")).toBe("A companhia limitada abriu");
+        expect(normalizePortuguese("Visitou a Grécia, etc.")).toBe("Visitou a Grécia, etcétera.");
+        expect(normalizePortuguese("Fundada em 300 a.C. por")).toBe("Fundada em 300 antes de Cristo por");
+        expect(normalizePortuguese("Em 1 de julho", true)).toBe("Em primeiro de julho");
     });
 });
