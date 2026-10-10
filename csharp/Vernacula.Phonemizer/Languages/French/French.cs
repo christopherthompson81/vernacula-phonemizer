@@ -21,9 +21,10 @@ public static class FrenchPhonemizer
     private static Dictionary<string, string> Supplement() =>
         SUPPLEMENT ??= LoadTsv.LoadTsvMap("languages/french", "supplement.tsv");
 
-    /** The Lexique pronunciation lexicon (lowercased word → IPA). Exposed so the async neural path (frNeural.ts) can skip
-     *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
-    public static IReadOnlyDictionary<string, string> FrenchLexicon() => Lexicon();
+    /** Does Lexique or the SUPPLEMENT answer this lowercased word? The neural pre-pass's skip test: the
+     *  supplement is consulted before the tagger's override, so a supplement word that reached the tagger was
+     *  an ONNX call whose answer was thrown away (#1463). */
+    public static bool FrenchHasWord(string lower) => Lexicon().ContainsKey(lower) || Supplement().ContainsKey(lower);
 
     private static readonly JsRe VOWEL_IPA = JsRegex.Compile("[aeiouyɛɔøœəɑ]", "");
 
@@ -161,11 +162,23 @@ public static class FrenchPhonemizer
 
         public string Text(string input) => Text(input, null);
 
-        public string Text(string input, Func<string, string?>? oovOverride)
+        /** The text as the TOKENIZER will see it: every normalization pass, and nothing after. The neural
+         *  pre-pass scans this, not the raw text, so a word the normalizer creates is offered to the tagger
+         *  (#1463, English's #1452). */
+        internal string NormalizedFor(string input)
         {
             bool IsWord(string w) => Lexicon().ContainsKey(w);
-            input = SYMBOLS(Normalize.NormalizeFrenchInitialisms(
-                NormalizeFrenchNumerals(Normalize.NormalizeFrench(input, IsWord)), IsWord));
+            return SYMBOLS(Normalize.NormalizeFrenchInitialisms(
+                NormalizeFrenchNumerals(Normalize.NormalizeFrench(input)), IsWord));
+        }
+
+        public string Text(string input, Func<string, string?>? oovOverride) =>
+            TextNormalized(NormalizedFor(input), oovOverride);
+
+        /** `Text` for input that has ALREADY been through NormalizedFor (the neural path only). Unnormalized
+         *  input here is a silent wrong reading. */
+        internal string TextNormalized(string input, Func<string, string?>? oovOverride)
+        {
             Core.Trace.EnterEngine(input);
             var items = new List<Item>();
             var gapCursor = 0;

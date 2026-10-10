@@ -114,11 +114,12 @@ const ABBREV_ALT = [...Object.keys(DOTTED_ABBREV), ...DOT_ONLY].sort((a, b) => b
 /**
  * Normalize one French input string. Pure text→text.
  *
- * `isWord` is the Lexique membership test, passed in by french.ts (the lexicon lives there, and taking
- * it as a parameter keeps this module free of both an import cycle and mutable state). It decides
- * whether an all-caps run is an acronym to be read as a word or an initialism to be spelled out.
+ * ⚠ IT TAKES NO LEXICON. It used to take an `isWord` parameter documented as deciding whether an all-caps run
+ * is an acronym read as a word or an initialism spelled out — but that decision lives in
+ * `normalizeFrenchInitialisms` (which takes its own `isRecorded`), and this function never read the parameter
+ * (#1463). A dead parameter with a live-sounding contract invites a caller to pass a predicate that matters.
  */
-export function normalizeFrench(input: string, isWord: (lower: string) => boolean): string {
+export function normalizeFrench(input: string): string {
     let s = input;
 
     // 0) DIGIT GROUPING: French groups thousands with a space (5 000 = five thousand). The tokenizer's

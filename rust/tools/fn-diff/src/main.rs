@@ -726,7 +726,7 @@ fn main() {
                 let is_word = |w: &JsString| fr.lexicon_has(w);
                 let t = units(&input["text"]);
                 match input["op"].as_str().unwrap() {
-                    "normalize" => n::normalize_french(&t, &is_word).unwrap(),
+                    "normalize" => n::normalize_french(&t).unwrap(),
                     "numerals" => normalize_romans(
                         &o::normalize_french_ordinal_digits(
                             &o::normalize_french_ordinal_romans(&t, &is_word).unwrap(),
