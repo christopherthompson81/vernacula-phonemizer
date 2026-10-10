@@ -324,9 +324,6 @@ public static class TibetanPhonemizer
         return null;
     }
 
-    /** JS `Number.isSafeInteger`. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /**
      * A numeral run → Tibetan number words → IPA. Beyond the named 10⁹ ladder (or a non-safe integer) the
      * digits are read one by one as NUMBER WORDS rather than leaked as digits.
@@ -335,7 +332,7 @@ public static class TibetanPhonemizer
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
-        var words = IsSafeInteger(n) ? NumToTibetan((long)n) : null;
+        var words = Js.IsSafeInteger(n) ? NumToTibetan((long)n) : null;
         if (words is not null) return PhonemizeWord(words);
         return string.Join(" ", digits.Where(c => c is >= '0' and <= '9')
             .Select(d => PhonemizeWord(d == '0' ? NUM.Zero : NUM.Units[d - '0'])));

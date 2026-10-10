@@ -27,9 +27,6 @@ public static class Numbers
     private static string Soft(string w) => w switch { "deg" => "ddeg", "cant" => "gant", "mil" => "fil", _ => w };
     private static string Aspirate(string w) => w == "cant" ? "chant" : w;
 
-    /** JS `Number.isSafeInteger` — the fleet spells this out per language. */
-    internal static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** unit (2–9, clipped) + mutated noun, honouring gender: (3, "mil") → "tair mil"; (2, "cant") → "dau gant". */
     private static string Counted(double u, string noun)
     {
@@ -62,7 +59,7 @@ public static class Numbers
     /** Non-negative integer → Welsh words; out of range → digit-by-digit (digits only). */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e9)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e9)
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n)))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => ONES[d[0] - '0']));

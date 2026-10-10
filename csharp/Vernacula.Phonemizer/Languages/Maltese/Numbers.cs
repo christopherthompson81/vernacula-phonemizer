@@ -34,9 +34,6 @@ internal sealed class Magnitude
 
 public static class Numbers
 {
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** 1 ≤ n < 100, ABSOLUTE series. Units-first with `u` inside 21–99 (ħamsa u erbgħin). */
     private static string Below100(double n, MalteseNumbers N)
     {
@@ -102,7 +99,7 @@ public static class Numbers
      */
     public static string NumberToWords(double n, MalteseNumbers N)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e12) return ReadDigits(Js.NumberToString(n), N);
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e12) return ReadDigits(Js.NumberToString(n), N);
         if (n == 0) return N.Units[0]; // żero
         var M = N.Magnitudes;
         var billion = new Magnitude { Sg = M.Billion, Pl = M.BillionPlural, LongAttributive = false };

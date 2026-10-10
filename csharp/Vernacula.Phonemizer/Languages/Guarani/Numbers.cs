@@ -25,9 +25,6 @@ public static class Numbers
     private const string THOUSAND = "su";     // < guasu 'big'
     private const string MILLION = "sua";     // 10⁶; pa+sua = 10⁷, sa+sua = 10⁸
 
-    /** JS `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** 0 ≤ n < 100. Teens FUSED (pateĩ), round tens FUSED (mokõipa), 21–99 tens + SPACE + full unit. */
     private static string Below100(int n)
     {
@@ -101,7 +98,7 @@ public static class Numbers
      */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e9) return ReadDigits(raw ?? Js.NumberToString(n));
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e9) return ReadDigits(raw ?? Js.NumberToString(n));
         if (n < 1e6) return Below1e6(n);
         var m = (int)Math.Floor(n / 1e6);
         var r = (int)(n % 1e6);

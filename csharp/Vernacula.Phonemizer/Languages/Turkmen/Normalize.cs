@@ -229,7 +229,7 @@ public static class Normalize
     private static string AttachOrdinal(string whole, string digits, string rawSuffix)
     {
         var n = Js.Number(digits);
-        if (!Numbers.IsSafeInteger(n)) return whole;
+        if (!Js.IsSafeInteger(n)) return whole;
         var suffix = Js.ToLowerCase(rawSuffix);
         var front = suffix.StartsWith("nji", StringComparison.Ordinal)
             || suffix.StartsWith("inji", StringComparison.Ordinal)

@@ -23,9 +23,6 @@ public static class Numbers
     private static IReadOnlyList<string> ONES => N.Ones;   // counting series: náid, aon, dó, trí, ceathair, …
     private static IReadOnlyList<string> ATTR => N.Attributive; // attributive: —, aon, dhá, trí, ceithre, …
 
-    /** JS `Number.isSafeInteger` — the fleet spells this out per language. */
-    internal static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static readonly JsRe LENITABLE = JsRegex.Compile("^[bcdfgmpt]", "i");
     private static readonly JsRe VOWEL_INITIAL = JsRegex.Compile("^[aeiouáéíóú]", "i");
     private static readonly JsRe SPACE_RUN = JsRegex.Compile("\\s+", "g");
@@ -111,7 +108,7 @@ public static class Numbers
     {
         // Out of range → digit-by-digit over the DIGITS only; a stray "-" or "." must not reach the g2p as a
         // word. (Unreachable from the text path — the tokenizer matches \d+ — but this is a public entry point.)
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(n))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => ONES[d[0] - '0']));

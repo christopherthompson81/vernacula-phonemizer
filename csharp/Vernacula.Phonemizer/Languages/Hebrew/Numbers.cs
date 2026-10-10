@@ -90,12 +90,10 @@ public static class Numbers
 
     /** An integer → its ordered niqqud number-words. Digit-by-digit past 10¹²-1 or unsafe — from `raw`, the
      *  TOKEN's own digits, because above 2^53 the double the caller parsed has already lost them (#1059). */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static List<string> IntegerWords(double n, string? raw = null)
     {
         if (n == 0) return new List<string> { N.UnitsF[0] };
-        if (n >= 1e12 || !IsSafeInteger(n))
+        if (n >= 1e12 || !Js.IsSafeInteger(n))
             return Js.CodePoints(raw ?? Js.NumberToString(n))
                 .Select(d =>
                 {

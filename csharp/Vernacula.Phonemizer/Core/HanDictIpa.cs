@@ -148,9 +148,6 @@ public static class HanDictIpa
     private static string SpellDigits(string s) =>
         string.Concat(Js.CodePoints(s).Select(c => c.Length == 1 && c[0] >= '0' && c[0] <= '9' ? DIGITS[c[0] - '0'] : c));
 
-    /** JS `Number.isSafeInteger`. The fleet spells this out per language; one copy here for the shared core. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static readonly ConditionalWeakTable<object, object> MAX_WORD_CACHE = new();
 
     /**
@@ -223,7 +220,7 @@ public static class HanDictIpa
                     // digits, so composing would be confidently wrong; digit-at-a-time is what Sinitic
                     // already does for a year. Js.Number reproduces JS parsing exactly.
                     var n = Js.Number(m.Groups[2].Value);
-                    var han = IsSafeInteger(n) ? IntegerToHan((long)n) : SpellDigits(m.Groups[2].Value);
+                    var han = Js.IsSafeInteger(n) ? IntegerToHan((long)n) : SpellDigits(m.Groups[2].Value);
                     sink.Emit(HanRun(han, d, max, _def.Chao));
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)

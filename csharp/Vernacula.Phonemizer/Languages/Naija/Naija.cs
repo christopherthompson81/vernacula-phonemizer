@@ -235,8 +235,6 @@ public sealed class NaijaPhonemizer : ILanguage
     private static readonly JsRe DOTS = JsRegex.Compile(@"\.", "gu");
     private static readonly JsRe GROUPING_COMMA = JsRegex.Compile(",", "gu");
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     // `foreign` = the English DICT lookup (knownWord): a known-English word is nativised, an OOV one
     // (substrate loan) falls through to the rule g2p. Wired in the registry from the English module.
     private readonly ForeignPhonemizer? _foreign;
@@ -256,7 +254,7 @@ public sealed class NaijaPhonemizer : ILanguage
                 // Above 2^53 the quantity is already lost, so the ORDINAL fallback keeps the marker and
                 // reads the digits after it rather than emitting the raw token.
                 var n = Js.Number(m.Groups[3].Value);
-                if (IsSafeInteger(n))
+                if (Js.IsSafeInteger(n))
                 {
                     foreach (var wd in OrdinalWords(n).Split(' ')) if (wd != "") sink.Emit(wd);
                 }
@@ -288,7 +286,7 @@ public sealed class NaijaPhonemizer : ILanguage
                 var frac = parts.Length > 1 ? parts[1] : null;
                 var n = Js.Number(intPart);
                 // numberWords already yields canonical IPA — emit it, don't re-run the g2p.
-                if (IsSafeInteger(n))
+                if (Js.IsSafeInteger(n))
                 {
                     foreach (var wd in NumberWords(n).Split(' ')) if (wd != "") sink.Emit(wd);
                     // A decimal tail is read DIGIT BY DIGIT after the separator word (the house convention).

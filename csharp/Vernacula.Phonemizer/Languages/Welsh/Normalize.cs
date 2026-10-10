@@ -110,7 +110,7 @@ public static class Normalize
      *  so the caller leaves the digit untouched rather than emitting a guess the corpus never exercises. */
     public static string? OrdinalWords(double n)
     {
-        if (!Numbers.IsSafeInteger(n) || n < 0) return null;
+        if (!Js.IsSafeInteger(n) || n < 0) return null;
         if (n <= 19) return n == 0 ? "dimfed" : ORD_1_19[(int)n];
         if (n == 20) return ROUND_TENS[20]; // the branch BOUNDARY: `low` is 0 here, so the 21-39 arm below
                                             // returned null and ugeinfed was unreachable.
@@ -296,7 +296,7 @@ public static class Normalize
         s = Rewrite(s, RANGE, m =>
         {
             var n = Js.Number(COMMAS.Replace(m.Groups[2].Value, ""));
-            if (!Numbers.IsSafeInteger(n)) return m.Value;
+            if (!Js.IsSafeInteger(n)) return m.Value;
             var words = Numbers.NumberToWords(n);
             if (words == "" || HAS_DIGIT.IsMatch(words)) return m.Value;
             // ⚠ `Js.Trim`, NOT `string.Trim()`. Group 3 captures the `\s?` TOGETHER with the unit, and the

@@ -25,13 +25,10 @@ public static class Numbers
         (1e6, "roob"), (1e3, "txhiab"), (100, "puas"),
     ];
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** An integer → the ordered White Hmong (RPA) number words that speak it. */
     public static List<string> NumberToHmongWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
         {
             return Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n)))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)

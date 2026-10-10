@@ -133,8 +133,6 @@ public static class Normalize
     private static readonly JsRe FRACTION = JsRegex.Compile(
         $"(?<![{D}\\p{{L}}\\p{{M}}/])([{D}]{{1,3}})/([{D}]{{1,3}})(?![{D}/])(\\s*برخ[ېه])?", "gu");
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /**
      * Builds the normalizer. `numeralWords` (non-negative integer → its Pashto spelling) is INJECTED rather
      * than referenced directly: the engine calls the normalizer, so reaching back into it would be a cycle.
@@ -158,7 +156,7 @@ public static class Normalize
                 s = Rewrite(s, JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}([{D}]+)\\s?{suffix}{Boundaries.NOT_LETTER_AFTER}", "gu"), m =>
                 {
                     var n = Js.Number(ToAscii(m.Groups[1].Value));
-                    if (!IsSafeInteger(n) || n < 1 || n >= cutoff) return m.Value;
+                    if (!Js.IsSafeInteger(n) || n < 1 || n >= cutoff) return m.Value;
                     var w = OrdinalWords(n, suffix, numeralWords);
                     return w == "" ? m.Value : w;
                 });
@@ -201,7 +199,7 @@ public static class Normalize
             {
                 string h = m.Groups[1].Value, min = m.Groups[2].Value;
                 var mm = Js.Number(ToAscii(min));
-                if (!IsSafeInteger(mm) || mm > 59) return m.Value;
+                if (!Js.IsSafeInteger(mm) || mm > 59) return m.Value;
                 return mm == 0 ? $"{h} بجې" : $"{h} بجې او {min} دقیقې";
             });
 
@@ -213,7 +211,7 @@ public static class Normalize
             {
                 string a = m.Groups[1].Value, b = m.Groups[2].Value;
                 double x = Js.Number(ToAscii(a)), y = Js.Number(ToAscii(b));
-                if (!IsSafeInteger(x) || !IsSafeInteger(y) || x >= y) return m.Value;
+                if (!Js.IsSafeInteger(x) || !Js.IsSafeInteger(y) || x >= y) return m.Value;
                 return $"{a} تر {b}";
             });
 
@@ -258,7 +256,7 @@ public static class Normalize
             {
                 string a = m.Groups[1].Value, b = m.Groups[2].Value;
                 double x = Js.Number(ToAscii(a)), y = Js.Number(ToAscii(b));
-                if (!IsSafeInteger(x) || !IsSafeInteger(y)) return m.Value;
+                if (!Js.IsSafeInteger(x) || !Js.IsSafeInteger(y)) return m.Value;
                 if (!(x < y && y <= 10)) return m.Value;
                 var den = OrdinalWords(y, "مه", numeralWords);
                 var noun = m.Groups[3].Success ? m.Groups[3].Value.Trim() : "برخه";

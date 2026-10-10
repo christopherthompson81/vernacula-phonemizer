@@ -60,13 +60,11 @@ public static class Normalize
     /** Read from the manifest — see the jsonc, where the evidence lives. */
     private static readonly IReadOnlyList<IReadOnlyList<string>> ORDINAL_TAIL = Manifest.MANIFEST.OrdinalTails;
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** The Haitian ordinal for `n`, or null when the composition has no attested tail (the `-en` band). */
     private static string? OrdinalWord(double n)
     {
         if (n == 1) return "premye"; // suppletive, ×6,723 — never *enyèm
-        if (!IsSafeInteger(n) || n < 1) return null;
+        if (!Js.IsSafeInteger(n) || n < 1) return null;
         var words = Numbers.NumberToWords(n).Split(' ');
         var last = words[^1];
         // Longest tail first, so `katòz` is not decided by `kat` and `senkant` is not decided by `senk`.

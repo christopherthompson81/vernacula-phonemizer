@@ -177,13 +177,11 @@ public sealed class NorwegianPhonemizer : ILanguage
     private static readonly string NB_WORD = $"{NB_LETTER}(?:{NB_LETTER}|\\p{{M}}|['’](?={NB_LETTER}))*";
     private static readonly JsRe TOKEN = JsRegex.Compile($"({NB_WORD})|(\\d+)|([.?!,;:…—])", "gu");
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static string Number(string digits)
     {
         var nn = Js.Number(digits);
         // ⚠ Above 2^53 the float has lost the low digits; read the numeral out digit-at-a-time instead.
-        if (!IsSafeInteger(nn)) return Numbers.SpellDigits(digits, MANIFEST.Numbers, w => PhonemizeWord(w));
+        if (!Js.IsSafeInteger(nn)) return Numbers.SpellDigits(digits, MANIFEST.Numbers, w => PhonemizeWord(w));
         return Numbers.RenderNumber(nn, MANIFEST.Numbers, w => PhonemizeWord(w), Numbers.westernNumberWords);
     }
 

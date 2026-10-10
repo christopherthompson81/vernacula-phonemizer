@@ -17,9 +17,6 @@ public static class Numbers
     private static IReadOnlyList<string> ONES => N.Ones;
     private static IReadOnlyList<string> ATTR => N.Attributive;
 
-    /** JS `Number.isSafeInteger` — the fleet spells this out per language. */
-    internal static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static readonly JsRe LENITABLE = JsRegex.Compile("^[bcdfgmpst]", "i");
     private static readonly JsRe VOWEL_INITIAL = JsRegex.Compile("^[aeiouàèìòùáéíóú]", "i");
     private static readonly JsRe SPACE_RUN = JsRegex.Compile("\\s+", "g");
@@ -84,7 +81,7 @@ public static class Numbers
     /** Non-negative integer → Scottish Gaelic words. Out-of-range input falls back to digit-by-digit. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(n))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)
                 .Select(d => ONES[d[0] - '0']));

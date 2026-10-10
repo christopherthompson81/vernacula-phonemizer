@@ -24,9 +24,6 @@ public static class Numbers
     private const string MILLION = "milyoŋ";
     private const string BILLION = "milyaar";
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** 1–99: `fukk` takes the quinary multiplier FIRST; units are added with `ak`. */
     private static string Below100(double n)
     {
@@ -52,7 +49,7 @@ public static class Numbers
      *  magnitudes). */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e12)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e12)
         {
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n)))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)

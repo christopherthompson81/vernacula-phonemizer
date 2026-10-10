@@ -20,9 +20,6 @@ namespace Vernacula.Phonemizer.Languages.LuleSami;
 
 public static class Numbers
 {
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     // Units 1–9 (index 0 unused — a bare 0 is `nålla`, handled in NumberToWords).
     private static readonly string[] UNITS =
         { "", "akta", "guokta", "gålmmå", "niellja", "vihtta", "guhtta", "gietjav", "gáktsa", "aktse" };
@@ -87,7 +84,7 @@ public static class Numbers
      */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e12) return ReadDigits(raw ?? Js.NumberToString(n));
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e12) return ReadDigits(raw ?? Js.NumberToString(n));
         if (n == 0) return ZERO;
         if (n < 1e6) return Below1e6(n);
         if (n < 1e9)

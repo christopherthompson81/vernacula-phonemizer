@@ -12,9 +12,6 @@ public static class Numbers
 {
     private static SetswanaNumbers N => Manifest.MANIFEST.Numbers;
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static string Below100(double n)
     {
         if (n < 10) return N.Units[(int)n];
@@ -37,7 +34,7 @@ public static class Numbers
 
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e6)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e6)
         {
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
             {

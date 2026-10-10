@@ -51,9 +51,6 @@ public static class Numbers
         return r == 0 ? head : $"{head} {AND} {Below100(r)}";
     }
 
-    /** JS `Number.isSafeInteger(n)`: an integral double inside ±(2^53 − 1). */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /**
      * Non-negative integer → Ewe words; beyond the attested magnitudes (≥ 10⁹) → digit-by-digit.
      *
@@ -63,7 +60,7 @@ public static class Numbers
      */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e9)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e9)
         {
             // No attested Ewe numeral above miliɔn — read the digits rather than invent a "billion".
             var src = raw ?? Js.NumberToString(Math.Abs(n));
