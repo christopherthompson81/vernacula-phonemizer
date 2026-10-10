@@ -73,11 +73,12 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def card(full: str, short: str) -> str:
+def card(repo: str, full: str, short: str) -> str:
+    # The Hub validates license_link as an https URI, so a relative path is refused at upload.
     return f"""---
 license: other
 license_name: per-file
-license_link: LICENSES/PROVENANCE.md
+license_link: https://huggingface.co/{repo}/blob/{short}/LICENSES/PROVENANCE.md
 tags:
   - phonemizer
   - g2p
@@ -133,7 +134,7 @@ def main() -> int:
         if missing:
             print(f"REFUSED: {full} data/ lacks {missing}; the licensing files must ship with the data.")
             return 2
-        (data / "README.md").write_text(card(full, short), encoding="utf-8")
+        (data / "README.md").write_text(card(args.repo, full, short), encoding="utf-8")
         files = sorted(p for p in data.rglob("*") if p.is_file())
         total = sum(p.stat().st_size for p in files)
         print(f"rev {full} → tag {short}; repo {args.repo}")
