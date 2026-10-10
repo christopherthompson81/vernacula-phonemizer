@@ -51,9 +51,12 @@ describe("spanish reads its lifted tables", () => {
         expect(say("El 1000º día")).toContain(say(MANIFEST.ordinals.thousandth));
     });
 
-    test("the fraction numerator is the APOCOPATED un, not numbers.ones[1]", () => {
-        expect(MANIFEST.fractions.numeratorOne).not.toBe(MANIFEST.numbers.ones[1]);
-        expect(say("1/5 del total")).toContain(say(MANIFEST.fractions.numeratorOne));
+    // `fractions.numeratorOne` is retired: every numerator is a multiplier and apocopates through
+    // `numbers.apocope` (21/5 = veintiún quintos), and its "1" entry is the same "un" the old key held.
+    test("the fraction numerator is the APOCOPATED un (numbers.apocope), not numbers.ones[1]", () => {
+        const un = MANIFEST.numbers.apocope["1"]!;
+        expect(un).not.toBe(MANIFEST.numbers.ones[1]);
+        expect(say("1/5 del total")).toContain(say(un));
         expect(say("1/5 del total")).not.toContain(say(`${MANIFEST.numbers.ones[1]!} `));
     });
 

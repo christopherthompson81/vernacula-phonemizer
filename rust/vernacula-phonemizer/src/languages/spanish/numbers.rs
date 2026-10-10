@@ -3,6 +3,9 @@
 //!
 //! JS `Number` arithmetic throughout (`f64`, `Math.floor`, `%`), as the TS does it.
 
+use std::collections::HashMap;
+use std::sync::LazyLock;
+
 use super::manifest::MANIFEST;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number, js_number_to_string};
 
@@ -44,12 +47,23 @@ fn below1000(n: f64) -> JsString {
     JsString::join(&parts, &js(" "))
 }
 
-/// `multiplier`: the words before `mil` or a scale noun, with the last word apocopated (veintiún mil).
-fn multiplier(words: JsString) -> JsString {
-    let cut = words.last_index_of(&js(" ")).map_or(0, |i| i + 1);
-    let last = words.slice(cut as isize, None).to_string_lossy();
-    match MANIFEST.numbers.apocope.get(&last) {
-        Some(short) => words.slice(0, Some(cut as isize)).concat(&js(short)),
+static SPACE: LazyLock<JsString> = LazyLock::new(|| js(" "));
+
+/// `numbers.apocope` keyed by the full WORD (`ones[key]`); the keys were checked at load (`validate`).
+static APOCOPE: LazyLock<HashMap<JsString, JsString>> = LazyLock::new(|| {
+    let n = &MANIFEST.numbers;
+    n.apocope
+        .iter()
+        .map(|(k, short)| (js(&n.ones[k.parse::<usize>().unwrap()]), js(short)))
+        .collect()
+});
+
+/// `multiplier`: the words before `mil`, a scale noun or a fraction noun, with the last word apocopated
+/// (veintiún mil, ciento un mil, veintiún quintos).
+pub(crate) fn multiplier(words: JsString) -> JsString {
+    let cut = words.last_index_of(&SPACE).map_or(0, |i| i + 1);
+    match APOCOPE.get(&words.slice(cut as isize, None)) {
+        Some(short) => words.slice(0, Some(cut as isize)).concat(short),
         None => words,
     }
 }

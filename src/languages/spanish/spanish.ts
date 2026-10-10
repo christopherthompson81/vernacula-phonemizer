@@ -7,7 +7,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments, type Seg } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
+import { multiplier, numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizeSpanish, normalizeSpanishInitialisms } from "./normalize.ts";
 import { noteRewrite } from "../../core/trace.ts";
@@ -120,6 +120,25 @@ function numberTokenToWords(tok: string): string {
             [...frac].map((d) => numberToWords(Number(d))).join(" ");
     return words;
 }
+/** A WRITTEN scale noun right after a number token: `21 mil`, `21 millones`, `1 millón`, `21 billones`. The digit
+ *  token is then a multiplier and apocopates (*veintiún millones*), just as it does when the compositor writes
+ *  the noun itself. It is decidable because these nouns always take the short form. Built from the manifest's
+ *  own words. The lookahead stops a longer word (`milímetros`, `miles`) from counting. */
+const SCALE_NOUN_NEXT = new RegExp(
+    `^\\s+(?:${[
+        MANIFEST.numbers.thousand,
+        ...MANIFEST.numbers.scales.flatMap((sc) => [sc.many, sc.one.slice(sc.one.lastIndexOf(" ") + 1)]),
+    ].join("|")})(?![\\p{L}\\p{M}])`,
+    "iu",
+);
+
+/** A number token, read as a multiplier when a written scale noun follows. ⚠ A decimal is left alone: `2,1
+ *  millones` keeps *dos coma uno*, because the fractional digits are read one by one and are not a multiplier. */
+function numberTokenWords(tok: string, after: string): string {
+    const words = numberTokenToWords(tok);
+    return !tok.includes(",") && SCALE_NOUN_NEXT.test(after) ? multiplier(words) : words;
+}
+
 // Unstressed monosyllabic clitics (articles, prepositions, conjunctions, clitic pronouns) — de-accented in
 // running text (DATA: spanish.jsonc). Accented counterparts (sí, tú, mí, más) keep their accent and stay stressed.
 const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
@@ -160,7 +179,7 @@ class SpanishPhonemizer implements Phonemizer {
             if (m[1]) sink.emit(wordIpa(nat(m[1])));
             else if (m[2])
                 sink.emit(
-                    numberTokenToWords(m[2]).split(" ").map(wordIpa).join(" "),
+                    numberTokenWords(m[2], normalized.slice(m.index! + m[0].length)).split(" ").map(wordIpa).join(" "),
                 );
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

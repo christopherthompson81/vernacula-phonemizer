@@ -30,7 +30,7 @@ public sealed class SpanishNumbers
     public string Thousand { get; init; } = "";
     public string Connector { get; init; } = "";
     public string DecimalConnector { get; init; } = "";
-    /** A multiplier's last word → its form before `mil` and a scale noun (veintiuno → veintiún). */
+    /** Number (a key into `Ones`) → its multiplier form before `mil`, a scale or a fraction noun. */
     public IReadOnlyDictionary<string, string> Apocope { get; init; } = new Dictionary<string, string>();
     public IReadOnlyList<SpanishScale> Scales { get; init; } = Array.Empty<SpanishScale>();
 }
@@ -76,13 +76,13 @@ public sealed class SpanishOrdinals
     public IReadOnlyList<string> Tens { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Hundreds { get; init; } = Array.Empty<string>();
     public string Thousandth { get; init; } = "";
+    /** The ordinals the `er` indicator shortens (primero → primer); each one is a `Units` word. */
+    public IReadOnlyList<string> Apocopating { get; init; } = Array.Empty<string>();
 }
 
-/** ⚠ `NumeratorOne` is the APOCOPATED "un", a different word from `Numbers.Ones[1]`. */
 public sealed class SpanishFractions
 {
     public IReadOnlyDictionary<string, string> Denominators { get; init; } = new Dictionary<string, string>();
-    public string NumeratorOne { get; init; } = "";
 }
 
 public sealed class SpanishEraMarkers

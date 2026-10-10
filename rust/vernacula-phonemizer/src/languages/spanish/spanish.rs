@@ -8,7 +8,7 @@ use std::sync::LazyLock;
 use super::g2p::{Seg, to_segments};
 use super::manifest::{MANIFEST, try_manifest};
 use super::normalize::{normalize_spanish, normalize_spanish_initialisms};
-use super::numbers::number_to_words;
+use super::numbers::{multiplier, number_to_words};
 use crate::core::clauses::assemble_clauses;
 use crate::core::host_word::{LATIN_RUN, make_nativiser};
 use crate::core::js_regex::JsRegex;
@@ -158,6 +158,33 @@ fn number_token_to_words(tok: &JsString) -> JsString {
     words
 }
 
+/// `SCALE_NOUN_NEXT`: a WRITTEN scale noun right after a number token (`21 millones`, `1 millón`), which makes
+/// the token a multiplier. Built from the manifest's own words, as the TS builds it.
+static SCALE_NOUN_NEXT: LazyLock<JsRegex> = LazyLock::new(|| {
+    let n = &MANIFEST.numbers;
+    let mut nouns = vec![n.thousand.clone()];
+    for sc in &n.scales {
+        nouns.push(sc.many.clone());
+        nouns.push(sc.one[sc.one.rfind(' ').map_or(0, |i| i + 1)..].to_string());
+    }
+    JsRegex::new(
+        &format!(r"^\s+(?:{})(?![\p{{L}}\p{{M}}])", nouns.join("|")),
+        "iu",
+    )
+    .unwrap()
+});
+
+/// `numberTokenWords`: a number token, read as a multiplier when a written scale noun follows. A decimal is
+/// left alone (its fractional digits are read one by one).
+fn number_token_words(tok: &JsString, after: &JsString) -> JsString {
+    let words = number_token_to_words(tok);
+    if !tok.includes(&js(",")) && SCALE_NOUN_NEXT.test(after) {
+        multiplier(words)
+    } else {
+        words
+    }
+}
+
 static FUNCTION_WORDS: LazyLock<HashSet<JsString>> =
     LazyLock::new(|| MANIFEST.function_words.iter().map(|w| js(w)).collect());
 
@@ -223,7 +250,8 @@ impl SpanishPhonemizer {
             if let Some(w) = m.group(1, s) {
                 sink.emit(&word_ipa(&NAT(&w)));
             } else if let Some(n) = m.group(2, s) {
-                let words: Vec<JsString> = number_token_to_words(&n)
+                let after = s.slice(m.end() as isize, None);
+                let words: Vec<JsString> = number_token_words(&n, &after)
                     .split(&js(" "))
                     .iter()
                     .map(word_ipa)
@@ -327,21 +355,59 @@ mod tests {
         assert_eq!(n("el 3er día"), "el tercer día");
         assert_eq!(n("21er"), "vigésimo primer");
         assert_eq!(n("13er"), "decimotercer");
-        assert_eq!(n("el 2er"), "el 2er");
-        assert_eq!(n("5er"), "5er");
-        assert_eq!(n("11er"), "11er");
+        // Any other number drops the whole marker and reads the cardinal.
+        assert_eq!(n("el 2er"), "el 2");
+        assert_eq!(n("5er"), "5");
+        assert_eq!(n("11er"), "11");
+        assert_eq!(n("1001er"), "1001");
+        let p = |s: &str| crate::phonemize(s, "es").unwrap();
+        assert_eq!(p("el 2.er piso"), "el dˈos pˈiso");
+        assert_eq!(p("2er"), "dˈos");
+    }
+
+    #[test]
+    fn digit_token_before_a_written_scale_noun() {
+        let p = |s: &str, l: &str| crate::phonemize(s, l).unwrap();
+        assert_eq!(
+            p("21 millones de personas", "es"),
+            "beᶦntjˈun miʎˈones ðe peɾsˈonas"
+        );
+        assert_eq!(p("21 mil", "es"), "beᶦntjˈun mˈil");
+        assert_eq!(p("101 mil", "es"), "θjˈento un mˈil");
+        assert_eq!(p("21 billones", "es"), "beᶦntjˈun biʎˈones");
+        assert_eq!(p("1 millón", "es"), "un miʎˈon");
+        assert_eq!(p("21 Millones", "es"), "beᶦntjˈun miʎˈones");
+        assert_eq!(p("21 milímetros", "es"), "beᶦntjˈuno milˈimetɾos");
+        assert_eq!(p("21 años", "es"), "beᶦntjˈuno ˈaɲos");
+        assert_eq!(p("2,1 millones", "es"), "dˈos kˈoma ˈuno miʎˈones");
+    }
+
+    #[test]
+    fn every_fraction_numerator_is_a_multiplier() {
+        let e = create_spanish(false).unwrap();
+        let n = |s: &str| e.normalize(&js(s), false).to_string_lossy();
+        assert_eq!(n("1/5"), "un quinto");
+        assert_eq!(n("21/5"), "veintiún quintos");
+        assert_eq!(n("21/100"), "veintiún centésimos");
     }
 
     #[test]
     fn ordinal_trims_are_not_on_the_provenance_seam() {
         use std::{cell::Cell, rc::Rc};
+        /// Clears the hook on every exit, a panic included (the TS `afterEach`, the C# `finally`).
+        struct ClearPoison;
+        impl Drop for ClearPoison {
+            fn drop(&mut self) {
+                crate::core::provenance::on_poison(None);
+            }
+        }
         let hits = Rc::new(Cell::new(0));
         let h = hits.clone();
         crate::core::provenance::on_poison(Some(Box::new(move |_, _| h.set(h.get() + 1))));
+        let _clear = ClearPoison;
         for l in ["el 1er lugar", "el 3er día", "la 1ª vez"] {
             crate::phonemize_trace(l, "es").unwrap();
         }
-        crate::core::provenance::on_poison(None);
         assert_eq!(hits.get(), 0);
     }
 }

@@ -40,7 +40,8 @@ pub struct Numbers {
     pub thousand: String,
     pub connector: String,
     pub decimal_connector: String,
-    /// A multiplier's last word → its form before `mil` and a scale noun (veintiuno → veintiún).
+    /// Number (a key into `ones`) → its multiplier form before `mil`, a scale or a fraction noun. Checked at
+    /// load by `validate`.
     pub apocope: IndexMap<String, String>,
     pub scales: Vec<Scale>,
 }
@@ -59,13 +60,14 @@ pub struct Ordinals {
     pub tens: Vec<String>,
     pub hundreds: Vec<String>,
     pub thousandth: String,
+    /// The ordinals the `er` indicator shortens (primero → primer); each one is a `units` word.
+    pub apocopating: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Fractions {
     pub denominators: IndexMap<String, String>,
-    pub numerator_one: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -145,8 +147,34 @@ pub struct SpanishManifest {
 pub fn try_manifest() -> Result<&'static SpanishManifest, String> {
     static M: OnceLock<SpanishManifest> = OnceLock::new();
     load_once(&M, || {
-        load_manifest(DIR, "spanish.jsonc").map_err(|e| e.to_string())
+        let m: SpanishManifest = load_manifest(DIR, "spanish.jsonc").map_err(|e| e.to_string())?;
+        validate(&m)?;
+        Ok(m)
     })
+}
+
+/// The cross-table checks the TS loaders throw on: every `numbers.apocope` key is a `numbers.ones` slot, and
+/// every `ordinals.apocopating` entry is an `ordinals.units` word. An entry failing either would be inert.
+fn validate(m: &SpanishManifest) -> Result<(), String> {
+    for k in m.numbers.apocope.keys() {
+        let slot = k.bytes().all(|b| b.is_ascii_digit()) && !k.is_empty();
+        if !slot
+            || k.parse::<usize>()
+                .map_or(true, |n| n >= m.numbers.ones.len())
+        {
+            return Err(format!(
+                "spanish.jsonc numbers.apocope: key {k:?} is not a numbers.ones slot"
+            ));
+        }
+    }
+    for o in &m.ordinals.apocopating {
+        if !m.ordinals.units.contains(o) {
+            return Err(format!(
+                "spanish.jsonc ordinals.apocopating: {o:?} is not an ordinals.units word"
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// The manifest for code reached only through a checked path: a `SpanishPhonemizer` (whose constructor loads

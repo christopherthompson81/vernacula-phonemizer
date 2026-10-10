@@ -36,6 +36,9 @@ Hace 20 °C, 35° y 2º piso.
 El 2er, el 5er y el 11er declinan; el 13er, el 21er y el 1.er piso no.
 # the multiplier apocope: veintiún mil, ciento un mil, veintiún millones
 Hay 21.000 casos, 101 000 votos, 31000 firmas y 21000000 de habitantes.
+Son 21 millones de personas, 21 mil votos, 101 mil firmas, 1 millón, 21 billones y 21 Millones.
+Declinan 21 milímetros, 21 miles, 21 años, 2,1 millones y 21.000 millones.
+El 2.er piso, 1001er, 21/5 y 21/100 del total, 1/5 y 31/7.
 # 6) signs
 Un error de ±5, 5+3, +5, 5 + 3, -5 grados, (−3) y –4.
 La clave a-5 no lleva signo.

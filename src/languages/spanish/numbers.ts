@@ -3,7 +3,6 @@
  * other word, so digits read like written Spanish. Covers 0 … <10¹².
  */
 
-import { own } from "../../core/own.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — consolidated in spanish.jsonc; the long-scale compositor is the algorithm.
@@ -32,11 +31,22 @@ function below1000(n: number): string {
     return parts.join(" ");
 }
 
-/** A MULTIPLIER — the words before `mil` or a scale noun — with its last word apocopated: *uno* is an
- *  adjective there, so 21000 is *veintiún mil* and 101000 *ciento un mil*, never *veintiuno mil*. */
-function multiplier(words: string): string {
+/** `numbers.apocope` keyed by the full WORD (`ones[key]`). ⚠ A key that is not a `ones` slot throws here, at
+ *  load, rather than leaving an entry nothing can ever match. */
+const APOCOPE = new Map(
+    Object.entries(N.apocope).map(([k, short]) => {
+        const n = Number(k);
+        if (!/^\d+$/u.test(k) || n >= ONES.length)
+            throw new Error(`spanish.jsonc numbers.apocope: key ${JSON.stringify(k)} is not a numbers.ones slot`);
+        return [ONES[n]!, short] as const;
+    }),
+);
+
+/** A MULTIPLIER, the words before `mil`, a scale noun or a fraction noun, with its last word apocopated. *Uno* is
+ *  an adjective there, so 21000 is *veintiún mil*, 101000 *ciento un mil* and 21/5 *veintiún quintos*. */
+export function multiplier(words: string): string {
     const cut = words.lastIndexOf(" ") + 1;
-    const short = own(N.apocope, words.slice(cut));
+    const short = APOCOPE.get(words.slice(cut));
     return short === undefined ? words : words.slice(0, cut) + short;
 }
 

@@ -30,7 +30,7 @@ export interface SpanishManifest {
         thousand: string;
         connector: string;
         decimalConnector: string;
-        /** A multiplier's last word → its form before `mil` and a scale noun (veintiuno → veintiún). */
+        /** Number (a key into `ones`) → its multiplier form before `mil`, a scale or a fraction noun. */
         apocope: Record<string, string>;
         scales: { value: number; one: string; many: string }[];
     };
@@ -46,9 +46,10 @@ export interface SpanishManifest {
         tens: string[];
         hundreds: string[];
         thousandth: string;
+        /** The ordinals the `er` indicator shortens (primero → primer); each one is a `units` word. */
+        apocopating: string[];
     };
-    /** ⚠ `numeratorOne` is the APOCOPATED "un", a different word from `numbers.ones[1]`. */
-    fractions: { denominators: Record<string, string>; numeratorOne: string };
+    fractions: { denominators: Record<string, string> };
     feminineOne: string;
     eraMarkers: { beforeChrist: string; afterChrist: string };
     unitedStates: string;

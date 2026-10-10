@@ -60,10 +60,12 @@ public static class Normalize
 
     private static readonly JsRe FINAL_O = JsRegex.Compile("o$", "u");
 
-    /** The two ordinals with an apocopated form before a masculine noun (primero → primer, tercero → tercer),
-     *  which is what the `er` indicator writes. A compound ending in one apocopates too (vigésimo primer). */
-    private static readonly string[] APOCOPATING_ORDINALS =
-        [Manifest.MANIFEST.Ordinals.Units[1], Manifest.MANIFEST.Ordinals.Units[3]];
+    /** The ordinals the `er` indicator shortens (spanish.jsonc `ordinals.apocopating`). ⚠ An entry that is not
+     *  a `units` word throws at load: a misspelt one would silently decline every `1er`. */
+    private static readonly string[] APOCOPATING_ORDINALS = DEF.Ordinals.Apocopating
+        .Select(o => DEF.Ordinals.Units.Contains(o) ? o
+            : throw new InvalidDataException($"spanish.jsonc ordinals.apocopating: \"{o}\" is not an ordinals.units word"))
+        .ToArray();
 
     /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera).
      *  ⚠ Each element is a WORD, not the pipeline string, so it takes `FINAL_O.Replace`: a `Rewrite` here
@@ -93,7 +95,8 @@ public static class Normalize
         var bas = DENOMINATOR.TryGetValue(Js.NumberToString(den), out var d) ? d
             : double.IsInteger(den) && den >= 1 && den <= 1000 ? RomanOrdinals.SpanishOrdinal((int)den) : null;
         if (bas is null) return null;
-        return $"{(num == 1 ? DEF.Fractions.NumeratorOne : Numbers.NumberToWords(num))} {(num > 1 ? $"{bas}s" : bas)}";
+        // The numerator is a multiplier and apocopates before the fraction noun: "un quinto", "veintiún quintos".
+        return $"{Numbers.Multiplier(Numbers.NumberToWords(num))} {(num > 1 ? $"{bas}s" : bas)}";
     }
 
     private static readonly JsRe SPACE_GROUP_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
@@ -164,15 +167,18 @@ public static class Normalize
         {
             var n = Js.Number(DIGITS_IN.Match(m.Value).Value);
             var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.SpanishOrdinal((int)n) : null;
-            if (masc is null) return m.Value;
+            // Past 1000 there is no ordinal. A declined `er` still drops its marker (see below); º and ª keep theirs.
+            if (masc is null) return HAS_ER.IsMatch(m.Value) ? Js.NumberToString(n) : m.Value;
             if (HAS_FEM.IsMatch(m.Value)) return FeminineOrdinal(masc);
             // ⚠ `er` IS THE APOCOPE OF primero AND tercero ONLY (primer, tercer, vigésimo primer, decimotercer).
-            //   No other ordinal has a short form, so `2er` and `5er` are not an indicator and stay as written;
-            //   they used to read *segund* and *quint*. ⚠ `masc` is a WORD, not the pipeline string, so its trim
-            //   is `FINAL_O.Replace`: a `Rewrite` here reported a false provenance poison.
+            //   No other ordinal has a short form, so `2er` or `5er` is a slip, and they used to read *segund* and
+            //   *quint*. A declined marker is DROPPED WHOLE and the cardinal stands (`el 2.er piso` → *el dos
+            //   piso*). Handing back the raw match kept the `.` of `2.er`, which the tokenizer reads as a phrase
+            //   break, plus a stray *er* word. ⚠ `masc` is a WORD, not the pipeline string, so its trim is
+            //   `FINAL_O.Replace`: a `Rewrite` here reported a false provenance poison.
             if (HAS_ER.IsMatch(m.Value))
                 return APOCOPATING_ORDINALS.Any(o => masc.EndsWith(o, StringComparison.Ordinal))
-                    ? FINAL_O.Replace(masc, "") : m.Value;
+                    ? FINAL_O.Replace(masc, "") : Js.NumberToString(n);
             return masc;
         });
 

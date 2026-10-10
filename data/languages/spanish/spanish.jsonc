@@ -153,10 +153,12 @@
         "thousand": "mil",
         "connector": "y", // tens + units (treinta y uno)
         "decimalConnector": "coma", // 3,14 → tres coma uno cuatro
-        // APOCOPE OF THE MULTIPLIER. A multiplier's last word takes this form before `mil` and before a scale
-        // noun (millones, billones): 21000 → veintiún mil, 101000 → ciento un mil, 21000000 → veintiún
-        // millones, never *veintiuno mil. Keyed by the written word in `ones`.
-        "apocope": { "uno": "un", "veintiuno": "veintiún" },
+        // APOCOPE OF THE MULTIPLIER. A multiplier's last word takes this form before `mil`, before a scale noun
+        // (millón, millones, billones) and before a fraction noun: 21000 → veintiún mil, 101000 → ciento un mil,
+        // 21000000 → veintiún millones, 1/5 → un quinto, 21/5 → veintiún quintos; never *veintiuno mil.
+        // ⚠ KEYED BY THE NUMBER, so the full word stays in `ones` alone: the loader looks up `ones[key]` and
+        // throws when the key is not one of its slots.
+        "apocope": { "1": "un", "21": "veintiún" },
         // Long-scale groups above 10⁶ (checked high→low). Below 10⁶ is the mil/cien compositor.
         "scales": [
             { "value": 1000000000000, "one": "un billón", "many": "billones" },
@@ -223,13 +225,17 @@
             "sexagésimo", "septuagésimo", "octogésimo", "nonagésimo"],
         "hundreds": ["", "centésimo", "ducentésimo", "tricentésimo", "cuadringentésimo",
             "quingentésimo", "sexcentésimo", "septingentésimo", "octingentésimo", "noningentésimo"],
-        "thousandth": "milésimo"
+        "thousandth": "milésimo",
+        // The ordinals with an apocopated form before a masculine noun (primer, tercer), which is what the
+        // `er` indicator writes. A compound ending in one apocopates too (vigésimo primer, decimotercer). Every
+        // entry must be a `units` word; the loader checks.
+        "apocopating": ["primero", "tercero"]
     },
 
     // FRACTIONS. Only 1/2 and 1/3 have a suppletive name; every other denominator takes the ordinal
-    // (1/5 = un quinto). `numeratorOne` is the APOCOPATED form the fraction noun takes — "un quinto", never
-    // *"uno quinto" — so it is a different word from `numbers.ones[1]`.
-    "fractions": { "denominators": { "2": "medio", "3": "tercio" }, "numeratorOne": "un" },
+    // (1/5 = un quinto). The numerator is a multiplier and apocopates through `numbers.apocope` ("un quinto",
+    // "veintiún quintos", never *"uno quinto").
+    "fractions": { "denominators": { "2": "medio", "3": "tercio" } },
 
     // The FEMININE "one", for the clock: *hora* is feminine, so 1 and 21 take *una* (a la una, las
     // veintiuna). Derived from `numbers.ones[1]` by a final -o → -a, but declared because the rule that

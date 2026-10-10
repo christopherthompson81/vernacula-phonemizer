@@ -47,11 +47,14 @@ public class SpanishManifestLiftedTests
         Assert.Contains(Say(DEF.Ordinals.Thousandth), Say("El 1000º día"));
     }
 
+    // `Fractions.NumeratorOne` is retired: every numerator is a multiplier and apocopates through
+    // `Numbers.Apocope` (21/5 = veintiún quintos), and its "1" entry is the same "un" the old key held.
     [Fact]
     public void TheFractionNumeratorIsTheApocopatedUn()
     {
-        Assert.NotEqual(DEF.Numbers.Ones[1], DEF.Fractions.NumeratorOne);
-        Assert.Contains(Say(DEF.Fractions.NumeratorOne), Say("1/5 del total"));
+        var un = DEF.Numbers.Apocope["1"];
+        Assert.NotEqual(DEF.Numbers.Ones[1], un);
+        Assert.Contains(Say(un), Say("1/5 del total"));
         Assert.DoesNotContain(Say($"{DEF.Numbers.Ones[1]} "), Say("1/5 del total"));
     }
 

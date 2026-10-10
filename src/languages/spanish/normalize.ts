@@ -26,7 +26,7 @@
  */
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
-import { numberToWords } from "./numbers.ts";
+import { multiplier, numberToWords } from "./numbers.ts";
 import { spanishOrdinal } from "./romanOrdinals.ts";
 import { rewrite } from "../../core/provenance.ts";
 
@@ -75,9 +75,13 @@ export function normalizeSpanishInitialisms(text: string): string {
     return INITIALISMS(() => false)(text);
 }
 
-/** The two ordinals with an apocopated form before a masculine noun (primero → primer, tercero → tercer),
- *  which is what the `er` indicator writes. A compound ending in one apocopates too (vigésimo primer). */
-const APOCOPATING_ORDINALS = [MANIFEST.ordinals.units[1]!, MANIFEST.ordinals.units[3]!];
+/** The ordinals the `er` indicator shortens (spanish.jsonc `ordinals.apocopating`). ⚠ An entry that is not a
+ *  `units` word throws at load: a misspelt one would silently decline every `1er`. */
+const APOCOPATING_ORDINALS = MANIFEST.ordinals.apocopating.map((o) => {
+    if (!MANIFEST.ordinals.units.includes(o))
+        throw new Error(`spanish.jsonc ordinals.apocopating: ${JSON.stringify(o)} is not an ordinals.units word`);
+    return o;
+});
 
 /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera). */
 function feminineOrdinal(masc: string): string {
@@ -104,8 +108,8 @@ function fractionWords(num: number, den: number): string | undefined {
     if (den < 2 || num < 1) return undefined;
     const base = DENOMINATOR[String(den)] ?? spanishOrdinal(den);
     if (base === undefined) return undefined;
-    // The numerator apocopates before the fraction noun: "un quinto", not "uno quinto".
-    return `${num === 1 ? MANIFEST.fractions.numeratorOne : numberToWords(num)} ${num > 1 ? `${base}s` : base}`;
+    // The numerator is a multiplier and apocopates before the fraction noun: "un quinto", "veintiún quintos".
+    return `${multiplier(numberToWords(num))} ${num > 1 ? `${base}s` : base}`;
 }
 
 export interface SpanishNormalizeOptions {
@@ -197,14 +201,17 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
     s = rewrite(s, /\b(\d+)\.?(?:er\b|º|ª)/gu, (whole) => {
         const n = Number(/\d+/.exec(whole)![0]);
         const masc = spanishOrdinal(n);
-        if (masc === undefined) return whole;
+        // Past 1000 there is no ordinal. A declined `er` still drops its marker (see below); º and ª keep theirs.
+        if (masc === undefined) return /er$/u.test(whole) ? String(n) : whole;
         if (/ª/u.test(whole)) return feminineOrdinal(masc);
         // ⚠ `er` IS THE APOCOPE OF primero AND tercero ONLY (primer, tercer, vigésimo primer, decimotercer). No
-        //   other ordinal has a short form, so `2er` and `5er` are not an indicator and stay as written; they
-        //   used to read *segund* and *quint*. ⚠ `masc` is a WORD, not the pipeline string, so its trim is
-        //   a plain `replace`: a `rewrite` here reported a false provenance poison.
+        //   other ordinal has a short form, so `2er` or `5er` is a slip, and they used to read *segund* and
+        //   *quint*. A declined marker is DROPPED WHOLE and the cardinal stands (`el 2.er piso` → *el dos
+        //   piso*). Handing back the raw match kept the `.` of `2.er`, which the tokenizer reads as a phrase
+        //   break, plus a stray *er* word. ⚠ `masc` is a WORD, not the pipeline string, so its trim is a plain
+        //   `replace`: a `rewrite` here reported a false provenance poison.
         if (/er$/u.test(whole))
-            return APOCOPATING_ORDINALS.some((o) => masc.endsWith(o)) ? masc.replace(/o$/u, "") : whole;
+            return APOCOPATING_ORDINALS.some((o) => masc.endsWith(o)) ? masc.replace(/o$/u, "") : String(n);
         return masc;
     });
 

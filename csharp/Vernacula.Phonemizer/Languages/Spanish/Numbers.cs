@@ -33,12 +33,22 @@ public static class Numbers
         return string.Join(" ", parts);
     }
 
-    /** A MULTIPLIER — the words before `mil` or a scale noun — with its last word apocopated: *uno* is an
-     *  adjective there, so 21000 is *veintiún mil* and 101000 *ciento un mil*, never *veintiuno mil*. */
-    private static string Multiplier(string words)
+    /** `Numbers.Apocope` keyed by the full WORD (`Ones[key]`). ⚠ A key that is not a `Ones` slot throws here,
+     *  at load, rather than leaving an entry nothing can ever match. */
+    private static readonly IReadOnlyDictionary<string, string> APOCOPE = N.Apocope.ToDictionary(
+        kv => int.TryParse(kv.Key, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var n)
+              && n < ONES.Count
+            ? ONES[n]
+            : throw new InvalidDataException($"spanish.jsonc numbers.apocope: key \"{kv.Key}\" is not a numbers.ones slot"),
+        kv => kv.Value, StringComparer.Ordinal);
+
+    /** A MULTIPLIER, the words before `mil`, a scale noun or a fraction noun, with its last word apocopated.
+     *  *Uno* is an adjective there, so 21000 is *veintiún mil*, 101000 *ciento un mil* and 21/5 *veintiún
+     *  quintos*. */
+    public static string Multiplier(string words)
     {
         int cut = words.LastIndexOf(' ') + 1;
-        return N.Apocope.TryGetValue(words[cut..], out var shortForm) ? words[..cut] + shortForm : words;
+        return APOCOPE.TryGetValue(words[cut..], out var shortForm) ? words[..cut] + shortForm : words;
     }
 
     /** 1 ≤ n < 10⁶ */
