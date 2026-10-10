@@ -119,7 +119,12 @@ public static class Normalize
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?°\\s?C(?![\\p{L}])", "giu");
     private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?°\\s?F(?![\\p{L}])", "giu");
     private static readonly JsRe DEG_BARE = JsRegex.Compile("(\\d)\\s?°", "gu");
-    private static readonly JsRe FRACTION_RE = JsRegex.Compile("(?<![\\d./])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    /**
+     * The two guards are mirrors (as Urdu's and Mandarin's, #1477/#1492): each side refuses a digit or `/`, a `.`
+     * with a digit beyond it (a decimal), and a grouped number — a `,` before exactly three digits, or (right side)
+     * the Indian lakh group `,dd,`. Any other `,` is a list separator (`1/2,3/4` reads both).
+     */
+    private static readonly JsRe FRACTION_RE = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,(?:\\d{3}(?!\\d)|\\d{2},\\d))", "gu");
     private static readonly JsRe LOCATIVE = JsRegex.Compile("(\\d)\\s*-?\\s*ல்(?![\\p{L}\\p{M}])", "gu");
 
     /** The Tamil normalizer. */
@@ -166,6 +171,21 @@ public static class Normalize
         s = Rewrite(s, CLOCK_ZERO, m => m.Groups[1].Value);
         s = Rewrite(s, CLOCK_COLON, _ => " ");
 
+        // Fractions BEFORE the decimals, so the guards see the raw digits: run after them, `1.5/2` became
+        // `1 புள்ளி 5/2` and the fraction read off the decimal's tail.
+        s = Rewrite(s, FRACTION_RE, m =>
+        {
+            string a = m.Groups[1].Value, b = m.Groups[2].Value;
+            var lex = FRACTION_WORD.GetValueOrDefault($"{a}/{b}");
+            if (lex is not null) return lex;
+            var tail = Cardinal(Js.Number(b)).Split(' ');
+            var den = TamilNumbersComposer.OrdinalStem(tail.Length > 0 ? tail[^1] : "");
+            if (den is null || Js.Number(b) == 0) return m.Value;
+            var dw = Cardinal(Js.Number(b)).Split(' ');
+            dw[^1] = $"{den}ில்";
+            return $"{string.Join(" ", dw)} {(Js.Number(a) == 1 ? "ஒரு" : Cardinal(Js.Number(a)))} பங்கு";
+        });
+
         s = Rewrite(s, DECIMAL_RE, m =>
             $"{m.Groups[1].Value} புள்ளி {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
@@ -181,19 +201,6 @@ public static class Normalize
         s = Rewrite(s, DEG_C, m => $"{m.Groups[1].Value} டிகிரி செல்சியஸ்");
         s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} டிகிரி பாரன்ஹீட்");
         s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} டிகிரி");
-
-        s = Rewrite(s, FRACTION_RE, m =>
-        {
-            string a = m.Groups[1].Value, b = m.Groups[2].Value;
-            var lex = FRACTION_WORD.GetValueOrDefault($"{a}/{b}");
-            if (lex is not null) return lex;
-            var tail = Cardinal(Js.Number(b)).Split(' ');
-            var den = TamilNumbersComposer.OrdinalStem(tail.Length > 0 ? tail[^1] : "");
-            if (den is null || Js.Number(b) == 0) return m.Value;
-            var dw = Cardinal(Js.Number(b)).Split(' ');
-            dw[^1] = $"{den}ில்";
-            return $"{string.Join(" ", dw)} {(Js.Number(a) == 1 ? "ஒரு" : Cardinal(Js.Number(a)))} பங்கு";
-        });
 
         s = Rewrite(s, ORDINAL_RE, m =>
             Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);

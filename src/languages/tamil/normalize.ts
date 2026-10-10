@@ -227,6 +227,28 @@ export function normalizeTamil(input: string): string {
     //    wall-clock instances already carry மணிக்கு/மணியளவில் in the text, so it would duplicate the noun.
     s = rewrite(s, /(?<=\d):(?=\d)/gu, " ");
 
+    // 7d) FRACTIONS. Only after the rate rule, which also owns `/`. Tamil lexicalises ½/¼/¾; anything
+    //     else takes the "N-இல் M பங்கு" frame (1/5 → ஐந்தில் ஒரு பங்கு).
+    //     ⚠ BEFORE THE DECIMALS (step 8), which used to run first and rewrite `1.5` to `1 புள்ளி 5` — so the
+    //     fraction guard never saw the `.`, and `1.5/2` read "one point, five halves" and `1/2.5` "a half
+    //     point five". Ahead of them, the guards see the raw digits.
+    //     ⚠ THE TWO GUARDS ARE MIRRORS (as urdu/ and mandarin/normalize.ts, #1477/#1492). Each side refuses a
+    //     digit or `/`, a `.` with a digit beyond it (a decimal), and a grouped number — a `,` before exactly
+    //     three digits, or (right side) the Indian lakh group `,dd,`. Step 2 has already de-grouped most of
+    //     those; the arms keep the rule correct without relying on it. Any other `,` is a list separator.
+    s = rewrite(s,
+        /(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,(?:\d{3}(?!\d)|\d{2},\d))/gu,
+        (whole, a: string, b: string) => {
+            const lex = FRACTION_WORD[`${a}/${b}`];
+            if (lex !== undefined) return lex;
+            const den = ordinalStem(cardinal(Number(b)).split(" ").pop() ?? "");
+            if (den === undefined || Number(b) === 0) return whole;
+            const dw = cardinal(Number(b)).split(" ");
+            dw[dw.length - 1] = `${den}ில்`;
+            return `${dw.join(" ")} ${Number(a) === 1 ? "ஒரு" : cardinal(Number(a))} பங்கு`;
+        },
+    );
+
     // 8) DECIMALS, after units and times have taken their share. Tamil reads the fractional part digit by
     //    digit after புள்ளி ("point"), so they are separated — 3.50 → மூன்று புள்ளி ஐந்து பூஜ்ஜியம்.
     s = rewrite(s,
@@ -250,21 +272,6 @@ export function normalizeTamil(input: string): string {
     s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}])/giu, "$1 டிகிரி செல்சியஸ்");
     s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}])/giu, "$1 டிகிரி பாரன்ஹீட்");
     s = rewrite(s, /(\d)\s?°/gu, "$1 டிகிரி");
-
-    // 10) FRACTIONS. Only after the rate rule, which also owns `/`. Tamil lexicalises ½/¼/¾; anything
-    //     else takes the "N-இல் M பங்கு" frame (1/5 → ஐந்தில் ஒரு பங்கு).
-    s = rewrite(s,
-        /(?<![\d./])(\d{1,3})\/(\d{1,3})(?![\d/])/gu,
-        (whole, a: string, b: string) => {
-            const lex = FRACTION_WORD[`${a}/${b}`];
-            if (lex !== undefined) return lex;
-            const den = ordinalStem(cardinal(Number(b)).split(" ").pop() ?? "");
-            if (den === undefined || Number(b) === 0) return whole;
-            const dw = cardinal(Number(b)).split(" ");
-            dw[dw.length - 1] = `${den}ில்`;
-            return `${dw.join(" ")} ${Number(a) === 1 ? "ஒரு" : cardinal(Number(a))} பங்கு`;
-        },
-    );
 
     // 11) ORDINALS, last of the digit rules — it must see a de-grouped, de-colonised numeral, and it
     //     consumes the hyphen that the range/clitic forms also use. Tamil fuses the suffix onto the final

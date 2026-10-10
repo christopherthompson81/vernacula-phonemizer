@@ -158,3 +158,6 @@ not); ukrainian (right refuses `/`, left does not); italian (left refuses only a
 Symmetric but permissive on both sides — the `\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])` family (english, french,
 german, spanish, portuguese, russian, indonesian): `\b` holds between `.` and a digit, so `1.5/2` and `1/2.5`
 both match a fraction inside the decimal. Not the issue's shape; a separate defect class.
+
+> Continued for hi, gu, mr, ne, lb and ta in `docs/investigations/fractions/fraction_guards_investigation.md`;
+> the `\b…\b` family and the letter-side asymmetries are #1495.

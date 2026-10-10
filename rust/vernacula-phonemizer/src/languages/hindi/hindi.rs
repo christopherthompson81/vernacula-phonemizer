@@ -466,4 +466,30 @@ mod tests {
         );
         assert!(crate::registry::port_pending().iter().all(|p| p != "hi"));
     }
+
+    /// The fraction guards are mirrors (#1477/#1492): a decimal or a grouped number beside the fraction
+    /// declines it, a list comma does not. Relational, as test/fraction-guard-mirrors.test.ts.
+    #[test]
+    fn fraction_guards_are_mirrors() {
+        let hi = |s: &str| phonemize(s, "hi").unwrap();
+        for (input, parts) in [
+            ("1/2.5", "1 2.5"),
+            ("1.5/2", "1.5 2"),
+            ("1/2.5/3", "1 2.5 3"),
+            ("1/1,000,000", "1 1,000,000"),
+            ("1/1,00,000", "1 1,00,000"),
+            ("5,000/10,000", "5,000 10,000"),
+            ("१/२.५", "1 2.5"),
+        ] {
+            assert_eq!(hi(input), hi(parts), "{input}");
+        }
+        for (input, spaced) in [
+            ("1/2,3/4", "1/2, 3/4"),
+            ("3,4/5", "3, 4/5"),
+            ("1/2.", "1/2 ."),
+        ] {
+            assert_eq!(hi(input), hi(spaced), "{input}");
+        }
+        assert_ne!(hi("1/2"), hi("1 2"));
+    }
 }

@@ -111,7 +111,11 @@ public static class Normalize
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe PLUS_AFTER_WORD = JsRegex.Compile($"(\\S)\\+{SP}?(\\d)", "gu");
     private static readonly JsRe PLUS_INITIAL = JsRegex.Compile($"(^|[\\s])\\+{SP}?(\\d)", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,:/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    /**
+     * The two guards are mirrors (as Urdu's and Mandarin's, #1477/#1492): each side refuses a digit or `/`, and a
+     * `.`, `,` or `:` with a digit beyond it (`,` is the decimal separator, `.` the anglicism decimal, `:` a clock).
+     */
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d[.,:])(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|[.,:]\\d)", "gu");
 
     // JS `[...frac].join(" ")` — one space between the code points.
     private static string PerDigit(string frac) => string.Join(" ", Js.CodePoints(frac));
@@ -231,6 +235,20 @@ public static class Normalize
             return $"{prev ?? ""}{psp}{hour} Auer{mins}{tail}";
         });
 
+        // 7b) FRACTIONS. Denominator 2 is the ADJECTIVE `hallef`; everything else composes as ordinal
+        //     stem + `el`. The numerator 1 is `een`, itself subject to the Eifeler Regel.
+        //     BEFORE THE DECIMALS (steps 8-9), so the guards see the raw digits: run after them, `1.5/2`
+        //     became `1 Komma 5/2` and the fraction read off the decimal's tail.
+        s = Rewrite(s, FRACTION, m =>
+        {
+            var num = Js.Number(m.Groups[1].Value);
+            var den = Js.Number(m.Groups[2].Value);
+            if (den == 2) return $"{(num == 1 ? OneBefore("hallef") : Numbers.NumberToWords(num))} hallef";
+            var noun = FractionNoun(den);
+            if (noun is null) return m.Value;
+            return $"{(num == 1 ? OneBefore(noun) : Numbers.NumberToWords(num))} {noun}";
+        });
+
         // 8) DOT DECIMAL — after the clock, which has first claim on `\d{1,2}.\d{2}`. THE FRACTION IS
         //    LIMITED TO ONE DIGIT on purpose: a two-digit fraction after a period is the clock shape
         //    (the decimal separator is the comma), so an unlicensed `20.30` is left alone.
@@ -283,18 +301,6 @@ public static class Normalize
         s = Rewrite(s, JsRegex.Compile("(\\d)[ \\u00a0]*×[ \\u00a0]*(?=\\d)", "gu"), "$1 mol ");
         s = Rewrite(s, JsRegex.Compile("[ \\u00a0]*÷[ \\u00a0]*", "gu"), " dividéiert duerch ");
         s = Rewrite(s, JsRegex.Compile("[ \\u00a0]*[&＆][ \\u00a0]*", "gu"), " an ");
-
-        // 14) FRACTIONS. Denominator 2 is the ADJECTIVE `hallef`; everything else composes as ordinal
-        //     stem + `el`. The numerator 1 is `een`, itself subject to the Eifeler Regel.
-        s = Rewrite(s, FRACTION, m =>
-        {
-            var num = Js.Number(m.Groups[1].Value);
-            var den = Js.Number(m.Groups[2].Value);
-            if (den == 2) return $"{(num == 1 ? OneBefore("hallef") : Numbers.NumberToWords(num))} hallef";
-            var noun = FractionNoun(den);
-            if (noun is null) return m.Value;
-            return $"{(num == 1 ? OneBefore(noun) : Numbers.NumberToWords(num))} {noun}";
-        });
 
         return s;
     }

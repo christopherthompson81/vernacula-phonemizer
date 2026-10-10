@@ -86,7 +86,12 @@ public static class Normalize
     private static readonly JsRe CURRENCY_RE = JsRegex.Compile($"([$€¥£₹])\\s?(\\d+(?:[.,]\\d+)*)(\\s*(?:{MAGNITUDE_ALT})(?![\\p{{L}}\\p{{M}}]))?", "gu");
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(?<![\\d.,])(\\d+(?:\\.\\d+)?)\\s?[-–—]\\s?(\\d+(?:\\.\\d+)?)(?![\\d.,])", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d\\/])", "gu");
+    /**
+     * The two guards are mirrors (as Urdu's and Mandarin's, #1477/#1492): each side refuses a digit or `/`, a `.`
+     * with a digit beyond it (a decimal), and a grouped number — a `,` before exactly three digits, or (right side)
+     * the Indian lakh group `,dd,`. Any other `,` is a list separator (`1/2,3/4` reads both).
+     */
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,(?:\\d{3}(?!\\d)|\\d{2},\\d))", "gu");
     private static readonly JsRe BARE_HUNDRED = JsRegex.Compile("(?<![\\d,.\\-–—])100(?![\\d,.\\-–—])(?!\\s*[A-Za-z])", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("\\+\\s?(?=\\d)", "gu");
     // ⚠ U+2212 MINUS SIGN — NOT the ASCII hyphen, which stays refused (a Devanagari compound or a

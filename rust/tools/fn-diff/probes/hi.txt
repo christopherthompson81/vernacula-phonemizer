@@ -123,6 +123,16 @@ R & D विभाग
 5/8 इंच
 1/0
 1/2/3
+# the mirrored guards (#1477/#1492): decimals and grouped numbers decline, a list comma does not
+1/2.5
+1/2.5/3
+1/1,000,000
+1/1,00,000
+5,000/10,000
+1/2,3/4
+3,4/5
+यह 1/2.
+१/२.५
 1234/5
 1.5/2
 # tokenizer: numbers
