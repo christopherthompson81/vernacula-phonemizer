@@ -294,6 +294,13 @@ pub(crate) fn normalize_french_loaded(input: &JsString) -> JsString {
         js_re!(&format!(r"{WORD_START}(mmes|mlles){WORD_END}"), "giu"),
         |m, x| honorific_plural(&g(m, 1, x).to_lower_case()).map_or_else(|| m.value(x), js),
     );
+    //     `Mr` / `Mr.` is Monsieur — case-sensitive and only before a capitalized word: all-caps `MR` is an
+    //     initialism in the corpus, and a lowercased `mr` cannot be told from it.
+    s = rewrite(
+        &s,
+        js_re!(&format!(r"{WORD_START}Mr\.?(?=\s+\p{{Lu}})"), "gu"),
+        &js("monsieur"),
+    );
 
     // 4) name initials.
     s = rewrite_with(
@@ -500,5 +507,15 @@ mod tests {
         }
         assert_eq!(norm("Mme Curie et Mlle Dupont"), "Mme Curie et Mlle Dupont");
         assert_eq!(norm("10 MM"), "10 MM");
+    }
+
+    /// `Mr` is Monsieur before a capitalized word; all-caps `MR` stays an initialism.
+    #[test]
+    fn mr_is_monsieur_before_a_name() {
+        let monsieur = ph("monsieur Dupont est là.", "fr");
+        assert_eq!(ph("Mr Dupont est là.", "fr"), monsieur);
+        assert_eq!(ph("Mr. Dupont est là.", "fr"), monsieur);
+        assert_eq!(norm("la région (MR) dit"), "la région (MR) dit");
+        assert_eq!(norm("mr dupont"), "mr dupont");
     }
 }

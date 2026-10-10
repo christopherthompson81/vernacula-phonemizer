@@ -47,6 +47,13 @@ const SIGN = MANIFEST.signWords;
 
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
+/** ⚠ A UNICODE-AWARE START OF WORD for the abbreviation templates (#1480's shape). JS `\b` is ASCII-only even
+ *  under the `u` flag, so after an accented letter it sees a boundary and a table key matched the END of a
+ *  longer word. "No letter, mark, digit or underscore before" is `\b`'s own ASCII behaviour, extended to
+ *  every script. The literal patterns in this file write the same lookbehind out, so the regex extractor
+ *  sees them. */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
 /** Spanish phonotactics, for the OOV rule in core/initialisms.ts. Spanish syllable structure is strict —
  *  no word begins with two stops, and codas are limited — so the illegal-cluster tests carry real weight
  *  here: `CD` [kð] and `ADN` [aðn] were both unpronounceable output. */
@@ -152,30 +159,30 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
 
     // 1) ERA MARKERS, before the generic abbreviation rule so the bare `a.` is not claimed first. Usually
     //    written with a space in the corpus ("356 a. C.", 9 of 11 occurrences).
-    s = rewrite(s, /\ba\.\s?de\s?C\.|\ba\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
-    s = rewrite(s, /\bd\.\s?de\s?C\.|\bd\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])a\.\s?de\s?C\.|(?<![\p{L}\p{M}\d_])a\.\s?C\./giu, MANIFEST.eraMarkers.beforeChrist);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])d\.\s?de\s?C\.|(?<![\p{L}\p{M}\d_])d\.\s?C\./giu, MANIFEST.eraMarkers.afterChrist);
 
     // 2) EE. UU. — the most frequent abbreviation in the corpus, and it expands to WORDS. Claimed before
     //    the generic rule, which would otherwise see two separate abbreviations and leave two pauses.
-    s = rewrite(s, /\bEE\.\s?UU\.?/gu, MANIFEST.unitedStates);
-    s = rewrite(s, /\bee\.\s?uu\.?/gu, MANIFEST.unitedStates);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])EE\.\s?UU\.?/gu, MANIFEST.unitedStates);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])ee\.\s?uu\.?/gu, MANIFEST.unitedStates);
 
     // 2b) a. m. / p. m. — read as the LETTER NAMES in Spanish ([a ˈeme], [pe ˈeme]), not expanded to the
     //     Latin. Handled here rather than in the generic table because the interior dots would otherwise
     //     survive as two phrase breaks ("a las 10:08 p. m." kept both).
     //     ⚠ COMPOSED FROM `letterNames`, not held as two more literals: the reading IS ⟨a⟩/⟨p⟩ followed by
     //     ⟨m⟩, said as letter names, so a change to either name must reach here.
-    s = rewrite(s, /\b([ap])\.\s?m\./giu, (_m, ap: string) =>
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])([ap])\.\s?m\./giu, (_m, ap: string) =>
         `${MANIFEST.letterNames[ap.toLowerCase()]!} ${MANIFEST.letterNames["m"]!}`);
 
     // 3) NÚMERO. `no.` only counts before a digit — bare "no" is one of the commonest Spanish words.
     //    Spanish writes it several ways, and `n.º` — n + period + the ORDINAL INDICATOR — is the form that
     //    actually occurs in the corpus. A single-character class missed it and left a bare º in the output.
-    s = rewrite(s, /\b(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])(?:n\.º|nº|n°|n\.|no\.)\s?(?=\d)/giu, `${MANIFEST.numberSign} `);
 
     // 4) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues, so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -183,7 +190,7 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its

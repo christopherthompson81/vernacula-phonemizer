@@ -71,3 +71,6 @@ Kalaallit Würzburg Ångström Œuvre cafe\u{301} ARCHIVO CRISIS EXAMEN Qing Xia
 whisky hámster jazz zigzag kiwi wifi yogur cuyo ley rey Uruguay ahí aún reúne.
 # foreign scripts: routed to the el / ru / cmn engines (port-pending until those are ported)
 La letra α, la palabra слово y el carácter 中 en una frase.
+# word edge (#1480 shape): each abbreviation glued after a non-ASCII letter must decline
+Era un taoísta. María vino en 300 Ña. C. y en 300 Ñd. C. hubo.
+Los ÑEE. UU. ganan, los ñee. uu. ganan, a las 10 Ñp. m. hoy y el Ñn.º 5 gana.

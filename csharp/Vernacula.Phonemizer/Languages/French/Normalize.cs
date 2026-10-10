@@ -113,6 +113,7 @@ public static class Normalize
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     private static readonly JsRe UNDOTTED = JsRegex.Compile($"{WORD_START}(dr|pr){WORD_END}\\.?(?=\\s+\\p{{L}})", "giu");
     private static readonly JsRe HONORIFIC_BARE = JsRegex.Compile($"{WORD_START}(mmes|mlles){WORD_END}", "giu");
+    private static readonly JsRe MR_HONORIFIC = JsRegex.Compile($"{WORD_START}Mr\\.?(?=\\s+\\p{{Lu}})", "gu");
     private static readonly JsRe NAME_INITIAL = JsRegex.Compile($"{WORD_START}([a-zà-ÿ])\\.(\\s+)(?=[\\p{{L}}])", "giu");
     private static readonly JsRe MONEY_POST = JsRegex.Compile("(\\d+),(\\d{2})\\s?([€$£¥])", "gu");
     private static readonly JsRe MONEY_PRE = JsRegex.Compile("([€$£¥])\\s?(\\d+),(\\d{2})", "gu");
@@ -170,6 +171,9 @@ public static class Normalize
             UNDOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
         s = Rewrite(s, HONORIFIC_BARE, m =>
             HONORIFIC_PLURAL.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        // `Mr` / `Mr.` is Monsieur — case-sensitive and only before a capitalized word: all-caps `MR` is an
+        // initialism in the corpus, and a lowercased `mr` cannot be told from it.
+        s = Rewrite(s, MR_HONORIFIC, "monsieur");
 
         s = Rewrite(s, NAME_INITIAL, m =>
         {

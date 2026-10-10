@@ -197,6 +197,11 @@ export function normalizeFrench(input: string): string {
     //     A dotted one was already expanded by step 3 (DOTTED_ABBREV).
     s = rewrite(s, /(?<![\p{L}\p{M}\d_])(mmes|mlles)(?![\p{L}\p{M}\d_])/giu,
         (m0, ab: string) => HONORIFIC_PLURAL[ab.toLowerCase()] ?? m0);
+    //     `Mr` (and `Mr.`) is Monsieur — the anglicized abbreviation, non-standard beside `M.` but common in
+    //     French text. Not a Lexique row, so it reached the tagger, which read it `̃ʁ`. ⚠ CASE-SENSITIVE AND
+    //     ONLY BEFORE A CAPITALIZED WORD: all-caps `MR` is an initialism in this corpus (`(MR)`, ×2 in fr
+    //     FLEURS, an organisation's acronym), and a lowercased `mr` cannot be told from it.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])Mr\.?(?=\s+\p{Lu})/gu, "monsieur");
 
     // 4) NAME INITIALS: a single letter + dot before a word is an initial, read as the LETTER NAME
     //    ("n. wayne hale" → "enne wayne hale"). Runs after step 3 so the honorifics (m., p.) win.

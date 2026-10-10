@@ -17,7 +17,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { phonemize } from "../src/index.ts";
+import { phonemize, phonemizeAsync } from "../src/index.ts";
 import { loadTsvMap } from "../src/core/loadTsv.ts";
 import { createFrenchForPrepass, frenchHasWord, phonemizeWord } from "../src/languages/french/french.ts";
 import { frenchPrepassWith } from "../src/languages/french/frenchNeural.ts";
@@ -82,5 +82,27 @@ describe("normalizeFrench takes no lexicon (#1463)", () => {
     it("has one parameter: the acronym decision is normalizeFrenchInitialisms's", () => {
         // It took an `isWord` it never read, documented as deciding acronym-vs-initialism.
         expect(normalizeFrench.length).toBe(1);
+    });
+});
+
+// The tagger can label a word-initial `m`/`n` with the bare nasal tilde it gives them after a vowel, and
+// nothing downstream has a base for it: `Mr` read `̃ʁ`. Nine OOV words in the fr golden + FLEURS vocabulary
+// had a reading starting with a combining mark. No IPA reading of any word can begin with one, so the
+// pre-pass declines it and the rule g2p reads the word — the sync reading.
+describe("a tagger reading that starts with a combining mark is declined", () => {
+    it("falls back to the sync reading", async () => {
+        const t = "Il vit à Ngorongoro avec McCord.";
+        expect(await frenchPrepassWith({ tag: async () => "̃x" }, t)).toBe(phonemize(t, "fr"));
+    });
+
+    it("while an ordinary tagger reading is still used", async () => {
+        expect(await frenchPrepassWith({ tag: async () => "QQ" }, "Ngorongoro")).toContain("QQ");
+    });
+
+    it.skipIf(!haveModel)("the real tagger's readings of those words no longer surface a bare mark", async () => {
+        for (const w of ["Ngorongoro", "McCord", "Mbit", "NSA", "mph", "Müslüm", "Mrs"]) {
+            const ipa = await phonemizeAsync(`Le mot ${w} ici.`, "fr");
+            expect(ipa, w).not.toMatch(/(?:^|\s)\p{M}/u);
+        }
     });
 });

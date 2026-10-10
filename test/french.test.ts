@@ -329,6 +329,18 @@ describe("french name initials and plural honorifics (#1480)", () => {
         }
     });
 
+    test("Mr is Monsieur before a name, and all-caps MR stays an initialism", async () => {
+        for (const lang of ["fr", "fr-CA"]) {
+            const monsieur = phonemize("monsieur Dupont est là.", lang);
+            for (const t of ["Mr Dupont est là.", "Mr. Dupont est là."]) {
+                expect(phonemize(t, lang)).toBe(monsieur); // was mʁ (sync), ̃ʁ (best)
+                expect(await phonemizeAsync(t, lang)).toBe(monsieur);
+            }
+        }
+        expect(normalizeFrench("la région (MR) dit")).toBe("la région (MR) dit");
+        expect(normalizeFrench("mr dupont")).toBe("mr dupont"); // lowercased: cannot be told from MR
+    });
+
     test("the singulars stay Lexique's own tokens, and bare MM stays the unit", () => {
         expect(normalizeFrench("Mme Curie et Mlle Dupont")).toBe("Mme Curie et Mlle Dupont");
         expect(normalizeFrench("10 MM")).toBe("10 MM");

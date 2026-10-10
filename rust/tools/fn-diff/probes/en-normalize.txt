@@ -230,3 +230,8 @@ the answer—a long one—arrived and Bose–Einstein
 # ── mixed / encoding ──
 😀 5 km and 𝐀 3 m
 ALL CAPS DOCUMENT WITH NHS AND 5 KM
+# ── word edge (#1480 shape): each abbreviation glued after a non-ASCII letter must decline ──
+They met Ømr. smith on Main Øst. and see Žrev. 3 here.
+They met the Taínos. Then the Taínos. 5 and Ømax. 5 and Ømax 5 and maxé 5.
+Smith Øet al. said, built Ýca. 1900, see Taíno. 5, fruit, Øe.g. apples, Øi.e. pears, at 10 Øa.m. today.
+they saw Øst louis and the ØU.S. army and the \u{17f}t. louis.

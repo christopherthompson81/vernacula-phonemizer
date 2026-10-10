@@ -67,4 +67,19 @@ public class FrenchNeuralPrepassTests
     [Fact]
     public void NormalizeFrenchTakesNoLexicon() =>
         Assert.Single(typeof(Normalize).GetMethod(nameof(Normalize.NormalizeFrench), BindingFlags.Public | BindingFlags.Static)!.GetParameters());
+
+    private sealed class Fixed(string reading) : IWordStructuralTagger
+    {
+        public Task<string> Tag(string word) => Task.FromResult(reading);
+    }
+
+    /// A tagger reading that starts with a combining mark (`Mr` read `̃ʁ`) is declined, so the rule g2p reads
+    /// the word — the sync reading. An ordinary reading is still used.
+    [Fact]
+    public async Task AReadingStartingWithACombiningMarkIsDeclined()
+    {
+        const string t = "Il vit à Ngorongoro avec McCord.";
+        Assert.Equal(Phonemizer.Phonemize(t, "fr"), await FrenchNeural.PrepassWith(new Fixed("̃x"), t));
+        Assert.Contains("QQ", await FrenchNeural.PrepassWith(new Fixed("QQ"), "Ngorongoro"));
+    }
 }

@@ -12,6 +12,8 @@ public static class FrenchNeural
     // The tagger's a–z + accented training letters (no apostrophe/elision). WORD never matches a hyphen, so the
     // vocab's hyphen is not listed: a compound reaches the tagger part by part, through PhonemizeWord.
     private static readonly JsRe IN_VOCAB = JsRegex.Compile("^[a-zà-ÿœæ]+$", "u");
+    /** A tagger reading with no base character for its first mark — see the Tag wrapper in PrepassWith. */
+    private static readonly JsRe LEADING_MARK = JsRegex.Compile("^\\p{M}", "u");
     private static Task<IWordStructuralTagger?>? taggerP;
     private static FrenchPhonemizer.FrenchEngine? engine;
     private static FrenchPhonemizer.FrenchEngine FrEngine() => engine ??= FrenchPhonemizer.CreateFrench();
@@ -44,7 +46,13 @@ public static class FrenchNeural
             Word = WORD,
             Key = w => w.ToLowerInvariant(),
             LexHas = lower => FrenchPhonemizer.FrenchHasWord(lower) || !IN_VOCAB.IsMatch(lower),
-            Tag = lower => tagger.Tag(lower),
+            // ⚠ A READING THAT STARTS WITH A COMBINING MARK IS DECLINED ("" → the rule g2p): the tagger can give a
+            // word-initial m/n the bare nasal tilde (`Mr` read `̃ʁ`), and no IPA reading can begin with a mark.
+            Tag = async lower =>
+            {
+                var o = await tagger.Tag(lower).ConfigureAwait(false);
+                return LEADING_MARK.IsMatch(o) ? "" : o;
+            },
             Render = (t, oov) => Foreign.WithHost("fr", () => E.TextNormalized(t, oov)),
         }).ConfigureAwait(false);
     }

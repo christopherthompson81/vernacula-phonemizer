@@ -21,6 +21,13 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
+/** ⚠ A UNICODE-AWARE START OF WORD for the abbreviation templates (#1480's shape). JS `\b` is ASCII-only even
+ *  under the `u` flag, so after an accented letter it sees a boundary and a table key matched the END of a
+ *  longer word. "No letter, mark, digit or underscore before" is `\b`'s own ASCII behaviour, extended to
+ *  every script. The literal patterns in this file write the same lookbehind out, so the regex extractor
+ *  sees them. */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
 /** Unit abbreviations the shared tier cannot express, plus the slash unit. */
 const UNIT_WORD: Readonly<Record<string, string>> = {
     "km/jam": "kilometer per jam", "m/detik": "meter per detik", "km/j": "kilometer per jam",
@@ -68,15 +75,15 @@ export function normalizeIndonesian(input: string): string {
     // 2) RUPIAH. `Rp` was read as the bare letter pair [rp]; the shared symbol tier is keyed on
     //    single-character signs and cannot express a two-letter prefix. Indonesian says the unit AFTER the
     //    amount, so the prefix is moved.
-    s = rewrite(s, /\bRp\.?\s?(\d[\d.,]*)/gu, "$1 rupiah");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])Rp\.?\s?(\d[\d.,]*)/gu, "$1 rupiah");
 
     // 2b) `No.` before a DIGIT is the number sign, which the letter-lookahead rule below cannot claim.
     //     The corpus instance is «kosmonot No. 11».
-    s = rewrite(s, /\bno\.\s?(?=\d)/giu, "nomor ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])no\.\s?(?=\d)/giu, "nomor ");
 
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues so it cannot become a
     //    phrase break; at a phrase end it stays, because there it really is the sentence end.
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -84,7 +91,7 @@ export function normalizeIndonesian(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its

@@ -51,6 +51,13 @@ function ordinalStem(n: number): string | undefined {
 const DOTTED_ABBREV: Readonly<Record<string, string>> = MANIFEST.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
+/** ⚠ A UNICODE-AWARE START OF WORD for the abbreviation templates (#1480's shape). JS `\b` is ASCII-only even
+ *  under the `u` flag, so after an accented letter it sees a boundary and a table key matched the END of a
+ *  longer word. "No letter, mark, digit or underscore before" is `\b`'s own ASCII behaviour, extended to
+ *  every script. The literal patterns in this file write the same lookbehind out, so the regex extractor
+ *  sees them. */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
 /** German letter names, for initialisms: USA is [uː ʔɛs ʔaː], not the word *usa*. */
 const LETTER_NAME: Readonly<Record<string, string>> = MANIFEST.letterNames;
 
@@ -129,12 +136,12 @@ export function normalizeGerman(input: string): string {
     // *f . kʁ* — a consonant cluster plus two phrase breaks. Same wall as the ordinal rule below and the
     // English st./dr. work: lowercased input is real input. `v. chr.` has no lowercase homograph to catch
     // by mistake.
-    s = rewrite(s, /\bv\.\s?Chr\./giu, "vor Christus");
-    s = rewrite(s, /\bn\.\s?Chr\./giu, "nach Christus");
-    s = rewrite(s, /\bz\.\s?B\./gu, "zum Beispiel");
-    s = rewrite(s, /\bd\.\s?h\./gu, "das heißt");
-    s = rewrite(s, /\bu\.\s?a\./gu, "unter anderem");
-    s = rewrite(s, /\bu\.\s?Ä\./gu, "und Ähnliches");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])v\.\s?Chr\./giu, "vor Christus");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])n\.\s?Chr\./giu, "nach Christus");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])z\.\s?B\./gu, "zum Beispiel");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])d\.\s?h\./gu, "das heißt");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])u\.\s?a\./gu, "unter anderem");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])u\.\s?Ä\./gu, "und Ähnliches");
 
     // 2) ORDINALS. See the file header for how the detector and the two endings were derived. One rule,
     //    two licensing conditions: the FOLLOWING word is a month or Jahrhundert (which alone covers ~100 of
@@ -189,7 +196,7 @@ export function normalizeGerman(input: string): string {
     //    sentence start stays ambiguous and is left to the table, as before.
     //    The lookahead admits a DIGIT as well as a letter: `S. 42` and `Nr. 5` are the ordinary forms and
     //    neither matched before, so both leaked a raw letter plus a spurious pause.
-    s = rewrite(s, new RegExp(`(?<!\\p{Lu}\\.[ \u00a0])\\b(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),  // space, NBSP
+    s = rewrite(s, new RegExp(`(?<!\\p{Lu}\\.[ \u00a0])${WORD_START}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d])`, "giu"),  // space, NBSP
         (m0, ab: string, sp: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
@@ -197,7 +204,7 @@ export function normalizeGerman(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its

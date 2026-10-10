@@ -38,10 +38,14 @@ public static class Normalize
 
     private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3])[.:]([0-5]\\d)\\b(?!\\.?\\d)", "gu");
     private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[ \u00a0]?\\d)", "gu");
-    private static readonly JsRe RUPIAH = JsRegex.Compile("\\bRp\\.?\\s?(\\d[\\d.,]*)", "gu");
-    private static readonly JsRe NOMOR = JsRegex.Compile("\\bno\\.\\s?(?=\\d)", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
-    private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
+    /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
+     *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
+    private static readonly JsRe RUPIAH = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])Rp\\.?\\s?(\\d[\\d.,]*)", "gu");
+    private static readonly JsRe NOMOR = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])no\\.\\s?(?=\\d)", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe ABBREV_END = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?)]|$))", "giu");
     private static readonly JsRe SLASH_UNIT = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}])", "gu");
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
     // counted as a boundary and this fired when it must not — `25°Cölner` ate the ⟨C⟩ as Celsius. See

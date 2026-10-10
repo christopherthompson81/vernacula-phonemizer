@@ -56,4 +56,19 @@ public class FrenchNameInitialTests
         Assert.Equal("Mme Curie et Mlle Dupont", Normalize.NormalizeFrench("Mme Curie et Mlle Dupont"));
         Assert.Equal("10 MM", Normalize.NormalizeFrench("10 MM"));
     }
+
+    [Theory]
+    [InlineData("fr")]
+    [InlineData("fr-CA")]
+    public async Task MrIsMonsieurBeforeAName(string lang)
+    {
+        var monsieur = Phonemizer.Phonemize("monsieur Dupont est là.", lang);
+        foreach (var t in new[] { "Mr Dupont est là.", "Mr. Dupont est là." })
+        {
+            Assert.Equal(monsieur, Phonemizer.Phonemize(t, lang));
+            Assert.Equal(monsieur, await Phonemizer.PhonemizeAsync(t, lang));
+        }
+        Assert.Equal("la région (MR) dit", Normalize.NormalizeFrench("la région (MR) dit"));
+        Assert.Equal("mr dupont", Normalize.NormalizeFrench("mr dupont"));
+    }
 }

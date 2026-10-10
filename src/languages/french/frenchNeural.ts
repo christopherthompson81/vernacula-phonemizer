@@ -18,6 +18,8 @@ const WORD = /[a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?/giu;
 // The tagger's a–z + accented training letters (no apostrophe/elision). Its vocab also has the hyphen, but `WORD`
 // never matches one: a hyphenated compound reaches the tagger part by part, through `phonemizeWord`'s recursion.
 const IN_VOCAB = /^[a-zà-ÿœæ]+$/u;
+/** A tagger reading with no base character for its first mark — see the `tag` wrapper below. */
+const LEADING_MARK = /^\p{M}/u;
 let taggerP: Promise<FrenchTagger | undefined> | undefined;
 let engine: ReturnType<typeof createFrenchForPrepass> | undefined;
 const frEngine = (): ReturnType<typeof createFrenchForPrepass> => (engine ??= createFrenchForPrepass());
@@ -55,7 +57,15 @@ export function frenchPrepassWith(tagger: Pick<FrenchTagger, "tag">, text: strin
         word: WORD,
         key: (w) => w.toLowerCase(),
         lexHas: (lower) => frenchHasWord(lower) || !IN_VOCAB.test(lower),
-        tag: (lower) => tagger.tag(lower),
+        // ⚠ AN OUTPUT THAT STARTS WITH A COMBINING MARK IS DECLINED, so the rule g2p reads the word instead.
+        // The tagger labels a word-initial `m`/`n` with the bare nasal tilde it gives them after a vowel, and
+        // nothing downstream has a base for it: `Mr` read `̃ʁ`, `Ngorongoro` `̃ɡɔʁɔ̃ɡɔʁo`, `Mbit` `̃bit`
+        // (9 such words in the fr golden + FLEURS vocabulary, every one OOV). No IPA reading of any word can
+        // begin with a combining mark, so this declines only output that is wrong whatever the word was.
+        tag: async (lower) => {
+            const out = await tagger.tag(lower);
+            return LEADING_MARK.test(out) ? "" : out;
+        },
         // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
         // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
         render: (t, oov) => withHost("fr", () => E.textNormalized(t, oov)),

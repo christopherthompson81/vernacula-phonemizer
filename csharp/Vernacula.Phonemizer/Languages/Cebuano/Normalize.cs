@@ -41,7 +41,11 @@ public static class Normalize
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d{1,2})(?![\\d.,])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<!\\b(?:ngadto sa|hangtod|hangtud|gikan sa)\\s)(?<![\\d.,\\p{L}-])(\\d+)\\s?[-–]\\s?(\\d+)(?![\\d.,-])", "gu");
-    private static readonly JsRe ABBREV = JsRegex.Compile($"\\b({ABBREV_ALT})\\.", "giu");
+    /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
+     *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+
+    private static readonly JsRe ABBREV = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.", "giu");
     private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
     private static readonly JsRe PLUS_ATTACHED = JsRegex.Compile("(\\S)\\+\\s?(\\(?\\s?[-−]?\\d)", "gu");
     private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|\\s)\\+\\s?(\\(?\\s?[-−]?\\d)", "gu");
