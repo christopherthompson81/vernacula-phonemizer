@@ -127,7 +127,17 @@ export function makeUrduNormalizer(numbers: NumbersDef): (text: string) => strin
         s = rewrite(s, /\s?÷\s?/gu, " تقسیم ");
 
         // 7) FRACTIONS, as "denominator بٹا numerator" — the ordinary spoken form; ½ is آدھا.
-        s = rewrite(s, /(?<![\d.,/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        //    ⚠ THE TWO SIDES ARE MIRRORS (as in mandarin/normalize.ts). Each refuses, next to the fraction:
+        //      · a digit or a `/` (a longer number, a date, a chain);
+        //      · `.` with a digit beyond it — a decimal: `1.5/2` and `1/2.5` are both declined;
+        //      · `,` with exactly three digits beyond it, on the number side — a thousands group:
+        //        `1/1,000,000` and `5,000/10,000` are both declined.
+        //    Any other `,` is a LIST SEPARATOR: `1/2,3/4` reads both, `3/4,5` reads تین بٹا چار then 5.
+        //    A sentence-final `1/2.` reads. Step 1 has already folded ٫ ٬ and a digit-flanked ، to ASCII.
+        //    The right side used to refuse only a digit or `/`, while the left refused any `.` and `,`:
+        //    `1/2.5` read آدھا then ".5", `1/1,000,000` read ایک بٹا ایک then "000,000", and `1/2,3/4`
+        //    read only the first fraction. #1477.
+        s = rewrite(s, /(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d{3}(?!\d))/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num === 1 && den === 2) return "آدھا";
             const nw = cardinal(num).join(" "), dw = cardinal(den).join(" ");
