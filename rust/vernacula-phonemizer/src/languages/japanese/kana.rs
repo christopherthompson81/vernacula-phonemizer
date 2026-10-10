@@ -5,9 +5,12 @@ use super::manifest::T;
 use super::{first_unit, to_hiragana};
 use crate::core::js_string::{JsString, js};
 
-fn is_vowel_char(ph: &JsString) -> bool {
+/// Whether a mora starts with a vowel phoneme, compared whole: ɯᵝ, e̞ and o̞ are two code units each.
+fn starts_with_vowel(mora: &JsString) -> bool {
     let t = &*T;
-    *ph == t.a || *ph == t.i || *ph == t.u || *ph == t.e || *ph == t.o
+    [&t.a, &t.i, &t.u, &t.e, &t.o]
+        .into_iter()
+        .any(|v| mora.starts_with(v))
 }
 
 fn vowel_of(ms: &JsString) -> JsString {
@@ -51,9 +54,9 @@ pub fn kana_to_morae(word: &JsString) -> Option<Vec<JsString>> {
                 (Some(y), Some(on)) => Some(on.concat(y)),
                 _ => t.mora.get(nx).cloned(),
             };
-            // `next[0]`: the first CODE UNIT, which is all the TS compares and pushes.
-            let pushed = match next.as_ref().and_then(first_unit) {
-                Some(n0) if !is_vowel_char(&n0) => n0,
+            // The geminate is `next[0]`, the first CODE UNIT, as the TS pushes it.
+            let pushed = match next.as_ref() {
+                Some(n) if !starts_with_vowel(n) => first_unit(n).unwrap_or_else(|| js("ʔ")),
                 _ => js("ʔ"),
             };
             morae.push(pushed);
@@ -91,8 +94,8 @@ pub fn geminate_sokuon(mut morae: Vec<JsString>) -> Vec<JsString> {
         if morae[k] != "ʔ" {
             continue;
         }
-        if let Some(onset) = morae.get(k + 1).and_then(first_unit) {
-            if !is_vowel_char(&onset) {
+        if let Some(next) = morae.get(k + 1) {
+            if let Some(onset) = first_unit(next).filter(|_| !starts_with_vowel(next)) {
                 morae[k] = onset;
             }
         }

@@ -209,27 +209,29 @@ pub fn normalize_japanese(input: &JsString) -> JsString {
         ),
         |m, s| spell(&m.value(s)),
     );
-    // ⚠ `replaceAll`, NOT the provenance seam, exactly as the TS: a `pH` hit desyncs the mapping.
-    for (k, v) in WORD_ACRONYM {
-        if js_re!(r"[a-z]", "u").test(&js(k)) {
-            s = replace_all(&s, &js(k), &js(v));
-        }
+    for (re, v) in MIXED_CASE_ACRONYM.iter() {
+        s = rewrite(&s, re, v);
     }
     s
 }
 
-/// `s.replaceAll(lit, rep)` with a `$`-free replacement: every non-overlapping occurrence, left to right.
-fn replace_all(s: &JsString, lit: &JsString, rep: &JsString) -> JsString {
-    let mut out = JsString::new();
-    let mut at = 0;
-    while let Some(i) = s.index_of(lit, at) {
-        out.push_units(&s.0[at..i]);
-        out.push_str(rep);
-        at = i + lit.len();
-    }
-    out.push_units(&s.0[at..]);
-    out
-}
+/// The mixed-case `WORD_ACRONYM` keys (`pH`), each Latin-bounded like the initialism rule.
+static MIXED_CASE_ACRONYM: LazyLock<Vec<(JsRegex, JsString)>> = LazyLock::new(|| {
+    WORD_ACRONYM
+        .iter()
+        .filter(|(k, _)| js_re!(r"[a-z]", "u").test(&js(k)))
+        .map(|(k, v)| {
+            // Spliced verbatim, so the key must be plain letters (no escaping needed).
+            assert!(
+                k.chars().all(|c| c.is_ascii_alphabetic()),
+                "WORD_ACRONYM key {k:?} must be ASCII letters"
+            );
+            let pattern =
+                format!(r"(?<![\p{{Script=Latin}}\p{{M}}]){k}(?![\p{{Script=Latin}}\p{{M}}])");
+            (JsRegex::new(&pattern, "gu").unwrap(), js(v))
+        })
+        .collect()
+});
 
 /// The five vowels, longest first (stable, so ties keep key order).
 static VOWEL_IPA: LazyLock<Vec<JsString>> = LazyLock::new(|| {

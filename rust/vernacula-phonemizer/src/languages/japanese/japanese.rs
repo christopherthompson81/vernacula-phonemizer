@@ -163,4 +163,27 @@ mod tests {
             assert_eq!(crate::phonemize(text, "ja").unwrap(), want, "{text}");
         }
     }
+
+    /// The two TS-first fixes (#1463): っ before a vowel is ʔ, and `pH` keeps every token's input span.
+    #[test]
+    fn sokuon_before_a_vowel_and_ph_spans() {
+        for (text, want) in [("あっお", "äʔo̞"), ("うわっうそ", "ɯᵝwäʔɯᵝso̞")] {
+            assert_eq!(crate::phonemize(text, "ja").unwrap(), want, "{text}");
+        }
+        for text in ["pHの値", "水のpHは", "pH7の水"] {
+            let tr = crate::phonemize_trace(text, "ja").unwrap();
+            assert!(!tr.trace.tokens.is_empty(), "{text}");
+            assert!(
+                tr.trace.tokens.iter().all(|k| k.input_span.is_some()),
+                "{text}"
+            );
+        }
+        let n = |t: &str| {
+            super::super::normalize::normalize_japanese(&crate::core::js_string::js(t)).to_string()
+        };
+        assert_eq!(n("pHの値"), "ピーエイチの値");
+        for w in ["DepHiは", "ApHは", "pHDは", "pHéは"] {
+            assert_eq!(n(w), w);
+        }
+    }
 }

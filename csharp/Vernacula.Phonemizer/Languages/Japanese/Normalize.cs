@@ -115,6 +115,22 @@ public static class Normalize
         "(?<![\\p{Script=Latin}\\p{M}])[A-Z][A-Z-]*[A-Z](?![\\p{Script=Latin}\\p{M}])"
         + "|(?<![\\p{Script=Latin}\\p{M}])[A-Z](?![\\p{Script=Latin}\\p{M}])", "gu");
     private static readonly JsRe HAS_LOWER = JsRegex.Compile("[a-z]", "u");
+    /**
+     * The mixed-case WORD_ACRONYM entries (`pH`), each as a Latin-bounded pattern: the same boundary as
+     * INITIALISM, so the key never matches inside a longer Latin word (`DepHi` stays as written).
+     * ⚠ IT GOES THROUGH `Rewrite`, NOT `string.Replace`: an untracked replacement poisons the provenance
+     * mapping, and every token of the row then lost its `InputSpan`.
+     */
+    private static readonly (JsRe Re, string Value)[] MIXED_CASE_ACRONYM = WORD_ACRONYM
+        .Where(kv => HAS_LOWER.IsMatch(kv.Key))
+        .Select(kv =>
+        {
+            // Spliced into the pattern verbatim, so the key must be plain letters (no escaping needed).
+            if (!kv.Key.All(char.IsAsciiLetter))
+                throw new InvalidOperationException($"WORD_ACRONYM key \"{kv.Key}\" must be ASCII letters");
+            return (JsRegex.Compile("(?<![\\p{Script=Latin}\\p{M}])" + kv.Key + "(?![\\p{Script=Latin}\\p{M}])", "gu"), kv.Value);
+        })
+        .ToArray();
     private static readonly JsRe TRAILING_CHOON = JsRegex.Compile("ー+$", "u");
 
     /** Normalize one Japanese input string. Pure text→text; every rule emits kana, kanji or ASCII digits and
@@ -197,9 +213,9 @@ public static class Normalize
         // are ALL of Latin, not `[A-Za-z]`: an ASCII-only guard does not see the accented letter of `São`, and
         // the isolated capital `S` was spelled out as a letter name.
         s = Rewrite(s, INITIALISM, m => Spell(m.Value));
-        foreach (var (k, v) in WORD_ACRONYM)
-            if (HAS_LOWER.IsMatch(k))
-                s = s.Replace(k, v, StringComparison.Ordinal);
+        // The mixed-case acronyms (`pH`), Latin-bounded and through `Rewrite` (see MIXED_CASE_ACRONYM).
+        foreach (var (re, v) in MIXED_CASE_ACRONYM)
+            s = Rewrite(s, re, v);
 
         return s;
     }

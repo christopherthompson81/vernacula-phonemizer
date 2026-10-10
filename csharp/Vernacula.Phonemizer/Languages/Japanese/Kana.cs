@@ -33,7 +33,15 @@ public static class Kana
         return @out;
     }
 
-    private static bool IsVowelChar(string ph) => ph == A || ph == I || ph == U || ph == E || ph == O;
+    /**
+     * Whether a mora STARTS with a vowel phoneme. ⚠ Compare whole phonemes, never a first character: ɯᵝ, e̞
+     * and o̞ are two units each, so a first-character test recognised only ä and i, and a っ before う/え/お
+     * copied a bare vowel letter (あっお → *äoo̞*) instead of the glottal stop.
+     */
+    private static bool StartsWithVowel(string mora) =>
+        mora.StartsWith(A, StringComparison.Ordinal) || mora.StartsWith(I, StringComparison.Ordinal)
+        || mora.StartsWith(U, StringComparison.Ordinal) || mora.StartsWith(E, StringComparison.Ordinal)
+        || mora.StartsWith(O, StringComparison.Ordinal);
 
     /** The vowel phoneme a mora ends in (ɯᵝ/o̞/e̞ before their bases), or "" for ん/っ/onset-only. */
     private static string VowelOf(string ms)
@@ -85,7 +93,7 @@ public static class Kana
                     && YOUON_ONSET.TryGetValue(nx, out var yo2) && yo2.Length > 0)
                     next = yo2 + sy2;
                 else next = MORA.GetValueOrDefault(nx);
-                morae.Add(!string.IsNullOrEmpty(next) && !IsVowelChar(First(next)) ? First(next) : "ʔ");
+                morae.Add(!string.IsNullOrEmpty(next) && !StartsWithVowel(next) ? First(next) : "ʔ");
                 lastVowel = "";
                 i++;
                 continue;
@@ -119,8 +127,8 @@ public static class Kana
         for (var k = 0; k < morae.Count; k++)
         {
             if (morae[k] != "ʔ") continue;
-            var onset = k + 1 < morae.Count ? First(morae[k + 1]) : "";
-            if (onset != "" && !IsVowelChar(onset)) morae[k] = onset;
+            var next = k + 1 < morae.Count ? morae[k + 1] : "";
+            if (next != "" && !StartsWithVowel(next)) morae[k] = First(next);
         }
         return morae;
     }

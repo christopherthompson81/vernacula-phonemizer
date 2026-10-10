@@ -69,6 +69,21 @@ const WORD_ACRONYM: Readonly<Record<string, string>> = {
     pH: "ピーエイチ",
 };
 
+/**
+ * The mixed-case WORD_ACRONYM entries (`pH`), each as a Latin-bounded pattern: the same boundary as the
+ * all-caps rule, so the key never matches inside a longer Latin word (`DepHi` stays as written).
+ * ⚠ IT GOES THROUGH `rewrite`, NOT `replaceAll`: an untracked replacement poisons the provenance mapping, and
+ * every token of the row then lost its `inputSpan`.
+ */
+const MIXED_CASE_ACRONYM: readonly (readonly [RegExp, string])[] = Object.entries(WORD_ACRONYM)
+    .filter(([k]) => /[a-z]/u.test(k))
+    .map(([k, v]) => {
+        // The key is spliced into the pattern verbatim, so it must be plain letters (no escaping needed).
+        if (![...k].every((c) => (c >= "A" && c <= "Z") || (c >= "a" && c <= "z")))
+            throw new Error(`WORD_ACRONYM key ${JSON.stringify(k)} must be ASCII letters`);
+        return [new RegExp(`(?<![\\p{Script=Latin}\\p{M}])${k}(?![\\p{Script=Latin}\\p{M}])`, "gu"), v] as const;
+    });
+
 /** Full-width Latin Ａ-Ｚ / ａ-ｚ → ASCII, so one representation reaches the rules below. */
 const FULLWIDTH_LATIN = /[Ａ-Ｚａ-ｚ]/gu;
 
@@ -269,8 +284,7 @@ export function normalizeJapanese(input: string): string {
     //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː*.
     s = rewrite(s, /(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
     //     `pH` and the other listed mixed-case initialisms, which the all-caps rule cannot reach.
-    for (const [k, v] of Object.entries(WORD_ACRONYM))
-        if (/[a-z]/u.test(k)) s = s.replaceAll(k, v);
+    for (const [re, v] of MIXED_CASE_ACRONYM) s = rewrite(s, re, v);
 
     return s;
 }
