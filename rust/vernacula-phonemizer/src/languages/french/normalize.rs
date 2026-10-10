@@ -64,7 +64,22 @@ const DOTTED_ABBREV: [(&str, &str); 26] = [
     ("tél", "téléphone"),
 ];
 
-const DOT_ONLY: [&str; 5] = ["etc", "mme", "mmes", "mlle", "mlles"];
+/// ⚠ NOT `mmes`/`mlles`: Lexique has neither, so they are expanded (#1480) — see `honorific_plural`.
+const DOT_ONLY: [&str; 3] = ["etc", "mme", "mlle"];
+
+/// ⚠ A UNICODE-AWARE WORD EDGE: JS `\b` is ASCII-only even under `u`, so `Unión.` read *Unióenne* (#1480).
+const WORD_START: &str = r"(?<![\p{L}\p{M}\d_])";
+const WORD_END: &str = r"(?![\p{L}\p{M}\d_])";
+
+/// The plural honorifics, bare (Mmes Dupont). Not French words, not Lexique rows; expanded before the numeral
+/// pass or `Mmes` is claimed as a Roman ordinal (#1480). Bare `MM` stays the millimetre unit.
+fn honorific_plural(key: &JsString) -> Option<&'static str> {
+    match key.to_string_lossy().as_str() {
+        "mmes" => Some("mesdames"),
+        "mlles" => Some("mesdemoiselles"),
+        _ => None,
+    }
+}
 
 fn dotted(key: &JsString) -> Option<&'static str> {
     DOTTED_ABBREV
@@ -160,11 +175,15 @@ static DIGIT_GROUP: LazyLock<JsRegex> = LazyLock::new(|| {
     .unwrap()
 });
 static ABBREV_CONTINUED: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(&format!(r"\b({})\.(\s+)(?=\p{{L}})", *ABBREV_ALT), "giu").unwrap()
+    JsRegex::new(
+        &format!(r"{WORD_START}({})\.(\s+)(?=\p{{L}})", *ABBREV_ALT),
+        "giu",
+    )
+    .unwrap()
 });
 static ABBREV_FINAL: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        &format!(r"\b({})\.(?=\s*(?:[.,;:!?»)]|$))", *ABBREV_ALT),
+        &format!(r"{WORD_START}({})\.(?=\s*(?:[.,;:!?»)]|$))", *ABBREV_ALT),
         "giu",
     )
     .unwrap()
@@ -206,12 +225,18 @@ pub(crate) fn normalize_french_loaded(input: &JsString) -> JsString {
     // 1) era markers.
     s = rewrite(
         &s,
-        js_re!(r"\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?", "giu"),
+        js_re!(
+            &format!(r"{WORD_START}av(?:ant)?\.?\s*j\.?\s*-?\s*c\.?"),
+            "giu"
+        ),
         &js("avant Jésus-Christ"),
     );
     s = rewrite(
         &s,
-        js_re!(r"\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?", "giu"),
+        js_re!(
+            &format!(r"{WORD_START}apr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?"),
+            "giu"
+        ),
         &js("après Jésus-Christ"),
     );
 
@@ -223,7 +248,11 @@ pub(crate) fn normalize_french_loaded(input: &JsString) -> JsString {
     );
 
     // 2) numéro.
-    s = rewrite(&s, js_re!(r"\bn[°º]\s*(?=\d)", "giu"), &js("numéro "));
+    s = rewrite(
+        &s,
+        js_re!(&format!(r"{WORD_START}n[°º]\s*(?=\d)"), "giu"),
+        &js("numéro "),
+    );
 
     // 3) dotted abbreviations.
     s = rewrite_with(&s, &ABBREV_CONTINUED, |m, x| {
@@ -251,14 +280,28 @@ pub(crate) fn normalize_french_loaded(input: &JsString) -> JsString {
     });
 
     // 3b) undotted abbreviations.
-    s = rewrite_with(&s, js_re!(r"\b(dr|pr)\b\.?(?=\s+\p{L})", "giu"), |m, x| {
-        undotted(&g(m, 1, x).to_lower_case()).map_or_else(|| m.value(x), js)
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(
+            &format!(r"{WORD_START}(dr|pr){WORD_END}\.?(?=\s+\p{{L}})"),
+            "giu"
+        ),
+        |m, x| undotted(&g(m, 1, x).to_lower_case()).map_or_else(|| m.value(x), js),
+    );
+    //     the plural honorifics, bare — before the numeral pass, which would read `Mmes` as a Roman ordinal.
+    s = rewrite_with(
+        &s,
+        js_re!(&format!(r"{WORD_START}(mmes|mlles){WORD_END}"), "giu"),
+        |m, x| honorific_plural(&g(m, 1, x).to_lower_case()).map_or_else(|| m.value(x), js),
+    );
 
     // 4) name initials.
     s = rewrite_with(
         &s,
-        js_re!(r"\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])", "giu"),
+        js_re!(
+            &format!(r"{WORD_START}([a-zà-ÿ])\.(\s+)(?=[\p{{L}}])"),
+            "giu"
+        ),
         |m, x| {
             let (ltr, sp) = (g(m, 1, x), g(m, 2, x));
             match MANIFEST
@@ -394,4 +437,68 @@ pub fn normalize_french_initialisms(
 pub fn is_unreadable_french(word: &JsString) -> Result<bool, String> {
     super::manifest::try_manifest()?;
     Ok(is_unreadable_french_loaded(word))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn norm(t: &str) -> String {
+        normalize_french(&js(t)).unwrap().to_string_lossy()
+    }
+    fn ph(t: &str, lang: &str) -> String {
+        crate::phonemize(t, lang).unwrap()
+    }
+
+    /// #1480: JS `\b` is ASCII-only, so `Unión.` read *Unióenne* and `cuisinés.` *cuisinéesse*.
+    #[test]
+    fn a_last_letter_after_an_accented_letter_is_not_an_initial() {
+        assert_eq!(
+            norm("Le syndicat Unión. Il part."),
+            "Le syndicat Unión. Il part."
+        );
+        assert_eq!(
+            norm("Les plats cuisinés. Ils sont bons."),
+            "Les plats cuisinés. Ils sont bons."
+        );
+        assert_eq!(
+            ph("Les plats cuisinés. Ils sont bons.", "fr"),
+            format!(
+                "{} {}",
+                ph("Les plats cuisinés.", "fr"),
+                ph("Ils sont bons.", "fr")
+            )
+        );
+        // the abbreviation rules had the same `\b`: `p.` after `á` was read as *page*.
+        assert_eq!(
+            norm("Il cite Čáp. Puis il part."),
+            "Il cite Čáp. Puis il part."
+        );
+        // and a real initial still reads as its letter name.
+        let n = MANIFEST.letter_names.get("n").unwrap();
+        assert_eq!(norm("N. Wayne Hale"), format!("{n} Wayne Hale"));
+    }
+
+    /// #1480: the plural honorifics are not Lexique rows; expanded, they read as the spelled-out words.
+    /// Expected readings are derived from the engine on the spelled-out form, never typed.
+    #[test]
+    fn mmes_and_mlles_read_as_their_words() {
+        for lang in ["fr"] {
+            // (fr-CA is not ported to Rust; the TS and C# tests cover it.)
+            let mesdames = ph("mesdames Dupont et Martin.", lang);
+            let mesdemoiselles = ph("mesdemoiselles Dupont et Martin.", lang);
+            for t in [
+                "Mmes Dupont et Martin.",
+                "Mmes. Dupont et Martin.",
+                "MMES Dupont et Martin.",
+            ] {
+                assert_eq!(ph(t, lang), mesdames, "{t} {lang}");
+            }
+            for t in ["Mlles Dupont et Martin.", "Mlles. Dupont et Martin."] {
+                assert_eq!(ph(t, lang), mesdemoiselles, "{t} {lang}");
+            }
+        }
+        assert_eq!(norm("Mme Curie et Mlle Dupont"), "Mme Curie et Mlle Dupont");
+        assert_eq!(norm("10 MM"), "10 MM");
+    }
 }

@@ -62,12 +62,36 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
  * Abbreviations Lexique ALREADY pronounces as a token (etc → [ɛtseteʁa], mme → [madam]). These only need
  * the dot removed so it cannot become a phrase break; expanding them was a regression — spelling out
  * "et cetera" made the g2p read *cetera* with a schwa, [e sətəʁa] instead of Lexique's [ɛtseteʁa].
+ *
+ * ⚠ `mmes` AND `mlles` USED TO BE LISTED HERE, AND LEXIQUE HAS NEITHER (#1480). Only the singulars `mme` and
+ * `mlle` are rows. So the plurals reached the reader as OOV words: the Roman-ordinal pass read `Mmes` as
+ * MM + the plural ordinal suffix (*deux-millièmes*), and the neural tagger read `Mlles` as a lone combining
+ * tilde. They are expanded instead — see DOTTED_ABBREV and HONORIFIC_PLURAL.
  */
-const DOT_ONLY: ReadonlySet<string> = new Set(["etc", "mme", "mmes", "mlle", "mlles"]);
+const DOT_ONLY: ReadonlySet<string> = new Set(["etc", "mme", "mlle"]);
 
 /** Undotted abbreviations. French normally writes these bare (le Dr Martin, Mme Curie); `dr`/`pr` are not
  *  French words, so expanding them unconditionally is safe. */
 const UNDOTTED_ABBREV: Readonly<Record<string, string>> = { dr: "docteur", pr: "professeur" };
+
+/**
+ * The plural honorifics, as French normally writes them: BARE (Mmes Dupont et Martin). Neither form is a
+ * French word nor a Lexique row, so expanding them anywhere is safe — and it must happen HERE, before the
+ * numeral pass, or `Mmes` is claimed as a Roman ordinal (#1480). Plain `MM` is deliberately NOT here: bare,
+ * it is the millimetre unit far more often than Messieurs (fr FLEURS: `mm` ×8, every one a unit), so only
+ * the dotted `MM.` is read as Messieurs.
+ */
+const HONORIFIC_PLURAL: Readonly<Record<string, string>> = { mmes: "mesdames", mlles: "mesdemoiselles" };
+
+/**
+ * ⚠ A UNICODE-AWARE WORD EDGE, because JS `\b` IS ASCII-ONLY EVEN UNDER THE `u` FLAG (#1480). `\b` sees a
+ * boundary between `ó` and `n` in `Unión`, so the name-initial rule took the word's last letter for a lone
+ * initial and `Unión.` read *Unióenne*, with the sentence break gone. The same `\b` fronted every
+ * abbreviation rule below. "No letter, mark, digit or underscore on that side" is `\b`'s own ASCII
+ * behaviour, extended to every script. Used by the two template patterns; the literal patterns in
+ * `normalizeFrench` write the same lookbehind (and its lookahead twin) out in full.
+ */
+const WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
 
 /**
  * French phonotactics, for the OOV rule in core/initialisms.ts. Legal onsets are obstruent + liquid plus
@@ -132,8 +156,11 @@ export function normalizeFrench(input: string): string {
     s = rewrite(s, /[\u00a0\u202f\u2009]/gu, " ");
 
     // 1) ERA MARKERS, before the generic `av.` → avenue: every "av." in the corpus is this.
-    s = rewrite(s, /\bav(?:ant)?\.?\s*j\.?\s*-?\s*c\.?/giu, "avant Jésus-Christ");
-    s = rewrite(s, /\bapr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?/giu, "après Jésus-Christ");
+    //    ⚠ The `(?<![\p{L}\p{M}\d_])` edges in this function are WORD_START written out (and
+    //    `(?![\p{L}\p{M}\d_])` its lookahead twin), so each pattern stays a LITERAL that
+    //    tools/extract_regexes.mts — and so regex-diff — can see.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])av(?:ant)?\.?\s*j\.?\s*-?\s*c\.?/giu, "avant Jésus-Christ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])apr(?:ès)?\.?\s*j\.?\s*-?\s*c\.?/giu, "après Jésus-Christ");
 
     // 1b) THE DEGREE SIGN, SPACED. French typography puts a space before `°C`, and the corpus writes
     //     `une chaleur de 32 ° C` — with blanks on BOTH sides of the sign. The tier reads the degree through
@@ -144,19 +171,19 @@ export function normalizeFrench(input: string): string {
     s = rewrite(s, /(\d)\s*°\s*(?=[CF](?![\p{L}\p{M}]))/gui, "$1°");
 
     // 2) NUMÉRO: n° / nº before a number.
-    s = rewrite(s, /\bn[°º]\s*(?=\d)/giu, "numéro ");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])n[°º]\s*(?=\d)/giu, "numéro ");
 
     // 3) DOTTED ABBREVIATIONS. The dot is CONSUMED when the sentence continues (a following word), so it
     //    cannot become a phrase break — the defect behind the reported English "St. James" pause. At a
     //    phrase end the dot stays, because there it really is the sentence end.
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
         (_m, ab: string, sp: string) => {
             const key = ab.toLowerCase();
             if (DOT_ONLY.has(key)) return `${ab}${sp}`;
             const w0 = DOTTED_ABBREV[key];   // ⚠ reachable miss (#1122)
             return w0 === undefined ? _m : `${w0}${sp}`;
         });
-    s = rewrite(s, new RegExp(`\\b(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             if (DOT_ONLY.has(ab.toLowerCase())) return m0;
             const w0 = DOTTED_ABBREV[ab.toLowerCase()];
@@ -164,12 +191,17 @@ export function normalizeFrench(input: string): string {
         });
 
     // 3b) UNDOTTED abbreviations, which is how French normally writes them (le Dr Martin).
-    s = rewrite(s, /\b(dr|pr)\b\.?(?=\s+\p{L})/giu,
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])(dr|pr)(?![\p{L}\p{M}\d_])\.?(?=\s+\p{L})/giu,
         (m0, ab: string) => UNDOTTED_ABBREV[ab.toLowerCase()] ?? m0);
+    //     The plural honorifics, bare — before the numeral pass, which would read `Mmes` as a Roman ordinal.
+    //     A dotted one was already expanded by step 3 (DOTTED_ABBREV).
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])(mmes|mlles)(?![\p{L}\p{M}\d_])/giu,
+        (m0, ab: string) => HONORIFIC_PLURAL[ab.toLowerCase()] ?? m0);
 
     // 4) NAME INITIALS: a single letter + dot before a word is an initial, read as the LETTER NAME
     //    ("n. wayne hale" → "enne wayne hale"). Runs after step 3 so the honorifics (m., p.) win.
-    s = rewrite(s, /\b([a-zà-ÿ])\.(\s+)(?=[\p{L}])/giu,
+    //    ⚠ WORD_START, not `\b`: after `ó`/`é` an ASCII `\b` matched, so `cuisinés.` read *cuisinéesse* (#1480).
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])([a-zà-ÿ])\.(\s+)(?=[\p{L}])/giu,
         (m0, ltr: string, sp: string) => {
             const name = FR_MANIFEST.letterNames[ltr.toLowerCase()];
             return name === undefined ? m0 : `${name}${sp}`;

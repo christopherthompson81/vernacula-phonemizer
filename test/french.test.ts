@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest";
 
-import { phonemize } from "../src/index.ts";
+import { phonemize, phonemizeAsync } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/french/french.ts";
 import { toIpa } from "../src/languages/french/g2p.ts";
-import { isUnreadableFrench } from "../src/languages/french/normalize.ts";
+import { MANIFEST } from "../src/languages/french/manifest.ts";
+import { isUnreadableFrench, normalizeFrench } from "../src/languages/french/normalize.ts";
 
 // Canonical-IPA goldens for French (fr) — standard/Parisian. Primary path is the Lexique 3.83 pronunciation
 // LEXICON (~125k forms, carries every irregular); the rule-based g2p (toIpa) is the OOV fallback. Convention:
@@ -287,5 +288,49 @@ describe("french clock — a fractional part is not a time of day", () => {
     test("and a real clock still reads as one", () => {
         expect(phonemize("il est 4:41", "fr")).toBe("il e katʁ œʁ kaʁɑ̃teˈyn");
         expect(phonemize("il est 8:30", "fr")).toContain("œʁ");
+    });
+});
+
+// #1480. JS `\b` is ASCII-only even under the `u` flag, so the name-initial rule saw a word boundary between
+// an accented letter and the next one: `Unión.` read *Unióenne* and `cuisinés.` *cuisinéesse*, with the
+// sentence break lost (11 of 1972 unique fr FLEURS texts). And the plural honorifics are not Lexique rows,
+// so `Mmes` went to the Roman-ordinal pass (MM + the plural suffix) and `Mlles` to the neural tagger.
+// ⚠ Every expected reading is DERIVED — the same engine on the spelled-out form — never typed IPA.
+describe("french name initials and plural honorifics (#1480)", () => {
+    test("a word's last letter after an accented letter is not a lone initial", () => {
+        expect(normalizeFrench("Le syndicat Unión. Il part.")).toBe("Le syndicat Unión. Il part.");
+        expect(normalizeFrench("Les plats cuisinés. Ils sont bons.")).toBe("Les plats cuisinés. Ils sont bons.");
+        // The sentence break survives: the two sentences read exactly as they do apart.
+        expect(phonemize("Les plats cuisinés. Ils sont bons.", "fr"))
+            .toBe(`${phonemize("Les plats cuisinés.", "fr")} ${phonemize("Ils sont bons.", "fr")}`);
+        // The same `\b` fronted the abbreviation rules: `p.` after `á` was read as *page*.
+        expect(normalizeFrench("Il cite Čáp. Puis il part.")).toBe("Il cite Čáp. Puis il part.");
+    });
+
+    test("a real initial still reads as its letter name", () => {
+        expect(normalizeFrench("N. Wayne Hale")).toBe(`${MANIFEST.letterNames["n"]} Wayne Hale`);
+        expect(normalizeFrench("(J. Martin)")).toBe(`(${MANIFEST.letterNames["j"]} Martin)`);
+    });
+
+    test("Mmes and Mlles read as mesdames and mesdemoiselles, dotted or bare", async () => {
+        for (const lang of ["fr", "fr-CA"]) {
+            const mesdames = phonemize("mesdames Dupont et Martin.", lang);
+            const mesdemoiselles = phonemize("mesdemoiselles Dupont et Martin.", lang);
+            for (const t of ["Mmes Dupont et Martin.", "Mmes. Dupont et Martin.", "MMES Dupont et Martin."]) {
+                expect(phonemize(t, lang)).toBe(mesdames); // was dø miljɛm — a Roman ordinal
+                expect(await phonemizeAsync(t, lang)).toBe(mesdames);
+            }
+            for (const t of ["Mlles Dupont et Martin.", "Mlles. Dupont et Martin."]) {
+                expect(phonemize(t, lang)).toBe(mesdemoiselles); // was mlə (sync), a lone tilde (best)
+                expect(await phonemizeAsync(t, lang)).toBe(mesdemoiselles);
+            }
+            // At a phrase end the dot is still the sentence end.
+            expect(phonemize("Bonjour Mmes.", lang)).toBe(phonemize("Bonjour mesdames.", lang));
+        }
+    });
+
+    test("the singulars stay Lexique's own tokens, and bare MM stays the unit", () => {
+        expect(normalizeFrench("Mme Curie et Mlle Dupont")).toBe("Mme Curie et Mlle Dupont");
+        expect(normalizeFrench("10 MM")).toBe("10 MM");
     });
 });
