@@ -3,29 +3,40 @@ confer	kɔ̃fɛʁ
 covid	kɔvid
 kilowatt	kilowat
 opep	ɔpɛp
-# LETTER NAMES (#1463). Every word french.jsonc's `letterNames` emits that Lexique lacks, so an initialism
-# the normalizer spells out (FM → effe emme, J. → ji) is a lexicon hit and never reaches the neural tagger.
-# Each value is the rule g2p's own reading, emitted by a script rather than typed, so the sync path is
-# byte-identical with or without these rows. They exist for the ASYNC path: once its pre-pass scans the
-# NORMALIZED text, the tagger is offered these words, and it reads three of them wrong (effe → ef,
-# ji → dʒi, emme → ɑ̃m). It reads the other seven right today; they are listed anyway so that spelling a
-# letter never depends on a model retrain.
+# LETTER NAMES (#1463). Every word of french.jsonc's `letterNames` that Lexique lacks, so an initialism the
+# normalizer spells out (FM → effe emme, J. → ji) is a lexicon hit and never reaches the neural tagger, which
+# the pre-pass offers every normalizer-created OOV word. Without these rows, 18 FLEURS texts regressed.
+# Each value was checked as the correct name of its letter. It happens to equal the rule g2p's reading, and is
+# printed from it by a script rather than typed, so the sync path is unchanged. The comment on each row says so.
+# ⚠ test/fr-neural-prepass.test.ts walks EVERY letterNames word and fails if Lexique or this file does not
+# answer it. A new or respelled letter name needs a row here.
 # ⚠ DELIBERATELY ABSENT: the names Lexique attests (a bé dé e ache i ka elle o erre esse té u ixe, double,
 # grec). Lexique is authoritative for those and is consulted first.
+# cé: the letter ⟨C⟩, whose name is /se/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 cé	se
+# effe: the letter ⟨F⟩, whose name is /ɛf/. Correct, and equal to the rule g2p's reading; the tagger read ef at #1463.
 effe	ɛf
+# gé: the letter ⟨G⟩, whose name is /ʒe/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 gé	ʒe
+# ji: the letter ⟨J⟩, whose name is /ʒi/. Correct, and equal to the rule g2p's reading; the tagger read dʒi at #1463.
 ji	ʒi
+# emme: the letter ⟨M⟩, whose name is /ɛm/. Correct, and equal to the rule g2p's reading; the tagger read ɑ̃m at #1463.
 emme	ɛm
+# enne: the letter ⟨N⟩, whose name is /ɛn/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 enne	ɛn
+# pé: the letter ⟨P⟩, whose name is /pe/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 pé	pe
+# ku: the letter ⟨Q⟩, whose name is /ky/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 ku	ky
+# vé: the letter ⟨V⟩, whose name is /ve/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 vé	ve
+# zède: the letter ⟨Z⟩, whose name is /zɛd/. Correct, and equal to the rule g2p's reading; the tagger agreed at #1463.
 zède	zɛd
-# UNIT WORDS (#1463). The symbol tier reads `ko` as kilooctet(s), a word Lexique lacks and the tagger misreads
-# once the pre-pass scans the normalized text: kilooctet → kilɔktɛ, dropping kilo's vowel (kilo-octet keeps
-# both). The value is the rule g2p's own reading, emitted by a script, so the sync path is unchanged. Found by
-# auditing every word the normalizer can emit against Lexique, the g2p and the tagger. ⚠ gigaoctet and
-# mégaoctet are deliberately absent: the tagger and the g2p agree on them.
-kilooctet	kilɔɔktɛ
-kilooctets	kilɔɔktɛ
+# UNIT WORDS (#1463). The symbol tier reads `ko` as kilooctet(s), a word Lexique lacks. Found by auditing every word
+# the normalizer can emit against Lexique, the g2p and the tagger. Both other readings are wrong: the tagger's
+# kilɔktɛ drops kilo's vowel, and the g2p's kilɔɔktɛ opens it. In kilo-octet, kilo keeps its close /o/.
+# The value is the CONCATENATION OF LEXIQUE'S OWN READINGS, kilo + octet (kilo + octets for the plural), printed
+# by a script rather than typed. This row CHANGES the sync reading (it was the g2p's kilɔɔktɛ).
+# ⚠ gigaoctet and mégaoctet are deliberately absent: the g2p and the tagger agree on them, and both read them right.
+kilooctet	kiloɔktɛ
+kilooctets	kiloɔktɛ

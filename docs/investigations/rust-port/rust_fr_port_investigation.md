@@ -371,6 +371,64 @@ fix buys is coverage: a normalizer-created OOV word now gets the tagger reading.
 either agrees with the g2p or is a supplement row, so the gain is latent until the normalizer emits a new word.
 The audit is the check to re-run when it does.
 
+## Run 13 — 2026-10-09 (review round on `fix/fr-port-findings`)
+
+**Question:** do the review's points hold, and does fixing them move any reading?
+
+**Kilooctet.** Review: a supplement row exists to give the CORRECT reading, not to mirror the g2p. In
+kilo-octet, kilo keeps its close /o/, and Lexique has `kilo` → kilo, `octet` → ɔktɛ, `octets` → ɔktɛ. So
+`.probe/fr/emit-compound.mts kilooctet kilo octet` (and `kilooctets kilo octets`) prints **kiloɔktɛ**,
+concatenating Lexique's own rows. I replaced the Run 12 value kilɔɔktɛ with it. Both of the other readings were
+wrong: the tagger's kilɔktɛ drops the vowel, and the g2p's kilɔɔktɛ opens it. `un fichier de 5 ko` now reads
+`kiloɔktˈɛ` on both paths. This row is the one change that moves a SYNC reading, but no corpus text reaches it:
+`corpus.mts` → fix3.jsonl, then (rebased) fix4.jsonl, gives **best 0, sync 0, fr-CA 0 changed** against base.jsonl.
+
+**Letter names, re-checked per row.** `.probe/fr/build-letter-section.mts` writes one comment and one row per
+Lexique-missing letter name. I checked each as the standard name of its letter: cé /se/ (C), effe /ɛf/ (F),
+gé /ʒe/ (G), ji /ʒi/ (J), emme /ɛm/ (M), enne /ɛn/ (N), pé /pe/ (P), ku /ky/ (Q), vé /ve/ (V), zède /zɛd/ (Z).
+All ten are correct, and all ten EQUAL the g2p's reading, so the value is printed from `toIpa`. Each row's
+comment says so and records the tagger's reading at #1463: it agreed on 7 and read effe ef, ji dʒi, emme ɑ̃m.
+
+**Re-audit** (`emitted.mts`): 261 emitted, 33 miss, 14 differ. The 14 are the same no-change / not-emitted rows
+as in Run 12. 0 real disagreements.
+
+**Other review points:**
+- A test now walks EVERY `letterNames` word (multi-word names split, ≥26 words) and asserts Lexique or the
+  supplement answers it. It is in TS, C# and Rust. Proved by deleting the `effe` row: red in all three.
+- The C# theory and the Rust `a_supplement_word_is_not_offered` now check the premise first: the normalized text
+  contains effe/emme/ji/kilooctet(s).
+- In TS, the model-dependent cases sit under `describe.skipIf(!haveModel)`. The arity, the letterNames walk and
+  the kilooctet value test (expectation = Lexique kilo + octet, derived, never typed) run without the model.
+  The kilooctet test was proved by restoring the Run 12 row: red.
+- `frenchLexicon()` (TS) and `FrenchLexicon()` (C#) had no callers left, so they are removed. Rust's `lexicon_has`
+  (used by fn-diff) is kept, with a corrected doc.
+- `preNormalized` is gone from the public surface. TS: `createFrench()` returns `{ text }` only, and
+  `createFrenchForPrepass()` exposes `normalizedFor` + `textNormalized` for frenchNeural.ts and its test.
+  C#: `NormalizedFor` and `TextNormalized` are `internal`. Rust: `text_normalized` already existed.
+- Rust `text_normalized` borrows its input instead of cloning it.
+
+**Gates** (rebased onto `origin/main` b6629d83, all fr dumps regenerated from the fixed TS):
+- check:goldens 0 stale, so fr and fr-CA did not move and nothing was regenerated.
+- vitest 6,432 passed, 5 skipped (341 files). dotnet test 7,043 → **7,069** passed (with main's additions).
+- regex-diff 145,198 identical, 0 DIFFER.
+- fn-diff: fr-normalize 12,126/0, fr-g2p 139,485/0, fr-tagger 15,006/0. phonemize-sync, -best and -trace each
+  4,041/4,042; the one row is the ru/el port-pending probe.
+- parity: ten languages 200/200, fr `--sync` 157/200. cargo test 73 + 1. 0 warnings, fmt clean.
+
+**Gates on the combined tree** (rebased onto `origin/main` af9d7ade, after hi, pt, cmn and es merged in
+#1485–#1488). The rebase was clean, and dump.mts keeps es-numbers next to the fr entries. A re-extraction of the
+regex corpus matches the committed file, so nothing needed hand-merging. Run one at a time:
+- check:goldens 0 stale.
+- vitest: the first run had **2 failures**, both English neural tests outside French, each just over the 5 s
+  timeout (5,645 and 5,964 ms): `en-neural-prepass` "the τ value…" and `foreign-runs` "th delegates…". Both
+  files pass on their own (57/57). A second full run: **347 files, 6,512 passed, 5 skipped, 0 failed**.
+  So it was load-dependent timing, not this change.
+- dotnet test 7,178 passed. C# regex-diff 145,234 identical, 0 DIFFER. Rust regex-diff 145,234 identical,
+  0 DIFFER, 0 refused, 0 UNSOUND.
+- cargo test 89 + 1. 0 warnings, fmt clean. parity: ten languages 200/200, fr `--sync` 157/200.
+- fn-diff from dumps regenerated from the TS: fr-normalize 12,126/0, fr-g2p 139,485/0, fr-tagger 15,006/0.
+  phonemize-sync, -best and -trace each 4,041/4,042 (the ru/el port-pending probe).
+
 ## Findings in the TS (reported, not fixed in Rust)
 
 **Status: 1–3 are FIXED TS-first, with C# and Rust following (Run 12).**

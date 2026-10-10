@@ -45,7 +45,7 @@ public static class FrenchNeural
             Key = w => w.ToLowerInvariant(),
             LexHas = lower => FrenchPhonemizer.FrenchHasWord(lower) || !IN_VOCAB.IsMatch(lower),
             Tag = lower => tagger.Tag(lower),
-            Render = (t, oov) => Foreign.WithHost("fr", () => E.Text(t, oov, true)),
+            Render = (t, oov) => Foreign.WithHost("fr", () => E.TextNormalized(t, oov)),
         }).ConfigureAwait(false);
     }
 }

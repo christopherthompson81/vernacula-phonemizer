@@ -75,12 +75,36 @@ mod tests {
     /// #1463: the letter names and kilooctet are supplement rows, so they never reach the tagger.
     #[test]
     fn a_supplement_word_is_not_offered() {
+        let e = create_french().unwrap();
         for t in ["la FM", "le J. Martin", "la RTJ", "un fichier de 5 ko"] {
+            // The premise first: the normalizer emits one of these words, or "not offered" holds vacuously.
+            let words = js_re!(r"\b(?:effe|emme|ji|kilooctets?)\b", "u");
+            assert!(words.test(&e.normalized_for(&js(t))), "{t}: premise");
             let (asked, best, sync) = run(t);
             for w in ["effe", "emme", "ji", "kilooctet", "kilooctets"] {
                 assert!(!asked.contains(&js(w)), "{t}: {w} offered");
             }
             assert_eq!(best, sync, "{t}");
         }
+    }
+
+    /// #1463: supplement.tsv's letter-name rows are a hand-kept copy of `letterNames`. A letter name neither
+    /// Lexique nor the supplement answers reaches the tagger, which misread three (18 FLEURS texts).
+    #[test]
+    fn every_letter_name_is_answered_by_lexicon_or_supplement() {
+        let e = create_french().unwrap();
+        let mut words: Vec<&str> = crate::languages::french::manifest::MANIFEST
+            .letter_names
+            .values()
+            .flat_map(|n| n.split(' '))
+            .collect();
+        words.sort_unstable();
+        words.dedup();
+        assert!(words.len() >= 26, "the walk is not vacuous");
+        let missing: Vec<&str> = words
+            .into_iter()
+            .filter(|w| !e.has_word(&js(w).to_lower_case()))
+            .collect();
+        assert!(missing.is_empty(), "unanswered letter names: {missing:?}");
     }
 }

@@ -11,7 +11,7 @@
  */
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 import { withHost } from "../../core/foreign.ts";
-import { createFrench, frenchHasWord } from "./french.ts";
+import { createFrenchForPrepass, frenchHasWord } from "./french.ts";
 import { createFrenchTagger, type FrenchTagger } from "./frenchTagger.ts";
 
 const WORD = /[a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?/giu;
@@ -19,8 +19,8 @@ const WORD = /[a-zà-ÿœæ]+(?:['’][a-zà-ÿœæ]+)?/giu;
 // never matches one: a hyphenated compound reaches the tagger part by part, through `phonemizeWord`'s recursion.
 const IN_VOCAB = /^[a-zà-ÿœæ]+$/u;
 let taggerP: Promise<FrenchTagger | undefined> | undefined;
-let engine: ReturnType<typeof createFrench> | undefined;
-const frEngine = (): ReturnType<typeof createFrench> => (engine ??= createFrench());
+let engine: ReturnType<typeof createFrenchForPrepass> | undefined;
+const frEngine = (): ReturnType<typeof createFrenchForPrepass> => (engine ??= createFrenchForPrepass());
 
 /**
  * Phonemize French text with the neural tagger filling the OOV tail. Async because the ONNX pass is; falls back to the
@@ -30,7 +30,7 @@ export async function phonemizeFrNeural(text: string): Promise<string> {
     if (taggerP === undefined) taggerP = createFrenchTagger();
     const tagger = await taggerP;
     const E = frEngine();
-    if (!tagger) return withHost("fr", () => E.text(text)); // no model → sync path
+    if (!tagger) return withHost("fr", () => E.textNormalized(E.normalizedFor(text))); // no model → sync path
     return frenchPrepassWith(tagger, text);
 }
 
@@ -46,7 +46,7 @@ export function frenchPrepassWith(tagger: Pick<FrenchTagger, "tag">, text: strin
     // training vocab (e.g. an elision apostrophe) is skipped so the sync rule g2p handles it.
     // ⚠ THE NORMALIZED TEXT, NOT THE CALLER'S (#1463, the shape English fixed in #1452). This scanned `text`,
     // so a word the NORMALIZER creates — a number word, an expanded abbreviation, a unit — was never tagged.
-    // Normalized ONCE, here, and handed to `text(…, preNormalized: true)` rather than normalized again.
+    // Normalized ONCE, here, and handed to `textNormalized` rather than normalized again.
     // ⚠ THE LETTER NAMES ARE WHY THE ORDER OF THE FIX MATTERED. An initialism's spelled-out letters (`effe`,
     // `emme`, `ji`) are exactly such words, and the tagger reads them wrong (ef, ɑ̃m, dʒi) where the rule g2p
     // is right — so supplement.tsv carries them first and `frenchHasWord` keeps them away from the tagger.
@@ -58,6 +58,6 @@ export function frenchPrepassWith(tagger: Pick<FrenchTagger, "tag">, text: strin
         tag: (lower) => tagger.tag(lower),
         // `withHost` — the engine is built here rather than by the registry, so nothing else pushes the host
         // and a foreign run would be dropped for want of one (core/foreign.ts). Sync, as that stack requires.
-        render: (t, oov) => withHost("fr", () => E.text(t, oov, true)),
+        render: (t, oov) => withHost("fr", () => E.textNormalized(t, oov)),
     });
 }

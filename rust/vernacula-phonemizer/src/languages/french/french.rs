@@ -207,7 +207,7 @@ pub fn create_french() -> Result<FrenchPhonemizer, String> {
 }
 
 impl FrenchPhonemizer {
-    /// `frenchLexicon().has(lower)`.
+    /// Lexique membership alone (the numeral and initialism passes' `isWord`); the pre-pass uses `has_word`.
     pub fn lexicon_has(&self, lower: &JsString) -> bool {
         self.lexicon.contains_key(lower)
     }
@@ -267,9 +267,8 @@ impl FrenchPhonemizer {
         self.text_normalized(&self.normalized_for(input), oov)
     }
 
-    /// `text(input, oovOverride, preNormalized: true)`: `input` has already been through `normalized_for`.
+    /// `textNormalized(input, oovOverride)`: `input` has already been through `normalized_for`.
     pub fn text_normalized(&self, input: &JsString, oov: Option<OovResolver>) -> JsString {
-        let input = input.clone();
         enter_engine(&input);
 
         let mut items: Vec<Item> = Vec::new();
