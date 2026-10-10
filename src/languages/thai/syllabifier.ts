@@ -284,7 +284,7 @@ function thaiVowelSpan(
         isThaiConsonant(at(1)) &&
         at(1) !== "อ" &&
         s[0] !== "ห" &&
-        !("กขฃคฅฆ".includes(s[0] ?? "") && at(1) === "ร")
+        !("กขฃคฅฆ".includes(s[0]!) && at(1) === "ร") // i === 1, so s[0] exists
     ) {
         return { gs: ["ว"] };
     }

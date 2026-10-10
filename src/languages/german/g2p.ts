@@ -157,7 +157,7 @@ export function toSegments(word: string): Seg[] {
             // Word-initial ⟨ch⟩ is never the ach-laut x: → ç before a front vowel (China → çiːna, Chemie → çe…),
             // → k before a consonant or back vowel (Christ → kʁ…, Chaos → k…, Chlor → k…). (French ⟨ch⟩→ʃ in
             // Chef/Chance is lexical, left as residual.) Mid-word ⟨ch⟩ uses the ach/ich-laut rule.
-            if (initial) push("eiäöüy".includes(nx2) ? "ç" : "k", i);
+            if (initial) push(nx2 !== "" && "eiäöüy".includes(nx2) ? "ç" : "k", i); // ⚠ nx2 may be "" (#1476)
             else push(chSound(lastVowelLetter), i);
             i += 2;
             continue;
@@ -361,7 +361,10 @@ export function toSegments(word: string): Seg[] {
             // their h — and need the same compound detector the medial ⟨th⟩ note above wants.
             } else if (
                 !isV(w[i - 1] ?? "") ||
-                (nx !== undefined &&
+                // ⚠ `nx` is `w[i + 1] ?? ""`, never undefined, and `includes("")` is TRUE (#1476) — so this
+                // guard used to be dead and a word-final ⟨h⟩ after a prefix-shaped stem was SOUNDED
+                // (geh → *ɡeːh*, vergeh → *…ɡəh*). Word-final has no following vowel; the h stays silent.
+                (nx !== "" &&
                     FULL_VOWEL.includes(nx) &&
                     /(be|ge|ver|zer|er|vor|zu|un|emp|ent|miss)$/.test(w.slice(0, i)))
             )
@@ -414,7 +417,7 @@ function finalDevoice(segs: Seg[], w: string): void {
         if (
             !next ||
             (!next.vowel &&
-                ("ptksfçxʃ".includes(next.ph[0] ?? "") || VOICED_FINAL[next.ph]))
+                ((next.ph !== "" && "ptksfçxʃ".includes(next.ph[0]!)) || VOICED_FINAL[next.ph]))
         )
             s.ph = dev;
     }

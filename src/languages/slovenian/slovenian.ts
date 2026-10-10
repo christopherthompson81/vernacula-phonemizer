@@ -90,7 +90,7 @@ function bySuffix(w: string, nucleiCount: number): number | undefined {
         const suffix = w.slice(cut);
         const at = lex.get(suffix);
         if (at === undefined) continue;
-        const prefixNuclei = countNuclei(w.slice(0, cut));
+        const prefixNuclei = countNuclei(w, cut);
         if (prefixNuclei < 1) continue;
         const shifted = prefixNuclei + at;
         return shifted < nucleiCount ? shifted : undefined;
@@ -98,14 +98,20 @@ function bySuffix(w: string, nucleiCount: number): number | undefined {
     return undefined;
 }
 
-/** Nuclei in a bare SPELLING, counted the way `toSegments` will: a vowel, or a syllabic ⟨r⟩ (no vowel
- *  neighbour), which `g2p.ts` turns into the ə that carries the syllable. */
-function countNuclei(w: string): number {
+/** Nuclei in the first `end` letters of a bare SPELLING, counted the way `toSegments` will: a vowel, or a
+ *  syllabic ⟨r⟩ (no vowel neighbour), which `g2p.ts` turns into the ə that carries the syllable.
+ *  ⚠ THE NEIGHBOURS ARE READ FROM THE WHOLE WORD, AND A WORD EDGE IS NOT A VOWEL — both as `syllabicR` has it.
+ *  This used to count `w.slice(0, cut)` with `"aeiou".includes(w[i ± 1] ?? "")`, and `includes("")` is TRUE
+ *  (#1476): a word-initial ⟨r⟩ + consonant (rdeč → ərˈdeːt͡ʃ) and a prefix-final consonant + ⟨r⟩ both read
+ *  their edge as a vowel and lost the ə nucleus, while the slice's right edge is not a word edge at all —
+ *  the letter after it is the suffix's first. */
+function countNuclei(w: string, end: number): number {
+    const isV = (c: string | undefined): boolean => c !== undefined && "aeiou".includes(c);
     let n = 0;
-    for (let i = 0; i < w.length; i++) {
+    for (let i = 0; i < end; i++) {
         const c = w[i]!;
-        if ("aeiou".includes(c)) n++;
-        else if (c === "r" && !"aeiou".includes(w[i - 1] ?? "") && !"aeiou".includes(w[i + 1] ?? "")) n++;
+        if (isV(c)) n++;
+        else if (c === "r" && !isV(w[i - 1]) && !isV(w[i + 1])) n++;
     }
     return n;
 }

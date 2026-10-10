@@ -100,7 +100,7 @@ function applyLength(ipa: string, spec: string | undefined): string {
         const long = (ipa[i + 1] ?? "") === "ː";
         // a TRUE diphthong (vowel + ɪ̯/ʊ̯/ʏ̯ glide) has no length axis; a vowel + ɐ̯ (vocalized r) still can (eːɐ̯).
         const diphthong =
-            "ɪʊʏ".includes(ipa[i + 1] ?? "") && (ipa[i + 2] ?? "") === "̯";
+            i + 1 < ipa.length && "ɪʊʏ".includes(ipa[i + 1]!) && ipa[i + 2] === "̯";
         const flag = corr.get(ord);
         if (!diphthong && flag === "L" && !long) {
             out += LONG_OF[ch] ?? ch;

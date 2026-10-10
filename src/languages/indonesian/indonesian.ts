@@ -104,7 +104,7 @@ function scan(w: string): Seg[] {
 /** Penultimate stress on the second-to-last vowel; if that nucleus is a schwa, shift to the final. */
 function stressIndex(segs: Seg[]): number {
     const nuclei = segs
-        .map((s, i) => (VOWEL_PH.includes(s.ph[0] ?? "") ? i : -1))
+        .map((s, i) => (s.ph !== "" && VOWEL_PH.includes(s.ph[0]!) ? i : -1))
         .filter((i) => i >= 0);
     if (nuclei.length === 0) return -1;
     if (nuclei.length === 1) return nuclei[0]!;
@@ -187,7 +187,7 @@ export function phonemizeWordRules(word: string): string {
     for (let i = 0; i < segs.length; i++) {
         if (segs[i]!.ph !== "k") continue;
         const next = segs[i + 1];
-        if (!next || (!VOWEL_PH.includes(next.ph[0] ?? "") && next.ph !== ""))
+        if (!next || (next.ph !== "" && !VOWEL_PH.includes(next.ph[0]!)))
             segs[i]!.ph = "ʔ";
     }
     const stress = stressIndex(segs);

@@ -61,7 +61,6 @@ public static class GermanicMorphology
     public static Func<string, Decomp> MakeDecompose(MorphologyConfig cfg)
     {
         var VOWELS = cfg.Vowels;
-        // TS declares `isVowelStart` here; it is unused in the module and is not ported.
 
         /** Loose gate: a stripped stem must have a vowel and start with a valid onset (so a prefix isn't peeled off a
          *  non-word — be+rlin, where "rl" is not an onset). */

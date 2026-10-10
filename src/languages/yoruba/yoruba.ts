@@ -14,7 +14,8 @@ import { yorubaNumber } from "./numbers.ts";
 const CLAUSE_MARK = DEF.clausePunctuation;
 const DOT_BELOW = "̣", ACUTE = "́", GRAVE = "̀", MACRON = "̄";
 const TONE_MARK = new Set([ACUTE, GRAVE, MACRON]);
-const isVowelLetter = (c: string): boolean => "aeiou".includes(c);
+/** ⚠ `"aeiou".includes("")` is TRUE, so a caller passing `s[i + 1] ?? ""` read the END of the word as a vowel (#1476). */
+const isVowelLetter = (c: string | undefined): boolean => c !== undefined && c !== "" && "aeiou".includes(c);
 
 interface Seg {
     ph: string;
@@ -95,7 +96,7 @@ export function phonemizeWord(word: string): string {
             c === "w" &&
             segs.length > 0 &&
             segs[segs.length - 1]!.tone === undefined &&
-            isVowelLetter(s[i + 1] ?? "")
+            isVowelLetter(s[i + 1])
         ) {
             segs[segs.length - 1]!.ph += "ʷ";
             i++;

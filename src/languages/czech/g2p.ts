@@ -68,7 +68,7 @@ function scan(word: string): Seg[] {
                     { ph: "ɲ", nucleus: false },
                     { ph: "ɛ", nucleus: true },
                 );
-            else if ("bpvf".includes(prev))
+            else if (prev !== "" && "bpvf".includes(prev)) // ⚠ prev is "" word-initially; includes("") is TRUE (#1476)
                 segs.push(
                     { ph: "j", nucleus: false },
                     { ph: "ɛ", nucleus: true },

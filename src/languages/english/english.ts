@@ -301,7 +301,7 @@ export class EnglishPhonemizer {
             const fires = (words[i + 1] ?? "").toLowerCase() === before.word && breakAfter[i] !== true
                 && before.when.some((alt) =>
                     (alt.tags === undefined || alt.tags.includes(tags[i]!))
-                    && (alt.nextTags === undefined || alt.nextTags.includes(tags[i + 1] ?? ""))
+                    && (alt.nextTags === undefined || alt.nextTags.includes(tags[i + 1]!)) // words[i + 1] matched, so it exists
                     // the left gate looks back three words, and not past a clause boundary either
                     && (alt.afterWords === undefined || words.slice(Math.max(0, i - 3), i).some((w, k) =>
                         alt.afterWords!.includes(w.toLowerCase())

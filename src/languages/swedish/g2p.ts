@@ -45,7 +45,7 @@ function stressedLong(w: string, i: number): boolean {
     let j = i + 1,
         count = 0;
     while (j < w.length && !isV(w[j]!)) {
-        if (w[j] === "r" && RETRO_2ND.includes(w[j + 1] ?? "")) {
+        if (w[j] === "r" && j + 1 < w.length && RETRO_2ND.includes(w[j + 1]!)) {
             count++; // retroflex r+dental = one consonant
             j += 2;
         } else if (w[j] === "x") {
