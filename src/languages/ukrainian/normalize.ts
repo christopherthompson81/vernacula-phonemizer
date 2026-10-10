@@ -406,7 +406,12 @@ export function normalizeUkrainian(input: string): string {
     //     ⚠ THE FEMININE 1 AND 2 ARE `numbers.feminine`, the pair the magnitude compositor already uses for
     //     the feminine тисяча (одна тисяча, дві тисячі) — and the masculine forms they replace are
     //     `numbers.units[1]` and `[2]`. This rule held its own copies of all four.
-    s = rewrite(s, /(?<![\d\p{L}])(\d{1,3})\/(\d{1,3})(?![\d/\p{L}])/gu, (whole, a: string, b: string) => {
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `,` or `.`
+    //   with a digit beyond it — `,` is this language's decimal, and the engine reads `.` as one too. A `,`
+    //   between two fractions is a list separator, so `1/2,3/4` reads both; any other `,` beside a digit is the
+    //   decimal. `/` is refused on BOTH sides now: it was refused only after the fraction, so `3/1/2` read `1/2`
+    //   out of the chain.
+    s = rewrite(s, /(?<![\d\p{L}/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/\p{L}]|\.\d|,\d+(?![\d/]))/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         const fem = ordinalForms(den)[FEM_NOM];
         if (fem === undefined) return whole;

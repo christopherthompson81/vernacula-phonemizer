@@ -1555,9 +1555,14 @@ pub fn normalize_english(input: &JsString) -> JsString {
 
     // 0g) `24/7`, then fractions.
     s = rewrite(&s, js_re!(r"(?<![\d/])24\/7(?![\d/])", "gu"), &js("24 7"));
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and
+    // grouping separators with a digit beyond them; a `,` between two fractions is a list separator.
     s = rewrite_with(
         &s,
-        js_re!(r"\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d])", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|\d,(?=\d{3}\/))\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d]|\.\d|,\d{3}(?!\d))",
+            "gu"
+        ),
         |m, w| fraction_words(int(&g(m, 1, w)), int(&g(m, 2, w))).unwrap_or_else(|| m.value(w)),
     );
 

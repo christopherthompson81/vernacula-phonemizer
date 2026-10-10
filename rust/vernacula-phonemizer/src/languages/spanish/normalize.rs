@@ -315,9 +315,14 @@ pub(crate) fn normalize_spanish(input: &JsString, americas: bool) -> JsString {
     );
 
     // 7) fractions.
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and
+    // grouping separators with a digit beyond them; a `,` between two fractions is a list separator.
     s = rewrite_with(
         &s,
-        js_re!(r"\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|(?<![\d/])\d+,)\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d]|\.\d|,\d+(?![\d/]))",
+            "gu"
+        ),
         |mm, t| {
             let (a, b) = (
                 js_number(&mm.group(1, t).unwrap()),

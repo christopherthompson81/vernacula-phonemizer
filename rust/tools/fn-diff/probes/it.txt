@@ -87,3 +87,15 @@ Accciaio, oggi, faccia, ciao, giorno, cielo, gelato, scena, sciame.
 Il numero 123456789012345678901234567890 è lungo.
 Il numero 9007199254740993 e 9007199254740991 e 1000000 e 2000000 e 1001001.
 ISTANBUL İstanbul e ǅemal.
+
+# fraction guards are mirrors (#1495): decimals, groups and chains decline; a list comma between fractions does not
+1/2.5
+1.5/2
+1/1,000
+1,000/2
+3/1/2
+1/2/3
+1/2,3/4
+1/2, 3/4
+It was 1/2.
+1/2,5

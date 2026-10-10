@@ -74,3 +74,15 @@ La letra α, la palabra слово y el carácter 中 en una frase.
 # word edge (#1480 shape): each abbreviation glued after a non-ASCII letter must decline
 Era un taoísta. María vino en 300 Ña. C. y en 300 Ñd. C. hubo.
 Los ÑEE. UU. ganan, los ñee. uu. ganan, a las 10 Ñp. m. hoy y el Ñn.º 5 gana.
+
+# fraction guards are mirrors (#1495): decimals, groups and chains decline; a list comma between fractions does not
+1/2.5
+1.5/2
+1/1,000
+1,000/2
+3/1/2
+1/2/3
+1/2,3/4
+1/2, 3/4
+It was 1/2.
+1/2,5

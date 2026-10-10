@@ -274,7 +274,12 @@ export function normalizeItalian(input: string): string {
 
     // 9) FRACTIONS, guarded against a date and a unit ratio by requiring digits on both sides and nothing
     //    numeric after.
-    s = rewrite(s, /(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) =>
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `,` or `.`
+    //   with a digit beyond it — `,` is this language's decimal and `.` its thousands mark (and an anglicism
+    //   decimal). A `,` between two fractions is a list separator, so `1/2,3/4` reads both; any other `,` beside a
+    //   digit is the decimal. `/` is refused on BOTH sides now: it was refused only after the fraction, so `3/1/2`
+    //   read `1/2` out of the chain.
+    s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 9b) THE PLUS AS A WORD-JOINER — a shape the whole signed-number sweep never met. Every other `+` resolved

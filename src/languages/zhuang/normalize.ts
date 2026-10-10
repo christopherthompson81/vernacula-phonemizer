@@ -459,7 +459,11 @@ export function normalizeZhuang(input: string): string {
     //    ⚠ IT EMITS DIGITS and lets the engine's own number path speak them (trap 20 checked: the only
     //    numeral rule za has is the plain cardinal compositor, which has no context-sensitive branch a
     //    re-emitted digit could trip).
-    s = rewrite(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `.` with a
+    //   digit beyond it (the decimal), and a `,` before exactly three digits (a thousands group); any other `,` is
+    //   a list separator. The letter guard is on BOTH sides now: it used to refuse a letter only before the
+    //   fraction, so `1/2abc` read (fused into the word) while `abc1/2` did not.
+    s = rewrite(s, /(?<![\d\p{L}\p{M}/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/\p{L}\p{M}]|\.\d|,\d{3}(?!\d))/gu, (whole, a: string, b: string) =>
         Number(a) < Number(b) && Number(b) <= 100 ? `${b} faenh cih ${a}` : whole);
 
     // 10) DECIMALS, after every rule that needs the number intact. The separator becomes NOTHING and the

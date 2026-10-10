@@ -369,9 +369,14 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     );
 
     // 9) Fractions.
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and
+    // grouping separators with a digit beyond them; a `,` between two fractions is a list separator.
     s = rewrite_with(
         &s,
-        js_re!(r"\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|(?<![\d/])\d+,)\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d]|\.\d|,\d+(?![\d/]))",
+            "gu"
+        ),
         |mm, s| {
             fraction_words(js_number(&g(mm, 1, s)), js_number(&g(mm, 2, s)), dialect)
                 .unwrap_or_else(|| mm.value(s))

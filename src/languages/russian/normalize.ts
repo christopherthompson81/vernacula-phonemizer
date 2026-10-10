@@ -249,7 +249,13 @@ export function normalizeRussian(input: string): string {
     s = rewrite(s, /\s?÷\s?/gu, " разделить на ");
 
     // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая».
-    s = rewrite(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d])/gu, (m0, a: string, b: string) => {
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `,` or `.`
+    //   with a digit beyond it — `,` is this language's decimal, and the engine reads `.` as one too. A `,`
+    //   between two fractions is a list separator, so `1/2,3/4` reads both; any other `,` beside a digit is the
+    //   decimal. `\b` alone holds between a separator and a digit, so `1.5/2` used to read a fraction off the
+    //   decimal's tail (en: "one point five halves") and `1/2.5` a half then "five"; `/` before the numerator was
+    //   not refused either (`3/1/2` read `1/2`).
+    s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,)\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d]|\.\d|,\d+(?![\d/]))/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (num === 1 && den === 2) return "одна вторая";
         const base = ordinalBase(den);

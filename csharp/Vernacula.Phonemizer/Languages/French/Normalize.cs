@@ -125,7 +125,9 @@ public static class Normalize
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})/(\\d{1,3})\\b(?!\\s*/?\\d)", "gu");
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and grouping
+    // separators with a digit beyond them; a `,` between two fractions is a list separator. See the TS source.
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*\\/?\\d|\\.\\d|,\\d+(?![\\d/]))", "gu");
     private static readonly JsRe CLOCK_H = JsRegex.Compile("\\b([01]?\\d|2[0-3])\\s*[hH]\\s*([0-5]\\d)?(?![\\p{L}\\p{M}\\d])", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("\\b([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!\\.\\d)", "gu");
     private static readonly JsRe NUMERIC_DATE = JsRegex.Compile("\\b(\\d{1,2})[/.](\\d{1,2})[/.](\\d{4})\\b", "gu");

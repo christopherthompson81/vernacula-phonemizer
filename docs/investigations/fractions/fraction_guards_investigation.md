@@ -162,3 +162,144 @@ Raw finding: the `\b…\b` family (en fr de es pt ru id) reads into a decimal on
 refuses a decimal on both sides.
 
 Implication: filed as #1495 (generic wording, synthetic probes), not fixed here.
+
+---
+
+# #1495 — the `\b…\b` family, and the letter-side and `/` asymmetries (base 6330c01a)
+
+The guards, per separator convention (each side refuses a digit or `/` as well):
+
+```
+en      (?<![\d/]|\d\.|\d,(?=\d{3}\/))\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d]|\.\d|,\d{3}(?!\d))
+de es pt ru id
+        (?<![\d/]|\d\.|(?<![\d/])\d+,)\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d]|\.\d|,\d+(?![\d/]))
+fr      the same, keeping its own `(?!\s*\/?\d)`
+it uk   the same without `\b`; uk keeps its \p{L} on both sides and gains `/` on the left
+ht ln   (?<![\d\p{L}\p{M}/]|L_DEC)(\d{1,3})\/(\d{1,3})(?![\d/\p{L}\p{M}]|R_DEC)      (comma-decimal arms)
+za      the en arms (`.` decimal, `,`+3 thousands), letters on both sides
+```
+
+In the comma-decimal languages, `,` with a digit beyond it is the DECIMAL. The exception is a `,` that sits
+BETWEEN TWO FRACTIONS, where the digits after it run into a `/` (right side), or the digits before it follow a
+`/` (left side). That `,` is a list separator, so `1/2,3/4` reads both fractions. Judgment, recorded: an
+unspaced `1/2,3/4` could also be parsed as `1/2.3/4`. That parse is nonsense, though, and the reading a news
+anchor would give is two fractions. The first version of the guard declined it (Run 9).
+
+## Run 8 — 2026-10-09 22:05 — repro on the unfixed engines
+
+Command: scratch `seps.mts en fr de es pt ru id ht ln za uk it`. It prints how each engine reads the bare
+separators (`2.5`, `2,5`, `1,000`, `1.000`, `1 000`), then a synthetic fraction probe set.
+
+Question: which separators does each engine treat as numeric? And where does the fraction read into one?
+
+Raw finding (selected):
+
+```
+separators: en `.` decimal, `,` thousands · de/es/pt/id/it `,` decimal, `.` thousands (es, pt and ru also read `.` as a
+            decimal) · fr/ru `,` and `.` both decimal, space thousands · ht/ln both numeric · za `.` decimal, `,` thousands
+en  1.5/2   wˈʌn pʰɔᶦnt fˈaᶦv hˈævz          "one point five halves"
+en  1/2.5   wˈʌn hˈæf . fˈaᶦv
+en  3/1/2   θɹˈiː wˈʌn hˈæf                   `/` not refused on the left
+de  1,5/2   aɪ̯ns , fʏnf hˈalbə                the decimal's tail read as five halves
+es  1/2.5   un mˈeðjo , θˈinko
+ru  1/1,000 ɐdnˈa pʲˈervəjə , nolʲ
+it  1,5/2   ˈuno virɡˈola t͡ʃˈinkwe mˈet͡st͡si
+ht  1/2abc  jɔ̃ dezjɛmabk                      read, fused to the next word
+ht  1/2.5   jɔ̃ dezjɛm viɡil sɛ̃k
+za  1/2abc  reads; abc1/2 declines
+uk  3/1/2   trɪ ɔdna druɦa
+```
+
+Implication: the same mirror applies everywhere, with each language's own separators. Every `\b` rule also
+needs `/` on the left.
+
+## Run 9 — 2026-10-09 22:15 — first fix, and the list-comma judgment
+
+Command: the guards above, but with the comma arm a plain `[.,]\d` on both sides. Then `seps.mts` again, diffed.
+
+Raw finding: every decimal and group case declines (`1.5/2` → en "one point five two"; de `1,5/2` → "eins
+Komma fünf zwei"). But `1/2,3/4` also declined in every comma-decimal language: de read "eins zwei Komma drei
+vier". Before, it read both fractions. ht and ln still read `1/2.5` as a fraction followed by the decimal tail.
+
+Implication: (a) that is a regression, not a decline. A list comma between two fractions is not a decimal, so
+the arm becomes `,\d+(?![\d/])` on the right, mirrored as `(?<![\d/])\d+,` on the left. (b) ht and ln have the
+lb/ta ordering defect (Run 10).
+
+## Run 10 — 2026-10-09 22:20 — ht and ln rewrite decimals before the fraction
+
+Command: read the step order in `haitian/normalize.ts` and `lingala/normalize.ts`.
+
+Raw finding: in both files step 10 DECIMALS comes before step 11 FRACTIONS. ht turns `2.5` into `2 vigil 5`, and
+ln turns it into `2 5`, and both decimal patterns accept a `/` next to them. So the fraction guard never sees the
+separator. za already runs fractions (9) before decimals (10).
+
+Implication: move FRACTIONS to 9b in ht and ln, in TS and C#. With only the guard mirrored, 5 ht/ln tests fail
+(Run 12), so the reorder is needed.
+
+## Run 11 — 2026-10-09 22:25 — after the fix, and rows moved
+
+Commands: `seps.mts` diffed against Run 8. Scratch `measure2.mts` over each language's golden plus FLEURS
+(en_us, fr_fr, de_de, es_419, pt_br, ru_ru, id_id, ln_cd, uk_ua, it_it; ht and za have golden only), at base and
+fixed, compared with `cmp.py`. Then `npm run check:goldens` for the whole fleet.
+
+Raw finding:
+
+```
+en 1/2.5 → wˈʌn tʰˈuː pʰɔᶦnt fˈaᶦv   1.5/2 → wˈʌn pʰɔᶦnt fˈaᶦv tʰˈuː   3/1/2 → θɹˈiː wˈʌn tʰˈuː
+de 1,5/2 → aɪ̯ns kˈɔma fʏnf t͡svaɪ̯   1/1.000 → aɪ̯ns ˈaɪ̯ntaʊ̯zənt
+ru 1/2,5 → ɐdʲˈin dva t͡sˈɛɫɨx pʲætʲ
+ht 1/2.5 → ɛ̃ de viɡil sɛ̃k   1/2abc → ɛ̃ de abk   1/2,3/4 → jɔ̃ dezjɛm , twa katɣijɛm (was "... vigil twa ...")
+1/2,3/4: unchanged (both read) in en fr de es pt ru id uk it za
+rows moved: en 0/1977 fr 0/2013 de 0/1968 es 0/1948 pt 0/1947 ru 0/1976 id 0/1938 ht 0/200 ln 0/1921
+            za 0/200 uk 0/1946 it 0/1982
+check:goldens: 189 languages, 0 stale
+```
+
+The corpus holds at most two digit/digit texts per language, and none has the affected shapes.
+
+Implication: no golden is regenerated. The fix is defensive, for input the corpus does not contain.
+
+Left as found: ln `1/2,3/4` reads both fractions but loses the pause between them, because the fraction's output
+digits (`1 ya 2,3 ya 4`) go back through the decimal step. It read the same before. The test pins only ln's
+full-stop case.
+
+## Run 12 — 2026-10-09 22:30 — tests fail on revert
+
+Commands: `npx vitest run test/fraction-guards-1495.test.ts`; `dotnet test --filter FractionGuards1495Tests`;
+`cargo test fraction_guards_are_mirrors_in`. Each was run fixed, and again with the engines checked out at base.
+Then TS with the ht/ln guard mirrored but the rule order unchanged.
+
+Raw finding: fixed: TS 102/102, C# 102/102, Rust 1/1. Reverted: TS 61 failed / 41 passed; C# 61 / 41; Rust
+fails, at `it 1/2,5` once Italian joined the test. `1/2.5` fails in all 12 languages. Guard-only ht/ln: 5 failed
+(`1/2,5`, `1/2.5` in both, and ht `1/2,3/4`).
+
+Implication: the tests witness the guard and the reorder.
+
+## Run 13 — 2026-10-09 22:40 — Rust, regex corpus, gates
+
+Rust mirrors en, es, pt, fr and it. Italian is ported too: Rust parity lists it, so it is included.
+
+Commands:
+- `LANGS=en,en-GB,es,pt,pt-BR,fr npx tsx rust/tools/fn-diff/dump.mts <arm>` for normalize, initialisms,
+  english-pre, english-gb-pre, es-normalize, pt-normalize, fr-normalize, phonemize-sync, phonemize-best and
+  phonemize-trace, and `LANGS=it` for it-normalize and the three phonemize arms. All replayed with `fn-diff`.
+  The probe files en-normalize, es, pt, pt-BR, fr and it gained 10 synthetic fraction lines each.
+- `tools/extract_regexes.mts`, then the C# and Rust regex-diffs.
+- `check:goldens`; `vitest` (with the tsx symlink, which was removed afterwards); `dotnet test` (full); C# parity
+  for the 12 languages plus en-GB, en-IN, fr-CA, es-419 and pt-BR; Rust `parity`; `cargo test --workspace`.
+
+Raw finding:
+- fn-diff: normalize 4160/0, initialisms 4160/0, english-pre 4160/0, english-gb-pre 4160/0, es-normalize 11874/0,
+  pt-normalize 11973/0, fr-normalize 12165/0, it-normalize 12123/0, it phonemize-sync/best/trace 4041/0.
+  The six-language phonemize-sync, -best and -trace arms: 24,303 identical, 8 DIFFER. All 8 are probe rows with
+  embedded Greek or Cyrillic (`loɣos`, `mɐskvˈa`, `vɫɐdʲˈimʲɪr`), which the Rust port drops because el and ru are
+  not ported. None contains a fraction. With the Rust edits reverted: en normalize 5 DIFFER, fr-normalize 6,
+  it-normalize 12, so the dumps do see the change.
+- regex corpus: 2,387 patterns, 8 added / 7 removed. C# 144,898 identical, 0 DIFFER, 0 threw. Rust 144,898, 0 DIFFER,
+  0 refused, 0 UNSOUND.
+- check:goldens fresh (189 languages, 0 stale); vitest 354 files, 6,805 passed, 5 skipped; dotnet test 7,479 passed;
+  C# parity 17 languages, 3,400 rows, 0 differ; Rust parity 10/10 at 200/200; cargo test --workspace ok (101 + 1).
+  `cargo fmt --check` flags only lines already unformatted on main (core/unicode.rs and the pt files), none of them
+  in this diff.
+
+Implication: green. #1495 is closed by this branch.

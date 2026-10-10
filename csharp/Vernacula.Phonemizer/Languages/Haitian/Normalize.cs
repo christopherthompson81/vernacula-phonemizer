@@ -159,8 +159,10 @@ public static class Normalize
     /// wrong; a false word is cheaper than a false clause boundary, and the shape is ×0 here. See the TS.</summary>
     private static readonly JsRe DECIMAL =
         JsRegex.Compile(@"(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)", "gu");
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and grouping
+    // separators with a digit beyond them; a `,` between two fractions is a list separator. See the TS source.
     private static readonly JsRe FRACTION =
-        JsRegex.Compile(@"(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu");
+        JsRegex.Compile("(?<![\\d\\p{L}\\p{M}/]|\\d\\.|(?<![\\d/])\\d+,)(\\d{1,3})\\/(\\d{1,3})(?![\\d/\\p{L}\\p{M}]|\\.\\d|,\\d+(?![\\d/]))", "gu");
     private static readonly JsRe ORDINAL =
         JsRegex.Compile(@"(?<![\d\p{L}\p{M}])(\d+)\s?(?:yèm|ème|èm|em)(?![\p{L}\p{M}])", "gu");
     private static readonly JsRe AMPERSAND = JsRegex.Compile(@"\s?&\s?", "gu");
@@ -238,6 +240,17 @@ public static class Normalize
             return NAMED.IsMatch(beforeDollar[(m.Index + m.Length)..]) ? quantity : $"{quantity} dola";
         });
 
+        // 9b) FRACTIONS → the ordinal-denominator idiom. The denominator is capped at ten.
+        // Before the decimals, so the guards see the raw digits: run after them, `1/2.5` lost its separator
+        // first and the fraction read off the decimal (#1495).
+        s = Rewrite(s, FRACTION, m =>
+        {
+            string a = m.Groups[1].Value, b = m.Groups[2].Value;
+            var den = OrdinalWord(Js.Number(b));
+            if (den is null || !(Js.Number(a) < Js.Number(b) && Js.Number(b) <= 10)) return m.Value;
+            return Js.Number(a) == 1 ? $"yon {den}" : $"{a} {den}";
+        });
+
         // 10) DECIMALS, after every rule that needs the number intact. The separator becomes `vigil`.
         s = Rewrite(s, DECIMAL, m =>
         {
@@ -245,15 +258,6 @@ public static class Normalize
             return frac.Length <= 2 && !frac.StartsWith("0", StringComparison.Ordinal)
                 ? $"{@int} vigil {frac}"
                 : $"{@int} vigil {string.Join(" ", Js.CodePoints(frac))}";
-        });
-
-        // 11) FRACTIONS → the ordinal-denominator idiom. The denominator is capped at ten.
-        s = Rewrite(s, FRACTION, m =>
-        {
-            string a = m.Groups[1].Value, b = m.Groups[2].Value;
-            var den = OrdinalWord(Js.Number(b));
-            if (den is null || !(Js.Number(a) < Js.Number(b) && Js.Number(b) <= 10)) return m.Value;
-            return Js.Number(a) == 1 ? $"yon {den}" : $"{a} {den}";
         });
 
         // 12) ORDINALS — this language's own suffix; the rule DECLINES rather than guesses.

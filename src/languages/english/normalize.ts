@@ -1346,7 +1346,12 @@ export function normalizeEnglish(input: string): string {
     //    whose slash is neither a fraction nor a date. Claimed here so the fraction rule never sees it.
     s = rewrite(s, /(?<![\d/])24\/7(?![\d/])/gu, "24 7");
 
-    s = rewrite(s, /\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d])/gu, (m0, a: string, b: string) =>
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `.` with a
+    //   digit beyond it (the decimal), and a `,` before exactly three digits (a thousands group); any other `,` is
+    //   a list separator. `\b` alone holds between a separator and a digit, so `1.5/2` used to read a fraction off
+    //   the decimal's tail (en: "one point five halves") and `1/2.5` a half then "five"; `/` before the numerator
+    //   was not refused either (`3/1/2` read `1/2`).
+    s = rewrite(s, /(?<![\d/]|\d\.|\d,(?=\d{3}\/))\b(\d{1,3})\/(\d{1,3})\b(?!\s*[\/\d]|\.\d|,\d{3}(?!\d))/gu, (m0, a: string, b: string) =>
         fractionWords(Number(a), Number(b)) ?? m0);
 
     // 1) CURRENCY before anything else touches the digits: the symbol precedes but is SPOKEN after, and a

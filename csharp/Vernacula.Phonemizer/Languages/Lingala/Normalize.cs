@@ -76,7 +76,12 @@ public static class Normalize
     private static readonly JsRe DOLLAR_BEFORE = JsRegex.Compile("\\$\\s?(\\d[\\d ,.]*)", "gu");
     private static readonly JsRe DOLLAR_AFTER = JsRegex.Compile("(\\d[\\d ,.]*?)\\s?\\$", "gu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(?<![\\d.,])(\\d+)[.,](\\d+)(?![\\d\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `.` or `,`
+    //   with a digit beyond it (this engine reads both as numeric). A `,` between two fractions is a list
+    //   separator, so `1/2,3/4` reads both; any other `,` beside a digit is the decimal. The letter guard is on
+    //   BOTH sides now: it used to refuse a letter only before the fraction, so `1/2abc` read (fused into the
+    //   word) while `abc1/2` did not.
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}/]|\\d\\.|(?<![\\d/])\\d+,)(\\d{1,3})\\/(\\d{1,3})(?![\\d/\\p{L}\\p{M}]|\\.\\d|,\\d+(?![\\d/]))", "gu");
     private static readonly JsRe QUARTER = JsRegex.Compile("\u00bc", "gu");
     private static readonly JsRe HALF = JsRegex.Compile("\u00bd", "gu");
     private static readonly JsRe ORD_FIRST = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}])1\\s?(?:er|ère|re)(?![\\p{L}\\p{M}])", "gu");
@@ -184,17 +189,19 @@ public static class Normalize
                 NAMED.IsMatch(subject[..m.Index]) ? m.Groups[1].Value : $"dolare {m.Groups[1].Value}");
         }
 
-        // ⚠ Decimals last of the numeric rules, after everything that needs the number intact. The separator
-        // becomes NOTHING and the fractional digits are spaced apart, so they are read one at a time.
-        s = Rewrite(s, DECIMAL, m =>
-            $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
-
+        // Before the decimals, so the guards see the raw digits: run after them, `1/2.5` lost its separator
+        // first and the fraction read off the decimal (#1495).
         s = Rewrite(s, FRACTION, m =>
         {
             string a = m.Groups[1].Value, b = m.Groups[2].Value;
             return Js.Number(a) < Js.Number(b) && Js.Number(b) <= 10 ? $"{a} ya {b}" : m.Value;
         });
         s = Rewrite(Rewrite(s, QUARTER, " mǒkó ya mínei "), HALF, " mǒkó ya míbalé ");
+
+        // ⚠ Decimals last of the numeric rules, after everything that needs the number intact. The separator
+        // becomes NOTHING and the fractional digits are spaced apart, so they are read one at a time.
+        s = Rewrite(s, DECIMAL, m =>
+            $"{m.Groups[1].Value} {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
         s = Rewrite(s, ORD_FIRST, $"ya {FIRST_ORDINAL}");
         s = Rewrite(s, ORD_EME, "ya $1");

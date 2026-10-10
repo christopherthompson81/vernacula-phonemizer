@@ -97,8 +97,10 @@ public static class Normalize
         JsRegex.Compile("(?<![\\d.,])(\\d+(?:\\.\\d+)?)\\s?%\\s?-\\s?(\\d+(?:\\.\\d+)?)\\s?%", "gu");
     private static readonly JsRe PERCENT = JsRegex.Compile("(?<![\\d.,])(\\d+(?:\\.\\d+)?)\\s?%", "gu");
 
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and grouping
+    // separators with a digit beyond them; a `,` between two fractions is a list separator. See the TS source.
     private static readonly JsRe FRACTION =
-        JsRegex.Compile("(?<![\\d\\p{L}\\p{M}/])(\\d{1,3})/(\\d{1,3})(?![\\d/])", "gu");
+        JsRegex.Compile("(?<![\\d\\p{L}\\p{M}/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,3})\\/(\\d{1,3})(?![\\d/\\p{L}\\p{M}]|\\.\\d|,\\d{3}(?!\\d))", "gu");
 
     private static readonly JsRe DECIMAL_POINT =
         JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d\\p{L}\\p{M}])", "gu");

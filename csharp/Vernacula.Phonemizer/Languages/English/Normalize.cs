@@ -921,7 +921,12 @@ public static class Normalize
      *  digit gate also misses. Horizontal space only, so a `+`-marked list keeps its bullets. */
     private static readonly JsRe PLUS_BETWEEN_WORDS =
         JsRegex.Compile("(?<=\\S)[ \\t\\u00a0]\\+[ \\t\\u00a0](?=\\S)", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[\\/\\d])", "gu");
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `.` with a
+    //   digit beyond it (the decimal), and a `,` before exactly three digits (a thousands group); any other `,` is
+    //   a list separator. `\b` alone holds between a separator and a digit, so `1.5/2` used to read a fraction off
+    //   the decimal's tail (en: "one point five halves") and `1/2.5` a half then "five"; `/` before the numerator
+    //   was not refused either (`3/1/2` read `1/2`).
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[\\/\\d]|\\.\\d|,\\d{3}(?!\\d))", "gu");
     /** ⚠ `24/7` is an IDIOM, not a fraction — the rule above read it "twenty four sevenths". Claimed
      *  before it so the fraction rule never sees it. See the TypeScript. */
     private static readonly JsRe TWENTY_FOUR_SEVEN = JsRegex.Compile("(?<![\\d/])24\\/7(?![\\d/])", "gu");

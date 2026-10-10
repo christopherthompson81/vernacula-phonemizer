@@ -62,7 +62,13 @@ public static class Normalize
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[/\\d])", "gu");
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `,` or `.`
+    //   with a digit beyond it — `,` is this language's decimal and `.` its thousands mark (and an anglicism
+    //   decimal). A `,` between two fractions is a list separator, so `1/2,3/4` reads both; any other `,` beside a
+    //   digit is the decimal. `\b` alone holds between a separator and a digit, so `1.5/2` used to read a fraction
+    //   off the decimal's tail (en: "one point five halves") and `1/2.5` a half then "five"; `/` before the
+    //   numerator was not refused either (`3/1/2` read `1/2`).
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[/\\d]|\\.\\d|,\\d+(?![\\d/]))", "gu");
 
     /**
      * Every rule here emits DIGITS where a number is involved and lets the engine's own number path speak them,
