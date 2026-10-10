@@ -7,7 +7,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { sibilants, toSegments, type Seg } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
+import { NUMBER_TOKEN, numberToWords, splitNumberToken, type Dialect } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizePortuguese, normalizePortugueseInitialisms } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -126,7 +126,7 @@ const REDUCE_BP_FINAL: Record<string, string> = { a: "ɐ", e: "i", o: "u" };
 const REDUCE_BP_MID: Record<string, string> = { a: "a", e: "e", o: "o" };
 
 /** Realize vowels: reduce unstressed oral vowels, nasalize nasal ones, mark the stressed nucleus with ˈ. */
-function realize(segs: Seg[], stress: number, dialect: "ep" | "bp" = "ep"): string {
+function realize(segs: Seg[], stress: number, dialect: Dialect = "ep"): string {
     let out = "";
     for (let i = 0; i < segs.length; i++) {
         const s = segs[i]!;
@@ -199,7 +199,7 @@ function correct(segs: Seg[], stress: number, corr: Corr): void {
 }
 
 /** Core: EP word → canonical IPA, applying an explicit correction (used by the lexicon and its generator). */
-export function renderWord(word: string, corr?: Corr, dialect: "ep" | "bp" = "ep"): string {
+export function renderWord(word: string, corr?: Corr, dialect: Dialect = "ep"): string {
     const segs = toSegments(word, dialect);
     if (segs.length === 0) return "";
     sibilants(segs, dialect);
@@ -226,21 +226,20 @@ function bpConsonants(ipa: string): string {
 /** One word → canonical IPA: rule engine + the lexical correction table (open/close vowels, x). `dialect` selects
  *  European (default) or Brazilian realization; the open/close correction lexicon is shared (EP-derived, mostly
  *  valid for BP — a small lexical tail where the dialects differ on a stressed mid vowel). */
-export function phonemizeWord(word: string, dialect: "ep" | "bp" = "ep"): string {
+export function phonemizeWord(word: string, dialect: Dialect = "ep"): string {
     return renderWord(word, lexicon().get(word.toLowerCase()), dialect);
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // Word / number / clause-punctuation. Portuguese numbers: dot = thousands (1.500), comma = decimal (3,14).
-const TOKEN = /([a-zà-ÿ]+)|(\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?)|([.!?…,;:])/giu;
+const TOKEN = new RegExp(`([a-zà-ÿ]+)|(${NUMBER_TOKEN.source})|([.!?…,;:])`, "giu");
 
 /** A number token (thousands-dots / decimal-comma) → spoken words. `dialect` selects the BP teen forms (16/17/19
  *  dez-e- vs the EP dez-a-). */
-function numberTokenToWords(tok: string, dialect: "ep" | "bp"): string {
-    const [intRaw, frac] = tok.split(",");
+function numberTokenToWords(tok: string, dialect: Dialect): string {
     // ⚠ THE DOT-STRIPPED STRING IS PASSED AS `raw` (#1095): Portuguese writes thousands with periods, so
     // the fallback must see the digits without them, not the double they were parsed into.
-    const intDigits = intRaw!.replace(/\./g, "");
+    const { intDigits, frac } = splitNumberToken(tok);
     let words = numberToWords(Number(intDigits), dialect, intDigits);
     if (frac !== undefined)
         words +=
@@ -257,7 +256,7 @@ const FUNCTION_WORDS = new Set(MANIFEST.functionWords);
  *  variant uses to apply its BP open/close override lexicon while reusing this engine's number/clause context. */
 function wordIpa(
     word: string,
-    dialect: "ep" | "bp",
+    dialect: Dialect,
     postWord?: (ipa: string, word: string) => string,
 ): string {
     let ipa = phonemizeWord(word, dialect);
@@ -284,7 +283,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class PortuguesePhonemizer implements Phonemizer {
     constructor(
-        private readonly dialect: "ep" | "bp" = "ep",
+        private readonly dialect: Dialect = "ep",
         private readonly postWord?: (ipa: string, word: string) => string,
     ) {}
     text(input: string): string {
@@ -315,7 +314,7 @@ class PortuguesePhonemizer implements Phonemizer {
  *  Brazilian ("bp") realization; `postWord` is an optional per-word IPA refinement (the BP open/close lexicon).
  *  See src/languages/portuguese-br for the BP accent-variant entry points. */
 export function createPortuguese(
-    dialect: "ep" | "bp" = "ep",
+    dialect: Dialect = "ep",
     postWord?: (ipa: string, word: string) => string,
 ): Phonemizer {
     return new PortuguesePhonemizer(dialect, postWord);

@@ -214,19 +214,14 @@ public static class PortuguesePhonemizer
         RenderWord(word, Lexicon().GetValueOrDefault(word.ToLowerInvariant()), dialect);
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
-    private static readonly JsRe TOKEN = JsRegex.Compile("([a-zà-ÿ]+)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d+)*(?:,\\d+)?)|([.!?…,;:])", "giu");
-
-    private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "g");
+    private static readonly JsRe TOKEN = JsRegex.Compile($"([a-zà-ÿ]+)|({Numbers.NUMBER_TOKEN})|([.!?…,;:])", "giu");
 
     /** A number token (thousands-dots / decimal-comma) → spoken words. `dialect` selects the BP teen forms (16/17/19
      *  dez-e- vs the EP dez-a-). */
     private static string NumberTokenToWords(string tok, string dialect)
     {
-        var split = tok.Split(',');
-        var intRaw = split[0];
-        var frac = split.Length > 1 ? split[1] : null;
         // ⚠ THE DOT-STRIPPED STRING IS PASSED AS `raw` (#1095): the fallback must see the digits, not the double.
-        var intDigits = DOT_G.Replace(intRaw, "");
+        var (intDigits, frac) = Numbers.SplitNumberToken(tok);
         var words = Numbers.NumberToWords(Js.Number(intDigits), dialect, intDigits);
         if (frac is not null)
             words +=

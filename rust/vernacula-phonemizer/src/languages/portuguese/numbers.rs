@@ -1,9 +1,26 @@
 //! Portuguese number → words, European by default with the Brazilian dez-e- teens for `Dialect::Bp`.
 //! Ported from src/languages/portuguese/numbers.ts — see that file for the evidence.
 
-use super::g2p::Dialect;
 use super::manifest::MANIFEST;
 use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
+use crate::js_re;
+
+/// `"ep" | "bp"`: the one dialect type for the whole engine.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Dialect {
+    Ep,
+    Bp,
+}
+
+/// The number token (TS `NUMBER_TOKEN`): one source for the tokenizer and the degree count.
+pub const NUMBER_TOKEN: &str = r"\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?";
+
+/// `splitNumberToken`: the integer digits (thousands dots removed) and the decimal digits, if any.
+pub fn split_number_token(tok: &JsString) -> (JsString, Option<JsString>) {
+    let parts = tok.split(&js(","));
+    let int_digits = js_re!(r"\.", "g").replace(&parts[0], &JsString::new());
+    (int_digits, parts.get(1).cloned())
+}
 
 fn small(i: f64, dialect: Dialect) -> Option<String> {
     let n = &MANIFEST.numbers;

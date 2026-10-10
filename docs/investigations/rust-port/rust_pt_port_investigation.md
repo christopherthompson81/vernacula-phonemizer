@@ -205,3 +205,114 @@ arms for it, es, pt and pt-BR; `dump.mts` lists the es-*, it-* and pt-* dumps. P
 -best 7932 / 6 (port-pending ru/el/cmn probes). Tests 54 + 1 passed; 0 warnings.
 
 **Implication.** Nothing moved; ready to merge.
+
+## Run 10 — 2026-10-09 18:36 (Run 4's three findings, fixed TS-first)
+
+**Question.** Fixed in TS, then C#, then Rust (branch `fix/pt-port-findings`, off 5acc6b73): does any golden
+move, and do the dumps catch the old behaviour?
+
+**Command.** In `normalize.ts`, `feminineCardinal`, `fractionWords` and `clockWords` now take the dialect
+(`brazilian ? "bp" : "ep"`). A plural fraction pluralizes every word of the denominator. `degreeWord` strips
+the tokenizer's thousands dots before `Number()`, using the same rule as TOKEN in portuguese.ts:
+`(?<!(?<!\d)0)\.`, so every dot is a group except one after a lone 0, and the comma is the decimal point.
+Then `test/portuguese-port-findings.test.ts`, with each fix reverted on its own; `npm run check:goldens`;
+`npx vitest run`; the same fix in C# `Normalize.cs` plus `PortuguesePortFindingsTests.cs`, and the full
+`dotnet test`; the same fix in Rust `normalize.rs` plus a `port_findings` test module. pt-BR.txt gained three
+synthetic probe lines (a colon clock with teens, compound-ordinal fractions, and degree counts with dots). I
+re-dumped the five pt dumps from the fixed TS, replayed them, and replayed them again against the
+UNFIXED Rust. Last, `cargo run --release -p parity`, `cargo test --workspace`, and both regex-diffs.
+
+**Raw finding.**
+- Before → after (`normalizePortuguese`):
+  - BP `Às 16h17 em ponto`: *dezasseis horas e dezassete* → *dezesseis horas e dezessete*.
+  - BP `Às 19:16`: *dezanove … dezasseis* → *dezenove … dezesseis*.
+  - EP `17/19`: *dezassete décimo nonos* → *dezassete décimos nonos*. BP: → *dezessete décimos nonos*.
+  - `2/21`: *vigésimo primeiros* → *vigésimos primeiros*.
+  - `1.000 °C`, `1.000 °F`, `1.000°`: *grau* → *graus*.
+  - Unchanged: `1/19` *um décimo nono*, `3/100` *três centésimos*, `1 °C` *grau*, `1,5 °C` *graus*,
+    `0.5 °C` *graus* (the tokenizer reads it as *zero . cinco*).
+- Left alone: `1,0 °C` still reads *um vírgula zero grau*, because `Number("1.0")` is 1. That is the
+  existing decimal reading, not one of the three findings.
+- TS test with each fix reverted on its own: dialect 3 of 8 fail, plural 2 of 8, degree 1 of 8. C# test
+  against the old `Normalize.cs`: 10 of 16 fail.
+- `check:goldens`: `goldens fresh: 189 languages, 36495 rows, 0 stale`. NO golden moves in any language,
+  pt and pt-BR included. The corpus never reaches these shapes: in the unfixed-Rust replay below, golden and
+  FLEURS stay at 0 differ.
+- The first full vitest run: 13 failed / 6,372 passed. Two failures were mine:
+  - `portuguese-br.test.ts` pinned `07h19` as *dezanˈovi*. It is now *dezenˈɔvi*, with the reason in the test.
+  - `regex-corpus.jsonl` was stale by one pattern, the new `(?<!(?<!\d)0)\.`. I re-extracted it (2,382
+    patterns). C# regex-diff and Rust regex-diff: 145,198 identical, 0 differ.
+  - The other 11 were environmental. `check-goldens-jobs` spawns `node_modules/.bin/tsx`, which the worktree
+    lacks (9/9 pass with it linked). foreign-runs, phonemizeAsync and trace-token-source pass on their own:
+    they were load timeouts while dotnet ran.
+  - The re-run, with both fixes and `.bin` linked: 339/339 files, 6,385 passed, 5 skipped, 0 failed.
+- `dotnet test` (full): 7,049 passed, 0 failed.
+- Re-dumped replays: pt-normalize `11922 identical, 0 DIFFER` (golden 921, fleurs 10,749, probe 252),
+  pt-g2p `75625 / 0`, pt-numbers `101973 / 0`, phonemize-sync and -best `7940 identical, 4 DIFFER` each.
+  The 4 are the port-pending ru and el mixed-script probes × 2 languages; `東京` closed when cmn merged.
+- The same dumps against the UNFIXED Rust: pt-normalize `11904 / 18 DIFFER`, all 18 of them probes;
+  phonemize-sync `7929 / 15`.
+- parity: en, en-GB, ja, it, es, pt, pt-BR, hi, cmn and fr each `200/200 identical`. `cargo test
+  --workspace`: 68 + 1 passed. 0 warnings in both dev and release.
+
+**Implication.** All three are fixed in all three engines and no golden moves. Only the new probe lines
+witness them, and they catch the old Rust (18 rows). The Rust reproduction note in `feminine_cardinal` is
+deleted. Shared files touched: `csharp/regex-corpus.jsonl` (the freshness gate requires it).
+
+## Run 11 — 2026-10-09 20:15 (review round on Run 10; rebased onto b6629d83)
+
+**Question.** The review raised six items:
+1. the degree capture counts only the tail of a multi-group number;
+2. `numberToWords`'s dialect should be required;
+3. a decimal-comma count should be plural;
+4. share the tokenizer's dot rule;
+5. pin the clock hour;
+6. one `Dialect` type.
+
+Do the fixes move any golden, and do the probes see them?
+
+**Command.** numbers.ts now exports `Dialect`, `NUMBER_TOKEN` (the TOKEN number group, still a literal so the
+regex corpus keeps it) and `splitNumberToken`. TOKEN, `numberTokenToWords`, the three degree rules and
+`degreeWord` all use them. The twins changed the same way: C# `Numbers.NUMBER_TOKEN` / `SplitNumberToken`;
+Rust `numbers::{Dialect, NUMBER_TOKEN, split_number_token}`, with g2p re-exporting `Dialect` so the registry
+and fn-diff paths stay unchanged. `numberToWords(n, dialect, raw?)` has no default in any engine. I proved the
+TS guard by dropping one call's dialect: `tsc` reports `TS2554: Expected 2-3 arguments`. pt-BR.txt gained two
+probe lines (multi-group numbers with a tail of 1, and decimal-comma counts). Then the gates on the rebased
+tree.
+
+**Raw finding.**
+- Before (Run 10) → after:
+  - `2.000.001°` and `1.000.001 °C`: *grau* → *graus*.
+  - `1,0 °C` and `1,000 °C`: *grau* → *graus*. These read *um vírgula zero (zero zero)*.
+  - `0.1 °C`: *graus* → *grau*. The tokenizer says *zero . um*, so the noun now agrees with the *um*
+    that is spoken.
+  - Unchanged: `1.001 °F`, `21.1 °C` (*duzentos e onze*, plural), `1 °C`, `01 °C`, `1,5 °C`, `0.5 °C`.
+- Item 1: I widened the capture to the TOKENIZER's own shape, not to step 4's `[1-9]\d{0,2}(?:\.\d{3})+|\d+`.
+  With step 4's shape, `21.1 °C` would match only `1` and say *grau*, while the tokenizer says *duzentos e
+  onze*. The count has to be the token the tokenizer speaks.
+- Item 4, step 4 disagrees with the tokenizer. Step 4 accepts strict 3-digit groups; the tokenizer accepts
+  any `\.\d+` except after a lone 0. So `1.5º` becomes `1.quinto` (*um . quinto*), and `12.34º` becomes
+  *doze . trigésimo quarto*. That is the same stranded head that step 4's own comment calls the worst
+  outcome. Step 4's strict grouping is the right thousands rule. The tokenizer is too lax: in the corpus, the
+  non-3-digit dotted numbers are `802.11`, `5.0`, `2.4`, `15.00` and `1.1`, and the tokenizer reads `5.0` as
+  *cinquenta* and `2.4` as *vinte e quatro*. NOT changed here: it is a reading change on golden rows and
+  belongs to its own issue. The corpus also has `802.11ª` ×3, which both rules misread.
+- Regex corpus: −3 rows (`(?<!(?<!\d)0)\.` and the two one-separator degree patterns), +1 (`NUMBER_TOKEN`,
+  flag `u`). TOKEN's literal row is gone, now that TOKEN is composed. The composed degree and TOKEN patterns
+  are not literals, so regex-diff does not replay them; their only new fragment is NUMBER_TOKEN, which it
+  does. Rebasing onto 944b4940 and then b6629d83 merged cleanly, and re-extraction made no further change.
+  2,380 patterns. C# and Rust regex-diff: 145,060 identical, 0 differ.
+- `check:goldens`: `goldens fresh: 189 languages, 36495 rows, 0 stale`, both before and after the rebase.
+- New tests against the Run 10 normalize: TS 3 of 11 fail; C# 6 of 23 fail. Rust pt-normalize against the
+  Run 10 normalize.rs: `11919 / 9 DIFFER`, all probes.
+- Gates on b6629d83:
+  - vitest: 341 files, 6,407 passed, 5 skipped. `.bin` was linked for the run and unlinked after.
+  - `dotnet test` (full): 7,085 passed.
+  - fn-diff, re-dumped: pt-normalize `11928 / 0` (golden 921, fleurs 10,749, probe 258), pt-g2p
+    `75625 / 0`, pt-numbers `101973 / 0`, phonemize-sync and -best `7944 / 4` each (the port-pending ru and el
+    probes).
+  - parity: all ten languages `200/200`.
+  - `cargo test --workspace`: 75 + 1. 0 warnings in dev and release.
+
+**Implication.** All six items are closed and no golden moves. The lax tokenizer grouping (`5.0`, `2.4` read as
+integers) is a separate, golden-moving finding, and I am reporting it, not fixing it.
