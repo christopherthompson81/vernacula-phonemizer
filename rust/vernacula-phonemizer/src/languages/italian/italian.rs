@@ -26,14 +26,9 @@ fn has(set: &str, c: u32) -> bool {
     set.chars().any(|x| x as u32 == c)
 }
 
-/// `VOWEL_LETTERS.includes(c ?? "")`. ⚠ `"…".includes("")` is TRUE in JS, so a missing letter counts as a
-/// vowel wherever the TS passes `x ?? ""` (word-final ⟨gn⟩, ⟨qu⟩, and the ⟨s⟩ voicing test).
-fn is_vowel_opt(c: Option<u32>) -> bool {
-    c.is_none_or(|c| has(VOWEL_LETTERS, c))
-}
-
-fn is_vowel_letter(c: u32) -> bool {
-    has(VOWEL_LETTERS, c)
+/// A missing letter is not a vowel (the TS took `x ?? ""` until #1463, and `includes("")` is true).
+fn is_vowel_letter(c: Option<u32>) -> bool {
+    c.is_some_and(|c| has(VOWEL_LETTERS, c))
 }
 
 fn is_front(c: Option<u32>) -> bool {
@@ -41,12 +36,12 @@ fn is_front(c: Option<u32>) -> bool {
 }
 
 fn is_cons_letter(c: u32) -> bool {
-    (b'a' as u32..=b'z' as u32).contains(&c) && !is_vowel_letter(c)
+    (b'a' as u32..=b'z' as u32).contains(&c) && !is_vowel_letter(Some(c))
 }
 
-/// `VOWEL_PH.includes(ph[0] ?? "")`: the first UTF-16 unit (an empty `ph` would count, as `""` does).
+/// `isVowelSeg`: the first UTF-16 unit of a segment is a vowel (a segment is never empty).
 fn starts_with_vowel_ph(ph: &JsString) -> bool {
-    ph.char_code_at(0).is_none_or(|u| has(VOWEL_PH, u as u32))
+    ph.char_code_at(0).is_some_and(|u| has(VOWEL_PH, u as u32))
 }
 
 struct Seg {
@@ -141,7 +136,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
         if c == ch('g') && nx == Some(ch('l')) && nn == Some(ch('i')) {
             let after = at(i + 3);
             push_gem(&mut segs, "ʎ", true);
-            if after.is_some_and(is_vowel_letter) {
+            if is_vowel_letter(after) {
                 i += 3;
             } else {
                 i += 2;
@@ -149,7 +144,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             continue;
         }
         if c == ch('g') && nx == Some(ch('n')) {
-            push_gem(&mut segs, "ɲ", is_vowel_opt(nn));
+            push_gem(&mut segs, "ɲ", is_vowel_letter(nn));
             i += 2;
             continue;
         }
@@ -157,7 +152,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             let i_dot = nn == Some(ch('i')) || nn == Some(ch('ì'));
             let after = at(i + 3);
             push_gem(&mut segs, "ʃ", true);
-            if i_dot && after.is_some_and(is_vowel_letter) {
+            if i_dot && is_vowel_letter(after) {
                 i += 3;
             } else {
                 i += 2;
@@ -187,7 +182,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
                 }
                 push(&mut segs, soft);
                 let i_dot = follow == Some(ch('i')) || follow == Some(ch('ì'));
-                if i_dot && rest.is_some_and(is_vowel_letter) {
+                if i_dot && is_vowel_letter(rest) {
                     i += if doubled { 3 } else { 2 };
                 } else {
                     i += if doubled { 2 } else { 1 };
@@ -203,7 +198,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
         }
         if c == ch('q') {
             push(&mut segs, "k");
-            if nx == Some(ch('u')) && is_vowel_opt(nn) {
+            if nx == Some(ch('u')) && is_vowel_letter(nn) {
                 push(&mut segs, "w");
                 i += 2;
             } else {
@@ -219,7 +214,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
                 continue;
             }
             let next_voiced = nx.is_some_and(|x| has("bdglmnrvz", x));
-            let voiced = (prev_is_vowel(&segs) && is_vowel_opt(nx)) || next_voiced;
+            let voiced = (prev_is_vowel(&segs) && is_vowel_letter(nx)) || next_voiced;
             push(&mut segs, if voiced { "z" } else { "s" });
             i += 1;
             continue;
@@ -257,9 +252,9 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             continue;
         }
 
-        if is_vowel_letter(c) {
-            let semivowel = (c == ch('i') || c == ch('u'))
-                && (nx.is_some_and(is_vowel_letter) || prev_is_vowel(&segs));
+        if is_vowel_letter(Some(c)) {
+            let semivowel =
+                (c == ch('i') || c == ch('u')) && (is_vowel_letter(nx) || prev_is_vowel(&segs));
             if semivowel {
                 push(&mut segs, if c == ch('i') { "j" } else { "w" });
                 i += 1;
@@ -274,7 +269,9 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
     segs
 }
 
-fn stress_index(segs: &[Seg]) -> Option<usize> {
+/// The stressed nucleus and whether it is the OPEN_ANTEPENULT ⟨e⟩ (the -esimo family, settimo, decimo:
+/// italian.ts has the account). `word` is the lowercased spelling `segs` was scanned from.
+fn stress_index(segs: &[Seg], word: &JsString) -> Option<(usize, bool)> {
     let nuclei: Vec<usize> = segs
         .iter()
         .enumerate()
@@ -285,12 +282,16 @@ fn stress_index(segs: &[Seg]) -> Option<usize> {
         return None;
     }
     if let Some(&a) = nuclei.iter().find(|&&i| segs[i].accent) {
-        return Some(a);
+        return Some((a, false));
     }
     if nuclei.len() == 1 {
-        return Some(nuclei[0]);
+        return Some((nuclei[0], false));
     }
-    Some(nuclei[nuclei.len() - 2])
+    if nuclei.len() >= 3 && crate::js_re!(".esim[oaie]$|^(?:settim|decim)[oaie]$", "u").test(word) {
+        let at = nuclei[nuclei.len() - 3];
+        return Some((at, segs[at].ph == "e"));
+    }
+    Some((nuclei[nuclei.len() - 2], false))
 }
 
 /// One Italian word → canonical IPA.
@@ -300,17 +301,21 @@ pub fn phonemize_word(word: &JsString) -> Result<JsString, String> {
 }
 
 pub(crate) fn word_ipa(t: &Tables, word: &JsString) -> JsString {
-    let segs = scan(t, &word.to_lower_case());
+    let lower = word.to_lower_case();
+    let segs = scan(t, &lower);
     if segs.is_empty() {
         return JsString::new();
     }
-    let stress = stress_index(&segs);
+    let stress = stress_index(&segs, &lower);
     let mut out = JsString::new();
     for (i, sg) in segs.iter().enumerate() {
-        if Some(i) == stress {
-            out.push_str(&js("ˈ"));
+        match stress {
+            Some((at, open)) if at == i => {
+                out.push_str(&js("ˈ"));
+                out.push_str(&if open { js("ɛ") } else { sg.ph.clone() });
+            }
+            _ => out.push_str(&sg.ph),
         }
-        out.push_str(&sg.ph);
     }
     normalize(&out, Form::Nfc)
 }
@@ -506,11 +511,30 @@ mod tests {
 
     /// Expectations are the TS engine's outputs (fn-diff it-g2p), not hand-derived IPA.
     #[test]
-    fn js_empty_includes_is_reproduced() {
-        // `isVowelLetter(nx ?? "")` is true word-finally, so a final ⟨s⟩ after a vowel voices (a TS finding).
-        assert_eq!(phonemize_word(&js("gas")).unwrap(), js("ɡˈaz"));
-        assert_eq!(phonemize_word(&js("magn")).unwrap(), js("mˈaɲɲ"));
-        assert_eq!(phonemize_word(&js("qu")).unwrap(), js("kw"));
+    fn a_missing_next_letter_is_not_a_vowel() {
+        // This pinned the defect (`gas` ɡˈaz, `magn` mˈaɲɲ, `qu` kw): the TS's `isVowelLetter(nx ?? "")` was
+        // true word-finally. Fixed TS-first (#1463); the values are the fixed TS engine's.
+        assert_eq!(phonemize_word(&js("gas")).unwrap(), js("ɡˈas"));
+        assert_eq!(phonemize_word(&js("autobus")).unwrap(), js("awtˈobus"));
+        assert_eq!(phonemize_word(&js("casa")).unwrap(), js("kˈaza"));
+        assert_eq!(phonemize_word(&js("magn")).unwrap(), js("mˈaɲ"));
+        assert_eq!(phonemize_word(&js("qu")).unwrap(), js("kˈu"));
+    }
+
+    #[test]
+    fn the_esimo_family_and_settimo_decimo_take_an_open_antepenult_e() {
+        // Penultimate by default read ventunezˈimo and settˈimo; fixed TS-first (#1463).
+        assert_eq!(
+            phonemize_word(&js("ventunesimo")).unwrap(),
+            js("ventunˈɛzimo")
+        );
+        assert_eq!(
+            phonemize_word(&js("cristianesimo")).unwrap(),
+            js("kristjanˈɛzimo")
+        );
+        assert_eq!(phonemize_word(&js("settimo")).unwrap(), js("sˈɛttimo"));
+        assert_eq!(phonemize_word(&js("decima")).unwrap(), js("dˈɛt͡ʃima"));
+        assert_eq!(phonemize_word(&js("settimana")).unwrap(), js("settimˈana"));
     }
 
     #[test]
