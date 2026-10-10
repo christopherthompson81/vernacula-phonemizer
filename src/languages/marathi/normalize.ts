@@ -115,11 +115,8 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         form: 0 | 1 | 2 | 3,
         suffix: string,
     ): string | undefined => {
-        // ⚠ ABOVE 2^53 THIS DECLINES, as the engine's own number path refuses to compose there (hindi.ts
-        // `number()`): `9007199254740993वा` composed …992, and a 309+-digit run is `Infinity`, whose
-        // composition overflowed the stack out of `phonemize`. The match is left for the number path, which
-        // spells the digits. Hindi's twin is guarded the same way (hindi/normalize.ts, #1463).
-        if (!Number.isSafeInteger(n)) return undefined;
+        // Above 2^53 `cardinal` is a gap (core/numbers.ts `indicNumberWords`), so this declines and the
+        // number path spells the digits (#1463).
         const irr = IRREGULAR[n];
         if (irr !== undefined) return irr[form];
         const words = cardinal(n);

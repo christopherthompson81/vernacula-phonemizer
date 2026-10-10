@@ -77,6 +77,9 @@ public static class Numbers
 
     private static List<string?> IndicNumberWordsFn(double n, NumbersDef d)
     {
+        // An unsafe integer is a gap, never a composition: on Infinity the crore arm recursed until the stack
+        // overflowed and killed the process. See the TS module (#1463).
+        if (!Js.IsSafeInteger(n)) return [null];
         if (n < 10) return [d.Units[(int)n]];
         if (n < 20) return [d.Teens![(int)n - 10]];
         if (n < 100)

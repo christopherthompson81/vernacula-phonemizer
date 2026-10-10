@@ -86,13 +86,10 @@ public static class Numbers
         return r == 0 ? head : $"{head} {LA} {(r < 10 ? Unit(r) : rest(r))}";
     }
 
-    /** JS `Number.isSafeInteger(n)`: an integral double inside ±(2^53 − 1). */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** Non-negative integer → Mooré words; ≥ 10¹² (nothing above milyaar is attested) → digit-by-digit. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e12)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e12)
         {
             // ⚠ THE DIGIT ARM READS `raw` WHEN IT HAS ONE — the token as the text wrote it, not a
             // re-stringified double, because above 2^53 the double is precisely what cannot be trusted.

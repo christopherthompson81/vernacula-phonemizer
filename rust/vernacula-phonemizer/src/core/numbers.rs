@@ -65,6 +65,17 @@ fn magnitudes(d: &NumbersDef) -> &Magnitudes {
     &d.magnitudes
 }
 
+/// `indicNumberWords(n, d)` for the JS `Number` a caller parsed out of a digit run: an unsafe integer (above
+/// 2^53, `Infinity`, `NaN`, a fraction) is a gap, `[null]`, never a composition. The TS composer used to
+/// compose the rounded float and recurse on `Infinity` until the stack overflowed (#1463). Below 2^53 this is
+/// `indic_number_words`; callers pass a non-negative digit run.
+pub fn indic_number_words_js(n: f64, d: &NumbersDef) -> Vec<Word> {
+    if !crate::core::js_string::is_safe_integer(n) {
+        return vec![None];
+    }
+    indic_number_words(n as u64, d)
+}
+
 pub fn indic_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
     let bare = d.bare_magnitude == Some(true);
     let rest = |r: u64| {
@@ -268,4 +279,36 @@ pub fn spell_digits(digits: &str, d: &NumbersDef, word: &dyn Fn(&str) -> String)
         .map(|w| word(w))
         .collect::<Vec<_>>()
         .join(" ")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn hi() -> NumbersDef {
+        crate::languages::hindi::manifest::try_manifest()
+            .unwrap()
+            .numbers
+            .clone()
+    }
+
+    /// The JS-number entry refuses an unsafe integer, as `indicNumberWords` does (#1463).
+    #[test]
+    fn an_unsafe_integer_is_a_gap() {
+        let d = hi();
+        for n in [
+            9_007_199_254_740_992.0,
+            9_007_199_254_740_994.0,
+            1e21,
+            f64::INFINITY,
+            f64::NEG_INFINITY,
+            f64::NAN,
+            1.5,
+        ] {
+            assert_eq!(indic_number_words_js(n, &d), vec![None], "{n}");
+        }
+        let safe = indic_number_words_js(9_007_199_254_740_991.0, &d);
+        assert!(safe.len() > 1 && safe.iter().all(Option::is_some));
+        assert_eq!(safe, indic_number_words(9_007_199_254_740_991, &d));
+    }
 }

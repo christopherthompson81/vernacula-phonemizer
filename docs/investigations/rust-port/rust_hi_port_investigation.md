@@ -257,3 +257,54 @@ without moving the `mr` golden?
 - C# `MarathiOrdinalSafeIntegerTests`: 4 passed; with the guard deleted, `Test host process crashed : Stack overflow`.
 - `npm run typecheck`: clean. `npm run check:goldens`: `189 languages, 36495 rows, 0 stale`. `mr` did not move.
 - `npx vitest run`: 340 files, 6400 passed, 5 skipped. `cd csharp && dotnet test`: 7056 passed, 0 failed.
+
+## Run 12 — 2026-10-09 (the guard moves into the shared composer, `indicNumberWords`)
+
+**Question.** Review found the same gap in every other caller of `indicNumberWords`: pa, ur, or and bn (ordinal
+suffixes) and as (the `নং` marker, and `তম` through the Bengali normalizer). Does one guard in the composer fix all of
+them, and does any golden move?
+
+**Baseline (`.probe/hi/indic53.mts`, TS before the change).** For `9007199254740993<marker>`: pa ਵਾਂ, ur واں, or ତମ,
+bn তম, as নং and as তম all read the same as `…992<marker>` (the rounded float composed). `"1"×400 + marker`:
+`THROW Maximum call stack size exceeded` in all six. hi, mr (Runs 10 and 11), gu and ne were already spelled.
+
+**What changed.**
+- `src/core/numbers.ts` `indicNumberWords`: `if (!Number.isSafeInteger(n)) return [null];`. Why `[null]`: every
+  direct caller (hi, mr, gu, ne, pa, ur, or, bn, as) maps `null` to `""` and then declines when a word is empty,
+  or checks `null` itself (or). `renderNumber` maps `null` to `?`, so a gap is loud rather than a dropped number.
+  Every `renderNumber` caller with the Indic composer (hi, bn, pa, or, ur, sd, syl) already checks
+  `isSafeInteger` first, so none of them reaches the gap.
+- `src/languages/assamese/normalize.ts`, the `নং` rule: it had no way to decline (`${cardinal(n)} নম্বৰ`), so with
+  the composer guard alone the digits would have vanished (` নম্বৰ`). It now returns the match when the cardinal
+  has an empty word. Shown to be needed: with the composer guard but the old Assamese file, the two `as নং` tests fail.
+- The hi and mr ordinal guards (Runs 10 and 11) are REMOVED in TS and C#: they are redundant. Every unsafe input
+  has `n ≥ 2^53`, which is not a safe integer, so the composer's `[null]` makes `ordinal()` decline on its own. No
+  irregular-ordinal key can match before that. The irregular lookup's `double.IsInteger(n) && n in int range` in C#
+  stays: without a guard in front of it, it is what keeps the `(int)` cast in range.
+- C#: `Js.IsSafeInteger` (Core/Js.cs) is used in `Numbers.IndicNumberWordsFn`. The private copies in
+  Mossi/Uzbek/Finnish/Sepedi/Haitian `Numbers.cs` are swapped for it (one call site each). Assamese's `নং` decline
+  is mirrored too.
+- Rust: `core::numbers::indic_number_words_js(n: f64, d)`, the JS-number entry (`[None]` when unsafe). Hindi's
+  `cardinal` uses it, and the hi ordinal guard is dropped as in TS.
+
+**Commands and raw counts.**
+- After the change, `.probe/hi/indic53.mts`: all ten (hi mr pa ur or bn as×2 gu ne) give `993==992: false`,
+  `993 spelled: true`, `400: spelled`.
+- `test/indic-composer-safe-integer.test.ts`, 24 tests: 7 composer cases, 1 for the largest safe integer, and
+  pa/ur/or/bn/as নং/as তম/hi/mr × {2^53+1, 400 digits}. With the composer guard deleted, these plus the hi and mr
+  files give `43 failed | 4 passed (47)`.
+- C# `IndicComposerSafeIntegerTests` (same matrix, plus `Js.IsSafeInteger`): with the guard deleted, the
+  2^53+1 cases fail (pa, ur, or, bn, as×2) and `UnsafeIntegerIsAGap(1.5)` fails, then `Test host process crashed :
+  Stack overflow`.
+- Rust `an_unsafe_integer_is_a_gap` (core::numbers): with the guard disabled, it and
+  `an_unsafe_ordinal_spells_its_digits` both FAIL.
+- Before the rebase: `check:goldens` `189 languages, 36495 rows, 0 stale` (nothing moved, nothing regenerated);
+  `npx vitest run` 342 files, 6428 passed, 5 skipped; `dotnet test` 7085 passed, 0 failed; `cargo test
+  --workspace` 67 + 1 passed, 0 warnings; parity 10/10 at 200/200; fn-diff `hi-normalize 3600/0`, `hi-word
+  43098/0`, `abugida-core 85810/0`, `phonemize-sync 3600/0`, `phonemize-best 3600/0`, `hi-in-en 14/0` on both paths.
+- After rebasing onto main b6629d83 (it and ja merged; clean, no conflict, so the regex corpus was not
+  re-extracted): typecheck clean; `check:goldens` `189 languages, 36495 rows, 0 stale`; `npx vitest run` 343 files,
+  6443 passed, 5 skipped; `dotnet test` 7110 passed, 0 failed; `cargo test --workspace` 71 + 1 passed, 0 warnings
+  (debug and release), fmt clean; parity en en-GB ja it es pt pt-BR hi cmn fr all 200/200; every hi dump regenerated
+  and replayed: `hi-normalize 3600/0`, `hi-word 43098/0`, `abugida-core 85810/0`, `phonemize-sync 3600/0`,
+  `phonemize-best 3600/0`, `hi-in-en 14/0` on both paths.

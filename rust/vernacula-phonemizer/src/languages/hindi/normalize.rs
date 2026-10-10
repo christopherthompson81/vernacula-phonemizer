@@ -6,8 +6,8 @@ use indexmap::IndexMap;
 
 use super::manifest::{OrdinalSuffixes, try_manifest};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, is_safe_integer, js, js_number, js_number_to_string};
-use crate::core::numbers::{NumbersDef, indic_number_words};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
+use crate::core::numbers::{NumbersDef, indic_number_words_js};
 use crate::core::postposed_sign::postposed_sign;
 use crate::core::provenance::{escape, rewrite, rewrite_with};
 use crate::js_re;
@@ -71,10 +71,10 @@ fn js_key_order<V>(m: &IndexMap<String, V>) -> Vec<(&String, &V)> {
     out
 }
 
-/// `indicNumberWords(n, numbers).map((w) => w ?? "")`, for a safe integer: the ordinal declines above 2^53, and
-/// every other caller's pattern bounds it (clock fields, fraction terms).
+/// `indicNumberWords(n, numbers).map((w) => w ?? "")`. An unsafe integer is a gap (`[""]`), so the ordinal
+/// declines and the number path spells the digits.
 fn cardinal(n: f64, d: &NumbersDef) -> Vec<String> {
-    indic_number_words(n as u64, d)
+    indic_number_words_js(n, d)
         .into_iter()
         .map(|w| w.unwrap_or_default())
         .collect()
@@ -180,9 +180,6 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
                 |n: f64| -> Option<&Vec<String>> { irregular.get(&js_number_to_string(n)) };
             let card = |n: f64| cardinal(n, d);
             let ordinal = |n: f64, form: usize, suffix: &str| -> Option<String> {
-                if !is_safe_integer(n) {
-                    return None;
-                }
                 if let Some(irr) = irregular_at(n) {
                     return irr.get(form).cloned();
                 }

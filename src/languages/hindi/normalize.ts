@@ -80,12 +80,8 @@ export function makeHindiNormalizer(
      * separately is what made the suffix a stray syllable ([sˈoːləɦ ʋˈiː̃], "sixteen vee").
      */
     const ordinal = (n: number, form: 0 | 1 | 2, suffix: string): string | undefined => {
-        // ⚠ ABOVE 2^53 THIS DECLINES, as the engine's own `number()` refuses to compose there (hindi.ts).
-        // `Number(digits)` has already lost the low digits, so `9007199254740993वाँ` composed …992 — a
-        // quantity the text never wrote — and a run of 309+ digits is `Infinity`, whose composition
-        // recursed until the STACK overflowed out of `phonemize`. Declining leaves the match as written,
-        // and the number path then spells the digits (`spellDigits`) with the suffix as its own word.
-        if (!Number.isSafeInteger(n)) return undefined;
+        // Above 2^53 `cardinal` is a gap (core/numbers.ts `indicNumberWords`), so this declines and the
+        // number path spells the digits (#1463).
         const irr = IRREGULAR_L[n];
         if (irr !== undefined) return irr[form];
         const words = cardinal(n);

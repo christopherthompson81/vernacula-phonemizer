@@ -93,7 +93,11 @@ public static class Normalize
             s = Rewrite(s, SHA_ONE_DIGIT, m =>
                 Js.Number(ToAscii(m.Groups[1].Value)) == 1 ? "একশ" : m.Value);
 
-            s = Rewrite(s, NANG, m => $"{Cardinal(Js.Number(ToAscii(m.Groups[1].Value)))} নম্বৰ");
+            s = Rewrite(s, NANG, m =>
+            {
+                var c = Cardinal(Js.Number(ToAscii(m.Groups[1].Value)));
+                return c.Split(' ').Any(w => w == "") ? m.Value : $"{c} নম্বৰ";
+            });
 
             for (var i = 0; i < 2; i++)
                 s = Rewrite(s, GROUPED_ORDINAL, "$1$2");

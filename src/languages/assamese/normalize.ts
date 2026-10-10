@@ -87,7 +87,12 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         // 3) THE `নং` NUMBER MARKER — "number N" (190 নং স্থান → position number 190). Not an ordinal; the
         //    marker reads নম্বৰ (number), like the Latin "no.".
         s = rewrite(s, new RegExp(`(?<![${D}])([${D}]+)\\s?নং(?![\\p{L}\\p{M}])`, "gu"),
-            (_m, d: string) => `${cardinal(Number(toAscii(d)))} নম্বৰ`);
+            (m0, d: string) => {
+                // An unsafe integer composes to no word (core/numbers.ts): decline, and the number path
+                // spells the digits.
+                const c = cardinal(Number(toAscii(d)));
+                return c.split(" ").some((w) => w === "") ? m0 : `${c} নম্বৰ`;
+            });
 
         // 4) COMMA-GROUPED ORDINALS — `1,000তম`. The Bengali normalize's ordinal rule keys on a plain digit
         //    run, and the grouping comma detaches the suffix. De-group the comma when an ordinal suffix

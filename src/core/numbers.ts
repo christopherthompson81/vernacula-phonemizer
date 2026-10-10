@@ -64,8 +64,17 @@ export type NumberComposer = (n: number, d: NumbersDef) => (string | null)[];
 /**
  * INDIC (South Asian) number composition: 2-2-3 lakh/crore grouping. Hindi 21-99 are irregular (not
  * compositional) and require their `compound` spellings; a missing one yields `null` (a marked gap).
+ *
+ * ⚠ AN UNSAFE INTEGER IS A GAP TOO: `[null]`, never a composition. Above 2^53 the float has already lost the
+ * low digits, so `9007199254740993` composed …992, and a 309+-digit run is `Infinity`, on which the crore arm
+ * recursed until the STACK overflowed (a `RangeError` out of `phonemize` in pa, ur, or, bn, as, hi, mr; in C#
+ * the process died). Every caller already treats a `null` word as a refusal: the ordinal and marker rules
+ * decline and leave the digits to the engine's number path, which spells them (`spellDigits`). `null` and
+ * not `[]` because `renderNumber` then says `?` instead of silently dropping the number, and every number
+ * path checks `isSafeInteger` before it gets here anyway (#1463).
  */
 export const indicNumberWords: NumberComposer = (n, d) => {
+    if (!Number.isSafeInteger(n)) return [null];
     if (n < 10) return [d.units[n]!];
     if (n < 20) return [d.teens![n - 10]!];
     if (n < 100) {

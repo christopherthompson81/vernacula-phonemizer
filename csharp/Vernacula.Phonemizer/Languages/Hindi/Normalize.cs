@@ -93,8 +93,6 @@ public static class Normalize
         /** The ordinal, agreeing with whatever the written suffix marked. */
         string? Ordinal(double n, int form, string suffix)
         {
-            // Declines above 2^53, as Hindi.cs's number path refuses to compose there; see the TS module.
-            if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return null;
             if (double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue && irregular.TryGetValue(((int)n).ToString(CultureInfo.InvariantCulture), out var irr))
                 return irr[form];
             var words = Cardinal(n);
