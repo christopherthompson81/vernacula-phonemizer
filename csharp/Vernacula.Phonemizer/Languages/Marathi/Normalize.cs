@@ -128,6 +128,8 @@ public static class Normalize
 
         string? Ordinal(double n, int form, string suffix)
         {
+            // Declines above 2^53, as the number path refuses to compose there; see the TS module.
+            if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d)) return null;
             if (double.IsInteger(n) && n >= int.MinValue && n <= int.MaxValue &&
                 IRREGULAR.TryGetValue((int)n, out var irr)) return irr[form];
             var words = Cardinal(n);

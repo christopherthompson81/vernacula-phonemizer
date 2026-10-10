@@ -237,4 +237,23 @@ goldens move, and do the C# and Rust twins close over the fixed behaviour?
 
 **Also found.** Marathi's own normalizer (`src/languages/marathi/normalize.ts` step 6, not this file) has the same
 gap: `9007199254740993वा` and `9007199254740992वा` read identically, and `"1"×400 + "वा"` throws the same
-RangeError out of `phonemize(…, "mr")`. Gujarati and Nepali already guard with `isSafeInteger`. Not fixed here.
+RangeError out of `phonemize(…, "mr")`. Gujarati and Nepali already guard with `isSafeInteger`. Fixed in Run 11.
+
+## Run 11 — 2026-10-09 19:05 (Marathi's twin of the ordinal gap, folded into this branch)
+
+**Question.** Does Marathi's own ordinal rule (`src/languages/marathi/normalize.ts` step 6) take the same guard
+without moving the `mr` golden?
+
+**What changed.** `ordinal()` there: `if (!Number.isSafeInteger(n)) return undefined;`. C# `Marathi/Normalize.cs`
+`Ordinal` mirrors it. No Rust Marathi exists yet.
+
+**Readings (TS).** Before: `9007199254740993वा` and `9007199254740992वा` gave the same string (…992), and `"1"×400 +
+"वा"` threw `RangeError: Maximum call stack size exceeded`. After: the digits are spelled, then the suffix, i.e.
+`phonemize(digits) + " " + phonemize("वा")`. `9007199254740991वा` still composes as an ordinal.
+
+**Commands and raw counts.**
+- `npx vitest run test/marathi-ordinal-safe-integer.test.ts`: 4 passed; with the guard deleted, 3 failed (2^53+1
+  with -वा and -व्या, and the 400-digit case), and the largest-safe-integer test passed either way.
+- C# `MarathiOrdinalSafeIntegerTests`: 4 passed; with the guard deleted, `Test host process crashed : Stack overflow`.
+- `npm run typecheck`: clean. `npm run check:goldens`: `189 languages, 36495 rows, 0 stale`. `mr` did not move.
+- `npx vitest run`: 340 files, 6400 passed, 5 skipped. `cd csharp && dotnet test`: 7056 passed, 0 failed.
