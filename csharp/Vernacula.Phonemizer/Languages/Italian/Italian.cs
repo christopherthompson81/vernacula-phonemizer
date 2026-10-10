@@ -105,15 +105,16 @@ public static class ItalianPhonemizer
     private static bool IsFront(string? c) => c is not null && FRONT.Contains(c, StringComparison.Ordinal);
     private static readonly JsRe ASCII_LOWER = JsRegex.Compile("[a-z]", "u");
     private static bool IsConsLetter(string c) => ASCII_LOWER.IsMatch(c) && !IsVowelLetter(c);
-    /** Does this segment's IPA open with a vowel? (A segment is never empty.) */
-    private static bool IsVowelSeg(Seg sg) =>
-        Js.CodePoints(sg.Ph) is var cp && cp.Count > 0 && VOWEL_PH.Contains(cp[0], StringComparison.Ordinal);
+    /** Does this segment's IPA open with a vowel? Its first UTF-16 unit, as the TS reads `ph[0]`; all of
+     *  VOWEL_PH is BMP. (A segment is never empty.) */
+    private static bool IsVowelSeg(Seg sg) => sg.Ph.Length > 0 && VOWEL_PH.IndexOf(sg.Ph[0]) >= 0;
     /**
-     * The -esimo family (ordinals: ventesimo, ventunesimo, millesimo; and -esimo nouns: cristianesimo,
-     * medesimo) is stressed on the suffix's ⟨e⟩, the ANTEPENULT, which the default penultimate rule cannot
-     * reach. The stem must be non-empty (the verb form *esimi* is not this suffix).
+     * Words stressed on an OPEN ⟨e⟩ in the ANTEPENULT, which the default penultimate rule cannot reach: the
+     * -esimo family (ventunesimo, millesimo, cristianesimo; the stem must be non-empty, so the verb form
+     * *esimi* is not one) and the irregular ordinal head's two proparoxytones, settimo and decimo, in every
+     * gender and number. The open vowel is the standard-register choice; see the TS twin.
      */
-    private static readonly JsRe ESIMO = JsRegex.Compile(".esim[oaie]$", "u");
+    private static readonly JsRe OPEN_ANTEPENULT = JsRegex.Compile(".esim[oaie]$|^(?:settim|decim)[oaie]$", "u");
 
     private sealed class Seg
     {
@@ -164,7 +165,7 @@ public static class ItalianPhonemizer
             {
                 var after = At(i + 3);
                 PushGem("ʎ", true);
-                if (after is not null && IsVowelLetter(after)) i += 3; // i silent
+                if (IsVowelLetter(after)) i += 3; // i silent
                 else i += 2; // leave the i as a nucleus
                 continue;
             }
@@ -179,7 +180,7 @@ public static class ItalianPhonemizer
                 var iDot = nn == "i" || nn == "ì";
                 var after = At(i + 3);
                 PushGem("ʃ", true);
-                if (iDot && after is not null && IsVowelLetter(after)) i += 3;
+                if (iDot && IsVowelLetter(after)) i += 3;
                 else i += 2;
                 continue;
             }
@@ -200,7 +201,7 @@ public static class ItalianPhonemizer
                     if (doubled) Push("t͡ʃ");
                     Push("t͡ʃ");
                     var iDot = follow == "i" || follow == "ì";
-                    if (iDot && rest is not null && IsVowelLetter(rest))
+                    if (iDot && IsVowelLetter(rest))
                         i += doubled ? 3 : 2; // ⟨ci⟩+V: silent i (ciao, faccia) — leave the following vowel
                     else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
                     continue;
@@ -227,7 +228,7 @@ public static class ItalianPhonemizer
                     if (doubled) Push("d͡ʒ");
                     Push("d͡ʒ");
                     var iDot = follow == "i" || follow == "ì";
-                    if (iDot && rest is not null && IsVowelLetter(rest))
+                    if (iDot && IsVowelLetter(rest))
                         i += doubled ? 3 : 2; // ⟨gi⟩+V: silent i (giorno, oggi) — leave the following vowel
                     else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
                     continue;
@@ -289,7 +290,7 @@ public static class ItalianPhonemizer
             if (IsVowelLetter(c))
             {
                 var semivowel = (c == "i" || c == "u") &&
-                                ((nx is not null && IsVowelLetter(nx)) || PrevIsVowel());
+                                (IsVowelLetter(nx) || PrevIsVowel());
                 if (semivowel)
                 {
                     Push(c == "i" ? "j" : "w");
@@ -306,19 +307,23 @@ public static class ItalianPhonemizer
     }
 
     /**
-     * Stressed nucleus index: the written accent if any, else the -esimo antepenult, else penultimate vowel
-     * (or the only/last nucleus). `word` is the lowercased spelling `segs` was scanned from.
+     * Stressed nucleus: the written accent if any, else the OPEN_ANTEPENULT ⟨e⟩ (`Open`), else penultimate
+     * vowel (or the only/last nucleus). `word` is the lowercased spelling `segs` was scanned from.
      */
-    private static int StressIndex(IReadOnlyList<Seg> segs, string word)
+    private static (int At, bool Open) StressIndex(IReadOnlyList<Seg> segs, string word)
     {
         var nuclei = segs
             .Select((sg, i) => IsVowelSeg(sg) ? i : -1)
             .Where(i => i >= 0).ToList();
-        if (nuclei.Count == 0) return -1;
-        foreach (var i in nuclei) if (segs[i].Accent) return i;
-        if (nuclei.Count == 1) return nuclei[0];
-        if (nuclei.Count >= 3 && ESIMO.IsMatch(word)) return nuclei[^3]; // ventunˈesimo
-        return nuclei[^2]; // default penultimate (antepenult is lexical/unmarked)
+        if (nuclei.Count == 0) return (-1, false);
+        foreach (var i in nuclei) if (segs[i].Accent) return (i, false);
+        if (nuclei.Count == 1) return (nuclei[0], false);
+        if (nuclei.Count >= 3 && OPEN_ANTEPENULT.IsMatch(word))
+        {
+            var at = nuclei[^3]; // ventunˈɛzimo, sˈɛttimo
+            return (at, segs[at].Ph == "e");
+        }
+        return (nuclei[^2], false); // default penultimate (antepenult is lexical/unmarked)
     }
 
     /** One Italian word → canonical IPA. */
@@ -331,8 +336,8 @@ public static class ItalianPhonemizer
         var outp = "";
         for (var i = 0; i < segs.Count; i++)
         {
-            if (i == stress) outp += "ˈ";
-            outp += segs[i].Ph;
+            if (i == stress.At) outp += "ˈ";
+            outp += i == stress.At && stress.Open ? "ɛ" : segs[i].Ph;
         }
         return outp.Normalize(System.Text.NormalizationForm.FormC);
     }

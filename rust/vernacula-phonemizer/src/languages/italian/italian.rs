@@ -27,12 +27,8 @@ fn has(set: &str, c: u32) -> bool {
 }
 
 /// A missing letter is not a vowel (the TS took `x ?? ""` until #1463, and `includes("")` is true).
-fn is_vowel_opt(c: Option<u32>) -> bool {
+fn is_vowel_letter(c: Option<u32>) -> bool {
     c.is_some_and(|c| has(VOWEL_LETTERS, c))
-}
-
-fn is_vowel_letter(c: u32) -> bool {
-    has(VOWEL_LETTERS, c)
 }
 
 fn is_front(c: Option<u32>) -> bool {
@@ -40,7 +36,7 @@ fn is_front(c: Option<u32>) -> bool {
 }
 
 fn is_cons_letter(c: u32) -> bool {
-    (b'a' as u32..=b'z' as u32).contains(&c) && !is_vowel_letter(c)
+    (b'a' as u32..=b'z' as u32).contains(&c) && !is_vowel_letter(Some(c))
 }
 
 /// `isVowelSeg`: the first UTF-16 unit of a segment is a vowel (a segment is never empty).
@@ -140,7 +136,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
         if c == ch('g') && nx == Some(ch('l')) && nn == Some(ch('i')) {
             let after = at(i + 3);
             push_gem(&mut segs, "ʎ", true);
-            if after.is_some_and(is_vowel_letter) {
+            if is_vowel_letter(after) {
                 i += 3;
             } else {
                 i += 2;
@@ -148,7 +144,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             continue;
         }
         if c == ch('g') && nx == Some(ch('n')) {
-            push_gem(&mut segs, "ɲ", is_vowel_opt(nn));
+            push_gem(&mut segs, "ɲ", is_vowel_letter(nn));
             i += 2;
             continue;
         }
@@ -156,7 +152,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             let i_dot = nn == Some(ch('i')) || nn == Some(ch('ì'));
             let after = at(i + 3);
             push_gem(&mut segs, "ʃ", true);
-            if i_dot && after.is_some_and(is_vowel_letter) {
+            if i_dot && is_vowel_letter(after) {
                 i += 3;
             } else {
                 i += 2;
@@ -186,7 +182,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
                 }
                 push(&mut segs, soft);
                 let i_dot = follow == Some(ch('i')) || follow == Some(ch('ì'));
-                if i_dot && rest.is_some_and(is_vowel_letter) {
+                if i_dot && is_vowel_letter(rest) {
                     i += if doubled { 3 } else { 2 };
                 } else {
                     i += if doubled { 2 } else { 1 };
@@ -202,7 +198,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
         }
         if c == ch('q') {
             push(&mut segs, "k");
-            if nx == Some(ch('u')) && is_vowel_opt(nn) {
+            if nx == Some(ch('u')) && is_vowel_letter(nn) {
                 push(&mut segs, "w");
                 i += 2;
             } else {
@@ -218,7 +214,7 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
                 continue;
             }
             let next_voiced = nx.is_some_and(|x| has("bdglmnrvz", x));
-            let voiced = (prev_is_vowel(&segs) && is_vowel_opt(nx)) || next_voiced;
+            let voiced = (prev_is_vowel(&segs) && is_vowel_letter(nx)) || next_voiced;
             push(&mut segs, if voiced { "z" } else { "s" });
             i += 1;
             continue;
@@ -256,9 +252,9 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
             continue;
         }
 
-        if is_vowel_letter(c) {
-            let semivowel = (c == ch('i') || c == ch('u'))
-                && (nx.is_some_and(is_vowel_letter) || prev_is_vowel(&segs));
+        if is_vowel_letter(Some(c)) {
+            let semivowel =
+                (c == ch('i') || c == ch('u')) && (is_vowel_letter(nx) || prev_is_vowel(&segs));
             if semivowel {
                 push(&mut segs, if c == ch('i') { "j" } else { "w" });
                 i += 1;
@@ -273,8 +269,9 @@ fn scan(t: &Tables, word: &JsString) -> Vec<Seg> {
     segs
 }
 
-/// `word` is the lowercased spelling `segs` was scanned from; the -esimo family takes the antepenult.
-fn stress_index(segs: &[Seg], word: &JsString) -> Option<usize> {
+/// The stressed nucleus and whether it is the OPEN_ANTEPENULT ⟨e⟩ (the -esimo family, settimo, decimo:
+/// italian.ts has the account). `word` is the lowercased spelling `segs` was scanned from.
+fn stress_index(segs: &[Seg], word: &JsString) -> Option<(usize, bool)> {
     let nuclei: Vec<usize> = segs
         .iter()
         .enumerate()
@@ -285,15 +282,16 @@ fn stress_index(segs: &[Seg], word: &JsString) -> Option<usize> {
         return None;
     }
     if let Some(&a) = nuclei.iter().find(|&&i| segs[i].accent) {
-        return Some(a);
+        return Some((a, false));
     }
     if nuclei.len() == 1 {
-        return Some(nuclei[0]);
+        return Some((nuclei[0], false));
     }
-    if nuclei.len() >= 3 && crate::js_re!(".esim[oaie]$", "u").test(word) {
-        return Some(nuclei[nuclei.len() - 3]);
+    if nuclei.len() >= 3 && crate::js_re!(".esim[oaie]$|^(?:settim|decim)[oaie]$", "u").test(word) {
+        let at = nuclei[nuclei.len() - 3];
+        return Some((at, segs[at].ph == "e"));
     }
-    Some(nuclei[nuclei.len() - 2])
+    Some((nuclei[nuclei.len() - 2], false))
 }
 
 /// One Italian word → canonical IPA.
@@ -311,10 +309,13 @@ pub(crate) fn word_ipa(t: &Tables, word: &JsString) -> JsString {
     let stress = stress_index(&segs, &lower);
     let mut out = JsString::new();
     for (i, sg) in segs.iter().enumerate() {
-        if Some(i) == stress {
-            out.push_str(&js("ˈ"));
+        match stress {
+            Some((at, open)) if at == i => {
+                out.push_str(&js("ˈ"));
+                out.push_str(&if open { js("ɛ") } else { sg.ph.clone() });
+            }
+            _ => out.push_str(&sg.ph),
         }
-        out.push_str(&sg.ph);
     }
     normalize(&out, Form::Nfc)
 }
@@ -521,16 +522,19 @@ mod tests {
     }
 
     #[test]
-    fn the_esimo_family_is_stressed_on_the_suffix_e() {
-        // Penultimate by default read ventunezˈimo; fixed TS-first (#1463).
+    fn the_esimo_family_and_settimo_decimo_take_an_open_antepenult_e() {
+        // Penultimate by default read ventunezˈimo and settˈimo; fixed TS-first (#1463).
         assert_eq!(
             phonemize_word(&js("ventunesimo")).unwrap(),
-            js("ventunˈezimo")
+            js("ventunˈɛzimo")
         );
         assert_eq!(
             phonemize_word(&js("cristianesimo")).unwrap(),
-            js("kristjanˈezimo")
+            js("kristjanˈɛzimo")
         );
+        assert_eq!(phonemize_word(&js("settimo")).unwrap(), js("sˈɛttimo"));
+        assert_eq!(phonemize_word(&js("decima")).unwrap(), js("dˈɛt͡ʃima"));
+        assert_eq!(phonemize_word(&js("settimana")).unwrap(), js("settimˈana"));
     }
 
     #[test]

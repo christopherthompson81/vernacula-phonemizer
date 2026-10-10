@@ -34,13 +34,18 @@ const isConsLetter = (c: string): boolean =>
 /** Does this segment's IPA open with a vowel? (Its first UTF-16 unit; a segment is never empty.) */
 const isVowelSeg = (sg: Seg): boolean => sg.ph !== "" && VOWEL_PH.includes(sg.ph[0]!);
 /**
- * The -esimo family (ordinals: ventesimo, ventunesimo, millesimo; and -esimo nouns: cristianesimo, medesimo,
- * battesimo, cresima) is stressed on the suffix's ⟨e⟩, the ANTEPENULT, which the default penultimate rule
- * cannot reach: ventunesimo read ventunezˈimo. normalize.ts and the Roman pass generate these words for every
- * composed ordinal (XXI secolo, 21°, 1/20), so the stress is decided here, where a typed and a generated
- * ordinal read alike. The stem must be non-empty (the verb form *esimi* is not this suffix).
+ * Words stressed on an OPEN ⟨e⟩ in the ANTEPENULT, which the default penultimate rule cannot reach:
+ *  - the -esimo family (ordinals: ventesimo, ventunesimo, millesimo; and -esimo nouns: cristianesimo,
+ *    medesimo, battesimo), whose stem must be non-empty (the verb form *esimi* is not this suffix);
+ *  - the two proparoxytones of the irregular ordinal head (italian.jsonc `ordinals`): settimo, decimo, in
+ *    every gender and number (decima, settimi).
+ * normalize.ts and the Roman pass generate these words for every ordinal (XXI secolo, VII secolo, 21°, 10ª,
+ * 1/20), so the stress is decided here, where a typed and a generated ordinal read alike: ventunesimo read
+ * ventunezˈimo and decima det͡ʃˈima. The vowel is OPEN (ventunˈɛzimo, sˈɛttimo, dˈɛt͡ʃimo), the standard
+ * reading; wikipron writes -esimo with e and ɛ about equally, so this is a choice for the standard register,
+ * not a measured one.
  */
-const ESIMO = /.esim[oaie]$/u;
+const OPEN_ANTEPENULT = /.esim[oaie]$|^(?:settim|decim)[oaie]$/u;
 
 interface Seg {
     ph: string;
@@ -83,7 +88,7 @@ function scan(word: string): Seg[] {
         if (c === "g" && nx === "l" && nn === "i") {
             const after = s[i + 3];
             pushGem("ʎ", true);
-            if (after !== undefined && isVowelLetter(after)) i += 3; // i silent
+            if (isVowelLetter(after)) i += 3; // i silent
             else i += 2; // leave the i as a nucleus
             continue;
         }
@@ -98,7 +103,7 @@ function scan(word: string): Seg[] {
             const iDot = nn === "i" || nn === "ì";
             const after = s[i + 3];
             pushGem("ʃ", true);
-            if (iDot && after !== undefined && isVowelLetter(after)) i += 3;
+            if (iDot && isVowelLetter(after)) i += 3;
             else i += 2;
             continue;
         }
@@ -118,7 +123,7 @@ function scan(word: string): Seg[] {
                 if (doubled) push("t͡ʃ");
                 push("t͡ʃ");
                 const iDot = follow === "i" || follow === "ì";
-                if (iDot && rest !== undefined && isVowelLetter(rest))
+                if (iDot && isVowelLetter(rest))
                     i += doubled ? 3 : 2; // ⟨ci⟩+V: silent i (ciao, faccia) — leave the following vowel
                 else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
                 continue;
@@ -144,7 +149,7 @@ function scan(word: string): Seg[] {
                 if (doubled) push("d͡ʒ");
                 push("d͡ʒ");
                 const iDot = follow === "i" || follow === "ì";
-                if (iDot && rest !== undefined && isVowelLetter(rest))
+                if (iDot && isVowelLetter(rest))
                     i += doubled ? 3 : 2; // ⟨gi⟩+V: silent i (giorno, oggi) — leave the following vowel
                 else i += doubled ? 2 : 1; // else the triggering e/i is a pronounced nucleus — leave it
                 continue;
@@ -214,7 +219,7 @@ function scan(word: string): Seg[] {
             // is lexical and lost — a documented tail.
             const semivowel =
                 (c === "i" || c === "u") &&
-                ((nx !== undefined && isVowelLetter(nx)) || prevIsVowel());
+                (isVowelLetter(nx) || prevIsVowel());
             if (semivowel) {
                 push(c === "i" ? "j" : "w");
                 i += 1;
@@ -229,18 +234,21 @@ function scan(word: string): Seg[] {
     return segs;
 }
 
-/** Stressed nucleus index: the written accent if any, else the -esimo antepenult, else penultimate vowel (or
- *  the only/last nucleus). `word` is the lowercased spelling `segs` was scanned from. */
-function stressIndex(segs: Seg[], word: string): number {
+/** Stressed nucleus: the written accent if any, else the OPEN_ANTEPENULT ⟨e⟩ (`open`), else penultimate vowel
+ *  (or the only/last nucleus). `word` is the lowercased spelling `segs` was scanned from. */
+function stressIndex(segs: Seg[], word: string): { at: number; open: boolean } {
     const nuclei = segs
         .map((sg, i) => (isVowelSeg(sg) ? i : -1))
         .filter((i) => i >= 0);
-    if (nuclei.length === 0) return -1;
+    if (nuclei.length === 0) return { at: -1, open: false };
     const accented = nuclei.find((i) => segs[i]!.accent);
-    if (accented !== undefined) return accented;
-    if (nuclei.length === 1) return nuclei[0]!;
-    if (nuclei.length >= 3 && ESIMO.test(word)) return nuclei[nuclei.length - 3]!; // ventunˈesimo
-    return nuclei[nuclei.length - 2]!; // default penultimate (antepenult is lexical/unmarked)
+    if (accented !== undefined) return { at: accented, open: false };
+    if (nuclei.length === 1) return { at: nuclei[0]!, open: false };
+    if (nuclei.length >= 3 && OPEN_ANTEPENULT.test(word)) {
+        const at = nuclei[nuclei.length - 3]!; // ventunˈɛzimo, sˈɛttimo
+        return { at, open: segs[at]!.ph === "e" };
+    }
+    return { at: nuclei[nuclei.length - 2]!, open: false }; // default penultimate (antepenult is lexical/unmarked)
 }
 
 /** One Italian word → canonical IPA. */
@@ -251,8 +259,8 @@ export function phonemizeWord(word: string): string {
     const stress = stressIndex(segs, lower);
     let out = "";
     for (let i = 0; i < segs.length; i++) {
-        if (i === stress) out += "ˈ";
-        out += segs[i]!.ph;
+        if (i === stress.at) out += "ˈ";
+        out += i === stress.at && stress.open ? "ɛ" : segs[i]!.ph;
     }
     return out.normalize("NFC");
 }

@@ -4,8 +4,10 @@
  *
  * 1. `isVowelLetter(next ?? "")`: JS `"…".includes("")` is TRUE, so "no next letter" counted as a vowel at
  *    the end of a word — a final ⟨s⟩ after a vowel voiced, a final ⟨gn⟩ geminated, a final ⟨qu⟩ glided.
- * 2. The -esimo family (every composed ordinal, plus nouns like *cristianesimo*) took the default penultimate
- *    stress: ventunezˈimo for ventunˈezimo. It reached FLEURS through the Roman pass, `21°` and fractions.
+ * 2. The -esimo family (every composed ordinal, plus nouns like *cristianesimo*) and the irregular head's two
+ *    proparoxytones (settimo, decimo) took the default penultimate stress: ventunezˈimo, settˈimo, det͡ʃˈima.
+ *    They reached FLEURS through the Roman pass, `21°`/`10ª` and fractions. The stressed e is OPEN, the
+ *    standard reading (wikipron is split on it and the eval folds ɛ→e, so this is a register choice).
  */
 import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
@@ -31,19 +33,30 @@ describe("italian: a missing next letter is not a vowel", () => {
     });
 });
 
-describe("italian: the -esimo family is stressed on the suffix's e", () => {
+describe("italian: the -esimo family and settimo/decimo are stressed on an open antepenult e", () => {
     test("typed words", () => {
-        expect(phonemizeWord("ventunesimo")).toBe("ventunˈezimo");
-        expect(phonemizeWord("cristianesimo")).toBe("kristjanˈezimo");
-        expect(phonemizeWord("medesimo")).toBe("medˈezimo");
+        expect(phonemizeWord("ventunesimo")).toBe("ventunˈɛzimo");
+        expect(phonemizeWord("cristianesimo")).toBe("kristjanˈɛzimo");
+        expect(phonemizeWord("medesimo")).toBe("medˈɛzimo");
+        expect(phonemizeWord("settimo")).toBe("sˈɛttimo");
+        expect(phonemizeWord("decima")).toBe("dˈɛt͡ʃima");
+        expect(phonemizeWord("decimi")).toBe("dˈɛt͡ʃimi");
+        // not the family: the bare verb form, and words that only begin like settim-/decim-
+        expect(phonemizeWord("esimi")).toBe("ezˈimi");
+        expect(phonemizeWord("settimana")).toBe("settimˈana");
+        expect(phonemizeWord("decimetro")).toBe("det͡ʃimˈetro");
+        expect(phonemizeWord("primo")).toBe("prˈimo");
     });
 
     test("ordinals the normalizer and the Roman pass generate", () => {
-        expect(phonemize("il XXI secolo", "it")).toBe("ˈil ventunˈezimo sekˈolo");
-        expect(phonemize("papa Giovanni XXIII", "it")).toBe("pˈapa d͡ʒovˈanni ventitreˈezimo");
-        expect(phonemize("il MMM anniversario", "it")).toBe("ˈil tremillˈezimo anniversˈarjo");
-        expect(phonemize("il 21° gol", "it")).toBe("ˈil ventunˈezimo ɡˈol");
-        expect(phonemize("la 21ª volta", "it")).toBe("lˈa ventunˈezima vˈolta");
-        expect(phonemize("3/20", "it")).toBe("trˈe ventˈezimi");
+        expect(phonemize("il XXI secolo", "it")).toBe("ˈil ventunˈɛzimo sekˈolo");
+        expect(phonemize("papa Giovanni XXIII", "it")).toBe("pˈapa d͡ʒovˈanni ventitreˈɛzimo");
+        expect(phonemize("il MMM anniversario", "it")).toBe("ˈil tremillˈɛzimo anniversˈarjo");
+        expect(phonemize("il 21° gol", "it")).toBe("ˈil ventunˈɛzimo ɡˈol");
+        expect(phonemize("la 21ª volta", "it")).toBe("lˈa ventunˈɛzima vˈolta");
+        expect(phonemize("3/20", "it")).toBe("trˈe ventˈɛzimi");
+        expect(phonemize("il VII secolo", "it")).toBe("ˈil sˈɛttimo sekˈolo");
+        expect(phonemize("la 10ª Armata", "it")).toBe("lˈa dˈɛt͡ʃima armˈata");
+        expect(phonemize("3/10", "it")).toBe("trˈe dˈɛt͡ʃimi");
     });
 });

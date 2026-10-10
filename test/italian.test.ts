@@ -80,9 +80,9 @@ describe("italian Roman-numeral ordinal policy", () => {
         expect(ROMAN_POLICY.ordinalBefore?.test("secolo")).toBe(true); // "nel secolo XIX"
         expect(ord(19)).toBe("diciannovesimo");
         expect(ord(18)).toBe("diciottesimo");
-        // -esimo is stressed on its e (antepenult): this read dit͡ʃannovezˈimo, the default penultimate, until
-        // the Rust port's reading found it (#1463). test/italian-port-findings.test.ts has the account.
-        expect(phonemize("diciannovesimo secolo", "it")).toBe("dit͡ʃannovˈezimo sekˈolo");
+        // -esimo is stressed on its OPEN e (antepenult): this read dit͡ʃannovezˈimo, the default penultimate,
+        // until the Rust port's reading found it (#1463). test/italian-port-findings.test.ts has the account.
+        expect(phonemize("diciannovesimo secolo", "it")).toBe("dit͡ʃannovˈɛzimo sekˈolo");
     });
 
     test("regnal name before the numeral fires the ordinal (papa Giovanni XXIII)", () => {
@@ -91,7 +91,7 @@ describe("italian Roman-numeral ordinal policy", () => {
         expect(ROMAN_POLICY.ordinalBefore?.test("luigi")).toBe(true);
         expect(ord(23)).toBe("ventitreesimo"); // -tré keeps its vowel: ventitreesimo, not *ventitresimo
         expect(ord(14)).toBe("quattordicesimo");
-        expect(phonemize("papa giovanni ventitreesimo", "it")).toBe("pˈapa d͡ʒovˈanni ventitreˈezimo"); // -ˈesimo (#1463)
+        expect(phonemize("papa giovanni ventitreesimo", "it")).toBe("pˈapa d͡ʒovˈanni ventitreˈɛzimo"); // -ˈɛsimo, open (#1463)
     });
 
     test("ordinal is unbounded — XL / L / above L (anniversaries, congresses)", () => {
@@ -100,7 +100,7 @@ describe("italian Roman-numeral ordinal policy", () => {
         expect(ord(60)).toBe("sessantesimo");
         expect(ord(100)).toBe("centesimo");
         expect(ROMAN_POLICY.ordinalAfter?.test("anniversario")).toBe(true);
-        expect(phonemize("cinquantesimo anniversario", "it")).toBe("t͡ʃinkwantˈezimo anniversˈarjo"); // -ˈesimo (#1463)
+        expect(phonemize("cinquantesimo anniversario", "it")).toBe("t͡ʃinkwantˈɛzimo anniversˈarjo"); // -ˈɛsimo, open (#1463)
     });
 
     test("a bare numeral, with no ordinal context, stays a CARDINAL", () => {
@@ -176,19 +176,19 @@ describe("italian text normalization", () => {
         // Before: "1° gennaio" → [ˈuno d͡ʒennˈajo]; "dell'11º" → [undˈit͡ʃi º], a non-IPA character in the
         // phoneme string (U+00BA is Script=Latin, so core/clauses.ts's foreign fallback emitted it verbatim).
         expect(phonemize("a partire dal 1° gennaio", "it")).toContain("prˈimo");
-        expect(phonemize("il suo 60° gol", "it")).toContain("sessantˈezimo"); // -ˈesimo (#1463)
-        expect(phonemize("al 190° posto", "it")).toContain("t͡ʃentonovantˈezimo");
-        expect(phonemize("dell'11º Reggimento", "it")).toContain("undit͡ʃˈezimo");
+        expect(phonemize("il suo 60° gol", "it")).toContain("sessantˈɛzimo"); // -ˈɛsimo, open (#1463)
+        expect(phonemize("al 190° posto", "it")).toContain("t͡ʃentonovantˈɛzimo");
+        expect(phonemize("dell'11º Reggimento", "it")).toContain("undit͡ʃˈɛzimo");
         expect(phonemize("dell'11º Reggimento", "it")).not.toContain("º");
-        expect(phonemize("della 10ª Armata", "it")).toContain("det͡ʃˈima"); // feminine
+        expect(phonemize("della 10ª Armata", "it")).toContain("dˈɛt͡ʃima"); // feminine; decima is proparoxytone, det͡ʃˈima until #1463
     });
 
     test("the other two senses of ° are claimed first: temperature and coordinate", () => {
         expect(phonemize("oltre i 30°C", "it")).toContain("ɡrˈadi t͡ʃˈelsjus"); // a final ⟨s⟩ no longer voices (#1463)
         expect(phonemize("temperature pari a 90 °F", "it")).toContain("ɡrˈadi");
         expect(phonemize("a est del 35°W", "it")).toContain("ɡrˈadi ˈovest");
-        // Stress-agnostic: pinned as -ezˈimo, this guard passed VACUOUSLY once -esimo took its own stress (#1463).
-        expect(phonemize("a est del 35°W", "it")).not.toMatch(/zˈ?imo/u); // no -esimo of any stress
+        // Anchored on the CARDINAL STEM, so neither the stress nor the ⟨s⟩ voicing can make it vacuous (#1463).
+        expect(phonemize("a est del 35°W", "it")).not.toMatch(/trentat͡ʃˈ?inkw\S*imo/u);
     });
 
     test("era markers (×10) left two pauses and a letter-spelled Cristo", () => {

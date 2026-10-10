@@ -77,8 +77,8 @@ describe("Roman numerals (core/roman.ts)", () => {
         expect(phonemize("siglo xix", "es")).toContain("ðjeθinwˈeβe");
         // Italian reads them as ORDINALS, including regnal names, per its own policy (Treccani).
         // -esimo is stressed on its e (antepenult), not the default penultimate (#1463).
-        expect(phonemize("papa giovanni xxiii", "it")).toContain("ventitreˈezimo");
-        expect(phonemize("xix secolo", "it")).toContain("dit͡ʃannovˈezimo");
+        expect(phonemize("papa giovanni xxiii", "it")).toContain("ventitreˈɛzimo");
+        expect(phonemize("xix secolo", "it")).toContain("dit͡ʃannovˈɛzimo");
         // ...while a BARE Italian numeral has no ordinal context and stays a cardinal.
         expect(phonemize("xix", "it")).toContain("dit͡ʃannˈove");
     });
