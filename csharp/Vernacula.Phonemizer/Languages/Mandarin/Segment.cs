@@ -27,14 +27,31 @@ public sealed class PinToken
 public static class Segmenter
 {
     private static readonly JsRe HAN = JsRegex.Compile("\\p{Script=Han}", "u");
+    /** The ideographic iteration mark: it repeats the character before it (人々 = 人人). */
+    private const string ITERATION = "々";
+
+    /**
+     * The character a code point is READ as: a Han code point with no entry of its own that NFKC folds to a
+     * single Han character (a Kangxi radical, a CJK compatibility ideograph: ⼀ → 一) reads as that character.
+     */
+    private static string ReadAs(string ch, PinyinTables t)
+    {
+        if (!HAN.IsMatch(ch) || t.Chars.ContainsKey(ch)) return ch;
+        var f = Js.Normalize(ch, System.Text.NormalizationForm.FormKC);
+        return f != ch && Js.CodePoints(f).Count == 1 && HAN.IsMatch(f) ? f : ch;
+    }
 
     /**
      * Segment a run of code points into pinyin tokens. `exempt[i]` marks a character that must not drive word
      * sandhi — a spoken digit synthesized from a number — so it gets no `Src` and 一/不 sandhi never fires on
      * it. Quantity 一 (一千) is NOT exempt and sandhis normally.
      */
-    public static List<PinToken> Segment(IReadOnlyList<string> chars, PinyinTables t, IReadOnlyList<bool>? exempt = null)
+    public static List<PinToken> Segment(IReadOnlyList<string> input, PinyinTables t, IReadOnlyList<bool>? exempt = null)
     {
+        // Fold first, so a phrase can match across a folded character; 々 takes its predecessor once that is folded.
+        var chars = new List<string>(input.Count);
+        for (var k = 0; k < input.Count; k++)
+            chars.Add(input[k] == ITERATION && k > 0 && HAN.IsMatch(chars[k - 1]) ? chars[k - 1] : ReadAs(input[k], t));
         var outp = new List<PinToken>();
         var i = 0;
         while (i < chars.Count)

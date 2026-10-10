@@ -9,7 +9,7 @@ use std::sync::OnceLock;
 use super::manifest::{DIR, MANIFEST, try_manifest};
 use super::normalize::{normalize_mandarin, spell_initialisms};
 use super::numbers::{digits_to_chinese, integer_to_chinese};
-use super::pinyin_to_ipa::{MandarinTables, PinyinToIpa, ThirdToneSandhi};
+use super::pinyin_to_ipa::{MandarinTables, PinyinToIpa, ThirdToneSandhi, split_whitespace_runs};
 use super::segment::{PinyinTables, is_han, segment};
 use super::yi_bu_sandhi::apply_yi_bu_sandhi;
 use crate::core::clauses::ClauseSink;
@@ -157,6 +157,9 @@ impl MandarinPhonemizer {
         if !is_han(&input)
             && js_re!(r"[1-5]").test(&input)
             && js_re!(r"^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$", "u").test(&input)
+            && split_whitespace_runs(&input.trim())
+                .iter()
+                .all(|t| self.pinyin_to_ipa.is_syllable(t))
         {
             return self.pinyin_to_ipa.convert(&input);
         }
@@ -347,5 +350,70 @@ mod tests {
             let groups = String::from_utf16(&ipa[a..b]).unwrap();
             assert_eq!(groups.split(' ').count(), hanzi);
         }
+    }
+
+    fn cmn(s: &str) -> String {
+        crate::phonemize(s, "cmn").unwrap()
+    }
+
+    /// Ported from test/mandarin-port-findings.test.ts (#1463): no raw Han reaches the IPA.
+    #[test]
+    fn han_with_no_reading_is_dropped_and_folds_and_iteration_read() {
+        assert_eq!(cmn("𠮷野家"), "jiɛ˨˩˦ t͡ɕiɑ˥˥");
+        assert_eq!(cmn("𪛖"), "");
+        assert_eq!(cmn("⼀"), cmn("一"));
+        assert_eq!(cmn("⼀个"), "ji˧˥ kɤ˥˩");
+        assert_eq!(cmn("人々"), cmn("人人"));
+        assert_eq!(cmn("時々刻々"), "ʂʐ̩˧˥ ʂʐ̩˧˥ kʰɤ˥˩ kʰɤ˥˩");
+        assert_eq!(cmn("々"), "");
+        let py = super::create_pinyin_phonemizer().unwrap();
+        assert_eq!(
+            py.convert(&crate::core::js_string::js("ni3 xyz9 hao3")),
+            "ni˨˩˦ xɑᵘ˨˩˦"
+        );
+    }
+
+    /// The trace shape survives a dropped character: one token for the whole run, one group per syllable read.
+    #[test]
+    fn a_dropped_hanzi_leaves_one_token_with_one_group_per_syllable() {
+        let r = crate::phonemize_trace("𠮷野家", "cmn").unwrap();
+        assert_eq!(r.trace.tokens.len(), 1);
+        let t = &r.trace.tokens[0];
+        assert_eq!(t.surface.code_points().count(), 3);
+        let ipa: Vec<u16> = r.ipa.encode_utf16().collect();
+        let (a, b) = t.ipa_span.expect("ipa span");
+        assert_eq!(
+            String::from_utf16(&ipa[a..b]).unwrap().split(' ').count(),
+            2
+        );
+    }
+
+    #[test]
+    fn fraction_guards_agree_on_both_sides() {
+        use super::super::normalize::normalize_mandarin;
+        use crate::core::js_string::js;
+        for (i, o) in [
+            ("1/2.5", "1/2.5"),
+            ("3/4,5", "3/4,5"),
+            ("1.5/2", "1.5/2"),
+            ("3,4/5", "3,4/5"),
+            ("1/2", "2分之1"),
+            ("1/2.", "2分之1."),
+            ("1/2, 好", "2分之1, 好"),
+        ] {
+            assert_eq!(normalize_mandarin(&js(i)), o, "{i}");
+        }
+        assert_eq!(cmn("1/2.5"), "ji˥˥ ər˥˩ tiɛn˧˥ wu˨˩˦");
+    }
+
+    #[test]
+    fn the_direct_pinyin_path_takes_only_real_syllables() {
+        assert_eq!(cmn("mp3"), "ˌɛmpˈiː san˥˥");
+        assert_eq!(cmn("web3"), "wˈɛb san˥˥");
+        assert_eq!(cmn("a4 paper"), "ˈə sɹ̩˥˩ pʰˈeᶦpɚ");
+        assert_eq!(cmn("ni3 hao3"), "ni˧˥ xɑᵘ˨˩˦");
+        assert_eq!(cmn("ni3 hao"), "ni˨˩˦ xɑᵘ");
+        assert_eq!(cmn("lv4"), "ly˥˩");
+        assert_eq!(cmn("a4"), "ɑ˥˩");
     }
 }

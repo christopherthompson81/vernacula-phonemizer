@@ -10,7 +10,9 @@
 5/67890太长
 ,1/3逗号后
 1/3/
-# TS finding: the right guard lacks the left guard's [.,] — 1/2.5 → 2分之1.5 while 1.5/2 is declined
+# both guards refuse a decimal or grouped number beside the slash; sentence punctuation after it still reads
+1/2.
+1/2, 好
 1/2.5
 1.5/2
 3/4,5
@@ -149,6 +151,14 @@ ni3hao3
 NI3 HAO3
 ni3 hao3 MP3
 xyz9
+# every token must be a syllable: lowercase alphanumerics that are not pinyin take the scanner
+mp3
+ipv4
+web3
+a4 paper
+a4
+ni3 hao
+我有mp3
 # ── embedded Latin, accented Latin, decomposed accents
 我用 iPhone 拍照
 他去了 Haldarsvík
@@ -179,6 +189,15 @@ hello world
 𪚥
 你𠀀好
 \u{2F00}
+# no raw Han in the IPA: NFKC folds (Kangxi radicals, compatibility ideographs), the iteration mark, unknowns dropped
+\u{2F00}个
+\u{F900}
+\u{2F800}
+你\u{2A6D6}好
+人々
+々
+時々刻々
+々々
 # ── edges: whitespace only (as an escape), fullwidth digit, Han numerals. Lone surrogates live in dump.mts's
 # `cmn-trace` extras: the public &str API cannot carry one, so a phonemize-sync row would measure the harness.
 \u{20}\u{3000}

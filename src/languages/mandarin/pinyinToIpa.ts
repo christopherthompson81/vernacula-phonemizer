@@ -29,14 +29,23 @@ function normalizeU(base: string): string {
     return base.replace(/u:/g, "ü");
 }
 
+const SYLLABLE = /^([a-zü:]+?)([1-5])?$/i;
+
 /** Split a pinyin token into its toneless base + tone digit (default 5 = neutral). */
 function parseSyllable(token: string): Syllable {
-    const m = /^([a-zü:]+?)([1-5])?$/i.exec(token);
+    const m = SYLLABLE.exec(token);
     if (!m) return { base: token.toLowerCase(), tone: 5 };
     return {
         base: normalizeU(m[1]!.toLowerCase()),
         tone: m[2] ? Number(m[2]) : 5,
     };
+}
+
+/** Whether `token` is a pinyin syllable this table can read: letters plus an optional tone digit, whose
+ *  toneless base (after the ü respellings) is a key of the syllable table. `mp3` has the shape and no syllable. */
+export function isPinyinSyllable(token: string, syllableIpa: ReadonlyMap<string, string>): boolean {
+    const m = SYLLABLE.exec(token);
+    return m !== null && syllableIpa.has(normalizeU(m[1]!.toLowerCase()));
 }
 
 /**
@@ -72,10 +81,11 @@ export function makePinyinToIpa(
         const out: string[] = [];
         for (let i = 0; i < syls.length; i++) {
             const seg = syllableIpa.get(syls[i]!.base);
-            if (seg === undefined) {
-                out.push(tokens[i]!);
-                continue;
-            } // unknown syllable: pass through
+            // ⚠ AN UNKNOWN TOKEN IS DROPPED, NOT PASSED THROUGH. Passed through, it put TEXT into the phoneme
+            // stream: a Han character with no reading (`𠮷野家` → `𠮷 jiɛ˨˩˦ t͡ɕiɑ˥˥`) or any unparseable token.
+            // It still holds its slot in the tone sequence above, so it separates its neighbours for sandhi
+            // exactly as the unread syllable does in speech.
+            if (seg === undefined) continue;
             out.push(seg + (tones[String(realized[i]!)] ?? ""));
         }
         return out.join(" ");

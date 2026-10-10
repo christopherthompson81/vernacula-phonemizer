@@ -13,9 +13,10 @@ public static class Normalize
     /**
      * Western fraction notation → the Chinese order, still in digits: `a/b` → `b分之a`. `\b` is unusable in
      * these patterns — it is defined on ASCII word characters and finds no boundary against Han — so the
-     * boundaries are explicit lookarounds throughout this file.
+     * boundaries are explicit lookarounds throughout this file. The right guard refuses a following decimal or
+     * grouped number as the left one does (`1/2.5` is not 2分之1.5), but not a sentence-final `.` or `,`.
      */
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,/])(\\d{1,4})\\/(\\d{1,4})(?![\\d/])", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,/])(\\d{1,4})\\/(\\d{1,4})(?![\\d/]|[.,]\\d)", "gu");
 
     /**
      * The two left guards differ ON PURPOSE, and must not be unified: the temperature rule can afford the

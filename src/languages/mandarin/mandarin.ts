@@ -8,7 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
+import { isPinyinSyllable, makePinyinToIpa, type MandarinTables } from "./pinyinToIpa.ts";
 import { segment, type PinyinTables } from "./segment.ts";
 import { applyYiBuSandhi } from "./yiBuSandhi.ts";
 import { integerToChinese, digitsToChinese } from "./numbers.ts";
@@ -64,6 +64,7 @@ const SYMBOLS = makeSymbolNormalizer({
 
 class MandarinPhonemizer implements Phonemizer {
     private readonly pinyinToIpa: (pinyin: string) => string;
+    private readonly syllableIpa: ReadonlyMap<string, string>;
 
     constructor(
         tables: MandarinTables,
@@ -71,6 +72,7 @@ class MandarinPhonemizer implements Phonemizer {
         private readonly foreign?: ForeignPhonemizer,
     ) {
         this.pinyinToIpa = makePinyinToIpa(tables);
+        this.syllableIpa = tables.syllableIpa;
     }
 
     /** A Han run (with a per-char sandhi-exempt mask): segment → 一/不 sandhi → pinyin → IPA (3-3 within run). */
@@ -181,7 +183,11 @@ class MandarinPhonemizer implements Phonemizer {
         // ⟨C⟩ of `20°C` before it runs destroys the unit. See the note on that function.
         input = spellInitialisms(SYMBOLS(normalizeMandarin(input)));
         // Tone-marked pinyin input (letters + a tone digit, no Han) keeps the direct path (e.g. "ni3 hao3").
-        if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input))
+        // ⚠ EVERY TOKEN MUST BE A SYLLABLE. The shape alone admitted any lowercase alphanumeric — `mp3`, `ipv4`,
+        // `web3`, `a4 paper` — and the converter has no reading for `mp` or `paper`. Declined here, they take
+        // the scanner below like any embedded Latin: the letters to English, the digit to a numeral.
+        if (!HAN.test(input) && /[1-5]/.test(input) && PINYIN_INPUT.test(input)
+            && input.trim().split(/\s+/u).every((t) => isPinyinSyllable(t, this.syllableIpa)))
             return this.pinyinToIpa(input);
 
         const { cp, exempt, pieces } = this.substituteNumbers(input);

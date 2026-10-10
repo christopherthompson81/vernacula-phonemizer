@@ -52,8 +52,11 @@ import { rewrite } from "../../core/provenance.ts";
  * and unit ratios by requiring digits on both sides and nothing numeric adjacent. `\b` is unusable here —
  * it is defined on ASCII word characters and finds no boundary against Han script — so the boundaries are
  * explicit lookarounds, the same discipline the Hindi pass needed.
+ * ⚠ THE TWO SIDES MUST AGREE. The right guard was `(?![\d/])` alone while the left refused `.` and `,`, so
+ * `1.5/2` was declined and `1/2.5` read 2分之1.5 (`3/4,5` → 4分之3,5). A `.` or `,` counts only before a
+ * digit, so a sentence-final `1/2.` or `1/2, …` still reads.
  */
-const FRACTION = /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])/gu;
+const FRACTION = /(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/]|[.,]\d)/gu;
 
 /**
  * THE TWO LEFT GUARDS, and why they differ — measured, not reasoned.

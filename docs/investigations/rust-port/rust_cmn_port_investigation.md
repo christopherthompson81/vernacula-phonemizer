@@ -219,3 +219,89 @@ its `text` has no input it refuses.
   (`cargo fmt --check` already fails on main; left alone as instructed.)
 
 **Implication.** Done. Port-pending: 5 synthetic probe rows needing el, th, ru, ko.
+
+## Run 8 — 2026-10-09 18:40 (the Run 3 findings, fixed TS-first)
+
+**Context.** Branch `fix/cmn-port-findings` on `origin/main` 5acc6b73. Four TS defects from Runs 3 and 6, fixed
+in the TS with a test, then in C# and Rust (csharp/PORTING.md, "THE PORT IS BIDIRECTIONAL").
+
+**Question 1. Before choosing a fix for the Han leak: which leaking code points exist, and would NFKC rescue them?**
+
+**Command.** `npx tsx .probe/cmn/leak-measure.mts`: every golden (189 languages, column 1) and every FLEURS corpus
+(column 3 and 4, 100 dirs mapped to an engine; `fil_ph`, `ny_mw` have none). For each text holding a Han code point
+missing from chars.tsv, run `phonemize(text, lang)` in its own language and check whether that code point appears in
+the output. `npx tsx .probe/cmn/fold-check.mts` checks NFKC against chars.tsv and against the whole Han repertoire.
+
+**Raw finding (before the fix).**
+- 383,329 texts, 11,623 with Han: cmn 4,009, ja 3,576, yue 3,466, wuu 198, gan 190, hsn 67, cdo 45, cjy 26, za 18,
+  hak 13, ko 6, ilo 4, bo 2, mag/syl/ti 1 each.
+- **Only 2 distinct Han code points are missing from chars.tsv in the whole haystack:**
+  `U+3005 々` (117 texts: ja 116, gan 1), leaks in 0 of 117 (ja and gan read it with their own engines), and
+  `U+2114F 𡅏`, a Min dialect character, 3 texts, all in the **cdo golden**, and it **leaks in 3 of 3**: cdo routes Han
+  to cmn through the script reader, so the cdo golden carries the raw character (`復加𡅏北韓` → `fu˥˩ t͡ɕiɑ˥˥ 𡅏 peⁱ˨˩˦ xan˧˥`).
+- NFKC changes neither. **Corpus fold count: 0 of 2 missing code points, and 0 of 1 leaking one, fold to a known character.**
+- Repertoire (U+0000–U+3FFFF, `\p{Script=Han}`): 99,030 Han code points, 57,177 missing from chars.tsv. Of those, NFKC
+  changes 1,219, and **1,141 fold to a character chars.tsv has** (all of U+2F00 Kangxi 214/214, U+F900 256/256,
+  U+FA00 198/215, U+2F800–2FA1F 468/541, U+2E00 2/115, U+3000 3/14). No fold yields more than one code point.
+  chars.tsv itself has 2 NFKC-unstable keys, both with readings identical to their folds. No phrase key is NFKC-unstable.
+
+**Decision.**
+1. **Fold first.** In `segment`, a Han code point with no chars.tsv entry whose NFKC is a single Han character reads as
+   that character (⼀ → 一). The corpus never needs it; the repertoire count says it rescues 1,141 variant forms
+   that are canonically or compatibly the same character, and it costs nothing where chars.tsv has an entry.
+2. **々 repeats its predecessor** (人々 = 人人), after folding; with no Han predecessor it is unknown. Wu already reads it
+   this way (wu/normalize.ts, rule 13: dropping it deletes a syllable from a name). No cmn-routed text carries it.
+3. **Anything still unknown is dropped**, in `pinyinToIpa`, where every unknown token went through as text. It keeps
+   its slot in the tone sequence, so it still separates its neighbours for 3-3 sandhi, as the unread syllable does.
+   Why drop: no reading is derivable for it (𡅏 is not in pypinyin, and the cmn engine has no other source),
+   any spelled-out stand-in would be a Mandarin syllable the text does not contain, and raw text in the phoneme
+   stream is what the downstream tokenizer cannot use. The scanner already drops other unreadable marks.
+   Trace shape: the run is still ONE token, and its ipa_span has one group per syllable READ, so a dropped character
+   contributes no group (`𠮷野家`: 3 code points, 2 groups). A consumer that pairs groups with hanzi by position must
+   not assume they are equal when a character is unreadable. Pinned by a Rust test.
+
+**Question 2. What do the four fixes move?**
+
+**Commands.** `npx vitest run test/mandarin-port-findings.test.ts` with and without the src change (`git diff -- src`,
+`git checkout -- src`, re-apply); `npx tsc --noEmit` the same; `npm run check:goldens`; `npx tsx .probe/cmn/golden-diff.mts cdo`;
+`npx vitest run`; `npx tsx tools/extract_regexes.mts` + `dotnet run -c Release --project csharp/tools/regex-diff`;
+`cd csharp && dotnet test` (full) and the same test file with the C# fix reverted; `dotnet run -c Release --project
+csharp/tools/parity -- cmn cdo`; all dumps regenerated from the fixed TS (`.probe/cmn/dumps.sh`) and replayed;
+`.probe/cmn/mutate.py` (reverts each Rust half) for the bite check; `cargo run --release -p parity`;
+`cargo run --release -p regex-diff`; `cargo test --workspace --release`; `cargo build --workspace` (debug and release).
+
+**Raw finding.**
+- Readings, before → after (from the engine):
+  `𠮷野家` `𠮷 jiɛ˨˩˦ t͡ɕiɑ˥˥` → `jiɛ˨˩˦ t͡ɕiɑ˥˥` · `⼀` `⼀` → `ji˥˥` · `⼀个` `⼀ kɤ˥˩` → `ji˧˥ kɤ˥˩` · `𪛖` `𪛖` → `` ·
+  `人々` `ʐən˧˥ 々` → `ʐən˧˥ ʐən˧˥` · `1/2.5` `ər˥˩ fən˥˥ ʈ͡ʂʐ̩˥˥ ji˥˩ tiɛn˧˥ wu˨˩˦` → `ji˥˥ ər˥˩ tiɛn˧˥ wu˨˩˦` (declined, as
+  `1.5/2` already was) · `3/4,5` `sɹ̩˥˩ fən˥˥ ʈ͡ʂʐ̩˥˥ san˥˥ , wu˨˩˦` → `san˥˥ sɹ̩˥˩ , wu˨˩˦` · `mp3` `mp3` → `ˌɛmpˈiː san˥˥` ·
+  `ipv4` `ipv4` → `ˈɪv sɹ̩˥˩` · `web3` `web3` → `wˈɛb san˥˥` · `a4 paper` `ɑ˥˩ paper` → `ˈə sɹ̩˥˩ pʰˈeᶦpɚ`.
+  Declined pinyin reads as embedded Latin does (`我有mp3` already read `… ˌɛmpˈiː san˥˥`): letters to English, the
+  digit to a Chinese numeral. Unchanged: `ni3 hao3`, `ni3 hao`, `lv4`, and `a4` → `ɑ˥˩` (a real syllable, à).
+  `ipv4`'s `ˈɪv` is the English reader's reading of `ipv`, not this engine's.
+- The test: 7 of 9 fail with the TS fix reverted (the 2 that pass are the unchanged-pinyin regression check and the
+  manifest test, whose failure is at the type level: `tsc` reports TS2322 `"compound"` not assignable to
+  `"before" | "after" | undefined`). The C# twin: 11 of 20 fail with the C# fix reverted.
+- `check:goldens`: **1 of 189 languages stale, 3 rows: cdo** (rows 168, 174, 190). Each differs ONLY by the dropped 𡅏:
+  168 `… ʐan˧˥ 𡅏 , …` / `… ʈ͡ʂoᵘ˥˩ 𡅏 t͡sɹ̩˥˩ …` / `… ku˥˩ 𡅏 weⁱ˥˩ …` → the same without `𡅏`;
+  174 `fu˥˩ t͡ɕiɑ˥˥ 𡅏 peⁱ˨˩˦ xan˧˥` → `fu˥˩ t͡ɕiɑ˥˥ peⁱ˨˩˦ xan˧˥`; 190 `jiɛ˨˩˦ xɑᵘ˥˩ 𡅏 xu˧˥ jyæn˧˥` → `jiɛ˨˩˦ xɑᵘ˥˩ xu˧˥ jyæn˧˥`.
+  **cmn's golden did not move**, and no other language did. cdo NOT regenerated (left for review, as instructed).
+  C# parity: `cmn OK 200`, `cdo` 197 ok / 3 differ, the same 3 rows, C# matching the fixed TS.
+- After the fix, the leak measurement: `leaking=0` (𡅏 0 of 3).
+- `csharp/regex-corpus.jsonl`: 1 pattern added / 1 dropped (the FRACTION lookahead). C# regex-diff `145140 identical,
+  0 DIFFER`; Rust regex-diff `145140 identical, 0 DIFFER, 0 refused`.
+- TS full suite: `6384 passed, 2 failed, 5 skipped` on the first run: regex-corpus freshness (fixed by the extraction
+  above) and `foreign-runs > th delegates …` timing out at 5 s under full-suite load; that file re-run alone passes
+  (4 files, 89 tests). C# full: `7053 passed, 0 failed`.
+- Dumps from the fixed TS: `cmn-normalize 12588/0` · `cmn-segment 16784/0` · `cmn-pinyin 54940/0` · `cmn-numbers 20608/0` ·
+  `cmn-trace-extras 14/0` · `phonemize-sync 4184, 5 DIFFER` · `phonemize-best 4184, 5` · `trace 4184, 5`; the 5 are
+  Run 7's port-pending probes (el ×2, th, ru, ko). The probe list gained the new arms and lost its "TS finding" note.
+- Bite check, all four Rust halves reverted: `cmn-normalize 4 DIFFER`, `cmn-segment 16`, `cmn-pinyin 5043`,
+  `cmn-trace-extras 2`, `phonemize-sync/best/trace 19`; restored → back to the numbers above.
+- Rust parity: all 10 registered languages `200/200`. `cargo test --workspace --release`: 69 + 1 passed. Build: 0 warnings.
+
+**Not fixed here (siblings, reported).** urdu/normalize.ts has the same lopsided fraction guard (`(?![\d/])` right,
+`(?<![\d.,/])` left). cdo's own engine emits Latin as text: `（IUPAC）承認` in cdo → `iupac˥˥ ʈ͡ʂʰəŋ˧˥ ʐən˥˩`.
+
+**Implication.** The four findings are closed in all three engines. The cdo golden needs regenerating (3 rows, each
+only the dropped 𡅏) once the drop decision is accepted.

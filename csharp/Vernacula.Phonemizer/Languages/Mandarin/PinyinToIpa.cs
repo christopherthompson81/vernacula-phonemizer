@@ -39,6 +39,14 @@ public static class PinyinToIpa
             m.Groups[2].Success && m.Groups[2].Value.Length > 0 ? (int)Js.Number(m.Groups[2].Value) : 5);
     }
 
+    /** Whether `token` is a pinyin syllable the table can read: the shape, and a toneless base (after the ü
+     *  respellings) that is a key of the syllable table. `mp3` has the shape and no syllable. */
+    public static bool IsPinyinSyllable(string token, IReadOnlyDictionary<string, string> syllableIpa)
+    {
+        var m = SYLLABLE.Match(token);
+        return m.Success && syllableIpa.ContainsKey(NormalizeU(m.Groups[1].Value.ToLowerInvariant()));
+    }
+
     /**
      * Third-tone sandhi over a syllable run: a 3rd tone immediately before another 3rd tone surfaces as 2nd
      * (你好 nǐ hǎo → ní hǎo). Applied left-to-right pairwise; the last 3rd tone in a run stays 3rd.
@@ -63,11 +71,8 @@ public static class PinyinToIpa
             var outp = new List<string>();
             for (var i = 0; i < syls.Count; i++)
             {
-                if (!tables.SyllableIpa.TryGetValue(syls[i].Base, out var seg))
-                {
-                    outp.Add(tokens[i]); // unknown syllable: pass through
-                    continue;
-                }
+                // An unknown token is DROPPED, not passed through as text; it keeps its slot in the tone sequence.
+                if (!tables.SyllableIpa.TryGetValue(syls[i].Base, out var seg)) continue;
                 outp.Add(seg + (tables.Tones.TryGetValue(Js.NumberToString(realized[i]), out var tone) ? tone : ""));
             }
             return string.Join(" ", outp);

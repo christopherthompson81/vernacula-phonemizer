@@ -8,6 +8,7 @@
 use std::collections::HashMap;
 
 use crate::core::js_string::{JsString, js};
+use crate::core::provenance::{Form, normalize};
 use crate::js_re;
 
 pub struct PinyinTables {
@@ -31,8 +32,33 @@ pub(super) fn is_han(ch: &JsString) -> bool {
     js_re!(r"\p{Script=Han}", "u").test(ch)
 }
 
+/// `readAs(ch, t)`: a Han code point with no entry of its own that NFKC folds to a single Han character (a
+/// Kangxi radical, a CJK compatibility ideograph: ⼀ → 一) reads as that character.
+fn read_as(ch: &JsString, t: &PinyinTables) -> JsString {
+    if !is_han(ch) || t.chars.contains_key(ch) {
+        return ch.clone();
+    }
+    let f = normalize(ch, Form::Nfkc);
+    if f != *ch && f.code_points().count() == 1 && is_han(&f) {
+        f
+    } else {
+        ch.clone()
+    }
+}
+
 /// `segment(chars, t, exempt)`; an `exempt` shorter than `chars` reads as false past its end.
-pub fn segment(chars: &[JsString], t: &PinyinTables, exempt: &[bool]) -> Vec<Token> {
+pub fn segment(input: &[JsString], t: &PinyinTables, exempt: &[bool]) -> Vec<Token> {
+    // Fold first, so a phrase can match across a folded character; 々 takes its predecessor once folded.
+    let iteration = js("々");
+    let mut chars: Vec<JsString> = Vec::with_capacity(input.len());
+    for (k, c) in input.iter().enumerate() {
+        let c = if *c == iteration && k > 0 && is_han(&chars[k - 1]) {
+            chars[k - 1].clone()
+        } else {
+            read_as(c, t)
+        };
+        chars.push(c);
+    }
     let yi = js("一");
     let di = js("第");
     let mut out: Vec<Token> = Vec::new();

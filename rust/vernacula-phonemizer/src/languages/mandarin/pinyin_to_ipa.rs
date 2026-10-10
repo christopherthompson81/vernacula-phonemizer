@@ -38,6 +38,16 @@ fn normalize_u(base: &JsString) -> JsString {
     js_re!(r"u:", "g").replace(base, &js("ü"))
 }
 
+/// `isPinyinSyllable(token, syllableIpa)`: the syllable shape, with a toneless base (after the ü respellings)
+/// that is a key of the table.
+pub fn is_pinyin_syllable(token: &JsString, syllable_ipa: &IndexMap<JsString, JsString>) -> bool {
+    js_re!(r"^([a-zü:]+?)([1-5])?$", "i")
+        .exec(token)
+        .is_some_and(|m| {
+            syllable_ipa.contains_key(&normalize_u(&m.group(1, token).unwrap().to_lower_case()))
+        })
+}
+
 fn parse_syllable(token: &JsString) -> Syllable {
     let re = js_re!(r"^([a-zü:]+?)([1-5])?$", "i");
     let Some(m) = re.exec(token) else {
@@ -67,7 +77,7 @@ pub fn apply_third_tone_sandhi(tones: &[f64], rule: ThirdToneSandhi) -> Vec<f64>
 }
 
 /// `s.split(/\s+/)`: the pieces between the (never empty) matches, the last piece included.
-fn split_whitespace_runs(s: &JsString) -> Vec<JsString> {
+pub(super) fn split_whitespace_runs(s: &JsString) -> Vec<JsString> {
     let mut out = Vec::new();
     let mut cursor = 0;
     for m in js_re!(r"\s+", "g").match_all(s) {
@@ -88,6 +98,10 @@ impl PinyinToIpa {
         Self { tables }
     }
 
+    pub fn is_syllable(&self, token: &JsString) -> bool {
+        is_pinyin_syllable(token, &self.tables.syllable_ipa)
+    }
+
     pub fn convert(&self, pinyin: &JsString) -> JsString {
         let tokens: Vec<JsString> = split_whitespace_runs(&pinyin.trim())
             .into_iter()
@@ -103,8 +117,9 @@ impl PinyinToIpa {
         );
         let mut out: Vec<JsString> = Vec::with_capacity(syls.len());
         for (i, syl) in syls.iter().enumerate() {
+            // An unknown token is dropped, keeping its slot in the tone sequence.
             match self.tables.syllable_ipa.get(&syl.base) {
-                None => out.push(tokens[i].clone()),
+                None => {}
                 Some(seg) => {
                     let tone = self
                         .tables

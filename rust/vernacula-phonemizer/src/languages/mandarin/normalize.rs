@@ -65,7 +65,7 @@ fn spell_letters(run: &JsString) -> JsString {
 pub fn normalize_mandarin(input: &JsString) -> JsString {
     let mut s = rewrite_with(
         input,
-        js_re!(r"(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/])", "gu"),
+        js_re!(r"(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/]|[.,]\d)", "gu"),
         |m, s| {
             let (num, den) = (m.group(1, s).unwrap(), m.group(2, s).unwrap());
             den.concat(&js("分之")).concat(&num)
