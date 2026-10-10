@@ -57,8 +57,16 @@ static R: LazyLock<Res> = LazyLock::new(|| {
             "gu",
         )
         .unwrap(),
-        abbrev_continue: JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(\s+)(?=\p{{L}})"), "giu").unwrap(),
-        abbrev_end: JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(?=\s*(?:[.,;:!?»)]|$))"), "giu").unwrap(),
+        abbrev_continue: JsRegex::new(
+            &format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(\s+)(?=\p{{L}})"),
+            "giu",
+        )
+        .unwrap(),
+        abbrev_end: JsRegex::new(
+            &format!(r"(?<![\p{{L}}\p{{M}}\d_])({alt})\.(?=\s*(?:[.,;:!?»)]|$))"),
+            "giu",
+        )
+        .unwrap(),
         dollar_codes: JsRegex::new(
             &format!(
                 "(?<![\\p{{L}}\\p{{M}}])(?:{})\\$(?=[ \u{a0}]?\\d)",
@@ -67,8 +75,14 @@ static R: LazyLock<Res> = LazyLock::new(|| {
             "gu",
         )
         .unwrap(),
-        date_first: JsRegex::new(&format!(r"(?<![\p{{L}}\p{{M}}\d_])1\s+de\s+({})(?![\p{{L}}\p{{M}}\d_])", m.months.join("|")), "giu")
-            .unwrap(),
+        date_first: JsRegex::new(
+            &format!(
+                r"(?<![\p{{L}}\p{{M}}\d_])1\s+de\s+({})(?![\p{{L}}\p{{M}}\d_])",
+                m.months.join("|")
+            ),
+            "giu",
+        )
+        .unwrap(),
         feminine_one: JsRegex::new(&format!("{}$", m.numbers.small[1]), "u").unwrap(),
     }
 });
@@ -206,7 +220,10 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     // 2) Número, only before a digit.
     s = rewrite(
         &s,
-        js_re!(r"(?<![\p{L}\p{M}\d_])(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)", "giu"),
+        js_re!(
+            r"(?<![\p{L}\p{M}\d_])(?:n\.º|nº|n°|no|núm\.)\s?(?=\d)",
+            "giu"
+        ),
         &js(&format!("{} ", m.number_sign)),
     );
 
@@ -479,7 +496,10 @@ mod port_findings {
     #[test]
     fn non_grouping_dot_is_spoken() {
         let p = |s: &str, l: &str| crate::phonemize(s, l).unwrap();
-        assert_eq!(p("O padrão 802.11n", "pt-BR"), "o padɾˈɐ̃w̃ ojtosˈẽtus e dˈojs pˈõtu ˈõzi n");
+        assert_eq!(
+            p("O padrão 802.11n", "pt-BR"),
+            "o padɾˈɐ̃w̃ ojtosˈẽtus e dˈojs pˈõtu ˈõzi n"
+        );
         assert_eq!(p("a 2.4 GHz", "pt-BR"), "a dˈojs pˈõtu kwˈatɾu ɡs");
         assert_eq!(p("a 5.0 GHz", "pt"), "a sˈĩku pˈõtu zˈɛɾu ɡʃ");
         assert_eq!(p("ver Figura 1.1.", "pt-BR"), "vˈeɾ fiɡˈuɾɐ ũ pˈõtu ũ .");
@@ -487,11 +507,17 @@ mod port_findings {
         assert_eq!(p("1.0000", "pt"), "ũ pˈõtu zˈɛɾu zˈɛɾu zˈɛɾu zˈɛɾu");
         assert_eq!(p("0.500", "pt"), "zˈɛɾu pˈõtu sˈĩku zˈɛɾu zˈɛɾu");
         assert_eq!(p("17.000 ilhas", "pt-BR"), "dezesˈɛt͡ʃi mˈiw ˈiʎɐs");
-        assert_eq!(p("5.000.000 visitantes", "pt-BR"), "sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis");
+        assert_eq!(
+            p("5.000.000 visitantes", "pt-BR"),
+            "sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis"
+        );
         assert_eq!(p("o 1.5º lugar", "pt"), "o ũ pˈõtu sˈĩku ˈɔ luɡˈaɾ");
         assert_eq!(p("o 802.11ª", "pt-BR"), p("o 802.11a", "pt-BR"));
         assert_eq!(p("o 802.11ª", "pt-BR"), "o ojtosˈẽtus e dˈojs pˈõtu ˈõzi a");
-        assert_eq!(p("Mediu 1.5 °C", "pt-BR"), "med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws");
+        assert_eq!(
+            p("Mediu 1.5 °C", "pt-BR"),
+            "med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws"
+        );
     }
 
     /// JS `\b` is ASCII-only: `Grécia.` matched `cia.` and read *Grécompanhia*. Synthetic sentences.
@@ -499,10 +525,19 @@ mod port_findings {
     fn abbreviations_use_a_unicode_word_edge() {
         assert_eq!(n("Visitou a Grécia.", false), "Visitou a Grécia.");
         assert_eq!(n("Visitou a Escócia.", false), "Visitou a Escócia.");
-        assert_eq!(n("Ficou na Grécia. Depois", false), "Ficou na Grécia. Depois");
+        assert_eq!(
+            n("Ficou na Grécia. Depois", false),
+            "Ficou na Grécia. Depois"
+        );
         assert_eq!(n("A Cia. Ltda. abriu", false), "A companhia limitada abriu");
-        assert_eq!(n("Visitou a Grécia, etc.", false), "Visitou a Grécia, etcétera.");
-        assert_eq!(n("Fundada em 300 a.C. por", false), "Fundada em 300 antes de Cristo por");
+        assert_eq!(
+            n("Visitou a Grécia, etc.", false),
+            "Visitou a Grécia, etcétera."
+        );
+        assert_eq!(
+            n("Fundada em 300 a.C. por", false),
+            "Fundada em 300 antes de Cristo por"
+        );
         assert_eq!(n("Em 1 de julho", true), "Em primeiro de julho");
     }
 }
