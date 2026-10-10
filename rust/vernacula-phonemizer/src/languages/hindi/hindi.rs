@@ -441,18 +441,19 @@ mod tests {
         assert_eq!(hits.get(), 0);
     }
 
-    /// A 309+-digit ordinal is `Infinity` in the TS, whose recursion throws a RangeError: an `Err` here, not a
-    /// panic.
+    /// Above 2^53 the ordinal rule declines, as the number path does (TS-first, #1463): the digits are spelled
+    /// and the suffix is its own word. It used to compose the float (`…993वाँ` read …992) and, at 309+ digits,
+    /// threw a RangeError out of the TS, which this engine returned as `PhonemizeError::Input`.
     #[test]
-    fn an_infinite_ordinal_is_an_error_not_a_panic() {
-        let text = format!("{}वाँ", "1".repeat(400));
-        assert!(matches!(
-            phonemize(&text, "hi"),
-            Err(crate::PhonemizeError::Input(_))
-        ));
+    fn an_unsafe_ordinal_spells_its_digits() {
+        let hi = |s: &str| phonemize(s, "hi").unwrap();
+        let above = hi("9007199254740993वाँ");
+        assert_ne!(above, hi("9007199254740992वाँ"));
+        assert_eq!(above, format!("{} {}", hi("9007199254740993"), hi("वाँ")));
+        let digits = "1".repeat(400);
         assert_eq!(
-            phonemize("9007199254740993वाँ", "hi").unwrap().is_empty(),
-            false
+            hi(&format!("{digits}वाँ")),
+            format!("{} {}", hi(&digits), hi("वाँ"))
         );
     }
 
