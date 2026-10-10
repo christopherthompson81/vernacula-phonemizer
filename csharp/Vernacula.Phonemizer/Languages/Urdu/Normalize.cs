@@ -60,7 +60,12 @@ public static class Normalize
     private static readonly JsRe PLUS_LEADING = JsRegex.Compile("(^|\\s)\\+\\s?(\\d)", "gu");
     private static readonly JsRe EQUALS_RE = JsRegex.Compile("\\s?=\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    /**
+     * The two sides are mirrors (as Mandarin's): each refuses a digit or `/`, a `.` with a digit beyond it (a
+     * decimal), and a `,` with exactly three digits beyond it (a thousands group). Any other `,` is a list
+     * separator (`1/2,3/4` reads both), and a sentence-final `1/2.` reads. #1477.
+     */
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,\\d{3}(?!\\d))", "gu");
 
     /** Build the Urdu normalizer. Takes the numbers definition so ordinals compose the same cardinal words the
      *  engine's own number path uses. */
