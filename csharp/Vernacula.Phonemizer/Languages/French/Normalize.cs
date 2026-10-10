@@ -37,9 +37,10 @@ public static class Normalize
         ["tél"] = "téléphone",
     };
 
-    /** Abbreviations Lexique ALREADY pronounces as a token (etc → [ɛtseteʁa], mme → [madam]). */
+    /** Abbreviations Lexique ALREADY pronounces as a token (etc → [ɛtseteʁa], mme → [madam]).
+     *  ⚠ NOT `mmes`/`mlles`: Lexique has neither, so they are expanded (#1480) — see HONORIFIC_PLURAL. */
     private static readonly IReadOnlySet<string> DOT_ONLY =
-        new HashSet<string>(new[] { "etc", "mme", "mmes", "mlle", "mlles" }, StringComparer.Ordinal);
+        new HashSet<string>(new[] { "etc", "mme", "mlle" }, StringComparer.Ordinal);
 
     /** Undotted abbreviations. French normally writes these bare (le Dr Martin, Mme Curie); `dr`/`pr` are not
      *  French words, so expanding them unconditionally is safe. */
@@ -47,6 +48,17 @@ public static class Normalize
     {
         ["dr"] = "docteur", ["pr"] = "professeur",
     };
+
+    /** The plural honorifics, bare (Mmes Dupont). Not French words, not Lexique rows; expanded before the numeral
+     *  pass or `Mmes` is claimed as a Roman ordinal (#1480). Bare `MM` stays the millimetre unit. */
+    private static readonly IReadOnlyDictionary<string, string> HONORIFIC_PLURAL = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["mmes"] = "mesdames", ["mlles"] = "mesdemoiselles",
+    };
+
+    /** ⚠ A UNICODE-AWARE WORD EDGE: JS `\b` is ASCII-only even under `u`, so `Unión.` read *Unióenne* (#1480). */
+    private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";
+    private const string WORD_END = "(?![\\p{L}\\p{M}\\d_])";
 
     /** French phonotactics, for the OOV rule in core/initialisms.ts. */
     public static readonly Func<string, bool> IsUnreadableFrench = Initialisms.MakeUnreadableTest(new PhonotacticsData
@@ -93,14 +105,15 @@ public static class Normalize
 
     private static readonly JsRe GROUP_SPACE_RE = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe NBSP_RUN = JsRegex.Compile("[\\u00a0\\u202f\\u2009]", "gu");
-    private static readonly JsRe ERA_BC = JsRegex.Compile("\\bav(?:ant)?\\.?\\s*j\\.?\\s*-?\\s*c\\.?", "giu");
-    private static readonly JsRe ERA_AD = JsRegex.Compile("\\bapr(?:ès)?\\.?\\s*j\\.?\\s*-?\\s*c\\.?", "giu");
+    private static readonly JsRe ERA_BC = JsRegex.Compile($"{WORD_START}av(?:ant)?\\.?\\s*j\\.?\\s*-?\\s*c\\.?", "giu");
+    private static readonly JsRe ERA_AD = JsRegex.Compile($"{WORD_START}apr(?:ès)?\\.?\\s*j\\.?\\s*-?\\s*c\\.?", "giu");
     private static readonly JsRe DEGREE_SPACED = JsRegex.Compile("(\\d)\\s*°\\s*(?=[CF](?![\\p{L}\\p{M}]))", "gui");
-    private static readonly JsRe NUMERO = JsRegex.Compile("\\bn[°º]\\s*(?=\\d)", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
-    private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
-    private static readonly JsRe UNDOTTED = JsRegex.Compile("\\b(dr|pr)\\b\\.?(?=\\s+\\p{L})", "giu");
-    private static readonly JsRe NAME_INITIAL = JsRegex.Compile("\\b([a-zà-ÿ])\\.(\\s+)(?=[\\p{L}])", "giu");
+    private static readonly JsRe NUMERO = JsRegex.Compile($"{WORD_START}n[°º]\\s*(?=\\d)", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe ABBREV_END = JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
+    private static readonly JsRe UNDOTTED = JsRegex.Compile($"{WORD_START}(dr|pr){WORD_END}\\.?(?=\\s+\\p{{L}})", "giu");
+    private static readonly JsRe HONORIFIC_BARE = JsRegex.Compile($"{WORD_START}(mmes|mlles){WORD_END}", "giu");
+    private static readonly JsRe NAME_INITIAL = JsRegex.Compile($"{WORD_START}([a-zà-ÿ])\\.(\\s+)(?=[\\p{{L}}])", "giu");
     private static readonly JsRe MONEY_POST = JsRegex.Compile("(\\d+),(\\d{2})\\s?([€$£¥])", "gu");
     private static readonly JsRe MONEY_PRE = JsRegex.Compile("([€$£¥])\\s?(\\d+),(\\d{2})", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");
@@ -155,6 +168,8 @@ public static class Normalize
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
             UNDOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        s = Rewrite(s, HONORIFIC_BARE, m =>
+            HONORIFIC_PLURAL.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
 
         s = Rewrite(s, NAME_INITIAL, m =>
         {
