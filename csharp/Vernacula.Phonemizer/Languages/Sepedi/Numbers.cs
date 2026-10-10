@@ -13,9 +13,6 @@ public static class Numbers
 {
     private static SepediNumbers N => Manifest.MANIFEST.Numbers;
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** A cl.8 magnitude + its multiplier: "tše" + cl.8 stem for 2–9, else recursive. */
     private static string Class8Multiple(string head, double k) =>
         k >= 2 && k <= 9 ? $"{head} {N.Class8Concord} {N.Class8[(int)k]}" : $"{head} {NumberToWords(k)}";
@@ -37,7 +34,7 @@ public static class Numbers
     /** A non-negative integer → space-separated Sepedi cardinal words. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
         {
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
             {

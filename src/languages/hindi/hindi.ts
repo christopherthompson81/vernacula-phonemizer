@@ -64,12 +64,15 @@ export interface HindiDef extends AbugidaDef {
      * Def is SHARED (hi, mr, gu and the rest of the family load their own jsonc through it), and the
      * agreement systems differ — Hindi marks [masculine, feminine, oblique] while Gujarati adds a neuter,
      * [masculine, feminine, neuter, oblique]. Each engine indexes the width its own language has.
+     * ⚠ OPTIONAL: most of the family's manifests declare none (only hindi.jsonc and gujarati.jsonc do), and
+     * `makeHindiNormalizer` then falls back to Hindi's.
      */
-    irregularOrdinals: Record<string, readonly string[]>;
+    irregularOrdinals?: Record<string, readonly string[]>;
     /**
      * The written ordinal suffixes and the agreement form each marks. ⚠ OPTIONAL: this Def is SHARED, and
      * a language in the family that has not sourced its own ordinal orthography declares nothing and gets
-     * no ordinal rule rather than Hindi's.
+     * HINDI'S, by the deliberate fallback in `makeHindiNormalizer` (see DEFAULT_SUFFIXES there). Only a
+     * declared but EMPTY `regular` table turns the rule off.
      */
     ordinalSuffixes?: {
         regular: Record<string, 0 | 1 | 2>;

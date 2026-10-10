@@ -61,8 +61,6 @@ public static class Numbers
         return string.Join(" ", TurkicNumberWords(Math.Floor(n), NUM).Select(w => w ?? "?"));
     }
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static readonly JsRe ENDS_VOWEL = JsRegex.Compile("[aeiou]$", "u");
 
     /** Cardinal stem → ordinal: vowel-final → -nchi, consonant-final → -inchi. The comma-letter ʻ (U+02BB)
@@ -72,7 +70,7 @@ public static class Numbers
     /** Integer → the Uzbek ORDINAL, ordinalizing only the LAST element (1978 → … sakkizinchi). */
     public static string? OrdinalWords(double n)
     {
-        if (!IsSafeInteger(n) || n < 1) return null;
+        if (!Js.IsSafeInteger(n) || n < 1) return null;
         var words = TurkicNumberWords(n, NUM).Select(w => w ?? "").ToList();
         if (words.Count == 0 || words.Any(w => w == "")) return null;
         words[^1] = Suffixed(words[^1]);

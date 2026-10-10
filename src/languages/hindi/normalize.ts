@@ -80,6 +80,8 @@ export function makeHindiNormalizer(
      * separately is what made the suffix a stray syllable ([sˈoːləɦ ʋˈiː̃], "sixteen vee").
      */
     const ordinal = (n: number, form: 0 | 1 | 2, suffix: string): string | undefined => {
+        // Above 2^53 `cardinal` is a gap (core/numbers.ts `indicNumberWords`), so this declines and the
+        // number path spells the digits (#1463).
         const irr = IRREGULAR_L[n];
         if (irr !== undefined) return irr[form];
         const words = cardinal(n);
@@ -108,9 +110,10 @@ export function makeHindiNormalizer(
         //    वाहन and — in the eight languages that inherit this normalizer — वाजता, वादळे, वाईल्ड. The
         //    Marathi run measured 13 live corruptions of that shape in its own corpus. This is trap #1 in
         //    ⚠ never a bare match where a letter may follow.
-        //    ⚠ BOTH ARMS ARE SKIPPED WHEN THE LANGUAGE DECLARES NO SUFFIXES. This normalizer is shared, and
-        //    a family member that has not sourced its own ordinal orthography must get NO rule rather than
-        //    Hindi's — an empty alternation would otherwise compile to `()` and match everywhere.
+        //    ⚠ BOTH ARMS ARE SKIPPED WHEN THE RESOLVED SUFFIX TABLE IS EMPTY — an empty alternation would
+        //    otherwise compile to `()` and match everywhere. A family member that declares no
+        //    `ordinalSuffixes` does NOT reach that case: it falls back to Hindi's (DEFAULT_SUFFIXES, above),
+        //    which is deliberate. Only a language that declares the block with an empty table gets no rule.
         if (Object.keys(SUFFIX_FORM).length > 0)
             s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?(${alt(Object.keys(SUFFIX_FORM))})(?![\\p{L}\\p{M}])`, "gu"),
                 (whole, digits: string, suffix: string) =>

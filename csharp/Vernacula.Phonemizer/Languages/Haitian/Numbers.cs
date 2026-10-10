@@ -94,12 +94,10 @@ public static class Numbers
         return r != 0 ? $"{thousand} {Below1000((int)r)}" : thousand;
     }
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** Non-negative integer → Haitian Creole words. Out-of-range / unsafe values read digit-by-digit. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e12)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e12)
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n)))
                 .Select(d =>
                 {

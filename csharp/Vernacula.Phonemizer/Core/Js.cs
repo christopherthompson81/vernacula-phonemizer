@@ -196,6 +196,10 @@ public static class Js
         return sb.ToString();
     }
 
+    /// <summary>JS `Number.isSafeInteger(n)`: an integral double inside ±(2^53 − 1). NaN and the infinities
+    /// are not. The one copy for the fleet; there is no BCL equivalent.</summary>
+    public static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
+
     /// <summary>Port of JS `Number(s)` for the numeral strings the engines parse out of text.
     ///
     /// ⚠ INVARIANT, ALWAYS. `double.Parse(s)` reads the AMBIENT culture, where "." can be a group

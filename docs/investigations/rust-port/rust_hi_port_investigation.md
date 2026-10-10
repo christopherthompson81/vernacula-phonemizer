@@ -188,3 +188,123 @@ pt pt-BR hi`, every hi dump regenerated and replayed, `cargo test --workspace`, 
 on both paths. Tests: 60 + 1 passed. Warnings: 0 and 0.
 
 **Implication.** Ready to merge.
+
+## Run 10 — 2026-10-09 18:40 (Run 5's three findings, fixed TS-first)
+
+**Question.** With the ordinal guard, the corrected comments and the optional type landed in the TS, do any
+goldens move, and do the C# and Rust twins close over the fixed behaviour?
+
+**What changed.**
+- `normalize.ts` `ordinal()`: `if (!Number.isSafeInteger(n)) return undefined;`. Declining leaves the match as
+  written, so the engine's `number()` spells the digits (`spellDigits`, its own above-2^53 refusal) and the suffix
+  is read as its own word. Mirrored in C# `Normalize.Ordinal` and Rust `ordinal`. Rust's float-composing `cardinal`
+  replica and its `Err(Input)` arm are gone: `cardinal` is the plain u64 composer (it was identical to
+  `small_cardinal`, which it replaces), and step 2 no longer carries an error out of the callback.
+- Comments: step 2 and the `HindiDef.ordinalSuffixes` doc now say a family member with no `ordinalSuffixes` gets
+  Hindi's (the deliberate fallback); only a declared EMPTY `regular` table turns the rule off.
+- `HindiDef.irregularOrdinals` is optional (declared only by hindi.jsonc and gujarati.jsonc). C# already defaults it
+  to an empty dictionary and falls back on `Count > 0`, so no C# type change.
+- `PhonemizeError::Input`: no producer remains. Its doc comment in `registry.rs` (shared file) now says so; the
+  variant stays.
+- Probes: three lines added to `probes/hi.txt` (2^53−1 and 2^53 ordinals; a 309-digit and a 400-digit ordinal),
+  which Run 5 could not add because the TS dump threw.
+
+**Readings (TS, derived by running the fixed engine).**
+- `9007199254740993वाँ` (hi): before, `…nˈɔː sˈɔː bˈaːnʋeːʋaː̃` (…992, the same string as `9007199254740992वाँ`);
+  after, `nˈɔː ʃˈuːnj ʃˈuːnj sˈaːt̪ ˈeːk … nˈɔː nˈɔː t̪ˈiːn ʋˈaː̃` (digits, then the suffix). Same shape for bgc, awa,
+  bho, hne, mag, mai and rkt.
+- `"1"×400 + "वाँ"`: before, `RangeError: Maximum call stack size exceeded` in all eight; after, 400 × `ˈeːk`, then
+  `ʋˈaː̃`. A 308-digit run used to compose a long garbage quantity (finite but float-rounded); now it is spelled too.
+- `9007199254740991वाँ` (the largest safe integer) still composes as an ordinal.
+
+**Commands and raw counts.**
+- `npx vitest run test/hindi-ordinal-safe-integer.test.ts`: 19 passed. With the guard line deleted: 17 failed (the
+  normalize case, and the 2^53+1 and 400-digit cases in all eight languages); the two fallback tests pass either way
+  (they pin the contract the comments now state). C# with the guard deleted: `AboveTwoToThe53ReadsItsOwnDigits`
+  fails in all eight, then `Test host process crashed : Stack overflow` (C# does not throw a RangeError; the
+  process dies).
+- `npm run typecheck`: clean. `npm run check:goldens`: `goldens fresh: 189 languages, 36495 rows, 0 stale`. No golden
+  moved, in the family or outside it, so nothing was regenerated.
+- `npx vitest run`: 339 files, 6396 passed, 5 skipped.
+- `cd csharp && dotnet test` (full): 7052 passed, 0 failed (19 of them new, `HindiOrdinalSafeIntegerTests`). No
+  existing C# test pinned the old reading.
+- fn-diff, dumps regenerated from the fixed TS: `hi-normalize 3600/0` (golden 132, fleurs 3306, probe 162),
+  `hi-word 43098/0`, `phonemize-sync 3600/0`, `phonemize-best 3600/0`, `hi-in-en 14/0` on both paths. Guard proof:
+  with the Rust `is_safe_integer` check disabled, `hi-normalize: 3595 identical, 5 DIFFER` (probe 5); restored, 0.
+- `cargo run --release -p parity`: en, en-GB, ja, it, es, pt, pt-BR, hi, cmn, fr all 200/200. `cargo test
+  --workspace`: 65 + 1 passed (`an_infinite_ordinal_is_an_error_not_a_panic` became
+  `an_unsafe_ordinal_spells_its_digits`). `cargo build` debug and release: 0 warnings; `cargo fmt --check` clean.
+
+**Also found.** Marathi's own normalizer (`src/languages/marathi/normalize.ts` step 6, not this file) has the same
+gap: `9007199254740993वा` and `9007199254740992वा` read identically, and `"1"×400 + "वा"` throws the same
+RangeError out of `phonemize(…, "mr")`. Gujarati and Nepali already guard with `isSafeInteger`. Fixed in Run 11.
+
+## Run 11 — 2026-10-09 19:05 (Marathi's twin of the ordinal gap, folded into this branch)
+
+**Question.** Does Marathi's own ordinal rule (`src/languages/marathi/normalize.ts` step 6) take the same guard
+without moving the `mr` golden?
+
+**What changed.** `ordinal()` there: `if (!Number.isSafeInteger(n)) return undefined;`. C# `Marathi/Normalize.cs`
+`Ordinal` mirrors it. No Rust Marathi exists yet.
+
+**Readings (TS).** Before: `9007199254740993वा` and `9007199254740992वा` gave the same string (…992), and `"1"×400 +
+"वा"` threw `RangeError: Maximum call stack size exceeded`. After: the digits are spelled, then the suffix, i.e.
+`phonemize(digits) + " " + phonemize("वा")`. `9007199254740991वा` still composes as an ordinal.
+
+**Commands and raw counts.**
+- `npx vitest run test/marathi-ordinal-safe-integer.test.ts`: 4 passed; with the guard deleted, 3 failed (2^53+1
+  with -वा and -व्या, and the 400-digit case), and the largest-safe-integer test passed either way.
+- C# `MarathiOrdinalSafeIntegerTests`: 4 passed; with the guard deleted, `Test host process crashed : Stack overflow`.
+- `npm run typecheck`: clean. `npm run check:goldens`: `189 languages, 36495 rows, 0 stale`. `mr` did not move.
+- `npx vitest run`: 340 files, 6400 passed, 5 skipped. `cd csharp && dotnet test`: 7056 passed, 0 failed.
+
+## Run 12 — 2026-10-09 (the guard moves into the shared composer, `indicNumberWords`)
+
+**Question.** Review found the same gap in every other caller of `indicNumberWords`: pa, ur, or and bn (ordinal
+suffixes) and as (the `নং` marker, and `তম` through the Bengali normalizer). Does one guard in the composer fix all of
+them, and does any golden move?
+
+**Baseline (`.probe/hi/indic53.mts`, TS before the change).** For `9007199254740993<marker>`: pa ਵਾਂ, ur واں, or ତମ,
+bn তম, as নং and as তম all read the same as `…992<marker>` (the rounded float composed). `"1"×400 + marker`:
+`THROW Maximum call stack size exceeded` in all six. hi, mr (Runs 10 and 11), gu and ne were already spelled.
+
+**What changed.**
+- `src/core/numbers.ts` `indicNumberWords`: `if (!Number.isSafeInteger(n)) return [null];`. Why `[null]`: every
+  direct caller (hi, mr, gu, ne, pa, ur, or, bn, as) maps `null` to `""` and then declines when a word is empty,
+  or checks `null` itself (or). `renderNumber` maps `null` to `?`, so a gap is loud rather than a dropped number.
+  Every `renderNumber` caller with the Indic composer (hi, bn, pa, or, ur, sd, syl) already checks
+  `isSafeInteger` first, so none of them reaches the gap.
+- `src/languages/assamese/normalize.ts`, the `নং` rule: it had no way to decline (`${cardinal(n)} নম্বৰ`), so with
+  the composer guard alone the digits would have vanished (` নম্বৰ`). It now returns the match when the cardinal
+  has an empty word. Shown to be needed: with the composer guard but the old Assamese file, the two `as নং` tests fail.
+- The hi and mr ordinal guards (Runs 10 and 11) are REMOVED in TS and C#: they are redundant. Every unsafe input
+  has `n ≥ 2^53`, which is not a safe integer, so the composer's `[null]` makes `ordinal()` decline on its own. No
+  irregular-ordinal key can match before that. The irregular lookup's `double.IsInteger(n) && n in int range` in C#
+  stays: without a guard in front of it, it is what keeps the `(int)` cast in range.
+- C#: `Js.IsSafeInteger` (Core/Js.cs) is used in `Numbers.IndicNumberWordsFn`. The private copies in
+  Mossi/Uzbek/Finnish/Sepedi/Haitian `Numbers.cs` are swapped for it (one call site each). Assamese's `নং` decline
+  is mirrored too.
+- Rust: `core::numbers::indic_number_words_js(n: f64, d)`, the JS-number entry (`[None]` when unsafe). Hindi's
+  `cardinal` uses it, and the hi ordinal guard is dropped as in TS.
+
+**Commands and raw counts.**
+- After the change, `.probe/hi/indic53.mts`: all ten (hi mr pa ur or bn as×2 gu ne) give `993==992: false`,
+  `993 spelled: true`, `400: spelled`.
+- `test/indic-composer-safe-integer.test.ts`, 24 tests: 7 composer cases, 1 for the largest safe integer, and
+  pa/ur/or/bn/as নং/as তম/hi/mr × {2^53+1, 400 digits}. With the composer guard deleted, these plus the hi and mr
+  files give `43 failed | 4 passed (47)`.
+- C# `IndicComposerSafeIntegerTests` (same matrix, plus `Js.IsSafeInteger`): with the guard deleted, the
+  2^53+1 cases fail (pa, ur, or, bn, as×2) and `UnsafeIntegerIsAGap(1.5)` fails, then `Test host process crashed :
+  Stack overflow`.
+- Rust `an_unsafe_integer_is_a_gap` (core::numbers): with the guard disabled, it and
+  `an_unsafe_ordinal_spells_its_digits` both FAIL.
+- Before the rebase: `check:goldens` `189 languages, 36495 rows, 0 stale` (nothing moved, nothing regenerated);
+  `npx vitest run` 342 files, 6428 passed, 5 skipped; `dotnet test` 7085 passed, 0 failed; `cargo test
+  --workspace` 67 + 1 passed, 0 warnings; parity 10/10 at 200/200; fn-diff `hi-normalize 3600/0`, `hi-word
+  43098/0`, `abugida-core 85810/0`, `phonemize-sync 3600/0`, `phonemize-best 3600/0`, `hi-in-en 14/0` on both paths.
+- After rebasing onto main b6629d83 (it and ja merged; clean, no conflict, so the regex corpus was not
+  re-extracted): typecheck clean; `check:goldens` `189 languages, 36495 rows, 0 stale`; `npx vitest run` 343 files,
+  6443 passed, 5 skipped; `dotnet test` 7110 passed, 0 failed; `cargo test --workspace` 71 + 1 passed, 0 warnings
+  (debug and release), fmt clean; parity en en-GB ja it es pt pt-BR hi cmn fr all 200/200; every hi dump regenerated
+  and replayed: `hi-normalize 3600/0`, `hi-word 43098/0`, `abugida-core 85810/0`, `phonemize-sync 3600/0`,
+  `phonemize-best 3600/0`, `hi-in-en 14/0` on both paths.

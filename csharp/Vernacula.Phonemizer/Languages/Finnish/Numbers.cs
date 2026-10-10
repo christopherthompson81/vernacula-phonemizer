@@ -12,9 +12,6 @@ public static class Numbers
 {
     private static FinnishNumbers N => Manifest.MANIFEST.Numbers;
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** 1–99 as one concatenated Finnish word (never called with 0). */
     private static string Below100(double n)
     {
@@ -50,7 +47,7 @@ public static class Numbers
     /** A non-negative integer → its Finnish cardinal reading (space-separated at the tuhat/miljoona joints). */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e9) return ReadDigits(raw ?? Js.NumberToString(n));
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e9) return ReadDigits(raw ?? Js.NumberToString(n));
         if (n == 0) return N.Zero;
         var parts = new List<string>();
         var mil = Math.Floor(n / 1e6);

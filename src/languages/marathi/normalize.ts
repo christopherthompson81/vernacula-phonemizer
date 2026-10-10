@@ -115,6 +115,8 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         form: 0 | 1 | 2 | 3,
         suffix: string,
     ): string | undefined => {
+        // Above 2^53 `cardinal` is a gap (core/numbers.ts `indicNumberWords`), so this declines and the
+        // number path spells the digits (#1463).
         const irr = IRREGULAR[n];
         if (irr !== undefined) return irr[form];
         const words = cardinal(n);

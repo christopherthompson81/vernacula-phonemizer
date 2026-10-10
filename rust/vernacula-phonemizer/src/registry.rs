@@ -180,8 +180,9 @@ pub enum PhonemizeError {
     /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
     Neural(String),
-    /// The TS engine THROWS on this input, so the port returns an error rather than a reading: e.g. Hindi's
-    /// ordinal rule on a 309-digit run, `Infinity`, whose recursion is a `RangeError` in the TS.
+    /// The TS engine THROWS on this input, so the port returns an error rather than a reading. ⚠ NO ENGINE
+    /// PRODUCES IT TODAY: its one producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to
+    /// decline above 2^53 (#1463). Kept because callers match it, and for the next such TS throw.
     Input(String),
 }
 

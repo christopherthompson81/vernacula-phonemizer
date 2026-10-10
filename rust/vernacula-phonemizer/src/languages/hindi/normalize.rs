@@ -6,8 +6,8 @@ use indexmap::IndexMap;
 
 use super::manifest::{OrdinalSuffixes, try_manifest};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, MAX_SAFE_INTEGER, js, js_number, js_number_to_string};
-use crate::core::numbers::{NumbersDef, indic_number_words};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
+use crate::core::numbers::{NumbersDef, indic_number_words_js};
 use crate::core::postposed_sign::postposed_sign;
 use crate::core::provenance::{escape, rewrite, rewrite_with};
 use crate::js_re;
@@ -71,37 +71,10 @@ fn js_key_order<V>(m: &IndexMap<String, V>) -> Vec<(&String, &V)> {
     out
 }
 
-/// `indicNumberWords(n, numbers).map((w) => w ?? "")`, for the `Number(...)` of a digit run.
-///
-/// ⚠ ABOVE 2^53 THE TS COMPOSES THE FLOAT: the crore arm splits `Math.floor(n / 1e7)` and `n % 1e7` in
-/// doubles, so a long ordinal reads a quantity the text did not write. Reproduced here (only that arm is
-/// reachable above 2^53); below it the shared u64 composer is exact and identical. A digit run of 309 or more
-/// digits is `Infinity`, and the TS recursion overflows the stack: a `RangeError` out of `phonemize`, returned
-/// here as `PhonemizeError::Input`.
-fn cardinal(n: f64, d: &NumbersDef) -> Result<Vec<String>, PhonemizeError> {
-    if n <= MAX_SAFE_INTEGER {
-        return Ok(indic_number_words(n as u64, d)
-            .into_iter()
-            .map(|w| w.unwrap_or_default())
-            .collect());
-    }
-    if !n.is_finite() {
-        return Err(PhonemizeError::Input(
-            "RangeError: Maximum call stack size exceeded (an ordinal of 309+ digits is Infinity, as in the TS)".into(),
-        ));
-    }
-    let (c, r) = ((n / 10_000_000.0).floor(), n % 10_000_000.0);
-    let mut out = cardinal(c, d)?;
-    out.push(d.magnitudes.crore.clone().unwrap_or_default());
-    if r != 0.0 {
-        out.extend(cardinal(r, d)?);
-    }
-    Ok(out)
-}
-
-/// `cardinal` for a value the pattern bounds below 1000 (clock fields, fraction terms): it cannot fail.
-fn small_cardinal(n: f64, d: &NumbersDef) -> Vec<String> {
-    indic_number_words(n as u64, d)
+/// `indicNumberWords(n, numbers).map((w) => w ?? "")`. An unsafe integer is a gap (`[""]`), so the ordinal
+/// declines and the number path spells the digits.
+fn cardinal(n: f64, d: &NumbersDef) -> Vec<String> {
+    indic_number_words_js(n, d)
         .into_iter()
         .map(|w| w.unwrap_or_default())
         .collect()
@@ -205,20 +178,19 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
             // `IRREGULAR_L[n]`: the key is `String(n)`.
             let irregular_at =
                 |n: f64| -> Option<&Vec<String>> { irregular.get(&js_number_to_string(n)) };
-            let card = |n: f64| small_cardinal(n, d);
-            let ordinal =
-                |n: f64, form: usize, suffix: &str| -> Result<Option<String>, PhonemizeError> {
-                    if let Some(irr) = irregular_at(n) {
-                        return Ok(irr.get(form).cloned());
-                    }
-                    let mut words = cardinal(n, d)?;
-                    if words.is_empty() || words.iter().any(|w| w.is_empty()) {
-                        return Ok(None);
-                    }
-                    let last = words.len() - 1;
-                    words[last] = format!("{}{suffix}", words[last]);
-                    Ok(Some(join(&words)))
-                };
+            let card = |n: f64| cardinal(n, d);
+            let ordinal = |n: f64, form: usize, suffix: &str| -> Option<String> {
+                if let Some(irr) = irregular_at(n) {
+                    return irr.get(form).cloned();
+                }
+                let mut words = cardinal(n, d);
+                if words.is_empty() || words.iter().any(|w| w.is_empty()) {
+                    return None;
+                }
+                let last = words.len() - 1;
+                words[last] = format!("{}{suffix}", words[last]);
+                Some(join(&words))
+            };
             let mut s = input.clone();
 
             // 1) Era markers.
@@ -235,25 +207,15 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
 
             // 2) Ordinal suffixes.
             if let Some(re) = &ordinal_re {
-                // The TS throws out of the replace callback; the first error is carried out of it here.
-                let mut failed: Option<PhonemizeError> = None;
                 s = rewrite_with(&s, re, |m, full| {
                     let digits = m.group(1, full).unwrap_or_default();
                     let suffix = m.group(2, full).unwrap_or_default().to_string_lossy();
                     let Some(&form) = suffix_form.get(suffix.as_str()) else {
                         return m.value(full);
                     };
-                    match ordinal(js_number(&digits), form, &suffix) {
-                        Ok(o) => o.map_or_else(|| m.value(full), |o| js(&o)),
-                        Err(e) => {
-                            failed.get_or_insert(e);
-                            m.value(full)
-                        }
-                    }
+                    ordinal(js_number(&digits), form, &suffix)
+                        .map_or_else(|| m.value(full), |o| js(&o))
                 });
-                if let Some(e) = failed {
-                    return Err(e);
-                }
             }
 
             // 2b) Suppletive spellings.
