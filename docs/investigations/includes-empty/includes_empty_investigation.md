@@ -182,3 +182,28 @@ not greppable without types and were found by the runtime probe; the test header
 **Implication:** done, with these left open: the Dutch/Swahili/Yoruba initialisms read as words (separate
 defect); Danish `danish.ts:104` has the indirect shape but no input reached it; `wu.ts:81` belongs to the
 Sinitic work and is allowlisted in the guard; the guard sees only the inline shape.
+
+## Run 7 — 2026-10-09 22:20
+
+**Question.** Does real text reach wu's allowlisted site, `VOWEL.includes(body[1] ?? "")` in `wu.ts`'s
+`syllableToIpa`, with a one-letter body (`y`/`w`), and does anything read differently once it is guarded?
+
+**Command.** A Python census (session scratchpad, `wu_site.py`): every reading syllable in `wu/dict.tsv`, split
+into body + tone exactly as `syllableToIpa`'s `/^([a-z]+?)([0-9])?$/i` does, and every raw Wugniu-shaped token in
+the wuu golden + mined text. Then the fix, `npm run check:goldens`, and C# parity on wuu.
+
+**Finding.**
+
+    dict reading syllables   224,129 (555 distinct bodies) — one-letter y/w bodies: 0
+    raw Wugniu tokens        3 in 1,405 golden + mined texts — one-letter y/w bodies: 0
+    check:goldens            0 stale · C# parity wuu 200/200
+
+And by reading: a body `y` never reaches the test, because `y` is a whole-body final and returns first; a body
+`w` passes it, but the remainder is `""`, which no final keys, so it falls through to the same place. The defect is
+INERT in output. The C# copy carried the same bug, with a comment noting it was reproduced on purpose
+(`VOWEL.Contains("")` is true in .NET too).
+
+**Implication.** Fixed in both ports as a predicate, `glideOnset` / `GlideOnset`, that requires the second letter
+to exist. Nothing reads differently, so the predicate is what the tests pin (TS and C#; both fail on revert, and
+so does the source scan). wu's allowlist entry is removed, so the scan now covers every file in `src/`, with no
+exceptions left. No golden moves.
