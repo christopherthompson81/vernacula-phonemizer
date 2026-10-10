@@ -31,18 +31,39 @@ function toHiragana(w: string): string {
     return out;
 }
 
-/**
- * Whether a mora STARTS with a vowel phoneme. ⚠ Compare whole phonemes, never a first code unit: ɯᵝ, e̞ and o̞
- * are two units each, so a `mora[0]` test recognised only ä and i, and a っ before う/え/お copied a bare vowel
- * letter (あっお → *äoo̞*) instead of the glottal stop.
- */
-const startsWithVowel = (mora: string): boolean =>
-    mora.startsWith(A) || mora.startsWith(I) || mora.startsWith(U) || mora.startsWith(E) || mora.startsWith(O);
+/** The five vowel phonemes, in the order `vowelOf` must test them (ɯᵝ/o̞/e̞ before their bases). */
+const VOWELS: readonly string[] = [U, O, E, A, I];
+
 /** The vowel phoneme a mora ends in (ɯᵝ/o̞/e̞ before their bases), or "" for ん/っ/onset-only. */
 function vowelOf(ms: string): string {
-    for (const v of [U, O, E, A, I]) if (ms.endsWith(v)) return v;
+    for (const v of VOWELS) if (ms.endsWith(v)) return v;
     return "";
 }
+
+/** The glottal stop a っ reads as when nothing follows it that can geminate. */
+export const GLOTTAL = "ʔ";
+
+/**
+ * The consonant phones, as the first code unit of every onset the manifest declares: the onset of each
+ * consonant+vowel mora in `mora` and `foreign`, plus every `youonOnset`. Derived, never listed by hand.
+ */
+const CONSONANTS: ReadonlySet<string> = (() => {
+    const out = new Set<string>();
+    for (const ms of [...Object.values(MORA), ...Object.values(FOREIGN)]) {
+        const v = vowelOf(ms);
+        if (v !== "" && ms.length > v.length) out.add(ms[0]!);
+    }
+    for (const on of Object.values(YOUON_ONSET)) if (on !== "") out.add(on[0]!);
+    return out;
+})();
+
+/**
+ * Whether a っ before this mora geminates it: the mora must be a full syllable, a CONSONANT onset plus a vowel.
+ * Stated positively. A "not a vowel" test also geminated ー (あっー → *äːː*), ん (あっん → *äɴɴ*) and an
+ * earlier geminate (あっっか), and a first-code-unit vowel test missed ɯᵝ/e̞/o̞ (あっお → *äoo̞*). Each of
+ * those is a glottal stop.
+ */
+const geminatesBefore = (mora: string): boolean => CONSONANTS.has(mora[0] ?? "") && vowelOf(mora) !== "";
 
 /**
  * A run of kana → its list of MORAE (one array element per mora: a long vowel ː is its own mora, a moraic ん is
@@ -77,11 +98,13 @@ export function kanaToMorae(word: string): string[] | null {
         }
         // Sokuon っ → geminate the next mora's first consonant (its own mora). Word-final / vowel-onset → glottal ʔ.
         if (c === "っ" || c === "ッ") {
+            // The next MORA exactly as the loop will read it (foreign first, then youon, then a single kana), so
+            // this and geminateSokuon judge the same mora: ッウィ geminates the w of ウィ, not the vowel of ウ.
+            const nx2 = chars[i + 2] ?? "";
             const next =
-                SMALL_Y[chars[i + 2] ?? ""] && YOUON_ONSET[nx]
-                    ? YOUON_ONSET[nx]! + SMALL_Y[chars[i + 2]!]!
-                    : MORA[nx];
-            morae.push(next && !startsWithVowel(next) ? next[0]! : "ʔ");
+                FOREIGN[nx + nx2] ||
+                (SMALL_Y[nx2] && YOUON_ONSET[nx] ? YOUON_ONSET[nx]! + SMALL_Y[nx2]! : MORA[nx]);
+            morae.push(next !== undefined && geminatesBefore(next) ? next[0]! : GLOTTAL);
             lastVowel = "";
             i++;
             continue;
@@ -126,15 +149,16 @@ export function kanaToMorae(word: string): string[] | null {
  * Sokuon っ geminates the FOLLOWING mora's initial consonant. Like the ん pass below, this is split out so it
  * can run again over CONCATENATED segments: per-morpheme conversion (segmentsToMorae) leaves a
  * segment-final っ unable to see the next segment's onset, so it fell back to the glottal ʔ — 吹っ切れ came
- * out ɸɯᵝʔkiɾe̞ instead of ɸɯᵝkkiɾe̞. Idempotent: an already-geminated mora is no longer "ʔ".
+ * out ɸɯᵝʔkiɾe̞ instead of ɸɯᵝkkiɾe̞. It applies the same `geminatesBefore` rule as kanaToMorae, so it leaves
+ * kanaToMorae's output unchanged: geminateSokuon(kanaToMorae(x)) equals kanaToMorae(x), and a test checks this.
  */
 export function geminateSokuon(morae: string[]): string[] {
     for (let k = 0; k < morae.length; k++) {
-        if (morae[k] !== "ʔ") continue;
+        if (morae[k] !== GLOTTAL) continue;
         const next = morae[k + 1];
-        // Only a CONSONANT-initial next mora geminates. A word-final っ, or one before a vowel-onset mora,
-        // is a genuine glottal stop and must stay ʔ.
-        if (next !== undefined && next !== "" && !startsWithVowel(next)) morae[k] = next[0]!;
+        // Only a consonant+vowel next mora geminates. A word-final っ, or one before a vowel, ー, ん or
+        // another っ, is a genuine glottal stop and must stay ʔ.
+        if (next !== undefined && geminatesBefore(next)) morae[k] = next[0]!;
     }
     return morae;
 }

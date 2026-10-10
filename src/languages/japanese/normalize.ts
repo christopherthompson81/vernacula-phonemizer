@@ -63,7 +63,7 @@ const LETTER_KANA: Readonly<Record<string, string>> = {
  * letter-spelling, which is always a legitimate Japanese reading and therefore a safe default.
  * `pH` is here because it is an initialism that merely happens to be written with a lowercase letter.
  */
-const WORD_ACRONYM: Readonly<Record<string, string>> = {
+export const WORD_ACRONYM: Readonly<Record<string, string>> = {
     NASA: "ナサ", NATO: "ナトー", UNESCO: "ユネスコ", UNICEF: "ユニセフ", ASEAN: "アセアン",
     OPEC: "オペック", JAXA: "ジャクサ", JICA: "ジャイカ", AIDS: "エイズ", FIFA: "フィファ",
     pH: "ピーエイチ",
@@ -71,17 +71,17 @@ const WORD_ACRONYM: Readonly<Record<string, string>> = {
 
 /**
  * The mixed-case WORD_ACRONYM entries (`pH`), each as a Latin-bounded pattern: the same boundary as the
- * all-caps rule, so the key never matches inside a longer Latin word (`DepHi` stays as written).
+ * all-caps rule, so the key never matches inside a longer Latin word (`DepHi` stays as written). A run of the key
+ * repeated back to back (`pHpH`) is still the acronym, once per repeat, which is what the old `replaceAll` gave.
  * ⚠ IT GOES THROUGH `rewrite`, NOT `replaceAll`: an untracked replacement poisons the provenance mapping, and
  * every token of the row then lost its `inputSpan`.
+ * The key is escaped character by character (no regex), so building the pattern cannot fail for any key.
  */
-const MIXED_CASE_ACRONYM: readonly (readonly [RegExp, string])[] = Object.entries(WORD_ACRONYM)
+const MIXED_CASE_ACRONYM: readonly (readonly [RegExp, string, string])[] = Object.entries(WORD_ACRONYM)
     .filter(([k]) => /[a-z]/u.test(k))
     .map(([k, v]) => {
-        // The key is spliced into the pattern verbatim, so it must be plain letters (no escaping needed).
-        if (![...k].every((c) => (c >= "A" && c <= "Z") || (c >= "a" && c <= "z")))
-            throw new Error(`WORD_ACRONYM key ${JSON.stringify(k)} must be ASCII letters`);
-        return [new RegExp(`(?<![\\p{Script=Latin}\\p{M}])${k}(?![\\p{Script=Latin}\\p{M}])`, "gu"), v] as const;
+        const lit = [...k].map((c) => ("^$\\.*+?()[]{}|/".includes(c) ? `\\${c}` : c)).join("");
+        return [new RegExp(`(?<![\\p{Script=Latin}\\p{M}])(?:${lit})+(?![\\p{Script=Latin}\\p{M}])`, "gu"), k, v] as const;
     });
 
 /** Full-width Latin Ａ-Ｚ / ａ-ｚ → ASCII, so one representation reaches the rules below. */
@@ -284,7 +284,7 @@ export function normalizeJapanese(input: string): string {
     //    LETTER NAME with the rest of the name left behind: `São` → *esu / ˈʌɔː*.
     s = rewrite(s, /(?<![\p{Script=Latin}\p{M}])[A-Z][A-Z-]*[A-Z](?![\p{Script=Latin}\p{M}])|(?<![\p{Script=Latin}\p{M}])[A-Z](?![\p{Script=Latin}\p{M}])/gu, spell);
     //     `pH` and the other listed mixed-case initialisms, which the all-caps rule cannot reach.
-    for (const [re, v] of MIXED_CASE_ACRONYM) s = rewrite(s, re, v);
+    for (const [re, k, v] of MIXED_CASE_ACRONYM) s = rewrite(s, re, (m: string) => v.repeat(m.length / k.length));
 
     return s;
 }

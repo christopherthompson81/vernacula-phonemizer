@@ -55,7 +55,7 @@ public static class Normalize
      * Acronyms Japanese reads as a WORD rather than as letters — a lexical fact, so this list holds only
      * established ones. Anything absent falls through to letter-spelling, always a legitimate reading.
      */
-    private static readonly IReadOnlyDictionary<string, string> WORD_ACRONYM = new Dictionary<string, string>(StringComparer.Ordinal)
+    public static readonly IReadOnlyDictionary<string, string> WORD_ACRONYM = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["NASA"] = "ナサ", ["NATO"] = "ナトー", ["UNESCO"] = "ユネスコ", ["UNICEF"] = "ユニセフ", ["ASEAN"] = "アセアン",
         ["OPEC"] = "オペック", ["JAXA"] = "ジャクサ", ["JICA"] = "ジャイカ", ["AIDS"] = "エイズ", ["FIFA"] = "フィファ",
@@ -117,18 +117,18 @@ public static class Normalize
     private static readonly JsRe HAS_LOWER = JsRegex.Compile("[a-z]", "u");
     /**
      * The mixed-case WORD_ACRONYM entries (`pH`), each as a Latin-bounded pattern: the same boundary as
-     * INITIALISM, so the key never matches inside a longer Latin word (`DepHi` stays as written).
+     * INITIALISM, so the key never matches inside a longer Latin word (`DepHi` stays as written). A run of the
+     * key repeated back to back (`pHpH`) is still the acronym, once per repeat, as the old replace gave.
      * ⚠ IT GOES THROUGH `Rewrite`, NOT `string.Replace`: an untracked replacement poisons the provenance
      * mapping, and every token of the row then lost its `InputSpan`.
+     * The key is escaped character by character (no regex), so building the pattern cannot fail for any key.
      */
-    private static readonly (JsRe Re, string Value)[] MIXED_CASE_ACRONYM = WORD_ACRONYM
+    private static readonly (JsRe Re, string Key, string Value)[] MIXED_CASE_ACRONYM = WORD_ACRONYM
         .Where(kv => HAS_LOWER.IsMatch(kv.Key))
         .Select(kv =>
         {
-            // Spliced into the pattern verbatim, so the key must be plain letters (no escaping needed).
-            if (!kv.Key.All(char.IsAsciiLetter))
-                throw new InvalidOperationException($"WORD_ACRONYM key \"{kv.Key}\" must be ASCII letters");
-            return (JsRegex.Compile("(?<![\\p{Script=Latin}\\p{M}])" + kv.Key + "(?![\\p{Script=Latin}\\p{M}])", "gu"), kv.Value);
+            var lit = string.Concat(Js.CodePoints(kv.Key).Select(c => "^$\\.*+?()[]{}|/".Contains(c, StringComparison.Ordinal) ? "\\" + c : c));
+            return (JsRegex.Compile("(?<![\\p{Script=Latin}\\p{M}])(?:" + lit + ")+(?![\\p{Script=Latin}\\p{M}])", "gu"), kv.Key, kv.Value);
         })
         .ToArray();
     private static readonly JsRe TRAILING_CHOON = JsRegex.Compile("ー+$", "u");
@@ -214,8 +214,8 @@ public static class Normalize
         // the isolated capital `S` was spelled out as a letter name.
         s = Rewrite(s, INITIALISM, m => Spell(m.Value));
         // The mixed-case acronyms (`pH`), Latin-bounded and through `Rewrite` (see MIXED_CASE_ACRONYM).
-        foreach (var (re, v) in MIXED_CASE_ACRONYM)
-            s = Rewrite(s, re, v);
+        foreach (var (re, k, v) in MIXED_CASE_ACRONYM)
+            s = Rewrite(s, re, m => string.Concat(Enumerable.Repeat(v, m.Value.Length / k.Length)));
 
         return s;
     }
