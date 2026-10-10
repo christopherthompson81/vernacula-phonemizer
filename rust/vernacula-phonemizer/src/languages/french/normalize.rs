@@ -344,9 +344,14 @@ pub(crate) fn normalize_french_loaded(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"\s?÷\s?", "gu"), &js(" divisé par "));
 
     // 6) fractions.
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and
+    // grouping separators with a digit beyond them; a `,` between two fractions is a list separator.
     s = rewrite_with(
         &s,
-        js_re!(r"\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d)", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|(?<![\d/])\d+,)\b(\d{1,3})\/(\d{1,3})\b(?!\s*\/?\d|\.\d|,\d+(?![\d/]))",
+            "gu"
+        ),
         |m, x| {
             fraction_words(js_number(&g(m, 1, x)), js_number(&g(m, 2, x)))
                 .unwrap_or_else(|| m.value(x))

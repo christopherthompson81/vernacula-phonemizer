@@ -396,17 +396,7 @@ export function normalizeLingala(input: string): string {
     s = rewrite(s, /(\d[\d ,.]*?)\s?\$/gu, (whole, n: string, off: number, all: string) =>
         NAMED.test(all.slice(0, off)) ? n : `dolare ${n}`);
 
-    // 10) DECIMALS, after every rule that needs the number intact. The separator becomes NOTHING and the
-    //    fractional digits are spaced apart so the number path speaks them one at a time — see the header
-    //    for why there is no point word to insert. What this fixes is the spurious CLAUSE BREAK and the
-    //    mis-read tail: `4,20` was *mínei , túku míbalé* ("four, twenty") and is now *mínei míbalé
-    //    libungutúlu*.
-    //    ⚠ THE TRAILING LETTER GUARD keeps a dotted designation (`802.11a`) out — zero in this corpus, and
-    //    the same robustness argument as step 5.
-    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
-        `${int} ${[...frac].join(" ")}`);
-
-    // 11) FRACTIONS → the ordinal-denominator idiom, which is the language's own and needs no new word:
+    // 9b) FRACTIONS → the ordinal-denominator idiom, which is the language's own and needs no new word:
     //     Lingala forms an ordinal as `ya` + the cardinal, and that construction is everywhere in the
     //     corpus (`ya liboso` ×560, `ya mibale` ×285, `ya misato` ×169). So `2/3` reads *míbalé ya mísáto*
     //     — "two of the third". ×79, the commonest being 2/3, 1/3 and 1/4.
@@ -419,10 +409,28 @@ export function normalizeLingala(input: string): string {
     //     `/digit` field additionally rejects the dates before the cap has to.
     //     ⚠ AND THE CAP IS A RANGE, NOT A TABLE (trap 8): the rule COMPOSES from the ordinal idiom, so
     //     `3/4` and `1/2` read correctly although the corpus writes neither in ASCII.
-    s = rewrite(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) =>
+    //     ⚠ BEFORE THE DECIMALS (step 10), which used to run first and rewrite the separator of `1/2.5` and
+    //     `1.5/2` into a space — so the guard never saw the `.` or `,`, and the fraction read off the decimal's
+    //     tail. Ahead of them it sees the raw digits (#1495; lb and ta had the same order, #1496).
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `.` or `,`
+    //   with a digit beyond it (this engine reads both as numeric). A `,` between two fractions is a list
+    //   separator, so `1/2,3/4` reads both; any other `,` beside a digit is the decimal. The letter guard is on
+    //   BOTH sides now: it used to refuse a letter only before the fraction, so `1/2abc` read (fused into the
+    //   word) while `abc1/2` did not.
+    s = rewrite(s, /(?<![\d\p{L}\p{M}/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/\p{L}\p{M}]|\.\d|,\d+(?![\d/]))/gu, (whole, a: string, b: string) =>
         Number(a) < Number(b) && Number(b) <= 10 ? `${a} ya ${b}` : whole);
     // ¼ and ½ occur once each; both are the same idiom with the numerator spelled out.
     s = rewrite(rewrite(s, /¼/gu, " mǒkó ya mínei "), /½/gu, " mǒkó ya míbalé ");
+
+    // 10) DECIMALS, after every rule that needs the number intact. The separator becomes NOTHING and the
+    //    fractional digits are spaced apart so the number path speaks them one at a time — see the header
+    //    for why there is no point word to insert. What this fixes is the spurious CLAUSE BREAK and the
+    //    mis-read tail: `4,20` was *mínei , túku míbalé* ("four, twenty") and is now *mínei míbalé
+    //    libungutúlu*.
+    //    ⚠ THE TRAILING LETTER GUARD keeps a dotted designation (`802.11a`) out — zero in this corpus, and
+    //    the same robustness argument as step 5.
+    s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d\p{L}\p{M}])/gu, (_m, int: string, frac: string) =>
+        `${int} ${[...frac].join(" ")}`);
 
     // 12) ORDINAL SUFFIXES. `16ème` was reaching the phoneme stream with its French suffix as raw letters
     //     (`zómi na motóbá e˩me˩`). ⚠ ALL 235 INSTANCES ARE INSIDE FRENCH TEXT — "du 16ème au 18ème

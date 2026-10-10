@@ -126,7 +126,9 @@ public static class Normalize
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("\\b(\\d{1,3})/(\\d{1,3})\\b(?!\\s*[/\\d])", "gu");
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and grouping
+    // separators with a digit beyond them; a `,` between two fractions is a list separator. See the TS source.
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)\\b(\\d{1,3})\\/(\\d{1,3})\\b(?!\\s*[/\\d]|\\.\\d|,\\d+(?![\\d/]))", "gu");
     private static readonly JsRe FIRST_OF_MONTH = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}\\d_])1\\s+de\\s+({MONTHS})(?![\\p{{L}}\\p{{M}}\\d_])", "giu");
 
     /** Normalize one Portuguese input string. */

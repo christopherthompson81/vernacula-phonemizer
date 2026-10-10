@@ -448,6 +448,31 @@ export function normalizeHaitian(input: string): string {
             return NAMED.test(all.slice(off + whole.length)) ? quantity : `${quantity} dola`;
         });
 
+    // 9b) FRACTIONS → the ordinal-denominator idiom, which is the language's own: `prèske yon senkyèm se
+    //     mizilman` ("nearly a fifth are Muslim"), `yon dizyèm milimèt`, and for numerators above one
+    //     `de tyè` and `twa ka`. So `1/5` reads *yon senkyèm* and `2/3` *2 twazyèm* — the numerator is left
+    //     as a digit for the number path, and `1` becomes the ARTICLE `yon` rather than the numeral `en`,
+    //     because `yon senkyèm` is what the corpus writes.
+    //     ⚠ THE DENOMINATOR IS CAPPED AT TEN, AND THAT CAP IS THE WHOLE RULE. `\d{1,3}/\d{1,3}` matches 69
+    //     times in Creole text and only about ten are fractions. The rest are a chess score (`14/16`), a
+    //     publisher's collection (`Paris, 10/18`), a year span (`-470/469`) and dates. Numerator <
+    //     denominator ≤ 10 admits the real ones and none of the others.
+    //     ⚠ AND THE CAP IS A RANGE, NOT A TABLE (trap 8): the rule composes through `ordinalWord`, so `3/4`
+    //     reads correctly although the corpus writes it only in words.
+    //     ⚠ BEFORE THE DECIMALS (step 10), which used to run first and rewrite the separator of `1/2.5` and
+    //     `1.5/2` into `vigil` — so the guard never saw the `.` or `,`, and the fraction read off the decimal's
+    //     tail. Ahead of them it sees the raw digits (#1495; lb and ta had the same order, #1496).
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `.` or `,`
+    //   with a digit beyond it (this engine reads both as numeric). A `,` between two fractions is a list
+    //   separator, so `1/2,3/4` reads both; any other `,` beside a digit is the decimal. The letter guard is on
+    //   BOTH sides now: it used to refuse a letter only before the fraction, so `1/2abc` read (fused into the
+    //   word) while `abc1/2` did not.
+    s = rewrite(s, /(?<![\d\p{L}\p{M}/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/\p{L}\p{M}]|\.\d|,\d+(?![\d/]))/gu, (whole, a: string, b: string) => {
+        const den = ordinalWord(Number(b));
+        if (den === undefined || !(Number(a) < Number(b) && Number(b) <= 10)) return whole;
+        return Number(a) === 1 ? `yon ${den}` : `${a} ${den}`;
+    });
+
     // 10) DECIMALS, after every rule that needs the number intact. The separator becomes `vigil`, which is
     //     the Haitian name of the mark and is attested IN THE DECIMAL SENSE four times, in four different
     //     articles: `yon rezilta ki gen senkant (,50) apre yon vigil`, `awondi yo volontèman a twa chif apre
@@ -475,23 +500,6 @@ export function normalizeHaitian(input: string): string {
     //     The chain guard is kept on the RIGHT as well, so `1.2.3` still declines from either direction.
     s = rewrite(s, /(?<![\d.,])(\d+)[.,](\d+)(?![\d]|[.,]\d)/gu, (_m, int: string, frac: string) =>
         frac.length <= 2 && !frac.startsWith("0") ? `${int} vigil ${frac}` : `${int} vigil ${[...frac].join(" ")}`);
-
-    // 11) FRACTIONS → the ordinal-denominator idiom, which is the language's own: `prèske yon senkyèm se
-    //     mizilman` ("nearly a fifth are Muslim"), `yon dizyèm milimèt`, and for numerators above one
-    //     `de tyè` and `twa ka`. So `1/5` reads *yon senkyèm* and `2/3` *2 twazyèm* — the numerator is left
-    //     as a digit for the number path, and `1` becomes the ARTICLE `yon` rather than the numeral `en`,
-    //     because `yon senkyèm` is what the corpus writes.
-    //     ⚠ THE DENOMINATOR IS CAPPED AT TEN, AND THAT CAP IS THE WHOLE RULE. `\d{1,3}/\d{1,3}` matches 69
-    //     times in Creole text and only about ten are fractions. The rest are a chess score (`14/16`), a
-    //     publisher's collection (`Paris, 10/18`), a year span (`-470/469`) and dates. Numerator <
-    //     denominator ≤ 10 admits the real ones and none of the others.
-    //     ⚠ AND THE CAP IS A RANGE, NOT A TABLE (trap 8): the rule composes through `ordinalWord`, so `3/4`
-    //     reads correctly although the corpus writes it only in words.
-    s = rewrite(s, /(?<![\d\p{L}\p{M}/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (whole, a: string, b: string) => {
-        const den = ordinalWord(Number(b));
-        if (den === undefined || !(Number(a) < Number(b) && Number(b) <= 10)) return whole;
-        return Number(a) === 1 ? `yon ${den}` : `${a} ${den}`;
-    });
 
     // 12) ORDINALS — this language's own suffix, not a French import, and the layer's second-largest class
     //     at ×1,259 in Creole text. `20yèm syèk` was reading as *ven* plus a bare *jɛm*; it is *ventyèm*.

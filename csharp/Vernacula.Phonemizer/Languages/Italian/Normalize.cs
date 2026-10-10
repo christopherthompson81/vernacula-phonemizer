@@ -142,7 +142,9 @@ public static readonly Func<string, bool> IsUnreadableItalian = Initialisms.Make
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<!\\d)(\\d{1,3})\\/(\\d{1,3})(?![\\d\\/])", "gu");
+    // The two guards are mirrors (#1495): each side refuses a digit or `/`, and the language's decimal and grouping
+    // separators with a digit beyond them; a `,` between two fractions is a list separator. See the TS source.
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,\\d+(?![\\d/]))", "gu");
     private static readonly JsRe PLUS_JOINER = JsRegex.Compile("(?<=[\\p{L}\\p{M}])\\+(?=[\\p{L}\\p{M}])", "gu");
     private static readonly JsRe CURRENCY_PRE = JsRegex.Compile("([€$£¥])\\s?(\\d[\\d.,]*)(\\s+(?:miliardi|miliardo|milioni|milione|mila))?", "gu");
     private static readonly JsRe LEADING_LETTER = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");

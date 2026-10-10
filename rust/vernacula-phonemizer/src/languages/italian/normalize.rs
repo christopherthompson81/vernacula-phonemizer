@@ -368,10 +368,14 @@ impl NormalizeData {
             &js(&format!(" {} ", sign.divided_by)),
         );
 
-        // 9) fractions.
+        // 9) fractions. The two guards are mirrors (#1495): each side refuses a digit or `/`, and a `,` or `.`
+        //    with a digit beyond it; a `,` between two fractions is a list separator.
         s = rewrite_with(
             &s,
-            js_re!(r"(?<!\d)(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"),
+            js_re!(
+                r"(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))",
+                "gu"
+            ),
             |mt, s| {
                 self.fraction_words(
                     js_number(&mt.group(1, s).unwrap()),

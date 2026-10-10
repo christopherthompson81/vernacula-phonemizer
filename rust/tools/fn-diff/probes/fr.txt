@@ -93,3 +93,15 @@ Le constructor et toString et hasOwnProperty et __proto__.
 # empty-ish
 .
 —
+
+# fraction guards are mirrors (#1495): decimals, groups and chains decline; a list comma between fractions does not
+1/2.5
+1.5/2
+1/1,000
+1,000/2
+3/1/2
+1/2/3
+1/2,3/4
+1/2, 3/4
+It was 1/2.
+1/2,5
