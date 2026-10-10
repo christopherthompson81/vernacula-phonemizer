@@ -3,6 +3,9 @@
 //!
 //! JS `Number` arithmetic throughout (`f64`, `Math.floor`, `%`), as the TS does it.
 
+use std::collections::HashMap;
+use std::sync::LazyLock;
+
 use super::manifest::MANIFEST;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number, js_number_to_string};
 
@@ -44,6 +47,27 @@ fn below1000(n: f64) -> JsString {
     JsString::join(&parts, &js(" "))
 }
 
+static SPACE: LazyLock<JsString> = LazyLock::new(|| js(" "));
+
+/// `numbers.apocope` keyed by the full WORD (`ones[key]`); the keys were checked at load (`validate`).
+static APOCOPE: LazyLock<HashMap<JsString, JsString>> = LazyLock::new(|| {
+    let n = &MANIFEST.numbers;
+    n.apocope
+        .iter()
+        .map(|(k, short)| (js(&n.ones[k.parse::<usize>().unwrap()]), js(short)))
+        .collect()
+});
+
+/// `multiplier`: the words before `mil`, a scale noun or a fraction noun, with the last word apocopated
+/// (veintiún mil, ciento un mil, veintiún quintos).
+pub(crate) fn multiplier(words: JsString) -> JsString {
+    let cut = words.last_index_of(&SPACE).map_or(0, |i| i + 1);
+    match APOCOPE.get(&words.slice(cut as isize, None)) {
+        Some(short) => words.slice(0, Some(cut as isize)).concat(short),
+        None => words,
+    }
+}
+
 /// 1 ≤ n < 10⁶
 fn below1e6(n: f64) -> JsString {
     if n < 1000.0 {
@@ -52,7 +76,7 @@ fn below1e6(n: f64) -> JsString {
     let (th, r) = ((n / 1000.0).floor(), n % 1000.0);
     let mut thousand = js(&MANIFEST.numbers.thousand);
     if th != 1.0 {
-        thousand = below1000(th).concat(&js(" ")).concat(&thousand);
+        thousand = multiplier(below1000(th)).concat(&js(" ")).concat(&thousand);
     }
     if r != 0.0 {
         thousand.concat(&js(" ")).concat(&below1000(r))
@@ -100,7 +124,9 @@ pub(crate) fn number_to_words(n: f64, raw: Option<&JsString>) -> JsString {
         let head = if q == 1.0 {
             js(&sc.one)
         } else {
-            below1e6(q).concat(&js(" ")).concat(&js(&sc.many))
+            multiplier(below1e6(q))
+                .concat(&js(" "))
+                .concat(&js(&sc.many))
         };
         return if r != 0.0 {
             head.concat(&js(" ")).concat(&number_to_words(r, None))

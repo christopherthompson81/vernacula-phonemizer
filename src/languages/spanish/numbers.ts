@@ -31,12 +31,31 @@ function below1000(n: number): string {
     return parts.join(" ");
 }
 
+/** `numbers.apocope` keyed by the full WORD (`ones[key]`). ⚠ A key that is not a `ones` slot throws here, at
+ *  load, rather than leaving an entry nothing can ever match. */
+const APOCOPE = new Map(
+    Object.entries(N.apocope).map(([k, short]) => {
+        const n = Number(k);
+        if (!/^\d+$/u.test(k) || n >= ONES.length)
+            throw new Error(`spanish.jsonc numbers.apocope: key ${JSON.stringify(k)} is not a numbers.ones slot`);
+        return [ONES[n]!, short] as const;
+    }),
+);
+
+/** A MULTIPLIER, the words before `mil`, a scale noun or a fraction noun, with its last word apocopated. *Uno* is
+ *  an adjective there, so 21000 is *veintiún mil*, 101000 *ciento un mil* and 21/5 *veintiún quintos*. */
+export function multiplier(words: string): string {
+    const cut = words.lastIndexOf(" ") + 1;
+    const short = APOCOPE.get(words.slice(cut));
+    return short === undefined ? words : words.slice(0, cut) + short;
+}
+
 /** 1 ≤ n < 10⁶ */
 function below1e6(n: number): string {
     if (n < 1000) return below1000(n);
     const th = Math.floor(n / 1000),
         r = n % 1000;
-    const thousand = th === 1 ? N.thousand : `${below1000(th)} ${N.thousand}`;
+    const thousand = th === 1 ? N.thousand : `${multiplier(below1000(th))} ${N.thousand}`;
     return r ? `${thousand} ${below1000(r)}` : thousand;
 }
 
@@ -50,7 +69,7 @@ export function numberToWords(n: number, raw?: string): string {
         if (n < sc.value) continue;
         const q = Math.floor(n / sc.value),
             r = n % sc.value;
-        const head = q === 1 ? sc.one : `${below1e6(q)} ${sc.many}`;
+        const head = q === 1 ? sc.one : `${multiplier(below1e6(q))} ${sc.many}`;
         return r ? `${head} ${numberToWords(r)}` : head;
     }
     return below1e6(n); // unreachable (n ≥ 1e6 matched a scale)

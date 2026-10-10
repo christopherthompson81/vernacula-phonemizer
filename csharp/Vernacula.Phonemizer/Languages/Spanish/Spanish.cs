@@ -114,6 +114,21 @@ public sealed class SpanishPhonemizer : ILanguage
         return words;
     }
 
+    /** A WRITTEN scale noun right after a number token (`21 mil`, `21 millones`, `1 millón`, `21 billones`). The
+     *  digit token is then a multiplier and apocopates (*veintiún millones*). The lookahead stops a longer word
+     *  (`milímetros`, `miles`) from counting. Built from the manifest's own words. */
+    private static readonly JsRe SCALE_NOUN_NEXT = JsRegex.Compile(
+        $"^\\s+(?:{string.Join("|", new[] { Manifest.MANIFEST.Numbers.Thousand }.Concat(Manifest.MANIFEST.Numbers.Scales.SelectMany(sc => new[] { sc.Many, sc.One[(sc.One.LastIndexOf(' ') + 1)..] })))})(?![\\p{{L}}\\p{{M}}])",
+        "iu");
+
+    /** A number token, read as a multiplier when a written scale noun follows. ⚠ A decimal is left alone:
+     *  `2,1 millones` keeps *dos coma uno*, because the fractional digits are read one by one. */
+    private static string NumberTokenWords(string tok, string after)
+    {
+        var words = NumberTokenToWords(tok);
+        return !tok.Contains(',') && SCALE_NOUN_NEXT.IsMatch(after) ? Numbers.Multiplier(words) : words;
+    }
+
     private static readonly IReadOnlySet<string> FUNCTION_WORDS =
         new HashSet<string>(Manifest.MANIFEST.FunctionWords, StringComparer.Ordinal);
 
@@ -155,7 +170,7 @@ public sealed class SpanishPhonemizer : ILanguage
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(WordIpa(Nat(m.Groups[1].Value)));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                sink.Emit(string.Join(" ", NumberTokenToWords(m.Groups[2].Value).Split(' ').Select(WordIpa)));
+                sink.Emit(string.Join(" ", NumberTokenWords(m.Groups[2].Value, normalized[(m.Index + m.Length)..]).Split(' ').Select(WordIpa)));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
             {
                 if (CLAUSE_MARK.TryGetValue(m.Groups[3].Value, out var mk) && mk.Length > 0) sink.Pause(mk);

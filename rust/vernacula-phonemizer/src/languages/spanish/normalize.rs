@@ -6,13 +6,13 @@ use std::collections::HashSet;
 use std::sync::{Arc, LazyLock};
 
 use super::manifest::MANIFEST;
-use super::numbers::number_to_words;
+use super::numbers::{multiplier, number_to_words};
 use super::roman_ordinals::spanish_ordinal;
 use crate::core::initialisms::{
     InitialismData, LetterName, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
 };
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
 use crate::core::normalize_symbols::{alternation, sorted_by_length_desc};
 use crate::core::provenance::{rewrite, rewrite_with};
 use crate::js_re;
@@ -43,6 +43,16 @@ static DATE_FIRST: LazyLock<JsRegex> = LazyLock::new(|| {
     let months = MANIFEST.months.join("|");
     JsRegex::new(&format!(r"\b1\.?º?\s+de\s+({months})\b"), "giu").unwrap()
 });
+/// `ordinals.apocopating` (checked against `units` at load), the ordinals the `er` indicator shortens.
+static APOCOPATING_ORDINALS: LazyLock<Vec<JsString>> = LazyLock::new(|| {
+    MANIFEST
+        .ordinals
+        .apocopating
+        .iter()
+        .map(|o| js(o))
+        .collect()
+});
+
 static FEMININE_ONE_END: LazyLock<JsRegex> =
     LazyLock::new(|| JsRegex::new(&format!("{}$", MANIFEST.numbers.ones[1]), "u").unwrap());
 
@@ -127,11 +137,7 @@ fn fraction_words(num: f64, den: f64) -> Option<JsString> {
         .get(&int_string(den))
         .map(|b| js(b))
         .or_else(|| spanish_ordinal(den))?;
-    let head = if num == 1.0 {
-        js(&MANIFEST.fractions.numerator_one)
-    } else {
-        number_to_words(num, None)
-    };
+    let head = multiplier(number_to_words(num, None));
     let noun = if num > 1.0 {
         base.concat(&js("s"))
     } else {
@@ -215,16 +221,26 @@ pub(crate) fn normalize_spanish(input: &JsString, americas: bool) -> JsString {
     s = rewrite_with(&s, js_re!(r"\b(\d+)\.?(?:er\b|º|ª)", "gu"), |mm, t| {
         let whole = mm.value(t);
         let digits = js_re!(r"\d+").exec(&whole).unwrap().value(&whole);
-        let Some(masc) = spanish_ordinal(js_number(&digits)) else {
-            return whole;
+        let n = js_number(&digits);
+        let Some(masc) = spanish_ordinal(n) else {
+            // Past 1000 there is no ordinal: a declined `er` still drops its marker; º and ª keep theirs.
+            return if js_re!("er$", "u").test(&whole) {
+                js(&js_number_to_string(n))
+            } else {
+                whole
+            };
         };
         if js_re!("ª", "u").test(&whole) {
             return feminine_ordinal(&masc);
         }
         if js_re!("er$", "u").test(&whole) {
-            // ⚠ The TS passes this through the provenance SEAM although `masc` is not the pipeline string, so
-            // under a trace it reports a poison (the outer rewrite then restores the mapping). Reproduced.
-            return rewrite(&masc, js_re!("o$", "u"), &JsString::new());
+            // `er` is the apocope of primero and tercero only (and the compounds ending in them). A declined
+            // marker is dropped whole and the cardinal stands: the `.` of `2.er` would be a phrase break.
+            return if APOCOPATING_ORDINALS.iter().any(|o| masc.ends_with(o)) {
+                js_re!("o$", "u").replace(&masc, &JsString::new())
+            } else {
+                js(&js_number_to_string(n))
+            };
         }
         masc
     });

@@ -33,12 +33,30 @@ public static class Numbers
         return string.Join(" ", parts);
     }
 
+    /** `Numbers.Apocope` keyed by the full WORD (`Ones[key]`). ⚠ A key that is not a `Ones` slot throws here,
+     *  at load, rather than leaving an entry nothing can ever match. */
+    private static readonly IReadOnlyDictionary<string, string> APOCOPE = N.Apocope.ToDictionary(
+        kv => int.TryParse(kv.Key, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var n)
+              && n < ONES.Count
+            ? ONES[n]
+            : throw new InvalidDataException($"spanish.jsonc numbers.apocope: key \"{kv.Key}\" is not a numbers.ones slot"),
+        kv => kv.Value, StringComparer.Ordinal);
+
+    /** A MULTIPLIER, the words before `mil`, a scale noun or a fraction noun, with its last word apocopated.
+     *  *Uno* is an adjective there, so 21000 is *veintiún mil*, 101000 *ciento un mil* and 21/5 *veintiún
+     *  quintos*. */
+    public static string Multiplier(string words)
+    {
+        int cut = words.LastIndexOf(' ') + 1;
+        return APOCOPE.TryGetValue(words[cut..], out var shortForm) ? words[..cut] + shortForm : words;
+    }
+
     /** 1 ≤ n < 10⁶ */
     private static string Below1e6(double n)
     {
         if (n < 1000) return Below1000(n);
         double th = Math.Floor(n / 1000), r = n % 1000;
-        var thousand = th == 1 ? N.Thousand : $"{Below1000(th)} {N.Thousand}";
+        var thousand = th == 1 ? N.Thousand : $"{Multiplier(Below1000(th))} {N.Thousand}";
         return r != 0 ? $"{thousand} {Below1000(r)}" : thousand;
     }
 
@@ -54,7 +72,7 @@ public static class Numbers
         {
             if (n < sc.Value) continue;
             double q = Math.Floor(n / sc.Value), r = n % sc.Value;
-            var head = q == 1 ? sc.One : $"{Below1e6(q)} {sc.Many}";
+            var head = q == 1 ? sc.One : $"{Multiplier(Below1e6(q))} {sc.Many}";
             return r != 0 ? $"{head} {NumberToWords(r)}" : head;
         }
         return Below1e6(n); // unreachable (n ≥ 1e6 matched a scale)
