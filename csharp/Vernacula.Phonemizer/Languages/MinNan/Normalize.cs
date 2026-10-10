@@ -78,6 +78,10 @@ public static class Normalize
 
         s = Sinitic.ReadDecimals(s, "點");
 
+
+        // LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+        // point (#1481). See the TS for why.
+        s = Unicode.RepeatHanIterationMarks(Unicode.FoldHanCompatibility(s));
         return s;
     }
 }

@@ -8,7 +8,7 @@ use super::manifest::MANIFEST;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js};
 use crate::core::provenance::{rewrite, rewrite_with};
-use crate::core::unicode::fold_han_compatibility;
+use crate::core::unicode::{fold_han_compatibility, repeat_han_iteration_marks};
 use crate::js_re;
 
 const SIGN: &str = "[-−–]";
@@ -91,9 +91,9 @@ pub fn normalize_mandarin(input: &JsString) -> JsString {
         let power = if e == "²" { "平方" } else { "立方" };
         js("的").concat(&js(power))
     });
-    // Han compatibility forms → their unified ideograph, then 々 / 〻 repeat the Han character before them.
-    s = fold_han_compatibility(&s);
-    rewrite(&s, js_re!(r"(\p{Script=Han})[々〻]", "gu"), &js("$1$1"))
+    // Han compatibility forms → their unified ideograph, then 々 / 〻 repeat the Han character before them —
+    // both core, shared with the other Sinitic hosts (#1481).
+    repeat_han_iteration_marks(&fold_han_compatibility(&s))
 }
 
 /// `spellInitialisms(input)`: a 2–3 capital run (not a Roman numeral) and a lone capital touching Han.

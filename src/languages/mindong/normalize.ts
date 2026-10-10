@@ -181,6 +181,7 @@
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { degroupThousands, readDecimals, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { foldHanCompatibility, repeatHanIterationMarks } from "../../core/unicode.ts";
 
 /**
  * ⚠ NO `unspacedScript` — see the header. This is the ONE Sinitic layer that must leave the tier's
@@ -358,6 +359,14 @@ export function normalizeMinDong(input: string): string {
             /(?:^|[^\p{L}\p{M}])[A-Z]{2,}[\s.]*$/u.test(full.slice(Math.max(0, off - 12), off)) ? m : `${a} gáu ${b}`,
     );
 
+
+    // ── LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+    // point (#1481). cdo has no Han front-end, so Han reaches the script router's Mandarin reader through the
+    // gap pass — but a Kangxi radical (⼈, U+2F00 block) is a SYMBOL, not a letter, so the gap pass never even
+    // offered it to the router and it was dropped. Folded here, it is a letter and is read with the run around
+    // it. The NFD fold `text()` applies already reached the U+F900 compatibility ideographs (they decompose
+    // canonically); the radicals decompose only under NFKC, which is why the fold is needed at all.
+    s = repeatHanIterationMarks(foldHanCompatibility(s));
     return s;
 }
 

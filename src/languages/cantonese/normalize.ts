@@ -36,6 +36,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
 import { degroupThousands, HAN_DIGITS, spellHanDigits, readDegrees, reorderFraction } from "../../core/sinitic.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { foldHanCompatibility, repeatHanIterationMarks } from "../../core/unicode.ts";
 
 /** 0–9 as Han numerals — RE-EXPORTED FROM `core/sinitic.ts`, not declared here.
  *  ⚠ There were THREE identical copies of this table (yue, wuu, core) until the extraction, which is the
@@ -191,5 +192,12 @@ export function normalizeCantonese(input: string, measureWords: string): string 
             "兩",
         );
 
+
+    // ── LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+    // point (#1481). A Kangxi radical (⼈) or a CJK compatibility ideograph folds to its unified ideograph,
+    // which is what dict.tsv is keyed on — unfolded it read as nothing. Then 々 / 〻 repeat the Han character
+    // before them (佐々木 → 佐佐木), after the fold so a folded radical is what gets repeated; dropped, the
+    // mark deleted a whole syllable from the name.
+    s = repeatHanIterationMarks(foldHanCompatibility(s));
     return s;
 }

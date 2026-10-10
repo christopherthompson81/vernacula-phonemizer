@@ -851,8 +851,10 @@ function build(lang: string): Phonemizer {
         case "bar":
             return createBavarian();
         // Min Dong / Eastern Min (Fuzhou) — Sinitic, tonal; Bàng-uâ-cê (BUC) → IPA converter; segmental + citation tone.
+        // An embedded Latin run that is NOT BUC (`IUPAC`, `Harry Potter`) routes to English, as in every other
+        // Sinitic host (#1478) — see `latinParts` in mindong.ts for how the two are told apart.
         case "cdo":
-            return createMinDong();
+            return createMinDong(readAsEnglish);
         // Hmong (White Hmong / Hmoob Dawb) — Hmong-Mien, tonal; RPA → IPA (final consonant letter = tone).
         case "hmn":
             return createHmong();

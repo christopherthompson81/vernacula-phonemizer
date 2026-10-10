@@ -74,6 +74,10 @@ public static class Normalize
         s = SYMBOLS(s);
         s = Rewrite(s, PERMILLE, "千分之$1");
         s = Sinitic.ReadDecimals(s, "點");
+
+        // LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+        // point (#1481). See the TS for why.
+        s = Unicode.RepeatHanIterationMarks(Unicode.FoldHanCompatibility(s));
         return s;
     }
 }

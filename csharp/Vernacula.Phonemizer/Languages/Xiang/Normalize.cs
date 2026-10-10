@@ -57,6 +57,10 @@ public static class Normalize
             var before = full[Math.Max(0, m.Index - 12)..m.Index];
             return LATIN_BEFORE.IsMatch(before) ? m.Value : $"{m.Groups[1].Value}到{m.Groups[2].Value}";
         });
+
+        // LAST. Han compatibility forms, then the iteration marks — the shared core pair cmn runs at the same
+        // point (#1481). See the TS for why.
+        s = Unicode.RepeatHanIterationMarks(Unicode.FoldHanCompatibility(s));
         return s;
     }
 }

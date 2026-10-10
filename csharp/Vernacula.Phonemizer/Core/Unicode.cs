@@ -558,10 +558,27 @@ public static class Unicode
     public static string FoldHanCompatibility(string s)
     {
         if (!HAN_COMPAT.IsMatch(s)) return s;
-        return Rewrite(s, HAN_COMPAT, m =>
-        {
-            var f = Js.Normalize(m.Value, NormalizationForm.FormKC);
-            return HAN_ONE.IsMatch(f) ? f : m.Value;
-        });
+        return Rewrite(s, HAN_COMPAT, m => FoldHanChar(m.Value));
     }
+    private static string FoldHanChar(string c)
+    {
+        var f = Js.Normalize(c, NormalizationForm.FormKC);
+        return HAN_ONE.IsMatch(f) ? f : c;
+    }
+
+    /**
+     * `FoldHanCompatibility` for a DICTIONARY KEY at load time — the same fold, UNTRACED. A dict loads lazily
+     * inside the first Text() that needs it, so under a trace a traced rewrite over a key would be recorded as
+     * a rewrite of the utterance (#1481; the TS lost wuu's first-row input spans that way). See the TS.
+     */
+    public static string FoldHanCompatibilityKey(string key) =>
+        HAN_COMPAT.IsMatch(key) ? HAN_COMPAT.Replace(key, m => FoldHanChar(m.Value)) : key;
+
+    /**
+     * The Han iteration marks 々 (U+3005) / 〻 (U+303B) repeat the Han character before them (人々 → 人人). Shared
+     * by cmn and the other Sinitic hosts (#1481); run it after `FoldHanCompatibility`, so a folded radical is
+     * what gets repeated. A mark with no Han before it is left alone. Traced.
+     */
+    private static readonly JsRe HAN_ITERATION = JsRegex.Compile("(\\p{Script=Han})[々〻]", "gu");
+    public static string RepeatHanIterationMarks(string s) => Rewrite(s, HAN_ITERATION, "$1$1");
 }

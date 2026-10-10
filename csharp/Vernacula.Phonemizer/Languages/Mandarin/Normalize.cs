@@ -58,8 +58,6 @@ public static class Normalize
      * digit before the exponent, which keeps it off `km²`. The power is written 平方/立方 rather than as a
      * digit on purpose: a digit here would be claimed by the engine's own 两 rule (`5²` → 五的两次方).
      */
-    /** An iteration mark after a Han character: 々 (U+3005) and its vertical form 〻 (U+303B). */
-    private static readonly JsRe ITERATION = JsRegex.Compile("(\\p{Script=Han})[々〻]", "gu");
     private static readonly JsRe BARE_EXPONENT = JsRegex.Compile("(?<=\\d)([²³])", "gu");
     private static readonly IReadOnlyDictionary<string, string> POWER = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -83,10 +81,11 @@ public static class Normalize
         s = Rewrite(s, AMP_ELSEWHERE, "和");
         // After the signs, or one of them strands the exponent.
         s = Rewrite(s, BARE_EXPONENT, m => $"的{POWER[m.Groups[1].Value]}");
-        // Han compatibility forms → their unified ideograph (core fold), then the iteration marks 々 / 〻 repeat
-        // the Han character before them (人々 → 人人), after the fold so a folded radical is what is repeated.
+        // Han compatibility forms → their unified ideograph, then the iteration marks 々 / 〻 repeat the Han
+        // character before them (人々 → 人人), after the fold so a folded radical is what is repeated. Both core,
+        // shared with the other Sinitic hosts (#1481).
         s = Unicode.FoldHanCompatibility(s);
-        s = Rewrite(s, ITERATION, "$1$1");
+        s = Unicode.RepeatHanIterationMarks(s);
         return s;
     }
 

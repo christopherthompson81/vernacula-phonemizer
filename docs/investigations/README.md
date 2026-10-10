@@ -13,6 +13,7 @@ registry code) and one per cross-cutting topic; a new log goes in the folder of 
 - [`normalization/`](normalization/) — cross-language normalization sweeps (Latin runs, silent deletions, initialisms, stress) (26)
 - [`numbers/`](numbers/) — the number compositors (5)
 - [`referee/`](referee/) — the referee-eval harness, folds and referee quality (6)
+- [`sinitic/`](sinitic/) — cross-Sinitic sweeps — the shared Han fold, iteration marks, Latin routing (1)
 - [`symbols/`](symbols/) — the shared symbol tier — units, rates, currency, signs, exponents (16)
 
 ## Languages

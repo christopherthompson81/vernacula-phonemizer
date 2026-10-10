@@ -487,9 +487,22 @@ pub fn fold_han_compatibility(s: &JsString) -> JsString {
     })
 }
 
+/// `repeatHanIterationMarks(s)`: 々 / 〻 repeat the Han character before them (人々 → 人人). Shared by cmn and
+/// the other Sinitic hosts (#1481); run after `fold_han_compatibility`. A mark with no Han before it is left
+/// alone. Traced.
+pub fn repeat_han_iteration_marks(s: &JsString) -> JsString {
+    rewrite(s, js_re!(r"(\p{Script=Han})[々〻]", "gu"), &js("$1$1"))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn han_iteration_marks_repeat_the_han_character_before() {
+        assert_eq!(repeat_han_iteration_marks(&js("佐々木 時〻")), "佐佐木 時時");
+        assert_eq!(repeat_han_iteration_marks(&js("々")), "々");
+    }
 
     #[test]
     fn latin_diacritics_fold() {
