@@ -68,14 +68,12 @@ public static class UzbekPhonemizer
         return x.Normalize(NormalizationForm.FormC);
     }
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
         // ⚠ ABOVE 2^53 the float has already lost the low digits, so the composed numeral would be
         // confidently wrong — read it digit-at-a-time instead. See Core/Numbers.cs `SpellDigits`.
-        if (!IsSafeInteger(n)) return Core.Numbers.SpellDigits(digits, DEF.Numbers, PhonemizeWord);
+        if (!Js.IsSafeInteger(n)) return Core.Numbers.SpellDigits(digits, DEF.Numbers, PhonemizeWord);
         return Core.Numbers.RenderNumber(n, DEF.Numbers, PhonemizeWord, Numbers.TurkicNumberWords);
     }
 

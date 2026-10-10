@@ -99,8 +99,6 @@ public static class NogaiPhonemizer
         return string.Concat(segs).Normalize(NormalizationForm.FormC);
     }
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /**
      * A digit run → spoken Nogai, phonemized through the same Cyrillic g2p. ⚠ ABOVE 2^53 THE RAW ASCII
      * DIGITS READ DIGIT-AT-A-TIME THROUGH THE SAME COMPOSER (a one-digit number is a call this engine
@@ -109,7 +107,7 @@ public static class NogaiPhonemizer
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
-        if (!IsSafeInteger(n))
+        if (!Js.IsSafeInteger(n))
         {
             var words = new List<string>();
             foreach (var d in Js.CodePoints(digits)) words.AddRange(Numbers.NumberToWords(Js.Number(d)));

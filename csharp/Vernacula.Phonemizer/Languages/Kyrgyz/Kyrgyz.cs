@@ -62,8 +62,6 @@ public static class KyrgyzPhonemizer
         return string.Concat(outp);
     }
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /**
      * A digit run → spoken Kyrgyz. ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA —
      * read them digit-at-a-time through this engine's own number words instead (a digit string, not a
@@ -72,7 +70,7 @@ public static class KyrgyzPhonemizer
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
-        if (!IsSafeInteger(n)) return Core.Numbers.SpellDigits(digits, Manifest.DEF.Numbers, PhonemizeWord);
+        if (!Js.IsSafeInteger(n)) return Core.Numbers.SpellDigits(digits, Manifest.DEF.Numbers, PhonemizeWord);
         return Core.Numbers.RenderNumber(n, Manifest.DEF.Numbers, PhonemizeWord, Numbers.Compose);
     }
 

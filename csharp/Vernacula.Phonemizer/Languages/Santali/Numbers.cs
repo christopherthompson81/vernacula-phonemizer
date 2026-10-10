@@ -77,9 +77,6 @@ public static class Numbers
     public static string ReadDigits(string digits) =>
         string.Join(" ", Js.CodePoints(digits).Select(d => Core.Numbers.DigitWord(UNITS, d) ?? d));
 
-    /** JS `Number.isSafeInteger(n)`: an integral double inside ±(2^53 − 1). */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /**
      * Non-negative integer → Santali cardinal words in Ol Chiki, space-separated. Indian 2-2-3 grouping
      * with lakh/crore; the crore multiplier RECURSES, so 10⁹ reads ᱢᱤᱫ ᱥᱟᱭ ᱠᱚᱨᱚᱲ ('a hundred crore').
@@ -88,7 +85,7 @@ public static class Numbers
      */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0) return ReadDigits(raw ?? Js.NumberToString(n));
+        if (!Js.IsSafeInteger(n) || n < 0) return ReadDigits(raw ?? Js.NumberToString(n));
         if (n == 0) return UNITS[0];
         if (n < 1e7) return Below1e7(n);
         double c = Math.Floor(n / 1e7), r = n % 1e7;

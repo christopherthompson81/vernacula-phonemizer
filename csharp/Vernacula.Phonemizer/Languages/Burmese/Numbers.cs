@@ -12,8 +12,6 @@ public static class Numbers
 
     private const double CRORE = 10_000_000; // 10⁷ ကုဋေ — the place at which the series repeats
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** THE DIGIT-AT-A-TIME READING — the fallback for a digit run `numberToWords` must refuse. */
     public static string SpellDigits(string digits) =>
         string.Join(" ", digits.Where(c => c >= '0' && c <= '9')
@@ -22,7 +20,7 @@ public static class Numbers
     /** Non-negative integer → the Burmese numeral as ONE orthographic word (no spaces). */
     public static string NumberToWords(double n)
     {
-        if (!IsSafeInteger(n) || n < 0) return Js.NumberToString(n);
+        if (!Js.IsSafeInteger(n) || n < 0) return Js.NumberToString(n);
         if (n == 0) return N.Zero;
         if (n >= CRORE)
         {

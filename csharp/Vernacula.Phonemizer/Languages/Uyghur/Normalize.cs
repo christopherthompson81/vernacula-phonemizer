@@ -157,7 +157,7 @@ public static class Normalize
             s = Rewrite(s, ORDINAL, m =>
             {
                 var n = Js.Number(ToAscii(m.Groups[1].Value));
-                if (!UyghurPhonemizer.IsSafeInteger(n) || n < 1) return m.Value;
+                if (!Js.IsSafeInteger(n) || n < 1) return m.Value;
                 var w = OrdinalWord(n, numeralWords);
                 return w == "" ? m.Value : $"{w} ";
             });

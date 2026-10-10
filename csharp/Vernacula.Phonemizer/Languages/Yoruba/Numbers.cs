@@ -69,15 +69,13 @@ public static class Numbers
     {
         var n = Js.Number(digits);
         // Not a safe integer → read the given digits, not a rounded reconstruction of them.
-        return IsSafeInteger(n) ? YorubaCardinal(n) : DigitByDigit(digits);
+        return Js.IsSafeInteger(n) ? YorubaCardinal(n) : DigitByDigit(digits);
     }
-
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
 
     /** A non-negative integer → its Yoruba cardinal reading. */
     public static string YorubaCardinal(double n)
     {
-        if (!double.IsFinite(n) || n < 0 || !double.IsInteger(n) || !IsSafeInteger(n))
+        if (!double.IsFinite(n) || n < 0 || !double.IsInteger(n) || !Js.IsSafeInteger(n))
             return DigitByDigit(double.IsFinite(n) ? Js.NumberToString(Math.Abs(Math.Truncate(n))) : "");
         if (n == 0) return N.Zero;
         if (n < 1000) return Below1000(n);

@@ -61,9 +61,6 @@ public static class AkanPhonemizer
 
     private static readonly JsRe NASAL_TAIL = JsRegex.Compile("[mnɲŋ]$", "u");
 
-    /** JS `Number.isSafeInteger`. Above 2^53 the double has already lost its low digits. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** One Akan word → canonical IPA. `useTone` overlays the lexical tone + vowel-nasality (shipped path). */
     private static string PhonemizeCore(string word, bool useTone)
     {
@@ -225,7 +222,7 @@ public static class AkanPhonemizer
                     // is precisely what cannot be trusted here.
                     var tok = m.Groups[2].Value;
                     var num = double.Parse(tok, System.Globalization.CultureInfo.InvariantCulture);
-                    if (IsSafeInteger(num))
+                    if (Js.IsSafeInteger(num))
                         foreach (var w in NumberWords(num).Split(' ')) sink.Emit(PhonemizeWord(w));
                     else
                         foreach (var d in tok)

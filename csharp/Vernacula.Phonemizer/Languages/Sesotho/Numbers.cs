@@ -13,9 +13,6 @@ public static class Numbers
 {
     private static SesothoNumbers N => Manifest.MANIFEST.Numbers;
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** The units slot of a compound: the motso/metso dummy-noun construction. */
     private static string UnitPart(int u) => u == 1 ? N.UnitOne : $"{N.UnitNoun} {N.Class4[u]}";
 
@@ -26,7 +23,7 @@ public static class Numbers
     /** A non-negative integer → space-separated Sesotho cardinal words. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
         {
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
             {

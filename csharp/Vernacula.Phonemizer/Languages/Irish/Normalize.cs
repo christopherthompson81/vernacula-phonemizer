@@ -146,7 +146,7 @@ public static class Normalize
      *  cardinal's last element takes the -ú ordinal ending. Anything outside the compositor's range → null. */
     public static string? OrdinalWords(double n, string noun = "")
     {
-        if (!Numbers.IsSafeInteger(n) || n < 1 || n >= 1e12) return null;
+        if (!Js.IsSafeInteger(n) || n < 1 || n >= 1e12) return null;
         if (n <= 10) return ORD_1_10[(int)n];
         // THE NOUN GOES INSIDE A COMPOUND ORDINAL: Irish writes "an naoú haois déag", never *an naoú déag
         // haois* — the tens element follows the NOUN, so the caller hands the following word over.

@@ -14,9 +14,6 @@ public static class Numbers
 {
     private static LugandaNumbers N => Manifest.MANIFEST.Numbers;
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static readonly JsRe VOWEL_INITIAL = JsRegex.Compile("^[aeiou]", "u");
 
     /** 1 ≤ n < 100 — teens use na/n', the tens+unit join uses "mu". */
@@ -55,7 +52,7 @@ public static class Numbers
     /** A non-negative integer → space-separated Luganda cardinal words. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n))).Select(d =>
             {
                 if (d == "0") return N.Zero;

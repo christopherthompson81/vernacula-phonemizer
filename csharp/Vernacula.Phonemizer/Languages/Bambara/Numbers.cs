@@ -48,13 +48,11 @@ public static class Numbers
         return r == 0 ? head : $"{head} {NI} {Below100(r)}";
     }
 
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** Non-negative integer → Bambara words; beyond the attested magnitudes (≥ 10¹²) → digit-by-digit.
      *  `raw` is the TOKEN TEXT and must be threaded — above 2^53 the double has already rounded. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0 || n >= 1e12)
+        if (!Js.IsSafeInteger(n) || n < 0 || n >= 1e12)
             // No attested Bambara numeral above miliyari — read the digits rather than invent a "trillion".
             return string.Join(" ", Js.CodePoints(raw ?? Js.NumberToString(Math.Abs(n)))
                 .Where(c => string.CompareOrdinal(c, "0") >= 0 && string.CompareOrdinal(c, "9") <= 0)

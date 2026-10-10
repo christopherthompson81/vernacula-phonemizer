@@ -39,9 +39,6 @@ public static class Numbers
     private const string BillionSingular = "mīlliardum";
     private const string BillionPlural = "mīlliarda";
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     private static readonly JsRe HUNDRED_MASC = JsRegex.Compile("ntī$", "u");
     private static readonly JsRe SPACES = JsRegex.Compile("\\s+", "gu");
 
@@ -100,7 +97,7 @@ public static class Numbers
      *  the RAW token where the caller has one, so the float's exponential form cannot leak. */
     public static string NumberToWords(double n, string? raw = null)
     {
-        if (!IsSafeInteger(n) || n < 0)
+        if (!Js.IsSafeInteger(n) || n < 0)
         {
             return string.Join(" ", (raw ?? Js.NumberToString(n))
                 .Where(c => c >= '0' && c <= '9')

@@ -13,9 +13,6 @@ public static class Numbers
 {
     private static ZuluNumbersDef N => Manifest.MANIFEST.Numbers;
 
-    /** `Number.isSafeInteger` — the local idiom the fleet uses; there is no BCL equivalent. */
-    private static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** A JS array index that overflows yields `undefined`, not an exception — the TS relies on it
      *  (`AMA[th] ?? numberToWords(th)`), so the overflow has to read as null here too. */
     private static string? At(IReadOnlyList<string> a, double i) =>
@@ -34,7 +31,7 @@ public static class Numbers
         if (n < 0 || double.IsNaN(n) || double.IsInfinity(n)) return "";
         n = Math.Floor(n);
         if (n == 0) return N.Zero;
-        if (!IsSafeInteger(n)) return ReadDigits(raw ?? Js.NumberToString(n));
+        if (!Js.IsSafeInteger(n)) return ReadDigits(raw ?? Js.NumberToString(n));
         var ku = N.Ku;
         var na = N.Na;
         var ama = N.Ama;

@@ -71,13 +71,11 @@ public sealed class UyghurPhonemizer : ILanguage
         return res;
     }
 
-    internal static bool IsSafeInteger(double n) => double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d;
-
     /** A run of ASCII digits → the spoken Uyghur cardinal in canonical IPA. */
     private static string Number(string digits)
     {
         var n = Js.Number(digits);
-        if (!IsSafeInteger(n)) return Numbers.SpellDigits(digits, NUM, PhonemizeWord);
+        if (!Js.IsSafeInteger(n)) return Numbers.SpellDigits(digits, NUM, PhonemizeWord);
         return Numbers.RenderNumber(n, NUM, PhonemizeWord, TurkicNumberWords);
     }
 
@@ -85,7 +83,7 @@ public sealed class UyghurPhonemizer : ILanguage
      *  normalizer's ordinal rule needs so it can suffix the LAST WORD of the numeral. */
     public static string NumeralWords(double n)
     {
-        if (!IsSafeInteger(n) || n < 0) return "";
+        if (!Js.IsSafeInteger(n) || n < 0) return "";
         return string.Join(" ", TurkicNumberWords(n, NUM).Where(w => w is not null && w != ""));
     }
 
