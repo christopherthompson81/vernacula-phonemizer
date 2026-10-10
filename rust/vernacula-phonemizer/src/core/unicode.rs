@@ -500,7 +500,10 @@ mod tests {
 
     #[test]
     fn han_iteration_marks_repeat_the_han_character_before() {
-        assert_eq!(repeat_han_iteration_marks(&js("佐々木 時〻")), "佐佐木 時時");
+        assert_eq!(
+            repeat_han_iteration_marks(&js("佐々木 時〻")),
+            "佐佐木 時時"
+        );
         assert_eq!(repeat_han_iteration_marks(&js("々")), "々");
     }
 

@@ -24,7 +24,8 @@ pub fn split_number_token(tok: &JsString) -> (JsString, Vec<JsString>, Option<Js
     let parts = tok.split(&js(","));
     let int_raw = &parts[0];
     let frac = parts.get(1).cloned();
-    if !js_re!(r"\.", "u").test(int_raw) || js_re!(r"^[1-9]\d{0,2}(?:\.\d{3})+$", "u").test(int_raw) {
+    if !js_re!(r"\.", "u").test(int_raw) || js_re!(r"^[1-9]\d{0,2}(?:\.\d{3})+$", "u").test(int_raw)
+    {
         let int_digits = js_re!(r"\.", "g").replace(int_raw, &JsString::new());
         return (int_digits, Vec::new(), frac);
     }
