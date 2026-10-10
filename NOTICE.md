@@ -28,7 +28,7 @@ Two upstreams require specific, named acknowledgement. These are obligations, no
 > the Electronic Dictionary Research and Development Group, and are used in conformance with the
 > Group's licence.
 
-Affects `src/languages/japanese/readings.tsv`, `fallback.tsv`, `adverbs.txt`. JMdict/KANJIDIC are
+Affects `languages/japanese/readings.tsv`, `fallback.tsv`, `adverbs.txt`. JMdict/KANJIDIC are
 © EDRDG, CC-BY-SA 4.0. <https://www.edrdg.org/edrdg/licence.html>
 
 **Sindhi Open Lexicon — Amar Fayaz Buriro (امر فياض ٻرڙو)**
@@ -36,8 +36,8 @@ Affects `src/languages/japanese/readings.tsv`, `fallback.tsv`, `adverbs.txt`. JM
 The Sindhi Open Lexicon is the work of **Amar Fayaz Buriro**, published via SindhiLanguage.org.
 Named attribution is mandatory under the dataset's own terms — a bespoke, permissive license, not
 CC-BY: `LICENSES/LicenseRef-SindhiOpenLexicon.txt`. Affects the Devanagari tier of
-`src/languages/sindhi/sindhi-lexicon.tsv` and the training data behind
-`src/languages/sindhi/sd-g2p-tagger.int8.onnx`.
+`languages/sindhi/sindhi-lexicon.tsv` and the training data behind
+`languages/sindhi/sd-g2p-tagger.int8.onnx`.
 
 ---
 
@@ -116,10 +116,10 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
 - **RCRL Afrikaans Pronunciation Dictionary v1.4.1** — © 2010 Centre for Text Technology (CTexT),
   North-West University, South Africa; redistributed via `ttslab/za_lex` `data/afr`, © 2016 The
   Department of Arts and Culture, Government of the Republic of South Africa (Multilingual Speech
-  Technologies, NWU). **CC BY-SA 2.5 South Africa** <http://creativecommons.org/licenses/by/2.5/za/>.
+  Technologies, NWU). **CC BY-SA 2.5 South Africa** <https://creativecommons.org/licenses/by-sa/2.5/za/>.
   Also the training input (with NCHLT above) for the shipped model weights
-  `src/languages/afrikaans/af-g2p-tagger.int8.onnx`, which are declared CC-BY-SA-inheriting.
-  Two artifacts: the SHIPPED pronunciation lexicon `src/languages/afrikaans/af-rcrl-lexicon.tsv`
+  `languages/afrikaans/af-g2p-tagger.int8.onnx`, which are declared CC-BY-SA-inheriting.
+  Two artifacts: the SHIPPED pronunciation lexicon `languages/afrikaans/af-rcrl-lexicon.tsv`
   (25,112 entries) and the `af` secondary eval referee
   `tools/referee-eval/referees/af.rcrl-apd.tsv`. Each carries a PROVENANCE sidecar.
 - **NCHLT-inlang Pronunciation Dictionaries** — Department of Arts and Culture (DAC), CSIR and
