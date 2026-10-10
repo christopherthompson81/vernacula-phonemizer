@@ -42,6 +42,8 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const NUM = DEF.numbers;
 const TWO = { ...DEF.prenasal, ...DEF.digraphs }; // all 2-letter graphemes
 const VOWEL_LETTER = "aeiou";
+/** ⚠ `"aeiou".includes("")` is TRUE, so a bare `includes(s[i + 1] ?? "")` reads the END of the word as a vowel (#1476). */
+const isVowelLetter = (c: string | undefined): boolean => c !== undefined && c !== "" && VOWEL_LETTER.includes(c);
 const isConsonantLetter = (c: string): boolean =>
     /[a-z]/u.test(c) && !VOWEL_LETTER.includes(c);
 
@@ -78,7 +80,7 @@ function scan(w: string): Seg[] {
             c === "w" &&
             segs.length > 0 &&
             !segs[segs.length - 1]!.nucleus &&
-            VOWEL_LETTER.includes(s[i + 1] ?? "")
+            isVowelLetter(s[i + 1])
         ) {
             // ⟨w⟩ after a consonant onset, before a vowel → labialization on that consonant (kweli→kʷeli, mwezi→mʷezi).
             segs[segs.length - 1]!.ph += "ʷ";

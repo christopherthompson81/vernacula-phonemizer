@@ -76,7 +76,7 @@ function harmonyOf(word: string): { hi: string; lo: string } {
     }
     return { hi: "ы", lo: "а" };
 }
-const endsInVowel = (w: string): boolean => VOWELS.includes(w[w.length - 1] ?? "");
+const endsInVowel = (w: string): boolean => w !== "" && VOWELS.includes(w[w.length - 1]!);
 const endsVoiceless = (w: string): boolean => VOICELESS.has(w[w.length - 1] ?? "");
 
 /**

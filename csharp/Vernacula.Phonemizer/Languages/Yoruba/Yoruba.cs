@@ -18,7 +18,8 @@ public sealed class YorubaPhonemizer : ILanguage
     // ⚠ NO EMPTY GUARD, AND NONE IS WANTED: the one caller that can pass "" is the `⟨w⟩` labialisation test
     // below, whose `s[i + 1] ?? ""` is deliberate — `"aeiou".includes("")` is TRUE in JS, and .NET's
     // `Contains("")` is true too, so a word-final ⟨w⟩ after a consonant labialises it in both engines.
-    private static bool IsVowelLetter(string c) => "aeiou".Contains(c, StringComparison.Ordinal);
+    /** ⚠ Refuses "": `Contains("")` is TRUE, and a caller passing the past-the-end "" read the END of the word as a vowel (#1476). */
+    private static bool IsVowelLetter(string c) => c != "" && "aeiou".Contains(c, StringComparison.Ordinal);
 
     private sealed class Seg
     {

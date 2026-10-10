@@ -28,7 +28,7 @@ const DIGRAPHS = DEF.digraphs;
 const VOWEL = DEF.vowels;
 const CONS = DEF.consonants;
 const POSTNASAL_VOICE = DEF.postNasalVoice;
-const isVowel = (ph: string): boolean => [..."aeiouæɨʌʊ"].includes(ph[0] ?? "");
+const isVowel = (ph: string): boolean => ph !== "" && "aeiouæɨʌʊ".includes(ph[0]!);
 const NASAL = new Set(DEF.voicingNasals);
 const VELAR = new Set(DEF.velars);
 

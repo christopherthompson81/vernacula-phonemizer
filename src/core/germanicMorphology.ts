@@ -50,7 +50,6 @@ export interface MorphologyConfig {
 /** Build a `decompose(word)` for a language from its morphology config. */
 export function makeDecompose(cfg: MorphologyConfig): (word: string) => Decomp {
     const VOWELS = cfg.vowels;
-    const isVowelStart = (w: string): boolean => VOWELS.includes(w[0] ?? "");
 
     /** Loose gate: a stripped stem must have a vowel and start with a valid onset (so a prefix isn't peeled off a
      *  non-word — be+rlin, where "rl" is not an onset). */

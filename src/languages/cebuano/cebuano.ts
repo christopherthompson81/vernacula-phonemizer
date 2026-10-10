@@ -55,7 +55,7 @@ function scan(w: string): string[] {
 
 /** Stress the PENULTIMATE vowel nucleus (default; phonemic stress is unwritten, ~majority is penultimate). */
 function stressed(units: string[]): string {
-    const nuclei = units.map((u, i) => (VOWEL_PH.includes(u[0] ?? "") ? i : -1)).filter((i) => i >= 0);
+    const nuclei = units.map((u, i) => (u !== "" && VOWEL_PH.includes(u[0]!) ? i : -1)).filter((i) => i >= 0);
     if (nuclei.length === 0) return units.join("");
     const idx = nuclei[nuclei.length >= 2 ? nuclei.length - 2 : 0]!;
     let out = "";

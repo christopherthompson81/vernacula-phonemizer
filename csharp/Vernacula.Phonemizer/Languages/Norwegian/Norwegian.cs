@@ -43,9 +43,9 @@ public sealed class NorwegianPhonemizer : ILanguage
         var count = 0;
         while (j < w.Length && !IsV(At(w, j)))
         {
-            // ⚠ `"tnlsd".Contains("")` IS TRUE, in both languages, and the reading depends on it: past the
-            // end of the word the TS reads `w[j + 1] ?? ""`, so a WORD-FINAL ⟨r⟩ takes the r+coronal arm.
-            if (At(w, j) == "r" && "tnlsd".Contains(At(w, j + 1), StringComparison.Ordinal)) { count++; j += 2; }
+            // ⚠ `j + 1 < w.Length` (#1476): `"tnlsd".Contains("")` is TRUE, so a WORD-FINAL ⟨r⟩ used to take the
+            // r+coronal arm. Both arms add one and both leave the loop, so no reading moves; the guard says so.
+            if (At(w, j) == "r" && j + 1 < w.Length && "tnlsd".Contains(At(w, j + 1), StringComparison.Ordinal)) { count++; j += 2; }
             else if (At(w, j) == "x") { count += 2; j++; } // ⟨x⟩ = /ks/ closes the syllable
             else { count++; j++; }
         }
@@ -114,7 +114,8 @@ public sealed class NorwegianPhonemizer : ILanguage
             if (vowelOrd == 0 && (c == "k" || c == "g") && IsFront(nx)) { outp.Add(c == "k" ? "ç" : "j"); i++; continue; }
 
             // silent word-final ⟨d⟩ after a vowel or l/n/r
-            if (c == "d" && i == n - 1 && (IsV(At(w, i - 1)) || "lnr".Contains(At(w, i - 1), StringComparison.Ordinal)))
+            // ⚠ `i > 0`: a one-letter ⟨d⟩ has no left neighbour, and `"lnr".Contains("")` is TRUE (#1476) — it was deleted.
+            if (c == "d" && i == n - 1 && i > 0 && (IsV(At(w, i - 1)) || "lnr".Contains(At(w, i - 1), StringComparison.Ordinal)))
             {
                 i++;
                 continue;

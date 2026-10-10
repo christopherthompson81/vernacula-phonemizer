@@ -38,7 +38,7 @@ function stressedLong(w: string, i: number): boolean {
     let count = 0;
     while (j < w.length && !isV(w[j]!)) {
         // (a silent final ⟨d⟩ is NOT skipped — the historical coda still closes the syllable: god→ɡuː but hånd→hɔn)
-        if (w[j] === "r" && "tnlsd".includes(w[j + 1] ?? "")) { count++; j += 2; } // r+coronal = one C (rd→r, silent d: jord→juːr)
+        if (w[j] === "r" && j + 1 < w.length && "tnlsd".includes(w[j + 1]!)) { count++; j += 2; } // r+coronal = one C (rd→r, silent d: jord→juːr)
         else if (w[j] === "x") { count += 2; j++; } // ⟨x⟩ = /ks/ closes the syllable
         else { count++; j++; }
     }
@@ -99,7 +99,7 @@ function toSegments(word: string): string[] {
         if (vowelOrd === 0 && (c === "k" || c === "g") && isFront(nx)) { out.push(c === "k" ? "ç" : "j"); i++; continue; }
 
         // silent word-final ⟨d⟩ after a vowel or l/n/r (god→ɡuː, land→lɑn, jord→juːr)
-        if (c === "d" && i === n - 1 && (isV(w[i - 1] ?? "") || "lnr".includes(w[i - 1] ?? ""))) { i++; continue; }
+        if (c === "d" && i === n - 1 && i > 0 && (isV(w[i - 1]!) || "lnr".includes(w[i - 1]!))) { i++; continue; }
 
         // geminate consonant → single C + ː (short preceding vowel already set by the length rule)
         if (c === nx && !isV(c)) {

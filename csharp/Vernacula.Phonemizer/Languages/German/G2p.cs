@@ -127,7 +127,7 @@ public static class G2p
             }
             if (c == "c" && nx == "h")
             {
-                if (initial) Push("eiäöüy".Contains(nx2, StringComparison.Ordinal) ? "ç" : "k", i); // empty nx2 → true, as in JS
+                if (initial) Push(nx2 != "" && "eiäöüy".Contains(nx2, StringComparison.Ordinal) ? "ç" : "k", i); // ⚠ nx2 may be "", and Contains("") is TRUE (#1476)
                 else Push(ChSound(lastVowelLetter), i);
                 i += 2;
                 continue;
@@ -199,7 +199,9 @@ public static class G2p
                     /* word-edge ⟨th⟩: silent */
                 }
                 else if (!IsV(At(w, i - 1))
-                         || (FULL_VOWEL.Contains(nx, StringComparison.Ordinal) && H_PREFIX.IsMatch(w[..i])))
+                         // ⚠ nx is "" word-finally and Contains("") is TRUE (#1476): a word-final ⟨h⟩ after a
+                         // prefix-shaped stem was sounded (geh → ɡeːh). Word-final has no following vowel.
+                         || (nx != "" && FULL_VOWEL.Contains(nx, StringComparison.Ordinal) && H_PREFIX.IsMatch(w[..i])))
                     Push("h", i);
             } // onset h pronounced; silent after a vowel (sehen, Uhr)
             else if (c == "s")

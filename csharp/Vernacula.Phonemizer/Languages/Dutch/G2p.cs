@@ -283,7 +283,9 @@ public static class G2p
             }
             if (c == "c")
             {
-                Push("eiyíé".Contains(nx, StringComparison.Ordinal) ? "s" : "k", i);
+                // ⚠ `nx` is "" word-finally and `Contains("")` is TRUE, exactly as JS `includes("")` (#1476):
+                // a word-final ⟨c⟩ took the soft branch. The rule is "before e/i/y"; word-final is [k].
+                Push(nx != "" && "eiyíé".Contains(nx, StringComparison.Ordinal) ? "s" : "k", i);
                 i++;
                 continue;
             } // c → s before e/i/y, else k

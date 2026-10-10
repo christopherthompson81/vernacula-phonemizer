@@ -64,7 +64,7 @@ public static class G2p
                 }
                 // ⚠ A WORD-INITIAL ⟨ě⟩ TAKES THIS BRANCH ON PURPOSE: `prev` is then "" and both JS
                 // `includes("")` and .NET `Contains("")` are TRUE, so the reading is jɛ. Do not "fix".
-                else if ("bpvf".Contains(prev, StringComparison.Ordinal))
+                else if (prev != "" && "bpvf".Contains(prev, StringComparison.Ordinal)) // ⚠ prev is "" word-initially; Contains("") is TRUE (#1476)
                 {
                     segs.Add(new Seg { Ph = "j", Nucleus = false });
                     segs.Add(new Seg { Ph = "ɛ", Nucleus = true });

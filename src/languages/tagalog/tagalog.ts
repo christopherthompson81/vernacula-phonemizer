@@ -84,7 +84,7 @@ function scan(w: string): string[] {
  *  (default; phonemic stress is unmarked in spelling, and ~77% of words are penultimate). */
 function stressed(units: string[], overrideVowelIdx?: number): string {
     const nuclei = units
-        .map((u, i) => (VOWEL_PH.includes(u[0] ?? "") ? i : -1))
+        .map((u, i) => (u !== "" && VOWEL_PH.includes(u[0]!) ? i : -1))
         .filter((i) => i >= 0);
     if (nuclei.length === 0) return units.join("");
     const vni =
@@ -163,7 +163,7 @@ export function phonemizeWord(word: string): string {
 }
 
 // ── Numbers (native Tagalog; explicit irregular teens/tens + productive ligature sandhi) ──────────────────────
-const endsInVowel = (s: string): boolean => "aeiou".includes(s[s.length - 1] ?? "");
+const endsInVowel = (s: string): boolean => s !== "" && "aeiou".includes(s[s.length - 1]!);
 
 /** The multiplier ligature before daan/libo/milyon: vowel-final → +ng (dalawa→dalawang), /n/-final → +g
  *  (daan→daang, so sandaang libo = 100,000), other consonant → + " na" (apat→apat na). Attaches to the phrase's

@@ -278,7 +278,10 @@ export function toSegments(word: string): Seg[] {
             continue;
         }
         if (c === "c") {
-            push("eiyíé".includes(nx) ? "s" : "k", i);
+            // ⚠ `nx` is `w[i + 1] ?? ""`, and `includes("")` is TRUE (#1476): a word-final ⟨c⟩ took the soft
+            // branch (bloc → *blˈɔs*, tic → *tˈɪs*). The rule is "before e/i/y", and word-final has no following
+            // letter at all, so it is [k] — the same call Afrikaans made for the same accident (#757).
+            push(nx !== "" && "eiyíé".includes(nx) ? "s" : "k", i);
             i++;
             continue;
         } // c → s before e/i/y, else k
@@ -341,7 +344,7 @@ function finalDevoice(segs: Seg[]): void {
         if (
             !next ||
             (!next.vowel &&
-                ("ptksfxʃ".includes(next.ph[0] ?? "") || VOICED_FINAL[next.ph]))
+                ((next.ph !== "" && "ptksfxʃ".includes(next.ph[0]!)) || VOICED_FINAL[next.ph]))
         )
             s.ph = dev;
     }

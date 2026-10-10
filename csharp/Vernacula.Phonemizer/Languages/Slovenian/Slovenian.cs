@@ -45,7 +45,7 @@ public sealed class SlovenianPhonemizer : ILanguage
         {
             var suffix = w[cut..];
             if (!lex.TryGetValue(suffix, out var at)) continue;
-            var prefixNuclei = CountNuclei(w[..cut]);
+            var prefixNuclei = CountNuclei(w, cut);
             if (prefixNuclei < 1) continue;
             var shifted = prefixNuclei + at;
             return shifted < nucleiCount ? shifted : null;
@@ -53,11 +53,14 @@ public sealed class SlovenianPhonemizer : ILanguage
         return null;
     }
 
-    /** Nuclei in a bare SPELLING, counted the way `ToSegments` will. */
-    private static int CountNuclei(string w)
+    /** Nuclei in the first `end` letters of a bare SPELLING, counted the way `ToSegments` will.
+     *  ⚠ NEIGHBOURS ARE READ FROM THE WHOLE WORD (#1476): the right neighbour of a prefix-final ⟨r⟩ is the
+     *  suffix's first letter, not the slice edge. This port counted `w[..cut]` with edges as non-vowels, the TS
+     *  counted it with edges as VOWELS (`includes("")`); both are replaced by the whole-word reading. */
+    private static int CountNuclei(string w, int end)
     {
         var n = 0;
-        for (var i = 0; i < w.Length; i++)
+        for (var i = 0; i < end; i++)
         {
             var c = w[i];
             if ("aeiou".Contains(c)) n++;

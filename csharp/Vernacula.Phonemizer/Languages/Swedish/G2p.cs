@@ -56,9 +56,9 @@ public static class G2p
         int j = i + 1, count = 0;
         while (j < w.Length && !IsV(CharAt(w, j)))
         {
-            // ⚠ `RETRO_2ND.Contains("")` is TRUE (as in JS), so a word-final ⟨r⟩ takes this arm. Same count,
-            // same exit — do not "fix" it into an out-of-range guard that changes the arm.
-            if (CharAt(w, j) == "r" && RETRO_2ND.Contains(CharAt(w, j + 1), StringComparison.Ordinal))
+            // ⚠ `j + 1 < w.Length` (#1476): `RETRO_2ND.Contains("")` is TRUE (as in JS), so a word-final ⟨r⟩ used
+            // to take this arm. Same count, same exit either way — the TS now guards it too, and so does this.
+            if (CharAt(w, j) == "r" && j + 1 < w.Length && RETRO_2ND.Contains(CharAt(w, j + 1), StringComparison.Ordinal))
             {
                 count++; // retroflex r+dental = one consonant
                 j += 2;

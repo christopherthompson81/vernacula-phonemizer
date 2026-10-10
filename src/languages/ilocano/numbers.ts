@@ -31,7 +31,7 @@ interface IloNumbers {
 }
 const N = loadManifest<{ numbers: IloNumbers }>(import.meta.url, "ilocano.jsonc").numbers;
 
-const isVowelFinal = (w: string): boolean => "aeiou".includes(w[w.length - 1] ?? "");
+const isVowelFinal = (w: string): boolean => w !== "" && "aeiou".includes(w[w.length - 1]!);
 
 /** "<multiplier> <magnitude>": sanga- for 1, fused for a vowel-final digit, else the "a" ligature. */
 function scaleGroup(count: number, scale: string): string {

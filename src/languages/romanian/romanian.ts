@@ -186,7 +186,7 @@ function stressFromEnd(word: string, nucleiCount: number): number {
     if (!VOWEL_LETTERS.includes(last)) return last === "c" ? 2 : 1;
     // ⟨-i⟩: after a VOWEL (glide, -ei/-ai genitives casei→ˈkasej) → PENULT; after a consonant (desyllabified
     // plural lupi→ˈlupʲ, elevi→eˈlevʲ) → FINAL of the remaining nuclei.
-    if (last === "i") return VOWEL_LETTERS.includes(word[word.length - 2] ?? "") ? 2 : 1;
+    if (last === "i") return word.length >= 2 && VOWEL_LETTERS.includes(word[word.length - 2]!) ? 2 : 1;
     // other vowel-final: ⟨-a⟩ leans FINAL (feminines/verbs, 54%); -e/-ă/-o/-u lean PENULT (67-85%).
     return last === "a" ? 1 : 2;
 }

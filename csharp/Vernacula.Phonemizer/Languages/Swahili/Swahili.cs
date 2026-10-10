@@ -85,13 +85,12 @@ public static class SwahiliPhonemizer
             else if (c == "w" &&
                      segs.Count > 0 &&
                      !segs[^1].Nucleus &&
-                     VOWEL_LETTER.Contains(i + 1 < n ? s[i + 1] : "", StringComparison.Ordinal))
+                     i + 1 < n && VOWEL_LETTER.Contains(s[i + 1], StringComparison.Ordinal))
             {
-                // ⚠ NO `i + 1 < n` GUARD, AND THAT IS THE POINT. The TS tests
-                // `VOWEL_LETTER.includes(s[i + 1] ?? "")`, and `"aeiou".includes("")` is TRUE — so a
-                // word-FINAL ⟨w⟩ after a consonant onset labializes that consonant. .NET's `Contains("")`
-                // is true as well, so the empty string reproduces it. Adding the bounds check here would
-                // look defensive and silently drop the final-w case.
+                // ⚠ THE BOUNDS CHECK IS THE FIX (#1476). The TS used to test `VOWEL_LETTER.includes(s[i + 1] ?? "")`,
+                // and `includes("")` is TRUE, so a word-FINAL ⟨w⟩ after a consonant was folded into labialization
+                // and deleted (an abbreviation like ⟨Bw⟩ read *ɓʷ*). `Contains("")` is true here as well, which is
+                // why this port once reproduced it on purpose. Word-final has no following vowel; the w stays.
                 segs[^1].Ph += "ʷ";
                 i++;
             }
