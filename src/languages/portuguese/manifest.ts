@@ -38,6 +38,7 @@ export interface PortugueseManifest {
         millionPlural: string;
         connector: string;
         decimalConnector: string;
+        dotConnector: string;
     };
     months: string[];
     dottedAbbrev: Record<string, string>;

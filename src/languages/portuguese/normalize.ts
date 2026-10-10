@@ -36,16 +36,17 @@ const DEG = MANIFEST.degree;
 function degreeWord(n: string): string {
     // ⚠ READ THE COUNT THE WAY THE NUMBER TOKENIZER WILL SAY IT: `n` is a whole NUMBER_TOKEN, split by the
     // tokenizer's own rule. `Number("1.000")` is 1, so `1.000 °C` was *mil grau* in the singular. A decimal
-    // part is SPOKEN (*um vírgula zero*), and a spoken fraction takes the plural: `1,0 °C` is *graus*.
-    const { intDigits, frac } = splitNumberToken(n);
-    return frac === undefined && Number(intDigits) === 1 ? DEG.singular : DEG.plural;
+    // part is SPOKEN (*um vírgula zero*), and a spoken fraction takes the plural: `1,0 °C` is *graus*. So is
+    // a spoken dot (#1490): `1.5 °C` is *um ponto cinco graus*, and only a whole 1 is singular.
+    const { intDigits, dotted, frac } = splitNumberToken(n);
+    return frac === undefined && dotted.length === 0 && Number(intDigits) === 1 ? DEG.singular : DEG.plural;
 }
 
 /**
  * The three degree rules. ⚠ THE COUNT IS THE TOKENIZER'S WHOLE NUMBER TOKEN, NOT A ONE-SEPARATOR
  * APPROXIMATION OF IT: `\d+(?:[.,]\d+)?` matched only the TAIL of a multi-group number, so `2.000.001°` and
  * `1.000.001 °C` were counted as 1 and read *grau*. Sharing NUMBER_TOKEN also means the count is exactly what
- * the tokenizer then says, including its lone-0 rule (`0.1 °C` is *zero . um grau*).
+ * the tokenizer then says, including its dot rule (`0.1 °C` is *zero ponto um graus*, #1490).
  */
 const DEGREE_C = new RegExp(`(${NUMBER_TOKEN.source})\\s?°\\s?C(?![\\p{L}\\p{M}])`, "giu");
 const DEGREE_F = new RegExp(`(${NUMBER_TOKEN.source})\\s?°\\s?F(?![\\p{L}\\p{M}])`, "giu");
@@ -165,8 +166,8 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //      `2.500º`  worse, because the tail IS an ordinal: it matched `500º` → *quingentésimo* and stranded
     //                `2.`, so the reading was *dois PONTO quingentésimo* — two point five-hundredth.
     //    Step 0 deliberately leaves dot-grouping to the number tokenizer, so this rule has to accept it
-    //    itself. The grouped alternative comes FIRST so it wins over the bare `\d+` on `1.000º`, and the dots
-    //    are stripped before Number() rather than by a separate pass, which would change what step 0 hands on.
+    //    itself — by matching the tokenizer's own NUMBER_TOKEN (below) — and the dots are stripped before
+    //    Number() rather than by a separate pass, which would change what step 0 hands on.
     //    ⚠ WHEN NO ORDINAL WORD IS AVAILABLE THE INDICATOR IS STRIPPED, NOT KEPT. `portugueseOrdinal` is
     //    bounded to 1–1000, so `2.500º` and `1.000.000º` have no word — and returning the match unchanged put
     //    a raw `º` in the phoneme string, which is the very thing this rule exists to prevent and the worst of
@@ -175,8 +176,15 @@ export function normalizePortuguese(input: string, brazilian = false): string {
     //    decision Xhosa's ordinal rule records for the English `-st/-nd/-th` suffixes.
     //    Every ordinal in this corpus is within range (`1º` ×5, `37º` ×3, `1.000º` ×3, `60º`, `11º`, `16º`,
     //    `7ª` ×3, `5ª` ×2), so this arm is for arbitrary text rather than for a corpus instance.
-    s = rewrite(s, /\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)/gu, (whole, digits: string) => {
-        const n = Number(digits.replace(/\./gu, ""));
+    //    ⚠ AND THE DIGITS ARE THE TOKENIZER'S WHOLE NUMBER_TOKEN, CLASSIFIED BY ITS OWN `splitNumberToken`
+    //    (#1490). The rule used to carry its own grouped-or-bare alternation, which agreed with the tokenizer
+    //    on `1.000º` and on nothing else: on `1.5º` and `1,5º` it matched the TAIL `5º` and left
+    //    *um . quinto* / *um , quinto*. Only a whole number has an ordinal; a spoken dot or a decimal comma
+    //    keeps its number and loses the indicator — the same stripped-indicator outcome as above.
+    s = rewrite(s, new RegExp(`\\b(${NUMBER_TOKEN.source})\\.?(?:º|ª)`, "gu"), (whole, digits: string) => {
+        const { intDigits, dotted, frac } = splitNumberToken(digits);
+        if (dotted.length > 0 || frac !== undefined) return digits;
+        const n = Number(intDigits);
         const masc = portugueseOrdinal(n);
         if (masc === undefined) return digits;
         return /ª/u.test(whole) ? feminineOrdinal(masc) : masc;

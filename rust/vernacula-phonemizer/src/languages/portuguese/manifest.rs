@@ -33,6 +33,7 @@ pub struct Numbers {
     pub million_plural: String,
     pub connector: String,
     pub decimal_connector: String,
+    pub dot_connector: String,
 }
 
 #[derive(Debug, Deserialize)]

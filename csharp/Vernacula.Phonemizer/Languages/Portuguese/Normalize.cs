@@ -29,9 +29,10 @@ public static class Normalize
      */
     private static string DegreeWord(string n)
     {
-        // `n` is a whole number token; a spoken decimal part takes the plural (`1,0 °C` is *graus*).
-        var (intDigits, frac) = Numbers.SplitNumberToken(n);
-        return frac is null && Js.Number(intDigits) == 1 ? DEGREE.Singular : DEGREE.Plural;
+        // `n` is a whole number token; a spoken decimal part takes the plural (`1,0 °C` is *graus*), and so
+        // does a spoken dot (`1.5 °C`, #1490).
+        var (intDigits, dotted, frac) = Numbers.SplitNumberToken(n);
+        return frac is null && dotted.Count == 0 && Js.Number(intDigits) == 1 ? DEGREE.Singular : DEGREE.Plural;
     }
 
     /** Dotted abbreviations → the spoken words. `no.` is deliberately absent and handled separately: bare
@@ -99,11 +100,11 @@ public static class Normalize
     private static readonly JsRe NUMERO = JsRegex.Compile("\\b(?:n\\.º|nº|n°|no|núm\\.)\\s?(?=\\d)", "giu");
     private static readonly JsRe ABBREV_MID = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"\\b({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
-    // The grouped alternative must come FIRST, or a bare \d+ matches only the tail of `1.000º`. ° (U+00B0
-    // DEGREE SIGN) is deliberately not an ordinal indicator here: "35°" is a temperature.
-    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile("\\b([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+)\\.?(?:º|ª)", "gu");
+    // The digits are the tokenizer's whole NUMBER_TOKEN, classified by its own SplitNumberToken (#1490): a
+    // narrower run matched only the tail of `1.000º`, `1.5º` and `1,5º`. ° (U+00B0 DEGREE SIGN) is
+    // deliberately not an ordinal indicator here: "35°" is a temperature.
+    private static readonly JsRe ORDINAL_INDICATOR = JsRegex.Compile($"\\b({Numbers.NUMBER_TOKEN})\\.?(?:º|ª)", "gu");
     private static readonly JsRe FEMININE_MARK = JsRegex.Compile("ª", "u");
-    private static readonly JsRe GROUPING_DOT = JsRegex.Compile("\\.", "gu");
     private static readonly JsRe REAIS = JsRegex.Compile("R\\$\\s?(\\d[\\d.,]*)", "gu");
     private static readonly JsRe DOLLAR_CODE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])(?:{string.Join("|", DEF.DollarCodes)})\\$(?=[ \\u00a0]?\\d)", "gu");  // space, NBSP
     // ⚠ `(?![\\p{L}\\p{M}])`, NOT `\\b`. JS defines `\\b` on ASCII `\\w`, so a following NON-ASCII letter
@@ -156,7 +157,10 @@ public static class Normalize
         s = Rewrite(s, ORDINAL_INDICATOR, m =>
         {
             var digits = m.Groups[1].Value;
-            var n = Js.Number(Rewrite(digits, GROUPING_DOT, ""));
+            // Only a whole number has an ordinal; a spoken dot or a decimal comma keeps its number.
+            var (intDigits, dotted, frac) = Numbers.SplitNumberToken(digits);
+            if (dotted.Count > 0 || frac is not null) return digits;
+            var n = Js.Number(intDigits);
             var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.PortugueseOrdinal((int)n) : null;
             if (masc is null) return digits;
             return FEMININE_MARK.IsMatch(m.Value) ? FeminineOrdinal(masc) : masc;

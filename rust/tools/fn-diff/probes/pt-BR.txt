@@ -34,6 +34,14 @@ Seu 1.000º selo
 O 2.500º visitante e o 1.000.000º
 O 0º caso
 Fazia 35° ontem
+# a non-grouping dot (#1490): spoken, and the ordinal and degree rules read the whole token
+O padrão 802.11n a 2.4 GHz e 5.0 GHz, ver Figura 1.1.
+O 1.5º e o 1,5º e a 1.5ª e o 802.11ª
+Mediu 1.5 °C e 0.1 °C e 2.05 e 1.0000 e 0.500 e 1.000.5 e 1.234,5
+# a non-grouping dot (#1490): spoken, and the ordinal and degree rules read the whole token
+O padrão 802.11n a 2.4 GHz e 5.0 GHz, ver Figura 1.1.
+O 1.5º e o 1,5º e a 1.5ª e o 802.11ª
+Mediu 1.5 °C e 0.1 °C e 2.05 e 1.0000 e 0.500 e 1.000.5 e 1.234,5
 # 5) R$, 5b) dollar codes
 Custou R$ 10,50 e R$1.000
 O R$ abc

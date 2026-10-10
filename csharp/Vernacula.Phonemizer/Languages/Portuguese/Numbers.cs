@@ -20,16 +20,26 @@ public static class Numbers
         [19] = "dezenove",
     };
 
-    /** The number token (TS `NUMBER_TOKEN`): one source for the tokenizer and the degree count. */
-    public const string NUMBER_TOKEN = "\\d+(?:(?<!(?<!\\d)0)\\.\\d+)*(?:,\\d+)?";
+    /** The number token (TS `NUMBER_TOKEN`): one source for the tokenizer, the degree count and the ordinal
+     *  indicator. It spans every dot; what a dot MEANS is decided once, by `SplitNumberToken`. */
+    public const string NUMBER_TOKEN = "\\d+(?:\\.\\d+)*(?:,\\d+)?";
 
     private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "g");
+    /** ⚠ A dot is a thousands separator only in the thousands shape (#1490): a 1–3-digit non-zero head, then
+     *  groups of exactly three. See numbers.ts `THOUSANDS_GROUPED` for the measurement. */
+    private static readonly JsRe THOUSANDS_GROUPED = JsRegex.Compile("^[1-9]\\d{0,2}(?:\\.\\d{3})+$", "u");
 
-    /** A number token → its integer digits (thousands dots removed) and its decimal digits, if any. */
-    public static (string IntDigits, string? Frac) SplitNumberToken(string tok)
+    /** A number token → its integer digits, the groups after any NON-thousands dot (spoken *ponto*), and its
+     *  comma decimal. A whole number exactly when `Dotted` is empty and `Frac` is null. */
+    public static (string IntDigits, IReadOnlyList<string> Dotted, string? Frac) SplitNumberToken(string tok)
     {
         var split = tok.Split(',');
-        return (DOT_G.Replace(split[0], ""), split.Length > 1 ? split[1] : null);
+        var intRaw = split[0];
+        var frac = split.Length > 1 ? split[1] : null;
+        if (!intRaw.Contains('.') || THOUSANDS_GROUPED.IsMatch(intRaw))
+            return (DOT_G.Replace(intRaw, ""), Array.Empty<string>(), frac);
+        var groups = intRaw.Split('.');
+        return (groups[0], groups[1..], frac);
     }
 
     private static string Small(int i, string dialect) =>

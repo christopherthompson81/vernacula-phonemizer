@@ -316,3 +316,84 @@ tree.
 
 **Implication.** All six items are closed and no golden moves. The lax tokenizer grouping (`5.0`, `2.4` read as
 integers) is a separate, golden-moving finding, and I am reporting it, not fixing it.
+
+## Run 12 — 2026-10-09 21:26 (#1490: the number tokenizer's dot rule)
+
+**Question.** Run 11 left one finding open: the tokenizer takes any digits after a dot as a thousands group.
+Step 4 takes only exact 3-digit groups. Which dots in the text are really thousands separators? What should
+the others read as? And does the fix move a golden?
+
+**Command.** A scratch probe (not committed) lists every `\d+(\.\d+)+` token, with any glued suffix. It reads
+the pt and pt-BR goldens, FLEURS pt_br (train/dev/test, column 3, the raw transcript), the ledger's pt_br `read_text` (2,793
+rows) and `tools/corpus/mined/pt.jsonc`. It classifies each number as thousands-shaped
+(`^[1-9]\d{0,2}(?:\.\d{3})+$`) or OTHER, and prints the current pt-BR reading. It ran before and after the
+fix. Then `gen_parity_goldens.mts pt pt-BR`, `check:goldens`, the fn-diff re-dumps, and the gates.
+
+**Raw finding.**
+- 39 distinct dotted numbers. 34 are thousands-shaped, and every one of them is a real group (`1.000 libras`,
+  `5.000.000`, `104.500`, `1.000º` …). The other 5:
+
+  | number | what it is | before | after |
+  |---|---|---|---|
+  | `802.11` (+`a`/`b`/`g`/`n`) | a standard designation | *oitenta mil duzentos e onze* | *oitocentos e dois ponto onze* |
+  | `2.4` (`2.4Ghz`) | a clock-speed spec | *vinte e quatro* | *dois ponto quatro* |
+  | `5.0` (`5.0Ghz`) | the same | *cinquenta* | *cinco ponto zero* |
+  | `1.1` | a figure number | *onze* | *um ponto um* |
+  | `15.00` | a dotted clock time (an hour against UTC) | *mil e quinhentos* | *quinze ponto zero zero* |
+
+  None is a group. The reading after the fix was taken from the same probe. All 34 thousands rows are
+  byte-identical before and after.
+- The dotted numbers in the goldens are all thousands-shaped. The 5 OTHER numbers appear only in FLEURS, the
+  ledger and the mined text. So no golden moves: `gen_parity_goldens.mts pt pt-BR` wrote no diff, and
+  `check:goldens` reports `189 languages, 36495 rows, 0 stale`. Run 11 expected this fix to move golden rows,
+  and it does not.
+- The rule: a dot is a thousands separator only when the head is 1–3 digits with a non-zero first digit and
+  every later group is exactly 3 digits. That is step 4's own shape. The non-zero head restates #1015's
+  zero-head guard, so the old `(?<!(?<!\d)0)` lookbehind could go. `0.5` now reads *zero ponto cinco*, where
+  it used to read *zero . cinco* with a pause.
+- The reading of a non-grouping dot: *ponto*, a new `numbers.dotConnector` in the manifest. The group after
+  it is read as a cardinal when it is `[1-9]\d?`, and digit by digit otherwise. A version or a designation
+  is said *ponto onze*, not *ponto um um*. A group with a leading zero (`15.00`, `2.05`) or of 3+ digits
+  (`1.0000`, `0.500`) has no cardinal reading. I rejected *vírgula*: it is the comma's word, and
+  *oitocentos e dois vírgula onze* is wrong for a designation. The siblings ca/gl/es rewrite a dot followed
+  by 1–2 digits to the comma decimal. gl records `802.11n` as the known exposure of doing that. All 5 corpus
+  instances here are designation- or version-like, which is why *ponto* is the right reading for this text.
+- Step 4 now matches `\b(NUMBER_TOKEN)\.?[ºª]` and classifies the match with `splitNumberToken`. Only a whole
+  number gets an ordinal. A spoken dot or a decimal comma keeps its number and loses the indicator.
+  `1.5º`: *um . quinto* → *um ponto cinco*. `1,5º`: *um , quinto* → *um vírgula cinco*. `1.000º` and
+  `2.500º` are unchanged.
+- The degree count is plural unless the token is a whole 1. `0.1 °C`: *grau* → *graus*. This reverses Run
+  11's agreement with the *um* that was spoken after the pause, because the token is now read whole
+  (*zero ponto um graus*).
+- Residuals, recorded and not fixed:
+  - `15.00 do Tempo Universal` is a clock time. It reads *quinze ponto zero zero*, and an anchor would say
+    *quinze horas*. Reading `HH.MM` as a clock needs context (UTC, *horas*). One instance does not license
+    that, and `2.40` could be a price.
+  - FLEURS column 4 (the normalized transcript, which fn-diff reads) writes `802.11a` as `802.11ª` ×3. It now reads *oitocentos e dois ponto onze*: the
+    indicator is stripped and the letter is lost. Before, it read *oitocentos e dois . décima primeira*.
+  - `2.4Ghz` reads its unit as *ɡs*. That is the symbol tier, and it is untouched.
+- Proved by revert:
+  - TS: with the three src files reverted, 5 of the 16 tests in `portuguese-port-findings.test.ts` fail.
+    That is every new #1490 test except the thousands guard, plus the edited `0.1 °C` row.
+  - C#: with Numbers/Portuguese/Normalize.cs reverted, 13 of 40 `PortuguesePortFindingsTests` cases fail.
+  - Rust: with numbers/portuguese/normalize.rs reverted and only the tests re-applied, 3 of 8 portuguese
+    tests fail.
+- Regex corpus re-extracted with `tools/extract_regexes.mts`. Two rows went: step 4's alternation and the
+  old NUMBER_TOKEN. Three came in: the new NUMBER_TOKEN, `THOUSANDS_GROUPED` and the `[1-9]\d?` group test.
+  That makes 2,384 patterns. C# regex-diff and Rust regex-diff: `145276 identical, 0 DIFFER`.
+- pt-BR.txt gained three probe lines (pt.txt is a symlink to it): designations, a dotted ordinal/decimal ordinal, and dotted
+  degree counts with the edge shapes.
+- Gates on the final tree:
+  - fn-diff, re-dumped from the fixed TS: pt-normalize `11937 / 0` (probe 267), pt-numbers `101973 / 0`,
+    pt-g2p `75630 / 0`, phonemize-sync and -best `7950 / 4` each. The 4 are the same port-pending ru and el
+    probes as before.
+  - Rust parity: all ten languages `200/200`.
+  - `cargo test --workspace`: 91 + 1.
+  - C# parity pt/pt-BR: `400 rows ok, 0 differ`.
+  - vitest, full: 347 files, 6,517 passed, 5 skipped. `node_modules/.bin` was linked for the run and
+    unlinked after. Without the link, `check-goldens-jobs.test.ts` fails 7 tests on a missing `tsx`.
+  - `dotnet test`, full: 7,195 passed.
+  - `check:goldens`: 0 stale.
+
+**Implication.** The tokenizer, the degree count and the ordinal indicator now share one predicate. No golden
+moved. What remains is the dotted clock time, which needs a context rule and evidence for one.

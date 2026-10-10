@@ -221,6 +221,9 @@
         "millionPlural": "milhões",
         "connector": "e",
         "decimalConnector": "vírgula", // 3,14 → três vírgula um quatro
+        // A dot that is NOT a thousands separator (numbers.ts `splitNumberToken`): a standard designation, a
+        // version, a figure number, a tech spec written English-style — `802.11` → oitocentos e dois ponto onze.
+        "dotConnector": "ponto",
     },
     // ---------------------------------------------------------------------------------------------------
     // Month names, for the DATE rule. ⚠ READ ONLY ON THE BRAZILIAN PATH: Brazil says *primeiro de julho*

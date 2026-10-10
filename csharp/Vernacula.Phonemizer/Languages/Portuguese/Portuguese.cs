@@ -216,13 +216,23 @@ public static class PortuguesePhonemizer
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile($"([a-zà-ÿ]+)|({Numbers.NUMBER_TOKEN})|([.!?…,;:])", "giu");
 
-    /** A number token (thousands-dots / decimal-comma) → spoken words. `dialect` selects the BP teen forms (16/17/19
+    private static readonly JsRe DOT_GROUP_AS_NUMBER = JsRegex.Compile("^[1-9]\\d?$", "u");
+
+    /** A number token (thousands-dots / decimal-comma / spoken dots) → spoken words. `dialect` selects the BP teen forms (16/17/19
      *  dez-e- vs the EP dez-a-). */
     private static string NumberTokenToWords(string tok, string dialect)
     {
         // ⚠ THE DOT-STRIPPED STRING IS PASSED AS `raw` (#1095): the fallback must see the digits, not the double.
-        var (intDigits, frac) = Numbers.SplitNumberToken(tok);
+        var (intDigits, dotted, frac) = Numbers.SplitNumberToken(tok);
         var words = Numbers.NumberToWords(Js.Number(intDigits), dialect, intDigits);
+        // ⚠ A SPOKEN DOT READS THE GROUP AFTER IT AS A NUMBER (#1490): `802.11` is *ponto onze*. A group with a
+        // leading zero, or of three or more digits, is spelled out (`15.00` → *ponto zero zero*).
+        foreach (var g in dotted)
+            words +=
+                $" {Manifest.MANIFEST.Numbers.DotConnector} " +
+                (DOT_GROUP_AS_NUMBER.IsMatch(g)
+                    ? Numbers.NumberToWords(Js.Number(g), dialect)
+                    : string.Join(" ", g.Select(d => Numbers.NumberToWords(Js.Number(d.ToString()), dialect))));
         if (frac is not null)
             words +=
                 $" {Manifest.MANIFEST.Numbers.DecimalConnector} " +

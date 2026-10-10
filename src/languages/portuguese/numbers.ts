@@ -15,16 +15,38 @@ const E = N.connector; // "e"
 export type Dialect = "ep" | "bp";
 
 /**
- * THE NUMBER TOKEN: dot = thousands (1.500), comma = decimal (3,14), and a dot after a lone 0 is not a group
- * (`0.5` is *zero . cinco*). ONE SOURCE for the tokenizer (portuguese.ts TOKEN) and for every normalize.ts
- * rule that has to agree with what the tokenizer will say — the degree count reads the same digits.
+ * THE NUMBER TOKEN: digit runs joined by dots, with an optional comma decimal (3,14). ONE SOURCE for the
+ * tokenizer (portuguese.ts TOKEN) and for every normalize.ts rule that has to agree with what the tokenizer
+ * will say — the degree count and the ordinal indicator read the same digits. The token SPANS every dot; what
+ * a dot MEANS is decided once, by `splitNumberToken` below.
  */
-export const NUMBER_TOKEN = /\d+(?:(?<!(?<!\d)0)\.\d+)*(?:,\d+)?/u;
+export const NUMBER_TOKEN = /\d+(?:\.\d+)*(?:,\d+)?/u;
 
-/** A number token → its integer digits (thousands dots removed) and its decimal digits, if any. */
-export function splitNumberToken(tok: string): { intDigits: string; frac: string | undefined } {
+/**
+ * ⚠ A DOT IS A THOUSANDS SEPARATOR ONLY IN THE SHAPE A THOUSANDS SEPARATOR PRODUCES: a 1–3-digit head with a
+ * non-zero first digit, then groups of EXACTLY three (`1.500`, `17.000`, `5.000.000`). The token used to take
+ * any digits after a dot as a group and strip them, so `5.0` read *cinquenta*, `2.4` *vinte e quatro*,
+ * `1.1` *onze* and the standard designation `802.11` *oitenta mil duzentos e onze* — every one a silent
+ * misreading, and the step-4 ordinal rule (exact groups only) disagreed with the tokenizer about the same
+ * digits (#1490). Measured over the pt/pt-BR goldens, the FLEURS pt_br splits, the alignment ledger and the
+ * mined pt artifact: 39 distinct dotted numbers, 34 of them true groups and all 34 in this shape; the other
+ * 5 are a standard designation, two clock-speed specs, a figure number and a dotted clock time — none a group.
+ * The non-zero head is the zero-head guard (#1015) restated: `0.500` is not five hundred.
+ */
+const THOUSANDS_GROUPED = /^[1-9]\d{0,2}(?:\.\d{3})+$/u;
+
+/**
+ * A number token → its integer digits, the groups after any NON-thousands dot, and its comma decimal.
+ * Thousands-grouped: `intDigits` is the digits with the dots removed and `dotted` is empty. Otherwise the
+ * dots are spoken (*ponto*): `intDigits` is the head and `dotted` the groups after it (`802.11` → `802`,
+ * [`11`]). A token is a whole number exactly when `dotted` is empty and `frac` is undefined.
+ */
+export function splitNumberToken(tok: string): { intDigits: string; dotted: string[]; frac: string | undefined } {
     const [intRaw, frac] = tok.split(",");
-    return { intDigits: intRaw!.replace(/\./g, ""), frac };
+    if (!intRaw!.includes(".") || THOUSANDS_GROUPED.test(intRaw!))
+        return { intDigits: intRaw!.replace(/\./g, ""), dotted: [], frac };
+    const [head, ...dotted] = intRaw!.split(".");
+    return { intDigits: head!, dotted, frac };
 }
 // The only EP/BP difference in the number words: the "dez-a-" teens 16/17/19 are "dez-e-" in Brazil.
 const SMALL_BP: Record<number, string> = {

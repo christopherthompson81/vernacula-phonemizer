@@ -25,10 +25,11 @@ fn g(m: &JsMatch, i: usize, s: &JsString) -> JsString {
 }
 
 fn degree_word(n: &JsString) -> &'static str {
-    // `n` is a whole number token; a spoken decimal part takes the plural (`1,0 °C` is *graus*).
-    let (int_digits, frac) = split_number_token(n);
+    // `n` is a whole number token; a spoken decimal part takes the plural (`1,0 °C` is *graus*), and so does
+    // a spoken dot (`1.5 °C`, #1490).
+    let (int_digits, dotted, frac) = split_number_token(n);
     let d = &MANIFEST.degree;
-    if frac.is_none() && js_number(&int_digits) == 1.0 {
+    if frac.is_none() && dotted.is_empty() && js_number(&int_digits) == 1.0 {
         &d.singular
     } else {
         &d.plural
@@ -224,13 +225,19 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
         }
     });
 
-    // 4) Ordinal indicators.
+    // 4) Ordinal indicators. The digits are the tokenizer's whole NUMBER_TOKEN, classified by its own
+    //    `split_number_token` (#1490): only a whole number has an ordinal, and a spoken dot or a decimal
+    //    comma keeps its number and loses the indicator (`1.5º` → *um ponto cinco*).
     s = rewrite_with(
         &s,
-        js_re!(r"\b([1-9]\d{0,2}(?:\.\d{3})+|\d+)\.?(?:º|ª)", "gu"),
+        js_re!(&format!(r"\b({NUMBER_TOKEN})\.?(?:º|ª)"), "gu"),
         |mm, s| {
             let (whole, digits) = (mm.value(s), g(mm, 1, s));
-            let n = js_number(&js_re!(r"\.", "gu").replace(&digits, &JsString::new()));
+            let (int_digits, dotted, frac) = split_number_token(&digits);
+            if !dotted.is_empty() || frac.is_some() {
+                return digits;
+            }
+            let n = js_number(&int_digits);
             match portuguese_ordinal(n) {
                 None => digits,
                 Some(masc) => {
@@ -435,7 +442,9 @@ mod port_findings {
             "Mediu 1.000.001 graus Celsius"
         );
         assert_eq!(n("Mediu 1.001 °F", false), "Mediu 1.001 graus Fahrenheit");
-        assert_eq!(n("Mediu 0.1 °C", false), "Mediu 0.1 grau Celsius");
+        // `0.1` is *zero ponto um*, and a spoken dot is plural (#1490).
+        assert_eq!(n("Mediu 0.1 °C", false), "Mediu 0.1 graus Celsius");
+        assert_eq!(n("Mediu 1.5 °C", false), "Mediu 1.5 graus Celsius");
         assert_eq!(n("Mediu 21.1 °C", false), "Mediu 21.1 graus Celsius");
     }
 
@@ -443,5 +452,32 @@ mod port_findings {
     fn spoken_decimal_part_takes_the_plural() {
         assert_eq!(n("Mediu 1,0 °C", false), "Mediu 1,0 graus Celsius");
         assert_eq!(n("Mediu 1,000 °C", false), "Mediu 1,000 graus Celsius");
+    }
+
+    /// #1490: the ordinal indicator reads the tokenizer's whole token; only a whole number has an ordinal.
+    #[test]
+    fn ordinal_indicator_reads_the_whole_token() {
+        assert_eq!(n("o 1.5º lugar", false), "o 1.5 lugar");
+        assert_eq!(n("o 1,5º lugar", false), "o 1,5 lugar");
+        assert_eq!(n("a 1.5ª vez", false), "a 1.5 vez");
+        assert_eq!(n("o 1.000º selo", false), "o milésimo selo");
+        assert_eq!(n("o 2.500º selo", false), "o 2.500 selo");
+    }
+
+    /// #1490: a dot is a thousands separator only in the thousands shape; any other dot is spoken.
+    #[test]
+    fn non_grouping_dot_is_spoken() {
+        let p = |s: &str, l: &str| crate::phonemize(s, l).unwrap();
+        assert_eq!(p("O padrão 802.11n", "pt-BR"), "o padɾˈɐ̃w̃ ojtosˈẽtus e dˈojs pˈõtu ˈõzi n");
+        assert_eq!(p("a 2.4 GHz", "pt-BR"), "a dˈojs pˈõtu kwˈatɾu ɡs");
+        assert_eq!(p("a 5.0 GHz", "pt"), "a sˈĩku pˈõtu zˈɛɾu ɡʃ");
+        assert_eq!(p("ver Figura 1.1.", "pt-BR"), "vˈeɾ fiɡˈuɾɐ ũ pˈõtu ũ .");
+        assert_eq!(p("2.05", "pt"), "dˈojʃ pˈõtu zˈɛɾu sˈĩku");
+        assert_eq!(p("1.0000", "pt"), "ũ pˈõtu zˈɛɾu zˈɛɾu zˈɛɾu zˈɛɾu");
+        assert_eq!(p("0.500", "pt"), "zˈɛɾu pˈõtu sˈĩku zˈɛɾu zˈɛɾu");
+        assert_eq!(p("17.000 ilhas", "pt-BR"), "dezesˈɛt͡ʃi mˈiw ˈiʎɐs");
+        assert_eq!(p("5.000.000 visitantes", "pt-BR"), "sˈĩku miʎˈõj̃s vizitˈɐ̃t͡ʃis");
+        assert_eq!(p("o 1.5º lugar", "pt"), "o ũ pˈõtu sˈĩku luɡˈaɾ");
+        assert_eq!(p("Mediu 1.5 °C", "pt-BR"), "med͡ʒˈiw ũ pˈõtu sˈĩku ɡɾˈaws sewsˈiws");
     }
 }
