@@ -44,6 +44,16 @@ fn below1000(n: f64) -> JsString {
     JsString::join(&parts, &js(" "))
 }
 
+/// `multiplier`: the words before `mil` or a scale noun, with the last word apocopated (veintiún mil).
+fn multiplier(words: JsString) -> JsString {
+    let cut = words.last_index_of(&js(" ")).map_or(0, |i| i + 1);
+    let last = words.slice(cut as isize, None).to_string_lossy();
+    match MANIFEST.numbers.apocope.get(&last) {
+        Some(short) => words.slice(0, Some(cut as isize)).concat(&js(short)),
+        None => words,
+    }
+}
+
 /// 1 ≤ n < 10⁶
 fn below1e6(n: f64) -> JsString {
     if n < 1000.0 {
@@ -52,7 +62,7 @@ fn below1e6(n: f64) -> JsString {
     let (th, r) = ((n / 1000.0).floor(), n % 1000.0);
     let mut thousand = js(&MANIFEST.numbers.thousand);
     if th != 1.0 {
-        thousand = below1000(th).concat(&js(" ")).concat(&thousand);
+        thousand = multiplier(below1000(th)).concat(&js(" ")).concat(&thousand);
     }
     if r != 0.0 {
         thousand.concat(&js(" ")).concat(&below1000(r))
@@ -100,7 +110,9 @@ pub(crate) fn number_to_words(n: f64, raw: Option<&JsString>) -> JsString {
         let head = if q == 1.0 {
             js(&sc.one)
         } else {
-            below1e6(q).concat(&js(" ")).concat(&js(&sc.many))
+            multiplier(below1e6(q))
+                .concat(&js(" "))
+                .concat(&js(&sc.many))
         };
         return if r != 0.0 {
             head.concat(&js(" ")).concat(&number_to_words(r, None))

@@ -60,9 +60,16 @@ public static class Normalize
 
     private static readonly JsRe FINAL_O = JsRegex.Compile("o$", "u");
 
-    /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera). */
+    /** The two ordinals with an apocopated form before a masculine noun (primero → primer, tercero → tercer),
+     *  which is what the `er` indicator writes. A compound ending in one apocopates too (vigésimo primer). */
+    private static readonly string[] APOCOPATING_ORDINALS =
+        [Manifest.MANIFEST.Ordinals.Units[1], Manifest.MANIFEST.Ordinals.Units[3]];
+
+    /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera).
+     *  ⚠ Each element is a WORD, not the pipeline string, so it takes `FINAL_O.Replace`: a `Rewrite` here
+     *  reported a provenance poison for every `1ª` under a trace (the TypeScript was already a plain replace). */
     private static string FeminineOrdinal(string masc) =>
-        string.Join(" ", masc.Split(' ').Select(w => Rewrite(w, FINAL_O, "a")));
+        string.Join(" ", masc.Split(' ').Select(w => FINAL_O.Replace(w, "a")));
 
     private static readonly JsRe FINAL_UNO = JsRegex.Compile($"{Manifest.MANIFEST.Numbers.Ones[1]}$", "u");
 
@@ -159,7 +166,13 @@ public static class Normalize
             var masc = double.IsInteger(n) && n >= 1 && n <= 1000 ? RomanOrdinals.SpanishOrdinal((int)n) : null;
             if (masc is null) return m.Value;
             if (HAS_FEM.IsMatch(m.Value)) return FeminineOrdinal(masc);
-            if (HAS_ER.IsMatch(m.Value)) return Rewrite(masc, FINAL_O, ""); // apocopated: primer, tercer
+            // ⚠ `er` IS THE APOCOPE OF primero AND tercero ONLY (primer, tercer, vigésimo primer, decimotercer).
+            //   No other ordinal has a short form, so `2er` and `5er` are not an indicator and stay as written;
+            //   they used to read *segund* and *quint*. ⚠ `masc` is a WORD, not the pipeline string, so its trim
+            //   is `FINAL_O.Replace`: a `Rewrite` here reported a false provenance poison.
+            if (HAS_ER.IsMatch(m.Value))
+                return APOCOPATING_ORDINALS.Any(o => masc.EndsWith(o, StringComparison.Ordinal))
+                    ? FINAL_O.Replace(masc, "") : m.Value;
             return masc;
         });
 

@@ -3,6 +3,7 @@
  * other word, so digits read like written Spanish. Covers 0 … <10¹².
  */
 
+import { own } from "../../core/own.ts";
 import { MANIFEST } from "./manifest.ts";
 
 // Number words are authored DATA — consolidated in spanish.jsonc; the long-scale compositor is the algorithm.
@@ -31,12 +32,20 @@ function below1000(n: number): string {
     return parts.join(" ");
 }
 
+/** A MULTIPLIER — the words before `mil` or a scale noun — with its last word apocopated: *uno* is an
+ *  adjective there, so 21000 is *veintiún mil* and 101000 *ciento un mil*, never *veintiuno mil*. */
+function multiplier(words: string): string {
+    const cut = words.lastIndexOf(" ") + 1;
+    const short = own(N.apocope, words.slice(cut));
+    return short === undefined ? words : words.slice(0, cut) + short;
+}
+
 /** 1 ≤ n < 10⁶ */
 function below1e6(n: number): string {
     if (n < 1000) return below1000(n);
     const th = Math.floor(n / 1000),
         r = n % 1000;
-    const thousand = th === 1 ? N.thousand : `${below1000(th)} ${N.thousand}`;
+    const thousand = th === 1 ? N.thousand : `${multiplier(below1000(th))} ${N.thousand}`;
     return r ? `${thousand} ${below1000(r)}` : thousand;
 }
 
@@ -50,7 +59,7 @@ export function numberToWords(n: number, raw?: string): string {
         if (n < sc.value) continue;
         const q = Math.floor(n / sc.value),
             r = n % sc.value;
-        const head = q === 1 ? sc.one : `${below1e6(q)} ${sc.many}`;
+        const head = q === 1 ? sc.one : `${multiplier(below1e6(q))} ${sc.many}`;
         return r ? `${head} ${numberToWords(r)}` : head;
     }
     return below1e6(n); // unreachable (n ≥ 1e6 matched a scale)

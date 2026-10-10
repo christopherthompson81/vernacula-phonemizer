@@ -338,6 +338,8 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const ns: number[] = [];
         for (let i = 0; i <= 20000; i++) ns.push(i);
         for (let e = 4; e <= 19; e++) { ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 1234567 * 10 ** (e - 4) + 42); }
+        // Every multiplier before mil and each scale noun (the apocope: 21000 = veintiún mil, #1463).
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 21, k * 1e6, k * 1e6 + 1, k * 1e9, (k + 1000) * 1e6, k * 1e12);
         ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 2 ** 53 + 2, 999999999999999, 1e21, 1.5, -1, NaN, Infinity);
         for (const n of ns) {
             emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));

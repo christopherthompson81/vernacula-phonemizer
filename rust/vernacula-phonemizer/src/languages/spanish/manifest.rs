@@ -40,6 +40,8 @@ pub struct Numbers {
     pub thousand: String,
     pub connector: String,
     pub decimal_connector: String,
+    /// A multiplier's last word → its form before `mil` and a scale noun (veintiuno → veintiún).
+    pub apocope: IndexMap<String, String>,
     pub scales: Vec<Scale>,
 }
 

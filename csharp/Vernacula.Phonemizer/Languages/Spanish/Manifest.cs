@@ -30,6 +30,8 @@ public sealed class SpanishNumbers
     public string Thousand { get; init; } = "";
     public string Connector { get; init; } = "";
     public string DecimalConnector { get; init; } = "";
+    /** A multiplier's last word → its form before `mil` and a scale noun (veintiuno → veintiún). */
+    public IReadOnlyDictionary<string, string> Apocope { get; init; } = new Dictionary<string, string>();
     public IReadOnlyList<SpanishScale> Scales { get; init; } = Array.Empty<SpanishScale>();
 }
 

@@ -33,6 +33,9 @@ Vive en la Av. Central, Sto. Domingo y Sta. Fe, aprox. a 3 km del dpto. 4.
 Es el 1º, la 1ª, el 1er, el 3er y el 1.º de la lista.
 La 21ª edición, el 100º aniversario, el 1000º y el 1001º.
 Hace 20 °C, 35° y 2º piso.
+El 2er, el 5er y el 11er declinan; el 13er, el 21er y el 1.er piso no.
+# the multiplier apocope: veintiún mil, ciento un mil, veintiún millones
+Hay 21.000 casos, 101 000 votos, 31000 firmas y 21000000 de habitantes.
 # 6) signs
 Un error de ±5, 5+3, +5, 5 + 3, -5 grados, (−3) y –4.
 La clave a-5 no lleva signo.

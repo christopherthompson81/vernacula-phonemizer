@@ -33,12 +33,20 @@ public static class Numbers
         return string.Join(" ", parts);
     }
 
+    /** A MULTIPLIER — the words before `mil` or a scale noun — with its last word apocopated: *uno* is an
+     *  adjective there, so 21000 is *veintiún mil* and 101000 *ciento un mil*, never *veintiuno mil*. */
+    private static string Multiplier(string words)
+    {
+        int cut = words.LastIndexOf(' ') + 1;
+        return N.Apocope.TryGetValue(words[cut..], out var shortForm) ? words[..cut] + shortForm : words;
+    }
+
     /** 1 ≤ n < 10⁶ */
     private static string Below1e6(double n)
     {
         if (n < 1000) return Below1000(n);
         double th = Math.Floor(n / 1000), r = n % 1000;
-        var thousand = th == 1 ? N.Thousand : $"{Below1000(th)} {N.Thousand}";
+        var thousand = th == 1 ? N.Thousand : $"{Multiplier(Below1000(th))} {N.Thousand}";
         return r != 0 ? $"{thousand} {Below1000(r)}" : thousand;
     }
 
@@ -54,7 +62,7 @@ public static class Numbers
         {
             if (n < sc.Value) continue;
             double q = Math.Floor(n / sc.Value), r = n % sc.Value;
-            var head = q == 1 ? sc.One : $"{Below1e6(q)} {sc.Many}";
+            var head = q == 1 ? sc.One : $"{Multiplier(Below1e6(q))} {sc.Many}";
             return r != 0 ? $"{head} {NumberToWords(r)}" : head;
         }
         return Below1e6(n); // unreachable (n ≥ 1e6 matched a scale)

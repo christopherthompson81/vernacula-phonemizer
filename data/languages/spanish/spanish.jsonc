@@ -153,6 +153,10 @@
         "thousand": "mil",
         "connector": "y", // tens + units (treinta y uno)
         "decimalConnector": "coma", // 3,14 → tres coma uno cuatro
+        // APOCOPE OF THE MULTIPLIER. A multiplier's last word takes this form before `mil` and before a scale
+        // noun (millones, billones): 21000 → veintiún mil, 101000 → ciento un mil, 21000000 → veintiún
+        // millones, never *veintiuno mil. Keyed by the written word in `ones`.
+        "apocope": { "uno": "un", "veintiuno": "veintiún" },
         // Long-scale groups above 10⁶ (checked high→low). Below 10⁶ is the mil/cien compositor.
         "scales": [
             { "value": 1000000000000, "one": "un billón", "many": "billones" },

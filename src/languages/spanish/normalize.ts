@@ -75,6 +75,10 @@ export function normalizeSpanishInitialisms(text: string): string {
     return INITIALISMS(() => false)(text);
 }
 
+/** The two ordinals with an apocopated form before a masculine noun (primero → primer, tercero → tercer),
+ *  which is what the `er` indicator writes. A compound ending in one apocopates too (vigésimo primer). */
+const APOCOPATING_ORDINALS = [MANIFEST.ordinals.units[1]!, MANIFEST.ordinals.units[3]!];
+
 /** Feminine ordinal: every element of a compound inflects (vigésimo primero → vigésima primera). */
 function feminineOrdinal(masc: string): string {
     return masc.split(" ").map((w) => w.replace(/o$/u, "a")).join(" ");
@@ -195,7 +199,12 @@ export function normalizeSpanish(input: string, { americas = false }: SpanishNor
         const masc = spanishOrdinal(n);
         if (masc === undefined) return whole;
         if (/ª/u.test(whole)) return feminineOrdinal(masc);
-        if (/er$/u.test(whole)) return rewrite(masc, /o$/u, ""); // apocopated: primer, tercer
+        // ⚠ `er` IS THE APOCOPE OF primero AND tercero ONLY (primer, tercer, vigésimo primer, decimotercer). No
+        //   other ordinal has a short form, so `2er` and `5er` are not an indicator and stay as written; they
+        //   used to read *segund* and *quint*. ⚠ `masc` is a WORD, not the pipeline string, so its trim is
+        //   a plain `replace`: a `rewrite` here reported a false provenance poison.
+        if (/er$/u.test(whole))
+            return APOCOPATING_ORDINALS.some((o) => masc.endsWith(o)) ? masc.replace(/o$/u, "") : whole;
         return masc;
     });
 

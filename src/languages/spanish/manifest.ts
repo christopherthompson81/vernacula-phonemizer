@@ -30,6 +30,8 @@ export interface SpanishManifest {
         thousand: string;
         connector: string;
         decimalConnector: string;
+        /** A multiplier's last word → its form before `mil` and a scale noun (veintiuno → veintiún). */
+        apocope: Record<string, string>;
         scales: { value: number; one: string; many: string }[];
     };
     months: string[];

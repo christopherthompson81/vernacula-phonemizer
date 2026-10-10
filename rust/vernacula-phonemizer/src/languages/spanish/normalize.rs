@@ -222,9 +222,16 @@ pub(crate) fn normalize_spanish(input: &JsString, americas: bool) -> JsString {
             return feminine_ordinal(&masc);
         }
         if js_re!("er$", "u").test(&whole) {
-            // ⚠ The TS passes this through the provenance SEAM although `masc` is not the pipeline string, so
-            // under a trace it reports a poison (the outer rewrite then restores the mapping). Reproduced.
-            return rewrite(&masc, js_re!("o$", "u"), &JsString::new());
+            // `er` is the apocope of primero and tercero only (and the compounds ending in them).
+            let units = &m.ordinals.units;
+            return if [&units[1], &units[3]]
+                .iter()
+                .any(|o| masc.ends_with(&js(o)))
+            {
+                js_re!("o$", "u").replace(&masc, &JsString::new())
+            } else {
+                whole
+            };
         }
         masc
     });

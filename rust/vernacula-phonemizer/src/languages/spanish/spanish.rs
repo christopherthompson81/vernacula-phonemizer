@@ -299,4 +299,49 @@ mod tests {
         assert_eq!(e.text(&js("la duda")).to_string_lossy(), "la ðˈuða");
         assert_eq!(e.text(&js("un dato")).to_string_lossy(), "un dˈato");
     }
+
+    /// The three defects of test/spanish-port-findings.test.ts (#1463), fixed TS-first.
+    #[test]
+    fn multiplier_apocopates_before_mil_and_a_scale_noun() {
+        let e = create_spanish(false).unwrap();
+        let w = |n: f64| e.number_to_words(n, None).to_string_lossy();
+        assert_eq!(w(21000.0), "veintiún mil");
+        assert_eq!(w(31000.0), "treinta y un mil");
+        assert_eq!(w(101000.0), "ciento un mil");
+        assert_eq!(w(21000000.0), "veintiún millones");
+        assert_eq!(w(1001000000.0), "mil un millones");
+        assert_eq!(w(21021.0), "veintiún mil veintiuno");
+        assert_eq!(w(21.0), "veintiuno");
+        assert_eq!(w(1000000.0), "un millón");
+        assert_eq!(
+            crate::phonemize("21.000 habitantes", "es").unwrap(),
+            "beᶦntjˈun mˈil aβitˈantes"
+        );
+    }
+
+    #[test]
+    fn er_indicator_is_the_apocope_of_primero_and_tercero_only() {
+        let e = create_spanish(false).unwrap();
+        let n = |s: &str| e.normalize(&js(s), false).to_string_lossy();
+        assert_eq!(n("el 1er lugar"), "el primer lugar");
+        assert_eq!(n("el 3er día"), "el tercer día");
+        assert_eq!(n("21er"), "vigésimo primer");
+        assert_eq!(n("13er"), "decimotercer");
+        assert_eq!(n("el 2er"), "el 2er");
+        assert_eq!(n("5er"), "5er");
+        assert_eq!(n("11er"), "11er");
+    }
+
+    #[test]
+    fn ordinal_trims_are_not_on_the_provenance_seam() {
+        use std::{cell::Cell, rc::Rc};
+        let hits = Rc::new(Cell::new(0));
+        let h = hits.clone();
+        crate::core::provenance::on_poison(Some(Box::new(move |_, _| h.set(h.get() + 1))));
+        for l in ["el 1er lugar", "el 3er día", "la 1ª vez"] {
+            crate::phonemize_trace(l, "es").unwrap();
+        }
+        crate::core::provenance::on_poison(None);
+        assert_eq!(hits.get(), 0);
+    }
 }
