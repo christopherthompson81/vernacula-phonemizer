@@ -338,3 +338,82 @@ cmn-trace-extras 14/0, phonemize-sync/best/trace 4184 / 5 (the port-pending el �
 0 warnings.
 
 **Implication.** Ready for review.
+
+## Run 11 — 2026-10-09 20:25 (review round: erhua, mirrored fraction guards, the reading audit, 〻, core fold)
+
+**Context.** Rebased onto `origin/main` b6629d83 (it, ja fixes), clean. Review items, TS first, then C# and Rust.
+
+**Question 1. Erhua, and what a stray non-syllable token should do to the pinyin path.**
+`npx tsx .probe/cmn/review-measure.mts`, `npx tsx .probe/cmn/pertoken.mts`.
+- Erhua: no `r` token anywhere in chars.tsv (0) or phrases.tsv (0), so it reaches the converter only as typed pinyin.
+  syllable-ipa.tsv has `er → ər`; the rhotic suffix is DERIVED as `er`'s reading after its nucleus (`r`), placed
+  between the host's segments and its tone, and an erhua token takes no slot in the tone sequence.
+  `yi1 dian3 r5` → `ji˥˥ tiɛnr˨˩˦` (was English + numerals), `dian3 r5 hao3` → `tiɛnr˧˥ xɑᵘ˨˩˦` (3-3 across the
+  suffix), bare `r` = `r5`, and `r5` alone → `ər` (the syllable er).
+- Pinyin-shaped texts (whole text matches the shape and has a 1–5 digit): **24 rows, 11 distinct, of 793,075 fleet
+  goldens + FLEURS texts, none of them pinyin**: Tagalog / Indonesian / Malay / Kabuverdianu / Shona / Somali / Swahili
+  prose with a token like `f1`, `tipu1`, `wechi4`. In cmn's own texts the only lowercase letters+tone-digit token is
+  `mm2` (×2, a unit). Read per token, those 11 texts would have had 0–11 words taken as Mandarin (sw_ke 11 of 33:
+  `ni na wa wa ya …`; kea_cv `si ta ma ka pa`). Probes: 11 pinyin-shaped, 7 accepted whole.
+- **Decision: all or nothing.** One token that is neither a table syllable nor erhua declines the WHOLE text to the
+  scanner (`ni3 hao3 xyz` → `nˈiː san˥˥ hˈaᶷ san˥˥ zˈaᶦz`). The corpus has no real pinyin to lose and plenty of
+  prose that per-token reading would turn into Mandarin syllables; with erhua accepted, the remaining false
+  negative is a misspelled syllable, which per-token reading would not read right either.
+- Dedupe: `isPinyinSyllable` is gone. One converter, `convert(tables, pinyin, strict)`: `makePinyinToIpa` drops an
+  unknown token, `makeStrictPinyinToIpa` returns `null` and the engine branches on it. One whitespace regex per
+  engine (C# `Mandarin.cs` lost its own `WHITESPACE`; Rust's `split_whitespace_runs` is private to pinyin_to_ipa.rs).
+
+**Question 2. Fraction neighbourhoods.** Same script.
+- cmn texts: ASCII `d/d,d` 0, `d,d/d` 0, `d/d.d` 0, `d.d/d` 0; plain `d/d` 4 (`1/5英寸`, 2 texts × 2 forms).
+- Fleet `d/d,d`: 3, and all three are THOUSANDS GROUPS, not lists: kaa golden `1/1,000,000,00…` ×2, st golden
+  `5,000/10,000`. So `,` is not simply a list separator next to a fraction.
+- **Decision: the two sides are exact mirrors.** Each refuses a digit or `/`; `.` with a digit beyond it (decimal);
+  `,` with exactly three digits beyond it, on the number side (thousands group). Any other `,` is a list separator:
+  `(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,4})\/(\d{1,4})(?![\d/]|\.\d|,\d{3}(?!\d))`.
+  `1/2,3/4` → `2分之1,4分之3` (read neither before); `3/4,5` → `4分之3,5`; `3,4/5` → `3,5分之4`; `好,1/2` → `好,2分之1`
+  (declined before); `1/2.5`, `1.5/2`, `1/1,000,000`, `5,000/10,000` declined; `1/2.` reads.
+
+**Question 3. Readings with no syllable (the drop hides them).** Same script.
+- chars.tsv: **5 distinct readings, 10 char-readings, 1 of them a first (reachable) reading**: `ê1 ê2 ê3 ê4` on 欸 / 誒
+  (3rd–8th readings; syllable-ipa.tsv has no `ê`) and `wong4` (𥦷's only reading, 𥥈's second; not a Mandarin
+  syllable). phrases.tsv: 0.
+- Not fixed: `ê` would need a hand-typed IPA row (no derivation), and `wong4` has no evident correct reading.
+  Pinned instead: `test/mandarin-port-findings.test.ts` asserts the unreadable set (chars + phrases, via the strict
+  converter) EQUALS an allowlist of those 5, so a new gap fails a test.
+
+**Items 5–7.** 〻 (U+303B) repeats like 々, as japanese/kanji.ts reads it. The iteration repeat is now a traced
+normalize-time rewrite (`(\p{Script=Han})[々〻]` → `$1$1`, as wu/normalize.ts:303) and the segment-time copy is gone
+(segment.ts is back to main's). The Han fold moved to core: `foldHanCompatibility` in core/unicode.ts (C#
+`Unicode.FoldHanCompatibility`, Rust `unicode::fold_han_compatibility`), a traced rewrite over
+`[⺀-⿟〸-〺豈-﫿\u{2F800}-\u{2FA1F}]` that keeps a fold only if it is one Han character.
+Measured over U+0000–U+3FFFF: 1,221 Han code points change under NFKC, all inside that class, all to one Han
+character (asserted in TS and C#). It runs before the iteration rewrite, so `⼀々` → 一一. It no longer checks
+chars.tsv first: the 2 NFKC-unstable chars.tsv keys read identically to their folds (Run 8), so this is the same
+output. Trace: `人々好` → normalized `人人好`, one token, 3 groups (TS and Rust tests).
+
+**Commands.** `npx vitest run test/mandarin-port-findings.test.ts` with the round's src reverted (`git diff -- src`,
+`git checkout -- src`, re-apply); `npx tsc --noEmit`; `npx tsx tools/extract_regexes.mts`; `npm run check:goldens`;
+`npx vitest run`; `dotnet test csharp`; C# regex-diff and `parity -- cmn cdo`; `.probe/cmn/dumps.sh` (all dumps
+regenerated from the fixed TS, probes extended with the new arms); `.probe/cmn/mutate2.py` for the bite check;
+Rust `parity`, `regex-diff`, `cargo test --workspace --release`, `cargo build --workspace` (debug and release).
+
+**Raw finding.**
+- New test with the round's src reverted: 8 of 15 fail (import failures included); all 15 pass with it.
+- regex corpus: re-extracted, 4 rows added / 1 dropped (FRACTION, the fold class, `^\p{Script=Han}$`, the iteration
+  rewrite); C# and Rust regex-diff `145372 identical, 0 DIFFER`.
+- `check:goldens`: `fresh: 189 languages, 36495 rows, 0 stale`: nothing in any golden moves this round.
+- TS `6411 passed, 5 skipped` (341 files). C# `7094 passed, 0 failed`. C# parity cmn, cdo 200/200.
+- Dumps: `cmn-normalize 12636/0`, `cmn-segment 16848/0`, `cmn-pinyin 54960/0`, `cmn-numbers 20608/0`,
+  `cmn-trace-extras 14/0`, `phonemize-sync`/`phonemize-best`/`trace` (golden + FLEURS + probes) `4200, 5 DIFFER`:
+  the same port-pending el ×2, th, ru, ko.
+- Bite check (fraction guard, iteration rewrite, core fold, erhua each reverted in Rust): `cmn-normalize 30 DIFFER`,
+  `cmn-pinyin 6`, `phonemize-sync/best/trace 25`; restored → the numbers above.
+- Rust parity all 10 languages 200/200; `cargo test` 75 + 1 passed; 0 warnings.
+
+**Implication.** Review items closed. The ê / wong4 gaps are listed and pinned, not fixed.
+
+**Re-gated after the rebase onto df516569 (pt fixes, #1486).** Extractor: no corpus diff. `check:goldens` fresh, 189.
+TS `6468 passed, 1 failed, 5 skipped`: the failure is `foreign-runs > th delegates …` timing out at 5 s under
+full-suite load, as in Run 8; the file alone passes (47/47). C# `7165 passed, 0 failed`; parity cmn, cdo, pt 200/200;
+regex-diff C# and Rust `145234 identical, 0 DIFFER`. Dumps unchanged from above (4200 / 5 port-pending). Rust parity
+all 10 languages 200/200; `cargo test` 81 + 1; 0 warnings.

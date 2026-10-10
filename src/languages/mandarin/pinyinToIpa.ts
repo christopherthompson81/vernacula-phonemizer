@@ -41,13 +41,6 @@ function parseSyllable(token: string): Syllable {
     };
 }
 
-/** Whether `token` is a pinyin syllable this table can read: letters plus an optional tone digit, whose
- *  toneless base (after the ü respellings) is a key of the syllable table. `mp3` has the shape and no syllable. */
-export function isPinyinSyllable(token: string, syllableIpa: ReadonlyMap<string, string>): boolean {
-    const m = SYLLABLE.exec(token);
-    return m !== null && syllableIpa.has(normalizeU(m[1]!.toLowerCase()));
-}
-
 /**
  * Third-tone sandhi over a syllable run: a 3rd tone immediately before another 3rd tone surfaces as 2nd
  * (你好 nǐ hǎo → ní hǎo). Applied left-to-right pairwise; the final 3rd tone in a run stays 3rd. Returns the
@@ -65,29 +58,60 @@ export function applyThirdToneSandhi(
     return out;
 }
 
-/** Build the pinyin→IPA converter from the data tables. */
-export function makePinyinToIpa(
-    tables: MandarinTables,
-): (pinyin: string) => string {
+const WHITESPACE = /\s+/;
+
+/**
+ * ERHUA: a bare `r` (`r5`, `r`) is not a syllable but the rhotic suffix of the one before it — `yi1 dian3 r5`
+ * is 一点儿, two syllables, the second rhotacized. It takes no slot in the tone sequence (so `dian3 r5 hao3`
+ * still sandhis dian3 before hao3), and attaches between its host's segments and tone: `tiɛnr˨˩˦`. The rhotic
+ * is DERIVED from the table, not typed: it is the syllable `er`'s own reading after its nucleus (`ər` → `r`),
+ * so a change to `er` moves it too. An `r` with no syllable before it is the syllable `er` itself.
+ */
+const ERHUA = "r";
+
+/**
+ * The converter. `strict`: an unknown token makes the whole conversion fail (`null`) — the direct pinyin path
+ * branches on that instead of checking first and converting second. Otherwise an unknown token is dropped.
+ */
+function convert(tables: MandarinTables, pinyin: string, strict: boolean): string | null {
     const { syllableIpa, tones, thirdToneSandhi } = tables;
-    return function pinyinToIpa(pinyin: string): string {
-        const tokens = pinyin.trim().split(/\s+/).filter(Boolean);
-        if (tokens.length === 0) return "";
-        const syls = tokens.map(parseSyllable);
-        const realized = applyThirdToneSandhi(
-            syls.map((s) => s.tone),
-            thirdToneSandhi,
-        );
-        const out: string[] = [];
-        for (let i = 0; i < syls.length; i++) {
-            const seg = syllableIpa.get(syls[i]!.base);
-            // ⚠ AN UNKNOWN TOKEN IS DROPPED, NOT PASSED THROUGH. Passed through, it put TEXT into the phoneme
-            // stream: a Han character with no reading (`𠮷野家` → `𠮷 jiɛ˨˩˦ t͡ɕiɑ˥˥`) or any unparseable token.
-            // It still holds its slot in the tone sequence above, so it separates its neighbours for sandhi
-            // exactly as the unread syllable does in speech.
-            if (seg === undefined) continue;
-            out.push(seg + (tones[String(realized[i]!)] ?? ""));
+    const tokens = pinyin.trim().split(WHITESPACE).filter(Boolean);
+    if (tokens.length === 0) return "";
+    const er = syllableIpa.get("er");
+    const rhotic = er === undefined ? undefined : [...er].slice(1).join("");
+    // Group each erhua token onto the token before it; the heads alone carry tones.
+    const heads: { syl: Syllable; suffix: string }[] = [];
+    for (const tok of tokens) {
+        const syl = parseSyllable(tok);
+        if (syl.base === ERHUA && rhotic !== undefined) {
+            const host = heads[heads.length - 1];
+            if (host !== undefined) host.suffix += rhotic;
+            else heads.push({ syl: { base: "er", tone: syl.tone }, suffix: "" });
+            continue;
         }
-        return out.join(" ");
-    };
+        if (strict && !syllableIpa.has(syl.base)) return null;
+        heads.push({ syl, suffix: "" });
+    }
+    const realized = applyThirdToneSandhi(heads.map((h) => h.syl.tone), thirdToneSandhi);
+    const out: string[] = [];
+    for (let i = 0; i < heads.length; i++) {
+        const seg = syllableIpa.get(heads[i]!.syl.base);
+        // ⚠ AN UNKNOWN TOKEN IS DROPPED, NOT PASSED THROUGH. Passed through, it put TEXT into the phoneme
+        // stream: a Han character with no reading (`𠮷野家` → `𠮷 jiɛ˨˩˦ t͡ɕiɑ˥˥`) or any unparseable token.
+        // It still holds its slot in the tone sequence above, so it separates its neighbours for sandhi
+        // exactly as the unread syllable does in speech (and an erhua suffix on it goes with it).
+        if (seg === undefined) continue;
+        out.push(seg + heads[i]!.suffix + (tones[String(realized[i]!)] ?? ""));
+    }
+    return out.join(" ");
+}
+
+/** Build the pinyin→IPA converter from the data tables. An unknown token is dropped. */
+export function makePinyinToIpa(tables: MandarinTables): (pinyin: string) => string {
+    return (pinyin) => convert(tables, pinyin, false)!;
+}
+
+/** The same converter, but `null` when any token is neither a syllable of the table nor erhua. */
+export function makeStrictPinyinToIpa(tables: MandarinTables): (pinyin: string) => string | null {
+    return (pinyin) => convert(tables, pinyin, true);
 }

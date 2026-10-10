@@ -16,21 +16,6 @@ export interface PinyinTables {
 }
 
 const HAN = /\p{Script=Han}/u;
-/** The ideographic iteration mark: it repeats the character before it (人々 = 人人). Script=Han, no reading. */
-const ITERATION = "々";
-
-/**
- * The character a code point is READ as. A Kangxi radical (U+2F00 ⼀) or a CJK compatibility ideograph
- * (U+F900 block, U+2F800 block) has no reading of its own, and NFKC folds it to the unified ideograph it
- * is a variant of (⼀ → 一) — 1,141 of the 1,219 Han code points that chars.tsv lacks and NFKC changes fold
- * to one it has. Only a Han code point is folded, never one that has its own entry, and never into anything but
- * a single Han character.
- */
-function readAs(ch: string, t: PinyinTables): string {
-    if (!HAN.test(ch) || t.chars.has(ch)) return ch;
-    const f = ch.normalize("NFKC");
-    return f !== ch && [...f].length === 1 && HAN.test(f) ? f : ch;
-}
 
 /** One segmented token: its `base+tone` pinyin, and (for single-char emissions) the source character so
  *  downstream sandhi can special-case 一/不/第. Phrase-dict tokens carry no `src` (their tones are baked). */
@@ -45,16 +30,10 @@ export interface Token {
  * 一/不 sandhi never fires on it. Quantity 一 (一千 → yì qiān) is NOT exempt and sandhis normally.
  */
 export function segment(
-    input: string[],
+    chars: string[],
     t: PinyinTables,
     exempt: boolean[] = [],
 ): Token[] {
-    // Fold first, so a phrase can match across a folded character; 々 takes its predecessor once that is folded.
-    const chars: string[] = [];
-    for (let k = 0; k < input.length; k++) {
-        const c = input[k]!;
-        chars.push(c === ITERATION && k > 0 && HAN.test(chars[k - 1]!) ? chars[k - 1]! : readAs(c, t));
-    }
     const out: Token[] = [];
     let i = 0;
     while (i < chars.length) {

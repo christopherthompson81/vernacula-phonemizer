@@ -32,7 +32,6 @@ public sealed class MandarinPhonemizer : ILanguage
     // phoneme stream verbatim. An all-caps run is a designation, not pinyin.
     private static readonly JsRe PINYIN_INPUT = JsRegex.Compile("^[a-zü:]+[1-5]?(?:\\s+[a-zü:]+[1-5]?)*$", "u");
     private static readonly JsRe TONE_DIGIT_ANY = JsRegex.Compile("[1-5]");
-    private static readonly JsRe WHITESPACE = JsRegex.Compile("\\s+", "u");
     private static readonly JsRe FOUR_DIGITS = JsRegex.Compile("^\\d{4}$");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe NUMBER_RE = JsRegex.Compile("[1-9]\\d{0,2}(?:,\\d{3})+|\\d+(?:\\.\\d+)?", "g");
@@ -52,14 +51,14 @@ public sealed class MandarinPhonemizer : ILanguage
     });
 
     private readonly Func<string, string> _pinyinToIpa;
-    private readonly IReadOnlyDictionary<string, string> _syllableIpa;
+    private readonly Func<string, string?> _strictPinyinToIpa;
     private readonly PinyinTables _pinyin;
     private readonly ForeignPhonemizer? _foreign;
 
     public MandarinPhonemizer(MandarinTables tables, PinyinTables pinyin, ForeignPhonemizer? foreign = null)
     {
         _pinyinToIpa = PinyinToIpa.MakePinyinToIpa(tables);
-        _syllableIpa = tables.SyllableIpa;
+        _strictPinyinToIpa = PinyinToIpa.MakeStrictPinyinToIpa(tables);
         _pinyin = pinyin;
         _foreign = foreign;
     }
@@ -163,10 +162,11 @@ public sealed class MandarinPhonemizer : ILanguage
         // Order: the Mandarin rewrite (fraction order) → the shared symbol tier → SpellInitialisms LAST,
         // because the tier reads a temperature's scale letter and spelling the ⟨C⟩ of `20°C` destroys it.
         input = Normalize.SpellInitialisms(SYMBOLS(Normalize.NormalizeMandarin(input)));
-        // Every token must be a syllable the table reads: the shape alone admitted `mp3`, `ipv4`, `a4 paper`.
+        // ALL OR NOTHING: every token must be a table syllable or erhua `r` (the shape alone admitted `mp3`,
+        // `a4 paper`); one stray token declines the whole text to the scanner below.
         if (!HAN.IsMatch(input) && TONE_DIGIT_ANY.IsMatch(input) && PINYIN_INPUT.IsMatch(input)
-            && WHITESPACE.Re.Split(input.Trim()).All(t => PinyinToIpa.IsPinyinSyllable(t, _syllableIpa)))
-            return _pinyinToIpa(input);
+            && _strictPinyinToIpa(input) is { } ipa)
+            return ipa;
 
         var (cp, exempt, pieces) = SubstituteNumbers(input);
         // A code-point run scanner (Han / Latin / other), deliberately not a single regex: it drives the

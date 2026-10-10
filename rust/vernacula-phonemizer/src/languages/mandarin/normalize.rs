@@ -8,6 +8,7 @@ use super::manifest::MANIFEST;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js};
 use crate::core::provenance::{rewrite, rewrite_with};
+use crate::core::unicode::fold_han_compatibility;
 use crate::js_re;
 
 const SIGN: &str = "[-−–]";
@@ -65,7 +66,10 @@ fn spell_letters(run: &JsString) -> JsString {
 pub fn normalize_mandarin(input: &JsString) -> JsString {
     let mut s = rewrite_with(
         input,
-        js_re!(r"(?<![\d.,/])(\d{1,4})\/(\d{1,4})(?![\d/]|[.,]\d)", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,4})\/(\d{1,4})(?![\d/]|\.\d|,\d{3}(?!\d))",
+            "gu"
+        ),
         |m, s| {
             let (num, den) = (m.group(1, s).unwrap(), m.group(2, s).unwrap());
             den.concat(&js("分之")).concat(&num)
@@ -82,11 +86,14 @@ pub fn normalize_mandarin(input: &JsString) -> JsString {
         &js(" and "),
     );
     s = rewrite(&s, js_re!(r"\s?[&＆]\s?", "gu"), &js("和"));
-    rewrite_with(&s, js_re!(r"(?<=\d)([²³])", "gu"), |m, s| {
+    s = rewrite_with(&s, js_re!(r"(?<=\d)([²³])", "gu"), |m, s| {
         let e = m.group(1, s).unwrap();
         let power = if e == "²" { "平方" } else { "立方" };
         js("的").concat(&js(power))
-    })
+    });
+    // Han compatibility forms → their unified ideograph, then 々 / 〻 repeat the Han character before them.
+    s = fold_han_compatibility(&s);
+    rewrite(&s, js_re!(r"(\p{Script=Han})[々〻]", "gu"), &js("$1$1"))
 }
 
 /// `spellInitialisms(input)`: a 2–3 capital run (not a Roman numeral) and a lone capital touching Han.

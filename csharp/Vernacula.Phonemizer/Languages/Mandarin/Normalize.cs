@@ -13,10 +13,11 @@ public static class Normalize
     /**
      * Western fraction notation → the Chinese order, still in digits: `a/b` → `b分之a`. `\b` is unusable in
      * these patterns — it is defined on ASCII word characters and finds no boundary against Han — so the
-     * boundaries are explicit lookarounds throughout this file. The right guard refuses a following decimal or
-     * grouped number as the left one does (`1/2.5` is not 2分之1.5), but not a sentence-final `.` or `,`.
+     * boundaries are explicit lookarounds throughout this file. The two sides are mirrors: each refuses a digit or
+     * `/`, a `.` with a digit beyond it (a decimal), and a `,` with exactly three digits beyond it (a thousands
+     * group). Any other `,` is a list separator (`1/2,3/4` reads both), and a sentence-final `1/2.` reads.
      */
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,/])(\\d{1,4})\\/(\\d{1,4})(?![\\d/]|[.,]\\d)", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,4})\\/(\\d{1,4})(?![\\d/]|\\.\\d|,\\d{3}(?!\\d))", "gu");
 
     /**
      * The two left guards differ ON PURPOSE, and must not be unified: the temperature rule can afford the
@@ -57,6 +58,8 @@ public static class Normalize
      * digit before the exponent, which keeps it off `km²`. The power is written 平方/立方 rather than as a
      * digit on purpose: a digit here would be claimed by the engine's own 两 rule (`5²` → 五的两次方).
      */
+    /** An iteration mark after a Han character: 々 (U+3005) and its vertical form 〻 (U+303B). */
+    private static readonly JsRe ITERATION = JsRegex.Compile("(\\p{Script=Han})[々〻]", "gu");
     private static readonly JsRe BARE_EXPONENT = JsRegex.Compile("(?<=\\d)([²³])", "gu");
     private static readonly IReadOnlyDictionary<string, string> POWER = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -80,6 +83,10 @@ public static class Normalize
         s = Rewrite(s, AMP_ELSEWHERE, "和");
         // After the signs, or one of them strands the exponent.
         s = Rewrite(s, BARE_EXPONENT, m => $"的{POWER[m.Groups[1].Value]}");
+        // Han compatibility forms → their unified ideograph (core fold), then the iteration marks 々 / 〻 repeat
+        // the Han character before them (人々 → 人人), after the fold so a folded radical is what is repeated.
+        s = Unicode.FoldHanCompatibility(s);
+        s = Rewrite(s, ITERATION, "$1$1");
         return s;
     }
 

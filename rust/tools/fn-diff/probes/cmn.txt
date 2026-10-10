@@ -13,6 +13,12 @@
 # both guards refuse a decimal or grouped number beside the slash; sentence punctuation after it still reads
 1/2.
 1/2, 好
+# a comma is a list separator unless three digits follow (a thousands group), on either side
+1/2,3/4
+好,1/2
+1/1,000,000
+5,000/10,000
+1,2345/2
 1/2.5
 1.5/2
 3/4,5
@@ -159,6 +165,14 @@ a4 paper
 a4
 ni3 hao
 我有mp3
+# erhua r attaches to the syllable before it; one stray token declines the whole text
+yi1 dian3 r5
+yi1 dian3 r
+dian3 r5 hao3
+r5
+r5 hao3
+ni3 hao3 xyz
+xyz9 r5
 # ── embedded Latin, accented Latin, decomposed accents
 我用 iPhone 拍照
 他去了 Haldarsvík
@@ -198,6 +212,10 @@ hello world
 々
 時々刻々
 々々
+人〻
+\u{2F00}々
+〸年
+人々々
 # ── edges: whitespace only (as an escape), fullwidth digit, Han numerals. Lone surrogates live in dump.mts's
 # `cmn-trace` extras: the public &str API cannot carry one, so a phonemize-sync row would measure the harness.
 \u{20}\u{3000}

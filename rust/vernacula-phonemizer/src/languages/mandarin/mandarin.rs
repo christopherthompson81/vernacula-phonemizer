@@ -9,7 +9,7 @@ use std::sync::OnceLock;
 use super::manifest::{DIR, MANIFEST, try_manifest};
 use super::normalize::{normalize_mandarin, spell_initialisms};
 use super::numbers::{digits_to_chinese, integer_to_chinese};
-use super::pinyin_to_ipa::{MandarinTables, PinyinToIpa, ThirdToneSandhi, split_whitespace_runs};
+use super::pinyin_to_ipa::{MandarinTables, PinyinToIpa, ThirdToneSandhi};
 use super::segment::{PinyinTables, is_han, segment};
 use super::yi_bu_sandhi::apply_yi_bu_sandhi;
 use crate::core::clauses::ClauseSink;
@@ -154,14 +154,13 @@ impl MandarinPhonemizer {
 
     pub fn text(&self, input: &JsString) -> JsString {
         let input = spell_initialisms(&self.symbols.apply(&normalize_mandarin(input)));
+        // All or nothing: one token that is neither a table syllable nor erhua declines the whole text.
         if !is_han(&input)
             && js_re!(r"[1-5]").test(&input)
             && js_re!(r"^[a-zü:]+[1-5]?(?:\s+[a-zü:]+[1-5]?)*$", "u").test(&input)
-            && split_whitespace_runs(&input.trim())
-                .iter()
-                .all(|t| self.pinyin_to_ipa.is_syllable(t))
+            && let Some(ipa) = self.pinyin_to_ipa.convert_strict(&input)
         {
-            return self.pinyin_to_ipa.convert(&input);
+            return ipa;
         }
         let (cp, exempt, pieces) = self.substitute_numbers(&input);
         let mut sink = ClauseSink::new();
@@ -389,14 +388,18 @@ mod tests {
     }
 
     #[test]
-    fn fraction_guards_agree_on_both_sides() {
+    fn fraction_guards_are_mirrors() {
         use super::super::normalize::normalize_mandarin;
         use crate::core::js_string::js;
         for (i, o) in [
             ("1/2.5", "1/2.5"),
-            ("3/4,5", "3/4,5"),
             ("1.5/2", "1.5/2"),
-            ("3,4/5", "3,4/5"),
+            ("1/1,000,000", "1/1,000,000"),
+            ("5,000/10,000", "5,000/10,000"),
+            ("1/2,3/4", "2分之1,4分之3"),
+            ("3/4,5", "4分之3,5"),
+            ("3,4/5", "3,5分之4"),
+            ("好,1/2", "好,2分之1"),
             ("1/2", "2分之1"),
             ("1/2.", "2分之1."),
             ("1/2, 好", "2分之1, 好"),
@@ -407,13 +410,36 @@ mod tests {
     }
 
     #[test]
+    fn iteration_marks_and_compatibility_forms_fold_at_normalize_time() {
+        use super::super::normalize::normalize_mandarin;
+        use crate::core::js_string::js;
+        assert_eq!(normalize_mandarin(&js("人々")), "人人");
+        assert_eq!(normalize_mandarin(&js("⼀〻")), "一一");
+        assert_eq!(cmn("人〻"), cmn("人人"));
+        let r = crate::phonemize_trace("人々好", "cmn").unwrap();
+        assert_eq!(r.trace.tokens.len(), 1);
+        let ipa: Vec<u16> = r.ipa.encode_utf16().collect();
+        let (a, b) = r.trace.tokens[0].ipa_span.expect("ipa span");
+        assert_eq!(
+            String::from_utf16(&ipa[a..b]).unwrap().split(' ').count(),
+            3
+        );
+    }
+
+    #[test]
     fn the_direct_pinyin_path_takes_only_real_syllables() {
         assert_eq!(cmn("mp3"), "ˌɛmpˈiː san˥˥");
         assert_eq!(cmn("web3"), "wˈɛb san˥˥");
         assert_eq!(cmn("a4 paper"), "ˈə sɹ̩˥˩ pʰˈeᶦpɚ");
+        assert_eq!(cmn("ni3 hao3 xyz"), "nˈiː san˥˥ hˈaᶷ san˥˥ zˈaᶦz");
+        assert_eq!(cmn("yi1 dian3 r5"), "ji˥˥ tiɛnr˨˩˦");
+        assert_eq!(cmn("yi1 dian3 r"), "ji˥˥ tiɛnr˨˩˦");
+        assert_eq!(cmn("dian3 r5 hao3"), "tiɛnr˧˥ xɑᵘ˨˩˦");
+        assert_eq!(cmn("r5"), "ər");
         assert_eq!(cmn("ni3 hao3"), "ni˧˥ xɑᵘ˨˩˦");
         assert_eq!(cmn("ni3 hao"), "ni˨˩˦ xɑᵘ");
         assert_eq!(cmn("lv4"), "ly˥˩");
+        assert_eq!(cmn("er2"), "ər˧˥");
         assert_eq!(cmn("a4"), "ɑ˥˩");
     }
 }

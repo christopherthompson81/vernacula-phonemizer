@@ -547,4 +547,21 @@ public static class Unicode
         if (!FULLWIDTH.IsMatch(s)) return s;
         return Rewrite(s, FULLWIDTH, m => ((char)(m.Value[0] - 0xFEE0)).ToString());
     }
+
+    /**
+     * Han compatibility forms → the unified ideograph they stand for (Kangxi radicals ⼀ → 一, radical-supplement
+     * forms, Hangzhou numerals 〸 → 十, CJK compatibility ideographs): the 1,221 Han code points NFKC changes,
+     * each to a single Han character. Only these blocks, and only where the fold is one Han character. Traced.
+     */
+    private static readonly JsRe HAN_COMPAT = JsRegex.Compile(@"[\u2E80-\u2FDF\u3038-\u303A\uF900-\uFAFF\u{2F800}-\u{2FA1F}]", "gu");
+    private static readonly JsRe HAN_ONE = JsRegex.Compile("^\\p{Script=Han}$", "u");
+    public static string FoldHanCompatibility(string s)
+    {
+        if (!HAN_COMPAT.IsMatch(s)) return s;
+        return Rewrite(s, HAN_COMPAT, m =>
+        {
+            var f = Js.Normalize(m.Value, NormalizationForm.FormKC);
+            return HAN_ONE.IsMatch(f) ? f : m.Value;
+        });
+    }
 }

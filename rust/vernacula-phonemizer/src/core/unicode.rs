@@ -466,6 +466,27 @@ pub fn fold_fullwidth_latin(s: &JsString) -> JsString {
     rewrite_with(s, re, |m, s| JsString(vec![m.value(s).0[0] - 0xFEE0]))
 }
 
+/// `foldHanCompatibility(s)`: a Han compatibility form (Kangxi radical, radical-supplement form, Hangzhou
+/// numeral, CJK compatibility ideograph) → its NFKC fold, where that is a single Han character. Traced.
+pub fn fold_han_compatibility(s: &JsString) -> JsString {
+    let re = js_re!(
+        r"[\u2E80-\u2FDF\u3038-\u303A\uF900-\uFAFF\u{2F800}-\u{2FA1F}]",
+        "gu"
+    );
+    if !re.test(s) {
+        return s.clone();
+    }
+    rewrite_with(s, re, |m, s| {
+        let c = m.value(s);
+        let f = normalize(&c, Form::Nfkc);
+        if js_re!(r"^\p{Script=Han}$", "u").test(&f) {
+            f
+        } else {
+            c
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
