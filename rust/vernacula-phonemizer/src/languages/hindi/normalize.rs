@@ -340,10 +340,16 @@ pub fn make_hindi_normalizer(numbers: &NumbersDef, own: OwnOrdinals) -> Result<T
             );
             s = rewrite(&s, js_re!(r"\s?&\s?", "gu"), &js(" और "));
 
-            // 8) Fractions.
+            // 8) Fractions. The two guards are mirrors (as ur and cmn, #1477/#1492): each side refuses a
+            //    digit or `/`, a `.` with a digit beyond it (a decimal), and a grouped number — a `,` before
+            //    exactly three digits, or (right side) the Indian lakh group `,dd,`. Any other `,` is a list
+            //    separator.
             s = rewrite_with(
                 &s,
-                js_re!(r"(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"),
+                js_re!(
+                    r"(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,(?:\d{3}(?!\d)|\d{2},\d))",
+                    "gu"
+                ),
                 |m, full| {
                     let num = js_number(&m.group(1, full).unwrap_or_default());
                     let den = js_number(&m.group(2, full).unwrap_or_default());

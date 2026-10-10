@@ -434,7 +434,12 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //     rather than replaced by a guess: an unsourced substitute is worse than an inherited word.
         //     It has to be restated here because supplying this normalizer stops Hindi's from running,
         //     and without the rule "1/5" would read as two unrelated numbers.
-        s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        // ⚠ THE TWO GUARDS ARE MIRRORS (as urdu/ and mandarin/normalize.ts, #1477/#1492). Each side refuses a
+        //     digit or `/`, a `.` with a digit beyond it (a decimal: `1/2.5`, `1.5/2`), and a grouped number — a `,`
+        //     before exactly three digits, or (right side) the Indian lakh group `,dd,` (`1/1,00,000`). Any other `,` is
+        //     a list separator: `1/2,3/4` reads both. The right side used to refuse only a digit or `/`, so `1/2.5`
+        //     read a half and a stranded `.5`, and the left refused every `,`.
+        s = rewrite(s, /(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,(?:\d{3}(?!\d)|\d{2},\d))/gu, (m0, a: string, b: string) => {
             const nw = cardinalText(Number(a)), dw = cardinalText(Number(b));
             return nw === "" || dw === "" ? m0 : `${nw} बटा ${dw}`;
         });

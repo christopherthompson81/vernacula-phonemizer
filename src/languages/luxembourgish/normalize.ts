@@ -151,7 +151,11 @@ const DEG_BARE = new RegExp(String.raw`(\d)${SP}?°${SP}?`, "gu");
 const MINUS = /(^|[\s(])[-−](\d)/gu;
 const PLUS_AFTER_WORD = new RegExp(String.raw`(\S)\+${SP}?(\d)`, "gu");
 const PLUS_INITIAL = new RegExp(String.raw`(^|\s)\+${SP}?(\d)`, "gu");
-const FRACTION = /(?<![\d.,:/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu;
+/** ⚠ THE TWO GUARDS ARE MIRRORS (as urdu/ and mandarin/normalize.ts, #1477/#1492). Each side refuses a digit or
+ *  `/`, and a `.`, `,` or `:` with a digit beyond it — `,` is this language's decimal separator, `.` the
+ *  anglicism decimal (thousands dots are already gone, step 2), `:` a clock. So `1/2,5`, `1,5/2`, `1/2.5` and
+ *  `1.5/2` are all declined. The right side used to refuse only a digit or `/`. */
+const FRACTION = /(?<![\d/]|\d[.,:])(\d{1,3})\/(\d{1,3})(?![\d/]|[.,:]\d)/gu;
 
 /** Digit run → the digits spoken one at a time, which is how a decimal fraction is read. */
 const perDigit = (frac: string): string => [...frac].join(" ");
@@ -247,6 +251,21 @@ export function normalizeLuxembourgish(input: string): string {
         return `${prev ?? ""}${psp ?? ""}${hour} Auer${mins}${tail}`;
     });
 
+    // 7b) FRACTIONS (`1/5` → *ee Fënneftel*). ⚠ Denominator 2 is the ADJECTIVE `hallef`, not a noun;
+    //     everything else composes as ordinal stem + `el` (see fractionNoun). The numerator 1 is
+    //     `een`, itself subject to the Eifeler Regel — the corpus writes `een Drëttel` (⟨d⟩ keeps the n)
+    //     and the rule therefore gives `ee Fënneftel` (⟨f⟩ does not).
+    //     ⚠ BEFORE THE DECIMALS (steps 8–9). They used to run first: `1.5/2` became `1 Komma 5/2` and the
+    //     fraction read *fënnef hallef* off the decimal's tail (`1/2.5` likewise read *hallef Komma fënnef*),
+    //     because the guard saw words, never the `.`. Ahead of them it sees the raw digits.
+    s = rewrite(s, FRACTION, (m0, a: string, b: string) => {
+        const num = Number(a), den = Number(b);
+        if (den === 2) return `${num === 1 ? oneBefore("hallef") : numberToWords(num)} hallef`;
+        const noun = fractionNoun(den);
+        if (noun === undefined) return m0;
+        return `${num === 1 ? oneBefore(noun) : numberToWords(num)} ${noun}`;
+    });
+
     // 8) DOT DECIMAL (`1.5 Fuerstonne`, an anglicism) — after the clock, which has first claim on
     //    `\d{1,2}.\d{2}`. The lookbehind keeps it off `802.11`, the lookahead off `1.1.` and off a
     //    version letter. THE FRACTION IS LIMITED TO ONE DIGIT on purpose: in this language a two-digit
@@ -307,18 +326,6 @@ export function normalizeLuxembourgish(input: string): string {
     s = rewrite(s, /(\d)[ \u00a0]*×[ \u00a0]*(?=\d)/gu, "$1 mol ");  // space, NBSP
     s = rewrite(s, /[ \u00a0]*÷[ \u00a0]*/gu, " dividéiert duerch ");  // space, NBSP
     s = rewrite(s, /[ \u00a0]*[&＆][ \u00a0]*/gu, " an ");  // space, NBSP
-
-    // 14) FRACTIONS (`1/5` → *ee Fënneftel*). ⚠ Denominator 2 is the ADJECTIVE `hallef`, not a noun;
-    //     everything else composes as ordinal stem + `el` (see fractionNoun). The numerator 1 is
-    //     `een`, itself subject to the Eifeler Regel — the corpus writes `een Drëttel` (⟨d⟩ keeps the n)
-    //     and the rule therefore gives `ee Fënneftel` (⟨f⟩ does not).
-    s = rewrite(s, FRACTION, (m0, a: string, b: string) => {
-        const num = Number(a), den = Number(b);
-        if (den === 2) return `${num === 1 ? oneBefore("hallef") : numberToWords(num)} hallef`;
-        const noun = fractionNoun(den);
-        if (noun === undefined) return m0;
-        return `${num === 1 ? oneBefore(noun) : numberToWords(num)} ${noun}`;
-    });
 
     return s;
 }

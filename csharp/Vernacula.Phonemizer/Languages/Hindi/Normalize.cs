@@ -72,7 +72,12 @@ public static class Normalize
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe AMP_LATIN = JsRegex.Compile("(?<=[A-Za-z])\\s?&\\s?(?=[A-Za-z])", "gu");
     private static readonly JsRe AMP = JsRegex.Compile("\\s?&\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    /**
+     * The two guards are mirrors (as Urdu's and Mandarin's, #1477/#1492): each side refuses a digit or `/`, a `.`
+     * with a digit beyond it (a decimal), and a grouped number — a `,` before exactly three digits, or (right side)
+     * the Indian lakh group `,dd,`. Any other `,` is a list separator (`1/2,3/4` reads both).
+     */
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,(?:\\d{3}(?!\\d)|\\d{2},\\d))", "gu");
 
     /** Build the Hindi normalizer. Takes the numbers definition so the ordinal rule can compose the cardinal
      *  words it attaches its suffix to — the same data the engine's own number path uses. */

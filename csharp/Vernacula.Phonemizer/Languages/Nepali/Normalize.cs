@@ -97,7 +97,12 @@ public static class Normalize
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(\\d)\\s?({UNIT_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe RATE = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({RATE_NUM})\\s*/\\s*({RATE_DEN})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(?<![\\d.,:])(\\d+(?:\\.\\d+)?)\\s?[-–—]\\s?(\\d+(?:\\.\\d+)?)(?![\\d.,:])(?!\\s*देखि(?![\\p{L}\\p{M}]))", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    /**
+     * The two guards are mirrors (as Urdu's and Mandarin's, #1477/#1492): each side refuses a digit or `/`, a `.`
+     * with a digit beyond it (a decimal), and a grouped number — a `,` before exactly three digits, or (right side)
+     * the Indian lakh group `,dd,`. Any other `,` is a list separator (`1/2,3/4` reads both).
+     */
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|\\d,(?=\\d{3}\\/))(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,(?:\\d{3}(?!\\d)|\\d{2},\\d))", "gu");
     private static readonly JsRe TILDE = JsRegex.Compile("~\\s?(?=\\d)", "gu");
     private static readonly JsRe DOUBLE_SPACE = JsRegex.Compile(" {2,}", "gu");
 

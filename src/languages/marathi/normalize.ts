@@ -302,7 +302,12 @@ export function makeMarathiNormalizer(def: MarathiWords): (text: string) => stri
         // 13) FRACTIONS. अर्धा / पाव / पाऊण are suppletive; anything else is the ordinary spoken
         //     division form "n भागिले m" (Marathi's equivalent of Hindi बटा, which the inherited pass
         //     would otherwise emit into Marathi output). Corpus: १/२, ३/४, 1/5 — all in measurements.
-        s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        // ⚠ THE TWO GUARDS ARE MIRRORS (as urdu/ and mandarin/normalize.ts, #1477/#1492). Each side refuses a
+        //     digit or `/`, a `.` with a digit beyond it (a decimal: `1/2.5`, `1.5/2`), and a grouped number — a `,`
+        //     before exactly three digits, or (right side) the Indian lakh group `,dd,` (`1/1,00,000`). Any other `,` is
+        //     a list separator: `1/2,3/4` reads both. The right side used to refuse only a digit or `/`, so `1/2.5`
+        //     read a half and a stranded `.5`, and the left refused every `,`.
+        s = rewrite(s, /(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,(?:\d{3}(?!\d)|\d{2},\d))/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num === 1 && den === 2) return FRAC.half;
             if (num === 1 && den === 4) return FRAC.quarter;

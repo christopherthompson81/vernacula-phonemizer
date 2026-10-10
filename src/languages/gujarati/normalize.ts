@@ -271,7 +271,12 @@ export function makeGujaratiNormalizer(numbers: NumbersDef): (text: string) => s
         //     it they would have become "બસો ત્રાણું ભાગ્યા ચાર". અડધો is corpus-attested; ભાગ્યા is the
         //     ordinary spoken division form (and replaces Hindi's inherited બટા-equivalent, which would
         //     have been emitted in Devanagari and so dropped outright).
-        s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+        // ⚠ THE TWO GUARDS ARE MIRRORS (as urdu/ and mandarin/normalize.ts, #1477/#1492). Each side refuses a
+        //     digit or `/`, a `.` with a digit beyond it (a decimal: `1/2.5`, `1.5/2`), and a grouped number — a `,`
+        //     before exactly three digits, or (right side) the Indian lakh group `,dd,` (`1/1,00,000`). Any other `,` is
+        //     a list separator: `1/2,3/4` reads both. The right side used to refuse only a digit or `/`, so `1/2.5`
+        //     read a half and a stranded `.5`, and the left refused every `,`.
+        s = rewrite(s, /(?<![\d/]|\d\.|\d,(?=\d{3}\/))(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,(?:\d{3}(?!\d)|\d{2},\d))/gu, (m0, a: string, b: string) => {
             const num = Number(a), den = Number(b);
             if (num >= den) return m0;
             if (num === 1 && den === 2) return "અડધો";
