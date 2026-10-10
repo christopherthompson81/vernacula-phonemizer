@@ -293,4 +293,80 @@ two new probe lines. 0 golden rows moved and 0 FLEURS rows moved. Neither corpus
 **Left open (same defect class, outside this batch).** A fraction numerator is a multiplier too: `21/5` reads
 *veintiuno quintos* where the norm is *veintiún quintos*. A bare cardinal before a noun (`21 años`) also reads
 *veintiuno*. Fixing that one needs a decision between the pronoun and adjective readings, which the number
-token cannot make alone.
+token cannot make alone. (The fraction case is fixed in Run 10.)
+
+## Run 10 — 2026-10-09 19:10 (review round, rebased onto main 944b4940)
+
+**Question.** The review found four more things. (1) The apocope misses a digit token followed by a WRITTEN
+scale noun (`21 millones`). (2) Fraction numerators also need the multiplier. (3) `apocope` restated `ones`, and
+nothing checked its keys. (4) A declined `2.er` kept its `.`, which became a phrase break. Do all four close in
+the three engines, and does any corpus row move?
+
+**Changes.**
+- Number token (spanish.ts / Spanish.cs / spanish.rs): `numberTokenWords(tok, after)` applies `multiplier` when
+  the rest of the pipeline string starts with `\s+` and then `mil`, a `many`, or the last word of a scale's `one`
+  (`millón`, `billón`), case-insensitive, with `(?![\p{L}\p{M}])` so `milímetros` and `miles` do not count. The
+  nouns are built from the manifest. A decimal token is left alone: `2,1 millones` keeps *dos coma uno*, since
+  its digits after the comma are read one by one.
+- Fractions: every numerator goes through `multiplier`. `fractions.numeratorOne` is retired, because
+  `apocope["1"]` is the same "un". The manifest-lifted test pinned `numeratorOne`, and it now pins `apocope["1"]`,
+  with the reason in the test, in TS and C#. Portuguese and Italian comments still mention Spanish's old key.
+  Those are comments in other languages' files, left alone.
+- `numbers.apocope` is keyed by number (`{"1": "un", "21": "veintiún"}`), so the full word lives only in
+  `ones`. The loader maps `ones[key]` to the short form and throws when a key is not all digits or is not a slot
+  (TS `Error`, C# `InvalidDataException`, Rust `try_manifest` → `Err`). Checked by breaking it: key "30" →
+  `spanish.jsonc numbers.apocope: key "30" is not a numbers.ones slot`.
+- `ordinals.apocopating: ["primero", "tercero"]` replaces the `units[1]`/`units[3]` test. Each entry must be a
+  `units` word, checked at load: with "terzero" →
+  `spanish.jsonc ordinals.apocopating: "terzero" is not an ordinals.units word`.
+- A declined `er` returns `String(n)`. The marker goes, the cardinal stands, and the same holds past 1000
+  (`1001er` → `1001`). º and ª past 1000 still keep the raw match. That is outside this finding.
+- Rust: the poison test clears the hook in a `Drop` guard. `SPACE`, the word-keyed `APOCOPE` map and
+  `APOCOPATING_ORDINALS` are `LazyLock` statics.
+- `csharp/regex-corpus.jsonl` re-extracted (`tools/extract_regexes.mts`; the TS key check added `^\d+$`).
+- probes/es.txt: three more synthetic lines (written scale nouns, the declines, fractions and `2.er`).
+
+**Readings (fixed engine, `.probe/es/fix/probe2.mts`).** `21 millones de personas` → *beᶦntjˈun miʎˈones*;
+`101 mil` → *θjˈento un mˈil*; `1 millón` → *un miʎˈon*; `21 billones` → *beᶦntjˈun biʎˈones*; `21/5` →
+*veintiún quintos*; `21/100` → *veintiún centésimos*; `el 2.er piso` → *el dˈos pˈiso* (was *el dˈos . ˈeɾ
+pˈiso*). Declines: `21 milímetros`, `21 años` and `2,1 millones` keep *uno*.
+
+**FLEURS.** Among the non-probe texts of the es haystack (golden + FLEURS es_419, 3,898 texts), 30 have a
+digit token followed by a written mil/millón/millones/billón/billones (40 occurrences). By last digit: 10 end
+in 0, 6 in 7, 4 in 2, 2 each in 3, 4 and 5, and 10 are decimals. NONE is an integer whose last group ends in
+1, so the rule is right but no corpus row exercises it. An old-vs-new `phonemize-sync` dump over the same inputs
+(`.probe/es/fix/moved.mts`): `{ probe: 3 }`. 0 FLEURS rows moved and 0 golden rows moved; the 3 moved rows are
+the new probe lines.
+
+**Tests, each proved by reverting its fix.** TS (7 in spanish-port-findings): reverting the number-token
+multiplier, the fraction multiplier and the `String(n)` decline fails 3. C# (6): the same reverts fail 3. Rust
+(5 Spanish tests in spanish.rs): the same reverts fail 3.
+
+**Gates on the rebased tree.**
+```
+check:goldens:   goldens fresh: 189 languages, 36495 rows, 0 stale
+TS:              typecheck clean; 340 files, 6388 passed, 5 skipped
+C#:              dotnet test 7043 passed, 0 failed; parity es es-419 400 ok, 0 differ; --poison 0 sites
+regex-diff:      C# 145198 identical, 0 DIFFER; Rust 145198 identical, 0 DIFFER
+es-normalize:    11838 identical, 0 DIFFER (golden 333, fleurs 11355, probe 150)
+es-g2p:          53724 identical, 0 DIFFER
+es-numbers:      54139 identical, 0 DIFFER
+phonemize-sync:  3945 identical, 1 DIFFER   (the el/ru port-pending probe line)
+phonemize-best:  3945 identical, 1 DIFFER   (the same line)
+Rust parity:     en en-GB ja it es pt pt-BR hi cmn fr: 200/200 each
+cargo test --workspace: 71 + 1 passed; debug and release builds 0 warnings; cargo fmt --check clean
+```
+Against the PRE-review Rust, the same dumps give `phonemize-sync: 4 DIFFER` and `es-normalize: 6 DIFFER`.
+
+Dead end: the first TS full run on the rebased tree failed 6 subprocess tests (check-goldens --jobs refusals,
+build-en-gb-sets) because they time out after about 5 s. They ran alongside `dotnet test` and the dumps; alone
+they pass (11/11), and the solo full run is green. During that run I also briefly swapped the spanish.jsonc
+and Rust files for the sensitivity check, so I re-ran both full suites alone afterwards. The numbers above come
+from those solo runs.
+
+**Rebased again onto main b6629d83 (#1482, ja), no conflicts, every gate re-run in sequence.** check:goldens:
+189 fresh, 0 stale. TS: typecheck clean; 341 files, 6403 passed, 5 skipped, with regex-corpus-fresh green.
+C#: 7068 passed; parity es es-419 400 ok; regex-diff 145198 identical, 0 DIFFER. Rust, over dumps regenerated
+on this tree: es-normalize 11838, es-g2p 53724 and es-numbers 54139 identical, 0 DIFFER; sync and best 3945
+identical, 1 DIFFER (the same port-pending line). Rust regex-diff 145198 identical; parity 200/200 for all 10
+languages; `cargo test --workspace` 75 + 1 passed; 0 warnings in debug and release; fmt clean.
