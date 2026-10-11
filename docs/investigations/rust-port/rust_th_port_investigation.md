@@ -138,3 +138,88 @@ Each one derived by running the TS engine (`normalizeThai` and `phonemize(…, "
   csharp/PORTING.md question 3.
 
 **Implication.** Reported in the PR, not fixed (the bidirectional rule: TS first, in its own change).
+
+## Run 6 — 2026-10-11 14:05 (#1512: baseline of the Run 5 findings, and the sourcing)
+
+**Question.** Do the Run 5 readings still reproduce on main, and is there evidence for the words a fix would
+emit (เอ็ด after a magnitude, บาท, the Fahrenheit word)?
+
+**Command.** `npx tsx .probe/th/fix1512.mts` (synthetic cases: `ยาว 3.5 กม.`, `2.5 กก.`, `123.45 น.`, `2024 น.`,
+the clock controls, 101/1001/111/201/100001/1000001, `ราคา ฿100`, `100฿`, `10°F`, `10 °F`, `๑๒`); a substring
+count over FLEURS th_th column 3 (1,906 unique); `npx tsx tools/normalization/attest.ts --lang th --words
+"บาท,องศาฟาเรนไฮต์,ฟาเรนไฮต์,หนึ่งร้อยเอ็ด,หนึ่งร้อยหนึ่ง,ร้อยเอ็ด,ร้อยหนึ่ง,หนึ่งพันเอ็ด,หนึ่งพันหนึ่ง"`.
+
+**Raw finding.**
+- All six reproduce: `ยาว 3.5 กม.` → `ยาว 3 จุด ห้า กม.` → `… kˈo˧m .`; `123.45 น.` → `123 นาฬิกา 45 นาที` (the
+  HH.MM arm matched `23.45`); `2024 น.` → `2024 นาฬิกา`; `101` → `nˈɯ˨˩ŋ rˈɔː˦˥j nˈɯ˨˩ŋ`; `ราคา ฿100` reads
+  as `ราคา 100`; `10°F` → `10 องศาF` → `… ˈɛf`. `๑๒` through `phonemize` reads as 12 (the registry fold).
+- FLEURS th_th: ร้อยเอ็ด / ร้อยหนึ่ง / พันเอ็ด / พันหนึ่ง / หมื่นเอ็ด / แสนเอ็ด / ล้านเอ็ด all ×0. `฿` ×0, `°F` ×0,
+  องศาฟาเรนไฮต์ ×1. บาท ×6, but every one is บทบาท (role) or บาทวิถี (footpath): no currency บาท at all.
+- th.wikipedia (substring, unspaced script; the examples are the evidence):
+  - `หนึ่งพันเอ็ด` 1 hit, and it is the reading itself: the 1000 article, "…อยู่ก่อนหน้า 1001 (หนึ่งพันเอ็ด)".
+    `หนึ่งพันหนึ่ง`, `หนึ่งร้อยหนึ่ง`, `ร้อยหนึ่ง` all 0.
+  - `ร้อยเอ็ด` 245, mostly the province, but also "เมืองร้อยเอ็ดประตู" (city of 101 gates), the number in use.
+  - `บาท` 254: "ในระบบเงินตรา บาท เป็นสกุลเงินตราของประเทศไทย", after a numeral ("4 บาท", "10 บาท").
+  - `องศาฟาเรนไฮต์` 36: "องศาฟาเรนไฮต์เขียนย่อโดยใช้สัญลักษณ์ °F", the article naming the sign's word.
+- ⚠ attest.ts rewrote `tools/corpus/attest/th.jsonc` with different indentation and DROPPED its `context`
+  field ("4 earlier finding(s) kept", but the header was reformatted). Reverted with `git checkout`; the
+  evidence is recorded here and in the code comments instead. Not fixed (a tool bug, not this issue's).
+
+**Implication.** Fix 1-5; decline 6 (the step is reachable from a direct `normalizeThai` call, which fn-diff's
+`th-normalize` makes, so it is kept and its comment now says so).
+
+## Run 7 — 2026-10-11 14:20 (#1512: the TS fixes, the golden, the tests)
+
+**Question.** Does each fix change only its own shape, and what does the golden do?
+
+**Command.** Edits: normalize.ts (clock arms gain `(?<![\d.])`; a step 6b runs the `unitOnly` ABBREV rules
+before the decimals, step 8 keeps the rest; `°F` → ` องศาฟาเรนไฮต์`), thai.ts (`if (r === 1 && n > 10)` →
+เอ็ด, outside the tens block), thai.jsonc (`"฿": ["บาท"]`). Then the probe again; `npm run check:goldens`;
+`npx tsx tools/gen_parity_goldens.mts th` with a before/after diff; `test/thai-port-findings.test.ts`, each fix
+reverted in turn (`revert_loop.sh`).
+
+**Raw finding.**
+- Probe diff: exactly the six shapes move. `ยาว 3.5 กม.` → `ยาว 3 จุด ห้า กิโลเมตร` (no pause); `2.5 กก.` →
+  `… กิโลกรัม`; `123.45 น.` → `123 จุด สี่ ห้า น.`; `2024 น.` → `2024 น.` (both read the number, then น plus a
+  pause: the text is ill-formed and no reading is right, but neither invents a time); 101/1001/201/100001/
+  1000001 end in `ʔˈe˨˩t`; `ราคา ฿100` and `100฿` end in `bˈaː˨˩t`; `10°F` → `… fˈaː˧reː˧nhˌa˧j`. The clock
+  controls (`09.30 น.`, `เวลา 9 น.`, `22.00-23.00 น.`), `111`, `21`, `11`, `ยาว 3 กม.`, `10°C` are unchanged.
+- ⚠ First cut of the clock guard was `(?<!\d)`. It refuses `23.45` inside `123.45 น.`, but then the hour-only
+  arm claims the decimal's `45` (`123.45 นาฬิกา`). Guard is `(?<![\d.])` on every arm.
+- check:goldens: `th 200 rows 3 stale`, 1 of 189 languages. Regenerated: 3 rows, one FLEURS sentence
+  appearing 3 times, with a decimal before กม.; `… t͡ɕˈu˨˩t pˈɛː˨˩t kˈo˧m . rˈɯː˩˩˦ …` → `… t͡ɕˈu˨˩t pˈɛː˨˩t
+  kˈi˨˩loː˧mˌeː˦˥t rˈɯː˩˩˦ …`. All fix 1 (the spurious clause pause is gone too). Run 5 counted 3 utterances.
+- Tests: 5 new, each fails with only its fix reverted (5/5) and passes restored.
+
+**Implication.** Mirror into C# and Rust; the Rust `rewrites_read_as_their_expansions` pins `101` as
+`หนึ่ง ร้อย หนึ่ง` and must change, with the reason.
+
+## Run 8 — 2026-10-11 15:30 (#1512: C# and Rust mirrors, revert proofs, gates)
+
+**Question.** Do the C# and Rust mirrors match the TS, does each new assertion see its fix, and is every
+gate clean?
+
+**Command.** Mirrors in `Languages/Thai/Normalize.cs` + `Thai.cs` and `thai/normalize.rs` + `thai.rs` (same
+three clock patterns, same 6b/8 split, same `°F` rule, same เอ็ด condition; `฿` is shared data). New
+`ThaiPortFindingsTests.cs` (5 facts); the Rust `rewrites_read_as_their_expansions` updated (`101` now pinned
+to `หนึ่ง ร้อย เอ็ด`, with the reason) and extended. Each fix reverted in turn in each engine
+(`revert_cs.sh`, `revert_rs.sh`). `npx tsx tools/extract_regexes.mts`. Five synthetic lines added to
+`probes/th.txt`. Then the full gates, and fn-diff `th-normalize`, `th-numbers` (replayed as phonemize-sync),
+`LANGS=th phonemize-sync`.
+
+**Raw finding.**
+- Revert proofs: C# 5/5 facts fail with their own fix reverted (one fact each); Rust: the combined test fails
+  on the matching assertion for all 5 (e.g. revert 5: `sˈi˨˩p ʔˈo˧ŋsaː˩˩˦ ˈɛf` vs `… fˈaː˧reː˧nhˌa˧j`).
+- regex-corpus.jsonl: 2388 distinct patterns, 4 insertions / 3 deletions (the three clock arms, the °F rule).
+- `npm run typecheck` clean. `npm test`: 6808 passed, 2 failed, 5 skipped; both failures were `Test timed out
+  in 5000ms` (arabic neural diacritizer, trace-token-source) while sibling cargo builds loaded the machine.
+  Re-run alone: 32/32 pass.
+- `npm run check:goldens`: fresh, 189 languages, 36495 rows, 0 stale.
+- C# full suite: 7484 passed, 0 failed. C# golden parity (`csharp/tools/parity`): 189 languages
+  byte-identical, 36495 rows.
+- Rust: `cargo fmt --check` clean; `cargo test` 186 + 1 passed; parity 51 languages, all identical except
+  the known mag 199/200 (Arabic run); `th: 200/200`. regex-diff: 144956 identical, 0 DIFFER, 0 refused.
+- fn-diff: `th-normalize 2550/0`; `th-numbers 3394/0`; `phonemize-sync 2549/1`, the one row being the
+  known Lao probe `ไทยລາວไทย` (lo not ported).
+
+**Implication.** Items 1-5 fixed in all three engines; item 6 declined (comment only). Done.

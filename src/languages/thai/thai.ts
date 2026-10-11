@@ -43,9 +43,13 @@ function numberToThaiWords(n: number, raw?: string): string[] {
         else if (t === 1) out.push("สิบ");
         else out.push(TH_UNITS[t]!, "สิบ");
         r %= 10;
-        if (r === 1) { out.push("เอ็ด"); r = 0; } // final 1 after a ten is เอ็ด
     }
-    if (r > 0) out.push(TH_UNITS[r]!);
+    // A final 1 in any compound ≥ 11 is เอ็ด, after a magnitude as well as after a ten: 101 หนึ่งร้อยเอ็ด,
+    // 1001 หนึ่งพันเอ็ด. th.wikipedia's 1000 article writes "1001 (หนึ่งพันเอ็ด)", and ร้อยเอ็ด is 101
+    // in "เมืองร้อยเอ็ดประตู" (the city of 101 gates). This used to fire only after a ten, so 101 read
+    // หนึ่งร้อยหนึ่ง while 111 read …สิบเอ็ด. A multiplier is its own call, so 1 ล้าน stays หนึ่ง ล้าน.
+    if (r === 1 && n > 10) out.push("เอ็ด");
+    else if (r > 0) out.push(TH_UNITS[r]!);
     return out;
 }
 

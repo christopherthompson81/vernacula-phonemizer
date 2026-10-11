@@ -329,7 +329,12 @@
         // numeral: กิโลเมตร ×25 "ห่างจากบัวโนสไอเรส 50 กิโลเมตร", เมตร ×46 "ยอดเขาวินสันสูง 4,892 เมตร",
         // เซนติเมตร ×1 "อยู่ห่างกันเพียง 69 เซนติเมตร". มิลลิเมตร and กิโลกรัม are ×0 and stay undeclared.
         "units": { "km": ["กิโลเมตร"], "m": ["เมตร"], "cm": ["เซนติเมตร"] },
-        "currency": { "$": ["ดอลลาร์"], "€": ["ยูโร"], "£": ["ปอนด์"], "¥": ["เยน"] },
+        // `฿` (U+0E3F) is inside the Thai block, so before it was declared the tokenizer took it as a Thai run
+        // with no consonant and DROPPED it: `ราคา ฿100` read exactly as `ราคา 100`. บาท is th.wikipedia's own
+        // word for the currency, "ในระบบเงินตรา บาท เป็นสกุลเงินตราของประเทศไทย", and it follows the numeral
+        // there ("4 บาท", "10 บาท"). th_th has no `฿` and no currency บาท (its 6 บาท substrings are บทบาท,
+        // role, and บาทวิถี, footpath), so the wiki is the whole of the evidence.
+        "currency": { "$": ["ดอลลาร์"], "€": ["ยูโร"], "£": ["ปอนด์"], "¥": ["เยน"], "฿": ["บาท"] },
         // `ตารางกิโลเมตร` ×5 and `ลูกบาศก์เมตร` ×1.
         // ⚠ Bare ตาราง substring-matches ×11 and its first instance is `ตารางธาตุ` — the periodic TABLE, which
         // is what ตาราง means on its own. In an unspaced script the bare count cannot be a token count at all
