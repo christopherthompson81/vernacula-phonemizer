@@ -301,7 +301,10 @@ export function normalizePolish(input: string): string {
     //    govern the genitive/locative plural (*w latach dwudziestych*) and `lata` the nominative plural
     //    (*na lata pięćdziesiąte*). Both are regular adjectival endings, so they are applied; every other
     //    context gets the masculine nominative, per the file header.
-    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(lat|lata|latach)(\s+)(\d+)\.(?=\s*[,\p{Ll}])/gu,
+    //    ⚠ THE HEAD MAY BE CAPITALISED (`Lata 90. były…` opens a sentence; #1522), and it is spelled `[Ll]`
+    //    rather than given the `i` flag: under `iu`, `\p{Ll}` in the lookahead would also match an UPPERCASE
+    //    letter, and that lookahead is the whole sentence-period discriminator.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])([Ll]at|[Ll]ata|[Ll]atach)(\s+)(\d+)\.(?=\s*[,\p{Ll}])/gu,
         (m0, head: string, sp: string, digits: string) => {
             const n = Number(digits);
             const masc = ordinal(n);
@@ -321,8 +324,10 @@ export function normalizePolish(input: string): string {
     //    sports scores ("wynosi 7:2", "wynosi zatem 3:2") — those were checked and are untouched.
     //    The governing preposition is looked up from the text BEFORE the match rather than with an
     //    optional lookbehind group: V8 lets `(?:(?<=…))?` match empty and never populates the capture.
+    //    ⚠ THE LEFT GUARD MIRRORS THE RIGHT (#1522): a digit or `:` before the hour refuses the match, or
+    //    `123:45` read the tail `23:45` (*1dwudziesta trzecia 45*) and `21:01:05` the inner `01:05`.
     const CLOCK_PREP = new RegExp(`(?:^|[\\s(])(${PREP_ALT})\\s+(?:godzin\\p{L}*\\s+)?$`, "iu");
-    s = rewrite(s, /([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu,
+    s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu,
         (m0, h: string, min: string, offset: number, whole: string) => {
             const masc = HOUR_ORD(Number(h));
             if (masc === undefined) return m0;
@@ -402,7 +407,11 @@ export function normalizePolish(input: string): string {
 
     // 11) FRACTIONS — feminine, agreeing with the elided *część*: 1/5 is "jedna piąta". Digits on both
     //     sides only, so the corpus's " / " in "lokalizacji i / lub płeć" is untouched.
-    s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
+    // ⚠ THE TWO GUARDS ARE MIRRORS (#1522; as ru/uk, #1495). Each side refuses a digit or `/`, and a `,` or `.`
+    //   only with a digit beyond it — `,` is this language's decimal. The old `(?![\d.,])` refused ANY following
+    //   `.` or `,`, so a fraction ending a sentence or a clause (`… i 1/2.`, `1/2, a`) stayed as digits. A `,`
+    //   between two fractions is a list separator, so `1/2,3/4` reads both.
+    s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))/gu, (m0, a: string, b: string) => {
         const den = ordinal(Number(b));
         if (den === undefined || Number(a) !== 1) return m0;
         return `jedna ${inflectOrdinal(den, "fem")}`;

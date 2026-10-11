@@ -59,7 +59,8 @@ function scan(word: string): Seg[] {
             i++;
             continue;
         }
-        // oral vowels; ⟨u⟩/⟨i⟩ after another vowel is a glide (au→aw, Europa→ɛwrɔpa)
+        // oral vowels; ⟨u⟩ after ⟨a⟩ is the [w] glide (au→aw). Only ⟨au⟩: eu/ou stay hiatus (Europa→ɛurɔpa, below),
+        // and ⟨i⟩ never reaches here (the ⟨i⟩ branch above makes it [j] before a vowel, else [i]: Kraina→kraina).
         if (VOWEL[ch]) {
             // au → aw (u-glide) in loanwords (auto→awtɔ, pauza→pawza); but the na-/za- PREFIX + u-root is hiatus
             // (nauka→na.u.ka, zaufanie→za.u.faɲɛ), so skip the glide there. eu/ou stay hiatus (loan-ambiguous).
@@ -89,8 +90,8 @@ function advanceSoft(w: string[], segs: Seg[], i: number): number {
     return i + 2;
 }
 
-/** Resolve ą/ę: oral + homorganic nasal before a stop/affricate; nasalized ɔ̃/ɛ̃ before a fricative or final ą; ę
- *  word-final denasalizes to ɛ. */
+/** Resolve ą/ę by the following segment (see nasalBefore): an oral vowel + a homorganic nasal stop, or + a [w̃]
+ *  glide, or a nasalized vowel before a sonorant. Word-final ą is [ɔw̃]; word-final ę denasalizes to [ɛ]. */
 function nasalRealization(segs: Seg[]): void {
     for (let i = 0; i < segs.length; i++) {
         const s = segs[i]!;
@@ -103,18 +104,24 @@ function nasalRealization(segs: Seg[]): void {
             continue;
         }
         const homorganic = nasalBefore(nx.ph);
-        if (homorganic === "w̃") s.ph = s.ph + "w̃"; // before a palatal fricative ɕ/ʑ → a nasal w-glide (gęś→ɡɛw̃ɕ)
+        if (homorganic === "w̃") s.ph = s.ph + "w̃"; // before f/v/ɕ/ʑ → a nasal w-glide (gęś→ɡɛw̃ɕ, trąf→trɔw̃f)
         else if (homorganic) segs.splice(i + 1, 0, { ph: homorganic, nucleus: false });
         else s.ph = s.ph + "̃"; // before a sonorant → nasalized vowel
     }
 }
 
-/** ą/ę → oral vowel + a homorganic nasal element before a following consonant (Polish transcribes the nasality as
- *  [m]/[n]/[ŋ] before an obstruent, a [w̃] glide before a palatal fricative ɕ/ʑ, and pure vowel-nasalization before
- *  a sonorant). Returns the nasal consonant, "w̃" for the glide, or null → nasalize the vowel. */
+/** ą/ę → oral vowel + a homorganic nasal element before a following consonant: [m]/[n]/[ɲ]/[ŋ] before a stop or
+ *  affricate, pure vowel-nasalization before a sonorant, and before a FRICATIVE a choice per place (#1522):
+ *    · labial f/v and palatal ɕ/ʑ → the [w̃] glide (trąf→trɔw̃f, gęś→ɡɛw̃ɕ). The labial was [m] until #1522;
+ *      wikipron (human) writes [w̃] there in all 13 rows and [m] in none, and the change scores +13 on it.
+ *    · velar x → [ŋ] (wąchać→vɔŋxat͡ɕ): wikipron 92 rows [ŋ], 0 rows [w̃]; [w̃] here measured −80.
+ *    · dental/retroflex s z ʂ ʐ → [n] (wąs→vɔns, mąż→mɔnʂ). ⚠ A CONVENTION, NOT A MEASUREMENT: wikipron gives
+ *      BOTH [n] and [w̃] as variants in ~1,500 rows, so the two score identically on it (and on epitran). [w̃] is
+ *      the normative careful reading; [n] is what this engine has always emitted, and is kept.
+ *  Returns the nasal consonant, "w̃" for the glide, or null → nasalize the vowel. */
 function nasalBefore(p: string): string | null {
-    if ("pbfv".includes(p)) return "m"; // labial
-    if (p === "ɕ" || p === "ʑ") return "w̃"; // palatal fricative → nasal glide
+    if (p === "p" || p === "b") return "m"; // labial stop
+    if (p === "f" || p === "v" || p === "ɕ" || p === "ʑ") return "w̃"; // labial / palatal fricative → nasal glide
     if (p === "t͡ɕ" || p === "d͡ʑ") return "ɲ"; // palatal affricate
     if (p === "k" || p === "ɡ" || p === "x") return "ŋ"; // velar
     if ("tdsz".includes(p) || p === "t͡s" || p === "d͡z" || p === "t͡ʂ" || p === "d͡ʐ" || p === "ʂ" || p === "ʐ")

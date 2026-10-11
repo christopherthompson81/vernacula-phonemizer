@@ -367,11 +367,12 @@ pub(crate) fn normalize_polish(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"(\d)\.(?=\d)", "gu"), &js("$1 kropka "));
 
     // 7) the `N.` ordinal: decades after lat/lata/latach inflect, any other lowercase follower reads the
-    //    masculine nominative.
+    //    masculine nominative. The head may be capitalised (`Lata 90.`; #1522): `[Ll]`, not the `i` flag, under
+    //    which `\p{Ll}` in the lookahead would match uppercase too.
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\p{L}\p{M}\d.,])(lat|lata|latach)(\s+)(\d+)\.(?=\s*[,\p{Ll}])",
+            r"(?<![\p{L}\p{M}\d.,])([Ll]at|[Ll]ata|[Ll]atach)(\s+)(\d+)\.(?=\s*[,\p{Ll}])",
             "gu"
         ),
         |m, t| {
@@ -398,9 +399,13 @@ pub(crate) fn normalize_polish(input: &JsString) -> JsString {
     );
 
     // 8) clock: the hour a feminine ordinal in the case of the preposition before the match; `:00` drops.
+    //    The left guard mirrors the right (#1522), or `123:45` read `23:45` out of its tail.
     s = rewrite_with(
         &s,
-        js_re!(r"([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)", "gu"),
+        js_re!(
+            r"(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)",
+            "gu"
+        ),
         |m, t| {
             let Some(masc) = hour_ord(js_number(&m.group(1, t).unwrap())) else {
                 return m.value(t);
@@ -466,10 +471,14 @@ pub(crate) fn normalize_polish(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"\s?>\s?", "gu"), &js(" większe niż "));
     s = rewrite(&s, js_re!(r"\s?÷\s?", "gu"), &js(" podzielić przez "));
 
-    // 11) fractions with numerator 1, feminine.
+    // 11) fractions with numerator 1, feminine. The guards are mirrors (#1522; as ru/uk, #1495): a `,` or `.`
+    //     is refused only with a digit beyond it, so `1/2.` and `1/2, a` read.
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))",
+            "gu"
+        ),
         |m, t| {
             let den = ordinal(js_number(&m.group(2, t).unwrap()));
             match den {
