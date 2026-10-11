@@ -1030,6 +1030,64 @@ fn main() {
                 }
             })
         }
+        "nl-normalize" => {
+            let nl = vernacula_phonemizer::languages::dutch::dutch::create_dutch().unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nl.normalize(&t),
+                    "initialisms" => nl.normalize_initialisms(&t),
+                    "symbols" => nl.symbols(&t),
+                    _ => JsString::from(nl.is_unreadable(&t).to_string().as_str()),
+                }
+            })
+        }
+        "nl-g2p" => {
+            let nl = vernacula_phonemizer::languages::dutch::dutch::create_dutch().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => nl.phonemize_word(&w),
+                    "segs" => {
+                        let segs: Vec<JsString> = nl
+                            .segments(&w)
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}/{}", s.s, s.vowel as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "lexical" => JsString::from(nl.is_lexical_word(&w).to_string().as_str()),
+                    _ => {
+                        let d = nl.decompose(&w);
+                        let kinds: Vec<&str> = d.kinds.iter().map(|k| k.as_str()).collect();
+                        JsString::join(&d.parts, &JsString::from("·")).concat(&JsString::from(
+                            format!("|{}|{}", kinds.join(","), d.stress_part).as_str(),
+                        ))
+                    }
+                }
+            })
+        }
+        "nl-numbers" => {
+            let nl = vernacula_phonemizer::languages::dutch::dutch::create_dutch().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                if input["op"].as_str().unwrap() == "ordinal" {
+                    return nl
+                        .ordinal_word(n)
+                        .unwrap_or_else(|| JsString::from("\u{0}none"));
+                }
+                let raw = if input["raw"].is_null() {
+                    None
+                } else {
+                    Some(units(&input["raw"]))
+                };
+                nl.number_to_words(n, raw.as_ref())
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

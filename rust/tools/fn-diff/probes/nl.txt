@@ -1,0 +1,97 @@
+# Dutch probes: synthetic text only (no corpus sentences). One line per arm of normalize.ts plus the neighbour
+# it must decline, g2p corners, and compounds for the morphology. `\n` and `\u{XXXX}` escapes are decoded.
+# 0) the dollar code
+Het kost US$ 14,7 miljoen en AUD$5 meer.
+Het kost US$\u{a0}14,7 miljoen.
+Een BUS$ 5 en een US$ zonder getal blijven staan.
+# 1) era markers and multi-dot abbreviations, mid-sentence and at the end
+Rond 500 v.Chr. was het hier leeg, en in 30 n. Chr. niet.
+De stad dateert uit 800 v.Chr.
+Fruit, o.a. appels, e.d. en peren e.a.
+Dat is d.w.z. alles, m.a.w. niets, i.p.v. iets, a.u.b. nu.
+Zeg het a. u. b. en d. w. z. zo.
+Een Xv.Chr. en een be.d. blijven staan.
+Het eindigt met e.a.
+# 2) dotted capital runs
+De V.S. en de V.N. stemden in, D. K. kwam ook.
+De V. S. met hem.
+Een zin die eindigt op VS.
+Een enkele A. blijft staan.
+# 3) single-dot abbreviations, continuing and at a phrase end
+Zie blz. 12 en nr. 5, bijv. hier.
+Dr. Jansen en prof. Smit en ir. De Vries en drs. Bakker en mr. Visser.
+Het gaat om 3 mln. euro en 2 mld. dollar.
+Appels, peren, etc.
+Appels, peren, enz., en meer.
+St. Maarten en ca. 40 man, bv. hier.
+Jansen jr. en Smit sr. kwamen.
+Het ſt. en Bijv. en BLZ. 4.
+# 4) ordinals with a letter suffix, and the declines
+De 18e eeuw, de 1e keer, de 15de dag, de 60ste keer, de 21ste en de 101e en de 112e.
+Op de 3den en de 4den en de 100ste en de 1000ste en de 9999ste.
+Een 0e keer en de 12345e en 1,5e en 2.3e blijven staan.
+De 20e en de 30ste en de 108e en de 119de.
+# 5) clock, colon and dot forms, with and without uur
+Om 12:00 uur en om 7:05 en om 23:59uur.
+Om 12.00 uur en 07.19 uur en 21.19 GMT.
+Tijden 4:41:30 en 802.11 en figuur 1.1 en 24:00 en 25.30 blijven.
+Om 9.5 en 10.000 en 1.234,5 hier.
+# 8) degrees
+Het is 30°C en 86 °F en 0° C.
+Op 35°W en 52°N en 4° O en 10°Z.
+Een hoek van 90° en 45 ° hier.
+Het is 20°c en 5°Cx.
+# 9) signs
+Het werd UTC+1 en +30°C en + 5.
+Het is ±3 graden.
+Als 2 = 2 en 1 < 2 en 3 > 2 en 6 ÷ 3.
+De score was 6-6 en 3 - 2.
+# 10) ampersand
+P&R en B&B en Q&A en Ä&Ö.
+Jan & Piet en jan&piet.
+AB&CD blijft.
+# 11) fractions
+Een 1/5 inch en 3/4 deel en 1/2 uur en 3/2 liter.
+Een 1/0 en 1/5/2020 en 1234/5 en 2/20 en 5/101.
+# numbers through the tokenizer: period grouping, comma decimal
+Het gaat om 400.000 mensen en 6,5 procent.
+Er zijn 1.000.000 en 12.345.678 en 3.000,50 euro.
+Er zijn 1000000000000 en 999999999999 en 21 en 22 en 23 en 33.
+Het kost € 5 en $ 10 en £ 3 en ¥ 7.
+Een snelheid van 80 km/u en 30 m/s en 100 km/h.
+Een oppervlak van 5 km² en 3 m³ en 2 x 3.
+Het is 25% en 3 keer zoveel.
+# initialisms
+De USA en de EU en de CEO van AOL en de BBP en de NOS en de KLM en de ANWB.
+De TV en de PC en de WC en de BTW.
+# g2p corners: vowels, diphthongs, digraphs, devoicing, the reductions
+Nieuw en leeuw en draai en mooi en moeite en vrouw en koud en deur en boek.
+Klein en huis en ijs en auto en thee en sjaal en meisje en school en schip en typisch.
+Twintig en gelukkig en big en mogelijk en lijk en lijkheid.
+Hond en dag en zeggen en bakken en geven en groot en magd en zorgt.
+Bloc en tic en cel en cent en citroen en circa.
+Enquête en crêpe en gêne en coûte en blessûre en Cañitas.
+Tweeën en ideeën en knieën en poëzie en naïef en Italië en geïnd.
+Quiz en xylofoon en taxi en rrr en Brandt en wordt en philosophie.
+Het 't 'n 'k 'm 's en zo'n en auto's en z’n.
+De je ze we me te ge het een.
+Ĳsland en ĳzer en İstanbul en Æsir en Øresund en Łódź en Œuvre.
+# morphology: compounds, linking elements, prefixes, suffixes
+Stadhuis en voetbalveld en voedingsstof en knooppunt en grasspriet.
+Kinderboek en schaapskooi en pannenkoek en zonnebloem en zielerust.
+Verkopen en geloven en beginnen en ontslag en herhalen en tevreden.
+Achterdeur en binnenplaats en buitenlucht en onderwijs en tegenstand en terugweg.
+Tussenstand en samenwerking en overheid en voorstelling en doorgang en meewerken.
+Aanbod en afslag en bijzaak en inval en omweg en opstand en nadeel en toegang en uitgang en wegwijzer.
+Schoonheid en universiteit en realisme en boerachtig en eetbaar en werkloos en zeldzaam.
+Vriendschap en leerling en lopende en woning en lopend en vriendelijk en logisch en kennis en rijkdom.
+Minister en hamster en spelling en drinken en schakelen en drukken en afsluiten en dringend.
+Ziekenhuisopname en verkeersveiligheid en arbeidsmarktbeleid en belastingdienst.
+Gemeenteraadsverkiezingen en kinderopvangtoeslag en waterstofauto en zonnepaneel.
+Ontwikkelingssamenwerking en onderzoeksresultaten en wetenschapsjournalist.
+Overgangsperiode en voorbereidingstijd en uitvoeringsbesluit en aanbestedingsprocedure.
+# a lone surrogate, astral letters and the foreign-script runs
+Een \u{d800} en ge\u{d800}ven en 𝔞ap en 𝐀&𝐁.
+Hij zei привет en 你好 en γεια.
+# reading-for-correctness findings (reproduced, not fixed): grouped decimal, ì ò ù, the orthographic prefix shift, fraction guards, section numbers
+Het kost 3.000,50 euro, però Niccolò lì, tennis en telling en hertog, 1/2,5 en 1,5/2, hoofdstuk 3.12.
