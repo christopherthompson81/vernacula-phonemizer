@@ -734,6 +734,60 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "pl-normalize" | "pl-g2p" | "pl-numbers" => {
+            let pl = vernacula_phonemizer::languages::polish::polish::create_polish().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => pl.normalize(&t()),
+                    "initialisms" => pl.normalize_initialisms(&t()),
+                    "symbols" => pl.symbols(&t()),
+                    "unreadable" => JsString::from(pl.is_unreadable(&t()).to_string().as_str()),
+                    "word" => pl.phonemize_word(&w()),
+                    "segs" => {
+                        let segs: Vec<JsString> = pl
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!(
+                                        "/{}/{}/{}",
+                                        s.nucleus as u8, s.nasal as u8, s.rz as u8
+                                    )
+                                    .as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "nat" => pl.nativise(&w()),
+                    "ordinal" => pl
+                        .ordinal(num())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "count" => JsString::from(
+                        vernacula_phonemizer::core::js_string::js_number_to_string(
+                            pl.count_form(num()),
+                        )
+                        .as_str(),
+                    ),
+                    "digits" => vernacula_phonemizer::languages::polish::numbers::read_digits(
+                        &units(&input["raw"]),
+                    ),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        pl.number_to_words(num(), raw.as_ref())
+                    }
+                }
+            })
+        }
+        "pl-roman" => {
+            let policy = vernacula_phonemizer::languages::polish::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "pt-normalize" => Box::new(|input| {
             use vernacula_phonemizer::languages::portuguese::normalize::*;
             let t = units(&input["text"]);

@@ -33,8 +33,9 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 15] = [
-    "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru", "de",
+pub const LANGUAGES: [&str; 16] = [
+    "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
+    "de", "pl",
 ];
 
 /// A language engine, as the registry holds it.
@@ -100,6 +101,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "de" => crate::languages::german::german::create_german()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "pl" => crate::languages::polish::polish::create_polish()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -113,6 +117,7 @@ fn roman_policy(lang: &str) -> RomanPolicy {
         "pt" => pt_roman_policy(),
         "pt-BR" => pt_br_roman_policy(),
         "ru" => crate::languages::russian::roman_ordinals::roman_policy(),
+        "pl" => crate::languages::polish::roman_ordinals::roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
             ..Default::default()

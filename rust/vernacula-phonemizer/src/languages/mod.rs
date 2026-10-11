@@ -8,6 +8,7 @@ pub mod italian;
 pub mod japanese;
 pub mod korean;
 pub mod mandarin;
+pub mod polish;
 pub mod portuguese;
 pub mod portuguese_br;
 pub mod russian;
