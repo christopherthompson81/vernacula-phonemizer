@@ -17,6 +17,7 @@ pub mod portuguese_br;
 pub mod russian;
 pub mod spanish;
 pub mod swedish;
+pub mod tagalog;
 pub mod thai;
 pub mod turkish;
 pub mod ukrainian;

@@ -1245,6 +1245,40 @@ fn main() {
             )
             .unwrap()
         }),
+        "tl-normalize" => {
+            let tl = vernacula_phonemizer::languages::tagalog::tagalog::create_tagalog().unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tl.normalize(&t),
+                    _ => tl.symbols(&t),
+                }
+            })
+        }
+        "tl-g2p" => {
+            let tl = vernacula_phonemizer::languages::tagalog::tagalog::create_tagalog().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => tl.phonemize_word(&w),
+                    "rules" => tl.phonemize_word_rules(&w),
+                    "noloan" => tl.phonemize_shipped_no_loan(&w),
+                    _ => tl.nativise(&w),
+                }
+            })
+        }
+        "tl-numbers" => {
+            let tl = vernacula_phonemizer::languages::tagalog::tagalog::create_tagalog().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "words" => JsString::from(
+                    tl.number_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                        .unwrap()
+                        .as_str(),
+                ),
+                _ => vernacula_phonemizer::registry::phonemize_in("tl", &units(&input["text"]))
+                    .unwrap(),
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

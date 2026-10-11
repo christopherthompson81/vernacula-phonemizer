@@ -34,9 +34,9 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 22] = [
+pub const LANGUAGES: [&str; 23] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv", "id", "ms",
+    "de", "pl", "tr", "nl", "uk", "sv", "id", "ms", "tl",
 ];
 
 /// A language engine, as the registry holds it.
@@ -127,6 +127,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
                 .map(|e| Arc::new(e) as Arc<dyn Engine>)
                 .map_err(PhonemizeError::Data)
         }
+        "tl" => crate::languages::tagalog::tagalog::create_tagalog()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -225,9 +228,10 @@ pub enum PhonemizeError {
     /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
     Neural(String),
-    /// The TS engine THROWS on this input, so the port returns an error rather than a reading. ⚠ NO ENGINE
-    /// PRODUCES IT TODAY: its one producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to
-    /// decline above 2^53 (#1463). Kept because callers match it, and for the next such TS throw.
+    /// The TS engine THROWS on this input, so the port returns an error rather than a reading. Its first
+    /// producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to decline above 2^53 (#1463).
+    /// Produced today by Tagalog: an `ika-` ordinal of 309+ digits is Infinity, on which the TS `numberWords`
+    /// recurses until its stack overflows.
     Input(String),
 }
 

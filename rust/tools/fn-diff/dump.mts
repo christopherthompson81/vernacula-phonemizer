@@ -30,6 +30,7 @@ const FLEURS_DIR: Record<string, string> = {
     sv: "sv_se",
     id: "id_id",
     ms: "ms_my",
+    tl: "fil_ph",
 };
 
 /**
@@ -1297,6 +1298,66 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e));
         ns.push("9007199254740991", "9007199254740992", "9007199254740993", "1.000", "12.345.678", "1,5", "0,25", "007", "1,", "1.000,5");
         for (const n of ns) emit({ text: units(n), lang: "id" }, phonemize(n, "id"));
+    },
+    // ── Tagalog (tl). Texts: the tl golden, FLEURS fil_ph (columns 3 and 4) and probes/tl.txt. ──
+    // tl-normalize: normalizeTagalog per text, then the symbol tier on its output, the TS tier rebuilt from
+    // tagalog.ts's own literal (evaluated from source).
+    async "tl-normalize"() {
+        const N = await import("../../../src/languages/tagalog/normalize.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const src = readFileSync(new URL("../../../src/languages/tagalog/tagalog.ts", import.meta.url), "utf8");
+        const start = src.indexOf("makeSymbolNormalizer({", src.indexOf("const SYMBOLS")) + "makeSymbolNormalizer(".length;
+        let depth = 0, end = start;
+        for (let i = start; i < src.length; i++) {
+            if (src[i] === "{") depth++;
+            else if (src[i] === "}" && --depth === 0) { end = i + 1; break; }
+        }
+        const symbols = makeSymbolNormalizer(new Function(`return (${src.slice(start, end)});`)());
+        for (const [t, from] of textsFor(["tl"], FLEURS_DIR.tl, ["tl.txt"])) {
+            const a = N.normalizeTagalog(t);
+            emit({ text: units(t), src: from, op: "normalize" }, a);
+            emit({ text: units(a), src: from, op: "symbols" }, symbols(a));
+        }
+    },
+    // The word level: phonemizeWord, phonemizeWordRules, phonemizeShippedNoLoan and nat over every key of the
+    // three lexicons, every letter run (with hyphens) of the texts (as written, lower, UPPER), every 1-3 letter
+    // string over the Tagalog letters and the two hyphens, and edge strings.
+    async "tl-g2p"() {
+        const T = await import("../../../src/languages/tagalog/tagalog.ts");
+        const at = new URL("../../../src/languages/tagalog/tagalog.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const f of ["stress-lexicon.tsv", "loanword-lexicon.tsv"]) for (const k of loadTsvMap(at, f).keys()) words.add(k);
+        for (const l of loadLines(at, "final-glottal.txt")) words.add(l);
+        for (const t of textsFor(["tl"], FLEURS_DIR.tl, ["tl.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "Ñora", "MGA", "Ng", "constructor", "__proto__", "toString", "pag-asa", "pag‑asa", "--", "a-", "-a", "maaari", "aaa"])
+            words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, T.phonemizeWordRules(w));
+            emit({ word: units(w), op: "noloan" }, T.phonemizeShippedNoLoan(w));
+            emit({ word: units(w), op: "nat" }, T.nat(w));
+        }
+    },
+    // numberWords (exported) over 0…20,000 and scaled samples past 2^53 (the float composes), then the number,
+    // clock and ika- ordinal paths end to end through phonemize(…, "tl").
+    async "tl-numbers"() {
+        const { numberWords } = await import("../../../src/languages/tagalog/tagalog.ts");
+        const { phonemize } = await import("../../../src/index.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e9 + 7);
+        for (let e = 4; e <= 25; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5e30, -1, -0);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberWords(n));
+        const texts: string[] = [];
+        for (let i = 0; i <= 1200; i++) texts.push(String(i), `ika-${i}`, `ika${i}`, `Ika-${i}`);
+        for (let h = 0; h < 24; h++) for (const mm of ["00", "05", "30", "59"]) texts.push(`${h}:${mm}`, `${h}:${mm}:07`, `${h}:${mm}:00`);
+        for (let e = 4; e <= 30; e++) texts.push("1" + "0".repeat(e), "9".repeat(e), `ika-${"9".repeat(e)}`);
+        texts.push("1,000", "1,000,000.25", "3.14", "0.5", "007", "ika-002", "ika-03", "9007199254740993", "12,345.6789");
+        for (const t of texts) emit({ text: units(t), op: "text" }, phonemize(t, "tl"));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
