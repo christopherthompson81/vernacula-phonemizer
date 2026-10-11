@@ -26,6 +26,7 @@ const FLEURS_DIR: Record<string, string> = {
     "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru", de: "de_de", pl: "pl_pl",
     tr: "tr_tr",
     nl: "nl_nl",
+    uk: "uk_ua",
 };
 
 /**
@@ -1065,6 +1066,72 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000000", "9007199254740993", "", "1a2", "𝟗9"])
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+    },
+    // ── Ukrainian (uk). Texts: the uk golden, FLEURS uk_ua (columns 3 and 4) and probes/uk.txt. ──
+    // normalize.ts's two passes per text, isUnreadableUkrainian over every letter run (as written and
+    // lowercased), and synthetic rows for the arms whose tables the texts reach only sparsely: numeral+suffix
+    // over every suffix the paradigm writes, the clock over every hour after each governing preposition, and
+    // fractions over small numerators and denominators.
+    async "uk-normalize"() {
+        const N = await import("../../../src/languages/ukrainian/normalize.ts");
+        const { MANIFEST: UK } = await import("../../../src/languages/ukrainian/manifest.ts");
+        const words = new Set<string>();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["uk"], FLEURS_DIR.uk, ["uk.txt"])) rows.set(t, src);
+        const suffixes = new Set<string>(["х", "их", "ти", "ми", "го", "му", "й", "е", "а", "у", "і", "ю", "я", "м", "от", "ох", "ої", "ою", "ій", "ім", "ьох", "Й", "ГО", "ть"]);
+        for (const e of UK.ordinals.endings) for (const end of [e.hard, e.soft]) for (let k = 1; k <= Math.min(3, end.length); k++) suffixes.add(end.slice(-k));
+        const ns = ["0", "1", "2", "3", "4", "5", "9", "10", "11", "12", "13", "19", "20", "21", "22", "23", "30", "33", "40", "54", "78", "90", "99", "100", "101", "111", "120", "200", "300", "400", "999", "1000", "1001", "1800", "1920", "1970", "2000", "2008", "3000", "9000", "10000", "10001", "21000", "999999", "1000000", "1000001", "12345678901234567890"];
+        for (const n of ns) for (const suf of suffixes) if (!rows.has(`${n}-${suf}`)) rows.set(`${n}-${suf}`, "synthetic");
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (let h = 0; h <= 24; h++) for (const mm of ["00", "05", "30", "59"]) {
+            add(`${h}:${mm}`);
+            for (const p of Object.keys(UK.clock.prepositionCase)) add(`${p} ${h}:${mm}`);
+        }
+        for (const p of ["Constructor", "constructor", "toString", "valueOf", "Між", "ЗІ"]) add(`${p} 10:30`);
+        for (let a = 0; a <= 23; a++) for (const b of [0, 1, 2, 3, 4, 5, 7, 10, 12, 20, 21, 100, 1000]) add(`${a}/${b}`);
+        for (const [t, src] of rows) {
+            const n = N.normalizeUkrainian(t);
+            emit({ text: units(t), op: "normalize", src }, n);
+            emit({ text: units(t), op: "initialisms", src }, N.normalizeUkrainianInitialisms(n));
+            for (const w of t.match(/\p{L}[\p{L}\p{M}]*/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), op: "unreadable" }, N.isUnreadableUkrainian(w) ? "1" : "0");
+    },
+    // phonemizeWord over every Cyrillic-block run of the texts (as written and lowercased), every 1-3 letter
+    // string of the alphabet plus the apostrophe and four non-Ukrainian Cyrillic letters, and every 4-letter
+    // string of the context letters (в й ь, the iotated and plain vowels, the coronals).
+    async "uk-g2p"() {
+        const U = await import("../../../src/languages/ukrainian/ukrainian.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("uk")) for (const w of t.match(/[Ѐ-ӿ'’ʼ]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        const abc = [..."абвгґдеєжзиіїйклмнопрстуфхцчшщьюя'ёыэъ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."вйьяюєїіоаитлнсц'"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "ВОДА", "Ї", "\ud800", "a\ud800б", "ллля", "нння", "ттьтя", "ссся", "ддз", "шшш", "щщ", "ццця", "лльлль"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, U.phonemizeWord(w));
+    },
+    // renderNumber(n, DEF.numbers, identity, eastSlavicNumberWords) over 0..20000, powers and multiples of
+    // ten, and the Roman ordinal over 0..120 and its non-integer corners.
+    async "uk-numbers"() {
+        const { renderNumber } = await import("../../../src/core/numbers.ts");
+        const { eastSlavicNumberWords } = await import("../../../src/languages/ukrainian/numbers.ts");
+        const { MANIFEST: UK } = await import("../../../src/languages/ukrainian/manifest.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/ukrainian/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 15; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 1234567 * 10 ** (e - 4) + 42);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 21, k * 1e6, k * 1e6 + 2001, k * 1e9 + 1002, k * 1e12 + 22000);
+        ns.push(Number.MAX_SAFE_INTEGER);
+        for (const n of ns) emit({ n: String(n), op: "words" }, renderNumber(n, UK.numbers, (w: string) => w, eastSlavicNumberWords));
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+    },
+    // normalizeRomans with Ukrainian's policy (registry.ts romanUk) over the Ukrainian texts.
+    async "uk-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/ukrainian/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["uk"], FLEURS_DIR.uk, ["uk.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
