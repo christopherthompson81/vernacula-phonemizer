@@ -696,6 +696,44 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "ru-normalize" | "ru-g2p" | "ru-numbers" => {
+            let ru = vernacula_phonemizer::languages::russian::russian::create_russian().unwrap();
+            let name = name.clone();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match (name.as_str(), input["op"].as_str().unwrap()) {
+                    (_, "normalize") => ru.normalize(&t()),
+                    (_, "initialisms") => ru.normalize_initialisms(&ru.normalize(&t())),
+                    (_, "unreadable") => {
+                        JsString::from(if ru.is_unreadable(&t()) { "1" } else { "0" })
+                    }
+                    (_, "word") => ru.phonemize_word(&units(&input["word"])),
+                    (_, "toipa") => {
+                        let ord = js_number(&JsString::from(input["ord"].as_str().unwrap()));
+                        let hard: Option<Vec<f64>> = input["hard"].as_array().map(|h| {
+                            h.iter()
+                                .map(|v| js_number(&JsString::from(v.as_str().unwrap())))
+                                .collect()
+                        });
+                        ru.to_ipa(&units(&input["word"]), ord, hard.as_deref())
+                    }
+                    (_, "ordinal") => ru
+                        .ordinal(num())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    (_, _) => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        ru.number_to_words(num(), raw.as_ref())
+                    }
+                }
+            })
+        }
+        "ru-roman" => {
+            let policy = vernacula_phonemizer::languages::russian::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "pt-normalize" => Box::new(|input| {
             use vernacula_phonemizer::languages::portuguese::normalize::*;
             let t = units(&input["text"]);
