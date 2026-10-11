@@ -213,3 +213,75 @@ regex-diff, `cargo fmt --check`, `cargo test --release`, `cargo run --release -p
 - Re-rebased onto main after the uk fix (#1545) landed (disjoint files) and re-ran: corpus re-extract no change;
   vitest 6849 passed / 5 skipped; check:goldens 0 stale; dotnet test 7539 passed; C# parity 189 / 0 differ; C# and
   Rust regex-diff 145096 / 0 DIFFER; cargo test 199 ok; Rust parity 50 languages identical, mag 199/200.
+
+## Run 9 — 2026-10-11 16:50 (#1551: ą/ę before s z ʂ ʐ → [w̃])
+
+**Question.** Run 6 kept [n] before the dental/retroflex fricatives as a convention, because the referees score
+[n] and [w̃] the same there. #1551 decides it the other way: standard orthoepy keeps an asynchronous nasal vowel
+before a fricative (język [ˈjɛw̃zɨk]). Sources:
+- https://en.wikipedia.org/wiki/%C4%98 (ę before a fricative is a nasal vowel / nasal glide, not vowel + [n]).
+- https://ruj.uj.edu.pl/entities/publication/de2d8727-f52e-42ad-8bda-351a21042c24 (a study of how students
+  pronounce it: ę before a hard fricative is nasal; before a soft fricative the nasality is optional).
+What does the change move, and does either referee notice?
+
+**Scope.** In `nasalBefore`, s z ʂ ʐ move from the [n] branch to the [w̃] branch. The soft fricatives ɕ/ʑ were
+already in the [w̃] branch (the same rule as f/v), so nothing changes for them. The study's "optional before a soft
+fricative" finding would argue for weakening that reading, not strengthening it, and #1551 does not ask for that, so
+it is left as is. Velar x stays [ŋ]. The affricates t͡s d͡z t͡ʂ d͡ʐ and the stops t d keep [n]: they are not
+fricatives. The `"tdsz".includes(p)` substring test became `"td".includes(p)`, keeping its substring form, in all
+three engines.
+
+**Command.** `npx tsx tools/referee-eval/eval.ts pl --jobs 12`, before and after (scratch copies of the output);
+`npx tsx tools/gen_parity_goldens.mts pl` and a script that checks each changed golden row; `npm run check:goldens`;
+probes through `phonemizeWord`; revert proofs in all three engines; fn-diff `pl-g2p` / `pl-normalize` with a new
+probe line of synthetic s/z/ʂ/ʐ words.
+
+**Raw finding.**
+- Referee eval, the same command as Run 6:
+  - before: wikipron (primary) folded backbone 127420/129736 (98.2%), symbol accuracy 99.7%; epitran
+    (secondary) 109343/129736 (84.3%), 98.1%.
+  - after: **byte-identical output**, 127420 / 109343, the residual classes unchanged too.
+  - Why it is flat (checked, not assumed; see "flat may mean blind"): wikipron gives both variants for these
+    words (`wąs`: `v ɔ n s` | `v ɔ w̃ s`; `język`: `j ɛ n z ɘ k` | `j ɛ w̃ z ɘ k` | `j ɛ̃ z ɨ k`; `mąż`, `wąski`,
+    `gęsty` the same), so either reading matches. Epitran writes a nasal vowel (`vɔ̃s`, `jɛ̃zɨk`), which folds to
+    an oral vowel, and that matches neither [n] nor [w], so both readings miss it equally. Run 6's result holds:
+    neither referee can decide between them.
+- Probes (fixed engine): wąs vˈɔw̃s, język jˈɛw̃zɨk, mąż mˈɔw̃ʂ, węże vˈɛw̃ʐɛ, mięso mjˈɛw̃sɔ, gęsty ɡˈɛw̃stɨ,
+  wąski vˈɔw̃ski, księżyc kɕˈɛw̃ʐɨt͡s; unchanged: wąchać vˈɔŋxat͡ɕ, ręce rˈɛnt͡sɛ, bęc bˈɛnt͡s, kąpać kˈɔmpat͡ɕ,
+  gęś ɡˈɛw̃ɕ, trąf trˈɔw̃f, są sˈɔw̃, się ɕˈɛ.
+- pl golden regenerated: **20 of 200 rows moved** (11 distinct texts; FLEURS repeats some sentences). Each moved
+  row differs only by [n] → [w̃] before s/z/ʂ/ʐ, and the script checked every word: języka jɛnzˈɨka→jɛw̃zˈɨka (×2),
+  często t͡ʂˈɛnstɔ→t͡ʂˈɛw̃stɔ (×4), wciąż ft͡ɕˈɔnʂ→ft͡ɕˈɔw̃ʂ (×2), związaną zvjɔnzˈanɔw̃→zvjɔw̃zˈanɔw̃ (×1),
+  powiązanych pɔvjɔnzˈanɨx→pɔvjɔw̃zˈanɨx (×2), związanych zvjɔnzˈanɨx→zvjɔw̃zˈanɨx (×2), ciężkiego
+  t͡ɕɛnʂkjˈɛɡɔ→t͡ɕɛw̃ʂkjˈɛɡɔ (×2), cząsteczek t͡ʂɔnstˈɛt͡ʂɛk→t͡ʂɔw̃stˈɛt͡ʂɛk (×2), książkach
+  kɕˈɔnʂkax→kɕˈɔw̃ʂkax (×2), zwyciężyła zvɨt͡ɕɛnʐˈɨwa→zvɨt͡ɕɛw̃ʐˈɨwa (×1). check:goldens: 189 languages, 0 stale.
+- Revert proofs: TS g2p.ts reverted fails test/polish-1551.test.ts 1/2 (the second test pins unchanged
+  behaviour); C# G2p.cs reverted fails Polish1551Tests 5/9 (the 4 that pass are the unchanged cases); Rust g2p.rs
+  reverted fails `issue_1551_…` (left `vˈɔns`).
+- The old `wąs → vˈɔns` assertions were updated (test/polish.test.ts) or removed (the #1522 tests in all three
+  engines), because they pinned the old convention.
+- fn-diff: pl-g2p 295714 identical / 0 DIFFER (probe 324, words 16445); pl-normalize 28322 / 0 DIFFER.
+
+**Implication.** This is a choice made on orthoepic grounds, and the referees do not register it, so no score can
+confirm or contradict it. The soft-fricative caveat in the study is left alone (see Scope). Next: rebase, then the
+gates.
+
+## Run 10 — 2026-10-11 17:15 (#1551: gates)
+
+**Command.** `git rebase origin/main` (already up to date at 9d80d2e7); `npx tsx tools/extract_regexes.mts`;
+`npm run typecheck`; `npm test`; `npm run check:goldens`; `dotnet test csharp/Vernacula.Phonemizer.Tests` (full);
+C# `parity` and `regex-diff`; `cargo fmt --check`, `cargo test --release`, `cargo run --release -p parity`, `-p regex-diff`.
+
+**Raw finding.** regex corpus re-extracts with no change (no TS regex was touched); typecheck clean; vitest 6884
+passed / 5 skipped (363 files); check:goldens 189 languages, 36495 rows, 0 stale; dotnet test 7609 passed / 0
+failed; C# parity 189 languages, 0 differ; C# regex-diff 145212 identical / 0 DIFFER; cargo fmt clean; cargo test
+203 + 1 ok; Rust parity: every language identical (pl 200/200) except the known mag 199/200 (Arabic); Rust
+regex-diff 145212 identical / 0 DIFFER.
+
+**Implication.** Done.
+- main moved while the gates ran (the ne fix #1552 landed; its files do not overlap these). Rebased onto 89054126 and
+  re-ran everything: corpus re-extract no change; typecheck clean; check:goldens 0 stale; dotnet test 7612 passed;
+  C# parity 189 / 0 differ; C# and Rust regex-diff 145212 / 0 DIFFER; cargo fmt clean; cargo test 203 + 1 ok; Rust
+  parity identical except mag 199/200. The first vitest run after the rebase failed 2 tests on a 5 s timeout
+  (`foreign-runs.test.ts`, neural English OOV reader) at a machine load of ~100. That file passed alone (47/47),
+  and the full rerun passed: 6884 passed / 5 skipped. The failures were load, not this change.

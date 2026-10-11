@@ -118,30 +118,32 @@ public static class G2p
                 continue;
             }
             var homorganic = NasalBefore(nx.Ph);
-            if (homorganic == "w̃") s.Ph += "w̃"; // before f/v/ɕ/ʑ → a nasal w-glide (gęś→ɡɛw̃ɕ, trąf→trɔw̃f)
+            if (homorganic == "w̃") s.Ph += "w̃"; // before a non-velar fricative → a nasal w-glide (gęś→ɡɛw̃ɕ, wąs→vɔw̃s)
             else if (homorganic is not null) segs.Insert(i + 1, new Seg { Ph = homorganic, Nucleus = false });
             else s.Ph += "̃"; // before a sonorant → nasalized vowel
         }
     }
 
     /** ą/ę → oral vowel + a homorganic nasal element before a following consonant: [m]/[n]/[ɲ]/[ŋ] before a stop
-     *  or affricate, pure vowel-nasalization before a sonorant, and before a FRICATIVE a choice per place (#1522):
-     *    · labial f/v and palatal ɕ/ʑ → the [w̃] glide (trąf→trɔw̃f, gęś→ɡɛw̃ɕ). The labial was [m] until #1522;
-     *      wikipron (human) writes [w̃] there in all 13 rows and [m] in none, and the change scores +13 on it.
+     *  or affricate, pure vowel-nasalization before a sonorant, and before a FRICATIVE a choice per place (#1522, #1551):
+     *    · labial f/v, dental/retroflex s z ʂ ʐ and palatal ɕ/ʑ → the [w̃] glide (trąf→trɔw̃f, wąs→vɔw̃s,
+     *      język→jɛw̃zɨk, gęś→ɡɛw̃ɕ). The labial was [m] until #1522: wikipron (human) writes [w̃] there in all 13 rows
+     *      and [m] in none (+13 on it). s z ʂ ʐ were [n] until #1551, and that one is a CHOICE, NOT A MEASUREMENT:
+     *      wikipron lists [n] and [w̃] side by side in ~1,500 rows, so the two score identically on it and on epitran.
+     *      [w̃] is standard orthoepy's asynchronous nasal vowel before a fricative; a study of student speech finds ę
+     *      before a hard fricative nasal, and before a soft one only optionally (sources in the pl investigation log).
      *    · velar x → [ŋ] (wąchać→vɔŋxat͡ɕ): wikipron 92 rows [ŋ], 0 rows [w̃]; [w̃] here measured −80.
-     *    · dental/retroflex s z ʂ ʐ → [n] (wąs→vɔns, mąż→mɔnʂ). ⚠ A CONVENTION, NOT A MEASUREMENT: wikipron gives
-     *      BOTH [n] and [w̃] as variants in ~1,500 rows, so the two score identically on it (and on epitran). [w̃] is
-     *      the normative careful reading; [n] is what this engine has always emitted, and is kept.
      *  Returns the nasal consonant, "w̃" for the glide, or null → nasalize the vowel. */
     private static string? NasalBefore(string p)
     {
         if (p == "p" || p == "b") return "m"; // labial stop
-        if (p == "f" || p == "v" || p == "ɕ" || p == "ʑ") return "w̃"; // labial / palatal fricative → nasal glide
+        if (p == "f" || p == "v" || p == "s" || p == "z" || p == "ʂ" || p == "ʐ" || p == "ɕ" || p == "ʑ")
+            return "w̃"; // a non-velar fricative → nasal glide
         if (p == "t͡ɕ" || p == "d͡ʑ") return "ɲ"; // palatal affricate
         if (p == "k" || p == "ɡ" || p == "x") return "ŋ"; // velar
-        if ((p.Length == 1 && "tdsz".Contains(p, StringComparison.Ordinal)) ||
-            p == "t͡s" || p == "d͡z" || p == "t͡ʂ" || p == "d͡ʐ" || p == "ʂ" || p == "ʐ")
-            return "n"; // dental / alveolar / retroflex obstruent
+        if ((p.Length == 1 && "td".Contains(p, StringComparison.Ordinal)) ||
+            p == "t͡s" || p == "d͡z" || p == "t͡ʂ" || p == "d͡ʐ")
+            return "n"; // dental / alveolar / retroflex stop or affricate
         return null; // sonorant (l, ł→w, r, j, nasals) → nasalized vowel
     }
 

@@ -220,7 +220,6 @@ mod tests {
         assert_eq!(w("trąf"), "trˈɔw̃f");
         assert_eq!(w("jąwszy"), "jˈɔw̃fʂɨ");
         assert_eq!(w("kąpać"), "kˈɔmpat͡ɕ");
-        assert_eq!(w("wąs"), "vˈɔns");
         assert_eq!(w("wąchać"), "vˈɔŋxat͡ɕ");
         // 5. a fraction before a clause stop; decimals and chains still decline
         assert_eq!(
@@ -228,6 +227,23 @@ mod tests {
             "Pół to jedna druga, a ćwierć jedna czwarta."
         );
         assert_eq!(n("3/1/2 i 1/2,5 oraz 1,5/2"), "3/1/2 i 1/2,5 oraz 1,5/2");
+    }
+
+    /// #1551: ą/ę before s z ʂ ʐ is the [w̃] glide (test/polish-1551.test.ts; derived from the TS engine).
+    #[test]
+    fn issue_1551_nasal_glide_before_dental_and_retroflex_fricatives() {
+        let e = create_polish().unwrap();
+        let w = |s: &str| e.phonemize_word(&js(s)).to_string_lossy();
+        assert_eq!(w("wąs"), "vˈɔw̃s");
+        assert_eq!(w("język"), "jˈɛw̃zɨk");
+        assert_eq!(w("mąż"), "mˈɔw̃ʂ");
+        assert_eq!(w("węże"), "vˈɛw̃ʐɛ");
+        assert_eq!(w("mięso"), "mjˈɛw̃sɔ");
+        // unchanged: the velar fricative, a dental affricate and stop, the soft fricative
+        assert_eq!(w("wąchać"), "vˈɔŋxat͡ɕ");
+        assert_eq!(w("ręce"), "rˈɛnt͡sɛ");
+        assert_eq!(w("kąt"), "kˈɔnt");
+        assert_eq!(w("gęś"), "ɡˈɛw̃ɕ");
     }
 
     #[test]
