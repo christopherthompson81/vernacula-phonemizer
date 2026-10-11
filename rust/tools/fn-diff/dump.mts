@@ -1394,6 +1394,53 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
             emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
+    // ── Hiligaynon (hil). Texts: the hil golden and probes/hil.txt (FLEURS has no hil). ──
+    // normalizeHiligaynon per text (the symbol tier is inside it); phonemizeWord and nat over every letter run of
+    // the texts (as written, lower, UPPER), every 1-3 letter string over the letters, apostrophes and hyphens,
+    // and edge strings; numberToWords over 0…20,000, scaled samples, the ≥10⁹ digit path and raw strings.
+    async "hil-normalize"() {
+        const N = await import("../../../src/languages/hiligaynon/normalize.ts");
+        for (const [t, src] of textsFor(["hil"], undefined, ["hil.txt"])) emit({ text: units(t), src }, N.normalizeHiligaynon(t));
+        // ⚠ NO FLEURS FOR hil, so the arms are also driven by generated shapes: every arm's template over a sweep
+        // of operands, each with the neighbours that must decline it (synthetic, never corpus text).
+        const gen: string[] = [];
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59", "60", "7"])
+            for (const pre of ["alas ", "las ", "Alas-", "ALAS ", "", "salas ", "alas  "]) gen.push(`${pre}${h}:${mm} sa aga`);
+        for (const a of ["1", "12", "1.5", "1,000", "2,5", "10.25", "0"]) for (const b of ["2", "20", "3.5", "2,000", "7.125"])
+            for (const sep of ["-", "–", " - ", "—", "--"]) for (const pre of ["", "halin sa ", "hasta ", "x", "ika-"]) gen.push(`${pre}${a}${sep}${b} ka adlaw`);
+        for (const n of ["1", "12", "123", "1234", "0"]) for (const f of ["5", "25", "125", "05"]) gen.push(`${n}.${f}`, `${n}.${f}.`, `${n},${f}`, `${n}.${f}x`);
+        for (const g of ["1,000", "12,345", "123,456,789", "1,23", "1,2345", "0,123", "1,000.5", "1,000,00"]) gen.push(`May ${g} ka tawo`);
+        for (const w of ["dr", "Dr", "DR", "fr", "mrs", "Mrs", "prof", "st", "dſ", "xdr", "dr1"]) gen.push(`Si ${w}. Cruz`, `${w}.`);
+        for (const n of ["1", "20", "100"]) for (const t of ["ng", "NG", "nga", "ngx"]) gen.push(`ika-${n}${t} adlaw`, `Ika-${n}${t}`);
+        for (const w of ["sg", "Sg", "SG", "sg.", "1sg", "sg1", "sg/", "-sg", "sgt"]) gen.push(`balay ${w} tawo`);
+        for (const t of gen) emit({ text: units(t), src: "generated" }, N.normalizeHiligaynon(t));
+    },
+    async "hil-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/hiligaynon/hiligaynon.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñ'ʼ-]", "iu"); // hiligaynon.ts's own (module-private) nativiser, same class and flags
+        const words = new Set<string>();
+        for (const t of textsFor(["hil"], undefined, ["hil.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'ʼ‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ'ʼ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "MGA", "constructor", "__proto__", "--", "a-", "-a", "daan", "kap-atan", "guitara", "queso", "gue", "qui", "ng", "gu", "Ñ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    async "hil-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/hiligaynon/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1.5, -1, -0, -12, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
     async "fr-normalize"() {

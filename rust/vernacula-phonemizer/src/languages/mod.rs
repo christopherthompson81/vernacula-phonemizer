@@ -5,6 +5,7 @@ pub mod english_gb;
 pub mod french;
 pub mod german;
 pub mod greek;
+pub mod hiligaynon;
 pub mod hindi;
 pub mod indonesian;
 pub mod italian;

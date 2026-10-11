@@ -1301,6 +1301,31 @@ fn main() {
                 ceb.number_to_words(n, raw.as_ref())
             })
         }
+        "hil-normalize" => {
+            let hil = vernacula_phonemizer::languages::hiligaynon::hiligaynon::create_hiligaynon()
+                .unwrap();
+            Box::new(move |input| hil.normalize(&units(&input["text"])))
+        }
+        "hil-g2p" => {
+            let hil = vernacula_phonemizer::languages::hiligaynon::hiligaynon::create_hiligaynon()
+                .unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => hil.phonemize_word(&w),
+                    _ => hil.nativise(&w),
+                }
+            })
+        }
+        "hil-numbers" => {
+            let hil = vernacula_phonemizer::languages::hiligaynon::hiligaynon::create_hiligaynon()
+                .unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                hil.number_to_words(n, raw.as_ref())
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
