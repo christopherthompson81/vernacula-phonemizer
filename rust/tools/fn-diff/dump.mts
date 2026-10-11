@@ -1630,6 +1630,85 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ word: units(w), op: "has" }, String(S.accentLexiconHas(w)));
         }
     },
+    // ── Slovenian (sl). Inputs: the sl golden, FLEURS sl_si (columns 3 and 4) and probes/sl.txt, plus synthetic
+    // rows for the arms the texts reach sparsely: `N.` before every licensor (and the bare-ordinal endings),
+    // the clock after every governing preposition, regnal titles, fractions, decades, scores and ranges, the
+    // gender repair before every counted noun's forms, and the dotted abbreviations before each follower.
+    async "sl-normalize"() {
+        const N = await import("../../../src/languages/slovenian/normalize.ts");
+        const { SYMBOLS, COUNTED } = await import("../../../src/languages/slovenian/slovenian.ts");
+        const src = readFileSync(new URL("../../../src/languages/slovenian/normalize.ts", import.meta.url), "utf8");
+        const block = src.slice(src.indexOf("const LICENSOR: Readonly"), src.indexOf("const LICENSOR_ALT"));
+        const licensors = [...block.matchAll(/^\s+([\p{L}]+): "/gmu)].map((m) => m[1]!);
+        const rows = new Map<string, string>();
+        for (const [t, s] of textsFor(["sl"], FLEURS_DIR.sl, ["sl.txt"])) rows.set(t, s);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const ns = ["0", "1", "2", "3", "4", "5", "11", "20", "21", "99", "100", "101", "120", "999", "1000", "1001", "1991", "2000", "2016", "21000", "999999", "1000000"];
+        for (const n of ns) {
+            for (const w of licensors) add(`V ${n}. ${w} je.`);
+            for (const w of ["prvega", "letih", "naprej", "constructor", "Toda"]) add(`Bil je ${n}. ${w}`);
+            add(`${n}., ${n}. in ${n}. stoletja`); add(`${n}-ih`); add(`${n}-letni`); add(`${n} 1/2`); add(`${n}/3`);
+            for (const t of ["kralj Karel", "kralja Ludvika XIV", "cesarica Marija", "papež Janez Pavel"]) { add(`${t} ${n}.`); add(`${t} ${n}. Nato`); add(`${t} ${n} je`); }
+        }
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59"]) {
+            add(`${h}:${mm}`); add(`${h}.${mm} ure`); add(`${h}${mm} UTC`);
+            for (const p of ["ob", "po", "okoli", "od", "do", "med", "pred", "Ob", "OD", "konec"]) add(`${p} ${h}:${mm}`);
+        }
+        for (const [a, b] of [["3", "2"], ["2", "3"], ["10", "12"], ["1990", "95"], ["1990", "1995"], ["5", "5"]]) for (const m of [":", "-", "–"]) add(`Izid ${a}${m}${b} proti`);
+        for (const c of Object.values(COUNTED)) for (const n of ["1", "2", "3", "4", "5", "do 3", "1,5"]) for (const f of c.forms) add(`${n} ${f}`);
+        for (const ab of ["itd.", "npr.", "oz.", "idr.", "št.", "ml.", "Itd.", "ŠT.", "Dr.", "dr.", "G.", "Ga.", "St.", "Inc.", "et al.", "pr. n. št.", "n. št."])
+            for (const after of ["", " u", " Ana", ",", ")", ".", " „x"]) add(`Bilo je ${ab}${after}`);
+        const words = new Set<string>();
+        for (const [t, from] of rows) {
+            emit({ text: units(t), src: from, op: "normalize" }, N.normalizeSlovenian(t));
+            emit({ text: units(t), src: from, op: "initialisms" }, N.normalizeSlovenianInitialisms(t));
+            emit({ text: units(t), src: from, op: "symbols" }, SYMBOLS(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableSlovenian(w)));
+        const slots = ["m.nom", "m.gen", "m.dat", "m.loc", "m.instr", "f.nom", "f.gen", "f.dat", "f.acc", "n.nom", "n.gen", "n.loc", "n.instr", "pl.nom", "pl.gen"];
+        const nums: number[] = [];
+        for (let i = -1; i <= 1100; i++) nums.push(i);
+        nums.push(1999, 2000, 2016, 3000, 21000, 100000, 999999, 1000000, 1.5, NaN);
+        for (const n of nums) for (const sl of slots) emit({ n: String(n), slot: sl, src: "numeric", op: "ordinal" }, N.ordinalWords(n, sl as never) ?? "\u0000none");
+    },
+    // The word level: phonemizeWord, toSegments, nat and stressLexiconHas over every stress.tsv key, every
+    // letter run of the texts (as written, lowercased, nativised), stem+suffix compounds that reach bySuffix,
+    // every 1-2 letter string over the alphabet, every 3-letter string over the context letters, and edges.
+    async "sl-g2p"() {
+        const S = await import("../../../src/languages/slovenian/slovenian.ts");
+        const { toSegments } = await import("../../../src/languages/slovenian/g2p.ts");
+        const words = new Set<string>();
+        const keys = [...S.stressDict().keys()];
+        for (const k of keys) words.add(k);
+        for (let i = 0; i < keys.length; i += 53) for (const p of ["pet", "štiriin", "pre", "r", "rd", "sr"]) { words.add(p + keys[i]!); words.add(keys[i]!.toUpperCase()); }
+        for (const t of textsFor(["sl"], FLEURS_DIR.sl, ["sl.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(S.nat(m[0])); }
+        const abc = [..."abcčdefghijklmnoprsštuvzžqwxyćđ"];
+        for (const a of abc) { words.add(a); for (const b of abc) words.add(a + b); }
+        const ctx = [..."aeiorljndžbpgkxhfsv"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) words.add(a + b + c);
+        for (const w of ["", "\ud800", "a\ud800b", "prst", "vrt", "čmrlj", "kralj", "konj", "polje", "grad", "glasba", "Afganistan", "Abhazija", "rdeč", "São", "İzmir", "ŁÓDŹ", "Ahil"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, S.phonemizeWord(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "nat" }, S.nat(w));
+            emit({ word: units(w), op: "has" }, String(S.stressLexiconHas(w)));
+        }
+    },
+    async "sl-numbers"() {
+        const { numberToWords, readDigits } = await import("../../../src/languages/slovenian/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 2002, k * 1e9, k * 1e9 + 3004005, k * 1e9 + 999999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e21, 1.5, 2.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000000", "9007199254740993", "", "1a2", "１２", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
+        }
+    },
     // composeSlavicNumber over each standard's table: 0..20000, multiples and powers, the unsafe and non-finite
     // corners, and raw strings for the digit-by-digit fallback.
     async "sh-numbers"() {

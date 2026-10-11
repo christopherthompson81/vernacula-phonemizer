@@ -1228,6 +1228,48 @@ fn main() {
                 }
             })
         }
+        "sl-normalize" | "sl-g2p" | "sl-numbers" => {
+            let sl =
+                vernacula_phonemizer::languages::slovenian::slovenian::create_slovenian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = || (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => sl.normalize(&t()),
+                    "initialisms" => sl.normalize_initialisms(&t()),
+                    "symbols" => sl.symbols(&t()),
+                    "unreadable" => JsString::from(sl.is_unreadable(&t()).to_string().as_str()),
+                    "ordinal" => sl
+                        .ordinal_words(n(), input["slot"].as_str().unwrap())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => sl.phonemize_word(&w()),
+                    "segs" => {
+                        let segs: Vec<JsString> = sl
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "nat" => sl.nativise(&w()),
+                    "has" => JsString::from(
+                        vernacula_phonemizer::languages::slovenian::slovenian::stress_lexicon_has(
+                            &w(),
+                        )
+                        .to_string()
+                        .as_str(),
+                    ),
+                    "digits" => sl.read_digits(&raw().unwrap()),
+                    _ => sl.number_to_words(n(), raw().as_ref()),
+                }
+            })
+        }
         "sh-g2p" => {
             let sr = vernacula_phonemizer::languages::serbian::serbian::create_serbian().unwrap();
             let nat_hr = vernacula_phonemizer::core::host_word::make_nativiser("[a-zčćšžđ]", "iu");

@@ -33,9 +33,9 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 23] = [
+pub const LANGUAGES: [&str; 24] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs",
+    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl",
 ];
 
 /// A language engine, as the registry holds it.
@@ -123,6 +123,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "bs" => crate::languages::bosnian::bosnian::create_bosnian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sl" => crate::languages::slovenian::slovenian::create_slovenian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         _ => return None,

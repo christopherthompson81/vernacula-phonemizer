@@ -1,0 +1,41 @@
+# Slovenian (sl) off-golden probes: synthetic text only, one or more lines per normalize.ts arm and the
+# neighbour it must decline, plus g2p corners.
+Mesto ima 1.300 prebivalcev in 800 000 obiskovalcev ter 12 345 avtov.
+Standard 802.11g in 3.14 ter 12.5.
+Leta 300 pr. n. št. je padlo, leta 200 n. št. Nato pa n. š.
+To je bilo pr. n. št.
+Sadje, zelenjava itd. so na mizi, itd., npr. jabolka, oz. hruške idr.
+Konec je itd.)
+Pokliči na št. 5 in Itd. Ana.
+Dr. Novak in g. Kranjc in ga. Horvat ter dr. novak.
+St. Louis in Apple Inc. je in Smith et al. pravi.
+Sestanek ob 10:30 in po 8.15 uri, okoli 12:00, od 9:00 do 17:00, med 13:00 in pred 0:00.
+Vlak odpelje ob 14:05 ure in 1430 UTC ter (0900 po GMT).
+Rezultat 3:2 in 2-1 in 10-12 in 3:2 proti.
+Od 1990-95 in 1990–1995 ter 10 - 20 ljudi in 1,5-2,5.
+Kralj Karel V. je umrl. Cesarica Marija Terezija 2. Papež Janez Pavel 2 je bil.
+Kralja Ludvika XIV in kralju Petru 1. kraljici Elizabeti 2. pa.
+V 20. stoletju, 15. julija 1991, 1., 2. in 3. mesto, 5. največja država.
+Bil je 3. prvega, 21. maja, 4. vojske, 11. polka in 1. Toda.
+Bil je 5. constructor in 6. hasOwnProperty.
+V 1990-ih in 1980-ih ter 2000-ih in 10-ih.
+Proga 10-km in 5-m.
+Voda vre pri 100 °C, 212 °F, 0 °C, 1,5 ° in 2°.
+Format 4x4 in 6×2, napaka ±2, +3 in (−4) ter ABC+5.
+Ima 5-letni sin in 20-letnico in 1000000000000-letni.
+Hitrost 100 milj/uro in 20 milj/h.
+Ima 93 % in 3 % in 2 % in 1 % in 0 %.
+Cena 5 $ in 10 USD in 20 € in 3 £ in 100 ¥.
+Površina 10 km² in 3 km2 in 5 mm2 ter 2 m³.
+Hitrost 240 km/h in 3 m/s in 100 Mbit/s in 2,4 GHz in 1,5 kg.
+Ima 1 kilometer, 2 kilometra, 3 kilometri, 4 kilometri, 2 milji na uro, do 3 kilometri.
+Točka 0,001 grama in 1,50 in 2,05 metra.
+Pol 1/2 in 2/3 in 3/4 in 5 1/2 in 1/11 in 22/7.
+Ploščica 29¾ in 24½ in 3¼.
+Če je 2 = 2 in 3 < 4 in 5 > 1, potem 6 ÷ 3 in 8 ÷ 2.
+AT&T in A & B in Rock & Roll in Q＆A.
+Model 5G in 3D in 7x.
+ZDA in USA in EU in DVD in NATO.
+Prst, vrt, čmrlj, kralj, konj, polje, grad, glasba, Afganistan, Abhazija, rdeč.
+São Paulo in İzmir in Łódź.
+Število 12345678901234567890 in 1000000000000 in 007.
