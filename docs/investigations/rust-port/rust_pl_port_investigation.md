@@ -20,7 +20,7 @@ expects them?
 - Parity: all 15 ported languages `200/200 identical, 0 differ`.
 - pl golden: 200 rows, 113 distinct texts.
 - ⚠ `/mnt/data/omnivoice_ipa` does NOT exist on this machine any more; an unbounded `find /` locates the FLEURS
-  transcripts at `/media/chris/TOSHIBA_EXT/omnivoice_ipa/corpus/fleurs_transcripts/data/pl_pl/{train,dev,test}.tsv`.
+  transcripts at `<external-drive>/omnivoice_ipa/corpus/fleurs_transcripts/data/pl_pl/{train,dev,test}.tsv`.
   `dump.mts` hardcodes the old root, and it is LOUD on a missing FLEURS file (throws), so this is not a silent
   hole — but a FLEURS dump cannot run unmodified.
 - The worktree has no `node_modules`; symlinked the main checkout's (gitignored by the `node_modules` rule).
