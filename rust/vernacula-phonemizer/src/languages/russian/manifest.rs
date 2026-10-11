@@ -46,6 +46,14 @@ pub struct ThousandFeminine {
     pub two: String,
 }
 
+/// One oblique case of the cardinal: the same ones/tens/hundreds slots as the nominative tables.
+#[derive(Debug, Deserialize)]
+pub struct CardinalCaseForms {
+    pub ones: Vec<String>,
+    pub tens: Vec<String>,
+    pub hundreds: Vec<String>,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Numbers {
@@ -56,6 +64,8 @@ pub struct Numbers {
     pub thousand: Vec<String>,
     pub thousand_feminine: ThousandFeminine,
     pub decimal_connector: String,
+    pub genitive: CardinalCaseForms,
+    pub instrumental: CardinalCaseForms,
 }
 
 #[derive(Debug, Deserialize)]
@@ -96,14 +106,18 @@ pub struct RussianManifest {
     pub voiceless_obstruents: Vec<String>,
     pub voiced_obstruents: Vec<String>,
     pub soften_targets: String,
-    /// Named by the TS interface and loaded, but g2p.ts never reads it (it hard-codes `"тд"`); see the log.
+    /// The с/з tier of regressive softening (g2p.rs).
     pub soften_triggers: String,
+    /// The т/д/н tier of regressive softening (g2p.rs).
+    pub soften_triggers_tdn: String,
     pub genitive_keep_g: Vec<String>,
     pub irregulars: IndexMap<String, String>,
     pub adjective_stress: AdjectiveStress,
     pub clause_punctuation: IndexMap<String, String>,
     pub numbers: Numbers,
     pub letter_names: IndexMap<String, String>,
+    /// Cyrillic letters outside а–я/ё → their Russian spelling (see the jsonc for the two sources).
+    pub letter_folds: IndexMap<String, String>,
     pub phonotactics: Phonotactics,
     pub symbol_tier: SymbolTier,
     pub roman_ordinals: Vec<String>,
@@ -129,6 +143,16 @@ fn validate(m: &RussianManifest) -> Result<(), String> {
         ("numbers.million", n.million.len(), 3),
         ("numbers.thousand", n.thousand.len(), 3),
         ("romanOrdinals", m.roman_ordinals.len(), 20),
+        ("numbers.genitive.ones", n.genitive.ones.len(), 20),
+        ("numbers.genitive.tens", n.genitive.tens.len(), 10),
+        ("numbers.genitive.hundreds", n.genitive.hundreds.len(), 10),
+        ("numbers.instrumental.ones", n.instrumental.ones.len(), 20),
+        ("numbers.instrumental.tens", n.instrumental.tens.len(), 10),
+        (
+            "numbers.instrumental.hundreds",
+            n.instrumental.hundreds.len(),
+            10,
+        ),
     ];
     for (name, have, want) in need {
         if have < want {

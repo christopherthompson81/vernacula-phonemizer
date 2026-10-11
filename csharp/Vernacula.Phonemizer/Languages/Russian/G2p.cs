@@ -88,7 +88,9 @@ public static class G2p
                 && (At(chars, i + 1) == "я" || At(chars, i + 1) == "ь")
                 && i + 2 >= chars.Count
                 && At(chars, i - 1) != "й"
-                && !VOWELS.Contains(At(chars, i - 1)))
+                && !VOWELS.Contains(At(chars, i - 1))
+                // ⚠ A REFLEXIVE NEEDS A STEM WITH A VOWEL: `вся` is the pronoun and keeps its soft с.
+                && chars.Take(i).Any(ch => VOWELS.Contains(ch)))
             {
                 units.Add(new Unit { Cyr = "с", Cons = new ConsPart { Ph = "s", Soft = false } });
                 continue;
@@ -116,8 +118,8 @@ public static class G2p
             var nx = i + 1 < units.Count ? units[i + 1] : null;
             if (nx?.Cons is null || !nx.Cons.Soft) continue;
             var ok = "сз".Contains(c.Cyr, StringComparison.Ordinal)
-                ? "тд".Contains(nx.Cyr, StringComparison.Ordinal)
-                : "тднч".Contains(nx.Cyr, StringComparison.Ordinal); // с/з soften before soft т/д (сделать→zʲdʲ, ездил→zʲdʲ)
+                ? Manifest.MANIFEST.SoftenTriggers.Contains(nx.Cyr, StringComparison.Ordinal)
+                : Manifest.MANIFEST.SoftenTriggersTdn.Contains(nx.Cyr, StringComparison.Ordinal); // с/з soften before soft т/д (сделать→zʲdʲ, ездил→zʲdʲ)
             if (ok) c.Cons = new ConsPart { Ph = CONS[c.Cyr][1], Soft = true };
         }
         for (var i = 0; i < units.Count - 1; i++)

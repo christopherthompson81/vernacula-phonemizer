@@ -157,7 +157,7 @@ describe("russian normalization", () => {
         expect(phonemize("3-м", "ru")).toBe("trʲˈetʲjɪm"); // третьем — the one soft stem
         expect(phonemize("7-му флоту", "ru")).toBe("sʲɪdʲmˈomʊ fɫˈotʊ"); // седьмому
         // Past the former's 1-100 range: only the LAST element inflects, the head stays cardinal.
-        expect(phonemize("1970-х годов", "ru")).toBe("ɐdnˈa tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof");
+        expect(phonemize("1970-х годов", "ru")).toBe("tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof");
     });
 
     test("Cyrillic initialisms — the core pass was silently doing nothing", () => {
@@ -174,8 +174,8 @@ describe("russian normalization", () => {
     test("abbreviations, with г. case-sensitive to its preposition", () => {
         // These also used \b and so matched nothing: г. read as a bare [k], н. э. and т. е. left their
         // interior dots as phrase breaks.
-        expect(phonemize("в 2007 г.", "ru")).toBe("f dvʲe tˈɨsʲət͡ɕɪ sʲemʲ ɡˈodʊ"); // в governs году
-        expect(phonemize("с 1970-х гг.", "ru")).toBe("s ɐdnˈa tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof .");
+        expect(phonemize("в 2007 г.", "ru")).toBe("f dvʲe tˈɨsʲət͡ɕɪ sʲemʲ ɡˈodʊ ."); // в governs году; the sentence-end dot stays (#1513)
+        expect(phonemize("с 1970-х гг.", "ru")).toBe("s tˈɨsʲət͡ɕə dʲɪvʲɪt͡sːˈot sʲɪmʲɪdʲɪsʲˈatɨx ɡɐdˈof .");
         // The trailing dot is TWO things and was being consumed unconditionally, so a sentence ending in
         // an era marker lost its boundary entirely — "в 200 г. н. э. Затем…" ran into the next sentence.
         // Discriminated by CASE now: it survives at a sentence end or before a capital, and is consumed

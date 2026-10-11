@@ -2263,6 +2263,9 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const RU = new URL("../../../src/languages/russian/russian.ts", import.meta.url).href;
         const words = new Set<string>();
         for (const t of langTexts("ru")) for (const w of t.match(/[а-яёА-ЯЁ]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        // The folded letters (letterFolds), alone, inside a word and in both cases (#1513).
+        for (const f of ["ѣ", "і", "ѳ", "ѵ", "ї", "є", "ґ"]) for (const c of [f, f.toUpperCase()])
+            for (const w of [c, `х${c}бъ`, `${c}ва`, `ки${c}в`]) words.add(w);
         const abc = [..."абвгдеёжзийклмнопрстуфхцчшщъыьэюя"];
         for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
         const ctx = [..."тдсзжчцьяеиоайн"];
@@ -2294,6 +2297,13 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "𝟙2"])
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+        // cardinalInCase (#1513) over its range, both ends and the off-range corners.
+        const { cardinalInCase } = await import("../../../src/languages/russian/numbers.ts");
+        const cs: number[] = [];
+        for (let i = -1; i <= 1001; i++) cs.push(i);
+        cs.push(1.5, -0, NaN, Infinity, 2 ** 53);
+        for (const n of cs) for (const kase of ["genitive", "instrumental"] as const)
+            emit({ n: String(n), raw: null, op: kase }, cardinalInCase(n, kase) ?? "\u0000none");
     },
     // normalizeRomans with Russian's policy (registry.ts romanRu) over the Russian texts.
     async "ru-roman"() {

@@ -39,9 +39,13 @@ const VOWEL_RE = new RegExp(`[${MANIFEST.vowelLetters}]`, "gi");
 // DATA (russian.jsonc).
 const IRREGULARS = MANIFEST.irregulars;
 
+/** Cyrillic letters outside а–я/ё → their Russian spelling (DATA: russian.jsonc `letterFolds`). */
+const LETTER_FOLDS = MANIFEST.letterFolds;
+const foldLetters = (w: string): string => [...w].map((c) => LETTER_FOLDS[c] ?? c).join("");
+
 /** One Russian word → canonical IPA. Stress from the dictionary; ё is inherently stressed; else first vowel. */
 export function phonemizeWord(word: string): string {
-    const w = word.toLowerCase();
+    const w = foldLetters(word.toLowerCase());
     const irr = IRREGULARS[w];
     if (irr !== undefined) return irr;
     let ord = stressDict().get(w);
@@ -95,7 +99,9 @@ function adjectiveStress(w: string): number | undefined {
 }
 
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
-const TOKEN = /([а-яёА-ЯЁ]+)|(\d+(?:[.,]\d+)?)|([.!?…,;:])/gu;
+/** The folded letters are word letters too, in both cases, so `хлѣбъ` and `Київ` stay one word. */
+const FOLDED = Object.keys(LETTER_FOLDS).map((c) => c + c.toUpperCase()).join("");
+const TOKEN = new RegExp(`([а-яёА-ЯЁ${FOLDED}]+)|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])`, "gu");
 
 // symbol normalization — Russian: CYRILLIC unit abbreviations (км, not km) and three-way agreement.
 const SYMBOLS = makeSymbolNormalizer({

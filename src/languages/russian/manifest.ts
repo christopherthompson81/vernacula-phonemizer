@@ -10,6 +10,13 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { CountForms } from "../../core/normalizeSymbols.ts";
 
+/** One oblique case of the cardinal: the same ones/tens/hundreds slots as the nominative tables. */
+export interface CardinalCaseForms {
+    ones: string[];
+    tens: string[];
+    hundreds: string[];
+}
+
 export interface RussianManifest {
     /** Acronyms read letter-by-letter; see russian.jsonc. */
     acronymLetters: string[];
@@ -25,6 +32,7 @@ export interface RussianManifest {
     voicedObstruents: string[];
     softenTargets: string;
     softenTriggers: string;
+    softenTriggersTdn: string;
     genitiveKeepG: string[];
     irregulars: Record<string, string>;
     adjectiveStress: {
@@ -41,8 +49,12 @@ export interface RussianManifest {
         thousand: string[];
         thousandFeminine: { one: string; two: string };
         decimalConnector: string;
+        genitive: CardinalCaseForms;
+        instrumental: CardinalCaseForms;
     };
     letterNames: Record<string, string>;
+    /** Cyrillic letters outside а–я/ё → their Russian spelling (see the jsonc for the two sources). */
+    letterFolds: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[] };
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
     symbolTier: {

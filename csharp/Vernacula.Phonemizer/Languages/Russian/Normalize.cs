@@ -31,8 +31,16 @@ public static class Normalize
         ["ым"] = new[] { "ым", "ьим" }, ["ыми"] = new[] { "ыми", "ьими" },
     };
 
-    /** Longest first, so `ого` is not matched as `го`. */
-    private static readonly string CASE_ALT = string.Join("|", CASE_ENDING.Keys.OrderByDescending(k => k.Length));
+    /** Written case ending → the oblique case of the CARDINAL whose last letters it is (`4-х` четырёх, `30-ти`
+     *  тридцати, `34-мя` тридцатью четырьмя), taken only where the cardinal's form really ends in them. */
+    private static readonly IReadOnlyDictionary<string, string> CARDINAL_ENDING = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["х"] = "genitive", ["ти"] = "genitive", ["мя"] = "instrumental",
+    };
+
+    /** Longest first, so `ого` is not matched as `го`. TS order: CASE_ENDING's keys, then CARDINAL_ENDING's new ones. */
+    private static readonly string CASE_ALT = string.Join("|",
+        CASE_ENDING.Keys.Concat(CARDINAL_ENDING.Keys).Distinct(StringComparer.Ordinal).OrderByDescending(k => k.Length));
 
     /** Integer → the masculine-nominative ordinal, extended past `russianOrdinal`'s own 1–100 range. */
     private static string? OrdinalBase(double n)
@@ -99,6 +107,12 @@ public static class Normalize
     private static readonly string[] HOUR = { "час", "часа", "часов" };
     private static readonly string[] MINUTE = { "минута", "минуты", "минут" };
 
+    /** A cardinal agreeing with a FEMININE noun: only the last element agrees, and only 1 and 2 have one. */
+    private static string Feminine(string words) => DVA_FINAL.Replace(ODIN_FINAL.Replace(words, "одна"), "две");
+
+    /** Does the dot after an abbreviation also end the sentence? Nothing follows, or an uppercase letter. */
+    private static bool EndsSentence(string next) => next == "" || UPPER.IsMatch(next);
+
     /** Dotted abbreviations → the full word. */
     private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -107,13 +121,15 @@ public static class Normalize
         ["руб"] = "рублей", ["тыс"] = "тысяч", ["млн"] = "миллионов", ["млрд"] = "миллиардов",
     };
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
+    /** The abbreviations that stand BEFORE their noun, so a capital after the dot is that noun, never a new sentence. */
+    private static readonly IReadOnlySet<string> PREPOSED_ABBREV = new HashSet<string>(StringComparer.Ordinal) { "ул", "им", "стр", "проф", "акад" };
 
     private static readonly JsRe GROUP_1 = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");  // space, NBSP, NNBSP, thin space
     private static readonly JsRe NUMERO = JsRegex.Compile("№\\s?(?=\\d)", "gu");
     private static readonly JsRe ORDINAL_NOTATION = JsRegex.Compile($"\\b(\\d+)\\s?-\\s?({CASE_ALT})(?![а-яё])", "giu");
-    private static readonly JsRe YEAR_G = JsRegex.Compile("(?<![\\p{L}\\p{M}])(в|во)\\s+(\\d+)\\s*г\\.", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(\\s+)(?=\\p{{L}})", "giu");
+    private static readonly JsRe YEAR_G = JsRegex.Compile("(?<![\\p{L}\\p{M}])(в|во)\\s+(\\d+)\\s*г\\.(?=\\s*(\\S?))", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(\\s+)(?=(\\p{{L}}))", "giu");
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
     private static readonly JsRe KM_H = JsRegex.Compile("(\\d)\\s?км\\/ч(?![а-яё])", "giu");
     private static readonly JsRe M_S = JsRegex.Compile("(\\d)\\s?м\\/с(?![а-яё])", "giu");
@@ -178,19 +194,37 @@ public static class Normalize
 
         s = Rewrite(s, ORDINAL_NOTATION, m =>
         {
+            var w = m.Groups[2].Value.ToLowerInvariant();
+            if (CARDINAL_ENDING.TryGetValue(w, out var kase))
+            {
+                var cardinal = Numbers.CardinalInCase(Js.Number(m.Groups[1].Value), kase);
+                if (cardinal is not null && cardinal.EndsWith(w, StringComparison.Ordinal)) return cardinal;
+            }
             var bas = OrdinalBase(Js.Number(m.Groups[1].Value));
             if (bas is null) return m.Value;
-            return InflectOrdinal(bas, m.Groups[2].Value.ToLowerInvariant()) ?? m.Value;
+            return InflectOrdinal(bas, w) ?? m.Value;
         });
 
-        s = Rewrite(s, YEAR_G, "$1 $2 году");
+        // The dot is kept where it also ends the sentence (`в 2007 г. Затем`), as in the multi-dot rule.
+        s = Rewrite(s, YEAR_G, m =>
+            $"{m.Groups[1].Value} {m.Groups[2].Value} году{(EndsSentence(m.Groups[3].Value) ? "." : "")}");
 
         s = Rewrite(s, ABBREV_MID, m =>
+        {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122). The pattern is built from this table's OWN keys but
             // carries `i`+`u`, so JS's fold widens it — `ſ`→`s`, and the Cyrillic `ᲀᲃᲅ` forms onto theirs —
             // and a near-miss MATCHES while its key is absent. The TS asserted non-null and spoke the word
             // "undefined"; this indexer THREW. Refuse the whole match.
-            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+            var ab = m.Groups[1].Value;
+            var key = ab.ToLowerInvariant();
+            var sp = m.Groups[2].Value;
+            if (!DOTTED_ABBREV.TryGetValue(key, out var w)) return m.Value;
+            if (PREPOSED_ABBREV.Contains(key) || !EndsSentence(m.Groups[3].Value)) return $"{w}{sp}";
+            // A capital single letter before a capitalised name is an INITIAL (В. Петров), spelled by its name.
+            if (Js.CodePoints(ab).Count() == 1 && ab != key)
+                return $"{(Manifest.MANIFEST.LetterNames.TryGetValue(key, out var n) ? n : ab)}{sp}";
+            return $"{w}.{sp}";
+        });
         s = Rewrite(s, ABBREV_END, m =>
             DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
@@ -206,7 +240,7 @@ public static class Normalize
         {
             double hv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             var head = $"{Numbers.NumberToWords(hv)} {Counted(hv, HOUR)}";
-            return mv == 0 ? head : $"{head} {Numbers.NumberToWords(mv)} {Counted(mv, MINUTE)}";
+            return mv == 0 ? head : $"{head} {Feminine(Numbers.NumberToWords(mv))} {Counted(mv, MINUTE)}";
         });
 
         s = Rewrite(s, MINUS, "$1минус $2");
@@ -225,9 +259,9 @@ public static class Normalize
             if (num == 1 && den == 2) return "одна вторая";
             var bas = OrdinalBase(den);
             if (bas is null) return m.Value;
-            var fem = InflectOrdinal(bas, "я");
-            var numWord = DVA_FINAL.Replace(ODIN_FINAL.Replace(Numbers.NumberToWords(num), "одна"), "две");
-            return fem is null ? m.Value : $"{numWord} {fem}";
+            // The denominator takes the numerator's count: singular after 1 (not 11), else genitive plural.
+            var denWord = InflectOrdinal(bas, NormalizeSymbols.SlavicCountForm(num) == 0 ? "я" : "х");
+            return denWord is null ? m.Value : $"{Feminine(Numbers.NumberToWords(num))} {denWord}";
         });
 
         return s;

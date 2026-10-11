@@ -19,6 +19,8 @@ struct Tables {
     voiced_obstr: HashSet<JsString>,
     gen_keep_g: HashSet<JsString>,
     soften_tgt: JsString,
+    soften_trig: JsString,
+    soften_trig_tdn: JsString,
 }
 
 static T: LazyLock<Tables> = LazyLock::new(|| {
@@ -37,6 +39,8 @@ static T: LazyLock<Tables> = LazyLock::new(|| {
         voiced_obstr: set(&m.voiced_obstruents),
         gen_keep_g: set(&m.genitive_keep_g),
         soften_tgt: js(&m.soften_targets),
+        soften_trig: js(&m.soften_triggers),
+        soften_trig_tdn: js(&m.soften_triggers_tdn),
     }
 });
 
@@ -124,6 +128,8 @@ fn parse(w: &JsString) -> Vec<Unit> {
             && (i + 2) as usize >= chars.len()
             && !is(i - 1, "й")
             && !at(i - 1).is_some_and(|p| t.vowels.contains(p))
+            // A reflexive needs a stem with a vowel: `вся` is the pronoun and keeps its soft с.
+            && chars[..i as usize].iter().any(|ch| t.vowels.contains(ch))
         {
             units.push(consonant("с", "s", false));
             i += 1;
@@ -178,9 +184,9 @@ fn parse(w: &JsString) -> Vec<Unit> {
             continue;
         }
         let ok = if js("сз").includes(&units[i].cyr) {
-            js("тд").includes(&nx.cyr)
+            t.soften_trig.includes(&nx.cyr)
         } else {
-            js("тднч").includes(&nx.cyr)
+            t.soften_trig_tdn.includes(&nx.cyr)
         };
         if ok {
             let (_, soft) = cons(&units[i].cyr).unwrap();

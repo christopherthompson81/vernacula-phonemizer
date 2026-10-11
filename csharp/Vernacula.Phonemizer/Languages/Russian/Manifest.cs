@@ -26,6 +26,14 @@ public sealed class ThousandFeminine
     public string Two { get; init; } = "";
 }
 
+/** One oblique case of the cardinal: the same ones/tens/hundreds slots as the nominative tables. */
+public sealed class CardinalCaseForms
+{
+    public IReadOnlyList<string> Ones { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Tens { get; init; } = Array.Empty<string>();
+    public IReadOnlyList<string> Hundreds { get; init; } = Array.Empty<string>();
+}
+
 public sealed class RussianNumbersDef
 {
     public IReadOnlyList<string> Ones { get; init; } = Array.Empty<string>();
@@ -35,6 +43,8 @@ public sealed class RussianNumbersDef
     public IReadOnlyList<string> Thousand { get; init; } = Array.Empty<string>();
     public ThousandFeminine ThousandFeminine { get; init; } = new();
     public string DecimalConnector { get; init; } = "";
+    public CardinalCaseForms Genitive { get; init; } = new();
+    public CardinalCaseForms Instrumental { get; init; } = new();
 }
 
 public sealed class RussianManifest
@@ -53,12 +63,15 @@ public sealed class RussianManifest
     public IReadOnlyList<string> VoicedObstruents { get; init; } = Array.Empty<string>();
     public string SoftenTargets { get; init; } = "";
     public string SoftenTriggers { get; init; } = "";
+    public string SoftenTriggersTdn { get; init; } = "";
     public IReadOnlyList<string> GenitiveKeepG { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> Irregulars { get; init; } = new Dictionary<string, string>();
     public AdjectiveStressDef AdjectiveStress { get; init; } = new();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public RussianNumbersDef Numbers { get; init; } = new();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
+    /** Cyrillic letters outside а–я/ё → their Russian spelling (see the jsonc for the two sources). */
+    public IReadOnlyDictionary<string, string> LetterFolds { get; init; } = new Dictionary<string, string>();
     public RussianPhonotactics Phonotactics { get; init; } = new();
     /** The shared symbol tier's data — see the jsonc, where the evidence lives. */
     public RussianSymbolTier SymbolTier { get; init; } = new();

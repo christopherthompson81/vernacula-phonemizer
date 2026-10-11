@@ -28,7 +28,8 @@ interface Unit {
 }
 
 const SOFTEN_TGT = MANIFEST.softenTargets; // dentals that soften regressively (л excluded — пополнять keeps ɫ)
-const SOFTEN_TRIG = MANIFEST.softenTriggers; // ... before a soft т/д (before soft н is inconsistent: сняться keeps hard с)
+const SOFTEN_TRIG = MANIFEST.softenTriggers; // ... с/з before a soft т/д (before soft н is inconsistent: сняться keeps hard с)
+const SOFTEN_TRIG_TDN = MANIFEST.softenTriggersTdn; // ... т/д/н before a soft т/д/н/ч
 
 /** Split a lowercased Cyrillic word into consonant / vowel / sign units, resolving palatalization + iotation. */
 function parse(w: string): Unit[] {
@@ -68,13 +69,15 @@ function parse(w: string): Unit[] {
             continue;
         }
         // Reflexive -ся / -сь after a hard consonant keeps hard с (вернулся → …ɫsə); after й (-йся) it stays soft
-        // (соприкасающийся → …jsʲə).
+        // (соприкасающийся → …jsʲə). ⚠ A REFLEXIVE NEEDS A STEM WITH A VOWEL: `вся` ends consonant + ся too, but
+        // it is the pronoun, a single syllable, and keeps its soft с (fsʲa, like всё → fsʲɵ).
         if (
             c === "с" &&
             (chars[i + 1] === "я" || chars[i + 1] === "ь") &&
             i + 2 >= chars.length &&
             chars[i - 1] !== "й" &&
-            !VOWELS.has(chars[i - 1] ?? "")
+            !VOWELS.has(chars[i - 1] ?? "") &&
+            chars.slice(0, i).some((ch) => VOWELS.has(ch))
         ) {
             units.push({ cyr: "с", cons: { ph: "s", soft: false } });
             continue;
@@ -110,8 +113,8 @@ function parse(w: string): Unit[] {
         // two-tier: с/з soften only before soft т (сделать/здесь keep hard z before soft д); т/д/н soften before
         // soft т/д/н/ч (стаканчик → nʲt͡ɕ; but женщина keeps hard н before щ).
         const ok = "сз".includes(c.cyr)
-            ? "тд".includes(nx.cyr)
-            : "тднч".includes(nx.cyr); // с/з soften before soft т/д (сделать→zʲdʲ, ездил→zʲdʲ)
+            ? SOFTEN_TRIG.includes(nx.cyr)
+            : SOFTEN_TRIG_TDN.includes(nx.cyr); // с/з soften before soft т/д (сделать→zʲdʲ, ездил→zʲdʲ)
         if (ok) c.cons = { ph: CONS[c.cyr]![1], soft: true };
     }
     // Geminate softness agreement: identical adjacent consonant letters take the softness of the second (россия

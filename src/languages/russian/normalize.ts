@@ -18,7 +18,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { slavicCountForm } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { numberToWords } from "./numbers.ts";
+import { cardinalInCase, numberToWords, type CardinalCase } from "./numbers.ts";
 import { russianOrdinal } from "./romanOrdinals.ts";
 import { rewrite } from "../../core/provenance.ts";
 
@@ -43,8 +43,19 @@ const CASE_ENDING: Readonly<Record<string, readonly [string, string]>> = {
     "ые": ["ые", "ьи"], "ие": ["ые", "ьи"],
     "ым": ["ым", "ьим"], "ыми": ["ыми", "ьими"],
 };
+/**
+ * Written case ending → the oblique case of the CARDINAL whose last letters it is. `4-х` is четырёх (genitive)
+ * and `30-ти` тридцати, `34-мя` тридцатью четырьмя (instrumental) — the cardinal, not an ordinal. Same
+ * principle as CASE_ENDING: the written letters are the end of the full form, so the cardinal reading is taken
+ * only where its form really ENDS in them. That is what separates `4-х` (четырёх) from `5-х` and `1970-х`
+ * (пяти, and no form at all past 999, so both stay ordinals: пятых, семидесятых).
+ */
+const CARDINAL_ENDING: Readonly<Record<string, CardinalCase>> = {
+    "х": "genitive", "ти": "genitive", "мя": "instrumental",
+};
 /** Longest first, so `ого` is not matched as `го`. */
-const CASE_ALT = Object.keys(CASE_ENDING).sort((a, b) => b.length - a.length).join("|");
+const CASE_ALT = [...new Set([...Object.keys(CASE_ENDING), ...Object.keys(CARDINAL_ENDING)])]
+    .sort((a, b) => b.length - a.length).join("|");
 
 /**
  * Integer → the masculine-nominative ordinal, extended past `russianOrdinal`'s own 1–100 range. ⚠ ONLY THE
@@ -106,6 +117,17 @@ function counted(n: number, forms: readonly [string, string, string]): string {
 const HOUR = ["час", "часа", "часов"] as const;
 const MINUTE = ["минута", "минуты", "минут"] as const;
 
+/** A cardinal agreeing with a FEMININE noun: only 1 and 2 have a feminine (одна, две), and only the last
+ *  element agrees, so двадцать один минута is двадцать одна минута. `$`-anchored: одиннадцать is untouched. */
+function feminine(words: string): string {
+    return words.replace(/один$/u, "одна").replace(/два$/u, "две");
+}
+
+/** Does the dot after an abbreviation also end the sentence? The CASE of what follows decides, as for the
+ *  multi-dot rule (step 1): nothing at all or an uppercase letter ⇒ yes. Tested in code, not in the pattern —
+ *  the patterns carry `i`, under which `\p{Lu}` matches lowercase too. */
+const endsSentence = (next: string): boolean => next === "" || /\p{Lu}/u.test(next);
+
 /** Abbreviations. `г.`/`гг.` are the frequent ones (×10) and were reading as a bare [k]. */
 const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     "г": "года", "гг": "годов", "в": "века", "вв": "веков",
@@ -113,6 +135,9 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     "руб": "рублей", "тыс": "тысяч", "млн": "миллионов", "млрд": "миллиардов",
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+/** The abbreviations that stand BEFORE their noun (ул. Ленина, проф. Иванов, стр. 5), so a capital after the
+ *  dot is that noun and never a new sentence. The rest follow a number (1990 г., 5 тыс.) and can end one. */
+const PREPOSED_ABBREV: ReadonlySet<string> = new Set(["ул", "им", "стр", "проф", "акад"]);
 
 /** Normalize one Russian input string. Pure text→text. */
 export function normalizeRussian(input: string): string {
@@ -160,26 +185,46 @@ export function normalizeRussian(input: string): string {
     s = rewrite(s, /№\s?(?=\d)/gu, "номер ");
 
     // 3) ORDINAL NOTATION. The suffix is the CASE ending, not an appendable marker (see the file header).
+    //    A suffix that can end a cardinal's oblique form (CARDINAL_ENDING) reads the cardinal when it does.
     s = rewrite(s, new RegExp(`\\b(\\d+)\\s?-\\s?(${CASE_ALT})(?![а-яё])`, "giu"),
         (whole, digits: string, written: string) => {
+            const w = written.toLowerCase();
+            const kase = CARDINAL_ENDING[w];
+            if (kase !== undefined) {
+                const cardinal = cardinalInCase(Number(digits), kase);
+                if (cardinal?.endsWith(w)) return cardinal;
+            }
             const base = ordinalBase(Number(digits));
             if (base === undefined) return whole;
-            return inflectOrdinal(base, written.toLowerCase()) ?? whole;
+            return inflectOrdinal(base, w) ?? whole;
         });
 
     // 3b) `г.` after a year is года, EXCEPT after the preposition в, which governs the prepositional
     //     году ("в 2007 г." = в 2007 году). All three corpus instances are year contexts — none is the
     //     city sense of г., which would need a different expansion and does not occur here.
-    s = rewrite(s, /(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\./giu, "$1 $2 году");
+    //     The dot is kept where it also ends the sentence (`в 2007 г. Затем`), as in step 1; the lookahead
+    //     only reads what follows, so a second `в … г.` straight after is still matched.
+    s = rewrite(s, /(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\.(?=\s*(\S?))/giu,
+        (_m, prep: string, year: string, next: string) =>
+            `${prep} ${year} году${endsSentence(next) ? "." : ""}`);
 
     // 4) DOTTED ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
-    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=\\p{L})`, "giu"),
-        (m0, ab: string, sp: string) => {
+    //    ⚠ A CAPITAL AFTER THE DOT is either a new sentence (`1990 г. Затем` keeps its dot) or, after a
+    //    capital single letter, a NAME: `В. Петров`, `Г. Иванов` are initials, not века / года, so the letter is
+    //    spelled here, by its name (вэ, гэ). Leaving the `В.` for the initialism pass is not enough: its lone
+    //    initial needs a capitalised word BEFORE it, so `и Г. Иванов` kept a bare [k] and a phrase break.
+    //    A preposed abbreviation's capital is its own noun (`ул. Ленина`).
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=(\\p{L}))`, "giu"),
+        (m0, ab: string, sp: string, next: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
-            const w = DOTTED_ABBREV[ab.toLowerCase()];
-            return w === undefined ? m0 : `${w}${sp}`;
+            const key = ab.toLowerCase();
+            const w = DOTTED_ABBREV[key];
+            if (w === undefined) return m0;
+            if (PREPOSED_ABBREV.has(key) || !endsSentence(next)) return `${w}${sp}`;
+            if ([...ab].length === 1 && ab !== key) return `${MANIFEST.letterNames[key] ?? ab}${sp}`; // an initial
+            return `${w}.${sp}`;
         });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
         (m0, ab: string) => {
@@ -205,10 +250,11 @@ export function normalizeRussian(input: string): string {
     //    Slavic count agreement (1 час / 2 часа / 5 часов).
     //    Guarded against a SPORTS time: "2:11,60 минуты" is 2 minutes 11.60 seconds, not two o'clock, and
     //    the corpus contains one. A comma-plus-digit after the minutes marks decimal seconds.
+    //    час is masculine and минута FEMININE, so the minutes take its agreement: 9:21 is двадцать одна минута.
     s = rewrite(s, /\b([01]?\d|2[0-3]):([0-5]\d)(?![\d:])(?!,\d)/gu, (_m, h: string, min: string) => {
         const hv = Number(h), mv = Number(min);
         const head = `${numberToWords(hv)} ${counted(hv, HOUR)}`;
-        return mv === 0 ? head : `${head} ${numberToWords(mv)} ${counted(mv, MINUTE)}`;
+        return mv === 0 ? head : `${head} ${feminine(numberToWords(mv))} ${counted(mv, MINUTE)}`;
     });
 
     // 7) SIGNS.
@@ -248,7 +294,9 @@ export function normalizeRussian(input: string): string {
     s = rewrite(s, /\s?>\s?/gu, " больше чем ");
     s = rewrite(s, /\s?÷\s?/gu, " разделить на ");
 
-    // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая».
+    // 8) FRACTIONS — feminine, agreeing with the elided *часть*: 1/5 is «одна пятая». ⚠ THE DENOMINATOR TAKES
+    //    THE NUMERATOR'S COUNT: a numerator ending in 1 (not 11) keeps the nominative singular, every other
+    //    takes the genitive plural — 2/3 две третьих, 5/8 пять восьмых, 21/100 двадцать одна сотая.
     // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `,` or `.`
     //   with a digit beyond it — `,` is this language's decimal, and the engine reads `.` as one too. A `,`
     //   between two fractions is a list separator, so `1/2,3/4` reads both; any other `,` beside a digit is the
@@ -260,9 +308,8 @@ export function normalizeRussian(input: string): string {
         if (num === 1 && den === 2) return "одна вторая";
         const base = ordinalBase(den);
         if (base === undefined) return m0;
-        const fem = inflectOrdinal(base, "я");
-        const numWord = numberToWords(num).replace(/один$/u, "одна").replace(/два$/u, "две");
-        return fem === undefined ? m0 : `${numWord} ${fem}`;
+        const denWord = inflectOrdinal(base, slavicCountForm(num) === 0 ? "я" : "х");
+        return denWord === undefined ? m0 : `${feminine(numberToWords(num))} ${denWord}`;
     });
 
     return s;
