@@ -22,7 +22,7 @@ const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
-    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr",
 };
 
 /**
@@ -741,6 +741,37 @@ const dumps: Record<string, () => void | Promise<void>> = {
                 for (const r of t.rewrites) lines.push(`rewrite ${r.stage}`);
                 emit({ text: units(text), lang }, lines.join("\n"));
             }
+    },
+    // ── Greek (el). Inputs: the el golden, FLEURS el_gr (columns 3 and 4) and probes/el.txt. ──
+    async "el-normalize"() {
+        const { normalizeGreek } = await import("../../../src/languages/greek/normalize.ts");
+        for (const [t, src] of textsFor(["el"], "el_gr", ["el.txt"])) emit({ text: units(t), src }, normalizeGreek(t));
+    },
+    // The three word entries over every letter run of the texts, every synizesis-lexicon key, every 1-3 letter
+    // string of the inventory, every 4-letter string of the context letters, and astral/uppercase corners;
+    // then numberToWords over 0..20000, powers of ten and the digit-by-digit fallback.
+    async "el-g2p"() {
+        const G = await import("../../../src/languages/greek/greek.ts");
+        const { numberToWords } = await import("../../../src/languages/greek/numbers.ts");
+        const words = new Set<string>();
+        for (const t of textsFor(["el"], "el_gr", ["el.txt"]).keys()) for (const w of t.match(/[\p{L}\p{M}]+/gu) ?? []) words.add(w);
+        for (const [k] of loadTsvMap(new URL("../../../src/languages/greek/greek.ts", import.meta.url).href, "greek-synizesis.tsv")) words.add(k);
+        const inv = [..."αβγδεζηθικλμνξοπρσςτυφχψωάέήίόύώϊϋΐΰ"];
+        for (const a of inv) { words.add(a); for (const b of inv) { words.add(a + b); for (const c of inv) words.add(a + b + c); } }
+        const ctx = [..."αειουγκμπντσλχάίόύ"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "𝔞ά", "ά𝔞ια", "κ𝔞ιά", "α\uD800υ", "ΣΟΦΟΣ", "ΚΟΙΛΙΑ", "ΆΥΛΟΣ", "İα", "ἀρχή", "ᾠδή", "ϐ", "ϲ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, G.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, G.phonemizeWordRules(w));
+            emit({ word: units(w), op: "forced" }, G.phonemizeWordForced(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 3 * 10 ** e + 23, 1234567 * 10 ** (e - 4));
+        for (const n of [2 ** 53 - 1, 2 ** 53, 1.5, -3, 999999999999, 1e12 - 1, 5e11 + 3e8 + 1234]) ns.push(n);
+        for (const n of ns) emit({ n, op: "number" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "1000000000000", "99999999999999999999"]) emit({ n: Number(raw), raw: units(raw), op: "number" }, numberToWords(Number(raw), raw));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.

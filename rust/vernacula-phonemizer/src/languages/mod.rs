@@ -1,6 +1,7 @@
 pub mod english;
 pub mod english_gb;
 pub mod french;
+pub mod greek;
 pub mod hindi;
 pub mod italian;
 pub mod japanese;
