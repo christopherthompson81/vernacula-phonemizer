@@ -34,9 +34,10 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 26] = [
+pub const LANGUAGES: [&str; 32] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv", "id", "ms", "tl", "ceb", "hil", "ilo",
+    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "id", "ms", "tl",
+    "ceb", "hil", "ilo",
 ];
 
 /// A language engine, as the registry holds it.
@@ -137,6 +138,24 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "ilo" => crate::languages::ilocano::ilocano::create_ilocano()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sr" => crate::languages::serbian::serbian::create_serbian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "hr" => crate::languages::croatian::croatian::create_croatian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "bs" => crate::languages::bosnian::bosnian::create_bosnian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sl" => crate::languages::slovenian::slovenian::create_slovenian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "lt" => crate::languages::lithuanian::lithuanian::create_lithuanian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "lv" => crate::languages::latvian::latvian::create_latvian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         _ => return None,

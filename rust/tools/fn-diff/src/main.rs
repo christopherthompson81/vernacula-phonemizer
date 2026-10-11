@@ -1349,6 +1349,167 @@ fn main() {
                 ilo.number_to_words(n, raw.as_ref())
             })
         }
+        "sh-normalize" => {
+            let sr = vernacula_phonemizer::languages::serbian::serbian::create_serbian().unwrap();
+            let hr =
+                vernacula_phonemizer::languages::croatian::croatian::create_croatian().unwrap();
+            let bs = vernacula_phonemizer::languages::bosnian::bosnian::create_bosnian().unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                let lang = input["lang"].as_str().unwrap();
+                match input["op"].as_str().unwrap() {
+                    "initialisms" => sr.normalize_initialisms(&t),
+                    "decimal" => sr.read_decimal_comma(&t),
+                    "unreadable" => JsString::from(sr.is_unreadable(&t).to_string().as_str()),
+                    op => match (lang, op) {
+                        ("sr", "normalize") => sr.normalize(&t),
+                        ("sr", _) => sr.symbols(&t),
+                        ("hr", "normalize") => hr.normalize(&t),
+                        ("hr", _) => hr.symbols(&t),
+                        ("bs", "normalize") => bs.normalize(&t),
+                        ("bs", _) => bs.symbols(&t),
+                        _ => panic!("no {lang} {op}"),
+                    },
+                }
+            })
+        }
+        "sl-normalize" | "sl-g2p" | "sl-numbers" => {
+            let sl =
+                vernacula_phonemizer::languages::slovenian::slovenian::create_slovenian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = || (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => sl.normalize(&t()),
+                    "initialisms" => sl.normalize_initialisms(&t()),
+                    "symbols" => sl.symbols(&t()),
+                    "unreadable" => JsString::from(sl.is_unreadable(&t()).to_string().as_str()),
+                    "ordinal" => sl
+                        .ordinal_words(n(), input["slot"].as_str().unwrap())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => sl.phonemize_word(&w()),
+                    "segs" => {
+                        let segs: Vec<JsString> = sl
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "nat" => sl.nativise(&w()),
+                    "has" => JsString::from(
+                        vernacula_phonemizer::languages::slovenian::slovenian::stress_lexicon_has(
+                            &w(),
+                        )
+                        .to_string()
+                        .as_str(),
+                    ),
+                    "digits" => sl.read_digits(&raw().unwrap()),
+                    _ => sl.number_to_words(n(), raw().as_ref()),
+                }
+            })
+        }
+        "lt-normalize" | "lt-g2p" | "lt-numbers" => {
+            let lt = vernacula_phonemizer::languages::lithuanian::lithuanian::create_lithuanian()
+                .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = || (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lt.normalize(&t()),
+                    "initialisms" => lt.normalize_initialisms(&t()),
+                    "word" => lt.phonemize_word(&w()),
+                    "segs" => {
+                        let segs: Vec<JsString> = lt
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "nat" => lt.nativise(&w()),
+                    "digits" => lt.read_digits(&raw().unwrap()),
+                    _ => lt.number_to_words(n(), raw().as_ref()),
+                }
+            })
+        }
+        "lv-normalize" | "lv-g2p" | "lv-numbers" => {
+            let lv = vernacula_phonemizer::languages::latvian::latvian::create_latvian().unwrap();
+            Box::new(move |input| {
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = || (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lv.normalize(&units(&input["text"])),
+                    "ordinal" => lv
+                        .ordinal_words(n(), input["case"].as_str().unwrap())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => lv.phonemize_word(&w()),
+                    "segs" => {
+                        let segs: Vec<JsString> = lv
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "nat" => lv.nativise(&w()),
+                    "digits" => lv.read_digits(&raw().unwrap()),
+                    _ => lv.number_to_words(n(), raw().as_ref()),
+                }
+            })
+        }
+        "sh-g2p" => {
+            let sr = vernacula_phonemizer::languages::serbian::serbian::create_serbian().unwrap();
+            let nat_hr = vernacula_phonemizer::core::host_word::make_nativiser("[a-zčćšžđ]", "iu");
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => sr.phonemize_word(&w),
+                    "foreign" => sr.foreign_letters(&w),
+                    "nat" => sr.nativise(&w),
+                    "nat-hr" => nat_hr(&w),
+                    _ => JsString::from(
+                        vernacula_phonemizer::languages::serbian::serbian::accent_lexicon_has(&w)
+                            .to_string()
+                            .as_str(),
+                    ),
+                }
+            })
+        }
+        "sh-numbers" => {
+            use vernacula_phonemizer::languages::serbian::numbers::compose_slavic_number;
+            let sr = vernacula_phonemizer::languages::serbian::manifest::try_manifest().unwrap();
+            let hr = vernacula_phonemizer::languages::croatian::manifest::try_manifest().unwrap();
+            let bs = vernacula_phonemizer::languages::bosnian::manifest::try_manifest().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                let table = match input["lang"].as_str().unwrap() {
+                    "sr" => &sr.numbers,
+                    "hr" => &hr.numbers,
+                    "bs" => &bs.numbers,
+                    l => panic!("no {l} table"),
+                };
+                compose_slavic_number(n, table, raw.as_ref())
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

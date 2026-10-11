@@ -456,6 +456,27 @@ pub fn is_safe_integer(n: f64) -> bool {
     n.is_finite() && n.fract() == 0.0 && n.abs() <= MAX_SAFE_INTEGER
 }
 
+/// Whether `key` is an `Object.prototype` member, i.e. what a plain-object (`Record`) lookup `obj[key]`
+/// returns for a key the object does not own: a function for every name but `__proto__` (an object). A TS
+/// site that indexes a record with an unguarded string reads that value instead of `undefined`.
+pub fn is_object_prototype_key(key: &str) -> bool {
+    matches!(
+        key,
+        "constructor"
+            | "__defineGetter__"
+            | "__defineSetter__"
+            | "hasOwnProperty"
+            | "__lookupGetter__"
+            | "__lookupSetter__"
+            | "isPrototypeOf"
+            | "propertyIsEnumerable"
+            | "toString"
+            | "valueOf"
+            | "__proto__"
+            | "toLocaleString"
+    )
+}
+
 /// `String(n)` / `Number.prototype.toString()` (radix 10), the ECMAScript algorithm: the shortest digits that
 /// round-trip (which Rust's float formatting also produces), placed by the spec's rules, with exponent form
 /// for n ≥ 1e21 or n < 1e-6. Rust's `{}` differs on both (`1e21` is `1000000000000000000000` there).

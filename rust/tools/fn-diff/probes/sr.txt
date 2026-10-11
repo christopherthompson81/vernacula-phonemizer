@@ -1,0 +1,59 @@
+# Serbian (sr) off-golden probes: synthetic text only, one or more lines per normalize.ts arm and the
+# neighbour it must decline, plus g2p corners. Both scripts.
+Град има 1.300 становника и 800.000 посетилаца.
+Стандард 802.11 и 12.00 сати.
+Око 1000. п. н. е. Асирци су дошли.
+Око 1000. н. е. почело је.
+Grad je osnovan 300. p.n.e. u dolini.
+U 50. p. n. e., rat je počeo.
+N. E. Kovač je došao.
+Н. Е. Ковач је дошао.
+To je bilo п.н.е, а онда.
+Почиње у 12.00 сати и траје до 14.30 часова.
+Voz polazi u 7.05 sati.
+Voće, povrće itd. su na stolu.
+Voće, povrće итд. Сутра идемо.
+Има много тога, нпр. јабука.
+Ima mnogo toga, npr., jabuka.
+Ovo je tzv. ključ.
+Kupili smo hleb, mleko itd.)
+Temperatura je -5 stepeni, a sutra −3.
+Rezultat je 26 - 00 i 3 -2.
+Il-76 je avion.
+Greška je ±2 posto.
+Vrednost je a+3 ili +4 ili + 5.
+Ako je 2 = 2 i 3 < 4 i 5 > 1 onda 6 ÷ 3.
+Voda ključa na 100 °C a ne 212 °F.
+Napolju je 32 °C степена.
+Било је 35°С и 35° с падавинама.
+Bilo je 35°W i 35° W i 35°Z i 35°З.
+Temperatura 35° i padavine, 35°i, 35° S, 35° И.
+Око 35° од екватора и 300°K.
+Krajem 1970-ih i 1980-их, 15-og i 11-om i 13-to.
+On je 24-časovnom smenom i 11-godišnja devojčica.
+Brzina je 100 Mbit/s i 3,5 m/s i 10 m / s.
+Utakmica 6-6, sezona 1995-96 i 10–20 ljudi.
+Rođen je 21. jula 1624. godine u 16. veku.
+U 1988. godini, za 2016. godinu, 21. Kudebek je došao.
+Rođen je 2000. godine i 5000. godine.
+U 1500. veku, 1000. godine.
+Sastanak je u 11:00 i u 13:45, a rezultat 5:3 i 26 : 0.
+Voz polazi u 21:01 i 22:02 i 0:05.
+Ima 3,50 m i 2,4 Ghz i 50% i 1,5 km.
+Cena je 5 $ i 100 ¥ i 20 €.
+Površina 10 km² i zapremina 3 m³.
+Tačka 0,001 grama i 1,50 i 2,05 metra.
+Format 4x4 i 6×2 i 36 x 24 mm.
+DVD i GPS i SSSR i UTC i AOL i NSA.
+ДВД и СССР и ЉУБЉЕНО.
+Rock & roll и A & B.
+Ljjubav i pop-pevač i Holland i HOLLAND.
+Exxon, Downing, Whitehall, web, Toyota, Dylana, taxi, quiz, Québec.
+Prethodni i pothranjenost i Othello i the Matthew.
+Grâd i grȁd, krv i prst i smrt.
+Толстой и Достојевски.
+Ćemo, bismo, biste, ćete.
+Najjednostavniji i najjeftiniji.
+Broj 12345678901234567890 i 9007199254740993.
+Godina 1000000000 i 007.
+Constructor 5. constructor i 7. hasOwnProperty.
