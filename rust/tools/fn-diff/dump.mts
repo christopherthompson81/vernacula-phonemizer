@@ -24,6 +24,7 @@ const FLEURS_ROOT = process.env.FLEURS_ROOT ?? "/mnt/data/omnivoice_ipa/corpus/f
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
     "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru", de: "de_de", pl: "pl_pl",
+    tr: "tr_tr",
 };
 
 /**
@@ -887,6 +888,90 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2"])
             emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    // ── Turkish (tr). Inputs: the tr golden, FLEURS tr_tr (columns 3 and 4) and probes/tr.txt. ──
+    // normalizeTurkish, the initialism pass alone (rebuilt with normalize.ts's own config) on the raw text, Turkish's
+    // symbol tier on the normalized text, and the phonotactic test on every letter run. readSuffixedUnits and the
+    // number-token reader are module-private: the `trace` dump's `normalized` and phonemize-sync cover them.
+    async "tr-normalize"() {
+        const N = await import("../../../src/languages/turkish/normalize.ts");
+        const { trLower } = await import("../../../src/languages/turkish/g2p.ts");
+        const { MANIFEST: TR } = await import("../../../src/languages/turkish/manifest.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const { makeInitialismNormalizer } = await import("../../../src/core/initialisms.ts");
+        const st = TR.symbolTier;
+        const symbols = makeSymbolNormalizer({
+            percent: st.percent, currency: st.currency, units: st.units, exponentWords: st.exponentWords,
+            percentPrefix: st.percentPrefix, multiply: st.multiply,
+        });
+        const initialisms = makeInitialismNormalizer({
+            lower: trLower, letterName: (l) => TR.letterNames[l], acronymLetters: new Set<string>(),
+            isRecorded: () => false, isUnreadable: N.isUnreadableTurkish,
+        });
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["tr"], FLEURS_DIR.tr, ["tr.txt"])) {
+            const a = N.normalizeTurkish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, initialisms(t));
+            emit({ text: units(a), src, op: "symbols" }, symbols(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toUpperCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableTurkish(w)));
+    },
+    // The word level: trLower, toSegments, phonemizeWord (lexicon/morphology and forced-final) and nat over every
+    // stress.tsv key, every letter run of the texts (as written, lowercased, uppercased and capitalised), synthetic
+    // stem+suffix words (every vowel-harmony variant of the pre-accenting and tail suffixes on a set of stems), every
+    // one- to three-letter string over the Turkish letters plus the casing specials, and edge strings.
+    async "tr-g2p"() {
+        const T = await import("../../../src/languages/turkish/turkish.ts");
+        const { toSegments, trLower } = await import("../../../src/languages/turkish/g2p.ts");
+        const TURKISH = new URL("../../../src/languages/turkish/turkish.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const k of loadTsvMap(TURKISH, "stress.tsv").keys()) { words.add(k); words.add(k.toUpperCase()); }
+        for (const t of textsFor(["tr"], FLEURS_DIR.tr, ["tr.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) {
+                const w = m[0];
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase());
+                words.add(w.charAt(0).toUpperCase() + w.slice(1));
+            }
+        const stems = ["gel", "git", "oku", "yaz", "ev", "köy", "okul", "kitap", "masa", "göz", "kuş", "baba", "anne",
+            "öğretmen", "hasta", "doktor", "türk", "dağ", "değ", "yürü", "sor", "bil", "ağla", "İzmir", "Istanbul"];
+        const suffixes = ["iyor", "ıyor", "uyor", "üyor", "iyorum", "ıyorsun", "uyoruz", "üyorsunuz", "iyorlar", "yor",
+            "ken", "rken", "yken", "la", "le", "yla", "yle", "ma", "me", "sa", "se", "dır", "dir", "dur", "dür", "tır",
+            "tir", "tur", "tür", "ım", "im", "um", "üm", "yım", "yim", "ız", "iz", "uz", "üz", "sınız", "siniz", "sunuz",
+            "sünüz", "lar", "ler", "da", "de", "dan", "den", "ta", "te", "tan", "ten", "nın", "nin", "nun", "nün", "a", "e",
+            "ya", "ye", "ı", "i", "u", "ü", "ğı", "ği", "mıyor", "miyorum", "acak", "ecek", "malı", "meli", "dı", "di"];
+        for (const s of stems) for (const x of suffixes) { words.add(s + x); for (const y of ["lar", "ler", "dan", "a", "nın"]) words.add(s + x + y); }
+        const letters = [..."abcçdefgğhıijklmnoöprsştuüvyzwxqâîûİIÂÎÛ"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of "aeıioöuüğlkgnr") words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00ğ", "i̇", "İ", "İ̇", "ẞ", "Σ", "ΑΣ", "ﬁ", "ŉ", "K", "ſ", "ǅ",
+            "Ⓐ", "𝐀", "Ꭰ", "ꭰ", "Ა", "ᲀ", "Ʂ", "Ɐ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "lower" }, trLower(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+            emit({ word: units(w), op: "final" }, T.phonemizeWord(w, true));
+            emit({ word: units(w), op: "nat" }, T.nat(w));
+        }
+    },
+    // numberToWords and ordinalWords over 0…20,000, thousands/millions multiples, powers of ten to 10²⁴ and their
+    // neighbours, and the non-integers / negatives / non-finites; attachSuffix over cardinals × suffixes.
+    async "tr-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/turkish/numbers.ts");
+        const { ordinalWords, attachSuffix } = await import("../../../src/languages/turkish/normalize.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n));
+            emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        }
+        const sufs = ["te", "ta", "de", "da", "ü", "i", "ı", "u", "e", "a", "Ü", "lerin", "ları", "sı", "si", "inci", "ten", "dan", ""];
+        for (const n of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 34, 40, 44, 100, 1000, 1985, 2004, 1e6, 1e9 + 4])
+            for (const s of sufs) emit({ words: units(numberToWords(n)), suffix: units(s), op: "attach" }, attachSuffix(numberToWords(n).split(" "), s).join("|"));
+        for (const s of sufs) emit({ words: null, suffix: units(s), op: "attach" }, attachSuffix([], s).join("|"));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.

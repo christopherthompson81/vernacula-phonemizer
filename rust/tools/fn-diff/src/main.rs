@@ -972,6 +972,64 @@ fn main() {
                 de.number_to_words(n, raw.as_ref())
             })
         }
+        "tr-normalize" => {
+            let tr = vernacula_phonemizer::languages::turkish::turkish::create_turkish().unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tr.normalize(&t),
+                    "initialisms" => tr.normalize_initialisms(&t),
+                    "symbols" => tr.symbols(&t),
+                    _ => JsString::from(tr.is_unreadable(&t).to_string().as_str()),
+                }
+            })
+        }
+        "tr-g2p" => {
+            let tr = vernacula_phonemizer::languages::turkish::turkish::create_turkish().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "lower" => tr.tr_lower(&w),
+                    "segs" => {
+                        let segs: Vec<JsString> = tr
+                            .segments(&w)
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "word" => tr.phonemize_word(&w, false),
+                    "final" => tr.phonemize_word(&w, true),
+                    _ => tr.nativise(&w),
+                }
+            })
+        }
+        "tr-numbers" => {
+            let tr = vernacula_phonemizer::languages::turkish::turkish::create_turkish().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "words" => {
+                    tr.number_to_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                }
+                "ordinal" => tr
+                    .ordinal_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                    .unwrap_or_else(|| JsString::from("\u{0}none")),
+                _ => {
+                    let words = if input["words"].is_null() {
+                        Vec::new()
+                    } else {
+                        units(&input["words"]).split(&JsString::from(" "))
+                    };
+                    JsString::join(
+                        &tr.attach_suffix(&words, &units(&input["suffix"])),
+                        &JsString::from("|"),
+                    )
+                }
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
