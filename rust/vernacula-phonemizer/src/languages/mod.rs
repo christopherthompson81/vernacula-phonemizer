@@ -9,6 +9,7 @@ pub mod korean;
 pub mod mandarin;
 pub mod portuguese;
 pub mod portuguese_br;
+pub mod russian;
 pub mod spanish;
 pub mod thai;
 

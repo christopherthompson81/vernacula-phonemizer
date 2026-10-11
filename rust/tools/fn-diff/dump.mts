@@ -22,7 +22,7 @@ const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
-    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru",
 };
 
 /**
@@ -971,6 +971,66 @@ const dumps: Record<string, () => void | Promise<void>> = {
             for (const lang of ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr"])
                 emit({ text: units(line), lang }, process.env.BEST ? await phonemizeAsync(line, lang) : phonemize(line, lang));
         }
+    },
+    // ── Russian (ru). Texts: the ru golden, FLEURS ru_ru (columns 3 and 4) and probes/ru.txt. ──
+    // normalize.ts's two passes per text, and isUnreadableRussian over every letter run (as written and lowercased).
+    async "ru-normalize"() {
+        const N = await import("../../../src/languages/russian/normalize.ts");
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["ru"], FLEURS_DIR.ru, ["ru.txt"])) {
+            const n = N.normalizeRussian(t);
+            emit({ text: units(t), op: "normalize", src }, n);
+            emit({ text: units(t), op: "initialisms", src }, N.normalizeRussianInitialisms(n));
+            for (const w of t.match(/\p{L}[\p{L}\p{M}]*/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), op: "unreadable" }, N.isUnreadableRussian(w) ? "1" : "0");
+    },
+    // phonemizeWord over every Cyrillic run of the texts (as written and lowercased), every 1-3 letter string of
+    // the alphabet, every 4-letter string of the context letters, every 50th stress.tsv key and every hard-e.tsv
+    // key; toIpa with off-range stress ordinals and hard lists.
+    async "ru-g2p"() {
+        const R = await import("../../../src/languages/russian/russian.ts");
+        const { toIpa } = await import("../../../src/languages/russian/g2p.ts");
+        const RU = new URL("../../../src/languages/russian/russian.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("ru")) for (const w of t.match(/[а-яёА-ЯЁ]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        const abc = [..."абвгдеёжзийклмнопрстуфхцчшщъыьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."тдсзжчцьяеиоайн"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        const stress = loadTsvMap(RU, "stress.tsv", Number);
+        let i = 0;
+        for (const k of stress.keys()) if (i++ % 50 === 0) words.add(k);
+        const hard = loadTsvMap(RU, "hard-e.tsv", (v) => v.split(",").map(Number));
+        for (const k of hard.keys()) words.add(k);
+        for (const w of words) emit({ word: units(w), op: "word" }, R.phonemizeWord(w));
+        const samples = ["тест", "стенд", "кафе", "интернет", "молоко", "здравствуйте", "объём", "", "щ", "аэ", "ёж"];
+        const ords = [0, 1, 2, 3, -1, -0, 1.5, NaN, 99, Infinity];
+        const hards: (number[] | undefined)[] = [undefined, [], [0], [1], [0, 1, 2], [5], [-1], [1.5], [NaN]];
+        for (const w of samples) for (const o of ords) for (const h of hards)
+            emit({ word: units(w), op: "toipa", ord: String(o), hard: h === undefined ? null : h.map(String) }, toIpa(w, o, h));
+    },
+    // numberToWords (with and without raw) and russianOrdinal.
+    async "ru-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/russian/numbers.ts");
+        const { russianOrdinal } = await import("../../../src/languages/russian/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 1234567 * 10 ** (e - 4) + 42);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 21, k * 1e6, k * 1e6 + 2001, k * 1e6 + 1000);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1.5, -1, -21, -0, NaN, Infinity, -Infinity, 0.1, 1e-7);
+        for (const n of ns) {
+            emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+            emit({ n: String(n), raw: null, op: "ordinal" }, russianOrdinal(n) ?? "\u0000none");
+        }
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "𝟙2"])
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+    },
+    // normalizeRomans with Russian's policy (registry.ts romanRu) over the Russian texts.
+    async "ru-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/russian/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["ru"], FLEURS_DIR.ru, ["ru.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
 };
 

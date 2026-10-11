@@ -10,4 +10,4 @@ cargo run --release -p parity               # the golden gate, every ported lang
 ```
 
 Status: ported, each byte-identical to its golden (`registry::LANGUAGES`): en, en-GB, ja, it, es, pt, pt-BR,
-hi, cmn, fr, el, ko, th. A foreign run routed to an unported engine is reported by `registry::port_pending()`.
+hi, cmn, fr, el, ko, th, ru. A foreign run routed to an unported engine is reported by `registry::port_pending()`.
