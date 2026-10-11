@@ -51,14 +51,16 @@ import { postposedSign } from "../../core/postposedSign.ts";
 import { rewrite } from "../../core/provenance.ts";
 
 /**
- * Suppletive ordinals 1-4 and 9. Nepali's ordinal has ONE form (no gender/number agreement written on it,
- * unlike Hindi's वाँ/वीं/वें or Marathi's वा/वी/वे/व्या), so this is a flat map. All five spellings are
- * ne_np corpus-attested as running words: पहिलो, दोस्रो, तेस्रो, चौथो, नवौं/नवौँ. 9 is here because नौ
- * takes the stem नव- before the suffix; 6 (छैटौं) is NOT here and is NOT invented — it is un-attested in
- * corpus and referee alike, so `ordinal()` returns undefined for 6 and the numeral is left as written.
+ * Suppletive ordinals 1-4, 6 and 9. Nepali's ordinal has ONE form (no gender/number agreement written on it,
+ * unlike Hindi's वाँ/वीं/वें or Marathi's वा/वी/वे/व्या), so this is a flat map. All six spellings are
+ * ne_np corpus-attested as running words: पहिलो, दोस्रो, तेस्रो, चौथो, छैठौं/छैठौँ, नवौं/नवौँ. 9 is here
+ * because नौ takes the stem नव- before the suffix, and 6 because छ takes छैठ- (the regular join would give
+ * छौं, a different word). 6 used to be declined as un-attested, but that search looked for छैटौं with ट,
+ * which is ×0. The corpus spells it with ठ (×1 each with anusvara and chandrabindu). Declining it left
+ * `6 औं` reading [t͡sʰˈʌ ˈʌũ], the stray syllable the ordinal rule exists to remove (#1536).
  */
 const IRREGULAR: Readonly<Record<number, string>> = {
-    1: "पहिलो", 2: "दोस्रो", 3: "तेस्रो", 4: "चौथो", 9: "नवौं",
+    1: "पहिलो", 2: "दोस्रो", 3: "तेस्रो", 4: "चौथो", 6: "छैठौं", 9: "नवौं",
 };
 
 /**
@@ -81,13 +83,11 @@ const UNIT_ALT = Object.keys(UNIT_WORD).sort((a, b) => b.length - a.length).join
  *  words as an "or" (र/वा, गुच्छा/समूह, मा/बाट) — and crucially `100 गज/ मिटर` and `25 गज/मिटर` are
  *  "yards-or-metres", not "yards per metre", so मिटर must NOT be a denominator. */
 const RATE_NUM = "किलोमिटर|मिलिमिटर|सेन्टिमिटर|मिटर|माइल|किमी|मिमी|गज";
+/** The denominators that are genuinely rates, and this closed alternation IS the guard. `मिटर` is in RATE_NUM
+ *  but not here, by the note above. A second copy of these four words used to be checked in the rate callback
+ *  as a "tripwire". It could never decline, because every word this alternation can capture was in it, and
+ *  anyone widening this list would widen the copy in the same edit. Removed (#1536). */
 const RATE_DEN = "घण्टा|सेकेण्ड|सेकेन्ड|मिनेट";
-/** The denominators that are genuinely rates. `मिटर` appears in RATE_NUM but not here, by the note above.
- *  ⚠ THIS SET IS A BELT-AND-BRACES RE-STATEMENT OF `RATE_DEN`, NOT A NARROWING OF IT — the two lists are the
- *  same four words, so the callback's decline branch cannot fire today. It is kept as a TRIPWIRE: the day a
- *  word is added to RATE_DEN for its numerator sense (as मिटर would have been), the rule declines it here
- *  instead of silently reading "yards PER metre". Delete one and the other stops being a guard. */
-const RATE_DEN_OK = new Set(["घण्टा", "सेकेण्ड", "सेकेन्ड", "मिनेट"]);
 
 /**
  * Currency sign → the Nepali noun. डलर (corpus ×6) and पाउन्ड (corpus ×2) are the two that DIFFER
@@ -176,7 +176,6 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
     const ordinal = (n: number, suffix: string): string | undefined => {
         const irr = IRREGULAR[n];
         if (irr !== undefined) return irr;
-        if (n === 6) return undefined; // छैटौं is un-attested in this repo's ne data — do not invent it
         const words = cardinal(n);
         if (words.length === 0 || words.some((w) => w === "")) return undefined;
         const last = words[words.length - 1]!;
@@ -250,10 +249,9 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
         //    spelled `1,00,000 औं` matches neither alternative and strands its suffix exactly as the bare
         //    `(\d+)` did. ×0 in the corpus (`1,000 औँ` is the only grouped ordinal, ×1) and the same shape is
         //    inherited by every Devanagari sibling, so it is filed rather than fixed here alone.
-        //    ⚠ Also filed: when the rule DECLINES — n = 6 (छैटौं un-attested; see `ordinal`) or n above 2⁵³ —
-        //    the numeral is left as written and the suffix reads on its own as [ˈʌũ], which is the stray
-        //    stressed syllable this whole rule exists to remove. Both are ×0 in the corpus: every `6 औँ` hit
-        //    is the tail of `16 औँ`.
+        //    ⚠ Also filed: when the rule DECLINES (n above 2⁵³) the numeral is left as written and the
+        //    suffix reads on its own as [ˈʌũ], which is the stray stressed syllable this whole rule exists to
+        //    remove. ×0 in the corpus. (n = 6 used to decline the same way; it is now छैठौं, see IRREGULAR.)
         s = rewrite(s,
             /(?<![\d.,:])([1-9]\d{0,2}(?:,\d{3})+|\d+)\s?(औं|औँ)(?![\p{L}\p{M}])/gu,
             (whole, digits: string, suffix: string) => {
@@ -409,8 +407,7 @@ export function makeNepaliNormalizer(numbers: NumbersDef): (text: string) => str
                 `(?<![\\p{L}\\p{M}])(${RATE_NUM})\\s*/\\s*(${RATE_DEN})(?![\\p{L}\\p{M}])`,
                 "gu",
             ),
-            (whole, num: string, den: string) =>
-                RATE_DEN_OK.has(den) ? `${UNIT_WORD[num] ?? num} प्रति ${den}` : whole,
+            (_m, num: string, den: string) => `${UNIT_WORD[num] ?? num} प्रति ${den}`,
         );
 
         // 11) RANGES N-M → "N देखि M". THE ASCENDING GUARD IS EVIDENCE, NOT CAUTION, and the ne_np corpus

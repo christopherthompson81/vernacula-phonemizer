@@ -14,11 +14,12 @@ use crate::js_re;
 use crate::languages::hindi::normalize::TextFn;
 
 // Generated from the TS object literals (key order preserved).
-const IRREGULAR: [(f64, &str); 5] = [
+const IRREGULAR: [(f64, &str); 6] = [
     (1.0, "पहिलो"),
     (2.0, "दोस्रो"),
     (3.0, "तेस्रो"),
     (4.0, "चौथो"),
+    (6.0, "छैठौं"),
     (9.0, "नवौं"),
 ];
 const UNIT_WORD: [(&str, &str); 4] = [
@@ -29,7 +30,6 @@ const UNIT_WORD: [(&str, &str); 4] = [
 ];
 const RATE_NUM: &str = "किलोमिटर|मिलिमिटर|सेन्टिमिटर|मिटर|माइल|किमी|मिमी|गज";
 const RATE_DEN: &str = "घण्टा|सेकेण्ड|सेकेन्ड|मिनेट";
-const RATE_DEN_OK: [&str; 4] = ["घण्टा", "सेकेण्ड", "सेकेन्ड", "मिनेट"];
 const CURRENCY: [(&str, &str); 4] = [("$", "डलर"), ("£", "पाउन्ड"), ("€", "युरो"), ("¥", "येन")];
 const NUM: &str = r"\d+(?:[.,]\d+)*(?![\d]|[.,]\d)";
 const MAGNITUDE_ALT: &str = "मिलियन|बिलियन|ट्रिलियन|खरब|अर्ब|करोड|लाख|हजार";
@@ -136,9 +136,6 @@ pub fn make_nepali_normalizer(numbers: &NumbersDef) -> TextFn {
         let ordinal = |n: f64, suffix: &str| -> Option<String> {
             if let Some((_, irr)) = IRREGULAR.iter().find(|(k, _)| *k == n) {
                 return Some(irr.to_string());
-            }
-            if n == 6.0 {
-                return None;
             }
             let mut words = cardinal(n, d);
             if words.is_empty() || words.iter().any(|w| w.is_empty()) {
@@ -342,9 +339,6 @@ pub fn make_nepali_normalizer(numbers: &NumbersDef) -> TextFn {
         s = rewrite_with(&s, &RATE, |m, full| {
             let num = m.group(1, full).unwrap_or_default().to_string_lossy();
             let den = m.group(2, full).unwrap_or_default().to_string_lossy();
-            if !RATE_DEN_OK.contains(&den.as_str()) {
-                return m.value(full);
-            }
             js(&format!(
                 "{} प्रति {den}",
                 lookup(&UNIT_WORD, &num).unwrap_or(&num)

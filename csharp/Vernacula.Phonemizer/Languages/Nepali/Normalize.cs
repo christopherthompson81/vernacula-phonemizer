@@ -11,10 +11,10 @@ namespace Vernacula.Phonemizer.Languages.Nepali;
 
 public static class Normalize
 {
-    /** Suppletive ordinals 1-4 and 9; 6 is deliberately absent — see normalize.ts. */
+    /** Suppletive ordinals 1-4, 6 and 9 — see normalize.ts. */
     private static readonly IReadOnlyDictionary<double, string> IRREGULAR = new Dictionary<double, string>
     {
-        [1] = "पहिलो", [2] = "दोस्रो", [3] = "तेस्रो", [4] = "चौथो", [9] = "नवौं",
+        [1] = "पहिलो", [2] = "दोस्रो", [3] = "तेस्रो", [4] = "चौथो", [6] = "छैठौं", [9] = "नवौं",
     };
 
     /** Devanagari unit abbreviations → the full Nepali word, matched only after a digit. */
@@ -28,7 +28,6 @@ public static class Normalize
 
     private const string RATE_NUM = "किलोमिटर|मिलिमिटर|सेन्टिमिटर|मिटर|माइल|किमी|मिमी|गज";
     private const string RATE_DEN = "घण्टा|सेकेण्ड|सेकेन्ड|मिनेट";
-    private static readonly HashSet<string> RATE_DEN_OK = new(StringComparer.Ordinal) { "घण्टा", "सेकेण्ड", "सेकेन्ड", "मिनेट" };
 
     private static readonly IReadOnlyDictionary<string, string> CURRENCY = new Dictionary<string, string>(StringComparer.Ordinal)
     {
@@ -116,7 +115,6 @@ public static class Normalize
         string? Ordinal(double n, string suffix)
         {
             if (IRREGULAR.TryGetValue(n, out var irr)) return irr;
-            if (n == 6) return null; // छैटौं is un-attested in this repo's ne data — do not invent it
             var words = Cardinal(n);
             if (words.Count == 0 || words.Any(w => w == "")) return null;
             var last = words[^1];
@@ -205,9 +203,7 @@ public static class Normalize
             {
                 var num = m.Groups[1].Value;
                 var den = m.Groups[2].Value;
-                return RATE_DEN_OK.Contains(den)
-                    ? $"{(UNIT_WORD.TryGetValue(num, out var w) ? w : num)} प्रति {den}"
-                    : m.Value;
+                return $"{(UNIT_WORD.TryGetValue(num, out var w) ? w : num)} प्रति {den}";
             });
 
             // Ranges fire only when ASCENDING: every descending or equal pair in this corpus is a sports
