@@ -750,7 +750,7 @@ impl SymbolNormalizer {
             let key = if cur.contains_key(sym) {
                 sym.clone()
             } else {
-                js_re!(r"[\s​‌]+", "gu").replace(sym, &JsString::new())
+                js_re!(r"[\s\u200b\u200c]+", "gu").replace(sym, &JsString::new())
             };
             let forms = &cur[&key];
             let already = &d.cur_said[&key];
