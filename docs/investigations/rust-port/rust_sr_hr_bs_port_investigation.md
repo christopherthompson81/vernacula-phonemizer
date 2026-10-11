@@ -138,3 +138,72 @@ clippy: only module_inception on croatian::croatian in the new files
 `Bilo je 7. hasOwnProperty i 3. toString.` → `Bilo je undefined hasOwnProperty i undefined toString.` (TS).
 
 **Implication.** Commit hr; port Bosnian.
+
+## Run 6 — 2026-10-11 09:50 (Bosnian: port, differentials over all three, trace, pins)
+
+**Question.** With `bosnian/{manifest,numbers,normalize,bosnian}.rs` ported (TOKEN and the nativiser are
+Serbian's character for character, so they are reused) and `bs` registered, do all gates hold for the three
+standards together?
+
+**Command.** `./target/release/parity bs`; `sh-normalize` (all three), `sh-g2p`, `sh-numbers` (all three tables),
+`LANGS=bs phonemize-sync` / `phonemize-best`, `LANGS=sr,hr,bs trace`; new synthetic `probes/bs.txt` (29 lines);
+pins; full gates. A small Python count over the sh-normalize dump measures how many texts normalize CHANGES
+(the haystack check).
+
+**Raw finding.**
+```
+parity bs:              200/200 identical, 0 differ
+sh-normalize sr+hr+bs:  173673 identical, 0 DIFFER  (golden 1252 / fleurs 46452 / probe 492 / synthetic 83712 / words 41765)
+sh-g2p:                 839872 identical, 0 DIFFER
+sh-numbers (3 tables):   81198 identical, 0 DIFFER
+phonemize-sync bs:        3990 identical, 0 DIFFER
+phonemize-best bs:        3990 identical, 0 DIFFER
+trace sr+hr+bs:          12049 identical, 0 DIFFER
+pins: test/bosnian.test.ts 102 extracted, 20 skipped (the extractor first threw on a multi-line expected
+      literal — `lit("\n  \"…\"")` returned undefined after `return` + newline; fixed by trimming)
+cargo test --release --workspace: 135 + 1 passed; parity all 23 languages 200/200
+clippy: only module_inception on the three new language modules
+```
+Texts normalize changes (changed / total): sr golden 19/112, FLEURS 515/3832, probe 45/57; hr golden 18/95,
+FLEURS 584/3925, probe 37/38; bs golden 21/106, FLEURS 623/3856, probe 27/28; synthetic 2879 / 4389 / 4041 of
+6976. So the golden reaches roughly one text in six, FLEURS one in seven, and the probes nearly all.
+
+**Implication.** Commit bs. Findings next.
+
+## Run 7 — 2026-10-11 10:05 (TS findings from reading; reported, not fixed)
+
+**Command.** `npx tsx .probe/sh/check.mts <lang> <text>` (normalize, phonemize, phonemizeWord in the TS) and
+`.probe/sh/tr.mts` (phonemizeTrace). Every input is synthetic.
+
+**Raw finding (TS output, verbatim):**
+1. **Object.prototype names after `N.` read `undefined`** (sr, hr, bs). `LICENSOR` is a plain object.
+   sr/bs lowercase the key through `lat`, so only `constructor` reaches it: `Bilo je 5. constructor i dalje.`
+   → `Bilo je undefined constructor i dalje.` (IPA `… ˈundefined t͡sˈonstrut͡stor …`); bs's coordinated pair
+   doubles it: `U 3. i 4. constructor.` → `U undefined i undefined constructor.` Croatian does not lowercase, so
+   `hasOwnProperty`, `toString`, `valueOf`, `isPrototypeOf`, `propertyIsEnumerable`, `toLocaleString` all reach
+   it: `Bilo je 7. hasOwnProperty i 3. toString.` → `Bilo je undefined hasOwnProperty i undefined toString.`
+   A `Map` or `Object.hasOwn` fixes it. 0 corpus hits (synthetic only).
+2. **Serbian's middle dotted-abbreviation arm lacks the #1122 miss guard** (the other two arms have it; Bosnian's
+   has it): `Voće итᲁ., даље` (U+1C81, which `iu` folds onto д) → `Voće undefined, даље`.
+3. **A clock before a full stop or comma is not read** (sr, bs: `(?![\d:.,])`; hr: `(?![:.\d])`). `Sastanak u
+   11:00.` → unchanged, IPA `… jedˈa˩˥naest , nˈu˥˩la .` (the colon read as a pause). The same defect Ukrainian
+   has (rust_uk_port_investigation.md Run 5, finding 7).
+4. **Serbian's first dotted-abbreviation arm eats a sentence end before a capital**: `Voće, povrće itd. Sutra
+   idemo.` → `… i tako dalje Sutra idemo.` (no pause). Bosnian's own header documents this as the divergence it
+   fixed; Serbian keeps it.
+5. **Croatian's prenominal-Roman slot heuristic reads `-u` as nominative**: `U I. stoljeću.` → `U prvi stoljeću.`
+   (`prvom` wanted; `stoljeću` is locative). Multi-letter numerals never reach step 4b through the registry (the
+   shared Roman pass turns `IV.` into `4.` and the licensor gives `četvrtom`), so only `I.` and `V.` show it.
+6. **Croatian's elided-year rule claims a fraction denominator**: `Vrijednost 2/1000.` → `Vrijednost
+   2/tisućite.` The lookbehind `(?<![\d.,\-])` does not exclude `/`.
+7. **Bosnian's `intOf` calls `rewrite` on a numeral string** (on the provenance seam, though `n` is not the
+   pipeline string). Measured harmless today: `phonemizeTrace("Brzina je 3 m/s i dalje.", "bs")` is
+   `traced: true`, 9/9 input spans (the enclosing rewrite recommits the mapping). Reproduced in Rust
+   (`rewrite`/`rewrite_lit`); the `trace` replay agrees.
+
+Every table the three manifests declare is read (checked field by field), and every TS module in the three
+directories has a Rust twin. Nothing in the goldens, FLEURS or probes routes a run to an unported engine, so no
+row is port-pending.
+
+**Implication.** Reported in the PR; Rust reproduces the TS (findings 1 and 2 are pinned by probe and
+synthetic rows in the dumps).

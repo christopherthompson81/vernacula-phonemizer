@@ -384,7 +384,7 @@ pub fn foreign_letters(w: &JsString) -> JsString {
     })
 }
 
-static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
+pub(crate) static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     let run = host_word_run(&["Latin"], "а-шђјљњћџ", "").unwrap();
     JsRegex::new(&format!(r"({run})|(\d+)|([.!?…,;:])"), "giu").unwrap()
 });

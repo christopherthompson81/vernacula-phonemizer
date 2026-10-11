@@ -1,3 +1,4 @@
+pub mod bosnian;
 pub mod croatian;
 pub mod dutch;
 pub mod english;
