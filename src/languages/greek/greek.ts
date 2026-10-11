@@ -21,6 +21,10 @@ import { MANIFEST } from "./manifest.ts";
 const V = MANIFEST.vowels;
 const VD = MANIFEST.vowelDigraphs;
 const C = MANIFEST.consonants;
+// The digraph readings and the before-a-front-vowel forms. The scan supplies the CONTEXT (where the [ŋ] of
+// the γ-nasal digraphs and the [m n] of medial μπ ντ go); the sounds come from these two tables.
+const CD = MANIFEST.consonantDigraphs;
+const PAL = MANIFEST.palatal;
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 
 // Stress tonos → base vowel (stress is tracked separately, then stripped from the output).
@@ -58,8 +62,12 @@ function matchVowel(w: string, i: number): [number, string] | null {
 function scan(word: string, forceSyn: boolean): string {
     const raw = word.toLowerCase();
     // Which orthographic positions carry the stress tonos — needed for synizesis (unstressed i only).
-    const stressed = [...raw].map((ch) => STRESSED.has(ch));
-    const w = [...raw].map((ch) => TONOS[ch] ?? ch).join("");
+    // ⚠ PER UTF-16 UNIT, because `w` is indexed by unit. Built per code point it fell one out of step after
+    // an astral character (`😀τσάι` lost its hiatus, #1510). Every key of `tonos` is one unit, so splitting a
+    // surrogate pair loses nothing: neither half is a key, and the join puts the pair back.
+    const units = raw.split("");
+    const stressed = units.map((ch) => STRESSED.has(ch));
+    const w = units.map((ch) => TONOS[ch] ?? ch).join("");
     let out = "";
     let i = 0;
     const n = w.length;
@@ -92,9 +100,8 @@ function scan(word: string, forceSyn: boolean): string {
         // γ-nasal digraphs ⟨γγ γκ γχ γξ⟩ → [ŋ] + stop/fricative (palatalised before a front vowel). Word-initial
         // ⟨γκ⟩ has no [ŋ]. Before the double-consonant rule so ⟨γγ⟩ isn't taken for a geminate.
         if (two === "γγ" || two === "γκ" || two === "γχ" || two === "γξ") {
-            const fr = front(i + 2);
             const nasal = two === "γκ" && i === 0 ? "" : "ŋ";
-            out += nasal + (two === "γξ" ? "ks" : two === "γχ" ? (fr ? "ç" : "x") : fr ? "ɟ" : "ɡ");
+            out += nasal + ((front(i + 2) ? PAL[two] : undefined) ?? CD[two]!);
             i += 2;
             continue;
         }
@@ -106,13 +113,13 @@ function scan(word: string, forceSyn: boolean): string {
             (two === "μπ" || two === "ντ") &&
             (matchVowel(w, i + 2) !== null || afterMpNt === "ρ" || afterMpNt === "λ")
         ) {
-            const voiced = two === "μπ" ? "b" : "d";
-            out += i === 0 ? voiced : (two === "μπ" ? "m" : "n") + voiced;
+            const voiced = CD[two]!;
+            out += i === 0 ? voiced : C[two[0]!]! + voiced;
             i += 2;
             continue;
         }
         if (two === "τσ" || two === "τζ") {
-            out += two === "τσ" ? "t͡s" : "d͡z";
+            out += CD[two]!;
             i += 2;
             continue;
         }
@@ -166,7 +173,7 @@ function scan(word: string, forceSyn: boolean): string {
             }
             // Velar palatalisation before a front vowel (the [i] is kept: γίδα → ʝiða).
             if ((ch === "κ" || ch === "γ" || ch === "χ") && front(i + 1)) {
-                out += ch === "κ" ? "c" : ch === "γ" ? "ʝ" : "ç";
+                out += PAL[ch]!;
                 i++;
                 continue;
             }
@@ -221,9 +228,10 @@ export function phonemizeWordForced(word: string): string {
 }
 
 // Greek uses `;` as the question mark and the ANO TELEIA as a semicolon. The corpus writes the latter as
-// U+00B7 MIDDLE DOT (all 10 instances); U+0387 GREEK ANO TELEIA is the canonical codepoint but sits INSIDE
-// the Greek letter range of the first group, so it could never reach this alternation — normalize.ts step 0
-// folds it to U+00B7 instead of widening the class here.
+// U+00B7 MIDDLE DOT (all 10 instances); U+0387 GREEK ANO TELEIA and U+037E GREEK QUESTION MARK are the
+// canonical codepoints but sit INSIDE the Greek letter range of the first group, so they could never reach
+// this alternation — normalize.ts step 0's NFC takes them to U+00B7 and `;` instead of widening the class
+// here. The same step folds every Greek Extended letter, so that range only ever holds spacing marks.
 const TOKEN = /([Ͱ-Ͽἀ-῿]+)|(\d+)|([.!;?…,:·])/gu;
 
 class GreekPhonemizer implements Phonemizer {

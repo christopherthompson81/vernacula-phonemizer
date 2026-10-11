@@ -9,17 +9,23 @@ use crate::js_re;
 use super::manifest::{GreekNumbers, try_manifest};
 
 // Generated from the TS object literal by .probe/el/gen_tables.mts (key order preserved).
-const FEMININE: [(&str, &str); 3] = [("ένα", "μία"), ("τρία", "τρεις"), ("τέσσερα", "τέσσερις")];
+const FEMININE: [(&str, &str); 5] = [
+    ("ένα", "μία"),
+    ("τρία", "τρεις"),
+    ("τέσσερα", "τέσσερις"),
+    ("δεκατρία", "δεκατρείς"),
+    ("δεκατέσσερα", "δεκατέσσερις"),
+];
 
 fn below100(nn: &GreekNumbers, n: usize) -> String {
     if n < 10 {
         return nn.units[n].clone();
     }
-    if n == 10 {
-        return nn.ten.clone();
+    let u = n % 10;
+    if n / 10 == 1 {
+        return nn.teens[u].clone();
     }
     let tens = &nn.tens[n / 10];
-    let u = n % 10;
     if u != 0 {
         format!("{tens} {}", nn.units[u])
     } else {
@@ -31,13 +37,13 @@ fn below1000(nn: &GreekNumbers, n: usize) -> String {
     if n < 100 {
         return below100(nn, n);
     }
-    let hundred = &nn.hundreds[n / 100];
+    let h = n / 100;
     let r = n % 100;
-    if r != 0 {
-        format!("{hundred} {}", below100(nn, r))
-    } else {
-        hundred.clone()
+    if r == 0 {
+        return nn.hundreds[h].clone();
     }
+    let hundred = if h == 1 { &nn.hundred } else { &nn.hundreds[h] };
+    format!("{hundred} {}", below100(nn, r))
 }
 
 fn feminine(s: &str) -> String {

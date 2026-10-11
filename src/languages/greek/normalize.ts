@@ -30,7 +30,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 // ── data ────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -209,14 +209,22 @@ function spellLatin(run: string): string {
 
 /** Normalize one Modern Greek input string. Pure text→text. */
 export function normalizeGreek(input: string): string {
-    let s = input;
-
-    // 0) ANO TELEIA. Greek's semicolon is canonically U+0387, but that codepoint sits INSIDE the Greek
-    //    letter range the engine's TOKEN uses for words, so it would be swallowed into the preceding word
-    //    run and never reach the clause-mark alternation. Folded to U+00B7 MIDDLE DOT, which is what the
-    //    corpus actually types (all 10 instances) and what greek.jsonc maps. Cheaper and safer than
-    //    widening the letter class, which is shared with every other Greek rule.
-    s = rewrite(s, /\u0387/gu, "\u00b7");
+    // 0) NFC AT THE ENTRY, then the POLYTONIC FOLD (#1510).
+    //    · A DECOMPOSED tonos (U+0301) is not in TOKEN's letter class, so NFD input split every accented word
+    //      and lost the tonos-driven hiatus and synizesis: `τσάι` read `t͡sa i`, `κοιλιά` read `cilia`.
+    //    · NFC ALSO TAKES BOTH GREEK PUNCTUATION SINGLETONS, which sit INSIDE TOKEN's letter range `Ͱ-Ͽ` and
+    //      were swallowed into the preceding word: U+0387 ANO TELEIA → U+00B7 MIDDLE DOT (what the corpus
+    //      types, all 10 instances, and what greek.jsonc maps — this used to be its own rewrite), and U+037E
+    //      GREEK QUESTION MARK → `;`, whose question pause was lost. Both are canonical singletons, so no
+    //      NFC text keeps either one.
+    //    · POLYTONIC letters (Greek Extended, U+1F00–U+1FFF) were claimed by TOKEN and then skipped by the
+    //      scan, which knows none of them: `ἀρχή` read `ɾçi` and `Ἡ` vanished. Modern reading drops the
+    //      breathings and the iota subscript, and every accent is the one stress mark, so each letter folds
+    //      to its monotonic twin: ἀ→α, ᾳ→α, ὰ ᾶ→ά, ῗ→ΐ. A spacing mark of the block has no letter to keep.
+    //    ⚠ NFC, NEVER NFKC — compatibility folds rewrite symbols the tier reads (trap 36).
+    let s = renormalize(input, "NFC");
+    s = rewrite(s, /[\u1F00-\u1FFF]/gu, (c) =>
+        c.normalize("NFD").replace(/[\u0313\u0314\u0345]/gu, "").replace(/[\u0300\u0342]/gu, "\u0301").normalize("NFC"));
 
     // 1) LATIN↔GREEK HOMOGLYPHS. FIRST, because every rule after this one assumes that a Latin run is
     //    genuinely foreign text, and these are not — they are Greek words with a lookalike Latin letter

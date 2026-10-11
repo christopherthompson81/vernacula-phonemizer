@@ -36,12 +36,13 @@ pub struct Clock {
 #[derive(Debug, Deserialize)]
 pub struct GreekNumbers {
     pub units: Vec<String>,
-    pub ten: String,
+    /// 10–19, indexed by the unit.
+    pub teens: Vec<String>,
     pub tens: Vec<String>,
+    /// εκατόν: 100 before a remainder (100 alone is `hundreds[1]`).
     pub hundred: String,
     pub hundreds: Vec<String>,
     pub thousand: String,
-    pub and: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -96,7 +97,8 @@ pub struct GreekManifest {
 ///
 /// Validated here so nothing downstream indexes a short table or misses a key the TS asserts with `!`:
 /// the cardinal, ordinal and clock tables are indexed by number, `palatal` must hold κ γ χ (greek.ts builds
-/// `SYN_PAL` from them) `homoglyphs` must hold H and O (normalize.ts step 1's sentence-initial article) and `ordinals.endings`
+/// `SYN_PAL` from them, and its front-vowel rule reads them), `consonantDigraphs` every digraph the scan
+/// matches and `consonants` μ ν (the medial μπ ντ), `homoglyphs` must hold H and O (normalize.ts step 1's sentence-initial article) and `ordinals.endings`
 /// must hold ο (step 2's fixed ending).
 pub fn try_manifest() -> Result<&'static GreekManifest, String> {
     static M: OnceLock<GreekManifest> = OnceLock::new();
@@ -106,6 +108,7 @@ pub fn try_manifest() -> Result<&'static GreekManifest, String> {
         let c = &m.clock;
         for (name, v, need) in [
             ("numbers.units", &n.units, 10),
+            ("numbers.teens", &n.teens, 10),
             ("numbers.tens", &n.tens, 10),
             ("numbers.hundreds", &n.hundreds, 10),
             ("ordinals.units", &m.ordinals.units, 13),
@@ -125,6 +128,16 @@ pub fn try_manifest() -> Result<&'static GreekManifest, String> {
         for k in ["κ", "γ", "χ"] {
             if !m.palatal.contains_key(k) {
                 return Err(format!("greek.jsonc: palatal.{k} missing"));
+            }
+        }
+        for k in ["γγ", "γκ", "γχ", "γξ", "μπ", "ντ", "τσ", "τζ"] {
+            if !m.consonant_digraphs.contains_key(k) {
+                return Err(format!("greek.jsonc: consonantDigraphs.{k} missing"));
+            }
+        }
+        for k in ["μ", "ν"] {
+            if !m.consonants.contains_key(k) {
+                return Err(format!("greek.jsonc: consonants.{k} missing"));
             }
         }
         if !m.ordinals.endings.contains_key("ο") {

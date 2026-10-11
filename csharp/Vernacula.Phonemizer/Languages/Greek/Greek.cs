@@ -12,6 +12,8 @@ public sealed class GreekPhonemizer : ILanguage
     private static IReadOnlyDictionary<string, string> V => Manifest.MANIFEST.Vowels;
     private static IReadOnlyDictionary<string, string> VD => Manifest.MANIFEST.VowelDigraphs;
     private static IReadOnlyDictionary<string, string> C => Manifest.MANIFEST.Consonants;
+    private static IReadOnlyDictionary<string, string> CD => Manifest.MANIFEST.ConsonantDigraphs;
+    private static IReadOnlyDictionary<string, string> PAL => Manifest.MANIFEST.Palatal;
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
 
     private static IReadOnlyDictionary<string, string> TONOS => Manifest.MANIFEST.Tonos;
@@ -61,7 +63,8 @@ public sealed class GreekPhonemizer : ILanguage
         // ⚠ Js.ToLowerCase, NOT ToLowerInvariant — .NET has no Greek final-sigma rule in any culture, so
         // `ΠΟΙΟΣ` lowercased to ποιοσ here and to ποιος in Node, and `isCons` excludes ς by name.
         var raw = Js.ToLowerCase(word);
-        var chars = Js.CodePoints(raw);
+        // Per UTF-16 unit, as `w` is indexed (every `tonos` key is one unit).
+        var chars = raw.Select(ch => ch.ToString()).ToArray();
         var stressedArr = chars.Select(ch => STRESSED.Contains(ch)).ToArray();
         var w = string.Concat(chars.Select(ch => TONOS.TryGetValue(ch, out var t) ? t : ch));
         bool Stressed(int p) => p >= 0 && p < stressedArr.Length && stressedArr[p];
@@ -98,9 +101,8 @@ public sealed class GreekPhonemizer : ILanguage
             var two = Slice(w, i, i + 2);
             if (two == "γγ" || two == "γκ" || two == "γχ" || two == "γξ")
             {
-                var fr = Front(i + 2);
                 var nasal = two == "γκ" && i == 0 ? "" : "ŋ";
-                outSb.Append(nasal).Append(two == "γξ" ? "ks" : two == "γχ" ? (fr ? "ç" : "x") : fr ? "ɟ" : "ɡ");
+                outSb.Append(nasal).Append(Front(i + 2) && PAL.TryGetValue(two, out var pal) ? pal : CD[two]);
                 i += 2;
                 continue;
             }
@@ -108,14 +110,14 @@ public sealed class GreekPhonemizer : ILanguage
             if ((two == "μπ" || two == "ντ")
                 && (MatchVowel(w, i + 2) is not null || afterMpNt == "ρ" || afterMpNt == "λ"))
             {
-                var voiced = two == "μπ" ? "b" : "d";
-                outSb.Append(i == 0 ? voiced : (two == "μπ" ? "m" : "n") + voiced);
+                var voiced = CD[two];
+                outSb.Append(i == 0 ? voiced : C[two[0].ToString()] + voiced);
                 i += 2;
                 continue;
             }
             if (two == "τσ" || two == "τζ")
             {
-                outSb.Append(two == "τσ" ? "t͡s" : "d͡z");
+                outSb.Append(CD[two]);
                 i += 2;
                 continue;
             }
@@ -163,7 +165,7 @@ public sealed class GreekPhonemizer : ILanguage
                 }
                 if ((ch == "κ" || ch == "γ" || ch == "χ") && Front(i + 1))
                 {
-                    outSb.Append(ch == "κ" ? "c" : ch == "γ" ? "ʝ" : "ç");
+                    outSb.Append(PAL[ch]);
                     i++;
                     continue;
                 }

@@ -145,7 +145,9 @@ public static class Normalize
     }
 
     // ── compiled patterns (the TS builds several of these per call with `new RegExp`) ───────────────────
-    private static readonly JsRe ANO_TELEIA = JsRegex.Compile("\\u0387", "gu");
+    private static readonly JsRe GREEK_EXTENDED = JsRegex.Compile("[\\u1F00-\\u1FFF]", "gu");
+    private static readonly JsRe BREATHING_SUBSCRIPT = JsRegex.Compile("[\\u0313\\u0314\\u0345]", "gu");
+    private static readonly JsRe GRAVE_CIRCUMFLEX = JsRegex.Compile("[\\u0300\\u0342]", "gu");
     private static readonly JsRe LATIN_TOUCHING_GREEK = JsRegex.Compile(
         "(?<=\\p{Script=Greek})[A-Za-z]+|[A-Za-z]+(?=\\p{Script=Greek})", "gu");
     private static readonly JsRe BARE_O = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d'’-])o(?![\\p{L}\\p{M}\\d'’-])", "gu");
@@ -191,7 +193,10 @@ public static class Normalize
     {
         var s = input;
 
-        s = Rewrite(s, ANO_TELEIA, "·");
+        s = Renormalize(s, NormalizationForm.FormC);
+        s = Rewrite(s, GREEK_EXTENDED, m => Js.Normalize(
+            GRAVE_CIRCUMFLEX.Replace(BREATHING_SUBSCRIPT.Replace(Js.Normalize(m.Value, NormalizationForm.FormD), ""), "\u0301"),
+            NormalizationForm.FormC));
 
         s = Rewrite(s, LATIN_TOUCHING_GREEK, m =>
             string.Concat(Js.CodePoints(m.Value).Select(c => HOMOGLYPH.TryGetValue(c, out var g) ? g : c)));

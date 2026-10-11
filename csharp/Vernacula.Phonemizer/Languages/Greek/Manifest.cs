@@ -9,12 +9,13 @@ namespace Vernacula.Phonemizer.Languages.Greek;
 public sealed class GreekNumbersDef
 {
     public IReadOnlyList<string> Units { get; init; } = Array.Empty<string>();
-    public string Ten { get; init; } = "";
+    /** 10–19, indexed by the unit. */
+    public IReadOnlyList<string> Teens { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> Tens { get; init; } = Array.Empty<string>();
+    /** εκατόν — 100 before a remainder; 100 alone is `Hundreds[1]`. */
     public string Hundred { get; init; } = "";
     public IReadOnlyList<string> Hundreds { get; init; } = Array.Empty<string>();
     public string Thousand { get; init; } = "";
-    public string And { get; init; } = "";
 }
 
 public sealed class GreekOrdinals

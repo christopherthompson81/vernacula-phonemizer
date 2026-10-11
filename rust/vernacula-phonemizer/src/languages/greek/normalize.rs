@@ -13,7 +13,7 @@ use crate::core::normalize_symbols::{
     ExponentWords, PositionDecl, SymbolData, SymbolNormalizer, alternation, make_symbol_normalizer,
     sorted_by_length_desc,
 };
-use crate::core::provenance::{rewrite, rewrite_with};
+use crate::core::provenance::{Form, normalize, renormalize, rewrite, rewrite_with};
 use crate::js_re;
 
 use super::manifest::{GreekManifest, try_manifest};
@@ -214,10 +214,14 @@ impl NormalizeData {
     }
 
     pub(crate) fn normalize(&self, input: &JsString) -> JsString {
-        let mut s = input.clone();
-
-        // 0) ANO TELEIA.
-        s = rewrite(&s, js_re!(r"·", "gu"), &js("\u{00b7}"));
+        // 0) NFC at the entry (which also takes U+0387 → U+00B7 and U+037E → `;`), then the polytonic fold.
+        let mut s = renormalize(input, Form::Nfc);
+        s = rewrite_with(&s, js_re!(r"[\u1F00-\u1FFF]", "gu"), |m, s| {
+            let d = normalize(&m.value(s), Form::Nfd);
+            let d = js_re!(r"[\u0313\u0314\u0345]", "gu").replace(&d, &JsString::new());
+            let d = js_re!(r"[\u0300\u0342]", "gu").replace(&d, &js("\u{0301}"));
+            normalize(&d, Form::Nfc)
+        });
 
         // 1) LATIN↔GREEK HOMOGLYPHS.
         s = rewrite_with(
