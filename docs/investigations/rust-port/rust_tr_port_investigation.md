@@ -25,7 +25,7 @@ entry or a Roman policy; and are the differential inputs where dump.mts expects 
   everything that is not İ/I, which the probes must measure. `initialisms` is given `lower: trLower`; the unreadable
   test inside core still lowercases with plain `toLowerCase` (already ported).
 - ⚠ `/mnt/data/omnivoice_ipa` no longer exists: `/mnt/data` was modified at 20:31 and the tree is now at
-  `/media/chris/TOSHIBA_EXT/omnivoice_ipa/` (tr_tr present, column 3 is a sentence). dump.mts hard-codes the old
+  `<external-drive>/omnivoice_ipa/` (tr_tr present, column 3 is a sentence). dump.mts hard-codes the old
   `FLEURS_ROOT`.
 
 **Implication.** Port manifest → numbers → g2p → normalize → turkish, one file each. For FLEURS, give dump.mts a
