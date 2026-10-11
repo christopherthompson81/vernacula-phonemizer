@@ -93,5 +93,8 @@ Overgangsperiode en voorbereidingstijd en uitvoeringsbesluit en aanbestedingspro
 # a lone surrogate, astral letters and the foreign-script runs
 Een \u{d800} en ge\u{d800}ven en 𝔞ap en 𝐀&𝐁.
 Hij zei привет en 你好 en γεια.
-# reading-for-correctness findings (reproduced, not fixed): grouped decimal, ì ò ù, the orthographic prefix shift, fraction guards, section numbers
+# reading-for-correctness findings (#1524): grouped decimal, ì ò ù, fraction guards fixed; the bound-root prefix shift
+# (tennis, telling, hertog) and section numbers declined
 Het kost 3.000,50 euro, però Niccolò lì, tennis en telling en hertog, 1/2,5 en 1,5/2, hoofdstuk 3.12.
+# #1524 item 3: an e-digraph spelling is not a prefix; a real prefix still shifts
+De beenhouwer en de beurtman beginnen, beamen en beëdigen.

@@ -28,6 +28,18 @@ fn alt(xs: &[String]) -> JsRegex {
 static UNSTRESSED_PREFIX: LazyLock<JsRegex> =
     LazyLock::new(|| alt(&MANIFEST.morphology.prefix_unstressed));
 static SCHWA_PREFIX: LazyLock<JsRegex> = LazyLock::new(|| alt(&MANIFEST.morphology.prefix_schwa));
+/// `DIGRAPH_PREFIX`: a be-/ge-/te- spelling whose ⟨e⟩ the scanner joins with the next letter (⟨ee⟩, ⟨ei⟩, ⟨eu⟩) is
+/// not a prefix, so been·houwer neither shifts nor loses its digraph to schwa (#1524).
+static DIGRAPH_PREFIX: LazyLock<JsRegex> = LazyLock::new(|| {
+    let es: Vec<&str> = MANIFEST
+        .morphology
+        .prefix_unstressed
+        .iter()
+        .filter(|p| p.ends_with('e'))
+        .map(String::as_str)
+        .collect();
+    JsRegex::new(&format!("^(?:{})[eiu]", es.join("|")), "u").unwrap()
+});
 
 /// `CONS_IPA`: the consonant phones a seam can degeminate, each one code unit in the manifest.
 static CONS_IPA: LazyLock<HashSet<JsString>> =
@@ -50,7 +62,11 @@ fn place_stress(segs: &mut [Seg], word: &JsString) -> Option<usize> {
         return None;
     }
     let lower = word.to_lower_case();
-    if nuclei.len() > 1 && UNSTRESSED_PREFIX.test(&lower) && segs[nuclei[1]].ph != schwa() {
+    if nuclei.len() > 1
+        && UNSTRESSED_PREFIX.test(&lower)
+        && !DIGRAPH_PREFIX.test(&lower)
+        && segs[nuclei[1]].ph != schwa()
+    {
         if SCHWA_PREFIX.test(&lower) {
             segs[nuclei[0]].ph = schwa();
         }
@@ -151,7 +167,7 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
 
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        r"(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\d{0,2}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])",
+        r"(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)|([.!?…,;:])",
         "giu",
     )
     .unwrap()
@@ -415,6 +431,52 @@ mod tests {
         }
         for (t, want) in PUBLIC_PINS {
             assert_eq!(crate::phonemize(t, "nl").unwrap().trim(), *want, "{t}");
+        }
+    }
+
+    /// test/dutch-1524.test.ts and the nl row of test/fraction-guards-1495.test.ts: relational or structural.
+    #[test]
+    fn the_1524_findings_are_fixed() {
+        create_dutch().unwrap();
+        let nl = |s: &str| crate::phonemize(s, "nl").unwrap();
+        let same = [
+            // 1) a grouped amount keeps its decimal
+            ("3.000,50 euro", "3000,50 euro"),
+            ("1.000.000,25 euro", "1000000,25 euro"),
+            ("1.000, dan", "1000, dan"),
+            // 2) ì ò ù are vowels
+            ("però", "pero"),
+            ("lì", "li"),
+            ("più", "piu"),
+            // 4) the fraction guards are mirrors
+            ("1/2,5", "1 2,5"),
+            ("1,5/2", "1,5 2"),
+            ("1/2.5", "1 2.5"),
+            ("1.5/2", "1.5 2"),
+            ("3/1/2", "3 1 2"),
+            ("1/2/3", "1 2 3"),
+            ("1/2,3/4", "1/2, 3/4"),
+            ("1/2.", "1/2 ."),
+        ];
+        for (a, b) in same {
+            assert_eq!(nl(a), nl(b), "{a} vs {b}");
+        }
+        assert_ne!(nl("1/3"), nl("1 3"));
+        assert!(to_segments(&js("però")).last().unwrap().vowel);
+        // 3) an e-digraph spelling is not a prefix; a real prefix still shifts
+        for w in ["beenhouwer", "geelzucht", "beurtman", "geilheid", "teelbal"] {
+            let ipa: Vec<char> = phonemize_word(&js(w)).to_string_lossy().chars().collect();
+            let onset = if w.starts_with('g') {
+                'ɣ'
+            } else {
+                w.chars().next().unwrap()
+            };
+            assert_eq!(&ipa[..2], &[onset, 'ˈ'], "{w}");
+            assert!(!ipa[..4].contains(&'ə'), "{w}");
+        }
+        for w in ["beginnen", "gebruiken", "beëdigen", "beamen", "verkopen"] {
+            let ipa: Vec<char> = phonemize_word(&js(w)).to_string_lossy().chars().collect();
+            assert!(!ipa[..2].contains(&'ˈ'), "{w}");
         }
     }
 }

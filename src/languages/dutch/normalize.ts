@@ -252,7 +252,11 @@ export function normalizeDutch(input: string): string {
     // 11) FRACTIONS (×1: `1/5 inch`). Dutch builds these on the ordinal: 1/5 → *een vijfde*, 3/4 → *drie
     //     vierde*, and 1/2 is the suppletive *een half*. The trailing guard keeps a date or a ratio chain
     //     (`1/5/2020`) out. LAST, so no earlier rule has to work around a slash.
-    s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
+    //     ⚠ THE TWO GUARDS ARE MIRRORS (#1524, the #1495 family; as it): each side refuses a digit or `/`, and a `,`
+    //     or `.` with a digit beyond it — `,` is this language's decimal and `.` its thousands mark. A `,` between
+    //     two fractions is a list separator, so `1/2,3/4` reads both. Without the separator arms `1/2,5` read *een
+    //     half , vijf* and `1,5/2` *een , vijf halve*.
+    s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den === 2) return num === 1 ? "een half" : `${numberToWords(num)} halve`;
         const ord = ordinalWord(den);

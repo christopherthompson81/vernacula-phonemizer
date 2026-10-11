@@ -27,7 +27,10 @@
     // WRITTEN OUT TWICE IN CODE AND THE TWO HAD ALREADY DRIFTED: g2p.ts carried the circumflexes and
     // morphology.ts did not. No reading depended on the difference (0 of 9,457 probes moved when they were
     // unified), so the drift was latent rather than harmless — the next edit to either copy decided it.
-    "vowelLetters": "aeiouyáéíóúàèâêîôûäëïöü",
+    // ⚠ EVERY LETTER g2p.ts BASE-MAPS MUST BE HERE (#1524): ì ò ù were missing although the vowel branch maps them
+    // (íìîï → i, óòô → o, úùû → u), so those rows were unreachable and the letter fell to the consonant path —
+    // `però` ended in a non-syllabic o and `lì` had no nucleus and no stress mark.
+    "vowelLetters": "aeiouyáéíóúàèìòùâêîôûäëïöü",
 
     // The CONSONANT phones that DEGEMINATE across a syllable seam: when a syllable's coda and the next
     // syllable's onset are the same phone and it is one of these, one copy is dropped. The Dutch-specific

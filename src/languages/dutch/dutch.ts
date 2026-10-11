@@ -23,6 +23,15 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 const alt = (xs: readonly string[]): RegExp => new RegExp(`^(${xs.join("|")})`, "u");
 const UNSTRESSED_PREFIX = alt(MANIFEST.morphology.prefixUnstressed);
 const SCHWA_PREFIX = alt(MANIFEST.morphology.prefixSchwa);
+// A vowel-final prefix spelling (be-/ge-/te-) whose ⟨e⟩ the g2p scanner joins with the next letter into ONE nucleus
+// — ⟨ee⟩/⟨eeuw⟩, ⟨ei⟩, ⟨eu⟩ — is not a prefix at all: the letters do not form a syllable (been·houwer, geel·zucht,
+// beurt·man, geil·heid). The shift used to fire on them anyway, and the reduction then overwrote the WHOLE digraph
+// with schwa, deleting a nucleus (beenhouwer → *bənɦˈɑu̯ər). Measured over the kaikki nl referee (#1524): 4,728
+// prefix-spelled words, folded backbone 2,888 → 2,941 (0 lost) and stressed syllable 3,308 → 3,353 (57 gained, 12
+// lost, each of the 12 already segmentally wrong). The `[eiu]` is the scanner's own list of what follows an ⟨e⟩ in
+// a vowel digraph (g2p.ts); a trema ⟨ë⟩ never joins, so be·ëdigen keeps its prefix.
+const DIGRAPH_PREFIX = new RegExp(
+    `^(?:${MANIFEST.morphology.prefixUnstressed.filter((p) => p.endsWith("e")).join("|")})[eiu]`, "u");
 
 // High-frequency function words / clitics whose vowel is reduced to schwa — the g2p's first-syllable rule
 // would give them a full vowel (de → deː). Now data: see dutch.jsonc, which also records why the
@@ -38,7 +47,8 @@ function placeStress(segs: Seg[], word: string): number {
     const nuclei = segs.map((s, k) => (s.vowel ? k : -1)).filter((k) => k >= 0);
     if (nuclei.length === 0) return -1;
     const lower = word.toLowerCase();
-    if (nuclei.length > 1 && UNSTRESSED_PREFIX.test(lower) && segs[nuclei[1]!]!.ph !== "ə") {
+    if (nuclei.length > 1 && UNSTRESSED_PREFIX.test(lower) && !DIGRAPH_PREFIX.test(lower)
+        && segs[nuclei[1]!]!.ph !== "ə") {
         if (SCHWA_PREFIX.test(lower)) segs[nuclei[0]!]!.ph = "ə"; // ge-/be-/ver-/te- vowel → schwa
         return nuclei[1]!;
     }
@@ -119,8 +129,10 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // ⚠ DUTCH GROUPS THOUSANDS WITH A PERIOD AND TAKES A COMMA DECIMAL, so a bare `(\d+)` number group lets BOTH
 // separators fall through to clausePunctuation: "400.000" reads *vierhonderd . nul* — a phrase break plus a
 // lost magnitude — and "6,5" reads *zes , vijf*. Clocks are claimed by normalize.ts first, so a period reaching
-// here is grouping and a comma is the decimal point.
-const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\d{0,2}(?:\.\d{3})+|\d+(?:,\d+)?)|([.!?…,;:])/giu;
+// here is grouping and a comma is the decimal point. The grouped arm takes the decimal too (#1524, as de #1514):
+// `3.000,50 euro` is the ordinary way to write an amount, and without `(?:,\d+)?` the comma became a PAUSE and the
+// fraction a new integer (*drieduizend , vijftig*).
+const TOKEN = /(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)|([.!?…,;:])/giu;
 
 // Dutch measure and currency nouns are INVARIANT after a numeral ("vijf euro", "83 kilometer", "27 miljoen
 // pond"), so each entry is a single form and no count agreement is needed.

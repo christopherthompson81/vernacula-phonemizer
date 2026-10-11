@@ -14,6 +14,10 @@ public sealed class DutchPhonemizer : ILanguage
     private static JsRe Alt(IReadOnlyList<string> xs) => JsRegex.Compile($"^({string.Join("|", xs)})", "u");
     private static readonly JsRe UNSTRESSED_PREFIX = Alt(Manifest.MANIFEST.Morphology.PrefixUnstressed);
     private static readonly JsRe SCHWA_PREFIX = Alt(Manifest.MANIFEST.Morphology.PrefixSchwa);
+    // A be-/ge-/te- spelling whose ⟨e⟩ the scanner joins with the next letter (⟨ee⟩, ⟨ei⟩, ⟨eu⟩) is not a prefix:
+    // been·houwer must not shift, nor have its digraph overwritten with schwa (#1524). See src/languages/dutch/dutch.ts.
+    private static readonly JsRe DIGRAPH_PREFIX = JsRegex.Compile(
+        $"^(?:{string.Join("|", Manifest.MANIFEST.Morphology.PrefixUnstressed.Where(p => p.EndsWith('e')))})[eiu]", "u");
 
     // The reduced (schwa) readings of the high-frequency function words. Now data; dutch.jsonc records why
     // the numeral/article "een" is deliberately absent.
@@ -26,7 +30,8 @@ public sealed class DutchPhonemizer : ILanguage
         for (var k = 0; k < segs.Count; k++) if (segs[k].Vowel) nuclei.Add(k);
         if (nuclei.Count == 0) return -1;
         var lower = word.ToLowerInvariant();
-        if (nuclei.Count > 1 && UNSTRESSED_PREFIX.IsMatch(lower) && segs[nuclei[1]].Ph != "ə")
+        if (nuclei.Count > 1 && UNSTRESSED_PREFIX.IsMatch(lower) && !DIGRAPH_PREFIX.IsMatch(lower)
+            && segs[nuclei[1]].Ph != "ə")
         {
             if (SCHWA_PREFIX.IsMatch(lower)) segs[nuclei[0]].Ph = "ə"; // ge-/be-/ver-/te- vowel → schwa
             return nuclei[1];
@@ -112,7 +117,7 @@ public sealed class DutchPhonemizer : ILanguage
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        "(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\\d{0,2}(?:\\.\\d{3})+|\\d+(?:,\\d+)?)|([.!?…,;:])", "giu");
+        "(['’]?[a-zà-ÿ]+(?:['’][a-zà-ÿ]+)*)|([1-9]\\d{0,2}(?:\\.\\d{3})+(?:,\\d+)?|\\d+(?:,\\d+)?)|([.!?…,;:])", "giu");
     private static readonly JsRe DOTS = JsRegex.Compile("\\.", "gu");
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData

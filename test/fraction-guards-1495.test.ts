@@ -36,6 +36,7 @@ const LANGS: Record<string, Case[]> = {
     id: [...COMMA_DECIMAL, ...CHAIN, ...READS],
     uk: [...COMMA_DECIMAL, ...CHAIN, ...READS],
     it: [...COMMA_DECIMAL, ...CHAIN, ...READS],
+    nl: [...COMMA_DECIMAL, ...CHAIN, ...READS],
     ht: [...COMMA_DECIMAL, ...LETTER, ...READS],
     // ln: `1/2,3/4` reads both fractions but loses the pause between them — the fraction's output digits
     // (`1 ya 2,3 ya 4`) re-enter the decimal step. Unchanged by #1495, so only the full-stop case is pinned.

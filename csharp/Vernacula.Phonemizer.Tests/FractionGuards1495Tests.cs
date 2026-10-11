@@ -1,6 +1,6 @@
 /**
  * #1495: the fraction rule's two guards are mirrors in the `\b…\b` family (en fr de es pt ru id) and in ht ln za uk
- * it; ht and ln also read fractions before decimals. Ported from test/fraction-guards-1495.test.ts. Expectations
+ * it nl; ht and ln also read fractions before decimals. Ported from test/fraction-guards-1495.test.ts. Expectations
  * are relational — a declined fraction reads as its numbers spaced, a read one as its spaced form — never typed IPA.
  */
 using Xunit;
@@ -28,6 +28,7 @@ public class FractionGuards1495Tests
         ["id"] = [.. COMMA_DECIMAL, .. CHAIN, .. READS],
         ["uk"] = [.. COMMA_DECIMAL, .. CHAIN, .. READS],
         ["it"] = [.. COMMA_DECIMAL, .. CHAIN, .. READS],
+        ["nl"] = [.. COMMA_DECIMAL, .. CHAIN, .. READS],
         ["ht"] = [.. COMMA_DECIMAL, .. LETTER, .. READS],
         // ln: `1/2,3/4` reads both fractions but loses the pause (the decimal step re-reads the output digits);
         // unchanged by #1495, so only the full-stop case is pinned.
