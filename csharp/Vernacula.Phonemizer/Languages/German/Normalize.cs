@@ -40,6 +40,10 @@ public static class Normalize
      *  spurious phrase break. */
     private static IReadOnlyDictionary<string, string> DOTTED_ABBREV => Manifest.MANIFEST.DottedAbbrev;
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
+    /** A scale abbreviation after the bare numeral 1 is singular and takes the article (#1514). */
+    private static IReadOnlyDictionary<string, string> DOTTED_ABBREV_ONE => Manifest.MANIFEST.DottedAbbrevOne;
+    private static readonly string ABBREV_ONE_ALT =
+        string.Join("|", DOTTED_ABBREV_ONE.Keys.OrderByDescending(k => k.Length));
 
     /** German letter names, for initialisms: USA is [uː ʔɛs ʔaː], not the word *usa*. */
     private static IReadOnlyDictionary<string, string> LETTER_NAME => Manifest.MANIFEST.LetterNames;
@@ -101,15 +105,18 @@ public static class Normalize
 
     private static readonly JsRe ERA_BC = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])v\\.\\s?Chr\\.", "giu");
     private static readonly JsRe ERA_AD = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])n\\.\\s?Chr\\.", "giu");
-    private static readonly JsRe ZB = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])z\\.\\s?B\\.", "gu");
+    private static readonly JsRe ZB = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])z\\.\\s?B\\.", "giu");
     private static readonly JsRe DH = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])d\\.\\s?h\\.", "gu");
     private static readonly JsRe UA = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])u\\.\\s?a\\.", "gu");
-    private static readonly JsRe UAE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])u\\.\\s?Ä\\.", "gu");
+    private static readonly JsRe UAE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d_])u\\.\\s?Ä\\.", "giu");
     private static readonly JsRe ORD = JsRegex.Compile("(?:(\\p{L}+)(\\s+))?(\\d{1,4})\\.(?=\\s+(\\p{L}+))", "gu");
     private static readonly JsRe ORDINAL_NOUN_RE = JsRegex.Compile($"^(?:{ORDINAL_NOUN})$", "iu");
     private static readonly JsRe UPPER_START = JsRegex.Compile("^\\p{Lu}", "u");
     private static readonly JsRe BARE_DAY_MONTH =
         JsRegex.Compile($"(?:(\\p{{L}}+)(\\s+))?(\\d{{1,2}})(\\s+)(?=(?:{MONTHS})(?![\\p{{L}}\\p{{M}}]))", "giu");
+    private static readonly JsRe ABBREV_ONE = JsRegex.Compile(
+        $"(?<![\\p{{L}}\\p{{M}}\\d_.,/+\\-\u2212\u2013\u00b1])1\\s+({ABBREV_ONE_ALT})\\.(?=(\\s+[\\p{{L}}\\d])|\\s*(?:[.,;:!?»)]|$))",
+        "giu");
     private static readonly JsRe ABBREV_MID =
         JsRegex.Compile($"(?<!\\p{{Lu}}\\.[ \u00a0]){WORD_START}({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d])", "giu");
     private static readonly JsRe ABBREV_END =
@@ -179,6 +186,10 @@ public static class Normalize
             return $"{prev ?? ""}{sp ?? ""}{stem}{ending}{sp2}";
         });
 
+        s = Rewrite(s, ABBREV_ONE, m =>
+            !DOTTED_ABBREV_ONE.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? m.Value
+            : m.Groups[2].Success ? w : $"{w}.");
+
         s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
         s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
 
@@ -210,6 +221,7 @@ public static class Normalize
         {
             var num = Js.Number(m.Groups[1].Value);
             var den = Js.Number(m.Groups[2].Value);
+            if (den < 2) return m.Value; // not a fraction word (#1514)
             if (den == 2) return num == 1 ? "ein halb" : $"{Numbers.NumberToWords(num)} halbe";
             var stem = OrdinalStem(den);
             return stem is null ? m.Value : $"{(num == 1 ? "ein" : Numbers.NumberToWords(num))} {stem}el";

@@ -17,6 +17,8 @@ export interface GermanManifest {
     ordinalLicensersExtra: string[];
     ordinals: { irregularStems: Record<string, string>; suffixBelow20: string; suffixFrom20: string };
     dottedAbbrev: Record<string, string>;
+    /** The singular reading after a bare `1` (`1 Mio.` → *eine Million*). */
+    dottedAbbrevOne: Record<string, string>;
     letterNames: Record<string, string>;
     phonotactics: { vowels: string; onsets: string[]; codas: string[]; digraphs: string[] };
     /** ⚠ STEMS — the rule appends `\p{L}*`, so each matches its inflected forms. */

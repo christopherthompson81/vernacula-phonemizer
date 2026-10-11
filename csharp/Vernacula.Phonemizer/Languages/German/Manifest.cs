@@ -70,6 +70,8 @@ public sealed class GermanManifest
     public string[] OrdinalLicensersExtra { get; init; } = [];
     public GermanOrdinals Ordinals { get; init; } = new();
     public IReadOnlyDictionary<string, string> DottedAbbrev { get; init; } = new Dictionary<string, string>();
+    /** The singular reading after a bare `1` (`1 Mio.` → *eine Million*). */
+    public IReadOnlyDictionary<string, string> DottedAbbrevOne { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> LetterNames { get; init; } = new Dictionary<string, string>();
     public GermanPhonotactics Phonotactics { get; init; } = new();
     /** ⚠ STEMS — the rule appends `\p{L}*`, so each matches its inflected forms. */

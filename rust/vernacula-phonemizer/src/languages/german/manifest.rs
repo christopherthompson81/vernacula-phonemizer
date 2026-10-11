@@ -117,6 +117,7 @@ pub struct GermanManifest {
     pub ordinal_licensers_extra: Vec<String>,
     pub ordinals: Ordinals,
     pub dotted_abbrev: IndexMap<String, String>,
+    pub dotted_abbrev_one: IndexMap<String, String>,
     pub letter_names: IndexMap<String, String>,
     pub phonotactics: Phonotactics,
     pub measure_stems: Vec<String>,

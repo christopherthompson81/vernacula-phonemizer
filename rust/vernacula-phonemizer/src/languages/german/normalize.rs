@@ -69,6 +69,26 @@ static ABBREV_ALT: LazyLock<String> = LazyLock::new(|| {
         .collect::<Vec<_>>()
         .join("|")
 });
+/// `ABBREV_ONE_ALT`: `dottedAbbrevOne`'s keys, longest first (stable, as `ABBREV_ALT`).
+static ABBREV_ONE_ALT: LazyLock<String> = LazyLock::new(|| {
+    let mut keys: Vec<&String> = MANIFEST.dotted_abbrev_one.keys().collect();
+    keys.sort_by_key(|k| std::cmp::Reverse(k.encode_utf16().count()));
+    keys.iter()
+        .map(|k| k.as_str())
+        .collect::<Vec<_>>()
+        .join("|")
+});
+/// Step 2c: a bare `1` before a scale abbreviation (#1514).
+static ABBREV_ONE: LazyLock<JsRegex> = LazyLock::new(|| {
+    JsRegex::new(
+        &format!(
+            "(?<![\\p{{L}}\\p{{M}}\\d_.,/+\\-\u{2212}\u{2013}\u{b1}])1\\s+({})\\.(?=(\\s+[\\p{{L}}\\d])|\\s*(?:[.,;:!?»)]|$))",
+            *ABBREV_ONE_ALT
+        ),
+        "giu",
+    )
+    .unwrap()
+});
 static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
@@ -195,7 +215,7 @@ pub(crate) fn normalize_german(input: &JsString) -> JsString {
     );
     s = rewrite(
         &s,
-        js_re!(r"(?<![\p{L}\p{M}\d_])z\.\s?B\.", "gu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])z\.\s?B\.", "giu"),
         &js("zum Beispiel"),
     );
     s = rewrite(
@@ -210,7 +230,7 @@ pub(crate) fn normalize_german(input: &JsString) -> JsString {
     );
     s = rewrite(
         &s,
-        js_re!(r"(?<![\p{L}\p{M}\d_])u\.\s?Ä\.", "gu"),
+        js_re!(r"(?<![\p{L}\p{M}\d_])u\.\s?Ä\.", "giu"),
         &js("und Ähnliches"),
     );
 
@@ -270,6 +290,20 @@ pub(crate) fn normalize_german(input: &JsString) -> JsString {
             .concat(&stem)
             .concat(&js(ending))
             .concat(&sp2)
+    });
+
+    // 2c) `1 Mio.` / `1 Mrd.` → the singular with its article, replacing the numeral (#1514). The dot is
+    //     consumed when the sentence continues and kept at a phrase end, as in step 3.
+    s = rewrite_with(&s, &ABBREV_ONE, |m, t| {
+        let ab = m.group(1, t).unwrap();
+        match MANIFEST
+            .dotted_abbrev_one
+            .get(&ab.to_lower_case().to_string_lossy())
+        {
+            None => m.value(t),
+            Some(w) if m.group(2, t).is_some() => js(w),
+            Some(w) => js(w).concat(&js(".")),
+        }
     });
 
     // 3) dotted abbreviations. ⚠ The miss branch is reachable (#1122): the `iu` fold widens the pattern past
@@ -359,6 +393,9 @@ pub(crate) fn normalize_german(input: &JsString) -> JsString {
         |m, t| {
             let num = js_number(&m.group(1, t).unwrap());
             let den = js_number(&m.group(2, t).unwrap());
+            if den < 2.0 {
+                return m.value(t); // not a fraction word (#1514)
+            }
             if den == 2.0 {
                 return if num == 1.0 {
                     js("ein halb")
