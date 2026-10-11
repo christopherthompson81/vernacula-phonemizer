@@ -1,0 +1,125 @@
+# Polish off-golden probes (synthetic text only): one line per normalize.ts arm, plus the neighbour each
+# arm must decline, and g2p / number / Roman corners. `\n` and `\u{XXXX}` are decoded by dump.mts.
+# 0) digit grouping
+Mamy 104 500 drzew i 5 000 000 liści.
+Było 12\u{a0}500 kotów, 3\u{202f}000 psów i 4\u{2009}000 ptaków.
+Kod 0 500 i 12 34 i 1,5 000 oraz 7 0000.
+Razem 999 999 999 999 ziaren i 1 000 000 000 000 kropli.
+# 1) multi-dot abbreviations
+W 300 r. p.n.e. powstało miasto.
+Działo się to do roku 1000 n.e.
+Były tam m.in. koty i psy.
+Około 50 p. n. e. było cicho, a n. e. zaczęła się.
+M.IN. psy, P.N.E. oraz N.E. Koniec.
+Słowo pn.e. i mn.e. nie pasuje.
+# 2) rate units
+Jechał 120 km/h przez wieś.
+Limit 50 km/godz. Potem stop.
+Prędkość 21 km / h i 22 km/h oraz 1 km/h.
+Mierzono km/h w mieście i km/godz. na wsi.
+Wiatr 30 mph i 1 mph, a 2,5 mph też.
+Łącze 100 Mb/s i 1 Mb/s.
+# 3) godz.
+Spotkanie o godz. 12:00 w sali.
+Wrócił przed godz. 23:35 do domu.
+Około godz. 8:46 zaczęło padać.
+Pociąg godz. 7:15 i do godz. 0:30 oraz między godz. 21:05.
+Pod godz. 13:13, nad godz. 6:45, z godz. 9:00, od godz. 10:10, po godz. 11:11, przy godz. 14:14.
+Zapisano: godzina 3 godz. trwała.
+# 4) r. / w. / s. / nr
+W 1990 r. Zbudowano most.
+Stało się to w 2004 r.
+To był III w. n.e. i XX w.
+Także 150 w. oraz 5 w. ogóle.
+Patrz 10 s. 12 i 3s.4 w księdze.
+Dom nr 5, nr. 7, nr X i nr kota.
+# 5) single-dot abbreviations
+Metale, np. złoto i srebro.
+Koty, psy itp.
+Domy, szkoły itd., a potem nic.
+Tak zwany tzw. spam to tzn. śmieci.
+Ok. 5 osób i ok.(dwie) oraz Ok. Teraz.
+Minister ds. kultury i zob. (rys. 2) oraz im. Jana.
+Słowo ang. „dog” oraz ang. "cat".
+Jr. przyjechał, a NP. ktoś i TZW. coś.
+Także dſ. kot i np.koty oraz xnp. psy.
+# 6) version / figure dots
+Standard 802.11n jest szybki.
+Zobacz rysunek 1.1. Dalej.
+Wersja 3.10.2 działa.
+# 7) N. ordinal notation
+To 37. kraj na liście.
+W latach 20. ubiegłego wieku.
+Na lata 50. i 60. przypadło wiele.
+W latach 75. oraz lat 30., a także latach 101. coś.
+Miał lat 21. Potem wyjechał.
+Pułk 1. i 3. pułku walczył.
+Na miejscu 190., a jego brat 2.
+Ten 101. raz i 100. raz.
+Lata 90. były dobre, a LATA 80. też.
+# 8) clock
+Wstał o 8:46 rano.
+Przyszedł o godzinie 7:05 i o 12:00.
+Wrócił przed 23:35 albo od 10:30 do 11:45.
+Było 0:15 i 24:00 oraz 00:30.
+Wynik 7:2 i 3:2 oraz 12:30,5 i 123:45.
+Z 9:00 do 21:01:05, (o 6:15) i Pod 13:13.
+Około godzin 19:20 i przed godzinami 20:20.
+# 9) ranges
+Lata 1418–1450 i 10-20 oraz 5 — 7.
+Wirus COVID-19 i samolot Ił-76 oraz 100-dolarowych.
+# 10) signs
+Było +30°C i 1°C oraz 22 °F.
+Mróz -5° i 2°c oraz 45° kąta, 3 ° i 12°F.
+Temperatura -5 stopni i wynik −3 oraz –2.
+Mecz 1977-1981 i 26 - 00 oraz słowo -1.
+Błąd ±3 i 5 ± 2.
+Numer +48 i (+5) oraz a+5 i + 7.
+# 10b) relational and division
+To 2 = 2, a 7 < 3 i 5>1.
+Wynik 6 ÷ 3 oraz a=b.
+# 11) fractions
+To 1/5 i 1/2 oraz 2/3.
+Także 1/100, 1/101, 3/1/2 i 1/5.
+Tylko lub / i oraz 1.5/2 i 1/2,5.
+# symbol tier
+Ponad 18% mieszkańców, 2% i 22% oraz 1%.
+Wzrost o 2,4% i 14,7 procent.
+Droga 5 km, 1 m, 3 kg, 21 cm i 12 mm.
+Mam 100 PLN i 5 zł oraz 1 zł.
+Kosztuje $5, €10, £3 i ¥100.
+Budżet 5 mln i 2,3 mld zł.
+Obszar 19 500 km² i 3 m³ oraz 2 km².
+Pole 5 × 3 i A & B.
+Kwota $5 mln oraz 22 tysiące dolarów.
+# initialisms
+USA i RPA w ONZ.
+PKB, DVD, GMT oraz UTC.
+NATO, UNESCO, XDR, ZSRR, UE i NBA.
+Firma BMW i PKP oraz FBI.
+TO JEST DUŻY TEKST.
+# Roman numerals
+To był XIX wiek, a wiek XIX minął.
+Żył w XIX wieku i w XXI wiekach.
+L rocznica i XL zjazd oraz V zjazdu.
+Papież Jan XXIII i król Karol X.
+C stulecie, CI wiek i IV stulecia.
+Rok MMXX i XC rocznica.
+# numbers, heavy inflection
+Liczby 0 1 2 3 4 5 9 10 11 12 13 14 15 19 20 21 22 25 99 100.
+Liczby 101 112 200 300 400 500 999 1000 1001 1012 1021.
+Mamy 2000 i 3000 i 4000 i 5000 i 12000 i 13000 i 14000 i 21000 i 22000.
+Także 101000 i 112000 i 122000 i 1000000 i 2000000 i 5000000.
+Także 21000000 i 1000000000 i 2000000000 i 12000000000.
+Wielkie 123456789012345 i 1000000000000 oraz 007.
+Ułamki 0,5 i 3,14 i 10,01.
+# g2p corners
+Ludzie i dzik oraz pies, radio, kiedy i nogi.
+Auto, pauza, nauka, zaufanie i Europa.
+Gęś, ząb, kąt, wąs, ręka, idę, są.
+Świat, przez, trzy, chrzest i bank.
+Dźwięk, krzyk, wtorek, kwiat i żaba.
+Rzeżucha, dżem, dzwon, chleb i szczęście.
+Wziąć, wziął, ciocia, siano, zima i nie.
+Foreign: São Paulo, Müller, Dvořák, Ørsted i Nguyễn.
+Słowo İstanbul i ſtop oraz ẞ.

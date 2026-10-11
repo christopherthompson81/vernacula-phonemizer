@@ -18,11 +18,12 @@ import { normalizeEnglish, normalizeEnglishInitialisms } from "../../../src/lang
 
 const units = (s: string): number[] => Array.from({ length: s.length }, (_, i) => s.charCodeAt(i));
 
-const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
+/** `FLEURS_ROOT=…` overrides the default root (the transcripts are not at the default on every machine). */
+const FLEURS_ROOT = process.env.FLEURS_ROOT ?? "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
-    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru", de: "de_de",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru", de: "de_de", pl: "pl_pl",
 };
 
 /**
@@ -1106,6 +1107,79 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { normalizeRomans } = await import("../../../src/core/roman.ts");
         const { ROMAN_POLICY } = await import("../../../src/languages/russian/romanOrdinals.ts");
         for (const [t, src] of textsFor(["ru"], FLEURS_DIR.ru, ["ru.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Polish (pl). Inputs: the pl golden, FLEURS pl_pl (columns 3 and 4) and probes/pl.txt. ──
+    // Each stage of text()'s normalization chain separately (op; the symbol tier built as polish.ts builds it),
+    // and the phonotactic test on every letter run (as written and lowercased).
+    async "pl-normalize"() {
+        const N = await import("../../../src/languages/polish/normalize.ts");
+        const { MANIFEST: PL } = await import("../../../src/languages/polish/manifest.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const st = PL.symbolTier;
+        const symbols = makeSymbolNormalizer({
+            units: st.units, countForm: N.plCountForm, percent: st.percent, currency: st.currency,
+            exponentWords: st.exponentWords, magnitudes: st.magnitudes, ampersand: st.ampersand, multiply: st.multiply,
+        });
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["pl"], FLEURS_DIR.pl, ["pl.txt"])) {
+            const a = N.normalizePolish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = N.normalizePolishInitialisms(a);
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(b), src, op: "symbols" }, symbols(b));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadablePolish(w)));
+    },
+    // phonemizeWord and toSegments over every letter run of the texts (as written and lowercased), every 1-3 letter
+    // string of the alphabet, every 4-letter string over the letters the scan's context rules look at, and corner
+    // strings; plus the nativiser (polish.ts's NATIVE_CLASS, copied) over the runs and foreign names.
+    async "pl-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/polish/polish.ts");
+        const { toSegments } = await import("../../../src/languages/polish/g2p.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("pl")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."aąbcćdeęfghijklłmnńoóprsśtuwyzźżqvx"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."dzirąęwcsnkbau"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "İstanbul", "ſ", "ẞ", "\ud800", "a\udc00z", "𝐚𝐛", "ĄĘ", "DZIEŃ", "Rzeżucha", "zaufanie",
+            "nauka", "auto", "pauza", "Europa", "ąą", "ęę", "ąę", "gęś", "ząb", "kąt", "pięć", "dźwięk", "wziąć"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "segs" },
+                toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}/${s.nasal ? 1 : 0}/${s.rz ? 1 : 0}`).join(" "));
+        }
+        for (const w of [...words, "São", "Müller", "Dvořák", "Ørsted", "Žižek", "Ångström", "Œuvre", "façade", "Tōkyō", "Nguyễn"])
+            emit({ word: units(w), op: "nat" }, nat(w));
+    },
+    // numberToWords (with and without raw), readDigits, the Roman ordinal and plCountForm.
+    async "pl-numbers"() {
+        const { numberToWords, readDigits } = await import("../../../src/languages/polish/numbers.ts");
+        const { ordinal } = await import("../../../src/languages/polish/romanOrdinals.ts");
+        const { plCountForm } = await import("../../../src/languages/polish/normalize.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7, 1234567 * 10 ** (e - 4) + 42);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 21, k * 1e6, k * 1e6 + 2001, k * 1e6 + 1000, k * 1e9, k * 1e9 + 12013);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1e12 - 1, 1e12, 1.5, 2.7, -1, -21, -0, NaN, Infinity, -Infinity, 0.1, 1e-7, 112, 1012, 22.5);
+        for (const n of ns) {
+            emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+            emit({ n: String(n), raw: null, op: "ordinal" }, ordinal(n) ?? "\u0000none");
+            emit({ n: String(n), raw: null, op: "count" }, String(plCountForm(n)));
+        }
+        for (const raw of ["0", "007", "1234567890", "1000000000000", "99999999999999999999", "1e3", "12a", "１２", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
+        }
+    },
+    // normalizeRomans with Polish's policy (registry.ts romanPl) over the Polish texts.
+    async "pl-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/polish/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["pl"], FLEURS_DIR.pl, ["pl.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
 };
 
