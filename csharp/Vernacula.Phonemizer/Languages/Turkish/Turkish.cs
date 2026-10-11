@@ -57,8 +57,9 @@ public static class TurkishPhonemizer
         double? syl = finalStress
             ? null
             : (StressDict().TryGetValue(wl, out var lex) ? lex : MorphStress(wl));
+        // A non-integer value falls back to final stress, as in the TS `Number.isInteger` test (#1523).
         var stressIdx =
-            syl is not null && syl >= 1 && syl <= nuclei.Count
+            syl is not null && Math.Floor(syl.Value) == syl.Value && syl >= 1 && syl <= nuclei.Count
                 ? nuclei[(int)syl.Value - 1]
                 : nuclei[^1];
         var outp = "";
@@ -72,7 +73,10 @@ public static class TurkishPhonemizer
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        $"({HostWord.LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d{{3}})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])", "giu");
+        $"({HostWord.LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d{{3}})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîûİ]+))?|([.!?…,;:])", "giu");
+
+    /** A year (≥4 digits) before a capital is a sentence end, not an ordinal (#1523) — see turkish.ts. */
+    private static readonly JsRe CAPITAL_NEXT = JsRegex.Compile("^[^\\S\\n]+\\p{Lu}", "u");
 
     /** This language's OWN inventory. */
     private const string NATIVE_CLASS = "[a-zçğıiöşüâîûİ]";
@@ -85,7 +89,7 @@ public static class TurkishPhonemizer
         var bits = tok.Split(',');
         var intRaw = bits[0];
         var frac = bits.Length > 1 ? bits[1] : null;
-        var words = TurkishNumbers.NumberToWords(Js.Number(JsRegex.Replace(intRaw, THOUSANDS_DOT, _ => "")));
+        var words = TurkishNumbers.DigitsToWords(JsRegex.Replace(intRaw, THOUSANDS_DOT, _ => "")); // exact past 2⁵³ (#1523)
         if (frac is not null)
             words +=
                 $" {Manifest.MANIFEST.Numbers.DecimalConnector} " +
@@ -131,13 +135,17 @@ public static class TurkishPhonemizer
 
     private sealed class Engine : ILanguage
     {
-        public string Text(string input) =>
-            Clauses.AssembleClauses(ReadSuffixedUnits(Normalize.NormalizeTurkish(input)), TOKEN, (m, sink) =>
+        public string Text(string input)
+        {
+            var normalized = ReadSuffixedUnits(Normalize.NormalizeTurkish(input));
+            return Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>
             {
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value)));
                 else if (m.Groups[2].Success)
                 {
-                    var ord = Normalize.OrdinalWords(Js.Number(m.Groups[2].Value));
+                    var sentenceEnd = m.Groups[2].Value.Length >= 4
+                        && CAPITAL_NEXT.IsMatch(normalized[(m.Index + m.Length)..]);
+                    var ord = sentenceEnd ? null : Normalize.OrdinalWords(Js.Number(m.Groups[2].Value));
                     if (ord is not null)
                         foreach (var wd in ord.Split(' ')) sink.Emit(PhonemizeWord(wd, true));
                     else
@@ -152,7 +160,7 @@ public static class TurkishPhonemizer
                 {
                     var words = NumberTokenToWords(m.Groups[3].Value).Split(' ').ToList();
                     foreach (var wd in m.Groups[4].Success && m.Groups[4].Value.Length > 0
-                                 ? Normalize.AttachSuffix(words, m.Groups[4].Value)
+                                 ? Normalize.AttachSuffix(words, G2p.TrCase(m.Groups[4].Value))
                                  : words)
                         sink.Emit(PhonemizeWord(wd, true));
                 }
@@ -162,6 +170,7 @@ public static class TurkishPhonemizer
                     if (mk is not null) sink.Pause(mk);
                 }
             });
+        }
     }
 
     /** Build the Turkish phonemizer (rule g2p + final-syllable stress + an exception lexicon). */

@@ -8,8 +8,8 @@ import { rewrite } from "../../core/provenance.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
-import { toSegments, trLower } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
+import { toSegments, trCase, trLower } from "./g2p.ts";
+import { digitsToWords, numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { attachSuffix, normalizeTurkish, ordinalWords } from "./normalize.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
@@ -70,8 +70,10 @@ export function phonemizeWord(word: string, finalStress = false): string {
     const syl = finalStress
         ? undefined
         : (stressDict().get(wl) ?? morphStress(wl));
+    // ⚠ `Number.isInteger`, not a range test alone: a fractional stress.tsv value indexed `nuclei[1.5]` as
+    // undefined and dropped the stress mark (#1523, latent — no row is fractional). It now falls back to final.
     const stressIdx =
-        syl !== undefined && syl >= 1 && syl <= nuclei.length
+        syl !== undefined && Number.isInteger(syl) && syl >= 1 && syl <= nuclei.length
             ? nuclei[syl - 1]!
             : nuclei[nuclei.length - 1]!;
     let out = "";
@@ -92,7 +94,22 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // matters: the ordinal branch precedes the number branch, and its lookahead (whitespace + another token) is
 // exactly the corpus-derived detector — it declines inside `1.234` and `802.11a`, where no space follows the
 // dot, and at end of input, which is the one sentence-final `N.` the corpus contains (`rekoru 7-2.`).
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d{3})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])`, "giu");
+//
+// ⚠ THE SUFFIX CLASS CARRIES `İ` FOR THE SAME REASON NATIVE_CLASS DOES (below): capital İ has no simple case fold
+// to `i`, so the /i/ flag alone rejected it and `1985'İN` split the suffix off as its own word (#1523).
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+)\\.(?=[^\\S\\n]+\\S)|(\\d+(?:(?<!(?<!\\d)0)\\.\\d{3})*(?:,\\d+)?)(?:['’]([a-zçğıiöşüâîûİ]+))?|([.!?…,;:])`, "giu");
+
+/**
+ * ⚠ A YEAR BEFORE A CAPITAL IS A SENTENCE END, NOT AN ORDINAL (#1523). The ordinal branch's lookahead only asks
+ * that another token follow, so `Yıl 2004. Sonra geldi.` read *iki bin dördüncü* and lost the phrase break.
+ * Over the tr_tr FLEURS text, 36 bare `N.` are followed by a token; the ones followed by a CAPITAL are
+ * `1./2. Dünya` ×4, `2. Elizabeth'in`, `3. New`, `4. Kategoride`, `11. Süvari` and `247. Maddesine` — every one
+ * an ordinal and every one below 1000. The only four-digit one (`1000. pulu`) is followed by a lower-case word.
+ * So a number of four or more digits followed by a capital is declined, which costs no corpus ordinal; a short
+ * number before a capital (`Skor 3. Sonra …`) still cannot be told from `2. Dünya` and stays an ordinal.
+ * Not in TOKEN itself: under the `i` flag `\p{Lu}` matches lower-case letters too, so the test is its own regex.
+ */
+const CAPITAL_NEXT = /^[^\S\n]+\p{Lu}/u;
 
 /**
  * This language's OWN inventory. ⚠ TWO DIFFERENT QUESTIONS, KEPT APART: the TOKEN class above decides where
@@ -117,7 +134,7 @@ export const nat = makeNativiser(NATIVE_CLASS, "iu");
 /** A number token (Turkish thousands-dots / decimal-comma) → spoken words. */
 function numberTokenToWords(tok: string): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/\./g, "")));
+    let words = digitsToWords(intRaw!.replace(/\./g, "")); // from the digits: exact past 2⁵³ (#1523)
     if (frac !== undefined)
         words +=
             ` ${MANIFEST.numbers.decimalConnector} ` +
@@ -205,7 +222,8 @@ class TurkishPhonemizer implements Phonemizer {
         return assembleClauses(readSuffixedUnits(normalizeTurkish(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1])));
             else if (m[2] !== undefined) {
-                const ord = ordinalWords(Number(m[2]));
+                const sentenceEnd = m[2].length >= 4 && CAPITAL_NEXT.test(m.input!.slice(m.index! + m[0].length));
+                const ord = sentenceEnd ? undefined : ordinalWords(Number(m[2]));
                 if (ord !== undefined)
                     for (const wd of ord.split(" ")) sink.emit(phonemizeWord(wd, true));
                 else {
@@ -217,7 +235,9 @@ class TurkishPhonemizer implements Phonemizer {
                 }
             } else if (m[3]) {
                 const words = numberTokenToWords(m[3]).split(" ");
-                for (const wd of m[4] ? attachSuffix(words, m[4]) : words)
+                // `trCase`: TOKEN matches the suffix case-insensitively, and `attachSuffix`'s dört→dörd test reads
+                // lower-case vowels — `34'Ü` read *dörtü* (#1523). The circumflex is kept for the g2p.
+                for (const wd of m[4] ? attachSuffix(words, trCase(m[4])) : words)
                     sink.emit(phonemizeWord(wd, true));
             } else if (m[5]) {
                 const mk = CLAUSE_MARK[m[5]];

@@ -30,18 +30,35 @@ export interface Seg {
     nucleus: boolean; // is a syllable nucleus (a vowel)
 }
 
+/** Turkish-locale lowercase WITHOUT the circumflex fold: İ→i and I→ı (JS toLowerCase would give i̇ / i). */
+export function trCase(word: string): string {
+    return word.replace(/İ/g, "i").replace(/I/g, "ı").toLowerCase();
+}
+
+/** One lowercased code point with its circumflex folded (â/î/û→a/i/u); any other is returned as is. */
+const foldCircumflex = (c: string): string => MANIFEST.circumflexFold[c] ?? c;
+
 /** Turkish-locale lowercase: İ→i and I→ı (JS toLowerCase would give i̇ / i). Then fold circumflex â/î/û→a/i/u. */
 export function trLower(word: string): string {
-    return word
-        .replace(/İ/g, "i")
-        .replace(/I/g, "ı")
-        .toLowerCase()
-        .replace(/[âîû]/g, (c) => MANIFEST.circumflexFold[c] ?? c);
+    return trCase(word).replace(/[âîû]/g, foldCircumflex);
 }
+
+/**
+ * ⚠ A CIRCUMFLEX ON A BACK VOWEL MARKS THE CONSONANT BEFORE IT, NOT THE VOWEL. In Turkish orthography â and û
+ * after k, g or l say that the consonant is PALATAL: kâr [caɾ] "profit" against kar [kaɾ] "snow", lâle with a
+ * clear l, rüzgâr, hikâye. Folding â→a first erased exactly that (#1523): the scan saw a back vowel and gave
+ * k, ɡ and dark ɫ. kaikki (Wiktionary) has kâr /ˈcaːɾ/ and rüzgâr /ɾyzˈɟaɾ/. The test is derived from the fold
+ * table rather than a second list: a circumflex letter whose fold is a BACK vowel (â→a, û→u). î folds to the
+ * front i, which palatalizes by itself.
+ */
+const palatalizes = (raw: string): boolean => raw !== foldCircumflex(raw) && BACK.has(foldCircumflex(raw));
 
 /** Turkish word → segment list. */
 export function toSegments(word: string): Seg[] {
-    const chars = [...trLower(word)];
+    // The scan reads the FOLDED letters; `raw` keeps the circumflex for the palatal test (the fold is one code
+    // point to one code point, so the two arrays stay aligned).
+    const raw = [...trCase(word)];
+    const chars = raw.map(foldCircumflex);
     const segs: Seg[] = [];
     let prevVowel = ""; // last vowel LETTER seen (for l-darkness / ğ)
     let gMerge = ""; // a ğ just lengthened this vowel letter; a following same vowel merges
@@ -49,6 +66,7 @@ export function toSegments(word: string): Seg[] {
         const c = chars[i]!;
         const next = chars[i + 1] ?? "";
         const prevC = chars[i - 1] ?? "";
+        const palatal = palatalizes(raw[i + 1] ?? ""); // k/g/l before â/û (kâr, lâle)
         // Vowel.
         if (c in VOWEL_IPA) {
             if (gMerge === c && c !== "ı") {
@@ -71,17 +89,19 @@ export function toSegments(word: string): Seg[] {
         if (c === "ğ") {
             if (FRONT_UNROUND.has(prevVowel))
                 segs.push({ ph: "j", nucleus: false }); // değil → dejil
-            else if (segs.length > 0) {
+            else if (segs.length > 0 && segs[segs.length - 1]!.nucleus) {
                 segs[segs.length - 1]!.ph += "ː";
                 gMerge = prevVowel;
             } // lengthen prev vowel
+            // ⚠ ONLY A VOWEL: ğ lengthens the vowel before it. After a consonant (no native word has one) it was
+            // lengthening the CONSONANT (`rğa` → ɾːa, #1523); there it is now silent.
             continue;
         }
         // l: dark ɫ next to a back vowel, clear l next to a front vowel. Onset l keys on the FOLLOWING vowel,
         // coda l on the PRECEDING vowel.
         if (c === "l") {
             const ctx = isVowel(next) ? next : prevVowel;
-            segs.push({ ph: BACK.has(ctx) ? "ɫ" : "l", nucleus: false });
+            segs.push({ ph: BACK.has(ctx) && !palatal ? "ɫ" : "l", nucleus: false });
             continue;
         }
         // k/g palatalize to c/ɟ in the environment of a FRONT vowel — an onset keys on the FOLLOWING vowel
@@ -89,13 +109,13 @@ export function toSegments(word: string): Seg[] {
         // onset/coda logic as l above.
         if (c === "k") {
             const ctx = isVowel(next) ? next : prevVowel;
-            segs.push({ ph: FRONT.has(ctx) ? "c" : "k", nucleus: false });
+            segs.push({ ph: FRONT.has(ctx) || palatal ? "c" : "k", nucleus: false });
             continue;
         }
         // g → ɟ before a front vowel (majority of the gold; the ɡ cases like bölge are lexical), else ɡ.
         if (c === "g") {
             const ctx = isVowel(next) ? next : prevVowel;
-            segs.push({ ph: FRONT.has(ctx) ? "ɟ" : "ɡ", nucleus: false });
+            segs.push({ ph: FRONT.has(ctx) || palatal ? "ɟ" : "ɡ", nucleus: false });
             continue;
         }
         const cons = CONS_IPA[c];

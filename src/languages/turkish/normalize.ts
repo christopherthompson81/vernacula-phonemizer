@@ -58,7 +58,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { trLower } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
+import { digitsToWords, numberToWords } from "./numbers.ts";
 import { rewrite } from "../../core/provenance.ts";
 
 const VOWEL = /[aeıioöuü]/u;
@@ -253,7 +253,7 @@ export function normalizeTurkish(input: string): string {
         const d = "pçtkfhsş".includes(stem[stem.length - 1]!) ? "t" : "d";
         return `${head}${stem}${d}${lowVowel(stem)}n`;
     };
-    const trWord = (t: string): string => numberToWords(Number(t)) || t;
+    const trWord = (t: string): string => digitsToWords(t) || t; // `t` is `\d+`: read from the digits (#1523)
     const OPERAND = String.raw`\d+`;
     const postposed = (sign: string, inflect: (w: string) => string, verb: string): void => {
         s = rewrite(s, new RegExp(`(${OPERAND})\\s?${sign}\\s?(${OPERAND})`, "gu"),

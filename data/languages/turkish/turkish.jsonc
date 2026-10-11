@@ -105,7 +105,10 @@
             "seksen",
             "doksan",
         ],
-        "scales": ["", "bin", "milyon", "milyar", "trilyon", "katrilyon"], // 10³ⁿ group multipliers
+        // 10³ⁿ group multipliers, short scale. Past katrilyon (10¹⁵) the names are tr.wikipedia's «Büyük sayıların
+        // adları» short-scale column (ABD, Modern Britanya ve Türkiye): kentilyon 10¹⁸ … desilyon 10³³. A number
+        // with more groups than this list is read digit by digit (numbers.ts), never with a scale word missing.
+        "scales": ["", "bin", "milyon", "milyar", "trilyon", "katrilyon", "kentilyon", "sekstilyon", "septilyon", "oktilyon", "nonilyon", "desilyon"],
         "hundred": "yüz",
         "zero": "sıfır",
         "decimalConnector": "virgül", // 3,14 → üç virgül bir dört

@@ -6,13 +6,13 @@ use std::sync::{LazyLock, OnceLock};
 
 use indexmap::IndexMap;
 
-use super::g2p::{Seg, to_segments, tr_lower};
+use super::g2p::{Seg, to_segments, tr_case, tr_lower};
 use super::manifest::{DIR, MANIFEST, try_manifest};
 use super::normalize::{
     attach_suffix, is_unreadable_turkish, normalize_turkish, normalize_turkish_initialisms,
     ordinal_words,
 };
-use super::numbers::number_to_words;
+use super::numbers::{digits_to_words, number_to_words};
 use crate::core::clauses::assemble_clauses;
 use crate::core::data_source::load_once;
 use crate::core::host_word::{LATIN_RUN, make_nativiser};
@@ -96,15 +96,15 @@ pub(crate) fn phonemize_word(word: &JsString, final_stress: bool) -> JsString {
             .copied()
             .or_else(|| morph_stress(&wl))
     };
-    // ⚠ A fractional in-range `syl` indexes `nuclei[syl - 1]` as undefined in the TS: no mark at all.
+    // A non-integer `syl` falls back to final stress, as the TS `Number.isInteger` test does (#1523).
     let stress_idx = match syl {
-        Some(n) if n >= 1.0 && n <= nuclei.len() as f64 => {
-            (n.fract() == 0.0).then(|| nuclei[n as usize - 1])
+        Some(n) if n.fract() == 0.0 && n >= 1.0 && n <= nuclei.len() as f64 => {
+            nuclei[n as usize - 1]
         }
-        _ => Some(nuclei[nuclei.len() - 1]),
+        _ => nuclei[nuclei.len() - 1],
     };
     for (i, s) in segs.iter().enumerate() {
-        if Some(i) == stress_idx {
+        if i == stress_idx {
             out.push_str(&js("ˈ"));
         }
         out.push_str(&s.ph);
@@ -115,13 +115,17 @@ pub(crate) fn phonemize_word(word: &JsString, final_stress: bool) -> JsString {
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r"({})|(\d+)\.(?=[^\S\n]+\S)|(\d+(?:(?<!(?<!\d)0)\.\d{{3}})*(?:,\d+)?)(?:['’]([a-zçğıiöşüâîû]+))?|([.!?…,;:])",
+            r"({})|(\d+)\.(?=[^\S\n]+\S)|(\d+(?:(?<!(?<!\d)0)\.\d{{3}})*(?:,\d+)?)(?:['’]([a-zçğıiöşüâîûİ]+))?|([.!?…,;:])",
             *LATIN_RUN
         ),
         "giu",
     )
     .unwrap()
 });
+
+/// `CAPITAL_NEXT`: a year (≥4 digits) before a capital is a sentence end, not an ordinal (#1523).
+static CAPITAL_NEXT: LazyLock<JsRegex> =
+    LazyLock::new(|| JsRegex::new(r"^[^\S\n]+\p{Lu}", "u").unwrap());
 
 const NATIVE_CLASS: &str = "[a-zçğıiöşüâîûİ]";
 type Nativiser = Box<dyn Fn(&JsString) -> JsString + Send + Sync>;
@@ -131,7 +135,7 @@ static NAT: LazyLock<Nativiser> = LazyLock::new(|| Box::new(make_nativiser(NATIV
 fn number_token_to_words(tok: &JsString) -> JsString {
     let parts = tok.split(&js(","));
     let int_raw = js_re!(r"\.", "g").replace(&parts[0], &JsString::new());
-    let mut words = number_to_words(js_number(&int_raw));
+    let mut words = digits_to_words(&int_raw); // exact past 2⁵³ (#1523)
     if let Some(frac) = parts.get(1) {
         let digits: Vec<JsString> = frac
             .code_point_strings()
@@ -224,6 +228,11 @@ impl TurkishPhonemizer {
         number_to_words(n)
     }
 
+    /// `digitsToWords(digits)` (numbers.ts).
+    pub fn digits_to_words(&self, digits: &JsString) -> JsString {
+        digits_to_words(digits)
+    }
+
     /// `ordinalWords(n)` (normalize.ts).
     pub fn ordinal_words(&self, n: f64) -> Option<JsString> {
         ordinal_words(n)
@@ -264,7 +273,14 @@ impl TurkishPhonemizer {
             if let Some(w) = m.group(1, s).filter(|w| !w.is_empty()) {
                 sink.emit(&phonemize_word(&NAT(&w), false));
             } else if let Some(n) = m.group(2, s) {
-                match ordinal_words(js_number(&n)) {
+                let sentence_end =
+                    n.len() >= 4 && CAPITAL_NEXT.test(&s.slice(m.end() as isize, None));
+                let ord = if sentence_end {
+                    None
+                } else {
+                    ordinal_words(js_number(&n))
+                };
+                match ord {
                     Some(ord) => emit_all(&ord.split(&js(" ")), sink),
                     None => {
                         emit_all(&number_token_to_words(&n).split(&js(" ")), sink);
@@ -276,7 +292,7 @@ impl TurkishPhonemizer {
             } else if let Some(n) = m.group(3, s).filter(|n| !n.is_empty()) {
                 let words = number_token_to_words(&n).split(&js(" "));
                 match m.group(4, s).filter(|x| !x.is_empty()) {
-                    Some(suffix) => emit_all(&attach_suffix(&words, &suffix), sink),
+                    Some(suffix) => emit_all(&attach_suffix(&words, &tr_case(&suffix)), sink),
                     None => emit_all(&words, sink),
                 }
             } else if let Some(p) = m.group(5, s).filter(|p| !p.is_empty())
@@ -436,5 +452,49 @@ mod tests {
         for (t, part) in CONTAINS_PINS {
             assert!(crate::phonemize(t, "tr").unwrap().contains(part), "{t}");
         }
+    }
+
+    /// test/turkish.test.ts's `Turkish #1523` block (each value the TS engine's output).
+    #[test]
+    fn the_1523_pins_hold() {
+        create_turkish().unwrap();
+        let say = |t: &str| crate::phonemize(t, "tr").unwrap();
+        let dw = |d: &str| digits_to_words(&js(d)).to_string_lossy();
+        assert_eq!(dw("1000000000000000000000"), "bir sekstilyon");
+        assert_eq!(dw("2005000000000000000000"), "iki sekstilyon beş kentilyon");
+        assert_eq!(number_to_words(1e18).to_string_lossy(), "bir kentilyon");
+        assert!(dw("1234567890123456789012").ends_with("yedi yüz seksen dokuz bin on iki"));
+        let mut zeros = vec!["bir"];
+        zeros.extend(std::iter::repeat_n("sıfır", 36));
+        assert_eq!(dw(&format!("1{}", "0".repeat(36))), zeros.join(" "));
+        assert_eq!(say("1000000000000000000000"), "bˈiɾ secstiljˈon");
+        assert!(say("1234567890123456789012").ends_with("dokˈuz bˈin ˈon icˈi"));
+        assert_eq!(
+            say("5 < 1000000000000000001"),
+            "bˈeʃ bˈiɾ centiljˈon biɾdˈen cyt͡ʃˈyctyɾ"
+        );
+        for (w, want) in [
+            ("kâr", "cˈaɾ"),
+            ("kar", "kˈaɾ"),
+            ("lâle", "lalˈe"),
+            ("rüzgâr", "ɾyzɟˈaɾ"),
+            ("elma", "elmˈa"),
+            ("masa", "masˈa"),
+            ("olsa", "ˈoɫsa"),
+        ] {
+            assert_eq!(phonemize_word(&js(w), false).to_string_lossy(), want, "{w}");
+        }
+        assert_eq!(say("34'Ü"), say("34'ü"));
+        assert_eq!(say("1985'İN"), say("1985'in"));
+        assert_eq!(
+            say("Yıl 2004. Sonra geldi."),
+            "jˈɯɫ icˈi bˈin dˈøɾt . sonɾˈa ɟeldˈi ."
+        );
+        assert_eq!(say("1. Dünya Savaşı"), "biɾind͡ʒˈi dˈynja savaʃˈɯ");
+        let segs: String = to_segments(&js("rğa"))
+            .iter()
+            .map(|s| s.ph.to_string_lossy())
+            .collect();
+        assert_eq!(segs, "ɾa");
     }
 }

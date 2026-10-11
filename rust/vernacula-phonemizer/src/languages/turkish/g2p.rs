@@ -49,19 +49,36 @@ static T: LazyLock<Tables> = LazyLock::new(|| {
 /// `trLower(word)`: İ→i and I→ı, THEN plain `toLowerCase()` (not a Turkish-locale one), then the circumflex
 /// fold. ⚠ The order is the behaviour: `toLowerCase` first would turn İ into i + U+0307 and I into i.
 pub fn tr_lower(word: &JsString) -> JsString {
+    js_re!("[âîû]", "g").replace_with(&tr_case(word), |m, s| fold_circumflex(&m.value(s)))
+}
+
+/// `trCase(word)`: İ→i and I→ı, then plain `toLowerCase()` — `trLower` without the circumflex fold.
+pub fn tr_case(word: &JsString) -> JsString {
     let s = js_re!("İ", "g").replace(word, &js("i"));
     let s = js_re!("I", "g").replace(&s, &js("ı"));
-    let s = s.to_lower_case();
-    js_re!("[âîû]", "g").replace_with(&s, |m, s| {
-        let c = m.value(s);
-        T.circumflex_fold.get(&c).cloned().unwrap_or(c)
-    })
+    s.to_lower_case()
+}
+
+/// `foldCircumflex(c)`: one lowercased code point with its circumflex folded; any other as is.
+fn fold_circumflex(c: &JsString) -> JsString {
+    T.circumflex_fold
+        .get(c)
+        .cloned()
+        .unwrap_or_else(|| c.clone())
+}
+
+/// `palatalizes(raw)`: a circumflex on a BACK vowel (â, û) marks the k/g/l before it palatal (#1523).
+fn palatalizes(raw: &JsString) -> bool {
+    let f = fold_circumflex(raw);
+    f != *raw && T.back.contains(&f)
 }
 
 /// `toSegments(word)`, over the code points of `trLower(word)`.
 pub fn to_segments(word: &JsString) -> Vec<Seg> {
     let t = &*T;
-    let chars = tr_lower(word).code_point_strings();
+    // `raw` keeps the circumflex for the palatal test; the fold is one code point to one, so they stay aligned.
+    let raw = tr_case(word).code_point_strings();
+    let chars: Vec<JsString> = raw.iter().map(fold_circumflex).collect();
     let empty = JsString::new();
     // `c !== "" && c in VOWEL_IPA` — no Object.prototype member is one code point.
     let is_vowel = |c: &JsString| !c.is_empty() && t.vowel_ipa.contains_key(c);
@@ -77,6 +94,7 @@ pub fn to_segments(word: &JsString) -> Vec<Seg> {
         let c = &chars[i];
         let next = chars.get(i + 1).unwrap_or(&empty);
         let prev_c = if i == 0 { &empty } else { &chars[i - 1] };
+        let palatal = palatalizes(raw.get(i + 1).unwrap_or(&empty));
         if let Some(v) = t.vowel_ipa.get(c) {
             if g_merge == *c && *c != ri {
                 g_merge = JsString::new();
@@ -105,8 +123,8 @@ pub fn to_segments(word: &JsString) -> Vec<Seg> {
                     ph: js("j"),
                     nucleus: false,
                 });
-            } else if let Some(last) = segs.last_mut() {
-                // ⚠ The LAST segment, which may be a consonant (a ğ after a consonant lengthens it).
+            } else if let Some(last) = segs.last_mut().filter(|l| l.nucleus) {
+                // Only a vowel lengthens: after a consonant ğ is silent (#1523).
                 last.ph.push_str(&js("ː"));
                 g_merge = prev_vowel.clone();
             }
@@ -114,11 +132,23 @@ pub fn to_segments(word: &JsString) -> Vec<Seg> {
         }
         let ctx = if is_vowel(next) { next } else { &prev_vowel };
         let ph = if *c == sl {
-            if t.back.contains(ctx) { "ɫ" } else { "l" }
+            if t.back.contains(ctx) && !palatal {
+                "ɫ"
+            } else {
+                "l"
+            }
         } else if *c == sk {
-            if t.front.contains(ctx) { "c" } else { "k" }
+            if t.front.contains(ctx) || palatal {
+                "c"
+            } else {
+                "k"
+            }
         } else if *c == sg {
-            if t.front.contains(ctx) { "ɟ" } else { "ɡ" }
+            if t.front.contains(ctx) || palatal {
+                "ɟ"
+            } else {
+                "ɡ"
+            }
         } else {
             if let Some(cons) = t.cons_ipa.get(c) {
                 segs.push(Seg {

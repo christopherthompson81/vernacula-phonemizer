@@ -102,7 +102,7 @@ mod tests {
     fn manifest_loads_with_every_block() {
         let m = try_manifest().unwrap();
         assert_eq!(m.numbers.ones.len(), 10);
-        assert_eq!(m.numbers.scales.len(), 6);
+        assert_eq!(m.numbers.scales.len(), 12); // "" … desilyon (10³³), #1523
         assert_eq!(m.vowels.ipa.len(), 8);
         assert_eq!(m.circumflex_fold.len(), 3);
         assert!(m.symbol_tier.percent_prefix);

@@ -30,6 +30,8 @@ public class LargeNumeralFidelityTests
     [InlineData("grc")]
     [InlineData("af")]
     [InlineData("ta")]
+    // #1523: grouped from the digit string, with scale words to 10³³.
+    [InlineData("tr")]
     public void TwoTwentyTwoDigitRunsDifferingOnlyInTheLastDigitDoNotReadAlike(string code) =>
         Assert.NotEqual(Phonemizer.Phonemize(A, code).Trim(), Phonemizer.Phonemize(B, code).Trim());
 
