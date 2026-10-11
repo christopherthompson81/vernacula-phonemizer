@@ -1,0 +1,68 @@
+# Slovak (sk) synthetic probes: one or more lines per normalize.ts arm plus the neighbour it must decline, and
+# g2p / number corners. Synthetic text only (no corpus sentences).
+# 0) grouping
+Mesto má 3 850 000 obyvateľov a 12 345 áut.
+Cena 1 234 567 eur, ale 0 123 nie.
+Medzera\u{a0}1\u{a0}500 a 2\u{202f}000 a 3\u{2009}000 a slovo\u{a0}slovo.
+# 1) multi-dot
+Stalo sa to v roku 300 p.n.l. Potom nič.
+Roku 50 pred n. l. bol pokoj a 400 n. l. a trvalo.
+Výška 2000 m n. m. a ďalej t. j. koniec.
+Rok 100 n.l., potom (1000–1300 n.l.).
+Slovo ap.n.l. zostane.
+# 2) dotted
+Prišli napr. susedia, atď. a tak.
+Jablká, hrušky atď.
+Poznám tzv. obra a Dr. Nováka a Jr. Smitha.
+Kozmonaut č. 11 a č.5.
+Atď., potom nič.
+Pozri St. Louis a stanica st. a St. koniec.
+# 3) clock range
+Otvorené medzi 06:30 a 07:30 a MEDZI 22:00 - 23:00 hod.
+Medzi 0:15 – 1:00 nič.
+# 4) clock
+Presne o 8:46 ráno, do 23:35 hod, po 11:00 a okolo 12.00 GMT.
+Je 15:00 a 1:15 a 21:01 a 22:02 a 0:30 h.
+Skóre 26:00 a 7:2 a 4:41,30 a 1:02:03 a 9.30.5.
+# 5) version dots
+Štandard 802.11n a 2.4 a 3.14.15.
+# 6) ranges
+Roky 1418–1450 a 5-10 a 6-6 a COVID-19 a Il-76.
+Od 160 – 320 km/h a 1,5-2 a 3-4.5.
+# 7) licensed ordinals
+V 16. storočí, do 17. septembra a v 60. rokoch 20. storočia.
+Na 190. mieste a búrka 4. kategórie a jeho 60. gólom.
+V 11., 12. a 13. storočí a z 19. a začiatku 20. storočia.
+V 1000. storočí a 1918. roky a 2000. mieste a 100. typu a 23. typom.
+Medzi 10. a 11. storočím a 37. najväčšou a 1. a 2. svetovej vojny.
+# 8) general ordinal
+Bol to 5. ročník, 3., a 21. deň.
+Kráľovná Alžbeta 2. mala, Alžbety 2. mala, Lealofiho 3. viedol, Karol 40. bol.
+V roku 1835. Potom a stanica Greely 9.
+# 9) mile rate
+Ide 40 míľ/h a 60 mi/h a 1 MI / H a 2 mi/h.
+# 10) signs
+Teplota +30°C, 1 °F, 2°c a 5° a 22 stupňov.
+Rozdiel ±5 a +3 a (-4) a −7 a 36x24 a 6 × 6 a 4x4x4.
+# 11-12) symbol tier, decimal comma
+Získal 88 % a 21 % a 2,4 GHz a 11 000 $ a 3 € a 5 ¥ a 2 £.
+Plocha 19 500 km² a 3 m³ a 64 km/h a 10 m/s a 0,5 kg.
+# 13) fractions
+Zlomky 3/4 a 1/5 a 2/3 a 5/10 a 1/11 a 21/2 a 02/03 a 1995/96 a 1/2.5.
+Kúsok 2¾ a 3½ a 1¼.
+# 14) relational, ampersand
+Platí 2 = 2, 3 ≈ 3, 5 < 6, 7 > 3, 8 ÷ 2.
+B&B a A ＆ B a Ä&Ö a ab&cd a X & Y.
+# 15) initialisms
+USA a OSN, MRI a FBI, HDP a VPN a PTWC, UNESCO, NASA, FIFA, SPRÁVA O STAVE.
+J. S. Bach a ZSSR a AI a IT.
+# numbers through text()
+Číslo 1000000000 a 999999999 a 2000000 a 21000 a 0 a 007.
+# g2p corners
+Deň, deti, list, milý, ľúbiť, chlieb, kôň, mäso, dievča, vlk, krv, stĺp, vták, včera, stav, pravda.
+Mäkký, vyšší, dzban, džem, xylofón, hĺbka, vŕba, diabol, ťava, ďateľ, kniha, nič.
+São Paulo, Müller, Dvořák, Ørsted, Žižek, Ångström, façade, Nguyễn.
+# the TS defects reported in the port log (reproduced, so pinned here)
+V 1000., 5. storočí a 2000., 3. a 4. mieste.
+Jablká atď. Potom a kozmonaut č. Potom.
+Ľad a l\u{30c}ad a ta\u{30c}ka.
