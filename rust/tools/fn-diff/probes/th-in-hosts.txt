@@ -1,0 +1,8 @@
+# Thai runs inside other hosts' text: the script reader routes them to the Thai engine. SYNTHETIC text.
+I said สวัสดี to them
+The word ไทย means Thai
+She wrote ภาษาไทย, then อาหาร.
+It cost ๑๒๓ baht
+สวัสดี
+A mix: สวัสดี, hello, ขอบคุณ goodbye
+ต่าง ๆ and สหรัฐฯ

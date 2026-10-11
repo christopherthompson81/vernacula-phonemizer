@@ -72,6 +72,69 @@ fn trace_json(text: &JsString, lang: &str) -> JsString {
     JsString::from(serde_json::to_string(&out).unwrap())
 }
 
+/// dump.mts's `thaiScanJson`: thaiPrep and the syllable scan, serialized.
+fn thai_scan_string(
+    prep: &vernacula_phonemizer::languages::thai::syllabifier::ThaiPrep,
+    scans: &[vernacula_phonemizer::languages::thai::syllabifier::ThaiSyllableScan],
+) -> String {
+    use vernacula_phonemizer::languages::thai::syllabifier::{ThaiUnit, from_cps};
+    use vernacula_phonemizer::languages::thai::thai_tone::ThaiTone;
+    let cp = |c: u32| from_cps(&[c]).to_string_lossy();
+    let unit = |u: &ThaiUnit| match u {
+        ThaiUnit::C { g, ph } => format!("C:{}:{ph}", cp(*g)),
+        ThaiUnit::V { gs, glide } => {
+            format!(
+                "V:{}:{}",
+                from_cps(gs).to_string_lossy(),
+                glide.unwrap_or("")
+            )
+        }
+    };
+    let tone = |t: ThaiTone| match t {
+        ThaiTone::Mid => "mid",
+        ThaiTone::Low => "low",
+        ThaiTone::Falling => "falling",
+        ThaiTone::High => "high",
+        ThaiTone::Rising => "rising",
+    };
+    let mut fates: Vec<_> = prep.fates.iter().collect();
+    fates.sort();
+    [
+        prep.units.iter().map(unit).collect::<Vec<_>>().join(","),
+        fates
+            .iter()
+            .map(|(k, v)| format!("{k}={v}"))
+            .collect::<Vec<_>>()
+            .join(","),
+        prep.unit_mark
+            .iter()
+            .map(|m| m.map_or("_".to_string(), cp))
+            .collect::<Vec<_>>()
+            .join(","),
+        prep.short_mark
+            .iter()
+            .map(|&b| if b { "1" } else { "0" })
+            .collect(),
+        scans
+            .iter()
+            .map(|s| {
+                format!(
+                    "{}|{}|{}|{}|{}|{}|{}",
+                    s.nucleus,
+                    s.tone.map_or("_", tone),
+                    from_cps(&s.onset_cs).to_string_lossy(),
+                    unit(&s.nuc_unit),
+                    s.coda_g.map(cp).unwrap_or_default(),
+                    if s.long { 1 } else { 0 },
+                    s.fate.map_or("_".to_string(), |f| f.to_string()),
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(";"),
+    ]
+    .join("\u{2}")
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let (name, path) = (args.get(1).expect("name"), args.get(2).expect("jsonl"));
@@ -823,6 +886,35 @@ fn main() {
                 .unwrap();
             Box::new(move |input| tagger.tag(&units(&input["word"])).unwrap())
         }
+        "th-normalize" => Box::new(|input| {
+            vernacula_phonemizer::languages::thai::normalize::normalize_thai(&units(&input["text"]))
+        }),
+        "th-segment" => Box::new(|input| {
+            let toks =
+                vernacula_phonemizer::languages::thai::segment::segment(&units(&input["text"]));
+            JsString::join(&toks, &JsString::from("\u{1}"))
+        }),
+        "th-word" => Box::new(|input| {
+            vernacula_phonemizer::languages::thai::g2p::phonemize_word(&units(&input["text"]))
+        }),
+        "th-syllabify" => Box::new(|input| {
+            use vernacula_phonemizer::languages::thai::syllabifier as s;
+            let run = units(&input["text"]);
+            let fixed = s::thai_lexical_fixup(&run);
+            let reordered = s::reorder_thai_leading_vowels(&fixed);
+            match input["op"].as_str().unwrap() {
+                "fixup" => fixed,
+                "reorder" => reordered,
+                "strip" => s::strip_thai_marks(&run),
+                _ => match s::thai_prep(&reordered) {
+                    None => JsString::from("\u{0}none"),
+                    Some(p) => JsString::from(thai_scan_string(
+                        &p,
+                        &s::thai_scan_syllables(&p.units, &p.fates, &p.unit_mark, &p.short_mark),
+                    )),
+                },
+            }
+        }),
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
