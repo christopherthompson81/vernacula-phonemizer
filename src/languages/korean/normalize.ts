@@ -36,7 +36,7 @@
  */
 import { digitIndex } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
-import { numberToWords } from "./numbers.ts";
+import { numberToWords, spellDigits } from "./numbers.ts";
 import { rewrite } from "../../core/provenance.ts";
 
 const NATIVE = MANIFEST.numbers.native;
@@ -182,8 +182,11 @@ export function normalizeKorean(input: string): string {
     // its particles, so a temperature is normally followed by one — and `(?![\p{L}])` rejected exactly that:
     // `20℃` read 섭씨 20도 while `20℃에` read "20도씨에", losing 섭씨 and spelling the C as 씨 through rule 9.
     // The corpus's own instance is `32℃에 달하는` (×3), so the ordinary case was the broken one.
+    // ⚠ °F TAKES THE SAME GUARD, and for a while did not: only °C was moved, so `70°F에서` still read
+    // 칠십도에프에서 — 화씨 lost and the F spelled 에프 by rule 9 (#1511). FLEURS has no °F, which is why the
+    // corpus never showed it; the particle that broke °C is the same particle here.
     s = rewrite(s, /([-−–±]?)(\d+)\s?°\s?C(?![\p{sc=Latn}\p{M}])/gui, "섭씨 $1$2도");
-    s = rewrite(s, /([-−–±]?)(\d+)\s?°\s?F(?![\p{L}\p{M}])/gui, "화씨 $1$2도");
+    s = rewrite(s, /([-−–±]?)(\d+)\s?°\s?F(?![\p{sc=Latn}\p{M}])/gui, "화씨 $1$2도");
     s = rewrite(s, /(\d)\s?°/gu, "$1도");
 
     //     ⚠ AND `+`, `−`, `±` WERE DROPPED OUTRIGHT TOO — pre-existing, and found while checking this rule's
@@ -233,7 +236,20 @@ export function normalizeKorean(input: string): string {
     //     Anything else — a parenthesis, a longer Latin word, a formula — leaves the sign dropped, as before.
     //     The postposed clause cannot be built without knowing both operands, and a rule that is right about
     //     what it claims beats a total rule that garbles the rest.
-    const OPERAND = String.raw`\d+|[가-힣]+|[A-Za-z]`;
+    //
+    //     ⚠ AN OPERAND IS A WHOLE EOJEOL, which "a longer Latin word leaves the sign dropped" needs and the
+    //     first draft did not enforce (#1511). Two halves:
+    //     · A NUMBER CARRIES ANY HANGUL GLUED TO IT. `\d+` alone stopped before the counter, so `값=3원` read
+    //       값은 삼과 같다원 — the 원 stranded after the predicate. Now the operand is `3원`, the particle is
+    //       chosen from the counter's last syllable (원 → 과), and the digits are LEFT for rules 7 and 8, which
+    //       already know which series each counter takes (`x=3개` → 세개와 같다, not 삼개). The left side never
+    //       had the bug — its Hangul alternative took the 원 and the 3 rode along unchanged — and the new
+    //       alternative gives it the same string.
+    //     · A LONE LATIN LETTER IS ALONE. `[A-Za-z]` had no letter guard, so `xy = z` took the y out of xy
+    //       (x와이는 제트와 같다) and `x = zebra` the z out of zebra (…제트와 같다ebra). The guard is all of
+    //       Latin plus marks, the boundary rule 9 uses and for the same reason (São).
+    const LONE_LATIN = String.raw`(?<![\p{sc=Latn}\p{M}])[A-Za-z](?![\p{sc=Latn}\p{M}])`;
+    const OPERAND = String.raw`\d+[가-힣]*|[가-힣]+|${LONE_LATIN}`;
     const kWord = (t: string): string =>
         /^\d+$/u.test(t) ? (numberToWords(Number(t)) || t) : (LETTER_HANGUL[t.toUpperCase()] ?? t);
     /** Does this word end in a closed syllable? Decodes the Hangul syllable block: T = (code − AC00) % 28. */
@@ -268,8 +284,11 @@ export function normalizeKorean(input: string): string {
     //    boundary inside a number. Korean says 점 and then the fractional digits INDIVIDUALLY (7.75 is
     //    칠 점 칠오, never 칠 점 칠십오, which is what the number path produced), and the whole thing is
     //    emitted as Hangul so rule 8 leaves it alone.
+    //    ⚠ THE INTEGER PART FALLS BACK TO ITS DIGITS past 2^53, where `numberToWords` returns "" — the ""
+    //    korean.ts already catches for a bare digit run. Composed alone it DELETED the integer part:
+    //    99999999999999999999.5 read 점오, "point five" (#1511).
     s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d.])/gu, (_m, int: string, frac: string) =>
-        `${numberToWords(Number(int))}점${[...frac].map((d) => MANIFEST.numbers.ones[digitIndex(d)]!).join("")}`);
+        `${numberToWords(Number(int)) || spellDigits(int)}점${[...frac].map((d) => MANIFEST.numbers.ones[digitIndex(d)]!).join("")}`);
 
     // 7) NATIVE-SERIES COUNTERS, before rule 8 claims the digits for the Sino series. Gated at 99
     //    because the native numerals stop there (아흔아홉) and ≥100 is Sino for every counter: 100명 is

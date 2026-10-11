@@ -156,3 +156,108 @@ en en-GB ja it es pt pt-BR hi cmn fr, replayed through fn-diff.
   (its Run 6/7) is now cleared.
 
 **Implication.** No golden of a ported language moves; the only change is that cmn's Hangul probe now reads.
+
+## Run 7 — 2026-10-11 14:15 (#1511: the Run 5 findings, reproduced before fixing)
+
+**Question.** Do the six Run 5 findings still reproduce on main, and what does the tensification list's
+prefix reach look like once the single-syllable keys are visible?
+
+**Command.** `npx tsx <scratch>/ko/defects.mts` (normalizeKorean + phonemize on synthetic probes);
+`npx tsx <scratch>/ko/remainders.mts` (every normalized Hangul run of FLEURS ko_kr column 3, distinct lines,
+that is not a key: the LONGEST key that is a proper prefix, and the remainder after it, tallied).
+
+**Raw finding.**
+```
+"70°F에서" → "칠십도에프에서"           "70°F 정도" → "화씨 칠십도 정도"
+"-5°F에"  → "마이너스 오도에프에"
+"99999999999999999999.5" → "점오"      "12345678901234567890.25배" → "점이오배"
+"값=3원" → "값은 삼과 같다원"           "x=3개" → "엑스는 삼과 같다개"   "a<5명" → "에이는 오보다 작다명"
+"3원=값" → "삼원은 값과 같다"   (the LEFT side is fine: the Hangul alternative takes 원 and the 3 rides along)
+"xy = z" → "x와이는 제트와 같다"        "ab < c" → "a비는 씨보다 작다"
+"x = zebra" → "엑스는 제트와 같다ebra"   (same defect on the RIGHT operand, not in the issue text)
+가능성 kɐnˈɯŋs͈ɘŋ   가능성이 kɐnˈɯŋsɘŋi   가능성은 kɐnˈɯŋsɘŋɯn   가능성에서는 kɐnˈɯŋsɘŋesɘnɯn
+국물 kˈuŋmuɭ
+```
+Remainders: `runs 25938 exact 197 prefix 766 distinct remainders 340`. The top remainders are particles
+(을 56, 의 35, 이 25, 에서 24, 에 23, 가 22, 는 20, 를 20, 은 17, 과 15, 로 13, 으로 10, 와 7, 도 4, 이다 5,
+입니다 4, 들은 3, 이라고 3) — but the tail is dominated by EIGHT ONE-SYLLABLE KEYS (겜 골 과 바 백 솔 신 실,
+all index 0): 과+학자들은 ×13, 바+랍니다 ×7, 과+정을, 신+호를, 바+르셀로나의, 실+험을 … Every one of those is
+a different word that happens to start with the syllable. And the 8 keys are loanword readings (tense
+initial) of syllables that are overwhelmingly native or Sino words when they stand with a particle: 신을 is
+"god/shoes", not a loan. Derivations also show (적인 5, 적으로 5, 했습니다 7, 한 7, 할 6).
+
+**Implication.**
+- 1–4 are one-rule fixes. 6: the engine's 국물 IS kuŋmuɭ, so the note's first half was right and "wait
+  kuŋmul" is the error; delete the drafting tail.
+- 5: a bare prefix match is wrong (the one-syllable keys alone make it so). Match a key only when what
+  follows is a chain of particles from a closed list, and only for keys of two or more syllables — the
+  one-syllable keys are loan homographs whose tense initial must not spread to the native word + particle.
+  Derivations (-적, 하다 forms) stay out: the issue names particles.
+
+## Run 8 — 2026-10-11 14:25 (#1511: TS fixes, reach of the particle lookup, golden)
+
+**Question.** With the five TS fixes in (°F guard; decimal `|| spellDigits`; operand `\d+[가-힣]*`;
+lone-letter guard `(?<![\p{sc=Latn}\p{M}])[A-Za-z](?![\p{sc=Latn}\p{M}])`; key + particle chain for keys of
+≥2 syllables, particle list in korean.jsonc), what moves — on the probes, over FLEURS, and in the golden?
+
+**Command.** `npx tsx <scratch>/ko/defects.mts`; `npx tsx <scratch>/ko/reach.mts` (FLEURS ko_kr, the same
+runs as Run 7, the shipped lookup re-implemented over MANIFEST.particles); `npx tsx tools/gen_parity_goldens.mts ko`
+then `npx tsx <scratch>/ko/golddiff.mts <old ko.tsv> csharp/goldens/ko.tsv` (word-level diff of changed rows).
+
+**Raw finding.**
+```
+"70°F에서" → "화씨 칠십도에서"    "-5°F에" → "화씨 마이너스 오도에"
+"99999999999999999999.5" → "구구…구점오" (20 digits)
+"값=3원" → "값은 삼원과 같다"   "x=3개" → "엑스는 세개와 같다"   "a<5명" → "에이는 다섯명보다 작다"
+"3원=값" → "삼원은 값과 같다" (unchanged)
+"xy = z" → "xy = z"   "ab < c" → "ab < c"   "x = zebra" → "x = zebra"   "x = y" → "엑스는 와이와 같다"
+가능성이 kɐnˈɯŋs͈ɘŋi   가능성은 kɐnˈɯŋs͈ɘŋɯn   가능성에서는 kɐnˈɯŋs͈ɘŋesɘnɯn   신을 sˈinɯɭ (untouched)
+```
+A side effect visible in the first probe: `칠십도에서` now tenses 십 (t͡ɕʰˈiɭs͈ip̚…), because 칠십 is a key and
+도+에서 parses as a particle chain. Here 도 is the degree counter, not the particle "also", but the key's
+index (칠십 [칠씹]) is right either way: what follows a key cannot change the key's own onsets.
+
+Reach: `runs 25938 exact 197 newly reached 308 distinct key+rest 238` (of the 766 bare-prefix runs of Run 7).
+By remainder: 을×52 의×32 이×25 에서×22 에×21 가×21 는×20 를×20 과×15 은×14 으로×10 인×9 로×8 와×7 이다×5 도×4
+입니다×4 들은×3 이라고×3, then singletons (보다도 로의 에서는 의들은 들에 나 들의 에는 와의 보다 에만 만 들이). Read all
+238 groups: every one is noun+particle, except 외과+의들은 (외과의 "surgeon" + 들은, a suffix 의 not the
+genitive — the key's 과 [꽈] still holds) and the lexicon's own homographs (대가+로, 보수+를), which tense
+exactly as their bare entries already did.
+
+Golden: `rows 200 changed 40` (20 texts, each present twice). Every changed word is a lenis→tense onset
+inside a key + particle: 시스템은, 소프트웨어에서, 세트에서/세트를, 가능성이 ×3, 염증을, 전염병을, 필수적인,
+물질과/물질이라고/물질이, 효과를, 당뇨병의, 결정론은, 여권을, 발전을, 조건에서는, 문법에, 발병으로/발병이/발병이라고,
+물살을, 게임에는/게임을, 통증에, 결정도, 밀도가, 사이즈로, 일주일에, 결정으로. No word count changed, no
+normalize arm (°F, relational, >2^53 decimal) occurs in the golden. `npm run check:goldens`: fresh, 189
+languages, 0 stale. New test file: 6 tests; each fails with its fix reverted (`<scratch>/ko/revert.sh`, seven
+reverts incl. the two-syllable minimum and the particle-chain test separately).
+
+**Implication.** Mirror into C# and Rust; the Rust golden gate will check the 40 rows.
+
+## Run 9 — 2026-10-11 15:05 (#1511: C# and Rust mirrors, gates)
+
+**Question.** Do the C# and Rust mirrors reproduce the fixed TS byte for byte, and do the new tests in each
+engine fail with each fix reverted?
+
+**Command.** `cd rust && cargo fmt --check && cargo test && cargo run --release -p parity && cargo run --release -p regex-diff`;
+fn-diff `ko-normalize ko-g2p phonemize-sync phonemize-best trace` (dumps re-made with five synthetic #1511
+lines appended to `rust/tools/fn-diff/probes/ko.txt`); `dotnet test csharp/Vernacula.Phonemizer.Tests` (full);
+`dotnet run --project csharp/tools/parity -c Release -- ko`; `<scratch>/ko/revert_rs.sh`, `<scratch>/ko/revert_cs.sh`
+(the same seven reverts as the TS script).
+
+**Raw finding.**
+- Rust: every language at its golden count, ko `200/200 identical` (the 40 moved rows included); mag 199/200
+  (the known Arabic row). `cargo test` 187 + 1 pass. regex-diff `144898 probe results identical, 0 DIFFER`.
+- fn-diff: `ko-normalize 3625 identical`, `ko-g2p 59915 identical`, `phonemize-sync/-best/trace 3619 identical`,
+  0 DIFFER each.
+- C#: first full run had ONE failure, in the new test: `Assert.Contains("͈", "s͈ˈin")` → "Sub-string not
+  found". xUnit's Contains is culture-sensitive and a lone combining mark is ignorable under it — so the
+  `DoesNotContain` assertions beside it were passing VACUOUSLY. Ordinal comparison on all of them; then
+  7485/7485 pass; C# parity `ko OK 200 rows`.
+- Reverts: in all three engines each of the seven reverts fails its test.
+- TS full suite: 1 failure, `foreign-runs.test.ts > th delegates to the same reading English itself gives`
+  at 6230ms — a timeout under full-suite load; the file alone passes 47/47, and a full re-run passes
+  6811 + 5 skipped. Not ko. C# parity over every golden: 189 languages byte-identical, 36495 rows.
+
+**Implication.** Done; the ordinal-comparison trap is worth remembering for any C# test asserting on a
+combining mark.

@@ -22,6 +22,8 @@ export interface KoreanManifest {
     voice: Record<string, string>;
     tense: Record<string, string>;
     tenseJamo: Record<string, string>;
+    /** Particles a lexical-tensification key may carry (see korean.jsonc and g2p.ts). */
+    particles: string[];
     aspiration: {
         hCodaLenisOnset: Record<string, string>;
         stopCodaHOnset: Record<string, string>;

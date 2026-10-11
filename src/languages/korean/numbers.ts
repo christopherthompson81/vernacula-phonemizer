@@ -29,7 +29,8 @@ function below10000(n: number): string {
  *
  * ⚠ `numberToWords` RETURNS `""` FOR AN UNSAFE INTEGER AND THAT CONTRACT IS DELIBERATELY UNTOUCHED: three
  * callers in normalize.ts test it (`numberToWords(…) || t`, `w === "" ? m : w`) to mean "out of range, leave
- * the digits for the number path". The bug was that the number path then dropped them too. So the fallback
+ * the digits for the number path". The bug was that the number path then dropped them too — and so did
+ * rule 6, a decimal's integer part, which now falls back to this function as well (#1511). So the fallback
  * is a SEPARATE function, used at that path's end, and the emptiness contract still holds for normalize.ts.
  *
  * Sino-Korean digit names are what rule 6 already spells a decimal tail with (7.75 → 칠점칠오), so this

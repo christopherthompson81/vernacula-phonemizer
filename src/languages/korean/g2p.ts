@@ -7,7 +7,7 @@
  *   - lenis voicing: ㄱㄷㅂㅈ → ɡdbd͡ʑ after a vowel/sonorant (가다→kɐdɐ);
  *   - aspiration: ㅎ ± a lenis stop → aspirated (놓고→nokʰo, 좋다→t͡ɕotʰɐ);
  *   - tensification: an obstruent coda + a lenis stop → tense (학교→hɐk̚k͈jo, 맑다→mɐk̚t͈ɐ);
- *   - nasalization: an obstruent coda + a nasal → nasal coda (국물→kuŋmuɭ… wait kuŋmul; 합니→hɐmni);
+ *   - nasalization: an obstruent coda + a nasal → nasal coda (국물→kuŋmuɭ; 합니→hɐmni);
  *   - lateralization: ㄴㄹ / ㄹㄴ → ll (신라→siɭɭɐ);
  *   - coda neutralization: the 7 possible codas, obstruents unreleased ̚ (밥→pɐp̚).
  * Contributes ̚ (unreleased) and ͈ (tense).
@@ -52,6 +52,38 @@ function tensLexicon(): Map<string, number[]> {
             { optional: true },
         );
     return TENS;
+}
+
+const PARTICLES = MANIFEST.particles;
+
+/** Is `rest` a (possibly empty) chain of listed particles — 에서는 = 에서 + 는, 들이 = 들 + 이? */
+function isParticleChain(rest: string): boolean {
+    if (rest === "") return true;
+    for (const p of PARTICLES)
+        if (rest.startsWith(p) && isParticleChain(rest.slice(p.length))) return true;
+    return false;
+}
+
+/**
+ * The lexical-tensification indices for one run: the whole run's entry, else the LONGEST key of two or more
+ * syllables that the run starts with when everything after it is a particle chain (#1511). The tokenizer's
+ * run carries its particle, so a whole-run lookup tensed 가능성 and not 가능성이 / 가능성은.
+ *
+ * ⚠ TWO SYLLABLES MINIMUM, because the list's one-syllable keys (겜 골 과 바 백 솔 신 실, all index 0) are
+ * LOANWORD readings with a tense initial — the gold, the bar, the scene — of syllables that with a particle
+ * are overwhelmingly the native or Sino word: 신을 is "god" or "shoes", not s͈in. Over FLEURS ko_kr those
+ * eight keys also start most of the compounds a prefix match would claim (과+학자들은, 바+랍니다, 실+험을).
+ * Keys are all Hangul, so a code-unit slice that matches one is a whole-syllable boundary.
+ */
+function lexicalTensing(word: string): number[] | undefined {
+    const lex = tensLexicon();
+    const exact = lex.get(word);
+    if (exact !== undefined) return exact;
+    for (let k = word.length - 1; k >= 2; k--) {
+        const tens = lex.get(word.slice(0, k));
+        if (tens !== undefined && isParticleChain(word.slice(k))) return tens;
+    }
+    return undefined;
 }
 
 interface Syl {
@@ -152,7 +184,7 @@ export function phonemizeWord(word: string): string {
 
     // LEXICAL tensification (경음화): force-tense the onsets the lexicon lists for this word (a tense onset
     // never voices). Applied after sandhi so it overrides the lenis realisation.
-    const tens = tensLexicon().get(word);
+    const tens = lexicalTensing(word);
     if (tens)
         for (const j of tens)
             if (onset[j] !== undefined && onset[j]! in TENSE_JAMO)

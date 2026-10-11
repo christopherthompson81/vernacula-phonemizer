@@ -124,3 +124,9 @@ $5 지불
 かな 가나
 ㄱㄴㄷ ㅏㅑ
 𠮷 한
+# #1511: °F with a particle, a decimal past 2^53, a counter after =, a lone letter, tensification + particle
+70°F에서 더웠다 -5°F에 얼었다
+99999999999999999999.5배 12345678901234567890.25
+값=3원 x=3개 a<5명 3원=값
+xy = z ab < c x = zebra x = y
+가능성이 가능성은 가능성에서는 신을 가운데 칠십도에서

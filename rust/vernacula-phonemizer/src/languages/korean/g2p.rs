@@ -8,7 +8,7 @@ use std::sync::{LazyLock, OnceLock};
 
 use indexmap::IndexMap;
 
-use super::manifest::{DIR, MANIFEST, table};
+use super::manifest::{DIR, MANIFEST, list, table};
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::load_tsv::{TsvOptions, load_tsv_map};
@@ -38,6 +38,7 @@ struct Tables {
     voice: HashMap<JsString, JsString>,
     tense: HashMap<JsString, JsString>,
     tense_jamo: HashMap<JsString, JsString>,
+    particles: Vec<JsString>,
     asp_h_coda: HashMap<JsString, JsString>,
     asp_stop_h: HashMap<JsString, JsString>,
 }
@@ -77,6 +78,7 @@ static T: LazyLock<Tables> = LazyLock::new(|| {
         voice: table(&m.voice),
         tense: table(&m.tense),
         tense_jamo: table(&m.tense_jamo),
+        particles: list(&m.particles),
         asp_h_coda: table(&m.aspiration.h_coda_lenis_onset),
         asp_stop_h: table(&m.aspiration.stop_coda_h_onset),
     }
@@ -102,6 +104,33 @@ fn tens_lexicon() -> Result<&'static IndexMap<JsString, Vec<f64>>, String> {
 /// Load the lexical-tensification list (the engine build checks it, so `phonemize_word` cannot fail later).
 pub fn try_tens_lexicon() -> Result<(), String> {
     tens_lexicon().map(|_| ())
+}
+
+/// Is `rest` a (possibly empty) chain of listed particles — 에서는 = 에서 + 는, 들이 = 들 + 이?
+fn is_particle_chain(rest: &[u16]) -> bool {
+    rest.is_empty()
+        || T.particles
+            .iter()
+            .any(|p| rest.starts_with(p.units()) && is_particle_chain(&rest[p.len()..]))
+}
+
+/// The lexical-tensification indices for one run: the whole run's entry, else the LONGEST key of two or more
+/// syllables the run starts with when everything after it is a particle chain (#1511). ⚠ Two syllables
+/// minimum: the one-syllable keys are loanword readings (see g2p.ts). Code-unit slices, as the TS.
+fn lexical_tensing(word: &JsString) -> Option<&'static Vec<f64>> {
+    let lex = tens_lexicon().expect("tensification.tsv is loaded at build");
+    if let Some(exact) = lex.get(word) {
+        return Some(exact);
+    }
+    let u = word.units();
+    for k in (2..u.len()).rev() {
+        if let Some(tens) = lex.get(&JsString::from_units(&u[..k]))
+            && is_particle_chain(&u[k..])
+        {
+            return Some(tens);
+        }
+    }
+    None
 }
 
 struct Syl {
@@ -213,10 +242,7 @@ pub fn phonemize_word(word: &JsString) -> JsString {
         }
     }
 
-    if let Some(tens) = tens_lexicon()
-        .expect("tensification.tsv is loaded at build")
-        .get(word)
-    {
+    if let Some(tens) = lexical_tensing(word) {
         for &j in tens {
             if let Some(j) = js_index(j, onset.len())
                 && let Some(tj) = t.tense_jamo.get(&onset[j])

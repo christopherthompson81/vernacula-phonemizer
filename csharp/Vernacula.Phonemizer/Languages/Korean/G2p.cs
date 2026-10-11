@@ -43,6 +43,30 @@ public static class G2p
             (v, _) => v.Split(',').Select(x => (int)Js.Number(x)).ToArray(), optional: true);
     }
 
+    /** Is `rest` a (possibly empty) chain of listed particles — 에서는 = 에서 + 는, 들이 = 들 + 이? */
+    private static bool IsParticleChain(string rest)
+    {
+        if (rest.Length == 0) return true;
+        foreach (var p in Manifest.MANIFEST.Particles)
+            if (rest.StartsWith(p, StringComparison.Ordinal) && IsParticleChain(rest[p.Length..])) return true;
+        return false;
+    }
+
+    /**
+     * The lexical-tensification indices for one run: the whole run's entry, else the LONGEST key of two or
+     * more syllables the run starts with when everything after it is a particle chain (#1511). ⚠ Two
+     * syllables minimum: the one-syllable keys are loanword readings of syllables that with a particle are
+     * the native or Sino word (신을 is "god" or "shoes"). See g2p.ts for the measurement.
+     */
+    private static int[]? LexicalTensing(string word)
+    {
+        var lex = TensLexicon();
+        if (lex.TryGetValue(word, out var exact)) return exact;
+        for (var k = word.Length - 1; k >= 2; k--)
+            if (lex.TryGetValue(word[..k], out var tens) && IsParticleChain(word[k..])) return tens;
+        return null;
+    }
+
     private sealed class Syl
     {
         public required string L { get; init; }
@@ -140,7 +164,7 @@ public static class G2p
 
         // Lexical tensification applies AFTER the sandhi loop so it overrides the lenis realisation (a tense
         // onset never voices).
-        if (TensLexicon().TryGetValue(word, out var tens))
+        if (LexicalTensing(word) is { } tens)
             foreach (var j in tens)
                 if (j >= 0 && j < onset.Count && TENSE_JAMO.ContainsKey(onset[j]))
                     onset[j] = TENSE_JAMO[onset[j]];

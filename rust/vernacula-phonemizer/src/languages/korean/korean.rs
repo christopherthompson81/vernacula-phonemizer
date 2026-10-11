@@ -94,4 +94,45 @@ mod tests {
         assert_eq!(say("2024"), say("이천이십사"));
         assert_eq!(say("1,000명"), say("천명"));
     }
+
+    /// The #1511 findings, ported from test/korean-port-findings.test.ts.
+    #[test]
+    fn port_findings_1511() {
+        use crate::core::js_string::{JsString, js};
+        use crate::languages::korean::g2p::phonemize_word;
+        use crate::languages::korean::normalize::normalize_korean;
+        use crate::languages::korean::numbers::spell_digits;
+        let norm = |s: &str| normalize_korean(&js(s)).to_string_lossy();
+        let word = |s: &str| phonemize_word(&js(s)).to_string_lossy();
+        // °F takes the °C guard.
+        assert_eq!(norm("70°F에서"), "화씨 칠십도에서");
+        assert_eq!(norm("-5°F에"), "화씨 마이너스 오도에");
+        assert_eq!(norm("70°F 정도"), "화씨 칠십도 정도");
+        // A decimal's integer part past 2^53 falls back to its digits.
+        let nines: JsString = spell_digits(&js("99999999999999999999"));
+        assert_eq!(
+            norm("99999999999999999999.5"),
+            format!("{}점오", nines.to_string_lossy())
+        );
+        assert_eq!(norm("3.5"), "삼점오");
+        // A counter glued to the right operand stays with it.
+        assert_eq!(norm("값=3원"), "값은 삼원과 같다");
+        assert_eq!(norm("x=3개"), "엑스는 세개와 같다");
+        assert_eq!(norm("a<5명"), "에이는 다섯명보다 작다");
+        assert_eq!(norm("3원=값"), "삼원은 값과 같다");
+        // A lone Latin letter is not taken out of a longer word.
+        assert_eq!(norm("xy = z"), "xy = z");
+        assert_eq!(norm("x = zebra"), "x = zebra");
+        assert_eq!(norm("x = y"), "엑스는 와이와 같다");
+        // Lexical tensification reaches a key carrying particles; not a one-syllable key, not a non-particle.
+        let bare = word("가능성");
+        assert!(bare.contains("s͈"));
+        for w in ["가능성이", "가능성은", "가능성에서는"] {
+            assert!(word(w).starts_with(&bare), "{w}");
+        }
+        assert!(word("신").contains('\u{348}'));
+        assert!(!word("신을").contains('\u{348}'));
+        assert!(word("가운").contains('\u{348}'));
+        assert!(!word("가운데").contains('\u{348}'));
+    }
 }
