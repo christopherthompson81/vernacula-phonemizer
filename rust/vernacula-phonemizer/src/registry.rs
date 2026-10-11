@@ -26,6 +26,7 @@ use crate::languages::english::english::{EnglishPhonemizer, WordTransform, creat
 use crate::languages::english::english_neural::{phonemize_en_neural, prewarm_foreign_english};
 use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagger_files};
 use crate::languages::english_gb::english_gb::rp_word_transform;
+use crate::languages::english_in::english_in::indian_word_transform;
 use crate::languages::portuguese::g2p::Dialect;
 use crate::languages::portuguese::portuguese::create_portuguese;
 use crate::languages::portuguese::roman_ordinals::roman_policy as pt_roman_policy;
@@ -34,10 +35,10 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 32] = [
+pub const LANGUAGES: [&str; 38] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "id", "ms", "tl",
-    "ceb", "hil", "ilo",
+    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
+    "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo",
 ];
 
 /// A language engine, as the registry holds it.
@@ -68,6 +69,7 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
     Some(match lang {
         "en" => english(EnglishVariant::Us),
         "en-GB" => english(EnglishVariant::Gb),
+        "en-IN" => english(EnglishVariant::In),
         "ja" => crate::languages::japanese::japanese::create_japanese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
@@ -158,6 +160,21 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "lv" => crate::languages::latvian::latvian::create_latvian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "es-419" => crate::languages::spanish_419::spanish_419::create_spanish_419()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "fr-CA" => crate::languages::french_ca::french_ca::create_french_ca()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ca" => crate::languages::catalan::catalan::create_catalan()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "gl" => crate::languages::galician::galician::create_galician()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ro" => crate::languages::romanian::romanian::create_romanian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -168,6 +185,9 @@ fn roman_policy(lang: &str) -> RomanPolicy {
     match lang {
         "it" => crate::languages::italian::roman_ordinals::roman_policy(),
         "es" => crate::languages::spanish::roman_ordinals::roman_policy(),
+        "es-419" => crate::languages::spanish_419::roman_ordinals::roman_policy(),
+        "ca" => crate::languages::catalan::roman_ordinals::roman_policy(),
+        "ro" => crate::languages::romanian::roman_ordinals::roman_policy(),
         "pt" => pt_roman_policy(),
         "pt-BR" => pt_br_roman_policy(),
         "ru" => crate::languages::russian::roman_ordinals::roman_policy(),
@@ -389,6 +409,7 @@ pub fn english() -> Result<Arc<EnglishPhonemizer>, PhonemizeError> {
 enum EnglishVariant {
     Us,
     Gb,
+    In,
 }
 
 struct EnglishEngine {
@@ -401,6 +422,7 @@ impl EnglishEngine {
         match self.variant {
             EnglishVariant::Us => ("en", None),
             EnglishVariant::Gb => ("en-GB", Some(&rp_word_transform)),
+            EnglishVariant::In => ("en-IN", Some(&indian_word_transform)),
         }
     }
 }
