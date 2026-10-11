@@ -229,11 +229,14 @@ export function normalizeHiligaynon(input: string): string {
     // same word on the weaker "a written corpus cannot say how a SYMBOL is spoken" argument; hil does not
     // have to.) The corpus's one `punto` is *pinakamataas nga punto*, the highest POINT of Negros — the same
     // sense in a different application, so it corroborates rather than contradicts.
-    // ⚠ ONE OR TWO FRACTIONAL DIGITS ONLY, and the cap is measured: the corpus has 398 one-digit and 1,244
+    // ⚠ THE CAP IS ON THE AMBIGUOUS SHAPE ONLY, and it is measured: the corpus has 398 one-digit and 1,244
     // two-digit fractional parts and exactly ONE three-digit — which is the German-town period-THOUSANDS
-    // instance from step 1. So the cap admits every real decimal and refuses the one number that is not one.
+    // instance from step 1. So exactly three fractional digits after a one-to-three-digit integer (`17.865`,
+    // and also `3.141`) stays refused. Everything a thousands group CANNOT be is a decimal (#1534): four or more
+    // fractional digits (`3.1416`), a `0` integer (`0.625`, a group never leads with 0) and an integer of four or
+    // more digits (`1234.567`, after step 1's de-grouping too). Those used to read as a pause plus a cardinal.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is.
-    s = rewrite(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
+    s = rewrite(s, /(\d)\.(\d{1,2}|\d{4,}|(?<=(?<![\d.])(?:0|\d{4,})\.)\d{3})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 6. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────
     s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.`, "giu"), (m0, ab: string) => {

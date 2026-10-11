@@ -26,6 +26,11 @@ public sealed class HiligaynonPhonemizer : ILanguage
     private const string VOWEL_PH = "aeiou";
 
     /** Scan a lowercased Hiligaynon word → IPA units (trigraphs/digraphs, single letters, glottal stops). */
+    /** A trigraph's IPA as separate consonant and vowel units when it ends in a vowel, so stress and the hiatus
+     *  test see the vowel (#1534). */
+    private static IEnumerable<string> SplitNucleus(string ipa) =>
+        ipa.Length > 1 && VOWEL_PH.Contains(ipa[^1]) ? new[] { ipa[..^1], ipa[^1..] } : new[] { ipa };
+
     private static List<string> Scan(string w)
     {
         var s = Js.CodePoints(w);
@@ -42,7 +47,7 @@ public sealed class HiligaynonPhonemizer : ILanguage
             var tg = c + (i + 1 < s.Count ? s[i + 1] : "") + (i + 2 < s.Count ? s[i + 2] : "");
             if (DEF.Digraphs.TryGetValue(tg, out var tgph) && tgph.Length > 0)
             {
-                outp.Add(tgph);
+                outp.AddRange(SplitNucleus(tgph));
                 i += 3;
                 continue;
             }

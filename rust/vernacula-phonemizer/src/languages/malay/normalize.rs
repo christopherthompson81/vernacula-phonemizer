@@ -123,6 +123,9 @@ fn re(pattern: String, flags: &str) -> JsRegex {
     JsRegex::new(&pattern, flags).unwrap()
 }
 
+/// `US` before an amount is folded to the bare sign, as Indonesian's 1b: kept, it read as the word *us* (#1534).
+static US_CODE: LazyLock<JsRegex> =
+    LazyLock::new(|| re(format!(r"{NOT_LETTER_BEFORE}US ?\$(?=\d)"), "gu"));
 static CURRENCY_CODE_PREFIX: LazyLock<JsRegex> = LazyLock::new(|| {
     re(
         format!(r"({NOT_LETTER_BEFORE}(?:US|AS|HK|NZ|CAD?))\$(?=\d)"),
@@ -301,6 +304,7 @@ pub(crate) fn normalize_malay(input: &JsString) -> JsString {
     );
 
     // 3) `US$30`, a magnitude between the amount and its currency, and a bare decimal amount.
+    s = rewrite(&s, &US_CODE, &js("$"));
     s = rewrite(&s, &CURRENCY_CODE_PREFIX, &js("$1 $"));
     s = rewrite(&s, &SIGN_BEFORE_CODE, &JsString::new());
     s = rewrite_with(&s, &SIGN_MAGNITUDE, |m, t| {
@@ -472,7 +476,7 @@ pub(crate) fn normalize_malay(input: &JsString) -> JsString {
     );
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d.])(\d+)\.(\d+)(?![\d])", "gu"),
+        js_re!(r"(?<![\d.])(\d+)\.(\d+)(?![\d]|\.\d)", "gu"),
         |m, t| {
             let (int, frac) = (m.group(1, t).unwrap(), m.group(2, t).unwrap());
             if int.len() <= 3 && frac == js("000") {
@@ -551,7 +555,8 @@ mod tests {
         ("berpusat di A.S.", "berpusat di AS."),
         ("pada 323 SM.", "pada 323 sebelum Masihi."),
         ("Seni &amp; Sains", "Seni dan Sains"),
-        ("yuran sebanyak US$30,", "yuran sebanyak US $30,"),
+        ("yuran sebanyak US$30,", "yuran sebanyak $30,"),
+        ("yuran sebanyak AS$30,", "yuran sebanyak AS $30,"),
         ("harga €1.50 sekilo", "harga 1 perpuluhan 5 0 € sekilo"),
         (
             "kekayaan $2.3 bilion.",
@@ -562,7 +567,7 @@ mod tests {
             "tambahan berjumlah $45 juta AUD.",
             "tambahan berjumlah 45 juta AUD.",
         ),
-        ("(US $14.7 billion)", "(US 14 perpuluhan 7 billion dolar)"),
+        ("(US $14.7 billion)", "(14 perpuluhan 7 billion dolar)"),
         ("kos $1000 setahun", "kos $1000 setahun"),
         ("juadah dsb. yang", "juadah dsb. yang"),
     ];

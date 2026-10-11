@@ -26,3 +26,5 @@ Ang buttonlabel=Maghimo kag Nynorsk kag -abot kag abot- kag gui kag que.
 May 0 kag 7 kag 10 kag 11 kag 21 kag 100 kag 101 kag 999 kag 1000 kag 1001 kag 999999 kag 1000000 kag 999999999 kag 1000000000.
 # punctuation and other scripts
 Una: isa; duha, tatlo. Matuod bala? Huo! Москва kag Αθήνα kag 北京.
+# #1534: four or more fraction digits, a 0 integer, a long integer; the ambiguous d.ddd; trigraph vowels
+Mga 3.1416 kag 0.625 kag 1234.567 kag 1,234.567 kag 3.141 kag 17.865 ka pumuluyo. Queso, quinse, Quezon, Miguel, guitara, Ambaguio.

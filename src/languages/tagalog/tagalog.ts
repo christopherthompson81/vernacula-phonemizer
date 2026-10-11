@@ -26,6 +26,8 @@ interface NumbersDef {
     thousand: string; // libo
     thousand1: string; // sanlibo (1000)
     million: string;
+    billion: string; // bilyon (10^9)
+    trillion: string; // trilyon (10^12)
     and: string; // at → 't after a vowel
     stressPenult: string[]; // number roots that are penult- not final-stressed (séro, ápat, líbo, …)
 }
@@ -206,8 +208,13 @@ export function numberWords(n: number): string {
         const thousands = th === 1 ? NUM.thousand1 : `${ligate(numberWords(th))} ${NUM.thousand}`;
         return joinRemainder(thousands, n % 1000);
     }
-    const m = Math.floor(n / 1000000);
-    return joinRemainder(`${ligate(numberWords(m))} ${NUM.million}`, n % 1000000);
+    if (n < 1e9) {
+        const m = Math.floor(n / 1000000);
+        return joinRemainder(`${ligate(numberWords(m))} ${NUM.million}`, n % 1000000);
+    }
+    // bilyon / trilyon (#1534): 10^9 used to read *libong milyon*, disagreeing with the tier's own magnitudes.
+    if (n < 1e12) return joinRemainder(`${ligate(numberWords(Math.floor(n / 1e9)))} ${NUM.billion}`, n % 1e9);
+    return joinRemainder(`${ligate(numberWords(Math.floor(n / 1e12)))} ${NUM.trillion}`, n % 1e12);
 }
 
 const NUM_PENULT = new Set(NUM.stressPenult);
@@ -488,7 +495,13 @@ class TagalogPhonemizer implements Phonemizer {
                 }
                 // ⚠ THE STRESS INDEX IS TAKEN ON THE BARE CARDINAL, then shifted past the prefix — see
                 // ORDINAL_PREFIX_NUCLEI. Only the first word is fused; the rest are ordinary number words.
-                numberWords(n).split(" ").forEach((wd, i) => {
+                // ⚠ ABOVE 2^53 THE ORDINAL READS ITS DIGITS, as the cardinal's `emitNumber` does (#1534). It used to
+                // compose the rounded FLOAT (ika-12345678901234567890 said …768), and at 309+ digits `Number` is
+                // Infinity and `numberWords` recursed until the stack overflowed — one input threw the utterance.
+                const words = Number.isSafeInteger(n)
+                    ? numberWords(n).split(" ")
+                    : [...m[4]].flatMap((d) => numberWords(Number(d)).split(" "));
+                words.forEach((wd, i) => {
                     const idx = numberStressIdx(wd);
                     if (i !== 0) { sink.emit(phonemizeCore(wd, idx)); return; }
                     sink.emit(phonemizeCore(ORDINAL_PREFIX + wd,

@@ -92,9 +92,15 @@ public static class Normalize
         "gu");
     // ⚠ ONE OR TWO FRACTIONAL DIGITS ONLY — the two-digit cap is what makes the rule unable to eat a
     // period-thousands group, and this corpus has none.
-    private static readonly JsRe DECIMAL = JsRegex.Compile(@"(\d)\.(\d{1,2})(?![\d.,])", "gu");
+    private static readonly JsRe DECIMAL = JsRegex.Compile(@"(\d)\.(\d+)(?![\d.,])", "gu");
     private static readonly JsRe DEGREE_C = JsRegex.Compile(@"(\d)\s?°\s?C(?![\p{L}\p{M}])", "gui");
     private static readonly JsRe DEGREE_F = JsRegex.Compile(@"(\d)\s?°\s?F(?![\p{L}\p{M}])", "gui");
+    // A compass letter after the sign is the direction, in the corpus's own words (#1534).
+    private static readonly JsRe DEGREE_COMPASS = JsRegex.Compile(@"(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])", "gu");
+    private static readonly IReadOnlyDictionary<string, string> COMPASS = new Dictionary<string, string>(StringComparer.Ordinal)
+    {
+        ["N"] = "amianan", ["S"] = "abagatan", ["E"] = "daya", ["W"] = "laud",
+    };
     private static readonly JsRe DEGREE_BARE = JsRegex.Compile(@"(\d)\s?°", "gu");
     private static readonly JsRe ABBREV = JsRegex.Compile(@"(?<![\p{L}\p{M}])(" + ABBREV_ALT + @")\.", "giu");
     // ⚠ A FOLLOWING DIGIT IS REQUIRED, and that is what separates `c.` from a personal INITIAL.
@@ -148,6 +154,7 @@ public static class Normalize
         // ── 6. DEGREES → `grado`, with the two scale names ───────────────────────────────────────────────────
         s = Rewrite(s, DEGREE_C, "$1 grado Celsius");
         s = Rewrite(s, DEGREE_F, "$1 grado Fahrenheit");
+        s = Rewrite(s, DEGREE_COMPASS, m => $"{m.Groups[1].Value} grado {COMPASS[m.Groups[2].Value]}");
         s = Rewrite(s, DEGREE_BARE, "$1 grado ");
 
         // ── 7. DOTTED ABBREVIATIONS — closed list ────────────────────────────────────────────────────────────

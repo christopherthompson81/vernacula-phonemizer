@@ -79,3 +79,29 @@ cargo clippy: only module_inception on hiligaynon/mod.rs in the new files
 No TS regex was added or changed. Large dumps deleted.
 
 **Implication.** Done on this machine, with the coverage caveat of Run 1: no corpus exists for hil.
+
+## Run 4 — 2026-10-11 16:45 (#1534: fixing the Run 3 findings, TS first)
+
+**Command.** `npx tsx .probe/1534/q.mts hil …`; `npx tsx tools/gen_parity_goldens.mts id ms tl ceb hil ilo` and a
+diff against the saved goldens.
+
+**Question.** Can three-digit decimals be read without eating the one period-thousands number the corpus has, and
+what moves when a trigraph's vowel becomes visible?
+
+**Raw finding.**
+1. **Decimals: partly fixed.** The corpus is not on this machine, so the header's measurement stands: 398 one-digit
+   and 1,244 two-digit fractional parts, and exactly one three-digit (`17.865 ka pumuluyo`, a German town's
+   period-thousands population). The shape `[1-9]\d{0,2}\.\d{3}` is therefore genuinely ambiguous here, and it stays
+   refused, `3.141` included. Everything a thousands group cannot be is now a decimal: four or more fraction
+   digits (`3.1416`), a `0` integer (`0.625`) and a four-plus-digit integer (`1234.567`, also after de-grouping
+   `1,234.567`). Each read *… . <cardinal>* before. Pattern:
+   `(\d)\.(\d{1,2}|\d{4,}|(?<=(?<![\d.])(?:0|\d{4,})\.)\d{3})(?![\d.,])`.
+2. **Trigraphs.** `gui gue qui que` are pushed as two units (consonant, vowel) when the data's IPA ends in a vowel,
+   so stress and the hiatus test see the vowel. `queso` *kesˈo* → *kˈeso* (= `keso`); `quinse` = `kinse`.
+   `Miguel` stays *mˈiɡel*: the vowel is now a nucleus, but the penult default lands on ⟨i⟩ exactly as it does for
+   `Migel`, so the issue's "Míguel" is the default stress, not this defect (lexical, declined).
+   Golden rows moved, all from this: `Quezon` *kesˈon* → *kˈeson*, `Antique` *ʔˈantike* → *ʔantˈike* (the province
+   is an-TÍ-ke), `Ambaguio` *ʔambˈaɡio* → *ʔambaɡˈiʔo* (the hiatus glottal after the trigraph vowel, plus the
+   penult), `guin` *ɡin* → *ɡˈin* (a monosyllable now has a nucleus), `Balaguer` *bˈalaɡeɾ* → *balˈaɡeɾ*. 5 of 112.
+
+**Implication.** Mirror into C# and Rust. The hil golden is regenerated with these 5 rows.

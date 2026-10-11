@@ -84,6 +84,15 @@ export function normalizeCebuano(input: string): string {
     // minutes drop out.
     const clock = (_m: string, h: string, min: string): string =>
         Number(min) === 0 ? `${Number(h)}` : `${Number(h)} ug ${Number(min)}`;
+    // ⚠ A MERIDIEM AFTER A CLOCK IS SAID AS THE PART OF THE DAY (#1534). It licensed the dot clock below and was
+    // then left in place, so `12.30 pm` read the letters *pm* raw and `8.15 p.m.` read *p . m .* with two pauses.
+    // The corpus's own clocks say the part of the day instead (`9:30 sa buntag`, `10:08 sa gabii`, `09:19 sa hapon
+    // GMT`): a.m. is `sa buntag`; p.m. is `sa gabii` from six to eleven and `sa hapon` otherwise, the split its
+    // `10:08 sa gabii` and `11:00 sa gabii` attest (its one `09:19 sa hapon` is a GMT conversion). The rewritten
+    // marker is itself one the dot clock accepts, so the reading below is unchanged.
+    s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3])([.:])([0-5]\d)\s*([ap])\.?m\b\.?/giu,
+        (_m, h: string, sep: string, min: string, ap: string) =>
+            `${h}${sep}${min} ${ap.toLowerCase() === "a" ? "sa buntag" : Number(h) % 12 >= 6 ? "sa gabii" : "sa hapon"}`);
     s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/gu, clock);
     // ⚠ AND THE PERIOD-SEPARATED CLOCK, which the corpus diff found and no probe would have: this corpus
     // writes `12.00 GMT` and `15.00 UTC` beside `9:30 sa buntag` and `8:46 sa buntag`. Without this the
@@ -114,7 +123,10 @@ export function normalizeCebuano(input: string): string {
     // they would say it. `punto` is the Spanish loan Cebuano uses for a point, and the alternative is 19
     // decimals read with a clause break.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is.
-    s = rewrite(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
+    // ⚠ ANY NUMBER OF FRACTIONAL DIGITS (#1534). A two-digit cap used to make `3.141` a clause pause followed by
+    // *one hundred and forty-one*. The cap reads as a guard against a period-thousands group, but this corpus writes
+    // none (×0, header) and step 1 has already consumed the comma groups it does write, so it protected nothing.
+    s = rewrite(s, /(\d)\.(\d+)(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 5. RANGES → `ngadto sa` ────────────────────────────────────────────────────────────────────────
     // ×12. The hyphen was dropped, leaving two numbers abutting with no connective — and for a YEAR SPAN

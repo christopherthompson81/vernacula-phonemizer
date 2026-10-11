@@ -34,11 +34,13 @@ public static class Normalize
 
     private static readonly JsRe GROUPED = JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2}(?:,\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
+    // A meridiem after a clock is said as the part of the day (#1534); it used to be read as raw letters.
+    private static readonly JsRe CLOCK_MERIDIEM = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3])([.:])([0-5]\\d)\\s*([ap])\\.?m\\b\\.?", "giu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)\\b(?!\\.?\\d)", "gu");
     private static readonly JsRe CLOCK_DOT = JsRegex.Compile(
         "(?<![\\d.:])([01]?\\d|2[0-3])\\.([0-5]\\d)(?!\\d)(?=\\s*(?:GMT|UTC|[ap]\\.?m\\b|sa (?:buntag|hapon|gabii)))", "giu");
     private static readonly JsRe CLOCK_MILITARY = JsRegex.Compile("(?<![\\d.:])([01]\\d|2[0-3])([0-5]\\d)(?!\\d)(?=\\s*(?:GMT|UTC))", "gu");
-    private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d{1,2})(?![\\d.,])", "gu");
+    private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d+)(?![\\d.,])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<!\\b(?:ngadto sa|hangtod|hangtud|gikan sa)\\s)(?<![\\d.,\\p{L}-])(\\d+)\\s?[-–]\\s?(\\d+)(?![\\d.,-])", "gu");
     /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
@@ -65,6 +67,12 @@ public static class Normalize
 
         s = Rewrite(s, GROUPED, m => COMMAS.Replace(m.Value, ""));
 
+        s = Rewrite(s, CLOCK_MERIDIEM, m =>
+        {
+            var ap = m.Groups[4].Value.ToLowerInvariant();
+            var part = ap == "a" ? "sa buntag" : Js.Number(m.Groups[1].Value) % 12 >= 6 ? "sa gabii" : "sa hapon";
+            return $"{m.Groups[1].Value}{m.Groups[2].Value}{m.Groups[3].Value} {part}";
+        });
         s = Rewrite(s, CLOCK_COLON, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
         s = Rewrite(s, CLOCK_DOT, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
         s = Rewrite(s, CLOCK_MILITARY, m => Clock(m.Groups[1].Value, m.Groups[2].Value));

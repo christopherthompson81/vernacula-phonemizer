@@ -21,3 +21,5 @@ Pag-asa at pag‑asa at maganda at ngayon at abenojar at abece at quezon at zebr
 Una: isa; ikalawa, dalawa. Totoo ba? Oo!
 # other scripts
 Ang Москва at Αθήνα at 北京.
+# #1534: an ika- ordinal above 2^53, and cardinals with the scales above milyon
+Ang ika-12345678901234567890 at ika-9007199254740993 at 2000000000 at 1000000000 at 3005000000000 at 999999999999.

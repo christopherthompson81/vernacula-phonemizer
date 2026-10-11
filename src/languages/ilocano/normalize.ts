@@ -269,6 +269,9 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 
+/** The compass letters after `°`, keyed as the rule matches them (uppercase, case-sensitive). See step 6. */
+const COMPASS: Readonly<Record<string, string>> = { N: "amianan", S: "abagatan", E: "daya", W: "laud" };
+
 /** Every rule emits DIGITS where a number is involved and lets the engine's own number path speak them. */
 export function normalizeIlocano(input: string): string {
     let s = input;
@@ -397,12 +400,12 @@ export function normalizeIlocano(input: string): string {
     // POINT). ⚠ `attest.ts` alone would have been the Gabon-district trap: its `punto` hits are 134 tokens
     // in 20 articles and the examples are all **Punto Batorampon**, a headland in Mindanao. The corpus
     // sentence is what closes this, and the wiki corroborates only that the word means "point".
-    // ⚠ ONE OR TWO FRACTIONAL DIGITS ONLY, and the cap is measured: this corpus's three-digit fractional
-    // parts are HDI figures (`0.625`, `0.443`, `0.856`) and `6.271 a riwriw`, i.e. genuine three-decimal
-    // values that the digit-by-digit tail would read correctly anyway — but capping at two is what makes
-    // the rule provably unable to eat a period-thousands group, and this corpus has none to eat.
+    // ⚠ ANY NUMBER OF FRACTIONAL DIGITS (#1534). This corpus's three-digit fractional parts are HDI figures
+    // (`0.625`, `0.443`, `0.856`) and `6.271 a riwriw`: genuine three-decimal values, and it has no period-thousands
+    // group to protect. The old two-digit cap read every one of them as a clause pause followed by a cardinal
+    // (`3.141` → *three . one hundred and forty-one*), and `4046.8564224` likewise.
     // ⚠ The fractional part is read DIGIT BY DIGIT, which is what a decimal is.
-    s = rewrite(s, /(\d)\.(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
+    s = rewrite(s, /(\d)\.(\d+)(?![\d.,])/gu, (_m, a: string, b: string) => `${a} punto ${[...b].join(" ")}`);
 
     // ── 6. DEGREES → `grado`, with the two scale names ───────────────────────────────────────────────────
     // ×954 digit-adjacent `°`, the third-largest class here and one the shared tier does not own. The sign
@@ -426,6 +429,11 @@ export function normalizeIlocano(input: string): string {
     // reading — recorded rather than guessed.
     s = rewrite(s, /(\d)\s?°\s?C(?![\p{L}\p{M}])/gui, "$1 grado Celsius");
     s = rewrite(s, /(\d)\s?°\s?F(?![\p{L}\p{M}])/gui, "$1 grado Fahrenheit");
+    // ⚠ A COMPASS LETTER AFTER THE SIGN IS THE DIRECTION, said in Ilocano (#1534; Indonesian's shape). The bare arm
+    // below left it, and the g2p read `45° N` as *…grado n*, a bare consonant. The words are the corpus's own, and so
+    // is the gloss: it abbreviates a coordinate itself (`16°Am 26', 120°Dy 21' (Am=amianan; Dy=daya)`) and writes
+    // amianan ×59, abagatan ×50, daya ×33, laud ×29 in the mined artifact, as directions (`iti abagatan a laud`).
+    s = rewrite(s, /(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])/gu, (_m, d: string, dir: string) => `${d} grado ${COMPASS[dir]!}`);
     s = rewrite(s, /(\d)\s?°/gu, "$1 grado ");
 
     // ── 7. DOTTED ABBREVIATIONS — closed list, see DOTTED_ABBREV ─────────────────────────────────────────

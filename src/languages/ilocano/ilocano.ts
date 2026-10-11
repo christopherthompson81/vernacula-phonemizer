@@ -27,6 +27,12 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const isVowelLetter = (c: string): boolean => "aeiou".includes(c);
 const VOWEL_PH = "aeiouɛ";
 
+/** A trigraph's IPA as SEPARATE consonant and vowel units (#1534, as hil). Pushed whole (`ke`), the unit began with a
+ *  consonant, so `stressed` and the hiatus test (both read a unit's FIRST character) never saw its vowel: `queso`
+ *  took final stress (*kesˈo*). Split only when the value ends in a vowel, so the data decides. */
+const splitNucleus = (ipa: string): string[] =>
+    ipa.length > 1 && VOWEL_PH.includes(ipa[ipa.length - 1]!) ? [ipa.slice(0, -1), ipa.slice(-1)] : [ipa];
+
 /** Scan a lowercased Ilocano word → IPA units. High-vowel gliding hiatus; else word-initial/non-high glottal. */
 function scan(w: string): string[] {
     const s = [...w];
@@ -38,7 +44,7 @@ function scan(w: string): string[] {
             continue;
         }
         const tg = c + (s[i + 1] ?? "") + (s[i + 2] ?? "");
-        if (DEF.digraphs[tg]) { out.push(DEF.digraphs[tg]!); i += 2; continue; }
+        if (DEF.digraphs[tg]) { out.push(...splitNucleus(DEF.digraphs[tg]!)); i += 2; continue; }
         const dg = c + (s[i + 1] ?? "");
         if (DEF.digraphs[dg]) { out.push(DEF.digraphs[dg]!); i += 1; continue; }
         if (isVowelLetter(c)) {

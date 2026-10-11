@@ -25,6 +25,8 @@ pub struct NumbersDef {
     pub thousand: String,
     pub thousand1: String,
     pub million: String,
+    pub billion: String,
+    pub trillion: String,
     pub and: String,
     pub stress_penult: Vec<String>,
 }

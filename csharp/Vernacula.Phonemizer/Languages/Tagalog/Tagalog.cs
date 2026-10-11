@@ -179,8 +179,14 @@ public sealed class TagalogPhonemizer : ILanguage
             var thousands = th == 1 ? NUM.Thousand1 : $"{Ligate(NumberWords(th))} {NUM.Thousand}";
             return JoinRemainder(thousands, n % 1000);
         }
-        var m = Math.Floor(n / 1000000);
-        return JoinRemainder($"{Ligate(NumberWords(m))} {NUM.Million}", n % 1000000);
+        if (n < 1e9)
+        {
+            var m = Math.Floor(n / 1000000);
+            return JoinRemainder($"{Ligate(NumberWords(m))} {NUM.Million}", n % 1000000);
+        }
+        // bilyon / trilyon (#1534): 10^9 used to read *libong milyon*.
+        if (n < 1e12) return JoinRemainder($"{Ligate(NumberWords(Math.Floor(n / 1e9)))} {NUM.Billion}", n % 1e9);
+        return JoinRemainder($"{Ligate(NumberWords(Math.Floor(n / 1e12)))} {NUM.Trillion}", n % 1e12);
     }
 
     private static readonly HashSet<string> NUM_PENULT = new(NUM.StressPenult, StringComparer.Ordinal);
@@ -300,7 +306,11 @@ public sealed class TagalogPhonemizer : ILanguage
                     foreach (var wd in contracted.Split(' ')) sink.Emit(PhonemizeCore(wd, NumberStressIdx(wd)));
                     return;
                 }
-                var card = NumberWords(n).Split(' ');
+                // Above 2^53 the ordinal reads its digits, as EmitNumber does (#1534): it composed the rounded
+                // float, and on Infinity (309+ digits) NumberWords never returned.
+                var card = double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d
+                    ? NumberWords(n).Split(' ')
+                    : m.Groups[4].Value.SelectMany(d => NumberWords(Js.Number(d.ToString())).Split(' ')).ToArray();
                 for (var i = 0; i < card.Length; i++)
                 {
                     var idx = NumberStressIdx(card[i]);

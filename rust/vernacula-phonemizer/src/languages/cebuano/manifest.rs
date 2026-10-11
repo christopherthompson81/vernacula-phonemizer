@@ -20,8 +20,7 @@ pub struct Multiply {
     pub by: Option<String>,
 }
 
-/// ⚠ The TS interface types `cubed` as required, but cebuano.jsonc declares `squared` only, so the Rust field is
-/// optional: a required one would refuse the file the TS loads.
+/// `cubed` is optional, as in the TS interface (#1534): cebuano.jsonc declares `squared` only.
 #[derive(Debug, Deserialize)]
 pub struct ExponentWords {
     pub squared: CountForms,

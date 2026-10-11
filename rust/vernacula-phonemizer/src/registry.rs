@@ -302,9 +302,8 @@ pub enum PhonemizeError {
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
     Neural(String),
     /// The TS engine THROWS on this input, so the port returns an error rather than a reading. Its first
-    /// producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to decline above 2^53 (#1463).
-    /// Produced today by Tagalog: an `ika-` ordinal of 309+ digits is Infinity, on which the TS `numberWords`
-    /// recurses until its stack overflows.
+    /// producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to decline above 2^53 (#1463), and
+    /// so was Tagalog's `ika-` ordinal (#1534). Produced today by Czech: an inflected ordinal outside 1–999.
     Input(String),
 }
 

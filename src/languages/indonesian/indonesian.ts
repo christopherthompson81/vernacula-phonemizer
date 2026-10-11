@@ -42,7 +42,8 @@ interface IndonesianDef {
         magnitudes: string[];
         ampersand: string;
         multiply: { times: string; by?: string };
-        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        /** `cubed` is OPTIONAL, as the data has it (#1534): the jsonc declares `squared` only. */
+        exponentWords: { squared: CountForms; cubed?: CountForms; position?: "before" | "after" };
     };
 }
 const DEF = loadManifest<IndonesianDef>(import.meta.url, "indonesian.jsonc");
@@ -268,7 +269,9 @@ const SYMBOLS = makeSymbolNormalizer({
 // that neither the leak classes nor the differential DROP test can see. Found only by reading a corpus diff.
 // `\p{M}` so a DECOMPOSED accent stays with its base rather than ending the token one character later.
 // yue fixed the same defect the same way and pins it (`yue("Müslüm") === phonemize(…, "en")`).
-const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|([1-9]\d{0,2}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])/gu;
+// The grouped number arm takes the decimal comma too (#1534, as de #1514 and nl #1524): `1.000,5` is this language's
+// own way to write 1000.5, and without `(?:,\d+)?` the comma became a clause PAUSE and *koma* was never said.
+const TOKEN = /(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|([1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)|([.?!,;:])/gu;
 /** An ordinary Indonesian word is plain ASCII letters. A diacritic means a FOREIGN name — Indonesian
  *  orthography has none — so such a token goes to the injected foreign reader instead of the native g2p, which
  *  has no rule for `ñ`/`ö`/`ó` and would mangle what it cannot spell. */

@@ -85,21 +85,38 @@ fn num_str(x: &JsString) -> JsString {
 pub(crate) fn normalize_indonesian(input: &JsString) -> JsString {
     let mut s = input.clone();
 
-    // 1) clock: two digits after the separator is a time.
+    // 1) clock: two digits after the separator is a time; a colon pair needs a marker (#1534).
+    let clock = |m: &JsMatch, t: &JsString| {
+        let (h, min) = (m.group(1, t).unwrap(), m.group(2, t).unwrap());
+        let mv = js_number(&min);
+        if mv == 0.0 {
+            num_str(&h)
+        } else {
+            num_str(&h)
+                .concat(&js(" lewat "))
+                .concat(&js(&js_number_to_string(mv)))
+        }
+    };
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d.:])([01]?\d|2[0-3])[.:]([0-5]\d)\b(?!\.?\d)", "gu"),
-        |m, t| {
-            let (h, min) = (m.group(1, t).unwrap(), m.group(2, t).unwrap());
-            let mv = js_number(&min);
-            if mv == 0.0 {
-                num_str(&h)
-            } else {
-                num_str(&h)
-                    .concat(&js(" lewat "))
-                    .concat(&js(&js_number_to_string(mv)))
-            }
-        },
+        js_re!(r"(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)\b(?!\.?\d)", "gu"),
+        clock,
+    );
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<=(?<![\p{L}\p{M}\d_])(?:pukul|jam)(?![\p{L}\p{M}\d_])[^.!?]{0,24})(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)",
+            "giu"
+        ),
+        clock,
+    );
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)(?=\s?(?:WIB|WITA|WIT|GMT|UTC|waktu|pagi|siang|sore|malam)(?![\p{L}\p{M}\d_]))",
+            "gu"
+        ),
+        clock,
     );
 
     // 1b) the dollar code → the bare sign.

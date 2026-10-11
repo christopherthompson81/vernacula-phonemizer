@@ -93,13 +93,20 @@ pub(crate) fn normalize_hiligaynon(input: &JsString) -> JsString {
     );
 
     // decimals → `punto`, the fraction digit by digit.
-    s = rewrite_with(&s, js_re!(r"(\d)\.(\d{1,2})(?![\d.,])", "gu"), |m, t| {
-        let digits = JsString::join(&m.group(2, t).unwrap().code_point_strings(), &js(" "));
-        m.group(1, t)
-            .unwrap()
-            .concat(&js(" punto "))
-            .concat(&digits)
-    });
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(\d)\.(\d{1,2}|\d{4,}|(?<=(?<![\d.])(?:0|\d{4,})\.)\d{3})(?![\d.,])",
+            "gu"
+        ),
+        |m, t| {
+            let digits = JsString::join(&m.group(2, t).unwrap().code_point_strings(), &js(" "));
+            m.group(1, t)
+                .unwrap()
+                .concat(&js(" punto "))
+                .concat(&digits)
+        },
+    );
 
     // dotted abbreviations (the dot is consumed). ⚠ The miss branch is reachable (#1122).
     s = rewrite_with(&s, &ABBREV, |m, t| {

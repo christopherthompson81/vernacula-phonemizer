@@ -27,6 +27,12 @@ const CLAUSE_MARK = DEF.clausePunctuation;
 const isVowelLetter = (c: string): boolean => "aeiou".includes(c);
 const VOWEL_PH = "aeiou";
 
+/** A trigraph's IPA as SEPARATE consonant and vowel units (#1534). Pushed whole (`ke`), the unit began with a consonant,
+ *  so `stressed` and the hiatus test (both read a unit's FIRST character) never saw its vowel: `queso` took final
+ *  stress (*kesˈo*, against `keso` → *kˈeso*). Split only when the value ends in a vowel, so the data decides. */
+const splitNucleus = (ipa: string): string[] =>
+    ipa.length > 1 && VOWEL_PH.includes(ipa[ipa.length - 1]!) ? [ipa.slice(0, -1), ipa.slice(-1)] : [ipa];
+
 /** Scan a lowercased Hiligaynon word → IPA units (trigraphs/digraphs, single letters, glottal stops). */
 function scan(w: string): string[] {
     const s = [...w];
@@ -39,7 +45,7 @@ function scan(w: string): string[] {
             continue;
         }
         const tg = c + (s[i + 1] ?? "") + (s[i + 2] ?? "");
-        if (DEF.digraphs[tg]) { out.push(DEF.digraphs[tg]!); i += 3; continue; } // ⟨gui gue qui que⟩
+        if (DEF.digraphs[tg]) { out.push(...splitNucleus(DEF.digraphs[tg]!)); i += 3; continue; } // ⟨gui gue qui que⟩
         const dg = c + (s[i + 1] ?? "");
         if (DEF.digraphs[dg]) { out.push(DEF.digraphs[dg]!); i += 2; continue; } // ⟨ng ch ny ts ll rr⟩
         if (isVowelLetter(c)) {

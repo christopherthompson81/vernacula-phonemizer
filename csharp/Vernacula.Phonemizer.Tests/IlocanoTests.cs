@@ -101,8 +101,8 @@ public class IlocanoTests
     public void DeGroupingAndTheDecimalPoint(string input, string want) => Assert.Equal(want, Say(input));
 
     [Fact]
-    // ⚠ THE THREE-DIGIT FRACTIONAL PART IS NOT CLAIMED — the two-digit cap, pinned from the opposite side.
-    public void TheThreeDigitFractionalPartIsNotClaimed() => Assert.DoesNotContain("pˈunto", Say("17.865"));
+    // A three-digit fractional part is a decimal (#1534): the corpus has no period-thousands group to protect.
+    public void AThreeDigitFractionalPartIsADecimal() => Assert.Equal(Say("3 punto 1 4 1 a metro"), Say("3.141 a metro"));
 
     [Theory]
     // ⚠ THE CLOCK'S GUARD IS THE RULE — 205 colon-numbers, ~23 clocks.

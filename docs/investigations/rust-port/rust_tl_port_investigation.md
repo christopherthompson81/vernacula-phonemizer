@@ -118,3 +118,27 @@ cargo clippy: only module_inception on tagalog/mod.rs in the new files
 No TS regex was added or changed. Nothing is port-pending.
 
 **Implication.** Done on this machine.
+
+## Run 6 — 2026-10-11 16:35 (#1534: fixing the Run 4 findings, TS first)
+
+**Command.** `npx tsx .probe/1534/p.mts tl`; `numberWords` on 1e9, 2e9, 3.005e12, 1e15, 999,999,999.
+
+**Question.** Can the ordinal stop throwing without inventing a reading, and does the scale gap close from data
+the engine already declares?
+
+**Raw finding.**
+1. **The `ika-` ordinal above 2⁵³** now reads its digits, exactly as the cardinal's `emitNumber` does, with the
+   prefix fused onto the first digit word and the same stress shift: `ika-12345678901234567890` → *ʔikaʔisˈa dalawˈa
+   tatlˈo …* (was …*sandaʔˈan ʔˈat ʔanimnapˈut walˈo*, the float's …768). `ika-` + 320 nines threw `RangeError`
+   before; it now reads 320 words. Rust's `PhonemizeError::Input` for this case is gone (no TS throw left to
+   reproduce), as is the `overflow` flag; the registry doc comment now names Czech as the remaining producer, and
+   the test `an_infinite_ordinal_is_an_error` is replaced by `the_1534_findings_are_fixed`. C# composed on the
+   float too and, on Infinity, never returned; it gets the same digit fallback.
+2. **Scales above `milyon`.** tagalog.jsonc `numbers` gains `billion: "bilyon"` and `trillion: "trilyon"`, the
+   symbol tier's own corpus-attested magnitudes (bilyon ×21 in the mined artifact, tl.wikipedia 572; trilyon 68).
+   `numberWords(2e9)` *dalawang libong milyon* → *dalawang bilyon*; 1e9 *isang bilyon*; 3.005e12 *tatlong trilyon
+   limang bilyon*; 1e15 *sanlibong trilyon* (no attested scale above trilyon, so it composes); 999,999,999 is
+   unchanged. Ligation is the existing `ligate`, as for milyon.
+
+**Implication.** Mirror into C# (Manifest gains Billion/Trillion) and Rust (NumbersDef gains both, required as in
+the TS); regenerate the tl golden.

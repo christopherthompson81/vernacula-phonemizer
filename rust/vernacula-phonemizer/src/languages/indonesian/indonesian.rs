@@ -54,8 +54,8 @@ pub struct MultiplyDef {
     pub by: Option<String>,
 }
 
-/// ⚠ The TS interface types `cubed` as required, but indonesian.jsonc declares `squared` only (the tier then has
-/// no cube word), so the Rust field is optional: a required one would refuse the file the TS loads.
+/// `cubed` is optional, as in the TS interface (#1534): indonesian.jsonc declares `squared` only, so the tier has
+/// no cube word.
 #[derive(Debug, Deserialize)]
 pub struct ExponentWordsDef {
     pub squared: CountForms,
@@ -345,7 +345,7 @@ pub(crate) fn number_words(n: u64) -> String {
 
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        r"(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|([1-9]\d{0,2}(?:\.\d{3})+|\d+(?:,\d+)?)|([.?!,;:])",
+        r"(\p{Script=Latin}[\p{Script=Latin}\p{M}]*)|([1-9]\d{0,2}(?:\.\d{3})+(?:,\d+)?|\d+(?:,\d+)?)|([.?!,;:])",
         "gu",
     )
     .unwrap()
@@ -592,5 +592,40 @@ mod tests {
         for w in ["RUMAH", "YANG", "BESAR", "DENGAN"] {
             assert_eq!(say(w, "id"), say(&w.to_lowercase(), "id"), "{w}");
         }
+    }
+
+    /// test/malayic-philippine-1534.test.ts, the id and ms rows: relational, never typed IPA.
+    #[test]
+    fn the_1534_findings_are_fixed() {
+        create_indonesian(None).unwrap();
+        let say = |t: &str, l: &str| crate::phonemize(t, l).unwrap();
+        for (a, b) in [
+            ("1.000,5", "1000,5"),
+            ("Rp 1.000,50", "Rp 1000,50"),
+            ("1.000.000,25 orang", "1000000,25 orang"),
+            ("1.000, dan", "1000, dan"),
+        ] {
+            assert_eq!(say(a, "id"), say(b, "id"), "{a}");
+        }
+        assert_eq!(say("skor 21:20", "id"), say("skor 21, 20", "id"));
+        assert!(!say("skor 21:20", "id").contains("lewˈat"));
+        for t in [
+            "pukul 21:20",
+            "Pukul 9:30",
+            "jam 9:30 pagi",
+            "21:20 WIB",
+            "pukul 8.46",
+            "8.46",
+        ] {
+            assert!(say(t, "id").contains("lewˈat"), "{t}");
+        }
+        assert_eq!(say("yuran US$30", "ms"), say("yuran $30", "ms"));
+        assert_eq!(say("yuran US $30", "ms"), say("yuran $30", "ms"));
+        assert_eq!(
+            crate::languages::malay::normalize::normalize_malay(&js("yuran AS$30")),
+            js("yuran AS $30")
+        );
+        assert_eq!(say("12.345.678 orang", "ms"), say("12345678 orang", "ms"));
+        assert!(say("3.141", "ms").contains("pərpulˈuhan"));
     }
 }

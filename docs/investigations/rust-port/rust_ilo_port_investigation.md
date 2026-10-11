@@ -78,3 +78,28 @@ cargo clippy: only module_inception on ilocano/mod.rs in the new files
 No TS regex was added or changed. Large dumps deleted.
 
 **Implication.** Done on this machine, with the no-corpus caveat of Run 1.
+
+## Run 4 — 2026-10-11 16:50 (#1534: fixing the Run 3 findings, TS first)
+
+**Command.** `npx tsx .probe/1534/q.mts ilo …`; a scan of `tools/corpus/mined/ilo.jsonc` for the compass words;
+`npx tsx tools/gen_parity_goldens.mts … ilo` and a diff against the saved golden.
+
+**Question.** Is the two-digit decimal cap protecting anything here, and does the corpus name the compass points?
+
+**Raw finding.**
+1. **Decimals.** The normalize header already measured this corpus's three-digit fractions as genuine decimals (HDI
+   `0.625`, `0.443`, `0.856`, `6.271 a riwriw`) with no period-thousands group to protect. The cap goes:
+   `(\d)\.(\d+)(?![\d.,])`. `3.141 a metro` → *tˈallo pˈunto mˈajsa ʔˈuppat mˈajsa …*. The test that pinned
+   `17.865` as not a decimal pinned the defect; it becomes `3.141 a metro` = `3 punto 1 4 1 a metro` (TS, C#; the
+   Rust row leaves NOTCONTAINS_PINS). Golden rows moved: `4046.8564224 a kuadrado a metro` (was *… ʔinnˈɛm .
+   waloɾˈiwɾiw …*) and `50.3764N` (was *limapˈulo . talloɾˈibo …*).
+2. **Trigraphs**, as hil: `queso` → *kˈeso*. Golden rows moved: `Quezon` *kesˈon* → *kˈeson*, `Arguilla`
+   *ʔˈaɾɡilla* → *ʔaɾɡˈilla*, `Guide` *ɡidˈɛ* → *ɡˈidɛ*. `Miguel` stays *mˈiɡel* (penult default, as `Migel`).
+   `quiet` *kiˈɛt* → *kˈiʔɛt*: the trigraph vowel is now a vowel for the hiatus test; an English word either way.
+3. **Compass.** amianan ×59, abagatan ×50, daya ×33, laud ×29 in the mined artifact, as directions (`iti abagatan a
+   laud`), and the corpus glosses its own coordinate abbreviation: `16°Am 26', 120°Dy 21' (Am=amianan; Dy=daya)`.
+   `(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])` before the bare arm: `45° N` → *… ɡɾˈado ʔamjˈanan* (was *ɡɾˈado n*),
+   `12°W` → *… lˈaʔud*. Case-sensitive: a lowercase `n` is not claimed. The corpus's `°Am`/`°Dy` and a direction
+   after arc-minutes (`126° 34' E`) are other shapes, not in the issue, untouched.
+
+**Implication.** Mirror into C# and Rust. 5 of 94 ilo golden rows move, each explained above.
