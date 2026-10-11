@@ -161,3 +161,95 @@ pinned by the differential (the probes carry 3, 5 and 7 as well).
 **Port-pending.** None. No el golden, FLEURS or probe text carries a script other than Greek, Latin and Common.
 
 **Implication.** Greek is done by the checklist.
+
+## Run 7 — 2026-10-11 14:19 (#1510: baseline of the seven Run-5 findings, before any fix)
+
+**Question.** Do the seven findings of Run 5 still reproduce on main, and what do the digraph cases read
+as today? These are the outputs that item 6's rewiring must not move.
+
+**Command.** `npx tsx .probe/el/fix1510.mts` (synthetic numbers, phrases and words only).
+
+**Raw finding.**
+- Teens: `11` «δέκα ένα» … `19` «δέκα εννέα»; `11000` «δέκα μία χιλιάδες»; `13000` «δέκα τρεις χιλιάδες»;
+  `2016` «δύο χιλιάδες δέκα έξι»; `13000000` «δέκα τρία εκατομμύρια».
+- 100 + n: `101` «εκατό ένα», `111` «εκατό δέκα ένα», `101000` «εκατό μία χιλιάδες».
+- U+037E: `Τι κάνεις`+U+037E+` Καλά.` → `ti kanis kala .`; with ASCII `;` → `ti kanis ? kala .`.
+- NFD: `τσάι` → `t͡sa i`, `κοιλιά` → `cilia`, `ρολόι` → `ɾolo i` (NFC: `t͡sai`, `ciʎa`, `ɾoloi`).
+- Polytonic: `ἀρχή` → `ɾçi`, `ὕδωρ` → `ðoɾ`, `Ἡ ἀρχή τοῦ λόγου.` → `ɾçi to loɣu .`, `ᾠδή` → `ði`,
+  `ῥήτωρ` → `itoɾ`, `Ἀθῆναι` → `θne`.
+- Astral: `phonemizeWord("😀τσάι")` → `t͡se` (the hiatus lost), against `t͡sai` without the emoji.
+- Digraph baseline (item 6 must keep these): άγγελος aŋɟelos, αγγίζω aŋɟizo, έλεγχος eleŋxos,
+  ελέγχει eleŋçi, σφίγγει sfiŋɟi, φθόγγος fθoŋɡos, γκέι ɟei, Σφίγξ sfiŋks, αγκίστρι aŋɟistɾi, μπίρα biɾa,
+  άντε ande, τσέπη t͡sepi, τζάκι d͡zaci, κέικ ceik, χέρι çeɾi, γέρος ʝeɾos.
+
+**Implication.** All seven reproduce. Fix order: numbers (1, 2), then step 0 of normalize (3, 4, 5), then the
+scan (6, 7).
+
+## Run 8 — 2026-10-11 14:25 (#1510: the TS fixes, measured)
+
+**Question.** Does each fix move exactly what it should, and nothing else?
+
+**Changes.** numbers: `numbers.teens` (10–19, by unit) replaces `ten`; `tens[1]` emptied; `hundred` is now
+εκατόν and is read for 100 + remainder; FEMININE gains δεκατρία→δεκατρείς, δεκατέσσερα→δεκατέσσερις;
+`numbers.and` deleted (Greek has no cardinal «and»). normalize step 0: `renormalize(input, "NFC")`, which
+also takes U+0387→U+00B7 and U+037E→`;` (both canonical singletons, so the old U+0387 rewrite is subsumed),
+then a per-letter fold of Greek Extended (NFD, drop U+0313 U+0314 U+0345, U+0300/U+0342→U+0301, NFC). The
+scan reads `consonantDigraphs` (now the digraph's own sound: γχ "x", γξ "ks") and `palatal` (gains γχ "ç"),
+and builds `stressed` per UTF-16 unit.
+
+**Command.** `npx tsx .probe/el/fix1510.mts` (diffed against Run 7), `npx tsx tools/gen_parity_goldens.mts el`,
+a word-level diff of the golden, and a revert script (each fix reverted in turn, the #1510 tests run).
+
+**Raw finding.**
+- Probe: every Run-7 defect line moved to the intended reading (`11` έντεκα, `101` εκατόν ένα, `13000`
+  δεκατρείς χιλιάδες, U+037E → `ti kanis ? kala .`, NFD `τσάι` → `t͡sai`, `Ἡ ἀρχή τοῦ λόγου.` →
+  `i aɾçi tu loɣu .`, `😀τσάι` → `t͡sai`). All 16 digraph words are byte-identical to Run 7. An NFD Latin
+  `à` in the same line is untouched.
+- Golden el: 7 rows of 200 move, all numbers: `ðeka efta`→`ðekaefta` ×2, `ðeka pende`→`ðekapende` ×2,
+  `ðeka eksi`→`ðekaeksi` ×2 (item 1), `ekato`→`ekaton` ×1 (item 2). Nothing from items 3–7 (the golden has no
+  NFD, polytonic, U+037E or astral text), as expected.
+- `test/greek.test.ts`: one existing expectation moved, the apposition-dash case `kɾom , ðeka ðio` →
+  `kɾom , ðoðeka` (12 is δώδεκα).
+- Revert proofs: teens reverted → 2 tests fail (the teens test, and the εκατόν test, which reads 111);
+  εκατόν reverted → 1; NFC reverted → 2 (U+037E and NFD); polytonic fold disabled → 1; per-code-point
+  `stressed` restored → 1.
+- ⚠ DEAD END in the harness, worth keeping: the revert script for the polytonic fold first failed its own
+  assertion, because the file-writing tool had rewritten the `ἀ-῿` escapes in the SCRIPT into
+  literal characters. The engine source was written with doubled escapes and is intact (checked by grep).
+- Item 6 cannot be proved by a revert: moving the scan onto the tables is behaviour-neutral by design. Its
+  test pins the digraph readings, so a drift in either table is caught.
+
+**Implication.** Mirror into C# and Rust; the golden moves only by items 1 and 2.
+
+## Run 9 — 2026-10-11 15:09 (#1510: the mirrors, and two goldens I did not expect)
+
+**Question.** Do C# and Rust match the fixed TS, and does the fix reach any golden outside el?
+
+**Command.** `npm run check:goldens` (all 189); `npx tsx tools/check-goldens.mts --show 3 gan syl`;
+`npx tsx tools/gen_parity_goldens.mts gan syl`; `dotnet test csharp/Vernacula.Phonemizer.Tests` (full);
+`dotnet run -c Release --project csharp/tools/parity` (all, then `-- el gan syl`), `.../regex-diff`;
+`cd rust && cargo fmt --check && cargo test --release && cargo run --release -p parity && cargo run --release
+-p regex-diff`; the four el fn-diff dumps re-made and replayed; a Rust revert script (each fix reverted in
+turn, `greek::greek::tests` run).
+
+**Raw finding.**
+- ⚠ check:goldens: el fresh after Run 8's regeneration, but **gan and syl stale, 1 row each**. Both rows
+  carry an embedded POLYTONIC Greek word that the script router hands to el. One is a person's name in a
+  Chinese-script row, which used to drop its initial Ἀ (`ɾçimiðis` → now `aɾçimiðis`); the other is a name in
+  a Sylheti row whose ὕ was dropped (`ea` → now `eva`). Item 5, so the goldens were wrong, not the engine.
+  Regenerated both; the word-level diff is exactly those two words.
+- C#: full suite 7486 passed, 0 failed. Parity 188 identical and 1 differ before the gan regeneration, the
+  differ being that gan row with C# already giving `aɾçimiðis`; after it, `el gan syl` 600/600. regex-diff
+  145060 identical, 0 DIFFER. The 7 new C# tests: with the Greek C# sources reverted to HEAD, 6 fail; the
+  digraph pin passes, as a behaviour-neutral change must.
+- Rust: fmt clean; 193 + 1 tests pass (7 new). Parity: all 51 languages identical except mag 199/200 (the
+  known Arabic row). `--sync el` 200/200. regex-diff 145060 identical, 0 DIFFER, 0 refused. fn-diff:
+  `el-normalize 4006/4006`, `el-g2p 522606/522606`, `phonemize-sync 4006/4006`, `phonemize-best 4006/4006`
+  (probes/el.txt gains five synthetic lines: U+037E, a decomposed tonos, polytonic text, an NFD Latin grave,
+  and the teens/εκατόν numbers).
+- Rust reverts: teens → 2 fail; εκατόν → 1; NFC → 3 (U+037E, NFD, and the old ano-teleia test, because NFC
+  now owns U+0387); polytonic → 1; per-code-point `stressed` → 1.
+- The old Rust step-0 regex was written as a literal U+0387 character where the TS wrote `·`. It is gone
+  with the rewrite; every new Rust pattern uses the TS's `\uXXXX` escapes.
+
+**Implication.** All seven items fixed. Goldens moved: el 7 rows, gan 1, syl 1.

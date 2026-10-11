@@ -15,9 +15,11 @@ const N = MANIFEST.numbers;
 
 function below100(n: number): string {
     if (n < 10) return N.units[n]!;
-    if (n === 10) return N.ten;
     const t = Math.floor(n / 10);
     const u = n % 10;
+    // 10–19 are LEXICAL words (έντεκα, δώδεκα, δεκατρία …), not δέκα + unit. Composing them read 11 as
+    // «δέκα ένα» on 59 of 1,969 FLEURS texts (#1510).
+    if (t === 1) return N.teens[u]!;
     const tens = N.tens[t]!;
     return u ? `${tens} ${N.units[u]}` : tens;
 }
@@ -26,17 +28,21 @@ function below1000(n: number): string {
     if (n < 100) return below100(n);
     const h = Math.floor(n / 100);
     const r = n % 100;
-    const hundred = N.hundreds[h]!;
-    return r ? `${hundred} ${below100(r)}` : hundred;
+    // ⚠ 100 IS εκατό ALONE and εκατόν BEFORE A REMAINDER (εκατόν ένα, εκατόν έντεκα); the other hundreds
+    // do not change. `hundreds[1]` is the bare form, `hundred` the one that takes a remainder (#1510).
+    if (!r) return N.hundreds[h]!;
+    return `${h === 1 ? N.hundred : N.hundreds[h]!} ${below100(r)}`;
 }
 
 /**
  * The multiplier of χιλιάδες agrees with it, and χιλιάδα is FEMININE: «πεντακόσιες χιλιάδες», «τρεις
- * χιλιάδες» — not the neuter πεντακόσια / τρία the tables hold. Only 1, 3, 4 and the hundreds inflect;
- * everything else is invariant. Exposed by the digit de-grouping, which made the corpus's 50
+ * χιλιάδες» — not the neuter πεντακόσια / τρία the tables hold. Only 1, 3, 4 (13 and 14 with them) and the
+ * hundreds inflect; everything else is invariant. Exposed by the digit de-grouping, which made the corpus's 50
  * period-grouped numbers (1.000, 783.562) reach this path as whole integers for the first time.
  */
-const FEMININE: Readonly<Record<string, string>> = { "ένα": "μία", "τρία": "τρεις", "τέσσερα": "τέσσερις" };
+const FEMININE: Readonly<Record<string, string>> = {
+    "ένα": "μία", "τρία": "τρεις", "τέσσερα": "τέσσερις", "δεκατρία": "δεκατρείς", "δεκατέσσερα": "δεκατέσσερις",
+};
 const feminine = (s: string): string =>
     s.split(" ").map((w) => FEMININE[w] ?? w.replace(/όσια$/u, "όσιες")).join(" ");
 

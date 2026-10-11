@@ -43,12 +43,13 @@ export interface GreekManifest {
     clausePunctuation: Record<string, string>;
     numbers: {
         units: string[];
-        ten: string;
+        /** 10–19, indexed by the unit. ⚠ Lexical words — `tens[1]` is empty, nothing composes δέκα + unit. */
+        teens: string[];
         tens: string[];
+        /** εκατόν — 100 BEFORE A REMAINDER. 100 alone is `hundreds[1]` (εκατό). */
         hundred: string;
         hundreds: string[];
         thousand: string;
-        and: string;
     };
     /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
     symbolTier: {

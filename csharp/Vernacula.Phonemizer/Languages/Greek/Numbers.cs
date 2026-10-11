@@ -13,9 +13,9 @@ public static class Numbers
     private static string Below100(double n)
     {
         if (n < 10) return N.Units[(int)n];
-        if (n == 10) return N.Ten;
         var t = (int)Math.Floor(n / 10);
         var u = (int)(n % 10);
+        if (t == 1) return N.Teens[u];
         var tens = N.Tens[t];
         return u != 0 ? $"{tens} {N.Units[u]}" : tens;
     }
@@ -25,8 +25,8 @@ public static class Numbers
         if (n < 100) return Below100(n);
         var h = (int)Math.Floor(n / 100);
         var r = n % 100;
-        var hundred = N.Hundreds[h];
-        return r != 0 ? $"{hundred} {Below100(r)}" : hundred;
+        if (r == 0) return N.Hundreds[h];
+        return $"{(h == 1 ? N.Hundred : N.Hundreds[h])} {Below100(r)}";
     }
 
     /**
@@ -36,6 +36,7 @@ public static class Numbers
     private static readonly IReadOnlyDictionary<string, string> FEMININE = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["ένα"] = "μία", ["τρία"] = "τρεις", ["τέσσερα"] = "τέσσερις",
+        ["δεκατρία"] = "δεκατρείς", ["δεκατέσσερα"] = "δεκατέσσερις",
     };
 
     private static readonly JsRe OSIA_FINAL = JsRegex.Compile("όσια$", "u");

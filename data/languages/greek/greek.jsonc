@@ -5,8 +5,9 @@
 // tonos) is NOT emitted — the referees (wikipron/kaikki) don't mark it, so we strip the tonos.
 //
 //   • VOWELS: α→a; ε/αι→e; η/ι/υ/ει/οι/υι→i; ο/ω→o; ου→u. (Diaeresis ϊ/ϋ breaks the digraph: αϊ→a.i.)
-//   • PALATALISATION before a front vowel [e i]: κ→c, γ→ʝ, χ→ç, γκ/γγ→ɟ; and synizesis λ→ʎ, ν→ɲ before [i]+vowel.
-//   • VOICED DIGRAPHS: μπ→b, ντ→d, γκ/γγ→ɡ (→ɟ before front), γχ→ŋx, τσ→t͡s, τζ→d͡z.
+//   • PALATALISATION before a front vowel [e i]: κ→c, γ→ʝ, χ→ç, γκ/γγ→ɟ, γχ→ç; and synizesis λ→ʎ, ν→ɲ before [i]+vowel.
+//   • VOICED DIGRAPHS: μπ→b, ντ→d (medial mb nd), γκ/γγ→ŋɡ (→ŋɟ before front; word-initial γκ→ɡ), γχ→ŋx, γξ→ŋks,
+//     τσ→t͡s, τζ→d͡z.
 //   • αυ/ευ → a/e + [v] (before a voiced sound) or [f] (before a voiceless one). σ → z before a voiced consonant.
 {
     "language": "el",
@@ -36,10 +37,15 @@
         "β": "v", "γ": "ɣ", "δ": "ð", "ζ": "z", "θ": "θ", "κ": "k", "λ": "l", "μ": "m", "ν": "n",
         "ξ": "ks", "π": "p", "ρ": "ɾ", "σ": "s", "ς": "s", "τ": "t", "φ": "f", "χ": "x", "ψ": "ps"
     },
-    "consonantDigraphs": { "μπ": "b", "ντ": "d", "γκ": "ɡ", "γγ": "ɡ", "γχ": "ŋx", "γξ": "ŋks", "τσ": "t͡s", "τζ": "d͡z" },
+    // ⚠ THE DIGRAPH'S OWN SOUND, WITHOUT ITS CONTEXT — greek.ts reads these and supplies the rest: the [ŋ] of
+    // the γ-nasal digraphs ⟨γκ γγ γχ γξ⟩ (none on a word-initial γκ), and the [m n] of a MEDIAL μπ ντ, which is
+    // `consonants`' μ ν. So γχ is "x" here and reads [ŋx]. greek.ts used to hard-code every one of these, and
+    // this table, which nothing read, had drifted: it held γχ as "ŋx" while the scan read [ŋç] before e/i (#1510).
+    "consonantDigraphs": { "μπ": "b", "ντ": "d", "γκ": "ɡ", "γγ": "ɡ", "γχ": "x", "γξ": "ks", "τσ": "t͡s", "τζ": "d͡z" },
 
-    // Velar palatalisation before a front vowel [e i].
-    "palatal": { "κ": "c", "γ": "ʝ", "χ": "ç", "γκ": "ɟ", "γγ": "ɟ" },
+    // Velar palatalisation before a front vowel [e i]. The digraph keys replace `consonantDigraphs`' reading
+    // there (γγ γκ → [ŋɟ], γχ → [ŋç]); γξ has none, the [k] of its [ks] is not before the vowel.
+    "palatal": { "κ": "c", "γ": "ʝ", "χ": "ç", "γκ": "ɟ", "γγ": "ɟ", "γχ": "ç" },
     // ── The tables greek.ts's g2p and normalize.ts read ───────────────────────────────────────────────
 
     // Accented vowel → its bare letter. ⚠ THE STRESSED-VOWEL SET IS DERIVED FROM THESE KEYS in greek.ts
@@ -118,14 +124,20 @@
     },
 
     // Cardinal number words (Modern Greek). Simplified; unmeasured (referees are word-only).
+    //
+    // ⚠ 10–19 ARE LEXICAL (έντεκα, δώδεκα, δεκατρία …) and live in `teens`, indexed by the unit; `tens[1]` is
+    // empty because nothing composes δέκα + unit. Composing them read 11 as «δέκα ένα» (#1510). 19 follows
+    // `units[9]` (εννέα); the clock's `minuteTeens` is the colloquial series (δεκαεννιά), as its units are.
+    // ⚠ 100 HAS TWO FORMS: `hundreds[1]` εκατό stands alone, `hundred` εκατόν takes a remainder (εκατόν ένα).
+    // Greek joins no «and» inside a cardinal, so the table has none.
     "numbers": {
         "units": ["μηδέν", "ένα", "δύο", "τρία", "τέσσερα", "πέντε", "έξι", "εφτά", "οχτώ", "εννέα"],
-        "ten": "δέκα",
-        "tens": ["", "δέκα", "είκοσι", "τριάντα", "σαράντα", "πενήντα", "εξήντα", "εβδομήντα", "ογδόντα", "ενενήντα"],
-        "hundred": "εκατό",
+        "teens": ["δέκα", "έντεκα", "δώδεκα", "δεκατρία", "δεκατέσσερα", "δεκαπέντε", "δεκαέξι", "δεκαεφτά",
+            "δεκαοχτώ", "δεκαεννέα"],
+        "tens": ["", "", "είκοσι", "τριάντα", "σαράντα", "πενήντα", "εξήντα", "εβδομήντα", "ογδόντα", "ενενήντα"],
+        "hundred": "εκατόν",
         "hundreds": ["", "εκατό", "διακόσια", "τριακόσια", "τετρακόσια", "πεντακόσια", "εξακόσια", "εφτακόσια", "οχτακόσια", "εννιακόσια"],
-        "thousand": "χίλια",
-        "and": "και"
+        "thousand": "χίλια"
     },
 
     // ---------------------------------------------------------------------------------------------------

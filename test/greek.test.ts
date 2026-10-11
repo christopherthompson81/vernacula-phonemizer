@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemize } from "../src/index.ts";
-import { phonemizeWord } from "../src/languages/greek/greek.ts";
+import { phonemizeWord, phonemizeWordRules } from "../src/languages/greek/greek.ts";
 import { normalizeGreek } from "../src/languages/greek/normalize.ts";
 import { numberToWords } from "../src/languages/greek/numbers.ts";
 
@@ -187,7 +187,7 @@ describe("greek clause marks", () => {
         // ambiguous. Greek brackets an ASIDE between dashes; drop both and the aside runs into its host
         // clause with no break at all.
         const g = phonemize("Ο ναός Πνομ Κρομ –12 χιλιόμετρα νοτιοδυτικά του Σιέμ Ριπ– που βρίσκεται στην κορυφή.", "el");
-        expect(g).toContain("kɾom , ðeka ðio");
+        expect(g).toContain("kɾom , ðoðeka");
         expect(g).toContain("ɾip , pu");
         // An opening dash before a LETTER is the same construction (×19 of the 20).
         expect(phonemize("θρησκείες –τον ιουδαϊσμό.", "el")).toContain("θɾiscies , ton");
@@ -202,5 +202,65 @@ describe("greek clause marks", () => {
         expect(phonemize("με 26 - 00 νίκες.", "el")).not.toContain("mion");
         // The minus itself: ROBUSTNESS only — el_gr has zero true negatives, so no gate can see this.
         expect(phonemize("θερμοκρασία -5 βαθμοί.", "el")).toContain("mion pende");
+    });
+});
+
+// #1510 — the defects the Rust port found (docs/investigations/rust-port/rust_el_port_investigation.md, Run 5).
+// Synthetic text throughout. Each expectation is the fixed engine's output, checked against the intent.
+describe("greek port findings (#1510)", () => {
+    test("10–19 are lexical words, not δέκα + unit", () => {
+        expect(numberToWords(10)).toBe("δέκα");
+        expect(numberToWords(11)).toBe("έντεκα");
+        expect(numberToWords(12)).toBe("δώδεκα");
+        expect(numberToWords(13)).toBe("δεκατρία");
+        expect(numberToWords(19)).toBe("δεκαεννέα");
+        expect(numberToWords(2016)).toBe("δύο χιλιάδες δεκαέξι");
+        // χιλιάδες is feminine, and 13 / 14 inflect with 3 / 4.
+        expect(numberToWords(11000)).toBe("έντεκα χιλιάδες");
+        expect(numberToWords(13000)).toBe("δεκατρείς χιλιάδες");
+        expect(numberToWords(14000)).toBe("δεκατέσσερις χιλιάδες");
+        expect(numberToWords(13_000_000)).toBe("δεκατρία εκατομμύρια");
+        expect(phonemize("Ήρθαν 11 άτομα.", "el")).toBe("iɾθan endeka atoma .");
+    });
+
+    test("100 is εκατό alone and εκατόν before a remainder", () => {
+        expect(numberToWords(100)).toBe("εκατό");
+        expect(numberToWords(101)).toBe("εκατόν ένα");
+        expect(numberToWords(111)).toBe("εκατόν έντεκα");
+        expect(numberToWords(199)).toBe("εκατόν ενενήντα εννέα");
+        expect(numberToWords(101_000)).toBe("εκατόν μία χιλιάδες");
+        expect(numberToWords(100_000)).toBe("εκατό χιλιάδες");
+        expect(numberToWords(201)).toBe("διακόσια ένα"); // only 100 has the -ν form
+    });
+
+    test("U+037E GREEK QUESTION MARK is the question pause, as `;` is", () => {
+        expect(phonemize("Τι κάνεις\u037e Καλά.", "el")).toBe(phonemize("Τι κάνεις; Καλά.", "el"));
+        expect(phonemize("Τι κάνεις\u037e Καλά.", "el")).toBe("ti kanis ? kala .");
+    });
+
+    test("decomposed (NFD) input reads as the composed word", () => {
+        for (const w of ["τσάι", "κοιλιά", "ρολόι", "Ήρθε· έφυγε."])
+            expect(phonemize(w.normalize("NFD"), "el")).toBe(phonemize(w, "el"));
+        expect(phonemize("τσάι".normalize("NFD"), "el")).toBe("t͡sai");
+    });
+
+    test("polytonic letters fold to their monotonic twins instead of vanishing", () => {
+        expect(phonemize("ἀρχή", "el")).toBe(phonemize("αρχή", "el"));
+        expect(phonemize("Ἡ ἀρχή τοῦ λόγου.", "el")).toBe(phonemize("Η αρχή του λόγου.", "el"));
+        expect(phonemize("ῥήτωρ ᾠδή Ἀθῆναι", "el")).toBe(phonemize("ρήτωρ ωδή Αθήναι", "el"));
+        expect(phonemize("Ἡ ἀρχή τοῦ λόγου.", "el")).toBe("i aɾçi tu loɣu .");
+        // An embedded Latin grave is not Greek Extended and is left alone.
+        expect(normalizeGreek("καφέ à")).toBe("καφέ à");
+    });
+
+    test("the digraph readings come from consonantDigraphs and palatal, unchanged", () => {
+        const got = ["άγγελος", "έλεγχος", "ελέγχει", "φθόγγος", "γκέι", "Σφίγξ", "μπίρα", "άντε", "τσέπη", "τζάκι", "κέικ"]
+            .map((w) => phonemizeWordRules(w));
+        expect(got).toEqual(["aŋɟelos", "eleŋxos", "eleŋçi", "fθoŋɡos", "ɟei", "sfiŋks", "biɾa", "ande", "t͡sepi", "d͡zaci", "ceik"]);
+    });
+
+    test("an astral character does not put the stress marks out of step", () => {
+        expect(phonemizeWord("\u{1F600}τσάι")).toBe(phonemizeWord("τσάι"));
+        expect(phonemizeWord("\u{1F600}ρολόι")).toBe("ɾoloi");
     });
 });

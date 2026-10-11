@@ -22,6 +22,8 @@ pub(crate) struct Tables {
     v: Map,
     vd: Map,
     c: Map,
+    cd: Map,
+    pal: Map,
     tonos: Map,
     stressed: HashSet<JsString>,
     voiceless: HashSet<JsString>,
@@ -50,6 +52,8 @@ pub(crate) fn tables() -> Result<&'static Tables, String> {
             v: map(&m.vowels),
             vd: map(&m.vowel_digraphs),
             c: map(&m.consonants),
+            cd: map(&m.consonant_digraphs),
+            pal: map(&m.palatal),
             tonos: map(&m.tonos),
             stressed: m.tonos.keys().map(|k| js(k)).collect(),
             voiceless: set(&m.voiceless),
@@ -82,8 +86,7 @@ fn lexicon() -> Result<&'static HashSet<JsString>, String> {
 struct Word<'a> {
     t: &'a Tables,
     w: Vec<u16>,
-    /// ⚠ Built per CODE POINT (`[...raw].map(...)`) but indexed by UTF-16 position, as in the TS: past an
-    /// astral character the two are out of step. A missing index reads as unstressed (`undefined`).
+    /// Per UTF-16 unit, as `w` is indexed. A missing index reads as unstressed (`undefined`).
     stressed: Vec<bool>,
 }
 
@@ -150,10 +153,10 @@ fn is_cons(t: &Tables, ch: &JsString) -> bool {
 /// `scan(word, forceSyn)`.
 fn scan(t: &Tables, word: &JsString, force_syn: bool) -> JsString {
     let raw = word.to_lower_case();
-    let cps = raw.code_point_strings();
-    let stressed: Vec<bool> = cps.iter().map(|c| t.stressed.contains(c)).collect();
+    let units: Vec<JsString> = raw.0.iter().map(|&u| JsString::from_units(&[u])).collect();
+    let stressed: Vec<bool> = units.iter().map(|c| t.stressed.contains(c)).collect();
     let mut w = JsString::new();
-    for c in &cps {
+    for c in &units {
         w.push_str(t.tonos.get(c).unwrap_or(c));
     }
     let wd = Word {
@@ -170,19 +173,14 @@ fn scan(t: &Tables, word: &JsString, force_syn: bool) -> JsString {
         let ch = wd.at(i).unwrap();
         let two = wd.slice(i, i + 2);
         if two == s("γγ") || two == s("γκ") || two == s("γχ") || two == s("γξ") {
-            let fr = wd.front(i + 2);
             let nasal = if two == s("γκ") && i == 0 { "" } else { "ŋ" };
-            let tail = if two == s("γξ") {
-                "ks"
-            } else if two == s("γχ") {
-                if fr { "ç" } else { "x" }
-            } else if fr {
-                "ɟ"
+            let pal = if wd.front(i + 2) {
+                t.pal.get(&two)
             } else {
-                "ɡ"
+                None
             };
             out.push_str(&s(nasal));
-            out.push_str(&s(tail));
+            out.push_str(pal.unwrap_or(&t.cd[&two]));
             i += 2;
             continue;
         }
@@ -192,18 +190,15 @@ fn scan(t: &Tables, word: &JsString, force_syn: bool) -> JsString {
                 || after_mp_nt == Some(s("ρ"))
                 || after_mp_nt == Some(s("λ")))
         {
-            let voiced = if two == s("μπ") { "b" } else { "d" };
-            if i == 0 {
-                out.push_str(&s(voiced));
-            } else {
-                out.push_str(&s(if two == s("μπ") { "m" } else { "n" }));
-                out.push_str(&s(voiced));
+            if i != 0 {
+                out.push_str(&t.c[&wd.slice(i, i + 1)]);
             }
+            out.push_str(&t.cd[&two]);
             i += 2;
             continue;
         }
         if two == s("τσ") || two == s("τζ") {
-            out.push_str(&s(if two == s("τσ") { "t͡s" } else { "d͡z" }));
+            out.push_str(&t.cd[&two]);
             i += 2;
             continue;
         }
@@ -250,13 +245,7 @@ fn scan(t: &Tables, word: &JsString, force_syn: bool) -> JsString {
                 continue;
             }
             if (ch == s("κ") || ch == s("γ") || ch == s("χ")) && wd.front(i + 1) {
-                out.push_str(&s(if ch == s("κ") {
-                    "c"
-                } else if ch == s("γ") {
-                    "ʝ"
-                } else {
-                    "ç"
-                }));
+                out.push_str(&t.pal[&ch]);
                 i += 1;
                 continue;
             }
@@ -368,5 +357,117 @@ mod tests {
         let say = |s: &str| crate::phonemize(s, "el").unwrap();
         assert_eq!(say("Ήρθε\u{0387} έφυγε."), "iɾθe , efiʝe .");
         assert_eq!(say("Ήρθε\u{00b7} έφυγε."), "iɾθe , efiʝe .");
+    }
+
+    // #1510 — ported from test/greek.test.ts's "greek port findings (#1510)" block.
+    fn words(n: f64) -> String {
+        crate::languages::greek::numbers::number_to_words(n, None)
+            .unwrap()
+            .to_string_lossy()
+    }
+
+    #[test]
+    fn teens_are_lexical_words() {
+        assert_eq!(words(10.0), "δέκα");
+        assert_eq!(words(11.0), "έντεκα");
+        assert_eq!(words(12.0), "δώδεκα");
+        assert_eq!(words(13.0), "δεκατρία");
+        assert_eq!(words(19.0), "δεκαεννέα");
+        assert_eq!(words(2016.0), "δύο χιλιάδες δεκαέξι");
+        assert_eq!(words(11000.0), "έντεκα χιλιάδες");
+        assert_eq!(words(13000.0), "δεκατρείς χιλιάδες");
+        assert_eq!(words(14000.0), "δεκατέσσερις χιλιάδες");
+        assert_eq!(words(13_000_000.0), "δεκατρία εκατομμύρια");
+        let say = |s: &str| crate::phonemize(s, "el").unwrap();
+        assert_eq!(say("Ήρθαν 11 άτομα."), "iɾθan endeka atoma .");
+    }
+
+    #[test]
+    fn hundred_takes_nu_before_a_remainder() {
+        assert_eq!(words(100.0), "εκατό");
+        assert_eq!(words(101.0), "εκατόν ένα");
+        assert_eq!(words(111.0), "εκατόν έντεκα");
+        assert_eq!(words(199.0), "εκατόν ενενήντα εννέα");
+        assert_eq!(words(101_000.0), "εκατόν μία χιλιάδες");
+        assert_eq!(words(100_000.0), "εκατό χιλιάδες");
+        assert_eq!(words(201.0), "διακόσια ένα");
+    }
+
+    #[test]
+    fn the_greek_question_mark_is_the_question_pause() {
+        let say = |s: &str| crate::phonemize(s, "el").unwrap();
+        assert_eq!(say("Τι κάνεις\u{037e} Καλά."), say("Τι κάνεις; Καλά."));
+        assert_eq!(say("Τι κάνεις\u{037e} Καλά."), "ti kanis ? kala .");
+    }
+
+    #[test]
+    fn decomposed_input_reads_as_the_composed_word() {
+        use unicode_normalization::UnicodeNormalization;
+        let say = |s: &str| crate::phonemize(s, "el").unwrap();
+        for w in ["τσάι", "κοιλιά", "ρολόι", "Ήρθε\u{0387} έφυγε."] {
+            assert_eq!(say(&w.nfd().collect::<String>()), say(w));
+        }
+        assert_eq!(say(&"τσάι".nfd().collect::<String>()), "t͡sai");
+    }
+
+    #[test]
+    fn polytonic_letters_fold_to_monotonic() {
+        let say = |s: &str| crate::phonemize(s, "el").unwrap();
+        assert_eq!(say("\u{1f00}ρχή"), say("αρχή"));
+        let polytonic = "\u{1f29} \u{1f00}ρχή τ\u{03bf}\u{1fe6} λόγου.";
+        assert_eq!(say(polytonic), say("Η αρχή του λόγου."));
+        assert_eq!(
+            say("\u{1fe5}ήτωρ \u{1fa0}δή \u{1f08}θ\u{1fc6}ναι"),
+            say("ρήτωρ ωδή Αθήναι")
+        );
+        assert_eq!(say(polytonic), "i aɾçi tu loɣu .");
+        let norm = crate::languages::greek::normalize::normalize_greek(&js("καφέ à")).unwrap();
+        assert_eq!(norm, js("καφέ à"));
+    }
+
+    #[test]
+    fn digraph_readings_come_from_the_tables_unchanged() {
+        let got: Vec<JsString> = [
+            "άγγελος",
+            "έλεγχος",
+            "ελέγχει",
+            "φθόγγος",
+            "γκέι",
+            "Σφίγξ",
+            "μπίρα",
+            "άντε",
+            "τσέπη",
+            "τζάκι",
+            "κέικ",
+        ]
+        .iter()
+        .map(|w| phonemize_word_rules(&js(w)).unwrap())
+        .collect();
+        let want: Vec<JsString> = [
+            "aŋɟelos",
+            "eleŋxos",
+            "eleŋçi",
+            "fθoŋɡos",
+            "ɟei",
+            "sfiŋks",
+            "biɾa",
+            "ande",
+            "t͡sepi",
+            "d͡zaci",
+            "ceik",
+        ]
+        .iter()
+        .map(|w| js(w))
+        .collect();
+        assert_eq!(got, want);
+    }
+
+    #[test]
+    fn an_astral_character_does_not_desync_the_stress_marks() {
+        assert_eq!(
+            phonemize_word(&js("\u{1F600}τσάι")).unwrap(),
+            phonemize_word(&js("τσάι")).unwrap()
+        );
+        assert_eq!(phonemize_word(&js("\u{1F600}ρολόι")).unwrap(), js("ɾoloi"));
     }
 }
