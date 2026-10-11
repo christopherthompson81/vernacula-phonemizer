@@ -22,7 +22,7 @@ const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
-    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr",
 };
 
 /**
@@ -81,6 +81,8 @@ function cmnPinyinTables(): { chars: Map<string, string[]>; phrases: Map<string,
 }
 /** Synthetic texts only a JsString-level replay can carry: lone surrogate halves (the public &str API cannot). */
 const CMN_EXTRAS = ["\uD842", "\uDFB7你", "你好\uD842", "𠮷\uD842", "1\uDC00年", "A\uD800B", "气温-\uD8005度"];
+/** Korean synthetic texts with lone surrogates (the &str replay cannot carry them). */
+const KO_EXTRAS = ["\uD842가", "가\uDC00나", "1\uD800,000명", "A\uD800B 회의", "3\uDC00명", "\uD842FBI"];
 /** The `trace` dump's serializer: traced, normalized, and per token
  *  [span, inputSpan|null, ipaSpan|null, surface units, source|null], as JSON. */
 function traceJson(t: {
@@ -838,6 +840,52 @@ const dumps: Record<string, () => void | Promise<void>> = {
         let i = 0;
         for (const w of lex.keys()) if (i++ % 25 === 0) words.add(w);
         for (const w of words) emit({ word: units(w) }, await tagger.tag(w));
+    },
+    // ── Korean (ko). Inputs: the ko golden, FLEURS ko_kr (columns 3 and 4) and probes/ko.txt. ──
+    async "ko-normalize"() {
+        const { normalizeKorean } = await import("../../../src/languages/korean/normalize.ts");
+        for (const [t, src] of textsFor(["ko"], "ko_kr", ["ko.txt"])) emit({ text: units(t), src }, normalizeKorean(t));
+        for (const t of KO_EXTRAS) emit({ text: units(t), src: "extra" }, normalizeKorean(t));
+    },
+    // phonemizeWord over every syllable, a coda × onset grid of pairs, every tensification.tsv key (bare and
+    // with a particle), every Hangul run of the texts (raw and normalized) and non-Hangul corners.
+    async "ko-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/korean/g2p.ts");
+        const { normalizeKorean } = await import("../../../src/languages/korean/normalize.ts");
+        const K = new URL("../../../src/languages/korean/korean.ts", import.meta.url).href;
+        const words = new Set<string>();
+        const syl = (l: number, v: number, t: number): string => String.fromCharCode(0xac00 + (l * 21 + v) * 28 + t);
+        for (let c = 0xac00; c <= 0xd7a3; c++) words.add(String.fromCharCode(c));
+        for (const l1 of [0, 11, 18, 5]) for (const t1 of Array.from({ length: 28 }, (_, i) => i))
+            for (let l2 = 0; l2 < 19; l2++) for (const v2 of [0, 6, 20]) for (const t2 of [0, 4, 8, 27])
+                words.add(syl(l1, 0, t1) + syl(l2, v2, t2));
+        for (let t1 = 0; t1 < 28; t1 += 3) for (let l2 = 0; l2 < 19; l2 += 2) for (let t2 = 0; t2 < 28; t2 += 5) for (let l3 = 0; l3 < 19; l3 += 3)
+            words.add(syl(2, 4, t1) + syl(l2, 20, t2) + syl(l3, 8, 0));
+        for (const k of loadTsvMap(K, "tensification.tsv").keys()) { words.add(k); words.add(k + "이"); words.add(k + "는"); words.add("가" + k); }
+        for (const t of textsFor(["ko"], "ko_kr", ["ko.txt"]).keys())
+            for (const x of [t, normalizeKorean(t)]) for (const m of x.matchAll(/[가-힣]+/gu)) words.add(m[0]);
+        for (const w of ["", "a", "ㄱ", "ㅏ", "漢", "𠮷", "가a나", "가𠮷나", "\uD842", "가\uDC00나", "힤", "꯿가", "힣힣", "가"]) words.add(w);
+        for (const w of words) emit({ word: units(w) }, phonemizeWord(w));
+    },
+    async "ko-numbers"() {
+        const { numberToWords, spellDigits } = await import("../../../src/languages/korean/numbers.ts");
+        const ns = new Set<number>();
+        for (let i = 0; i <= 20000; i++) ns.add(i);
+        for (let e = 4; e <= 16; e++)
+            for (const k of [1, 2, 3, 7, 10, 11, 99, 101, 1001])
+                for (const d of [0, 1, 10, -1, 1000, 10001]) ns.add(k * 10 ** e + d);
+        for (const x of [Number.MAX_SAFE_INTEGER, 2 ** 53, 2 ** 53 + 2, 1e21, -1, -0, 1.5, NaN, Infinity, 0.1]) ns.add(x);
+        for (const n of ns) emit({ n: String(n), op: "int" }, numberToWords(n));
+        for (const d of ["0", "007", "1234567890", "99999999999999999999", "5x", "١", "𝟗", "", "\uD842"])
+            emit({ digits: units(d), op: "digits" }, spellDigits(d));
+    },
+    // Texts only a JsString-level replay can carry (lone surrogates), through the trace and the reading.
+    async "ko-extras"() {
+        const { phonemize, phonemizeTrace } = await import("../../../src/index.ts");
+        for (const text of KO_EXTRAS) {
+            emit({ text: units(text), lang: "ko", op: "trace" }, traceJson(phonemizeTrace(text, "ko")));
+            emit({ text: units(text), lang: "ko", op: "ipa" }, phonemize(text, "ko"));
+        }
     },
 };
 
