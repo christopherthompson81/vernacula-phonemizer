@@ -110,3 +110,31 @@ assertion holding the evaluated value. Then `cargo fmt`, `cargo clippy --workspa
 - clippy: nothing in the new files except `module_inception` on `serbian::serbian`.
 
 **Implication.** Commit sr; port Croatian.
+
+## Run 5 — 2026-10-11 09:20 (Croatian: port, differentials, pins)
+
+**Question.** With `croatian/{manifest,numbers,normalize,croatian}.rs` ported (the tier `SYMBOLS` lives in
+croatian.rs, as croatian.ts exports it and normalize.ts imports it) and `hr` registered, do the golden, the
+per-module differentials and test/croatian.test.ts hold?
+
+**Command.** `./target/release/parity hr`; `SH_LANGS=sr,hr sh-normalize`, `sh-numbers` (sr+hr rows), `LANGS=hr
+phonemize-sync` / `phonemize-best`, with the new synthetic `probes/hr.txt` (39 lines, one or more per arm);
+`.probe/sh/pins.mts test/croatian.test.ts hr e`; then the full gates.
+
+**Raw finding.** One compile error (a `LazyLock<Box<dyn Fn>>` passed where `&dyn Fn` was wanted), then:
+```
+parity hr:          200/200 identical, 0 differ
+sh-normalize sr+hr: 125612 identical, 0 DIFFER  (golden 828 / fleurs 31028 / probe 380 / synthetic 55808 / words 37568)
+sh-numbers sr+hr:    54132 identical, 0 DIFFER
+phonemize-sync hr:    4058 identical, 0 DIFFER
+phonemize-best hr:    4058 identical, 0 DIFFER
+pins: test/croatian.test.ts 92 extracted, 11 skipped (computed expectations); sr's held-back hr pin restored
+cargo test --release --workspace: 133 + 1 passed; parity all 22 languages 200/200
+clippy: only module_inception on croatian::croatian in the new files
+```
+
+**JS semantics reproduced on purpose.** Croatian's `LICENSOR[word]` is NOT lowercased (Serbian's goes through
+`lat`), so every `Object.prototype` name starting with a lowercase letter reads the inherited member:
+`Bilo je 7. hasOwnProperty i 3. toString.` → `Bilo je undefined hasOwnProperty i undefined toString.` (TS).
+
+**Implication.** Commit hr; port Bosnian.

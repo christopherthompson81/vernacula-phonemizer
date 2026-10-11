@@ -1206,6 +1206,8 @@ fn main() {
         }
         "sh-normalize" => {
             let sr = vernacula_phonemizer::languages::serbian::serbian::create_serbian().unwrap();
+            let hr =
+                vernacula_phonemizer::languages::croatian::croatian::create_croatian().unwrap();
             Box::new(move |input| {
                 let t = units(&input["text"]);
                 let lang = input["lang"].as_str().unwrap();
@@ -1216,6 +1218,8 @@ fn main() {
                     op => match (lang, op) {
                         ("sr", "normalize") => sr.normalize(&t),
                         ("sr", _) => sr.symbols(&t),
+                        ("hr", "normalize") => hr.normalize(&t),
+                        ("hr", _) => hr.symbols(&t),
                         _ => panic!("no {lang} {op}"),
                     },
                 }
@@ -1242,11 +1246,13 @@ fn main() {
         "sh-numbers" => {
             use vernacula_phonemizer::languages::serbian::numbers::compose_slavic_number;
             let sr = vernacula_phonemizer::languages::serbian::manifest::try_manifest().unwrap();
+            let hr = vernacula_phonemizer::languages::croatian::manifest::try_manifest().unwrap();
             Box::new(move |input| {
                 let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
                 let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
                 let table = match input["lang"].as_str().unwrap() {
                     "sr" => &sr.numbers,
+                    "hr" => &hr.numbers,
                     l => panic!("no {l} table"),
                 };
                 compose_slavic_number(n, table, raw.as_ref())

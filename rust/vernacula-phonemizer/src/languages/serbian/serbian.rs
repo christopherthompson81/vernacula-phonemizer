@@ -1061,5 +1061,6 @@ mod tests {
         assert_eq!(crate::phonemize("pšenica", "sr").unwrap(), "pʃˈenit͡sa");
         assert_eq!(crate::phonemize("НАТО", "sr").unwrap(), "nˈato");
         assert_eq!(crate::phonemize("САД", "sr").unwrap(), "sad");
+        assert_eq!(crate::phonemize("tko", "hr").unwrap(), "tko˥˩");
     }
 }

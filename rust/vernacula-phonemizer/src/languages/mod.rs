@@ -1,3 +1,4 @@
+pub mod croatian;
 pub mod dutch;
 pub mod english;
 pub mod english_gb;

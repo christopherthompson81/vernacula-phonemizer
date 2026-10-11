@@ -1,0 +1,40 @@
+# Croatian (hr) off-golden probes: synthetic text only, one or more lines per normalize.ts arm and the
+# neighbour it must decline, plus number-token corners.
+Tekst s​nevidljivim﻿ znakovima.
+Grad ima 1.300 stanovnika i 800.000 posjetitelja, standard 802.11.
+Razdoblje 1000. – 1300. n. e. bilo je dugo.
+Hram je izgrađen 400. g. n. e. i srušen 1000. g. pr. Kr. u ratu.
+Grad je osnovan 300. p.n.e. u dolini, a pao je 200. n. e.
+Završilo je p.n.e. Sljedeće razdoblje.
+To je bilo n. e.
+N. E. Kovač je došao.
+Voće, povrće itd. su na stolu, itd., i itd.)
+George W. Bush i J. R. R. Tolkien i A. B. Šenoa.
+Dr. Ivić je stigao, a Dr. je otišao. Pita dr. Horvat.
+Trupe SAD-a i SAD su otišle.
+U I. svjetskom ratu i II. svjetskog rata, I. i II. reda, IV. stoljeće, X. mjesto.
+Voda vrije na 100 °C, ne 212 °F, i 0°c.
+Bilo je 35° W i 35° S i 35°s i 35° s padavinama.
+Oko 35° od ekvatora i 300°K i 35° X.
+Tijekom 1990-ih bilo je, 1480-ih, kada, 15-og, 11-om.
+Rođen je 15. kolovoza 1940. Saveznici su došli.
+U 1988. godini, 190. mjesto, 37. najveća zemlja, 4. kategorije, 11. husarska pukovnija.
+Vladao je do 1945.
+Godine 1683. dinastija je pala, a 1965. bio je prvi.
+Utakmica (1644. - 1912.) i 1990-1995. kraj.
+Sastanak u 22:00 i 23:00 h, pa 23:35 h i 12:00 GMT, a 4:41.30 tempo.
+Rezultat 6:6. i 07:30. i 25:00.
+Od 10 – 60 ljudi i 2-3 i 120-160.
+Brzina 100 milja/h i 3,5 milja/sat i 20 milja / sat.
+Ima 3,50 m i 2,4 Ghz i 50% i 1,5 km i 70 km/h i 133 m/s.
+Cijena je 5 $ i 100 ¥ i 20 € i 3 £.
+Površina 10 km² i 3 m³.
+Točka 0,001 grama i 1,50 i 2,05 metra.
+Pergament 29¾ sa 24½ inča i 1/5 inča i 3/0 i 22/7 i 1/2/3.
+Rock&Roll i AT&T i A & B.
+Format 4x4 i 6×2, greška ±2, temperatura +3 i (+4) i ABC+5.
+Temperatura −5 i -3, raspon 5 - 3, a -2-3.
+Ako je 2 = 2 i 3 < 4 i 5 > 1 onda 6 ÷ 3.
+Broj 1.234.567,89 i 12,5 i 1000000000 i 12345678901234567890.
+DVD i GPS i UTC.
+Bilo je 5. constructor i 7. hasOwnProperty i 3. toString.

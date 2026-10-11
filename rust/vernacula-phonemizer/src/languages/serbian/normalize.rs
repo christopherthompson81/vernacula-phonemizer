@@ -375,7 +375,7 @@ pub(crate) fn serbian_symbols(s: &JsString) -> JsString {
 // ── THE RULES ───────────────────────────────────────────────────────────────────────────────────────
 
 /// `intOf(n)`: the integer part of a written number ("3,50" → 3); off the seam, as in the TS.
-fn int_of(n: &JsString) -> f64 {
+pub(crate) fn int_of(n: &JsString) -> f64 {
     let a = js_re!(r"\.", "gu").replace(n, &JsString::new());
     let b = js_re!(",", "").replace(&a, &js("."));
     js_number(&b).trunc()
