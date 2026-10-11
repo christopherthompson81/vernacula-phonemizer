@@ -129,9 +129,13 @@
         "ʐ",
     ],
 
-    // Regressive palatalization: dentals that soften (л excluded) before a following soft trigger.
+    // Regressive palatalization: dentals that soften (л excluded) before a following soft trigger. Two tiers by
+    // target: с/з soften before a soft consonant in `softenTriggers` (ездил → zʲdʲ; not before soft н —
+    // сняться keeps hard с), т/д/н before one in `softenTriggersTdn` (стаканчик → nʲt͡ɕ; женщина keeps hard н
+    // before щ). Both are read by g2p.ts.
     "softenTargets": "сзтдн",
     "softenTriggers": "тд",
+    "softenTriggersTdn": "тднч",
 
     // Adverbs in -ого that KEEP [ɡ] (the genitive -ого/-его → v rule does not apply to them).
     "genitiveKeepG": [
@@ -259,6 +263,41 @@
         "thousand": ["тысяча", "тысячи", "тысяч"], // one / few / many (feminine)
         "thousandFeminine": { "one": "одна", "two": "две" }, // один→одна, два→две before тысяча
         "decimalConnector": "целых", // 3,14 → три целых…
+        // OBLIQUE CASES, for the case suffix written after digits (`4-х` четырёх, `30-ти` тридцати, `34-мя`
+        // тридцатью четырьмя). Every element of a Russian cardinal declines, so these are the same three slots
+        // as the nominative tables above. Genitive serves -х and -ти (it is also the prepositional, and for
+        // 5 and up the dative); instrumental serves -мя. Index 0 is never reached (n ≥ 1, and a zero slot
+        // is skipped by the compositor).
+        "genitive": {
+            "ones": [
+                "", "одного", "двух", "трёх", "четырёх", "пяти", "шести", "семи", "восьми", "девяти",
+                "десяти", "одиннадцати", "двенадцати", "тринадцати", "четырнадцати", "пятнадцати",
+                "шестнадцати", "семнадцати", "восемнадцати", "девятнадцати",
+            ],
+            "tens": [
+                "", "", "двадцати", "тридцати", "сорока", "пятидесяти", "шестидесяти", "семидесяти",
+                "восьмидесяти", "девяноста",
+            ],
+            "hundreds": [
+                "", "ста", "двухсот", "трёхсот", "четырёхсот", "пятисот", "шестисот", "семисот", "восьмисот",
+                "девятисот",
+            ],
+        },
+        "instrumental": {
+            "ones": [
+                "", "одним", "двумя", "тремя", "четырьмя", "пятью", "шестью", "семью", "восемью", "девятью",
+                "десятью", "одиннадцатью", "двенадцатью", "тринадцатью", "четырнадцатью", "пятнадцатью",
+                "шестнадцатью", "семнадцатью", "восемнадцатью", "девятнадцатью",
+            ],
+            "tens": [
+                "", "", "двадцатью", "тридцатью", "сорока", "пятьюдесятью", "шестьюдесятью", "семьюдесятью",
+                "восемьюдесятью", "девяноста",
+            ],
+            "hundreds": [
+                "", "ста", "двумястами", "тремястами", "четырьмястами", "пятьюстами", "шестьюстами",
+                "семьюстами", "восемьюстами", "девятьюстами",
+            ],
+        },
     },
 
     "letterNames": {
@@ -267,6 +306,17 @@
         "р": "эр", "с": "эс", "т": "тэ", "у": "у", "ф": "эф", "х": "ха", "ц": "цэ", "ч": "че", "ш": "ша",
         "щ": "ща", "ы": "ы", "э": "э", "ю": "ю", "я": "я"
     },
+
+    // CYRILLIC LETTERS OUTSIDE а–я/ё, folded to the Russian spelling they correspond to before the g2p reads
+    // the word. Without them the tokenizer broke the word at the letter and dropped it (`хлѣбъ` read [xɫ p]).
+    // Two closed sets, each a published correspondence rather than a guess:
+    //   · the letters the 1918 orthography reform retired, by the reform's own replacements: ѣ→е, і→и, ѳ→ф,
+    //     ѵ→и (final ъ needs no entry — it is already a sign the g2p reads as nothing);
+    //   · the Ukrainian letters, by their Russian Cyrillic equivalents: ї [ji] → йи, є [je] → е, ґ → г
+    //     (і is already in the first set).
+    // A letter not listed (ў, the Serbian and Macedonian letters, the Turkic additions) still breaks the word
+    // as before. Keys are lowercase; the tokenizer adds their uppercase.
+    "letterFolds": { "ѣ": "е", "і": "и", "ѳ": "ф", "ѵ": "и", "ї": "йи", "є": "е", "ґ": "г" },
     "phonotactics": {
         "vowels": "аеёиоуыэюя",
         "onsets": [

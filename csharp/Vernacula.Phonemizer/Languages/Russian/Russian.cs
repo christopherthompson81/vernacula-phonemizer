@@ -24,10 +24,14 @@ public sealed class RussianPhonemizer : ILanguage
 
     private static IReadOnlyDictionary<string, string> IRREGULARS => Manifest.MANIFEST.Irregulars;
 
+    /** Cyrillic letters outside а–я/ё → their Russian spelling (DATA: russian.jsonc `letterFolds`). */
+    private static string FoldLetters(string w) =>
+        string.Concat(Js.CodePoints(w).Select(c => Manifest.MANIFEST.LetterFolds.TryGetValue(c, out var f) ? f : c));
+
     /** One Russian word → canonical IPA. Stress from the dictionary; ё is inherently stressed; else first. */
     public static string PhonemizeWord(string word)
     {
-        var w = word.ToLowerInvariant();
+        var w = FoldLetters(word.ToLowerInvariant());
         if (IRREGULARS.TryGetValue(w, out var irr)) return irr;
         double? ord = StressDict().TryGetValue(w, out var d) ? d : null;
         if (ord is null && w.Contains('е'))
@@ -81,7 +85,9 @@ public sealed class RussianPhonemizer : ILanguage
     }
 
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
-    private static readonly JsRe TOKEN = JsRegex.Compile("([а-яёА-ЯЁ]+)|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])", "gu");
+    /** The folded letters are word letters too, in both cases, so `хлѣбъ` and `Київ` stay one word. */
+    private static readonly string FOLDED = string.Concat(Manifest.MANIFEST.LetterFolds.Keys.Select(c => c + c.ToUpperInvariant()));
+    private static readonly JsRe TOKEN = JsRegex.Compile($"([а-яёА-ЯЁ{FOLDED}]+)|(\\d+(?:[.,]\\d+)?)|([.!?…,;:])", "gu");
     private static readonly JsRe DECIMAL_SEP = JsRegex.Compile("[.,]");
 
     private static readonly Func<string, string> SYMBOLS = NormalizeSymbols.MakeSymbolNormalizer(new SymbolData

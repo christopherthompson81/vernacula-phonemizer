@@ -79,7 +79,11 @@ pub(crate) fn number_to_words(n: f64, raw: Option<&JsString>) -> JsString {
         parts.push(js(&below1000(mil)));
         parts.push(js(plural(mil, &m.million[0], &m.million[1], &m.million[2])));
     }
-    if th != 0.0 {
+    if th == 1.0 {
+        // ⚠ A lone thousand is bare `тысяча`, the news reading of a year; `одна тысяча` is the formal register.
+        //   Only the group that IS one drops it (21000 keeps двадцать одна тысяча).
+        parts.push(js(&m.thousand[0]));
+    } else if th != 0.0 {
         let th_words = js_re!("один$").replace(&js(&below1000(th)), &js(&m.thousand_feminine.one));
         let th_words = js_re!("два$").replace(&th_words, &js(&m.thousand_feminine.two));
         parts.push(th_words);
@@ -94,4 +98,37 @@ pub(crate) fn number_to_words(n: f64, raw: Option<&JsString>) -> JsString {
         parts.push(js(&below1000(r)));
     }
     JsString::join(&parts, &js(" "))
+}
+
+/// `CardinalCase`: which oblique-case slots of the manifest a cardinal is read from.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum CardinalCase {
+    Genitive,
+    Instrumental,
+}
+
+/// `cardinalInCase(n, kase)`: 1 ≤ n < 1000 as a cardinal in an oblique case, every element declined
+/// (тридцать пять → тридцати пяти). `None` outside the range.
+pub(crate) fn cardinal_in_case(n: f64, kase: CardinalCase) -> Option<JsString> {
+    if !is_safe_integer(n) || !(1.0..1000.0).contains(&n) {
+        return None;
+    }
+    let t = match kase {
+        CardinalCase::Genitive => &MANIFEST.numbers.genitive,
+        CardinalCase::Instrumental => &MANIFEST.numbers.instrumental,
+    };
+    let mut parts: Vec<&str> = Vec::new();
+    let (h, r) = ((n / 100.0).floor() as usize, (n % 100.0) as usize);
+    if h != 0 {
+        parts.push(&t.hundreds[h]);
+    }
+    if r >= 20 {
+        parts.push(&t.tens[r / 10]);
+        if r % 10 != 0 {
+            parts.push(&t.ones[r % 10]);
+        }
+    } else if r != 0 {
+        parts.push(&t.ones[r]);
+    }
+    Some(js(&parts.join(" ")))
 }

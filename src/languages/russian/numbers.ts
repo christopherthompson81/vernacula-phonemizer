@@ -52,7 +52,13 @@ export function numberToWords(n: number, raw?: string): string {
             below1000(mil),
             plural(mil, N.million[0]!, N.million[1]!, N.million[2]!),
         );
-    if (th) {
+    if (th === 1) {
+        // ⚠ A LONE THOUSAND IS BARE `тысяча`, the reading a news reader gives a year (1939 → тысяча девятьсот
+        //   тридцать девять). `одна тысяча` is the formal register of a cheque or a contract, and it made every
+        //   year from 1000 to 1999 read that way. Only the group that IS one drops it: 21000 keeps двадцать
+        //   одна тысяча, where одна is the agreeing last element of a compound.
+        parts.push(N.thousand[0]!);
+    } else if (th) {
         // тысяча is feminine → 1 → одна, 2 → две
         const thWords = below1000(th)
             .replace(/один$/, N.thousandFeminine.one)
@@ -63,5 +69,28 @@ export function numberToWords(n: number, raw?: string): string {
         );
     }
     if (r) parts.push(below1000(r));
+    return parts.join(" ");
+}
+
+/** The cardinal's oblique-case slots (manifest: numbers.genitive, numbers.instrumental). */
+export type CardinalCase = "genitive" | "instrumental";
+
+/**
+ * 1 ≤ n < 1000 → the cardinal in an oblique case: тридцать пять → тридцати пяти, тридцать четыре →
+ * тридцатью четырьмя. ⚠ EVERY ELEMENT DECLINES in a Russian cardinal (unlike the ordinal, where only the last
+ * does), so this is the nominative compositor over another set of the same slots. undefined outside the range:
+ * a thousand declines as a noun (тысячи, тысячей), which is not attempted.
+ */
+export function cardinalInCase(n: number, kase: CardinalCase): string | undefined {
+    if (!Number.isSafeInteger(n) || n < 1 || n >= 1000) return undefined;
+    const t = N[kase];
+    const parts: string[] = [];
+    const h = Math.floor(n / 100),
+        r = n % 100;
+    if (h) parts.push(t.hundreds[h]!);
+    if (r >= 20) {
+        parts.push(t.tens[Math.floor(r / 10)]!);
+        if (r % 10) parts.push(t.ones[r % 10]!);
+    } else if (r) parts.push(t.ones[r]!);
     return parts.join(" ");
 }

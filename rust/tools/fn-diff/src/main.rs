@@ -755,6 +755,9 @@ fn main() {
                     (_, "ordinal") => ru
                         .ordinal(num())
                         .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    (_, op @ ("genitive" | "instrumental")) => ru
+                        .cardinal_in_case(num(), op == "genitive")
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
                     (_, _) => {
                         let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
                         ru.number_to_words(num(), raw.as_ref())

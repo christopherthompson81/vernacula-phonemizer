@@ -56,7 +56,13 @@ public static class Numbers
             parts.Add(Below1000(mil));
             parts.Add(Plural(mil, N.Million[0], N.Million[1], N.Million[2]));
         }
-        if (th != 0)
+        if (th == 1)
+        {
+            // ⚠ A LONE THOUSAND IS BARE `тысяча`, the news reading of a year; `одна тысяча` is the formal
+            //   register. Only the group that IS one drops it (21000 keeps двадцать одна тысяча).
+            parts.Add(N.Thousand[0]);
+        }
+        else if (th != 0)
         {
             var thWords = DVA_FINAL.Replace(
                 ODIN_FINAL.Replace(Below1000(th), N.ThousandFeminine.One),
@@ -65,6 +71,27 @@ public static class Numbers
             parts.Add(Plural(th, N.Thousand[0], N.Thousand[1], N.Thousand[2]));
         }
         if (r != 0) parts.Add(Below1000(r));
+        return string.Join(" ", parts);
+    }
+
+    /**
+     * 1 ≤ n < 1000 → the cardinal in an oblique case (`genitive` | `instrumental`): тридцать пять → тридцати
+     * пяти. Every element of a Russian cardinal declines. null outside the range — a thousand declines as a
+     * noun, which is not attempted.
+     */
+    public static string? CardinalInCase(double n, string kase)
+    {
+        if (!double.IsInteger(n) || n < 1 || n >= 1000) return null;
+        var t = kase == "genitive" ? N.Genitive : N.Instrumental;
+        var parts = new List<string>();
+        int h = (int)Math.Floor(n / 100), r = (int)(n % 100);
+        if (h != 0) parts.Add(t.Hundreds[h]);
+        if (r >= 20)
+        {
+            parts.Add(t.Tens[r / 10]);
+            if (r % 10 != 0) parts.Add(t.Ones[r % 10]);
+        }
+        else if (r != 0) parts.Add(t.Ones[r]);
         return string.Join(" ", parts);
     }
 }

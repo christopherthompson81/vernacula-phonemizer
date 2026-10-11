@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::sync::{Arc, LazyLock};
 
 use super::manifest::MANIFEST;
-use super::numbers::number_to_words;
+use super::numbers::{CardinalCase, cardinal_in_case, number_to_words};
 use super::roman_ordinals::russian_ordinal;
 use crate::core::initialisms::{
     InitialismData, LetterName, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
@@ -65,6 +65,16 @@ const DOTTED_ABBREV: [(&str, &str); 13] = [
     ("млрд", "миллиардов"),
 ];
 
+/// `CARDINAL_ENDING`: written ending → the oblique case of the cardinal whose last letters it is.
+const CARDINAL_ENDING: [(&str, CardinalCase); 3] = [
+    ("х", CardinalCase::Genitive),
+    ("ти", CardinalCase::Genitive),
+    ("мя", CardinalCase::Instrumental),
+];
+
+/// `PREPOSED_ABBREV`: the abbreviations that stand before their noun, so a capital after the dot is that noun.
+const PREPOSED_ABBREV: [&str; 5] = ["ул", "им", "стр", "проф", "акад"];
+
 const HOUR: [&str; 3] = ["час", "часа", "часов"];
 const MINUTE: [&str; 3] = ["минута", "минуты", "минут"];
 
@@ -103,14 +113,21 @@ static MULTI_DOT_RE: LazyLock<Vec<(JsRegex, &'static str)>> = LazyLock::new(|| {
 });
 
 static ORDINAL_RE: LazyLock<JsRegex> = LazyLock::new(|| {
-    let alt = alt_by_length_desc(CASE_ENDING.iter().map(|(k, _)| *k));
+    // `[...new Set([...CASE_ENDING keys, ...CARDINAL_ENDING keys])]`: first occurrence wins the slot.
+    let mut keys: Vec<&str> = CASE_ENDING.iter().map(|(k, _)| *k).collect();
+    for (k, _) in CARDINAL_ENDING {
+        if !keys.contains(&k) {
+            keys.push(k);
+        }
+    }
+    let alt = alt_by_length_desc(keys.into_iter());
     JsRegex::new(&format!(r"\b(\d+)\s?-\s?({alt})(?![а-яё])"), "giu").unwrap()
 });
 
 static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     let alt = alt_by_length_desc(DOTTED_ABBREV.iter().map(|(k, _)| *k));
     JsRegex::new(
-        &format!(r"(?<![\p{{L}}\p{{M}}])({alt})\.(\s+)(?=\p{{L}})"),
+        &format!(r"(?<![\p{{L}}\p{{M}}])({alt})\.(\s+)(?=(\p{{L}}))"),
         "giu",
     )
     .unwrap()
@@ -232,6 +249,17 @@ fn counted(n: f64, forms: &[&'static str; 3]) -> &'static str {
     forms[slavic_count_form(n).min(2.0) as usize]
 }
 
+/// `feminine(words)`: the last element agrees with a feminine noun (один → одна, два → две).
+fn feminine(words: &JsString) -> JsString {
+    let w = js_re!("один$", "u").replace(words, &js("одна"));
+    js_re!("два$", "u").replace(&w, &js("две"))
+}
+
+/// `endsSentence(next)`: nothing follows, or an uppercase letter does.
+fn ends_sentence(next: &JsString) -> bool {
+    next.is_empty() || js_re!(r"\p{Lu}", "u").test(next)
+}
+
 /// `normalizeRussian(input)`.
 pub(crate) fn normalize_russian(input: &JsString) -> JsString {
     let mut s = input.clone();
@@ -264,30 +292,65 @@ pub(crate) fn normalize_russian(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"№\s?(?=\d)", "gu"), &js("номер "));
 
     // 3) ordinal notation: the suffix is the case ending.
+    //    A suffix that can end a cardinal's oblique form reads the cardinal when it does.
     s = rewrite_with(&s, &ORDINAL_RE, |m, t| {
         let whole = m.value(t);
         let digits = m.group(1, t).unwrap();
-        let written = m.group(2, t).unwrap();
+        let w = m.group(2, t).unwrap().to_lower_case();
+        if let Some((_, kase)) = CARDINAL_ENDING.iter().find(|(k, _)| js(k) == w)
+            && let Some(cardinal) = cardinal_in_case(js_number(&digits), *kase)
+            && cardinal.ends_with(&w)
+        {
+            return cardinal;
+        }
         let Some(base) = ordinal_base(js_number(&digits)) else {
             return whole;
         };
-        inflect_ordinal(&base, &written.to_lower_case()).unwrap_or(whole)
+        inflect_ordinal(&base, &w).unwrap_or(whole)
     });
 
-    // 3b) `г.` after в/во and a year is году.
-    s = rewrite(
+    // 3b) `г.` after в/во and a year is году; the dot stays where it also ends the sentence.
+    s = rewrite_with(
         &s,
-        js_re!(r"(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\.", "giu"),
-        &js("$1 $2 году"),
+        js_re!(r"(?<![\p{L}\p{M}])(в|во)\s+(\d+)\s*г\.(?=\s*(\S?))", "giu"),
+        |m, t| {
+            let next = m.group(3, t).unwrap_or_default();
+            m.group(1, t)
+                .unwrap()
+                .concat(&js(" "))
+                .concat(&m.group(2, t).unwrap())
+                .concat(&js(if ends_sentence(&next) {
+                    " году."
+                } else {
+                    " году"
+                }))
+        },
     );
 
     // 4) dotted abbreviations. ⚠ The miss branch is reachable (#1122): the `iu` fold widens the pattern past
     //    the table's keys, and the match then stays as written.
+    //    A capital after the dot is a new sentence (the dot stays) or, after a capital single letter, an
+    //    initial spelled by its name; a preposed abbreviation's capital is its own noun.
     s = rewrite_with(&s, &ABBREV_CONTINUES, |m, t| {
-        match dotted_abbrev(&m.group(1, t).unwrap().to_lower_case()) {
-            None => m.value(t),
-            Some(w) => js(w).concat(&m.group(2, t).unwrap()),
+        let ab = m.group(1, t).unwrap();
+        let key = ab.to_lower_case();
+        let sp = m.group(2, t).unwrap();
+        let next = m.group(3, t).unwrap_or_default();
+        let Some(w) = dotted_abbrev(&key) else {
+            return m.value(t);
+        };
+        if PREPOSED_ABBREV.iter().any(|p| js(p) == key) || !ends_sentence(&next) {
+            return js(w).concat(&sp);
         }
+        if ab.code_point_strings().len() == 1 && ab != key {
+            let name = MANIFEST
+                .letter_names
+                .get(&key.to_string_lossy())
+                .map(|n| js(n))
+                .unwrap_or(ab);
+            return name.concat(&sp);
+        }
+        js(w).concat(&js(".")).concat(&sp)
     });
     s = rewrite_with(&s, &ABBREV_ENDS, |m, t| {
         match dotted_abbrev(&m.group(1, t).unwrap().to_lower_case()) {
@@ -333,7 +396,7 @@ pub(crate) fn normalize_russian(input: &JsString) -> JsString {
                 head
             } else {
                 head.concat(&js(" "))
-                    .concat(&number_to_words(mv, None))
+                    .concat(&feminine(&number_to_words(mv, None)))
                     .concat(&js(" "))
                     .concat(&js(counted(mv, &MINUTE)))
             }
@@ -369,12 +432,17 @@ pub(crate) fn normalize_russian(input: &JsString) -> JsString {
             let Some(base) = ordinal_base(den) else {
                 return m0;
             };
-            let fem = inflect_ordinal(&base, &js("я"));
-            let num_word = js_re!("один$", "u").replace(&number_to_words(num, None), &js("одна"));
-            let num_word = js_re!("два$", "u").replace(&num_word, &js("две"));
-            match fem {
+            // The denominator takes the numerator's count: singular after 1 (not 11), else genitive plural.
+            let written = if slavic_count_form(num) == 0.0 {
+                "я"
+            } else {
+                "х"
+            };
+            match inflect_ordinal(&base, &js(written)) {
                 None => m0,
-                Some(f) => num_word.concat(&js(" ")).concat(&f),
+                Some(f) => feminine(&number_to_words(num, None))
+                    .concat(&js(" "))
+                    .concat(&f),
             }
         },
     );

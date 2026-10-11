@@ -202,3 +202,73 @@ registered, and again with the `ru` build arm temporarily renamed so `ru` is unk
 
 **Implication.** Russian is done by the checklist. Registering it changes no golden; it fixes 3 off-golden
 rows in other languages, where a Cyrillic run was dropped as port-pending before and is now read.
+
+## Run 7 — 2026-10-11 14:10 (the nine #1513 findings, TS first)
+
+**Question.** Each of Run 5's nine findings (filed as #1513): fix it in the TS, or decline it, and what moves?
+
+**Command.** `npx tsx .probe/ru/p.mts` before and after (synthetic inputs through `normalizeRussian`,
+`phonemizeWord`, `numberToWords`, `phonemize`), `npm run check:goldens`, `npx tsx tools/gen_parity_goldens.mts
+ru`, and `python3 .probe/ru/revert.py N` (reverts fix N in place, runs the two new test files, restores).
+
+**Raw finding (TS, before → after).**
+1. `К 1990 г. Затем` → `К 1990 года. Затем`; `в 2007 г. Затем` → `в 2007 году. Затем`; `5 тыс. Затем` →
+   `5 тысяч. Затем`. The step-1 case discriminator now also runs in 3b (lookahead capture, so `в 1990 г. в
+   2000 г.` still claims both) and 4. ⚠ A NEW DISTINCTION WAS NEEDED: `ул. Ленина`, `проф. Иванов` are
+   abbreviations that stand BEFORE a capitalised noun, so a capital after them is never a sentence; a
+   `PREPOSED_ABBREV` set (ул им стр проф акад) keeps consuming. ⚠ Side effect, deliberate: `в 2007 г.` at
+   end of input now keeps its dot (3b used to eat it there too; step 1 and the ABBREV_ENDS rule already kept
+   it) — one assertion in russian.test.ts moved to the engine's new output (` .` appended).
+2. `В. Петров и Г. Иванов` → `вэ Петров и гэ Иванов`; `В. В. Набоков` → `вэ вэ Набоков`. ⚠ DEAD END FIRST:
+   returning the match untouched for the initialism pass gave `vɛ pʲɪtrˈof i k . ɪvɐnˈof` — core's
+   LONE_INITIAL needs a capitalised word before the initial, so `и Г.` kept a bare [k] and a phrase break.
+   The rule spells the letter by `letterNames` itself instead.
+3. `2/3` две третья → две третьих, `5/8` → пять восьмых, `3/2` → три вторых, `11/5` → одиннадцать пятых;
+   `1/5`, `21/100` unchanged (`slavicCountForm(num) === 0` keeps the singular). The issue suggested `две
+   трети`; that is the noun треть, a different construction — the adjective reading the rule already uses
+   takes the genitive plural.
+4. `9:21` → двадцать одна минута, `3:02` → две минуты, `1:01` → один час одна минута; 11/12 untouched.
+5. `в 4-х томах` четвёртых → четырёх, `2-х` → двух, `22-х` → двадцати двух, `30-ти` → тридцати, `35-ти` →
+   тридцати пяти, `34-мя` → тридцатью четырьмя, `3-мя` → тремя. `5-х` пятых, `12-х` двенадцатых, `1970-х`
+   stay ordinals: the cardinal reading is taken only where the oblique form ENDS in the written letters
+   (пяти, двенадцати do not end in х; nothing past 999 is attempted). New manifest tables
+   `numbers.genitive` / `numbers.instrumental`; every word in them is in stress.tsv except трёх (ё).
+6. `вся` fsa → fsʲa; `вернулся` unchanged. The reflexive rule now needs a vowel before the с.
+7. `хлѣбъ` `xɫ p` → `xlʲep`, `Київ` `kʲi f` → `kʲˈijɪf`, `ґанок` → `ɡˈanək`, `Європа` → `jɪvrˈopə`. New manifest
+   `letterFolds` (1918-reform letters ѣ і ѳ ѵ; Ukrainian ї є ґ); TOKEN is built from its keys + uppercase.
+   ⚠ TOKEN is no longer a literal, so it dropped out of `csharp/regex-corpus.jsonl` (re-extracted: 2386).
+8. g2p reads `softenTriggers` and a new `softenTriggersTdn` (тднч). ⚠ A HOISTED `vi.mock` PASSED ALONE AND
+   FAILED IN THE FULL SUITE: `isolate: false` hands back the g2p another file already imported. The test
+   now `vi.resetModules()` + `vi.doMock` before a dynamic import, and resets again in `afterAll`.
+9. Taken, as the news-anchor reading (speaker variation is a choice): a thousands group of exactly 1 is
+   bare `тысяча` (1900 → тысяча девятьсот); 21000 keeps двадцать одна тысяча.
+
+**Golden.** `check:goldens`: `ru 200 rows 7 stale`, every other language fresh. Regenerated ru: 7 rows, all
+`f ɐdnˈa tˈɨsʲət͡ɕə …` → `f tˈɨsʲət͡ɕə …` (1964, 1959, 1998 ×2 each, 1000 долларов ×1) — item 9 alone.
+FLEURS ru_ru column 3 (1,959 distinct) reach by grep: 81 with a 1xxx number, 16 with `\d-(х|ти|мя)`, 16
+clock-shaped, 2 `вся`, 1 abbreviation-dot before a capital, 1 fraction, 0 initials В./Г., 0 folded letters.
+
+**Revert proof.** Every item's test fails with its fix reverted (1 also fails 2, since the initial is only
+reached on a sentence-ending capital; 9 also fails the `1970-х` assertion in 5).
+
+**Implication.** All nine fixed TS-first; mirror into C# and Rust.
+
+## Run 8 — 2026-10-11 15:10 (the C# and Rust mirrors, every gate)
+
+**Command.** C# and Rust edits; `dotnet test csharp/Vernacula.Phonemizer.Tests` (full), `dotnet run -c
+Release` in `csharp/tools/parity`; `cargo fmt --check`, `cargo test --release`, `cargo run --release -p
+parity`, `-p regex-diff`; the fn-diff replays via `.probe/ru/fndiff.sh` (probes/ru.txt +17 synthetic lines,
+`ru-g2p` gains the folded letters, `ru-numbers` gains `cardinalInCase` over −1…1001 and the corners).
+
+**Raw finding.**
+- C#: 7488 passed, 0 failed. C# parity: `189 languages byte-identical, 0 differ (36495 rows)`.
+- Rust: 188 + 1 passed; parity identical for every language except mag 199/200 (needs Arabic, known);
+  regex-diff `144818 probe results identical, 0 DIFFER, 0 patterns refused`.
+- fn-diff: ru-normalize 24806, ru-g2p 114877, ru-numbers 52182, ru-roman 4046, phonemize-sync 4046,
+  phonemize-best 4046 — all 0 DIFFER.
+- ⚠ Two TS tests (foreign-runs th, phonemizeAsync abjads) failed in a full `npm test` run concurrent with a
+  Rust release build, and pass alone — load timeouts, not this change; the full suite is re-run quiet.
+- The C# and Rust tests for item 8 can only check the two tiers load (no per-file manifest substitution);
+  the TS mock test carries the "live data" proof.
+
+**Implication.** Ready for the PR.
