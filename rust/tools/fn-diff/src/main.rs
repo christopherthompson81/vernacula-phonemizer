@@ -1088,6 +1088,30 @@ fn main() {
                 nl.number_to_words(n, raw.as_ref())
             })
         }
+        "uk-normalize" | "uk-g2p" | "uk-numbers" => {
+            let uk =
+                vernacula_phonemizer::languages::ukrainian::ukrainian::create_ukrainian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => uk.normalize(&t()),
+                    "initialisms" => uk.normalize_initialisms(&uk.normalize(&t())),
+                    "unreadable" => JsString::from(if uk.is_unreadable(&t()) { "1" } else { "0" }),
+                    "word" => uk.phonemize_word(&units(&input["word"])),
+                    "roman" => uk
+                        .roman_ordinal(num())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    _ => uk.number_words(num() as u64),
+                }
+            })
+        }
+        "uk-roman" => {
+            let policy = vernacula_phonemizer::languages::ukrainian::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
