@@ -25,6 +25,7 @@ const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
     "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru", de: "de_de", pl: "pl_pl",
     tr: "tr_tr",
+    nl: "nl_nl",
 };
 
 /**
@@ -972,6 +973,98 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const n of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 34, 40, 44, 100, 1000, 1985, 2004, 1e6, 1e9 + 4])
             for (const s of sufs) emit({ words: units(numberToWords(n)), suffix: units(s), op: "attach" }, attachSuffix(numberToWords(n).split(" "), s).join("|"));
         for (const s of sufs) emit({ words: null, suffix: units(s), op: "attach" }, attachSuffix([], s).join("|"));
+    },
+    // ── Dutch (nl). Inputs: the nl golden, FLEURS nl_nl (columns 3 and 4) and probes/nl.txt. ──
+    // Each stage of text()'s normalization chain separately (op), and the phonotactic test on every word.
+    async "nl-normalize"() {
+        const N = await import("../../../src/languages/dutch/normalize.ts");
+        const { MANIFEST: NL } = await import("../../../src/languages/dutch/manifest.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const st = NL.symbolTier;
+        const symbols = makeSymbolNormalizer({
+            percent: st.percent, currency: st.currency, units: st.units, rateDenominators: st.rateDenominators,
+            unitPer: st.unitPer, exponentWords: st.exponentWords, magnitudes: st.magnitudes, multiply: st.multiply,
+        });
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["nl"], FLEURS_DIR.nl, ["nl.txt"])) {
+            const a = N.normalizeDutch(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = N.normalizeDutchInitialisms(a);
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(b), src, op: "symbols" }, symbols(b));
+            // The initialism pass and the tier on the RAW text too: input the earlier stages did not shape.
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeDutchInitialisms(t));
+            emit({ text: units(t), src, op: "symbols" }, symbols(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) words.add(m[0]);
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableDutch(w)));
+    },
+    // The word level: phonemizeWord, toSegments, decompose and isLexicalWord over every 3rd stem-list entry, every
+    // letter run of the texts (as written and lowercased), SYNTHETIC compounds built from the stem list (two and
+    // three stems with every linking element, a prefix on a stem and on a non-word, a stem plus each suffix, a
+    // stem plus a 3-letter word for the trailing-length floor, and list entries that are themselves a stem·stem
+    // concatenation), every one- and two-letter string over the Dutch letters (three letters over a context
+    // set), and edge strings.
+    async "nl-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/dutch/dutch.ts");
+        const { toSegments } = await import("../../../src/languages/dutch/g2p.ts");
+        const { decompose, isLexicalWord } = await import("../../../src/languages/dutch/morphology.ts");
+        const { MANIFEST: NL } = await import("../../../src/languages/dutch/manifest.ts");
+        const { readDataText } = await import("../../../src/core/dataSource.ts");
+        const stems = readDataText("languages/dutch/nl-stems.txt").split("\n").map((l) => l.trim().toLowerCase()).filter(Boolean);
+        const stemSet = new Set(stems);
+        const words = new Set<string>();
+        stems.forEach((w, i) => { if (i % 3 === 0) words.add(w); });
+        for (const t of textsFor(["nl"], FLEURS_DIR.nl, ["nl.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const M = NL.morphology;
+        const links = M.linkingElements;
+        const prefixes = [...M.prefixUnstressed, ...M.prefixStressed];
+        const long = stems.filter((w) => w.length >= 4 && /^[a-z]+$/.test(w));
+        const three = stems.filter((w) => w.length === 3 && /^[a-z]+$/.test(w));
+        for (let i = 0; i + 2 < long.length; i += 37) {
+            const [a, b, c] = [long[i]!, long[i + 1]!, long[i + 2]!];
+            words.add(a + links[i % links.length]! + b);
+            words.add(prefixes[i % prefixes.length]! + a);
+            words.add(prefixes[(i >> 1) % prefixes.length]! + a.slice(1));
+            words.add(b + M.suffixes[i % M.suffixes.length]!);
+            words.add(a + three[i % three.length]!);
+            if (i % 5 === 0) words.add(a + links[(i >> 2) % links.length]! + b + c);
+            if (i % 7 === 0) words.add(prefixes[(i >> 3) % prefixes.length]! + a + b + M.suffixes[(i >> 1) % M.suffixes.length]!);
+        }
+        // List entries that are also a stem·stem concatenation: the dontSplitKnownWords branch.
+        let known = 0;
+        for (const w of long) {
+            if (known >= 3000) break;
+            for (let k = 4; k + 4 <= w.length; k++)
+                if (stemSet.has(w.slice(0, k)) && stemSet.has(w.slice(k))) { words.add(w); words.add(w + "en"); words.add(w + "heid"); known++; break; }
+        }
+        const letters = [..."abcdefghijklmnopqrstuvwxyzáéíóúàèâêîôûäëïöüñç"];
+        const ctx = [..."aeioulnrgschjkwëï"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of ctx) words.add(a + b + c); } }
+        for (const w of ["", "'t", "’t", "'s", "constructor", "\ud800", "ge\ud800", "İs", "ſt", "Ĳs", "ĳzer", "𝔞ap"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.s}/${s.vowel ? 1 : 0}`).join(" "));
+            const d = decompose(w);
+            emit({ word: units(w), op: "decomp" }, `${d.parts.join("·")}|${d.kinds.join(",")}|${d.stressPart}`);
+            emit({ word: units(w), op: "lexical" }, String(isLexicalWord(w)));
+        }
+    },
+    async "nl-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/dutch/numbers.ts");
+        const { ordinalWord } = await import("../../../src/languages/dutch/normalize.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e9, k * 1e9 + 999999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(1e12 - 1, 1e12, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+            emit({ n: String(n), raw: null, op: "ordinal" }, ordinalWord(n) ?? "\u0000none");
+        }
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000000", "9007199254740993", "", "1a2", "𝟗9"])
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
