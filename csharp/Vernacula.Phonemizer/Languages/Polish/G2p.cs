@@ -73,7 +73,8 @@ public static class G2p
             if (VOWEL.TryGetValue(ch, out var vPh) && vPh != "")
             {
                 // ⟨au⟩ → the w-glide in loanwords (auto→awtɔ), but the na-/za- PREFIX plus a u-initial root is
-                // HIATUS (nauka→na.u.ka), so the glide is skipped there. eu/ou stay hiatus, being loan-ambiguous.
+                // HIATUS (nauka→na.u.ka), so the glide is skipped there. Only ⟨au⟩: eu/ou stay hiatus, being
+                // loan-ambiguous (Europa→ɛurɔpa), and ⟨i⟩ never reaches here (the branch above: Kraina→kraina).
                 var auPrefix = i == 2 && (At(0) == "n" || At(0) == "z");
                 if (ch == "u" && At(i - 1) == "a" && !auPrefix) segs.Add(new Seg { Ph = "w", Nucleus = false });
                 else segs.Add(new Seg { Ph = vPh, Nucleus = true });
@@ -101,8 +102,8 @@ public static class G2p
         return i + 2;
     }
 
-    /** Resolve ą/ę: oral + homorganic nasal before a stop/affricate; nasalized ɔ̃/ɛ̃ before a fricative or final ą; ę
-     *  word-final denasalizes to ɛ. */
+    /** Resolve ą/ę by the following segment (see NasalBefore): an oral vowel + a homorganic nasal stop, or + a [w̃]
+     *  glide, or a nasalized vowel before a sonorant. Word-final ą is [ɔw̃]; word-final ę denasalizes to [ɛ]. */
     private static void NasalRealization(List<Seg> segs)
     {
         for (var i = 0; i < segs.Count; i++)
@@ -117,19 +118,25 @@ public static class G2p
                 continue;
             }
             var homorganic = NasalBefore(nx.Ph);
-            if (homorganic == "w̃") s.Ph += "w̃"; // before a palatal fricative ɕ/ʑ → a nasal w-glide (gęś→ɡɛw̃ɕ)
+            if (homorganic == "w̃") s.Ph += "w̃"; // before f/v/ɕ/ʑ → a nasal w-glide (gęś→ɡɛw̃ɕ, trąf→trɔw̃f)
             else if (homorganic is not null) segs.Insert(i + 1, new Seg { Ph = homorganic, Nucleus = false });
             else s.Ph += "̃"; // before a sonorant → nasalized vowel
         }
     }
 
-    /** ą/ę → oral vowel + a homorganic nasal element before a following consonant: [m]/[n]/[ŋ] before an
-     *  obstruent, a [w̃] glide before a palatal fricative ɕ/ʑ, and pure vowel-nasalization before a sonorant.
+    /** ą/ę → oral vowel + a homorganic nasal element before a following consonant: [m]/[n]/[ɲ]/[ŋ] before a stop
+     *  or affricate, pure vowel-nasalization before a sonorant, and before a FRICATIVE a choice per place (#1522):
+     *    · labial f/v and palatal ɕ/ʑ → the [w̃] glide (trąf→trɔw̃f, gęś→ɡɛw̃ɕ). The labial was [m] until #1522;
+     *      wikipron (human) writes [w̃] there in all 13 rows and [m] in none, and the change scores +13 on it.
+     *    · velar x → [ŋ] (wąchać→vɔŋxat͡ɕ): wikipron 92 rows [ŋ], 0 rows [w̃]; [w̃] here measured −80.
+     *    · dental/retroflex s z ʂ ʐ → [n] (wąs→vɔns, mąż→mɔnʂ). ⚠ A CONVENTION, NOT A MEASUREMENT: wikipron gives
+     *      BOTH [n] and [w̃] as variants in ~1,500 rows, so the two score identically on it (and on epitran). [w̃] is
+     *      the normative careful reading; [n] is what this engine has always emitted, and is kept.
      *  Returns the nasal consonant, "w̃" for the glide, or null → nasalize the vowel. */
     private static string? NasalBefore(string p)
     {
-        if (p.Length == 1 && "pbfv".Contains(p, StringComparison.Ordinal)) return "m"; // labial
-        if (p == "ɕ" || p == "ʑ") return "w̃"; // palatal fricative → nasal glide
+        if (p == "p" || p == "b") return "m"; // labial stop
+        if (p == "f" || p == "v" || p == "ɕ" || p == "ʑ") return "w̃"; // labial / palatal fricative → nasal glide
         if (p == "t͡ɕ" || p == "d͡ʑ") return "ɲ"; // palatal affricate
         if (p == "k" || p == "ɡ" || p == "x") return "ŋ"; // velar
         if ((p.Length == 1 && "tdsz".Contains(p, StringComparison.Ordinal)) ||

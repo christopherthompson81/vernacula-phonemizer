@@ -82,6 +82,7 @@ Wynik 6 ÷ 3 oraz a=b.
 To 1/5 i 1/2 oraz 2/3.
 Także 1/100, 1/101, 3/1/2 i 1/5.
 Tylko lub / i oraz 1.5/2 i 1/2,5.
+Pół to 1/2. Ćwierć to 1/4, a nie 1/2,3/4 ani 1,5/2.
 # symbol tier
 Ponad 18% mieszkańców, 2% i 22% oraz 1%.
 Wzrost o 2,4% i 14,7 procent.
@@ -121,5 +122,6 @@ Gęś, ząb, kąt, wąs, ręka, idę, są.
 Dźwięk, krzyk, wtorek, kwiat i żaba.
 Rzeżucha, dżem, dzwon, chleb i szczęście.
 Wziąć, wziął, ciocia, siano, zima i nie.
+Trąf, jąwszy, fąfel, przedsięwziąć, kąpać i wąchać.
 Foreign: São Paulo, Müller, Dvořák, Ørsted i Nguyễn.
 Słowo İstanbul i ſtop oraz ẞ.

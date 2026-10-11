@@ -189,9 +189,9 @@ public static class Normalize
     private static readonly JsRe DOTTED_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}.])({DOTTED_ALT})\\.(\\s+)(?=[\\p{{L}}\\d(„\"])", "giu");
     private static readonly JsRe DOTTED_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}.])({DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))", "giu");
     private static readonly JsRe VERSION_DOT = JsRegex.Compile("(\\d)\\.(?=\\d)", "gu");
-    private static readonly JsRe DECADE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(lat|lata|latach)(\\s+)(\\d+)\\.(?=\\s*[,\\p{Ll}])", "gu");
+    private static readonly JsRe DECADE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])([Ll]at|[Ll]ata|[Ll]atach)(\\s+)(\\d+)\\.(?=\\s*[,\\p{Ll}])", "gu");
     private static readonly JsRe ORDINAL_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.(?=\\s*[,\\p{Ll}])", "gu");
-    private static readonly JsRe CLOCK = JsRegex.Compile("([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)", "gu");
+    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)", "gu");
     private static readonly JsRe CLOCK_PREP = JsRegex.Compile($"(?:^|[\\s(])({PREP_ALT})\\s+(?:godzin\\p{{L}}*\\s+)?$", "iu");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[–—-]\\s?(?=\\d)", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+)\\s?°\\s?C(?![\\p{L}\\p{M}])", "gui");
@@ -205,7 +205,7 @@ public static class Normalize
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d.,])(\\d{1,3})\\/(\\d{1,3})(?![\\d.,])", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,\\d+(?![\\d/]))", "gu");
 
     /** Normalize one Polish input string. Pure text→text; ordered, and each ordering coupling is stated. */
     public static string NormalizePolish(string input)
@@ -273,7 +273,8 @@ public static class Normalize
         //    → an ordinary sentence period, left alone; a LOWERCASE word or a comma → an ordinal. DECADES are
         //    the one context whose inflection is recoverable — `lat`/`latach` govern the genitive/locative
         //    plural and `lata` the nominative plural — so they are inflected and everything else is masculine
-        //    nominative.
+        //    nominative. ⚠ The head may be capitalised (`Lata 90.` opens a sentence; #1522): it is spelled `[Ll]`
+        //    rather than given the `i` flag, under which `\p{Ll}` in the lookahead would match uppercase too.
         s = Rewrite(s, DECADE, m =>
         {
             var head = m.Groups[1].Value;
@@ -291,7 +292,8 @@ public static class Normalize
         //    drops the minutes. TWO digits are required after the colon, which is also what keeps the rule off
         //    sports scores. ⚠ The preposition is looked up from the text BEFORE the match rather than with an
         //    optional lookbehind group: in the JS engine `(?:(?<=…))?` matches empty and never populates the
-        //    capture, so the port reproduces the explicit lookup rather than "fixing" it.
+        //    capture, so the port reproduces the explicit lookup rather than "fixing" it. ⚠ The left guard mirrors
+        //    the right (#1522): a digit or `:` before the hour refuses, or `123:45` read `23:45` out of its tail.
         var whole8 = s;
         s = Rewrite(s, CLOCK, m =>
         {
@@ -333,7 +335,9 @@ public static class Normalize
         s = Rewrite(s, DIVIDE, _ => " podzielić przez ");
 
         // 11) FRACTIONS — feminine, agreeing with the elided *część*: 1/5 is "jedna piąta". Digits on both
-        //     sides only, so an ordinary spaced " / " is untouched.
+        //     sides only, so an ordinary spaced " / " is untouched. ⚠ The two guards are mirrors (#1522; as ru/uk,
+        //     #1495): each side refuses a digit or `/`, and a `,` or `.` only with a digit beyond it, so a fraction
+        //     before a sentence or clause stop (`1/2.`, `1/2, a`) is read; `1/2,3/4` is a list.
         s = Rewrite(s, FRACTION, m =>
         {
             var den = RomanOrdinals.Ordinal(Js.Number(m.Groups[2].Value));

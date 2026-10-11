@@ -190,8 +190,44 @@ mod tests {
             n("W 300 r. p.n.e. powstało miasto."),
             "W 300 roku przed naszą erą powstało miasto."
         );
-        // The sentence period declines `1/2` (the `(?![\d.,])` guard) — reported in the port log.
-        assert_eq!(n("To 1/5 i 1/2."), "To jedna piąta i 1/2.");
+        // A sentence period no longer declines `1/2` (#1522).
+        assert_eq!(n("To 1/5 i 1/2."), "To jedna piąta i jedna druga.");
+    }
+
+    /// #1522, mirrored from test/polish-1522.test.ts (values derived from the fixed TS).
+    #[test]
+    fn issue_1522_clock_decade_nasal_and_fraction() {
+        let e = create_polish().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        let w = |s: &str| e.phonemize_word(&js(s)).to_string_lossy();
+        // 1. the clock's left boundary
+        assert_eq!(n("Wynik 123:45 i 21:01:05."), "Wynik 123:45 i 21:01:05.");
+        assert_eq!(
+            n("Spotkanie o 12:30 i 7:05."),
+            "Spotkanie o dwunastej 30 i siódma 05."
+        );
+        // 2. a capitalised decade head
+        assert_eq!(
+            n("Lata 90. były dobre."),
+            "Lata dziewięćdziesiąte były dobre."
+        );
+        assert_eq!(
+            n("W Latach 20. było cicho."),
+            "W Latach dwudziestych było cicho."
+        );
+        assert_eq!(n("Lata 90. Potem"), "Lata 90. Potem");
+        // 3. ą/ę before a labial fricative
+        assert_eq!(w("trąf"), "trˈɔw̃f");
+        assert_eq!(w("jąwszy"), "jˈɔw̃fʂɨ");
+        assert_eq!(w("kąpać"), "kˈɔmpat͡ɕ");
+        assert_eq!(w("wąs"), "vˈɔns");
+        assert_eq!(w("wąchać"), "vˈɔŋxat͡ɕ");
+        // 5. a fraction before a clause stop; decimals and chains still decline
+        assert_eq!(
+            n("Pół to 1/2, a ćwierć 1/4."),
+            "Pół to jedna druga, a ćwierć jedna czwarta."
+        );
+        assert_eq!(n("3/1/2 i 1/2,5 oraz 1,5/2"), "3/1/2 i 1/2,5 oraz 1,5/2");
     }
 
     #[test]

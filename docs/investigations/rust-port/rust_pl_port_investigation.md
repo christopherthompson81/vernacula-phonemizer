@@ -134,3 +134,82 @@ via `.probe/pl/look.mts`.
 
 **Implication.** Done. Port-pending rows: none (the pl golden needs no other engine; its Latin foreign names are
 nativised by Polish itself). The `.probe/pl` dumps (66 MB) are deleted after this run.
+
+## Run 6 — 2026-10-11 15:05 (#1522: which nasal before a fricative does the referee back?)
+
+**Question.** Item 3 of #1522: the `nasalRealization` docstring says "nasalized vowel before a fricative", the code
+inserts n/m/ŋ, and only ɕ/ʑ get [w̃]. Which is intended? Measure, by fricative place.
+
+**Command.** A count over `tools/referee-eval/referees/pl.wikipron-pol.tsv` (every variant field, not only the
+first) of what follows ɔ/ɛ before a fricative in words spelt ą/ę + fricative; then
+`npx tsx tools/referee-eval/eval.ts pl --jobs 12` with the engine edited three ways.
+
+**Raw finding.**
+- Variant sets per word: {n, w̃} 1273, {n, oral, w̃} 206, {n, w̃, ̃} 36, {ŋ} 80, {oral, ŋ} 12, {w̃} 12 (all labial:
+  `-ąwszy`, `fąfel`), {̃} 7, singletons. So before s z ʂ ʐ the referee lists BOTH [n] and [w̃]; before x only [ŋ];
+  before f/v only [w̃] (13 rows, 0 [m]).
+- eval, primary wikipron / secondary epitran (folded backbone):
+  - baseline: 127407 / 109343
+  - f v → w̃ only: 127420 (+13) / 109343
+  - f v s z ʂ ʐ → w̃: 127420 / 109343 (identical to labial-only: the dental class is invisible to both referees)
+  - f v s z ʂ ʐ x → w̃: 127327 (−80) / 109256 (−87)
+- Note on the instrument: the BACKBONE strips combining marks, so w̃ is compared as w. That is still a w-vs-n
+  distinction, and the dental class is flat because the referee credits either variant, not because the fold is blind.
+
+**Implication.** Labial [m] is not an attested reading: fixed to [w̃] (+13). Velar stays [ŋ] (referee 92:0). The
+dental/retroflex class is a both-real variant — [w̃] is the normative careful reading, [n] the engine's — so it is a
+convention choice, not a defect: kept [n], and the docstring now says so with the numbers. The docstring and the
+g2p comment (item 4, `Europa→ɛwrɔpa`, contradicted by the code and by "eu/ou stay hiatus") are rewritten.
+
+## Run 7 — 2026-10-11 15:30 (#1522: the normalize fixes, rows moved, tests proved)
+
+**Question.** Do the clock left guard, the `[Ll]` decade head and the mirrored fraction guards do what the issue
+asks, and what do they move?
+
+**Command.** `plvals.mts` (synthetic probes through `normalizePolish` / `phonemizeWord`); `plmeasure.mts`
+(an unfixed snapshot of `src/` vs the fixed tree over every FLEURS pl_pl transcript + the golden's texts, 1932
+distinct); `npx tsx tools/gen_parity_goldens.mts pl`; `npm run check:goldens`; a revert loop that undoes each
+fix alone and runs `test/polish-1522.test.ts`.
+
+**Raw finding.**
+- `Wynik 123:45 i 21:01:05.` → unchanged (was `1dwudziesta trzecia 45` / `21:pierwsza 05`); `o 12:30` still
+  `o dwunastej 30`.
+- `Lata 90. były dobre.` → `Lata dziewięćdziesiąte` (was masculine `dziewięćdziesiąty`); `W Latach 20.` →
+  `dwudziestych`; `Lata 90. Potem` still declines (sentence period). The `i` flag was NOT used: under `iu`,
+  `\p{Ll}` in the lookahead matches uppercase too, which would erase the sentence-period discriminator.
+- `To 1/5 i 1/2.` → `jedna piąta i jedna druga.`; `1/2, a` reads; `3/1/2`, `1/2,5`, `1,5/2` still decline.
+- Rows moved over 1932 texts: **1**, `pɔt͡ʂˈɔmfʂɨ → pɔt͡ʂˈɔw̃fʂɨ` (a `-cząwszy` participle: item 3; wikipron writes
+  `rozpocząwszy` with [w̃]). The golden is not among them: regenerated pl.tsv is byte-identical, check:goldens 0 stale.
+- Revert loop: each fix reverted alone fails exactly its own test (1/4 each, four times).
+- Seen and left alone: `1/2.5` reads `jedna druga kropka pięć` because step 6 rewrites `2.5` to `2 kropka 5`
+  before the fraction rule runs (the ht/ln ordering defect of #1495). Not in #1522; unchanged by this fix.
+
+**Implication.** TS done; mirror into C# and Rust, regenerate the regex corpus (three TS regexes changed).
+
+## Run 8 — 2026-10-11 16:10 (#1522: mirrors, fn-diff, gates after rebasing onto main)
+
+**Question.** Do C# and Rust match the fixed TS, and is the whole tree green on top of the sibling el/ko/ru/th/de fixes?
+
+**Command.** C#/Rust edits mirrored; `npx tsx rust/tools/fn-diff/dump.mts pl-normalize|pl-g2p` (probes gained a
+sentence-final fraction line and a labial-fricative word line) and `cargo run --release -p fn-diff -- …`; revert
+proofs on both ports; then, after `git rebase origin/main`: `npx tsx tools/extract_regexes.mts`, `npm run typecheck`,
+`npm test`, `npm run check:goldens`, `dotnet test csharp/Vernacula.Phonemizer.Tests` (full), C# parity and
+regex-diff, `cargo fmt --check`, `cargo test --release`, `cargo run --release -p parity`, `-p regex-diff`.
+
+**Raw finding.**
+- fn-diff: pl-normalize 28315 identical / 0 DIFFER (probe 321, words 16441); pl-g2p 295705 / 0 DIFFER.
+- Revert proofs: Rust with the two source files reverted fails both pl normalize tests (left
+  `Wynik 1dwudziesta trzecia 45 i 21:pierwsza 05.`, `To jedna piąta i 1/2.`); C# with its two files reverted fails
+  8 of the 11 Polish1522 cases (the 3 that pass pin unchanged behaviour: kąpać, wąs, wąchać).
+- The regex corpus re-extracts byte-identical: none of normalize.ts's `rewrite(s, /…/gu, (…) =>` callback-form
+  regexes is in it, before or after (13 Polish rows, all other shapes). Pre-existing gap; fn-diff is what covers
+  these three patterns.
+- Gates: typecheck clean; vitest 6843 passed / 5 skipped (360 files); check:goldens 189 languages 0 stale; dotnet
+  test 7533 passed / 0 failed; C# parity 189 languages 0 differ; C# regex-diff 145038 identical / 0 DIFFER; cargo
+  fmt clean; cargo test all ok (198 in the library); Rust parity every language identical except the known mag
+  199/200 (Arabic); Rust regex-diff 145038 identical / 0 DIFFER.
+
+**Implication.** Done. Left open: `1/2.5` still reads a half then "kropka pięć" (decimal step before fraction step).
+- Re-rebased onto main after the uk fix (#1545) landed (disjoint files) and re-ran: corpus re-extract no change;
+  vitest 6849 passed / 5 skipped; check:goldens 0 stale; dotnet test 7539 passed; C# parity 189 / 0 differ; C# and
+  Rust regex-diff 145096 / 0 DIFFER; cargo test 199 ok; Rust parity 50 languages identical, mag 199/200.

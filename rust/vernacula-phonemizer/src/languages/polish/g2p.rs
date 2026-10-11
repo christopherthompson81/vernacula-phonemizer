@@ -178,13 +178,14 @@ fn nasal_realization(segs: &mut Vec<Seg>) {
 }
 
 /// `nasalBefore(p)`: the homorganic nasal, `"w̃"` for the glide, or `None` to nasalize the vowel. The string
-/// `includes` tests are substring tests, as in the TS.
+/// `includes` tests are substring tests, as in the TS. Before a fricative: [w̃] for f/v/ɕ/ʑ (the labial was [m]
+/// until #1522), [ŋ] for x, [n] for s/z/ʂ/ʐ (a convention; the measurements are in the TS docstring).
 fn nasal_before(p: &JsString) -> Option<&'static str> {
     let any = |xs: &[&str]| xs.iter().any(|x| *p == js(x));
-    if js("pbfv").includes(p) {
+    if any(&["p", "b"]) {
         return Some("m");
     }
-    if any(&["ɕ", "ʑ"]) {
+    if any(&["f", "v", "ɕ", "ʑ"]) {
         return Some("w̃");
     }
     if any(&["t͡ɕ", "d͡ʑ"]) {
