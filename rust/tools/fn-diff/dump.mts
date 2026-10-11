@@ -31,6 +31,7 @@ const FLEURS_DIR: Record<string, string> = {
     id: "id_id",
     ms: "ms_my",
     tl: "fil_ph",
+    ceb: "ceb_ph",
 };
 
 /**
@@ -1358,6 +1359,40 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 30; e++) texts.push("1" + "0".repeat(e), "9".repeat(e), `ika-${"9".repeat(e)}`);
         texts.push("1,000", "1,000,000.25", "3.14", "0.5", "007", "ika-002", "ika-03", "9007199254740993", "12,345.6789");
         for (const t of texts) emit({ text: units(t), op: "text" }, phonemize(t, "tl"));
+    },
+    // ── Cebuano (ceb). Texts: the ceb golden, FLEURS ceb_ph (columns 3 and 4) and probes/ceb.txt. ──
+    // normalizeCebuano per text (the symbol tier is inside it); phonemizeWord and nat over every letter run of
+    // the texts (as written, lower, UPPER), every 1-3 letter string over the letters, apostrophes and hyphens,
+    // and edge strings; numberToWords over 0…20,000, scaled samples, the ≥10⁹ digit path and raw strings.
+    async "ceb-normalize"() {
+        const N = await import("../../../src/languages/cebuano/normalize.ts");
+        for (const [t, src] of textsFor(["ceb"], FLEURS_DIR.ceb, ["ceb.txt"])) emit({ text: units(t), src }, N.normalizeCebuano(t));
+    },
+    async "ceb-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/cebuano/cebuano.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñ'ʼ-]", "iu"); // cebuano.ts's own (module-private) nativiser, same class and flags
+        const words = new Set<string>();
+        for (const t of textsFor(["ceb"], FLEURS_DIR.ceb, ["ceb.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'ʼ‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ'ʼ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "MGA", "constructor", "__proto__", "--", "a-", "-a", "maayo", "kap-atan", "Ñ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    async "ceb-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/cebuano/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1.5, -1, -0, -12, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.

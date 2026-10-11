@@ -1279,6 +1279,28 @@ fn main() {
                     .unwrap(),
             })
         }
+        "ceb-normalize" => {
+            let ceb = vernacula_phonemizer::languages::cebuano::cebuano::create_cebuano().unwrap();
+            Box::new(move |input| ceb.normalize(&units(&input["text"])))
+        }
+        "ceb-g2p" => {
+            let ceb = vernacula_phonemizer::languages::cebuano::cebuano::create_cebuano().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => ceb.phonemize_word(&w),
+                    _ => ceb.nativise(&w),
+                }
+            })
+        }
+        "ceb-numbers" => {
+            let ceb = vernacula_phonemizer::languages::cebuano::cebuano::create_cebuano().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                ceb.number_to_words(n, raw.as_ref())
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
