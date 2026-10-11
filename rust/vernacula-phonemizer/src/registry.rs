@@ -35,10 +35,10 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 38] = [
+pub const LANGUAGES: [&str; 43] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
     "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
-    "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo",
+    "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo", "cs", "sk", "be", "bg", "mk",
 ];
 
 /// A language engine, as the registry holds it.
@@ -175,6 +175,21 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "ro" => crate::languages::romanian::romanian::create_romanian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "cs" => crate::languages::czech::czech::create_czech()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sk" => crate::languages::slovak::slovak::create_slovak()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "be" => crate::languages::belarusian::belarusian::create_belarusian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "bg" => crate::languages::bulgarian::bulgarian::create_bulgarian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "mk" => crate::languages::macedonian::macedonian::create_macedonian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -193,6 +208,7 @@ fn roman_policy(lang: &str) -> RomanPolicy {
         "ru" => crate::languages::russian::roman_ordinals::roman_policy(),
         "pl" => crate::languages::polish::roman_ordinals::roman_policy(),
         "uk" => crate::languages::ukrainian::roman_ordinals::roman_policy(),
+        "be" => crate::languages::belarusian::roman_ordinals::roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
             ..Default::default()

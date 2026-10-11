@@ -1,0 +1,103 @@
+# Czech (cs) synthetic probes: one or more lines per normalize.ts arm plus the neighbour it must decline, and
+# g2p / number corners. Synthetic text only (no corpus sentences).
+# 0) grouping
+Město má 3 850 000 obyvatel a 12 345 aut.
+Cena 1 234 567 korun, ale 0 123 ne.
+Skupina 12 3456 a 1 23.
+Mezera\u{a0}1\u{a0}500 a 2\u{202f}000 a 3\u{2009}000.
+# 1) era markers
+Stalo se to roku 1000 př. n. l.
+Stalo se to roku 300 př.n.l a pak nic!
+Roku 50 n. l. byl klid.
+Roku 50 n.l. Potom přišli.
+Slovo apř. n. l. zůstane.
+# 2) dotted abbreviations
+Přišli např. sousedé, atd. a tak.
+Jablka, hrušky apod.
+Znám tzv. obra a Dr. Nováka.
+Firma Co. a Inc. odešly.
+Viz s. 109 a S. 12.
+Jako J. S. Bach a A. S. Puškin.
+Rychlost cca 83 km/h.
+Tj. to je ono; tzn. konec.
+Hodně mil. lidí, aj.
+Sv. Václav a St. Petr.
+Daleko ᲃt. zůstane.
+# 3) clock
+Vlak jede v 8:46 hodin a ve 12:00.
+Sejdeme se v 9:30 h ráno a v 1:15 ráno.
+Začíná ve 21:01 a končí ve 22:02.
+Čas 2:11,60 a 4:41,30 není hodina.
+Ve 24:00 nic, ale 23:59 ano a 1:5 ne.
+V 11:30:15 a 7:30.
+# 4) dates
+Od 24. 8. do 5. 9. 2021 bylo zavřeno.
+Dne 1. 1. 2000 a 31. 12. a 32. 13. ne.
+Akce 3. 4., pak nic.
+# 5) version dots
+Standard 802.11n a 2.4Ghz a 5.0Ghz.
+Obrázek 1.1 a verze 3.14.15.
+# 6) ordinal range
+Mezi 10.–11. a 14. stoletím.
+Mezi 1000.–1001. nic.
+Od 3.-5. ano.
+# 7) century
+V 18. století a ve 21. století.
+Do 15. století, kolem 11., 12. a 13. století.
+Ve 5. a 6. století a během 999. století.
+# 8) decade
+V 60. letech a 70. let.
+V 90. letech a 20., 30. letech.
+# 9) months
+Dne 21. července a 24. září 2007.
+K 1. červenci a 17. listopadu a 3. května.
+# 10) place and hour
+Skončil na 5. a 6. místě a na 13. místě.
+Je na 190. místo a po 11. hodině.
+Po 3. hodinách a 2. hodinu.
+# 11) general ordinal
+Byl to 3. pokus, 4., a 5. den.
+Bylo to v roce 1990. Přišel domů.
+Rok 2000. konec a 12. Novák.
+# 12) regnal
+Karel 4 a Ludvík 16. a Alžběta 2.
+Papež Jan 23, Lev 40 a Petr 39!
+Ahoj 1,5 a Ahoj 12 lidí.
+Karel\u{a0}4 a Václav 3.
+# 13) ranges
+Roky 1418–1450 a 5-10 a COVID-19.
+Strana 3 – 4 a Ił-76.
+# 14) mil/h
+Jel 35–40 mil/h a 60 MIL / H.
+# 15) signs
+Teplota 20 °C, 1 °F, 2°C a 5° a 22 stupňů.
+Rozdíl ±5 a +3 a (+4) a -5 stupňů a −7.
+Je to 6 × 6 cm a 6x6 cm.
+Platí 2 = 2, 3 ≈ 3, 1 < 2, 3 > 2, 6 ÷ 2.
+B&B a A ＆ B.
+# 16) fractions
+Jedna 1/5 a 1/2 a 2/3 a 1/1000 a 1/100.
+Datum 12/2020 a 1/2.5 a 1,5/2.
+# 17) pH, Ghz
+Hodnota pH 7 a GHZ a pHx.
+# numbers through text()
+Mám 0,001 a 19,500 km² a 2,3 a 0,500.
+Číslo 1000000000 a 1000000000000 a 1000000000000000000001.
+Celkem 21 procent, 2 procenta, 1 procento, 5 %.
+Stojí 3 € a 21 $ a 1 £.
+Plocha 5 km² a 3 m³ a 10 km/h a 5 m/s.
+# initialisms
+USA, OSN, FBI, DNA, GPS, DVD, TV, UNESCO, NASA, RS, CEP.
+DSLR a QVC a USGS a ČT a ČR.
+# g2p corners
+Divadlo, děti, běh, měl, policie, venku, led, kde, prosba, vstup, sníh, rozhodně.
+Tři, při, tvář, krk, vlk, republika, vyšší, činnost, denně, xylofon, Praha.
+Ěcho, Ěbě, ouha, auto, euro, chchch, ůů, ťťť, ďábel, ňadra.
+São Paulo, Müller, Dvořák, Ørsted, Žižek, Ångström, façade, Nguyễn.
+Stadion, studie, technik, administrativa.
+# the TS defects reported in the port log (reproduced, so pinned here)
+Mám 3 psy a Kus 6 × 6 cm a Ahoj 1,500 l.
+Bylo to dne 5. 5.
+Město Kyjev 12. století a slovo atd. Potom.
+Je to 2/3 a 5/8 a 22/5.
+Děti a de\u{30c}ti a Ne\u{30c}co.
