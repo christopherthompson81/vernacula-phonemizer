@@ -111,9 +111,11 @@ function number(digits: string): string {
  * symbol normalization — Ukrainian: CYRILLIC unit abbreviations (км, not km) and the three-way Slavic
  * agreement, which for uk IS Russian's selector (see normalize.ts's header for the evidence).
  *
- * `м` is NOT declared here on purpose: the shared tier's trailing guard is `(?![\p{L}\p{M}])`, and the
- * Ukrainian apostrophe is neither a letter nor a mark, so `41 м'яч` would become *сорок один метр'яч*.
- * It is handled in normalize.ts with an apostrophe-aware guard instead.
+ * `м` IS declared (ukrainian.jsonc `symbolTier.units`), and the tier reaches it for the exponent forms
+ * (`3 м²` → *три квадратні метри*). A BARE `м` after a number is read first, by normalize.ts step 6, whose
+ * guard knows the Ukrainian apostrophe, so `41 м'яч` stays *сорок один м'яч*. The tier's own trailing guard
+ * rejects an apostrophe too now (core/normalizeSymbols.ts). (#1525: this comment used to say `м` was not
+ * declared here, on purpose.)
  *
  * Currency: NOT attested in uk_ua (the corpus spells доларів / фунтів / євро out), but the signs were
  * being dropped outright, so the three that occur in Ukrainian text at all are declared. The forms are

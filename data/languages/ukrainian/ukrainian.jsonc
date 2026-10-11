@@ -226,6 +226,11 @@
     // agree with the following number, so it has its own rule.
     "dottedAbbrev": { "р": "року", "рр": "років", "стор": "сторінка", "див": "дивись", "ін": "інше" },
 
+    // The `dottedAbbrev` keys that stand BEFORE what they abbreviate (`див. Петренко`, `стор. 5`). A capital
+    // after their dot is that object, never a new sentence; after any other key (`1990 р.`, `та ін.`) a
+    // capital means the dot ended the sentence too, and it is kept as the pause (#1525).
+    "preposedAbbrev": ["див", "стор"],
+
     // MULTI-WORD dotted abbreviations, claimed whole and BEFORE the single-dot rule so their interior dots
     // never become phrase breaks. ⚠ ORDER MATTERS: `до н. е.` must precede `н. е.`, or the longer reading can
     // never be reached. The written form is matched with its spacing optional after a dot (both `н. е.` and

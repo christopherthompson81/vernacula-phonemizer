@@ -38,6 +38,8 @@ public sealed class UkrainianDef
     public IReadOnlyList<string> Degree { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> TemperatureScales { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> DottedAbbrev { get; init; } = new Dictionary<string, string>();
+    /** The `DottedAbbrev` keys that precede their object, so a capital after the dot is no sentence end. */
+    public IReadOnlyList<string> PreposedAbbrev { get; init; } = Array.Empty<string>();
     /** ⚠ ORDERED — `до н. е.` must precede `н. е.` or the longer reading is unreachable. */
     public IReadOnlyList<MultiDotAbbrev> MultiDotAbbrev { get; init; } = Array.Empty<MultiDotAbbrev>();
     public string NumberSign { get; init; } = "";

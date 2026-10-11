@@ -212,7 +212,8 @@ pub(crate) fn normalize_ukrainian_initialisms(text: &JsString) -> JsString {
     )(text)
 }
 
-/// `HOUR_CASE`: preposition → the `ordinals.endings` index it governs.
+/// `HOUR_CASE`: preposition → the `ordinals.endings` index it governs. A `Map` in the TS since #1525, so a
+/// word such as `constructor` is an ordinary miss.
 static HOUR_CASE: LazyLock<HashMap<String, usize>> = LazyLock::new(|| {
     MANIFEST
         .clock
@@ -222,6 +223,11 @@ static HOUR_CASE: LazyLock<HashMap<String, usize>> = LazyLock::new(|| {
         .collect()
 });
 static FEM_NOM: LazyLock<usize> = LazyLock::new(|| case_index(&MANIFEST.clock.default_case));
+/// `GEN_PL`: the genitive plural a fraction's denominator takes after a numerator not ending in 1 (#1525).
+static GEN_PL: LazyLock<usize> = LazyLock::new(|| case_index("genPl"));
+/// `PREPOSED_ABBREV`: the abbreviations whose following capital is their object, not a new sentence.
+static PREPOSED_ABBREV: LazyLock<HashSet<String>> =
+    LazyLock::new(|| MANIFEST.preposed_abbrev.iter().cloned().collect());
 
 /// `ABBREV_ALT`: the dotted-abbreviation keys, longest first (stable), unescaped as in the TS.
 static ABBREV_ALT: LazyLock<String> = LazyLock::new(|| {
@@ -264,7 +270,7 @@ static ORDINAL_SUFFIX_RE: LazyLock<JsRegex> = LazyLock::new(|| {
 static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r"(?<![\p{{L}}\p{{M}}])({})\.(\s+)(?=[\p{{L}}\d(])",
+            r"(?<![\p{{L}}\p{{M}}])({})\.(\s+)(?=([\p{{L}}\d(]))",
             *ABBREV_ALT
         ),
         "giu",
@@ -298,6 +304,13 @@ static FEM_ONE_RE: LazyLock<JsRegex> = LazyLock::new(|| {
 static FEM_TWO_RE: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(&format!("{}$", MANIFEST.numbers.east.base.units[2]), "u").unwrap()
 });
+
+/// `feminine(words)`: the last element agrees with a feminine noun (одна, дві), `$`-anchored.
+fn feminine(words: &JsString) -> JsString {
+    let fm = &MANIFEST.numbers.east.feminine;
+    let w = FEM_ONE_RE.replace(words, &js(&fm.one));
+    FEM_TWO_RE.replace(&w, &js(&fm.two))
+}
 
 /// `DOTTED_ABBREV[key]`; the key is a lowercased match, which the `iu` fold can widen past the table.
 fn dotted_abbrev(key: &JsString) -> Option<&'static str> {
@@ -385,16 +398,30 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
     });
 
     // 5) dotted abbreviations. ⚠ The miss branch is reachable (#1122): the `iu` fold widens the pattern past
-    //    the table's keys. The first and last arms keep the match; the middle arm's `!` stringifies
-    //    `undefined` in the TS, and is reproduced.
+    //    the table's keys, so every arm keeps the match on a miss (the middle arm too, since #1525). A capital
+    //    after the dot also ends the sentence, so the dot is kept, unless the abbreviation is preposed.
     s = rewrite_with(&s, &ABBREV_CONTINUES, |mm, t| {
-        match dotted_abbrev(&mm.group(1, t).unwrap().to_lower_case()) {
+        let key = mm.group(1, t).unwrap().to_lower_case();
+        match dotted_abbrev(&key) {
             None => mm.value(t),
-            Some(w) => js(w).concat(&mm.group(2, t).unwrap()),
+            Some(w) => {
+                let sp = mm.group(2, t).unwrap();
+                let next = mm.group(3, t).unwrap();
+                if !PREPOSED_ABBREV.contains(&key.to_string_lossy())
+                    && js_re!(r"\p{Lu}", "u").test(&next)
+                {
+                    js(w).concat(&js(".")).concat(&sp)
+                } else {
+                    js(w).concat(&sp)
+                }
+            }
         }
     });
     s = rewrite_with(&s, &ABBREV_BEFORE_PUNCT, |mm, t| {
-        js(dotted_abbrev(&mm.group(1, t).unwrap().to_lower_case()).unwrap_or("undefined"))
+        match dotted_abbrev(&mm.group(1, t).unwrap().to_lower_case()) {
+            None => mm.value(t),
+            Some(w) => js(w),
+        }
     });
     s = rewrite_with(&s, &ABBREV_ENDS, |mm, t| {
         match dotted_abbrev(&mm.group(1, t).unwrap().to_lower_case()) {
@@ -459,7 +486,10 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
     // 7) clock: the hour as a feminine ordinal in the case the preceding preposition governs.
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])", "gu"),
+        js_re!(
+            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)",
+            "gu"
+        ),
         |mm, full| {
             let whole = mm.value(full);
             let hv = js_number(&mm.group(1, full).unwrap());
@@ -472,11 +502,7 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
                 .exec(&before)
                 .and_then(|p| p.group(1, &before))
                 .map(|p| p.to_lower_case().to_string_lossy());
-            // `HOUR_CASE[prev] ?? FEM_NOM` on a plain object: `constructor` (the one Object.prototype member
-            // whose name survives lowercasing) reads the inherited function, which indexes nothing, so the
-            // clock is left as written.
             let idx = match prev.as_deref() {
-                Some("constructor") => return whole,
                 Some(p) => HOUR_CASE.get(p).copied().unwrap_or(*FEM_NOM),
                 None => *FEM_NOM,
             };
@@ -484,10 +510,12 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
             let Some(head) = forms.get(idx) else {
                 return whole;
             };
+            // The minutes agree with the feminine хвилина (#1525): 1:01 is першій одна.
             if mv == 0.0 {
                 head.clone()
             } else {
-                head.concat(&js(&format!(" {}", mv as u64)))
+                head.concat(&js(" "))
+                    .concat(&feminine(&cardinal(mv as u64)))
             }
         },
     );
@@ -538,7 +566,8 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
         &js(&format!("$1 {} ", m.range_word)),
     );
 
-    // 10) fractions, feminine (the elided частина). The two guards are mirrors (#1495).
+    // 10) fractions, feminine (the elided частина). The two guards are mirrors (#1495). The denominator takes
+    //     the numerator's count (#1525): одна п'ята, but дві третіх, п'ять восьмих.
     s = rewrite_with(
         &s,
         js_re!(
@@ -548,13 +577,17 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
         |mm, t| {
             let num = js_number(&mm.group(1, t).unwrap());
             let den = js_number(&mm.group(2, t).unwrap());
-            let Some(fem) = ordinal_forms(den).into_iter().nth(*FEM_NOM) else {
+            let idx = if slavic_count_form(num) == 0.0 {
+                *FEM_NOM
+            } else {
+                *GEN_PL
+            };
+            let Some(den_word) = ordinal_forms(den).into_iter().nth(idx) else {
                 return mm.value(t);
             };
-            let fm = &m.numbers.east.feminine;
-            let num_word = FEM_ONE_RE.replace(&cardinal(num as u64), &js(&fm.one));
-            let num_word = FEM_TWO_RE.replace(&num_word, &js(&fm.two));
-            num_word.concat(&js(" ")).concat(&fem)
+            feminine(&cardinal(num as u64))
+                .concat(&js(" "))
+                .concat(&den_word)
         },
     );
 
