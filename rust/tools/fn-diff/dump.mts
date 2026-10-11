@@ -1773,6 +1773,65 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
         }
     },
+    // ── Latvian (lv). Inputs: the lv golden, FLEURS lv_lv (columns 3 and 4) and probes/lv.txt, plus synthetic
+    // rows: `N.` and `N.–M.` before every HEAD_NOUN form (and a non-head word, the Object.prototype names), the
+    // abbreviations before each follower, every unit/currency/degree form after a set of numbers, and the signs.
+    // `ordinalWords` over 0..2100 and corners × every case.
+    async "lv-normalize"() {
+        const N = await import("../../../src/languages/latvian/normalize.ts");
+        const O = await import("../../../src/languages/latvian/ordinals.ts");
+        const rows = new Map<string, string>();
+        for (const [t, s] of textsFor(["lv"], FLEURS_DIR.lv, ["lv.txt"])) rows.set(t, s);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const heads = [...Object.keys(O.HEAD_NOUN), "mājās", "constructor", "Gadā", "valueof"];
+        for (const n of ["1", "2", "3", "10", "11", "19", "20", "21", "100", "200", "1000", "1885", "2010", "2024", "3100", "10000"]) {
+            for (const h of heads) { add(`Tas bija ${n}. ${h} beigās.`); add(`No ${n}.–1550. ${h} ilga.`); }
+            for (const u of ["%", " km", " m", " cm", " mm", " kg", " g", " ha", " nm", " t", " km/h", " m/s", " km²", " m³", " $", " €", " £", " miljardiem $", "°", " °C", "°F", "°K", " lpp.", "lpp", ",5", ",05", ",0"])
+                add(`Ir ${n}${u} tur.`);
+        }
+        for (const ab of ["p.m.ē.", "m.ē.", "u.tml.", "u.t.t.", "t.sk.", "utt.", "u.c.", "t.i.", "piem.", "plkst.", "nr.5", "Nr. 5", "№3", "№ 3", "№"])
+            for (const after of ["", " Nākamais", " un", ","]) add(`Tas ir dārgi ${ab}${after}`);
+        for (const sg of ["≈5", "≈ -3", "±2", "+3", "-4", "−4", "6 ÷ 3", "a = b", "x=2", "3 < 4", "5 > 1", "a<b", "== 2", "2^3", "x²", "5-10", "1995–96", "5,5-7"])
+            add(`Vērtība ${sg} ir.`);
+        for (const [t, from] of rows) emit({ text: units(t), src: from, op: "normalize" }, N.normalizeLatvian(t));
+        const cases = ["nomSg", "genSg", "datSg", "accSg", "locSg", "nomPl", "datPl", "accPl", "locPl"];
+        const ns: number[] = [];
+        for (let i = -1; i <= 2100; i++) ns.push(i);
+        ns.push(9999, 10000, 1.5, NaN, 3100, 5000);
+        for (const n of ns) for (const c of cases) emit({ n: String(n), case: c, src: "numeric", op: "ordinal" }, O.ordinalWords(n, c as never) ?? "\u0000none");
+    },
+    async "lv-g2p"() {
+        const L = await import("../../../src/languages/latvian/latvian.ts");
+        const { toSegments } = await import("../../../src/languages/latvian/g2p.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[A-Za-zĀāČčĒēĢģĪīĶķĻļŅņŌōŠšŪūŽž]", "u");
+        const words = new Set<string>();
+        for (const t of textsFor(["lv"], FLEURS_DIR.lv, ["lv.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(nat(m[0])); }
+        const abc = [..."aābcčdeēfgģhiījkķlļmnņoōprsštuūvzžqwxyäöü"];
+        for (const a of abc) { words.add(a); for (const b of abc) words.add(a + b); }
+        const ctx = [..."aeiuoāīvzdžsgknbtj"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) words.add(a + b + c);
+        for (const w of ["", "\ud800", "a\ud800b", "loks", "maize", "draugs", "dievs", "Latvija", "dzelzs", "atgriezt", "daudz", "Monako", "xenons", "hokejs"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, L.phonemizeWord(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    async "lv-numbers"() {
+        const { numberToWords, readDigits } = await import("../../../src/languages/latvian/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 2002, k * 1e6 + 11011, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e21, 1.5, 2.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
+        }
+    },
     // composeSlavicNumber over each standard's table: 0..20000, multiples and powers, the unsafe and non-finite
     // corners, and raw strings for the digit-by-digit fallback.
     async "sh-numbers"() {

@@ -1300,6 +1300,36 @@ fn main() {
                 }
             })
         }
+        "lv-normalize" | "lv-g2p" | "lv-numbers" => {
+            let lv = vernacula_phonemizer::languages::latvian::latvian::create_latvian().unwrap();
+            Box::new(move |input| {
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = || (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lv.normalize(&units(&input["text"])),
+                    "ordinal" => lv
+                        .ordinal_words(n(), input["case"].as_str().unwrap())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => lv.phonemize_word(&w()),
+                    "segs" => {
+                        let segs: Vec<JsString> = lv
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "nat" => lv.nativise(&w()),
+                    "digits" => lv.read_digits(&raw().unwrap()),
+                    _ => lv.number_to_words(n(), raw().as_ref()),
+                }
+            })
+        }
         "sh-g2p" => {
             let sr = vernacula_phonemizer::languages::serbian::serbian::create_serbian().unwrap();
             let nat_hr = vernacula_phonemizer::core::host_word::make_nativiser("[a-zčćšžđ]", "iu");
