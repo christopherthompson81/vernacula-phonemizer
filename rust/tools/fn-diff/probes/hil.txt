@@ -1,0 +1,28 @@
+# Synthetic Hiligaynon (hil) probes. FLEURS has no Hiligaynon, so these and the golden are the whole haystack:
+# one or more lines per normalize.ts step with the neighbour it must decline, the scan's trigraphs and digraphs,
+# and the number corners. Synthetic text only, written for this list.
+# de-grouping: comma groups, a decimal after a group, a two-digit group, a dot group
+May 1,100 ka tawo kag 14,700.5 ka metro kag 1,000,000 ka piso, pero 12,34 kag 1.234 indi.
+May 35,102 ka pumuluyo kag 2,500,000 kag 999,999,999 kag 1,000,000,000 kag 12,345,678,901.
+# the clock, only after alas/las; a bare colon pair, zero minutes, out of range
+Sa alas 9:30 kag las 07:15 kag alas-6:00 kag Alas 12:05, pero 9:30 lang kag alas 24:00 kag alas 9:60.
+Sa alas 4:41.30 kag 21:20 nga iskor.
+# the tier: percent, peso, magnitudes, units, rate, squared, ampersand; the signs it does not read
+Mga 16% kag ₱20 kag ₱5 milyon kag 83 km kag 5 m kag 10 cm kag 2 mm kag 40 kg kag 100 km/h kag 50 km² kag A&B.
+Ang $5 kag €3 kag 3 × 4 kag 2 = 2 kag 30°C kag -5 kag 5 m³.
+# ranges: hyphen, en dash, spaced, decimals and groups as endpoints, a written connective, a chain, ika-20
+Halin sa 1990-1995 kag 5–7 kag 10 - 20 kag 2.5-3.5 kag 1,000-2,000, hasta 3-4, halin 6-8, ang 1-2-3 kag ika-20.
+# decimals: one and two digits, three digits, a version
+Mga 2.5 metros kag 0.75 kag 567.82 kag 3.141 kag 1.2.3 kag 14.7.
+# dotted abbreviations, a sentence-end neighbour, a near-miss under the fold
+Si Dr. Santos kag Jr. kag Sr. kag St. Peter kag Mr. kag Mrs. kag Prof. kag Fr. Cruz nagkadto sa Japan. ſt. Dſ.
+# the ika-Nng ligature, and sg
+Ang ika-3ng adlaw kag Ika-20ng siglo kag ika-5ngadto; sg balay kag sg. kag 5sg kag Sg kag sgt.
+# g2p: trigraphs, digraphs, hiatus, hyphen, apostrophe glottal, loan letters j/f, specials, foreign accents
+Ang mga guitara queso guerra quinto Miguel daan maayo pag-abot ka'on chinelas nyog tsinelas kalle barrio.
+Si Jose kag Fernando kag Julia kag vaca kag zebra kag xylo kag Ñora kag São Paulo kag Klöcker kag Cañitas.
+Ang buttonlabel=Maghimo kag Nynorsk kag -abot kag abot- kag gui kag que.
+# numbers through the tokenizer, to 10⁹ and over
+May 0 kag 7 kag 10 kag 11 kag 21 kag 100 kag 101 kag 999 kag 1000 kag 1001 kag 999999 kag 1000000 kag 999999999 kag 1000000000.
+# punctuation and other scripts
+Una: isa; duha, tatlo. Matuod bala? Huo! Москва kag Αθήνα kag 北京.

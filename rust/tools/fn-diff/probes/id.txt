@@ -1,0 +1,58 @@
+# Synthetic Indonesian (id) probes: one line per normalize.ts arm plus the neighbour it must decline, and the
+# g2p / tokenizer corners. Synthetic text only, written for this list.
+# 1) clock: dot and colon, :00, leading zero, out of range, race time, grouping neighbour
+Rapat dimulai pukul 08.30 dan selesai pukul 11.00.
+Kereta berangkat 7:05 pagi.
+Jam 24.00 bukan waktu, begitu juga 23.60.
+Catatan waktunya 4:41.30 menit dan 1:09.02 menit.
+Ada 9.000 orang dan 12.345.678 rupiah.
+Pukul 9.5 bukan jam.
+# 1b) dollar code
+Harganya US$ 14,7 miliar dan AUD$20 dan US $30.
+Kode US$ tanpa angka.
+# 2) rupiah
+Harga Rp 15.000 atau Rp.20.000,50 atau Rp5000.
+Kata Rpm bukan rupiah.
+# 2b) No. before a digit
+Kamar No. 12 dan no.5 dan NO.7.
+# 3) dotted abbreviations, mid-sentence and clause end, near-miss under the fold
+Dr. Siti dan Prof. Budi serta Ir. Agus datang.
+Buku, pena, dll. Lalu dsb. dan dkk., tsb. hlm. 5 Jl. Merdeka yg baru tgl. 3 PT. Maju.
+Kata ſt. dan Dſb. bukan singkatan.
+Penulis: Dr.
+# 4) slash units
+Kecepatan 120 km/jam atau 80km/j atau 3 m/detik.
+Kecepatan 5 km/jamnya.
+# 5) degrees and coordinates
+Suhu 30°C dan 86 °F, lalu 25°Cölner.
+Letak 35°W dan 12°S dan 7° n dan 12°ſ dan 40°Q.
+Sudut 90° tepat.
+# 6) signs
+Suhu -5 derajat dan −3 dan –2, nilai ±10, 3+4 dan +7.
+Kata a-5 tetap.
+# 6b) relational and division
+Jika 2 = 2 dan 3 < 4 dan 5 > 1 serta 10 ÷ 2.
+# 7) fractions
+Separuh 1/2 dan 3/4 dan 1/2,3/4 dan 1.5/2 dan 1/2.5 dan 3/1/2 dan 1,5/2 dan 12/1000.
+# tokenizer: numbers, decimal comma, big numbers
+Angka 0 1 10 11 12 19 20 21 99 100 101 199 200 999 1000 1001 1999 2000 999999 1000000 2500000.
+Nilai 1,5 dan 3,14 dan 0,05 dan 1, dan 12345678901234567890 dan 9007199254740993,5.
+Jumlah 1.000.000.000 jiwa.
+# symbol tier: percent, currency, units, magnitudes, ampersand, multiply, squared
+Naik 3% dan 12,5 % lalu $5 dan €10 juta dan £2 dan ¥300 serta 5 km, 3 kg, 2 l, 4 L, 10 ha, 7 m² dan 3 m³.
+B&B dan 3 × 4 dan 2 x 3 meter.
+# acronyms: unreadable, spelled anyway, listed, readable
+DPR dan TV dan GPS dan AS dan REM dan AOL dan OHA serta UNESCO, COVID, ACTA, NATO, ASEAN, RUMAH.
+Kata Unesco dan Covid tidak semua huruf besar.
+# foreign names with diacritics, decomposed marks
+Cañitas dan São Paulo dan Klöcker dan Mu\u{308}ller dan Ångström.
+# letters with no rule, digraphs, diphthongs, coda k
+Kata xenon quran vaksin zebra fajar syarat khusus ghaib nyanyi bangun pantai pulau amboi.
+Bapak tidak masuk; anak-anak bermain? Ya!
+Kata air, kerbau, kerbaukah, baik, bakso.
+# punctuation as pause
+Pertama: satu; kedua, dua. Benarkah?
+# other scripts inside Indonesian text
+Kata Москва dan Αθήνα dan 北京 dan ソウル.
+# lone surrogates and odd code points
+Kata \u{d800}a dan b\u{dc00} serta ﬁsik dan ẞ.

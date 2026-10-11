@@ -28,6 +28,10 @@ const FLEURS_DIR: Record<string, string> = {
     nl: "nl_nl",
     uk: "uk_ua",
     sv: "sv_se",
+    id: "id_id",
+    ms: "ms_my",
+    tl: "fil_ph",
+    ceb: "ceb_ph",
     sr: "sr_rs",
     hr: "hr_hr",
     bs: "bs_ba",
@@ -1267,6 +1271,273 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    // ── Indonesian (id) and Malay (ms). Texts: each golden, FLEURS id_id / ms_my (columns 3 and 4) and
+    // probes/<code>.txt. id-normalize: normalizeIndonesian per text, then the symbol tier on its output — the
+    // TS tier rebuilt from indonesian.ts's own literal (evaluated from source with the manifest in scope).
+    // ms-normalize: normalizeMalay per ms text, then normalizeIndonesian on its output (the inherited layer).
+    async "id-normalize"() {
+        const N = await import("../../../src/languages/indonesian/normalize.ts");
+        const { MANIFEST: DEF } = await import("../../../src/languages/indonesian/indonesian.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const src = readFileSync(new URL("../../../src/languages/indonesian/indonesian.ts", import.meta.url), "utf8");
+        const start = src.indexOf("makeSymbolNormalizer({", src.indexOf("const SYMBOLS")) + "makeSymbolNormalizer(".length;
+        let depth = 0, end = start;
+        for (let i = start; i < src.length; i++) {
+            if (src[i] === "{") depth++;
+            else if (src[i] === "}" && --depth === 0) { end = i + 1; break; }
+        }
+        const symbols = makeSymbolNormalizer(new Function("DEF", `return (${src.slice(start, end)});`)(DEF));
+        for (const [t, from] of textsFor(["id"], FLEURS_DIR.id, ["id.txt"])) {
+            const a = N.normalizeIndonesian(t);
+            emit({ text: units(t), src: from, op: "normalize" }, a);
+            emit({ text: units(a), src: from, op: "symbols" }, symbols(a));
+        }
+    },
+    async "ms-normalize"() {
+        const M = await import("../../../src/languages/malay/normalize.ts");
+        const N = await import("../../../src/languages/indonesian/normalize.ts");
+        for (const [t, src] of textsFor(["ms"], FLEURS_DIR.ms, ["ms.txt"])) {
+            const a = M.normalizeMalay(t);
+            emit({ text: units(t), src, op: "malay" }, a);
+            emit({ text: units(a), src, op: "indonesian" }, N.normalizeIndonesian(a));
+        }
+    },
+    // The word level: phonemizeWord and phonemizeWordRules over every ⟨e⟩-lexicon key, every letter run of the
+    // id and ms texts (as written, lowercased, UPPERCASED, Capitalised), every 1-3 letter string over a-z (and
+    // the same UPPERCASED, which is the acronym gate and the unreadable test), every 4-letter string over a
+    // context set, and edge strings.
+    async "id-g2p"() {
+        const I = await import("../../../src/languages/indonesian/indonesian.ts");
+        const words = new Set<string>();
+        for (const l of loadLines(new URL("../../../src/languages/indonesian/indonesian.ts", import.meta.url).href, "indonesian-e-lexicon.tsv")) {
+            const k = l.split("\t")[0]!;
+            if (l.includes("\t")) { words.add(k); words.add(k.toUpperCase()); }
+        }
+        const texts = [...textsFor(["id"], FLEURS_DIR.id, ["id.txt"]).keys(), ...textsFor(["ms"], FLEURS_DIR.ms, ["ms.txt"]).keys()];
+        for (const t of texts)
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) {
+                const w = m[0];
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase());
+                words.add(w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+            }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz"];
+        for (const a of abc) {
+            words.add(a); words.add(a.toUpperCase());
+            for (const b of abc) {
+                words.add(a + b); words.add((a + b).toUpperCase());
+                for (const c of abc) { words.add(a + b + c); words.add((a + b + c).toUpperCase()); }
+            }
+        }
+        const ctx = [..."aeioukngyshc"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) { words.add(a + b + c + d); words.add((a + b + c + d).toUpperCase()); }
+        for (const w of ["", "\ud800", "a\ud800b", "ſkala", "İndah", "ﬁsik", "Ångström", "KHUSUS", "NGANGA", "BBM", "DPK", "AKP", "constructor", "__proto__", "toString", "AI", "AU", "OI", "kk", "k", "q", "x", "aiai", "aai"])
+            words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, I.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, I.phonemizeWordRules(w));
+        }
+    },
+    // numberWords is module-private; reach it as the engine does, through phonemize(<digits>, "id") — the
+    // number path splits on spaces and reads each word with the rules, so this is the module end to end.
+    async "id-numbers"() {
+        const { phonemize } = await import("../../../src/index.ts");
+        const ns: string[] = [];
+        for (let i = 0; i <= 12000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1e3), String(k * 1e3 + 1), String(k * 1e6), String(k * 1e6 + 1001), String(k * 1e9 + 7));
+        for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e));
+        ns.push("9007199254740991", "9007199254740992", "9007199254740993", "1.000", "12.345.678", "1,5", "0,25", "007", "1,", "1.000,5");
+        for (const n of ns) emit({ text: units(n), lang: "id" }, phonemize(n, "id"));
+    },
+    // ── Tagalog (tl). Texts: the tl golden, FLEURS fil_ph (columns 3 and 4) and probes/tl.txt. ──
+    // tl-normalize: normalizeTagalog per text, then the symbol tier on its output, the TS tier rebuilt from
+    // tagalog.ts's own literal (evaluated from source).
+    async "tl-normalize"() {
+        const N = await import("../../../src/languages/tagalog/normalize.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const src = readFileSync(new URL("../../../src/languages/tagalog/tagalog.ts", import.meta.url), "utf8");
+        const start = src.indexOf("makeSymbolNormalizer({", src.indexOf("const SYMBOLS")) + "makeSymbolNormalizer(".length;
+        let depth = 0, end = start;
+        for (let i = start; i < src.length; i++) {
+            if (src[i] === "{") depth++;
+            else if (src[i] === "}" && --depth === 0) { end = i + 1; break; }
+        }
+        const symbols = makeSymbolNormalizer(new Function(`return (${src.slice(start, end)});`)());
+        for (const [t, from] of textsFor(["tl"], FLEURS_DIR.tl, ["tl.txt"])) {
+            const a = N.normalizeTagalog(t);
+            emit({ text: units(t), src: from, op: "normalize" }, a);
+            emit({ text: units(a), src: from, op: "symbols" }, symbols(a));
+        }
+    },
+    // The word level: phonemizeWord, phonemizeWordRules, phonemizeShippedNoLoan and nat over every key of the
+    // three lexicons, every letter run (with hyphens) of the texts (as written, lower, UPPER), every 1-3 letter
+    // string over the Tagalog letters and the two hyphens, and edge strings.
+    async "tl-g2p"() {
+        const T = await import("../../../src/languages/tagalog/tagalog.ts");
+        const at = new URL("../../../src/languages/tagalog/tagalog.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const f of ["stress-lexicon.tsv", "loanword-lexicon.tsv"]) for (const k of loadTsvMap(at, f).keys()) words.add(k);
+        for (const l of loadLines(at, "final-glottal.txt")) words.add(l);
+        for (const t of textsFor(["tl"], FLEURS_DIR.tl, ["tl.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "Ñora", "MGA", "Ng", "constructor", "__proto__", "toString", "pag-asa", "pag‑asa", "--", "a-", "-a", "maaari", "aaa"])
+            words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, T.phonemizeWordRules(w));
+            emit({ word: units(w), op: "noloan" }, T.phonemizeShippedNoLoan(w));
+            emit({ word: units(w), op: "nat" }, T.nat(w));
+        }
+    },
+    // numberWords (exported) over 0…20,000 and scaled samples past 2^53 (the float composes), then the number,
+    // clock and ika- ordinal paths end to end through phonemize(…, "tl").
+    async "tl-numbers"() {
+        const { numberWords } = await import("../../../src/languages/tagalog/tagalog.ts");
+        const { phonemize } = await import("../../../src/index.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e9 + 7);
+        for (let e = 4; e <= 25; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5e30, -1, -0);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberWords(n));
+        const texts: string[] = [];
+        for (let i = 0; i <= 1200; i++) texts.push(String(i), `ika-${i}`, `ika${i}`, `Ika-${i}`);
+        for (let h = 0; h < 24; h++) for (const mm of ["00", "05", "30", "59"]) texts.push(`${h}:${mm}`, `${h}:${mm}:07`, `${h}:${mm}:00`);
+        for (let e = 4; e <= 30; e++) texts.push("1" + "0".repeat(e), "9".repeat(e), `ika-${"9".repeat(e)}`);
+        texts.push("1,000", "1,000,000.25", "3.14", "0.5", "007", "ika-002", "ika-03", "9007199254740993", "12,345.6789");
+        for (const t of texts) emit({ text: units(t), op: "text" }, phonemize(t, "tl"));
+    },
+    // ── Cebuano (ceb). Texts: the ceb golden, FLEURS ceb_ph (columns 3 and 4) and probes/ceb.txt. ──
+    // normalizeCebuano per text (the symbol tier is inside it); phonemizeWord and nat over every letter run of
+    // the texts (as written, lower, UPPER), every 1-3 letter string over the letters, apostrophes and hyphens,
+    // and edge strings; numberToWords over 0…20,000, scaled samples, the ≥10⁹ digit path and raw strings.
+    async "ceb-normalize"() {
+        const N = await import("../../../src/languages/cebuano/normalize.ts");
+        for (const [t, src] of textsFor(["ceb"], FLEURS_DIR.ceb, ["ceb.txt"])) emit({ text: units(t), src }, N.normalizeCebuano(t));
+    },
+    async "ceb-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/cebuano/cebuano.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñ'ʼ-]", "iu"); // cebuano.ts's own (module-private) nativiser, same class and flags
+        const words = new Set<string>();
+        for (const t of textsFor(["ceb"], FLEURS_DIR.ceb, ["ceb.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'ʼ‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ'ʼ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "MGA", "constructor", "__proto__", "--", "a-", "-a", "maayo", "kap-atan", "Ñ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    async "ceb-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/cebuano/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1.5, -1, -0, -12, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    // ── Hiligaynon (hil). Texts: the hil golden and probes/hil.txt (FLEURS has no hil). ──
+    // normalizeHiligaynon per text (the symbol tier is inside it); phonemizeWord and nat over every letter run of
+    // the texts (as written, lower, UPPER), every 1-3 letter string over the letters, apostrophes and hyphens,
+    // and edge strings; numberToWords over 0…20,000, scaled samples, the ≥10⁹ digit path and raw strings.
+    async "hil-normalize"() {
+        const N = await import("../../../src/languages/hiligaynon/normalize.ts");
+        for (const [t, src] of textsFor(["hil"], undefined, ["hil.txt"])) emit({ text: units(t), src }, N.normalizeHiligaynon(t));
+        // ⚠ NO FLEURS FOR hil, so the arms are also driven by generated shapes: every arm's template over a sweep
+        // of operands, each with the neighbours that must decline it (synthetic, never corpus text).
+        const gen: string[] = [];
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59", "60", "7"])
+            for (const pre of ["alas ", "las ", "Alas-", "ALAS ", "", "salas ", "alas  "]) gen.push(`${pre}${h}:${mm} sa aga`);
+        for (const a of ["1", "12", "1.5", "1,000", "2,5", "10.25", "0"]) for (const b of ["2", "20", "3.5", "2,000", "7.125"])
+            for (const sep of ["-", "–", " - ", "—", "--"]) for (const pre of ["", "halin sa ", "hasta ", "x", "ika-"]) gen.push(`${pre}${a}${sep}${b} ka adlaw`);
+        for (const n of ["1", "12", "123", "1234", "0"]) for (const f of ["5", "25", "125", "05"]) gen.push(`${n}.${f}`, `${n}.${f}.`, `${n},${f}`, `${n}.${f}x`);
+        for (const g of ["1,000", "12,345", "123,456,789", "1,23", "1,2345", "0,123", "1,000.5", "1,000,00"]) gen.push(`May ${g} ka tawo`);
+        for (const w of ["dr", "Dr", "DR", "fr", "mrs", "Mrs", "prof", "st", "dſ", "xdr", "dr1"]) gen.push(`Si ${w}. Cruz`, `${w}.`);
+        for (const n of ["1", "20", "100"]) for (const t of ["ng", "NG", "nga", "ngx"]) gen.push(`ika-${n}${t} adlaw`, `Ika-${n}${t}`);
+        for (const w of ["sg", "Sg", "SG", "sg.", "1sg", "sg1", "sg/", "-sg", "sgt"]) gen.push(`balay ${w} tawo`);
+        for (const t of gen) emit({ text: units(t), src: "generated" }, N.normalizeHiligaynon(t));
+    },
+    async "hil-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/hiligaynon/hiligaynon.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñ'ʼ-]", "iu"); // hiligaynon.ts's own (module-private) nativiser, same class and flags
+        const words = new Set<string>();
+        for (const t of textsFor(["hil"], undefined, ["hil.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'ʼ‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ'ʼ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "MGA", "constructor", "__proto__", "--", "a-", "-a", "daan", "kap-atan", "guitara", "queso", "gue", "qui", "ng", "gu", "Ñ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    async "hil-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/hiligaynon/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1.5, -1, -0, -12, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    // ── Ilocano (ilo). Texts: the ilo golden and probes/ilo.txt (FLEURS has no ilo), plus GENERATED shapes for
+    // each normalize.ts arm and its neighbours (synthetic, never corpus text). ──
+    async "ilo-normalize"() {
+        const N = await import("../../../src/languages/ilocano/normalize.ts");
+        for (const [t, src] of textsFor(["ilo"], undefined, ["ilo.txt"])) emit({ text: units(t), src }, N.normalizeIlocano(t));
+        const gen: string[] = [];
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59", "60"])
+            for (const [pre, post] of [["", " a.m."], ["", " pm"], ["", "PM"], ["", " p. m."], ["", " GMT"], ["", " UTC"], ["", " ti agsapa"], ["", " iti rabii"], ["", " ti aldawen"], ["oras a ", ""], ["oras ti ", ""], ["Oras nga ", ""], ["oras  a ", ""], ["", ""], ["+", " UTC"], ["-", " pm"], ["1.", " am"], ["", " amang"]])
+                gen.push(`${pre}${h}:${mm}${post}`);
+        for (const d of ["1h 30m", "2h30m", "12 h 5 m 20 s", "1h 2m 3.5s", "1h 30mx", "x1h 30m", "100h 3m", "1h"]) gen.push(`Nagbayag ${d}.`);
+        for (const u of ["km²", "m²", "km", "m", "kg", "km³"]) for (const p of ["tunggal ", "tunggal maysa a ", "tunggal maysa nga ", "Tunggal ", "tunggal  "]) gen.push(`50 tao ${p}${u}`);
+        for (const a of ["1", "12", "1.5", "1,000", "0"]) for (const b of ["2", "20", "3.5", "2,000", "7.125"])
+            for (const sep of ["-", "–", " - ", "--"]) for (const pre of ["", "manipud ", "manipud iti ", "aginggana ti ", "x"]) gen.push(`${pre}${a}${sep}${b} nga aldaw`);
+        for (const n of ["1", "12", "123", "0"]) for (const f of ["5", "25", "125"]) gen.push(`${n}.${f}`, `${n}.${f}.`, `${n}.${f}x`);
+        for (const g of ["1,000", "12,345", "123,456,789", "1,23", "1,000.5"]) gen.push(`Adda ${g} a tao`);
+        for (const d of ["30°C", "30 ° c", "86°F", "45°", "45° N", "30°Cx"]) gen.push(`Ti ${d} ditoy`);
+        for (const m of ["−5", "x−5", "5 −3", "−x", "(−2)"]) gen.push(`Ti ${m} ditoy`);
+        for (const w of ["blng", "Blng", "dr", "DR", "jr", "sr", "st", "dſ", "xdr"]) gen.push(`Ni ${w}. Cruz`, `${w}.`);
+        for (const c of ["c. 1900", "ca. 1900", "C.1900", "c.x", "abc. 1900", "c. 19"]) gen.push(`Naipasngay ${c}`);
+        for (const t of gen) emit({ text: units(t), src: "generated" }, N.normalizeIlocano(t));
+    },
+    async "ilo-g2p"() {
+        const I = await import("../../../src/languages/ilocano/ilocano.ts");
+        const words = new Set<string>();
+        for (const k of loadTsvMap(new URL("../../../src/languages/ilocano/ilocano.ts", import.meta.url).href, "ilo-lexicon.tsv").keys()) { words.add(k); words.add(k.toUpperCase()); }
+        for (const t of textsFor(["ilo"], undefined, ["ilo.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'ʼ‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ'ʼ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiougqn"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "constructor", "__proto__", "--", "a-", "-a", "dua", "radio", "tao", "guitara", "queso", "garcia", "é", "É"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, I.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, I.phonemizeWordRules(w));
+            emit({ word: units(w), op: "nat" }, I.nat(w));
+        }
+    },
+    async "ilo-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/ilocano/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1.5, -1, -0, -12, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
             emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
     // ── Catalan (ca). Inputs: the ca golden, FLEURS ca_es (columns 3 and 4) and probes/ca.txt. ──

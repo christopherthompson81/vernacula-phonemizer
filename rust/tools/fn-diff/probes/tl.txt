@@ -1,0 +1,23 @@
+# Synthetic Tagalog (tl) probes: one line per normalize.ts arm plus the neighbour it must decline, the token
+# branches (clock, ika- ordinals, grouped and decimal numbers), the symbol tier and g2p corners. Synthetic text only.
+# entities: spacing/dash to their character, the rest dropped; a bare ampersand and an unknown entity stay
+Ang 116°&nbsp;40' at Enero 14 &ndash; 20 at 5&mdash;7 at A &amp; B at &quot;oo&quot; at &lt;x&gt; at &#39; at &copy; at B&B.
+# ranges: en dash, em dash, digit hyphen; a letter hyphen and a leading dash are not ranges
+Mula 1995–2000 at 3 — 5 at 100-600 at ika-3 at kaibigan-ko at taong -73 000.
+# clock: hh:mm, hh:mm:ss, zero minutes, zero seconds, out of range
+Alas 08:50:38 UTC at 5:00 at 12:05:00 at 23:59 at 24:61 at 1:2.
+# ika- ordinals: suppletive, contracted, fused, with and without hyphen, capital, leading zero, letter after
+Ang una, ika-1, ika-2, ika-3, ika-4, ikaapat, ika20, Ika-130, ika-104, ika-1000, ika-02, ika-5b at ika-99999999999999999999.
+# numbers: grouped, decimal, plain, large
+May 1,000 at 1,234,567.89 at 3.5 at 0.25 at 42 at 100000 at 9007199254740993 at 12345678901234567890 tao.
+# symbol tier: percent, currency, magnitudes (incl. ligated), units, rates, exponents, per
+Mga 5% at ₱20 at $19.8 bilyon at US$5 at ¥10,000,000 at €3 at 3.9 milyong tao at 380 libong kilometro².
+Layo 10 km, 10 m, 10 cm, 5 mm, 40 kg (90 lbs), 200 mg, 400-700 nm, 2 l, 2 L, 10 ha, 299,792,458m/s at 160 km/h.
+Dami 43,079 katao/km² at 5 m³ at 11 milyong mga Pilipino at 15 GB at 101.1 FM at 2GO.
+# g2p: digraphs, glottal stops, specials, loan letters, ñ, foreign accents (folded), hyphen compounds
+Ang mga bata ng tao ay maaari, chinelas, nyog, syota, kalle, tsinelas, barrio, Doña, Cañitas, São Paulo, Klöcker.
+Pag-asa at pag‑asa at maganda at ngayon at abenojar at abece at quezon at zebra at xylo at jeep at valle.
+# punctuation as pause
+Una: isa; ikalawa, dalawa. Totoo ba? Oo!
+# other scripts
+Ang Москва at Αθήνα at 北京.

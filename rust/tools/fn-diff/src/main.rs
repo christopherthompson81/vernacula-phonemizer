@@ -1377,6 +1377,151 @@ fn main() {
                 sv.number_to_words(n, raw.as_ref())
             })
         }
+        "id-normalize" => {
+            let id =
+                vernacula_phonemizer::languages::indonesian::indonesian::create_indonesian(None)
+                    .unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => id.normalize(&t),
+                    _ => id.symbols(&t),
+                }
+            })
+        }
+        "ms-normalize" => {
+            let ms = vernacula_phonemizer::languages::malay::malay::create_malay(None).unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "malay" => ms.normalize(&t),
+                    _ => ms.inner().normalize(&t),
+                }
+            })
+        }
+        "id-g2p" => {
+            let id =
+                vernacula_phonemizer::languages::indonesian::indonesian::create_indonesian(None)
+                    .unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => id.phonemize_word(&w),
+                    _ => id.phonemize_word_rules(&w),
+                }
+            })
+        }
+        "id-numbers" => Box::new(|input| {
+            vernacula_phonemizer::registry::phonemize_in(
+                input["lang"].as_str().unwrap(),
+                &units(&input["text"]),
+            )
+            .unwrap()
+        }),
+        "tl-normalize" => {
+            let tl = vernacula_phonemizer::languages::tagalog::tagalog::create_tagalog().unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tl.normalize(&t),
+                    _ => tl.symbols(&t),
+                }
+            })
+        }
+        "tl-g2p" => {
+            let tl = vernacula_phonemizer::languages::tagalog::tagalog::create_tagalog().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => tl.phonemize_word(&w),
+                    "rules" => tl.phonemize_word_rules(&w),
+                    "noloan" => tl.phonemize_shipped_no_loan(&w),
+                    _ => tl.nativise(&w),
+                }
+            })
+        }
+        "tl-numbers" => {
+            let tl = vernacula_phonemizer::languages::tagalog::tagalog::create_tagalog().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "words" => JsString::from(
+                    tl.number_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                        .unwrap()
+                        .as_str(),
+                ),
+                _ => vernacula_phonemizer::registry::phonemize_in("tl", &units(&input["text"]))
+                    .unwrap(),
+            })
+        }
+        "ceb-normalize" => {
+            let ceb = vernacula_phonemizer::languages::cebuano::cebuano::create_cebuano().unwrap();
+            Box::new(move |input| ceb.normalize(&units(&input["text"])))
+        }
+        "ceb-g2p" => {
+            let ceb = vernacula_phonemizer::languages::cebuano::cebuano::create_cebuano().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => ceb.phonemize_word(&w),
+                    _ => ceb.nativise(&w),
+                }
+            })
+        }
+        "ceb-numbers" => {
+            let ceb = vernacula_phonemizer::languages::cebuano::cebuano::create_cebuano().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                ceb.number_to_words(n, raw.as_ref())
+            })
+        }
+        "hil-normalize" => {
+            let hil = vernacula_phonemizer::languages::hiligaynon::hiligaynon::create_hiligaynon()
+                .unwrap();
+            Box::new(move |input| hil.normalize(&units(&input["text"])))
+        }
+        "hil-g2p" => {
+            let hil = vernacula_phonemizer::languages::hiligaynon::hiligaynon::create_hiligaynon()
+                .unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => hil.phonemize_word(&w),
+                    _ => hil.nativise(&w),
+                }
+            })
+        }
+        "hil-numbers" => {
+            let hil = vernacula_phonemizer::languages::hiligaynon::hiligaynon::create_hiligaynon()
+                .unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                hil.number_to_words(n, raw.as_ref())
+            })
+        }
+        "ilo-normalize" => {
+            let ilo = vernacula_phonemizer::languages::ilocano::ilocano::create_ilocano().unwrap();
+            Box::new(move |input| ilo.normalize(&units(&input["text"])))
+        }
+        "ilo-g2p" => {
+            let ilo = vernacula_phonemizer::languages::ilocano::ilocano::create_ilocano().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => ilo.phonemize_word(&w),
+                    "rules" => ilo.phonemize_word_rules(&w),
+                    _ => ilo.nativise(&w),
+                }
+            })
+        }
+        "ilo-numbers" => {
+            let ilo = vernacula_phonemizer::languages::ilocano::ilocano::create_ilocano().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                ilo.number_to_words(n, raw.as_ref())
+            })
+        }
         "sh-normalize" => {
             let sr = vernacula_phonemizer::languages::serbian::serbian::create_serbian().unwrap();
             let hr =

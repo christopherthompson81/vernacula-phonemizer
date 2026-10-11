@@ -33,11 +33,12 @@ use crate::languages::portuguese::roman_ordinals::roman_policy as pt_roman_polic
 use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
-/// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 32] = [
+/// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
+/// same engine as `ms`, but has no golden of its own, so it is not listed.
+pub const LANGUAGES: [&str; 38] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
     "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
-    "en-IN", "ca", "gl", "ro",
+    "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo",
 ];
 
 /// A language engine, as the registry holds it.
@@ -117,6 +118,28 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "sv" => crate::languages::swedish::swedish::create_swedish()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "id" => crate::languages::indonesian::indonesian::create_indonesian(Some(Arc::new(
+            read_as_english,
+        )))
+        .map(|e| Arc::new(e) as Arc<dyn Engine>)
+        .map_err(PhonemizeError::Data),
+        "ms" | "zsm" => {
+            crate::languages::malay::malay::create_malay(Some(Arc::new(read_as_english)))
+                .map(|e| Arc::new(e) as Arc<dyn Engine>)
+                .map_err(PhonemizeError::Data)
+        }
+        "tl" => crate::languages::tagalog::tagalog::create_tagalog()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ceb" => crate::languages::cebuano::cebuano::create_cebuano()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "hil" => crate::languages::hiligaynon::hiligaynon::create_hiligaynon()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ilo" => crate::languages::ilocano::ilocano::create_ilocano()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "sr" => crate::languages::serbian::serbian::create_serbian()
@@ -253,9 +276,10 @@ pub enum PhonemizeError {
     /// The neural OOV model failed while running (a missing model is not an error: the best path degrades
     /// to the sync engine, as the TS does, and `tagger_unavailable_reason` says why).
     Neural(String),
-    /// The TS engine THROWS on this input, so the port returns an error rather than a reading. ⚠ NO ENGINE
-    /// PRODUCES IT TODAY: its one producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to
-    /// decline above 2^53 (#1463). Kept because callers match it, and for the next such TS throw.
+    /// The TS engine THROWS on this input, so the port returns an error rather than a reading. Its first
+    /// producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to decline above 2^53 (#1463).
+    /// Produced today by Tagalog: an `ika-` ordinal of 309+ digits is Infinity, on which the TS `numberWords`
+    /// recurses until its stack overflows.
     Input(String),
 }
 

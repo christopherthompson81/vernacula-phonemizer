@@ -1,0 +1,27 @@
+# Synthetic Cebuano (ceb) probes: one line per normalize.ts arm plus the neighbour it must decline, and the g2p
+# and number corners. Synthetic text only, written for this list.
+# 1. de-grouping: comma groups, a decimal after a group, a grouped run inside a decimal, a two-digit group
+Adunay 1,100 km ug 14,700.5 ka metro ug 1,000,000 ka tawo, apan 12,34 ug 3.1,234 dili.
+# 2. clocks: colon, colon zero, the licensed dot, the unlicensed dot (a decimal), military before a timezone, a year
+Mga alas 9:30 sa buntag ug alas 07:19 ug 12:00, unya 12.00 GMT ug 15.00 UTC ug 8.15 pm ug 6.34 pulgada.
+Sa 0230 UTC ug 1200 GMT, apan sa tuig 1995 ug 2359 ka tawo; 4:41.30 ug 24:00 ug 23:60.
+# 3. the tier: percent, currency (code, sign), magnitudes, units, rates, squared, ampersand, multiply
+Mga 16% ug US$14.7 bilyones ug AUD$20 ug $5 ug €3 ug £2 ug 83 km ug 5 m ug 10 cm ug 2 mm ug 40 kg.
+Ang 100 km/h ug 3 m/s ug 50 km² ug A&B ug 3 × 4 ug 8 ka pilo.
+# 4. decimals: one and two digits, a three-digit fraction, a trailing dot
+Mga 2.5 metros ug 0.75 ug 3.141 ug Bersyon 1.2.3 ug 14.7.
+# 5. ranges: digit hyphen, en dash, spaced, a connective already written, a chain, ika-20
+Gikan sa 1990-1995 ug 5–7 ug 10 - 20, hangtod 3-4, gikan sa 6-8, ang 1-2-3 ug ika-20 nga siglo.
+# 6. dotted abbreviations, a sentence-end neighbour, a fold near-miss
+Si Dr. Santos ug Jr. ug Sr. ug St. Peter ug Mr. ug Mrs. ug Prof. Cruz miadto sa Japan. ſt. Dſ.
+# 7. fractions
+Ang 1/2 ug 3/4 ug 10/100 ug 1/2/3 ug 1234/5.
+# 8. plus; the unread signs stay
+Ang 2+3 ug +5 ug (+ -4) ug 2 = 2 ug 3 < 4 ug ±1 ug 30°C.
+# g2p: digraphs, hiatus, hyphen, apostrophe glottal, loan letters, specials, foreign accents
+Ang mga bata kaon maayo kap-atan pag-asa ka'on chinelas nyog tsinelas kalle barrio vaca jeep zebra quezon Ñora.
+Si São Paulo ug Klöcker ug Cañitas ug Müller ug Ångström.
+# numbers: tokenizer digits, 10⁹ and over
+Adunay 0 ug 7 ug 10 ug 11 ug 21 ug 100 ug 101 ug 999 ug 1000 ug 1001 ug 999999 ug 1000000 ug 999999999 ug 1000000000 ug 12345678901234567890.
+# punctuation and other scripts
+Una: usa; duha, tulo. Tinuod ba? Oo! Москва ug Αθήνα ug 北京.
