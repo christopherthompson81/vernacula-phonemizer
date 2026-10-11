@@ -1292,6 +1292,10 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: String(n), src: "numeric", op: "ordinal" }, N.ordinal(n) ?? "\u0000none");
             emit({ n: String(n), src: "numeric", op: "hundreds" }, N.hundredsYear(n) ?? "\u0000none");
         }
+        // centuryYear (#1526) reaches past 2100: the 1000s blocks and their boundaries up to 10000.
+        for (let i = -2; i <= 10001; i += i < 2200 ? 1 : 7) ns.push(i);
+        ns.push(2999, 3000, 3099, 3100, 9000, 9099, 9100, 9998, 10000, 2000.5);
+        for (const n of ns) emit({ n: String(n), src: "numeric", op: "century" }, N.centuryYear(n) ?? "\u0000none");
     },
     // The word level: phonemizeWord and nat over every lexicon key (with the #1068 nativised aliases), every
     // letter run of the texts (as written, lowercased and nativised), every 1-3 letter string over the Swedish

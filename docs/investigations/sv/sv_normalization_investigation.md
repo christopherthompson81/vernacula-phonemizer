@@ -421,3 +421,99 @@ Delta against the PR as submitted: **12 utterances — 6 `OS`, 2 `AI`, 2 `USOC` 
 | `review.ts --lang sv` | **checklist clean**, all 8 checks |
 | `corpus-diff` sv_se | **287/1863 (15.4%)**, DIGIT 0 / SLOT-GAP 0 / RAWMARK 0 / DROP 0 / THROW 0 (DROP was 2) |
 | `referee-eval sv` | **unchanged**: 797/5286 raw, 2946/5286 folded (55.7%), symbol 88.1% |
+
+## Run 13 — 2026-10-11 15:20 — #1526: the four findings the Rust port reported, reproduced in TS
+
+**Question.** Do the port's findings (rust-port/rust_sv_port_investigation.md Run 5) reproduce on the TS
+reference, and what does each one read as today?
+
+**Command.** A scratch probe calling `normalizeSwedish` and `phonemize(…, "sv")` over synthetic lines, one or
+more per finding plus the neighbour each fix must keep declining (a dotted date, a score, a dotted `osv.` at a
+sentence end, the undotted `dvs` between commas, a range across 2000).
+
+**Raw finding (before).**
+```
+"Han var osviklig och osvensk." => "Han var och så vidareiklig och och så vidareensk."
+"dvsbilen"                      => "det vill sägabilen"
+"Mötet börjar kl. 20.30."       => "Mötet börjar klockan 20.30."  | … ɕˈʉ̀ːɡɔ kˈɔ̀mːa treː nɔlː .
+"Mellan 9.00 och 17.30."        => "Mellan 9 0 0 och 17.30."      | … ɧˈɵ̀tːɔn kˈɔ̀mːa treː nɔlː .
+"Vi ses klockan 12:00."         => "Vi ses klockan 12 00."        | … tɔlv nɔlː .   (mid-sentence: nɔlː nɔlː)
+"Under 2000-talet och 2100-talet." | tvɔtˈʉːsɛn tˈɑːlɛt ɔ tvɔtˈʉːsɛn ɛtːhˈɵndra tˈɑːlɛt .
+"1900-2000-talet"               => "nittonhundra-2000-talet"   (the range rule declines; the year rule strands the hyphen)
+```
+All four reproduce exactly as the port reported. The `1900-2000-talet` row is a new observation: a range that
+crosses 2000 was worse than either end alone.
+
+**Implication.** Fix each at the rule that owns it: a right edge on `dvs`/`osv`; the step-4/5 lookahead
+`(?![\d.])` / `(?![\d.,])` declined the sentence period along with the decimal continuation, so narrow the
+period to `(?!\.\d)` — the shape step 11 already uses for the same reason; and a `-tal`-only `centuryYear`
+that extends `hundredsYear` past 1999 without touching the bare-year rule (whose 2000+ ambiguity is real).
+
+## Run 14 — 2026-10-11 15:30 — the fixes, the corpus diff, and reverting each one
+
+**Commands.**
+```sh
+npx tsx <scratch>/probe.mts                    # same lines, after
+npx tsx tools/normalization/corpus-diff.ts emit --lang sv --corpus sv_se --out <scratch>/sv.after
+#   (HEAD normalize.ts restored into the tree for the before emit, then the fix copied back)
+npx tsx tools/normalization/corpus-diff.ts compare --before <scratch>/sv.before --after <scratch>/sv.after --corpus sv_se
+npx tsx tools/check-goldens.mts --jobs 8
+```
+
+**Raw finding.** Probe, after:
+```
+"Han var osviklig och osvensk." => unchanged             | hɑːn vɑːr ˈɔ̀svɪklɪɡ ɔ ˈùːsvˌɛnsk .
+"Mötet börjar kl. 20.30."       => "… klockan 20 30."     | … ɕˈʉ̀ːɡɔ trˈɛ̀tːɪɔ .
+"Vi ses klockan 12:00."         => "… klockan 12 0 0."    | … tɔlv nɔlː nɔlː .
+"Under 2000-talet och 2100-talet." => "Under tvåtusentalet och tjugoetthundratalet."
+"2010-talet" => "tvåtusentiotalet"   "3000-talet" => "tretusentalet"
+"1900-2000-talet" => "nittonhundra till tvåtusentalet"
+"Datum 12.05.2020 här." => unchanged (the date is still declined: `(?!\.\d)`)
+```
+Corpus diff sv_se: **changed 1/1863**; every defect class 0 before and after. The one row is the timetable
+utterance the port counted (a "between H.MM and H.MM" pair at the end of the sentence): its second time went
+from *sju komma tre noll* to *sju trettio*, full stop kept. Nothing else in FLEURS moves — no `osv`/`dvs`
+prefix word, no 2000+ `-tal`, no sentence-final colon clock, as the port measured.
+
+Goldens: `goldens fresh: 189 languages, 36495 rows, 0 stale` — the sv golden carries none of these shapes, so
+no golden row moves.
+
+Revert-each (each fix undone alone, `test/swedish.test.ts` re-run): osv/dvs edge → 1 failed; period clock →
+1 failed; colon clock → 1 failed; centuryYear → 2 failed. Every new assertion is load-bearing.
+
+One test expectation I typed by hand was wrong (`nittionion…` for 9999) and the engine's
+`nittioniohundranittionio` was right — the derive-don't-type rule, caught by the run.
+
+**Deliberately not changed.** `12:00,` (clause comma after a colon clock) still falls to the score rule: the
+`,` stays in step 5's lookahead because the issue names only the sentence period and the comma's own reason
+for being there (the sports time) is not something I re-measured. `LATIN_RUN` removed from swedish.ts's import
+(finding 5); the C# and Rust ports never imported it.
+
+## Run 15 — 2026-10-11 15:40 — mirrored into Rust and C#; the differential sees the change
+
+**Commands.** `FLEURS_ROOT=… npx tsx rust/tools/fn-diff/dump.mts sv-normalize > .probe/sv/sv-normalize.jsonl`
+(the dump now also sweeps `centuryYear` over −2…10001 and the block boundaries; two new synthetic probe lines),
+then `cargo run --release -p fn-diff -- sv-normalize …`. Then the Rust `century_year` broken on purpose
+(`< 100.0` → `< 99.0`) and the `osv` right edge removed, and replayed again.
+
+**Raw finding.**
+```
+sv-normalize: 37306 identical, 0 DIFFER     (numeric 9666, probe 372)
+broken:       37300 identical, 6 DIFFER     (numeric 5, probe 1)
+```
+**Implication.** The replay can see both a boundary slip in the new helper and the regex edge; restored.
+
+## Run 16 — 2026-10-11 16:00 — rebased onto main (de/th/ru/ko fixes in), the gates
+
+**Question.** Does the combined tree still pass everything, and is C# checked on shapes the goldens never carry?
+
+**Raw finding.** Rebase clean; `extract_regexes.mts` re-run on the combined tree, no further change.
+`npm run typecheck` clean; `npm test` 359 files, 6840 passed / 5 skipped; `check:goldens` 189 languages, 36495
+rows, 0 stale; `dotnet test` (full) 7522 → 7546 passed, 0 failed, after adding `SwedishNormalizeTests.cs` (24
+cases mirroring the new TS assertions — golden parity alone cannot see these shapes); C# golden parity 189
+byte-identical; C# regex-diff 145038 identical. Rust: `cargo fmt --check` clean, `cargo test --release` 199
+passed / 0 failed, `parity` 50 languages 200/200 + mag 199/200 (the known Arabic one), `regex-diff` 145038
+identical, 0 refused.
+
+Revert check on the C# side: osv edge, period-clock lookahead and the century block boundary broken together →
+`SwedishNormalizeTests` 4 failed / 20 passed; restored.

@@ -109,10 +109,12 @@ Han sa 'ordet' och ’ordet’ till München.
 Qatar och Qing och Zürich och Ångström.
 # decomposed vowels and case
 Ko\u{308}tt och sma\u{30a} och BÅTEN.
-# TS findings (reported, reproduced): unbounded osv/dvs, sentence-final clocks, 2000-talet
+# TS findings (reported by the port, fixed in #1526): unbounded osv/dvs, sentence-final clocks, 2000-talet
 Han var osviklig och osvensk, det var dvsbilen.
 Vi ses klockan 12:00.
 Mötet börjar kl. 20.30.
 Bussen avgår mellan 8.15 och 9.45.
 Under 2000-talet och 2100-talet.
 Den 0:e och 101:a gången.
+Från 1900-2000-talet till 2010-talet och 3000-talet, men inte 10000-talet.
+Datum 12.05.2020, klockan 9.00, sedan osv, dvs. Bra osv.

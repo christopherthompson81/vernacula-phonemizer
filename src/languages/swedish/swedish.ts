@@ -8,7 +8,7 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
-import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
+import { makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { loadTsvMap } from "../../core/loadTsv.ts";
 import { toSegments, type Compound } from "./g2p.ts";
