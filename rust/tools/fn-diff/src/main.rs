@@ -1326,6 +1326,29 @@ fn main() {
                 hil.number_to_words(n, raw.as_ref())
             })
         }
+        "ilo-normalize" => {
+            let ilo = vernacula_phonemizer::languages::ilocano::ilocano::create_ilocano().unwrap();
+            Box::new(move |input| ilo.normalize(&units(&input["text"])))
+        }
+        "ilo-g2p" => {
+            let ilo = vernacula_phonemizer::languages::ilocano::ilocano::create_ilocano().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => ilo.phonemize_word(&w),
+                    "rules" => ilo.phonemize_word_rules(&w),
+                    _ => ilo.nativise(&w),
+                }
+            })
+        }
+        "ilo-numbers" => {
+            let ilo = vernacula_phonemizer::languages::ilocano::ilocano::create_ilocano().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                ilo.number_to_words(n, raw.as_ref())
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

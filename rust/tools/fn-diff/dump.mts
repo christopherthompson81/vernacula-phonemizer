@@ -1441,6 +1441,55 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
             emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
+    // ── Ilocano (ilo). Texts: the ilo golden and probes/ilo.txt (FLEURS has no ilo), plus GENERATED shapes for
+    // each normalize.ts arm and its neighbours (synthetic, never corpus text). ──
+    async "ilo-normalize"() {
+        const N = await import("../../../src/languages/ilocano/normalize.ts");
+        for (const [t, src] of textsFor(["ilo"], undefined, ["ilo.txt"])) emit({ text: units(t), src }, N.normalizeIlocano(t));
+        const gen: string[] = [];
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59", "60"])
+            for (const [pre, post] of [["", " a.m."], ["", " pm"], ["", "PM"], ["", " p. m."], ["", " GMT"], ["", " UTC"], ["", " ti agsapa"], ["", " iti rabii"], ["", " ti aldawen"], ["oras a ", ""], ["oras ti ", ""], ["Oras nga ", ""], ["oras  a ", ""], ["", ""], ["+", " UTC"], ["-", " pm"], ["1.", " am"], ["", " amang"]])
+                gen.push(`${pre}${h}:${mm}${post}`);
+        for (const d of ["1h 30m", "2h30m", "12 h 5 m 20 s", "1h 2m 3.5s", "1h 30mx", "x1h 30m", "100h 3m", "1h"]) gen.push(`Nagbayag ${d}.`);
+        for (const u of ["km²", "m²", "km", "m", "kg", "km³"]) for (const p of ["tunggal ", "tunggal maysa a ", "tunggal maysa nga ", "Tunggal ", "tunggal  "]) gen.push(`50 tao ${p}${u}`);
+        for (const a of ["1", "12", "1.5", "1,000", "0"]) for (const b of ["2", "20", "3.5", "2,000", "7.125"])
+            for (const sep of ["-", "–", " - ", "--"]) for (const pre of ["", "manipud ", "manipud iti ", "aginggana ti ", "x"]) gen.push(`${pre}${a}${sep}${b} nga aldaw`);
+        for (const n of ["1", "12", "123", "0"]) for (const f of ["5", "25", "125"]) gen.push(`${n}.${f}`, `${n}.${f}.`, `${n}.${f}x`);
+        for (const g of ["1,000", "12,345", "123,456,789", "1,23", "1,000.5"]) gen.push(`Adda ${g} a tao`);
+        for (const d of ["30°C", "30 ° c", "86°F", "45°", "45° N", "30°Cx"]) gen.push(`Ti ${d} ditoy`);
+        for (const m of ["−5", "x−5", "5 −3", "−x", "(−2)"]) gen.push(`Ti ${m} ditoy`);
+        for (const w of ["blng", "Blng", "dr", "DR", "jr", "sr", "st", "dſ", "xdr"]) gen.push(`Ni ${w}. Cruz`, `${w}.`);
+        for (const c of ["c. 1900", "ca. 1900", "C.1900", "c.x", "abc. 1900", "c. 19"]) gen.push(`Naipasngay ${c}`);
+        for (const t of gen) emit({ text: units(t), src: "generated" }, N.normalizeIlocano(t));
+    },
+    async "ilo-g2p"() {
+        const I = await import("../../../src/languages/ilocano/ilocano.ts");
+        const words = new Set<string>();
+        for (const k of loadTsvMap(new URL("../../../src/languages/ilocano/ilocano.ts", import.meta.url).href, "ilo-lexicon.tsv").keys()) { words.add(k); words.add(k.toUpperCase()); }
+        for (const t of textsFor(["ilo"], undefined, ["ilo.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'ʼ‑-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñ'ʼ-‑"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiougqn"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\ud800b", "ſala", "İlog", "ﬁlo", "constructor", "__proto__", "--", "a-", "-a", "dua", "radio", "tao", "guitara", "queso", "garcia", "é", "É"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, I.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, I.phonemizeWordRules(w));
+            emit({ word: units(w), op: "nat" }, I.nat(w));
+        }
+    },
+    async "ilo-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/ilocano/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 22, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1.5, -1, -0, -12, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "\ud800"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
     async "fr-normalize"() {
