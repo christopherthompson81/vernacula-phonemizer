@@ -47,6 +47,8 @@ const FLEURS_DIR: Record<string, string> = {
     be: "be_by",
     bg: "bg_bg",
     mk: "mk_mk",
+    ne: "ne_np",
+    mr: "mr_in",
 };
 
 /**
@@ -90,8 +92,14 @@ function englishTexts(): Map<string, string> {
 function langTexts(lang: string): string[] {
     if (lang === "en" || lang === "en-GB") return [...englishTexts().keys()];
     if (lang === "en-IN") return [...textsFor(["en", "en-GB", "en-IN"], "en_us", ["en-normalize.txt", "en-IN.txt"]).keys()];
-    return [...textsFor([lang], Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined, [`${lang}.txt`]).keys()];
+    const extra = Object.hasOwn(EXTRA_PROBES, lang) ? EXTRA_PROBES[lang]! : [];
+    return [...textsFor([lang], Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined, [`${lang}.txt`, ...extra]).keys()];
 }
+/** Probe files a language replays besides its own: the six dialects inherit Hindi's normalizer and symbol tier
+ *  unchanged, so Hindi's arm-by-arm probes are theirs too. */
+const EXTRA_PROBES: Record<string, string[]> = {
+    bho: ["hi.txt"], mag: ["hi.txt"], awa: ["hi.txt"], mai: ["hi.txt"], hne: ["hi.txt"], rkt: ["hi.txt"],
+};
 /** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
 const LANGS = (process.env.LANGS ?? "en,en-GB").split(",").filter((l) => l !== "");
 
@@ -534,6 +542,63 @@ const dumps: Record<string, () => void | Promise<void>> = {
             if (line === "" || line.startsWith("#")) continue;
             for (const lang of ["en", "en-GB"])
                 emit({ text: units(line), lang }, process.env.BEST ? await phonemizeAsync(line, lang) : phonemize(line, lang));
+        }
+    },
+    // Nepali's own normalizer (makeNepaliNormalizer with nepali.jsonc's numbers) over the ne golden, FLEURS ne_np
+    // (columns 3 and 4) and probes/ne.txt.
+    async "ne-normalize"() {
+        const { makeNepaliNormalizer } = await import("../../../src/languages/nepali/normalize.ts");
+        const { parseJsonc } = await import("../../../src/core/jsonc.ts");
+        const def = parseJsonc(readFileSync(new URL("../../../data/languages/nepali/nepali.jsonc", import.meta.url), "utf8")) as any;
+        const norm = makeNepaliNormalizer(def.numbers);
+        for (const [t, src] of textsFor(["ne"], "ne_np", ["ne.txt"])) emit({ text: units(t), src }, norm(t));
+    },
+    // Marathi's own normalizer (makeMarathiNormalizer(DEF)) over the mr golden, FLEURS mr_in (columns 3 and 4)
+    // and probes/mr.txt.
+    async "mr-normalize"() {
+        const { makeMarathiNormalizer } = await import("../../../src/languages/marathi/normalize.ts");
+        const { DEF } = await import("../../../src/languages/marathi/marathi.ts");
+        const norm = makeMarathiNormalizer(DEF);
+        for (const [t, src] of textsFor(["mr"], "mr_in", ["mr.txt"])) emit({ text: units(t), src }, norm(t));
+    },
+    // The Hindi-belt engines' word level (LANGS, default all eight): word, wordRules and number() of each
+    // language's own create function (so awa's flap, mai's fold and ne's ʌ are in it), over every Devanagari run
+    // in that language's golden + FLEURS + probes, every consonant of ITS manifest x matra/virama/sign tails, and
+    // the hi-word digit strings.
+    async "hindi-family-word"() {
+        const FAMILY: Record<string, [string, string]> = {
+            bho: ["bhojpuri", "createBhojpuri"], mag: ["magahi", "createMagahi"], awa: ["awadhi", "createAwadhi"],
+            mai: ["maithili", "createMaithili"], hne: ["chhattisgarhi", "createChhattisgarhi"],
+            rkt: ["rangpuri", "createRangpuri"], ne: ["nepali", "createNepali"], mr: ["marathi", "createMarathi"],
+        };
+        const langs = process.env.LANGS ? LANGS : Object.keys(FAMILY);
+        for (const lang of langs) {
+            const [dir, make] = FAMILY[lang]!;
+            const mod = await import(`../../../src/languages/${dir}/${dir}.ts`);
+            const E = mod[make]();
+            const { parseJsonc } = await import("../../../src/core/jsonc.ts");
+            const def = parseJsonc(readFileSync(new URL(`../../../data/languages/${dir}/${dir}.jsonc`, import.meta.url), "utf8")) as any;
+            const words = new Set<string>();
+            for (const t of langTexts(lang)) for (const m of t.normalize("NFC").matchAll(/[ऀ-ॣॲ-ॿ]+/gu)) words.add(m[0]);
+            const s = def.signs;
+            const sign = (k: string): string[] => (s[k]?.char ? [s[k].char] : []);
+            const tails = ["", ...sign("virama"), ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga"), ...sign("nukta"),
+                ...Object.keys(def.vowelSigns), ...Object.keys(def.vowelSigns).flatMap((v) => sign("anusvara").map((a) => v + a)),
+                ...Object.keys(def.vowelSigns).flatMap((v) => sign("chandrabindu").map((a) => v + a)), "‍", "‌", "ऽ", "॑"];
+            const cons = Object.keys(def.consonants);
+            const vir = sign("virama")[0] ?? "्";
+            for (const c of cons) for (const t of tails) { words.add(c + t); words.add(c + t + "क"); words.add("अ" + c + t + "ता"); words.add("आ" + c + t + "ा"); }
+            for (const c of cons) for (const d of ["क", "ग", "च", "ड", "ढ", "त", "प", "म", "र", "ह"]) { words.add(c + vir + d + "ा"); words.add("आ" + c + vir + d + "ी"); }
+            for (const v of Object.keys(def.independentVowels)) for (const t of ["", ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga")]) { words.add(v + t); words.add(v + t + "ब"); words.add(v + t + "डा"); }
+            for (const w of words) {
+                emit({ op: "word", lang, word: units(w) }, E.word(w));
+                emit({ op: "rules", lang, word: units(w) }, E.wordRules(w));
+            }
+            const nums = new Set<string>();
+            for (let n = 0; n <= 3000; n++) nums.add(String(n));
+            for (let e = 4; e <= 22; e++) { nums.add("1" + "0".repeat(e)); nums.add("9".repeat(e)); nums.add("12345678901234567890123".slice(0, e)); }
+            for (const x of ["0.5", "3.14", "12.05", ".5", "0.0", "१२३", "१,२३४", "१.५", "1,00,000", "9,000", "0,001", "10,0", "9007199254740993", "9007199254740993.25", "123456789012345678901.5"]) nums.add(x);
+            for (const x of nums) emit({ op: "number", lang, word: units(x) }, E.number(x));
         }
     },
     numbers() {

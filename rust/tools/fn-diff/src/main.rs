@@ -902,6 +902,32 @@ fn main() {
                 }
             })
         }
+        "ne-normalize" => {
+            use vernacula_phonemizer::core::load_manifest::load_manifest;
+            use vernacula_phonemizer::languages::hindi::manifest::HindiDef;
+            use vernacula_phonemizer::languages::nepali::normalize::make_nepali_normalizer;
+            let def: HindiDef = load_manifest("languages/nepali", "nepali.jsonc").unwrap();
+            let norm = make_nepali_normalizer(&def.numbers);
+            Box::new(move |input| norm(&units(&input["text"])).unwrap())
+        }
+        "mr-normalize" => {
+            use vernacula_phonemizer::languages::marathi::{marathi::try_def, normalize::*};
+            let def = try_def().unwrap();
+            let norm = make_marathi_normalizer(&def.hindi.numbers, &def.words).unwrap();
+            Box::new(move |input| norm(&units(&input["text"])).unwrap())
+        }
+        "hindi-family-word" => {
+            let cache: std::cell::RefCell<std::collections::HashMap<String, FamilyWordFn>> =
+                Default::default();
+            Box::new(move |input| {
+                let lang = input["lang"].as_str().unwrap();
+                let mut c = cache.borrow_mut();
+                let f = c
+                    .entry(lang.to_string())
+                    .or_insert_with(|| family_word(lang));
+                f(input["op"].as_str().unwrap(), &units(&input["word"]))
+            })
+        }
         "abugida-core" => Box::new(|input| {
             use vernacula_phonemizer::core::weight_stress::{apply_weight_stress, tokenize_ipa};
             use vernacula_phonemizer::core::{
@@ -2006,4 +2032,58 @@ fn czech_polish(n: f64, fraction_is_3: bool) -> f64 {
     }
     let m10 = m100 % 10.0;
     if (2.0..=4.0).contains(&m10) { 1.0 } else { 2.0 }
+}
+
+type FamilyWordFn = Box<dyn Fn(&str, &JsString) -> JsString>;
+
+/// A Hindi-belt engine's word level (`word`, `wordRules`, `number`), as its own create function builds it.
+fn family_word(lang: &str) -> FamilyWordFn {
+    use vernacula_phonemizer::languages as l;
+    use vernacula_phonemizer::languages::hindi::hindi::NativeHindi;
+    fn native(h: NativeHindi) -> FamilyWordFn {
+        Box::new(move |op, w| match op {
+            "word" => h.word(w),
+            "rules" => h.word_rules(w),
+            _ => h.number(w).unwrap(),
+        })
+    }
+    match lang {
+        "bho" => native(l::bhojpuri::bhojpuri::create_bhojpuri(None).unwrap()),
+        "mag" => native(l::magahi::magahi::create_magahi(None).unwrap()),
+        "awa" => {
+            let e = l::awadhi::awadhi::create_awadhi(None).unwrap();
+            Box::new(move |op, w| match op {
+                "word" => e.word(w),
+                "rules" => e.word_rules(w),
+                _ => e.number(w).unwrap(),
+            })
+        }
+        "mai" => {
+            let e = l::maithili::maithili::create_maithili(None).unwrap();
+            Box::new(move |op, w| match op {
+                "word" => e.word(w),
+                "rules" => e.word_rules(w),
+                _ => e.number(w).unwrap(),
+            })
+        }
+        "hne" => native(l::chhattisgarhi::chhattisgarhi::create_chhattisgarhi(None).unwrap()),
+        "rkt" => native(l::rangpuri::rangpuri::create_rangpuri(None).unwrap()),
+        "ne" => {
+            let e = l::nepali::nepali::create_nepali(None).unwrap();
+            Box::new(move |op, w| match op {
+                "word" => e.word(w),
+                "rules" => e.word_rules(w),
+                _ => e.number(w).unwrap(),
+            })
+        }
+        "mr" => {
+            let e = l::marathi::marathi::create_marathi(None).unwrap();
+            Box::new(move |op, w| match op {
+                "word" => e.word(w),
+                "rules" => e.word_rules(w),
+                _ => e.number(w).unwrap(),
+            })
+        }
+        _ => panic!("hindi-family-word: no replay for {lang}"),
+    }
 }

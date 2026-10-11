@@ -1,0 +1,18 @@
+# Magahi off-golden probes. SYNTHETIC text only. dump.mts also replays probes/hi.txt through mag.
+# glide hardening (flat व→b, य→d͡ʒ, everywhere)
+वंश यंत्र विशाल भारतीय पाण्डव
+# the Bihari core: no length, श/ष→s, ण→n, ऐ→ɛ
+देश बैल गणेश षट
+# its own ordinal suffix मा, plus Hindi's वाँ/वीं/वें and the suppletive arm, which the block keeps
+१७मा शताब्दी, १०मा बेर, २३मा मुख्यमन्त्री
+१मा २मा ३मा ४मा ६मा दिन
+5वाँ 6वीं 7वें
+१०मासे पहिले
+१० मा बेर
+स्थल मा मन्दिर
+9007199254740993मा
+# avagraha, symbols, numbers
+करऽ होवऽ रहऽ
+50% आ ₹20 आ ५८० nm
+१२:३० बजे
+हम Gaya गेलियै।

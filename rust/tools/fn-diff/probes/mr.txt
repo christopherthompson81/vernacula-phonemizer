@@ -1,0 +1,33 @@
+# Marathi off-golden probes: one line per arm of src/languages/marathi/normalize.ts and of marathi.ts, each with
+# the neighbour that arm must decline. SYNTHETIC text only.
+# 1) vowel-sign repairs and ZW joiners
+अॅ अ‌ॅ अ‍ॉ अॉ बँक क‌ष
+# 2) native digits, a visarga between digits, colons
+९३ १,००० ३ः४५ विशेषत: स्वत: दुख: राम:श्याम कारण: पुढे
+# 3) era markers and their neighbours
+इ.स.पू. ३०० ई. स. पू ई.पू. २०० इ.स. १९४७ इसवी सन कइ.स. मोठे
+# 4) abbreviation
+डॉ. आंबेडकर डॉ आंबेडकर डॉ.१२
+# 5) ordinals: irregular, -ीस, शे, नऊ, units/teens, consonant-final tens, unsafe, glued and spaced
+1वा 2री 3रे 4थ्या 1ली 2वी 9वा 20वा 100वा 16व्या 60वी 54व्या 9007199254740993वा 5 वे
+1.5वा 3,4वा
+# 6) a number before व- that is not an ordinal suffix
+10 वर्षे 5वाजता 12 वेळा 9007199254740993 वर्षे
+# 7) sports times, clocks, the GMT dot clock
+1:23.45 5:00 वाजता 5:00 7:00 वाजेपर्यंत 9:30 18.30 GMT 9.75 GMT 24:00
+# 8) degrees
+25°C 30 °से. 40°से 98°F 10°c 20° N 30°S 40°E 50°W 45°
+# 9) percent (singular at exactly one), currency with magnitudes
+1% 1.0% 2% ९३% 1,5% 50 ٪ 3％ $5 ₹२२,५०० €10 £3 ¥4 $२.३ बिलियन $5 हजार
+# 10) units (the escaped alternation), and the decline before a letter
+5 किमी 3किमी/तास 4 मी/से 5 किमी² 2 सेमी2 10 किग्रॅ 7 ग्रॅ 3 मी 5 km² 4 km 2 mm2 10 ha 5 l 5 L 5 किमीचा
+# 11) ranges, fractions, a bare hundred
+5-10 10-5 1.5–2.5 1/2 1/4 3/4 2/3 1/2.5 100 लोक 100m 1,100 100.5 -100
+# 12) signs
++5 5+3 −3 x−3 ~5 ±2 a < b 5 > 3 8 ÷ 2 a=b
+# the symbol tier: ampersand, multiply, units after the amount, currency after the amount, percent
+B&B Arts & Sciences 3 × 4 3x4 10 km 2 cm 5 mm 3 kg 10 ha 2 l 5 L 100 m 802.11 g 5 £ 10 €
+# Latin runs, clause marks
+मराठी भाषा. Pune शहर? हो! ठीक॥
+# a bare % (no digit before it) reaches the tokenizer's bare-sign map, which WITH_SYMBOLS derives
+% वाढ, x% आणि टक्के %

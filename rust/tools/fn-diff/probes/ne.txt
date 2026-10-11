@@ -1,0 +1,38 @@
+# Nepali off-golden probes: one line per arm of src/languages/nepali/normalize.ts and the nepali.ts wrappers,
+# each with the neighbour that arm must decline. SYNTHETIC text only.
+# 1) ZWJ / ZWNJ removed
+गर्‍यो भयो‌ ठीक
+# 2) native digits fold
+१९ औं ३.५ १,२३४
+# 3) visarga colon: between letters, and the closed adverb list; a list colon stays a pause
+प्राय: पुन: अन्तत: मुख्यत: विशेषत: सामान्यत: स्वत: राम:श्याम
+कारक: तीन छ: पाँच
+# 4) abbreviations
+कि.मी. कि. मी यु.एस. यु. एस डब्ल्यु. डब्ल्यू. बुश डब्ल्यु.बाट
+डा. राम डा.राम डा. १२
+# 5) ordinals in -औं/-औँ: irregular, six declined, matra after a consonant-final cardinal, grouped, unsafe
+1औं 2औँ 3औं 4औं 9औं 6औं 15औं 20औँ 100औं 1,000औं 19 औं
+9007199254740993औं 12.5औं 3:15औं 7औंमा
+# 6) sports times, clock ranges, clocks
+1:23.45 10:05.5
+9:00-10:30 21:15–22:45
+5:00 बजे 5:00 9:30 7:00 बजेसम्म 24:00 12:60
+# 7) signs
+±5 -5 3-5 10 -5 (−3) +5 5+3 a +5 x<y 5 < 6 > 4 a=b 8÷2
+# 8) degrees
+25°C 25 °F 25°c 30° N 40°S 70°E 80°W 45° 5°Cx
+# 9) currency, before and after, magnitudes, the noun already written
+$5 $ 5.5 £20 €3 ¥100 $5 लाख 5$ 5 करोड $ $5 डलर US$5 $5,000.50
+# 10) units, squared, rates
+5 किमी 3मिमी 2 सेमी 10 किग्रा 5 किमी² 5 किमी2 5 किमीको
+60 किलोमिटर/घण्टा किमी / सेकेण्ड गज/मिनेट माइल/घण्टाको
+# 11) numeric ranges, and the declines (descending, a score, before देखि)
+5-10 10-5 2.5-3.5 5–10 देखि 3-3
+# 12) fractions
+1/2 3/4 1/2.5 1,000/2 1/1,000
+# 13) approximately, double spaces
+~5 ~ 10 एक  दुई   तीन
+# the symbol tier: percent, units, rates, exponents, ampersand, multiply
+50% 5 km 3 cm 2 mm 4 kg 10 m 5 km/h 3 m/s 5 m² 6 km³ A & B 3 × 4 3x4
+# the inherent vowel ʌ, and a Latin run whose ə is shielded from it
+म computer मा छु। नमस्ते Kathmandu about
