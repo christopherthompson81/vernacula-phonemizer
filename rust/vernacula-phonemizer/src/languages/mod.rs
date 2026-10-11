@@ -14,6 +14,7 @@ pub mod portuguese_br;
 pub mod russian;
 pub mod spanish;
 pub mod thai;
+pub mod turkish;
 
 /// The fraction guards are mirrors in the ported `\b…\b` family and Italian (#1495). Relational, as
 /// test/fraction-guards-1495.test.ts: a declined fraction reads as its numbers spaced.
