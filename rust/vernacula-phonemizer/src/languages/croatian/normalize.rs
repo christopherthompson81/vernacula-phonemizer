@@ -250,7 +250,10 @@ pub(crate) fn normalize_croatian(input: &JsString) -> JsString {
                 return mm.value(t);
             };
             let ends = |x: &str| word.ends_with(&js(x));
-            let slot = if ends("og") {
+            // A licensor's own slot first (#1532: `I. stoljeću` read *prvi*).
+            let slot = if let Slot::Own(licensed) = slot_of(&LICENSOR, &word) {
+                licensed
+            } else if ends("og") {
                 "m.gen"
             } else if ends("om") {
                 "m.loc"
@@ -333,7 +336,7 @@ pub(crate) fn normalize_croatian(input: &JsString) -> JsString {
     // 7b) a year with `godine` elided; the period kept only where it is also a sentence end.
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d.,\-])(1\d{3}|20\d{2}|2100)\.(?!\d)", "gu"),
+        js_re!(r"(?<![\d.,\-]|\d\/)(1\d{3}|20\d{2}|2100)\.(?!\d)", "gu"),
         |mm, all| elided_year(&ORD, mm, all),
     );
 
@@ -341,7 +344,7 @@ pub(crate) fn normalize_croatian(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*h)?",
+            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)(?:\s*h)?",
             "giu"
         ),
         |mm, t| {

@@ -98,7 +98,7 @@ const COUNTED_KEYS: [&str; 18] = [
     "litas",
     "squared",
 ];
-const WORD_KEYS: [&str; 21] = [
+const WORD_KEYS: [&str; 22] = [
     "decimalPoint",
     "minus",
     "plus",
@@ -120,6 +120,7 @@ const WORD_KEYS: [&str; 21] = [
     "number",
     "page",
     "inhabitants",
+    "perHour",
 ];
 
 fn validate(m: &LithuanianManifest) -> Result<(), String> {

@@ -365,7 +365,7 @@ public static class Normalize
 
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe LEAD_PLUS = JsRegex.Compile("(^|[\\s(])\\+\\s?(?=\\d)", "gu");
-    private static readonly JsRe LEAD_MINUS = JsRegex.Compile("(^|[\\s(])[-−]\\s?(?=\\d)", "gu");
+    private static readonly JsRe LEAD_MINUS = JsRegex.Compile("(^|[\\s(])[-−](?=\\d)", "gu");
     private static readonly JsRe TZ_PLUS = JsRegex.Compile("(?<=\\p{Lu})\\+(?=\\d)", "gu");
 
     private static readonly JsRe NUM_COMPOUND = JsRegex.Compile("(?<![\\d.,-])(\\d+)-(\\p{Ll}{4,})", "gu");

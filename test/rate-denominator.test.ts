@@ -98,7 +98,7 @@ const ACCEPTED_SPOKEN = new Set(
     ("ko kg/h|kl kg/h|ro kg/h|mr km/h|mr kg/h|sd kg/h|ak km/h|ak m/s|ak kg/h|ps km/h|ps kg/h|pbt km/h|" +
         "pbt kg/h|bg kg/h|is kg/h|haw kg/h|bo m/s|nci m/s|naq kg/h|ee km/h|ee m/s|bar kg/h|hmn km/h|" +
         "bal km/h|bal m/s|mn km/h|mn kg/h|yo m/s|my m/s|nya m/s|ln km/h|ln kg/h|bm km/h|mos km/h|ki km/h|" +
-        "ki m/s|ki kg/h|ka km/h|ka kg/h|lt km/h|lt m/s|lt kg/h|lg km/h|lg m/s|lg kg/h|ug km/h|ug kg/h|" +
+        "ki m/s|ki kg/h|ka km/h|ka kg/h|lt m/s|lt kg/h|lg km/h|lg m/s|lg kg/h|ug km/h|ug kg/h|" +
         // ⚠ THESE SEVEN WERE INVISIBLE TO THE FIRST INSTRUMENT and are what widening it found: the host's own
         // g2p reading the letter as a native phone. da `/h` → *ˈhɔːˀ*, nb → *ˈhoː*, mt → *ħ*, za `/s` → *θ*,
         // smj spells the whole rate. Verified pre-existing by running the widened classifier on both sides of

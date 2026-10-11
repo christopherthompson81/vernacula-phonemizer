@@ -415,7 +415,7 @@ mod tests {
         assert_eq!(e.normalize(&js("2:15:16")).to_string_lossy(), "2:15:16");
         assert_eq!(
             e.normalize(&js("515,3 km/val.")).to_string_lossy(),
-            "515 kablelis 3 km/val."
+            "penki šimtai penkiolika kablelis trys kilometrų per valandą."
         );
         assert_eq!(e.normalize(&js("802.11m")).to_string_lossy(), "802.11m");
         assert_eq!(
@@ -503,10 +503,6 @@ mod tests {
             "devyniasdešimt milijonų dolerių"
         );
         assert_eq!(
-            e.normalize(&js("515,3 km/val.")).to_string_lossy(),
-            "515 kablelis 3 km/val."
-        );
-        assert_eq!(
             e.normalize(&js("515,3 km/min.")).to_string_lossy(),
             "515 kablelis 3 km/min."
         );
@@ -558,6 +554,71 @@ mod tests {
             e.normalize(&js("07:19 a.m. vietos laiku"))
                 .to_string_lossy(),
             "07:19 a.m. vietos laiku"
+        );
+    }
+
+    /// The #1532 findings, pinned from test/sh-baltic-port-findings.test.ts (synthetic, TS-evaluated).
+    #[test]
+    fn lithuanian_port_findings_1532() {
+        let e = create_lithuanian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(
+            n("Bokšto aukštis siekia 50 m."),
+            "Bokšto aukštis siekia penkiasdešimt metų."
+        );
+        assert_eq!(
+            n("Tai įvyko 1990 m."),
+            "Tai įvyko tūkstantis devyni šimtai devyniasdešimt metais."
+        );
+        assert_eq!(
+            n("1802 m. Vilniuje"),
+            "tūkstantis aštuoni šimtai du metais Vilniuje"
+        );
+        assert!(
+            crate::phonemize("Tai įvyko 1990 m.", "lt")
+                .unwrap()
+                .ends_with(" .")
+        );
+        assert_eq!(
+            n("Jis bėgo 5 km/h greičiu."),
+            "Jis bėgo penki kilometrai per valandą greičiu."
+        );
+        assert_eq!(
+            n("Jis bėgo 21 km / h, o"),
+            "Jis bėgo dvidešimt vienas kilometras per valandą, o"
+        );
+        assert_eq!(
+            n("Greitis 2,5 km/h"),
+            "Greitis du kablelis penki kilometrų per valandą"
+        );
+        assert_eq!(
+            n("Vėjas siekė 240 km/val. greitį."),
+            "Vėjas siekė du šimtai keturiasdešimt kilometrų per valandą greitį."
+        );
+        assert_eq!(
+            n("Jis bėgo 5 km/h."),
+            "Jis bėgo penki kilometrai per valandą."
+        );
+        assert_eq!(
+            n("Sausio 5 d. 10:30 val."),
+            "Sausio penkios dieną dešimt valandų trisdešimt minučių."
+        );
+        assert_eq!(
+            n("Prasidėjo 8.46 val. ryte."),
+            "Prasidėjo aštuonios valandos keturiasdešimt šešios minutės ryte."
+        );
+        assert_eq!(
+            n("21:21 val."),
+            "dvidešimt viena valanda dvidešimt viena minutė."
+        );
+        assert_eq!(
+            n("10:30 val. Kitas"),
+            "dešimt valandų trisdešimt minučių Kitas"
+        );
+        assert_eq!(n("Laimėjo 3–2."), "Laimėjo 3–2.");
+        assert_eq!(
+            n("Laimėjo 1990–1995 metais."),
+            "Laimėjo 1990 iki 1995 metais."
         );
     }
 }

@@ -60,6 +60,7 @@ import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbo
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { own } from "../../core/own.ts";
 
 const N = MANIFEST.numbers;
 
@@ -323,16 +324,22 @@ export function normalizeSerbian(input: string): string {
 
     // 3) DOTTED ABBREVIATIONS. The dot is consumed before a following word so it cannot become a phrase
     //    break; at a real sentence end it is kept.
-    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
-        (m0, ab: string, sp: string) => {
+    //    ⚠ A CAPITAL AFTER THE DOT IS A NEW SENTENCE (#1532), so the dot is kept there: `itd. Sutra idemo`
+    //    read *i tako dalje Sutra idemo*, two sentences with no pause between them. Bosnian made the same fix
+    //    first. The case test runs in the CALLBACK: `\p{Lu}` inside an `i`-flagged pattern matches lowercase.
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(\\s+)(?=([\\p{L}\\d(]))`, "giu"),
+        (m0, ab: string, sp: string, next: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
             const w = DOTTED[lat(ab)];
-            return w === undefined ? m0 : `${w}${sp}`;
+            if (w === undefined) return m0;
+            return /\p{Lu}/u.test(next) ? `${w}.${sp}` : `${w}${sp}`;
         });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${DOTTED_ALT})\\.(?=\\s*[,;:])`, "giu"),
-        (_m, ab: string) => DOTTED[lat(ab)]!);
+        // ⚠ THE MISS BRANCH IS REACHABLE (#1122) here too. This was the one arm of the three without the
+        // guard (#1532), so `итᲁ., даље` (U+1C81, which `iu` folds onto д) printed `undefined`.
+        (m0, ab: string) => DOTTED[lat(ab)] ?? m0);
     //    ⚠ A CLOSING BRACKET OR QUOTE IS NOT A PAUSE — serbian.jsonc maps only `.!?…,;:` — so the dot must be
     //    KEPT before one, not consumed the way it is before a comma. Grouping `)` with the comma silently
     //    loses the sentence-final pause on `…, итд.)`.
@@ -458,7 +465,9 @@ export function normalizeSerbian(input: string): string {
     //    and cannot be mistaken for a licensor.
     s = rewrite(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
-            const slot = LICENSOR[lat(word)];
+            // ⚠ `own`, NOT `LICENSOR[…]` (#1532): the key is the word after the numeral, and a plain-object
+            // lookup reads `Object.prototype`, so `5. constructor` printed *undefined constructor*.
+            const slot = own(LICENSOR, lat(word));
             if (slot === undefined) return whole;
             const base = ordinalBase(Number(digits));
             if (base === undefined) return whole; // round thousands — see ordinalBase
@@ -469,7 +478,10 @@ export function normalizeSerbian(input: string): string {
     //    Serbian says a CARDINAL hour with the counted noun — `u 11 sati` — unlike Ukrainian's feminine
     //    ordinal. TWO-DIGIT minutes are required, which keeps scores (`5:3`, `26 : 0`) out. Runs before the
     //    decimal fold (step 10).
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu, (_m, h: string, min: string) => {
+    //    ⚠ THE TRAILING GUARD REFUSES `.`/`,` ONLY WITH A DIGIT BEYOND IT (#1532), i.e. a decimal or a dotted
+    //    continuation (`11:30,5`, `11:30.5`). Refusing any `.` or `,` left every time before a full stop or a
+    //    comma unread (`u 11:00.` was *jedanaest , nula*). Ukrainian had the same defect (#1525).
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)/gu, (_m, h: string, min: string) => {
         const hv = Number(h), mv = Number(min);
         const head = `${numberToWords(hv)} ${counted(hv, SAT)}`;
         return mv === 0 ? head : `${head} i ${numberToWords(mv)} ${counted(mv, MINUT)}`;

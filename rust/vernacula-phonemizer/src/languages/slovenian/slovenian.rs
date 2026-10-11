@@ -1132,4 +1132,17 @@ mod tests {
             "stressLexiconHas(\"brezoblačnostjo\")"
         );
     }
+
+    /// The #1532 findings, pinned from test/sh-baltic-port-findings.test.ts (synthetic, TS-evaluated).
+    #[test]
+    fn slovenian_port_findings_1532() {
+        let e = create_slovenian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(n("Seznam: - 5 jabolk."), "Seznam: - 5 jabolk.");
+        assert_eq!(
+            n("Temperatura je -5 stopinj."),
+            "Temperatura je minus 5 stopinj."
+        );
+        assert_eq!(n("(-5 stopinj)"), "(minus 5 stopinj)");
+    }
 }

@@ -33,6 +33,7 @@ import { makeSymbolNormalizer, type CountForms } from "../../core/normalizeSymbo
 import { numberToWords } from "./numbers.ts";
 import { HEAD_NOUN, ordinalWords } from "./ordinals.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { own } from "../../core/own.ts";
 
 /**
  * Latvian AGREEMENT for a counted noun: SINGULAR after a count ending in ...1 but NOT ...11 — *21 procents*,
@@ -316,7 +317,7 @@ const ORDINAL_RANGE = /(?<![\d.,\p{L}])(\d{1,4})\.\s*[-–—]\s*(\d{1,4})\.(\s+
 
 function ordinalRange(text: string): string {
     return rewrite(text, ORDINAL_RANGE, (whole, a: string, b: string, gap: string, next: string) => {
-        const c = HEAD_NOUN[next.toLowerCase()];
+        const c = own(HEAD_NOUN, next.toLowerCase()); // ⚠ `own`: a plain-object lookup reads Object.prototype (#1532)
         const first = c === undefined ? undefined : ordinalWords(Number(a), c);
         const second = c === undefined ? undefined : ordinalWords(Number(b), c);
         /**
@@ -376,7 +377,7 @@ function ordinalRange(text: string): string {
  */
 function ordinalPeriod(text: string): string {
     return rewrite(text, /(?<![\d.,])(\d{1,4})\.(\s+)(\p{Ll}[\p{L}\p{M}]*)/gu, (whole, fig: string, gap: string, next: string) => {
-        const c = HEAD_NOUN[next.toLowerCase()];
+        const c = own(HEAD_NOUN, next.toLowerCase()); // ⚠ `own`: a plain-object lookup reads Object.prototype (#1532)
         if (c === undefined) return `${fig}${gap}${next}`; // period dropped, figure left cardinal — see above
         const words = ordinalWords(Number(fig), c);
         /**
@@ -425,6 +426,39 @@ function ordinalPeriod(text: string): string {
  * makes the guard match what is written about it.
  */
 const RANGE = /(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d|[,.]\d|-)/gu;
+
+/**
+ * ⚠ A SCORE IS NOT A RANGE (#1532): `5 - 3` and the corpus's `pret kanādieti ir 7–2` read *5 līdz 3*. A pair
+ * of one- or two-digit WHOLE numbers that does not ascend is a score, and its dash is dropped so the two
+ * cardinals stand side by side (no score word is sourced here; Lithuanian refuses its scores the same way).
+ * A range ascends. The descending ranges this corpus does write are DECIMAL (`4,2–3,9 miljoniem gadu`), and
+ * those still read *līdz*. The known exposure is a whole-number descending span (`10–5 miljoni gadu`), ×0.
+ */
+function range(text: string): string {
+    return rewrite(text, RANGE, (_m, a: string, b: string) =>
+        /^\d{1,2}$/u.test(a) && /^\d{1,2}$/u.test(b) && Number(b) <= Number(a) ? `${a} ${b}` : `${a} līdz ${b}`);
+}
+
+/**
+ * 2b. THE CLOCK (#1532). There was no rule, so the colon was a clause pause inside the time: `Pulksten 10:30`
+ * read *desmit , trīsdesmit*. The time is read as its two figures with the pause removed, `10:30` → *10 30*,
+ * which is how the figure is spoken; `:00` drops (`plkst. 12:00` → *pulksten 12*), and a leading zero of the
+ * minutes is spoken (`7:05` → *7 0 5*, *septiņi nulle pieci*). ⚠ NO HOUR WORD AND NO CASE FORM is emitted:
+ * the idiomatic locative (*pulksten desmitos*) is not sourced here, so the figures stay cardinals.
+ * ⚠ THE GUARDS ARE THE ONES THE SERBO-CROATIAN CLOCKS USE: a 0–23 hour and two-digit minutes keep the
+ * corpus's score `26:00` out, and a `.`/`,` followed by a DIGIT keeps the durations (`4:41.30`, `1:09.02`)
+ * out, while a time before a full stop or a comma is still read.
+ * ⚠ A SPAN BETWEEN TWO CLOCKS (`06:30 - 07:30`) is joined with *līdz* FIRST: once the clocks are figures,
+ * the range step would see `30 - 7`, which descends, and drop the dash as a score.
+ */
+function clock(text: string): string {
+    return rewrite(rewrite(text, /(\d{1,2}:\d{2})\s?[-–—]\s?(?=\d{1,2}:\d{2})/gu, "$1 līdz "),
+        /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)/gu, (_m, h: string, min: string) => {
+            const hour = String(Number(h));
+            if (min === "00") return hour;
+            return min.startsWith("0") ? `${hour} 0 ${min.slice(1)}` : `${hour} ${min}`;
+        });
+}
 
 /**
  * 7. DEGREES. `°C` and `°F` take the scale name; a bare `°` after a figure is `grādi`.
@@ -534,9 +568,10 @@ export function normalizeLatvian(input: string): string {
     let s = input;
     s = rewrite(s, GROUP_SPACE, ""); // 1. de-group 29 660 → 29660, before anything reads a number
     s = abbreviations(s); // 2. dotted abbreviations, whose periods are the same periods as step 4's
+    s = clock(s); // 2b. HH:MM, before the range step can see a dash between two clocks
     s = ordinalRange(s); // 3. N.–M. + noun, before either half can be claimed separately
     s = ordinalPeriod(s); // 4. the ordinal period, before any step consumes a dot
-    s = rewrite(s, RANGE, `$1 līdz $2`); // 5. ranges, before a dash can be read as a minus
+    s = range(s); // 5. ranges (a score keeps no dash), before a dash can be read as a minus
     s = SYMBOLS(s); // 6. percent, currency, units, rates, exponents
     s = degrees(s); // 7. ° and the scale names
     s = signs(s); // 8. the remaining signs

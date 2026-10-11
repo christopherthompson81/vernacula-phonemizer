@@ -22,6 +22,7 @@ import { numberToWords } from "./numbers.ts";
 import { SYMBOLS } from "./croatian.ts";
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { own } from "../../core/own.ts";
 
 const N = MANIFEST.numbers;
 
@@ -191,9 +192,11 @@ export function normalizeCroatian(input: string): string {
         (whole, rom: string, word: string) => {
             const base = ROMAN_ORD[rom.toUpperCase()];
             if (base === undefined) return whole;
-            // The slot from the licensing word's ending: svjetskog/svjetskom/reda → the matching case.
-            const slot = word.endsWith("og") ? "m.gen" : word.endsWith("om") ? "m.loc"
-                : word.endsWith("e") || word.endsWith("a") ? "m.gen" : "m.nom";
+            // The slot a LICENSOR governs comes first, so `I. stoljeću` takes the m.loc that `4. stoljeću`
+            // takes in step 7 (#1532: the ending heuristic below read `-u` as the nominative, *prvi stoljeću*).
+            // Otherwise the slot from the following word's ending: svjetskog/svjetskom/reda → the matching case.
+            const slot = own(LICENSOR, word) ?? (word.endsWith("og") ? "m.gen" : word.endsWith("om") ? "m.loc"
+                : word.endsWith("e") || word.endsWith("a") ? "m.gen" : "m.nom");
             const ord = inflect(base, slot);
             return ord === undefined ? whole : `${ord} ${word}`;
         });
@@ -239,7 +242,7 @@ export function normalizeCroatian(input: string): string {
     // 7) THE `N.` ORDINAL — claimed when a licensing word from the closed list follows, LOWERCASE.
     s = rewrite(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
-            const slot = LICENSOR[word];
+            const slot = own(LICENSOR, word); // ⚠ `own`: a plain-object lookup reads Object.prototype (#1532)
             if (slot === undefined) return whole;
             const base = ordinalBase(Number(digits));
             if (base === undefined) return whole;
@@ -261,7 +264,11 @@ export function normalizeCroatian(input: string): string {
     //     A SENTENCE END is a capital or the end of the utterance — NOT merely "no letter follows".
     //     Closing punctuation counts as neither: the corpus writes the year range `(1644. - 1912.)`, where
     //     both periods are ordinal markers and the text runs on after the bracket.
-    s = rewrite(s, /(?<![\d.,\-])(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
+    //     ⚠ A FRACTION'S DENOMINATOR IS NOT A YEAR (#1532): `2/1000.` read *2/tisućite* and lost its full
+    //     stop, so a DIGIT-THEN-SLASH joins the lookbehind. Step 12 reads denominators of up to three digits
+    //     only, so this one stays as cardinals. ⚠ NOT A BARE `/`: the corpus's season `1995./1996.` is two
+    //     years, and the dot before its slash is what tells it from a fraction.
+    s = rewrite(s, /(?<![\d.,\-]|\d\/)(1\d{3}|20\d{2}|2100)\.(?!\d)/gu, (whole, digits: string, at: number, all: string) => {
         const base = ordinalBase(Number(digits));
         if (base === undefined) return whole;
         const year = inflect(base, "f.gen");
@@ -276,7 +283,9 @@ export function normalizeCroatian(input: string): string {
     //    time: a THIRD `\d.\d\d` field (4:41.30) means a pace. The optional `h` is consumed WITHOUT
     //    eating the space before a following word (the clock-glue trap): a bare `\s*` glued "22:00 i
     //    23:00" → "satai" and "12:00 GMT" → "satiGMT".
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![:.\d])(?:\s*h)?/giu,
+    //    ⚠ A `.` IS REFUSED ONLY WITH A DIGIT BEYOND IT (#1532): `(?![:.\d])` left every time before a full
+    //    stop unread (`u 11:00.` was *jedanaest , nula*). The pace's third field (`4:41.30`) is still declined.
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)(?:\s*h)?/giu,
         (_m, h: string, min: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv > 23 || mv > 59) return _m;

@@ -16,7 +16,7 @@ use crate::core::initialisms::{
     InitialismData, LetterName, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
 };
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, is_object_prototype_key, js, js_number};
+use crate::core::js_string::{JsString, js, js_number};
 use crate::core::normalize_symbols::{
     ExponentPosition, ExponentWords, Multiply, PositionDecl, SymbolData, SymbolNormalizer, UnitPer,
     make_symbol_normalizer, slavic_count_form,
@@ -123,21 +123,18 @@ const ORD_TENS: [&str; 10] = [
     "devedeseti",
 ];
 
-/// A licensing table's lookup, as a plain-object index: an own key, an inherited `Object.prototype` member
-/// (whose value is a function, so `ENDINGS[slot]` then misses), or nothing.
+/// A licensing table's lookup: an own key, or nothing.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Slot {
     Own(&'static str),
-    Proto,
     Miss,
 }
 
-/// `TABLE[key]` over a record literal.
+/// `own(TABLE, key)` over a record literal (an `Object.prototype` name is a miss, #1532).
 pub(crate) fn slot_of(table: &[(&str, &'static str)], key: &JsString) -> Slot {
     let k = key.to_string_lossy();
     match table.iter().find(|(w, _)| *w == k) {
         Some((_, s)) => Slot::Own(s),
-        None if is_object_prototype_key(&k) => Slot::Proto,
         None => Slot::Miss,
     }
 }
@@ -436,15 +433,26 @@ pub(crate) fn normalize_serbian(input: &JsString) -> JsString {
         },
     );
 
-    // 3) dotted abbreviations. ⚠ The miss branch is reachable (#1122); the middle arm's `!` stringifies it.
-    s = rewrite_with(&s, &ABBREV.0, |mm, t| {
+    // 3) dotted abbreviations. ⚠ The miss branch is reachable (#1122) on every arm. Before a capital the
+    //    first arm keeps the dot (#1532), tested in the callback: `\p{Lu}` under `i` matches lowercase.
+    s = rewrite_with(&s, &ABBREV_NEXT, |mm, t| {
         match dotted(&DOTTED, &mm.group(1, t).unwrap()) {
             None => mm.value(t),
-            Some(w) => js(w).concat(&mm.group(2, t).unwrap()),
+            Some(w) => {
+                let dot = if js_re!(r"\p{Lu}", "u").test(&mm.group(3, t).unwrap()) {
+                    "."
+                } else {
+                    ""
+                };
+                js(w).concat(&js(dot)).concat(&mm.group(2, t).unwrap())
+            }
         }
     });
     s = rewrite_with(&s, &ABBREV.1, |mm, t| {
-        js(dotted(&DOTTED, &mm.group(1, t).unwrap()).unwrap_or("undefined"))
+        match dotted(&DOTTED, &mm.group(1, t).unwrap()) {
+            None => mm.value(t),
+            Some(w) => js(w),
+        }
     });
     s = rewrite_with(&s, &ABBREV.2, |mm, t| {
         match dotted(&DOTTED, &mm.group(1, t).unwrap()) {
@@ -569,7 +577,10 @@ pub(crate) fn normalize_serbian(input: &JsString) -> JsString {
     // 8) the colon clock: a cardinal hour with the counted noun.
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])", "gu"),
+        js_re!(
+            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)",
+            "gu"
+        ),
         |mm, t| {
             let hv = js_number(&mm.group(1, t).unwrap());
             let mv = js_number(&mm.group(2, t).unwrap());
@@ -606,6 +617,17 @@ pub(crate) fn clock_words(hv: f64, mv: f64, words: &dyn Fn(f64) -> JsString) -> 
 
 /// The three dotted-abbreviation arms: before a following word, before `,;:`, at a sentence end.
 static ABBREV: LazyLock<(JsRegex, JsRegex, JsRegex)> = LazyLock::new(|| dotted_arms(&DOTTED_ALT));
+/// Serbian's first arm captures the follower (group 3) for the capital test; Bosnian's reads it off the text.
+static ABBREV_NEXT: LazyLock<JsRegex> = LazyLock::new(|| {
+    JsRegex::new(
+        &format!(
+            r"(?<![\p{{L}}\p{{M}}])({})\.(\s+)(?=([\p{{L}}\d(]))",
+            *DOTTED_ALT
+        ),
+        "giu",
+    )
+    .unwrap()
+});
 
 pub(crate) fn dotted_arms(alt: &str) -> (JsRegex, JsRegex, JsRegex) {
     (

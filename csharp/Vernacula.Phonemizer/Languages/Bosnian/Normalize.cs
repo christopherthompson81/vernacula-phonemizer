@@ -236,7 +236,7 @@ public static class Normalize
         JsRegex.Compile("(\\d+(?:,\\d+)?)\\s?milja\\s*\\/\\s*(?:sat|h)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe CLOCK_SPAN = JsRegex.Compile("(\\d{1,2}:\\d{2})\\s?[-–—]\\s?(?=\\d{1,2}:\\d{2})", "gu");
     private static readonly JsRe CLOCK =
-        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])(\\s*(?:sati|sata|časova|sahati|sahata))?", "giu");
+        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:]|[.,]\\d)(\\s*(?:sati|sata|časova|sahati|sahata))?", "giu");
     private static readonly JsRe YEAR_SPAN =
         JsRegex.Compile("(?<![\\d.,])(1\\d{3}|20\\d{2}|2100)\\s?[-–—]\\s?(1\\d{3}|20\\d{2}|2100)\\.(?=\\s+\\p{Ll})", "gu");
     private static readonly JsRe ORDINAL_PAIR = JsRegex.Compile(

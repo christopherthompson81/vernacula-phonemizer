@@ -235,6 +235,30 @@ public static class Normalize
      *  date) is not read as a range. */
     private static readonly JsRe RANGE =
         JsRegex.Compile("(?<![\\d,.\\p{L}-])(\\d+(?:,\\d+)?)\\s*[-–—]\\s*(\\d+(?:,\\d+)?)(?!\\d|[,.]\\d|-)", "gu");
+    private static readonly JsRe SMALL_WHOLE = JsRegex.Compile("^\\d{1,2}$", "u");
+
+    /** A non-ascending pair of 1–2 digit whole numbers is a SCORE, and its dash is dropped (#1532). */
+    private static string Range(string text) => Rewrite(text, RANGE, m =>
+    {
+        var a = m.Groups[1].Value;
+        var b = m.Groups[2].Value;
+        return SMALL_WHOLE.IsMatch(a) && SMALL_WHOLE.IsMatch(b) && Js.Number(b) <= Js.Number(a)
+            ? $"{a} {b}" : $"{a} līdz {b}";
+    });
+
+    // ── 2b. the clock (#1532) ──────────────────────────────────────────────────────────────────────────
+    private static readonly JsRe CLOCK_SPAN = JsRegex.Compile("(\\d{1,2}:\\d{2})\\s?[-–—]\\s?(?=\\d{1,2}:\\d{2})", "gu");
+    private static readonly JsRe CLOCK =
+        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:]|[.,]\\d)", "gu");
+
+    /** `HH:MM` → the two figures with the colon's pause removed; `:00` drops, a leading minute zero is spoken. */
+    private static string Clock(string text) => Rewrite(Rewrite(text, CLOCK_SPAN, "$1 līdz "), CLOCK, m =>
+    {
+        var hour = Js.NumberToString(Js.Number(m.Groups[1].Value));
+        var min = m.Groups[2].Value;
+        if (min == "00") return hour;
+        return min.StartsWith('0') ? $"{hour} 0 {min[1..]}" : $"{hour} {min}";
+    });
 
     // ── 7. degrees ────────────────────────────────────────────────────────────────────────────────────
     /** ⚠ THE WHITESPACE AFTER `°` IS ONLY CONSUMED WHEN A SCALE LETTER IS ACTUALLY TAKEN — an unconditional
@@ -321,9 +345,10 @@ public static class Normalize
         var s = input;
         s = Rewrite(s, GROUP_SPACE, "");   // 1. de-group 29 660 → 29660, before anything reads a number
         s = Abbreviations(s);              // 2. dotted abbreviations, whose periods are step 4's periods
+        s = Clock(s);                      // 2b. HH:MM, before the range step can see a dash between clocks
         s = OrdinalRange(s);               // 3. N.–M. + noun, before either half can be claimed separately
         s = OrdinalPeriod(s);              // 4. the ordinal period, before any step consumes a dot
-        s = Rewrite(s, RANGE, "$1 līdz $2"); // 5. ranges, before a dash can be read as a minus
+        s = Range(s);                      // 5. ranges (a score keeps no dash), before a dash is a minus
         s = SYMBOLS(s);                    // 6. percent, currency, units, rates, exponents
         s = Degrees(s);                    // 7. ° and the scale names
         s = Signs(s);                      // 8. the remaining signs

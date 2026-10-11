@@ -23,3 +23,7 @@ Format 4x4 un 6×2 un Rock & Roll.
 Skaitlis 3,14 un 0,001 un 1,00 un 1234567890123456,5.
 Loks, maize, draugs, dievs, Latvija, dzelzs, atgriezt, daudz, Monako, hokejs, Ōsaka.
 Skaitlis 12345678901234567890 un 1000000000 un 007.
+Pulksten 10:30 sākās, plkst. 7:05 beidzās.
+No 06:30 - 07:30 un plkst. 12:00 pēc GMT.
+Rezultāts 5 - 3 un 7–2, bet no 10 - 20 metriem.
+Viņš bija 3. constructor.

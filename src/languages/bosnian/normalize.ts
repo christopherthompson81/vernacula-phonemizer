@@ -60,6 +60,7 @@ import { makeSymbolNormalizer, slavicCountForm } from "../../core/normalizeSymbo
 import { numberToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { own } from "../../core/own.ts";
 
 const N = MANIFEST.numbers;
 
@@ -528,7 +529,9 @@ export function normalizeBosnian(input: string): string {
     //    `ostvarila ugodnu pobjedu od 26:00 protiv petoplasirane Zambije` (26 is not an hour), plus the
     //    utterance-final `rezultat bio 6:6.` (one-digit minute).
     //    RUNS BEFORE the range rule (step 9), which would otherwise eat `Između 10:00 - 11:00 sati`.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])(\s*(?:sati|sata|časova|sahati|sahata))?/giu,
+    //    ⚠ THE TRAILING GUARD REFUSES `.`/`,` ONLY WITH A DIGIT BEYOND IT (#1532), as in Serbian: a time before
+    //    a full stop or a comma (`u 11:00.`) was left unread, and only a decimal continuation is declined.
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)(\s*(?:sati|sata|časova|sahati|sahata))?/giu,
         (_m, h: string, min: string, _noun: string | undefined) => {
             const hv = Number(h), mv = Number(min);
             const head = `${numberToWords(hv)} ${counted(hv, SAT)}`;
@@ -581,7 +584,7 @@ export function normalizeBosnian(input: string): string {
     s = rewrite(s,
         new RegExp(`(?<![\\d.,])(\\d{1,4})\\.\\s+(${CONNECTIVE_ALT})\\s+(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)`, "gu"),
         (whole, from: string, conn: string, to: string, word: string) => {
-            const slot = LICENSOR[lat(word)];
+            const slot = own(LICENSOR, lat(word)); // ⚠ `own`: a plain-object lookup reads Object.prototype (#1532)
             if (slot === undefined) return whole;
             const a = ordinalBase(Number(from)), b = ordinalBase(Number(to));
             if (a === undefined || b === undefined) return whole; // round thousands — see ordinalBase
@@ -596,7 +599,7 @@ export function normalizeBosnian(input: string): string {
     //     gone and its `e.` cannot be mistaken for a licensor.
     s = rewrite(s, /(?<![\d.,])(\d{1,4})\.\s+(\p{Ll}[\p{L}\p{M}]*)/gu,
         (whole, digits: string, word: string) => {
-            const slot = LICENSOR[lat(word)];
+            const slot = own(LICENSOR, lat(word)); // ⚠ `own`: a plain-object lookup reads Object.prototype (#1532)
             if (slot === undefined) return whole;
             const base = ordinalBase(Number(digits));
             if (base === undefined) return whole; // round thousands — see ordinalBase

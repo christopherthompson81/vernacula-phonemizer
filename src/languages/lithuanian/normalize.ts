@@ -190,6 +190,15 @@ const SP = "[ \\u00a0\\u202f\\u2009]";  // space, NBSP, NNBSP, thin space
 const NUM = `(?<![\\d.,:])(\\d+(?:,\\d+)?)(?!\\d|[.,]\\d|:)`;
 
 /**
+ * DOES THE UTTERANCE END HERE? Nothing but closing brackets, quotes and space after an abbreviation's dot.
+ * Then the dot is ALSO the full stop, and a rule that consumes it must put it back (#1532: `siekia 50 m.`
+ * came out with no final stop). ⚠ A FOLLOWING CAPITAL IS NOT COUNTED AS A SENTENCE END, unlike Croatian's
+ * year rule: FLEURS lt_lt writes `2009 m. Vengrijos`, `4892 m. Vinsono kalnas`, `2007 m. Taipėjaus`, a
+ * genitive proper noun straight after the year, so a capital would put a false pause inside the clause.
+ */
+const endsUtterance = (rest: string): boolean => /^[\s)»"'“”\]]*$/u.test(rest);
+
+/**
  * GENDER. Lithuanian's 1–9 inflect for gender and the engine's `numberToWords` emits the MASCULINE citation
  * form, which is correct for a bare numeral (it has no noun to agree with) and wrong the moment this layer
  * supplies one: `4 val.` is *keturios valandos*, never *keturi valandos*. Only the FINAL unit word of a
@@ -293,8 +302,12 @@ const MAGS: readonly [RegExp, LithuanianAgreement][] = [
  * ⚠ AND THE REFUSAL HAD ALREADY SEEN THE DISCRIMINATOR AND READ IT BACKWARDS — it cites `19:11 val.` as a
  * reason NOT to read, because the hour noun "is already there". It is: which is exactly what makes it a
  * marker no counter-example carries.
- * ⚠ NO WORD IS EMITTED. `val.` is written, so nothing needs sourcing; what this removes is the CLAUSE
- * PAUSE the colon was, and the full stop `8.46` was taking mid-figure.
+ * ⚠ THE HOURS AND THE MINUTES ARE BOTH COUNTED (#1532). This used to emit no word and only drop the
+ * separator, leaving `10 30 val.` for step 10's hours rule, which then counted the MINUTES as hours:
+ * `10:30 val.` read *10 trisdešimt valandų*, "10, thirty hours". The clock is now read whole, as the
+ * written `10 val. 30 min.` is: *dešimt valandų trisdešimt minučių*, both nouns this file already declares
+ * (`hour`, `minute`), both feminine, agreeing with their own figure. `:00` reads the hours alone, and the
+ * `val.` is consumed with it; its dot is put back where the utterance ends there.
  * ⚠ EVERY COUNTER-EXAMPLE THE REFUSAL NAMES IS STILL DECLINED, because none carries the marker: the
  * timestamps `00:58:53 UTC` / `19:14:07 GMT`, the durations `2:15:16` and `5:48:45.98`, the FLEURS sports
  * times `4:41.30` / `2:11.60` / `1:09.02`, and the Wi-Fi designations `802.11a/b/g/n`.
@@ -308,7 +321,7 @@ const MAGS: readonly [RegExp, LithuanianAgreement][] = [
  * as `(?![\d.,:])` it declined every clock that ENDS A CLAUSE — `kusaawa 11:29,` and `ssaawa 11:00,` came
  * back untouched, which is trap 58 and is how half the marked instances were being missed.
  */
-const CLOCK_MARKED = /(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)(?=\s*val\b)/gu;
+const CLOCK_MARKED = /(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)\s*val\b(\.?)/gu;
 /**
  * ⚠ A SPAN'S FIRST OPERAND IS **NOT** CLAIMED, AND THAT IS A REVERSAL RECORDED RATHER THAN HIDDEN.
  * `8:00 - 19:00 val.` is the refusal's own opening-hours example, and the marker plainly licenses both
@@ -316,8 +329,9 @@ const CLOCK_MARKED = /(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)(
  * range rule below sees a bare `00 - 19` and claims it: *8 nuo 00 iki 19 nulis valandų*, "8 from 00 to 19
  * zero hours". Exactly tn's known-loss shape (#1104) from the other side — a rule that turns a separator
  * into a boundary changes what the NEXT rule can see.
- * So only the operand the marker touches is claimed, and `8:00 - 19 nulis valandų` is where this stops:
- * one pause removed, one left, and no new wrong word. Fixing it properly means the range rule learning to
+ * So only the operand the marker touches is claimed, and `8:00 - devyniolika valandų` is where this stops:
+ * one pause removed, one left, and no new wrong word (it was `8:00 - 19 nulis valandų` until the clock read
+ * its own minutes, #1532). Fixing it properly means the range rule learning to
  * see an already-rewritten operand, which is a new pattern shape rather than a move.
  */
 
@@ -331,7 +345,11 @@ export function normalizeLithuanian(input: string): string {
 
     // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the ordinal and
     //    decimal rules below both read a dot and would spend `8.46`'s before this could see it.
-    t = rewrite(t, CLOCK_MARKED, "$1 $2");
+    t = rewrite(t, CLOCK_MARKED, (m, h: string, min: string, dot: string, off: number, whole: string) => {
+        const minutes = Number(min) === 0 ? "" : ` ${quantity(min, N.minute)}`;
+        const stop = dot !== "" && endsUtterance(whole.slice(off + m.length)) ? "." : "";
+        return `${quantity(h, N.hour)}${minutes}${stop}`;
+    });
 
     // 1) FIXED MULTI-DOT PHRASES, ABOVE EVERY SINGLE-DOT RULE. Two separate reasons, and both bite:
     //    · The playbook's standing coupling — a multi-dot abbreviation must be claimed before a single-dot
@@ -436,7 +454,10 @@ export function normalizeLithuanian(input: string): string {
     //    komandai 155–157` puts three words between the verb and the score, so an end-anchored needle
     //    missed it — which is why `komandai` was on the list at all: it was doing the ANCHORING rather than
     //    the identifying. Widening the reach is what let the over-broad word come off it.
-    const SCORE = new RegExp(`${NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|lygus)`, "iu");
+    //    ⚠ `laimėj` ("won") JOINS `pralaimėj` ("lost") (#1532): `Laimėjo 3–2.` read *nuo 3 iki 2*, a
+    //    descending range. FLEURS lt_lt has no `laimėj` within 50 characters before any digit pair, so it
+    //    refuses nothing the corpus reads today.
+    const SCORE = new RegExp(`${NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|laimėj|lygus)`, "iu");
     t = rewrite(t,
         new RegExp(
             `(?<![\\d.,:/\\p{L}\\p{M}–—-])(\\d+(?:,\\d+)?)${SP}*[–—-]${SP}*(\\d+(?:,\\d+)?)` +
@@ -444,7 +465,11 @@ export function normalizeLithuanian(input: string): string {
             "gu",
         ),
         (m, a: string, b: string, off: number, whole: string) => {
-            if (SCORE.test(whole.slice(Math.max(0, off - 50), off))) return m;
+            // `temporal` is explained below. ⚠ A TEMPORAL SPAN IS NEVER A SCORE (#1532): once `laimėj` joined
+            // the list, `Laimėjo 1990–1995 metais` was refused as one, so the score test yields to it.
+            const after = whole.slice(off + m.length, off + m.length + 10);
+            const temporal = new RegExp(`^${SP}*(m\\.|d\\.|a\\.|met|dien|amž|tūkstantme)`, "u").test(after);
+            if (!temporal && SCORE.test(whole.slice(Math.max(0, off - 50), off))) return m;
             // ⚠ DO NOT SAY `nuo` TWICE. Word-bounded and case-insensitive, for both reasons the Luganda
             // review found: `nuo` is a substring of nothing dangerous here, but it opens a sentence
             // ("Nuo 1952 iki 1967") as often as it sits mid-clause, and a case-sensitive needle would
@@ -475,8 +500,6 @@ export function normalizeLithuanian(input: string): string {
             // really needs are the series the header records as measured and refused — and it is kept
             // because a connective is what makes the span audible at all. What the fix above removes is the
             // SECOND, avoidable clash, not the first.
-            const after = whole.slice(off + m.length, off + m.length + 10);
-            const temporal = new RegExp(`^${SP}*(m\\.|d\\.|a\\.|met|dien|amž|tūkstantme)`, "u").test(after);
             const from = hasNuo || temporal ? "" : `${W.rangeFrom} `;
             // ⚠ THE LEFT OPERAND IS RE-EMITTED AS DIGITS, so the tokenizer words-ifies it downstream and no
             // rule in this file can make it AGREE. That is harmless for a masculine noun, which is the
@@ -550,8 +573,9 @@ export function normalizeLithuanian(input: string): string {
     //    was understood. A TRAILING slash: the first cut of this rule had no such guard and read
     //    `500 m/s` as *penki šimtai METRŲ/s* — it claimed the numerator of a RATE and left the denominator
     //    raw, which is strictly worse than the two raw letters it replaced. 8 rates in the retained text
-    //    (`500 m/s`, `90 m/s`, `16 m/s`, `515,3 km/val.`, `1,5 Mbit/s` ×3, `1,32 MB/s`) and no rate word is
-    //    declared, so all 8 are refused WHOLE. Trap 54's `si` case in both directions.
+    //    (`500 m/s`, `90 m/s`, `16 m/s`, `515,3 km/val.`, `1,5 Mbit/s` ×3, `1,32 MB/s`). Only `km/h` and
+    //    `km/val.` have a rate word (`perHour`, read just above, #1532); the other 7 are refused WHOLE.
+    //    Trap 54's `si` case in both directions.
     //    ⚠ A MAGNITUDE MAY STAND BETWEEN THE FIGURE AND ITS UNIT, AND THIS STEP MUST CLAIM IT — the
     //    playbook's "One declaration, two consumers" note, found by the corpus diff rather than reasoned
     //    to. `Lietuva plotu (65,3 TŪKST. km²)` is the shape, ×6 in one Baltic-geography paragraph
@@ -561,6 +585,18 @@ export function normalizeLithuanian(input: string): string {
     //    magnitude step having no idea a unit was behind it. Claiming both here is the fix trap 14
     //    prescribes: once a rule stops re-emitting its operand verbatim it owns whatever the later steps
     //    can no longer see. After a magnitude the unit is always the GENITIVE plural.
+    //    ⚠ ONE RATE IS READ, `km/h` (and `km/val.`), BEFORE THE UNITS (#1532). The slash guard below refuses
+    //    every rate whole, which left `5 km/h` as the raw letters *k m h*. The kilometre agrees with its figure
+    //    exactly as the bare unit does, and the denominator is the spelled idiom (`words.perHour`). FLEURS
+    //    lt_lt writes the rate 10 times. The `h` is not an abbreviation, so a dot after it is the writer's
+    //    full stop and is left alone; the dot of `val.` is consumed and put back where the utterance ends.
+    t = rewrite(t,
+        new RegExp(`(?<![/\\p{L}])${NUM}${SP}*km${SP}*/${SP}*(?:h${NOT_LETTER_AFTER}|val${NOT_LETTER_AFTER}(\\.)?)`, "gu"),
+        (m, num: string, dot: string | undefined, off: number, whole: string) => {
+            const stop = dot !== undefined && endsUtterance(whole.slice(off + m.length)) ? "." : "";
+            return `${quantity(num, N.kilometre)} ${W.perHour}${stop}`;
+        },
+    );
     const MAG_MID = `(?:${SP}*(mlrd|mln|tūkst)\\.?)?`;
     const UNITS: readonly [string, LithuanianAgreement, boolean][] = [
         ["km", N.kilometre, true], ["mm", N.millimetre, true], ["cm", N.centimetre, true],
@@ -760,11 +796,17 @@ export function normalizeLithuanian(input: string): string {
     //     admitting the capitalised variant, which trap 7 normally demands, would read a person's initial
     //     as *metais*. The initialism pass claims those instead. Probed: `2000 M.` is left alone.
     const MONTHS = NRM.monthsGen.join("|");
+    //     ⚠ AT THE END OF THE UTTERANCE THE DOT IS ALSO THE FULL STOP, and consuming it lost the final stop
+    //     (#1532: `siekia 50 m.`, and every sentence-final year). It is put back there; see `endsUtterance`
+    //     for why a following capital does not count. Declined from the same report: reading a small `50 m.`
+    //     as METRES. FLEURS lt_lt's small-operand `m.` are years and ages (`20–30 m. amžiaus`, `400 m. po
+    //     Kristaus`), so the year reading stays (the header's 346/347).
     t = rewrite(t,
         new RegExp(`${NUM}${SP}*m\\.(${SP}*(?:${MONTHS})${NOT_LETTER_AFTER})?`, "gu"),
-        (_m, num: string, month: string | undefined) => {
+        (m, num: string, month: string | undefined, off: number, whole: string) => {
             const small = !num.includes(",") && num.length <= 2;
             const noun = month !== undefined || num.includes(",") || small ? W.yearGen : W.yearInstr;
+            if (month === undefined && endsUtterance(whole.slice(off + m.length))) return `${bare(num)} ${noun}.`;
             return `${bare(num)} ${noun}${month ?? ""} `;
         },
     );

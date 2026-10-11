@@ -165,18 +165,25 @@ public static class Normalize
     };
 
     /**
-     * A CLOCK'S SEPARATOR LOSES ITS PAUSE BEHIND `val.` — and nothing else happens. NO WORD IS EMITTED;
-     * what this removes is the CLAUSE PAUSE the colon was, and the full stop `8.46` was taking mid-figure.
+     * A CLOCK MARKED BY `val.` IS READ WHOLE: the hours and the minutes each counted with their own noun
+     * (#1532), the `val.` consumed and its dot put back where the utterance ends.
      * ⚠ `a.m.`/`p.m.` are deliberately NOT in the marker set: removing the colon puts the minute field next
      * to the `a.`, and step 6's century abbreviation then reads `19 a.` as *devyniolika amžiaus*. Trading a
      * pause for a wrong WORD is the wrong side of trap 53.
      * ⚠ THE TRAILING GUARD REJECTS A DIGIT OR A SEPARATOR THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK.
      */
     private static readonly JsRe CLOCK_MARKED =
-        JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3])[.:]([0-5]\\d)(?![\\d]|[.,:]\\d)(?=\\s*val\\b)", "gu");
+        JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3])[.:]([0-5]\\d)(?![\\d]|[.,:]\\d)\\s*val\\b(\\.?)", "gu");
+
+    /** Nothing but closing brackets, quotes and space after an abbreviation's dot: the dot is also the
+     *  full stop, and a rule that consumes it puts it back. A following capital does not count. */
+    private static readonly JsRe END_UTTERANCE = JsRegex.Compile("^[\\s)»\"'“”\\]]*$", "u");
+    private static bool EndsUtterance(string rest) => END_UTTERANCE.IsMatch(rest);
 
     private static readonly JsRe SCORE =
-        JsRegex.Compile($"{NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|lygus)", "iu");
+        JsRegex.Compile($"{NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|laimėj|lygus)", "iu");
+    private static readonly JsRe KM_PER_HOUR = JsRegex.Compile(
+        $"(?<![/\\p{{L}}]){NUM}{SP}*km{SP}*/{SP}*(?:h{NOT_LETTER_AFTER}|val{NOT_LETTER_AFTER}(\\.)?)", "gu");
     private static readonly JsRe HAS_NUO = JsRegex.Compile(
         $"{NOT_LETTER_BEFORE}(?:nuo|iki|apie|prieš|per|tarp){NOT_LETTER_AFTER}{SP}*$", "iu");
     private static readonly JsRe HAS_IKI = JsRegex.Compile($"{NOT_LETTER_BEFORE}iki{NOT_LETTER_AFTER}{SP}*$", "iu");
@@ -274,7 +281,16 @@ public static class Normalize
 
         // 0) THE MARKED CLOCK loses the separator's pause. First, because the ordinal and decimal rules
         //    below both read a dot and would spend `8.46`'s before this could see it.
-        t = Rewrite(t, CLOCK_MARKED, "$1 $2");
+        {
+            var subject = t;
+            t = Rewrite(t, CLOCK_MARKED, m =>
+            {
+                var min = m.Groups[2].Value;
+                var minutes = Js.Number(min) == 0 ? "" : $" {Quantity(min, N("minute"))}";
+                var stop = m.Groups[3].Value != "" && EndsUtterance(subject[(m.Index + m.Length)..]) ? "." : "";
+                return $"{Quantity(m.Groups[1].Value, N("hour"))}{minutes}{stop}";
+            });
+        }
 
         // 1) FIXED MULTI-DOT PHRASES, ABOVE EVERY SINGLE-DOT RULE. ⚠ THE ERA PHRASE CONTAINS THE VERY LETTER
         //    THE YEAR RULE CLAIMS: in `pr. m. e.` the `m.` is *mūsų*, not *metai*. Step 10 running first
@@ -319,7 +335,10 @@ public static class Normalize
                 var off = m.Index;
                 // A SPORTS SCORE IS NOT A SPAN — refused WHOLE, keyed on the words this corpus itself puts
                 // in front of its three scores, anywhere in the 50 characters before the match.
-                if (SCORE.IsMatch(subject[Math.Max(0, off - 50)..off])) return m.Value;
+                // ⚠ A TEMPORAL SPAN IS NEVER A SCORE (#1532), so the temporal test runs first.
+                var after = subject[(off + m.Length)..Math.Min(subject.Length, off + m.Length + 10)];
+                var temporal = TEMPORAL.IsMatch(after);
+                if (!temporal && SCORE.IsMatch(subject[Math.Max(0, off - 50)..off])) return m.Value;
                 // ⚠ DO NOT SAY `nuo` TWICE — and not after any other preposition either. `prieš 50 –65
                 // tūkst. metų` already has its preposition; prefixing gave *prieš NUO 50 iki 65*.
                 var before = subject[Math.Max(0, off - 14)..off];
@@ -330,8 +349,6 @@ public static class Normalize
                 if (HAS_IKI.IsMatch(before)) return m.Value;
                 // ⚠ A TEMPORAL SPAN DOES NOT TAKE THE CORRELATIVE — `1997–1998 metais` would put a
                 // genitive-governing preposition in front of an instrumental. The century is temporal too.
-                var after = subject[(off + m.Length)..Math.Min(subject.Length, off + m.Length + 10)];
-                var temporal = TEMPORAL.IsMatch(after);
                 var from = hasNuo || temporal ? "" : $"{W("rangeFrom")} ";
                 // ⚠ THE LEFT OPERAND IS RE-EMITTED AS DIGITS so the tokenizer words-ifies it downstream, and
                 // no rule here can make it AGREE. Harmless for a masculine noun, audible for a feminine one:
@@ -363,6 +380,15 @@ public static class Normalize
         //    match, so a rate with no rate word declared is refused WHOLE rather than half (trap 54).
         //    ⚠ A MAGNITUDE MAY STAND BETWEEN THE FIGURE AND ITS UNIT and this step must claim it — step 9
         //    words-ifies `65,3 tūkst.` and thereby destroys the number–unit adjacency this step matches on.
+        {
+            // `km/h` and `km/val.` are the one declared rate (#1532), read before the units refuse it.
+            var subject = t;
+            t = Rewrite(t, KM_PER_HOUR, m =>
+            {
+                var stop = m.Groups[2].Success && EndsUtterance(subject[(m.Index + m.Length)..]) ? "." : "";
+                return $"{Quantity(m.Groups[1].Value, N("kilometre"))} {W("perHour")}{stop}";
+            });
+        }
         foreach (var (key, noun, squarable) in UNIT_KEYS)
         {
             var forms = N(noun);
@@ -518,14 +544,19 @@ public static class Normalize
         //     ages, which take the genitive too.
         //     ⚠ AND THIS RULE IS DELIBERATELY CASE-SENSITIVE, WHICH INVERTS TRAP 7: a capital `M.` is a
         //     PERSONAL INITIAL in this corpus, and the initialism pass claims those instead.
-        t = Rewrite(t, YEAR_RE, m =>
         {
-            var num = m.Groups[1].Value;
-            var month = m.Groups[2].Success ? m.Groups[2].Value : null;
-            var small = !num.Contains(',') && num.Length <= 2;
-            var word = month is not null || num.Contains(',') || small ? W("yearGen") : W("yearInstr");
-            return $"{Bare(num)} {word}{month ?? ""} ";
-        });
+            var subject = t;
+            t = Rewrite(t, YEAR_RE, m =>
+            {
+                var num = m.Groups[1].Value;
+                var month = m.Groups[2].Success ? m.Groups[2].Value : null;
+                var small = !num.Contains(',') && num.Length <= 2;
+                var word = month is not null || num.Contains(',') || small ? W("yearGen") : W("yearInstr");
+                // At the end of the utterance the dot is also the full stop (#1532).
+                if (month is null && EndsUtterance(subject[(m.Index + m.Length)..])) return $"{Bare(num)} {word}.";
+                return $"{Bare(num)} {word}{month ?? ""} ";
+            });
+        }
         //     `d.` — every one a day of the month. ⚠ *diena* IS FEMININE AND THE NUMERAL WAS NOT:
         //     `balandžio 7 d.` came out *septyni dieną*. What this does NOT fix, said plainly: the day of a
         //     date is an ORDINAL in the ACCUSATIVE, and the ordinal series is measured and refused.

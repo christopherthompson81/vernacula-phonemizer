@@ -860,7 +860,7 @@ pub(crate) fn normalize_slovenian(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"(?<=\d)\s?[x×]\s?(?=\d)", "gu"), &js(" krat "));
     s = rewrite(&s, js_re!("±", "gu"), &js(" plus minus "));
     s = rewrite(&s, js_re!(r"(^|[\s(])\+\s?(?=\d)", "gu"), &js("$1plus "));
-    s = rewrite(&s, js_re!(r"(^|[\s(])[-−]\s?(?=\d)", "gu"), &js("$1minus "));
+    s = rewrite(&s, js_re!(r"(^|[\s(])[-−](?=\d)", "gu"), &js("$1minus "));
     s = rewrite(&s, js_re!(r"(?<=\p{Lu})\+(?=\d)", "gu"), &js(" plus "));
 
     // 11) a number hyphenated to a word: the last number word fused with it.

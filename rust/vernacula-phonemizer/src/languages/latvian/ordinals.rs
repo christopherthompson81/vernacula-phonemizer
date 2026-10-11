@@ -7,7 +7,7 @@ use std::sync::LazyLock;
 use indexmap::IndexMap;
 
 use super::numbers::number_to_words;
-use crate::core::js_string::{JsString, is_object_prototype_key, js};
+use crate::core::js_string::{JsString, js};
 use crate::js_re;
 
 /// `ENDING[c]`.
@@ -112,21 +112,19 @@ pub static HEAD_NOUN: LazyLock<IndexMap<String, &'static str>> = LazyLock::new(|
     m
 });
 
-/// `HEAD_NOUN[key]` on a plain object: an own case, an inherited `Object.prototype` member (a function, which
-/// `ENDING` then misses), or nothing.
+/// A case for `ordinalWords`: a named one, or a value `ENDING` has no entry for (`Proto`; only the fn-diff
+/// replay passes one, since `head_noun` is an own-key lookup).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum HeadCase {
     Own(&'static str),
     Proto,
 }
 
+/// `own(HEAD_NOUN, key)`: an `Object.prototype` name is a miss (#1532).
 pub fn head_noun(key: &JsString) -> Option<HeadCase> {
-    let k = key.to_string_lossy();
-    match HEAD_NOUN.get(&k) {
-        Some(c) => Some(HeadCase::Own(c)),
-        None if is_object_prototype_key(&k) => Some(HeadCase::Proto),
-        None => None,
-    }
+    HEAD_NOUN
+        .get(&key.to_string_lossy())
+        .map(|c| HeadCase::Own(c))
 }
 
 /// `ordinalWords(n, c)`: `None` for a non-integer, out of 1–9999, or a round hundred/thousand. ⚠ A case

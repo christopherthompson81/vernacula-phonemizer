@@ -38,3 +38,7 @@ Ako je 2 = 2 i 3 < 4 i 5 > 1 onda 6 ÷ 3.
 Broj 1.234.567,89 i 12,5 i 1000000000 i 12345678901234567890.
 DVD i GPS i UTC.
 Bilo je 5. constructor i 7. hasOwnProperty i 3. toString.
+U I. stoljeću i u V. stoljeću.
+Vrijednost 2/1000. Zatim 1995./1996. sezona.
+Sastanak u 11:00. Ručak u 12:30, zatim odmor.
+Bilo je 7. hasOwnProperty i 3. toString.

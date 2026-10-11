@@ -57,3 +57,8 @@ Najjednostavniji i najjeftiniji.
 Broj 12345678901234567890 i 9007199254740993.
 Godina 1000000000 i 007.
 Constructor 5. constructor i 7. hasOwnProperty.
+Voće, povrće itd. Sutra idemo.
+Воће итд. Сутра идемо.
+Voće итᲁ., даље.
+Sastanak u 11:00. Ručak u 12:30, zatim odmor.
+Vreme 11:30,5 i 11:30.5 nije sat.
