@@ -1709,6 +1709,70 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
         }
     },
+    // ── Lithuanian (lt). Inputs: the lt golden, FLEURS lt_lt (columns 3 and 4) and probes/lt.txt, plus synthetic
+    // rows: every counted unit, currency and magnitude after a set of numbers (with and without a decimal and a
+    // magnitude between), years/days/centuries with and without a month, ranges after each correlative, and the
+    // abbreviations before each follower.
+    async "lt-normalize"() {
+        const N = await import("../../../src/languages/lithuanian/normalize.ts");
+        const rows = new Map<string, string>();
+        for (const [t, s] of textsFor(["lt"], FLEURS_DIR.lt, ["lt.txt"])) rows.set(t, s);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const ns = ["0", "1", "2", "5", "10", "11", "12", "19", "20", "21", "22", "100", "101", "111", "1000", "2021", "1,5", "0,25", "12 345"];
+        for (const n of ns) {
+            for (const u of ["%", " proc.", " °C", "°F", " km", " km²", " km2", " mm", " cm", " kg", " ha", " ha2", " mg", " m", " t", " g", " t-", " m/s", " mln. km", " tūkst. ha", " mlrd", " mln", " tūkst.", " tūkst. gyventojų", " mln. pr. m. e.", " m.", " m. sausio", " d.", " a.", " val.", " min.", " €", " $", " £", " Lt", " mln. €", " milijonų eurų"])
+                add(`Apie ${n}${u} buvo.`);
+            for (const c of ["€", "$", "£"]) { add(`Kaina ${c}${n} mln.`); add(`Kaina ${c} ${n} eurų`); add(`Kaina ${n} ${c} dolerių`); }
+        }
+        for (const [a, b] of [["5", "10"], ["1990", "1995"], ["3", "4"], ["1,5", "2,5"], ["10", "12"]])
+            for (const pre of ["", "nuo ", "iki ", "per ", "rezultatas ", "Tarp "]) for (const post of ["", " m.", " val.", " t", " dienų", " amžiaus"]) add(`Buvo ${pre}${a}–${b}${post} kartų`);
+        for (const ab of ["pr. m. e.", "p. m. e.", "m. e.", "t. y.", "p. pl.", "š. pl.", "v. ilg.", "r. ilg.", "t-mečio", "mėn.", "pvz.", "ir kt.", "Ir Kt.", "nr.", "Nr.", "psl", "psl.", "gyv.", "val.", "min.", "&amp;", "&"])
+            for (const after of ["", " A", " a", ","]) add(`Tai ${ab}${after} buvo`);
+        for (let h = 0; h <= 24; h++) for (const mm of ["00", "30"]) { add(`${h}:${mm} val.`); add(`${h}.${mm} val`); add(`${h}:${mm}val`); }
+        const words = new Set<string>();
+        for (const [t, from] of rows) {
+            const a = N.normalizeLithuanian(t);
+            emit({ text: units(t), src: from, op: "normalize" }, a);
+            emit({ text: units(a), src: from, op: "initialisms" }, N.normalizeLithuanianInitialisms(a));
+            emit({ text: units(t), src: from, op: "initialisms" }, N.normalizeLithuanianInitialisms(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        // isUnreadableLithuanian is not exported; the initialism pass over each word (and its uppercase) is
+        // where it decides.
+        for (const w of words) for (const x of [w, w.toUpperCase()]) emit({ text: units(x), src: "words", op: "initialisms" }, N.normalizeLithuanianInitialisms(x));
+    },
+    async "lt-g2p"() {
+        const L = await import("../../../src/languages/lithuanian/lithuanian.ts");
+        const { toSegments } = await import("../../../src/languages/lithuanian/g2p.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[A-Za-ząčęėįšųūžĄČĘĖĮŠŲŪŽ]", "u");
+        const words = new Set<string>();
+        for (const t of textsFor(["lt"], FLEURS_DIR.lt, ["lt.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(nat(m[0])); }
+        const abc = [..."aąbcčdeęėfghiįyjklmnoprsštuųūvzžqwxäöüéàñ"];
+        for (const a of abc) { words.add(a); for (const b of abc) words.add(a + b); }
+        const ctx = [..."aąeėiįuųoyjkgnsštdzžcčhb"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) words.add(a + b + c);
+        for (const w of ["", "\ud800", "a\ud800b", "čia", "Dievas", "dirbti", "duona", "ranka", "kiaušinis", "džiaugsmas", "chemija", "XXL", "xenon", "Hamletas"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, L.phonemizeWord(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    async "lt-numbers"() {
+        const { numberToWords, readDigits } = await import("../../../src/languages/lithuanian/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 2002, k * 1e9, k * 1e9 + 3004005, k * 1e9 + 999999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e21, 1.5, 2.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000000", "9007199254740993", "", "1a2", "１２", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
+        }
+    },
     // composeSlavicNumber over each standard's table: 0..20000, multiples and powers, the unsafe and non-finite
     // corners, and raw strings for the digit-by-digit fallback.
     async "sh-numbers"() {

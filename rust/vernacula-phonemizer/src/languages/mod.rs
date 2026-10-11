@@ -10,6 +10,7 @@ pub mod hindi;
 pub mod italian;
 pub mod japanese;
 pub mod korean;
+pub mod lithuanian;
 pub mod mandarin;
 pub mod polish;
 pub mod portuguese;

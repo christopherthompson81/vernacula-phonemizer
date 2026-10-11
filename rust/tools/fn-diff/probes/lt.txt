@@ -1,0 +1,26 @@
+# Lithuanian (lt) off-golden probes: synthetic text only, one or more lines per normalize.ts arm and the
+# neighbour it must decline, plus g2p corners.
+Susitikimas 10:30 val. ir 8.15 val, bet ne 10:30 be žodžio.
+Tai buvo 300 m. pr. m. e., o vėliau 200 m. m. e. ir t. y. viskas.
+Koordinatės 55 š. pl. ir 24 r. ilg., 10 p. pl., 30 v. ilg.
+Antrojo t-mečio pradžioje ir t - mečio.
+Mieste gyvena 12 345 žmonių ir 1 234 567 turistų.
+Formatas 6 x 6 ir 4x4.
+Nuo 5–10 metų, iki 3-4 dienų, apie 1990–1995 m., 10–12 val., rezultatas 3–2, tarp 5-6 t.
+Buvo 5–10 kartų ir 1,5–2,5 karto.
+Temperatūra -5 laipsniai ir +3 ir (−4).
+Augimas 5 % ir 21 % ir 11 proc. ir 1,5 %.
+Vanduo verda 100 °C ir 212 °F ir 0°c.
+Atstumas 5 km, 21 km², 3 km2, 10 mm, 2 cm, 1 kg, 5 ha, 2 mg, 3 m, 1 t, 2 g, 2 t-3 t.
+Plotas 1,5 mln. km² ir 3 tūkst. ha ir 2 mlrd. eurų.
+Kaina €5, 5 €, $10 mln., 10 $ dolerių, £3, 3 Lt, 2 mln. € ir 5 milijonų eurų.
+Simbolis € vienas ir $ vienas.
+Gyventojų 3 mln. ir 2 tūkst. gyventojų ir mln. ir tūkst. pr. m. e.
+Gimė 1990 m. sausio 5 d., 1990 m., 20 m., 15 a., 3 val., 25 min. ir 1,5 m.
+Per 2 val. ir 5 min. ir val. ir min. bei mėn. ir Mėn.
+Pvz. obuoliai ir kt., Nr. 5, psl. 10, gyv. 300.
+Skaičius 3,14 ir 0,001.
+Tom &amp; Jerry ir A & B.
+NATO ir ES ir JAV ir LRT ir ŠMM.
+Čia Dievas, dirbti duona, ranka, kiaušinis, džiaugsmas, chemija, Hamletas, Xenon.
+Skaičius 12345678901234567890 ir 1000000000000.
