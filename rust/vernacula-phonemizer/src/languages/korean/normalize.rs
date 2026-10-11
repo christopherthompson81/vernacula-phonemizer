@@ -6,7 +6,7 @@
 use std::sync::LazyLock;
 
 use super::manifest::{MANIFEST, list};
-use super::numbers::number_to_words;
+use super::numbers::{number_to_words, spell_digits};
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::numbers::digit_index;
@@ -130,7 +130,9 @@ static UNIT_RE: LazyLock<JsRegex> = LazyLock::new(|| {
     .unwrap()
 });
 
-const OPERAND: &str = r"\d+|[가-힣]+|[A-Za-z]";
+/// ⚠ An operand is a whole eojeol (#1511): a number carries the Hangul glued to it, and a lone Latin letter
+/// is bounded by all of Latin. See normalize.ts.
+const OPERAND: &str = r"\d+[가-힣]*|[가-힣]+|(?<![\p{sc=Latn}\p{M}])[A-Za-z](?![\p{sc=Latn}\p{M}])";
 
 /// The relational rules `=`, `<`, `>`, built once.
 static RELATIONAL: LazyLock<Vec<(JsRegex, &'static str)>> = LazyLock::new(|| {
@@ -221,7 +223,7 @@ pub fn normalize_korean(input: &JsString) -> JsString {
     );
     s = rewrite(
         &s,
-        js_re!(r"([-−–±]?)(\d+)\s?°\s?F(?![\p{L}\p{M}])", "gui"),
+        js_re!(r"([-−–±]?)(\d+)\s?°\s?F(?![\p{sc=Latn}\p{M}])", "gui"),
         &js("화씨 $1$2도"),
     );
     s = rewrite(&s, js_re!(r"(\d)\s?°", "gu"), &js("$1도"));
@@ -268,7 +270,10 @@ pub fn normalize_korean(input: &JsString) -> JsString {
         |m, s| {
             let int = m.group(1, s).unwrap();
             let frac = m.group(2, s).unwrap();
-            let mut out = number_to_words(js_number(&int)).concat(&js("점"));
+            // ⚠ Past 2^53 number_to_words is "", which deleted the integer part (#1511): spell the digits.
+            let w = number_to_words(js_number(&int));
+            let w = if w.is_empty() { spell_digits(&int) } else { w };
+            let mut out = w.concat(&js("점"));
             for d in frac.0.iter() {
                 let i = digit_index(*d);
                 if i >= 0

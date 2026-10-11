@@ -87,7 +87,7 @@ public static class Normalize
     private const string SPAN = "\\d[\\d.]*(?:\\s?[-–—~〜～]\\s?\\d[\\d.]*)?";
     private static readonly JsRe UNIT_RE = JsRegex.Compile($"(?<=\\d)\\s?({UNIT_ALT})([²³2-3])?(?![A-Za-z\\d])", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("([-−–±]?)(\\d+)\\s?°\\s?C(?![\\p{sc=Latn}\\p{M}])", "gui");
-    private static readonly JsRe DEG_F = JsRegex.Compile("([-−–±]?)(\\d+)\\s?°\\s?F(?![\\p{L}\\p{M}])", "gui");
+    private static readonly JsRe DEG_F = JsRegex.Compile("([-−–±]?)(\\d+)\\s?°\\s?F(?![\\p{sc=Latn}\\p{M}])", "gui");
     private static readonly JsRe DEG_BARE = JsRegex.Compile("(\\d)\\s?°", "gu");
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe PLUS_INFIX = JsRegex.Compile("(\\d)\\s?\\+\\s?(?=\\d)", "gu");
@@ -103,7 +103,10 @@ public static class Normalize
     private static readonly JsRe INITIALISM = JsRegex.Compile(
         "(?<![\\p{Script=Latin}\\p{M}])[A-Z][A-Z-]*[A-Z](?![\\p{Script=Latin}\\p{M}])|(?<![\\p{Script=Latin}\\p{M}])[A-Z](?![\\p{Script=Latin}\\p{M}])", "gu");
     private static readonly JsRe ALL_DIGITS = JsRegex.Compile("^\\d+$", "u");
-    private const string OPERAND = "\\d+|[가-힣]+|[A-Za-z]";
+    // ⚠ An operand is a whole eojeol (#1511): a number carries the Hangul glued to it (값=3원 → 삼원과 같다,
+    // the digits left for rules 7/8), and a lone Latin letter is bounded by all of Latin (xy = z claims nothing).
+    private const string LONE_LATIN = "(?<![\\p{sc=Latn}\\p{M}])[A-Za-z](?![\\p{sc=Latn}\\p{M}])";
+    private const string OPERAND = "\\d+[가-힣]*|[가-힣]+|" + LONE_LATIN;
 
     /** Normalize one Korean input string. Pure text→text; every rule emits Hangul or ASCII digits and lets
      *  the existing engine do the pronouncing. */
@@ -201,8 +204,9 @@ public static class Normalize
 
         // 6) DECIMALS. The point is clause punctuation too, so 1.5 would break into "일 . 오". The fractional
         //    digits are read INDIVIDUALLY (7.75 → 칠 점 칠오), and the result is Hangul so rule 8 skips it.
+        //    ⚠ Past 2^53 NumberToWords is "", and the integer part was deleted (…5 → 점오): fall back to its digits.
         s = Rewrite(s, DECIMAL_RE, m =>
-            $"{KoreanNumbers.NumberToWords(Js.Number(m.Groups[1].Value))}점" +
+            $"{(KoreanNumbers.NumberToWords(Js.Number(m.Groups[1].Value)) is { Length: > 0 } w ? w : KoreanNumbers.SpellDigits(m.Groups[1].Value))}점" +
             string.Concat(Js.CodePoints(m.Groups[2].Value).Select(d => (Core.Numbers.DigitWord(Manifest.MANIFEST.Numbers.Ones, d) ?? d))));
 
         // 7) NATIVE-SERIES COUNTERS, BEFORE rule 8 claims the digits for the Sino series. Gated at 99, since

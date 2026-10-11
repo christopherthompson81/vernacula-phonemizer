@@ -162,6 +162,21 @@
     // Lenis onset jamo → its tense counterpart jamo (fortis). Used by rule tensification AND lexical 경음화.
     "tenseJamo": { "ㄱ": "ㄲ", "ㄷ": "ㄸ", "ㅂ": "ㅃ", "ㅅ": "ㅆ", "ㅈ": "ㅉ" },
 
+    // The PARTICLES (조사) a tensification.tsv key may carry and still be that key (#1511). Korean writes its
+    // particles onto the noun, so a tokenizer run is 가능성이, not 가능성, and a whole-run lookup tensed the
+    // citation form only. g2p.ts accepts a key followed by any CHAIN of these (에서+는, 들+이); the key's own
+    // syllable indices carry over unchanged, since a suffix cannot move a syllable before it.
+    // A CLOSED LIST, not "anything after a key": over FLEURS ko_kr most non-particle remainders are a different
+    // word that merely begins with the key (가운+데, and every one-syllable key — see g2p.ts). The case and
+    // auxiliary particles; 들, the plural, because it stacks before them (요건들은); and the copula forms,
+    // which school grammar counts as the predicative particle. Allomorph pairs are both listed and not
+    // checked against the key's final syllable.
+    "particles": [
+        "이", "가", "은", "는", "을", "를", "의", "에", "에서", "에게", "께", "한테", "로", "으로",
+        "와", "과", "도", "만", "까지", "부터", "보다", "처럼", "마다", "조차", "이나", "나", "랑", "이랑",
+        "들", "이다", "입니다", "인", "이라고", "이며", "이고",
+    ],
+
     // Aspiration onset substitutions (a lenis onset jamo → its aspirated jamo).
     "aspiration": {
         "hCodaLenisOnset": { "ㄱ": "ㅋ", "ㄷ": "ㅌ", "ㅈ": "ㅊ", "ㅅ": "ㅆ" }, // ㅎ coda + lenis onset

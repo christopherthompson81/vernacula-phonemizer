@@ -77,6 +77,8 @@ pub struct KoreanManifest {
     pub voice: IndexMap<String, String>,
     pub tense: IndexMap<String, String>,
     pub tense_jamo: IndexMap<String, String>,
+    /// Particles a lexical-tensification key may carry (see korean.jsonc and g2p.ts).
+    pub particles: Vec<String>,
     pub aspiration: Aspiration,
     pub clause_punctuation: IndexMap<String, String>,
     pub numbers: Numbers,

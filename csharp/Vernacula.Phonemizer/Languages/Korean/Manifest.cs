@@ -59,6 +59,8 @@ public sealed class KoreanManifest
     public IReadOnlyDictionary<string, string> Voice { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> Tense { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> TenseJamo { get; init; } = new Dictionary<string, string>();
+    /** Particles a lexical-tensification key may carry (see korean.jsonc and g2p.ts). */
+    public IReadOnlyList<string> Particles { get; init; } = Array.Empty<string>();
     public AspirationTables Aspiration { get; init; } = new();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public KoreanNumbersDef Numbers { get; init; } = new();
