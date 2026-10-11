@@ -5,6 +5,7 @@ pub mod greek;
 pub mod hindi;
 pub mod italian;
 pub mod japanese;
+pub mod korean;
 pub mod mandarin;
 pub mod portuguese;
 pub mod portuguese_br;

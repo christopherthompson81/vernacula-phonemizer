@@ -1,0 +1,126 @@
+# Korean (ko) off-golden probes: one line per arm of normalize.ts plus the neighbour it must decline, and
+# g2p corners. SYNTHETIC text only (no corpus sentences).
+# 1) grouped thousands, and the commas that are not grouping
+사과 1,000개가 있다
+인구는 1,000,000명이다
+값은 1,23이다
+값은 1,2345이다
+0,500
+10,500원
+1.5,000
+가,나,다
+# 2) speed units (range consumed whole; an existing 시속 consumed, not duplicated)
+35-40 mph로 달렸다
+시속 160km/h의 바람
+초속 5 m/s
+100kph로
+12.5mph
+3mphx
+5 km/hour
+# 3) units, joined, with exponents
+20km를 걸었다
+83m이고
+50 mi 떨어진
+10mm2 넓이
+3m³ 부피
+2m3 정도
+5kg의 쌀
+802.11g 표준
+4 ft 높이
+7mmx
+3cm2x
+# 4) degrees and signs
+기온이 30°C까지
+32℃에 달하는
+-5 °C의 추위
+화씨 -40°F
+각도 45°
+±3 오차
+3 + 4 = 7
++5 점
+(-3도)
+-12는 작다
+5°c 정도
+20°Cx
+# 4b) relational, division, ampersand
+x = y
+7 = 7
+4 = 사
+가 < 나
+10 > 9
+3 ÷ 4
+R&B 음악
+A & B
+xy = z
+# 5) ranges
+1894~1895년
+3–5개
+10 — 20
+7〜8
+# 6) decimals
+1.5배
+7.75점
+0.001
+1.2.3
+3.14159265358979323846
+99999999999999999999.5
+# 7) native counters (and the guards: 번째 before 번, 시간 before 시, 개월/개국 Sino, ≥100 Sino)
+3명이 왔다
+11시에 만나
+2시간 동안
+5번째 시도
+24번 이상
+20마리
+21살
+2가지
+3척
+1사람
+6개월
+7개국
+5개
+제5시드
+시속 3시
+100명
+0명
+99명
+20명
+# 8) months, digit runs before Hangul, unsafe digits
+6월 10월 16월 26월
+17일
+100년
+6개월
+12345678901234567890원
+9007199254740993개
+# 9) initialisms, word acronyms, mixed case, accented neighbours
+FBI 요원
+CCTV 설치
+UN 회의
+NATO와 NASA
+WHO 발표
+XDR-TB 환자
+H5N1 바이러스
+슈퍼-G 경기
+W. 부시
+ZMapp 치료
+São 파울루
+É 글자
+a b c
+COVID-19 대유행
+# symbol tier: percent, currency, multiply
+80% 증가
+$5 지불
+3 × 4
+3x4
+# tokens, clause marks
+안녕하세요. 반갑습니다!
+정말? 네… 그렇군요; 좋아: 끝
+# g2p corners: liaison, ㅎ, palatalization, aspiration, tensification, nasalization, lateralization
+국이 좋아 같이 놓고 좋다 학교 맑다 국물 합니다 신라 밥
+닭이 앉아 많이 싫어 없어 읽다 넓다 핥다 읊다 값이
+굳이 밭이 해돋이 독립 국립 십리 종로 음료 칼날
+낳는 놓는 쌓네 백합 축하 입학 맏형
+# non-Hangul inside a run, Han, kana, astral, jamo letters
+漢字 한자
+かな 가나
+ㄱㄴㄷ ㅏㅑ
+𠮷 한

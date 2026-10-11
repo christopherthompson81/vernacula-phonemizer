@@ -498,6 +498,34 @@ fn main() {
         "trace" => {
             Box::new(|input| trace_json(&units(&input["text"]), input["lang"].as_str().unwrap()))
         }
+        // ── Korean (ko) ──
+        "ko-normalize" => Box::new(|input| {
+            vernacula_phonemizer::languages::korean::normalize::normalize_korean(&units(
+                &input["text"],
+            ))
+        }),
+        "ko-g2p" => {
+            vernacula_phonemizer::languages::korean::g2p::try_tens_lexicon().unwrap();
+            Box::new(|input| {
+                vernacula_phonemizer::languages::korean::g2p::phonemize_word(&units(&input["word"]))
+            })
+        }
+        "ko-numbers" => Box::new(|input| {
+            use vernacula_phonemizer::languages::korean::numbers as n;
+            match input["op"].as_str().unwrap() {
+                "int" => {
+                    n::number_to_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                }
+                _ => n::spell_digits(&units(&input["digits"])),
+            }
+        }),
+        "ko-extras" => Box::new(|input| {
+            let (text, lang) = (units(&input["text"]), input["lang"].as_str().unwrap());
+            match input["op"].as_str().unwrap() {
+                "trace" => trace_json(&text, lang),
+                _ => vernacula_phonemizer::registry::phonemize_in(lang, &text).unwrap(),
+            }
+        }),
         // ── Mandarin (cmn) ──
         "cmn-normalize" => Box::new(|input| {
             use vernacula_phonemizer::languages::mandarin::normalize::{
