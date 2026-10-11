@@ -304,6 +304,9 @@ mod tests {
         ("50", "al cincizecilea"),
         ("60", "al șaizecilea"),
         ("100", "al sutălea"),
+        // #1533: a final thousand takes the plural stem at a count of 1 too.
+        ("1000", "al miilea"),
+        ("2000", "al două miilea"),
     ];
 
     #[test]

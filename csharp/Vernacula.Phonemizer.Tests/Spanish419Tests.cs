@@ -48,4 +48,13 @@ public class Spanish419Tests
         var es = Phonemizer.Phonemize("XXI aniversario", "es").Replace("θ", "s").Replace("ʎ", "ʝ");
         Assert.Equal(es, Phonemizer.Phonemize("XXI aniversario", "es-419"));
     }
+
+    /** #1533: the mergers spare an embedded foreign run (on the assembled string Greek θεός read seos). */
+    [Fact]
+    public void TheMergersSpareAnEmbeddedForeignRun()
+    {
+        Assert.Equal(Phonemizer.Phonemize("Dijo θεός en griego.", "es"), Phonemizer.Phonemize("Dijo θεός en griego.", "es-419"));
+        Assert.Equal("leʝˈo aθina i θesalonici .", Phonemizer.Phonemize("Leyó Αθήνα y Θεσσαλονίκη.", "es-419"));
+        Assert.Equal("la kˈaʝe i la seɾβˈesa .", Phonemizer.Phonemize("La calle y la cerveza.", "es-419"));
+    }
 }

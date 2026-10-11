@@ -104,6 +104,13 @@ fn stressed_nucleus(word: &JsString, segs: &[Seg]) -> Option<usize> {
     if nuclei.len() == 1 {
         return Some(nuclei[0]);
     }
+    // A falling diphthong is tested after the LAST NUCLEUS, so a following -s does not hide it (#1533).
+    let last_nuc = nuclei[nuclei.len() - 1];
+    if let Some(after) = segs.get(last_nuc + 1) {
+        if after.ph == "ᶦ" || after.ph == "ᶷ" {
+            return Some(last_nuc);
+        }
+    }
     // `word.toLowerCase().at(-1) ?? ""`: the last code UNIT.
     let w = word.to_lower_case();
     let last = if w.is_empty() {
@@ -264,6 +271,14 @@ mod tests {
         ("dous", "dˈoᶷs"),
         ("cantou", "kantˈoᶷ"),
         ("amei", "amˈeᶦ"),
+        // #1533: a falling diphthong + final -s is still oxytone.
+        ("ademais", "aðemˈaᶦs"),
+        ("xamais", "ʃamˈaᶦs"),
+        ("papeis", "papˈeᶦs"),
+        ("chapeus", "t͡ʃapˈeᶷs"),
+        ("cantous", "kantˈoᶷs"),
+        ("cousas", "kˈoᶷsas"),
+        ("moitas", "mˈoᶦtas"),
         ("muíño", "muˈiɲo"),
         ("ruído", "ruˈiðo"),
         ("viúva", "biˈuβa"),
@@ -285,7 +300,7 @@ mod tests {
         ("35 %", "tɾˈinta e θˈiŋko poɾ θˈento"),
         ("100 €", "θˈeŋ ˈeᶷɾos"),
         ("US$ 500", "θiŋkoθˈentos ðˈolaɾes"),
-        ("R$ 30", "tɾˈinta rˈeaᶦs"),
+        ("R$ 30", "tɾˈinta reˈaᶦs"),
         ("12,5 km", "dˈoθe kˈoma θˈiŋko kilˈometɾos"),
         ("120 km/h", "θˈento βˈinte kilˈometɾos poɾ ˈoɾa"),
         ("5 millóns de euros", "θˈiŋko miʎˈoŋs ðe ˈeᶷɾos"),

@@ -6,7 +6,6 @@ use std::sync::LazyLock;
 
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js};
-use crate::core::trace::note_rewrite;
 use crate::js_re;
 use crate::languages::french::french::{FrenchPhonemizer, create_french};
 use crate::registry::{Engine, PhonemizeError};
@@ -16,8 +15,16 @@ const CODA: &str = "ptkbdɡfsʃmnɲŋlç";
 /// After a coda consonant, one of these makes it an onset (open syllable), so no laxing.
 const OPEN: &str = "aeɛiouyœøəɑɔˈ\u{0361}";
 
-static LAXING: LazyLock<JsRegex> =
-    LazyLock::new(|| JsRegex::new(&format!("([iyu])(?=[{CODA}](?![{OPEN}]))"), "gu").unwrap());
+/// An obstruent + liquid before a vowel is a two-consonant ONSET, not a coda (pu.blique), so no laxing (#1533).
+static ONSET_CLUSTER: LazyLock<String> = LazyLock::new(|| format!("[ptkbdɡf][lʁ][{OPEN}]"));
+
+static LAXING: LazyLock<JsRegex> = LazyLock::new(|| {
+    JsRegex::new(
+        &format!("([iyu])(?=(?!{})[{CODA}](?![{OPEN}]))", *ONSET_CLUSTER),
+        "gu",
+    )
+    .unwrap()
+});
 
 /// `LAX[v]`.
 fn lax(v: &JsString) -> JsString {
@@ -36,21 +43,18 @@ pub fn to_quebecois(fr: &JsString) -> JsString {
     js_re!(r"a(?=[ .,;!?…»)]|$)", "gu").replace(&s, &js("ɑ"))
 }
 
-/// The fr-CA engine (`createFrenchCA`).
+/// The fr-CA engine (`createFrenchCA`): the France engine with the delta applied per French word, so an
+/// embedded foreign run is never rewritten (#1533).
 pub struct FrenchCaPhonemizer(FrenchPhonemizer);
 
 impl FrenchCaPhonemizer {
     pub fn text(&self, input: &JsString) -> JsString {
-        let pre = self.0.text(input, None);
-        let out = to_quebecois(&pre);
-        // NOT positional: the delta changes lengths.
-        note_rewrite("accent:fr-CA", &pre, &out, false);
-        out
+        self.0.text(input, None)
     }
 
-    /// `phonemizeWord(word)` (= `phonemizeWordRules`): the France engine's `text(word)` plus the delta.
+    /// `phonemizeWord(word)` (= `phonemizeWordRules`): `createFrench(undefined, toQuebecois).text(word)`.
     pub fn phonemize_word(&self, word: &JsString) -> JsString {
-        to_quebecois(&self.0.text(word, None))
+        self.0.text(word, None)
     }
 }
 
@@ -62,7 +66,7 @@ impl Engine for FrenchCaPhonemizer {
 
 /// `createFrenchCA()`.
 pub fn create_french_ca() -> Result<FrenchCaPhonemizer, String> {
-    create_french().map(FrenchCaPhonemizer)
+    create_french().map(|f| FrenchCaPhonemizer(f.with_accent(to_quebecois)))
 }
 
 #[cfg(test)]
@@ -90,7 +94,28 @@ mod tests {
         ("habitude", "abit͡sˈʏd"),
         ("stupide", "st͡sypˈɪd"),
         ("politique", "pɔlit͡sˈɪk"),
+        // #1533: an obstruent + liquid onset leaves the syllable before it open.
+        ("publique", "pyblˈɪk"),
+        ("cyclone", "siklˈɔn"),
+        ("citron", "sitʁˈɔ̃"),
+        ("supplier", "syplijˈe"),
+        ("microscope", "mikʁɔskˈɔp"),
+        ("chiffre", "ʃˈɪfʁ"),
+        ("équilibre", "ekilˈɪbʁ"),
     ];
+
+    /// #1533: the delta spares an embedded foreign run (it ran on the assembled string).
+    #[test]
+    fn ts_foreign_run_pins() {
+        assert_eq!(
+            crate::phonemize("Il a dit τι.", "fr-CA").unwrap(),
+            "ɪl ɑ d͡zi tˈi ."
+        );
+        assert_eq!(
+            crate::phonemize("Il a dit τι.", "fr").unwrap(),
+            "il a di tˈi ."
+        );
+    }
 
     #[test]
     fn ts_word_pins() {

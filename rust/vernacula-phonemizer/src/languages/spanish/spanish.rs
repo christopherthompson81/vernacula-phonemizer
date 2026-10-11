@@ -202,6 +202,8 @@ fn word_ipa(word: &JsString) -> JsString {
 pub struct SpanishPhonemizer {
     americas: bool,
     symbols: SymbolNormalizer,
+    /// `accent`: a word-level IPA delta (es-419), applied to every Spanish reading and to no foreign run.
+    accent: Option<fn(&JsString) -> JsString>,
 }
 
 /// The module functions, exposed through the engine: holding a `SpanishPhonemizer` proves the manifest loaded,
@@ -246,15 +248,23 @@ impl SpanishPhonemizer {
                 input,
                 self.americas,
             )));
+        // An accent delta is applied per Spanish word, not to the assembled string (#1533).
+        let accent = self.accent;
+        let word = |w: &JsString| -> JsString {
+            match accent {
+                Some(a) => a(&word_ipa(w)),
+                None => word_ipa(w),
+            }
+        };
         let assembled = assemble_clauses(&normalized, &TOKEN, |m, s, sink| {
             if let Some(w) = m.group(1, s) {
-                sink.emit(&word_ipa(&NAT(&w)));
+                sink.emit(&word(&NAT(&w)));
             } else if let Some(n) = m.group(2, s) {
                 let after = s.slice(m.end() as isize, None);
                 let words: Vec<JsString> = number_token_words(&n, &after)
                     .split(&js(" "))
                     .iter()
-                    .map(word_ipa)
+                    .map(word)
                     .collect();
                 sink.emit(&JsString::join(&words, &js(" ")));
             } else if let Some(p) = m.group(3, s) {
@@ -305,7 +315,21 @@ pub fn create_spanish(americas: bool) -> Result<SpanishPhonemizer, String> {
         magnitude_connective: Some(st.magnitude_connective.clone()),
         ..Default::default()
     })?;
-    Ok(SpanishPhonemizer { americas, symbols })
+    Ok(SpanishPhonemizer {
+        americas,
+        symbols,
+        accent: None,
+    })
+}
+
+impl SpanishPhonemizer {
+    /// `createSpanish(americas, accent)`: the same engine with a word-level accent delta.
+    pub fn with_accent(self, accent: fn(&JsString) -> JsString) -> Self {
+        SpanishPhonemizer {
+            accent: Some(accent),
+            ..self
+        }
+    }
 }
 
 #[cfg(test)]

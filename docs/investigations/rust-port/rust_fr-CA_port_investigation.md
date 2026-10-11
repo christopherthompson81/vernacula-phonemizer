@@ -75,3 +75,34 @@ context-free post-process: what matters is the IPA alphabet it is fed, and the L
 **Raw finding.** 18 extracted `phonemizeWord` pins: `1 passed`. Parity: all 22 registered languages 200/200.
 
 **Implication.** fr-CA done; the group's remaining gates are recorded in the last language's log.
+
+## Run 6 — 2026-10-11 16:35 (#1533: onset clusters and foreign runs, TS-first)
+
+**Question 1.** Does treating an obstruent + liquid before a vowel as an ONSET (`(?![ptkbdɡf][lʁ][OPEN])` ahead of
+the coda consonant) stop `publique`/`cyclone`/`citron` laxing, and move nothing else?
+
+**Raw finding 1.** `publique pyblˈɪk`, `cyclone siklˈɔn`, `citron sitʁˈɔ̃`, `supplier syplijˈe`, `microscope
+mikʁɔskˈɔp`; a word-final cluster still closes the syllable (`chiffre ʃˈɪfʁ`, `équilibre ekilˈɪbʁ`). Golden
+(`npx tsx tools/check-goldens.mts fr-CA --show 50`, then `--write`): 14 rows (15 findings, one row is duplicated)
+move, and every changed word is a lax→tense vowel before such a cluster: `pʏblɪk→pyblɪk`×2, `nʏkleɛʁ→nykleɛʁ`×2,
+`pʏblije`, `mɪɡʁatwaʁ`, `mɪɡʁasjɔ̃`, `ɪdʁatasjɔ̃`, `sʏplemɑ̃`, `nʏtʁɪsjɔnɛl`, `mɪkʁɔskɔp`, `nʊblije`, `ʁepʏblɪk`,
+`ʁɛpʊblikɑ`, `pʏblikasjɔ̃`, `sɪklɔn`, `ʒezʏkʁɪst`. No fr-CA pronunciation referee exists, so the module's own rule
+("Open syllables keep the tense vowel") is the only witness; this is a code/doc gap closed toward the doc.
+
+**Question 2.** Can the delta stop reaching an embedded foreign run (`τι` → `t͡si`) without changing a French word?
+
+**Fix.** `createFrench(foreign, accent?)`: the delta runs in `flush`, per group slot, AFTER `accentFinal` (it reads
+the stress mark) and BEFORE the trace offsets are taken, and skips the slots that hold a foreign run's IPA. No rule
+of the delta looks across a space (affrication and the onset test are in-word lookaheads; the laxing coda test sees
+a space or the end of the piece the same way; word-final /a/ matches `$` at the end of a piece as it matched a space),
+so a French word reads as before.
+
+**Raw finding 2.** Apart from the 14 onset rows, 0 golden rows move. `Il a dit τι.` → `ɪl ɑ d͡zi tˈi .` (the Greek
+run reads as the `fr` host reads it: `il a di tˈi .`). Side effect, measured: fr-CA no longer has a length-changing
+post-assembly pass, so `phonemizeTrace` now REPORTS exact `ipaSpan`s for fr-CA; `test/trace.test.ts`'s
+"length-changing pass withholds the output spans" lost its fr-CA case (`found` was 0), and a positive test replaces it.
+
+**Implication.** Both fixed; mirror into C# and Rust. Each new test fails with its fix reverted (the onset guard
+alone, and french.ts + french-ca.ts together).
+
+(#1533 C#/Rust mirrors and the gates: see rust_ro_port_investigation.md Run 8.)

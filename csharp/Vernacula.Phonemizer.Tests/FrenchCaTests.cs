@@ -75,4 +75,24 @@ public class FrenchCaTests
         Assert.Equal(FrenchCa.PhonemizeWord("petite"), FrenchCa.PhonemizeWordRules("petite"));
         Assert.Equal(FrenchCa.ToQuebecois(Phonemizer.Phonemize("petite", "fr")), Phonemizer.Phonemize("petite", "fr-CA"));
     }
+
+    /** #1533: an obstruent + liquid ONSET leaves the syllable before it open (no laxing). */
+    [Theory]
+    [InlineData("publique", "pyblˈɪk")]
+    [InlineData("cyclone", "siklˈɔn")]
+    [InlineData("citron", "sitʁˈɔ̃")]
+    [InlineData("supplier", "syplijˈe")]
+    [InlineData("microscope", "mikʁɔskˈɔp")]
+    [InlineData("chiffre", "ʃˈɪfʁ")]     // a word-final cluster still closes the syllable
+    [InlineData("équilibre", "ekilˈɪbʁ")]
+    public void AnObstruentLiquidOnsetDoesNotLax(string word, string want) =>
+        Assert.Equal(want, FrenchCa.PhonemizeWord(word));
+
+    /** #1533: the delta spares an embedded foreign run (on the assembled string it affricated Greek τι). */
+    [Fact]
+    public void TheDeltaSparesAnEmbeddedForeignRun()
+    {
+        Assert.Equal("ɪl ɑ d͡zi tˈi .", Phonemizer.Phonemize("Il a dit τι.", "fr-CA"));
+        Assert.Equal("il a di tˈi .", Phonemizer.Phonemize("Il a dit τι.", "fr"));
+    }
 }

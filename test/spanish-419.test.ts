@@ -134,3 +134,13 @@ describe("spanish normalization", () => {
         expect(phonemize("el 17 de septiembre", "es-419")).toBe("el djesisjˈete ðe septjˈembɾe");
     });
 });
+
+// #1533: the seseo/yeísmo delta ran on the ASSEMBLED string, so it also rewrote a run in another script that
+// another engine had read: the Greek θ of θεός came out s. It is applied per Spanish word now.
+describe("es-419: the accent delta spares an embedded foreign run", () => {
+    test("a Greek run keeps the Greek engine's θ; the Spanish words around it still merge", () => {
+        expect(phonemize("Dijo θεός en griego.", "es-419")).toBe(phonemize("Dijo θεός en griego.", "es"));
+        expect(phonemize("Leyó Αθήνα y Θεσσαλονίκη.", "es-419")).toBe("leʝˈo aθina i θesalonici .");
+        expect(phonemize("La calle y la cerveza.", "es-419")).toBe("la kˈaʝe i la seɾβˈesa .");
+    });
+});

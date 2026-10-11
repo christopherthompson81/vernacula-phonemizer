@@ -468,6 +468,13 @@ pub fn number_words(n: f64, stem: bool) -> JsString {
     js(&parts.join(" "))
 }
 
+/// `THOUSAND_NOUN`: the thousand noun (singular, plural). An ordinal that ENDS on the thousand is built on the
+/// plural stem whatever the count — al miilea, al două miilea (#1533).
+pub fn thousand_noun() -> (JsString, JsString) {
+    let nm = num();
+    (js(&nm.thousand), js(&nm.thousands))
+}
+
 // ── text() ───────────────────────────────────────────────────────────────────────────────────────────
 
 type Nativiser = Box<dyn Fn(&JsString) -> JsString + Send + Sync>;

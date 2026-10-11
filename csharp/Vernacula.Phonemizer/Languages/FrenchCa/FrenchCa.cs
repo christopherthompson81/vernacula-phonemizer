@@ -32,10 +32,13 @@ public static class FrenchCa
     // consonant is a syllable ONSET (open syllable) → no laxing. ⚠ U+0361 COMBINING DOUBLE INVERTED BREVE is
     // the last character of this class: a coda C followed by the tie is an affricate onset (t͡s), not a coda.
     private const string OPEN = "aeɛiouyœøəɑɔˈ͡";
+    // ⚠ AN OBSTRUENT + LIQUID before a vowel is a two-consonant ONSET, not a coda (pu.blique, cy.clone,
+    // ci.tron), so the vowel before it is in an OPEN syllable and stays tense (#1533).
+    private const string ONSET_CLUSTER = $"[ptkbdɡf][lʁ][{OPEN}]";
 
     private static readonly JsRe AFFRICATE_T = JsRegex.Compile("t(?=[ˈˌ]?[iyɥj])", "gu");
     private static readonly JsRe AFFRICATE_D = JsRegex.Compile("d(?=[ˈˌ]?[iyɥj])", "gu");
-    private static readonly JsRe LAXING = JsRegex.Compile($"([iyu])(?=[{CODA}](?![{OPEN}]))", "gu");
+    private static readonly JsRe LAXING = JsRegex.Compile($"([iyu])(?=(?!{ONSET_CLUSTER})[{CODA}](?![{OPEN}]))", "gu");
     private static readonly JsRe FINAL_A = JsRegex.Compile("a(?=[ .,;!?…»)]|$)", "gu");
 
     /** France-French citation IPA → Québécois (affrication + high-vowel laxing + final-/a/ backing). */
@@ -48,25 +51,19 @@ public static class FrenchCa
     }
 
     /** One fr-CA word → canonical IPA. Context-free, so the shipped path IS the rule path. */
-    public static string PhonemizeWord(string word) => ToQuebecois(FrenchPhonemizer.CreateFrench().Text(word));
+    public static string PhonemizeWord(string word) =>
+        FrenchPhonemizer.CreateFrench(accent: ToQuebecois).Text(word);
 
     /** Alias kept for parity with the variants (en-GB/pt-BR) that split a lexicon-bearing shipped path. */
     public static string PhonemizeWordRules(string word) => PhonemizeWord(word);
 
-    private sealed class FrCaLanguage(ILanguage inner) : ILanguage
-    {
-        // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output (#1150).
-        public string Text(string input)
-        {
-            var pre = inner.Text(input);
-            var o = ToQuebecois(pre);
-            Core.Trace.NoteRewrite("accent:fr-CA", pre, o);
-            return o;
-        }
-    }
-
-    /** Build the Québécois-French phonemizer (France engine + the Québécois delta on the output). */
-    public static ILanguage CreateFrenchCA() => new FrCaLanguage(FrenchPhonemizer.CreateFrench());
+    /**
+     * Build the Québécois-French phonemizer (France engine + the Québécois delta on each French word).
+     * ⚠ THE DELTA IS HANDED TO THE ENGINE AND APPLIED PER FRENCH WORD (#1533). On the assembled string it also
+     * rewrote an embedded FOREIGN run read by another engine (Greek τι → t͡si). No rule of it looks across a
+     * space, so every French word reads as before, and the trace's output spans are now exact for fr-CA.
+     */
+    public static ILanguage CreateFrenchCA() => FrenchPhonemizer.CreateFrench(accent: ToQuebecois);
 
     internal static void RegisterSelf() => Registry.Register("french-ca", CreateFrenchCA);
 }

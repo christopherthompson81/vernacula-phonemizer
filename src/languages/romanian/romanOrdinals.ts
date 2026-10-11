@@ -22,7 +22,7 @@
  * before any ordinal logic and the context rules here cannot re-enable it.
  */
 import { ROMAN_EXCLUSIONS, type RomanPolicy } from "../../core/roman.ts";
-import { numberWords } from "./romanian.ts";
+import { numberWords, THOUSAND_NOUN } from "./romanian.ts";
 
 /** Romanian masculine/neuter ordinal (`al …-lea`) for any n a Roman numeral can encode. */
 function romanianOrdinal(n: number): string | undefined {
@@ -32,7 +32,11 @@ function romanianOrdinal(n: number): string | undefined {
     // the CARDINAL takes before a magnitude noun (100 = "o sută" spoken, but "al sutălea", not *al o sutălea).
     const card = numberWords(n, { stem: true });
     const words = card.split(" ");
-    const last = words[words.length - 1]!;
+    // ⚠ A FINAL THOUSAND TAKES THE PLURAL STEM, count 1 included (#1533): stem mode returns the bare singular
+    // `mie` for a count of 1, which gave *al mielea* for 1000 beside al două miilea for 2000. The ordinal is
+    // *al miilea*.
+    const tail = words[words.length - 1]!;
+    const last = tail === THOUSAND_NOUN.sg ? THOUSAND_NOUN.pl : tail;
     // -lea after a vowel (doi → doilea, nouăsprezece → nouăsprezecelea, sută → sutălea),
     // -ulea after a consonant (opt → optulea, milion → milionulea).
     words[words.length - 1] = /[aeiouăâîy]$/u.test(last) ? `${last}lea` : `${last}ulea`;

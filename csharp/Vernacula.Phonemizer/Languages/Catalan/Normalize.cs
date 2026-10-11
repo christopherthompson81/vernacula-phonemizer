@@ -40,19 +40,30 @@ public static class Normalize
         if (card == "" || HAS_DIGIT.IsMatch(card)) return null;
         var words = card.Split(' ');
         var stem = words[^1];
-        var small = fem ? ORD_FEM_1_10 : ORD_MASC_1_10;
-        var mod10 = (int)(n % 10);
-        if (mod10 != 0 && mod10 < 10 && n % 100 > 10)
-        {
-            var tail = mod10 < 10 ? SMALL_CARDINAL_TAIL[mod10] : "";
-            if (tail != "" && card.EndsWith(tail, StringComparison.Ordinal))
-                return $"{card[..^tail.Length]}{small[mod10]}";
-        }
+        // ⚠ ONE COMPOSITOR FOR BOTH ORDINAL PATHS (#1533): the suffixed cardinal (IEC), 21 → vint i unè, as the
+        // Roman XXI reads. The cinc/nou/deu alternations are the under-ten ones, reached in a compound too. A
+        // PLAIN replace: `stem` is a word of a composed number, never the tracked text.
         stem = stem.EndsWith("ó", StringComparison.Ordinal) ? $"{stem[..^1]}on"
             : stem == "cents" ? "cent"
-            : Rewrite(stem, STEM_FINAL_AE, "");
+            : stem.EndsWith("cinc", StringComparison.Ordinal) ? $"{stem[..^1]}qu"
+            : stem.EndsWith("nou", StringComparison.Ordinal) ? $"{stem[..^1]}v"
+            : stem.EndsWith("deu", StringComparison.Ordinal) ? $"{stem[..^1]}s"
+            : STEM_FINAL_AE.Replace(stem, "");
         words[^1] = fem ? $"{stem}ena" : $"{stem}è";
         return string.Join(" ", words);
+    }
+
+    /** The colloquial masculine compound with an IRREGULAR tail (21 → vint i primer … 24 → vint i quart), for a
+     *  digit ordinal whose written suffix (r/n/t) names that series. Null outside compounds ending in 1–4 with
+     *  `n % 100 > 10`. */
+    private static string? IrregularCompound(double n)
+    {
+        var u = (int)(n % 10);
+        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n <= 10 || n % 100 <= 10 || u < 1 || u > 4)
+            return null;
+        var card = Numbers.NumberToWords(n);
+        var tail = SMALL_CARDINAL_TAIL[u];
+        return card.EndsWith($" {tail}", StringComparison.Ordinal) ? $"{card[..^tail.Length]}{ORD_MASC_1_10[u]}" : null;
     }
 
     /** `dC` = després de Crist (AD), `aC` = abans de Crist (BC). */
@@ -170,11 +181,13 @@ public static class Normalize
         {
             var n = Js.Number(m0.Groups[1].Value);
             var sfx = m0.Groups[2].Value;
-            var fem = Js.ToLowerCase(sfx) == "a";
-            var ord = OrdinalWords(n, fem);
+            var mm = Js.ToLowerCase(sfx);
+            var fem = mm == "a";
+            // ⚠ THE SUFFIX PICKS THE SERIES IN A COMPOUND TOO (#1533): è / a the normative suffixed cardinal,
+            // r / n / t the colloquial irregular tail (21r vint i primer, 22ns vint i segons).
+            var ord = mm == "è" || mm == "a" ? OrdinalWords(n, fem) : IrregularCompound(n) ?? OrdinalWords(n);
             if (ord is null) return m0.Value;
             var last = ord.Split(' ')[^1];
-            var mm = Js.ToLowerCase(sfx);
             if (mm == "r" && !(last == "primer" || last == "tercer")) return m0.Value;
             if (mm == "n" && last != "segon") return m0.Value;
             if (mm == "ns" && last != "segon") return m0.Value;

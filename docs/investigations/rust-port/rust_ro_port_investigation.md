@@ -113,3 +113,27 @@ foreign script — Cyrillic, Greek, Han, Hangul, Hebrew, Arabic, Devanagari, Tha
   needs an unported engine.
 
 **Implication.** The group is done on this machine.
+
+## Run 7 — 2026-10-11 16:55 (#1533: the stale stress docstring and the ordinal of 1000, TS-first)
+
+**Question.** Is `al miilea` the ordinal of 1000, and does fixing it move anything else?
+
+**Command.** `ROMAN_POLICY.ordinal(n)` for `1 2 19 100 200 1000 1001 1100 2000 3000 3999`; `phonemize("secolul M",
+"ro")`; `npx tsx tools/check-goldens.mts ro`.
+
+**Raw finding.** Only 1000 changes: `al mielea` → `al miilea` (the ordinal is built on the plural stem *mii*, as
+`2000 → al două miilea` already was). `1001 → al mie unulea` and `1100 → al mie sutălea` are not touched — the issue
+names only the count-of-1 final thousand, and nothing here witnesses the compound form. `secolul M` → `sekoˈlul ˈal
+miˈjle̯a` (the g2p reads ⟨iil⟩ with a glide; a g2p matter, not this fix). Golden: 0 rows move. Finding 1 is a doc
+fix: the header now says ˈ is emitted (`stressFromEnd` + the kaikki stress lexicon), since that is the measured
+behaviour.
+
+**Implication.** Fixed; mirror the ordinal into C# and Rust. The new pin fails with romanOrdinals.ts reverted.
+
+## Run 8 — 2026-10-11 17:40 (#1533: C# + Rust mirrors, the group gates after rebasing onto origin/main)
+
+**Commands.** `npx tsx tools/extract_regexes.mts`; `npm run typecheck`; `npm test`; `npm run check:goldens`; `dotnet test csharp/Vernacula.Phonemizer.Tests` (full); `dotnet run --project csharp/tools/parity`; `cd rust && cargo fmt --check && cargo test --release && cargo run --release -p parity && cargo run --release -p regex-diff`. Each new C# and Rust test was also run with its fix reverted.
+
+**Raw finding.** regex-corpus.jsonl unchanged (the new fr-CA lookahead is built at runtime, as the old one was). TS 6887 passed / 5 skipped; goldens fresh, 189 languages, 36495 rows; C# 7643 passed (full suite); C# parity 189 byte-identical, accent variants 5/5; Rust 205 + 1 passed, parity 200/200 on every ported language except the known mag 199/200, regex-diff 145212 identical / 0 DIFFER. With the fixes reverted: C# 32 of the 212 tests in the touched suites fail (every new case), Rust 6 of 14 in the touched modules fail.
+
+**Implication.** #1533's gl / es-419 / fr-CA / ca / ro items are closed in all three engines. The en-IN item was not part of this pass.

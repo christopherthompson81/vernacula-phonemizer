@@ -84,3 +84,29 @@ re-run; `cargo run --release -p parity`.
 **Raw finding.** 25 word + 26 `gl.text` + 2 `phonemize` + 45 normalize + 6 ordinal pins (one `toContain` pin,
 `299 792 458 m/s`, is not a `toBe` and is not carried): `2 passed`. Re-run: `gl-normalize 18796 / gl-g2p 394092 /
 phonemize-sync 3658 / phonemize-best 3658 / trace 3658 identical, 0 DIFFER`. Parity: all 25 languages 200/200.
+
+## Run 6 — 2026-10-11 16:15 (#1533: fixing finding 1 TS-first)
+
+**Question.** Does testing the falling diphthong after the LAST NUCLEUS (Catalan's `stressedNucleus` shape) make
+`ademais` / `xamais` / `papeis` oxytone without moving anything that is not a final ⟨V+i/u+s⟩?
+
+**Command.** Synthetic word probe (`ademais xamais papeis cantous ameis chapeus cantou amei animais cousas peixe
+seis reis moitas dixeches coidas pais bueis hoxe fixen`) through `phonemize(w, "gl")`, before and after; then
+`npx tsx tools/gen_parity_goldens.mts gl` and a word-level diff of `csharp/goldens/gl.tsv` against HEAD.
+
+**Raw finding.** Before: `aðˈemaᶦs ʃˈamaᶦs pˈapeᶦs kˈantoᶷs ˈameᶦs t͡ʃˈapeᶷs`. After: `aðemˈaᶦs ʃamˈaᶦs papˈeᶦs
+kantˈoᶷs amˈeᶦs t͡ʃapˈeᶷs`; `cantou amei` unchanged (already oxytone); `cousas kˈoᶷsas`, `moitas mˈoᶦtas`, `peixe`,
+`dixeches`, `fixen` unchanged (the diphthong is not in the last syllable). Golden: 28 of 200 rows move, the text set
+is identical, and every changed word is a plural/adverb in final ⟨-ais/-eis/-ois⟩: `despois`×10, `dezaseis`×3,
+`demais`×3, `ademais`, `animais`×3, `oficiais`, `cerebrais`, `mentais`, `adicionais`, `habituais`, `caracois`,
+`internacionais`, `metais`, `vexetais`, `tradicionais`, `occidentais` — each one penult → final. Nothing else moved.
+The referee (wikipron glg broad) carries NO stress marks, so `tools/referee-eval/eval.ts gl` cannot witness the
+change (folded 7427/8091 = 91.8% either way). Its headwords with an unaccented final ⟨V+i/u(+s)⟩ and more than one
+nucleus that this changes — `anzois carpais chapeus despois endexamais escornabois españois hoteis` — are all
+oxytone in the standard (plurals of oxytone -ol/-el/-al singulars); none is a paroxytone counterexample. The
+gl text pin `R$ 30` moved with it: `reais` `rˈeaᶦs` → `reˈaᶦs`.
+
+**Implication.** Fixed; mirror into C# and Rust. Pins: `ademais xamais papeis chapeus cantous` oxytone, `cousas
+moitas` untouched. Reverting the fix fails both new pins (and the `reais` pin).
+
+(#1533 C#/Rust mirrors and the gates: see rust_ro_port_investigation.md Run 8.)

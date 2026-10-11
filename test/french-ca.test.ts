@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { phonemizeWord } from "../src/languages/french-ca/french-ca.ts";
+import { phonemize } from "../src/index.ts";
 
 // Hand-adjudicated DIAGNOSTIC GOLD for Québécois French (fr-CA), from the documented phonology (Walker 1984, *The
 // Pronunciation of Canadian French*; Côté 2012). No fr-CA pronunciation corpus exists (wikipron/kaikki French is
@@ -41,5 +42,27 @@ describe("Québécois French (fr-CA) — diagnostic gold", () => {
         expect(phonemizeWord("habitude")).toBe("abit͡sˈʏd"); // affricate t→t͡s before y, lax y→ʏ
         expect(phonemizeWord("stupide")).toBe("st͡sypˈɪd");
         expect(phonemizeWord("politique")).toBe("pɔlit͡sˈɪk"); // first ⟨i⟩ open (no lax), affricate, final ⟨ik⟩ laxes
+    });
+
+    // #1533: the lookahead tested only the ONE symbol after the consonant, so an obstruent + liquid onset
+    // (pu.blique, cy.clone, ci.tron) read as closing the syllable and the open-syllable vowel laxed.
+    test("an obstruent + liquid ONSET leaves the syllable before it open (no laxing)", () => {
+        expect(phonemizeWord("publique")).toBe("pyblˈɪk");
+        expect(phonemizeWord("cyclone")).toBe("siklˈɔn");
+        expect(phonemizeWord("citron")).toBe("sitʁˈɔ̃");
+        expect(phonemizeWord("supplier")).toBe("syplijˈe");
+        expect(phonemizeWord("microscope")).toBe("mikʁɔskˈɔp");
+        // …but a word-final cluster, with no vowel after it, still closes the syllable.
+        expect(phonemizeWord("chiffre")).toBe("ʃˈɪfʁ");
+        expect(phonemizeWord("équilibre")).toBe("ekilˈɪbʁ");
+    });
+});
+
+// #1533: the delta ran on the ASSEMBLED string, so it also affricated a run in another script that another
+// engine had read (Greek τι → t͡si). It is applied per French word now.
+describe("fr-CA: the accent delta spares an embedded foreign run", () => {
+    test("the Greek run reads as the fr host reads it; the French words around it still shift", () => {
+        expect(phonemize("Il a dit τι.", "fr-CA")).toBe("ɪl ɑ d͡zi tˈi .");
+        expect(phonemize("Il a dit τι.", "fr")).toBe("il a di tˈi .");
     });
 });

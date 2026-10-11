@@ -2,7 +2,6 @@
 //! Ported from src/languages/spanish-419/spanish-419.ts — see that file for the phonology.
 
 use crate::core::js_string::JsString;
-use crate::core::trace::note_rewrite;
 use crate::js_re;
 use crate::languages::spanish::spanish::{
     SpanishPhonemizer, create_spanish, phonemize_word as phonemize_word_es,
@@ -20,15 +19,13 @@ pub fn phonemize_word(word: &JsString) -> JsString {
     to_latin_american(&phonemize_word_es(word))
 }
 
-/// The es-419 engine (`createSpanish419`): `createSpanish(true)` plus the mergers.
+/// The es-419 engine (`createSpanish419`): `createSpanish(true, toLatinAmerican)`, the mergers applied per Spanish
+/// word so an embedded foreign run is never rewritten (#1533).
 pub struct Spanish419Phonemizer(SpanishPhonemizer);
 
 impl Spanish419Phonemizer {
     pub fn text(&self, input: &JsString) -> JsString {
-        let pre = self.0.text(input);
-        let out = to_latin_american(&pre);
-        note_rewrite("accent:es-419", &pre, &out, true);
-        out
+        self.0.text(input)
     }
 }
 
@@ -40,7 +37,7 @@ impl Engine for Spanish419Phonemizer {
 
 /// `createSpanish419()`.
 pub fn create_spanish_419() -> Result<Spanish419Phonemizer, String> {
-    create_spanish(true).map(Spanish419Phonemizer)
+    create_spanish(true).map(|e| Spanish419Phonemizer(e.with_accent(to_latin_american)))
 }
 
 #[cfg(test)]
@@ -154,6 +151,23 @@ mod tests {
             };
             assert_eq!(crate::phonemize(t, lang).unwrap(), *want, "{t}");
         }
+    }
+
+    /// #1533: the mergers spare an embedded foreign run (they ran on the assembled string).
+    #[test]
+    fn ts_foreign_run_pins() {
+        assert_eq!(
+            crate::phonemize("Dijo θεός en griego.", "es-419").unwrap(),
+            crate::phonemize("Dijo θεός en griego.", "es").unwrap()
+        );
+        assert_eq!(
+            crate::phonemize("Leyó Αθήνα y Θεσσαλονίκη.", "es-419").unwrap(),
+            "leʝˈo aθina i θesalonici ."
+        );
+        assert_eq!(
+            crate::phonemize("La calle y la cerveza.", "es-419").unwrap(),
+            "la kˈaʝe i la seɾβˈesa ."
+        );
     }
 
     #[test]

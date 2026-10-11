@@ -167,7 +167,10 @@ const SYMBOLS = makeSymbolNormalizer({
 });
 
 class SpanishPhonemizer implements Phonemizer {
-    constructor(private readonly americas = false) {}
+    constructor(
+        private readonly americas = false,
+        private readonly accent?: (ipa: string) => string,
+    ) {}
 
     text(input: string): string {
         // normalization order: general text normalization (abbreviations, era markers, ordinal
@@ -175,11 +178,16 @@ class SpanishPhonemizer implements Phonemizer {
         // upstream has already claimed the hour. Roman numerals need no ordering care here: `es` is not in
         // the registry's ROMAN_NATIVE set, so the shared pass has already converted them before text().
         const normalized = SYMBOLS(normalizeSpanishInitialisms(normalizeSpanish(input, { americas: this.americas })));
+        // ⚠ AN ACCENT DELTA IS APPLIED PER SPANISH WORD, NOT TO THE ASSEMBLED STRING (#1533). A run in another
+        // script is read by its own engine (emitUnclaimed), and seseo is a fact about Spanish words: the
+        // whole-string form turned the Greek θ of `θεός` into s.
+        const accent = this.accent;
+        const word = accent === undefined ? wordIpa : (w: string): string => accent(wordIpa(w));
         return spirantizeAcrossWords(assembleClauses(normalized, TOKEN, (m, sink) => {
-            if (m[1]) sink.emit(wordIpa(nat(m[1])));
+            if (m[1]) sink.emit(word(nat(m[1])));
             else if (m[2])
                 sink.emit(
-                    numberTokenWords(m[2], normalized.slice(m.index! + m[0].length)).split(" ").map(wordIpa).join(" "),
+                    numberTokenWords(m[2], normalized.slice(m.index! + m[0].length)).split(" ").map(word).join(" "),
                 );
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
@@ -191,7 +199,9 @@ class SpanishPhonemizer implements Phonemizer {
 
 /** Build the Spanish phonemizer (no data files — the engine is fully rule-based). */
 /** `americas` selects Latin-American usage in the normalization layer — currently just the first of the
- *  month, an ordinal in America and a cardinal in Spain. es-419 passes it; `es` (Castilian) does not. */
-export function createSpanish(americas = false): Phonemizer {
-    return new SpanishPhonemizer(americas);
+ *  month, an ordinal in America and a cardinal in Spain. es-419 passes it; `es` (Castilian) does not.
+ *  `accent` is a word-level IPA delta (es-419's seseo + yeísmo), applied to every Spanish reading and to nothing
+ *  an embedded foreign run emits. */
+export function createSpanish(americas = false, accent?: (ipa: string) => string): Phonemizer {
+    return new SpanishPhonemizer(americas, accent);
 }

@@ -83,6 +83,8 @@ public sealed class GalicianPhonemizer : ILanguage
      * Index of the stressed nucleus: the written accent, else penultimate (word ends in a syllabic vowel /
      * n / s) or final. The "ends in a vowel" test is on the last SEGMENT being a nucleus — a word ending in
      * a falling diphthong is glide-final (cantou→[kanˈtow], amei→[aˈmej]), so it takes oxytone stress.
+     * ⚠ The diphthong is tested on the segment after the LAST NUCLEUS, so a coda after the offglide (the
+     * plural or a lexical -s) does not hide it: ademais, papeis, chapeus are oxytone (#1533).
      */
     private static int StressedNucleus(string word, IReadOnlyList<Seg> segs)
     {
@@ -91,6 +93,8 @@ public sealed class GalicianPhonemizer : ILanguage
         if (nuclei.Count == 0) return -1;
         foreach (var i in nuclei) if (segs[i].Accent) return i;
         if (nuclei.Count == 1) return nuclei[0];
+        var lastNuc = nuclei[^1];
+        if (lastNuc + 1 < segs.Count && (segs[lastNuc + 1].Ph == "ᶦ" || segs[lastNuc + 1].Ph == "ᶷ")) return lastNuc;
         var w = Js.ToLowerCase(word);
         var last = w.Length > 0 ? w[^1].ToString() : "";
         var endsNucleus = segs[^1].Nucleus; // a TRUE final vowel (a diphthong offglide is not one)

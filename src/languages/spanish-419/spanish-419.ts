@@ -18,7 +18,6 @@ import {
     createSpanish,
     phonemizeWord as phonemizeWordEs,
 } from "../spanish/spanish.ts";
-import { noteRewrite } from "../../core/trace.ts";
 
 /** Castilian IPA → Latin-American: seseo (θ→s) + yeísmo (ʎ→ʝ). Context-free, no information lost. */
 export function toLatinAmerican(castilian: string): string {
@@ -32,15 +31,10 @@ export function phonemizeWord(word: string): string {
 
 /** Build the Latin-American Spanish phonemizer (Castilian engine + the seseo/yeísmo mergers). */
 export function createSpanish419(): Phonemizer {
-    const e = createSpanish(true); // Latin-American usage in the normalization layer (el primero de enero)
-    // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output, so a trace token records
-    // the CASTILIAN reading and the utterance ships the American one. Reported (#1150).
-    return {
-        text: (input: string): string => {
-            const pre = e.text(input);
-            const out = toLatinAmerican(pre);
-            noteRewrite("accent:es-419", pre, out, true);
-            return out;
-        },
-    };
+    // `true`: Latin-American usage in the normalization layer (el primero de enero).
+    // ⚠ THE DELTA IS HANDED TO THE ENGINE AND APPLIED PER SPANISH WORD (#1533). It used to run on the assembled
+    // string, which also rewrote an embedded FOREIGN run read by another engine: Greek `θεός` → `seos`. Being
+    // context-free, the per-word form reads every Spanish word exactly as before, and a trace token now records
+    // the reading that ships rather than the Castilian one (#1150).
+    return createSpanish(true, toLatinAmerican);
 }

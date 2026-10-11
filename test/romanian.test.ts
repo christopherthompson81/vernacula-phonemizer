@@ -129,6 +129,10 @@ describe("Romanian Roman-numeral ordinal policy", () => {
         expect(ord(50)).toBe("al cincizecilea");
         expect(ord(60)).toBe("al șaizecilea");
         expect(ord(100)).toBe("al sutălea");
+        // #1533: a final thousand takes the PLURAL stem at a count of 1 too — it was *al mielea* beside al două miilea.
+        expect(ord(1000)).toBe("al miilea");
+        expect(ord(2000)).toBe("al două miilea");
+        expect(phonemize("secolul M", "ro")).toBe(`sekoˈlul ${phonemize("al miilea", "ro")}`);
         expect(phonemize("al cincizecilea aniversar", "ro")).toBe("ˈal t͡ʃint͡ʃizet͡ʃiˈle̯a aniveˈrsar");
     });
 
