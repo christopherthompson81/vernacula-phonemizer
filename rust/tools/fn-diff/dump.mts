@@ -22,7 +22,7 @@ const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
-    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th", ru: "ru_ru", de: "de_de",
 };
 
 /**
@@ -811,6 +811,81 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const n of [2 ** 53 - 1, 2 ** 53, 1.5, -3, 999999999999, 1e12 - 1, 5e11 + 3e8 + 1234]) ns.push(n);
         for (const n of ns) emit({ n, op: "number" }, numberToWords(n));
         for (const raw of ["0", "007", "1234567890", "1000000000000", "99999999999999999999"]) emit({ n: Number(raw), raw: units(raw), op: "number" }, numberToWords(Number(raw), raw));
+    },
+    // ── German (de). Inputs: the de golden, FLEURS de_de (columns 3 and 4) and probes/de.txt. ──
+    // Each stage of text()'s normalization chain separately (op), and the phonotactic test on every word.
+    async "de-normalize"() {
+        const N = await import("../../../src/languages/german/normalize.ts");
+        const { MANIFEST: DE } = await import("../../../src/languages/german/manifest.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const st = DE.symbolTier;
+        const symbols = makeSymbolNormalizer({
+            percent: st.percent, currency: st.currency, units: st.units, exponentWords: st.exponentWords,
+            bareExponent: st.bareExponent, magnitudes: st.magnitudes, ampersand: st.ampersand, multiply: st.multiply,
+        });
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["de"], FLEURS_DIR.de, ["de.txt"])) {
+            const a = N.normalizeGerman(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = N.normalizeGermanInitialisms(a);
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            const c = symbols(b);
+            emit({ text: units(b), src, op: "symbols" }, c);
+            emit({ text: units(c), src, op: "years" }, N.normalizeGermanYears(c));
+            // The year pass on the RAW text too: it must hold on input the earlier stages did not shape.
+            emit({ text: units(t), src, op: "years" }, N.normalizeGermanYears(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) words.add(m[0]);
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableGerman(w)));
+    },
+    // The word level: phonemizeWord, toSegments and decompose over every key of the six German lexicons, every
+    // letter run of the texts (as written and lowercased), synthetic compounds built from the lexicon's own
+    // constituents (with each linking element, a prefix, a suffix, three parts), and every one- to three-letter
+    // string over the German letters.
+    async "de-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/german/german.ts");
+        const { toSegments } = await import("../../../src/languages/german/g2p.ts");
+        const { decompose } = await import("../../../src/languages/german/morphology.ts");
+        const { MANIFEST: DE } = await import("../../../src/languages/german/manifest.ts");
+        const GERMAN = new URL("../../../src/languages/german/german.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const f of ["stress.tsv", "length.tsv", "quality.tsv", "consonant.tsv", "er.tsv", "lexicon.tsv"])
+            for (const k of loadTsvMap(GERMAN, f).keys()) words.add(k);
+        for (const t of textsFor(["de"], FLEURS_DIR.de, ["de.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const lex = loadTsvMap(GERMAN, "lexicon.tsv");
+        const cons = [...lex].filter(([w, f]) => w.length >= 3 && f.includes("k")).map(([w]) => w);
+        const links = ["", ...DE.morphology.linkingElements];
+        const prefixes = [...DE.morphology.prefixUnstressed, ...DE.morphology.prefixStressed];
+        const suffixes = DE.morphology.suffixes;
+        for (let i = 0; i + 2 < cons.length; i += 3) {
+            const [a, b, c] = [cons[i]!, cons[i + 1]!, cons[i + 2]!];
+            words.add(a + links[i % links.length]! + b);
+            words.add(prefixes[i % prefixes.length]! + a);
+            words.add(b + suffixes[i % suffixes.length]!);
+            if (i % 9 === 0) words.add(a + "s" + b + c);
+            if (i % 15 === 0) words.add(prefixes[(i >> 1) % prefixes.length]! + a + b + suffixes[(i >> 2) % suffixes.length]!);
+        }
+        const letters = [..."abcdefghijklmnopqrstuvwxyzäöüß"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of "aeiouäöüyhrs") words.add(a + b + c); } }
+        for (const w of ["", "Ɛ", "é", "\ud800", "ah\ud800", "ſt", "İst"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.s}/${s.vowel ? 1 : 0}`).join(" "));
+            const d = decompose(w);
+            emit({ word: units(w), op: "decomp" }, `${d.parts.join("·")}|${d.kinds.join(",")}|${d.stressPart}`);
+        }
+    },
+    async "de-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/german/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
