@@ -46,6 +46,18 @@ public static class Normalize
         return null;
     }
 
+    /** The stem of a `-tal` compound: HundredsYear, extended to 2000–9999 (#1526). The N000–N099 block takes
+     *  the thousands word (tvåtusen, tvåtusentio); above it the hundreds reading resumes (tjugoetthundra). */
+    public static string? CenturyYear(double n)
+    {
+        var below = HundredsYear(n);
+        if (below != null || !double.IsInteger(n) || n < 2000 || n >= 10000) return below;
+        var rest = n % 100;
+        var tail = rest != 0 ? Numbers.NumberToWords(rest) : "";
+        if (n % 1000 < 100) return $"{Numbers.NumberToWords(n - rest)}{tail}"; // tvåtusen, tvåtusentio
+        return $"{Numbers.NumberToWords(Math.Floor(n / 100))}{HUNDRED}{tail}"; // tjugoetthundra
+    }
+
     /** TS `type KeepFinal = "terminal"` — the abbreviations whose dot may also be the sentence period. */
     private const string TERMINAL = "terminal";
 
@@ -57,8 +69,8 @@ public static class Normalize
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])e\\.\\s?Kr\\.", "giu"), "efter Kristus", TERMINAL),
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])t\\.\\s?ex\\.", "giu"), "till exempel", null),
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])s\\.\\s?k\\.", "giu"), "så kallad", null),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])dvs\\.?", "giu"), "det vill säga", null),
-        (JsRegex.Compile("(?<![\\p{L}\\p{M}])osv\\.?", "giu"), "och så vidare", TERMINAL),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])dvs(?![\\p{L}\\p{M}])\\.?", "giu"), "det vill säga", null),
+        (JsRegex.Compile("(?<![\\p{L}\\p{M}])osv(?![\\p{L}\\p{M}])\\.?", "giu"), "och så vidare", TERMINAL),
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])etc\\.", "giu"), "etcetera", TERMINAL),
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])fvt(?![\\p{L}\\p{M}])", "gu"), "före vår tidräkning", null),
         (JsRegex.Compile("(?<![\\p{L}\\p{M}])kl\\.\\s*", "giu"), "klockan ", null),
@@ -158,8 +170,8 @@ public static class Normalize
     private static readonly JsRe COMMA_GROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)[,](?=\\d{3}(?!\\d))", "gu");
     private static readonly JsRe SPORTS_TIME = JsRegex.Compile("(?<![\\d:,])(\\d{1,2}):(\\d{2})[.,](\\d{1,2})(?!\\d)", "gu");
     private static readonly JsRe CLOCK_DOT_RANGE = JsRegex.Compile("(?<![\\d:,])(?<!\\.\\d)(\\d{1,2})\\.(\\d{2})\\s*[-–—]\\s*(\\d{1,2})\\.(\\d{2})(?!\\d)", "gu");
-    private static readonly JsRe CLOCK_DOT = JsRegex.Compile("(?<![\\d:,])(?<!\\.\\d)(\\d{1,2})\\.(\\d{2})(?![\\d.])", "gu");
-    private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:,])(\\d{1,2}):(\\d{2})(?![\\d.,])", "gu");
+    private static readonly JsRe CLOCK_DOT = JsRegex.Compile("(?<![\\d:,])(?<!\\.\\d)(\\d{1,2})\\.(\\d{2})(?!\\d)(?!\\.\\d)", "gu");
+    private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:,])(\\d{1,2}):(\\d{2})(?![\\d,])(?!\\.\\d)", "gu");
     private static readonly JsRe SCORE_COLON = JsRegex.Compile("(?<![\\d:.,])(\\d{1,2}):(\\d{1,2})(?![\\d\\p{L}])", "gu");
     private static readonly JsRe ORDINAL_COLON = JsRegex.Compile("(?<![\\d:.,])(\\d{1,3}):(a|e|s|or)(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe CENTURY_RANGE = JsRegex.Compile("(?<![\\d.,:])(\\d{3,4})-(\\d{3,4})-(tal\\p{L}*)", "gu");
@@ -240,12 +252,12 @@ public static class Normalize
         // 9) century / decade `NNNN-tal…`; the range form is claimed first.
         t = Rewrite(t, CENTURY_RANGE, m =>
         {
-            string? first = HundredsYear(Js.Number(m.Groups[1].Value)), second = HundredsYear(Js.Number(m.Groups[2].Value));
+            string? first = CenturyYear(Js.Number(m.Groups[1].Value)), second = CenturyYear(Js.Number(m.Groups[2].Value));
             return first is not null && second is not null ? $"{first} till {second}{m.Groups[3].Value}" : m.Value;
         });
         t = Rewrite(t, CENTURY, m =>
         {
-            var word = HundredsYear(Js.Number(m.Groups[1].Value));
+            var word = CenturyYear(Js.Number(m.Groups[1].Value));
             return word is null ? m.Value : $"{word}{m.Groups[2].Value}";
         });
 

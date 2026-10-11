@@ -217,6 +217,11 @@ impl SwedishPhonemizer {
         super::normalize::hundreds_year(n)
     }
 
+    /// `centuryYear(n)` (normalize.ts).
+    pub fn century_year(&self, n: f64) -> Option<JsString> {
+        super::normalize::century_year(n)
+    }
+
     /// `phonemizeWord(word)`.
     pub fn phonemize_word(&self, word: &JsString) -> JsString {
         phonemize_word(word)
@@ -414,7 +419,11 @@ mod tests {
         ("1000-talet", "tusentalet"),
         ("800-talet", "åttahundratalet"),
         ("1100-1200-talet", "elvahundra till tolvhundratalet"),
-        ("2000-talet", "2000-talet"),
+        ("Under 2000-talet.", "Under tvåtusentalet."),
+        ("2010-talet", "tvåtusentiotalet"),
+        ("2100-talet", "tjugoetthundratalet"),
+        ("1900-2000-talet", "nittonhundra till tvåtusentalet"),
+        ("10000-talet", "10000-talet"),
         ("år 1945 och", "år nittonhundrafyrtiofem och"),
         ("1956 flyttade", "nittonhundrafemtiosex flyttade"),
         ("norr om 1770. De", "norr om sjuttonhundrasjuttio. De"),
@@ -429,7 +438,11 @@ mod tests {
         ("Standarden 802.11n", "Standarden 802.11n"),
         ("se figur 1.1.", "se figur 1.1."),
         ("priset 1.75", "priset 1.75"),
+        ("Mötet börjar kl. 20.30.", "Mötet börjar klockan 20 30."),
+        ("Mellan 9.00 och 17.30.", "Mellan 9 0 0 och 17 30."),
+        ("datum 12.05.2020 här", "datum 12.05.2020 här"),
         ("klockan 12:00", "klockan 12 0 0"),
+        ("Vi ses klockan 12:00.", "Vi ses klockan 12 0 0."),
         ("Cirka 11:29 rörde", "Cirka 11 29 rörde"),
         ("tid på 4:41,30.", "tid på 4 41,30."),
         ("och 1:09.02 minuter", "och 1 09,02 minuter"),
@@ -447,6 +460,13 @@ mod tests {
         ("t.ex. visering", "till exempel visering"),
         ("t.o.m. en kajak", "till och med en kajak"),
         ("dvs. 0 eller 1", "det vill säga 0 eller 1"),
+        (
+            "Han var osviklig och osvensk.",
+            "Han var osviklig och osvensk.",
+        ),
+        ("dvsbilen", "dvsbilen"),
+        ("Det är, dvs, bra.", "Det är, det vill säga, bra."),
+        ("båtar osv. Sedan", "båtar och så vidare. Sedan"),
         ("s.k. flikstup", "så kallad flikstup"),
         ("Truex, Jr. är", "Truex, junior är"),
         ("Six Flags St. Louis", "Six Flags Sankt Louis"),
@@ -486,6 +506,31 @@ mod tests {
         ("NASA:s chef", "NASAs chef"),
         ("Luno:n hade", "Lunon hade"),
     ];
+
+    #[test]
+    fn century_year_pins_hold() {
+        let e = create_swedish().unwrap();
+        let pins: &[(f64, Option<&str>)] = &[
+            (1945.0, Some("nittonhundrafyrtiofem")),
+            (1000.0, Some("tusen")),
+            (2000.0, Some("tvåtusen")),
+            (2050.0, Some("tvåtusenfemtio")),
+            (2099.0, Some("tvåtusennittionio")),
+            (2100.0, Some("tjugoetthundra")),
+            (3000.0, Some("tretusen")),
+            (9999.0, Some("nittioniohundranittionio")),
+            (10000.0, None),
+            (2000.5, None),
+            (99.0, None),
+        ];
+        for (n, want) in pins {
+            assert_eq!(
+                e.century_year(*n).map(|w| w.to_string_lossy()).as_deref(),
+                *want,
+                "{n}"
+            );
+        }
+    }
 
     #[test]
     fn the_ts_suite_pins_hold() {

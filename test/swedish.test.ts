@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/swedish/swedish.ts";
 import {
-    hundredsYear, normalizeSwedish, normalizeSwedishInitialisms, ordinal,
+    centuryYear, hundredsYear, normalizeSwedish, normalizeSwedishInitialisms, ordinal,
 } from "../src/languages/swedish/normalize.ts";
 
 // Canonical-IPA goldens for Central Standard Swedish (rikssvenska). The NST lexicon adds
@@ -181,7 +181,26 @@ describe("swedish text normalization", () => {
         expect(normalizeSwedish("1000-talet")).toBe("tusentalet"); //         the tusen branch
         expect(normalizeSwedish("800-talet")).toBe("åttahundratalet"); //     3-digit branch
         expect(normalizeSwedish("1100-1200-talet")).toBe("elvahundra till tolvhundratalet"); // the range form
-        expect(normalizeSwedish("2000-talet")).toBe("2000-talet"); //         declined, not guessed
+        // 2000 and up (#1526): the -tal compound is not the bare year's tvåtusentjugo/tjugohundratjugo choice.
+        expect(normalizeSwedish("Under 2000-talet.")).toBe("Under tvåtusentalet."); // was *tvåtusen talet*
+        expect(normalizeSwedish("2010-talet")).toBe("tvåtusentiotalet"); //   the 20xx block, with a decade
+        expect(normalizeSwedish("2100-talet")).toBe("tjugoetthundratalet"); // hundreds reading resumes
+        expect(normalizeSwedish("1900-2000-talet")).toBe("nittonhundra till tvåtusentalet"); // range across 2000
+        expect(normalizeSwedish("10000-talet")).toBe("10000-talet"); //       5 digits: not matched at all
+    });
+
+    test("centuryYear(): hundredsYear below 2000, then the tvåtusen block and the hundreds above it", () => {
+        expect(centuryYear(1945)).toBe(hundredsYear(1945)); //    below 2000 it IS hundredsYear
+        expect(centuryYear(1000)).toBe("tusen");
+        expect(centuryYear(2000)).toBe("tvåtusen"); //            the 2000–2099 block: the thousands word
+        expect(centuryYear(2050)).toBe("tvåtusenfemtio"); //      …one compound, not numberToWords' two words
+        expect(centuryYear(2099)).toBe("tvåtusennittionio"); //   the block's upper boundary
+        expect(centuryYear(2100)).toBe("tjugoetthundra"); //      hundreds branch begins
+        expect(centuryYear(3000)).toBe("tretusen"); //            every N000 block takes the thousands word
+        expect(centuryYear(9999)).toBe("nittioniohundranittionio");
+        expect(centuryYear(10000)).toBeUndefined();
+        expect(centuryYear(2000.5)).toBeUndefined();
+        expect(centuryYear(99)).toBeUndefined();
     });
 
     test("bare four-digit year takes the hundreds reading — and only 1100–1999", () => {
@@ -221,10 +240,16 @@ describe("swedish text normalization", () => {
         expect(normalizeSwedish("Standarden 802.11n")).toBe("Standarden 802.11n"); // 3 digits before the dot
         expect(normalizeSwedish("se figur 1.1.")).toBe("se figur 1.1."); //         1 digit after it
         expect(normalizeSwedish("priset 1.75")).toBe("priset 1.75"); //             75 is not a minute
+        // AT A SENTENCE END (#1526): the full stop is not a decimal continuation, and it is kept.
+        expect(normalizeSwedish("Mötet börjar kl. 20.30.")).toBe("Mötet börjar klockan 20 30.");
+        expect(normalizeSwedish("Mellan 9.00 och 17.30.")).toBe("Mellan 9 0 0 och 17 30.");
+        expect(normalizeSwedish("datum 12.05.2020 här")).toBe("datum 12.05.2020 här"); // a date stays declined
     });
 
     test("clock: the COLON form, and the four other jobs of the Swedish colon", () => {
         expect(normalizeSwedish("klockan 12:00")).toBe("klockan 12 0 0");
+        // …and at a sentence end, where it fell to the score rule and lost a zero (#1526).
+        expect(normalizeSwedish("Vi ses klockan 12:00.")).toBe("Vi ses klockan 12 0 0.");
         expect(normalizeSwedish("Cirka 11:29 rörde")).toBe("Cirka 11 29 rörde");
         expect(normalizeSwedish("tid på 4:41,30.")).toBe("tid på 4 41,30."); // sports time, not a clock
         expect(normalizeSwedish("och 1:09.02 minuter")).toBe("och 1 09,02 minuter"); // …nor 09.02 inside it
@@ -248,6 +273,11 @@ describe("swedish text normalization", () => {
         expect(normalizeSwedish("t.ex. visering")).toBe("till exempel visering");
         expect(normalizeSwedish("t.o.m. en kajak")).toBe("till och med en kajak");
         expect(normalizeSwedish("dvs. 0 eller 1")).toBe("det vill säga 0 eller 1");
+        // The undotted `dvs` / `osv` need a RIGHT edge too, or they expand inside a word (#1526).
+        expect(normalizeSwedish("Han var osviklig och osvensk.")).toBe("Han var osviklig och osvensk.");
+        expect(normalizeSwedish("dvsbilen")).toBe("dvsbilen");
+        expect(normalizeSwedish("Det är, dvs, bra.")).toBe("Det är, det vill säga, bra."); // undotted, still read
+        expect(normalizeSwedish("båtar osv. Sedan")).toBe("båtar och så vidare. Sedan"); // terminal dot kept
         expect(normalizeSwedish("s.k. flikstup")).toBe("så kallad flikstup");
         expect(normalizeSwedish("Truex, Jr. är")).toBe("Truex, junior är");
         expect(normalizeSwedish("Six Flags St. Louis")).toBe("Six Flags Sankt Louis");

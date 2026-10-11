@@ -130,6 +130,26 @@ export function hundredsYear(n: number): string | undefined {
 }
 
 /**
+ * The year as the stem of a `-tal` compound (step 9): `hundredsYear`, extended past 1999 (#1526). The
+ * header's reason for leaving 2000+ alone is the BARE year, where *tvåtusentjugo* and *tjugohundratjugo*
+ * are both current; a `-tal` compound has no such choice to make, and declining it left the three defects
+ * step 9 exists for (`2000-talet` → *tvåtusen talet*: cardinal style, two words, hyphen dropped).
+ *
+ * The 2000–2099 block follows the 1000–1099 rule above — the thousands word, not *tjugohundra*: the 21st
+ * century is *tvåtusentalet*, as the 11th is *tusentalet*. Above it the hundreds reading resumes
+ * (2100 → *tjugoetthundra*). Composed from `numberToWords`, so 2000 is its own one-word *tvåtusen*;
+ * 10000 and up returns undefined, which step 9 already handles by keeping the digits.
+ */
+export function centuryYear(n: number): string | undefined {
+    const below = hundredsYear(n);
+    if (below !== undefined || !Number.isInteger(n) || n < 2000 || n >= 10000) return below;
+    const rest = n % 100;
+    const tail = rest ? numberToWords(rest) : "";
+    if (n % 1000 < 100) return `${numberToWords(n - rest)}${tail}`; // tvåtusen, tvåtusentio
+    return `${numberToWords(Math.floor(n / 100))}${HUNDRED}${tail}`; // tjugoetthundra
+}
+
+/**
  * AN ABBREVIATION DOT IS SOMETIMES ALSO THE SENTENCE PERIOD, and consuming it loses the pause. Measured
  * over sv_se: **5 utterance-final pauses** were lost by the first draft, at `… tar tag i ens arm, etc.`,
  * `… storytelling, etc.)`, `… ost, tonfisk, etc.`, `… omkring 10 000 f.v.t.`, `… templet 323 f.Kr.` and
@@ -171,8 +191,11 @@ const ABBREV: readonly (readonly [RegExp, string, KeepFinal?])[] = [
     [/(?<![\p{L}\p{M}])e\.\s?Kr\./giu, "efter Kristus", TERMINAL], // 2
     [/(?<![\p{L}\p{M}])t\.\s?ex\./giu, "till exempel"], //       8
     [/(?<![\p{L}\p{M}])s\.\s?k\./giu, "så kallad"], //           2
-    [/(?<![\p{L}\p{M}])dvs\.?/giu, "det vill säga"], //          2
-    [/(?<![\p{L}\p{M}])osv\.?/giu, "och så vidare", TERMINAL], // 1
+    // `dvs` / `osv` may be written undotted, so they need a RIGHT edge as well (#1526): without it the
+    // pattern fired as a word PREFIX — `osviklig` → *och så vidareiklig*, `dvsbilen` → *det vill sägabilen*.
+    // The guard sits on the letters, before the optional dot.
+    [/(?<![\p{L}\p{M}])dvs(?![\p{L}\p{M}])\.?/giu, "det vill säga"], //          2
+    [/(?<![\p{L}\p{M}])osv(?![\p{L}\p{M}])\.?/giu, "och så vidare", TERMINAL], // 1
     [/(?<![\p{L}\p{M}])etc\./giu, "etcetera", TERMINAL], //     4 — the corpus itself spells the
     //                                                              expansion out once ("…i baren, etcetera")
     [/(?<![\p{L}\p{M}])fvt(?![\p{L}\p{M}])/gu, "före vår tidräkning"], // 1 — the undotted variant, so no dot to keep
@@ -333,13 +356,19 @@ export function normalizeSwedish(input: string): string {
                 ? `${h1} ${minutes(m1)} till ${h2} ${minutes(m2)}`
                 : m,
     );
-    t = rewrite(t, /(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})(?![\d.])/gu, (m, h: string, mm: string) =>
+    //    A following period disqualifies only when a DIGIT follows it (`12.05.2020`, a date), the same
+    //    `(?!\.\d)` shape as step 11's year rule: a bare `(?![\d.])` also declined the SENTENCE period, so
+    //    `kl. 20.30.` at the end of a sentence read *tjugo komma tre noll* (#1526). The period itself is
+    //    never touched, so the full stop survives.
+    t = rewrite(t, /(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})(?!\d)(?!\.\d)/gu, (m, h: string, mm: string) =>
         isClock(h, mm) ? `${h} ${minutes(mm)}` : m);
 
     // 5) CLOCK, COLON FORM `HH:MM` (7). The colon is `,` in clausePunctuation, so `klockan 12:00` read
     //    *klockan tolv , noll* — a pause inside the time. Two digits of minutes is what separates it from
-    //    the score in step 6 and from the `N:a` ordinal in step 8.
-    t = rewrite(t, /(?<![\d:,])(\d{1,2}):(\d{2})(?![\d.,])/gu, (m, h: string, mm: string) =>
+    //    the score in step 6 and from the `N:a` ordinal in step 8. The same sentence-period guard as step 4
+    //    (#1526): `(?![\d.,])` declined `klockan 12:00.`, which then fell to the score rule and lost the
+    //    second zero (*tolv noll*); only a period followed by a digit disqualifies now.
+    t = rewrite(t, /(?<![\d:,])(\d{1,2}):(\d{2})(?![\d,])(?!\.\d)/gu, (m, h: string, mm: string) =>
         isClock(h, mm) ? `${h} ${minutes(mm)}` : m);
 
     // 6) SCORE `N:N` (2) — `betyget 2:2`, `vara 3:2.`. AFTER the clock, which has two minute digits and
@@ -388,12 +417,12 @@ export function normalizeSwedish(input: string): string {
     t = rewrite(t,
         /(?<![\d.,:])(\d{3,4})-(\d{3,4})-(tal\p{L}*)/gu,
         (m, a: string, b: string, tail: string) => {
-            const first = hundredsYear(Number(a)), second = hundredsYear(Number(b));
+            const first = centuryYear(Number(a)), second = centuryYear(Number(b));
             return first !== undefined && second !== undefined ? `${first} till ${second}${tail}` : m;
         },
     );
     t = rewrite(t, /(?<![\d.,:])(\d{3,4})-(tal\p{L}*)/gu, (m, y: string, tail: string) => {
-        const word = hundredsYear(Number(y));
+        const word = centuryYear(Number(y));
         return word === undefined ? m : `${word}${tail}`;
     });
 

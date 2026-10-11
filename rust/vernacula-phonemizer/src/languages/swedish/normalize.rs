@@ -89,6 +89,30 @@ pub(crate) fn hundreds_year(n: f64) -> Option<JsString> {
     None
 }
 
+/// `centuryYear(n)`: the stem of a `-tal` compound — `hundredsYear`, extended to 2000 … 9999 (#1526). The
+/// N000–N099 block takes the thousands word (2000 → tvåtusen, 2010 → tvåtusentio); above it the hundreds
+/// reading resumes (2100 → tjugoetthundra).
+pub(crate) fn century_year(n: f64) -> Option<JsString> {
+    let below = hundreds_year(n);
+    if below.is_some() || !(n.is_finite() && n.trunc() == n) || n < 2000.0 || n >= 10000.0 {
+        return below;
+    }
+    let rest = n % 100.0;
+    let tail = if rest != 0.0 {
+        number_to_words(rest, None)
+    } else {
+        JsString::new()
+    };
+    if n % 1000.0 < 100.0 {
+        return Some(number_to_words(n - rest, None).concat(&tail));
+    }
+    Some(
+        number_to_words((n / 100.0).floor(), None)
+            .concat(&js(&MANIFEST.numbers.hundred))
+            .concat(&tail),
+    )
+}
+
 /// `ABBREV`: (pattern, expansion, keepFinal = terminal).
 static ABBREV: LazyLock<Vec<(JsRegex, &'static str, bool)>> = LazyLock::new(|| {
     let r = |p: &str, f: &str| JsRegex::new(p, f).unwrap();
@@ -119,8 +143,16 @@ static ABBREV: LazyLock<Vec<(JsRegex, &'static str, bool)>> = LazyLock::new(|| {
             false,
         ),
         (r(r"(?<![\p{L}\p{M}])s\.\s?k\.", "giu"), "så kallad", false),
-        (r(r"(?<![\p{L}\p{M}])dvs\.?", "giu"), "det vill säga", false),
-        (r(r"(?<![\p{L}\p{M}])osv\.?", "giu"), "och så vidare", true),
+        (
+            r(r"(?<![\p{L}\p{M}])dvs(?![\p{L}\p{M}])\.?", "giu"),
+            "det vill säga",
+            false,
+        ),
+        (
+            r(r"(?<![\p{L}\p{M}])osv(?![\p{L}\p{M}])\.?", "giu"),
+            "och så vidare",
+            true,
+        ),
         (r(r"(?<![\p{L}\p{M}])etc\.", "giu"), "etcetera", true),
         (
             r(r"(?<![\p{L}\p{M}])fvt(?![\p{L}\p{M}])", "gu"),
@@ -340,14 +372,17 @@ pub(crate) fn normalize_swedish(input: &JsString) -> JsString {
     );
     t = rewrite_with(
         &t,
-        js_re!(r"(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})(?![\d.])", "gu"),
+        js_re!(
+            r"(?<![\d:,])(?<!\.\d)(\d{1,2})\.(\d{2})(?!\d)(?!\.\d)",
+            "gu"
+        ),
         clock,
     );
 
     // 5) clock, colon form.
     t = rewrite_with(
         &t,
-        js_re!(r"(?<![\d:,])(\d{1,2}):(\d{2})(?![\d.,])", "gu"),
+        js_re!(r"(?<![\d:,])(\d{1,2}):(\d{2})(?![\d,])(?!\.\d)", "gu"),
         clock,
     );
 
@@ -402,8 +437,8 @@ pub(crate) fn normalize_swedish(input: &JsString) -> JsString {
         |m, s| {
             let g = |i| m.group(i, s).unwrap();
             match (
-                hundreds_year(js_number(&g(1))),
-                hundreds_year(js_number(&g(2))),
+                century_year(js_number(&g(1))),
+                century_year(js_number(&g(2))),
             ) {
                 (Some(a), Some(b)) => a.concat(&js(" till ")).concat(&b).concat(&g(3)),
                 _ => m.value(s),
@@ -413,7 +448,7 @@ pub(crate) fn normalize_swedish(input: &JsString) -> JsString {
     t = rewrite_with(
         &t,
         js_re!(r"(?<![\d.,:])(\d{3,4})-(tal\p{L}*)", "gu"),
-        |m, s| match hundreds_year(js_number(&m.group(1, s).unwrap())) {
+        |m, s| match century_year(js_number(&m.group(1, s).unwrap())) {
             None => m.value(s),
             Some(w) => w.concat(&m.group(2, s).unwrap()),
         },

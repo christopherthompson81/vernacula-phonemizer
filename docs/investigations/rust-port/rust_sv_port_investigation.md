@@ -224,3 +224,10 @@ parity: en en-GB ja it es pt pt-BR hi cmn fr el ko th ru de sv — each 200/200 
 ```
 
 **Implication.** sv is done on this machine. No TS regex was added, so the regex corpus needs no regeneration.
+
+## Run 8 — 2026-10-11 15:45 (#1526: Run 5's findings 1–4 and 6 fixed TS-first)
+
+Fixed in TS and mirrored here and in C#; the log of the fix is `docs/investigations/sv/sv_normalization_investigation.md`
+Runs 13–15. `sv-normalize` re-dumped with a `centuryYear` sweep (−2…10001): **37306 identical, 0 DIFFER**; with
+`century_year`'s block boundary and the `osv` right edge broken on purpose, 6 DIFFER. Finding 5 (`0:e` / `101:a`
+keep the colon) stays by design and was not part of the issue.

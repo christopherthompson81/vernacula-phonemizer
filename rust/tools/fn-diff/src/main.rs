@@ -1322,6 +1322,7 @@ fn main() {
                 match input["op"].as_str().unwrap() {
                     "ordinal" => sv.ordinal(n()).unwrap_or_else(none),
                     "hundreds" => sv.hundreds_year(n()).unwrap_or_else(none),
+                    "century" => sv.century_year(n()).unwrap_or_else(none),
                     op => {
                         let t = units(&input["text"]);
                         match op {
