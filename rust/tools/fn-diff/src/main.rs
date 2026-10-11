@@ -560,6 +560,24 @@ fn main() {
                 _ => vernacula_phonemizer::registry::phonemize_in(lang, &text).unwrap(),
             }
         }),
+        "el-normalize" => Box::new(|input| {
+            vernacula_phonemizer::languages::greek::normalize::normalize_greek(&units(
+                &input["text"],
+            ))
+            .unwrap()
+        }),
+        "el-g2p" => Box::new(|input| {
+            use vernacula_phonemizer::languages::greek::{greek as g, numbers as n};
+            match input["op"].as_str().unwrap() {
+                "word" => g::phonemize_word(&units(&input["word"])).unwrap(),
+                "rules" => g::phonemize_word_rules(&units(&input["word"])).unwrap(),
+                "forced" => g::phonemize_word_forced(&units(&input["word"])).unwrap(),
+                _ => {
+                    let raw = input.get("raw").map(units);
+                    n::number_to_words(input["n"].as_f64().unwrap(), raw.as_ref()).unwrap()
+                }
+            }
+        }),
         "it-normalize" => Box::new(|input| {
             use vernacula_phonemizer::languages::italian::normalize as n;
             let t = units(&input["text"]);
