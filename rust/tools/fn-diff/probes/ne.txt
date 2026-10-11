@@ -10,7 +10,7 @@
 # 4) abbreviations
 कि.मी. कि. मी यु.एस. यु. एस डब्ल्यु. डब्ल्यू. बुश डब्ल्यु.बाट
 डा. राम डा.राम डा. १२
-# 5) ordinals in -औं/-औँ: irregular, six declined, matra after a consonant-final cardinal, grouped, unsafe
+# 5) ordinals in -औं/-औँ: irregular (six is छैठौं), matra after a consonant-final cardinal, grouped, unsafe
 1औं 2औँ 3औं 4औं 9औं 6औं 15औं 20औँ 100औं 1,000औं 19 औं
 9007199254740993औं 12.5औं 3:15औं 7औंमा
 # 6) sports times, clock ranges, clocks

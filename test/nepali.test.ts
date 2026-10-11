@@ -68,6 +68,9 @@ describe("Nepali normalization", () => {
     test("ordinals join the cardinal as a MATRA, not the independent vowel", () => {
         expect(t("15 औं")).toBe("pˈʌnd̪ʱɾʌũ"); // पन्ध्रौं — was pˈʌnd̪ʱɾʌ ˈʌũ, a stray syllable
         expect(t("9 औँ")).toBe("nˈʌwʌũ"); // नवौं — suppletive stem
+        // छैठौं — suppletive stem, the corpus spelling. Was declined, leaving t͡sʰˈʌ ˈʌũ, a stray syllable (#1536)
+        expect(t("6 औं")).toBe("t͡sʰˈʌiʈʰʌũ");
+        expect(t("6 औं")).toBe(t("छैठौं")); // the same reading as the written-out word
         expect(t("1,000 औँ")).toBe("ˈek ɦˈʌd͡zaɾʌũ"); // a comma-grouped numeral still matches
     });
 

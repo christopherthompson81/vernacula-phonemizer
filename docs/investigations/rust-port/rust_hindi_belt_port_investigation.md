@@ -272,3 +272,57 @@ replayed (FLEURS from `<external-drive>`).
   mai 380, hne 308, rkt 309, ne 3986, mr 3998, all others 0 DIFFER; `ne-normalize 3986/0`, `mr-normalize 3998/0`.
 
 **Implication.** Done. Port-pending: one mag golden row, on `ar`.
+
+## Run 10 — 2026-10-11 14:10 (ne, issue #1536: the two TS readings of Run 7)
+
+**Question.** Is छैटौं really unattested, and what does each item read today?
+
+**Commands.** `grep -ohE "[^ ]*(छैटौ|छैठौ)[^ ]*"` over FLEURS `ne_np` train/dev/test, then the same restricted to
+the unique column-3 utterances; a TS probe (`phonemize(s, "ne")`) on synthetic inputs.
+
+**Raw finding.**
+- छैटौं (with ट, the spelling the docstring searched for): ×0. छैठौं (with ठ): ×1 and छैठौँ ×1 in the unique
+  column-3 utterances (×6 / ×2 counting every column of every split). So the ordinal for 6 IS corpus-attested; the
+  "un-attested" claim came from searching the wrong letter. The two spellings differ only in anusvara vs
+  chandrabindu, which the normalizer already treats as phonemically identical (both read `t͡sʰˈʌiʈʰʌũ`).
+- `6 औं`, `6औँ`, `६ औं` → `t͡sʰˈʌ ˈʌũ` (the stray syllable). `16 औँ` → `sˈoɦɾʌũ`, `5 औं` → `pˈãt͡sʌũ` (regular, fine).
+- Rates: `165 किमी/ घण्टा` → `… kˈilomiʈʌɾ pɾˈʌt̪i ɡʱˈʌɳʈa`; `25 गज/मिटर` → `pˈʌt͡sːis ɡˈʌd͡z mˈiʈʌɾ` (no प्रति,
+  because the RATE_DEN alternation itself refuses मिटर). `RATE_DEN_OK` can never decline: every `den` the regex
+  can capture is one of the four words in the set.
+
+**Implication.** Item 2: add 6 → छैठौं to IRREGULAR (corpus spelling, not invented) and drop the n = 6 decline.
+Item 1: delete `RATE_DEN_OK`; the closed `RATE_DEN` alternation is the guard, and the set is a second copy that
+anyone widening RATE_DEN would widen in the same edit. Both are behaviour-neutral on the rate side.
+
+## Run 11 — 2026-10-11 14:40 (ne, #1536: the fix in three engines)
+
+**Change.** TS, C# and Rust: IRREGULAR gains 6 → छैठौं and the n = 6 decline is deleted; `RATE_DEN_OK` and the
+rate callback's decline branch are deleted (the `RATE_DEN` alternation is the guard). Pins: test/nepali.test.ts
+`6 औं` → `t͡sʰˈʌiʈʰʌũ`, plus `6 औं` equal to `छैठौं`; the two rows added to the Rust PINS table (values from the TS
+engine); C# `Nepali1536Tests` (relational, three spellings: `6 औं`, `6औँ`, `६ औं`). probes/ne.txt comment updated.
+
+**Raw finding.**
+- TS probe after: `6 औं`, `6औँ`, `६ औं` → `t͡sʰˈʌiʈʰʌũ` (the same as written-out छैठौं). Rates unchanged:
+  `165 किमी/ घण्टा` and `25 गज/मिटर` byte-identical to Run 10; `10 मिटर/सेकेन्ड` → `… pɾˈʌt̪i sekˈenɖʌ`.
+- `gen_parity_goldens.mts ne`: 0 rows moved (no `6 औं` in the golden).
+- Revert proofs. TS: with only the IRREGULAR entry removed, the test fails with `t͡sʰˈʌũ` (the regular join gives
+  छौं, a different word, so the entry and not just the deleted decline is what the test pins). C#: the 3
+  Nepali1536 cases fail. Rust: `the_ts_suite_pins_hold` fails on `text ne 6 औं`, left `t͡sʰˈʌũ`. All restored.
+- Item 1 has no test: it removes a branch that cannot run, and the existing rate pin covers the arm.
+- C# full suite 7592 passed.
+
+**Implication.** Both items fixed. Next: rebase, regex corpus, every gate.
+
+## Run 12 — 2026-10-11 15:10 (ne, #1536: gates on the rebased tree)
+
+**Command.** Rebased onto origin/main 9d80d2e7; `npx tsx tools/extract_regexes.mts`; then every gate.
+
+**Raw finding.**
+- regex-corpus.jsonl unchanged after re-extraction (no regex added or changed).
+- `npm run typecheck` clean. `npm test`: 362 files, 6882 passed, 5 skipped.
+- `npm run check:goldens`: 189 languages fresh, 36495 rows, 0 stale.
+- C# full suite: 7604 passed, 0 failed. C# parity: 189 languages byte-identical, 36495 rows, 0 differ.
+- Rust: `cargo fmt --check` clean; `cargo test --release` 202 + 1 passed; parity 50 languages identical, mag
+  199/200 (the known ar row), ne 200/200; regex-diff 145212 probe results identical, 0 DIFFER, 0 refused.
+
+**Implication.** Done. Both items of #1536 fixed; nothing left open.
