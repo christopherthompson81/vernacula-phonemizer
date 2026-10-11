@@ -52,6 +52,7 @@ fn esc(s: &JsString) -> JsString {
 struct AbbrevRule {
     re: JsRegex,
     to: JsString,
+    unit_only: bool,
 }
 
 /// `ABBREV_RULES`, longest key first as `ABBREV` is ordered.
@@ -68,6 +69,7 @@ static ABBREV_RULES: LazyLock<Vec<AbbrevRule>> = LazyLock::new(|| {
             AbbrevRule {
                 re: JsRegex::new(&pattern, "gu").unwrap_or_else(|e| panic!("{pattern}: {e}")),
                 to: js(to),
+                unit_only,
             }
         })
         .collect()
@@ -149,11 +151,11 @@ pub fn normalize_thai(input: &JsString) -> JsString {
         &JsString::new(),
     );
 
-    // 6. clock: range, then HH.MM น., then H น.
+    // 6. clock: range, then HH.MM น., then H น. (each hour refuses the tail of a longer number)
     s = rewrite_with(
         &s,
         js_re!(
-            r"(\d{1,2})[.:](\d{2})\s*[-–—]\s*(\d{1,2})[.:](\d{2})\s*น\.",
+            r"(?<![\d.])(\d{1,2})[.:](\d{2})\s*[-–—]\s*(\d{1,2})[.:](\d{2})\s*น\.",
             "gu"
         ),
         |m, s| {
@@ -163,12 +165,19 @@ pub fn normalize_thai(input: &JsString) -> JsString {
             out
         },
     );
-    s = rewrite_with(&s, js_re!(r"(\d{1,2})[.:](\d{2})\s*น\.", "gu"), |m, s| {
-        clock(&group(m, 1, s), &group(m, 2, s))
-    });
-    s = rewrite_with(&s, js_re!(r"(\d{1,2})\s*น\.", "gu"), |m, s| {
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d.])(\d{1,2})[.:](\d{2})\s*น\.", "gu"),
+        |m, s| clock(&group(m, 1, s), &group(m, 2, s)),
+    );
+    s = rewrite_with(&s, js_re!(r"(?<![\d.])(\d{1,2})\s*น\.", "gu"), |m, s| {
         js(&format!("{} นาฬิกา", number_str(&group(m, 1, s))))
     });
+
+    // 6b. Thai unit abbreviations, BEFORE the decimals: `3.5 กม.` must still see its digit
+    for r in ABBREV_RULES.iter().filter(|r| r.unit_only) {
+        s = rewrite(&s, &r.re, &r.to);
+    }
 
     // 7. decimals
     s = rewrite_with(&s, js_re!(r"(\d)\.(\d+)", "gu"), |m, s| {
@@ -178,8 +187,8 @@ pub fn normalize_thai(input: &JsString) -> JsString {
         out
     });
 
-    // 8. Thai abbreviations
-    for r in ABBREV_RULES.iter() {
+    // 8. Thai abbreviations (eras, titles)
+    for r in ABBREV_RULES.iter().filter(|r| !r.unit_only) {
         s = rewrite(&s, &r.re, &r.to);
     }
 
@@ -211,6 +220,11 @@ pub fn normalize_thai(input: &JsString) -> JsString {
         &s,
         js_re!(r"\s*°\s*C(?![A-Za-z])", "gui"),
         &js(" องศาเซลเซียส"),
+    );
+    s = rewrite(
+        &s,
+        js_re!(r"\s*°\s*F(?![A-Za-z])", "gui"),
+        &js(" องศาฟาเรนไฮต์"),
     );
     s = rewrite(&s, js_re!(r"\s*°", "gu"), &js(" องศา"));
 

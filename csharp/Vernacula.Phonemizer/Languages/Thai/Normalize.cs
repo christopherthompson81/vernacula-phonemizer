@@ -53,9 +53,9 @@ public static class Normalize
 
     /** `\b` is ASCII-defined and matches NOTHING against Thai script — the trap that bit six of the first
      *  thirteen languages. Every left-edge guard in this file is this explicit lookbehind instead. */
-    private static readonly (JsRe Re, string To)[] ABBREV_RULES = ABBREV.Select(a => (
+    private static readonly (JsRe Re, string To, bool UnitOnly)[] ABBREV_RULES = ABBREV.Select(a => (
         Re: JsRegex.Compile((a.UnitOnly ? "(?<=\\d\\s?)" : Boundaries.NOT_LETTER_BEFORE) + Esc(a.From), "gu"),
-        To: a.To)).ToArray();
+        To: a.To, a.UnitOnly)).ToArray();
 
     /** Digits of a numeral, spelled one at a time — how Thai reads the fractional part of a decimal
      *  (3.5 = สามจุดห้า; 802.11 = …จุดหนึ่งหนึ่ง, never จุดสิบเอ็ด). */
@@ -80,9 +80,9 @@ public static class Normalize
     private static readonly JsRe MAIYAMOK = JsRegex.Compile("([ก-ๅ็-๎]*)\\s*ๆ", "gu");
     private static readonly JsRe PAIYANNOI = JsRegex.Compile("ฯ", "gu");
     private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
-    private static readonly JsRe CLOCK_RANGE = JsRegex.Compile("(\\d{1,2})[.:](\\d{2})\\s*[-–—]\\s*(\\d{1,2})[.:](\\d{2})\\s*น\\.", "gu");
-    private static readonly JsRe CLOCK_ONE = JsRegex.Compile("(\\d{1,2})[.:](\\d{2})\\s*น\\.", "gu");
-    private static readonly JsRe CLOCK_HOUR = JsRegex.Compile("(\\d{1,2})\\s*น\\.", "gu");
+    private static readonly JsRe CLOCK_RANGE = JsRegex.Compile("(?<![\\d.])(\\d{1,2})[.:](\\d{2})\\s*[-–—]\\s*(\\d{1,2})[.:](\\d{2})\\s*น\\.", "gu");
+    private static readonly JsRe CLOCK_ONE = JsRegex.Compile("(?<![\\d.])(\\d{1,2})[.:](\\d{2})\\s*น\\.", "gu");
+    private static readonly JsRe CLOCK_HOUR = JsRegex.Compile("(?<![\\d.])(\\d{1,2})\\s*น\\.", "gu");
     private static readonly JsRe DECIMAL_RE = JsRegex.Compile("(\\d)\\.(\\d+)", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("\\s*\\+\\s*(?=\\d)", "gu");
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
@@ -94,6 +94,7 @@ public static class Normalize
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
     private static readonly JsRe TIMES = JsRegex.Compile("\\s*[×]\\s*(?=\\d)", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("\\s*°\\s*C(?![A-Za-z])", "gui");
+    private static readonly JsRe DEG_F = JsRegex.Compile("\\s*°\\s*F(?![A-Za-z])", "gui");
     private static readonly JsRe DEG_BARE = JsRegex.Compile("\\s*°", "gu");
     private static readonly JsRe CAPS_RUN = JsRegex.Compile("(?<![A-Za-z0-9])[A-Z]{2,6}(?![A-Za-z0-9])", "gu");
 
@@ -123,9 +124,12 @@ public static class Normalize
         s = Rewrite(s, CLOCK_ONE, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
         s = Rewrite(s, CLOCK_HOUR, m => $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} นาฬิกา");
 
+        // Units BEFORE the decimals: `3.5 กม.` must still see its digit (the decimal ends in a word).
+        foreach (var (re, to, unitOnly) in ABBREV_RULES) if (unitOnly) s = Rewrite(s, re, _ => to);
+
         s = Rewrite(s, DECIMAL_RE, m => $"{m.Groups[1].Value} จุด {SpellDigits(m.Groups[2].Value)}");
 
-        foreach (var (re, to) in ABBREV_RULES) s = Rewrite(s, re, _ => to);
+        foreach (var (re, to, unitOnly) in ABBREV_RULES) if (!unitOnly) s = Rewrite(s, re, _ => to);
 
         s = Rewrite(s, PLUS, _ => " บวก ");
 
@@ -142,6 +146,7 @@ public static class Normalize
         s = Rewrite(s, TIMES, _ => " คูณ ");
 
         s = Rewrite(s, DEG_C, _ => " องศาเซลเซียส");
+        s = Rewrite(s, DEG_F, _ => " องศาฟาเรนไฮต์");
         s = Rewrite(s, DEG_BARE, _ => " องศา");
 
         s = Rewrite(s, CAPS_RUN, m =>

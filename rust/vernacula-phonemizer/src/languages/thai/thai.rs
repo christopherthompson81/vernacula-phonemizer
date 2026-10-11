@@ -62,12 +62,11 @@ pub fn number_to_thai_words(n: f64, raw: Option<&JsString>) -> Vec<&'static str>
             out.push("สิบ");
         }
         r %= 10.0;
-        if r == 1.0 {
-            out.push("เอ็ด");
-            r = 0.0;
-        }
     }
-    if r > 0.0 {
+    // A final 1 in any compound >= 11 is เอ็ด, after a magnitude as well as after a ten (101, 1001).
+    if r == 1.0 && n > 10.0 {
+        out.push("เอ็ด");
+    } else if r > 0.0 {
         out.push(THAI_DIGIT_WORDS[r as usize]);
     }
     out
@@ -150,9 +149,23 @@ mod tests {
         assert_eq!(th("ต่าง ๆ"), th("ต่าง ต่าง"));
         assert_eq!(th("สหรัฐฯ"), th("สหรัฐ"));
         assert_eq!(th("21"), th("ยี่สิบ เอ็ด"));
-        assert_eq!(th("101"), th("หนึ่ง ร้อย หนึ่ง"));
+        // #1512: a final 1 after a magnitude is เอ็ด too (was หนึ่ง ร้อย หนึ่ง).
+        assert_eq!(th("101"), th("หนึ่ง ร้อย เอ็ด"));
+        assert_eq!(th("1001"), th("หนึ่ง พัน เอ็ด"));
+        assert_eq!(th("111"), th("หนึ่ง ร้อย สิบ เอ็ด"));
+        assert_eq!(th("1000000"), th("หนึ่ง ล้าน"));
+        assert_eq!(th("1"), th("หนึ่ง"));
         assert_eq!(th("๒๑"), th("21"));
         assert_eq!(th("1,234"), th("1234"));
+        // #1512: a unit after a decimal, the clock guard, the baht sign and °F.
+        assert_eq!(th("ยาว 3.5 กม."), th("ยาว 3 จุด ห้า กิโลเมตร"));
+        assert_eq!(th("2.5 กก."), th("2 จุด ห้า กิโลกรัม"));
+        assert_eq!(th("123.45 น."), th("123 จุด สี่ ห้า น."));
+        assert_eq!(th("2024 น."), th("2024 น."));
+        assert_ne!(th("2024 น."), th("2024 นาฬิกา"));
+        assert_eq!(th("09.30 น."), th("9 นาฬิกา 30 นาที"));
+        assert_eq!(th("ราคา ฿100"), th("ราคา 100 บาท"));
+        assert_eq!(th("10°F"), th("10 องศาฟาเรนไฮต์"));
         assert_eq!(
             th("9007199254740993"),
             th("เก้า ศูนย์ ศูนย์ เจ็ด หนึ่ง เก้า เก้า สอง ห้า สี่ เจ็ด สี่ ศูนย์ เก้า เก้า สาม")

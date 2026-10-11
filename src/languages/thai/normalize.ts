@@ -114,6 +114,7 @@ const ABBREV_RULES = ABBREV.map((a) => ({
         "gu",
     ),
     to: a.to,
+    unitOnly: a.unitOnly,
 }));
 
 /** Digits of a numeral, spelled one at a time — how Thai reads the fractional part of a decimal
@@ -137,6 +138,8 @@ export function normalizeThai(input: string): string {
     // FIRST, so every numeric rule below sees one representation. ZERO occurrences in the th_th corpus
     // (checked before writing it) — kept because real Thai text does use them and the number path in
     // thai.ts only accepts ASCII, so an unfolded ๐-๙ would be dropped outright by the tokenizer.
+    // ⚠ Unreachable through `phonemize`: the registry's foldNativeDigits (core/unicode.ts) has already
+    // folded them before text() runs. Only a direct normalizeThai call gets here; kept for that caller.
     s = rewrite(s, /[๐-๙]/gu, (c) => String(c.codePointAt(0)! - 0x0e50));
 
     // ── 2. ฯลฯ (et cetera) ───────────────────────────────────────────────────────────────────────
@@ -176,16 +179,29 @@ export function normalizeThai(input: string): string {
     // 3.50 เมตร are decimals, 09.30 น. is a time). น. = นาฬิกา, the formal register FLEURS is written in.
     // Range first, so the leading time of `22.00-23.00 น.` — which carries no น. of its own — is
     // recognised; ถึง is unambiguous there because the corpus instance is inside ระหว่าง ("between").
+    // ⚠ Every arm's hour carries `(?<![\d.])`: without it the hour matched the TAIL of a longer number,
+    // so `123.45 น.` read as a time (its `23.45`) and `2024 น.` as 2024 o'clock (its `24`). The `.` is
+    // there too because once `23.45` is refused, the hour-only arm would claim the decimal's `45`. A clock
+    // hour is one or two digits standing alone. The range's second hour needs no guard: the dash anchors it.
     s = rewrite(s,
-        /(\d{1,2})[.:](\d{2})\s*[-–—]\s*(\d{1,2})[.:](\d{2})\s*น\./gu,
+        /(?<![\d.])(\d{1,2})[.:](\d{2})\s*[-–—]\s*(\d{1,2})[.:](\d{2})\s*น\./gu,
         (_m, h1: string, m1: string, h2: string, m2: string) =>
             `${clock(h1, m1)} ถึง ${clock(h2, m2)}`,
     );
     s = rewrite(s,
-        /(\d{1,2})[.:](\d{2})\s*น\./gu,
+        /(?<![\d.])(\d{1,2})[.:](\d{2})\s*น\./gu,
         (_m, hh: string, mm: string) => clock(hh, mm),
     );
-    s = rewrite(s, /(\d{1,2})\s*น\./gu, (_m, hh: string) => `${Number(hh)} นาฬิกา`);
+    s = rewrite(s, /(?<![\d.])(\d{1,2})\s*น\./gu, (_m, hh: string) => `${Number(hh)} นาฬิกา`);
+
+    // ── 6b. Thai unit abbreviations (the `unitOnly` half of ABBREV) ──────────────────────────────
+    // AFTER steps 5-6 and BEFORE step 7. The unit guard is "a digit immediately to the left": de-grouping
+    // (3,850 → 3850) is what makes that digit adjacent, and the clock has already consumed its น.. But the
+    // decimal rewrite ENDS IN A WORD (3.5 → 3 จุด ห้า), so a unit after a decimal lost its digit and stayed
+    // unread — `ยาว 3.5 กม.` read กม. as a syllable plus a clause pause. Neither rule can create or destroy
+    // the other's match (one is digit-dot-digit, the other starts with a Thai letter), so the move changes
+    // only what the guard sees. Applied longest-key-first (see ABBREV).
+    for (const { re, to, unitOnly } of ABBREV_RULES) if (unitOnly) s = rewrite(s, re, to);
 
     // ── 7. decimals ──────────────────────────────────────────────────────────────────────────────
     // AFTER step 6. The point is จุด and the fractional digits are spelled ONE AT A TIME.
@@ -194,11 +210,9 @@ export function normalizeThai(input: string): string {
         (_m, last: string, frac: string) => `${last} จุด ${spellDigits(frac)}`,
     );
 
-    // ── 8. Thai abbreviations (units, eras, titles) ──────────────────────────────────────────────
-    // AFTER steps 5-7: the unit guard is "a digit immediately to the left", and de-grouping (3,850 →
-    // 3850) is what makes that digit adjacent, while the clock and decimal rules have already removed
-    // every period that is NOT an abbreviation dot. Applied longest-key-first (see ABBREV).
-    for (const { re, to } of ABBREV_RULES) s = rewrite(s, re, to);
+    // ── 8. Thai abbreviations (eras, titles; the units ran at 6b) ────────────────────────────────
+    // AFTER steps 6-7, which have already removed every period that is NOT an abbreviation dot.
+    for (const { re, to, unitOnly } of ABBREV_RULES) if (!unitOnly) s = rewrite(s, re, to);
 
     // ── 8b. the plus sign → บวก, SOURCED FROM THE CORPUS'S OWN AUDIO ─────────────────────────────
     // The corpus's two instances are `ตามเวลาท้องถิ่น (UTC+1)`, and the sign was DROPPED outright:
@@ -303,6 +317,10 @@ export function normalizeThai(input: string): string {
     // ── 9. degree sign ───────────────────────────────────────────────────────────────────────────
     // °C before a bare ° (else the C is left behind and routes to the English phonemizer as "sˈiː").
     s = rewrite(s, /\s*°\s*C(?![A-Za-z])/gui, " องศาเซลเซียส");
+    // °F the same way: `10°F` left `10 องศาF` and the F read as English ˈɛf. th.wikipedia's own article
+    // names the word for the sign: "องศาฟาเรนไฮต์เขียนย่อโดยใช้สัญลักษณ์ °F" (degrees Fahrenheit is
+    // abbreviated with the symbol °F); th_th has องศาฟาเรนไฮต์ ×1. Fused, like the Celsius word above.
+    s = rewrite(s, /\s*°\s*F(?![A-Za-z])/gui, " องศาฟาเรนไฮต์");
     s = rewrite(s, /\s*°/gu, " องศา");
 
     // ── 10. all-caps Latin initialisms → Thai letter names ───────────────────────────────────────

@@ -44,9 +44,9 @@ public static class ThaiPhonemizer
             else if (t == 1) @out.Add("สิบ");
             else { @out.Add(TH_UNITS[(int)t]); @out.Add("สิบ"); }
             r %= 10;
-            if (r == 1) { @out.Add("เอ็ด"); r = 0; } // final 1 after a ten is เอ็ด
         }
-        if (r > 0) @out.Add(TH_UNITS[(int)r]);
+        if (r == 1 && n > 10) @out.Add("เอ็ด"); // a final 1 in any compound >= 11, after a magnitude too
+        else if (r > 0) @out.Add(TH_UNITS[(int)r]);
         return @out;
     }
 
