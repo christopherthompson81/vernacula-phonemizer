@@ -28,6 +28,12 @@ const FLEURS_DIR: Record<string, string> = {
     nl: "nl_nl",
     uk: "uk_ua",
     sv: "sv_se",
+    sr: "sr_rs",
+    hr: "hr_hr",
+    bs: "bs_ba",
+    sl: "sl_si",
+    lt: "lt_lt",
+    lv: "lv_lv",
 };
 
 /**
@@ -1511,6 +1517,138 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { normalizeRomans } = await import("../../../src/core/roman.ts");
         const { ROMAN_POLICY } = await import("../../../src/languages/polish/romanOrdinals.ts");
         for (const [t, src] of textsFor(["pl"], FLEURS_DIR.pl, ["pl.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Serbo-Croatian (sr, hr, bs). `SH_LANGS=sr,hr` narrows the run. Inputs per language: its golden, its
+    // FLEURS transcripts (columns 3 and 4) and probes/<lang>.txt, plus synthetic rows for the arms whose
+    // tables the texts reach sparsely: numeral+suffix over every case ending (both scripts), `N.` before every
+    // licensor of the three standards and the Object.prototype names, the colon clock over every hour, the
+    // degree before every bearing letter, and the era markers in both cases.
+    async "sh-normalize"() {
+        const sr = await import("../../../src/languages/serbian/normalize.ts");
+        const { slavicCountForm } = await import("../../../src/core/normalizeSymbols.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const norm: Record<string, (t: string) => string> = { sr: sr.normalizeSerbian };
+        // The symbol tiers, rebuilt from each file's OWN object literal (Serbian's and Bosnian's are not
+        // exported; Croatian's is, and is checked the same way), so the dump cannot hold a second copy.
+        const tierFrom = (file: string): ((t: string) => string) => {
+            const src = readFileSync(new URL(`../../../src/languages/${file}`, import.meta.url), "utf8");
+            const start = src.indexOf("makeSymbolNormalizer({", src.indexOf("SYMBOLS = ")) + "makeSymbolNormalizer(".length;
+            let depth = 0, end = start;
+            for (let i = start; i < src.length; i++) {
+                if (src[i] === "{") depth++;
+                else if (src[i] === "}" && --depth === 0) { end = i + 1; break; }
+            }
+            return makeSymbolNormalizer(new Function("slavicCountForm", `return (${src.slice(start, end)});`)(slavicCountForm));
+        };
+        const tiers: Record<string, (t: string) => string> = { sr: tierFrom("serbian/normalize.ts") };
+        const langs = (process.env.SH_LANGS ?? "sr,hr,bs").split(",").filter((l) => l !== "");
+        if (langs.includes("hr")) {
+            norm.hr = (await import("../../../src/languages/croatian/normalize.ts")).normalizeCroatian;
+            tiers.hr = tierFrom("croatian/croatian.ts");
+        }
+        if (langs.includes("bs")) {
+            norm.bs = (await import("../../../src/languages/bosnian/normalize.ts")).normalizeBosnian;
+            tiers.bs = tierFrom("bosnian/normalize.ts");
+        }
+        const words = new Set<string>();
+        const licensors = ["godine", "godini", "godinu", "godina", "veka", "veku", "vek", "vijeka", "vijeku", "vijek", "stoljeća",
+            "stoljeću", "stoljeće", "januara", "jula", "decembra", "kolovoza", "rujna", "prosinca", "marka", "marku", "najvećim",
+            "mjesto", "mjestu", "dana", "kategorije", "husarska", "pukovnija", "pukovniju", "zemlja", "gol", "svjetskog", "svjetskom",
+            "svjetski", "svjetskoga", "reda", "redu", "najveća", "najveći", "najveće", "pakistanskog", "године", "веку", "јула",
+            "constructor", "hasOwnProperty", "toString", "valueOf", "isPrototypeOf", "propertyIsEnumerable", "toLocaleString", "nijedan"];
+        const suffixes = ["i", "og", "eg", "om", "em", "o", "e", "a", "oj", "u", "ih", "im", "ti", "go", "x", "ог", "их", "ом", "е", "а", "ју", "ти"];
+        const ns = ["0", "1", "2", "3", "4", "5", "9", "10", "11", "12", "19", "20", "21", "22", "30", "33", "99", "100", "101", "111", "120", "200",
+            "300", "999", "1000", "1001", "1418", "1450", "1500", "1624", "1970", "1990", "2000", "2015", "2016", "2100", "2101", "3000", "21000",
+            "999999", "1000000", "12345678901234567890"];
+        for (const lang of langs) {
+            const rows = new Map<string, string>();
+            for (const [t, src] of textsFor([lang], FLEURS_DIR[lang], [`${lang}.txt`])) rows.set(t, src);
+            const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+            for (const n of ns) {
+                for (const suf of suffixes) add(`${n}-${suf}`);
+                for (const w of licensors) { add(`${n}. ${w}`); add(`U ${n}. ${w} je.`); }
+                add(`${n}.`); add(`od ${n}. Zatim`); add(`${n}. i ${n}. stoljeća`); add(`${n}. ili 11. godini`); add(`${n} - 1450. godine`);
+                add(`${n}-${n}.`); add(`(${n}–1912.)`); add(`${n}. n. e.`); add(`${n}. p.n.e. u`); add(`${n}. g. n. e.`); add(`${n}. pr. Kr. i`);
+            }
+            for (let h = 0; h <= 25; h++) for (const mm of ["00", "01", "05", "30", "59", "60"]) {
+                add(`u ${h}:${mm}`); add(`${h}:${mm} h`); add(`${h}:${mm} sati.`); add(`${h}.${mm} sati`); add(`${h}:${mm}.`);
+                add(`${h}:${mm} - ${h}:${mm} sati`);
+            }
+            for (const b of [..."NSEWJZIXYQnsewjzixyqСЈИЗсјиз", "K", "C", "F", "c", "f", "С", "Ц", "Ф", "с"]) {
+                add(`35°${b}`); add(`35° ${b}`); add(`35 °${b} stepena`); add(`35°${b} od`);
+            }
+            for (const era of ["p.n.e.", "п.н.е.", "n. e.", "н. е.", "P.N.E.", "N. E.", "pr. Kr.", "p.n.e", "itd.", "Itd.", "итд.", "npr.", "tzv.", "tj.", "br.", "str.", "Dr.", "dr."])
+                for (const after of ["", " u", " U", ",", ")", ".", "!"]) add(`Od 300 ${era}${after} kraj`);
+            for (const sign of ["-5", "−5", "– 5", "5 - 3", "±2", "+3", "a+3", "=", "<", ">", "÷", "4x4", "4 × 4", "A&B", "a & b", "AUD$ 5", "45 miliona AUD$", "SAD-a", "SAD-u", "George W. Bush", "A. B. C."])
+                add(`Rezultat ${sign} 7`);
+            for (const [t, src] of rows) {
+                const a = norm[lang]!(t);
+                emit({ lang, text: units(t), src, op: "normalize" }, a);
+                emit({ lang, text: units(t), src, op: "initialisms" }, sr.normalizeSerbianInitialisms(t));
+                emit({ lang, text: units(t), src, op: "symbols" }, tiers[lang]!(t));
+                emit({ lang, text: units(t), src, op: "decimal" }, sr.readDecimalComma(t));
+                for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+            }
+        }
+        for (const w of words) emit({ lang: "sr", text: units(w), src: "words", op: "unreadable" }, String(sr.isUnreadableSerbian(w)));
+    },
+    // The shared word level: phonemizeWord, foreignLetters and each standard's nativiser over every stress.tsv
+    // key (as written, uppercased), stem+ending forms that reach the OOV accent tier, every letter run of the
+    // three standards' texts (as written, lowercased, and folded), every 1-2 letter string over both alphabets
+    // plus q w x y й, every 3-letter string over the context letters, and edge strings.
+    async "sh-g2p"() {
+        const S = await import("../../../src/languages/serbian/serbian.ts");
+        const SERBIAN = new URL("../../../src/languages/serbian/serbian.ts", import.meta.url).href;
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const natHr = makeNativiser("[a-zčćšžđ]", "iu");
+        const stress = loadTsvMap(SERBIAN, "stress.tsv");
+        const trans = loadTsvMap(SERBIAN, "accent-transitions.tsv");
+        const words = new Set<string>();
+        // The lexicon keys and the synthetic OOV forms take only the g2p (they are many); the rest take every op.
+        const g2pOnly = new Set<string>(stress.keys());
+        const keys = [...stress.keys()];
+        const endings = [...new Set([...trans.keys()].map((k) => k.split("|")[0]!))];
+        for (let i = 0; i < keys.length; i += 397) {
+            g2pOnly.add(keys[i]!.toUpperCase());
+            for (const e of endings) g2pOnly.add(keys[i]! + e);
+        }
+        for (const lang of ["sr", "hr", "bs"])
+            for (const t of textsFor([lang], FLEURS_DIR[lang], [`${lang}.txt`]).keys())
+                for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(S.foreignLetters(m[0])); }
+        const abc = [..."abcčćdđefghijklmnoprsštuvzžqwxyабвгдђежзијклљмнњопрстћуфхцчџшй"];
+        for (const a of abc) { words.add(a); for (const b of abc) words.add(a + b); }
+        const ctx = [..."aeiorlnjdžtshxwqyрнљј"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) words.add(a + b + c);
+        for (const w of ["", "\ud800", "a\ud800b", "ljjubav", "pop-pevač", "SSSR", "СССР", "MMF", "www", "Holland", "HOLLAND", "krv", "prst", "Exxon",
+            "prethodni", "pothranjenost", "Othello", "Thomas", "Toyota", "Dylana", "quiz", "Québec", "İstanbul", "Толстой", "ćemo", "bismo", "grad", "ADD"]) words.add(w);
+        for (const w of g2pOnly) if (!words.has(w)) emit({ word: units(w), op: "word" }, S.phonemizeWord(w));
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, S.phonemizeWord(w));
+            emit({ word: units(w), op: "foreign" }, S.foreignLetters(w));
+            emit({ word: units(w), op: "nat" }, S.nat(w));
+            emit({ word: units(w), op: "nat-hr" }, natHr(w));
+            emit({ word: units(w), op: "has" }, String(S.accentLexiconHas(w)));
+        }
+    },
+    // composeSlavicNumber over each standard's table: 0..20000, multiples and powers, the unsafe and non-finite
+    // corners, and raw strings for the digit-by-digit fallback.
+    async "sh-numbers"() {
+        const { composeSlavicNumber } = await import("../../../src/languages/serbian/numbers.ts");
+        const tables: Record<string, unknown> = {
+            sr: (await import("../../../src/languages/serbian/manifest.ts")).MANIFEST.numbers,
+            hr: (await import("../../../src/languages/croatian/manifest.ts")).MANIFEST.numbers,
+            bs: (await import("../../../src/languages/bosnian/manifest.ts")).MANIFEST.numbers,
+        };
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 1001, k * 1e6 + 2002, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const [lang, N] of Object.entries(tables)) {
+            for (const n of ns) emit({ lang, n: String(n), raw: null }, composeSlavicNumber(n, N as never));
+            for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "𝟗9"])
+                emit({ lang, n: String(Number(raw)), raw: units(raw) }, composeSlavicNumber(Number(raw), N as never, raw));
+        }
     },
 };
 

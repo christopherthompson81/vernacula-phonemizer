@@ -13,6 +13,7 @@ pub mod polish;
 pub mod portuguese;
 pub mod portuguese_br;
 pub mod russian;
+pub mod serbian;
 pub mod spanish;
 pub mod swedish;
 pub mod thai;
