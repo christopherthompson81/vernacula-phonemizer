@@ -28,6 +28,8 @@ const FLEURS_DIR: Record<string, string> = {
     nl: "nl_nl",
     uk: "uk_ua",
     sv: "sv_se",
+    id: "id_id",
+    ms: "ms_my",
 };
 
 /**
@@ -1218,6 +1220,83 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２"])
             emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    // ── Indonesian (id) and Malay (ms). Texts: each golden, FLEURS id_id / ms_my (columns 3 and 4) and
+    // probes/<code>.txt. id-normalize: normalizeIndonesian per text, then the symbol tier on its output — the
+    // TS tier rebuilt from indonesian.ts's own literal (evaluated from source with the manifest in scope).
+    // ms-normalize: normalizeMalay per ms text, then normalizeIndonesian on its output (the inherited layer).
+    async "id-normalize"() {
+        const N = await import("../../../src/languages/indonesian/normalize.ts");
+        const { MANIFEST: DEF } = await import("../../../src/languages/indonesian/indonesian.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const src = readFileSync(new URL("../../../src/languages/indonesian/indonesian.ts", import.meta.url), "utf8");
+        const start = src.indexOf("makeSymbolNormalizer({", src.indexOf("const SYMBOLS")) + "makeSymbolNormalizer(".length;
+        let depth = 0, end = start;
+        for (let i = start; i < src.length; i++) {
+            if (src[i] === "{") depth++;
+            else if (src[i] === "}" && --depth === 0) { end = i + 1; break; }
+        }
+        const symbols = makeSymbolNormalizer(new Function("DEF", `return (${src.slice(start, end)});`)(DEF));
+        for (const [t, from] of textsFor(["id"], FLEURS_DIR.id, ["id.txt"])) {
+            const a = N.normalizeIndonesian(t);
+            emit({ text: units(t), src: from, op: "normalize" }, a);
+            emit({ text: units(a), src: from, op: "symbols" }, symbols(a));
+        }
+    },
+    async "ms-normalize"() {
+        const M = await import("../../../src/languages/malay/normalize.ts");
+        const N = await import("../../../src/languages/indonesian/normalize.ts");
+        for (const [t, src] of textsFor(["ms"], FLEURS_DIR.ms, ["ms.txt"])) {
+            const a = M.normalizeMalay(t);
+            emit({ text: units(t), src, op: "malay" }, a);
+            emit({ text: units(a), src, op: "indonesian" }, N.normalizeIndonesian(a));
+        }
+    },
+    // The word level: phonemizeWord and phonemizeWordRules over every ⟨e⟩-lexicon key, every letter run of the
+    // id and ms texts (as written, lowercased, UPPERCASED, Capitalised), every 1-3 letter string over a-z (and
+    // the same UPPERCASED, which is the acronym gate and the unreadable test), every 4-letter string over a
+    // context set, and edge strings.
+    async "id-g2p"() {
+        const I = await import("../../../src/languages/indonesian/indonesian.ts");
+        const words = new Set<string>();
+        for (const l of loadLines(new URL("../../../src/languages/indonesian/indonesian.ts", import.meta.url).href, "indonesian-e-lexicon.tsv")) {
+            const k = l.split("\t")[0]!;
+            if (l.includes("\t")) { words.add(k); words.add(k.toUpperCase()); }
+        }
+        const texts = [...textsFor(["id"], FLEURS_DIR.id, ["id.txt"]).keys(), ...textsFor(["ms"], FLEURS_DIR.ms, ["ms.txt"]).keys()];
+        for (const t of texts)
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) {
+                const w = m[0];
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase());
+                words.add(w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+            }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz"];
+        for (const a of abc) {
+            words.add(a); words.add(a.toUpperCase());
+            for (const b of abc) {
+                words.add(a + b); words.add((a + b).toUpperCase());
+                for (const c of abc) { words.add(a + b + c); words.add((a + b + c).toUpperCase()); }
+            }
+        }
+        const ctx = [..."aeioukngyshc"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) { words.add(a + b + c + d); words.add((a + b + c + d).toUpperCase()); }
+        for (const w of ["", "\ud800", "a\ud800b", "ſkala", "İndah", "ﬁsik", "Ångström", "KHUSUS", "NGANGA", "BBM", "DPK", "AKP", "constructor", "__proto__", "toString", "AI", "AU", "OI", "kk", "k", "q", "x", "aiai", "aai"])
+            words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, I.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, I.phonemizeWordRules(w));
+        }
+    },
+    // numberWords is module-private; reach it as the engine does, through phonemize(<digits>, "id") — the
+    // number path splits on spaces and reads each word with the rules, so this is the module end to end.
+    async "id-numbers"() {
+        const { phonemize } = await import("../../../src/index.ts");
+        const ns: string[] = [];
+        for (let i = 0; i <= 12000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1e3), String(k * 1e3 + 1), String(k * 1e6), String(k * 1e6 + 1001), String(k * 1e9 + 7));
+        for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e));
+        ns.push("9007199254740991", "9007199254740992", "9007199254740993", "1.000", "12.345.678", "1,5", "0,25", "007", "1,", "1.000,5");
+        for (const n of ns) emit({ text: units(n), lang: "id" }, phonemize(n, "id"));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.

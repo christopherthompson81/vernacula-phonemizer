@@ -1204,6 +1204,47 @@ fn main() {
                 sv.number_to_words(n, raw.as_ref())
             })
         }
+        "id-normalize" => {
+            let id =
+                vernacula_phonemizer::languages::indonesian::indonesian::create_indonesian(None)
+                    .unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => id.normalize(&t),
+                    _ => id.symbols(&t),
+                }
+            })
+        }
+        "ms-normalize" => {
+            let ms = vernacula_phonemizer::languages::malay::malay::create_malay(None).unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "malay" => ms.normalize(&t),
+                    _ => ms.inner().normalize(&t),
+                }
+            })
+        }
+        "id-g2p" => {
+            let id =
+                vernacula_phonemizer::languages::indonesian::indonesian::create_indonesian(None)
+                    .unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => id.phonemize_word(&w),
+                    _ => id.phonemize_word_rules(&w),
+                }
+            })
+        }
+        "id-numbers" => Box::new(|input| {
+            vernacula_phonemizer::registry::phonemize_in(
+                input["lang"].as_str().unwrap(),
+                &units(&input["text"]),
+            )
+            .unwrap()
+        }),
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

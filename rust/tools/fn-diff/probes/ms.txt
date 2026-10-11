@@ -1,0 +1,48 @@
+# Synthetic Standard Malay (ms/zsm) probes: one line per normalize.ts arm plus the neighbour it must decline.
+# Synthetic text only, written for this list.
+# 1) ampersand and the HTML entity; an entity that is not &amp;
+Seni &amp; Sains dan B&B serta A & B, tetapi &copy; kekal.
+# 2) comma thousands; the leading anchor; a decimal comma neighbour
+Seramai 1,400 orang dan 5,000,000 ringgit, tahun 1990,300 dan 3,14 bukan ribuan, 12,34567.
+# 3) currency code glued, magnitude after the amount, code after the amount, decimal amount
+Harga US$30 dan HK$5 dan CA$7 dan $2.3 bilion dan €45 juta AUD dan $45 juta AUD dan $1.50 dan £3.25 dan $1000.
+Wang US$ sahaja dan $ 5 billion dan ¥10 trilion.
+# 4) percent, with and without the word
+Naik 80% peratus dan 15 % lagi dan 3%.
+# 5) era marker; an SM that is not after a number
+Tahun 323 SM dan 5000SM, tetapi SM itu sekolah.
+# 6a) multi-dot initialisms, mid-sentence and clause end
+Presiden A.S. berkata dan rakyat A.S.
+Ejaan U.S.A., dan P.B.B.!
+# 6b) the Malay abbreviations; near-miss under the fold
+Dr. Ali dan En. Abu, kemudian No. 5 dan no.7, juga Dr.
+Kata ſt. dan Eſ. bukan singkatan.
+# 7) rates
+Laju 160km/j dan 60 batu/jam dan 3 m/s dan 10 Mbit/s dan 5 kbit/s dan 100 bsj dan 80 kmj dan 9 km/jamnya.
+# 8) exponents: squared and cubed, glued and spaced, ASCII forms, M2/M3 neighbours
+Luas 19,500km² dan 3,850 km² dan km2 sahaja dan 7 m² dan 5 km³ dan 2cm3 dan mm³ dan 120 m³ dan M2 dan 5 m3.
+# 9) frequency
+Wi-Fi 2.4Ghz dan 5.0 GHz dan 900 MHz dan 50 Hz dan 10khz.
+# 10) degrees and compass
+Suhu 30°C dan 86 °F dan 35°W dan 12°s dan 40° utara dan 25°Cölner.
+# 11) clocks: marker before, marker after, meridiem, coordinated pair, a mangled spaced clock, non-clocks
+Pada pukul 06.30 dan 07.30 kami bertolak.
+Mesyuarat jam 8:46 pagi dan 10.08 malam, juga 1.15 pg.
+Antara 10: 00-11: 00 pm MDT.
+Kira-kira 9.30 a.m. dan 12.00 p.m. dan 12.15 a.m. dan 3.45 pm GMT.
+Tinggi 3.50 m dan 6.34 inci.
+# 12) bare hour with a meridiem; pg after a number
+Pukul 8 p.m. dan 12 a.m. dan 7 pm malam dan 11 pg.
+Tiada nombor pg di sini.
+# 13) colon pairs: H:00, score, ratio, race time
+Jam 21:00 dan skor 21:20 dan nisbah 3:2 dan masa 4:41.30, dikatakan 3:2.
+# 13b) arithmetic and comparison signs; an HTML tag neighbour
+Format 6 × 6 dan 3 < 4 dan 5 > 1 dan x = y dan <i>tajuk</i>.
+# 14) ranges with hingga; scores that must stay
+Selama 10-60 minit dan 5 – 7 hari dan 1995-1996, apabila skor 5-3 dan 26 - 00.
+Jarak 2.5-3.5 km dan 100-200 orang.
+# 15) decimals and versions; the all-zero thousands neighbour; a sentence-final dot
+Nilai 3.141 dan 9.000 orang dan 802.11a dan 1.5 dan Rajah 1.1.
+Versi 2.0b dan 10.25.
+# inherited Indonesian arms reaching through
+Harga Rp 15.000 dan Prof. Ali dan 1/2 dan 3/4.

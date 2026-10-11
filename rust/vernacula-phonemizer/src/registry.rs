@@ -32,10 +32,11 @@ use crate::languages::portuguese::roman_ordinals::roman_policy as pt_roman_polic
 use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
-/// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 20] = [
+/// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
+/// same engine as `ms`, but has no golden of its own, so it is not listed.
+pub const LANGUAGES: [&str; 22] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv",
+    "de", "pl", "tr", "nl", "uk", "sv", "id", "ms",
 ];
 
 /// A language engine, as the registry holds it.
@@ -116,6 +117,16 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "sv" => crate::languages::swedish::swedish::create_swedish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "id" => crate::languages::indonesian::indonesian::create_indonesian(Some(Arc::new(
+            read_as_english,
+        )))
+        .map(|e| Arc::new(e) as Arc<dyn Engine>)
+        .map_err(PhonemizeError::Data),
+        "ms" | "zsm" => {
+            crate::languages::malay::malay::create_malay(Some(Arc::new(read_as_english)))
+                .map(|e| Arc::new(e) as Arc<dyn Engine>)
+                .map_err(PhonemizeError::Data)
+        }
         _ => return None,
     })
 }
