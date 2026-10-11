@@ -1,0 +1,42 @@
+# Synthetic Romanian probes (no corpus text): one line per arm of src/languages/romanian/normalize.ts plus the
+# neighbour each arm must decline, then the tokenizer, the number compositor and the g2p corners.
+# `\u{XXXX}` escapes are decoded.
+# 1) dot-grouped thousands (repeated), and the declines: a leading 0, two digits
+Au venit 1.234.567 de oameni și 2.500 de mașini, dar nu 0.500 și nici 1.25.
+# 2) space-grouped thousands (space, NBSP, NNBSP, thin space)
+Sunt 5 000 de ani, 3\u{a0}850 km, 3\u{202f}850 km și 3\u{2009}850 km, dar nu 10 0001.
+# 3) decimal comma
+Valoarea este 3,14 și 0,05 și 12,5.
+# 4) clock and its decline
+La ora 10:30 și la 9:05, dar nu 10:305.
+# 5) percent
+Crește cu 25 % și cu 7%.
+# 6) degrees, incl. the precomposed signs
+Sunt 30 °C, 90 °F, 25℃, 77℉, 30 °c și 12° la umbră.
+# 7) squared and cubed units
+O suprafață de 3 km², 50 m², 4 cm² și 2 m³.
+# 8) rates
+Merge cu 120 km/h, cu 90 km/oră și cu 3 m/s.
+# 9) a unit after a digit, the bare units, and the guarded ones
+Are 5 km, 3 kg, 12 cm, 4 mm, 7 m, 200 g, standardul 802.11g, 2.5m și km fără număr.
+# 10) ranges and the triple dash they decline
+Între 1990-2000, 10 – 20 și 5—6, dar nu 1-2-3.
+# 11) currency signs before and after the number; lei is a word
+Costă $ 20, 30 €, £5, 100 ¥ și 50 lei.
+# 12) a sign glued to a number, and the hyphen inside a word
+Temperatura e -5, −3 și +7, dar nu a-5.
+# 13) plus between numbers, relational signs, multiply, divide
+2 + 2, 3 ± 1, x ≈ 4, 5 ≤ 6, 7 ≥ 1, 2 = 2, 3 < 4, 5 > 1, 4 x 4, 6×6, 8 ÷ 2.
+# 14) ampersand (ASCII and fullwidth)
+Ion & Maria și Ana＆Radu.
+# numbers: the compositor's gender agreement and the de linker, huge runs
+Am 1 mie, 2 mii, 21 de mii, 100 de mii, 1 milion, 2 milioane, 12 mii, 101 cărți, 1000000000 și 12345678901234567890.
+# Roman numerals: century, regnal, the stoplisted vii, postposed event nouns, feminine heads declined
+În secolul XIX, Carol II, regele Mihai I, secolul VII, al L aniversar și ediția III.
+# g2p corners: c/g softening, ch/gh, ci/gi + vowel, qu, ea/oa, ie hiatus, glides, final i, initial je, x
+Cere, ciorbă, chem, ghem, gem, giulgiu, quasar, seară, floare, geografie, cheie, iarnă, ziua, mai, eu.
+Lupi, copii, membri, și, este, el, ea, examen, taxi, Alexandria, Austria, politic, casei, elevi.
+# tokenizer: capitals, cedilla forms, a decomposed accent, out-of-inventory letters
+ȘTIINȚĂ, ştiinţă, Ca\u{306}sa, São Paulo, Müller, Ångström, Łódź.
+# finding: a count of exactly 1000 takes the singular stem in the ordinal (al mielea, against al două miilea)
+În mileniul M și secolul MM.

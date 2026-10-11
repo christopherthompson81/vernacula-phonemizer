@@ -293,6 +293,18 @@ fn main() {
                 )
             })
         }
+        "enin" => {
+            use vernacula_phonemizer::languages::english_in::english_in as i;
+            let en = vernacula_phonemizer::registry::english().unwrap();
+            Box::new(move |input| {
+                let ipa = units(&input["ipa"]);
+                match input["op"].as_str().unwrap() {
+                    "transform" => i::indian_word_transform(&ipa, &units(&input["word"])),
+                    "indian" => i::to_indian(&ipa),
+                    _ => i::phonemize_word(&en, &ipa),
+                }
+            })
+        }
         "torp" => Box::new(|input| {
             let (w, ipa) = (units(&input["word"]), units(&input["ipa"]));
             if input.get("bare").is_some() {
@@ -434,6 +446,28 @@ fn main() {
                     })
                     .collect();
                 JsString::join(&segs, &JsString::from(" "))
+            })
+        }
+        "es419-word" => {
+            use vernacula_phonemizer::languages::spanish_419::spanish_419 as e;
+            e::create_spanish_419().unwrap();
+            Box::new(|input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => e::phonemize_word(&w),
+                    _ => e::to_latin_american(&w),
+                }
+            })
+        }
+        "frca-word" => {
+            use vernacula_phonemizer::languages::french_ca::french_ca as q;
+            let e = q::create_french_ca().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "quebec" => q::to_quebecois(&w),
+                    _ => e.phonemize_word(&w),
+                }
             })
         }
         "es-numbers" => {
@@ -1110,6 +1144,145 @@ fn main() {
             let policy = vernacula_phonemizer::languages::ukrainian::roman_ordinals::roman_policy();
             Box::new(move |input| {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
+        // ── Catalan (ca) ──
+        "ca-normalize" => {
+            use vernacula_phonemizer::languages::catalan::{catalan, normalize as n};
+            let ca = catalan::create_catalan().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "ordinal" => n::ordinal_words(
+                    js_number(&JsString::from(input["n"].as_str().unwrap())),
+                    input["fem"].as_bool().unwrap(),
+                )
+                .unwrap_or_else(|| JsString::from("\u{0}none")),
+                op => {
+                    let t = units(&input["text"]);
+                    match op {
+                        "normalize" => n::normalize_catalan(&t),
+                        "symbols" => ca.symbols(&t),
+                        _ => JsString::from(n::IS_UNREADABLE(&t).to_string().as_str()),
+                    }
+                }
+            })
+        }
+        "ca-g2p" => {
+            use vernacula_phonemizer::languages::catalan::{catalan, g2p};
+            catalan::create_catalan().unwrap();
+            Box::new(|input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => catalan::phonemize_word(&w, false),
+                    "unstressed" => catalan::phonemize_word(&w, true),
+                    "nat" => catalan::NAT(&w),
+                    _ => {
+                        let segs: Vec<JsString> = g2p::to_segments(&w)
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}{}", s.nucleus as u8, s.accent as u8).as_str(),
+                                ))
+                                .concat(&s.reduced.clone().unwrap_or_else(|| JsString::from("-")))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                }
+            })
+        }
+        "ca-numbers" => {
+            use vernacula_phonemizer::languages::catalan::{catalan, numbers, roman_ordinals};
+            catalan::create_catalan().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                if input["op"] == "roman" {
+                    // `ROMAN_POLICY.ordinal(n)` takes any JS number (the registry hands it a u32): the f64 entry.
+                    return roman_ordinals::catalan_ordinal(n)
+                        .unwrap_or_else(|| JsString::from("\u{0}none"));
+                }
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                numbers::number_to_words(n, raw.as_ref())
+            })
+        }
+        // ── Galician (gl) ──
+        "gl-normalize" => {
+            use vernacula_phonemizer::languages::galician::{galician, normalize as n};
+            let gl = galician::create_galician().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "ordinal" => {
+                    n::galician_ordinal(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                        .unwrap_or_else(|| JsString::from("\u{0}none"))
+                }
+                op => {
+                    let t = units(&input["text"]);
+                    match op {
+                        "normalize" => n::normalize_galician(&t),
+                        "symbols" => gl.symbols(&t),
+                        _ => JsString::from(n::IS_UNREADABLE(&t).to_string().as_str()),
+                    }
+                }
+            })
+        }
+        "gl-g2p" => {
+            use vernacula_phonemizer::languages::galician::{g2p, galician};
+            galician::create_galician().unwrap();
+            Box::new(|input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => galician::phonemize_word(&w),
+                    "nat" => galician::NAT(&w),
+                    _ => {
+                        let segs: Vec<JsString> = g2p::to_segments(&w)
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}{}", s.nucleus as u8, s.accent as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                }
+            })
+        }
+        "gl-numbers" => {
+            use vernacula_phonemizer::languages::galician::{galician, numbers};
+            galician::create_galician().unwrap();
+            Box::new(|input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = (!input["raw"].is_null()).then(|| units(&input["raw"]));
+                numbers::number_to_words(n, raw.as_ref())
+            })
+        }
+        // ── Romanian (ro) ──
+        "ro-normalize" => {
+            use vernacula_phonemizer::languages::romanian::{normalize, romanian};
+            romanian::create_romanian().unwrap();
+            Box::new(|input| normalize::normalize_romanian(&units(&input["text"])))
+        }
+        "ro-g2p" => {
+            use vernacula_phonemizer::languages::romanian::romanian;
+            romanian::create_romanian().unwrap();
+            Box::new(|input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => romanian::phonemize_word(&w),
+                    "rules" => romanian::phonemize_word_rules(&w),
+                    _ => romanian::NAT(&w),
+                }
+            })
+        }
+        "ro-numbers" => {
+            use vernacula_phonemizer::languages::romanian::{roman_ordinals, romanian};
+            romanian::create_romanian().unwrap();
+            Box::new(|input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "words" => romanian::number_words(n, false),
+                    "stem" => romanian::number_words(n, true),
+                    _ => roman_ordinals::romanian_ordinal(n)
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                }
             })
         }
         "sv-normalize" => {
