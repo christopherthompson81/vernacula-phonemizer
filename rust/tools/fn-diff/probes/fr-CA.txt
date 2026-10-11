@@ -1,0 +1,29 @@
+# Synthetic Québécois French probes (no corpus text): each arm of toQuebecois (affrication, laxing, final /a/)
+# with the neighbour it must decline, the punctuation set the final-/a/ lookahead names, and the France engine's
+# normalizer arms the delta then rewrites. `\u{XXXX}` escapes are decoded.
+# affrication before i y j ɥ (and stressed), not before u / a / o
+Tu dis que le dimanche la tuile du toit tient.
+Le tout petit tableau de Didier dort.
+Il étudie la diète et le tiède du dieu.
+# laxing in a closed syllable; tense before ʁ v z ʒ and in an open syllable
+La petite jupe rouge de six filles route vers la musique.
+Il dit que la rive, la ruse et la tige sont pures.
+Une difficile politique, une habitude stupide.
+# final /a/ before each punctuation mark the lookahead lists, and at the end of the string
+Le Canada, la Floride; il va! Cela? Voilà… «Ha» (déjà)
+Il y a là un chat
+Papa a mangé à la plage.
+# liaison and elision across words: t/d + i across a word boundary
+C'est un petit ami et un grand idiot qui dit tout.
+# numbers, ordinals and Roman numerals (fr-CA reads its own), symbols
+Le 21 juin, le XXIe siècle, Louis XIV et 3 000 $ ou 25 %.
+Il est 17 h 30, il fait −5 °C et 1/2 litre.
+# initialisms, capitals, a decomposed accent and an English run
+La SAAQ, la TVQ et le CÉGEP de Te\u{301}miscouming.
+Il regarde Netflix sur un iPad à Montréal.
+# foreign scripts routed to other engines (their t / d / i are rewritten too)
+Il a dit дети et τι.
+# finding: an obstruent + liquid ONSET cluster is read as a coda, so an open-syllable vowel laxes
+La publique du cyclone, le citron et supplier.
+# finding: the delta reaches a foreign run (a Greek τι is affricated)
+Il a dit τι.

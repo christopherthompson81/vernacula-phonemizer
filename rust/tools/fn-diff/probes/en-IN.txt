@@ -1,0 +1,20 @@
+# Synthetic Indian English probes (no corpus text): each arm of toIndian with the neighbour it must decline,
+# the per-word seam (the delta runs on each word's reading, not on the sentence), and OOV words the neural path
+# reads. `\u{XXXX}` escapes are decoded.
+# retroflexion of t/d with aspiration / flap diacritics; the tied affricates are spared
+The little water bottle tasted better today.
+Judge Church chose the cheap jeans and the edge.
+# TH-stopping, v/w merger, FACE/GOAT, de-aspiration, clear l, the rhotic tap
+They think three weather vans went west via Vienna.
+The goat ate a plate of cake at the lake.
+Pick a cup, keep the cap, fill the pool.
+The nurse heard her father's letter word for word.
+# reduced vowels and the palatal on-glide
+The visited roses and the music of the university.
+# numbers, symbols, initialisms and Roman numerals (the English normalizer)
+Rs. 2,50,000 was paid on 15 August 1947 at 10:30 a.m. by the RBI.
+World War II ended in 1945; Henry VIII had 6 wives; 25% of 3/4.
+# OOV words (invented) for the neural reader, with t / d / th / w in them
+Thrindlewort and Vadderwick met Quorthington at Dathmoor.
+# foreign scripts inside English (routed to other engines; their t / d are rewritten too)
+He said дети and τι and नमस्ते.

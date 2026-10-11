@@ -1,0 +1,49 @@
+# Synthetic Galician probes (no corpus text): one line per arm of src/languages/galician/normalize.ts plus the
+# neighbour each arm must decline, then the symbol tier, the tokenizer and the g2p corners.
+# `\u{XXXX}` escapes are decoded.
+# 0) digit grouping with a space, NBSP, thin space, NNBSP; and the declines (four digits, a lone 0)
+Hai 5 000 anos, 3\u{a0}850 km, 3\u{2009}850 km e 3\u{202f}850 km, pero non 10 0001 nin 0 500.
+# 1) era markers
+No 200 a. C., no 300 d. C., no 50 a.e.c. e no 40 a. e. c., pero non a.C sen punto.
+# 2) número
+Vive no n.º 5, no nº 6, no n° 7 e no núm. 8, pero non nº seguido de letra.
+# 3) dotted capital runs and the capital-dot before a capital word
+Dixo que a O.N.U. e a U. E. e George W. Bush e X. Álvarez.
+# 4) abbreviations mid-sentence and phrase-final, and the fold miss
+O Dr. Pérez, a Dra. Vila, o Sr. López, a Sra. Rey, o Prof. Mato, o vol. 2, a páx. 3 e o séc. XX, etc. E libros etc.
+O ſr. Pérez non é unha abreviatura.
+# 5) ordinal indicators: masculine, feminine, dotted thousands, above 100
+O 1º, a 1ª, o 21.º, a 33.ª, o 100º, o 101º e o 1.000º.
+# 6) dot decimals and the thousands dot
+Son 2.5 metros, 3.14 litros, pero 1.500 persoas e 1.234.567 euros.
+# 7) currencies the tier does not carry
+Custa US$ 20, AUD$ 30, CAD$40 e R$ 15,50.
+# 8) degrees
+Fai 30 °C, 90 °F, 30 °c, 12°N, 40 °O e 25° á sombra.
+# 9) clocks: h:mm:ss, h:mm on the hour and not, and the declines
+Ás 10:30, ás 9:00, ás 23:59, un tempo de 1:02:03 e 25:99 e 10:30.5.
+# 10) signs: ±, minus (true, en dash, after a paren), plus (glued and spaced), equals, comparisons, division
+Erro ± 2, fai -5 graos e (−3) e –4, 2+2, UTC +1, 2 = 2, 3 < 4, 5 > 1 e 8 ÷ 2, pero non 6-6.
+# 11) fractions: halves, thirds, ordinals, a letter glued after, and the declines
+Comeu 1/2, 3/2, 1/3, 2/3, 1/4, 3/4, 2/5, 7/10, 5/12, 1/2l, pero non 1/13 nin 5/3 nin 1/2/3.
+# 12) numeric ranges
+Entre 1990-2000 e 10 – 20 e 5—6.
+# 13) the ditto mark
+Idem 〃 e 〃.
+# 14) initialisms: spelled, recorded words, listed letters
+A ONU, a OTAN, o PIB, o ISBN, a UE, o PDF e a URL e o BNG.
+# symbol tier: percent, currency, units, per, exponents, bare squared, multiply, ampersand, magnitudes
+Un 25 % de 3 € e 4 $ e 2 £ e 2.500 ¥, 120 km/h, 3 km², 5 m³, 5², 6³, 4x4 e 6 × 6, Thames & Hudson, 2 millóns de dólares.
+# numbers: decimal comma, thousands dots, huge digit runs, leading zeros
+Ten 3,14 e 1.000.000 e 12345678901234567890 e 007 e 0,5.
+# tokenizer: capitals, a decomposed accent, foreign letters
+CANCIÓN, Cancio\u{301}n, Groß, Ñandú, Qatar, kiwi, whisky, çedilla.
+# g2p corners: x, j, g, nh, ll, ch, qu/gu/gü, y, hiatus, falling diphthongs, final nasals
+A xente, o texto, o seixo, a unha, a lingua, o pingüín, a chuvia, o muíño, o ruído, a viúva, saíu, cantou, amei.
+Os cans, as cancións, ningún, álbum, cinco, o rei, hoxe, muy, o yate.
+# spirantization across words: after a vowel, after a nasal, d after l, after a pause
+A boca, un dedo, o gato, el dixo. Bo, dado.
+# function words
+O can e a cadela de Lugo, por que non?
+# finding: a falling diphthong + final s takes PENULT stress (the 2R s-test overrides the glide-final oxytone)
+Ademais, xamais viu os papeis nin os chapeus.

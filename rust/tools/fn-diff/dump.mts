@@ -34,6 +34,10 @@ const FLEURS_DIR: Record<string, string> = {
     sl: "sl_si",
     lt: "lt_lt",
     lv: "lv_lv",
+    "fr-CA": "fr_fr",
+    ca: "ca_es",
+    gl: "gl_es",
+    ro: "ro_ro",
 };
 
 /**
@@ -76,6 +80,7 @@ function englishTexts(): Map<string, string> {
 /** Every distinct text for `lang` (English keeps `englishTexts()`). A language needs a golden. */
 function langTexts(lang: string): string[] {
     if (lang === "en" || lang === "en-GB") return [...englishTexts().keys()];
+    if (lang === "en-IN") return [...textsFor(["en", "en-GB", "en-IN"], "en_us", ["en-normalize.txt", "en-IN.txt"]).keys()];
     return [...textsFor([lang], Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined, [`${lang}.txt`]).keys()];
 }
 /** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
@@ -142,6 +147,19 @@ function traceJson(t: {
         normalized: units(t.normalized),
         tokens: t.tokens.map((k) => [k.span, k.inputSpan ?? null, k.ipaSpan ?? null, units(k.surface), k.source ?? null]),
     });
+}
+/** A language's symbol tier rebuilt from the `makeSymbolNormalizer({...})` literal in its own source (`dir/file.ts`
+ *  under src/languages), so the dump also proves the data the Rust port embeds. */
+async function symbolsFromLiteral(path: string): Promise<(t: string) => string> {
+    const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+    const src = readFileSync(new URL(`../../../src/languages/${path}`, import.meta.url), "utf8");
+    const start = src.indexOf("makeSymbolNormalizer({", src.indexOf("const SYMBOLS")) + "makeSymbolNormalizer(".length;
+    let depth = 0, end = start;
+    for (let i = start; i < src.length; i++) {
+        if (src[i] === "{") depth++;
+        else if (src[i] === "}" && --depth === 0) { end = i + 1; break; }
+    }
+    return makeSymbolNormalizer(new Function(`return (${src.slice(start, end)});`)());
 }
 const emit = (input: unknown, output: string): void => {
     process.stdout.write(JSON.stringify({ input, output: units(output) }) + "\n");
@@ -226,6 +244,19 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
     },
     // toRP alone over every lexicon reading (word + GenAm IPA), with and without the lexical sets.
+    // en-IN: toIndian over every accent-lexicon reading (and through indianWordTransform), every 1-3 symbol string
+    // over the delta's context alphabet, and phonemizeWord over every letter run of the English texts.
+    async enin() {
+        const I = await import("../../../src/languages/english-in/english-in.ts");
+        const lex = loadTsvMap(ENGLISH, "accent-lexicon.tsv", (rest) => { const f = rest.split("\t"); const ipa = f[1]?.trim(); return f.length >= 2 && ipa ? ipa : undefined; });
+        for (const [w, ipa] of lex) emit({ word: units(w), ipa: units(ipa), op: "transform" }, I.indianWordTransform(ipa));
+        const alpha = ["t", "d", "ʰ", "̬", "̰", "͡", "ʃ", "θ", "ð", "e", "o", "a", "ᶦ", "ᶷ", "v", "w", "p", "k", "ɫ", "ɝ", "ɚ", "ɹ", "ᵻ", "ᵿ", "ʲ", "ˈ", " ", "\uD800"];
+        for (const a of alpha) { emit({ ipa: units(a), op: "indian" }, I.toIndian(a)); for (const b of alpha) { emit({ ipa: units(a + b), op: "indian" }, I.toIndian(a + b)); for (const c of alpha) emit({ ipa: units(a + b + c), op: "indian" }, I.toIndian(a + b + c)); } }
+        const words = new Set<string>();
+        for (const t of textsFor(["en", "en-GB", "en-IN"], "en_us", ["en-normalize.txt", "en-IN.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) words.add(m[0]);
+        for (const w of words) emit({ ipa: units(w), op: "word" }, I.phonemizeWord(w));
+    },
     torp() {
         const lex = loadTsvMap(ENGLISH, "accent-lexicon.tsv", (rest) => { const f = rest.split("\t"); const ipa = f[1]?.trim(); return f.length >= 2 && ipa ? ipa : undefined; });
         const T = rpWordTransform();
@@ -382,6 +413,19 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
     },
     // Spanish numberToWords (with and without `raw`) and spanishOrdinal.
+    // es-419: phonemizeWord (the Castilian word + seseo/yeísmo) over every letter run of the es and es-419 texts
+    // (as written and lowercased) and the 1-3 letter strings of es-g2p; toLatinAmerican over synthetic strings.
+    async "es419-word"() {
+        const E = await import("../../../src/languages/spanish-419/spanish-419.ts");
+        const words = new Set<string>();
+        for (const t of [...textsFor(["es", "es-419"], FLEURS_DIR.es, ["es.txt", "es-419.txt"]).keys()])
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const letters = [..."abcdefghijklmnopqrstuvwxyzáéíóúüñç"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of "aeiouyáíú") words.add(a + b + c); } }
+        for (const w of words) emit({ word: units(w), op: "word" }, E.phonemizeWord(w));
+        for (const s of ["", "θ", "ʎ", "θθʎʎ", "aθa ʎa", "\uD800θ", "ʎ\uDC00", "Θ", "sθ̃", "kaʎe θjelo"])
+            emit({ word: units(s), op: "latam" }, E.toLatinAmerican(s));
+    },
     async "es-numbers"() {
         const { numberToWords } = await import("../../../src/languages/spanish/numbers.ts");
         const { spanishOrdinal } = await import("../../../src/languages/spanish/romanOrdinals.ts");
@@ -1225,6 +1269,156 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２"])
             emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
+    // ── Catalan (ca). Inputs: the ca golden, FLEURS ca_es (columns 3 and 4) and probes/ca.txt. ──
+    // normalizeCatalan, the symbol tier (rebuilt from catalan.ts's own literal) on its output, isUnreadableCatalan
+    // over every letter run, and ordinalWords (m/f) over -2…2100 and the float/NaN/∞ corners.
+    async "ca-normalize"() {
+        const N = await import("../../../src/languages/catalan/normalize.ts");
+        const symbols = await symbolsFromLiteral("catalan/catalan.ts");
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["ca"], FLEURS_DIR.ca, ["ca.txt"])) {
+            const a = N.normalizeCatalan(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, symbols(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}·]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableCatalan(w)));
+        const ns: number[] = [];
+        for (let i = -2; i <= 2100; i++) ns.push(i);
+        ns.push(0.5, 1.5, 21.5, -0, NaN, Infinity, 9999, 123456, 999999999, 1e9, 2 ** 53, 2 ** 53 + 2);
+        for (const n of ns) for (const fem of [false, true])
+            emit({ n: String(n), fem, src: "numeric", op: "ordinal" }, N.ordinalWords(n, fem) ?? "\u0000none");
+    },
+    // phonemizeWord (stressed and proclitic), toSegments and nat over every mid-vowel / geminate key, every letter
+    // run of the texts (as written, lowercased, nativised), every 1-3 letter string over the Catalan letters and
+    // every 4-letter string over the context letters, plus edge strings.
+    async "ca-g2p"() {
+        const C = await import("../../../src/languages/catalan/catalan.ts");
+        const { toSegments } = await import("../../../src/languages/catalan/g2p.ts");
+        const CA = new URL("../../../src/languages/catalan/catalan.ts", import.meta.url).href;
+        const words = new Set<string>([...loadTsvMap(CA, "mid-vowels.tsv").keys(), ...loadTsvMap(CA, "bl-gl-geminate.tsv").keys()]);
+        for (const t of textsFor(["ca"], FLEURS_DIR.ca, ["ca.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}·]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(C.nat(m[0])); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzàèéíòóúüïç·"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouxgrstlnyc·"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\ud800b", "ſant", "İgual", "ÀNGEL", "ﬁ", "naïf", "examen", "exèrcit", "pausa", "maig", "puig", "ig", "ix", "aix", "xx", "qq", "ñ", "ß", "Ñandú", "Qatar", "kiwi", "whisky"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, C.phonemizeWord(w));
+            emit({ word: units(w), op: "unstressed" }, C.phonemizeWord(w, true));
+            emit({ word: units(w), op: "nat" }, C.nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.accent ? 1 : 0}${s.reduced ?? "-"}`).join(" "));
+        }
+    },
+    // numberToWords (with and without raw) and the Roman ordinal (ROMAN_POLICY.ordinal) over 0…20000 and beyond.
+    async "ca-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/catalan/numbers.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/catalan/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+            emit({ n: String(n), raw: null, op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        }
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "x𝟙"])
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+    },
+    // ── Galician (gl). Inputs: the gl golden, FLEURS gl_es (columns 3 and 4) and probes/gl.txt. ──
+    // normalizeGalician, the symbol tier (rebuilt from galician.ts's own literal) on its output,
+    // isUnreadableGalician over every letter run, and galicianOrdinal over -2…200 and the float corners.
+    async "gl-normalize"() {
+        const N = await import("../../../src/languages/galician/normalize.ts");
+        const symbols = await symbolsFromLiteral("galician/galician.ts");
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["gl"], FLEURS_DIR.gl, ["gl.txt"])) {
+            const a = N.normalizeGalician(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, symbols(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableGalician(w)));
+        const ns: number[] = [];
+        for (let i = -2; i <= 200; i++) ns.push(i);
+        ns.push(0.5, 1.5, 99.5, -0, NaN, Infinity);
+        for (const n of ns) emit({ n: String(n), src: "numeric", op: "ordinal" }, N.galicianOrdinal(n) ?? "\u0000none");
+    },
+    // phonemizeWord, nat and toSegments over every letter run of the texts (as written, lowercased, nativised),
+    // every 1-3 letter string over the Galician letters, every 4-letter string over the context letters, and edges.
+    async "gl-g2p"() {
+        const G = await import("../../../src/languages/galician/galician.ts");
+        const { toSegments } = await import("../../../src/languages/galician/g2p.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-záéíóúüñ]", "iu");
+        const words = new Set<string>();
+        for (const t of textsFor(["gl"], FLEURS_DIR.gl, ["gl.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(nat(m[0])); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzáéíóúüñ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouíúyxnhgqcrsl"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\ud800b", "ſol", "İgrexa", "ÁLBUM", "ﬁ", "muíño", "ruído", "viúva", "saíu", "cantou", "amei", "cans", "ningún", "xente", "texto", "Qatar", "kiwi", "ß", "ç", "whisky"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, G.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.accent ? 1 : 0}`).join(" "));
+        }
+    },
+    async "gl-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/galician/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 1001, k * 1e9, k * 1e12 + 7, (k + 1000) * 1e6);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 999999999999999, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000000000000", "9007199254740993", "", "1a2", "１２", "x𝟙"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
+    },
+    // ── Romanian (ro). Inputs: the ro golden, FLEURS ro_ro (columns 3 and 4) and probes/ro.txt. ──
+    async "ro-normalize"() {
+        const N = await import("../../../src/languages/romanian/normalize.ts");
+        for (const [t, src] of textsFor(["ro"], FLEURS_DIR.ro, ["ro.txt"])) emit({ text: units(t), src }, N.normalizeRomanian(t));
+    },
+    // phonemizeWord (lexicon stress) and phonemizeWordRules (rule stress) and nat over every stress-lexicon key,
+    // every letter run of the texts (as written, lowercased, nativised), every 1-3 letter string over the Romanian
+    // letters, every 4-letter string over the context letters, and edge strings.
+    async "ro-g2p"() {
+        const R = await import("../../../src/languages/romanian/romanian.ts");
+        const RO = new URL("../../../src/languages/romanian/romanian.ts", import.meta.url).href;
+        const words = new Set<string>(loadTsvMap(RO, "romanian-stress.tsv").keys());
+        for (const t of textsFor(["ro"], FLEURS_DIR.ro, ["ro.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(R.nat(m[0])); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzăâîșț"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouăcghxqlrt"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\ud800b", "ſat", "İași", "ŞTIINŢĂ", "ştiinţă", "ﬁ", "este", "ESTE", "copii", "membri", "geografie", "cheie", "Alexandria", "examen", "x", "qu", "ß", "é", "𝐚b"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, R.phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, R.phonemizeWordRules(w));
+            emit({ word: units(w), op: "nat" }, R.nat(w));
+        }
+    },
+    // numberWords (cardinal and stem) and the Roman ordinal over 0…20000 and the magnitude strides.
+    async "ro-numbers"() {
+        const { numberWords } = await import("../../../src/languages/romanian/romanian.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/romanian/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 2, k * 1e6, k * 1e6 + 21000, k * 1e9, k * 1e9 + 2e6 + 12);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        // No fractional n: the engine passes only integers, and a fraction indexes `NUM.units` with a non-integer.
+        ns.push(Number.MAX_SAFE_INTEGER, 1e21, -1, -0, NaN, Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberWords(n));
+            emit({ n: String(n), op: "stem" }, numberWords(n, { stem: true }));
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        }
+    },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
     async "fr-normalize"() {
@@ -1257,6 +1451,20 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         for (const w of ["", "h", "ill", "illégal", "Málaga", "Taínos", "Cañitas", "𝔞b", "\ud835x", "c'", "c’est", "qu'", "ﬁn", "İle", "straße", "øre", "x", "ex", "eux", "euille", "aill", "œuf", "bœufs"]) words.add(w);
         for (const w of words) emit({ word: units(w) }, toIpa(w));
+    },
+    // fr-CA: toQuebecois over every Lexique / supplement reading and every 1-3 symbol string over the delta's
+    // context alphabet; phonemizeWord (France text() + the delta) over every letter run of the fr / fr-CA texts.
+    async "frca-word"() {
+        const Q = await import("../../../src/languages/french-ca/french-ca.ts");
+        const FR = new URL("../../../src/languages/french/french.ts", import.meta.url).href;
+        const ipa = new Set<string>([...loadTsvMap(FR, "lexicon.tsv").values(), ...loadTsvMap(FR, "supplement.tsv").values()]);
+        const alpha = ["t", "d", "i", "y", "u", "ɥ", "j", "a", "ˈ", "ˌ", "p", "k", "s", "ʁ", "v", "z", "ʒ", "l", "ɛ", "͡", "ʃ", " ", ".", "»", "…", "ɑ", "\uD800"];
+        for (const a of alpha) { ipa.add(a); for (const b of alpha) { ipa.add(a + b); for (const c of alpha) ipa.add(a + b + c); } }
+        for (const s of ipa) emit({ word: units(s), op: "quebec" }, Q.toQuebecois(s));
+        const words = new Set<string>();
+        for (const t of textsFor(["fr", "fr-CA"], "fr_fr", ["fr.txt", "fr-CA.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) words.add(m[0]);
+        for (const w of words) emit({ word: units(w), op: "word" }, Q.phonemizeWord(w));
     },
     async "fr-numbers"() {
         const { numberToWords } = await import("../../../src/languages/french/numbers.ts");

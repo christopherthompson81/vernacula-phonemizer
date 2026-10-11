@@ -1,0 +1,28 @@
+# Synthetic Latin-American Spanish probes (no corpus text): the two mergers (seseo θ→s, yeísmo ʎ→ʝ) on the
+# words that carry them, the one variety-specific normalize rule (the first of the month), the shared Roman
+# policy, and the trace's positional rewrite. `\u{XXXX}` escapes are decoded.
+# seseo: c before e/i, z anywhere, and the clusters next to them
+La cerveza de la plaza cuesta cinco pesos en la ciudad.
+El zorro azul cruzó el zócalo con paciencia y luz.
+Hizo ejercicio, conoció a la actriz y cazó cigarras.
+# yeísmo: ll and y, word-initially, medially and next to other palatals
+La llave de la calle está en el pollo del caballo.
+Ayer llovió en la playa y ella llamó a su yerno.
+Ya llegó el yate a la orilla amarilla.
+# words with neither (the Castilian reading must survive untouched)
+El gato bebe agua en la casa del perro.
+# the first of the month (ordinal in America) and its neighbours
+El 1 de enero, el 1.º de mayo, el 2 de junio y el 31 de diciembre.
+Desde el 1 de julio hasta el 1 de agostos no hay clase.
+# Roman numerals: century cardinal, prenominal anniversary ordinal, bare numeral
+En el siglo XXI se celebró el XL aniversario y el L aniversario del club.
+Juan XXIII y la edición XV de la feria.
+# symbol tier and numbers through the seseo (cero, once, doce, trece, catorce, quince)
+Pagó 15 % de 1 300 dólares el 13 de marzo a las 12:15.
+Hace 0,5 grados y −12 °C en la sierra.
+# accented capitals, a decomposed accent, a foreign word with a θ-trigger letter
+CIELO, ZAPATO, LLUVIA y Ce\u{301}sar.
+Compró un iPhone en Zürich y una pizza en Cádiz.
+# finding: the whole-string delta also reaches an embedded foreign run (a Greek θ is seseo'd)
+Dijo θεός en griego.
+Leyó Αθήνα y Θεσσαλονίκη.
