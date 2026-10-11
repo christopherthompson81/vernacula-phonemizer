@@ -1,0 +1,118 @@
+# Swedish (sv) off-golden probes: synthetic sentences only, one or more per normalize.ts arm plus the
+# neighbour each arm must decline, and g2p / accent / compound corners. Never verbatim corpus text.
+# 1) space-grouped thousands (space, NBSP, NNBSP, thin space; a leading 0 group declines)
+Det kom 1 400 personer till mötet.
+Priset var 5 000 000 kronor.
+Vi såg 24\u{a0}000 fåglar och 3\u{202f}500 fiskar.
+Avståndet är 12\u{2009}345 meter.
+Koden 0 123 är inte ett tal.
+Talen 12 34 och 1 2345 grupperas inte.
+# 2) English comma grouping (exactly three digits) vs the decimal comma
+Ytan är 23,764 kvadratkilometer.
+Han fick 2,243 poäng och 1,234,567 röster.
+Temperaturen var 12,8 grader och 3,14159 är pi.
+# 3) sports / duration time
+Loppet tog 4:41,30 och sedan 1:09.02 för den andra.
+Tiden 12:34,5 slog rekordet.
+# 4) clock, period form, ranges, and the non-clock decimals
+Mötet börjar kl. 20.30 och slutar kl.12.00 i dag.
+Öppet mellan 22.00–23.00 MDT varje dag.
+Standarden 802.11 och figur 1.1 och talet 1.75 är inga klockslag.
+Klockan 25.10 finns inte, och inte 7.65 heller.
+# 5) clock, colon form
+Vi ses klockan 12:00 och 9:05 i morgon.
+Klockan 24:00 och 7:60 är ogiltiga.
+# 6) score
+Matchen slutade 3:2 och betyget blev 2:2.
+Det stod 10:9 i halvtid.
+# 7) dotted abbreviations, terminal and introducer
+Templet byggdes 323 f.Kr. Sedan kom romarna.
+Det hände år 1100 e.Kr.
+Han tog med frukt, ost, etc.
+Vi köpte bröd, smör osv. och gick hem.
+Ta t.ex. Camp David som exempel.
+Det var dvs. Northern Rock som föll.
+Detta gäller t.o.m. i morgon.
+En s.k. flikstup syns här.
+Omkring 10 000 f.v.t. levde människor här.
+Omkring 5000 fvt fanns en by.
+Han heter Sammy Jr. och bor i St. Louis.
+Vi bor på St. vid kusten.
+Det gäller t. ex. barn och f. Kr. och e. Kr.
+# 8) ordinal colon and suffixes
+Den 1:a januari och den 3:e maj och den 37:e gången.
+Elizabeth 2:s krona och Il-76:or flög.
+Den 20:e, den 100:e och den 101:a.
+Han kom på 0:e plats.
+# 9) century / decade
+Under 1400-talet och 1700-talsmarknaden och 1000-talet.
+Mellan 1100-1200-talet hände mycket.
+Det var på 800-talet och 2000-talet.
+Under 1 000-talet byggdes kyrkan.
+# 10) ranges vs scores
+Isen är 2-3 km tjock och det tar 10–60 minuter.
+Kriget (1644-1912) styrkor och perioden 1990-1995.
+Det blev en 5-3-seger och sedan 21-20, och till sist 6-6.
+Mellan 4,2-3,9 miljoner bor där.
+# 11) bare four-digit years vs units
+Hon föddes 1945 och flyttade 1770. De kom tillbaka.
+Vägen är 1600 km lång och 1200 GHz och 1200 Mbit/s.
+Han betalade 1500 kr och 1300 € och 1250 % mer.
+Version 1999.5 och 1066 och 2021 och 1100,5.
+# 12) degrees
+Det var +30°C i går och 90 °F i USA.
+Platsen ligger på 35°V och 20 ℃ och 5℉.
+Vinkeln är 45° exakt.
+# 13) x as multiplication
+Tavlan är 75,6 cm x 62,2 cm stor.
+Rummet är 6x6 meter och X 5 är en bil.
+# 14) signs
+Klockan var UTC+1 och det var -5 grader.
+Summan 3 + 4 blir sju och −2 är negativt.
+# 15) relational and operator signs
+Om a = b och c < d och e > f.
+Värdet ±5 och ≈ 10 och ≤ 3 och ≥ 4 och 6 × 7 och 8 ÷ 2.
+# 16) ampersand
+Bed & breakfast och Arts ＆ Sciences.
+# colon inflection on initialisms and names
+USA:s president och FN:s chef och TV:n och Anna:s bil.
+NASA:s raket och UNESCO:s arv och XYZ:n.
+# initialisms
+Han jobbar på SVT och IKEA och BBC och OS i år.
+AI och USOC och KTH är förkortningar.
+# symbol tier
+Det kostar 50 $ och 20 € och 10 £ och 15 %.
+Bilen kör 160 km/t och 100 km/h och 30 m/s.
+Ytan är 5 km² och volymen 3 m³.
+Det finns 3 miljoner och 2 miljarder.
+Han sprang 100 m och vägde 80 kg.
+Kabeln har 600 Mbit/s och 2,4 GHz.
+Det tog 5 min och 2 h.
+# numbers
+Vi har 0 och 7 och 21 och 1001 och 21000 och 999999999 och 1000000000.
+Talen 12345678901234567890 och 3,05 och 007.
+# g2p: sje/tje, softening, retroflex, silent digraphs, geminates, -tion
+Sjuk skjorta stjärna schack skepp kör kind gäst gift.
+Hjärta ljus djur gjorde gnista regn vagn.
+Barn bord kort fors Karl.
+Kött tack ägg bock vaccin piccolo succé acceptera.
+Nation station pension tionde.
+Berg älg sex lax.
+# accent and stress
+Anden ägde anden. Tomten och tomtar.
+Telefon kol stol. Banan och bananer.
+Storkök arbetsplats kvadratkilometer.
+Universitetet regeringen tillsammans.
+# foreign names and apostrophes
+O'Brien åt på McDonald's och lyssnade på rock'n'roll.
+Han sa 'ordet' och ’ordet’ till München.
+Qatar och Qing och Zürich och Ångström.
+# decomposed vowels and case
+Ko\u{308}tt och sma\u{30a} och BÅTEN.
+# TS findings (reported, reproduced): unbounded osv/dvs, sentence-final clocks, 2000-talet
+Han var osviklig och osvensk, det var dvsbilen.
+Vi ses klockan 12:00.
+Mötet börjar kl. 20.30.
+Bussen avgår mellan 8.15 och 9.45.
+Under 2000-talet och 2100-talet.
+Den 0:e och 101:a gången.

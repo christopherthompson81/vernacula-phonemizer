@@ -27,6 +27,7 @@ const FLEURS_DIR: Record<string, string> = {
     tr: "tr_tr",
     nl: "nl_nl",
     uk: "uk_ua",
+    sv: "sv_se",
 };
 
 /**
@@ -1132,6 +1133,91 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { normalizeRomans } = await import("../../../src/core/roman.ts");
         const { ROMAN_POLICY } = await import("../../../src/languages/ukrainian/romanOrdinals.ts");
         for (const [t, src] of textsFor(["uk"], FLEURS_DIR.uk, ["uk.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Swedish (sv). Inputs: the sv golden, FLEURS sv_se (columns 3 and 4) and probes/sv.txt. ──
+    // Each stage of text()'s normalization chain separately (op), the initialism pass on the raw text too, the
+    // phonotactic test on every letter run, and normalize.ts's ordinal / hundredsYear over a numeric sweep.
+    // The symbol tier is rebuilt from swedish.ts's OWN object literal (evaluated from the source; it is not
+    // exported), so the dump and the engine cannot hold two copies of it.
+    async "sv-normalize"() {
+        const N = await import("../../../src/languages/swedish/normalize.ts");
+        const { makeSymbolNormalizer } = await import("../../../src/core/normalizeSymbols.ts");
+        const sv = readFileSync(new URL("../../../src/languages/swedish/swedish.ts", import.meta.url), "utf8");
+        const start = sv.indexOf("makeSymbolNormalizer({", sv.indexOf("const SYMBOLS")) + "makeSymbolNormalizer(".length;
+        let depth = 0, end = start;
+        for (let i = start; i < sv.length; i++) {
+            if (sv[i] === "{") depth++;
+            else if (sv[i] === "}" && --depth === 0) { end = i + 1; break; }
+        }
+        const symbols = makeSymbolNormalizer(new Function(`return (${sv.slice(start, end)});`)());
+        const words = new Set<string>();
+        for (const [t, src] of textsFor(["sv"], FLEURS_DIR.sv, ["sv.txt"])) {
+            const a = N.normalizeSwedish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = N.normalizeSwedishInitialisms(a);
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeSwedishInitialisms(t));
+            emit({ text: units(b), src, op: "symbols" }, symbols(b));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableSwedish(w)));
+        const ns: number[] = [];
+        for (let i = -2; i <= 2100; i++) ns.push(i);
+        ns.push(0.5, 1.5, 19.5, 1100.5, -0, NaN, Infinity, 9999, 1e9, 2 ** 53);
+        for (const n of ns) {
+            emit({ n: String(n), src: "numeric", op: "ordinal" }, N.ordinal(n) ?? "\u0000none");
+            emit({ n: String(n), src: "numeric", op: "hundreds" }, N.hundredsYear(n) ?? "\u0000none");
+        }
+    },
+    // The word level: phonemizeWord and nat over every lexicon key (with the #1068 nativised aliases), every
+    // letter run of the texts (as written, lowercased and nativised), every 1-3 letter string over the Swedish
+    // letters and the apostrophes, every 4-letter string over the context letters, and edge strings; the parsed
+    // entry of every lexicon key; toSegments over a sample with off-range stress ordinals, oLong, and synthetic
+    // compounds.
+    async "sv-g2p"() {
+        const S = await import("../../../src/languages/swedish/swedish.ts");
+        const { toSegments } = await import("../../../src/languages/swedish/g2p.ts");
+        const lex = S.lexicon();
+        const words = new Set<string>();
+        for (const k of lex.keys()) words.add(k);
+        for (const t of textsFor(["sv"], FLEURS_DIR.sv, ["sv.txt"]).keys())
+            for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(S.nat(m[0])); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzåäöéü'’"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeioyäöskgctjrnldh"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\ud800b", "ſkepp", "İsa", "KÖTT", "Ångström", "öl", "MÜNCHEN", "naïve", "ﬁsk", "cc", "accé", "succé", "ction", "tion", "station", "xx", "qq", "hh", "ww"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, S.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, S.nat(w));
+        }
+        for (const [k, e] of lex) {
+            const l = e.longOrds === undefined ? "-" : [...e.longOrds].join(",");
+            emit({ word: units(k), op: "lex" }, `${e.accent}|${e.ord ?? "-"}|${e.oLong ? 1 : 0}|${e.secOrd ?? "-"}|${l}|${e.secVowelInitial ? 1 : 0}`);
+        }
+        const sample = [...words].filter((_, i) => i % 97 === 0);
+        const ords = [0, 1, 2, 3, 7, -1, 1.5, NaN];
+        type C = { secOrd: number; longOrds: number[]; secVowelInitial?: boolean } | null;
+        const compounds: C[] = [
+            null, { secOrd: 1, longOrds: [] }, { secOrd: 1, longOrds: [0, 1] }, { secOrd: 2, longOrds: [0, 2], secVowelInitial: true },
+            { secOrd: 0, longOrds: [1] }, { secOrd: 1.5, longOrds: [1.5, 3] }, { secOrd: 3, longOrds: [0, 1, 2, 3], secVowelInitial: false },
+        ];
+        const seg = (w: string, o: number, ol: boolean, c: C): string =>
+            toSegments(w, o, ol, c === null ? undefined : { secOrd: c.secOrd, longOrds: new Set(c.longOrds), secVowelInitial: c.secVowelInitial })
+                .map((s) => `${s.ph}/${s.vowel ? 1 : 0}`).join(" ");
+        for (const w of sample) for (const o of ords) for (const ol of [false, true]) for (const c of compounds)
+            emit({ word: units(w), op: "segs", ord: String(o), oLong: ol, compound: c }, seg(w, o, ol, c));
+    },
+    async "sv-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/swedish/numbers.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 1001, k * 1e6 + 999999, k * 1e6 + 21000);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null }, numberToWords(n));
+        for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２"])
+            emit({ n: String(Number(raw)), raw: units(raw) }, numberToWords(Number(raw), raw));
     },
     // ── French (fr). Inputs: the fr golden, FLEURS fr_fr (columns 3 and 4) and probes/fr.txt. ──
     // Each stage of the normalization chain separately (op), with the Lexique membership test as isWord.
