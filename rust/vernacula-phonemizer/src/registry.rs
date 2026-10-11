@@ -33,9 +33,9 @@ use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize.
-pub const LANGUAGES: [&str; 20] = [
+pub const LANGUAGES: [&str; 26] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv",
+    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv",
 ];
 
 /// A language engine, as the registry holds it.
@@ -114,6 +114,24 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "sv" => crate::languages::swedish::swedish::create_swedish()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sr" => crate::languages::serbian::serbian::create_serbian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "hr" => crate::languages::croatian::croatian::create_croatian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "bs" => crate::languages::bosnian::bosnian::create_bosnian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sl" => crate::languages::slovenian::slovenian::create_slovenian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "lt" => crate::languages::lithuanian::lithuanian::create_lithuanian()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "lv" => crate::languages::latvian::latvian::create_latvian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         _ => return None,

@@ -1,0 +1,25 @@
+# Latvian (lv) off-golden probes: synthetic text only, one or more lines per normalize.ts arm and the
+# neighbour it must decline, plus g2p corners.
+Pilsētā ir 29 660 iedzīvotāju un 1 234 567 tūristu, bet 0 123 nē.
+Grāmatā ir 25 lpp. un 1 lpp, 21lpp. un 11 lpp.
+Kosmosa kuģis 2MV-4 №3 un nr.859 un Nr. 5 un № bez skaitļa.
+Tas notika 300. gadā p.m.ē. Nākamais teikums. Vēlāk m.ē. sākās.
+Augļi, dārzeņi u.c. Ābolus u.t.t. un piem. bumbierus, t.i. visu, t.sk. plūmes utt.
+Sanāksme plkst. 10 un u.tml. lietas.
+Tas bija 1885. gada 22. jūnijā un 5. gadsimtā, 20. gados, 10. gadsimtā, 2010. gada.
+Tas bija 200. gadā un 1900. gadā un 10.–12. gs. un 3100.–1550. gadam.
+No 1918.–1920. gadam un 1. janvārī un 21. aprīļa un 3. decembrim.
+Viņš bija 5. vietā un 7. mājās un 3. constructor.
+Cena 5-10 eiro, 1995–96 sezonā, 5,5-7 un A-5.
+Augums 50 % un 21 % un 11 %.
+Cena $5 un 10 € un 3 £ un $1 miljards un 45,46 miljardi USD un $17.37 miljardiem.
+Attālums 5 km, 21 m, 11 cm, 3 mm, 1 kg, 2 g, 5 ha, 500 nm, 3 t.
+Ātrums 90 km/h un 3 m/s un 5 m/sek.
+Platība 10 km² un 3 m³ un x² un 2⁻³.
+Temperatūra 21 °C un 21,5 °C un 0°F un 6500°K un 30°.
+Vērtība ≈5 un ≈ -3 un ±2 un +3 un -4 un −4.
+Ja 2 = 2 un 3 < 4 un 5 > 1 un 6 ÷ 3, tad a == b un x=2.
+Format 4x4 un 6×2 un Rock & Roll.
+Skaitlis 3,14 un 0,001 un 1,00 un 1234567890123456,5.
+Loks, maize, draugs, dievs, Latvija, dzelzs, atgriezt, daudz, Monako, hokejs, Ōsaka.
+Skaitlis 12345678901234567890 un 1000000000 un 007.
