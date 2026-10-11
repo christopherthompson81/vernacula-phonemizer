@@ -4,7 +4,7 @@
 //!   cargo run --release -p fn-diff -- arpabet ../.probe/rust/arpabet.jsonl
 use indexmap::IndexMap;
 use serde_json::Value;
-use vernacula_phonemizer::core::js_string::{JsString, js_number};
+use vernacula_phonemizer::core::js_string::{JsString, js_number, js_number_to_string};
 use vernacula_phonemizer::core::load_manifest::load_json;
 use vernacula_phonemizer::core::load_tsv::load_lines;
 use vernacula_phonemizer::core::load_tsv::{TsvOptions, load_tsv_map};
@@ -1110,6 +1110,98 @@ fn main() {
             let policy = vernacula_phonemizer::languages::ukrainian::roman_ordinals::roman_policy();
             Box::new(move |input| {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
+        "sv-normalize" => {
+            let sv = vernacula_phonemizer::languages::swedish::swedish::create_swedish().unwrap();
+            Box::new(move |input| {
+                let none = || JsString::from("\u{0}none");
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "ordinal" => sv.ordinal(n()).unwrap_or_else(none),
+                    "hundreds" => sv.hundreds_year(n()).unwrap_or_else(none),
+                    op => {
+                        let t = units(&input["text"]);
+                        match op {
+                            "normalize" => sv.normalize(&t),
+                            "initialisms" => sv.normalize_initialisms(&t),
+                            "symbols" => sv.symbols(&t),
+                            _ => JsString::from(sv.is_unreadable(&t).to_string().as_str()),
+                        }
+                    }
+                }
+            })
+        }
+        "sv-g2p" => {
+            use vernacula_phonemizer::languages::swedish::g2p::Compound;
+            let sv = vernacula_phonemizer::languages::swedish::swedish::create_swedish().unwrap();
+            let f = |v: &Value| v.as_f64().unwrap();
+            let opt = |v: Option<f64>| v.map_or("-".to_string(), js_number_to_string);
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => sv.phonemize_word(&w),
+                    "nat" => sv.nativise(&w),
+                    "lex" => {
+                        let e = sv.lexicon_entry(&w).expect("a lexicon key");
+                        let l = e.long_ords.as_ref().map_or("-".to_string(), |l| {
+                            l.iter()
+                                .map(|x| js_number_to_string(*x))
+                                .collect::<Vec<_>>()
+                                .join(",")
+                        });
+                        JsString::from(format!(
+                            "{}|{}|{}|{}|{l}|{}",
+                            e.accent,
+                            opt(e.ord),
+                            e.o_long as u8,
+                            opt(e.sec_ord),
+                            e.sec_vowel_initial as u8
+                        ))
+                    }
+                    _ => {
+                        let ord = js_number(&JsString::from(input["ord"].as_str().unwrap()));
+                        let c = &input["compound"];
+                        let compound = (!c.is_null()).then(|| {
+                            // `new Set(longOrds)`: membership only, so duplicates are harmless.
+                            Compound {
+                                sec_ord: f(&c["secOrd"]),
+                                long_ords: c["longOrds"]
+                                    .as_array()
+                                    .unwrap()
+                                    .iter()
+                                    .map(f)
+                                    .collect(),
+                                sec_vowel_initial: c["secVowelInitial"].as_bool().unwrap_or(false),
+                            }
+                        });
+                        let segs: Vec<JsString> = sv
+                            .segments(
+                                &w,
+                                ord,
+                                input["oLong"].as_bool().unwrap(),
+                                compound.as_ref(),
+                            )
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(format!("/{}", s.vowel as u8).as_str()))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                }
+            })
+        }
+        "sv-numbers" => {
+            let sv = vernacula_phonemizer::languages::swedish::swedish::create_swedish().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = if input["raw"].is_null() {
+                    None
+                } else {
+                    Some(units(&input["raw"]))
+                };
+                sv.number_to_words(n, raw.as_ref())
             })
         }
         "fr-normalize" => {
