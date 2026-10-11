@@ -67,6 +67,18 @@ pub fn try_manifest() -> Result<&'static HindiDef, String> {
     })
 }
 
+/// `loadManifest<HindiDef>(import.meta.url, "<dir>.jsonc")` for a family member whose data lives in
+/// `languages/<dir>/<dir>.jsonc`, loaded once into the caller's cell. Cached only on success.
+pub fn load_family_def(
+    cell: &'static OnceLock<HindiDef>,
+    dir: &str,
+) -> Result<&'static HindiDef, String> {
+    load_once(cell, || {
+        load_manifest(&format!("languages/{dir}"), &format!("{dir}.jsonc"))
+            .map_err(|e| e.to_string())
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

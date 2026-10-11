@@ -1,0 +1,12 @@
+# Awadhi off-golden probes. SYNTHETIC text only. dump.mts also replays probes/hi.txt through awa.
+# the flap: intervocalic, after a long vowel, across a stress mark, before/after a diphthong
+अडा सडक पडोसी गढा गाडी बूढा कडैल पडौरा
+# and what it must decline: after a nasal consonant, after nasalisation, word-initial, geminate, word boundary
+अंडा अँडा डर ढोल अड्डा गोडा डाल
+ड़ ढ़ पड़ा बढ़ा
+# number words through the flap (the wrapper's number() and text())
+18 80 1,800 3.18
+# the sibilant merger, व→w, ऐ/औ diphthongs, the avagraha, ज्ञ
+शेर देश अवधी विशाल बैल कौन रामऽ करऽ ज्ञान
+₹500 ५०% 6:24 बजे
+हम Lucknow गएन।

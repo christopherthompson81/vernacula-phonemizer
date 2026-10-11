@@ -1,0 +1,27 @@
+# Bhojpuri off-golden probes. SYNTHETIC text only. The normalizer and symbol tier are Hindi's, and dump.mts
+# replays probes/hi.txt through bho as well; these lines are the manifest's own corners.
+# avagraha retains the final vowel; without it the schwa deletes
+करऽ आ कर
+देखऽ, खइलऽ।
+ऽ अकेले
+# vowels without length, monophthong ऐ/औ
+बैल कौन किताब पानी
+ऐसन औरत
+# sibilant merger, व/ण/ञ
+देश विशाल गणेश शहर षष्ठी
+ज्ञान विज्ञान यज्ञ
+# ऋ and ृ are the tap
+कृष्ण ऋषि वृत्त कर
+# symbols: % and ₹, stripSymbols
+50% लोग
+₹500 के
+₹ अकेले
+# numbers, decimal, Devanagari digits, ordinals inherited from Hindi
+२१ ३५ ९९ १०० 1,00,000 3.14
+5वाँ दिन, 1ला आदमी
+10:30 बजे
+# Latin and mixed runs
+हम Patna गइलीं
+Rāmā आ São Paulo
+# clause marks
+का हो? हाँ! ठीक बा॥ एक; दू: तीन

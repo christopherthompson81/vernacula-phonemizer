@@ -16,6 +16,7 @@ pub mod jsonc;
 pub mod latin_phones;
 pub mod load_manifest;
 pub mod load_tsv;
+pub mod markers;
 pub mod markup;
 pub mod neural;
 pub mod normalize_symbols;

@@ -1,0 +1,14 @@
+# Maithili off-golden probes. SYNTHETIC text only. dump.mts also replays probes/hi.txt through mai.
+# the udatta ⟨॑⟩ folds to the avagraha and retains the final vowel, mid-sentence and at the end
+अब॑ करल॑ हम जाइत छी।
+क॑ म॑ स॑ न॑ ल॑
+अब॑अब कर॑ल
+॑ अकेले
+म॑थिली मथिली
+# the avagraha itself, ऎ/ऒ short vowels, ऐ/औ
+अऽ अहाँलऽ ऎकरा बैसब दौड़ब
+# U+A8FF ends the word
+कꣿ मꣿथिली
+# symbols, numbers, ordinals and clock inherited from Hindi
+₹500 ₹ अछि 50% ५वाँ १०:१५ बजे
+हम Darbhanga गेलहुँ॥

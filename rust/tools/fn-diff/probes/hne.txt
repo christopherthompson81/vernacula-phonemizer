@@ -1,0 +1,10 @@
+# Chhattisgarhi off-golden probes. SYNTHETIC text only. dump.mts also replays probes/hi.txt through hne.
+# श/ष→s, monophthong ऐ/औ, no finalRules (no əɦə lowering, no अय→ɛj), no ज्ञ postRule
+शहर देश षट गौरव बैल समय नया ज्ञान विज्ञान
+# geminate collapse postRule and its neighbours
+पक्का अच्छा बच्चा सत्तर अद्भुत
+# avagraha is NOT a retention sign here; schwa deletion as Hindi
+करऽ कर लोगन बरोबरी
+# the inherited tier, numbers, clock, Latin
+₹20 50% 3.5 ७वाँ १०:४५ बजे
+मोर नाम Raipur हे।

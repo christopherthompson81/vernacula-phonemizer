@@ -1,0 +1,12 @@
+# Rangpuri off-golden probes. SYNTHETIC text only. dump.mts also replays probes/hi.txt through rkt.
+# deaffrication, voiced aspirates kept, voiceless aspirates kept only word-initially (the (?<!^) post rule)
+काचे गाजोर छाता झाल घर आधाचेर ठीक आठ खलान थाल माथा फल साफ
+# inherent ɔ after schwa deletion; final deletion; geminates
+आगोत आदा आगोन आम कमल पक्का अच्छा
+# ⟨श⟩→ʃ, no length
+आकाश बिष आलु पानी
+# no `symbols`, no `stripSymbols`: the signs are not tokens here, and the tier is Hindi's
+50% ₹20 $5 १०:३० बजे
+# digits, the decimal word दशमिक, ordinals
+२१ ३.५ 1,00,000 ५वाँ
+आम खलान। Rangpur भाषा?
