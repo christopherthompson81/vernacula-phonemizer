@@ -865,6 +865,59 @@ fn main() {
             }
             out
         }),
+        "de-normalize" => {
+            let de = vernacula_phonemizer::languages::german::german::create_german().unwrap();
+            Box::new(move |input| {
+                let t = units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => de.normalize(&t),
+                    "initialisms" => de.normalize_initialisms(&t),
+                    "symbols" => de.symbols(&t),
+                    "years" => de.normalize_years(&t),
+                    _ => JsString::from(de.is_unreadable(&t).to_string().as_str()),
+                }
+            })
+        }
+        "de-g2p" => {
+            let de = vernacula_phonemizer::languages::german::german::create_german().unwrap();
+            Box::new(move |input| {
+                let w = units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "word" => de.phonemize_word(&w),
+                    "segs" => {
+                        let segs: Vec<JsString> = de
+                            .segments(&w)
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}/{}", s.s, s.vowel as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    _ => {
+                        let d = de.decompose(&w);
+                        let kinds: Vec<&str> = d.kinds.iter().map(|k| k.as_str()).collect();
+                        JsString::join(&d.parts, &JsString::from("·")).concat(&JsString::from(
+                            format!("|{}|{}", kinds.join(","), d.stress_part).as_str(),
+                        ))
+                    }
+                }
+            })
+        }
+        "de-numbers" => {
+            let de = vernacula_phonemizer::languages::german::german::create_german().unwrap();
+            Box::new(move |input| {
+                let n = js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let raw = if input["raw"].is_null() {
+                    None
+                } else {
+                    Some(units(&input["raw"]))
+                };
+                de.number_to_words(n, raw.as_ref())
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

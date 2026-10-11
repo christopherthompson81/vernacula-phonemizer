@@ -1,6 +1,7 @@
 pub mod english;
 pub mod english_gb;
 pub mod french;
+pub mod german;
 pub mod greek;
 pub mod hindi;
 pub mod italian;
@@ -39,7 +40,7 @@ mod fraction_guard_tests {
             ("1/2,3/4", "1/2, 3/4"),
             ("1/2.", "1/2 ."),
         ];
-        for lang in ["en", "es", "pt", "fr", "it"] {
+        for lang in ["en", "es", "pt", "fr", "it", "de"] {
             let say = |s: &str| phonemize(s, lang).unwrap();
             let own: &[(&str, &str)] = if lang == "en" { &dot } else { &comma };
             for (input, spaced) in own.iter().chain(shared.iter()) {
