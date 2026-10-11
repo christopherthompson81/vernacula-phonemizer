@@ -531,7 +531,7 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r"({})|([1-9]\d{{0,2}}(?:\.\d{{3}})+|\d+(?:,\d+)?)|([.!?…,;:])",
+            r"({})|([1-9]\d{{0,2}}(?:\.\d{{3}})+(?:,\d+)?|\d+(?:,\d+)?)|([.!?…,;:])",
             *LATIN_RUN
         ),
         "gu",
@@ -919,5 +919,53 @@ mod tests {
             assert_ne!(n(fires), fires, "{fires}");
             assert_eq!(n(declines), declines, "{declines}");
         }
+    }
+
+    /// test/german-1514.test.ts: each input reads as a spelling the engine already reads correctly.
+    #[test]
+    fn the_1514_findings_are_fixed() {
+        use crate::languages::german::g2p::to_segments;
+        use crate::languages::german::normalize::normalize_german;
+        create_german().unwrap();
+        let de = |s: &str| crate::phonemize(s, "de").unwrap();
+        let norm = |s: &str| normalize_german(&js(s)).to_string_lossy();
+        let same = [
+            // 1) a grouped amount keeps its decimal comma
+            ("3.000,50 Euro", "3000,50 Euro"),
+            ("1.000,5", "1000,5"),
+            ("1.000.000,25 Euro", "1000000,25 Euro"),
+            ("1.000, dann", "1000, dann"),
+            // 2) z. B. and u. Ä. match lowercased input
+            ("z. b. das", "z. B. das"),
+            ("z.b. das", "z.B. das"),
+            ("u. ä. mehr", "u. Ä. mehr"),
+            // 3) a denominator of 1 is not a fraction word
+            ("1/1", "1 1"),
+            // 4) 1 Mio. and 1 Mrd. are singular with the article; anything else keeps the plural
+            ("1 Mio. Euro", "eine Million Euro"),
+            ("1 mio. Euro", "eine Million Euro"),
+            ("1 Mrd. Menschen", "eine Milliarde Menschen"),
+            ("das kostet 1 Mio.", "das kostet eine Million."),
+            ("2 Mio. Euro", "2 Millionen Euro"),
+            ("11 Mio. Euro", "11 Millionen Euro"),
+            ("1,1 Mio. Euro", "1,1 Millionen Euro"),
+        ];
+        for (a, b) in same {
+            assert_eq!(de(a), de(b), "{a} vs {b}");
+        }
+        assert_eq!(norm("z. b. das"), norm("z. B. das"));
+        assert_eq!(norm("1/1"), "1/1");
+        assert_eq!(norm("2/1"), "2/1");
+        assert_ne!(norm("1/2"), "1/2");
+        // 5) a non-initial ch with no vowel before it is the ich-laut; a back vowel still gives the ach-laut
+        let phs = |w: &str| {
+            to_segments(&js(w))
+                .iter()
+                .map(|s| s.ph.to_string_lossy())
+                .collect::<Vec<_>>()
+        };
+        assert!(!phs("lchen").contains(&"x".to_string()));
+        assert!(phs("lchen").contains(&"ç".to_string()));
+        assert!(phs("lachen").contains(&"x".to_string()));
     }
 }

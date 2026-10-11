@@ -50,6 +50,10 @@ function ordinalStem(n: number): string | undefined {
  *  read as a consonant cluster plus a phrase break. */
 const DOTTED_ABBREV: Readonly<Record<string, string>> = MANIFEST.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+/** A scale abbreviation after the bare numeral 1 is singular and takes the article: `1 Mio.` is *eine Million*,
+ *  not *eins Millionen* (#1514). */
+const DOTTED_ABBREV_ONE: Readonly<Record<string, string>> = MANIFEST.dottedAbbrevOne;
+const ABBREV_ONE_ALT = Object.keys(DOTTED_ABBREV_ONE).sort((a, b) => b.length - a.length).join("|");
 
 /** ⚠ A UNICODE-AWARE START OF WORD for the abbreviation templates (#1480's shape). JS `\b` is ASCII-only even
  *  under the `u` flag, so after an accented letter it sees a boundary and a table key matched the END of a
@@ -138,10 +142,12 @@ export function normalizeGerman(input: string): string {
     // by mistake.
     s = rewrite(s, /(?<![\p{L}\p{M}\d_])v\.\s?Chr\./giu, "vor Christus");
     s = rewrite(s, /(?<![\p{L}\p{M}\d_])n\.\s?Chr\./giu, "nach Christus");
-    s = rewrite(s, /(?<![\p{L}\p{M}\d_])z\.\s?B\./gu, "zum Beispiel");
+    // ⚠ z. B. and u. Ä. are case-insensitive for the same reason (#1514): `z. b. das` read as two letters and two
+    // phrase breaks. d. h. and u. a. are lowercase in standard spelling and stay as they were.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])z\.\s?B\./giu, "zum Beispiel");
     s = rewrite(s, /(?<![\p{L}\p{M}\d_])d\.\s?h\./gu, "das heißt");
     s = rewrite(s, /(?<![\p{L}\p{M}\d_])u\.\s?a\./gu, "unter anderem");
-    s = rewrite(s, /(?<![\p{L}\p{M}\d_])u\.\s?Ä\./gu, "und Ähnliches");
+    s = rewrite(s, /(?<![\p{L}\p{M}\d_])u\.\s?Ä\./giu, "und Ähnliches");
 
     // 2) ORDINALS. See the file header for how the detector and the two endings were derived. One rule,
     //    two licensing conditions: the FOLLOWING word is a month or Jahrhundert (which alone covers ~100 of
@@ -186,6 +192,16 @@ export function normalizeGerman(input: string): string {
             if (stem === undefined) return whole;
             const ending = prev !== undefined && WEAK_EN.has(prev.toLowerCase()) ? "en" : "e";
             return `${prev ?? ""}${sp ?? ""}${stem}${ending}${sp2}`;
+        });
+
+    // 2c) `1 Mio.` / `1 Mrd.` → the singular with its article, replacing the numeral (#1514). The dot follows
+    //     step 3's rule: consumed when the sentence continues, kept at a phrase end. The numeral must stand
+    //     alone: a decimal (`1,1 Mio.`), a longer number, a fraction or a sign before it keeps the plural path.
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d_.,/+\\-\u2212\u2013\u00b1])1\\s+(${ABBREV_ONE_ALT})\\.(?=(\\s+[\\p{L}\\d])|\\s*(?:[.,;:!?»)]|$))`, "giu"),
+        (m0, ab: string, cont: string | undefined) => {
+            // The miss branch is reachable for the same reason as step 3's (#1122): `i`+`u` widen the fold.
+            const w = DOTTED_ABBREV_ONE[ab.toLowerCase()];
+            return w === undefined ? m0 : cont !== undefined ? w : `${w}.`;
         });
 
     // 3) DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
@@ -292,6 +308,8 @@ export function normalizeGerman(input: string): string {
     //   numerator was not refused either (`3/1/2` read `1/2`).
     s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,)\b(\d{1,3})\/(\d{1,3})\b(?!\s*[/\d]|\.\d|,\d+(?![\d/]))/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
+        // A denominator of 1 is not a fraction word (`1/1` read *ein erstel*, #1514); the fleet declines it too.
+        if (den < 2) return m0;
         if (den === 2) return num === 1 ? "ein halb" : `${numberToWords(num)} halbe`;
         const stem = ordinalStem(den);
         return stem === undefined ? m0 : `${num === 1 ? "ein" : numberToWords(num)} ${stem}el`;

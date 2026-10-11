@@ -61,9 +61,10 @@ function isLong(w: string, i: number): boolean {
     return true; // Vater, gut, Tag, Hof (single C → long)
 }
 
-/** ch after a back vowel a/o/u (incl. au) → ach-laut x; otherwise ich-laut ç (ich, Milch, Bücher). */
+/** ch after a back vowel a/o/u (incl. au) → ach-laut x; otherwise ich-laut ç (ich, Milch, Bücher).
+ *  ⚠ prevVowel is "" when no vowel letter precedes, and `"aou".includes("")` is true (#1476, #1514). */
 function chSound(prevVowel: string): string {
-    return "aou".includes(prevVowel) ? "x" : "ç";
+    return prevVowel !== "" && "aou".includes(prevVowel) ? "x" : "ç";
 }
 
 /** Scan a lowercased German word into IPA segments (no stress; devoicing + r-vocalization applied here). */

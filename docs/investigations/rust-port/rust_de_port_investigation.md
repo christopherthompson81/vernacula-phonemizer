@@ -179,3 +179,72 @@ No TS regex was added or changed, so `csharp/regex-corpus.jsonl` needs no re-ext
 `src/` only).
 
 **Implication.** Done on this machine. New core module: `core/germanic_morphology.rs` (nl and af reuse it when ported).
+
+## Run 7 — 2026-10-11 14:22 (#1514: fixing the Run 5 findings TS-first)
+
+**Question.** Do the five Run 5 findings close in the TS, and which rows move over the golden, FLEURS de_de and the
+probes?
+
+**Changes (TS).** (1) german.ts TOKEN: the grouped arm gains `(?:,\d+)?`. (2) normalize.ts step 1: `z. B.` and
+`u. Ä.` take `i` (d. h. and u. a. are lowercase in standard spelling and stay as they were). (3) fractions: a
+denominator below 2 declines, as en/es/pt/it/fr already do. (4) a new step 2c reads a bare `1` before `Mio.`/`Mrd.`
+as the singular with the article, from a new german.jsonc table `dottedAbbrevOne`. The dot follows step 3's rule, and
+a digit, `.`, `,`, `/`, a sign or a letter before the `1` declines it. (5) chSound: `""` is not a back vowel.
+
+**Command.** `npx tsx .probe/de/fix1514.mts` (synthetic inputs), `npx tsx tools/gen_parity_goldens.mts de`,
+`npm run check:goldens`. Then the de fn-diff arms (de-normalize, de-g2p, de-numbers, phonemize-sync/-best with
+LANGS=de) were dumped from HEAD's TS and from the fixed TS, and diffed row by row. probes/de.txt gained two synthetic
+lines first, so both dumps share their inputs.
+
+**Raw finding.**
+```
+gen_parity_goldens de: csharp/goldens/de.tsv unchanged (git diff empty)
+check:goldens: fresh, 189 languages, 36495 rows, 0 stale
+de-normalize:  37853 rows; normalize op moved 7 fleurs + 4 probe (+33 downstream stages of those 11)
+de-g2p:        300207 rows; 22 word + 22 segs moved. Every one is a consonant + ⟨ch⟩ with no vowel before it, from
+               the synthetic 1-3 letter strings and the probe's `lchen`/`rchen` (x → ç). No lexicon word, no FLEURS word.
+de-numbers:    0 moved
+phonemize-sync/-best de: 12 moved each = the same 7 FLEURS + 5 probe rows
+```
+All 7 FLEURS rows are item 2: a lowercased `z. b.` (5) or `z.b.` (2) mid-sentence that read *t͡s . p .* and now reads
+*zum Beispiel*. Item 1 reads `3.000,50` as *dreitausend Komma fünf null*, the same digit-by-digit decimal the
+ungrouped `3000,50` already gets. Item 5 confirms Run 5's "latent": nothing real moved. One side effect: a
+sentence-initial `Z. B.` used to reach the initialism pass (*t͡sɛt beː*) and now reads *zum Beispiel*, as it should.
+
+Noted, not fixed (outside the issue): `21 Mio.,` keeps its dot before the comma (*21 Millionen.,*), because step 3's
+second arm keeps a dot before any punctuation.
+
+**Implication.** Mirror into C# and Rust, with tests in all three, each proven by reverting its fix. TS tests
+(test/german-1514.test.ts, 5): each of the five fixes reverted alone fails exactly its own test.
+
+## Run 8 — 2026-10-11 15:19 (#1514: the C# and Rust mirrors, and every gate)
+
+**Changes.** C# German.cs/G2p.cs/Normalize.cs/Manifest.cs and Rust german.rs/g2p.rs/normalize.rs/manifest.rs mirror
+the five TS changes. The new 2c pattern keeps the TS code points (− – ± written as escapes that yield the characters,
+as in the TS template). C# step 2c takes the TS miss branch (`TryGetValue`), not the indexer the two step-3 arms
+use. In Rust, `ch_sound` drops `includes_or_empty` for `is_some_and`. The helper's other two callers stay: one sits
+behind `i + 2 < n` and the other behind `nx.is_some()`, so neither can see the empty letter. Tests:
+csharp/…Tests/German1514Tests.cs (16 cases) and `the_1514_findings_are_fixed` in german.rs.
+
+**Command and raw finding.**
+```
+revert each fix alone (scratch revert.py), C# --filter German1514: item 1 → 3 fail, 2 → 2, 3 → 1, 4 → 4, 5 → 1
+revert each fix alone, cargo test the_1514: each of 1-5 fails on its own assertion
+                (3.000,50 Euro | z. b. das | 1/1 | 1 Mio. Euro | !lchen contains x)
+fn-diff replays of the fixed-TS dumps: de-normalize 37853 / de-g2p 300207 / de-numbers 26065 /
+                phonemize-sync 4009 / phonemize-best 4009 identical, 0 DIFFER each
+extract_regexes: 2 corpus rows change (the z. B. and u. Ä. flags gu → giu). TOKEN and 2c are built at runtime,
+                so they are outside the corpus; the fn-diff dumps cover them.
+npm run typecheck: clean
+npm test: 355 files, 6810 passed, 5 skipped. A first run alongside the C# suite timed out two neural-English
+          tests at 5 s (en-neural-prepass, foreign-runs); both pass alone and in the clean rerun. Load, not German.
+check:goldens: fresh, 189 languages, 36495 rows, 0 stale
+dotnet test (full): 7495 passed, 0 failed
+csharp/tools/parity: 189 languages byte-identical, 36495 rows, 0 differ
+csharp/tools/regex-diff: 144898 identical, 0 DIFFER, 0 refused
+cargo fmt --check: clean. cargo test: 187 + 1 passed
+cargo run -p parity: 50 languages, all identical except mag 199/200 (the known Arabic row)
+cargo run -p regex-diff: 144898 identical, 0 DIFFER, 0 refused
+```
+
+**Implication.** Every item is fixed. No golden moved in any language. On FLEURS de_de, 7 rows move, all item 2.

@@ -185,6 +185,10 @@
         "bd": "Band", "s": "Seite", "vgl": "vergleiche"
     },
 
+    // After a bare `1` the scale abbreviations are singular and take the article (#1514): `1 Mio.` is
+    // *eine Million*, not *eins Millionen*. The rule replaces the numeral too.
+    "dottedAbbrevOne": { "mio": "eine Million", "mrd": "eine Milliarde" },
+
     // German letter names, for initialisms: USA is [uː ʔɛs ʔaː], not the word *usa*.
     "letterNames": {
         "a": "a", "b": "be", "c": "ze", "d": "de", "e": "e", "f": "eff", "g": "ge", "h": "ha", "i": "i",

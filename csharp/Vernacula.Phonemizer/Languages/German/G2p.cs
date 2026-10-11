@@ -70,12 +70,10 @@ public static class G2p
     }
 
     /** ch after a back vowel a/o/u (incl. au) → ach-laut x; otherwise ich-laut ç (ich, Milch, Bücher). */
-    // ⚠ NO EMPTY GUARD, DELIBERATELY. `prevVowel` is "" until the scan has seen a vowel, and JS
-    // `"aou".includes("")` is TRUE — so a ⟨ch⟩ with no preceding vowel takes the ach-laut. .NET's
-    // `Contains("")` is true as well, so the plain call reproduces it; adding a `!= ""` guard would silently
-    // flip those words to ç.
+    // ⚠ THE EMPTY GUARD IS LOAD-BEARING (#1514). `prevVowel` is "" until the scan has seen a vowel, and
+    // `Contains("")` is true, so without it a ⟨ch⟩ with no preceding vowel took the ach-laut.
     private static string ChSound(string prevVowel) =>
-        "aou".Contains(prevVowel, StringComparison.Ordinal) ? "x" : "ç";
+        prevVowel != "" && "aou".Contains(prevVowel, StringComparison.Ordinal) ? "x" : "ç";
 
     /**
      * Scan a lowercased German word into IPA segments (no stress; devoicing + r-vocalization applied here).

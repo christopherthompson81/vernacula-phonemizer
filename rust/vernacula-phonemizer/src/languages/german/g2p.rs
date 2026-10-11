@@ -99,9 +99,9 @@ fn is_long(word: &JsString, i: usize) -> bool {
     cons_run(w, i + 1) < 2
 }
 
-/// `chSound(prevVowel)`: ⚠ the ach-laut also for an EMPTY previous vowel (`"aou".includes("")`).
+/// `chSound(prevVowel)`: the ach-laut after a/o/u only; no previous vowel is the ich-laut (#1514).
 fn ch_sound(prev_vowel: Option<u16>) -> &'static str {
-    if includes_or_empty("aou", prev_vowel) {
+    if prev_vowel.is_some_and(|u| has("aou", u)) {
         "x"
     } else {
         "ç"
