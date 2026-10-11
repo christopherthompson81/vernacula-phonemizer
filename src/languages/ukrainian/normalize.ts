@@ -182,11 +182,16 @@ export function normalizeUkrainianInitialisms(text: string): string {
 // ---------------------------------------------------------------------------------------------------
 
 /** Preposition → the `ordinals.endings` case it governs (ukrainian.jsonc `clock`), resolved to the index
- *  `ordinalForms` returns. `FEM_NOM` is the default when no preposition governs. */
-const HOUR_CASE: Readonly<Record<string, number>> = Object.fromEntries(
+ *  `ordinalForms` returns. `FEM_NOM` is the default when no preposition governs.
+ *  ⚠ A `Map`, NOT A PLAIN OBJECT (#1525): the key is whatever word precedes the time, and a plain object's
+ *  lookup finds INHERITED members — `HOUR_CASE["constructor"]` was the Object function, never `undefined`, so
+ *  the `?? FEM_NOM` default did not apply and `Constructor 10:30` was left unread. */
+const HOUR_CASE: ReadonlyMap<string, number> = new Map(
     Object.entries(DEF.clock.prepositionCase).map(([prep, name]) => [prep, caseIndex(name)]),
 );
 const FEM_NOM = caseIndex(DEF.clock.defaultCase);
+/** The genitive plural a fraction's denominator takes after any numerator not ending in 1 (step 10). */
+const GEN_PL = caseIndex("genPl");
 
 // ⚠ THE METRE AND THE SQUARE ADJECTIVE COME FROM THE SYMBOL TIER'S OWN DATA, not from a second copy here.
 // Both rules below hold words the tier already declares (`symbols.units.м`, `symbols.exponentWords.squared`),
@@ -208,6 +213,24 @@ const RATE = DEF.symbolTier.rateDenominators;
 /** Abbreviations whose dot is NOT a sentence end (ukrainian.jsonc `dottedAbbrev`). */
 const DOTTED_ABBREV = DEF.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+/** The abbreviations that stand BEFORE what they abbreviate (`див. Петренко`, `стор. 5`), so a capital after
+ *  the dot is their object and never a new sentence (ukrainian.jsonc `preposedAbbrev`). The rest FOLLOW a
+ *  number or a list (`1990 р.`, `та ін.`) and can end one. */
+const PREPOSED_ABBREV: ReadonlySet<string> = new Set(DEF.preposedAbbrev);
+
+/** Does the dot after an abbreviation also end the sentence? The CASE of what follows decides, as for the
+ *  multi-dot rule (step 1) and Russian's (#1513): an uppercase letter ⇒ yes. Tested in code, not in the
+ *  pattern — the patterns carry `i`, under which `\p{Lu}` matches lowercase too. */
+const startsSentence = (next: string): boolean => /\p{Lu}/u.test(next);
+
+/** A cardinal agreeing with a FEMININE noun (the elided *частина*, *хвилина*): only 1 and 2 have a feminine
+ *  (`numbers.feminine`), and only the last element agrees, so двадцять один is двадцять одна. `$`-anchored, so
+ *  одинадцять is untouched. ⚠ THE MASCULINE FORMS ARE `numbers.units[1]` AND `[2]`, not copies. */
+function feminine(words: string): string {
+    return words
+        .replace(new RegExp(`${DEF.numbers.units[1]!}$`, "u"), DEF.numbers.feminine.one)
+        .replace(new RegExp(`${DEF.numbers.units[2]!}$`, "u"), DEF.numbers.feminine.two);
+}
 
 /**
  * The multi-word dotted abbreviations, compiled from `multiDotAbbrev` IN MANIFEST ORDER — `до н. е.` must be
@@ -296,16 +319,26 @@ export function normalizeUkrainian(input: string): string {
 
     // 5) DOTTED ABBREVIATIONS. The dot is consumed before a following word or a comma, so it cannot become
     //    a phrase break; at a real sentence end it is kept. Runs AFTER step 1 so `н. е.` is already gone.
-    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
-        (m0, ab: string, sp: string) => {
+    //    ⚠ A CAPITAL AFTER THE DOT IS A NEW SENTENCE (#1525): `1990 р. Потім` lost its full stop, so року and
+    //    потім ran together with no pause. The dot is kept there, as step 1 keeps its final dot — except
+    //    after a PREPOSED abbreviation, whose capital is its own object (`див. Петренко`).
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(\\s+)(?=([\\p{L}\\d(]))`, "giu"),
+        (m0, ab: string, sp: string, next: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
-            const w = DOTTED_ABBREV[ab.toLowerCase()];
-            return w === undefined ? m0 : `${w}${sp}`;
+            const key = ab.toLowerCase();
+            const w = DOTTED_ABBREV[key];
+            if (w === undefined) return m0;
+            return !PREPOSED_ABBREV.has(key) && startsSentence(next) ? `${w}.${sp}` : `${w}${sp}`;
         });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
-        (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
+        (m0, ab: string) => {
+            // ⚠ THE MISS BRANCH IS REACHABLE (#1122) here too — this arm was the one of the three without
+            // the guard (#1525), so `ᲁив., далі` (U+1C81, which `iu` folds onto д) printed `undefined`.
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : w;
+        });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
         (m0, ab: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
@@ -316,11 +349,12 @@ export function normalizeUkrainian(input: string): string {
         });
 
     // 6) UNITS the shared symbol tier cannot express.
-    //    · `м` is deliberately NOT declared as a shared unit: the tier's trailing guard is
-    //      `(?![\p{L}\p{M}])`, and the Ukrainian APOSTROPHE is neither, so `41 м'яч` ("41 balls") would
-    //      have become *сорок один метр'яч*. Handled here with an apostrophe-aware guard instead.
-    //      Reported as a core limitation rather than patched — see the commit message.
-    //    · `м/с` follows from the same exclusion: with м out of `units`, the rate cannot compose there.
+    //    · A BARE `м` after a number is read HERE, with an apostrophe-aware guard, so `41 м'яч` ("41 balls")
+    //      is not a unit (the Ukrainian APOSTROPHE is neither a letter nor a mark). ⚠ `м` IS declared in `symbolTier.units` (this rule's METRE forms are read
+    //      from it, and the tier reads `3 м²` as *три квадратні метри* from it). This rule runs first and
+    //      leaves `м` before `²`, `³` or `/` to the later rules (#1525: this comment used to say `м` was not
+    //      declared). `41 м'яч` stays *сорок один м'яч*.
+    //    · `м/с` is composed here, with the metre in the count form this rule picks.
     //    · `миль/год` has a SPELLED-OUT numerator, which the tier (abbreviation keys only) cannot match.
     //    Units run BEFORE the clock and before the decimal fold, because both destroy number adjacency.
     s = rewrite(s, /(\d+(?:[.,]\d+)?)\s?м\/с(?![\p{L}\p{M}])/gu,
@@ -345,16 +379,22 @@ export function normalizeUkrainian(input: string): string {
     //    The preceding word is read off the text rather than captured, so the lookbehind stays simple.
     //    Two-digit minutes are REQUIRED, which is what keeps the corpus's scores and ratios (`5:3`, `3:2`,
     //    `26 - 00`) out of this rule.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])/gu,
+    //    ⚠ THE TRAILING GUARD REFUSES `.`/`,` ONLY WITH A DIGIT BEYOND IT (#1525) — a decimal or a dotted
+    //    continuation (`6:30,5`, `6:30.5`). Refusing any `.` or `,` left every time before a full stop or a
+    //    comma unread (`о 6:30.` was *шість , тридцять*), 3 of the corpus's 25 clock texts.
+    //    The MINUTES agree with the elided *хвилина*, which is FEMININE: 1:01 is першій одна, 3:22 третя
+    //    двадцять дві (#1525; the same reading Russian takes, #1513). Spelled here because the number path
+    //    reads a bare numeral as masculine. A leading zero is not read (`1:01` is першій одна, not нуль одна).
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)/gu,
         (whole: string, h: string, min: string, offset: number, full: string) => {
             const hv = Number(h), mv = Number(min);
             if (hv === 0) return whole; // *нульова година* is not said; leave it
             const prev = /([\p{L}\p{M}']+)\s+$/u.exec(full.slice(0, offset))?.[1]?.toLowerCase();
-            const idx = (prev !== undefined ? HOUR_CASE[prev] : undefined) ?? FEM_NOM;
+            const idx = (prev !== undefined ? HOUR_CASE.get(prev) : undefined) ?? FEM_NOM;
             const forms = ordinalForms(hv);
             const head = forms[idx];
             if (head === undefined) return whole;
-            return mv === 0 ? head : `${head} ${mv}`;
+            return mv === 0 ? head : `${head} ${feminine(cardinal(mv))}`;
         });
 
     // 8) SIGNS. `+30°C` lost its sign entirely (the ° rule above has already made it `+30 градусів …`).
@@ -406,6 +446,10 @@ export function normalizeUkrainian(input: string): string {
     //     ⚠ THE FEMININE 1 AND 2 ARE `numbers.feminine`, the pair the magnitude compositor already uses for
     //     the feminine тисяча (одна тисяча, дві тисячі) — and the masculine forms they replace are
     //     `numbers.units[1]` and `[2]`. This rule held its own copies of all four.
+    //     ⚠ THE DENOMINATOR TAKES THE NUMERATOR'S COUNT (#1525): a numerator ending in 1 (not 11) keeps the
+    //     feminine nominative singular, every other takes the GENITIVE PLURAL — дві третіх, п'ять восьмих,
+    //     двадцять одна сота (the norm's own example: «дві третіх гектара»). It was always the singular:
+    //     *дві третя*, *п'ять восьма*.
     // ⚠ THE TWO GUARDS ARE MIRRORS (#1495; as ur/cmn, #1477). Each side refuses a digit or `/`, and a `,` or `.`
     //   with a digit beyond it — `,` is this language's decimal, and the engine reads `.` as one too. A `,`
     //   between two fractions is a list separator, so `1/2,3/4` reads both; any other `,` beside a digit is the
@@ -413,12 +457,9 @@ export function normalizeUkrainian(input: string): string {
     //   out of the chain.
     s = rewrite(s, /(?<![\d\p{L}/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/\p{L}]|\.\d|,\d+(?![\d/]))/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
-        const fem = ordinalForms(den)[FEM_NOM];
-        if (fem === undefined) return whole;
-        const numWord = cardinal(num)
-            .replace(new RegExp(`${DEF.numbers.units[1]!}$`, "u"), DEF.numbers.feminine.one)
-            .replace(new RegExp(`${DEF.numbers.units[2]!}$`, "u"), DEF.numbers.feminine.two);
-        return `${numWord} ${fem}`;
+        const denWord = ordinalForms(den)[slavicCountForm(num) === 0 ? FEM_NOM : GEN_PL];
+        if (denWord === undefined) return whole;
+        return `${feminine(cardinal(num))} ${denWord}`;
     });
 
     // 11) DOT DECIMALS → the comma form the engine's number token reads. Narrow ON PURPOSE (see header):

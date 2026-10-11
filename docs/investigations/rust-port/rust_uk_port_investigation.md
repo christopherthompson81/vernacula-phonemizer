@@ -208,3 +208,88 @@ th,ru,de phonemize-sync` (their goldens, FLEURS and probes) replayed with `uk` r
 
 **Implication.** Ukrainian is done by the checklist, with no port-pending rows. The 68 MB cross-language dump
 was deleted after the replay.
+
+## Run 7 — 2026-10-11 15:00 (fixing the Run 5 findings, #1525)
+
+**Question.** Which of the seven Run 5 findings (#1525) can be fixed TS-first, and what does each fix move?
+
+**Command.** `npx tsx .probe/uk/check.mts <synthetic inputs>` before and after each edit to `normalize.ts`;
+`npx tsx tools/gen_parity_goldens.mts uk`; a FLEURS before/after diff (`.probe/uk/fleurs.mts`: HEAD's
+`normalizeUkrainian` against the edited one over the 1,925 distinct uk_ua column-3 texts).
+
+**Raw finding (before → after, synthetic text):**
+1. Clock before `.`/`,`: `Це почалося о 6:30.` → `… о 6:30.` (*шість , тридцять*) → `… о шостій тридцять.`.
+   Guard `(?![\d:.,])` → `(?![\d:]|[.,]\d)`; `о 6:30,5` and `о 6:30.5` still decline (unchanged output).
+2. Abbreviation before a capital: `1990 р. Потім` → `1990 року Потім` → `1990 року. Потім` (the ` . ` pause is
+   in the phonemes). `1990 р. потім` → `1990 року потім` (unchanged). The capital test is in code (`\p{Lu}`
+   on the lookahead letter), as in Russian (#1513), because the pattern carries `i`. A new manifest list
+   `preposedAbbrev: ["див", "стор"]` keeps `див. Петренко` → `дивись Петренко`: these two precede their
+   object. Not taken: a capital single-letter `Р.` before a name is still read року (an initial); the issue
+   does not list it, and 0 FLEURS rows have it.
+3. Fractions: `2/3` дві третя → **дві третіх**, `5/8` п'ять восьма → п'ять восьмих, `22/5` → двадцять дві
+   п'ятих, `11/5` → одинадцять п'ятих; `1/5` одна п'ята, `21/100` двадцять одна сота unchanged. The issue
+   text suggested *дві треті* (nom. pl.) for 2–4; Ukrainian school grammars give the genitive plural for every
+   numerator not ending in 1 (their example: «дві третіх гектара»), the same choice Russian took, so `genPl`
+   is used. The nominative plural is a real variant; not chosen.
+4. #1122 guard on the `,;:` arm: `ᲁив., далі` → `undefined, далі` → `ᲁив., далі`; `Див. ᲃтор., далі` →
+   `дивись ᲃтор., далі`. C# had no guard on any of the three arms (`DOTTED_ABBREV[...]` would throw on a
+   folded miss); all three now use `TryGetValue`.
+5. `constructor`: `HOUR_CASE` is now a `Map`. `Constructor 10:30` → unchanged → `Constructor десята тридцять`
+   (`toString 10:30` likewise). Rust had a special `Some("constructor") => return whole` arm reproducing the
+   bug; removed. C# was already correct (a dictionary).
+6. Feminine minutes (marked "needs a native speaker"): taken, because *хвилина* is feminine and Russian took
+   the same reading (#1513). `О 1:01` → `О першій 1` (*один*) → `О першій одна`; `3:02` → `третя дві`;
+   `о 20:21` → `о двадцятій двадцять одна`; `11:12` → `дванадцять` (not a 2). The minutes are now spelled
+   in the normalizer (`feminine(cardinal(mv))`) instead of left as a digit for the number path. Declined: the
+   leading zero (`1:01` could be *нуль одна*); that needs a native reader and isn't a gender question.
+7. Stale comment: rewritten in `ukrainian.ts` (SYMBOLS docstring) and `normalize.ts` step 6, which said the
+   same thing. `м` is declared in `symbolTier.units`, and the tier's own trailing guard rejects `'’ʼ` now
+   (core/normalizeSymbols.ts). Output unchanged: `41 м'яч` → `… sɔrɔk ɔdɪn mjat͡ʃ .`, `3 м²` → `… kʋadratʲnʲi
+   mɛtrɪ .`.
+
+- Golden: `gen_parity_goldens.mts uk` moves **0 rows**. The golden's only clock texts are `Об 11:20` and
+  `Близько 11:29`, mid-sentence, and their spelled minutes (двадцять) read the same as the digit did.
+- FLEURS (normalizer output): **10 of 1,925 texts change**. 7 are the minutes spelled as words, mid-sentence
+  (`о восьмій 46` → `о восьмій сорок шість`), and phonemize identically. The other 3 are finding 1's sentence-
+  final times (`… до 07:30.`, `… о 23:35.`, `… о 20:30.`), which now read as times. 0 texts reach findings
+  2–5 (as Run 5 counted).
+
+**Implication.** Every finding fixed or declined with a reason, except the leading zero in item 6 (declined).
+Next: mirror into C# and Rust and run the gates.
+
+## Run 8 — 2026-10-11 15:40 (mirrors and gates)
+
+**Question.** Do C# and Rust match the fixed TS, and is every gate green?
+
+**Command.** `dotnet test csharp/Vernacula.Phonemizer.slnx` (full); new `probes/uk.txt` lines for #1525; `npx tsx
+rust/tools/fn-diff/dump.mts uk-normalize` and `LANGS=uk … phonemize-sync`, replayed with `./target/release/
+fn-diff`; `cargo test --release` for ukrainian.
+
+**Raw finding.**
+- C#: 7492 passed, 0 failed (full suite; 6 new `UkrainianPortFindingsTests`).
+- fn-diff `uk-normalize`: 31926 identical, 0 DIFFER (fleurs 7516, probe 158, synthetic 7714).
+  `phonemize-sync` (uk): 3950 identical, 0 DIFFER.
+- Rust ukrainian tests: 5 passed (the old one updated: `О 20:30 і з 6:30.` and `2/3`; a new `port_findings_1525`).
+- Each new TS test fails with HEAD's `normalize.ts` swapped back in (6 of 6 failed), and passes with the fix.
+
+## Run 9 — 2026-10-11 16:10 (rebased onto main with the el/ko/ru/th/de fixes; every gate)
+
+**Question.** After rebasing onto main (which now has the ru fix #1513, adding Ukrainian letter folds to the
+*Russian* engine), is anything shared or broken?
+
+**Command.** `git rebase origin/main` (the one conflict was the generated `csharp/regex-corpus.jsonl`,
+regenerated with `npx tsx tools/extract_regexes.mts`: 2390 patterns); `npm run typecheck`, `npm test`, `npm
+run check:goldens`; `dotnet test csharp/Vernacula.Phonemizer.slnx`; `dotnet run --project csharp/tools/parity`;
+`cargo fmt --check`, `cargo test --release`, `cargo run --release -p parity`, `-p regex-diff`; fn-diff
+`uk-normalize` again.
+
+**Raw finding.**
+- No overlap: #1513 folds ї є ґ inside `src/languages/russian/`; nothing in `ukrainian/` reads it, and uk does not
+  route text to ru.
+- TS: 6845 passed, 5 skipped (360 files). Goldens fresh: 189 languages, 36,495 rows, 0 stale.
+- C#: 7528 passed, 0 failed (full). C# parity: 189 languages byte-identical, 36,495 rows.
+- Rust: 198 + 1 tests pass; fmt clean. Parity: every language identical except the known mag 199/200
+  (Arabic). uk 200/200. regex-diff: 145,096 identical, 0 DIFFER, 0 refused. fn-diff uk-normalize: 31,926
+  identical, 0 DIFFER.
+
+**Implication.** Ready for the PR.

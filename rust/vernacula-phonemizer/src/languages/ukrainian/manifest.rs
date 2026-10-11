@@ -159,6 +159,8 @@ pub struct UkrainianManifest {
     pub degree: CountForms,
     pub temperature_scales: IndexMap<String, String>,
     pub dotted_abbrev: IndexMap<String, String>,
+    /// The `dotted_abbrev` keys that precede their object, so a capital after the dot is no sentence end.
+    pub preposed_abbrev: Vec<String>,
     pub multi_dot_abbrev: Vec<MultiDot>,
     pub number_sign: String,
     pub range_word: String,

@@ -56,6 +56,8 @@ export interface UkrainianManifest {
     degree: CountForms;
     temperatureScales: Record<string, string>;
     dottedAbbrev: Record<string, string>;
+    /** The `dottedAbbrev` keys that precede their object, so a capital after the dot is no sentence end. */
+    preposedAbbrev: string[];
     /** ⚠ ORDERED — `до н. е.` must precede `н. е.` or the longer reading is unreachable. */
     multiDotAbbrev: { written: string; reading: string }[];
     numberSign: string;

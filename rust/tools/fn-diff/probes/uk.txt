@@ -96,3 +96,9 @@
 # reading findings (Run 5): the #1122 fold miss in the comma arm, Object.prototype in the clock lookup
 Див. \u{1C83}тор., далі і \u{1C81}ив.; кінець.
 Constructor 10:30 і constructor 9:15.
+# #1525 fixes: a clock before `.`/`,` (and the decimal it must still decline), an abbreviation before a capital,
+# fraction count agreement, feminine minutes
+Це почалося о 6:30. Потім о 7:45, і о 6:30,5 та 6:30.5.
+Це сталося у 1990 р. Потім у 1991 р. потім, та ін. Далі див. Петренко і стор. Перша.
+Це 2/3, 5/8, 22/5, 11/5, 1/5, 21/100, 3/4 і 12/7.
+О 1:01, о 3:02, о 20:21, о 11:12, о 22:22 і toString 10:30.

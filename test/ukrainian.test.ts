@@ -152,12 +152,12 @@ describe("Ukrainian text normalization", () => {
     });
 
     test("clock: a feminine ordinal in the case the preposition governs (×18)", () => {
-        expect(normalizeUkrainian("о 20:30")).toBe("о двадцятій 30"); // locative
-        expect(normalizeUkrainian("Об 11:20")).toBe("Об одинадцятій 20");
-        expect(normalizeUkrainian("з 06:30 до 07:30")).toBe("з шостої 30 до сьомої 30"); // genitive
+        expect(normalizeUkrainian("о 20:30")).toBe("о двадцятій тридцять"); // locative
+        expect(normalizeUkrainian("Об 11:20")).toBe("Об одинадцятій двадцять");
+        expect(normalizeUkrainian("з 06:30 до 07:30")).toBe("з шостої тридцять до сьомої тридцять"); // genitive
         expect(normalizeUkrainian("Між 22:00 та 23:00")).toBe("Між двадцять другою та двадцять третя"); // instr
         expect(normalizeUkrainian("о 12:00 GMT")).toBe("о дванадцятій GMT"); // :00 ⇒ hour alone
-        expect(normalizeUkrainian("Рівно о 8:46 ранку")).toBe("Рівно о восьмій 46 ранку");
+        expect(normalizeUkrainian("Рівно о 8:46 ранку")).toBe("Рівно о восьмій сорок шість ранку");
     });
 
     test("units: Cyrillic abbreviations, rates, exponents and the кв. square (×35)", () => {

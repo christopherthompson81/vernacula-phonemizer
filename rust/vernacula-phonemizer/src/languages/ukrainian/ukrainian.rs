@@ -308,13 +308,35 @@ mod tests {
             n("У 1970-х роках, 3-х дітей і 5-го."),
             "У тисяча дев'ятсот сімдесятих роках, трьох дітей і п'ятого."
         );
-        // The second time is followed by `.` and is left as written (investigation Run 5, finding 7).
-        assert_eq!(n("О 20:30 і з 6:30."), "О двадцятій 30 і з 6:30.");
+        // A time before `.` is read too, with feminine minutes (#1525).
+        assert_eq!(
+            n("О 20:30 і з 6:30."),
+            "О двадцятій тридцять і з шостої тридцять."
+        );
         assert_eq!(
             n("Це сталося у 300 році до н. е."),
             "Це сталося у 300 році до нашої ери."
         );
-        assert_eq!(n("Це 1/5 і 2/3."), "Це одна п'ята і дві третя.");
+        assert_eq!(n("Це 1/5 і 2/3."), "Це одна п'ята і дві третіх.");
+    }
+
+    /// #1525: each finding, one assertion per fix (synthetic text; values from `.probe/uk/check.mts`).
+    #[test]
+    fn port_findings_1525() {
+        let e = create_ukrainian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(n("о 6:30, потім"), "о шостій тридцять, потім");
+        assert_eq!(n("о 6:30,5"), "о 6:30,5");
+        assert_eq!(n("1990 р. Потім"), "1990 року. Потім");
+        assert_eq!(n("1990 р. потім"), "1990 року потім");
+        assert_eq!(n("див. Петренко"), "дивись Петренко");
+        assert_eq!(n("5/8"), "п'ять восьмих");
+        assert_eq!(n("11/5"), "одинадцять п'ятих");
+        assert_eq!(n("21/100"), "двадцять одна сота");
+        assert_eq!(n("\u{1C81}ив., далі"), "\u{1C81}ив., далі");
+        assert_eq!(n("Constructor 10:30"), "Constructor десята тридцять");
+        assert_eq!(n("о 20:21"), "о двадцятій двадцять одна");
+        assert_eq!(n("3:02"), "третя дві");
     }
 
     #[test]

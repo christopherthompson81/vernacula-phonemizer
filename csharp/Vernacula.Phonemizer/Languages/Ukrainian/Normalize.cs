@@ -135,6 +135,8 @@ public static class Normalize
     private static readonly IReadOnlyDictionary<string, int> HOUR_CASE =
         DEF.Clock.PrepositionCase.ToDictionary(kv => kv.Key, kv => CaseIndex(kv.Value), StringComparer.Ordinal);
     private static readonly int FEM_NOM = CaseIndex(DEF.Clock.DefaultCase);
+    /** The genitive plural a fraction's denominator takes after any numerator not ending in 1 (step 10). */
+    private static readonly int GEN_PL = CaseIndex("genPl");
 
     // ⚠ THE METRE AND THE SQUARE ADJECTIVE COME FROM THE SYMBOL TIER'S OWN DATA, not from a second copy here.
     // Both rules below hold words the tier already declares (`symbols.units.м`, `symbols.exponentWords.squared`),
@@ -157,6 +159,13 @@ public static class Normalize
      *  purpose — it is an ADJECTIVE that must agree with the following number, so it has its own rule. */
     private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
+    /** The abbreviations that stand BEFORE what they abbreviate (`див. Петренко`), so a capital after the dot
+     *  is their object and never a new sentence (ukrainian.jsonc `preposedAbbrev`; #1525). */
+    private static readonly HashSet<string> PREPOSED_ABBREV = new(DEF.PreposedAbbrev, StringComparer.Ordinal);
+    /** Does the letter after an abbreviation's dot start a new sentence? Uppercase means yes (#1525). Tested in
+     *  code, not in the pattern: the patterns carry `i`, under which `\p{Lu}` matches lowercase too. */
+    private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "u");
+    private static bool StartsSentence(string next) => UPPER.IsMatch(next);
 
     private const string NOT_LETTER = "(?![\\p{L}\\p{M}'\u2019\u02bc])";
 
@@ -188,7 +197,7 @@ public static class Normalize
     private static readonly JsRe SQ_KM = JsRegex.Compile("(\\d)\\s?кв\\.\\s?км(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe SQ_MILES = JsRegex.Compile("(\\d)\\s?кв\\.\\s?миль(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe SUFFIXED = JsRegex.Compile($"(?<![\\d.,])(\\d+)\\s?-\\s?([а-яіїєґ]{{1,3}}){NOT_LETTER}", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d(])", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(\\s+)(?=([\\p{{L}}\\d(]))", "giu");
     private static readonly JsRe ABBREV_COMMA = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*[,;:])", "giu");
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*(?:[.!?\u00bb)]|$))", "giu");
     private static readonly JsRe M_S = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?м\\/с(?![\\p{L}\\p{M}])", "gu");
@@ -197,7 +206,7 @@ public static class Normalize
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?\u00b0\\s?[CСc](?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_F = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?\u00b0\\s?[FФf](?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?\u00b0", "gu");
-    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])", "gu");
+    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:]|[.,]\\d)", "gu");
     private static readonly JsRe PREV_WORD = JsRegex.Compile("([\\p{L}\\p{M}']+)\\s+$", "u");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-\u2212\u2013](\\d)", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("\u00b1", "gu");
@@ -218,6 +227,9 @@ public static class Normalize
     // and `[2]`. The fraction rule held its own copies of all four.
     private static readonly JsRe ODIN_FINAL = JsRegex.Compile($"{Manifest.DEF.Numbers.Units[1]}$", "u");
     private static readonly JsRe DVA_FINAL = JsRegex.Compile($"{Manifest.DEF.Numbers.Units[2]}$", "u");
+    /** A cardinal agreeing with a FEMININE noun (the elided частина, хвилина): only the last element agrees. */
+    private static string Feminine(string words) =>
+        DVA_FINAL.Replace(ODIN_FINAL.Replace(words, NUM.Feminine.One), NUM.Feminine.Two);
     private static readonly JsRe DOT_DECIMAL = JsRegex.Compile("(?<![\\d.])(\\d{1,2})\\.(\\d)(?![\\d.])", "gu");
 
     /** Normalize one Ukrainian input string. Pure text→text. */
@@ -258,9 +270,20 @@ public static class Normalize
             return gen is not null && gen.EndsWith(suffix, StringComparison.Ordinal) ? gen : whole;
         });
 
-        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = Rewrite(s, ABBREV_COMMA, m => DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]);
-        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the `iu` fold widens the pattern past the table's keys, so
+        // every arm declines on a miss (the `,;:` arm lacked the guard in TS, #1525).
+        // A capital after the dot is a new sentence, so the dot is kept, unless the abbreviation is preposed.
+        s = Rewrite(s, ABBREV_MID, m =>
+        {
+            var key = m.Groups[1].Value.ToLowerInvariant();
+            if (!DOTTED_ABBREV.TryGetValue(key, out var w)) return m.Value;
+            return !PREPOSED_ABBREV.Contains(key) && StartsSentence(m.Groups[3].Value)
+                ? $"{w}.{m.Groups[2].Value}" : $"{w}{m.Groups[2].Value}";
+        });
+        s = Rewrite(s, ABBREV_COMMA, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        s = Rewrite(s, ABBREV_END, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         s = Rewrite(s, M_S, m =>
         {
@@ -304,7 +327,8 @@ public static class Normalize
                 // indexer would throw, so the bound is explicit.
                 if (idx >= forms.Count) return whole;
                 var head = forms[idx];
-                return mv == 0 ? head : $"{head} {Js.NumberToString(mv)}";
+                // The minutes agree with the FEMININE хвилина (#1525): 1:01 is першій одна.
+                return mv == 0 ? head : $"{head} {Feminine(Cardinal(mv))}";
             });
         }
 
@@ -323,11 +347,11 @@ public static class Normalize
         {
             var whole = m.Value;
             double num = Js.Number(m.Groups[1].Value), den = Js.Number(m.Groups[2].Value);
+            // The denominator takes the numerator's count (#1525): одна п'ята, but дві третіх, п'ять восьмих.
             var forms = OrdinalForms(den);
-            if (FEM_NOM >= forms.Count) return whole;
-            var fem = forms[FEM_NOM];
-            var numWord = DVA_FINAL.Replace(ODIN_FINAL.Replace(Cardinal(num), NUM.Feminine.One), NUM.Feminine.Two);
-            return $"{numWord} {fem}";
+            var idx = NormalizeSymbols.SlavicCountForm(num) == 0 ? FEM_NOM : GEN_PL;
+            if (idx >= forms.Count) return whole;
+            return $"{Feminine(Cardinal(num))} {forms[idx]}";
         });
 
         s = Rewrite(s, DOT_DECIMAL, "$1,$2");
