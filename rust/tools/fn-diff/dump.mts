@@ -22,7 +22,7 @@ const FLEURS_ROOT = "/mnt/data/omnivoice_ipa/corpus/fleurs_transcripts/data";
 /** The FLEURS transcript directory for a language code. */
 const FLEURS_DIR: Record<string, string> = {
     en: "en_us", "en-GB": "en_us", es: "es_419", "es-419": "es_419", fr: "fr_fr", hi: "hi_in", it: "it_it",
-    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr",
+    "pt-BR": "pt_br", pt: "pt_br", ja: "ja_jp", cmn: "cmn_hans_cn", el: "el_gr", ko: "ko_kr", th: "th_th",
 };
 
 /**
@@ -69,6 +69,43 @@ function langTexts(lang: string): string[] {
 }
 /** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
 const LANGS = (process.env.LANGS ?? "en,en-GB").split(",").filter((l) => l !== "");
+
+// ── Thai helpers ──────────────────────────────────────────────────────────────────────────────────────
+const THAI = new URL("../../../src/languages/thai/thai.ts", import.meta.url).href;
+/** Thai-block runs to probe the segmenter and g2p with (see "th-segment"). Synthetic strings are drawn from
+ *  the seg-words list and the Thai block by a fixed-seed PRNG, never from the corpus. */
+async function thaiItems(): Promise<string[]> {
+    const { normalizeThai } = await import("../../../src/languages/thai/normalize.ts");
+    const items = new Set<string>();
+    const runs = (t: string) => { for (const m of t.matchAll(/[฀-๿]+/gu)) items.add(m[0]); };
+    for (const t of langTexts("th")) { runs(t); runs(normalizeThai(t)); }
+    const seg = loadLines(THAI, "seg-words.txt").map((l) => l.trim()).filter(Boolean);
+    for (const w of seg) items.add(w);
+    for (const k of loadTsvMap(THAI, "dictionary.tsv").keys()) items.add(k);
+    let x = 0x7c3a91d;
+    const rnd = (n: number): number => { x = (x + 0x6d2b79f5) | 0; let t = Math.imul(x ^ (x >>> 15), 1 | x); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return (((t ^ (t >>> 14)) >>> 0) % n); };
+    const thaiCp = (): string => String.fromCodePoint(0x0e00 + rnd(0x80));
+    for (let i = 0; i < 4000; i++) {
+        let s = "";
+        for (let k = 2 + rnd(4); k > 0; k--) s += seg[rnd(seg.length)]!;
+        items.add(s);
+        if (i % 2 === 0) { const cs = [...s]; cs.splice(rnd(cs.length + 1), 0, thaiCp()); items.add(cs.join("")); }
+    }
+    for (let i = 0; i < 2000; i++) { let s = ""; for (let k = 1 + rnd(12); k > 0; k--) s += thaiCp(); items.add(s); }
+    return [...items];
+}
+/** thaiPrep + thaiScanSyllables, serialized for the "th-syllabify" replay. */
+function thaiScanJson(prep: any, scans: any[]): string {
+    const unit = (u: any): string => u.kind === "C" ? `C:${u.g}:${u.ph}` : `V:${u.gs.join("")}:${u.glide ?? ""}`;
+    const fates = [...prep.fates.entries()].sort((a: any, b: any) => a[0] - b[0]).map(([k, v]: any) => `${k}=${v}`).join(",");
+    return [
+        prep.units.map(unit).join(","),
+        fates,
+        prep.unitMark.map((m: any) => m ?? "_").join(","),
+        prep.shortMark.map((b: boolean) => (b ? "1" : "0")).join(""),
+        scans.map((s) => `${s.nucleus}|${s.tone ?? "_"}|${s.onsetCs.join("")}|${unit(s.nucUnit)}|${s.codaG}|${s.long ? 1 : 0}|${s.fate ?? "_"}`).join(";"),
+    ].join("\u0002");
+}
 
 // ── Mandarin helpers ──────────────────────────────────────────────────────────────────────────────────
 const MANDARIN = new URL("../../../src/languages/mandarin/mandarin.ts", import.meta.url).href;
@@ -885,6 +922,54 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const text of KO_EXTRAS) {
             emit({ text: units(text), lang: "ko", op: "trace" }, traceJson(phonemizeTrace(text, "ko")));
             emit({ text: units(text), lang: "ko", op: "ipa" }, phonemize(text, "ko"));
+        }
+    },
+    // ── Thai (th). Texts are langTexts("th") (golden, FLEURS th_th columns 3 and 4, probes/th.txt).
+    // normalizeThai alone.
+    async "th-normalize"() {
+        const { normalizeThai } = await import("../../../src/languages/thai/normalize.ts");
+        for (const t of langTexts("th")) emit({ text: units(t) }, normalizeThai(t));
+    },
+    // segment() over every Thai run of the texts (raw and normalized), every seg-words entry and dictionary key,
+    // and SYNTHETIC strings from a seeded PRNG: 2-5 seg-words concatenated, the same with a random Thai-block
+    // code point spliced in, and random Thai-block strings. Tokens joined by \u0001.
+    async "th-segment"() {
+        const { segment } = await import("../../../src/languages/thai/segment.ts");
+        for (const run of await thaiItems()) emit({ text: units(run) }, segment(run).join("\u0001"));
+    },
+    // phonemizeWord over the same items, and the syllabifier's intermediate stages for each:
+    // fixup, reorder, strip, and thaiPrep + thaiScanSyllables serialized.
+    async "th-word"() {
+        const { phonemizeWord } = await import("../../../src/languages/thai/g2p.ts");
+        for (const run of await thaiItems()) emit({ text: units(run) }, phonemizeWord(run));
+    },
+    async "th-syllabify"() {
+        const s = await import("../../../src/languages/thai/syllabifier.ts");
+        for (const run of await thaiItems()) {
+            const fixed = s.thaiLexicalFixup(run);
+            const reordered = s.reorderThaiLeadingVowels(fixed);
+            emit({ text: units(run), op: "fixup" }, fixed);
+            emit({ text: units(run), op: "reorder" }, reordered);
+            emit({ text: units(run), op: "strip" }, s.stripThaiMarks(run));
+            const prep = s.thaiPrep(reordered);
+            emit({ text: units(run), op: "scan" }, prep === null ? "\u0000none" : thaiScanJson(prep, s.thaiScanSyllables(prep.units, prep.fates, prep.unitMark, prep.shortMark)));
+        }
+    },
+    // The public entry over number strings (0..3000, magnitudes, unsafe) and Thai runs inside the other hosts.
+    async "th-numbers"() {
+        const { phonemize } = await import("../../../src/index.ts");
+        const ns = new Set<string>();
+        for (let n = 0; n <= 3000; n++) ns.add(String(n));
+        for (let e = 3; e <= 16; e++) for (const k of [1, 2, 11, 21, 101, 999]) for (const d of [0, 1, 11, 21, 101]) ns.add(String(k * 10 ** e + d));
+        for (const x of ["9007199254740991", "9007199254740992", "9007199254740993", "1".repeat(40), "1".repeat(400), "007", "0000"]) ns.add(x);
+        for (const n of ns) emit({ text: units(n), lang: "th" }, phonemize(n, "th"));
+    },
+    async "th-in-hosts"() {
+        const { phonemize, phonemizeAsync } = await import("../../../src/index.ts");
+        for (const line of readFileSync(new URL("./probes/th-in-hosts.txt", import.meta.url), "utf8").split("\n")) {
+            if (line === "" || line.startsWith("#")) continue;
+            for (const lang of ["en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr"])
+                emit({ text: units(line), lang }, process.env.BEST ? await phonemizeAsync(line, lang) : phonemize(line, lang));
         }
     },
 };

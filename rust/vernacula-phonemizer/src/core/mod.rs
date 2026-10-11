@@ -25,6 +25,7 @@ pub mod provenance;
 pub mod roman;
 pub mod schwa;
 pub mod scripts;
+pub mod segment;
 pub mod structural_tagger;
 pub mod trace;
 pub mod unicode;
