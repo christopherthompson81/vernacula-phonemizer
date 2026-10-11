@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { phonemizeWord } from "../src/languages/turkish/turkish.ts";
 import { ordinalWords } from "../src/languages/turkish/normalize.ts";
+import { digitsToWords, numberToWords } from "../src/languages/turkish/numbers.ts";
+import { toSegments } from "../src/languages/turkish/g2p.ts";
 
 describe("Turkish g2p (segmental)", () => {
     it("vowels, palatalization, dark-l, ğ", () => {
@@ -142,5 +144,49 @@ describe("Turkish text normalization", () => {
     it("the squared/cubed measure word", () => {
         expect(phonemize("783.562 km²", "tr")).toContain("ciɫometɾekaɾˈe");
         expect(phonemize("120 m³", "tr")).toContain("metɾecˈyp");
+    });
+});
+
+// #1523 — defects the Rust port found. Expected readings are the fixed engine's output, checked against the fix.
+describe("Turkish #1523", () => {
+    it("a numeral past katrilyon keeps its scale word, and every digit", () => {
+        expect(digitsToWords("1000000000000000000000")).toBe("bir sekstilyon");
+        expect(digitsToWords("2005000000000000000000")).toBe("iki sekstilyon beş kentilyon");
+        expect(numberToWords(1e18)).toBe("bir kentilyon");
+        // past 2⁵³ the digits are read from the string, not from a rounded double
+        expect(digitsToWords("1234567890123456789012").endsWith("yedi yüz seksen dokuz bin on iki")).toBe(true);
+        // more groups than scale words → digit by digit, never a missing scale
+        expect(digitsToWords("1" + "0".repeat(36))).toBe(["bir", ...Array<string>(36).fill("sıfır")].join(" "));
+        expect(phonemize("1000000000000000000000", "tr")).toBe("bˈiɾ secstiljˈon");
+        expect(phonemize("1234567890123456789012", "tr").endsWith("dokˈuz bˈin ˈon icˈi")).toBe(true);
+        // the `<` operand, past 2⁵³: the final 1 survives only when the digits are read as written
+        expect(phonemize("5 < 1000000000000000001", "tr")).toBe("bˈeʃ bˈiɾ centiljˈon biɾdˈen cyt͡ʃˈyctyɾ");
+    });
+
+    it("â/û after k, g, l keep the consonant palatal", () => {
+        expect(phonemizeWord("kâr")).toBe("cˈaɾ");
+        expect(phonemizeWord("kar")).toBe("kˈaɾ");
+        expect(phonemizeWord("lâle")).toBe("lalˈe");
+        expect(phonemizeWord("rüzgâr")).toBe("ɾyzɟˈaɾ");
+    });
+
+    it("a plain noun ending -mA/-sA/-lA keeps final stress; the suffixes still pre-accent", () => {
+        expect(phonemizeWord("elma")).toBe("elmˈa");
+        expect(phonemizeWord("masa")).toBe("masˈa");
+        expect(phonemizeWord("olsa")).toBe("ˈoɫsa");
+    });
+
+    it("an upper-case apostrophe suffix reads like the lower-case one", () => {
+        expect(phonemize("34'Ü", "tr")).toBe(phonemize("34'ü", "tr"));
+        expect(phonemize("1985'İN", "tr")).toBe(phonemize("1985'in", "tr"));
+    });
+
+    it("a year before a capital ends the sentence; a short ordinal before one stays an ordinal", () => {
+        expect(phonemize("Yıl 2004. Sonra geldi.", "tr")).toBe("jˈɯɫ icˈi bˈin dˈøɾt . sonɾˈa ɟeldˈi .");
+        expect(phonemize("1. Dünya Savaşı", "tr")).toBe("biɾind͡ʒˈi dˈynja savaʃˈɯ");
+    });
+
+    it("ğ after a consonant does not lengthen the consonant", () => {
+        expect(toSegments("rğa").map((s) => s.ph).join("")).toBe("ɾa");
     });
 });

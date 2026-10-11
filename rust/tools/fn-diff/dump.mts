@@ -1095,6 +1095,19 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: String(n), op: "words" }, numberToWords(n));
             emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
         }
+        // digitsToWords (#1523): the written numeral, grouped from its digits — every power of ten to 10⁴⁰, with
+        // ±1-style neighbours, leading zeros, and deterministic pseudo-random digit strings of every length to 40.
+        const { digitsToWords } = await import("../../../src/languages/turkish/numbers.ts");
+        const ds: string[] = ["", "0", "00", "007", "0001000", "1", "10", "1000"];
+        for (let k = 0; k <= 40; k++) ds.push("1" + "0".repeat(k), "9".repeat(k + 1), "1" + "0".repeat(k) + "1", "2" + "0".repeat(k) + "5");
+        let seed = 1523;
+        for (let len = 1; len <= 40; len++)
+            for (let r = 0; r < 25; r++) {
+                let d = "";
+                for (let i = 0; i < len; i++) { seed = (seed * 1103515245 + 12345) % 2147483648; d += String(seed % 10); }
+                ds.push(d);
+            }
+        for (const d of ds) emit({ n: d, op: "digits" }, digitsToWords(d));
         const sufs = ["te", "ta", "de", "da", "ü", "i", "ı", "u", "e", "a", "Ü", "lerin", "ları", "sı", "si", "inci", "ten", "dan", ""];
         for (const n of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 14, 34, 40, 44, 100, 1000, 1985, 2004, 1e6, 1e9 + 4])
             for (const s of sufs) emit({ words: units(numberToWords(n)), suffix: units(s), op: "attach" }, attachSuffix(numberToWords(n).split(" "), s).join("|"));

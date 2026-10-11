@@ -6,7 +6,7 @@ use std::sync::{Arc, LazyLock};
 
 use super::g2p::tr_lower;
 use super::manifest::MANIFEST;
-use super::numbers::number_to_words;
+use super::numbers::{digits_to_words, number_to_words};
 use crate::core::initialisms::{
     InitialismData, LetterName, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
 };
@@ -194,9 +194,9 @@ fn ablative(w: &JsString) -> JsString {
         .concat(&js("n"))
 }
 
-/// `trWord(t)`: `numberToWords(Number(t)) || t`.
+/// `trWord(t)`: `digitsToWords(t) || t` — `t` is `\d+`, read from the digits (#1523).
 fn tr_word(t: &JsString) -> JsString {
-    let w = number_to_words(js_number(t));
+    let w = digits_to_words(t);
     if w.is_empty() { t.clone() } else { w }
 }
 

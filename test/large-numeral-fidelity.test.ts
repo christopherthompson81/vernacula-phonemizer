@@ -61,7 +61,9 @@ const B = "1000000000000000000009";
  *     Croatian's number token carries the thousands periods and the decimal comma. The same rule applied
  *     to the #1095 batch: ar, pt, cy, ff, ga, mk and af all strip a separator before parsing, and the
  *     STRIPPED string is what the fallback must be handed.
- *   · NO FALLBACK AT ALL — tr returns "" above its range and zu composes right past it. Giving these a
+ *   · NO FALLBACK AT ALL — zu composes right past its range. (`tr` was listed here too, returning "" above
+ *     katrilyon; #1523 gave it the scale words to 10³³, a written numeral grouped from its digits, and a
+ *     digit-at-a-time reading only past the last scale, so it came off the list.) Giving these a
  *     digit-at-a-time arm is a per-language behaviour ADDITION, not a mechanical repair, and wants the
  *     language's own evidence. ⚠ `xh` CAME OFF THE LIST ON EXACTLY THAT EVIDENCE, and it was in its own
  *     file: `xhosa/normalize.ts`'s `spell()` already reads a decimal's fractional part digit-at-a-time in
@@ -70,7 +72,7 @@ const B = "1000000000000000000009";
  *     sibling `zu` has no such precedent in its own file and stays listed.
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
-const ACCEPTED_LOSSY = new Set("tr az vi si kk tg zu".split(" "));
+const ACCEPTED_LOSSY = new Set("az vi si kk tg zu".split(" "));
 
 const CODES = [
     ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/^\s*case "([^"]+)":/gmu)].map((m) => m[1]!)),

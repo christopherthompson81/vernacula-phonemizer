@@ -89,3 +89,9 @@ café naïve Zürich Müller São
 Yıl 2004. Sonra geldi.
 fiyat 1.50 lira sürüm 2.15 çıktı
 rğa lğı ağğa
+# --- #1523: the fixes' edges (synthetic)
+1234567890123456789012 ve 1000000000000000000000000000000000000 ve 007
+5 < 1000000000000000001 ve 3 > 1000000000000000000
+KÂR Kâr gâvur mahkûm LÂLE dîn hâlâ ile aile hale
+34'ÜNCÜ 1985'TEN 12'İNCİ
+Yıl 1453. Sonra 1. Dünya ve 2004. sonra

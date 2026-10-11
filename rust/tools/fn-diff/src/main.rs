@@ -1080,6 +1080,7 @@ fn main() {
                 "ordinal" => tr
                     .ordinal_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
                     .unwrap_or_else(|| JsString::from("\u{0}none")),
+                "digits" => tr.digits_to_words(&JsString::from(input["n"].as_str().unwrap())),
                 _ => {
                     let words = if input["words"].is_null() {
                         Vec::new()

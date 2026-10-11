@@ -161,7 +161,7 @@ public static class Normalize
         }
         static string TrWord(string t)
         {
-            var w = TurkishNumbers.NumberToWords(Js.Number(t));
+            var w = TurkishNumbers.DigitsToWords(t); // `t` is `\d+`: read from the digits (#1523)
             return w != "" ? w : t;
         }
         void Postposed(string sign, Func<string, string> inflect, string verb)

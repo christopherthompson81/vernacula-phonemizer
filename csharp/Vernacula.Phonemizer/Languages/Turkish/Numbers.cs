@@ -28,18 +28,11 @@ public static class TurkishNumbers
         return parts;
     }
 
-    /** Non-negative integer → Turkish words. */
-    public static string NumberToWords(double n)
+    /** Little-endian thousands groups (groups[g] multiplies 10³ᵍ) → words; "" when there are more groups than
+     *  scale words. */
+    private static string ComposeGroups(List<double> groups)
     {
-        if (!double.IsFinite(n) || n < 0) return "";
-        if (n == 0) return N.Zero;
-        var groups = new List<double>();
-        var x = Math.Floor(n);
-        while (x > 0)
-        {
-            groups.Add(x % 1000);
-            x = Math.Floor(x / 1000);
-        }
+        if (groups.Count > SCALES.Length) return "";
         var parts = new List<string>();
         for (var g = groups.Count - 1; g >= 0; g--)
         {
@@ -51,13 +44,40 @@ public static class TurkishNumbers
                 continue;
             } // "bin", not "bir bin"
             parts.AddRange(Below1000(v));
-            // ⚠ `SCALES[g]` IS AN OUT-OF-RANGE READ once the number outgrows the authored scale list (which
-            // stops at katrilyon, 10¹⁵). The TS pushes the resulting `undefined` and `Array.join` renders it
-            // as the EMPTY STRING, so `numberToWords(1e18)` is literally `"bir "` — trailing space and all.
-            // C# would throw on the index, so the bound is explicit and pushes `""` to reproduce that string
-            // exactly. ⚠ NOT FILTERED OUT: dropping the empty part would give `"bir"` and fork the two engines.
-            if (g > 0) parts.Add(g < SCALES.Length ? SCALES[g] : "");
+            if (g > 0) parts.Add(SCALES[g]);
         }
         return string.Join(" ", parts);
+    }
+
+    /** Non-negative integer → Turkish words. "" past the largest scale word (10³⁶ and up); a written numeral
+     *  goes through `DigitsToWords`, which keeps every digit. */
+    public static string NumberToWords(double n)
+    {
+        if (!double.IsFinite(n) || n < 0) return "";
+        if (n == 0) return N.Zero;
+        var groups = new List<double>();
+        var x = Math.Floor(n);
+        while (x > 0)
+        {
+            groups.Add(x % 1000);
+            x = Math.Floor(x / 1000);
+        }
+        return ComposeGroups(groups);
+    }
+
+    private static readonly JsRe LEADING_ZEROS = JsRegex.Compile("^0+(?=\\d)", "u");
+
+    /** A written digit string → words, grouped from the STRING (past 2⁵³ `Number()` has already rounded it);
+     *  more groups than scale words → digit by digit (#1523). See numbers.ts. */
+    public static string DigitsToWords(string digits)
+    {
+        var d = JsRegex.Replace(digits, LEADING_ZEROS, _ => "");
+        if (d == "0") return N.Zero;
+        var groups = new List<double>();
+        for (var end = d.Length; end > 0; end -= 3)
+            groups.Add(Js.Number(d[Math.Max(0, end - 3)..end]));
+        if (groups.Count > SCALES.Length)
+            return string.Join(" ", d.Select(c => c == '0' ? N.Zero : ONES[c - '0']));
+        return ComposeGroups(groups);
     }
 }
