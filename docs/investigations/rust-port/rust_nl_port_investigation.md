@@ -213,3 +213,89 @@ No TS regex was added or changed, so `csharp/regex-corpus.jsonl` needs no re-ext
 
 **Implication.** Done on this machine. No new core module: core/germanic_morphology.rs (de port) covers nl
 unchanged, and its three nl-only branches are proven by the Run 3 breaks.
+
+## Run 7 — 2026-10-11 15:05 (#1524 item 3: does any lexical gate on the stress shift pay?)
+
+**Question.** The shift fires on any be/ge/te/ver/ont/her spelling (`tennis` *tənˈɪs*, `telling`, `hertog`). Would
+gating it on the morphology, the way the splitter's `ambiguousPrefixes` gate does, fix those without breaking real
+prefixes? Measured, not judged.
+
+**Command.** A scratch script (not committed) over every kaikki nl / wikipron nld word whose spelling starts with a
+prefixUnstressed member (no space or hyphen): `phonemizeWord` vs the referee, folded backbone through
+`tools/referee-eval`'s own `makeFold`, plus the stressed-syllable index (kaikki carries ˈ; wikipron broad does not).
+Variants sat behind a temporary env switch in `placeStress`, since removed.
+
+**Raw finding** (kaikki, n = 4,728; stress compared on 4,608):
+```
+base                                                       seg 2888 (61.08%)  stress 3308 (71.79%)
+A  be/ge/te shift only if the remainder is a stem-list word  seg 2398 (50.72%)  stress 2486 (53.95%)
+C  all six: remainder is a stem-list word                    seg 2137 (45.20%)  stress 2090 (45.36%)
+D  A, or the remainder decomposes to a stem-list head         seg 2540 (53.72%)  stress 2668 (57.90%)
+E  shift unless the WHOLE word is lexical and D fails         seg 2608 (55.16%)  stress 2791 (60.57%)
+F  the first nucleus's next seg starts inside the prefix      seg 2948 (62.35%)  stress 3353 (72.76%)
+G  be/ge/te followed by e/i/u (the e-digraphs) never shift     seg 2941 (62.20%)  stress 3353 (72.76%)
+```
+A loses hundreds of real prefixes on BOUND roots: beginnen, gebruiken, begrijpen, belofte, geboorte, gedrag,
+genoeg — the remainder (`ginnen`, `bruiken`, `lofte`) is not a word, so a word gate cannot see the prefix. The
+tennis/tempo/techno/Gerrit gains are real but an order of magnitude fewer. Every lexical gate is net negative.
+
+The diff of base→A also surfaced a different shape, which F and G go after: `beenhouwer` read *bənɦˈɑu̯ər*. The
+prefix letters ⟨be⟩ are not a syllable there (the scanner reads ⟨ee⟩ as ONE nucleus), and the schwa reduction
+overwrote the whole digraph, deleting a vowel. F does this through the seg starts, but it also catches a degeminated
+⟨rr⟩ (`terras` r@3), which is chance, not structure (it loses terras/terrein/terreur and gains Gerrit). G is the
+orthographic statement of the scanner's own digraphs (⟨ee⟩/⟨eeuw⟩, ⟨ei⟩, ⟨eu⟩): 57 stress gained / 12 lost, seg
+53 gained / **0 lost**. The 12 lost (geestdriftig, beeldschoon, Geertruida, …) are final-stressed words where base
+landed on the right syllable by deleting the digraph, so they were segmentally wrong before and stay wrong.
+
+**Implication.** Ship G. Decline the tennis/telling/hertog part: the instrument says a rule cannot separate a
+bound-root prefix from a non-prefix root, and these words need a lexicon (the correction lexicon the bring-up
+log already defers), not a gate.
+
+## Run 8 — 2026-10-11 15:20 (#1524 items 1, 2, 4, 5: the TS fixes and the item-5 witness)
+
+**Changes.** TOKEN's grouped arm takes `(?:,\d+)?` (de #1514's fix, verbatim); `vowelLetters` gains ì ò ù; the
+fraction rule takes the mirrored guards that `it` carries (`(?<![\d/]|\d\.|(?<![\d/])\d+,)…(?![\d/]|\.\d|,\d+(?![\d/]))`).
+
+**Raw finding** (`phonemize`, synthetic probes):
+```
+3.000,50 euro  == 3000,50 euro   drˈidˈœy̯zənt kˈɔmaː vˈɛi̯f nˈʏl ˈøːroː
+1.000, dan     == 1000, dan      (the list comma stays a pause)
+però → pˈeːroː   lì → lˈi        (was a non-syllabic o / no nucleus)
+1/2,5 == 1 2,5   1,5/2 == 1,5 2   1/2,3/4 == 1/2, 3/4   3/1/2 == 3 1 2
+beenhouwer → bˈeːnɦɑu̯ər   beginnen → bəɣˈɪnən   beëdigen → bəˈeːdiɣən   tennis → tənˈɪs (declined)
+```
+Full referee eval after all four: kaikki 31,151 → 31,205, wikipron 30,831 → 30,884.
+
+Item 5 (`hoofdstuk 3.12` → *drie uur twaalf*): the FLEURS nl transcripts hold 14 dotted `h.mm` tokens, and all 14
+are clocks. Three carry no `uur` (`21.19 GMT`, `11.00 lokale`, `tussen 6.30 en`), so requiring `uur` would lose
+real clocks, and no instrument here has a single dotted section number to say how one is read (*drie punt
+twaalf*? *drie twaalf*?).
+
+**Implication.** Item 5 declined: a fix needs the section-number reading, which nothing here witnesses.
+
+## Run 9 — 2026-10-11 16:10 (ports, tests, and every gate on the tree rebased onto main)
+
+**Changes.** C# and Rust mirror the TS: TOKEN's grouped decimal, DIGRAPH_PREFIX in placeStress, and the mirrored
+fraction guards. The ì/ò/ù change is the jsonc alone, which all three engines read. Tests are test/dutch-1524.test.ts,
+the nl row in test/fraction-guards-1495.test.ts (and in its C# twin), Dutch1524Tests.cs and
+`the_1524_findings_are_fixed` in dutch.rs. They are relational or structural, with no typed IPA. probes/nl.txt
+gains one synthetic line for item 3.
+
+**Proof by revert.** I reverted each fix on its own in each engine:
+- TS token: 2 tests fail. TS vowels: 4 fail. TS digraph: 5 fail. TS fraction: 4 fail.
+- C#: token 2, digraph 5, fraction 4, vowels 4.
+- Rust: the 1524 test fails for each of token, digraph, fraction and vowels.
+
+**Raw finding** (after rebasing onto origin/main, which now includes de #1514, uk, th, ru and ko):
+```
+goldens: nl regenerated, 0 rows moved; check:goldens fresh, 189 languages, 36495 rows, 0 stale
+regex-corpus.jsonl: re-extracted, unchanged (the new patterns are already in it from it/de)
+npm test 6871 passed | 5 skipped; typecheck clean
+dotnet test (full) 7554 passed; C# parity 189 byte-identical; C# regex-diff 145096 identical
+cargo fmt clean; cargo test 199 + 1 passed; parity: 50 languages, all identical except mag 199/200 (known, Arabic)
+regex-diff 145096 identical, 0 DIFFER, 0 refused
+fn-diff (pre-rebase): nl-normalize 29783, nl-g2p 502588, nl-numbers 54126, phonemize-sync/best 3746, symbols 6738 — 0 DIFFER
+```
+
+**Implication.** Items 1, 2 and 4 are fixed. Item 3 is half fixed: the e-digraph case ships, and the bound-root
+case (tennis/telling/hertog) is declined on the Run 7 measurement. Item 5 is declined on the Run 8 witness.

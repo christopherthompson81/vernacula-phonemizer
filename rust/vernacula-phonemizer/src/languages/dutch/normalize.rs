@@ -321,10 +321,13 @@ pub(crate) fn normalize_dutch(input: &JsString) -> JsString {
     );
     s = rewrite(&s, js_re!(r"\s&\s", "gu"), &js(" en "));
 
-    // 11) fractions on the ordinal; ½ is *een half*.
+    // 11) fractions on the ordinal; ½ is *een half*. The two guards are mirrors (#1524, the #1495 family).
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"),
+        js_re!(
+            r"(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))",
+            "gu"
+        ),
         |m, t| {
             let num = js_number(&m.group(1, t).unwrap());
             let den = js_number(&m.group(2, t).unwrap());

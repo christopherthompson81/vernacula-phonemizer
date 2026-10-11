@@ -121,7 +121,8 @@ public static class Normalize
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?\u00f7\\s?", "gu");
     private static readonly JsRe AMP_LETTERS = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\p{Lu})&(\\p{Lu})(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe AMP_SPACED = JsRegex.Compile("\\s&\\s", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/])(\\d{1,3})\\/(\\d{1,3})(?![\\d/])", "gu");
+    // The two guards are mirrors (#1524, the #1495 family): see src/languages/dutch/normalize.ts step 11.
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,\\d+(?![\\d/]))", "gu");
     private static readonly IReadOnlyDictionary<string, string> COMPASS = new Dictionary<string, string>(StringComparer.Ordinal)
     {
         ["N"] = "noord", ["O"] = "oost", ["Z"] = "zuid", ["W"] = "west",
