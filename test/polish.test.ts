@@ -31,7 +31,7 @@ describe("Polish canonical IPA", () => {
         expect(phonemizeWord("ząb")).toBe("zˈɔmp"); // ą + labial → ɔm
         expect(phonemizeWord("kąt")).toBe("kˈɔnt"); // ą + dental → ɔn
         expect(phonemizeWord("ręka")).toBe("rˈɛŋka"); // ę + velar → ɛŋ
-        expect(phonemizeWord("wąs")).toBe("vˈɔns"); // ą + fricative → ɔn
+        expect(phonemizeWord("wąs")).toBe("vˈɔw̃s"); // ą + dental fricative → ɔw̃ (nasal glide, #1551)
         expect(phonemizeWord("gęś")).toBe("ɡˈɛw̃ɕ"); // ę + palatal fricative → ɛw̃ (nasal glide)
         expect(phonemizeWord("są")).toBe("sˈɔw̃"); // ą word-final → ɔw̃
         expect(phonemizeWord("imię")).toBe("ˈimjɛ"); // ę word-final → ɛ (denasalized)

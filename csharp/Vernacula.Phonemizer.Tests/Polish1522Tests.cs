@@ -44,7 +44,6 @@ public class Polish1522Tests
     [InlineData("trąf", "trˈɔw̃f")]
     [InlineData("jąwszy", "jˈɔw̃fʂɨ")]
     [InlineData("kąpać", "kˈɔmpat͡ɕ")] // a labial STOP keeps [m]
-    [InlineData("wąs", "vˈɔns")] // the convention, see NasalBefore
     [InlineData("wąchać", "vˈɔŋxat͡ɕ")]
     public void NasalBeforeAFricative(string word, string ipa) =>
         Assert.Equal(ipa, PolishEngine.PhonemizeWord(word));

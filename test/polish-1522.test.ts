@@ -22,11 +22,10 @@ describe("#1522 Polish", () => {
         expect(n("Lata 90. Potem")).toBe("Lata 90. Potem"); // an uppercase follower is still a sentence period
     });
 
-    test("3. ą/ę before a labial fricative is the [w̃] glide; dental/velar fricatives keep the nasal stop", () => {
+    test("3. ą/ę before a labial fricative is the [w̃] glide; a velar fricative keeps [ŋ]", () => {
         expect(phonemizeWord("trąf")).toBe("trˈɔw̃f");
         expect(phonemizeWord("jąwszy")).toBe("jˈɔw̃fʂɨ");
         expect(phonemizeWord("kąpać")).toBe("kˈɔmpat͡ɕ"); // a labial STOP keeps [m]
-        expect(phonemizeWord("wąs")).toBe("vˈɔns"); // the convention, see nasalBefore
         expect(phonemizeWord("wąchać")).toBe("vˈɔŋxat͡ɕ");
     });
 

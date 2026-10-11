@@ -4,11 +4,12 @@
 //   - the ⟨i⟩ palatalizer: coronal c/s/z/n(/dz) + i → the SOFT series t͡ɕ/ɕ/ʑ/ɲ(/d͡ʑ) (i silent before a vowel:
 //     siano→ɕanɔ; the i-vowel before a consonant/end: zima→ʑima); velar k/g + i → palatalized kʲ/ɡʲ; any other
 //     consonant + i + VOWEL → a [j] glide (pies→pjɛs, radio→radjɔ).
-//   - nasal vowels ą/ę: oral vowel + a homorganic nasal element by the FOLLOWING consonant's place — matching the
-//     wikipron human convention, which realizes the nasality as a consonant before an obstruent (stop OR fricative):
-//     m/n/ŋ (ząb→zɔmp, wąs→vɔns, wąchać→vɔŋx), a [w̃] glide before a labial or palatal fricative f/v/ɕ/ʑ
-//     (trąf→trɔw̃f, gęś→ɡɛw̃ɕ), and pure vowel-nasalization before a sonorant. Before s/z/ʂ/ʐ wikipron lists [n] and
-//     [w̃] side by side; [n] is a convention here (g2p.ts nasalBefore, #1522). ą word-FINAL → [ɔw̃] (są→sɔw̃); ę word-FINAL denasalizes to ɛ (się→ɕɛ).
+//   - nasal vowels ą/ę: oral vowel + a homorganic nasal element by the FOLLOWING consonant's place. Before a stop or
+//     affricate a nasal consonant m/n/ɲ/ŋ (ząb→zɔmp, ręka→rɛŋka); before a fricative the [w̃] glide (trąf→trɔw̃f,
+//     wąs→vɔw̃s, gęś→ɡɛw̃ɕ), except velar x, which takes [ŋ] (wąchać→vɔŋx; wikipron 92:0). Before s/z/ʂ/ʐ wikipron
+//     lists [n] and [w̃] side by side, so [w̃] there is the orthoepic choice, not a measurement (g2p.ts nasalBefore,
+//     #1522, #1551). Pure vowel-nasalization before a sonorant. ą word-FINAL → [ɔw̃] (są→sɔw̃); ę word-FINAL
+//     denasalizes to ɛ (się→ɕɛ).
 //   - regressive voicing assimilation + word-final devoicing; progressive devoicing of w(v)/rz(ʐ) after a voiceless
 //     obstruent (świat→ɕfjat, przez→pʂɛs). Stress is PENULTIMATE (applied in polish.ts).
 {
