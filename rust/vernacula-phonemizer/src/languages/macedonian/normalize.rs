@@ -289,10 +289,17 @@ pub(crate) fn normalize_macedonian(input: &JsString) -> JsString {
     s = rewrite_with(&s, js_re!(r"(\d+)\s*г\.", "gu"), year);
 
     // 3) abbreviations.
-    s = rewrite(
+    //    `итн.` closes a list: before a capital its dot is kept as the sentence end (#1535).
+    s = rewrite_with(
         &s,
         js_re!(r#"(?<![\p{L}\p{M}])итн\.(?=\s|$|[,.;:!?»"')])"#, "giu"),
-        &js("и така натаму"),
+        |m, t| {
+            if js_re!(r"^\s+\p{Lu}", "u").test(&t.slice(m.end() as isize, None)) {
+                js("и така натаму.")
+            } else {
+                js("и така натаму")
+            }
+        },
     );
     s = rewrite(&s, js_re!(r"(?<![\p{L}\p{M}])т\.е\.", "giu"), &js("то ест"));
     s = rewrite(
@@ -430,11 +437,12 @@ pub(crate) fn normalize_macedonian(input: &JsString) -> JsString {
         }
     });
 
-    // 10) regnal ordinals after a capitalised name (2–39, before punctuation or the end).
+    // 10) regnal ordinals after a capitalised name (2–39, before punctuation or the end), the name not the
+    //     sentence's first word (#1535).
     s = rewrite_with(
         &s,
         js_re!(
-            r"(\p{Lu}\p{Ll}+\p{M}*)[  ](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)",
+            r"(?<=[^\s.!?\u2026]\s+)(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)",
             "gu"
         ),
         |m, t| {
@@ -532,7 +540,8 @@ pub(crate) fn normalize_macedonian(input: &JsString) -> JsString {
         &js("гигахерци"),
     );
 
-    // 14b) fractions: the vulgar three, then a unit fraction with a 2–6 denominator.
+    // 14b) fractions: the vulgar three, then any numerator over a 2–6 denominator, the noun and numeral agreeing
+    //     (#1535).
     s = rewrite(&s, js_re!(r"(\d+)¾", "gu"), &js("$1 и три четвртини"));
     s = rewrite(&s, js_re!(r"(\d+)½", "gu"), &js("$1 и половина"));
     s = rewrite(&s, js_re!(r"(\d+)¼", "gu"), &js("$1 и четвртина"));
@@ -541,18 +550,25 @@ pub(crate) fn normalize_macedonian(input: &JsString) -> JsString {
         js_re!(r"(?<![\d.,])(\d{1,2})\/(\d{1,2})(?![\d.,])", "gu"),
         |m, t| {
             let denom = js_number(&m.group(2, t).unwrap());
-            let suffix = match denom {
-                2.0 => "половина",
-                3.0 => "третина",
-                4.0 => "четвртина",
-                5.0 => "петтина",
-                6.0 => "шестина",
+            let forms = match denom {
+                2.0 => ["половина", "половини"],
+                3.0 => ["третина", "третини"],
+                4.0 => ["четвртина", "четвртини"],
+                5.0 => ["петтина", "петтини"],
+                6.0 => ["шестина", "шестини"],
                 _ => return m.value(t),
             };
-            if js_number(&m.group(1, t).unwrap()) != 1.0 {
-                return m.value(t);
-            }
-            js("една ").concat(&js(suffix))
+            let num = js_number(&m.group(1, t).unwrap());
+            let m100 = num % 100.0;
+            let noun = forms[if m100 % 10.0 == 1.0 && m100 != 11.0 {
+                0
+            } else {
+                1
+            }];
+            let a = js_re!(r"(?<![\p{L}\p{M}])еден$", "u")
+                .replace(&js(&number_to_text(num, None)), &js("една"));
+            let num_word = js_re!(r"(?<![\p{L}\p{M}])два$", "u").replace(&a, &js("две"));
+            num_word.concat(&js(" ")).concat(&js(noun))
         },
     );
 

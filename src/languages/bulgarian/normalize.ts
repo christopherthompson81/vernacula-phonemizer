@@ -1,4 +1,8 @@
 import { rewrite } from "../../core/provenance.ts";
+import { loadManifest } from "../../core/loadManifest.ts";
+// ⚠ A CIRCULAR IMPORT, AND SAFE: bulgarian.ts imports this module, and `numberToText` is only CALLED at run
+// time, never while either module is still evaluating.
+import { numberToText } from "./bulgarian.ts";
 /**
  * Bulgarian (bg) TEXT NORMALIZATION — the pre-tokenizer pass that rewrites everything the
  * Bulgarian g2p cannot already read into Bulgarian words the existing pipeline speaks. Pure text→text, no
@@ -89,6 +93,32 @@ const RELATIONAL: [RegExp, string][] = [
     [/÷/gu, " делено на "],
 ];
 
+/** The normalizer's own slice of bulgarian.jsonc (#1535). */
+interface NormalizeDef {
+    ordinals: { words: Record<string, string>; endings: string[] };
+    magnitudeAbbrev: Record<string, { exponent: number; decimal: string }>;
+    hourAbbrev: string;
+}
+const DEF = loadManifest<NormalizeDef>(import.meta.url, "bulgarian.jsonc");
+const ORDINAL_WORD: ReadonlyMap<string, string> = new Map(Object.entries(DEF.ordinals.words));
+
+/**
+ * Every form of the ordinal of `n` the suffix notation can write, masculine first, or [] when the cardinal's last
+ * word has no ordinal in the table. Only the last word inflects: 21 → двайсет и първи / първа / първото ….
+ */
+function ordinalForms(n: number): string[] {
+    const words = numberToText(n).split(" ");
+    const masc = ORDINAL_WORD.get(words[words.length - 1]!);
+    if (masc === undefined) return [];
+    const head = words.slice(0, -1).map((w) => `${w} `).join("");
+    const stem = masc.endsWith("ен") ? `${masc.slice(0, -2)}н` : masc.slice(0, -1);
+    return [masc, ...DEF.ordinals.endings.map((e) => `${stem}${e}`)].map((f) => `${head}${f}`);
+}
+
+/** Was the abbreviation's dot (just consumed) also the end of the utterance? Only then is it put back: a capital
+ *  after `млн.` or `ч.` is mid-sentence as often as not (`в 12:00 ч. GMT`). */
+const atEnd = (rest: string): boolean => /^[\s»)”"']*$/u.test(rest);
+
 export function normalizeBulgarian(input: string): string {
     let t = input;
 
@@ -124,6 +154,17 @@ export function normalizeBulgarian(input: string): string {
         t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))/gu, "");  // space, NBSP, NNBSP, thin space
     } while (t !== prev);
 
+    // 4b) MAGNITUDE ABBREVIATIONS `млн` / `млрд` (#1535): `1,5 млн. души` read the cluster [mɫn] and then a
+    //     sentence break at its dot. Before the decimal comma, which would part the figure from it. An integer
+    //     is multiplied out so the composer agrees it (два милиона, един милиард); a decimal takes the plural.
+    //     The dot is consumed, and put back only where it also ended the utterance.
+    for (const [abbr, { exponent, decimal }] of Object.entries(DEF.magnitudeAbbrev))
+        t = rewrite(t, new RegExp(`(\\d+(?:,\\d+)?)\\s*${abbr}(\\.?)(?![\\p{L}\\p{M}])`, "gu"),
+            (_m, n: string, dot: string, offset: number, whole: string) => {
+                const read = n.includes(",") ? `${n} ${decimal}` : `${n}${"0".repeat(exponent)}`;
+                return dot !== "" && atEnd(whole.slice(offset + _m.length)) ? `${read}.` : read;
+            });
+
     // 5) DECIMAL COMMA. The comma is clause punctuation, so `12,5` reads as "дванайсет , пет" — a PAUSE
     //    inside a number. ⚠ Bulgarian reads the separator as `цяло и` ("whole and"), not as a bare "comma";
     //    the fractional part follows digit by digit.
@@ -132,7 +173,25 @@ export function normalizeBulgarian(input: string): string {
 
     // 6) CLOCK, COLON FORM ONLY. The colon reaches clausePunctuation as a COMMA PAUSE, so `22:00` reads as
     //    "двайсет и две , нула". There is no period-clock form — see the header.
+    //    THE HOUR ABBREVIATION after a clock (#1535): `в 12:05 ч.` read the bare letter ч and a sentence break.
+    //    It is the word *часа*; the dot is consumed and put back only at the utterance end (a capital after it is
+    //    mid-sentence: `в 12:00 ч. GMT`). A letter glued on after the dot (`ч.сутринта`) is spaced off.
+    t = rewrite(t, /(\d{1,2}:\d{2})(?!\d)\s*ч(?:(\.)|(?![\p{L}\p{M}]))/gu,
+        (m0: string, clock: string, dot: string | undefined, offset: number, whole: string) => {
+            const rest = whole.slice(offset + m0.length);
+            if (dot !== undefined && atEnd(rest)) return `${clock} ${DEF.hourAbbrev}.`;
+            return /^[\p{L}\p{M}]/u.test(rest) ? `${clock} ${DEF.hourAbbrev} ` : `${clock} ${DEF.hourAbbrev}`;
+        });
     t = rewrite(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+
+    // 6c) ORDINAL SUFFIX `1-ви`, `2-ри`, `18-ти`, `15-то`, `4-о`, `37-ата`, also spaced (`15 - ти век`) (#1535:
+    //     14 FLEURS texts read the suffix as a bare syllable, `1-ви` → *едно ви*). The suffix is the end of the
+    //     full word, so the form that ends with what was written is chosen; none ending so (`50-те`, the
+    //     definite cardinal) leaves the text as it was. Capped at 3 letters and refused before another letter,
+    //     which keeps compounds (`28-годишен`) out. Before the range and sign rules, which spend hyphens.
+    t = rewrite(t, /(?<![\d.,])(\d+)\s?-\s?([а-я]{1,3})(?![\p{L}\p{M}])/gu,
+        (m0: string, digits: string, suffix: string) =>
+            ordinalForms(Number(digits)).find((f) => f.endsWith(suffix)) ?? m0);
 
     // 6b) НОМЕР. The NUMERO SIGN is dropped outright — "космонавт № 11" reads as *космонавт единадесет*.
     //     ⚠ THIS CHARACTER IS DELIBERATELY EXCLUDED FROM THE ℃ FOLD: NFKC maps № to the Latin "No", which a

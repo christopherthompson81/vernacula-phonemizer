@@ -354,15 +354,17 @@ const DOTTED_ABBREV: [(&str, &str); 11] = [
     ("дол", "долараў"),
 ];
 
-/// `DOTTED_ABBREV[key]!`, as JS stringifies it. ⚠ THE MISS IS REACHABLE (#1122): the `iu` alternation matches
-/// a Cyrillic Extended-C letter whose fold is one of the keys' letters (`ᲃт.` for `ст.`), the lowercased match
-/// is then no key, and the TS splices the string `undefined` into the text. Reproduced.
-fn dotted(key: &JsString) -> &'static str {
+/// `DOTTED_ABBREV[key]`. ⚠ THE MISS IS REACHABLE (#1122): the `iu` alternation matches a Cyrillic Extended-C
+/// letter whose fold is one of the keys' letters (`ᲃт.` for `ст.`); the match then stays as written (#1535).
+fn dotted(key: &JsString) -> Option<&'static str> {
     DOTTED_ABBREV
         .iter()
         .find(|(k, _)| js(k) == *key)
-        .map_or("undefined", |(_, v)| *v)
+        .map(|(_, v)| *v)
 }
+
+/// `CLOSING_ABBREV`: the keys that close a list, so a capital after their dot is a new sentence (#1535).
+const CLOSING_ABBREV: [&str; 1] = ["інш"];
 
 static ABBREV_ALT: LazyLock<String> = LazyLock::new(|| {
     alternation(&sorted_by_length_desc(
@@ -373,13 +375,14 @@ static ABBREV_ALT: LazyLock<String> = LazyLock::new(|| {
 /// `NOT_LETTER`, verbatim.
 const NOT_LETTER: &str = r"(?![\p{L}\p{M}'’ʼ])";
 
-static MULTI: LazyLock<[(JsRegex, &str); 4]> = LazyLock::new(|| {
+/// The multi-dot abbreviations; the flag marks the one that closes a list (#1535).
+static MULTI: LazyLock<[(JsRegex, &str, bool); 4]> = LazyLock::new(|| {
     let re = |p: &str| JsRegex::new(&format!("{NOT_LETTER_BEFORE}{p}"), "giu").unwrap();
     [
-        (re(r"да\s+н\.\s?э\."), "да нашай эры"),
-        (re(r"н\.\s?э\."), "нашай эры"),
-        (re(r"і\s+г\.\s?д\."), "і гэтак далей"),
-        (re(r"т\.\s?зв\."), "так званы"),
+        (re(r"да\s+н\.\s?э\."), "да нашай эры", false),
+        (re(r"н\.\s?э\."), "нашай эры", false),
+        (re(r"і\s+г\.\s?д\."), "і гэтак далей", true),
+        (re(r"т\.\s?зв\."), "так званы", false),
     ]
 });
 
@@ -398,7 +401,7 @@ static MAGNITUDE_RES: LazyLock<Vec<JsRegex>> = LazyLock::new(|| {
 static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r"{NOT_LETTER_BEFORE}({})\.(\s+)(?=[\p{{L}}\d(])",
+            r"{NOT_LETTER_BEFORE}({})\.(\s+)(?=([\p{{L}}\d(]))",
             *ABBREV_ALT
         ),
         "giu",
@@ -451,12 +454,16 @@ pub(crate) fn normalize_belarusian(input: &JsString) -> JsString {
     }
     s = rewrite(&s, js_re!(r"[    ]", "gu"), &js(" "));
 
-    // 1) multi-dot abbreviations; the final dot kept at the utterance end.
-    for (re, word) in MULTI.iter() {
+    // 1) multi-dot abbreviations; the final dot kept at the utterance end, and before a capital after the one
+    //    that closes a list (#1535).
+    for (re, word, closes) in MULTI.iter() {
         s = rewrite_with(&s, re, |m, full| {
             let rest = full.slice(m.end() as isize, None);
             let w = js(word);
             if js_re!(r#"^\s*["»)']?\s*$"#, "u").test(&rest) {
+                return w.concat(&js("."));
+            }
+            if *closes && js_re!(r"^\s+\p{Lu}", "u").test(&rest) {
                 w.concat(&js("."))
             } else {
                 w
@@ -488,14 +495,29 @@ pub(crate) fn normalize_belarusian(input: &JsString) -> JsString {
     }
 
     // 4) dotted abbreviations: before a word, before a mark, at a sentence end.
+    //    A miss stays as written in all three (#1122, #1535); a closing abbreviation before a capital keeps its dot.
     s = rewrite_with(&s, &ABBREV_CONTINUES, |m, t| {
-        js(dotted(&m.group(1, t).unwrap().to_lower_case())).concat(&m.group(2, t).unwrap())
+        let key = m.group(1, t).unwrap().to_lower_case();
+        let Some(w) = dotted(&key) else {
+            return m.value(t);
+        };
+        let sp = m.group(2, t).unwrap();
+        if CLOSING_ABBREV.iter().any(|k| js(k) == key)
+            && js_re!(r"\p{Lu}", "u").test(&m.group(3, t).unwrap())
+        {
+            js(w).concat(&js(".")).concat(&sp)
+        } else {
+            js(w).concat(&sp)
+        }
     });
     s = rewrite_with(&s, &ABBREV_BEFORE_MARK, |m, t| {
-        js(dotted(&m.group(1, t).unwrap().to_lower_case()))
+        dotted(&m.group(1, t).unwrap().to_lower_case()).map_or_else(|| m.value(t), js)
     });
     s = rewrite_with(&s, &ABBREV_ENDS, |m, t| {
-        js(dotted(&m.group(1, t).unwrap().to_lower_case())).concat(&js("."))
+        match dotted(&m.group(1, t).unwrap().to_lower_case()) {
+            Some(w) => js(w).concat(&js(".")),
+            None => m.value(t),
+        }
     });
 
     // 5) numeral + written suffix: the form (ordinal, else oblique cardinal) that ends with the typed letters.
@@ -592,7 +614,7 @@ pub(crate) fn normalize_belarusian(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d\p{L}/.,])(\d{1,2})\/(\d{1,2})(?![\d/\p{L}.,])",
+            r"(?<![\d\p{L}/.,])(\d{1,2})\/(\d{1,2})(?![\d/\p{L}]|[.,]\d)",
             "gu"
         ),
         |m: &JsMatch, t| {

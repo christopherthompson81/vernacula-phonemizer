@@ -101,3 +101,26 @@ expected: a Cyrillic run inside any other host still goes to ru, and nothing rou
 patterns refused`. `cargo fmt --check` clean. clippy: in the new files, only the five `module_inception` warnings
 (every clippy span was grepped for the five directories). No TS regex was added or changed, so `tools/extract_regexes.mts` was not
 needed.
+
+## Run 7 — 2026-10-11 17:20 (fixing the Run 5 findings TS-first, #1535)
+
+**Command.** As the cs log, Run 7 (FLEURS mk_mk, 1,857 texts).
+
+**Raw finding.**
+1. Russian-spelled names (fixed): TOKEN class `[а-яА-ЯёЁ…]`, and manifest `russianLetters` folds ё й щ ъ ы ь э ю я to
+   the Macedonian spelling before the scan. `Юрий Гагарин` → `jˈurij ɡˈaɡarin` (= `Јуриј`). 0 FLEURS texts carry
+   these letters.
+2. `итн.` before a capital (fixed): the dot is kept. The year (declined, measured):
+- **Year before a capital: measured, declined.** `tools`-free scan of every `N г. <Capital>` in FLEURS be_by, bg_bg
+  and mk_mk (words since the sentence start printed per hit, each read by hand): 20 hits, **12 mid-sentence** (the
+  year phrase opens its sentence before the subject: `У 1970 г. Рэйманд …`, `През 1956 г. Слания …`, `Все пак през
+  991 г. Етелред …`, `След унгарското Гран При през 2009 г. Пике младши беше уволнен`), **8 sentence ends** (be 5,
+  bg 2, mk 1). Keeping the dot before any capital (the ru/uk choice) reads 12 wrong to fix 8, so the year rule is
+  unchanged. A words-since-sentence-start threshold of ≤5 separates all 20, but with a one-word margin, tuned on the
+  same 20 rows: dead end, not shipped. The era markers follow a year and share the decision.
+3. Fraction (fixed): every numerator, `FRACTION_NOUN` [sg, pl] by mkCountForm's rule, feminine numeral: `две третини`,
+   `дваесет и една половина`, `единаесет третини`.
+4. Regnal (partly fixed, as cs): the name may not open the sentence. `Македонија 2.` stays; all three FLEURS regnal
+   readings are mid-sentence and unchanged. test/macedonian.test.ts's two utterance-initial pins (`Лиалофи III`,
+   `Луј XVI`) were given a preceding word. Declined: a capitalised non-name mid-sentence.
+- FLEURS mk_mk: 0 changes; golden mk: 0 rows. Revert proof: HEAD normalize.ts fails 3 tests, HEAD macedonian.ts 1.

@@ -224,20 +224,25 @@ public static class Normalize
      * The multi-word dotted abbreviations, in the TS declaration order — `да н. э.` must be tried before
      * `н. э.` or the longer reading is unreachable.
      */
-    private static readonly (JsRe Re, string Word)[] MULTI_DOT =
+    // The third field marks the one that CLOSES a list: a capital after it keeps its dot (#1535).
+    private static readonly (JsRe Re, string Word, bool Closes)[] MULTI_DOT =
     [
-        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}да\\s+н\\.\\s?э\\.", "giu"), "да нашай эры"),
-        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}н\\.\\s?э\\.", "giu"), "нашай эры"),
-        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}і\\s+г\\.\\s?д\\.", "giu"), "і гэтак далей"),
-        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}т\\.\\s?зв\\.", "giu"), "так званы"),
+        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}да\\s+н\\.\\s?э\\.", "giu"), "да нашай эры", false),
+        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}н\\.\\s?э\\.", "giu"), "нашай эры", false),
+        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}і\\s+г\\.\\s?д\\.", "giu"), "і гэтак далей", true),
+        (JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}т\\.\\s?зв\\.", "giu"), "так званы", false),
     ];
+    private static readonly JsRe CAPITAL_NEXT = JsRegex.Compile("^\\s+\\p{Lu}", "u");
+    private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "u");
+    /** The DOTTED_ABBREV keys that CLOSE a list (`і інш.`), so a capital after their dot starts a sentence (#1535). */
+    private static readonly HashSet<string> CLOSING_ABBREV = new(StringComparer.Ordinal) { "інш" };
     private static readonly JsRe SENTENCE_TAIL = JsRegex.Compile("^\\s*[\"\u00bb)']?\\s*$", "u");
     private static readonly JsRe NUMERO = JsRegex.Compile("\u2116\\s?(?=\\d)", "gu");
     private static readonly JsRe KM_PER_HOUR = JsRegex.Compile("(\\d)\\s?(?:км\\s?/\\s?(?:гадз|год|г)|км/ч)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe YEAR_G = JsRegex.Compile($"(\\d)\\s?г\\.{NOT_LETTER}", "gu");
     private static readonly JsRe YEAR_GG = JsRegex.Compile($"(\\d)\\s?гг\\.{NOT_LETTER}", "gu");
     private static readonly JsRe SUFFIXED = JsRegex.Compile($"(?<![\\d.,])(\\d+)\\s?-\\s?([а-яёіў]{{1,3}}){NOT_LETTER}", "giu");
-    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d(])", "giu");
+    private static readonly JsRe ABBREV_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(\\s+)(?=([\\p{{L}}\\d(]))", "giu");
     private static readonly JsRe ABBREV_COMMA = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*[,;:])", "giu");
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*(?:[.!?\u00bb)]|$))", "giu");
     private static readonly JsRe M_S = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?м\\/с(?![\\p{L}\\p{M}])", "gu");
@@ -255,7 +260,7 @@ public static class Normalize
     private static readonly JsRe LESS_THAN = JsRegex.Compile("(\\d)\\s?<\\s?(?=\\d)", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("(\\d)\\s?>\\s?(?=\\d)", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("(\\d)\\s?\u00f7\\s?(?=\\d)", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d\\p{L}/.,])(\\d{1,2})\\/(\\d{1,2})(?![\\d/\\p{L}.,])", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d\\p{L}/.,])(\\d{1,2})\\/(\\d{1,2})(?![\\d/\\p{L}]|[.,]\\d)", "gu");
     private static readonly JsRe ADZIN_FINAL = JsRegex.Compile("адзін$", "u");
     private static readonly JsRe DVA_FINAL = JsRegex.Compile("два$", "u");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[\u2013\u2014-]\\s?(?=\\d)", "gu");
@@ -274,13 +279,14 @@ public static class Normalize
 
         // 1) MULTI-DOT ABBREVIATIONS, before the single-dot rule (step 4). The FINAL dot is kept when the
         //    abbreviation ends the sentence, or the corpus's sentence-final pause is lost outright.
-        foreach (var (re, word) in MULTI_DOT)
+        foreach (var (re, word, closes) in MULTI_DOT)
         {
             var subject = s;
             s = Rewrite(s, re, m =>
             {
                 var rest = subject[(m.Index + m.Length)..];
-                return SENTENCE_TAIL.IsMatch(rest) ? $"{word}." : word;
+                if (SENTENCE_TAIL.IsMatch(rest)) return $"{word}.";
+                return closes && CAPITAL_NEXT.IsMatch(rest) ? $"{word}." : word;
             });
         }
 
@@ -306,9 +312,19 @@ public static class Normalize
 
         // 4) DOTTED ABBREVIATIONS — the dot is consumed before a following word or a comma so it cannot
         //    become a phrase break; at a real sentence end it is kept.
-        s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = Rewrite(s, ABBREV_COMMA, m => DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]);
-        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        // ⚠ THE MISS BRANCH IS REACHABLE (#1122) in all three (#1535): a folded near-miss (`ᲃт.`) is left alone.
+        // A capital after a CLOSING abbreviation is a new sentence, so its dot is kept.
+        s = Rewrite(s, ABBREV_MID, m =>
+        {
+            var key = m.Groups[1].Value.ToLowerInvariant();
+            if (!DOTTED_ABBREV.TryGetValue(key, out var w)) return m.Value;
+            return CLOSING_ABBREV.Contains(key) && UPPER.IsMatch(m.Groups[3].Value)
+                ? $"{w}.{m.Groups[2].Value}" : $"{w}{m.Groups[2].Value}";
+        });
+        s = Rewrite(s, ABBREV_COMMA, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+        s = Rewrite(s, ABBREV_END, m =>
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
 
         // 5) NUMERAL + WRITTEN SUFFIX — the ordinal notation AND the oblique cardinal in one notation; the
         //    written letters choose, and a form that does not end with the typed suffix is never returned.

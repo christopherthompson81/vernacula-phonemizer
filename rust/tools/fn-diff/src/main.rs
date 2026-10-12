@@ -1721,9 +1721,7 @@ fn main() {
                 let w = || units(&input["word"]);
                 let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
                 match input["op"].as_str().unwrap() {
-                    "normalize" => cs
-                        .normalize(&t())
-                        .unwrap_or_else(|e| JsString::from(format!("\u{0}throw {e}").as_str())),
+                    "normalize" => cs.normalize(&t()),
                     "initialisms" => cs.normalize_initialisms(&t()),
                     "symbols" => cs.symbols(&t()),
                     "unreadable" => JsString::from(cs.is_unreadable(&t()).to_string().as_str()),

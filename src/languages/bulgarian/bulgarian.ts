@@ -122,7 +122,7 @@ function applyPhonotactics(toks: string[]): string {
 
 // ── Numbers (decimal; Bulgarian) ──────────────────────────────────────────────
 /** Build the Bulgarian words for n; "и" precedes the final component (сто двайсет и три; сто и три). */
-function numberToText(n: number): string {
+export function numberToText(n: number): string {
     if (n < 0) return "";
     if (n < 10) return NUM.units[n]!;
     if (n === 10) return NUM.ten;
@@ -180,8 +180,9 @@ function number(digits: string): string {
     return words.split(" ").filter(Boolean).map(phonemizeWord).join(" ");
 }
 
-// A word (Bulgarian Cyrillic) / number / punctuation token.
-const TOKEN = /([а-яёА-ЯЁ']+)|(\d+)|([.!?…,;:—])/gu;
+// A word (Bulgarian Cyrillic) / number / punctuation token. ⚠ ѐ ѝ Ѐ Ѝ ARE BULGARIAN LETTERS (#1535): outside the
+// class, the clitic ѝ (*her*) fell to the Russian reader, which reads nothing, so `и ѝ каза` lost a word.
+const TOKEN = /([а-яёА-ЯЁѐѝЀЍ']+)|(\d+)|([.!?…,;:—])/gu;
 
 class BulgarianPhonemizer implements Phonemizer {
     text(rawInput: string): string {

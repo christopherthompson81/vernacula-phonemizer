@@ -98,7 +98,10 @@ public sealed class MacedonianPhonemizer : ILanguage
      */
     private static List<string> Scan(string word)
     {
-        var chars = Js.CodePoints(Js.ToLowerCase(word));
+        // Russian letters fold to their Macedonian spelling first (macedonian.jsonc `russianLetters`, #1535).
+        var chars = Js.CodePoints(Js.ToLowerCase(word))
+            .SelectMany(c => Manifest.DEF.RussianLetters.TryGetValue(c, out var f) ? Js.CodePoints(f) : new List<string> { c })
+            .ToList();
         var toks = new List<string>();
         for (var i = 0; i < chars.Count; i++)
         {
@@ -186,7 +189,7 @@ public sealed class MacedonianPhonemizer : ILanguage
      * (the corpus's "1,400 луѓе" is fourteen hundred), so it is read as one number; 1–2 digits are a decimal.
      */
     private static readonly JsRe TOKEN =
-        JsRegex.Compile("([а-шА-ШѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\\d+(?:,\\d+)?)|([.!?…,;:—])", "gu");
+        JsRegex.Compile("([а-яА-ЯёЁѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\\d+(?:,\\d+)?)|([.!?…,;:—])", "gu");
 
     public string Text(string input)
     {

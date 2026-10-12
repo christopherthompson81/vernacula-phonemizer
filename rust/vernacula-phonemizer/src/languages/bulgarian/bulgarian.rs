@@ -49,6 +49,25 @@ pub struct BulgarianDef {
     pub front_vowel_letters: Vec<String>,
     pub clause_punctuation: IndexMap<String, String>,
     pub numbers: NumbersDef,
+    /// normalize.ts's own slice (#1535): the suffix-notation ordinals.
+    pub ordinals: OrdinalsDef,
+    /// `magnitudeAbbrev`, in its object's key order.
+    pub magnitude_abbrev: IndexMap<String, MagnitudeAbbrev>,
+    pub hour_abbrev: String,
+}
+
+/// `ordinals`: the masculine ordinal of each last cardinal word, and the endings after the masculine.
+#[derive(Debug, Deserialize)]
+pub struct OrdinalsDef {
+    pub words: HashMap<String, String>,
+    pub endings: Vec<String>,
+}
+
+/// One `magnitudeAbbrev` entry.
+#[derive(Debug, Deserialize)]
+pub struct MagnitudeAbbrev {
+    pub exponent: u32,
+    pub decimal: String,
 }
 
 /// `DEF`, or why bulgarian.jsonc could not be loaded. Cached once loaded; a failure is retried.
@@ -242,7 +261,7 @@ fn apply_phonotactics(mut toks: Vec<JsString>) -> JsString {
 }
 
 /// `numberToText(n)`: Bulgarian words for a safe integer, `и` before the final component.
-fn number_to_text(n: f64) -> String {
+pub(crate) fn number_to_text(n: f64) -> String {
     let num = &DEF.numbers;
     if n < 0.0 {
         return String::new();
@@ -356,7 +375,7 @@ fn number(digits: &JsString) -> JsString {
 }
 
 static TOKEN: LazyLock<JsRegex> =
-    LazyLock::new(|| JsRegex::new("([а-яёА-ЯЁ']+)|(\\d+)|([.!?…,;:—])", "gu").unwrap());
+    LazyLock::new(|| JsRegex::new("([а-яёА-ЯЁѐѝЀЍ']+)|(\\d+)|([.!?…,;:—])", "gu").unwrap());
 
 /// The Bulgarian engine (`createBulgarian`).
 pub struct BulgarianPhonemizer;
@@ -497,15 +516,38 @@ mod tests {
         }
     }
 
-    /// Cyrillic-in-host routing: bg has no `HOST_OVERRIDES` entry and its TOKEN is `[а-яёА-ЯЁ']`, so ѝ (U+045D)
-    /// is an unclaimed Cyrillic run that goes to the Russian reader, which reads it as nothing — the TS reading
-    /// (`и ѝ каза` → `i kaza`), reported in the port log, reproduced here.
+    /// ѝ and ѐ are in the TOKEN and the letter table (#1535): `и ѝ каза` reads the clitic. A lone ѝ handed to the
+    /// router still resolves to `ru` (the script table, not the engine's TOKEN, decides that).
     #[test]
-    fn an_unclaimed_cyrillic_run_goes_to_russian() {
-        assert_eq!(crate::phonemize("и ѝ каза", "bg").unwrap(), "i kaza");
+    fn grave_vowels_are_read_by_bulgarian() {
+        assert_eq!(crate::phonemize("и ѝ каза", "bg").unwrap(), "i i kaza");
+        assert_eq!(crate::phonemize("ЍЀ", "bg").unwrap(), "iɛ");
         assert_eq!(
             crate::core::scripts::reader_for(&js("ѝ"), "bg").map(|(t, _)| t),
             Some("ru")
         );
+    }
+
+    /// test/slavic-port-findings.test.ts, the Bulgarian block (#1535).
+    #[test]
+    fn the_1535_findings_hold() {
+        let e = create_bulgarian().unwrap();
+        for (t, want) in [
+            ("1,5 млн. души", "1 цяло и 5 милиона души"),
+            ("340 млн. до 500", "340000000 до 500"),
+            ("общо 2 млрд.", "общо 2000000000."),
+            (
+                "1-ви, 2-ри, 3-ти, 4-о, 5-та, 7-ми, 15-то, 37-ата, 190-то, 21-ви, 11-и, 1-вия",
+                "първи, втори, трети, четвърто, пета, седми, петнайсето, трийсет и седмата, сто и деветдесето, двайсет и първи, единайсети, първия",
+            ),
+            ("50-те години", "50-те години"),
+            ("28-годишен", "28-годишен"),
+            ("в 12:05 ч.", "в 12 05 часа."),
+            ("в 12:00 ч. GMT", "в 12 00 часа GMT"),
+            ("в 10:00 ч.сутринта", "в 10 00 часа сутринта"),
+        ] {
+            assert_eq!(e.normalize(&js(t)).to_string_lossy(), want, "{t}");
+        }
+        assert_eq!(crate::phonemize("1-ви клас", "bg").unwrap(), "pɤrvi kɫas");
     }
 }

@@ -53,3 +53,6 @@ Latin words and Ελληνικά and ԑ inside Belarusian.
 # the TS defects reported in the port log (reproduced, so pinned here)
 Гэта ᲃт. слова і ᲁол. Потым, і 1/2. І 3/4, і 5/8.
 Гл. Потым, у 438 г. н.э. Потым і ў 1990 г. Потым.
+Гэта \u{1c83}т., а потым \u{1c81}ол.
+Палова 1/2. Потым 5/8, і 29/30.10.1937.
+Кнігі і інш. Потым і г.д. Затым.

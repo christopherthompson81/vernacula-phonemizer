@@ -269,6 +269,9 @@ const DOTTED_ABBREV: Readonly<Record<string, string>> = {
     "дол": "долараў",
 };
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+/** The DOTTED_ABBREV keys that CLOSE a list (`і інш.`), so a capital after their dot starts a new sentence
+ *  (#1535). A positive list: the rest precede their object or qualify a figure. */
+const CLOSING_ABBREV: ReadonlySet<string> = new Set(["інш"]);
 
 const NOT_LETTER = "(?![\\p{L}\\p{M}'’ʼ])";
 /** Normalize one Belarusian input string. Pure text→text. Steps are ORDER-DEPENDENT. */
@@ -287,16 +290,22 @@ export function normalizeBelarusian(input: string): string {
     //    become phrase breaks. `н.э.` ×17 glued and `н. э.` ×2 spaced — both spellings occur. The FINAL dot
     //    is kept when the abbreviation ends the sentence, or the corpus's `…у 438 г. н.э.` loses its
     //    sentence-final pause outright (the German run's check: zero sentence-final pauses may be lost).
-    const multi: readonly (readonly [RegExp, string])[] = [
-        [new RegExp(`${NOT_LETTER_BEFORE}да\\s+н\\.\\s?э\\.`, "giu"), "да нашай эры"],
-        [new RegExp(`${NOT_LETTER_BEFORE}н\\.\\s?э\\.`, "giu"), "нашай эры"],
-        [new RegExp(`${NOT_LETTER_BEFORE}і\\s+г\\.\\s?д\\.`, "giu"), "і гэтак далей"],
-        [new RegExp(`${NOT_LETTER_BEFORE}т\\.\\s?зв\\.`, "giu"), "так званы"],
+    //    The third field marks the one that CLOSES a list (see the ⚠ below).
+    const multi: readonly (readonly [RegExp, string, boolean])[] = [
+        [new RegExp(`${NOT_LETTER_BEFORE}да\\s+н\\.\\s?э\\.`, "giu"), "да нашай эры", false],
+        [new RegExp(`${NOT_LETTER_BEFORE}н\\.\\s?э\\.`, "giu"), "нашай эры", false],
+        [new RegExp(`${NOT_LETTER_BEFORE}і\\s+г\\.\\s?д\\.`, "giu"), "і гэтак далей", true],
+        [new RegExp(`${NOT_LETTER_BEFORE}т\\.\\s?зв\\.`, "giu"), "так званы", false],
     ];
-    for (const [re, word] of multi)
+    //    ⚠ `і г.д.` ALSO ENDS A SENTENCE BEFORE A CAPITAL (#1535): it closes a list, so `… і г.д. Потым` is two
+    //    sentences, and eating the dot ran them together. The era markers are NOT given that test: they follow
+    //    a year, and a capital after a year is mid-sentence more often than not (FLEURS be/bg/mk `N г.
+    //    <Capital>`: 12 of 20 mid-sentence, `У 1970 г. Рэйманд …`) — see step 3. `т. зв.` precedes its object.
+    for (const [re, word, closes] of multi)
         s = rewrite(s, re, (m0, offset: number, full: string) => {
             const rest = full.slice(offset + m0.length);
-            return /^\s*["»)']?\s*$/u.test(rest) ? `${word}.` : word;
+            if (/^\s*["»)']?\s*$/u.test(rest)) return `${word}.`;
+            return closes && /^\s+\p{Lu}/u.test(rest) ? `${word}.` : word;
         });
 
     // 2) НУМАР. The sign was dropped outright. `нумар` ×39 — "Міжнародны стандартны кніжны нумар (ISBN)".
@@ -310,6 +319,10 @@ export function normalizeBelarusian(input: string): string {
     //    The genitive *года* is what a figure governs (`1990 года`), and the final dot is dropped because
     //    it is not a sentence end — step 1's clause-final test does not apply, since a year is followed by
     //    more sentence in every corpus instance.
+    //    ⚠ A CAPITAL AFTER THE YEAR'S DOT IS STILL NOT TAKEN AS A SENTENCE END (#1535, measured and declined).
+    //    FLEURS be/bg/mk hold 20 `N г. <Capital>`: 12 are mid-sentence (`У 1970 г. Рэйманд …`, a year phrase
+    //    opening its sentence before the subject) and 8 are sentence ends. Keeping the dot there would read 12
+    //    wrong to fix 8.
     s = rewrite(s, /(\d)\s?(?:км\s?\/\s?(?:гадз|год|г)|км\/ч)(?![\p{L}\p{M}])/giu, "$1 кіламетраў на гадзіну");
     s = rewrite(s, new RegExp(`(\\d)\\s?г\\.${NOT_LETTER}`, "gu"), "$1 года");
     s = rewrite(s, new RegExp(`(\\d)\\s?гг\\.${NOT_LETTER}`, "gu"), "$1 гадоў");
@@ -326,12 +339,26 @@ export function normalizeBelarusian(input: string): string {
 
     // 4) DOTTED ABBREVIATIONS. The dot is consumed before a following word or a comma so it cannot become a
     //    phrase break; at a real sentence end it is kept.
-    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=[\\p{L}\\d(])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}${sp}`);
+    //    ⚠ THE MISS BRANCH IS REACHABLE (#1122) IN ALL THREE (#1535): the pattern is built from this table's
+    //    own keys but carries `i`+`u`, so JS's fold widens it — `ᲃт.` (U+1C83, which folds onto с) matches `ст`
+    //    while its key is absent, and the `!` made `String.replace` print `undefined`, read aloud in English.
+    //    ⚠ AND A CAPITAL AFTER A CLOSING ABBREVIATION IS A NEW SENTENCE (#1535): `і інш. Потым` lost its pause.
+    //    Only `інш` closes a list; every other key is followed by its object, capital or not (`гл. Малюнак`,
+    //    `вул. Леніна`, `0,71 дол. ЗША`).
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(\\s+)(?=([\\p{L}\\d(]))`, "giu"),
+        (m0, ab: string, sp: string, next: string) => {
+            const key = ab.toLowerCase();
+            const w = DOTTED_ABBREV[key];
+            if (w === undefined) return m0;
+            return CLOSING_ABBREV.has(key) && /\p{Lu}/u.test(next) ? `${w}.${sp}` : `${w}${sp}`;
+        });
     s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
-        (_m, ab: string) => DOTTED_ABBREV[ab.toLowerCase()]!);
+        (m0, ab: string) => DOTTED_ABBREV[ab.toLowerCase()] ?? m0);
     s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
-        (_m, ab: string) => `${DOTTED_ABBREV[ab.toLowerCase()]!}.`);
+        (m0, ab: string) => {
+            const w = DOTTED_ABBREV[ab.toLowerCase()];
+            return w === undefined ? m0 : `${w}.`;
+        });
 
     // 5) NUMERAL + WRITTEN SUFFIX — the ordinal notation, ×23 in the retained text and `ordinal-latin`
     //    30,090 corpus-wide. The suffix is the LAST LETTERS OF THE FULL WORD, not an appendable marker, so
@@ -418,7 +445,10 @@ export function normalizeBelarusian(input: string): string {
     //     still claiming the ordinary shape if it occurs, which is the honest position: a rule with no
     //     attested instance is a misfire generator (trap 9), and a rule that reads a death year as a
     //     fraction is a defect that produces a READING (trap 56).
-    s = rewrite(s, /(?<![\d\p{L}/.,])(\d{1,2})\/(\d{1,2})(?![\d/\p{L}.,])/gu, (whole, a: string, b: string) => {
+    //     ⚠ THE TRAILING GUARD REFUSES `.`/`,` ONLY WITH A DIGIT BEYOND IT (#1535) — a decimal or a dotted date
+    //     (`29/30.10.1937`). Refusing any `.` or `,` left every fraction before a full stop or a comma unread
+    //     (`1/2.` was *адзін два*).
+    s = rewrite(s, /(?<![\d\p{L}/.,])(\d{1,2})\/(\d{1,2})(?![\d/\p{L}]|[.,]\d)/gu, (whole, a: string, b: string) => {
         const num = Number(a), den = Number(b);
         if (den < 2 || den > 10 || num < 1 || num >= den) return whole;
         // ⚠ THE DENOMINATOR AGREES WITH THE NUMERATOR, not merely with the elided noun. Belarusian says

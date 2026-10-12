@@ -5,10 +5,56 @@
 
 use std::sync::LazyLock;
 
+use super::bulgarian::{DEF, number_to_text};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js};
+use crate::core::js_string::{JsString, js, js_number};
 use crate::core::provenance::{escape, rewrite, rewrite_with};
 use crate::js_re;
+
+/// `ordinalForms(n)`: every form of the ordinal of `n` the suffix notation can write, masculine first; empty when
+/// the cardinal's last word has no ordinal (#1535).
+fn ordinal_forms(n: f64) -> Vec<JsString> {
+    let text = number_to_text(n);
+    let words: Vec<&str> = text.split(' ').collect();
+    let Some(masc) = DEF.ordinals.words.get(*words.last().unwrap()) else {
+        return Vec::new();
+    };
+    let head: String = words[..words.len() - 1]
+        .iter()
+        .map(|w| format!("{w} "))
+        .collect();
+    let masc = js(masc);
+    let stem = if masc.ends_with(&js("ен")) {
+        masc.slice(0, Some(-2)).concat(&js("н"))
+    } else {
+        masc.slice(0, Some(-1))
+    };
+    let mut forms = vec![masc];
+    forms.extend(DEF.ordinals.endings.iter().map(|e| stem.concat(&js(e))));
+    forms.into_iter().map(|f| js(&head).concat(&f)).collect()
+}
+
+/// `atEnd(rest)`: the consumed abbreviation dot was also the end of the utterance.
+fn at_end(rest: &JsString) -> bool {
+    js_re!(r#"^[\s»)”"']*$"#, "u").test(rest)
+}
+
+static MAGNITUDE_RES: LazyLock<Vec<(JsRegex, u32, JsString)>> = LazyLock::new(|| {
+    DEF.magnitude_abbrev
+        .iter()
+        .map(|(abbr, m)| {
+            (
+                JsRegex::new(
+                    &format!(r"(\d+(?:,\d+)?)\s*{abbr}(\.?)(?![\p{{L}}\p{{M}}])"),
+                    "gu",
+                )
+                .unwrap(),
+                m.exponent,
+                js(&m.decimal),
+            )
+        })
+        .collect()
+});
 
 /// `UNITS`, longest first.
 const UNITS: [(&str, &str); 10] = [
@@ -153,6 +199,25 @@ pub(crate) fn normalize_bulgarian(input: &JsString) -> JsString {
         }
     }
 
+    // 4b) magnitude abbreviations (#1535): an integer multiplied out, a decimal with the plural; the dot put back
+    //     only at the utterance end.
+    for (re, exponent, decimal) in MAGNITUDE_RES.iter() {
+        t = rewrite_with(&t, re, |m, s| {
+            let n = m.group(1, s).unwrap();
+            let read = if n.includes(&js(",")) {
+                n.concat(&js(" ")).concat(decimal)
+            } else {
+                n.concat(&js(&"0".repeat(*exponent as usize)))
+            };
+            let dot = m.group(2, s).unwrap_or_default();
+            if !dot.is_empty() && at_end(&s.slice(m.end() as isize, None)) {
+                read.concat(&js("."))
+            } else {
+                read
+            }
+        });
+    }
+
     // 5) the decimal comma: `цяло и`, then the fraction digit by digit (code points).
     t = rewrite_with(&t, js_re!(r"(\d+),(\d+)", "gu"), |m, s| {
         let frac: Vec<JsString> = m.group(2, s).unwrap().code_point_strings();
@@ -162,8 +227,40 @@ pub(crate) fn normalize_bulgarian(input: &JsString) -> JsString {
             .concat(&JsString::join(&frac, &js(" ")))
     });
 
-    // 6) the colon clock, read as two numbers.
+    // 6) the colon clock, read as two numbers; `ч.` after it is the word *часа* (#1535).
+    t = rewrite_with(
+        &t,
+        js_re!(r"(\d{1,2}:\d{2})(?!\d)\s*ч(?:(\.)|(?![\p{L}\p{M}]))", "gu"),
+        |m, s| {
+            let rest = s.slice(m.end() as isize, None);
+            let read = m
+                .group(1, s)
+                .unwrap()
+                .concat(&js(" "))
+                .concat(&js(&DEF.hour_abbrev));
+            if m.group(2, s).is_some() && at_end(&rest) {
+                read.concat(&js("."))
+            } else if js_re!(r"^[\p{L}\p{M}]", "u").test(&rest) {
+                read.concat(&js(" "))
+            } else {
+                read
+            }
+        },
+    );
     t = rewrite(&t, js_re!(r"(\d{1,2}):(\d{2})(?!\d)", "gu"), &js("$1 $2"));
+
+    // 6c) the ordinal suffix: the form that ends with the written letters, else as written (#1535).
+    t = rewrite_with(
+        &t,
+        js_re!(r"(?<![\d.,])(\d+)\s?-\s?([а-я]{1,3})(?![\p{L}\p{M}])", "gu"),
+        |m, s| {
+            let suffix = m.group(2, s).unwrap();
+            ordinal_forms(js_number(&m.group(1, s).unwrap()))
+                .into_iter()
+                .find(|f| f.ends_with(&suffix))
+                .unwrap_or_else(|| m.value(s))
+        },
+    );
 
     // 6b) №.
     t = rewrite(&t, js_re!(r"№\s?(?=\d)", "gu"), &js("номер "));

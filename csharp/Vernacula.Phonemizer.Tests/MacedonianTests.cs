@@ -160,9 +160,9 @@ public class MacedonianTests
 
     /** Regnal ordinals after the shared Roman→digit pass: feminine after a name in -а, 2–39 only. */
     [Theory]
-    [InlineData("Лиалофи III", "liˈaɫɔfi trˈɛti")]
+    [InlineData("главатар Лиалофи III", "ɡɫˈavatar liˈaɫɔfi trˈɛti")]
     [InlineData("Кралица Елизабета II", "krˈalit͡sa ɛlizˈabɛta ftˈɔra")]  // Втора, feminine
-    [InlineData("Луј XVI", "ɫˈuj ʃɛsnaˈɛsɛtti")]
+    [InlineData("крал Луј XVI", "krˈaɫ ɫˈuj ʃɛsnaˈɛsɛtti")]
     [InlineData("во Формула 1.", "vˈɔ fˈɔrmuɫa ˈɛdɛn .")]                // Formula ONE — a cardinal
     public void TheRegnalOrdinals(string text, string want) => Assert.Equal(want, Ph(text));
 

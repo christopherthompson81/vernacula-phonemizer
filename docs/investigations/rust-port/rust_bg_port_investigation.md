@@ -98,3 +98,32 @@ distinct column-3 texts.
 **Raw finding.** parity: all 24 `200/200 identical, 0 differ`. `cargo test --release --workspace`: 139 + 1 passed.
 regex-diff `144898 … 0 DIFFER, 0 patterns refused`. fmt clean; clippy adds only `module_inception` on
 `bulgarian::bulgarian`. No TS regex added.
+
+## Run 7 — 2026-10-11 17:20 (fixing the Run 5 findings TS-first, #1535)
+
+**Command.** As the cs log, Run 7 (FLEURS bg_bg, 1,990 texts), plus the year scan below.
+
+**Raw finding.**
+1. ѝ (fixed): ѐ ѝ Ѐ Ѝ in the TOKEN, `"ѐ": "ɛ", "ѝ": "i"` in `letters`, both in `frontVowelLetters`. `и ѝ каза` → `i i
+   kaza`. Golden bg: **6 rows move** (2 texts × 3), each only gaining the `i` of ѝ. FLEURS: all 7 ѝ texts change.
+2. `млн.`/`млрд.` (fixed): manifest `magnitudeAbbrev`; an integer is multiplied out so the composer agrees it
+   (`340 млн.` → `триста и четирийсет милиона`, `1 млн.` → `един милион`), a decimal keeps its digits + plural. FLEURS: 1.
+3. Ordinal suffix (fixed): manifest `ordinals` (last cardinal word → masculine ordinal, plus the six endings); the form
+   ending with the written suffix is chosen, none → as written. FLEURS: 30 texts change through `phonemize`
+   (`1-ви януари`, `18-ти век`, `4-о, 5-о и 6-о място`, `37-ата`, `190-то`, …). **Dead end found:** the 11 SPACED
+   texts (`15 - ти век`) change under `normalizeBulgarian` but not through `phonemize`: `core/unicode.ts`
+   `foldSpacedDash` turns ` - ` before a letter into `, ` upstream (`15, ти век`), and claiming `N, ти` would misread
+   the pronoun *ти*. Left. `-те` (`50-те години`, the definite CARDINAL) is left as written: out of scope, and the
+   definite plural `-ите` is kept out of the endings so it cannot be claimed as an ordinal.
+4. Year before a capital (declined, measured):
+- **Year before a capital: measured, declined.** `tools`-free scan of every `N г. <Capital>` in FLEURS be_by, bg_bg
+  and mk_mk (words since the sentence start printed per hit, each read by hand): 20 hits, **12 mid-sentence** (the
+  year phrase opens its sentence before the subject: `У 1970 г. Рэйманд …`, `През 1956 г. Слания …`, `Все пак през
+  991 г. Етелред …`, `След унгарското Гран При през 2009 г. Пике младши беше уволнен`), **8 sentence ends** (be 5,
+  bg 2, mk 1). Keeping the dot before any capital (the ru/uk choice) reads 12 wrong to fix 8, so the year rule is
+  unchanged. A words-since-sentence-start threshold of ≤5 separates all 20, but with a one-word margin, tuned on the
+  same 20 rows: dead end, not shipped. The era markers follow a year and share the decision.
+5. `ч.` after a clock (fixed): `часа` (manifest `hourAbbrev`), dot kept only at the utterance end (`12:00 ч. GMT` is
+   mid-sentence), a glued letter spaced off. FLEURS: 4 texts.
+- FLEURS bg_bg: normalize 41, phonemize 37 of 1,990 change, every one one of the above.
+- Revert proof: HEAD normalize.ts fails the three normalizer tests; HEAD bulgarian.ts fails ѝ and the ordinal test.

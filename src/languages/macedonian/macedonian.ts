@@ -29,11 +29,13 @@ interface NumbersDef {
 interface MacedonianDef {
     letters: Record<string, string>;
     frontLetters: readonly string[];
+    russianLetters: Record<string, string>;
     clausePunctuation: Record<string, string>;
     numbers: NumbersDef;
 }
 const DEF = loadManifest<MacedonianDef>(import.meta.url, "macedonian.jsonc");
 const L = DEF.letters;
+const RUSSIAN: ReadonlyMap<string, string> = new Map(Object.entries(DEF.russianLetters));
 const CLAUSE_MARK = DEF.clausePunctuation;
 
 /**
@@ -92,7 +94,8 @@ const isNucleus = (t: string): boolean => isVowel(t) || t === "r̩"; // the syll
 
 /** Scan a lowercased Macedonian word into IPA phoneme tokens (dark-l in code, every other letter from the table). */
 function scan(word: string): string[] {
-    const chars = [...word.toLowerCase()];
+    // Russian letters fold to their Macedonian spelling first (macedonian.jsonc `russianLetters`, #1535).
+    const chars = [...word.toLowerCase()].flatMap((c) => [...(RUSSIAN.get(c) ?? c)]);
     const toks: string[] = [];
     for (let i = 0; i < chars.length; i++) {
         const c = chars[i]!;
@@ -165,7 +168,9 @@ export function phonemizeWord(word: string): string {
 // (Macedonian's decimal mark) so the comma is not read as clause punctuation — `6,5` was coming out as a
 // phrase break between "шест" and "пет". A 3-digit block after the comma is GROUPING, not a fraction (the
 // corpus's "1,400 луѓе" is fourteen hundred), so it is read as one number; 1–2 digits are a decimal.
-const TOKEN = /([а-шА-ШѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\d+(?:,\d+)?)|([.!?…,;:—])/gu;
+// ⚠ THE WORD CLASS TAKES THE RUSSIAN LETTERS TOO (а-я, ё), which `russianLetters` folds (#1535): with ⟨ю⟩ outside
+// the class a Russian-spelled name was split between two readers (`Юрий` → *ju rˈi*).
+const TOKEN = /([а-яА-ЯёЁѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\d+(?:,\d+)?)|([.!?…,;:—])/gu;
 
 class MacedonianPhonemizer implements Phonemizer {
     text(input: string): string {

@@ -73,6 +73,26 @@ public static class Normalize
     private static readonly JsRe MULTI_SPACE = JsRegex.Compile("[ \\t]{2,}", "gu");
     private static readonly JsRe ESCAPE = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
 
+    // #1535: the magnitude abbreviations, the hour abbreviation after a clock, the ordinal suffix.
+    private static readonly BulgarianDef DEF = BulgarianPhonemizer.DEF;
+    private static readonly List<(JsRe Re, int Exponent, string Decimal)> MAGNITUDE_RES = DEF.MagnitudeAbbrev
+        .Select(kv => (JsRegex.Compile($"(\\d+(?:,\\d+)?)\\s*{kv.Key}(\\.?)(?![\\p{{L}}\\p{{M}}])", "gu"), kv.Value.Exponent, kv.Value.Decimal))
+        .ToList();
+    private static readonly JsRe AT_END = JsRegex.Compile("^[\\s»)”\"']*$", "u");
+    private static readonly JsRe HOUR_ABBREV = JsRegex.Compile("(\\d{1,2}:\\d{2})(?!\\d)\\s*ч(?:(\\.)|(?![\\p{L}\\p{M}]))", "gu");
+    private static readonly JsRe LETTER_FIRST = JsRegex.Compile("^[\\p{L}\\p{M}]", "u");
+    private static readonly JsRe ORDINAL_SUFFIX = JsRegex.Compile("(?<![\\d.,])(\\d+)\\s?-\\s?([а-я]{1,3})(?![\\p{L}\\p{M}])", "gu");
+
+    /** Every form of the ordinal of `n` the suffix notation can write, masculine first, or empty. */
+    private static List<string> OrdinalForms(double n)
+    {
+        var words = BulgarianPhonemizer.NumberToText(n).Split(' ');
+        if (!DEF.Ordinals.Words.TryGetValue(words[^1], out var masc)) return new List<string>();
+        var head = string.Concat(words[..^1].Select(w => $"{w} "));
+        var stem = masc.EndsWith("ен", StringComparison.Ordinal) ? $"{masc[..^2]}н" : masc[..^1];
+        return new[] { masc }.Concat(DEF.Ordinals.Endings.Select(e => $"{stem}{e}")).Select(f => $"{head}{f}").ToList();
+    }
+
     private static readonly List<(JsRe Re, string Word)> UNIT_RES = UNITS
         .Select(u => (JsRegex.Compile($"(\\d)\\s*{u.Abbr}(?!\\p{{L}})", "gu"), $"$1 {u.Word}"))
         .ToList();
@@ -106,10 +126,36 @@ public static class Normalize
             t = Rewrite(t, SPACE_GROUP, "");
         } while (t != prev);
 
+        foreach (var (re, exponent, dec) in MAGNITUDE_RES)
+        {
+            var whole = t;
+            t = Rewrite(t, re, m =>
+            {
+                var n = m.Groups[1].Value;
+                var read = n.Contains(',') ? $"{n} {dec}" : $"{n}{new string('0', exponent)}";
+                return m.Groups[2].Value != "" && AT_END.IsMatch(whole[(m.Index + m.Length)..]) ? $"{read}." : read;
+            });
+        }
+
         t = Rewrite(t, DECIMAL, m =>
             $"{m.Groups[1].Value} цяло и {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 
+        var whole6 = t;
+        t = Rewrite(t, HOUR_ABBREV, m =>
+        {
+            var rest = whole6[(m.Index + m.Length)..];
+            var clock = m.Groups[1].Value;
+            if (m.Groups[2].Success && AT_END.IsMatch(rest)) return $"{clock} {DEF.HourAbbrev}.";
+            return LETTER_FIRST.IsMatch(rest) ? $"{clock} {DEF.HourAbbrev} " : $"{clock} {DEF.HourAbbrev}";
+        });
         t = Rewrite(t, CLOCK, "$1 $2");
+
+        t = Rewrite(t, ORDINAL_SUFFIX, m =>
+        {
+            var suffix = m.Groups[2].Value;
+            return OrdinalForms(Js.Number(m.Groups[1].Value)).FirstOrDefault(f => f.EndsWith(suffix, StringComparison.Ordinal))
+                ?? m.Value;
+        });
 
         t = Rewrite(t, NUMERO, "номер ");
 

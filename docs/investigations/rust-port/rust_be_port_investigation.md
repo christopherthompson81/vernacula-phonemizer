@@ -117,3 +117,22 @@ them). No port-pending rows.
 **Raw finding.** parity: all 23 `200/200 identical, 0 differ`. `cargo test --release --workspace`: 137 + 1 passed.
 regex-diff `144898 … 0 DIFFER, 0 patterns refused`. fmt clean; clippy adds only `module_inception` on
 `belarusian::belarusian`. No TS regex added.
+
+## Run 7 — 2026-10-11 17:20 (fixing the Run 5 findings TS-first, #1535)
+
+**Command.** As the cs log, Run 7 (FLEURS be_by, 1,882 texts), plus the year scan below.
+
+**Raw finding.**
+1. #1122 guard (fixed) on all three dotted arms: `гэта ᲃт. слова` is left as written (no `undefined`).
+2. Fraction before `.`/`,` (fixed): trailing guard `(?![\d/\p{L}]|[.,]\d)`: `1/2.` → `адна другая.`; `29/30.10.1937`
+   still refused.
+3. Sentence end before a capital (partly fixed): `і г.д.` (step 1, a per-entry `closes` flag) and `інш` (step 4,
+   `CLOSING_ABBREV`) keep the dot before a capital. Declined: `Гл.` (precedes its object: `гл. Малюнак`), and the year:
+- **Year before a capital: measured, declined.** `tools`-free scan of every `N г. <Capital>` in FLEURS be_by, bg_bg
+  and mk_mk (words since the sentence start printed per hit, each read by hand): 20 hits, **12 mid-sentence** (the
+  year phrase opens its sentence before the subject: `У 1970 г. Рэйманд …`, `През 1956 г. Слания …`, `Все пак през
+  991 г. Етелред …`, `След унгарското Гран При през 2009 г. Пике младши беше уволнен`), **8 sentence ends** (be 5,
+  bg 2, mk 1). Keeping the dot before any capital (the ru/uk choice) reads 12 wrong to fix 8, so the year rule is
+  unchanged. A words-since-sentence-start threshold of ≤5 separates all 20, but with a one-word margin, tuned on the
+  same 20 rows: dead end, not shipped. The era markers follow a year and share the decision.
+- FLEURS be_by: 0 changes; golden be: 0 rows. Revert proof: all 3 Belarusian tests fail with HEAD normalize.ts.

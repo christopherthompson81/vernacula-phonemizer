@@ -202,3 +202,70 @@ that the out-of-range ordinal is an `Input` error. To prove the pin test bites, 
 **Implication.** Czech is done by the checklist, with no port-pending rows. The cross-language check (does
 registering cs move any other language) is run once for the whole group at the end (the bg log, final run).
 
+
+## Run 7 — 2026-10-11 17:20 (fixing the Run 5 findings TS-first, #1535)
+
+**Question.** Which of Run 5's seven findings can be fixed, and what does each fix move?
+
+**Command.** Fixes in `src/languages/czech/normalize.ts`; `L=cs npx tsx <scratch>/t.mts <probe>` (normalize + phonemize);
+FLEURS cs_cz column 3 (1,947 distinct texts) normalized and phonemized before and after (`<scratch>/fl.mts`, diffed by
+`diff.py`); `npx tsx tools/gen_parity_goldens.mts cs sk be bg mk`; each fixed file reverted to HEAD under the new test.
+
+**Raw finding.**
+1. Throw (fixed): steps 7–10 go through `ordinalIn`, which returns undefined outside 1–999, and the match is left as
+   written: `Ve 1000. století.` → `Ve 1000. století.` (cardinal + break, the general ordinal's own out-of-range
+   behaviour). A century list keeps only the out-of-range item (`Ve 12. a 1000. století` → `Ve dvanáctém a 1000.`).
+2. Regnal (partly fixed): the capitalised word must follow another word's last character and a space,
+   `(?<=[^\s.!?\u2026]\s+\p{Lu}…)`. `Mám 3 psy` stays; FLEURS: `Standardní 35 mm` and `Celých 20 procent` now read as
+   cardinals. All three FLEURS regnal readings (Lealofi III, Alžběty II., Ludvík XVI.) are mid-sentence and unchanged.
+   `Turecka 37. největší` was never a misread (37th largest, step 11). Declined: `šampionátu Formule 1` (a capitalised
+   non-name mid-sentence; needs to know what a name is).
+3. `N. N.` date (fixed): keepFinal, `dne 5. 5.` → `pátého pátého.`
+4. Abbreviation before a capital (fixed): a POSITIVE list `CLOSING` (atd apod aj jr co inc) keeps the dot before a
+   capital. A preposed-key list was tried first and dropped: `mil.` precedes its currency (`50 mil. Kč`), so "every key
+   but the preposed ones" would have put a pause there. 0 FLEURS hits either way.
+5. Century locative (fixed): `(?<![\p{L}\p{M}])(?:v|ve)\s+$`. `Kyjev 12. století` → genitive.
+6. Fraction (fixed): every numerator, the ordinal in the numerator's count form (csCountForm: fem sg / neutNom = fem pl
+   / plGen): `dvě třetí`, `čtyři páté`, `pět osmých`, `dvacetjedna stých`; `1/5` still `jedna pátá`. Side effect found
+   in the FLEURS diff: `29¾ x 24½` (folded upstream to `29 3/4 x 24 1/2`) lost its `krát` — the shared tier's `NxN`
+   runs after normalize and no longer saw a digit before the `x` (read `ks`). Step 15 now takes ASCII `x` too, with the
+   tier's own word.
+7. NFD (fixed): `renormalize(input, "NFC")` first. NFD `děti` → `ɟˈɛcɪ`.
+- FLEURS cs_cz: normalize 3 of 1,947 change (the two regnal misreads, the ¾ row); golden cs: 0 rows.
+- Revert proof: with HEAD normalize.ts all 7 Czech tests in test/slavic-port-findings.test.ts fail.
+
+**Implication.** Port to C# and Rust (the Rust out-of-range `Input` error goes away with the throw).
+
+## Run 8 — 2026-10-12 (#1535: verifying the Rust mirror for cs, sk, be, bg, mk)
+
+**Question.** The fixing agent stopped before checking its Rust port. Does the Rust mirror reproduce the fixed TS?
+
+**Command.** On the tree rebased onto main (which carries the vendored regress fix, #1556):
+`FLEURS_ROOT=… npx tsx rust/tools/fn-diff/dump.mts <op>` and `fn-diff <op>` for each language op, plus
+`LANGS=cs,sk,be,bg,mk … phonemize-sync`. Then the full gates.
+
+**Raw finding.**
+
+| Replay | Identical rows | Differ |
+|---|---|---|
+| cs-normalize | 32,612 | 0 |
+| cs-numbers | 54,190 | 0 |
+| sk-normalize | 70,498 | 0 |
+| sk-numbers | 50,196 | 0 |
+| be-normalize | 32,253 | 0 |
+| be-numbers | 26,170 | 0 |
+| be-roman | 3,816 | 0 |
+| bg-normalize | 4,393 | 0 |
+| mk-normalize | 28,959 | 0 |
+| mk-numbers | 50,156 | 0 |
+| phonemize-sync (all five) | 19,105 | 0 |
+
+- **Gates:**
+  - TS 6960 passed. The new Slavic tests fail 21 cases against main's src/ and data/.
+  - C# 7714 passed (full suite), and C# golden parity is 189 languages byte-identical.
+  - Rust 222 + 1 passed. Parity is identical on all 51 languages except mag's known 199/200.
+  - regex-diff: 145,956 identical. check:goldens is fresh.
+- **Rust `Input` error:** nothing produces `PhonemizeError::Input` any more, because the cs throw was its
+  last source. The variant stays, as part of the public error type, and its doc comment now says so.
+
+**Implication.** The Rust mirror is complete. Ship as one PR closing #1535.

@@ -4,7 +4,6 @@
 //! separately-run initialism pass and the Czech count-form selector.
 //! Ported from src/languages/czech/normalize.ts — see that file for the corpus evidence and the ordering.
 
-use std::cell::Cell;
 use std::collections::HashSet;
 use std::sync::{Arc, LazyLock};
 
@@ -16,7 +15,7 @@ use crate::core::initialisms::{
 use crate::core::js_regex::{JsMatch, JsRegex};
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::normalize_symbols::{alternation, sorted_by_length_desc};
-use crate::core::provenance::{rewrite, rewrite_with};
+use crate::core::provenance::{Form, renormalize, rewrite, rewrite_with};
 use crate::js_re;
 
 /// `GROUP_SPACE`, verbatim: the regex escapes for space, NBSP, NNBSP and thin space.
@@ -208,6 +207,15 @@ fn dotted(key: &JsString) -> Option<&'static str> {
     DOTTED.iter().find(|(k, _)| js(k) == *key).map(|(_, v)| *v)
 }
 
+/// `CLOSING`: the DOTTED keys that close a list or a name, so a capital after their dot is a new sentence
+/// (#1535).
+const CLOSING: [&str; 6] = ["atd", "apod", "aj", "jr", "co", "inc"];
+
+/// `startsSentence(next)`: an uppercase letter next.
+fn starts_sentence(next: &JsString) -> bool {
+    js_re!(r"\p{Lu}", "u").test(next)
+}
+
 /// `DOTTED_ALT`: every key but `s`, longest first (a stable sort).
 static DOTTED_ALT: LazyLock<String> = LazyLock::new(|| {
     alternation(&sorted_by_length_desc(
@@ -310,6 +318,12 @@ pub(crate) fn ordinal(n: f64) -> Option<JsString> {
     Some(s)
 }
 
+/// `ordinalIn(digits, c)`: the ordinal of `digits` in case `c`, or `None` outside 1–999 (#1535: the TS used to
+/// throw there).
+fn ordinal_in(digits: &JsString, c: OrdCase) -> Option<JsString> {
+    ordinal(js_number(digits)).map(|o| inflect_ordinal(&o, c))
+}
+
 /// `MONTH_RULE`, in the TS object's key order.
 const MONTH_RULE: [(&str, OrdCase); 13] = [
     ("ledna", OrdCase::Gen),
@@ -345,7 +359,7 @@ static GROUP_SPACE_RE: LazyLock<JsRegex> =
 static DOTTED_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r#"(?<![\p{{L}}\p{{M}}.])({})\.(\s+)(?=[\p{{L}}\d(„"])"#,
+            r#"(?<![\p{{L}}\p{{M}}.])({})\.(\s+)(?=([\p{{L}}\d(„"]))"#,
             *DOTTED_ALT
         ),
         "giu",
@@ -373,31 +387,10 @@ static MONTH_RE: LazyLock<JsRegex> = LazyLock::new(|| {
     .unwrap()
 });
 
-/// The TS throws (`inflectOrdinal(undefined)` reads `.split` of undefined) where steps 7–10 take the ordinal of
-/// a number outside 1–999.
-const THROW: &str = "TypeError: Cannot read properties of undefined (reading 'split')";
-
-/// `normalizeCzech(input)`. `Err` exactly where the TS throws (see `THROW`).
-pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
-    let mut s = input.clone();
-    let threw = Cell::new(false);
-    // `inflectOrdinal(ordinal(n)!, c)`: a miss marks the call as thrown; the rewrite's output is then discarded.
-    let inflect_n = |n: &JsString, c: OrdCase| -> JsString {
-        match ordinal(js_number(n)) {
-            Some(o) => inflect_ordinal(&o, c),
-            None => {
-                threw.set(true);
-                JsString::new()
-            }
-        }
-    };
-    let check = || {
-        if threw.get() {
-            Err(THROW.to_string())
-        } else {
-            Ok(())
-        }
-    };
+/// `normalizeCzech(input)`.
+pub(crate) fn normalize_czech(input: &JsString) -> JsString {
+    // Composed first (#1535): a decomposed háček reached the g2p as a bare letter and a skipped mark.
+    let mut s = renormalize(input, Form::Nfc);
 
     // 0) digit de-grouping (twice: the groups overlap on the shared digit), then the separators to a space.
     for _ in 0..2 {
@@ -412,10 +405,20 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
 
     // 2) single-dot abbreviations. ⚠ The miss branch is reachable (#1122): the `iu` fold widens the pattern
     //    past the table's keys, and the match then stays as written.
+    //    A closing abbreviation before a capital keeps its dot as the sentence end (#1535).
     s = rewrite_with(&s, &DOTTED_CONTINUES, |m, t| {
-        match dotted(&m.group(1, t).unwrap().to_lower_case()) {
+        let key = m.group(1, t).unwrap().to_lower_case();
+        match dotted(&key) {
             None => m.value(t),
-            Some(w) => js(w).concat(&m.group(2, t).unwrap()),
+            Some(w) => {
+                let sp = m.group(2, t).unwrap();
+                if CLOSING.iter().any(|k| js(k) == key) && starts_sentence(&m.group(3, t).unwrap())
+                {
+                    js(w).concat(&js(".")).concat(&sp)
+                } else {
+                    js(w).concat(&sp)
+                }
+            }
         }
     });
     s = rewrite_with(&s, &DOTTED_ENDS, |m, t| {
@@ -454,7 +457,7 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
         },
     );
 
-    // 4) the `N. N.` date, both halves genitive ordinals.
+    // 4) the `N. N.` date, both halves genitive ordinals; a sentence-final dot is put back (#1535).
     s = rewrite_with(
         &s,
         js_re!(
@@ -467,10 +470,15 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
             if !(1.0..=31.0).contains(&dv) || !(1.0..=12.0).contains(&mv) {
                 return m.value(t);
             }
-            inflect_ordinal(&ordinal(dv).unwrap(), OrdCase::Gen)
+            let read = inflect_ordinal(&ordinal(dv).unwrap(), OrdCase::Gen)
                 .concat(&js(" "))
-                .concat(&inflect_ordinal(&ordinal(mv).unwrap(), OrdCase::Gen))
-                .concat(&js(" "))
+                .concat(&inflect_ordinal(&ordinal(mv).unwrap(), OrdCase::Gen));
+            let kept = keep_final(&read.to_string_lossy(), m, t);
+            if kept == read {
+                read.concat(&js(" "))
+            } else {
+                kept
+            }
         },
     );
 
@@ -502,15 +510,17 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
             "gu"
         ),
         |m, t| {
-            let loc = js_re!(r"(?:v|ve)\s+$", "iu").test(&t.slice(0, Some(m.index() as isize)));
+            let loc = js_re!(r"(?<![\p{L}\p{M}])(?:v|ve)\s+$", "iu")
+                .test(&t.slice(0, Some(m.index() as isize)));
             let c = if loc { OrdCase::Loc } else { OrdCase::Gen };
             let list = m.group(1, t).unwrap();
             js_re!(r"(\d+)\.", "gu")
-                .replace_with(&list, |nm, l| inflect_n(&nm.group(1, l).unwrap(), c))
+                .replace_with(&list, |nm, l| {
+                    ordinal_in(&nm.group(1, l).unwrap(), c).unwrap_or_else(|| nm.value(l))
+                })
                 .concat(&js("století"))
         },
     );
-    check()?;
 
     // 8) decade: genitive/locative plural.
     s = rewrite_with(
@@ -519,13 +529,11 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
             r"(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(let|letech)(?!\p{L})",
             "gu"
         ),
-        |m, t| {
-            inflect_n(&m.group(1, t).unwrap(), OrdCase::PlGen)
-                .concat(&js(" "))
-                .concat(&m.group(2, t).unwrap())
+        |m, t| match ordinal_in(&m.group(1, t).unwrap(), OrdCase::PlGen) {
+            Some(o) => o.concat(&js(" ")).concat(&m.group(2, t).unwrap()),
+            None => m.value(t),
         },
     );
-    check()?;
 
     // 9) date months: the month name is the case cue.
     s = rewrite_with(&s, &MONTH_RE, |m, t| {
@@ -535,52 +543,51 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
             .find(|(k, _)| js(k) == month)
             .map(|(_, c)| *c)
             .unwrap();
-        inflect_n(&m.group(1, t).unwrap(), c)
-            .concat(&js(" "))
-            .concat(&month)
+        match ordinal_in(&m.group(1, t).unwrap(), c) {
+            Some(o) => o.concat(&js(" ")).concat(&month),
+            None => m.value(t),
+        }
     });
-    check()?;
 
     // 10) place (compound first, locative, neuter accusative) and the written-out hour ordinal.
     s = rewrite_with(
         &s,
         js_re!(r"(?<![\p{L}\p{M}\d.,])(\d+)\.\s+a\s+(\d+)\.\s+místě", "gu"),
-        |m, t| {
-            let a = inflect_n(&m.group(1, t).unwrap(), OrdCase::Loc);
-            if threw.get() {
-                return JsString::new();
-            }
-            a.concat(&js(" a "))
-                .concat(&inflect_n(&m.group(2, t).unwrap(), OrdCase::Loc))
-                .concat(&js(" místě"))
+        |m, t| match (
+            ordinal_in(&m.group(1, t).unwrap(), OrdCase::Loc),
+            ordinal_in(&m.group(2, t).unwrap(), OrdCase::Loc),
+        ) {
+            (Some(a), Some(b)) => a.concat(&js(" a ")).concat(&b).concat(&js(" místě")),
+            _ => m.value(t),
         },
     );
-    check()?;
     s = rewrite_with(
         &s,
         js_re!(r"(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místě(?!\p{L})", "gu"),
-        |m, t| inflect_n(&m.group(1, t).unwrap(), OrdCase::Loc).concat(&js(" místě")),
+        |m, t| match ordinal_in(&m.group(1, t).unwrap(), OrdCase::Loc) {
+            Some(o) => o.concat(&js(" místě")),
+            None => m.value(t),
+        },
     );
-    check()?;
     s = rewrite_with(
         &s,
         js_re!(r"(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místo(?!\p{L})", "gu"),
-        |m, t| inflect_n(&m.group(1, t).unwrap(), OrdCase::NeutNom).concat(&js(" místo")),
+        |m, t| match ordinal_in(&m.group(1, t).unwrap(), OrdCase::NeutNom) {
+            Some(o) => o.concat(&js(" místo")),
+            None => m.value(t),
+        },
     );
-    check()?;
     s = rewrite_with(
         &s,
         js_re!(
             r"(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(hodin\p{L}*)(?!\p{L})",
             "gu"
         ),
-        |m, t| {
-            inflect_n(&m.group(1, t).unwrap(), OrdCase::NeutNom)
-                .concat(&js(" "))
-                .concat(&m.group(2, t).unwrap())
+        |m, t| match ordinal_in(&m.group(1, t).unwrap(), OrdCase::NeutNom) {
+            Some(o) => o.concat(&js(" ")).concat(&m.group(2, t).unwrap()),
+            None => m.value(t),
         },
     );
-    check()?;
 
     // 11) the general ordinal: followed by a lowercase word or a comma.
     s = rewrite_with(
@@ -589,11 +596,11 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
         |m, t| ordinal(js_number(&m.group(1, t).unwrap())).unwrap_or_else(|| m.value(t)),
     );
 
-    // 12) regnal ordinals after a capitalised name, up to 39.
+    // 12) regnal ordinals after a capitalised name, up to 39, the name not the sentence's first word (#1535).
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<=\p{Lu}\p{Ll}+\p{M}*[  ])(\d{1,2})\.?(?=[\s.,;:!?]|$)",
+            r"(?<=[^\s.!?\u2026]\s+\p{Lu}\p{Ll}+\p{M}*[ \u00a0])(\d{1,2})\.?(?=[\s.,;:!?]|$)",
             "gu"
         ),
         |m, t| {
@@ -635,7 +642,7 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
     s = rewrite_with(&s, js_re!(r"(\d+)\s?°", "gu"), |m, t| degrees(m, t, ""));
     s = rewrite(&s, js_re!("±", "gu"), &js(" plus mínus "));
     s = rewrite(&s, js_re!(r"(^|[\s(])\+\s?(?=\d)", "gu"), &js("$1plus "));
-    s = rewrite(&s, js_re!(r"(\d)\s*×\s*(?=\d)", "gu"), &js("$1 krát "));
+    s = rewrite(&s, js_re!(r"(\d)\s*[×x]\s*(?=\d)", "gu"), &js("$1 krát "));
     s = rewrite(&s, js_re!(r"(^|[\s(])[-−]\s?(?=\d)", "gu"), &js("$1mínus "));
     s = rewrite(&s, js_re!(r"\s*[=≈]\s*", "gu"), &js(" rovná se "));
     s = rewrite(&s, js_re!(r"\s*<\s*", "gu"), &js(" menší než "));
@@ -643,18 +650,19 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
     s = rewrite(&s, js_re!(r"\s*÷\s*", "gu"), &js(" děleno "));
     s = rewrite(&s, js_re!(r"\s*[&＆]\s*", "gu"), &js(" a "));
 
-    // 16) fractions with numerator 1, feminine.
+    // 16) fractions, the denominator agreeing with any numerator's count form (#1535).
     s = rewrite_with(
         &s,
         js_re!(r"(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])", "gu"),
         |m, t| {
-            let den = ordinal(js_number(&m.group(2, t).unwrap()));
-            match den {
-                Some(d) if js_number(&m.group(1, t).unwrap()) == 1.0 => {
-                    js("jedna ").concat(&inflect_ordinal(&d, OrdCase::Fem))
-                }
-                _ => m.value(t),
-            }
+            let Some(den) = ordinal(js_number(&m.group(2, t).unwrap())) else {
+                return m.value(t);
+            };
+            let num = js_number(&m.group(1, t).unwrap());
+            let c = [OrdCase::Fem, OrdCase::NeutNom, OrdCase::PlGen][cs_count_form(num) as usize];
+            feminine(&number_to_words(num, None))
+                .concat(&js(" "))
+                .concat(&inflect_ordinal(&den, c))
         },
     );
 
@@ -670,5 +678,5 @@ pub(crate) fn normalize_czech(input: &JsString) -> Result<JsString, String> {
         &js("gigahertz"),
     );
 
-    Ok(s)
+    s
 }

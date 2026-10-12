@@ -127,6 +127,12 @@ public static class Normalize
     // ⚠ `s` IS HELD OUT of the shared alternation and gets its own digit-guarded rule — see the TypeScript.
     private static readonly string DOTTED_ALT =
         string.Join("|", DOTTED.Keys.Where(k => k != "s").OrderByDescending(a => a.Length));
+    /** The DOTTED keys that CLOSE what they abbreviate (a list or a name), so a capital after their dot is a new
+     *  sentence and the dot is kept (#1535). A positive list — see the TypeScript. */
+    private static readonly HashSet<string> CLOSING = new(StringComparer.Ordinal) { "atd", "apod", "aj", "jr", "co", "inc" };
+    /** Uppercase next ⇒ the abbreviation's dot also ends the sentence. Tested in code: the pattern carries `i`. */
+    private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "u");
+    private static bool StartsSentence(string next) => UPPER.IsMatch(next);
 
     private static readonly string[] HOUR = { "hodina", "hodiny", "hodin" };
     private static readonly string[] MINUTE = { "minuta", "minuty", "minut" };
@@ -166,6 +172,14 @@ public static class Normalize
         "osmistý", "devítistý",
     };
 
+    /** The ordinal of `digits` in case `c`, or null outside 1–999 — the caller then leaves its match as written
+     *  (#1535: steps 7–10 used `Ordinal(n)!`, which threw on `Ve 1000. století.`). */
+    private static string? OrdinalIn(string digits, string c)
+    {
+        var o = Ordinal(Js.Number(digits));
+        return o is null ? null : InflectOrdinal(o, c);
+    }
+
     /** Masculine-nominative ordinal for 1–999, or null out of range. */
     private static string? Ordinal(double n)
     {
@@ -192,7 +206,7 @@ public static class Normalize
     // The step patterns, hoisted. JsRegex.Compile caches, so this is a readability choice, not a behaviour one.
     private static readonly JsRe DEGROUP = JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d\\.,])0)[{GROUP_SPACE}](?=\\d{{3}}(?!\\d))", "gu");
     private static readonly JsRe GROUP_SPACE_ANY = JsRegex.Compile($"[{GROUP_SPACE}]", "gu");
-    private static readonly JsRe DOTTED_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}.])({DOTTED_ALT})\\.(\\s+)(?=[\\p{{L}}\\d(„\"])", "giu");
+    private static readonly JsRe DOTTED_MID = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}.])({DOTTED_ALT})\\.(\\s+)(?=([\\p{{L}}\\d(„\"]))", "giu");
     private static readonly JsRe DOTTED_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}.])({DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))", "giu");
     private static readonly JsRe PAGE_S = JsRegex.Compile("(?<![\\p{L}\\p{M}.])s\\.(\\s+)(?=\\d)", "giu");
     private static readonly JsRe CLOCK = JsRegex.Compile("([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:])(?!,\\d)(?:\\s+(?:h|hodin)(?![\\p{L}\\p{M}]))?", "gu");
@@ -200,7 +214,7 @@ public static class Normalize
     private static readonly JsRe VERSION_DOT = JsRegex.Compile("(\\d)\\.(?=\\d)", "gu");
     private static readonly JsRe ORD_RANGE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.])(\\d+)\\.\\s*[–—-]\\s*(\\d+)\\.(?![\\d])", "gu");
     private static readonly JsRe CENTURY = JsRegex.Compile("((?:\\d+\\.\\s*)(?:,\\s*\\d+\\.\\s*)*(?:\\s+a\\s+\\d+\\.\\s*)?)století(?![\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe CENTURY_V = JsRegex.Compile("(?:v|ve)\\s+$", "iu");
+    private static readonly JsRe CENTURY_V = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:v|ve)\\s+$", "iu");
     private static readonly JsRe CENTURY_ITEM = JsRegex.Compile("(\\d+)\\.", "gu");
     private static readonly JsRe DECADE = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.\\s+(let|letech)(?!\\p{L})", "gu");
     private static readonly JsRe DATE_MONTH = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}\\d.,])(\\d+)\\.\\s+({MONTH_ALT})(?!\\p{{L}})", "gu");
@@ -209,7 +223,7 @@ public static class Normalize
     private static readonly JsRe PLACE_ACC = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.\\s+místo(?!\\p{L})", "gu");
     private static readonly JsRe HOUR_ORD = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.\\s+(hodin\\p{L}*)(?!\\p{L})", "gu");
     private static readonly JsRe ORDINAL_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.(?=\\s*[,\\p{Ll}])", "gu");
-    private static readonly JsRe REGNAL = JsRegex.Compile("(?<=\\p{Lu}\\p{Ll}+\\p{M}*[\u0020\u00a0])(\\d{1,2})\\.?(?=[\\s.,;:!?]|$)", "gu");
+    private static readonly JsRe REGNAL = JsRegex.Compile("(?<=[^\\s.!?\u2026]\\s+\\p{Lu}\\p{Ll}+\\p{M}*[\u0020\u00a0])(\\d{1,2})\\.?(?=[\\s.,;:!?]|$)", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[–—-]\\s?(?=\\d)", "gu");
     private static readonly JsRe MIL_H = JsRegex.Compile("(\\d+)\\s?mil\\s?\\/\\s?h(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d+)\\s?°\\s?C(?![\\p{L}\\p{M}])", "gui");
@@ -217,7 +231,7 @@ public static class Normalize
     private static readonly JsRe DEG_BARE = JsRegex.Compile("(\\d+)\\s?°", "gu");
     private static readonly JsRe PLUSMINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("(^|[\\s(])\\+\\s?(?=\\d)", "gu");
-    private static readonly JsRe TIMES = JsRegex.Compile("(\\d)\\s*×\\s*(?=\\d)", "gu");
+    private static readonly JsRe TIMES = JsRegex.Compile("(\\d)\\s*[×x]\\s*(?=\\d)", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-−]\\s?(?=\\d)", "gu");
     private static readonly JsRe EQUALS = JsRegex.Compile("\\s*[=≈]\\s*", "gu");
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s*<\\s*", "gu");
@@ -232,7 +246,8 @@ public static class Normalize
      *  the TypeScript. */
     public static string NormalizeCzech(string input)
     {
-        var s = input;
+        // ⚠ COMPOSED FIRST (#1535): NFD input lost its háček in the g2p scan.
+        var s = Renormalize(input, System.Text.NormalizationForm.FormC);
 
         // 0) DIGIT DE-GROUPING, first — TWO passes, because the groups overlap on the shared digit.
         for (var i = 0; i < 2; i++)
@@ -247,10 +262,16 @@ public static class Normalize
         }
 
         // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
+        //    A capital after a CLOSING abbreviation's dot is a new sentence, so the dot is kept (#1535).
         s = Rewrite(s, DOTTED_MID, m =>
+        {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold widens it and a near-miss matches while its key is absent.
-            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+            var key = m.Groups[1].Value.ToLowerInvariant();
+            if (!DOTTED.TryGetValue(key, out var w)) return m.Value;
+            return CLOSING.Contains(key) && StartsSentence(m.Groups[3].Value)
+                ? $"{w}.{m.Groups[2].Value}" : $"{w}{m.Groups[2].Value}";
+        });
         s = Rewrite(s, DOTTED_END, m =>
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
         s = Rewrite(s, PAGE_S, m => $"{DOTTED["s"]}{m.Groups[1].Value}");
@@ -264,11 +285,15 @@ public static class Normalize
         });
 
         // 4) DATE `N. N.`, before the version-dot rule, which would otherwise eat the interior dot.
+        //    The month's dot is consumed, so a sentence-final one is put back (#1535).
+        var whole4 = s;
         s = Rewrite(s, DATE_NN, m =>
         {
             double dv = Js.Number(m.Groups[1].Value), mv = Js.Number(m.Groups[2].Value);
             if (dv < 1 || dv > 31 || mv < 1 || mv > 12) return m.Value;
-            return $"{InflectOrdinal(Ordinal(dv)!, "gen")} {InflectOrdinal(Ordinal(mv)!, "gen")} ";
+            var read = $"{InflectOrdinal(Ordinal(dv)!, "gen")} {InflectOrdinal(Ordinal(mv)!, "gen")}";
+            var kept = KeepFinal(read, m.Value, m.Index, whole4);
+            return kept == read ? $"{read} " : kept;
         });
 
         // 5) VERSION / FIGURE DOTS between digits, before the ordinal rules.
@@ -290,26 +315,31 @@ public static class Normalize
             var loc = CENTURY_V.IsMatch(whole7[..m.Index]);
             var c = loc ? "loc" : "gen";
             var list = JsRegex.Replace(m.Groups[1].Value, CENTURY_ITEM,
-                mm => InflectOrdinal(Ordinal(Js.Number(mm.Groups[1].Value))!, c));
+                mm => OrdinalIn(mm.Groups[1].Value, c) ?? mm.Value);
             return $"{list}století";
         });
 
         // 8) DECADE — `N. + let/letech` governs the genitive/locative PLURAL.
         s = Rewrite(s, DECADE, m =>
-            $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "plGen")} {m.Groups[2].Value}");
+            OrdinalIn(m.Groups[1].Value, "plGen") is { } o ? $"{o} {m.Groups[2].Value}" : m.Value);
 
         // 9) DATE MONTHS — the month name is the case cue; červenci (after `k`) takes the dative.
         s = Rewrite(s, DATE_MONTH, m =>
-            $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, MONTH_RULE[m.Groups[2].Value])} {m.Groups[2].Value}");
+            OrdinalIn(m.Groups[1].Value, MONTH_RULE[m.Groups[2].Value]) is { } o ? $"{o} {m.Groups[2].Value}" : m.Value);
 
         // 10) PLACE — the compound first, then locative `místě` and neuter-accusative `místo`, then the one
         //     written-out hour ordinal (feminine locative, whose -é/-í ending neutNom already supplies).
+        //     Out of range (1–999) each leaves its match as written (#1535).
         s = Rewrite(s, PLACE_PAIR, m =>
-            $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "loc")} a {InflectOrdinal(Ordinal(Js.Number(m.Groups[2].Value))!, "loc")} místě");
-        s = Rewrite(s, PLACE_LOC, m => $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "loc")} místě");
-        s = Rewrite(s, PLACE_ACC, m => $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "neutNom")} místo");
+        {
+            var oa = OrdinalIn(m.Groups[1].Value, "loc");
+            var ob = OrdinalIn(m.Groups[2].Value, "loc");
+            return oa is null || ob is null ? m.Value : $"{oa} a {ob} místě";
+        });
+        s = Rewrite(s, PLACE_LOC, m => OrdinalIn(m.Groups[1].Value, "loc") is { } o ? $"{o} místě" : m.Value);
+        s = Rewrite(s, PLACE_ACC, m => OrdinalIn(m.Groups[1].Value, "neutNom") is { } o ? $"{o} místo" : m.Value);
         s = Rewrite(s, HOUR_ORD, m =>
-            $"{InflectOrdinal(Ordinal(Js.Number(m.Groups[1].Value))!, "neutNom")} {m.Groups[2].Value}");
+            OrdinalIn(m.Groups[1].Value, "neutNom") is { } o ? $"{o} {m.Groups[2].Value}" : m.Value);
 
         // 11) GENERAL ORDINAL — a following LOWERCASE word or comma → ordinal; uppercase or clause end →
         //     an ordinary sentence period, left alone.
@@ -346,11 +376,14 @@ public static class Normalize
         s = Rewrite(s, AMPERSAND, _ => " a ");
 
         // 16) FRACTIONS — feminine, agreeing with the elided *část*.
+        //     Every numerator is read; the denominator takes its count form (#1535).
         s = Rewrite(s, FRACTION, m =>
         {
             var den = Ordinal(Js.Number(m.Groups[2].Value));
-            if (den is null || Js.Number(m.Groups[1].Value) != 1) return m.Value;
-            return $"jedna {InflectOrdinal(den, "fem")}";
+            if (den is null) return m.Value;
+            var num = Js.Number(m.Groups[1].Value);
+            var c = new[] { "fem", "neutNom", "plGen" }[CsCountForm(num)];
+            return $"{Feminine(CzechNumbers.NumberToWords(num))} {InflectOrdinal(den, c)}";
         });
 
         // 17) pH and Ghz — AFTER the version-dot rule, so "2.4Ghz" reads "dva tečka čtyři gigahertz".
