@@ -165,10 +165,23 @@ const UNITS: Record<string, [string, string]> = {
     hz: ["hertz", "hertz"], khz: ["kilohertz", "kilohertz"], mhz: ["megahertz", "megahertz"],
     ghz: ["gigahertz", "gigahertz"], kb: ["kilobyte", "kilobytes"], mb: ["megabyte", "megabytes"],
     gb: ["gigabyte", "gigabytes"], tb: ["terabyte", "terabytes"], kw: ["kilowatt", "kilowatts"],
+    // ⚠ THE PASCALS ARE CASE-EXACT, and `CASE_EXACT` below keeps them out of the folded index (#1503).
+    // Folding would claim `3.8 GPA` (a grade point average) as gigapascals and `2 PA` (the credential
+    // CREDENTIAL_CODE reads) as pascals; `mPa` is a MILLIpascal and `MPa` a MEGApascal, 10⁹ apart. Before
+    // this every prefixed form reached the g2p raw: `2 GPa` read *ɡpˈæ*, `101.3 kPa` *kpˈæ*. The words are
+    // single, as the hertz row above is: `pascal` is in the dictionary, and the OOV g2p reads each prefixed
+    // form with the stress on *pas* (gigapascals ɡˌɪɡəpʰˈæskəɫz); the spaced `hecto pascals` lost its ⟨o⟩.
+    // A BARE `GPa` (no number) stays unclaimed: no English corpus here has one, nor a `GPA` after a number.
+    Pa: ["pascal", "pascals"], hPa: ["hectopascal", "hectopascals"], kPa: ["kilopascal", "kilopascals"],
+    MPa: ["megapascal", "megapascals"], GPa: ["gigapascal", "gigapascals"], mPa: ["millipascal", "millipascals"],
 };
+/** Keys whose CASE is the identification, so a miscased spelling must not reach them through the fold (#1503).
+ *  `foldedIndex` already drops a slot whose declared keys disagree (mPa/MPa); these have no such twin. */
+const CASE_EXACT: readonly string[] = ["Pa", "hPa", "kPa", "GPa"];
 /** The case-folded index for step 1 (see resolveUnitSymbol) — built once, beside the table it indexes.
  *  ⚠ core `foldedIndex` leaves out the slots whose declared keys disagree (µm/µM, µs/µS, mΩ/MΩ): see there. */
 const UNITS_FOLDED: Record<string, [string, string]> = foldedIndex(UNITS);
+for (const k of CASE_EXACT) delete UNITS_FOLDED[k.toLowerCase()];
 
 const CURRENCY: Record<string, [string, string]> = {
     $: ["dollar", "dollars"], "£": ["pound", "pounds"], "€": ["euro", "euros"], "¥": ["yen", "yen"],

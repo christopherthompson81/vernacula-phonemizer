@@ -98,7 +98,13 @@ public static class Normalize
         ["hz"] = new[] { "hertz", "hertz" }, ["khz"] = new[] { "kilohertz", "kilohertz" }, ["mhz"] = new[] { "megahertz", "megahertz" },
         ["ghz"] = new[] { "gigahertz", "gigahertz" }, ["kb"] = new[] { "kilobyte", "kilobytes" }, ["mb"] = new[] { "megabyte", "megabytes" },
         ["gb"] = new[] { "gigabyte", "gigabytes" }, ["tb"] = new[] { "terabyte", "terabytes" }, ["kw"] = new[] { "kilowatt", "kilowatts" },
+        // Case-exact, kept out of the fold by CASE_EXACT (#1503): see the TS table.
+        ["Pa"] = new[] { "pascal", "pascals" }, ["hPa"] = new[] { "hectopascal", "hectopascals" }, ["kPa"] = new[] { "kilopascal", "kilopascals" },
+        ["MPa"] = new[] { "megapascal", "megapascals" }, ["GPa"] = new[] { "gigapascal", "gigapascals" }, ["mPa"] = new[] { "millipascal", "millipascals" },
     };
+
+    /** Keys whose CASE is the identification, so a miscased spelling must not reach them through the fold (#1503). */
+    private static readonly string[] CASE_EXACT = { "Pa", "hPa", "kPa", "GPa" };
 
     /** The case-folded index for step 1 (see resolveUnitSymbol) — built once, beside the table it indexes. */
     /**
@@ -150,7 +156,12 @@ public static class Normalize
 
     /** Core `FoldedIndex`: first-declared wins, and a slot whose declared keys disagree (µm/µM, µs/µS, mΩ/MΩ)
      *  is left out — see there. */
-    private static Dictionary<string, string[]> BuildFolded() => NormalizeSymbols.FoldedIndex(UNITS);
+    private static Dictionary<string, string[]> BuildFolded()
+    {
+        var folded = NormalizeSymbols.FoldedIndex(UNITS);
+        foreach (var k in CASE_EXACT) folded.Remove(Js.ToLowerCase(k));
+        return folded;
+    }
 
     private static readonly IReadOnlyDictionary<string, string[]> CURRENCY = new Dictionary<string, string[]>(StringComparer.Ordinal)
     {
