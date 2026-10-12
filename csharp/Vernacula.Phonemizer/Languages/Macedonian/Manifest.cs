@@ -30,6 +30,8 @@ public sealed class MacedonianDef
     public IReadOnlyDictionary<string, string> Letters { get; init; } = new Dictionary<string, string>();
     /** ⟨л⟩ is light [l] before these, dark [ɫ] elsewhere. */
     public IReadOnlyList<string> FrontLetters { get; init; } = Array.Empty<string>();
+    /** Russian letters folded to their Macedonian spelling before the scan (#1535). */
+    public IReadOnlyDictionary<string, string> RussianLetters { get; init; } = new Dictionary<string, string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     /** LEXICAL: acronyms Macedonian spells out although the letters could be read as a word. */
     public IReadOnlyList<string> AcronymLetters { get; init; } = Array.Empty<string>();

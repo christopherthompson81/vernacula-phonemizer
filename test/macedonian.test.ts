@@ -142,9 +142,10 @@ describe("Macedonian text normalization", () => {
     });
 
     test("regnal ordinals after roman→digit: feminine after a name in -а, 2–39 only", () => {
-        expect(ph("Лиалофи III")).toBe("liˈaɫɔfi trˈɛti");
+        // Mid-sentence: the name must not be the sentence's first word (#1535, see the next test).
+        expect(ph("главатар Лиалофи III")).toBe("ɡɫˈavatar liˈaɫɔfi trˈɛti");
         expect(ph("Кралица Елизабета II")).toBe("krˈalit͡sa ɛlizˈabɛta ftˈɔra"); // Втора, feminine
-        expect(ph("Луј XVI")).toBe("ɫˈuj ʃɛsnaˈɛsɛtti");
+        expect(ph("крал Луј XVI")).toBe("krˈaɫ ɫˈuj ʃɛsnaˈɛsɛtti");
         expect(ph("во Формула 1.")).toBe("vˈɔ fˈɔrmuɫa ˈɛdɛn ."); // Formula ONE — cardinal, not regnal
     });
 

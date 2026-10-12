@@ -47,6 +47,8 @@ pub struct NumbersDef {
 pub struct MacedonianDef {
     pub letters: IndexMap<String, String>,
     pub front_letters: Vec<String>,
+    /// Russian letters → their Macedonian spelling, folded before the scan (#1535).
+    pub russian_letters: HashMap<String, String>,
     pub clause_punctuation: IndexMap<String, String>,
     pub numbers: NumbersDef,
     pub acronym_letters: Vec<String>,
@@ -90,6 +92,7 @@ const SYMBOL_DATA: &str = r#"{"multiply":{"times":"пати"},"percent":["про
 struct Tables {
     letters: IndexMap<JsString, JsString>,
     front_l: HashSet<JsString>,
+    russian: HashMap<JsString, JsString>,
 }
 
 /// Every lookup key is one scanned code point, never an `Object.prototype` member's name.
@@ -98,6 +101,11 @@ static T: LazyLock<Tables> = LazyLock::new(|| {
     Tables {
         letters: m.letters.iter().map(|(k, v)| (js(k), js(v))).collect(),
         front_l: m.front_letters.iter().map(|k| js(k)).collect(),
+        russian: m
+            .russian_letters
+            .iter()
+            .map(|(k, v)| (js(k), js(v)))
+            .collect(),
     }
 });
 
@@ -145,7 +153,13 @@ fn is_nucleus(t: &JsString) -> bool {
 /// `scan(word)`: over the code points of the lowercased word.
 fn scan(word: &JsString) -> Vec<JsString> {
     let t = &*T;
-    let chars = word.to_lower_case().code_point_strings();
+    // Russian letters fold to their Macedonian spelling first (#1535).
+    let chars: Vec<JsString> = word
+        .to_lower_case()
+        .code_point_strings()
+        .into_iter()
+        .flat_map(|c| t.russian.get(&c).cloned().unwrap_or(c).code_point_strings())
+        .collect();
     let empty = JsString::new();
     let mut toks = Vec::new();
     for (i, c) in chars.iter().enumerate() {
@@ -237,7 +251,7 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
 
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        "([а-шА-ШѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\\d+(?:,\\d+)?)|([.!?…,;:—])",
+        "([а-яА-ЯёЁѓѕјљњќџЃЅЈЉЊЌЏѐѝЀЍ]+)|(\\d+(?:,\\d+)?)|([.!?…,;:—])",
         "gu",
     )
     .unwrap()
@@ -493,9 +507,9 @@ mod tests {
         ("Г-дин Рид", "ɡˈɔspɔdin rˈit", true),
         ("НАСА, Н. Вејн", "nˈasa , ˈɛn vˈɛjn", true),
         ("Џорџ В. Буш", "d͡ʒˈɔrt͡ʃ vˈɛ bˈuʃ", true),
-        ("Лиалофи III", "liˈaɫɔfi trˈɛti", true),
+        ("главатар Лиалофи III", "ɡɫˈavatar liˈaɫɔfi trˈɛti", true),
         ("Кралица Елизабета II", "krˈalit͡sa ɛlizˈabɛta ftˈɔra", true),
-        ("Луј XVI", "ɫˈuj ʃɛsnaˈɛsɛtti", true),
+        ("крал Луј XVI", "krˈaɫ ɫˈuj ʃɛsnaˈɛsɛtti", true),
         ("во Формула 1.", "vˈɔ fˈɔrmuɫa ˈɛdɛn .", true),
         (
             "29¾ инчи на 24½ инчи",
@@ -545,15 +559,39 @@ mod tests {
         }
     }
 
-    /// Cyrillic-in-host routing: mk has no `HOST_OVERRIDES` entry and its TOKEN omits the Russian-only letters,
-    /// so `Ю` in `Юрий` is an unclaimed Cyrillic run read by the Russian reader (and `й`, inside the class but in
-    /// no letter table, is dropped) — the TS reading `ju rˈi`, reported in the port log, reproduced here.
+    /// Russian letters are in the TOKEN and fold to the Macedonian spelling (#1535): `Юрий` reads whole. A lone
+    /// `Ю` handed to the router still resolves to `ru` (the script table decides that, not the engine's TOKEN).
     #[test]
-    fn an_unclaimed_cyrillic_run_goes_to_russian() {
-        assert_eq!(crate::phonemize("Юрий", "mk").unwrap(), "ju rˈi");
+    fn a_russian_spelled_name_is_read_whole() {
+        let ph = |t: &str| crate::phonemize(t, "mk").unwrap();
+        assert_eq!(ph("Юрий Гагарин"), ph("Јуриј Гагарин"));
+        assert_eq!(ph("Юрий Гагарин"), "jˈurij ɡˈaɡarin");
+        assert_eq!(ph("Щукин, Наталья, Ёлкин"), "ʃtˈukin , nˈatalja , jˈɔɫkin");
         assert_eq!(
             crate::core::scripts::reader_for(&js("Ю"), "mk").map(|(t, _)| t),
             Some("ru")
         );
+    }
+
+    /// test/slavic-port-findings.test.ts, the Macedonian normalizer block (#1535).
+    #[test]
+    fn the_1535_findings_hold() {
+        for (t, want) in [
+            ("итн. Потоа", "и така натаму. Потоа"),
+            ("итн. потоа", "и така натаму потоа"),
+            ("2/3 од нив", "две третини од нив"),
+            (
+                "1/5 и 21/2 и 11/3",
+                "една петтина и дваесет и една половина и единаесет третини",
+            ),
+            ("Македонија 2.", "Македонија 2."),
+            ("главатар Лиалофи 3.", "главатар Лиалофи трети."),
+        ] {
+            assert_eq!(
+                super::super::normalize::normalize_macedonian(&js(t)).to_string_lossy(),
+                want,
+                "{t}"
+            );
+        }
     }
 }

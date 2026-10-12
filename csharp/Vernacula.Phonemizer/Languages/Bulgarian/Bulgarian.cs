@@ -23,6 +23,20 @@ public sealed class BgNumbersDef
     public string And { get; init; } = "";
 }
 
+/** bulgarian.jsonc `ordinals` (#1535): each last cardinal word's masculine ordinal, and the endings after it. */
+public sealed class BgOrdinalsDef
+{
+    public IReadOnlyDictionary<string, string> Words { get; init; } = new Dictionary<string, string>();
+    public IReadOnlyList<string> Endings { get; init; } = Array.Empty<string>();
+}
+
+/** One bulgarian.jsonc `magnitudeAbbrev` entry (#1535). */
+public sealed class BgMagnitudeDef
+{
+    public int Exponent { get; init; }
+    public string Decimal { get; init; } = "";
+}
+
 public sealed class BulgarianDef
 {
     public IReadOnlyDictionary<string, string> Letters { get; init; } = new Dictionary<string, string>();
@@ -30,11 +44,14 @@ public sealed class BulgarianDef
     public IReadOnlyList<string> FrontVowelLetters { get; init; } = Array.Empty<string>();
     public IReadOnlyDictionary<string, string> ClausePunctuation { get; init; } = new Dictionary<string, string>();
     public BgNumbersDef Numbers { get; init; } = new();
+    public BgOrdinalsDef Ordinals { get; init; } = new();
+    public IReadOnlyDictionary<string, BgMagnitudeDef> MagnitudeAbbrev { get; init; } = new Dictionary<string, BgMagnitudeDef>();
+    public string HourAbbrev { get; init; } = "";
 }
 
 public sealed class BulgarianPhonemizer : ILanguage
 {
-    private static readonly BulgarianDef DEF = LoadManifest.Load<BulgarianDef>("languages/bulgarian", "bulgarian.jsonc");
+    internal static readonly BulgarianDef DEF = LoadManifest.Load<BulgarianDef>("languages/bulgarian", "bulgarian.jsonc");
     private static IReadOnlyDictionary<string, string> L => DEF.Letters;
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => DEF.ClausePunctuation;
     private static BgNumbersDef NUM => DEF.Numbers;
@@ -137,7 +154,7 @@ public sealed class BulgarianPhonemizer : ILanguage
     }
 
     /** Build the Bulgarian words for n; "и" precedes the final component (сто двайсет и три; сто и три). */
-    private static string NumberToText(double n)
+    internal static string NumberToText(double n)
     {
         if (n < 0) return "";
         if (n < 10) return NUM.Units[(int)n];
@@ -202,7 +219,7 @@ public sealed class BulgarianPhonemizer : ILanguage
         return string.Join(" ", words.Split(' ').Where(w => w.Length > 0).Select(w => PhonemizeWord(w)));
     }
 
-    private static readonly JsRe TOKEN = JsRegex.Compile("([а-яёА-ЯЁ']+)|(\\d+)|([.!?…,;:—])", "gu");
+    private static readonly JsRe TOKEN = JsRegex.Compile("([а-яёА-ЯЁѐѝЀЍ']+)|(\\d+)|([.!?…,;:—])", "gu"); // ѐ ѝ Ѐ Ѝ are Bulgarian letters (#1535)
 
     public string Text(string rawInput)
     {

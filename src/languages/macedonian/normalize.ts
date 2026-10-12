@@ -141,6 +141,12 @@ function suffixKind(suffix: string): SuffixKind {
     }
 }
 
+/** Fraction denominator nouns 2–6, [singular, plural] — feminine, so the numeral agrees (една, две). */
+const FRACTION_NOUN: Readonly<Record<number, readonly [string, string]>> = {
+    2: ["половина", "половини"], 3: ["третина", "третини"], 4: ["четвртина", "четвртини"],
+    5: ["петтина", "петтини"], 6: ["шестина", "шестини"],
+};
+
 /**
  * Normalize one Macedonian input string. Pure text→text. Runs BEFORE the shared symbol tier (which needs
  * the number still adjacent to its unit/sign), and the initialism pass runs after it.
@@ -170,7 +176,12 @@ export function normalizeMacedonian(input: string): string {
 
     // 3) SINGLE-DOT / HYPHEN ABBREVIATIONS. "итн." (etc.), "т.е." (that is), "Г-дин" (Mr.), "Д-р" (Dr.).
     //    Hyphenated, so they do not collide with the year rule's `N г.`.
-    s = rewrite(s, /(?<![\p{L}\p{M}])итн\.(?=\s|$|[,.;:!?»"')])/giu, "и така натаму");
+    //    ⚠ `итн.` CLOSES A LIST, so a capital after it starts a new sentence and its dot is kept as that pause
+    //    (#1535: `итн. Потоа` ran on with none). The capital is tested in code: the pattern carries `i`. The year
+    //    is NOT given that test (step 2): a capital after `N г.` is mid-sentence more often than not (FLEURS
+    //    be/bg/mk: 12 of 20).
+    s = rewrite(s, /(?<![\p{L}\p{M}])итн\.(?=\s|$|[,.;:!?»"')])/giu, (m0: string, offset: number, whole: string) =>
+        /^\s+\p{Lu}/u.test(whole.slice(offset + m0.length)) ? "и така натаму." : "и така натаму");
     s = rewrite(s, /(?<![\p{L}\p{M}])т\.е\./giu, "то ест");
     s = rewrite(s, /[Гг]-дин(?![\p{L}\p{M}])/gu, "господин");
     s = rewrite(s, /[Дд]-р(?![\p{L}\p{M}])/gu, "доктор");
@@ -290,7 +301,11 @@ export function normalizeMacedonian(input: string): string {
     //     roman, and "Формула 1" is Formula ONE, a cardinal), must be followed by PUNCTUATION or end
     //     (all three regnal instances are "III."/"II."/"XVI,"; "Цели 20 проценти" and "Имаше 2 гола" are
     //     counts), and must not open a comma-grouped thousands run ("Од 1,400 луѓе").
-    s = rewrite(s, /(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)/gu, (_m: string, name: string, d: string) => {  // space, NBSP
+    //     ⚠ AND THE CAPITALISED WORD MAY NOT OPEN THE SENTENCE (#1535, as Czech): a capital there is the
+    //     sentence's, not a name's, so `Македонија 2.` read *Македонија втора*. The word must follow some other
+    //     word's last character and a space. Still declined: a capitalised NON-name mid-sentence (`во
+    //     Македонија 2.`), which needs to know what a name is.
+    s = rewrite(s, /(?<=[^\s.!?\u2026]\s+)(\p{Lu}\p{Ll}+\p{M}*)[ \u00a0](\d{1,2})(?![,\d])(?=\.?[.,;:!?]|$)/gu, (_m: string, name: string, d: string) => {  // space, NBSP
         const n = Number(d);
         const o = mkOrdinal(n);
         if (o === undefined || n < 2 || n > 39) return _m;
@@ -345,12 +360,17 @@ export function normalizeMacedonian(input: string): string {
     s = rewrite(s, /(\d+)¾/gu, "$1 и три четвртини");
     s = rewrite(s, /(\d+)½/gu, "$1 и половина");
     s = rewrite(s, /(\d+)¼/gu, "$1 и четвртина");
+    //     ⚠ EVERY NUMERATOR IS READ (#1535), not only 1: `2/3` dropped its slash and read as two bare numbers.
+    //     The noun takes the count form (mkCountForm's rule: singular after a count ending in 1, not 11, else
+    //     plural — две третини, пет шестини, дваесет и една петтина), and the numeral agrees with the feminine
+    //     noun in its last word (еден → една, два → две), as the ¾ rule's *три четвртини* already reads.
     s = rewrite(s, /(?<![\d.,])(\d{1,2})\/(\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => {
-        const denom = Number(b);
-        const suffix = denom === 2 ? "половина" : denom === 3 ? "третина" : denom === 4 ? "четвртина"
-            : denom === 5 ? "петтина" : denom === 6 ? "шестина" : undefined;
-        if (suffix === undefined || Number(a) !== 1) return _m;
-        return `една ${suffix}`;
+        const forms = FRACTION_NOUN[Number(b)];
+        if (forms === undefined) return _m;
+        const num = Number(a), m100 = num % 100;
+        const noun = forms[m100 % 10 === 1 && m100 !== 11 ? 0 : 1];
+        const numWord = numberToText(num).replace(/(?<![\p{L}\p{M}])еден$/u, "една").replace(/(?<![\p{L}\p{M}])два$/u, "две");
+        return `${numWord} ${noun}`;
     });
 
     // 15) PERSONAL-INITIAL single capitals — `Н. Вејн` (the shared LONE_INITIAL handles `В. Буш`, which

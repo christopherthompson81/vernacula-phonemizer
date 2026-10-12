@@ -132,3 +132,17 @@ Pin guard: `coda_v = false` → `the_ts_suite_pins_hold` FAILED on `dievča`; re
 - `cargo test --release --workspace`: 135 + 1 passed. regex-diff `144898 … 0 DIFFER, 0 patterns refused`.
   fmt clean; clippy adds only `module_inception` on `slovak::slovak`.
 - No TS regex added; the regex corpus needs no re-extraction.
+
+## Run 7 — 2026-10-11 17:20 (fixing the Run 5 findings TS-first, #1535)
+
+**Command.** As the cs log, Run 7 (FLEURS sk_sk, 1,719 texts).
+
+**Raw finding.**
+1. Doubled comma (fixed): the list item's fallback is `${n}.` not the whole match: `V 1000., 5. storočí.` → `V 1000.,
+   piatom storočí.`
+2. Abbreviation before a capital (fixed): positive list `CLOSING` (atď jr): `Atď. Potom.` → `a tak ďalej. Potom.`
+   Declined for `č.`: it precedes its object (`č. 5`), so `kozmonaut č. Potom` keeps no pause.
+3. NFD (fixed): `renormalize(input, "NFC")`; NFD `ľad` → `ʎˈat`.
+4. Regnal -a gender (declined): telling a feminine name from any capitalised -a word needs a name list or a native
+   reader; FLEURS sk_sk has no misfire (the three `\p{Lu}… N.` hits are claimed by the licensor rule first).
+- FLEURS sk_sk: 0 normalize changes; golden sk: 0 rows. Revert proof: all 3 Slovak tests fail with HEAD normalize.ts.

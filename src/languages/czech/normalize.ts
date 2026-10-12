@@ -20,7 +20,7 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { MANIFEST } from "./manifest.ts";
 import { numberToWords } from "./numbers.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /** Regular, NBSP and narrow-NBSP — all three occur as thousands separators. */
 const GROUP_SPACE = " \\u00a0\\u202f\\u2009";
@@ -140,6 +140,16 @@ const DOTTED: Readonly<Record<string, string>> = {
  * instances are `s. 109` — a page number — which is the only shape the abbreviation actually takes, and
  * what this file's own comment already claimed the rule did.
  */
+/**
+ * The DOTTED keys that CLOSE what they abbreviate — a list (`atd.`, `apod.`, `aj.`) or a name (`Jr.`, `Co.`,
+ * `Inc.`) — so a capital after their dot is a new sentence and the dot is kept as its pause (#1535). ⚠ A POSITIVE
+ * LIST: every other key is followed by its own object, capital or not — `Dr. Novák`, `Sv. Václav`, `např.
+ * Praha`, and `mil.` before its currency (`50 mil. Kč`), where a pause would be wrong.
+ */
+const CLOSING: ReadonlySet<string> = new Set(["atd", "apod", "aj", "jr", "co", "inc"]);
+/** Does the dot after an abbreviation also end the sentence? An uppercase letter next ⇒ yes. Tested in code,
+ *  not in the pattern — the pattern carries `i`, under which `\p{Lu}` matches lowercase too. */
+const startsSentence = (next: string): boolean => /\p{Lu}/u.test(next);
 const DOTTED_ALT = Object.keys(DOTTED).filter((k) => k !== "s").sort((a, b) => b.length - a.length).join("|");
 
 const HOUR: readonly string[] = ["hodina", "hodiny", "hodin"];
@@ -176,6 +186,15 @@ function ordinal(n: number): string | undefined {
     const h = Math.floor(n / 100), r = n % 100;
     return ORD_HUNDREDS[h]! + (r ? ` ${ordinal(r)}` : "");
 }
+/**
+ * The ordinal of `digits` in case `c`, or undefined outside 1–999 — the caller then leaves its match as written.
+ * ⚠ STEPS 7–10 USED `ordinal(n)!` (#1535), so `Ve 1000. století.` THREW (`inflectOrdinal(undefined)`) and the
+ * whole utterance failed; out of range the number is now read as the cardinal it is written as.
+ */
+function ordinalIn(digits: string, c: OrdCase): string | undefined {
+    const o = ordinal(Number(digits));
+    return o === undefined ? undefined : inflectOrdinal(o, c);
+}
 const ORD_1_19 = [
     "", "první", "druhý", "třetí", "čtvrtý", "pátý", "šestý", "sedmý", "osmý", "devátý",
     "desátý", "jedenáctý", "dvanáctý", "třináctý", "čtrnáctý", "patnáctý", "šestnáctý",
@@ -200,7 +219,10 @@ const MONTH_ALT = Object.keys(MONTH_RULE).sort((a, b) => b.length - a.length).jo
  * Runs BEFORE the shared symbol tier (which needs the number still adjacent to its unit/sign).
  */
 export function normalizeCzech(input: string): string {
-    let s = input;
+    // ⚠ COMPOSED FIRST (#1535): a decomposed háček or acute (`e` + U+030C) reached the g2p as a bare letter and a
+    //   combining mark its scan skips, so NFD `děti` read *dɛcɪ*; and every pattern below spells its words
+    //   precomposed.
+    let s = renormalize(input, "NFC");
 
     // 0) DIGIT DE-GROUPING, first (⚠ a grouping separator is otherwise read as clause
     //    punctuation, and the number token cannot span a space). Czech groups thousands with a SPACE and
@@ -224,13 +246,18 @@ export function normalizeCzech(input: string): string {
     // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break. Two shapes:
     //    followed by a word, and followed by another mark or end of clause (`apod.` at the end of a
     //    list), where the sentence period is kept.
-    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
-        (m0, ab: string, sp: string) => {
+    //    ⚠ A CAPITAL AFTER THE DOT IS A NEW SENTENCE (#1535): `atd. Potom` lost its full stop, so the list's end
+    //    and the next sentence ran together with no pause. The dot is kept there, after a CLOSING abbreviation
+    //    only; any other's capital is its own object (`Dr. Novák`, `50 mil. Kč`).
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=([\\p{L}\\d(„"]))`, "giu"),
+        (m0, ab: string, sp: string, next: string) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
-            const w = DOTTED[ab.toLowerCase()];
-            return w === undefined ? m0 : `${w}${sp}`;
+            const key = ab.toLowerCase();
+            const w = DOTTED[key];
+            if (w === undefined) return m0;
+            return CLOSING.has(key) && startsSentence(next) ? `${w}.${sp}` : `${w}${sp}`;
         });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[,;:!?»)”]|$))`, "giu"),
         (m0, ab: string) => {
@@ -271,11 +298,15 @@ export function normalizeCzech(input: string): string {
     //    čtvrtého osmého"). Before the version-dot rule, which would otherwise eat the interior dot of
     //    "5. 9." (a space separates date parts; version dots never do). Validated on day/month ranges so a
     //    bare "N. N." cannot be claimed spuriously.
+    //    ⚠ THE MONTH'S DOT IS CONSUMED, so where it was also the sentence period it is put back (#1535):
+    //    `dne 5. 5.` at the end ended with no pause. This rule was the one dot-consuming rule without keepFinal.
     s = rewrite(s, /(?<![\p{L}\p{M}\d])(\d{1,2})\.\s+(\d{1,2})\.(?=\s*(?:do\b|\d{4}|[.,\p{Ll}]|$))/gu,
-        (m0, d: string, mo: string) => {
+        (m0: string, d: string, mo: string, ...rest: unknown[]) => {
             const dv = Number(d), mv = Number(mo);
             if (dv < 1 || dv > 31 || mv < 1 || mv > 12) return m0;
-            return `${inflectOrdinal(ordinal(dv)!, "gen")} ${inflectOrdinal(ordinal(mv)!, "gen")} `;
+            const read = `${inflectOrdinal(ordinal(dv)!, "gen")} ${inflectOrdinal(ordinal(mv)!, "gen")}`;
+            const kept = keepFinal(read, m0, rest);
+            return kept === read ? `${read} ` : kept;
         });
 
     // 5) VERSION / FIGURE DOTS between digits — `802.11n` ×3, `2.4Ghz`/`5.0Ghz` and the figure `1.1` were
@@ -299,37 +330,53 @@ export function normalizeCzech(input: string): string {
     //    context is the general ordinal's business, which keeps that sentence's endings consistent.
     s = rewrite(s, /((?:\d+\.\s*)(?:,\s*\d+\.\s*)*(?:\s+a\s+\d+\.\s*)?)století(?![\p{L}\p{M}])/gu,
         (m0: string, list: string, offset: number, whole: string) => {
-            const loc = /(?:v|ve)\s+$/iu.test(whole.slice(0, offset));
+            // ⚠ BOUNDED ON THE LEFT (#1535): without it any word ENDING in v/ve governed the locative —
+            // `Kyjev 12. století` read *dvanáctém*.
+            const loc = /(?<![\p{L}\p{M}])(?:v|ve)\s+$/iu.test(whole.slice(0, offset));
             const c: OrdCase = loc ? "loc" : "gen";
-            return `${list.replace(/(\d+)\./gu, (_m, n: string) => inflectOrdinal(ordinal(Number(n))!, c))}století`;
+            return `${list.replace(/(\d+)\./gu, (m: string, n: string) => ordinalIn(n, c) ?? m)}století`;
         });
 
     // 8) DECADE — `N. + let/letech` (60. let, 70. let, 20./30./50./80. letech) governs the
     //    genitive/locative PLURAL (v 60. letech → v šedesátých letech). Before the general ordinal so
     //    the number is claimed here with the agreeing ending.
     s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(let|letech)(?!\p{L})/gu,
-        (_m, n: string, head: string) => `${inflectOrdinal(ordinal(Number(n))!, "plGen")} ${head}`);
+        (m0, n: string, head: string) => {
+            const o = ordinalIn(n, "plGen");
+            return o === undefined ? m0 : `${o} ${head}`;
+        });
 
     // 9) DATE MONTHS — `N. + month genitive` (21. července, 24. září, 17. září 2007 …). The month name is
     //    the case cue; červenci (after `k`) takes the dative. Before the general ordinal for the same
     //    reason as step 8.
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d.,])(\\d+)\\.\\s+(${MONTH_ALT})(?!\\p{L})`, "gu"),
-        (_m, n: string, month: string) => `${inflectOrdinal(ordinal(Number(n))!, MONTH_RULE[month]!)} ${month}`);
+        (m0, n: string, month: string) => {
+            const o = ordinalIn(n, MONTH_RULE[month]!);
+            return o === undefined ? m0 : `${o} ${month}`;
+        });
 
     // 10) PLACE — `na 5. a 6. místě` (compound first), `na 13. místě` (locative) and `na 190. místo`
     //     (neuter accusative: na + acc). The `místo` form is the "place" sense in the corpus, not the
     //     homographic preposition.
     s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+a\s+(\d+)\.\s+místě/gu,
-        (_m, a: string, b: string) =>
-            `${inflectOrdinal(ordinal(Number(a))!, "loc")} a ${inflectOrdinal(ordinal(Number(b))!, "loc")} místě`);
-    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místě(?!\p{L})/gu,
-        (_m, n: string) => `${inflectOrdinal(ordinal(Number(n))!, "loc")} místě`);
-    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místo(?!\p{L})/gu,
-        (_m, n: string) => `${inflectOrdinal(ordinal(Number(n))!, "neutNom")} místo`);
+        (m0, a: string, b: string) => {
+            const oa = ordinalIn(a, "loc"), ob = ordinalIn(b, "loc");
+            return oa === undefined || ob === undefined ? m0 : `${oa} a ${ob} místě`;
+        });
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místě(?!\p{L})/gu, (m0, n: string) => {
+        const o = ordinalIn(n, "loc");
+        return o === undefined ? m0 : `${o} místě`;
+    });
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+místo(?!\p{L})/gu, (m0, n: string) => {
+        const o = ordinalIn(n, "neutNom");
+        return o === undefined ? m0 : `${o} místo`;
+    });
     //    The one written-out hour ordinal, `po 11. hodině` → po jedenácté hodině (locative, feminine —
     //    the same -é/-í ending as the neuter, so neutNom supplies it).
-    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(hodin\p{L}*)(?!\p{L})/gu,
-        (_m, n: string, head: string) => `${inflectOrdinal(ordinal(Number(n))!, "neutNom")} ${head}`);
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d+)\.\s+(hodin\p{L}*)(?!\p{L})/gu, (m0, n: string, head: string) => {
+        const o = ordinalIn(n, "neutNom");
+        return o === undefined ? m0 : `${o} ${head}`;
+    });
 
     // 11) GENERAL ORDINAL — derived by tabulating what surrounds `N.` in this corpus, NOT ported from
     //     another language's rule. The discriminator that fell out of the table: followed by a LOWERCASE
@@ -345,7 +392,12 @@ export function normalizeCzech(input: string): string {
     //     read as an ordinal (Lealofi 3 → Lealofi třetí). Guarded two ways: the number must be ≤ 39 (the
     //     practical monarch/pope range, which keeps "Standard 802.11n" and "O 250 let" untouched) and
     //     followed by a break, never another digit/letter.
-    s = rewrite(s, /(?<=\p{Lu}\p{Ll}+\p{M}*[ \u00a0])(\d{1,2})\.?(?=[\s.,;:!?]|$)/gu, (m0, d: string) => {  // space, NBSP
+    //     \u26a0 AND THE CAPITALISED WORD MAY NOT OPEN THE SENTENCE (#1535): a capital there is the sentence's, not a
+    //     name's, so `M\u00e1m 3 psy` read *M\u00e1m t\u0159et\u00ed psy* (FLEURS: `Cel\u00fdch 20 procent`, `Standardn\u00ed 35 mm`). The word
+    //     must follow some other word's last character and a space. A regnal name that opens the sentence with a
+    //     dotted ordinal before a lowercase word (`Karel 4. zalo\u017eil`) is still read, by step 11. Still declined: a
+    //     capitalised NON-name mid-sentence (`\u0161ampion\u00e1tu Formule 1`), which needs to know what a name is.
+    s = rewrite(s, /(?<=[^\s.!?\u2026]\s+\p{Lu}\p{Ll}+\p{M}*[ \u00a0])(\d{1,2})\.?(?=[\s.,;:!?]|$)/gu, (m0, d: string) => {  // space, NBSP
         const n = Number(d);
         const o = ordinal(n);
         return o === undefined || n > 39 ? m0 : o;
@@ -374,7 +426,10 @@ export function normalizeCzech(input: string): string {
     //    already in this file.
     s = rewrite(s, /±/gu, " plus mínus ");
     s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
-    s = rewrite(s, /(\d)\s*×\s*(?=\d)/gu, "$1 krát ");
+    //    ⚠ THE ASCII `x` TOO (#1535), the reading the shared tier's `multiply` gives it: the tier runs after the
+    //    fraction rule below, and once `29¾ x 24½` (folded to `29 3/4 x 24 1/2`) has its fraction read there is no
+    //    digit before the `x` for the tier to see, so it was read as the letter *iks*.
+    s = rewrite(s, /(\d)\s*[×x]\s*(?=\d)/gu, "$1 krát ");
     // MINUS, the counterpart of the `plus` rule above and missing from it. A sign before a number was
     // dropped outright, so `-5 stupňů` read as "pět stupňů" — five degrees, not minus five. Same boundary
     // as the plus rule so a hyphenated compound is untouched; U+2212 as well as the hyphen.
@@ -392,12 +447,18 @@ export function normalizeCzech(input: string): string {
     // `B&B` read as two bare letters with nothing between them.
     s = rewrite(s, /\s*[&＆]\s*/gu, " a ");
 
-    // 16) FRACTIONS — feminine, agreeing with the elided *část*: 1/5 is "jedna pětina". Digits on both
+    // 16) FRACTIONS — feminine, agreeing with the elided *část*: 1/5 is "jedna pátá". Digits on both
     //     sides only, so the corpus's " / " in "i / nebo"-shaped phrases is untouched.
+    //     ⚠ EVERY NUMERATOR IS READ (#1535), not only 1: `2/3` dropped its slash and read as two bare numbers.
+    //     The denominator takes the numerator's count form (csCountForm): 1 the feminine singular, 2–4 the
+    //     feminine plural (dvě třetí, tři páté — the same -é/-í ending as the neuter, so neutNom supplies it),
+    //     5+ and compounds ending in 1 the genitive plural (pět osmých, dvacet jedna pátých).
     s = rewrite(s, /(?<![\d.,])(\d{1,3})\/(\d{1,3})(?![\d.,])/gu, (m0, a: string, b: string) => {
         const den = ordinal(Number(b));
-        if (den === undefined || Number(a) !== 1) return m0;
-        return `jedna ${inflectOrdinal(den, "fem")}`;
+        if (den === undefined) return m0;
+        const num = Number(a);
+        const c: OrdCase = (["fem", "neutNom", "plGen"] as const)[csCountForm(num)]!;
+        return `${feminine(numberToWords(num))} ${inflectOrdinal(den, c)}`;
     });
 
     // 17) pH and Ghz — the corpus's lowercase tech tokens that would otherwise read as consonant

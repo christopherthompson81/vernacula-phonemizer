@@ -22,6 +22,14 @@
     // the palatal glide, so it conditions the light variant exactly as a front vowel does.
     "frontLetters": ["е", "и", "ј"],
 
+    // RUSSIAN LETTERS that Macedonian does not write, folded to the Macedonian spelling of the same sound before
+    // the scan — the standard transliteration Macedonian uses for Russian names (Юрий → Јуриј, Щукин → Штукин).
+    // #1535: `Юрий Гагарин` read *ju rˈi*, the word split at ⟨ю⟩ (outside the TOKEN, read by the Russian reader on
+    // its own) and ⟨й⟩ dropped (inside the TOKEN, in no letter table). The two signs fold to nothing.
+    "russianLetters": {
+        "ё": "јо", "й": "ј", "щ": "шт", "ъ": "", "ы": "и", "ь": "", "э": "е", "ю": "ју", "я": "ја"
+    },
+
     "clausePunctuation": {
         ".": ".", "!": "!", "?": "?", "…": ",", ",": ",", ";": ",", ":": ",", "—": ",",
     },

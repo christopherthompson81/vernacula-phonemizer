@@ -238,7 +238,11 @@ public static class Normalize
     private static readonly string DOTTED_ALT = string.Join("|", DOTTED.Keys.OrderByDescending(a => a.Length));
 
     private static readonly JsRe DOTTED_MID =
-        JsRegex.Compile("(?<![\\p{L}\\p{M}.])(" + DOTTED_ALT + ")\\.(\\s+)(?=[\\p{L}\\d(„\"])", "giu");
+        JsRegex.Compile("(?<![\\p{L}\\p{M}.])(" + DOTTED_ALT + ")\\.(\\s+)(?=([\\p{L}\\d(„\"]))", "giu");
+    /** The DOTTED keys that CLOSE what they abbreviate (`atď.`, `Jr.`): a capital after their dot is a new
+     *  sentence and the dot is kept (#1535). A positive list — see the TypeScript. */
+    private static readonly HashSet<string> CLOSING = new(StringComparer.Ordinal) { "atď", "jr" };
+    private static readonly JsRe UPPER = JsRegex.Compile("\\p{Lu}", "u");
     private static readonly JsRe DOTTED_END =
         JsRegex.Compile("(?<![\\p{L}\\p{M}.])(" + DOTTED_ALT + ")\\.(?=\\s*(?:[»)”\\]]\\s*)*$)", "giu");
     private static readonly JsRe DOTTED_BARE =
@@ -330,7 +334,8 @@ public static class Normalize
      *  the TypeScript. */
     public static string NormalizeSlovak(string input)
     {
-        var s = input;
+        // ⚠ COMPOSED FIRST (#1535): NFD input lost its caron in the g2p scan.
+        var s = Renormalize(input, System.Text.NormalizationForm.FormC);
 
         // 0) DIGIT DE-GROUPING, FIRST — TWO passes, because the groups overlap on the shared digit.
         for (var i = 0; i < 2; i++)
@@ -345,10 +350,16 @@ public static class Normalize
         }
 
         // 2) SINGLE-DOT ABBREVIATIONS. The dot is consumed so it cannot become a phrase break.
+        //    A capital after a CLOSING abbreviation's dot is a new sentence, so the dot is kept (#1535).
         s = Rewrite(s, DOTTED_MID, m =>
+        {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) — the pattern is built from this table's own keys but
             // carries `i`+`u`, so JS's fold can widen it; a near-miss that lacks a key is left alone.
-            DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+            var key = m.Groups[1].Value.ToLowerInvariant();
+            if (!DOTTED.TryGetValue(key, out var w)) return m.Value;
+            return CLOSING.Contains(key) && UPPER.IsMatch(m.Groups[3].Value)
+                ? $"{w}.{m.Groups[2].Value}" : $"{w}{m.Groups[2].Value}";
+        });
         s = Rewrite(s, DOTTED_END, m =>
             DOTTED.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
         s = Rewrite(s, DOTTED_BARE, m =>
@@ -392,7 +403,8 @@ public static class Normalize
             if (tail is null) return m.Value;
             // ⚠ ON A CAPTURE, NOT THE PIPELINE STRING — hence JsRegex.Replace, not the seam.
             var pre = JsRegex.Replace(m.Groups[1].Value, LIC_ITEM, mm =>
-                (OrdinalWords(Js.Number(mm.Groups[1].Value), slot) ?? mm.Value) + mm.Groups[2].Value);
+                // Out of range the item keeps its digits and dot, not the whole match with its comma (#1535).
+                (OrdinalWords(Js.Number(mm.Groups[1].Value), slot) ?? $"{mm.Groups[1].Value}.") + mm.Groups[2].Value);
             return $"{pre}{tail} {m.Groups[3].Value}";
         });
 

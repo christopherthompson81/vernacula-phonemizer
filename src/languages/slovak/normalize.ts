@@ -52,7 +52,7 @@ import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initial
 import { MANIFEST } from "./manifest.ts";
 import { SYMBOLS, skCountForm } from "./slovak.ts";
 import { numberToWords } from "./numbers.ts";
-import { rewrite } from "../../core/provenance.ts";
+import { renormalize, rewrite } from "../../core/provenance.ts";
 
 /**
  * SLOVAK LETTER NAMES, for the initialism pass.
@@ -303,6 +303,11 @@ const DOTTED: Readonly<Record<string, string>> = {
     tzv: "takzvaný", atď: "a tak ďalej", napr: "napríklad", č: "číslo", dr: "doktor", jr: "junior",
 };
 const DOTTED_ALT = Object.keys(DOTTED).sort((a, b) => b.length - a.length).join("|");
+/** The DOTTED keys that CLOSE what they abbreviate — a list (`atď.`) or a name (`Jr.`) — so a capital after
+ *  their dot is a new sentence and the dot is kept as its pause (#1535). ⚠ A POSITIVE LIST: every other key is
+ *  followed by its own object, capital or not (`Dr. Novák`, `napr. Bratislava`, `č. 5`). The capital is tested
+ *  in code: the pattern carries `i`. */
+const CLOSING: ReadonlySet<string> = new Set(["atď", "jr"]);
 
 /** Fraction denominator nouns 2–10, feminine. Slovak derives them from the CARDINAL stem with -ina
  *  (päť → pätina, šesť → šestina), and the three count forms are then the regular -ina / -iny / -ín
@@ -359,7 +364,9 @@ const CLOCK_TAIL = "(?![\\d:])(?!\\.\\d)(?!,\\d)";
  * decimal comma — see step 12.
  */
 export function normalizeSlovak(input: string): string {
-    let s = input;
+    // ⚠ COMPOSED FIRST (#1535): a decomposed caron or acute (`l` + U+030C) reached the g2p as a bare letter and
+    //   a combining mark it skips, so NFD `ľad` read *lat*; and every pattern below spells its words precomposed.
+    let s = renormalize(input, "NFC");
 
     // 0) DIGIT DE-GROUPING, FIRST (⚠ a grouping separator is otherwise read as clause
     //    punctuation, and the number token cannot span a space). Slovak groups thousands with a SPACE
@@ -386,8 +393,15 @@ export function normalizeSlovak(input: string): string {
     //    following comma already carries the pause, so appending a period there produced `a tak ďalej.,`
     //    — two marks where the sentence has one. Only an abbreviation at the very end of the utterance
     //    (or before closing brackets that end it) gets the period back.
-    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=[\\p{L}\\d(„"])`, "giu"),
-        (_m, ab: string, sp: string) => `${DOTTED[ab.toLowerCase()]!}${sp}`);
+    //    ⚠ A CAPITAL AFTER THE DOT IS A NEW SENTENCE (#1535): `atď. Potom` lost its full stop, so the list's end
+    //    and the next sentence ran together. The dot is kept there, as keepFinal does for step 1, after a
+    //    CLOSING abbreviation only; any other's capital is its own object (`Dr. Novák`, `napr. Bratislava`).
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(\\s+)(?=([\\p{L}\\d(„"]))`, "giu"),
+        (_m, ab: string, sp: string, next: string) => {
+            const key = ab.toLowerCase();
+            const w = DOTTED[key]!;
+            return CLOSING.has(key) && /\p{Lu}/u.test(next) ? `${w}.${sp}` : `${w}${sp}`;
+        });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?=\\s*(?:[»)”\\]]\\s*)*$)`, "giu"),
         (_m, ab: string) => `${DOTTED[ab.toLowerCase()]!}.`);
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}.])(${DOTTED_ALT})\\.(?![\\p{L}\\p{M}])`, "giu"),
@@ -457,8 +471,10 @@ export function normalizeSlovak(input: string): string {
             //    The item's own COMMA is re-emitted: `v 11., 12. a 13. storočí` is spoken with that pause,
             //    and swallowing it with the ordinal period lost it (⚠ once you
             //    stop writing an operand back verbatim, its character class starts eating punctuation).
+            //    ⚠ AN ITEM OUT OF RANGE KEEPS ITS DIGITS AND DOT, NOT THE WHOLE MATCH (#1535): the fallback was
+            //    `w`, which already ends in the comma, so `V 1000., 5. storočí` came out `1000.,,`.
             const pre = list.replace(/(\d{1,4})\.(,?)/gu,
-                (w, n: string, comma: string) => `${ordinalWords(Number(n), slot) ?? w}${comma}`);
+                (_w, n: string, comma: string) => `${ordinalWords(Number(n), slot) ?? `${n}.`}${comma}`);
             return `${pre}${tail} ${head}`;
         },
     );

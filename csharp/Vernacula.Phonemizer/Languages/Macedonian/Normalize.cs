@@ -162,7 +162,7 @@ public static class Normalize
     private static readonly JsRe DATE =
         JsRegex.Compile($"(\\d{{1,2}})(?:\\.)?\\s+({MONTH_ALT})(?![\\p{{L}}\\p{{M}}])", "giu");
     private static readonly JsRe REGNAL =
-        JsRegex.Compile("(\\p{Lu}\\p{Ll}+\\p{M}*)[ \u00a0](\\d{1,2})(?![,\\d])(?=\\.?[.,;:!?]|$)", "gu");  // space, NBSP
+        JsRegex.Compile("(?<=[^\\s.!?\u2026]\\s+)(\\p{Lu}\\p{Ll}+\\p{M}*)[ \u00a0](\\d{1,2})(?![,\\d])(?=\\.?[.,;:!?]|$)", "gu");  // space, NBSP
     private static readonly JsRe MILJI = JsRegex.Compile("(\\d+)\\s*милји\\s*\\/\\s*час(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe MPH = JsRegex.Compile("(\\d+)\\s*mph(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe KPH = JsRegex.Compile("(\\d+)\\s*kph(?![\\p{L}\\p{M}])", "giu");
@@ -188,6 +188,15 @@ public static class Normalize
     private static readonly JsRe FRAC_34 = JsRegex.Compile("(\\d+)¾", "gu");
     private static readonly JsRe FRAC_12 = JsRegex.Compile("(\\d+)½", "gu");
     private static readonly JsRe FRAC_14 = JsRegex.Compile("(\\d+)¼", "gu");
+    private static readonly JsRe CAPITAL_NEXT = JsRegex.Compile("^\\s+\\p{Lu}", "u");
+    private static readonly JsRe EDEN_FINAL = JsRegex.Compile("(?<![\\p{L}\\p{M}])еден$", "u");
+    private static readonly JsRe DVA_FINAL = JsRegex.Compile("(?<![\\p{L}\\p{M}])два$", "u");
+    /** Fraction denominator nouns 2–6, [singular, plural] — feminine (#1535). */
+    private static readonly IReadOnlyDictionary<double, (string Sg, string Pl)> FRACTION_NOUN = new Dictionary<double, (string, string)>
+    {
+        [2] = ("половина", "половини"), [3] = ("третина", "третини"), [4] = ("четвртина", "четвртини"),
+        [5] = ("петтина", "петтини"), [6] = ("шестина", "шестини"),
+    };
     private static readonly JsRe UNIT_FRACTION =
         JsRegex.Compile("(?<![\\d.,])(\\d{1,2})\\/(\\d{1,2})(?![\\d.,])", "gu");
     private static readonly JsRe INITIAL_AFTER_COMMA =
@@ -222,7 +231,10 @@ public static class Normalize
         s = Rewrite(s, YEAR_G, m => $"{m.Groups[1].Value} {(Js.Number(m.Groups[1].Value) >= 100 ? "година" : "години")}");
 
         // 3) SINGLE-DOT / HYPHEN ABBREVIATIONS. Hyphenated, so they do not collide with the year rule.
-        s = Rewrite(s, ITN, "и така натаму");
+        //    `итн.` closes a list: a capital after it keeps its dot as the sentence end (#1535).
+        var whole3 = s;
+        s = Rewrite(s, ITN, m =>
+            CAPITAL_NEXT.IsMatch(whole3[(m.Index + m.Length)..]) ? "и така натаму." : "и така натаму");
         s = Rewrite(s, TE, "то ест");
         s = Rewrite(s, GDIN, "господин");
         s = Rewrite(s, DR, "доктор");
@@ -385,13 +397,15 @@ public static class Normalize
         s = Rewrite(s, FRAC_34, "$1 и три четвртини");
         s = Rewrite(s, FRAC_12, "$1 и половина");
         s = Rewrite(s, FRAC_14, "$1 и четвртина");
+        //      Every numerator is read, the noun in its count form and the numeral feminine (#1535).
         s = Rewrite(s, UNIT_FRACTION, m =>
         {
-            var denom = Js.Number(m.Groups[2].Value);
-            var suffix = denom == 2 ? "половина" : denom == 3 ? "третина" : denom == 4 ? "четвртина"
-                : denom == 5 ? "петтина" : denom == 6 ? "шестина" : null;
-            if (suffix is null || Js.Number(m.Groups[1].Value) != 1) return m.Value;
-            return $"една {suffix}";
+            if (!FRACTION_NOUN.TryGetValue(Js.Number(m.Groups[2].Value), out var forms)) return m.Value;
+            var num = Js.Number(m.Groups[1].Value);
+            var m100 = num % 100;
+            var noun = m100 % 10 == 1 && m100 != 11 ? forms.Sg : forms.Pl;
+            var numWord = DVA_FINAL.Replace(EDEN_FINAL.Replace(Numbers.NumberToText(num), "една"), "две");
+            return $"{numWord} {noun}";
         });
 
         // 15) PERSONAL-INITIAL single capitals — `Н. Вејн` (the shared LONE_INITIAL handles `В. Буш`; this

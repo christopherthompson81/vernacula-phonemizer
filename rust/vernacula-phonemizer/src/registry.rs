@@ -303,7 +303,8 @@ pub enum PhonemizeError {
     Neural(String),
     /// The TS engine THROWS on this input, so the port returns an error rather than a reading. Its first
     /// producer, Hindi's ordinal rule on a 309-digit run, was fixed TS-first to decline above 2^53 (#1463), and
-    /// so was Tagalog's `ika-` ordinal (#1534). Produced today by Czech: an inflected ordinal outside 1–999.
+    /// so were Tagalog's `ika-` ordinal (#1534) and Czech's inflected ordinal outside 1–999 (#1535). Nothing
+    /// produces it today; it stays so that a future TS throw has a typed home rather than a panic.
     Input(String),
 }
 

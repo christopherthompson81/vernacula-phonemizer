@@ -16,7 +16,7 @@ use crate::core::initialisms::{
 use crate::core::js_regex::{JsMatch, JsRegex};
 use crate::core::js_string::{JsString, js, js_number};
 use crate::core::normalize_symbols::{alternation, sorted_by_length_desc};
-use crate::core::provenance::{rewrite, rewrite_with};
+use crate::core::provenance::{Form, renormalize, rewrite, rewrite_with};
 use crate::js_re;
 
 /// `LETTER_NAME`, in the TS object's key order.
@@ -457,6 +457,10 @@ fn dotted(key: &JsString) -> &'static str {
         .map_or("undefined", |(_, v)| *v)
 }
 
+/// `CLOSING`: the DOTTED keys that close a list or a name, so a capital after their dot is a new sentence
+/// (#1535).
+const CLOSING: [&str; 2] = ["atď", "jr"];
+
 static DOTTED_ALT: LazyLock<String> =
     LazyLock::new(|| alternation(&sorted_by_length_desc(DOTTED.iter().map(|(k, _)| js(k)))));
 
@@ -527,7 +531,7 @@ static GROUP_SPACE_RE: LazyLock<JsRegex> =
 static DOTTED_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r#"(?<![\p{{L}}\p{{M}}.])({})\.(\s+)(?=[\p{{L}}\d(„"])"#,
+            r#"(?<![\p{{L}}\p{{M}}.])({})\.(\s+)(?=([\p{{L}}\d(„"]))"#,
             *DOTTED_ALT
         ),
         "giu",
@@ -583,7 +587,8 @@ static LICENSED: LazyLock<JsRegex> = LazyLock::new(|| {
 
 /// `normalizeSlovak(input)`.
 pub(crate) fn normalize_slovak(input: &JsString) -> JsString {
-    let mut s = input.clone();
+    // Composed first (#1535): a decomposed caron reached the g2p as a bare letter and a skipped mark.
+    let mut s = renormalize(input, Form::Nfc);
     let num = |m: &JsMatch, t: &JsString, i: usize| js_number(&m.group(i, t).unwrap());
 
     // 0) digit de-grouping (twice: the groups overlap on the shared digit), then the separators to a space.
@@ -598,8 +603,18 @@ pub(crate) fn normalize_slovak(input: &JsString) -> JsString {
     }
 
     // 2) single-dot abbreviations: before a word, at the utterance end (the period kept), elsewhere.
+    //    A closing abbreviation before a capital keeps its dot as the sentence end (#1535).
     s = rewrite_with(&s, &DOTTED_CONTINUES, |m, t| {
-        js(dotted(&m.group(1, t).unwrap().to_lower_case())).concat(&m.group(2, t).unwrap())
+        let key = m.group(1, t).unwrap().to_lower_case();
+        let w = js(dotted(&key));
+        let sp = m.group(2, t).unwrap();
+        if CLOSING.iter().any(|k| js(k) == key)
+            && js_re!(r"\p{Lu}", "u").test(&m.group(3, t).unwrap())
+        {
+            w.concat(&js(".")).concat(&sp)
+        } else {
+            w.concat(&sp)
+        }
     });
     s = rewrite_with(&s, &DOTTED_ENDS, |m, t| {
         js(dotted(&m.group(1, t).unwrap().to_lower_case())).concat(&js("."))
@@ -660,10 +675,11 @@ pub(crate) fn normalize_slovak(input: &JsString) -> JsString {
             return m.value(t);
         };
         let list = m.group(1, t).unwrap_or_default();
-        // ⚠ A declined item writes back its WHOLE match (`w`, which already holds the comma) plus the comma.
+        // A declined item keeps its digits and dot, then the comma once (#1535).
         let pre = js_re!(r"(\d{1,4})\.(,?)", "gu").replace_with(&list, |im, l| {
-            ordinal_words(js_number(&im.group(1, l).unwrap()), slot)
-                .unwrap_or_else(|| im.value(l))
+            let n = im.group(1, l).unwrap();
+            ordinal_words(js_number(&n), slot)
+                .unwrap_or_else(|| n.concat(&js(".")))
                 .concat(&im.group(2, l).unwrap_or_default())
         });
         pre.concat(&tail).concat(&js(" ")).concat(&head)

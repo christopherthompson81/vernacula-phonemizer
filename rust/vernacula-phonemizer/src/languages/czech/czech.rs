@@ -106,8 +106,8 @@ pub struct CzechPhonemizer {
 /// The module functions, exposed through the engine: holding a `CzechPhonemizer` proves the manifest and the
 /// lexicon loaded, so none of these can reach a load panic. (The per-module differentials call them.)
 impl CzechPhonemizer {
-    /// `normalizeCzech(text)`; `Err` where the TS throws.
-    pub fn normalize(&self, text: &JsString) -> Result<JsString, String> {
+    /// `normalizeCzech(text)`.
+    pub fn normalize(&self, text: &JsString) -> JsString {
         normalize_czech(text)
     }
 
@@ -161,11 +161,11 @@ impl CzechPhonemizer {
         NAT(word)
     }
 
-    /// `text(input)`; `Err` where the TS throws (the normalizer's ordinal steps).
-    pub fn text(&self, input: &JsString) -> Result<JsString, String> {
+    /// `text(input)`.
+    pub fn text(&self, input: &JsString) -> JsString {
         let normalized = self
             .symbols
-            .apply(&normalize_czech_initialisms(&normalize_czech(input)?));
+            .apply(&normalize_czech_initialisms(&normalize_czech(input)));
         let m = &*MANIFEST;
         let emit_number =
             |sink: &mut crate::core::clauses::ClauseSink, n: f64, raw: Option<&JsString>| {
@@ -173,7 +173,7 @@ impl CzechPhonemizer {
                     sink.emit(&phonemize_word(&wd));
                 }
             };
-        Ok(assemble_clauses(&normalized, &TOKEN, |mm, s, sink| {
+        assemble_clauses(&normalized, &TOKEN, |mm, s, sink| {
             if let Some(w) = mm.group(1, s).filter(|w| !w.is_empty()) {
                 sink.emit(&phonemize_word(&NAT(&w)));
             } else if let Some(num) = mm.group(2, s).filter(|n| !n.is_empty()) {
@@ -204,13 +204,13 @@ impl CzechPhonemizer {
             {
                 sink.pause(&js(mk));
             }
-        }))
+        })
     }
 }
 
 impl Engine for CzechPhonemizer {
     fn text(&self, input: &JsString) -> Result<JsString, PhonemizeError> {
-        CzechPhonemizer::text(self, input).map_err(PhonemizeError::Input)
+        Ok(CzechPhonemizer::text(self, input))
     }
 }
 
@@ -298,7 +298,7 @@ mod tests {
             assert_eq!(e.phonemize_word(&js(w)).to_string_lossy(), *want, "{w}");
         }
         for (t, want) in NORM_PINS {
-            assert_eq!(e.normalize(&js(t)).unwrap().to_string_lossy(), *want, "{t}");
+            assert_eq!(e.normalize(&js(t)).to_string_lossy(), *want, "{t}");
         }
         for (t, want) in TEXT_PINS {
             assert_eq!(crate::phonemize(t, "cs").unwrap(), *want, "{t}");
@@ -318,12 +318,59 @@ mod tests {
         assert_eq!(a.split(' ').count(), 22);
     }
 
-    /// The TS throws on an ordinal step's number outside 1–999 (reported in the port log); so does the port.
+    /// #1535: an inflected ordinal outside 1–999 is left as written (the TS used to throw there).
     #[test]
-    fn an_out_of_range_inflected_ordinal_is_an_input_error() {
-        assert!(matches!(
-            crate::phonemize("Ve 1000. století.", "cs"),
-            Err(PhonemizeError::Input(_))
-        ));
+    fn an_out_of_range_inflected_ordinal_is_left_as_written() {
+        let e = create_czech().unwrap();
+        for (t, want) in [
+            ("Ve 1000. století.", "Ve 1000. století."),
+            ("V 0. letech", "V 0. letech"),
+            ("1000. září", "1000. září"),
+            ("na 1000. místě", "na 1000. místě"),
+            ("po 1000. hodině", "po 1000. hodině"),
+            ("na 1000. a 5. místě", "na 1000. a pátém místě"),
+            ("Ve 12. a 1000. století", "Ve dvanáctém a 1000. století"),
+        ] {
+            assert_eq!(e.normalize(&js(t)).to_string_lossy(), want, "{t}");
+        }
+        assert!(crate::phonemize("Ve 1000. století.", "cs").is_ok());
+    }
+
+    /// test/slavic-port-findings.test.ts, the Czech block (#1535).
+    #[test]
+    fn the_1535_findings_hold() {
+        let e = create_czech().unwrap();
+        for (t, want) in [
+            ("Mám 3 psy", "Mám 3 psy"),
+            ("Je to Karel 4 a jeho", "Je to Karel čtvrtý a jeho"),
+            ("Bylo to dne 5. 5.", "Bylo to dne pátého pátého."),
+            ("slovo atd. Potom.", "slovo a tak dále. Potom."),
+            ("atd. potom", "a tak dále potom"),
+            ("Dr. Novák", "doktor Novák"),
+            ("stojí 50 mil. Kč", "stojí 50 milionů Kč"),
+            ("Město Kyjev 12. století", "Město Kyjev dvanáctého století"),
+            ("ve 12. století", "ve dvanáctém století"),
+            (
+                "2/3 a 4/5 a 5/8 a 21/100",
+                "dvě třetí a čtyři páté a pět osmých a dvacetjedna stých",
+            ),
+            ("1/5", "jedna pátá"),
+        ] {
+            assert_eq!(e.normalize(&js(t)).to_string_lossy(), want, "{t}");
+        }
+        assert!(
+            crate::phonemize("Bylo to dne 5. 5.", "cs")
+                .unwrap()
+                .ends_with(" .")
+        );
+        assert!(
+            crate::phonemize("29¾ x 24½", "cs")
+                .unwrap()
+                .contains("krˈaːt")
+        );
+        let ph = |t: &str| crate::phonemize(t, "cs").unwrap();
+        assert_eq!(ph("de\u{30C}ti"), ph("děti"));
+        assert_eq!(ph("Ne\u{30C}co"), ph("Něco"));
+        assert_eq!(ph("de\u{30C}ti"), "ɟˈɛcɪ");
     }
 }

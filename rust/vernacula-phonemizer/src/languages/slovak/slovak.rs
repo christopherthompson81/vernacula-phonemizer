@@ -411,4 +411,21 @@ mod tests {
                 .ends_with('.')
         );
     }
+
+    /// test/slavic-port-findings.test.ts, the Slovak block (#1535).
+    #[test]
+    fn the_1535_findings_hold() {
+        let e = create_slovak().unwrap();
+        for (t, want) in [
+            ("V 1000., 5. storočí.", "V 1000., piatom storočí."),
+            ("Atď. Potom.", "a tak ďalej. Potom."),
+            ("atď. potom", "a tak ďalej potom"),
+            ("Dr. Novák", "doktor Novák"),
+        ] {
+            assert_eq!(e.normalize(&js(t)).to_string_lossy(), want, "{t}");
+        }
+        let ph = |t: &str| crate::phonemize(t, "sk").unwrap();
+        assert_eq!(ph("l\u{30C}ad"), ph("ľad"));
+        assert_eq!(ph("l\u{30C}ad"), "ʎˈat");
+    }
 }

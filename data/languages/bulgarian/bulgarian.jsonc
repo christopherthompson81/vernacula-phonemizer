@@ -15,14 +15,18 @@
     "letters": {
         "а": "a", "б": "b", "в": "v", "г": "ɡ", "д": "d", "е": "ɛ", "ж": "ʒ", "з": "z", "и": "i", "й": "j",
         "к": "k", "м": "m", "н": "n", "о": "ɔ", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f",
-        "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃt", "ъ": "ɤ"
+        "х": "x", "ц": "t͡s", "ч": "t͡ʃ", "ш": "ʃ", "щ": "ʃt", "ъ": "ɤ",
+        // ⟨ѝ⟩ (U+045D) and ⟨ѐ⟩ (U+0450) are ⟨и⟩ and ⟨е⟩ with a grave that marks a HOMOGRAPH, not a sound: ѝ is the
+        // clitic "her" (и ѝ каза), told apart from the conjunction и. They read as the plain vowels (#1535: they
+        // were outside the TOKEN and dropped).
+        "ѐ": "ɛ", "ѝ": "i"
     },
 
     // The ⟨л⟩ THREE-WAY SPLIT (the rule is in bulgarian.ts). Bulgarian ⟨л⟩ is not one sound: it is palatal
     // [lʲ] before a PALATALIZING letter, clear [l] before a FRONT vowel, and the dark/velarized [ɫ]
     // everywhere else — which is the default, so these two short lists are the whole rule.
     "palatalizingLetters": ["ь", "я", "ю"],
-    "frontVowelLetters": ["и", "е"],
+    "frontVowelLetters": ["и", "е", "ѝ", "ѐ"],
 
     "clausePunctuation": {
         ".": ".", "?": "?", "!": "!", ",": ",", ";": ",", ":": ",", "…": ".", "—": ","
@@ -51,5 +55,41 @@
         // Masculine 1/2 — required before милион/милиард (един милион, два милиона).
         "masculine": { "1": "един", "2": "два" },
         "and": "и"
-    }
+    },
+
+    // ORDINALS, for the written-suffix notation `1-ви`, `2-ри`, `18-ти`, `15-то`, `37-ата` (#1535: the suffix was
+    // read as a bare syllable). Only the LAST word of a compound is ordinal (двайсет и ПЪРВИ, сто и деветдесетО),
+    // so `words` maps each last word the cardinal composer can end in to its masculine ordinal; a cardinal ending
+    // in any other word (хиляди, милиона) is left as written. The suffix is the end of the full form, so the rule
+    // picks the form that ends with what was written. `endings` are the forms after the masculine, added to the
+    // stem (the masculine without its -и, or -ен → -н: стотен → стотн-): definite -ия/-ият, feminine -а/-ата,
+    // neuter -о/-ото. The plural is the masculine's own spelling; the definite plural -ите is LEFT OUT, because
+    // `50-те години` is the definite CARDINAL (петдесетте), not an ordinal.
+    "ordinals": {
+        "words": {
+            "едно": "първи", "две": "втори", "три": "трети", "четири": "четвърти", "пет": "пети",
+            "шест": "шести", "седем": "седми", "осем": "осми", "девет": "девети", "десет": "десети",
+            "единайсет": "единайсети", "дванайсет": "дванайсети", "тринайсет": "тринайсети",
+            "четиринайсет": "четиринайсети", "петнайсет": "петнайсети", "шестнайсет": "шестнайсети",
+            "седемнайсет": "седемнайсети", "осемнайсет": "осемнайсети", "деветнайсет": "деветнайсети",
+            "двайсет": "двайсети", "трийсет": "трийсети", "четирийсет": "четирийсети", "петдесет": "петдесети",
+            "шейсет": "шейсети", "седемдесет": "седемдесети", "осемдесет": "осемдесети", "деветдесет": "деветдесети",
+            "сто": "стотен", "двеста": "двестотен", "триста": "тристотен", "четиристотин": "четиристотен",
+            "петстотин": "петстотен", "шестстотин": "шестстотен", "седемстотин": "седемстотен",
+            "осемстотин": "осемстотен", "деветстотин": "деветстотен", "хиляда": "хиляден"
+        },
+        "endings": ["ия", "ият", "а", "ата", "о", "ото"]
+    },
+
+    // MAGNITUDE ABBREVIATIONS after a figure (`340 млн. до 500 милиона`, #1535: read as the cluster [mɫn]). An
+    // INTEGER figure is multiplied out (`exponent` zeros appended) so the cardinal composer says it with its own
+    // agreement — един милион, два милиона, триста и четирийсет милиона; a DECIMAL figure keeps its digits and
+    // takes the count plural (`decimal`): 1,5 милиона.
+    "magnitudeAbbrev": {
+        "млрд": { "exponent": 9, "decimal": "милиарда" },
+        "млн": { "exponent": 6, "decimal": "милиона" }
+    },
+
+    // THE HOUR ABBREVIATION after a clock time (`в 12:05 ч.`, #1535: read as the bare letter ч).
+    "hourAbbrev": "часа"
 }
