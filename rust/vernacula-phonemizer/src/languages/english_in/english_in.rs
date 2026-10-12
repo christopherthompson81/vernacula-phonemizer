@@ -102,4 +102,30 @@ mod tests {
             phonemize_word(&en, &js("thin"))
         );
     }
+
+    /// #1533, as test/accent-variants-spare-foreign-runs.test.ts: an accent delta leaves a run another reader
+    /// read as that reader read it. The expected tokens are plain `en`'s, so no IPA is typed.
+    #[test]
+    fn accent_variants_spare_foreign_runs() {
+        let cases: &[(&str, &[usize], usize)] = &[
+            ("She said नमस्ते to me.", &[2], 1),
+            ("He wrote Привет, мир here.", &[2, 4], 1),
+            ("The word θεός appears.", &[2], 1),
+        ];
+        for lang in ["en-IN", "en-GB"] {
+            for &(text, foreign, english) in cases {
+                let base = crate::phonemize(text, "en").unwrap();
+                let got = crate::phonemize(text, lang).unwrap();
+                let (base, got): (Vec<_>, Vec<_>) =
+                    (base.split(' ').collect(), got.split(' ').collect());
+                assert_eq!(got.len(), base.len(), "{lang}: {text}");
+                for &i in foreign {
+                    assert_eq!(got[i], base[i], "{lang}: {text}");
+                }
+                if lang == "en-IN" {
+                    assert_ne!(got[english], base[english], "{lang}: {text}"); // the delta still applies
+                }
+            }
+        }
+    }
 }

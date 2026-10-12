@@ -73,3 +73,33 @@ Neural reach (`.probe/bin/sync_vs_best.py`): 619 of the 4,171 texts read differe
 
 **Raw finding.** 27 extracted pins plus the `tin` ≠ `thin` assertion: `1 passed`. Parity: all 23 registered languages
 200/200.
+
+## Run 6 — 2026-10-12 (#1533: the accent delta rewrote foreign runs)
+
+**Question.** Run 4's finding is that en-IN's retroflexion hits the dental t̪ of a Hindi run and strips Russian
+palatalisation. Where is the delta applied, and does en-GB share the defect?
+
+**Command.** A synthetic probe (`She said नमस्ते to me.`, `He wrote Привет, мир here.`, `The word θεός appears.`)
+through `phonemize` for en, en-IN and en-GB. Then the full-sentence fn-diff dump (`LANGS=en,en-GB,en-IN …
+phonemize-sync`, 12,491 rows over FLEURS, goldens and probes), taken on main and again on the fix, and diffed.
+
+**Raw finding.**
+- **Where:** both accents pass their per-word delta into `english.ts`'s `text(…, wordTransform)`. The render
+  loop called it for every clause item, including the `tier: "foreign"` items that hold another reader's IPA.
+- **en-IN:** `nəmˈəst̪eː` became `nəmˈəsʈ̪eː`, `prʲɪvʲˈet` became `prɪʋˈeʈ`, and Greek `θeos` became `t̪ʰeos`.
+- **en-GB:** it had the defect too. Its delta drops `ʲ`, so `prʲɪvʲˈet` became `prɪvˈet` and `mʲir` became
+  `mir`.
+- **Fix:** the hook is skipped for foreign items in TS, C# and Rust. Afterwards both accents emit plain `en`'s
+  run tokens, and the English words around the run still carry the accent.
+- **Main vs. fix:** 2 en-IN rows change (the probe line, and one `vita` read by another reader that had been
+  re-accented as `ʋiʈa`). en and en-GB: 0. The goldens are unchanged (`check-goldens en en-GB en-IN`: 600 rows
+  fresh), because none holds an embedded run.
+- **Dead end:** `gen_parity_goldens.mts en-IN en-GB` is not the tool for the accent variants. It reported en-IN
+  as empty and rewrote all 200 en-GB rows from another source, so that output was reverted. `check-goldens` is
+  the right tool for them.
+- **Tests:** TS `test/accent-variants-spare-foreign-runs.test.ts`, C# `AccentVariantsSpareForeignRunsTests` and
+  Rust `accent_variants_spare_foreign_runs` take their expected tokens from plain `en`, so no IPA is typed. With
+  the fix reverted, TS and C# fail 4 of 6; the 2 en-GB cases its delta never touched still pass. Rust fails.
+- **fn-diff:** phonemize-sync is identical for all 12,491 rows.
+
+**Implication.** Closes the last #1533 item.

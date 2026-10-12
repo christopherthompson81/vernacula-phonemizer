@@ -587,7 +587,8 @@ export class EnglishPhonemizer {
                         : promoteFirstVowel(last.citation);
             }
             for (const it of c.items) {
-                const rendered = wordTransform ? wordTransform(it.display, it.word) : it.display;
+                // A foreign run is the other reader's own IPA; an accent delta is English phonology (#1533).
+                const rendered = wordTransform && it.tier !== "foreign" ? wordTransform(it.display, it.word) : it.display;
                 parts.push(rendered);
                 // ⚠ RECORDED AFTER RENDERING (#1150). This pipeline is two-phase — tokens, then a POS tagger
                 // over the whole stream, then a resolver — so no token is ever "open" while its reading is
