@@ -248,3 +248,32 @@ cargo run -p regex-diff: 144898 identical, 0 DIFFER, 0 refused
 ```
 
 **Implication.** Every item is fixed. No golden moved in any language. On FLEURS de_de, 7 rows move, all item 2.
+
+## Run 9 — 2026-10-12 (#1543: the abbreviation's dot before a mark, and closing German quotes)
+
+**Question.** Run 8 left `21 Mio.,` reading «21 Millionen.,». Is that audible, and what else does step 3's
+phrase-end lookahead get wrong?
+
+**Command.** A synthetic probe through `normalizeGerman` and `phonemize` on main and on the fix. Then
+`FLEURS_ROOT=… npx tsx rust/tools/fn-diff/dump.mts de-normalize` (37,853 rows over FLEURS de_de, goldens and
+probes) on both trees, diffed, and the fixed dump replayed through the Rust `fn-diff`.
+
+**Raw finding.**
+- **Not audible.** The normalized text was `21 Millionen., also`, but the IPA already had a single pause
+  (`mɪli̯ˈoːnən , ˈalzoː`): the clause splitter merges `.,`. #1543 is a normalized-text defect.
+- **Fix 1:** steps 2c and 3 drop the dot before `,` `;` `:` `!` `?`, because that mark carries the pause
+  (`absorbsDot`). The dot stays at the end of input, before an ellipsis, and before a bracket or quote.
+- **A real reading defect in the same lookahead.** It listed `»` and `)` but not the closing quotes German
+  uses (»…« closes with «, „…“ with “). So `»21 Mio.«` and `„21 Mio.“` were left unexpanded and read
+  *mˈɪoː*. Fix 2: `PHRASE_END` adds « “ ”, and both now read *mɪli̯ˈoːnən*.
+- **Dead end:** my first regex wrote `\s*(X)|$`, which lost the original `\s*(?:X|$)` grouping, so trailing
+  spaces before the end of input stopped matching. Caught by the `Mio.  ` probe and fixed before any test was
+  written.
+- **de-normalize, main vs. fix:** 12 of 37,853 rows change. That is 3 distinct texts, each the `.,` becoming
+  `,`: one FLEURS text (`und so weiter.,`) and two probe lines. The goldens are fresh (no row moves). The
+  regex corpus is unchanged, since these patterns are built from a template.
+- **Tests:** TS `test/german-1543.test.ts`, C# `German1543Tests` and Rust `the_1543_findings_are_fixed` are
+  all relational. With the fix reverted, TS and C# fail 9 of 13 (the 4 that pass pin the dots that must
+  stay), and Rust fails. The Rust replay of de-normalize is 37,853 identical.
+
+**Implication.** Closes #1543.
