@@ -516,7 +516,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
             }
             foreach (var it in c.Items)
             {
-                var rendered = wordTransform is not null ? wordTransform(it.Display, it.Word) : it.Display;
+                // A foreign run is the other reader's own IPA; an accent delta is English phonology (#1533).
+                var rendered = wordTransform is not null && it.Tier != TokenSource.Foreign ? wordTransform(it.Display, it.Word) : it.Display;
                 parts.Add(rendered);
                 if (it.Source is not null)
                 {

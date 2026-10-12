@@ -637,9 +637,10 @@ impl EnglishPhonemizer {
                 }
             }
             for it in &c.items {
+                // A foreign run is the other reader's own IPA; an accent delta is English phonology (#1533).
                 let rendered = match word_transform {
-                    Some(f) => f(&it.display, &it.word),
-                    None => it.display.clone(),
+                    Some(f) if it.tier != TokenSource::Foreign => f(&it.display, &it.word),
+                    _ => it.display.clone(),
                 };
                 parts.push(rendered.clone());
                 match traced.get_mut(&it.span) {
