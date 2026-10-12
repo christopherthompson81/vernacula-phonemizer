@@ -925,7 +925,10 @@ export function normalizeSlovenian(input: string): string {
     //     right.
     s = rewrite(s, /±/gu, " plus minus ");
     s = rewrite(s, /(^|[\s(])\+\s?(?=\d)/gu, "$1plus ");
-    s = rewrite(s, /(^|[\s(])[-−]\s?(?=\d)/gu, "$1minus ");
+    //     ⚠ THE DIGIT MUST TOUCH THE SIGN (#1532). With `\s?` allowed between them a LIST DASH was read as a
+    //     minus (`Seznam: - 5 jabolk.` → *minus 5 jabolk*); Serbian rejects the spaced form for the same
+    //     reason. The corpus writes no spaced minus.
+    s = rewrite(s, /(^|[\s(])[-−](?=\d)/gu, "$1minus ");
     //     …and a `+` glued to a TIMEZONE CODE, `(UTC+1)` ×1 — the corpus's only other sign, and the one the
     //     artifact scan reported as `DROP math-sign`. Gated on an upper-case letter before the sign, so it
     //     cannot claim a hyphenated compound; it runs before step 20 spells the code out, which is why the

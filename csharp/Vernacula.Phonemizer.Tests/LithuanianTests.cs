@@ -121,7 +121,8 @@ public class LithuanianTests
      * as they ought to read, so the exposure stays visible.
      */
     [Theory]
-    [InlineData("1802 m.", "tūkstantis aštuoni šimtai du metais")]
+    // At the end of the utterance the dot is also the full stop, and it is kept (#1532).
+    [InlineData("1802 m.", "tūkstantis aštuoni šimtai du metais.")]
     [InlineData("8850 m aukštis", "aštuoni tūkstančiai aštuoni šimtai penkiasdešimt metrų aukštis")]
     // RESIDUAL: a METRE read as a year — one instance in 347, and no feature of the string separates it.
     [InlineData("aukštis 174 m. Liūčių", "aukštis šimtas septyniasdešimt keturi metais Liūčių")]
@@ -144,7 +145,7 @@ public class LithuanianTests
         "tūkstantis devyni šimtai trisdešimt metų balandžio dvidešimt penkios dieną")]
     [InlineData("1997 m. jis", "tūkstantis devyni šimtai devyniasdešimt septyni metais jis")]
     // A SMALL or decimal operand is a QUANTITY of years, not a date — a life expectancy takes the genitive.
-    [InlineData("83,4 m.", "aštuoniasdešimt trys kablelis keturi metų")]
+    [InlineData("83,4 m.", "aštuoniasdešimt trys kablelis keturi metų.")] // the stop kept, #1532
     [InlineData("13 m. sūnų", "trylika metų sūnų")]
     // ORDERING: in `pr. m. e.` the `m.` is *mūsų*, not *metai*, so the era phrase must be consumed first.
     // This is the one ordering constraint in the file that produces a wrong WORD rather than a wrong pause.
@@ -370,18 +371,21 @@ public class LithuanianTests
      * day"; over `lt_lt` there are 16 true clocks and 12 carry `val.`. ⚠ The refusal had already SEEN the
      * discriminator and read it backwards — it cites `19:11 val.` as a reason NOT to read, because the hour
      * noun is already there. It is, which is what makes it a marker no counter-example carries.
-     * ⚠ NO WORD IS EMITTED: `valandų` always came from `val.`; what is gone is the clause pause.
+     * #1532: the clock now counts its hours AND its minutes (it used to leave the minutes to the hours rule).
      */
     [Theory]
-    [InlineData("Vos po 11:00 val. protestuotojai", "Vos po 11 nulis valandų protestuotojai")]
-    [InlineData("Šiandien 12.00 val (GMT laiku)", "Šiandien 12 00 val (GMT laiku)")]
-    [InlineData("(19:11 val. UTC)", "(19 vienuolika valandų UTC)")]
-    [InlineData("apie 19:11 val.", "apie 19 vienuolika valandų")]
+    // #1532: the marked clock counts its hours AND its minutes; `:00` reads the hours alone, and a `val.`
+    // that ends the utterance keeps its full stop.
+    [InlineData("Vos po 11:00 val. protestuotojai", "Vos po vienuolika valandų protestuotojai")]
+    [InlineData("Šiandien 12.00 val (GMT laiku)", "Šiandien dvylika valandų (GMT laiku)")]
+    [InlineData("(19:11 val. UTC)", "(devyniolika valandų vienuolika minučių UTC)")]
+    [InlineData("apie 19:11 val.", "apie devyniolika valandų vienuolika minučių.")]
     // ⚠ AND THE SPAN IS STILL HALF-CLAIMED, deliberately: taking the first operand too let the range rule
     // read `00 - 19` as *nuo 00 iki 19*, which is worse than the pause it would have removed.
-    [InlineData("8:00 - 19:00 val.", "8:00 - 19 nulis valandų")]
-    // A RATE still blocks it, or the denominator would be read while the numerator stays raw.
-    [InlineData("515,3 km/val.", "515 kablelis 3 km/val.")]
+    [InlineData("8:00 - 19:00 val.", "8:00 - devyniolika valandų.")]
+    // `km/val.` is a declared rate since #1532, read whole; an undeclared rate still blocks the unit.
+    [InlineData("515,3 km/val.", "penki šimtai penkiolika kablelis trys kilometrų per valandą.")]
+    [InlineData("515,3 km/min.", "515 kablelis 3 km/min.")]
     public void AMarkedClockKeepsItsPauseOff(string text, string want) => Assert.Equal(want, NT(text));
 
     /** ⚠ EVERY COUNTER-EXAMPLE THE REFUSAL NAMES IS STILL DECLINED, because none carries the marker. */
@@ -436,8 +440,8 @@ public class LithuanianTests
     [InlineData("$90 milijonų dolerių", "devyniasdešimt milijonų dolerių")]
     [InlineData("25 min.", "dvidešimt penkios minutės")]
     [InlineData("78 val. 25 min.", "septyniasdešimt aštuonios valandos dvidešimt penkios minutės")]
-    // ⚠ A RATE STILL BLOCKS BOTH, or the denominator would be read while the numerator stays raw.
-    [InlineData("515,3 km/val.", "515 kablelis 3 km/val.")]
+    // ⚠ AN UNDECLARED RATE STILL BLOCKS BOTH, or the denominator would be read while the numerator stays
+    // raw. (`km/val.` is declared since #1532.)
     [InlineData("515,3 km/min.", "515 kablelis 3 km/min.")]
     // ⚠ THE SYMBOLS ONLY, NEVER `Lt` — two letters, and a bare-`Lt` mop-up would fire on any capitalised
     // abbreviation spelled that way. All four corpus `Lt` carry a claimable figure already.

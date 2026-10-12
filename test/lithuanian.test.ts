@@ -122,7 +122,8 @@ describe("Lithuanian text normalization — concord, the year/metre split, and t
     // bare `m` is the METRE (×18). Both branches, plus the shape that would break if the dot guard were
     // dropped from the one-letter key (trap 46).
     test("`m.` is the YEAR and bare `m` is the METRE — the dot is the whole discriminator", () => {
-        expect(normalizeLithuanian("1802 m.").trim()).toBe("tūkstantis aštuoni šimtai du metais");
+        // At the end of the utterance the dot is also the full stop, and it is kept (#1532).
+        expect(normalizeLithuanian("1802 m.").trim()).toBe("tūkstantis aštuoni šimtai du metais.");
         expect(normalizeLithuanian("8850 m aukštis"))
             .toBe("aštuoni tūkstančiai aštuoni šimtai penkiasdešimt metrų aukštis");
         // A capital `M.` is a PERSONAL INITIAL in this corpus (all 6), never a year — so the rule is
@@ -139,7 +140,7 @@ describe("Lithuanian text normalization — concord, the year/metre split, and t
             .toBe("tūkstantis devyni šimtai devyniasdešimt septyni metais jis");
         // A SMALL or decimal operand is a QUANTITY of years, not a date — "Šveicarijoje – 83,4 m." is a
         // life expectancy. That arm takes the genitive too.
-        expect(normalizeLithuanian("83,4 m.").trim()).toBe("aštuoniasdešimt trys kablelis keturi metų");
+        expect(normalizeLithuanian("83,4 m.").trim()).toBe("aštuoniasdešimt trys kablelis keturi metų."); // the stop kept, #1532
         expect(normalizeLithuanian("13 m. sūnų").trim()).toBe("trylika metų sūnų");
     });
 
@@ -309,14 +310,17 @@ describe("Lithuanian normalization — the refusals, the anchors, and the two re
         // refusal above. #1102 re-measured that refusal against `lt_lt` — 16 true clocks, 12 carrying
         // `val.` — and the colon of a MARKED clock is now spent on a space. No word is added: `valandų` was
         // always emitted from `val.`, and what has gone is the clause pause between the two fields.
-        expect(normalizeLithuanian("(19:11 val. UTC)").trim()).toBe("(19 vienuolika valandų UTC)");
-        expect(normalizeLithuanian("apie 19:11 val.").trim()).toBe("apie 19 vienuolika valandų");
+        // ⚠ #1532: that left the MINUTES to the hours rule (*19 vienuolika valandų*, "19, eleven hours"). The
+        // marked clock now counts both fields, and a `val.` that ends the utterance keeps its full stop.
+        expect(normalizeLithuanian("(19:11 val. UTC)").trim()).toBe("(devyniolika valandų vienuolika minučių UTC)");
+        expect(normalizeLithuanian("apie 19:11 val.").trim()).toBe("apie devyniolika valandų vienuolika minučių.");
         // ⚠ AND THE SPAN IS STILL HALF-CLAIMED, deliberately — see CLOCK_MARKED's note. Taking the first
         // operand too let the range rule read `00 - 19` as *nuo 00 iki 19*, which is worse than the pause.
-        expect(normalizeLithuanian("8:00 - 19:00 val.").trim()).toBe("8:00 - 19 nulis valandų");
+        expect(normalizeLithuanian("8:00 - 19:00 val.").trim()).toBe("8:00 - devyniolika valandų.");
         expect(normalizeLithuanian("2:15:16")).toBe("2:15:16");
-        // A RATE still blocks it, or the denominator would be read while the numerator stays raw.
-        expect(normalizeLithuanian("515,3 km/val.")).toBe("515 kablelis 3 km/val."); // the unit stays raw
+        // `km/val.` is now a declared rate (#1532), so it is read whole; an undeclared rate still blocks the unit.
+        expect(normalizeLithuanian("515,3 km/val.")).toBe("penki šimtai penkiolika kablelis trys kilometrų per valandą.");
+        expect(normalizeLithuanian("515,3 km/min.")).toBe("515 kablelis 3 km/min."); // the unit stays raw
     });
 
     // A separator belongs to the number only when a DIGIT follows it. The comma had been fixed this way and
@@ -449,8 +453,8 @@ describe("Lithuanian normalization — the refusals, the anchors, and the two re
         expect(normalizeLithuanian("25 min.").trim()).toBe("dvidešimt penkios minutės");
         expect(normalizeLithuanian("78 val. 25 min.").trim())
             .toBe("septyniasdešimt aštuonios valandos dvidešimt penkios minutės");
-        // ⚠ A RATE STILL BLOCKS BOTH, or the denominator would be read while the numerator stays raw.
-        expect(normalizeLithuanian("515,3 km/val.")).toBe("515 kablelis 3 km/val.");
+        // ⚠ AN UNDECLARED RATE STILL BLOCKS BOTH, or the denominator would be read while the numerator stays
+        // raw. (`km/val.` is declared since #1532 and is pinned in the colon test above.)
         expect(normalizeLithuanian("515,3 km/min.")).toBe("515 kablelis 3 km/min.");
         // ⚠ THE SYMBOLS ONLY, NEVER `Lt` — two letters, and a bare-`Lt` mop-up would fire on any
         // capitalised abbreviation spelled that way. All four corpus `Lt` carry a claimable figure.
@@ -507,8 +511,9 @@ describe("Lithuanian normalization — the refusals, the anchors, and the two re
 // noun is already there. It is, which is what makes it a marker no counter-example carries.
 describe("a marked clock keeps its pause off (#1102)", () => {
     test.each([
-        ["Vos po 11:00 val. protestuotojai", "Vos po 11 nulis valandų protestuotojai"],
-        ["Šiandien 12.00 val (GMT laiku)", "Šiandien 12 00 val (GMT laiku)"],
+        // #1532: the hours and the minutes are both counted now, and `:00` reads the hours alone.
+        ["Vos po 11:00 val. protestuotojai", "Vos po vienuolika valandų protestuotojai"],
+        ["Šiandien 12.00 val (GMT laiku)", "Šiandien dvylika valandų (GMT laiku)"],
     ])("%s", (a, b) => expect(normalizeLithuanian(a)).toBe(b));
 
     test("⚠ EVERY COUNTER-EXAMPLE THE REFUSAL NAMES IS STILL DECLINED", () => {

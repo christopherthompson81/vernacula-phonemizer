@@ -10,7 +10,7 @@ use indexmap::IndexMap;
 use super::numbers::number_to_words;
 use super::ordinals::{head_noun, ordinal_words};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
 use crate::core::normalize_symbols::{
     BareExponent, ExponentPosition, ExponentWords, Multiply, PositionDecl, SymbolData,
     SymbolNormalizer, UnitPer, make_symbol_normalizer,
@@ -315,6 +315,55 @@ fn decimal_comma(text: &JsString) -> JsString {
 }
 
 /// `normalizeLatvian(input)`.
+/// 5. ranges; a non-ascending pair of 1–2 digit whole numbers is a score and loses its dash (#1532).
+fn range(text: &JsString) -> JsString {
+    rewrite_with(
+        text,
+        js_re!(
+            r"(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d|[,.]\d|-)",
+            "gu"
+        ),
+        |mm, t| {
+            let (a, b) = (mm.group(1, t).unwrap(), mm.group(2, t).unwrap());
+            let small = |x: &JsString| js_re!(r"^\d{1,2}$", "u").test(x);
+            let joiner = if small(&a) && small(&b) && js_number(&b) <= js_number(&a) {
+                " "
+            } else {
+                " līdz "
+            };
+            a.concat(&js(joiner)).concat(&b)
+        },
+    )
+}
+
+/// 2b. the clock (#1532): a span between two clocks takes `līdz` first, then `HH:MM` → the two figures
+/// (`:00` dropped, a leading minute zero spoken).
+fn clock(text: &JsString) -> JsString {
+    let s = rewrite(
+        text,
+        js_re!(r"(\d{1,2}:\d{2})\s?[-–—]\s?(?=\d{1,2}:\d{2})", "gu"),
+        &js("$1 līdz "),
+    );
+    rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)",
+            "gu"
+        ),
+        |mm, t| {
+            let hour = js(&js_number_to_string(js_number(&mm.group(1, t).unwrap())));
+            let min = mm.group(2, t).unwrap();
+            if min == js("00") {
+                hour
+            } else if min.starts_with(&js("0")) {
+                hour.concat(&js(" 0 ")).concat(&min.slice(1, None))
+            } else {
+                hour.concat(&js(" ")).concat(&min)
+            }
+        },
+    )
+}
+
 pub(crate) fn normalize_latvian(input: &JsString) -> JsString {
     let mut s = rewrite(
         input,
@@ -322,16 +371,10 @@ pub(crate) fn normalize_latvian(input: &JsString) -> JsString {
         &JsString::new(),
     );
     s = abbreviations(&s);
+    s = clock(&s);
     s = ordinal_range(&s);
     s = ordinal_period(&s);
-    s = rewrite(
-        &s,
-        js_re!(
-            r"(?<![\d,.\p{L}-])(\d+(?:,\d+)?)\s*[-–—]\s*(\d+(?:,\d+)?)(?!\d|[,.]\d|-)",
-            "gu"
-        ),
-        &js("$1 līdz $2"),
-    );
+    s = range(&s);
     s = SYMBOLS.apply(&s);
     s = degrees(&s);
     s = signs(&s);

@@ -71,3 +71,34 @@ The masculine-default `divi` before a feminine noun (`2 māsas` → *divi*) is t
 not a finding. Every manifest field is read; nothing routes to an unported engine (no port-pending row).
 
 **Implication.** Reported in the PR; Rust reproduces the TS.
+
+## Run 4 — 2026-10-11 17:25 (#1532: Run 3's findings, fixed TS-first, FLEURS before/after)
+
+**Question.** What clock shapes and score shapes does FLEURS lv_lv carry, and what does a clock rule change?
+
+**Command.** greps over the unique FLEURS lv_lv texts for `N[:.]NN` and `N - N`, then the before/after
+normalizer diff over all 1,764.
+
+**Raw finding (before).** Clocks: 18 `HH:MM`, mostly after `plkst.`/`pulksten` (`no plkst. 06:30 līdz 07:30`,
+`plkst. 12:00 pēc GMT laika`). Non-clocks with a colon: `26:00` (a score, hour > 23) and the durations
+`4:41.30`, `2:11.60`, `1:09.02`. No `pulksten desmitos`-style locative is written anywhere, so no case form
+is sourced. Digit pairs with a dash: one descending score (`pret kanādieti ir 7–2`) and one descending
+DECIMAL range (`pirms 4,2–3,9 miljoniem gadu`); no spaced ` - ` between figures.
+
+**Fixes.** `HEAD_NOUN` lookups through `core/own.ts` (`3. constructor` → `3 constructor`, the untabulated-noun
+reading). A clock step 2b: `HH:MM` → the two figures (`:00` dropped, a leading minute zero spoken), a span
+between two clocks joined with *līdz* first. The range step drops the dash of a non-ascending pair of 1–2
+digit whole numbers (a score).
+
+**Raw finding (after).** 16 lines change: 15 clocks (`pulksten 06:30 līdz 07:30` → `pulksten 6 30 līdz 7 30`,
+`plkst. 12:00 pēc GMT` → `pulksten 12 pēc GMT`, `22:08` → `22 0 8`) and the score (`7 līdz 2` → `7 2`).
+`26:00` and the three durations are unchanged, and so is `4,2–3,9`.
+The span step is there because, with the clocks as figures, the range step would see `30 - 7` in `06:30 -
+07:30`, which descends, and drop its dash as a score (reasoned before the run; the FLEURS line reads *līdz*).
+
+## Run 5 — 2026-10-11 18:10 (#1532: goldens, C# and Rust mirrored)
+
+**Raw finding.** `gen_parity_goldens.mts … lv`: 6 rows move, all the clock: 2 copies of `Plkst. 11:20`, 3 of
+`plkst. 5:00`, 1 of `plkst. 7:19 … plkst. 21:19` (the colon's ` , ` pause gone; `5:00` → *pieci*). No golden
+holds a score. In Rust `head_noun` is an own-key lookup; `HeadCase::Proto` stays only for the fn-diff replay
+of `ordinalWords` with a case name `ENDING` lacks. `lv-normalize`: 25676 identical, 0 DIFFER; parity lv 200/200.

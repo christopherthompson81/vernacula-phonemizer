@@ -192,10 +192,23 @@ static DEGROUP: LazyLock<JsRegex> = LazyLock::new(|| {
 static TIMES: LazyLock<JsRegex> = LazyLock::new(|| re(&format!(r"(?<=\d){SP}*x{SP}*(?=\d)"), "gu"));
 static SCORE: LazyLock<JsRegex> = LazyLock::new(|| {
     re(
-        &format!("{NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|lygus)"),
+        &format!("{NOT_LETTER_BEFORE}(?:rezultat|pergal|pralaimėj|laimėj|lygus)"),
         "iu",
     )
 });
+static KM_PER_HOUR: LazyLock<JsRegex> = LazyLock::new(|| {
+    re(
+        &format!(
+            r"(?<![/\p{{L}}]){NUM}{SP}*km{SP}*/{SP}*(?:h{NOT_LETTER_AFTER}|val{NOT_LETTER_AFTER}(\.)?)"
+        ),
+        "gu",
+    )
+});
+
+/// `endsUtterance(rest)`: nothing but closing brackets, quotes and space after an abbreviation's dot.
+fn ends_utterance(rest: &JsString) -> bool {
+    js_re!(r#"^[\s)»"'“”\]]*$"#, "u").test(rest)
+}
 static RANGE: LazyLock<JsRegex> = LazyLock::new(|| {
     re(
         &format!(
@@ -424,14 +437,32 @@ fn money(arm: &CurrencyArm, num: &JsString, mag: Option<&JsString>, tail: &JsStr
 pub(crate) fn normalize_lithuanian(input: &JsString) -> JsString {
     let mut t = renormalize(input, Form::Nfc);
 
-    // 0) the marked clock.
-    t = rewrite(
+    // 0) the marked clock: hours and minutes each counted; the `val.` dot put back at the utterance's end.
+    t = rewrite_with(
         &t,
         js_re!(
-            r"(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)(?=\s*val\b)",
+            r"(?<![\d.,:])([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)\s*val\b(\.?)",
             "gu"
         ),
-        &js("$1 $2"),
+        |mm, whole| {
+            let min = mm.group(2, whole).unwrap();
+            let minutes = if js_number(&min) == 0.0 {
+                JsString::new()
+            } else {
+                js(" ").concat(&quantity(&min, noun("minute")))
+            };
+            let end = mm.index() + mm.value(whole).len();
+            let stop = if !mm.group(3, whole).unwrap_or_default().is_empty()
+                && ends_utterance(&whole.slice(end as isize, None))
+            {
+                "."
+            } else {
+                ""
+            };
+            quantity(&mm.group(1, whole).unwrap(), noun("hour"))
+                .concat(&minutes)
+                .concat(&js(stop))
+        },
     );
 
     // 1) the abbreviations.
@@ -454,7 +485,11 @@ pub(crate) fn normalize_lithuanian(input: &JsString) -> JsString {
         let m = mm.value(whole);
         let off = mm.index();
         let back = |k: usize| whole.slice(off.saturating_sub(k) as isize, Some(off as isize));
-        if SCORE.test(&back(50)) {
+        // A temporal span is never a score (#1532), so the temporal test runs first.
+        let end = off + m.len();
+        let after = whole.slice(end as isize, Some(end as isize + 10));
+        let temporal = RANGE_TEMPORAL.test(&after);
+        if !temporal && SCORE.test(&back(50)) {
             return m;
         }
         let before = back(14);
@@ -462,9 +497,6 @@ pub(crate) fn normalize_lithuanian(input: &JsString) -> JsString {
         if RANGE_IKI.test(&before) {
             return m;
         }
-        let end = off + m.len();
-        let after = whole.slice(end as isize, Some(end as isize + 10));
-        let temporal = RANGE_TEMPORAL.test(&after);
         let from = if has_nuo || temporal {
             String::new()
         } else {
@@ -505,7 +537,17 @@ pub(crate) fn normalize_lithuanian(input: &JsString) -> JsString {
         quantity(&num(mm, s), noun("degree")).concat(&js(&format!(" {}", w("fahrenheit"))))
     });
 
-    // 6) units (squared first), magnitude abbreviations between number and unit.
+    // 6) the one declared rate, `km/h` / `km/val.` (#1532); then units (squared first), magnitude
+    //    abbreviations between number and unit.
+    t = rewrite_with(&t, &KM_PER_HOUR, |mm, s| {
+        let end = mm.index() + mm.value(s).len();
+        let stop = if mm.group(2, s).is_some() && ends_utterance(&s.slice(end as isize, None)) {
+            "."
+        } else {
+            ""
+        };
+        quantity(&num(mm, s), noun("kilometre")).concat(&js(&format!(" {}{stop}", w("perHour"))))
+    });
     for arm in UNIT_ARMS.iter() {
         let forms = noun(arm.noun);
         if let Some(sq) = &arm.squared {
@@ -586,6 +628,10 @@ pub(crate) fn normalize_lithuanian(input: &JsString) -> JsString {
         } else {
             w("yearInstr")
         };
+        let end = mm.index() + mm.value(s).len();
+        if month.is_none() && ends_utterance(&s.slice(end as isize, None)) {
+            return bare(&n).concat(&js(&format!(" {noun}.")));
+        }
         bare(&n)
             .concat(&js(&format!(" {noun}")))
             .concat(&month.unwrap_or_default())

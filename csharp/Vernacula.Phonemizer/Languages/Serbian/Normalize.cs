@@ -216,7 +216,7 @@ public static class Normalize
     private static readonly JsRe CLOCK_DOT =
         JsRegex.Compile("(?<![\\d.,])(\\d{1,2})\\.(\\d{2})(?=\\s*(?:сати|часова|sati|časova))", "gu");
     private static readonly JsRe ABBREV_MID =
-        JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({DOTTED_ALT})\\.(\\s+)(?=[\\p{{L}}\\d(])", "giu");
+        JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({DOTTED_ALT})\\.(\\s+)(?=([\\p{{L}}\\d(]))", "giu");
     private static readonly JsRe ABBREV_COMMA =
         JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({DOTTED_ALT})\\.(?=\\s*[,;:])", "giu");
     private static readonly JsRe ABBREV_END =
@@ -241,7 +241,7 @@ public static class Normalize
     private static readonly JsRe M_S = JsRegex.Compile("(\\d+(?:[.,]\\d+)?)\\s?m\\s?\\/\\s?s(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[-–—]\\s?(?=\\d)", "gu");
     private static readonly JsRe ORDINAL_N = JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)", "gu");
-    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:.,])", "gu");
+    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:]|[.,]\\d)", "gu");
 
     private static readonly JsRe DECIMAL_FRAC = JsRegex.Compile(@"(?<=\d),(\d+)", "gu");
 
@@ -299,7 +299,9 @@ public static class Normalize
 
         // 3) DOTTED ABBREVIATIONS.
         s = Rewrite(s, ABBREV_MID, m =>  // ⚠ reachable miss (#1122)
-            DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}{m.Groups[2].Value}" : m.Value);
+            DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w)
+                ? $"{w}{(ERA_UPPER.IsMatch(m.Groups[3].Value) ? "." : "")}{m.Groups[2].Value}"
+                : m.Value);
         s = Rewrite(s, ABBREV_COMMA, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? w : m.Value);
         s = Rewrite(s, ABBREV_END, m => DOTTED.TryGetValue(Lat(m.Groups[1].Value), out var w) ? $"{w}." : m.Value);
 

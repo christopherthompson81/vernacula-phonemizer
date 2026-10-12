@@ -604,4 +604,25 @@ mod tests {
             "peː˥˩t zˈarez nˈu˥˩la"
         );
     }
+
+    /// The #1532 findings, pinned from test/sh-baltic-port-findings.test.ts (synthetic, TS-evaluated).
+    #[test]
+    fn croatian_port_findings_1532() {
+        let e = create_croatian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(
+            n("Bilo je 7. hasOwnProperty i 3. toString."),
+            "Bilo je 7. hasOwnProperty i 3. toString."
+        );
+        assert_eq!(n("Sastanak u 11:00."), "Sastanak u jedanaest sati.");
+        assert_eq!(n("u 11:30,5"), "u 11:30 zarez 5");
+        assert_eq!(n("U I. stoljeću."), "U prvom stoljeću.");
+        assert_eq!(n("U I. svjetskom ratu."), "U prvom svjetskom ratu.");
+        assert_eq!(n("Vrijednost 2/1000."), "Vrijednost 2/1000.");
+        assert_eq!(
+            n("u sezoni 2003./2004. kada"),
+            "u sezoni dvije tisuće treće/dvije tisuće četvrte kada"
+        );
+        assert_eq!(n("Bilo je 1990."), "Bilo je tisuću devetsto devedesete.");
+    }
 }

@@ -207,3 +207,51 @@ row is port-pending.
 
 **Implication.** Reported in the PR; Rust reproduces the TS (findings 1 and 2 are pinned by probe and
 synthetic rows in the dumps).
+
+## Run 8 — 2026-10-11 17:10 (#1532: the TS fixes, measured on FLEURS)
+
+**Question.** With the Run 7 findings fixed TS-first, what changes in the normalizer output beyond the synthetic
+probes?
+
+**Command.** A scratch script runs `normalizeSerbian` / `normalizeCroatian` / `normalizeBosnian` over every unique
+FLEURS sr_rs / hr_hr / bs_ba transcript (column 3) before and after the edit, and diffs line by line. The probe
+lines are the synthetic ones from Run 7.
+
+**Fixes.**
+1. `LICENSOR` lookups go through `core/own.ts` (sr step 7, hr step 7, bs steps 9b and 10). `Bilo je 5.
+   constructor i dalje.` → `Bilo je 5. constructor i dalje.` (an unlicensed `N.`, as any other word gets).
+2. sr's `,;:` dotted-abbreviation arm falls back to the match: `Voće итᲁ., даље` keeps `итᲁ.`.
+3. sr's first dotted-abbreviation arm keeps the dot before a capital (Bosnian's rule): `itd. Sutra idemo.` →
+   `i tako dalje. Sutra idemo.`
+4. Clock trailing guard `(?![\d:]|[.,]\d)` in all three (sr/bs had `(?![\d:.,])`, hr `(?![:.\d])`).
+5. hr step 4b takes a LICENSOR's slot before the ending heuristic: `U I. stoljeću.` → `U prvom stoljeću.`
+6. hr step 7b's lookbehind adds `\d\/`: `2/1000.` is no longer a year.
+
+**Raw finding.** First cut of 6 used a bare `/` in the lookbehind, and FLEURS hr caught it: `od sezone 1995./1996.
+kada` lost the second year's ordinal (`… devedeset pete/1996. kada`). The season's slash follows a DOT; a
+fraction's follows a digit. With `(?<![\d.,\-]|\d\/)` that line is unchanged again. Final diff:
+```
+sr  3 of 1923 lines change: 06:30 и 07:30.  /  у 22:08.  /  после 11:00,   (each now read as a clock)
+hr  1 of 2007: između 06:30 i 07:30.   (the second time, before the full stop)
+bs  1 of 1976: u 01:15, prema svjedocima
+```
+No FLEURS line reaches fixes 1, 2, 3, 5 or 6 (synthetic only); every changed line is fix 4.
+
+**Implication.** Regenerate the sr/hr/bs goldens and look at what moves; then mirror into C# and Rust.
+
+## Run 9 — 2026-10-11 18:10 (#1532: goldens, C# and Rust mirrored)
+
+**Command.** `npx tsx tools/gen_parity_goldens.mts sr hr bs sl lt lv`, then a diff against the pre-fix copies;
+the full C# suite and `csharp/tools/parity`; in rust, `parity`, the `sh-normalize` dump replayed by `fn-diff`
+(`SH_LANGS=sr,hr,bs`), and `phonemize-sync` / `trace` over the six languages.
+
+**Raw finding.** sr, hr, bs: 0 golden rows move (no golden text holds a clock before `.`/`,`, an
+`Object.prototype` name, `itd.` before a capital, `I. stoljeću` or a `N/NNNN.`). C# already used dictionaries
+for `LICENSOR` and already had the miss guard on sr's `,;:` arm, so only the clock guards, sr's capital rule and
+hr's two edits were ported. In Rust `Slot::Proto` is gone (`slot_of` is an own-key lookup) and sr's first
+abbreviation arm is its own regex, because its pattern now captures the follower and Bosnian's does not.
+```
+sh-normalize sr+hr+bs: 173724 identical, 0 DIFFER  (probe 536 with the 11 new synthetic lines)
+phonemize-sync (6 langs): 23466 identical, 0 DIFFER; trace: 23466 identical, 0 DIFFER
+parity sr/hr/bs: 200/200 each
+```

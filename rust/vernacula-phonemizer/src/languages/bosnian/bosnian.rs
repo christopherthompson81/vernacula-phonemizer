@@ -704,4 +704,18 @@ mod tests {
             "peː˥˩t zˈarez nˈu˥˩la"
         );
     }
+
+    /// The #1532 findings, pinned from test/sh-baltic-port-findings.test.ts (synthetic, TS-evaluated).
+    #[test]
+    fn bosnian_port_findings_1532() {
+        let e = create_bosnian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(n("U 3. i 4. constructor."), "U 3. i 4. constructor.");
+        assert_eq!(
+            n("Bilo je 5. constructor i dalje."),
+            "Bilo je 5. constructor i dalje."
+        );
+        assert_eq!(n("Sastanak u 11:00."), "Sastanak u jedanaest sati.");
+        assert_eq!(n("u 22:08 sati."), "u dvadeset dva sata i osam minuta.");
+    }
 }

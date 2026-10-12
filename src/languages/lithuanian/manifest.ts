@@ -58,7 +58,7 @@ export interface LithuanianManifest {
             | "rangeFrom" | "rangeTo" | "and"
             | "yearInstr" | "yearGen" | "day" | "centuryGen" | "month"
             | "eraBefore" | "eraOur" | "thatIs" | "forExample" | "etCetera"
-            | "number" | "page" | "inhabitants",
+            | "number" | "page" | "inhabitants" | "perHour",
             string
         >;
         /** Month names in the GENITIVE — the discriminator between a full date and a bare year. */

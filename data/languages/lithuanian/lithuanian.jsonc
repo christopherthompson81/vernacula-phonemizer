@@ -207,7 +207,11 @@
             "etCetera": "ir kita",    // `kt.` ×6, in the frozen `ir kt.` = "ir kita"
             "number": "numeris",      // espeak `nr  n'um;er;is`
             "page": "puslapis",
-            "inhabitants": "gyventojų" // `gyv.` ×2, in "BVP/1 gyv."
+            "inhabitants": "gyventojų", // `gyv.` ×2, in "BVP/1 gyv."
+            // The rate denominator of `km/h` / `km/val.` (#1532). FLEURS lt_lt spells the idiom out 4 times
+            // ("105 mylias per valandą", "8 mylių, per valandą", "3 000 mylių per valandą", "100–200 mylių
+            // per valandą"); *per* + the accusative of *valanda*.
+            "perHour": "per valandą"
         },
 
         // THE MONTH NAMES IN THE GENITIVE — the only form a Lithuanian date writes them in, and the

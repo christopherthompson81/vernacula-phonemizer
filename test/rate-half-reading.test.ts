@@ -54,7 +54,7 @@ const SHAPES = [["km", "h"], ["m", "s"], ["km²", "h"], ["m³", "s"], ["kg", "m"
 const ACCEPTED_DECLINE = new Set(
     ("ak kg/m|ak km²/h|ak km/h|ak m/s|bal km/h|bal m/s|bm km²/h|bm km/h|bo kg/m|bo m/s|ee km²/h|ee km/h|" +
         "ee m/s|hmn km²/h|hmn km/h|ht kg/m|ht km²/h|ht m³/s|ki km/h|ki m/s|lg kg/m|lg km/h|lg m/s|ln kg/m|" +
-        "ln km²/h|ln km/h|lt km/h|lt m/s|mn kg/m|mn km²/h|mn km/h|mos km²/h|mos km/h|nci km/h|nci m/s|" +
+        "ln km²/h|ln km/h|lt m/s|mn kg/m|mn km²/h|mn km/h|mos km²/h|mos km/h|nci km/h|nci m/s|" +
         "ro kg/m").split("|"),
 );
 

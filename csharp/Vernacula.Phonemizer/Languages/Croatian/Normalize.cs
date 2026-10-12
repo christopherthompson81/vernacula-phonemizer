@@ -155,11 +155,11 @@ public static class Normalize
     private static readonly JsRe SUFFIXED =
         JsRegex.Compile($"(?<![\\d.,])(\\d+)\\s?-\\s?(\\p{{Ll}}{{1,2}}){Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe ORDINAL_N = JsRegex.Compile("(?<![\\d.,])(\\d{1,4})\\.\\s+(\\p{Ll}[\\p{L}\\p{M}]*)", "gu");
-    private static readonly JsRe ELIDED_YEAR = JsRegex.Compile("(?<![\\d.,\\-])(1\\d{3}|20\\d{2}|2100)\\.(?!\\d)", "gu");
+    private static readonly JsRe ELIDED_YEAR = JsRegex.Compile("(?<![\\d.,\\-]|\\d\\/)(1\\d{3}|20\\d{2}|2100)\\.(?!\\d)", "gu");
     private static readonly JsRe YEAR_TRAIL = JsRegex.Compile("^[\\s)»\"'\\]]+", "u");
     private static readonly JsRe YEAR_UPPER = JsRegex.Compile("^[\\p{Lu}]", "u");
     private static readonly JsRe CLOCK =
-        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![:.\\d])(?:\\s*h)?", "giu");
+        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?![\\d:]|[.,]\\d)(?:\\s*h)?", "giu");
     private static readonly JsRe RANGE = JsRegex.Compile("(\\d)\\s?[-–—]\\s?(?=\\d)", "gu");
     private static readonly JsRe MILJA_RATE =
         JsRegex.Compile("(\\d+(?:,\\d+)?)\\s?milja\\s*\\/\\s*(?:sat|h)(?![\\p{L}\\p{M}])", "giu");
@@ -233,7 +233,8 @@ public static class Normalize
         {
             if (!ROMAN_ORD.TryGetValue(m.Groups[1].Value.ToUpperInvariant(), out var bas)) return m.Value;
             var word = m.Groups[2].Value;
-            var slot = word.EndsWith("og", StringComparison.Ordinal) ? "m.gen"
+            var slot = LICENSOR.TryGetValue(word, out var licensed) ? licensed
+                : word.EndsWith("og", StringComparison.Ordinal) ? "m.gen"
                 : word.EndsWith("om", StringComparison.Ordinal) ? "m.loc"
                 : word.EndsWith("e", StringComparison.Ordinal) || word.EndsWith("a", StringComparison.Ordinal) ? "m.gen"
                 : "m.nom";

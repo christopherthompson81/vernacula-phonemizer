@@ -375,7 +375,7 @@ pub(crate) fn normalize_bosnian(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:.,])(\s*(?:sati|sata|časova|sahati|sahata))?",
+            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)(\s*(?:sati|sata|časova|sahati|sahata))?",
             "giu"
         ),
         |mm, t| {

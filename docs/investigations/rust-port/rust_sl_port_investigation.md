@@ -80,3 +80,25 @@ fold-widened miss is reachable from these keys).
 Every manifest field is read (checked field by field); nothing routes to an unported engine (no port-pending row).
 
 **Implication.** Reported in the PR; Rust reproduces the TS.
+
+## Run 4 — 2026-10-11 17:10 (#1532: Run 3's findings 1 and 2, fixed TS-first)
+
+**Question.** Does removing the spaced form from the sign rule cost a real minus?
+
+**Command.** `grep -E '(^|[ (])[-−] ?[0-9]' ` over the unique FLEURS sl_si texts, then the before/after normalizer
+diff over all 1,903.
+
+**Raw finding.** The grep finds no spaced minus and no list dash before a figure: 0 matches. Diff: 0 lines
+change. The fix (`(^|[\s(])[-−](?=\d)`) is reached only by the synthetic probe: `Seznam: - 5 jabolk.` →
+`Seznam: - 5 jabolk.` (IPA `… sɛznˈam , pɛt jˈabɔlk .`), and `-5 stopinj` still reads *minus*.
+Finding 2 is a docstring correction (slovenian.ts `Counted`): the tokenizer reads 1/3/4 as feminine *ena tri
+štiri* and 2 as masculine *dva*. The behaviour it describes (`2 uri` → *dva uri*) is declined: the gender repair
+would need the gender of every feminine noun, which no table here has. Finding 3 stays as stated (a deliberate
+range exclusion).
+
+**Implication.** No golden should move for sl.
+
+## Run 5 — 2026-10-11 18:10 (#1532: golden, C# and Rust mirrored)
+
+**Raw finding.** `gen_parity_goldens.mts sl`: 0 rows move. C# and Rust carry the same one-character pattern
+change. `sl-normalize` replay: 57019 identical, 0 DIFFER (probe 2 new synthetic lines); parity sl 200/200.

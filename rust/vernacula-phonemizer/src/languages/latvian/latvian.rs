@@ -457,4 +457,30 @@ mod tests {
         assert_eq!(e.normalize(&js("§ 5")).to_string_lossy(), "§ 5");
         assert_eq!(e.normalize(&js("5 §")).to_string_lossy(), "5 §");
     }
+
+    /// The #1532 findings, pinned from test/sh-baltic-port-findings.test.ts (synthetic, TS-evaluated).
+    #[test]
+    fn latvian_port_findings_1532() {
+        let e = create_latvian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(n("Viņš bija 3. constructor."), "Viņš bija 3 constructor.");
+        assert_eq!(n("Pulksten 10:30 sākās."), "Pulksten 10 30 sākās.");
+        assert_eq!(n("Sākās plkst. 7:05."), "Sākās pulksten 7 0 5.");
+        assert_eq!(n("plkst. 12:00 pēc"), "pulksten 12 pēc");
+        assert_eq!(n("no 06:30 - 07:30"), "no 6 30 līdz 7 30");
+        assert!(
+            !crate::phonemize("Pulksten 10:30 sākās.", "lv")
+                .unwrap()
+                .contains(',')
+        );
+        assert_eq!(n("rezultāts 25:00 komandai"), "rezultāts 25:00 komandai");
+        assert_eq!(n("ar laiku 3:12.45"), "ar laiku 3:12.45");
+        assert_eq!(n("Rezultāts 5 - 3."), "Rezultāts 5 3.");
+        assert_eq!(n("Rezultāts 7–2."), "Rezultāts 7 2.");
+        assert_eq!(n("No 10 - 20 metriem."), "No 10 līdz 20 metriem.");
+        assert_eq!(
+            n("Pirms 5,1–4,6 miljoniem."),
+            "Pirms pieci komats viens līdz četri komats seši miljoniem."
+        );
+    }
 }

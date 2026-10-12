@@ -193,7 +193,10 @@ export const slCountForm = (n: number): number =>
 
 /** A counted noun in the five slots `slCountForm` indexes, plus its grammatical GENDER — which the tier
  *  does not need but normalize.ts step 15 does, because Slovene marks gender on the numerals 1–4 and the
- *  tokenizer reads a bare digit as the feminine form. */
+ *  tokenizer reads a bare digit in ONE fixed form: feminine *ena*, *tri*, *štiri* for 1, 3, 4, but
+ *  MASCULINE *dva* for 2 (`numbers.units`; #1532 — this said "the feminine form" for all four). So a
+ *  masculine noun needs 1/3/4 repaired and a feminine one needs 2. A feminine noun outside this table keeps
+ *  *dva* (`2 uri` reads *dva uri*): the repair knows only these nouns' genders. */
 interface Counted {
     readonly g: "m" | "f";
     readonly forms: readonly [string, string, string, string, string];

@@ -1063,4 +1063,43 @@ mod tests {
         assert_eq!(crate::phonemize("САД", "sr").unwrap(), "sad");
         assert_eq!(crate::phonemize("tko", "hr").unwrap(), "tko˥˩");
     }
+
+    /// The #1532 findings, pinned from test/sh-baltic-port-findings.test.ts (synthetic, TS-evaluated).
+    #[test]
+    fn serbian_port_findings_1532() {
+        let e = create_serbian().unwrap();
+        let n = |s: &str| e.normalize(&js(s)).to_string_lossy();
+        assert_eq!(
+            n("Bilo je 5. constructor i dalje."),
+            "Bilo je 5. constructor i dalje."
+        );
+        assert_eq!(n("Voće итᲁ., даље"), "Voće итᲁ., даље");
+        assert_eq!(n("Voće itd., dalje"), "Voće i tako dalje, dalje");
+        assert_eq!(
+            n("Voće, povrće itd. Sutra idemo."),
+            "Voće, povrće i tako dalje. Sutra idemo."
+        );
+        assert_eq!(n("Воће итд. Сутра."), "Воће i tako dalje. Сутра.");
+        assert_eq!(
+            n("Voće, povrće itd. sutra idemo."),
+            "Voće, povrće i tako dalje sutra idemo."
+        );
+        assert_eq!(n("Sastanak u 11:00."), "Sastanak u jedanaest sati.");
+        assert_eq!(
+            n("Sastanak u 11:30, zatim ručak."),
+            "Sastanak u jedanaest sati i trideset minuta, zatim ručak."
+        );
+        assert_eq!(n("u 11:30,5"), "u 11:30 zarez 5");
+        assert_eq!(n("u 11:30.5"), "u 11:30.5");
+        assert!(
+            crate::phonemize("Voće itd. Sutra idemo.", "sr")
+                .unwrap()
+                .contains(" . ")
+        );
+        assert!(
+            !crate::phonemize("Voće itd. sutra idemo.", "sr")
+                .unwrap()
+                .contains(" . ")
+        );
+    }
 }
