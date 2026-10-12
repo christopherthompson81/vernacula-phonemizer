@@ -91,7 +91,7 @@ fn roman_cardinal_ctx() -> &'static JsRegex {
 
 // ── Units and symbols ───────────────────────────────────────────────────────────────────────────────
 /// `UNITS`, in declaration order (78 keys; none integer-like, so JS key order is this order).
-const UNITS_SRC: [(&str, &str, &str); 78] = [
+const UNITS_SRC: [(&str, &str, &str); 84] = [
     ("km", "kilometer", "kilometers"),
     ("cm", "centimeter", "centimeters"),
     ("mm", "millimeter", "millimeters"),
@@ -186,7 +186,16 @@ const UNITS_SRC: [(&str, &str, &str); 78] = [
     ("gb", "gigabyte", "gigabytes"),
     ("tb", "terabyte", "terabytes"),
     ("kw", "kilowatt", "kilowatts"),
+    // Case-exact, kept out of the fold by CASE_EXACT (#1503): see the TS table.
+    ("Pa", "pascal", "pascals"),
+    ("hPa", "hectopascal", "hectopascals"),
+    ("kPa", "kilopascal", "kilopascals"),
+    ("MPa", "megapascal", "megapascals"),
+    ("GPa", "gigapascal", "gigapascals"),
+    ("mPa", "millipascal", "millipascals"),
 ];
+/// Keys whose CASE is the identification, so a miscased spelling must not reach them through the fold (#1503).
+const CASE_EXACT: [&str; 4] = ["Pa", "hPa", "kPa", "GPa"];
 
 type Forms = (JsString, JsString);
 static UNITS: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| {
@@ -196,7 +205,13 @@ static UNITS: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| {
         .collect()
 });
 /// Core `folded_index`: the first-declared key keeps a slot, and a slot whose declared keys disagree is left out.
-static UNITS_FOLDED: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| folded_index(&UNITS));
+static UNITS_FOLDED: LazyLock<IndexMap<JsString, Forms>> = LazyLock::new(|| {
+    let mut folded = folded_index(&UNITS);
+    for k in CASE_EXACT {
+        folded.shift_remove(&js(k).to_lower_case());
+    }
+    folded
+});
 
 fn unit_forms(written: &JsString) -> Option<&'static Forms> {
     resolve_unit_symbol(Some(&*UNITS), &UNITS_FOLDED, written, false)
@@ -2048,6 +2063,41 @@ pub fn normalize_english_initialisms(
 mod tests {
     use super::*;
 
+    /// test/english-1503-pascals.test.ts: an SI pressure unit after a number reads as its word, and the
+    /// case-folded near-misses are left as written. Relational; no IPA is typed.
+    #[test]
+    fn pascals_are_read_case_exactly() {
+        for lang in ["en", "en-GB"] {
+            for (unit, word) in [
+                ("at 2 GPa", "at 2 gigapascals"),
+                ("at 1 GPa", "at 1 gigapascal"),
+                ("at 101.3 kPa", "at 101.3 kilopascals"),
+                ("1013 hPa", "1013 hectopascals"),
+                ("200 MPa", "200 megapascals"),
+                ("5 mPa", "5 millipascals"),
+                ("5 Pa", "5 pascals"),
+                ("1 Pa", "1 pascal"),
+                ("2 million Pa", "2 million pascals"),
+            ] {
+                assert_eq!(
+                    crate::phonemize(unit, lang).unwrap(),
+                    crate::phonemize(word, lang).unwrap(),
+                    "{lang}: {unit}"
+                );
+            }
+        }
+        for kept in [
+            "a 3.8 GPA",
+            "2 PA students",
+            "5 pa",
+            "5 PA",
+            "5 gpa",
+            "GPa alone",
+        ] {
+            assert_eq!(normalize_english(&js(kept)).to_string_lossy(), kept);
+        }
+    }
+
     fn n(t: &str) -> String {
         normalize_english(&js(t)).to_string_lossy()
     }
@@ -2070,8 +2120,9 @@ mod tests {
         ] {
             re.test(&js(""));
         }
-        assert_eq!(UNITS.len(), 78);
-        // 65 folded keys, minus the 5 whose declared spellings disagree (mω, µs, μs, µm, μm).
+        assert_eq!(UNITS.len(), 84);
+        // 70 folded keys, minus the 6 whose declared spellings disagree (mω, µs, μs, µm, μm, mpa), minus the 4
+        // CASE_EXACT pascals (pa, hpa, kpa, gpa; #1503).
         assert_eq!(UNITS_FOLDED.len(), 60);
     }
 
