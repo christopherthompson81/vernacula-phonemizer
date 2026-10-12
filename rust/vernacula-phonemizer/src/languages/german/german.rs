@@ -921,6 +921,46 @@ mod tests {
         }
     }
 
+    /// test/german-1543.test.ts: an abbreviation's dot before , ; : ! ? goes (that mark carries the pause), a
+    /// sentence-end dot stays, and a closing German quote is a phrase end.
+    #[test]
+    fn the_1543_findings_are_fixed() {
+        use crate::languages::german::normalize::normalize_german;
+        create_german().unwrap();
+        let norm = |s: &str| normalize_german(&js(s)).to_string_lossy();
+        let de = |s: &str| crate::phonemize(s, "de").unwrap();
+        for (abbr, plain) in [
+            (
+                "Es kostet 21 Mio., also viel.",
+                "Es kostet 21 Millionen, also viel.",
+            ),
+            (
+                "Es kostet 1 Mio., also viel.",
+                "Es kostet eine Million, also viel.",
+            ),
+            (
+                "Es sind 21 Mio.; danach mehr.",
+                "Es sind 21 Millionen; danach mehr.",
+            ),
+            ("Es sind 21 Mio.: genug.", "Es sind 21 Millionen: genug."),
+            ("Sind es 21 Mio.?", "Sind es 21 Millionen?"),
+            ("Es sind 21 Mio.!", "Es sind 21 Millionen!"),
+            ("Siehe S., dann weiter.", "Siehe Seite, dann weiter."),
+            ("Es kostet 21 Mio.", "Es kostet 21 Millionen."),
+            ("Es kostet 1 Mio.  ", "Es kostet eine Million.  "),
+            ("(Es sind 21 Mio.)", "(Es sind 21 Millionen.)"),
+            ("Es sind 21 Mio... mehr", "Es sind 21 Millionen... mehr"),
+        ] {
+            assert_eq!(norm(abbr), norm(plain), "{abbr}");
+        }
+        for (abbr, plain) in [
+            ("Er sagte »21 Mio.«", "Er sagte »21 Millionen.«"),
+            ("Er sagte „21 Mio.“", "Er sagte „21 Millionen.“"),
+        ] {
+            assert_eq!(de(abbr), de(plain), "{abbr}");
+        }
+    }
+
     /// test/german-1514.test.ts: each input reads as a spelling the engine already reads correctly.
     #[test]
     fn the_1514_findings_are_fixed() {

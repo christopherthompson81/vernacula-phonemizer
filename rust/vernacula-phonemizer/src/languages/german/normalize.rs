@@ -78,11 +78,19 @@ static ABBREV_ONE_ALT: LazyLock<String> = LazyLock::new(|| {
         .collect::<Vec<_>>()
         .join("|")
 });
+/// `PHRASE_END`: what may follow an abbreviation's dot at a phrase end: a mark, or a closing bracket or quote.
+/// German closes »…« with « and „…“ with “, so those are listed beside » and ” (#1543).
+const PHRASE_END: &str = "[.,;:!?)\\u00bb\\u00ab\\u201c\\u201d]";
+/// `absorbsDot`: before `,` `;` `:` `!` `?` the dot is not a sentence end, and that mark carries the pause
+/// (#1543). Before `.` (an ellipsis), a bracket or a quote it stays.
+fn absorbs_dot(end: Option<JsString>) -> bool {
+    end.is_some_and(|e| [",", ";", ":", "!", "?"].iter().any(|p| e == js(p)))
+}
 /// Step 2c: a bare `1` before a scale abbreviation (#1514).
 static ABBREV_ONE: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            "(?<![\\p{{L}}\\p{{M}}\\d_.,/+\\-\u{2212}\u{2013}\u{b1}])1\\s+({})\\.(?=(\\s+[\\p{{L}}\\d])|\\s*(?:[.,;:!?»)]|$))",
+            "(?<![\\p{{L}}\\p{{M}}\\d_.,/+\\-\u{2212}\u{2013}\u{b1}])1\\s+({})\\.(?=(\\s+[\\p{{L}}\\d])|\\s*(?:({PHRASE_END})|$))",
             *ABBREV_ONE_ALT
         ),
         "giu",
@@ -101,7 +109,10 @@ static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
 });
 static ABBREV_ENDS: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
-        &format!("{WORD_START}({})\\.(?=\\s*(?:[.,;:!?»)]|$))", *ABBREV_ALT),
+        &format!(
+            "{WORD_START}({})\\.(?=\\s*(?:({PHRASE_END})|$))",
+            *ABBREV_ALT
+        ),
         "giu",
     )
     .unwrap()
@@ -301,7 +312,7 @@ pub(crate) fn normalize_german(input: &JsString) -> JsString {
             .get(&ab.to_lower_case().to_string_lossy())
         {
             None => m.value(t),
-            Some(w) if m.group(2, t).is_some() => js(w),
+            Some(w) if m.group(2, t).is_some() || absorbs_dot(m.group(3, t)) => js(w),
             Some(w) => js(w).concat(&js(".")),
         }
     });
@@ -325,6 +336,7 @@ pub(crate) fn normalize_german(input: &JsString) -> JsString {
             .get(&ab.to_lower_case().to_string_lossy())
         {
             None => m.value(t),
+            Some(w) if absorbs_dot(m.group(2, t)) => js(w),
             Some(w) => js(w).concat(&js(".")),
         }
     });

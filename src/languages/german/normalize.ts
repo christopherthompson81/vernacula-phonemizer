@@ -48,6 +48,12 @@ function ordinalStem(n: number): string | undefined {
 
 /** Dotted abbreviations → the spoken words. `bzw.` ×13 and `usw.` ×7 are the frequent ones, and both were
  *  read as a consonant cluster plus a phrase break. */
+/** What may follow an abbreviation's dot at a phrase end: a mark, or a closing bracket or quote. German closes
+ *  »…« with « and „…“ with “, so those are listed beside the » and ” of the other conventions (#1543). */
+const PHRASE_END = "[.,;:!?)\u00bb\u00ab\u201c\u201d]";
+/** Before `,` `;` `:` `!` `?` the abbreviation's dot is not a sentence end, and that mark carries the pause:
+ *  keeping it wrote `21 Millionen.,` (#1543). Before `.` (an ellipsis), a bracket or a quote it stays. */
+const absorbsDot = (end: string | undefined): boolean => end !== undefined && ",;:!?".includes(end);
 const DOTTED_ABBREV: Readonly<Record<string, string>> = MANIFEST.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
 /** A scale abbreviation after the bare numeral 1 is singular and takes the article: `1 Mio.` is *eine Million*,
@@ -197,11 +203,11 @@ export function normalizeGerman(input: string): string {
     // 2c) `1 Mio.` / `1 Mrd.` → the singular with its article, replacing the numeral (#1514). The dot follows
     //     step 3's rule: consumed when the sentence continues, kept at a phrase end. The numeral must stand
     //     alone: a decimal (`1,1 Mio.`), a longer number, a fraction or a sign before it keeps the plural path.
-    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d_.,/+\\-\u2212\u2013\u00b1])1\\s+(${ABBREV_ONE_ALT})\\.(?=(\\s+[\\p{L}\\d])|\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (m0, ab: string, cont: string | undefined) => {
+    s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}\\d_.,/+\\-\u2212\u2013\u00b1])1\\s+(${ABBREV_ONE_ALT})\\.(?=(\\s+[\\p{L}\\d])|\\s*(?:(${PHRASE_END})|$))`, "giu"),
+        (m0, ab: string, cont: string | undefined, end: string | undefined) => {
             // The miss branch is reachable for the same reason as step 3's (#1122): `i`+`u` widen the fold.
             const w = DOTTED_ABBREV_ONE[ab.toLowerCase()];
-            return w === undefined ? m0 : cont !== undefined ? w : `${w}.`;
+            return w === undefined ? m0 : cont !== undefined || absorbsDot(end) ? w : `${w}.`;
         });
 
     // 3) DOTTED ABBREVIATIONS. The dot is consumed when the sentence continues so it cannot become a
@@ -220,13 +226,13 @@ export function normalizeGerman(input: string): string {
             const w = DOTTED_ABBREV[ab.toLowerCase()];
             return w === undefined ? m0 : `${w}${sp}`;
         });
-    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))`, "giu"),
-        (m0, ab: string) => {
+    s = rewrite(s, new RegExp(`${WORD_START}(${ABBREV_ALT})\\.(?=\\s*(?:(${PHRASE_END})|$))`, "giu"),
+        (m0, ab: string, end: string | undefined) => {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122): the pattern is built from this table's own
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
             const w = DOTTED_ABBREV[ab.toLowerCase()];
-            return w === undefined ? m0 : `${w}.`;
+            return w === undefined ? m0 : absorbsDot(end) ? w : `${w}.`;
         });
 
     // 4) CLOCK, before the number tokenizer sees the separator. Both written forms occur and both were

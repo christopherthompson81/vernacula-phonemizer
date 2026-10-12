@@ -114,13 +114,19 @@ public static class Normalize
     private static readonly JsRe UPPER_START = JsRegex.Compile("^\\p{Lu}", "u");
     private static readonly JsRe BARE_DAY_MONTH =
         JsRegex.Compile($"(?:(\\p{{L}}+)(\\s+))?(\\d{{1,2}})(\\s+)(?=(?:{MONTHS})(?![\\p{{L}}\\p{{M}}]))", "giu");
+    /// <summary>What may follow an abbreviation's dot at a phrase end: a mark, or a closing bracket or quote.
+    /// German closes »…« with « and „…“ with “, so those are listed beside » and ” (#1543).</summary>
+    private const string PHRASE_END = "[.,;:!?)\\u00bb\\u00ab\\u201c\\u201d]";
+    /// <summary>Before `,` `;` `:` `!` `?` the dot is not a sentence end, and that mark carries the pause
+    /// (#1543). Before `.` (an ellipsis), a bracket or a quote it stays.</summary>
+    private static bool AbsorbsDot(System.Text.RegularExpressions.Group g) => g.Success && ",;:!?".Contains(g.Value);
     private static readonly JsRe ABBREV_ONE = JsRegex.Compile(
-        $"(?<![\\p{{L}}\\p{{M}}\\d_.,/+\\-\u2212\u2013\u00b1])1\\s+({ABBREV_ONE_ALT})\\.(?=(\\s+[\\p{{L}}\\d])|\\s*(?:[.,;:!?»)]|$))",
+        $"(?<![\\p{{L}}\\p{{M}}\\d_.,/+\\-\u2212\u2013\u00b1])1\\s+({ABBREV_ONE_ALT})\\.(?=(\\s+[\\p{{L}}\\d])|\\s*(?:({PHRASE_END})|$))",
         "giu");
     private static readonly JsRe ABBREV_MID =
         JsRegex.Compile($"(?<!\\p{{Lu}}\\.[ \u00a0]){WORD_START}({ABBREV_ALT})\\.(\\s+)(?=[\\p{{L}}\\d])", "giu");
     private static readonly JsRe ABBREV_END =
-        JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?»)]|$))", "giu");
+        JsRegex.Compile($"{WORD_START}({ABBREV_ALT})\\.(?=\\s*(?:({PHRASE_END})|$))", "giu");
     private static readonly JsRe CLOCK = JsRegex.Compile("\\b([01]?\\d|2[0-3])[:.]([0-5]\\d)\\b(?!\\.?\\d)(\\s*Uhr)?", "giu");
     private static readonly JsRe KMH = JsRegex.Compile("(\\d)\\s?km\\/h\\b", "gu");
     private static readonly JsRe MS = JsRegex.Compile("(\\d)\\s?m\\/s\\b", "gu");
@@ -188,10 +194,14 @@ public static class Normalize
 
         s = Rewrite(s, ABBREV_ONE, m =>
             !DOTTED_ABBREV_ONE.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? m.Value
-            : m.Groups[2].Success ? w : $"{w}.");
+            : m.Groups[2].Success || AbsorbsDot(m.Groups[3]) ? w : $"{w}.");
 
         s = Rewrite(s, ABBREV_MID, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}{m.Groups[2].Value}");
-        s = Rewrite(s, ABBREV_END, m => $"{DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()]}.");
+        s = Rewrite(s, ABBREV_END, m =>
+        {
+            var w = DOTTED_ABBREV[m.Groups[1].Value.ToLowerInvariant()];
+            return AbsorbsDot(m.Groups[2]) ? w : $"{w}.";
+        });
 
         s = Rewrite(s, CLOCK, m =>
         {
