@@ -1,5 +1,6 @@
 [workspace]
 members = ["vernacula-phonemizer", "tools/regex-diff", "tools/fn-diff", "tools/parity", "tools/onnx-diff"]
+exclude = ["vendor"]
 resolver = "3"
 
 [workspace.package]
@@ -8,3 +9,8 @@ license = "MIT"
 
 [profile.release]
 debug = 1
+
+# regress 0.12.0 with a backtracking fix for a match attempt that starts inside a surrogate pair (see
+# vendor/regress/VERNACULA_PATCH.md). Drop this once an upstream release carries the fix.
+[patch.crates-io]
+regress = { path = "vendor/regress" }

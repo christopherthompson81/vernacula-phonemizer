@@ -772,6 +772,46 @@ mod tests {
         );
     }
 
+    /// A one-character loop that has to back off across a surrogate pair, when the attempt starts inside
+    /// one (the mid-pair scan). Unpatched regress 0.12.0 stepped over the loop's start and never ended.
+    /// Expected ranges are Node's `s.matchAll(new RegExp(p, f))`, not hand-derived.
+    #[test]
+    fn loop_backtracking_from_inside_a_surrogate_pair_terminates() {
+        let cases: &[(&str, &str, &str, &[(usize, usize)])] = &[
+            (r"(?<=j[^.]?):", "gu", "😀", &[]),
+            (r"(?<=j[^.]?):", "gu", "j😀:", &[(3, 4)]),
+            (r"(?<=j[^.]{0,24}):", "gu", "j😀:😀:", &[(3, 4), (6, 7)]),
+            (r"(?<=j[^.]*):", "gu", "😀j😀😀:", &[(7, 8)]),
+            (r"(?<=j[^.]??):", "gu", "j😀:", &[(3, 4)]),
+            (r"(?<=j[^.]?)[^a]", "gu", "j😀x", &[(1, 3), (3, 4)]),
+            (r"(?<=j.?)[^a]", "gu", "😀j😀", &[(3, 5)]),
+            (r".?x", "gu", "😀x", &[(0, 3)]),
+            (r"[^a]?b", "gu", "😀😀b", &[(2, 5)]),
+            (r"[^a]??b", "gu", "😀b😀b", &[(0, 3), (3, 6)]),
+            (r"[^a]*?b", "gu", "😀😀b", &[(0, 5)]),
+            (
+                r"(?<=(?<![\p{L}\p{M}\d_])(?:pukul|jam)(?![\p{L}\p{M}\d_])[^.!?]{0,24})(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)",
+                "giu",
+                "pukul 😀 9:30 😀 21:20",
+                &[(9, 13), (17, 22)],
+            ),
+        ];
+        for &(p, f, s, want) in cases {
+            let subject = js(s);
+            for re in [
+                JsRegex::new(p, f).unwrap(),
+                JsRegex::new(p, f).unwrap().with_full_scan(),
+            ] {
+                let got: Vec<_> = re
+                    .match_all(&subject)
+                    .iter()
+                    .map(|m| (m.range.start, m.range.end))
+                    .collect();
+                assert_eq!(got, want, "/{p}/{f} on {s:?}");
+            }
+        }
+    }
+
     #[test]
     fn empty_global_matches_advance_by_code_point() {
         let re = JsRegex::new("", "gu").unwrap();
