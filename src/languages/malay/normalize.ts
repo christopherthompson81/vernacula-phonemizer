@@ -110,6 +110,11 @@ export function normalizeMalay(input: string): string {
     // 3) `US$30` — the shared symbol tier is keyed on a sign at a token boundary, so a `$` glued behind
     //    letters was swallowed and the amount lost its currency word entirely (`uɛs tiga puluh`). One space
     //    is the whole fix; `US` is written, so it stays written (a REDUNDANT symbol is a permissible drop: say each thing once).
+    //    ⚠ EXCEPT `US`, WHICH IS FOLDED TO THE BARE SIGN, as Indonesian's step 1b does (#1534). The inherited
+    //    acronym gate finds `US` readable (VC) and it is not in Indonesian's spelled-anyway list, so the kept code
+    //    was read as the WORD *us* (`US$30` → *ˈus tiga puluh dolar*), in both corpus spellings (`US$30`,
+    //    `US $14.7 billion`). `AS`, `HK` and `NZ` are spelled letter by letter and keep their codes.
+    s = rewrite(s, new RegExp(`${NOT_LETTER_BEFORE}US ?\\$(?=\\d)`, "gu"), "$");
     s = rewrite(s, new RegExp(`(${NOT_LETTER_BEFORE}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)`, "gu"), "$1 $");
     //    …and A MAGNITUDE WORD AFTER THE AMOUNT has to be got out from between the number and its currency.
     //    The tier keys the currency word on the sign's ADJACENCY TO THE DIGITS, so it lands inside the
@@ -333,7 +338,11 @@ export function normalizeMalay(input: string): string {
     //     THE VERSION DOT IS `titik`, NOT `perpuluhan`: `802.11` is not a quantity, so the dot is the
     //     PUNCTUATION MARK rather than a decimal separator, and Malay names the two separately.
     s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)([a-z])(?![\p{L}\p{M}])/gu, "$1 titik $2-$3");
-    s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d])/gu, (whole, int: string, frac: string) =>
+    //     A run with TWO OR MORE grouping dots (`12.345.678`) is never a decimal either (#1534): the old guard
+    //     `(?!\d)` let the first pair match and read *dua belas perpuluhan tiga empat lima* before a stray
+    //     `.678`. Refusing a following `.digit` leaves the whole run to the inherited tokenizer, which reads it
+    //     as Indonesian dot-grouped thousands.
+    s = rewrite(s, /(?<![\d.])(\d+)\.(\d+)(?![\d]|\.\d)/gu, (whole, int: string, frac: string) =>
         int.length <= 3 && frac === "000" ? whole : `${int} perpuluhan ${[...frac].join(" ")}`);
 
     return s;

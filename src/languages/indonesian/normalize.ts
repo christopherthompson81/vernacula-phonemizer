@@ -52,10 +52,19 @@ export function normalizeIndonesian(input: string): string {
     //    Both guards are needed. The trailing one keeps a RACE time out ("4:41.30, 2:11.60 menit" is
     //    minutes:seconds.hundredths, and the corpus has three); the LEADING one stops the scan restarting
     //    inside one and claiming "09.02" out of "1:09.02" as a clock in its own right.
-    s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3])[.:]([0-5]\d)\b(?!\.?\d)/gu, (whole, h: string, min: string) => {
+    //    ⚠ THE COLON NEEDS A MARKER, THE DOT DOES NOT (#1534). The dot pair is this language's own clock
+    //    spelling (`pukul 08.00`), and all 16 dotted pairs in FLEURS id_id are clocks. A colon pair is also a
+    //    score or a ratio (`21:20`, the corpus's own `3:2` and `2:2`), and reading `skor 21:20` as "twenty-one
+    //    PAST twenty" invents a time. So a colon clock needs `pukul`/`jam` earlier in the clause (Malay's
+    //    window) or a zone / part-of-day word after it; an unmarked colon pair keeps both numbers and the
+    //    colon's pause. FLEURS id_id has no colon clock, so nothing measured moves.
+    const clock = (_m: string, h: string, min: string): string => {
         const mv = Number(min);
         return mv === 0 ? `${Number(h)}` : `${Number(h)} lewat ${mv}`;
-    });
+    };
+    s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3])\.([0-5]\d)\b(?!\.?\d)/gu, clock);
+    s = rewrite(s, /(?<=(?<![\p{L}\p{M}\d_])(?:pukul|jam)(?![\p{L}\p{M}\d_])[^.!?]{0,24})(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)/giu, clock);
+    s = rewrite(s, /(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)(?=\s?(?:WIB|WITA|WIT|GMT|UTC|waktu|pagi|siang|sore|malam)(?![\p{L}\p{M}\d_]))/gu, clock);
 
     // 1b) THE DOLLAR CODE → the bare sign. Third language with this defect after pt and nl, and it arrives by
     //     a THIRD route: those two compose an `initialisms` pass that split `US$` and left the `$` behind a

@@ -42,6 +42,14 @@ const DOTTED_ABBREV: [(&str, &str); 5] = [
     ("st", "Santo"),
 ];
 
+/// `COMPASS`. Generated from normalize.ts's object literal (key order preserved).
+const COMPASS: [(&str, &str); 4] = [
+    ("N", "amianan"),
+    ("S", "abagatan"),
+    ("E", "daya"),
+    ("W", "laud"),
+];
+
 /// `Object.keys(table).sort((a, b) => b.length - a.length).join("|")` (a stable sort).
 fn alt(table: &[(&str, &str)]) -> String {
     let mut keys: Vec<&str> = table.iter().map(|(k, _)| *k).collect();
@@ -166,7 +174,7 @@ pub(crate) fn normalize_ilocano(input: &JsString) -> JsString {
     );
 
     // decimals → `punto`, the fraction digit by digit.
-    s = rewrite_with(&s, js_re!(r"(\d)\.(\d{1,2})(?![\d.,])", "gu"), |m, t| {
+    s = rewrite_with(&s, js_re!(r"(\d)\.(\d+)(?![\d.,])", "gu"), |m, t| {
         let digits = JsString::join(&m.group(2, t).unwrap().code_point_strings(), &js(" "));
         m.group(1, t)
             .unwrap()
@@ -184,6 +192,19 @@ pub(crate) fn normalize_ilocano(input: &JsString) -> JsString {
         &s,
         js_re!(r"(\d)\s?°\s?F(?![\p{L}\p{M}])", "gui"),
         &js("$1 grado Fahrenheit"),
+    );
+    // A compass letter after the sign is the direction, in the corpus's own words (#1534).
+    s = rewrite_with(
+        &s,
+        js_re!(r"(\d)\s?°\s?([NSEW])(?![\p{L}\p{M}])", "gu"),
+        |m, t| {
+            let dir = m.group(2, t).unwrap().to_string_lossy();
+            let word = COMPASS.iter().find(|(k, _)| *k == dir).unwrap().1;
+            m.group(1, t)
+                .unwrap()
+                .concat(&js(" grado "))
+                .concat(&js(word))
+        },
     );
     s = rewrite(&s, js_re!(r"(\d)\s?°", "gu"), &js("$1 grado "));
 

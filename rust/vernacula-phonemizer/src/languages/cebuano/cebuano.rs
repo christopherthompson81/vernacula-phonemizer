@@ -235,4 +235,20 @@ mod tests {
             assert!(!say(t, l).contains(part), "{t}");
         }
     }
+
+    /// test/malayic-philippine-1534.test.ts, the ceb rows: relational, never typed IPA.
+    #[test]
+    fn the_1534_findings_are_fixed() {
+        let say = |t: &str| crate::phonemize(t, "ceb").unwrap();
+        for (a, b) in [
+            ("3.141 ka metro", "3 punto 1 4 1 ka metro"),
+            ("12.30 pm", "12.30 sa hapon"),
+            ("8.15 p.m. ug", "8.15 sa gabii ug"),
+            ("8.15 P.M. ug", "8.15 sa gabii ug"),
+            ("8.15 a.m. ug", "8.15 sa buntag ug"),
+            ("alas 9:30 pm", "alas 9:30 sa gabii"),
+        ] {
+            assert_eq!(say(a), say(b), "{a}");
+        }
+    }
 }

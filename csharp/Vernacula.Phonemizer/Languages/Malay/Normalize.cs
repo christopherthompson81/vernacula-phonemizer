@@ -99,6 +99,8 @@ public static class Normalize
     private static readonly JsRe COMMA_THOUSANDS = JsRegex.Compile("(?<!\\d)([1-9]\\d{0,2}(?:,\\d{3})+)(?!\\d)", "gu");
     private static readonly JsRe COMMA_G = JsRegex.Compile(",", "gu");
     private static readonly JsRe DOT_G = JsRegex.Compile("\\.", "gu");
+    // `US` before an amount is folded to the bare sign, as Indonesian's 1b: kept, it was read as the word *us* (#1534).
+    private static readonly JsRe US_CODE = JsRegex.Compile($"{L}US ?\\$(?=\\d)", "gu");
     private static readonly JsRe CURRENCY_CODE_PREFIX = JsRegex.Compile($"({L}(?:US|AS|HK|NZ|CAD?))\\$(?=\\d)", "gu");
     private static readonly JsRe CURRENCY_REDUNDANT =
         JsRegex.Compile($"[$€£¥]\\s?(?={AMOUNT}\\s+(?:AUD|USD|MYR|SGD|EUR|GBP|JPY|NZD|CAD|HKD){R})", "gu");
@@ -142,7 +144,7 @@ public static class Normalize
         JsRegex.Compile($"(?<![\\d.])({NUM})\\s?[-–]\\s?({NUM})(?=\\s*(?:{RANGE_NOUN}){R})", "gu");
     private static readonly JsRe RANGE_YEARS = JsRegex.Compile("(?<!\\d)([12]\\d{3})\\s?[-–]\\s?([12]\\d{3})(?!\\d)", "gu");
     private static readonly JsRe VERSION_DOT = JsRegex.Compile("(?<![\\d.])(\\d+)\\.(\\d+)([a-z])(?![\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe DECIMAL_RE = JsRegex.Compile("(?<![\\d.])(\\d+)\\.(\\d+)(?![\\d])", "gu");
+    private static readonly JsRe DECIMAL_RE = JsRegex.Compile("(?<![\\d.])(\\d+)\\.(\\d+)(?![\\d]|\\.\\d)", "gu");
 
     /**
      * Malay is not a mutating or case-marking language, so no agreement is lost by rewriting around DIGITS —
@@ -156,6 +158,7 @@ public static class Normalize
 
         s = Rewrite(s, COMMA_THOUSANDS, m => COMMA_G.Replace(m.Value, ""));
 
+        s = Rewrite(s, US_CODE, "$");
         s = Rewrite(s, CURRENCY_CODE_PREFIX, "$1 $");
         // The magnitude word has to be got out from between the number and its currency, and the SIGN cannot
         // simply be moved: the shared tier keys the currency word on adjacency to the digits, so a moved sign

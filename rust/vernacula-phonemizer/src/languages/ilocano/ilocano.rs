@@ -62,6 +62,18 @@ fn is_nucleus(u: &JsString) -> bool {
         .is_some_and(|&x| "aeiouɛ".encode_utf16().any(|v| v == x))
 }
 
+/// `splitNucleus(ipa)` (#1534): a trigraph's IPA as separate consonant and vowel units when it ends in a vowel, so
+/// stress and the hiatus test see the vowel.
+fn split_nucleus(ipa: &str) -> Vec<JsString> {
+    let u = js(ipa);
+    let n = u.len();
+    if n > 1 && is_nucleus(&u.substring(n - 1, None)) {
+        vec![u.substring(0, Some(n - 1)), u.substring(n - 1, None)]
+    } else {
+        vec![u]
+    }
+}
+
 fn table(t: &'static IndexMap<String, String>, k: &JsString) -> Option<&'static String> {
     t.get(&k.to_string_lossy()).filter(|v| !v.is_empty())
 }
@@ -80,7 +92,7 @@ fn scan(w: &JsString) -> Vec<JsString> {
                 out.push(js("ʔ"));
             }
         } else if let Some(t) = table(&DEF.digraphs, &c.concat(at(i + 1)).concat(at(i + 2))) {
-            out.push(js(t));
+            out.extend(split_nucleus(t));
             i += 2;
         } else if let Some(d) = table(&DEF.digraphs, &c.concat(at(i + 1))) {
             out.push(js(d));
@@ -383,10 +395,7 @@ mod tests {
         ("ni Theophrastus (c. 371 BC)", "ʔaɡˈaɾup ʔˈa talloɡˈasut"),
         ("ti kaadayuna 3 a bilion km", "bˈiljon kilomˈɛtɾo"),
     ];
-    const NOTCONTAINS_PINS: &[(&str, &str)] = &[
-        ("17.865", "pˈunto"),
-        ("Ti UTC+08:00 ket", "kˈɛt wˈalo kˈɛt"),
-    ];
+    const NOTCONTAINS_PINS: &[(&str, &str)] = &[("Ti UTC+08:00 ket", "kˈɛt wˈalo kˈɛt")];
     const REL_PINS: &[(&str, &str)] = &[("zzqx", "zzqx")];
 
     #[test]
@@ -425,5 +434,29 @@ mod tests {
         }
         // `expect(say(1000000000).split(" ")).toHaveLength(10)`: the digit-by-digit fallback.
         assert_eq!(say("1000000000").split(' ').count(), 10);
+    }
+
+    /// test/malayic-philippine-1534.test.ts, the ilo rows: relational, never typed IPA.
+    #[test]
+    fn the_1534_findings_are_fixed() {
+        let say = |t: &str| crate::phonemize(t, "ilo").unwrap();
+        for (a, b) in [
+            ("3.141 a metro", "3 punto 1 4 1 a metro"),
+            ("45° N", "45 grado amianan"),
+            ("45°S ken", "45 grado abagatan ken"),
+            ("12° E", "12 grado daya"),
+            ("12°W", "12 grado laud"),
+        ] {
+            assert_eq!(say(a), say(b), "{a}");
+        }
+        let at = |w: &str| {
+            phonemize_word_rules(&js(w))
+                .to_string_lossy()
+                .find('ˈ')
+                .unwrap()
+        };
+        for (a, b) in [("queso", "keso"), ("Quezon", "Keson")] {
+            assert_eq!(at(a), at(b), "{a}");
+        }
     }
 }

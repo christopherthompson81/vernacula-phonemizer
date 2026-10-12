@@ -111,7 +111,9 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
 
     test("the currency VOCABULARY stays with the shared tier; only the sign's position is Malay's problem", () => {
         // A sign glued behind letters was swallowed whole, so the amount lost its currency word.
-        expect(normalizeMalay("yuran sebanyak US$30,")).toBe("yuran sebanyak US $30,");
+        // `US` itself folds to the bare sign (#1534): kept, the inherited acronym gate read it as the WORD *us*.
+        expect(normalizeMalay("yuran sebanyak US$30,")).toBe("yuran sebanyak $30,");
+        expect(normalizeMalay("yuran sebanyak AS$30,")).toBe("yuran sebanyak AS $30,");
         // …and a sign in front of a bare DECIMAL amount is moved behind it, or the tier sees only the
         // integer part and says the currency word INSIDE the number (*satu dolar perpuluhan lima nol*).
         expect(normalizeMalay("harga €1.50 sekilo")).toBe("harga 1 perpuluhan 5 0 € sekilo");
@@ -132,7 +134,7 @@ describe("malay (zsm) normalization — the conventions Indonesian does not shar
         // dropped rather than said twice. `billion` is in the magnitude class because the corpus writes the
         // English spelling once, in `US $14.7 billion`.
         expect(normalizeMalay("tambahan berjumlah $45 juta AUD.")).toBe("tambahan berjumlah 45 juta AUD.");
-        expect(normalizeMalay("(US $14.7 billion)")).toBe("(US 14 perpuluhan 7 billion dolar)");
+        expect(normalizeMalay("(US $14.7 billion)")).toBe("(14 perpuluhan 7 billion dolar)");
         // An INTEGER amount with no magnitude word is left entirely alone — the tier already reads it.
         expect(normalizeMalay("kos $1000 setahun")).toBe("kos $1000 setahun");
         expect(phonemize("kos $1000 setahun", "zsm")).toBe("kˈos sərˈibu dˈolar sətˈahun");

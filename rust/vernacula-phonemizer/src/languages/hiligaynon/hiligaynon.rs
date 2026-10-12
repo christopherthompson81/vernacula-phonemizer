@@ -52,6 +52,18 @@ fn is_nucleus(u: &JsString) -> bool {
     u.units().first().is_some_and(|&x| is_vowel_unit(x))
 }
 
+/// `splitNucleus(ipa)` (#1534): a trigraph's IPA as separate consonant and vowel units when it ends in a vowel, so
+/// stress and the hiatus test see the vowel.
+fn split_nucleus(ipa: &str) -> Vec<JsString> {
+    let u = js(ipa);
+    let n = u.len();
+    if n > 1 && is_vowel_unit(u.units()[n - 1]) {
+        vec![u.substring(0, Some(n - 1)), u.substring(n - 1, None)]
+    } else {
+        vec![u]
+    }
+}
+
 fn table(t: &'static IndexMap<String, String>, k: &JsString) -> Option<&'static String> {
     t.get(&k.to_string_lossy()).filter(|v| !v.is_empty())
 }
@@ -74,7 +86,7 @@ fn scan(w: &JsString) -> Vec<JsString> {
             continue;
         }
         if let Some(t) = table(&DEF.digraphs, &c.concat(at(i + 1)).concat(at(i + 2))) {
-            out.push(js(t));
+            out.extend(split_nucleus(t));
             i += 3;
             continue;
         }
@@ -322,5 +334,22 @@ mod tests {
         }
         // `expect(say(1000000000).split(" ")).toHaveLength(10)`: the digit-by-digit fallback.
         assert_eq!(say("1000000000").split(' ').count(), 10);
+    }
+
+    /// test/malayic-philippine-1534.test.ts, the hil rows: relational, never typed IPA.
+    #[test]
+    fn the_1534_findings_are_fixed() {
+        let say = |t: &str| crate::phonemize(t, "hil").unwrap();
+        for (a, b) in [
+            ("0.625", "0 punto 6 2 5"),
+            ("3.1416", "3 punto 1 4 1 6"),
+            ("1234.567", "1234 punto 5 6 7"),
+        ] {
+            assert_eq!(say(a), say(b), "{a}");
+        }
+        assert!(!say("17.865 ka pumuluyo").contains("pˈunto"));
+        for (a, b) in [("queso", "keso"), ("quinse", "kinse"), ("Quezon", "Keson")] {
+            assert_eq!(phonemize_word(&js(a)), phonemize_word(&js(b)), "{a}");
+        }
     }
 }

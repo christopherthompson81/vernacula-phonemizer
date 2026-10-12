@@ -87,3 +87,26 @@ cargo clippy: only module_inception on cebuano/mod.rs in the new files
 No TS regex was added or changed. Large dumps in `.probe/ceb/` deleted.
 
 **Implication.** Done on this machine.
+
+## Run 4 — 2026-10-11 16:40 (#1534: fixing the Run 3 findings, TS first)
+
+**Command.** `npx tsx .probe/1534/q.mts ceb …` on synthetic inputs; FLEURS ceb_ph column 3 grepped for
+fraction lengths, meridiems and part-of-day phrases.
+
+**Question.** Is the two-digit decimal cap protecting anything here, and what does this corpus say after a clock?
+
+**Raw finding.**
+1. **Decimals.** Fraction lengths in ceb_ph: 1 digit ×14, 2 digits ×5, three or more ×0, and the header's
+   period-thousands count is ×0. So the cap protected nothing. `(\d)\.(\d+)(?![\d.,])`: `3.141 ka metro` → *tˈulo
+   pˈunto ʔˈusa ʔˈupat ʔˈusa kˈa mˈetɾo* (was *tˈulo . ʔˈusa kˈa ɡˈatos …*), `0.125` likewise.
+2. **Meridiem.** One corpus clock carries one: `alas 8:30 p.m. sa lokal`, which read *… p . m . sˈa lˈokal*.
+   The others say the part of the day: `9:30 sa buntag`, `07:19 sa buntag`, `10:00 sa buntag`, `10:08 sa gabii`,
+   `11:00 sa gabii`, and one `09:19 sa hapon GMT` (a GMT conversion of a 9 p.m.). The fix rewrites `H[.:]MM` +
+   `[ap].?m.?` to the clock followed by `sa buntag` (a.m.), `sa gabii` (p.m., hour mod 12 from 6 to 11) or `sa
+   hapon` (other p.m.), before the clock rules, so the dot clock still finds its licence. `12.30 pm` → *… sˈa
+   hˈapon*, `8.15 p.m.` → *… sˈa ɡabˈiʔi*, `9:30 pm` (colon, also raw before) → *… sˈa ɡabˈiʔi*. Not attested and so
+   not claimed: 12 a.m. (it reads `sa buntag`) and the noon word *udto*; a bare hour with a meridiem (`8 p.m.`) is
+   untouched.
+3. **`cubed`.** manifest.ts types it optional now, matching cebuano.jsonc.
+
+**Implication.** Mirror into C# and Rust; regenerate the ceb golden (the p.m. sentence is not among its 200 rows).

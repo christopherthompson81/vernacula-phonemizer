@@ -90,7 +90,29 @@ pub(crate) fn normalize_cebuano(input: &JsString) -> JsString {
         |m, t| js_re!(r",", "g").replace(&m.value(t), &JsString::new()),
     );
 
-    // 2. clocks: colon, a dot licensed by a following marker, and the military form before a timezone.
+    // 2. clocks: a meridiem said as the part of the day (#1534), then colon, a dot licensed by a following
+    // marker, and the military form before a timezone.
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\d.:])([01]?\d|2[0-3])([.:])([0-5]\d)\s*([ap])\.?m\b\.?",
+            "giu"
+        ),
+        |m, t| {
+            let h = m.group(1, t).unwrap();
+            let part = if m.group(4, t).unwrap().to_lower_case() == js("a") {
+                "sa buntag"
+            } else if js_number(&h) % 12.0 >= 6.0 {
+                "sa gabii"
+            } else {
+                "sa hapon"
+            };
+            h.concat(&m.group(2, t).unwrap())
+                .concat(&m.group(3, t).unwrap())
+                .concat(&js(" "))
+                .concat(&js(part))
+        },
+    );
     s = rewrite_with(
         &s,
         js_re!(r"(?<![\d.:])([01]?\d|2[0-3]):([0-5]\d)\b(?!\.?\d)", "gu"),
@@ -117,7 +139,7 @@ pub(crate) fn normalize_cebuano(input: &JsString) -> JsString {
     s = try_symbols().unwrap_or_else(|e| panic!("{e}")).apply(&s);
 
     // 4. decimals → `punto`, the fraction digit by digit.
-    s = rewrite_with(&s, js_re!(r"(\d)\.(\d{1,2})(?![\d.,])", "gu"), |m, t| {
+    s = rewrite_with(&s, js_re!(r"(\d)\.(\d+)(?![\d.,])", "gu"), |m, t| {
         let digits = JsString::join(&m.group(2, t).unwrap().code_point_strings(), &js(" "));
         m.group(1, t)
             .unwrap()

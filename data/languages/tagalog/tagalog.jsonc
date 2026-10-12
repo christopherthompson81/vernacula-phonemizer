@@ -45,6 +45,9 @@
         "tens": ["", "sampu", "dalawampu", "tatlumpu", "apatnapu", "limampu", "animnapu", "pitumpu", "walumpu", "siyamnapu"],
         "hundred": "daan", "hundredAfterNa": "raan", "hundred1": "sandaan",
         "thousand": "libo", "thousand1": "sanlibo", "million": "milyon", "and": "at",
+        // The scales above milyon (#1534): without them 10^9 composed as *libong milyon*. Both are the symbol tier's own
+        // corpus-attested magnitudes (bilyon x21 in the mined artifact, tl.wikipedia 572; trilyon 68).
+        "billion": "bilyon", "trillion": "trilyon",
         // Number-sense stress (kaikki-mined): number words are FINAL-stressed EXCEPT these penult roots (séro, ápat,
         // ánim, líbo, sanlíbo, labíng-ápat, labíng-ánim). The -ng/'t/na ligatures add no vowel, so they don't move
         // stress. This overrides the general stress lexicon for the number path (which abstains on the number-sense

@@ -25,3 +25,5 @@ Si São Paulo ug Klöcker ug Cañitas ug Müller ug Ångström.
 Adunay 0 ug 7 ug 10 ug 11 ug 21 ug 100 ug 101 ug 999 ug 1000 ug 1001 ug 999999 ug 1000000 ug 999999999 ug 1000000000 ug 12345678901234567890.
 # punctuation and other scripts
 Una: usa; duha, tulo. Tinuod ba? Oo! Москва ug Αθήνα ug 北京.
+# #1534: three or more fraction digits; a meridiem after a clock
+Mga 3.141 ka metro ug 0.125 ug 3.14159 ug 12.30 pm ug 8.15 p.m. ug 8.15 P.M. ug 8.15 a.m. ug alas 9:30 pm ug 9:30 sa buntag.

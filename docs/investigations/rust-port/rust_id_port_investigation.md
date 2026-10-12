@@ -165,3 +165,37 @@ No TS regex was added or changed, so the regex corpus needs no re-extraction. No
 
 **Implication.** Done on this machine. One commit for both codes: test/indonesian.test.ts itself pins `ms` (`NATO`,
 `Cañitas`), so an id-only commit could not carry its own suite.
+
+## Run 7 — 2026-10-11 16:20 (#1534: fixing the Run 5 findings, TS first)
+
+**Command.** `npx tsx .probe/1534/p.mts` (synthetic inputs, before and after each edit); FLEURS id_id / ms_my
+column 3 grepped for the clock and currency shapes.
+
+**Question.** Which of the Run 5 findings can be fixed on the evidence there is, and what does each fix move?
+
+**Raw finding.**
+1. **id `1.000,5`** read *sərˈibu , lˈima* (a pause, *koma* lost); `Rp 1.000,50` *sərˈibu , lˈima pˈuluh rupˈiah*;
+   `1.000.000,25` *sˈatu d͡ʒˈuta , dˈua pˈuluh lˈima*. TOKEN's grouped arm gains `(?:,\d+)?` (de #1514 / nl #1524):
+   now *sərˈibu kˈoma lˈima*, *… kˈoma lˈima nˈol rupˈiah*, *… kˈoma dˈua lˈima*. `1.000, dan` keeps its pause.
+2. **id clocks.** All 16 dotted `H.MM` pairs in id_id are clocks (15 after `pukul`, one before `GMT`). There is no
+   colon clock at all; the only colon pairs are the race times the guards already handle, the aspect ratio `3:2` and
+   the degree class `2:2` (neither has two minute digits, so neither was claimed). The same rugby sentence is
+   `21-20` in id_id and `21:20` in ms_my. So the dot stays a clock unconditionally (it is the language's own clock
+   spelling and the decimal is a comma), and the COLON needs a marker: `pukul`/`jam` earlier in the clause
+   (Malay's 24-character window) or a zone / part-of-day word after (`WIB WITA WIT GMT UTC waktu pagi siang sore
+   malam`). `skor 21:20` → *skˈor dˈua pˈuluh sˈatu , dˈua pˈuluh*; `pukul 21:20`, `Pukul 9:30`, `jam 9:30 pagi`,
+   `21:20 WIB` still read *lewat*. Dead end, kept: the dotted decimal `2.50 meter` still reads *dua lewat lima
+   puluh*. That part is DECLINED: nothing in id_id is a dotted two-digit decimal, and a marker guard on the dot
+   would have to be proved against 16 of 16 clocks that need none.
+3. **ms `US$30`** read *ˈus tˈiɡa pˈuluh dˈolar*, and so did the spaced `US $30` (both corpus spellings,
+   `US$30,` and `US $14.7 billion`; the audio transcript column 4 keeps `us$30`, so no reading is witnessed). Malay
+   now folds `US ?$` before a digit to the bare sign, as Indonesian's 1b does: *tˈiɡa pˈuluh dˈolar*. `AS`/`HK`/`NZ`
+   are spelled as letters already and keep their codes. Not touched (not in the issue): `CA$`/`CAD$` also read as a
+   word (*t͡ʃˈa*), and a bare `US` not before `$` still reads *ˈus*.
+4. **ms `12.345.678 orang`** read *dua belas perpuluhan tiga empat lima ribu …*. Step 15's guard becomes
+   `(?![\d]|\.\d)`, so a run with two dots goes whole to the inherited tokenizer: now the same reading as
+   `12345678 orang`. `3.141` still reads *perpuluhan*.
+5. **id/ceb `cubed`.** The TS interfaces now type `cubed?` as optional, which is what both jsonc files declare
+   (`squared` only). Rust already had `Option`; its two ⚠ comments now just say it matches the TS.
+
+**Implication.** Mirror into C# and Rust; regenerate the id and ms goldens.

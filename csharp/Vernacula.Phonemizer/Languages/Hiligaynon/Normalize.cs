@@ -55,7 +55,7 @@ public static class Normalize
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<!\\b(?:hasta|asta|tubtob|tubtub|halin sa|halin)\\s)(?<![\\d.,\\p{L}-])(\\d[\\d,]*(?:\\.\\d+)?)\\s?[-–]\\s?(\\d[\\d,]*(?:\\.\\d+)?)(?![\\d,-]|\\.\\d)",
         "gu");
-    private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d{1,2})(?![\\d.,])", "gu");
+    private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d{1,2}|\\d{4,}|(?<=(?<![\\d.])(?:0|\\d{4,})\\.)\\d{3})(?![\\d.,])", "gu");
     /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
      *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
     private const string WORD_START = "(?<![\\p{L}\\p{M}\\d_])";

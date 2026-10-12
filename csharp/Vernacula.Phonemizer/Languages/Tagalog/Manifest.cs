@@ -20,6 +20,8 @@ public sealed class TagalogNumbersDef
     public string Thousand { get; init; } = "";
     public string Thousand1 { get; init; } = "";
     public string Million { get; init; } = "";
+    public string Billion { get; init; } = "";
+    public string Trillion { get; init; } = "";
     /** at → 't after a vowel. */
     public string And { get; init; } = "";
     /** Number roots that are penult- not final-stressed (séro, ápat, líbo, …). */

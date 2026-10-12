@@ -20,3 +20,5 @@ Ni São Paulo ken Klöcker ken Cañitas ken Müller ken Ångström; pag-asa ken 
 Adda 0 ken 7 ken 10 ken 11 ken 21 ken 100 ken 101 ken 999 ken 1000 ken 1001 ken 999999 ken 1000000 ken 999999999 ken 1000000000.
 # punctuation and other scripts
 Umuna: maysa; dua, tallo. Pudno kadi? Wen! Москва ken Αθήνα ken 北京.
+# #1534: three fraction digits; compass letters after the degree sign; trigraph vowels
+Ti 3.141 a metro ken 17.865 ken 4046.8564224 ken 45° N, 45°S, 12° E, 12°W, 45° n. Queso, Quezon, Miguel, Arguilla, quiet.

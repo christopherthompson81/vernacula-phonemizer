@@ -104,9 +104,9 @@ describe("Ilocano text normalization", () => {
         // ⚠ THE DIGIT-LIST MUST SURVIVE. `aggibus iti 0,1,8,9` is a phone-prefix list with ONE digit per
         // group; the `{3}` in the de-grouping rule is what refuses it. Pinned so a widening cannot pass.
         expect(say("aggibus iti 0,1,8,9")).toBe("ʔaɡɡˈibus ʔˈiti sˈɛɾo , mˈajsa , wˈalo , sjˈam");
-        // ⚠ AND THE THREE-DIGIT FRACTIONAL PART IS NOT CLAIMED — the two-digit cap, pinned from the
-        // opposite side, so a later widening of the decimal rule cannot silently claim a thousands group.
-        expect(say("17.865")).not.toContain("pˈunto");
+        // ⚠ AND A THREE-DIGIT FRACTIONAL PART IS A DECIMAL (#1534): this corpus's are HDI figures and it has no
+        // period-thousands group, so the old two-digit cap only turned `3.141` into a pause plus a cardinal.
+        expect(say("3.141 a metro")).toBe(say("3 punto 1 4 1 a metro"));
     });
 
     test("⚠ THE CLOCK'S GUARD IS THE RULE — 205 colon-numbers, ~23 clocks", () => {

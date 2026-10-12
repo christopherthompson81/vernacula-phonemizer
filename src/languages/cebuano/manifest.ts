@@ -24,7 +24,8 @@ export interface CebuanoManifest {
         magnitudes: string[];
         ampersand: string;
         multiply: { times: string; by?: string };
-        exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
+        /** `cubed` is OPTIONAL, as the data has it (#1534): the jsonc declares `squared` only. */
+        exponentWords: { squared: CountForms; cubed?: CountForms; position?: "before" | "after" };
     };
 }
 

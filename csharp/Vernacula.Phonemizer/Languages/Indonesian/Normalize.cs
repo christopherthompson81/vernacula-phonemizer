@@ -36,7 +36,10 @@ public static class Normalize
         ["n"] = "utara", ["s"] = "selatan", ["e"] = "timur", ["w"] = "barat",
     };
 
-    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3])[.:]([0-5]\\d)\\b(?!\\.?\\d)", "gu");
+    private static readonly JsRe CLOCK = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3])\\.([0-5]\\d)\\b(?!\\.?\\d)", "gu");
+    // A colon pair is also a score or a ratio, so it is a clock only beside a marker (#1534).
+    private static readonly JsRe CLOCK_COLON_AFTER_MARKER = JsRegex.Compile("(?<=(?<![\\p{L}\\p{M}\\d_])(?:pukul|jam)(?![\\p{L}\\p{M}\\d_])[^.!?]{0,24})(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)\\b(?!\\.?\\d)", "giu");
+    private static readonly JsRe CLOCK_COLON_BEFORE_ZONE = JsRegex.Compile("(?<![\\d.:])([01]?\\d|2[0-3]):([0-5]\\d)\\b(?!\\.?\\d)(?=\\s?(?:WIB|WITA|WIT|GMT|UTC|waktu|pagi|siang|sore|malam)(?![\\p{L}\\p{M}\\d_]))", "gu");
     private static readonly JsRe DOLLAR_CODE = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|AUD)\\$(?=[ \u00a0]?\\d)", "gu");
     /** ⚠ A UNICODE-AWARE START OF WORD (#1480's shape): JS `\b` is ASCII-only even under `u`, so after an
      *  accented letter a table key matched the END of a longer word (`Taínos.` read *Taínumbers*). */
@@ -81,12 +84,15 @@ public static class Normalize
         // The clock runs FIRST, before anything can treat the dot as grouping. Both lookarounds are needed:
         // the trailing one keeps a race time (`2:11.60`) out, the leading one stops the scan restarting inside
         // one and claiming `09.02` out of `1:09.02`.
-        s = Rewrite(s, CLOCK, m =>
+        static string Clock(System.Text.RegularExpressions.Match m)
         {
             var h = Js.Number(m.Groups[1].Value);
             var mv = Js.Number(m.Groups[2].Value);
             return mv == 0 ? $"{Js.NumberToString(h)}" : $"{Js.NumberToString(h)} lewat {Js.NumberToString(mv)}";
-        });
+        }
+        s = Rewrite(s, CLOCK, Clock);
+        s = Rewrite(s, CLOCK_COLON_AFTER_MARKER, Clock);
+        s = Rewrite(s, CLOCK_COLON_BEFORE_ZONE, Clock);
 
         s = Rewrite(s, DOLLAR_CODE, "$");
 

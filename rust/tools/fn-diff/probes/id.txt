@@ -56,3 +56,6 @@ Pertama: satu; kedua, dua. Benarkah?
 Kata Москва dan Αθήνα dan 北京 dan ソウル.
 # lone surrogates and odd code points
 Kata \u{d800}a dan b\u{dc00} serta ﬁsik dan ẞ.
+# #1534: a grouped amount with a decimal comma; colon pairs with and without a clock marker
+Harga 1.000,5 dan Rp 1.000,50 dan 1.000.000,25 orang dan 1.000, dan 2.000.
+Skor 21:20 dan pukul 21:20 dan Pukul 9:30 dan jam 9:30 pagi dan 21:20 WIB dan 8.46 dan 3:2.

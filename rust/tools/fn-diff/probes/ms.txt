@@ -46,3 +46,5 @@ Nilai 3.141 dan 9.000 orang dan 802.11a dan 1.5 dan Rajah 1.1.
 Versi 2.0b dan 10.25.
 # inherited Indonesian arms reaching through
 Harga Rp 15.000 dan Prof. Ali dan 1/2 dan 3/4.
+# #1534: the US code before an amount, AS keeping its code; a run with two grouping dots
+Yuran US$30, US $30, AS$30 dan US $14.7 billion dan 12.345.678 orang dan 1.234.567 dan 3.141.

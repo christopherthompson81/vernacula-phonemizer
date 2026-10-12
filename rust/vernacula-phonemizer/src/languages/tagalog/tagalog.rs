@@ -239,10 +239,30 @@ pub(crate) fn number_words(n: f64) -> String {
         };
         return join_remainder(&thousands, n % 1000.0);
     }
-    let m = (n / 1_000_000.0).floor();
+    if n < 1e9 {
+        let m = (n / 1_000_000.0).floor();
+        return join_remainder(
+            &format!("{} {}", ligate(&number_words(m)), num.million),
+            n % 1_000_000.0,
+        );
+    }
+    if n < 1e12 {
+        return join_remainder(
+            &format!(
+                "{} {}",
+                ligate(&number_words((n / 1e9).floor())),
+                num.billion
+            ),
+            n % 1e9,
+        );
+    }
     join_remainder(
-        &format!("{} {}", ligate(&number_words(m)), num.million),
-        n % 1_000_000.0,
+        &format!(
+            "{} {}",
+            ligate(&number_words((n / 1e12).floor())),
+            num.trillion
+        ),
+        n % 1e12,
     )
 }
 
@@ -356,11 +376,9 @@ impl TagalogPhonemizer {
         NAT(word)
     }
 
-    /// `text(input)`. ⚠ An ika- ordinal of 309+ digits is `Number(…) = Infinity`, on which the TS `numberWords`
-    /// recurses until the stack overflows and `phonemize` THROWS; that is reproduced as an error, not a reading.
+    /// `text(input)`.
     pub fn text(&self, input: &JsString) -> Result<JsString, PhonemizeError> {
         let normalized = self.symbols.apply(&normalize_tagalog(input));
-        let mut overflow = false;
         let emit_word = |wd: &str, sink: &mut ClauseSink| {
             let w = js(wd);
             sink.emit(&phonemize_core(&w, number_stress_idx(&w)));
@@ -401,11 +419,22 @@ impl TagalogPhonemizer {
                     }
                     return;
                 }
-                if !n.is_finite() {
-                    overflow = true;
-                    return;
-                }
-                for (i, wd) in number_words(n).split(' ').enumerate() {
+                // Above 2^53 the ordinal reads its digits, as `emit_number` does (#1534).
+                let words: Vec<String> = if is_safe_integer(n) {
+                    number_words(n).split(' ').map(String::from).collect()
+                } else {
+                    digits
+                        .code_point_strings()
+                        .iter()
+                        .flat_map(|d| {
+                            number_words(js_number(d))
+                                .split(' ')
+                                .map(String::from)
+                                .collect::<Vec<_>>()
+                        })
+                        .collect()
+                };
+                for (i, wd) in words.iter().enumerate() {
                     let w = js(wd);
                     let idx = number_stress_idx(&w);
                     if i != 0 {
@@ -435,11 +464,6 @@ impl TagalogPhonemizer {
                 sink.pause(&js(mk));
             }
         });
-        if overflow {
-            return Err(PhonemizeError::Input(
-                "tl: an ika- ordinal too large for a number (the TS overflows its stack)".into(),
-            ));
-        }
         Ok(out)
     }
 }
@@ -637,15 +661,29 @@ mod tests {
         }
     }
 
-    /// The TS `numberWords` recurses without end on Infinity (an `ika-` run of 309+ digits) and `phonemize`
-    /// throws; the port returns an error, never a reading and never a stack overflow.
+    /// test/tagalog-1534.test.ts: above 2^53 an `ika-` ordinal reads its digits (it threw on Infinity), and
+    /// the cardinal has scales above milyon.
     #[test]
-    fn an_infinite_ordinal_is_an_error() {
-        let text = format!("ika-{}", "9".repeat(400));
-        assert!(matches!(
-            crate::phonemize(&text, "tl"),
-            Err(PhonemizeError::Input(_))
-        ));
-        assert!(crate::phonemize(&format!("ika-{}", "9".repeat(300)), "tl").is_ok());
+    fn the_1534_findings_are_fixed() {
+        let tl = |s: &str| crate::phonemize(s, "tl").unwrap();
+        let long = format!("ika-{}", "9".repeat(400));
+        assert_eq!(tl(&long).split(' ').count(), 400);
+        let (a, b) = (
+            tl("ika-12345678901234567891"),
+            tl("ika-12345678901234567899"),
+        );
+        assert_ne!(a, b);
+        assert_eq!(
+            a.split(' ').skip(1).collect::<Vec<_>>(),
+            tl("12345678901234567891")
+                .split(' ')
+                .skip(1)
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(number_words(2e9), "dalawang bilyon");
+        assert_eq!(number_words(1e9), "isang bilyon");
+        assert_eq!(number_words(3e12 + 5e9), "tatlong trilyon limang bilyon");
+        assert_eq!(number_words(1e15), "sanlibong trilyon");
+        assert_eq!(number_words(999_999_999.0).split(' ').last(), Some("siyam"));
     }
 }
