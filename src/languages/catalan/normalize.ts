@@ -35,6 +35,14 @@ const ORD_FEM_1_10: readonly string[] = [
  * Integer → the Catalan ordinal (masculine or feminine). Below 10 the irregular table; from 10 up the
  * cardinal + -è / -ena on the LAST word (vint → vintè/vintena, quaranta → quarantè, vint-i-cinc →
  * vint-i-cinquè). Only the last element of a compound takes the ending.
+ *
+ * ⚠ ONE COMPOSITOR FOR BOTH ORDINAL PATHS (#1533). romanOrdinals.ts used to build its own, and the two disagreed
+ * on 21–99: this one kept the irregular under-ten stem at the end of a compound (21 → *vint i primer*), the Roman
+ * one suffixed the cardinal (XXI → *vint i unè*), so `el 21è aniversari i el XXI aniversari` read the same ordinal
+ * two ways. The IEC/Optimot form is the suffixed cardinal — *vint-i-unè*, *vint-i-dosè*, *vint-i-tresè*,
+ * *vint-i-quatrè*; feminine *vint-i-unena* … — and the irregular forms are 1–4 alone. The old branch was not even
+ * self-consistent: it was gated on `n % 100 > 10`, so 101 read *cent unè* while 21 read *vint i primer*, and 105
+ * reached the generic path as *cent cincè*.
  */
 export function ordinalWords(n: number, fem = false): string | undefined {
     if (!Number.isSafeInteger(n) || n < 1) return undefined;
@@ -43,26 +51,37 @@ export function ordinalWords(n: number, fem = false): string | undefined {
     if (card === "" || /\d/u.test(card)) return undefined;
     const words = card.split(" ");
     let stem = words[words.length - 1]!;
-    // The irregular under-ten stems stay when they end a compound: vint-i-un → vint-i-primer.
-    const small = fem ? ORD_FEM_1_10 : ORD_MASC_1_10;
-    if (n % 10 !== 0 && n % 10 < 10 && n % 100 > 10) {
-        const u = n % 10;
-        const tail = u < 10 ? ["", "un", "dos", "tres", "quatre", "cinc", "sis", "set", "vuit", "nou"][u]! : "";
-        if (tail !== "" && card.endsWith(tail))
-            return `${card.slice(0, -tail.length)}${small[u]}`;
-    }
     // THE STEM LOSES ITS FINAL VOWEL before the ending: quaranta → quarantè/quarantena, noranta →
-    // norantè/norantena, seixanta → seixantè. Appending straight to the cardinal gave *seixantaè* and
-    // *cent norantaena*, which is both corpus instances of a tens ordinal (`60è`, `190a`). A final -ó
-    // takes the -on- stem instead (milió → milionè).
+    // norantè/norantena, seixanta → seixantè, quatre → quatrè. Appending straight to the cardinal gave
+    // *seixantaè* and *cent norantaena*, which is both corpus instances of a tens ordinal (`60è`, `190a`). A
+    // final -ó takes the -on- stem instead (milió → milionè).
     // …and a PLURAL HUNDREDS stem loses its -s: dos-cents → dos-centè, nou-cents → nou-centena. Only
     // `cents` — a bare `dos`/`tres` ending a compound keeps its s (102 → cent dosè), so this cannot be a
     // blanket strip. Found by enumerating the branch rather than the corpus, which writes no N00 ordinal.
+    // The three consonant alternations are the under-ten ones (cinquè, novè, desè), now reached in a compound
+    // too: vint i cinc → vint i cinquè, cent nou → cent novè, cent deu → cent desè.
+    // ⚠ A PLAIN replace, not a provenance `rewrite`: `stem` is a word of a composed number, not the tracked
+    // text, so a seam rewrite here reported false poison under a trace (the es #1463 fix, same shape).
     stem = stem.endsWith("ó") ? `${stem.slice(0, -1)}on`
         : stem === "cents" ? "cent"
-        : rewrite(stem, /[ae]$/u, "");
+        : stem.endsWith("cinc") ? `${stem.slice(0, -1)}qu`
+        : stem.endsWith("nou") ? `${stem.slice(0, -1)}v`
+        : stem.endsWith("deu") ? `${stem.slice(0, -1)}s`
+        : stem.replace(/[ae]$/u, "");
     words[words.length - 1] = fem ? `${stem}ena` : `${stem}è`;
     return words.join(" ");
+}
+
+/** The colloquial masculine compound with an IRREGULAR tail — 21 → vint i primer, 22 → vint i segon, 23 →
+ *  vint i tercer, 24 → vint i quart — for a digit ordinal whose written suffix (r/n/t) names that series.
+ *  `undefined` outside 21–99-style compounds ending in 1–4 (the gate is `n % 100 > 10`, so 101 does not
+ *  qualify), where the suffixed cardinal is the only form. */
+function irregularCompound(n: number): string | undefined {
+    const u = n % 10;
+    if (!Number.isSafeInteger(n) || n <= 10 || n % 100 <= 10 || u < 1 || u > 4) return undefined;
+    const card = numberToWords(n);
+    const tail = ["", "un", "dos", "tres", "quatre"][u]!;
+    return card.endsWith(` ${tail}`) ? `${card.slice(0, -tail.length)}${ORD_MASC_1_10[u]}` : undefined;
 }
 
 /** Multi-dot abbreviations and era markers. Handled BEFORE the single-dot rule so no interior dot survives
@@ -167,13 +186,17 @@ export function normalizeCatalan(input: string): string {
     //    does not write (11r, 5t) — ⚠ a guard alternative with no attested instance is a misfire
     //    generator. Was *set è* / *set a* / *cent noranta a* / *quatre t*. BEFORE the clock rule so a digit
     //    run is not first claimed as a time.
+    //    ⚠ THE SUFFIX PICKS THE SERIES IN A COMPOUND TOO (#1533). The normative compound is the suffixed
+    //    cardinal (21è vint-i-unè, the Roman XXI too); a writer who puts r/n/t on 21–24 is writing the
+    //    colloquial irregular tail (21r vint-i-primer, 22ns vint-i-segons), so that suffix keeps it rather
+    //    than declining. `21è` no longer reads *primer* against its own suffix.
     s = rewrite(s, /(?<![\d.,])(\d+)(è|a|r|n|ns|t)(?![\p{L}\p{M}])/giu, (m0, d: string, sfx: string) => {
         const n = Number(d);
-        const fem = sfx.toLowerCase() === "a";
-        const ord = ordinalWords(n, fem);
+        const m = sfx.toLowerCase();
+        const fem = m === "a";
+        const ord = m === "è" || m === "a" ? ordinalWords(n, fem) : irregularCompound(n) ?? ordinalWords(n);
         if (ord === undefined) return m0;
         const last = ord.split(" ").pop()!;
-        const m = sfx.toLowerCase();
         if (m === "r" && !(last === "primer" || last === "tercer")) return m0;
         if (m === "n" && last !== "segon") return m0;
         if (m === "ns" && last !== "segon") return m0;

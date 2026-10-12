@@ -98,3 +98,32 @@ probe additions; `cargo run --release -p parity`.
 **Raw finding.** 58 word + 25 text + 30 `ph` + 17 normalize + 7 Roman + 7 `ordinalWords` pins: `3 passed`.
 Re-run: `ca-normalize 22403 / ca-g2p 487280 / phonemize-sync 3707 / phonemize-best 3707 / trace 3707 identical,
 0 DIFFER`. Parity: all 24 registered languages 200/200.
+
+## Run 6 — 2026-10-11 16:45 (#1533: one ordinal compositor, TS-first)
+
+**Question.** Which compound form is right, and can both paths share one compositor?
+
+**Finding (source, not measured).** The IEC/Optimot compound ordinal is the suffixed cardinal: *vint-i-unè,
+vint-i-dosè, vint-i-tresè, vint-i-quatrè*, feminine *vint-i-unena …*; *primer/segon/tercer/quart* are 1–4 alone.
+So `romanOrdinals.ts`'s form was right and `ordinalWords` was wrong — and also inconsistent with itself.
+
+**Command.** Enumerated `ordinalWords(n)`, `ordinalWords(n, true)` and `ROMAN_POLICY.ordinal(n)` over
+`1 4 10 11 15 19 20 21 22 23 24 25 29 31 37 60 99 100 101 102 104 105 109 110 121 190 200 1000 1001 2024`, before
+and after; `npx tsx tools/check-goldens.mts ca`; FLEURS ca_es transcripts grepped for `\d+(è|a|r|n|ns|t)`.
+
+**Raw finding.** Before, besides 21–24 → *primer/segon/tercer/quart* tails: `105 → cent cincè`, `109 → cent nouè`,
+`110 → cent deuè` (the generic branch had no cinc/nou/deu alternation; only the Roman builder had it). After, the
+two paths are equal on every n above and `ROMAN_POLICY.ordinal` is `ordinalWords(n, false)`. Corpus digit
+ordinals: `7a`×3, `37è`×2, `1r`×2, `190a`×2, `7è`, `60è` — none reads differently (37è was *trenta setè* both ways).
+Golden: 0 rows move.
+**Dead end.** Making the shared compositor normative alone broke the existing pin `22ns → vint i segons`: the
+suffix guard then saw `dosè` and declined, leaving `22ns` raw. A written r/n/t suffix names the irregular series, so
+those suffixes keep the colloquial tail (`irregularCompound`, the old branch's gate `n % 100 > 10`, units 1–4 only);
+è and a take the normative form (`21è → vint i unè`, `21a → vint i unena`). The `[ae]$` stem strip is now a plain
+`replace`: `stem` is a word of a composed number, never the tracked text, so the provenance `rewrite` there was a
+false-poison site (the es #1463 shape).
+
+**Implication.** Fixed; mirror into C# and Rust. The new test fails with normalize.ts + romanOrdinals.ts reverted,
+and `22ns`/`21r` fail with `irregularCompound` removed.
+
+(#1533 C#/Rust mirrors and the gates: see rust_ro_port_investigation.md Run 8.)

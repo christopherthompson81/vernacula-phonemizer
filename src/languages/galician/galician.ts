@@ -85,7 +85,11 @@ function spirantizeAcrossWordsCore(ipa: string): string {
 
 /** Index of the stressed nucleus: the written accent, else penultimate (word ends in a syllabic vowel / n / s)
  *  or final. The "ends in a vowel" test is on the last SEGMENT being a nucleus — a word ending in a falling
- *  diphthong is glide-final (cantou→[kanˈtow], amei→[aˈmej]), so it takes oxytone stress, not penult. */
+ *  diphthong is glide-final (cantou→[kanˈtow], amei→[aˈmej]), so it takes oxytone stress, not penult.
+ *  ⚠ The diphthong is tested on the segment after the LAST NUCLEUS, not on the last segment, so a coda after
+ *  the offglide (the plural or a lexical -s) does not hide it: ademais, xamais, papeis, chapeus are oxytone
+ *  (#1533). The orthography writes no accent on them, so an unaccented final ⟨V+i/u(+s)⟩ is oxytone; Catalan's
+ *  stressedNucleus makes the same test. */
 function stressedNucleus(word: string, segs: Seg[]): number {
     const nuclei = segs
         .map((s, i) => (s.nucleus ? i : -1))
@@ -94,6 +98,9 @@ function stressedNucleus(word: string, segs: Seg[]): number {
     const accented = nuclei.find((i) => segs[i]!.accent);
     if (accented !== undefined) return accented;
     if (nuclei.length === 1) return nuclei[0]!;
+    const lastNuc = nuclei[nuclei.length - 1]!;
+    const afterLastNuc = segs[lastNuc + 1];
+    if (afterLastNuc && (afterLastNuc.ph === "ᶦ" || afterLastNuc.ph === "ᶷ")) return lastNuc;
     const last = word.toLowerCase().at(-1) ?? "";
     const endsNucleus = segs[segs.length - 1]!.nucleus; // a TRUE final vowel (a diphthong offglide is not one)
     const penult = endsNucleus || last === "n" || last === "s";

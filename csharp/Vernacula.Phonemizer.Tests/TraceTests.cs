@@ -301,8 +301,7 @@ public class TraceTests
      * six rows, found none of them, and passed with the guard removed and a false positional claim in place.
      */
     [Theory]
-    [InlineData("as")]
-    [InlineData("fr-CA")]
+    [InlineData("as")] // fr-CA was the second case until #1533 moved its accent delta into the engine, per word
     public void ALengthChangingPostAssemblyPassWithholdsTheOutputSpans(string lang)
     {
         // the same upward walk the other suites use, so the test does not depend on the runner's cwd
@@ -322,6 +321,19 @@ public class TraceTests
             Assert.All(t.Tokens, k => Assert.Null(k.IpaSpan));
         }
         Assert.True(found > 0, $"{lang}: no length-changing post-assembly rewrite in the golden — the test proves nothing");
+    }
+
+    /** #1533: fr-CA's accent delta runs per French word now, so nothing rewrites the assembled reading, a token
+     *  records the Québécois reading, and its span slices it out exactly. */
+    [Fact]
+    public void FrCaReportsExactOutputSpans()
+    {
+        var t = Phonemizer.PhonemizeTrace("Il dit petite.", "fr-CA");
+        Assert.Empty(t.Rewrites.Where(r => r.Stage != "normalize"));
+        var petite = t.Tokens.First(k => k.Surface == "petite");
+        Assert.NotNull(petite.IpaSpan);
+        Assert.Equal(string.Join(" ", petite.Emitted), t.Ipa[petite.IpaSpan!.Value.Start..petite.IpaSpan.Value.End]);
+        Assert.Contains("t͡s", string.Join(" ", petite.Emitted));
     }
 
     /**

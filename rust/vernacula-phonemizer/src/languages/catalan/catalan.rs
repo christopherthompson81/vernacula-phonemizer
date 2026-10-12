@@ -615,4 +615,41 @@ mod tests {
                 && !after.test(&js("edició"))
         );
     }
+
+    /// #1533: the digit and the Roman ordinal share one compositor, the suffixed cardinal.
+    #[test]
+    fn ts_one_ordinal_compositor_pins() {
+        for n in [
+            21.0, 22.0, 23.0, 24.0, 25.0, 29.0, 31.0, 101.0, 104.0, 105.0, 109.0, 110.0, 121.0,
+            2024.0,
+        ] {
+            assert_eq!(ordinal_words(n, false), catalan_ordinal(n), "{n}");
+        }
+        for (n, fem, want) in [
+            (21.0, false, "vint i unè"),
+            (24.0, false, "vint i quatrè"),
+            (21.0, true, "vint i unena"),
+            (105.0, false, "cent cinquè"),
+            (109.0, false, "cent novè"),
+            (110.0, false, "cent desè"),
+        ] {
+            assert_eq!(
+                ordinal_words(n, fem).unwrap().to_string_lossy(),
+                want,
+                "{n}"
+            );
+        }
+        assert_eq!(
+            crate::phonemize("El 21è aniversari i el XXI aniversari.", "ca").unwrap(),
+            "əɫ βˈin i unˈɛ əniβəɾsˈaɾi i əɫ βˈin i unˈɛ əniβəɾsˈaɾi ."
+        );
+        assert_eq!(
+            normalize_catalan(&js("el 21r")).to_string_lossy(),
+            "el vint i primer"
+        );
+        assert_eq!(
+            normalize_catalan(&js("la 21a")).to_string_lossy(),
+            "la vint i unena"
+        );
+    }
 }

@@ -158,7 +158,12 @@ public static class FrenchPhonemizer
     public sealed class FrenchEngine : ILanguage
     {
         private readonly Func<string, string>? _foreign;
-        internal FrenchEngine(Func<string, string>? foreign = null) => _foreign = foreign;
+        private readonly Func<string, string>? _accent;
+        internal FrenchEngine(Func<string, string>? foreign = null, Func<string, string>? accent = null)
+        {
+            _foreign = foreign;
+            _accent = accent;
+        }
 
         public string Text(string input) => Text(input, null);
 
@@ -230,14 +235,22 @@ public static class FrenchPhonemizer
             // ⚠ RECORDED AT FLUSH, NOT AT PUSH (#1150): AccentFinal MUTATES the group in place before it is
             // joined, so a reading captured at push is not the reading that ships.
             var groupSrc = new List<Src?>();
+            // Which slots of `group` hold a foreign run's IPA, so an accent delta passes them by.
+            var groupForeign = new List<bool>();
             var traced = new Dictionary<string, (Src Src, List<string> Emitted, (int Start, int End) At)>();
             var @out = "";
             var carry = ""; // liaison consonant to prepend to the next word (its new onset)
+            var accent = _accent;
             void Flush(string? pause)
             {
                 if (group.Count > 0)
                 {
                     AccentFinal(group);
+                    // ⚠ AN ACCENT DELTA (fr-CA) RUNS HERE, PER FRENCH WORD, AFTER `AccentFinal` (its rules read
+                    // the stress mark) and never on a foreign run (#1533). No rule of it looks across a space.
+                    if (accent is not null)
+                        for (var gi = 0; gi < group.Count; gi++)
+                            if (!groupForeign[gi]) group[gi] = accent(group[gi]);
                     // ⚠ #1150 STAGE 3: OFFSETS AFTER `AccentFinal`, which REWRITES the group in place —
                     // computing them before would place every piece by its pre-accent length. The base is
                     // where this group lands in `out`, and the join adds one separator per preceding piece.
@@ -257,6 +270,7 @@ public static class FrenchPhonemizer
                     @out += (@out != "" ? " " : "") + string.Join(" ", group);
                     group = new List<string>();
                     groupSrc = new List<Src?>();
+                    groupForeign = new List<bool>();
                 }
                 if (!string.IsNullOrEmpty(pause)) @out += $" {pause}";
             }
@@ -275,6 +289,7 @@ public static class FrenchPhonemizer
                     carry = "";
                     group.Add(ip.Ipa);
                     groupSrc.Add(ip.Source);
+                    groupForeign.Add(true);
                     continue;
                 }
                 var wi = (WordItem)it;
@@ -290,7 +305,7 @@ public static class FrenchPhonemizer
                     carry = LiaisonOnto(wi.Word, nw.Word);
                     if (carry != "") ipa = StripLatent(ipa, carry); // avoid doubling a citation-realised final consonant
                 }
-                if (ipa != "") { group.Add(ipa); groupSrc.Add(it.Source); }
+                if (ipa != "") { group.Add(ipa); groupSrc.Add(it.Source); groupForeign.Add(false); }
             }
             Flush(null);
             foreach (var (src2, emitted, at) in traced.Values)
@@ -302,8 +317,10 @@ public static class FrenchPhonemizer
 
     /** Build the French phonemizer. `foreign` handles embedded non-French (unused for now). No data files. The returned
      *  `text` takes an optional per-call `oovOverride` (neural path only) injecting tagger readings for OOV
-     *  words (lexicon → oovOverride → rule g2p); still assignable to Phonemizer. */
-    public static FrenchEngine CreateFrench(Func<string, string>? foreign = null) => new(foreign);
+     *  words (lexicon → oovOverride → rule g2p); still assignable to Phonemizer. `accent` is a word-level IPA
+     *  delta (fr-CA's Québécois rules), applied to every French reading and to no embedded foreign run. */
+    public static FrenchEngine CreateFrench(Func<string, string>? foreign = null, Func<string, string>? accent = null) =>
+        new(foreign, accent);
 
     internal static void RegisterSelf() => Registry.Register("french", () => CreateFrench());
 }

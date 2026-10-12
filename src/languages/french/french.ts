@@ -201,7 +201,10 @@ function normalizeFrenchNumerals(text: string): string {
 }
 
 class FrenchPhonemizer implements Phonemizer {
-    constructor(private readonly foreign?: (latin: string) => string) {}
+    constructor(
+        private readonly foreign?: (latin: string) => string,
+        private readonly accent?: (ipa: string) => string,
+    ) {}
 
     /**
      * The text as the TOKENIZER will see it — every normalization pass, and nothing after.
@@ -297,10 +300,20 @@ class FrenchPhonemizer implements Phonemizer {
         // joined, so a reading captured when the word was pushed is not the reading that ships. `groupSrc`
         // tracks which source token produced each slot so the trace reports the post-mutation value.
         let groupSrc: (Src | undefined)[] = [];
+        // Which slots of `group` hold a foreign run's IPA, so an accent delta passes them by.
+        let groupForeign: boolean[] = [];
         const traced = new Map<string, { span: [number, number]; surface: string; emitted: string[]; at: [number, number] }>();
+        const accent = this.accent;
         const flush = (pause: string | null): void => {
             if (group.length) {
                 accentFinal(group);
+                // ⚠ AN ACCENT DELTA (fr-CA) RUNS HERE, PER FRENCH WORD, AFTER `accentFinal` (its rules read the
+                // stress mark) and never on a foreign run (#1533): on the assembled string it affricated the
+                // Greek engine's `ti` of `τι` into t͡si. No rule of the delta looks across a space, so a French
+                // word reads exactly as it did when the delta ran on the whole string.
+                if (accent !== undefined)
+                    for (let gi = 0; gi < group.length; gi++)
+                        if (!groupForeign[gi]) group[gi] = accent(group[gi]!);
                 // ⚠ #1150 STAGE 3: OFFSETS AFTER `accentFinal`, which REWRITES the group in place — computing
                 // them before it would place every piece by its pre-accent length. The base is where this
                 // group lands in `out`, and the join's separator is one character per preceding piece.
@@ -318,6 +331,7 @@ class FrenchPhonemizer implements Phonemizer {
                 out += (out ? " " : "") + group.join(" ");
                 group = [];
                 groupSrc = [];
+                groupForeign = [];
             }
             if (pause) out += ` ${pause}`;
         };
@@ -336,6 +350,7 @@ class FrenchPhonemizer implements Phonemizer {
                 carry = "";
                 group.push(it.ipa);
                 groupSrc.push(it.src);
+                groupForeign.push(true);
                 continue;
             }
             // Heteronym first: it is the only reading that depends on context, so it must pre-empt the
@@ -361,6 +376,7 @@ class FrenchPhonemizer implements Phonemizer {
             if (ipa) {
                 group.push(ipa);
                 groupSrc.push(it.src);
+                groupForeign.push(false);
             }
         }
         flush(null);
@@ -372,11 +388,13 @@ class FrenchPhonemizer implements Phonemizer {
 
 /** Build the French phonemizer. `foreign` handles embedded non-French (unused for now). No data files. The returned
  *  `text` takes an optional per-call `oovOverride` (neural path only) injecting tagger readings for OOV words
- *  (lexicon → oovOverride → rule g2p); still assignable to Phonemizer. */
+ *  (lexicon → oovOverride → rule g2p); still assignable to Phonemizer. `accent` is a word-level IPA delta (fr-CA's
+ *  Québécois rules), applied to every French reading and to no embedded foreign run. */
 export function createFrench(
     foreign?: (latin: string) => string,
+    accent?: (ipa: string) => string,
 ): { text(input: string, oovOverride?: OovResolver): string } {
-    return new FrenchPhonemizer(foreign);
+    return new FrenchPhonemizer(foreign, accent);
 }
 
 /** The engine with its two pre-pass halves exposed, for frenchNeural.ts (and its test) ONLY: `normalizedFor`, then

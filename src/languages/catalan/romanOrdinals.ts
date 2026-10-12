@@ -30,7 +30,8 @@
  * shortcoming: `Enric VIII` keeps the cardinal — and in practice is not converted at all, `VI`/`XI` being on
  * the shared pass's global collision list and `I` below its two-character minimum.
  *
- * FORM: derived from Catalan's own cardinal compositor (`numberToWords`), because the Catalan ordinal above
+ * FORM: `ordinalWords` in ./normalize.ts, the one Catalan ordinal compositor, which the digit ordinal (`21è`)
+ * also uses. It is derived from Catalan's own cardinal compositor (`numberToWords`), because the Catalan ordinal above
  * ten is the cardinal plus `-è` (vint → vintè, quaranta → quarantè, cinquanta → cinquantè, vint i cinc →
  * vint i cinquè). Only 1–4 and 10 are genuinely irregular, but 1–10 is tabulated for legibility. Note the
  * compositor emits the orthographic hyphens of *vint-i-cinquè* as spaces, by the same deliberate convention
@@ -42,32 +43,13 @@
  * ordinal.
  */
 import type { RomanPolicy } from "../../core/roman.ts";
-import { numberToWords } from "./numbers.ts";
+import { ordinalWords } from "./normalize.ts";
 
-/** 1–10; *primer/segon/tercer/quart* and *desè* are not derivable from the cardinal. */
-const IRREGULAR: Readonly<Record<number, string>> = {
-    1: "primer", 2: "segon", 3: "tercer", 4: "quart", 5: "cinquè",
-    6: "sisè", 7: "setè", 8: "vuitè", 9: "novè", 10: "desè",
-};
-
-/** Cardinal final word → its ordinal stem, where `-è` cannot simply be appended. */
-function ordinalizeWord(w: string): string {
-    if (w.endsWith("cinc")) return `${w.slice(0, -1)}què`; // cinc → cinquè, vint i cinc → vint i cinquè
-    if (w.endsWith("nou")) return `${w.slice(0, -1)}vè`; // nou → novè, dinou → dinovè
-    if (w.endsWith("deu")) return `${w.slice(0, -1)}sè`; // deu → desè, cent deu → cent desè
-    if (w === "cents") return "centè"; // dos cents → dos centè (orthographically dos-centè)
-    if (/[aeiou]$/u.test(w)) return `${w.slice(0, -1)}è`; // quaranta → quarantè, onze → onzè
-    return `${w}è`; // vint → vintè, cent → centè, mil → milè
-}
-
-/** Catalan masculine ordinal for any n a Roman numeral can encode. */
+/** Catalan masculine ordinal for any n a Roman numeral can encode.
+ *  ⚠ THE SAME COMPOSITOR AS THE DIGIT ORDINAL (`21è`), not a second one (#1533): the two used to disagree on
+ *  21–99, so one sentence could read the same ordinal two ways. */
 function catalanOrdinal(n: number): string | undefined {
-    if (!Number.isInteger(n) || n < 1) return undefined;
-    const irr = IRREGULAR[n];
-    if (irr !== undefined) return irr;
-    const words = numberToWords(n).split(" ");
-    words[words.length - 1] = ordinalizeWord(words[words.length - 1]!);
-    return words.join(" ");
+    return ordinalWords(n, false);
 }
 
 /** This policy always supplies `ordinal`, which is optional on `RomanPolicy` — the intersection makes it

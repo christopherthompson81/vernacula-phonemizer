@@ -287,6 +287,10 @@ public sealed class RomanianPhonemizer : ILanguage
         return string.Join(" ", parts);
     }
 
+    /** The thousand noun, singular and plural, for `RomanOrdinals`: an ordinal that ENDS on the thousand is
+     *  built on the plural stem whatever the count — al miilea, al două miilea (#1533). */
+    public static (string Sg, string Pl) ThousandNoun => (NUM.Thousand, NUM.Thousands);
+
     /**
      * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim,
      * so nothing about the orthography is invented here.

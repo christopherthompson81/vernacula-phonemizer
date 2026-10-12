@@ -25,28 +25,18 @@ public static class Spanish419
     public static string PhonemizeWord(string word) =>
         ToLatinAmerican(SpanishPhonemizer.PhonemizeWord(word));
 
-    private sealed class Es419Language(ILanguage inner) : ILanguage
-    {
-        // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output, so a trace token records
-        // the CASTILIAN reading and the utterance ships the American one. Reported (#1150).
-        public string Text(string input)
-        {
-            var pre = inner.Text(input);
-            var o = ToLatinAmerican(pre);
-            Core.Trace.// ⚠ POSITIONAL (#1150 stage 3): one character for one, so the output spans survive it.
-            NoteRewrite("accent:es-419", pre, o, true);
-            return o;
-        }
-    }
-
     /**
+     * ⚠ THE DELTA IS HANDED TO THE ENGINE AND APPLIED PER SPANISH WORD (#1533). It used to run on the assembled
+     * string, which also rewrote an embedded FOREIGN run read by another engine (Greek θεός → seos). Being
+     * context-free, the per-word form reads every Spanish word exactly as before.
+     *
      * Build the Latin-American Spanish phonemizer. ⚠ `americas: true` is not decoration — it selects the
      * ORDINAL first-of-the-month in the normalization layer (*el primero de enero*, where Spain says *el uno
      * de enero*). That flag is the only thing `spanish.jsonc`'s `months` table is read for; in `es` the rule
      * is a no-op. See the es lift.
      */
     public static ILanguage CreateSpanish419() =>
-        new Es419Language(SpanishPhonemizer.CreateSpanish(americas: true));
+        SpanishPhonemizer.CreateSpanish(americas: true, accent: ToLatinAmerican);
 
     internal static void RegisterSelf()
     {

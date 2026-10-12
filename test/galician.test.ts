@@ -46,6 +46,19 @@ describe("Galician canonical IPA — Spanish-shaped Ibero-Romance engine + Galic
         expect(phonemizeWord("amei")).toBe("amˈeᶦ"); // -ei preterite oxytone
     });
 
+    // #1533: the diphthong was tested on the LAST segment, so a final -s after the offglide flipped the word to
+    // penult (ademais → aðˈemaᶦs). It is tested after the last nucleus now, as Catalan does.
+    test("a falling diphthong + final -s is still oxytone (ademais, papeis, chapeus)", () => {
+        expect(phonemizeWord("ademais")).toBe("aðemˈaᶦs");
+        expect(phonemizeWord("xamais")).toBe("ʃamˈaᶦs");
+        expect(phonemizeWord("papeis")).toBe("papˈeᶦs");
+        expect(phonemizeWord("chapeus")).toBe("t͡ʃapˈeᶷs");
+        expect(phonemizeWord("cantous")).toBe("kantˈoᶷs");
+        // …while a diphthong in the PENULT syllable leaves the ordinary -s rule alone.
+        expect(phonemizeWord("cousas")).toBe("kˈoᶷsas");
+        expect(phonemizeWord("moitas")).toBe("mˈoᶦtas");
+    });
+
     test("accented weak vowel breaks a diphthong into HIATUS (muíño→mu.í.ño), but a following weak stays offglide", () => {
         expect(phonemizeWord("muíño")).toBe("muˈiɲo"); // ⟨uí⟩ hiatus: u is its own nucleus (not the glide mwiɲo)
         expect(phonemizeWord("ruído")).toBe("ruˈiðo"); // ⟨uí⟩ hiatus
@@ -131,7 +144,7 @@ describe("galician text normalization", () => {
         expect(gl.text("35 %").trim()).toBe("tɾˈinta e θˈiŋko poɾ θˈento");
         expect(gl.text("100 €").trim()).toBe("θˈeŋ ˈeᶷɾos");
         expect(gl.text("US$ 500").trim()).toBe("θiŋkoθˈentos ðˈolaɾes"); // the code folds to the sign
-        expect(gl.text("R$ 30").trim()).toBe("tɾˈinta rˈeaᶦs");
+        expect(gl.text("R$ 30").trim()).toBe("tɾˈinta reˈaᶦs"); // reais is oxytone (#1533)
         expect(gl.text("12,5 km").trim()).toBe("dˈoθe kˈoma θˈiŋko kilˈometɾos");
         expect(gl.text("120 km/h").trim()).toBe("θˈento βˈinte kilˈometɾos poɾ ˈoɾa");
         // ⚠ THE MAGNITUDE MUST END AT A WORD BOUNDARY. `millóns` = `millón` + `s`, and `s` is this

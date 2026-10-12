@@ -190,6 +190,18 @@ pub struct FrenchPhonemizer {
     lexicon: IndexMap<JsString, JsString>,
     supplement: IndexMap<JsString, JsString>,
     symbols: SymbolNormalizer,
+    /// `accent`: a word-level IPA delta (fr-CA), applied to every French reading and to no foreign run.
+    accent: Option<fn(&JsString) -> JsString>,
+}
+
+impl FrenchPhonemizer {
+    /// `createFrench(undefined, accent)`: the same engine with a word-level accent delta.
+    pub fn with_accent(self, accent: fn(&JsString) -> JsString) -> Self {
+        FrenchPhonemizer {
+            accent: Some(accent),
+            ..self
+        }
+    }
 }
 
 /// `createFrench()`: loads the manifest, the Lexique lexicon and the supplement, or says why it cannot.
@@ -203,6 +215,7 @@ pub fn create_french() -> Result<FrenchPhonemizer, String> {
         lexicon,
         supplement,
         symbols: build_symbols()?,
+        accent: None,
     })
 }
 
@@ -359,16 +372,28 @@ impl FrenchPhonemizer {
 
         let mut group: Vec<JsString> = Vec::new();
         let mut group_src: Vec<Option<Src>> = Vec::new();
+        // Which slots of `group` hold a foreign run's IPA, so an accent delta passes them by.
+        let mut group_foreign: Vec<bool> = Vec::new();
         let mut out = JsString::new();
         let mut carry = JsString::new();
         let mut traced: IndexMap<Span, Traced> = IndexMap::new();
+        let accent = self.accent;
         let flush = |pause: Option<&JsString>,
                      group: &mut Vec<JsString>,
                      group_src: &mut Vec<Option<Src>>,
+                     group_foreign: &mut Vec<bool>,
                      out: &mut JsString,
                      traced: &mut IndexMap<Span, Traced>| {
             if !group.is_empty() {
                 accent_final(group);
+                // An accent delta (fr-CA) runs per French word, after `accentFinal`, never on a foreign run (#1533).
+                if let Some(accent) = accent {
+                    for (gi, piece) in group.iter_mut().enumerate() {
+                        if !group_foreign[gi] {
+                            *piece = accent(piece);
+                        }
+                    }
+                }
                 let mut off = out.len() + if out.is_empty() { 0 } else { 1 };
                 for (gi, piece) in group.iter().enumerate() {
                     let at = (off, off + piece.len());
@@ -398,6 +423,7 @@ impl FrenchPhonemizer {
                 out.push_str(&JsString::join(group, &js(" ")));
                 group.clear();
                 group_src.clear();
+                group_foreign.clear();
             }
             if let Some(p) = pause.filter(|p| !p.is_empty()) {
                 out.push_str(&js(" "));
@@ -419,13 +445,21 @@ impl FrenchPhonemizer {
                 Kind::Pause(p) => {
                     carry = JsString::new();
                     if !group.is_empty() || !out.is_empty() {
-                        flush(Some(p), &mut group, &mut group_src, &mut out, &mut traced);
+                        flush(
+                            Some(p),
+                            &mut group,
+                            &mut group_src,
+                            &mut group_foreign,
+                            &mut out,
+                            &mut traced,
+                        );
                     }
                 }
                 Kind::Ipa(ipa) => {
                     carry = JsString::new();
                     group.push(ipa.clone());
                     group_src.push(it.src.clone());
+                    group_foreign.push(true);
                 }
                 Kind::Word(w) => {
                     let w_lower = w.to_lower_case();
@@ -448,11 +482,19 @@ impl FrenchPhonemizer {
                     if !ipa.is_empty() {
                         group.push(ipa);
                         group_src.push(it.src.clone());
+                        group_foreign.push(false);
                     }
                 }
             }
         }
-        flush(None, &mut group, &mut group_src, &mut out, &mut traced);
+        flush(
+            None,
+            &mut group,
+            &mut group_src,
+            &mut group_foreign,
+            &mut out,
+            &mut traced,
+        );
         for t in traced.values() {
             note_token(t.span, &t.surface, &t.emitted, None, Some(t.at), None);
         }

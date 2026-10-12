@@ -17,7 +17,9 @@ public static class RomanOrdinals
         if (n == 1) return "întâi"; // secolul I = secolul întâi; there is no *al unulea*
         var card = RomanianPhonemizer.NumberWords(n, stem: true);
         var words = card.Split(' ').ToList();
-        var last = words[^1];
+        // ⚠ A FINAL THOUSAND TAKES THE PLURAL STEM, count 1 included (#1533): *al mielea* → al miilea.
+        var thousand = RomanianPhonemizer.ThousandNoun;
+        var last = words[^1] == thousand.Sg ? thousand.Pl : words[^1];
         words[^1] = VOWEL_FINAL.IsMatch(last) ? $"{last}lea" : $"{last}ulea";
         return $"al {string.Join(" ", words)}";
     }

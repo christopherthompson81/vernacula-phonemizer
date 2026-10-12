@@ -27,6 +27,17 @@ public class GalicianTests
     public void XIsTheGalicianSignature(string word, string want) => Assert.Equal(want, Word(word));
 
     [Theory]
+    // #1533: a falling diphthong + final -s is still oxytone (the test reads the seg after the LAST nucleus).
+    [InlineData("ademais", "aðemˈaᶦs")]
+    [InlineData("xamais", "ʃamˈaᶦs")]
+    [InlineData("papeis", "papˈeᶦs")]
+    [InlineData("chapeus", "t͡ʃapˈeᶷs")]
+    [InlineData("cantous", "kantˈoᶷs")]
+    [InlineData("cousas", "kˈoᶷsas")]   // …a diphthong in the penult leaves the -s rule alone
+    [InlineData("moitas", "mˈoᶦtas")]
+    public void AFallingDiphthongPlusSIsOxytone(string word, string want) => Assert.Equal(want, Word(word));
+
+    [Theory]
     // ⟨g⟩ is always the velar stop (no jota); intervocalic → spirant ɣ.
     [InlineData("galego", "ɡalˈeɣo")]  // initial ɡ, intervocalic ɣ
     [InlineData("xénero", "ʃˈeneɾo")]  // x=ʃ + é stress
@@ -153,7 +164,7 @@ public class GalicianTests
     [InlineData("35 %", "tɾˈinta e θˈiŋko poɾ θˈento")]
     [InlineData("100 €", "θˈeŋ ˈeᶷɾos")]
     [InlineData("US$ 500", "θiŋkoθˈentos ðˈolaɾes")]  // the code folds to the sign
-    [InlineData("R$ 30", "tɾˈinta rˈeaᶦs")]
+    [InlineData("R$ 30", "tɾˈinta reˈaᶦs")] // reais is oxytone (#1533)
     [InlineData("12,5 km", "dˈoθe kˈoma θˈiŋko kilˈometɾos")]
     [InlineData("120 km/h", "θˈento βˈinte kilˈometɾos poɾ ˈoɾa")]
     // ⚠ THE MAGNITUDE MUST END AT A WORD BOUNDARY: `millóns` = `millón` + `s`, and `s` is the declared

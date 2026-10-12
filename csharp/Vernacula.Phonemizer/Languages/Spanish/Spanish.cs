@@ -157,8 +157,13 @@ public sealed class SpanishPhonemizer : ILanguage
     });
 
     private readonly bool _americas;
+    private readonly Func<string, string>? _accent;
 
-    public SpanishPhonemizer(bool americas = false) => _americas = americas;
+    public SpanishPhonemizer(bool americas = false, Func<string, string>? accent = null)
+    {
+        _americas = americas;
+        _accent = accent;
+    }
 
     public string Text(string input)
     {
@@ -166,11 +171,15 @@ public sealed class SpanishPhonemizer : ILanguage
         // already claimed the hour.
         var normalized = SYMBOLS(Normalize.NormalizeSpanishInitialisms(
             Normalize.NormalizeSpanish(input, new SpanishNormalizeOptions { Americas = _americas })));
+        // ⚠ AN ACCENT DELTA IS APPLIED PER SPANISH WORD, NOT TO THE ASSEMBLED STRING (#1533): a run in another
+        // script is read by its own engine, and seseo is a fact about Spanish words (θεός keeps its θ).
+        var accent = _accent;
+        Func<string, string> word = accent is null ? WordIpa : w => accent(WordIpa(w));
         return SpirantizeAcrossWords(Clauses.AssembleClauses(normalized, TOKEN, (m, sink) =>
         {
-            if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(WordIpa(Nat(m.Groups[1].Value)));
+            if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(word(Nat(m.Groups[1].Value)));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                sink.Emit(string.Join(" ", NumberTokenWords(m.Groups[2].Value, normalized[(m.Index + m.Length)..]).Split(' ').Select(WordIpa)));
+                sink.Emit(string.Join(" ", NumberTokenWords(m.Groups[2].Value, normalized[(m.Index + m.Length)..]).Split(' ').Select(word)));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
             {
                 if (CLAUSE_MARK.TryGetValue(m.Groups[3].Value, out var mk) && mk.Length > 0) sink.Pause(mk);
@@ -179,8 +188,11 @@ public sealed class SpanishPhonemizer : ILanguage
     }
 
     /** Build the Spanish phonemizer (no data files — the engine is fully rule-based). `americas` selects
-     *  Latin-American usage in the normalization layer. es-419 passes it; `es` (Castilian) does not. */
-    public static ILanguage CreateSpanish(bool americas = false) => new SpanishPhonemizer(americas);
+     *  Latin-American usage in the normalization layer. es-419 passes it; `es` (Castilian) does not.
+     *  `accent` is a word-level IPA delta (es-419's seseo + yeísmo), applied to every Spanish reading and to
+     *  nothing an embedded foreign run emits. */
+    public static ILanguage CreateSpanish(bool americas = false, Func<string, string>? accent = null) =>
+        new SpanishPhonemizer(americas, accent);
 
     internal static void RegisterSelf()
     {

@@ -588,11 +588,12 @@ describe("phonemizeTrace — the reading side (#1150 stage 3)", () => {
     });
 
     /**
-     * ⚠ ABSENT MEANS NOT KNOWN, HERE TOO. Assamese collapses a doubled aspirate and fr-CA applies its accent
-     * AFTER assembly; both change lengths, so every offset recorded against the assembled reading is wrong
-     * about the one the caller receives. Measured over the goldens rather than assumed — see the tool.
+     * ⚠ ABSENT MEANS NOT KNOWN, HERE TOO. Assamese collapses a doubled aspirate AFTER assembly, which changes
+     * lengths, so every offset recorded against the assembled reading is wrong about the one the caller
+     * receives. Measured over the goldens rather than assumed — see the tool. (fr-CA was the second case until
+     * #1533 moved its accent delta into the engine, per French word; see the test below.)
      */
-    test.each(["as", "fr-CA"])("a length-changing post-assembly pass withholds the output spans: %s", (lang) => {
+    test.each(["as"])("a length-changing post-assembly pass withholds the output spans: %s", (lang) => {
         // ⚠ THE WHOLE GOLDEN, NOT A SAMPLE, AND THE COUNT IS ASSERTED. `as` changes length on 11 of its 200
         // rows; a six-row sample found none of them, so the first version of this test passed with the
         // length guard REMOVED and with `collapse-geminates` falsely claiming to be positional. A test that
@@ -613,6 +614,20 @@ describe("phonemizeTrace — the reading side (#1150 stage 3)", () => {
             expect(t.tokens.every((k) => k.ipaSpan === undefined)).toBe(true);
         }
         expect(found).toBeGreaterThan(0);
+    });
+
+    /**
+     * ⚠ AN ACCENT DELTA APPLIED PER WORD LEAVES NOTHING TO DISBELIEVE (#1533). fr-CA used to rewrite the
+     * assembled string, so its spans were withheld; the delta now runs on each French word before the offsets
+     * are taken, the token records the Québécois reading, and the span slices it out of the reading exactly.
+     */
+    test("fr-CA reports exact output spans, and a token records the Québécois reading", () => {
+        const t = phonemizeTrace("Il dit petite.", "fr-CA");
+        expect(t.rewrites.filter((r) => r.stage !== "normalize")).toEqual([]);
+        const petite = t.tokens.find((k) => k.surface === "petite")!;
+        expect(petite.ipaSpan).toBeDefined();
+        expect(t.ipa.slice(...petite.ipaSpan!)).toBe(petite.emitted.join(" "));
+        expect(petite.emitted.join(" ")).toContain("t͡s");
     });
 
     /**

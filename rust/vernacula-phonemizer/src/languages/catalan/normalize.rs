@@ -38,28 +38,44 @@ pub fn ordinal_words(n: f64, fem: bool) -> Option<JsString> {
     }
     let mut words = card.split(&js(" "));
     let mut stem = words[words.len() - 1].clone();
-    if n % 10.0 != 0.0 && n % 10.0 < 10.0 && n % 100.0 > 10.0 {
-        let u = (n % 10.0) as usize;
-        let tail = js([
-            "", "un", "dos", "tres", "quatre", "cinc", "sis", "set", "vuit", "nou",
-        ][u]);
-        if !tail.is_empty() && card.ends_with(&tail) {
-            return Some(
-                card.slice(0, Some(-(tail.len() as isize)))
-                    .concat(&js(small[u])),
-            );
-        }
-    }
+    // One compositor for both ordinal paths (#1533): the suffixed cardinal, 21 → vint i unè. A plain replace:
+    // `stem` is a word of a composed number, never the tracked text.
     stem = if stem.ends_with(&js("ó")) {
         stem.slice(0, Some(-1)).concat(&js("on"))
     } else if stem == "cents" {
         js("cent")
+    } else if stem.ends_with(&js("cinc")) {
+        stem.slice(0, Some(-1)).concat(&js("qu"))
+    } else if stem.ends_with(&js("nou")) {
+        stem.slice(0, Some(-1)).concat(&js("v"))
+    } else if stem.ends_with(&js("deu")) {
+        stem.slice(0, Some(-1)).concat(&js("s"))
     } else {
-        rewrite(&stem, js_re!("[ae]$", "u"), &JsString::new())
+        js_re!("[ae]$", "u").replace(&stem, &JsString::new())
     };
     let last = words.len() - 1;
     words[last] = stem.concat(&js(if fem { "ena" } else { "è" }));
     Some(JsString::join(&words, &js(" ")))
+}
+
+/// `irregularCompound(n)`: the colloquial masculine compound with an irregular tail (21 → vint i primer … 24 →
+/// vint i quart), for a digit ordinal whose written suffix (r/n/t) names that series.
+fn irregular_compound(n: f64) -> Option<JsString> {
+    let u = n % 10.0;
+    if !is_safe_integer(n) || n <= 10.0 || n % 100.0 <= 10.0 || !(1.0..=4.0).contains(&u) {
+        return None;
+    }
+    let u = u as usize;
+    let card = number_to_words(n, None);
+    let tail = js(["", "un", "dos", "tres", "quatre"][u]);
+    if card.ends_with(&js(" ").concat(&tail)) {
+        Some(
+            card.slice(0, Some(-(tail.len() as isize)))
+                .concat(&js(ORD_MASC_1_10[u])),
+        )
+    } else {
+        None
+    }
 }
 
 const MULTI_DOT: [(&str, &str); 2] = [("dC", "després de Crist"), ("aC", "abans de Crist")];
@@ -233,7 +249,14 @@ pub fn normalize_catalan(input: &JsString) -> JsString {
             let m0 = m.value(t);
             let n = js_number(&g(m, 1, t));
             let sfx = g(m, 2, t).to_lower_case();
-            let Some(ord) = ordinal_words(n, sfx == "a") else {
+            // The suffix picks the series in a compound too (#1533): è / a the suffixed cardinal, r / n / t the
+            // colloquial irregular tail.
+            let ord = if sfx == "è" || sfx == "a" {
+                ordinal_words(n, sfx == "a")
+            } else {
+                irregular_compound(n).or_else(|| ordinal_words(n, false))
+            };
+            let Some(ord) = ord else {
                 return m0;
             };
             let parts = ord.split(&js(" "));

@@ -81,3 +81,28 @@ Parity: every registered language 200/200, es-419 included (11.5 s for all 21).
 
 **Implication.** es-419 done; remaining gates (fmt, clippy, regex-diff, full test) are run once for the group at the
 end and recorded in the last language's log.
+
+## Run 6 — 2026-10-11 16:25 (#1533: the accent delta and foreign runs, TS-first)
+
+**Question.** Can seseo/yeísmo stop reaching an embedded foreign run without changing any Spanish word?
+
+**Dead end considered first.** Keeping the whole-string delta and protecting the foreign spans needs their offsets
+in the assembled string, which only the trace recorder knows (and only while tracing). Placeholder characters for
+θ/ʎ inside the foreign output would be seen by `spirantizeAcrossWords`'s `[\p{L}\p{M}ˈˌ]` test. Neither is sound.
+
+**Fix.** `createSpanish(americas, accent?)`: the delta is applied to every Spanish reading (`wordIpa`, both the word
+and the number branch) and never to what `emitUnclaimed` emits. The delta is a context-free code-point substitution,
+and nothing after `wordIpa` creates or tests θ/ʎ (`spirantizeAcrossWords` reads nasals, `l` and a letter class), so
+a Spanish word reads exactly as before.
+
+**Command.** `npx tsx tools/check-goldens.mts es-419 --show 50`; synthetic probe lines.
+
+**Raw finding.** `goldens fresh` for es-419: 0 of 200 rows moved. `Dijo θεός en griego.` now reads identically in
+es and es-419 (`dˈixo θeos en ɡɾjˈeɣo .`); `Leyó Αθήνα y Θεσσαλονίκη.` → `leʝˈo aθina i θesalonici .` (the Spanish
+yeísmo applies, the Greek θ survives); `La calle y la cerveza.` → `la kˈaʝe i la seɾβˈesa .` unchanged. The
+`accent:es-419` rewrite event is gone (there is nothing left to rewrite), so a trace token now records the reading
+that ships rather than the Castilian one — the #1150 note in Run 4 item 2 is resolved by the same change.
+
+**Implication.** Fixed; mirror into C# and Rust. The new test fails with spanish.ts/spanish-419.ts reverted.
+
+(#1533 C#/Rust mirrors and the gates: see rust_ro_port_investigation.md Run 8.)

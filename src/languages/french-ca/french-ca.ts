@@ -26,7 +26,6 @@
  */
 import type { Phonemizer } from "../../registry.ts";
 import { createFrench } from "../french/french.ts";
-import { noteRewrite } from "../../core/trace.ts";
 
 const LAX: Record<string, string> = { i: "ɪ", y: "ʏ", u: "ʊ" };
 // non-lengthening coda consonants; the LENGTHENING set /ʁ v z ʒ/ is deliberately absent (it keeps the vowel tense).
@@ -34,6 +33,10 @@ const CODA = "ptkbdɡfsʃmnɲŋlç";
 // after a coda consonant: end-of-word or another consonant. A vowel / stress mark / affricate-TIE means the
 // consonant is a syllable ONSET (open syllable) → no laxing. U+0361 tie: a coda C + tie is an affricate onset (t͡s).
 const OPEN = "aeɛiouyœøəɑɔˈ͡";
+// ⚠ AN OBSTRUENT + LIQUID before a vowel is a two-consonant ONSET, not a coda (pu.blique, cy.clone, ci.tron,
+// su.pplier), so the vowel before it is in an OPEN syllable and stays tense (#1533). Testing only the one symbol
+// after the consonant read `.bl` / `.kl` / `.tʁ` as closing the syllable.
+const ONSET_CLUSTER = `[ptkbdɡf][lʁ][${OPEN}]`;
 
 /** France-French citation IPA → Québécois (affrication + high-vowel laxing + final-/a/ backing; context-free). */
 export function toQuebecois(fr: string): string {
@@ -42,7 +45,7 @@ export function toQuebecois(fr: string): string {
     s = s.replace(/t(?=[ˈˌ]?[iyɥj])/gu, "t͡s").replace(/d(?=[ˈˌ]?[iyɥj])/gu, "d͡z");
     // LAXING: high vowel before a non-lengthening coda consonant (not a syllable onset).
     s = s.replace(
-        new RegExp(`([iyu])(?=[${CODA}](?![${OPEN}]))`, "gu"),
+        new RegExp(`([iyu])(?=(?!${ONSET_CLUSTER})[${CODA}](?![${OPEN}]))`, "gu"),
         (_m, v: string) => LAX[v]!,
     );
     // WORD-FINAL /a/ → posterior [ɑ].
@@ -52,22 +55,16 @@ export function toQuebecois(fr: string): string {
 
 /** One fr-CA word → canonical IPA (France engine + the Québécois delta). Context-free → shipped == rule path. */
 export function phonemizeWord(word: string): string {
-    return toQuebecois(createFrench().text(word));
+    return createFrench(undefined, toQuebecois).text(word);
 }
 /** Alias kept for parity with the other accent variants (en-GB/pt-BR) that split a lexicon-bearing shipped path. */
 export const phonemizeWordRules = phonemizeWord;
 
-/** Build the Québécois-French phonemizer (France engine + the Québécois delta on the output). */
+/** Build the Québécois-French phonemizer (France engine + the Québécois delta on each French word). */
 export function createFrenchCA(): Phonemizer {
-    const e = createFrench();
-    // ⚠ AN ACCENT VARIANT IS A WHOLE-STRING DELTA over the base engine's output (#1150).
-    return {
-        text: (input: string): string => {
-            const pre = e.text(input);
-            const out = toQuebecois(pre);
-            // ⚠ NOT positional (#1150): measured length-changing on 156 of 199 golden rows.
-            noteRewrite("accent:fr-CA", pre, out);
-            return out;
-        },
-    };
+    // ⚠ THE DELTA IS HANDED TO THE ENGINE AND APPLIED PER FRENCH WORD (#1533). It used to run on the assembled
+    // string, which also rewrote an embedded FOREIGN run read by another engine (Greek `τι` → t͡si). No rule of
+    // the delta looks across a space, so every French word reads as before; and since nothing rewrites the
+    // assembled string any more, the trace's output spans (#1150) are now exact for fr-CA.
+    return createFrench(undefined, toQuebecois);
 }

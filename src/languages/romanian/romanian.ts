@@ -12,8 +12,11 @@
  *     ⟨ii⟩→iʲ (copii→kopiʲ); it stays syllabic after an obstruent+liquid cluster (membri) and in monosyllables (și).
  *   • word-initial ⟨e⟩→je in the copula/pronoun class (este→jeste, el→jel).
  *
- * Stress is UNWRITTEN and lexically unpredictable in Romanian; the broad referee marks none, so it is DEFERRED (no
- * ˈ emitted). Referee: wikipron ron_latn broad (HUMAN, 9285).
+ * Stress is UNWRITTEN and lexically unpredictable in Romanian, and the broad referee marks none — but ˈ IS emitted,
+ * on every word with a nucleus, before the stressed syllable's onset: `stressFromEnd` predicts it from the ending
+ * (kaikki-derived), and the kaikki stress lexicon (romanian-stress.tsv) closes the rule's misses on the shipped
+ * path. ⚠ This header used to say stress was DEFERRED with no ˈ emitted, which the code had stopped doing (#1533).
+ * Referee: wikipron ron_latn broad (HUMAN, 9285).
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
@@ -322,6 +325,10 @@ export function numberWords(n: number, opts: { stem?: boolean } = {}): string {
     if (rest > 0) parts.push(under1000(rest, "m", stem));
     return parts.join(" ");
 }
+
+/** The thousand noun, singular and plural, for `romanOrdinals.ts`: an ordinal that ENDS on the thousand is built
+ *  on the plural stem whatever the count — al miilea, al două miilea — never on the singular *mie* (#1533). */
+export const THOUSAND_NOUN: { readonly sg: string; readonly pl: string } = { sg: NUM.thousand, pl: NUM.thousands };
 
 /**
  * This language's OWN inventory — the TOKEN class as it stood before the widening below, lifted verbatim, so

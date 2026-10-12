@@ -2,7 +2,7 @@
 //! before a short list of event nouns; `vii` is stoplisted.
 //! Ported from src/languages/romanian/romanOrdinals.ts — see that file for the sources and the known gap.
 
-use super::romanian::{data_loaded, number_words};
+use super::romanian::{data_loaded, number_words, thousand_noun};
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js};
 use crate::core::roman::{RomanPolicy, roman_exclusions};
@@ -18,7 +18,13 @@ pub fn romanian_ordinal(n: f64) -> Option<JsString> {
     }
     let mut words = number_words(n, true).split(&js(" "));
     let at = words.len() - 1;
-    let last = words[at].clone();
+    // A final thousand takes the plural stem, count 1 included (#1533): *al mielea* → al miilea.
+    let (thousand_sg, thousand_pl) = thousand_noun();
+    let last = if words[at] == thousand_sg {
+        thousand_pl
+    } else {
+        words[at].clone()
+    };
     let suffix = if js_re!("[aeiouăâîy]$", "u").test(&last) {
         "lea"
     } else {

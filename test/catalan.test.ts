@@ -218,6 +218,25 @@ describe("Catalan text normalization", () => {
         expect(ph("el 1r dia")).toBe("əɫ pɾimˈe ðˈiə"); // primer
     });
 
+    // #1533: two compositors disagreed on 21–99 — `21è` read *vint i primer*, Roman XXI *vint i unè* — and
+    // the digit one was not self-consistent (101 *cent unè*, 105 *cent cincè*). One compositor now, the IEC form.
+    test("the digit and the Roman ordinal agree on a compound: the suffixed cardinal", () => {
+        for (const n of [21, 22, 23, 24, 25, 29, 31, 101, 104, 105, 109, 110, 121, 2024])
+            expect(ordinalWords(n)).toBe(ROMAN_POLICY.ordinal(n));
+        expect(ordinalWords(21)).toBe("vint i unè");
+        expect(ordinalWords(24)).toBe("vint i quatrè");
+        expect(ordinalWords(21, true)).toBe("vint i unena");
+        expect(ordinalWords(105)).toBe("cent cinquè");
+        expect(ordinalWords(109)).toBe("cent novè");
+        expect(ordinalWords(110)).toBe("cent desè");
+        expect(ph("El 21è aniversari i el XXI aniversari.")).toBe(
+            "əɫ βˈin i unˈɛ əniβəɾsˈaɾi i əɫ βˈin i unˈɛ əniβəɾsˈaɾi .",
+        );
+        // …while a written r/n/t suffix names the irregular series, colloquial in a compound: 21r = vint-i-primer.
+        expect(normalizeCatalan("el 21r")).toBe("el vint i primer");
+        expect(normalizeCatalan("la 21a")).toBe("la vint i unena");
+    });
+
     test("dot-thousands stay grouped; 1-2 digit fractions are decimals/versions (punt)", () => {
         expect(ph("1.400 persones")).toBe("mˈiɫ kwˈatɾə sˈens pəɾsˈonəs"); // 1400
         // The bare `m` was the RAW LETTER here until `metre`/`metres` were declared — this corpus's only
