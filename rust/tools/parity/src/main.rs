@@ -24,6 +24,10 @@ fn main() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../csharp/goldens");
     let mut total_bad = 0;
     for lang in &langs {
+        // ⚠ THE FOREIGN-OOV MEMO IS PROCESS-WIDE, and tools/gen_parity_goldens.mts clears it per language (as the
+        // C# parity tool does): without this, a mixed-script language's prewarm leaves neural readings behind that a
+        // later Latin-script language picks up, so a full run fails rows a one-language run passes.
+        vernacula_phonemizer::core::foreign::clear_foreign_oov();
         let text = std::fs::read_to_string(root.join(format!("{lang}.tsv")))
             .unwrap_or_else(|e| panic!("{lang}: {e}"));
         let (mut ok, mut bad) = (0, 0);

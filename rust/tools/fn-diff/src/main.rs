@@ -2830,6 +2830,171 @@ fn main() {
                 }
             })
         }
+        "vi-normalize" | "vi-g2p" => {
+            use std::sync::Arc;
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::vietnamese::{g2p, vietnamese};
+            // Building `vi` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "vi").unwrap();
+            let vi = vietnamese::create_vietnamese(Some(Arc::new(
+                vernacula_phonemizer::registry::read_as_english,
+            )))
+            .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => vi.normalize(&t()),
+                    "symbols" => vi.symbols(&t()),
+                    "text" => with_host(&JsString::from("vi"), || vi.text(&t())),
+                    "syllable" => g2p::phonemize_syllable(&units(&input["word"])),
+                    _ => vi.number_words(js_number(&JsString::from(input["n"].as_str().unwrap()))),
+                }
+            })
+        }
+        "lo-normalize" | "lo-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::lao::lao;
+            // Building `lo` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "lo").unwrap();
+            let lo = lao::create_lao().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lo.normalize(&t()),
+                    "symbols" => lo.symbols(&t()),
+                    "text" => with_host(&JsString::from("lo"), || lo.text(&t())),
+                    "word" => lao::phonemize_word(&w()),
+                    _ => {
+                        let parts: Vec<String> = lao::word_features(&w())
+                            .iter()
+                            .map(|(cls, live, long, mark)| {
+                                let c = match cls {
+                                    lao::Cls::High => "high",
+                                    lao::Cls::Mid => "mid",
+                                    lao::Cls::Low => "low",
+                                };
+                                format!(
+                                    "{c}/{}{}/{}",
+                                    *live as u8,
+                                    *long as u8,
+                                    mark.to_string_lossy()
+                                )
+                            })
+                            .collect();
+                        JsString::from(parts.join(" ").as_str())
+                    }
+                }
+            })
+        }
+        "my-normalize" | "my-g2p" => {
+            use std::sync::Arc;
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::burmese::{burmese, numbers};
+            // Building `my` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "my").unwrap();
+            let my = burmese::create_burmese(Some(Arc::new(
+                vernacula_phonemizer::registry::read_as_english,
+            )))
+            .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => my.normalize(&t()),
+                    "text" => with_host(&JsString::from("my"), || my.text(&t())),
+                    "syllabify" => {
+                        let parts: Vec<JsString> = burmese::syllabify(&w())
+                            .iter()
+                            .map(|s| {
+                                s.onset
+                                    .concat(&JsString::from("|"))
+                                    .concat(&s.body)
+                                    .concat(&JsString::from(format!("|{}", s.start).as_str()))
+                            })
+                            .collect();
+                        JsString::join(&parts, &JsString::from(" "))
+                    }
+                    "rules" => burmese::phonemize_word_rules(&w()),
+                    "segment" => JsString::join(&burmese::segment(&w()), &JsString::from("\u{1}")),
+                    "word" => burmese::phonemize_word(&w()),
+                    "spell" => numbers::spell_digits(&w()),
+                    _ => numbers::number_to_words(js_number(&JsString::from(
+                        input["n"].as_str().unwrap(),
+                    ))),
+                }
+            })
+        }
+        "jv-normalize" | "jv-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::javanese::{javanese, normalize};
+            // Building `jv` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "jv").unwrap();
+            let jv = javanese::create_javanese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => jv.normalize(&t()),
+                    "symbols" => jv.symbols(&t()),
+                    "text" => with_host(&JsString::from("jv"), || jv.text(&t())),
+                    "unreadable" => {
+                        JsString::from(normalize::IS_UNREADABLE(&t()).to_string().as_str())
+                    }
+                    "word" => javanese::phonemize_word(&w()),
+                    "rules" => javanese::phonemize_word_rules(&w()),
+                    _ => javanese::NAT(&w()),
+                }
+            })
+        }
+        "su-normalize" | "su-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::sundanese::{sunda_aksara, sundanese};
+            // Building `su` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "su").unwrap();
+            let su = sundanese::create_sundanese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => su.normalize(&t()),
+                    "digits" => sunda_aksara::normalize_sunda_digits(&t()),
+                    "symbols" => su.symbols(&t()),
+                    "text" => with_host(&JsString::from("su"), || su.text(&t())),
+                    "word" => sundanese::phonemize_word(&w()),
+                    "nat" => sundanese::NAT(&w()),
+                    _ => {
+                        JsString::from(format!("{}|", sunda_aksara::is_aksara_sunda(&w())).as_str())
+                            .concat(&sunda_aksara::aksara_to_latin(&w()))
+                    }
+                }
+            })
+        }
+        "mad-normalize" | "mad-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::madurese::{madurese, numbers};
+            // Building `mad` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "mad").unwrap();
+            let mad = madurese::create_madurese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => mad.normalize(&t()),
+                    "symbols" => mad.symbols(&t()),
+                    "text" => with_host(&JsString::from("mad"), || mad.text(&t())),
+                    "word" => madurese::phonemize_word(&w()),
+                    "nat" => madurese::NAT(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

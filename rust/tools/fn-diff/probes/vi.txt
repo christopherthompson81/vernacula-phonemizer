@@ -1,0 +1,44 @@
+# Synthetic Vietnamese probes: one or more lines per arm of normalize.ts, plus the neighbour it must decline.
+Diện tích 120 km<sup>2</sup> và 5 m<sup> 2 </sup> nữa.
+Chữ <b>đậm</b> và <i>nghiêng</i>.
+Mở cửa 10:00-11:30 và 9:15 – 17:45 hằng ngày.
+Không phải giờ: 25:00-26:00 hoặc 9:60-10:00.
+Anh ấy chạy 4:41,30 phút và 2:11,60.
+Kỷ lục 1:05,7 rồi 12:59,99phút.
+Lúc 12:00 giờ GMT, rồi 07:05 giờ sáng.
+Vào lúc 11:20, cảnh sát đến; tỷ lệ 3:2 và 2:2.
+Đồng hồ chỉ 23:59 rồi 24:00 và 1:2:3.
+Xe chạy 165 km/h, 100 kph và 60 mph trên đường.
+Hai từ và/hoặc, đi/đến, km/hướng.
+Nhiệt độ 30°C, 86 ° F, 45° và -5 °C, rồi 20°Ca.
+Dân số 5.000.000 người, giá ¥130.000, và 1.234,5 mét.
+Chuẩn 802.11n, tần số 2.4 Ghz, Hình 1.1 và 1.2.3.
+Giá 7,000 đô và 12,345,678 đồng; số 1,5 và 14,7.
+Khoảng 1.000-1.300 người, tỷ số 3-1, năm 1990–1995, 4,2-3,9 triệu năm trước.
+Từ 5 — 10 và 10—5 và 2-2.
+Tỷ lệ 1/2, 3/4 và 12/31 nhưng 1/2/3 và 123/4.
+Phòng 6x6 m, 3 × 4, 2 X 5 và x bình thường.
+Múi giờ UTC+7, +30° và nhiệt độ + 5 độ, a+b.
+Giá trị ±2 và -5, (−3), –4, nhưng 26 - 00 và 10 -5.
+Phương trình 1 + 1 = 2, a<b, c > d và 8 ÷ 2.
+Công ty A&B và Tom & Jerry.
+Năm 300 TCN đến 50 SCN, ngành CNTT phát triển.
+Tổ chức WHO, NATO, UNESCO và mã A1GP, JAS 39C, ABCDEFG.
+HÀ NỘI LÀ THỦ ĐÔ
+NASA
+Các số 0, 5, 10, 15, 21, 25, 101, 105, 1000, 1001, 1005, 1000000, 2000000000.
+Số lớn 1000000000000 và 9007199254740993 và 123456789012345678901234567890.
+Diện tích 783.562 km² và 5 m³, 10% và 3 $.
+Xe 50 kg, 30 cm, 2 mm và 30 m.
+Paris, Sofia, facebook và Internet ở Canada.
+Thuyền qua quốc lộ, gì giết già, gieo ghế nghiêng, ngh nhẹ.
+Tiếng việt có dấu tổ hợp: Việt Nam, Tiếng Việt.
+Chữ hoa ĐÀ NẴNG và Đà Nẵng, ƯU ÁI.
+Hỏi: ổn, ngã: những, nặng: mạnh, sắc: má, huyền: bà.
+Gõ ỹ ỳ ý ỷ ỵ, ằ ắ ẳ ẵ ặ.
+x ê-ru-xa-lem; ...!? hừm…
+Dấu ngoặc (a) [b] {c} «d» “e”.
+Tie\u{0302}\u{0301}ng Vie\u{0323}\u{0302}t (decomposed), Vie\u{0302}\u{0323}t (reordered marks).
+ma\u{0300} ma\u{0301} ma\u{0309} ma\u{0303} ma\u{0323} a\u{0306}n o\u{031B}n u\u{031B}\u{0300}a.
+Two tones ma\u{0300}\u{0301} and stray \u{0301}a and \u{0323}.
+Math 𝐀𝐁 letters and ﬁ ligature.
