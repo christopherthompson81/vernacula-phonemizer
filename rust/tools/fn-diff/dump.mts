@@ -61,6 +61,7 @@ const FLEURS_DIR: Record<string, string> = {
     nb: "nb_no",
     af: "af_za",
     lb: "lb_lu",
+    tg: "tg_tj",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -4269,6 +4270,76 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const rows = new Map(textsFor(["chv"], undefined, ["chv.txt"]));
         for (const r of ["I", "II", "IV", "IX", "XIII", "XVIII", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["ӗмӗр", "ĕмĕр", "ӗмӗрте", "ĕмĕрччен", "ӗмĕрсенче", "ӖМӖР", "Ĕмĕрĕн", "ҫул", "ӗмӗрлӗх"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
         for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Tajik (tg). Inputs: the tg golden, FLEURS tg_tj (columns 3 and 4) and probes/tg.txt, plus GENERATED shapes. ──
+    // normalizeTajik, normalizeTajikInitialisms (on the raw and the normalized text), the symbol tier normalize.ts built
+    // (recorded through the wrapper) on the raw text, the engine's text(), and the phonotactic test, over the texts
+    // and synthetic rows: every ordinal / case suffix after a sweep of numbers, dotted dates, the abbreviations in every
+    // trailing context, degrees with suffixes and compass letters, fractions, ranges and decimals.
+    async "tg-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/tajik/normalize.ts");
+        const P = (await import("../../../src/languages/tajik/tajik.ts")).createTajik();
+        const rec = records.find((r) => /src\/languages\/tajik\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["tg"], FLEURS_DIR.tg, ["tg.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["ум", "юм", "умин", "юми", "ро", "и", "ест", "аш", "ат", "ам", "он", "ҳо", "ҳоро", "x", "РО"];
+        const ns = ["0", "1", "2", "3", "5", "10", "11", "20", "21", "30", "33", "40", "100", "101", "200", "999", "1000", "1001", "1992",
+            "999999", "1000000", "9007199254740993"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} рӯз`); add(`${n}%-${sfx}`); add(`${n}-${sfx}`); }
+        for (const d of ["16.11.1992", "1.1.2000", "32.1.1992", "1.13.1992", "0.5.1992", "16.11.92", "1.2.3.4"]) add(`Ин ${d} буд`);
+        for (const ab of ["с.", "С.", "диг.", "ғ.", "млрд.", "млн.", "ҳаз.", "млрд", "млн", "ҳаз"]) for (const tail of ["", " 1992", " нафар", " Нафар", ")", " 5", "."]) { add(`5 ${ab}${tail}`); add(`Ин ${ab}${tail}`); }
+        for (const d of ["°C", "°С", "°c", "°с", "°C-ро", "°С-и", "°F", "°f", "°N", "°S", "°E", "°W", "°n", "°", "°-ро", " ° кунҷ"]) for (const n of ["5", "-5", "45"]) add(`${n}${d} буд`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "5 — 8", "а – б", "1/2", "2/3", "9/10", "3/2", "1/11", "1.5", "1,5", "1.2.3", "5=5", "а = б", "нафар/км²", "нафар / км2"]) add(`Ин ${r} аст`);
+        for (const [t, src] of rows) {
+            const a = N.normalizeTajik(t);
+            const b = N.normalizeTajikInitialisms(a);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeTajikInitialisms(t));
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableTajik(w)));
+    },
+    // phonemizeWord over every Cyrillic run of the texts (as written, lowercased, uppercased, NFD), every 1-3 letter
+    // string over the alphabet (third letter from a context set), every 4-letter string of the vowel / glide letters,
+    // and edge strings.
+    async "tg-g2p"() {
+        const T = await import("../../../src/languages/tajik/tajik.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("tg")) for (const w of t.match(/[\p{L}\p{M}]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.normalize("NFD")); }
+        const abc = [..."абвгғдеёжзиӣйкқлмнопрстуӯфхҳчҷшъэюяцщьыѝў"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аеиӣоуӯэёюяйнр") words.add(a + b + c); } }
+        const ctx = [..."аеэиӣйёяъьн"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "е́", "й", "ʼ", "x"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+    },
+    // numberWords and tajikOrdinal over 0…20,000 and beyond (to and past 2^53, where the composer has no guard), and the
+    // engine's own number reading on digit runs.
+    async "tg-numbers"() {
+        const T = await import("../../../src/languages/tajik/tajik.ts");
+        const { tajikOrdinal } = await import("../../../src/languages/tajik/normalize.ts");
+        const P = T.createTajik();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, -1, NaN, Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, T.numberWords(n));
+            emit({ n: String(n), op: "ordinal" }, tajikOrdinal(n) ?? "\u0000none");
+        }
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
     },
 };
 

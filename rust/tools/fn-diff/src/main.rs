@@ -2120,6 +2120,25 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "tg-normalize" | "tg-g2p" | "tg-numbers" => {
+            let tg = vernacula_phonemizer::languages::tajik::tajik::create_tajik().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tg.normalize(&t()),
+                    "initialisms" => tg.normalize_initialisms(&t()),
+                    "symbols" => tg.symbols(&t()),
+                    "engine" => tg.text(&t()),
+                    "unreadable" => JsString::from(tg.is_unreadable(&t()).to_string().as_str()),
+                    "word" => tg.phonemize_word(&units(&input["word"])),
+                    "words" => tg.number_words(num()),
+                    "ordinal" => tg.ordinal(num()).unwrap_or_else(none),
+                    _ => tg.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
         "ba-roman" => {
             let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
             Box::new(move |input| {

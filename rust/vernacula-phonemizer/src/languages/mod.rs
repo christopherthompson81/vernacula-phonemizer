@@ -64,6 +64,7 @@ pub mod spanish;
 pub mod spanish_419;
 pub mod swedish;
 pub mod tagalog;
+pub mod tajik;
 pub mod tatar;
 pub mod thai;
 pub mod turkish;
