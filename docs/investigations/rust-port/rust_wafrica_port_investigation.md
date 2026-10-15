@@ -173,3 +173,42 @@ DIFFER`. Restored: 0 DIFFER both.
    initial (`M. Bello`), but an acronym at the end of a sentence followed by any capitalised sentence matches it too.
 
 **Implication.** Commit ha; ee next.
+
+## Run 7 — 2026-10-15 07:35 (ee: first build, differentials, pins)
+
+**Shape.** No manifest.ts: ewe.rs loads `EweDef` (digraphs, letters) itself; numbers.rs holds its tables as the TS
+does (the nasal `etɔ̃` / `atɔ̃` keep their separate U+0303); normalize.rs builds its unit, percent and currency
+patterns at runtime from the same `UNITS` / `CURRENCY` tables and `NUM` / `NLB` / `NOT_MAGNITUDE` sources the TS
+interpolates (each `format!` template checked against the TS template by hand: the three `audit_regex` misses are
+exactly these). The invisible-character class the TS holds as literal U+200B / U+200C / U+200D / U+FEFF is written as
+`\u{…}` escapes in an ordinary string (same code points, as clippy requires); the U+0342 → U+0303 fold keeps both
+marks literal, as the TS writes them. The `w` rule reads the first code UNIT of the next character's NFD, as
+`normalize("NFD")[0]` does.
+
+**Commands.** As before; `ee-normalize` / `ee-g2p` dumps (no FLEURS: the golden, `probes/ee.txt` (15 synthetic lines)
+and 279 synthetic rows: the homoglyph fold incl. U+0342, entities, the five invisibles, grouping in every separator,
+4 units × 8 prefixes × 6 suffixes incl. the currency-magnitude refusal, percent ranges and percents, every currency
+key, dotted abbreviations, number ranges and their refusals, decimals, ordinal tails, the ampersand); `ee-g2p` over
+every letter run × 5 forms, every 1–3 string over 34 letters plus the tilde, acute and grave, precomposed marked
+letters and corners, and `numberToWords` over 0…20,000 with and without raw, the 10⁹ edge and non-finite values.
+
+**Raw finding.** `ee: 200/200` on the first build; audits `19 raw patterns, 3 not verbatim` (the three templates),
+`6 TS escapes, 0 short`, `42 non-ASCII runs, 0 not found`. Then:
+```
+ee-normalize: 988 identical, 0 DIFFER   (golden 400 / probe 30 / synthetic 558)
+ee-g2p: 99205 identical, 0 DIFFER
+phonemize-sync / phonemize-best / phonemize-trace / trace: 215 identical, 0 DIFFER each
+cargo test --release ewe: 1 passed (68 pins: 28 normalizeEwe, 11 phonemizeWord, 14 numberToWords, 15 createEwe().text;
+1 call skipped, an object result; 68 expects, 0 failures)
+```
+Haystack: `normalizeEwe` changed golden 40/200, probes 9/15, synthetic 186/279 texts. No FLEURS for Ewe, so the
+golden and the synthetic rows are the whole corpus side; stated rather than left implicit.
+
+**Guard check.** The number range's "one side has two digits" condition removed, and ⟨r⟩'s post-vowel [r] reduced to
+word-initial only: `ee-normalize: 794 identical, 194 DIFFER`, `ee-g2p: 97997 identical, 1208 DIFFER`. Restored:
+0 DIFFER both.
+
+**TS findings.** None new. The silent minus (`ame -5 le` → *ame atɔ̃ le*) and the absent decimal word
+(`3.14` → *etɔ̃ ɖeka ene*) are both recorded in normalize.ts's header as known.
+
+**Implication.** Commit ee; ak next.

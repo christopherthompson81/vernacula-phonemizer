@@ -28,6 +28,7 @@ pub mod english;
 pub mod english_gb;
 pub mod english_in;
 pub mod estonian;
+pub mod ewe;
 pub mod faroese;
 pub mod finnish;
 pub mod french;

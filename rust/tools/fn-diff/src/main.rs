@@ -3067,6 +3067,28 @@ fn main() {
                 }
             })
         }
+        "ee-normalize" | "ee-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::ewe::{ewe, numbers};
+            // Building `ee` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ee").unwrap();
+            let ee = ewe::create_ewe().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ee.normalize(&t()),
+                    "text" => with_host(&JsString::from("ee"), || ee.text(&t())),
+                    "word" => ewe::phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

@@ -5861,6 +5861,56 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(1e12 - 1, 1e12, 1e12 + 1, 2 ** 53, 1.5, 1.234, -1, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
     },
+    // ── Ewe (ee). Inputs: the ee golden and probes/ee.txt (no FLEURS transcript exists). ──
+    // normalizeEwe and the registry's ee engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per
+    // arm: the homoglyph fold (Ð Đ Ƞ U+0342), entities, invisible characters, comma and space grouping, units squared
+    // and bare with the currency-magnitude refusal, percent ranges (ascending, descending, grouped) and percents, every
+    // currency key, dotted abbreviations, number ranges (single-digit and descending refusals), decimals, ordinal tails
+    // and the ampersand.
+    async "ee-normalize"() {
+        const { normalizeEwe } = await import("../../../src/languages/ewe/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ee"], undefined, ["ee.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const h of ["Ðasefowo", "Đoɖo", "Ƞkɔ", "ha͂", "kata͂", "ŋɔ͂tsɛ", "Ðeka Đɔkita", "ã", "ã"]) add(`${h} le afi sia`);
+        for (const e of ["&nbsp;", "&nbsp", "&NBSP;", "&ndash;", "&#x2013;", "&#8211;", "&#xZZ;", "&amp;"]) add(`nya${e}gã`);
+        for (const z of ["\u{200b}", "\u{200c}", "\u{200d}", "\u{feff}", "\u{ad}"]) add(`nya${z}gã le`);
+        for (const n of ["1,000", "12,345,678", "0,500", "1,0000", "1,000,5", "1 000", "12\u00a0345", "1\u202f000\u2009000", "1 000 0", "1 00"]) add(`ame ${n} le`);
+        for (const u of ["km", "cm", "mm", "m"]) for (const pre of ["5", "5 ", "1,5 ", "2.5", "a5 ", "$5 ", "€ 10 ", "GH₵ 3 "]) for (const post of ["", "²", "2", "³", "/h", "x"]) add(`didime ${pre}${u}${post} le`);
+        for (const p of ["10-20%", "10%-20%", "10 % – 20 %", "20-10%", "1,000-2,000%", "1.5-2.5%", ":10-20%", "5%", "5 %", "1.000%", "a5%"]) add(`ame ${p} le`);
+        for (const c of ["GH¢5", "GH₵ 5", "GHS5", "GHC 5", "¢5", "₵5", "US$5", "$5", "€5", "£5", "aGH¢5", "$ 5,000.50"]) add(`ga ${c} le`);
+        for (const a of ["U.S.A.", "a.b.c", "Dr. Kofi", "e.g. nu"]) add(`${a} va`);
+        for (const r of ["1990-1995", "5-6", "10-5", "5-10", "10 – 20", "a5-10", "5-10a", "1:5-10", "5-10-15"]) add(`ƒe ${r} me`);
+        for (const d of ["3.14159", "2.5", "1.0", "1.2.3", "2.5a", "0.05"]) add(`xexlẽ ${d} le`);
+        for (const o of ["1st", "22nd", "3rd", "4th", "4tha", "a4th"]) add(`ƒe ${o} me`);
+        for (const a of ["A&B", "a & b", "a& b", "&"]) add(`${a} nu`);
+        for (const l of ["Lone \ud800 surrogate kple 𝐀𝐁 kple ﬁ.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeEwe(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("ee", t));
+        }
+    },
+    // phonemizeWord over every letter run of the texts (as written, lower, UPPER, NFD, NFC), every 1–3 letter string
+    // over the alphabet plus the tilde, acute and grave, precomposed marked letters, edge strings; numberToWords over
+    // 0…20,000 (with and without the raw digits), scaled samples, the 10^9 edge, and non-integer / non-finite values.
+    async "ee-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/ewe/ewe.ts");
+        const { numberToWords } = await import("../../../src/languages/ewe/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("ee")) for (const m of t.matchAll(/[\p{L}\p{M}']+/gu)) { const w = m[0]; words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.normalize("NFD")); words.add(w.normalize("NFC")); }
+        const abc = [..."abdɖeɛfƒgɣhiklmnŋoɔprstuvʋwxyzcjq'", "̃", "́", "̀"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "ã", "ẽ", "ĩ", "õ", "ũ", "ɛ̃", "ɔ̃", "é", "à", "ç", "ý", "ñ", "ß", "æ", "Podobský", "Française", "kwasiɖa", "Mars", "wu", "wɔ", "wa", "wã", "wõ", "awo", "trɔ", "ŋɔ͂", "ÐĐƞ"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: string[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 3) ns.push(String(k * 1000 + 21), String(k * 1e6 + 155), String(k * 1e6));
+        for (let e = 8; e <= 22; e++) { ns.push(String(10 ** e)); ns.push(String(10 ** e - 1)); ns.push(String(10 ** e + 7)); }
+        ns.push("999999999", "1000000000", "9007199254740993", "12345678901234567890123", "007", "0000");
+        for (const d of ns) { emit({ n: d, raw: units(d), op: "words" }, numberToWords(Number(d), d)); emit({ n: d, raw: null, op: "words" }, numberToWords(Number(d))); }
+        for (const [n, raw] of [["1.5", "15"], ["-1", "1"], ["NaN", "x9"], ["Infinity", "٣"], ["-0", "0"], ["1e21", undefined], ["1.5", undefined], ["-12", undefined], ["NaN", undefined], ["-Infinity", undefined]] as const) emit({ n, raw: raw === undefined ? null : units(raw), op: "words" }, numberToWords(Number(n), raw));
+    },
 };
 
 
