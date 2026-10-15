@@ -2851,6 +2851,42 @@ fn main() {
                 }
             })
         }
+        "lo-normalize" | "lo-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::lao::lao;
+            // Building `lo` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "lo").unwrap();
+            let lo = lao::create_lao().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lo.normalize(&t()),
+                    "symbols" => lo.symbols(&t()),
+                    "text" => with_host(&JsString::from("lo"), || lo.text(&t())),
+                    "word" => lao::phonemize_word(&w()),
+                    _ => {
+                        let parts: Vec<String> = lao::word_features(&w())
+                            .iter()
+                            .map(|(cls, live, long, mark)| {
+                                let c = match cls {
+                                    lao::Cls::High => "high",
+                                    lao::Cls::Mid => "mid",
+                                    lao::Cls::Low => "low",
+                                };
+                                format!(
+                                    "{c}/{}{}/{}",
+                                    *live as u8,
+                                    *long as u8,
+                                    mark.to_string_lossy()
+                                )
+                            })
+                            .collect();
+                        JsString::from(parts.join(" ").as_str())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

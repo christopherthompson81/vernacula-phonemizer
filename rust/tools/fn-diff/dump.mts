@@ -74,6 +74,7 @@ const FLEURS_DIR: Record<string, string> = {
     ta: "ta_in",
     ml: "ml_in",
     vi: "vi_vn",
+    lo: "lo_la",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5337,6 +5338,71 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
         ns.push(2 ** 53, 2 ** 53 + 2, 1e300, 1.5, 20.7, -1, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
+    },
+    // ── Lao (lo). Inputs: the lo golden, FLEURS lo_la (columns 3 and 4) and probes/lo.txt. ──
+    // normalizeLao, the symbol tier on what normalize hands it (recorded through the wrapper) and the registry's lo
+    // engine (`renderInHost`: no pre-pass), over every text plus synthetic rows for every arm: the invisible
+    // characters, `&nbsp;`, `Us$`, both era markers bounded and unbounded, grouping by every group size and mark,
+    // both minus arms and their range neighbours, degrees in both orders, the spent percent word, the tier's signs
+    // and units, decimals; and the engine's digit reading over 0…3,000, magnitudes and unsafe integers.
+    async "lo-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeLao } = await import("../../../src/languages/lao/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/lao\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["lo"], FLEURS_DIR.lo, ["lo.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const inv of ["­", "‌", "﻿", "​", "‍", "&nbsp;", "&NBSP;", "&nbsp"]) add(`ຊະ${inv}ນິດ`);
+        for (const u of ["Us$", "US$", "us$", "aUs$", "ກUs$"]) add(`ແຕ ${u} 549ຂື້ນໄປ`);
+        for (const e of ["ຄ.ສ.", "ຄ.ສ", "ຄ . ສ .", "ຄ.ສ..", "ພ.ສ.", "ພ.ສ", "ພ .ສ", "ກຄ.ສ.", "ຄ.ສ.ກ", "ຄ.ສ. ", "ຄ.ສ.  "]) for (const tail of ["", " 1990", "1990", "."]) add(`ປີ ${e}${tail}`);
+        for (const n of ["1,000", "12,345", "123,456,789", "1.000", "52.201", "5.000.000", "0,001", "0.500", "1,23", "1,2345", "1.234,5", "1,234.5", "01,000", "1,000,0", "١٢٣,٤٥٦"]) for (const tail of ["", ",", ".", " ຄົນ", "ຄົນ"]) add(`ມີ ${n}${tail}`);
+        for (const m of ["−5", "-5", " -5", "(-4)", "1642 -1647", "1642-1647", "ກ -180", "{-1}", "_-1", "x-1", "−x", "- 5", "5 - 5"]) add(`ຄ່າ ${m} ອົງສາ`);
+        for (const d of ["°C", "° C", "°c", "°F", "c°", "f °", "C°", "°", "°Ca", "c°a", "° "]) for (const n of ["20", "25.5", "12,5", "x"]) add(`ອຸນຫະພູມ ${n} ${d}ຂຶ້ນ`);
+        for (const p of ["ເປີເຊັນ 10%", "ເປີເຊັນ10 %", "ຮ້ອຍລະ 30%", "ຮ້ອຍລະ% 5", "ຮ້ອຍລະ %5", "ເປີເຊັນ % ກ", "10%", "10 %", "ເປີເຊັນ 1.5%"]) add(`ໄດ້ ${p}`);
+        for (const c of ["$5", "$95.3ລ້ານ", "£72ລ້ານ", "€180 ລ້ານ", "US$49,600", "5 km", "5km", "5 km²", "5 m³", "5 kg", "3 cm", "A&B", "ກ&ຂ", "5ລ້ານ"]) add(`ລາຄາ ${c}ແລ້ວ`);
+        for (const d of ["0.75", "21.2967", "1.2.3", "3.14,", "12,5", "0,1", "1.5.", "1.05"]) add(`ຄ່າ ${d} ແລ້ວ`);
+        for (const [t, src] of rows) {
+            const a = normalizeLao(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "text" }, renderInHost("lo", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let e = 4; e <= 22; e++) { ns.push(String(10 ** e)); ns.push(String(10 ** e + 1)); ns.push(String(10 ** e + 21)); }
+        ns.push("9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("lo", n));
+        // The tier, over every input normalize handed it (rec saw them all above).
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord and wordFeatures over every Lao-block run of the texts (raw and normalized), every onset ×
+    // vowel pattern (lead vowel + signs) × tone mark × coda, the cancellation mark in every position, ໆ, and
+    // fixed-seed PRNG strings over the Lao block.
+    async "lo-g2p"() {
+        const { phonemizeWord, wordFeatures, MANIFEST: LM } = await import("../../../src/languages/lao/lao.ts");
+        const { normalizeLao } = await import("../../../src/languages/lao/normalize.ts");
+        const items = new Set<string>();
+        const runs = (t: string): void => { for (const m of t.matchAll(/[຀-໿]+/gu)) items.add(m[0]); };
+        for (const t of langTexts("lo")) { runs(t); runs(normalizeLao(t)); }
+        const cons = Object.keys(LM.onsets);
+        const marks = ["", ...LM.toneMarks];
+        const codas = ["", ...Object.keys(LM.codas), "ຽ", "໌", "ກ໌", "ນທ໌"];
+        for (const c of cons) for (const p of LM.vowelPatterns) for (const mk of marks) for (const cd of ["", "ກ", "ນ", "ວ", "ຽ", "ຍ໌"]) {
+            items.add((p.pre ?? "") + c + mk + p.signs + cd);
+            items.add((p.pre ?? "") + "ຫ" + c + mk + p.signs + cd);
+            items.add((p.pre ?? "") + c + "ຼ" + mk + p.signs + cd);
+        }
+        for (const c of cons) for (const cd of codas) for (const v of ["", "າ", "ະ", "ອ", "ວ", "ອາ", "ວາ"]) items.add(c + v + cd + "ອ" + "ັ");
+        for (const w of ["", "ໆ", "ກໆ", "ໆກ", "໌", "໌໌", "ກ໌໌", "ເ", "ເກ", "ເຫ", "ເຫຼ", "ຼ", "ກຼ", "\ud800", "ກ\udc00", "ກັ่", "ກ่ັ", "ກ่้", "ໜໝ", "a", "ไทย"]) items.add(w);
+        let x = 0x51a0c3;
+        const rnd = (n: number): number => { x = (x + 0x6d2b79f5) | 0; let t = Math.imul(x ^ (x >>> 15), 1 | x); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) % n; };
+        for (let i = 0; i < 6000; i++) { let s = ""; for (let k = 1 + rnd(7); k > 0; k--) s += String.fromCodePoint(0x0e80 + rnd(0x80)); items.add(s); }
+        for (const w of items) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "features" }, wordFeatures(w).map((f) => `${f.cls}/${f.live ? 1 : 0}${f.long ? 1 : 0}/${f.mark}`).join(" "));
+        }
     },
 };
 

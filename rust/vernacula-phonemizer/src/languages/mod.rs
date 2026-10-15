@@ -48,6 +48,7 @@ pub mod karakalpak;
 pub mod kazakh;
 pub mod korean;
 pub mod kyrgyz;
+pub mod lao;
 pub mod latvian;
 pub mod lithuanian;
 pub mod luxembourgish;
