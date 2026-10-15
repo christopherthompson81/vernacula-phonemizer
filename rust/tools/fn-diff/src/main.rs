@@ -1961,6 +1961,37 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "tk-normalize" | "tk-g2p" | "tk-numbers" => {
+            let tk = vernacula_phonemizer::languages::turkmen::turkmen::create_turkmen().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tk.normalize(&t()),
+                    "initialisms" => tk.normalize_initialisms(&t()),
+                    "tildes" => tk.fold_tildes(&t()),
+                    "engine" => tk.text(&t()),
+                    "symbols" => tk.symbols(&t()),
+                    "unreadable" => JsString::from(tk.is_unreadable(&t()).to_string().as_str()),
+                    "word" => tk.phonemize_word(&w()),
+                    "nat" => tk.nativise(&w()),
+                    "words" => tk.number_words(num()),
+                    "ordinal" => tk
+                        .ordinal_of(num(), input["front"].as_bool().unwrap())
+                        .unwrap_or_else(none),
+                    "roman" => tk.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => tk.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "tk-roman" => {
+            let policy = vernacula_phonemizer::languages::turkmen::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

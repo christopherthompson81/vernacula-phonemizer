@@ -57,6 +57,7 @@ pub mod swedish;
 pub mod tagalog;
 pub mod thai;
 pub mod turkish;
+pub mod turkmen;
 pub mod ukrainian;
 pub mod uzbek;
 

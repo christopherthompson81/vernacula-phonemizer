@@ -1,0 +1,33 @@
+# Turkmen (tk) probes: synthetic text only, one line per normalize.ts arm plus a neighbour it must decline,
+# and the g2p / stress / tokenizer corners. FLEURS has no tk, so these and the golden carry the weight.
+# tilde fold
+Türkmeniñ halky, ÿyl, ÑAÝ, señor ñandu Ÿ, españa.
+# digit grouping
+19 500 adam, 800 000 manat, 1 234 567 dollar, 0 123 san, 12\u{a0}345 san, 1.5 000 san.
+# magnitude and era abbreviations
+5 mlrd manat, 3 mln. adam, MLN, b.e.ö. 300 ýyl, b. e. öňki asyr, b.e. 1200 ýyl, b.e.ö., b.e.ö.", b.e.ö.»
+# percent suffix, year, numero
+20%-i, 5 % -den, 30%-iň, 1990 ý. bäri, 2000ý, № 5 mekdep, №12.
+# written ordinals
+1-nji, 2-nji, 3-nji, 4-nji, 5-nji, 6-njy, 9-njy, 10-njy, 20-nji, 40-njy, 100-nji, 1000-nji, 1990-njy, 2-njiden, 3-njisi, 7-nji ýyl, 5-NJI, 0-njy, 12345678901234567890-nji, 4-ünji, 6-ynjy, 2-njilerde.
+# fractions
+1/2, 2/3, 3/4, 1/12, 5/6, 7/7, 13/14, 0/5.
+# signs
+-5 gradus, (−3, –7, ±2, +30, 5-6, 10–20, 1838—1917.
+# degrees
+40°30′15″, 7°15', +30°C, 25°C-den, 30°c-a, 90°F, 45° burç, 40°dan, 10° gradus.
+# slashes and ranges
+3/2020, 2020/21, 5-8 sm, 1990 - 1995.
+# initialisms
+ABŞ, BMG, SSSR, TDNG, BAE, NATO, Ýewropa, HTTU.
+# symbol tier
+5 km, 3 kg, 2 m², 10%, $5, €20, ₼100, 5 km/sag, 60 km/h, B&B, 3 müň, 2 million.
+# g2p and stress corners
+salam kitap mekdep dostluk Aşgabat Türkmenistan ýyldyz sport strategiýa tramwaý
+ç j ž ş ň ý ä ö ü y w h r s z
+Washington Müller café naïve İstanbul ıslak
+# numbers through the tokenizer
+0, 7, 21, 100, 101, 1000, 1985, 2024, 1000000, 999999999999, 1000000000000, 9007199254740993, 12345678901234567890.
+# foreign scripts and lone surrogates
+Москва we Παρίσι 北京.
+a\u{d800}b \u{dc00}
