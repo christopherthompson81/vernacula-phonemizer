@@ -363,3 +363,40 @@ arm's FLEURS types were printed and read against the sources.
 **Implication.** This closes #1551's tr items (the -mA/-sA/-lA rule on running text, and *kele*). `Skor 3.
 Sonra` stays: TDK makes `3.` an ordinal marker or a sentence period with no written difference, and all 9
 FLEURS cases are ordinals.
+
+## Run 12 — 2026-10-14 (#1569: why 561 stress.tsv rows disagreed with kaikki)
+
+**Question.** Run 11 found 561 of stress.tsv's 2,273 rows disagreeing with today's kaikki. Is the data stale, was
+the original mine wrong, or are these real double readings?
+
+**Command.** For every row word, collect from the kaikki dump each entry's stress-marked IPAs (all of them, and
+the first-listed), its POS and its sense glosses. Classify each disagreement, edit the rows in place (no reorder,
+comments kept), then the FLEURS tr phonemize-sync diff main vs refresh and the tr golden.
+
+**Raw finding.**
+- **Cause: none of the three guesses.** A Wiktionary page lists EVERY reading of a spelling:
+  - *adım* gives /aˈdɯm/ (noun "step", and the possessive) and /ˈa.dɯm/ (predicative "it is my name");
+  - *okuma* gives /okuˈma/ (verbal noun) and /oˈkuma/ (negative imperative);
+  - *artık* gives [ɑɾˈtɯk] (noun) and [ˈɑɾtɯk] (adverb).
+
+  The original mine kept a non-final variant, and Run 11's extraction kept the first-listed one, so neither
+  was right across the board. Counted with ambiguous pages included, 671 rows disagree.
+- **The three groups:**
+
+  | Group | Rows | What it is | Action |
+  |---|---|---|---|
+  | A | 538 | The non-final variant is the predicative or negative-imperative sense, and a possessive, case or verbal-noun sense exists | 505 take the page's FIRST-listed reading. 33 whose pages disagree on the first reading (akım, arama, koyun) are kept |
+  | B | 122 | Genuine variation with no inflectional explanation (adverbs artık, acilen; names; the conjunction ama) | Kept |
+  | C | 11 | The row matches no kaikki variant | 10 take kaikki's value; trabzon is kept (Sezer place-name stress) |
+
+  513 rows changed in total, with a header note recording the refresh.
+- **FLEURS.** 156 of 3,834 rows change, 162 tokens over 33 types, every one a noun, possessive or verbal noun
+  moving to final: *sorun* ×24, *seçim* ×13, *isim* ×10, *düzenleme* ×10, *verme* ×8, *takım*, *basın*,
+  *yazma*, *deneyim*, *okuma*, *terim*, *adım*, *tanım*.
+- **The tr golden.** 12 rows move.
+- **Measurement limits.** The kaikki unambiguous-pairs score (Run 11) cannot measure this change, because these
+  are exactly the ambiguous pages. The evidence is the per-type FLEURS list, read against the senses.
+- **Test.** `test/turkish-1569-stress-refresh.test.ts` (stressed syllable from kaikki's first-listed IPA) fails
+  7/9 against the old rows. The two passes are the kept adverb *artık* and a row that already agreed.
+
+**Implication.** Closes #1569. C# and Rust read the same file, and golden parity holds them to it.
