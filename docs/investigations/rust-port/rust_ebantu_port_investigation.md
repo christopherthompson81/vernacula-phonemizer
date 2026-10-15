@@ -177,3 +177,40 @@ provenance-poison; pins.
 
 **Implication.** rn done. TS defects to report (not fixed): kirundi/normalize.ts drops the sign of a negative
 temperature; a decimal with ≥3 fractional digits reads as a sentence break plus an integer (shared with rw).
+
+## Run 5 — 2026-10-15 06:35 (lg, and a harness slip that left a logging binary behind)
+
+**What was written.** `languages/luganda/{manifest,numbers,normalize,luganda}.rs`. The engine scans by UTF-16 code
+unit (`w[i]`, `w.startsWith(k, i)`), as the TS does; `G[sp] ?? "ⁿ"` keeps an empty-string value (only a miss takes
+the fallback). The range rule's pattern is built with `String.raw`, so its ` ` is an ESCAPE in the pattern
+(not a cooked NBSP as in rw's templates) and stays one in Rust; the cm/mm/kg template doubles its backslash
+(`\\u00a0`), so it is an escape too. `saidNear` builds its alternation at call time with the TS's own escaping
+(`[.*+?^${}()|[\]\\]` → `\$&`, a space → `\s+`).
+
+**Command.** `parity -- lg`; `audit.sh luganda luganda`; `escape_audit.py`; `regs.sh lg` then `newonly.py lg` (the
+Rust-only patterns minus the core pre-pass set rw established); `lg-normalize` (golden, FLEURS lg_ug columns 3+4,
+`probes/lg.txt`, generated rows per arm) / `lg-g2p`; two mutations; e2e + trace; provenance-poison; pins.
+
+**Raw finding.**
+- `lg: 200/200 identical`, first build.
+- Audits: 27 raw patterns, 1 miss (the TOKEN template); 23 non-ASCII runs, 0 missing; `22 TS escapes, 0 code points
+  short`. `newonly.py lg`: `rust 72, rust-only 11, of which core baseline 11, other 0`.
+- `lg-normalize: 12175 identical, 0 DIFFER` (golden 256, fleurs 7346, probe 26, synthetic 934, number 3613);
+  `lg-g2p: 176147 identical, 0 DIFFER`.
+- Mutations (`ᵑ` before ⟨k⟩ only, not ⟨g⟩; the year test `na >= 1000` → `> 1000`): `lg-normalize: 9331 identical,
+  2844 DIFFER` (golden 92, fleurs 2747), `lg-g2p: 172310 identical, 3837 DIFFER`. Reverted: 12175/0, 176147/0.
+- **Harness slip.** The first `regs.sh lg` was piped into a `grep` that failed at once (ugrep rejected the
+  pattern); SIGPIPE killed the script after it had restored `core/js_regex.rs` but BEFORE its rebuild, so the next
+  e2e run replayed through an fn-diff that still logged every pattern to stderr (the results were unaffected,
+  stdout only, but the output was unreadable). `git status` confirmed the source was clean; rebuilt the workspace
+  and re-ran: `phonemize-sync / phonemize-best / phonemize-trace / trace: 3814 identical, 0 DIFFER` each. Rule
+  kept from here: `regs.sh` is never piped into a filter; its output is read afterwards with `newonly.py`.
+- provenance-poison `0` sites; test/luganda.test.ts `141 pinned, 0 skipped; expects evaluated: 143, failures: 0`
+  (65 normalizeLuganda, 16 numberToWords, 30 phonemizeWord, 30 phonemize); both Rust tests pass.
+
+**Reading for correctness** (TS prints, `t.mts lg`). Nothing new to report: the readings that look wrong are
+documented refusals in the normalize.ts header — `20°C` reads `amakumi abiɾi c` (no sourced scale name; the header
+records that the bare `C` then reads as the palatal stop), a decimal reads its digits with no point word (`1.5 km`
+→ `kiɾomita emu tːaːno`), `5 km/h` keeps raw letters (no rate rule), and a bare `-5` loses its sign.
+
+**Implication.** lg done.

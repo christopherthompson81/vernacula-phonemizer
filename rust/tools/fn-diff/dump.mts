@@ -78,6 +78,7 @@ const FLEURS_DIR: Record<string, string> = {
     my: "my_mm",
     jv: "jv_id",
     sw: "sw_ke",
+    lg: "lg_ug",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5867,6 +5868,63 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(999999999, 1e9, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
         for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
+    // ── Luganda (lg). Texts: the lg golden, FLEURS lg_ug (columns 3 and 4) and probes/lg.txt. ──
+    // normalizeLuganda and the registry's lg engine (`renderInHost`: no pre-pass) over every text plus synthetic rows
+    // per arm, each with the neighbour it must decline; and the number path through the engine over 0…3,000,
+    // scaled samples and long runs.
+    async "lg-normalize"() {
+        const { normalizeLuganda } = await import("../../../src/languages/luganda/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["lg"], FLEURS_DIR.lg, ["lg.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const pre of ["", "essaawa ", "saawa ", "Ssaawa ", "aawa "]) for (const c of ["7.30", "10:15", "23.59", "24.00", "7.300", "1.7.30", "7:60"]) for (const post of ["", " am", " p.m.", " pm", " P.M", " GMT", " UTC", " ezekiro", " bwe", " amx"]) add(`${pre}${c}${post} ne`);
+        for (const o of ["1st", "2nd", "3rd", "4th", "21ST", "5thx", "11th", "st"]) add(`olunaku ${o} ne`);
+        for (const r of ["1990-1995", "5–10", "1,000-2,000", "10—5", "999-1000", "0999-1000", "a1-2", "1-2a", "1.5-2", "-1-2", "1-2-3", "1990/1995", "1 - 2", "+1-2", "1-2/3", "1-2,", "1,000-1,500", "1000-2000", "10000-20000"]) add(`emyaka ${r} ne`);
+        for (const n of ["1,300", "12,500,000", "1 300", "1\u00a0300", "1\u202f300", "1\u2009300", "1.300", "2.500.000", "1,0000", "0,500"]) for (const tail of ["", ".", ",", ".5"]) add(`abantu ${n}${tail} ne`);
+        for (const p of ["50%", "3.5 %", "20% ku kikumi", "ku buli kikumi 10%", "7%", "KU KIKUMI 5%", "x5%"]) add(`ebitundu ${p} ne`);
+        for (const c of ["US$ 29", "US$5", "us$ 4", "$10", "ddoola $5", "dolla $3", "dddoola $2", "€20", "euro €5", "£7", "pawundi £2", "$ x", "€ 3", "£\u00a04"]) add(`ssente ${c} ne`);
+        for (const u of ["5 km²", "3km2", "10 km", "kiromita 7 km", "kilomiita 7 km", "4 kmx", "2 km/h", "6 cm", "8 mm", "9 kg", "sentimita 3 cm", "kiro 5 kg", "5 m", "mita 6 m", "7m", "8 m²", "2.5 km", "1.5 cm", "3\u202fkm", "4 km³"]) add(`ekitundu ${u} ne`);
+        for (const d of ["3.14", "2.5", "1.2.3", "0.75", "12.345", "802.11n", "1.5,", "1.5.", "1.5.6"]) add(`omuwendo ${d} ne`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeLuganda(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("lg", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e9 + 10), String(k * 1e12 + 1));
+        for (let e = 6; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("lg", n));
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3 letter
+    // string over the alphabet plus ŋ and the apostrophes, every 4-letter string over a context set (nasals,
+    // obstruents, w, y, vowels, apostrophe) and edge strings; numberToWords over 0…20,000, scaled samples, the corners
+    // and raw strings.
+    async "lg-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/luganda/luganda.ts");
+        const { numberToWords } = await import("../../../src/languages/luganda/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zŋ'’]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("lg")) for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzŋ'’"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."nmŋgbkyw'aeu"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚ng'", "Dvořák", "Straße", "constructor", "toString", "__proto__", "NNG'OMA", "Ŋ", "nng", "nn'"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e6 + 1, k * 1e9 + 1001, k * 1e12 + 7);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(2 ** 53 - 1, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890", "0"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
     },
 };
 
