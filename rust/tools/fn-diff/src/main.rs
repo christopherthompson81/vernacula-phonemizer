@@ -3155,6 +3155,138 @@ fn main() {
                 }
             })
         }
+        "sw-normalize" | "sw-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::swahili::swahili;
+            // Building `sw` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "sw").unwrap();
+            let sw = swahili::create_swahili().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => sw.normalize(&t()),
+                    "symbols" => sw.symbols(&t()),
+                    "text" => with_host(&JsString::from("sw"), || sw.text(&t())),
+                    "word" => swahili::phonemize_word(&w()),
+                    _ => swahili::NAT(&w()),
+                }
+            })
+        }
+        "rw-normalize" | "rw-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::kinyarwanda::{kinyarwanda, numbers};
+            // Building `rw` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "rw").unwrap();
+            let rw = kinyarwanda::create_kinyarwanda().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => rw.normalize(&t()),
+                    "symbols" => rw.symbols(&t()),
+                    "text" => with_host(&JsString::from("rw"), || rw.text(&t())),
+                    "word" => kinyarwanda::phonemize_word(&w()),
+                    "nat" => kinyarwanda::NAT(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "rn-normalize" | "rn-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::kirundi::{kirundi, numbers};
+            // Building `rn` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "rn").unwrap();
+            let rn = kirundi::create_kirundi().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => rn.normalize(&t()),
+                    "symbols" => rn.symbols(&t()),
+                    "text" => with_host(&JsString::from("rn"), || rn.text(&t())),
+                    "word" => kirundi::phonemize_word(&w()),
+                    "nat" => kirundi::NAT(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "lg-normalize" | "lg-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::luganda::{luganda, numbers};
+            // Building `lg` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "lg").unwrap();
+            let lg = luganda::create_luganda().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lg.normalize(&t()),
+                    "text" => with_host(&JsString::from("lg"), || lg.text(&t())),
+                    "word" => luganda::phonemize_word(&w()),
+                    "nat" => luganda::NAT(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "ln-normalize" | "ln-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::lingala::lingala;
+            // Building `ln` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ln").unwrap();
+            let ln = lingala::create_lingala().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ln.normalize(&t()),
+                    "text" => with_host(&JsString::from("ln"), || ln.text(&t())),
+                    _ => lingala::phonemize_word(&units(&input["word"])),
+                }
+            })
+        }
+        "nya-normalize" | "nya-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::chichewa::{chichewa, numbers};
+            // Building `nya` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "nya").unwrap();
+            let nya = chichewa::create_chichewa().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nya.normalize(&t()),
+                    "symbols" => nya.symbols(&t()),
+                    "text" => with_host(&JsString::from("nya"), || nya.text(&t())),
+                    "word" => chichewa::phonemize_word(&w()),
+                    "nat" => chichewa::NAT(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         "yo-normalize" | "yo-g2p" => {
             use std::sync::Arc;
             use vernacula_phonemizer::core::foreign::with_host;

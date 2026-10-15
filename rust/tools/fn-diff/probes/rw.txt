@@ -1,0 +1,21 @@
+# Synthetic Kinyarwanda probes (rw has no FLEURS text, so these carry the corpus-wide weight): one or more lines per
+# arm of normalize.ts and the neighbour it must decline, plus g2p and number corners. Synthetic text only.
+Umuryango wa U.N. na O.N.U. ukorera muri U. S. A. no muri E.A.C kandi U.N.ishyirahamwe ni U.N.
+Abantu 1,300 na 12,500,000 na 1.300 na 2.500.000 na 1 300 na 12 500 000 na 1,300.5 na 1.300,5 na 0,500 na 1,0000.
+Ahantu 1,300° na 2.500°N na 1 300 m.
+Uburebure km 5, m 10, cm 3, mm 7, kg 2, g 9, gm 4, gr 6, ml 8, l 1, ha 12, km² 5, m2 3, KM 4, Kg 2 na kmx 5.
+Ubushyuhe −5°C, -3 °F, –2° C, 10-15°C, 20–25 °C, 30—35°F, 15-10°C, 25°C, 2,5 °C, 77°F, 30°, 12º na 5°X.
+Ubushyuhe bwa dogere 25°C na 25°C dogere.
+Aho ni 1°57′S 30°04′E na 2°N na 29° 45' 30" E na 5°W.
+Saa 7:30 na saa 9:00 na saa 23:59 na SAA 1:05 na saa 24:00 na 12:30:45 UTC na 1:02:03 na 10:15 na 7:5 na 123:45.
+Ijanisha 10%-20% na 30 % – 40 % na 50%-40% na 5%.
+Intera 5-10 km na 10–20 m² na 3-4 ha na 20-10 km na 1-2 kmx na 2-3 m3 na 5-6 m'.
+Imyaka 1990-1995 na 5–10 na 10—5 na 1-2-3 na a1-2 na 1.5-2 na 2-3.5.
+Amafaranga US$ 5, $10, 5 FRw, 1,000 Frw, RWF 500, Rwf 20, 50%, miliyoni 3, A & B na 5 km/h.
+Umuvuduko 60 km/h, 5 m/km, 10 / km², 3/ha, 7/kg3, km³, cm² na mm³.
+Imibare 3.14 na 2.5 na 1,5 na 12,34 na 1.234 na 0.75 na 12.345 na 1.2.3 na 5,123.
+Inyuguti shyira, cyane, jya, bya, rya, mya, pya, vya, hya, kya, gya, tya, dya, fya, lya, sya, zya, nyina, shuri, inka, aa, ee, ii, oo, uu, q, x, Ñ.
+Amazina Dvořák, Ångström, Straße, ſala, İzmir na 'umuntu'.
+Imibare 0 1 9 10 11 19 20 21 99 100 101 110 999 1000 1001 2000 9999 10000 100000 999999 1000000 1000001 999999999 1000000000 1000000001 999999999999 1000000000000 9007199254740993 12345678901234567890 007.
+Ese? Yego! Murakoze. Akaduruvayo, akabago; utubago tubiri: iherezo… birarangiye.
+   Umwanya   munini   hagati   .
