@@ -32,27 +32,72 @@ const nVowels = (s: string): number => {
 };
 
 // PRE-ACCENTING (pre-stressing) suffixes: Turkish stress falls on the syllable immediately before the LEFTMOST
-// pre-accenting suffix (Kabak & Vogel). The set — progressive -Iyor, -ken, instrumental -(y)lA, negation /
-// verbal-noun -mA, conditional -sA, generalizing copula -DIr, predicative person endings -Im/-Iz/-sInIz — plus
-// one optional trailing suffix (person / case / plural), anchored to the word end. NB the bare 2sg -sIn is
-// deliberately EXCLUDED: it collides with the imperative -sIn (olsun) and possessive+case -sInDA (arasında),
-// costing more than it fixes.
-const PRE_ACCENT =
-    "(?:(?:r)?ken|(?:y)?l[ae]|m[ae]|s[ae]|[dt][ıiuü]r|(?:y)?(?:[ıiuü]m|[ıiuü]z|s[ıiuü]n[ıiuü]z))";
-const TAIL = "(?:l[ae]r|[ıiuü][mnz]|n[ıiuü]z|[ae]|y[ae]|d[ae]n?|n[ıiuü]n|)";
-const PRE_ACCENT_RE = new RegExp(PRE_ACCENT + TAIL + "$", "u");
+// pre-accenting suffix. ⚠ THE SET IS NARROWED TO WHAT THE SOURCES LIST, AND TO SHAPES THE SPELLING CAN SHOW (#1551).
+// The earlier rule matched any word-final -mA, -sA, -(y)lA, -ken, -DIr or person ending, and on the 9,260 unambiguous
+// stress-marked kaikki lemmas every arm was net negative: the person endings alone fired on 921 and were right on 26
+// (deniz, dokuz, yıldız, yardım read ˈdeniz…), and it pre-stressed the verb geldim and the possessive evim. The
+// sources (Özçelik 2014, Phonology 31; Kornfilt on copular clitics; Kabak & Vogel 2001 / Inkelas & Orgun 2003 as
+// summarised in en.wikipedia "Turkish phonology"):
+//   · NEGATIVE -mA- is pre-stressing, inside a verb form: gelmedi, gelmemiş, gelmeyecek, gelmeden, gelmeyen,
+//     gelmiyor. A BARE word-final -mA is the verbal noun (okuma, dondurma) or a noun (elma), and -mA + dative
+//     (yapmaya) is the verbal noun too: final stress. The aorist negative -mAz carries the stress itself (gelmez).
+//   · The conditional -sA is NOT pre-stressing on a verb stem (gitse, olsa: final). The COPULAR -(y)sA is: after
+//     the y buffer (hastaysa), a tense or participle (gelirse, gelmişse, gelecekse) or var/yok/değil.
+//   · -(y)ken after a tense (gelirken) or the y buffer (dışındayken), copular -DIr (güzeldir, değildir), and the
+//     instrumental -(y)lA (nedeniyle; after a consonant, insanla, genellikle) are pre-stressing.
+//   · The predicative person endings are pre-stressing but are spelled like the possessive (öğretmenim "my teacher"
+//     / "I am a teacher") and like roots (deneyim, uyum): only the unambiguous shape after a locative (evdeyim) is
+//     taken; the rest are left to the default.
+// A host of ≥2 syllables is required where a short ROOT carries the same letters (erken, kale, kele, fazla), except
+// for -DIr, where the copula on a one-syllable noun outnumbers the roots (see the arm).
+// Measured on the 10,240 unambiguous kaikki words, names included (shipped, with stress.tsv): 87.23% → 92.17%,
+// +521 / −15 (the 10 lost nouns and names are now stress.tsv rows); rule alone 72.5% → 83.5%.
+// See docs/investigations/rust-port/rust_tr_port_investigation.md, Run 11.
+const H = "[ıiuü]", A = "[ae]";
+/** An optional person / plural ending after a pre-accenting suffix (gelmedim, gelirseniz, gelmeyecekler). */
+const PERSON = `(?:m|n|k|n${H}z|l${A}r|${H}m|${H}z|s${H}n${H}z|s${H}n|${H}n|${H}k)?`;
+interface PreAccent {
+    re: RegExp;
+    /** Where the suffix starts: the stress is on the syllable before it. */
+    start: (w: string, m: RegExpMatchArray) => number;
+    /** The fewest syllables the host must have; a shorter host is a root that only looks suffixed. */
+    minHost: number;
+}
+const atMatch = (_w: string, m: RegExpMatchArray): number => m.index!;
+const atLastS = (w: string): number => w.lastIndexOf("s");
+/** Tried in order; the first whose pattern matches decides (a short host then means default stress). */
+const PRE_ACCENT: readonly PreAccent[] = [
+    { re: /^(?:var|yok|değil)s[ae](?:m|n|k|n[ıiuü]z|l[ae]r)?$/u, start: atLastS, minHost: 1 },
+    // the existential hosts take the copular -DIr too, whatever their length: vardır, yoktur, değildir
+    { re: /^(?:var|yok|değil)[dt][ıiuü]r(?:l[ae]r)?$/u, start: (w) => w.search(/[dt][ıiuü]r(?:l[ae]r)?$/u), minHost: 1 },
+    // negative -mI- + progressive: two letters before the m, or `umuyor` (um- + -uyor) would match
+    { re: new RegExp(`(?<=..)m${H}yor${PERSON}$`, "u"), start: atMatch, minHost: 1 },
+    { re: new RegExp(`m${A}(?:d${H}|m${H}ş|s${A}|y${A}c${A}[kğ]|s${H}n|d${A}n|y${A}n|m${A}k|y${A}l${H}m)${PERSON}$`, "u"), start: atMatch, minHost: 1 },
+    // the predicative person ending after a LOCATIVE, the one shape that cannot be a possessive or a root: evdeyim,
+    // buradayım (a one-syllable host is the noun deyim)
+    { re: new RegExp(`(?<=[dt]${A})y(?:${H}m|${H}z|s${H}n${H}z|s${H}n)$`, "u"), start: atMatch, minHost: 2 },
+    { re: new RegExp(`(?<=[aeıioöuü])y(?:l${A}|ken|s${A}${PERSON})$`, "u"), start: atMatch, minHost: 1 },
+    { re: new RegExp(`(?:${H}r|${A}r|m${A}z|${A}c${A}k|m${H}ş|yor)s${A}${PERSON}$`, "u"), start: atLastS, minHost: 2 },
+    { re: new RegExp(`(?:${H}r|${A}r|m${A}z|m${H}ş|yor)ken$`, "u"), start: (w) => w.length - 3, minHost: 2 },
+    // copular -DIr on ANY host: a one-syllable noun takes it often in running text (yerdir, yıldır, şeydir, azdır;
+    // about 57 FLEURS tokens) against the roots that only end in its letters (kültür, nadir, takdir: about 24),
+    // which are stress.tsv rows from kaikki
+    { re: new RegExp(`[dt]${H}r(?:l${A}r)?$`, "u"), start: atMatch, minHost: 1 },
+    { re: /(?<=[^aeıioöuüâîûy])l[ae]$/u, start: atMatch, minHost: 2 },
+];
 const IYOR_RE = /([ıiuü])yor(?:um|sun|uz|sunuz|lar)?$/u;
 
 /** A pre-accenting suffix's 1-based stressed syllable, or undefined (→ default final stress). */
 function morphStress(wl: string): number | undefined {
+    for (const { re, start, minHost } of PRE_ACCENT) {
+        const m = wl.match(re);
+        if (!m || m.index === undefined) continue;
+        const syl = nVowels(wl.slice(0, start(wl, m)));
+        return syl >= minHost ? syl : undefined;
+    }
     const iyor = wl.match(IYOR_RE); // progressive: stress the I of Iyor (geliyor→ɟelˈijoɾ)
     if (iyor && iyor.index !== undefined)
         return nVowels(wl.slice(0, iyor.index + 1));
-    const m = wl.match(PRE_ACCENT_RE); // leftmost pre-accenting suffix → stress the syllable before it
-    if (m && m.index !== undefined) {
-        const syl = nVowels(wl.slice(0, m.index));
-        if (syl >= 1) return syl;
-    }
     return undefined;
 }
 

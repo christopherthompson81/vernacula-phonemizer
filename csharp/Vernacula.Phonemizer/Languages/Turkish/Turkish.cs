@@ -24,23 +24,41 @@ public static class TurkishPhonemizer
         return n;
     }
 
-    private const string PRE_ACCENT =
-        "(?:(?:r)?ken|(?:y)?l[ae]|m[ae]|s[ae]|[dt][ıiuü]r|(?:y)?(?:[ıiuü]m|[ıiuü]z|s[ıiuü]n[ıiuü]z))";
-    private const string TAIL = "(?:l[ae]r|[ıiuü][mnz]|n[ıiuü]z|[ae]|y[ae]|d[ae]n?|n[ıiuü]n|)";
-    private static readonly JsRe PRE_ACCENT_RE = JsRegex.Compile(PRE_ACCENT + TAIL + "$", "u");
+    // PRE-ACCENTING suffixes, narrowed to what the sources list and to shapes the spelling can show (#1551). The
+    // measurement and the sources are in src/languages/turkish/turkish.ts; this is its mirror, arm for arm.
+    private const string H = "[ıiuü]", A = "[ae]";
+    private const string PERSON = "(?:m|n|k|n" + H + "z|l" + A + "r|" + H + "m|" + H + "z|s" + H + "n" + H + "z|s" + H + "n|" + H + "n|" + H + "k)?";
+    private sealed record PreAccent(JsRe Re, Func<string, System.Text.RegularExpressions.Match, int> Start, int MinHost);
+    private static int AtMatch(string _, System.Text.RegularExpressions.Match m) => m.Index;
+    private static int AtLastS(string w, System.Text.RegularExpressions.Match _) => w.LastIndexOf('s');
+    private static readonly JsRe EXISTENTIAL_DIR = JsRegex.Compile("[dt][ıiuü]r(?:l[ae]r)?$", "u");
+    private static readonly PreAccent[] PRE_ACCENT =
+    {
+        new(JsRegex.Compile("^(?:var|yok|değil)s[ae](?:m|n|k|n[ıiuü]z|l[ae]r)?$", "u"), AtLastS, 1),
+        new(JsRegex.Compile("^(?:var|yok|değil)[dt][ıiuü]r(?:l[ae]r)?$", "u"), (w, _) => EXISTENTIAL_DIR.Match(w).Index, 1),
+        new(JsRegex.Compile("(?<=..)m" + H + "yor" + PERSON + "$", "u"), AtMatch, 1),
+        new(JsRegex.Compile("m" + A + "(?:d" + H + "|m" + H + "ş|s" + A + "|y" + A + "c" + A + "[kğ]|s" + H + "n|d" + A + "n|y" + A + "n|m" + A + "k|y" + A + "l" + H + "m)" + PERSON + "$", "u"), AtMatch, 1),
+        new(JsRegex.Compile("(?<=[dt]" + A + ")y(?:" + H + "m|" + H + "z|s" + H + "n" + H + "z|s" + H + "n)$", "u"), AtMatch, 2),
+        new(JsRegex.Compile("(?<=[aeıioöuü])y(?:l" + A + "|ken|s" + A + PERSON + ")$", "u"), AtMatch, 1),
+        new(JsRegex.Compile("(?:" + H + "r|" + A + "r|m" + A + "z|" + A + "c" + A + "k|m" + H + "ş|yor)s" + A + PERSON + "$", "u"), AtLastS, 2),
+        new(JsRegex.Compile("(?:" + H + "r|" + A + "r|m" + A + "z|m" + H + "ş|yor)ken$", "u"), (w, _) => w.Length - 3, 2),
+        new(JsRegex.Compile("[dt]" + H + "r(?:l" + A + "r)?$", "u"), AtMatch, 1),
+        new(JsRegex.Compile("(?<=[^aeıioöuüâîûy])l[ae]$", "u"), AtMatch, 2),
+    };
     private static readonly JsRe IYOR_RE = JsRegex.Compile("([ıiuü])yor(?:um|sun|uz|sunuz|lar)?$", "u");
 
     /** A pre-accenting suffix's 1-based stressed syllable, or undefined (→ default final stress). */
     private static int? MorphStress(string wl)
     {
+        foreach (var arm in PRE_ACCENT)
+        {
+            var m = arm.Re.Match(wl);
+            if (!m.Success) continue;
+            var syl = NVowels(wl[..arm.Start(wl, m)]);
+            return syl >= arm.MinHost ? syl : null;
+        }
         var iyor = IYOR_RE.Match(wl); // progressive: stress the I of Iyor (geliyor→ɟelˈijoɾ)
         if (iyor.Success) return NVowels(wl[..(iyor.Index + 1)]);
-        var m = PRE_ACCENT_RE.Match(wl); // leftmost pre-accenting suffix → stress the syllable before it
-        if (m.Success)
-        {
-            var syl = NVowels(wl[..m.Index]);
-            if (syl >= 1) return syl;
-        }
         return null;
     }
 

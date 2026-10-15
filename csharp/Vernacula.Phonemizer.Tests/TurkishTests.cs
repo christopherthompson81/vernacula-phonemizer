@@ -37,7 +37,7 @@ public class TurkishTests
     [Theory]
     [InlineData("elma", "elmˈa")]
     [InlineData("masa", "masˈa")]
-    [InlineData("olsa", "ˈoɫsa")]
+    [InlineData("olsa", "oɫsˈa")] // #1551: the conditional on a verb stem is final
     public void APlainNounEndingMaSaLaKeepsFinalStress(string word, string want) => Assert.Equal(want, Word(word));
 
     [Fact]
