@@ -11,6 +11,7 @@
  */
 import { dataFile } from "./dataPath.ts";
 import { NoDataSourceError, readDataText } from "./dataSource.ts";
+import { untraced } from "./trace.ts";
 
 /** Read a data file beside `metaUrl`, returning its non-blank, non-`#`-comment lines. `optional` → [] on a
  *  missing file (else rethrows). Shared by loadTsvMap and loadLines so both parse lines identically. */
@@ -78,11 +79,16 @@ export function loadTsvMap<V = string>(
             rows.push([line.slice(0, tab), v]);
         }
     }
-    if (opts.fold) {
-        for (const [k, v] of rows) {
-            const f = opts.fold(k);
-            if (f !== k && !map.has(f)) map.set(f, v);
-        }
+    // ⚠ UNTRACED: a lazy lexicon loads inside the first traced call, and the fold's nativiser notes would land on
+    // that call's open token. See `untraced`.
+    const fold = opts.fold;
+    if (fold) {
+        untraced(() => {
+            for (const [k, v] of rows) {
+                const f = fold(k);
+                if (f !== k && !map.has(f)) map.set(f, v);
+            }
+        });
     }
     return map;
 }

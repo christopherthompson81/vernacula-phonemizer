@@ -25,6 +25,7 @@ if (!Directory.Exists(dir)) { Console.Error.WriteLine($"goldens not found: {dir}
 
 var traced = 0;
 var noSpans = new List<string>();
+var coldNativised = new List<string>();
 // ⚠ A SKIPPED LANGUAGE IS A HOLE IN THE GUARD AND MUST BE COUNTED. A bare `catch` that silently drops
 // a language leaves the tool printing "traced 139 languages / no poisons" and exiting 0 while a quarter
 // of its coverage is gone — green, and three quarters of a guard.
@@ -43,6 +44,13 @@ foreach (var f in Directory.GetFiles(dir, "*.tsv").OrderBy(x => x))
         // same defect wearing a different face — `Provenance.For` withholding rather than poisoning.
         // Four engines hand-roll their tokenizer and emit no tokens at all; those are not this.
         if (t.Tokens.Count > 0 && t.Tokens.All(k => k.InputSpan is null)) noSpans.Add(lang);
+        // ⚠ THE THIRD: load-time work must not write into the open token (#1577). A lazy lexicon's `fold`
+        // alias pass ran the nativiser over every key inside the first traced call, so its last rewrite
+        // landed on the first token as `Nativised`. The warm re-trace of the same text is the reference.
+        var warm = Phonemizer.PhonemizeTrace(first.Split('\t')[0], lang);
+        var c = string.Join("|", t.Tokens.Select(k => k.Nativised));
+        var w = string.Join("|", warm.Tokens.Select(k => k.Nativised));
+        if (c != w) coldNativised.Add($"{lang}: cold=\"{Trim(c)}\" warm=\"{Trim(w)}\"");
     }
     catch (Exception e) { skipped.Add($"{lang} ({e.GetType().Name})"); }
 }
@@ -52,8 +60,9 @@ Console.WriteLine($"traced {traced} of {files} languages");
 if (skipped.Count > 0) Console.WriteLine("\u26a0 SKIPPED (a language that throws is not covered):\n  " + string.Join(" ", skipped));
 if (bad.Count > 0) Console.WriteLine("⚠ POISONED:\n  " + string.Join("\n  ", bad));
 if (noSpans.Count > 0) Console.WriteLine("⚠ NO INPUT SPANS ON THE COLD TRACE:\n  " + string.Join(" ", noSpans));
-if (bad.Count == 0 && noSpans.Count == 0) Console.WriteLine("no poisons, every traced language carries input spans");
+if (coldNativised.Count > 0) Console.WriteLine("⚠ COLD TRACE NATIVISED DIFFERS FROM WARM:\n  " + string.Join("\n  ", coldNativised));
+if (bad.Count == 0 && noSpans.Count == 0 && coldNativised.Count == 0) Console.WriteLine("no poisons, every traced language carries input spans, cold nativised = warm");
 // ⚠ A COLLAPSE IN COVERAGE FAILS TOO. `traced` was printed and never compared against anything, so a
 // regression that made 50 languages throw would have kept this green.
 if (traced < files - 5) { Console.WriteLine($"\u26a0 COVERAGE COLLAPSED: only {traced} of {files} traced"); return 1; }
-return bad.Count == 0 && noSpans.Count == 0 ? 0 : 1;
+return bad.Count == 0 && noSpans.Count == 0 && coldNativised.Count == 0 ? 0 : 1;

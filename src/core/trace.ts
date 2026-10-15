@@ -293,6 +293,25 @@ export function noteNativised(from: string, to: string): void {
 }
 
 /**
+ * Run `fn` with no token open, so the recorders it reaches cannot write into the caller's token.
+ *
+ * ⚠ FOR WORK THAT IS NOT ABOUT THE OPEN TOKEN. A lexicon loads lazily, inside the first traced call while its
+ * first token is open, and `loadTsvMap`'s `fold` alias pass runs the engine's nativiser over every key: the
+ * last key it rewrote landed on that token (da `Mandag` traced `nativised: "joao"`; sv, nb the same). Found by
+ * the Rust port (#1577), whose lexicons load before any trace starts.
+ */
+export function untraced<T>(fn: () => T): T {
+    if (recording === null) return fn();
+    const saved = recording.current;
+    recording.current = null;
+    try {
+        return fn();
+    } finally {
+        recording.current = saved;
+    }
+}
+
+/**
  * Record a COMPLETE token in one call — the hook for a pipeline that cannot bracket its emits.
  *
  * ⚠ `english.ts` and `french.ts` are two-phase: they collect tokens, run a POS tagger / liaison lookahead over
