@@ -94,3 +94,39 @@ is claimed by rule 6 first. And the `ì` / `ọ` alternatives in SAID_BEFORE / S
 mark-stripped fold), which is harmless.
 
 **Implication.** Commit yo; ig next.
+
+## Run 5 — 2026-10-15 06:50 (ig: first build, differentials, pins)
+
+**Shape.** manifest.rs (`IgboManifest`: clause punctuation and numbers), numbers, normalize (the tier's argument is a
+TS object literal, so it is the RECORDED `JSON.stringify` of it, byte-compared against the recording; FUSED_QUANTITY
+is built from the `UNIT` table at runtime, as the TS builds it) and igbo (`IgboDef`, igbo.ts's own slice of the same
+jsonc). `digits()` reproduces `units[digitIndex(d)] ?? d`: a non-digit code point passes through as itself.
+
+**Commands.** As Runs 2–4: placeholders + `swap.py` (igbo.rs 9), `audit.sh igbo igbo`, `parity ig`; `ig-normalize` /
+`ig-g2p` dumps with `FLEURS_DIR` `ig: "ig_ng"` and `probes/ig.txt` (16 synthetic lines) plus 160 synthetic rows
+(grouping, the ordinal tail in every case incl. the long s and the boundary refusals, ranges, the fused-quantity space
+over 6 prefixes × 12 unit spellings, the tier, decimals incl. `2.30pm` / `100.9fm`); `ig-g2p` over every letter run ×
+5 forms, every 1–3 string over 31 letters plus five marks (U+0307 among them), corners, and `numberToWords` over
+0…20,000 with and without the raw digits, runs past 10¹², and non-integer / non-finite values with and without raw;
+e2e; the three TS suites' calls.
+
+**Raw finding.** `ig: 200/200` on the first build; audits `6 raw patterns, 1 not verbatim` (the recorded JSON, equal to
+the recording byte for byte), `0 TS escapes`, `18 non-ASCII runs, 0 not found`. Then:
+```
+ig-normalize: 12430 identical, 0 DIFFER   (golden 230 / fleurs 7706 / probe 32 / synthetic 320 / tier 4142)
+ig-g2p: 106756 identical, 0 DIFFER
+phonemize-sync / phonemize-best / phonemize-trace / trace: 3984 identical, 0 DIFFER each
+cargo test --release igbo: 1 passed (67 pins: igbo 12, igboNormalize 33, igboNumbers 22; 68 expects, 0 failures)
+```
+Haystack: `normalizeIgbo` changed golden 7/115, FLEURS 138/3,853, probes 11/16, synthetic 124/160 texts.
+
+**Guard check.** FUSED_QUANTITY's power class narrowed from `[²³23]` to `[²³2]`, and `below100`'s unit remainder of 1
+read through `units` instead of `one`: `ig-normalize: 12365 identical, 65 DIFFER`, `ig-g2p: 100430 identical, 6326
+DIFFER`. Restored: 0 DIFFER both.
+
+**TS observation (reported, not fixed).** A letter `x` between digits reads as the Latin fallback's initial /z/:
+`4x100` → *anɔ z otu naɾɪ* ("four z one hundred"). The header declines MULTIPLICATION for lack of a word, which covers
+`×`; an ASCII `x` is not declined but voiced. The leading minus (`-5` → *ise*) and the infix U+2212 (`5 − 3` →
+*ise atɔ*) are silent too, which the header records as an accepted silence.
+
+**Implication.** Commit ig; ha next.

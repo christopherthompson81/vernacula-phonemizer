@@ -78,6 +78,7 @@ const FLEURS_DIR: Record<string, string> = {
     my: "my_mm",
     jv: "jv_id",
     yo: "yo_ng",
+    ig: "ig_ng",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5742,6 +5743,54 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const d of ds) emit({ text: units(d), op: "number" }, yorubaNumber(d));
         for (const n of [1.5, -1, -0, NaN, Infinity, -Infinity, 1e21, 1.5e21, 2 ** 53, 2 ** 53 + 2, 1e12, 123456.789, -12.7, 0.5]) emit({ n: String(n), op: "cardinal" }, yorubaCardinal(n));
         for (const t of [...texts, "٣٤٥ àti ১২ àti 12", "５"]) emit({ text: units(t), op: "read" }, readYorubaNumbers(t));
+    },
+    // ── Igbo (ig). Inputs: the ig golden, FLEURS ig_ng (columns 3 and 4) and probes/ig.txt. ──
+    // normalizeIgbo, the symbol tier on what normalize hands it (recorded through the wrapper) and the registry's ig
+    // engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm: grouping, the ordinal tail
+    // (cases, the long s, the boundary refusals), the range dash, the fused-quantity space for every unit and power,
+    // the tier (percent first, currencies, units noun-first, squared after and cubed before, `&`) and decimals.
+    async "ig-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeIgbo } = await import("../../../src/languages/igbo/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/igbo\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ig"], FLEURS_DIR.ig, ["ig.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["1,000", "12,345,678", "0,500", "10,500", "1,0000", "1,00", "2,5", "01,000", "1,000.5"]) for (const tail of ["", ",", ".", " mmadụ"]) add(`e nwere ${n}${tail}`);
+        for (const o of ["8th", "32nd", "21st", "3rd", "1,000th", "8TH", "21ſt", "8tha", "a8th", "8 th", "11th.", "ndị", "Kraịst", "2nd-3rd"]) add(`mba ${o} kachasị`);
+        for (const r of ["1967-1970", "90 – 120", "3—4", "5 -6", "a-5", "5-a", "1.5-2.5"]) add(`afọ ${r} ahụ`);
+        for (const u of ["km", "mm", "cm", "kg", "km2", "km²", "km³", "km3", "KM", "Kg", "kma", "kmx2"]) for (const pre of ["ala198 ", "ala198", "ala198-200 ", "x5.5 ", "ọ7 ", "a1,000 "]) add(`mpaghara ${pre}${u} ebe`);
+        for (const t of ["9%", "8.3%", "60 %", "(9%)", "₦500", "US$170,000", "$5", "$ 5", "10 km", "48 kg", "923,768 km2", "100 km³", "5 mm", "5 cm²", "5 & 6", "A & B", "5 m", "6 ft", "5 km/h"]) add(`ọ bụ ${t} ebe a`);
+        for (const d of ["3.14159", "2.5", "1.0", "0.05", "1.2.3", ".5", "5.", "2.30pm", "100.9fm"]) add(`ọnụ ọgụgụ ${d} ebe a`);
+        for (const l of ["Lone \ud800 surrogate na 𝐀𝐁 na ﬁ.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeIgbo(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("ig", t));
+        }
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord over every letter run of the texts (as written, lower, UPPER, NFD, NFC), every 1–3 letter string
+    // over the alphabet plus the five marks, edge strings; numberToWords over 0…20,000 (with and without the raw
+    // digits), scaled samples, runs past 10^12, and non-integer / non-finite values with and without raw.
+    async "ig-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/igbo/igbo.ts");
+        const { numberToWords } = await import("../../../src/languages/igbo/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("ig")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { const w = m[0]; words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.normalize("NFD")); words.add(w.normalize("NFC")); }
+        const abc = [..."abcdefghijklmnoprstuvwyzịọụṅŋq", "̀", "́", "̄", "̣", "̇"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Ọ̀", "ṅ", "Ṅ", "ń", "ǹ", "ḿ", "m̄", "n̄", "ụ̀", "ị́", "nwa", "nnụ", "chch", "kpkp", "x", "q", "c", "ñ", "ß", "æ", "h", "hụ"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: string[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 3) ns.push(String(k * 1000 + 21), String(k * 1e6 + 155), String(k * 1e9 + 1999), String(k * 1e6), String(k * 1e9));
+        for (let e = 9; e <= 22; e++) { ns.push(String(10 ** e)); ns.push(String(10 ** e - 1)); ns.push(String(10 ** e + 7)); }
+        ns.push("999999999999", "1000000000000", "9007199254740993", "12345678901234567890123", "007", "0000");
+        for (const d of ns) { emit({ n: d, raw: units(d), op: "words" }, numberToWords(Number(d), d)); emit({ n: d, raw: null, op: "words" }, numberToWords(Number(d))); }
+        for (const [n, raw] of [["1.5", "15"], ["-1", "1"], ["NaN", "x9"], ["Infinity", "٣"], ["-0", "0"], ["1e21", undefined], ["1.5", undefined], ["-12", undefined], ["NaN", undefined], ["-Infinity", undefined]] as const) emit({ n, raw: raw === undefined ? null : units(raw), op: "words" }, numberToWords(Number(n), raw));
     },
 };
 

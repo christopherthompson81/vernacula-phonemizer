@@ -39,6 +39,7 @@ pub mod hiligaynon;
 pub mod hindi;
 pub mod hungarian;
 pub mod icelandic;
+pub mod igbo;
 pub mod ilocano;
 pub mod indonesian;
 pub mod irish;
