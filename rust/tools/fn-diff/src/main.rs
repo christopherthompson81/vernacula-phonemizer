@@ -2947,6 +2947,29 @@ fn main() {
                 }
             })
         }
+        "su-normalize" | "su-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::sundanese::{sunda_aksara, sundanese};
+            // Building `su` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "su").unwrap();
+            let su = sundanese::create_sundanese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => su.normalize(&t()),
+                    "digits" => sunda_aksara::normalize_sunda_digits(&t()),
+                    "symbols" => su.symbols(&t()),
+                    "text" => with_host(&JsString::from("su"), || su.text(&t())),
+                    "word" => sundanese::phonemize_word(&w()),
+                    "nat" => sundanese::NAT(&w()),
+                    _ => {
+                        JsString::from(format!("{}|", sunda_aksara::is_aksara_sunda(&w())).as_str())
+                            .concat(&sunda_aksara::aksara_to_latin(&w()))
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

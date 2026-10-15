@@ -5547,6 +5547,77 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ word: units(w), op: "nat" }, nat(w));
         }
     },
+    // ── Sundanese (su). Inputs: the su golden and probes/su.txt (no FLEURS transcript exists). ──
+    // normalizeSundanese, the symbol tier on what normalize hands it (recorded through the wrapper) and the registry's
+    // su engine (`renderInHost`: digit fold, normalize, no pre-pass) over every text plus synthetic rows per arm: TeX
+    // superscripts, grouping (dot, comma, every space variant, a lone 0), clocks after each clock word and bare, the
+    // two rate arms over every unit × exponent spelling, decimals, both era markers, ranges and each refusal, school
+    // years and fractions, degrees with every scale and compass letter, and the signs; the number path over 0…3,000
+    // and long runs.
+    async "su-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeSundanese } = await import("../../../src/languages/sundanese/normalize.ts");
+        const { normalizeSundaDigits } = await import("../../../src/languages/sundanese/sundaAksara.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/sundanese\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["su"], undefined, ["su.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const t of ["$x²$", "$a⁻¹+b$", "$x$", "$$²", "a$²$b"]) add(`rumus ${t} tea`);
+        for (const n of ["1.234", "12.345.678", "1,234", "12,345,678", "1 234", "1 234", "1 234", "1 234", "0.500", "01.234", "1.2345", "1.234,5"]) for (const tail of ["", ".", ",", " jalma"]) add(`aya ${n}${tail}`);
+        for (const w of ["jam", "Jam", "JAM", "tabuh", "pukul", "Pukul", "jamm"]) for (const c of ["7.30", "07:00", "23.59", "24:00", "9.05", "12.5", "7.300", "1.30.5"]) add(`${w} ${c} isuk`);
+        for (const c of ["10:30", "7:00", "25:00", "9:60", "1:2:3", "a10:30", "10:301", "10:30.5"]) add(`mimiti ${c} wungkul`);
+        for (const u of ["km", "m", "cm", "mm", "kg", "g", "ha", "l", "c", "KM", "Kg", "gr", "x"]) for (const e of ["", "²", "³", "2", "3", "4"]) { add(`laju 60 jalma/${u}${e} wungkul`); add(`laju 60 per ${u}${e} wungkul`); add(`laju 60/${u}${e}`); }
+        for (const d of ["3,14", "2.5", "1,05", "12,345", "1.2.3", "0,5,", "7.25"]) add(`panjang ${d} m`);
+        for (const e of ["500 SM", "5 M", "1990-an M", "300 SM.", "SMA", "M.Sc", "5M", "5 Ma", "5 M.a"]) add(`taun ${e} kitu`);
+        for (const r of ["1990-1995", "5 - 10", "nepi ka 3-4", "ti 6-7", "antara 8-9", "10-5", "abc-12", "1.5-2", "3-4-5", "dugi ka 1-2", "tepi ka 2–3"]) add(`taun ${r} kitu`);
+        for (const f of ["2019/2020", "2019/2021", "1/2", "3/4", "1/2/3", "1234/5", "01/2", "1/02"]) add(`bagian ${f} kitu`);
+        for (const d of ["30°C", "86 ° F", "6°S", "107°E", "12° N", "45°lintang", "90°", "5°ſ", "5°w", "5° Wa", "5°K"]) add(`suhu ${d} kitu`);
+        for (const g of ["±5", "3+4", "+5", "2 + (−3)", "x+(5", "x = y", "a < b", "c > d", "8 ÷ 2", "-5", "(−7)", "–8", "a-5", "A&B", "a & b", "3 x 4", "2×3"]) add(`itung ${g} kitu`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeSundanese(t));
+            emit({ text: units(t), src, op: "digits" }, normalizeSundaDigits(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("su", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e9 + 10));
+        for (let e = 10; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e + 1));
+        ns.push("9007199254740991", "9007199254740993", "12345678901234567890", "007", "᮱᮲᮳");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("su", n));
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3
+    // letter string over the alphabet, every 4-letter string over a context set, every Aksara Sunda onset × medial ×
+    // vowel sign × final and fixed-seed PRNG strings over U+1B80–U+1BBF; aksaraToLatin over the same Aksara items.
+    async "su-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/sundanese/sundanese.ts");
+        const { aksaraToLatin, isAksaraSunda } = await import("../../../src/languages/sundanese/sundaAksara.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zéÉ\\u{1B80}-\\u{1BAF}\\u{1BBA}-\\u{1BBF}]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("su")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzé"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouéngyks"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        const aks = new Set<string>();
+        const cp = (a: number, b: number): string[] => Array.from({ length: b - a + 1 }, (_, i) => String.fromCodePoint(a + i));
+        const onsets = [...cp(0x1b8a, 0x1ba0), "ᮮ", "ᮯ", "ᮽ", ...cp(0x1b83, 0x1b89), "ᮻ", "ᮼ"];
+        for (const o of onsets) for (const md of ["", "ᮡ", "ᮢ", "ᮣ", "ᮬ", "ᮭ", "ᮢᮡ"]) for (const v of ["", "ᮤ", "ᮥ", "ᮦ", "ᮧ", "ᮨ", "ᮩ", "᮪", "᮫"]) for (const f of ["", "ᮀ", "ᮁ", "ᮂ", "ᮾ", "ᮿ", "ᮀᮂ"]) aks.add(o + md + v + f);
+        let x = 0x51d0a9;
+        const rnd = (n: number): number => { x = (x + 0x6d2b79f5) | 0; let t = Math.imul(x ^ (x >>> 15), 1 | x); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) % n; };
+        for (let i = 0; i < 4000; i++) { let s = ""; for (let k = 1 + rnd(7); k > 0; k--) s += String.fromCodePoint(0x1b80 + rnd(0x40)); aks.add(s); if (i % 4 === 0) aks.add("a" + s); }
+        for (const a of aks) words.add(a);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Dvořák", "Ångström", "Œuvre", "Straße", "constructor", "toString", "aa", "naam", "eueu", "ee", "əə"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        for (const a of aks) emit({ word: units(a), op: "latin" }, `${isAksaraSunda(a)}|${aksaraToLatin(a)}`);
+    },
 };
 
 

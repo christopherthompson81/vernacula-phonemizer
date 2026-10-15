@@ -1,0 +1,22 @@
+# Synthetic Sundanese probes (su has no FLEURS text, so these carry the corpus-wide weight): one or more lines per
+# arm of normalize.ts and the neighbour it must decline, plus g2p and number corners.
+Rumusna $x²+y³$ jeung $10^{2}$ sarta $a⁻¹$ tapi $biasa$ wungkul.
+Jumlahna 1.234.567 jalma, 12,345 imah, 1 000 000 rupiah, 5 000 km sarta 0.500 jeung 1.0000.
+Jam 7.30 isuk, tabuh 07:00, pukul 23:59, jam 24:00, Jam 9.05 sarta jam 12.5.
+Mimitina 10:30 nepi ka 11:00, lain 25:00 atawa 9:60, sarta 1:2:3.
+Lajuna 60 km/jam, 5 m/detik, 30 km/j, 10/km, 7 jalma/km², 8 jiwa/km2 jeung 9 per m³ sarta 3 per ha.
+Hargana Rp 5.000, US$ 10, AS$ 3, € 20, £ 5 jeung $ 7 sarta 50%.
+Beuratna 5 kg, 10 g, 3 gr, 2 mg, 7 l, 1 pm, 4 ha, 8 mm, 9 cm jeung 6 m.
+Panjangna 3,14 m, 2.5 km, 1,05 jeung 12,345 sarta 1.2.3.
+Taun 500 SM, abad ka-5 M, taun 1990-an M, 300 SM. jeung SMA sarta M.Sc.
+Taun 1990-1995, 5 - 10, nepi ka 3-4, ti 6-7, antara 8-9, 10-5 jeung abc-12.
+Taun ajaran 2019/2020, 2019/2021, 1/2 bagian, 3/4 jalma, 1/2/3 sarta 1234/5.
+Suhuna 30°C, 86 ° F, 6°S, 107°E, 12° N, 45°lintang jeung 90° sarta 5°ſ.
+Tambah ±5, 3+4, +5, 2 + (−3), x = y, a < b, c > d jeung 8 ÷ 2 sarta -5 jeung (−7).
+Abdi jeung Tom & Jerry sarta 3 x 4 jeung 2×3.
+Awi naam saé, eusi, bengeut, ngaran, nyaho, khas, syarat, quran, xilofon, zebra, hésé.
+ᮃᮊ᮪ᮞᮛ ᮞᮥᮔ᮪ᮓ ᮘᮞ ᮞᮥᮔ᮪ᮓ ᮊᮢᮤᮞ᮪ ᮻᮞ ᮼᮙ᮪ ᮄᮀ ᮃᮁ ᮉᮂ ᮊᮾ ᮙᮿ ᮮᮯᮽ
+Angka ᮱᮲᮳ jeung ᮰ sarta ᮱᮰᮰᮰.
+Angka 0 1 10 11 12 19 20 21 99 100 101 111 999 1000 1001 2000 1000000 2500000 1000000000 9007199254740991 9007199254740993 12345678901234567890.
+Naon? Muhun! Réngsé. Koma, titik koma; titik dua: rampés… tungtung.
+Ngaran Dvořák, Ångström, Œuvre, Straße jeung Müller.
