@@ -72,6 +72,7 @@ const FLEURS_DIR: Record<string, string> = {
     zu: "zu_za",
     xh: "xh_za",
     nso: "nso_za",
+    sn: "sn_zw",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5363,6 +5364,67 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
         }
+    },
+    // ── Shona (sn). Inputs: the sn golden, FLEURS sn_zw (columns 3 and 4) and probes/sn.txt. normalizeShonaPre, the
+    // symbol tier over its output (recorded through the wrapper), normalizeShonaPost over that and over the raw
+    // text, and `createShona().text`, over every text plus synthetic rows for every arm. ──
+    async "sn-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeShonaPre, normalizeShonaPost } = await import("../../../src/languages/shona/normalize.ts");
+        const { createShona } = await import("../../../src/languages/shona/shona.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/shona\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createShona();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["sn"], FLEURS_DIR.sn, ["sn.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["&amp;", "&nbsp;", "A &amp; B", "A&B", "vane$5", "ne$100", "Ne$5", "$5", "zvi $5"]) add(`pa ${e} zvakare`);
+        for (const d of ["U.S.", "U. S. A.", "U.\u00a0S. ", "U.S.A", "U.S.Geological", "A.B", "É.Ü.", "U.S", "U. S. "]) for (const tail of ["", "Iye", " Iye", " iye", "."]) add(`kuAmerica ${d}${tail}`);
+        for (const g of ["1,000", "1,000,000", "1,234,5", "1,000.5", "1 000", "1\u00a0000", "1\u202f000", "1\u2009000", "30 9", "1,0000"]) add(`vanhu ${g} vakauya`);
+        for (const o of ["15th", "1st", "2ND", "3rd", "16thx"]) add(`muzana ramakore re${o}`);
+        for (const r of ["10-20", "20-10", "10 – 20", "10—20", "1995-96", "5-5", "-5-6", "5-6-7", "10-20.5", "10-20a"]) add(`kubva ${r} zvakare`);
+        for (const m of ["2.5 m", "2,5m", "2.5 m²", "2.5 m³", "2.5 m'", "2.5 ma", "2.5m2", "25 m"]) add(`kureba ${m} zvakare`);
+        for (const h of ["5 hrs", "5hr", "1.5 hrs", "5 hrsx", "a5 hrs", "5:30 hrs"]) add(`kwemaawa ${h} zvakare`);
+        for (const d of ["30°C", "30 °C", "30°c", "30 oC", "30\u00a0oC", "86°F", "30°", "30 o", "30°x", "1.5°C", "madhigiriyi 30°C", "30°C madhigiriyi"]) add(`kupisa ${d} nhasi`);
+        for (const c of ["makiromita 5", "mamita 2", "madhora 3", "madhora 13", "madhora 100", "madhora 1000000", "madhora 5.5", "matani 9", "maawa 22", "madhora\u00a04"]) add(`pane ${c} chete`);
+        for (const t of ["$5", "US$5", "50%", "5 km", "5 kg", "5 t", "5 ha", "5 l", "5 L", "100 km/h", "5 km/hr", "5 m/s", "5 km/min", "5 km²", "6x6", "6 × 6"]) add(`ne ${t} zvakare`);
+        for (const v of ["3.5", "3.14", "3.145", "1,5", "1,50", "1,500", "0.5", "1.2.3"]) add(`ne ${v} zvakare`);
+        for (const c of ["ALL CAPS", "  spaced  out  ", "a\u00a0\u00a0b"]) add(c);
+        for (const [t, src] of rows) {
+            const a = normalizeShonaPre(t);
+            const b = rec.apply(a);
+            emit({ text: units(t), src, op: "pre" }, a);
+            emit({ text: units(a), src, op: "symbols" }, b);
+            emit({ text: units(b), src, op: "post" }, normalizeShonaPost(b));
+            emit({ text: units(t), src, op: "post" }, normalizeShonaPost(t));
+            emit({ text: units(t), src, op: "text" }, withHost("sn", () => E.text(t)));
+        }
+    },
+    // phonemizeWord over every letter run, every 1–3 letter string of the alphabet (with both apostrophes) and
+    // corners; numberToWords over 0…20,000, magnitudes and the token-string fallback; withClass6Concord.
+    async "sn-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/shona/shona.ts");
+        const { numberToWords, withClass6Concord } = await import("../../../src/languages/shona/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("sn")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz'’"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "ng'ombe", "ng’ombe", "NG'OMBE", "tsvaga", "dzvene", "nzvimbo", "x", "q", "çà", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1e12 - 1, 1.5, 20.7, -1, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["9007199254740993", "1000000000000000000001", "007", "", "12a", "١٢", "\ud800", "𝟙2"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
+        }
+        for (let i = 0; i <= 2000; i++) emit({ text: units(numberToWords(i)), op: "concord" }, withClass6Concord(numberToWords(i)));
+        for (const w of ["", "zero", "piri", "motsi", "a piri", "piri ", "sere sere", "gumi ne piri"]) emit({ text: units(w), op: "concord" }, withClass6Concord(w));
     },
 };
 

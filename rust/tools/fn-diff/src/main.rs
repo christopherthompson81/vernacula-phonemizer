@@ -2872,6 +2872,29 @@ fn main() {
                 }
             })
         }
+        "sn-normalize" | "sn-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let sn = vernacula_phonemizer::languages::shona::shona::create_shona().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "pre" => sn.normalize_pre(&t()),
+                    "symbols" => sn.symbols(&t()),
+                    "post" => sn.normalize_post(&t()),
+                    "text" => with_host(&js("sn"), || sn.text(&t())),
+                    "word" => sn.phonemize_word(&units(&input["word"])),
+                    "concord" => sn.with_class6_concord(&t()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        sn.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

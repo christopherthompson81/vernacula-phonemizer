@@ -242,3 +242,34 @@ Haystack: `normalizeSepedi` changed golden 15/141, FLEURS 248/3,380, probes 11/1
 **Clippy note.** `cargo clippy --workspace` stops with one `invisible_characters` error, in
 `languages/sylheti/normalize.rs:163` (main's, fixed by a PR landing now). None of this group's files holds a literal
 invisible or format character (grep over the six TS directories and the Rust modules).
+
+## Run 10 — 2026-10-15 07:20 (sn: first build, differentials, pins)
+
+**Shape.** manifest.rs (with `GRAPHEME_KEYS`), numbers (magnitude nouns with concorded counts, the digit fallback
+from 10^12, `withClass6Concord`), normalize (two passes around the tier) and shona. Differences from tn that the port
+keeps: TOKEN is `hostWordRun(["Latin"], "'’")` (both apostrophes inside a word), `phonemizeWord` folds `’` to `'`
+after lowercasing, the native class is `[a-z'’]`, and `DEG` is an ordinary TS string, so its NBSP is a literal
+character in the cooked pattern.
+
+**Commands.** The three audits (`fix_esc.py` restored 14 literals; then 19 raw patterns, 2 not verbatim (TOKEN and
+the recorded JSON), 0 escapes short, 0 non-ASCII runs missing); `parity sn`; `sn-normalize` / `sn-g2p` dumps with
+`FLEURS_DIR` `sn: "sn_zw"`; `sbantu/e2e.sh sn sn-normalize sn-g2p phonemize-sync phonemize-best trace`; the TS
+suite's 90 calls appended to shona.rs.
+
+**Raw finding.** `sn: 200/200` on the first build, and:
+```
+sn-normalize: 19800 identical, 0 DIFFER   (golden 650 / fleurs 18380 / probe 65 / synthetic 705)
+sn-g2p: 69675 identical, 0 DIFFER   (incl. withClass6Concord over 0…2,000 and corners)
+phonemize-sync / phonemize-best / trace: 3819 identical, 0 DIFFER each
+cargo test --release shona: 1 passed (90 pins)
+```
+
+**Guard check.** The concord pass's ceiling (`n >= 1e6` keeps the digits) raised to 1e18:
+`sn-normalize: 19796 identical, 4 DIFFER`. Restored: 0 DIFFER.
+
+**TS findings (reported, not fixed).**
+1. The bare-`o` degree arm reads a free-standing `o` after a number as degrees: `Vaive 5 o kure` →
+   `Vaive madhigiriyi mashanu kure`. The step's note says the arm "cannot bite into an ordinary word" because it
+   demands a space before the letter; a one-letter word after a numeral is exactly the case that guard leaves open.
+2. As in st and tn, a magnitude suffix with no word is spelled as letters: `Ne $1.5bn zvakare` →
+   `… $1 poyindi 5bn …` → *… ʃanu ɓn …*.

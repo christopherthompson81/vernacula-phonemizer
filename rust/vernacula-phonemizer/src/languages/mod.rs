@@ -72,6 +72,7 @@ pub mod sepedi;
 pub mod serbian;
 pub mod sesotho;
 pub mod setswana;
+pub mod shona;
 pub mod slovak;
 pub mod slovenian;
 pub mod spanish;
