@@ -1,0 +1,27 @@
+# Sylheti off-golden probes: one line per arm of src/languages/sylheti/normalize.ts and the sylheti.ts tokenizer,
+# each with the neighbour that arm must decline. SYNTHETIC text only (single words recombined). Invisible and
+# Bengali-script characters are written as \u{…} escapes.
+# 1) NFC: precomposed and decomposed ya-nukta inside a Syloti run
+ꠙꠦꠎ\u{09BC}ꠣꠞꠣ ꠙꠦ\u{09DF}ꠣꠞꠣ ꠡꠧꠒꠤꠎ\u{09BC}ꠣꠝ ꠞꠎ\u{09BC}ꠦꠍꠦ ꠛꠤꠛꠦꠌꠘꠣꠎ\u{09BC}
+# 2) zero-width characters inside and between words
+ꠖꠇ꠆\u{200C}ꠈꠤꠘ ꠀ\u{200D}ꠍꠦ ꠝꠣ\u{200B}ꠔ ꠡꠘ\u{FEFF}ꠘ ꠀ\u{2060}ꠞ ꠀ\u{200E}ꠞ ꠀ\u{200F}ꠞ
+# 3) stray Bengali marks and letters in a Syloti word; a pure Bengali gloss must not fold
+ꠝ\u{09C2}ꠟ꠆ꠎꠝꠣꠘ ꠙꠞꠤꠝꠣ\u{09A3}ꠦ ꠀ\u{0981}ꠡ ꠃ\u{09CE}ꠙꠣꠖꠘ ꠙ꠆ꠞꠜ\u{09C3}ꠔꠤ \u{098B}ꠔ ꠇ\u{09DC}ꠣ ꠇ\u{09A1}\u{09BC}ꠣ ꠇ\u{0982}ꠇ ꠇ\u{0983}ꠇ
+\u{09AC}\u{09BE}\u{0982}\u{09B2}\u{09BE}\u{09A6}\u{09C7}\u{09B6} ꠍꠤꠟꠐꠤ ꠇ\u{09F0}ꠇ ꠇ\u{09E6}ꠇ ꠇ\u{09F3}ꠇ
+# 4) dotted native abbreviations (multi-dot, trailing dot, a single-dot abbreviation keeps its pause)
+২৫ ꠝꠤ.ꠉ꠆ꠞꠣ. ꠍꠦ.ꠝꠤ. ꠝꠦ.ꠐꠘ ꠇꠤ.ꠇ꠆ꠎꠣꠟꠧꠞꠤ ꠄꠘ.ꠄꠁꠌ.ꠄꠍ ꠒꠣ. ꠞꠣꠝ ꠀꠍꠦ.
+# 5) de-grouping: Indic and Western groups, a leading zero, a two-digit tail, a list comma
+১,০০,০০০ ২২,২২৪,২৮২ ১৯,৬০০ 0,001 1,5 1990, 1991 12,34,567
+# 6) ranges: ascending (kept), a score and a lifespan (declined), decimals, each dash
+১০-১৪ ꠍꠦ.ꠝꠤ. ১২–২৬ ꠉ꠆ꠞꠣꠝ 1500—1650 3-3 4-2 ৩.৯-৫.৫ ১৯,৬০০-২০,০০০ 10 - 20 ২৫-১০
+# 7) degrees: the Syloti scale abbreviations, Latin C/F in both cases, the bare sign, a letter after
+-২৭৩.১৫° ꠍꠦ. ১৮°ꠍꠦ. -৪৫৯.৬৭° ꠚꠣ. ৩০°C 86 ° f 45° 20°Ca ৩০°ꠍꠦꠟ
+# 8) the decimal point and the DOI/URL shapes it refuses
+৯.৭ ꠡꠞ꠆ꠇꠞꠣ 3.14 10.1177/0261927 2018.06.010 1.2.3 .5
+# 9) percent with and without an operand
+৫০% ꠔꠘꠦ ৯০% ꠀꠞ % ꠎꠝꠤꠘ 4 %
+# 10) taka: before a number, the word already written, a bare sign
+৳১ ꠨ ৳২ ꠀꠞ ৳৫ ꠐꠦꠈꠣꠞ ꠘꠧꠐ ৳১-ꠞ ꠜꠣꠉ ꠙ꠆ꠞꠔꠤꠇ ꠪ ৳ ॥ ৳১০ ৳ ১০
+# numbers and punctuation: every terminator and comma mark, digits past 2^53, embedded Latin
+১২৩ ৫২৬ ꠎꠣꠔꠤ 9007199254740993 12345678901234567890 ꠀꠍꠦ⁕ ꠀꠍꠦ꠫ ꠀꠍꠦ꠪ ꠀꠍꠦ꠨ ꠀꠍꠦ꠩ ꠀꠍꠦ। ꠀꠍꠦ॥ ꠀꠍꠦ৷ ꠀꠍꠦ? ꠀꠍꠦ! ꠀꠍꠦ, ꠀꠍꠦ.
+Google ꠀꠍꠦ São Paulo ꠕꠘꠦ

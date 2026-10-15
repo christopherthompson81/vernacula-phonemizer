@@ -2484,6 +2484,51 @@ fn main() {
                 }
             })
         }
+        "bengali-family" => {
+            let cache: std::cell::RefCell<std::collections::HashMap<String, BengaliFamilyFn>> =
+                Default::default();
+            Box::new(move |input| {
+                let lang = input["lang"].as_str().unwrap();
+                let mut c = cache.borrow_mut();
+                let f = c
+                    .entry(lang.to_string())
+                    .or_insert_with(|| bengali_family(lang));
+                let x = input
+                    .get("text")
+                    .or_else(|| input.get("word"))
+                    .map(units)
+                    .unwrap();
+                f(input["op"].as_str().unwrap(), &x)
+            })
+        }
+        "bn-tagger" => {
+            use vernacula_phonemizer::languages::bengali::bengali_tagger::create_bengali_tagger;
+            let tagger = create_bengali_tagger("bn-g2p-tagger").unwrap();
+            Box::new(move |input| tagger.tag(&units(&input["word"])).unwrap())
+        }
+        "syl" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::sylheti::{normalize::normalize_sylheti, sylheti};
+            let e = sylheti::create_sylheti().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "normalize" => normalize_sylheti(&units(&input["text"])),
+                "text" => with_host(&js("syl"), || e.text(&units(&input["text"]))),
+                "word" => e.phonemize_word(&units(&input["word"])),
+                op => panic!("syl: unknown op {op}"),
+            })
+        }
+        "or" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let e = vernacula_phonemizer::languages::odia::odia::create_odia(None).unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "normalize" => e.normalize(&units(&input["text"])),
+                "text" => with_host(&js("or"), || e.text(&units(&input["text"]))),
+                "word" => e.phonemize_word(&units(&input["word"])),
+                op => panic!("or: unknown op {op}"),
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
@@ -2645,4 +2690,61 @@ fn family_word(lang: &str) -> FamilyWordFn {
         }
         _ => panic!("hindi-family-word: no replay for {lang}"),
     }
+}
+
+type BengaliFamilyFn = Box<dyn Fn(&str, &JsString) -> JsString>;
+
+/// The Bengali maker's per-module surface for one of bn / as / bpy: its normalizer, its engine's text(), and the
+/// word level, as the language's own create function builds it.
+fn bengali_family(lang: &str) -> BengaliFamilyFn {
+    use vernacula_phonemizer::core::abugida::make_abugida_g2p;
+    use vernacula_phonemizer::core::foreign::with_host;
+    use vernacula_phonemizer::core::js_string::js;
+    use vernacula_phonemizer::core::load_manifest::load_manifest;
+    use vernacula_phonemizer::core::phonology::load_shared_phonology;
+    use vernacula_phonemizer::languages as l;
+    use vernacula_phonemizer::languages::bengali::manifest::BengaliDef;
+    use vernacula_phonemizer::languages::bengali::normalize::make_bengali_normalizer;
+    let dir = match lang {
+        "bn" => "bengali",
+        "as" => "assamese",
+        "bpy" => "bishnupriya",
+        _ => panic!("bengali-family: no replay for {lang}"),
+    };
+    let def: BengaliDef =
+        load_manifest(&format!("languages/{dir}"), &format!("{dir}.jsonc")).unwrap();
+    let g2p = make_abugida_g2p(&def.abugida, load_shared_phonology().unwrap());
+    let norm = make_bengali_normalizer(&def.numbers).unwrap();
+    let host = js(lang);
+    if lang == "as" {
+        use l::assamese::{assamese::create_assamese, normalize::normalize_assamese};
+        let e = create_assamese(None).unwrap();
+        return Box::new(move |op, x| match op {
+            "normalize" => norm(x),
+            "as-normalize" => normalize_assamese(x).unwrap(),
+            "text" => with_host(&host, || e.text(x)).unwrap(),
+            "g2p" => g2p.g2p(x),
+            "rules" => e.word_rules(x),
+            "word" => e.word(x),
+            "number" => e.number(x).unwrap(),
+            _ => panic!("bengali-family: unknown op {op}"),
+        });
+    }
+    let e = match lang {
+        "bpy" => {
+            l::bishnupriya::bishnupriya::create_bishnupriya(None)
+                .unwrap()
+                .0
+        }
+        _ => l::bengali::bengali::create_bengali(None).unwrap(),
+    };
+    Box::new(move |op, x| match op {
+        "normalize" => norm(x),
+        "text" => with_host(&host, || e.text(x, None)).unwrap(),
+        "g2p" => g2p.g2p(x),
+        "rules" => e.word_rules(x),
+        "word" => e.word(x, None),
+        "number" => e.number(x, None).unwrap(),
+        _ => panic!("bengali-family: unknown op {op}"),
+    })
 }
