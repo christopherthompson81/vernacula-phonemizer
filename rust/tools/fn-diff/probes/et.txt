@@ -1,0 +1,44 @@
+# Estonian (et) synthetic probes: one line per normalize.ts arm plus the neighbour it must decline. Synthetic text only.
+# 0) the marked clock, and the unmarked / sports / version neighbours
+Kell 11.20 algas koosolek ja kella 22:08 lõppes, kell 9.30, siis kella 11.35-ks.
+Tulemus 21:20 oli tasavägine ja standard 802.11n ning 6.30 ja 7.30 vahel; kell 24.00 ei ole.
+Akell 10.00 ja kelld 10.00 ning kella 1.15.5 jäävad.
+# 1) space grouping, and the year-plus-count neighbour
+Linnas elab 2 831 741 inimest, pindala on 84 000 km² ja eelarve 28\u{a0}150\u{202f}000 eurot.
+Aastal 1985 200 inimest ja 30 9 ning 0 123 jäid.
+# 2) era markers
+Linn rajati 322 eKr ja hävitati 3.–4. sajandil pKr; 632 m.a.j. ja 500 e.m.a ning umbes 1750 e. m. a.
+# 3) dotless abbreviations, with and without the dot, mid-sentence and sentence-final
+Kasutati püsse jms. Teise maailmasõja ajal oli nt kass, nr 665 ja sh hazara keel.
+Vaata ka jt. Siis vt. lisa ja ptk 3, tlk Mari, nn uus, jm asjad, jmt teised.
+Ta tuli u 1230 ja u. 4,8 km, kuid tähed n o r t u ũ w y jäävad.
+Lõpus on jms
+# 4) the ordinal coordination and range
+Need olid 7. ja 6. sajandil ning 1. või 2. kohal, samuti 1920.–1940. aastatel ja 3.–8. sajandini.
+Vahemik 21. ja 22. aastatel ning 15.–16. eluaastani ja 5. ja 6. tundmatu.
+# 5) the bare ordinal in every case
+See juhtus 1924. aastal, 19. sajandil, 1913. aasta, 2005. aastast, 2012. aastaks ja 1766. aastat.
+Pidu oli 9. augustil, 24. oktoober, 4. mai, 1. ametlik ja 2. trükk ning 1. tundmatu.
+Kuni 9. oktoobrini 1933 ja 1868. aastani, siis 1921. aastatel ja 1980. aastail.
+Aastal 1964. See nägi ette ja New York 1946.
+# 6) the hyphen case suffix on digits
+Tõsta 4-le ja 5000–6000-ni, kuid $2-le ja 63-aastaselt ning 2,6-trimetüül jäävad.
+# 7) ranges, ascending only, and the ellipsis span
+Aastad 1912–1913, 70–110 cm, 3000...4000 m, 3000–2000 eKr ja 14,5-30 atm.
+Lehed lk 137–151. ja 50 000 – 100 000. ning 1750/1500–500 ja II.16-17.98b32–34.
+# 8) the decimal comma
+Kasv oli 74,2% ja 120,758 miljardit, kuid Diogenes Laertios 5.14 ja 1,6 cm.
+# 9) degrees and the said-near guard
+Temperatuur on 25 °C ja 46° ja 49° põhjalaiuse ning 38°51' ja 41°16'.
+Ulatub temperatuur +26 °C kraadini, Kraadini ulatub 26 °C ja põhjalaiuskraadil, 26 °C.
+Temperatuur oli 30 °C. Sellest sai kraadi mõõdetud ja 100 °F.
+# 10) signs
+Alla −15 °C, (-35$ aastas), maakood +376, (315+35), sin(x) + x³ ja ($20+$20) ning 18–13,7 °C.
+# initialisms and the hyphen inflection
+SKP kasvas, NATO ja UNESCO, Šveitsi ja USA turg, 1,5% SKP-st ja USA-sse ning SNCF-i liin.
+TGV-rongile, SI-süsteemis, ISIS-e ja ICANN-i ning WC ja ÜRO.
+# symbol tier
+Kokku 70%, 1 km, 5 km, 13 m³, 2 ha, 1 kg, 5 € ja 3 £ ning Smith & Wesson ja 120 koma 758 miljardit dollarit.
+# numbers and g2p corners
+Number 1234567890 ja 999999999 ning 0 ja 007 ja 1000000.
+Õun, külm, töö, kõik, pea, kass, tikk, raamat, keskkool, linn ja Aragón.

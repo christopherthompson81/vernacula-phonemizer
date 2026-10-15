@@ -1,0 +1,25 @@
+# Icelandic (is) synthetic probes: one line per normalize.ts arm plus the neighbour it must decline. Synthetic text only.
+# 0) the dotted abbreviations
+Epli, perur o.s.frv. og bananar o.fl. í körfunni, en bo.fl. stendur.
+# 1–2) period grouping and the decimal comma
+Í bænum búa 1.234 manns og 12.345.678 fuglar, en 0.123 og 6.34 tommur standa; meðaltalið er 12,5 og 3,14159.
+# 3) the colon clock
+Lestin fer klukkan 9:30 og kemur 23:59, en 123:45 og 1:5 eru ekki tímar.
+# 4) percent and degrees
+Hlutfallið er 45 % og hitinn 20 °C, 5℃, 70 °F, 41℉ og 30° halli.
+# 5–6) squared, cubed, rates and plain units
+Svæðið er 5 km² og 3 m2 og 2 km³ og 7 m3, hraðinn 83 km/klst. og 120 km/h og 300 mph, fjarlægðin 5 km, 3 kg, 2 cm, 4 mm og 100 m og 802.11m.
+# 7) the ordinal selected by the following word
+Hann fæddist 17. september og 3. maí, á 18. öld en 18. aldar, í 1. sæti, 1. dag og 2. sæti; árið 1978. Síðan kom.
+Hún varð 31. og 32. ekki, en 07. maí stendur.
+# 8) ranges
+Árin 1990–2000 og 5 - 7 en 1-2-3 stendur.
+# 9) currency on both sides
+Það kostar $5 og 5 € og £ 3 og 6¥.
+# 10–11) signs, arithmetic and relational
+Hitinn fór í -5 og +3 og −2, en a-5 stendur; 3+4 og 2 ± 1, 1=1, 1≈2, 2<3, 4>3, 2×3, 2 x 3 og 6÷3.
+# 12) ampersand
+Fyrirtækið R&D og AT&T og A＆B.
+# g2p corners
+Hekla, vatn, Biblía, María, drekkja, deigja, Alþingi, bang, Steinn, Anna, Sviss, höfn, lofa, lukt, þríeyki, erkiengill og ein.
+Talan 1234567890123 og 999999999999 og 0 og 21 og 101 og 121 og 1001.

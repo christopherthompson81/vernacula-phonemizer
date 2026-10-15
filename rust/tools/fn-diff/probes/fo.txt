@@ -1,0 +1,27 @@
+# Faroese (fo) synthetic probes: one line per normalize.ts arm plus the neighbour it must decline, and the g2p
+# rules. Synthetic text only. FLEURS has no Faroese, so these and the golden are the whole of the text input.
+# 1) the time with two dots, and its neighbours
+Eitt eyka sekund, 23.59.60, verður lagt afturat, men 25.10.10 og 1.2.3 standa.
+# 2) grouping by dot and by space (NBSP, NNBSP, thin space)
+Í bygdini búgva 49.267 fólk, 1.000.000 fuglar, 7 737 fólkini og 48\u{a0}219 og 12\u{202f}000 og 3\u{2009}000.
+Talið 0.500 og 12.34 og 1.234,5 standa.
+# 3) the decimal dot
+Frímerkið kostar 3.00 kr og 4.19$ pr. km².
+# 4) abbreviations, mid-sentence and sentence-final
+Bygdin liggur á 62° n.br. og 7° v.l., bygd 300 f.Kr. og 1200 e.Kr., kl. 3 e.m. og kl. 9 f.m.; 2,5 mió. kr. og uml. 5 km.
+Hetta var um kl.
+Tað hendi f. Kr.) og so.
+# 5) the ordinal period: lowercase, capital, NBSP
+Tann 1. juli og 23. apríl og 3. min. og 2. og 3. ættarlið; frá 2. nov til 31.\u{a0}des. Tað var 1998. Síðan kom.
+# 6) degrees
+Hitin var 11 °C (52 °F), 56,7 °c og 62° norðurbreidd.
+# 7) signs
+Kuldin var -5 stig og (−3) og a –4, men x-5 stendur.
+# 8) ranges
+Árini 1269–1308 og 5 — 7 og 3-4 og 10-20 km, men 1-2-3 og 2/3-4 standa.
+# symbol tier
+Tað kostar 100 kr. og 5 $ og 3 € og 49,5 % og 5 km² og 2 m³, og A & B.
+# numbers with a decimal comma
+Talið 6,3 og 80,11 og 0,5 og 21 og 101 og 1234567 og 1000000000000.
+# g2p corners
+Dúgva, ógv, eggja, ikki, allur, Bogi, Eyður, dagur, bága, agað, aðal, avgera, ahorn, fílum, Adam, heim, gangi, Urð, tjóðra, hvat og hjá.

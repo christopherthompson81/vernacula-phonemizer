@@ -1928,6 +1928,118 @@ fn main() {
                 },
             }
         }),
+        "fi-normalize" | "fi-g2p" => {
+            let fi = vernacula_phonemizer::languages::finnish::finnish::create_finnish().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => fi.normalize(&t()),
+                    "initialisms" => fi.normalize_initialisms(&t()),
+                    "symbols" => fi.symbols(&t()),
+                    "unreadable" => JsString::from(fi.is_unreadable(&t()).to_string().as_str()),
+                    "ordinal" => fi
+                        .ordinal(num())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => fi.phonemize_word(&w()),
+                    "nat" => fi.nativise(&w()),
+                    "digits" => fi.read_digits(&units(&input["raw"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        fi.number_to_words(num(), raw.as_ref())
+                    }
+                }
+            })
+        }
+        "et-normalize" | "et-g2p" => {
+            let et =
+                vernacula_phonemizer::languages::estonian::estonian::create_estonian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => et.normalize(&t()),
+                    "initialisms" => et.normalize_initialisms(&t()),
+                    "symbols" => et.symbols(&t()),
+                    "unreadable" => JsString::from(et.is_unreadable(&t()).to_string().as_str()),
+                    "ordinal" => et
+                        .ordinal(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            input["ending"].as_str(),
+                        )
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => et.phonemize_word(&w()),
+                    "nat" => et.nativise(&w()),
+                    _ => et.text(&t()),
+                }
+            })
+        }
+        "hu-normalize" | "hu-g2p" | "hu-numbers" => {
+            let hu =
+                vernacula_phonemizer::languages::hungarian::hungarian::create_hungarian().unwrap();
+            let roman = vernacula_phonemizer::languages::hungarian::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => hu.normalize(&t()),
+                    "unreadable" => JsString::from(hu.is_unreadable(&t()).to_string().as_str()),
+                    "word" => hu.phonemize_word(&w()),
+                    "nat" => hu.nativise(&w()),
+                    "ordinal" => hu.ordinal_words(num()).unwrap_or_else(none),
+                    "mult" => hu.multiplicative_words(num()).unwrap_or_else(none),
+                    "roman" => (roman.ordinal.as_ref().unwrap())(num() as u32).unwrap_or_else(none),
+                    "stem" => hu.stem_for_suffix(&w(), &units(&input["suffix"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        hu.number_to_words(num(), raw.as_ref())
+                    }
+                }
+            })
+        }
+        "is-normalize" | "is-g2p" => {
+            let is =
+                vernacula_phonemizer::languages::icelandic::icelandic::create_icelandic().unwrap();
+            Box::new(move |input| {
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => is.normalize(&units(&input["text"])),
+                    "word" => is.phonemize_word(&w()),
+                    "nat" => is.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        is.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "fo-normalize" | "fo-g2p" => {
+            let fo = vernacula_phonemizer::languages::faroese::faroese::create_faroese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => fo.normalize(&t()),
+                    "symbols" => fo.symbols(&t()),
+                    "text" => fo.text(&t()),
+                    "word" => fo.phonemize_word(&w()),
+                    "nat" => fo.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        fo.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

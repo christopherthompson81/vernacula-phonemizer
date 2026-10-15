@@ -1,0 +1,34 @@
+# Hungarian (hu) synthetic probes: one line per normalize.ts arm plus the neighbour it must decline. Synthetic text only.
+# 1) multiplication and the abbreviations
+A pálya 2x15 méter és 6 × 4 elem, de a 3.2x4 kód és 1,5x2 marad.
+Ez pl. egy példa, kb. 20 km-re van, stb. És Dr. Kovács jött, ld. lent; vége stb.
+A város Kr. e. 300-ban épült, Kr.u. 50-ben nőtt, i. sz. 100 és i.e. 200 között; d. e. 10 és d.u. 3.
+# 2) de-grouping in every separator
+Ott 100.000 ember, 5.000.000 forint, 400. 000 lakos, 30 000 fő és 100,000 madár; 24.000, és mások.
+A kód 0.123 és 12,5 meg 1\u{a0}000 darab.
+# 3) the clock, and the score it must refuse
+A vonat 10:00-kor indul, 11: 20-kor megáll, 8:46-kor érkezik és 11:35-re ér oda; az eredmény 3:2-re.
+Éjjel 23:59 és 24:00 között, 9:05-kor.
+# 4–5) unit, metre and percent with a hyphen suffix
+A falu 20 km-re, 5 mm-es, 3 cm²-en, 2 kg-os, 10 mérföld-re és 2m-es, 4 m³-es, a 802.11g-vel.
+Az arány 29%-a, 93%-ával és 8 %-kal nőtt.
+# 6) the symbol tier
+Az út 120 km/h, 30 m/s, 300 mp/h, 5 km², 2 m³, 8 Mbit, 5 $ és 3 £, 57 % és A & B.
+# 7) degrees and signs
+A hőmérséklet 35°-tól, 20 °c-a, 30°C, 5 °F, 45° és −3 fok; 1990-5 nem negatív, de a -5 igen.
+Az érték ±2, UTC+1 és a + 30°C.
+# relational and division
+Ha 1 = 1 és 2<3 és 4 > 3, akkor 6 ÷ 3 és 100 ÷ 22 és 7÷1 és 9÷4 és 12÷30.
+# 8) decimals
+Az érték 3,5 és 0,25 méter.
+# 9) ordinals: year + month, month + day, general, and the ordinal period
+Az 1759. szeptember hónapban, augusztus 24. és március 3. között, a 19. század és a 3. helyen, a 2., a 3.
+A XIX. század, a XX. századi, II. Erzsébet, IV. Béla és a III. kerület; ez a második. Erzsébet jött.
+Mondat vége 2020. Új mondat.
+# 10) date and numeral suffixes
+Szeptember 17-én, május 1-jén, május 11-e, június 4-i, 1848-ban, 1970-es, 36-an, 1945-ig, 2022-es, 1943-as, 1907-es, 1000-es.
+# 11) acronyms with suffix, lexical, initialisms
+A GPS-hez, FBI-nak, GDP-je, WC-be, NATO-hoz, ENSZ-ben, WC és AOL, HIV, SUV, BBC, ÉÁ-ra.
+# numbers and g2p corners
+Szám 1234567890123 és 999999999999 és 0 és 22000 és 22000000.
+Harminchat, kilenchet, archoz, nyolcszáz, feddj, adj, bánja, hallja, feddte, hang, angyal, színpad, biztat, vasgolyó, Bach.
