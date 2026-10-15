@@ -205,7 +205,7 @@ public static class Normalize
     private static readonly JsRe LESS_THAN = JsRegex.Compile("\\s?<\\s?", "gu");
     private static readonly JsRe GREATER_THAN = JsRegex.Compile("\\s?>\\s?", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("\\s?÷\\s?", "gu");
-    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,)(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,\\d+(?![\\d/]))", "gu");
+    private static readonly JsRe FRACTION = JsRegex.Compile("(?<![\\d/]|\\d\\.|(?<![\\d/])\\d+,|\\d kropka )(\\d{1,3})\\/(\\d{1,3})(?![\\d/]|\\.\\d|,\\d+(?![\\d/])| kropka \\d)", "gu");
 
     /** Normalize one Polish input string. Pure text→text; ordered, and each ordering coupling is stated. */
     public static string NormalizePolish(string input)

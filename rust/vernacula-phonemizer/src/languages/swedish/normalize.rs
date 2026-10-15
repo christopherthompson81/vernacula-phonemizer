@@ -382,7 +382,7 @@ pub(crate) fn normalize_swedish(input: &JsString) -> JsString {
     // 5) clock, colon form.
     t = rewrite_with(
         &t,
-        js_re!(r"(?<![\d:,])(\d{1,2}):(\d{2})(?![\d,])(?!\.\d)", "gu"),
+        js_re!(r"(?<![\d:,])(\d{1,2}):(\d{2})(?!\d|,\d)(?!\.\d)", "gu"),
         clock,
     );
 

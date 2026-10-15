@@ -174,6 +174,26 @@ pub fn create_polish() -> Result<PolishPhonemizer, String> {
 mod tests {
     use super::*;
 
+    /// test/leftovers-1551.test.ts: a period decimal beside a slash is not a fraction; it reads as the comma
+    /// decimal does, differing only in the point word.
+    #[test]
+    fn the_1551_period_decimal_is_not_a_fraction() {
+        let pl = |s: &str| crate::phonemize(s, "pl").unwrap();
+        for (period, comma) in [
+            ("To 1/2.5 razy", "To 1/2,5 razy"),
+            ("Wynik 0.1/2 oraz", "Wynik 0,1/2 oraz"),
+        ] {
+            let (p, c) = (pl(period), pl(comma));
+            let (p, c): (Vec<_>, Vec<_>) = (p.split(' ').collect(), c.split(' ').collect());
+            assert_eq!(p.len(), c.len(), "{period}");
+            assert_eq!(
+                p.iter().zip(&c).filter(|(a, b)| a != b).count(),
+                1,
+                "{period}"
+            );
+        }
+    }
+
     #[test]
     fn clock_decade_era_and_fraction_rewrites() {
         let e = create_polish().unwrap();

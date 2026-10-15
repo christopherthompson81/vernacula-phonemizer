@@ -476,7 +476,7 @@ pub(crate) fn normalize_polish(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))",
+            r"(?<![\d/]|\d\.|(?<![\d/])\d+,|\d kropka )(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/])| kropka \d)",
             "gu"
         ),
         |m, t| {

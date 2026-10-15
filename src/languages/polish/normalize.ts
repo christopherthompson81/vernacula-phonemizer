@@ -411,7 +411,10 @@ export function normalizePolish(input: string): string {
     //   only with a digit beyond it — `,` is this language's decimal. The old `(?![\d.,])` refused ANY following
     //   `.` or `,`, so a fraction ending a sentence or a clause (`… i 1/2.`, `1/2, a`) stayed as digits. A `,`
     //   between two fractions is a list separator, so `1/2,3/4` reads both.
-    s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,)(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/]))/gu, (m0, a: string, b: string) => {
+    // ⚠ AND STEP 6 HAS ALREADY REWRITTEN A PERIOD DECIMAL (#1551): `2.5` is `2 kropka 5` by now, so the `\.\d`
+    //   arms never see `1/2.5` or `0.5/2`, and `1/2.5` read *jedna druga kropka pięć*. ` kropka ` + digit is the
+    //   same decimal tail on either side.
+    s = rewrite(s, /(?<![\d/]|\d\.|(?<![\d/])\d+,|\d kropka )(\d{1,3})\/(\d{1,3})(?![\d/]|\.\d|,\d+(?![\d/])| kropka \d)/gu, (m0, a: string, b: string) => {
         const den = ordinal(Number(b));
         if (den === undefined || Number(a) !== 1) return m0;
         return `jedna ${inflectOrdinal(den, "fem")}`;
