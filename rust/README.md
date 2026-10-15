@@ -9,6 +9,6 @@ cargo run --release -p regex-diff           # JsRegex against Node over csharp/r
 cargo run --release -p parity               # the golden gate, every ported language
 ```
 
-Status: 51 languages ported (`registry::LANGUAGES`), each byte-identical to its golden. The one exception is a
+Status: 56 languages ported (`registry::LANGUAGES`), each byte-identical to its golden. The one exception is a
 mag row that needs the unported `ar` engine. A foreign run routed to an unported engine is reported by
 `registry::port_pending()`. Per-language logs are in `docs/investigations/rust-port/`.
