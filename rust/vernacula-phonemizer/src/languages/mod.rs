@@ -54,6 +54,7 @@ pub mod korean;
 pub mod kyrgyz;
 pub mod lao;
 pub mod latvian;
+pub mod lingala;
 pub mod lithuanian;
 pub mod luganda;
 pub mod luxembourgish;

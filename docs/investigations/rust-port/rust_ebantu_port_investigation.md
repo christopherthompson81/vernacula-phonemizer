@@ -214,3 +214,51 @@ records that the bare `C` then reads as the palatal stop), a decimal reads its d
 → `kiɾomita emu tːaːno`), `5 km/h` keeps raw letters (no rate rule), and a bare `-5` loses its sign.
 
 **Implication.** lg done.
+
+## Run 6 — 2026-10-15 06:50 (ln: written tone, the NFD pipeline string, literal zero-width characters)
+
+**What was written.** `languages/lingala/{lingala,normalize}.rs` (the TS has no manifest module: the engine loads
+lingala.jsonc itself, and normalize.ts loads it a second time for `firstCard`, so both Rust modules do the same).
+Code points that needed care, all written from placeholders and substituted byte-level:
+- the four tone marks U+0301 U+0300 U+0302 U+030C and the TOKEN class range U+0300–U+036F are LITERAL in the TS and
+  stay literal (combining marks; not an invisible-character lint target);
+- the zero-width class `[​‌‍﻿]` (U+200B U+200C U+200D U+FEFF) is literal in the TS; per the #1591 rule it is written
+  as `\u{…}` escapes in an ordinary Rust string — same code points in the compiled pattern, nothing invisible in the
+  source;
+- the `expandDotted` NBSP is cooked from a template, so a Rust `\u{a0}` escape; the de-grouping class keeps its
+  regex-literal `   ` escapes.
+The text path runs `renormalize(…, NFD)` on the pipeline string and the g2p NFD/NFC on the word (off the seam).
+
+**Command.** `parity -- ln`; `audit.sh lingala lingala`; `escape_audit.py`; `regs.sh ln` then `newonly.py ln`;
+`ln-normalize` (golden, FLEURS ln_cd columns 3+4, `probes/ln.txt`, every text again in NFD, generated arms) /
+`ln-g2p` (letter runs as written / lower / UPPER / NFD, every 1–3 letter string over a–z ɛ ɔ, every vowel × two
+tone-mark slots composed and decomposed, 4-letter context strings); mutations; e2e + trace; provenance-poison; pins.
+
+**Raw finding.**
+- `ln: 200/200 identical`, first build.
+- Audits: 31 raw patterns, 0 misses; 60 non-ASCII runs, 0 missing; `7 TS escapes, 0 code points short`.
+  `newonly.py ln`: `rust 238, rust-only 17, core baseline 11, other 6`. Five of the six are reached through the
+  default foreign reader (English initials, DMS coordinates, Cyrillic stress marks, the micro sign) on the probes'
+  foreign names, i.e. not ln's. The sixth is ln's: `[– -]` (`gu`), the ISBN separator class, a regex literal inside
+  a template interpolation, which `tools/extract_regexes.mts` does not reach (the rn finding again; the same line
+  exists in haitian/ and bambara/). Checked by code point against the TS: U+2013 U+0020 U+002D, identical.
+- `ln-normalize: 13051 identical, 0 DIFFER` (golden 198, fleurs 7482, probe 34, synthetic 1576, number 3761);
+  `ln-g2p: 75924 identical, 0 DIFFER`.
+- Mutations: the spaced-range single-digit refusal narrowed to the left operand, and the fraction ceiling `<= 10` →
+  `< 10`: `ln-normalize: 13041 identical, 10 DIFFER` (probe 4, synthetic 6). The consonant keys sorted shortest
+  first: `ln-normalize: 6619 identical, 6432 DIFFER`, `ln-g2p: 67830 identical, 8094 DIFFER`. All reverted:
+  13051/0, 75924/0.
+- `phonemize-sync / phonemize-best / phonemize-trace / trace: 3857 identical, 0 DIFFER` each; provenance-poison `0`
+  sites; test/lingala.test.ts `97 pinned, 2 skipped` (the `getPhonemizer("ln")` object and a `loadManifest` call
+  return objects; the 19 `.text` calls through it are pinned and replayed through `registry::phonemize_in`),
+  `expects evaluated: 99, failures: 0`; both Rust tests pass.
+
+**Reading for correctness** (TS prints, `t.mts ln`):
+- **The `Ne` ordinal rule fuses a following digit.** `(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])` checks only that no
+  LETTER follows the `e`, so `1e5` reads `ya zómi na mítáno` ("fifteenth") and `2e6 ya bato` reads `ya túkú míbalé na
+  motóbá` ("twenty-sixth") — the `e` is deleted and the digits on either side join into a number nobody wrote.
+- Recorded, documented or by design: `25°F` reads the number and a bare `f` (only `°C` has a rule); `-5` loses its
+  sign; `5 - 6` (spaced single digits) stays a juxtaposition.
+
+**Implication.** ln done. TS defect to report (not fixed): lingala/normalize.ts's French ordinal rule `(\d+)e` has no
+digit guard after the `e`.

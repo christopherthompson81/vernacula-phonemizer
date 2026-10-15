@@ -3087,6 +3087,21 @@ fn main() {
                 }
             })
         }
+        "ln-normalize" | "ln-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::lingala::lingala;
+            // Building `ln` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ln").unwrap();
+            let ln = lingala::create_lingala().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ln.normalize(&t()),
+                    "text" => with_host(&JsString::from("ln"), || ln.text(&t())),
+                    _ => lingala::phonemize_word(&units(&input["word"])),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

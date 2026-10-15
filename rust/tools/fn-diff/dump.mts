@@ -79,6 +79,7 @@ const FLEURS_DIR: Record<string, string> = {
     jv: "jv_id",
     sw: "sw_ke",
     lg: "lg_ug",
+    ln: "ln_cd",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5925,6 +5926,58 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(2 ** 53 - 1, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
         for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890", "0"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
+    // ── Lingala (ln). Texts: the ln golden, FLEURS ln_cd (columns 3 and 4) and probes/ln.txt. ──
+    // normalizeLingala and the registry's ln engine (`renderInHost`: no pre-pass) over every text, each also in NFD,
+    // plus synthetic rows per arm, each with the neighbour it must decline; and the number path through the engine
+    // over 0…3,000, scaled samples and long runs.
+    async "ln-normalize"() {
+        const { normalizeLingala } = await import("../../../src/languages/lingala/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ln"], FLEURS_DIR.ln, ["ln.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const t of [...rows.keys()]) add(t.normalize("NFD"));
+        for (const c of ["7.30", "10:15", "23.59", "24.00", "7.300", "1.7.30", "7:60"]) for (const post of [" na ntongo", " na  ntongo", " ya butu", " UTC", " GMT", " MDT", " utc", " UTCx", " kaka", ""]) add(`ngonga ${c}${post} awa`);
+        for (const e of ["&nbsp;", "&NBSP;", "&#233;", "&#xE9;", "&#XE9;", "&amp;", "&#;", "\u200b", "\u200c", "\u200d", "\ufeff", "\u2060"]) add(`mo${e}kanda`);
+        for (const a of ["L.T.B.", "T.B.", "n. Y.K.", "n.Y.K.", "Y.K.", "b.n.b.", "L.T.B", "Y.K", "aY.K."]) for (const tail of ["", " Bato", " bato", ".", ",", "\u00a0Bato"]) add(`mobu 300 ${a}${tail}`);
+        for (const i of ["ISBN 978-2-1234-5680-3", "ISBN-13: 978 2 1234 5680 3", "ISBN 10 0-306-40615-2", "ISBN x", "ISBN 12X", "ISBN–10:1–2", "aISBN 12"]) add(`buku ${i} awa`);
+        for (const n of ["1,300", "12,500,000", "1.300", "2.500.000", "1 300", "12 500 000", "1\u00a0300", "1\u202f300", "1\u2009300", "1,0000", "0,500", "1,300.5", "1 300 5"]) for (const tail of ["", ".", ",", ",5"]) add(`bato ${n}${tail} awa`);
+        for (const u of ["km²", "km2", "m²", "m2", "km", "cm", "mm", "kg"]) for (const n of ["5", "5-10", "10–20", "3 — 4", "20-10", "2,5", "1.5", "5- 6"]) for (const sp of [" ", ""]) add(`molai ${n}${sp}${u} awa`);
+        for (const u of ["km 5", "km/h", "5 km/h", "kmx", "5 km²x", "5 kg3"]) add(`molai ${u} awa`);
+        for (const d of ["25°C", "30 ° c", "2,5°C", "25°F", "10%-20%", "30 % – 40 %", "50%-40%", "1,5%-2,5%", "5%", "1,5 %"]) add(`molunge ${d} awa`);
+        for (const r of ["1990-1995", "5-10", "5 - 10", "15 - 20", "5 -10", "5- 10", "10—5", "1-2-3", "a1-2", "1.5-2", "2-3,5", "12 - 3"]) add(`mibu ${r} awa`);
+        for (const m of ["$5", "$ 10", "5$", "1,000 $", "US$ 7", "us $7", "dolare $3", "falánga 5$", "dollars $9", "$x", "5 $ ", "1.5$"]) add(`mbongo ${m} awa`);
+        for (const f of ["1/2", "3/4", "2/3", "5/10", "7/12", "10/5", "1/2/3", "3,1/2", "1.1/2", "1/2.5", "1/2,5", "12,1/2", "¼", "½", "a1/2"]) add(`ndambo ${f} awa`);
+        for (const d of ["3,14", "2.5", "12,345", "1.2.3", "0,75", "802.11n", "1.5.", "1,5,"]) add(`motuya ${d} awa`);
+        for (const o of ["1er", "1ère", "1re", "1 er", "2ème", "2nd", "3e", "21e", "1erx", "a1e", "10 ème"]) add(`ya ${o} awa`);
+        for (const a of ["Tata & mama", "Kinshasa&Brazzaville", "&", " & "]) add(a);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeLingala(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("ln", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e4 + 101), String(k * 1e5 + 7), String(k * 1e6 + 101), String(k * 1e9 + 10));
+        for (let e = 4; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999", "1000000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("ln", n));
+    },
+    // phonemizeWord over every letter run of the texts (as written, lower, UPPER, NFD), every 1–3 letter string over
+    // the alphabet plus ɛ ɔ, every vowel × tone-mark pair and triple, every 4-letter string over a context set
+    // (nasals, the prenasal halves, vowels, marks) and edge strings.
+    async "ln-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/lingala/lingala.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("ln")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { for (const w of [m[0], m[0].toLowerCase(), m[0].toUpperCase()]) { words.add(w); words.add(w.normalize("NFD")); } }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzɛɔ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const marks = ["\u0301", "\u0300", "\u0302", "\u030c", "\u0303", "\u0301\u0301", ""];
+        for (const v of [..."aeiouɛɔAEIOUƐƆ"]) for (const m1 of marks) for (const m2 of marks) { words.add(v + m1 + m2); words.add("b" + v + m1 + "k" + v + m2); words.add((v + m1).normalize("NFC") + m2); }
+        const ctx = [..."mnbdgkyszaɛo\u0301\u0302"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚mb", "Dvořák", "Straße", "constructor", "toString", "__proto__", "LINGÁLA", "ʼa"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
     },
 };
 
