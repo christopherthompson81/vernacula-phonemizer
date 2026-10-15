@@ -1,6 +1,7 @@
 pub mod afrikaans;
 pub mod awadhi;
 pub mod azerbaijani;
+pub mod bashkir;
 pub mod bavarian;
 pub mod belarusian;
 pub mod bhojpuri;

@@ -2018,6 +2018,36 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "ba-normalize" | "ba-g2p" | "ba-numbers" => {
+            let ba = vernacula_phonemizer::languages::bashkir::bashkir::create_bashkir().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ba.normalize(&t()),
+                    "initialisms" => ba.normalize_initialisms(&t()),
+                    "symbols" => ba.symbols(&t()),
+                    "engine" => ba.text(&t()),
+                    "unreadable" => JsString::from(ba.is_unreadable(&t()).to_string().as_str()),
+                    "word" => ba.phonemize_word(&w()),
+                    "native" => ba.phonemize_word_native(&w()),
+                    "loan" => JsString::from(ba.is_russian_loan(&w()).to_string().as_str()),
+                    "fold" => ba.fold_legacy_codepage(&w()),
+                    "words" => ba.number_words(num()),
+                    "ordinal" => ba.ordinal_of(num()).unwrap_or_else(none),
+                    "roman" => ba.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => ba.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "ba-roman" => {
+            let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
