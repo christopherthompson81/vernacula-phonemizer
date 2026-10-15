@@ -2042,6 +2042,25 @@ fn main() {
                 }
             })
         }
+        "crh-normalize" | "crh-g2p" | "crh-numbers" => {
+            let crh =
+                vernacula_phonemizer::languages::crimeantatar::crimeantatar::create_crimean_tatar()
+                    .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => crh.normalize(&t()),
+                    "symbols" => crh.symbols(&t()),
+                    "engine" => crh.text(&t()),
+                    "word" => crh.phonemize_word(&w()),
+                    "nat" => crh.nativise(&w()),
+                    "words" => crh.number_words(num()),
+                    _ => crh.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
         "ba-roman" => {
             let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
             Box::new(move |input| {

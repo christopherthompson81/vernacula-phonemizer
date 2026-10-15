@@ -10,6 +10,7 @@ pub mod bulgarian;
 pub mod catalan;
 pub mod cebuano;
 pub mod chhattisgarhi;
+pub mod crimeantatar;
 pub mod croatian;
 pub mod czech;
 pub mod danish;

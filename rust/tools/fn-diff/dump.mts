@@ -4011,6 +4011,66 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const r of ["I", "II", "IV", "IX", "XIX", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["быуат", "быуатта", "быуаттарҙың", "Быуаттан", "БЫУАТ", "йыл", "быуатлыҡ"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
         for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
+    // ── Crimean Tatar (crh). Inputs: the crh golden and probes/crh.txt (FLEURS has no crh), plus GENERATED shapes. ──
+    // normalizeCrimeanTatar, the symbol tier normalize.ts built (recorded through the wrapper) on the raw text, and
+    // the engine's text(), over the texts and synthetic rows: the percent suffix, the magnitude abbreviations, every
+    // grouping mark, the era marker and coordinates in every trailing context, signed ranges, minus and degrees.
+    async "crh-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/crimeantatar/normalize.ts");
+        const P = (await import("../../../src/languages/crimeantatar/crimeantatar.ts")).createCrimeanTatar();
+        const rec = records.find((r) => /src\/languages\/crimeantatar\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["crh"], undefined, ["crh.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["0", "5", "0,7", "12.5", "100", "1 000"]) for (const p of ["%", " %", "%-ine", "% -den", "%ten", "% - ge", "%-İNE", "%-yüzde", "%-x"]) add(`Bu ${n}${p} kele`);
+        for (const m of ["mln", "mln.", "mln .", "mlrd", "mlrd.", "Mln", "mlnler", "kvadrat km", "kvadrat  km", "kvadrat km-ge", "kvadrat kmler"]) for (const tail of ["", " km²", " kişi", "."]) add(`5 ${m}${tail}`);
+        for (const n of ["1 000", "12 345 678", "1,000", "12,345,678", "1.000", "12.345.678", "1,5", "1.5", "123,4567", "0,123", "3 779,8", "1 000,000.5"]) add(`Bu ${n} metr`);
+        for (const ab of ["m.e.", "m. e.", "M.E.", "ş.e.", "c.e.", "ş.b.", "ğ.b.", "ş. e.", "ğ . b ."]) for (const tail of ["", " 753 senesi", ".", "\"", " »", ")", " enlikleri", " boyluğı", "enlik", " ve"]) add(`Bu ${ab}${tail}`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "5 – +8", "+3 – +4", "-8", "–8", "−8", "(–5", "5/6-7", "5-6/7", "1-2-3", "a-5", "x -5"]) for (const d of ["", "°C", " °С", "°c-den", "°-ge", "°", " %"]) add(`Hava ${r}${d} oldı`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, N.normalizeCrimeanTatar(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+    },
+    // phonemizeWord and the nativiser (rebuilt with crimeantatar.ts's class) over every letter run of the texts (as
+    // written, lowercased, uppercased), every 1-3 letter string over the alphabet (third letter from a context set),
+    // every 4-letter string of the coda and casing letters, and edge strings.
+    async "crh-g2p"() {
+        const T = await import("../../../src/languages/crimeantatar/crimeantatar.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zâçğıiñöşüA-ZÂÇĞIİÑÖŞÜ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("crh")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcçdefgğhıijklmnñoöprsştuüvyzâqxwIİÂ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "aeıiouüvlnrs") words.add(a + b + c); } }
+        const ctx = [..."avuIİıiqlns"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00b", "ŉ", "ǅ", "K", "ſ", "ﬁ", "é", "é", "ñ", "İ", "ı", "ẞ", "Ω", "й"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords over 0…20,000 and beyond, and the engine's own number reading on digit runs (the unsafe ones
+    // digit at a time).
+    async "crh-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/crimeantatar/numbers.ts");
+        const P = (await import("../../../src/languages/crimeantatar/crimeantatar.ts")).createCrimeanTatar();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n).join("|"));
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
 };
 
 
