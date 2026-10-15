@@ -1,0 +1,34 @@
+# Odia off-golden probes: one line per arm of src/languages/odia/normalize.ts and the odia.ts tokenizer, each with
+# the neighbour that arm must decline. SYNTHETIC text only. Nukta letters are written as \u{…} escapes.
+# native digits, folded before the rules
+୨୦୦୮ ମସିହା ୬.୫ କିମି ୩:୨ ଅନୁପାତ ୩୫ମିମି ବର୍ଷା
+# 1) the symbol tier: percent, currencies (US$ before $), magnitudes, units, rates, exponents, multiply, ampersand
+50% ଲୋକ US$14.7 ବିଲିଅନ୍ $5 £20 ¥100 10 km 5 mm 3 kg 60 mph 100 kph 5 km/h 3136 mm2 19,500 km² 2 x 3 A & B 76s 5 h
+# 2) unit abbreviations after a number, and the word they must not bite into
+160କିମି/ଘଣ୍ଟା 5 କି.ମି. 5କି.ମି 3 ମି.ମି. 2ମିମି 10 କି.ଗ୍ରା. 5 ମିମିରେ
+# 3) Latin dotted initialisms, and a version string they must leave alone
+07:19 a.m. ରେ U.S. A.D. 802.11a e.g.
+# 4) the rate slash between measure nouns, and a slash between ordinary words
+କିଲୋମିଟର/ଘଣ୍ଟା ମାଇଲ / ସେକେଣ୍ଡ ଏବଂ/କିମ୍ବା ମିଟର/ମିନିଟ୍
+# 5) de-grouping: Indian, Western, and a list separator
+1,00,000 12,34,567 5,000,000 7,000 1990, 1991 1,2345
+# 6) a standalone dotted abbreviation
+କି.ଗ୍ରା. ଓଜନ
+# 7) decimals
+1.2 ମିଲିୟନ 802.11n 3.14
+# 8) times, :00 dropped, and the ratio and sports splits it must decline
+ରାତି 11:35ଟା 10:00ଟା - 11:00ଟା 24:00 4: 41.30 9:5
+# 9) ordinal suffixes, spaced and glued, and the hundred word
+18ଶ 1000ତମ 60 ତମ 7 ମ 24ତମ 18ଶହ ଶତାବ୍ଦୀ 9007199254740993ତମ 1.5ମ
+# 10) abbreviations: dot and visarga required
+ଡଃ. ରାମ ଡାଃ.ରାମ ଡା. ରାମ ନଂ. 5 ନଂ.ଘର ନଂ 5
+# 11) a Latin I as a danda, and the English pronoun it must not be confused with
+ହୋଇଛି I ପାଇଥିଲେI AI I am
+# 12) degrees
+35°W 90 ° ତାପମାତ୍ରା
+# 13) ±, the minus (declined after a digit to its left), the plus
+±5 -5 ଡିଗ୍ରୀ (UTC+1)ରେ 3 -5 ଘ -5 a-5 −10 –2
+# relational and division signs, and the substring trap
+5 < 6 5 > 4 a = b 8 ÷ 2 ତଳଭାଗରେ
+# the word level: geminates, ଳ୍ଳ, anusvara word-finally, nukta letters precomposed and decomposed, Latin
+ଏବଂ ଘର ଓଡ଼ିଆ ଓ\u{0B5C}ିଆ ଓ\u{0B21}\u{0B3C}ିଆ ପଲ୍ଲୀ ଗଳ୍ଳ ସତ୍ୟ \u{0B5F}ୁବକ São Paulo ରେ

@@ -1,0 +1,25 @@
+# Assamese off-golden probes: one line per arm of src/languages/assamese/normalize.ts (the pre-pass before the
+# Bengali normalizer, whose own probes/bn.txt also runs here) and the assamese.ts geminate collapse, each with the
+# neighbour that arm must decline. SYNTHETIC text only.
+# NFC first: precomposed and decomposed nukta letters in the magnitude and currency literals
+$১৪.৭ বি\u{09B2}ি\u{09DF}ন আমেৰিকান ডলাৰ $১৪.৭ বিলি\u{09AF}\u{09BC}ন আমেৰিকান ডলাৰ
+# 1) dotted Latin runs (space and NBSP), a lone initial, a sentence period after an acronym, dotted Bengali runs
+U.S. আৰু U. S. আৰু U.\u{00A0}S. George W. Bush NASA. Bush ইউ.এছ.অ.চি আৰু ক. খ.
+# 2) the শ ordinals 11-20, 10শ, 1শ, other two-digit runs, the শত guard
+১১শ শতিকা ১২শ ১৮শ ২০শ ১০শ ১শ ২১শ ৯০শত ১১শত 11শ 1শ
+# 3) the নং marker, an unsafe integer, glued to a following letter
+১৯০ নং স্থান 5নং 9007199254740993নং ১২নংখন
+# 4) comma-grouped ordinals, one and two groups, and a plain grouped number
+1,000তম ১,২৩৪,৫৬৭তম 1,000শে 1,000 জন
+# 5) version dots, and the decimals they must leave alone
+802.11a 802.11n ৮০২.১১এন 802.11ab 6.5km 6.5তকৈ 12.5
+# 6) currency codes, magnitudes, the redundant sign, a bare sign with a magnitude
+AUD$৪৫ মিলিয়ন US$30 US$ 30 $১৪.৭ বিলিয়ন আমেৰিকান ডলাৰ $2.3 বিলিয়ন ডলাৰৰ $45 মিলিয়ন $45 xUS$5
+# 7) the ampersand: spaced, bare, tight between letters
+B&B য়ে ক & খ ক&খ A & B &
+# 8) the regnal ordinal before বিশ্ব যুদ্ধ, in range and out
+II বিশ্ব যুদ্ধৰ 2 বিশ্ব যুদ্ধ ১৫ বিশ্ব যুদ্ধ 25 বিশ্ব যুদ্ধ 0 বিশ্ব যুদ্ধ
+# 9) the remaining signs
+ক = খ 5<6 5 > 4 3×4 a<b
+# the geminate collapse: deaffricated, merged and aspirated geminates
+যুদ্ধ চক্কৰ সচ্চা পত্তা লজ্জা বস্সা মোক্ষ

@@ -1,0 +1,5 @@
+# Bishnupriya off-golden probes: the Bengali maker on bishnupriya.jsonc (no height harmony, no lexicon), where it
+# differs from bn: words whose bn reading raises ɔ or lowers e, and words the bn lexicon covers. probes/bn.txt (the
+# shared normalizer's arms) also runs here. SYNTHETIC text only.
+করি কলি বই অই দেখা মেলা ঘরে কর জল অংশ এক দুই তিন আমি তুমি
+১২৩ ১,২৩,৪৫৬ ৩.১৪ ১৭তম ২৬শে ১০:৩০ ৫০% $১০০ ৩০°C
