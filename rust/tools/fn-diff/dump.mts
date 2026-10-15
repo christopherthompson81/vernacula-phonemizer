@@ -5194,6 +5194,61 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
         }
     },
+    // ── Sesotho (st). Inputs: the st golden and probes/st.txt (FLEURS has no Sesotho, so the synthetic rows carry
+    // the weight). normalizeSesotho, the symbol tier over the raw text (recorded through the wrapper; the
+    // normalizer calls it mid-pass) and `createSesotho().text` over every text plus synthetic rows for every arm. ──
+    async "st-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeSesotho } = await import("../../../src/languages/sesotho/normalize.ts");
+        const { createSesotho } = await import("../../../src/languages/sesotho/sesotho.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/sesotho\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createSesotho();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["st"], undefined, ["st.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["&nbsp;", "&NBSP;", "Ntat&#39;a", "&#039;Matsaba", "&#x27;m", "&#x0027;", "&apos;", "&#x5B;", "&#x5d;", "&amp;", "M&G", "A & B", "A\t&\tB", "A&amp;B", "&#40;"]) add(`ho ${e} teng`);
+        for (const d of ["U.S.", "U. S. A.", "U.\u00a0S.", "U.S.A", "U.S.Geological", "A.B", "É.Ü.", "U.S. Kodwa", "U.S. kodwa", "U. S. "]) for (const tail of ["", " Ke", " ke", "."]) add(`naheng ya ${d}${tail}`);
+        for (const d of ["1.2.2008", "12.10.1999", "1.2.200", "1.2.20081", "1.2.2008.", "11.12.13.2000"]) add(`ka ${d} ho`);
+        for (const g of ["1,000", "1,000,000", "1,234,5", "1,000.5", "1.000", "1.000.000", "1.234,5", "1 000", "1\u00a0000", "1\u202f000", "1\u2009000", "30 9", "1,0000", "12,34"]) add(`tse ${g} tsa batho`);
+        for (const c of ["$5m", "$2.5bn", "£1.98bn", "R10m", "€3m", "US$4m", "US $4m", "R 5m", "$5ma", "$5 m", "R5bnx"]) add(`ka ${c} ho`);
+        for (const p of ["liperesente tse 25%", "liporesente 25 %", "diphesente tse 35%", "diperesente tse 1.5%", "Liperesente tse 25%", "ho12%", "mahareng 3% ho isa ho12%", "25%", "25 %", "a25%"]) add(`e ${p} libakeng`);
+        for (const r of ["10-20", "20-10", "10 – 20", "10—20", "1995-96", "5-5", "-5-6", "5-6-7", "10-20.5", "10-20a", "a10-20", "9007199254740993-9007199254740995"]) add(`ho ${r} teng`);
+        for (const o of ["15th", "1st", "2ND", "3rd", "16thx", "21st-century"]) add(`lekgolong la ${o} la dilemo`);
+        for (const t of ["$5", "US$5", "R5", "R 1,000", "£3", "$5 milione", "$5.5 dimilione", "50%", "km 5", "5 km", "5km", "5 m", "5 kg", "100 km/h", "5 km²", "5 km2", "5 m³", "5 dimilione dikhilomithara"]) add(`ho ${t} teng`);
+        for (const t of ["tse dimilione 5", "tse dibilione 5", "tse milione\u00a05", "tse  dimilione  5", "tse dimilionea 5"]) add(`didolara ${t}`);
+        for (const v of ["3.5", "3.14", "3.145", "1,5", "1,50", "1,500", "12:30.5", "1.2.3", "0.5", "3.5.", "3,5,"]) add(`ho ${v} teng`);
+        for (const c of ["ALL CAPS", "  spaced  out  ", "a\u00a0\u00a0b"]) add(c);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeSesotho(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "text" }, withHost("st", () => E.text(t)));
+        }
+    },
+    // phonemizeWord over every letter run, every grapheme key, every 1–3 letter string of the alphabet (with š ê ô)
+    // and corners; numberToWords over 0…20,000, magnitudes and the token-string fallback.
+    async "st-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/sesotho/sesotho.ts");
+        const { numberToWords } = await import("../../../src/languages/sesotho/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("st")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzšêô'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "Tšhehla", "TŠH", "tšh", "ŝ", "x", "xa", "ax", "çà", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1.5, 20.7, -1, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["9007199254740993", "1000000000000000000001", "007", "", "12a", "١٢", "\ud800", "𝟙2"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
+        }
+    },
 };
 
 

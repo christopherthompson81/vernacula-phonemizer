@@ -146,3 +146,38 @@ that cannot be right", and no step claims `±`. The Rust reproduces the drop.
 
 **Raw finding.** `cargo test --release xhosa`: 1 passed. fmt clean; clippy on the new files: only `module_inception`.
 `parity`: every line byte-identical but the known mag 199, tt 199, syl 195; zu and xh 200/200.
+
+## Run 7 — 2026-10-15 05:50 (st: first build, differentials, pins)
+
+**Shape.** No manifest.ts: sesotho.ts, numbers.ts and normalize.ts each load their own slice of sesotho.jsonc, and
+the Rust does the same (`SesothoDef` in sesotho.rs, `SesothoNumbersDef` in numbers.rs; normalize.rs reads `and` from
+the numbers slice). The symbol tier is built in normalize.ts and called mid-pass, so it lives in normalize.rs
+(`try_symbols`), and `magnitudes` in its JSON is the module's `MAGNITUDES` constant.
+
+**Commands.** The three audits (`fix_esc.py` restored 17 literals; then 22 raw patterns, 1 not verbatim (the TOKEN
+template), 0 escapes short, 0 non-ASCII runs missing); `parity st`; `st-normalize` / `st-g2p` dumps (no FLEURS;
+the golden, `probes/st.txt` (15 synthetic lines) and 151 synthetic rows: every entity, the ampersand, dotted
+capitals × tails, dotted dates, the three grouping separators, the currency-glued `m`/`bn`, the four percent
+spellings and the glued `ho12%`, ranges incl. descending, signed and above-2^53 endpoints, ordinal suffixes, the
+tier's prefix shapes, the concord repair, decimals); `sbantu/e2e.sh st st-normalize st-g2p phonemize-sync
+phonemize-best trace`; the TS suite's 66 calls appended to sesotho.rs.
+
+**Raw finding.** `st: 200/200` on the first build, and:
+```
+st-normalize: 1098 identical, 0 DIFFER   (golden 600 / probe 45 / synthetic 453; normalize, symbols, text per text)
+st-g2p: 58776 identical, 0 DIFFER
+phonemize-sync / phonemize-best / trace: 215 identical, 0 DIFFER each
+cargo test --release sesotho: 1 passed (66 pins)
+```
+Haystack: `normalizeSesotho` changed golden 54/200, probes 13/15, synthetic 125/151 texts. No FLEURS, so the golden's
+200 rows and the synthetic rows are the whole corpus side; stated rather than left implicit.
+
+**Guard check.** The range rule's ascending test `<` loosened to `<=`: `st-normalize: 1094 identical, 4 DIFFER`
+(the `5-5` rows). Restored: 0 DIFFER.
+
+**TS findings (reported, not fixed; the Rust reproduces each).**
+1. A road number reads as money. `Tsela ya R59 le N12 e kgolo` → `… diranta tse 59 le N12 …`: st declares `R` on the
+   tier with no guard, while setswana/normalize.ts documents exactly this hazard (`R59, N12, N17 le N3`) and keeps
+   `R` off its tier for it.
+2. A magnitude suffix with no currency sign is spelled out as letters: `Ho ne ho le 1.5bn` → `… 1 5bn` →
+   *… nŋwɛ ɬɑnɔ bn*. Step 5 claims `m`/`bn` only after `[$£€R]`.

@@ -2807,6 +2807,27 @@ fn main() {
                 }
             })
         }
+        "st-normalize" | "st-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let st = vernacula_phonemizer::languages::sesotho::sesotho::create_sesotho().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => st.normalize(&t()),
+                    "symbols" => st.symbols(&t()),
+                    "text" => with_host(&js("st"), || st.text(&t())),
+                    "word" => st.phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        st.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

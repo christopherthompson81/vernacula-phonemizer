@@ -1,0 +1,17 @@
+# Sesotho (st) off-golden probes: synthetic lines, one or more per normalize.ts arm with the neighbour it must
+# decline. FLEURS has no Sesotho, so these and the dump's synthetic rows are the only off-golden haystack.
+Ntat&#39;a le &#39;Matsaba ba ile&nbsp;Maseru &amp; Leribe
+M&G le A & B
+Naheng ya U.S. Ke nako, naheng ya U.S. ke nako, U.S.A le U.S.Geological
+Ka 1.2.2008 ho ile ha eba le pula
+Batho ba 1,000,000 le 1.000.000 le 1 000 000
+Ho ne ho le $5m le £1.98bn le R10m
+Li ka balloa ho liporesente tse 25% libakeng; mahareng 3% ho isa ho12%
+Dilemo tsa 1995-96 le 10-20 le 20-10 le 5-5
+Lekgolong la 15th la dilemo le 21st-century
+Ho ne ho le $5 milione le US$5 le R 1,000 le 50%
+Ho tloha 5 km ho isa 100 km/h, 5 km² le 5 kg
+Didolara tse dimilione 5 le tse dibilione 7
+Ho ne ho le 3.5 le 1,5 le 12:30.5 le 1.2.3
+Tšhehla e ile Tšhabong; ho na le ŝ le çà
+Palo ya 9007199254740993 le 1000000000000000000001
