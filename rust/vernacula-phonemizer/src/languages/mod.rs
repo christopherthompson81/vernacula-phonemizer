@@ -78,7 +78,11 @@ pub mod rangpuri;
 pub mod romanian;
 pub mod russian;
 pub mod scottishgaelic;
+pub mod sepedi;
 pub mod serbian;
+pub mod sesotho;
+pub mod setswana;
+pub mod shona;
 pub mod sinhala;
 pub mod slovak;
 pub mod slovenian;
@@ -100,7 +104,9 @@ pub mod uzbek;
 pub mod vietnamese;
 pub mod welsh;
 pub mod wolof;
+pub mod xhosa;
 pub mod yoruba;
+pub mod zulu;
 
 /// The fraction guards are mirrors in the ported `\b…\b` family and Italian (#1495). Relational, as
 /// test/fraction-guards-1495.test.ts: a declined fraction reads as its numbers spaced.
