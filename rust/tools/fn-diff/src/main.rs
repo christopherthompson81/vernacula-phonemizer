@@ -2506,6 +2506,18 @@ fn main() {
             let tagger = create_bengali_tagger("bn-g2p-tagger").unwrap();
             Box::new(move |input| tagger.tag(&units(&input["word"])).unwrap())
         }
+        "syl" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::sylheti::{normalize::normalize_sylheti, sylheti};
+            let e = sylheti::create_sylheti().unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "normalize" => normalize_sylheti(&units(&input["text"])),
+                "text" => with_host(&js("syl"), || e.text(&units(&input["text"]))),
+                "word" => e.phonemize_word(&units(&input["word"])),
+                op => panic!("syl: unknown op {op}"),
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

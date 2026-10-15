@@ -66,6 +66,7 @@ pub mod slovenian;
 pub mod spanish;
 pub mod spanish_419;
 pub mod swedish;
+pub mod sylheti;
 pub mod tagalog;
 pub mod tajik;
 pub mod tatar;

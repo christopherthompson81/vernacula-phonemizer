@@ -4426,6 +4426,48 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const w of ["", "мир", "aক", "ক☃খ", "\u09dc", "\u09df", "\u09af\u09bc", "বাংলাদেশ", "ক্ষমতা", "জ্ঞানী", "অ্যাসিড", "\u200dক", "ক\u200c্"]) words.add(w);
         for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
     },
+    // ── Sylheti (syl). Inputs: the syl golden and probes/syl.txt (FLEURS has no syl), plus synthetic grids. ──
+    // normalizeSylheti and `createSylheti().text` over every text plus synthetic rows (ranges over a value grid,
+    // grouping shapes, degrees, decimals, percent, taka, stray Bengali characters in and out of a Syloti run);
+    // phonemizeWord over every Syloti run, every consonant x vowel-sign/hasanta tail in three frames, conjuncts, and
+    // corners; number() through text() over 0…3000 and long runs.
+    async "syl"() {
+        const { normalizeSylheti } = await import("../../../src/languages/sylheti/normalize.ts");
+        const { createSylheti, phonemizeWord } = await import("../../../src/languages/sylheti/sylheti.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const { parseJsonc } = await import("../../../src/core/jsonc.ts");
+        const def = parseJsonc(readFileSync(new URL("../../../data/languages/sylheti/sylheti.jsonc", import.meta.url), "utf8")) as any;
+        const E = createSylheti();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["syl"], undefined, ["syl.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const bnd = (n: number | string): string => [...String(n)].map((d) => (d >= "0" && d <= "9" ? "০১২৩৪৫৬৭৮৯"[Number(d)] : d)).join("");
+        for (const [a, b] of [[1, 2], [2, 1], [5, 5], [10, 14], [14, 10], [1.5, 2.5], [1990, 1995], [0, 0]] as const)
+            for (const dash of ["-", "–", "—", " - "]) { add(`ꠔꠣꠞꠤꠈ ${a}${dash}${b} ꠛꠍꠞ`); add(`ꠔꠣꠞꠤꠈ ${bnd(a)}${dash}${bnd(b)} ꠛꠍꠞ`); }
+        for (const g of ["1,000", "10,00,000", "1,23,456", "0,5", "00,500", "1,2", "1,2345", "12,345,678"]) { add(`ꠝꠣꠘꠥꠡ ${g} ꠎꠘ`); add(`ꠝꠣꠘꠥꠡ ${bnd(g)} ꠎꠘ`); }
+        for (const d of ["5°", "5 °", "5°ꠍꠦ", "5° ꠍꠦ.", "5°ꠚꠣ.", "5°C", "5°c", "5 ° F", "5°Cx", "5°ꠍꠦꠟ", "°ꠍꠦ"]) { add(`ꠔꠣꠙ ${d} ꠀꠍꠦ`); add(`ꠔꠣꠙ ${bnd(d)} ꠀꠍꠦ`); }
+        for (const p of ["5%", "5 %", "%", "৳5", "৳ 5", "৳5 ꠐꠦꠈꠣ", "৳5 ꠀꠞ ꠐꠦꠈꠣ", "৳", "5.5", "5.5.5", "5.5/2", "5..5"]) { add(`ꠄꠇ ${p} ꠀꠍꠦ`); add(`ꠄꠇ ${bnd(p)} ꠀꠍꠦ`); }
+        const SYL_C = Object.keys(def.consonants), SYL_V = Object.keys(def.vowelSigns), SYL_IV = Object.keys(def.independentVowels);
+        const BN = ["়", "ঁ", "ং", "্", "ৎ", "ৃ", "া", "ি", "ে", "ো", "অ", "আ", "ক", "ণ", "ষ", "ড়", "ড়", "য়", "য়", "ৰ", "০"];
+        for (const b of BN) { add(`ꠇ${b}ꠣ ꠀꠍꠦ`); add(`${b}ꠇ`); add(`ꠇꠣ ${b}`); add(`ꠎ${b}ꠣ`); }
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeSylheti(t));
+            emit({ text: units(t), src, op: "text" }, withHost("syl", () => E.text(t)));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/[ꠀ-ꠧ꠬]+/gu)) words.add(m[0]);
+        const vir = def.signs.virama.char as string;
+        for (const c of SYL_C) for (const t of ["", vir, ...SYL_V, "ꠋ", "ꠂ", "ꠀ", "꠬"]) { words.add(c + t); words.add(c + t + "ꠇ"); words.add("ꠅ" + c + t + "ꠔꠣ"); words.add("ꠀ" + c + t + "ꠤ"); }
+        for (const c of SYL_C) for (const d of ["ꠇ", "ꠔ", "ꠘ", "ꠝ", "ꠞ", "ꠟ", "ꠛ", "ꠡ"]) { words.add(c + vir + d + "ꠣ"); words.add("ꠀ" + c + vir + d); words.add(c + vir + c + "ꠅ"); }
+        for (const v of SYL_IV) for (const t of ["", "ꠋ", "ꠇ", "ꠤ", "ꠥ"]) { words.add(v + t); words.add(v + t + "ꠘ"); }
+        for (const w of ["", "ꠀ", "꠆", "ꠇ꠆", "\ud800", "ꠇ়", "ꠇꠇꠇꠇ", "ꠍꠤꠟꠐꠤ"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e), "12345678901234567890123".slice(0, e));
+        ns.push("9007199254740991", "9007199254740993", "007");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, withHost("syl", () => E.text(n)));
+    },
 };
 
 

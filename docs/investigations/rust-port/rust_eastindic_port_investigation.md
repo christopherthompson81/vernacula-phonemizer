@@ -135,3 +135,31 @@ word level); `phonemize-sync / phonemize-best / trace: 219 identical, 0 DIFFER` 
 test/bishnupriya.test.ts pinned by extraction pass. Audit: no non-ASCII literal in the module.
 
 **Implication.** bpy is done; the maker now serves three languages from one port.
+
+## Run 6 — 2026-10-15 02:53 (syl: two more escape folds, and five port-pending golden rows)
+
+**Question.** Does Sylheti (its own engine and normalizer) match, and what are the golden rows that do not?
+
+**Command.** The code-point audits over `languages/sylheti`; `dump.mts syl` (normalize / text over the golden,
+`probes/syl.txt` and synthetic grids: ranges over a value grid with each dash in both digit scripts, grouping shapes,
+degree forms, decimals, percent, taka, each stray Bengali mark in and out of a Syloti run; phonemizeWord over every
+Syloti run, every consonant × vowel-sign/hasanta tail in four frames, conjuncts and corners; numbers through text)
+→ `fn-diff syl`; `e2e.sh syl`; `parity syl`. The BN_TO_SYL / INDEPENDENT tables were GENERATED from the TS source by
+a script (`gen_syl_tables.mts`) and the ZERO_WIDTH class's seven literal Cf characters copied by code point, both
+inserted by a byte-level edit rather than typed.
+
+**Raw finding.**
+- The audit caught two more escape folds in the hand-written parts: `BN_LETTER` (`ঀ-৥ৰৱ` in the
+  TS) came back as four literal characters, and `YA_NUKTA`'s `য়` as literal য and ়. Restored. The run
+  audit had missed the first (the literal characters also occur elsewhere in the TS), so a third audit now checks the
+  reverse direction: every `\u` escape in the TS code must be an escape in the Rust (`escape_audit.py`: sylheti 9 TS
+  escapes, assamese 2, bengali and bishnupriya 0; 0 short).
+- `syl: 8515 identical, 0 DIFFER` (golden 400, probe 26, synthetic 414, number 3061), before and after the fix.
+- `parity syl: 195/200`, and `phonemize-sync / phonemize-best / trace: 208 identical, 5 DIFFER` each: the same five
+  golden rows. Each carries an Arabic-script gloss (four rows: Arabic or Persian words in parentheses) or a Hebrew one
+  (one row, beside an Arabic one), which the TS script router reads with the `ar` / `he` engines. Rust drops the run
+  and records the target as port-pending; the Rust readings are the TS readings with exactly those words missing.
+- The 48 calls test/sylheti.test.ts makes are pinned by extraction and pass; a pinning test asserts `ar` and `he`
+  are port-pending until each is in `LANGUAGES`.
+
+**Implication.** syl is done apart from 5 golden rows port-pending on `ar` (5) and `he` (1), listed in the PR.
