@@ -1952,6 +1952,29 @@ fn main() {
                 }
             })
         }
+        "et-normalize" | "et-g2p" => {
+            let et =
+                vernacula_phonemizer::languages::estonian::estonian::create_estonian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => et.normalize(&t()),
+                    "initialisms" => et.normalize_initialisms(&t()),
+                    "symbols" => et.symbols(&t()),
+                    "unreadable" => JsString::from(et.is_unreadable(&t()).to_string().as_str()),
+                    "ordinal" => et
+                        .ordinal(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            input["ending"].as_str(),
+                        )
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => et.phonemize_word(&w()),
+                    "nat" => et.nativise(&w()),
+                    _ => et.text(&t()),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

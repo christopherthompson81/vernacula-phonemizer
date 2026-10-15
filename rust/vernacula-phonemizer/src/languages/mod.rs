@@ -12,6 +12,7 @@ pub mod dutch;
 pub mod english;
 pub mod english_gb;
 pub mod english_in;
+pub mod estonian;
 pub mod finnish;
 pub mod french;
 pub mod french_ca;
