@@ -376,7 +376,7 @@ pub fn normalize_hungarian(input: &JsString) -> JsString {
         s = rewrite(
             &s,
             js_re!(
-                r"(?<=\d)(?<!(?<![\d\.,])0)[.    ](?=\d{3}(?![\d]|,\d))",
+                r"(?<=\d)(?<!(?<![\d\.,])0)[.\u00a0\u202f\u2009 ](?=\d{3}(?![\d]|,\d))",
                 "gu"
             ),
             &JsString::new(),
@@ -384,7 +384,7 @@ pub fn normalize_hungarian(input: &JsString) -> JsString {
         s = rewrite(
             &s,
             js_re!(
-                r"(?<=\d)(?<!(?<![\d\.,])0)\.[    ](?=\d{3}(?![\d]|,\d))",
+                r"(?<=\d)(?<!(?<![\d\.,])0)\.[ \u00a0\u202f\u2009](?=\d{3}(?![\d]|,\d))",
                 "gu"
             ),
             &JsString::new(),
@@ -399,7 +399,7 @@ pub fn normalize_hungarian(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d.,:])([01]?\d|2[0-3]):[  ]?([0-5]\d)(?![\d:])",
+            r"(?<![\d.,:])([01]?\d|2[0-3]):[ \u00a0]?([0-5]\d)(?![\d:])",
             "gu"
         ),
         |m, w| {

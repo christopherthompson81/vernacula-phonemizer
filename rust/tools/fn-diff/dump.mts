@@ -2802,7 +2802,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
         ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1e9 - 1, 1e9, 1.5, 2.7, -1, -21, -0, NaN, Infinity, -Infinity, 0.1, 1e-7, 22.5);
         for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
-        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", " \t "]) {
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", " \t\u00a0"]) {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "1000000000", raw: units(raw), op: "words" }, numberToWords(1e9, raw));
             emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
@@ -2888,11 +2888,11 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const [t, src] of textsFor(["hu"], FLEURS_DIR.hu, ["hu.txt"])) rows.set(t, src);
         const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
         for (const n of ["1", "2", "3", "6", "10", "22", "56", "100", "999999", "1000000"]) for (const x of ["x", "×", " x ", " × "]) { add(`${n}${x}4 méter`); add(`3.${n}${x}4`); }
-        for (const ab of ["pl", "Pl", "PL", "kb", "stb", "ld", "dr", "Dr", "Kb", "ſtb", "Kr", "i", "d"]) for (const t of [". 20 km-re", ". körül", ".", ".)", ". Ma", "."]) add(`ez ${ab}${t}`);
+        for (const ab of ["pl", "Pl", "PL", "kb", "stb", "ld", "dr", "Dr", "\u212Ab", "ſtb", "Kr", "i", "d"]) for (const t of [". 20 km-re", ". körül", ".", ".)", ". Ma", "."]) add(`ez ${ab}${t}`);
         for (const x of ["Kr. e.", "Kr.u.", "i. sz.", "i.e.", "d. e.", "d.u.", "KR. E."]) add(`a ${x} 100`);
-        for (const g of ["100.000", "5.000.000", "400. 000", "30 000", "100,000", "24.000, és", "0.123", "12,5", "1,234,567", "1 000"]) add(`van ${g} ember`);
+        for (const g of ["100.000", "5.000.000", "400. 000", "30 000", "100,000", "24.000, és", "0.123", "12,5", "1,234,567", "1\u00a0000"]) add(`van ${g} ember`);
         for (const h of ["0", "9", "11", "23", "24"]) for (const m of ["00", "05", "35", "59", "60"]) { add(`${h}:${m}-kor`); add(`${h}: ${m} óra`); add(`${h}:${m}-re`); }
-        for (const u of ["km", "mm", "cm", "kg", "mérföld", "KM", "Km", "m", "g"]) for (const e of ["", "²", "³", "2", "3"]) { add(`20 ${u}${e}-re`); add(`2${u}${e}-es`); }
+        for (const u of ["km", "mm", "cm", "kg", "mérföld", "KM", "\u212Am", "m", "g"]) for (const e of ["", "²", "³", "2", "3"]) { add(`20 ${u}${e}-re`); add(`2${u}${e}-es`); }
         for (const p of ["29%-a", "8 %-kal", "5٪-os", "3％-ot", "10%"]) add(p);
         for (const d of ["35°-tól", "20 °c-a", "30°C", "5 °F", "45°", "-5 °C", "1990-5", "a −3 fok", "±2", "UTC+1", "a + 30°C"]) add(d);
         for (const r of ["1 = 1", "2<3", "4 > 3", "6 ÷ 3", "100 ÷ 22", "7÷1", "9÷4", "10÷20", "12÷30"]) add(r);
@@ -2985,6 +2985,64 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const ctx = [..."kgnfíaeijt"];
         for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
         for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "ég", "Hekla", "vatn", "Biblía", "María", "drekkja", "deigja", "Alþingi", "bang", "Steinn", "Anna", "Sviss", "höfn", "lofa", "lukt", "þríeyki", "erkiengill", "ein"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        for (const w of [...words, "São", "Müller", "Dvořák", "Ørsted", "Žižek", "Ångström", "Œuvre", "façade", "Tōkyō", "Nguyễn"])
+            emit({ word: units(w), op: "nat" }, nat(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // ── Faroese (fo). Inputs: the fo golden and probes/fo.txt; FLEURS has no Faroese, so the synthetic rows and
+    // the probes carry the arms the golden misses. ──
+    // normalizeFaroese, the symbol tier over its output (recorded through the wrapper), and synthetic rows for
+    // every arm: the leap-second time grid, both grouping separators, the decimal dot, each abbreviation
+    // mid-sentence and sentence-final, the ordinal period before a lowercase word / a capital / an NBSP,
+    // degrees, signs, en-dash and hyphen ranges.
+    async "fo-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeFaroese } = await import("../../../src/languages/faroese/normalize.ts");
+        const fo = (await import("../../../src/languages/faroese/faroese.ts")).createFaroese();
+        await import("../../../src/languages/faroese/faroese.ts");
+        const rec = records.find((r) => /src\/languages\/faroese\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["fo"], undefined, ["fo.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const h of ["0", "9", "19", "23", "24", "25", "01"]) for (const m of ["00", "59", "60"]) for (const sec of ["00", "59", "60", "61"]) add(`kl ${h}.${m}.${sec} í dag`);
+        for (const g of ["49.267", "1.000.000", "12.34", "1.2", "0.500", "7 737", "48\u00a0219", "12 000–10 000", "1.234,5", "3.00 kr", "4.19$"]) add(`har eru ${g} fólk`);
+        for (const ab of ["n.br.", "n. br.", "v.l.", "f.Kr.", "f. Kr.", "e.Kr.", "e.m.", "f.m.", "kl.", "mió.", "uml.", "Kl."]) for (const tail of [" 5", "", ")", " Síðan", "\""]) add(`tað var ${ab}${tail}`);
+        for (const n of ["1", "23", "999", "1998", "10000"]) for (const t of [". juli", ". Síðan", ".\u00a0des.", ".\u00a0Des", ". 5"]) add(`tann ${n}${t}`);
+        for (const d of ["11 °C", "52°F", "62°", "56,7 °c", "-5 stig", "(−3)", "a –4", "x-5", "1269–1308", "5 — 7", "3-4", "1-2-3", "2/3-4", "10-20 km"]) add(`er ${d} her`);
+        for (const [t, src] of rows) {
+            const a = normalizeFaroese(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, fo.text(t));
+        }
+    },
+    // phonemizeWord over every letter run (as written and lowercased), every 1–3 letter string of the alphabet,
+    // every 4-letter string over the context letters (the vowels that pair with ð/g, g/k/j, r + coronals, n, v, h),
+    // corners; the nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "fo-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/faroese/faroese.ts");
+        const { numberToWords } = await import("../../../src/languages/faroese/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-záíóúýæøðþA-ZÁÍÓÚÝÆØÐÞ'-]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("fo")) for (const m of t.matchAll(/[\p{L}\p{M}'-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."aábdðefghiíjklmnoóprstuúvyýæøþcqwxz'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouóðgkjrnvhm"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "ógv", "dúgva", "ógv", "eggja", "ikki", "allur", "Bogi", "Eyður", "dagur", "bága", "agað", "aðal", "avgera", "ahorn", "fílum", "Adam", "heim", "gangi", "Urð", "tjóðra", "hvat", "hjá", "ggjj", "kkj", "rðn"]) words.add(w);
         for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
         for (const w of [...words, "São", "Müller", "Dvořák", "Ørsted", "Žižek", "Ångström", "Œuvre", "façade", "Tōkyō", "Nguyễn"])
             emit({ word: units(w), op: "nat" }, nat(w));

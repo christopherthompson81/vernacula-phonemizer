@@ -276,7 +276,10 @@ pub fn normalize_finnish(input: &JsString) -> JsString {
         let prev = t.clone();
         t = rewrite(
             &t,
-            js_re!(r"(?<=\d)(?<!(?<![\d\.,])0)[    ](?=\d{3}(?!\d))", "gu"),
+            js_re!(
+                r"(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))",
+                "gu"
+            ),
             &JsString::new(),
         );
         if t == prev {

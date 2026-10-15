@@ -110,3 +110,13 @@ Pin guard: ⟨nk⟩ → `n` instead of `ŋ` → the test FAILED on `sænky` vs `
 199/200. `fi: 200/200 identical, 0 differ`.
 
 **Implication.** No port-pending rows: TOKEN is all of Latin, and nothing else routes out of the engine.
+
+## Run 6 — 2026-10-14 23:24 (regex escapes restored; found during the fo port)
+
+**Command.** `grep -P '[\x{00a0}\x{202f}\x{2009}]' rust/vernacula-phonemizer/src/languages/finnish/*.rs`.
+
+**Raw finding.** The editing tool had written step 1's `[ \u00a0\u202f\u2009]` as four LITERAL characters, where
+normalize.ts writes the escapes. Same match, different code points (so no differential could see it). Restored
+byte-level with `perl -CSD`; `north/audit_regex.py` then finds every raw pattern in the module verbatim in the TS.
+Re-run: `fi-normalize 36034 identical, 0 DIFFER`; `phonemize-sync` (fi, hu, fo) 0 DIFFER; parity unchanged. The
+fix rides in the fo commit (see rust_fo_port_investigation.md Run 2).

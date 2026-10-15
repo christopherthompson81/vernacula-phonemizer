@@ -2019,6 +2019,27 @@ fn main() {
                 }
             })
         }
+        "fo-normalize" | "fo-g2p" => {
+            let fo = vernacula_phonemizer::languages::faroese::faroese::create_faroese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => fo.normalize(&t()),
+                    "symbols" => fo.symbols(&t()),
+                    "text" => fo.text(&t()),
+                    "word" => fo.phonemize_word(&w()),
+                    "nat" => fo.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        fo.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

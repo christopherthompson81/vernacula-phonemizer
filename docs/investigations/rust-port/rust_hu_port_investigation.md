@@ -41,7 +41,7 @@ No lexicon, no neural entry.
 `probes/hu.txt`.
 - `hu-normalize`: `normalizeHungarian` per text (its symbol tier and initialism pass are internal);
   `isUnreadableHungarian` per letter run; synthetic rows for every arm (multiplication, the abbreviations in
-  every case INCLUDING the `i`-fold spellings `Kb.` and `ſtb.`, de-grouping in every separator, the clock
+  every case INCLUDING the `i`-fold spellings `\u212Ab.` and `ſtb.`, de-grouping in every separator, the clock
   grid, unit/metre/percent/degree/numeral/date/acronym hyphen suffixes, signs, division, the ordinal arms, Roman
   contexts).
 - `hu-g2p`: `phonemizeWord` over every letter run, every 1–3 letter string of 36 letters, every 4-letter string over
@@ -83,7 +83,7 @@ symbols: 7098 identical, 0 DIFFER  (probe 3072 / hungarian 4026)
    `ez undefined körül` → `ˈɛz ˈundɛfinɛd ˈkøryl`. The `giu` alternation built from `DOTTED_ABBREV`'s own keys
    matches `ſtb`, `ab.toLowerCase()` keeps the long s, and the `!` hides the miss — the #1122 shape that
    csharp/PORTING.md describes (a dotted-abbreviation alternation built from the table's own keys, then given
-   `i`). A Kelvin-sign `Kb.` is safe only because its lowercase IS `k`.
+   `i`). A Kelvin-sign `\u212Ab.` is safe only because its lowercase IS `k`.
 2. (Recorded, not a defect claim.) `Ez a második. Erzsébet jött` keeps its period — the residual the file's 9d
    note documents and deliberately leaves.
 
@@ -101,3 +101,14 @@ failures). The recorder was extended for this file: a policy OBJECT's function m
 only `module_inception` on `hungarian::hungarian`.
 
 **Implication.** No port-pending rows (TOKEN is all of Latin).
+
+## Run 6 — 2026-10-14 23:24 (regex escapes restored; found during the fo port)
+
+**Command.** `grep -P '[\x{00a0}\x{202f}\x{2009}]' rust/vernacula-phonemizer/src/languages/hungarian/*.rs`.
+
+**Raw finding.** The editing tool had written the de-grouping and clock classes (`[.\u00a0\u202f\u2009 ]`,
+`[ \u00a0\u202f\u2009]`, `[ \u00a0]`) as literal characters, where normalize.ts writes the escapes; the dump.mts
+rows this port added had their Kelvin-sign and NBSP escapes folded the same way (JS strings, so the values were
+already equal). Restored byte-level with `perl -CSD`; `north/audit_regex.py` then finds every raw pattern in the
+module verbatim in the TS. Re-run: `hu-normalize 20611 identical, 0 DIFFER`; parity unchanged. The fix rides in
+the fo commit (see rust_fo_port_investigation.md Run 2).
