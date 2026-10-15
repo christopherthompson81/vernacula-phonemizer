@@ -62,6 +62,7 @@ const FLEURS_DIR: Record<string, string> = {
     af: "af_za",
     lb: "lb_lu",
     tg: "tg_tj",
+    cy: "cy_gb",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -4340,6 +4341,87 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let i = 0; i <= 3000; i++) ds.push(String(i));
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // ── Welsh (cy). Inputs: the cy golden, FLEURS cy_gb (columns 3 and 4) and probes/cy.txt. ──
+    // normalizeWelsh, the symbol tier over its output (recorded through the wrapper) and `createWelsh().text`, over
+    // every text plus synthetic rows for every arm: era markers, the currency prefixes and UD/DU/UDA/AS in every case
+    // and tail, dotted capitals (NBSP, non-ASCII capitals), ayb., ordinals 0…220 × every suffix, decades, the
+    // timezone hyphen, clock ranges and number ranges (every unit, a sign after), clocks over an hour × minute ×
+    // marker grid, dot clocks before a timezone, version dots and decimals, comma decimals, fractions over a
+    // numerator × denominator grid, degrees, rates, signs; ordinalWords over −2…2,000 and corners; soften.
+    async "cy-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeWelsh, ordinalWords, soften } = await import("../../../src/languages/welsh/normalize.ts");
+        const { createWelsh } = await import("../../../src/languages/welsh/welsh.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/welsh\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createWelsh();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["cy"], FLEURS_DIR.cy, ["cy.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["O.C.", "o.c.", "C.C.", "OC 1000-1300", "oc 5 – 6", "OC"]) for (const tail of ["", ".", " a", ", wedyn"]) add(`yn 400 ${e}${tail}`);
+        for (const c of ["AUD$45", "AUD 45", "aud$7", "US$11,000", "US 3", "UD $14.7", "U.D.", "yr UD", "UD,", "UDa", "DU", "du", "DU.", "UDA", "UDA,", "AS", "as", "AS.", "ASa"]) for (const tail of ["", " yma", "."]) add(`mae ${c}${tail}`);
+        for (const d of ["George W. Bush", "D. Wyn Jones", "R. Ŵyn Jones", "U.S.A.", "U. S. A.", "U. S.", "É.Ü.", "A.b."]) add(`gan ${d} heddiw`);
+        for (const a of ["ayb. a", "ayb.", "ayb.,", "AYB. Mae", "ayb.)", "ayb. 5", "aybc."]) add(`llyfrau ${a}`);
+        for (let n = 0; n <= 220; n++) for (const sfx of ["fed", "ed", "af", "eg", "ydd", "ain", "FED", "feda"]) add(`y ${n}${sfx} tro`);
+        for (const n of ["1,000fed", "1,0fed", "99999fed", "100000fed", "190fed", "007fed", "1.5fed", "x5fed"]) add(`y ${n} tro`);
+        for (const d of ["1970au", "90au", "1,900au", "a1970au", "1970aua", "1970AU"]) add(`yn y ${d} roedd`);
+        for (const z of ["UTC-08:00", "GMT-0:44", "UTC–5", "a-b", "x-5"]) add(`amser ${z} yma`);
+        for (const r of ["10:00-11:00", "6:30 – 7:45", "23:59-00:00", "25:00-26:00", "9:60-10:00", "6-6", "5-3", "6-6.", "7-2.", "26-00", "1894-1895", "100-200", "10-60 munud", "2-3 km", "2-3km", "2 - 3 m", "4-5 kg", "1-2 mm", "5-6 cm", "5-6 cma", "10-20%", "10-20 $", "1995-96, pan", "1,000-2,000", "1-2.5", "3-4.", "9007199254740993-9007199254740995", "1-1000000000"]) add(`roedd ${r} yno`);
+        for (const h of ["0", "1", "06", "11", "12", "23", "24"]) for (const m of ["00", "05", "35", "59"]) for (const ap of ["", " p.m.", " a.m.", "pm", "AM", " P.M", " amser", " a", "am."]) add(`am ${h}:${m}${ap} heddiw`);
+        for (const c of ["4:41.30", "10:00:00", "1:2", ",5:30"]) add(`amser ${c} yma`);
+        for (const c of ["15.00 UTC", "12.00 GMT", "9.30 utc", "24.00 UTC", "15.00UTC"]) add(`am ${c} yna`);
+        for (const v of ["802.11n", "802.11n/a/b/g", "2.4Ghz", "5.0Gh", "5.0 GHZ", "1.5 miliwn", "$2.3", "1.234", "4.2-3.9 miliwn", "12.8 km", "12.8km", "1.5 M", "3.25 kg", "0.5 mm", "2.5 cm", "2.5 cma", "1.2.3", "3.14"]) add(`mae ${v} yma`);
+        for (const v of ["12,5", "4,2", "1,400", "1,4000", "3,14,", "0,05"]) add(`mae ${v} yma`);
+        for (let a = 0; a <= 12; a++) for (const b of [0, 1, 2, 3, 4, 5, 7, 10, 19, 20, 21, 25, 37, 40, 45, 100, 190, 200, 1000]) add(`tua ${a}/${b} modfedd`);
+        for (const f of ["2¾", "1½", "1/5/7", "1234/5"]) add(`tua ${f} modfedd`);
+        for (const d of ["+30°C", "30 °C", "30°c", "86°F", "86 º F", "45°", "45° ", "45°N", "20°Ca"]) add(`roedd ${d} heddiw`);
+        for (const r of ["480 cilomedr/awr", "100 llath/metr", "Cilomedr/Awr", "cilomedr/awra"]) add(`ar ${r} yno`);
+        for (const g of ["±2", "+3", "+ 3", "-5", "−5", "a-5", "5-5", "-5 - 6", "A&B", "A&Bs", "Ŵ&Ŷ", "a & b", "x = y", "a=b", "8 ÷ 2", "3 < 4", "5 > 2", "3 × 4", "AT&T"]) add(`mae ${g} yn wir`);
+        for (const [t, src] of rows) {
+            const a = normalizeWelsh(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("cy", () => E.text(t)));
+        }
+        for (let n = -2; n <= 2000; n++) emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        for (const n of [1e5, 1e6, 2 ** 53, 2 ** 53 + 2, 1.5, 20.5, NaN, Infinity, -0]) emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        for (const w of ["pump", "tri", "cant", "dau gant", "llyfr", "Llyfr", "rhif", "Rhyd", "chwech", "ddeg", "ffordd", "ngh", "phump", "thri", "mil", "gardd", "Gwyn", "bach", "deg", "a", "İ", "\ud800x", "𝐚", "Pump", "M"]) emit({ word: units(w), op: "soften" }, soften(w));
+    },
+    // phonemizeWord and toSegments over every letter run (as written and lowercased), every lexicon key, every 1–3
+    // letter string of the alphabet, every 4-letter string over the context letters, enclitic and corner forms; the
+    // nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "cy-g2p"() {
+        const { phonemizeWord, nat } = await import("../../../src/languages/welsh/welsh.ts");
+        const { toSegments } = await import("../../../src/languages/welsh/g2p.ts");
+        const { numberToWords } = await import("../../../src/languages/welsh/numbers.ts");
+        const W = new URL("../../../src/languages/welsh/welsh.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("cy")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const k of loadTsvMap(W, "lexicon.tsv", undefined, { optional: true }).keys()) words.add(k);
+        const abc = [..."abcdefghijklmnopqrstuvwxyzâêîôûŵŷïë'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouwyngchdlsr"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const p of ["o", "hi", "mae", "cymru", "i", "y", "fe"]) for (const e of ["'r", "’n", "'m", "'th", "'ch", "'x", "'"]) words.add(p + e);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "Ŵyn", "ﬁ", "Dvořák", "Ångström", "xylo", "Qing", "Joaquim", "nghymru", "Nghymru", "mhrifysgol", "enghraifft", "gwyn", "achwyn", "llyfrau", "cau", "-", "'", "a-b", "constructor", "toString"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.long ? 1 : 0}`).join(" "));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "1,400"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
     },
 };
 

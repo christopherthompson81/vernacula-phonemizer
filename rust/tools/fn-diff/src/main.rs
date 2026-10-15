@@ -2484,6 +2484,39 @@ fn main() {
                 }
             })
         }
+        "cy-normalize" | "cy-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let cy = vernacula_phonemizer::languages::welsh::welsh::create_welsh().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => cy.normalize(&t()),
+                    "symbols" => cy.symbols(&t()),
+                    "text" => with_host(&js("cy"), || cy.text(&t())),
+                    "ordinal" => cy.ordinal_words(n()).unwrap_or_else(|| js("\u{0}none")),
+                    "soften" => cy.soften(&w()),
+                    "word" => cy.phonemize_word(&w()),
+                    "nat" => cy.nativise(&w()),
+                    "segs" => {
+                        let parts: Vec<JsString> = cy
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&js(&format!("/{}{}", s.nucleus as u8, s.long as u8)))
+                            })
+                            .collect();
+                        JsString::join(&parts, &js(" "))
+                    }
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        cy.number_to_words(n(), raw.as_ref())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
