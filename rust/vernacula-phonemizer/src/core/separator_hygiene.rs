@@ -127,6 +127,7 @@ mod tests {
     ];
 
     #[test]
+    #[cfg(feature = "nog")]
     fn the_ts_suite_calls_return_the_ts_values() {
         use crate::core::js_string::js;
         // test/separator-hygiene.test.ts also pins `phonemize` in seven languages not yet ported (quc naq rup kl mto

@@ -808,6 +808,7 @@ mod tests {
     /// test/english-1504-able.test.ts: an -able/-ible word reads from its DICTIONARY STEM, preferring the stem
     /// without ⟨e⟩, and the best path agrees with the sync path. Built from the dictionary's own rows; no IPA.
     #[test]
+    #[cfg(feature = "en-GB")]
     fn able_reads_from_the_dictionary_stem() {
         let en = create_english().unwrap();
         let able = ["AH0", "B", "AH0", "L"];

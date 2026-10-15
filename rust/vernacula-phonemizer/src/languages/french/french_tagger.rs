@@ -44,7 +44,7 @@ pub fn french_tagger_unavailable_reason() -> Option<String> {
     shipped().err()
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "fr"))]
 mod tests {
     use super::*;
 

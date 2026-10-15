@@ -2066,6 +2066,7 @@ mod tests {
     /// test/english-1503-pascals.test.ts: an SI pressure unit after a number reads as its word, and the
     /// case-folded near-misses are left as written. Relational; no IPA is typed.
     #[test]
+    #[cfg(feature = "en-GB")]
     fn pascals_are_read_case_exactly() {
         for lang in ["en", "en-GB"] {
             for (unit, word) in [

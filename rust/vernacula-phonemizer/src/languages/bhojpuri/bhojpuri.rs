@@ -32,7 +32,7 @@ pub fn engine() -> Result<Arc<dyn Engine>, PhonemizeError> {
     ))
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "bho"))]
 mod tests {
     use super::*;
     use crate::core::js_string::js;

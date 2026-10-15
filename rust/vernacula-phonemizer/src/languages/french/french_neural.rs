@@ -52,7 +52,7 @@ pub fn prepass_with(
     )
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "fr"))]
 mod tests {
     use super::*;
     use crate::languages::french::french::create_french;

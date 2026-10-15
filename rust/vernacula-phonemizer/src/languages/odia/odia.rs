@@ -234,6 +234,7 @@ mod tests {
     /// A Bengali, Odia or Syloti Nagri run inside another host reaches its engine through the script reader (the
     /// router targets bn, or and syl). Readings are the TS engine's, printed by running it, not typed.
     #[test]
+    #[cfg(all(feature = "bn", feature = "hi", feature = "syl"))]
     fn group_scripts_inside_other_hosts_are_read_by_their_engines() {
         #[rustfmt::skip]
         let rows: &[(&str, &str, &str)] = &[

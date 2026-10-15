@@ -243,6 +243,13 @@ mod tests {
     /// A Kannada, Telugu, Tamil, Malayalam or Sinhala run inside another host reaches its engine through the script
     /// reader. Readings are the TS engine's, printed by running it, not typed.
     #[test]
+    #[cfg(all(
+        feature = "hi",
+        feature = "kn",
+        feature = "ml",
+        feature = "ta",
+        feature = "te"
+    ))]
     fn group_scripts_inside_other_hosts_are_read_by_their_engines() {
         #[rustfmt::skip]
         let rows: &[(&str, &str, &str)] = &[

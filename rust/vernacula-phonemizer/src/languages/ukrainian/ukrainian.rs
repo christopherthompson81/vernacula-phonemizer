@@ -296,7 +296,7 @@ pub fn create_ukrainian() -> Result<UkrainianPhonemizer, String> {
 }
 
 /// Expectations derived from the TS engine (`.probe/uk/check.mts`), never hand-typed.
-#[cfg(test)]
+#[cfg(all(test, feature = "uk"))]
 mod tests {
     use super::*;
 

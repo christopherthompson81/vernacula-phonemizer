@@ -7,7 +7,11 @@
 //! differently from "wrong".
 //!
 //! ADDING A LANGUAGE: implement `Engine` for it, add one arm to `build` (and to `roman_policy` if it has its
-//! own), and add its code to `LANGUAGES`. Nothing else in this file changes.
+//! own), and add its code to `LANGUAGES`, each under `#[cfg(feature = "<code>")]`. Then give the code a feature
+//! in Cargo.toml (and in `default`), and gate its module in `languages/mod.rs` on every feature that uses it.
+//!
+//! FEATURES: with a language's feature off, its arms compile out and its code is an `UnknownLanguage`, as a
+//! code this crate never had is. A foreign run routed to it is then dropped and listed in `port_pending()`.
 
 use std::collections::{BTreeSet, HashMap};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -25,25 +29,253 @@ use crate::core::unicode::{
 use crate::languages::english::english::{EnglishPhonemizer, WordTransform, create_english};
 use crate::languages::english::english_neural::{phonemize_en_neural, prewarm_foreign_english};
 use crate::languages::english::english_tagger::{EnglishTagger, load_english_tagger_files};
+#[cfg(feature = "en-GB")]
 use crate::languages::english_gb::english_gb::rp_word_transform;
+#[cfg(feature = "en-IN")]
 use crate::languages::english_in::english_in::indian_word_transform;
+#[cfg(feature = "pt")]
 use crate::languages::portuguese::g2p::Dialect;
+#[cfg(feature = "pt")]
 use crate::languages::portuguese::portuguese::create_portuguese;
+#[cfg(feature = "pt")]
 use crate::languages::portuguese::roman_ordinals::roman_policy as pt_roman_policy;
+#[cfg(feature = "pt-BR")]
 use crate::languages::portuguese_br::portuguese_br::create_portuguese_br;
+#[cfg(feature = "pt-BR")]
 use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman_policy;
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 115] = [
-    "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
-    "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
-    "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo", "cs", "sk", "be", "bg", "mk",
-    "bho", "mag", "awa", "mai", "hne", "rkt", "ne", "mr", "fi", "et", "hu", "is", "fo", "az", "kk",
-    "ky", "uz", "tk", "tt", "da", "nb", "af", "lb", "bar", "ba", "crh", "kaa", "nog", "chv", "tg",
-    "cy", "ga", "gd", "eu", "sq", "ast", "an", "oc", "bn", "as", "bpy", "syl", "or", "kn", "te",
-    "ta", "ml", "si", "vi", "lo", "my", "jv", "su", "mad", "zu", "xh", "st", "tn", "nso", "sn",
-    "sw", "rw", "rn", "lg", "ln", "nya", "yo", "ig", "ha", "ee", "ak", "wo",
+pub const LANGUAGES: &[&str] = &[
+    "en",
+    #[cfg(feature = "en-GB")]
+    "en-GB",
+    #[cfg(feature = "ja")]
+    "ja",
+    #[cfg(feature = "it")]
+    "it",
+    #[cfg(feature = "es")]
+    "es",
+    #[cfg(feature = "pt")]
+    "pt",
+    #[cfg(feature = "pt-BR")]
+    "pt-BR",
+    #[cfg(feature = "hi")]
+    "hi",
+    #[cfg(feature = "cmn")]
+    "cmn",
+    #[cfg(feature = "fr")]
+    "fr",
+    #[cfg(feature = "el")]
+    "el",
+    #[cfg(feature = "ko")]
+    "ko",
+    #[cfg(feature = "th")]
+    "th",
+    #[cfg(feature = "ru")]
+    "ru",
+    #[cfg(feature = "de")]
+    "de",
+    #[cfg(feature = "pl")]
+    "pl",
+    #[cfg(feature = "tr")]
+    "tr",
+    #[cfg(feature = "nl")]
+    "nl",
+    #[cfg(feature = "uk")]
+    "uk",
+    #[cfg(feature = "sv")]
+    "sv",
+    #[cfg(feature = "sr")]
+    "sr",
+    #[cfg(feature = "hr")]
+    "hr",
+    #[cfg(feature = "bs")]
+    "bs",
+    #[cfg(feature = "sl")]
+    "sl",
+    #[cfg(feature = "lt")]
+    "lt",
+    #[cfg(feature = "lv")]
+    "lv",
+    #[cfg(feature = "es-419")]
+    "es-419",
+    #[cfg(feature = "fr-CA")]
+    "fr-CA",
+    #[cfg(feature = "en-IN")]
+    "en-IN",
+    #[cfg(feature = "ca")]
+    "ca",
+    #[cfg(feature = "gl")]
+    "gl",
+    #[cfg(feature = "ro")]
+    "ro",
+    #[cfg(feature = "id")]
+    "id",
+    #[cfg(feature = "ms")]
+    "ms",
+    #[cfg(feature = "tl")]
+    "tl",
+    #[cfg(feature = "ceb")]
+    "ceb",
+    #[cfg(feature = "hil")]
+    "hil",
+    #[cfg(feature = "ilo")]
+    "ilo",
+    #[cfg(feature = "cs")]
+    "cs",
+    #[cfg(feature = "sk")]
+    "sk",
+    #[cfg(feature = "be")]
+    "be",
+    #[cfg(feature = "bg")]
+    "bg",
+    #[cfg(feature = "mk")]
+    "mk",
+    #[cfg(feature = "bho")]
+    "bho",
+    #[cfg(feature = "mag")]
+    "mag",
+    #[cfg(feature = "awa")]
+    "awa",
+    #[cfg(feature = "mai")]
+    "mai",
+    #[cfg(feature = "hne")]
+    "hne",
+    #[cfg(feature = "rkt")]
+    "rkt",
+    #[cfg(feature = "ne")]
+    "ne",
+    #[cfg(feature = "mr")]
+    "mr",
+    #[cfg(feature = "fi")]
+    "fi",
+    #[cfg(feature = "et")]
+    "et",
+    #[cfg(feature = "hu")]
+    "hu",
+    #[cfg(feature = "is")]
+    "is",
+    #[cfg(feature = "fo")]
+    "fo",
+    #[cfg(feature = "az")]
+    "az",
+    #[cfg(feature = "kk")]
+    "kk",
+    #[cfg(feature = "ky")]
+    "ky",
+    #[cfg(feature = "uz")]
+    "uz",
+    #[cfg(feature = "tk")]
+    "tk",
+    #[cfg(feature = "tt")]
+    "tt",
+    #[cfg(feature = "da")]
+    "da",
+    #[cfg(feature = "nb")]
+    "nb",
+    #[cfg(feature = "af")]
+    "af",
+    #[cfg(feature = "lb")]
+    "lb",
+    #[cfg(feature = "bar")]
+    "bar",
+    #[cfg(feature = "ba")]
+    "ba",
+    #[cfg(feature = "crh")]
+    "crh",
+    #[cfg(feature = "kaa")]
+    "kaa",
+    #[cfg(feature = "nog")]
+    "nog",
+    #[cfg(feature = "chv")]
+    "chv",
+    #[cfg(feature = "tg")]
+    "tg",
+    #[cfg(feature = "cy")]
+    "cy",
+    #[cfg(feature = "ga")]
+    "ga",
+    #[cfg(feature = "gd")]
+    "gd",
+    #[cfg(feature = "eu")]
+    "eu",
+    #[cfg(feature = "sq")]
+    "sq",
+    #[cfg(feature = "ast")]
+    "ast",
+    #[cfg(feature = "an")]
+    "an",
+    #[cfg(feature = "oc")]
+    "oc",
+    #[cfg(feature = "bn")]
+    "bn",
+    #[cfg(feature = "as")]
+    "as",
+    #[cfg(feature = "bpy")]
+    "bpy",
+    #[cfg(feature = "syl")]
+    "syl",
+    #[cfg(feature = "or")]
+    "or",
+    #[cfg(feature = "kn")]
+    "kn",
+    #[cfg(feature = "te")]
+    "te",
+    #[cfg(feature = "ta")]
+    "ta",
+    #[cfg(feature = "ml")]
+    "ml",
+    #[cfg(feature = "si")]
+    "si",
+    #[cfg(feature = "vi")]
+    "vi",
+    #[cfg(feature = "lo")]
+    "lo",
+    #[cfg(feature = "my")]
+    "my",
+    #[cfg(feature = "jv")]
+    "jv",
+    #[cfg(feature = "su")]
+    "su",
+    #[cfg(feature = "mad")]
+    "mad",
+    #[cfg(feature = "zu")]
+    "zu",
+    #[cfg(feature = "xh")]
+    "xh",
+    #[cfg(feature = "st")]
+    "st",
+    #[cfg(feature = "tn")]
+    "tn",
+    #[cfg(feature = "nso")]
+    "nso",
+    #[cfg(feature = "sn")]
+    "sn",
+    #[cfg(feature = "sw")]
+    "sw",
+    #[cfg(feature = "rw")]
+    "rw",
+    #[cfg(feature = "rn")]
+    "rn",
+    #[cfg(feature = "lg")]
+    "lg",
+    #[cfg(feature = "ln")]
+    "ln",
+    #[cfg(feature = "nya")]
+    "nya",
+    #[cfg(feature = "yo")]
+    "yo",
+    #[cfg(feature = "ig")]
+    "ig",
+    #[cfg(feature = "ha")]
+    "ha",
+    #[cfg(feature = "ee")]
+    "ee",
+    #[cfg(feature = "ak")]
+    "ak",
+    #[cfg(feature = "wo")]
+    "wo",
 ];
 
 /// A language engine, as the registry holds it.
@@ -73,256 +305,353 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
     };
     Some(match lang {
         "en" => english(EnglishVariant::Us),
+        #[cfg(feature = "en-GB")]
         "en-GB" => english(EnglishVariant::Gb),
+        #[cfg(feature = "en-IN")]
         "en-IN" => english(EnglishVariant::In),
+        #[cfg(feature = "ja")]
         "ja" => crate::languages::japanese::japanese::create_japanese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "it")]
         "it" => crate::languages::italian::italian::create_italian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "es")]
         "es" => crate::languages::spanish::spanish::create_spanish(false)
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "pt")]
         "pt" => create_portuguese(Dialect::Ep, None).map(|e| e as Arc<dyn Engine>),
+        #[cfg(feature = "pt-BR")]
         "pt-BR" => create_portuguese_br().map(|e| e as Arc<dyn Engine>),
+        #[cfg(feature = "hi")]
         "hi" => crate::languages::hindi::hindi::engine(),
+        #[cfg(feature = "cmn")]
         "cmn" => {
             crate::languages::mandarin::mandarin::create_mandarin(Some(Arc::new(read_as_english)))
                 .map(|m| Arc::new(m) as Arc<dyn Engine>)
                 .map_err(PhonemizeError::Data)
         }
+        #[cfg(feature = "fr")]
         "fr" => crate::languages::french::french::create_french()
             .map(|fr| Arc::new(FrenchEngine(fr)) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "el")]
         "el" => crate::languages::greek::greek::create_greek()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ko")]
         "ko" => crate::languages::korean::korean::create_korean()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "th")]
         "th" => crate::languages::thai::thai::create_thai()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ru")]
         "ru" => crate::languages::russian::russian::create_russian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "de")]
         "de" => crate::languages::german::german::create_german()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "pl")]
         "pl" => crate::languages::polish::polish::create_polish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "tr")]
         "tr" => crate::languages::turkish::turkish::create_turkish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "nl")]
         "nl" => crate::languages::dutch::dutch::create_dutch()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "uk")]
         "uk" => crate::languages::ukrainian::ukrainian::create_ukrainian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sv")]
         "sv" => crate::languages::swedish::swedish::create_swedish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "id")]
         "id" => crate::languages::indonesian::indonesian::create_indonesian(Some(Arc::new(
             read_as_english,
         )))
         .map(|e| Arc::new(e) as Arc<dyn Engine>)
         .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ms")]
         "ms" | "zsm" => {
             crate::languages::malay::malay::create_malay(Some(Arc::new(read_as_english)))
                 .map(|e| Arc::new(e) as Arc<dyn Engine>)
                 .map_err(PhonemizeError::Data)
         }
+        #[cfg(feature = "tl")]
         "tl" => crate::languages::tagalog::tagalog::create_tagalog()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ceb")]
         "ceb" => crate::languages::cebuano::cebuano::create_cebuano()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "hil")]
         "hil" => crate::languages::hiligaynon::hiligaynon::create_hiligaynon()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ilo")]
         "ilo" => crate::languages::ilocano::ilocano::create_ilocano()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sr")]
         "sr" => crate::languages::serbian::serbian::create_serbian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "hr")]
         "hr" => crate::languages::croatian::croatian::create_croatian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "bs")]
         "bs" => crate::languages::bosnian::bosnian::create_bosnian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sl")]
         "sl" => crate::languages::slovenian::slovenian::create_slovenian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "lt")]
         "lt" => crate::languages::lithuanian::lithuanian::create_lithuanian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "lv")]
         "lv" => crate::languages::latvian::latvian::create_latvian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "es-419")]
         "es-419" => crate::languages::spanish_419::spanish_419::create_spanish_419()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "fr-CA")]
         "fr-CA" => crate::languages::french_ca::french_ca::create_french_ca()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ca")]
         "ca" => crate::languages::catalan::catalan::create_catalan()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "gl")]
         "gl" => crate::languages::galician::galician::create_galician()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ro")]
         "ro" => crate::languages::romanian::romanian::create_romanian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "cs")]
         "cs" => crate::languages::czech::czech::create_czech()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sk")]
         "sk" => crate::languages::slovak::slovak::create_slovak()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "be")]
         "be" => crate::languages::belarusian::belarusian::create_belarusian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "bg")]
         "bg" => crate::languages::bulgarian::bulgarian::create_bulgarian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "mk")]
         "mk" => crate::languages::macedonian::macedonian::create_macedonian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "bho")]
         "bho" => crate::languages::bhojpuri::bhojpuri::engine(),
+        #[cfg(feature = "mag")]
         "mag" => crate::languages::magahi::magahi::engine(),
+        #[cfg(feature = "awa")]
         "awa" => crate::languages::awadhi::awadhi::engine(),
+        #[cfg(feature = "mai")]
         "mai" => crate::languages::maithili::maithili::engine(),
+        #[cfg(feature = "hne")]
         "hne" => crate::languages::chhattisgarhi::chhattisgarhi::engine(),
+        #[cfg(feature = "rkt")]
         "rkt" => crate::languages::rangpuri::rangpuri::engine(),
+        #[cfg(feature = "ne")]
         "ne" => crate::languages::nepali::nepali::engine(),
+        #[cfg(feature = "mr")]
         "mr" => crate::languages::marathi::marathi::engine(),
+        #[cfg(feature = "fi")]
         "fi" => crate::languages::finnish::finnish::create_finnish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "et")]
         "et" => crate::languages::estonian::estonian::create_estonian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "hu")]
         "hu" => crate::languages::hungarian::hungarian::create_hungarian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "is")]
         "is" => crate::languages::icelandic::icelandic::create_icelandic()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "fo")]
         "fo" => crate::languages::faroese::faroese::create_faroese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "az")]
         "az" => crate::languages::azerbaijani::azerbaijani::create_azerbaijani()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "kk")]
         "kk" => crate::languages::kazakh::kazakh::create_kazakh()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ky")]
         "ky" => crate::languages::kyrgyz::kyrgyz::create_kyrgyz()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "uz")]
         "uz" => crate::languages::uzbek::uzbek::create_uzbek()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "tk")]
         "tk" => crate::languages::turkmen::turkmen::create_turkmen()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "tt")]
         "tt" => crate::languages::tatar::tatar::create_tatar()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "da")]
         "da" => crate::languages::danish::danish::create_danish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "nb")]
         "nb" => crate::languages::norwegian::norwegian::create_norwegian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "af")]
         "af" => crate::languages::afrikaans::afrikaans::create_afrikaans()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "lb")]
         "lb" => crate::languages::luxembourgish::luxembourgish::create_luxembourgish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "bar")]
         "bar" => crate::languages::bavarian::bavarian::create_bavarian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ba")]
         "ba" => crate::languages::bashkir::bashkir::create_bashkir()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "crh")]
         "crh" => crate::languages::crimeantatar::crimeantatar::create_crimean_tatar()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "kaa")]
         "kaa" => crate::languages::karakalpak::karakalpak::create_karakalpak()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "nog")]
         "nog" => crate::languages::nogai::nogai::create_nogai()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "chv")]
         "chv" => crate::languages::chuvash::chuvash::create_chuvash()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "tg")]
         "tg" => crate::languages::tajik::tajik::create_tajik()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "cy")]
         "cy" => crate::languages::welsh::welsh::create_welsh()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ga")]
         "ga" => crate::languages::irish::irish::create_irish()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "gd")]
         "gd" => crate::languages::scottishgaelic::scottishgaelic::create_scottish_gaelic()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "eu")]
         "eu" => crate::languages::basque::basque::create_basque()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sq")]
         "sq" => crate::languages::albanian::albanian::create_albanian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ast")]
         "ast" => crate::languages::asturian::asturian::create_asturian()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "an")]
         "an" => crate::languages::aragonese::aragonese::create_aragonese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "oc")]
         "oc" => crate::languages::occitan::occitan::create_occitan()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "bn")]
         "bn" => crate::languages::bengali::bengali::engine(),
+        #[cfg(feature = "as")]
         "as" => crate::languages::assamese::assamese::engine(),
+        #[cfg(feature = "bpy")]
         "bpy" => crate::languages::bishnupriya::bishnupriya::engine(),
+        #[cfg(feature = "syl")]
         "syl" => crate::languages::sylheti::sylheti::engine(),
+        #[cfg(feature = "or")]
         "or" => crate::languages::odia::odia::engine(),
+        #[cfg(feature = "kn")]
         "kn" => crate::languages::kannada::kannada::engine(),
+        #[cfg(feature = "te")]
         "te" => crate::languages::telugu::telugu::engine(),
+        #[cfg(feature = "ta")]
         "ta" => crate::languages::tamil::tamil::engine(),
+        #[cfg(feature = "ml")]
         "ml" => crate::languages::malayalam::malayalam::engine(),
+        #[cfg(feature = "si")]
         "si" => crate::languages::sinhala::sinhala::engine(),
+        #[cfg(feature = "vi")]
         "vi" => crate::languages::vietnamese::vietnamese::create_vietnamese(Some(Arc::new(
             read_as_english,
         )))
         .map(|e| Arc::new(e) as Arc<dyn Engine>)
         .map_err(PhonemizeError::Data),
+        #[cfg(feature = "lo")]
         "lo" => crate::languages::lao::lao::create_lao()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "my")]
         "my" => crate::languages::burmese::burmese::create_burmese(Some(Arc::new(read_as_english)))
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "jv")]
         "jv" => crate::languages::javanese::javanese::create_javanese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "su")]
         "su" => crate::languages::sundanese::sundanese::create_sundanese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "mad")]
         "mad" => crate::languages::madurese::madurese::create_madurese()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "zu")]
         "zu" => crate::languages::zulu::zulu::create_zulu(
             Some(Arc::new(read_as_english)),
             Some(Arc::new(|w: &JsString| {
@@ -331,6 +660,7 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         )
         .map(|e| Arc::new(e) as Arc<dyn Engine>)
         .map_err(PhonemizeError::Data),
+        #[cfg(feature = "xh")]
         "xh" => crate::languages::xhosa::xhosa::create_xhosa(
             Some(Arc::new(read_as_english)),
             Some(Arc::new(|w: &JsString| {
@@ -339,51 +669,67 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         )
         .map(|e| Arc::new(e) as Arc<dyn Engine>)
         .map_err(PhonemizeError::Data),
+        #[cfg(feature = "st")]
         "st" => crate::languages::sesotho::sesotho::create_sesotho()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "tn")]
         "tn" => crate::languages::setswana::setswana::create_setswana()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "nso")]
         "nso" => crate::languages::sepedi::sepedi::create_sepedi()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sn")]
         "sn" => crate::languages::shona::shona::create_shona()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "sw")]
         "sw" => crate::languages::swahili::swahili::create_swahili()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "rw")]
         "rw" => crate::languages::kinyarwanda::kinyarwanda::create_kinyarwanda()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "rn")]
         "rn" => crate::languages::kirundi::kirundi::create_kirundi()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "lg")]
         "lg" => crate::languages::luganda::luganda::create_luganda()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ln")]
         "ln" => crate::languages::lingala::lingala::create_lingala()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "nya")]
         "nya" => crate::languages::chichewa::chichewa::create_chichewa()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "yo")]
         "yo" => crate::languages::yoruba::yoruba::create_yoruba(Some(Arc::new(read_as_english)))
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ig")]
         "ig" => crate::languages::igbo::igbo::create_igbo()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ha")]
         "ha" => crate::languages::hausa::hausa::create_hausa()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ee")]
         "ee" => crate::languages::ewe::ewe::create_ewe()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "ak")]
         "ak" => crate::languages::akan::akan::create_akan()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        #[cfg(feature = "wo")]
         "wo" => crate::languages::wolof::wolof::create_wolof()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
@@ -395,24 +741,43 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
 /// rather than a table, because a policy holds a compiled regex and an ordinal closure, which no `const` can.
 fn roman_policy(lang: &str) -> RomanPolicy {
     match lang {
+        #[cfg(feature = "it")]
         "it" => crate::languages::italian::roman_ordinals::roman_policy(),
+        #[cfg(feature = "es")]
         "es" => crate::languages::spanish::roman_ordinals::roman_policy(),
+        #[cfg(feature = "es-419")]
         "es-419" => crate::languages::spanish_419::roman_ordinals::roman_policy(),
+        #[cfg(feature = "ca")]
         "ca" => crate::languages::catalan::roman_ordinals::roman_policy(),
+        #[cfg(feature = "ro")]
         "ro" => crate::languages::romanian::roman_ordinals::roman_policy(),
+        #[cfg(feature = "pt")]
         "pt" => pt_roman_policy(),
+        #[cfg(feature = "pt-BR")]
         "pt-BR" => pt_br_roman_policy(),
+        #[cfg(feature = "ru")]
         "ru" => crate::languages::russian::roman_ordinals::roman_policy(),
+        #[cfg(feature = "pl")]
         "pl" => crate::languages::polish::roman_ordinals::roman_policy(),
+        #[cfg(feature = "uk")]
         "uk" => crate::languages::ukrainian::roman_ordinals::roman_policy(),
+        #[cfg(feature = "be")]
         "be" => crate::languages::belarusian::roman_ordinals::roman_policy(),
+        #[cfg(feature = "hu")]
         "hu" => crate::languages::hungarian::roman_ordinals::roman_policy(),
+        #[cfg(feature = "az")]
         "az" => crate::languages::azerbaijani::roman_ordinals::roman_policy(),
+        #[cfg(feature = "kk")]
         "kk" => crate::languages::kazakh::roman_ordinals::roman_policy(),
+        #[cfg(feature = "uz")]
         "uz" => crate::languages::uzbek::roman_ordinals::roman_policy(),
+        #[cfg(feature = "tk")]
         "tk" => crate::languages::turkmen::roman_ordinals::roman_policy(),
+        #[cfg(feature = "tt")]
         "tt" => crate::languages::tatar::roman_ordinals::roman_policy(),
+        #[cfg(feature = "ba")]
         "ba" => crate::languages::bashkir::roman_ordinals::roman_policy(),
+        #[cfg(feature = "chv")]
         "chv" => crate::languages::chuvash::roman_ordinals::roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
@@ -629,7 +994,9 @@ pub fn english() -> Result<Arc<EnglishPhonemizer>, PhonemizeError> {
 #[derive(Clone, Copy)]
 enum EnglishVariant {
     Us,
+    #[cfg(feature = "en-GB")]
     Gb,
+    #[cfg(feature = "en-IN")]
     In,
 }
 
@@ -642,7 +1009,9 @@ impl EnglishEngine {
     fn host_and_transform(&self) -> (&'static str, Option<WordTransform<'static>>) {
         match self.variant {
             EnglishVariant::Us => ("en", None),
+            #[cfg(feature = "en-GB")]
             EnglishVariant::Gb => ("en-GB", Some(&rp_word_transform)),
+            #[cfg(feature = "en-IN")]
             EnglishVariant::In => ("en-IN", Some(&indian_word_transform)),
         }
     }
@@ -693,12 +1062,15 @@ fn build_english_tagger() -> Result<EnglishTagger, String> {
 // ── French ───────────────────────────────────────────────────────────────────────────────────────────
 
 /// Why the French BiLSTM OOV tagger is unavailable (the fr best path then serves the sync reading), or `None`.
+#[cfg(feature = "fr")]
 pub fn french_tagger_unavailable_reason() -> Option<String> {
     crate::languages::french::french_tagger::french_tagger_unavailable_reason()
 }
 
+#[cfg(feature = "fr")]
 struct FrenchEngine(crate::languages::french::french::FrenchPhonemizer);
 
+#[cfg(feature = "fr")]
 impl Engine for FrenchEngine {
     fn text(&self, input: &JsString) -> Result<JsString, PhonemizeError> {
         Ok(self.0.text(input, None))
@@ -716,5 +1088,21 @@ impl Engine for FrenchEngine {
 
     fn has_neural(&self) -> bool {
         true
+    }
+}
+
+/// A language whose feature is off is an unknown code. Runs only in a build without `de`, e.g.
+/// `cargo test --no-default-features --features en-GB`.
+#[cfg(all(test, not(feature = "de")))]
+mod feature_off_tests {
+    use super::*;
+
+    #[test]
+    fn a_language_without_its_feature_is_unknown() {
+        assert!(!LANGUAGES.contains(&"de"));
+        assert_eq!(
+            phonemize_in("de", &js("Haus")).err(),
+            Some(PhonemizeError::UnknownLanguage("de".to_string()))
+        );
     }
 }

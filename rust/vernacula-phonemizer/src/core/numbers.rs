@@ -432,7 +432,7 @@ pub fn spell_digits(digits: &str, d: &NumbersDef, word: &dyn Fn(&str) -> String)
         .join(" ")
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "hi"))]
 mod tests {
     use super::*;
 

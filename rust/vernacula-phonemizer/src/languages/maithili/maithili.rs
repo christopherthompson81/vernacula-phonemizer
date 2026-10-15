@@ -127,6 +127,7 @@ mod tests {
     ];
 
     #[test]
+    #[cfg(feature = "hi")]
     fn the_ts_suite_pins_hold() {
         let e = create_maithili(None).unwrap();
         for (op, lang, input, want) in PINS {

@@ -182,7 +182,7 @@ fn validate(m: &SpanishManifest) -> Result<(), String> {
 pub(crate) static MANIFEST: LazyLock<&'static SpanishManifest> =
     LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 
-#[cfg(test)]
+#[cfg(all(test, feature = "es"))]
 mod tests {
     use super::*;
 

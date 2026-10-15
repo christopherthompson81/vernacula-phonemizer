@@ -359,7 +359,7 @@ pub(crate) fn normalize_spanish(input: &JsString, americas: bool) -> JsString {
 /// The dotted-abbreviation rules start at a Unicode word edge, not an ASCII `\b` (#1480's shape). Each pair:
 /// the abbreviation alone (the rule fires) and glued after a non-ASCII letter (it declines). Ported from
 /// test/abbrev-word-edge.test.ts; every word is synthetic.
-#[cfg(test)]
+#[cfg(all(test, feature = "es"))]
 mod word_edge {
     use super::*;
 

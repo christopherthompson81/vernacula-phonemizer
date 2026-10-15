@@ -491,7 +491,7 @@ pub(crate) fn normalize_malay(input: &JsString) -> JsString {
     s
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "ms"))]
 mod tests {
     use super::*;
     use crate::languages::malay::malay::create_malay;

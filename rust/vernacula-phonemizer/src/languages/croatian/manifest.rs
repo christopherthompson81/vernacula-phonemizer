@@ -37,7 +37,7 @@ pub fn try_manifest() -> Result<&'static CroatianManifest, String> {
 pub(crate) static MANIFEST: LazyLock<&'static CroatianManifest> =
     LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 
-#[cfg(test)]
+#[cfg(all(test, feature = "hr"))]
 mod tests {
     use super::*;
 

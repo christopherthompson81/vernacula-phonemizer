@@ -419,7 +419,7 @@ pub fn engine() -> Result<Arc<dyn Engine>, PhonemizeError> {
     )))
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "bn"))]
 mod tests {
     use super::*;
     use crate::phonemize;
