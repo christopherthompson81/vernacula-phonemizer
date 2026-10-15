@@ -3043,6 +3043,30 @@ fn main() {
                 }
             })
         }
+        "ha-normalize" | "ha-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::hausa::{hausa, normalize, numbers};
+            // Building `ha` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ha").unwrap();
+            let ha = hausa::create_hausa().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ha.normalize(&t()),
+                    "symbols" => ha.symbols(&t()),
+                    "text" => with_host(&JsString::from("ha"), || ha.text(&t())),
+                    "unreadable" => {
+                        JsString::from(normalize::IS_UNREADABLE(&t()).to_string().as_str())
+                    }
+                    "word" => hausa::phonemize_word(&w()),
+                    "nat" => hausa::NAT(&w()),
+                    _ => numbers::number_to_words(js_number(&JsString::from(
+                        input["n"].as_str().unwrap(),
+                    ))),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

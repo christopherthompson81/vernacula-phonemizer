@@ -130,3 +130,46 @@ DIFFER`. Restored: 0 DIFFER both.
 *ise atɔ*) are silent too, which the header records as an accepted silence.
 
 **Implication.** Commit ig; ha next.
+
+## Run 6 — 2026-10-15 07:15 (ha: first build, differentials, pins)
+
+**Shape.** manifest (the rule table as `(String, String, bool)` tuples; the tier's `exponentWords` is its own struct
+because the TS declares `squared` and `cubed` required), g2p (the optional, trimmed `tone.tsv`; `codes[n]` read one
+code UNIT at a time, `?? ""` past the end), numbers ("" for anything but a non-negative integer below 10¹²), normalize
+(the initialism pass and `isUnreadableHausa` over the manifest's phonotactics; each `{…}[u.toLowerCase()]!` table a
+`match` whose miss stringifies as `undefined`) and hausa (TOKEN built from `hostWordRun(["Latin"], "'’")`, the
+nativiser, the tier from the manifest, the digit-at-a-time fallback).
+
+**Commands.** As before; `ha-normalize` / `ha-g2p` dumps with `FLEURS_DIR` `ha: "ha_ng"` and `FLEURS_SPLITS`
+`ha_ng: ["train"]` (the directory ships only train), `probes/ha.txt` (21 synthetic lines) and 652 synthetic rows
+(entities, era markers, dotted capitals incl. hooked ones, `v.`, `US$`, both range rules incl. `1, -2`, a clock grid of
+9 hours × 5 minutes × 10 markers, timezone clocks, GHz, decimal + unit over 16 unit spellings incl. U+212A and U+017F,
+version letters, comma decimals, fractions, degrees × scales × compass, rates, the preposed unit, the signs, A&B, the
+decimal percent, 14 initialisms × 2 frames); `isUnreadableHausa` over every letter run; `ha-g2p` over every letter run
+× 3 forms, every tone key × 3 casings, every 1–3 string over 31 letters, every 4-letter string over 16 context
+letters, corners, the nativiser on each, and `numberToWords` over 0…20,000, scaled samples and the 10¹² edge.
+
+**Raw finding.** `ha: 200/200` on the first build; audits `36 raw patterns, 0 not found verbatim` (TOKEN's `format!`
+checked by hand), `1 TS escape, 0 short`, `24 non-ASCII runs, 0 not found` (the minus class keeps its literal U+2212
+as the TS writes it). Then:
+```
+ha-normalize: 86953 identical, 0 DIFFER   (golden 2741 / fleurs 77220 / probe 174 / synthetic 3299 / tier 3519)
+ha-g2p: 248249 identical, 0 DIFFER
+phonemize-sync / phonemize-best / phonemize-trace / trace: 3029 identical, 0 DIFFER each
+cargo test --release hausa: 1 passed (67 pins: 22 phonemizeWord, 11 numberToWords, 34 phonemize; 72 expects, 0 failures)
+```
+Haystack: `normalizeHausa` changed golden 9/100, FLEURS 183/2,908, probes 17/21, synthetic 447/652 texts.
+
+**Guard check.** The range rule's operand loosened back to `(\d[\d,]*)` (the `1, -2` shape #1015 closed), and the tone
+overlay's lowercase fallback removed: `ha-normalize: 86484 identical, 469 DIFFER`, `ha-g2p: 245013 identical, 3236
+DIFFER`. Restored: 0 DIFFER both.
+
+**TS findings (reported, not fixed; the Rust reproduces each).**
+1. `nisa 12.8 m/ſ ne` (U+017F) → normalized `nisa 12 maki takwas undefined ne` → *… undeɸˈined …*: the decimal + unit
+   rule's alternation `m\/s` is matched under `iu`, which admits the long s, and the lookup table keyed by
+   `u.toLowerCase()` has no row for it (#1122's shape). The Kelvin sign is safe there: U+212A lowercases to `k`.
+2. A sentence ending in a capital loses its full stop: `Ya je BBC. Bello ya zo.` reads *… t͡ʃˈa˥ bˈe˥llo˩ …* with no
+   clause break, while `Ya je Kano. Bello ya zo.` keeps it. Step 3's `(?<=\p{Lu})\.(?=\s+\p{Lu})` is written for an
+   initial (`M. Bello`), but an acronym at the end of a sentence followed by any capitalised sentence matches it too.
+
+**Implication.** Commit ha; ee next.

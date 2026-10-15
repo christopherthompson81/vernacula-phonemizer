@@ -35,6 +35,7 @@ pub mod french_ca;
 pub mod galician;
 pub mod german;
 pub mod greek;
+pub mod hausa;
 pub mod hiligaynon;
 pub mod hindi;
 pub mod hungarian;

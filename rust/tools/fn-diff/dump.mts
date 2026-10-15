@@ -79,10 +79,11 @@ const FLEURS_DIR: Record<string, string> = {
     jv: "jv_id",
     yo: "yo_ng",
     ig: "ig_ng",
+    ha: "ha_ng",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
-const FLEURS_SPLITS: Record<string, string[]> = { kk_kz: ["train"] };
+const FLEURS_SPLITS: Record<string, string[]> = { kk_kz: ["train"], ha_ng: ["train"] };
 
 /**
  * A language's inputs, deduplicated, each tagged with the first source it came from: its goldens' text column,
@@ -5791,6 +5792,74 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push("999999999999", "1000000000000", "9007199254740993", "12345678901234567890123", "007", "0000");
         for (const d of ns) { emit({ n: d, raw: units(d), op: "words" }, numberToWords(Number(d), d)); emit({ n: d, raw: null, op: "words" }, numberToWords(Number(d))); }
         for (const [n, raw] of [["1.5", "15"], ["-1", "1"], ["NaN", "x9"], ["Infinity", "٣"], ["-0", "0"], ["1e21", undefined], ["1.5", undefined], ["-12", undefined], ["NaN", undefined], ["-Infinity", undefined]] as const) emit({ n, raw: raw === undefined ? null : units(raw), op: "words" }, numberToWords(Number(n), raw));
+    },
+    // ── Hausa (ha). Inputs: the ha golden, FLEURS ha_ng (train only; columns 3 and 4) and probes/ha.txt. ──
+    // normalizeHausa, the symbol tier on what normalize hands it, isUnreadableHausa over every letter run, and the
+    // registry's ha engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm: entities, era
+    // markers, dotted capitals (incl. hooked capitals), `v.`, `US$`, both range rules and the `1, -2` refusal, colon
+    // clocks × markers, timezone clocks, GHz, decimal + unit (incl. the Kelvin sign and the long s), version letters,
+    // comma decimals, fractions, degrees × scales × compass, rates, the preposed unit, signs, A&B, the decimal percent,
+    // and initialisms.
+    async "ha-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeHausa, isUnreadableHausa } = await import("../../../src/languages/hausa/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/hausa\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ha"], FLEURS_DIR.ha, ["ha.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["&amp;", "&AMP;", "&amp", "A&amp;B"]) add(`Bello ${e} Musa`);
+        for (const b of ["1000 B.C.kafin zuwan", "1000 BC", "10,000 BCE", "500 B.C.E.", "bc", "ABC", "B.C", "BCa"]) add(`shekara ${b} ne`);
+        for (const d of ["U.S.A.", "U. S.", "M. Bello", "M. Ɗanjuma", "George W. Bush", "Roe v. Wade", "Roe v. wade", "A.B.C", "Ƙ.Ɓ."]) add(`${d} ya zo`);
+        for (const u of ["US$14.7", "US $ 30", "uS$5", "us$5", "US$x", "aUS$5"]) add(`kuɗi ${u} miliyan`);
+        for (const r of ["4.2-3.9", "2-3", "5 – 3", "1644-1912", "1, -2", "1,000-2,000", "1,-2", "2-3.5", "5-", "1.2.3-4"]) add(`daga ${r} km`);
+        for (const h of ["0", "7", "07", "11", "12", "19", "23", "24", "29"]) for (const m of ["00", "05", "29", "59", "60"]) for (const tail of ["", " na safe", " AM", " p.m.", " a.m", " PM.", "am", " ama", ":10", ".5"]) add(`da ${h}:${m}${tail} ne`);
+        for (const c of ["12.00 GMT", "15.30 UTC", "9.05gmt", "123.00 GMT", "1.5 UTC", "12.00GMT"]) add(`a ${c} ne`);
+        for (const g of ["2.4 GHz", "5.0Ghz", "2.4 Gh", "2.4 GHza"]) add(`mita ${g} ne`);
+        for (const u of ["km/h", "m/s", "km/u", "mph", "mil/awa", "km", "m", "kg", "mm", "cm", "KM", "\u212am", "m/\u017f", "Km/H", "kma", "mx"]) for (const n of ["12.8", "12.8 ", "0.5"]) add(`nisa ${n}${u} ne`);
+        for (const v of ["802.11n", "802.11N", "1.1a", "1.1ab", "2.8 miliyan", "1.5", "12.8", "1.2.3", "3.14159"]) add(`sigar ${v} ne`);
+        for (const c of ["12,5", "6,387", "1,25", "1,2,3", "12,50"]) add(`adadi ${c} ne`);
+        for (const f of ["4/4", "1/5", "12/123", "1234/5", "1/2/3", "a1/2"]) add(`inci ${f} ne`);
+        for (const d of ["30°C", "30 ° c", "30ºF", "35°W", "35°w", "35° N", "35°\u017f", "45°", "45°a", "30°Ca", "+30°C", "−5°C"]) add(`zafi ${d} ne`);
+        for (const r of ["160km / h", "480 km/h", "133 m/s", "300 mph", "600Mbit/s", "64 kph", "100-200 mil/awa", "5 kg/s", "5 KM/U", "5 \u212aph", "5 m/x"]) add(`gudu ${r} ne`);
+        for (const p of ["km 2-3", "km 5", "kg 10", "mm 3", "cm 4", "KM 5", "km5", "akm 5", "km x"]) add(`mai nisan ${p} ya rufe`);
+        for (const s of ["+30", "+ 5", "-5", "−5", "a-5", "5-5", "-5-6", "- 5", "A&B", "AT&Ts", "a & b", "1 = 2", "a=b", "1 < 2", "3 > 2", "3 × 4", "3×4", "3.5%", "kashi 3.5%", "1.5 %", "x maki biyu %"]) add(`alama ${s} ne`);
+        for (const c of ["NASA", "UN", "BBC", "HIV", "DNA", "ECOWAS", "XYZQ", "A1GP", "XDR-TB", "H5N1", "MRI", "MS", "TV", "COVID"]) { add(`ƙungiyar ${c} ta`); add(`${c} TA ZO`); }
+        for (const w of ["  a  ", " \t b", "\n c \n"]) add(`x${w}y`);
+        for (const l of ["Lone \ud800 surrogate da 𝐀𝐁 da ﬁ.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeHausa(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("ha", t));
+            for (const m of t.matchAll(/\p{L}+/gu)) emit({ text: units(m[0].toLowerCase()), src, op: "unreadable" }, String(isUnreadableHausa(m[0].toLowerCase())));
+        }
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every tone-lexicon
+    // key (and UPPER), every 1–3 letter string over the Boko alphabet, every 4-letter string over a rule-context set,
+    // edge strings; numberToWords over 0…20,000, scaled samples, the 10^12 edge and non-integer / non-finite values.
+    async "ha-g2p"() {
+        const { phonemizeWord, nat } = await import("../../../src/languages/hausa/hausa.ts");
+        const { numberToWords } = await import("../../../src/languages/hausa/numbers.ts");
+        const H = new URL("../../../src/languages/hausa/g2p.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("ha")) for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        for (const k of loadTsvMap(H, "tone.tsv", undefined, { optional: true }).keys()) { words.add(k); words.add(k.toUpperCase()); words.add(k[0]!.toUpperCase() + k.slice(1)); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzɓɗƙƴ'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouynkgƙshtcw'"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Dvořák", "Ångström", "Œuvre", "Straße", "ƁƊƘƳ", "’yan", "'yan", "chh", "ƙw", "ŋ", "ñ", "x"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1000 + 21, k * 1e6 + 155, k * 1e9 + 1999, k * 1e6, k * 1e9);
+        ns.push(1e12 - 1, 1e12, 1e12 + 1, 2 ** 53, 1.5, 1.234, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
     },
 };
 
