@@ -117,3 +117,21 @@ chosen while reading each file against its docstring). Rust reproduces each one 
    likewise). The detour works, but the script run is not traced as foreign at the vi level.
 
 **Implication.** Item 1 reported in the PR, not fixed (TS first, in its own change).
+
+## Run 5 — 2026-10-15 05:40 (the group rebased onto main, and a gate that depended on order)
+
+**Question.** After rebasing the six commits onto origin/main a64aa195 (the East Indic, west and Dravidian groups
+landed meanwhile; registry, module list, dump.mts and the replay arms conflicted at every step and were rebuilt from
+upstream plus each language's own additions), do all gates hold?
+
+**Command.** `cargo run --release -p parity` (every language, one process), then `parity vi` and `parity en vi`.
+
+**Raw finding.** The full run: `vi: 193/200 identical, 7 differ`, every row an embedded English word (`Daesh`, `Pago
+Pago`, `Niue`, `Saint-Saens`, `Muskoka`) read with a neural reading where the golden has the n-gram one. Alone, and
+after `en`: `vi: 200/200`. Cause: the foreign-OOV memo is process-wide; tools/gen_parity_goldens.mts calls
+`clearForeignOov()` before every language (and so does the C# parity tool), the Rust parity tool did not, and the
+new non-Latin languages now ahead of `vi` in LANGUAGES prewarm the same FLEURS sentences' English words. Fixed in the
+HARNESS (`clear_foreign_oov()` per language in rust/tools/parity, its own commit): full run `vi: 200/200`; every
+other language unchanged (mag 199/200, tt 199/200, syl 195/200 are their known Arabic-run port-pending rows).
+
+**Implication.** A one-language parity run cannot see an order dependence; the full run is the gate.
