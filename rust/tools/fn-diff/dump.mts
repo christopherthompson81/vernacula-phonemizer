@@ -69,10 +69,11 @@ const FLEURS_DIR: Record<string, string> = {
     bn: "bn_in",
     as: "as_in",
     or: "or_in",
+    zu: "zu_za",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
-const FLEURS_SPLITS: Record<string, string[]> = { kk_kz: ["train"] };
+const FLEURS_SPLITS: Record<string, string[]> = { kk_kz: ["train"], zu_za: ["train"], xh_za: ["train"] };
 
 /**
  * A language's inputs, deduplicated, each tagged with the first source it came from: its goldens' text column,
@@ -5037,6 +5038,90 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e), "12345678901234567890123".slice(0, e));
         for (const x of ["9007199254740991", "9007199254740993", "007", "୧୨୩", "୯୦୦୭୧୯୯୨୫୪୭୪୦୯୯୩"]) ns.push(x);
         for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, withHost("or", () => E.text(n)));
+    },
+    // ── Zulu (zu). Inputs: the zu golden, FLEURS zu_za (columns 3 and 4) and probes/zu.txt. ──
+    // normalizeZulu, the symbol tier over its output (recorded through the wrapper) and `createZulu().text` (no
+    // foreign reader: the English route is covered end to end) over every text plus synthetic rows for every arm;
+    // isForeignNguniWord over every letter run against the real English lexicon.
+    async "zu-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeZulu } = await import("../../../src/languages/zulu/normalize.ts");
+        const { createZulu, isForeignNguniWord } = await import("../../../src/languages/zulu/zulu.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/zulu\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createZulu();
+        const en = createEnglish();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["zu"], FLEURS_DIR.zu, ["zu.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const a of ["amaB&amp;B", "A & B", "A&B", "x&AMP;y", "a &amp; b", "&"]) add(`kukhona ${a} lapha`);
+        for (const e of ["B.C.", "B.C.E.", "B.C", "BCE", "BC", "BCD", "aB.C.", "B.C.E"]) for (const tail of ["", ".", " Kodwa", " kodwa", ",", "\u00a0Kodwa"]) { add(`ngo-400 ${e}${tail}`); add(`ngo-400\u00a0${e}${tail}`); }
+        for (const d of ["U.S.", "U. S. A.", "U.\u00a0S.", "É.Ü.", "A.b.", "uJoji W. Hlathi", "uJoji W. hlathi", "uJoji W.\u00a0Hlathi", "W. Hlathi"]) add(`ngu ${d} namuhla`);
+        for (const g of ["1,000", "1,000,", "1,000.", "1,000.5", "12,345,678", "0,500", "1,0000", "1,5", "100 000", "100\u00a0000", "100\u202f000", "100\u2009000", "30 9", "1 000 000", "1,000 000"]) add(`angu-${g} futhi`);
+        for (const p of ["4:41.30", "2:11.60", "1:09.02", "12:34.5", "4:41.305"]) add(`isikhathi ${p} sokugijima`);
+        for (const h of ["0", "1", "07", "11", "12", "19", "23", "24"]) for (const m of ["00", "05", "30", "59", "60", " 08"]) for (const ap of ["", " a.m.", " p.m.", "pm", "AM", " P.M", " am.", " amaXhosa"]) add(`ngo-${h}:${m}${ap} namuhla`);
+        for (const c of ["12,00 GMT", "15.00 UTC", "0230 UTC", "24.00 UTC", "9.30 utc", "15.00UTC", "1230 GMT", "12,00 GMTa", "1,30 UTC"]) add(`(${c})`);
+        for (const a of ["a.m.", "p.m", "A.M.", "pm", "P.M", "ama.m."]) add(`ekuseni ${a} namuhla`);
+        for (const x of ["±2", "+3", "+ 3", "a+3", "+\u00a03", "+30°C", "UTC+1", "+"]) add(`inani ${x} lapha`);
+        for (const d of ["+30°C", "30 °C", "30°c", "30º C", "86°F", "86 º F", "45°", "45° ", "35°W", "35°w", "35° N", "20°Ca", "1.5°C", "1,5°C"]) { add(`kwaba ${d} namuhla`); add(`amazinga kwaba ${d} namuhla`); add(`amazinga. kwaba ${d}`); }
+        for (const r of ["1995-96", "5-3", "26 -00", "4.2-3.9", "4.2 – 3.9", "10-20", "1,000-2,000", "3 – 5", "3—5", "5-5", "1.5-2", "2-1.5", "35-40 mph", "9007199254740993-9007199254740995"]) add(`kusukela ${r} lapha`);
+        for (const r of ["100 km/h", "5 m/s", "100km/H", "5 m/\u017f", "100 \u212am/h", "5 MM / S", "3 kg/h", "2 cm/h", "7 mi/h", "1.5 km/h", "mph", "kph", "sama-kph", "40 MPH", "kphx", "80 km / h"]) add(`ngejubane le-${r} manje`);
+        for (const q of ["300,948 sq mi", "5 sqmi", "5 SQ MI", "5 sq mia", "1600 kma", "kma", "1600.5 kma", "1600kma kusuka"]) add(`indawo ${q} lapha`);
+        for (const v of ["$2.50", "US$ 14.7", "£3.05", "AUD$1.5", "$2.00", "12.8 km", "3.5km²", "3.5 km2", "2.5 m'", "1.50", "1.2.3", "2.5 FT", "0.5 mm", "1.5 \u212ag", "3.10", "4.0", "1.5.", "$1.5.2"]) add(`kwakungu-${v} lapha`);
+        for (const v of ["1,5", "1,50", "1,500", "12,3,", "0,05"]) add(`ezingu-${v} lapha`);
+        for (const f of ["1/2", "1/5", "1/10", "1/11", "1/0", "1/05", "1/00", "2/5", "1/2/3", "1 / 4", "1.5/2", "11/2"]) add(`ingxenye ${f} yabantu`);
+        for (const g of ["6 × 6", "6×6", "x = y", "a=b", "3 < 4", "5 > 2", "-5", "a -5", "a-5", "−5", "5 -5", "(-5)", "6x6 cm"]) add(`inani ${g} lapha`);
+        for (const d of ["ilunga - bona", "a -- b", "5 - 6", "a – b", "a — 5", "a - "]) add(`${d} Umfanekiso`);
+        for (const n of ["njll.", "njl.", "njll", "NJLL.", "njlla", "udkt.", "dkt", "Udkt.", "udkta"]) add(`izinto, ${n} futhi`);
+        for (const i of ["UTC", "i-PBS", "weNPWS", "kwiTV", "i-COVID-19", "US$5", "AUD$45", "ABCDEFG", "ABCDEF", "PBS2", "SADC", "eskom", "ESKOM"]) add(`sibona ${i} lapha`);
+        for (const c of ["ALL CAPS DOCUMENT", "ALLCAPS", "PBS NEWS", " PBS "]) add(c);
+        for (const [t, src] of rows) {
+            const a = normalizeZulu(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("zu", () => E.text(t)));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/\p{L}+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of ["china", "cima", "xhosa", "cha", "check", "cycle", "box", "quick", "fox", "Xerox", "quiz", "xyz", "compyutha", "acquire", "exact", "chalk", "qinsekisa", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "foreign" }, isForeignNguniWord(w.toLowerCase(), (x) => en.knownWord(x) !== undefined) ? "1" : "0");
+    },
+    // phonemizeWord (lexicon tone, explicit codes and no codes), phonemizeCompound, toSegments and `nat` over every
+    // letter run, every tone-lexicon key, every 1–3 letter string of the alphabet, every 4-letter string over the
+    // click-context letters and corners; deClick and the loan lexicon; numberToWords over 0…20,000 and magnitudes.
+    async "zu-g2p"() {
+        const { phonemizeWord, phonemizeCompound, nat } = await import("../../../src/languages/zulu/zulu.ts");
+        const { toSegments } = await import("../../../src/languages/zulu/g2p.ts");
+        const { numberToWords } = await import("../../../src/languages/zulu/numbers.ts");
+        const { deClick, NGUNI_LOANS } = await import("../../../src/languages/zulu/nguniLoans.ts");
+        const Z = new URL("../../../src/languages/zulu/zulu.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("zu")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const k of loadTsvMap(Z, "tone.tsv", undefined, { optional: true }).keys()) { words.add(k); words.add(k[0]!.toUpperCase() + k.slice(1)); words.add("e" + k[0]!.toUpperCase() + k.slice(1)); }
+        for (const k of NGUNI_LOANS.keys()) { words.add(k); words.add(k.toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiounhgcqxtsk"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "ﬁ", "Ntshonalanga", "ntsh", "ntshntsh", "NTSHA", "eNingizimu", "INingizimu", "KwaZulu", "uMnuMnu", "AbC", "aBc", "ABc", "XHosa", "São", "constructor", "toString", "Ā", "a-b", "'"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), codes: units("HLFRHLX"), op: "toned" }, phonemizeWord(w, "HLFRHLX"));
+            emit({ word: units(w), codes: units(""), op: "toned" }, phonemizeWord(w, ""));
+            emit({ word: units(w), op: "compound" }, phonemizeCompound(w).join("|"));
+            emit({ word: units(w), op: "nat" }, nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.v ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "declick" }, deClick(w));
+            emit({ word: units(w), op: "loan" }, NGUNI_LOANS.get(w) ?? "\u0000none");
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 25; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53 + 2, 1e300, 1.5, 20.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
     },
 };
 

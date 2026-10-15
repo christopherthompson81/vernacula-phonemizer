@@ -2735,6 +2735,48 @@ fn main() {
                 op => panic!("or: unknown op {op}"),
             })
         }
+        "zu-normalize" | "zu-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::zulu::{g2p, nguni_loans, zulu};
+            let zu = zulu::create_zulu(None, None).unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => zu.normalize(&t()),
+                    "symbols" => zu.symbols(&t()),
+                    "text" => with_host(&js("zu"), || zu.text(&t())),
+                    "foreign" => {
+                        let en = vernacula_phonemizer::registry::english().unwrap();
+                        let hit = zulu::is_foreign_nguni_word(&w().to_lower_case(), &|x| {
+                            en.known_word(x).is_some()
+                        });
+                        js(if hit { "1" } else { "0" })
+                    }
+                    "word" => zu.phonemize_word(&w(), None),
+                    "toned" => zu.phonemize_word(&w(), Some(&units(&input["codes"]))),
+                    "compound" => JsString::join(&zu.phonemize_compound(&w()), &js("|")),
+                    "nat" => zu.nativise(&w()),
+                    "segs" => {
+                        let parts: Vec<JsString> = g2p::to_segments(&w(), &g2p::RULES)
+                            .iter()
+                            .map(|s| s.ph.concat(&js(&format!("/{}", s.v as u8))))
+                            .collect();
+                        JsString::join(&parts, &js(" "))
+                    }
+                    "declick" => nguni_loans::de_click(&w()),
+                    "loan" => js(match nguni_loans::nguni_loan(&w()) {
+                        Some(nguni_loans::LoanReading::Declick) => "declick",
+                        Some(nguni_loans::LoanReading::Foreign) => "foreign",
+                        None => "\u{0}none",
+                    }),
+                    _ => {
+                        zu.number_to_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
