@@ -349,7 +349,7 @@ export function articleText(extract: unknown): string {
         .trim();
 }
 
-interface Finding {
+export interface Finding {
     word: string;
     tokenHits: number;
     articles: number;
@@ -360,6 +360,9 @@ interface Finding {
     verdict: "attested" | "attested*" | "substring-only" | "absent";
     /** Set when the article sample was widened with an `insource:` query — see `probe()`. */
     via?: "insource";
+    /** The `--context` register this finding's article sample was narrowed to (#1544). Recorded PER FINDING,
+     *  because one cache holds findings from many runs and a run's register is a fact about its findings. */
+    context?: string;
 }
 
 /**
@@ -387,7 +390,8 @@ export function renderFinding(f: Finding): string {
     return `        {
                 "word": ${esc(f.word)},
                 "verdict": ${esc(f.verdict)},
-                "bounded": ${f.bounded},${f.via === undefined ? "" : `
+                "bounded": ${f.bounded},${f.context === undefined ? "" : `
+                "context": ${esc(f.context)},`}${f.via === undefined ? "" : `
                 // The article sample was widened with an \`insource:\` query, because CirrusSearch tokenises
                 // this word on its own punctuation and its plain word query samples the PARTS — see \`probe()\`.
                 "via": ${esc(f.via)},`}
@@ -396,6 +400,104 @@ export function renderFinding(f: Finding): string {
                 "substringOnly": ${f.substringOnly},
                 "examples": [${f.examples.map((x) => `\n                ${esc(x)}`).join(",")}${f.examples.length ? "\n            " : ""}]
             }`;
+}
+
+/**
+ * THE CACHE FILE, ASSEMBLED FROM THIS RUN'S FINDINGS AND THE PRIOR FILE — pure, so it can be tested (#1544).
+ *
+ * ⚠ PRIOR FINDINGS ARE CARRIED FORWARD, BECAUSE THIS TOOL USED TO DESTROY THEM. The cache is per LANGUAGE and
+ * the file was rewritten from this run's findings alone, so probing one word deleted every word probed before
+ * it — `--lang hi --words दशमलव` replaced seven existing findings (ऋण, गुणा, भाजित, घन, माइनस, बराबर, ऋणात्मक)
+ * and the only trace was a cheerful "(replaced 7 prior finding(s))" in the log. A word probed in THIS run always
+ * wins — that is a fresh measurement of the same question. Everything else is kept block for block.
+ *
+ * ⚠ AND THE CARRY-FORWARD IS CHECKED, because the block pattern depends on the indentation this file writes, and
+ * a hand-edited cache could defeat it. The word list is matched with a pattern that cannot miss, so any word
+ * neither probed nor carried means the block parse failed: the result is `{ lost }` and nothing is written.
+ *
+ * ⚠ THE REGISTER IS A FACT ABOUT EACH FINDING, NOT ABOUT THE FILE (#1544). It used to be one file-level
+ * `context`, set from THIS run's `--context` alone, so a later run without it rewrote a register-restricted
+ * file as plain `wikipedia` and the register its carried findings were gathered under was gone. Now:
+ *   · a finding records its own `context` (renderFinding);
+ *   · a carried block with no `context` line of its own inherits the prior file's, injected beside its
+ *     `"word"` line — the one edit a carried block can receive, and it adds what the header used to say;
+ *   · the header names a register only when EVERY finding shares it, and says `mixed registers` otherwise.
+ * The header is written at column 0. The template used to sit inside the function's indentation, so every
+ * header line after the first was written four spaces in.
+ */
+export function assembleCache(
+    lang: string,
+    wiki: string,
+    findings: readonly Finding[],
+    prior: string,
+): { text: string; replaced: number; carried: number } | { lost: string[] } {
+    const esc = (s: string): string => JSON.stringify(s);
+    const priorBlocks = [...prior.matchAll(new RegExp(BLOCK_RE.source, BLOCK_RE.flags))].map((m) => m[0]);
+    const probed = new Set(findings.map((f) => f.word));
+    const wordOf = (b: string): string | undefined => /"word":\s*"([^"]+)"/u.exec(b)?.[1];
+    const carriedRaw = priorBlocks.filter((b) => {
+        const w = wordOf(b);
+        return w !== undefined && !probed.has(w);
+    });
+    const priorWords = new Set([...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!));
+    const carriedWords = new Set(carriedRaw.map(wordOf));
+    const lost = [...priorWords].filter((w) => !probed.has(w) && !carriedWords.has(w));
+    if (lost.length > 0) return { lost };
+
+    // The prior file-level register: in the header, i.e. before `"findings"`.
+    const findingsAt = prior.indexOf('"findings"');
+    const priorHeader = findingsAt < 0 ? "" : prior.slice(0, findingsAt);
+    const headerCtx = /"context":\s*("(?:[^"\\]|\\.)*")/u.exec(priorHeader)?.[1];
+    const priorCtx = headerCtx === undefined ? undefined : (JSON.parse(headerCtx) as string);
+    const blockCtx = (b: string): string | undefined => {
+        const m = /"context":\s*("(?:[^"\\]|\\.)*")/u.exec(b)?.[1];
+        return m === undefined ? undefined : (JSON.parse(m) as string);
+    };
+    const carried = carriedRaw.map((b) => {
+        if (priorCtx === undefined || blockCtx(b) !== undefined) return b;
+        return b.replace(/^([ \t]*)("word":[^\n]*\n)/mu, (_m, ind: string, line: string) => `${ind}${line}${ind}"context": ${esc(priorCtx)},\n`);
+    });
+
+    const contexts = [...findings.map((f) => f.context), ...carried.map(blockCtx)];
+    const shared = contexts.every((c) => c === contexts[0]) ? contexts[0] : null;
+    const tier = shared === undefined ? "wikipedia" : shared === null ? "wikipedia (mixed registers)" : "wikipedia (register-restricted)";
+    const ctxHeader = shared === null
+        ? `
+    // The findings were gathered under DIFFERENT registers; each one records its own \`context\`. Reproduce a
+    // finding with \`--context\` set to exactly that finding's string (absent means unrestricted).`
+        : shared === undefined
+          ? ""
+          : `
+    // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
+    // \`--context\` set to exactly this string.
+    "context": ${esc(shared)},`;
+    const text = `// WIKIPEDIA WORD ATTESTATION — ${lang}. Written by tools/normalization/attest.ts.
+//
+// A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
+// user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
+// idiolect — so \`articles\` is recorded beside \`tokenHits\`: one hit in one article is a LEAD, not a finding.
+//
+// \`substringOnly\` is the column that matters when tokenHits is 0. It is the count of articles where the
+// letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
+// lb's \`Yen\` in \`Libyen\`, xh's \`iiyeni\` in \`yeNintendo\`. A substring-only verdict is a NEGATIVE result.
+//
+// \`bounded\` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
+// exists to test, so \`tokenHits\` is a substring count and the verdict is written \`attested*\`. The precision
+// that makes \`Libyen\` fail for \`Yen\` is simply unavailable — a Han hit can always be part of a longer
+// compound — so for those the examples are not a courtesy, they are the entire finding.
+//
+// ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
+// speech and the sense against the examples before using any of this to justify a reading.
+{
+    "language": ${esc(lang)},
+    "wiki": ${esc(wiki)},
+    "tier": ${esc(tier)},${ctxHeader}
+    "findings": [
+${[...findings.map(renderFinding), ...carried.map((b) => `        ${b.replace(/^\s+/u, "")}`)].join(",\n")}
+    ],
+}
+`;
+    return { text, replaced: priorBlocks.length - carriedRaw.length, carried: carried.length };
 }
 
 /**
@@ -554,7 +656,7 @@ async function probe(word: string): Promise<Finding> {
     }
     const verdict: Finding["verdict"] = tokenHits > 0 ? (bounded ? "attested" : "attested*")
         : substringOnly > 0 ? "substring-only" : "absent";
-    return { word, tokenHits, articles, substringOnly, examples, bounded, verdict, via };
+    return { word, tokenHits, articles, substringOnly, examples, bounded, verdict, via, context };
 }
 
 /**
@@ -700,69 +802,16 @@ if (IS_CLI) {
     if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
     const outPath = join(OUT_DIR, `${lang}.jsonc`);
     const prior = existsSync(outPath) ? readFileSync(outPath, "utf8") : "";
-    /**
-     * ⚠ PRIOR FINDINGS ARE CARRIED FORWARD, BECAUSE THIS TOOL USED TO DESTROY THEM. The cache is per LANGUAGE and
-     * the file was rewritten from this run's findings alone, so probing one word deleted every word probed before
-     * it — `--lang hi --words दशमलव` replaced seven existing findings (ऋण, गुणा, भाजित, घन, माइनस, बराबर, ऋणात्मक)
-     * and the only trace was a cheerful "(replaced 7 prior finding(s))" in the log. The loss is worse than it
-     * sounds: each finding costs a live Wikipedia fetch, `review.ts`'s haystack reads the cache for its example
-     * prose, and its "wikipedia NOT probed" hint sends the next reader to this exact command. Following the gate's
-     * own advice silently unsourced seven other words.
-     *
-     * A word probed in THIS run always wins — that is a fresh measurement of the same question. Everything else is
-     * kept verbatim, block for block, so no re-parse can alter a finding this run did not make.
-     */
-    const priorBlocks = [...prior.matchAll(BLOCK_RE)].map((m) => m[0]);
-    const probed = new Set(findings.map((f) => f.word));
-    const carried = priorBlocks.filter((b) => {
-        const w = /"word":\s*"([^"]+)"/u.exec(b)?.[1];
-        return w !== undefined && !probed.has(w);
-    });
-    const replaced = priorBlocks.length - carried.length;
-    // ⚠ AND THE CARRY-FORWARD IS CHECKED, because the block pattern above depends on the indentation THIS FILE
-    // writes, and a hand-edited cache could defeat it — reintroducing the silent deletion by another route. The
-    // word list is matched with a pattern that cannot miss, so any word neither probed nor carried means the
-    // block parse failed. Loud, and non-zero exit, because the failure mode is data loss.
-    const priorWords = new Set([...prior.matchAll(/"word":\s*"([^"]+)"/gu)].map((m) => m[1]!));
-    const carriedWords = new Set(carried.map((b) => /"word":\s*"([^"]+)"/u.exec(b)?.[1]));
-    const lost = [...priorWords].filter((w) => !probed.has(w) && !carriedWords.has(w));
-    if (lost.length > 0) {
-        console.error(`\n  REFUSING TO WRITE: ${lost.length} existing finding(s) could not be parsed for carry-forward `
-            + `— ${lost.join(", ")}. Writing now would delete them. The block pattern expects the indentation this `
+    const out = assembleCache(lang, `${wiki}.wikipedia.org`, findings, prior);
+    if ("lost" in out) {
+        console.error(`\n  REFUSING TO WRITE: ${out.lost.length} existing finding(s) could not be parsed for carry-forward `
+            + `— ${out.lost.join(", ")}. Writing now would delete them. The block pattern expects the indentation this `
             + `tool emits; if ${outPath} was hand-edited, restore it from git and re-run.`);
         process.exit(1);
     }
-    const esc = (s: string): string => JSON.stringify(s);
-    writeFileSync(outPath, `// WIKIPEDIA WORD ATTESTATION — ${lang}. Written by tools/normalization/attest.ts.
-    //
-    // A SEPARATE AND WEAKER TIER than the FLEURS corpus, the referees, and espeak's dictsource. Wikipedia is
-    // user-generated and not audio-aligned, and on a small wiki one article can be a single contributor's
-    // idiolect — so \`articles\` is recorded beside \`tokenHits\`: one hit in one article is a LEAD, not a finding.
-    //
-    // \`substringOnly\` is the column that matters when tokenHits is 0. It is the count of articles where the
-    // letters appear INSIDE another word, which is exactly how an absent word comes to look sourced —
-    // lb's \`Yen\` in \`Libyen\`, xh's \`iiyeni\` in \`yeNintendo\`. A substring-only verdict is a NEGATIVE result.
-    //
-    // \`bounded\` false means the word is in an UNSPACED script (Han, kana, Thai, Khmer, …) where no word boundary
-    // exists to test, so \`tokenHits\` is a substring count and the verdict is written \`attested*\`. The precision
-    // that makes \`Libyen\` fail for \`Yen\` is simply unavailable — a Han hit can always be part of a longer
-    // compound — so for those the examples are not a courtesy, they are the entire finding.
-    //
-    // ⚠ ATTESTATION IS NEVER SUFFICIENT. It proves a word exists, not that it fits the slot. Check the part of
-    // speech and the sense against the examples before using any of this to justify a reading.
-    {
-        "language": ${esc(lang)},
-        "wiki": ${esc(`${wiki}.wikipedia.org`)},
-        "tier": ${esc(context === undefined ? "wikipedia" : "wikipedia (register-restricted)")},${context === undefined ? "" : `
-        // The article sample was narrowed to this register; the hit test was NOT relaxed. Reproduce with
-        // \`--context\` set to exactly this string.
-        "context": ${esc(context)},`}
-        "findings": [
-${[...findings.map(renderFinding), ...carried.map((b) => `        ${b.replace(/^\s+/u, "")}`)].join(",\n")}
-        ],
-    }
-    `, "utf8");
+    writeFileSync(outPath, out.text, "utf8");
+    const { replaced, carried } = out;
     console.log(`  → ${outPath}${replaced ? `  (re-probed ${replaced} existing finding(s))` : ""}`
-        + `${carried.length ? `, ${carried.length} earlier finding(s) kept` : ""}`);
+        + `${carried ? `, ${carried} earlier finding(s) kept` : ""}`);
     console.log(`  Only an \`attested\` verdict WITH a sense you have checked belongs in a sourcing argument.\n`);
 }

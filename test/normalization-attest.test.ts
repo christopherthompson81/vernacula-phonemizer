@@ -27,7 +27,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { BLOCK_RE, fold, isHit, countHits, matchers, needsInsource, renderFinding } from "../tools/normalization/attest.ts";
+import { assembleCache, BLOCK_RE, fold, isHit, countHits, matchers, needsInsource, renderFinding, type Finding } from "../tools/normalization/attest.ts";
 
 describe("attest.ts — words whose orthography contains punctuation", () => {
     /** The reported case. `corpus-words.ts` scores this `attested ×14`; `attest.ts` said `0 token`. */
@@ -303,5 +303,87 @@ describe("attest.ts — probes whose article sample the remote tokenizer would g
 
     test("an unspaced script is excluded even if a stray hyphen appears", () => {
         expect(needsInsource("摄氏度-x")).toBe(false);
+    });
+});
+
+/**
+ * #1544: a run without `--context` rewrote a register-restricted cache as plain `wikipedia`, so the register its
+ * carried findings were gathered under was lost, and the header came out four spaces in. These tests drive the
+ * writer itself (`assembleCache`), seeded with its own output or with a cache shaped like the legacy files in the
+ * tree, so the writer is the fixture.
+ */
+describe("attest.ts — the cache keeps each finding's register (#1544)", () => {
+    const f = (word: string, context?: string): Finding => ({
+        word, tokenHits: 1, articles: 1, substringOnly: 0, examples: [`…${word}…`], bounded: true,
+        verdict: "attested", ...(context === undefined ? {} : { context }),
+    });
+    const write = (findings: Finding[], prior = ""): string => {
+        const out = assembleCache("xx", "xx.wikipedia.org", findings, prior);
+        if ("lost" in out) throw new Error(`lost ${out.lost.join(",")}`);
+        return out.text;
+    };
+    const body = (text: string): unknown => JSON.parse(text.replace(/^\s*\/\/.*$/gmu, "").replace(/,(\s*[\]}])/gu, "$1"));
+    const ctxOf = (text: string, word: string): string | undefined =>
+        (body(text) as { findings: { word: string; context?: string }[] }).findings.find((x) => x.word === word)?.context;
+
+    test("an unrestricted run keeps the register of the findings it carries", () => {
+        const first = write([f("lop", "math register")]);
+        const second = write([f("baht")], first);
+        expect(ctxOf(second, "lop")).toBe("math register");
+        expect(ctxOf(second, "baht")).toBeUndefined();
+        expect((body(second) as { tier: string }).tier).toBe("wikipedia (mixed registers)");
+        expect((body(second) as { context?: string }).context).toBeUndefined();
+    });
+
+    test("a legacy cache's file-level context is inherited by every block it carries", () => {
+        // The shape of the 22 register-restricted files in the tree: one header `context`, no per-block one.
+        const legacy = `// header
+{
+    "language": "xx",
+    "wiki": "xx.wikipedia.org",
+    "tier": "wikipedia (register-restricted)",
+    "context": "math register",
+    "findings": [
+        {
+            "word": "lop",
+            "verdict": "attested",
+            "bounded": true,
+            "tokenHits": 1,
+            "articles": 1,
+            "substringOnly": 0,
+            "examples": []
+        }
+    ],
+}
+`;
+        const out = write([f("baht")], legacy);
+        expect(ctxOf(out, "lop")).toBe("math register");
+        expect(ctxOf(out, "baht")).toBeUndefined();
+    });
+
+    test("a run under a different register records its own, and both survive the next run", () => {
+        const mixed = write([f("baht", "money register")], write([f("lop", "math register")]));
+        const third = write([f("hok")], mixed);
+        expect(ctxOf(third, "lop")).toBe("math register");
+        expect(ctxOf(third, "baht")).toBe("money register");
+        expect(ctxOf(third, "hok")).toBeUndefined();
+    });
+
+    test("a rerun under the same register keeps the file-level register", () => {
+        const out = write([f("hok", "math register")], write([f("lop", "math register")]));
+        expect((body(out) as { tier: string; context?: string }).tier).toBe("wikipedia (register-restricted)");
+        expect((body(out) as { context?: string }).context).toBe("math register");
+    });
+
+    test("the header is written at column 0, not at the function's indentation", () => {
+        const out = write([f("lop")]);
+        expect(out.split("\n").filter((l) => /^ {4}\/\//u.test(l) && !/^ {4}\/\/ (?:The|finding)/u.test(l))).toEqual([]);
+        expect(out.startsWith("// WIKIPEDIA WORD ATTESTATION — xx.")).toBe(true);
+        expect(out).toContain("\n{\n    \"language\"");
+    });
+
+    test("a carried block the pattern cannot read still refuses the write", () => {
+        const broken = `{\n    "findings": [\n{\n"word": "lop"\n}\n    ],\n}\n`;
+        expect(assembleCache("xx", "xx.wikipedia.org", [f("baht")], broken)).toEqual({ lost: ["lop"] });
     });
 });
