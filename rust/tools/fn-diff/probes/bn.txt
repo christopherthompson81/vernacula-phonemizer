@@ -1,0 +1,34 @@
+# Bengali off-golden probes: one line per arm of src/languages/bengali/normalize.ts and bengali.ts (the shared
+# maker as and bpy also run), each with the neighbour that arm must decline. SYNTHETIC text only.
+# 0) the digit fold, both scripts, inside times, decimals and fractions
+৫ আর 5 ১১:২০ ২.৩ ১/৫ ৮% 8%
+# 1) abbreviations: visarga and dot, with and without a following letter
+ডঃ রহমান এলেন ড. রহমান ডঃ ১২ অধ্যা. পাঁচ পৃ. বারো সং. চার ডঃরহমান
+# 2) ordinals: date series (suppletive 1-4), classical (suppletive 1-10), regular, spaced, glued to a word
+২৬শে নভেম্বর ৮ই জুলাই ১লা বৈশাখ ২রা মে ৩রা জুন ৪ঠা জুলাই ৫ই মার্চ
+১৭তম শতক ৩য় স্থান ৫ম শ্রেণি ৪র্থ বার ৬ষ্ঠ দিন ১০ম ১১ম ২১ তম ১০০তম ১,০০০তম ১২তমবার
+9007199254740993তম 1.5তম ০শে ৯৯রা
+# 3) unit abbreviations after a number, and the word they must not bite into
+১০ কিমি পথ ৫০কিমি/ঘন্টা ৩ সেমি ২মিমি ৪০ কেজি ৫ গ্রা ১০০ মি দৌড় ৫ মিনিট ৫মিটার
+# 4) degrees, both cases, spaced, and the bare sign
+৩০°C ৮৬ ° f ২০°c ১০০°F ৪৫° ২০°Cx ৩০ ℃ ৮৬℉
+# 5) clock: :00 with and without টা, out of range, minutes, a three-digit run
+১০:৩০ ১১:০০টা ১১:০০ টা ৭:০৫ টা ২৫:০০ ৯:৬০ 123:45 ১২:০০
+# 6) signs
+-৫ ডিগ্রি তাপমাত্রা −১০ (–২) ৩+৪ +৫ গোল ক+ ৫ ১০-২০
+# relational and division signs, and the substring trap
+ক < খ ৫ > ৩ ক = খ ১০ ÷ ২ বেশিরভাগ ভাগ
+# 7) fractions: half, spoken form, guards against decimals and grouping
+১/২ ৩/৪ ১২/৫০ ১/২.৫ 1/1,000 ১০০০/২ ২/৩/৪
+# the shared symbol tier: percent, each currency, units, exponents, multiply, ampersand
+৫০% $১০০ ₹৫০০ €২০ £৩ ¥১০০০ ৳১০ ৫ km ১০kg ৩ m² ২ cm ৫০ km/h ২ x ৩ ২×৩ A & B
+# numbers: grouped, decimal, a leading zero before a comma, above 2^53
+১২৩৪৫ ১,২৩,৪৫৬ ৩.১৪ ০,০০১ 12345678901234567890 ০.৫ 9007199254740993.25
+# tokenizer: Latin with diacritics, ZWJ / ZWNJ, danda, double danda, punctuation
+São Paulo থেকে এলেন। র\u{200D}্যাব ক্\u{200C}ষ বই॥ কেন? হ্যাঁ! এক; দুই: তিন
+# the word level: ং, ৎ, ওয়া, word-initial ্যা and অ্যা, ক্ষ, জ্ঞ, phôla gemination and its exceptions
+বাংলা উৎসব খাওয়া গ্যাস অ্যাসিড ক্ষমা অক্ষর জ্ঞান বিজ্ঞান বিদ্যা মহত্ব পদ্ম ব্যথা দ্বিতীয় সন্ধ্যা অঙ্ক স্বর
+# harmony and inherent-vowel deletion
+করি কর জল অংশ কলি ঘরে অকলুষ দেখা বই অই অওসৎ জীবন শহর আপনার আকবর মাছ যুদ্ধ
+# best-path embedded English OOV words (made-up names): read by the neural engine's own English reader
+আমি Zorblatt করি। আমি Quexington করি। Brimfelder ও Snorkwell এলেন।

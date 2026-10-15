@@ -62,6 +62,9 @@ const FLEURS_DIR: Record<string, string> = {
     af: "af_za",
     lb: "lb_lu",
     tg: "tg_tj",
+    bn: "bn_in",
+    as: "as_in",
+    or: "or_in",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -115,6 +118,7 @@ function langTexts(lang: string): string[] {
  *  unchanged, so Hindi's arm-by-arm probes are theirs too. */
 const EXTRA_PROBES: Record<string, string[]> = {
     bho: ["hi.txt"], mag: ["hi.txt"], awa: ["hi.txt"], mai: ["hi.txt"], hne: ["hi.txt"], rkt: ["hi.txt"],
+    as: ["bn.txt"], bpy: ["bn.txt"],
 };
 /** `LANGS=es,fr` (default: en,en-GB) for the end-to-end dumps. */
 const LANGS = (process.env.LANGS ?? "en,en-GB").split(",").filter((l) => l !== "");
@@ -4340,6 +4344,87 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let i = 0; i <= 3000; i++) ds.push(String(i));
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // ── The Bengali maker (bn, and as / bpy, which build it from their own manifests). LANGS (default bn,as,bpy).
+    // Inputs: each language's golden, FLEURS (bn_in, as_in) and probes (bn.txt for all three, plus the language's
+    // own). Ops: the Bengali normalizer with that language's numbers; the engine's text() (no foreign reader); the
+    // raw abugida g2p, wordRules, word and number() over every Bengali-script run, every consonant of the manifest x
+    // matra/virama/sign tails, the conjuncts the orthographic rules key on, and digit strings. For as the engine is
+    // createAssamese's (its pre-pass and geminate collapse included) and an "as-normalize" op runs the pre-pass alone.
+    async "bengali-family"() {
+        const { makeBengaliNormalizer } = await import("../../../src/languages/bengali/normalize.ts");
+        const { makeAbugidaG2P } = await import("../../../src/core/abugida.ts");
+        const { loadSharedPhonology } = await import("../../../src/core/phonology.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const { parseJsonc } = await import("../../../src/core/jsonc.ts");
+        const FAMILY: Record<string, string> = { bn: "bengali", as: "assamese", bpy: "bishnupriya" };
+        const langs = process.env.LANGS ? LANGS : Object.keys(FAMILY);
+        for (const lang of langs) {
+            const dir = FAMILY[lang]!;
+            const def = parseJsonc(readFileSync(new URL(`../../../data/languages/${dir}/${dir}.jsonc`, import.meta.url), "utf8")) as any;
+            const g2p = makeAbugidaG2P(parseJsonc(readFileSync(new URL(`../../../data/languages/${dir}/${dir}.jsonc`, import.meta.url), "utf8")) as any, loadSharedPhonology());
+            let E: any;
+            if (lang === "bn") E = (await import("../../../src/languages/bengali/bengali.ts")).createBengali();
+            else if (lang === "as") E = (await import("../../../src/languages/assamese/assamese.ts")).createAssamese();
+            else E = (await import("../../../src/languages/bishnupriya/bishnupriya.ts")).createBishnupriya();
+            const W: any = E; // makeNativeBengali's word level (for as, createAssamese's wrapper of it)
+            const norm = makeBengaliNormalizer(def.numbers);
+            const rows = new Map<string, string>();
+            for (const [t, src] of textsFor([lang], Object.hasOwn(FLEURS_DIR, lang) ? FLEURS_DIR[lang] : undefined, ["bn.txt", ...(lang === "bn" ? [] : [`${lang}.txt`])])) rows.set(t, src);
+            const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+            const bnd = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
+            for (let n = 0; n <= 40; n++) for (const suf of ["তম", "শে", "ই", "ম", "য়", "র্থ", "ষ্ঠ", "লা", "রা", "ঠা", "শ", "নং"]) { add(`সে ${n}${suf} দিন`); add(`সে ${[...String(n)].map((d) => bnd[Number(d)]).join("")} ${suf} দিন`); }
+            for (const h of [0, 1, 9, 10, 12, 23, 24]) for (const m of ["00", "05", "30", "59", "60"]) for (const tail of ["", "টা", " টা", " বাজে"]) add(`এখন ${h}:${m}${tail}`);
+            for (let a = 0; a <= 12; a++) for (const b of [1, 2, 3, 4, 10, 100, 1000]) add(`${a}/${b} অংশ`);
+            for (const sg of ["$", "€", "£", "¥", "₹", "৳", "US$", "AUD$"]) for (const f of [`${sg}50`, `${sg} 50`, `${sg}১৪.৭ বিলিয়ন`, `${sg}৪৫ মিলিয়ন`, `${sg}2.3 বিলিয়ন ডলাৰৰ`, `50${sg}`]) add(`দাম ${f} হল`);
+            for (const r of ["±", "=", "<", ">", "×", "÷", "&", "+", "-", "−"]) { add(`ক ${r} খ এবং 3${r}4`); add(`B${r}B য়ে`); }
+            for (const [t, src] of rows) {
+                emit({ text: units(t), src, lang, op: "normalize" }, norm(t));
+                if (lang === "as") {
+                    const { normalizeAssamese } = await import("../../../src/languages/assamese/normalize.ts");
+                    emit({ text: units(t), src, lang, op: "as-normalize" }, normalizeAssamese(t));
+                }
+                emit({ text: units(t), src, lang, op: "text" }, withHost(lang, () => E.text(t)));
+            }
+            const words = new Set<string>();
+            for (const t of rows.keys()) for (const m of t.normalize("NFC").matchAll(/[ঀ-ৣৰ-৾]+/gu)) words.add(m[0]);
+            for (const t of rows.keys()) for (const m of t.matchAll(/[ঀ-ৣৰ-৾]+/gu)) words.add(m[0]);
+            const s = def.signs;
+            const sign = (k: string): string[] => (s[k]?.char ? [s[k].char] : []);
+            const tails = ["", ...sign("virama"), ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga"), ...sign("nukta"),
+                ...Object.keys(def.vowelSigns), ...Object.keys(def.vowelSigns).flatMap((v) => sign("anusvara").map((a) => v + a)),
+                ...Object.keys(def.vowelSigns).flatMap((v) => sign("chandrabindu").map((a) => v + a)), "‍", "‌", "ৎ", "্যা", "্য", "্ব", "্ম", "্র", "ওয়া", "য়া"];
+            const cons = Object.keys(def.consonants);
+            for (const c of cons) for (const t of tails) { words.add(c + t); words.add(c + t + "ক"); words.add("অ" + c + t + "তা"); words.add("আ" + c + t + "ি"); words.add(c + t + "র"); }
+            for (const c of cons) for (const d of ["ক", "খ", "গ", "চ", "জ", "ট", "ড", "ত", "দ", "ধ", "ন", "প", "ব", "ম", "য", "র", "ল", "শ", "ষ", "স", "হ"]) { words.add(c + "্" + d + "া"); words.add("আ" + c + "্" + d + "ি"); words.add(c + "্" + d); words.add("অ" + c + "্" + d); }
+            for (const v of Object.keys(def.independentVowels)) for (const t of ["", ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga"), "্যা"]) { words.add(v + t); words.add(v + t + "ব"); words.add(v + t + "ডা"); words.add(v + "ই"); words.add(v + "উ"); }
+            for (const w of ["", "\u09dc", "\u09a1\u09bc", "\u09dd", "\u09df", "\u09af\u09bc", "\u09dc\u09bf", "আষা\u09dd", "ব\u09a1\u09bcো", "\ud800", "a", "অ্যাক্ষ", "ক্ষ্যা", "ঙ্ক্ষ"]) words.add(w);
+            for (const w of words) {
+                emit({ op: "g2p", lang, word: units(w) }, g2p(w));
+                emit({ op: "rules", lang, word: units(w) }, W.wordRules(w));
+                emit({ op: "word", lang, word: units(w) }, W.word(w));
+            }
+            const nums = new Set<string>();
+            for (let n = 0; n <= 3000; n++) nums.add(String(n));
+            for (let e = 4; e <= 22; e++) { nums.add("1" + "0".repeat(e)); nums.add("9".repeat(e)); nums.add("12345678901234567890123".slice(0, e)); }
+            for (const x of ["0.5", "3.14", "12.05", ".5", "0.0", "১২৩", "১,২৩৪", "১.৫", "1,00,000", "9,000", "0,001", "10,0", "9007199254740993", "9007199254740993.25", "123456789012345678901.5", "০.০৭"]) nums.add(x);
+            for (const x of nums) emit({ op: "number", lang, word: units(x) }, W.number(x));
+        }
+    },
+    // The BiLSTM tagger over every Bengali run of the bn texts (as the pre-pass offers it: raw), every 10th lexicon
+    // key, the bengali-family synthetic words, and corners.
+    async "bn-tagger"() {
+        const { createBengaliTagger } = await import("../../../src/languages/bengali/bengaliTagger.ts");
+        const { bengaliLexicon } = await import("../../../src/languages/bengali/bengali.ts");
+        const tagger = await createBengaliTagger();
+        if (!tagger) throw new Error("bn tagger unavailable");
+        const words = new Set<string>();
+        for (const t of langTexts("bn")) for (const m of t.matchAll(/[ঀ-ৣৰ-৾]+/gu)) words.add(m[0]);
+        let i = 0;
+        for (const w of bengaliLexicon().keys()) if (i++ % 10 === 0) words.add(w);
+        for (const c of ["ক", "খ", "গ", "চ", "জ", "ট", "ত", "দ", "ন", "প", "ব", "ম", "র", "ল", "শ", "স", "হ", "য়", "ড়"]) for (const t of ["", "া", "ি", "ু", "ে", "ো", "্", "ং", "ঁ"]) { words.add(c + t); words.add("অ" + c + t + "ল"); words.add(c + t + "কর"); }
+        for (const w of ["", "мир", "aক", "ক☃খ", "\u09dc", "\u09df", "\u09af\u09bc", "বাংলাদেশ", "ক্ষমতা", "জ্ঞানী", "অ্যাসিড", "\u200dক", "ক\u200c্"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
     },
 };
 

@@ -4,6 +4,7 @@ pub mod azerbaijani;
 pub mod bashkir;
 pub mod bavarian;
 pub mod belarusian;
+pub mod bengali;
 pub mod bhojpuri;
 pub mod bosnian;
 pub mod bulgarian;

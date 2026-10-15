@@ -2484,6 +2484,28 @@ fn main() {
                 }
             })
         }
+        "bengali-family" => {
+            let cache: std::cell::RefCell<std::collections::HashMap<String, BengaliFamilyFn>> =
+                Default::default();
+            Box::new(move |input| {
+                let lang = input["lang"].as_str().unwrap();
+                let mut c = cache.borrow_mut();
+                let f = c
+                    .entry(lang.to_string())
+                    .or_insert_with(|| bengali_family(lang));
+                let x = input
+                    .get("text")
+                    .or_else(|| input.get("word"))
+                    .map(units)
+                    .unwrap();
+                f(input["op"].as_str().unwrap(), &x)
+            })
+        }
+        "bn-tagger" => {
+            use vernacula_phonemizer::languages::bengali::bengali_tagger::create_bengali_tagger;
+            let tagger = create_bengali_tagger("bn-g2p-tagger").unwrap();
+            Box::new(move |input| tagger.tag(&units(&input["word"])).unwrap())
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
@@ -2645,4 +2667,40 @@ fn family_word(lang: &str) -> FamilyWordFn {
         }
         _ => panic!("hindi-family-word: no replay for {lang}"),
     }
+}
+
+type BengaliFamilyFn = Box<dyn Fn(&str, &JsString) -> JsString>;
+
+/// The Bengali maker's per-module surface for one of bn / as / bpy: its normalizer, its engine's text(), and the
+/// word level, as the language's own create function builds it.
+fn bengali_family(lang: &str) -> BengaliFamilyFn {
+    use vernacula_phonemizer::core::abugida::make_abugida_g2p;
+    use vernacula_phonemizer::core::foreign::with_host;
+    use vernacula_phonemizer::core::js_string::js;
+    use vernacula_phonemizer::core::load_manifest::load_manifest;
+    use vernacula_phonemizer::core::phonology::load_shared_phonology;
+    use vernacula_phonemizer::languages as l;
+    use vernacula_phonemizer::languages::bengali::manifest::BengaliDef;
+    use vernacula_phonemizer::languages::bengali::normalize::make_bengali_normalizer;
+    let dir = match lang {
+        "bn" => "bengali",
+        "as" => "assamese",
+        "bpy" => "bishnupriya",
+        _ => panic!("bengali-family: no replay for {lang}"),
+    };
+    let def: BengaliDef =
+        load_manifest(&format!("languages/{dir}"), &format!("{dir}.jsonc")).unwrap();
+    let g2p = make_abugida_g2p(&def.abugida, load_shared_phonology().unwrap());
+    let norm = make_bengali_normalizer(&def.numbers).unwrap();
+    let e = l::bengali::bengali::create_bengali(None).unwrap();
+    let host = js(lang);
+    Box::new(move |op, x| match op {
+        "normalize" => norm(x),
+        "text" => with_host(&host, || e.text(x, None)).unwrap(),
+        "g2p" => g2p.g2p(x),
+        "rules" => e.word_rules(x),
+        "word" => e.word(x, None),
+        "number" => e.number(x, None).unwrap(),
+        _ => panic!("bengali-family: unknown op {op}"),
+    })
 }
