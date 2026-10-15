@@ -2995,6 +2995,166 @@ fn main() {
                 }
             })
         }
+        "zu-normalize" | "zu-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::zulu::{g2p, nguni_loans, zulu};
+            let zu = zulu::create_zulu(None, None).unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => zu.normalize(&t()),
+                    "symbols" => zu.symbols(&t()),
+                    "text" => with_host(&js("zu"), || zu.text(&t())),
+                    "foreign" => {
+                        let en = vernacula_phonemizer::registry::english().unwrap();
+                        let hit = zulu::is_foreign_nguni_word(&w().to_lower_case(), &|x| {
+                            en.known_word(x).is_some()
+                        });
+                        js(if hit { "1" } else { "0" })
+                    }
+                    "word" => zu.phonemize_word(&w(), None),
+                    "toned" => zu.phonemize_word(&w(), Some(&units(&input["codes"]))),
+                    "compound" => JsString::join(&zu.phonemize_compound(&w()), &js("|")),
+                    "nat" => zu.nativise(&w()),
+                    "segs" => {
+                        let parts: Vec<JsString> = g2p::to_segments(&w(), &g2p::RULES)
+                            .iter()
+                            .map(|s| s.ph.concat(&js(&format!("/{}", s.v as u8))))
+                            .collect();
+                        JsString::join(&parts, &js(" "))
+                    }
+                    "declick" => nguni_loans::de_click(&w()),
+                    "loan" => js(match nguni_loans::nguni_loan(&w()) {
+                        Some(nguni_loans::LoanReading::Declick) => "declick",
+                        Some(nguni_loans::LoanReading::Foreign) => "foreign",
+                        None => "\u{0}none",
+                    }),
+                    _ => {
+                        zu.number_to_words(js_number(&JsString::from(input["n"].as_str().unwrap())))
+                    }
+                }
+            })
+        }
+        "xh-normalize" | "xh-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::{xhosa::xhosa, zulu::zulu};
+            let xh = xhosa::create_xhosa(None, None).unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => xh.normalize(&t()),
+                    "symbols" => xh.symbols(&t()),
+                    "text" => with_host(&js("xh"), || xh.text(&t())),
+                    "foreign" => {
+                        let en = vernacula_phonemizer::registry::english().unwrap();
+                        let hit = zulu::is_foreign_nguni_word(&w().to_lower_case(), &|x| {
+                            en.known_word(x).is_some()
+                        });
+                        js(if hit { "1" } else { "0" })
+                    }
+                    "word" => xh.phonemize_word(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        xh.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "st-normalize" | "st-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let st = vernacula_phonemizer::languages::sesotho::sesotho::create_sesotho().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => st.normalize(&t()),
+                    "symbols" => st.symbols(&t()),
+                    "text" => with_host(&js("st"), || st.text(&t())),
+                    "word" => st.phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        st.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "tn-normalize" | "tn-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let tn =
+                vernacula_phonemizer::languages::setswana::setswana::create_setswana().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "pre" => tn.normalize_pre(&t()),
+                    "symbols" => tn.symbols(&t()),
+                    "post" => tn.normalize_post(&t()),
+                    "text" => with_host(&js("tn"), || tn.text(&t())),
+                    "word" => tn.phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        tn.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "nso-normalize" | "nso-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let nso = vernacula_phonemizer::languages::sepedi::sepedi::create_sepedi().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nso.normalize(&t()),
+                    "symbols" => nso.symbols(&t()),
+                    "text" => with_host(&js("nso"), || nso.text(&t())),
+                    "word" => nso.phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        nso.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "sn-normalize" | "sn-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let sn = vernacula_phonemizer::languages::shona::shona::create_shona().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "pre" => sn.normalize_pre(&t()),
+                    "symbols" => sn.symbols(&t()),
+                    "post" => sn.normalize_post(&t()),
+                    "text" => with_host(&js("sn"), || sn.text(&t())),
+                    "word" => sn.phonemize_word(&units(&input["word"])),
+                    "concord" => sn.with_class6_concord(&t()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        sn.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
