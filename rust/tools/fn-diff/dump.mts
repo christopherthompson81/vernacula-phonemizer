@@ -63,6 +63,7 @@ const FLEURS_DIR: Record<string, string> = {
     lb: "lb_lu",
     tg: "tg_tj",
     cy: "cy_gb",
+    ga: "ga_ie",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -4363,7 +4364,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
         for (const e of ["O.C.", "o.c.", "C.C.", "OC 1000-1300", "oc 5 – 6", "OC"]) for (const tail of ["", ".", " a", ", wedyn"]) add(`yn 400 ${e}${tail}`);
         for (const c of ["AUD$45", "AUD 45", "aud$7", "US$11,000", "US 3", "UD $14.7", "U.D.", "yr UD", "UD,", "UDa", "DU", "du", "DU.", "UDA", "UDA,", "AS", "as", "AS.", "ASa"]) for (const tail of ["", " yma", "."]) add(`mae ${c}${tail}`);
-        for (const d of ["George W. Bush", "D. Wyn Jones", "R. Ŵyn Jones", "U.S.A.", "U. S. A.", "U. S.", "É.Ü.", "A.b."]) add(`gan ${d} heddiw`);
+        for (const d of ["George W. Bush", "D. Wyn Jones", "R. Ŵyn Jones", "U.S.A.", "U. S. A.", "U.\u00a0S.", "É.Ü.", "A.b."]) add(`gan ${d} heddiw`);
         for (const a of ["ayb. a", "ayb.", "ayb.,", "AYB. Mae", "ayb.)", "ayb. 5", "aybc."]) add(`llyfrau ${a}`);
         for (let n = 0; n <= 220; n++) for (const sfx of ["fed", "ed", "af", "eg", "ydd", "ain", "FED", "feda"]) add(`y ${n}${sfx} tro`);
         for (const n of ["1,000fed", "1,0fed", "99999fed", "100000fed", "190fed", "007fed", "1.5fed", "x5fed"]) add(`y ${n} tro`);
@@ -4421,6 +4422,87 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "1,400"]) {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // ── Irish (ga). Inputs: the ga golden, FLEURS ga_ie (columns 3 and 4) and probes/ga.txt. ──
+    // normalizeIrish, the symbol tier over its output (recorded through the wrapper) and `createIrish().text`, over
+    // every text plus synthetic rows for every arm: zero-width characters, era markers in each position and case,
+    // N.A./S.A./srl, US$, dotted capitals, Dr./etc., the `Nú` ordinal over 0…120 after `an`/bare × enclosed and
+    // excluded nouns, ranges, the timezone hyphen, clocks over an hour × minute × marker grid, gigahertz, version
+    // letters, decimals with every unit and a slash, comma decimals, fractions over a numerator × denominator grid,
+    // degrees and compass points, rates, signs, the percent-after-pointe rule; ordinalWords over 0…2,000 with and
+    // without a noun.
+    async "ga-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeIrish, ordinalWords } = await import("../../../src/languages/irish/normalize.ts");
+        const { createIrish } = await import("../../../src/languages/irish/irish.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/irish\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createIrish();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ga"], FLEURS_DIR.ga, ["ga.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const z of ["\u200b", "\u200c", "\u200d", "\ufeff"]) add(`fo${z}cal${z} eile`);
+        for (const e of ["A.D.", "a.d.", "R.C.", "AD 500", "ad500", "500 AD", "1,200 AD", "500 ADa", "BC 44", "44 BC", "44 bc", "N.A.", "S.A.", "srl", "srl.", "srla", "Srl."]) for (const tail of ["", ".", " agus", ","]) add(`sa bhliain ${e}${tail}`);
+        for (const c of ["US$5", "uS$ 5", "US$5,000", "US $5", "AUS$5"]) add(`costas ${c} ann`);
+        for (const d of ["U.S.A.", "U. S.", "U.\u00a0S.", "Á.É.", "J. Ó Néill", "A.b."]) add(`le ${d} inniu`);
+        for (const a of ["Dr. Ó", "Dr.", "Dr.,", "dr. 5", "etc. agus", "etc.", "etc.)", "ETC. A"]) add(`bhí ${a} ann`);
+        for (let n = 0; n <= 120; n++) for (const [pre, post] of [["an ", ""], ["an ", " lá"], ["", " lá"], ["an ", " agus"], ["", ""], ["An ", " hÁras"], ["an ", "\u00a0bliain"], ["", " sa"]]) add(`${pre}${n}ú${post} anseo`);
+        for (const n of ["1,000ú", "1,0ú", "999999999999ú", "1000000000000ú", "0ú", "05ú", "1.5ú", "x5ú", "21úa"]) add(`an ${n} uair`);
+        for (const r of ["5-3", "1990-1995", "1,000-2,000", "10 – 20", "5-3.", "5-3.5", "a-5", "UTC-5", "x-y"]) add(`idir ${r} ann`);
+        for (const h of ["0", "1", "06", "11", "12", "23", "24"]) for (const m of ["00", "05", "35", "59"]) for (const ap of ["", " i.n.", " r.n.", " in", "rn", " a.m.", " P.M.", " am", " pm", " iad"]) add(`ag ${h}:${m}${ap} inniu`);
+        for (const c of ["4:41.30", "10:00:00", ",5:30", "25:00"]) add(`am ${c} anseo`);
+        for (const v of ["2.4Ghz", "5.0Gh", "802.11n", "802.11n/a", "1.5 km", "1.5km", "1.5 M", "3.25 kg", "0.5 mm", "2.5 cm", "60.5 msu", "60.5 mſu", "1.5 km/h", "1.5 km /u", "2.5 cma", "1.2.3", "3.14", "1.5 kmx"]) add(`tá ${v} ann`);
+        for (const v of ["12,5", "4,2", "1,400", "1,4000", "3,14,", "0,05"]) add(`tá ${v} ann`);
+        for (let a = 0; a <= 12; a++) for (const b of [0, 1, 2, 3, 4, 5, 7, 10, 11, 12, 19, 20, 21, 25, 37, 40, 45, 100, 101, 190, 200, 1000]) add(`thart ar ${a}/${b} orlach`);
+        for (const f of ["2¾", "1½", "1/5/7", "1234/5"]) add(`thart ar ${f} orlach`);
+        for (const d of ["+30°C", "30 °C", "30°c", "86°F", "86 º F", "45°", "45°N", "45° S", "45°e", "45°w", "45°ſ", "20°Ca", "45°Na"]) add(`bhí ${d} inné`);
+        for (const r of ["100 km/h", "100km / u", "5 m/h", "5 kg/u", "5 mm/h", "5 cm/u", "5 KM/H", "60 msu", "60msu", "60 mſu", "5 km/hx"]) add(`ag ${r} anseo`);
+        for (const g of ["±2", "+3", "+ 3", "-5", "−5", "a-5", "5-5", "-5 - 6", "A&B", "A&Bs", "A&Bach", "Á&É", "a & b", "x = y", "a=b", "8 ÷ 2", "3 < 4", "5 > 2", "3 × 4", "AT&T"]) add(`tá ${g} fíor`);
+        for (const p of ["1.5 %", "1.5%", "3,5 %", "1.5 % a", "1.5%x", "12 %"]) add(`méadú ${p} ann`);
+        for (const [t, src] of rows) {
+            const a = normalizeIrish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("ga", () => E.text(t)));
+        }
+        for (let n = -2; n <= 2000; n++) for (const noun of ["", "lá"]) emit({ n: String(n), noun: units(noun), op: "ordinal" }, ordinalWords(n, noun) ?? "\u0000none");
+        for (const n of [1e6, 1e9, 1e12 - 1, 1e12, 2 ** 53, 1.5, 20.5, NaN, Infinity, -0, 1234567, 1000021]) for (const noun of ["", "bliain"]) emit({ n: String(n), noun: units(noun), op: "ordinal" }, ordinalWords(n, noun) ?? "\u0000none");
+    },
+    // phonemizeWord, g2pWord and toSegments over every letter run (as written and lowercased), every lexicon key,
+    // every 1–3 letter string of the alphabet, every 4-letter string over the context letters, eclipsis / lenition
+    // forms and corners; the nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "ga-g2p"() {
+        const { phonemizeWord, g2pWord, nat } = await import("../../../src/languages/irish/irish.ts");
+        const { toSegments } = await import("../../../src/languages/irish/g2p.ts");
+        const { numberToWords } = await import("../../../src/languages/irish/numbers.ts");
+        const I = new URL("../../../src/languages/irish/irish.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("ga")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const k of loadTsvMap(I, "lexicon.tsv").keys()) words.add(k);
+        const abc = [..."abcdefghijklmnopqrstuvwxyzáéíóú'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouáóbdghlnrst"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const p of ["mb", "gc", "nd", "bp", "dt", "ts", "bhf", "ng", "n-", "t-", "h"]) for (const s of ["ád", "éan", "oileán", "ar", "ír", "uí", "eo"]) words.add(p + s);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "ﬁ", "Dvořák", "Ångström", "xylo", "piquet", "Albuquerque", "yoga", "rr", "carr", "gorm", "bolg", "ainm", "áit", "cóir", "ceoil", "long", "banc", "chéadaigh", "airigh", "-", "'", "d'", "constructor", "toString"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "g2p" }, g2pWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.noGlide ? 1 : 0}`).join(" "));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "1,400", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
         }
     },
 };

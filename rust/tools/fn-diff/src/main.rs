@@ -2517,6 +2517,44 @@ fn main() {
                 }
             })
         }
+        "ga-normalize" | "ga-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let ga = vernacula_phonemizer::languages::irish::irish::create_irish().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ga.normalize(&t()),
+                    "symbols" => ga.symbols(&t()),
+                    "text" => with_host(&js("ga"), || ga.text(&t())),
+                    "ordinal" => ga
+                        .ordinal_words(n(), &units(&input["noun"]))
+                        .unwrap_or_else(|| js("\u{0}none")),
+                    "word" => ga.phonemize_word(&w()),
+                    "g2p" => ga.g2p_word(&w()),
+                    "nat" => ga.nativise(&w()),
+                    "segs" => {
+                        let parts: Vec<JsString> = ga
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&js(&format!(
+                                    "/{}{}",
+                                    s.nucleus as u8, s.no_glide as u8
+                                )))
+                            })
+                            .collect();
+                        JsString::join(&parts, &js(" "))
+                    }
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        ga.number_to_words(n(), raw.as_ref())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

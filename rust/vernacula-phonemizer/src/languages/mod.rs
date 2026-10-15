@@ -33,6 +33,7 @@ pub mod hungarian;
 pub mod icelandic;
 pub mod ilocano;
 pub mod indonesian;
+pub mod irish;
 pub mod italian;
 pub mod japanese;
 pub mod karakalpak;

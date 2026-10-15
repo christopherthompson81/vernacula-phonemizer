@@ -1,0 +1,28 @@
+# Irish (ga) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it must
+# decline, then tokenizer and g2p corners.
+Tógadh an caisleán sa bhliain 1200 A.D. agus scriosadh é in 44 R.C.
+Rugadh é in AD 500, fuair sé bás i 560 AD, agus bhí cogadh ann in BC 44 agus 30 BC.
+Labhair na N.A. agus na S.A. faoi bhia, deochanna srl. agus faoi uisce srl
+Chosain sé US$5,000 agus uS$ 20 ar an gcarr, ach AUS$5 ar an rothar.
+Bhí U.S.A. agus J. Ó Néill ann, le Dr. Ó Briain agus etc. eile, agus etc.
+An 1ú lá, an 2ú bliain, an 11ú lá, an 21ú háit, an 8ú aois, an 18ú hAois, an 100ú uair, an 1,000ú duine.
+An 13ú agus an 25ú, an 20ú, an 30ú lá, an 45ú sa tír agus an 0ú.
+Idir 5-3 agus 1990-1995, ó 1,000-2,000 duine, agus am UTC-5 inniu.
+Ag 11:35 i.n., 06:30 r.n., 7:15 a.m., 8:45 P.M. agus 10:00 iad, ach 4:41.30 ar an rás.
+Úsáideann 802.11n agus 2.4Ghz agus 5.0Gh, ach 1.5 km agus 60.5 msu agus 1.5 km/h.
+Tá 3.14 agus 12,5 agus 1,400 ann, agus 1.2.3 freisin.
+Thart ar 1/5 orlach, 1/2 méadar, 3/4 uair, 1/3 den phobal, 2¾ agus 1½ míle, 5/11 agus 7/20.
+Bhí sé +30°C inné, 86°F inniu, 45°N agus 45° S agus 45°.
+Ag 100 km/h agus 60 msu agus 5 m/u ar an mbóthar.
+Tá ±2 agus +3 agus -5 agus −7, ach 5-5 agus -5 - 6 difriúil.
+Tá A&B agus A&Bs agus A&Bach fíor, a & b freisin, x = y, 8 ÷ 2, 3 < 4, 5 > 2, 3 × 4.
+Méadú 1.5 % agus 3,5 % sa bhliain, ach 12 % eile.
+Chonaic sé an BBC, an FBI, H5N1, XDR-TB, DNA agus NATO ar an RTÉ agus an GAA.
+Tá mbád, gcarr, ndoras, bpáiste, dtír, tsráid, bhfuil agus ngeata ann.
+Bhí bhuail, chuaigh, dhún, fhág, ghlan, mhol, phós, shiúil agus thit sé.
+Carr, gorm, bolg, ainm, áit, cóir, óige, ceoil, long agus banc.
+Chéadaigh sé agus airigh sí, ach spéir agus Gaeilge eile.
+Léigh sé Dvořák, Ångström, piquet, Albuquerque, yoga agus Zoë.
+Uimhir 1,400,000 agus 19,500 agus 5,000,000 agus 1234567890123.
+Tá constructor agus toString focail Bhéarla… ach cén fáth? Mar!
+Foca\u{200b}l le fo\u{200c}cal agus fo\u{feff}cal agus fo\u{200d}cal.
