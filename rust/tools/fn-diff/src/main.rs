@@ -3013,6 +3013,31 @@ fn main() {
                 }
             })
         }
+        "rw-normalize" | "rw-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::kinyarwanda::{kinyarwanda, numbers};
+            // Building `rw` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "rw").unwrap();
+            let rw = kinyarwanda::create_kinyarwanda().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => rw.normalize(&t()),
+                    "symbols" => rw.symbols(&t()),
+                    "text" => with_host(&JsString::from("rw"), || rw.text(&t())),
+                    "word" => kinyarwanda::phonemize_word(&w()),
+                    "nat" => kinyarwanda::NAT(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

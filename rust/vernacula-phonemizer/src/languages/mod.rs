@@ -48,6 +48,7 @@ pub mod javanese;
 pub mod kannada;
 pub mod karakalpak;
 pub mod kazakh;
+pub mod kinyarwanda;
 pub mod korean;
 pub mod kyrgyz;
 pub mod lao;
