@@ -1,0 +1,16 @@
+# Synthetic Ewe probes, one or more lines per arm of normalize.ts and the g2p (no corpus sentences).
+Ðasefowo kple Đɔkita kpe ɖe Ƞkɔ ŋu.
+Nyagbe&nbsp;sia le&ndash;eme.
+Ame 1,234,567 le du la me, kple 12 345 le kɔƒe me.
+Mɔ la didi 25 km, eye xɔ la didi 5 m kple 30 cm.
+Anyigba la lolo 400 km² kple 20 m2.
+Ame 10-20% kple 30% le afi sia.
+Ega la nye GH₵ 50 kple US$20 kple €5.
+Ƒe 1990-1995 me ame 5-6 va.
+Xexlẽ la nye 3.14159.
+Ƒe 21st me, Kofi & Ama va.
+Ŋkekea nyo, ãɖe ẽ ĩ õ ũ ɛ̃ ɔ̃.
+Kwasiɖa, trɔ, Mars kple wu.
+Eƒe nya: "Ɛ̃!" Èva a? Ao; mele eme o…
+Xexlẽ 12345678901234567890 lolo.
+Ƒe 1945 kple 2024.

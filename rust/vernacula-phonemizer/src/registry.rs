@@ -35,7 +35,7 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 109] = [
+pub const LANGUAGES: [&str; 115] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
     "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
     "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo", "cs", "sk", "be", "bg", "mk",
@@ -43,7 +43,7 @@ pub const LANGUAGES: [&str; 109] = [
     "ky", "uz", "tk", "tt", "da", "nb", "af", "lb", "bar", "ba", "crh", "kaa", "nog", "chv", "tg",
     "cy", "ga", "gd", "eu", "sq", "ast", "an", "oc", "bn", "as", "bpy", "syl", "or", "kn", "te",
     "ta", "ml", "si", "vi", "lo", "my", "jv", "su", "mad", "zu", "xh", "st", "tn", "nso", "sn",
-    "sw", "rw", "rn", "lg", "ln", "nya",
+    "sw", "rw", "rn", "lg", "ln", "nya", "yo", "ig", "ha", "ee", "ak", "wo",
 ];
 
 /// A language engine, as the registry holds it.
@@ -367,6 +367,24 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "nya" => crate::languages::chichewa::chichewa::create_chichewa()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "yo" => crate::languages::yoruba::yoruba::create_yoruba(Some(Arc::new(read_as_english)))
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ig" => crate::languages::igbo::igbo::create_igbo()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ha" => crate::languages::hausa::hausa::create_hausa()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ee" => crate::languages::ewe::ewe::create_ewe()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "ak" => crate::languages::akan::akan::create_akan()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "wo" => crate::languages::wolof::wolof::create_wolof()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         _ => return None,

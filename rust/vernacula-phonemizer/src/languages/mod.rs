@@ -1,4 +1,5 @@
 pub mod afrikaans;
+pub mod akan;
 pub mod albanian;
 pub mod aragonese;
 pub mod assamese;
@@ -29,6 +30,7 @@ pub mod english;
 pub mod english_gb;
 pub mod english_in;
 pub mod estonian;
+pub mod ewe;
 pub mod faroese;
 pub mod finnish;
 pub mod french;
@@ -36,10 +38,12 @@ pub mod french_ca;
 pub mod galician;
 pub mod german;
 pub mod greek;
+pub mod hausa;
 pub mod hiligaynon;
 pub mod hindi;
 pub mod hungarian;
 pub mod icelandic;
+pub mod igbo;
 pub mod ilocano;
 pub mod indonesian;
 pub mod irish;
@@ -105,7 +109,9 @@ pub mod ukrainian;
 pub mod uzbek;
 pub mod vietnamese;
 pub mod welsh;
+pub mod wolof;
 pub mod xhosa;
+pub mod yoruba;
 pub mod zulu;
 
 /// The fraction guards are mirrors in the ported `\b…\b` family and Italian (#1495). Relational, as

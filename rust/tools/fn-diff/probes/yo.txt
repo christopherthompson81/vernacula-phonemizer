@@ -1,0 +1,27 @@
+# Synthetic Yoruba probes, one or more lines per arm of normalize.ts and the g2p (no corpus sentences).
+Ó ní ènìyàn 2,500 ní ìlú náà.
+Ó ní 1,234,567 owó, kì í ṣe 1,23.
+Láti ọdún 1990-1995 sí 2000 – 2005 ni.
+Ìwọ̀n otútù jẹ́ \u{2212}47.6 °C ní ìgbà òtútù.
+Iye náà jẹ́ 1.98739x10 \u{2212}21 s gẹ́gẹ́ bí a ti kọ.
+Ìdá 84% nínú ọgọ́rùn-ún ni wọ́n dìbò.
+Wọ́n dìbò ní ìdá 84 nínú ọgọ́rùn-ún (84%).
+60% àwọn ènìyàn àti 8.3% àwọn ọmọdé.
+Ilẹ̀ náà tó 56 km² àti 10 ha².
+Ìwọ̀n ilẹ̀ tó tó 705.78sq km 2 ni.
+Ó ná ₦500 àti US$5 àti $20.
+Ọkọ̀ náà ń sáré 100 km/h tàbí 60 km/w.
+Ó mu 5 l omi àti 2 L wàrà.
+Òjò tó ju 250 mm rọ̀.
+Òkè náà ga tó 500 m (1,600 ft).
+Ìyípo rẹ̀ jẹ́ 9h 50m 30.0s.
+Ìgbóná ara jẹ́ 38°C tàbí 100.4°F.
+Ìdíje 4 × 100 mítà.
+Iye pi jẹ́ 3.14159.
+Ọ̀YỌ́ ni ìlú ńlá.
+Ẹ ǹ lẹ́ o, ḿ bọ̀.
+Ọmọ náà ń ṣeré nínú ẹgwa.
+Kpa gbẹ́ àti ghana.
+Ó wí pé: "Bẹ́ẹ̀ ni!" Ṣé o wá? Bẹ́ẹ̀ kọ́; rárá.
+Nọ́mbà 12345678901234567890 tóbi.
+Ọdún 1945 àti 2024.

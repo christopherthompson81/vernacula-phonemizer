@@ -1,0 +1,22 @@
+# Synthetic Hausa probes, one or more lines per arm of normalize.ts and the g2p (no corpus sentences).
+Bello &amp; Musa sun zo a shekara 1000 BC.
+M. Ɗanjuma da George W. Bush sun haɗu a U.S.A.
+Kuɗin ya kai US$14.7 miliyan.
+Daga 2-3 km zuwa 4.2-3.9 miliyan, ba 1, -2 ba.
+Taron ya fara da 8:46 na safe har 11:29 PM.
+Labaran 12.00 GMT sun fito.
+Wayar tana amfani da 2.4 GHz da 802.11n.
+Nisan ya kai 12.8km da 0.5 kg.
+Adadin ya kai 12,5 kawai.
+Mota mai 4/4 da inci 1/5.
+Zafi ya kai 30°C ko 86°F a 35°W.
+Gudun ya kai 480 km/h ko 300 mph da 600Mbit/s.
+Mai nisan km 2-3 ya rufe shi.
+Ya karu da +30 kuma ya ragu da -5.
+AT&T da Bello & Musa: 1 = 1, 1 < 2, 3 > 2, 3 × 4.
+Kashi 3.5% na mutane.
+Ƙungiyar NASA da BBC da HIV sun zo.
+'Yan Najeriya sun ƙi ƙwarai.
+Ya ce: "Na'am!" Ka zo? A'a; ban zo ba…
+Lambar 12345678901234567890 babba ce.
+Shekara 1945 da 2024.

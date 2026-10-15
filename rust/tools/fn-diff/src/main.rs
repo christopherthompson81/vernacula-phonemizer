@@ -3287,6 +3287,141 @@ fn main() {
                 }
             })
         }
+        "yo-normalize" | "yo-g2p" => {
+            use std::sync::Arc;
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::yoruba::{numbers, yoruba};
+            // Building `yo` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "yo").unwrap();
+            let yo = yoruba::create_yoruba(Some(Arc::new(
+                vernacula_phonemizer::registry::read_as_english,
+            )))
+            .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => yo.normalize(&t()),
+                    "symbols" => yo.symbols(&t()),
+                    "text" => with_host(&JsString::from("yo"), || yo.text(&t())),
+                    "word" => yoruba::phonemize_word(&units(&input["word"])),
+                    "number" => numbers::yoruba_number(&t()),
+                    "read" => numbers::read_yoruba_numbers(&t()),
+                    _ => numbers::yoruba_cardinal(js_number(&JsString::from(
+                        input["n"].as_str().unwrap(),
+                    ))),
+                }
+            })
+        }
+        "ig-normalize" | "ig-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::igbo::{igbo, numbers};
+            // Building `ig` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ig").unwrap();
+            let ig = igbo::create_igbo().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ig.normalize(&t()),
+                    "symbols" => ig.symbols(&t()),
+                    "text" => with_host(&JsString::from("ig"), || ig.text(&t())),
+                    "word" => igbo::phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "ha-normalize" | "ha-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::hausa::{hausa, normalize, numbers};
+            // Building `ha` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ha").unwrap();
+            let ha = hausa::create_hausa().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ha.normalize(&t()),
+                    "symbols" => ha.symbols(&t()),
+                    "text" => with_host(&JsString::from("ha"), || ha.text(&t())),
+                    "unreadable" => {
+                        JsString::from(normalize::IS_UNREADABLE(&t()).to_string().as_str())
+                    }
+                    "word" => hausa::phonemize_word(&w()),
+                    "nat" => hausa::NAT(&w()),
+                    _ => numbers::number_to_words(js_number(&JsString::from(
+                        input["n"].as_str().unwrap(),
+                    ))),
+                }
+            })
+        }
+        "ee-normalize" | "ee-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::ewe::{ewe, numbers};
+            // Building `ee` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ee").unwrap();
+            let ee = ewe::create_ewe().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ee.normalize(&t()),
+                    "text" => with_host(&JsString::from("ee"), || ee.text(&t())),
+                    "word" => ewe::phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "ak-normalize" | "ak-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::akan::akan;
+            // Building `ak` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ak").unwrap();
+            let ak = akan::create_akan().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ak.normalize(&t()),
+                    "text" => with_host(&JsString::from("ak"), || ak.text(&t())),
+                    "word" => akan::phonemize_word(&w()),
+                    "rules" => akan::phonemize_word_rules(&w()),
+                    _ => akan::NAT(&w()),
+                }
+            })
+        }
+        "wo-normalize" | "wo-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::wolof::{numbers, wolof};
+            // Building `wo` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "wo").unwrap();
+            let wo = wolof::create_wolof().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => wo.normalize(&t()),
+                    "symbols" => wo.symbols(&t()),
+                    "text" => with_host(&JsString::from("wo"), || wo.text(&t())),
+                    "word" => wolof::phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

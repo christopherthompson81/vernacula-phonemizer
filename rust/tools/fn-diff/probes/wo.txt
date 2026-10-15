@@ -1,0 +1,15 @@
+# Synthetic Wolof probes, one or more lines per arm of normalize.ts and the g2p (no corpus sentences).
+Ñu dem ci 8:30 ci suba ba 18:45 ci ngoon, 12:00 GMT.
+Km&sup2; ak km&nbsp;bi &amp; ñeneen.
+Tàngaay bi tollu na ci 30° te 25 °.
+Mu ngi ci a.b.c Ndakaaru, ak x.y.
+Ñu am na 50% ak US$5 ak 5 milyoŋ dolaar.
+Yoon wi tollu na 10 km, ab neeg 5 m ak 30 cm.
+Dëkk bi am na 1,234,567 nit, walla 1.234.567.
+Ci at 1990-1995 ak 5-10.
+At 21st la.
+Lim bi 0.5 ak 3.14 ak 3,5 la.
+Benn, làkk, noppa, Angale, ñaar.
+Mu ne: "Waaw!" Dinga ñëw? Déedéet; du ñëw…
+Lim 12345678901234567890 bu mag la.
+At 1945 ak 2024.
