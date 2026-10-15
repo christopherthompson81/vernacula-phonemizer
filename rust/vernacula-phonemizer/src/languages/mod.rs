@@ -1,4 +1,5 @@
 pub mod afrikaans;
+pub mod akan;
 pub mod albanian;
 pub mod aragonese;
 pub mod assamese;

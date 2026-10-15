@@ -3089,6 +3089,24 @@ fn main() {
                 }
             })
         }
+        "ak-normalize" | "ak-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::akan::akan;
+            // Building `ak` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "ak").unwrap();
+            let ak = akan::create_akan().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ak.normalize(&t()),
+                    "text" => with_host(&JsString::from("ak"), || ak.text(&t())),
+                    "word" => akan::phonemize_word(&w()),
+                    "rules" => akan::phonemize_word_rules(&w()),
+                    _ => akan::NAT(&w()),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

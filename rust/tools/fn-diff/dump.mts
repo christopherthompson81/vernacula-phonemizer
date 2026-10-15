@@ -5911,6 +5911,64 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const d of ns) { emit({ n: d, raw: units(d), op: "words" }, numberToWords(Number(d), d)); emit({ n: d, raw: null, op: "words" }, numberToWords(Number(d))); }
         for (const [n, raw] of [["1.5", "15"], ["-1", "1"], ["NaN", "x9"], ["Infinity", "٣"], ["-0", "0"], ["1e21", undefined], ["1.5", undefined], ["-12", undefined], ["NaN", undefined], ["-Infinity", undefined]] as const) emit({ n, raw: raw === undefined ? null : units(raw), op: "words" }, numberToWords(Number(n), raw));
     },
+    // ── Akan (ak). Inputs: the ak golden and probes/ak.txt (no FLEURS transcript exists). ──
+    // normalizeAkan and the registry's ak engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per
+    // arm: entities and invisibles, the digit-pipe, the Greek / Hebrew homoglyphs, the elided apostrophe (three
+    // apostrophes, every vowel, the refusals), comma / dot / space grouping, units squared and bare with the currency
+    // refusal, percent ranges and percents with the already-written window, every currency key, dotted
+    // abbreviations, number ranges, both decimal marks and `fraction`, ordinal tails, `&`; the number path over
+    // 0…3,000, scaled samples and runs past 2^53.
+    async "ak-normalize"() {
+        const { normalizeAkan } = await import("../../../src/languages/akan/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ak"], undefined, ["ak.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["&nbsp;", "&nbsp", "&#x2013;", "&#8211;", "&#xZZ;", "\u{200b}", "\u{200c}", "\u{200d}", "\u{feff}", "\u{ad}"]) add(`asɛm${e}no`);
+        for (const p of ["5|abusua", "5|5", "a|b", "5 |a"]) add(`${p} yɛ`);
+        for (const h of ["ε", "כ", "mεn", "Ε"]) add(`ɔman ${h} no`);
+        for (const c of ["n", "w", "m", "N", "W", "M", "k"]) for (const ap of ["'", "’", "ʼ", "`"]) for (const v of ["a", "ɛ", "o", "U", "x"]) { add(`${c}${ap}${v}kɔ`); add(`a${c}${ap}${v}`); }
+        for (const n of ["1,000", "12,345,678", "0,500", "1,0000", "1,000,5", "1.000.000", "1.000", "12.345.678,5", "1 000", "12\u00a0345", "1\u202f000\u2009000", "1 000 0"]) add(`nnipa ${n} wɔ hɔ`);
+        for (const u of ["km", "cm", "mm", "kg", "m"]) for (const pre of ["5", "5 ", "1,5 ", "2.5", "a5 ", "$5 ", "€ 10 ", "GH₵ 3 "]) for (const post of ["", "²", "2", "³", "/h", "x"]) add(`ɛware ${pre}${u}${post} no`);
+        for (const p of ["10-20%", "10%-20%", "10 % – 20 %", "20-10%", "1,000-2,000%", "1.5-2.5%", ":10-20%", "5%", "5 %", "a5%"]) for (const pre of ["", "ɔha mu nkyekyɛmu ", "Oha mu nkyekyem ", "oha nkyekyɛmu bɛyɛ ", "ɔha mu nkyekyɛmu. "]) add(`${pre}${p} na ɛyɛ`);
+        for (const c of ["GH₵5", "GHC 5", "GHc5", "GHS 5", "₵5", "US$5", "$5", "$ 5,000.50", "aGH₵5", "€5"]) add(`ɛbo ${c} no`);
+        for (const a of ["U.S.A.", "a.b.c", "Dr. Kofi", "ɛ.ɔ.", "á.b."]) add(`${a} kɔɔ`);
+        for (const r of ["1990-1995", "5-6", "10-5", "5-10", "10 – 20", "a5-10", "5-10a", "1:5-10", "5-10-15", "5-10,5"]) add(`afe ${r} mu`);
+        for (const d of ["3.14159", "2.5", "1.05", "1.25", "1.0", "1.2.3", "2,5", "2,05", "2,555", "0.5"]) add(`akontaa ${d} no`);
+        for (const o of ["1st", "22nd", "3rd", "4th", "4tha", "a4th"]) add(`afe ${o} mu`);
+        for (const a of ["A&B", "a & b", "a& b", "&"]) add(`${a} kɔɔ`);
+        for (const l of ["Lone \ud800 surrogate ne 𝐀𝐁 ne ﬁ.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeAkan(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("ak", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 21), String(k * 1e6 + 55), String(k * 1e9 + 100), String(k * 1e12 + 1));
+        for (let e = 9; e <= 22; e++) { ns.push(String(10 ** e)); ns.push(String(10 ** e - 1)); }
+        ns.push("1000000", "1001001", "999999999999", "9007199254740991", "9007199254740993", "12345678901234567890", "007");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("ak", n));
+    },
+    // phonemizeWord, phonemizeWordRules and the nativiser over every letter run of the texts (as written, lower, UPPER),
+    // every tone-lexicon key (and UPPER), every 1–3 letter string over the alphabet plus the tilde, every 4-letter
+    // string over a harmony / nasal context set, edge strings.
+    async "ak-g2p"() {
+        const { phonemizeWord, phonemizeWordRules, nat } = await import("../../../src/languages/akan/akan.ts");
+        const A = new URL("../../../src/languages/akan/akan.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("ak")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        for (const k of loadTsvMap(A, "akan-tone.tsv", undefined, { optional: true }).keys()) { words.add(k); words.add(k.toUpperCase()); }
+        const abc = [..."abdeɛfghiklmnŋoɔprstuwyzcjqvx", "̃"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeɛioɔunbmkgw", "̃"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Dvořák", "Ångström", "Straße", "ƐƆŊ", "ã", "ɛ̃", "nnipa", "abusua", "ɔbaa", "mmienu", "nkron", "twi", "dwom", "hyɛ", "ngo", "nwom", "ñ"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "rules" }, phonemizeWordRules(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
 };
 
 

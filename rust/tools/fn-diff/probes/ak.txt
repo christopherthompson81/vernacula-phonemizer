@@ -1,0 +1,16 @@
+# Synthetic Akan probes, one or more lines per arm of normalize.ts and the g2p (no corpus sentences).
+Asɛm&nbsp;no yɛ 5|abusua nsɛm.
+Ɔman no mu nnipa yɛ 1,234,567 anaa 1.234.567.
+Kwan no tenten yɛ 25 km, na dan no yɛ 5 m ne 30 cm.
+Asase no trɛ yɛ 400 km² ne 20 m2.
+Nnipa 10-20% ne 30% wɔ hɔ.
+Ɔha mu nkyekyɛmu bɛyɛ 45% na ɛyɛ.
+Ɛbo no yɛ GH₵ 50 ne US$20.
+Afe 1990-1995 mu, nnipa 5-6 baa.
+Akontaa no yɛ 3.14159 ne 2,5.
+Afe 21st mu, Kofi & Ama kɔɔ.
+N'ani gye, m'abusua, w'ɔyɛ.
+Nnipa, abusua, ɔbaa, twi, dwom, hyɛ, nwom, ngo.
+Ɔkaa sɛ: "Yoo!" Wobɛba? Daabi; menkɔ.
+Akontaa 12345678901234567890 kɛse.
+Afe 1945 ne 2024.

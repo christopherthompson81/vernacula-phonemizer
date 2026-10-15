@@ -212,3 +212,47 @@ word-initial only: `ee-normalize: 794 identical, 194 DIFFER`, `ee-g2p: 97997 ide
 (`3.14` → *etɔ̃ ɖeka ene*) are both recorded in normalize.ts's header as known.
 
 **Implication.** Commit ee; ak next.
+
+## Run 8 — 2026-10-15 08:05 (ak: first build, the one port-pending row, differentials, pins)
+
+**Shape.** No manifest.ts: akan.rs loads `AkanDef` and the optional `akan-tone.tsv` (values as written, the default
+parse) itself, and holds the numbers, which normalize.ts does not see. `atrByIndex` keeps its two fill passes;
+`NUCLEI.has(seg)` is "one code unit and an IPA vowel" (the TS set is single BMP characters); `t[0] === "H"` reads a
+code unit. normalize.rs builds its unit, percent, currency and elision patterns from the TS tables at runtime (the
+four `audit_regex` misses are those `format!` templates and TOKEN's, checked by hand), and the Greek ε / Hebrew כ
+homoglyph class from `HOMOGLYPH`'s keys in order.
+
+**Commands.** As before; `parity ak`; `ak-normalize` / `ak-g2p` dumps (no FLEURS: the golden, `probes/ak.txt` (15
+synthetic lines) and 648 synthetic rows: entities and the five invisibles, the digit-pipe, the homoglyphs, the elided
+apostrophe over 7 letters × 4 apostrophes × 5 vowels in two positions, the three grouping marks, 5 units × 8 prefixes
+× 6 suffixes, percent ranges and percents × 5 already-written prefixes, every currency, dotted abbreviations, number
+ranges, both decimal marks through `fraction`, ordinal tails, `&`; plus the number path through the engine over
+0…3,000, scaled samples and runs past 2⁵³); `ak-g2p` over every letter run × 3 forms, every tone key × 2, every 1–3
+string over 30 letters plus the tilde, every 4-letter string over a 14-symbol harmony / nasal set, corners, through
+`phonemizeWord`, `phonemizeWordRules` and the nativiser.
+
+**Raw finding.** `ak: 130/131 identical, 1 differ` on the first build (the ak golden has 131 rows). The one row is
+`Butan (འབྲུག་ཡུལ་) yε ɔman …`: the TS reads the Tibetan run through the `bo` engine (*ʈ͡ʂuʔ˩ jyː˩*), which is not
+ported, so the Rust drops it and records `bo` in `port_pending()`. PORT-PENDING, pinned by
+`a_tibetan_run_is_pending_on_bo_until_it_is_ported` (flips when `bo` lands). Every other gate:
+```
+ak-normalize: 5195 identical, 1 DIFFER   (golden 261 + the bo row / probe 30 / synthetic 1296 / number 3608)
+ak-g2p: 211119 identical, 0 DIFFER
+phonemize-sync / phonemize-best / phonemize-trace / trace: 145 identical, 1 DIFFER each (the same bo row)
+cargo test --release akan: 2 passed (105 pins: 55 normalizeAkan, 16 phonemizeWordRules, 4 phonemizeWord,
+30 getPhonemizer("ak").text; 1 call skipped, an object result; 105 expects, 0 failures)
+```
+Audits: `22 raw patterns, 4 not verbatim` (the templates), `6 TS escapes, 0 short`, `44 non-ASCII runs, 0 not found`.
+Haystack: `normalizeAkan` changed golden 82/131, probes 11/15, synthetic 328/648 texts. No FLEURS (stated).
+
+**Guard check.** The already-written window narrowed from 60 to 30 characters: `ak-normalize: 5193 identical, 3 DIFFER`.
+A first harmony break (seeding the backward pass with +ATR) moved NOTHING, and that is right rather than blind: after
+the forward pass only leading vowels are undecided, and a word with no deciding vowel already defaults to +ATR, so the
+seed is equivalent. The real break, ɔ no longer deciding −ATR: `ak-normalize: 3509 identical, 1687 DIFFER`, `ak-g2p:
+205683 identical, 5436 DIFFER`. Restored: back to the one bo row and 0 DIFFER.
+
+**TS observations (reported, not fixed).** `4x100` reads *nnan z ɔha*, as in ig: an ASCII `x` between digits reaches
+the Latin fallback's initial /z/. The single-group dot number is read as a decimal (`766.397` → *… akyiri pɔ …*, the
+golden row above), which normalize.ts's step-3 note records as the deliberate side of a measured ambiguity.
+
+**Implication.** Commit ak; wo next.
