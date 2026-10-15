@@ -2995,6 +2995,24 @@ fn main() {
                 }
             })
         }
+        "sw-normalize" | "sw-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::swahili::swahili;
+            // Building `sw` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "sw").unwrap();
+            let sw = swahili::create_swahili().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => sw.normalize(&t()),
+                    "symbols" => sw.symbols(&t()),
+                    "text" => with_host(&JsString::from("sw"), || sw.text(&t())),
+                    "word" => swahili::phonemize_word(&w()),
+                    _ => swahili::NAT(&w()),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

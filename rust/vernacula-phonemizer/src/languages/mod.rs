@@ -81,6 +81,7 @@ pub mod slovenian;
 pub mod spanish;
 pub mod spanish_419;
 pub mod sundanese;
+pub mod swahili;
 pub mod swedish;
 pub mod sylheti;
 pub mod tagalog;

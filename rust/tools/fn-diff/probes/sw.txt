@@ -1,0 +1,23 @@
+# Synthetic Swahili probes: one or more lines per arm of normalize.ts and the neighbour it must decline, plus g2p and
+# number corners. Synthetic text only.
+Wageni kutoka São Paulo, Gürses, Sámi, Dvořák, Ångström, Œuvre, Straße, ſala, ﬁlamu na İzmir walifika.
+Jina la Ελλάδα na Москва halibadiliki, wala 東京.
+Joto ni +30ºC leo, 25 ºC jana, 5º tu.
+Watu 1,000 na 755,688 walikuja; 24,000, na wengine 1,0000 au 12,345.6 au 0,500 au 1,000,000.
+Thamani ni ±5 au ± 3 au a±4.
+Joto la −5 na -12 na –3, lakini x-5 si hasi, 5 -3 ni alama, na 10 - 2 pia, na neno - 5.
+Saa UTC+1 na +5 na a +7 na 3+4 na + 2.
+Joto 30°C, 30 ° c, 45°, 20°Ca, -5°F, 86 °f, +4°C, 2.9°C na 1,000°.
+Kilomita 2-3, alama 5-3, 10 – 15, msimu 1995-96, a5-6, 7-2a, 6-6 na 1469-1539.
+Urefu 1.5 na 6.34 na 802.11n na 1.2.3 na 0.75 na 12.
+Mwaka 500 B.C.E. Kisha 1100 A.D. Mwaka 10,000 BCE. Mwaka 1000 BC na A.D. 33 na B.C. kwa n.k. na kadhalika n.k.
+Takribani 1000 BC, ABC, BCE ni, BCD na 5 BCx.
+Kwa usahihi - pia jaribu – tena — mwisho, na 26 - 00 na 26 – 00.
+Kama 6 ÷ 3 = 2 basi 2 < 3 na 5 > 4, na a=b, x<y.
+Asilimia 80%, dola $30, euro €20, £5, ¥100, KSh 500, TSh 1,000 na 3.5%.
+Kilomita 10 km, mita 5 m, cm 7 cm, kg 3 kg, kasi 60 km/h na 5 m/s, mara 5 x 3 na A & B.
+Ng'ombe, ngoma, mbwa, nchi, mtu, njia, mvua, nzi, kuu, taa, mwezi, kweli, chakula, shule, nyumba, dhahabu, thelathini, ghali, khabari.
+Mmea, nne, mw, nw, mm, nn, m, n, mwa, nya, ngw, ng', cq, xyz, aa, aaa, ee, ii, oo, uu, kwaa, ndwa.
+GPS, UNESCO, Bw. Juma, Dkt. Ali na 'kweli' na ng'ang'ania.
+Namba 0 1 9 10 11 19 20 21 99 100 101 110 999 1000 1001 2000 10000 100000 999999 1000000 1000001 999999999 1000000000 4082940073 9007199254740991 9007199254740993 12345678901234567890 007.
+Je? Ndiyo! Sawa. Koma, nukta mkato; nukta mbili: mwisho… kwisha.
