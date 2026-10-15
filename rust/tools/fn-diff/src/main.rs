@@ -1992,6 +1992,32 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "tt-normalize" | "tt-g2p" | "tt-numbers" => {
+            let tt = vernacula_phonemizer::languages::tatar::tatar::create_tatar().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tt.normalize(&t()),
+                    "initialisms" => tt.normalize_initialisms(&t()),
+                    "symbols" => tt.symbols(&t()),
+                    "engine" => tt.text(&t()),
+                    "unreadable" => JsString::from(tt.is_unreadable(&t()).to_string().as_str()),
+                    "word" => tt.phonemize_word(&units(&input["word"])),
+                    "words" => tt.number_words(num()),
+                    "ordinal" => tt.ordinal_of(num()).unwrap_or_else(none),
+                    "roman" => tt.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => tt.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "tt-roman" => {
+            let policy = vernacula_phonemizer::languages::tatar::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

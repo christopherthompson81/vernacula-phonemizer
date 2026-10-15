@@ -3467,6 +3467,89 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const r of ["I", "II", "IV", "IX", "XIX", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["asyr", "asyrda", "asyrlaryň", "asyrdan", "ýyl", "asyrlik"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
         for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
+    // ── Tatar (tt). Inputs: the tt golden and probes/tt.txt (FLEURS has no tt), plus GENERATED shapes. ──
+    // normalizeTatar, normalizeTatarInitialisms (on the raw and the normalized text), the symbol tier tatar.ts built
+    // (recorded through the wrapper) on the prepared text, the engine's text(), and the phonotactic test, over the
+    // texts and synthetic rows: every ordinal / case suffix after a sweep of numbers (hyphenated, glued, spaced),
+    // the era markers in every trailing context, clocks with suffixes, degrees with suffixes, signs, ranges.
+    async "tt-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/tatar/normalize.ts");
+        const P = (await import("../../../src/languages/tatar/tatar.ts")).createTatar();
+        const rec = records.find((r) => /src\/languages\/tatar\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["tt"], undefined, ["tt.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["нче", "нчы", "енче", "ынчы", "нчедә", "енчесе", "нчыга", "ның", "нең", "га", "гә", "ка", "кә", "да", "дә", "та", "тә",
+            "дан", "тән", "ннан", "лар", "ләр", "ларда", "ы", "сы", "ен", "ына", "ндә", "н", "НЧЕ", "ел", "еллар"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "15", "20", "30", "40", "50", "60", "70", "80", "90",
+            "100", "101", "200", "1000", "1990", "2011", "1000000", "1000000000", "9007199254740993"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кайт`); add(`${n}${sfx}`); add(`${n} ${sfx}`); }
+        for (const era of ["б.э.к.", "б. э. к.", "я.э.к", "б.э.", "я. э.", "һ.б.", "ш.и.", "млрд.", "млн .", "Б.Э.К."]) for (const tail of ["", " 300 ел", ".", "\"", " »", ")", " соң"]) add(`Бу ${era}${tail}`);
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59"]) for (const sfx of ["", "да", "-дә", "тән", "ка", "кә", "х"]) { add(`${h}:${mm}${sfx} килде`); add(`${h}:${mm}:15${sfx}`); }
+        for (const d of ["°C", "°С", "°F", "°Ф", "°", "°30′", "°30′та", "°30'да", "°30′кеше", " ° почмак"]) for (const n of ["5", "-5", "+5", "−5", "(–5"]) add(`${n}${d} булды`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "-8", "5 = 5", "2×3", "±2"]) add(`Кар ${r} см`);
+        for (const [t, src] of rows) {
+            const a = N.normalizeTatar(t);
+            const b = N.normalizeTatarInitialisms(a);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeTatarInitialisms(t));
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(b), src, op: "symbols" }, rec.apply(b));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableTatar(w)));
+    },
+    // phonemizeWord over every Cyrillic-block run of the texts (as written, lowercased, uppercased), every 1-3
+    // letter string over the alphabet (third letter from a context set), every 4-letter string of the harmony and
+    // cluster letters, and edge strings.
+    async "tt-g2p"() {
+        const T = await import("../../../src/languages/tatar/tatar.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("tt")) for (const w of t.match(/[\p{L}\p{M}]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); }
+        const abc = [..."аәбвгдеёжҗзийклмнңоөпрстуүфхһцчшщъыьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аәеиыоөуүкгрлсн") words.add(a + b + c); } }
+        const ctx = [..."кгаәеоысттрл"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "ӑ", "ј", "е́", "й"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+    },
+    // numberToWords and ordinalOf over 0…20,000 and beyond, the Roman ordinal, and the engine's own number reading
+    // on digit runs (the unsafe ones digit at a time) and comma decimals.
+    async "tt-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/tatar/numbers.ts");
+        const { ordinalOf } = await import("../../../src/languages/tatar/normalize.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/tatar/romanOrdinals.ts");
+        const P = (await import("../../../src/languages/tatar/tatar.ts")).createTatar();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n).join("|"));
+            emit({ n: String(n), op: "ordinal" }, ordinalOf(n) ?? "\u0000none");
+        }
+        for (const n of [1.5, -1, NaN, Infinity]) emit({ n: String(n), op: "ordinal" }, ordinalOf(n) ?? "\u0000none");
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40), "2,5", "0,05", "3,14159"];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // normalizeRomans with Tatar's policy (registry.ts romanTt) over the Tatar texts and synthetic Roman × context rows.
+    async "tt-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/tatar/romanOrdinals.ts");
+        const rows = new Map(textsFor(["tt"], undefined, ["tt.txt"]));
+        for (const r of ["I", "II", "IV", "IX", "XIX", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["гасыр", "гасырда", "гасырларның", "йөзьеллык", "йөзъеллыкта", "ел", "гасырлык"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
+        for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
 };
 
 
