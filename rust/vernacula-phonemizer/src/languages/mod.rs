@@ -58,6 +58,7 @@ pub mod portuguese_br;
 pub mod rangpuri;
 pub mod romanian;
 pub mod russian;
+pub mod scottishgaelic;
 pub mod serbian;
 pub mod slovak;
 pub mod slovenian;

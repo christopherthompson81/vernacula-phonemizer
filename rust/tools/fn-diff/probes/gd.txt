@@ -1,0 +1,19 @@
+# Scottish Gaelic (gd) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour
+# it must decline, then tokenizer and g2p corners. FLEURS has no gd, so these and the dump's synthetic rows carry
+# the arms the golden misses.
+Tha 1,000 duine agus 12,345,678 not ann, ach 0,500 agus 1,23 eile.
+Bha 1.000 agus 1.234.567 ann, agus 1 000 no 12 345 678 cuideachd.
+Leabhraichean, pàipearan srl. agus dealbhan srl.
+Faic td. 5 agus bh. a' chiad fhir, ach chan e asrl. no srlx.
+Aig no. 5 agus àir. 7 agus № 4 air an t-sràid.
+Anns na 1990s agus na 1800s bha an saoghal eadar-dhealaichte, ach chan e 1995s.
+An 1mh latha, an 2na àite, an 3s latha, an 11mh latha, an 12na latha, an 20mh latha.
+An 2-na àite, an 4mh, an 21mh agus an 1s, ach chan e an 5x.
+Tha 1.5 agus 3.14 ann, ach 1.234 agus 1.5km eile.
+Bha an teòthachd -5 ceum agus −3 agus (–2), ach 5-3 sa gheama.
+Bha 5% den t-sluagh agus £10 agus $20 agus €30 ann.
+Tha 5 km agus 10 kg agus 3 m agus 100 km/h agus 50 km² ann.
+Ruith e 25 mìle agus 101 agus 1745 agus 2000 agus 999999.
+Tha mac, cat, bochd, luchd, taigh, aoigh, ceud agus mìle nam faclan.
+Tha Dvořák, Ångström, xylo agus Zoë nan ainmean cèin.
+Tha constructor agus toString nam faclan Beurla… ach carson? Seadh!

@@ -4505,6 +4505,67 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
         }
     },
+    // ── Scottish Gaelic (gd). Inputs: the gd golden and probes/gd.txt; FLEURS has no Scottish Gaelic, so the
+    // synthetic rows and the probes carry every arm the golden misses. ──
+    // normalizeScottishGaelic, the symbol tier over its output (recorded through the wrapper) and
+    // `createScottishGaelic().text`, over every text plus synthetic rows for every arm: grouping with each separator
+    // (and the leading-zero guard), the dotted abbreviations in three casings and every tail (and the long-s fold),
+    // àireamh, decades, the ordinal over 0…25 × every suffix × hyphen × a following noun, decimals, minus forms.
+    async "gd-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeScottishGaelic } = await import("../../../src/languages/scottishgaelic/normalize.ts");
+        const { createScottishGaelic } = await import("../../../src/languages/scottishgaelic/scottishgaelic.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/scottishgaelic\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createScottishGaelic();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["gd"], undefined, ["gd.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1,000", "1,000,000", "12,345,678", "0,500", "1.000", "1.234.567", "0.500", "1 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1,23", "1,2345", "10,000.5", "5 000 000 km"]) add(`tha ${g} duine ann`);
+        for (const ab of ["srl.", "SRL.", "Srl.", "td.", "TD.", "bh.", "Bh.", "ſrl.", "srlx.", "asrl."]) for (const tail of [" agus", " 5", " (a)", ".", "", ")", ","]) add(`leabhraichean ${ab}${tail}`);
+        for (const a of ["no. 5", "No.5", "àir. 7", "Àir.3", "№ 4", "№4", "no.", "àir. x"]) add(`aig ${a} an seo`);
+        for (const d of ["1990s", "1800s", "2000s", "2010s", "1990sa", "199s", "1995s", "2100s"]) add(`anns na ${d} bha`);
+        for (let n = 0; n <= 25; n++) for (const sfx of ["mh", "na", "s", "d", "MH", "ſ", "x"]) for (const hy of ["", "-"]) for (const tail of ["", " latha", " Latha", " àite'n", ".", " 5"]) add(`an ${n}${hy}${sfx}${tail} seo`);
+        for (const d of ["1.5", "3.14", "10.05", "1.234", "1.5km", "1.5.2", "x1.5", "0.5"]) add(`tha ${d} ann`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", "x-5", " -5"]) add(`teòthachd ${m} ceum`);
+        for (const [t, src] of rows) {
+            const a = normalizeScottishGaelic(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("gd", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, lenition/pre-aspiration corners; numberToWords
+    // over 0…20,000, magnitudes and raw strings.
+    async "gd-g2p"() {
+        const { phonemizeWord, numberToWords } = await import("../../../src/languages/scottishgaelic/scottishgaelic.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zàèìòùáéíóúA-ZÀÈÌÒÙÁÉÍÓÚ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("gd")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzàèìòùéó'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouàòbcdghlnprst"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "e\u0300", "ﬁ", "Dvořák", "Ångström", "xylo", "mac", "cat", "bochd", "luchd", "aidh", "taigh", "rr", "constructor", "toString", "-", "'"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
+        }
+    },
 };
 
 

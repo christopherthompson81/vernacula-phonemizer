@@ -2555,6 +2555,31 @@ fn main() {
                 }
             })
         }
+        "gd-normalize" | "gd-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let gd =
+                vernacula_phonemizer::languages::scottishgaelic::scottishgaelic::create_scottish_gaelic()
+                    .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => gd.normalize(&t()),
+                    "symbols" => gd.symbols(&t()),
+                    "text" => with_host(&js("gd"), || gd.text(&t())),
+                    "word" => gd.phonemize_word(&w()),
+                    "nat" => gd.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        gd.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
