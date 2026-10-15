@@ -2018,6 +2018,133 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "ba-normalize" | "ba-g2p" | "ba-numbers" => {
+            let ba = vernacula_phonemizer::languages::bashkir::bashkir::create_bashkir().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ba.normalize(&t()),
+                    "initialisms" => ba.normalize_initialisms(&t()),
+                    "symbols" => ba.symbols(&t()),
+                    "engine" => ba.text(&t()),
+                    "unreadable" => JsString::from(ba.is_unreadable(&t()).to_string().as_str()),
+                    "word" => ba.phonemize_word(&w()),
+                    "native" => ba.phonemize_word_native(&w()),
+                    "loan" => JsString::from(ba.is_russian_loan(&w()).to_string().as_str()),
+                    "fold" => ba.fold_legacy_codepage(&w()),
+                    "words" => ba.number_words(num()),
+                    "ordinal" => ba.ordinal_of(num()).unwrap_or_else(none),
+                    "roman" => ba.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => ba.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "crh-normalize" | "crh-g2p" | "crh-numbers" => {
+            let crh =
+                vernacula_phonemizer::languages::crimeantatar::crimeantatar::create_crimean_tatar()
+                    .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => crh.normalize(&t()),
+                    "symbols" => crh.symbols(&t()),
+                    "engine" => crh.text(&t()),
+                    "word" => crh.phonemize_word(&w()),
+                    "nat" => crh.nativise(&w()),
+                    "words" => crh.number_words(num()),
+                    _ => crh.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "kaa-normalize" | "kaa-g2p" | "kaa-numbers" => {
+            let kaa = vernacula_phonemizer::languages::karakalpak::karakalpak::create_karakalpak()
+                .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => kaa.normalize(&t()),
+                    "symbols" => kaa.symbols(&t()),
+                    "engine" => kaa.text(&t()),
+                    "word" => kaa.phonemize_word(&w()),
+                    "nat" => kaa.nativise(&w()),
+                    "words" => kaa.number_words(num()),
+                    _ => kaa.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "nog-normalize" | "nog-g2p" | "nog-numbers" => {
+            let nog = vernacula_phonemizer::languages::nogai::nogai::create_nogai().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nog.normalize(&t()),
+                    "engine" => nog.text(&t()),
+                    "word" => nog.phonemize_word(&units(&input["word"])),
+                    "words" => nog.number_words(num()),
+                    _ => nog.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "chv-normalize" | "chv-g2p" | "chv-numbers" => {
+            let chv = vernacula_phonemizer::languages::chuvash::chuvash::create_chuvash().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => chv.normalize(&t()),
+                    "initialisms" => chv.normalize_initialisms(&t()),
+                    "symbols" => chv.symbols(&t()),
+                    "attributive" => chv.spell_attributive(&t()),
+                    "engine" => chv.text(&t()),
+                    "unreadable" => JsString::from(chv.is_unreadable(&t()).to_string().as_str()),
+                    "word" => chv.phonemize_word(&units(&input["word"])),
+                    "words" => chv.number_words(num(), input["attr"].as_bool().unwrap()),
+                    "ordinal" => chv.ordinal_of(num()).unwrap_or_else(none),
+                    "roman" => chv.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => chv.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "chv-roman" => {
+            let policy = vernacula_phonemizer::languages::chuvash::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
+        "tg-normalize" | "tg-g2p" | "tg-numbers" => {
+            let tg = vernacula_phonemizer::languages::tajik::tajik::create_tajik().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => tg.normalize(&t()),
+                    "initialisms" => tg.normalize_initialisms(&t()),
+                    "symbols" => tg.symbols(&t()),
+                    "engine" => tg.text(&t()),
+                    "unreadable" => JsString::from(tg.is_unreadable(&t()).to_string().as_str()),
+                    "word" => tg.phonemize_word(&units(&input["word"])),
+                    "words" => tg.number_words(num()),
+                    "ordinal" => tg.ordinal(num()).unwrap_or_else(none),
+                    _ => tg.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "ba-roman" => {
+            let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
