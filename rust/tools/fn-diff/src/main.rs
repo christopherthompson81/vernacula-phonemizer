@@ -1882,6 +1882,41 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "kk-normalize" | "kk-g2p" | "kk-numbers" => {
+            let kk = vernacula_phonemizer::languages::kazakh::kazakh::create_kazakh().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => kk.normalize(&t()),
+                    "symbols" => kk.symbols(&t()),
+                    "segs" => {
+                        let segs: Vec<JsString> = kk
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&JsString::from(
+                                    format!("/{}", s.nucleus as u8).as_str(),
+                                ))
+                            })
+                            .collect();
+                        JsString::join(&segs, &JsString::from(" "))
+                    }
+                    "word" => kk.phonemize_word(&w()),
+                    "ipa" => kk.number_to_ipa(num()),
+                    _ => kk
+                        .roman_ordinal(num())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                }
+            })
+        }
+        "kk-roman" => {
+            let policy = vernacula_phonemizer::languages::kazakh::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

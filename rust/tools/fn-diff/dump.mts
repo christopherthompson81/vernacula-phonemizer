@@ -58,6 +58,9 @@ const FLEURS_DIR: Record<string, string> = {
     ky: "ky_kg",
     uz: "uz_uz",
 };
+/** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
+ *  here or by default that is absent throws. */
+const FLEURS_SPLITS: Record<string, string[]> = { kk_kz: ["train"] };
 
 /**
  * A language's inputs, deduplicated, each tagged with the first source it came from: its goldens' text column,
@@ -73,7 +76,7 @@ function textsFor(goldens: readonly string[], fleursDir: string | undefined, pro
         for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n"))
             add(row.split("\t")[0] ?? "", "golden");
     if (fleursDir !== undefined)
-        for (const split of ["train", "dev", "test"])
+        for (const split of Object.hasOwn(FLEURS_SPLITS, fleursDir) ? FLEURS_SPLITS[fleursDir]! : ["train", "dev", "test"])
             for (const row of readFileSync(`${FLEURS_ROOT}/${fleursDir}/${split}.tsv`, "utf8").split("\n")) {
                 const cols = row.split("\t");
                 add(cols[2] ?? "", "fleurs");
@@ -3151,6 +3154,72 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { normalizeRomans } = await import("../../../src/core/roman.ts");
         const { ROMAN_POLICY } = await import("../../../src/languages/azerbaijani/romanOrdinals.ts");
         for (const [t, src] of textsFor(["az"], FLEURS_DIR.az, ["az.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Kazakh (kk). Inputs: the kk golden, FLEURS kk_kz (columns 3 and 4) and probes/kk.txt. ──
+    // normalizeKazakh (which applies the symbol tier inside, step 7) and the tier kazakh.ts exports on the
+    // normalized text, plus synthetic rows: every case suffix, ordinal suffix and noun tail after a sweep of
+    // numbers, the clock grid × every case suffix, fractions, divisions and degrees. ordinalWord / orthographic /
+    // withCase are module-private: these rows drive them.
+    async "kk-normalize"() {
+        const N = await import("../../../src/languages/kazakh/normalize.ts");
+        const { SYMBOLS } = await import("../../../src/languages/kazakh/kazakh.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["kk"], FLEURS_DIR.kk, ["kk.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["ге", "ға", "ке", "қа", "ден", "дан", "тен", "тан", "нен", "нан", "ның", "нің", "дың", "дің", "тың", "тің",
+            "да", "де", "та", "те", "мен", "бен", "пен", "ші", "шы", "нші", "ншы", "жылы", "ғасыр", "і", "ы", "ГЕ", "Ші"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "15", "20", "29", "30", "40", "50", "60", "70", "80",
+            "90", "99", "100", "101", "110", "200", "340", "999", "1000", "1001", "1990", "2016", "10000", "99999", "100000", "999999", "1000000", "1000001"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кейін`); add(`${n}${sfx}`); }
+        for (let h = 0; h <= 24; h++) for (const mm of ["00", "05", "30", "59"]) for (const sfx of ["", "-ден", "-да", "-ге", "-та", "-мен", "ге"]) add(`сағат ${h}:${mm}${sfx} келді`);
+        for (let a = 0; a <= 11; a++) for (const b of [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 20, 40, 60, 100, 1000]) { add(`${a}/${b}`); add(`${a} ÷ ${b}`); }
+        for (const n of ["0", "1", "5", "30", "40", "1000000"]) for (const d of ["°C", " °C-тан", "°F-ке", "°N", "°w"]) { add(`${n}${d}`); add(`+${n}${d}`); add(`-${n}${d}`); }
+        for (const [t, src] of rows) {
+            const a = N.normalizeKazakh(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, SYMBOLS(a));
+        }
+    },
+    // phonemizeWord and toSegments over every Cyrillic-block run of the texts (as written, lowercased, uppercased),
+    // the camelCase parts, every 1-3 letter string over the alphabet plus the signs (third letter from a context
+    // set), every 4-letter string of the cluster letters, and edge strings.
+    async "kk-g2p"() {
+        const K = await import("../../../src/languages/kazakh/kazakh.ts");
+        const { toSegments } = await import("../../../src/languages/kazakh/g2p.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("kk"))
+            for (const w of t.match(/[Ѐ-ӿ]+/gu) ?? []) {
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase());
+                for (const p of w.split(/(?<=\p{Ll})(?=\p{Lu})/u)) words.add(p);
+            }
+        const abc = [..."аәбвгғдеёжзийкқлмнңоөпрстуұүфхһцчшщъыіьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аеыіиуьъл") words.add(a + b + c); } }
+        const ctx = [..."стркпьъиу"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "ӑ", "ј"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "word" }, K.phonemizeWord(w));
+        }
+    },
+    // numberToIpa over 0…20,000, multiples, powers of ten to 10²⁴ and neighbours, the corners; the Roman ordinal.
+    async "kk-numbers"() {
+        const { numberToIpa } = await import("../../../src/languages/kazakh/numbers.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/kazakh/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1e300, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), op: "ipa" }, numberToIpa(n));
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+    },
+    // normalizeRomans with Kazakh's policy (registry.ts romanKk) over the Kazakh texts.
+    async "kk-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/kazakh/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["kk"], FLEURS_DIR.kk, ["kk.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
 };
 

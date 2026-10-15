@@ -30,6 +30,7 @@ pub mod ilocano;
 pub mod indonesian;
 pub mod italian;
 pub mod japanese;
+pub mod kazakh;
 pub mod korean;
 pub mod latvian;
 pub mod lithuanian;
