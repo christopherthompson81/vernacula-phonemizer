@@ -4180,6 +4180,96 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
     },
+    // ── Chuvash (chv). Inputs: the chv golden and probes/chv.txt (FLEURS has no chv), plus GENERATED shapes. ──
+    // normalizeChuvash, normalizeChuvashInitialisms (on the raw and the normalized text), the symbol tier chuvash.ts
+    // built (recorded through the wrapper) on the prepared text, spellAttributive on the tier's output, the engine's
+    // text(), and the phonotactic test, over the texts and synthetic rows: every -мӗш suffix shape after a sweep of
+    // numbers, ordinal ranges, fractions, clocks, magnitude / era abbreviations, degrees, signs, ranges, and figures
+    // before words, units and punctuation.
+    async "chv-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/chuvash/normalize.ts");
+        const P = (await import("../../../src/languages/chuvash/chuvash.ts")).createChuvash();
+        const rec = records.find((r) => /src\/languages\/chuvash\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["chv"], undefined, ["chv.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["мӗш", "мĕш", "мӗшӗ", "мĕшĕнче", "мӗшӗсенче", "мӗшсем", "МӖШ", "мӗшӗнчен", "мш", "ри", "мӗшӗсенчен"];
+        const ns = ["0", "1", "2", "3", "4", "5", "7", "10", "11", "17", "20", "22", "40", "80", "90", "100", "101", "200", "1000", "1870", "2011",
+            "1000000", "9007199254740993"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кун`); add(`${n} - ${sfx}`); add(`1-${n}-${sfx}`); add(`${n} - 19-${sfx}`); }
+        for (const n of ns) for (const tail of [" ҫын", " км", " пин ҫын", ".", ",", " 5", "", " Ҫын", " km", " %"]) add(`Ку ${n}${tail}`);
+        for (const [a, b] of [[1, 2], [3, 4], [2, 3], [5, 3], [1, 12], [1, 13], [0, 5], [11, 12]]) for (const p of [" пайӗ", " пай", " пая", " пайĕн", " пайсем", " ҫурт", ""]) add(`вӗсенчен ${a}/${b}${p}`);
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59", "60"]) { add(`${h}:${mm} килчӗ`); add(`${h}:${mm}:60 UTC`); add(`${h}: ${mm}`); }
+        for (const ab of ["млн", "млн.", "МЛН", "млрд.", "трлн", "п. эрч.", "п.эрч.", "ҫ.", "ҫҫ.", "№ "]) for (const tail of ["", " ҫын", " 300", "."]) add(`5 ${ab}${tail}`);
+        for (const d of ["°C", "°С", "°с", "°c", "°F", "°Ф", "°ф", "°", " ° кӗтес"]) for (const n of ["5", "-5", "+5", "−5", "(–5", "+ 5", "18,7"]) add(`${n}${d} пулчӗ`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "-8", "±2"]) add(`Юр ${r} см`);
+        for (const [t, src] of rows) {
+            const a = N.normalizeChuvash(t);
+            const b = N.normalizeChuvashInitialisms(a);
+            const c = rec.apply(b);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeChuvashInitialisms(t));
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(b), src, op: "symbols" }, c);
+            emit({ text: units(c), src, op: "attributive" }, N.spellAttributive(c));
+            emit({ text: units(t), src, op: "attributive" }, N.spellAttributive(t));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableChuvash(w)));
+    },
+    // phonemizeWord over every Cyrillic run of the texts (as written, lowercased, uppercased, NFD), every 1-3 letter
+    // string over the alphabet (third letter from a context set), every 4-letter string of the voicing, reduced-vowel,
+    // sign and geminate letters, and edge strings.
+    async "chv-g2p"() {
+        const T = await import("../../../src/languages/chuvash/chuvash.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("chv")) for (const w of t.match(/[\p{L}\p{M}]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.normalize("NFD")); }
+        const abc = [..."аӑбвгдеӗёжзийклмнҥопрсҫтуӳфхцчшщъыьэюяĕ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аӑеӗиуӳыьптксҫ") words.add(a + b + c); } }
+        const ctx = [..."аӑӗептсрлнйьъ"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "е́", "й", "ьа", "ъе", "ь", "ппп", "аппа", "атта"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+    },
+    // numberToWords (both series) and ordinalOf over 0…20,000 and beyond, the Roman ordinal, and the engine's own
+    // number reading on digit runs (the unsafe ones digit at a time) and comma decimals.
+    async "chv-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/chuvash/numbers.ts");
+        const { ordinalOf } = await import("../../../src/languages/chuvash/normalize.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/chuvash/romanOrdinals.ts");
+        const P = (await import("../../../src/languages/chuvash/chuvash.ts")).createChuvash();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21);
+        for (const n of ns) {
+            emit({ n: String(n), attr: false, op: "words" }, numberToWords(n).join("|"));
+            emit({ n: String(n), attr: true, op: "words" }, numberToWords(n, true).join("|"));
+            emit({ n: String(n), op: "ordinal" }, ordinalOf(n) ?? "\u0000none");
+        }
+        for (const n of [1.5, -1, NaN, Infinity]) emit({ n: String(n), op: "ordinal" }, ordinalOf(n) ?? "\u0000none");
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40), "2,5", "0,05", "3,14159"];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // normalizeRomans with Chuvash's policy (registry.ts romanChv) over the Chuvash texts and synthetic Roman × context
+    // rows, with ӗмӗр in both encodings of its ӗ.
+    async "chv-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/chuvash/romanOrdinals.ts");
+        const rows = new Map(textsFor(["chv"], undefined, ["chv.txt"]));
+        for (const r of ["I", "II", "IV", "IX", "XIII", "XVIII", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["ӗмӗр", "ĕмĕр", "ӗмӗрте", "ĕмĕрччен", "ӗмĕрсенче", "ӖМӖР", "Ĕмĕрĕн", "ҫул", "ӗмӗрлӗх"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
+        for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
 };
 
 

@@ -2093,6 +2093,33 @@ fn main() {
                 }
             })
         }
+        "chv-normalize" | "chv-g2p" | "chv-numbers" => {
+            let chv = vernacula_phonemizer::languages::chuvash::chuvash::create_chuvash().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => chv.normalize(&t()),
+                    "initialisms" => chv.normalize_initialisms(&t()),
+                    "symbols" => chv.symbols(&t()),
+                    "attributive" => chv.spell_attributive(&t()),
+                    "engine" => chv.text(&t()),
+                    "unreadable" => JsString::from(chv.is_unreadable(&t()).to_string().as_str()),
+                    "word" => chv.phonemize_word(&units(&input["word"])),
+                    "words" => chv.number_words(num(), input["attr"].as_bool().unwrap()),
+                    "ordinal" => chv.ordinal_of(num()).unwrap_or_else(none),
+                    "roman" => chv.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => chv.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "chv-roman" => {
+            let policy = vernacula_phonemizer::languages::chuvash::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "ba-roman" => {
             let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
             Box::new(move |input| {

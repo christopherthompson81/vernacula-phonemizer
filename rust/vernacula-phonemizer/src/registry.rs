@@ -35,12 +35,12 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 71] = [
+pub const LANGUAGES: [&str; 72] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
     "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
     "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo", "cs", "sk", "be", "bg", "mk",
     "bho", "mag", "awa", "mai", "hne", "rkt", "ne", "mr", "fi", "et", "hu", "is", "fo", "az", "kk",
-    "ky", "uz", "tk", "tt", "da", "nb", "af", "lb", "bar", "ba", "crh", "kaa", "nog",
+    "ky", "uz", "tk", "tt", "da", "nb", "af", "lb", "bar", "ba", "crh", "kaa", "nog", "chv",
 ];
 
 /// A language engine, as the registry holds it.
@@ -260,6 +260,9 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "nog" => crate::languages::nogai::nogai::create_nogai()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
+        "chv" => crate::languages::chuvash::chuvash::create_chuvash()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
         _ => return None,
     })
 }
@@ -286,6 +289,7 @@ fn roman_policy(lang: &str) -> RomanPolicy {
         "tk" => crate::languages::turkmen::roman_ordinals::roman_policy(),
         "tt" => crate::languages::tatar::roman_ordinals::roman_policy(),
         "ba" => crate::languages::bashkir::roman_ordinals::roman_policy(),
+        "chv" => crate::languages::chuvash::roman_ordinals::roman_policy(),
         _ => RomanPolicy {
             exclude: roman_exclusions(lang),
             ..Default::default()
