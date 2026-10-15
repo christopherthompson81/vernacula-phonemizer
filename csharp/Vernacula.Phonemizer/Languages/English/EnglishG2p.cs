@@ -61,6 +61,9 @@ public interface IEnglishG2p
     bool KnownWord(string word);
     /** Diagnostic: the ARPABET decomposition + which path produced it (C/M/N). */
     Decomposition Decompose(string word);
+    /** A derivational form read from its DICTIONARY STEM (`castable` = `cast` + -able), or null when the word
+     *  has no such suffix or its stem is unknown. The resolver prefers it to the neural tagger (#1504). */
+    string? Derived(string word);
 }
 
 public static class EnglishG2pFactory
@@ -169,6 +172,18 @@ public static class EnglishG2pFactory
                 ("ings", w => new() { Slice(w, 4), Slice(w, 4) + "e" }, _ => new() { "IH0", "NG", "Z" }),
                 ("edly", w => new() { Slice(w, 4), Slice(w, 4) + "e" }, _ => new() { "IH0", "D", "L", "IY0" }),
                 ("ness", w => new() { Slice(w, 4), FINAL_I.Replace(Slice(w, 4), "y") }, _ => new() { "N", "AH0", "S" }),
+                // -able/-ible prefer the stem WITHOUT ⟨e⟩ (#1504); see the TS twin for the measurement.
+                ("able", w =>
+                {
+                    // `-iable` tries the ⟨y⟩ stem FIRST: `reli` is a dictionary row too (see the TS twin).
+                    var stems = new List<string>();
+                    if (w.Length >= 5 && w[^5] == 'i') stems.Add(Slice(w, 5) + "y");
+                    stems.Add(Slice(w, 4));
+                    stems.Add(Slice(w, 4) + "e");
+                    if (w.Length >= 6 && w[^5] == w[^6]) stems.Add(Slice(w, 5));
+                    return stems;
+                }, _ => new() { "AH0", "B", "AH0", "L" }),
+                ("ible", w => new() { Slice(w, 4), Slice(w, 4) + "e" }, _ => new() { "AH0", "B", "AH0", "L" }),
                 ("less", w => new() { Slice(w, 4) }, _ => new() { "L", "AH0", "S" }),
                 ("ment", w => new() { Slice(w, 4) }, _ => new() { "M", "AH0", "N", "T" }),
                 ("ful", w => new() { Slice(w, 3) }, _ => new() { "F", "AH0", "L" }),
@@ -292,6 +307,7 @@ public static class EnglishG2pFactory
             foreach (var (suf, stems, allo) in SUFFIXES)
             {
                 if (!w.EndsWith(suf, StringComparison.Ordinal) || w.Length <= suf.Length + 1) continue;
+                if (asPiece && DERIVATIONAL_ONLY.Contains(suf)) continue;
                 foreach (var stem in stems(w))
                 {
                     if (stem.Length < 2) continue;
@@ -325,6 +341,10 @@ public static class EnglishG2pFactory
         /// measurement. Derived from the dictionary rather than listed, and deliberately NOT memoized:
         /// a cache keyed on a word is a cache keyed on `_dict`, which the hold-out tests mutate.
         /// </summary>
+        /// <summary>Suffixes MorphDecode serves only to a WHOLE word, never to CompoundSplit's final piece
+        /// (#1504): a stem+able piece lets the splitter compose `in|credible` with the stress on `in`.</summary>
+        private static readonly HashSet<string> DERIVATIONAL_ONLY = new(StringComparer.Ordinal) { "able", "ible" };
+        private static bool EndsDerivational(string w) => DERIVATIONAL_ONLY.Any(s => w.EndsWith(s, StringComparison.Ordinal));
         /// <summary>The inflections an INITIALISM genuinely takes — see MorphDecode.</summary>
         private static readonly HashSet<string> PLURAL_SUFFIX = new(StringComparer.Ordinal) { "s", "es", "sses" };
 
@@ -422,10 +442,13 @@ public static class EnglishG2pFactory
 
         public Decomposition Decompose(string w)
         {
-            var c = CompoundSplit(w);
+            // A derivational suffix outranks the compound split (#1504): `able` is a common word, so the
+            // splitter read `accept|able` with the full vowel of the word *able*. See the TS twin.
+            var derived = EndsDerivational(w) ? MorphDecode(w) : null;
+            var c = derived is null ? CompoundSplit(w) : null;
             if (c is not null)
                 return new Decomposition { Phones = EnforceSinglePrimary(CollapseGeminates(c, VOWEL), VOWEL), Source = "C" };
-            var m = MorphDecode(w);
+            var m = derived ?? MorphDecode(w);
             if (m is not null)
                 return new Decomposition { Phones = EnforceSinglePrimary(CollapseGeminates(m, VOWEL), VOWEL), Source = "M" };
             var ng = EnforceSinglePrimary(CollapseGeminates(NgramDecode(w), VOWEL), VOWEL);
@@ -448,6 +471,13 @@ public static class EnglishG2pFactory
         }
 
         public bool KnownWord(string word) => _dict.ContainsKey(word);
+
+        public string? Derived(string word)
+        {
+            if (!EndsDerivational(word)) return null;
+            var m = MorphDecode(word);
+            return m is null ? null : _arpabetToIpa(EnforceSinglePrimary(CollapseGeminates(m, VOWEL), VOWEL), word);
+        }
 
         public string G2p(string word)
         {

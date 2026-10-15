@@ -277,7 +277,16 @@ impl EnglishPhonemizer {
             Some(o) => o,
             None => {
                 let g2p_key = js_re!("'", "g").replace(&lookup_key, &JsString::new());
-                if let Some(tagged) = oov.and_then(|f| f(&g2p_key)) {
+                // A form built on a dictionary stem outranks the tagger (#1504); see the TS twin.
+                let derived = if js_re!("^[a-z]+$").test(&g2p_key) {
+                    self.g2p.derived(&g2p_key)
+                } else {
+                    None
+                };
+                if let Some(d) = derived {
+                    source = TokenSource::G2p;
+                    d
+                } else if let Some(tagged) = oov.and_then(|f| f(&g2p_key)) {
                     source = TokenSource::Tagger;
                     tagged
                 } else if js_re!("^[a-z]+$").test(&g2p_key) {
@@ -789,4 +798,45 @@ pub fn create_english() -> Result<EnglishPhonemizer, String> {
         wh_secondary: set(&m.wh_secondary),
         clause_initial_stressed: map(&m.clause_initial_stressed),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::languages::english::english_g2p::DecomposeSource;
+
+    /// test/english-1504-able.test.ts: an -able/-ible word reads from its DICTIONARY STEM, preferring the stem
+    /// without ⟨e⟩, and the best path agrees with the sync path. Built from the dictionary's own rows; no IPA.
+    #[test]
+    fn able_reads_from_the_dictionary_stem() {
+        let en = create_english().unwrap();
+        let able = ["AH0", "B", "AH0", "L"];
+        for (word, stem) in [
+            ("castable", "cast"),
+            ("pastable", "past"),
+            ("tasteable", "taste"),
+            ("spinnable", "spin"),
+            ("surfable", "surf"),
+            ("lovable", "love"),
+            ("reliable", "rely"),
+        ] {
+            let stem_phones = en.g2p.dict().get(&js(stem)).expect(stem).clone();
+            let d = en.g2p.decompose(&js(word));
+            assert!(d.source == DecomposeSource::Morph, "{word}");
+            let want: Vec<String> = stem_phones
+                .into_iter()
+                .chain(able.iter().map(|s| s.to_string()))
+                .collect();
+            assert_eq!(d.phones, want, "{word}");
+        }
+        for lang in ["en", "en-GB"] {
+            for w in ["castable", "pastable", "tasteable"] {
+                assert_eq!(
+                    crate::phonemize_best(w, lang).unwrap(),
+                    crate::phonemize(w, lang).unwrap(),
+                    "{lang}: {w}"
+                );
+            }
+        }
+    }
 }

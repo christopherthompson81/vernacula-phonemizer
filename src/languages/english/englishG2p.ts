@@ -98,6 +98,10 @@ export interface EnglishG2p {
     knownWord(word: string): boolean;
     /** Diagnostic: the ARPABET decomposition + which path produced it (C/M/N). */
     decompose(word: string): { phones: string[]; source: "C" | "M" | "N" };
+    /** A derivational form read from its DICTIONARY STEM (`castable` = `cast` + -able), or undefined when the
+     *  word has no such suffix or its stem is unknown. Deterministic, so the resolver prefers it to the neural
+     *  tagger, which reads `castable` as `caste` + -able (#1504). */
+    derived(word: string): string | undefined;
 }
 
 /**
@@ -265,6 +269,10 @@ export function createEnglishG2p(
               ? ["T"]
               : ["D"];
     };
+    /** Suffixes `morphDecode` serves only to a WHOLE word, never to `compoundSplit`'s final piece (#1504): a
+     *  piece built as stem+able lets the splitter compose `in|credible` and `ap|plicable` with the stress on
+     *  the first piece. Measured on the held-out dict -able/-ible words: see en_able_suffix_investigation.md. */
+    const DERIVATIONAL_ONLY = new Set(["able", "ible"]);
     /** The inflections an INITIALISM genuinely takes — see `morphDecode`. */
     const PLURAL_SUFFIX = new Set(["s", "es", "sses"]);
     const SUFFIXES: [
@@ -295,6 +303,24 @@ export function createEnglishG2p(
             (w) => [w.slice(0, -4), w.slice(0, -4).replace(/i$/, "y")],
             () => ["N", "AH0", "S"],
         ],
+        // ⚠ -able/-ible PREFER THE STEM WITHOUT ⟨e⟩ (#1504). `castable` is `cast`, not `caste`; `lovable` falls
+        // back to `love` only because `lov` is not a word. A doubled consonant (`forgettable`) drops one, and
+        // `-iable` restores the ⟨y⟩ (`reliable` → `rely`). The suffix is the dictionary's own AH0 B AH0 L
+        // (655 of the -able rows, 123 of the -ible). `able`/`ible` are also stop pieces, or the compound
+        // splitter claims `cast|able` first and the piece keeps the full vowel of the word *able*.
+        [
+            "able",
+            // `-iable` tries the ⟨y⟩ stem FIRST: `reli` is a dictionary row too (a name, R EH1 L IY0), and
+            // bare-first read `reliable` as *RELL-ee-able*.
+            (w) => [
+                ...(w.at(-5) === "i" ? [w.slice(0, -5) + "y"] : []),
+                w.slice(0, -4),
+                w.slice(0, -4) + "e",
+                ...(w.at(-5) === w.at(-6) ? [w.slice(0, -5)] : []),
+            ],
+            () => ["AH0", "B", "AH0", "L"],
+        ],
+        ["ible", (w) => [w.slice(0, -4), w.slice(0, -4) + "e"], () => ["AH0", "B", "AH0", "L"]],
         ["less", (w) => [w.slice(0, -4)], () => ["L", "AH0", "S"]],
         ["ment", (w) => [w.slice(0, -4)], () => ["M", "AH0", "N", "T"]],
         ["ful", (w) => [w.slice(0, -3)], () => ["F", "AH0", "L"]],
@@ -407,6 +433,7 @@ export function createEnglishG2p(
     function morphDecode(w: string, asPiece = false): string[] | null {
         for (const [suf, stems, allo] of SUFFIXES) {
             if (!w.endsWith(suf) || w.length <= suf.length + 1) continue;
+            if (asPiece && DERIVATIONAL_ONLY.has(suf)) continue;
             for (const stem of stems(w)) {
                 if (stem.length < 2) continue;
                 // `ach` + `er` is not how `acher` is read — but `mph` + `s` IS how `mphs` is read.
@@ -560,13 +587,16 @@ export function createEnglishG2p(
         phones: string[];
         source: "C" | "M" | "N";
     } {
-        const c = compoundSplit(w);
+        // ⚠ A DERIVATIONAL SUFFIX OUTRANKS THE COMPOUND SPLIT (#1504). `able` is a common word, so the splitter
+        // reads `accept|able` with the full vowel of the word *able* (… T EY2 B AH0 L); the suffix row reduces it.
+        const derived = [...DERIVATIONAL_ONLY].some((suf) => w.endsWith(suf)) ? morphDecode(w) : null;
+        const c = derived ? null : compoundSplit(w);
         if (c)
             return {
                 phones: enforceSinglePrimary(collapseGeminates(c, VOWEL), VOWEL),
                 source: "C",
             };
-        const m = morphDecode(w);
+        const m = derived ?? morphDecode(w);
         if (m)
             return {
                 phones: enforceSinglePrimary(collapseGeminates(m, VOWEL), VOWEL),
@@ -589,6 +619,11 @@ export function createEnglishG2p(
 
     return {
         decompose: decomposeInner,
+        derived(word: string): string | undefined {
+            if (![...DERIVATIONAL_ONLY].some((suf) => word.endsWith(suf))) return undefined;
+            const m = morphDecode(word);
+            return m ? arpabetToIpa(enforceSinglePrimary(collapseGeminates(m, VOWEL), VOWEL), word) : undefined;
+        },
         knownWord: (word: string): boolean => dict.has(word),
         g2p(word: string): string {
             const d = decomposeInner(word);
