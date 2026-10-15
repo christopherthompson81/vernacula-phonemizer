@@ -1,0 +1,19 @@
+# Synthetic Kirundi probes (rn has no FLEURS text, so these carry the corpus-wide weight): one or more lines per arm
+# of normalize.ts and the neighbour it must decline, plus g2p and number corners. Synthetic text only.
+Ishirahamwe rya U.N. na O.N.U. rikorera muri U. S. A. no muri E.A.C kandi U.N.ishirahamwe ni U.N.
+Itariki 1.7.1962 na 01.07.1962 na 1.7.62 na 31.12.2020. na 1.2.3.4567.
+Inzira km 5, mm 7, KM 3, km² 4, km2 6, km³ 2, mm3 9, km 5 na kmx 5.
+Abantu 1,300 na 12,500,000 na 1.300 na 2.500.000 na 1 300 na 12 500 000 na 1,300.5 na 1,300, na 0,500.
+Ubushuhe 10-15°C, 20–25 °C, 30/35°F, 15-10°C, dogere 10-15, dogere 20/25, dogere 30-20, 1990-1995°.
+Imyaka 1990-2000 na kuva 1990-2000 na guhera mu 1990-2000 na 5-10 na 10—5 na 3/4 na 4/3 na 1/2/3 na 5/6: na 1990/2000.
+Ubushuhe 25°C, −5°C, -3 °F, –2° C, 2,5 °C, 77°F, 30°, 12º, 5°X, 1°57′S na 29° 45' 30" E.
+Ijanisha 50% kw'ijana na 30 % na 20% na 10 kw’ijana 5%.
+Amafaranga US$ 5, $10, 50%, A & B na 5 km/h.
+Umuvuduko 60 km/h, 5 mm/km, 10 / km², 3/km3, 4/mm³ na x/km.
+Isaha 7:30 na 10:15 na 7:5 na 123:45 na 10: 15.
+Imibare 3.14 na 2.5 na 1,5 na 12,34 na 1.234 na 0.75 na 12.345 na 1.2.3 na 5,123.
+Inyuguti shira, cane, jya, bya, rya, mya, pya, vya, hya, kya, gya, tya, dya, fya, lya, sya, zya, nyina, shure, inka, jambo, aa, ee, ii, oo, uu, q, x, Ñ.
+Amazina Dvořák, Ångström, Straße, ſala, İzmir na 'umuntu'.
+Imibare 0 1 9 10 11 19 20 21 99 100 101 110 999 1000 1001 2000 9999 10000 100000 999999 1000000 1000001 999999999 1000000000 9007199254740993 12345678901234567890 007.
+Ni iki? Ego! Murakoze. Akabago, akabago k'akarongo; utubago tubiri: iherezo… birarangiye.
+   Umwanya   munini   hagati   .

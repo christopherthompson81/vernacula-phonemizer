@@ -1,0 +1,17 @@
+# Synthetic Chichewa probes: one or more lines per arm of normalize.ts and the neighbour it must decline, plus g2p and
+# number corners. Synthetic text only.
+Ana&nbsp;ndi makolo &amp; abale & anzawo na &AMP; ndi &NBSP;.
+Bungwe la U.N. ndi U. S. A. ndi E.U ndi U.N.bungwe ndi U.N. Lero ndi U.N. lero.
+Nthawi 7:30 a.m., 10:15 PM, 9:00 pm, 6:00 UTC, 8:15 GMT, 7:30 m'mawa, 7:30 m’mawa, 7:30 mmawa, 3:00 masana, 6:30 madzulo, 11:00 usiku, 7:30 kaka, 24:00 UTC, 7: 30 PM, 7:300 PM, 7:30 UTCx.
+Anthu 1,300 ndi 12,500,000 ndi 1.300 ndi 2.500.000 ndi 1 300 ndi 1,0000 ndi 0,500 ndi 1,300.5.
+Kutentha 25°C, 30 ° c, 2,5°C, 77°F, 5°N, 10° S, 3°E, 4°W, 30°, 12º, 5°X ndi madigiri 25°C.
+Mtunda 5 m, 10m, 5 mamita, 7 m', 8 m2, 9 mi, 5 km, 3 cm, 2 mm, 4 kg, 6 g, 1 l, 2 L, 3 ha, 60 km/h, 5 km², 10 ha².
+Lero 1st, 2nd, 3rd, 4th, 21ST, 5thx.
+Zaka 1990-1995, 5–10, 10—5, 1-2-3, a1-2, 1.5-2, 2-3.5, 5 - 6.
+Ndalama $5, £10, 50%, 3.5 %, $ 1,000 ndi £2.50.
+Chiwerengero 3.14, 2.5, 1,5, 12,34, 1.234, 0.75, 12.345, 1.2.3, 5,123, 1,5,6.
+Mawu ng'ombe, nkhwali, ntchito, thyolo, khya, phya, mpsa, mbzu, nkhuku, nthawi, mphepo, ndzi, ntsa, nchito, tchire, psa, bza, thwa, khwa, phwa, phala, thupi, khasu, chala, tsiku, dzina, bvala, pfuma, mbale, mphaka, mfumu, mvula, ndodo, ntanda, njira, nzeru, nsomba, nkono, ngoma, nyumba, shuga, bya, dya, lya, rya, x, q, c.
+Mayina Dvořák, Ångström, Straße, ſala, İzmir, ’chimodzi’ ndi 'zinayi'.
+Manambala 0 1 9 10 11 19 20 21 99 100 101 110 999 1000 1001 2000 9999 10000 100000 999999 1000000 1000001 2000000 999999999 1000000000 2000000000 999999999999 1000000000000 9007199254740993 12345678901234567890 007.
+Chiyani? Inde! Zikomo. Koma, komanso; zinthu ziwiri: mapeto… zatha.
+   Malo   ambiri   pakati   .

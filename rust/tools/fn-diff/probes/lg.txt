@@ -1,0 +1,15 @@
+# Synthetic Luganda probes: one or more lines per arm of normalize.ts and the neighbour it must decline, plus g2p and
+# number corners. Synthetic text only.
+Essaawa 7.30 n'saawa 10:15 ne saawa 23.59 ne 7.30 am ne 9:45 p.m. ne 12.00 GMT ne 6:00 UTC ne 8.15 ezekiro ne 7.30 bwe.
+Olunaku 1st ne 2nd ne 3rd ne 4th ne 21ST ne 5thx ne first.
+Emyaka 1990-1995 ne 5–10 ne 1,000-2,000 ne 10—5 ne 999-1000 ne 0999-1000 ne a1-2 ne 1-2a ne 1.5-2 ne -1-2 ne 1-2-3 ne 1990/1995.
+Abantu 1,300 ne 12,500,000 ne 1 300 ne 1.300 ne 2.500.000 ne 1,0000 ne 0,500.
+Ebitundu 50% ne 3.5 % ne 20% ku kikumi ne ku buli kikumi 10% ne 7%.
+Ssente US$ 29 ne US$5 ne $10 ne ddoola $5 ne dolla $3 ne €20 ne euro €5 ne £7 ne pawundi £2 ne $ x.
+Ekitundu 5 km² ne 3km2 ne 10 km ne kiromita 7 km ne 4 kmx ne 2 km/h ne 6 cm ne 8 mm ne 9 kg ne sentimita 3 cm ne kiro 5 kg ne 5 m ne mita 6 m ne 7m ne 8 m² ne 2.5 km.
+Omuwendo 3.14 ne 2.5 ne 1.2.3 ne 0.75 ne 12.345 ne 802.11n.
+Ebigambo nng'oma, ng'ombe, nnyumba, nyumba, n'omu, mbuzi, mpologoma, nfuna, nvuma, ntabi, ndiga, ncuti, njovu, nkoko, ngabo, nsi, nzige, ŋŋ, ŋk, bbiri, kitto, ssatu, aa, ee, ii, oo, uu, bwa, gwa, kwa, Buganda.
+Amannya Dvořák, Ångström, Straße, ſala, İzmir, ’kweli’ ne 'omuntu'.
+Emiwendo 0 1 9 10 11 12 19 20 21 99 100 101 110 999 1000 1001 2000 9999 10000 100000 999999 1000000 1000001 2000000 999999999 1000000000 2000000000 12000000000 9007199254740993 12345678901234567890 007.
+Kiki? Ye! Weebale. Akasiriiza, akasiriiza ak'omukka; obubonero bubiri: enkomerero… kiwedde.
+   Ebanga   ddene   wakati   .

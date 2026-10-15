@@ -81,6 +81,10 @@ const FLEURS_DIR: Record<string, string> = {
     xh: "xh_za",
     nso: "nso_za",
     sn: "sn_zw",
+    sw: "sw_ke",
+    lg: "lg_ug",
+    ln: "ln_cd",
+    nya: "ny_mw",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -6071,6 +6075,363 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         for (let i = 0; i <= 2000; i++) emit({ text: units(numberToWords(i)), op: "concord" }, withClass6Concord(numberToWords(i)));
         for (const w of ["", "zero", "piri", "motsi", "a piri", "piri ", "sere sere", "gumi ne piri"]) emit({ text: units(w), op: "concord" }, withClass6Concord(w));
+    },
+    // ── Swahili (sw). Texts: the sw golden, FLEURS sw_ke (columns 3 and 4) and probes/sw.txt. ──
+    // normalizeSwahili, the symbol tier (the real normalizer the engine built, recorded through the wrapper) and the
+    // registry's sw engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm; and the
+    // number path through the engine over 0…3,000, scaled samples and long runs.
+    async "sw-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeSwahili } = await import("../../../src/languages/swahili/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        renderInHost("sw", "");
+        const rec = records.find((r) => /src\/languages\/swahili\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["sw"], FLEURS_DIR.sw, ["sw.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["1,000", "755,688", "24,000", "1,0000", "12,345.6", "0,500", "1,000,000", "123,456,789", "1,23", "9,999,"]) for (const tail of ["", ".", ",", ", na", ".5", ",5"]) add(`watu ${n}${tail} walikuja`);
+        for (const sg of ["-", "−", "–", "+", "±", "+ ", "- "]) for (const pre of ["", " ", "a", "5 ", "x5", "neno "]) add(`joto ${pre}${sg}5 leo`);
+        for (const d of ["30°C", "30 ° c", "45°", "20°Ca", "-5°F", "86 °f", "+4°C", "2.9°C", "1,000°", "30ºC", "5º", "°C"]) add(`joto ${d} leo`);
+        for (const r of ["2-3", "5-3", "10 – 15", "1995-96", "a5-6", "7-2a", "6-6", "1469-1539", "3 -4", "3- 4", "1.5-2", "2-3.5", "1-2-3"]) add(`miaka ${r} iliyopita`);
+        for (const d of ["1.5", "6.34", "802.11n", "1.2.3", "0.75", "12.", ".5", "1,5.5"]) add(`urefu ${d} mita`);
+        for (const e of ["B.C.E.", "B.C.", "A.D.", "n.k.", "BCE", "BC", "BCx", "ABC", "B.C.E", "A.D"]) for (const tail of ["", " Kisha", " kisha", ".", ",", " 33"]) { add(`mwaka 500 ${e}${tail}`); add(`${e}${tail}`); add(`mwaka 500\u00a0${e}${tail}`); }
+        for (const d of [" - ", " – ", " — ", " -- ", "5 - 6", " -5", "- ", " ---  "]) add(`kwa usahihi${d}pia`);
+        for (const r of ["=", " = ", "<", " < ", ">", " > ", "÷", " ÷ "]) add(`6${r}3 na a${r}b`);
+        for (const sy of ["80%", "3.5 %", "$30", "€ 20", "£5", "¥100", "KSh 500", "TSh 1,000", "10 km", "5 m", "7 cm", "3 kg", "60 km/h", "5 m/s", "5 x 3", "A & B", "2 km²"]) add(`thamani ${sy} leo`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeSwahili(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("sw", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e6 + 999999), String(k * 1e9 + 10));
+        for (let e = 6; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999", "1000000000", "4082940073", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("sw", n));
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3 letter
+    // string over the alphabet plus the apostrophe, every 4-letter string over a context set (nasals, glides, vowels,
+    // the digraph halves) and edge strings.
+    async "sw-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/swahili/swahili.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zA-Z']", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("sw")) for (const m of t.matchAll(/[\p{L}\p{M}']+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."mnwygdbjhaeiou'"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚ng'a", "𝐚𝐚ng'a", "a𝐚ng'o", "São", "Gürses", "constructor", "toString", "__proto__", "ng'", "ng'ng'", "NG'OMBE", "mwmw", "aaaa", "nnnn"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // ── Kinyarwanda (rw). Texts: the rw golden and probes/rw.txt (FLEURS has no rw). ──
+    // normalizeKinyarwanda, its symbol tier (the real normalizer, recorded through the wrapper) and the registry's rw
+    // engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm, each with the neighbour it
+    // must decline; and the number path through the engine over 0…3,000, scaled samples and long runs.
+    async "rw-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeKinyarwanda } = await import("../../../src/languages/kinyarwanda/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        renderInHost("rw", "");
+        const rec = records.find((r) => /src\/languages\/kinyarwanda\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["rw"], undefined, ["rw.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const a of ["U.N.", "U.N", "O.N.U.", "U. S. A.", "E.A.C", "A.B", "a.b.", "U.\u00a0N."]) for (const tail of ["", " Ibi", " ibi", "ishyirahamwe", ".", ","]) add(`muri ${a}${tail}`);
+        for (const n of ["1,300", "12,500,000", "1.300", "2.500.000", "1 300", "1\u00a0300", "1\u202f300", "1\u2009300", "1,300.5", "1.300,5", "0,500", "1,0000", "1,300,"]) for (const tail of ["", "°", " °", "\u00a0°", "º", " m", ".5", ",5", "."]) add(`abantu ${n}${tail} ni`);
+        for (const u of ["km", "m", "cm", "mm", "kg", "g", "gm", "gr", "ml", "l", "ha", "KM", "Kg", "kmx"]) for (const e of ["", "²", "³", "2", "3", "4"]) for (const sp of [" ", "\u00a0", ""]) add(`ni ${u}${e}${sp}5 gusa`);
+        for (const sg of ["−", "-", "–", ""]) for (const n of ["5", "2,5", "3.75", "10-15", "15-10", "20–25"]) for (const d of ["°C", " °F", "° C", "°c", "°", "º", "°X", "°N", "°57′S", "° 45' 30\" E"]) add(`ubushyuhe ${sg}${n}${d} uyu munsi`);
+        for (const pre of ["", "dogere ", "bwa dogere "]) for (const post of ["", " dogere"]) add(`${pre}25°C${post}`);
+        for (const c of ["saa 7:30", "saa 9:00", "SAA 1:05", "saa  23:59", "saa 24:00", "12:30:45 UTC", "12:30:45 GMT", "12:30:45 UTCx", "1:02:03", "10:15", "7:5", "123:45", "1: 02: 03", "10: 15", "saa 7: 30"]) add(`ni ${c} neza`);
+        for (const r of ["10%-20%", "30 % – 40 %", "50%-40%", "5-10 km", "10–20 m²", "3-4 ha", "20-10 km", "1-2 kmx", "2-3 m3", "5-6 m'", "1990-1995", "5–10", "10—5", "1-2-3", "a1-2", "1.5-2", "2-3.5"]) add(`ni ${r} gusa`);
+        for (const r of ["60 km/h", "5 m/km", "10 / km²", "3/ha", "7/kg3", "km³", "cm²", "mm³", "m²", "x/km", "/KM2"]) add(`umuvuduko ${r} gusa`);
+        for (const d of ["3.14", "2.5", "1,5", "12,34", "1.234", "0.75", "12.345", "1.2.3", "5,123", "0,5"]) add(`imibare ${d} gusa`);
+        for (const sy of ["US$ 5", "$10", "5 FRw", "1,000 Frw", "RWF 500", "Rwf 20", "50%", "miliyoni 3", "A & B", "5 km/h", "3 miliyari $"]) add(`ni ${sy} gusa`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeKinyarwanda(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("rw", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e9 + 10), String(k * 1e9 + 999999999));
+        for (let e = 6; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999", "1000000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("rw", n));
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3 letter
+    // string over the alphabet, every 4-letter string over a context set (the palatal and digraph halves, vowels) and
+    // edge strings; numberToWords over 0…20,000, scaled samples, the ceiling, the corners and raw strings.
+    async "rw-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/kinyarwanda/kinyarwanda.ts");
+        const { numberToWords } = await import("../../../src/languages/kinyarwanda/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-z]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("rw")) for (const m of t.matchAll(/[\p{L}\p{M}']+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."shycjbrmngaeiou"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚shy", "Dvořák", "Straße", "constructor", "toString", "__proto__", "SHYIRA", "ñ", "q", "x"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e6 + 1, k * 1e9 + 1001, k * 1e9);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999999, 1e12, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
+    // ── Kirundi (rn). Texts: the rn golden and probes/rn.txt (FLEURS has no rn). ──
+    // normalizeKirundi, its symbol tier (the real normalizer, recorded through the wrapper) and the registry's rn
+    // engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm, each with the neighbour it
+    // must decline; and the number path through the engine over 0…3,000, scaled samples and long runs.
+    async "rn-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeKirundi } = await import("../../../src/languages/kirundi/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        renderInHost("rn", "");
+        const rec = records.find((r) => /src\/languages\/kirundi\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["rn"], undefined, ["rn.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const a of ["U.N.", "U.N", "O.N.U.", "U. S. A.", "E.A.C", "A.B", "a.b.", "U.\u00a0N."]) for (const tail of ["", " Ibi", " ibi", "ishirahamwe", ".", ","]) add(`muri ${a}${tail}`);
+        for (const d of ["1.7.1962", "01.07.1962", "1.7.62", "31.12.2020", "1.2.3.4567", "123.4.5678", "1.7.19621"]) for (const tail of ["", ".", ",5"]) add(`itariki ${d}${tail} ni`);
+        for (const u of ["km", "mm", "KM", "Mm", "kmx", "m", "cm"]) for (const e of ["", "²", "³", "2", "3", "4"]) for (const sp of [" ", "\u00a0", "\u202f", "\u2009", ""]) add(`ni ${u}${e}${sp}5 gusa`);
+        for (const n of ["1,300", "12,500,000", "1.300", "2.500.000", "1 300", "1\u00a0300", "1\u202f300", "1\u2009300", "1,300.5", "1.300,5", "0,500", "1,0000", "1,300,"]) for (const tail of ["", "°", " m", ".5", ",5", "."]) add(`abantu ${n}${tail} ni`);
+        for (const pre of ["", "dogere ", "kuva ", "guhera mu ", "Kuva mu mwaka "]) for (const r of ["10-15°C", "20–25 °C", "30/35°F", "15-10°C", "10-15", "20/25", "30-20", "1990-2000", "1990/2000", "5-10", "10—5", "3/4", "4/3", "1/2/3", "5/6:", "1990-1995°", "2-3.5", "a1-2"]) add(`${pre}${r} ni`);
+        for (const sg of ["−", "-", "–", ""]) for (const n of ["5", "2,5", "3.75"]) for (const d of ["°C", " °F", "° C", "°c", "°", "º", "°X", "°57′S", "° 45' 30\" E", "° 5'"]) add(`ubushuhe ${sg}${n}${d} uyu munsi`);
+        for (const p of ["50% kw'ijana", "30 %", "20%", "10 kw’ijana 5%", "KW'IJANA 5%", "5 %"]) add(`ijanisha ${p} ni`);
+        for (const r of ["60 km/h", "5 mm/km", "10 / km²", "3/km3", "4/mm³", "x/km", "/KM2", "7:30", "10:15", "7:5", "123:45", "10: 15"]) add(`ni ${r} gusa`);
+        for (const d of ["3.14", "2.5", "1,5", "12,34", "1.234", "0.75", "12.345", "1.2.3", "5,123", "0,5"]) add(`imibare ${d} gusa`);
+        for (const sy of ["US$ 5", "$10", "50%", "A & B", "5 km/h", "3 km²"]) add(`ni ${sy} gusa`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeKirundi(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("rn", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e6 + 999999), String(k * 1e9 + 10));
+        for (let e = 6; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999", "1000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("rn", n));
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3 letter
+    // string over the alphabet, every 4-letter string over a context set and edge strings; numberToWords over
+    // 0…20,000, scaled samples, the 10⁹ ceiling, the corners and raw strings.
+    async "rn-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/kirundi/kirundi.ts");
+        const { numberToWords } = await import("../../../src/languages/kirundi/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-z]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("rn")) for (const m of t.matchAll(/[\p{L}\p{M}']+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."shycjbrmngaeiou"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚shy", "Dvořák", "Straße", "constructor", "toString", "__proto__", "SHIRA", "ñ", "q", "x"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e6 + 1, k * 1e6 + 999999);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999, 1e9, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
+    // ── Luganda (lg). Texts: the lg golden, FLEURS lg_ug (columns 3 and 4) and probes/lg.txt. ──
+    // normalizeLuganda and the registry's lg engine (`renderInHost`: no pre-pass) over every text plus synthetic rows
+    // per arm, each with the neighbour it must decline; and the number path through the engine over 0…3,000,
+    // scaled samples and long runs.
+    async "lg-normalize"() {
+        const { normalizeLuganda } = await import("../../../src/languages/luganda/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["lg"], FLEURS_DIR.lg, ["lg.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const pre of ["", "essaawa ", "saawa ", "Ssaawa ", "aawa "]) for (const c of ["7.30", "10:15", "23.59", "24.00", "7.300", "1.7.30", "7:60"]) for (const post of ["", " am", " p.m.", " pm", " P.M", " GMT", " UTC", " ezekiro", " bwe", " amx"]) add(`${pre}${c}${post} ne`);
+        for (const o of ["1st", "2nd", "3rd", "4th", "21ST", "5thx", "11th", "st"]) add(`olunaku ${o} ne`);
+        for (const r of ["1990-1995", "5–10", "1,000-2,000", "10—5", "999-1000", "0999-1000", "a1-2", "1-2a", "1.5-2", "-1-2", "1-2-3", "1990/1995", "1 - 2", "+1-2", "1-2/3", "1-2,", "1,000-1,500", "1000-2000", "10000-20000"]) add(`emyaka ${r} ne`);
+        for (const n of ["1,300", "12,500,000", "1 300", "1\u00a0300", "1\u202f300", "1\u2009300", "1.300", "2.500.000", "1,0000", "0,500"]) for (const tail of ["", ".", ",", ".5"]) add(`abantu ${n}${tail} ne`);
+        for (const p of ["50%", "3.5 %", "20% ku kikumi", "ku buli kikumi 10%", "7%", "KU KIKUMI 5%", "x5%"]) add(`ebitundu ${p} ne`);
+        for (const c of ["US$ 29", "US$5", "us$ 4", "$10", "ddoola $5", "dolla $3", "dddoola $2", "€20", "euro €5", "£7", "pawundi £2", "$ x", "€ 3", "£\u00a04"]) add(`ssente ${c} ne`);
+        for (const u of ["5 km²", "3km2", "10 km", "kiromita 7 km", "kilomiita 7 km", "4 kmx", "2 km/h", "6 cm", "8 mm", "9 kg", "sentimita 3 cm", "kiro 5 kg", "5 m", "mita 6 m", "7m", "8 m²", "2.5 km", "1.5 cm", "3\u202fkm", "4 km³"]) add(`ekitundu ${u} ne`);
+        for (const d of ["3.14", "2.5", "1.2.3", "0.75", "12.345", "802.11n", "1.5,", "1.5.", "1.5.6"]) add(`omuwendo ${d} ne`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeLuganda(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("lg", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e9 + 10), String(k * 1e12 + 1));
+        for (let e = 6; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("lg", n));
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3 letter
+    // string over the alphabet plus ŋ and the apostrophes, every 4-letter string over a context set (nasals,
+    // obstruents, w, y, vowels, apostrophe) and edge strings; numberToWords over 0…20,000, scaled samples, the corners
+    // and raw strings.
+    async "lg-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/luganda/luganda.ts");
+        const { numberToWords } = await import("../../../src/languages/luganda/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zŋ'’]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("lg")) for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzŋ'’"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."nmŋgbkyw'aeu"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚ng'", "Dvořák", "Straße", "constructor", "toString", "__proto__", "NNG'OMA", "Ŋ", "nng", "nn'"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e6 + 1, k * 1e9 + 1001, k * 1e12 + 7);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(2 ** 53 - 1, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890", "0"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
+    // ── Lingala (ln). Texts: the ln golden, FLEURS ln_cd (columns 3 and 4) and probes/ln.txt. ──
+    // normalizeLingala and the registry's ln engine (`renderInHost`: no pre-pass) over every text, each also in NFD,
+    // plus synthetic rows per arm, each with the neighbour it must decline; and the number path through the engine
+    // over 0…3,000, scaled samples and long runs.
+    async "ln-normalize"() {
+        const { normalizeLingala } = await import("../../../src/languages/lingala/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ln"], FLEURS_DIR.ln, ["ln.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const t of [...rows.keys()]) add(t.normalize("NFD"));
+        for (const c of ["7.30", "10:15", "23.59", "24.00", "7.300", "1.7.30", "7:60"]) for (const post of [" na ntongo", " na  ntongo", " ya butu", " UTC", " GMT", " MDT", " utc", " UTCx", " kaka", ""]) add(`ngonga ${c}${post} awa`);
+        for (const e of ["&nbsp;", "&NBSP;", "&#233;", "&#xE9;", "&#XE9;", "&amp;", "&#;", "\u200b", "\u200c", "\u200d", "\ufeff", "\u2060"]) add(`mo${e}kanda`);
+        for (const a of ["L.T.B.", "T.B.", "n. Y.K.", "n.Y.K.", "Y.K.", "b.n.b.", "L.T.B", "Y.K", "aY.K."]) for (const tail of ["", " Bato", " bato", ".", ",", "\u00a0Bato"]) add(`mobu 300 ${a}${tail}`);
+        for (const i of ["ISBN 978-2-1234-5680-3", "ISBN-13: 978 2 1234 5680 3", "ISBN 10 0-306-40615-2", "ISBN x", "ISBN 12X", "ISBN–10:1–2", "aISBN 12"]) add(`buku ${i} awa`);
+        for (const n of ["1,300", "12,500,000", "1.300", "2.500.000", "1 300", "12 500 000", "1\u00a0300", "1\u202f300", "1\u2009300", "1,0000", "0,500", "1,300.5", "1 300 5"]) for (const tail of ["", ".", ",", ",5"]) add(`bato ${n}${tail} awa`);
+        for (const u of ["km²", "km2", "m²", "m2", "km", "cm", "mm", "kg"]) for (const n of ["5", "5-10", "10–20", "3 — 4", "20-10", "2,5", "1.5", "5- 6"]) for (const sp of [" ", ""]) add(`molai ${n}${sp}${u} awa`);
+        for (const u of ["km 5", "km/h", "5 km/h", "kmx", "5 km²x", "5 kg3"]) add(`molai ${u} awa`);
+        for (const d of ["25°C", "30 ° c", "2,5°C", "25°F", "10%-20%", "30 % – 40 %", "50%-40%", "1,5%-2,5%", "5%", "1,5 %"]) add(`molunge ${d} awa`);
+        for (const r of ["1990-1995", "5-10", "5 - 10", "15 - 20", "5 -10", "5- 10", "10—5", "1-2-3", "a1-2", "1.5-2", "2-3,5", "12 - 3"]) add(`mibu ${r} awa`);
+        for (const m of ["$5", "$ 10", "5$", "1,000 $", "US$ 7", "us $7", "dolare $3", "falánga 5$", "dollars $9", "$x", "5 $ ", "1.5$"]) add(`mbongo ${m} awa`);
+        for (const f of ["1/2", "3/4", "2/3", "5/10", "7/12", "10/5", "1/2/3", "3,1/2", "1.1/2", "1/2.5", "1/2,5", "12,1/2", "¼", "½", "a1/2"]) add(`ndambo ${f} awa`);
+        for (const d of ["3,14", "2.5", "12,345", "1.2.3", "0,75", "802.11n", "1.5.", "1,5,"]) add(`motuya ${d} awa`);
+        for (const o of ["1er", "1ère", "1re", "1 er", "2ème", "2nd", "3e", "21e", "1erx", "a1e", "10 ème"]) add(`ya ${o} awa`);
+        for (const a of ["Tata & mama", "Kinshasa&Brazzaville", "&", " & "]) add(a);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeLingala(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("ln", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e4 + 101), String(k * 1e5 + 7), String(k * 1e6 + 101), String(k * 1e9 + 10));
+        for (let e = 4; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999", "1000000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("ln", n));
+    },
+    // phonemizeWord over every letter run of the texts (as written, lower, UPPER, NFD), every 1–3 letter string over
+    // the alphabet plus ɛ ɔ, every vowel × tone-mark pair and triple, every 4-letter string over a context set
+    // (nasals, the prenasal halves, vowels, marks) and edge strings.
+    async "ln-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/lingala/lingala.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("ln")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { for (const w of [m[0], m[0].toLowerCase(), m[0].toUpperCase()]) { words.add(w); words.add(w.normalize("NFD")); } }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzɛɔ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const marks = ["\u0301", "\u0300", "\u0302", "\u030c", "\u0303", "\u0301\u0301", ""];
+        for (const v of [..."aeiouɛɔAEIOUƐƆ"]) for (const m1 of marks) for (const m2 of marks) { words.add(v + m1 + m2); words.add("b" + v + m1 + "k" + v + m2); words.add((v + m1).normalize("NFC") + m2); }
+        const ctx = [..."mnbdgkyszaɛo\u0301\u0302"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚mb", "Dvořák", "Straße", "constructor", "toString", "__proto__", "LINGÁLA", "ʼa"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+    },
+    // ── Chichewa (nya). Texts: the nya golden, FLEURS ny_mw (columns 3 and 4) and probes/nya.txt. ──
+    // normalizeChichewa, the engine's symbol tier (the real normalizer, recorded through the wrapper) and the
+    // registry's nya engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm, each with the
+    // neighbour it must decline; and the number path through the engine over 0…3,000, scaled samples and long runs.
+    async "nya-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeChichewa } = await import("../../../src/languages/chichewa/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        renderInHost("nya", "");
+        const rec = records.find((r) => /src\/languages\/chichewa\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["nya"], FLEURS_DIR.nya, ["nya.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["&nbsp;", "&NBSP;", "&amp;", "&AMP;", "&", " & ", "&amp;nbsp;", "&#38;"]) add(`ana${e}makolo`);
+        for (const a of ["U.N.", "U.N", "U. S. A.", "E.U", "A.B", "a.b.", "U.\u00a0N."]) for (const tail of ["", " Lero", " lero", "bungwe", ".", ","]) add(`bungwe la ${a}${tail}`);
+        for (const c of ["7:30", "10:15", "9:00", "24:00", "23:59", "7: 30", "7:300", "07:05", "1:7:30", "0:00"]) for (const post of [" a.m.", " A.M", " am", " PM", " p.m", " pm.", " UTC", " GMT", " PDT", " UTCx", " m'mawa", " m’mawa", " mmawa", " masana", " madzulo", " usiku", " usikux", " kaka", "", "\u00a0PM", "  am"]) add(`nthawi ${c}${post} ndi`);
+        for (const n of ["1,300", "12,500,000", "1.300", "2.500.000", "1 300", "1\u00a0300", "1\u202f300", "1\u2009300", "1,0000", "0,500", "1,300.5", "1.300,5"]) for (const tail of ["", ".", ",", ",5", ".5"]) add(`anthu ${n}${tail} ndi`);
+        for (const n of ["25", "2,5", "3.75"]) for (const d of ["°C", " °F", "° C", "°c", "°", "º", "°X", "°N", "° S", "°E", "°W", "°n"]) for (const pre of ["", "madigiri "]) add(`kutentha ${pre}${n}${d} lero`);
+        for (const u of ["5 m", "10m", "7 m'", "7 m’", "8 m2", "9 mi", "5 km", "3 cm", "2 mm", "4 kg", "6 g", "1 l", "2 L", "3 ha", "60 km/h", "5 km²", "10 ha²", "5 m/s", "5m3", "a5 m", "1.5 m"]) add(`mtunda ${u} ndi`);
+        for (const o of ["1st", "2nd", "3rd", "4th", "21ST", "5thx", "st"]) add(`lero ${o} ndi`);
+        for (const r of ["1990-1995", "5–10", "10—5", "1-2-3", "a1-2", "1.5-2", "2-3.5", "5 - 6", "5 -6", "-1-2", "1-2a"]) add(`zaka ${r} ndi`);
+        for (const m of ["$5", "£10", "50%", "3.5 %", "$ 1,000", "£2.50", "$x"]) add(`ndalama ${m} ndi`);
+        for (const d of ["3.14", "2.5", "1,5", "12,34", "1.234", "0.75", "12.345", "1.2.3", "5,123", "1,5,6", "1.5.", "1,5."]) add(`chiwerengero ${d} ndi`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeChichewa(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("nya", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e9 + 10), String(k * 1e9 + 999999999));
+        for (let e = 6; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999", "1000000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("nya", n));
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3 letter
+    // string over the alphabet plus the apostrophes, every 4-letter string over a context set (the digraph and
+    // trigraph halves, vowels) and edge strings; numberToWords over 0…20,000, scaled samples, the 10¹² ceiling, the
+    // corners and raw strings.
+    async "nya-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/chichewa/chichewa.ts");
+        const { numberToWords } = await import("../../../src/languages/chichewa/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-z'’]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("nya")) for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz'’"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."nmtkphswyzcbdga'"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚ng'", "Dvořák", "Straße", "constructor", "toString", "__proto__", "NKHWALI", "ntchw", "nkhwy"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k += 3) ns.push(k * 1e3, k * 1e6 + 1, k * 1e9 + 1001, k * 1e9);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(999999999999, 1e12, 2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993", "12345678901234567890"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
     },
 };
 
