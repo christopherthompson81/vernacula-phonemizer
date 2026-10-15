@@ -71,6 +71,7 @@ pub mod romanian;
 pub mod russian;
 pub mod scottishgaelic;
 pub mod serbian;
+pub mod sinhala;
 pub mod slovak;
 pub mod slovenian;
 pub mod spanish;

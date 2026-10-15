@@ -2750,6 +2750,9 @@ fn main() {
             use vernacula_phonemizer::languages::malayalam;
             let ml = malayalam::malayalam::create_malayalam(None).unwrap();
             let ml_def = malayalam::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::sinhala;
+            let si = sinhala::sinhala::create_sinhala().unwrap();
+            let si_def = sinhala::manifest::try_manifest().unwrap();
             Box::new(move |input| {
                 let nf = || js_number(&JsString::from(input["n"].as_str().unwrap()));
                 let lang = input["lang"].as_str().unwrap();
@@ -2816,6 +2819,12 @@ fn main() {
                     ("ml", "stem-plural") => {
                         malayalam::numbers::plural_stem(&units(&input["word"]))
                             .unwrap_or_else(|| js("\u{0}none"))
+                    }
+                    ("si", "normalize") => si.normalize(&units(&input["text"])),
+                    ("si", "text") => with_host(&js("si"), || si.text(&units(&input["text"]))),
+                    ("si", "word") => si.phonemize_word(&units(&input["word"])),
+                    ("si", "words") => {
+                        js(&sinhala::numbers::number_to_words(nf(), &si_def.numbers))
                     }
                     _ => panic!("dravidian: unknown {lang} op {op}"),
                 }

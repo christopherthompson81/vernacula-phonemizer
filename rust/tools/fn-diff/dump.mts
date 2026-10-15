@@ -5238,6 +5238,32 @@ const dumps: Record<string, () => void | Promise<void>> = {
                     emit({ lang: "ml", word: units(w), op: "stem-plural" }, Nu.pluralStem(w) ?? "\u0000none");
                 }
             },
+            async si() {
+                const { normalizeSinhala } = await import("../../../src/languages/sinhala/normalize.ts");
+                const Nu = await import("../../../src/languages/sinhala/numbers.ts");
+                const { MANIFEST } = await import("../../../src/languages/sinhala/manifest.ts");
+                const { createSinhala, phonemizeWord } = await import("../../../src/languages/sinhala/sinhala.ts");
+                const E = createSinhala();
+                const rows = textsFor(["si"], undefined, ["si.txt"]);
+                const sd = nativeDigits(0x0de6);
+                const items: string[] = [];
+                for (const j of ["\u200b", "\u200c", "\u200d", "\u2060", "\ufeff", "\u00ad", "&nbsp;", "&nbsp", "&NBSP;"]) items.push(`ක්${j}රම`, `1${j},000`, `${j}සිංහල`);
+                for (const a of ["ක්රි.පූ.", "ක්රි.පූ", "ක්රි. පූ.", "ක්රි.පු.", "ක්රි.ව.", "ක්\u200dරි.ව. 1660", "ඇ.ඩො.මි. 5", "ඇ.ඩො. 5", "කි.මී. 5", "කි.මී", "සෙ.මී", "මි.මී.", "රු.500", "රු. 500", "රු.", "අක්රි.පූ.", "කි.මීය"]) items.push(a);
+                for (const i of ["එෆ්.ආර්.ප්\u200dරනාන්දු", "ජේ.ආර්.ජයවර්ධන", "එස්.ඩබ්.ආර්.ඩී. බණ්ඩාරනායක", "ක.ඛ.", "කකකකකකකක.ක.", "a.ක.ඛ.", "ක.", "ක. ඛ. ග."]) items.push(i);
+                for (const g of ["1,000", "12,345,678", "0,500", "1,2345", "1990, 1991", "10,00,000", "1,000.5", "1,000,", ".5", "(.5)", " .5", "a.5", sd(1234)]) items.push(g);
+                for (const t of ["30°C", "−30°C", "30 ° c", "30º C", "30⁰C", "86°F", "−5.5°F", "35°N", "35.5 ° W", "35°S", "90°", "−90°", "90 º", "300 K", "300 K.", "300 Kg", "-5", "(-5)", "(−5)", " −5", "a−5", "–5", "5-6"]) items.push(t);
+                for (const r of ["100 km/h", "100km/h", "100 km / h", "km/h", "5 m/s", "m/s", "5-10 km/h", "5 – 10 km/h", "1,000 km/h", "a km/h", "5km/hr", "1.5 m/s"]) items.push(r);
+                for (const c of ["$5m", "US$ 5m", "€10.5m", "£5,000m", "₨5m", "$5ma", "5.5m", "a5.5m", "5m"]) items.push(c);
+                for (const sg of ["US$", "$", "€", "£", "Rs", "₨"]) items.push(`${sg}50`, `${sg} 1,000`, `${sg}14.7`, `50${sg}`, `${sg}`);
+                for (const u of ["km", "m", "cm", "mm", "kg", "ml", "ha"]) items.push(`5${u}`, `5 ${u}`, `1.5 ${u}`, `${u}`, `3 ${u}²`, `3 ${u}³`, `1 ${u}`);
+                items.push("50%", "5 %", "1%", "A & B", "a&b", "5 දහස", "$5 මිලියන");
+                for (const d of ["3.5", "0.25", "1.2.3", "12.", "1,234.56", sd(3) + "." + sd(5)]) items.push(d);
+                frames(rows, "ඔහු", "විය", items);
+                run("si", rows, normalizeSinhala, E, phonemizeWord, /[඀-෿]+/gu, MANIFEST,
+                    ["ක", "බව", "පව්ව", "නිව්ටන්", "පංසු", "අංක", "සංඥා", "කංඩ", "සංස්කෘතික", "ං", "කං", "අං", "ඛ්ඛ", "ක්ක", "ව්", "ශ්\u200dරී", "ක්\u200dරි", "අ"], 0x0de6);
+                for (const n of numberGrid()) emit({ lang: "si", n: String(n), op: "words" }, Nu.numberToWords(n));
+                for (const n of [1e10, 1e15, 1e21, 1.5e22, 12345678901234567890, 1e300, Number.MAX_SAFE_INTEGER + 2, 2.5, 99.9, -1, NaN, Infinity]) emit({ lang: "si", n: String(n), op: "words" }, Nu.numberToWords(n));
+            },
         };
         for (const lang of langs) {
             if (!Object.hasOwn(L, lang)) throw new Error(`dravidian: no entry for ${lang}`);

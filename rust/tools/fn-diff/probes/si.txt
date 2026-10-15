@@ -1,0 +1,20 @@
+# Sinhala (si) off-golden probes: synthetic sentences, one per normalize.ts arm plus the neighbour it must decline.
+# FLEURS has no Sinhala, so these lines, the golden and the dump's synthetic grids carry the whole differential.
+# joiners and the soft hyphen stripped, an HTML non-breaking space
+ශ්\u{200d}රී ලංකාව\u{200b} සහ\u{00ad} ඉන්දියාව&nbsp;අසල්වැසි රටවල් ය\u{feff}.
+# dotted era, currency and unit abbreviations, the rupee before a number only
+ක්රි.පූ. 300 දී, ක්රි.ව. 1660 දී, ඇ.ඩො.මි. 5ක්, කි.මී. 10ක්, රු.500ක් සහ රු. නොවේ
+# Sinhala letter initials, and a single dotted letter left alone
+ජේ.ආර්.ජයවර්ධන සහ එස්.ඩබ්.ආර්.ඩී. බණ්ඩාරනායක ආහ. ක. ලෙස
+# de-grouping, a leading decimal point, a leading zero group declined
+1,000ක් සහ 12,345,678ක් සහ (.5) සහ 0,500 නොවේ
+# temperatures, compass degrees, plain degrees, kelvin
+උෂ්ණත්වය 30°C, −5°F, 35°N, 90°, 300 K වේ
+# minus signs at the start, in brackets and after a space; a range dash left alone
+-5 සහ (−3) සහ x −2 සහ 5-6
+# rates with an operand, a range operand and none
+පැයට 100 km/h, 5-10 km/h, km/h, 5 m/s
+# the million suffix, a decimal followed by m, the symbol tier in prefix position
+$5m සහ 5.5m සහ 50% සහ US$ 1,000 සහ 5 km² සහ A & B
+# decimals, native digits, clause marks
+3.75ක් සහ ෧෨ ද? ඔව්! හරි; නැත: …

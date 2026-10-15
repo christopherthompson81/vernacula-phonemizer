@@ -155,3 +155,76 @@ every composed word) → `fn-diff dravidian`; a mutation (the retroflex post-nas
   Rust test passes.
 
 **Implication.** ml done; no TS defect found by the reading or the probes.
+
+## Run 5 — 2026-10-15 05:20 (si)
+
+**Question.** Does Sinhala (its homorganic anusvara, schwa alternation and stress post-pass, its own analytic
+composer in JS `Number` arithmetic, and the normalizer with its own symbol tier in prefix position) match the TS?
+
+**What was written.** The joiner class (U+200B-U+200D, U+2060, U+FEFF, U+00AD) and the ZWJ inside four expansion
+words are LITERAL in the TS and were substituted byte-level from placeholders; the three `−` / `⁰`
+escapes in `SIGN` / `DEG` are ESCAPES in the TS and were substituted from `@BS@`. The `&nbsp;` replace inside
+`stripJoiners` is a plain replace in the TS (off the provenance seam) and stays one. The composer is kept in `f64`:
+it has no safe-integer guard, so a long run is composed from the float exactly as the TS does.
+
+**Command.** `audit.sh sinhala`; `parity si`; `LANGS=si dump.mts dravidian` (no FLEURS: the golden, `probes/si.txt`
+and synthetic grids over every arm, each joiner, each abbreviation, the initials, the degree and rate forms, the
+million suffix, the tier's currencies and units; words over every Sinhala run and the consonant × tail grids;
+`numberToWords` on the value grid and on 10^10, 10^15, 10^21, 1.5e22, 1e300, 2^53+2, 2.5, 99.9, -1, NaN, Infinity)
+→ `fn-diff dravidian`; two mutations (the double-space collapse removed; the schwa rule's word-end test forced
+false); `e2e.sh si`; `pins.sh sinhala si`; a TS print of unsafe integers (`p.mts si …`).
+
+**Raw finding.**
+- Audits: 33 raw patterns, 2 misses (`format!` templates: `abbrev` and the plain-degree rule, checked by hand);
+  135 non-ASCII runs, 0 missing; `3 TS escapes, 0 short`; each Cf character present as in the TS.
+- `si: 200/200`.
+- `dravidian (si): 24978 identical, 0 DIFFER` (golden 400, probe 18, synthetic 1600, number 3068).
+  Mutation 1: `24934 identical, 44 DIFFER` (golden 6); mutation 2: `24711 identical, 267 DIFFER` (golden 45).
+  Both reverted.
+- `phonemize-sync / phonemize-best / trace: 209 identical, 0 DIFFER` each.
+- test/sinhala.test.ts: 71 calls pinned (72 matchers, all green); the Rust test passes.
+- TS prints: `9007199254740993` and `9007199254740992` give the SAME reading (the float), ending `… ˈanuːd̪ˌekə`
+  (…92); `100000000000000000000000` reads as the float's digits (`99999999999999991611392`), not as 10^23.
+
+**Implication.** si done. TS defect to report (not fixed): sinhala/numbers.ts composes any digit run from
+`Number(digits)` with no safe-integer guard and no digit-at-a-time fallback (the `spellDigits` shape the rest of the
+fleet uses), so above 2^53 it reads a confidently wrong quantity.
+
+## Run 6 — 2026-10-15 06:10 (rebase onto main 6bebb881, every gate on the combined tree)
+
+**What changed.** origin/main gained the East Indic (#1582) and west (#1583) groups. Rebasing the five commits
+conflicted in `registry.rs` on every commit (LANGUAGES header and tail, and the `build` arms), and on the kn commit
+also in `dump.mts` (FLEURS_DIR and the end of the dumps table) and `fn-diff/src/main.rs` (the end of the replay
+match). Both sides were kept everywhere (`resolve.py`). In main.rs git had factored the shared `})` / `}` out of
+the hunk, so it was restored as glue. LANGUAGES was de-duplicated and recounted (`fixcount.py`): 86 → 91.
+`dump.mts` parses.
+
+**Command.** `final.sh` (scratchpad): the esbuild parse check, `gates.sh` (fmt, build, parity over all languages,
+regex-diff, clippy, test), `e2e.sh kn,te,ta,ml,si`, and the `dravidian` dump over all five, replayed.
+
+**Raw finding.**
+- fmt clean; build 0 warnings.
+- parity: every line 200/200 (hil 112/112, ilo 94/94, nog 68/68), except mag 199/200, tt 199/200 and syl 195/200,
+  which are the known port-pending rows. kn, te, ta, ml, si: 200/200.
+- regex-diff: `146326 probe results identical, 0 DIFFER, 0 patterns refused`.
+- clippy: in the five new modules only their five `module_inception` warnings; none in fn-diff.
+- cargo test: 289 + 1 passed, 0 failed (including the cross-host test: each of the five scripts inside `en` and `hi`
+  text reaches its engine through the script router, and none of the five is port-pending).
+- combined end to end: `phonemize-sync / phonemize-best / trace: 15164 identical, 0 DIFFER` each.
+- combined `dravidian`: `269198 identical, 0 DIFFER` (golden 1348, fleurs 28882, probe 98, synthetic 57336, number
+  15340).
+
+**TS findings, reported and not fixed (the Rust reproduces each).**
+1. te: the century-year rule runs before the symbol tier, so `$1500` and `1500%` lose their currency and percent
+   words (Run 2).
+2. ta: the ordinal step has no safe-integer guard and passes no `raw`, so an ordinal on a 17+ digit run reads the
+   float's digits (Run 3).
+3. si: the composer has no safe-integer guard and no digit-at-a-time fallback; above 2^53 it reads a wrong quantity
+   (Run 5).
+4. kn: `KM_RE` leaves a dotted unit's trailing dot as a clause pause (Run 1).
+5. kn: in `VULGAR_FOLD_OPT_OUT`, but its own rule only covers a digit-adjacent fraction, so a bare `½` is dropped
+   (Run 1).
+
+**Port-pending.** None.
+
+**Implication.** Ready for the PR.
