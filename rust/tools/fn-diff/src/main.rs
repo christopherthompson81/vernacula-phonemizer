@@ -2247,6 +2247,32 @@ fn main() {
                 }
             })
         }
+        "nb-normalize" | "nb-g2p" | "nb-tagger" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::core::structural_tagger::one_stress;
+            use vernacula_phonemizer::languages::norwegian::{norwegian, norwegian_tagger};
+            let nb = norwegian::create_norwegian().unwrap();
+            let tagger = (name == "nb-tagger")
+                .then(|| norwegian_tagger::create_norwegian_tagger("nb-g2p-tagger").unwrap());
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nb.normalize(&t()),
+                    "text" => with_host(&js("nb"), || nb.text(&t(), None)),
+                    "rules" => nb.phonemize_word_rules(&w()),
+                    "word" => nb.phonemize_word(&w()),
+                    "nat" => nb.nativise(&w()),
+                    "tag" => tagger.as_ref().unwrap().tag(&w()).unwrap(),
+                    "oneStressNb" => one_stress(
+                        &w(),
+                        vernacula_phonemizer::js_re!(r"[ɑaeɛiɪoɔuʉʊyʏøœæ]", "u"),
+                    ),
+                    op => panic!("nb: unknown op {op}"),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

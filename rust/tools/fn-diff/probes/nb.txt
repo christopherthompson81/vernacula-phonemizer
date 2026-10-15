@@ -1,0 +1,38 @@
+# Norwegian Bokmål (nb) off-golden probes: synthetic text only, one or more lines per normalize.ts arm plus the
+# neighbour each arm must decline, and g2p / tokenizer corners.
+# 1 space-grouped thousands (ASCII space, NBSP, narrow NBSP, thin space; a leading zero; four digits)
+Byen har 5 000 000 innbyggere og 1\u{a0}250 biler og 3\u{202f}400 hus og 7\u{2009}800 trær.
+Det var 0 500 og 12 3456 og 1 23 stykker.
+# 2 English comma grouping and 3 decimal comma
+Arealet er 23,764 og 291,773,000 eller 12,5 og 3,14159 og 1,2.
+# 4 colon clock
+Møtet starter 14:30 og slutter 9:05, ikke 123:456.
+# 5 abbreviations
+Vi møtes kl. 8 hos dr. Hansen, bl.a. for nr. 5 osv. og f.eks. dvs. ca. alt med Piquet jr. her.
+Han levde 323 f.Kr. og døde 12 e.Kr og f.kr! men ikke f. Kristian og F.KRISTUS.
+# 6 percent and 7 degrees
+Renten steg 5 % og 12%, det var 20 °C og 68°F, 25°Cölner og 40° varmt, 30 ℃ og 86 ℉ i dag.
+# 8 squared and cubed units
+Huset er 120 m² og tomta 3 km² og 5 cm ² og 2 m³ jord.
+# 9 numeric dates
+Født 24.08.2021 og 5.9.1939 og 31.13.2000 og 32.01.1999 og 00.00.2020.
+# 10 ordinal ranges and 11 ordinal dot
+I 10.–11. århundre og 07.-08. århundre og 3. mai og 21. desember, men året 1998. Så kom 07. juli.
+# 12 ranges
+Mellom 1990-1995 og 10 – 20 men ikke 1-2-3 eller -5-6.
+# 13 currency
+Det koster $50 og €20 og £5 og ¥2500 og ¥130 000, og ¥ 7 og 10 kr.
+Mellom ¥2500 og ¥130 000 og $110m.
+# 14 signed numbers
+Temperaturen var -5 grader og +30°C og UTC +1 og −12, men ikke a-5.
+# 15 arithmetic and relational
+Regn 3+1 og 4 + 5, x ± y, a ≈ b, c ≤ d, e ≥ f, EX = Utryddet, i < j, k > l, 3 × 4, 8 ÷ 2.
+# symbol tier: rates, multiply, ampersand
+Toget kjører 120 km/t og 90 km/h og 3 m/s, et 6x6 cm felt, 35 mm og B&B og Arts & Sciences.
+# tokenizer: medial apostrophe, closing quote, genitive s; out-of-inventory letters
+O'Shannessy og l'Oyapock og President's og Anders' bil, sa 'nei' og ’ja’ og O’Flynn.
+São Paulo og Malmö og Señor Göring og Dvořák og Øystein og Åse.
+# g2p corners: length, softening, digraphs, silent digraphs, retroflex, silent d, geminates, -sjon
+bok takk ski kino gift skje sjø kjøre tjue hvem gnage hjem gjøre ljom djup
+kart barn ærlig vers god land jord hånd nasjon stasjon station bergen lekker
+ekstra taxi xylofon mygg bukk mann ringe sang hvordan

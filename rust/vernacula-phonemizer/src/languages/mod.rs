@@ -42,6 +42,7 @@ pub mod malay;
 pub mod mandarin;
 pub mod marathi;
 pub mod nepali;
+pub mod norwegian;
 pub mod polish;
 pub mod portuguese;
 pub mod portuguese_br;

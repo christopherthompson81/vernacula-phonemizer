@@ -58,6 +58,7 @@ const FLEURS_DIR: Record<string, string> = {
     ky: "ky_kg",
     uz: "uz_uz",
     da: "da_dk",
+    nb: "nb_no",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -3628,6 +3629,80 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
         for (const s of ["", "ˈa", "ˈˈa", "ˌˌa", "ˈaˈb", "ˌaˈb", "ˌa", "aˌbˌc", "ba", "bdə", "pst", "ˈˌaˌˈb", "kɐɐ", "øːˀ", "ˈaˌbˈc"])
             emit({ word: units(s), op: "oneStress" }, oneStress(s));
+    },
+    // ── Norwegian Bokmål (nb). Inputs: the nb golden, FLEURS nb_no (columns 3 and 4) and probes/nb.txt. ──
+    // normalizeNorwegian (the symbol tier included) and `createNorwegian().text` over every text plus synthetic rows
+    // for every arm: each grouping separator (and a leading zero / four digits), comma grouping vs decimals, colon
+    // clocks, each abbreviation in three casings and four tails, percent, every degree form, squared units, dates
+    // (valid / day or month out of range / zero), ordinal ranges and dots (0…40, padded), ranges, each currency sign,
+    // signs and relational signs.
+    async "nb-normalize"() {
+        const { normalizeNorwegian } = await import("../../../src/languages/norwegian/normalize.ts");
+        const { createNorwegian } = await import("../../../src/languages/norwegian/norwegian.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createNorwegian();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["nb"], FLEURS_DIR.nb, ["nb.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["5 000 000", "1\u00a0250", "3\u202f400", "7\u2009800", "0 500", "12 3456", "23,764", "291,773,000", "0,500", "1,2345", "12,5", "1 234,5", "802.11"]) add(`det er ${g} mennesker`);
+        for (const c of ["9:05", "14:30", "24:60", "123:456", "kl. 14:30"]) add(`ved ${c} i dag`);
+        for (const ab of ["f.kr.", "f.kr", "e.kr.", "ca.", "kl.", "dvs.", "bl.a.", "f.eks.", "osv.", "nr.", "dr.", "jr."]) for (const v of [ab, ab.toUpperCase(), ab[0]!.toUpperCase() + ab.slice(1)]) for (const tail of [" 5", "", " Så", "x"]) add(`det var ${v}${tail}`);
+        for (const d of ["20 °C", "20°c", "68 ° F", "25°Cölner", "40°", "30 ℃", "86℉"]) add(`det er ${d} her`);
+        for (const u of ["km²", "km ²", "m²", "cm²", "m³", "KM²"]) add(`et areal på 5 ${u} jord`);
+        for (const dt of ["24.08.2021", "5.9.1939", "31.13.2000", "32.01.1999", "00.00.2020", "1.1.20201", "12.12.1912"]) add(`født ${dt} her`);
+        for (let a = 0; a <= 40; a++) for (const tail of [". mai", ". Mai", ".", ".–" + (a + 1) + ". århundre"]) add(`den ${a}${tail}`);
+        for (const a of ["01", "07", "10"]) for (const tail of [". mai", ".-08. århundre"]) add(`den ${a}${tail}`);
+        for (const r of ["1990-1995", "10 – 20", "1-2-3", "-5-6", "5—7", "a-5", "(−3)", "+30", "3+1", "4 + 5", "UTC +1"]) add(`fra ${r} og så`);
+        for (const sgn of ["$", "€", "£", "¥"]) for (const f of [`${sgn}50`, `${sgn} 50`, `${sgn}130 000 og`, `${sgn}2500 og`, `${sgn}110m`, `50${sgn}`, `${sgn}`]) add(`det koster ${f} nu`);
+        for (const r of ["±", "≈", "≤", "≥", "=", "<", ">", "×", "÷", "&"]) add(`a ${r} b og 3${r}4`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeNorwegian(t));
+            emit({ text: units(t), src, op: "text" }, withHost("nb", () => E.text(t)));
+        }
+        // numbers through text(): 0…20,000, magnitudes, 2^53 neighbours, long runs.
+        const ns: string[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1e3 + 21), String(k * 1e6 + 1001), String(k * 1e9 + 3));
+        ns.push("9007199254740991", "9007199254740992", "9007199254740993", "12345678901234567890", "007", "1000000000000");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, withHost("nb", () => E.text(n)));
+    },
+    // phonemizeWordRules and phonemizeWord over every letter run (as written and lowercased), every lexicon key,
+    // every 1–3 letter string of the alphabet, every 4-letter string over the context letters, corners; the
+    // nativiser.
+    async "nb-g2p"() {
+        const { phonemizeWordRules, phonemizeWord, nat, lexicon } = await import("../../../src/languages/norwegian/norwegian.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("nb")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzæøåéèêëàâôü'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiosktgjrnldhxv"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const s of ["sjon", "tion", "skj", "sk", "ng", "ck", "gn", "hv", "kj", "tj"]) for (const p of ["", "a", "na", "ske", "ber"]) words.add(p + s);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐚", "𝐚𝐛", "ÆBLE", "Øystein", "é", "öl", "ﬁsk", "São", "''", "--"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "rules" }, phonemizeWordRules(w));
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        for (const k of lexicon().keys()) emit({ word: units(k), op: "word" }, phonemizeWord(k));
+    },
+    // The BiLSTM tagger over every pre-pass word of the texts (raw, as the pre-pass offers it, and nativised),
+    // every 25th lexicon key and corners; oneStress with the nb vowel class over synthetic mark arrangements.
+    async "nb-tagger"() {
+        const { createNorwegianTagger } = await import("../../../src/languages/norwegian/norwegianTagger.ts");
+        const { oneStress } = await import("../../../src/core/structuralTagger.ts");
+        const { nat, lexicon } = await import("../../../src/languages/norwegian/norwegian.ts");
+        const tagger = await createNorwegianTagger();
+        if (!tagger) throw new Error("nb tagger unavailable");
+        const words = new Set<string>();
+        for (const t of langTexts("nb")) for (const m of t.matchAll(/[A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+/gu)) words.add(m[0]);
+        for (const t of langTexts("nb")) for (const m of t.matchAll(/[\p{L}\p{M}'’]+/gu)) words.add(nat(m[0]));
+        let i = 0;
+        for (const w of lexicon().keys()) if (i++ % 25 === 0) words.add(w);
+        for (const w of ["", "мир", "a☃b", "ÆBLE", "ég", "İsted", "ſkip", "x", "qqqq", "abcdefghijklmnopqrstuvwxyzæøå"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
+        for (const s of ["", "ˈa", "ˈˈa", "ˌˌa", "ˈaˈb", "ˌaˈb", "ˌa", "aˌbˌc", "ba", "bdə", "pst", "ˈˌaˌˈb", "kɐɐ", "øːˀ", "ˈaˌbˈc"])
+            emit({ word: units(s), op: "oneStressNb" }, oneStress(s, /[ɑaeɛiɪoɔuʉʊyʏøœæ]/u));
     },
 };
 
