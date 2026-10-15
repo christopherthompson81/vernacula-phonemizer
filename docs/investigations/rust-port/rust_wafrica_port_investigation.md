@@ -296,3 +296,30 @@ stop at the next sign or at a clause mark.
 
 **Implication.** Commit wo. All six ported; merge origin/main (the sbantu group, #1592, landed meanwhile) and re-run
 every gate on the combined tree.
+
+## Run 10 — 2026-10-15 09:05 (merge of main 263f6bf3, every gate on the combined tree)
+
+**What changed.** origin/main gained the southern Bantu group (#1592). Every commit of this branch would have
+conflicted in the registry, so main was MERGED once instead. The four routine conflicts (`registry.rs`,
+`languages/mod.rs`, `dump.mts`, fn-diff `main.rs`) were resolved by `wafrica/remerge.py`: main's file plus this
+branch's contiguous additions cut from HEAD, `FLEURS_DIR` and `FLEURS_SPLITS` re-added. LANGUAGES went 103 → 109, its
+declared length matches its entry count, and `dump.mts` parses.
+
+**Commands.** `wafrica/gates.sh` (fmt, build, parity over all languages, regex-diff, clippy incl. errors, test) on tree
+7f55ae4a; `wafrica/modules.sh` (every per-module dump re-dumped and replayed, then sync / best / phonemize-trace /
+trace with `LANGS=yo,ig,ha,ee,ak,wo`).
+
+**Raw finding.**
+- fmt clean; build 0 warnings.
+- parity: every line byte-identical but mag 199/200, tt 199/200, syl 195/200 (the known port-pending rows) and
+  ak 130/131 (its `bo` row); yo, ig, ha, ee, wo 200/200; every sbantu language 200/200.
+- regex-diff: `146326 probe results identical, 0 DIFFER, 0 patterns refused`.
+- clippy: completes with no `error:` lines; in this group's files only the six `module_inception` warnings.
+- cargo test: 315 + 1 passed, 0 failed.
+- per module, unchanged from Runs 3–9: yo 12025 / 92370, ig 12430 / 106756, ha 86953 / 248249, ee 988 / 99205,
+  ak 5195 (+1 bo row) / 211119, wo 11094 / 162254, all 0 DIFFER otherwise.
+- end to end: `14449 identical, 1 DIFFER` for each of the four dumps; the one row is ak's Tibetan run.
+
+**Port-pending.** ak's `Butan (འབྲུག་ཡུལ་) …` on `bo`, pinned.
+
+**Implication.** Ready for the PR.
