@@ -3864,6 +3864,65 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
         }
     },
+    // ── Bavarian (bar). Inputs: the bar golden and probes/bar.txt; FLEURS has no Bavarian, so the synthetic rows
+    // and the probes carry every arm the golden misses. ──
+    // normalizeBavarian (the symbol tier included) and `createBavarian().text` over every text plus synthetic rows
+    // for every arm: the three `&nbsp;` spellings, `z. B.`, ordinals 0…40 after every licenser / before every head
+    // noun / under a governing preposition / declined, each abbreviation in three casings and tails, the clock
+    // and clock ranges over an hour × minute grid, both groupings and every separator, degrees, signs in and out of
+    // the degree slot, fractions over the full 2-digit × 1-digit grid, ranges ascending / descending / chained.
+    async "bar-normalize"() {
+        const { normalizeBavarian } = await import("../../../src/languages/bavarian/normalize.ts");
+        const { createBavarian } = await import("../../../src/languages/bavarian/bavarian.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createBavarian();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["bar"], undefined, ["bar.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const sp of ["&nbsp;", "&#160;", "\u00a0", "&NBSP;", "&#160"]) add(`67${sp}km und a${sp}b`);
+        for (const z of ["z. B.", "z.B.", "Z. B.", "z.  B.", "z. b."]) add(`des is ${z} a Haus`);
+        for (let n = 0; n <= 40; n++) for (const [pre, post] of [["", " Jenna"], ["", " Joahundat"], ["", " Jh"], ["am ", " Haus"], ["da ", " Buachstob"], ["vo da ", " Person"], ["um de ", " Person"], ["", " ISBN"], ["", " noch"], ["Im ", " Mai"], ["seitm ", " Beziak"], ["", ""]]) add(`${pre}${n}.${post}`);
+        for (const ab of ["bzw.", "za.", "ca.", "Eihw.", "Mrd.", "Mio."]) for (const v of [ab, ab.toUpperCase(), ab.toLowerCase()]) for (const tail of [" 5", " €", "", ")", " Haus"]) add(`es san ${v}${tail}`);
+        for (const h of ["0", "5", "09", "12", "23", "24", "39"]) for (const m of ["00", "05", "30", "59", "60"]) for (const post of ["", " Uhr", "Uhr", "-9:00 Uhr", " - 12:00", ":36", ".30"]) add(`vo ${h}:${m}${post} do`);
+        for (const g of ["30.528", "4.324.782", "0.500", "1.2345", "8140.43P", "549 000", "43\u00a0000", "1\u202f234", "7\u2009000", "12345 678"]) add(`des san ${g} km`);
+        for (const d of ["-13 °C", "+15 °C", "30 ℃", "86℉", "20°c", "47°16′15″", "90°-Winkl", "360°", "−1 bis −2 °C", "-0,5 beziehungsweise -1,4 °C", "1961 -1990", "-5 Grad", "(−3 Grad)", "±5"]) add(`do woar ${d} hoit`);
+        for (let a = 0; a <= 12; a++) for (let b = 0; b <= 9; b++) add(`des hod ${a}/${b} da`);
+        for (const r of ["5 - 8", "6-9", "2003-2004", "9-3", "3-86520-078-8", "8115-2", "1–2", "12—11"]) add(`Beziak ${r} do`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeBavarian(t));
+            emit({ text: units(t), src, op: "text" }, withHost("bar", () => E.text(t)));
+        }
+    },
+    // phonemizeWord over every letter run (as written and lowercased), every 1–3 letter string of the alphabet,
+    // every 4-letter string over the context letters, corners; the nativiser; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "bar-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/bavarian/bavarian.ts");
+        const { numberToWords } = await import("../../../src/languages/bavarian/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zåäöüéèáàâßA-ZÅÄÖÜÉÈÁÀÂ'-]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("bar")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzåäöüéß'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouårhcgnksdtp"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "öl", "ﬁsch", "Dvořák", "Ångström", "Müller", "Ärger"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
 };
 
 

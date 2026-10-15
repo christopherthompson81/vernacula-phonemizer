@@ -2334,6 +2334,29 @@ fn main() {
                 }
             })
         }
+        "bar-normalize" | "bar-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let bar =
+                vernacula_phonemizer::languages::bavarian::bavarian::create_bavarian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => bar.normalize(&t()),
+                    "text" => with_host(&js("bar"), || bar.text(&t())),
+                    "word" => bar.phonemize_word(&w()),
+                    "nat" => bar.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        bar.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
