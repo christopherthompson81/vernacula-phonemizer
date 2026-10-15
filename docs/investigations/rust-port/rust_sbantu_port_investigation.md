@@ -213,3 +213,32 @@ Haystack: pre + tier + post changed golden 41/200, probes 10/12, synthetic 361/6
 
 **TS finding (reported, not fixed).** As in st, a magnitude suffix with no currency sign is spelled as letters:
 `Go ne go le 1.5bn` → `… 1 ntlha 5bn` → *… bʊt͡ɬʰanʊ bn*.
+
+## Run 9 — 2026-10-15 06:45 (nso: first build, differentials, pins)
+
+**Shape.** As st (no manifest.ts; sepedi.rs and numbers.rs load their own slices; sepedi.rs follows sesotho.rs line
+for line, as the two TS files do). normalize.rs runs the tier FIRST; its JSON takes `TSE`/`AND` from the manifest.
+Two of its patterns are `String.raw` templates, whose NBSP stays an ESCAPE (`\u00a0` text) in the pattern, while
+the unit pattern is a cooked template whose NBSP / NNBSP / thin space are literal characters; the Rust spells each
+the way the TS pattern holds it. `UNIT` keeps the object's order for `makeBareUnitNormalizer` and the alternations.
+
+**Commands.** The three audits (`fix_esc.py` restored 25 literals; then 22 raw patterns, 1 not verbatim (TOKEN),
+0 escapes short, 0 non-ASCII runs missing; the two `format!` rand templates checked by hand); `parity nso`;
+`nso-normalize` / `nso-g2p` dumps with `FLEURS_DIR` `nso: "nso_za"`; `sbantu/e2e.sh nso nso-normalize nso-g2p
+phonemize-sync phonemize-best trace`; the TS suite's 87 calls appended to sepedi.rs.
+
+**Raw finding.** `nso: 200/200` on the first build, and:
+```
+nso-normalize: 11073 identical, 0 DIFFER   (golden 423 / fleurs 10140 / probe 39 / synthetic 471)
+nso-g2p: 65392 identical, 0 DIFFER
+phonemize-sync / phonemize-best / trace: 3534 identical, 0 DIFFER each
+cargo test --release sepedi: 1 passed (87 pins)
+```
+Haystack: `normalizeSepedi` changed golden 15/141, FLEURS 248/3,380, probes 11/13, synthetic 119/157 texts.
+
+**Guard check.** The range rule's digit-count guard (a length difference of 2 or more keeps the pair) loosened to
+99: `nso-normalize: 11063 identical, 10 DIFFER`. Restored: 0 DIFFER.
+
+**Clippy note.** `cargo clippy --workspace` stops with one `invisible_characters` error, in
+`languages/sylheti/normalize.rs:163` (main's, fixed by a PR landing now). None of this group's files holds a literal
+invisible or format character (grep over the six TS directories and the Rust modules).

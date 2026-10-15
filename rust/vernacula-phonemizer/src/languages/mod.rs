@@ -68,6 +68,7 @@ pub mod rangpuri;
 pub mod romanian;
 pub mod russian;
 pub mod scottishgaelic;
+pub mod sepedi;
 pub mod serbian;
 pub mod sesotho;
 pub mod setswana;

@@ -2851,6 +2851,27 @@ fn main() {
                 }
             })
         }
+        "nso-normalize" | "nso-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let nso = vernacula_phonemizer::languages::sepedi::sepedi::create_sepedi().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nso.normalize(&t()),
+                    "symbols" => nso.symbols(&t()),
+                    "text" => with_host(&js("nso"), || nso.text(&t())),
+                    "word" => nso.phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        nso.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

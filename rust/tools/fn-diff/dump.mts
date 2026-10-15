@@ -71,6 +71,7 @@ const FLEURS_DIR: Record<string, string> = {
     or: "or_in",
     zu: "zu_za",
     xh: "xh_za",
+    nso: "nso_za",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5304,6 +5305,61 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1.5, 20.7, -1, -1.5, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
         for (const raw of ["9007199254740993", "1000000000000000000001", "1000000", "007", "", "12a", "١٢", "\ud800", "𝟙2", "1 2", "1 2"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
+        }
+    },
+    // ── Sepedi (nso). Inputs: the nso golden, FLEURS nso_za (columns 3 and 4) and probes/nso.txt. normalizeSepedi,
+    // the symbol tier over the raw text (recorded through the wrapper; the normalizer runs it first) and
+    // `createSepedi().text`, over every text plus synthetic rows for every arm. ──
+    async "nso-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeSepedi } = await import("../../../src/languages/sepedi/normalize.ts");
+        const { createSepedi } = await import("../../../src/languages/sepedi/sepedi.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/sepedi\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createSepedi();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["nso"], FLEURS_DIR.nso, ["nso.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const c of ["4:41.30", "12:30", "1:09:02", "2:2", "123:45", "12:345", "a1:30", "1:30a"]) add(`ka ${c} go`);
+        for (const d of ["U.S.", "U. S. A.", "U.\u00a0S.", "U.S.A", "U.S.Geological", "A.B", "É.Ü.", "U.S", "U.S. Ke", "U.S. ke"]) for (const tail of ["", " Ke", " ke", "."]) add(`naga ya ${d}${tail}`);
+        for (const g of ["1,000", "1,000,000", "1,234,5", "1,000.5", "1.000", "1.000.000", "1 000", "1\u00a0000", "1\u202f000", "1\u2009000", "30 9", "1,0000", "1,000,000,000,000,000", "1,000,000,000,000"]) add(`tše ${g} tša batho`);
+        for (const o of ["15th", "1st", "2ND", "3rd", "16thx"]) add(`ngwagakgolong wa ${o}`);
+        for (const r of ["R5.50", "R1000", "R 1000", "R100", "R100 milione", "R5 dimilione", "R5.5 bilione", "r5000", "R59", "aR5000", "R5000a", "R 5\u00a0milione"]) add(`ka ${r} go`);
+        for (const u of ["5 km", "1 km", "5km", "5 KM", "5 m", "1 m", "5 cm", "5 mm", "5 kg", "1 000 km", "1,5 km", "5 km/h", "5 km/s", "5 m/s", "5 km/km", "5 km/\u017f", "5 \u212am", "5 km²", "5 km2", "5 m²", "5 km³", "5 cm²", "5 cm2", "802.11n", "802.11a km", "5 kma", "5 km'", "5 m3"]) add(`go ${u} go`);
+        for (const b of ["km", "kg", "mm", "cm", "m", "KM", "km.", "km/h"]) add(`ka ${b} go`);
+        for (const d of ["30°C", "30 °C", "30°c", "30º C", "86°F", "35°W", "35° N", "45°", "45º", "45°x", "Celsius 30°C", "30°C Celsius", "1,5°C"]) add(`go ${d} lehono`);
+        for (const r of ["10-20", "20-10", "10 – 20", "10—20", "1995-96", "1995-1996", "5-5", "-5-6", "5-6-7", "10-20.5", "100-2", "10-20 -30", "1-2 – 3"]) add(`go ${r} go`);
+        for (const v of ["3.5", "3.14", "3.145", "1,5", "1,50", "1,500", "0.5", "1.2.3"]) add(`go ${v} go`);
+        for (const t of ["$5", "US$5", "50%", "5 %", "peresente ye 5", "A & B", "$5 milione", "$5.5 dimilione"]) add(`go ${t} go`);
+        for (const c of ["ALL CAPS", "  spaced  out  ", "a\u00a0\u00a0b"]) add(c);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeSepedi(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "text" }, withHost("nso", () => E.text(t)));
+        }
+    },
+    // phonemizeWord over every letter run, every 1–3 letter string of the alphabet (with š ê ô) and corners;
+    // numberToWords over 0…20,000, magnitudes and the token-string fallback.
+    async "nso-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/sepedi/sepedi.ts");
+        const { numberToWords } = await import("../../../src/languages/sepedi/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("nso")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzšêô'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "Tšhipi", "TŠH", "tšh", "ŝ", "x", "xa", "ax", "çà", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1.5, 20.7, -1, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["9007199254740993", "1000000000000000000001", "007", "", "12a", "١٢", "\ud800", "𝟙2"]) {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
         }
