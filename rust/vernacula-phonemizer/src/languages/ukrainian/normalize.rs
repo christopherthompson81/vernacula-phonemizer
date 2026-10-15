@@ -267,6 +267,12 @@ static ORDINAL_SUFFIX_RE: LazyLock<JsRegex> = LazyLock::new(|| {
     .unwrap()
 });
 
+/// A key shaped like an INITIAL (one letter, or that letter doubled: р, рр) expands only as written in lowercase
+/// (#1551; Правопис 2019 §64). See src/languages/ukrainian/normalize.ts.
+fn case_refused(written: &JsString, key: &JsString) -> bool {
+    js_re!(r"^(\p{L})\1?$", "u").test(key) && written != key
+}
+
 static ABBREV_CONTINUES: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
@@ -401,9 +407,11 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
     //    the table's keys, so every arm keeps the match on a miss (the middle arm too, since #1525). A capital
     //    after the dot also ends the sentence, so the dot is kept, unless the abbreviation is preposed.
     s = rewrite_with(&s, &ABBREV_CONTINUES, |mm, t| {
-        let key = mm.group(1, t).unwrap().to_lower_case();
+        let written = mm.group(1, t).unwrap();
+        let key = written.to_lower_case();
         match dotted_abbrev(&key) {
             None => mm.value(t),
+            Some(_) if case_refused(&written, &key) => mm.value(t),
             Some(w) => {
                 let sp = mm.group(2, t).unwrap();
                 let next = mm.group(3, t).unwrap();
@@ -418,14 +426,20 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
         }
     });
     s = rewrite_with(&s, &ABBREV_BEFORE_PUNCT, |mm, t| {
-        match dotted_abbrev(&mm.group(1, t).unwrap().to_lower_case()) {
+        let written = mm.group(1, t).unwrap();
+        let key = written.to_lower_case();
+        match dotted_abbrev(&key) {
             None => mm.value(t),
+            Some(_) if case_refused(&written, &key) => mm.value(t),
             Some(w) => js(w),
         }
     });
     s = rewrite_with(&s, &ABBREV_ENDS, |mm, t| {
-        match dotted_abbrev(&mm.group(1, t).unwrap().to_lower_case()) {
+        let written = mm.group(1, t).unwrap();
+        let key = written.to_lower_case();
+        match dotted_abbrev(&key) {
             None => mm.value(t),
+            Some(_) if case_refused(&written, &key) => mm.value(t),
             Some(w) => js(w).concat(&js(".")),
         }
     });
@@ -510,11 +524,13 @@ pub(crate) fn normalize_ukrainian(input: &JsString) -> JsString {
             let Some(head) = forms.get(idx) else {
                 return whole;
             };
-            // The minutes agree with the feminine хвилина (#1525): 1:01 is першій одна.
+            // The minutes agree with the feminine хвилина (#1525), and a leading zero is read (#1551): 1:01 is
+            // перша нуль одна. See the TS twin.
             if mv == 0.0 {
                 head.clone()
             } else {
-                head.concat(&js(" "))
+                let zero = mm.group(2, full).unwrap().starts_with(&js("0"));
+                head.concat(&js(if zero { " нуль " } else { " " }))
                     .concat(&feminine(&cardinal(mv as u64)))
             }
         },

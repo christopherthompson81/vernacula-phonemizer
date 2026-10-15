@@ -300,6 +300,21 @@ pub fn create_ukrainian() -> Result<UkrainianPhonemizer, String> {
 mod tests {
     use super::*;
 
+    /// test/ukrainian-1551.test.ts: the leading-zero minute is read with нуль (the Kyiv Dictionary's own example),
+    /// and a capital initial-shaped letter before a name is an initial.
+    #[test]
+    fn the_1551_leading_zero_and_initial() {
+        use crate::languages::ukrainian::normalize::normalize_ukrainian;
+        let n = |s: &str| normalize_ukrainian(&js(s)).to_string_lossy();
+        let uk = |s: &str| crate::phonemize(s, "uk").unwrap();
+        assert_eq!(n("о 8:05"), "о восьмій нуль п'ять");
+        assert!(!n("о 10:10").contains("нуль") && !n("о 9:00").contains("нуль"));
+        assert_eq!(uk("Р. Шухевич був"), uk("ер Шухевич був"));
+        assert_eq!(uk("Р. Р. Шухевич"), uk("ер ер Шухевич"));
+        assert_eq!(n("у 1990 р. Потім"), n("у 1990 року. Потім"));
+        assert_eq!(n("у 1990 р. потім"), n("у 1990 року потім"));
+    }
+
     #[test]
     fn suffix_notation_reads_as_ordinal_or_oblique_cardinal() {
         let e = create_ukrainian().unwrap();
@@ -336,7 +351,8 @@ mod tests {
         assert_eq!(n("\u{1C81}ив., далі"), "\u{1C81}ив., далі");
         assert_eq!(n("Constructor 10:30"), "Constructor десята тридцять");
         assert_eq!(n("о 20:21"), "о двадцятій двадцять одна");
-        assert_eq!(n("3:02"), "третя дві");
+        // #1551 added the spoken leading zero (*нуль*); the minutes still agree with the feminine хвилина.
+        assert_eq!(n("3:02"), "третя нуль дві");
     }
 
     #[test]

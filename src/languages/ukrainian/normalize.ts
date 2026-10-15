@@ -213,6 +213,12 @@ const RATE = DEF.symbolTier.rateDenominators;
 /** Abbreviations whose dot is NOT a sentence end (ukrainian.jsonc `dottedAbbrev`). */
 const DOTTED_ABBREV = DEF.dottedAbbrev;
 const ABBREV_ALT = Object.keys(DOTTED_ABBREV).sort((a, b) => b.length - a.length).join("|");
+/** A key shaped like an INITIAL — one letter, or that letter doubled (`р`, `рр`) — expands only as written in
+ *  lowercase (#1551). Правопис 2019 §64 writes an initial as a capital and a period (`Т. Г. Шевченко`) and the
+ *  year abbreviation lowercase after a numeral (`2008 р.`), but the `i` flag the patterns carry let
+ *  `Р. Шухевич` read *року. Шухевич*. A capital falls through to the initialism speller (*ер*). */
+const INITIAL_SHAPED = /^(\p{L})\1?$/u;
+const caseRefused = (written: string, key: string): boolean => INITIAL_SHAPED.test(key) && written !== key;
 /** The abbreviations that stand BEFORE what they abbreviate (`див. Петренко`, `стор. 5`), so a capital after
  *  the dot is their object and never a new sentence (ukrainian.jsonc `preposedAbbrev`). The rest FOLLOW a
  *  number or a list (`1990 р.`, `та ін.`) and can end one. */
@@ -329,7 +335,7 @@ export function normalizeUkrainian(input: string): string {
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
             const key = ab.toLowerCase();
             const w = DOTTED_ABBREV[key];
-            if (w === undefined) return m0;
+            if (w === undefined || caseRefused(ab, key)) return m0;
             return !PREPOSED_ABBREV.has(key) && startsSentence(next) ? `${w}.${sp}` : `${w}${sp}`;
         });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*[,;:])`, "giu"),
@@ -337,7 +343,7 @@ export function normalizeUkrainian(input: string): string {
             // ⚠ THE MISS BRANCH IS REACHABLE (#1122) here too — this arm was the one of the three without
             // the guard (#1525), so `ᲁив., далі` (U+1C81, which `iu` folds onto д) printed `undefined`.
             const w = DOTTED_ABBREV[ab.toLowerCase()];
-            return w === undefined ? m0 : w;
+            return w === undefined || caseRefused(ab, ab.toLowerCase()) ? m0 : w;
         });
     s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])(${ABBREV_ALT})\\.(?=\\s*(?:[.!?»)]|$))`, "giu"),
         (m0, ab: string) => {
@@ -345,7 +351,7 @@ export function normalizeUkrainian(input: string): string {
             // keys but carries `i`+`u`, so JS's fold widens it and a near-miss matches while its
             // key is absent. The `!` here made `String.replace` stringify `undefined`.
             const w = DOTTED_ABBREV[ab.toLowerCase()];
-            return w === undefined ? m0 : `${w}.`;
+            return w === undefined || caseRefused(ab, ab.toLowerCase()) ? m0 : `${w}.`;
         });
 
     // 6) UNITS the shared symbol tier cannot express.
@@ -384,7 +390,10 @@ export function normalizeUkrainian(input: string): string {
     //    comma unread (`о 6:30.` was *шість , тридцять*), 3 of the corpus's 25 clock texts.
     //    The MINUTES agree with the elided *хвилина*, which is FEMININE: 1:01 is першій одна, 3:22 третя
     //    двадцять дві (#1525; the same reading Russian takes, #1513). Spelled here because the number path
-    //    reads a bare numeral as masculine. A leading zero is not read (`1:01` is першій одна, not нуль одна).
+    //    reads a bare numeral as masculine.
+    //    ⚠ A LEADING ZERO IS READ (#1551): the Kyiv Dictionary's language consultation gives the digital reading
+    //    as «о восьмій нуль п'ять», and both FLEURS speakers of the corpus's one such time (`о 22:08`) say
+    //    *нуль*. So 1:01 is перша нуль одна. `HH:00` stays the bare hour (*нуль-нуль* is the emphatic "sharp").
     s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?![\d:]|[.,]\d)/gu,
         (whole: string, h: string, min: string, offset: number, full: string) => {
             const hv = Number(h), mv = Number(min);
@@ -394,7 +403,8 @@ export function normalizeUkrainian(input: string): string {
             const forms = ordinalForms(hv);
             const head = forms[idx];
             if (head === undefined) return whole;
-            return mv === 0 ? head : `${head} ${feminine(cardinal(mv))}`;
+            if (mv === 0) return head;
+            return `${head}${min.startsWith("0") ? " нуль" : ""} ${feminine(cardinal(mv))}`;
         });
 
     // 8) SIGNS. `+30°C` lost its sign entirely (the ° rule above has already made it `+30 градусів …`).

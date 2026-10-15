@@ -60,8 +60,9 @@ public class UkrainianPortFindingsTests
     [Fact]
     public void ClockMinutesAgreeWithTheFeminineKhvylyna()
     {
-        Assert.Equal("О першій одна", N("О 1:01"));
-        Assert.Equal("третя дві", N("3:02"));
+        // #1551 added the spoken leading zero (*нуль*); the minutes still agree with the feminine хвилина.
+        Assert.Equal("О першій нуль одна", N("О 1:01"));
+        Assert.Equal("третя нуль дві", N("3:02"));
         Assert.Equal("о двадцятій двадцять одна", N("о 20:21"));
         Assert.Equal("о одинадцятій дванадцять", N("о 11:12"));
     }

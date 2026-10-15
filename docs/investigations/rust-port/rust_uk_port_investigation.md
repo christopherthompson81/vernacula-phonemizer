@@ -293,3 +293,44 @@ run check:goldens`; `dotnet test csharp/Vernacula.Phonemizer.slnx`; `dotnet run 
   identical, 0 DIFFER.
 
 **Implication.** Ready for the PR.
+
+## Run 10 — 2026-10-14 (#1551: the leading-zero minute, and `Р.` before a name — sourced)
+
+**Question.** Run 8 left two items for "a native speaker": how `1:01` is read (with or without *нуль*), and
+`Р. Шухевич` reading *року*. Can sources settle them?
+
+**Command.** A research pass (web sources plus the FLEURS uk audio for the one leading-zero clock, transcribed by
+ASR), then probes and `FLEURS_ROOT=… npx tsx rust/tools/fn-diff/dump.mts uk-normalize` before and after.
+
+**Raw finding.**
+- **Leading zero: sourced.**
+  - The Kyiv Dictionary's language consultation (kyivdictionary.com, Випуск 5) gives the digital clock reading
+    with an explicit zero: «о шостій п'ятдесят п'ять, о восьмій **нуль** п'ять».
+  - СУМ-11 records *нуль-нуль* after an hour, for an exact time.
+  - The corpus's one leading-zero clock (`о 22:08`) was recorded by two FLEURS speakers. ASR returned *нуль*
+    before *вісім* for both.
+  - The minutes stay feminine after *нуль* (*нуль одна*). That part is inference: *п'ять* and *вісім* show no
+    gender.
+  - The fix reads the zero: `1:01` → *перша нуль одна*, `о 8:05` → *о восьмій нуль п'ять*. `HH:00` stays the
+    bare hour.
+- **`Р.`: sourced.** Правопис 2019 §64 writes an initial as a capital and a period, and the year abbreviation
+  lowercase after a numeral (`2008 р.`). The `i` flag on the abbreviation patterns let any capital `Р.` match the
+  key `р`.
+  - A key shaped like an initial (one letter, or that letter doubled: `р`, `рр`) now expands only as written.
+  - `Р. Шухевич` falls through to the initialism speller (*ер Шухевич*).
+  - `у 1990 р. Потім` / `… потім` and `Див. Петренко` are unchanged.
+  - FLEURS has 0 `Р.` and 2 `р.`, both years.
+- **Impact.**
+  - uk-normalize: 836 of 31,926 rows change, every one only adding *нуль*. That is 418 distinct inputs, nearly
+    all from the probe sweep; in FLEURS only the `22:08` text moves.
+  - The uk golden is unchanged.
+  - Rust replays uk-normalize (31,932 rows) and phonemize-sync (3,951 rows) identically, including the new
+    synthetic probe line.
+- **Tests.**
+  - The #1525 pins `О 1:01` → *О першій одна* and `3:02` → *третя дві* (TS, C#, Rust) move to the *нуль*
+    reading. The feminine agreement they guard stands.
+  - New relational tests are `test/ukrainian-1551.test.ts`, C# `Ukrainian1551Tests` and Rust
+    `the_1551_leading_zero_and_initial`. The clock expectation is the source's own example. With the fix
+    reverted, TS fails 2/4 (the other two are pins).
+
+**Implication.** Both uk items of #1551 are closed.
