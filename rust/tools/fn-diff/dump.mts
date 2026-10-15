@@ -4618,6 +4618,63 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(1e12 - 1);
         for (const n of ns) emit({ n: String(n), op: "words" }, cardinalWords(n));
     },
+    // ── Albanian (sq). Inputs: the sq golden and probes/sq.txt; FLEURS has no Albanian, so the synthetic rows and the
+    // probes carry every arm the golden misses. ──
+    // normalizeAlbanian (the symbol tier is inside it) and `createAlbanian().text`, over every text plus synthetic rows
+    // for every arm: ASCII km exponents, grouping with every separator, ranges (decimal operands, chained, after a
+    // letter), per mille, the tier's currency/units/rates/magnitudes, degrees with each scale and a following word or
+    // scale name, every sign in and out of its guards, decimals with leading zeros.
+    async "sq-normalize"() {
+        const { normalizeAlbanian } = await import("../../../src/languages/albanian/normalize.ts");
+        const { createAlbanian } = await import("../../../src/languages/albanian/albanian.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createAlbanian();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["sq"], undefined, ["sq.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const k of ["km2", "km3", "km2a", "km4", "akm2", "km22", "KM2"]) add(`sipërfaqja 5 ${k} është`);
+        for (const g of ["1.000", "130.000", "1,000,000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1.000,5", "12.5"]) add(`janë ${g} banorë`);
+        for (const r of ["5-8", "5 – 8", "1990—2000", "1.5-2.5", "5-8-9", "a5-8", "x-5", "5-", "-5", "3,5–4,5"]) add(`nga ${r} vjet`);
+        for (const p of ["5‰", "5 ‰", "x‰"]) add(`norma ${p} është`);
+        for (const c of ["5%", "1%", "US$5", "$1", "5 €", "£2", "5 km", "1 km", "5 m", "1 kg", "5 mb", "5 mhz", "5 km/h", "1 m/s", "5 km²", "5 milion", "1 milion", "5 mijë", "2 × 3", "A & B"]) add(`vlera ${c} sot`);
+        for (const d of ["20°", "20 °C", "20°c", "90 °F", "20° C Celsius", "20°Celsius", "20°veri", "1,5°", "20 ° C", "20°Ca"]) add(`temperatura ${d} sot`);
+        for (const s of ["+5", "+ 5", "a+5", "-5", "−5", "–5", "a-5", "x = y", "5=5", "a==b", "3 < 4", "a<=b", "5 > 2", "8 ÷ 2", "8÷x"]) add(`vlera ${s} sot`);
+        for (const d of ["1.5", "1,05", "0.005", "1.000005", "3,0", "3.00", "1.5.6"]) add(`numri ${d} është`);
+        for (const n of ["0", "1", "2", "5", "21", "1000", "1.5", "1,5", "1 000"]) for (const u of ["%", "‰", "€", "$", "US$", "£", "km", "m", "cm", "mm", "kg", "mb", "mhz", "km²", "m³", "km/h", "m/s", "milion", "mijë", "miliard", "°", "°C", "°F"]) { add(`janë ${n}${u} sot`); add(`janë ${n} ${u}`); add(`${u}${n} sot`); }
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeAlbanian(t));
+            emit({ text: units(t), src, op: "text" }, withHost("sq", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000, magnitudes
+    // and raw strings.
+    async "sq-g2p"() {
+        const { phonemizeWord, numberToWords } = await import("../../../src/languages/albanian/albanian.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zçëA-ZÇË]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("sq")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzçë'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiëoushdtlmnrjz"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "e\u0308", "c\u0327", "Ë", "ﬁ", "Dvořák", "Ångström", "mprehtë", "shtëpi", "ndrrojnë", "gjuhë", "xhaxha", "atlas", "qytet"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
+        }
+    },
 };
 
 

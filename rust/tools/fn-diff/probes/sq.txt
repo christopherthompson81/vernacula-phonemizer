@@ -1,0 +1,17 @@
+# Albanian (sq) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it must
+# decline, then tokenizer and g2p corners. FLEURS has no sq, so these and the dump's synthetic rows carry the arms
+# the golden misses.
+Sipërfaqja është 28.748 km2 dhe vëllimi 5 km3, por jo km4.
+Qyteti ka 130.000 banorë, 1,000,000 vizitorë dhe 12 345 678 lekë.
+Nga 1990-2000 dhe 5 – 8 vjet, ose 1,5–2,5 metra, por jo x-5.
+Norma është 5‰ dhe 10% dhe 1% e popullsisë.
+Kushton US$5 dhe $1 dhe 5 € dhe £2.
+Distanca 5 km, 1 km, 5 m, 1 kg, 5 mb, 5 mhz, 5 km/h dhe 1 m/s.
+Sipërfaqja 5 km² dhe 5 milion dhe 1 milion dhe 5 mijë banorë.
+Temperatura 20°, 20 °C, 90 °F, 20° C Celsius dhe 20°veri.
+Vlera +5 dhe -5 dhe −5 dhe x = y dhe 3 < 4 dhe 5 > 2 dhe 8 ÷ 2 dhe 2 × 3.
+Numri 1.5 dhe 1,05 dhe 0.005 dhe 3,0 është.
+Shtëpi, gjuhë, xhaxha, mprehtë, ndrrojnë, atlas, qytet, dhe, thikë, zhurmë, llamba, rrugë.
+Dvořák dhe Ångström dhe Zoë janë emra të huaj.
+Numri 1234567890123 dhe 999999 dhe 2000000 është.
+Kjo është constructor dhe toString… por pse? Po!

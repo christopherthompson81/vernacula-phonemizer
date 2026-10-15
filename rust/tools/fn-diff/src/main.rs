@@ -2596,6 +2596,29 @@ fn main() {
                 }
             })
         }
+        "sq-normalize" | "sq-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let sq =
+                vernacula_phonemizer::languages::albanian::albanian::create_albanian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => sq.normalize(&t()),
+                    "text" => with_host(&js("sq"), || sq.text(&t())),
+                    "word" => sq.phonemize_word(&w()),
+                    "nat" => sq.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        sq.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
