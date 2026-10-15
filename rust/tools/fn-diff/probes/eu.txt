@@ -1,0 +1,16 @@
+# Basque (eu) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it must
+# decline, then tokenizer and g2p corners. FLEURS has no eu, so these and the dump's synthetic rows carry the arms
+# the golden misses.
+Herriak 130.000 biztanle ditu, eta hiriak 1.000.000, baina 0.500 ez.
+Herriak 9 000 biztanle eta 12 345 678 euro ditu.
+Tenperatura 20 °C eta 90°F izan zen, eta 20 ºC atzo.
+Abiadura 100 km/h-ko zen, eta 50 km/h-an, eta 3 m/s-koa.
+Eremua 5 km²-ko da, 10 m³-an, eta 7 km-ko bidea, eta 3 kg-a.
+Biztanleen %5 eta 10 € eta 20 £ eta $30 eta 5 milioi.
+Balioa -5 da, baina 5-3 emaitza izan zen, eta (−2) ere bai.
+1998an jaio zen, 2000-ko urtea, 21ean, 5eko, 100etik, 3ra, 40-an.
+Batezbestekoa 1,5ean dago, 2,25eko, 1,0ean, 3,141 eta 0,05.
+Etxe, hitz, ttipi, kalle, erreka, ura, txakur, tzar eta tsunami.
+Ñandu eta Çaba eta Dvořák eta Ångström.
+Zenbakia 1234567890123 eta 999999999999 eta 1000000000000 da.
+Hau constructor eta toString da… baina zergatik? Hala!

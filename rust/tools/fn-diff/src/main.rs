@@ -2580,6 +2580,22 @@ fn main() {
                 }
             })
         }
+        "eu-normalize" | "eu-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let eu = vernacula_phonemizer::languages::basque::basque::create_basque().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => eu.normalize(&t()),
+                    "text" => with_host(&js("eu"), || eu.text(&t())),
+                    "word" => eu.phonemize_word(&w()),
+                    "nat" => eu.nativise(&w()),
+                    _ => eu.cardinal_words(input["n"].as_str().unwrap().parse().unwrap()),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

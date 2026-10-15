@@ -4566,6 +4566,58 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
         }
     },
+    // ── Basque (eu). Inputs: the eu golden and probes/eu.txt; FLEURS has no Basque, so the synthetic rows and the
+    // probes carry every arm the golden misses. ──
+    // normalizeBasque (the symbol tier is inside it) and `createBasque().text`, over every text plus synthetic rows
+    // for every arm: º, dot and space grouping with every separator, degrees, each unit × rate × case ending, each
+    // unit × exponent × hyphen × case ending, the tier's percent/currency/units/magnitudes, minus in and out of a
+    // range, every number × case ending with and without the hyphen and a comma fraction, comma decimals.
+    async "eu-normalize"() {
+        const { normalizeBasque } = await import("../../../src/languages/basque/normalize.ts");
+        const { createBasque } = await import("../../../src/languages/basque/basque.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createBasque();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["eu"], undefined, ["eu.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const ENDINGS = ["etik", "eko", "ean", "era", "koa", "tik", "an", "ko", "ra", "en", "a", "n", "x", ""];
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "12.5", "1.000,5"]) add(`${g} euro dira`);
+        for (const d of ["20 °C", "20°c", "90°F", "20\u00a0°\u00a0C", "20 ºC", "20º", "20°Ca", "20 °K"]) add(`tenperatura ${d} da`);
+        for (const u of ["km", "m", "kg", "mm"]) for (const r of ["h", "s", "x"]) for (const e of ENDINGS) add(`100 ${u}/${r}-${e} abiadura`);
+        for (const u of ["km", "m", "kg", "mm", "cm"]) for (const x of ["²", "³", "²-", "-", ""]) for (const e of ENDINGS) add(`5 ${u}${x}${e} dira`);
+        for (const p of ["%5", "5%", "% 5", "5 %", "€5", "5€", "5 £", "$5", "5 milioi", "5 mila", "5 km", "5 km/h", "5 km²"]) add(`hori ${p} da`);
+        for (const m of ["-5", "−5", "5-3", "a-5", "(-5)", "1990 - 5", "x -5"]) add(`balioa ${m} da`);
+        for (const n of ["0", "1", "5", "10", "19", "20", "21", "40", "99", "100", "101", "1000", "1998", "2000000", "999999999999", "1000000000000"]) for (const e of ENDINGS) for (const h of ["", "-"]) add(`${n}${h}${e} urte`);
+        for (const f of ["1,5", "1,05", "1,50", "1,0", "1,00", "2,25", "3,141", "0,5", "1,99999999999999"]) for (const e of ["", "ean", "-ean", "a", "eko"]) add(`${f}${e} da`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeBasque(t));
+            emit({ text: units(t), src, op: "text" }, withHost("eu", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; cardinalWords over 0…20,000 and
+    // magnitudes.
+    async "eu-g2p"() {
+        const { phonemizeWord, cardinalWords } = await import("../../../src/languages/basque/basque.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñçA-ZÑÇ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("eu")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñç'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiourtzsxdlh"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "n\u0303", "c\u0327", "Ñ", "ﬁ", "Dvořák", "Ångström", "etxe", "hitz", "ttipi", "kalle", "erreka", "ura"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3, k * 1e9 + 99);
+        ns.push(1e12 - 1);
+        for (const n of ns) emit({ n: String(n), op: "words" }, cardinalWords(n));
+    },
 };
 
 
