@@ -53,6 +53,10 @@ const FLEURS_DIR: Record<string, string> = {
     et: "et_ee",
     hu: "hu_hu",
     is: "is_is",
+    az: "az_az",
+    kk: "kk_kz",
+    ky: "ky_kg",
+    uz: "uz_uz",
 };
 
 /**
@@ -3056,6 +3060,97 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
         }
+    },
+    // ── Azerbaijani (az). Inputs: the az golden, FLEURS az_az (columns 3 and 4) and probes/az.txt. ──
+    // normalizeAzerbaijani, the initialism pass alone (rebuilt with normalize.ts's own config) on the raw text, the
+    // symbol tier azerbaijani.ts built (recorded through the wrapper) on the normalized text, and the phonotactic
+    // test on every letter run, plus synthetic ordinal / clock / fraction / percent shapes. The tokenizer is
+    // module-private: phonemize-sync and trace cover it.
+    async "az-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/azerbaijani/normalize.ts");
+        await import("../../../src/languages/azerbaijani/azerbaijani.ts");
+        const { azLower } = await import("../../../src/languages/azerbaijani/g2p.ts");
+        const { makeInitialismNormalizer } = await import("../../../src/core/initialisms.ts");
+        const rec = records.find((r) => /src\/languages\/azerbaijani\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const LETTER: Record<string, string> = {
+            a: "a", b: "be", c: "ce", ç: "çe", d: "de", e: "e", ə: "ə", f: "fe", g: "ge", ğ: "ğe", h: "he",
+            x: "xı", ı: "ı", i: "i", j: "je", k: "ke", q: "qe", l: "el", m: "em", n: "en", o: "o", ö: "ö",
+            p: "pe", r: "er", s: "se", ş: "şe", t: "te", u: "u", ü: "ü", v: "ve", y: "ye", z: "ze",
+        };
+        const WORDS = new Set(["abş", "nasa", "unesco", "aol", "covid", "fiba", "opec", "rem"]);
+        const initialisms = makeInitialismNormalizer({
+            lower: azLower, letterName: (l) => LETTER[azLower(l)],
+            acronymLetters: new Set(["bmt", "gps", "ms", "knp", "cep", "mt", "mri", "dnt", "ftb", "cctv", "dvd", "pbs", "utc", "gmt"]),
+            isRecorded: (w) => WORDS.has(w), isUnreadable: N.isUnreadableAzerbaijani,
+        });
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["az"], FLEURS_DIR.az, ["az.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100", "1000", "1001", "2010", "1000000", "999999999"])
+            for (const suf of ["cı", "ci", "cu", "cü", "CI", "Cİ"]) add(`${n}-${suf} yer`);
+        for (let h = 0; h <= 24; h++) for (const mm of ["00", "05", "30", "59"]) for (const sfx of ["", "-da", "-də", "-dan", "-dən", "-a", "-ə", "-u"]) add(`saat ${h}:${mm}${sfx} gəldi`);
+        for (let a = 0; a <= 11; a++) for (const b of [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 20, 60, 100]) { add(`${a}/${b}`); add(`${a} ÷ ${b}`); }
+        for (const n of ["1", "3", "20", "88", "46"]) for (const sfx of ["i", "ı", "u", "ü", "ni", "nin", "dən", "da", "ə", "a"]) add(`${n}%-${sfx}`);
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            const a = N.normalizeAzerbaijani(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, initialisms(t));
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toUpperCase()); words.add(azLower(m[0])); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableAzerbaijani(w)));
+    },
+    // The word level: azLower, toSegments, phonemizeWord and the nativiser (rebuilt with azerbaijani.ts's class)
+    // over every letter run of the texts (as written, lowercased, uppercased, capitalised), every 1-3 letter string
+    // over the alphabet plus the casing specials (third letter from a context set), and edge strings.
+    async "az-g2p"() {
+        const A = await import("../../../src/languages/azerbaijani/azerbaijani.ts");
+        const { toSegments, azLower } = await import("../../../src/languages/azerbaijani/g2p.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zçğəıiöşüx]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("az"))
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) {
+                const w = m[0];
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.charAt(0).toUpperCase() + w.slice(1));
+            }
+        const letters = [..."abcçdeəfgğhxıijkqlmnoöprsştuüvyzwİIƏÇĞÖŞÜQX"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of "aeəıioöuüqklgnğ") words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00q", "i̇", "İ", "İ̇", "ẞ", "Σ", "ﬁ", "ŉ", "K", "ſ", "ǅ", "nk", "nq", "ng", "nkə", "ppp", "qq", "kk", "gg"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "lower" }, azLower(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "word" }, A.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords and ordinalWords over 0…20,000, multiples, powers of ten to 10²⁴ and their neighbours, and
+    // the non-integers / negatives / non-finites; the Roman ordinal over 0…120 and its corners.
+    async "az-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/azerbaijani/numbers.ts");
+        const { ordinalWords } = await import("../../../src/languages/azerbaijani/normalize.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/azerbaijani/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n));
+            emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        }
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+    },
+    // normalizeRomans with Azerbaijani's policy (registry.ts romanAz) over the Azerbaijani texts.
+    async "az-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/azerbaijani/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["az"], FLEURS_DIR.az, ["az.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
 };
 
