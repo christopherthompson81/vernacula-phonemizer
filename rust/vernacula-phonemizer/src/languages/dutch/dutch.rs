@@ -77,7 +77,26 @@ fn stem_vowel_e(lower: &JsString, at: usize, last: bool) -> bool {
 
 /// `placeStress(segs, word)`: the stressed-nucleus seg index, reducing a ge-/be-/ver-/te- prefix vowel when the
 /// shift fires; `None` when there is no nucleus.
-fn place_stress(segs: &mut [Seg], word: &JsString) -> Option<usize> {
+/// Words that START with a prefix spelling but are not prefixed (tennis, hertog); see nl-not-prefixed.txt (#1551).
+fn not_prefixed_words() -> &'static HashSet<JsString> {
+    static S: std::sync::OnceLock<HashSet<JsString>> = std::sync::OnceLock::new();
+    S.get_or_init(|| {
+        let mut set = HashSet::new();
+        if let Ok(text) = crate::core::data_source::read_data_text(
+            &crate::core::data_path::data_file("languages/dutch", "nl-not-prefixed.txt"),
+        ) {
+            for line in text.split('\n') {
+                let w = js(line).trim().to_lower_case();
+                if !w.is_empty() && !w.starts_with(&js("#")) {
+                    set.insert(w);
+                }
+            }
+        }
+        set
+    })
+}
+
+fn place_stress(segs: &mut [Seg], word: &JsString, not_prefixed: bool) -> Option<usize> {
     let nuclei: Vec<usize> = segs
         .iter()
         .enumerate()
@@ -88,7 +107,11 @@ fn place_stress(segs: &mut [Seg], word: &JsString) -> Option<usize> {
         return None;
     }
     let lower = word.to_lower_case();
-    if nuclei.len() > 1 && UNSTRESSED_PREFIX.test(&lower) && !DIGRAPH_PREFIX.test(&lower) {
+    if !not_prefixed
+        && nuclei.len() > 1
+        && UNSTRESSED_PREFIX.test(&lower)
+        && !DIGRAPH_PREFIX.test(&lower)
+    {
         let at = segs[nuclei[1]].s;
         let stem_e = segs[nuclei[1]].ph == schwa() && stem_vowel_e(&lower, at, nuclei.len() == 2);
         if segs[nuclei[1]].ph != schwa() || stem_e {
@@ -111,12 +134,12 @@ fn place_stress(segs: &mut [Seg], word: &JsString) -> Option<usize> {
 }
 
 /// `phonemizeChunk(word)`: one stress group.
-fn phonemize_chunk(word: &JsString) -> JsString {
+fn phonemize_chunk(word: &JsString, not_prefixed: bool) -> JsString {
     let mut segs = to_segments(word);
     if segs.is_empty() {
         return JsString::new();
     }
-    let stress = place_stress(&mut segs, word);
+    let stress = place_stress(&mut segs, word, not_prefixed);
     let mut out = JsString::new();
     for (k, s) in segs.iter().enumerate() {
         if Some(k) == stress {
@@ -180,18 +203,24 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
     if let Some(reduced) = MANIFEST.function_words.get(&w.to_string_lossy()) {
         return js(reduced);
     }
+    // A prefix SPELLING that is not a prefix (nl-not-prefixed.txt, #1551): no shift in the first chunk.
+    let not_prefixed = not_prefixed_words().contains(&w);
     if is_lexical_word(&w) {
-        return phonemize_chunk(word);
+        return phonemize_chunk(word, not_prefixed);
     }
     let d = decompose(&w);
     if d.parts.len() > 1 {
         let groups = stress_groups(&d.parts, &d.kinds);
         if groups.len() > 1 {
-            let chunks: Vec<JsString> = groups.iter().map(phonemize_chunk).collect();
+            let chunks: Vec<JsString> = groups
+                .iter()
+                .enumerate()
+                .map(|(i, g)| phonemize_chunk(g, not_prefixed && i == 0))
+                .collect();
             return join_chunks(&chunks);
         }
     }
-    phonemize_chunk(word)
+    phonemize_chunk(word, not_prefixed)
 }
 
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
@@ -331,6 +360,37 @@ pub fn create_dutch() -> Result<DutchPhonemizer, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// test/dutch-1551-not-prefixed.test.ts: a prefix spelling that is not a prefix keeps first-syllable stress and
+    /// a full first vowel; a real prefix still shifts (#1551).
+    #[test]
+    fn the_1551_not_prefixed_words() {
+        let first_stressed_full = |w: &str| {
+            let ipa = phonemize_word(&js(w)).to_string_lossy();
+            let Some((vi, vc)) = ipa
+                .char_indices()
+                .find(|(_, c)| "aeiouyɑɛɪɔʏəøœ".contains(*c))
+            else {
+                return false;
+            };
+            ipa.find('ˈ').is_some_and(|s| s < vi) && vc != 'ə'
+        };
+        for w in [
+            "tennis",
+            "hertog",
+            "hersenen",
+            "generaal",
+            "verreweg",
+            "tempo",
+            "technisch",
+            "hersenletsel",
+        ] {
+            assert!(first_stressed_full(w), "{w}");
+        }
+        for w in ["vertellen", "bestellen", "gezellig", "verkopen", "geloven"] {
+            assert!(!first_stressed_full(w), "{w}");
+        }
+    }
 
     /// test/dutch-1551-section-numbers.test.ts: a dotted number after a section word is not a clock (#1551).
     #[test]

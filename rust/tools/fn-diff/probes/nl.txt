@@ -102,3 +102,5 @@ De beenhouwer en de beurtman beginnen, beamen en beëdigen.
 Zij vertellen het, vergeten niets en bestellen gezellig; geven, beter, tegen, verder en tegenstander blijven.
 # #1551: a dotted number after a section word is not a clock
 Zie hoofdstuk 3.12, artikel 4.15 en versie 2.10, maar het begint om 12.30 uur en eindigt rond 07.19 uur.
+# #1551: prefix spellings that are not prefixes (nl-not-prefixed.txt), beside real prefixes
+Het tennis, de hertog en de hersenen van de generaal; verreweg de beste tennisbaan, maar vertellen en bestellen.
