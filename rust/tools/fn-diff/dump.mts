@@ -75,6 +75,7 @@ const FLEURS_DIR: Record<string, string> = {
     ml: "ml_in",
     vi: "vi_vn",
     lo: "lo_la",
+    my: "my_mm",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5403,6 +5404,83 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ word: units(w), op: "word" }, phonemizeWord(w));
             emit({ word: units(w), op: "features" }, wordFeatures(w).map((f) => `${f.cls}/${f.live ? 1 : 0}${f.long ? 1 : 0}/${f.mark}`).join(" "));
         }
+    },
+    // ── Burmese (my). Inputs: the my golden, FLEURS my_mm (columns 3 and 4) and probes/my.txt. ──
+    // normalizeBurmese and the registry's my engine (`renderInHost`: its own token loop, no pre-pass) over every text
+    // plus synthetic rows per arm: the invisible characters, grouping (both commas, a lone 0, ASCII and Myanmar
+    // digits), every unit × rate denominator, clocks, decimals, percent, both degree orders and the ℃/℉ signs, every
+    // currency, fractions, ranges with each dash and each refusal, ²/³ × every unit, bare units, the signs, `&`, dotted
+    // initialisms; and the digit token over 0…3,000, powers of ten, 2⁵³±1 and long runs, in both digit sets.
+    async "my-normalize"() {
+        const { normalizeBurmese } = await import("../../../src/languages/burmese/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["my"], FLEURS_DIR.my, ["my.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const my = (s: string): string => s.replace(/[0-9]/gu, (c) => String.fromCodePoint(0x1040 + Number(c)));
+        for (const inv of ["​", "‌", "‍", "⁠", "﻿", "­"]) add(`မြန်${inv}မာ`);
+        for (const n of ["1,234", "12,345,678", "0,123", "10,123", "1,23", "1,2345", "1٬000", "a,123"]) { add(`ဦးရေ ${n} ဦး`); add(`ဦးရေ ${my(n)} ဦး`); }
+        const uns = ["km", "kg", "cm", "mm", "mg", "ug", "µg", "μg", "m", "g", "KM", "Mg"];
+        for (const u of uns) for (const den of ["kg", "h", "hr", "hrs", "d", "day", "DAY", "x"]) for (const n of ["30", "2.5", "10-20", "1,5 – 2,5"]) add(`ဆေး ${n} ${u}/${den} ပေး`);
+        for (const c of ["14:30", "9:05", "123:45", "10:5", "1:234", "0:00"]) { add(`အချိန် ${c} မှာ`); add(`အချိန် ${my(c)} မှာ`); }
+        for (const v of ["3.14", "2.5", "1.2.3", ".5", "5."]) { add(`တန်ဖိုး ${v} ပါ`); add(`တန်ဖိုး ${my(v)} ပါ`); }
+        for (const p of ["50%", "25 ％", "5 %", "x%"]) add(`နှုန်း ${p} ပါ`);
+        for (const dg of ["30°C", "86 ° F", "25℃", "70℉", "45°", "20°Ca", "30 °c", "x°"]) { add(`အပူ ${dg} ပါ`); add(`အပူ ${my(dg)} ပါ`); }
+        for (const c of ["$", "€", "£", "¥", "₹"]) for (const n of ["100", " 50", "၁၀"]) add(`ဈေး ${c}${n} ပါ`);
+        for (const f of ["1/2", "10 / 20", "1/2/3", "123/4"]) { add(`အပိုင်း ${f} ပါ`); add(`အပိုင်း ${my(f)} ပါ`); }
+        for (const dash of ["-", "‐", "‒", "–", "—", "―", "−"]) for (const r of [`1990${dash}1995`, `10 ${dash} 27 အထိ`, `3${dash}4 ထိ`, `1${dash}2${dash}3`, `5×2${dash}3`, `x 4${dash}5`, `${dash}5${dash}6`]) add(`ကာလ ${r} ပါ`);
+        for (const sup of ["²", "³"]) for (const u of uns) add(`ဧရိယာ 100 ${u}${sup} နှင့် 5${u} ${sup}`);
+        for (const u of uns) for (const tail of ["", "x", " ပါ", "ပါ"]) add(`အကွာ 10 ${u}${tail}`);
+        for (const g of ["1 + 2", "+5", "3+", "1 = 1", "2 ≈ 2", "3 < 4", "5 > 4", "2 × 3", "2x3", "2 x 3", "2  x  3", "6 ÷ 2", "A & B", "A＆B", "U.S.A.", "U.N", "A.B", "Dr.", "ကက.ခခ."]) add(`ပေါင်း ${g} ပါ`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeBurmese(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("my", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) { ns.push(String(i)); if (i % 7 === 0) ns.push(my(String(i))); }
+        for (let e = 4; e <= 22; e++) { ns.push(String(10 ** e)); ns.push(String(10 ** e + 1)); ns.push(String(10 ** e + 21)); ns.push(my(String(10 ** e + 11))); }
+        ns.push("9007199254740991", "9007199254740993", "12345678901234567890", "007", "000", "၀၀၇", "12၃4");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("my", n));
+    },
+    // syllabify (serialized onset/body/start), phonemizeWordRules, segment and phonemizeWord over every Myanmar-block
+    // run of the texts (raw and normalized), every dictionary, voicing-lexicon and seg-words key, 4,000 fixed-seed
+    // concatenations of 2–5 seg-words (half with a random U+1000–109F code point spliced in) and 3,000 random
+    // Myanmar-block strings; numberToWords and spellDigits over 0…20,000 and the unsafe corners.
+    async "my-g2p"() {
+        const B = await import("../../../src/languages/burmese/burmese.ts");
+        const { normalizeBurmese } = await import("../../../src/languages/burmese/normalize.ts");
+        const { numberToWords, spellDigits } = await import("../../../src/languages/burmese/numbers.ts");
+        const BU = new URL("../../../src/languages/burmese/burmese.ts", import.meta.url).href;
+        const items = new Set<string>();
+        const runs = (t: string): void => { for (const m of t.matchAll(/[က-႟ꧠ-꧿]+/gu)) items.add(m[0]); };
+        for (const t of langTexts("my")) { runs(t); runs(normalizeBurmese(t)); }
+        for (const k of loadTsvMap(BU, "dictionary.tsv", undefined, { optional: true }).keys()) items.add(k);
+        for (const k of loadTsvMap(BU, "voicing-lexicon.tsv", undefined, { optional: true }).keys()) items.add(k);
+        const seg = loadLines(BU, "seg-words.txt").map((l) => l.trim()).filter(Boolean);
+        for (const w of seg) items.add(w);
+        let x = 0x3b9e17;
+        const rnd = (n: number): number => { x = (x + 0x6d2b79f5) | 0; let t = Math.imul(x ^ (x >>> 15), 1 | x); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) % n; };
+        const cp = (): string => String.fromCodePoint(0x1000 + rnd(0xa0));
+        for (let i = 0; i < 4000; i++) {
+            let s = "";
+            for (let k = 2 + rnd(4); k > 0; k--) s += seg[rnd(seg.length)]!;
+            if (i % 2) { const at = rnd(s.length + 1); s = s.slice(0, at) + cp() + s.slice(at); }
+            items.add(s);
+        }
+        for (let i = 0; i < 3000; i++) { let s = ""; for (let k = 1 + rnd(8); k > 0; k--) s += cp(); items.add(s); }
+        for (const w of ["", "\ud800", "က\udc00", "ꧠꧡ", "a", "ကa", "င်္က", "က္", "္", "်", "့်"]) items.add(w);
+        for (const w of items) {
+            emit({ word: units(w), op: "syllabify" }, B.syllabify(w).map((s) => `${s.onset}|${s.body}|${s.start}`).join(" "));
+            emit({ word: units(w), op: "rules" }, B.phonemizeWordRules(w));
+            emit({ word: units(w), op: "segment" }, B.segment(w).join("\u0001"));
+            emit({ word: units(w), op: "word" }, B.phonemizeWord(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 500; k++) ns.push(k * 1e5, k * 1e6 + 11, k * 1e7, k * 1e7 + 1, k * 1e9 + 10);
+        ns.push(2 ** 53 - 1, 2 ** 53, 1.5, -1, -0, NaN, Infinity);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
+        for (const ds of ["0", "007", "1234567890", "12a3", "", "၁၂", "9007199254740993"]) emit({ word: units(ds), op: "spell" }, spellDigits(ds));
     },
 };
 

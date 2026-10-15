@@ -2887,6 +2887,44 @@ fn main() {
                 }
             })
         }
+        "my-normalize" | "my-g2p" => {
+            use std::sync::Arc;
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::burmese::{burmese, numbers};
+            // Building `my` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "my").unwrap();
+            let my = burmese::create_burmese(Some(Arc::new(
+                vernacula_phonemizer::registry::read_as_english,
+            )))
+            .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => my.normalize(&t()),
+                    "text" => with_host(&JsString::from("my"), || my.text(&t())),
+                    "syllabify" => {
+                        let parts: Vec<JsString> = burmese::syllabify(&w())
+                            .iter()
+                            .map(|s| {
+                                s.onset
+                                    .concat(&JsString::from("|"))
+                                    .concat(&s.body)
+                                    .concat(&JsString::from(format!("|{}", s.start).as_str()))
+                            })
+                            .collect();
+                        JsString::join(&parts, &JsString::from(" "))
+                    }
+                    "rules" => burmese::phonemize_word_rules(&w()),
+                    "segment" => JsString::join(&burmese::segment(&w()), &JsString::from("\u{1}")),
+                    "word" => burmese::phonemize_word(&w()),
+                    "spell" => numbers::spell_digits(&w()),
+                    _ => numbers::number_to_words(js_number(&JsString::from(
+                        input["n"].as_str().unwrap(),
+                    ))),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

@@ -14,6 +14,7 @@ pub mod bhojpuri;
 pub mod bishnupriya;
 pub mod bosnian;
 pub mod bulgarian;
+pub mod burmese;
 pub mod catalan;
 pub mod cebuano;
 pub mod chhattisgarhi;
