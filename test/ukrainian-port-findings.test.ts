@@ -50,8 +50,9 @@ describe("Ukrainian port findings (#1525)", () => {
     });
 
     test("6: clock minutes agree with the feminine хвилина", () => {
-        expect(normalizeUkrainian("О 1:01")).toBe("О першій одна");
-        expect(normalizeUkrainian("3:02")).toBe("третя дві");
+        // #1551 added the spoken leading zero (*нуль*); the minutes still agree with the feminine хвилина.
+        expect(normalizeUkrainian("О 1:01")).toBe("О першій нуль одна");
+        expect(normalizeUkrainian("3:02")).toBe("третя нуль дві");
         expect(normalizeUkrainian("о 20:21")).toBe("о двадцятій двадцять одна");
         expect(normalizeUkrainian("о 11:12")).toBe("о одинадцятій дванадцять"); // 12 is not a 2
     });

@@ -159,6 +159,10 @@ public static class Normalize
      *  purpose — it is an ADJECTIVE that must agree with the following number, so it has its own rule. */
     private static readonly IReadOnlyDictionary<string, string> DOTTED_ABBREV = DEF.DottedAbbrev;
     private static readonly string ABBREV_ALT = string.Join("|", DOTTED_ABBREV.Keys.OrderByDescending(k => k.Length));
+    /** A key shaped like an INITIAL (one letter, or that letter doubled: р, рр) expands only as written in lowercase
+     *  (#1551; Правопис 2019 §64). See src/languages/ukrainian/normalize.ts. */
+    private static readonly JsRe INITIAL_SHAPED = JsRegex.Compile("^(\\p{L})\\1?$", "u");
+    private static bool CaseRefused(string written, string key) => INITIAL_SHAPED.IsMatch(key) && written != key;
     /** The abbreviations that stand BEFORE what they abbreviate (`див. Петренко`), so a capital after the dot
      *  is their object and never a new sentence (ukrainian.jsonc `preposedAbbrev`; #1525). */
     private static readonly HashSet<string> PREPOSED_ABBREV = new(DEF.PreposedAbbrev, StringComparer.Ordinal);
@@ -276,14 +280,16 @@ public static class Normalize
         s = Rewrite(s, ABBREV_MID, m =>
         {
             var key = m.Groups[1].Value.ToLowerInvariant();
-            if (!DOTTED_ABBREV.TryGetValue(key, out var w)) return m.Value;
+            if (!DOTTED_ABBREV.TryGetValue(key, out var w) || CaseRefused(m.Groups[1].Value, key)) return m.Value;
             return !PREPOSED_ABBREV.Contains(key) && StartsSentence(m.Groups[3].Value)
                 ? $"{w}.{m.Groups[2].Value}" : $"{w}{m.Groups[2].Value}";
         });
         s = Rewrite(s, ABBREV_COMMA, m =>
-            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? w : m.Value);
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w)
+            && !CaseRefused(m.Groups[1].Value, m.Groups[1].Value.ToLowerInvariant()) ? w : m.Value);
         s = Rewrite(s, ABBREV_END, m =>
-            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w) ? $"{w}." : m.Value);
+            DOTTED_ABBREV.TryGetValue(m.Groups[1].Value.ToLowerInvariant(), out var w)
+            && !CaseRefused(m.Groups[1].Value, m.Groups[1].Value.ToLowerInvariant()) ? $"{w}." : m.Value);
 
         s = Rewrite(s, M_S, m =>
         {
@@ -328,7 +334,9 @@ public static class Normalize
                 if (idx >= forms.Count) return whole;
                 var head = forms[idx];
                 // The minutes agree with the FEMININE хвилина (#1525): 1:01 is першій одна.
-                return mv == 0 ? head : $"{head} {Feminine(Cardinal(mv))}";
+                // A leading zero is read (#1551): «о восьмій нуль п'ять». See the TS twin.
+                if (mv == 0) return head;
+                return $"{head}{(m.Groups[2].Value.StartsWith('0') ? " нуль" : "")} {Feminine(Cardinal(mv))}";
             });
         }
 
