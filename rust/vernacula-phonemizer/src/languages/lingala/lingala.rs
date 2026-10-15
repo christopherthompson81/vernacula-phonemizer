@@ -195,7 +195,7 @@ impl LingalaPhonemizer {
                 sink.emit(&phonemize_word(&w));
             } else if let Some(d) = m.group(2, s).filter(|d| !d.is_empty()) {
                 let num = js_number(&d);
-                if is_safe_integer(num) && num >= 0.0 && num < 1e12 {
+                if is_safe_integer(num) && (0.0..1e12).contains(&num) {
                     for w in cardinal_words(num as u64).split(' ') {
                         sink.emit(&phonemize_word(&js(w)));
                     }

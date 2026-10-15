@@ -295,3 +295,31 @@ day-part); `-5` loses its sign; `1/2` reads `chimodzi ziwiri`; `5 m/s` leaves a 
 
 **Implication.** nya done; all six ported. TS defect to report (not fixed): chichewa/normalize.ts reads a decimal with
 ≥3 fractional digits as a sentence break plus an integer (the rw/rn shape).
+
+## Run 8 — 2026-10-15 07:35 (merge of origin/main 263f6bf3, every gate on the combined tree)
+
+**What changed.** origin/main gained the southern Bantu group (#1592) and the invisible-character fix (#1591). Every
+one of the six commits conflicted at the same tails (LANGUAGES, the `build` arms, FLEURS_DIR, the end of the dumps
+table, the end of the replay match), so origin/main was MERGED once rather than rebased. git had interleaved the two
+sides' replay arms in main.rs hunk by hunk, so the three files were resolved by taking main's side and re-applying
+this group's arms and blocks with the same scripts that first inserted them (`rewire.sh`: `wire.py` × 6, `add.py` ×
+6). Nothing from the sbantu group was reusable here (no shared module with these six).
+
+**Command.** `gates.sh` (scratchpad): dump.mts parse check, fmt, build, `parity` over every language, `cargo test`,
+regex-diff, clippy, the twelve per-module dumps re-made and replayed, and `LANGS=sw,rw,rn,lg,ln,nya` e2e.
+
+**Raw finding.**
+- LANGUAGES: declared 109, 109 entries, 109 distinct. dump.mts parses. fmt clean; build 0 warnings.
+- parity: every language line 200/200 (hil 112/112, ilo 94/94, nog 68/68) except the known port-pending rows mag
+  199/200, tt 199/200, syl 195/200. sw, rw, rn, lg, ln, nya: 200/200 each.
+- `cargo test`: 320 + 1 passed, 0 failed. regex-diff: `146326 probe results identical, 0 DIFFER, 0 patterns refused`.
+- clippy: completes with 0 `error:` lines. In the six new directories: the six `module_inception` warnings, and ONE
+  more, `manual_range_contains` on ln's number guard (`num >= 0.0 && num < 1e12`), fixed to
+  `(0.0..1e12).contains(&num)` (the same for -0, NaN and ±Infinity); after it ln 200/200, ln-normalize 13051/0.
+- per-module: sw 16335/0 + 180212/0, rw 6443/0 + 170857/0, rn 6059/0 + 167240/0, lg 12175/0 + 176147/0, ln 13051/0 +
+  75924/0, nya 17138/0 + 252417/0 (identical / DIFFER).
+- combined e2e: `phonemize-sync / phonemize-best / phonemize-trace / trace: 16066 identical, 0 DIFFER` each.
+
+**Port-pending.** None: no row of the six routes to an unported engine.
+
+**Implication.** Ready for the PR.
