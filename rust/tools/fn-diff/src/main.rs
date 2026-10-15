@@ -2741,6 +2741,9 @@ fn main() {
             use vernacula_phonemizer::languages::kannada;
             let kn = kannada::kannada::create_kannada(None).unwrap();
             let kn_def = kannada::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::telugu;
+            let te = telugu::telugu::create_telugu(None).unwrap();
+            let te_def = telugu::manifest::try_manifest().unwrap();
             Box::new(move |input| {
                 let lang = input["lang"].as_str().unwrap();
                 let op = input["op"].as_str().unwrap();
@@ -2754,6 +2757,16 @@ fn main() {
                         n(),
                         &units(&input["suffix"]),
                         &kn_def.numbers,
+                    ),
+                    ("te", "normalize") => te.normalize(&units(&input["text"])),
+                    ("te", "text") => with_host(&js("te"), || te.text(&units(&input["text"]))),
+                    ("te", "word") => te.phonemize_word(&units(&input["word"])),
+                    ("te", "words") => telugu::numbers::number_to_words(n(), &te_def.numbers),
+                    ("te", "year") => telugu::numbers::year_to_words(n(), &te_def.numbers),
+                    ("te", "ordinal") => telugu::numbers::ordinal_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        &te_def.numbers,
                     ),
                     _ => panic!("dravidian: unknown {lang} op {op}"),
                 }

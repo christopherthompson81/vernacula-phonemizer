@@ -67,3 +67,34 @@ mutations of the composer; `pins.sh kannada kn` then the Rust suite test; a TS p
 **Implication.** kn done. Two TS observations to report (not fixed): the kn unit abbreviation leaves its trailing
 dot as a pause, and a bare vulgar fraction is dropped in kn because the opt-out pre-empts the shared fold while the
 local rule only covers the digit-adjacent case.
+
+## Run 2 — 2026-10-15 04:05 (te: an escape class written back as literal characters, and a TS ordering defect)
+
+**Question.** Does Telugu (manifest, numbers with the century reading, normalizer with the ౦ homoglyph rule,
+engine) match the TS, and did the literals survive the write?
+
+**Command.** `audit.sh telugu`; `parity -- te kn`; `LANGS=te dump.mts dravidian` → `fn-diff dravidian`; a mutation
+(`mutate.py`: the homoglyph rule's left-neighbour test dropped); `e2e.sh te`; `pins.sh telugu te` and the Rust test;
+a TS print of numerals in the century band carrying a currency, a percent and a unit (`p.mts te …`).
+
+**Raw finding.**
+- The audit caught the editor damage on the first write: `TE_LETTER`, `"\\u0C00-\\u0C65\\u0C70-\\u0C7F"` in the TS
+  (a regex built from ESCAPES), came back as four literal characters in the Rust (`escape_audit`: `4 TS escapes, 4
+  code points short`; `nonascii_audit`: two runs `U+0C65 U+0C70` and `U+0C7F` not in the TS). Same class, different
+  code points. Restored by a byte-level line replacement (`setline.py`, which spells the backslash `BS`); after it
+  `111 non-ASCII runs, 0 not found`, `4 TS escapes, 0 short`. The 6 raw-pattern misses are `format!` templates,
+  checked by hand. The same write had also folded the `\u200d`/`\u200c`/`\ufeff`/`\u200b` escapes in the kn section
+  of the `dravidian` dump into literal characters (harmless to the TS, unreadable in review); `escape_cf.py`
+  rewrites any literal Cf inside that dump entry as an escape, and `insert_l.py` runs it after every insertion.
+  Rule for the rest of the group: an escape is never typed — it is written as a placeholder and substituted.
+- `te: 200/200`, `kn: 200/200`.
+- `dravidian (te): 54053 identical, 0 DIFFER` (golden 230, fleurs 6860, probe 20, synthetic 6104, number 3068).
+  Mutation: `53965 identical, 88 DIFFER` (golden 4, fleurs 72, synthetic 12); reverted.
+- `phonemize-sync / phonemize-best / trace: 3555 identical, 0 DIFFER` each.
+- test/telugu.test.ts: 71 calls pinned (68 matchers, all green); the Rust test passes.
+- TS prints: `$1500` → `pˈad̪iheːnu ʋˈãn̪d̪alu` (no dollar word) against `$2500` → `… ɖˈaːlaɾlu`; `1500%` →
+  `pˈad̪iheːnu ʋˈãn̪d̪alu` (no percent word) against `2500%` → `… ʃˈaːt̪am`; `1200 km` keeps its unit (singular).
+
+**Implication.** te done. TS defect to report (not fixed): telugu/normalize.ts reads every 1100-1999 numeral as a
+century year BEFORE the symbol tier runs, so a currency sign or a percent sign on a number in that band has no
+number left to attach to and is dropped (`$1500`, `1500%`).

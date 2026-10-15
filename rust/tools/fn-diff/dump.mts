@@ -5081,7 +5081,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
             const sign = (k: string): string[] => (s[k]?.char ? [s[k].char] : []);
             const vs = Object.keys(manifest.vowelSigns);
             const tails = ["", ...sign("virama"), ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga"), ...sign("nukta"),
-                ...vs, ...vs.flatMap((v) => sign("anusvara").map((a) => v + a)), ...vs.flatMap((v) => sign("virama").map((a) => v + a)), "‍", "‌"];
+                ...vs, ...vs.flatMap((v) => sign("anusvara").map((a) => v + a)), ...vs.flatMap((v) => sign("virama").map((a) => v + a)), "\u200d", "\u200c"];
             const cons = Object.keys(manifest.consonants);
             const iv = Object.keys(manifest.independentVowels);
             const c0 = cons[0]!, v0 = iv[0]!, v1 = iv[1] ?? v0, vir = sign("virama")[0] ?? "";
@@ -5124,12 +5124,44 @@ const dumps: Record<string, () => void | Promise<void>> = {
                 for (const d of ["3.5", "0.25", "1.2.3", "12.", ".5", "3.50 ಲಕ್ಷ", "1,234.56"]) items.push(d);
                 for (const g of ["1,000", "12,345,678", "0,500", "1990, 1991", "1,2345", "12,34", "10,00,000", "1,000ನೇ"]) items.push(g);
                 for (const x of ["+5", "a+5", "UTC+1", "+ 5", "5°", "5 ° C", "-5°", "5 < 6", "5 > 4", "a=b", "8÷2", "5<6 ಮತ್ತು 7>3", "x = y = z"]) items.push(x);
-                for (const z of ["ಪಾಯಿಂಟ್‌ಗಳಿಂದ", "ಕ‍ಗ", "﻿ಕನ್ನಡ", "1​,000", "೪ ಶೂಟರ್ಗಳಿಗೆ", kd(1976), `${kd(15)}%`]) items.push(z);
+                for (const z of ["ಪಾಯಿಂಟ್\u200cಗಳಿಂದ", "ಕ\u200dಗ", "\ufeffಕನ್ನಡ", "1\u200b,000", "೪ ಶೂಟರ್ಗಳಿಗೆ", kd(1976), `${kd(15)}%`]) items.push(z);
                 frames(rows, "ಅವರು", "ಆಗಿದೆ", items);
                 run("kn", rows, N.normalizeKannada, E, phonemizeWord, /[ಀ-೥೰-೿]+/gu, MANIFEST, ["ಳ್ಳ", "ಕೊಳ್ಳು", "ಅಂ", "ಅಂಗ", "ಹಂ", "ಂ", "ಕಂಂ", "೦", "ಽ", "ೠ", "ೱ"], 0x0ce6);
                 for (const n of numberGrid()) {
                     emit({ lang: "kn", n: String(n), op: "words" }, N.numberToWords(n));
                     for (const suf of ["ನೇ", "ನೆಯದು"]) emit({ lang: "kn", n: String(n), suffix: units(suf), op: "ordinal" }, N.ordinalToWords(n, suf));
+                }
+            },
+            async te() {
+                const N = await import("../../../src/languages/telugu/normalize.ts");
+                const Nu = await import("../../../src/languages/telugu/numbers.ts");
+                const { MANIFEST } = await import("../../../src/languages/telugu/manifest.ts");
+                const { createTelugu, phonemizeWord } = await import("../../../src/languages/telugu/telugu.ts");
+                const E = createTelugu();
+                const rows = textsFor(["te"], FLEURS_DIR.te, ["te.txt"]);
+                const td = nativeDigits(0x0c66);
+                const items: string[] = [];
+                for (const z of ["౦", "క౦", "౦క", "౦౦", "1౦", "క ౦ ల", "కి౦ద", "౦ా", "౧౦", "౦౧", "అ౦\u200b"]) items.push(z);
+                for (let n = 0; n <= 40; n++) for (const suf of ["వ", "వది", "వ ది"]) items.push(`${n}${suf}`, `${n} ${suf}`, `${n}-${suf}`, `${n} -${suf}లో`);
+                for (const n of ["100", "1000", "1976", "1100", "1999", "2011", "1,000", "100000", "9007199254740993", "1.5", td(18)]) items.push(`${n}వ`, `${n} వది`);
+                for (const y of ["1976", "1100", "1099", "1999", "2000", "1976.5", "1976,", "19765", "1,976", "a1976", "1800లో", "1500-1600"]) items.push(y);
+                for (const e of ["క్రీ.శ. 1000", "క్రీ.పూ 300", "క్రీ . శ", "క్రీ.శకం", "అక్రీ.పూ", "ఉదా. ఇది", "ఉదా.5", "ఉదా . రాముడు"]) items.push(e);
+                for (const k of ["5 కి.మీ.", "కి . మీ", "కిమీ", "కిమీలు", "5 మై", "5మై దూరం", "మై దూరం", "అకిమీ"]) items.push(k);
+                for (const i of ["యు.ఎస్. ప్రభుత్వం", "ఎ.బి.సి", "యు . ఎస్ . ఏ", "బి.జె.పి.", "ఐ.పి.ఎల్ 5", "యు.ఎస్.లో", "డబ్ల్యూ.హెచ్.ఓ"]) items.push(i);
+                for (const r of ["100 km/h", "5 m/s", "3 mi/h", "10 ft/s", "100 KM/H", "5 m / s", "గంటకు 100 km/h", "5 kg/h", "5 km/hr", "a5 km/h", "100 కిలోమీటర్లు/గం.", "గంటకు 100 కిలోమీటర్లు / గం"]) items.push(r);
+                for (const f of ["2½", "3 ¾", "½", "1¼"]) items.push(f);
+                items.push(...tierItems(MANIFEST.symbolTier));
+                for (const h of ["0", "07", "9", "10", "12", "19", "23", "24", "123"]) for (const m of ["00", "05", "30", "59", "60", " 00", "00.5"]) items.push(`${h}:${m}`);
+                for (const d of ["3.5", "0.25", "1.2.3", "12.", ".5", "1,234.56"]) items.push(d);
+                for (const g of ["1,000", "12,345,678", "0,500", "1990, 1991", "1,2345", "12,34", "10,00,000"]) items.push(g);
+                for (const x of ["±5", "-5", "−5", "–5", "3-5", "3 -5", "a-5", "క -5", "+5", "a+5", "UTC+1", "5 < 6", "5 > 4", "a=b", "8÷2", "30°C", "30 ° c", "86°F", "5°", "5 °K", "-5°C"]) items.push(x);
+                for (const z of ["ఫారెన్\u200cహీట్", "క\u200dగ", "\ufeffతెలుగు", "1\u200b,000", td(1976), `${td(15)}%`]) items.push(z);
+                frames(rows, "అతను", "ఉన్నాడు", items);
+                run("te", rows, N.normalizeTelugu, E, phonemizeWord, /[ఀ-౯ౠ-ౣ]+/gu, MANIFEST, ["ళ్ల", "కోళ్లు", "అంకురం", "అం", "ం", "కంం", "౦", "ఽ", "ౠ", "ౘ", "ౚ", "చ్చ", "త్స"], 0x0c66);
+                for (const n of numberGrid()) {
+                    emit({ lang: "te", n: String(n), op: "words" }, Nu.numberToWords(n));
+                    emit({ lang: "te", n: String(n), op: "year" }, Nu.yearToWords(n));
+                    for (const suf of ["వ", "వది"]) emit({ lang: "te", n: String(n), suffix: units(suf), op: "ordinal" }, Nu.ordinalToWords(n, suf));
                 }
             },
         };

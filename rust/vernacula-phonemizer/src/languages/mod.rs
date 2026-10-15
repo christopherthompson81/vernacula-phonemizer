@@ -79,6 +79,7 @@ pub mod sylheti;
 pub mod tagalog;
 pub mod tajik;
 pub mod tatar;
+pub mod telugu;
 pub mod thai;
 pub mod turkish;
 pub mod turkmen;
