@@ -181,3 +181,35 @@ Haystack: `normalizeSesotho` changed golden 54/200, probes 13/15, synthetic 125/
    `R` off its tier for it.
 2. A magnitude suffix with no currency sign is spelled out as letters: `Ho ne ho le 1.5bn` → `… 1 5bn` →
    *… nŋwɛ ɬɑnɔ bn*. Step 5 claims `m`/`bn` only after `[$£€R]`.
+
+## Run 8 — 2026-10-15 06:15 (tn: first build, differentials, pins)
+
+**Shape.** manifest.rs (with `GRAPHEME_KEYS`, a stable length-descending sort), numbers, normalize (two passes,
+`normalizeSetswanaPre` and `…Post`) and setswana (the tier between the passes; its `ampersand` is the manifest's
+`numbers.and`, so the recorded JSON takes it from the manifest rather than hard-coding it). `numberToWords`'s digit
+fallback indexes `units[Number(d)]`, so a miss joins as `""` (Array.join), not as the character: reproduced through
+`js_number` on each code point.
+
+**Commands.** The three audits (`fix_esc.py` restored 21 literals; then 18 raw patterns, 1 not verbatim (the TOKEN
+template), 0 escapes short, 0 non-ASCII runs missing); `parity tn`; `tn-normalize` / `tn-g2p` dumps (no FLEURS; the
+golden, `probes/tn.txt` (12 synthetic lines) and 609 synthetic rows: entities and the ampersand, the currency-glued
+`m`/`M`/`bn`, the rand guard (road numbers, separators, magnitude words in both scripts), signed degrees, a clock grid
+of 7 hours × 5 minutes × 14 markers incl. timezones and day-parts, grouping, ordinal suffixes, both range rules, the
+tier's prefix shapes, decimals incl. the `0.125` arm); `pre`, `symbols`, `post` (on the tier's output and on the raw
+text) and `text` per text; `sbantu/e2e.sh tn tn-normalize tn-g2p phonemize-sync phonemize-best trace`; the TS
+suite's 100 calls appended to setswana.rs.
+
+**Raw finding.** `tn: 200/200` on the first build, and:
+```
+tn-normalize: 4105 identical, 0 DIFFER   (golden 1000 / probe 60 / synthetic 3045)
+tn-g2p: 56949 identical, 0 DIFFER
+phonemize-sync / phonemize-best / trace: 212 identical, 0 DIFFER each
+cargo test --release setswana: 1 passed (100 pins)
+```
+Haystack: pre + tier + post changed golden 41/200, probes 10/12, synthetic 361/609 texts. No FLEURS (stated).
+
+**Guard check.** The rand guard (a bare small integer after `R` is a road number) disabled:
+`tn-normalize: 4091 identical, 14 DIFFER`. Restored: 0 DIFFER.
+
+**TS finding (reported, not fixed).** As in st, a magnitude suffix with no currency sign is spelled as letters:
+`Go ne go le 1.5bn` → `… 1 ntlha 5bn` → *… bʊt͡ɬʰanʊ bn*.

@@ -5249,6 +5249,65 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
         }
     },
+    // ── Setswana (tn). Inputs: the tn golden and probes/tn.txt (FLEURS has no Setswana, so the synthetic rows carry
+    // the weight). normalizeSetswanaPre, the symbol tier over its output (recorded through the wrapper),
+    // normalizeSetswanaPost over that, and `createSetswana().text`, over every text plus synthetic rows. ──
+    async "tn-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeSetswanaPre, normalizeSetswanaPost } = await import("../../../src/languages/setswana/normalize.ts");
+        const { createSetswana } = await import("../../../src/languages/setswana/setswana.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/setswana\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createSetswana();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["tn"], undefined, ["tn.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["&nbsp;", "&NBSP;", "&#x20;", "&#x5B;", "&#x5d;", "&amp;", "Food & Agriculture", "A&B", "kwena &jones", "Texas A&I", "&#39;"]) add(`mo ${e} gape`);
+        for (const c of ["$145m", "$2.5bn", "£3M", "P10m", "R5m", "US$4m", "US $4m", "US$ 4 500m", "R 5m", "$5ma", "P 1.5bn", "$5 m"]) add(`ka ${c} ka ngwaga`);
+        for (const r of ["R59", "R59, N12", "R5", "R 5", "R5.50", "R1,000", "R1 000", "R 5 million", "R5million", "R5 dimilione", "R5 milionea", "aR5", "R5a", "R10 000 000"]) add(`tsela ya ${r} le N3`);
+        for (const d of ["30°C", "-30°C", "−5°C", "–5 °C", "30 °c", "86°F", "1.5°C", "1,5°F", "45°", "45º", "45° ", "45°x", "a30°C"]) add(`go ne go le ${d} gompieno`);
+        for (const h of ["0", "07", "9", "12", "19", "23", "24"]) for (const m of ["00", "05", "30", "59", "60"]) for (const ap of ["", " a.m.", " p.m.", "pm", "AM", " UTC", " SAST", " CAT", " mo mosong", " thapama", " maitseboa", " bosigo", " UTCa", " mosonga"]) add(`ka ${h}:${m}${ap} re tla`);
+        for (const g of ["1,000", "1,000,000", "1,234,5", "1,000.5", "1.000", "1.000.000", "1 000", "1\u00a0000", "1\u202f000", "1\u2009000", "30 9", "1,0000", "4 500"]) add(`di le ${g} tsa batho`);
+        for (const o of ["15th", "1st", "2ND", "3rd", "16thx", "18th-century"]) add(`mo lekgolong la ${o} la dingwaga`);
+        for (const r of ["10-38", "38-10", "10 – 38", "10—38", "1995-96", "5-5", "-5-6", "10-38.5", "10-38a", "12-13 m3", "56-64 km/h", "10-20%", "5-10 km", "5 - 10 km"]) add(`go tswa ${r} ka ura`);
+        for (const t of ["$5", "US$5", "P5", "£3", "50%", "5 km", "5km", "5 m", "5 kg", "100 km/h", "5 m/s", "5 km²", "604.3 km2", "5 m³", "5 m3", "5 ha", "5 mi", "5 cm", "5 mm", "A & B"]) add(`go ${t} gape`);
+        for (const v of ["3.5", "3.14", "3.145", "1,5", "1,50", "1,500", "0.125", "0,125", "0.12", "12:30.5", "1.2.3", "3.5.", "00.125"]) add(`go ${v} gape`);
+        for (const c of ["ALL CAPS", "  spaced  out  ", "a\u00a0\u00a0b"]) add(c);
+        for (const [t, src] of rows) {
+            const a = normalizeSetswanaPre(t);
+            const b = rec.apply(a);
+            emit({ text: units(t), src, op: "pre" }, a);
+            emit({ text: units(a), src, op: "symbols" }, b);
+            emit({ text: units(b), src, op: "post" }, normalizeSetswanaPost(b));
+            emit({ text: units(t), src, op: "post" }, normalizeSetswanaPost(t));
+            emit({ text: units(t), src, op: "text" }, withHost("tn", () => E.text(t)));
+        }
+    },
+    // phonemizeWord over every letter run, every grapheme key, every 1–3 letter string of the alphabet (with š ê ô)
+    // and corners; numberToWords over 0…20,000, the million boundary, magnitudes and the token-string fallback.
+    async "tn-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/setswana/setswana.ts");
+        const { numberToWords } = await import("../../../src/languages/setswana/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("tn")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzšêô'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "Tšhipi", "TŠH", "tšh", "ŝ", "x", "xa", "ax", "çà", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e9 + 3);
+        for (let i = 999990; i <= 1000010; i++) ns.push(i);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1.5, 20.7, -1, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["9007199254740993", "1000000000000000000001", "1000000", "007", "", "12a", "١٢", "\ud800", "𝟙2", "1 2", "1 2"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
+        }
+    },
 };
 
 
