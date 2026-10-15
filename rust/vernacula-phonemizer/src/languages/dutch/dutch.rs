@@ -6,7 +6,7 @@
 use std::collections::HashSet;
 use std::sync::LazyLock;
 
-use super::g2p::{Seg, to_segments};
+use super::g2p::{Seg, full_vowel, to_segments};
 use super::manifest::{MANIFEST, try_manifest};
 use super::morphology::{decompose, is_lexical_word};
 use super::normalize::{is_unreadable_dutch, normalize_dutch, normalize_dutch_initialisms};
@@ -49,6 +49,32 @@ fn schwa() -> JsString {
     js("ə")
 }
 
+/// A prefix shift may land on a reduced STEM ⟨e⟩ (#1550): the scanner reduced it before stress was placed, so
+/// ver·tel·len kept the stress on the prefix. Not when only an ending follows the last-nucleus ⟨e⟩ (ge·ven, be·ter,
+/// te·gen), and not after a longer STRESSED prefix (tegen, terug). See src/languages/dutch/dutch.ts.
+const ENDING_AFTER_E: [&str; 5] = ["n", "r", "l", "m", ""];
+static STRESSED_PREFIX_START: LazyLock<JsRegex> = LazyLock::new(|| {
+    let m = &MANIFEST.morphology;
+    let longer: Vec<&str> = m
+        .prefix_stressed
+        .iter()
+        .filter(|p| {
+            m.prefix_unstressed
+                .iter()
+                .any(|u| p.starts_with(u.as_str()) && p.len() > u.len())
+        })
+        .map(String::as_str)
+        .collect();
+    JsRegex::new(&format!("^(?:{})", longer.join("|")), "u").unwrap()
+});
+fn stem_vowel_e(lower: &JsString, at: usize, last: bool) -> bool {
+    if lower.0.get(at) != Some(&u16::from(b'e')) || STRESSED_PREFIX_START.test(lower) {
+        return false;
+    }
+    let rest = lower.slice(at as isize + 1, None);
+    !last || !ENDING_AFTER_E.iter().any(|e| rest == js(e))
+}
+
 /// `placeStress(segs, word)`: the stressed-nucleus seg index, reducing a ge-/be-/ver-/te- prefix vowel when the
 /// shift fires; `None` when there is no nucleus.
 fn place_stress(segs: &mut [Seg], word: &JsString) -> Option<usize> {
@@ -62,15 +88,18 @@ fn place_stress(segs: &mut [Seg], word: &JsString) -> Option<usize> {
         return None;
     }
     let lower = word.to_lower_case();
-    if nuclei.len() > 1
-        && UNSTRESSED_PREFIX.test(&lower)
-        && !DIGRAPH_PREFIX.test(&lower)
-        && segs[nuclei[1]].ph != schwa()
-    {
-        if SCHWA_PREFIX.test(&lower) {
-            segs[nuclei[0]].ph = schwa();
+    if nuclei.len() > 1 && UNSTRESSED_PREFIX.test(&lower) && !DIGRAPH_PREFIX.test(&lower) {
+        let at = segs[nuclei[1]].s;
+        let stem_e = segs[nuclei[1]].ph == schwa() && stem_vowel_e(&lower, at, nuclei.len() == 2);
+        if segs[nuclei[1]].ph != schwa() || stem_e {
+            if stem_e {
+                segs[nuclei[1]].ph = full_vowel(&lower, at);
+            }
+            if SCHWA_PREFIX.test(&lower) {
+                segs[nuclei[0]].ph = schwa();
+            }
+            return Some(nuclei[1]);
         }
-        return Some(nuclei[1]);
     }
     Some(
         nuclei
@@ -302,6 +331,36 @@ pub fn create_dutch() -> Result<DutchPhonemizer, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// test/dutch-1550-prefix-stem-e.test.ts: the prefix shift reaches a reduced stem ⟨e⟩; relational, built from
+    /// words the engine already reads right (#1550).
+    #[test]
+    fn a_prefix_shift_reaches_a_reduced_stem_e() {
+        let nl = |w: &str| phonemize_word(&js(w)).to_string_lossy();
+        let prefix_of = |whole: &str, stem: &str| {
+            let (w, s) = (nl(whole), nl(stem));
+            assert!(w.ends_with(&s), "{whole}");
+            w[..w.len() - s.len()].to_string()
+        };
+        for (word, ref_whole, ref_stem, stem) in [
+            ("vertellen", "verkopen", "kopen", "tellen"),
+            ("vergeten", "verkopen", "kopen", "geten"),
+            ("herkennen", "herhalen", "halen", "kennen"),
+            ("bestellen", "bekijken", "kijken", "stellen"),
+            ("gezellig", "gekocht", "kocht", "zellig"),
+        ] {
+            assert_eq!(
+                nl(word),
+                prefix_of(ref_whole, ref_stem) + &nl(stem),
+                "{word}"
+            );
+        }
+        for w in ["geven", "beter", "tegen", "verder", "tegenstander"] {
+            let ipa = nl(w);
+            let v = ipa.find(|c: char| "aeiouyɑɛɪɔʏəøœ".contains(c)).unwrap();
+            assert!(ipa.find('ˈ').unwrap() < v, "{w}: {ipa}");
+        }
+    }
 
     /// test/dutch.test.ts's `phonemizeWord(…).toBe(…)` and `d.text(…).trim()` pins, and
     /// test/rate-denominator.test.ts's nl `phonemize(…, "nl").trim()` pins, extracted from those files

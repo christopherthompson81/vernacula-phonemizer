@@ -44,6 +44,14 @@ public static class G2p
     /** JS `w[i]` — the code UNIT at i, or "" past the end (the TS reads with `?? ""` throughout). */
     private static string At(string w, int i) => i >= 0 && i < w.Length ? w[i].ToString() : "";
 
+    /** The FULL reading of a single plain vowel letter at index i under the open/closed length rule (#1550). */
+    public static string FullVowel(string w, int i)
+    {
+        var c = w[i].ToString();
+        var v = IsOpen(w, i) ? (LONG.TryGetValue(c, out var l) ? l : null) : (SHORT.TryGetValue(c, out var sh) ? sh : null);
+        return v ?? c;
+    }
+
     /** Is the single vowel at index i in an OPEN syllable (→ tense/long)? */
     private static bool IsOpen(string w, int i)
     {
