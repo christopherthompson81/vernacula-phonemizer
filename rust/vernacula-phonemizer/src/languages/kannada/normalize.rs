@@ -110,7 +110,11 @@ impl KannadaNormalizer {
         let numbers = &self.def.numbers;
 
         // 1) Zero-width characters (the TS writes them as literal characters).
-        let mut s = rewrite(input, js_re!(r"[​‌‍﻿]", "gu"), &JsString::new());
+        let mut s = rewrite(
+            input,
+            js_re!("[\u{200B}\u{200C}\u{200D}\u{FEFF}]", "gu"),
+            &JsString::new(),
+        );
 
         // 2) Native digits.
         s = fold_native_digits(&s);

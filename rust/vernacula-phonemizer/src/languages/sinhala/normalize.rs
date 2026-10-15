@@ -70,7 +70,11 @@ static SYMBOLS: LazyLock<SymbolNormalizer> = LazyLock::new(|| {
 /// `stripJoiners(s)`: `&nbsp;` to a space (a plain replace, off the seam, as in the TS), then the joiners deleted.
 fn strip_joiners(s: &JsString) -> JsString {
     let s = js_re!(r"&nbsp;", "gu").replace(s, &js(" "));
-    rewrite(&s, js_re!(r"[​-‍⁠﻿­]", "gu"), &JsString::new())
+    rewrite(
+        &s,
+        js_re!("[\u{200B}-\u{200D}\u{2060}\u{FEFF}\u{00AD}]", "gu"),
+        &JsString::new(),
+    )
 }
 
 fn abbrev(body: &str, word: &str) -> (JsRegex, JsString) {

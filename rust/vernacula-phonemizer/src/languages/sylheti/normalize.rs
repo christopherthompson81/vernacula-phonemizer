@@ -160,7 +160,14 @@ pub fn normalize_sylheti(input: &JsString) -> JsString {
     let mut s = renormalize(input, Form::Nfc);
 
     // 2. Zero-width formatting characters.
-    s = rewrite(&s, js_re!(r"[​‌‍‎‏⁠﻿]", "gu"), &JsString::new());
+    s = rewrite(
+        &s,
+        js_re!(
+            "[\u{200B}\u{200C}\u{200D}\u{200E}\u{200F}\u{2060}\u{FEFF}]",
+            "gu"
+        ),
+        &JsString::new(),
+    );
 
     // 3. Stray Bengali-Assamese characters inside a Syloti word.
     s = fold_stray_bengali(&s);
