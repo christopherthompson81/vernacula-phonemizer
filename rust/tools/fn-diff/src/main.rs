@@ -2744,7 +2744,11 @@ fn main() {
             use vernacula_phonemizer::languages::telugu;
             let te = telugu::telugu::create_telugu(None).unwrap();
             let te_def = telugu::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::tamil;
+            let ta = tamil::tamil::create_tamil().unwrap();
+            let ta_def = tamil::manifest::try_manifest().unwrap();
             Box::new(move |input| {
+                let nf = || js_number(&JsString::from(input["n"].as_str().unwrap()));
                 let lang = input["lang"].as_str().unwrap();
                 let op = input["op"].as_str().unwrap();
                 let n = || input["n"].as_str().unwrap().parse::<u64>().unwrap();
@@ -2768,6 +2772,19 @@ fn main() {
                         &units(&input["suffix"]),
                         &te_def.numbers,
                     ),
+                    ("ta", "normalize") => ta.normalize(&units(&input["text"])),
+                    ("ta", "text") => with_host(&js("ta"), || ta.text(&units(&input["text"]))),
+                    ("ta", "word") => ta.phonemize_word(&units(&input["word"])),
+                    ("ta", "words" | "words-f") => {
+                        tamil::numbers::number_to_words(nf(), None, &ta_def.numbers)
+                    }
+                    ("ta", "words-raw") => tamil::numbers::number_to_words(
+                        nf(),
+                        Some(&units(&input["raw"])),
+                        &ta_def.numbers,
+                    ),
+                    ("ta", "stem") => tamil::numbers::ordinal_stem(&units(&input["word"]))
+                        .unwrap_or_else(|| js("\u{0}none")),
                     _ => panic!("dravidian: unknown {lang} op {op}"),
                 }
             })

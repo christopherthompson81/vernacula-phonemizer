@@ -98,3 +98,33 @@ a TS print of numerals in the century band carrying a currency, a percent and a 
 **Implication.** te done. TS defect to report (not fixed): telugu/normalize.ts reads every 1100-1999 numeral as a
 century year BEFORE the symbol tier runs, so a currency sign or a percent sign on a number in that band has no
 number left to attach to and is dropped (`$1500`, `1500%`).
+
+## Run 3 — 2026-10-15 04:30 (ta)
+
+**Question.** Does Tamil (its own sandhi-fused composer, the unit segmenter, the voicing allophony and two-level
+stress, the normalizer with fractions and ordinal suffixes) match the TS?
+
+**Command.** `audit.sh tamil`; `parity ta`; `LANGS=ta dump.mts dravidian` (normalize / text / word as for kn and te,
+plus `numberToWords` with and without `raw` over the value grid, on floats at and past 10^10 and 10^21, on -1, NaN and
+Infinity, and `ordinalStem` over every word the composer produces) → `fn-diff dravidian`; a mutation (the ʈ coda
+exception dropped from the voicing condition); `e2e.sh ta`; `pins.sh tamil ta`; a TS print of ordinals on long
+digit runs (`p.mts ta …`).
+
+**Raw finding.**
+- Audits: 25 raw patterns, 6 misses, all `format!` templates checked by hand; 109 non-ASCII runs, 0 missing;
+  the zero-width range written by placeholder (U+200B U+002D U+200D U+FEFF); 0 TS escapes.
+- `ta: 200/200`.
+- `dravidian (ta): 45279 identical, 0 DIFFER` (golden 262, fleurs 7328, probe 22, synthetic 7952, number 3068).
+  Mutation: `44307 identical, 972 DIFFER` (golden 26, fleurs 612); reverted.
+- `phonemize-sync / phonemize-best / trace: 3806 identical, 0 DIFFER` each.
+- test/tamil.test.ts: 97 calls pinned (97 matchers, all green); the Rust test passes.
+- `numberToWords(n)` at 10^10 and above with no `raw` reads `String(n)`, reproduced with `js_number_to_string`.
+  The one caller that passes no `raw` with an unbounded n is the ordinal step, which, unlike kn, te and ml, has no
+  safe-integer guard: `12345678901234567891ஆம்` reads the digits of `12345678901234567000` (the float), ending
+  `… ˈeːɻʊ pˈuːd͡ʒːɪjɐm pˈuːd͡ʒːɪjɐm pˈuːd͡ʒːɪjˌɐmaːm` where the bare numeral reads `… ˈeʈːʊ ˈonbɐd̪ʊ ˈonrʊ`;
+  past 10^21 the digits come from the exponent form (`1.2345678901234568e+21`), so the reading ends `… ˈeʈːʊ ˈɪɾɐɳɖʊ
+  ˈonraːm` — digits the writer never typed.
+
+**Implication.** ta done. TS defect to report (not fixed): tamil/normalize.ts's ordinal step composes from
+`Number(digits)` with no safe-integer guard and no `raw`, so an ordinal on a run of 17+ digits reads a different
+digit string from the one written (the bare numeral path passes `raw` and is right).

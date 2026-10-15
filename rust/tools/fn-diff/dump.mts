@@ -5164,6 +5164,41 @@ const dumps: Record<string, () => void | Promise<void>> = {
                     for (const suf of ["వ", "వది"]) emit({ lang: "te", n: String(n), suffix: units(suf), op: "ordinal" }, Nu.ordinalToWords(n, suf));
                 }
             },
+            async ta() {
+                const { normalizeTamil } = await import("../../../src/languages/tamil/normalize.ts");
+                const Nu = await import("../../../src/languages/tamil/numbers.ts");
+                const { MANIFEST } = await import("../../../src/languages/tamil/manifest.ts");
+                const { createTamil, phonemizeWord } = await import("../../../src/languages/tamil/tamil.ts");
+                const E = createTamil();
+                const rows = textsFor(["ta"], FLEURS_DIR.ta, ["ta.txt"]);
+                const tdg = nativeDigits(0x0be6);
+                const items: string[] = [];
+                for (const g of ["1,000", "12,34,567", "1,00,000", "0,500", "10,00", "1990, 1991", "1,2345", "12,34", "5,000,000", "1,234.5"]) items.push(g);
+                for (const e of ["கி.மு. 300", "கி.பி 1000", "கி மு", "கி.மு", "கிமு", "அகி.மு", "எ.கா. இது", "எ . கா", "எ.கா", "திரு. ராமன்", "திரு.5", "திருமணம்"]) items.push(e);
+                for (const k of ["5 கி.மீ", "5 கி . மி", "5 மி.மீ", "5 செ.மீ", "5 கி மீ", "5கி மீ", "கி மீ", "5 கிமீ", "கிமீ", "கிகி", "5 கிகி", "கிமீக்கு", "5 செ மி"]) items.push(k);
+                for (const i of ["யு.எஸ். அரசு", "ஏ.பி.சி", "டி.என்.ஏ", "ஐ . நா . சபை", "யு.எஸ்.", "பி.சி. 5", "எம்.ஜி.ஆர் வந்தார்"]) items.push(i);
+                for (const r of ["100 km/h", "5 m/s", "3 mi/h", "10 ft/s", "100 KM/H", "5 m / s", "மணிக்கு 100 km/h", "5 kg/h", "a5 km/h", "60 mph", "மணிக்கு 60 mph", "60mph"]) items.push(r);
+                items.push(...tierItems(MANIFEST.symbolTier));
+                for (const h of ["0", "07", "9", "10", "12", "19", "23", "24", "123"]) for (const m of ["00", "05", "30", "59", "60"]) items.push(`${h}:${m}`, `${h}.${m} UTC`, `${h}.${m} GMT`, `${h}.${m}`);
+                for (const f of ["1/2", "1/4", "3/4", "2/3", "1/10", "5/100", "3/0", "0/5", "1/2/3", "1.5/2", "12/2020", "1,000/2", "1/2.5", "1/2,000", "100/1000", "7/8 பங்கு"]) items.push(f);
+                for (const d of ["3.5", "0.25", "1.2.3", "12.", ".5"]) items.push(d);
+                for (const x of ["±5", "+5", "a+5", "UTC+1", "+ 5", "5 < 6", "5 > 4", "a=b", "8÷2", "30°C", "30 ° c", "86°F", "5°", "-5°C"]) items.push(x);
+                for (let n = 0; n <= 40; n++) for (const suf of [...MANIFEST.ordinalSuffixes, "ஆவதாக"]) items.push(`${n}${suf}`, `${n} ${suf}`, `${n}-${suf}`);
+                for (const n of ["100", "1000", "100000", "10000000", "12345678901", "123456789012345678901234", "1.5", "1,000"]) for (const suf of MANIFEST.ordinalSuffixes) items.push(`${n}${suf}`);
+                for (const l of ["2020ல்", "2020 ல்", "2020-ல்", "5ல்லா", "ல்"]) items.push(l);
+                for (const z of ["தமிழ்\u200b", "க\u200dக", "\ufeffதமிழ்", tdg(1976), `${tdg(15)}%`]) items.push(z);
+                frames(rows, "அவர்", "ஆகும்", items);
+                run("ta", rows, normalizeTamil, E, phonemizeWord, /[஀-௿]+/gu, MANIFEST, ["ற்ற", "ற்ச", "அவர்", "அரசு", "பம்பரம்", "கடல்", "தங்கம்", "பஞ்சம்", "க்க", "ஃ", "௦", "௰", "ௐ"], 0x0be6);
+                for (const n of numberGrid()) {
+                    emit({ lang: "ta", n: String(n), op: "words" }, Nu.numberToWords(n));
+                    emit({ lang: "ta", n: String(n), raw: units(String(n).split("").reverse().join("")), op: "words-raw" }, Nu.numberToWords(n, String(n).split("").reverse().join("")));
+                }
+                for (const n of [1e10, 1e15, 1e21, 1.5e22, 12345678901234567890, Number.MAX_SAFE_INTEGER + 2, -1, NaN, Infinity]) emit({ lang: "ta", n: String(n), op: "words-f" }, Nu.numberToWords(n));
+                const stems = new Set<string>();
+                for (const n of numberGrid()) for (const w of Nu.numberToWords(n).split(" ")) stems.add(w);
+                for (const w of ["", "ம்", "ு", "ி", "கம்", "அது"]) stems.add(w);
+                for (const w of stems) emit({ lang: "ta", word: units(w), op: "stem" }, Nu.ordinalStem(w) ?? "\u0000none");
+            },
         };
         for (const lang of langs) {
             if (!Object.hasOwn(L, lang)) throw new Error(`dravidian: no entry for ${lang}`);
