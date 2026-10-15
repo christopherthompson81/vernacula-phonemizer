@@ -53,3 +53,33 @@ full vowel through the scanner's own open/closed rule (`fullVowel`), which gives
   stem `tellen` itself (it starts with te-). Without the stressed-prefix check, tegenstander does.
 
 **Implication.** Closes #1550. The prefix-spelled stems are lexicon work.
+
+## Run 2 — 2026-10-14 (#1551: `hoofdstuk 3.12` read as a clock)
+
+**Question.** #1524 declined the section-number reading for want of evidence. Can it be sourced?
+
+**Command.** A research pass (Onze Taal, Vlaanderen Taaladvies, nl.wiktionary, usage), every `\d{1,2}\.\d{2}` in FLEURS nl
+and the golden with its preceding word, probes, and `nl-normalize` before/after.
+
+**Raw finding.**
+- **Writing: sourced.** Onze Taal ("tijden noteren"; "komma of punt in getal") and Vlaanderen Taaladvies
+  ("uurnotatie"): Dutch writes a clock with a dot (`12.30 uur`, with `uur` optional) and a decimal with a comma.
+  A dotted pair is therefore a clock, or an English-style decimal or version number.
+- **Speech: not sourced.** How a section number is spoken has no authoritative description. The only usage
+  attested is *punt* for version numbers (an nl.taal thread, "Twee punt nul").
+- **Corpus.**
+  - All 17 dotted clocks in FLEURS nl follow om, rond, tussen, vanaf, precies, na, ongeveer, was or en, or a
+    parenthesis. None follows a section word.
+  - The one real section number, `figuur 1.1`, never reached the clock rule (one-digit minute).
+  - The golden's dotted clock is `Vanaf 11.29 uur`.
+- **Fix.** After a `sectionWords` member (new dutch.jsonc list: hoofdstuk, paragraaf, par., sectie, artikel,
+  art., figuur, fig., tabel, bijlage, versie, lid, stap), the dot form is not a clock. It falls through to the
+  path `figuur 1.1` already takes (*drie . twaalf*). No spoken *punt* is invented.
+- **Impact.** nl-normalize changes 0 of 29,792 rows. Every probe clock (`om 12.30 uur`, `rond 07.19 uur`,
+  `tussen 6.30 en 7.30`) is unchanged.
+- **Tests.** `test/dutch-1551-section-numbers.test.ts`, C# `Dutch1551SectionTests` and Rust
+  `the_1551_section_numbers_are_not_clocks`, relational. With the fix reverted they fail 4/5 (TS, C#) and fail
+  (Rust).
+
+**Implication.** The section number is no longer misread. If a source for the spoken *punt* turns up, it slots in
+at the release point.

@@ -100,3 +100,5 @@ Het kost 3.000,50 euro, però Niccolò lì, tennis en telling en hertog, 1/2,5 e
 De beenhouwer en de beurtman beginnen, beamen en beëdigen.
 # #1550: a prefix shift onto a reduced stem ⟨e⟩, against the ⟨ge⟩/⟨be⟩ roots whose remainder is an ending
 Zij vertellen het, vergeten niets en bestellen gezellig; geven, beter, tegen, verder en tegenstander blijven.
+# #1551: a dotted number after a section word is not a clock
+Zie hoofdstuk 3.12, artikel 4.15 en versie 2.10, maar het begint om 12.30 uur en eindigt rond 07.19 uur.

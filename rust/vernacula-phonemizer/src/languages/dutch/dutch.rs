@@ -332,6 +332,25 @@ pub fn create_dutch() -> Result<DutchPhonemizer, String> {
 mod tests {
     use super::*;
 
+    /// test/dutch-1551-section-numbers.test.ts: a dotted number after a section word is not a clock (#1551).
+    #[test]
+    fn the_1551_section_numbers_are_not_clocks() {
+        let nl = |s: &str| crate::phonemize(s, "nl").unwrap();
+        for (section, plain) in [
+            ("Zie hoofdstuk 3.12 hier", "Zie hoofdstuk 3 . 12 hier"),
+            (
+                "In Hoofdstuk 2.10 staat het",
+                "In Hoofdstuk 2 . 10 staat het",
+            ),
+            ("Volgens art. 4.15 mag dat", "Volgens art. 4 . 15 mag dat"),
+            ("versie 3.12 is uit", "versie 3 . 12 is uit"),
+        ] {
+            assert_eq!(nl(section), nl(plain), "{section}");
+        }
+        assert_eq!(nl("Het begint om 12.30 uur"), nl("Het begint om 12:30 uur"));
+        assert_eq!(nl("rond 07.19 uur"), nl("rond 07:19 uur"));
+    }
+
     /// test/dutch-1550-prefix-stem-e.test.ts: the prefix shift reaches a reduced stem ⟨e⟩; relational, built from
     /// words the engine already reads right (#1550).
     #[test]
