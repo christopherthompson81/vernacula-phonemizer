@@ -102,8 +102,17 @@ public static class Markup
     };
     private static readonly JsRe SUP_TAG = JsRegex.Compile(@"<sup>([+-]?\d+)<\/sup>", "giu");
 
-    /** An HTML TAG. */
-    private static readonly JsRe TAG = JsRegex.Compile(@"<\/?[a-zA-Z][^<>]*>", "gu");
+    /**
+     * An HTML TAG: a KNOWN ELEMENT NAME, then `name=value` attributes only, then `>` or `/>`. Any `<` + letter
+     * used to match, which deleted prose in angle brackets (see the TypeScript for the measurement).
+     */
+    private static readonly JsRe TAG = JsRegex.Compile(
+        @"<\/?(?:a|abbr|b|bdi|bdo|big|blockquote|body|br|caption|center|chem|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|font|gallery|h[1-6]|head|hr|html|i|img|includeonly|ins|kbd|li|mark|math|noinclude|nowiki|ol|onlyinclude|p|poem|pre|q|rb|ref|references|rp|rt|ruby|s|samp|score|section|small|source|span|strike|strong|sub|sup|syntaxhighlight|table|tbody|td|templatestyles|tfoot|th|thead|time|timeline|title|tr|tt|u|ul|var|wbr)(?:\s+[a-zA-Z_:][a-zA-Z0-9_:.-]*\s*=\s*(?:""[^""<>]*""|'[^'<>]*'|[^\s""'<>=]+))*\s*\/?>", "giu");
+
+    /** PROSE IN ANGLE BRACKETS, left by the narrowed TAG, is read as PARENTHESES; most engines read a lone `<`
+     *  or `>` as a comparison. */
+    private static readonly JsRe PROSE_ANGLE = JsRegex.Compile(
+        @"(?<![\p{L}\p{N}])<(?=[^\s<>])([^<>]*\p{L}[^<>]*)(?<=[^\s<>])>(?![\p{L}\p{N}])", "gu");
 
     /**
      * WIKITABLE SYNTAX — not HTML, but it arrives by the same route (scraped text) and was likewise SPOKEN,
@@ -156,6 +165,7 @@ public static class Markup
             return sb.ToString();
         });
         s = Rewrite(s, TAG, "");
+        s = Rewrite(s, PROSE_ANGLE, m => "(" + m.Groups[1].Value + ")");
         return Rewrite(s, ENTITY, m =>
         {
             var whole = m.Value;
