@@ -1,0 +1,23 @@
+# Kannada (kn) off-golden probes: synthetic sentences, one per normalize.ts arm plus the neighbour it must decline.
+# zero-width characters after a virama, and a BOM
+ಪಾಯಿಂಟ್\u{200c}ಗಳಿಂದ ಗೆದ್ದರು\u{200d} \u{feff}ಕನ್ನಡ
+# native digits, de-grouping, a leading zero group declined
+೪ ಮಕ್ಕಳು, 1,000 ಜನ, 0,500 ಅಲ್ಲ, 12,345,678 ರೂಪಾಯಿ
+# ordinals spaced, welded, hyphenated, with the nominaliser; zero and an unsafe run declined
+15 ನೇ ದಿನ, 16ನೇ ವರ್ಷ, 20-ನೆಯ ಶತಮಾನ, 60ನೆಯದು, 0ನೇ, 9007199254740993ನೇ
+# era markers, mid-sentence and sentence-final
+ಕ್ರಿ.ಪೂ. 356 ರಲ್ಲಿ, ಕ್ರಿ.ಶ.1000 ರಿಂದ, ಕ್ರಿ.ಪೂದಲ್ಲಿ ಇತ್ತು. ಅದು ಕ್ರಿ.ಶ.
+# unit abbreviations with and without a welded clitic, and ಕಿ as a clitic left alone
+10 ಕಿ.ಮೀ ದೂರ, ಕಿ.ಮೀಯಲ್ಲಿ, 5 ಕಿಮಿ, ಮಿ.ಮೀ ಮಳೆ, ಅವನಿಗೆ ಕಿ ಮೀ
+# initialisms, with a continuing and a final dot
+ಯು.ಎಸ್. ಸರ್ಕಾರ ಮತ್ತು ಡಿ.ಕೆ. ಶಿವಕುಮಾರ್ ಬಂದರು. ಅವರು ಯು.ಎಸ್.
+# the dative rate, with and without the prefix already written
+ಗಂಟೆಗೆ 83 ಕಿಮೀ/ಗಂ ವೇಗ, 1.5 ಕಿ.ಮೀ/ಸೆ, 40 ಮೈ/ಗಂ. ಮೈದಾನ ಮೈ/ಗಂ
+# vulgar fractions after a digit, and alone
+2½ ಕೆಜಿ, 3 ¼ ಲೀಟರ್, ½ ಭಾಗ
+# the symbol tier, the clock, decimals
+50% ಮತ್ತು $1,000 ಮತ್ತು 3 km² ಮತ್ತು 11:00 ಕ್ಕೆ 9:30 ರಿಂದ 2:11.60 ಸಮಯ 3.75 ಮೀಟರ್
+# signs: plus, degree, relational, equals, division
+UTC+1 ಮತ್ತು +5 ಮತ್ತು 30°C, 5 < 6, 7 > 3, a = b, 8 ÷ 2
+# Latin runs, accented Latin, clause marks
+NASA ಮತ್ತು Cañitas ಹೇಳಿದರು! ಏಕೆ? ಸರಿ; ಹೌದು: ಇಲ್ಲ।

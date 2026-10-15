@@ -1,0 +1,23 @@
+# Tamil (ta) off-golden probes: synthetic sentences, one per normalize.ts arm plus the neighbour it must decline.
+# zero-width characters and a BOM
+தமிழ்\u{200b} மொழி\u{200d} \u{feff}நல்லது
+# native digits, Western and Indian grouping, a leading zero group declined
+௪ பேர், 1,000 பேர், 12,34,567 ரூபாய், 0,500 அல்ல
+# era markers, the example abbreviation, the honorific
+கி.மு. 300 முதல் கி.பி 1000 வரை, எ.கா. இது, திரு. ராமன் வந்தார்
+# Tamil unit spellings, dotted, spaced after a number, fused, and a spaced pair with no number
+5 கி.மீ தூரம், 10 செ மீ நீளம், 3கிகி எடை, கி மீ இல்லை
+# initialisms with a continuing and a final dot
+யு.எஸ். அரசு மற்றும் டி.என்.ஏ சோதனை. அவர் யு.எஸ்.
+# Latin rates, mph, with and without the dative already written
+100 km/h வேகம், மணிக்கு 100 km/h, 5 m/s, 60 mph, 5 kg/h
+# the symbol tier, the dotted clock before UTC, the colon clock
+50% மற்றும் $1,000 மற்றும் 11.30 UTC மற்றும் 10:00 மணி 9:30 மணி
+# fractions: the lexical three, a composed one, a date and a decimal neighbour declined
+1/2 கிலோ, 2/3 பங்கு, 12/2020 இல், 1.5/2 இல்லை, 3/0 இல்லை
+# decimals, signs, relations, degrees
+3.75 மீட்டர், ±5, UTC+1, 5 < 6, 7 > 3, a = b, 8 ÷ 2, 30°C, 86°F, 5°
+# ordinal suffixes, a long run, the locative clitic
+5ஆவது இடம், 2ஆம் நாள், 10வது ஆண்டு, 3ம் தேதி, 12345678901ஆம், 2020ல் நடந்தது
+# Latin runs (no Latin arm in this engine), clause marks
+NASA சொன்னது! ஏன்? சரி; ஆமாம்: இல்லை… முடிந்தது.

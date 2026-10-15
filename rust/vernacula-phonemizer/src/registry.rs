@@ -35,13 +35,14 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 86] = [
+pub const LANGUAGES: [&str; 91] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
     "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
     "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo", "cs", "sk", "be", "bg", "mk",
     "bho", "mag", "awa", "mai", "hne", "rkt", "ne", "mr", "fi", "et", "hu", "is", "fo", "az", "kk",
     "ky", "uz", "tk", "tt", "da", "nb", "af", "lb", "bar", "ba", "crh", "kaa", "nog", "chv", "tg",
-    "cy", "ga", "gd", "eu", "sq", "ast", "an", "oc", "bn", "as", "bpy", "syl", "or",
+    "cy", "ga", "gd", "eu", "sq", "ast", "an", "oc", "bn", "as", "bpy", "syl", "or", "kn", "te",
+    "ta", "ml", "si",
 ];
 
 /// A language engine, as the registry holds it.
@@ -296,6 +297,11 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
         "bpy" => crate::languages::bishnupriya::bishnupriya::engine(),
         "syl" => crate::languages::sylheti::sylheti::engine(),
         "or" => crate::languages::odia::odia::engine(),
+        "kn" => crate::languages::kannada::kannada::engine(),
+        "te" => crate::languages::telugu::telugu::engine(),
+        "ta" => crate::languages::tamil::tamil::engine(),
+        "ml" => crate::languages::malayalam::malayalam::engine(),
+        "si" => crate::languages::sinhala::sinhala::engine(),
         _ => return None,
     })
 }

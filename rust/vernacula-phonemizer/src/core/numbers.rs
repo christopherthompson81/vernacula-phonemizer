@@ -1,7 +1,6 @@
-//! Number words from a language's `NumbersDef`: the Indic (lakh/crore) and Western (thousand/million)
+//! Number words from a language's `NumbersDef`: the Indic (lakh/crore), Western (thousand/million) and Dravidian
 //! composers, rendering, and digit spelling. Ported from src/core/numbers.ts — see that file for each system.
 //!
-//! ⚠ PARTIAL: `dravidianNumberWords` is ported with its first consumer.
 //! Callers pass integers (the TS `n: number` is always one at the call sites), so `n` is a `u64` here.
 
 use std::collections::HashMap;
@@ -238,6 +237,158 @@ pub fn western_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
     out.push(mag("billion", b));
     out.extend(rest(r));
     out
+}
+
+/// `DravidianForms`: a magnitude/hundred noun's bare and combining forms, plus the count-inflected pair.
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DravidianForms {
+    pub bare: String,
+    pub combining: String,
+    pub plural: Option<String>,
+    pub plural_oblique: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct DravidianMagnitudeForms {
+    pub hundred: DravidianForms,
+    pub thousand: DravidianForms,
+    pub lakh: DravidianForms,
+    pub crore: DravidianForms,
+}
+
+/// `DravidianNumbersDef`.
+#[derive(Debug, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct DravidianNumbersDef {
+    pub units: Vec<String>,
+    pub teens: Vec<String>,
+    pub tens: HashMap<String, String>,
+    pub compound: Option<HashMap<String, String>>,
+    pub hundred_forms: Option<HashMap<String, DravidianForms>>,
+    pub thousand_forms: Option<HashMap<String, DravidianForms>>,
+    pub magnitude_forms: DravidianMagnitudeForms,
+}
+
+fn dravidian_form(f: &DravidianForms, count: u64, has_remainder: bool) -> String {
+    match (count == 1, has_remainder) {
+        (true, true) => f.combining.clone(),
+        (true, false) => f.bare.clone(),
+        (false, true) => f
+            .plural_oblique
+            .clone()
+            .unwrap_or_else(|| f.combining.clone()),
+        (false, false) => f.plural.clone().unwrap_or_else(|| f.bare.clone()),
+    }
+}
+
+// A missing table entry is the TS's `undefined`, which `join(" ")` renders as "": the empty string here.
+fn at(v: &[String], i: u64) -> String {
+    v.get(i as usize).cloned().unwrap_or_default()
+}
+
+fn key(m: &HashMap<String, String>, n: u64) -> String {
+    m.get(&n.to_string()).cloned().unwrap_or_default()
+}
+
+fn dravidian_below_100(n: u64, d: &DravidianNumbersDef) -> Vec<String> {
+    if n == 0 {
+        return Vec::new();
+    }
+    if n < 10 {
+        return vec![at(&d.units, n)];
+    }
+    if n < 20 {
+        return vec![at(&d.teens, n - 10)];
+    }
+    let (t, u) = (n / 10 * 10, n % 10);
+    if u == 0 {
+        return vec![key(&d.tens, t)];
+    }
+    match d.compound.as_ref().and_then(|c| c.get(&n.to_string())) {
+        Some(fused) => vec![fused.clone()],
+        None => vec![key(&d.tens, t), at(&d.units, u)],
+    }
+}
+
+fn dravidian_below_1000(n: u64, d: &DravidianNumbersDef) -> Vec<String> {
+    let (h, r) = (n / 100, n % 100);
+    if h == 0 {
+        return dravidian_below_100(r, d);
+    }
+    let mut out = Vec::new();
+    if let Some(sup) = d.hundred_forms.as_ref().and_then(|f| f.get(&h.to_string())) {
+        out.push(if r > 0 {
+            sup.combining.clone()
+        } else {
+            sup.bare.clone()
+        });
+    } else {
+        if h != 1 {
+            out.push(at(&d.units, h));
+        }
+        out.push(dravidian_form(&d.magnitude_forms.hundred, h, r > 0));
+    }
+    out.extend(dravidian_below_100(r, d));
+    out
+}
+
+fn dravidian_group(
+    key: &str,
+    count: u64,
+    has_remainder: bool,
+    d: &DravidianNumbersDef,
+) -> Vec<String> {
+    if key == "thousand"
+        && let Some(sup) = d
+            .thousand_forms
+            .as_ref()
+            .and_then(|f| f.get(&count.to_string()))
+    {
+        return vec![if has_remainder {
+            sup.combining.clone()
+        } else {
+            sup.bare.clone()
+        }];
+    }
+    let forms = match key {
+        "crore" => &d.magnitude_forms.crore,
+        "lakh" => &d.magnitude_forms.lakh,
+        _ => &d.magnitude_forms.thousand,
+    };
+    let mag = dravidian_form(forms, count, has_remainder);
+    if count == 1 {
+        return vec![mag];
+    }
+    let mut out = dravidian_number_words(count, d);
+    out.push(mag);
+    out
+}
+
+/// `dravidianNumberWords(n, d)`: Indian 2-2-3 grouping with fused 21-99, suppletive hundreds/thousands and
+/// combining magnitude forms. Callers pass a safe non-negative integer.
+pub fn dravidian_number_words(n: u64, d: &DravidianNumbersDef) -> Vec<String> {
+    if n == 0 {
+        return vec![at(&d.units, 0)];
+    }
+    let crore = n / 10_000_000;
+    let n = n % 10_000_000;
+    let lakh = n / 100_000;
+    let n = n % 100_000;
+    let thou = n / 1000;
+    let n = n % 1000;
+    let mut parts = Vec::new();
+    if crore > 0 {
+        parts.extend(dravidian_group("crore", crore, lakh + thou + n > 0, d));
+    }
+    if lakh > 0 {
+        parts.extend(dravidian_group("lakh", lakh, thou + n > 0, d));
+    }
+    if thou > 0 {
+        parts.extend(dravidian_group("thousand", thou, n > 0, d));
+    }
+    parts.extend(dravidian_below_1000(n, d));
+    parts
 }
 
 pub type NumberComposer = fn(u64, &NumbersDef) -> Vec<Word>;

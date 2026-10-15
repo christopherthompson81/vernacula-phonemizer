@@ -2735,6 +2735,101 @@ fn main() {
                 op => panic!("or: unknown op {op}"),
             })
         }
+        "dravidian" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::kannada;
+            let kn = kannada::kannada::create_kannada(None).unwrap();
+            let kn_def = kannada::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::telugu;
+            let te = telugu::telugu::create_telugu(None).unwrap();
+            let te_def = telugu::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::tamil;
+            let ta = tamil::tamil::create_tamil().unwrap();
+            let ta_def = tamil::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::malayalam;
+            let ml = malayalam::malayalam::create_malayalam(None).unwrap();
+            let ml_def = malayalam::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::sinhala;
+            let si = sinhala::sinhala::create_sinhala().unwrap();
+            let si_def = sinhala::manifest::try_manifest().unwrap();
+            Box::new(move |input| {
+                let nf = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let lang = input["lang"].as_str().unwrap();
+                let op = input["op"].as_str().unwrap();
+                let n = || input["n"].as_str().unwrap().parse::<u64>().unwrap();
+                match (lang, op) {
+                    ("kn", "normalize") => kn.normalize(&units(&input["text"])),
+                    ("kn", "text") => with_host(&js("kn"), || kn.text(&units(&input["text"]))),
+                    ("kn", "word") => kn.phonemize_word(&units(&input["word"])),
+                    ("kn", "words") => kannada::numbers::number_to_words(n(), &kn_def.numbers),
+                    ("kn", "ordinal") => kannada::numbers::ordinal_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        &kn_def.numbers,
+                    ),
+                    ("te", "normalize") => te.normalize(&units(&input["text"])),
+                    ("te", "text") => with_host(&js("te"), || te.text(&units(&input["text"]))),
+                    ("te", "word") => te.phonemize_word(&units(&input["word"])),
+                    ("te", "words") => telugu::numbers::number_to_words(n(), &te_def.numbers),
+                    ("te", "year") => telugu::numbers::year_to_words(n(), &te_def.numbers),
+                    ("te", "ordinal") => telugu::numbers::ordinal_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        &te_def.numbers,
+                    ),
+                    ("ta", "normalize") => ta.normalize(&units(&input["text"])),
+                    ("ta", "text") => with_host(&js("ta"), || ta.text(&units(&input["text"]))),
+                    ("ta", "word") => ta.phonemize_word(&units(&input["word"])),
+                    ("ta", "words" | "words-f") => {
+                        tamil::numbers::number_to_words(nf(), None, &ta_def.numbers)
+                    }
+                    ("ta", "words-raw") => tamil::numbers::number_to_words(
+                        nf(),
+                        Some(&units(&input["raw"])),
+                        &ta_def.numbers,
+                    ),
+                    ("ta", "stem") => tamil::numbers::ordinal_stem(&units(&input["word"]))
+                        .unwrap_or_else(|| js("\u{0}none")),
+                    ("ml", "normalize") => ml.normalize(&units(&input["text"])),
+                    ("ml", "text") => with_host(&js("ml"), || ml.text(&units(&input["text"]))),
+                    ("ml", "word") => ml.phonemize_word(&units(&input["word"])),
+                    ("ml", "words") => malayalam::numbers::number_to_words(n(), &ml_def.numbers),
+                    ("ml", "ordinal") => malayalam::numbers::ordinal_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        &ml_def.numbers,
+                    ),
+                    ("ml", "clitic") => malayalam::numbers::clitic_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        if input["stem"] == "plural" {
+                            malayalam::numbers::plural_stem
+                        } else {
+                            malayalam::numbers::oblique_stem
+                        },
+                        &ml_def.numbers,
+                    ),
+                    ("ml", "stem-ordinal") => {
+                        malayalam::numbers::ordinal_stem(&units(&input["word"]))
+                    }
+                    ("ml", "stem-oblique") => {
+                        malayalam::numbers::oblique_stem(&units(&input["word"])).unwrap_or_default()
+                    }
+                    ("ml", "stem-plural") => {
+                        malayalam::numbers::plural_stem(&units(&input["word"]))
+                            .unwrap_or_else(|| js("\u{0}none"))
+                    }
+                    ("si", "normalize") => si.normalize(&units(&input["text"])),
+                    ("si", "text") => with_host(&js("si"), || si.text(&units(&input["text"]))),
+                    ("si", "word") => si.phonemize_word(&units(&input["word"])),
+                    ("si", "words") => {
+                        js(&sinhala::numbers::number_to_words(nf(), &si_def.numbers))
+                    }
+                    _ => panic!("dravidian: unknown {lang} op {op}"),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
