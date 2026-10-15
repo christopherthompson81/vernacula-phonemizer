@@ -1,0 +1,40 @@
+# Afrikaans (af) off-golden probes: synthetic text only, one or more lines per normalize.ts arm plus the
+# neighbour each arm must decline, and g2p / tokenizer corners.
+# 0 HTML ampersand and the article's spellings
+Die B&amp;B en Huis &AMP; Tuin is ‘n mooi plek, ’n huis, ʼn boom, `n kat, ´n hond, ń man, maar ‘nuwe’ bly.
+# 1 era markers and multi-dot abbreviations
+In 300 v.C. en 45 n. C. en 12 vC, d.i. lank gelede, en v.Chr. nie.
+Dit was 200 v. C.
+# 2 dotted capitals
+Die V.S. en die V. S. A. en die U.\u{a0}K. is groot, maar A. Smith nie.
+# 3 single-dot abbreviations
+Dr. Botha en mnr. Smith ry 60 m.p.u. op die pad, of 70 m.p.u (vinnig), teen 8:30 n.m. vandag.
+Hy het DR. Jansen en Dr gesien, en Dromaeosauridae.
+# 4 letter-suffix ordinals
+Die 11de, 15de, 9e, 60ste, 190ste, 101ste, 112de, 21ste, 1ste en 11De keer, maar 5des en 3eenhede nie.
+# 5 clocks
+Ons begin om 11:20. Die trein ry 9:30 vm en 10:00vm en 15.00 GUT en 0230 UTC en 5vm, maar 10nm en 6.34 duim.
+Tyd 4:41.30 en 2:11:60 en 24:00 en 23:59 nm.
+# 6 comma grouping and 6b comma decimal
+Daar is 17,500 myl en 100,000 mense en 1,234,567 bome; 12,5 en R2,50 en In 1990, 5 mense.
+# 7 version dots and figures
+Die 802.11n standaard en Figuur 1.1 en 12.5km en 3.50-meter.
+# 8 rates
+Die lyn is 600Mbit/s vinnig.
+# 9 regnal ordinals
+Die Wêreld Oorlog 2 en Wêreldoorlog II en Wereld oorlog I en Wêreld Oorlog IV en Wêreld Oorlog IIV.
+# 10 degrees
+Dit is +30°C en 90 ° F-hitte en 20 °c en 45° en 25°Cölner.
+# 11 signs
+Die waarde is ±5 en UTC+1 en -5 grade en −12, maar 2-3 km en 7-2 en 1838−1917.
+B&B en A & B en x = y en 3 < 4 en 5 > 2 en 3 × 4 en 8 ÷ 2.
+# 12 fractions
+Sowat 1/5 duim en 1/2 en 3/2 en 3/4 en 1/5/2020 en 2/0.
+# symbol tier
+Dit kos $5 en €20 en £3 en ¥100 en U$5 en VS$10, 50% en 5 km en 3 km/h en 12 m/s en 10 km² en 5 m³.
+# tokenizer: apostrophes, Latin-bounded runs, numbers
+Die kind se 'n boek, Jan's kar, sê 'nee', δοκιμή en тест en เด็ก hier, 12.8 km en 17,500 myl.
+# g2p corners: length, devoicing, seams, stress suffixes, diacritics, foreign letters
+hond advies aandklok sending veldtog wildtuin landdros grootoon swaar twee kwaad dwaal antwoord
+aborsie universiteit argeologiese biologiese nasionalisme chemie franc arc appel handomkeer
+bâton piñata garçon Provençaalse ê ë ï ô û naïef reën kopiëring

@@ -59,6 +59,7 @@ const FLEURS_DIR: Record<string, string> = {
     uz: "uz_uz",
     da: "da_dk",
     nb: "nb_no",
+    af: "af_za",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -3703,6 +3704,95 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
         for (const s of ["", "ˈa", "ˈˈa", "ˌˌa", "ˈaˈb", "ˌaˈb", "ˌa", "aˌbˌc", "ba", "bdə", "pst", "ˈˌaˌˈb", "kɐɐ", "øːˀ", "ˈaˌbˈc"])
             emit({ word: units(s), op: "oneStressNb" }, oneStress(s, /[ɑaeɛiɪoɔuʉʊyʏøœæ]/u));
+    },
+    // ── Afrikaans (af). Inputs: the af golden, FLEURS af_za (columns 3 and 4) and probes/af.txt. ──
+    // normalizeAfrikaans, the symbol tier over its output (recorded through the wrapper), the initialism pass over
+    // the tier's output, and `createAfrikaans().text`, over every text plus synthetic rows for every arm (the
+    // article spellings, each multi-dot and dotted abbreviation in three casings and three tails, dotted capitals,
+    // ordinal suffixes 0…200 × 7 endings, the clock forms over an hour × minute × marker grid, comma grouping and
+    // decimals, version dots, rates, regnal ordinals, degrees, signs, fractions); isUnreadableAfrikaans over every
+    // letter run; ordinalWord over 0…2,000 and corners.
+    async "af-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/afrikaans/normalize.ts");
+        const { createAfrikaans } = await import("../../../src/languages/afrikaans/afrikaans.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/afrikaans\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createAfrikaans();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["af"], FLEURS_DIR.af, ["af.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const a of ["‘n", "’n", "ʼn", "`n", "´n", "ń", "'n", "‘nuwe", "x‘n"]) add(`dit is ${a} huis`);
+        for (const ab of ["v.C.", "v. C.", "vC", "n.C.", "n. C", "d.i.", "dr.", "mnr.", "m.p.u.", "m.p.u", "n.m.", "n.m", "Dr", "V.S.", "U. K."])
+            for (const v of [ab, ab.toUpperCase(), ab.toLowerCase()]) for (const tail of [" 5 jaar", "", ")", " (x)"]) add(`dit was ${v}${tail}`);
+        for (let n = 0; n <= 200; n++) for (const suf of ["ste", "sten", "de", "den", "e", "De", "x"]) add(`die ${n}${suf} keer`);
+        for (const h of ["0", "9", "09", "12", "23", "24"]) for (const m of ["00", "05", "30", "59", "60"]) for (const p of ["", " vm", "nm", " NM", " GUT", " UTC"]) { add(`om ${h}:${m}${p} daar`); add(`om ${h}.${m}${p} daar`); add(`om ${h}${m}${p} daar`); }
+        for (const g of ["17,500", "1,234,567", "0,500", "12,5", "R2,50", "1,2345", "802.11n", "1.1a", "Figuur 3.2", "12.5km", "600Mbit/s", "6 mbit/s"]) add(`daar is ${g} hier`);
+        for (const w of ["Wêreld Oorlog 2", "Wereld oorlog 1", "Wêreldoorlog II", "Wêreld Oorlog IV", "Wêreld Oorlog IIV", "Wêreld Oorlog 0", "Wêreld Oorlog III"]) add(`die ${w} was`);
+        for (const d of ["+30°C", "90 ° F-hitte", "20 °c", "45°", "25°Cölner", "±5", "UTC+1", "-5", "−12", "2-3", "1838−1917", "B&B", "a & b", "x = y", "3<4", "5 > 2", "3×4", "8 ÷ 2", "1/5", "1/2", "3/2", "3/4", "1/5/2020", "2/0", "7/100"]) add(`dit is ${d} nou`);
+        for (const [t, src] of rows) {
+            const a = N.normalizeAfrikaans(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = rec.apply(a);
+            emit({ text: units(a), src, op: "symbols" }, b);
+            emit({ text: units(b), src, op: "initialisms" }, N.normalizeAfrikaansInitialisms(b));
+            emit({ text: units(t), src, op: "text" }, withHost("af", () => E.text(t)));
+            for (const m of t.matchAll(/\p{L}+/gu)) for (const w of [m[0], m[0].toLowerCase()]) emit({ word: units(w), op: "unreadable" }, String(N.isUnreadableAfrikaans(w)));
+        }
+        const ns: number[] = [];
+        for (let i = -2; i <= 2000; i++) ns.push(i);
+        ns.push(1e6, 1e6 + 12, 999999999, 1e9, 1e9 + 1, 2 ** 53, 1.5, NaN, Infinity);
+        for (const n of ns) emit({ n: String(n), op: "ordinal" }, N.ordinalWord(n) ?? "\u0000none");
+    },
+    // phonemizeWordRules, phonemizeWord and decompose over every letter run (as written and lowercased), every
+    // key of both lexicons, every 1–3 letter string of the alphabet, every 4-letter string over the context
+    // letters, corners; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "af-g2p"() {
+        const A = await import("../../../src/languages/afrikaans/afrikaans.ts");
+        const { decompose } = await import("../../../src/languages/afrikaans/morphology.ts");
+        const { numberToWords } = await import("../../../src/languages/afrikaans/numbers.ts");
+        const AF = new URL("../../../src/languages/afrikaans/afrikaans.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("af")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzêôûîëïéèáàóúüöñç'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouybdgvwstkch"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "'n", "’n", "‘n", "N", "Ê", "é", "öp", "ﬁsk", "bâton", "Dvořák", "ſon"]) words.add(w);
+        for (const k of [...loadTsvMap(AF, "af-lexicon.tsv").keys(), ...loadTsvMap(AF, "af-rcrl-lexicon.tsv").keys()]) words.add(k);
+        for (const w of words) {
+            emit({ word: units(w), op: "rules" }, A.phonemizeWordRules(w));
+            emit({ word: units(w), op: "word" }, A.phonemizeWord(w));
+            const d = decompose(w);
+            emit({ word: units(w), op: "decompose" }, `${d.parts.join("+")}|${d.kinds.join("+")}|${d.stressPart}`);
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e9, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000", raw: units(raw), op: "words" }, numberToWords(1e9, raw));
+        }
+    },
+    // The BiLSTM tagger over every pre-pass word of the texts (keyed NFC + lowercase, as the pre-pass offers it),
+    // every 25th RCRL key and corners.
+    async "af-tagger"() {
+        const { createAfrikaansTagger } = await import("../../../src/languages/afrikaans/afrikaansTagger.ts");
+        const AF = new URL("../../../src/languages/afrikaans/afrikaans.ts", import.meta.url).href;
+        const tagger = await createAfrikaansTagger();
+        if (!tagger) throw new Error("af tagger unavailable");
+        const words = new Set<string>();
+        const re = /['’]?\p{Script=Latin}[\p{Script=Latin}\p{M}]*(?:['’]\p{Script=Latin}[\p{Script=Latin}\p{M}]*)*/gu;
+        for (const t of langTexts("af")) for (const m of t.matchAll(re)) words.add(m[0].normalize("NFC").toLowerCase());
+        let i = 0;
+        for (const w of loadTsvMap(AF, "af-rcrl-lexicon.tsv").keys()) if (i++ % 25 === 0) words.add(w);
+        for (const w of ["", "мир", "a☃b", "ÊKS", "ég", "İsted", "ſkip", "x", "qqqq", "abcdefghijklmnopqrstuvwxyzêôûîëï"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
     },
 };
 

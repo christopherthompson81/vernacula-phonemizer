@@ -2273,6 +2273,43 @@ fn main() {
                 }
             })
         }
+        "af-normalize" | "af-g2p" | "af-tagger" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::afrikaans::{afrikaans, afrikaans_tagger};
+            let af = afrikaans::create_afrikaans().unwrap();
+            let tagger = (name == "af-tagger")
+                .then(|| afrikaans_tagger::create_afrikaans_tagger("af-g2p-tagger").unwrap());
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => af.normalize(&t()),
+                    "symbols" => af.symbols(&t()),
+                    "initialisms" => af.normalize_initialisms(&t()),
+                    "text" => with_host(&js("af"), || af.text(&t(), None)),
+                    "unreadable" => js(&af.is_unreadable(&w()).to_string()),
+                    "ordinal" => af.ordinal_word(n()).unwrap_or_else(|| js("\u{0}none")),
+                    "rules" => af.phonemize_word_rules(&w()),
+                    "word" => af.phonemize_word(&w()),
+                    "decompose" => {
+                        let d = af.decompose(&w());
+                        let kinds: Vec<&str> = d.kinds.iter().map(|k| k.as_str()).collect();
+                        JsString::join(&d.parts, &js("+")).concat(&js(&format!(
+                            "|{}|{}",
+                            kinds.join("+"),
+                            d.stress_part
+                        )))
+                    }
+                    "tag" => tagger.as_ref().unwrap().tag(&w()).unwrap(),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        af.number_to_words(n(), raw.as_ref())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
