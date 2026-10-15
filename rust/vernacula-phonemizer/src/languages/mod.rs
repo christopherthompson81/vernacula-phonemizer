@@ -48,6 +48,7 @@ pub mod malay;
 pub mod mandarin;
 pub mod marathi;
 pub mod nepali;
+pub mod nogai;
 pub mod norwegian;
 pub mod polish;
 pub mod portuguese;

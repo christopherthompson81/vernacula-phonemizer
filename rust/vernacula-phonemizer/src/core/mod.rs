@@ -28,6 +28,7 @@ pub mod roman;
 pub mod schwa;
 pub mod scripts;
 pub mod segment;
+pub mod separator_hygiene;
 pub mod structural_tagger;
 pub mod trace;
 pub mod unicode;

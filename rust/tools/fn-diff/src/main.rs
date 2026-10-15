@@ -2079,6 +2079,20 @@ fn main() {
                 }
             })
         }
+        "nog-normalize" | "nog-g2p" | "nog-numbers" => {
+            let nog = vernacula_phonemizer::languages::nogai::nogai::create_nogai().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => nog.normalize(&t()),
+                    "engine" => nog.text(&t()),
+                    "word" => nog.phonemize_word(&units(&input["word"])),
+                    "words" => nog.number_words(num()),
+                    _ => nog.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
         "ba-roman" => {
             let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
             Box::new(move |input| {

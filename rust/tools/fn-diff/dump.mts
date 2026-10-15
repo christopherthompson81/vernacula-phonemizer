@@ -4132,6 +4132,54 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
     },
+    // ── Nogai (nog). Inputs: the nog golden and probes/nog.txt (no FLEURS, no corpus), plus GENERATED shapes. ──
+    // normalizeNogai (= core/separatorHygiene.ts) and the engine's text() over the texts and synthetic rows: every
+    // grouping mark and group count, short decimals in every trailing context, dotted runs, and dash spans.
+    async "nog-normalize"() {
+        const N = await import("../../../src/languages/nogai/normalize.ts");
+        const P = (await import("../../../src/languages/nogai/nogai.ts")).createNogai();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["nog"], undefined, ["nog.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const seps = [" ", "\u00a0", "\u202f", "\u2009", ".", ",", "  "];
+        for (const sp of seps) for (const head of ["0", "1", "12", "123", "1234"]) for (const groups of [["000"], ["000", "000"], ["234", "5678"], ["23"], ["2"], ["000", "00"]])
+            for (const tail of ["", ".", ",", " сом", ".5", ",5", "-"]) add(`${head}${groups.map((g) => sp + g).join("")}${tail}`);
+        for (const r of ["5–8", "5 – 8", "5—8", "5-8", "5 — 8", "–8", "5–", "1.2.3", "1.2.3.4.5", "12345.1.1", "1.2", "1..2", "v1.2.3"]) for (const tail of ["", ".", " йыл"]) add(`Сан ${r}${tail}`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, N.normalizeNogai(t));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+    },
+    // phonemizeWord over every Cyrillic run of the texts (as written, lowercased, uppercased), every 1-3 letter string
+    // over the alphabet (third letter from a context set), every 4-letter string of the digraph, в and е letters, and
+    // edge strings.
+    async "nog-g2p"() {
+        const T = await import("../../../src/languages/nogai/nogai.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("nog")) for (const w of t.match(/[\p{L}\p{M}]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); }
+        const abc = [..."абвгдеёжзийклмнопрстуфхцчшщъыьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аеиоуыэьъвлрст") words.add(a + b + c); } }
+        const ctx = [..."авеоуьъгкнсрт"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "ӑ", "ј", "е́", "й", "а\ud800ь"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+    },
+    // numberToWords over 0…20,000 and beyond, and the engine's own number reading on digit runs (the unsafe ones
+    // digit at a time).
+    async "nog-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/nogai/numbers.ts");
+        const P = (await import("../../../src/languages/nogai/nogai.ts")).createNogai();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n).join("|"));
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
 };
 
 
