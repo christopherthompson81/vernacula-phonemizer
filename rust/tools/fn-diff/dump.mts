@@ -60,6 +60,7 @@ const FLEURS_DIR: Record<string, string> = {
     da: "da_dk",
     nb: "nb_no",
     af: "af_za",
+    lb: "lb_lu",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -3793,6 +3794,75 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const w of loadTsvMap(AF, "af-rcrl-lexicon.tsv").keys()) if (i++ % 25 === 0) words.add(w);
         for (const w of ["", "мир", "a☃b", "ÊKS", "ég", "İsted", "ſkip", "x", "qqqq", "abcdefghijklmnopqrstuvwxyzêôûîëï"]) words.add(w);
         for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
+    },
+    // ── Luxembourgish (lb). Inputs: the lb golden, FLEURS lb_lu (columns 3 and 4) and probes/lb.txt. ──
+    // normalizeLuxembourgish, the symbol tier over its output (recorded through the wrapper) and
+    // `createLuxembourgish().text`, over every text plus synthetic rows for every arm: grouping in both forms and
+    // every separator, era markers in every position, the multi-dot and single-dot abbreviations (and the long-s
+    // fold), ordinals 0…120 after each licenser / before each noun / in lists / unlicensed, sports times, the clock
+    // over an hour × minute × licenser grid, fractions, both decimals, ranges, mph, degrees, signs; the Eifeler Regel
+    // over every word ending × every following letter; ordinalStem over 0…2,000.
+    async "lb-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeLuxembourgish, ordinalStem } = await import("../../../src/languages/luxembourgish/normalize.ts");
+        const { applyEifelerRegel } = await import("../../../src/languages/luxembourgish/numbers.ts");
+        const { createLuxembourgish } = await import("../../../src/languages/luxembourgish/luxembourgish.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/luxembourgish\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createLuxembourgish();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["lb"], FLEURS_DIR.lb, ["lb.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678"]) add(`et kascht ${g} Euro`);
+        for (const ab of ["v. Chr.", "v.Chr.", "n. Chr", "v. Chr)", "n.\u00a0Chr."]) for (const tail of [" an", " 5", ".", "!", "", ")."]) add(`am Joer 300 ${ab}${tail}`);
+        for (const ab of ["z. B.", "z.B.", "d. h.", "d.h.", "asw.", "Dr.", "NR.", "jr.", "aſw.", "dr"]) for (const tail of [" an", ", déi", ").", ".", ""]) add(`dat ${ab}${tail}`);
+        for (let n = 0; n <= 120; n++) for (const [pre, post] of [["", " Joerhonnert"], ["", " Mee"], ["den ", " Dag"], ["der ", " Plaz"], ["vum ", " Dag"], ["", ", 12. an 13. Joerhonnert"], ["ass ", " beim"], ["", " Dag"], ["am ", " Abrëll"]]) add(`${pre}${n}.${post}`);
+        for (const h of ["0", "1", "07", "12", "23", "24"]) for (const m of ["00", "05", "15", "59", "60"]) for (const [pre, post] of [["um ", ""], ["", " Auer"], ["", " UTC"], ["Um ", " MDT"], ["", ""], ["géint ", ","]]) add(`${pre}${h}.${m}${post} dann`);
+        for (const t of ["4.41,30", "1.09,02", "12.30,5"]) add(`hien huet ${t} gelaf`);
+        for (const f of ["1/5", "1/2", "3/2", "1/4", "3/4", "1/3", "2/7", "1.5/2", "1/2,5", "2/0", "1/100", "999/999"]) add(`ongeféier ${f} Zoll`);
+        for (const d of ["1.5", "20.30", "1,5", "7,74", "1894 – 1895", "2 – 3 km", "7 – 8", "1000000 – 2000000", "60 mph", "30 Meilen/h", "20 °C", "90°F", "35 °W", "-5", "(−3)", "A+1", "+3", "±2", "x = y", "3 < 4", "5 > 2", "3 × 4", "8 ÷ 2", "A&B"]) add(`et war ${d} hei`);
+        for (const [t, src] of rows) {
+            const a = normalizeLuxembourgish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("lb", () => E.text(t)));
+        }
+        for (const w of ["an", "een", "siwen", "Milliounen", "Millioun", "eent", "", "n", "dräi"]) for (const f of ["", "a", "b", "d", "e", "h", "n", "t", "z", "v", "A", "B", "D", "Z", "ä", "ë", "é", "è", "ô", "y", "İ", "ſ", "1", ".", " ", "\ud800", "𝐚"]) emit({ word: units(w), following: units(f), op: "eifeler" }, applyEifelerRegel(w, f));
+        for (let n = -2; n <= 2000; n++) emit({ n: String(n), op: "stem" }, ordinalStem(n) ?? "\u0000none");
+        for (const n of [1e6, 1e6 + 3, 1e9, 1e12, 2 ** 53, 1.5, NaN, Infinity]) emit({ n: String(n), op: "stem" }, ordinalStem(n) ?? "\u0000none");
+    },
+    // phonemizeWord over every letter run (as written and lowercased), every 1–3 letter string of the alphabet,
+    // every 4-letter string over the context letters, corners; the nativiser; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "lb-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/luxembourgish/luxembourgish.ts");
+        const { numberToWords } = await import("../../../src/languages/luxembourgish/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zéëäA-ZÉËÄ'-]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("lb")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzéëäôü'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouëgsntkdbzpvr"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const p of ["ge", "be", "er", "zer", "ze", "ver"]) for (const s of ["", "a", "b", "e", "äin", "follegt", "halen", "ste"]) words.add(p + s);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "Éischt", "é", "öl", "ﬁsch", "Dvořák", "Ångström", "xylo"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
     },
 };
 

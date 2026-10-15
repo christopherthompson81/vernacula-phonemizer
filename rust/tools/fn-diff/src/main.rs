@@ -2310,6 +2310,30 @@ fn main() {
                 }
             })
         }
+        "lb-normalize" | "lb-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let lb = vernacula_phonemizer::languages::luxembourgish::luxembourgish::create_luxembourgish()
+                .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => lb.normalize(&t()),
+                    "symbols" => lb.symbols(&t()),
+                    "text" => with_host(&js("lb"), || lb.text(&t())),
+                    "eifeler" => lb.eifeler(&w(), &units(&input["following"])),
+                    "stem" => lb.ordinal_stem(n()).unwrap_or_else(|| js("\u{0}none")),
+                    "word" => lb.phonemize_word(&w()),
+                    "nat" => lb.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        lb.number_to_words(n(), raw.as_ref())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

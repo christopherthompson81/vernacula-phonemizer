@@ -36,6 +36,7 @@ pub mod korean;
 pub mod kyrgyz;
 pub mod latvian;
 pub mod lithuanian;
+pub mod luxembourgish;
 pub mod macedonian;
 pub mod magahi;
 pub mod maithili;
