@@ -310,6 +310,24 @@ pub fn create_swedish() -> Result<SwedishPhonemizer, String> {
 mod tests {
     use super::*;
 
+    /// test/leftovers-1551.test.ts: a colon clock before a comma reads as before a full stop, not as a score.
+    #[test]
+    fn the_1551_clock_before_a_comma() {
+        let sv = |s: &str| crate::phonemize(s, "sv").unwrap();
+        let strip = |s: String| {
+            js_re!(r"\s*[.,]\s*", "gu")
+                .replace(&js(&s), &js(" "))
+                .to_string_lossy()
+                .trim()
+                .to_string()
+        };
+        assert_eq!(
+            strip(sv("Klockan 12:00, sedan")),
+            strip(sv("Klockan 12:00. Sedan").to_lowercase())
+        );
+        assert_eq!(sv("Det blev 3:0, sedan"), sv("Det blev 3 0, sedan"));
+    }
+
     // test/swedish.test.ts's literal `expect(f("…")).toBe("…")` pins, extracted from that file mechanically
     // (each is a reading the TS suite asserts), so the two engines are held to one list.
     const WORD_PINS: &[(&str, &str)] = &[

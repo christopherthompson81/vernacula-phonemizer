@@ -171,7 +171,7 @@ public static class Normalize
     private static readonly JsRe SPORTS_TIME = JsRegex.Compile("(?<![\\d:,])(\\d{1,2}):(\\d{2})[.,](\\d{1,2})(?!\\d)", "gu");
     private static readonly JsRe CLOCK_DOT_RANGE = JsRegex.Compile("(?<![\\d:,])(?<!\\.\\d)(\\d{1,2})\\.(\\d{2})\\s*[-–—]\\s*(\\d{1,2})\\.(\\d{2})(?!\\d)", "gu");
     private static readonly JsRe CLOCK_DOT = JsRegex.Compile("(?<![\\d:,])(?<!\\.\\d)(\\d{1,2})\\.(\\d{2})(?!\\d)(?!\\.\\d)", "gu");
-    private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:,])(\\d{1,2}):(\\d{2})(?![\\d,])(?!\\.\\d)", "gu");
+    private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:,])(\\d{1,2}):(\\d{2})(?!\\d|,\\d)(?!\\.\\d)", "gu");
     private static readonly JsRe SCORE_COLON = JsRegex.Compile("(?<![\\d:.,])(\\d{1,2}):(\\d{1,2})(?![\\d\\p{L}])", "gu");
     private static readonly JsRe ORDINAL_COLON = JsRegex.Compile("(?<![\\d:.,])(\\d{1,3}):(a|e|s|or)(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe CENTURY_RANGE = JsRegex.Compile("(?<![\\d.,:])(\\d{3,4})-(\\d{3,4})-(tal\\p{L}*)", "gu");

@@ -285,3 +285,24 @@ regex-diff 145212 identical / 0 DIFFER.
   parity identical except mag 199/200. The first vitest run after the rebase failed 2 tests on a 5 s timeout
   (`foreign-runs.test.ts`, neural English OOV reader) at a machine load of ~100. That file passed alone (47/47),
   and the full rerun passed: 6884 passed / 5 skipped. The failures were load, not this change.
+
+## Run 11 — 2026-10-14 (#1551: `1/2.5`, a period decimal beside a slash)
+
+**Question.** Run 8 left `1/2.5` reading *jedna druga kropka pięć*. Why does the fraction rule's `\.\d` guard miss
+it?
+
+**Command.** `normalizePolish`/`phonemize` on synthetic lines, main vs fix; `FLEURS_ROOT=… npx tsx
+rust/tools/fn-diff/dump.mts pl-normalize` (28,322 rows) before and after.
+
+**Raw finding.**
+- **Cause.** Step 6 (version dots) has already rewritten `2.5` to `2 kropka 5` by the time step 11 runs, so the
+  fraction's `\.\d` arms never see a period. The left side has the same shape: `0.1/2` read *zero kropka jedna
+  druga*.
+- **The fix.** ` kropka ` + digit (right) and `\d kropka ` (left) are now decimal tails too. `1/2.5` reads
+  *jeden dwa kropka pięć* and `0.1/2` *zero kropka jeden dwa*, each identical to the comma spelling apart from
+  the point word. `1/2.`, `1/2, a` and `1/2 i 3/4` are unchanged.
+- **Impact.** pl-normalize changes 0 of 28,322 rows.
+- **Tests.** In `test/leftovers-1551.test.ts`, C# `Leftovers1551Tests` and Rust
+  `the_1551_period_decimal_is_not_a_fraction`. They fail with the fix reverted.
+
+**Implication.** Done. The other #1551 items (tr, uk, nl) stay open for want of data or a native reader.

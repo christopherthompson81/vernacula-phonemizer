@@ -367,8 +367,11 @@ export function normalizeSwedish(input: string): string {
     //    *klockan tolv , noll* — a pause inside the time. Two digits of minutes is what separates it from
     //    the score in step 6 and from the `N:a` ordinal in step 8. The same sentence-period guard as step 4
     //    (#1526): `(?![\d.,])` declined `klockan 12:00.`, which then fell to the score rule and lost the
-    //    second zero (*tolv noll*); only a period followed by a digit disqualifies now.
-    t = rewrite(t, /(?<![\d:,])(\d{1,2}):(\d{2})(?![\d,])(?!\.\d)/gu, (m, h: string, mm: string) =>
+    //    second zero (*tolv noll*); only a period followed by a digit disqualifies now. A COMMA the same way
+    //    (#1551): `(?![\d,])` sent `klockan 12:00, sedan` to the score rule (*tolv noll*), while the sports
+    //    time it was guarding against (`4:41,30`) is claimed by step 3 before this runs — only `,` + digit
+    //    is a decimal tail.
+    t = rewrite(t, /(?<![\d:,])(\d{1,2}):(\d{2})(?!\d|,\d)(?!\.\d)/gu, (m, h: string, mm: string) =>
         isClock(h, mm) ? `${h} ${minutes(mm)}` : m);
 
     // 6) SCORE `N:N` (2) — `betyget 2:2`, `vara 3:2.`. AFTER the clock, which has two minute digits and

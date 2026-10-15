@@ -517,3 +517,22 @@ identical, 0 refused.
 
 Revert check on the C# side: osv edge, period-clock lookahead and the century block boundary broken together →
 `SwedishNormalizeTests` 4 failed / 20 passed; restored.
+
+## Run 17 — 2026-10-14 (#1551: a colon clock before a comma)
+
+**Question.** #1526 fixed `12:00.` but left `12:00,` reading through the score rule (*tolv noll*, one zero lost).
+Is the comma half of step 5's `(?![\d,])` guarding anything?
+
+**Command.** `phonemize`/`normalizeSwedish` on synthetic lines; `FLEURS_ROOT=… npx tsx rust/tools/fn-diff/dump.mts
+sv-normalize` (37,306 rows: FLEURS sv_se, goldens, probes) before and after.
+
+**Raw finding.**
+- **What the guard was for.** It protected the sports time `4:41,30`, but step 3 claims that shape before
+  step 5 runs. Only a comma followed by a digit is a decimal tail. The guard is now `(?!\d|,\d)`.
+- **The fix.** `Klockan 12:00, sedan` → *tolv noll noll ,*, matching `12:00.`. `3:0,` and `2:1,` still read as
+  scores, because they have one minute digit.
+- **Impact.** sv-normalize changes 0 of 37,306 rows: the corpus has no such clock.
+- **Tests.** In `test/leftovers-1551.test.ts`, C# `Leftovers1551Tests` and Rust `the_1551_clock_before_a_comma`,
+  all relational. They fail with the guard reverted, apart from the score pin.
+
+**Implication.** Done.
