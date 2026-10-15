@@ -83,3 +83,42 @@ and the golden with its preceding word, probes, and `nl-normalize` before/after.
 
 **Implication.** The section number is no longer misread. If a source for the spoken *punt* turns up, it slots in
 at the release point.
+
+## Run 3 — 2026-10-14 (#1551: the prefix-spelled stems, as a sourced exception list)
+
+**Question.** Runs 1 and #1524 found that no rule separates a prefix from a stem that only begins with its
+letters (tennis, hertog, hersenen), so these "need a lexicon". Is a kaikki-derived list legitimate here, and how
+much does it gain?
+
+**Command.**
+- `<scratchpad>/mine.mts` over `nl.kaikki-nl.tsv`: every lowercase word starting ver/ont/her/be/ge/te whose
+  stressed variants ALL put primary stress on the first syllable, and which the engine stressed elsewhere.
+- `<scratchpad>/score.mts` on those words, before and after.
+- `tools/referee-eval/eval.ts nl` main vs fix.
+- The FLEURS nl phonemize-sync diff and the nl golden.
+
+**Raw finding.**
+- **Legitimacy.** The repo already ships the same thing for Turkish (`turkish/stress.tsv`, a kaikki mine,
+  CC-BY-SA, fenced per file and listed in `LICENSES/PROVENANCE.md` §3). The Dutch engine had no exception
+  mechanism at all.
+- **The list.** 276 words. `telefoon` and `temperatuur` are not in it: their referee stress is final, so a
+  first-syllable list could not fix them.
+- **Mechanism.** A listed word takes no prefix shift in its FIRST chunk. Reading listed compounds whole was a
+  dead end: it dropped the seam rules, so *bedlamp* kept a voiced *d* (bˈɛdlɑmp). They now split as before,
+  with the flag on chunk 0. A related bug: `groups.map(phonemizeChunk)` would have passed the array index as
+  the new flag (typecheck caught it).
+- **On the 276 words.** Stress is right on 0 → 276, which is circular by construction. Segments against kaikki
+  go 15 → 167. The rest are loanwords the g2p cannot spell (beauty, beagle, teamgenoot) and inflection-driven
+  vowels.
+- **Full referee eval.** kaikki 31,629 → 31,782 (+153), wikipron 31,305 → 31,454 (+149). Both are partly
+  circular, since both referees are Wiktionary-derived.
+- **FLEURS nl.** 52 of 3,748 rows change: *generaal* ×14, *hersenen* ×10, *tempo*, *versie*, *technisch*,
+  *verreweg*, *verrekijker*, *bergachtig*, *tennis*, *hertog*.
+- **The nl golden.** 6 rows move (*hersenletsel*, *technisch*, *genus*, each ×2). *hersenletsel* was one of
+  Run 1's measured losses.
+- **Rust.** It replays FLEURS plus all 276 listed words identically (4,025 rows), and nl parity is 200/200.
+- **Tests.** `test/dutch-1551-not-prefixed.test.ts`, C# `Dutch1551NotPrefixedTests` and Rust
+  `the_1551_not_prefixed_words` are structural: where the stress sits, and whether the first vowel is full.
+  With the list file removed, TS and C# fail 8/13 and Rust fails.
+
+**Implication.** Closes the last nl item of #1551.

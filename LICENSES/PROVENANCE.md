@@ -123,7 +123,8 @@ GPL-3.0 in §4 item 3; a file cannot sit in two strata and the more restrictive 
 `gujarati/gujarati-lexicon.tsv`; `greek/greek-synizesis.tsv`; `english-gb/en-gb-*.tsv`;
 `portuguese-br/pt-br-openclose.tsv`; `portuguese/lexicon.tsv`; `korean/tensification.tsv`;
 `ilocano/ilo-lexicon.tsv`; `turkish/stress.tsv` (kaikki non-final-stress mine + adjudicated
-entries, per header); `afrikaans/af-stems.txt` (afwiki + OpenSubtitles + kaikki union; sidecar);
+entries, per header); `dutch/nl-not-prefixed.txt` (kaikki first-syllable-stress mine of prefix-spelled
+words, per header; #1551); `afrikaans/af-stems.txt` (afwiki + OpenSubtitles + kaikki union; sidecar);
 `afrikaans/af-rcrl-lexicon.tsv` (25,112 entries — RCRL Afrikaans Pronunciation Dictionary v1.4.1,
 CTexT/NWU via ttslab/za_lex, **CC BY-SA 2.5 ZA**, the one shipped lexicon in the fleet that is NOT
 Wiktionary-derived; sidecar);

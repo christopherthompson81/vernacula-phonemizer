@@ -10,6 +10,8 @@ import { fullVowel, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { decompose, isLexicalWord } from "./morphology.ts";
 import { MANIFEST } from "./manifest.ts";
+import { dataFile } from "../../core/dataPath.ts";
+import { readDataText } from "../../core/dataSource.ts";
 import { normalizeDutch, normalizeDutchInitialisms } from "./normalize.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 
@@ -59,16 +61,32 @@ function stemVowelE(lower: string, at: number, last: boolean): boolean {
     return !last || !ENDING_AFTER_E.includes(lower.slice(at + 1));
 }
 
+/** Words that START with a prefix spelling but are not prefixed (tennis, telex, hertog, hersenen): mined from kaikki
+ *  (Wiktionary, CC-BY-SA), see nl-not-prefixed.txt's header. Optional — absent, every prefix spelling shifts. */
+let NOT_PREFIXED: Set<string> | undefined;
+function notPrefixedWords(): Set<string> {
+    if (NOT_PREFIXED === undefined) {
+        NOT_PREFIXED = new Set();
+        try {
+            for (const line of readDataText(dataFile(import.meta.url, "nl-not-prefixed.txt")).split("\n")) {
+                const w = line.trim().toLowerCase();
+                if (w && !w.startsWith("#")) NOT_PREFIXED.add(w);
+            }
+        } catch { /* no list → every prefix spelling shifts, as before */ }
+    }
+    return NOT_PREFIXED;
+}
+
 /** Place primary stress and reduce an unstressed prefix's vowel. Returns the stressed-nucleus seg index. The
  *  prefix is treated as unstressed ONLY when a later nucleus exists AND it isn't a schwa — this distinguishes a
  *  real prefix (ge·maakt, nucleus1 = aː → shift + reduce ge→ɣə) from a ⟨ge⟩-root (geven, nucleus1 = ə → no shift,
  *  ɣˈeːvən, no stressed schwa). When the shift fires, a ge-/be-/ver-/te- prefix vowel (segs[nuclei0]) also
  *  reduces to ə (ont-/her- keep their full vowel). Offglides (vowel:false) are skipped — only true nuclei count. */
-function placeStress(segs: Seg[], word: string): number {
+function placeStress(segs: Seg[], word: string, notPrefixed = false): number {
     const nuclei = segs.map((s, k) => (s.vowel ? k : -1)).filter((k) => k >= 0);
     if (nuclei.length === 0) return -1;
     const lower = word.toLowerCase();
-    if (nuclei.length > 1 && UNSTRESSED_PREFIX.test(lower) && !DIGRAPH_PREFIX.test(lower)) {
+    if (!notPrefixed && nuclei.length > 1 && UNSTRESSED_PREFIX.test(lower) && !DIGRAPH_PREFIX.test(lower)) {
         const second = segs[nuclei[1]!]!;
         const stemE = second.ph === "ə" && stemVowelE(lower, second.s, nuclei.length === 2);
         if (second.ph !== "ə" || stemE) {
@@ -83,10 +101,10 @@ function placeStress(segs: Seg[], word: string): number {
 
 /** Phonemize a single stress group (a stem plus its own prefixes/suffixes) — the existing g2p handles its internal
  *  prefix reduction (ge-/be-/ver-/te-) and suffix schwa (-ig/-lijk/-isch). */
-function phonemizeChunk(word: string): string {
+function phonemizeChunk(word: string, notPrefixed = false): string {
     const segs = toSegments(word);
     if (segs.length === 0) return "";
-    const stress = placeStress(segs, word);
+    const stress = placeStress(segs, word, notPrefixed);
     let out = "";
     for (let k = 0; k < segs.length; k++) {
         if (k === stress) out += "ˈ";
@@ -118,15 +136,18 @@ export function phonemizeWord(word: string): string {
     const reduced = FUNCTION_WORDS[word.toLowerCase()];
     if (reduced !== undefined) return reduced;
     const w = word.toLowerCase();
+    // A word whose prefix SPELLING is not a prefix (tennis, hertog, hersenen; nl-not-prefixed.txt, #1551) takes no
+    // prefix shift in its FIRST chunk; a compound (bedlamp, tennisbaan) still splits, so its seam rules apply.
+    const notPrefixed = notPrefixedWords().has(w);
     // A word that is itself a dictionary entry is monomorphemic-or-lexicalised → phonemize whole (skip splitting).
     // Guards minister→mini·ster, spelling→spel·ling, drinken→drin·ken (no constituent flags to reject those tails).
-    if (isLexicalWord(w)) return phonemizeChunk(word);
+    if (isLexicalWord(w)) return phonemizeChunk(word, notPrefixed);
     const d = decompose(w);
     if (d.parts.length > 1) {
         const groups = stressGroups(d.parts, d.kinds);
-        if (groups.length > 1) return joinChunks(groups.map(phonemizeChunk));
+        if (groups.length > 1) return joinChunks(groups.map((g, i) => phonemizeChunk(g, notPrefixed && i === 0)));
     }
-    return phonemizeChunk(word);
+    return phonemizeChunk(word, notPrefixed);
 }
 
 // IPA consonant symbols a Dutch chunk can end/start with (for seam degemination). Vowels/offglides excluded.

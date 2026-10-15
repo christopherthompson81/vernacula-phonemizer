@@ -36,13 +36,35 @@ public sealed class DutchPhonemizer : ILanguage
     }
 
     /** Place primary stress and reduce an unstressed prefix's vowel. */
-    private static int PlaceStress(List<Seg> segs, string word)
+    /** Words that START with a prefix spelling but are not prefixed (tennis, hertog); see nl-not-prefixed.txt. */
+    private static HashSet<string>? NOT_PREFIXED;
+    private static readonly object NOT_PREFIXED_GATE = new();
+    private static HashSet<string> NotPrefixedWords()
+    {
+        lock (NOT_PREFIXED_GATE)
+        {
+            if (NOT_PREFIXED is not null) return NOT_PREFIXED;
+            var set = new HashSet<string>(StringComparer.Ordinal);
+            try
+            {
+                foreach (var line in LoadTsv.LoadLines("languages/dutch", "nl-not-prefixed.txt", optional: true))
+                {
+                    var w = line.Trim().ToLowerInvariant();
+                    if (w.Length > 0 && !w.StartsWith('#')) set.Add(w);
+                }
+            }
+            catch { /* no list → every prefix spelling shifts, as before */ }
+            return NOT_PREFIXED = set;
+        }
+    }
+
+    private static int PlaceStress(List<Seg> segs, string word, bool notPrefixed = false)
     {
         var nuclei = new List<int>();
         for (var k = 0; k < segs.Count; k++) if (segs[k].Vowel) nuclei.Add(k);
         if (nuclei.Count == 0) return -1;
         var lower = word.ToLowerInvariant();
-        if (nuclei.Count > 1 && UNSTRESSED_PREFIX.IsMatch(lower) && !DIGRAPH_PREFIX.IsMatch(lower))
+        if (!notPrefixed && nuclei.Count > 1 && UNSTRESSED_PREFIX.IsMatch(lower) && !DIGRAPH_PREFIX.IsMatch(lower))
         {
             var second = segs[nuclei[1]];
             var stemE = second.Ph == "ə" && StemVowelE(lower, second.S, nuclei.Count == 2);
@@ -59,11 +81,11 @@ public sealed class DutchPhonemizer : ILanguage
 
     /** Phonemize a single stress group (a stem plus its own prefixes/suffixes) — the existing g2p handles its internal
      *  prefix reduction (ge-/be-/ver-/te-) and suffix schwa (-ig/-lijk/-isch). */
-    private static string PhonemizeChunk(string word)
+    private static string PhonemizeChunk(string word, bool notPrefixed = false)
     {
         var segs = G2p.ToSegments(word);
         if (segs.Count == 0) return "";
-        var stress = PlaceStress(segs, word);
+        var stress = PlaceStress(segs, word, notPrefixed);
         var outp = "";
         for (var k = 0; k < segs.Count; k++)
         {
@@ -99,14 +121,16 @@ public sealed class DutchPhonemizer : ILanguage
     {
         if (FUNCTION_WORDS.TryGetValue(word.ToLowerInvariant(), out var reduced)) return reduced;
         var w = word.ToLowerInvariant();
-        if (Morphology.IsLexicalWord(w)) return PhonemizeChunk(word);
+        // A prefix SPELLING that is not a prefix (nl-not-prefixed.txt, #1551): no shift in the first chunk.
+        var notPrefixed = NotPrefixedWords().Contains(w);
+        if (Morphology.IsLexicalWord(w)) return PhonemizeChunk(word, notPrefixed);
         var d = Morphology.Decompose(w);
         if (d.Parts.Count > 1)
         {
             var groups = StressGroups(d.Parts, d.Kinds);
-            if (groups.Count > 1) return JoinChunks(groups.Select(PhonemizeChunk).ToList());
+            if (groups.Count > 1) return JoinChunks(groups.Select((g, i) => PhonemizeChunk(g, notPrefixed && i == 0)).ToList());
         }
-        return PhonemizeChunk(word);
+        return PhonemizeChunk(word, notPrefixed);
     }
 
     private static readonly IReadOnlySet<string> CONS_IPA =
