@@ -176,7 +176,7 @@ fn i_to_y(w: JsString) -> JsString {
     js_re!("i$").replace(&w, &js("y"))
 }
 
-const SUFFIXES: [(&str, StemFn, Allo); 17] = [
+const SUFFIXES: [(&str, StemFn, Allo); 19] = [
     (
         "ies",
         |w| vec![plus(cut(w, 3), "y")],
@@ -203,6 +203,29 @@ const SUFFIXES: [(&str, StemFn, Allo); 17] = [
         "ness",
         |w| vec![cut(w, 4), i_to_y(cut(w, 4))],
         Allo::Fixed(&["N", "AH0", "S"]),
+    ),
+    // -able/-ible prefer the stem WITHOUT ⟨e⟩ (#1504); see the TS twin for the measurement.
+    (
+        "able",
+        |w| {
+            // `-iable` tries the ⟨y⟩ stem FIRST: `reli` is a dictionary row too (see the TS twin).
+            let mut v = Vec::new();
+            if w.len() >= 5 && w.0[w.len() - 5] == u16::from(b'i') {
+                v.push(plus(cut(w, 5), "y"));
+            }
+            v.push(cut(w, 4));
+            v.push(plus(cut(w, 4), "e"));
+            if w.len() >= 6 && w.0[w.len() - 5] == w.0[w.len() - 6] {
+                v.push(cut(w, 5));
+            }
+            v
+        },
+        Allo::Fixed(&["AH0", "B", "AH0", "L"]),
+    ),
+    (
+        "ible",
+        |w| vec![cut(w, 4), plus(cut(w, 4), "e")],
+        Allo::Fixed(&["AH0", "B", "AH0", "L"]),
     ),
     ("less", |w| vec![cut(w, 4)], Allo::Fixed(&["L", "AH0", "S"])),
     (
@@ -244,6 +267,12 @@ const SUFFIXES: [(&str, StemFn, Allo); 17] = [
 ];
 
 const PLURAL_SUFFIX: [&str; 3] = ["s", "es", "sses"];
+/// Suffixes `morph_decode` serves only to a WHOLE word, never to `compound_split`'s final piece (#1504): a
+/// stem+able piece lets the splitter compose `in|credible` with the stress on `in`.
+const DERIVATIONAL_ONLY: [&str; 2] = ["able", "ible"];
+fn ends_derivational(w: &JsString) -> bool {
+    DERIVATIONAL_ONLY.iter().any(|s| w.ends_with(&js(s)))
+}
 
 /// One code point of `s` at `i`, and its width.
 fn code_point_str(s: &JsString, i: usize) -> (JsString, usize) {
@@ -525,6 +554,9 @@ impl EnglishG2p {
             if !w.ends_with(&js(suf)) || w.len() <= suf.len() + 1 {
                 continue;
             }
+            if as_piece && DERIVATIONAL_ONLY.contains(&suf) {
+                continue;
+            }
             for stem in stems(w) {
                 if stem.len() < 2 {
                     continue;
@@ -643,13 +675,22 @@ impl EnglishG2p {
         let finish = |ph: Vec<String>| {
             enforce_single_primary(&collapse_geminates(&ph, &self.vowel), &self.vowel)
         };
-        if let Some(c) = self.compound_split(w) {
-            return Decomposed {
-                phones: finish(c),
-                source: DecomposeSource::Compound,
-            };
+        // A derivational suffix outranks the compound split (#1504): `able` is a common word, so the
+        // splitter read `accept|able` with the full vowel of the word *able*. See the TS twin.
+        let derived = if ends_derivational(w) {
+            self.morph_decode(w, false)
+        } else {
+            None
+        };
+        if derived.is_none() {
+            if let Some(c) = self.compound_split(w) {
+                return Decomposed {
+                    phones: finish(c),
+                    source: DecomposeSource::Compound,
+                };
+            }
         }
-        if let Some(m) = self.morph_decode(w, false) {
+        if let Some(m) = derived.or_else(|| self.morph_decode(w, false)) {
             return Decomposed {
                 phones: finish(m),
                 source: DecomposeSource::Morph,
@@ -690,6 +731,17 @@ impl EnglishG2p {
 
     pub fn known_word(&self, w: &JsString) -> bool {
         self.dict.contains_key(w)
+    }
+
+    /// A derivational form read from its DICTIONARY STEM (`castable` = `cast` + -able), or None when the word
+    /// has no such suffix or its stem is unknown. The resolver prefers it to the neural tagger (#1504).
+    pub fn derived(&self, word: &JsString) -> Option<JsString> {
+        if !ends_derivational(word) {
+            return None;
+        }
+        let m = self.morph_decode(word, false)?;
+        let ph = enforce_single_primary(&collapse_geminates(&m, &self.vowel), &self.vowel);
+        Some(self.arpabet_to_ipa.convert(&ph, word))
     }
 
     pub fn g2p(&self, word: &JsString) -> JsString {

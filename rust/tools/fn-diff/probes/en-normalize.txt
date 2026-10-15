@@ -247,3 +247,5 @@ they saw Øst louis and the ØU.S. army and the \u{17f}t. louis.
 1/2, 3/4
 It was 1/2.
 1/2,5
+# #1504: -able/-ible on a dictionary stem (castable is cast, not caste), against the tagger and the compound split
+The castable resin, the pastable dough and the tasteable sauce were spinnable, washable and surfable.

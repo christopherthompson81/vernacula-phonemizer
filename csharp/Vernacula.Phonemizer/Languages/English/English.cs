@@ -14,6 +14,8 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
     private readonly IReadOnlyDictionary<string, string> _lexicon;
     private readonly IReadOnlyDictionary<string, HeteronymEntry> _heteronyms;
     private readonly IEnglishG2p _g2p;
+    /** The OOV G2P, for the morphology tests (#1504). */
+    internal IEnglishG2p G2pForTests => _g2p;
     private readonly PosTagger _tagger;
     private readonly IReadOnlySet<string> _unstressed;
     private readonly IReadOnlyDictionary<string, string> _clausePunctuation;
@@ -210,8 +212,11 @@ public sealed class EnglishPhonemizer : IEnglishPhonemizer
         if (over is null)
         {
             var g2pKey = APOSTROPHES.Replace(lookupKey, "");
-            var tagged = oovOverride?.Invoke(g2pKey);
-            if (tagged is not null) { over = tagged; source = TokenSource.Tagger; }
+            // A form built on a dictionary stem outranks the tagger (#1504); see the TS twin.
+            var derived = ASCII_WORD.IsMatch(g2pKey) ? _g2p.Derived(g2pKey) : null;
+            var tagged = derived is null ? oovOverride?.Invoke(g2pKey) : null;
+            if (derived is not null) { over = derived; source = TokenSource.G2p; }
+            else if (tagged is not null) { over = tagged; source = TokenSource.Tagger; }
             else if (ASCII_WORD.IsMatch(g2pKey)) { over = _g2p.G2p(g2pKey); source = TokenSource.G2p; }
             else { over = g2pKey; source = TokenSource.Passthrough; }
         }

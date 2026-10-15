@@ -264,8 +264,12 @@ export class EnglishPhonemizer {
             // OOV → the neural tagger (async path) if it has a reading, else native n-gram G2P (strip any apostrophes
             // so contractions/loanwords G2P their letters).
             const g2pKey = lookupKey.replace(/'/g, "");
-            const tagged = oovOverride?.(g2pKey);
-            if (tagged !== undefined) { over = tagged; source = "tagger"; }
+            // ⚠ A FORM BUILT ON A DICTIONARY STEM OUTRANKS THE TAGGER (#1504): the tagger cannot tell `cast`
+            // from `caste` under -able, and the stem lookup can. Only -able/-ible with a known stem qualify.
+            const derived = /^[a-z]+$/.test(g2pKey) ? this.g2p.derived(g2pKey) : undefined;
+            const tagged = derived === undefined ? oovOverride?.(g2pKey) : undefined;
+            if (derived !== undefined) { over = derived; source = "g2p"; }
+            else if (tagged !== undefined) { over = tagged; source = "tagger"; }
             else if (/^[a-z]+$/.test(g2pKey)) { over = this.g2p.g2p(g2pKey); source = "g2p"; }
             else { over = g2pKey; source = "passthrough"; }
         }
