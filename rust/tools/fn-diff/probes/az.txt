@@ -1,0 +1,79 @@
+# Azerbaijani (az) probes: synthetic text only, one line per normalize.ts arm plus a neighbour it must decline,
+# and the g2p / tokenizer corners.
+# 1) era markers and multi-dot abbreviations, mid-sentence and at the end
+Bu məbəd e.ə. 500-cü ildə tikilib.
+Bu məbəd e.ə.
+Şəhər b.e.ə. 300-cü ildə salınıb.
+Şəhər b.e.ə.
+Qala E.ə. dövrünə aiddir.
+Hadisə b.e. 1200-cü ildə baş verib.
+Hadisə b. e. ilə bağlıdır.
+Dövr BE 1000-1300 illəri əhatə edir.
+Sözün özü BEK deyil.
+Ab.e. sözü deyil.
+# 2) dotted capitals and initials
+Corc V. Buş gəldi.
+M. Bayramov və M. Əliyev danışdı.
+A.B.Ş. nümayəndəsi gəldi.
+A. B. C. hərfləri.
+Ə.Ç. imzası.
+# 3) dotted abbreviations
+Dr. Həsənov gəldi.
+Prof. Məmmədov dərs dedi.
+Şək. 1.1 göstərir.
+Bunu dr. dedi.
+Gördüm Dr.
+Bunu dR. dedi.
+Adr. sözü.
+# 4) N-ci ordinals
+7-ci sinif, 190-cı il, 24-cü gün, 2010-cu il.
+1-ci, 2-ci, 3-cü, 4-cü, 5-ci, 6-cı, 9-cu, 10-cu, 100-cü, 1000-ci gün.
+0-cı yer, 1.5-ci yer, 12345678901234567890-ci yer.
+7-cilər, 7-CI, 7-Cİ gün.
+# 5) space thousands
+400 000 nəfər, 30 000 manat, 1 234 567 dollar, 0 123 sayı.
+12 34 sayı, 1 2345 sayı.
+# 6) clocks
+Saat 12:00 GMT, 21:20 oldu.
+10:00-da, 11:00-dan, 01:15-də, 23:35-ə, 8:46-da, 07:19-da.
+1:09:02 vaxt, 4:41.30 nəticə, 24:00 deyil, 23:60 deyil.
+Saat 9:30-DA gəldi.
+# 7) version dots
+2.4Ghz və 5.0 Ghz, 802.11n standartı.
+Versiya 3.1 çıxdı. Qiymət 1.234 nəfər.
+Şəkil 2.15) göstərir.
+# 8) rates and gigahertz
+Saatda 40 km/saat, 60 km/h, 1,5 m/s, 10 mil/saat, 3 yard/m, 100 Mbit/s.
+5GHz tezlik.
+# 9) percent with a suffix
+30%-i, 3%-ni, 88%-ni, 46%-dən, 1%-nin, 50 % artım, 20%-ə.
+# 10) degrees
++30°C, 90°F, 35° bucaq, 5 ° C.
+# 11) signs
+-5 dərəcə, 1838−1917, 10−19, −7 xal, 1-3 hesab.
+I&O və A&B və İ&Ə şirkəti.
+Biz & siz, 2 = 2, 3 < 5, 7 > 2, 6 × 6, x=y.
+# 12) fractions and division
+24½, 29¾ düym, 3¼ saat.
+1/5, 1/3, 1/2, 3/2, 2/10, 0/7, 12/100, 1234/5.
+6 ÷ 3, 10 ÷ 2, 1 ÷ 60, 5÷1000000.
+# 13) regnal II Dünya
+II Dünya Müharibəsi, 2 Dünya Müharibəsində, 123 Dünya Müharibəsi.
+XIX əsr, XX əsrdə, IX sinif, II Yekaterina, V konqres, C əsr.
+# 14) initialisms
+BMT, GPS, ABŞ, NASA, UNESCO, IBM sistemi, İTV kanalı, HQ, QVC, QHT.
+ABŞ VƏ BMT BİRLİKDƏ İŞLƏYİR.
+COVID-19, MP3, 3D.
+# tokenizer: numbers
+1.234 nəfər, 1.234.567 manat, 0.123 sayı, 6,5 faiz, 3,14 ədəd, 007 agent.
+5 km, 3 kg, 10 sm, 2 m, 4 m² sahə, 5 km³, 1 mil.
+€20, $100, £5, ¥1000, 3 milyon, 2 milyard.
+6x6 sm, 3×4.
+# g2p corners
+kitab kənd səkkiz dağ oğul yaxşı oxumaq palıq qapı gəl çörək
+İki İstanbul IŞIQ ıslaq ölkə Ölkə ÖLKƏ şəhər ŞƏHƏR
+Vaşinqton Washington Müller Zürich café naïve
+sinqa bankə anqar mənzil
+# foreign scripts and lone surrogates
+Москва и Παρίσι 北京 hamısı.
+a\u{d800}b \u{dc00}

@@ -53,7 +53,14 @@ const FLEURS_DIR: Record<string, string> = {
     et: "et_ee",
     hu: "hu_hu",
     is: "is_is",
+    az: "az_az",
+    kk: "kk_kz",
+    ky: "ky_kg",
+    uz: "uz_uz",
 };
+/** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
+ *  here or by default that is absent throws. */
+const FLEURS_SPLITS: Record<string, string[]> = { kk_kz: ["train"] };
 
 /**
  * A language's inputs, deduplicated, each tagged with the first source it came from: its goldens' text column,
@@ -69,7 +76,7 @@ function textsFor(goldens: readonly string[], fleursDir: string | undefined, pro
         for (const row of readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n"))
             add(row.split("\t")[0] ?? "", "golden");
     if (fleursDir !== undefined)
-        for (const split of ["train", "dev", "test"])
+        for (const split of Object.hasOwn(FLEURS_SPLITS, fleursDir) ? FLEURS_SPLITS[fleursDir]! : ["train", "dev", "test"])
             for (const row of readFileSync(`${FLEURS_ROOT}/${fleursDir}/${split}.tsv`, "utf8").split("\n")) {
                 const cols = row.split("\t");
                 add(cols[2] ?? "", "fleurs");
@@ -3056,6 +3063,492 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
         }
+    },
+    // ── Azerbaijani (az). Inputs: the az golden, FLEURS az_az (columns 3 and 4) and probes/az.txt. ──
+    // normalizeAzerbaijani, the initialism pass alone (rebuilt with normalize.ts's own config) on the raw text, the
+    // symbol tier azerbaijani.ts built (recorded through the wrapper) on the normalized text, and the phonotactic
+    // test on every letter run, plus synthetic ordinal / clock / fraction / percent shapes. The tokenizer is
+    // module-private: phonemize-sync and trace cover it.
+    async "az-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/azerbaijani/normalize.ts");
+        await import("../../../src/languages/azerbaijani/azerbaijani.ts");
+        const { azLower } = await import("../../../src/languages/azerbaijani/g2p.ts");
+        const { makeInitialismNormalizer } = await import("../../../src/core/initialisms.ts");
+        const rec = records.find((r) => /src\/languages\/azerbaijani\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const LETTER: Record<string, string> = {
+            a: "a", b: "be", c: "ce", ç: "çe", d: "de", e: "e", ə: "ə", f: "fe", g: "ge", ğ: "ğe", h: "he",
+            x: "xı", ı: "ı", i: "i", j: "je", k: "ke", q: "qe", l: "el", m: "em", n: "en", o: "o", ö: "ö",
+            p: "pe", r: "er", s: "se", ş: "şe", t: "te", u: "u", ü: "ü", v: "ve", y: "ye", z: "ze",
+        };
+        const WORDS = new Set(["abş", "nasa", "unesco", "aol", "covid", "fiba", "opec", "rem"]);
+        const initialisms = makeInitialismNormalizer({
+            lower: azLower, letterName: (l) => LETTER[azLower(l)],
+            acronymLetters: new Set(["bmt", "gps", "ms", "knp", "cep", "mt", "mri", "dnt", "ftb", "cctv", "dvd", "pbs", "utc", "gmt"]),
+            isRecorded: (w) => WORDS.has(w), isUnreadable: N.isUnreadableAzerbaijani,
+        });
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["az"], FLEURS_DIR.az, ["az.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100", "1000", "1001", "2010", "1000000", "999999999"])
+            for (const suf of ["cı", "ci", "cu", "cü", "CI", "Cİ"]) add(`${n}-${suf} yer`);
+        for (let h = 0; h <= 24; h++) for (const mm of ["00", "05", "30", "59"]) for (const sfx of ["", "-da", "-də", "-dan", "-dən", "-a", "-ə", "-u"]) add(`saat ${h}:${mm}${sfx} gəldi`);
+        for (let a = 0; a <= 11; a++) for (const b of [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 20, 60, 100]) { add(`${a}/${b}`); add(`${a} ÷ ${b}`); }
+        for (const n of ["1", "3", "20", "88", "46"]) for (const sfx of ["i", "ı", "u", "ü", "ni", "nin", "dən", "da", "ə", "a"]) add(`${n}%-${sfx}`);
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            const a = N.normalizeAzerbaijani(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, initialisms(t));
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toUpperCase()); words.add(azLower(m[0])); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableAzerbaijani(w)));
+    },
+    // The word level: azLower, toSegments, phonemizeWord and the nativiser (rebuilt with azerbaijani.ts's class)
+    // over every letter run of the texts (as written, lowercased, uppercased, capitalised), every 1-3 letter string
+    // over the alphabet plus the casing specials (third letter from a context set), and edge strings.
+    async "az-g2p"() {
+        const A = await import("../../../src/languages/azerbaijani/azerbaijani.ts");
+        const { toSegments, azLower } = await import("../../../src/languages/azerbaijani/g2p.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zçğəıiöşüx]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("az"))
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) {
+                const w = m[0];
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.charAt(0).toUpperCase() + w.slice(1));
+            }
+        const letters = [..."abcçdeəfgğhxıijkqlmnoöprsştuüvyzwİIƏÇĞÖŞÜQX"];
+        for (const a of letters) { words.add(a); for (const b of letters) { words.add(a + b); for (const c of "aeəıioöuüqklgnğ") words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00q", "i̇", "İ", "İ̇", "ẞ", "Σ", "ﬁ", "ŉ", "K", "ſ", "ǅ", "nk", "nq", "ng", "nkə", "ppp", "qq", "kk", "gg"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "lower" }, azLower(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "word" }, A.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords and ordinalWords over 0…20,000, multiples, powers of ten to 10²⁴ and their neighbours, and
+    // the non-integers / negatives / non-finites; the Roman ordinal over 0…120 and its corners.
+    async "az-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/azerbaijani/numbers.ts");
+        const { ordinalWords } = await import("../../../src/languages/azerbaijani/normalize.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/azerbaijani/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n));
+            emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        }
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+    },
+    // normalizeRomans with Azerbaijani's policy (registry.ts romanAz) over the Azerbaijani texts.
+    async "az-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/azerbaijani/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["az"], FLEURS_DIR.az, ["az.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Kazakh (kk). Inputs: the kk golden, FLEURS kk_kz (columns 3 and 4) and probes/kk.txt. ──
+    // normalizeKazakh (which applies the symbol tier inside, step 7) and the tier kazakh.ts exports on the
+    // normalized text, plus synthetic rows: every case suffix, ordinal suffix and noun tail after a sweep of
+    // numbers, the clock grid × every case suffix, fractions, divisions and degrees. ordinalWord / orthographic /
+    // withCase are module-private: these rows drive them.
+    async "kk-normalize"() {
+        const N = await import("../../../src/languages/kazakh/normalize.ts");
+        const { SYMBOLS } = await import("../../../src/languages/kazakh/kazakh.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["kk"], FLEURS_DIR.kk, ["kk.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["ге", "ға", "ке", "қа", "ден", "дан", "тен", "тан", "нен", "нан", "ның", "нің", "дың", "дің", "тың", "тің",
+            "да", "де", "та", "те", "мен", "бен", "пен", "ші", "шы", "нші", "ншы", "жылы", "ғасыр", "і", "ы", "ГЕ", "Ші"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "15", "20", "29", "30", "40", "50", "60", "70", "80",
+            "90", "99", "100", "101", "110", "200", "340", "999", "1000", "1001", "1990", "2016", "10000", "99999", "100000", "999999", "1000000", "1000001"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кейін`); add(`${n}${sfx}`); }
+        for (let h = 0; h <= 24; h++) for (const mm of ["00", "05", "30", "59"]) for (const sfx of ["", "-ден", "-да", "-ге", "-та", "-мен", "ге"]) add(`сағат ${h}:${mm}${sfx} келді`);
+        for (let a = 0; a <= 11; a++) for (const b of [0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 20, 40, 60, 100, 1000]) { add(`${a}/${b}`); add(`${a} ÷ ${b}`); }
+        for (const n of ["0", "1", "5", "30", "40", "1000000"]) for (const d of ["°C", " °C-тан", "°F-ке", "°N", "°w"]) { add(`${n}${d}`); add(`+${n}${d}`); add(`-${n}${d}`); }
+        for (const [t, src] of rows) {
+            const a = N.normalizeKazakh(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, SYMBOLS(a));
+        }
+    },
+    // phonemizeWord and toSegments over every Cyrillic-block run of the texts (as written, lowercased, uppercased),
+    // the camelCase parts, every 1-3 letter string over the alphabet plus the signs (third letter from a context
+    // set), every 4-letter string of the cluster letters, and edge strings.
+    async "kk-g2p"() {
+        const K = await import("../../../src/languages/kazakh/kazakh.ts");
+        const { toSegments } = await import("../../../src/languages/kazakh/g2p.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("kk"))
+            for (const w of t.match(/[Ѐ-ӿ]+/gu) ?? []) {
+                words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase());
+                for (const p of w.split(/(?<=\p{Ll})(?=\p{Lu})/u)) words.add(p);
+            }
+        const abc = [..."аәбвгғдеёжзийкқлмнңоөпрстуұүфхһцчшщъыіьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аеыіиуьъл") words.add(a + b + c); } }
+        const ctx = [..."стркпьъиу"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "ӑ", "ј"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}`).join(" "));
+            emit({ word: units(w), op: "word" }, K.phonemizeWord(w));
+        }
+    },
+    // numberToIpa over 0…20,000, multiples, powers of ten to 10²⁴ and neighbours, the corners; the Roman ordinal.
+    async "kk-numbers"() {
+        const { numberToIpa } = await import("../../../src/languages/kazakh/numbers.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/kazakh/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1e300, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), op: "ipa" }, numberToIpa(n));
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+    },
+    // normalizeRomans with Kazakh's policy (registry.ts romanKk) over the Kazakh texts.
+    async "kk-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/kazakh/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["kk"], FLEURS_DIR.kk, ["kk.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Kyrgyz (ky). Inputs: the ky golden, FLEURS ky_kg (columns 3 and 4) and probes/ky.txt. ──
+    // normalizeKyrgyz, the initialism pass alone (normalizeKyrgyzInitialisms, both seam modes) on the raw text, and
+    // the phonotactic test on every letter run, plus synthetic rows: every case suffix after a sweep of numerals,
+    // percents, units and acronyms; ordinal heads; degree shapes; fractions and decimals.
+    async "ky-normalize"() {
+        const N = await import("../../../src/languages/kyrgyz/normalize.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ky"], FLEURS_DIR.ky, ["ky.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["дын", "дин", "тун", "нүн", "дан", "дөн", "тан", "дай", "тей", "ына", "сына", "үн", "сын", "га", "кө", "да", "те",
+            "ны", "ди", "ту", "ы", "сы", "у", "ү", "орун", "класс", "жылы", "кылым", "ГА", "Дан"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "20", "30", "40", "50", "60", "70", "80", "90", "100",
+            "101", "200", "1000", "2010", "1000000", "999999999999", "1000000000000"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кийин`); add(`${n}${sfx}`); add(`${n}-${n}-${sfx}`); }
+        for (const u of ["км", "кг", "м²", "см3", "га", "л", "km", "ha", "мкг"]) for (const sfx of ["ге", "дан", "де", "ны", "га", "ка", "тан"]) add(`5 ${u}${sfx}`);
+        for (const run of ["КР", "АКШ", "БУУ", "ЖОЖ", "NATO", "ООН", "ЭЭМ"]) for (const sfx of ["дин", "га", "до", "нун", "ны", "дан"]) add(`${run}${sfx}`);
+        for (const d of ["°C", "°С-та", "°", "°-ка", "°F", "°30′", "°30′15″", "оC"]) for (const n of ["5", "-5", "−5", "+5", "5,5"]) add(`${n}${d}`);
+        for (let a = 0; a <= 13; a++) for (const b of [1, 2, 3, 4, 5, 10, 12, 13]) add(`${a}/${b}`);
+        for (const n of ["0", "3", "12", "999999999999", "1000000000000"]) for (const f of ["5", "25", "05", "123"]) { add(`${n},${f}`); add(`${n}.${f}`); }
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, N.normalizeKyrgyz(t));
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeKyrgyzInitialisms(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableKyrgyz(w)));
+    },
+    // phonemizeWord over every Cyrillic-block run of the texts (as written and lowercased), every 1-3 letter string
+    // over the alphabet (third letter from a context set), every 4-letter string of the harmony letters, and edges.
+    async "ky-g2p"() {
+        const K = await import("../../../src/languages/kyrgyz/kyrgyz.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("ky")) for (const w of t.match(/[Ѐ-ӿ]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        const abc = [..."абвгдеёжзийклмнңоөпрстуүфхцчшщъыьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аеыиуүкглб") words.add(a + b + c); } }
+        const ctx = [..."кглбаеоү"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ТОО", "Ӏ", "ә", "і", "ј", "аааа", "кк"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, K.phonemizeWord(w));
+    },
+    // numberWords and kyrgyzOrdinal over 0…20,000, multiples, powers of ten to 10²⁴ and neighbours, the corners;
+    // the engine's own number reading (createKyrgyz().text on a digit run: renderNumber / spellDigits).
+    async "ky-numbers"() {
+        const K = await import("../../../src/languages/kyrgyz/kyrgyz.ts");
+        const { kyrgyzOrdinal } = await import("../../../src/languages/kyrgyz/normalize.ts");
+        const P = K.createKyrgyz();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, K.numberWords(n) ?? "\u0000none");
+            emit({ n: String(n), op: "ordinal" }, kyrgyzOrdinal(n) ?? "\u0000none");
+        }
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // ── Uzbek (uz). Inputs: the uz golden, FLEURS uz_uz (columns 3 and 4) and probes/uz.txt. ──
+    // normalizeUzbek, the initialism pass alone (rebuilt with normalize.ts's own config — it is module-private) on
+    // the raw text, the symbol tier uzbek.ts built (recorded through the wrapper) on the normalized text, and the
+    // phonotactic test (rebuilt likewise) on every letter run, plus synthetic ordinal / regnal / fraction / rate rows.
+    async "uz-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/uzbek/normalize.ts");
+        await import("../../../src/languages/uzbek/uzbek.ts");
+        const { makeInitialismNormalizer, makeUnreadableTest } = await import("../../../src/core/initialisms.ts");
+        const rec = records.find((r) => /src\/languages\/uzbek\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const LETTER: Record<string, string> = {
+            a: "a", b: "be", c: "se", d: "de", e: "e", f: "ef", g: "ge", h: "ha", i: "i", j: "je",
+            k: "ka", l: "el", m: "em", n: "en", o: "o", p: "pe", q: "qa", r: "er", s: "es", t: "te",
+            u: "u", v: "ve", w: "ve", x: "xa", y: "ye", z: "ze",
+        };
+        const unreadable = makeUnreadableTest({
+            vowels: /[aeiou]/u,
+            legalOnsets: new Set(["bl", "br", "by", "dr", "dy", "fl", "fr", "gl", "gr", "kl", "kr", "kv", "ky", "pl",
+                "pr", "ps", "py", "sk", "sl", "sm", "sn", "sp", "st", "sv", "sy", "tr", "ts", "vy"]),
+            legalCodas: new Set(["ft", "kt", "ks", "lm", "lt", "nd", "ng", "nk", "nt", "pt", "rd", "rf", "rk", "rl",
+                "rm", "rn", "rp", "rs", "rt", "sk", "st", "ts", "yk"]),
+        });
+        const WORDS = new Set(["aqsh", "nasa", "asus", "opec", "rem", "covid"]);
+        const initialisms = makeInitialismNormalizer({
+            letterName: (l) => LETTER[l.toLowerCase()], acronymLetters: new Set(["pa", "to", "oha", "aol"]),
+            isRecorded: (w) => WORDS.has(w), isUnreadable: unreadable,
+        });
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["uz"], FLEURS_DIR.uz, ["uz.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["0", "1", "2", "3", "4", "5", "6", "7", "9", "10", "19", "20", "40", "90", "100", "101", "999", "1000", "1001",
+            "1978", "2000", "1000000", "1000001", "3,5", "12,25", "9007199254740993"])
+            for (const w of ["yil", "oʻrin", "noyabr", "Mart", "regbi", "moliviy", "rasmga", "sinf"]) add(`${n}-${w} keldi`);
+        for (const name of ["Yelizaveta", "Pyotr", "Sahifa"]) for (const d of ["1", "2", "3", "39", "40", "12"]) for (const tail of [" ning", " hukmronligi", ".", " kitob"]) add(`${name} ${d}${tail}`);
+        for (let a = 0; a <= 13; a++) for (const b of [0, 1, 2, 3, 4, 5, 10, 12, 13]) add(`${a}/${b}`);
+        for (const n of ["5", "35", "2,4", "480"]) for (const u of ["km/soat", "km/s", "km/h", "mil/soat", "milya/soat", "m/s"])
+            for (const sfx of ["", "ga", "gacha", " dan", "da"]) { add(`${n} ${u}${sfx}`); add(`${n}–40 ${u}`); }
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            const a = N.normalizeUzbek(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, initialisms(t));
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(unreadable(w)));
+    },
+    // phonemizeWord and the nativiser (rebuilt with uzbek.ts's class) over every letter run of the texts (as
+    // written, lowercased, uppercased), every 1-3 letter string over the alphabet and the apostrophe variants
+    // (third letter from a context set), and edge strings.
+    async "uz-g2p"() {
+        const U = await import("../../../src/languages/uzbek/uzbek.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zʻ'’‘`ʼ′]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("uz"))
+            for (const m of t.matchAll(/[\p{L}\p{M}ʻ'’‘`ʼ′]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzʻ'’‘`ʼ′OʻGʻ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "aeiougnhʻ'") words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00b", "ŉ", "ǅ", "K", "ſ", "ﬁ", "nʻg", "ngʻ", "ʻa", "aʻ", "ʻʻ", "é", "é"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, U.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords and ordinalWords over 0…20,000, multiples, powers of ten to 10²⁴ and neighbours, the corners;
+    // the Roman ordinal; and the engine's own number reading on digit runs (renderNumber / spellDigits, decimals).
+    async "uz-numbers"() {
+        const { numberToWords, ordinalWords } = await import("../../../src/languages/uzbek/numbers.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/uzbek/romanOrdinals.ts");
+        const U = await import("../../../src/languages/uzbek/uzbek.ts");
+        const P = U.createUzbek();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1e300, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n));
+            emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        }
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40), "2,5", "0,05", "3,14159"];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // normalizeRomans with Uzbek's policy (registry.ts romanUz) over the Uzbek texts.
+    async "uz-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/uzbek/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["uz"], FLEURS_DIR.uz, ["uz.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Turkmen (tk). Inputs: the tk golden and probes/tk.txt (FLEURS has no tk), plus GENERATED shapes. ──
+    // normalizeTurkmen, normalizeTurkmenInitialisms (on the raw and the normalized text), foldTurkmenTildes, the
+    // symbol tier turkmen.ts built (recorded through the wrapper) on the prepared text, and the phonotactic test,
+    // over the texts and synthetic rows: every written-ordinal suffix after a sweep of numbers, the era markers in
+    // every trailing context, percents and years with suffixes, fractions, signs, degrees, ranges.
+    async "tk-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/turkmen/normalize.ts");
+        const P = (await import("../../../src/languages/turkmen/turkmen.ts")).createTurkmen();
+        const rec = records.find((r) => /src\/languages\/turkmen\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["tk"], undefined, ["tk.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["nji", "njy", "inji", "ynjy", "unjy", "ünji", "njiden", "njidan", "njisi", "njysy", "njilerde", "njynyň", "NJI", "nj", "ji"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "20", "30", "40", "50", "60", "70", "80", "90", "100",
+            "101", "200", "1000", "1990", "2024", "1000000", "1000000000", "9007199254740993"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} ýyl`); add(`${n} - ${sfx}`); }
+        for (const era of ["b.e.ö.", "b. e. ö.", "b.e.öň", "b.e.öňki", "b.e.", "B.E.Ö."]) for (const tail of ["", " 300 ýyl", ".", "\"", " »", ")", " soň"]) add(`Bu ${era}${tail}`);
+        for (const n of ["1", "20", "50"]) for (const sfx of ["i", "iň", "den", "e", "ä", "ler"]) { add(`${n}%-${sfx}`); add(`${n} % - ${sfx}`); }
+        for (let a = 0; a <= 13; a++) for (const b of [1, 2, 3, 4, 5, 10, 12, 13, 2020]) add(`${a}/${b}`);
+        for (const d of ["°C", "°c-den", "°C-a", "°F", "°", "°dan", "°30′", "°30′15″", " ° gradus"]) for (const n of ["5", "-5", "+5", "−5", "(–5"]) add(`${n}${d} boldy`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "1990/95", "-8"]) add(`Gar ${r} sm`);
+        for (const [t, src] of rows) {
+            const a = N.normalizeTurkmen(t);
+            const b = N.normalizeTurkmenInitialisms(a);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeTurkmenInitialisms(t));
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(t), src, op: "tildes" }, N.foldTurkmenTildes(t));
+            emit({ text: units(b), src, op: "symbols" }, rec.apply(b));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableTurkmen(w)));
+    },
+    // phonemizeWord and the nativiser (rebuilt with turkmen.ts's class) over every letter run of the texts (as
+    // written, lowercased, uppercased), every 1-3 letter string over the alphabet (third letter from a context
+    // set), every 4-letter string of the onset-cluster letters, and edge strings.
+    async "tk-g2p"() {
+        const T = await import("../../../src/languages/turkmen/turkmen.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zäçžňöşüýA-ZÄÇŽŇÖŞÜÝ]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("tk")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abçdeäfghijžklmnňoöprsştuüwyýzcqvxÄÇŽŇÖŞÜÝ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "aeiouyäöüsrlmn") words.add(a + b + c); } }
+        const ctx = [..."strpklmnşçjaey"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00b", "ŉ", "ǅ", "K", "ſ", "ﬁ", "é", "é", "ñ", "İ", "ı"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords, ordinalOf (both harmony classes) over 0…20,000 and beyond, the Roman ordinal, and the engine's
+    // own number reading on digit runs (renderNumber / spellDigits).
+    async "tk-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/turkmen/numbers.ts");
+        const { ordinalOf } = await import("../../../src/languages/turkmen/normalize.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/turkmen/romanOrdinals.ts");
+        const T = await import("../../../src/languages/turkmen/turkmen.ts");
+        const P = T.createTurkmen();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, 0.5, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            if (Number.isFinite(n) && n >= 0 && Number.isInteger(n)) emit({ n: String(n), op: "words" }, numberToWords(n).join("|"));
+            emit({ n: String(n), front: true, op: "ordinal" }, ordinalOf(n, true) ?? "\u0000none");
+            emit({ n: String(n), front: false, op: "ordinal" }, ordinalOf(n, false) ?? "\u0000none");
+        }
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // normalizeRomans with Turkmen's policy (registry.ts romanTk) over the Turkmen texts.
+    async "tk-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/turkmen/romanOrdinals.ts");
+        const rows = new Map(textsFor(["tk"], undefined, ["tk.txt"]));
+        for (const r of ["I", "II", "IV", "IX", "XIX", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["asyr", "asyrda", "asyrlaryň", "asyrdan", "ýyl", "asyrlik"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
+        for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Tatar (tt). Inputs: the tt golden and probes/tt.txt (FLEURS has no tt), plus GENERATED shapes. ──
+    // normalizeTatar, normalizeTatarInitialisms (on the raw and the normalized text), the symbol tier tatar.ts built
+    // (recorded through the wrapper) on the prepared text, the engine's text(), and the phonotactic test, over the
+    // texts and synthetic rows: every ordinal / case suffix after a sweep of numbers (hyphenated, glued, spaced),
+    // the era markers in every trailing context, clocks with suffixes, degrees with suffixes, signs, ranges.
+    async "tt-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/tatar/normalize.ts");
+        const P = (await import("../../../src/languages/tatar/tatar.ts")).createTatar();
+        const rec = records.find((r) => /src\/languages\/tatar\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["tt"], undefined, ["tt.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["нче", "нчы", "енче", "ынчы", "нчедә", "енчесе", "нчыга", "ның", "нең", "га", "гә", "ка", "кә", "да", "дә", "та", "тә",
+            "дан", "тән", "ннан", "лар", "ләр", "ларда", "ы", "сы", "ен", "ына", "ндә", "н", "НЧЕ", "ел", "еллар"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "15", "20", "30", "40", "50", "60", "70", "80", "90",
+            "100", "101", "200", "1000", "1990", "2011", "1000000", "1000000000", "9007199254740993"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кайт`); add(`${n}${sfx}`); add(`${n} ${sfx}`); }
+        for (const era of ["б.э.к.", "б. э. к.", "я.э.к", "б.э.", "я. э.", "һ.б.", "ш.и.", "млрд.", "млн .", "Б.Э.К."]) for (const tail of ["", " 300 ел", ".", "\"", " »", ")", " соң"]) add(`Бу ${era}${tail}`);
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "30", "59"]) for (const sfx of ["", "да", "-дә", "тән", "ка", "кә", "х"]) { add(`${h}:${mm}${sfx} килде`); add(`${h}:${mm}:15${sfx}`); }
+        for (const d of ["°C", "°С", "°F", "°Ф", "°", "°30′", "°30′та", "°30'да", "°30′кеше", " ° почмак"]) for (const n of ["5", "-5", "+5", "−5", "(–5"]) add(`${n}${d} булды`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "-8", "5 = 5", "2×3", "±2"]) add(`Кар ${r} см`);
+        for (const [t, src] of rows) {
+            const a = N.normalizeTatar(t);
+            const b = N.normalizeTatarInitialisms(a);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeTatarInitialisms(t));
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(b), src, op: "symbols" }, rec.apply(b));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableTatar(w)));
+    },
+    // phonemizeWord over every Cyrillic-block run of the texts (as written, lowercased, uppercased), every 1-3
+    // letter string over the alphabet (third letter from a context set), every 4-letter string of the harmony and
+    // cluster letters, and edge strings.
+    async "tt-g2p"() {
+        const T = await import("../../../src/languages/tatar/tatar.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("tt")) for (const w of t.match(/[\p{L}\p{M}]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); }
+        const abc = [..."аәбвгдеёжҗзийклмнңоөпрстуүфхһцчшщъыьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аәеиыоөуүкгрлсн") words.add(a + b + c); } }
+        const ctx = [..."кгаәеоысттрл"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ЁЛКА", "Ӏ", "ԥ", "ӑ", "ј", "е́", "й"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+    },
+    // numberToWords and ordinalOf over 0…20,000 and beyond, the Roman ordinal, and the engine's own number reading
+    // on digit runs (the unsafe ones digit at a time) and comma decimals.
+    async "tt-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/tatar/numbers.ts");
+        const { ordinalOf } = await import("../../../src/languages/tatar/normalize.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/tatar/romanOrdinals.ts");
+        const P = (await import("../../../src/languages/tatar/tatar.ts")).createTatar();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n).join("|"));
+            emit({ n: String(n), op: "ordinal" }, ordinalOf(n) ?? "\u0000none");
+        }
+        for (const n of [1.5, -1, NaN, Infinity]) emit({ n: String(n), op: "ordinal" }, ordinalOf(n) ?? "\u0000none");
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40), "2,5", "0,05", "3,14159"];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // normalizeRomans with Tatar's policy (registry.ts romanTt) over the Tatar texts and synthetic Roman × context rows.
+    async "tt-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/tatar/romanOrdinals.ts");
+        const rows = new Map(textsFor(["tt"], undefined, ["tt.txt"]));
+        for (const r of ["I", "II", "IV", "IX", "XIX", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["гасыр", "гасырда", "гасырларның", "йөзьеллык", "йөзъеллыкта", "ел", "гасырлык"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
+        for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
 };
 
