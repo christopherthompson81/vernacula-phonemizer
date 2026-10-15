@@ -34,14 +34,14 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `en-g2p-tagger.int8.onnx`, `g2p-model.json` | CMUdict | Public domain |
 | `english/g2p-common.txt` | CMUdict ∩ Norvig count_1w frequency ranking | PD + facts (header) |
 | `danish/da-lexicon.tsv`, `da-g2p-tagger.int8.onnx` | NST Danish (Språkbanken sbr-26) | CC0 |
-| `norwegian/nb-lexicon.tsv`, `nb-g2p-tagger.onnx` | NST Norwegian (Nasjonalbiblioteket) | CC0 |
+| `norwegian/nb-lexicon.tsv`, `nb-g2p-tagger.int8.onnx` | NST Norwegian (Nasjonalbiblioteket) | CC0 |
 | `swedish/accent-stress.tsv` | NST Swedish (abstract accent/stress features only) | CC0 |
 | `persian/fa-tagger.int8.onnx`, `fa-pin-vowels.tsv` | HomoRich (MahtaFetrat, HF) | CC0 |
 | `hebrew/he-tagger.int8.onnx` (majority tier) | Nakdimon pre-modern PD subset | PD (modern/wiki slice → §3) |
 | `vietnamese/rhymes.tsv` | exhaustive closed-class rhyme inventory | Facts |
 | `mandarin/syllable-ipa.tsv` | exhaustive pinyin-syllable inventory; row-level corroboration vs epitran (MIT) | Facts |
 | `catalan/mid-vowels.tsv`, `bl-gl-geminate.tsv` | per-word Central-Catalan dictionary facts (DCVB-verifiable); one feature per word, measured with espeak-ng 1.52 over an external wordlist (§5.1) | Facts |
-| `english-gb/en-gb-lexical.tsv` (3 of 38 rows) | one British/American feature per word for `schedule`, `leisure`, `ballet`, decided against espeak-ng's **dictsource** (§5.1); the shipped bytes are the parent's own CMUdict row with that one feature rewritten, so no espeak phoneme string is reproduced | Facts |
+| `english-gb/en-gb-lexical.tsv` (3 rows) | one British/American feature per word for `schedule`, `leisure`, `ballet`, decided against espeak-ng's **dictsource** (§5.1); the shipped bytes are the parent's own CMUdict row with that one feature rewritten, so no espeak phoneme string is reproduced | Facts |
 | `irish/lexicon.tsv` | mechanically-generated pronunciation facts over an external frequency wordlist | Facts |
 | `amharic/fidel.tsv`, `tigrinya/fidel.tsv` | hand-authored Ge'ez syllabary tables | Own work |
 | `french/supplement.tsv` | 3 cleanroom pronunciations for words Lexique lacks (celsius, confer, kilowatt), authored here; deliberately NOT merged into `french/lexicon.tsv`, which is CC-BY-SA (§3) — keeping them separate keeps them MIT-safe and keeps Lexique re-importable | Own work |
@@ -114,8 +114,6 @@ CC-BY-SA 4.0 + iTaigi CC0 + kaikki Hokkien chars; sidecar); `thai/dictionary.tsv
 `km-lexicon-kaikki.tsv` (kaikki tier);
 `sindhi/sindhi-lexicon.tsv` (kaikki tier); `arabic/egyptian-lexicon.tsv`;
 `urdu/{lexicon.tsv,lexicon-ipa.tsv}`; `persian/lexicon.tsv`;
-(⚠ `pashto/lexicon.tsv` LEFT this stratum on 2026-08-10 — it is now 89.6% espeak-derived and fenced
-GPL-3.0 in §4 item 3; a file cannot sit in two strata and the more restrictive one governs);
 `punjabi/{lexicon.tsv,crossscript.tsv,gurmukhi-lexicon.tsv}`; `indonesian/indonesian-e-lexicon.tsv`;
 `romanian/romanian-stress.tsv`; `welsh/lexicon.tsv`; `czech/loanwords.tsv`; `hausa/tone.tsv`;
 `zulu/tone.tsv`; `akan/akan-tone.tsv`; `zhuang/sawndip-readings.tsv`;
@@ -291,14 +289,10 @@ no linkage, but worth stating rather than implying a blanket rule.) Four distinc
    Facts), not the Pashto one. `leisure` is independently attested by the CC-BY-SA wikipron
    referee under `leisurely`, so one of the three is not even reachable-only-from-espeak.
 
-**It is a witness, never an oracle**, and that was measured rather than assumed: espeak is phonetic
-and cannot hand over orthography, so every spelling derived from it was round-tripped through this
-repo's own g2p and matched against an independent referee where one existed. The Punjabi 61–99 run
-built exactly that pipeline for the 39 numerals its referee lacked, then validated it against the 36
-the referee *does* carry — **8 of 36 (22%) were espeak being wrong about the word**, and the 39 were
-not shipped on that basis. The method and the measurement are in
-`docs/normalization_playbook.md` §5c. What ships is the adjudicated word — a linguistic fact. No
-dictsource rules, phoneme tables, or arrangement are reproduced.
+**It is a witness, never an oracle.** espeak is phonetic and cannot hand over orthography, so every spelling
+derived from it was round-tripped through this repo's own g2p and matched against an independent referee where
+one existed (`docs/normalization_playbook.md` §5c). What ships is the adjudicated word, a linguistic fact. No
+dictsource rules, phoneme tables or arrangement are reproduced.
 
 #### The Catalan tables
 
@@ -333,15 +327,10 @@ similarity — both come from the author's own repaired engines.
 
 ### 5.2 Wiktionary and epitran
 
-Both already appear in this map as *shipped* data where their content is redistributed —
-Wiktionary-derived lexica are the §3 share-alike stratum, and the eval referee sets are fenced there
-too. They are repeated here for the role that fencing doesn't capture: they are the reason any
-quality claim in this repo is falsifiable. wikipron and kaikki supply the human transcriptions each
-engine is scored against; epitran supplies a *mechanically independent* second opinion whose
-disagreements are treated as candidates to adjudicate, not as bugs. A language with neither is
-recorded as `🔷 single-source` or `⛔ cannot-verify` in `docs/language-maturity.md` rather than
-quietly reported as fine — an evidence verdict those two sources define the boundary of.
-Attribution is owed under CC-BY-SA regardless of whether a given use shipped bytes.
+Where their content is redistributed, both already appear in this map as shipped data: the
+Wiktionary-derived lexica and the eval referee sets are in the §3 share-alike stratum. They are listed here
+for their other role, as the human (wikipron, kaikki) and programmatic (epitran) transcriptions each engine
+is scored against. Attribution is owed under CC BY-SA whether or not a given use shipped bytes.
 
 ### 5.3 Moby Pronunciator II
 
@@ -358,11 +347,6 @@ for the data. The generator reads only the pronunciation body, never the header,
 it. And the upstream `.unc` file is **not** committed here — only the derived corpora are, which keeps the
 repo free of the boilerplate entirely.
 
-**Why it was brought in.** English had two sources and they share ancestry problems: this repo's lexicon
-is CMUdict-derived, and the wikipron referee is Wiktionary. Moby is independent of both — a third opinion
-with its own lineage — which is what made it usable as an *arbiter* for the ~2,000 dictionary corrections
-in #1334–#1341, where "gold and Moby agree against us" was the selection rule for one band of them.
-
 **What ships.** Two referee corpora built by `tools/gen/build-en-moby-referee.mts`:
 
 | file | rows | role |
@@ -370,36 +354,13 @@ in #1334–#1341, where "gold and Moby agree against us" was the selection rule 
 | `en.moby-lexicon.tsv` | 35,202 | words this dictionary carries — 22,934 of them inside the 40k frequency list |
 | `en.moby-oov.tsv` | 57,503 | words it does **not** — the first referee this repo has had for the OOV tier |
 
-⚠ **THEY ARE `secondary`, AND THE REASON IS CIRCULARITY, NOT QUALITY.** One band of #1338's corrections
-was selected on Moby's agreement, so for those rows scoring against it is partly a mirror. #1334–#1336
-were driven by wikipron + gold and are independent of it, as is the entire OOV file, from which no
-correction has ever been derived. The wikipron set remains `primary` and keeps the floor.
-
-⚠ **THE GENERATOR FOLDS NOTATION AND DELIBERATELY DOES NOT FOLD PHONOLOGY**, and that distinction is the
-whole basis for treating the artifact as a referee rather than a mirror. Moby spells out what this engine
-writes as one phone (`ə`+`r` for `ɚ`, two-segment diphthongs); that is transcription convention and is
-folded. Its FORCE/NORTH distinction is folded too, but only because CMUdict has none and this engine
-therefore cannot regress into it. Its unmerged marry–merry and its conservative yod are **left in**, so
-the referee can still catch a regression on the two axes most recently changed here. The argument for each
-is in the generator's header.
-
 **And 16,227 rows now ship in the dictionary itself.** `tools/english/en_import_moby.mts` adds Moby
 headwords `g2p-dict.tsv` lacked, recorded in `data/languages/english/moby-import.tsv` — which is a
 re-appliable layer for the same reason `g2p-curated.tsv` is one: `en_g2p_ngram.ts --emit` rebuilds the
 dict from CMUdict and carries none of them.
 
-⚠ **THE BAR IS THE SAME TWO-SOURCE STANDARD every correction in #1334–#1341 had to clear**: Moby and
-misaki gold must agree after both are folded to this engine's conventions. Of 57,503 absent headwords,
-gold has no reading for 33,684 and disagrees on 7,413; 166 more were dropped because they are Commonwealth
-spellings the `americanSpelling` fold already resolves, and giving those their own row SHADOWS the fold
-and swaps a curated reading for a raw one. The independent check that this was worth doing is the
-*primary* referee: wikipron went 60.1% → 61.7%.
-
-⚠ **AND THE CONVERSION RUNS THE OPPOSITE WAY FROM THE REFEREE'S**, which is the one thing to hold in mind
-when reading either. A row entering the LEXICON is fully modernised — FORCE→NORTH, yod-dropping, æɹ→ɛɹ —
-because it must arrive in this engine's conventions or contradict the dictionary it joins. A row entering
-the REFEREE keeps marry–merry and the conservative yod, because folding them would blind it to the two
-axes most recently changed here. Same source, two derivations, opposite treatment of the same distinction.
+A Moby row is imported only where Moby and misaki gold agree after both are folded to this engine's
+conventions.
 
 Attribution is owed as a courtesy rather than as a licence condition: the grant imposes none.
 

@@ -5,7 +5,7 @@
  * output as its lowest-priority char source).
  *
  * License: Wiktionary → CC-BY-SA (same fence as the gan/hakka/jin/xiang dicts).
- * CAVEAT (stated in dict.PROVENANCE.md): the nan referee (wikipron Hokkien) is ALSO
+ * CAVEAT (stated in docs/investigations/nan/minnan-dict_build_notes_investigation.md): the nan referee (wikipron Hokkien) is ALSO
  * Wiktionary-derived, so referee-eval numbers for chars sourced from this tier are not
  * independent. Quality assurance for this tier comes from the taihoa/itaigi cross-validation in
  * the builder, not the referee score.

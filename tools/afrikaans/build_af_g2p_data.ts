@@ -9,7 +9,7 @@
  *
  * ⚠ THAT IS THE CEILING FOR THIS LANGUAGE. The third open dictionary, Lwazi Afrikaans (4,998, CC BY 2.5 ZA),
  * adds ZERO headwords — every one is already in RCRL. There is no nb/da-scale (199k NST) Afrikaans resource.
- * For context, the repo's own starvation line is ~10k pairs (measured in da-g2p-tagger.PROVENANCE.md) and the
+ * For context, the repo's own starvation line is ~10k pairs (measured in docs/investigations/da/da-g2p-tagger_build_notes_investigation.md) and the
  * shipped Sindhi tagger trains on 9,274, so ~32.6k is mid-fleet: above sd, below bn's ~60k.
  *
  * ⚠ THE TWO SOURCES ARE NOT INDEPENDENT — 96.6% identical on their 9,871-word overlap, same NWU/CSIR lineage.

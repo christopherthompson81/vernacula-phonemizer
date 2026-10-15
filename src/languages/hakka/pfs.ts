@@ -14,7 +14,8 @@
  * spelling and a Meixian Sinological-IPA reading — a parallel corpus of exactly the two things needed.
  * 4,754 align syllable-for-syllable (PFS hyphens against IPA spaces against Han characters, three lengths
  * that must agree). `tools/gen/build-hak-pfs.mts` turns that into `pfs.tsv`; the tone system falls out of it
- * rather than being assumed. See `pfs.PROVENANCE.md`.
+ * rather than being assumed. See `pfs.PROVENANCE.md` and
+ * `docs/investigations/hak/pfs_build_notes_investigation.md`.
  *
  * ⚠ IT IS A DIALECT TRANSLATION, DELIBERATELY. Wiktionary tags the PFS spelling *Sixian* (Taiwan) and this
  * engine is *Meixian*. Pairing them maps the SPELLING onto THIS ENGINE'S dialect instead of importing a

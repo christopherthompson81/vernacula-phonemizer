@@ -1,6 +1,6 @@
 /**
  * Build the Hebrew PHASE-2 restorer training corpus from a VOCALIZED Hebrew text corpus (the Nakdimon
- * `hebrew_diacritized` collection). ARCHITECTURE (see he-tagger.PROVENANCE.md): a SENTENCE-LEVEL per-consonant
+ * `hebrew_diacritized` collection). ARCHITECTURE (see docs/investigations/he/he-tagger_build_notes_investigation.md): a SENTENCE-LEVEL per-consonant
  * BiLSTM that restores the NIQQUD of unvocalized Hebrew (the ar/nakdan approach), which the deterministic rule
  * g2p (hebrew.ts) then converts to IPA — the neural net learns ONLY the context-dependent diacritization, not the
  * (already-validated) g2p. SENTENCE-LEVEL (the fa faTagger pattern): each example is a CLAUSE (words joined by
@@ -26,7 +26,7 @@ const OUT = process.argv[3] ?? "/tmp/he_tagger_train.tsv";
 // Two register-balancing levers close the modern-OOD gap (the permissive corpus is ~89% pre-modern —
 // Bialik/Tchernichovsky, archaic vocabulary, DEFECTIVE ktiv-haser — but the target is MODERN running text; on the
 // ~20% of shared skeletons the two registers give a CONFLICTING reading, שנים = šnayim/šanim, so a 12:1 pre-modern
-// majority drags the prior toward the archaic reading). See he-tagger.PROVENANCE.md.
+// majority drags the prior toward the archaic reading). See docs/investigations/he/he-tagger_build_notes_investigation.md.
 //   (1) OVERSAMPLE the CC-BY-SA modern/wiki (+ validation) ×5 — adds modern weight without discarding pre-modern.
 //   (2) `suppress`: on the pre-modern source, MASK (ignore in the loss) any word whose reading is ABSENT from the
 //       modern reading-set for that skeleton — a genuinely-archaic vocalization modern never uses. Pre-modern still

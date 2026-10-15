@@ -1,123 +1,21 @@
-# Arabic diacritizer model — provenance
+# `diacritizer.onnx` — provenance (Arabic, MSA)
 
-The neural Arabic diacritizer (`diacritizer.onnx`, tracked in git) restores short vowels on bare Arabic as an
-async pre-pass before the g2p. It is a **permissively-sourced** model, built to avoid any non-commercial or
-copyleft encumbrance at the source.
+**What it is.** A sentence-level character BiLSTM (int8 ONNX, 19-label pausal scheme) that restores short
+vowels on bare Arabic before the g2p. `diacritizer.meta.json` holds its character and label maps.
 
-## What it is
+**Training data.** Silver-only, with no warm start:
+- **Teacher:** CATT, the Character-based Arabic Tashkeel Transformer (AbjadAI, arXiv:2407.03236,
+  <https://github.com/abjadai/catt>), **Apache-2.0**. It was used offline to label the training text.
+- **Text:** **Arabic Wikipedia** (`arwiki-latest-pages-articles`), **CC BY-SA 4.0**, about 320k clean
+  sentences.
 
-A sentence-level BiLSTM (emb 128, hidden 512, 3 layers, ~15.3 M params), int8-quantized ONNX (~15 MB),
-char-level, 19-label pausal alphabet. Deterministic argmax decode, one sentence per inference context.
+**Licence posture.** The model is trained on CATT-labelled public Wikipedia text. It retains none of any
+source corpus's selection or arrangement, only the orthographic regularities of the language, which are
+facts (*Feist*). The inputs are permissive by their own terms in any case. It is listed with the models that
+have share-alike training inputs under the training-as-use posture (`LICENSES/PROVENANCE.md` §3;
+`LICENSES/licencing_posture.md`).
 
-## Provenance — fully permissive (no NC, no GPL)
+**Regenerate.** `tools/arabic/train_ar.sh` reproduces the shipped model. Data and licences are in
+`tools/CORPORA.md`.
 
-- **Teacher:** CATT — Character-based Arabic Tashkeel Transformer (**Apache-2.0**; AbjadAI, arXiv:2407.03236,
-  https://github.com/abjadai/catt). Used offline to silver-label training text.
-- **Training text:** **Arabic Wikipedia** (`arwiki-latest-pages-articles`, **CC-BY-SA 4.0**) — 320 k clean
-  sentences extracted from the dump, CATT-silver-labelled, trained **silver-only** (no warm-start).
-
-We deliberately trained silver-only rather than warm-starting from a Tashkeela/Fadel init. A head-to-head
-showed the silver-only model is **better on both domains** — modern (our target) **2.17% DER** vs 2.36% for
-the warm-started variant, and even on the classical Fadel benchmark 4.21% vs 4.59%. With 320 k in-domain
-Wikipedia sentences there is enough signal to learn from scratch; the classical init only added bias to
-unlearn. So the maximally-clean model is also the best one — no provenance-vs-quality trade-off.
-
-## Regenerate
-
-Offline GPU pipeline (not in CI), staged on `$ARDIAC`: download the arwiki dump → extract Arabic
-sentences → `catt_silver.py` (CATT → silver) → `train_bilstm_sent.py --pausal 1` (silver-only, no `--resume`)
-→ `export_onnx.py` → int8 `quantize_dynamic`. The `.onnx` is tracked in git alongside `diacritizer.meta.json` (char/label
-maps) is committed beside it.
-
-## Licence posture
-
-a model trained on CATT-labelled public Wikipedia retains none of any source corpus's selection/arrangement —
-only the orthographic regularities of the language, which are facts (Feist). The chosen inputs are permissive by
-their own terms regardless (Apache-2.0 teacher, CC-BY-SA text), so the question is moot at the source.
-
-## 2026-08-20 — retrained: packed sequences + a cosine tail
-
-Measured END-TO-END through the runtime against PAUSALIZED gold (`tools/arabic/eval_ar_runtime.mts`, 1,500
-held-out sentences / 32,018 words) — both sides through the identical sync g2p, so a mismatch is a
-diacritization error:
-
-| | word-exact | sentence-exact |
-|---|---|---|
-| previous model | 85.10% (27,248/32,018) | 11.9% |
-| **this model** | **85.53% (27,385/32,018)** | **12.3%** |
-
-At checkpoint level on the pausal task, TEST DER 2.02% → **1.83%**, WER 7.81% → **7.20%**.
-
-⚠ **ATTRIBUTION: ~0.17pp of the DER gain is the COSINE SCHEDULE, ~0.02pp (noise) is the packing.** Arabic is
-the one language in the fleet-wide packing rollout where packing is not measurable, and the mechanism predicts
-it: a sentence-level model with `maxlen 400` has almost no positions near the sequence end, whereas a
-10-character word is nearly all "near the end" (da +5.6pp, nb +2.2pp). Do not read this row as a packing win.
-
-⚠ The 25-epoch cap was truncating an ADAPTIVE `ReduceLROnPlateau` mid-decay — and asymmetrically, so an A/B
-under it read 2.02 vs 2.10 and looked like packing had HURT. Resuming both arms from one epoch under an
-identical cosine anneal (`--cosine`) removed the confound and found 0.2pp neither arm had reached.
-
-**Quantization is free**: fp32 1.83% vs QUInt8 1.84% DER, scored one sentence at a time as the runtime serves.
-⚠ A padded-batch scorer read 2.73% for the SAME fp32 graph and was briefly mistaken for a 0.9pp int8 loss —
-an unpacked BiLSTM over padding, i.e. the very defect this retrain is about, reintroduced in the measuring
-tool.
-
-⚠ **THIS FILE'S "Provenance" SECTION IS UNRELIABLE ABOUT THE PREVIOUS MODEL'S SOURCE.** It names
-`bilstm_silver_only.pt`, but that checkpoint is PAUSAL (2.02% DER at `--pausal 1`) while the artifact it
-shipped predicted FULL diacritization (3.31% at `--pausal 0`, 16.89% at `--pausal 1`). They are different
-models. Harmless in service — `diacritizer.ts::pausalize()` strips case endings downstream either way, which
-is why the two agree on 98.04% of words — but it means the previously deployed artifact was not reproducible
-from the checkpoint this document names. The model now shipped IS reproducible: `tools/arabic/train_ar.sh`.
-
-### ⚠ Full-then-pausalize costs MEASUREMENT accuracy, and the referee already knew
-
-The previous arrangement trained on FULL diacritization and stripped case endings at serve time
-(`diacritizer.ts::pausalize()`). Three consequences worth stating, because "full diacritization" sounds like
-the higher-accuracy option and is not:
-
-1. **Its headline DER overstates served error.** Tashkeela-style gold scores the iʕrab case/mood endings, and
-   `pausalize()` then discards them — so that number counts mistakes which never reach the output. The
-   previous artifact's 3.31% (`--pausal 0`) is not a description of the product; this model's 1.83%
-   (`--pausal 1`) scores only what survives to the IPA.
-2. **The referee never rewarded them either.** `tools/referee-eval/langs/ar.jsonc` uses kaikki ara — "PAUSAL,
-   multi-pron" — with an explicit preFold: *drop a word-final SHORT vowel (the iʕrab case/mood ending, and
-   the verb -a)*. Case endings are folded off both sides before scoring.
-3. So a full model's headline DER will always overstate its served error, whatever its quality.
-
-### RESOLVED 2026-08-20 — the two objectives are equivalent; the metric is not
-
-⚠ **Point 3 previously read "capacity went to predicting syntax nobody consumes". That was wrong and is
-retracted.** A full-diacritization model trained under this exact recipe (packed, cosine 1e-3 → 0 over 40
-epochs, same split) was measured head-to-head through `eval_ar_runtime.mts`, 1,500 sentences / 32,018 words,
-both arms in one run:
-
-| | word-exact | sentence-exact |
-|---|---|---|
-| full (`--pausal 0`) | 85.57% (27,399) | 12.5% |
-| **pausal — shipped** | 85.53% (27,385) | 12.3% |
-
-**14 words apart.** The objectives are equivalent end-to-end; case endings are neither a wasted target nor a
-useful auxiliary signal at this scale.
-
-**Pausal is kept for a MEASUREMENT reason, not a quality one.** Its DER scores only what survives
-`pausalize()`, so the headline number describes the product; the full model's 2.83% DER counts case-ending
-errors the runtime discards and will mislead every future reader. Given equivalent output, prefer the model
-whose metric cannot be misread.
-
-### An alternate FULL-diacritization model exists — feedback wanted
-
-Trained under the same recipe with `--pausal 0`, kept at
-`/mnt/data/ar-diac/alt-full-diacritization/` (with its own README and rebuild command). **Overall equivalent**
-— 85.57% vs 85.53% word-exact — so it is not shipped, and the pausal model is preferred because its DER
-describes what actually serves.
-
-⚠ **But the two are audibly different on ~1 word in 85** (1.17%, 145 of 12,350), and not randomly: the
-disagreements are concentrated in case marking on attached pronoun suffixes — `wabiħaːrˈihaː` vs
-`wabiħaːrˈahaː`, `wasufˈunih` vs `wasufˈunah` — which survives `pausalize()` because it is not word-final, plus
-vowel quality in names and loans. On those contested words the alternate is right 54 times to the shipped
-model's 42, with 49 where neither is right.
-
-**If Arabic output sounds wrong in a way that smells syntactic — a pronoun suffix vowel, a case-marked
-ending — try the alternate before assuming the g2p is at fault.** Swapping is two file copies and a
-`git checkout` to revert; the README beside it has the commands. Reports either way are useful: a 56/44 split
-on 145 words is not enough to choose on, and ears may separate them where the metric cannot.
+Build notes and measurements: `docs/investigations/ar/diacritizer_build_notes_investigation.md`.

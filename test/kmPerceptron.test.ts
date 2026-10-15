@@ -4,7 +4,7 @@
  * This model exists because the BiLSTM needs `onnxruntime-node` (optional) and so can only serve the async tier.
  * The perceptron is a Map of 42,643 weights and an addition loop, so it could serve `phonemize` itself. What is
  * asserted here is deliberately structural: the model is ~77% on exact boundary placement, so pinning individual
- * splits would pin noise. See km-segmenter.PROVENANCE.md for the three-way comparison.
+ * splits would pin noise. See docs/investigations/km/km-segmenter_build_notes_investigation.md for the three-way comparison.
  */
 import { describe, expect, test } from "vitest";
 

@@ -9,7 +9,7 @@
 vernacula-phonemizer is an **original work**. It is a new engine, new per-language architectures,
 and a canonical-IPA focus. External data carried into this project are **linguistic facts only**
 — a word's pronunciation, a syllable inventory, a stress position. The per-artifact determinations
-are recorded in `LICENSES/PROVENANCE.md` §4.3.
+are recorded in `LICENSES/PROVENANCE.md`.
 
 The repository does, however, ship **data derived from many third-party sources** (Wiktionary/
 wikipron/kaikki, NST, CMUdict, Lexique, ChhoeTaigi, rime projects, and others) and **model
