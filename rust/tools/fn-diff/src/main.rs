@@ -2707,7 +2707,14 @@ fn bengali_family(lang: &str) -> BengaliFamilyFn {
             _ => panic!("bengali-family: unknown op {op}"),
         });
     }
-    let e = l::bengali::bengali::create_bengali(None).unwrap();
+    let e = match lang {
+        "bpy" => {
+            l::bishnupriya::bishnupriya::create_bishnupriya(None)
+                .unwrap()
+                .0
+        }
+        _ => l::bengali::bengali::create_bengali(None).unwrap(),
+    };
     Box::new(move |op, x| match op {
         "normalize" => norm(x),
         "text" => with_host(&host, || e.text(x, None)).unwrap(),

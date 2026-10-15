@@ -7,6 +7,7 @@ pub mod bavarian;
 pub mod belarusian;
 pub mod bengali;
 pub mod bhojpuri;
+pub mod bishnupriya;
 pub mod bosnian;
 pub mod bulgarian;
 pub mod catalan;

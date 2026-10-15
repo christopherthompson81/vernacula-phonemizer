@@ -96,7 +96,7 @@ bpy syl or`; a TS probe of four made-up English names inside bn, hi and en (`lat
 **Implication.** Reproduced on purpose (a commented `bn_engine()` with `phonemize_in("en", …)`), reported as a TS
 defect, and pinned by two synthetic probe lines in `probes/bn.txt`. Not fixed here.
 
-## Run 4 — 2026-10-15 02:55 (after rebasing onto main 5b2bf359; as: an escape written back as a literal NBSP)
+## Run 4 — 2026-10-15 02:40 (after rebasing onto main 5b2bf359; as: an escape written back as a literal NBSP)
 
 **Question.** After the rebase onto the second Turkic group (#1580), does the Assamese layer (its pre-pass, the
 Bengali maker on `assamese.jsonc`, the geminate collapse) match the TS, and did its literals survive the write?
@@ -120,3 +120,18 @@ object return, skipped) are pinned by extraction and pass.
 
 **Implication.** as is done. The escape-to-literal failure is invisible to every differential, so the audit stays
 mandatory after each write.
+
+## Run 5 — 2026-10-15 02:44 (bpy)
+
+**Question.** Does Bishnupriya, the Bengali maker on `bishnupriya.jsonc` with nothing of its own, match end to end?
+
+**Command.** `LANGS=bpy dump.mts bengali-family` → `fn-diff bengali-family`; `e2e.sh bpy`; `parity bpy`; the audit.
+Inputs: the bpy golden, `probes/bn.txt` (the shared normalizer's arms) and `probes/bpy.txt` (words whose bn reading
+harmonizes or comes from the bn lexicon, which bpy skips). FLEURS has no bpy, so the golden, both probe files and the
+synthetic grids carry it.
+
+**Raw finding.** `bengali-family: 41324 identical, 0 DIFFER` (golden 400, probe 38, synthetic 2566 text rows; the rest
+word level); `phonemize-sync / phonemize-best / trace: 219 identical, 0 DIFFER` each; `bpy: 200/200`. The 12 calls of
+test/bishnupriya.test.ts pinned by extraction pass. Audit: no non-ASCII literal in the module.
+
+**Implication.** bpy is done; the maker now serves three languages from one port.
