@@ -117,7 +117,11 @@ impl TeluguNormalizer {
         let numbers = &self.def.numbers;
 
         // Zero-width characters (the TS writes the range as literal characters).
-        let mut s = rewrite(input, js_re!(r"[​-‍﻿]", "gu"), &JsString::new());
+        let mut s = rewrite(
+            input,
+            js_re!("[\u{200B}-\u{200D}\u{FEFF}]", "gu"),
+            &JsString::new(),
+        );
 
         // The ౦ homoglyph beside a Telugu letter is the anusvara ం; BEFORE the digit fold.
         s = rewrite_with(&s, &ZERO_RE, |m, full| {

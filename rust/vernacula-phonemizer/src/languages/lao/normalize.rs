@@ -22,15 +22,15 @@ pub fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
 }
 
 /// `normalizeLao(input)`. The steps are order-dependent, as in the TS.
-/// The step-1 class holds LITERAL format characters, as the TS writes it.
-#[allow(clippy::invisible_characters)]
+/// The step-1 class holds literal format characters in the TS; here they are `\u{…}` escapes of the same code
+/// points (clippy's `invisible_characters` denies the literal form).
 pub fn normalize_lao(input: &JsString) -> JsString {
     let mut s = input.clone();
 
     // 1) The soft hyphen goes, the zero width space stays; `&nbsp;` and `Us$`.
     s = rewrite(
         &rewrite(&s, js_re!(r"&nbsp;", "gu"), &js(" ")),
-        js_re!(r"[­‌﻿]", "gu"),
+        js_re!("[\u{00AD}\u{200C}\u{FEFF}]", "gu"),
         &JsString::new(),
     );
     s = rewrite(&s, js_re!(r"(?<![\p{L}])Us\$", "gu"), &js("US$"));

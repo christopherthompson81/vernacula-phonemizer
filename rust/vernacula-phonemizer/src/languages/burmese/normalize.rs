@@ -137,14 +137,18 @@ static BUILT: LazyLock<Built> = LazyLock::new(|| {
 });
 
 /// `normalizeBurmese(input)`. The steps are order-dependent, as in the TS.
-/// The step-1 class holds LITERAL format characters, as the TS writes it.
-#[allow(clippy::invisible_characters)]
+/// The step-1 class holds literal format characters in the TS; here they are `\u{…}` escapes of the same code
+/// points (clippy's `invisible_characters` denies the literal form).
 pub fn normalize_burmese(input: &JsString) -> JsString {
     let bt = &*BUILT;
     let mut t = input.clone();
 
     // 1) Invisible characters; 2) digit grouping; 2b) rates (before the clock, decimal and range rules).
-    t = rewrite(&t, js_re!(r"[​-‍⁠﻿]", "gu"), &JsString::new());
+    t = rewrite(
+        &t,
+        js_re!("[\u{200B}-\u{200D}\u{2060}\u{FEFF}]", "gu"),
+        &JsString::new(),
+    );
     t = rewrite(&t, &bt.group, &JsString::new());
     for (r, rep) in &bt.rates {
         t = rewrite(&t, r, rep);
