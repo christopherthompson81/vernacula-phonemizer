@@ -2643,6 +2643,30 @@ fn main() {
                 }
             })
         }
+        "an-normalize" | "an-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let an =
+                vernacula_phonemizer::languages::aragonese::aragonese::create_aragonese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => an.normalize(&t()),
+                    "symbols" => an.symbols(&t()),
+                    "text" => with_host(&js("an"), || an.text(&t())),
+                    "word" => an.phonemize_word(&w()),
+                    "nat" => an.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        an.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

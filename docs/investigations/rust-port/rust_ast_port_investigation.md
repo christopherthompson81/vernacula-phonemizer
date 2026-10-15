@@ -70,3 +70,12 @@ both documented choices in the file.
 **Raw finding.** asturian.rs pins all 68 calls; `cargo test asturian`: 1 passed. `parity` (all): every language
 byte-identical but mag and tt at their known 199/200; `ast: 200/200`. clippy: only `module_inception`. No
 port-pending rows.
+
+## Run 6 — 2026-10-15 02:51 (a finding carried back from the Aragonese reading)
+
+**Command.** `WT=<wt> npx tsx west/t.mts ast "a les 9:00 hores" "a les 9:05"`.
+
+**Raw finding (TS output, verbatim).** `a les 9:00 hores` → *a les nwebe θeɾo oɾes*; `a les 9:05` → *a les nwebe
+θinko*. The clock rule is `$1 $2`, so the tokenizer reads `00` as *cero* and `05` as *cinco* (the minutes' zero
+dropped, nothing marking them as minutes). Run 4's "nothing reported" is superseded: this is a TS finding, reported
+with the identical Aragonese one (rust_an_port_investigation.md Run 4); the Rust reproduces it.

@@ -1,0 +1,17 @@
+# Aragonese (an) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it
+# must decline, then tokenizer and g2p corners. FLEURS has no an, so these and the dump's synthetic rows carry the
+# arms the golden misses.
+O lugar tiene 130.000 habitants, 1.000.000 de visitants y 12 345 678 euros, pero no 0.500.
+O valor ye 3.14 u 12.5, y 1.000,5 tamién.
+En l'anyo 300 a.C. y en o 400 d. C. pasó, y remató en o 500 d.C.
+Ye o n.º 5 y o lum. 7 d'a carrera, con 5 hab./km² y 3 m.a. d'historia.
+A las 9:30 y a las 23:59, pero no 25:00 ni 9:60.
+O valor ye -5 u −3 u (–2), pero 5-3 ye un resultau y -5:30 una hora.
+Teneba 20 °C, 90ºF, 20° 30′, 20° N, 20°S, 20° de latitut, 20° y 30°.
+Entre 1990–2000 y 5—8 anyos, y de 1990-2000, pero no 5-8-9 ni 1/5-8.
+Bi ha un 5% y 10 € y 20 £ y US$30 y 5 km y 1 km² y 2 millons de personas.
+Chesús, fer, mullers, agüelo, quiet, gent, xarra, nueit, chent, cantar, yerba.
+Ciudat, cielo, cuan, guerra, guapo, queso, embaixada, invierno, anyada.
+Dvořák y Ångström y Zoë son nombres extranchers.
+O numero 1234567890123 y 999999 y 2000000 ye gran.
+Isto ye constructor y toString… pero por qué? Sí!

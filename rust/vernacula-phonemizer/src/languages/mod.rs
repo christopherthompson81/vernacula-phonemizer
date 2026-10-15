@@ -1,5 +1,6 @@
 pub mod afrikaans;
 pub mod albanian;
+pub mod aragonese;
 pub mod asturian;
 pub mod awadhi;
 pub mod azerbaijani;

@@ -4739,6 +4739,68 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
         }
     },
+    // ── Aragonese (an). Inputs: the an golden and probes/an.txt; FLEURS has no Aragonese, so the synthetic rows and
+    // the probes carry every arm the golden misses. ──
+    // normalizeAragonese, the symbol tier over its output (recorded through the wrapper) and `createAragonese().text`,
+    // over every text plus synthetic rows for every arm: grouping with every separator, the dot decimal, era markers
+    // mid-text and text-final, numero/lumero, hab./ and m.a., the clock over an hour × minute grid, minus forms (and
+    // the clock exclusion), degrees with a scale / minutes / each compass point / each licensed tail, ranges.
+    async "an-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeAragonese } = await import("../../../src/languages/aragonese/normalize.ts");
+        const { createAragonese } = await import("../../../src/languages/aragonese/aragonese.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/aragonese\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createAragonese();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["an"], undefined, ["an.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "12.5", "3.14", "1.000,5", "1.5.6"]) add(`bi ha ${g} personas`);
+        for (const e of ["a.C.", "a. C.", "a.C", "d.C.", "d. C .", "ba.C."]) for (const tail of ["", ".", "\"", " »", " y dimpués", ")"]) add(`en l'anyo 300 ${e}${tail}`);
+        for (const a of ["n.º 5", "nº5", "n° 3", "n.5", "lum. 7", "lum.x", "5 hab./km²", "5hab./km2", "5 hab. en", "3 m.a.", "3m. a.", "3 m.a"]) add(`ye ${a} aquí`);
+        for (const h of ["0", "1", "09", "12", "23", "24", "25"]) for (const m of ["00", "05", "30", "59", "60"]) add(`a las ${h}:${m} horas`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", "-5:30", "-12:00", " - 5"]) add(`valor ${m} graus`);
+        for (const d of ["20 °C", "20°c", "90ºF", "20° 30′", "20°30'", "20° N", "20°S", "20° E", "20°U", "20°Na", "20° de latitut", "20° y", "20° en", "20°.", "20°(", "20°", "20°x", "20° dena", "20° W"]) add(`teneba ${d} agora`);
+        for (const r of ["1990–2000", "5—8", "1990-2000", "5 - 8", "5-8-9", "1/5-8", "5-8/9", "a5-8", "1.5-2"]) add(`entre ${r} anyos`);
+        for (const [t, src] of rows) {
+            const a = normalizeAragonese(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("an", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "an-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/aragonese/aragonese.ts");
+        const { numberToWords } = await import("../../../src/languages/aragonese/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñáéíóúüïA-ZÑÁÉÍÓÚÜÏ'·]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("an")) for (const m of t.matchAll(/[\p{L}\p{M}'’·-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñáéíóúüï'·"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouüqgcynrlbpmt"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "n\u0303", "ﬁ", "Dvořák", "Ångström", "xylo", "chesús", "fer", "mullers", "agüelo", "quiet", "gent"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
 };
 
 
