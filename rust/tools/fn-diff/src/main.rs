@@ -2995,6 +2995,31 @@ fn main() {
                 }
             })
         }
+        "yo-normalize" | "yo-g2p" => {
+            use std::sync::Arc;
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::yoruba::{numbers, yoruba};
+            // Building `yo` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "yo").unwrap();
+            let yo = yoruba::create_yoruba(Some(Arc::new(
+                vernacula_phonemizer::registry::read_as_english,
+            )))
+            .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => yo.normalize(&t()),
+                    "symbols" => yo.symbols(&t()),
+                    "text" => with_host(&JsString::from("yo"), || yo.text(&t())),
+                    "word" => yoruba::phonemize_word(&units(&input["word"])),
+                    "number" => numbers::yoruba_number(&t()),
+                    "read" => numbers::read_yoruba_numbers(&t()),
+                    _ => numbers::yoruba_cardinal(js_number(&JsString::from(
+                        input["n"].as_str().unwrap(),
+                    ))),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

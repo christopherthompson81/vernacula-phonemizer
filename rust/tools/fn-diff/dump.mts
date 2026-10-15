@@ -77,6 +77,7 @@ const FLEURS_DIR: Record<string, string> = {
     lo: "lo_la",
     my: "my_mm",
     jv: "jv_id",
+    yo: "yo_ng",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5683,6 +5684,64 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push(2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity);
         for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
         for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
+    // ── Yoruba (yo). Inputs: the yo golden, FLEURS yo_ng (columns 3 and 4) and probes/yo.txt. ──
+    // normalizeYoruba, the symbol tier on what normalize hands it (recorded through the wrapper) and the registry's yo
+    // engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm: grouping, the range dash, the
+    // U+2212 minus and its refusals, both percent arms with the said-before/said-after windows, squared units, `sq`,
+    // the tier (currencies, units, rates, `&`), the bare metre and the `Nh Nm` refusal, scaled degrees, `×`, decimals.
+    async "yo-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeYoruba } = await import("../../../src/languages/yoruba/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/yoruba\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["yo"], FLEURS_DIR.yo, ["yo.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["1,000", "12,345,678", "0,500", "10,500", "1,0000", "1,00", "2,5", "01,000", "1,000.5"]) for (const tail of ["", ",", ".", " ènìyàn"]) add(`ó ní ${n}${tail}`);
+        for (const r of ["1990-1995", "5 – 10", "3—4", "5 -6", "a-5", "5-a", "1.5-2.5"]) add(`ọdún ${r} ni`);
+        for (const m of ["\u22125", "x \u22125", "5 \u22123", "a\u22125", "(\u221247.6 °C)", "1.98739x10 \u221221 s", "\u2212 5", "\u2212x"]) add(`ìwọ̀n ${m} ni`);
+        for (const p of ["60%", "8.3%", "60 %", "(84%)", "( 8.3 % )", "%5"]) for (const pre of ["", "ìdá ", "ida ", "ìpín ", "ipin  ", "ọ̀rọ̀ "]) for (const post of ["", " nínú ọgọ́rùn-ún", " ninu ogorun", " nínú ọgọ́rùn"]) add(`${pre}${p}${post} ni`);
+        add(`ìdá 84 nínú ọgọ́rùn-ún (84%) ni`); add(`ìdá 84 nínú ọgọ́rùn-ún tí ó jẹ́ ohun tí a kò mọ̀ rárá ní àsìkò yìí (84%)`);
+        for (const u of ["56 km²", "10 ha ²", "km²", "xkm²", "5 ha²a", "5 mi²"]) add(`ilẹ̀ ${u} ni`);
+        for (const u of ["705.78sq km 2", "5 sq. ha", "5 SQ KM", "5 sq ft", "5 sq mi", "5 sq in", "5 sq \u212am", "5 Sq Ha", "5 sqkm", "xsq km", "5 sq kma"]) add(`ìwọ̀n ${u} ni`);
+        for (const t of ["₦500", "US$5", "$5", "$ 5", "10 km", "100 km/h", "5 km/w", "5 l", "5 L", "5 mm", "5 ft", "5 mi", "5 & 6", "A & B", "5 lẹ́yìn", "5 km/s", "5km"]) add(`ó jẹ́ ${t} ni`);
+        for (const m of ["500 m", "8.62 m", "500m", "9h 50m 30.0s", "9h 55m 40.6s", "x5 m", "5 ma", "5\u00a0m", "5 m'", "5 m’", "5.5.5 m", "1h\u00a05 m", "5  m"]) add(`gíga ${m} ni`);
+        for (const d of ["38°C", "79.63 °F", "5°K", "5 ° c", "5°\u212a", "5°", "5°Ca", "100.4°F", "−5 °C", "5° F"]) add(`ìgbóná ${d} ni`);
+        for (const x of ["4 × 100", "4×100", "a × 5", "4 ×", "1920×1080"]) add(`ìwọ̀n ${x} ni`);
+        for (const d of ["3.14159", "2.5", "1.0", "0.05", "1.2.3", ".5", "5."]) add(`nọ́mbà ${d} ni`);
+        for (const w of ["  ", "\t\t", " \t "]) add(`a${w}b`);
+        for (const l of ["Lone \ud800 surrogate àti 𝐀𝐁 àti ﬁ.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            const a = normalizeYoruba(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "text" }, renderInHost("yo", t));
+        }
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord over every letter run of the texts (as written, lower, UPPER, NFD, NFC), every 1–3 letter string
+    // over the alphabet plus the five marks, edge strings; yorubaNumber over 0…20,000 and long runs, yorubaCardinal over
+    // non-integers and non-finite values, readYorubaNumbers over the texts and native digits.
+    async "yo-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/yoruba/yoruba.ts");
+        const { yorubaNumber, yorubaCardinal, readYorubaNumbers } = await import("../../../src/languages/yoruba/numbers.ts");
+        const words = new Set<string>();
+        const texts = langTexts("yo");
+        for (const t of texts) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { const w = m[0]; words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.normalize("NFD")); words.add(w.normalize("NFC")); }
+        const abc = [..."abdeẹfghijklmnoọprsṣtuwycqvxz", "̀", "́", "̄", "̣", "̃"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Ọ̀YỌ́", "ṣ̀", "ń", "ǹ", "ḿ", "m̄", "n̄", "ọn", "ọ́n", "nwọn", "ẹgwa", "gbẹ́", "kpa", "w", "wa", "aw", "bwa", "ńwa", "aǹ", "ñ", "ß", "æ"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ds: string[] = [];
+        for (let i = 0; i <= 20000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k += 3) ds.push(String(k * 1000 + 21), String(k * 1e6 + 155), String(k * 1e9 + 1999), String(k * 1e6), String(k * 1e9));
+        for (let e = 9; e <= 22; e++) { ds.push(String(10 ** e)); ds.push(String(10 ** e - 1)); ds.push(String(10 ** e + 7)); }
+        ds.push("999999999999", "1000000000000", "9007199254740991", "9007199254740993", "12345678901234567890123", "007", "0000", "");
+        for (const d of ds) emit({ text: units(d), op: "number" }, yorubaNumber(d));
+        for (const n of [1.5, -1, -0, NaN, Infinity, -Infinity, 1e21, 1.5e21, 2 ** 53, 2 ** 53 + 2, 1e12, 123456.789, -12.7, 0.5]) emit({ n: String(n), op: "cardinal" }, yorubaCardinal(n));
+        for (const t of [...texts, "٣٤٥ àti ১২ àti 12", "５"]) emit({ text: units(t), op: "read" }, readYorubaNumbers(t));
     },
 };
 
