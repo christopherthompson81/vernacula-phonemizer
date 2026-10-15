@@ -35,14 +35,15 @@ use crate::languages::portuguese_br::roman_ordinals::roman_policy as pt_br_roman
 
 /// The languages this build can phonemize, one per golden. `zsm` (ISO 639-3 Standard Malay) is also built, as the
 /// same engine as `ms`, but has no golden of its own, so it is not listed.
-pub const LANGUAGES: [&str; 103] = [
+pub const LANGUAGES: [&str; 109] = [
     "en", "en-GB", "ja", "it", "es", "pt", "pt-BR", "hi", "cmn", "fr", "el", "ko", "th", "ru",
     "de", "pl", "tr", "nl", "uk", "sv", "sr", "hr", "bs", "sl", "lt", "lv", "es-419", "fr-CA",
     "en-IN", "ca", "gl", "ro", "id", "ms", "tl", "ceb", "hil", "ilo", "cs", "sk", "be", "bg", "mk",
     "bho", "mag", "awa", "mai", "hne", "rkt", "ne", "mr", "fi", "et", "hu", "is", "fo", "az", "kk",
     "ky", "uz", "tk", "tt", "da", "nb", "af", "lb", "bar", "ba", "crh", "kaa", "nog", "chv", "tg",
     "cy", "ga", "gd", "eu", "sq", "ast", "an", "oc", "bn", "as", "bpy", "syl", "or", "kn", "te",
-    "ta", "ml", "si", "vi", "lo", "my", "jv", "su", "mad", "sw", "rw", "rn", "lg", "ln", "nya",
+    "ta", "ml", "si", "vi", "lo", "my", "jv", "su", "mad", "zu", "xh", "st", "tn", "nso", "sn",
+    "sw", "rw", "rn", "lg", "ln", "nya",
 ];
 
 /// A language engine, as the registry holds it.
@@ -320,6 +321,34 @@ fn build(lang: &str) -> Option<Result<Arc<dyn Engine>, PhonemizeError>> {
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "mad" => crate::languages::madurese::madurese::create_madurese()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "zu" => crate::languages::zulu::zulu::create_zulu(
+            Some(Arc::new(read_as_english)),
+            Some(Arc::new(|w: &JsString| {
+                crate::registry::english().is_ok_and(|en| en.known_word(w).is_some())
+            })),
+        )
+        .map(|e| Arc::new(e) as Arc<dyn Engine>)
+        .map_err(PhonemizeError::Data),
+        "xh" => crate::languages::xhosa::xhosa::create_xhosa(
+            Some(Arc::new(read_as_english)),
+            Some(Arc::new(|w: &JsString| {
+                crate::registry::english().is_ok_and(|en| en.known_word(w).is_some())
+            })),
+        )
+        .map(|e| Arc::new(e) as Arc<dyn Engine>)
+        .map_err(PhonemizeError::Data),
+        "st" => crate::languages::sesotho::sesotho::create_sesotho()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "tn" => crate::languages::setswana::setswana::create_setswana()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "nso" => crate::languages::sepedi::sepedi::create_sepedi()
+            .map(|e| Arc::new(e) as Arc<dyn Engine>)
+            .map_err(PhonemizeError::Data),
+        "sn" => crate::languages::shona::shona::create_shona()
             .map(|e| Arc::new(e) as Arc<dyn Engine>)
             .map_err(PhonemizeError::Data),
         "sw" => crate::languages::swahili::swahili::create_swahili()
