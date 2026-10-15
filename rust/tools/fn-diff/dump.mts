@@ -51,6 +51,7 @@ const FLEURS_DIR: Record<string, string> = {
     mr: "mr_in",
     fi: "fi_fi",
     et: "et_ee",
+    hu: "hu_hu",
 };
 
 /**
@@ -2874,6 +2875,79 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let k = 1; k < 1000; k++) ns.push(String(k * 1e3), String(k * 1e3 + 21), String(k * 1e6), String(k * 1e6 + 2001), String(k * 1e6 + 1000));
         ns.push("999999999", "1000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007", "0000");
         for (const n of ns) emit({ text: units(n), op: "text" }, et.text(n));
+    },
+    // ── Hungarian (hu). Inputs: the hu golden, FLEURS hu_hu (columns 3 and 4) and probes/hu.txt. ──
+    // normalizeHungarian (the symbol tier and the initialism pass run inside it), the phonotactic test on every
+    // letter run, and synthetic rows: multiplication, the dotted abbreviations (incl. case-folded spellings),
+    // de-grouping, the clock grid, unit / percent / degree / numeral / date / acronym hyphen suffixes, signs,
+    // division, decimals and the three ordinal arms.
+    async "hu-normalize"() {
+        const N = await import("../../../src/languages/hungarian/normalize.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["hu"], FLEURS_DIR.hu, ["hu.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["1", "2", "3", "6", "10", "22", "56", "100", "999999", "1000000"]) for (const x of ["x", "×", " x ", " × "]) { add(`${n}${x}4 méter`); add(`3.${n}${x}4`); }
+        for (const ab of ["pl", "Pl", "PL", "kb", "stb", "ld", "dr", "Dr", "Kb", "ſtb", "Kr", "i", "d"]) for (const t of [". 20 km-re", ". körül", ".", ".)", ". Ma", "."]) add(`ez ${ab}${t}`);
+        for (const x of ["Kr. e.", "Kr.u.", "i. sz.", "i.e.", "d. e.", "d.u.", "KR. E."]) add(`a ${x} 100`);
+        for (const g of ["100.000", "5.000.000", "400. 000", "30 000", "100,000", "24.000, és", "0.123", "12,5", "1,234,567", "1 000"]) add(`van ${g} ember`);
+        for (const h of ["0", "9", "11", "23", "24"]) for (const m of ["00", "05", "35", "59", "60"]) { add(`${h}:${m}-kor`); add(`${h}: ${m} óra`); add(`${h}:${m}-re`); }
+        for (const u of ["km", "mm", "cm", "kg", "mérföld", "KM", "Km", "m", "g"]) for (const e of ["", "²", "³", "2", "3"]) { add(`20 ${u}${e}-re`); add(`2${u}${e}-es`); }
+        for (const p of ["29%-a", "8 %-kal", "5٪-os", "3％-ot", "10%"]) add(p);
+        for (const d of ["35°-tól", "20 °c-a", "30°C", "5 °F", "45°", "-5 °C", "1990-5", "a −3 fok", "±2", "UTC+1", "a + 30°C"]) add(d);
+        for (const r of ["1 = 1", "2<3", "4 > 3", "6 ÷ 3", "100 ÷ 22", "7÷1", "9÷4", "10÷20", "12÷30"]) add(r);
+        for (const n of ["1", "2", "3", "5", "10", "19", "20", "24", "31", "32", "1759", "2022", "10000"]) {
+            add(`${n}. szeptember`); add(`augusztus ${n}. és`); add(`a ${n}. helyen`); add(`a ${n}., a`); add(`szeptember ${n}-én`); add(`szeptember ${n}-jén`);
+            add(`május ${n}-e`); add(`május ${n}-i`); add(`${n}-ban`); add(`${n}-es`); add(`${n}-an`); add(`${n}-ig`); add(`${n}. Ma`);
+        }
+        for (const x of ["XIX. század", "II. Erzsébet", "IV. Béla", "XX. századi", "a III. kerület", "V. fejezet"]) add(x);
+        for (const a of ["GPS-hez", "FBI-nak", "GDP-je", "WC-be", "NATO-hoz", "ENSZ-ben", "WC", "AOL", "HIV", "ÉÁ-ra", "BBC"]) add(`a ${a} és`);
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, N.normalizeHungarian(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableHungarian(w)));
+    },
+    // phonemizeWord over every letter run (as written and lowercased), every 1–3 letter string of the alphabet,
+    // every 4-letter string over the context letters (digraph halves, the voicing pairs, n and j), corners and the
+    // c+h / c+sz boundary shapes; the nativiser.
+    async "hu-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/hungarian/hungarian.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-záéíóöőúüű]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("hu")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzáéíóöőúüűñ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."szcygnjdtkbva"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "harminchat", "kilenchet", "archoz", "perchez", "nyolcszáz", "csz", "cscs", "ddzs", "feddj", "adj", "bánja", "hallja", "feddte", "hang", "angyal", "színpad", "biztat", "vasgolyó", "Bach", "Schmidt"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        for (const w of [...words, "São", "Müller", "Dvořák", "Ørsted", "Žižek", "Ångström", "Œuvre", "façade", "Tōkyō", "Nguyễn"])
+            emit({ word: units(w), op: "nat" }, nat(w));
+    },
+    // numberToWords (0…20,000, magnitudes to 10¹², unsafe and non-finite corners, raw strings), ordinalWords,
+    // multiplicativeWords, stemForSuffix over cardinals × suffixes, and the Roman policy's ordinal.
+    async "hu-numbers"() {
+        const { numberToWords, ordinalWords, multiplicativeWords, stemForSuffix } = await import("../../../src/languages/hungarian/numbers.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/hungarian/romanOrdinals.ts");
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 2, k * 1e6, k * 1e6 + 2002, k * 1e9, k * 1e9 + 22022);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1e12 - 1, 1e12, 1.5, 2.7, -1, -21, -1.5, -0, NaN, Infinity, -Infinity, 0.1, 1e-7, 22.5);
+        for (const n of ns) {
+            emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+            emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+            emit({ n: String(n), op: "mult" }, multiplicativeWords(n) ?? "\u0000none");
+        }
+        for (let n = 0; n <= 3000; n++) emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+        const sufs = ["es", "as", "an", "ban", "ig", "e", "ő", "re", "", "Es", "ös"];
+        for (let i = 0; i <= 3000; i++) for (const s of sufs) emit({ word: units(numberToWords(i)), suffix: units(s), op: "stem" }, stemForSuffix(numberToWords(i), s));
     },
 };
 

@@ -21,6 +21,7 @@ pub mod german;
 pub mod greek;
 pub mod hiligaynon;
 pub mod hindi;
+pub mod hungarian;
 pub mod ilocano;
 pub mod indonesian;
 pub mod italian;

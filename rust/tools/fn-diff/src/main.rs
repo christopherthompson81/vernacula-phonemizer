@@ -1975,6 +1975,31 @@ fn main() {
                 }
             })
         }
+        "hu-normalize" | "hu-g2p" | "hu-numbers" => {
+            let hu =
+                vernacula_phonemizer::languages::hungarian::hungarian::create_hungarian().unwrap();
+            let roman = vernacula_phonemizer::languages::hungarian::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => hu.normalize(&t()),
+                    "unreadable" => JsString::from(hu.is_unreadable(&t()).to_string().as_str()),
+                    "word" => hu.phonemize_word(&w()),
+                    "nat" => hu.nativise(&w()),
+                    "ordinal" => hu.ordinal_words(num()).unwrap_or_else(none),
+                    "mult" => hu.multiplicative_words(num()).unwrap_or_else(none),
+                    "roman" => (roman.ordinal.as_ref().unwrap())(num() as u32).unwrap_or_else(none),
+                    "stem" => hu.stem_for_suffix(&w(), &units(&input["suffix"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        hu.number_to_words(num(), raw.as_ref())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
