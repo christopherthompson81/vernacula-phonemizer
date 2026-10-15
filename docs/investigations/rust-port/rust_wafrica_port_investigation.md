@@ -323,3 +323,14 @@ trace with `LANGS=yo,ig,ha,ee,ak,wo`).
 **Port-pending.** ak's `Butan (འབྲུག་ཡུལ་) …` on `bo`, pinned.
 
 **Implication.** Ready for the PR.
+
+## Run 11 — 2026-10-15 09:40 (second merge of main 48fb3ce3, every gate again)
+
+**What changed.** The East/Central Bantu group (#1594) landed after Run 10. Merged again with `wafrica/remerge.py`
+(the same four routine conflicts); LANGUAGES 109 → 115, declared length = entry count, `dump.mts` parses.
+
+**Raw finding (tree c92e0af4).** fmt clean; build 0 warnings; parity: every line byte-identical but mag 199/200,
+tt 199/200, syl 195/200, ak 130/131 (the known port-pending rows), sw rw rn lg ln nya and all six of this group
+otherwise 200/200; regex-diff `146326 identical, 0 DIFFER, 0 refused`; clippy 0 `error:` lines, only the six
+`module_inception` warnings in this group's files; cargo test 327 + 1 passed. Per-module and end-to-end dumps
+unchanged from Run 10 (the only DIFFER anywhere is ak's `bo` row).
