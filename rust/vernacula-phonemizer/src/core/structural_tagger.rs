@@ -37,6 +37,53 @@ pub fn masked_argmax(
     Some(best)
 }
 
+/// `DEFAULT_STRESS_VOWEL`: `oneStress`'s fallback vowel class.
+pub fn default_stress_vowel() -> &'static JsRegex {
+    crate::js_re!(r"[ɑaeɛiɪoɔuʉʊyʏøœæəɐɒ]", "u")
+}
+
+/// `oneStress(ipa, vowel)`: exactly one primary mark — adjacent marks collapse (primary wins), later primaries
+/// are dropped, else the first secondary is promoted, else `ˈ` goes at the walked-back onset of the first vowel.
+pub fn one_stress(ipa: &JsString, vowel: &JsRegex) -> JsString {
+    use super::js_string::js;
+    let ipa = crate::js_re!(r"[ˈˌ]{2,}", "gu").replace_with(ipa, |m, s| {
+        js(if m.value(s).includes(&js("ˈ")) {
+            "ˈ"
+        } else {
+            "ˌ"
+        })
+    });
+    let mut seen = false;
+    let ipa = crate::js_re!(r"ˈ", "gu").replace_with(&ipa, |_, _| {
+        if seen {
+            JsString::new()
+        } else {
+            seen = true;
+            js("ˈ")
+        }
+    });
+    if seen {
+        return ipa;
+    }
+    if let Some(at) = ipa.index_of(&js("ˌ"), 0) {
+        return ipa
+            .slice(0, Some(at as isize))
+            .concat(&js("ˈ"))
+            .concat(&ipa.slice(at as isize + 1, None));
+    }
+    let Some(m) = vowel.exec(&ipa) else {
+        return ipa;
+    };
+    // `ipa[onset - 1]`: one CODE UNIT.
+    let mut onset = m.index();
+    while onset > 0 && !vowel.test(&ipa.char_at(onset - 1)) {
+        onset -= 1;
+    }
+    ipa.slice(0, Some(onset as isize))
+        .concat(&js("ˈ"))
+        .concat(&ipa.slice(onset as isize, None))
+}
+
 /// A character-sequence model: `chars` int64 [1, T] in, `logits` f32 [T · n_tags] out, row-major.
 pub trait CharLogits: Send + Sync {
     fn logits(&self, ids: &[i64]) -> Result<Vec<f32>, String>;

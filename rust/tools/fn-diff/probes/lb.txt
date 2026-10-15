@@ -1,0 +1,32 @@
+# Luxembourgish (lb) off-golden probes: synthetic text only, one or more lines per normalize.ts arm plus the
+# neighbour each arm must decline, and g2p / tokenizer corners.
+# 1 de-grouping: period and space (ASCII, NBSP, NNBSP, thin) forms; a leading zero; a fourth digit
+Et kascht 1.000 $ an 130.000 Euro an 9 000 Leit an 2\u{a0}500 Autoen an 7\u{202f}000 an 3\u{2009}400, mee 0.500 an 1.2345.
+# 2 era markers and 3 multi-dot abbreviations
+Am Joer 300 v. Chr. an 45 n.Chr. an 12 v. Chr) an et war 50 v. Chr.
+Zum Beispill z. B. dat an d. h. dëst, z.B. och.
+# 4 single-dot abbreviations (and the fold: a long s inside asw)
+Dr. Muller an Nr. 5 asw., déi a Jr. Smith asw.). Dat ass aſw. dann.
+# 5 ordinals: month/noun licensed, determiner licensed, list licensed, unlicensed
+De 16. Joerhonnert an den 3. Mee an am 11., 12. an 13. Joerhonnert an dem 10. bis 11. Dag, vum 1. Dag, op der 10. Plaz.
+Hie war 1998. Dono huet hien 1. gesot an et ass 15. beim Rennen.
+# 6 sports times and 7 clocks
+Hien huet 4.41,30 gelaf an 1.09,02, um 7.19 Auer an géint 1.15 an um 15.00 UTC an 23.00 Auer MDT an tëschent 9.30.
+Den 802.11n Standard an 20.30 ouni Licenz.
+# 7b fractions
+Ongeféier 1/5 Zoll an 1/2 an 3/2 an 1/4 an 3/4 an 1/3 an 1.5/2 an 1/2,5 an 2/0.
+# 8 dot decimal and 9 comma decimal
+Et dauert 1.5 Stonnen an 1,5 Kilometer an 7,74 an 20.30.
+# 10 ranges
+Vun 1894 – 1895 an 2 – 3 km an 7 – 8 an 1000000 – 2000000, mee de Satz – deen hei.
+# 11 mph and 12 degrees
+Et fiert 60 mph an 30 Meilen/h an 31 Meile, bei 20 °C an 90°F an 35 °W.
+# 13 signs, relational, ampersand
+Et war -5 Grad an (−3) an Typ-1-Diabetes an COVID-19, ±2, A+1 an +3, x = y, a ≈ b, 3 < 4, 5 > 2, 3 × 4, 8 ÷ 2, A&B an C ＆ D.
+# symbol tier
+Et kascht 50 % an 5 km an 3 km/h an 12 m/s an 10 km² an 5 m³ an 6x6 cm.
+# numbers with the Eifeler Regel across the right edge
+Et sinn 7 Kilometer an 7 Dag an 7. an 1000000 Leit an 7 Äppel.
+# g2p corners: diphthongs, digraphs, s-voicing, st/sp, devoicing, velar nasal, spirantization, geminates, prefixes
+Sonn Iesel Stad Spill Hand Abt Bandscheif Dag Alg Bankrott Lager Flott Bidden Capellen Belsch Decken Gemeng
+gefollegt verhalen erbaarmen Veräin Becher Zebra Lëtzebuergesch Éischt Äppel Dvořák Müller Ångström

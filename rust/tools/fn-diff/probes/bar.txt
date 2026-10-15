@@ -1,0 +1,27 @@
+# Bavarian (bar) off-golden probes: synthetic text only, one or more lines per normalize.ts arm plus the
+# neighbour each arm must decline, and g2p / tokenizer corners. FLEURS has no Bavarian, so these and the golden
+# are the whole of the text input.
+# 1 &nbsp; in its three spellings
+Des san 67&nbsp;km und 3757&#160;km und 12\u{a0}m und -13&nbsp;°C, owa &nbsp;ned.
+# 2 z. B.
+Des is z. B. a Haus und z.B. a Bam, owa ned zB.
+# 3 ordinals: noun-licensed, licenser + capital, governed article, declined
+Am 1. Jenna und da 2. Buachstob und vo da 3. Person und im 10. Joahundat und am 20. Beziak und am 21. Mai.
+Des woar 2005. ISBN und 1998. Noch und am 4. Mai und am 01. Jenna und um de 3. Person.
+# 4 abbreviations
+Es san za. 208.000 Eihw. und ca. 5 bzw. 7, 21,905 Mrd. € und 3 Mio. Leit, des is bzw. CA.
+# 5 clock and clock ranges, ratios declined
+Vo 5:00-9:00 Uhr und 9:00-12:00 und um 14:30 Uhr und 7:05, owa 39:15:36 und 13:5:12 und 4:41.30.
+# 6 dot- and space-grouped thousands; a version dot
+Des san 30.528 km² und 4.324.782 km² und 549 000 € und 43\u{a0}000 € und 8140.43P und 0.500.
+# 7 degrees
+Bei -13 °C im Winta und +15 °C im Summa, 30 ℃ und 86 ℉, 47°16′15″ und 90°-Winkl und 360°.
+# 8 signs in the degree slot
+−1 bis −2 °C und -0,5 beziehungsweise -1,4 °C und 18 beziahungsweis 17 °C, owa 1961 -1990 und ±5.
+# 9 fractions and 9b ranges
+Des hod 2/3 und 1/3 und 1/2 und 1/4 und 3/5 und 469/470 und 1938/39 und Beziak 5 - 8 und 3-86520-078-8 und 8115-2.
+# 10 symbol tier
+Des kost 59% und 2,1 % und 5 € und US$105 und $ 45.000 und 41.397 $ und £ 795 und 5 km und 410 m und 2 cm³ und 3 m³.
+# g2p corners: diphthongs, lenis, r-vocalization, ich/ach, st/sp, silent h, gn, k lenition, final -a
+Biaschtl Duafa Boarisch Dreier Bersch Glumpert ich ach Bach Stoa Spui Fruah Gfüh Regn Fliagn Dackn Klass Kaas
+Bana Beda Oida Bånk Bappn Leffl dreißg Wåssa Dånkschee Müller Dvořák Ångström
