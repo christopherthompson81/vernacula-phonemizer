@@ -73,12 +73,16 @@ public static class LoadTsv
             var v = parse(line[(tab + 1)..], line[..tab]);
             if (v is not null) { map[line[..tab]] = v; rows.Add((line[..tab], v)); }
         }
+        // ⚠ UNTRACED: a lazy lexicon loads inside the first traced call (see Trace.Untraced).
         if (fold is not null)
-            foreach (var (k, v) in rows)
+            Trace.Untraced(() =>
             {
-                var f = fold(k);
-                if (f != k && !map.ContainsKey(f)) map[f] = v;
-            }
+                foreach (var (k, v) in rows)
+                {
+                    var f = fold(k);
+                    if (f != k && !map.ContainsKey(f)) map[f] = v;
+                }
+            });
         return map;
     }
 
@@ -102,12 +106,16 @@ public static class LoadTsv
             var v = parse(line[(tab + 1)..], line[..tab]);
             if (v.HasValue) { map[line[..tab]] = v.Value; rows.Add((line[..tab], v.Value)); }
         }
+        // ⚠ UNTRACED: a lazy lexicon loads inside the first traced call (see Trace.Untraced).
         if (fold is not null)
-            foreach (var (k, v) in rows)
+            Trace.Untraced(() =>
             {
-                var f = fold(k);
-                if (f != k && !map.ContainsKey(f)) map[f] = v;
-            }
+                foreach (var (k, v) in rows)
+                {
+                    var f = fold(k);
+                    if (f != k && !map.ContainsKey(f)) map[f] = v;
+                }
+            });
         return map;
     }
 

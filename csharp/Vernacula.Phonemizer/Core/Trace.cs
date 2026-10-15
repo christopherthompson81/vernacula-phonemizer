@@ -212,6 +212,19 @@ public static class Trace
         recording.Current.Nativised = to;
     }
 
+    /// <summary>Run <paramref name="fn"/> with no token open, so the recorders it reaches cannot write into the
+    /// caller's token. ⚠ For work that is not about the open token: a lazy lexicon's <c>fold</c> alias pass
+    /// (<see cref="LoadTsv"/>) ran the nativiser over every key inside the first traced call. Mirrors TS
+    /// <c>untraced</c> (#1577).</summary>
+    public static void Untraced(Action fn)
+    {
+        if (recording == null) { fn(); return; }
+        var saved = recording.Current;
+        recording.Current = null;
+        try { fn(); }
+        finally { recording.Current = saved; }
+    }
+
     /** Record one emitted reading against the token currently open. */
     public static void NoteEmit(string ipa, int? at = null)
     {
