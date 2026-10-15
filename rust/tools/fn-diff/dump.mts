@@ -80,6 +80,7 @@ const FLEURS_DIR: Record<string, string> = {
     yo: "yo_ng",
     ig: "ig_ng",
     ha: "ha_ng",
+    wo: "wo_sn",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5968,6 +5969,62 @@ const dumps: Record<string, () => void | Promise<void>> = {
             emit({ word: units(w), op: "rules" }, phonemizeWordRules(w));
             emit({ word: units(w), op: "nat" }, nat(w));
         }
+    },
+    // ── Wolof (wo). Inputs: the wo golden, FLEURS wo_sn (columns 3 and 4) and probes/wo.txt. ──
+    // normalizeWolof, the symbol tier on what normalize hands it (recorded through the wrapper) and the registry's wo
+    // engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm: marked clocks × markers,
+    // entities (incl. the long-s miss), format characters, both degree arms with the said-after window, dotted
+    // lowercase abbreviations by what follows, the tier (percent, currencies, magnitudes, units, squared, `&`),
+    // grouping in three marks, ranges with the operator refusal, ordinal tails and the three decimal arms.
+    async "wo-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeWolof } = await import("../../../src/languages/wolof/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/wolof\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["wo"], FLEURS_DIR.wo, ["wo.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const h of ["0", "7", "07", "12", "19", "23", "24"]) for (const m of ["00", "30", "59", "60"]) for (const tail of [" ci suba", " ci ngoon", " GMT", "\u00a0ci\u00a0suba", " ci subaa", " CI NGOON", "GMT", ""]) add(`ci ${h}:${m}${tail} la`);
+        for (const e of ["&amp;", "&sup2", "&sup3;", "&nbsp;", "&NBSP", "&alpha;", "&\u017fup2", "&amp;nbsp;", "&beta;"]) add(`km${e} la`);
+        for (const z of ["\u{200b}", "\u{200c}", "\u{200d}", "\u{feff}", "\u{ad}", "\u{2060}"]) add(`Ndakaa${z}ru la`);
+        for (const d of ["30°", "30 °", "30° aj", "30°10", "30 ° 10", "30º", "30°C", "a30°", "30°x"]) for (const tail of ["", " aj", " la aj", " ci kaw", " ci kaw bu kawe lool la aj", " ci kaw bu kawe lool te sedd na lool ci guddi gi aj"]) add(`tàng ${d}${tail} la`);
+        for (const a of ["a.b", "a.b.", "a.b.c.d", "a.b.c.d.e", "a.B", "x.y", ".a.b", "a.b2"]) for (const tail of ["", " ", " Ndakaaru", " ndakaaru"]) add(`ci ${a}${tail}`);
+        for (const t of ["50%", "50 %", "US$5", "$5", "5 junni $", "5 milyoŋ ciy dolaar", "10 km", "5 cm", "5 mm", "5 kg", "5 km²", "5 & 6", "A & B", "5 m"]) add(`am na ${t} la`);
+        for (const n of ["1,000", "12,345,678", "1,000.5", "1.000", "12.345.678", "1.000,5", "1 000", "12\u00a0345", "1\u202f000\u2009000", "01,000"]) add(`nit ${n} la`);
+        for (const r of ["1990-1995", "5-6", "10-5", "5 – 10", "a5-10", "5-10a", "1:5-10", "5-10,5", "3·5-10", "3 × 5-10", "-5-10"]) add(`at ${r} la`);
+        for (const o of ["1st", "22ND", "3rd", "4th", "4tha", "21ſt"]) add(`at ${o} la`);
+        for (const d of ["0.5", "0,05", "0.123", "3.14", "3,5", "3.141", "1.2.3", "12:0.5"]) add(`lim ${d} la`);
+        for (const w of ["  a  ", " \t b", "\n c \n"]) add(`x${w}y`);
+        for (const l of ["Lone \ud800 surrogate ak 𝐀𝐁 ak ﬁ.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeWolof(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("wo", t));
+        }
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord over every letter run of the texts (as written, lower, UPPER, NFD), every 1–3 letter string over
+    // the alphabet, every 4-letter string over a gemination / length context set, edge strings; numberToWords over
+    // 0…20,000 (with and without raw), scaled samples, the 10^12 edge, and non-integer / non-finite values.
+    async "wo-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/wolof/wolof.ts");
+        const { numberToWords } = await import("../../../src/languages/wolof/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("wo")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { const w = m[0]; words.add(w); words.add(w.toLowerCase()); words.add(w.toUpperCase()); words.add(w.normalize("NFD")); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzàéëóñŋ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouéóëàbnkgmlx"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Dvořák", "Ångström", "Straße", "benn", "làkk", "noppa", "Angale", "ñaar", "ŋŋ", "éé", "óó", "ëë", "àà", "nng", "nnk", "ç"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: string[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 3) ns.push(String(k * 1000 + 21), String(k * 1e6 + 155), String(k * 1e9 + 1999), String(k * 1e6), String(k * 1e9));
+        for (let e = 11; e <= 22; e++) { ns.push(String(10 ** e)); ns.push(String(10 ** e - 1)); ns.push(String(10 ** e + 7)); }
+        ns.push("999999999999", "1000000000000", "9007199254740993", "12345678901234567890123", "007", "0000");
+        for (const d of ns) { emit({ n: d, raw: units(d), op: "words" }, numberToWords(Number(d), d)); emit({ n: d, raw: null, op: "words" }, numberToWords(Number(d))); }
+        for (const [n, raw] of [["1.5", "15"], ["-1", "1"], ["NaN", "x9"], ["Infinity", "٣"], ["-0", "0"], ["1e21", undefined], ["1.5", undefined], ["-12", undefined], ["NaN", undefined], ["-Infinity", undefined]] as const) emit({ n, raw: raw === undefined ? null : units(raw), op: "words" }, numberToWords(Number(n), raw));
     },
 };
 

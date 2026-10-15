@@ -256,3 +256,43 @@ the Latin fallback's initial /z/. The single-group dot number is read as a decim
 golden row above), which normalize.ts's step-3 note records as the deliberate side of a measured ambiguity.
 
 **Implication.** Commit ak; wo next.
+
+## Run 9 — 2026-10-15 08:30 (wo: first build, differentials, a guard the haystack could not see, pins)
+
+**Shape.** manifest.rs (with `GRAPHEME_KEYS`, a stable length-descending sort), numbers, normalize (the tier's
+argument the RECORDED `JSON.stringify` of the TS object literal, swapped in byte for byte from the recording;
+`ENTITY[key] ?? e` a `match` whose miss returns the match) and wolof (the scan walks code UNITS, as `w[i]` does;
+TOKEN from `LATIN_RUN` with `giu`; the nativiser).
+
+**Commands.** As before; `wo-normalize` / `wo-g2p` dumps with `FLEURS_DIR` `wo: "wo_sn"`, `probes/wo.txt` (14
+synthetic lines) and 361 synthetic rows (marked clocks over 7 hours × 4 minutes × 8 markers, entities incl. the long-s
+miss, six format characters, both degree arms × 4 → 6 tails, dotted lowercase runs × 4 followers, the tier, grouping
+in three marks, ranges incl. the `·` / `×` operator refusal, ordinal tails, the three decimal arms); `wo-g2p` over
+every letter run × 4 forms, every 1–3 string over 32 letters, every 4-letter string over 16 context letters, corners,
+and `numberToWords` with and without raw over 0…20,000, scaled samples, the 10¹² edge and non-finite values.
+
+**Raw finding.** `wo: 200/200` on the first build; audits `24 raw patterns, 2 not verbatim` (the recorded JSON and
+TOKEN's template), `16 TS escapes, 0 short`, `33 non-ASCII runs, 0 not found`. Then:
+```
+wo-normalize: 11094 identical, 0 DIFFER   (golden 258 / fleurs 6374 / probe 28 / synthetic 769 / tier 3665)
+wo-g2p: 162254 identical, 0 DIFFER
+phonemize-sync / phonemize-best / phonemize-trace / trace: 3330 identical, 0 DIFFER each
+cargo test --release wolof: 1 passed (102 pins: 64 normalizeWolof, 13 phonemizeWord, 20 numberToWords,
+5 createWolof().text; 1 call skipped, an object result; 102 expects, 0 failures)
+```
+Haystack: `normalizeWolof` changed golden 8/129, FLEURS 127/3,187, probes 10/14, synthetic 215/361 texts.
+
+**Guard check, and a dead end in the haystack.** First break: the said-after window cut from 45 to 10 characters, and
+the gemination rule allowed on vowel letters. `wo-g2p: 161454 identical, 800 DIFFER`, but `wo-normalize: 11047
+identical, 0 DIFFER` — the window break was INVISIBLE: every synthetic `aj` sat within 10 characters of its sign, and
+neither the golden nor FLEURS has one further out. Two rows were added with the gloss 25 and 50 characters after the
+sign; then the same break gives `wo-normalize: 11082 identical, 12 DIFFER`. Restored: 0 DIFFER both (11094 rows).
+
+**TS finding (reported, not fixed; the Rust reproduces it).** The `aj` redundancy test over-suppresses in exactly the
+mirror of the case its docstring argues against: `12° ak 16° (fukk ak juróom benn aj)` → `12 ak 16 (fukk ak juróom
+benn aj)`: the first coordinate loses its degree word because the SECOND one's gloss lies within its 45-character
+after-window. Likewise across a clause: `tàng 30° la, waaye aj du` → `tàng 30 la, waaye aj du`. The window does not
+stop at the next sign or at a clause mark.
+
+**Implication.** Commit wo. All six ported; merge origin/main (the sbantu group, #1592, landed meanwhile) and re-run
+every gate on the combined tree.

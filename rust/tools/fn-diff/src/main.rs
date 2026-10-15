@@ -3107,6 +3107,29 @@ fn main() {
                 }
             })
         }
+        "wo-normalize" | "wo-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::wolof::{numbers, wolof};
+            // Building `wo` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "wo").unwrap();
+            let wo = wolof::create_wolof().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => wo.normalize(&t()),
+                    "symbols" => wo.symbols(&t()),
+                    "text" => with_host(&JsString::from("wo"), || wo.text(&t())),
+                    "word" => wolof::phonemize_word(&units(&input["word"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        numbers::number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

@@ -99,6 +99,7 @@ pub mod ukrainian;
 pub mod uzbek;
 pub mod vietnamese;
 pub mod welsh;
+pub mod wolof;
 pub mod yoruba;
 
 /// The fraction guards are mirrors in the ported `\b…\b` family and Italian (#1495). Relational, as
