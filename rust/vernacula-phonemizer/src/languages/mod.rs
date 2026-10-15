@@ -44,6 +44,7 @@ pub mod indonesian;
 pub mod irish;
 pub mod italian;
 pub mod japanese;
+pub mod javanese;
 pub mod kannada;
 pub mod karakalpak;
 pub mod kazakh;

@@ -2925,6 +2925,28 @@ fn main() {
                 }
             })
         }
+        "jv-normalize" | "jv-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::javanese::{javanese, normalize};
+            // Building `jv` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "jv").unwrap();
+            let jv = javanese::create_javanese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => jv.normalize(&t()),
+                    "symbols" => jv.symbols(&t()),
+                    "text" => with_host(&JsString::from("jv"), || jv.text(&t())),
+                    "unreadable" => {
+                        JsString::from(normalize::IS_UNREADABLE(&t()).to_string().as_str())
+                    }
+                    "word" => javanese::phonemize_word(&w()),
+                    "rules" => javanese::phonemize_word_rules(&w()),
+                    _ => javanese::NAT(&w()),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
