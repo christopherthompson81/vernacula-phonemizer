@@ -1,0 +1,17 @@
+# Malayalam (ml) off-golden probes: synthetic sentences, one per normalize.ts arm plus the neighbour it must decline.
+# legacy chillu spellings (base + virama + ZWJ), a non-chillu base with ZWJ, ZWNJ splitting a word, a BOM
+അവന്\u{200d} വന്നു, അവര്\u{200d} പോയി, മ്\u{200d}മ, പുസ്തക\u{200c}ങ്ങൾ \u{feff}ശരി
+# native digits, de-grouping, a leading zero group declined
+൪ പേർ, 1,000 പേർ, 12,345,678 രൂപ, 0,500 അല്ല
+# ordinal endings, with and without the vowel sign, a zero and an unsafe run declined
+5-ാം സ്ഥാനം, 3ആം ദിവസം, 10-ാമത്തെ വർഷം, 2മത് തവണ, 0ാം, 9007199254740993ാം
+# plural and oblique clitics, the folded ones, and a numeral with nothing welded
+1990കളിൽ, 1980കളുടെ, 2020ൽ, 2019ന്റെ, 2018-ത്തിൽ, 1000ലോ, 5 ആളുകൾ
+# the symbol tier, a doubled percent word, the clock, decimals
+50% ശതമാനം വർധന, $1,000 വില, 11:00 ന്, 9:30 ന്, 3.75 മീറ്റർ
+# signs, relations, the postposed equals, degrees
+±5, -5 ഉം 3-5 ഉം, UTC+1, 5 < 6, 7 > 3, a = b, 8 ÷ 2, 30°C, 5°
+# samvritokaram, chillu-final words, anusvara before a stop and before a sibilant, intervocalic voicing
+നാല് അവൻ അവർ അംഗം അംശം അടി കറുക പണ്ട് അതത് കള്ളൻ
+# Latin runs, accented Latin, clause marks
+NASA യും Cañitas ഉം പറഞ്ഞു! എന്തുകൊണ്ട്? ശരി; അതെ: ഇല്ല।

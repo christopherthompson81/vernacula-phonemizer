@@ -1,0 +1,21 @@
+# Telugu (te) off-golden probes: synthetic sentences, one per normalize.ts arm plus the neighbour it must decline.
+# zero-width characters and a BOM
+తెలుగు\u{200b} భాష\u{200d} \u{feff}బాగుంది
+# the ౦ homoglyph beside a letter is the anusvara; a lone ౦ and a ౦ inside a digit run stay digits
+అ౦దరూ వచ్చారు, ౦ మరియు ౧౦ మరియు ౦౦
+# ordinals spaced, welded, hyphenated, with వది; zero and an unsafe run declined
+18వ శతాబ్దం, 20 వ తేదీ, 3-వది, 0వ, 9007199254740993వ
+# century years, the 2000s, a year inside a decimal declined
+1976లో మరియు 2011లో మరియు 1976.5 మరియు 19765
+# era markers and the example abbreviation
+క్రీ.శ. 1000 నుండి క్రీ.పూ 300 వరకు, ఉదా. ఇది
+# unit abbreviations, the mile after a digit only, initialisms
+5 కి.మీ. దూరం, 3కిమీ, 10 మై దూరం, మై దూరం, యు.ఎస్. ప్రభుత్వం మరియు బి.జె.పి.
+# Latin and Telugu rates, with and without the dative already written
+100 km/h వేగం, గంటకు 100 km/h, 5 m/s, 5 kg/h, 100 కిలోమీటర్లు/గం.
+# fractions, the symbol tier, the clock, decimals
+2½ కిలోలు, 3 ¾ లీటర్లు, 50% మరియు $1,000 మరియు 11:00 కి 9:30 కి 3.75 మీటర్లు
+# signs, relations, degrees
+±5, -5 మరియు 3-5, UTC+1, 5 < 6, 7 > 3, a = b, 8 ÷ 2, 30°C, 86°F, 5°
+# Latin runs, accented Latin, clause marks
+NASA మరియు Cañitas చెప్పారు! ఎందుకు? సరే; అవును: కాదు।
