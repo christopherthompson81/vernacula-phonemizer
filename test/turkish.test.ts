@@ -30,13 +30,16 @@ describe("Turkish g2p (segmental)", () => {
         expect(phonemizeWord("istiyorum")).toBe("istˈijoɾum");
         expect(phonemizeWord("giderken")).toBe("ɟidˈeɾcen"); // -ken
         expect(phonemizeWord("benimle")).toBe("benˈimle"); // -lA instrumental
-        expect(phonemizeWord("kaybetme")).toBe("kajbˈetme"); // -mA negation/verbal-noun
+        // #1551: a bare word-final -mA is the verbal noun (final stress), not the negative imperative it also spells
+        expect(phonemizeWord("kaybetme")).toBe("kajbetmˈe");
         expect(phonemizeWord("güzeldir")).toBe("ɟyzˈeldiɾ"); // -DIr copula
         expect(phonemizeWord("evdeyim")).toBe("evdˈejim"); // predicative person ending
     });
 
-    it("conditional -sA is pre-accenting", () => {
-        expect(phonemizeWord("olsa")).toBe("ˈoɫsa");
+    // #1551: the conditional -sA on a VERB STEM is not pre-accenting (Özçelik 2014; Kornfilt; Kabak & Vogel 2001);
+    // the copular -sA after var/yok/değil is.
+    it("conditional -sA: final on a verb stem, pre-accenting after the copular hosts", () => {
+        expect(phonemizeWord("olsa")).toBe("oɫsˈa");
         expect(phonemizeWord("varsa")).toBe("vˈaɾsa");
     });
 
@@ -173,7 +176,7 @@ describe("Turkish #1523", () => {
     it("a plain noun ending -mA/-sA/-lA keeps final stress; the suffixes still pre-accent", () => {
         expect(phonemizeWord("elma")).toBe("elmˈa");
         expect(phonemizeWord("masa")).toBe("masˈa");
-        expect(phonemizeWord("olsa")).toBe("ˈoɫsa");
+        expect(phonemizeWord("olsa")).toBe("oɫsˈa"); // #1551: the verbal conditional is final
     });
 
     it("an upper-case apostrophe suffix reads like the lower-case one", () => {

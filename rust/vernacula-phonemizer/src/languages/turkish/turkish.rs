@@ -56,22 +56,94 @@ fn n_vowels(s: &JsString) -> usize {
         .count()
 }
 
-const PRE_ACCENT: &str =
-    "(?:(?:r)?ken|(?:y)?l[ae]|m[ae]|s[ae]|[dt][ıiuü]r|(?:y)?(?:[ıiuü]m|[ıiuü]z|s[ıiuü]n[ıiuü]z))";
-const TAIL: &str = "(?:l[ae]r|[ıiuü][mnz]|n[ıiuü]z|[ae]|y[ae]|d[ae]n?|n[ıiuü]n|)";
-static PRE_ACCENT_RE: LazyLock<JsRegex> =
-    LazyLock::new(|| JsRegex::new(&format!("{PRE_ACCENT}{TAIL}$"), "u").unwrap());
+// PRE-ACCENTING suffixes, narrowed to what the sources list and to shapes the spelling can show (#1551). The
+// measurement and the sources are in src/languages/turkish/turkish.ts; this is its mirror, arm for arm.
+const H: &str = "[ıiuü]";
+const A: &str = "[ae]";
+static PERSON: LazyLock<String> =
+    LazyLock::new(|| format!("(?:m|n|k|n{H}z|l{A}r|{H}m|{H}z|s{H}n{H}z|s{H}n|{H}n|{H}k)?"));
+/// Where the suffix starts (the stress is on the syllable before it).
+#[derive(Clone, Copy)]
+enum Start {
+    AtMatch,
+    AtLastS,
+    Existential,
+    KenTail,
+}
+struct PreAccent {
+    re: JsRegex,
+    start: Start,
+    /// The fewest syllables the host must have; a shorter host is a root that only looks suffixed.
+    min_host: usize,
+}
+static PRE_ACCENT: LazyLock<Vec<PreAccent>> = LazyLock::new(|| {
+    let p = &*PERSON;
+    let arm = |re: String, start: Start, min_host: usize| PreAccent {
+        re: JsRegex::new(&re, "u").unwrap(),
+        start,
+        min_host,
+    };
+    vec![
+        arm(
+            r"^(?:var|yok|değil)s[ae](?:m|n|k|n[ıiuü]z|l[ae]r)?$".into(),
+            Start::AtLastS,
+            1,
+        ),
+        arm(
+            r"^(?:var|yok|değil)[dt][ıiuü]r(?:l[ae]r)?$".into(),
+            Start::Existential,
+            1,
+        ),
+        arm(format!("(?<=..)m{H}yor{p}$"), Start::AtMatch, 1),
+        arm(
+            format!("m{A}(?:d{H}|m{H}ş|s{A}|y{A}c{A}[kğ]|s{H}n|d{A}n|y{A}n|m{A}k|y{A}l{H}m){p}$"),
+            Start::AtMatch,
+            1,
+        ),
+        arm(
+            format!("(?<=[dt]{A})y(?:{H}m|{H}z|s{H}n{H}z|s{H}n)$"),
+            Start::AtMatch,
+            2,
+        ),
+        arm(
+            format!("(?<=[aeıioöuü])y(?:l{A}|ken|s{A}{p})$"),
+            Start::AtMatch,
+            1,
+        ),
+        arm(
+            format!("(?:{H}r|{A}r|m{A}z|{A}c{A}k|m{H}ş|yor)s{A}{p}$"),
+            Start::AtLastS,
+            2,
+        ),
+        arm(
+            format!("(?:{H}r|{A}r|m{A}z|m{H}ş|yor)ken$"),
+            Start::KenTail,
+            2,
+        ),
+        arm(format!("[dt]{H}r(?:l{A}r)?$"), Start::AtMatch, 1),
+        arm(r"(?<=[^aeıioöuüâîûy])l[ae]$".into(), Start::AtMatch, 2),
+    ]
+});
 
-/// `morphStress(wl)`: the syllable before the leftmost pre-accenting suffix, or the I of -Iyor.
+/// `morphStress(wl)`: the syllable before the first matching pre-accenting suffix, or the I of -Iyor.
 fn morph_stress(wl: &JsString) -> Option<f64> {
+    for a in PRE_ACCENT.iter() {
+        let Some(m) = a.re.exec(wl) else {
+            continue;
+        };
+        let start = match a.start {
+            Start::AtMatch => m.index(),
+            Start::AtLastS => wl.last_index_of(&js("s")).unwrap_or(0),
+            Start::Existential => js_re!(r"[dt][ıiuü]r(?:l[ae]r)?$", "u")
+                .exec(wl)
+                .map_or(0, |e| e.index()),
+            Start::KenTail => wl.len() - 3,
+        };
+        let syl = n_vowels(&wl.slice(0, Some(start as isize)));
+        return (syl >= a.min_host).then_some(syl as f64);
+    }
     if let Some(iyor) = js_re!(r"([ıiuü])yor(?:um|sun|uz|sunuz|lar)?$", "u").exec(wl) {
         return Some(n_vowels(&wl.slice(0, Some(iyor.index() as isize + 1))) as f64);
-    }
-    if let Some(m) = PRE_ACCENT_RE.exec(wl) {
-        let syl = n_vowels(&wl.slice(0, Some(m.index() as isize)));
-        if syl >= 1 {
-            return Some(syl as f64);
-        }
     }
     None
 }
@@ -338,6 +410,54 @@ pub fn create_turkish() -> Result<TurkishPhonemizer, String> {
 mod tests {
     use super::*;
 
+    /// test/turkish-1551-pre-accent.test.ts: the narrowed pre-accent rule; each expectation is the 1-based stressed
+    /// syllable the sources give, not typed IPA (#1551).
+    #[test]
+    fn the_1551_pre_accenting_suffixes() {
+        let stressed = |w: &str| {
+            let ipa = phonemize_word(&js(w), false).to_string_lossy();
+            let ipa: String = {
+                use unicode_normalization::UnicodeNormalization;
+                ipa.nfd().collect()
+            };
+            let (mut n, mut in_v) = (0, false);
+            for ch in ipa[..ipa.find('ˈ').unwrap()].chars() {
+                let v = "aeiouyɯøœɛɑ".contains(ch);
+                if v && !in_v {
+                    n += 1;
+                }
+                in_v = v;
+            }
+            n + 1
+        };
+        for (w, syl) in [
+            ("gelmedi", 1),
+            ("gelmiyor", 1),
+            ("gelmeden", 1),
+            ("olmayan", 1),
+            ("olmasa", 1),
+            ("olsa", 2),
+            ("gelse", 2),
+            ("hastaysa", 2),
+            ("gelirse", 2),
+            ("varsa", 1),
+            ("vardır", 1),
+            ("yoktur", 1),
+            ("güzeldir", 2),
+            ("nedeniyle", 3),
+            ("gelirken", 2),
+            ("evdeyim", 2),
+            ("deniz", 2),
+            ("dokuz", 2),
+            ("yıldız", 2),
+            ("koruma", 3),
+            ("kele", 2),
+            ("geldim", 2),
+        ] {
+            assert_eq!(stressed(w), syl, "{w}");
+        }
+    }
+
     // test/turkish.test.ts's `phonemizeWord`, `phonemize(…, "tr")` and `ordinalWords` pins, extracted from that file
     // mechanically (each is a reading the TS suite asserts), so the two engines are held to one list.
     const WORD_PINS: &[(&str, &str)] = &[
@@ -358,10 +478,10 @@ mod tests {
         ("istiyorum", "istˈijoɾum"),
         ("giderken", "ɟidˈeɾcen"),
         ("benimle", "benˈimle"),
-        ("kaybetme", "kajbˈetme"),
+        ("kaybetme", "kajbetmˈe"), // #1551: the bare -mA is the verbal noun
         ("güzeldir", "ɟyzˈeldiɾ"),
         ("evdeyim", "evdˈejim"),
-        ("olsa", "ˈoɫsa"),
+        ("olsa", "oɫsˈa"), // #1551: the conditional on a verb stem is final
         ("varsa", "vˈaɾsa"),
         ("kitap", "citˈap"),
         ("araba", "aɾabˈa"),
@@ -480,7 +600,7 @@ mod tests {
             ("rüzgâr", "ɾyzɟˈaɾ"),
             ("elma", "elmˈa"),
             ("masa", "masˈa"),
-            ("olsa", "ˈoɫsa"),
+            ("olsa", "oɫsˈa"), // #1551: the conditional on a verb stem is final
         ] {
             assert_eq!(phonemize_word(&js(w), false).to_string_lossy(), want, "{w}");
         }

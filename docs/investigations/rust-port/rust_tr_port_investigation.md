@@ -284,3 +284,82 @@ regex-diff 145212 identical, 0 DIFFER, 0 refused
 **Implication.** Ready for the PR. Still open: item 6 (declined), `kele` (not in kaikki), a short sentence-final
 number before a capital, and whether the arms pay for themselves on running text, which needs an inflected-form
 stress gold.
+
+## Run 11 — 2026-10-14 (#1551: the pre-accent rule, narrowed to its sources and measured)
+
+**Question.** Run 9 kept the -mA/-sA/-lA arms ("the arms earn their keep on running text") and could not measure
+that for want of stress data on inflected forms. Can sources settle which suffixes pre-stress, and does a
+narrowed rule pay?
+
+**Sources** (from a research pass):
+- Özçelik 2014 (*Phonology* 31): the pre-stressing suffixes are negative -mA, de, -ken, mI, -leyin and -sizin;
+  "/-sa/ is not a pre-stressing suffix", and its apparent pre-stress comes from the null copula.
+- Kornfilt, "On copular clitic forms in Turkish" (ZAS Papers): the verbal conditional is regular (final);
+  the copular form is pre-stressed.
+- en.wikipedia "Turkish phonology", citing Kabak & Vogel 2001, Inkelas & Orgun 2003 and Sezer 1981: -DI and
+  -sA are not pre-accenting on a verb stem; the negative, -(y)lA, -ce, -ki, de, mi and the copular forms are.
+  Place names take Sezer stress.
+- TDK and tr.wiktionary: *kele* is a dialect noun ("boğa"), with nothing marking exceptional stress.
+
+**Command.** The kaikki Turkish dump, re-downloaded (kaikki.org, 437 MB; the Run 7 copy was gone), gives
+10,240 unambiguous word→stressed-syllable pairs, names included. A replica of each rule was scored arm by arm
+against them, and then the real engine. The FLEURS tr_tr phonemize-sync dump was diffed main vs fix, and each
+arm's FLEURS types were printed and read against the sources.
+
+**Raw finding.**
+- **The old rule, arm by arm, on the kaikki lemmas** (fires / right / wrong where the default final was right):
+
+  | Arm | Fires | Right | Wrong (final was right) |
+  |---|---|---|---|
+  | person -Im/-Iz/-sInIz | 921 | 26 | 869 (deniz, dokuz, yıldız, yardım) |
+  | -mA | 193 | 16 | 167 |
+  | -lA | 134 | 43 | 80 |
+  | -sA | 44 | 15 | 23 |
+  | -DIr | 43 | 4 | 37 |
+  | -ken | 15 | 2 | 11 |
+
+  It also pre-stressed the verb *geldim* and the possessive *evim*, read *olsa* as ˈoɫsa (against all three
+  sources), and missed the finite negatives (*gelmiyor* ɟelmˈijoɾ, *gelmedim*).
+- **The narrowed rule, arms in order:**
+  - var/yok/değil + -sA or -DIr;
+  - negative -mI-yor (two letters before the m, so *umuyor* is excluded);
+  - negative -mA- + past, evidential, -sA, future, optative, -dAn, participle -yAn, -mAk or -yAlIm — not the
+    dative verbal noun -mAyA, and not the aorist -mAz;
+  - locative + y + person, host ≥2 syllables (*evdeyim*, *buradayım*; *deyim* is a root);
+  - y + -lA / -ken / copular -sA;
+  - -sA or -ken after a tense or participle (Ir, Ar, mAz, AcAk, mIş, yor), host ≥2;
+  - copular -DIr on any host;
+  - consonant + -lA (instrumental), host ≥2;
+  - then the existing -Iyor.
+- **Dead ends:**
+  - A host minimum of 2 on -DIr broke *vardır* ×92 and *yoktur* ×28 and the one-syllable copulas (*yerdir*,
+    *yıldır*, *şeydir*: about 57 FLEURS tokens, against about 24 for roots such as *kültür* and *nadir*). The
+    minimum came off, and the roots became rows.
+  - A bare `y${A}` alternative in the negative arm caught the dative verbal noun (*yapmaya*, *olmaya*); it was
+    dropped.
+  - A -yIm predicative arm hit roots (*uyum* ×11, *deneyim* ×5, *kalsiyum* ×4) more often than predicates
+    (*mutluyum* ×3); only the locative shape was kept.
+- **kaikki, shipped (with stress.tsv), real engine:** 86.26% → 91.40% (+526). The replica, fairly compared:
+  87.23% → 92.38%, +528 / −5. The 5 losses are *vereceğim* and four negative participles kaikki lists as
+  lexicalised adjectives (*istenmeyen*, *giyilmemiş*); they follow the sources' verbal reading.
+- **stress.tsv gains three commented sections:**
+  - 43 kaikki rows for every unambiguous word the narrowed rule still mis-stresses, plus words the old rule
+    had read right only by misfiring (pırasa, fransa, katır; roots kültür, nadir, takdir, çadır; places such as
+    Altınyayla);
+  - Sezer-stress place names *roma* and *goma*;
+  - four UNSOURCED frequent words kept as they were (*fazla* ×92, *ise* ×34, *mesela* ×12, *kimse* ×8).
+    kaikki has no entry for them, en.wiktionary gives /fɑzɫɑ/ and /me.se.laː/ with no stress mark, and
+    *kimse* has only an audio file.
+- **FLEURS.** 2,089 of 3,833 sentence rows change. The top types are the sourced shifts: *bilim*, *deniz*,
+  *yardım*, *erken*, *olsa*, *öğrenme*, *dokuz*, verbal nouns and possessives to final; *olmayan*,
+  *bildirilmedi* and *bilinmiyor* to pre-stress. *Fransız* to final agrees with en.wiktionary
+  /fɾɑnˈsɯz/. The tr golden moves 126 of 200 rows.
+- **A side finding, not fixed here.** 561 of the 2,273 stress.tsv rows that appear in today's kaikki
+  disagree with it, many of them possessives listed with non-final stress (*adım*, *artık*, *aktörüm*,
+  *evim*, *okuma*). Filed as its own issue: it is a data refresh, not this rule.
+- **Rust.** It replays FLEURS plus all 10,240 kaikki headwords identically (14,074 rows), and tr parity is
+  200/200.
+
+**Implication.** This closes #1551's tr items (the -mA/-sA/-lA rule on running text, and *kele*). `Skor 3.
+Sonra` stays: TDK makes `3.` an ordinal marker or a sentence period with no written difference, and all 9
+FLEURS cases are ordinals.
