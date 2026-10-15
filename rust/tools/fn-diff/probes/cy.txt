@@ -1,0 +1,31 @@
+# Welsh (cy) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it must
+# decline, then tokenizer and g2p corners.
+Codwyd y castell yn 400 O.C. ac fe'i dinistriwyd yn 1300 C.C.
+Roedd OC 1000-1300 yn gyfnod hir, ond nid oc yn unig.
+Costiodd AUD$45 a US$11,000 i'r cwmni, a UD $14.7 i'r llall.
+Mae'r UD a'r DU yn wahanol i UDA; mae AS yn eistedd yno, as a du hefyd.
+Siaradodd George W. Bush a R. Ŵyn Jones a D. Wyn Jones â'r U.S.A. heddiw.
+Prynodd lyfrau, cylchgronau ayb. a phapurau newydd ayb.
+Dyma'r 1af, yr 2il, y 3ydd, y 7fed, yr 11eg, y 37fed, y 190fed a'r 1,000fed tro.
+Yn y 1970au a'r 90au roedd y 41ain yn wahanol i'r 45fed.
+Mae'r amser yn UTC-08:00 neu GMT-0:44 heddiw.
+Sgôr o 6-6 a 5-3, rhwng 1894-1895, o 100-200 a 10:00-11:00 bob dydd.
+Roedd 2-3 km o iâ, 10-20% o'r tir, ac ers 1995-96, pan ddaeth y glaw.
+Am 11:35 p.m. neu 06:30 a 07:30, ond 11:00 amser lleol, a 10:00am hefyd.
+Rhedodd y filltir mewn 4:41.30 ac am 15.00 UTC daeth y canlyniad.
+Mae 802.11n/a/b/g yn defnyddio 2.4Ghz a 5.0Ghz, ac 1.5 miliwn o bobl.
+Rhwng 4.2-3.9 miliwn, tua 12.8 km a 1.234 o fetrau, a 12,5 neu 1,400.
+Tua 1/5 modfedd, 1/2 metr, 3/4 awr, 2/3 o'r bobl, 2¾ a 1½ milltir, 5/37 a 7/41.
+Roedd hi'n +30°C ddoe, 86°F heddiw a 45° yfory.
+Teithiodd 480 cilomedr/awr dros 100 llath/metr.
+Mae ±2 a +3 a -5 a −7, ond 5-5 a -5 - 6 yn wahanol.
+Mae A&B a A&Bs yn wir, a & b hefyd, ac x = y, 8 ÷ 2, 3 < 4, 5 > 2, 3 × 4.
+Gwelodd NHK, KNP, NPWS, NSW, PA, MS, FAA, XDR-TB ac APS ar y BBC, ond nid NATO.
+Mae nghymru, mhrifysgol, nhw ac enghraifft yn eiriau.
+Mae'r gwyn, gwybod, achwyn, Arglwydd, llongwr, dwr a gwlad yn gyfarwydd.
+Mae siarad, sir, iaith, wedi, melin a gwin yn hawdd.
+Roedd llyfrau, pethau a cau yn y tŷ, a o'r, hi'n, mae'r, cymru'n.
+Darllenodd Qing, piquet, Joaquim, Dvořák, Ångström a Zoë.
+Rhif 1,400,000 a 19,500 a 5,000,000 a 1234567890123.
+Mae constructor a toString yn eiriau Saesneg… ond pam? Achos!
+Mae'r gorffennaf, torri, cannwyll a gorffennaf yn dyblu.

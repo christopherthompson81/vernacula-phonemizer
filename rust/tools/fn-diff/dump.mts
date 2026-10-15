@@ -62,6 +62,10 @@ const FLEURS_DIR: Record<string, string> = {
     af: "af_za",
     lb: "lb_lu",
     tg: "tg_tj",
+    cy: "cy_gb",
+    ga: "ga_ie",
+    ast: "ast_es",
+    oc: "oc_fr",
     bn: "bn_in",
     as: "as_in",
     or: "or_in",
@@ -4344,6 +4348,523 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let i = 0; i <= 3000; i++) ds.push(String(i));
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // ── Welsh (cy). Inputs: the cy golden, FLEURS cy_gb (columns 3 and 4) and probes/cy.txt. ──
+    // normalizeWelsh, the symbol tier over its output (recorded through the wrapper) and `createWelsh().text`, over
+    // every text plus synthetic rows for every arm: era markers, the currency prefixes and UD/DU/UDA/AS in every case
+    // and tail, dotted capitals (NBSP, non-ASCII capitals), ayb., ordinals 0…220 × every suffix, decades, the
+    // timezone hyphen, clock ranges and number ranges (every unit, a sign after), clocks over an hour × minute ×
+    // marker grid, dot clocks before a timezone, version dots and decimals, comma decimals, fractions over a
+    // numerator × denominator grid, degrees, rates, signs; ordinalWords over −2…2,000 and corners; soften.
+    async "cy-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeWelsh, ordinalWords, soften } = await import("../../../src/languages/welsh/normalize.ts");
+        const { createWelsh } = await import("../../../src/languages/welsh/welsh.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/welsh\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createWelsh();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["cy"], FLEURS_DIR.cy, ["cy.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const e of ["O.C.", "o.c.", "C.C.", "OC 1000-1300", "oc 5 – 6", "OC"]) for (const tail of ["", ".", " a", ", wedyn"]) add(`yn 400 ${e}${tail}`);
+        for (const c of ["AUD$45", "AUD 45", "aud$7", "US$11,000", "US 3", "UD $14.7", "U.D.", "yr UD", "UD,", "UDa", "DU", "du", "DU.", "UDA", "UDA,", "AS", "as", "AS.", "ASa"]) for (const tail of ["", " yma", "."]) add(`mae ${c}${tail}`);
+        for (const d of ["George W. Bush", "D. Wyn Jones", "R. Ŵyn Jones", "U.S.A.", "U. S. A.", "U.\u00a0S.", "É.Ü.", "A.b."]) add(`gan ${d} heddiw`);
+        for (const a of ["ayb. a", "ayb.", "ayb.,", "AYB. Mae", "ayb.)", "ayb. 5", "aybc."]) add(`llyfrau ${a}`);
+        for (let n = 0; n <= 220; n++) for (const sfx of ["fed", "ed", "af", "eg", "ydd", "ain", "FED", "feda"]) add(`y ${n}${sfx} tro`);
+        for (const n of ["1,000fed", "1,0fed", "99999fed", "100000fed", "190fed", "007fed", "1.5fed", "x5fed"]) add(`y ${n} tro`);
+        for (const d of ["1970au", "90au", "1,900au", "a1970au", "1970aua", "1970AU"]) add(`yn y ${d} roedd`);
+        for (const z of ["UTC-08:00", "GMT-0:44", "UTC–5", "a-b", "x-5"]) add(`amser ${z} yma`);
+        for (const r of ["10:00-11:00", "6:30 – 7:45", "23:59-00:00", "25:00-26:00", "9:60-10:00", "6-6", "5-3", "6-6.", "7-2.", "26-00", "1894-1895", "100-200", "10-60 munud", "2-3 km", "2-3km", "2 - 3 m", "4-5 kg", "1-2 mm", "5-6 cm", "5-6 cma", "10-20%", "10-20 $", "1995-96, pan", "1,000-2,000", "1-2.5", "3-4.", "9007199254740993-9007199254740995", "1-1000000000"]) add(`roedd ${r} yno`);
+        for (const h of ["0", "1", "06", "11", "12", "23", "24"]) for (const m of ["00", "05", "35", "59"]) for (const ap of ["", " p.m.", " a.m.", "pm", "AM", " P.M", " amser", " a", "am."]) add(`am ${h}:${m}${ap} heddiw`);
+        for (const c of ["4:41.30", "10:00:00", "1:2", ",5:30"]) add(`amser ${c} yma`);
+        for (const c of ["15.00 UTC", "12.00 GMT", "9.30 utc", "24.00 UTC", "15.00UTC"]) add(`am ${c} yna`);
+        for (const v of ["802.11n", "802.11n/a/b/g", "2.4Ghz", "5.0Gh", "5.0 GHZ", "1.5 miliwn", "$2.3", "1.234", "4.2-3.9 miliwn", "12.8 km", "12.8km", "1.5 M", "3.25 kg", "0.5 mm", "2.5 cm", "2.5 cma", "1.2.3", "3.14"]) add(`mae ${v} yma`);
+        for (const v of ["12,5", "4,2", "1,400", "1,4000", "3,14,", "0,05"]) add(`mae ${v} yma`);
+        for (let a = 0; a <= 12; a++) for (const b of [0, 1, 2, 3, 4, 5, 7, 10, 19, 20, 21, 25, 37, 40, 45, 100, 190, 200, 1000]) add(`tua ${a}/${b} modfedd`);
+        for (const f of ["2¾", "1½", "1/5/7", "1234/5"]) add(`tua ${f} modfedd`);
+        for (const d of ["+30°C", "30 °C", "30°c", "86°F", "86 º F", "45°", "45° ", "45°N", "20°Ca"]) add(`roedd ${d} heddiw`);
+        for (const r of ["480 cilomedr/awr", "100 llath/metr", "Cilomedr/Awr", "cilomedr/awra"]) add(`ar ${r} yno`);
+        for (const g of ["±2", "+3", "+ 3", "-5", "−5", "a-5", "5-5", "-5 - 6", "A&B", "A&Bs", "Ŵ&Ŷ", "a & b", "x = y", "a=b", "8 ÷ 2", "3 < 4", "5 > 2", "3 × 4", "AT&T"]) add(`mae ${g} yn wir`);
+        for (const [t, src] of rows) {
+            const a = normalizeWelsh(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("cy", () => E.text(t)));
+        }
+        for (let n = -2; n <= 2000; n++) emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        for (const n of [1e5, 1e6, 2 ** 53, 2 ** 53 + 2, 1.5, 20.5, NaN, Infinity, -0]) emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        for (const w of ["pump", "tri", "cant", "dau gant", "llyfr", "Llyfr", "rhif", "Rhyd", "chwech", "ddeg", "ffordd", "ngh", "phump", "thri", "mil", "gardd", "Gwyn", "bach", "deg", "a", "İ", "\ud800x", "𝐚", "Pump", "M"]) emit({ word: units(w), op: "soften" }, soften(w));
+    },
+    // phonemizeWord and toSegments over every letter run (as written and lowercased), every lexicon key, every 1–3
+    // letter string of the alphabet, every 4-letter string over the context letters, enclitic and corner forms; the
+    // nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "cy-g2p"() {
+        const { phonemizeWord, nat } = await import("../../../src/languages/welsh/welsh.ts");
+        const { toSegments } = await import("../../../src/languages/welsh/g2p.ts");
+        const { numberToWords } = await import("../../../src/languages/welsh/numbers.ts");
+        const W = new URL("../../../src/languages/welsh/welsh.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("cy")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const k of loadTsvMap(W, "lexicon.tsv", undefined, { optional: true }).keys()) words.add(k);
+        const abc = [..."abcdefghijklmnopqrstuvwxyzâêîôûŵŷïë'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouwyngchdlsr"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const p of ["o", "hi", "mae", "cymru", "i", "y", "fe"]) for (const e of ["'r", "’n", "'m", "'th", "'ch", "'x", "'"]) words.add(p + e);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "Ŵyn", "ﬁ", "Dvořák", "Ångström", "xylo", "Qing", "Joaquim", "nghymru", "Nghymru", "mhrifysgol", "enghraifft", "gwyn", "achwyn", "llyfrau", "cau", "-", "'", "a-b", "constructor", "toString"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.long ? 1 : 0}`).join(" "));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "1,400"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // ── Irish (ga). Inputs: the ga golden, FLEURS ga_ie (columns 3 and 4) and probes/ga.txt. ──
+    // normalizeIrish, the symbol tier over its output (recorded through the wrapper) and `createIrish().text`, over
+    // every text plus synthetic rows for every arm: zero-width characters, era markers in each position and case,
+    // N.A./S.A./srl, US$, dotted capitals, Dr./etc., the `Nú` ordinal over 0…120 after `an`/bare × enclosed and
+    // excluded nouns, ranges, the timezone hyphen, clocks over an hour × minute × marker grid, gigahertz, version
+    // letters, decimals with every unit and a slash, comma decimals, fractions over a numerator × denominator grid,
+    // degrees and compass points, rates, signs, the percent-after-pointe rule; ordinalWords over 0…2,000 with and
+    // without a noun.
+    async "ga-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeIrish, ordinalWords } = await import("../../../src/languages/irish/normalize.ts");
+        const { createIrish } = await import("../../../src/languages/irish/irish.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/irish\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createIrish();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ga"], FLEURS_DIR.ga, ["ga.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const z of ["\u200b", "\u200c", "\u200d", "\ufeff"]) add(`fo${z}cal${z} eile`);
+        for (const e of ["A.D.", "a.d.", "R.C.", "AD 500", "ad500", "500 AD", "1,200 AD", "500 ADa", "BC 44", "44 BC", "44 bc", "N.A.", "S.A.", "srl", "srl.", "srla", "Srl."]) for (const tail of ["", ".", " agus", ","]) add(`sa bhliain ${e}${tail}`);
+        for (const c of ["US$5", "uS$ 5", "US$5,000", "US $5", "AUS$5"]) add(`costas ${c} ann`);
+        for (const d of ["U.S.A.", "U. S.", "U.\u00a0S.", "Á.É.", "J. Ó Néill", "A.b."]) add(`le ${d} inniu`);
+        for (const a of ["Dr. Ó", "Dr.", "Dr.,", "dr. 5", "etc. agus", "etc.", "etc.)", "ETC. A"]) add(`bhí ${a} ann`);
+        for (let n = 0; n <= 120; n++) for (const [pre, post] of [["an ", ""], ["an ", " lá"], ["", " lá"], ["an ", " agus"], ["", ""], ["An ", " hÁras"], ["an ", "\u00a0bliain"], ["", " sa"]]) add(`${pre}${n}ú${post} anseo`);
+        for (const n of ["1,000ú", "1,0ú", "999999999999ú", "1000000000000ú", "0ú", "05ú", "1.5ú", "x5ú", "21úa"]) add(`an ${n} uair`);
+        for (const r of ["5-3", "1990-1995", "1,000-2,000", "10 – 20", "5-3.", "5-3.5", "a-5", "UTC-5", "x-y"]) add(`idir ${r} ann`);
+        for (const h of ["0", "1", "06", "11", "12", "23", "24"]) for (const m of ["00", "05", "35", "59"]) for (const ap of ["", " i.n.", " r.n.", " in", "rn", " a.m.", " P.M.", " am", " pm", " iad"]) add(`ag ${h}:${m}${ap} inniu`);
+        for (const c of ["4:41.30", "10:00:00", ",5:30", "25:00"]) add(`am ${c} anseo`);
+        for (const v of ["2.4Ghz", "5.0Gh", "802.11n", "802.11n/a", "1.5 km", "1.5km", "1.5 M", "3.25 kg", "0.5 mm", "2.5 cm", "60.5 msu", "60.5 mſu", "1.5 km/h", "1.5 km /u", "2.5 cma", "1.2.3", "3.14", "1.5 kmx"]) add(`tá ${v} ann`);
+        for (const v of ["12,5", "4,2", "1,400", "1,4000", "3,14,", "0,05"]) add(`tá ${v} ann`);
+        for (let a = 0; a <= 12; a++) for (const b of [0, 1, 2, 3, 4, 5, 7, 10, 11, 12, 19, 20, 21, 25, 37, 40, 45, 100, 101, 190, 200, 1000]) add(`thart ar ${a}/${b} orlach`);
+        for (const f of ["2¾", "1½", "1/5/7", "1234/5"]) add(`thart ar ${f} orlach`);
+        for (const d of ["+30°C", "30 °C", "30°c", "86°F", "86 º F", "45°", "45°N", "45° S", "45°e", "45°w", "45°ſ", "20°Ca", "45°Na"]) add(`bhí ${d} inné`);
+        for (const r of ["100 km/h", "100km / u", "5 m/h", "5 kg/u", "5 mm/h", "5 cm/u", "5 KM/H", "60 msu", "60msu", "60 mſu", "5 km/hx"]) add(`ag ${r} anseo`);
+        for (const g of ["±2", "+3", "+ 3", "-5", "−5", "a-5", "5-5", "-5 - 6", "A&B", "A&Bs", "A&Bach", "Á&É", "a & b", "x = y", "a=b", "8 ÷ 2", "3 < 4", "5 > 2", "3 × 4", "AT&T"]) add(`tá ${g} fíor`);
+        for (const p of ["1.5 %", "1.5%", "3,5 %", "1.5 % a", "1.5%x", "12 %"]) add(`méadú ${p} ann`);
+        for (const [t, src] of rows) {
+            const a = normalizeIrish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("ga", () => E.text(t)));
+        }
+        for (let n = -2; n <= 2000; n++) for (const noun of ["", "lá"]) emit({ n: String(n), noun: units(noun), op: "ordinal" }, ordinalWords(n, noun) ?? "\u0000none");
+        for (const n of [1e6, 1e9, 1e12 - 1, 1e12, 2 ** 53, 1.5, 20.5, NaN, Infinity, -0, 1234567, 1000021]) for (const noun of ["", "bliain"]) emit({ n: String(n), noun: units(noun), op: "ordinal" }, ordinalWords(n, noun) ?? "\u0000none");
+    },
+    // phonemizeWord, g2pWord and toSegments over every letter run (as written and lowercased), every lexicon key,
+    // every 1–3 letter string of the alphabet, every 4-letter string over the context letters, eclipsis / lenition
+    // forms and corners; the nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "ga-g2p"() {
+        const { phonemizeWord, g2pWord, nat } = await import("../../../src/languages/irish/irish.ts");
+        const { toSegments } = await import("../../../src/languages/irish/g2p.ts");
+        const { numberToWords } = await import("../../../src/languages/irish/numbers.ts");
+        const I = new URL("../../../src/languages/irish/irish.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("ga")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const k of loadTsvMap(I, "lexicon.tsv").keys()) words.add(k);
+        const abc = [..."abcdefghijklmnopqrstuvwxyzáéíóú'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouáóbdghlnrst"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const p of ["mb", "gc", "nd", "bp", "dt", "ts", "bhf", "ng", "n-", "t-", "h"]) for (const s of ["ád", "éan", "oileán", "ar", "ír", "uí", "eo"]) words.add(p + s);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "ﬁ", "Dvořák", "Ångström", "xylo", "piquet", "Albuquerque", "yoga", "rr", "carr", "gorm", "bolg", "ainm", "áit", "cóir", "ceoil", "long", "banc", "chéadaigh", "airigh", "-", "'", "d'", "constructor", "toString"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "g2p" }, g2pWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+            emit({ word: units(w), op: "segs" }, toSegments(w).map((s) => `${s.ph}/${s.nucleus ? 1 : 0}${s.noGlide ? 1 : 0}`).join(" "));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "1,400", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
+        }
+    },
+    // ── Scottish Gaelic (gd). Inputs: the gd golden and probes/gd.txt; FLEURS has no Scottish Gaelic, so the
+    // synthetic rows and the probes carry every arm the golden misses. ──
+    // normalizeScottishGaelic, the symbol tier over its output (recorded through the wrapper) and
+    // `createScottishGaelic().text`, over every text plus synthetic rows for every arm: grouping with each separator
+    // (and the leading-zero guard), the dotted abbreviations in three casings and every tail (and the long-s fold),
+    // àireamh, decades, the ordinal over 0…25 × every suffix × hyphen × a following noun, decimals, minus forms.
+    async "gd-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeScottishGaelic } = await import("../../../src/languages/scottishgaelic/normalize.ts");
+        const { createScottishGaelic } = await import("../../../src/languages/scottishgaelic/scottishgaelic.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/scottishgaelic\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createScottishGaelic();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["gd"], undefined, ["gd.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1,000", "1,000,000", "12,345,678", "0,500", "1.000", "1.234.567", "0.500", "1 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1,23", "1,2345", "10,000.5", "5 000 000 km"]) add(`tha ${g} duine ann`);
+        for (const ab of ["srl.", "SRL.", "Srl.", "td.", "TD.", "bh.", "Bh.", "ſrl.", "srlx.", "asrl."]) for (const tail of [" agus", " 5", " (a)", ".", "", ")", ","]) add(`leabhraichean ${ab}${tail}`);
+        for (const a of ["no. 5", "No.5", "àir. 7", "Àir.3", "№ 4", "№4", "no.", "àir. x"]) add(`aig ${a} an seo`);
+        for (const d of ["1990s", "1800s", "2000s", "2010s", "1990sa", "199s", "1995s", "2100s"]) add(`anns na ${d} bha`);
+        for (let n = 0; n <= 25; n++) for (const sfx of ["mh", "na", "s", "d", "MH", "ſ", "x"]) for (const hy of ["", "-"]) for (const tail of ["", " latha", " Latha", " àite'n", ".", " 5"]) add(`an ${n}${hy}${sfx}${tail} seo`);
+        for (const d of ["1.5", "3.14", "10.05", "1.234", "1.5km", "1.5.2", "x1.5", "0.5"]) add(`tha ${d} ann`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", "x-5", " -5"]) add(`teòthachd ${m} ceum`);
+        for (const [t, src] of rows) {
+            const a = normalizeScottishGaelic(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("gd", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, lenition/pre-aspiration corners; numberToWords
+    // over 0…20,000, magnitudes and raw strings.
+    async "gd-g2p"() {
+        const { phonemizeWord, numberToWords } = await import("../../../src/languages/scottishgaelic/scottishgaelic.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zàèìòùáéíóúA-ZÀÈÌÒÙÁÉÍÓÚ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("gd")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzàèìòùéó'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouàòbcdghlnprst"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "e\u0300", "ﬁ", "Dvořák", "Ångström", "xylo", "mac", "cat", "bochd", "luchd", "aidh", "taigh", "rr", "constructor", "toString", "-", "'"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
+        }
+    },
+    // ── Basque (eu). Inputs: the eu golden and probes/eu.txt; FLEURS has no Basque, so the synthetic rows and the
+    // probes carry every arm the golden misses. ──
+    // normalizeBasque (the symbol tier is inside it) and `createBasque().text`, over every text plus synthetic rows
+    // for every arm: º, dot and space grouping with every separator, degrees, each unit × rate × case ending, each
+    // unit × exponent × hyphen × case ending, the tier's percent/currency/units/magnitudes, minus in and out of a
+    // range, every number × case ending with and without the hyphen and a comma fraction, comma decimals.
+    async "eu-normalize"() {
+        const { normalizeBasque } = await import("../../../src/languages/basque/normalize.ts");
+        const { createBasque } = await import("../../../src/languages/basque/basque.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createBasque();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["eu"], undefined, ["eu.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const ENDINGS = ["etik", "eko", "ean", "era", "koa", "tik", "an", "ko", "ra", "en", "a", "n", "x", ""];
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "12.5", "1.000,5"]) add(`${g} euro dira`);
+        for (const d of ["20 °C", "20°c", "90°F", "20\u00a0°\u00a0C", "20 ºC", "20º", "20°Ca", "20 °K"]) add(`tenperatura ${d} da`);
+        for (const u of ["km", "m", "kg", "mm"]) for (const r of ["h", "s", "x"]) for (const e of ENDINGS) add(`100 ${u}/${r}-${e} abiadura`);
+        for (const u of ["km", "m", "kg", "mm", "cm"]) for (const x of ["²", "³", "²-", "-", ""]) for (const e of ENDINGS) add(`5 ${u}${x}${e} dira`);
+        for (const p of ["%5", "5%", "% 5", "5 %", "€5", "5€", "5 £", "$5", "5 milioi", "5 mila", "5 km", "5 km/h", "5 km²"]) add(`hori ${p} da`);
+        for (const m of ["-5", "−5", "5-3", "a-5", "(-5)", "1990 - 5", "x -5"]) add(`balioa ${m} da`);
+        for (const n of ["0", "1", "5", "10", "19", "20", "21", "40", "99", "100", "101", "1000", "1998", "2000000", "999999999999", "1000000000000"]) for (const e of ENDINGS) for (const h of ["", "-"]) add(`${n}${h}${e} urte`);
+        for (const f of ["1,5", "1,05", "1,50", "1,0", "1,00", "2,25", "3,141", "0,5", "1,99999999999999"]) for (const e of ["", "ean", "-ean", "a", "eko"]) add(`${f}${e} da`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeBasque(t));
+            emit({ text: units(t), src, op: "text" }, withHost("eu", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; cardinalWords over 0…20,000 and
+    // magnitudes.
+    async "eu-g2p"() {
+        const { phonemizeWord, cardinalWords } = await import("../../../src/languages/basque/basque.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñçA-ZÑÇ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("eu")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñç'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiourtzsxdlh"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "n\u0303", "c\u0327", "Ñ", "ﬁ", "Dvořák", "Ångström", "etxe", "hitz", "ttipi", "kalle", "erreka", "ura"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3, k * 1e9 + 99);
+        ns.push(1e12 - 1);
+        for (const n of ns) emit({ n: String(n), op: "words" }, cardinalWords(n));
+    },
+    // ── Albanian (sq). Inputs: the sq golden and probes/sq.txt; FLEURS has no Albanian, so the synthetic rows and the
+    // probes carry every arm the golden misses. ──
+    // normalizeAlbanian (the symbol tier is inside it) and `createAlbanian().text`, over every text plus synthetic rows
+    // for every arm: ASCII km exponents, grouping with every separator, ranges (decimal operands, chained, after a
+    // letter), per mille, the tier's currency/units/rates/magnitudes, degrees with each scale and a following word or
+    // scale name, every sign in and out of its guards, decimals with leading zeros.
+    async "sq-normalize"() {
+        const { normalizeAlbanian } = await import("../../../src/languages/albanian/normalize.ts");
+        const { createAlbanian } = await import("../../../src/languages/albanian/albanian.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createAlbanian();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["sq"], undefined, ["sq.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const k of ["km2", "km3", "km2a", "km4", "akm2", "km22", "KM2"]) add(`sipërfaqja 5 ${k} është`);
+        for (const g of ["1.000", "130.000", "1,000,000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1.000,5", "12.5"]) add(`janë ${g} banorë`);
+        for (const r of ["5-8", "5 – 8", "1990—2000", "1.5-2.5", "5-8-9", "a5-8", "x-5", "5-", "-5", "3,5–4,5"]) add(`nga ${r} vjet`);
+        for (const p of ["5‰", "5 ‰", "x‰"]) add(`norma ${p} është`);
+        for (const c of ["5%", "1%", "US$5", "$1", "5 €", "£2", "5 km", "1 km", "5 m", "1 kg", "5 mb", "5 mhz", "5 km/h", "1 m/s", "5 km²", "5 milion", "1 milion", "5 mijë", "2 × 3", "A & B"]) add(`vlera ${c} sot`);
+        for (const d of ["20°", "20 °C", "20°c", "90 °F", "20° C Celsius", "20°Celsius", "20°veri", "1,5°", "20 ° C", "20°Ca"]) add(`temperatura ${d} sot`);
+        for (const s of ["+5", "+ 5", "a+5", "-5", "−5", "–5", "a-5", "x = y", "5=5", "a==b", "3 < 4", "a<=b", "5 > 2", "8 ÷ 2", "8÷x"]) add(`vlera ${s} sot`);
+        for (const d of ["1.5", "1,05", "0.005", "1.000005", "3,0", "3.00", "1.5.6"]) add(`numri ${d} është`);
+        for (const n of ["0", "1", "2", "5", "21", "1000", "1.5", "1,5", "1 000"]) for (const u of ["%", "‰", "€", "$", "US$", "£", "km", "m", "cm", "mm", "kg", "mb", "mhz", "km²", "m³", "km/h", "m/s", "milion", "mijë", "miliard", "°", "°C", "°F"]) { add(`janë ${n}${u} sot`); add(`janë ${n} ${u}`); add(`${u}${n} sot`); }
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeAlbanian(t));
+            emit({ text: units(t), src, op: "text" }, withHost("sq", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000, magnitudes
+    // and raw strings.
+    async "sq-g2p"() {
+        const { phonemizeWord, numberToWords } = await import("../../../src/languages/albanian/albanian.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zçëA-ZÇË]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("sq")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzçë'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiëoushdtlmnrjz"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "e\u0308", "c\u0327", "Ë", "ﬁ", "Dvořák", "Ångström", "mprehtë", "shtëpi", "ndrrojnë", "gjuhë", "xhaxha", "atlas", "qytet"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e9 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
+        }
+    },
+    // ── Asturian (ast). Inputs: the ast golden, FLEURS ast_es (columns 3 and 4) and probes/ast.txt. ──
+    // normalizeAsturian, the symbol tier over its output (recorded through the wrapper) and `createAsturian().text`,
+    // over every text plus synthetic rows for every arm: grouping with every separator and the decimal neighbour,
+    // the dot decimal, era markers mid-text and text-final (with a closing quote), Roman and numeric month dates
+    // over every month and out-of-range neighbours, the clock over an hour × minute grid, degrees with a scale /
+    // minutes / each licensed tail, minus forms, dash and hyphen ranges with their declining neighbours.
+    async "ast-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeAsturian } = await import("../../../src/languages/asturian/normalize.ts");
+        const { createAsturian } = await import("../../../src/languages/asturian/asturian.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/asturian\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createAsturian();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ast"], FLEURS_DIR.ast, ["ast.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1,5 000", "12.5", "3.14", "1.000,5", "1.5.6"]) add(`hai ${g} persones`);
+        for (const e of ["e.C.", "e. C.", "e.C", "d.C.", "d. C .", "ae.C."]) for (const tail of ["", ".", "\"", " »", " y depués", ")"]) add(`nel añu 300 ${e}${tail}`);
+        for (const r of ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "IIII", "VV"]) add(`el 12-${r}-1990 foi`);
+        for (let mo = 0; mo <= 13; mo++) add(`el 5-${mo}-2001 y el 05 - ${mo} - 199 foi`);
+        for (const h of ["0", "1", "09", "12", "23", "24", "25"]) for (const m of ["00", "05", "30", "59", "60"]) add(`a les ${h}:${m} hores`);
+        for (const d of ["20 °C", "20°c", "90ºF", "20° 30′", "20°30'", "20° de llatitú", "20° y", "20° col", "20° na", "20°.", "20°)", "20°", "20° N", "20°S", "20°x", "20° dena"]) add(`tenía ${d} agora`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", "x-5", " - 5"]) add(`valor ${m} grados`);
+        for (const r of ["1990–2000", "5—8", "1990-2000", "5 - 8", "5-8-9", "1/5-8", "5-8/9", "a5-8", "1.5-2"]) add(`ente ${r} años`);
+        for (const [t, src] of rows) {
+            const a = normalizeAsturian(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("ast", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "ast-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/asturian/asturian.ts");
+        const { numberToWords } = await import("../../../src/languages/asturian/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñáéíóúüïḥḷA-ZÑÁÉÍÓÚÜÏḤḶ'·]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("ast")) for (const m of t.matchAll(/[\p{L}\p{M}'’·-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñáéíóúüïḥḷ'·"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouüqgcynrlbpm"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "l\u0323l\u0323", "ḷḷ", "Ḷḷ", "n\u0303", "ﬁ", "Dvořák", "Ångström", "xylo", "güeyu", "quixu", "ḥuerta"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // ── Aragonese (an). Inputs: the an golden and probes/an.txt; FLEURS has no Aragonese, so the synthetic rows and
+    // the probes carry every arm the golden misses. ──
+    // normalizeAragonese, the symbol tier over its output (recorded through the wrapper) and `createAragonese().text`,
+    // over every text plus synthetic rows for every arm: grouping with every separator, the dot decimal, era markers
+    // mid-text and text-final, numero/lumero, hab./ and m.a., the clock over an hour × minute grid, minus forms (and
+    // the clock exclusion), degrees with a scale / minutes / each compass point / each licensed tail, ranges.
+    async "an-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeAragonese } = await import("../../../src/languages/aragonese/normalize.ts");
+        const { createAragonese } = await import("../../../src/languages/aragonese/aragonese.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/aragonese\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createAragonese();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["an"], undefined, ["an.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "12.5", "3.14", "1.000,5", "1.5.6"]) add(`bi ha ${g} personas`);
+        for (const e of ["a.C.", "a. C.", "a.C", "d.C.", "d. C .", "ba.C."]) for (const tail of ["", ".", "\"", " »", " y dimpués", ")"]) add(`en l'anyo 300 ${e}${tail}`);
+        for (const a of ["n.º 5", "nº5", "n° 3", "n.5", "lum. 7", "lum.x", "5 hab./km²", "5hab./km2", "5 hab. en", "3 m.a.", "3m. a.", "3 m.a"]) add(`ye ${a} aquí`);
+        for (const h of ["0", "1", "09", "12", "23", "24", "25"]) for (const m of ["00", "05", "30", "59", "60"]) add(`a las ${h}:${m} horas`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", "-5:30", "-12:00", " - 5"]) add(`valor ${m} graus`);
+        for (const d of ["20 °C", "20°c", "90ºF", "20° 30′", "20°30'", "20° N", "20°S", "20° E", "20°U", "20°Na", "20° de latitut", "20° y", "20° en", "20°.", "20°(", "20°", "20°x", "20° dena", "20° W"]) add(`teneba ${d} agora`);
+        for (const r of ["1990–2000", "5—8", "1990-2000", "5 - 8", "5-8-9", "1/5-8", "5-8/9", "a5-8", "1.5-2"]) add(`entre ${r} anyos`);
+        for (const [t, src] of rows) {
+            const a = normalizeAragonese(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("an", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "an-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/aragonese/aragonese.ts");
+        const { numberToWords } = await import("../../../src/languages/aragonese/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñáéíóúüïA-ZÑÁÉÍÓÚÜÏ'·]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("an")) for (const m of t.matchAll(/[\p{L}\p{M}'’·-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñáéíóúüï'·"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouüqgcynrlbpmt"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "n\u0303", "ﬁ", "Dvořák", "Ångström", "xylo", "chesús", "fer", "mullers", "agüelo", "quiet", "gent"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // ── Occitan (oc). Inputs: the oc golden, FLEURS oc_fr (columns 3 and 4) and probes/oc.txt. ──
+    // normalizeOccitan, the symbol tier over its output (recorded through the wrapper) and `createOccitan().text`,
+    // over every text plus synthetic rows for every arm: grouping with every separator, the dot decimal, both era
+    // markers in their dotted/undotted spellings and neighbours, the clock over an hour × minute grid, minus forms,
+    // degrees with a scale / minutes / bare and inside the `in-4°` book format, dash and hyphen ranges.
+    async "oc-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeOccitan } = await import("../../../src/languages/occitan/normalize.ts");
+        const { createOccitan } = await import("../../../src/languages/occitan/occitan.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/occitan\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createOccitan();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["oc"], FLEURS_DIR.oc, ["oc.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1.000", "12.5", "3.14", "1,5 000", "1.5.6"]) add(`i a ${g} personas`);
+        for (const e of ["ab. C.", "av. C.", "abC", "av.C", "ap. C.", "apC.", "ap. Ca", "xap. C.", "ab. c."]) add(`en 300 ${e} e après`);
+        for (const h of ["0", "1", "09", "12", "23", "24", "25"]) for (const m of ["00", "05", "30", "59", "60"]) add(`a ${h}:${m} oras`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", " - 5"]) add(`valor ${m} graus`);
+        for (const d of ["20 °C", "20°c", "90°F", "20° 30′", "20°30'", "20°", "20° N", "in-4°", "in-12° C", "in-8°30'", "fin-4°", "20°Ca"]) add(`aviá ${d} ara`);
+        for (const r of ["1990–2000", "5—8", "1990-2000", "5 - 8", "5-8-9", "1/5-8", "5-8/9", "a5-8", "1.5-2"]) add(`entre ${r} ans`);
+        for (const [t, src] of rows) {
+            const a = normalizeOccitan(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("oc", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "oc-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/occitan/occitan.ts");
+        const { numberToWords } = await import("../../../src/languages/occitan/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zàèòáéíóúïüçA-ZÀÈÒÁÉÍÓÚÏÜÇ'·-]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("oc")) for (const m of t.matchAll(/[\p{L}\p{M}'’·-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzàèòáéíóúïüç'·-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouòqgcsnrdbtz"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "a\u0300", "c\u0327", "ﬁ", "Dvořák", "Ångström", "xylo", "lenga", "occitana", "casa", "rosa", "pan", "amor", "grand", "nuèit"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
     },
     // ── The Bengali maker (bn, and as / bpy, which build it from their own manifests). LANGS (default bn,as,bpy).
     // Inputs: each language's golden, FLEURS (bn_in, as_in) and probes (bn.txt for all three, plus the language's

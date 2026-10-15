@@ -1,8 +1,12 @@
 pub mod afrikaans;
+pub mod albanian;
+pub mod aragonese;
 pub mod assamese;
+pub mod asturian;
 pub mod awadhi;
 pub mod azerbaijani;
 pub mod bashkir;
+pub mod basque;
 pub mod bavarian;
 pub mod belarusian;
 pub mod bengali;
@@ -36,6 +40,7 @@ pub mod hungarian;
 pub mod icelandic;
 pub mod ilocano;
 pub mod indonesian;
+pub mod irish;
 pub mod italian;
 pub mod japanese;
 pub mod karakalpak;
@@ -54,6 +59,7 @@ pub mod marathi;
 pub mod nepali;
 pub mod nogai;
 pub mod norwegian;
+pub mod occitan;
 pub mod odia;
 pub mod polish;
 pub mod portuguese;
@@ -61,6 +67,7 @@ pub mod portuguese_br;
 pub mod rangpuri;
 pub mod romanian;
 pub mod russian;
+pub mod scottishgaelic;
 pub mod serbian;
 pub mod slovak;
 pub mod slovenian;
@@ -76,6 +83,7 @@ pub mod turkish;
 pub mod turkmen;
 pub mod ukrainian;
 pub mod uzbek;
+pub mod welsh;
 
 /// The fraction guards are mirrors in the ported `\b…\b` family and Italian (#1495). Relational, as
 /// test/fraction-guards-1495.test.ts: a declined fraction reads as its numbers spaced.

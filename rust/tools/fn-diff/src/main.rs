@@ -2484,6 +2484,212 @@ fn main() {
                 }
             })
         }
+        "cy-normalize" | "cy-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let cy = vernacula_phonemizer::languages::welsh::welsh::create_welsh().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => cy.normalize(&t()),
+                    "symbols" => cy.symbols(&t()),
+                    "text" => with_host(&js("cy"), || cy.text(&t())),
+                    "ordinal" => cy.ordinal_words(n()).unwrap_or_else(|| js("\u{0}none")),
+                    "soften" => cy.soften(&w()),
+                    "word" => cy.phonemize_word(&w()),
+                    "nat" => cy.nativise(&w()),
+                    "segs" => {
+                        let parts: Vec<JsString> = cy
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&js(&format!("/{}{}", s.nucleus as u8, s.long as u8)))
+                            })
+                            .collect();
+                        JsString::join(&parts, &js(" "))
+                    }
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        cy.number_to_words(n(), raw.as_ref())
+                    }
+                }
+            })
+        }
+        "ga-normalize" | "ga-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let ga = vernacula_phonemizer::languages::irish::irish::create_irish().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let n = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ga.normalize(&t()),
+                    "symbols" => ga.symbols(&t()),
+                    "text" => with_host(&js("ga"), || ga.text(&t())),
+                    "ordinal" => ga
+                        .ordinal_words(n(), &units(&input["noun"]))
+                        .unwrap_or_else(|| js("\u{0}none")),
+                    "word" => ga.phonemize_word(&w()),
+                    "g2p" => ga.g2p_word(&w()),
+                    "nat" => ga.nativise(&w()),
+                    "segs" => {
+                        let parts: Vec<JsString> = ga
+                            .segments(&w())
+                            .iter()
+                            .map(|s| {
+                                s.ph.concat(&js(&format!(
+                                    "/{}{}",
+                                    s.nucleus as u8, s.no_glide as u8
+                                )))
+                            })
+                            .collect();
+                        JsString::join(&parts, &js(" "))
+                    }
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        ga.number_to_words(n(), raw.as_ref())
+                    }
+                }
+            })
+        }
+        "gd-normalize" | "gd-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let gd =
+                vernacula_phonemizer::languages::scottishgaelic::scottishgaelic::create_scottish_gaelic()
+                    .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => gd.normalize(&t()),
+                    "symbols" => gd.symbols(&t()),
+                    "text" => with_host(&js("gd"), || gd.text(&t())),
+                    "word" => gd.phonemize_word(&w()),
+                    "nat" => gd.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        gd.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "eu-normalize" | "eu-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let eu = vernacula_phonemizer::languages::basque::basque::create_basque().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => eu.normalize(&t()),
+                    "text" => with_host(&js("eu"), || eu.text(&t())),
+                    "word" => eu.phonemize_word(&w()),
+                    "nat" => eu.nativise(&w()),
+                    _ => eu.cardinal_words(input["n"].as_str().unwrap().parse().unwrap()),
+                }
+            })
+        }
+        "sq-normalize" | "sq-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let sq =
+                vernacula_phonemizer::languages::albanian::albanian::create_albanian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => sq.normalize(&t()),
+                    "text" => with_host(&js("sq"), || sq.text(&t())),
+                    "word" => sq.phonemize_word(&w()),
+                    "nat" => sq.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        sq.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "ast-normalize" | "ast-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let ast =
+                vernacula_phonemizer::languages::asturian::asturian::create_asturian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ast.normalize(&t()),
+                    "symbols" => ast.symbols(&t()),
+                    "text" => with_host(&js("ast"), || ast.text(&t())),
+                    "word" => ast.phonemize_word(&w()),
+                    "nat" => ast.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        ast.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "an-normalize" | "an-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let an =
+                vernacula_phonemizer::languages::aragonese::aragonese::create_aragonese().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => an.normalize(&t()),
+                    "symbols" => an.symbols(&t()),
+                    "text" => with_host(&js("an"), || an.text(&t())),
+                    "word" => an.phonemize_word(&w()),
+                    "nat" => an.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        an.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
+        "oc-normalize" | "oc-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let oc = vernacula_phonemizer::languages::occitan::occitan::create_occitan().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => oc.normalize(&t()),
+                    "symbols" => oc.symbols(&t()),
+                    "text" => with_host(&js("oc"), || oc.text(&t())),
+                    "word" => oc.phonemize_word(&w()),
+                    "nat" => oc.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        oc.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         "bengali-family" => {
             let cache: std::cell::RefCell<std::collections::HashMap<String, BengaliFamilyFn>> =
                 Default::default();
