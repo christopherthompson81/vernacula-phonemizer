@@ -49,6 +49,7 @@ const FLEURS_DIR: Record<string, string> = {
     mk: "mk_mk",
     ne: "ne_np",
     mr: "mr_in",
+    fi: "fi_fi",
 };
 
 /**
@@ -2733,6 +2734,75 @@ const dumps: Record<string, () => void | Promise<void>> = {
             for (const n of ns) emit({ lang, n: String(n), raw: null }, composeSlavicNumber(n, N as never));
             for (const raw of ["12345678901234567890", "0001", "000", "1000000000", "9007199254740993", "", "1a2", "１２", "𝟗9"])
                 emit({ lang, n: String(Number(raw)), raw: units(raw) }, composeSlavicNumber(Number(raw), N as never, raw));
+        }
+    },
+    // ── Finnish (fi). Inputs: the fi golden, FLEURS fi_fi (columns 3 and 4) and probes/fi.txt. ──
+    // Each stage of text()'s chain (normalizeFinnish, the initialism pass over its output, the symbol tier over
+    // that, recorded through the wrapper), the phonotactic test on every letter run, synthetic rows (numbers ×
+    // the ordinal heads, dotted dates, the clock grid behind each marker, decimals, colon suffixes), and
+    // `ordinal` over 0…1200 and corners.
+    async "fi-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/finnish/normalize.ts");
+        await import("../../../src/languages/finnish/finnish.ts");
+        const rec = records.find((r) => /src\/languages\/finnish\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["fi"], FLEURS_DIR.fi, ["fi.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const heads = ["toukokuuta", "päivänä", "kesäkuu", "herttuatar", "Jakokoski", "", "(PDF)", "5.", "– 24. lokakuuta", "–24. heinäkuuta", "—3. sija"];
+        for (const n of ["0", "1", "2", "9", "10", "11", "19", "20", "21", "22", "99", "100", "101", "126", "200", "999", "1000", "1978", "007"])
+            for (const h of heads) for (const pre of ["", "vuonna ", "s. ", "k. ", "V. ", "a"]) add(`${pre}${n}. ${h}`);
+        for (const d of ["0", "1", "13", "31", "32", "01"]) for (const mo of ["0", "1", "5", "12", "13", "07"]) { add(`${d}.${mo}.2019`); add(`${d}.${mo}. alkaen`); add(`x ${d}.${mo}.19`); }
+        for (const p of ["kello ", "klo ", "klo. ", "Kello ", "(", ""]) for (const h of ["0", "9", "21", "23", "24", "06"]) for (const m of ["00", "01", "30", "59", "60"]) {
+            add(`${p}${h}.${m} UTC`); add(`${p}${h}:${m} ja 7.${m} välisenä`); add(`${p}${h}.${m},43`);
+        }
+        for (const x of ["3,14", "50,7 %", "13,6 cm", "1,2,3", "0,001 km/h", "12 , 5", "33:s", "1000:s", "850:n", "55 kg:n", "53 %:lla", "°C:n", "km²:iin", "5 m:ssä"]) add(x);
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            const a = N.normalizeFinnish(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            const b = N.normalizeFinnishInitialisms(a);
+            emit({ text: units(a), src, op: "initialisms" }, b);
+            emit({ text: units(b), src, op: "symbols" }, rec.apply(b));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableFinnish(w)));
+        const ns: number[] = [];
+        for (let i = 0; i <= 1200; i++) ns.push(i);
+        ns.push(1.5, -1, -0, NaN, Infinity, 999.5, 1e9);
+        for (const n of ns) emit({ n: String(n), op: "ordinal" }, N.ordinal(n) ?? "\u0000none");
+    },
+    // phonemizeWord over every letter run of the texts (as written and lowercased), every 1–3 letter string of the
+    // alphabet plus loan and foreign letters, every 4-letter string of the context letters (n g k, doubled
+    // consonants, the diphthong vowels), and corners; the nativiser over them and foreign names; then
+    // numberToWords / readDigits.
+    async "fi-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/finnish/finnish.ts");
+        const { numberToWords, readDigits } = await import("../../../src/languages/finnish/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zäöåšž]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("fi")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzäöåšžéüñ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."ngkaieuoyäöh"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "NG", "Nk", "nng", "nkk", "kkk", "ŋ", "x", "xx", "hh", "Ää", "ÄÖ", "ẞ"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        for (const w of [...words, "São", "Müller", "Dvořák", "Ørsted", "Žižek", "Ångström", "Œuvre", "façade", "Tōkyō", "Nguyễn", "Słania"])
+            emit({ word: units(w), op: "nat" }, nat(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 21, k * 1e6, k * 1e6 + 2001, k * 1e6 + 1000);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 1e9 - 1, 1e9, 1.5, 2.7, -1, -21, -0, NaN, Infinity, -Infinity, 0.1, 1e-7, 22.5);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", " \t "]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000", raw: units(raw), op: "words" }, numberToWords(1e9, raw));
+            emit({ n: "0", raw: units(raw), op: "digits" }, readDigits(raw));
         }
     },
 };

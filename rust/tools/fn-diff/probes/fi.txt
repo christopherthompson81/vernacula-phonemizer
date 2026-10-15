@@ -1,0 +1,57 @@
+# Finnish (fi) synthetic probes: one line per normalize.ts arm plus the neighbour it must decline. Synthetic text only.
+# 1) space grouping (space, NBSP, NNBSP, thin space; a leading 0; a four-digit block)
+Kaupungissa asuu 1 786 ihmistä ja 1 600 000 lintua.
+Matka oli 12\u{a0}345 metriä ja 2\u{202f}500 askelta.
+Luku 3\u{2009}141 on pitkä, mutta 30 9 ei ole.
+Koodi 0 123 ja 1,0 456 sekä 12 3456 jäävät.
+# 2) abbreviations, each with its guard
+Hän (o. s. Virtanen) muutti, ja o.s. Koski jäi.
+Kaupunki perustettiin 2100 eaa. Myöhemmin se tuhoutui 400 jaa.
+Taiteilija (s. 21. helmikuuta 1966, k. 3. toukokuuta 2020) asui täällä.
+Tulos oli 10,3 s. ja 944 mm. Sateet jatkuivat; siellä on mm. eräs talo.
+Paino oli n. 259 km2 ja Volvo 850:n. Rinnakkaismalli tuli myöhemmin.
+Rakennus valmistui v. 1920 ja V. 1930 sitä laajennettiin; v. kesällä ei.
+Esim. tämä, jne. ja väh. kolme, milj. euroa sekä lyh. sana.
+Kylässä on 300 as. Kaupungissa 5 000 as.
+Nimi (engl. Algic languages, ven. Малюта, saks. Haus, arab. kitab, jap. kana) tuli.
+Kielet (kreik. logos, ital. casa, kiin. ma, kor. han, ukr. mova, puol. dom, mong. ger, arm. hay, esp. casa) ovat.
+Teksti päättyy esim.
+Teksti päättyy jne. "Uusi" lause alkaa.
+# 3) dotted dates
+Sopimus tehtiin 1.11.2019 ja 31.12. alkaen; 32.1.2019 ja 1.13.2019 eivät ole päiviä.
+Versio 1.2.3 ja H.264 sekä 0.5.2020 jäävät.
+# 4) the marked clock
+Juna lähti kello 21.01 ja klo 6.30 ja 7.30 välisenä aikana.
+Kokous alkoi kello 9.30 paikallista aikaa (2.30 UTC) ja (15.00 koordinoitua yleisaikaa).
+Ajalla 9.29,43 hän voitti ja kello 25.10 ei ole aika; klo. 10:00 on.
+Noin 11.29 protesti eteni ja (2.30 jotain) jäi.
+# 5) the bare ordinal and the ordinal range
+Hän syntyi 13. toukokuuta ja 18. herttuatar tuli 20.–24. toukokuuta.
+Joukkue sijoittui 101.–150. maailmassa ja 1000. sija jäi.
+Vuonna 1978. Jakokoski on kylä ja Sega Model 3.
+# 6–7) colon suffixes
+Hän oli 33:s ja 27:s, mutta 9:nnen ja 1000:s jäivät.
+Määrä 172001:stä ja 850:n sekä 53 %:lla ja 55 kg:n ja 20 °C:n ja 76 km²:iin.
+# 8) the apostrophe genitive and the hiatus mark
+Perrault’n ja Renault'lla sekä raa'asti ja vaa'an.
+# 9) the decimal comma
+Arvo 50,7 % ja 13,6 cm sekä 264,362 km/h ja 3,14159.
+# 10) degrees
+Lämpötila oli −34,3 °C ja 75° kulma sekä 100 °F ja 5℃ ja 41℉; 45°28′N.
+# 11) signs
+Pakkasta −2 °C, -5 ja +33,2 °C sekä (156+27) ja UTC+1; vuodet 1994–1997.
+# 11b) relational signs and the refused ones
+Merkintä 5 < 6 ja 7 > 3 sekä x = y; 6 ÷ 3 ja 2 ± 1.
+# 12) ampersand
+Robinson & Cook, B&B ja AT&amp;T sekä A＆B.
+# initialisms and the colon inflection
+CIA:n ja BKT:sta sekä YK:n ja EU:n ja AHL:ssä ja KTM:n ja V70:n.
+MM-kilpailuissa ja EM-kilpailuissa sekä USA ja IVY ja Nasa:n ja SARS.
+Kaikki Isot Kirjaimet ja SNTL ja HIFK ja UTC ja UKK.
+# symbol tier
+Nopeus 120 km/h ja 3 m/s, ala 76 km² ja 1 kg sekä 100 $ ja 5 € ja 1 850 miljardia dollaria.
+Laite 802.11m ja 4 096 × 2 304 sekä 2×15 minuuttia.
+# numbers and g2p corners
+Numero 1234567890 ja 999999999 sekä 0 ja 007.
+Kengät, sänky, kaupunki, kukka, tullut, mummo, pöytä, työ, vuosi ja Suomi.
+Šakki, žurnalisti, Åland, xenon, zeppeliini, quiz, watti ja cello.

@@ -1928,6 +1928,30 @@ fn main() {
                 },
             }
         }),
+        "fi-normalize" | "fi-g2p" => {
+            let fi = vernacula_phonemizer::languages::finnish::finnish::create_finnish().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => fi.normalize(&t()),
+                    "initialisms" => fi.normalize_initialisms(&t()),
+                    "symbols" => fi.symbols(&t()),
+                    "unreadable" => JsString::from(fi.is_unreadable(&t()).to_string().as_str()),
+                    "ordinal" => fi
+                        .ordinal(num())
+                        .unwrap_or_else(|| JsString::from("\u{0}none")),
+                    "word" => fi.phonemize_word(&w()),
+                    "nat" => fi.nativise(&w()),
+                    "digits" => fi.read_digits(&units(&input["raw"])),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        fi.number_to_words(num(), raw.as_ref())
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
