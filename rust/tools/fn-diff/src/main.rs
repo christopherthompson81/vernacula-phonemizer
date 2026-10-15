@@ -2735,6 +2735,30 @@ fn main() {
                 op => panic!("or: unknown op {op}"),
             })
         }
+        "dravidian" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::kannada;
+            let kn = kannada::kannada::create_kannada(None).unwrap();
+            let kn_def = kannada::manifest::try_manifest().unwrap();
+            Box::new(move |input| {
+                let lang = input["lang"].as_str().unwrap();
+                let op = input["op"].as_str().unwrap();
+                let n = || input["n"].as_str().unwrap().parse::<u64>().unwrap();
+                match (lang, op) {
+                    ("kn", "normalize") => kn.normalize(&units(&input["text"])),
+                    ("kn", "text") => with_host(&js("kn"), || kn.text(&units(&input["text"]))),
+                    ("kn", "word") => kn.phonemize_word(&units(&input["word"])),
+                    ("kn", "words") => kannada::numbers::number_to_words(n(), &kn_def.numbers),
+                    ("kn", "ordinal") => kannada::numbers::ordinal_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        &kn_def.numbers,
+                    ),
+                    _ => panic!("dravidian: unknown {lang} op {op}"),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

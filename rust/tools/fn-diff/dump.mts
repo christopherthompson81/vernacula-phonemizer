@@ -69,6 +69,10 @@ const FLEURS_DIR: Record<string, string> = {
     bn: "bn_in",
     as: "as_in",
     or: "or_in",
+    kn: "kn_in",
+    te: "te_in",
+    ta: "ta_in",
+    ml: "ml_in",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5037,6 +5041,102 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e), "12345678901234567890123".slice(0, e));
         for (const x of ["9007199254740991", "9007199254740993", "007", "୧୨୩", "୯୦୦୭୧୯୯୨୫୪୭୪୦୯୯୩"]) ns.push(x);
         for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, withHost("or", () => E.text(n)));
+    },
+    // ── The Dravidian group (kn, te, ta, ml, si), one entry over LANGS (default all five). Inputs per language: its
+    // golden, FLEURS (kn_in, te_in, ta_in, ml_in; none for si; columns 3 and 4) and probes/<code>.txt, plus synthetic
+    // grids over every normalizer arm and its declined neighbour. Ops: normalize and text over every text;
+    // phonemizeWord over every native run (raw and NFC), every consonant × sign/matra tail in four frames, conjuncts
+    // and corners; the number module's own exports over a value grid; text() over digit runs 0…3000, magnitudes and
+    // long runs in both digit scripts.
+    async dravidian() {
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const langs = (process.env.LANGS ?? "kn,te,ta,ml,si").split(",");
+        const nativeDigits = (zero: number) => (n: number | string): string =>
+            [...String(n)].map((d) => (d >= "0" && d <= "9" ? String.fromCodePoint(zero + Number(d)) : d)).join("");
+        const numberGrid = (): number[] => {
+            const ns: number[] = [];
+            for (let i = 0; i <= 3000; i++) ns.push(i);
+            for (let k = 1; k < 100; k++) ns.push(k * 1e3, k * 1e3 + 7, k * 1e5, k * 1e5 + 1001, k * 1e7, k * 1e7 + 100001, k * 1e9 + 21);
+            for (let e = 4; e <= 15; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 1);
+            ns.push(Number.MAX_SAFE_INTEGER, 123456789, 987654321012);
+            return ns;
+        };
+        const digitRuns = (zero: number): string[] => {
+            const ns: string[] = [];
+            for (let i = 0; i <= 3000; i++) ns.push(String(i));
+            for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e), "12345678901234567890123".slice(0, e));
+            for (const x of ["9007199254740991", "9007199254740993", "007", "123", "9007199254740993"]) { ns.push(x); ns.push(nativeDigits(zero)(x)); }
+            return ns;
+        };
+        type Engine = { text(s: string): string };
+        const run = (lang: string, rows: Map<string, string>, norm: (s: string) => string, E: Engine, word: (w: string) => string,
+            wordClass: RegExp, manifest: any, extraWords: string[], zero: number): void => {
+            for (const [t, src] of rows) {
+                emit({ lang, text: units(t), src, op: "normalize" }, norm(t));
+                emit({ lang, text: units(t), src, op: "text" }, withHost(lang, () => E.text(t)));
+            }
+            const words = new Set<string>();
+            for (const t of rows.keys()) { for (const m of t.normalize("NFC").matchAll(wordClass)) words.add(m[0]); for (const m of t.matchAll(wordClass)) words.add(m[0]); }
+            const s = manifest.signs as any;
+            const sign = (k: string): string[] => (s[k]?.char ? [s[k].char] : []);
+            const vs = Object.keys(manifest.vowelSigns);
+            const tails = ["", ...sign("virama"), ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga"), ...sign("nukta"),
+                ...vs, ...vs.flatMap((v) => sign("anusvara").map((a) => v + a)), ...vs.flatMap((v) => sign("virama").map((a) => v + a)), "‍", "‌"];
+            const cons = Object.keys(manifest.consonants);
+            const iv = Object.keys(manifest.independentVowels);
+            const c0 = cons[0]!, v0 = iv[0]!, v1 = iv[1] ?? v0, vir = sign("virama")[0] ?? "";
+            for (const c of cons) for (const t of tails) { words.add(c + t); words.add(c + t + c0); words.add(v0 + c + t + c0); words.add(v1 + c + t + vs[0]); }
+            for (const c of cons) for (const d of cons) { words.add(c + vir + d + vs[0]); words.add(v1 + c + vir + d); words.add(v0 + c + d + vir); }
+            for (const v of iv) for (const t of ["", ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga")]) { words.add(v + t); words.add(v + t + c0); words.add(c0 + v + t); }
+            for (const w of ["", "\ud800", ...extraWords]) words.add(w);
+            for (const w of words) emit({ lang, word: units(w), op: "word" }, word(w));
+            for (const n of digitRuns(zero)) emit({ lang, text: units(n), src: "number", op: "text" }, withHost(lang, () => E.text(n)));
+        };
+        const frames = (rows: Map<string, string>, pre: string, post: string, items: string[]): void => {
+            for (const it of items) for (const t of [`${pre} ${it} ${post}`, `${it}`, `${pre}${it}${post}`, `${pre} ${it}.`]) if (!rows.has(t)) rows.set(t, "synthetic");
+        };
+        const tierItems = (tier: any): string[] => {
+            const out: string[] = [];
+            for (const sg of Object.keys(tier.currency ?? {})) out.push(`${sg}50`, `${sg} 1,000`, `${sg}14.7`, `50${sg}`, `${sg}`, `${sg}5 ಲಕ್ಷ`);
+            for (const u of Object.keys(tier.units ?? {})) out.push(`5${u}`, `5 ${u}`, `1.5 ${u}`, `${u}`, `3 ${u}²`, `3 ${u}2`, `3 ${u}³`, `1 ${u}`);
+            out.push("50%", "5 %", "1%", "3×4", "3 x 4", "A & B", "a&b", "100 km/h", "3 km²", "10 m/s");
+            return out;
+        };
+        const L: Record<string, () => Promise<void>> = {
+            async kn() {
+                const N = await import("../../../src/languages/kannada/normalize.ts");
+                const { MANIFEST } = await import("../../../src/languages/kannada/manifest.ts");
+                const { createKannada, phonemizeWord } = await import("../../../src/languages/kannada/kannada.ts");
+                const E = createKannada();
+                const rows = textsFor(["kn"], FLEURS_DIR.kn, ["kn.txt"]);
+                const kd = nativeDigits(0x0ce6);
+                const items: string[] = [];
+                for (let n = 0; n <= 40; n++) for (const suf of ["ನೇ", "ನೆಯ", "ನೆಯದು", "ನೇದು", "ನೆ"]) items.push(`${n}${suf}`, `${n} ${suf}`, `${n}-${suf}`, `${n} - ${suf}ಗೆ`);
+                for (const n of ["100", "1000", "1,000", "100000", "10000000", "9007199254740993", "1.5", "1,00,000", kd(15)]) items.push(`${n}ನೇ`, `${n} ನೆಯದು`);
+                for (const e of ["ಕ್ರಿ.ಪೂ. 356", "ಕ್ರಿ.ಪೂ.5000", "ಕ್ರಿ.ಶ. 1000", "ಕ್ರಿ.ಪೂದಲ್ಲಿ", "ಕ್ರಿ . ಶ .", "ಕ್ರಿ.ಶ", "ಅಕ್ರಿ.ಪೂ", "ಕ್ರಿ.ಪೂ. ರಾಜ", "ಕ್ರಿ.ಪೂ.\nರಾಜ"]) items.push(e);
+                for (const k of ["5 ಕಿ.ಮೀ", "ಕಿ.ಮೀಯಲ್ಲಿ", "ಕಿಮೀ", "ಕಿಮಿನಷ್ಟು", "ಕಿ . ಮಿ", "ಮಿ.ಮೀ", "ಮಿ . ಮೀ", "ಅಕಿಮೀ", "ಕಿ.ಮೀ.", "ಕಿಮೀ.ರಾಜ"]) items.push(k);
+                for (const i of ["ಯು.ಎಸ್ ಸರ್ಕಾರ", "ಯು.ಎಸ್. ಸರ್ಕಾರ", "ಡಿ.ಕೆ.", "ಯು . ಎಸ್ . ಡಿ", "ಯು.ಎಸ್.", "ಎಸ್.ಯು.ಡಿ.ಕೆ ಶಿವಕುಮಾರ್", "ಯು.ಎಸ್ಗೆ", "ಯು.", "ಡಿ.ಕೆ. 5"]) items.push(i);
+                for (const r of ["83 ಕಿಮೀ/ಗಂ", "ಗಂಟೆಗೆ 83 ಕಿಮೀ/ಗಂ", "1.5 ಕಿ.ಮೀ/ಸೆ", "ಸೆಕೆಂಡಿಗೆ 1.5ಕಿಮಿ / ಸೆ.", "40 ಮೈ/ಗಂ.", "ಗಂಟೆಗೆ 40ಮೈ / ಗಂ", "165 ಕಿಮಿ/ಗಂ)", "5 ಕಿಲೋಮೀಟರ್/ಗಂಟೆ", "ಮೈ/ಗಂ"]) items.push(r);
+                for (const f of ["2½", "3 ¼", "½", "10¾ ಇಂಚು", "a½"]) items.push(f);
+                items.push(...tierItems(MANIFEST.symbolTier));
+                for (const h of ["0", "07", "9", "10", "12", "19", "23", "24", "123"]) for (const m of ["00", "05", "30", "59", "60", "5", " 00", "00.5"]) items.push(`${h}:${m}`);
+                items.push("10:00-11:00 pm", "2:11.60", "1:09.02", "11:00(UTC +1)ಕ್ಕೆ");
+                for (const d of ["3.5", "0.25", "1.2.3", "12.", ".5", "3.50 ಲಕ್ಷ", "1,234.56"]) items.push(d);
+                for (const g of ["1,000", "12,345,678", "0,500", "1990, 1991", "1,2345", "12,34", "10,00,000", "1,000ನೇ"]) items.push(g);
+                for (const x of ["+5", "a+5", "UTC+1", "+ 5", "5°", "5 ° C", "-5°", "5 < 6", "5 > 4", "a=b", "8÷2", "5<6 ಮತ್ತು 7>3", "x = y = z"]) items.push(x);
+                for (const z of ["ಪಾಯಿಂಟ್‌ಗಳಿಂದ", "ಕ‍ಗ", "﻿ಕನ್ನಡ", "1​,000", "೪ ಶೂಟರ್ಗಳಿಗೆ", kd(1976), `${kd(15)}%`]) items.push(z);
+                frames(rows, "ಅವರು", "ಆಗಿದೆ", items);
+                run("kn", rows, N.normalizeKannada, E, phonemizeWord, /[ಀ-೥೰-೿]+/gu, MANIFEST, ["ಳ್ಳ", "ಕೊಳ್ಳು", "ಅಂ", "ಅಂಗ", "ಹಂ", "ಂ", "ಕಂಂ", "೦", "ಽ", "ೠ", "ೱ"], 0x0ce6);
+                for (const n of numberGrid()) {
+                    emit({ lang: "kn", n: String(n), op: "words" }, N.numberToWords(n));
+                    for (const suf of ["ನೇ", "ನೆಯದು"]) emit({ lang: "kn", n: String(n), suffix: units(suf), op: "ordinal" }, N.ordinalToWords(n, suf));
+                }
+            },
+        };
+        for (const lang of langs) {
+            if (!Object.hasOwn(L, lang)) throw new Error(`dravidian: no entry for ${lang}`);
+            await L[lang]!();
+        }
     },
 };
 
