@@ -2218,6 +2218,35 @@ fn main() {
                 }
             })
         }
+        "da-normalize" | "da-g2p" | "da-tagger" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::core::structural_tagger::{default_stress_vowel, one_stress};
+            use vernacula_phonemizer::languages::danish::{danish, danish_tagger};
+            let da = danish::create_danish().unwrap();
+            let tagger = (name == "da-tagger")
+                .then(|| danish_tagger::create_danish_tagger("da-g2p-tagger").unwrap());
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => da.normalize(&t()),
+                    "text" => with_host(&js("da"), || da.text(&t(), None)),
+                    "rules" => da.phonemize_word_rules(&w()),
+                    "word" => da.phonemize_word(&w()),
+                    "nat" => da.nativise(&w()),
+                    "tag" => tagger.as_ref().unwrap().tag(&w()).unwrap(),
+                    "oneStress" => one_stress(&w(), default_stress_vowel()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        da.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

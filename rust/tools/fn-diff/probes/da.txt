@@ -1,0 +1,51 @@
+# Danish (da) off-golden probes: synthetic text only, one or more lines per normalize.ts arm plus the neighbour
+# each arm must decline, and g2p / tokenizer corners.
+# 1 period-grouped thousands (and the 802.11 shape, a leading zero, a fourth digit)
+Byen har 330.000 indbyggere og 7.000 biler.
+Der kom 1.234.567 mennesker.
+Standarden 802.11a er gammel.
+Prisen er 0.500 kroner og 12.3456 point.
+Han sagde 3.5 og 10.000.0 gange.
+# 2 decimal comma
+Det kostede 12,5 kroner eller 3,14159 dollar.
+# 3 colon clock
+Mødet starter 14:30 og slutter 9:05, ikke 123:456.
+Klokken 11:20 bad politiet om ro.
+# 4 abbreviations
+Vi mødes kl. 8 hos Dr. Hansen, bl.a. for at tale om nr. 5 osv. og f.eks. dvs. alt.
+KL. 9 og Kl. 10 og BL.A. tre.
+# 5 percent
+Renten steg 5 % og 12%.
+# 6 degrees
+Det var 20 °C og 68°F, så 25°Cölner og 35°V og 40° varmt, 30 ℃ og 86 ℉ i dag.
+Vandet var 5 ° koldt.
+# 7 squared and cubed units
+Huset er 120 m² og grunden 3 km² og 5 cm ² og 2 m³ jord.
+# 8 ordinal ranges
+I 10.-11. århundrede og 07.–08. århundrede og 40.-41. gang.
+# 9 coordinated ordinals
+Den 1. og 3. New Hampshire og 2. eller 4. bataljon og 07. og 08. Maj.
+# 10 ordinal dot
+Den 3. maj og 21. december, men året 1998. Så kom 31. august og 32. juli.
+# 11 ranges
+Mellem 1990-1995 og 10 – 20 men ikke 1-2-3 eller -5-6.
+# 12 currency
+Det koster 1000$ og $50 og €20 og 5£ og ¥2.500 og 11.000 US$ og AUD$ 5 og $110m.
+# 13 signed numbers
+Temperaturen var -5 grader og +30 og −12, men ikke a-5.
+# 14 arithmetic and relational
+Regn 2+3 og 4 + 5, x ± y, a ≈ b, c ≤ d, e ≥ f, g = h, i < j, k > l, 3 × 4, 8 ÷ 2.
+# 15 ampersand
+A&B og C ＆ D.
+# symbol tier: rates, multiply
+Toget kører 120 km/t og 90 km/h og 3 m/s, et 6x6 cm felt og 5 km.
+# tokenizer: medial apostrophe (two capitals decline), closing quote, genitive s
+FN's og USA's og DNA'et og REM'er, men Haiti's og O'Brien og Xi'an og Anders' bil, sagde 'nej'.
+Han sagde ’ja’ og Haiti’s.
+# g2p corners: af- prefix, unstressed prefixes, -er/-et/-en/-el, soft d, final t, c, ng/nk, silent h/d/g
+afbryde afrikansk betale forstå gemytlig undskyld erfaring
+lærer huset bogen cykel mad gade absolut cirkus cola musc
+sang tænke hjul hvad thomas land guld rolig dig kaffe
+ind hold vinden holde den der
+Galápagosøer taínoer Guaraníerne Haldarsvík Cañitas Chişinău Asunción
+gribletop vandby underdør flurpeskov

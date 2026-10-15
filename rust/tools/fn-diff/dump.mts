@@ -57,6 +57,7 @@ const FLEURS_DIR: Record<string, string> = {
     kk: "kk_kz",
     ky: "ky_kg",
     uz: "uz_uz",
+    da: "da_dk",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -3549,6 +3550,84 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const rows = new Map(textsFor(["tt"], undefined, ["tt.txt"]));
         for (const r of ["I", "II", "IV", "IX", "XIX", "XX", "XXI", "C", "MM", "L"]) for (const ctx of ["гасыр", "гасырда", "гасырларның", "йөзьеллык", "йөзъеллыкта", "ел", "гасырлык"]) { rows.set(`${r} ${ctx}`, "synthetic"); rows.set(`${ctx} ${r}`, "synthetic"); }
         for (const [t, src] of rows) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
+    // ── Danish (da). Inputs: the da golden, FLEURS da_dk (columns 3 and 4) and probes/da.txt. ──
+    // normalizeDanish (the symbol tier included) over every text plus synthetic rows for every arm: the thousands
+    // dot (3/4/2 digits, a leading zero, chained groups), the decimal comma, the colon clock, each abbreviation in
+    // three casings, percent, every degree form, squared units, ordinal ranges / coordinated / single (1…40, padded),
+    // ranges, every currency sign in both positions and before a letter, signs, relational signs, the ampersand;
+    // and `createDanish().text` over the same rows (the tokenizer and the number words).
+    async "da-normalize"() {
+        const { normalizeDanish } = await import("../../../src/languages/danish/normalize.ts");
+        const { createDanish } = await import("../../../src/languages/danish/danish.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const E = createDanish();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["da"], FLEURS_DIR.da, ["da.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["330.000", "1.000.000", "12.34", "1.2345", "0.500", "00.500", "10.000.0", "1.234,5", "3,00", "12,", ",5", "802.11"]) add(`der er ${g} mennesker`);
+        for (const c of ["9:05", "14:30", "24:60", "123:456", "1:2", "kl. 14:30"]) add(`ved ${c} i dag`);
+        for (const ab of ["kl.", "bl.a.", "f.eks.", "dvs.", "osv.", "nr.", "dr."]) for (const v of [ab, ab.toUpperCase(), ab[0]!.toUpperCase() + ab.slice(1)]) for (const tail of [" 5", "", " Så", "x"]) add(`det var ${v}${tail}`);
+        for (const d of ["20 °C", "20°c", "68 ° F", "25°Cölner", "35°V", "40°", "5 °", "30 ℃", "86℉", "°C", "12°Ca"]) add(`det er ${d} her`);
+        for (const u of ["km²", "km ²", "m²", "cm²", "m³", "mm²", "KM²"]) add(`et areal på 5 ${u} jord`);
+        for (let a = 0; a <= 40; a++) for (const tail of [". maj", ". Maj", ".", ".-" + (a + 1) + ". århundrede", ". og " + (a + 2) + ". bind", ". eller " + (a + 2) + ". New"]) add(`den ${a}${tail}`);
+        for (const a of ["01", "07", "10"]) for (const tail of [". maj", ".-08. århundrede", ". og 08. bind"]) add(`den ${a}${tail}`);
+        for (const r of ["1990-1995", "10 – 20", "1-2-3", "-5-6", "5—7", "a-5", "(−3)", "+30", "2+3", "4 + 5"]) add(`fra ${r} og så`);
+        for (const sgn of ["$", "€", "£", "¥"]) for (const f of [`1000${sgn}`, `1000 ${sgn}`, `${sgn}50`, `${sgn} 50`, `${sgn}110m`, `US${sgn}`, `${sgn}`]) add(`det koster ${f} nu`);
+        for (const r of ["±", "≈", "≤", "≥", "=", "<", ">", "×", "÷", "&", "＆"]) add(`a ${r} b og 3${r}4`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeDanish(t));
+            emit({ text: units(t), src, op: "text" }, withHost("da", () => E.text(t)));
+        }
+    },
+    // phonemizeWordRules and phonemizeWord over every letter run (as written and lowercased), every lexicon key,
+    // every 1–3 letter string of the alphabet, every 4-letter string over the context letters, corners; the
+    // nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "da-g2p"() {
+        const { phonemizeWordRules, phonemizeWord, nat, lexicon } = await import("../../../src/languages/danish/danish.ts");
+        const { numberToWords } = await import("../../../src/languages/danish/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("da")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzæøåéöäü'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiodtrcgnkhjvlf"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const p of ["af", "be", "for", "ge", "und", "er"]) for (const s of ["", "b", "r", "rt", "ste", "ler", "en", "et", "el", "ning", "e"]) words.add(p + s);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "ÆBLE", "Østerbro", "ÅEN", "é", "öl", "ﬁsk", "café", "naïve", "Müller"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "rules" }, phonemizeWordRules(w));
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        for (const k of lexicon().keys()) emit({ word: units(k), op: "word" }, phonemizeWord(k));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "9007199254740993", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // The BiLSTM tagger over every out-of-lexicon word of the texts (nativised, as the pre-pass offers it), every
+    // 25th lexicon key, and corners; oneStress over synthetic stress-mark arrangements.
+    async "da-tagger"() {
+        const { createDanishTagger } = await import("../../../src/languages/danish/danishTagger.ts");
+        const { oneStress } = await import("../../../src/core/structuralTagger.ts");
+        const { nat, lexicon, DA_WORD } = await import("../../../src/languages/danish/danish.ts");
+        const tagger = await createDanishTagger();
+        if (!tagger) throw new Error("da tagger unavailable");
+        const words = new Set<string>();
+        const re = new RegExp(DA_WORD, "gu");
+        for (const t of langTexts("da")) for (const m of t.matchAll(re)) words.add(nat(m[0]));
+        let i = 0;
+        for (const w of lexicon().keys()) if (i++ % 25 === 0) words.add(w);
+        for (const w of ["", "мир", "a☃b", "ÆBLE", "ég", "İsted", "ſkib", "x", "qqqq", "abcdefghijklmnopqrstuvwxyzæøå"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "tag" }, await tagger.tag(w));
+        for (const s of ["", "ˈa", "ˈˈa", "ˌˌa", "ˈaˈb", "ˌaˈb", "ˌa", "aˌbˌc", "ba", "bdə", "pst", "ˈˌaˌˈb", "kɐɐ", "øːˀ", "ˈaˌbˈc"])
+            emit({ word: units(s), op: "oneStress" }, oneStress(s));
     },
 };
 
