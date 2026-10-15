@@ -77,6 +77,8 @@ export const isUnreadableDutch = makeUnreadableTest({
     legalCodas: new Set(MANIFEST.phonotactics.codas),
 });
 const ACRONYM_LETTERS: ReadonlySet<string> = new Set(MANIFEST.acronymLetters);
+/** Words after which a dotted `N.NN` is a section/figure/version number, not a clock (#1551; dutch.jsonc). */
+const SECTION_WORDS: ReadonlySet<string> = new Set(MANIFEST.sectionWords);
 
 /** Dutch has no pronunciation dictionary that records acronym readings (nl-stems.txt is a morphological
  *  stem list, not an attested-pronunciation table), so — as in German — the lexical facts live entirely in
@@ -190,8 +192,13 @@ export function normalizeDutch(input: string): string {
     };
     s = rewrite(s, /(?<![\d:])([01]?\d|2[0-3]):([0-5]\d)(?![:\d])(\s*uur)?/gu,
         (_m, h: string, min: string, uur?: string) => clock(h, min, uur));
+    //    ⚠ NOT AFTER A SECTION WORD (#1551): `hoofdstuk 3.12` read *drie uur twaalf*. The dot form is a clock
+    //    unless the preceding word names a section, figure, article or version (dutch.jsonc `sectionWords`).
     s = rewrite(s, /(?<![\d.,:])([01]?\d|2[0-3])\.([0-5]\d)(?![\d.,:])(\s*uur)?/gu,
-        (_m, h: string, min: string, uur?: string) => clock(h, min, uur));
+        (m0, h: string, min: string, uur: string | undefined, offset: number, full: string) => {
+            const prev = /([\p{L}\p{M}]+\.?)\s+$/u.exec(full.slice(0, offset))?.[1]?.toLowerCase();
+            return prev !== undefined && SECTION_WORDS.has(prev) ? m0 : clock(h, min, uur);
+        });
 
     // 6-7) SQUARED UNITS and RATES are composed by the shared symbol tier — see `unitPer`,
     //    `rateDenominators` and `exponentWords` in dutch.ts. Migrating them off the local rules was

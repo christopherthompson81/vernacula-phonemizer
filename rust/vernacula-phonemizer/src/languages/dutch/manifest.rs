@@ -99,6 +99,8 @@ pub struct DutchManifest {
     pub acronym_letters: Vec<String>,
     pub numbers: Numbers,
     pub vowel_letters: String,
+    /// Words after which a dotted `N.NN` is a section/figure/version number, not a clock (#1551).
+    pub section_words: Vec<String>,
     pub function_words: IndexMap<String, String>,
     pub morphology: Morphology,
     pub letter_names: IndexMap<String, String>,

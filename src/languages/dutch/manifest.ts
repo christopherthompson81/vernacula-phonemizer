@@ -33,6 +33,8 @@ export interface DutchManifest {
     };
     /** The ORTHOGRAPHIC vowel letters. ⚠ Not `vowelChars`, which is the IPA set. */
     vowelLetters: string;
+    /** Words after which a dotted `N.NN` is a section/figure/version number, not a clock (#1551). */
+    sectionWords: string[];
     /** Function words / clitics → their reduced (schwa) IPA reading. */
     functionWords: Record<string, string>;
     morphology: {

@@ -98,6 +98,12 @@
     "voicedFinal": { "b": "p", "d": "t", "v": "f", "z": "s", "ɣ": "x", "ʒ": "ʃ" },
 
     // Clause / phrase punctuation → canonical inline pause marks.
+    // Words after which a dotted number `3.12` is a SECTION, FIGURE or VERSION number, not a clock (#1551). Dutch
+    // writes a clock with a dot (Onze Taal, "tijden noteren": `12.30 uur`) and a decimal with a comma, so a dotted
+    // pair is a clock unless something says otherwise; these words do. All 17 dotted clocks in FLEURS nl follow
+    // other words (om, rond, tussen, vanaf, …). How the section number is SPOKEN is not sourced, so it is only
+    // released from the clock rule and reads as `figuur 1.1` already does. Matched lowercase, dot included.
+    "sectionWords": ["hoofdstuk", "paragraaf", "par.", "sectie", "artikel", "art.", "figuur", "fig.", "tabel", "bijlage", "versie", "lid", "stap"],
     // High-frequency function words and clitics whose vowel is reduced to schwa. ⚠ WORD→IPA, unlike English's
     // `unstressedWords`, which is a bare list — Dutch names the reduced reading itself because the g2p's
     // first-syllable rule would otherwise give a full vowel (de → deː). The numeral/article "een" is

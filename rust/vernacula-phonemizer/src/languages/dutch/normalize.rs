@@ -262,6 +262,15 @@ pub(crate) fn normalize_dutch(input: &JsString) -> JsString {
             "gu"
         ),
         |m, t| {
+            // Not after a section word (#1551): `hoofdstuk 3.12` is not a clock. See the TS twin.
+            let before = t.slice(0, Some(m.index() as isize));
+            let prev = js_re!(r"([\p{L}\p{M}]+\.?)\s+$", "u")
+                .exec(&before)
+                .and_then(|p| p.group(1, &before))
+                .map(|p| p.to_lower_case().to_string_lossy());
+            if prev.is_some_and(|p| MANIFEST.section_words.contains(&p)) {
+                return m.value(t);
+            }
             clock(
                 &m.group(1, t).unwrap(),
                 &m.group(2, t).unwrap(),

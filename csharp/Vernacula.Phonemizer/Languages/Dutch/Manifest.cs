@@ -51,6 +51,8 @@ public sealed class DutchManifest
     public string VowelChars { get; init; } = "";
     /** The ORTHOGRAPHIC vowel letters. ⚠ Not `VowelChars`, which is the IPA set. */
     public string VowelLetters { get; init; } = "";
+    /** Words after which a dotted `N.NN` is a section/figure/version number, not a clock (#1551). */
+    public IReadOnlyList<string> SectionWords { get; init; } = Array.Empty<string>();
     /** Function words / clitics → their reduced (schwa) IPA reading. */
     public IReadOnlyDictionary<string, string> FunctionWords { get; init; } = new Dictionary<string, string>();
     public IReadOnlyList<string> ConsonantPhones { get; init; } = Array.Empty<string>();

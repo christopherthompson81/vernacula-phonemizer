@@ -108,6 +108,8 @@ public static class Normalize
     private static readonly JsRe ABBREV_END = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({ABBREV_ALT})\\.(?=\\s*(?:[.,;:!?\u00bb)]|$))", "giu");
     private static readonly JsRe ORDINAL = JsRegex.Compile("(?<![\\d,.])(\\d{1,4})(?:ste[n]?|de[n]?|e)(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):([0-5]\\d)(?![:\\d])(\\s*uur)?", "gu");
+    private static readonly HashSet<string> SECTION_WORDS = new(Manifest.MANIFEST.SectionWords, StringComparer.Ordinal);
+    private static readonly JsRe PREV_WORD = JsRegex.Compile("([\\p{L}\\p{M}]+\\.?)\\s+$", "u");
     private static readonly JsRe CLOCK_DOT = JsRegex.Compile("(?<![\\d.,:])([01]?\\d|2[0-3])\\.([0-5]\\d)(?![\\d.,:])(\\s*uur)?", "gu");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d)\\s?\u00b0\\s?C(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_F = JsRegex.Compile("(\\d)\\s?\u00b0\\s?F(?![\\p{L}\\p{M}])", "gui");
@@ -166,8 +168,14 @@ public static class Normalize
         // hands an EMPTY string, so the group's Success is what decides here.
         s = Rewrite(s, CLOCK_COLON, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
             m.Groups[3].Success ? m.Groups[3].Value : null));
-        s = Rewrite(s, CLOCK_DOT, m => Clock(m.Groups[1].Value, m.Groups[2].Value,
-            m.Groups[3].Success ? m.Groups[3].Value : null));
+        // Not after a section word (#1551): `hoofdstuk 3.12` is not a clock. See src/languages/dutch/normalize.ts.
+        var dotIn = s;
+        s = Rewrite(s, CLOCK_DOT, m =>
+        {
+            var pm = PREV_WORD.Match(dotIn[..m.Index]);
+            if (pm.Success && SECTION_WORDS.Contains(Js.ToLowerCase(pm.Groups[1].Value))) return m.Value;
+            return Clock(m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Success ? m.Groups[3].Value : null);
+        });
 
         s = Rewrite(s, DEG_C, "$1 graden Celsius");
         s = Rewrite(s, DEG_F, "$1 graden Fahrenheit");
