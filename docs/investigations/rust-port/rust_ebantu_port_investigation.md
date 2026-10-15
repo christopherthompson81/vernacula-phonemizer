@@ -262,3 +262,36 @@ tone-mark slots composed and decomposed, 4-letter context strings); mutations; e
 
 **Implication.** ln done. TS defect to report (not fixed): lingala/normalize.ts's French ordinal rule `(\d+)e` has no
 digit guard after the `e`.
+
+## Run 7 — 2026-10-15 07:05 (nya)
+
+**What was written.** `languages/chichewa/{manifest,numbers,normalize,chichewa}.rs`. The symbol tier's tables are
+generated from chichewa.ts's object literals (key order kept; no integer-like keys); the tier runs on the raw input
+BEFORE normalize.ts, as in the TS. The clock pattern is a template (its two NBSPs cooked, so the one `NB` escape
+constant); the rest keep their regex-literal escapes. The registry code is `nya` (FLEURS directory `ny_mw`).
+
+**Command.** `parity -- nya`; audits; `regs.sh nya` + `newonly.py nya`; `nya-normalize` (golden, FLEURS ny_mw
+columns 3+4, `probes/nya.txt`, generated arms; normalize / symbols / text) / `nya-g2p`; two mutations; e2e + trace +
+symbols; provenance-poison; pins.
+
+**Raw finding.**
+- `nya: 200/200 identical`, first build.
+- Audits: 21 raw patterns, 2 misses (the TOKEN and clock templates, checked by the compiled comparison); 11
+  non-ASCII runs, 0 missing; U+00A0 `TS 15, Rust 14` (the clock template's two cooked NBSPs are the one `NB`
+  constant). `newonly.py nya`: `rust 82, rust-only 13, of which core baseline 13, other 0`.
+- `nya-normalize: 17138 identical, 0 DIFFER` (golden 600, fleurs 11538, probe 45, synthetic 1341, number 3614);
+  `nya-g2p: 252417 identical, 0 DIFFER`.
+- Mutations (the loan magnitude's multiplier series class-6 → citation; the clock's hour ceiling 23 → 22):
+  `nya-normalize: 16679 identical, 459 DIFFER` (golden 9, fleurs 2, number 406), `nya-g2p: 251513 identical, 904
+  DIFFER`. Reverted: 17138/0, 252417/0.
+- `phonemize-sync / phonemize-best / phonemize-trace / trace: 4061 identical, 0 DIFFER` each; `symbols: 7118
+  identical, 0 DIFFER`; provenance-poison `0` sites; test/chichewa.test.ts `103 pinned, 0 skipped; expects
+  evaluated: 106, failures: 0` (49 normalizeChichewa, 33 numberToWords, 21 phonemize); both Rust tests pass.
+
+**Reading for correctness** (TS prints, `t.mts nya`): the rw decimal shape again — the decimal rules take only
+`\d{1,2}` after the mark, so `0.125` reads `ziro .` and then 125, and `3.14159` reads `zitatu .` and then 14,159.
+Recorded, not defects: an unmarked `7:30` reads two numbers with a pause (the clock rule needs a meridiem, zone or
+day-part); `-5` loses its sign; `1/2` reads `chimodzi ziwiri`; `5 m/s` leaves a raw `s`.
+
+**Implication.** nya done; all six ported. TS defect to report (not fixed): chichewa/normalize.ts reads a decimal with
+≥3 fractional digits as a sentence break plus an integer (the rw/rn shape).

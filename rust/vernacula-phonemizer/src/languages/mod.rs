@@ -18,6 +18,7 @@ pub mod burmese;
 pub mod catalan;
 pub mod cebuano;
 pub mod chhattisgarhi;
+pub mod chichewa;
 pub mod chuvash;
 pub mod crimeantatar;
 pub mod croatian;
