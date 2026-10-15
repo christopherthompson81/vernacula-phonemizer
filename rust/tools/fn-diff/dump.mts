@@ -73,6 +73,7 @@ const FLEURS_DIR: Record<string, string> = {
     te: "te_in",
     ta: "ta_in",
     ml: "ml_in",
+    vi: "vi_vn",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5269,6 +5270,73 @@ const dumps: Record<string, () => void | Promise<void>> = {
             if (!Object.hasOwn(L, lang)) throw new Error(`dravidian: no entry for ${lang}`);
             await L[lang]!();
         }
+    },
+    // ── Vietnamese (vi). Inputs: the vi golden, FLEURS vi_vn (columns 3 and 4) and probes/vi.txt. ──
+    // normalizeVietnamese, the symbol tier over its output (recorded through the wrapper) and the registry's vi engine
+    // (`renderInHost`: English foreign reader, vi's host scope, no pre-pass), over every text plus synthetic rows for every arm: sup markup,
+    // clock ranges, sports times and clocks over an hour × minute × tail grid, the rate units, degrees, dot/comma
+    // grouping and decimals, dash ranges both directions, fractions, ×, plus, minus/±, the relational signs, the era
+    // abbreviations and the initialism gate (lowercase present, single token, all caps).
+    async "vi-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeVietnamese } = await import("../../../src/languages/vietnamese/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/vietnamese\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["vi"], FLEURS_DIR.vi, ["vi.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const h of ["0", "1", "07", "9", "12", "19", "20", "23", "24", "29", "123"]) for (const m of ["00", "05", "30", "59", "60", "5"]) for (const tail of ["", " giờ", " giờa", "giờ", ",", ", x", ",5", ":10", "5", " phút"]) add(`lúc ${h}:${m}${tail} nay`);
+        for (const r of ["10:00-11:00", "9:15 – 17:45", "23:59—00:00", "1:2-3:4", "10:00 - 11:0", "123:45-12:00"]) add(`mở ${r} ngày`);
+        for (const sp of ["4:41,30", "2:11,60 phút", "2:11,60 phúta", "0:59,9", "12:00,123", "1:60,10"]) add(`chạy ${sp} xong`);
+        for (const u of ["km/h", "KM/H", "kph", "Kph", "mph", "km/ha", "mphx"]) for (const n of ["165", "165 ", "a "]) add(`xe ${n}${u} nhanh`);
+        for (const d of ["°C", "° C", "°c", "°F", "° f", "°", "°Ca", "°Fx", " °"]) for (const n of ["30", "-5", "+5", "x"]) add(`trời ${n}${d} nay`);
+        for (const n of ["1.000", "12.345", "123.456.789", "1.23", "0.500", "1.0000", "1.000,5", "1,000", "12,345,678", "1,5", "1,000.5", "01.000", "1.000.00"]) for (const tail of ["", ",", ".", " km"]) add(`có ${n}${tail} người`);
+        for (const [a, b] of [["1", "2"], ["2", "1"], ["5", "5"], ["1.000", "1.300"], ["4,2", "3,9"], ["1,5", "2,5"], ["10", "9"], ["1990", "1995"], ["3", "10"]]) for (const dash of ["-", " - ", "–", " — "]) add(`từ ${a}${dash}${b} năm`);
+        for (let a = 0; a <= 13; a++) for (const b of [1, 2, 4, 10, 12, 31, 100]) add(`chia ${a}/${b} phần`);
+        for (const x of ["3x4", "3 x 4", "3X4", "3×4", "3 × 4", "a x 4", "3 x b"]) add(`kích ${x} m`);
+        for (const p of ["UTC+7", "+30°", "+ 5", "a+b", "(+5)", "+5", "x +5"]) add(`giá ${p} nay`);
+        for (const m of ["-5", "−5", "–5", "(-5)", "10 -5", "10-5", "a -5", "±2", "± 2", "-x"]) add(`độ ${m} nay`);
+        for (const g of ["1 = 2", "a=b", "a < b", "a>b", "8 ÷ 2", "A&B", "a & b"]) add(`ta có ${g} rồi`);
+        for (const e of ["TCN", "SCN", "CNTT", "TCNa", "aTCN", "ĐTCN", "TCN."]) add(`năm 300 ${e} đó`);
+        for (const c of ["WHO", "NATO", "AB", "ABCDEF", "ABCDEFG", "A1GP", "JAS 39C", "ĐHQG", "ÁB", "XYZ"]) { add(`tổ chức ${c} họp`); add(`${c} HỌP`); add(c); }
+        // A lone surrogate (the &str end-to-end dumps cannot carry one).
+        for (const l of ["Lone \ud800 surrogate and 𝐀𝐁 maths and ﬁ ligature.", "a\udc00 ﬁ", "\ud800"]) add(l);
+        for (const [t, src] of rows) {
+            const a = normalizeVietnamese(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, renderInHost("vi", t));
+        }
+    },
+    // phonemizeSyllable over every letter run of the texts (as written, lower, UPPER), every onset × rhyme key × tone
+    // mark (precomposed and decomposed), every 1–3 letter string over the Vietnamese alphabet, edge strings;
+    // numberToWords over 0…20,000, scaled samples, powers of ten past the last scale and non-finite values.
+    async "vi-g2p"() {
+        const { phonemizeSyllable } = await import("../../../src/languages/vietnamese/g2p.ts");
+        const { numberToWords } = await import("../../../src/languages/vietnamese/numbers.ts");
+        const { MANIFEST: VM } = await import("../../../src/languages/vietnamese/manifest.ts");
+        const G = new URL("../../../src/languages/vietnamese/g2p.ts", import.meta.url).href;
+        const words = new Set<string>();
+        for (const t of langTexts("vi")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const rhymes = [...loadTsvMap(G, "rhymes.tsv").keys()];
+        const tones = ["", ...Object.keys(VM.tones.diacritics)];
+        const onsets = ["", ...VM.onsets.map(([o]) => o)];
+        for (const o of onsets) for (const r of rhymes) for (const tn of tones) {
+            const w = (o + r).normalize("NFD") + tn;
+            words.add(w); words.add(w.normalize("NFC")); words.add(w.normalize("NFC").toUpperCase());
+        }
+        const abc = [..."aăâbcdđeêghiklmnoôơpqrstuưvxyfjwz"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "constructor", "toString", "gi", "gì", "giêng", "giết", "qu", "quốc", "quở", "quả", "q", "ngh", "Ð", "đ", "́", "á̀", "ậ", "ậ"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "syllable" }, phonemizeSyllable(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 5, k * 1e3 + 21, k * 1e6, k * 1e6 + 105, k * 1e9, k * 1e9 + 15);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(2 ** 53, 2 ** 53 + 2, 1e300, 1.5, 20.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
     },
 };
 

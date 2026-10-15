@@ -2830,6 +2830,27 @@ fn main() {
                 }
             })
         }
+        "vi-normalize" | "vi-g2p" => {
+            use std::sync::Arc;
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::languages::vietnamese::{g2p, vietnamese};
+            // Building `vi` through the registry installs the foreign readers an unclaimed run reaches.
+            vernacula_phonemizer::phonemize("", "vi").unwrap();
+            let vi = vietnamese::create_vietnamese(Some(Arc::new(
+                vernacula_phonemizer::registry::read_as_english,
+            )))
+            .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => vi.normalize(&t()),
+                    "symbols" => vi.symbols(&t()),
+                    "text" => with_host(&JsString::from("vi"), || vi.text(&t())),
+                    "syllable" => g2p::phonemize_syllable(&units(&input["word"])),
+                    _ => vi.number_words(js_number(&JsString::from(input["n"].as_str().unwrap()))),
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
