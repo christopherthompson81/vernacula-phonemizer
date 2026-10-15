@@ -2000,6 +2000,25 @@ fn main() {
                 }
             })
         }
+        "is-normalize" | "is-g2p" => {
+            let is =
+                vernacula_phonemizer::languages::icelandic::icelandic::create_icelandic().unwrap();
+            Box::new(move |input| {
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => is.normalize(&units(&input["text"])),
+                    "word" => is.phonemize_word(&w()),
+                    "nat" => is.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        is.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

@@ -52,6 +52,7 @@ const FLEURS_DIR: Record<string, string> = {
     fi: "fi_fi",
     et: "et_ee",
     hu: "hu_hu",
+    is: "is_is",
 };
 
 /**
@@ -2948,6 +2949,55 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         const sufs = ["es", "as", "an", "ban", "ig", "e", "ő", "re", "", "Es", "ös"];
         for (let i = 0; i <= 3000; i++) for (const s of sufs) emit({ word: units(numberToWords(i)), suffix: units(s), op: "stem" }, stemForSuffix(numberToWords(i), s));
+    },
+    // ── Icelandic (is). Inputs: the is golden, FLEURS is_is (columns 3 and 4) and probes/is.txt. ──
+    // normalizeIcelandic per text, plus synthetic rows: the ordinal 0…40 (and `07`) before a month, an `öld`
+    // oblique, a neuter noun, a capital; grouping, decimals, the clock, units in every case, ranges, currency on
+    // both sides, signs and relational signs.
+    async "is-normalize"() {
+        const { normalizeIcelandic } = await import("../../../src/languages/icelandic/normalize.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["is"], FLEURS_DIR.is, ["is.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const ns: string[] = ["07", "00", "100", "123"];
+        for (let i = 0; i <= 40; i++) ns.push(String(i));
+        for (const n of ns) for (const h of ["september", "maíbyrjun", "aldar", "öldinni", "sæti", "Maí", "dag", ""]) { add(`${n}. ${h}`); add(`a${n}. ${h}`); }
+        for (const g of ["1.234", "12.345.678", "0.123", "1.23", "12,5", "3,14159", "6.34"]) add(`um ${g} manns`);
+        for (const c of ["9:30", "23:59", "123:45", "1:5"]) add(`klukkan ${c}`);
+        for (const u of ["mph", "MPH", "km", "KM", "kg", "cm", "mm", "m", "km²", "km2", "m²", "M3", "km³", "km/klst.", "km/h", "Km/H"]) { add(`5 ${u} og`); add(`5${u}x`); }
+        for (const r of ["1990–2000", "1-2-3", "5 - 7", "-5", "+3", "−2", "a-5", "3+4", "2 ± 1", "1=1", "1≈2", "2<3", "4>3", "2×3", "2 x 3", "6÷3", "R&D", "AT&T"]) add(`er ${r} hér`);
+        for (const c of ["$", "€", "£", "¥"]) { add(`${c}5`); add(`5 ${c}`); add(`${c} 5 og 6${c}`); }
+        for (const x of ["o.s.frv.", "o. s. frv", "O.S.FRV.", "o.fl.", "o. fl", "bo.fl."]) add(`epli ${x} og`);
+        for (const [t, src] of rows) emit({ text: units(t), src, op: "normalize" }, normalizeIcelandic(t));
+    },
+    // phonemizeWord over every letter run (as written and lowercased), every 1–3 letter string of the alphabet,
+    // every 4-letter string over the context letters (the geminates, k/g + front vowels, n, f, í), corners; the
+    // nativiser; numberToWords over 0…20,000, magnitudes and raw strings.
+    async "is-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/icelandic/icelandic.ts");
+        const { numberToWords } = await import("../../../src/languages/icelandic/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-záéíóúýþðæöA-ZÁÉÍÓÚÝÞÐÆÖ'-]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("is")) for (const m of t.matchAll(/[\p{L}\p{M}'-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."aábcdðeéfghiíjklmnoóöpqrstuúvwxyýzþæ'-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."kgnfíaeijt"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "ég", "Hekla", "vatn", "Biblía", "María", "drekkja", "deigja", "Alþingi", "bang", "Steinn", "Anna", "Sviss", "höfn", "lofa", "lukt", "þríeyki", "erkiengill", "ein"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        for (const w of [...words, "São", "Müller", "Dvořák", "Ørsted", "Žižek", "Ångström", "Œuvre", "façade", "Tōkyō", "Nguyễn"])
+            emit({ word: units(w), op: "nat" }, nat(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
     },
 };
 
