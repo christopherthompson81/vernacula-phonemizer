@@ -2061,6 +2061,24 @@ fn main() {
                 }
             })
         }
+        "kaa-normalize" | "kaa-g2p" | "kaa-numbers" => {
+            let kaa = vernacula_phonemizer::languages::karakalpak::karakalpak::create_karakalpak()
+                .unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                match input["op"].as_str().unwrap() {
+                    "normalize" => kaa.normalize(&t()),
+                    "symbols" => kaa.symbols(&t()),
+                    "engine" => kaa.text(&t()),
+                    "word" => kaa.phonemize_word(&w()),
+                    "nat" => kaa.nativise(&w()),
+                    "words" => kaa.number_words(num()),
+                    _ => kaa.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
         "ba-roman" => {
             let policy = vernacula_phonemizer::languages::bashkir::roman_ordinals::roman_policy();
             Box::new(move |input| {

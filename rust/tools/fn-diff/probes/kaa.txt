@@ -1,0 +1,76 @@
+# Karakalpak (kaa) off-golden probes: synthetic text, one line per arm of normalize.ts plus the neighbour it must
+# decline, and g2p corners. No corpus sentence is quoted.
+Bul 96%in qurayды.
+Bul 96%in quraydı.
+Bul 50% ten artıq.
+Bul 50% den kem.
+Bul 50%ke shekem.
+Bul 50% ı
+Bul 50% ma
+Bul 5%tıń
+21 mln. jılı
+9,5 mln adam
+$205,539 mlrd (2018)
+23,3 mlrd. kvt/saat
+139,2 mln.ga
+914 mln. kilovatt
+mlnler
+8 m.kv. maydan
+23,2 adam/1 km kv
+5 km.kv. jer
+5 km kv.
+10 kvt/saat
+10 kvt-saat
+$100,000 investiciya
+19,605,052 akciya
+179,332 mlrd. dollar
+1 098 581 km²
+1/299 792 458 sekund
+1,5 metr
+1.65 metr
+198.51.100.0 adres
+26.02.1994-j. buyrıq
+b.e.sh. 776-jılı
+Bul b.e.sh.
+Bul B. E. Sh. "
+Suyıqlanıw t-rası 323°
+t-ra joqarı
+t-ralar
+saat 8:00 de
+saat 12:13:05 de
+ISO/IEC 14882:2024
+24:00 de
++40+45 °C
+-32-38 °C
++15+20°С gradus
+diametri 6+90 mm
+C++11 tili
+(-5 °C)
+x -5 y
+–7 gradus
+25-28°C
+8-12C
+500-600 mm
+1858-1859 jıllar
+5 - 8 km
+1-2-3 qatar
+5/6-7
+5–8 km
+5—8 km
+3 kg hám 5 t
+5 ga jer
+US$ 50
+Qaraqalpaq
+QARAQALPAQ
+İnsan
+ISHI
+shashqan
+chay
+ǵarǵa
+ńań
+Wolfgang
+José
+1000000000000
+kitåp
+atå
+saat 24:00 de

@@ -34,6 +34,7 @@ pub mod ilocano;
 pub mod indonesian;
 pub mod italian;
 pub mod japanese;
+pub mod karakalpak;
 pub mod kazakh;
 pub mod korean;
 pub mod kyrgyz;

@@ -4071,6 +4071,67 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
     },
+    // ── Karakalpak (kaa). Inputs: the kaa golden and probes/kaa.txt (FLEURS has no kaa), plus GENERATED shapes. ──
+    // normalizeKarakalpak, the symbol tier normalize.ts built (recorded through the wrapper) on the raw text, and the
+    // engine's text(), over the texts and synthetic rows: every percent suffix, the abbreviations, every grouping and
+    // decimal mark, the era and year markers, clocks, paired signs, degrees with and without the gloss, ranges.
+    async "kaa-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/karakalpak/normalize.ts");
+        const P = (await import("../../../src/languages/karakalpak/karakalpak.ts")).createKarakalpak();
+        const rec = records.find((r) => /src\/languages\/karakalpak\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["kaa"], undefined, ["kaa.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["0", "5", "0,7", "12.5", "100", "1 000"]) for (const p of ["%", " %", "%in", "% ın", "%ke", "% ki", "%ten", "% dan", "%tı", "% ti", "%i", "%ma", "%-ke", "%KE"]) add(`Bul ${n}${p} boldı`);
+        for (const m of ["mln", "mln.", "mln .", "mlrd", "mlrd.", "Mln", "m.kv.", "m. kv .", "km kv", "km.kv.", "km kv.", "kvt/saat", "kvt - saat", "kvt saat", "mlnler"]) for (const tail of ["", " km²", " adam", ".", "ga"]) add(`5 ${m}${tail}`);
+        for (const n of ["1,000", "12,345,678", "1,000 mıń", "205,539 million", "1 000", "12 345 678", "1,5", "1.5", "1.2.3", "123,4567", "0,123"]) add(`Bul ${n} metr`);
+        for (const ab of ["b.e.sh.", "b. e. sh.", "B.E.SH.", "1994-j.", "1994-j .", "t-rası", "t-ra", "t-ralar"]) for (const tail of ["", " 776-jılı", ".", "\"", " »", ")", " hám"]) add(`Bul ${ab}${tail}`);
+        for (let h = 0; h <= 25; h++) for (const mm of ["00", "05", "59", "60"]) for (const sec of ["", ":15", ":75"]) add(`saat ${h}:${mm}${sec} de`);
+        for (const r of ["5-8", "5 - 8", "5–8", "5—8", "+40+45", "-32-38", "+3+300", "6+90", "-8", "–8", "−8", "+8", "(–5", "5/6-7", "5-6/7", "1-2-3", "a-5", "x -5", "C++11"]) for (const d of ["", "°C", " °С", "°c", "° gradus", "°", " gradus", "C", " mm"]) add(`Hawa ${r}${d} boldı`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, N.normalizeKarakalpak(t));
+            emit({ text: units(t), src, op: "symbols" }, rec.apply(t));
+            emit({ text: units(t), src, op: "engine" }, P.text(t));
+        }
+    },
+    // phonemizeWord and the nativiser (rebuilt with karakalpak.ts's class) over every letter run of the texts (as
+    // written, lowercased, uppercased), every 1-3 letter string over the alphabet (third letter from a context set),
+    // every 4-letter string of the digraph and casing letters, and edge strings.
+    async "kaa-g2p"() {
+        const T = await import("../../../src/languages/karakalpak/karakalpak.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-záóúíńǵıA-ZÁÓÚÍŃǴIİ]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("kaa")) for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."aábcdefgǵhıijklmnńoópqrstuúvwxyzíçIİÁŃǴ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "aeıiouúshcnr") words.add(a + b + c); } }
+        const ctx = [..."schıiIİaeqn"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00b", "ŉ", "ǅ", "K", "ſ", "ﬁ", "é", "é", "ǵ", "İ", "ı", "ẞ", "Ω", "й", "s\ud800h"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, T.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords over 0…20,000 and beyond, and the engine's own number reading on digit runs (the unsafe ones
+    // digit at a time).
+    async "kaa-numbers"() {
+        const { numberToWords } = await import("../../../src/languages/karakalpak/numbers.ts");
+        const P = (await import("../../../src/languages/karakalpak/karakalpak.ts")).createKarakalpak();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21);
+        for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n).join("|"));
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
 };
 
 
