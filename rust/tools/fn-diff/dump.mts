@@ -5618,6 +5618,72 @@ const dumps: Record<string, () => void | Promise<void>> = {
         }
         for (const a of aks) emit({ word: units(a), op: "latin" }, `${isAksaraSunda(a)}|${aksaraToLatin(a)}`);
     },
+    // ── Madurese (mad). Inputs: the mad golden and probes/mad.txt (no FLEURS transcript exists). ──
+    // normalizeMadurese, the symbol tier on what normalize hands it (recorded through the wrapper) and the registry's
+    // mad engine (`renderInHost`: no pre-pass) over every text plus synthetic rows per arm: whole-hour clocks after
+    // every hour word, before every clock mark and bare, grouping both marks, mark ranges, degrees, ± with and
+    // without an approximation word, both era markers, both rate arms over every unit × exponent, the tier, `dpl`,
+    // number ranges, decimals both marks (with the hour-word refusal); and the number path over 0…3,000 and long runs.
+    async "mad-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeMadurese } = await import("../../../src/languages/madurese/normalize.ts");
+        const { renderInHost } = await import("../../../src/registry.ts");
+        const rec = records.find((r) => /src\/languages\/madurese\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["mad"], undefined, ["mad.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const w of ["pokol", "kol", "jhâm", "jam", "Jam", "JHÂM", "apokol", ""]) for (const sp of ["", " ", "  "]) for (const c of ["7.00", "10:00", "23.00", "7.30", "7.000", "123.00"]) add(`${w}${sp}${c} isa'`);
+        for (const mk of ["WIB", "WITA", "WIT", "PM", "AM", "malem", "bâkto", "Wib", "WIBx", "malemma"]) for (const c of ["7.00", "06:00", "12.00", "1.00.0"]) add(`orèng ${c} ${mk} ka`);
+        for (const c of ["7:00", "23:00", "24:00", "0:00", "a7:00", "7:000", "1,7:00"]) add(`bâkto ${c} ka`);
+        for (const n of ["1.234", "1.234.567", "12,345", "0,500", "1,000,000", "01.234", "1.2345", "1,23"]) for (const tail of ["", ".", ",", " orèng"]) add(`ra-kèra ${n}${tail}`);
+        for (const r of ["30'-40'", "5°-10°", "3″–4″", "6º—8º", "5’ - 6", "x'-4"]) add(`bâkto ${r} ka`);
+        for (const d of ["30°C", "86 º F", "45°", "20°Ca", "10 °", "5°ſ", "5°c", "5ºf"]) add(`panas ${d} ka`);
+        for (const p of ["±5", "korang lebbi ±3", "sakètar ± 2", "kèra-kèra±4", "ra-kèra ±1", "a±8", "± x"]) add(`ra ${p} ka`);
+        for (const e of ["300 SM", "1500 M", "20M", "SMA", "5 Ma", "M", "5SM", "a5 M"]) add(`taon ${e} ka`);
+        for (const u of ["km", "cm", "mm", "kg", "ha", "m", "KM", "Kg", "x"]) for (const e of ["", "²", "³", "2", "3", "4"]) { add(`laju 60 orèng/${u}${e} ka`); add(`laju 60 per ${u}${e} ka`); add(`laju 60/${u}${e}`); }
+        for (const d of ["500 mèter dpl", "300 meter dpl", "2 m dpl", "5 metèr dpl", "dplx", "mèter dplx"]) add(`tèngghi ${d} ka`);
+        for (const r of ["1990-1995", "5 – 10", "2,5-3,5", "10—5", "a-5", "1-2-3", "1.5-2", "3/4-5", "5-6a"]) add(`taon ${r} ka`);
+        for (const d of ["3,14", "2.5", "1,005", "12,3456", "jam 7.30", "pokol 9.15", "1.2.3", "0.75", "kol7.25"]) add(`panjang ${d} ka`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, normalizeMadurese(t));
+            emit({ text: units(t), src, op: "text" }, renderInHost("mad", t));
+        }
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let k = 1; k < 1000; k += 7) ns.push(String(k * 1000 + 11), String(k * 1e6 + 101), String(k * 1e9 + 10), String(k * 1e12 + 1));
+        for (let e = 13; e <= 22; e++) ns.push(String(10 ** e), String(10 ** e - 1));
+        ns.push("999999999999999", "1000000000000000", "9007199254740991", "9007199254740993", "12345678901234567890", "007");
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, renderInHost("mad", n));
+        for (const [input, out] of new Map(rec.calls)) emit({ text: units(input), src: "tier", op: "symbols" }, out);
+    },
+    // phonemizeWord and the nativiser over every letter run of the texts (as written, lower, UPPER), every 1–3
+    // letter string over the alphabet (â è é ò ḍ ṭ ' included), every 4-letter string over a context set (geminates,
+    // hiatus pairs, raise/low/transparent consonants) and edge strings; numberToWords over 0…20,000 and the corners.
+    async "mad-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/madurese/madurese.ts");
+        const { numberToWords } = await import("../../../src/languages/madurese/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zâèéòḍṭ']", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("mad")) for (const m of t.matchAll(/[\p{L}\p{M}']+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzâèéòḍṭ'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."abdhtlrwyâèeoiu'"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "a\udc00", "İ", "ſ", "ﬁ", "𝐚", "Dvořák", "Ångström", "Œuvre", "Straße", "constructor", "toString", "bbh", "ḍḍh", "bbâ", "tt", "rr", "ll", "ḍ", "ab𝐚b"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let e = 4; e <= 22; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(2 ** 53, 2 ** 53 + 2, 1.5, -1, -0, NaN, Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["007", "12a3", "١٢٣", "", "\ud800", "9007199254740993"]) emit({ n: "1e16", raw: units(raw), op: "words" }, numberToWords(1e16, raw));
+    },
 };
 
 

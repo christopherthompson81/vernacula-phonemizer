@@ -1,0 +1,18 @@
+# Synthetic Madurese probes (mad has no FLEURS text, so these carry the corpus-wide weight): one or more lines per
+# arm of normalize.ts and the neighbour it must decline, plus g2p and number corners.
+Pokol 7.00 isa', jhâm 10:00, kol 9.00, Jam 12.00 WIB, 8.00 malem, 7:00, 23:00, 24:00 bân 7.30.
+Bâkto 06.00 WITA, 5.00 PM, 11.00 AM, 3.00bâkto, 1.00 Wib sarta 9.000 orèng.
+Orèng 1.234.567, 12,345, 0,500, 1,000,000, 01.234 bân 1.2345.
+Bâktona 30'-40', 5°-10°, 3″–4″ bân 6º—8º.
+Panassa 30°C, 86 º F, 45°, 20°Ca, 10 ° bân 5°ſ.
+Ra-kèra ±5, korang lebbi ±3, sakètar ± 2, kèra-kèra±4, ±7 bân a±8.
+Taon 300 SM, 1500 M, 20M, SMA, 5 Ma bân M.
+Kacepadhân 60 km/jam, 5 m/s, 10/km, 7 orèng/km², 8 orèng / m2, 9 per ha bân 3 per KM³.
+Arghâna Rp 5.000, US$ 10, AS$ 3, € 20, $ 7, 50 % bân 3 juta.
+Tèngghina 500 mèter dpl, 300 meter dpl, 2 m dpl bân dplx.
+Taon 1990-1995, 5 – 10, 2,5-3,5, 10—5, a-5, 1-2-3, 1.5-2 bân 3/4-5.
+Panjangnga 3,14, 2.5, 1,005, 12,3456, jam 7.30, pokol 9.15, 1.2.3 bân 0.75.
+Abâ' bhâsa madhurâ, bâla, bra, ḍhâlâng, ṭèngka, ngakan, nyèlem, khas, ka'-bâ'-ka', settong, pettong, abbâ, aèng, ea, oa, ia.
+Kata Dvořák, Ångström, Œuvre, Straße bân Müller.
+Angka 0 1 10 11 19 20 21 99 100 101 110 1000 1001 2000 1000000 1000000000 1000000000000 999999999999999 1000000000000000 9007199254740993.
+Apa? Iyâ! Lastarè. Koma, titik koma; titik dhuwâ: tamat… ahèr.

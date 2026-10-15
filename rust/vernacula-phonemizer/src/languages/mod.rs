@@ -55,6 +55,7 @@ pub mod latvian;
 pub mod lithuanian;
 pub mod luxembourgish;
 pub mod macedonian;
+pub mod madurese;
 pub mod magahi;
 pub mod maithili;
 pub mod malay;
