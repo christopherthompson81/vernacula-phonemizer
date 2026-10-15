@@ -64,6 +64,7 @@ const FLEURS_DIR: Record<string, string> = {
     tg: "tg_tj",
     cy: "cy_gb",
     ga: "ga_ie",
+    ast: "ast_es",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -4673,6 +4674,69 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "2.3", "-5"]) {
             emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
             emit({ n: "-1", raw: units(raw), op: "words" }, numberToWords(-1, raw));
+        }
+    },
+    // ── Asturian (ast). Inputs: the ast golden, FLEURS ast_es (columns 3 and 4) and probes/ast.txt. ──
+    // normalizeAsturian, the symbol tier over its output (recorded through the wrapper) and `createAsturian().text`,
+    // over every text plus synthetic rows for every arm: grouping with every separator and the decimal neighbour,
+    // the dot decimal, era markers mid-text and text-final (with a closing quote), Roman and numeric month dates
+    // over every month and out-of-range neighbours, the clock over an hour × minute grid, degrees with a scale /
+    // minutes / each licensed tail, minus forms, dash and hyphen ranges with their declining neighbours.
+    async "ast-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeAsturian } = await import("../../../src/languages/asturian/normalize.ts");
+        const { createAsturian } = await import("../../../src/languages/asturian/asturian.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/asturian\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createAsturian();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ast"], FLEURS_DIR.ast, ["ast.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1.000", "130.000", "1.000.000", "0.500", "1.2345", "9 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1,5 000", "12.5", "3.14", "1.000,5", "1.5.6"]) add(`hai ${g} persones`);
+        for (const e of ["e.C.", "e. C.", "e.C", "d.C.", "d. C .", "ae.C."]) for (const tail of ["", ".", "\"", " »", " y depués", ")"]) add(`nel añu 300 ${e}${tail}`);
+        for (const r of ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "IIII", "VV"]) add(`el 12-${r}-1990 foi`);
+        for (let mo = 0; mo <= 13; mo++) add(`el 5-${mo}-2001 y el 05 - ${mo} - 199 foi`);
+        for (const h of ["0", "1", "09", "12", "23", "24", "25"]) for (const m of ["00", "05", "30", "59", "60"]) add(`a les ${h}:${m} hores`);
+        for (const d of ["20 °C", "20°c", "90ºF", "20° 30′", "20°30'", "20° de llatitú", "20° y", "20° col", "20° na", "20°.", "20°)", "20°", "20° N", "20°S", "20°x", "20° dena"]) add(`tenía ${d} agora`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", "x-5", " - 5"]) add(`valor ${m} grados`);
+        for (const r of ["1990–2000", "5—8", "1990-2000", "5 - 8", "5-8-9", "1/5-8", "5-8/9", "a5-8", "1.5-2"]) add(`ente ${r} años`);
+        for (const [t, src] of rows) {
+            const a = normalizeAsturian(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("ast", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "ast-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/asturian/asturian.ts");
+        const { numberToWords } = await import("../../../src/languages/asturian/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zñáéíóúüïḥḷA-ZÑÁÉÍÓÚÜÏḤḶ'·]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("ast")) for (const m of t.matchAll(/[\p{L}\p{M}'’·-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzñáéíóúüïḥḷ'·"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouüqgcynrlbpm"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "l\u0323l\u0323", "ḷḷ", "Ḷḷ", "n\u0303", "ﬁ", "Dvořák", "Ångström", "xylo", "güeyu", "quixu", "ḥuerta"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
         }
     },
 };

@@ -1,0 +1,16 @@
+# Asturian (ast) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it
+# must decline, then tokenizer and g2p corners.
+La villa tien 130.000 habitantes, 1.000.000 de visitantes y 12 345 678 euros, pero non 0.500.
+El valor ye 3.14 o 12.5, y 1.000,5 tamién.
+Nel añu 300 e.C. y nel 400 d. C. pasó, y acabó nel 500 d.C.
+Foi'l 12-IV-1990, el 5-12-2001 y el 05 - 13 - 1999, pero non el 12-XIII-1990.
+A les 9:30 y a les 23:59, pero non 25:00 nin 9:60.
+Tenía 20 °C, 90ºF, 20° 30′ de llatitú, 20° de calor, 20° y 30°.
+El valor ye -5 o −3 o (–2), pero 5-3 ye un resultáu.
+Ente 1990–2000 y 5—8 años, y de 1990-2000, pero non 5-8-9 nin 1/5-8.
+Hai un 5% y 10 € y 20 £ y $30 y 5 km y 1 km² y 2 millones de persones.
+La llingua tien ḷḷ, ḥ, güeyu, quixu, cigüeña, xente, ñu, rríu y yerba.
+Ciudá, cielu, cuandu, guerra, guapu, quesu, embaxada, enfermu, inviernu.
+Dvořák y Ångström y Zoë son nomes estranxeros.
+El númberu 1234567890123 y 999999 y 2000000 ye grande.
+Esto ye constructor y toString… ¿pero por qué? ¡Sí!

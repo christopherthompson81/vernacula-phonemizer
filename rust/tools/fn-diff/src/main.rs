@@ -2619,6 +2619,30 @@ fn main() {
                 }
             })
         }
+        "ast-normalize" | "ast-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let ast =
+                vernacula_phonemizer::languages::asturian::asturian::create_asturian().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ast.normalize(&t()),
+                    "symbols" => ast.symbols(&t()),
+                    "text" => with_host(&js("ast"), || ast.text(&t())),
+                    "word" => ast.phonemize_word(&w()),
+                    "nat" => ast.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        ast.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
