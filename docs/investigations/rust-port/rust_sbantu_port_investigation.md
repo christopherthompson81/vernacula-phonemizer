@@ -273,3 +273,31 @@ cargo test --release shona: 1 passed (90 pins)
    demands a space before the letter; a one-letter word after a numeral is exactly the case that guard leaves open.
 2. As in st and tn, a magnitude suffix with no word is spelled as letters: `Ne $1.5bn zvakare` →
    `… $1 poyindi 5bn …` → *… ʃanu ɓn …*.
+
+## Run 11 — 2026-10-15 07:50 (merge of main 149e11e3, every gate on the combined tree)
+
+**What changed.** origin/main gained the Dravidian (#1586) and seasia (#1588) groups and #1591 (invisible regex
+characters as escapes). Every one of the six commits would have conflicted in the registry, so main was MERGED once
+instead. The four routine conflicts (`registry.rs`, `languages/mod.rs`, `dump.mts`, fn-diff `main.rs`) were
+resolved by `sbantu/remerge.py`: main's file plus this branch's contiguous additions cut from HEAD. LANGUAGES
+went 97 → 103, its declared length matches its entry count, and `dump.mts` parses.
+
+**Commands.** `sbantu/gates.sh` (fmt, build, parity over all languages, regex-diff, clippy incl. errors, test);
+`sbantu/e2e.sh zu,xh,st,tn,nso,sn phonemize-sync phonemize-best phonemize-trace trace`; `sbantu/modules.sh`
+(every per-module dump re-dumped and replayed).
+
+**Raw finding.**
+- fmt clean; build 0 warnings.
+- parity: every line byte-identical but mag 199/200, tt 199/200, syl 195/200 (the known port-pending rows); all six
+  of this group 200/200.
+- regex-diff: `146326 probe results identical, 0 DIFFER, 0 patterns refused`.
+- clippy: completes with no `error:` lines now that #1591 is in (Run 9's sylheti error is gone); in the new files only
+  the six `module_inception` warnings.
+- cargo test: 308 + 1 passed, 0 failed.
+- end to end: `phonemize-sync / phonemize-best / phonemize-trace / trace: 13804 identical, 0 DIFFER` each.
+- per module: zu 25754 / 640645, xh 26543 / 115132, st 1098 / 58776, tn 4105 / 56949, nso 11073 / 65392,
+  sn 19800 / 69675, all 0 DIFFER.
+
+**Port-pending.** None.
+
+**Implication.** Ready for the PR.
