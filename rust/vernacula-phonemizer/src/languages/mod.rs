@@ -1,4 +1,5 @@
 pub mod afrikaans;
+pub mod assamese;
 pub mod awadhi;
 pub mod azerbaijani;
 pub mod bashkir;

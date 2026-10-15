@@ -2692,8 +2692,22 @@ fn bengali_family(lang: &str) -> BengaliFamilyFn {
         load_manifest(&format!("languages/{dir}"), &format!("{dir}.jsonc")).unwrap();
     let g2p = make_abugida_g2p(&def.abugida, load_shared_phonology().unwrap());
     let norm = make_bengali_normalizer(&def.numbers).unwrap();
-    let e = l::bengali::bengali::create_bengali(None).unwrap();
     let host = js(lang);
+    if lang == "as" {
+        use l::assamese::{assamese::create_assamese, normalize::normalize_assamese};
+        let e = create_assamese(None).unwrap();
+        return Box::new(move |op, x| match op {
+            "normalize" => norm(x),
+            "as-normalize" => normalize_assamese(x).unwrap(),
+            "text" => with_host(&host, || e.text(x)).unwrap(),
+            "g2p" => g2p.g2p(x),
+            "rules" => e.word_rules(x),
+            "word" => e.word(x),
+            "number" => e.number(x).unwrap(),
+            _ => panic!("bengali-family: unknown op {op}"),
+        });
+    }
+    let e = l::bengali::bengali::create_bengali(None).unwrap();
     Box::new(move |op, x| match op {
         "normalize" => norm(x),
         "text" => with_host(&host, || e.text(x, None)).unwrap(),

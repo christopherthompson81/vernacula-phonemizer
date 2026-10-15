@@ -95,3 +95,28 @@ bpy syl or`; a TS probe of four made-up English names inside bn, hi and en (`lat
 
 **Implication.** Reproduced on purpose (a commented `bn_engine()` with `phonemize_in("en", …)`), reported as a TS
 defect, and pinned by two synthetic probe lines in `probes/bn.txt`. Not fixed here.
+
+## Run 4 — 2026-10-15 02:55 (after rebasing onto main 5b2bf359; as: an escape written back as a literal NBSP)
+
+**Question.** After the rebase onto the second Turkic group (#1580), does the Assamese layer (its pre-pass, the
+Bengali maker on `assamese.jsonc`, the geminate collapse) match the TS, and did its literals survive the write?
+
+**What changed.** Rebase conflicts only in `registry.rs` (`LANGUAGES` and the `build` arms) and `dump.mts` (the
+FLEURS map and the end of the dumps table), both sides kept; git had factored the shared `},` out of the dump.mts
+hunk again, restored, then `npx esbuild rust/tools/fn-diff/dump.mts` parses. The `bengali-family` replay learned the
+`as` engine and an `as-normalize` op (the pre-pass alone). `probes/as.txt`: one line per pre-pass arm and its
+neighbour, with the precomposed and decomposed nukta spellings written as `\u{…}` escapes.
+
+**Command.** `LANGS=as dump.mts bengali-family` → `fn-diff bengali-family`; `e2e.sh as`; `parity as bn`; the two
+code-point audits over `languages/assamese`.
+
+**Raw finding.** The audit found the second class of editor damage: both dotted-run patterns came back with a
+LITERAL U+00A0 where the TS writes the escape `[  ]`. Same semantics (the differential was already green), not
+the same code points; restored by a byte-level edit, after which `74 non-ASCII runs, 0 not found` and the four
+remaining raw-pattern misses are `format!` templates checked by hand. Then: `bengali-family: 92488 identical, 0
+DIFFER` (golden 351, fleurs 11529, probe 84, synthetic 3849); `phonemize-sync / phonemize-best / trace: 3988 / 3988 /
+3988 identical, 0 DIFFER`; `as: 200/200`, `bn: 200/200`. The 39 calls test/assamese.test.ts makes (one more is an
+object return, skipped) are pinned by extraction and pass.
+
+**Implication.** as is done. The escape-to-literal failure is invisible to every differential, so the audit stays
+mandatory after each write.
