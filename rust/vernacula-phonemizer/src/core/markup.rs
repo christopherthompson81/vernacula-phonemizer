@@ -113,7 +113,29 @@ pub fn strip_markup(text: &JsString) -> JsString {
         }
         out
     });
-    s = rewrite(&s, js_re!(r"<\/?[a-zA-Z][^<>]*>", "gu"), &JsString::new());
+    // A known element name and `name=value` attributes only: prose in angle brackets is not a tag.
+    s = rewrite(
+        &s,
+        js_re!(
+            r#"<\/?(?:a|abbr|b|bdi|bdo|big|blockquote|body|br|caption|center|chem|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|font|gallery|h[1-6]|head|hr|html|i|img|includeonly|ins|kbd|li|mark|math|noinclude|nowiki|ol|onlyinclude|p|poem|pre|q|rb|ref|references|rp|rt|ruby|s|samp|score|section|small|source|span|strike|strong|sub|sup|syntaxhighlight|table|tbody|td|templatestyles|tfoot|th|thead|time|timeline|title|tr|tt|u|ul|var|wbr)(?:\s+[a-zA-Z_:][a-zA-Z0-9_:.-]*\s*=\s*(?:"[^"<>]*"|'[^'<>]*'|[^\s"'<>=]+))*\s*\/?>"#,
+            "giu"
+        ),
+        &JsString::new(),
+    );
+    // Prose in angle brackets reads as parentheses; most engines read a lone `<` or `>` as a comparison.
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\p{L}\p{N}])<(?=[^\s<>])([^<>]*\p{L}[^<>]*)(?<=[^\s<>])>(?![\p{L}\p{N}])",
+            "gu"
+        ),
+        |m, s| {
+            let mut out = js("(");
+            out.push_str(&m.group(1, s).unwrap());
+            out.push_str(&js(")"));
+            out
+        },
+    );
     rewrite_with(
         &s,
         js_re!(r"&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z][a-zA-Z0-9]*);", "gu"),
@@ -142,4 +164,40 @@ pub fn strip_markup(text: &JsString) -> JsString {
                 .map_or(whole, |(_, v)| js(v))
         },
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Ported from test/markup-angle-prose.test.ts. All inputs are synthetic.
+    #[test]
+    fn angle_bracketed_prose_is_read_and_real_tags_are_stripped() {
+        for (input, want) in [
+            (
+                "Before <a longer note here> after.",
+                "Before (a longer note here) after.",
+            ),
+            (
+                "<Question for the team: was the widget tested?>",
+                "(Question for the team: was the widget tested?)",
+            ),
+            ("<I think so>", "(I think so)"),
+            ("3 < 5 and 7 > 2", "3 < 5 and 7 > 2"),
+            ("x<y and z>w", "x<y and z>w"),
+            ("a lone < here", "a lone < here"),
+            ("Year <i>2024</i> end", "Year 2024 end"),
+            ("<B>bold</B>", "bold"),
+            ("<a href=\"https://x.example/y\">link</a>", "link"),
+            ("<br/>x<br />y<br>", "xy"),
+            ("<ref name=\"n1\"/>z", "z"),
+            ("<span class='q' style=\"c:r\">s</span>", "s"),
+            ("<p class=lead>t</p>", "t"),
+            ("2.802×10<sup>10</sup>", "2.802×10¹⁰"),
+            ("km<sup>2</sup>", "km²"),
+            ("4<sup>th</sup>", "4th"),
+        ] {
+            assert_eq!(strip_markup(&js(input)), js(want), "{input}");
+        }
+    }
 }

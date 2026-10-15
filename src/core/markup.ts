@@ -175,10 +175,39 @@ const SUP_MAP: Readonly<Record<string, string>> = {
 const SUP_TAG = /<sup>([+-]?\d+)<\/sup>/giu;
 
 /**
- * An HTML TAG. The name must start with a letter or `/`, which is what keeps ordinary prose safe: a
- * comparison like `5 < 6` or `a < b` has a space or digit after the `<` and is never matched.
+ * An HTML TAG: a KNOWN ELEMENT NAME, then `name=value` attributes only, then `>` or `/>`.
+ *
+ * ⚠ IT USED TO BE ANY `<` + letter + anything up to `>` (`<\/?[a-zA-Z][^<>]*>`), and that DELETES PROSE.
+ * An author's aside in angle brackets is shaped like a tag: `Before <a longer note here> after.` lost the
+ * whole note, and a paragraph wrapped in `< >` (an editor's note) left an empty input, which a TTS caller
+ * rejects as having no phonemes. `5 < 6` was never at risk, because a space or digit follows the `<`.
+ *
+ * Both halves are needed. With the name list alone, `<a longer note here>` still matches, since `a` is a
+ * real element. With the attribute shape alone, `<note>` does. The attribute arm requires `=`, so a run of
+ * bare words is never taken for boolean attributes. Those occur in hand-written HTML (`<input disabled>`)
+ * but not in the text dumps this reads.
+ *
+ * Measured before narrowing, over every tag-shaped span in the corpus drive: `sup` 52, `i` 16, `b` 8, and
+ * nothing else. The list covers the inline and block HTML elements and MediaWiki's extension tags
+ * (`ref`, `math`, `nowiki`, …) for text scraped by other routes. A name missing from it is READ, not
+ * deleted. That is the safe failure, because the brackets around it read as punctuation.
  */
-const TAG = /<\/?[a-zA-Z][^<>]*>/gu;
+const TAG =
+    /<\/?(?:a|abbr|b|bdi|bdo|big|blockquote|body|br|caption|center|chem|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|font|gallery|h[1-6]|head|hr|html|i|img|includeonly|ins|kbd|li|mark|math|noinclude|nowiki|ol|onlyinclude|p|poem|pre|q|rb|ref|references|rp|rt|ruby|s|samp|score|section|small|source|span|strike|strong|sub|sup|syntaxhighlight|table|tbody|td|templatestyles|tfoot|th|thead|time|timeline|title|tr|tt|u|ul|var|wbr)(?:\s+[a-zA-Z_:][a-zA-Z0-9_:.-]*\s*=\s*(?:"[^"<>]*"|'[^'<>]*'|[^\s"'<>=]+))*\s*\/?>/giu;
+
+/**
+ * PROSE IN ANGLE BRACKETS, which the narrowed `TAG` now leaves in place, is rewritten to PARENTHESES.
+ *
+ * ⚠ KEEPING THE BRACKETS IS NOT ENOUGH. Most engines read a lone `<` or `>` as a comparison, so
+ * `Before <a longer note here> after.` came out in German as *… kleiner als a longer note here größer als …*,
+ * and the same in es, fr, it, pt-BR, hi, ar and cmn. Read as parentheses it gets the pause an aside should.
+ * en and ja already read the two forms identically.
+ *
+ * A pair qualifies only if the `<` hugs its first word and the `>` hugs its last, the inside contains a letter,
+ * and neither bracket touches a letter or digit outside. That keeps the comparison readings: `3 < 5 and 7 > 2`
+ * has a space inside both brackets, and in `x<y and z>w` both touch letters outside.
+ */
+const PROSE_ANGLE = /(?<![\p{L}\p{N}])<(?=[^\s<>])([^<>]*\p{L}[^<>]*)(?<=[^\s<>])>(?![\p{L}\p{N}])/gu;
 
 /**
  * WIKITABLE SYNTAX — not HTML, but it arrives by the same route (scraped text) and was likewise SPOKEN:
@@ -223,6 +252,7 @@ export function stripMarkup(text: string): string {
     s = rewrite(s, WIKITABLE, " ");
     s = rewrite(s, SUP_TAG, (_m, d: string) => [...d].map((c) => SUP_MAP[c] ?? c).join(""));
     s = rewrite(s, TAG, "");
+    s = rewrite(s, PROSE_ANGLE, (_m, inner: string) => `(${inner})`);
     return rewrite(s, ENTITY, (whole, body: string) => {
         if (body.startsWith("#")) {
             const cp =
