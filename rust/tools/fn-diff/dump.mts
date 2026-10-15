@@ -4468,6 +4468,55 @@ const dumps: Record<string, () => void | Promise<void>> = {
         ns.push("9007199254740991", "9007199254740993", "007");
         for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, withHost("syl", () => E.text(n)));
     },
+    // ── Odia (or). Inputs: the or golden, FLEURS or_in (columns 3 and 4) and probes/or.txt, plus synthetic grids. ──
+    // makeOdiaNormalizer (its symbol tier included) and `createOdia().text` over every text plus synthetic rows
+    // (ordinals 0…40 × each suffix, spaced and glued, the clock grid, both groupings, decimals, each unit
+    // abbreviation, the rate slash, each currency and unit of the tier, the signs in their guarded contexts, the
+    // Latin I); phonemizeWord over every Odia run, every consonant × matra/virama/sign tail in four frames, conjuncts
+    // and corners; numbers through text() over 0…3000, magnitudes and long runs in both digit scripts.
+    async "or"() {
+        const { makeOdiaNormalizer } = await import("../../../src/languages/odia/normalize.ts");
+        const { MANIFEST } = await import("../../../src/languages/odia/manifest.ts");
+        const { createOdia, phonemizeWord } = await import("../../../src/languages/odia/odia.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const norm = makeOdiaNormalizer(MANIFEST.numbers);
+        const E = createOdia();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["or"], FLEURS_DIR.or, ["or.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const ord = (n: number | string): string => [...String(n)].map((d) => (d >= "0" && d <= "9" ? "୦୧୨୩୪୫୬୭୮୯"[Number(d)] : d)).join("");
+        for (let n = 0; n <= 40; n++) for (const suf of [...MANIFEST.ordinalSuffixes, "ଶହ", "ତମରେ"]) { add(`ସେ ${n}${suf} ସ୍ଥାନ`); add(`ସେ ${n} ${suf} ସ୍ଥାନ`); }
+        for (const n of ["100", "1000", "100000", "10000000", "9007199254740993", "1.5", "1,000"]) for (const suf of MANIFEST.ordinalSuffixes) add(`ସେ ${n}${suf} ସ୍ଥାନ`);
+        for (const h of ["0", "07", "9", "10", "12", "19", "23", "24", "123"]) for (const m of ["00", "05", "30", "59", "60", "5"]) add(`ସମୟ ${h}:${m}ଟା`);
+        for (const g of ["1,00,000", "12,34,567", "5,000,000", "7,000", "0,500", "1990, 1991", "1,2345", "12,34", "1,234.5"]) add(`ପ୍ରାୟ ${g} ଲୋକ`);
+        for (const u of ["କି.ମି.", "କି.ମି", "କିମି", "ମି.ମି.", "ମି.ମି", "ମିମି", "କି.ଗ୍ରା.", "କି.ଗ୍ରା", "km", "mm", "kg", "mph", "kph", "km/h", "m/s", "km²", "mm2", "s", "h"]) { add(`5${u} ଦୂର`); add(`5 ${u} ଦୂର`); add(`${u} ଦୂର`); }
+        for (const [a, b] of [["କିଲୋମିଟର", "ଘଣ୍ଟା"], ["ମାଇଲ୍", "ସେକେଣ୍ଡ"], ["ଏବଂ", "କିମ୍ବା"], ["ମିଟର", "ମିନିଟ୍"]]) { add(`${a}/${b}`); add(`${a} / ${b}ରେ`); }
+        for (const sg of ["$", "US$", "£", "¥", "€", "₹"]) for (const f of [`${sg}50`, `${sg} 50`, `${sg}14.7 ବିଲିଅନ୍`, `50${sg}`, `${sg}`]) add(`ମୂଲ୍ୟ ${f} ଥିଲା`);
+        for (const r of ["±5", "-5", "−5", "–5", "3-5", "3 -5", "a-5", "ଏ -5", "+5", "UTC+1", "5 < 6", "5 > 4", "a=b", "8÷2", "50%", "5 %", "3×4", "3x4", "A & B"]) add(`ମାନ ${r} ଅଟେ`);
+        for (const t of ["ହୋଇଛି I", "ପାଇଥିଲେI", "I am", "AI", "I.", "a.m. ରେ", "U.S.A", "A.D.", "802.11a", "ଡଃ. ରାମ", "ଡାଃ.ରାମ", "ଡା. ରାମ", "ନଂ. 5", "ନଂ.ରାମ", "35°W", "90 °", "5 °C"]) add(`ସେ ${t} ଥିଲେ`);
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, norm(t));
+            emit({ text: units(t), src, op: "text" }, withHost("or", () => E.text(t)));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.normalize("NFC").matchAll(/[଀-୥୰-୷]+/gu)) words.add(m[0]);
+        for (const t of rows.keys()) for (const m of t.matchAll(/[଀-୥୰-୷]+/gu)) words.add(m[0]);
+        const s = MANIFEST.signs as any;
+        const sign = (k: string): string[] => (s[k]?.char ? [s[k].char] : []);
+        const tails = ["", ...sign("virama"), ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga"), ...sign("nukta"),
+            ...Object.keys(MANIFEST.vowelSigns), ...Object.keys(MANIFEST.vowelSigns).flatMap((v) => sign("anusvara").map((a) => v + a)), "‍", "‌"];
+        const cons = Object.keys(MANIFEST.consonants);
+        for (const c of cons) for (const t of tails) { words.add(c + t); words.add(c + t + "କ"); words.add("ଅ" + c + t + "ତା"); words.add("ଆ" + c + t + "ି"); }
+        for (const c of cons) for (const d of ["କ", "ଗ", "ଟ", "ତ", "ଦ", "ନ", "ପ", "ବ", "ମ", "ଯ", "ର", "ଳ", "ଲ", "ଷ", "ସ", "ହ"]) { words.add(c + "୍" + d + "ା"); words.add("ଆ" + c + "୍" + d); words.add(c + "୍" + c); }
+        for (const v of Object.keys(MANIFEST.independentVowels)) for (const t of ["", ...sign("anusvara"), ...sign("chandrabindu"), ...sign("visarga")]) { words.add(v + t); words.add(v + t + "ବ"); }
+        for (const w of ["", "ଡ଼", "ଡ଼", "ଢ଼", "ୟ", "ଯ଼", "ଳ୍ଳ", "\ud800", "୰", "୷", "଀"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: string[] = [];
+        for (let i = 0; i <= 3000; i++) ns.push(String(i));
+        for (let e = 4; e <= 22; e++) ns.push("1" + "0".repeat(e), "9".repeat(e), "12345678901234567890123".slice(0, e));
+        for (const x of ["9007199254740991", "9007199254740993", "007", "୧୨୩", "୯୦୦୭୧୯୯୨୫୪୭୪୦୯୯୩"]) ns.push(x);
+        for (const n of ns) emit({ text: units(n), src: "number", op: "text" }, withHost("or", () => E.text(n)));
+    },
 };
 
 

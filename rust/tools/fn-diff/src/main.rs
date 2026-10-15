@@ -2518,6 +2518,17 @@ fn main() {
                 op => panic!("syl: unknown op {op}"),
             })
         }
+        "or" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let e = vernacula_phonemizer::languages::odia::odia::create_odia(None).unwrap();
+            Box::new(move |input| match input["op"].as_str().unwrap() {
+                "normalize" => e.normalize(&units(&input["text"])),
+                "text" => with_host(&js("or"), || e.text(&units(&input["text"]))),
+                "word" => e.phonemize_word(&units(&input["word"])),
+                op => panic!("or: unknown op {op}"),
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

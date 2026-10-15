@@ -54,6 +54,7 @@ pub mod marathi;
 pub mod nepali;
 pub mod nogai;
 pub mod norwegian;
+pub mod odia;
 pub mod polish;
 pub mod portuguese;
 pub mod portuguese_br;

@@ -163,3 +163,59 @@ inserted by a byte-level edit rather than typed.
   are port-pending until each is in `LANGUAGES`.
 
 **Implication.** syl is done apart from 5 golden rows port-pending on `ar` (5) and `he` (1), listed in the PR.
+
+## Run 7 — 2026-10-15 03:01 (or)
+
+**Question.** Does Odia (its own engine, manifest and normalizer with its own symbol tier) match the TS?
+
+**Command.** `dump.mts or` (normalize / text over the or golden, FLEURS or_in columns 3 and 4, `probes/or.txt` and
+synthetic grids: ordinals 0–40 × each suffix spaced and glued plus magnitudes and an unsafe run, a clock grid, both
+groupings, each unit abbreviation in three frames, the rate slash against a non-rate slash, each currency in five
+frames, the guarded signs, the Latin I, initialisms; phonemizeWord over every Odia run, every consonant ×
+matra/virama/sign tail in four frames, conjuncts, nukta letters precomposed and decomposed; numbers through text in
+both digit scripts) → `fn-diff or`; `e2e.sh or`; `parity or`; the three audits. Mutation check together with syl:
+syl's final-coda threshold `>= 2` → `>= 3`, and `ɾr` dropped from Odia's geminate class.
+
+**Raw finding.** `or: 23834 identical, 0 DIFFER` (golden 328, fleurs 5118, probe 32, synthetic 1250, number 3063);
+`phonemize-sync / phonemize-best / trace: 2739 identical, 0 DIFFER` each; `or: 200/200`. Audits: 98 non-ASCII runs,
+18 raw patterns, 0 TS escapes, nothing missing. The 39 calls of test/odia.test.ts pinned by extraction pass. Mutation:
+`syl: 8145 identical, 370 DIFFER`, `or: 23816 identical, 18 DIFFER`; both reverted, back to 0.
+
+**Implication.** or is done. All five ported; next the full gate set on the combined tree.
+
+## Run 8 — 2026-10-15 03:07 (every gate on the combined tree, e6cc559d on main 5b2bf359)
+
+**Command.** `gates.sh` (scratchpad): `cargo fmt --check`, `cargo build --release --workspace`, `cargo run --release -p
+parity` (all languages), `cargo run --release -p regex-diff`, `cargo clippy --workspace --release`, `cargo test
+--workspace --release`; `e2e.sh bn,as,bpy,syl,or` (phonemize-sync, phonemize-best and trace over all five in one
+process, so the process-wide foreign memo is shared as in a real run); a TS print of each group script inside `en`
+and `hi` text, pinned as a Rust test (`group_scripts_inside_other_hosts_are_read_by_their_engines`).
+
+**Raw finding.**
+- fmt clean; build 0 warnings.
+- parity: every language line 200/200 (hil 112/112, ilo 94/94, nog 68/68: their full goldens) except mag 199/200 and
+  tt 199/200 (their known Arabic rows) and syl 195/200 (Run 6's five rows, port-pending on ar / he). bn, as, bpy, or
+  200/200.
+- regex-diff: `146326 probe results identical, 0 DIFFER, 0 patterns refused` (no TS regex was added, so the corpus
+  was not regenerated).
+- clippy: the only warnings in the five new modules are the five `module_inception`s every language module has; none
+  in fn-diff.
+- cargo test: 274 + 1 passed, 0 failed (275 + 1 once the cross-host script test was added).
+- combined end to end: `phonemize-sync / phonemize-best / trace: 11167 identical, 5 DIFFER` each, the five syl rows.
+- The script router targets bn, or and syl for their scripts inside any other host; the readings match the TS and
+  none of the three is port-pending any more.
+
+**TS findings, reported and not fixed (Rust reproduces each).**
+1. bn best path: `bengaliNeural.ts` reads embedded Latin with `getPhonemizer("en").text`, not `readAsEnglish`, so the
+   prewarmed neural English reading is ignored on exactly the path that prewarmed it (Run 3).
+2. bn: the phôla class `[ক-হড়-য়]` spells ড়/য় precomposed, a range NFC input can never contain, so a phôla after
+   ড়/ঢ়/য় never geminates (Run 1).
+3. `BengaliDef` declares `symbolTier` and `ordinals` required, but assamese.jsonc and bishnupriya.jsonc omit both (the
+   engine only reads Bengali's), the same contract-versus-data gap Hindi's `irregularOrdinals` had.
+4. as: the pre-pass header says every rule must accept both digit scripts because it runs before the Bengali digit
+   fold, but step 9's `<`, `>` and `×` rules key on `\d`; unreachable through `phonemize` (the registry folds native
+   digits first), live for a direct `normalizeAssamese` call.
+
+**Port-pending.** syl: 5 golden rows, on `ar` (5) and `he` (1); pinned by `arabic_and_hebrew_runs_are_pending_until_ported`.
+
+**Implication.** Ready for the PR.
