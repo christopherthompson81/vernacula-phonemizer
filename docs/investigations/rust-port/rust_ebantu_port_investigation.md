@@ -130,3 +130,50 @@ synthetic `probes/rw.txt`, generated arms; every 1–3 letter string, 4-letter c
 
 **Implication.** rw done; rn reuses `compose_rwanda_rundi`. TS defect to report (not fixed): kinyarwanda/normalize.ts
 reads a decimal with ≥3 fractional digits that dot de-grouping cannot claim as a sentence break plus an integer.
+
+## Run 4 — 2026-10-15 06:30 (rn: reusing rw's composer, its own normalizer, and a pin-extraction collision)
+
+**What was written.** `languages/kirundi/{manifest,numbers,normalize,kirundi}.rs`. `manifest.rs` types its number
+table as `kinyarwanda::manifest::RwandaRundiNumbers` and `numbers.rs` calls `kinyarwanda::numbers::
+compose_rwanda_rundi`, as the TS imports them: one composer, not a fork. kirundi.ts's `phonemizeWord` is its OWN
+module in the TS (a near-clone of rw's, not an import), so it is its own Rust function. normalize.ts is also its own
+module; a comment-stripped diff against rw's (`strip.py` + `diff`) lists what differs: a dotted-date rule, two units
+with a singular table, `exponentPhrase`, year spans as `kuva … gushika`, degree spans with `na`, a sign carried into
+the degree body, `saidNear` without rw's sentinel, the `kw'ijana` percent rule, no clock words.
+
+**Command.** `parity -- rn`; `audit.sh kirundi kirundi`; `escape_audit.py`; `regs.sh rn`; `rn-normalize` / `rn-g2p`
+dumps (golden, the new synthetic `probes/rn.txt`, generated arms); two mutations; e2e + trace + symbols;
+provenance-poison; pins.
+
+**Raw finding.**
+- `rn: 200/200 identical`, first build.
+- Audits: 29 raw patterns, 2 misses (the TOKEN template; the `(?<=dogere…)` template, checked by the compiled
+  comparison); 20 non-ASCII runs, 0 missing; U+00A0 escapes `TS 25, Rust 21` — the four cooked template NBSPs, the
+  `NB` constant. `regs.sh rn`: `rust 93, rust-only 16`; 15 are the core pre-pass patterns rw also listed, and ONE is
+  rn's: `(?:kuva|guhera)\s\S{0,10}\s*$` (`iu`), absent from the TS side because it is a regex literal INSIDE a
+  template-literal interpolation (normalize.ts's `join`), which `tools/extract_regexes.mts` does not reach — so the
+  regex corpus, and therefore regex-diff, cannot see it either. ASCII only; checked by hand against the TS: identical.
+  The compass-free `[′']` and `kw['’]ijana` classes hold no `"`.
+- `rn-normalize: 6059 identical, 0 DIFFER` (golden 600, probe 51, synthetic 1794, number 3614); `rn-g2p: 167240
+  identical, 0 DIFFER`.
+- Mutations (`exponentPhrase`'s cubed test narrowed to `³`; the `kuva`/`guhera` look-back forced false):
+  `rn-normalize: 6015 identical, 44 DIFFER` (probe 6, synthetic 38). Reverted: 6059/0.
+- `phonemize-sync / phonemize-best / phonemize-trace / trace: 217 identical, 0 DIFFER` each; `symbols: 3272
+  identical, 0 DIFFER`; provenance-poison `0` sites.
+- **Pins, first attempt: a FALSE failure.** test/kirundi.test.ts imports `phonemizeWord` and `numberToWords` from
+  BOTH kirundi and kinyarwanda (it compares the two), and the recorder named calls by export name only, so rw's
+  `phonemizeWord("ijana")` → `iʒana` was replayed through rn's (`id͡ʒana`). The recorder now qualifies names by
+  language directory under `PIN_QUALIFY=1`: `114 pinned, 0 skipped; expects evaluated: 117, failures: 0` (58
+  kirundi.normalizeKirundi, 17 kirundi.numberToWords, 9 kirundi.phonemizeWord, 7 kinyarwanda.phonemizeWord, 3
+  kinyarwanda.numberToWords, 20 phonemize); both Rust tests pass.
+
+**Reading for correctness** (TS prints, `t.mts rn`):
+- **A negative temperature loses its sign.** The degree rules capture `([-−–]?)` and put it straight into the body,
+  `dogere -5`, where the tokenizer has no arm for `-` and drops it: `-5°C` reads `doɡeɾe ɡatanu`, "five degrees".
+  rw reads the same input with `munsi ya zeru` ("below zero").
+- Recorded, by design per the TS header (all five of the corpus's slash spans are measurements, and there is no
+  fraction rule): `1/2` reads `rimwe gushika kuri kabiri` ("one up to two") and `3/4` the same shape.
+- `0.125` has rw's decimal shape: `zeru . ijana na mirongo ibiri na gatanu`.
+
+**Implication.** rn done. TS defects to report (not fixed): kirundi/normalize.ts drops the sign of a negative
+temperature; a decimal with ≥3 fractional digits reads as a sentence break plus an integer (shared with rw).
