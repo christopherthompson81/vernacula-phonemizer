@@ -143,7 +143,7 @@ pub fn create_croatian() -> Result<CroatianPhonemizer, String> {
 
 /// test/croatian.test.ts's literal-input pins, extracted mechanically (`.probe/sh/pins.mts`) with every value
 /// evaluated from the TS engine; never hand-typed.
-#[cfg(test)]
+#[cfg(all(test, feature = "hr"))]
 mod tests {
     use super::*;
 

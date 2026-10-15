@@ -106,6 +106,7 @@ mod tests {
     /// #1533, as test/accent-variants-spare-foreign-runs.test.ts: an accent delta leaves a run another reader
     /// read as that reader read it. The expected tokens are plain `en`'s, so no IPA is typed.
     #[test]
+    #[cfg(all(feature = "en-GB", feature = "hi", feature = "ru", feature = "el"))]
     fn accent_variants_spare_foreign_runs() {
         let cases: &[(&str, &[usize], usize)] = &[
             ("She said नमस्ते to me.", &[2], 1),

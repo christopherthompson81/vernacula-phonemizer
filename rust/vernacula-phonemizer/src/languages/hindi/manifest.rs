@@ -79,7 +79,7 @@ pub fn load_family_def(
     })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "hi"))]
 mod tests {
     use super::*;
     use crate::core::data_source::read_data_text;

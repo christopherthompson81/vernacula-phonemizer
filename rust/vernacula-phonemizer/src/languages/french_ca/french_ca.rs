@@ -106,6 +106,7 @@ mod tests {
 
     /// #1533: the delta spares an embedded foreign run (it ran on the assembled string).
     #[test]
+    #[cfg(feature = "fr")]
     fn ts_foreign_run_pins() {
         assert_eq!(
             crate::phonemize("Il a dit τι.", "fr-CA").unwrap(),

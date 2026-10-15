@@ -451,7 +451,7 @@ pub fn is_unreadable_french(word: &JsString) -> Result<bool, String> {
     Ok(is_unreadable_french_loaded(word))
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "fr"))]
 mod tests {
     use super::*;
 

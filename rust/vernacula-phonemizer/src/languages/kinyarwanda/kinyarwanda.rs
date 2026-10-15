@@ -103,7 +103,7 @@ pub fn create_kinyarwanda() -> Result<KinyarwandaPhonemizer, String> {
     Ok(KinyarwandaPhonemizer)
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "rw"))]
 mod tests {
     use super::*;
 

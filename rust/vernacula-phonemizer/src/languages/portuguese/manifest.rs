@@ -174,7 +174,7 @@ pub fn try_manifest() -> Result<&'static PortugueseManifest, String> {
 pub static MANIFEST: LazyLock<&'static PortugueseManifest> =
     LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 
-#[cfg(test)]
+#[cfg(all(test, feature = "pt"))]
 mod tests {
     use super::*;
 

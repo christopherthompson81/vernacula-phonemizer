@@ -141,6 +141,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "es")]
     fn ts_text_pins() {
         for (i, (t, want)) in TEXT_PINS.iter().enumerate() {
             // The last pin is the TS file's one `es` assertion (the first of the month is a cardinal in Spain).
@@ -155,6 +156,7 @@ mod tests {
 
     /// #1533: the mergers spare an embedded foreign run (they ran on the assembled string).
     #[test]
+    #[cfg(feature = "es")]
     fn ts_foreign_run_pins() {
         assert_eq!(
             crate::phonemize("Dijo θεός en griego.", "es-419").unwrap(),

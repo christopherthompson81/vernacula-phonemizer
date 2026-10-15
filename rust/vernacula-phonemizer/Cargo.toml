@@ -12,3 +12,238 @@ indexmap = { version = "2", features = ["serde"] }
 unicode-normalization = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
+
+[features]
+# One feature per language code the registry serves. `default` turns them all on; a consumer that
+# wants a subset depends with `default-features = false` and names the codes. English (`en`) is not a
+# feature: it is the foreign reader every host delegates Latin runs to, so it is always built.
+default = [
+    "en-GB",
+    "en-IN",
+    "ja",
+    "it",
+    "es",
+    "pt",
+    "pt-BR",
+    "hi",
+    "cmn",
+    "fr",
+    "el",
+    "ko",
+    "th",
+    "ru",
+    "de",
+    "pl",
+    "tr",
+    "nl",
+    "uk",
+    "sv",
+    "id",
+    "ms",
+    "tl",
+    "ceb",
+    "hil",
+    "ilo",
+    "sr",
+    "hr",
+    "bs",
+    "sl",
+    "lt",
+    "lv",
+    "es-419",
+    "fr-CA",
+    "ca",
+    "gl",
+    "ro",
+    "cs",
+    "sk",
+    "be",
+    "bg",
+    "mk",
+    "bho",
+    "mag",
+    "awa",
+    "mai",
+    "hne",
+    "rkt",
+    "ne",
+    "mr",
+    "fi",
+    "et",
+    "hu",
+    "is",
+    "fo",
+    "az",
+    "kk",
+    "ky",
+    "uz",
+    "tk",
+    "tt",
+    "da",
+    "nb",
+    "af",
+    "lb",
+    "bar",
+    "ba",
+    "crh",
+    "kaa",
+    "nog",
+    "chv",
+    "tg",
+    "cy",
+    "ga",
+    "gd",
+    "eu",
+    "sq",
+    "ast",
+    "an",
+    "oc",
+    "bn",
+    "as",
+    "bpy",
+    "syl",
+    "or",
+    "kn",
+    "te",
+    "ta",
+    "ml",
+    "si",
+    "vi",
+    "lo",
+    "my",
+    "jv",
+    "su",
+    "mad",
+    "zu",
+    "xh",
+    "st",
+    "tn",
+    "nso",
+    "sn",
+    "sw",
+    "rw",
+    "rn",
+    "lg",
+    "ln",
+    "nya",
+    "yo",
+    "ig",
+    "ha",
+    "ee",
+    "ak",
+    "wo",
+]
+"en-GB" = []
+"en-IN" = []
+ja = []
+it = []
+es = []
+pt = []
+"pt-BR" = []
+hi = []
+cmn = []
+fr = []
+el = []
+ko = []
+th = []
+ru = []
+de = []
+pl = []
+tr = []
+nl = []
+uk = []
+sv = []
+id = []
+ms = []
+tl = []
+ceb = []
+hil = []
+ilo = []
+sr = []
+hr = []
+bs = []
+sl = []
+lt = []
+lv = []
+"es-419" = []
+"fr-CA" = []
+ca = []
+gl = []
+ro = []
+cs = []
+sk = []
+be = []
+bg = []
+mk = []
+bho = []
+mag = []
+awa = []
+mai = []
+hne = []
+rkt = []
+ne = []
+mr = []
+fi = []
+et = []
+hu = []
+is = []
+fo = []
+az = []
+kk = []
+ky = []
+uz = []
+tk = []
+tt = []
+da = []
+nb = []
+af = []
+lb = []
+bar = []
+ba = []
+crh = []
+kaa = []
+nog = []
+chv = []
+tg = []
+cy = []
+ga = []
+gd = []
+eu = []
+sq = []
+ast = []
+an = []
+oc = []
+bn = []
+as = []
+bpy = []
+syl = []
+or = []
+kn = []
+te = []
+ta = []
+ml = []
+si = []
+vi = []
+lo = []
+my = []
+jv = []
+su = []
+mad = []
+zu = []
+xh = []
+st = []
+tn = []
+nso = []
+sn = []
+sw = []
+rw = []
+rn = []
+lg = []
+ln = []
+nya = []
+yo = []
+ig = []
+ha = []
+ee = []
+ak = []
+wo = []

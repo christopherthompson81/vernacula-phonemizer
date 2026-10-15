@@ -285,7 +285,7 @@ pub fn create_russian() -> Result<RussianPhonemizer, String> {
 }
 
 /// Expectations derived from the TS engine (`.probe/ru/testvals.mts`), never hand-typed.
-#[cfg(test)]
+#[cfg(all(test, feature = "ru"))]
 mod tests {
     use super::*;
 

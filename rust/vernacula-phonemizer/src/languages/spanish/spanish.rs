@@ -332,7 +332,7 @@ impl SpanishPhonemizer {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "es"))]
 mod tests {
     use super::*;
 

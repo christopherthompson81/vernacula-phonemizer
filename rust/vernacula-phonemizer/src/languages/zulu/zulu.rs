@@ -281,7 +281,7 @@ pub fn create_zulu(
     })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "zu"))]
 mod tests {
     use super::*;
 

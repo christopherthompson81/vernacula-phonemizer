@@ -410,7 +410,7 @@ pub fn normalize_portuguese(input: &JsString, brazilian: bool) -> JsString {
     s
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "pt"))]
 mod port_findings {
     use super::*;
 
@@ -494,6 +494,7 @@ mod port_findings {
 
     /// #1490: a dot is a thousands separator only in the thousands shape; any other dot is spoken.
     #[test]
+    #[cfg(all(feature = "pt", feature = "pt-BR"))]
     fn non_grouping_dot_is_spoken() {
         let p = |s: &str, l: &str| crate::phonemize(s, l).unwrap();
         assert_eq!(

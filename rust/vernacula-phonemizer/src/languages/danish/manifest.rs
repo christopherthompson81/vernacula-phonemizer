@@ -51,7 +51,7 @@ pub fn try_manifest() -> Result<&'static DanishManifest, String> {
 pub(crate) static MANIFEST: LazyLock<&'static DanishManifest> =
     LazyLock::new(|| try_manifest().unwrap_or_else(|e| panic!("{e}")));
 
-#[cfg(test)]
+#[cfg(all(test, feature = "da"))]
 mod tests {
     use super::*;
 

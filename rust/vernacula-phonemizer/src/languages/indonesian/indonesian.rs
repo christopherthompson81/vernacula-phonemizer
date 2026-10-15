@@ -468,7 +468,7 @@ pub fn create_indonesian(
     Ok(IndonesianPhonemizer { foreign, symbols })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "id"))]
 mod tests {
     use super::*;
 

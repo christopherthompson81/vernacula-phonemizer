@@ -494,7 +494,7 @@ pub fn create_serbian() -> Result<SerbianPhonemizer, String> {
 
 /// test/serbian.test.ts's literal-input pins, extracted mechanically (`.probe/sh/pins.mts`) with every value
 /// evaluated from the TS engine; never hand-typed.
-#[cfg(test)]
+#[cfg(all(test, feature = "sr"))]
 mod tests {
     use super::*;
 

@@ -329,7 +329,7 @@ pub fn create_danish() -> Result<DanishPhonemizer, String> {
     Ok(DanishPhonemizer { symbols })
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "da"))]
 mod tests {
     use super::*;
 

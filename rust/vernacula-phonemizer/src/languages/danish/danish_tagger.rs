@@ -49,7 +49,7 @@ pub fn danish_tagger_unavailable_reason() -> Option<String> {
     shipped().err()
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "da"))]
 mod tests {
     use super::*;
     use crate::core::js_string::js;
