@@ -1,0 +1,40 @@
+# Uzbek (uz) probes: synthetic text only, one line per normalize.ts arm plus a neighbour it must decline,
+# and the g2p / tokenizer corners.
+# 0) digit grouping
+19 500 kishi, 800 000 soʻm, 783 562 948 dollar, 0 123 son, 3000 mil, 12\u{a0}345 son.
+# 1) era markers
+m.a. 300-yil, m.a. avval, mil. m. 5 asr, M.A. 200.
+# 2) abbreviations
+olma, nok va h.k. mevalar. va h.k.) 5 mln. kishi. 3 mln.
+# 3) clocks
+soat 10:00 da, 11:35 da, 24:00, 23:60, 1:09:02.
+# 4) version dots
+802.11n standarti, 1.1-rasmga qarang, 2.4 versiya, 1.2.3 versiya.
+# 5) N-word ordinals
+16-noyabr, 1978-yil, 190-oʻrin, 1-Mart, 7-regbi, 2005-moliviy, 3,5-qism, 0-qavat, 99999999999999999-oʻrin.
+# 6) regnal
+Yelizaveta 2 ning hukmronligi, Lealofi 3 hukmronligidan, Sahifa 12. boʻldi, Izmir 3,7 million, Pyotr 1 ning.
+# 7) fractions
+29¾ duymga 24½ duym, 1/2, 1/4, 3/4, 1/5, 2/3, 5/5, 1/1, 16/11/1978, 1/5/2020.
+# 8) degrees
++30°C, 90 °F, 45° burchak.
+# 9) signs
+±5, UTC+1, 30+, +30, -5, 1838−1917, B&B, a&b, x = y, 3 < 5, 7 > 2, 2 × 3, 6 ÷ 2.
+# 9b) percent suffix
+93%i ulangan, 50% oshdi.
+# 10) rates
+240 km/soat, 64 km/s, 133 m/s, 300 milya/soat, 480 km/soatgacha, 160 km/soatga, 70 km/s ga, 35–40 mil/s, 2,4 Gs va 5,0 Gs.
+# 10b) lone initials
+T. rex topildi, N. Ueyn keldi, S. 42 sahifa, D. K. Arya.
+# 11) initialisms
+AQSH, BMT, MS, GPS, NASA, PA, IBM, OʻzR.
+# tokenizer: numbers and decimals
+2,5 foiz, 3,14 son, 007 agent, 9007199254740993 son, 12345678901234567890 son.
+5 km, 3 m², 2 m³, 10 sm, $5, ¥100, 6x6 sm.
+# g2p corners
+oʻzbek gʻisht shahar choy ming tong ngʻ maʼno taʼlim sanʼat qoʻl Oʻzbekiston OʻZBEKISTON
+sanʼ'at o'zbek g`isht oʼqish o‘qish o′qish
+Washington Müller café naïve
+# foreign scripts and lone surrogates
+Москва va Παρίσι 北京.
+a\u{d800}b \u{dc00}

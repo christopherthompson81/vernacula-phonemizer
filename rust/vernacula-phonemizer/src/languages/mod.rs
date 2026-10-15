@@ -58,6 +58,7 @@ pub mod tagalog;
 pub mod thai;
 pub mod turkish;
 pub mod ukrainian;
+pub mod uzbek;
 
 /// The fraction guards are mirrors in the ported `\b…\b` family and Italian (#1495). Relational, as
 /// test/fraction-guards-1495.test.ts: a declined fraction reads as its numbers spaced.

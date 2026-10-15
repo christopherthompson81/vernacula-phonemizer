@@ -1934,6 +1934,33 @@ fn main() {
                 }
             })
         }
+        "uz-normalize" | "uz-g2p" | "uz-numbers" => {
+            let uz = vernacula_phonemizer::languages::uzbek::uzbek::create_uzbek().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => uz.normalize(&t()),
+                    "initialisms" => uz.normalize_initialisms(&t()),
+                    "symbols" => uz.symbols(&t()),
+                    "unreadable" => JsString::from(uz.is_unreadable(&t()).to_string().as_str()),
+                    "word" => uz.phonemize_word(&w()),
+                    "nat" => uz.nativise(&w()),
+                    "words" => uz.number_to_words(num()),
+                    "ordinal" => uz.ordinal_words(num()).unwrap_or_else(none),
+                    "roman" => uz.roman_ordinal(num()).unwrap_or_else(none),
+                    _ => uz.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
+        "uz-roman" => {
+            let policy = vernacula_phonemizer::languages::uzbek::roman_ordinals::roman_policy();
+            Box::new(move |input| {
+                vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};

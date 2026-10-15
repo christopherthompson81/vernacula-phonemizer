@@ -3281,6 +3281,102 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
         for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
     },
+    // ── Uzbek (uz). Inputs: the uz golden, FLEURS uz_uz (columns 3 and 4) and probes/uz.txt. ──
+    // normalizeUzbek, the initialism pass alone (rebuilt with normalize.ts's own config — it is module-private) on
+    // the raw text, the symbol tier uzbek.ts built (recorded through the wrapper) on the normalized text, and the
+    // phonotactic test (rebuilt likewise) on every letter run, plus synthetic ordinal / regnal / fraction / rate rows.
+    async "uz-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const N = await import("../../../src/languages/uzbek/normalize.ts");
+        await import("../../../src/languages/uzbek/uzbek.ts");
+        const { makeInitialismNormalizer, makeUnreadableTest } = await import("../../../src/core/initialisms.ts");
+        const rec = records.find((r) => /src\/languages\/uzbek\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const LETTER: Record<string, string> = {
+            a: "a", b: "be", c: "se", d: "de", e: "e", f: "ef", g: "ge", h: "ha", i: "i", j: "je",
+            k: "ka", l: "el", m: "em", n: "en", o: "o", p: "pe", q: "qa", r: "er", s: "es", t: "te",
+            u: "u", v: "ve", w: "ve", x: "xa", y: "ye", z: "ze",
+        };
+        const unreadable = makeUnreadableTest({
+            vowels: /[aeiou]/u,
+            legalOnsets: new Set(["bl", "br", "by", "dr", "dy", "fl", "fr", "gl", "gr", "kl", "kr", "kv", "ky", "pl",
+                "pr", "ps", "py", "sk", "sl", "sm", "sn", "sp", "st", "sv", "sy", "tr", "ts", "vy"]),
+            legalCodas: new Set(["ft", "kt", "ks", "lm", "lt", "nd", "ng", "nk", "nt", "pt", "rd", "rf", "rk", "rl",
+                "rm", "rn", "rp", "rs", "rt", "sk", "st", "ts", "yk"]),
+        });
+        const WORDS = new Set(["aqsh", "nasa", "asus", "opec", "rem", "covid"]);
+        const initialisms = makeInitialismNormalizer({
+            letterName: (l) => LETTER[l.toLowerCase()], acronymLetters: new Set(["pa", "to", "oha", "aol"]),
+            isRecorded: (w) => WORDS.has(w), isUnreadable: unreadable,
+        });
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["uz"], FLEURS_DIR.uz, ["uz.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const n of ["0", "1", "2", "3", "4", "5", "6", "7", "9", "10", "19", "20", "40", "90", "100", "101", "999", "1000", "1001",
+            "1978", "2000", "1000000", "1000001", "3,5", "12,25", "9007199254740993"])
+            for (const w of ["yil", "oʻrin", "noyabr", "Mart", "regbi", "moliviy", "rasmga", "sinf"]) add(`${n}-${w} keldi`);
+        for (const name of ["Yelizaveta", "Pyotr", "Sahifa"]) for (const d of ["1", "2", "3", "39", "40", "12"]) for (const tail of [" ning", " hukmronligi", ".", " kitob"]) add(`${name} ${d}${tail}`);
+        for (let a = 0; a <= 13; a++) for (const b of [0, 1, 2, 3, 4, 5, 10, 12, 13]) add(`${a}/${b}`);
+        for (const n of ["5", "35", "2,4", "480"]) for (const u of ["km/soat", "km/s", "km/h", "mil/soat", "milya/soat", "m/s"])
+            for (const sfx of ["", "ga", "gacha", " dan", "da"]) { add(`${n} ${u}${sfx}`); add(`${n}–40 ${u}`); }
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            const a = N.normalizeUzbek(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(t), src, op: "initialisms" }, initialisms(t));
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(unreadable(w)));
+    },
+    // phonemizeWord and the nativiser (rebuilt with uzbek.ts's class) over every letter run of the texts (as
+    // written, lowercased, uppercased), every 1-3 letter string over the alphabet and the apostrophe variants
+    // (third letter from a context set), and edge strings.
+    async "uz-g2p"() {
+        const U = await import("../../../src/languages/uzbek/uzbek.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zʻ'’‘`ʼ′]", "iu");
+        const words = new Set<string>();
+        for (const t of langTexts("uz"))
+            for (const m of t.matchAll(/[\p{L}\p{M}ʻ'’‘`ʼ′]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); words.add(m[0].toUpperCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzʻ'’‘`ʼ′OʻGʻ"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "aeiougnhʻ'") words.add(a + b + c); } }
+        for (const w of ["", "\ud800", "a\udc00b", "ŉ", "ǅ", "K", "ſ", "ﬁ", "nʻg", "ngʻ", "ʻa", "aʻ", "ʻʻ", "é", "é"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, U.phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+    },
+    // numberToWords and ordinalWords over 0…20,000, multiples, powers of ten to 10²⁴ and neighbours, the corners;
+    // the Roman ordinal; and the engine's own number reading on digit runs (renderNumber / spellDigits, decimals).
+    async "uz-numbers"() {
+        const { numberToWords, ordinalWords } = await import("../../../src/languages/uzbek/numbers.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/uzbek/romanOrdinals.ts");
+        const U = await import("../../../src/languages/uzbek/uzbek.ts");
+        const P = U.createUzbek();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1e300, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, numberToWords(n));
+            emit({ n: String(n), op: "ordinal" }, ordinalWords(n) ?? "\u0000none");
+        }
+        for (const n of [...Array(121).keys(), -1, 1.5, NaN, Infinity, 1000])
+            emit({ n: String(n), op: "roman" }, ROMAN_POLICY.ordinal(n) ?? "\u0000none");
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40), "2,5", "0,05", "3,14159"];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
+    // normalizeRomans with Uzbek's policy (registry.ts romanUz) over the Uzbek texts.
+    async "uz-roman"() {
+        const { normalizeRomans } = await import("../../../src/core/roman.ts");
+        const { ROMAN_POLICY } = await import("../../../src/languages/uzbek/romanOrdinals.ts");
+        for (const [t, src] of textsFor(["uz"], FLEURS_DIR.uz, ["uz.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
+    },
 };
 
 
