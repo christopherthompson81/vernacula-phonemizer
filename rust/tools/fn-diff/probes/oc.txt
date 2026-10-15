@@ -1,0 +1,14 @@
+# Occitan (oc) off-golden probes: synthetic text only, one or more per normalize.ts arm plus the neighbour it must
+# decline, then tokenizer and g2p corners.
+La vila a 130 000 estatjants e 12 345 678 èuros, mas 1.000 es un decimal e 3.14 tanben.
+En 300 ab. C. o en 400 av. C., puèi en 500 ap. C., mas pas xap. C.
+A 9:30 e a 23:59, mas pas 25:00 ni 9:60.
+La valor es -5 o −3 o (–2), mas 5-3 es un resultat.
+Aviá 20 °C, 90°F, 20° 30′, 20° de calor, e un libre in-4° o in-12°.
+Entre 1990–2000 e 5—8 ans, e de 1990-2000, mas pas 5-8-9 ni 1/5-8.
+I a un 5 % e 10 € e 20 £ e $30 e 5 km e 1 km² e 2 milions de personas.
+La lenga occitana, la casa, la rosa, lo pan, l'amor, grand, nuèit, aiga, quatre, guerra, gent.
+Lhum, canha, chanta, viatge, petjar, tz, ròsa, causa, uèlh, iòu, pòrta.
+Dvořák e Ångström e Zoë son de noms estrangièrs.
+Lo nombre 1234567890123 e 999999 e 2000000 es grand.
+Aquò es constructor e toString… mas perqué? Òc!

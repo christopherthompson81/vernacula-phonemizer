@@ -65,6 +65,7 @@ const FLEURS_DIR: Record<string, string> = {
     cy: "cy_gb",
     ga: "ga_ie",
     ast: "ast_es",
+    oc: "oc_fr",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -4786,6 +4787,66 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const ctx = [..."aeiouüqgcynrlbpmt"];
         for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
         for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "n\u0303", "ﬁ", "Dvořák", "Ångström", "xylo", "chesús", "fer", "mullers", "agüelo", "quiet", "gent"]) words.add(w);
+        for (const w of words) {
+            emit({ word: units(w), op: "word" }, phonemizeWord(w));
+            emit({ word: units(w), op: "nat" }, nat(w));
+        }
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 21; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 1e12 - 1, 1e12, 1.5, -1, -21, -1.5, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["0", "007", "1234567890", "99999999999999999999", "1e3", "12a", "１２", "٣٠", "𝟙2", "", "\ud800", "-5"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1000000000000", raw: units(raw), op: "words" }, numberToWords(1e12, raw));
+        }
+    },
+    // ── Occitan (oc). Inputs: the oc golden, FLEURS oc_fr (columns 3 and 4) and probes/oc.txt. ──
+    // normalizeOccitan, the symbol tier over its output (recorded through the wrapper) and `createOccitan().text`,
+    // over every text plus synthetic rows for every arm: grouping with every separator, the dot decimal, both era
+    // markers in their dotted/undotted spellings and neighbours, the clock over an hour × minute grid, minus forms,
+    // degrees with a scale / minutes / bare and inside the `in-4°` book format, dash and hyphen ranges.
+    async "oc-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeOccitan } = await import("../../../src/languages/occitan/normalize.ts");
+        const { createOccitan } = await import("../../../src/languages/occitan/occitan.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/occitan\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createOccitan();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["oc"], FLEURS_DIR.oc, ["oc.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const g of ["1 000", "2\u00a0500", "7\u202f000", "3\u20094000", "12 345 678", "1.000", "12.5", "3.14", "1,5 000", "1.5.6"]) add(`i a ${g} personas`);
+        for (const e of ["ab. C.", "av. C.", "abC", "av.C", "ap. C.", "apC.", "ap. Ca", "xap. C.", "ab. c."]) add(`en 300 ${e} e après`);
+        for (const h of ["0", "1", "09", "12", "23", "24", "25"]) for (const m of ["00", "05", "30", "59", "60"]) add(`a ${h}:${m} oras`);
+        for (const m of ["-5", "−5", "–5", "(-3)", "a -5", "5-3", " - 5"]) add(`valor ${m} graus`);
+        for (const d of ["20 °C", "20°c", "90°F", "20° 30′", "20°30'", "20°", "20° N", "in-4°", "in-12° C", "in-8°30'", "fin-4°", "20°Ca"]) add(`aviá ${d} ara`);
+        for (const r of ["1990–2000", "5—8", "1990-2000", "5 - 8", "5-8-9", "1/5-8", "5-8/9", "a5-8", "1.5-2"]) add(`entre ${r} ans`);
+        for (const [t, src] of rows) {
+            const a = normalizeOccitan(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("oc", () => E.text(t)));
+        }
+    },
+    // phonemizeWord and the nativiser over every letter run (as written and lowercased), every 1–3 letter string of
+    // the alphabet, every 4-letter string over the context letters, corners; numberToWords over 0…20,000,
+    // magnitudes and raw strings.
+    async "oc-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/occitan/occitan.ts");
+        const { numberToWords } = await import("../../../src/languages/occitan/numbers.ts");
+        const { makeNativiser } = await import("../../../src/core/hostWord.ts");
+        const nat = makeNativiser("[a-zàèòáéíóúïüçA-ZÀÈÒÁÉÍÓÚÏÜÇ'·-]", "u");
+        const words = new Set<string>();
+        for (const t of langTexts("oc")) for (const m of t.matchAll(/[\p{L}\p{M}'’·-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyzàèòáéíóúïüç'·-"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiouòqgcsnrdbtz"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "a\u0300", "c\u0327", "ﬁ", "Dvořák", "Ångström", "xylo", "lenga", "occitana", "casa", "rosa", "pan", "amor", "grand", "nuèit"]) words.add(w);
         for (const w of words) {
             emit({ word: units(w), op: "word" }, phonemizeWord(w));
             emit({ word: units(w), op: "nat" }, nat(w));

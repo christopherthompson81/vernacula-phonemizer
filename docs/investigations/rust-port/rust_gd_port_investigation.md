@@ -75,3 +75,24 @@ row with a decomposed vowel, which is why the corner is in the dump). Restored: 
 **Raw finding.** scottishgaelic.rs pins 77 calls; `cargo test scottishgaelic`: 1 passed. `parity` (all): every
 language byte-identical but mag and tt at their known 199/200; `gd: 200/200`. clippy: only `module_inception` in
 the new files. No port-pending rows.
+
+## Run 6 — 2026-10-15 03:20 (the gates, rebased onto main after #1579 and the second Turkic group #1580)
+
+**Commands.** `git rebase origin/main` (conflicts in registry.rs, dump.mts and languages/mod.rs only, rebuilt per
+commit by `west/resolve.py` from upstream plus this language's own block; dump.mts parse-checked with esbuild after
+each), `cargo fmt`; then `west/gates.sh` on the combined tree: `cargo fmt --check`, `parity` (all), `cargo test
+--release`, `regex-diff`, `cargo clippy --workspace --release`, every west per-module dump re-dumped and replayed, and
+`LANGS=cy,ga,gd,eu,sq,ast,an,oc` `phonemize-sync` / `phonemize-best` / `phonemize-trace` / `trace`.
+
+**Raw finding.**
+```
+fmt: clean
+parity: all 81 language lines byte-identical except mag 199/200 and tt 199/200 (both known port-pending Arabic rows)
+cargo test: 275 passed, 0 failed (+1 doc test)
+regex-diff: 146326 probe results identical, 0 DIFFER, 0 patterns refused
+clippy: in the new files only module_inception (the fn-diff main.rs:651 warning predates)
+cy-normalize 21609 / cy-g2p 359050 / ga-normalize 20977 / ga-g2p 511130 / gd-normalize 7554 / gd-g2p 331028 /
+eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-normalize 11817 / ast-g2p 295456 /
+an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
+phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
+```

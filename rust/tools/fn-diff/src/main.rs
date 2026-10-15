@@ -2667,6 +2667,29 @@ fn main() {
                 }
             })
         }
+        "oc-normalize" | "oc-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            let oc = vernacula_phonemizer::languages::occitan::occitan::create_occitan().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => oc.normalize(&t()),
+                    "symbols" => oc.symbols(&t()),
+                    "text" => with_host(&js("oc"), || oc.text(&t())),
+                    "word" => oc.phonemize_word(&w()),
+                    "nat" => oc.nativise(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        oc.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);
