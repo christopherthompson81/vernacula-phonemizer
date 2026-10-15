@@ -386,7 +386,8 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
     // builder drops single-letter rows at BUILD time. The safety is the build-time filter, not this order.
     // ⚠ NOT ON THE EVAL PATH: the entries come from the referee this language is scored against, so
     // phonemizeWordRules below (what the eval calls) skips them — house pattern, same as en-GB/tl/ilo.
-    // Provenance + the single-source circularity note: af-lexicon.PROVENANCE.md.
+    // Provenance: af-lexicon.PROVENANCE.md; the single-source circularity note:
+    // docs/investigations/af/af-lexicon_build_notes_investigation.md.
     const pinned = lexicon().get(w);
     if (pinned !== undefined) return withStress(pinned, w);
     // ⚠ THEN THE 27k RCRL LEXICON, AND ONLY THEN THE RULES. Order matters against the tier above: RCRL writes

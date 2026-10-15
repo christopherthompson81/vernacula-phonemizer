@@ -43,7 +43,8 @@ public class EnglishGbTests
         Assert.Contains("əᶷ", Say("process"));
         Assert.Contains("əᶷ", Say("progress"));
         Assert.Contains("aluminium", EnglishGb.LexicalVariants());
-        // ...and NOT the participles, which the parent already reads as verbs — see the PROVENANCE file.
+        // ...and NOT the participles, which the parent already reads as verbs — see
+        // docs/investigations/en-GB/en-gb-lexical_build_notes_investigation.md.
         Assert.DoesNotContain("progressed", EnglishGb.LexicalVariants());
     }
 

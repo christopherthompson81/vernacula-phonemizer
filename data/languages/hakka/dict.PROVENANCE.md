@@ -1,84 +1,24 @@
-# `dict.tsv` provenance — Hakka Chinese / 客家话 (hak), Meixian 梅县 (Moiyen) dialect
+# `dict.tsv` — provenance (Hakka Chinese / 客家话, hak; Meixian 梅县 dialect)
 
-Han → Sinological-IPA readings, **9,220 entries**: 6,362 **traditional** headwords (2,600 single-character
-citation readings + 3,762 multi-character word readings, with the Meixian tone sandhi baked in as
-`underlying⁻surface`) + 2,857 **simplified** aliases generated from them, so mainland Hakka text (written in
-simplified Han) resolves too, + **1 derived entry** (see below).
+**What it is.** Han → Sinological-IPA readings, 9,220 entries: 6,362 traditional headwords (2,600
+single-character readings and 3,762 multi-character words, with Meixian tone sandhi as `underlying⁻surface`),
+2,857 simplified aliases, and one derived entry.
 
-- **Dialect choice:** Hakka has several standards in Wiktionary (Sixian 四縣 and Hailu 海陸 in Taiwan, Meixian
-  梅县 on the mainland). **Meixian** is the traditional prestige/representative dialect (the analogue of taking
-  Taiyuan for Jin), and it carries a clean single `Meixian` tag, so it was chosen for consistency.
-- **Source:** the **Wiktionary Chinese** dialectal-pronunciation data, via the machine-readable **kaikki.org**
-  extract (`kaikki.org-dictionary-Chinese.jsonl`, 1.18 GB). Every entry whose `sounds` array carries a
-  pronunciation tagged `["Hakka","Meixian","Sinological-IPA"]` was kept (first/primary reading per word); the
-  IPA string is taken verbatim (stripped of the enclosing `/…/`).
-- **Format:** `<han-word>\t<syllable …>` where each syllable is segmental IPA + a superscript pitch-number tone
-  (`ma⁴⁴`, `səp̚⁵`); multi-syllable readings are space-separated and may carry a sandhi arrow `underlying⁻surface`.
-  The runtime (`hakka.ts` via the shared `hanDictIpa.ts`) segments a Han string by greedy longest match over
-  these keys, converts each pitch digit → a Chao contour letter (1→˩ … 5→˥), and renders the SURFACE tone after
-  the arrow.
-- **Tone system (Meixian, 6 citation tones):** 陰平 ˦˦ (44), 陽平 ˩˩ (11), 上 ˧˩ (31), 去 ˥˧ (53), 陰入 ˩ (1,
-  checked/-ptk̚), 陽入 ˥ (5, checked/-ptk̚). The retained **-p̚ -t̚ -k̚** stop codas (all three MC entering-tone
-  codas) are the Hakka signature that separates it from Jin (merged -ʔ) and Mandarin (lost).
-- **Simplified aliases:** the kaikki headwords are traditional; each key is converted character-by-character to
-  simplified via **OpenCC `TSCharacters`** (Apache-2.0) and, where the result differs and doesn't collide with an
-  existing key, added as an alias pointing at the same reading. 2,857 aliases added, 27 collisions skipped. Same
-  merged-simplified-char caveat as Jin (a merged glyph keeps only its own primary-sense reading).
-- **License:** Wiktionary content is CC-BY-SA 3.0; the kaikki extract is a mechanical redistribution of it.
-  OpenCC `TSCharacters` is Apache-2.0.
+**Source.** The Wiktionary Chinese dialectal-pronunciation data, via the kaikki.org extract
+(`kaikki.org-dictionary-Chinese.jsonl`). Every entry whose `sounds` array carries a pronunciation tagged
+``["Hakka","Meixian","Sinological-IPA"]`` was kept, with the IPA string taken verbatim (the enclosing `/…/` stripped; first reading per word).
 
-**Single-source ():** no independent second referee for Meixian Hakka (no wikipron hak; epitran ships no Hakka),
-so this dict is verified only *within* the Wiktionary tradition — a systematic error shared with that source
-would go undetected.
+**Simplified aliases.** The kaikki headwords are traditional. Each key is converted character by character
+with OpenCC `TSCharacters` (Apache-2.0), and where the result differs and does not collide with an existing
+key, it is added as an alias for the same reading.
 
-## Derived entries — exactly one, and why
+**Licence.** Wiktionary content is CC BY-SA 3.0, and the kaikki extract is a mechanical redistribution of it.
+OpenCC `TSCharacters` is Apache-2.0. This file is in the share-alike stratum (`LICENSES/PROVENANCE.md` §3).
 
-Everything above is verbatim from kaikki. **One entry is not, and it is listed here so the file's provenance
-claim stays exact:**
+**One derived entry.** Every row is verbatim from kaikki except one:
 
-| key | reading | derivation |
+| key | reading | basis |
 |---|---|---|
-| 度 | `tʰu⁵³` | see below |
+| 度 | `tʰu⁵³` | The source has no single-character Meixian reading for 度. The reading is taken from two Meixian entries in this same file (`印度 in⁵³⁻⁵⁵ tʰu⁵³`, `深度 t͡sʰəm⁴⁴⁻³⁵ tʰu⁵³`). It agrees with the source's own Sixian row (`/tʰu⁵⁵/`, 去聲, which is ˥˧ in Meixian) and with hak.wikipedia's Pha̍k-fa-sṳ spelling `thu`. |
 
-**度 has no single-character Meixian reading in the source at all** — checked against the full 1.18 GB kaikki
-Chinese extract, including non-primary readings: the character carries Hakka pronunciations tagged *Sixian*
-(`Phak-fa-su thu`, `Sinological-IPA /tʰu⁵⁵/`) and *Hailu* (`/tʰu³³/`), and no *Meixian* one. The reading above
-is derived, and three independent things agree on it:
-
-1. **From the Meixian data itself.** Two multi-character Meixian entries in this very dict carry the character
-   with its tone: `印度 in⁵³⁻⁵⁵ tʰu⁵³` and `深度 t͡sʰəm⁴⁴⁻³⁵ tʰu⁵³`. The single-character citation reading is
-   read straight off them.
-2. **From the source's own Sixian row.** Sixian `/tʰu⁵⁵/` is 去聲; the Meixian contour for 去聲 is ˥˧ — which
-   is what (1) gives. Same segment, same tone category, the dialect's own contour.
-3. **From hak.wikipedia.** The Pha̍k-fa-sṳ corpus writes the word 15 times as the degree unit (`Pet-vúi 42
-   thu`, `180 thu`, `ngiap-shì 2040 thu`) and inside compounds (`Yin-thu` 印度, `chhòng-thu` 長度, `me̍t-thu`
-   密度) — `th` = /tʰ/, matching (1) and (2).
-
-⚠ **AND IT IS NOT A CONVENIENCE.** 度 is the **second most frequent uncovered single character** in the Han
-portion of hak.wikipedia (137 occurrences; only 於 ×414 is commoner), and it is the one word
-`normalize.ts` must emit for the degree rule to say anything at all — the shared Han engine SKIPS an
-uncovered character silently, so `攝氏20度` would have read *ŋiap̚ sz̩ ŋi səp̚* with the unit gone. That is the
-line drawn here: a character this layer EMITS gets sourced or the rule is declined (which is what the Jin layer
-did with the same gap). 於 and the rest of the 1,282 uncovered characters are NOT added — they are the engine's
-coverage gap, recorded in `docs/investigations/hak_normalization_investigation.md`, not this layer's.
-
-## ⚠ Eleven keys are UNREACHABLE, and that is a property of the extract, not a defect
-
-11 of the 9,220 keys can never be looked up, because they contain characters the tokenizer breaks a Han run
-on — 7 carry `，`, and 4 carry `……` or `——`:
-
-```
-人比人，气死人        人比人，氣死人        冬至羊，夏至狗
-成事不足，敗事有餘     成事不足，败事有余     早知拉尿，企到天光
-自家脧仔歪，嫌人尿桶漏  紧……紧……            緊……緊……
-老公拨扇——凄凉       老公撥扇——淒涼
-```
-
-They are proverbs and 歇後語 that arrived whole from the kaikki extract. The shared engine
-(`core/hanDictIpa.ts`) segments with a greedy longest match over a run the tokenizer has ALREADY split at
-that punctuation, so no lookup can present them — the longest key it can ever offer stops at the comma.
-
-**0.12% of the dict, no behavioural effect, and both engines agree byte-for-byte** (#1056). Recorded rather
-than stripped: deleting them means re-running the generator and taking a diff against the upstream extract
-for no reading that changes. ⚠ If a future extract adds many more, that is a signal the generator's key
-filter changed — the number to compare against is 11.
+Build notes, including why that entry was needed: `docs/investigations/hak/hakka-dict_build_notes_investigation.md`.

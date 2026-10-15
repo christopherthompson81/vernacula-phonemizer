@@ -1,8 +1,8 @@
 /**
  * Khmer word-boundary tagger — a per-character BiLSTM (ONNX) that re-inserts the U+200B word boundaries
  * Khmer does not write, so the syllabifier stops re-parsing across them.
- * Ported from src/languages/khmer/khmerSegmenter.ts — see that file (and km-segmenter.PROVENANCE.md) for
- * the label cleaning and the measured gain.
+ * Ported from src/languages/khmer/khmerSegmenter.ts — see that file (and
+ * docs/investigations/km/km-segmenter_build_notes_investigation.md) for the label cleaning and the measured gain.
  */
 using System.Text.Json;
 using Vernacula.Phonemizer.Core;

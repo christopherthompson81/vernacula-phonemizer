@@ -1,8 +1,9 @@
 /**
  * Sindhi G2P STRUCTURAL tagger — the neural OOV reader. A per-letter BiLSTM (ONNX) labelling each
  * Perso-Arabic letter with its IPA-chunk TAG, so the model only ever decides the unwritten short vowel.
- * Ported from src/languages/sindhi/sindhiTagger.ts — see that file (and sd-g2p-tagger.PROVENANCE.md) for
- * the training data and the measured accuracies.
+ * Ported from src/languages/sindhi/sindhiTagger.ts — see that file (and
+ * docs/investigations/sd/sd-g2p-tagger_build_notes_investigation.md) for the training data and the measured
+ * accuracies.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;

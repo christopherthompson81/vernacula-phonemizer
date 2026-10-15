@@ -2,7 +2,8 @@
  * Central Kurdish BIZROKE tagger — the neural OOV tier for Sorani's one unwritten vowel. A per-symbol
  * BiLSTM (ONNX) labelling each code point of THIS ENGINE'S OWN RULE OUTPUT with either itself or itself + /ɪ/.
  * Ported from src/languages/central-kurdish/centralKurdishTagger.ts — see that file (and
- * ckb-bizroke-tagger.PROVENANCE.md) for the training data, the accuracies, and why there is no postprocess.
+ * docs/investigations/ckb/ckb-bizroke-tagger_build_notes_investigation.md) for the training data, the accuracies,
+ * and why there is no postprocess.
  */
 using Vernacula.Phonemizer.Core;
 

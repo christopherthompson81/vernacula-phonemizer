@@ -1,0 +1,219 @@
+# `en-g2p-tagger` (english) — build notes
+
+Moved verbatim from `data/languages/english/en-g2p-tagger.PROVENANCE.md` on 2026-10-15 (as of be9d9bf1). That sidecar now records only
+where the material came from, its licence, what was taken and how to regenerate it. The design reasoning,
+measurements and retrain history it used to carry are kept here unchanged, as they were written.
+
+---
+
+## `en-g2p-tagger.int8.onnx` provenance
+
+A per-grapheme **BiLSTM** sequence-labeller that maps a bare OOV English word to canonical IPA — the neural **OOV** tier
+for English (`phonemizeEnNeural`; inference in `englishTagger.ts`). It labels each **letter** with one **ARPABET-chunk**
+tag in a SINGLE forward pass, then finishes the ARPABET the SAME way the sync n-gram path does — `enforceSinglePrimary`
++ `collapseGeminates` + `arpabetToIpa` (shared from `englishG2p.ts`), so a G2P word has no seam with the CMUdict
+lexicon. Output length == input length → it cannot degenerate; a per-letter CONSONANT-consistency MASK (`charTags`)
+keeps it from emitting an impossible tag; on an out-of-vocab letter it declines ("") and the word falls back to the
+sync engine.
+
+**Why a tagger, and why it replaces the n-gram.** English OOV is the classic hard G2P problem. The prior OOV path
+(compound-split → morph → joint n-gram) is weak on the non-compositional tail (proper nouns, foreign/novel words), and
+the noisy wikipron referee couldn't even measure it. On a CLEAN CMUdict 90/10 held-out
+(11,748 words), the BiLSTM roughly HALVES the phone-error-rate:
+
+| model (held-out, stress-independent phones) | WORD-exact | PHONE-accuracy (1−PER) |
+|---|---|---|
+| current pipeline (compound→morph→n-gram) | 42.7% | 81.8% |
+| **BiLSTM tagger (this model)** | **71.5%** | **93.4%** (PER 6.6% vs 18.2% — 64% fewer phone errors) |
+
+⚠ **RETRAINED 2026-09-21 ON THE CORRECTED DICTIONARY (#1402), AND THE GAIN IS AGAIN ONLY IN THE TAIL.**
+~2,000 corrections landed between #1361 and this run — the loanword slice, the `-ed` adjectives, the
+prefix vowel, the yod/velar rows, the #1369 stress block. Scored on the SAME two populations the
+2026-09-19 entry below published, so the eras are directly comparable:
+
+| held-out population | stress-indep | incl. stress |
+|---|---|---|
+| words the #1341 dictionary also had (n=11,748) | 71.4% → **71.6%** | 66.4% → **66.4%** |
+| the Moby tail added in #1344/#1353 (n=1,780) | 65.7% → **67.7%** | 53.7% → **55.7%** |
+
+**+2.0pp on the obscure/foreign/proper-noun vocabulary the OOV tier exists for, and nothing on the
+established core** — the same narrow shape as the previous retrain's +6.1pp, and the correct one: the
+corrections were overwhelmingly to the tail.
+
+⚠ **AND THE STALENESS NUMBER IS MOSTLY MEMORISATION, WHICH THE FIRST DRAFT OF THIS ENTRY OVERSOLD.**
+Asked for each of the 2,764 curated words, the tagger emitted the UPSTREAM reading on 671 before and
+54 after. That confirms the export landed, and it is NOT a runtime gain: a curated word is IN the
+dictionary, so the lexicon answers and the tagger is never consulted for it. What a retrain actually
+buys is the generalisation above.
+
+    training environment (a `.venv` now exists and is gitignored; pins in
+    tools/english/requirements-bilstm.txt)
+    torch 2.6.0+cu124 · cuda 12.4 · onnx 1.22.0 · onnxruntime 1.27.0
+    python 3.12.3 · NVIDIA GeForce RTX 3090
+
+⚠ THAT IS A TORCH DOWNGRADE FROM THE 2026-09-19 WEIGHTS (2.11.0+cu128) AND IT WAS NOT A CHOICE: it is
+what the `.venv` in this checkout already carried. Recorded because the point of this block is to say
+where a set of weights came from, and an unexplained move backwards is exactly the thing a later
+reproduction attempt would waste time on.
+    split model: 65.0% exact / 71.1% stress-indep on n=13,531; 190s to measure, then a full-dict
+    retrain to export. 28 chars, 208 tags — the vocab is unchanged, so `.meta.json` is byte-identical.
+
+⚠ **40 GOLDEN LANGUAGES MOVED, 162 ROWS, AND IT IS CLOSE TO A WASH.** Enumerated rather than
+summarised, because "majority repairs" would bury the other half:
+
+    REPAIRS    ʹCrosbyʹ ɹˈɔːbi → ɹˈɔːsbi (12) · Santorini …ˈiːniː → …ˈiːni (10) · Bellingshausen
+               …ɪŋzh… → …ɪŋʃ… (6) · Saint-Saëns sˈiːnz → sˈɑːnz (9) · Xiang ʃjˈæŋ → ʃjˈɑːŋ (2)
+               NVDA ˈɛnvdə → ˌɛnvˌiːdˈeᶦ (2) · Hunanese huː… → hjˌuː… (2) · tahlequah, abbott
+    REGRESSIONS Panthera pʰˌænθˈɛɹə → pɑːnθˈɛɹə (14) · biorhythm, stress moved off the first
+               syllable (8) · `Eee` ˈiːʲi → ˌiːpləˈiː (8) · a ŋ lost in `langwithname` (5) · the romanised `uong` wˈɔːŋ →
+               uːˈɔːŋ (3) — ⚠ NOT the name `Wong`, which is in the dictionary and unaffected;
+               an earlier draft of this line said it was, which sends a reader at the lexicon path · resistivity ɹˌiːz… → ɹˌɛz… (3) · Zhen ʒˈɛn → zˈɛn (3)
+    COSMETIC   Aldwych and Gangnam gain or lose a secondary mark (10)
+
+⚠ **AND `rr` WAS FIXED AT THE ROOT RATHER THAN ACCEPTED**, which took the churn from 204 rows to 162.
+The 2026-09-19 entry records `ˌɑːɹˈɑːɹ` for a bare `rr` as a deliberate repair — and the sentence those 42
+rows come from is *about* distinguishing Spanish `r` from `rr`, so collapsing them to one `ˈɑːɹ` loses
+the point of the text. It is now a DICTIONARY row (`rr  AA1 R AA1 R`), which pins it in every path
+rather than in whichever model is shipped — the same remedy #1400 used for `COVID`.
+⚠ `Eee` WAS *NOT* GIVEN ONE, and the shipped reading is the tagger's `ˌiːpləˈiː` — which is plainly
+bad, inventing an `l` the spelling has no letter for. It is left because no source was found for any
+reading: the sync path says `ˈiː` (one syllable for three letters), the previous tagger said `ˈiːʲi`
+(two), and ASUS's own "Eee PC" is said both "e-e-e" and "triple-E". Inventing a dictionary row to
+protect a golden is the tail wagging the dog.
+⚠ AND A LEXICON ROW FOR IT DID EXIST BRIEFLY AND WAS REMOVED, which is worth recording because it
+nearly shipped: `--add-missing` wrote `eee  ˈiː` into `accent-lexicon.tsv` during an earlier attempt,
+the dict row behind it was then dropped, and a plain `--write` does not remove rows. The orphan was
+NOT inert — it was what produced `ˈiː`, so it would have silently pinned this regression while this
+paragraph claimed the word was left alone. The doc and the data now agree.
+
+⚠ **RETRAINED 2026-09-19 ON THE MOBY-EXPANDED DICTIONARY (+15% data), AND THE HEADLINE IS THAT IT DID
+NOT MOVE THE ORIGINAL POPULATION.** The dictionary went 117,483 → 135,308 rows between #1341 and this
+run, almost entirely the Moby imports of #1344 and #1353. The md5 held-out split is deterministic, so
+the old held-out population survives inside the new one exactly (n=11,748) and the two eras are
+directly comparable:
+
+⚠ **THE TRAINING ENVIRONMENT IS RECORDED BECAUSE THE SEEDS CANNOT CARRY IT.** `random.seed(0)` and
+`torch.manual_seed(0)` are set and `cudnn.deterministic` is now requested, but a cuDNN LSTM's backward
+pass uses atomics: a re-run on this machine may differ slightly and a re-run on different hardware
+almost certainly will. The weights shipped 2026-09-19 were produced by
+
+    torch 2.11.0+cu128 · cuda 12.8 · onnx 1.21.0 · onnxruntime 1.24.4
+    python 3.12.3 · NVIDIA GeForce RTX 3090
+
+so a reproduction attempt that lands somewhere else knows why. ⚠ THE "NO `requirements.txt` AND NO
+`.venv`" THIS PARAGRAPH USED TO END WITH IS OUT OF DATE as of #1402: `.venv/` is gitignored and
+`tools/english/requirements-bilstm.txt` records the pins. They are a record, not a contract — a cuDNN
+LSTM's backward pass uses atomics, so the same seeds on the same GPU can still diverge.
+
+⚠ THESE ARE THE 90%-SPLIT MODEL'S NUMBERS, NOT THE SHIPPED ARTIFACT'S. The script trains a split model
+to measure, then retrains on the full dictionary to export. The shipped graph scores 99.1% on the rows
+below because they are its training data; only the split model can be asked how it generalises.
+
+| held-out population | stress-indep | incl. stress |
+|---|---|---|
+| words the old dictionary also had (n=11,748) | **71.4%** — baseline 71.5% | 66.4% |
+| words added since, the Moby tail (n=1,780) | **65.7%** | 53.7% |
+
+So the extra data taught the model nothing about the vocabulary it already handled, and cost it nothing
+either. What it bought is the tail: decoding the PREVIOUS shipped int8 graph over those same 1,780 words
+gives **59.6%** stress-independent, against 65.7% here — **+6.1pp on the obscure/foreign/proper-noun
+vocabulary the OOV tier exists for**. That is the whole gain, and it is narrow by construction.
+⚠ IT IS +6.1, NOT THE +9 THIS FILE FIRST CLAIMED. The 56.3% behind that figure came from a 3,000-word
+stride sample of ALL 17,825 added words through the full serving path, which is neither the same
+population nor the same decode as the 65.7% it was subtracted from. Measured like for like — same graph
+interface, same 1,780 rows — the gain is a third smaller.
+
+⚠ **AND THE REFEREES AGREE, INCLUDING THE INDEPENDENT ONE**, which is what rules out the obvious
+objection. The new training rows are MOBY-DERIVED, so a jump against the Moby OOV referee could be the
+model learning that corpus's conventions rather than learning English. The wikipron primary has no such
+relationship to them:
+
+    wikipron primary (independent)   62.7% → 64.0%   (2531 → 2584)   symbol 90.8% → 91.3%
+    Moby — the OOV tier              38.1% → 44.2%   (15,056 → 17,454)  symbol 85.6% → 87.4%
+    Moby — words the dict carries    75.7%, unchanged — correct, the model is not consulted for them
+
++1.3pp on the independent referee is the largest single move it has recorded in this audit; the +6.1pp
+on Moby-OOV is partly the circularity above and should not be read alone.
+
+⚠ **55 GOLDEN LANGUAGES MOVED, 232 ROWS.** The English neural tagger renders EMBEDDED English inside
+every other language's text, so retraining it moves Cherokee (`Sundance`), Tibetan (`vasanta`) and
+Belarusian (`caro`) goldens too. ⚠ THIS FILE FIRST SAID "NONE OF THEM IS ENGLISH-ONLY", WHICH IS THE
+OPPOSITE OF THE DIFF: `en`, `en-GB` and `en-IN` are three of the 55 files and carry 45 of the 232 rows,
+15 each, the largest block after `chr` at 21. What is true is that every changed row contains Latin
+source text.
+
+Repairs confirmed: `medicines` was reading as "medi-signs" (`mˈɛd̬ɪsˌaᶦnz` → `mˈɛd̬ɪsˌɪnz`), `Aldwych`
+`ˈɔːɫdwɪk` → `ˈɔːɫdwɪt͡ʃ`, `Saint-Saëns` `snz` → `sˈiːnz`, plus `resistivity`, `tahlequah`, `biorhythm`,
+and a 32-row block where bare `rr` becomes `ˌɑːɹˈɑːɹ`, consistent with the bare `r` both eras already
+read as `ˈɑːɹ`.
+
+⚠ AND SIX ROWS REGRESSED, which "majority repairs" alone would have buried:
+
+    Tt (Audi TT)  tʰˌiːtʰˈiː → t        ← a bare consonant, no vowel at all
+    kW            kʰˈuː      → kw       ← the same shape
+    heHe          hˈiːhi     → hˈiːh
+    Rossby        ɹˈɔːsbi    → ɹˈɔːbi   ← the /s/ is gone
+    Dhara         dˈɑːɹə     → dˈɛɹə
+    stealthily    ɪ → ə (the weak-vowel axis, minor)
+
+⚠ THE VOWELLESS-OUTPUT CLASS IS FLAT, NOT A NEW DEFECT, and that is what makes these six acceptable
+rather than blocking: enumerating every 2- and 3-letter string plus a 1-in-7 sample of 4-letter ones
+gives 48/853/3,189 vowelless outputs before and 52/850/3,209 after. `tt` and `kw` fell in while others
+fell out. The cause is structural — a per-letter tagger with no nucleus constraint — and it belongs in
+its own issue, not in a retrain.
+
+⚠ **RETRAINED 2026-08-19 WITH PACKED SEQUENCES — the largest gain in the fleet (+3.1pp).** Training ran the
+BiLSTM over padded batches without `pack_padded_sequence`, so its backward direction crossed the padding
+before reaching each word's last letter, while serving (`englishNeural.ts`) is batch=1 and unpadded. The damage
+lands at the END of the word, and English concentrates two things there that this tag alphabet must get right:
+the suffix that determines STRESS placement, and the final-consonant/vowel-reduction pattern. Same CMUdict
+90/10 split, same seed:
+
+| | unpacked training | **packed training** |
+|---|---|---|
+| WORD-exact, stress-independent | 68.4% | **71.5%** |
+| WORD-exact, including stress | 63.2% | **66.3%** |
+| phone accuracy (1−PER) | 92.6% | **93.4%** |
+
+⚠ The pre-fix baseline reproduced the historical 68.4% exactly, so the delta is the packing and nothing else.
+See `tools/bilstm_training/tagger.py` and investigation Runs 41 and 43.
+
+Concretely it reads proper nouns the n-gram mangles: Zelensky → zəlɛnski (n-gram: …aɪzɪlɛnski). Precedence is
+lexicon → heteronym → possessive → **tagger** → n-gram (the tagger only fires on genuinely-OOV alpha words; dict text
+is byte-identical to `phonemize(text, "en")`).
+
+### Data + training
+
+- **Corpus:** CMUdict (public domain) — `g2p-dict.tsv`, 117,479 ascii-alpha word→ARPABET entries (the same lexicon the
+  sync engine ships).
+- **Alignment:** hard-EM many-to-{0,1,2} monotonic (grapheme → 0/1/2 ARPABET phones), parallelised across cores
+  (`tools/norwegian/nb_tagger_parallel.py::align_parallel`, with `SEP=" "` so a 2-phone chunk keeps its ARPABET token
+  boundary — ⟨x⟩ → `K S`, not `KS`).
+- **Model:** char-embedding (64) → 2-layer BiLSTM (hidden 256, dropout 0.3) → per-position ARPABET-chunk tag head;
+  cosine-LR (2e-3→0). Trained on the FULL CMUdict for the shipped weights. 28 chars, 212 tags.
+- **Export:** `en-g2p-tagger.int8.onnx` (dynamic-int8 quantised, 9.4MB fp32 → 2.4MB) + `en-g2p-tagger.meta.json`
+  (`src` letter→id, `tags` id→ARPABET-chunk, `charTags` id→permitted tag-ids = the mask).
+
+Reproduce:
+
+```bash
+EN_PRODUCTION=1 EN_FREQ=data/languages/english/g2p-common.txt \
+  .venv/bin/python -u tools/english/en_g2p_bilstm.py   # held-out report + full train + int8 export
+```
+
+⚠ THE QUANTISE USED TO BE A PROSE STEP HERE AND IS NOW IN THE SCRIPT, because a two-step recipe whose
+second step is a comment is a step that does not get run. The exporter wrote fp32 under the bare name
+`en-g2p-tagger.onnx` while the runtime loads `en-g2p-tagger.int8.onnx`, so a production run left the
+shipped model untouched — and, worse, still overwrote `meta.json`, which IS read, leaving a new vocab
+beside old weights. English was also the only tagger language with no committed export script at all;
+`bengali/`, `hebrew/`, `khmer/` and `sindhi/` each have one.
+
+⚠ AND THE TRAINING SOURCE IS THIS REPO'S OWN `g2p-dict.tsv`, NOT RAW CMUdict — it always was (`load()`
+reads the shipped dict), which means a retrain absorbs every correction in `g2p-curated.tsv` for free.
+The weights shipped before 2026-09-18 predate ~2,000 of them: asked for the 2,077 curated words, the old
+model emitted the PRE-CORRECTION reading for 2,035 of them.
+
+`onnxruntime-node` is an OPTIONAL dependency, imported lazily; absent it (or the model), `createEnglishTagger()`
+resolves to `undefined` and `phonemizeEnNeural` returns exactly the sync path (CMUdict + n-gram, no throw). This is a
+SEPARATE async path; the sync engine is untouched. See
+ (Runs 3, 6-7).

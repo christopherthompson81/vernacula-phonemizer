@@ -1,8 +1,9 @@
 /**
  * Danish OOV g2p STRUCTURAL tagger — a per-grapheme BiLSTM (ONNX) labelling each letter with its IPA-chunk
  * tag, trained on the full 199k NST and matching its narrow convention.
- * Ported from src/languages/danish/danishTagger.ts — see that file (and da-g2p-tagger.PROVENANCE.md) for
- * the training data and the measured accuracies.
+ * Ported from src/languages/danish/danishTagger.ts — see that file (and
+ * docs/investigations/da/da-g2p-tagger_build_notes_investigation.md) for the training data and the measured
+ * accuracies.
  */
 using System.Text;
 using Vernacula.Phonemizer.Core;

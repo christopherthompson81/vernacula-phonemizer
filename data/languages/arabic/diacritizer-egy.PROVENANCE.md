@@ -1,77 +1,35 @@
-# Egyptian Arabic diacritizer model (diacritizer-egy.onnx) — provenance
+# `diacritizer-egy.onnx` — provenance (Egyptian Arabic)
 
-The Egyptian neural diacritizer restores EGYPTIAN short vowels on bare Arabic as the async pre-pass for
-`variety:"egyptian"` (arz) — where the shared MSA diacritizer restores the *wrong* (MSA) vowels (مصر MSA miṣr →
-Egyptian maṣr, قلب qalb → ʔalb). Same architecture, alphabet, and inference code as the MSA model
-(`diacritizer.ts`); a different `.onnx`.
+**What it is.** The Egyptian counterpart of `diacritizer.onnx`. It has the same architecture, alphabet and
+inference code, and restores Egyptian rather than MSA short vowels for `variety:"egyptian"` (arz).
+`diacritizer-egy.meta.json` holds its character and label maps.
 
-## What it is
+**Training data.** Teacher-to-student distillation, silver-only.
+- **Teacher (offline only, not shipped):**
+  - the CAMeL Tools `calima-egy-r13` Egyptian morphological analyzer, whose database is **GPL-2.0**;
+  - the `disambig-bert-unfactored-egy` in-context disambiguator, **MIT** (NYU Abu Dhabi / Habash).
 
-A sentence-level BiLSTM (emb 128, hidden 512, 3 layers, ~15.3 M params), int8-quantized ONNX (~15 MB),
-char-level, the same 19-label pausal alphabet as the MSA model. Trained `--pausal 1` (pausal Egyptian, matching
-our pausal-TTS target). **TEST DER 1.63% / WER 4.70%** vs the held-out teacher silver (better than the MSA
-student's 2.17% DER). ONNX-vs-PyTorch argmax parity 100%.
-
-## Provenance — teacher→student distillation (the MSA pattern)
-
-- **Teacher:** CAMeL Tools `calima-egy-r13` Egyptian morphological analyzer + `disambig-bert-unfactored-egy`
-  (MIT) in-context disambiguator (NYU Abu Dhabi / Habash). The morphology DB is **GPL-2.0** and was used
-  **OFFLINE ONLY** to silver-label training text — it is NOT shipped and NOT in the training pipeline of the
+  They were used only to silver-label the training text, and are neither shipped nor part of the
   distributed model.
-- **Training text (silver corpus, both PERMISSIVE):**
-  - **Masri (Egyptian) Wikipedia** (`arzwiki-latest-pages-articles`, **CC BY-SA 4.0**) — 350 k sentences.
-  - **arabic-dialect-corpus** (dataflare, **MIT**) — the Egyptian (Masri) subset, ~90 k sentences.
-  - Combined, calima-egy-silver-labelled, OOV-filtered (drop sentences <70% diacritized → non-Egyptian/loan
-    contamination), deduped → **222,888 train / 12,383 val / 12,383 test**. Trained silver-only, no warm-start.
-- **No Wiktionary in the model** — the kaikki lexicon is a separate shipped supplement (egyptian-lexicon.tsv),
-  not part of this model's training.
+- **Text:**
+  - **Masri (Egyptian) Wikipedia** (`arzwiki-latest-pages-articles`), **CC BY-SA 4.0**, all 2.67M lines;
+  - the Egyptian subset of **arabic-dialect-corpus** (dataflare), **MIT**.
+- No Wiktionary data is in the model. The kaikki-derived `egyptian-lexicon.tsv` is a separate file.
 
-## Licence posture (per `LICENSES/licencing_posture.md` — the project author's reasoned posture, not legal advice)
+**Licence posture** (`LICENSES/licencing_posture.md`; the project author's reasoned posture, not legal
+advice). A model trained on silver labels retains none of the teacher's or the corpus's selection and
+arrangement, only the orthographic regularities of Egyptian Arabic, which are facts (*Feist*). GPL is a
+copyright licence on the teacher database. Training a distinct model on its outputs is a use, not the
+distribution of a derivative. The corpora are permissive by their own terms. The model is listed in
+`LICENSES/PROVENANCE.md` §3 (training-as-use) and §4 item 5 (calima-egy, offline only).
 
-A model trained on silver retains none of the teacher's or corpus's selection/arrangement — only the
-orthographic regularities of Egyptian Arabic, which are facts (Feist). GPL is a copyright license on the teacher
-DATABASE; training a distinct model on its outputs is a use, not a distribution of a derivative, and the student
-weights are not the teacher's protected expression. The chosen corpus is permissive by its own terms (CC-BY-SA
-Wikipedia, MIT dialect corpus). The GPL teacher is offline-only and unshipped. See the arz Phase-2 discussion in
-.
+**Regenerate.** Retrain with:
 
-## Regenerate
+```
+tools/arabic/train_ar_diacritizer.py --pausal 1 --cosine 1 --cosine-lr 5e-4 --epochs 37 --patience 99 --batch 128 --resume <v2 checkpoint>
+```
 
-Offline GPU pipeline (staged on `$ARZDIAC`, camel-tools venv): extract Masri Wikipedia +
-the MIT dialect Egyptian subset → `calima_egy_silver.py` (calima-egy + BERT disambig → silver, 6 parallel GPU
-workers) → `filter_split.py` (OOV-filter, 90/5/5) → `train_bilstm_sent.py --pausal 1` (silver-only) →
-`export_egy2.py` (legacy ONNX export + int8 `quantize_dynamic`). `diacritizer-egy.meta.json` (char/label maps)
-is committed beside the model.
+Then export with `tools/arabic/export_ar_diacritizer_onnx.py --basename diacritizer-egy`. The upstream
+silver pipeline (calima-egy labelling, filtering, the v2 training run) is described in the build notes.
 
-## 2026-07-18 — v2 retrain on the FULL corpus (shipped)
-
-Retrained on the FULL Masri Wikipedia (all 2.67M lines silver-labelled by calima-egy, vs v1's 350k sample) + the
-MIT dialect corpus → filter/dedupe **1,322,224 kept → 1,190,002 train / 66,111 val / 66,111 test** (v1: ~222,888
-train). Same BiLSTM (emb 128, hidden 512×2, 3 layers), 25 epochs, best-val at epoch 24. **Held-out TEST DER 1.69%
-/ WER 5.00%** — NOT directly comparable to v1's 1.63% (v2's test set is the larger, more diverse full-corpus 66k).
-The honest comparison is the NON-CIRCULAR wikipron-arz referee (rules-only, lexicon:false): **v1 41.9% → v2 42.7%
-(+0.8pp)**. So 5.3× more silver gave a MARGINAL real-referee gain — the model was near-saturated at 350k
-(teacher-distillation plateaus: the ceiling is the calima-egy teacher's quality + the abjad, not silver volume).
-Shipped v2 as the full-corpus model (better on the honest metric). Pipeline: `$ARZDIAC/run_pipeline_v2.sh`
-(6 parallel silver shards → filter_split_v2.py → train_bilstm_sent.py → export_egy_v2.py).
-
-## 2026-08-20 — cosine retrain
-
-The previous model finished its 25 epochs with `lr` still at 5.0e-04 — `ReduceLROnPlateau` never reduced it
-once — while val DER was still falling. Resumed from its epoch-25 checkpoint with packed sequences and a
-deterministic cosine anneal (5e-4 → 0 over 12 epochs), same split, `--pausal 1`.
-
-| | TEST DER | TEST WER |
-|---|---|---|
-| previous | 1.69% | 5.00% |
-| **this model** | **0.89%** | **2.54%** |
-
-⚠ **DER IS A POOR PROXY HERE AND THIS ROW WILL BE MISREAD.** DER scores the diacritic LABEL sequence, and most
-labels do not survive into the IPA. The halving corresponds to **0.85% of words pronounced differently** (64 of
-7,494) — a ~50× discrepancy. Measured alongside: the runtime harness against silver gold moved 64.68% → 65.01%,
-and mean phone-distance against FLEURS `ar_eg` audio was **unchanged at 0.4341**. Do not quote 0.89% as a
-user-visible quality gain; it is convergence onto the CALIMA silver teacher.
-
-Rebuild: `tools/arabic/train_ar_diacritizer.py --pausal 1 --cosine 1 --cosine-lr 5e-4 --epochs 37 --patience 99
---batch 128 --resume <v2 resume ckpt>`, then `export_ar_diacritizer_onnx.py --basename diacritizer-egy`.
-Checkpoint: `/mnt/data/arz-diac/bilstm_egy_cosine.pt`.
+Build notes and measurements: `docs/investigations/ar/diacritizer-egy_build_notes_investigation.md`.

@@ -20,7 +20,7 @@
  *
  * Optional third input: a kaikki single-char Hokkien Tai-lo TSV (build-nan-kaikki-chars.mts),
  * used as the LOWEST-priority char tier (Wiktionary CC-BY-SA; referee-circularity caveat stated in
- * dict.PROVENANCE.md). Where a kaikki reading exists for a char we also carry from taihoa/itaigi,
+ * docs/investigations/nan/minnan-dict_build_notes_investigation.md). Where a kaikki reading exists for a char we also carry from taihoa/itaigi,
  * the ChhoeTaigi reading wins and the agreement rate is reported as the cross-validation number.
  *
  * Usage: npx tsx tools/gen/build-nan-chhoetaigi.mts <taihoa.csv> <itaigi.csv> [kaikki-chars.tsv]
@@ -169,7 +169,7 @@ for (const [ch, v] of votes) {
 }
 
 // kaikki single-char Hokkien readings (Wiktionary CC-BY-SA; circularity caveat in
-// dict.PROVENANCE.md). ChhoeTaigi-attested readings win; overlap agreement = cross-validation.
+// docs/investigations/nan/minnan-dict_build_notes_investigation.md). ChhoeTaigi-attested readings win; overlap agreement = cross-validation.
 let kaikkiAdded = 0;
 if (kaikkiPath) {
     let overlap = 0, agree = 0;
