@@ -41,6 +41,13 @@ function consRun(w: string, j: number): number {
     return n;
 }
 
+/** The FULL reading of a single plain vowel letter at index i under the open/closed length rule — what the scanner
+ *  would have written had the letter not been reduced. For a prefix shift landing on a stem ⟨e⟩ (#1550). */
+export function fullVowel(w: string, i: number): string {
+    const c = w[i]!;
+    return (isOpen(w, i) ? LONG[c] : SHORT[c]) ?? c;
+}
+
 /** Is the single vowel at index i in an OPEN syllable (→ tense/long)? Open = word-final (ja, nu), a hiatus
  *  vowel (open), or a single consonant followed by another vowel (wa·ter → aː). Closed (VC#, VCC → lax): dag→ɑ,
  *  man→ɑ, kort→ɔ. Doubled vowels (aa/ee/oo/uu) are handled before this is called (always long). */

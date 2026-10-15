@@ -23,6 +23,18 @@ public sealed class DutchPhonemizer : ILanguage
     // the numeral/article "een" is deliberately absent.
     private static IReadOnlyDictionary<string, string> FUNCTION_WORDS => Manifest.MANIFEST.FunctionWords;
 
+    // A prefix shift may land on a reduced STEM ⟨e⟩ (#1550): the scanner reduced it before stress was placed, so
+    // ver·tel·len kept the stress on the prefix. Not when only an ending follows the last-nucleus ⟨e⟩ (ge·ven,
+    // be·ter, te·gen), and not after a longer STRESSED prefix (tegen, terug). See src/languages/dutch/dutch.ts.
+    private static readonly string[] ENDING_AFTER_E = { "n", "r", "l", "m", "" };
+    private static readonly JsRe STRESSED_PREFIX_START = JsRegex.Compile(
+        $"^(?:{string.Join("|", Manifest.MANIFEST.Morphology.PrefixStressed.Where(p => Manifest.MANIFEST.Morphology.PrefixUnstressed.Any(u => p.StartsWith(u, StringComparison.Ordinal) && p.Length > u.Length)))})", "u");
+    private static bool StemVowelE(string lower, int at, bool last)
+    {
+        if (lower[at] != 'e' || STRESSED_PREFIX_START.IsMatch(lower)) return false;
+        return !last || !ENDING_AFTER_E.Contains(lower[(at + 1)..]);
+    }
+
     /** Place primary stress and reduce an unstressed prefix's vowel. */
     private static int PlaceStress(List<Seg> segs, string word)
     {
@@ -30,11 +42,16 @@ public sealed class DutchPhonemizer : ILanguage
         for (var k = 0; k < segs.Count; k++) if (segs[k].Vowel) nuclei.Add(k);
         if (nuclei.Count == 0) return -1;
         var lower = word.ToLowerInvariant();
-        if (nuclei.Count > 1 && UNSTRESSED_PREFIX.IsMatch(lower) && !DIGRAPH_PREFIX.IsMatch(lower)
-            && segs[nuclei[1]].Ph != "ə")
+        if (nuclei.Count > 1 && UNSTRESSED_PREFIX.IsMatch(lower) && !DIGRAPH_PREFIX.IsMatch(lower))
         {
-            if (SCHWA_PREFIX.IsMatch(lower)) segs[nuclei[0]].Ph = "ə"; // ge-/be-/ver-/te- vowel → schwa
-            return nuclei[1];
+            var second = segs[nuclei[1]];
+            var stemE = second.Ph == "ə" && StemVowelE(lower, second.S, nuclei.Count == 2);
+            if (second.Ph != "ə" || stemE)
+            {
+                if (stemE) second.Ph = G2p.FullVowel(lower, second.S);
+                if (SCHWA_PREFIX.IsMatch(lower)) segs[nuclei[0]].Ph = "ə"; // ge-/be-/ver-/te- vowel → schwa
+                return nuclei[1];
+            }
         }
         foreach (var k in nuclei) if (segs[k].Ph != "ə") return k;
         return nuclei[0];

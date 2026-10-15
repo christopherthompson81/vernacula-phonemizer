@@ -73,6 +73,14 @@ fn cons_run(w: &[u16], mut j: usize) -> usize {
     n
 }
 
+/// `fullVowel(w, i)`: the FULL reading of the single plain vowel letter at i under the open/closed length rule
+/// (#1550), for a prefix shift landing on a reduced stem ⟨e⟩.
+pub fn full_vowel(w: &JsString, i: usize) -> JsString {
+    let ch = JsString::from_units(&[w.0[i]]);
+    let table = if is_open(&w.0, i) { &T.long } else { &T.short };
+    table.get(&ch).cloned().unwrap_or(ch)
+}
+
 /// `isOpen(w, i)`: word-final or hiatus, or one consonant then a vowel.
 fn is_open(w: &[u16], i: usize) -> bool {
     match cons_run(w, i + 1) {

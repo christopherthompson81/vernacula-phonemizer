@@ -6,7 +6,7 @@
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import type { Kind } from "../../core/germanicMorphology.ts";
-import { toSegments, type Seg } from "./g2p.ts";
+import { fullVowel, toSegments, type Seg } from "./g2p.ts";
 import { numberToWords } from "./numbers.ts";
 import { decompose, isLexicalWord } from "./morphology.ts";
 import { MANIFEST } from "./manifest.ts";
@@ -38,6 +38,27 @@ const DIGRAPH_PREFIX = new RegExp(
 // numeral/article "een" is deliberately absent.
 const FUNCTION_WORDS: Record<string, string> = MANIFEST.functionWords;
 
+// A PREFIX SHIFT MAY LAND ON A REDUCED STEM ⟨e⟩ (#1550). The scanner reduces every non-initial single ⟨e⟩ to schwa
+// before stress is placed, so `ver·tel·len`, `be·stel·len`, `ge·zel·lig`, `her·ken·nen` reached `placeStress` with a
+// schwa second nucleus and kept the stress on the prefix (vˈɛrtələn). The schwa guard exists for a ⟨ge⟩/⟨be⟩ ROOT
+// whose remainder is an inflectional ending (ge·ven, be·ter, te·gen): so the shift now lands on a reduced ⟨e⟩
+// unless it is the LAST nucleus and only an ending follows it (`ENDING_AFTER_E`), and the shifted vowel gets back
+// the full quality the open/closed rule gives it (tɛl, zɛl, ɣeːt). Not when the word begins with a longer STRESSED
+// prefix that the unstressed one is the start of (`tegen`, `terug`): te·gen·stan·der is not te- + a stem.
+// Measured on the 4,296 prefix-spelled kaikki nl words: stress 72.97% → 85.15% (+664 / −149), segments
+// 62.55% → 72.88% (+579 / −135). The ending set n,r,l,m,"" was the best of the five measured; see
+// docs/investigations/nl/nl_prefix_stem_vowel_investigation.md. The losses are prefix-SPELLED stems (teken-,
+// hersen-, bedel-, verre-), which, as #1524 found, need a lexicon rather than a gate.
+const ENDING_AFTER_E: readonly string[] = ["n", "r", "l", "m", ""];
+const STRESSED_PREFIX_START = new RegExp(`^(?:${MANIFEST.morphology.prefixStressed
+    .filter((p) => MANIFEST.morphology.prefixUnstressed.some((u) => p.startsWith(u) && p.length > u.length))
+    .join("|")})`, "u");
+/** Is the schwa at letter `at` a reduced STEM ⟨e⟩ the prefix shift may land on, rather than an ending? */
+function stemVowelE(lower: string, at: number, last: boolean): boolean {
+    if (lower[at] !== "e" || STRESSED_PREFIX_START.test(lower)) return false;
+    return !last || !ENDING_AFTER_E.includes(lower.slice(at + 1));
+}
+
 /** Place primary stress and reduce an unstressed prefix's vowel. Returns the stressed-nucleus seg index. The
  *  prefix is treated as unstressed ONLY when a later nucleus exists AND it isn't a schwa — this distinguishes a
  *  real prefix (ge·maakt, nucleus1 = aː → shift + reduce ge→ɣə) from a ⟨ge⟩-root (geven, nucleus1 = ə → no shift,
@@ -47,10 +68,14 @@ function placeStress(segs: Seg[], word: string): number {
     const nuclei = segs.map((s, k) => (s.vowel ? k : -1)).filter((k) => k >= 0);
     if (nuclei.length === 0) return -1;
     const lower = word.toLowerCase();
-    if (nuclei.length > 1 && UNSTRESSED_PREFIX.test(lower) && !DIGRAPH_PREFIX.test(lower)
-        && segs[nuclei[1]!]!.ph !== "ə") {
-        if (SCHWA_PREFIX.test(lower)) segs[nuclei[0]!]!.ph = "ə"; // ge-/be-/ver-/te- vowel → schwa
-        return nuclei[1]!;
+    if (nuclei.length > 1 && UNSTRESSED_PREFIX.test(lower) && !DIGRAPH_PREFIX.test(lower)) {
+        const second = segs[nuclei[1]!]!;
+        const stemE = second.ph === "ə" && stemVowelE(lower, second.s, nuclei.length === 2);
+        if (second.ph !== "ə" || stemE) {
+            if (stemE) second.ph = fullVowel(lower, second.s);
+            if (SCHWA_PREFIX.test(lower)) segs[nuclei[0]!]!.ph = "ə"; // ge-/be-/ver-/te- vowel → schwa
+            return nuclei[1]!;
+        }
     }
     // First non-schwa nucleus (a schwa-initial root like the reduced prefix be- pushes stress right).
     return nuclei.find((k) => segs[k]!.ph !== "ə") ?? nuclei[0]!;
