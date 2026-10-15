@@ -2777,6 +2777,36 @@ fn main() {
                 }
             })
         }
+        "xh-normalize" | "xh-g2p" => {
+            use vernacula_phonemizer::core::foreign::with_host;
+            use vernacula_phonemizer::core::js_string::js;
+            use vernacula_phonemizer::languages::{xhosa::xhosa, zulu::zulu};
+            let xh = xhosa::create_xhosa(None, None).unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let w = || units(&input["word"]);
+                match input["op"].as_str().unwrap() {
+                    "normalize" => xh.normalize(&t()),
+                    "symbols" => xh.symbols(&t()),
+                    "text" => with_host(&js("xh"), || xh.text(&t())),
+                    "foreign" => {
+                        let en = vernacula_phonemizer::registry::english().unwrap();
+                        let hit = zulu::is_foreign_nguni_word(&w().to_lower_case(), &|x| {
+                            en.known_word(x).is_some()
+                        });
+                        js(if hit { "1" } else { "0" })
+                    }
+                    "word" => xh.phonemize_word(&w()),
+                    _ => {
+                        let raw = input["raw"].as_array().map(|_| units(&input["raw"]));
+                        xh.number_to_words(
+                            js_number(&JsString::from(input["n"].as_str().unwrap())),
+                            raw.as_ref(),
+                        )
+                    }
+                }
+            })
+        }
         _ => panic!("unknown function {name}"),
     };
     let (mut same, mut differ) = (0, 0);

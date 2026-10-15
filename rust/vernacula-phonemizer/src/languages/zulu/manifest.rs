@@ -2,7 +2,8 @@
 //! punctuation, the number words and the `ye-` ordinals. Xhosa reads the same shape from its own file.
 //! Ported from src/languages/zulu/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`) except `ordinalYe`, below;
+//! documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
@@ -39,7 +40,9 @@ pub struct ZuluManifest {
     pub tone_chao: IndexMap<String, String>,
     pub clause_punctuation: IndexMap<String, String>,
     pub numbers: Numbers,
-    pub ordinal_ye: IndexMap<String, String>,
+    /// ⚠ `Option`, though the TS interface declares it required: xhosa.jsonc (read through the same type) has
+    /// none, and Xhosa never reads it.
+    pub ordinal_ye: Option<IndexMap<String, String>>,
 }
 
 /// The manifest, or why it could not be loaded. Cached once loaded; a failure is retried on the next call.

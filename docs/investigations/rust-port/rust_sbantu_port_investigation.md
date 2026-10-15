@@ -106,3 +106,43 @@ so the IPA's combining marks are the TS output's).
 port-pending rows); `zu: 200/200`. No zu row is port-pending (its foreign runs go to `en`, which is ported).
 
 **Implication.** Commit zu; xh next.
+
+## Run 5 — 2026-10-15 05:20 (xh: the shared modules, first build, differentials)
+
+**What xh reuses.** `zulu::g2p::to_segments` with Xhosa's own rule table (`rules_of(MANIFEST)`, Zulu's plus ⟨rh⟩),
+`zulu::nguni_loans`, the `ZuluManifest` type, and the two copy-pasted blocks Run 1 found: `is_foreign_nguni_word`
+and `spell_nguni_initialisms` are called from zu's modules. The dump replays xhosa.ts's OWN `isForeignNguniWord`
+against the Rust zu one, which is what proves the collapse.
+
+**Dead end, then a type change.** The first read of `xhosa.jsonc` through `ZuluManifest` would have failed: the TS
+interface declares `ordinalYe` required, and xhosa.jsonc has no such key (TS never notices, since Xhosa never reads
+it). `ordinal_ye` is therefore an `Option` in the shared struct, and `create_zulu` checks it is present for zu.
+
+**Commands.** As Run 2 and 3: the three audits (`fix_esc.py` restored 44 literal NBSP/NNBSP/thin spaces in
+normalize.rs; afterwards 40 raw patterns, 1 not verbatim (the TOKEN template), 0 escapes short, 0 non-ASCII runs
+missing); `parity xh`; `xh-normalize` / `xh-g2p` dumps with `FLEURS_DIR` `xh: "xh_za"`;
+`sbantu/e2e.sh xh xh-normalize xh-g2p phonemize-sync phonemize-best trace`.
+
+**Raw finding.** `xh: 200/200 identical, 0 differ` on the first build, and:
+```
+xh-normalize: 26543 identical, 0 DIFFER   (golden 285 / fleurs 8781 / probe 57 / synthetic 1593, + foreign-test rows)
+xh-g2p: 115132 identical, 0 DIFFER
+phonemize-sync / phonemize-best / trace: 3041 identical, 0 DIFFER each
+```
+Haystack: `normalizeXhosa` changed golden 16/95, FLEURS 286/2,927, probes 16/19, synthetic 498/531 texts;
+`isForeignNguniWord` answered yes for 448 words.
+
+**TS finding (reported, not fixed).** `±` is silently DROPPED in xh: `Ubushushu bu-±5 apha` normalizes unchanged and
+reads *… ɓˈuː kʼuɬˈaːnu …* with no sign at all. zu reads it (`plas o mayinas`) and zu's step 8c explains why that
+word is not free for xh; but xhosa/normalize.ts's own step 14 says "a dropped sign is INAUDIBLE — the one outcome
+that cannot be right", and no step claims `±`. The Rust reproduces the drop.
+
+**TS finding (type only).** `XhosaManifest = ZuluManifest` declares `ordinalYe` required; xhosa.jsonc has none.
+
+## Run 6 — 2026-10-15 05:30 (xh: pins, gates)
+
+**Changes.** xhosa.rs gains a test module: all 161 calls test/xhosa.test.ts makes (89 `normalizeXhosa`, 50
+`phonemize`, 11 `createXhosa().text`, 8 `phonemizeWord`, 3 `numberToWords`), extracted as for zu.
+
+**Raw finding.** `cargo test --release xhosa`: 1 passed. fmt clean; clippy on the new files: only `module_inception`.
+`parity`: every line byte-identical but the known mag 199, tt 199, syl 195; zu and xh 200/200.

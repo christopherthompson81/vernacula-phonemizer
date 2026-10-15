@@ -442,7 +442,7 @@ pub fn normalize_zulu(input: &JsString) -> JsString {
         ),
         |m, s| {
             let key = js_number_to_string(js_number(&m.group(1, s).unwrap()));
-            match MANIFEST.ordinal_ye.get(&key) {
+            match MANIFEST.ordinal_ye.as_ref().unwrap().get(&key) {
                 None => m.value(s),
                 Some(ord) => js(&format!("ingxenye {ord}")),
             }

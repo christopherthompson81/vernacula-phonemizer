@@ -70,6 +70,7 @@ const FLEURS_DIR: Record<string, string> = {
     as: "as_in",
     or: "or_in",
     zu: "zu_za",
+    xh: "xh_za",
 };
 /** The FLEURS splits a directory ships, where it is not all three (kk_kz has only train). Still loud: a split named
  *  here or by default that is absent throws. */
@@ -5122,6 +5123,76 @@ const dumps: Record<string, () => void | Promise<void>> = {
         for (let e = 4; e <= 25; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
         ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53 + 2, 1e300, 1.5, 20.7, -1, -0, NaN, Infinity, -Infinity);
         for (const n of ns) emit({ n: String(n), op: "words" }, numberToWords(n));
+    },
+    // ── Xhosa (xh). Inputs: the xh golden, FLEURS xh_za (columns 3 and 4) and probes/xh.txt. ──
+    // normalizeXhosa, the symbol tier over its output (recorded through the wrapper) and `createXhosa().text` (no
+    // foreign reader: the English route is covered end to end) over every text plus synthetic rows for every arm;
+    // xhosa.ts's OWN isForeignNguniWord (the Rust replays zulu's, which it collapses onto) against the English lexicon.
+    async "xh-normalize"() {
+        const { register } = await import("node:module");
+        register(new URL("./symbols-hook.mjs", import.meta.url));
+        const { records } = await import("./symbols-wrap.ts");
+        const { normalizeXhosa } = await import("../../../src/languages/xhosa/normalize.ts");
+        const { createXhosa, isForeignNguniWord } = await import("../../../src/languages/xhosa/xhosa.ts");
+        const { withHost } = await import("../../../src/core/foreign.ts");
+        const rec = records.find((r) => /src\/languages\/xhosa\//u.test(r.stack.split("\n").slice(2).join("\n")))!;
+        const E = createXhosa();
+        const en = createEnglish();
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["xh"], FLEURS_DIR.xh, ["xh.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        for (const a of ["A&amp;B", "A & B", "A&B", "x&AMP;y", "&"]) add(`kukho ${a} apha`);
+        for (const d of ["U.S.", "U.S.Geological", "U.S. House", "U.S House", "U.S", "A.B.C.", "uN.Wayne", "N.Wayne", "É.Ü.", "U.\u00a0S."]) for (const tail of ["", " Kodwa", " kodwa", "."]) add(`yase ${d}${tail}`);
+        for (const a of ["Mnu. Reid", "uMnu Reid", "UMnu. Reid", "Mnu. reid", "umnu reid", "Mnu.\u00a0Reid", "Jr. ke", "Jr. Ke", "Jr.", "njll.", "njl", "NJLL.", "njlla"]) add(`ngu ${a} apha`);
+        for (const g of ["11,000", "130,000,", "1,234,5", "1,000.", "26,2008", "2,3", "6 500", "6\u00a0500", "6\u202f500", "6\u2009500", "30 9", "1 000 000", "1,0000"]) add(`ezingama-${g} apha`);
+        for (const c of ["leUS$30", "i$10", "i£5", "i¥100", "i€3", "US $ 14.7", "US $14.7", "AUD 45", "AUD $45", "US$ 14.7 yezigidi", "$2,3 miliyoni", "$2,345", "£1.50", "¥12.5 bhiliyoni", "AUD$1.5", "US$14.7\u00a0million", "i$2.5 izigidi"]) add(`ixabiso ${c} ngoku`);
+        for (const u of ["12.8km", "12.8 km", "12,8 km", "12,800 km", "2.5 m", "2.5 m'", "2.5 mʼ", "0.5 mm", "1.5 kg", "3.2 mi", "1.5 KM", "4.5 cma"]) add(`eziyi-${u} apha`);
+        for (const r of ["4.2-3.9", "4.2 – 3.9", "1.5-2.5", "4.2--3.9"]) add(`iminyaka eyi-${r} edlulileyo`);
+        for (const h of ["0", "07", "9", "12", "19", "23", "24"]) for (const m of ["00", "05", "30", "59", "60", " 00"]) for (const ap of ["", " a.m.", " p.m.", "pm", "AM", " P.M", " amaXhosa", " Am"]) add(`ngo-${h}:${m}${ap} kusasa`);
+        for (const c of ["12.00 GMT", "15.00 UTC", "9.30 utc", "24.00 UTC", "15.00UTC", "12.5 GMT", "12.000 GMT"]) add(`(${c})`);
+        for (const p of ["4: 41.30", "2: 11.60", "1: 09.02", "2:2", "3 : 4", "12:345"]) add(`le-${p} isidanga`);
+        for (const r of ["1995-96", "5-3", "26 - 00", "100-200", "10–20", "56-64 km/h", "3 - 5", "5-5", "9007199254740993-9007199254740995"]) add(`ku-${r} apha`);
+        for (const r of ["160km/h", "480 km/h", "83 km / h", "5 m/s", "5 m/u", "5 mi/h", "5 m/\u017f", "5 \u212am/h", "40 mph", "40mph", "40 kph", "40 KPH", "40 \u212aph", "5 kg/h"]) add(`ngesantya se-${r} ngoku`);
+        for (const d of ["+30°C", "-30°C", "kwi-30°C", "30 °C", "30°c", "30°F", "35°W", "35° N", "45°", "45º", "45°x", "amaqondo angaphezulu kwe +30°C"]) add(`kwakuyi ${d} apha`);
+        for (const o of ["15th", "17th-century", "1st", "2ND", "3rd", "16thx"]) add(`ngesenturi ye ${o} apha`);
+        for (const g of ["x = y", "a≈b", "3 < 4", "5 > 2", "6 × 6", "6×6", "a × b", "8 ÷ 2", "UTC+1", "4+4", "+5", "a +5", "-40", "kangange -40 mph", "−5", "(-5)", "6x6 cm"]) add(`inani ${g} apha`);
+        for (const v of ["3.14", "0.5", "1,5", "1,50", "1,500", "26,2008", "1.2.3", "12."]) add(`malunga ne-${v} apha`);
+        for (const i of ["UTC", "i-PBS", "weNPWS", "kwiTV", "i-COVID-19", "US$5", "ABCDEFG", "SADC", "ESKOM"]) add(`sibona ${i} apha`);
+        for (const c of ["ALL CAPS DOCUMENT", "ALLCAPS", "  spaced  out  ", "a\u00a0\u00a0b"]) add(c);
+        for (const [t, src] of rows) {
+            const a = normalizeXhosa(t);
+            emit({ text: units(t), src, op: "normalize" }, a);
+            emit({ text: units(a), src, op: "symbols" }, rec.apply(a));
+            emit({ text: units(t), src, op: "text" }, withHost("xh", () => E.text(t)));
+        }
+        const words = new Set<string>();
+        for (const t of rows.keys()) for (const m of t.matchAll(/\p{L}+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        for (const w of ["china", "cima", "xhosa", "cha", "check", "box", "quick", "fox", "Xerox", "quiz", "compyutha", "exact", "qhwa", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "foreign" }, isForeignNguniWord(w.toLowerCase(), (x) => en.knownWord(x) !== undefined) ? "1" : "0");
+    },
+    // phonemizeWord over every letter run, every 1–3 letter string of the alphabet, every 4-letter string over the
+    // click-context letters (with ⟨rh⟩) and corners; numberToWords with and without the token string.
+    async "xh-g2p"() {
+        const { phonemizeWord } = await import("../../../src/languages/xhosa/xhosa.ts");
+        const { numberToWords } = await import("../../../src/languages/xhosa/numbers.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("xh")) for (const m of t.matchAll(/[\p{L}\p{M}'’-]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        const abc = [..."abcdefghijklmnopqrstuvwxyz'"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of abc) words.add(a + b + c); } }
+        const ctx = [..."aeiounhgcqxrtsk"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "İ", "ſ", "\ud800", "a\udc00z", "𝐚𝐛", "é", "Ntshona", "ntsh", "NTSHA", "rhola", "RHOLA", "isiXhosa", "constructor"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, phonemizeWord(w));
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e3 + 21, k * 1e6, k * 1e6 + 2, k * 1e6 + 1001, k * 1e9, k * 1e9 + 3);
+        for (let e = 4; e <= 25; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, 2 ** 53, 2 ** 53 + 2, 1e300, 1.5, 20.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) emit({ n: String(n), raw: null, op: "words" }, numberToWords(n));
+        for (const raw of ["9007199254740993", "1000000000000000000001", "1000000000000000000009", "007", "", "12a", "١٢", "\ud800", "𝟙2"]) {
+            emit({ n: String(Number(raw)), raw: units(raw), op: "words" }, numberToWords(Number(raw), raw));
+            emit({ n: "1e+21", raw: units(raw), op: "words" }, numberToWords(1e21, raw));
+        }
     },
 };
 

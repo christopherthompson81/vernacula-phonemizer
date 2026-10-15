@@ -269,7 +269,9 @@ pub fn create_zulu(
     foreign: Option<ForeignPhonemizer>,
     is_english_word: Option<EnglishWordTest>,
 ) -> Result<ZuluPhonemizer, String> {
-    try_manifest()?;
+    if try_manifest()?.ordinal_ye.is_none() {
+        return Err("languages/zulu/zulu.jsonc: `ordinalYe` is missing".to_string());
+    }
     try_tone_lexicon()?;
     let symbols = SYMBOLS.as_ref().map_err(|e| e.clone())?;
     Ok(ZuluPhonemizer {
