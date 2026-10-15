@@ -3221,6 +3221,66 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const { ROMAN_POLICY } = await import("../../../src/languages/kazakh/romanOrdinals.ts");
         for (const [t, src] of textsFor(["kk"], FLEURS_DIR.kk, ["kk.txt"])) emit({ text: units(t), src }, normalizeRomans(t, ROMAN_POLICY));
     },
+    // ── Kyrgyz (ky). Inputs: the ky golden, FLEURS ky_kg (columns 3 and 4) and probes/ky.txt. ──
+    // normalizeKyrgyz, the initialism pass alone (normalizeKyrgyzInitialisms, both seam modes) on the raw text, and
+    // the phonotactic test on every letter run, plus synthetic rows: every case suffix after a sweep of numerals,
+    // percents, units and acronyms; ordinal heads; degree shapes; fractions and decimals.
+    async "ky-normalize"() {
+        const N = await import("../../../src/languages/kyrgyz/normalize.ts");
+        const rows = new Map<string, string>();
+        for (const [t, src] of textsFor(["ky"], FLEURS_DIR.ky, ["ky.txt"])) rows.set(t, src);
+        const add = (t: string): void => { if (!rows.has(t)) rows.set(t, "synthetic"); };
+        const sufs = ["дын", "дин", "тун", "нүн", "дан", "дөн", "тан", "дай", "тей", "ына", "сына", "үн", "сын", "га", "кө", "да", "те",
+            "ны", "ди", "ту", "ы", "сы", "у", "ү", "орун", "класс", "жылы", "кылым", "ГА", "Дан"];
+        const ns = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "20", "30", "40", "50", "60", "70", "80", "90", "100",
+            "101", "200", "1000", "2010", "1000000", "999999999999", "1000000000000"];
+        for (const n of ns) for (const sfx of sufs) { add(`${n}-${sfx} кийин`); add(`${n}${sfx}`); add(`${n}-${n}-${sfx}`); }
+        for (const u of ["км", "кг", "м²", "см3", "га", "л", "km", "ha", "мкг"]) for (const sfx of ["ге", "дан", "де", "ны", "га", "ка", "тан"]) add(`5 ${u}${sfx}`);
+        for (const run of ["КР", "АКШ", "БУУ", "ЖОЖ", "NATO", "ООН", "ЭЭМ"]) for (const sfx of ["дин", "га", "до", "нун", "ны", "дан"]) add(`${run}${sfx}`);
+        for (const d of ["°C", "°С-та", "°", "°-ка", "°F", "°30′", "°30′15″", "оC"]) for (const n of ["5", "-5", "−5", "+5", "5,5"]) add(`${n}${d}`);
+        for (let a = 0; a <= 13; a++) for (const b of [1, 2, 3, 4, 5, 10, 12, 13]) add(`${a}/${b}`);
+        for (const n of ["0", "3", "12", "999999999999", "1000000000000"]) for (const f of ["5", "25", "05", "123"]) { add(`${n},${f}`); add(`${n}.${f}`); }
+        const words = new Set<string>();
+        for (const [t, src] of rows) {
+            emit({ text: units(t), src, op: "normalize" }, N.normalizeKyrgyz(t));
+            emit({ text: units(t), src, op: "initialisms" }, N.normalizeKyrgyzInitialisms(t));
+            for (const m of t.matchAll(/[\p{L}\p{M}]+/gu)) { words.add(m[0]); words.add(m[0].toLowerCase()); }
+        }
+        for (const w of words) emit({ text: units(w), src: "words", op: "unreadable" }, String(N.isUnreadableKyrgyz(w)));
+    },
+    // phonemizeWord over every Cyrillic-block run of the texts (as written and lowercased), every 1-3 letter string
+    // over the alphabet (third letter from a context set), every 4-letter string of the harmony letters, and edges.
+    async "ky-g2p"() {
+        const K = await import("../../../src/languages/kyrgyz/kyrgyz.ts");
+        const words = new Set<string>();
+        for (const t of langTexts("ky")) for (const w of t.match(/[Ѐ-ӿ]+/gu) ?? []) { words.add(w); words.add(w.toLowerCase()); }
+        const abc = [..."абвгдеёжзийклмнңоөпрстуүфхцчшщъыьэюя"];
+        for (const a of abc) { words.add(a); for (const b of abc) { words.add(a + b); for (const c of "аеыиуүкглб") words.add(a + b + c); } }
+        const ctx = [..."кглбаеоү"];
+        for (const a of ctx) for (const b of ctx) for (const c of ctx) for (const d of ctx) words.add(a + b + c + d);
+        for (const w of ["", "\ud800", "а\udc00б", "ТОО", "Ӏ", "ә", "і", "ј", "аааа", "кк"]) words.add(w);
+        for (const w of words) emit({ word: units(w), op: "word" }, K.phonemizeWord(w));
+    },
+    // numberWords and kyrgyzOrdinal over 0…20,000, multiples, powers of ten to 10²⁴ and neighbours, the corners;
+    // the engine's own number reading (createKyrgyz().text on a digit run: renderNumber / spellDigits).
+    async "ky-numbers"() {
+        const K = await import("../../../src/languages/kyrgyz/kyrgyz.ts");
+        const { kyrgyzOrdinal } = await import("../../../src/languages/kyrgyz/normalize.ts");
+        const P = K.createKyrgyz();
+        const ns: number[] = [];
+        for (let i = 0; i <= 20000; i++) ns.push(i);
+        for (let k = 1; k < 1000; k++) ns.push(k * 1e3, k * 1e3 + 1, k * 1e6, k * 1e6 + 1001, k * 1e9 + 4, k * 1e12 + 5);
+        for (let e = 4; e <= 24; e++) ns.push(10 ** e, 10 ** e - 1, 10 ** e + 7);
+        ns.push(Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER + 1, 1e21, 1.5, 0.5, 1000.7, -1, -0, NaN, Infinity, -Infinity);
+        for (const n of ns) {
+            emit({ n: String(n), op: "words" }, K.numberWords(n) ?? "\u0000none");
+            emit({ n: String(n), op: "ordinal" }, kyrgyzOrdinal(n) ?? "\u0000none");
+        }
+        const ds: string[] = ["0", "00", "007", "9007199254740991", "9007199254740993", "12345678901234567890", "1".repeat(40)];
+        for (let i = 0; i <= 3000; i++) ds.push(String(i));
+        for (let k = 1; k < 1000; k++) ds.push(String(k * 1e6 + 7), String(k * 1e9 + 21), String(k * 1e12 + 300));
+        for (const d of ds) emit({ n: d, op: "number" }, P.text(d));
+    },
 };
 
 

@@ -1917,6 +1917,23 @@ fn main() {
                 vernacula_phonemizer::core::roman::normalize_romans(&units(&input["text"]), &policy)
             })
         }
+        "ky-normalize" | "ky-g2p" | "ky-numbers" => {
+            let ky = vernacula_phonemizer::languages::kyrgyz::kyrgyz::create_kyrgyz().unwrap();
+            Box::new(move |input| {
+                let t = || units(&input["text"]);
+                let num = || js_number(&JsString::from(input["n"].as_str().unwrap()));
+                let none = || JsString::from("\u{0}none");
+                match input["op"].as_str().unwrap() {
+                    "normalize" => ky.normalize(&t()),
+                    "initialisms" => ky.normalize_initialisms(&t()),
+                    "unreadable" => JsString::from(ky.is_unreadable(&t()).to_string().as_str()),
+                    "word" => ky.phonemize_word(&units(&input["word"])),
+                    "words" => ky.number_words(num()).unwrap_or_else(none),
+                    "ordinal" => ky.ordinal(num()).unwrap_or_else(none),
+                    _ => ky.text(&JsString::from(input["n"].as_str().unwrap())),
+                }
+            })
+        }
         "fr-normalize" => {
             use vernacula_phonemizer::core::roman::{RomanPolicy, normalize_romans};
             use vernacula_phonemizer::languages::french::{normalize as n, ordinals as o};
