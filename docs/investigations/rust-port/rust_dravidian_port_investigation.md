@@ -128,3 +128,30 @@ digit runs (`p.mts ta …`).
 **Implication.** ta done. TS defect to report (not fixed): tamil/normalize.ts's ordinal step composes from
 `Number(digits)` with no safe-integer guard and no `raw`, so an ordinal on a run of 17+ digits reads a different
 digit string from the one written (the bare numeral path passes `raw` and is right).
+
+## Run 4 — 2026-10-15 04:55 (ml)
+
+**Question.** Does Malayalam (chillu expansion, samvritokaram, the anusvara and voicing rules, the shared composer
+with suppletive thousands, the ordinal / plural / oblique clitics) match the TS, and did its ESCAPED joiners stay
+escapes?
+
+**What was written.** ml is the one language here whose TS writes its joiners as escapes (`/([ണനരലളക])്\u200d/` and
+`[\u200b\u200c\u200d\ufeff]`). Per Run 2's rule they were written with a `@BS@` placeholder for the backslash and
+substituted byte-level (`ph.py … @BS@ 5c`), never typed.
+
+**Command.** `audit.sh malayalam`; `parity ml`; `LANGS=ml dump.mts dravidian` (normalize / text / word, plus
+`numberToWords`, `ordinalToWords`, `cliticToWords` with each stem kind over the value grid, and the three stems over
+every composed word) → `fn-diff dravidian`; a mutation (the retroflex post-nasal voicing `ɳʈ → ɳɖ` removed);
+`e2e.sh ml`; `pins.sh malayalam ml`.
+
+**Raw finding.**
+- Audits: 21 raw patterns, 2 misses (`format!` templates: the token and the clitic builder, checked by hand); 144
+  non-ASCII runs, 0 missing; `5 TS escapes, 0 code points short` — the escapes survived as escapes.
+- `ml: 200/200`.
+- `dravidian (ml): 90877 identical, 0 DIFFER` (golden 212, fleurs 7666, probe 16, synthetic 33464, number 3068).
+  Mutation: `85666 identical, 5211 DIFFER` (golden 48, fleurs 1650); reverted.
+- `phonemize-sync / phonemize-best / trace: 3947 identical, 0 DIFFER` each.
+- test/malayalam.test.ts: 43 calls pinned (one more returns the engine object and is skipped); 43 matchers green; the
+  Rust test passes.
+
+**Implication.** ml done; no TS defect found by the reading or the probes.

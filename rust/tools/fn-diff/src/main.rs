@@ -2747,6 +2747,9 @@ fn main() {
             use vernacula_phonemizer::languages::tamil;
             let ta = tamil::tamil::create_tamil().unwrap();
             let ta_def = tamil::manifest::try_manifest().unwrap();
+            use vernacula_phonemizer::languages::malayalam;
+            let ml = malayalam::malayalam::create_malayalam(None).unwrap();
+            let ml_def = malayalam::manifest::try_manifest().unwrap();
             Box::new(move |input| {
                 let nf = || js_number(&JsString::from(input["n"].as_str().unwrap()));
                 let lang = input["lang"].as_str().unwrap();
@@ -2785,6 +2788,35 @@ fn main() {
                     ),
                     ("ta", "stem") => tamil::numbers::ordinal_stem(&units(&input["word"]))
                         .unwrap_or_else(|| js("\u{0}none")),
+                    ("ml", "normalize") => ml.normalize(&units(&input["text"])),
+                    ("ml", "text") => with_host(&js("ml"), || ml.text(&units(&input["text"]))),
+                    ("ml", "word") => ml.phonemize_word(&units(&input["word"])),
+                    ("ml", "words") => malayalam::numbers::number_to_words(n(), &ml_def.numbers),
+                    ("ml", "ordinal") => malayalam::numbers::ordinal_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        &ml_def.numbers,
+                    ),
+                    ("ml", "clitic") => malayalam::numbers::clitic_to_words(
+                        n(),
+                        &units(&input["suffix"]),
+                        if input["stem"] == "plural" {
+                            malayalam::numbers::plural_stem
+                        } else {
+                            malayalam::numbers::oblique_stem
+                        },
+                        &ml_def.numbers,
+                    ),
+                    ("ml", "stem-ordinal") => {
+                        malayalam::numbers::ordinal_stem(&units(&input["word"]))
+                    }
+                    ("ml", "stem-oblique") => {
+                        malayalam::numbers::oblique_stem(&units(&input["word"])).unwrap_or_default()
+                    }
+                    ("ml", "stem-plural") => {
+                        malayalam::numbers::plural_stem(&units(&input["word"]))
+                            .unwrap_or_else(|| js("\u{0}none"))
+                    }
                     _ => panic!("dravidian: unknown {lang} op {op}"),
                 }
             })

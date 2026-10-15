@@ -55,6 +55,7 @@ pub mod macedonian;
 pub mod magahi;
 pub mod maithili;
 pub mod malay;
+pub mod malayalam;
 pub mod mandarin;
 pub mod marathi;
 pub mod nepali;

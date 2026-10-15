@@ -5199,6 +5199,45 @@ const dumps: Record<string, () => void | Promise<void>> = {
                 for (const w of ["", "ம்", "ு", "ி", "கம்", "அது"]) stems.add(w);
                 for (const w of stems) emit({ lang: "ta", word: units(w), op: "stem" }, Nu.ordinalStem(w) ?? "\u0000none");
             },
+            async ml() {
+                const { normalizeMalayalam } = await import("../../../src/languages/malayalam/normalize.ts");
+                const Nu = await import("../../../src/languages/malayalam/numbers.ts");
+                const { MANIFEST } = await import("../../../src/languages/malayalam/manifest.ts");
+                const { createMalayalam, phonemizeWord } = await import("../../../src/languages/malayalam/malayalam.ts");
+                const E = createMalayalam();
+                const rows = textsFor(["ml"], FLEURS_DIR.ml, ["ml.txt"]);
+                const md = nativeDigits(0x0d66);
+                const items: string[] = [];
+                for (const b of ["ണ", "ന", "ര", "ല", "ള", "ക", "മ"]) items.push(`അവ${b}്\u200d`, `അവ${b}്\u200dകൾ`, `${b}്\u200c`, `${b}്`);
+                for (const z of ["മലയാളം\u200b", "ക\u200cക", "\ufeffമലയാളം", "1\u200b,000", md(1976), `${md(15)}%`]) items.push(z);
+                const endings = [...MANIFEST.ordinalEndings, "ആമത്", "ാമതായി"];
+                const clitics = ["ത്തിലെ", "ത്തിൽ", "ത്തില്", "ലാണ്", "ന്റെ", "ലോ", "നും", "ലെ", "ൽ", "ന്", "കളുടെ", "കളിലെ", "കളിൽ", "കൾ"];
+                for (let n = 0; n <= 40; n++) for (const e of [...endings, ...clitics]) items.push(`${n}${e}`, `${n} ${e}`, `${n}-${e}`, `${n} – ${e}`);
+                for (const n of ["100", "1000", "100000", "10000000", "1976", "2000", "9007199254740993", "1.5", "1,000", "1,00,000"]) for (const e of ["ാം", "ആം", "ൽ", "ന്റെ", "കൾ", "ത്തിൽ", "ലെ"]) items.push(`${n}${e}`);
+                items.push(...tierItems(MANIFEST.symbolTier));
+                for (const p of ["50% ശതമാനം", "50 ശതമാനം ശതമാനം", "ശതമാനം  ശതമാനം ശതമാനം"]) items.push(p);
+                for (const h of ["0", "07", "9", "10", "12", "19", "23", "24", "123"]) for (const m of ["00", "05", "30", "59", "60", " 00", "00.5"]) items.push(`${h}:${m}`);
+                for (const d of ["3.5", "0.25", "1.2.3", "12.", ".5", "1,234.56"]) items.push(d);
+                for (const g of ["1,000", "12,345,678", "0,500", "1990, 1991", "1,2345", "12,34", "10,00,000"]) items.push(g);
+                for (const x of ["±5", "-5", "−5", "–5", "3-5", "3 -5", "a-5", "ക -5", "+5", "a+5", "UTC+1", "5 < 6", "5 > 4", "a=b", "a = b.", "8÷2", "30°C", "5°", "5 °"]) items.push(x);
+                frames(rows, "അവൻ", "ആണ്", items);
+                run("ml", rows, normalizeMalayalam, E, phonemizeWord, /[ഀ-ൿ]+/gu, MANIFEST,
+                    ["ൺ", "ൻ", "ർ", "ൽ", "ൾ", "ൿ", "ൔ", "ൕ", "ൖ", "അവൻ", "അവർ", "നാല്", "അതത്", "പണ്ട്", "അടി", "കറുക", "അംശം", "അംഗം", "ള്ള", "കുട്ടി", "അമ്മ", "ണ്ട", "ണ്ഠ", "ൻ്", "൦", "ൎ", "ൗ"], 0x0d66);
+                const stems = new Set<string>();
+                for (const n of numberGrid()) {
+                    emit({ lang: "ml", n: String(n), op: "words" }, Nu.numberToWords(n));
+                    emit({ lang: "ml", n: String(n), suffix: units("ാം"), op: "ordinal" }, Nu.ordinalToWords(n));
+                    for (const [c, k] of [["ൽ", "oblique"], ["ന്റെ", "oblique"], ["കൾ", "plural"]] as const)
+                        emit({ lang: "ml", n: String(n), suffix: units(c), stem: k, op: "clitic" }, Nu.cliticToWords(n, c, k === "plural" ? Nu.pluralStem : Nu.obliqueStem));
+                    for (const w of Nu.numberToWords(n).split(" ")) stems.add(w);
+                }
+                for (const w of ["", "്", "ം", "ാ", "അവൻ", "കോടി", "കൈ"]) stems.add(w);
+                for (const w of stems) {
+                    emit({ lang: "ml", word: units(w), op: "stem-ordinal" }, Nu.ordinalStem(w));
+                    emit({ lang: "ml", word: units(w), op: "stem-oblique" }, Nu.obliqueStem(w));
+                    emit({ lang: "ml", word: units(w), op: "stem-plural" }, Nu.pluralStem(w) ?? "\u0000none");
+                }
+            },
         };
         for (const lang of langs) {
             if (!Object.hasOwn(L, lang)) throw new Error(`dravidian: no entry for ${lang}`);
