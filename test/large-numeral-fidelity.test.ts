@@ -74,8 +74,9 @@ const B = "1000000000000000000009";
  */
 // az and kk came off in #1576: az now groups a written numeral from its digits (tr's #1523 shape), and kk reads a
 // run past 2⁵³ digit by digit from its own unit atoms. si came off in #1587: an unsafe run is read one digit at a
-// time through its own composer.
-const ACCEPTED_LOSSY = new Set("vi tg zu".split(" "));
+// time through its own composer. tg came off in #1581: a run past 2⁵³ is read digit by digit (`digitWords`), the
+// kk shape.
+const ACCEPTED_LOSSY = new Set("vi zu".split(" "));
 
 const CODES = [
     ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/^\s*case "([^"]+)":/gmu)].map((m) => m[1]!)),

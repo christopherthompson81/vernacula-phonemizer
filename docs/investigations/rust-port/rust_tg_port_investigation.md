@@ -109,3 +109,26 @@ and replayed).
 - tg: tg-normalize 37,012, tg-g2p 64,119, tg-numbers 58,133, phonemize-sync / phonemize-best / trace 3,713 each, symbols 6,707: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 8 — 2026-10-15 20:35 (#1581 fixes, TS-first, mirrored to C# and Rust)
+
+**Question.** Do the #1581 tg defects reproduce, and what is the fix shape? Tool: `try.mts tg …` (synthetic probes).
+
+**Found.**
+- `1000000000000000` read *trilliˈɔn*. The trillion multiplier was 1000, `three` refuses any group over 999, and
+  the leading digits vanished with no marker.
+- `9007199254740993` dropped its `9007` and read the rounded double.
+- The fixed-point loop around the space-group join never did more than one pass's work, and `0 000 000` came
+  out half joined.
+
+**Done.**
+- An oversized multiplier is composed in full: 10¹⁵ → *ҳазор триллион*, the kk shape from #1576.
+- A digit run past 2⁵³ is read digit by digit (`digitWords`). Its callers are the number token and the
+  numeral+enclitic rule.
+- The space-group join is now core/separatorHygiene.ts `joinSpaceGroups`: the whole run in one pass, and a
+  standalone-`0` run refused whole.
+
+**Declined: the minus.** `-5 дараҷа` → *five* stays as it is. normalize.ts records it as a measured refusal:
+`манфӣ` fails on sense, and most dash-before-digit shapes in the corpus are not negatives.
+
+**Goldens.** tg moved 0 rows.

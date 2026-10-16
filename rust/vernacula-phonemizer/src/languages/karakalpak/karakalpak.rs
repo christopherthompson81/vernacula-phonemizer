@@ -42,9 +42,11 @@ pub fn try_def() -> Result<&'static KarakalpakDef, String> {
 static DEF: LazyLock<&'static KarakalpakDef> =
     LazyLock::new(|| try_def().unwrap_or_else(|e| panic!("{e}")));
 
-/// `IPA_VOWEL.has(s)`: the WHOLE segment is one vowel character (not "contains a vowel").
+/// `[...seg].some((c) => IPA_VOWEL.has(c))`: ⟨å⟩ is the multi-character vowel `oː` (#1581).
 fn is_vowel_seg(seg: &JsString) -> bool {
-    seg.len() == 1 && is_ipa_vowel(seg.units()[0])
+    seg.code_point_strings()
+        .iter()
+        .any(|c| c.len() == 1 && is_ipa_vowel(c.units()[0]))
 }
 
 /// `phonemizeWord(word)`: one Karakalpak word to canonical IPA.
@@ -377,5 +379,28 @@ mod tests {
             let got: Option<String> = call(f, &a).map(|s| s.to_string_lossy());
             assert_eq!(got.as_deref(), *want, "{f}{args:?}");
         }
+    }
+}
+
+/// #1581, as test/turkic2-defects-1581.test.ts: relational, so no IPA is typed.
+#[cfg(all(test, feature = "kaa"))]
+mod defects_1581_tests {
+    use super::*;
+    use crate::core::js_string::js;
+
+    fn say(s: &str) -> String {
+        crate::phonemize(s, "kaa").unwrap()
+    }
+
+    #[test]
+    fn trillion_long_a_stress_and_24_00() {
+        assert_eq!(say("1000000000000"), say("bir trillion"));
+        assert!(
+            phonemize_word(&js("tåw"))
+                .to_string_lossy()
+                .starts_with('ˈ')
+        );
+        assert_eq!(say("24:00"), say("24 00"));
+        assert_ne!(say("24:30"), say("24 30"));
     }
 }

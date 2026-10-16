@@ -126,8 +126,25 @@ pub(crate) fn normalize_chuvash_initialisms(text: &JsString) -> JsString {
     )(text)
 }
 
-const SFX: &str = "[а-яёӑӗҫӳ]";
-const WORD: &str = "[а-яёӑӗҫӳА-ЯЁӐӖҪӲ]";
+/// The four Latin look-alikes ⟨ă ĕ ç ü⟩ are in both classes, and folded back by `to_cyrillic` (#1581).
+const SFX: &str = "[а-яёӑӗҫӳăĕçü]";
+const WORD: &str = "[а-яёӑӗҫӳА-ЯЁӐӖҪӲăĕçüĂĔÇÜ]";
+
+/// A written suffix with its Latin look-alikes folded to the Chuvash Cyrillic letters.
+fn to_cyrillic(sfx: &JsString) -> JsString {
+    let s: String = sfx
+        .to_string_lossy()
+        .chars()
+        .map(|c| match c {
+            'ă' => 'ӑ',
+            'ĕ' => 'ӗ',
+            'ç' => 'ҫ',
+            'ü' => 'ӳ',
+            c => c,
+        })
+        .collect();
+    js(&s)
+}
 
 fn g(m: &JsMatch, s: &JsString, i: usize) -> JsString {
     m.group(i, s).unwrap_or_default()
@@ -237,7 +254,7 @@ pub(crate) fn normalize_chuvash(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d):([0-5]\d|60)(?![\d:.,])",
+            r"(?<![\d:.,])([01]?\d|2[0-3]|24(?=:00:00)):([0-5]\d):([0-5]\d|60)(?![\d:.,])",
             "gu"
         ),
         |m, t| {
@@ -254,7 +271,7 @@ pub(crate) fn normalize_chuvash(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d:.,])([01]?\d|2[0-4]):\s?([0-5]\d)(?![\d:.,])",
+            r"(?<![\d:.,])([01]?\d|2[0-3]|24(?=:\s?00(?![\d:.,]))):\s?([0-5]\d)(?![\d:.,])",
             "gu"
         ),
         |m, t| {
@@ -284,7 +301,7 @@ pub(crate) fn normalize_chuvash(input: &JsString) -> JsString {
     // 5) The ordinal range; 6) the ordinal suffix (a Latin ĕ in it folded to ӗ).
     s = rewrite_with(&s, &bt.ordinal_range, |m, t| {
         let whole = m.value(t);
-        let sfx = g(m, t, 3);
+        let sfx = to_cyrillic(&g(m, t, 3));
         let first = attach_ordinal(&whole, &g(m, t, 1), &sfx);
         let second = attach_ordinal(&whole, &g(m, t, 2), &sfx);
         if first == whole || second == whole {
@@ -293,11 +310,7 @@ pub(crate) fn normalize_chuvash(input: &JsString) -> JsString {
         first.concat(&js(", ")).concat(&second)
     });
     s = rewrite_with(&s, &bt.ordinal, |m, t| {
-        attach_ordinal(
-            &m.value(t),
-            &g(m, t, 1),
-            &js_re!(r"ĕ", "gu").replace(&g(m, t, 2), &js("ӗ")),
-        )
+        attach_ordinal(&m.value(t), &g(m, t, 1), &to_cyrillic(&g(m, t, 2)))
     });
 
     // 7) Signs.

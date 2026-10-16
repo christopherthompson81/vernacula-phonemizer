@@ -96,6 +96,8 @@ public static class BashkirPhonemizer
         {
             var nucleus = vidx[^1];
             var at = nucleus > 0 && !IsV(segs[nucleus - 1]) ? nucleus - 1 : nucleus;
+            // ⚠ A word-initial cluster is the whole onset (спорт → ˈspʊɾt), #1581.
+            if (!segs.Take(at).Any(IsV)) at = 0;
             segs.Insert(at, "ˈ");
         }
         return string.Concat(segs).Normalize(NormalizationForm.FormC);

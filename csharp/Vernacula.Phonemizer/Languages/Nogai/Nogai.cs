@@ -16,20 +16,6 @@ public static class NogaiPhonemizer
     private static IReadOnlyDictionary<string, string> VOWEL => Manifest.DEF.Vowels;
     private static IReadOnlyDictionary<string, string> IOTATED => Manifest.DEF.Iotated;
     private static IReadOnlyDictionary<string, string> DIGRAPH => Manifest.DEF.Digraphs;
-    private static readonly HashSet<string> STRESS_NASAL = new(StringComparer.Ordinal) { "m", "n", "ŋ" };
-
-    /** Sonority for maximal-onset stress: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
-    private static int Sonority(string seg)
-    {
-        if (Js.CodePoints(seg).Any(c => Ipa.IPA_VOWEL.Contains(c))) return 6;
-        if (seg is "j" or "w") return 5;
-        if (seg is "l" or "r") return 4;
-        if (STRESS_NASAL.Contains(seg)) return 3;
-        if (seg.Contains("͡")) return 1;
-        if (seg is "f" or "v" or "s" or "z" or "ʃ" or "ʒ" or "x" or "χ" or "h" or "ʁ" or "ɣ") return 2;
-        return 0;
-    }
-
     /** Is an emitted IPA segment a vowel (or vowel-bearing)? Used for the coda-⟨в⟩, ⟨е⟩-iotation, and stress tests. */
     private static bool IsVowelSeg(string? s) =>
         s is not null && Js.CodePoints(s).Any(c => Ipa.IPA_VOWEL.Contains(c));
@@ -78,22 +64,15 @@ public static class NogaiPhonemizer
             else if (ch == "ъ") segs.Add("ʔ"); // a stray hard sign (not part of гъ/къ/нъ)
             // ь (a stray soft sign, not part of аь/оь/уь): loan palatalization — dropped
         }
-        // Word-final (oxytone) stress: ˈ before the maximal onset of the last vowel's syllable.
+        // Word-final (oxytone) stress: ˈ before the onset of the last vowel's syllable. ⚠ One onset consonant
+        // word-internally (китап.лар); only a word-initial cluster is a whole onset (спорт → ˈsport). #1581.
         var vidx = new List<int>();
         for (var idx = 0; idx < segs.Count; idx++) if (IsVowelSeg(segs[idx])) vidx.Add(idx);
         if (vidx.Count > 0)
         {
             var at = vidx[^1];
             if (at > 0 && !IsVowelSeg(segs[at - 1])) at--; // the immediate onset consonant
-            while (at > 0 && !IsVowelSeg(segs[at - 1]))
-            {
-                var p = segs[at - 1];
-                var l = segs[at];
-                var obstruentLiquid = Sonority(p) <= 2 && Sonority(l) >= 4;
-                var sibilantStop = (p == "s" || p == "ʃ") && Sonority(l) <= 1;
-                if (!(obstruentLiquid || sibilantStop)) break;
-                at--;
-            }
+            if (!segs.Take(at).Any(IsVowelSeg)) at = 0; // a word-initial cluster is the whole onset
             segs.Insert(at, "ˈ");
         }
         return string.Concat(segs).Normalize(NormalizationForm.FormC);

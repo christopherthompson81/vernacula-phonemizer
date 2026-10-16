@@ -110,3 +110,23 @@ and replayed).
 - ba: ba-normalize 23,387, ba-g2p 212,112, ba-numbers 58,260, ba-roman 436, phonemize-sync / phonemize-best / trace 296 each, symbols 3,272: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 8 — 2026-10-15 20:35 (#1581 fixes, TS-first, mirrored to C# and Rust)
+
+**Question.** Do the #1581 ba defects reproduce? Also, does ba have the medial-cluster stress walk that tk/tt
+had (#1576)?
+
+**Found.**
+- No sonority walk: ba took one onset consonant only, so the medial case (*kitɑpˈɫɑɾ*) was already right. The
+  word-INITIAL cluster was wrong instead: спорт → *sˈpʊɾt*.
+- 10¹² read *ˈmɪŋ miɫɫiˈɑɾd*.
+- `1990 -1995` read *минус*: the sign rule (step 8) ran before the range rule.
+- `5 г-ға` stranded *ʁɑ*.
+
+**Done.**
+- A word-initial cluster is the whole onset, the tt rule.
+- триллион, attested ×2 in the mined artifact as 10¹² (a GDP figure).
+- The sign rule refuses a hyphen after a number and a space.
+- The gram rule glues a written case suffix, as the degree rule does.
+
+**Goldens.** ba moved 19 rows, all initial-cluster stress (*sˈpʊɾt* → *ˈspʊɾt*, *ɡˈɾɑf* → *ˈɡɾɑf*, …).

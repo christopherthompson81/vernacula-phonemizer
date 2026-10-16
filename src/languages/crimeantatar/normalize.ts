@@ -99,7 +99,9 @@ export function normalizeCrimeanTatar(input: string): string {
     // 1) THE PERCENT SIGN AND ITS CASE SUFFIX, TOGETHER AND BEFORE THE TIER. Turkic agglutination lands on
     //    the symbol through a hyphen here — "dünya okean yüzüniñ 0,7%-ine kele" — and the tier reads the
     //    sign and stops, leaving `ine` to reach the g2p as a bare syllable (it reads *ine* today).
-    s = rewrite(s, /(\d)\s?%\s?-?\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 faiz$2");
+    //    ⚠ A SPACE IS ALLOWED ONLY AROUND THE HYPHEN (#1581): with the hyphen optional and the spaces still
+    //    allowed, `50% ve` took the next short WORD as the suffix and read *faizve*.
+    s = rewrite(s, /(\d)\s?%(?:\s?-\s?)?(\p{Ll}{1,4})(?![\p{L}\p{M}])/gu, "$1 faiz$2");
 
     // 2) ⚠ THE AUTHOR'S OWN SQUARE MEASURE, BEFORE THE TIER. When the corpus writes `kvadrat` itself the
     //    unit abbreviation is no longer adjacent to its number — "5 kvadrat km qaplağan", "10 biñ kvadrat
@@ -180,7 +182,9 @@ export function normalizeCrimeanTatar(input: string): string {
     // 9) THE MINUS. ⚠ ONLY THE MINUS — see the header: no plus word survives the sourcing check, and a
     //    plus does not invert its operand, so the silence costs nothing. `(?<!\d)` is what leaves the
     //    ranges above alone; by this point they have already been spent anyway.
-    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
+    //    ⚠ THE SIGN IS TIGHT AGAINST ITS FIGURE (#1581). Every minus the header cites is (`-6 °C`, `–1,8°C`); a
+    //    dash with a space on both sides is punctuation (`fiyatı - 5 lira`), and it used to read *minus*.
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–](\d)/gu, "$1minus $2");
 
     // 10) DEGREES. ⚠ THE SCALE LETTER MAY BE CYRILLIC (U+0421) and it MAY CARRY A CASE SUFFIX through a
     //    hyphen — "suv arareti +23 °C-den +26 °C-ge qadar deñişe", "minus 16°С-ge yaqın". The suffix

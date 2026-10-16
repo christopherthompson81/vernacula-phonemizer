@@ -104,3 +104,16 @@ and replayed).
 - nog: nog-normalize 3,244, nog-g2p 45,046, nog-numbers 32,066, phonemize-sync / phonemize-best / trace 113 each, symbols 3,072: 0 DIFFER; parity 68/68.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 8 — 2026-10-15 20:35 (#1581 fixes, TS-first, mirrored to C# and Rust)
+
+**Question.** The #1576 note said ba probably had the tk/tt medial-cluster walk. Which of this group does?
+
+**Found.** nog does: китаплар → *kitaˈplar*, the same sonority walk.
+
+**Done.** The tt rule: one onset consonant word-internally, and a word-initial cluster is the whole onset.
+
+**Declined: trillion.** No source found. There is no en.wiktionary entry, Omniglot "Numbers in Nogai" stops
+at миллиард, and there is no mined artifact. nog also uses the shared space-group join (core/separatorHygiene.ts).
+
+**Goldens.** nog moved 0 of its 68 rows.

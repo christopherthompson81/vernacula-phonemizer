@@ -512,3 +512,23 @@ mod tests {
         }
     }
 }
+
+/// #1581, as test/turkic2-defects-1581.test.ts: relational, so no IPA is typed.
+#[cfg(all(test, feature = "chv"))]
+mod defects_1581_tests {
+    use crate::core::js_string::js;
+
+    fn say(s: &str) -> String {
+        crate::phonemize(s, "chv").unwrap()
+    }
+
+    #[test]
+    fn latin_suffix_forms_and_hour_24() {
+        use super::super::normalize::normalize_chuvash as n;
+        assert_eq!(n(&js("15-мĕшĕсенче")), n(&js("15-мӗшӗсенче")));
+        assert_eq!(n(&js("11-15-мĕшĕсенче")), n(&js("11-15-мӗшӗсенче")));
+        assert!(!n(&js("15-мĕшĕсенче")).to_string_lossy().contains("15"));
+        assert_eq!(n(&js("24:30")), js("24:30"));
+        assert_eq!(say("24:00"), say("24"));
+    }
+}

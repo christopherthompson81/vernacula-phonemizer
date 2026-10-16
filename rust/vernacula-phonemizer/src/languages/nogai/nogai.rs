@@ -1,5 +1,5 @@
 //! Nogai (nog) phonemizer: a digraph-aware Cyrillic scan (coda в → w, е iotated after a vowel segment, a stray ъ
-//! as a glottal stop) with final stress placed before the onset a sonority test allows, and text() over words,
+//! as a glottal stop) with final stress placed before the onset (one consonant, or a whole word-initial cluster), and text() over words,
 //! numbers and punctuation. Ported from src/languages/nogai/nogai.ts — see that file for the sources.
 
 use std::sync::{LazyLock, OnceLock};
@@ -49,26 +49,6 @@ fn is_vowel_seg(seg: Option<&JsString>) -> bool {
             .iter()
             .any(|c| c.len() == 1 && is_ipa_vowel(c.units()[0]))
     })
-}
-
-/// `sonority(seg)`: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0.
-fn sonority(seg: &JsString) -> u8 {
-    let s = seg.to_string_lossy();
-    if is_vowel_seg(Some(seg)) {
-        6
-    } else if s == "j" || s == "w" {
-        5
-    } else if s == "l" || s == "r" {
-        4
-    } else if ["m", "n", "ŋ"].contains(&s.as_str()) {
-        3
-    } else if s.contains('\u{361}') {
-        1
-    } else if ["f", "v", "s", "z", "ʃ", "ʒ", "x", "χ", "h", "ʁ", "ɣ"].contains(&s.as_str()) {
-        2
-    } else {
-        0
-    }
 }
 
 /// `phonemizeWord(word)`: the digraph-aware scan, then the stress mark before the last nucleus and its onset.
@@ -130,15 +110,9 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
         if at > 0 && !is_vowel_seg(Some(&segs[at - 1])) {
             at -= 1;
         }
-        while at > 0 && !is_vowel_seg(Some(&segs[at - 1])) {
-            let (p, l) = (&segs[at - 1], &segs[at]);
-            let obstruent_liquid = sonority(p) <= 2 && sonority(l) >= 4;
-            let sibilant_stop =
-                ["s", "ʃ"].contains(&p.to_string_lossy().as_str()) && sonority(l) <= 1;
-            if !(obstruent_liquid || sibilant_stop) {
-                break;
-            }
-            at -= 1;
+        // One onset consonant word-internally (китап.лар); a word-initial cluster is the whole onset (#1581).
+        if !segs[..at].iter().any(|g| is_vowel_seg(Some(g))) {
+            at = 0;
         }
         segs.insert(at, js("ˈ"));
     }
@@ -281,5 +255,27 @@ mod tests {
             let got: Option<String> = call(f, &a).map(|s| s.to_string_lossy());
             assert_eq!(got.as_deref(), *want, "{f}{args:?}");
         }
+    }
+}
+
+/// #1581, as test/turkic2-defects-1581.test.ts: relational, so no IPA is typed.
+#[cfg(all(test, feature = "nog"))]
+mod defects_1581_tests {
+    use super::*;
+    use crate::core::js_string::js;
+
+    #[test]
+    fn a_medial_cluster_splits_for_stress() {
+        let w: Vec<char> = phonemize_word(&js("китаплар"))
+            .to_string_lossy()
+            .chars()
+            .collect();
+        let stress = w.iter().position(|&c| c == 'ˈ').unwrap();
+        assert_eq!(w[stress + 1], 'l');
+        assert!(
+            phonemize_word(&js("спорт"))
+                .to_string_lossy()
+                .starts_with('ˈ')
+        );
     }
 }

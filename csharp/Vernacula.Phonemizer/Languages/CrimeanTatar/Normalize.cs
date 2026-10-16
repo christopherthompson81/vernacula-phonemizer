@@ -40,7 +40,8 @@ public static class Normalize
 
     /** The percent sign carrying a written case suffix — `5%-nen` → *beş faiznen*. */
     private static readonly JsRe PERCENT_SUFFIX =
-        JsRegex.Compile("(\\d)\\s?%\\s?-?\\s?(\\p{Ll}{1,4})(?![\\p{L}\\p{M}])", "gu");
+        // ⚠ A space only around the hyphen: `50% ve` is not *faizve* (#1581).
+        JsRegex.Compile("(\\d)\\s?%(?:\\s?-\\s?)?(\\p{Ll}{1,4})(?![\\p{L}\\p{M}])", "gu");
 
     private static readonly JsRe KVADRAT_KM =
         JsRegex.Compile($"{Boundaries.NOT_LETTER_BEFORE}kvadrat(\\s+)km{Boundaries.NOT_LETTER_AFTER}", "gu");
@@ -88,7 +89,8 @@ public static class Normalize
     private static readonly JsRe DASH_RANGE = JsRegex.Compile("(\\d)\\s?[–—]\\s?(?=[+-]?\\d)", "gu");
     private static readonly JsRe HYPHEN_RANGE =
         JsRegex.Compile("(?<![\\d.,\\-\\/])(\\d+)\\s?-\\s?(\\d+)(?![\\d\\/])(?!\\s?-\\s?\\d)", "gu");
-    private static readonly JsRe MINUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])[-\\u2212\\u2013]\\s?(\\d)", "gu");
+    // ⚠ The sign is tight against its figure; a dash with a space on both sides is punctuation (#1581).
+    private static readonly JsRe MINUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])[-\\u2212\\u2013](\\d)", "gu");
 
     /** ⚠ BOTH THE LATIN ⟨C⟩ AND THE CYRILLIC ⟨С⟩, in both cases — they render identically, and a class
      *  carrying only one of them leaves the other to be read as a bare letter. Spelled as escapes so the

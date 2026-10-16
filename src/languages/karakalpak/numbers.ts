@@ -31,7 +31,9 @@ const TENS: Record<number, string> = {
 const HUNDRED = "júz",
     THOUSAND = "mıń",
     MILLION = "million",
-    BILLION = "milliard";
+    BILLION = "milliard",
+    // trillion — attested in the mined kaa artifact as 10¹² ("6 trillion AQSH dolları", a damages figure). #1581.
+    TRILLION = "trillion";
 
 /** A non-negative safe integer → the ordered Karakalpak number WORDS (2016 Latin spellings, not IPA). */
 export function numberToWords(n: number): string[] {
@@ -56,7 +58,12 @@ export function numberToWords(n: number): string[] {
             r = n % 1_000_000;
         return [...numberToWords(m), MILLION, ...(r ? numberToWords(r) : [])];
     }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...numberToWords(b), BILLION, ...(r ? numberToWords(r) : [])];
+    if (n < 1_000_000_000_000) {
+        const b = Math.floor(n / 1_000_000_000),
+            r = n % 1_000_000_000;
+        return [...numberToWords(b), BILLION, ...(r ? numberToWords(r) : [])];
+    }
+    const t = Math.floor(n / 1_000_000_000_000),
+        r = n % 1_000_000_000_000;
+    return [...numberToWords(t), TRILLION, ...(r ? numberToWords(r) : [])];
 }

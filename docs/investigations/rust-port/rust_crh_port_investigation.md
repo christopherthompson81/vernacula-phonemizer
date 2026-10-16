@@ -99,3 +99,20 @@ and replayed).
 - crh: crh-normalize 1,719, crh-g2p 70,582, crh-numbers 32,066, phonemize-sync / phonemize-best / trace 271 each, symbols 3,272: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 8 — 2026-10-15 20:35 (#1581 fixes, TS-first, mirrored to C# and Rust)
+
+**Question.** Do the #1581 crh defects reproduce?
+
+**Found.**
+- `50% ve` → *fɑizˈve*: the suffix arm allowed a space with no hyphen.
+- `a - 5` → *minus*: the sign rule allowed a space after the sign.
+
+**Done.**
+- A space is admitted only around the hyphen.
+- The sign must be tight against its figure. Every minus the header cites is (`-6 °C`, `–1,8°C`).
+
+**Declined: trillion.** No source found. There is no en.wiktionary entry, Omniglot "Numbers in Crimean
+Tatar" stops at milliard, and the mined artifact has 0 instances. *milliard* stays the top scale.
+
+**Goldens.** crh moved 1 row: `Tımoşenko () - 13-ünci` no longer reads *minus* at an apposition dash.

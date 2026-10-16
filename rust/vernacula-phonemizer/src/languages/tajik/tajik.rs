@@ -142,27 +142,7 @@ pub(crate) fn number_words(n: f64) -> JsString {
     if n == 0.0 {
         return js(&nm.units[0]);
     }
-    let mut parts: Vec<String> = Vec::new();
-    let scales: [(f64, &str, bool); 4] = [
-        (1_000_000_000_000.0, &nm.trillion, false),
-        (1_000_000_000.0, &nm.milliard, false),
-        (1_000_000.0, &nm.million, false),
-        (1000.0, &nm.thousand, true),
-    ];
-    let mut left = n;
-    for (value, word, drop_one) in scales {
-        let q = (left / value).floor();
-        if q > 0.0 {
-            if !(drop_one && q == 1.0) {
-                parts.extend(three(q));
-            }
-            parts.push(word.to_string());
-            left %= value;
-        }
-    }
-    if left > 0.0 {
-        parts.extend(three(left));
-    }
+    let parts = number_parts(n);
     if parts.is_empty() {
         return JsString::new();
     }
@@ -178,6 +158,55 @@ pub(crate) fn number_words(n: f64) -> JsString {
         out.push_str(p);
     }
     js(&out)
+}
+
+/// `digitWords(digits)`: past 2⁵³ the run is read digit by digit, since the double has rounded the low digits
+/// away (#1581).
+pub(crate) fn digit_words(digits: &JsString) -> JsString {
+    let n = js_number(digits);
+    let d = digits.to_string_lossy();
+    if !d.is_empty()
+        && d.bytes().all(|b| b.is_ascii_digit())
+        && !crate::core::js_string::is_safe_integer(n)
+    {
+        let units = &MANIFEST.numbers.units;
+        let spelled: Vec<&str> = d
+            .bytes()
+            .map(|b| units[(b - b'0') as usize].as_str())
+            .collect();
+        return js(&spelled.join(" "));
+    }
+    number_words(n)
+}
+
+/// The words of `n` before the connector is applied, largest magnitude first.
+fn number_parts(n: f64) -> Vec<String> {
+    let nm = &MANIFEST.numbers;
+    let mut parts: Vec<String> = Vec::new();
+    let scales: [(f64, &str, bool); 4] = [
+        (1_000_000_000_000.0, &nm.trillion, false),
+        (1_000_000_000.0, &nm.milliard, false),
+        (1_000_000.0, &nm.million, false),
+        (1000.0, &nm.thousand, true),
+    ];
+    let mut left = n;
+    for (value, word, drop_one) in scales {
+        let q = (left / value).floor();
+        if q > 0.0 {
+            // The top scale's multiplier can exceed 999 from 10¹⁵ (#1581): composed in full.
+            if q > 999.0 {
+                parts.extend(number_parts(q));
+            } else if !(drop_one && q == 1.0) {
+                parts.extend(three(q));
+            }
+            parts.push(word.to_string());
+            left %= value;
+        }
+    }
+    if left > 0.0 {
+        parts.extend(three(left));
+    }
+    parts
 }
 
 static TOKEN: LazyLock<JsRegex> =
@@ -225,7 +254,7 @@ impl TajikPhonemizer {
             if let Some(w) = m.group(1, s).filter(|w| !w.is_empty()) {
                 sink.emit(&phonemize_word(&w));
             } else if let Some(n) = m.group(2, s).filter(|n| !n.is_empty()) {
-                for w in number_words(js_number(&n)).split(&js(" ")) {
+                for w in digit_words(&n).split(&js(" ")) {
                     sink.emit(&phonemize_word(&w));
                 }
             } else if let Some(p) = m.group(3, s).filter(|p| !p.is_empty())
@@ -438,5 +467,27 @@ mod tests {
             let got: Option<String> = call(f, &a).map(|s| s.to_string_lossy());
             assert_eq!(got.as_deref(), *want, "{f}{args:?}");
         }
+    }
+}
+
+/// #1581, as test/turkic2-defects-1581.test.ts: relational, so no IPA is typed.
+#[cfg(all(test, feature = "tg"))]
+mod defects_1581_tests {
+    use super::*;
+    use crate::core::js_string::js;
+
+    fn say(s: &str) -> String {
+        crate::phonemize(s, "tg").unwrap()
+    }
+
+    #[test]
+    fn numbers_from_10_15_keep_their_leading_digits() {
+        assert_eq!(number_words(1e15), js("ҳазор триллион"));
+        assert_eq!(say("1000000000000000"), say("ҳазор триллион"));
+        assert_ne!(say("1000000000000000"), say("1000000000000"));
+        let run = "9007199254740993";
+        assert_eq!(digit_words(&js(run)).split(&js(" ")).len(), run.len());
+        let spaced: Vec<String> = run.chars().map(String::from).collect();
+        assert_eq!(say(run), say(&spaced.join(" ")));
     }
 }

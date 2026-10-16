@@ -30,6 +30,8 @@ public static class Numbers
     private const string THOUSAND = "мең";
     private const string MILLION = "миллион";
     private const string BILLION = "миллиард";
+    // триллион — attested ×2 in the mined ba artifact as 10¹² (#1581).
+    private const string TRILLION = "триллион";
 
     /** A non-negative safe integer → the ordered Bashkir number WORDS (spellings, not IPA). */
     public static List<string> NumberToWords(double n)
@@ -71,10 +73,18 @@ public static class Numbers
             if (r != 0) outp.AddRange(NumberToWords(r));
             return outp;
         }
-        var b = Math.Floor(n / 1_000_000_000);
-        var rem = n % 1_000_000_000;
-        var res = new List<string>(NumberToWords(b)) { BILLION };
-        if (rem != 0) res.AddRange(NumberToWords(rem));
-        return res;
+        if (n < 1_000_000_000_000)
+        {
+            var b = Math.Floor(n / 1_000_000_000);
+            var rem = n % 1_000_000_000;
+            var res = new List<string>(NumberToWords(b)) { BILLION };
+            if (rem != 0) res.AddRange(NumberToWords(rem));
+            return res;
+        }
+        var tc = Math.Floor(n / 1_000_000_000_000);
+        var tr = n % 1_000_000_000_000;
+        var trl = new List<string>(NumberToWords(tc)) { TRILLION };
+        if (tr != 0) trl.AddRange(NumberToWords(tr));
+        return trl;
     }
 }

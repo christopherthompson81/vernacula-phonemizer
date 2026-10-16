@@ -191,7 +191,9 @@ export function normalizeKarakalpak(input: string): string {
     //    12:13:05 de"), so the figures are left as FIGURES and only the colon is spent.
     //    ⚠ THE HOUR BOUND IS WHAT DECLINES THE STANDARD NUMBER: this corpus cites `ISO/IEC 14882:2024` and
     //    `C++11 (14882:2011)`, where the digits before the colon are five long.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?(?![\d:.,])/gu,
+    //    ⚠ AND `24:00`, THE END OF THE DAY (ISO 8601), IS A CLOCK TOO (#1581); no other hour-24 time is. The
+    //    corpus writes no `24:` time either way, so the bound is the standard's.
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]|24(?=:00(?!:)))(?::([0-5]\d))(?::([0-5]\d))?(?![\d:.,])/gu,
         (_m, h: string, mi: string, se?: string) => (se === undefined ? `${h} ${mi}` : `${h} ${mi} ${se}`));
 
     // 9) SIGNS. ⚠ THE PLUS IS CLAIMED AND THE DIGIT LOOKAHEAD IS THE WHOLE GUARD — see the header:

@@ -142,7 +142,8 @@ pub(crate) fn normalize_karakalpak(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"(?<![\d:.,])([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?(?![\d:.,])",
+            // `24:00`, ISO 8601's end of day, is a clock too (#1581).
+            r"(?<![\d:.,])([01]?\d|2[0-3]|24(?=:00(?!:))):([0-5]\d)(?::([0-5]\d))?(?![\d:.,])",
             "gu"
         ),
         |m, t| {

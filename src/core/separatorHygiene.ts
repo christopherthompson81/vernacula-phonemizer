@@ -71,20 +71,31 @@ const SP = "[ \\u00a0\\u202f\\u2009]";  // space, NBSP, NNBSP, thin space
  * `digit SPACE digit` in any affected golden). The left edge rejects a STANDALONE `0`, so `0 000` is not
  * welded into a figure the writer did not write.
  *
- * Iterated to a FIXED POINT, because one pass consumes only the first separator of a pair; it terminates
- * because every pass that does anything deletes a character.
+ * ⚠ IT MATCHES THE WHOLE RUN, head and groups together, in ONE pass (#1581). It used to match each separator
+ * on its own, zero-width on both sides, and loop "to a fixed point because one pass consumes only the first
+ * separator of a pair" — which was never true: with nothing consumed around it, every separator in
+ * `1 000 000` matches in the first pass, and the loop never did a second pass's work. Matching per separator
+ * also split the standalone-`0` guard: it refused only the separator right after the `0`, so `0 000 000`
+ * came out half joined (*0 000000*). Refusing is a property of the RUN, so the run is the match.
  */
-const SPACE_GROUP = new RegExp(`(?<=\\d)(?<!(?<![\\d.,])0)${SP}(?=\\d{3}(?!\\d))`, "gu");
+// ⚠ THE REFUSED RUN IS MATCHED TOO, by the first alternative, and returned unchanged — CONSUMED, so the scan cannot
+// restart at its second group and join the rest (`0 000 000` → *0 000000*, the half-join this replaces).
+const GROUPS = `((?:${SP}\\d{3}(?!\\d))+)`;
+const SPACE_RUN = new RegExp(`(?<![\\d.,])0${GROUPS}|(?<!\\d)(\\d+)${GROUPS}`, "gu");
+const SP_ALL = new RegExp(SP, "gu");
+
+/** Join every space-grouped run (`1 000 000` → `1000000`), except one that starts with a standalone `0`. */
+export function joinSpaceGroups(input: string): string {
+    return rewrite(input, SPACE_RUN, (m0, zeroRun: string | undefined, head: string, groups: string) =>
+        zeroRun !== undefined ? m0 : head + groups.replace(SP_ALL, ""));
+}
 
 export function separatorHygiene(input: string): string {
     let s = input;
 
     // 0) THE SPACE GROUP — above everything, for the reason every de-grouping rule in this tree is first:
     //    the separator must stop being a boundary before any other rule reads the number around it.
-    for (let prev = ""; prev !== s; ) {
-        prev = s;
-        s = rewrite(s, SPACE_GROUP, "");
-    }
+    s = joinSpaceGroups(s);
 
     // 1) A run of TWO OR MORE three-digit groups is grouping in every convention that groups — `1.234.567`,
     //    `1,234,567`, `19,605,052`. One group is ambiguous and is left alone (see the header). Today this
