@@ -155,4 +155,23 @@ public class FinnishTests
             Assert.False(w.Contains("undefined") || w.Contains("NaN") || w.Any(char.IsAsciiDigit), $"n={n}");
         }
     }
+
+    // #1574 — a dashed clock range and a comma list (synthetic probes).
+    [Theory]
+    [InlineData("klo 6.30–7.30 välillä", "klo 6 30–7 30 välillä")]
+    [InlineData("klo 6.30 - 7.30", "klo 6 30 - 7 30")]
+    [InlineData("klo 6.30 ja 7.30 välillä", "klo 6 30 ja 7 30 välillä")]
+    [InlineData("klo 6.30–25.30", "klo 6 30–25.30")]
+    [InlineData("Arvot 1,2,3 ja 4.", "Arvot 1,2,3 ja 4.")]
+    [InlineData("Arvot 1,25,3", "Arvot 1,25,3")]
+    [InlineData("luku 3,14 ja 2,5", "luku 3 pilkku 1 4 ja 2 pilkku 5")]
+    public void Issue1574RangeAndList(string input, string want) => Assert.Equal(want, FiNormalize.NormalizeFinnish(input));
+
+    [Fact]
+    public void Issue1574RangeHasNoSentenceBreak()
+    {
+        Assert.Equal(Say("klo 6 30–7 30 välillä"), Say("klo 6.30–7.30 välillä"));
+        Assert.DoesNotContain(" . ", Say("klo 6.30–7.30 välillä"));
+        Assert.Equal(Say("Arvot 1, 2, 3 ja 4."), Say("Arvot 1,2,3 ja 4."));
+    }
 }

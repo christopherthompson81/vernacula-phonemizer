@@ -521,6 +521,48 @@ mod tests {
                 "ait nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl nʊtl",
             ),
         ),
+        // #1574 (synthetic probes; values from the TS engine)
+        (
+            "normalizeFaroese",
+            &["kl. 14.30 í dag"],
+            Some("klokkan 14 30 í dag"),
+        ),
+        (
+            "normalizeFaroese",
+            &["klokkan 10.00"],
+            Some("klokkan 10 null null"),
+        ),
+        (
+            "normalizeFaroese",
+            &["klokkan 9.05"],
+            Some("klokkan 9 null 5"),
+        ),
+        ("normalizeFaroese", &["3.00 kr"], Some("3,00 kr")),
+        (
+            "normalizeFaroese",
+            &["Hann kom 23.4.2020 heim"],
+            Some("Hann kom 23 apríl 2020 heim"),
+        ),
+        (
+            "normalizeFaroese",
+            &["Føddur 12.10.20 í Havn"],
+            Some("Føddur 12 oktober 20 í Havn"),
+        ),
+        (
+            "normalizeFaroese",
+            &["sekund 23.59.60 verður"],
+            Some("sekund 23 59 60 verður"),
+        ),
+        (
+            "phonemize",
+            &["Hann kom 23.4.2020 heim", "fo"],
+            Some("han koːm tɹʊiːɔkt͡ʃʏvʊ apɹʊil tvɛiː tʉuːsʊnt oːk t͡ʃʉuːvʊ haiːm"),
+        ),
+        (
+            "phonemize",
+            &["kl. 14.30 í dag", "fo"],
+            Some("klɔkan fjʏɻʈan tɹʊiːatɪ ʊiː tɛaːk"),
+        ),
     ];
 
     #[test]

@@ -816,7 +816,7 @@ mod tests {
         (
             "normalizeEstonian",
             &["kell 22:08 mõõdukas"],
-            Some("kell 22 08 mõõdukas"),
+            Some("kell 22 null 8 mõõdukas"),
         ),
         (
             "normalizeEstonian",
@@ -837,6 +837,27 @@ mod tests {
             "normalizeEstonian",
             &["6.30 ja 7.30 vahel"],
             Some("6.30 ja 7.30 vahel"),
+        ),
+        // #1574 (synthetic probes; values from the TS engine)
+        (
+            "normalizeEstonian",
+            &["kell 22:08 algas"],
+            Some("kell 22 null 8 algas"),
+        ),
+        (
+            "normalizeEstonian",
+            &["kell 10:00 algas"],
+            Some("kell 10 null null algas"),
+        ),
+        (
+            "normalizeEstonian",
+            &["kell 7.05-ks"],
+            Some("kell 7 null 5-ks"),
+        ),
+        (
+            "normalizeEstonian",
+            &["kell 22.30 algas"],
+            Some("kell 22 30 algas"),
         ),
     ];
 

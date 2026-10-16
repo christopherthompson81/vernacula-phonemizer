@@ -330,16 +330,33 @@ static RANGE: LazyLock<JsRegex> = LazyLock::new(|| {
     .unwrap()
 });
 
+/// `clockMinutes`: the minutes keep their zero (#1574), `08` → *null 8*, `00` → *null null*.
+fn clock_minutes(mm: &str) -> String {
+    if mm == "00" {
+        "null null".to_string()
+    } else if let Some(rest) = mm.strip_prefix('0') {
+        format!("null {rest}")
+    } else {
+        mm.to_string()
+    }
+}
+
 /// `normalizeEstonian(input)`.
 pub fn normalize_estonian(input: &JsString) -> JsString {
     let g = |m: &JsMatch, s: &JsString, i: usize| m.group(i, s).unwrap_or_default();
-    let input = rewrite(
+    let input = rewrite_with(
         input,
         js_re!(
             r"(?<=\bkell[ao]?\s)([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)",
             "giu"
         ),
-        &js("$1 $2"),
+        |m, s| {
+            js(&format!(
+                "{} {}",
+                g(m, s, 1).to_string_lossy(),
+                clock_minutes(&g(m, s, 2).to_string_lossy())
+            ))
+        },
     );
     let mut t = input;
 

@@ -30,11 +30,18 @@ public static class Normalize
     private static readonly JsRe GROUPED_DOT =
         JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)\\.(?=\\d{3}(?!\\d))", "gu");
 
+    /** AN ENGLISH-GROUPED THOUSAND (#1574) — a comma before exactly three digits, the WHOLE number at once; a
+     *  `0` is never a group's head. See the TS for the corpus counts. */
+    private static readonly JsRe GROUPED_COMMA =
+        JsRegex.Compile("(?<![\\d.,])([1-9]\\d{0,2})((?:,\\d{3})+)(?![\\d]|,\\d)", "gu");
+    private static readonly JsRe COMMA_SEPS = JsRegex.Compile(",", "gu");
+
     /** DECIMAL COMMA — the fractional part is spoken digit by digit. */
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(\\d+),(\\d+)", "gu");
 
-    /** CLOCK, COLON FORM ONLY — the period form is a decimal here. */
-    private static readonly JsRe CLOCK = JsRegex.Compile("(\\d{1,2}):(\\d{2})(?!\\d)", "gu");
+    /** CLOCK, COLON FORM ONLY — the period form is a decimal here. ⚠ Anchored on the left, and the minutes keep
+     *  their zero (#1574). */
+    private static readonly JsRe CLOCK = JsRegex.Compile("(?<!\\d)(\\d{1,2}):(\\d{2})(?!\\d)", "gu");
 
     private static readonly JsRe PERCENT = JsRegex.Compile("(\\d+)\\s*%", "gu");
     private static readonly JsRe CELSIUS_SIGN = JsRegex.Compile("℃", "gu");
@@ -135,13 +142,20 @@ public static class Normalize
             t = Rewrite(t, GROUPED_DOT, "");
         } while (t != prev);
 
+        // 1b) AN ENGLISH-GROUPED THOUSAND (#1574), before the decimal comma reads `100,000` as a decimal.
+        t = Rewrite(t, GROUPED_COMMA, m => m.Groups[1].Value + COMMA_SEPS.Replace(m.Groups[2].Value, ""));
+
         // 2) DECIMAL COMMA. The comma is clause punctuation too, so `12,5` read as a PAUSE inside a
         //    number. Fractional part spoken digit by digit.
         t = Rewrite(t, DECIMAL_COMMA, m =>
             m.Groups[1].Value + " komma " + string.Join(" ", Js.CodePoints(m.Groups[2].Value)));
 
         // 3) CLOCK, COLON FORM ONLY. The period form is a decimal here — see the header.
-        t = Rewrite(t, CLOCK, "$1 $2");
+        t = Rewrite(t, CLOCK, m =>
+        {
+            string h = m.Groups[1].Value, mm = m.Groups[2].Value;
+            return mm == "00" ? $"{h} núll núll" : mm.StartsWith('0') ? $"{h} núll {mm[1..]}" : $"{h} {mm}";
+        });
 
         // 4) PERCENT and DEGREES. Postposed.
         t = Rewrite(t, PERCENT, "$1 prósent");
@@ -176,8 +190,10 @@ public static class Normalize
             return $"{word} {next}";
         });
 
-        // 8) RANGES. Spoken `til`.
-        t = Rewrite(t, RANGE, "$1 til $2");
+        // 8) RANGES. Spoken `til`. ⚠ ASCENDING ONLY (#1574): a descending pair is a score.
+        t = Rewrite(t, RANGE, m =>
+            Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value)
+                ? $"{m.Groups[1].Value} til {m.Groups[2].Value}" : m.Value);
 
         // 9) CURRENCY, both placements.
         foreach (var (sign, word) in CURRENCY)

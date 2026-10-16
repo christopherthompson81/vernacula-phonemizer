@@ -441,8 +441,12 @@ export function normalizeFinnish(input: string): string {
     //    so the marker licenses both operands — which means it has to run BEFORE the single arm, or that
     //    arm has already rewritten `6.30` and the lookbehind no longer sees a digit to anchor on. Written
     //    the other way round first, and it silently claimed nothing.
+    //    ⚠ THE JOINER IS `ja` OR A DASH (#1574). `klo 6.30–7.30` is the commoner written range, and with only
+    //    `ja` accepted its left operand took the single arm and its right kept the sentence break this
+    //    arm exists to remove. The dash is kept as written, so it reads exactly as a dash between digits
+    //    reads anywhere else in this file.
     t = rewrite(t,
-        /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
+        /(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+|\s*[–—-]\s*)(\d{1,2})[.:](\d{2})(?![\d.,])/giu,
         (m, h1: string, m1: string, sep: string, h2: string, m2: string) => {
             const a = clockBody(h1, m1), b = clockBody(h2, m2);
             return a !== undefined && b !== undefined ? `${a}${sep}${b}` : m;
@@ -535,7 +539,12 @@ export function normalizeFinnish(input: string): string {
     //    composed *sataneljäkymmentäyksi*.
     //
     //    AFTER steps 2–5, every one of which needs to see an unbroken digit run, and BEFORE the tier.
-    t = rewrite(t, /(\d),(\d+)(?!\d)/gu, (_m, int: string, frac: string) =>
+    //    ⚠ A RUN WITH TWO OR MORE COMMAS IS A LIST, NOT A DECIMAL (#1574). `1,2,3` read as `1 pilkku 2`
+    //    and then a pause before `3`: one comma taken as a decimal and the next as a list separator. A
+    //    decimal has one comma, so neither edge of the match may continue the run with another `,\d`, and
+    //    the commas of a list are left as the pauses they are. A following `,ddd` group is NOT a list item:
+    //    `1,000,000` is an English-grouped thousand, out of this fix's scope, and keeps the reading it had.
+    t = rewrite(t, /(?<!\d,\d*)(\d),(\d+)(?!\d)(?!,\d(?!\d\d(?!\d)))/gu, (_m, int: string, frac: string) =>
         `${int} ${DECIMAL_WORD} ${[...frac].join(" ")}`);
 
     // 10) DEGREES (17), BEFORE any rule that could claim the scale letter — `−34,3 °C` read the sign and

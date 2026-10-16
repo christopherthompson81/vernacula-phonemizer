@@ -325,7 +325,7 @@ pub fn normalize_finnish(input: &JsString) -> JsString {
     t = rewrite_with(
         &t,
         js_re!(
-            r"(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+)(\d{1,2})[.:](\d{2})(?![\d.,])",
+            r"(?<=(?:kello|klo\.?)\s)(\d{1,2})[.:](\d{2})(\s+ja\s+|\s*[–—-]\s*)(\d{1,2})[.:](\d{2})(?![\d.,])",
             "giu"
         ),
         |m, s| {
@@ -400,7 +400,9 @@ pub fn normalize_finnish(input: &JsString) -> JsString {
         &JsString::new(),
     );
 
-    t = rewrite_with(&t, js_re!(r"(\d),(\d+)(?!\d)", "gu"), |m, s| {
+    // A run with two or more commas is a list, not a decimal; a following `,ddd` group is not a list item (#1574).
+    let decimal = js_re!(r"(?<!\d,\d*)(\d),(\d+)(?!\d)(?!,\d(?!\d\d(?!\d)))", "gu");
+    t = rewrite_with(&t, decimal, |m, s| {
         let frac = JsString::join(&g(m, s, 2).code_point_strings(), &js(" "));
         g(m, s, 1)
             .concat(&js(&format!(" {DECIMAL_WORD} ")))

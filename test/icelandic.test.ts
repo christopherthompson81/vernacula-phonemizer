@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { createIcelandic, phonemizeWord } from "../src/languages/icelandic/icelandic.ts";
 import { numberToWords } from "../src/languages/icelandic/numbers.ts";
 import { normalizeIcelandic } from "../src/languages/icelandic/normalize.ts";
+import { phonemize } from "../src/index.ts";
 
 // Icelandic (is) — íslenska, North Germanic (Insular), Latin + ⟨þ ð æ ö⟩ (~330k). One of the deepest orthographies
 // in the fleet: NO voicing contrast in stops (the contrast is ASPIRATION), so ⟨b d g⟩/⟨p t k⟩ neutralize to [p t k];
@@ -162,7 +163,7 @@ describe("icelandic normalization", () => {
     test("period-grouped thousands, decimal comma, colon clock", () => {
         expect(normalizeIcelandic("1.234")).toBe("1234");
         expect(normalizeIcelandic("12,5")).toBe("12 komma 5");
-        expect(normalizeIcelandic("11:00")).toBe("11 00");
+        expect(normalizeIcelandic("11:00")).toBe("11 núll núll"); // the minutes keep their zero (#1574)
     });
 
     test("percent, units, squared units, ranges", () => {
@@ -218,5 +219,32 @@ describe("icelandic normalization", () => {
         expect(normalizeIcelandic("300 mph")).toBe("300 mílur á klukkustund");
         expect(normalizeIcelandic("40 mph (64 km/klst)")).toBe("40 mílur á klukkustund (64 kílómetrar á klukkustund)");
         expect(createIcelandic().text("300 mph").trim()).toContain("mˈilʏr ˈau");
+    });
+});
+
+// #1574 — three misreadings found by the Rust port (synthetic probes).
+describe("#1574: the colon clock, an English-grouped thousand, a descending pair", () => {
+    test("the colon clock is anchored on the left and keeps the minutes' zero", () => {
+        expect(normalizeIcelandic("123:45 var")).toBe("123:45 var");
+        expect(normalizeIcelandic("klukkan 9:05")).toBe("klukkan 9 núll 5");
+        expect(normalizeIcelandic("klukkan 10:00")).toBe("klukkan 10 núll núll");
+        expect(normalizeIcelandic("klukkan 9:30")).toBe("klukkan 9 30");
+        expect(phonemize("klukkan 9:05", "is")).toBe(phonemize("klukkan 9 núll 5", "is"));
+    });
+
+    test("a comma before exactly three digits is a thousands group, the whole number at once", () => {
+        expect(normalizeIcelandic("Um 100,000 manns")).toBe("Um 100000 manns");
+        expect(normalizeIcelandic("Um 5,000,000 manns")).toBe("Um 5000000 manns");
+        expect(normalizeIcelandic("Um 100,000, sagði hann")).toBe("Um 100000, sagði hann");
+        // a decimal stays a decimal: a zero head, a fraction that is not three digits
+        expect(normalizeIcelandic("0,500")).toBe("0 komma 5 0 0");
+        expect(normalizeIcelandic("1,2345")).toBe("1 komma 2 3 4 5");
+        expect(normalizeIcelandic("12,5")).toBe("12 komma 5");
+    });
+
+    test("only an ascending pair is a range", () => {
+        expect(normalizeIcelandic("Leikurinn fór 3-2")).toBe("Leikurinn fór 3-2");
+        expect(normalizeIcelandic("jafntefli 2-2")).toBe("jafntefli 2-2");
+        expect(normalizeIcelandic("árin 1990-1995")).toBe("árin 1990 til 1995");
     });
 });

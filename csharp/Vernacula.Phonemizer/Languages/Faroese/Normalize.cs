@@ -19,6 +19,20 @@ public static class Normalize
     // The rules — ⚠ EVERY BOUNDARY IS AN EXPLICIT LOOKAROUND, NEVER `\b`
     // ───────────────────────────────────────────────────────────────────────────────────────────────
 
+    /** 0) THE DOTTED DATE (#1574) — a middle field of 1–12 is a month, so `23.59.60` still reaches the time rule. */
+    private static readonly JsRe DOTTED_DATE = JsRegex.Compile(
+        "(?<![\\d.,])(\\d{1,2})\\.(\\d{1,2})\\.(\\d{4}|\\d{2})(?![\\d]|[.,]\\d)", "gu");
+    /** The month names, in the spelling of `tools/corpus/mined/fo.jsonc` (each attested there). */
+    private static readonly string[] MONTHS =
+    {
+        "januar", "februar", "mars", "apríl", "mai", "juni",
+        "juli", "august", "september", "oktober", "november", "desember",
+    };
+
+    /** 0b) THE CLOCK AFTER `kl.`/`klokkan` (#1574), before the decimal dot folds `14.30` onto the comma. */
+    private static readonly JsRe CLOCK_MARKED = JsRegex.Compile(
+        $"(?<={Boundaries.NOT_LETTER_BEFORE}(?:kl\\.|klokkan)\\s?)([01]?\\d|2[0-3])[.:]([0-5]\\d)(?![\\d]|[.,:]\\d)", "giu");
+
     /** 1) THE TIME — the only shape with TWO dots, resolved first or the grouping rule takes its first pair. */
     private static readonly JsRe TIME = JsRegex.Compile(
         "(?<![\\d.,])([01]?\\d|2[0-4])\\.([0-5]\\d)\\.([0-5]\\d|60)(?![\\d.,])", "gu");
@@ -87,6 +101,24 @@ public static class Normalize
     public static string NormalizeFaroese(string input)
     {
         var s = input;
+
+        // 0) THE DOTTED DATE (#1574), before the time rule and the decimal dot, both of which claimed it. The
+        //    day stays a figure, as step 5 leaves `1. juli`'s.
+        s = Rewrite(s, DOTTED_DATE, m =>
+        {
+            var day = Js.Number(m.Groups[1].Value);
+            var month = Js.Number(m.Groups[2].Value);
+            return day >= 1 && day <= 31 && month >= 1 && month <= 12
+                ? $"{Js.NumberToString(day)} {MONTHS[(int)month - 1]} {m.Groups[3].Value}"
+                : m.Value;
+        });
+
+        // 0b) THE CLOCK AFTER `kl.`/`klokkan` (#1574). The minutes keep their zero, `05` → *null 5*.
+        s = Rewrite(s, CLOCK_MARKED, m =>
+        {
+            string h = m.Groups[1].Value, mm = m.Groups[2].Value;
+            return $"{h} {(mm == "00" ? "null null" : mm.StartsWith('0') ? $"null {mm[1..]}" : mm)}";
+        });
 
         // 1) THE TIME, first — the only two-dot shape; the fields are separated and left as figures.
         s = Rewrite(s, TIME, "$1 $2 $3");

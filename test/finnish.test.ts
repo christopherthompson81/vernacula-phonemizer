@@ -238,3 +238,24 @@ describe("the clock's marker licenses its whole span (#1114)", () => {
         expect(normalizeFinnish("Noin 11.29 protesti")).toBe("Noin 11.29 protesti");
     });
 });
+
+// #1574 — two misreadings found by the Rust port (synthetic probes).
+describe("#1574: a dashed clock range and a comma list", () => {
+    test("a dashed clock range is claimed whole, so neither operand keeps a sentence break", () => {
+        expect(normalizeFinnish("klo 6.30–7.30 välillä")).toBe("klo 6 30–7 30 välillä");
+        expect(normalizeFinnish("klo 6.30 - 7.30")).toBe("klo 6 30 - 7 30");
+        expect(phonemize("klo 6.30–7.30 välillä", "fi")).toBe(phonemize("klo 6 30–7 30 välillä", "fi"));
+        expect(phonemize("klo 6.30–7.30 välillä", "fi")).not.toContain(" . ");
+        // the `ja` arm is unchanged, and an invalid right operand still declines the whole range
+        expect(normalizeFinnish("klo 6.30 ja 7.30 välillä")).toBe("klo 6 30 ja 7 30 välillä");
+        expect(normalizeFinnish("klo 6.30–25.30")).toBe("klo 6 30–25.30");
+    });
+
+    test("a run with two or more commas is a list, not a decimal", () => {
+        expect(normalizeFinnish("Arvot 1,2,3 ja 4.")).toBe("Arvot 1,2,3 ja 4.");
+        expect(normalizeFinnish("Arvot 1,25,3")).toBe("Arvot 1,25,3");
+        expect(phonemize("Arvot 1,2,3 ja 4.", "fi")).toBe(phonemize("Arvot 1, 2, 3 ja 4.", "fi"));
+        // a one-comma decimal is still a decimal
+        expect(normalizeFinnish("luku 3,14 ja 2,5")).toBe("luku 3 pilkku 1 4 ja 2 pilkku 5");
+    });
+});

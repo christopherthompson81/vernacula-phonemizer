@@ -520,7 +520,7 @@ mod tests {
         ),
         ("normalizeIcelandic", &["1.234"], Some("1234")),
         ("normalizeIcelandic", &["12,5"], Some("12 komma 5")),
-        ("normalizeIcelandic", &["11:00"], Some("11 00")),
+        ("normalizeIcelandic", &["11:00"], Some("11 núll núll")),
         ("normalizeIcelandic", &["25 %"], Some("25 prósent")),
         ("normalizeIcelandic", &["5 km"], Some("5 kílómetrar")),
         ("normalizeIcelandic", &["km²"], Some("ferkílómetrar")),
@@ -590,6 +590,55 @@ mod tests {
             "createIcelandic().text",
             &["300 mph"],
             Some("θrjˈu hˈʏntrʏð mˈilʏr ˈau hklˈʏhkʏstʏnt"),
+        ),
+        // #1574 (synthetic probes; values from the TS engine)
+        ("normalizeIcelandic", &["123:45 var"], Some("123:45 var")),
+        (
+            "normalizeIcelandic",
+            &["klukkan 9:05"],
+            Some("klukkan 9 núll 5"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["klukkan 10:00"],
+            Some("klukkan 10 núll núll"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["klukkan 9:30"],
+            Some("klukkan 9 30"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["Um 100,000 manns"],
+            Some("Um 100000 manns"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["Um 5,000,000 manns"],
+            Some("Um 5000000 manns"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["Um 100,000, sagði hann"],
+            Some("Um 100000, sagði hann"),
+        ),
+        ("normalizeIcelandic", &["0,500"], Some("0 komma 5 0 0")),
+        ("normalizeIcelandic", &["1,2345"], Some("1 komma 2 3 4 5")),
+        (
+            "normalizeIcelandic",
+            &["Leikurinn fór 3-2"],
+            Some("Leikurinn fór 3-2"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["jafntefli 2-2"],
+            Some("jafntefli 2-2"),
+        ),
+        (
+            "normalizeIcelandic",
+            &["árin 1990-1995"],
+            Some("árin 1990 til 1995"),
         ),
     ];
 

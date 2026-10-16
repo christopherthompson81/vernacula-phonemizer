@@ -139,3 +139,22 @@ describe("a numeral past 2^53 reads the digits the writer typed", () => {
         expect(words("1000000000000000000000")).toHaveLength(22);
     });
 });
+
+// #1574 — three misreadings found by the Rust port (synthetic probes).
+describe("#1574: the clock after kl., the dotted date", () => {
+    test("a clock after kl./klokkan is a clock, not a decimal, and keeps the minutes' zero", () => {
+        expect(normalizeFaroese("kl. 14.30 í dag")).toBe("klokkan 14 30 í dag");
+        expect(normalizeFaroese("klokkan 10.00")).toBe("klokkan 10 null null");
+        expect(normalizeFaroese("klokkan 9.05")).toBe("klokkan 9 null 5");
+        // without the marker a `d.dd` is still the dollar decimal
+        expect(normalizeFaroese("3.00 kr")).toBe("3,00 kr");
+    });
+
+    test("a dotted date names its month, with or without a two-digit year", () => {
+        expect(normalizeFaroese("Hann kom 23.4.2020 heim")).toBe("Hann kom 23 apríl 2020 heim");
+        expect(normalizeFaroese("Føddur 12.10.20 í Havn")).toBe("Føddur 12 oktober 20 í Havn");
+        expect(phonemize("Hann kom 23.4.2020 heim", "fo")).not.toContain(" . ");
+        // a middle field over 12 is a minute, so the leap second still reaches the time rule
+        expect(normalizeFaroese("sekund 23.59.60 verður")).toBe("sekund 23 59 60 verður");
+    });
+});
