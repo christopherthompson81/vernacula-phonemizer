@@ -11,7 +11,9 @@ Devanagari's inherent vowel are masked out of training.
   **Named attribution is mandatory** and is in NOTICE.
 - **kaikki** Sindhi (Wiktionary), CC BY-SA 4.0.
 
-See `tools/sindhi/PROVENANCE.md` and `LICENSES/PROVENANCE.md` §2 and §2b.
+**Licence.** Declared CC-BY-SA-inheriting, like the fr and af pronunciation taggers, because the kaikki tier
+is share-alike (`LICENSES/PROVENANCE.md` §3); the Sindhi Open Lexicon terms and its named attribution apply
+too (§2, §2b). See `tools/sindhi/PROVENANCE.md`.
 
 **Regenerate.** `tools/sindhi/export_sd_tagger_onnx.py` trains (40 epochs), exports fp32 ONNX, checks argmax
 parity against PyTorch, quantizes to int8, and writes the meta file. Run it under a torch ≤ 2.6 venv.

@@ -15,6 +15,9 @@ character map.
 
 No other model or annotation is used.
 
+**Licence.** A model with share-alike training input, held under the training-as-use posture with the arabic
+diacritizers (`LICENSES/PROVENANCE.md` §3); the Google word list is attributed under §2 and in NOTICE.
+
 **Regenerate.**
 
 ```

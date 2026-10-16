@@ -2401,6 +2401,14 @@ goma	1
 # entry, en.wiktionary gives /fɑzɫɑ/ and /me.se.laː/ with no stress mark, tr.wiktionary none, and `kimse` has only
 # an audio file. Moving ~150 tokens of common words on no evidence is the wrong default, so the old reading is
 # preserved here, explicitly as unsourced. Replace any row with a sourced value when one is found.
+# ⚠ 2026-10-15: CLASS RULES FOUND, NOT WORD ATTESTATIONS. Halit Dursunoğlu, "Türkiye Türkçesinde Vurgu", pp. 270–273
+# (https://dergipark.org.tr/tr/download/article-file/31986), states three tendencies, not word entries:
+#   §A.6.3 the conditional -se, from "ise", is pre-stressing: gelecékse, yazársa;
+#   §B.3   "zarfların çoğunda" (in most adverbs) the stress is on the first syllable: yárın, sónra, yíne, şímdi;
+#   §B.4   "bağlaçlarda çoğunlukla" (in conjunctions, mostly) on the first: çünkü, yáhut, yálnız.
+# fazla 1 (adverb), ise 1 (conjunction; i- + the pre-stressing -se) and kimse 1 (kim + -se) AGREE with them.
+# mesela 2 does NOT: as an adverb, §B.3 would put it on syllable 1. It is left at 2, because a "most adverbs"
+# tendency does not settle one Arabic loan; it needs a word-level source (a stress-marking dictionary, or audio).
 fazla	1
 ise	1
 mesela	2

@@ -14,6 +14,9 @@ phoneme strings are copied, and only words already in this repo's dictionary get
 covering referee to write `n`, plus either two covering referees or one referee and a seam visible in the
 spelling.
 
+**Licence.** Public domain + facts: each row is a CMUdict position, and the referees act only as filters
+(`LICENSES/PROVENANCE.md` §1).
+
 **Regenerate.** `tools/gen/build-en-nasal-seam.mts`, which is the whole extraction. It reads the morpheme
 boundaries in `tools/gen/en-morph-boundary.tsv` (kaikki etymology templates, CC BY-SA; tools-only, see
 `LICENSES/PROVENANCE.md` §3).

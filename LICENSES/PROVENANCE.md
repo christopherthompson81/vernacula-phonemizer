@@ -31,7 +31,8 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 
 | Artifact (shipped unless noted) | Upstream / basis | Status |
 |---|---|---|
-| `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `en-g2p-tagger.int8.onnx`, `g2p-model.json` | CMUdict | Public domain |
+| `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `en-g2p-tagger.int8.onnx`, `g2p-model.json` | CMUdict, plus the 16,227 Moby Pronunciator II rows imported into the dictionary (`moby-import.tsv`, §5.3) and own-work corrections (`g2p-curated.tsv`); the tagger and the model are trained on that dictionary | Public domain (Moby by explicit grant) |
+| `english/en-nasal-seam.tsv` | CMUdict `N` sites; Moby (PD) and wikipron US/UK (Wiktionary, CC-BY-SA) used only as **filters** — a site gets a row only where every covering referee writes `n` — plus the tools-only kaikki morpheme boundaries (§3). No referee bytes are reproduced; the row is a CMUdict position. Same filter shape as FrequencyWords over the NST lexica (§3) | PD + facts (filter) |
 | `english/g2p-common.txt` | CMUdict ∩ Norvig count_1w frequency ranking | PD + facts (header) |
 | `danish/da-lexicon.tsv`, `da-g2p-tagger.int8.onnx` | NST Danish (Språkbanken sbr-26) | CC0 |
 | `norwegian/nb-lexicon.tsv`, `nb-g2p-tagger.int8.onnx` | NST Norwegian (Nasjonalbiblioteket) | CC0 |
@@ -57,7 +58,8 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 | `mandarin/chars.tsv`, `phrases.tsv` | pypinyin | MIT | attribution |
 | `cantonese/dict.tsv` | rime-cantonese (via pycantonese) | CC-BY 4.0 | attribution |
 | `bengali/bn-g2p-tagger.int8.onnx`, `bengali-lexicon.tsv` | Google language-resources/bn | CC-BY 4.0 | attribution |
-| `khmer/km-lexicon-dict.tsv`, referee `km.google-lexicon.tsv` | Google language-resources/km | CC-BY 4.0 | attribution |
+| `khmer/km-lexicon-dict.tsv`, referee `km.google-lexicon.tsv`, the word list behind `km-segmenter.int8.onnx` (`tools/khmer/km-lexicon-words.txt`) | Google language-resources/km | CC-BY 4.0 | attribution |
+| `english/en-syllabic.tsv` | misaki `us_gold.json` (hexgrad/misaki) — syllabic-slot POSITIONS only, for words the dictionary already carries; the file header states the change (Apache-2.0 §4(b)) | Apache-2.0 | notice; upstream ships no NOTICE file |
 | `sindhi/` lexicon Devanagari tier, `sd-g2p-tagger.int8.onnx` training data | Sindhi Open Lexicon (SindhiLanguage.org) | bespoke, permissive; **not CC-BY** (§2b) | **named attribution: Amar Fayaz Buriro (امر فياض ٻرڙو) — mandatory** |
 | `hebrew/he-lexicon.tsv` builders | Phonikud + ReNikud (thewh1teagle) | CC-BY 4.0 | attribution |
 | `thai/seg-words.txt` | ICU thaidict + PyThaiNLP | Unicode-DFS-2016 + CC0 | notice |
@@ -136,13 +138,17 @@ CC-BY-SA 4.0 — EDRDG requires **specific named attribution** in NOTICE).
 data): `core/riderDiacritizer.onnx`; `persian/fa-vowel-restorer.*.onnx`;
 `persian/fa-context-restorer.*.onnx` (Tajik component); `french/fr-g2p-tagger.int8.onnx`
 (Lexique); `afrikaans/af-g2p-tagger.int8.onnx` (RCRL CC BY-SA 2.5 ZA + NCHLT-inlang
-CC BY 3.0 — the share-alike term governs the combination; sidecar). These cannot ship in an MIT-only
+CC BY 3.0 — the share-alike term governs the combination; sidecar); `sindhi/sd-g2p-tagger.int8.onnx`
+(Sindhi Open Lexicon, §2 + kaikki Sindhi CC-BY-SA 4.0 — a pronunciation tagger like the fr and af ones,
+so the share-alike term governs; sidecar). These cannot ship in an MIT-only
 package; they are fenced like the data.
 
 **Models with share-alike training inputs under the training-as-use posture:**
 `arabic/diacritizer.onnx` (arwiki silver), `arabic/diacritizer-egy.onnx` (arzwiki silver + MIT
 dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.json`
-(UD-EWT CC-BY-SA 4.0; sidecar). Flagged individually in NOTICE with their training-data statements.
+(UD-EWT CC-BY-SA 4.0; sidecar), `khmer/km-segmenter.int8.onnx` (kmwiki text, its typed U+200B as the
+supervision, plus the Google km word list in §2; sidecar). Flagged individually in NOTICE with their
+training-data statements.
 
 **tools-only (af training data):** `afrikaans/nchlt_afr.dict` — NCHLT-inlang Afrikaans, 15,094 rows,
 **CC BY 3.0** (DAC / CSIR / NWU via SADiLaR); sidecar. Training input for the af tagger only — NOT a
