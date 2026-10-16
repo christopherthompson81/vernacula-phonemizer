@@ -20,7 +20,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "vitest";
 
-import { CORPUS, CORPUS_PATH } from "../tools/extract_regexes.mts";
+import { CORPUS, CORPUS_PATH, regexLiterals } from "../tools/extract_regexes.mts";
 
 test("csharp/regex-corpus.jsonl is a fresh extraction of src/ (#1083)", () => {
     const committed = readFileSync(CORPUS_PATH, "utf8");
@@ -40,4 +40,28 @@ test("csharp/regex-corpus.jsonl is a fresh extraction of src/ (#1083)", () => {
             `  first added: ${added.slice(0, 3).map(pat).join("  ")}\n` +
             `  first gone:  ${gone.slice(0, 3).map(pat).join("  ")}`,
     );
+});
+
+/**
+ * #1590: the extractor finds every regex literal, including one with a quote inside a character class. The old
+ * text scanner stripped `"…"` strings first, so such a quote opened a fake string, which cut the pattern and
+ * swallowed the source up to the next quote. Synthetic source.
+ */
+test("a quote inside a character class does not hide a regex literal (#1590)", () => {
+    const source = [
+        `s = rewrite(s, /(\\d)\\s?[′']\\s?(\\d+)\\s?[″"]/gu, "$1 minutes $2 seconds ");`,
+        `s = rewrite(s, /(\\d+)\\s*°\\s*C/gu, "$1 degrees");`,
+        `const a = /(\\d)\\s?[″"]/gu;`,
+        `const s = "a string, not a /pattern/";`,
+        `const b = /^["“(]?\\p{Lu}/u; // a comment with /slashes/ in it`,
+        `const c = 6 / 2 / 3;`,
+        "const t = `a template ${/[x]/g.source} too`;",
+    ].join("\n");
+    expect(regexLiterals("synthetic.ts", source)).toEqual([
+        { pattern: `(\\d)\\s?[′']\\s?(\\d+)\\s?[″"]`, flags: "gu" },
+        { pattern: `(\\d+)\\s*°\\s*C`, flags: "gu" },
+        { pattern: `(\\d)\\s?[″"]`, flags: "gu" },
+        { pattern: `^["“(]?\\p{Lu}`, flags: "u" },
+        { pattern: "[x]", flags: "g" },
+    ]);
 });

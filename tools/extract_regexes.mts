@@ -34,21 +34,33 @@
  * `test/regex-corpus-fresh.test.ts` fails if this file's output differs from what is committed.
  */
 import { globSync, readFileSync, writeFileSync } from "node:fs";
+import ts from "typescript";
 
-// ⚠ STRINGS ARE STRIPPED BEFORE SCANNING, and the first run is why: `import … from "./languages/x"`
-//    yielded a "pattern" of `languages`. A regex literal never lives inside a string literal, so
-//    removing strings kills that whole false-positive class without touching a real pattern.
-const strip = (s: string) =>
-  s.replace(/\/\*[\s\S]*?\*\//g, "")
-   .replace(/^\s*\/\/.*$/gm, "")
-   // ⚠ TRAILING // comments too, or their PROSE is scanned for regex literals: "/ bhf → w/v"
-   // and three like it were extracted as v-flag patterns and reported as harness refusals. A
-   // real literal always escapes an inner slash outside a class, so `//` here is a comment.
-   .replace(/(^|[^\\:])\/\/.*$/gm, "$1")
-   .replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
-   .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
-   .replace(/`(?:[^`\\]|\\.)*`/g, "``");
-const LITERAL = /(?<![\w)\]])\/((?:[^/\\\n[]|\\.|\[(?:[^\]\\]|\\.)*\])+)\/([dgimsuvy]*)/g;
+/**
+ * Every regex LITERAL in a file, found by the TypeScript parser.
+ *
+ * ⚠ THIS USED TO BE A TEXT SCAN, AND IT WAS BLIND IN BOTH DIRECTIONS (#1590). It stripped `"…"` strings before
+ * scanning, so a `"` inside a character class (`/[″"]/`, `/^["“(]?/`) opened a fake string that ran to the next
+ * quote in the file. That cut the pattern and swallowed everything in between. Measured against the parser on
+ * 2026-10-15: 119 distinct patterns were missing from the corpus (most of `slovenian/normalize.ts`, and patterns
+ * in sv, sk, tk, uz and umb among others), and 11 corpus rows were fragments spliced across source lines.
+ * Regex-diff had therefore never compared the 119, and nothing reported it. The parser knows what a regex literal
+ * is, so there is no division/regex guess and no comment or string heuristic left to get wrong.
+ */
+export function regexLiterals(file: string, source: string): { pattern: string; flags: string }[] {
+  const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, false);
+  const out: { pattern: string; flags: string }[] = [];
+  const walk = (n: ts.Node): void => {
+    if (n.kind === ts.SyntaxKind.RegularExpressionLiteral) {
+      const text = (n as ts.RegularExpressionLiteral).text;
+      const end = text.lastIndexOf("/");
+      out.push({ pattern: text.slice(1, end), flags: text.slice(end + 1) });
+    }
+    ts.forEachChild(n, walk);
+  };
+  walk(sf);
+  return out;
+}
 
 const PROBES: string[] = ["abc def", "ABC DEF", "hello, world.", "  spaced  out  ", "123 456", "1.5", "1,500", "10:08", "2026-08-23", "007", "٢٠٢٤ ٣", "৩৫ ২৪", "१२३", "๑๒๓", "café naïve", "ÅNGSTRÖM", "Grüße", "İstanbul", "ĳsselmeer", "Ελληνικά", "Русский", "עברית", "العربية", "हिन्दी", "ไทย", "中文", "日本語", "한국어", "ǀclick ǁtwo", "kʼeʼ ɓaɗ", "ˈstrʌk.tʃɚ", "tʰˈɛn əklˈɑːk", "<b>tag</b>", "a&amp;b", "km<sup>2</sup>", "{en:five}", "h5n1", "covid19", "", " ", "\t", "a\nb", "-", "—", "…", "'’‘", "\"quoted\"", "\u017f\u212a\u2126\u1e9e\u0131\u0345", "\u00df\u0130i\u0307", "\u{1E950}\u{1E94F}", "\u{20001}\u{2B740}\u{1F600}", "\uD800", "\uDC00", "a\uD800b", "a\uDC00b", "ge\uD800\u00e9", "\uD800\uD800", "x\uDBFF"];
 
@@ -118,20 +130,19 @@ const enc = (s: string) =>
 
 const rows: string[] = [];
 const seen = new Set<string>();
-let files = 0, unparseable = 0;
-for (const f of globSync("src/**/*.ts")) {
+let files = 0, literals = 0;
+for (const f of globSync("src/**/*.ts").sort()) {
   files++;
-  for (const m of strip(readFileSync(f, "utf8")).matchAll(LITERAL)) {
-    // ⚠ NON-NULL, and it is safe by construction: LITERAL's two groups are not optional, so a match has
-    // both. Written out because this module is now IMPORTED by `test/regex-corpus-fresh.test.ts` and so
-    // reaches `tsc` for the first time — the looseness predates that and was simply never typechecked.
-    const pattern = m[1]!;
-    const flags = m[2]!;
+  for (const { pattern, flags } of regexLiterals(f, readFileSync(f, "utf8"))) {
+    literals++;
     const key = `${pattern}\u0000${flags}`;
     if (seen.has(key)) continue;
     seen.add(key);
     const base = flags.replace(/[dgy]/g, "");
-    try { new RegExp(pattern, base); } catch { unparseable++; continue; }  // a division, not a regex
+    // ⚠ A LITERAL THAT DOES NOT COMPILE IS AN ERROR, NOT A ROW TO DROP. The old scanner counted these as
+    // "unparseable" and skipped them silently. Every literal now comes from the parser, so a failure here
+    // means the source itself is broken.
+    new RegExp(pattern, base);
     const matches: [string, string[]][] = [];
     // ⚠ `test` on a /g regex is STATEFUL (lastIndex), so the relevance probe gets its own
     // non-global copy; sharing the loop's regex would make the derivation order-dependent.
@@ -156,5 +167,5 @@ export const CORPUS_PATH = "csharp/regex-corpus.jsonl";
  */
 if (process.argv[1]?.endsWith("extract_regexes.mts")) {
     writeFileSync(CORPUS_PATH, CORPUS, "utf8");
-    console.log(`${rows.length} distinct patterns from ${files} files (${unparseable} unparseable, dropped)`);
+    console.log(`${rows.length} distinct patterns from ${literals} regex literals in ${files} files`);
 }
