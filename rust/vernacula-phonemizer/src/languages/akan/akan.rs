@@ -544,3 +544,27 @@ mod tests {
         );
     }
 }
+
+/// #1597, relational: mirrors test/wafrica-defects-1597.test.ts.
+#[cfg(all(test, feature = "ak"))]
+mod defects_1597_tests {
+    fn count(out: &str, token: &str) -> usize {
+        out.split(' ').filter(|t| *t == token).count()
+    }
+    fn say(s: &str, lang: &str) -> String {
+        crate::phonemize(s, lang).unwrap()
+    }
+
+    #[test]
+    fn a_digit_flanked_x_reads_as_times() {
+        for (ascii, times) in [
+            ("4x100", "4×100"),
+            ("4 x 100", "4 × 100"),
+            ("4X100", "4×100"),
+            ("4x100m", "4×100m"),
+        ] {
+            assert_eq!(say(ascii, "ak"), say(times, "ak"), "{ascii}");
+        }
+        assert_ne!(say("x 100", "ak"), say("× 100", "ak"));
+    }
+}

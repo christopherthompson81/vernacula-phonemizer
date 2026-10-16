@@ -213,3 +213,27 @@ mod tests {
         assert_eq!(count, 67);
     }
 }
+
+/// #1597, relational: mirrors test/wafrica-defects-1597.test.ts.
+#[cfg(all(test, feature = "ha"))]
+mod defects_1597_tests {
+    fn count(out: &str, token: &str) -> usize {
+        out.split(' ').filter(|t| *t == token).count()
+    }
+    fn say(s: &str, lang: &str) -> String {
+        crate::phonemize(s, lang).unwrap()
+    }
+
+    #[test]
+    fn a_sentence_ending_in_an_acronym_keeps_its_break() {
+        let acronym = say("Ya je BBC. Bello ya zo.", "ha");
+        assert_eq!(
+            count(&acronym, "."),
+            count(&say("Ya je Kano. Bello ya zo.", "ha"), ".")
+        );
+        assert_eq!(count(&acronym, "."), 2);
+        for t in ["Ya je M. Bello ya zo.", "Ya je M. Ɗanjuma ya zo."] {
+            assert_eq!(count(&say(t, "ha"), "."), 1, "{t}");
+        }
+    }
+}

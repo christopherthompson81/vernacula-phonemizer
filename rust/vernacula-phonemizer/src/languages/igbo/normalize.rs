@@ -49,6 +49,12 @@ static FUSED_QUANTITY: LazyLock<JsRegex> = LazyLock::new(|| {
 /// `normalizeIgbo(text)`.
 pub fn normalize_igbo(text: &JsString) -> JsString {
     let mut s = text.clone();
+    // A digit-flanked ASCII `x` is the `×` it stands for (#1597): a relay dimension, and `×` is unread.
+    s = rewrite(
+        &s,
+        js_re!(r"(\d[ \u00a0]?)[xX](?=[ \u00a0]?\d)", "gu"),
+        &js("$1×"),
+    );
     s = rewrite(
         &s,
         js_re!(r"(?<=\d)(?<!(?<![\d\.,])0),(?=\d{3}(?!\d))", "gu"),

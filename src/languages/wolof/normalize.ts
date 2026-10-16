@@ -271,9 +271,17 @@ const spell = (int: string, frac: string): string => `${int} ${[...frac].join(" 
  * *"12°8(fukk ak ñaari aj juroom-ñett) ak 16°41"* the SECOND coordinate has an `aj` 20 characters to its
  * left and no gloss of its own, and it is the one instance that most needs the word emitted.
  * ⚠ WHOLE-TOKEN, because `aj` is a substring of `ajiin` and `ajkat`, which are the pilgrimage words.
+ * ⚠ THE WINDOW STOPS AT THE NEXT SIGN OR CLAUSE MARK (#1597). Without that it over-suppressed in exactly the
+ * mirror of the case above: in `12° ak 16° (fukk ak juróom benn aj)` the FIRST coordinate lost its word to the
+ * second one's gloss, and in `tàng 30° la, waaye aj du` to a word in the next clause. None of the four
+ * redundant instances has a sign or a clause mark between the sign and its `aj`.
  */
+const SAID_AFTER_STOP = /[°º,;]|[.!?](?=\s|$)/u;
+
 function saidAfter(full: string, end: number, word: string): boolean {
-    return new RegExp(`(?<![\\p{L}\\p{M}])${word}(?![\\p{L}\\p{M}])`, "u").test(full.slice(end, end + 45));
+    const window = full.slice(end, end + 45);
+    const stop = window.search(SAID_AFTER_STOP);
+    return new RegExp(`(?<![\\p{L}\\p{M}])${word}(?![\\p{L}\\p{M}])`, "u").test(stop < 0 ? window : window.slice(0, stop));
 }
 
 /** Normalize one Wolof input string. Steps are ORDER-DEPENDENT; each states its coupling. */

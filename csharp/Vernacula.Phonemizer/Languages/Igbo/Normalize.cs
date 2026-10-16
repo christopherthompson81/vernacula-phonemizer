@@ -44,6 +44,9 @@ public static class Normalize
     });
 
     /** The thousands separator is a COMMA and the decimal separator a PERIOD. */
+    /** A digit-flanked ASCII `x` is the `×` it stands for: every one in the corpus is a relay dimension, and `×`
+     *  is deliberately unread. Without this the `x` was voiced as /z/ (#1597). */
+    private static readonly JsRe DIGIT_X = JsRegex.Compile("(\\d[ \u00a0]?)[xX](?=[ \u00a0]?\\d)", "gu");
     private static readonly JsRe GROUPED = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?!\\d))", "gu");
     /** A decimal period. Voiced as `ntụkpọ` — see rule 4. */
     private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)\\.(\\d+)", "gu");
@@ -59,6 +62,7 @@ public static class Normalize
     public static string NormalizeIgbo(string text)
     {
         var s = text;
+        s = Rewrite(s, DIGIT_X, "$1×");
 
         // 1. De-group thousands FIRST, repeatedly, so `1,234,567` becomes one number.
         s = Rewrite(s, GROUPED, "");

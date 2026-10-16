@@ -158,10 +158,11 @@ pub fn normalize_hausa(input: &JsString) -> JsString {
         js_re!(r"(?<![\p{L}\p{M}])\p{Lu}\.(?:[ \u00a0]?\p{Lu}\.)+", "gu"),
         |m, t| js_re!(r"[.\s]", "gu").replace(&m.value(t), &JsString::new()),
     );
+    // A LONE capital before the dot (#1597): `(?<=\p{Lu})` alone also took the last letter of an acronym.
     s = rewrite(
         &s,
-        js_re!(r"(?<=\p{Lu})\.(?=\s+\p{Lu})", "gu"),
-        &JsString::new(),
+        js_re!(r"(?<![\p{L}\p{M}])(\p{Lu})\.(?=\s+\p{Lu})", "gu"),
+        &js("$1"),
     );
     s = rewrite(
         &s,
