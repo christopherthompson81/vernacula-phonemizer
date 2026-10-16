@@ -79,6 +79,9 @@ public static class Normalize
     private static string Fraction(string tail) =>
         tail.Length <= 2 && !tail.StartsWith('0') ? tail : string.Join(" ", Js.CodePoints(tail));
 
+    /** A digit-flanked ASCII `x` is the `×` it stands for: every one in the corpus is a relay dimension, and `×`
+     *  is deliberately unread. Without this the `x` was voiced as /z/ (#1597). */
+    private static readonly JsRe DIGIT_X = JsRegex.Compile("(\\d[ \u00a0]?)[xX](?=[ \u00a0]?\\d)", "gu");
     private static readonly JsRe ENTITIES = JsRegex.Compile(@"&nbsp;|&#(?:x[0-9a-f]+|\d+);", "giu");
     private static readonly JsRe ZERO_WIDTH = JsRegex.Compile("[​‌‍﻿]", "gu");
     private static readonly JsRe PIPE_AFTER_DIGIT = JsRegex.Compile(@"(?<=\d)\|(?=\p{L})", "gu");
@@ -114,6 +117,7 @@ public static class Normalize
     {
         // 0) NFC at the entry, so a literal here matches whichever normalization the corpus used.
         var s = Renormalize(input, NormalizationForm.FormC);
+        s = Rewrite(s, DIGIT_X, "$1×");
 
         // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first.
         s = Rewrite(s, ENTITIES, _ => " ");

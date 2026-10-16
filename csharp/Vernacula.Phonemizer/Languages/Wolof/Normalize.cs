@@ -92,8 +92,14 @@ public static class Normalize
     {
         var re = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){word}(?![\\p{{L}}\\p{{M}}])", "u");
         var from = Math.Min(full.Length, end);
-        return re.IsMatch(full[from..Math.Min(full.Length, end + 45)]);
+        var window = full[from..Math.Min(full.Length, end + 45)];
+        // ⚠ The window stops at the next sign or clause mark (#1597): `12° ak 16° (… aj)` must not lend the
+        // second coordinate's gloss to the first.
+        var stop = SAID_AFTER_STOP.Match(window);
+        return re.IsMatch(stop.Success ? window[..stop.Index] : window);
     }
+
+    private static readonly JsRe SAID_AFTER_STOP = JsRegex.Compile(@"[°º,;]|[.!?](?=\s|$)", "u");
 
     /**
      * A CLOCK'S COLON LOSES ITS PAUSE — but ONLY when a day-part or timezone MARKER follows (#1111).

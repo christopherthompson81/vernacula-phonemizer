@@ -312,6 +312,12 @@ export function normalizeAkan(input: string): string {
     //    costs nothing and closes trap 11 in a Latin script.
     let s = renormalize(input, "NFC");
 
+    // 0. A DIGIT-FLANKED ASCII `x` IS THE `×` IT STANDS FOR (#1597). Every one in the corpus is the relay
+    //    dimension (`mita 4 x 100`, `4x100m relay`), written with `×` elsewhere in the same articles, and `×` is
+    //    deliberately unread (see the header). Without this the `x` reached the Latin fallback and was voiced:
+    //    `4x100` read "four z one hundred". No hex shape (`0x1F`) occurs.
+    s = rewrite(s, /(\d[ \u00a0]?)[xX](?=[ \u00a0]?\d)/gu, "$1×");  // space, NBSP
+
     // 1) HTML ENTITIES AND ZERO-WIDTH MARKS, first — a dump carries `&nbsp;` and `&#xFEFF;` (the
     //    `zero-width` cell holds 258 instances) and both must go BEFORE the ampersand rule at step 10, or
     //    `&nbsp;` is read as the word "and" followed by the letters n-b-s-p. `&#xFEFF;` is a rendering

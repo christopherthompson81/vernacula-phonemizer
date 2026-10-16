@@ -46,7 +46,9 @@ public static class Normalize
     private static readonly JsRe BCE = JsRegex.Compile("(?<![\\p{L}\\p{M}])B\\.?C\\.?E?\\.?(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe DOTTED_CAPS = JsRegex.Compile("(?<![\\p{L}\\p{M}])\\p{Lu}\\.(?:[ \u00a0]?\\p{Lu}\\.)+", "gu");
     private static readonly JsRe DOT_OR_SPACE = JsRegex.Compile("[.\\s]", "gu");
-    private static readonly JsRe INITIAL_DOT = JsRegex.Compile("(?<=\\p{Lu})\\.(?=\\s+\\p{Lu})", "gu");
+    /** A LONE capital before the dot (#1597): `(?<=\\p{Lu})` alone also took the last letter of an acronym, so
+     *  `Ya je BBC. Bello ya zo.` lost its sentence break. */
+    private static readonly JsRe INITIAL_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}])(\\p{Lu})\\.(?=\\s+\\p{Lu})", "gu");
     private static readonly JsRe VERSUS = JsRegex.Compile("(?<=\\p{L})\\s+v\\.\\s+(?=[A-Z])", "gu");
     private static readonly JsRe US_DOLLAR = JsRegex.Compile("(?<![\\p{L}\\p{M}])(?:US|uS)\\s?\\$\\s?(?=\\d)", "giu");
     private static readonly JsRe RANGE_DECIMAL = JsRegex.Compile("(?<![\\d.,])(\\d+\\.\\d+)\\s*[-–]\\s*(\\d+\\.\\d+)(?![\\d.])", "gu");
@@ -122,7 +124,7 @@ public static class Normalize
         s = Rewrite(s, DOTTED_CAPS, m => JsRegex.Replace(m.Value, DOT_OR_SPACE, _ => ""));
         // ⚠ `\p{Lu}`, NOT `[A-Z]` — the ASCII form leaves the dot after Hausa's own hooked capitals
         //    ⟨Ɓ Ɗ Ƙ⟩ standing as a spurious clause break.
-        s = Rewrite(s, INITIAL_DOT, _ => "");
+        s = Rewrite(s, INITIAL_DOT, "$1");
         s = Rewrite(s, VERSUS, _ => " da ");
 
         s = Rewrite(s, US_DOLLAR, _ => "dala ");

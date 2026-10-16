@@ -249,3 +249,27 @@ mod tests {
         assert_eq!(count, 102);
     }
 }
+
+/// #1597, relational: mirrors test/wafrica-defects-1597.test.ts.
+#[cfg(all(test, feature = "wo"))]
+mod defects_1597_tests {
+    fn count(out: &str, token: &str) -> usize {
+        out.split(' ').filter(|t| *t == token).count()
+    }
+    fn say(s: &str, lang: &str) -> String {
+        crate::phonemize(s, lang).unwrap()
+    }
+
+    #[test]
+    fn the_degree_window_stops_at_the_next_sign_or_clause_mark() {
+        let aj = say("aj", "wo").trim().to_string();
+        for (t, want) in [
+            ("12° ak 16° (fukk ak juróom benn aj)", 2),
+            ("tàng 30° la, waaye aj du", 2),
+            ("60° (60 aj)", 1),
+            ("0° (tus aj)", 1),
+        ] {
+            assert_eq!(count(&say(t, "wo"), &aj), want, "{t}");
+        }
+    }
+}

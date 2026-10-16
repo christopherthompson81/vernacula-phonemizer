@@ -153,6 +153,12 @@ fn point(m: &JsMatch, t: &JsString) -> JsString {
 /// `normalizeAkan(input)`.
 pub fn normalize_akan(input: &JsString) -> JsString {
     let mut s = renormalize(input, Form::Nfc);
+    // A digit-flanked ASCII `x` is the `×` it stands for (#1597): a relay dimension, and `×` is unread.
+    s = rewrite(
+        &s,
+        js_re!(r"(\d[ \u00a0]?)[xX](?=[ \u00a0]?\d)", "gu"),
+        &js("$1×"),
+    );
     s = rewrite(&s, js_re!(r"&nbsp;|&#(?:x[0-9a-f]+|\d+);", "giu"), &js(" "));
     s = rewrite(
         &s,

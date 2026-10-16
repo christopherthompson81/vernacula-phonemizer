@@ -222,6 +222,12 @@ const FUSED_QUANTITY = new RegExp(
 export function normalizeIgbo(text: string): string {
     let s = text;
 
+    // 0. A DIGIT-FLANKED ASCII `x` IS THE `×` IT STANDS FOR (#1597). Every one in the corpus is the relay
+    //    dimension (`4 x 100 metres relay`, `4x100m`), written with `×` elsewhere in the same articles, and `×` is
+    //    deliberately unread (see the header). Without this the `x` reached the Latin fallback and was voiced:
+    //    `4x100` read "four z one hundred". No hex shape (`0x1F`) occurs.
+    s = rewrite(s, /(\d[ \u00a0]?)[xX](?=[ \u00a0]?\d)/gu, "$1×");  // space, NBSP
+
     // 1. De-group thousands FIRST: a grouping comma left in place makes the number two numbers with a pause
     //    between them (`1,500` → *otu , naɾɪ ise*, "one, five hundred").
     //    ⚠ EXACTLY THREE FOLLOWING DIGITS, so a decimal comma cannot be eaten. Applied repeatedly for numbers

@@ -334,3 +334,53 @@ tt 199/200, syl 195/200, ak 130/131 (the known port-pending rows), sw rw rn lg l
 otherwise 200/200; regex-diff `146326 identical, 0 DIFFER, 0 refused`; clippy 0 `error:` lines, only the six
 `module_inception` warnings in this group's files; cargo test 327 + 1 passed. Per-module and end-to-end dumps
 unchanged from Run 10 (the only DIFFER anywhere is ak's `bo` row).
+
+## Run 12 — 2026-10-15 22:40 (#1597: fixing the reported TS defects, all three engines)
+
+Probes on main 4b6e7511 (TS, synthetic):
+
+```
+yo "5 − 3"                          ma˥ɾũ˩ ũ˥ mɛ˥ta˧          ("five three"; `5 - 3` reads … si … — the range)
+ha "Ya je BBC. Bello ya zo."        … t͡ʃˈa˥ bˈe˥llo˩ …        (no break; `… Kano. Bello …` keeps it)
+ha "12.8 m/ſ"                       … mˈita ˈa da˩kʼˈi˥kʼa˩    (FIXED already, by #1601's registry fold)
+wo "12° ak 16° (… aj)"              the FIRST 12° loses its aj
+ig "4x100" → anɔ z otu naɾɪ         ak "4x100" → nnan z ɔha   (`4×100` reads with no z in both)
+```
+
+**yo, DECLINED.** No sourced word for binary subtraction:
+- en.wiktionary "minus" has no Yoruba translation;
+- kaikki's `yọ` has only "remove / delete / rescue" senses, no arithmetic one;
+- the mined yo corpus spells out no subtraction, and its one infix U+2212 is an exponent (`1.98739x10 −21`).
+
+Reading `alòdì` (the sourced NEGATIVE sign) between two digits would say "five negative three", which is a
+different quantity. The silence stays, which is the same accepted silence that ig and ak record for an infix U+2212.
+
+**ha.** Census of `\p{Lu}{2,}\.\s+\p{Lu}` in the mined ha artifact: 6 hits, all English words or metadata
+(`EVIDENCE.`, `COUNT.`, `II.`). None is an abbreviation before a name, and there are 0 single initials in that
+position. The rule now takes a LONE capital: `(?<![\p{L}\p{M}])(\p{Lu})\.(?=\s+\p{Lu})` → `$1`. It is written as a
+capture rather than a nested lookbehind, so that all three regex engines run the same shape.
+
+**wo.** `saidAfter`'s 45-character window now ends at the next `°`/`º`, at `,`/`;`, or at a sentence-final `.!?`.
+None of the four attested redundant glosses has one of these between the sign and its `aj`.
+
+**ig, ak.** Census of digit-flanked `x`/`×` in the mined artifacts:
+- ig: 15 `×` and 4 `x`; ak: 1 `×` and 2 `x`.
+- Every one is the relay dimension (`4 × 100 metres`), and there are 0 hex `0x…`.
+
+`(\d[  ]?)[xX](?=[  ]?\d)` → `$1×`, so the ASCII form takes the existing, deliberately silent `×` path.
+
+Goldens: ak, 2 rows.
+- `mita 4 x 100 mu` now reads without the stray /z/.
+- `4x100m relay` loses the /z/, and its `m` now reads *mita*. The `x` had glued `100m` into one token, so the
+  unit rule never saw the number before it.
+
+No other language moved (ha, wo, ig, yo: 0 stale).
+
+Guard proof: reverting each fixed normalizer alone fails its tests, in all three engines. TS fails 1/2/1/1 of 9
+(ha/wo/ig/ak), C# fails 1/2/4/4 of 17, and Rust fails 1 of 4 each. The control cases (the initial before a name, the
+glosses said once, an `x` not between digits) pass either way.
+
+The regex corpus gains 3 patterns. Rust and C# regex-diff: 153,086 identical, 0 differ.
+
+Noticed, not changed: the same `(?<=\p{Lu})\.(?=\s+\p{Lu})` initial-dot rule exists in gl, ga, cy and az (as
+`LONE_INITIAL_DOT` / `INITIAL_DOT`), so it probably has the same acronym-before-a-capital shape there.

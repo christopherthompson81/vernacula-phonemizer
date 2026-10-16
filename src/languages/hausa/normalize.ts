@@ -65,7 +65,10 @@ export function normalizeHausa(input: string): string {
     //    Hausa's own hooked ⟨Ɓ Ɗ Ƙ⟩. The minimal pair, measured before the fix:
     //        "M. Bello"    → "M Bello"
     //        "M. Ɗanjuma" → unchanged   ← the dot survives as a spurious clause break
-    s = rewrite(s, /(?<=\p{Lu})\.(?=\s+\p{Lu})/gu, "");
+    //    ⚠ A LONE CAPITAL ONLY (#1597). `(?<=\p{Lu})` alone also matched the last letter of an ACRONYM, so a
+    //    sentence ending in one lost its full stop: `Ya je BBC. Bello ya zo.` ran the two sentences together,
+    //    while `… Kano. Bello …` kept the break. The corpus has no all-caps abbreviation before a name.
+    s = rewrite(s, /(?<![\p{L}\p{M}])(\p{Lu})\.(?=\s+\p{Lu})/gu, "$1");
     // `v.` in a legal case name (Roe v. Wade) reads "da" (and). The v. sits between two NAMES, not two
     // initials, so match a word-boundary "v." with a capital following (Wade).
     s = rewrite(s, /(?<=\p{L})\s+v\.\s+(?=[A-Z])/gu, " da ");

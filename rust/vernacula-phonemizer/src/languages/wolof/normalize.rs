@@ -44,14 +44,20 @@ fn spell(int: &JsString, frac: &JsString) -> JsString {
         .concat(&JsString::join(&frac.code_point_strings(), &js(" ")))
 }
 
-/// `saidAfter(full, end, word)`: the word follows within 45 code units.
+/// `saidAfter(full, end, word)`: the word follows within 45 code units, and before the next sign or clause
+/// mark (#1597).
 fn said_after(full: &JsString, end: usize, word: &str) -> bool {
+    let window = full.slice(end as isize, Some(end as isize + 45));
+    let window = match js_re!(r"[°º,;]|[.!?](?=\s|$)", "u").exec(&window) {
+        Some(m) => window.slice(0, Some(m.index() as isize)),
+        None => window,
+    };
     JsRegex::new(
         &format!(r"(?<![\p{{L}}\p{{M}}]){word}(?![\p{{L}}\p{{M}}])"),
         "u",
     )
     .unwrap()
-    .test(&full.slice(end as isize, Some(end as isize + 45)))
+    .test(&window)
 }
 
 fn g(m: &JsMatch, s: &JsString, i: usize) -> JsString {
