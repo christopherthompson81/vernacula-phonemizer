@@ -79,7 +79,8 @@ pub(crate) fn normalize_crimean_tatar(input: &JsString) -> JsString {
     // 1) The percent sign and its case suffix.
     s = rewrite(
         &s,
-        js_re!(r"(\d)\s?%\s?-?\s?(\p{Ll}{1,4})(?![\p{L}\p{M}])", "gu"),
+        // A space only around the hyphen: `50% ve` is not *faizve* (#1581).
+        js_re!(r"(\d)\s?%(?:\s?-\s?)?(\p{Ll}{1,4})(?![\p{L}\p{M}])", "gu"),
         &js("$1 faiz$2"),
     );
 
@@ -161,7 +162,8 @@ pub(crate) fn normalize_crimean_tatar(input: &JsString) -> JsString {
     // 9) The minus.
     s = rewrite(
         &s,
-        js_re!(r"(^|(?<!\d)[\s(])[-−–]\s?(\d)", "gu"),
+        // The sign is tight against its figure (#1581).
+        js_re!(r"(^|(?<!\d)[\s(])[-−–](\d)", "gu"),
         &js("$1minus $2"),
     );
 

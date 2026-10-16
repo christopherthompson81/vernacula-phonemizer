@@ -98,6 +98,32 @@ public static class TajikPhonemizer
     {
         if (!double.IsFinite(n) || n < 0) return "";
         if (n == 0) return N.Units[0];
+        var parts = NumberParts(n);
+        if (parts.Count == 0) return "";
+        var MAG = new HashSet<string>(new[] { N.Thousand, N.Million, N.Milliard, N.Trillion }, StringComparer.Ordinal);
+        var @out = parts[0];
+        for (var i = 1; i < parts.Count; i++)
+        {
+            @out += (MAG.Contains(parts[i]) ? " " : $"{N.And} ") + parts[i];
+        }
+        return @out; // space-separated tokens; "бисту" is one token, phonemized bistu
+    }
+
+    /**
+     * A written digit run → its words. ⚠ PAST 2⁵³ THE RUN IS READ DIGIT BY DIGIT: the double has already rounded
+     * the low digits away (#1581). See `digitWords` in src/languages/tajik/tajik.ts.
+     */
+    public static string DigitWords(string digits)
+    {
+        var n = Js.Number(digits);
+        if (digits.Length > 0 && digits.All(char.IsAsciiDigit) && !Js.IsSafeInteger(n))
+            return string.Join(" ", digits.Select(c => N.Units[c - '0']));
+        return NumberWords(n);
+    }
+
+    /** The words of `n` before the connector is applied, largest magnitude first. */
+    private static List<string> NumberParts(double n)
+    {
         var parts = new List<string>();
         List<string> Three(double x)
         {
@@ -129,20 +155,15 @@ public static class TajikPhonemizer
             var q = Math.Floor(left / value);
             if (q > 0)
             {
-                if (!(dropOne && q == 1)) parts.AddRange(Three(q));
+                // ⚠ THE TOP SCALE'S MULTIPLIER CAN EXCEED 999 (#1581): composed in full, as `numberParts` does.
+                if (q > 999) parts.AddRange(NumberParts(q));
+                else if (!(dropOne && q == 1)) parts.AddRange(Three(q));
                 parts.Add(word);
                 left %= value;
             }
         }
         if (left > 0) parts.AddRange(Three(left));
-        if (parts.Count == 0) return "";
-        var MAG = new HashSet<string>(new[] { N.Thousand, N.Million, N.Milliard, N.Trillion }, StringComparer.Ordinal);
-        var @out = parts[0];
-        for (var i = 1; i < parts.Count; i++)
-        {
-            @out += (MAG.Contains(parts[i]) ? " " : $"{N.And} ") + parts[i];
-        }
-        return @out; // space-separated tokens; "бисту" is one token, phonemized bistu
+        return parts;
     }
 
     private static readonly JsRe TOKEN = JsRegex.Compile("([Ѐ-ӿ]+)|(\\d+)|([.!?…,;:])", "gu");
@@ -157,7 +178,7 @@ public static class TajikPhonemizer
                 if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    foreach (var w in NumberWords(Js.Number(m.Groups[2].Value)).Split(' ')) sink.Emit(PhonemizeWord(w));
+                    foreach (var w in DigitWords(m.Groups[2].Value).Split(' ')) sink.Emit(PhonemizeWord(w));
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
                 {

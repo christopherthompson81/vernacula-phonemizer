@@ -31,8 +31,9 @@
 import { makeInitialismNormalizer, makeUnreadableTest } from "../../core/initialisms.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { MANIFEST } from "./manifest.ts";
-import { numberWords } from "./tajik.ts";
+import { digitWords, numberWords } from "./tajik.ts";
 import { rewrite } from "../../core/provenance.ts";
+import { joinSpaceGroups } from "../../core/separatorHygiene.ts";
 
 // ---------------------------------------------------------------------------------------------------
 // ORDINALS — the Persian side of the language, and its highest-traffic native pattern
@@ -175,7 +176,9 @@ export function normalizeTajik(input: string): string {
     //    ("seventy zero"). 42 occurrences in 24 of 456 segments; 7,348 articles wiki-wide.
     //    FIRST after the invisible-character fold, because a grouping space that survives is later read as
     //    two operands by the range rule and as two numbers by the tier.
-    for (let i = 0; i < 3; i++) s = rewrite(s, /(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))/gu, "");  // space, NBSP, NNBSP, thin space
+    //    The shared run-at-once join (core/separatorHygiene.ts); this used to be a copy of its per-separator
+    //    regex looped three times, which never did more than the first pass's work (#1581).
+    s = joinSpaceGroups(s);
 
     // 2) DOTTED ABBREVIATIONS — the three that are TAJIK. Before any single-dot handling, so the interior
     //    dot cannot survive as a phrase break.
@@ -244,7 +247,7 @@ export function normalizeTajik(input: string): string {
     //    The bare numeral form. The digits become words HERE so the enclitic has a word to attach to.
     s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)-(${SUFFIX})(?![\\p{L}\\p{M}])`, "gu"),
         (m0, d: string, sfx: string) => {
-            const w = numberWords(Number(d));
+            const w = digitWords(d);
             return w === "" ? m0 : glueSuffix(w, sfx);
         });
 

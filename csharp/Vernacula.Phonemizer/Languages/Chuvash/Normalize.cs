@@ -91,9 +91,10 @@ public static class Normalize
     /** ⚠ EVERY BOUNDARY IN THIS FILE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and
      *  finds none against Cyrillic. */
     /** The Chuvash-Cyrillic letters a written suffix can be spelt with. */
-    private const string SFX = "[а-яёӑӗҫӳ]";
+    // ⚠ The four Latin look-alikes ⟨ă ĕ ç ü⟩ are in the class, and folded back by `ToCyrillic` (#1581).
+    private const string SFX = "[а-яёӑӗҫӳăĕçü]";
     /** A Chuvash word, for the attributive pass and the fraction's `пай` guard. */
-    private const string WORD = "[а-яёӑӗҫӳА-ЯЁӐӖҪӲ]";
+    private const string WORD = "[а-яёӑӗҫӳА-ЯЁӐӖҪӲăĕçüĂĔÇÜ]";
 
     /** 0) DIGIT DE-GROUPING, FIRST — ⚠ THE WHOLE NUMBER AT ONCE (trap 63), and the trailing guard rejects a
      *  DIGIT and nothing else: `(?![.,]\d)` costs `3 779,8` and `(?![\d.,])` declines every clause-final
@@ -123,9 +124,9 @@ public static class Normalize
     /** 3) CLOCK — every one of this corpus's clocks has THREE FIELDS, and the seconds field reaches 60
      *  (the leap second). The two-field form follows for the ordinary case. */
     private static readonly JsRe CLOCK_3 = JsRegex.Compile(
-        "(?<![\\d:.,])([01]?\\d|2[0-4]):([0-5]\\d):([0-5]\\d|60)(?![\\d:.,])", "gu");
+        "(?<![\\d:.,])([01]?\\d|2[0-3]|24(?=:00:00))(?::([0-5]\\d)):([0-5]\\d|60)(?![\\d:.,])", "gu");
     private static readonly JsRe CLOCK_2 = JsRegex.Compile(
-        "(?<![\\d:.,])([01]?\\d|2[0-4]):\\s?([0-5]\\d)(?![\\d:.,])", "gu");
+        "(?<![\\d:.,])([01]?\\d|2[0-3]|24(?=:\\s?00(?![\\d:.,]))):\\s?([0-5]\\d)(?![\\d:.,])", "gu");
 
     /** 4) THE FRACTION, claimed ONLY WHERE `пай` FOLLOWS (the shape every attested instance has). */
     private static readonly JsRe FRACTION = JsRegex.Compile(
@@ -139,8 +140,9 @@ public static class Normalize
     /** 6) NUMERAL + THE ORDINAL SUFFIX. MUST run before the range rule, which would eat the hyphen. */
     private static readonly JsRe ORD_SUFFIX = JsRegex.Compile(
         $"(?<![\\d.,/])(\\d+)\\s?-\\s?(м[ĕӗ]ш{SFX}{{0,6}}){Boundaries.NOT_LETTER_AFTER}", "gu");
-    /** The Latin ⟨ĕ⟩ folded to the real ⟨ӗ⟩ in a written suffix. */
-    private static readonly JsRe LAT_E = JsRegex.Compile("ĕ", "gu");
+    /** A written suffix with its Latin look-alikes folded to the Chuvash Cyrillic letters. */
+    private static string ToCyrillic(string sfx) =>
+        sfx.Replace('ă', 'ӑ').Replace('ĕ', 'ӗ').Replace('ç', 'ҫ').Replace('ü', 'ӳ');
 
     /** 7) SIGNS — the true MINUS (U+2212) as well as the hyphen. ± is a SINGLE CHARACTER, not a `+`. */
     private static readonly JsRe MINUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])[-\\u2212\\u2013](\\d)", "gu");
@@ -235,14 +237,14 @@ public static class Normalize
         s = Rewrite(s, ORD_RANGE, m =>
         {
             var whole = m.Value;
-            var first = AttachOrdinal(whole, m.Groups[1].Value, m.Groups[3].Value);
-            var second = AttachOrdinal(whole, m.Groups[2].Value, m.Groups[3].Value);
+            var first = AttachOrdinal(whole, m.Groups[1].Value, ToCyrillic(m.Groups[3].Value));
+            var second = AttachOrdinal(whole, m.Groups[2].Value, ToCyrillic(m.Groups[3].Value));
             if (first == whole || second == whole) return whole;
             return $"{first}, {second}";
         });
 
         // 6) Numeral + the ordinal suffix.
-        s = Rewrite(s, ORD_SUFFIX, m => AttachOrdinal(m.Value, m.Groups[1].Value, LAT_E.Replace(m.Groups[2].Value, "ӗ")));
+        s = Rewrite(s, ORD_SUFFIX, m => AttachOrdinal(m.Value, m.Groups[1].Value, ToCyrillic(m.Groups[2].Value)));
 
         // 7) Signs.
         s = Rewrite(s, MINUS, "$1минус $2");

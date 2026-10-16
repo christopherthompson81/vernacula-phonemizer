@@ -30,6 +30,8 @@ const HUNDRED: &str = "йөҙ";
 const THOUSAND: &str = "мең";
 const MILLION: &str = "миллион";
 const BILLION: &str = "миллиард";
+/// Attested in the mined artifact as 10¹² (#1581).
+const TRILLION: &str = "триллион";
 
 /// `numberToWords(n)` over the JS number (callers pass non-negative integers; the arithmetic is the TS's `f64`).
 pub(crate) fn number_to_words(n: f64) -> Vec<&'static str> {
@@ -80,8 +82,14 @@ pub(crate) fn number_to_words(n: f64) -> Vec<&'static str> {
         out.extend(more(n % 1_000_000.0));
         return out;
     }
-    let mut out = number_to_words((n / 1_000_000_000.0).floor());
-    out.push(BILLION);
-    out.extend(more(n % 1_000_000_000.0));
+    if n < 1_000_000_000_000.0 {
+        let mut out = number_to_words((n / 1_000_000_000.0).floor());
+        out.push(BILLION);
+        out.extend(more(n % 1_000_000_000.0));
+        return out;
+    }
+    let mut out = number_to_words((n / 1_000_000_000_000.0).floor());
+    out.push(TRILLION);
+    out.extend(more(n % 1_000_000_000_000.0));
     out
 }

@@ -110,3 +110,25 @@ and replayed).
 - chv: chv-normalize 17,052, chv-g2p 56,305, chv-numbers 84,321, chv-roman 477, phonemize-sync / phonemize-best / trace 279 each, symbols 3,272: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 8 — 2026-10-15 20:35 (#1581 fixes, TS-first, mirrored to C# and Rust)
+
+**Question.** Do the #1581 chv defects reproduce?
+
+**Found.**
+- `normalizeChuvash("15-мĕшĕсенче")` returned its input unchanged. `SFX` was Cyrillic-only, so after `м[ĕӗ]ш`
+  the second Latin ⟨ĕ⟩ ended the class and the edge guard failed. Text worked only because the registry fold
+  runs first.
+- `24:30` read as a clock (`2[0-4]`).
+
+**Done.**
+- ⟨ă ĕ ç ü⟩ are in `SFX`/`WORD`, and `toCyrillic` folds all four. The ordinal-range rule had folded none.
+- Hour 24 is admitted only as `24:00`.
+
+**Declined: trillion.** The symbol tier lists триллион as a magnitude, but no independent source was found:
+no en.wiktionary entry, no cv.wikipedia article, and 0 instances in the mined artifact.
+
+**Goldens.** chv moved 2 rows. A numeral before the Latin `ç.` now takes the attributive form (*вун*, *виҫ*),
+as it already did before Cyrillic `ҫ.`.
+
+**Noted, not fixed.** The Latin `ç.` itself still reads as the English letter name, where `ҫ.` reads *ҫул*.

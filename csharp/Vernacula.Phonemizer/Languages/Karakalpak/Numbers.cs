@@ -19,6 +19,8 @@ public static class Numbers
     private const string THOUSAND = "mıń";
     private const string MILLION = "million";
     private const string BILLION = "milliard";
+    // trillion — attested in the mined kaa artifact as 10¹² (#1581).
+    private const string TRILLION = "trillion";
 
     /** A non-negative safe integer → the ordered Karakalpak number WORDS (2016 Latin spellings, not IPA). */
     public static IReadOnlyList<string> NumberToWords(double n)
@@ -62,12 +64,22 @@ public static class Numbers
             if (r != 0) outp.AddRange(NumberToWords(r));
             return outp;
         }
-        var b = Math.Floor(n / 1_000_000_000);
-        var rem = n % 1_000_000_000;
-        var res = new List<string>();
-        res.AddRange(NumberToWords(b));
-        res.Add(BILLION);
-        if (rem != 0) res.AddRange(NumberToWords(rem));
-        return res;
+        if (n < 1_000_000_000_000)
+        {
+            var b = Math.Floor(n / 1_000_000_000);
+            var rem = n % 1_000_000_000;
+            var res = new List<string>();
+            res.AddRange(NumberToWords(b));
+            res.Add(BILLION);
+            if (rem != 0) res.AddRange(NumberToWords(rem));
+            return res;
+        }
+        var tc = Math.Floor(n / 1_000_000_000_000);
+        var tr = n % 1_000_000_000_000;
+        var trl = new List<string>();
+        trl.AddRange(NumberToWords(tc));
+        trl.Add(TRILLION);
+        if (tr != 0) trl.AddRange(NumberToWords(tr));
+        return trl;
     }
 }

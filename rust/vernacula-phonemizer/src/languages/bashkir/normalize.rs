@@ -205,6 +205,7 @@ struct Built {
     degree_scale_suffix: JsRegex,
     degree_suffix: JsRegex,
     scale_degree_suffix: JsRegex,
+    gram_suffix: JsRegex,
 }
 
 /// The patterns normalize.ts builds with `new RegExp`, built once.
@@ -232,6 +233,7 @@ static BUILT: LazyLock<Built> = LazyLock::new(|| {
         degree_scale_suffix: re(format!(r"(\d)\s?°\s?[CСcс]\s?-\s?({SFX}{{1,4}}){a}"), "gu"),
         degree_suffix: re(format!(r"(\d)\s?°\s?-\s?({SFX}{{1,4}}){a}"), "gu"),
         scale_degree_suffix: re(format!(r"(\d)\s?[CСcс]\s?°\s?-\s?({SFX}{{1,4}}){a}"), "gu"),
+        gram_suffix: re(format!(r"(\d+(?:,\d+)?)\s?г-({SFX}{{1,4}}){a}"), "gu"),
     }
 });
 
@@ -316,7 +318,8 @@ pub(crate) fn normalize_bashkir(input: &JsString) -> JsString {
     );
     s = rewrite(&s, js_re!(r"(\d)\s?°", "gu"), &js("$1 градус "));
 
-    // 7) The gram (a dot after it is the Russian year).
+    // 7) The gram (a dot after it is the Russian year); a case suffix on the sign glued to the word (#1581).
+    s = rewrite(&s, &bt.gram_suffix, &js("$1 грамм$2"));
     s = rewrite(
         &s,
         js_re!(r"(\d+(?:,\d+)?)\s?г(?![\p{L}\p{M}.])", "gu"),
@@ -324,7 +327,12 @@ pub(crate) fn normalize_bashkir(input: &JsString) -> JsString {
     );
 
     // 8) Signs.
-    s = rewrite(&s, js_re!(r"(^|[\s(])[-−–](\d)", "gu"), &js("$1минус $2"));
+    // Not after a number and a space: `1990 -1995` is a range (#1581).
+    s = rewrite(
+        &s,
+        js_re!(r"(^|\(|(?<![\d.,])\s)[-−–](\d)", "gu"),
+        &js("$1минус $2"),
+    );
     s = rewrite(&s, js_re!(r"±", "gu"), &js(" плюс минус "));
     s = rewrite(&s, js_re!(r"(^|[\s(])\+\s?(\d)", "gu"), &js("$1плюс $2"));
     s = rewrite(&s, js_re!(r"(\d)\s?=\s?(?=\d)", "gu"), &js("$1 тигеҙ "));

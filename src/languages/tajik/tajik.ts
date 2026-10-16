@@ -96,6 +96,37 @@ const N = DEF.numbers;
 export function numberWords(n: number): string {
     if (!Number.isFinite(n) || n < 0) return "";
     if (n === 0) return N.units[0]!;
+    const parts = numberParts(n);
+    if (parts.length === 0) return "";
+    // The Persian connector -у (va) glues to the END of the preceding word (бисту як, сесаду чилу панҷ), EXCEPT
+    // before a magnitude word, which just follows its multiplier with a space (ду ҳазор, not ду-у ҳазор).
+    //
+    // ⚠ THE CONNECTOR IS READ FROM THE MANIFEST, and it used to be a LITERAL here while `numbers.and` sat in
+    // tajik.jsonc unread by anything. The two agreed, so nothing was wrong — but the value was authored twice
+    // and only one copy was reachable, which is the setup for a silent divergence rather than a bug today: an
+    // editor correcting the manifest would change nothing, and the manifest is where this file's header says
+    // the data lives. Found by reading, not by any gate; no golden row moves.
+    const MAG = new Set([N.thousand, N.million, N.milliard, N.trillion]);
+    let out = parts[0]!;
+    for (let i = 1; i < parts.length; i++) {
+        out += (MAG.has(parts[i]!) ? " " : `${N.and} `) + parts[i]!;
+    }
+    return out; // space-separated tokens; "бисту" is one token, phonemized bistu
+}
+
+/**
+ * A written digit run → its words. ⚠ PAST 2⁵³ THE RUN IS READ DIGIT BY DIGIT: `Number` has already rounded the
+ * low digits away, so composing it would read a different number (`9007199254740993` was read as …992, and
+ * past 10¹⁵ it also lost its leading digits). The same rule as kk's `digitsToIpa` (#1576); #1581.
+ */
+export function digitWords(digits: string): string {
+    const n = Number(digits);
+    if (/^\d+$/u.test(digits) && !Number.isSafeInteger(n)) return [...digits].map((c) => N.units[Number(c)]!).join(" ");
+    return numberWords(n);
+}
+
+/** The words of `n` before the connector is applied, largest magnitude first. */
+function numberParts(n: number): string[] {
     const parts: string[] = [];
     const three = (x: number): string[] => {
         const p: string[] = [];
@@ -124,27 +155,18 @@ export function numberWords(n: number): string {
     for (const [value, word, dropOne] of SCALES) {
         const q = Math.floor(left / value);
         if (q > 0) {
-            if (!(dropOne && q === 1)) parts.push(...three(q));
+            // ⚠ THE TOP SCALE'S MULTIPLIER CAN EXCEED 999 (#1581): from 10¹⁵ the trillion count is 1000+, and
+            // `three` refuses a group it cannot spell — so `1000000000000000` read *триллион* and lost its
+            // leading digits silently. There is no higher scale word, so the multiplier is composed in full
+            // (ҳазор триллион), as kk composes its trillion count (#1576).
+            if (q > 999) parts.push(...numberParts(q));
+            else if (!(dropOne && q === 1)) parts.push(...three(q));
             parts.push(word);
             left %= value;
         }
     }
     if (left > 0) parts.push(...three(left));
-    if (parts.length === 0) return "";
-    // The Persian connector -у (va) glues to the END of the preceding word (бисту як, сесаду чилу панҷ), EXCEPT
-    // before a magnitude word, which just follows its multiplier with a space (ду ҳазор, not ду-у ҳазор).
-    //
-    // ⚠ THE CONNECTOR IS READ FROM THE MANIFEST, and it used to be a LITERAL here while `numbers.and` sat in
-    // tajik.jsonc unread by anything. The two agreed, so nothing was wrong — but the value was authored twice
-    // and only one copy was reachable, which is the setup for a silent divergence rather than a bug today: an
-    // editor correcting the manifest would change nothing, and the manifest is where this file's header says
-    // the data lives. Found by reading, not by any gate; no golden row moves.
-    const MAG = new Set([N.thousand, N.million, N.milliard, N.trillion]);
-    let out = parts[0]!;
-    for (let i = 1; i < parts.length; i++) {
-        out += (MAG.has(parts[i]!) ? " " : `${N.and} `) + parts[i]!;
-    }
-    return out; // space-separated tokens; "бисту" is one token, phonemized bistu
+    return parts;
 }
 
 const TOKEN = /([Ѐ-ӿ]+)|(\d+)|([.!?…,;:])/gu;
@@ -159,7 +181,7 @@ class TajikPhonemizer implements Phonemizer {
         return assembleClauses(normalizeTajikInitialisms(normalizeTajik(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2]) {
-                for (const w of numberWords(Number(m[2])).split(" ")) sink.emit(phonemizeWord(w));
+                for (const w of digitWords(m[2]).split(" ")) sink.emit(phonemizeWord(w));
             } else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

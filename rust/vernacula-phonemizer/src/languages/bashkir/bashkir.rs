@@ -137,11 +137,15 @@ pub(crate) fn phonemize_word_native(word: &JsString) -> JsString {
         }
     }
     if let Some(nucleus) = (0..segs.len()).rev().find(|&i| has_ipa_vowel(&segs[i])) {
-        let at = if nucleus > 0 && !has_ipa_vowel(&segs[nucleus - 1]) {
+        let mut at = if nucleus > 0 && !has_ipa_vowel(&segs[nucleus - 1]) {
             nucleus - 1
         } else {
             nucleus
         };
+        // A word-initial cluster is the whole onset (спорт → ˈspʊɾt), #1581.
+        if !segs[..at].iter().any(has_ipa_vowel) {
+            at = 0;
+        }
         segs.insert(at, js("ˈ"));
     }
     normalize(&JsString::join(&segs, &JsString::new()), Form::Nfc)
@@ -495,5 +499,36 @@ mod tests {
             let got: Option<String> = call(f, &a).map(|s| s.to_string_lossy());
             assert_eq!(got.as_deref(), *want, "{f}{args:?}");
         }
+    }
+}
+
+/// #1581, as test/turkic2-defects-1581.test.ts: relational, so no IPA is typed.
+#[cfg(all(test, feature = "ba"))]
+mod defects_1581_tests {
+    use super::*;
+    use crate::core::js_string::js;
+
+    fn say(s: &str) -> String {
+        crate::phonemize(s, "ba").unwrap()
+    }
+
+    #[test]
+    fn trillion_range_gram_and_initial_cluster() {
+        assert_eq!(say("1000000000000"), say("бер триллион"));
+        assert_eq!(say("1990 -1995"), say("1990-1995"));
+        assert_eq!(say("-5"), say("минус 5"));
+        assert_eq!(say("5 г-ға"), say("5 граммға"));
+        assert!(
+            phonemize_word_native(&js("спорт"))
+                .to_string_lossy()
+                .starts_with('ˈ')
+        );
+        let k: Vec<char> = phonemize_word_native(&js("китаплар"))
+            .to_string_lossy()
+            .chars()
+            .collect();
+        let stress = k.iter().position(|&c| c == 'ˈ').unwrap();
+        let last_a = k.iter().rposition(|&c| c == 'ɑ').unwrap();
+        assert_eq!(stress, last_a - 2);
     }
 }

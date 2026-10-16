@@ -40,10 +40,13 @@ export function phonemizeWord(word: string): string {
         if (ph !== undefined) segs.push(ph);
     }
     // Word-final (oxytone) stress — ˈ before the last vowel's onset consonant (Turkic default).
-    const vIdx = segs.map((s, idx) => (IPA_VOWEL.has(s) ? idx : -1)).filter((x) => x >= 0);
+    // ⚠ A SEGMENT IS A VOWEL IF ANY OF ITS CHARACTERS IS (#1581): ⟨å⟩ is the one multi-character vowel, `oː`, and
+    // testing the whole segment missed it — `tåw` came back with no stress mark at all.
+    const isV = (seg: string): boolean => [...seg].some((c) => IPA_VOWEL.has(c));
+    const vIdx = segs.map((s, idx) => (isV(s) ? idx : -1)).filter((x) => x >= 0);
     if (vIdx.length) {
         const nucleus = vIdx[vIdx.length - 1]!;
-        const at = nucleus > 0 && !IPA_VOWEL.has(segs[nucleus - 1]!) ? nucleus - 1 : nucleus;
+        const at = nucleus > 0 && !isV(segs[nucleus - 1]!) ? nucleus - 1 : nucleus;
         segs.splice(at, 0, "ˈ");
     }
     return segs.join("");

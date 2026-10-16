@@ -85,7 +85,6 @@ public static class Normalize
     // them is a readability choice and not a behaviour one.
     private static readonly JsRe SOFT_HYPHEN = JsRegex.Compile("\\u00ad", "gu");
     private static readonly JsRe NBSP_ENTITY = JsRegex.Compile("&nbsp;?", "gu");
-    private static readonly JsRe GROUP_SPACE = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0)[ \u00a0\u202f\u2009](?=\\d{3}(?![\\d]))", "gu");
     private static readonly JsRe SOLI = JsRegex.Compile("(?<![\\p{L}\\p{M}])[Сс]\\.\\s?(?=\\d{3,4}(?![\\d]))", "gu");
     private static readonly JsRe DIGAR = JsRegex.Compile("(?<![\\p{L}\\p{M}])диг\\.", "gu");
     private static readonly JsRe GHAYRA = JsRegex.Compile("(?<![\\p{L}\\p{M}])ғ\\.(?=\\s|$|\\))", "gu");
@@ -124,7 +123,8 @@ public static class Normalize
 
         s = Rewrite(Rewrite(s, SOFT_HYPHEN, _ => ""), NBSP_ENTITY, _ => " ");
 
-        s = Rewrite(s, GROUP_SPACE, "");
+        // The shared run-at-once space-group join (#1581).
+        s = SeparatorHygienePass.JoinSpaceGroups(s);
 
         s = Rewrite(s, SOLI, _ => "соли ");
         s = Rewrite(s, DIGAR, _ => "дигар");
@@ -154,7 +154,7 @@ public static class Normalize
         s = Rewrite(s, PERCENT_ENCLITIC, m => $"{m.Groups[1].Value} дарсад{m.Groups[2].Value}");
         s = Rewrite(s, NUMBER_ENCLITIC, m =>
         {
-            var w = TajikPhonemizer.NumberWords(Js.Number(m.Groups[1].Value));
+            var w = TajikPhonemizer.DigitWords(m.Groups[1].Value);
             return w == "" ? m.Value : GlueSuffix(w, m.Groups[2].Value);
         });
 

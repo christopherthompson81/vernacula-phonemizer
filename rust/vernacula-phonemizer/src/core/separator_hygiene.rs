@@ -12,14 +12,23 @@ use crate::js_re;
 /// `SP`: ASCII space, NBSP, NNBSP, thin space, written as escapes as the TS writes them.
 const SP: &str = r"[ \u00a0\u202f\u2009]";
 
-/// `SPACE_GROUP`.
-static SPACE_GROUP: LazyLock<JsRegex> = LazyLock::new(|| {
-    JsRegex::new(
-        &format!(r"(?<=\d)(?<!(?<![\d.,])0){SP}(?=\d{{3}}(?!\d))"),
-        "gu",
-    )
-    .unwrap()
+/// `SPACE_RUN`: the whole run in one pass; the first alternative consumes a refused standalone-`0` run (#1581).
+static SPACE_RUN: LazyLock<JsRegex> = LazyLock::new(|| {
+    let groups = format!(r"((?:{SP}\d{{3}}(?!\d))+)");
+    JsRegex::new(&format!(r"(?<![\d.,])0{groups}|(?<!\d)(\d+){groups}"), "gu").unwrap()
 });
+static SP_ALL: LazyLock<JsRegex> = LazyLock::new(|| JsRegex::new(SP, "gu").unwrap());
+
+/// `joinSpaceGroups`: join every space-grouped run (`1 000 000` → `1000000`), except one that starts with a
+/// standalone `0`.
+pub fn join_space_groups(input: &JsString) -> JsString {
+    rewrite_with(input, &SPACE_RUN, |m, t| match m.group(2, t) {
+        Some(head) if !head.is_empty() => {
+            head.concat(&SP_ALL.replace(&g(m, t, 3), &JsString::new()))
+        }
+        _ => m.value(t),
+    })
+}
 
 fn g(m: &crate::core::js_regex::JsMatch, s: &JsString, i: usize) -> JsString {
     m.group(i, s).unwrap_or_default()
@@ -29,12 +38,8 @@ fn g(m: &crate::core::js_regex::JsMatch, s: &JsString, i: usize) -> JsString {
 pub fn separator_hygiene(input: &JsString) -> JsString {
     let mut s = input.clone();
 
-    // 0) The space group, iterated to a fixed point (`for (let prev = ""; prev !== s; )`).
-    let mut prev = JsString::new();
-    while prev != s {
-        prev = s.clone();
-        s = rewrite(&s, &SPACE_GROUP, &JsString::new());
-    }
+    // 0) The space group, the whole run in one pass.
+    s = join_space_groups(&s);
 
     // 1) Two or more three-digit groups.
     s = rewrite_with(
@@ -148,5 +153,23 @@ mod tests {
             let got: Option<String> = call(f, &a).map(|s| s.to_string_lossy());
             assert_eq!(got.as_deref(), *want, "{f}{args:?}");
         }
+    }
+}
+
+/// #1581: the space-group join takes a run whole, and refuses a standalone-`0` run whole.
+#[cfg(test)]
+mod join_space_groups_tests {
+    use super::*;
+    use crate::core::js_string::js;
+
+    #[test]
+    fn whole_runs() {
+        assert_eq!(join_space_groups(&js("1 000 000")), js("1000000"));
+        assert_eq!(join_space_groups(&js("5 781 203 и")), js("5781203 и"));
+        assert_eq!(join_space_groups(&js("0 000 000")), js("0 000 000"));
+        assert_eq!(separator_hygiene(&js("0 000 000")), js("0 000 000"));
+        assert_eq!(join_space_groups(&js("0 000")), js("0 000"));
+        assert_eq!(join_space_groups(&js("21 2001")), js("21 2001"));
+        assert_eq!(join_space_groups(&js("3,0 000")), js("3,0000"));
     }
 }

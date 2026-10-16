@@ -6,7 +6,7 @@
 use std::sync::{Arc, LazyLock, OnceLock};
 
 use super::manifest::MANIFEST;
-use super::tajik::number_words;
+use super::tajik::{digit_words, number_words};
 use crate::core::data_source::load_once;
 use crate::core::initialisms::{
     InitialismData, PhonotacticsData, make_initialism_normalizer, make_unreadable_test,
@@ -155,17 +155,8 @@ pub(crate) fn normalize_tajik(input: &JsString) -> JsString {
         &js(" "),
     );
 
-    // Digit grouping, three passes.
-    for _ in 0..3 {
-        s = rewrite(
-            &s,
-            js_re!(
-                r"(?<=\d)(?<!(?<![\d\.,])0)[ \u00a0\u202f\u2009](?=\d{3}(?![\d]))",
-                "gu"
-            ),
-            &JsString::new(),
-        );
-    }
+    // Digit grouping: the shared run-at-once join (#1581).
+    s = crate::core::separator_hygiene::join_space_groups(&s);
 
     // The year, дигар and ғайра abbreviations; the magnitude abbreviations after a figure.
     s = rewrite(
@@ -244,7 +235,7 @@ pub(crate) fn normalize_tajik(input: &JsString) -> JsString {
         g(mm, t, 1).concat(&js(" дарсад")).concat(&g(mm, t, 2))
     });
     s = rewrite_with(&s, &bt.case_suffix, |mm, t| {
-        let w = number_words(js_number(&g(mm, t, 1)));
+        let w = digit_words(&g(mm, t, 1));
         if w.is_empty() {
             mm.value(t)
         } else {

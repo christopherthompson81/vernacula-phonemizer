@@ -42,11 +42,13 @@ public static class KarakalpakPhonemizer
         }
         // Word-final (oxytone) stress — ˈ before the last vowel's onset consonant (Turkic default).
         var vIdx = new List<int>();
-        for (var idx = 0; idx < segs.Count; idx++) if (Ipa.IPA_VOWEL.Contains(segs[idx])) vIdx.Add(idx);
+        // ⚠ A segment is a vowel if any of its characters is: ⟨å⟩ is `oː` (#1581).
+        static bool IsV(string seg) => Js.CodePoints(seg).Any(Ipa.IPA_VOWEL.Contains);
+        for (var idx = 0; idx < segs.Count; idx++) if (IsV(segs[idx])) vIdx.Add(idx);
         if (vIdx.Count > 0)
         {
             var nucleus = vIdx[^1];
-            var at = nucleus > 0 && !Ipa.IPA_VOWEL.Contains(segs[nucleus - 1]) ? nucleus - 1 : nucleus;
+            var at = nucleus > 0 && !IsV(segs[nucleus - 1]) ? nucleus - 1 : nucleus;
             segs.Insert(at, "ˈ");
         }
         return string.Concat(segs);

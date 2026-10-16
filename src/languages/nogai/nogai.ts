@@ -25,19 +25,6 @@ const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
 const DIGRAPH = DEF.digraphs;
 const CYR_VOWEL = new Set(DEF.vowelLetters);
-const STRESS_NASAL = new Set(["m", "n", "ŋ"]);
-
-/** Sonority for maximal-onset stress: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
-function sonority(seg: string): number {
-    if ([...seg].some((c) => IPA_VOWEL.has(c))) return 6;
-    if (seg === "j" || seg === "w") return 5;
-    if (["l", "r"].includes(seg)) return 4;
-    if (STRESS_NASAL.has(seg)) return 3;
-    if (seg.includes("͡")) return 1;
-    if (["f", "v", "s", "z", "ʃ", "ʒ", "x", "χ", "h", "ʁ", "ɣ"].includes(seg)) return 2;
-    return 0;
-}
-
 /** Is an emitted IPA segment a vowel (or vowel-bearing)? Used for the coda-⟨в⟩, ⟨е⟩-iotation, and stress tests. */
 const isVowelSeg = (s: string | undefined): boolean => s !== undefined && [...s].some((c) => IPA_VOWEL.has(c));
 
@@ -74,20 +61,16 @@ export function phonemizeWord(word: string): string {
         else if (ch === "ъ") segs.push("ʔ"); // a stray hard sign (not part of гъ/къ/нъ) — glottal / hiatus
         // ь (a stray soft sign, not part of аь/оь/уь): loan palatalization — dropped
     }
-    // Word-final (oxytone) stress — the Turkic default: ˈ before the maximal onset of the last vowel's syllable
-    // (native Nogai has no onset clusters; loans do). Same algorithm as the Tatar/Turkmen scans.
-    const vidx = segs.map((s, idx) => (isVowelSeg(s) ? idx : -1)).filter((x) => x >= 0);
-    if (vidx.length) {
-        let at = vidx[vidx.length - 1]!;
+    // Word-final (oxytone) stress — the Turkic default: ˈ before the onset of the last vowel's syllable.
+    // ⚠ ONE ONSET CONSONANT WORD-INTERNALLY: native Nogai has no onset clusters, so a medial cluster splits
+    // (китап.лар). Only a word-INITIAL cluster, with no vowel before it, is a whole onset — the loans спорт→ˈsport.
+    // The sonority walk this replaces took a medial obstruent+liquid as an onset and gave *kitaˈplar*; tk and tt
+    // had the same walk and the same fix (#1576, #1581).
+    const nucleus = segs.findLastIndex(isVowelSeg);
+    if (nucleus >= 0) {
+        let at = nucleus;
         if (at > 0 && !isVowelSeg(segs[at - 1]!)) at--; // the immediate onset consonant
-        while (at > 0 && !isVowelSeg(segs[at - 1]!)) {
-            const p = segs[at - 1]!,
-                l = segs[at]!;
-            const obstruentLiquid = sonority(p) <= 2 && sonority(l) >= 4;
-            const sibilantStop = ["s", "ʃ"].includes(p) && sonority(l) <= 1;
-            if (!(obstruentLiquid || sibilantStop)) break;
-            at--;
-        }
+        if (!segs.slice(0, at).some(isVowelSeg)) at = 0; // a word-initial cluster is the whole onset
         segs.splice(at, 0, "ˈ");
     }
     return segs.join("").normalize("NFC");

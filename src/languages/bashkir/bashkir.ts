@@ -88,11 +88,14 @@ export function phonemizeWordNative(word: string): string {
         // ъ ь and other marks: dropped
     });
     // Word-final (oxytone) stress — the Turkic default: ˈ before the last vowel's onset consonant.
+    // ⚠ A WORD-INITIAL CLUSTER IS THE WHOLE ONSET (#1581): with no vowel before it there is nowhere for its first
+    // consonant to be a coda, so спорт is ˈspʊɾt, not *sˈpʊɾt*. Medially one consonant is the onset (китап.лар),
+    // as tk and tt now place it too (#1576).
     const isV = (s: string): boolean => [...s].some((c) => IPA_VOWEL.has(c));
-    const vidx = segs.map((s, idx) => (isV(s) ? idx : -1)).filter((x) => x >= 0);
-    if (vidx.length) {
-        const nucleus = vidx[vidx.length - 1]!;
-        const at = nucleus > 0 && !isV(segs[nucleus - 1]!) ? nucleus - 1 : nucleus;
+    const nucleus = segs.findLastIndex(isV);
+    if (nucleus >= 0) {
+        let at = nucleus > 0 && !isV(segs[nucleus - 1]!) ? nucleus - 1 : nucleus;
+        if (!segs.slice(0, at).some(isV)) at = 0;
         segs.splice(at, 0, "ˈ");
     }
     return segs.join("").normalize("NFC");

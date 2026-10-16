@@ -372,3 +372,20 @@ mod tests {
         }
     }
 }
+
+/// #1581, as test/turkic2-defects-1581.test.ts: relational, so no IPA is typed.
+#[cfg(all(test, feature = "crh"))]
+mod defects_1581_tests {
+
+    fn say(s: &str) -> String {
+        crate::phonemize(s, "crh").unwrap()
+    }
+
+    #[test]
+    fn percent_suffix_and_spaced_dash() {
+        assert_eq!(say("50% ve"), say("50 faiz ve"));
+        assert_eq!(say("0,7%-ine"), say("0,7 faizine"));
+        assert_eq!(say("fiyatı - 5 lira"), say("fiyatı 5 lira"));
+        assert_eq!(say("-6 °C"), say("minus 6 °C"));
+    }
+}

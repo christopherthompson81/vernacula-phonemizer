@@ -195,12 +195,16 @@ public static class Normalize
     /** 7) THE GRAM, claimed HERE rather than declared to the shared tier: `3,300 г` is a gram and `1938 г.`
      *  is a Russian year, and the DOT is the only thing that separates them — the tier's trailing guard
      *  does not reject a dot, so declaring the key would have read every Russian year as a weight. */
+    // A case suffix on the gram sign is glued to the word, as on the degree sign (#1581).
+    private static readonly JsRe GRAM_SFX = JsRegex.Compile(
+        $"(\\d+(?:,\\d+)?)\\s?г-({SFX}{{1,4}}){Boundaries.NOT_LETTER_AFTER}", "gu");
     private static readonly JsRe GRAM = JsRegex.Compile("(\\d+(?:,\\d+)?)\\s?г(?![\\p{L}\\p{M}.])", "gu");
 
     /** 8) SIGNS. The climate prose writes `+18 °C`, `+0,3 °C` and `−18 °C` — the true MINUS (U+2212) as
      *  well as the hyphen — and every one lost its sign. ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT a `+`, so
      *  no `+` rule can ever match inside it. */
-    private static readonly JsRe MINUS = JsRegex.Compile("(^|[\\s(])[-\\u2212\\u2013](\\d)", "gu");
+    // ⚠ Not after a number and a space: `1990 -1995` is a range with a stray space (#1581).
+    private static readonly JsRe MINUS = JsRegex.Compile("(^|\\(|(?<![\\d.,])\\s)[-\\u2212\\u2013](\\d)", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("\\u00b1", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("(^|[\\s(])\\+\\s?(\\d)", "gu");
     /** `=` is DIGIT-GATED: 16 of the corpus's 17 are LaTeX, a Russian-text typo or raw dump markup. No `÷`
@@ -309,6 +313,7 @@ public static class Normalize
         s = Rewrite(s, DEG_BARE, "$1 градус ");
 
         // 7) The gram.
+        s = Rewrite(s, GRAM_SFX, "$1 грамм$2");
         s = Rewrite(s, GRAM, "$1 грамм");
 
         // 8) Signs.

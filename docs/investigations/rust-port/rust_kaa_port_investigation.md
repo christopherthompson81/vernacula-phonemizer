@@ -101,3 +101,20 @@ and replayed).
 - kaa: kaa-normalize 2,928, kaa-g2p 80,182, kaa-numbers 32,066, phonemize-sync / phonemize-best / trace 274 each, symbols 3,272: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 8 — 2026-10-15 20:35 (#1581 fixes, TS-first, mirrored to C# and Rust)
+
+**Question.** Do the #1581 kaa defects reproduce?
+
+**Found.**
+- `phonemizeWord("tåw")` came back with NO stress mark. The vowel test took a whole segment, and ⟨å⟩ is `oː`.
+  The text path was unaffected, because normalize folds ⟨å⟩ first.
+- `24:00` fell through the clock rule.
+
+**Done.**
+- A segment is a vowel if any of its characters is.
+- `24(?=:00)` joins the hour class. ISO 8601's end of day is the only hour-24 time; the corpus writes no `24:`
+  time either way.
+- trillion, attested in the mined artifact as 10¹² ("6 trillion AQSH dolları", a damages figure).
+
+**Goldens.** kaa moved 2 rows: the pico- and femtosecond figures now read *trillion*.

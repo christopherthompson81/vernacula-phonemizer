@@ -123,10 +123,19 @@ export function normalizeChuvashInitialisms(text: string): string {
 
 /** ⚠ EVERY BOUNDARY IN THIS FILE IS AN EXPLICIT LOOKAROUND, NEVER `\b` — `\b` is ASCII-defined and finds
  *  none against Cyrillic, which is how `core/initialisms.ts` was a total no-op for Russian (trap 1). */
-/** The Chuvash-Cyrillic letters a written suffix can be spelt with. */
-const SFX = "[а-яёӑӗҫӳ]";
+/**
+ * The letters a written suffix can be spelt with. ⚠ THE FOUR LATIN LOOK-ALIKES ARE IN THE CLASS (#1581): the
+ * corpus writes ⟨ă ĕ ç ü⟩ for ⟨ӑ ӗ ҫ ӳ⟩ more often than not (see the header), and without them `м[ĕӗ]ш` matched
+ * the first ⟨ĕ⟩ and the class stopped at the second, so `15-мĕшĕсенче`, the form this file's own comments cite,
+ * passed through unchanged. Text worked only because the registry's confusable fold runs first; a direct call
+ * did not. `toCyrillic` folds them back before the suffix is spliced.
+ */
+const SFX = "[а-яёӑӗҫӳăĕçü]";
 /** A Chuvash word, for the attributive pass and the fraction's `пай` guard. */
-const WORD = "[а-яёӑӗҫӳА-ЯЁӐӖҪӲ]";
+const WORD = "[а-яёӑӗҫӳА-ЯЁӐӖҪӲăĕçüĂĔÇÜ]";
+const LATIN_TO_CYRILLIC: Readonly<Record<string, string>> = { "ă": "ӑ", "ĕ": "ӗ", "ç": "ҫ", "ü": "ӳ" };
+/** A written suffix with its Latin look-alikes folded to the Chuvash Cyrillic letters. */
+const toCyrillic = (sfx: string): string => sfx.replace(/[ăĕçü]/gu, (c) => LATIN_TO_CYRILLIC[c]!);
 
 /**
  * Attach a written suffix to an ordinal figure. The suffix the writer typed is the TAIL of a longer word
@@ -201,10 +210,12 @@ export function normalizeChuvash(input: string): string {
     //    ⚠ AND THE SECONDS FIELD REACHES 60, because one of the three is the LEAP SECOND itself:
     //    "1972, 23:59:60 UTC — пĕрремĕш хут тĕкел çул çеккунтине кĕртнĕ". A `[0-5]\d` seconds field is
     //    right for every clock in the world except the one this corpus was written to describe.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d):([0-5]\d|60)(?![\d:.,])/gu,
+    //    ⚠ HOUR 24 ONLY AS `24:00` (#1581): `[01]?\d|2[0-4]` admitted `24:30`, which is no time. ISO 8601's
+    //    end-of-day `24:00` is the one hour-24 reading; the corpus has no `24:` time either way.
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]|24(?=:00:00))(?::([0-5]\d)):([0-5]\d|60)(?![\d:.,])/gu,
         (_m, h: string, mi: string, sec: string) =>
             `${cardinal(Number(h))} ${cardinal(Number(mi))} ${cardinal(Number(sec))}`);
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):\s?([0-5]\d)(?![\d:.,])/gu, (_m, h: string, mi: string) => {
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-3]|24(?=:\s?00(?![\d:.,]))):\s?([0-5]\d)(?![\d:.,])/gu, (_m, h: string, mi: string) => {
         const mv = Number(mi);
         return mv === 0 ? cardinal(Number(h)) : `${cardinal(Number(h))} ${cardinal(mv)}`;
     });
@@ -230,8 +241,8 @@ export function normalizeChuvash(input: string): string {
     //    has spent a hyphen. The suffix is written ONCE, on the second endpoint, and belongs to both.
     s = rewrite(s, new RegExp(`(?<![\\d.,])(\\d+)\\s?-\\s?(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,8})${NOT_LETTER_AFTER}`, "gu"),
         (whole, a: string, b: string, sfx: string) => {
-            const first = attachOrdinal(whole, a, sfx);
-            const second = attachOrdinal(whole, b, sfx);
+            const first = attachOrdinal(whole, a, toCyrillic(sfx));
+            const second = attachOrdinal(whole, b, toCyrillic(sfx));
             if (first === whole || second === whole) return whole;
             return `${first}, ${second}`;
         });
@@ -243,7 +254,7 @@ export function normalizeChuvash(input: string): string {
     //    gain and every space-separated noun to lose.
     //    MUST run before the range rule (step 9), which would otherwise eat the hyphen.
     s = rewrite(s, new RegExp(`(?<![\\d.,/])(\\d+)\\s?-\\s?(м[ĕӗ]ш${SFX}{0,6})${NOT_LETTER_AFTER}`, "gu"),
-        (whole, digits: string, sfx: string) => attachOrdinal(whole, digits, sfx.replace(/ĕ/gu, "ӗ")));
+        (whole, digits: string, sfx: string) => attachOrdinal(whole, digits, toCyrillic(sfx)));
 
     // 7) SIGNS. This corpus's climate prose writes the true MINUS (U+2212) as well as the hyphen, on both
     //    sides of the scale: `−19 °C`, `-13°С`, `+19 °C`, `+ 37°С` (spaced), `+20°с`.

@@ -28,7 +28,9 @@ const TENS: Record<number, string> = {
 const HUNDRED = "йөҙ",
     THOUSAND = "мең",
     MILLION = "миллион",
-    BILLION = "миллиард";
+    BILLION = "миллиард",
+    // триллион — attested ×2 in the mined ba artifact, both 10¹² (a GDP figure: "€1,9 триллион"). #1581.
+    TRILLION = "триллион";
 
 /** A non-negative safe integer → the ordered Bashkir number WORDS (spellings, not IPA). */
 export function numberToWords(n: number): string[] {
@@ -53,7 +55,12 @@ export function numberToWords(n: number): string[] {
             r = n % 1_000_000;
         return [...numberToWords(m), MILLION, ...(r ? numberToWords(r) : [])];
     }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...numberToWords(b), BILLION, ...(r ? numberToWords(r) : [])];
+    if (n < 1_000_000_000_000) {
+        const b = Math.floor(n / 1_000_000_000),
+            r = n % 1_000_000_000;
+        return [...numberToWords(b), BILLION, ...(r ? numberToWords(r) : [])];
+    }
+    const t = Math.floor(n / 1_000_000_000_000),
+        r = n % 1_000_000_000_000;
+    return [...numberToWords(t), TRILLION, ...(r ? numberToWords(r) : [])];
 }

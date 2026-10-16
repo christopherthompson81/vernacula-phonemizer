@@ -297,11 +297,16 @@ export function normalizeBashkir(input: string): string {
     //    `2,176 г` are grams; `1938 г.` and `1988 г.` are Russian years, and the DOT is the only thing that
     //    separates them. The tier's trailing guard (`(?![\p{L}\p{M}])`) does not reject a dot, so declaring
     //    the key would have read every Russian year in the corpus as a weight.
+    //    ⚠ AND A CASE SUFFIX ON THE SIGN IS GLUED TO THE WORD, as the degree rule above does (#1581): `5 г-ға`
+    //    read *грамм ға*, the suffix stranded as a word of its own.
+    s = rewrite(s, new RegExp(`(\\d+(?:,\\d+)?)\\s?г-(${SFX}{1,4})${NOT_LETTER_AFTER}`, "gu"), "$1 грамм$2");
     s = rewrite(s, /(\d+(?:,\d+)?)\s?г(?![\p{L}\p{M}.])/gu, "$1 грамм");
 
     // 8) SIGNS. This corpus's climate prose writes `+18 °C`, `+0,3 °C` and `−18 °C` — the true MINUS
     //    (U+2212) as well as the hyphen — and every one lost its sign.
-    s = rewrite(s, /(^|[\s(])[-−–](\d)/gu, "$1минус $2");
+    //    ⚠ NOT AFTER A NUMBER AND A SPACE (#1581): `1990 -1995` is a range written with one stray space, and
+    //    this rule used to claim its hyphen before the range rule (step 9) could, reading a subtraction.
+    s = rewrite(s, /(^|\(|(?<![\d.,])\s)[-−–](\d)/gu, "$1минус $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
     s = rewrite(s, /±/gu, " плюс минус ");
     s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1плюс $2");

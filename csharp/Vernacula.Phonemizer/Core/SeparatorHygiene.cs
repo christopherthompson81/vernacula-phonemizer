@@ -39,21 +39,28 @@ public static class SeparatorHygienePass
      * group and declines a bare pair like `21 2001` (a date); the left edge rejects a STANDALONE `0`, so
      * `0 000` is not welded into a figure nobody wrote.
      */
-    private static readonly JsRe SPACE_GROUP =
-        JsRegex.Compile($"(?<=\\d)(?<!(?<![\\d.,])0){SP}(?=\\d{{3}}(?!\\d))", "gu");
+    // ⚠ THE WHOLE RUN IS THE MATCH, in ONE pass (#1581). Matching each separator zero-width never needed the
+    // fixed-point loop that used to wrap it, and it split the standalone-`0` guard so `0 000 000` came out half
+    // joined. The refused run is matched by the first alternative and returned unchanged — CONSUMED, so the
+    // scan cannot restart at its second group. See `joinSpaceGroups` in src/core/separatorHygiene.ts.
+    private const string GROUPS = $"((?:{SP}\\d{{3}}(?!\\d))+)";
+    private static readonly JsRe SPACE_RUN =
+        JsRegex.Compile($"(?<![\\d.,])0{GROUPS}|(?<!\\d)(\\d+){GROUPS}", "gu");
+    private static readonly JsRe SP_ALL = JsRegex.Compile(SP, "gu");
+
+    /** Join every space-grouped run (`1 000 000` → `1000000`), except one that starts with a standalone `0`. */
+    public static string JoinSpaceGroups(string input) =>
+        Rewrite(input, SPACE_RUN, m => m.Groups[2].Value.Length == 0
+            ? m.Value
+            : m.Groups[2].Value + SP_ALL.Replace(m.Groups[3].Value, ""));
 
     public static string SeparatorHygiene(string input)
     {
         var s = input;
 
         // 0) THE SPACE GROUP — above everything, for the reason every de-grouping rule in this tree is
-        //    first: the separator must stop being a boundary before any other rule reads the number around
-        //    it. Iterated to a FIXED POINT, since one pass consumes only the first separator of a pair.
-        for (var prev = ""; prev != s;)
-        {
-            prev = s;
-            s = Rewrite(s, SPACE_GROUP, "");
-        }
+        //    first: the separator must stop being a boundary before any other rule reads the number around it.
+        s = JoinSpaceGroups(s);
 
         s = Rewrite(s, JsRegex.Compile(@"(?<![\d.,])([1-9]\d{0,2})((?:[.,]\d{3}){2,})(?!\d)(?![.,]\d)", "gu"),
             m => m.Groups[1].Value + JsRegex.Compile("[.,]", "gu").Replace(m.Groups[2].Value, ""));

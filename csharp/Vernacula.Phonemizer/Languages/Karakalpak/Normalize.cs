@@ -78,7 +78,8 @@ public static class Normalize
 
     /** 8) THE CLOCK — the hour bound is what declines a standard number. */
     private static readonly JsRe CLOCK =
-        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?(?![\\d:.,])", "gu");
+        // ⚠ And `24:00`, ISO 8601's end of day, is a clock too; no other hour-24 time is (#1581).
+        JsRegex.Compile("(?<![\\d:.,])([01]?\\d|2[0-3]|24(?=:00(?!:)))(?::([0-5]\\d))(?::([0-5]\\d))?(?![\\d:.,])", "gu");
 
     /** 9) SIGNS — the plus is claimed and the DIGIT lookahead is the whole guard (`C++` never has one). */
     private static readonly JsRe PLUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])\\+\\s?(?=\\d)", "gu");
