@@ -86,7 +86,7 @@ public static class Normalize
     private static readonly JsRe HALF = JsRegex.Compile("\u00bd", "gu");
     private static readonly JsRe ORD_FIRST = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}])1\\s?(?:er|ère|re)(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe ORD_EME = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}])(\\d+)\\s?(?:ème|nd)(?![\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe ORD_E = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}])(\\d+)e(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe ORD_E = JsRegex.Compile("(?<![\\d\\p{L}\\p{M}])(\\d+)e(?![\\p{L}\\p{M}\\d])", "gu");  // not before a digit: `1e5` (#1595)
     private static readonly JsRe AMPERSAND = JsRegex.Compile("\\s?&\\s?", "gu");
     private static readonly JsRe ESCAPE = JsRegex.Compile("[.*+?^${}()|[\\]\\\\]", "gu");
 

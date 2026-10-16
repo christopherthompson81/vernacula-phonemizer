@@ -152,7 +152,7 @@ public static class Normalize
     private static readonly JsRe BARE_EXPONENT_UNIT = JsRegex.Compile(
         $"(?<![\\p{{L}}\\p{{M}}\\d])({DENOM_UNIT}|m)(²|³)(?![\\p{{L}}\\p{{M}}\\d'’])", "giu");
 
-    private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d{1,2})(?!\\d|[.,]\\d)", "gu");
+    private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?!\\d|[.,]\\d)", "gu");  // any tail (#1595): see normalize.ts
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?!\\d|[.,]\\d)", "gu");
     private static readonly JsRe RUN_OF_SPACES = JsRegex.Compile("[^\\S\\n]{2,}", "gu");
     private static readonly JsRe EDGE_SPACES = JsRegex.Compile("^[^\\S\\n]+|[^\\S\\n]+$", "gu");

@@ -694,15 +694,17 @@ export function normalizeKirundi(input: string): string {
     //    the digit adjacent to its sign. The separator was reaching `clausePunctuation` and becoming a
     //    SENTENCE OR CLAUSE BREAK inside a number, 145 times in the corpus. NO separator word is emitted; see
     //    the header for why.
-    //    ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 4 uses from the
-    //    other side. rn's decimals are `0.8`, `3.8`, `7.34`, `0.18`, `196.7`, `695.52`, `61,19`, `0,6`,
+    //    ⚠ THE COMMA IS RESTRICTED TO A 1–2 DIGIT TAIL — the same discipline step 4 uses from the other side.
+    //    ⚠ THE DOT IS NOT (#1595): its limit read `0.125` as "zero." then 125. Step 2 has spent every grouped
+    //    and dated dot shape, so a longer tail reaching this arm is a decimal; the corpus has none either way.
+    //    rn's decimals are `0.8`, `3.8`, `7.34`, `0.18`, `196.7`, `695.52`, `61,19`, `0,6`,
     //    `232,1`, `24,4`, `68,7` and the fractional halves of the nine ANGLO areas (`…64.54`, `…35.52`).
     //    ⚠ THE TRAILING GUARD IS `(?!\d|[.,]\d)`, NOT `(?!\d)`, and in rn its evidence is the DOTTED DATE
     //    rather than rw's fertiliser grade: without it `26.08.1940` would match its first pair (the following
     //    character is a `.`, not a digit) and read a birth date as "twenty-six point zero eight". Step 2 has
     //    already spent those ten dates, so this is belt and braces — but the guard also keeps a decimal at a
     //    sentence END readable (`Ibirometero kwadarato 1,457.40.`), which `(?![\d.,])` would have broken.
-    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?!\d|[.,]\d)/gu, (_m, i: string, f: string) => spell(i, f));
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?!\d|[.,]\d)/gu, (_m, i: string, f: string) => spell(i, f));
     s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?!\d|[.,]\d)/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` ${PER} `, `letters `) doubles a space that was already there and can leave one

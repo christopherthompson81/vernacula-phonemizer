@@ -192,7 +192,7 @@ public static class Normalize
         JsRegex.Compile("(?<![\\d:])(\\d{1,2}):[ \\u00a0]?(\\d{2})(?![:\\d])", "gu");  // space, NBSP
 
     private static readonly JsRe DECIMAL_DOT =
-        JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d{1,2})(?!\\d|[.,]\\d)", "gu");
+        JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?!\\d|[.,]\\d)", "gu");  // any tail (#1595): see normalize.ts
     private static readonly JsRe DECIMAL_COMMA =
         JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?!\\d|[.,]\\d)", "gu");
 

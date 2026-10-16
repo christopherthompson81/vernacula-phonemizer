@@ -660,9 +660,15 @@ export function normalizeKinyarwanda(input: string): string {
     //     the digit adjacent to its sign. The separator was reaching `clausePunctuation` and becoming a
     //     SENTENCE OR CLAUSE BREAK inside a number, 3,225 times in the corpus. NO separator word is emitted;
     //     see the header for why `akadomo` was declined.
-    //     ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 2 uses from the
-    //     other side. Without the tail limit these two arms would swallow any grouped thousand step 2
-    //     declined (a date comma, `Ukuboza 26,2008`, has a four-digit tail and is excluded by both).
+    //     ⚠ THE COMMA IS RESTRICTED TO A 1–2 DIGIT TAIL — the same discipline step 2 uses from the other side.
+    //     Without the limit it would swallow any grouped thousand step 2 declined (a date comma, `Ukuboza
+    //     26,2008`, has a four-digit tail).
+    //     ⚠ THE DOT IS NOT (#1595). Its 1–2 digit limit read `0.125` as "zero." then 125 and `3.14159` as
+    //     "three." then 14,159. Every grouped shape a dot can take has already been spent by step 2, so what
+    //     reaches this arm with a longer tail is a decimal: a leading zero (no grouped number opens with one),
+    //     a tail of four or more digits (×2 in the corpus, both decimal coordinates: `−2.010556`, `30.557500`),
+    //     or the three-place coordinates step 2's `NOT_COORD` declines (`1.867 ° S`). No dotted date has a
+    //     four-digit tail in the corpus.
     //     ⚠ AND THIS IS THE RULE THAT SPENDS THE DOT `NOT_VERSION` NEEDS. It runs after the tier for that
     //     reason as much as for the adjacency one — trap 46's fleet-level ordering fix, applied.
     //     ⚠ THE TRAILING GUARD IS `(?!\d|[.,]\d)`, NOT `(?!\d)`, and one corpus line is the whole reason: the
@@ -671,7 +677,7 @@ export function normalizeKinyarwanda(input: string): string {
     //     separator followed by a digit, so a DOTTED CHAIN declines entirely while a decimal at a sentence
     //     END (`…49.5.`) still reads, which `(?![\d.,])` would have broken. Same shape as step 2's guard, and
     //     for the same reason: a partial match inside a longer run is the failure mode, not the neighbour.
-    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?!\d|[.,]\d)/gu, (_m, i: string, f: string) => spell(i, f));
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?!\d|[.,]\d)/gu, (_m, i: string, f: string) => spell(i, f));
     s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?!\d|[.,]\d)/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` ${AND} `, `letters `) doubles a space that was already there and can leave one

@@ -62,6 +62,8 @@ public static class Normalize
     private static readonly JsRe DIGIT_AT_END = JsRegex.Compile("\\d\\s*$", "u");
     private static readonly JsRe PLUS_AFTER = JsRegex.Compile("(\\S)\\+\\s?(?=\\d)", "gu");
     private static readonly JsRe PLUS_START = JsRegex.Compile("(^|\\s)\\+\\s?(?=\\d)", "gu");
+    // A TEMPERATURE RANGE, claimed before the degree arms (#1595): see `normalize.ts`.
+    private static readonly JsRe DEG_RANGE = JsRegex.Compile("(?<![\\d.,\\p{L}])(\\d+(?:\\.\\d+)?)\\s?[-–]\\s?(\\d+(?:\\.\\d+)?)\\s?°\\s?([CF])?(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_C = JsRegex.Compile("(\\d[\\d.,]*)\\s?°\\s?C(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_F = JsRegex.Compile("([+-]?)(\\d[\\d.,]*)\\s?°\\s?F(?![\\p{L}\\p{M}])", "gui");
     private static readonly JsRe DEG_BARE = JsRegex.Compile("([+-]?)(\\d[\\d.,]*)\\s?°", "gu");
@@ -89,6 +91,14 @@ public static class Normalize
         s = Rewrite(s, MINUS, m => DIGIT_AT_END.IsMatch(whole5[..m.Index]) ? m.Value : "hasi ");
         s = Rewrite(s, PLUS_AFTER, m => $"{m.Groups[1].Value} plas ");
         s = Rewrite(s, PLUS_START, m => $"{m.Groups[1].Value}plas ");
+        s = Rewrite(s, DEG_RANGE, m =>
+        {
+            if (!(Js.Number(m.Groups[1].Value) < Js.Number(m.Groups[2].Value))) return m.Value;
+            var scale = m.Groups[3];
+            var name = !scale.Success || scale.Value.Length == 0 ? ""
+                : scale.Value.ToUpperInvariant() == "C" ? " Selsiasi" : " Fahrenheit";
+            return $"nyuzi joto {m.Groups[1].Value} hadi {m.Groups[2].Value}{name}";
+        });
         s = Rewrite(s, DEG_C, m => $"nyuzi joto {m.Groups[1].Value} Selsiasi");
         s = Rewrite(s, DEG_F, m => $"nyuzi joto {m.Groups[2].Value} Fahrenheit");
         s = Rewrite(s, DEG_BARE, m => $"nyuzi joto {m.Groups[2].Value}");

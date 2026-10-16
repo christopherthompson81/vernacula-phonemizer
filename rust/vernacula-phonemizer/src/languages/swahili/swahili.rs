@@ -508,3 +508,23 @@ mod tests {
         assert_eq!(hits.get(), 0);
     }
 }
+
+/// #1595, as test/ebantu-defects-1595.test.ts: relational, so no IPA is typed. Synthetic inputs.
+#[cfg(all(test, feature = "sw"))]
+mod defects_1595_tests {
+    #[test]
+    fn a_temperature_range_keeps_its_span_word() {
+        for (input, written) in [
+            ("10-15°C", "nyuzi joto 10 hadi 15 Selsiasi"),
+            ("2.5-3.5°F", "nyuzi joto 2.5 hadi 3.5 Fahrenheit"),
+            ("10-15°", "nyuzi joto 10 hadi 15"),
+            ("15-10°C", "15-nyuzi joto 10 Selsiasi"),
+        ] {
+            assert_eq!(
+                crate::phonemize(input, "sw").unwrap(),
+                crate::phonemize(written, "sw").unwrap(),
+                "{input}"
+            );
+        }
+    }
+}
