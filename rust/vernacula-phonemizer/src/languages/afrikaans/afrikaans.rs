@@ -378,11 +378,21 @@ pub fn afrikaans_lexicon_has(word: &JsString) -> bool {
     lexicon().contains_key(&w) || rcrl().contains_key(&w)
 }
 
-/// `afrikaansRuleReserved(word)`: ⟨'n⟩ and a bare single letter belong to the rule path.
+/// `afrikaansRuleReserved(word)`: ⟨'n⟩, a bare single letter and the letter names (#1578: the tagger read the
+/// initialism letter `er` *ər* against the rule path's *ɛr*) belong to the rule path.
 pub fn afrikaans_rule_reserved(word: &JsString) -> bool {
     let w = normalize(word, Form::Nfc).to_lower_case();
-    w == "'n" || w == "’n" || w.code_point_strings().len() == 1
+    w == "'n" || w == "’n" || w.code_point_strings().len() == 1 || LETTER_NAME_WORDS.contains(&w)
 }
+
+/// The letter names as words (`bee`, `er`, `zet`), for `afrikaans_rule_reserved`.
+static LETTER_NAME_WORDS: LazyLock<HashSet<JsString>> = LazyLock::new(|| {
+    MANIFEST
+        .letter_names
+        .values()
+        .map(|n| js(n).to_lower_case())
+        .collect()
+});
 
 /// `withStress(ipa, word)`: a reading without a primary mark gets one where the rule computes it.
 fn with_stress(ipa: &JsString, word: &JsString) -> JsString {

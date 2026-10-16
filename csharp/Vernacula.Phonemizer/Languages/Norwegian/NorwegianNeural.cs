@@ -9,8 +9,9 @@ namespace Vernacula.Phonemizer.Languages.Norwegian;
 
 public static class NorwegianNeural
 {
-    private static readonly JsRe WORD = JsRegex.Compile("[A-Za-zÆØÅæøåÉéÈèÊêËëÀàÂâÔôÜü]+", "gu");
-
+    // ⚠ THE WORDS TAGGED ARE THE WORDS THE ENGINE ASKS FOR, recorded rather than re-derived (#1578): a
+    // hand-listed letter class keyed by the raw match offered `Dvořák` as `Dvo` + `k` while the engine asked
+    // for `Dvorak`. See norwegianNeural.ts.
     private static Task<IWordStructuralTagger?>? taggerP;
     private static readonly object Gate = new();
     private static NorwegianPhonemizer? engine;
@@ -23,14 +24,8 @@ public static class NorwegianNeural
         lock (Gate) p = taggerP ??= NorwegianTaggerFactory.CreateNorwegianTagger();
         var tagger = await p.ConfigureAwait(false);
         if (tagger is null) return Foreign.WithHost("nb", () => NbEngine().Text(text)); // no model → sync path
-        return await StructuralTagger.WordLevelNeuralPrepass(text, new NeuralPrepassOptions
-        {
-            Word = WORD,
-            // ⚠ NO `Key`: the TS declares none, so the tagged map is keyed by the RAW matched spelling while
-            // `LexHas` lowercases. Adding one would change which words the tagger claims.
-            LexHas = w => NorwegianPhonemizer.NorwegianLexiconHas(Js.ToLowerCase(w)),
-            Tag = w => tagger.Tag(w),
-            Render = (t, oov) => Foreign.WithHost("nb", () => NbEngine().Text(t, w => oov(w))),
-        }).ConfigureAwait(false);
+        return await StructuralTagger.AskedWordsNeuralPrepass(text,
+            w => tagger.Tag(w),
+            (t, oov) => Foreign.WithHost("nb", () => NbEngine().Text(t, w => oov(w)))).ConfigureAwait(false);
     }
 }

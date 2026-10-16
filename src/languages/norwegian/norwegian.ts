@@ -145,14 +145,8 @@ export function lexicon(): Map<string, string> {
     return LEX;
 }
 
-/** The NST pronunciation lexicon (lowercased word → canonical IPA). Exposed so the async neural path (nbNeural.ts)
- *  can skip lexicon-covered words — they are served authoritatively by the sync lexicon path. */
-export function norwegianLexicon(): Map<string, string> {
-    return lexicon();
-}
-
 /** Per-call OOV resolver: word → IPA, or undefined to defer to the rule engine. Consulted BETWEEN the lexicon and the
- *  rule engine (lexicon → oovOverride → rules). Used only by the async neural path (nbNeural.ts) to inject the BiLSTM
+ *  rule engine (lexicon → oovOverride → rules). Used only by the async neural path (norwegianNeural.ts) to inject the BiLSTM
  *  tagger's OOV readings; the sync path passes nothing, so behaviour is unchanged. */
 export type OovResolver = (word: string) => string | undefined;
 
@@ -197,17 +191,19 @@ const NB_LETTER = `(?!\\p{Nd})[\\p{Script=Latin}]`;
 const NB_WORD = `${NB_LETTER}(?:${NB_LETTER}|\\p{M}|['’](?=${NB_LETTER}))*`;
 const TOKEN = new RegExp(`(${NB_WORD})|(\\d+)|([.?!,;:…—])`, "gu");
 
-// Number words (en, hundre, tusen, …) are all in the lexicon, so they never reach the oovOverride tier — the sync
-// phonemizeWord is correct here and the neural path's tagged map (populated only from input tokens) never holds them.
-function number(digits: string): string {
+// ⚠ THE NUMBER WORDS TAKE THE OOV OVERRIDE TOO (#1578). A comment here said every number word was in the
+// lexicon, so none needed it; 8 of the 42 are not (`tohundre` … `nihundre`), and `200` read *ˈtuːhʉndɾə* by
+// rule on every path while the word `tohundre` read *tuːˈhʊndɾə* by the tagger on the best path.
+function number(digits: string, oovOverride?: OovResolver): string {
+    const word = (w: string): string => phonemizeWord(w, oovOverride);
     const nn = Number(digits);
     // ⚠ ABOVE 2^53 THE RAW ASCII DIGITS USED TO LEAK STRAIGHT INTO THE IPA. `isSafeInteger` is right to
     // refuse to COMPOSE — the float has already lost the low digits, so the numeral would be confidently
     // wrong — but the refusal returned the digit string, which no g2p in this fleet reads. Read it out
     // digit-at-a-time through this engine's own number words instead; see core/numbers.ts `spellDigits`
     // for the full account and the cost (above 2^53 the reading is a digit string, not a quantity).
-    if (!Number.isSafeInteger(nn)) return spellDigits(digits, MANIFEST.numbers, phonemizeWord);
-    return renderNumber(nn, MANIFEST.numbers, phonemizeWord, westernNumberWords);
+    if (!Number.isSafeInteger(nn)) return spellDigits(digits, MANIFEST.numbers, word);
+    return renderNumber(nn, MANIFEST.numbers, word, westernNumberWords);
 }
 
 class NorwegianPhonemizer implements Phonemizer {
@@ -218,7 +214,7 @@ class NorwegianPhonemizer implements Phonemizer {
         // for the ordered steps and the three measured disambiguations.
         return assembleClauses(normalizeNorwegian(rawInput), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(nat(m[1]), oovOverride));
-            else if (m[2]) sink.emit(number(m[2]));
+            else if (m[2]) sink.emit(number(m[2], oovOverride));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];
                 if (mk) sink.pause(mk);

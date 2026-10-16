@@ -164,7 +164,11 @@ public static class BavarianPhonemizer
     private static void ReduceFinalA(List<Tok> toks)
     {
         var last = toks.Count - 1;
-        if (last > 0 && toks[last].Ph == "ɑ" && !EndsWithVowel(toks[last - 1].Ph)) toks[last].Ph = "ɐ";
+        // ⚠ The phone before is the last NON-EMPTY one (#1578): `SilentH` has already emptied a ⟨h⟩ after a
+        // vowel, and an empty phone passed as the consonant this rule requires (`Aha` → *ɑɐ*).
+        var prev = last - 1;
+        while (prev > 0 && toks[prev].Ph == "") prev--;
+        if (last > 0 && toks[last].Ph == "ɑ" && !EndsWithVowel(toks[prev].Ph)) toks[last].Ph = "ɐ";
     }
 
     /** ⟨n⟩ → [ŋ] before a velar — this catches ⟨nk⟩ (Bånk→b̥ɔŋɡ̥); ⟨ng⟩ is already [ŋ]. */

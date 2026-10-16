@@ -190,7 +190,16 @@ fn lenit_k(toks: &mut [Tok]) {
 /// `reduceFinalA(toks)`.
 fn reduce_final_a(toks: &mut [Tok]) {
     let n = toks.len();
-    if n >= 2 && toks[n - 1].ph == "ɑ" && !ends_with_vowel(&toks[n - 2].ph) {
+    if n < 2 {
+        return;
+    }
+    // The phone before is the last NON-EMPTY one (#1578): `silent_h` has already emptied a ⟨h⟩ after a vowel,
+    // and an empty phone passed as the consonant this rule requires (`Aha` → *ɑɐ*).
+    let mut prev = n - 2;
+    while prev > 0 && toks[prev].ph.is_empty() {
+        prev -= 1;
+    }
+    if toks[n - 1].ph == "ɑ" && !ends_with_vowel(&toks[prev].ph) {
         toks[n - 1].ph = js("ɐ");
     }
 }

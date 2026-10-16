@@ -34,12 +34,6 @@ export function lexicon(): Map<string, string> {
     return LEX;
 }
 
-/** The NST pronunciation lexicon (lowercased word → IPA). Exposed so the async neural path (daNeural.ts) can skip
- *  lexicon-covered words — they are served authoritatively by the sync lexicon path. */
-export function danishLexicon(): Map<string, string> {
-    return lexicon();
-}
-
 // Unstressed prefixes (Danish): stress falls on the following syllable (beˈɡønə, foˈʁsdɔ, undˈskyl).
 const UNSTRESSED_PREFIX = /^(be|for|ge|und|er)[^aeiouyæøå]*[aeiouyæøå]/u;
 
@@ -117,9 +111,9 @@ export function phonemizeWordRules(word: string): string {
     return segs.map((s) => (s.stress ? "ˈ" : "") + s.ph).join("");
 }
 
-/** Per-call OOV resolver: the raw word (as tokenized, NOT lowercased) → IPA, or undefined to defer to the rule engine.
- *  Consulted BETWEEN the lexicon and the rule g2p (lexicon → oovOverride → rule); used only by the async neural path
- *  (daNeural.ts), which keys by the raw match so it can share the fleet `wordLevelNeuralPrepass` (nb/bn pattern). */
+/** Per-call OOV resolver: the word as `phonemizeWord` received it (nativised, NOT lowercased) → IPA, or undefined to
+ *  defer to the rule engine. Consulted BETWEEN the lexicon and the rule g2p (lexicon → oovOverride → rule); used only
+ *  by the async neural path (danishNeural.ts), which records the words asked for and answers them. */
 export type OovResolver = (word: string) => string | undefined;
 
 /** One Danish word → canonical IPA. ⚠ THREE TIERS, because the orthography is deep: (1) the LEXICON (~37k known
@@ -134,11 +128,8 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
 // A Danish word (any Latin run) / number / punctuation token. LATIN_RUN rather than a hand-listed alphabet,
 // so no lexicon key can be split at a letter the list forgot (voilà → "voil"); the INVENTORY question is
 // `nat` below, which is a different question (see core/hostWord.ts).
-// ⚠ danishNeural.ts's pre-pass MUST TOKENIZE AND KEY THE SAME WAY — it imports this module's `DA_WORD` and
-// `nat` rather than restating them, because a hand-listed copy drifted and silently skipped the tagger tier
-// for every word the nativiser rewrites. See the ⚠ on `WORD` there. ⚠ IT IMPORTS `DA_WORD`, NOT core's
-// `LATIN_RUN`: once this arm claimed the medial apostrophe the two stopped being the same regex, and
-// importing the shared one would have re-opened the drift that was just closed.
+// danishNeural.ts no longer tokenizes for itself: it records the words this engine asks `oovOverride` for
+// (#1578), so this tokenizer and `nat` are the only ones the tagger tier sees.
 /**
  * ⚠ THE WORD ARM CARRIES A MEDIAL APOSTROPHE, and in Danish that is native orthography rather than a
  * borrowing. `LATIN_RUN` stops at `'`, so the run split and each half was phonemized as its own word:
@@ -165,7 +156,7 @@ export function phonemizeWord(word: string, oovOverride?: OovResolver): string {
  * change; making the genitive attach to a letter-name run is a separate question this does not answer.
  */
 const DA_LETTER = "(?!\\p{Nd})[\\p{Script=Latin}]";
-export const DA_WORD =
+const DA_WORD =
     `${DA_LETTER}(?:${DA_LETTER}|\\p{M}|(?<![A-ZÆØÅ]{2})['\u2019](?=${DA_LETTER}))*`;
 // ⚠ `gu`, NOT `giu`, AND THE FLAG IS LOAD-BEARING NOW. Under `/i` a character class is case-insensitive,
 // so `[A-ZÆØÅ]` in the apostrophe guard above matched LOWERCASE too and declined `Haiti's` along with

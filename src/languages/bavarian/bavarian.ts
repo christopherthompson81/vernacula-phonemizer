@@ -149,7 +149,12 @@ function lenitK(toks: Tok[]): void {
  *  (already [ɐ̯]/[e]) are untouched. */
 function reduceFinalA(toks: Tok[]): void {
     const last = toks.length - 1;
-    if (last > 0 && toks[last]!.ph === "ɑ" && !endsWithVowel(toks[last - 1]!.ph)) toks[last]!.ph = "ɐ";
+    // ⚠ THE PHONE BEFORE IS THE LAST NON-EMPTY ONE (#1578). `silentH` has already emptied a ⟨h⟩ after a vowel,
+    // and an empty phone does not end in a vowel, so it passed as the consonant this rule requires:
+    // `Aha` → *ɑɐ*, `Oha` → *oɐ*, a reduced final on the interjections' stressed vowel.
+    let prev = last - 1;
+    while (prev > 0 && toks[prev]!.ph === "") prev--;
+    if (last > 0 && toks[last]!.ph === "ɑ" && !endsWithVowel(toks[prev]!.ph)) toks[last]!.ph = "ɐ";
 }
 
 /** ⟨n⟩ → [ŋ] before a velar [k]/[ɡ̥] (the ⟨ng⟩ digraph is already [ŋ]; this catches ⟨nk⟩ Bånk→b̥ɔŋɡ̥, the [k]

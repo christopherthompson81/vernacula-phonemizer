@@ -315,8 +315,9 @@ const LETTER_NAME = MANIFEST.letterNames; // a bare single letter is SPELLED (se
 // registry.ts imports this module STATICALLY, so a throw at module init would make one typo in the
 // Afrikaans manifest break every other language's import too.
 
-/** Is this word served by either shipped lexicon? Read by the async neural path (afrikaansNeural.ts) so a
- *  lexicon-covered word is served by the exact dictionary reading rather than by the tagger. */
+/** Is this word served by either shipped lexicon? Read by test/afNeural.test.ts, which checks that its OOV
+ *  probes really are OOV. (The neural path no longer asks: `phonemizeWord` consults the tagger only after both
+ *  lexicons miss, #1578.) */
 export function afrikaansLexiconHas(word: string): boolean {
     const w = word.normalize("NFC").toLowerCase();
     return lexicon().has(w) || rcrl().has(w);
@@ -331,7 +332,10 @@ export type OovResolver = (word: string) => string | undefined;
 /**
  * Words `phonemizeWordRules` handles with a SPECIAL CASE, which no outside tier may claim: the indefinite
  * article ⟨'n⟩ = [ə], and a bare single letter, which is SPELLED as its NAME rather than sounded (⟨C⟩ is
- * "see" [siə], #761).
+ * "see" [siə], #761). And the letter NAMES themselves (#1578): the initialism normalizer writes `USSR` as
+ * `uu es es er`, so once the tagger saw what the normalizer creates it read `er` *ər* where the rule path's
+ * own letter name is *ɛr*. Of the 20 names outside both lexicons it misreads only that one (the rest differ at
+ * most by the stress mark, which `withStress` adds to every tier), so this costs nothing elsewhere.
  *
  * ⚠ THIS IS THE THIRD TIME THIS TRAP HAS BEEN SPRUNG IN THIS LANGUAGE, and the first two fixes were both
  * local to whatever tier was being added: #770 caught stray `j`/`q` rows in af-lexicon.tsv making ⟨J⟩ read
@@ -343,8 +347,10 @@ export type OovResolver = (word: string) => string | undefined;
  */
 export function afrikaansRuleReserved(word: string): boolean {
     const w = word.normalize("NFC").toLowerCase();
-    return w === "'n" || w === "’n" || [...w].length === 1;
+    return w === "'n" || w === "’n" || [...w].length === 1 || LETTER_NAME_WORDS.has(w);
 }
+/** The letter names as words (`bee`, `er`, `zet`), for `afrikaansRuleReserved`. */
+const LETTER_NAME_WORDS: ReadonlySet<string> = new Set(Object.values(LETTER_NAME).map((n) => n.toLowerCase()));
 
 
 /**

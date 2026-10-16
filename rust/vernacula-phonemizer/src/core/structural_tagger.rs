@@ -2,7 +2,8 @@
 //! mask of permitted tags, plus the word-level tagger and its serving pre-pass. Ported from
 //! src/core/structuralTagger.ts (only what the ported taggers use).
 
-use std::collections::HashMap;
+use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
 
 use serde::Deserialize;
 
@@ -294,7 +295,7 @@ impl WordStructuralTagger {
     }
 }
 
-/// `wordLevelNeuralPrepass`: tag each DISTINCT out-of-lexicon word once (in text order), then render the
+/// `wordLevelNeuralPrepass` (bn, fr, sd, ckb): tag each DISTINCT out-of-lexicon word once (in text order), then render the
 /// whole text through the sync engine with those readings as its OOV override. A declined word is not
 /// memoized, so it is offered to the tagger again at its next occurrence, as in the TS.
 pub fn word_level_neural_prepass(
@@ -314,6 +315,34 @@ pub fn word_level_neural_prepass(
         let out = tag(&w)?;
         if !out.is_empty() {
             tagged.insert(w, out);
+        }
+    }
+    Ok(render(text, &|w| tagged.get(w).cloned()))
+}
+
+/// `askedWordsNeuralPrepass` (#1578): render once with a recording override that answers nothing, tag each
+/// distinct word the engine asked for (in the order asked), then render again with the readings. The engine
+/// consults its override only after its lexicon misses, so the recorded words are its OOV words, in exactly the
+/// spelling it looks them up by. See structuralTagger.ts for why `word_level_neural_prepass`'s guessed words
+/// drifted (da, nb, af).
+pub fn asked_words_neural_prepass(
+    text: &JsString,
+    tag: &dyn Fn(&JsString) -> Result<JsString, String>,
+    render: &dyn Fn(&JsString, &dyn Fn(&JsString) -> Option<JsString>) -> JsString,
+) -> Result<JsString, String> {
+    let asked: RefCell<Vec<JsString>> = RefCell::new(Vec::new());
+    let seen: RefCell<HashSet<JsString>> = RefCell::new(HashSet::new());
+    render(text, &|w| {
+        if seen.borrow_mut().insert(w.clone()) {
+            asked.borrow_mut().push(w.clone());
+        }
+        None
+    });
+    let mut tagged: HashMap<JsString, JsString> = HashMap::new();
+    for w in asked.into_inner() {
+        let out = tag(&w)?;
+        if !out.is_empty() {
+            tagged.insert(w, out); // "" = declined → leave to the rule engine
         }
     }
     Ok(render(text, &|w| tagged.get(w).cloned()))

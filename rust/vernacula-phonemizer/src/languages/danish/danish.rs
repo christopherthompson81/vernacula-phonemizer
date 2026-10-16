@@ -280,7 +280,7 @@ impl DanishPhonemizer {
         number_to_words(n, raw)
     }
 
-    /// `danishLexicon().has(word)`.
+    /// `lexicon().has(word)` (danish.ts).
     pub fn has_word(&self, word: &JsString) -> bool {
         lexicon().contains_key(word)
     }

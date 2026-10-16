@@ -120,3 +120,31 @@ clippy: in the new files only module_inception (registry.rs collapsible_if and s
 phonemize-sync / phonemize-best / trace: 14128 identical, 0 DIFFER; phonemize-trace 14126 / 2 DIFFER — the first da
   and the first nb text (`nativised: "joao"` / `"marta"`), the lazy-lexicon trace note of da Run 3, not reproduced
 ```
+
+## Run 7 — 2026-10-15 18:33 (#1578: fixing Run 4's findings 1–3)
+
+**Question.** Do Run 4's three TS defects close in all three engines, and what moves in the golden?
+
+**Commands.** A best-path probe over the Run 4 texts; the NST lexicon grepped for the hundreds, the
+ordinals and two `to-`/`ni-` compounds; `npx tsx tools/check-goldens.mts --show 40 nb` before the rewrite;
+`test/germanic-defects-1578.test.ts`, with each fix reverted in turn.
+
+**Raw finding.**
+1. *Key drift.* The pre-pass now records the words `text()` asks for (`askedWordsNeuralPrepass`).
+   `Han bor i Dvořák.` best → *ˈdʋoːˌɾɑk*, the same as `Dvorak`; `São` best → *ˈsɑːʊ*, the same as `Sao`.
+2. *Number words.* `number()` now passes `oovOverride`, and the false comment is replaced. `200` best →
+   *tuːˈhʊndɾə*, the same as `tohundre`.
+3. *Zero-padded ordinal.* Step 11 keys `ORDINALS[String(Number(n))]`. `Den 07. mai.` → *ˈdɛn ˈʃʉːənə ˈmɑɪ .*.
+4. *Golden:* 17 nb rows went stale: the hundreds, `sekstende` and one `Galápagos`.
+   - NST writes `hundre` *ˈhʊndɾə*, `trettende` *ˈtɾɛtnə*, `femtende` *ˈfɛmtnə*, `attende` *ˈɑtnə*, and
+     compounds with a first-element primary (`todelt` *ˈtuːˌdeːlt*, `niåring` *ˈniːˌoːɾɪŋ*).
+   - Against that: `trehundre`, `firehundre`, `femhundre` and `åttehundre` now read *ˈXˌhʊndɾə* (match);
+     `sekstende` *ˈsɛkstəndə* → *ˈsɛkstnə* (match); `Galápagos` *ˈɡɑːlɑpɑɡɔs* → *ɡɑlɑˈpɑːɡʊs*.
+   - **Two tagger misreads, now visible:** `tohundre` *tuːˈhʊndɾə* and `nihundre` *nɪˈhʊndɾə* put the
+     primary on the second element. The rule reading had the right stress but NST's wrong vowel (ʉ for ʊ).
+     These are the tagger's own errors on words it now sees, not an artifact of the pre-pass; a lexicon
+     row for each hundred would settle all 8. Recorded, not fixed here.
+
+   Rewritten with `--write`.
+
+**Implication.** Findings 1–3 closed in TS, C# and Rust. Open: the 8 hundreds have no lexicon row.

@@ -176,7 +176,8 @@ public static class Normalize
         // 11) ORDINAL DOT — the largest defect in the language.
         // ⚠ The key is the RAW digits, not `String(Number(n))` as in steps 9/10 — so `03.` declines.
         t = Rewrite(t, ORDINAL_DOT, m =>
-            ORDINALS.TryGetValue(m.Groups[1].Value, out var o) ? o : m.Value);
+            // Keyed by `String(Number(n))`, as the date and range arms: a zero-padded `07. mai` too (#1578).
+            ORDINALS.TryGetValue(Js.NumberToString(Js.Number(m.Groups[1].Value)), out var o) ? o : m.Value);
 
         // 12) RANGES.
         t = Rewrite(t, RANGE, m => $"{m.Groups[1].Value} til {m.Groups[2].Value}");

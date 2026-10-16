@@ -31,9 +31,6 @@ public sealed class DanishPhonemizer : ILanguage
                 optional: true, fold: Nat);
     }
 
-    /** Exposed so the async neural path can skip lexicon-covered words. */
-    public static bool DanishLexiconHas(string w) => Lexicon().ContainsKey(w);
-
     private static readonly JsRe UNSTRESSED_PREFIX =
         JsRegex.Compile("^(be|for|ge|und|er)[^aeiouyæøå]*[aeiouyæøå]", "u");
 

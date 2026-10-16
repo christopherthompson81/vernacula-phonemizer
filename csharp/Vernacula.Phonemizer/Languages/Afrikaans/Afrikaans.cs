@@ -235,23 +235,20 @@ public sealed class AfrikaansPhonemizer : ILanguage
 
     private static IReadOnlyDictionary<string, string> LETTER_NAME => MANIFEST.LetterNames; // a bare single letter is SPELLED
 
-    /** Is this word served by either shipped lexicon? Read by the async neural path (afrikaansNeural.ts) so a
-     *  lexicon-covered word is served by the exact dictionary reading rather than by the tagger. */
-    public static bool AfrikaansLexiconHas(string word)
-    {
-        var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
-        return Lexicon().ContainsKey(w) || Rcrl().ContainsKey(w);
-    }
-
     /**
      * Words `phonemizeWordRules` handles with a SPECIAL CASE, which no outside tier may claim: the indefinite
-     * article ⟨'n⟩ = [ə], and a bare single letter, which is SPELLED as its name rather than sounded.
+     * article ⟨'n⟩ = [ə], a bare single letter, which is SPELLED as its name rather than sounded, and the letter
+     * names themselves (#1578): the tagger read the initialism letter `er` *ər* against the rule path's *ɛr*.
      */
     public static bool AfrikaansRuleReserved(string word)
     {
         var w = Js.ToLowerCase(word.Normalize(NormalizationForm.FormC));
-        return w == "'n" || w == "’n" || Js.CodePoints(w).Count == 1;
+        return w == "'n" || w == "’n" || Js.CodePoints(w).Count == 1 || LetterNameWords.Contains(w);
     }
+
+    /** The letter names as words (`bee`, `er`, `zet`), for `AfrikaansRuleReserved`. */
+    private static readonly HashSet<string> LetterNameWords =
+        new(LETTER_NAME.Values.Select(Js.ToLowerCase), StringComparer.Ordinal);
 
     /** Vowel symbols the Afrikaans engine emits — the nucleus test for `withStress`. */
     private static readonly JsRe IPA_NUCLEUS = JsRegex.Compile("[aeiouyɑɛɔœəøæɪʊ]", "u");

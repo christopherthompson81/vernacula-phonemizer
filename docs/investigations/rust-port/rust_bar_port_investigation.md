@@ -101,3 +101,15 @@ clippy: in the new files only module_inception (registry.rs collapsible_if and s
 phonemize-sync / phonemize-best / trace: 14128 identical, 0 DIFFER; phonemize-trace 14126 / 2 DIFFER — the first da
   and the first nb text (`nativised: "joao"` / `"marta"`), the lazy-lexicon trace note of da Run 3, not reproduced
 ```
+
+## Run 7 — 2026-10-15 18:33 (#1578: fixing Run 4's finding 1)
+
+**Question.** Should `reduceFinalA` follow its docstring (a consonant before the ⟨a⟩) when `silentH` has
+emptied the token before it?
+
+**Raw finding.** The only words this reaches are ⟨V-h-a⟩ finals, and the attested ones are the interjections
+`Aha` and `Oha`, whose final vowel is the stressed one. A reduced *ɐ* there is wrong whatever else is. The
+rule now looks back past emptied tokens: `Aha` → *ɑɑ*, `Oha` → *oɑ*; `Bana` and `Oida` still reduce.
+(`silentH` also silencing the ⟨h⟩ of `Aha` is a separate question, not taken up.) Golden: 0 bar rows stale.
+
+**Implication.** Closed in TS, C# and Rust.

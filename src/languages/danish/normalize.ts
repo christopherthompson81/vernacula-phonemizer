@@ -172,13 +172,16 @@ export function normalizeDanish(input: string): string {
     //    inconsistent "første og 3.". A coordinator between two dotted numbers makes both ordinals
     //    regardless of what follows, so the pair is claimed together.
     t = rewrite(t, /(?<!\d)(\d{1,2})\.\s+(og|eller)\s+(\d{1,2})\./gu, (m, a: string, conj: string, b: string) => {
-        const first = ORDINALS[a], second = ORDINALS[b];
+        // `String(Number(…))`, as step 8: a zero-padded `07.` is the same ordinal as `7.` (#1578).
+        const first = ORDINALS[String(Number(a))], second = ORDINALS[String(Number(b))];
         return first !== undefined && second !== undefined ? `${first} ${conj} ${second}` : m;
     });
 
     // 10) ORDINAL DOT (112) — the largest defect. `3. maj` read as "tre" + a SENTENCE BREAK + "maj". The
     //    following-lowercase guard separates it from a sentence ending in a year (8 such).
-    t = rewrite(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
+    //    ⚠ KEYED BY `String(Number(n))`: indexed by the raw digits, a zero-padded `07. maj` missed and read
+    //    as a cardinal plus a sentence break mid-date (#1578).
+    t = rewrite(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[String(Number(n))] ?? m);
 
     // 11) RANGES (16). A dash between numerals is spoken `til`.
     t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
