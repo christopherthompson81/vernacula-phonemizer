@@ -7,7 +7,8 @@ import { MANIFEST } from "../../../src/languages/english/manifest.ts";
 import { makeArpabetToIpa } from "../../../src/languages/english/englishArpabet.ts";
 import { loadTsvMap, loadLines } from "../../../src/core/loadTsv.ts";
 import { loadJson } from "../../../src/core/loadManifest.ts";
-import { PosTagger, type PosModel } from "../../../src/languages/english/posTagger.ts";
+import { PosTagger } from "../../../src/languages/english/posTagger.ts";
+import { loadPosModel } from "../../../src/languages/english/posModelBinary.ts";
 import { americanSpelling } from "../../../src/languages/english/spellingVariants.ts";
 import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
 import { rpWordTransform, toRP } from "../../../src/languages/english-gb/english-gb.ts";
@@ -242,7 +243,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
     },
     // Whitespace-split sentences of every English golden, through the POS tagger (tags joined by spaces).
     pos() {
-        const tagger = new PosTagger(loadJson<PosModel>(ENGLISH, "pos-model.json"));
+        const tagger = new PosTagger(loadPosModel(ENGLISH));
         for (const g of ["en", "en-GB", "en-IN"]) {
             const rows = readFileSync(new URL(`../../../csharp/goldens/${g}.tsv`, import.meta.url), "utf8").split("\n");
             for (const row of rows) {

@@ -595,7 +595,7 @@
             "note": "cleanroom joint n-gram — the rule engine Hindi doesn't need (English spelling isn't rule-derivable).",
         },
         "posModel": {
-            "file": "pos-model.json",
+            "file": "pos-model.bin",
             "note": "averaged perceptron (UD-EWT); drives heteronym selection + de-accenting.",
         },
     },

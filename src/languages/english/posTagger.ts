@@ -6,7 +6,7 @@
  *
  * Zero runtime dependencies. The model artifact is trained OFFLINE on UD English-EWT
  * XPOS (Penn Treebank tags) by `tools/english/en_pos_train.ts` and shipped as the
- * data file `pos-model.json`; `pos-model.PROVENANCE.md` records where the weights
+ * data file `pos-model.bin` (layout: `posModelBinary.ts`); `pos-model.PROVENANCE.md` records where the weights
  * came from.
  * ⚠ THIS MODULE IS THE SINGLE SOURCE OF TRUTH FOR FEATURE EXTRACTION — the trainer
  * imports {@link extractFeatures} from here, so train-time and run-time features
@@ -136,7 +136,7 @@ export function isVerbalUpos(tag: string): boolean {
     return tag === "VERB" || tag === "AUX";
 }
 
-/** Serialized model artifact format (emitted by `tools/english/en_pos_train.ts`). */
+/** The trainer's model, as JSON (`tools/english/en_pos_train.ts`). The engines load {@link PackedPosModel}. */
 export interface PosModel {
     scale: number;
     classes: string[];
@@ -144,27 +144,43 @@ export interface PosModel {
     weights: Record<string, Record<string, number>>; // feature -> classIdx -> intWeight
 }
 
+/**
+ * The model as the tagger holds it, and as `pos-model.bin` stores it (`posModelBinary.ts`): a sparse matrix in
+ * compressed rows. Row `rows.get(feature)` is `cls`/`weight[rowStart[r] .. rowStart[r + 1]]`, classes ascending.
+ */
+export interface PackedPosModel {
+    scale: number;
+    classes: string[];
+    tagdict: Map<string, number>;
+    rows: Map<string, number>;
+    rowStart: Uint32Array;
+    cls: Uint8Array;
+    weight: Int32Array;
+}
+
 /** Greedy left-to-right averaged-perceptron tagger. */
 export class PosTagger {
     private readonly classes: string[];
-    private readonly tagdict: Record<string, number>;
-    private readonly weights: Record<string, Record<string, number>>;
+    private readonly tagdict: Map<string, number>;
+    private readonly model: PackedPosModel;
 
-    constructor(model: PosModel) {
+    constructor(model: PackedPosModel) {
         this.classes = model.classes;
         this.tagdict = model.tagdict;
-        this.weights = model.weights;
+        this.model = model;
     }
 
     private predict(features: Record<string, number>): string {
+        const { rows, rowStart, cls, weight } = this.model;
         const scores = new Float64Array(this.classes.length);
         for (const feat in features) {
-            const w = this.weights[feat];
-            if (!w) continue;
+            const r = rows.get(feat);
+            if (r === undefined) continue;
             const val = features[feat] ?? 0;
-            for (const idx in w) {
-                const ci = +idx;
-                scores[ci] = (scores[ci] ?? 0) + (w[idx] ?? 0) * val;
+            // Classes ascending within the row, the order `for (idx in w)` visited the JSON row in.
+            for (let k = rowStart[r] ?? 0, end = rowStart[r + 1] ?? 0; k < end; k++) {
+                const ci = cls[k] ?? 0;
+                scores[ci] = (scores[ci] ?? 0) + (weight[k] ?? 0) * val;
             }
         }
         let best = 0;
@@ -197,13 +213,11 @@ export class PosTagger {
         let prev2 = START;
         for (let i = 0; i < norm.length; i++) {
             const word = norm[i] ?? "";
-            const cached = this.tagdict[word];
-            // ⚠ `typeof === "number"`, not `!== undefined`. The tagdict comes from `loadJson` (a bare
-            // JSON.parse — the models are too large for the jsonc loader's null-prototype reviver), so it
-            // inherits Object.prototype and `tagdict["constructor"]` is a FUNCTION: the fast path was taken
-            // for the ordinary English word ⟨constructor⟩, `classes[fn]` was undefined, and the perceptron's
-            // prediction was silently replaced by the "NN" fallback. The C# port's Dictionary inherits
-            // nothing and always predicted, so this was a divergence too.
+            const cached = this.tagdict.get(word);
+            // ⚠ A `Map`, not an object. The tagdict was once a bare JSON.parse object, which inherits
+            // Object.prototype: `tagdict["constructor"]` was a FUNCTION, the fast path was taken for the
+            // ordinary English word ⟨constructor⟩, `classes[fn]` was undefined, and the perceptron's
+            // prediction was silently replaced by the "NN" fallback (the C# Dictionary always predicted).
             const tag =
                 typeof cached === "number"
                     ? (this.classes[cached] ?? "NN")

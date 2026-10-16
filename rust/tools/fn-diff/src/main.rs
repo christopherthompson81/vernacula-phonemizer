@@ -21,7 +21,7 @@ use vernacula_phonemizer::languages::english::normalize::{
 use vernacula_phonemizer::languages::english::numbers::{
     BigNat, number_to_words, ordinal_to_words,
 };
-use vernacula_phonemizer::languages::english::pos_tagger::{PosModel, PosTagger};
+use vernacula_phonemizer::languages::english::pos_tagger::PosTagger;
 use vernacula_phonemizer::languages::english::spelling_variants::american_spelling;
 use vernacula_phonemizer::languages::english_gb::english_gb::{SETS, rp_word_transform, to_rp};
 
@@ -210,7 +210,10 @@ fn main() {
             })
         }
         "pos" => {
-            let tagger = PosTagger::new(load_json::<PosModel>(DIR, "pos-model.json").unwrap());
+            let tagger = PosTagger::new(
+                vernacula_phonemizer::languages::english::pos_model_binary::load_pos_model(DIR)
+                    .unwrap(),
+            );
             Box::new(move |input| {
                 let words: Vec<JsString> = input["words"]
                     .as_array()

@@ -26,8 +26,8 @@ import {
     posExpectation,
     headsObjectPhrase,
     type PosExpectation,
-    type PosModel,
 } from "./posTagger.ts";
+import { loadPosModel } from "./posModelBinary.ts";
 import { numberToWords, ordinalToWords } from "./numbers.ts";
 import { foldLatinDiacritics } from "../../core/unicode.ts";
 import { normalizeEnglish, normalizeEnglishInitialisms } from "./normalize.ts";
@@ -696,9 +696,7 @@ export function createEnglish(): EnglishPhonemizer {
         },
     );
 
-    const tagger = new PosTagger(
-        loadJson<PosModel>(import.meta.url, "pos-model.json"),
-    );
+    const tagger = new PosTagger(loadPosModel(import.meta.url));
 
     return new EnglishPhonemizer(
         lexicon,

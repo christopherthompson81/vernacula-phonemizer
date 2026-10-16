@@ -8,6 +8,8 @@
  * ⚠ BUILD-TIME TOOLING. Never shipped, and no bearing on the runtime's
  * zero-dependency contract. Run offline:
  *   tsx tools/english/en_pos_train.ts <train.conllu> <dev.conllu> <out.json>
+ * then `tools/english/pos_model_pack.mts pack <out.json> data/languages/english/pos-model.bin`, the form the
+ * engines load.
  *
  * Algorithm: greedy averaged perceptron (Collins 2002 / Honnibal 2013 feature
  * set). Frequent unambiguous words are cached in a `tagdict` fast path; only

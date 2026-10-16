@@ -145,7 +145,7 @@ package; they are fenced like the data.
 
 **Models with share-alike training inputs under the training-as-use posture:**
 `arabic/diacritizer.onnx` (arwiki silver), `arabic/diacritizer-egy.onnx` (arzwiki silver + MIT
-dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.json`
+dialect corpus), `hebrew/he-tagger.int8.onnx` (small modern/wiki slice), `english/pos-model.bin`
 (UD-EWT CC-BY-SA 4.0; sidecar), `khmer/km-segmenter.int8.onnx` (kmwiki text, its typed U+200B as the
 supervision, plus the Google km word list in §2; sidecar). Flagged individually in NOTICE with their
 training-data statements.
