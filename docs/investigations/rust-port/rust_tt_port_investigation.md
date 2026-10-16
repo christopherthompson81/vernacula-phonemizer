@@ -99,3 +99,22 @@ TS on this tree and replayed).
 - tt: tt-normalize 25,634, tt-g2p 42,577, tt-numbers 58,260, tt-roman 355, symbols 3,275: 0 DIFFER; phonemize-sync / phonemize-best / trace 214 identical and 1 DIFFER each (the port-pending Arabic row); parity 199/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 7 — 2026-10-15 19:20 (the findings fixed, TS-first, #1576)
+
+**Question.** Is ъ → ʔ right, and do the other findings fix cleanly?
+
+**Command.** Probe scripts under `.probe/` on synthetic inputs (`npx tsx .probe/tt.mts <lang> …`), then `npx vitest run`, `npx tsx tools/check-goldens.mts --write`, `dotnet run --project csharp/tools/parity`, `cargo run -p parity`, and each source file reverted alone against `test/turkic-defects-1576.test.ts`.
+
+**Raw finding.**
+1. ъ — sourced on en.wikipedia "Tatar alphabet": the hard sign IS the glottal stop natively (after a closed
+   back-vowel syllable), гъ/къ mark the uvular, and Russian loans keep Russian pronunciation. So the defect is
+   narrower than reported: ʔ stays (мәсъәлә), къ/гъ make the preceding consonant uvular and drop the sign
+   (мәкъалә → mæqaˈlæ, мәгънә → mæʁˈnæ), and ъ before е/ё/ю/я is the /j/ separator (съезд → ˈsjezd, compound
+   йөзъеллык → jøzjelˈlɨq).
+2. Stress: the same medial-cluster defect as tk (китаплар → kitaˈplar); fixed the same way.
+3. триллион added (the Wiktionary Tatar lemma, and the tier's own magnitude list).
+- Goldens: 145 rows changed; 125 only in ˈ position, the other 20 the ъ readings (мәгълүмат, объект, аръягы,
+  әгъза) and one long code number now read with триллион.
+
+**Implication.** Done; mirrored (Rust parity 199/200, the existing port-pending Arabic row).

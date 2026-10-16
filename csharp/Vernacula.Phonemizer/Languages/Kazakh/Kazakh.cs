@@ -92,7 +92,7 @@ public static class KazakhPhonemizer
                 }
                 else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
                 {
-                    var ipa = KazakhNumbers.NumberToIpa(Js.Number(SPACES.Replace(m.Groups[2].Value, "")));
+                    var ipa = KazakhNumbers.DigitsToIpa(SPACES.Replace(m.Groups[2].Value, ""));
                     foreach (var w in ipa.Split(' ')) sink.Emit(w); // numbers are pre-phonemized
                 }
                 else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)

@@ -142,7 +142,7 @@ describe("Tatar text normalization", () => {
     test("the SYMBOL tier, and the rate whose numerator carries an exponent", () => {
         expect(tt.text("11,5%")).toBe("unˈber øˈter ˈbiʃ proˈt͡sent");
         expect(tt.text("$100 миллион")).toBe("ˈjøz milliˈon dolˈlɑr");
-        expect(tt.text("11 500 км²")).toBe("unˈber ˈmeŋ ˈbiʃ ˈjøz qvɑˈdrɑt kiloˈmetr");
+        expect(tt.text("11 500 км²")).toBe("unˈber ˈmeŋ ˈbiʃ ˈjøz qvɑdˈrɑt kiloˈmetr");
         // ⚠ `м³/с` — the river-discharge shape. Before the core fix the rate alternative began at the
         // slash, so the `³` ended the match and `/с` reached the phoneme sink as a bare [s].
         expect(tt.text("9,44 м³/с")).toBe("tuˈʁɨz øˈter ˈdyrt ˈdyrt ˈqub ˈmetr sekundɨˈna");

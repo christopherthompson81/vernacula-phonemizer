@@ -31,6 +31,10 @@ pub(crate) static NUM: LazyLock<&'static NumbersDef> =
 
 /// `turkmenNumberWords(n, d)` over the JS number `n`. ⚠ A `f64`: `ordinalOf` passes any integer, unbounded.
 fn words_f64(n: f64, d: &NumbersDef) -> Vec<Word> {
+    // Not a non-negative integer, no words: NaN used to recurse until the stack overflowed (#1576).
+    if !(n.is_finite() && n.fract() == 0.0) || n < 0.0 {
+        return Vec::new();
+    }
     let unit = |k: f64| d.units.get(k as usize).cloned();
     let mag = &d.magnitudes;
     let more = |r: f64| {

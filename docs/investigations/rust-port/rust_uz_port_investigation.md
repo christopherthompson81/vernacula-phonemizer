@@ -95,3 +95,18 @@ TS on this tree and replayed).
 - uz: uz-normalize 30,159, uz-g2p 87,696, uz-numbers 58,274, uz-roman 4,016, phonemize-sync / phonemize-best / trace 4,016 each, symbols 7,067: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 7 — 2026-10-15 19:20 (the findings fixed, TS-first, #1576)
+
+**Question.** Do the Run 5 findings fix cleanly?
+
+**Command.** Probe scripts under `.probe/` on synthetic inputs (`npx tsx .probe/tt.mts <lang> …`), then `npx vitest run`, `npx tsx tools/check-goldens.mts --write`, `dotnet run --project csharp/tools/parity`, `cargo run -p parity`, and each source file reverted alone against `test/turkic-defects-1576.test.ts`.
+
+**Raw finding.**
+1. Past 2⁵³: `numberToWords` returns "" for an unsafe integer; the regbi/moliviy branch then leaves the digits for
+   the engine's digit-at-a-time reading.
+2. `trillion` added (infoedu.uz's table: milliard 9 zeros, trillion 12); 10¹² = *bir trillion*.
+3. The `ordinalWords` docstring now says *yuz toʻqsoninchi*, which is what the code returns.
+- Goldens: 0 uz rows changed.
+
+**Implication.** Done; mirrored.

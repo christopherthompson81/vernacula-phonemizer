@@ -4,7 +4,7 @@
  * left-to-right scan (kyrgyz.jsonc = the letter tables) with three code rules: (1) VELAR/UVULAR harmony —
  * ⟨к⟩→[q]/⟨г⟩→[ʁ] next to a BACK vowel, [k]/[ɡ] next to a FRONT vowel (Kyrgyz does not spell this, unlike
  * Kazakh қ/ғ); (2) dark ⟨л⟩→[ɫ] by the same back-harmony, clear [l] by front; (3) LONG vowels — a doubled
- * vowel is [Vː]. ⟨б⟩ lenites to the bilabial fricative [β] between two vowels.
+ * vowel is [Vː]. ⟨б⟩ lenites to the bilabial fricative [β] between two vowels. Stress is word-final (#1576).
  * Ported from src/languages/kyrgyz/kyrgyz.ts — see that file for the corpus evidence.
  */
 using System.Text;
@@ -55,11 +55,26 @@ public static class KyrgyzPhonemizer
             if (c == "л") { outp.Add(BackHarmony(chars, i) ? "ɫ" : "l"); continue; }
             // ⟨б⟩ lenites to the bilabial fricative [β] between two vowels
             if (c == "б" && i > 0 && IsVowelLetter(chars[i - 1]) && i + 1 < chars.Count && IsVowelLetter(chars[i + 1])) { outp.Add("β"); continue; }
-            if (IOTATED.TryGetValue(c, out var io)) { outp.Add(io); continue; }
+            // ⚠ One segment per code point, as the TS spreads it: `MarkFinalStress` counts segments.
+            if (IOTATED.TryGetValue(c, out var io)) { outp.AddRange(Js.CodePoints(io)); continue; }
             if (CONS.TryGetValue(c, out var cons)) outp.Add(cons);
             // else: ъ/ь and unknown chars → skip
         }
-        return string.Concat(outp);
+        return string.Concat(MarkFinalStress(outp));
+    }
+
+    private static bool IsVowelSeg(string seg) => Js.CodePoints(seg).Any(c => Ipa.IPA_VOWELS.Contains(c));
+
+    /** Word-final stress: ˈ before the onset of the LAST vowel's syllable — one onset consonant word-internally
+     *  (китептер → kitepˈter), the whole cluster only word-initially (спорт → ˈsport). See kyrgyz.ts (#1576). */
+    private static List<string> MarkFinalStress(List<string> segs)
+    {
+        var at = segs.FindLastIndex(IsVowelSeg);
+        if (at < 0) return segs;
+        if (at > 0 && !IsVowelSeg(segs[at - 1])) at--;
+        if (!segs.Take(at).Any(IsVowelSeg)) at = 0;
+        segs.Insert(at, "ˈ");
+        return segs;
     }
 
     /**

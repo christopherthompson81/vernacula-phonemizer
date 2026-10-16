@@ -143,7 +143,8 @@ describe("Kazakh text normalization", () => {
         expect(normalizeKazakh("2016-жылы")).toBe("екі мың он алтыншы жылы"); // a four-digit ordinal
         expect(normalizeKazakh("247-бабына")).toBe("екі жүз қырық жетінші бабына");
         expect(normalizeKazakh("15-і")).toBe("он бесі"); // the date possessive, not an ordinal
-        expect(normalizeKazakh("1000-шы")).toBe("1000-шы"); // a round thousand still declines (мыңыншы)
+        // a round thousand takes the ending on мың: мыңыншы, the Wiktionary Kazakh numeral (#1576)
+        expect(normalizeKazakh("1000-шы")).toBe("бір мыңыншы");
     });
 
     it("clocks read the h-less colon form, incl. the case suffix", () => {
@@ -163,8 +164,9 @@ describe("Kazakh text normalization", () => {
         expect(ph("802.11n")).toBe("seɡˈɪz ʒˈʏz jekˈɪ nʏktˈe ˈon bˈɪr ˈɛn");
         expect(ph("1.1 суретті")).toBe("bˈɪr nʏktˈe bˈɪr swrettˈɪ");
         expect(ph("15.00 UTC")).toBe("ˈon bˈes jˈuː tʰˈiː sˈiː");
-        // the 4-digit ordinal is corpus-absent and must not emit a fused guess
-        expect(normalizeKazakh("1000-ші")).toBe("1000-ші");
+        // the round-thousand ordinal is SOURCED, not guessed (мыңыншы, Wiktionary); the harmony is мың's, not the
+        // written suffix's (#1576)
+        expect(normalizeKazakh("1000-ші")).toBe("бір мыңыншы");
     });
 
     it("era markers, degrees, roman ordinals and percent read their Kazakh words", () => {

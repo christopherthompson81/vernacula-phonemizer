@@ -576,7 +576,9 @@ export function normalizeKyrgyz(input: string): string {
     //     ⚠ THE SECOND OPERAND RUNS TO THE CLAUSE EDGE, not to the next space, because the word goes AFTER it:
     //     `= 100 тыйынга` is *жүз тыйынга барабар*, and a single-token capture produced *жүз барабар тыйынга*
     //     — the right word in the wrong place, which is the failure this rule was written to avoid.
-    s = rewrite(s, /([\d\p{Script=Cyrillic}])\s*=\s*([\d\p{Script=Cyrillic}][^=.,;:!?()]{0,40})/gu,
+    //     ⚠ BUT THE OPERAND IS ONE WORD, OR A NUMBER AND ITS NOUN — every attestation above has that shape. Taken
+    //     to the clause edge, `а = б жана в ушундай болот` put барабар after the whole clause (#1576).
+    s = rewrite(s, /([\d\p{Script=Cyrillic}])\s*=\s*(\d[\d ]*(?:[.,]\d+)?(?:\s?[\p{L}\p{M}°%]+)?|\p{Script=Cyrillic}[\p{L}\p{M}]*)/gu,
         (_m, a: string, b: string) => `${a} ${b.trimEnd()} барабар`);
 
     // 11c) THE NUMERO SIGN — `Инв. № 222`, `№1057`, `№ 7`, `№ 222-инвертарынан`. 8 occurrences, every one a
@@ -632,6 +634,13 @@ export function normalizeKyrgyz(input: string): string {
     //     Guarded to a single unspaced dot between digits, so `01.04.1776` is rejected at both ends (trap 52:
     //     the trailing guard is what stops the engine restarting inside it and matching `04.1776`) and a
     //     sentence period is never eaten.
+    //     ⚠ ONE FRACTIONAL DIGIT IS A DECIMAL, and reads as step 13's comma does. Every one-digit instance above
+    //     is a quantity (`198.5`, `6.4`, `7.5`, `0.8`, `161.9`); the clocks and the page number are two digits,
+    //     the dates two dots. Read bare, `2.5 версия` was two numbers (#1576).
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d)(?![\d.,])/gu, (m0, whole: string, frac: string) => {
+        const w = numberWords(Number(whole)), f = numberWords(Number(frac)), den = numberWords(10);
+        return w === undefined || f === undefined || den === undefined ? m0 : `${w} бүтүн ${glue(den, CASE.abl)} ${f}`;
+    });
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.,])/gu, "$1 $2");
 
     // 15) INITIALISMS, LAST, so every abbreviation rule above has already spent its capitals.

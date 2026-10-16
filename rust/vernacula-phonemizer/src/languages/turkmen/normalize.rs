@@ -311,7 +311,8 @@ pub(crate) fn normalize_turkmen(input: &JsString) -> JsString {
     // Signs.
     s = rewrite(
         &s,
-        js_re!(r"(^|(?<!\d)[\s(])[-−–]\s?(\d)", "gu"),
+        // the en dash is a sign only when it touches the digit; spaced, it is punctuation (#1576)
+        js_re!(r"(^|(?<!\d)[\s(])(?:[-−]\s?|–)(\d)", "gu"),
         &js("$1minus $2"),
     );
     s = rewrite(&s, js_re!(r"±", "gu"), &js(" plýus minus "));

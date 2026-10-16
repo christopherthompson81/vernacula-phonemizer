@@ -250,7 +250,11 @@ pub(crate) fn normalize_uzbek(input: &JsString) -> JsString {
         let wl = w.to_lower_case();
         let n = js_number(&first_comma_to_dot(&d));
         if wl.starts_with(&js("regbi")) || wl.starts_with(&js("moliviy")) {
-            return number_to_words(n).concat(&js(" ")).concat(&w);
+            // A numeral past 2⁵³ stays digits, for the engine's digit-at-a-time reading (#1576).
+            let card = number_to_words(n);
+            return if card.is_empty() { d } else { card }
+                .concat(&js(" "))
+                .concat(&w);
         }
         match ordinal_words(n) {
             None => d.concat(&js(" ")).concat(&w),

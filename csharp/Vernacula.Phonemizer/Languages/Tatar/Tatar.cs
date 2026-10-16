@@ -19,23 +19,9 @@ public static class TatarPhonemizer
     private static readonly IReadOnlySet<string> BACK = Manifest.BACK;
     private static readonly IReadOnlySet<string> FRONT = Manifest.FRONT;
 
-    private static readonly IReadOnlySet<string> STRESS_NASAL =
-        new HashSet<string>(["m", "n", "ŋ"], StringComparer.Ordinal);
-    private static readonly IReadOnlySet<string> STRESS_FRICATIVE = new HashSet<string>(
-        ["f", "v", "s", "z", "ʃ", "ʒ", "ɕ", "ʑ", "x", "χ", "h", "ʁ", "ɣ"], StringComparer.Ordinal);
-
-    /** Sonority for maximal-onset stress: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1,
-     *  stop 0. ⚠ THE AFFRICATE TEST PRECEDES THE FRICATIVE LIST — a tie-break the order encodes. */
-    private static int Sonority(string seg)
-    {
-        if (Js.CodePoints(seg).Any(Ipa.IPA_VOWEL.Contains)) return 6;
-        if (seg == "j" || seg == "w") return 5;
-        if (seg == "l" || seg == "r") return 4;
-        if (STRESS_NASAL.Contains(seg)) return 3;
-        if (seg.Contains('͡')) return 1; // the tie bar of an affricate
-        if (STRESS_FRICATIVE.Contains(seg)) return 2;
-        return 0;
-    }
+    /** The vowel letters a separating ⟨ъ⟩ precedes: each begins with /j/ (#1576). */
+    private static readonly IReadOnlySet<string> IOTATED_AFTER_SIGN =
+        new HashSet<string>(["е", "ё", "ю", "я"], StringComparer.Ordinal);
 
     /** Is the nearest vowel to position `i` (scanning outward) a BACK vowel? Defaults to back (Turkic
      *  default). ⚠ ⟨а⟩ is SKIPPED rather than answering — it is harmony-neutral for the к/г backing and
@@ -71,35 +57,31 @@ public static class TatarPhonemizer
             if (ch == "к") segs.Add(NearBack(chars, i) ? "q" : "k");
             else if (ch == "г") segs.Add(NearBack(chars, i) ? "ʁ" : "ɡ");
             else if (ch == "а") segs.Add(frontWord ? "a" : "ɑ");
-            else if (ch == "е") segs.Add(i == 0 || CYR_VOWEL.Contains(chars[i - 1]) ? "je" : "e"); // word-initial / post-vocalic
+            // word-initial / post-vocalic ⟨е⟩ → [je], and after the separating ⟨ъ⟩ (съезд, йөзъеллык)
+            else if (ch == "е") segs.Add(i == 0 || CYR_VOWEL.Contains(chars[i - 1]) || chars[i - 1] == "ъ" ? "je" : "e");
             else if (CONS.TryGetValue(ch, out var c)) segs.Add(c);
             else if (IOTATED.TryGetValue(ch, out var io)) segs.Add(io);
             else if (VOWEL.TryGetValue(ch, out var v)) segs.Add(v);
-            else if (ch == "ъ") segs.Add("ʔ"); // hard sign — glottal / hiatus
+            // ⟨ъ⟩: the glottal stop natively (мәсъәлә), the UVULAR marker after ⟨к г⟩ (мәкъалә, мәгънә), the /j/
+            // separator before an iotated vowel (съезд, йөзъеллык). See tatar.ts (#1576).
+            else if (ch == "ъ")
+            {
+                var prev = i > 0 ? chars[i - 1] : "";
+                if (prev == "к" || prev == "г") segs[^1] = prev == "к" ? "q" : "ʁ";
+                else if (!(i + 1 < chars.Count && IOTATED_AFTER_SIGN.Contains(chars[i + 1]))) segs.Add("ʔ");
+            }
             // ь (soft sign) and other marks: dropped
         }
-        // Word-final (oxytone) stress — the Turkic default: ˈ before the MAXIMAL onset of the last vowel's
-        // syllable (native Tatar has no onset clusters; loans do — спорт→ˈsport).
+        // Word-final (oxytone) stress — the Turkic default: ˈ before the onset of the last vowel's syllable.
+        // ⚠ ONE ONSET CONSONANT word-internally (китап.лар); only a word-INITIAL cluster, with no vowel before it,
+        // is the whole onset (спорт→ˈsport). See tatar.ts (#1576).
         static bool IsV(string s) => Js.CodePoints(s).Any(Ipa.IPA_VOWEL.Contains);
-        var vidx = new List<int>();
-        for (var k = 0; k < segs.Count; k++)
-            if (IsV(segs[k])) vidx.Add(k);
-        if (vidx.Count > 0)
+        var nucleus = segs.FindLastIndex(IsV);
+        if (nucleus >= 0)
         {
-            var nucleus = vidx[^1];
             var at = nucleus;
             if (at > 0 && !IsV(segs[at - 1])) at--; // the immediate onset consonant
-            while (at > 0 && !IsV(segs[at - 1]))
-            {
-                var p = segs[at - 1];
-                var l = segs[at];
-                // obstruent + liquid/glide (loan pl/kr) or fricative + stop (sp/st) — Turkic has NO native
-                // onset clusters, and no nasal+stop onsets, so those two suffice.
-                var obstruentLiquid = Sonority(p) <= 2 && Sonority(l) >= 4;
-                var sibilantStop = (p == "s" || p == "ʃ" || p == "ɕ") && Sonority(l) <= 1;
-                if (!(obstruentLiquid || sibilantStop)) break;
-                at--;
-            }
+            if (!segs.Take(at).Any(IsV)) at = 0; // a word-initial cluster is the whole onset
             segs.Insert(at, "ˈ");
         }
         return string.Concat(segs).Normalize(NormalizationForm.FormC);

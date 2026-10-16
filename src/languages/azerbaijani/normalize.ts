@@ -104,8 +104,10 @@ const MULTI_DOT: readonly (readonly [string, string])[] = [
     ["e\\.\\s?ə\\.", "eramızdan əvvəl"],
     ["E\\.\\s?ə\\.", "eramızdan əvvəl"],
     ["b\\.\\s?e\\.", "bizim eramız"],
-    ["\\bBE(?=\\s+\\d)", "bizim eramız"],
 ];
+// ⚠ `BE` IS NOT IN THE TABLE: the table is matched case-insensitively (the dotted forms are written both ways), and
+// a case-folded `BE` also took `be 5 il` and `Be 2010` (#1576). Only the capital pair is the era marker.
+const BE_ERA = /(?<![\p{L}\p{M}])\bBE(?=\s+\d)/gu;
 
 /** Single-dot abbreviations → the spoken words. `Dr.` = Doktor, `Şək.` = şəkil (figure). The dot is a phrase
  *  break otherwise. */
@@ -188,6 +190,7 @@ export function normalizeAzerbaijani(input: string): string {
         s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}(?=\\s*$)`, "giu"), `${word}.`);
         s = rewrite(s, new RegExp(`(?<![\\p{L}\\p{M}])${body}`, "giu"), word);
     }
+    s = rewrite(s, BE_ERA, "bizim eramız");
 
     // 2) DOTTED CAPITAL RUNS → a bare all-caps run, so the initialism pass reads them as LETTERS.
     //    `Corc V. Buş` — the W.-style initial dot is a break.

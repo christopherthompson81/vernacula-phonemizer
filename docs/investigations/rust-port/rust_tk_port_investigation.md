@@ -104,3 +104,22 @@ TS on this tree and replayed).
 - tk: tk-normalize 11,510, tk-g2p 141,528, tk-numbers 84,329, tk-roman 337, phonemize-sync / phonemize-best / trace 217 each, symbols 3,272: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 7 — 2026-10-15 19:20 (the findings fixed, TS-first, #1576)
+
+**Question.** Do the Run 5 findings fix cleanly?
+
+**Command.** Probe scripts under `.probe/` on synthetic inputs (`npx tsx .probe/tt.mts <lang> …`), then `npx vitest run`, `npx tsx tools/check-goldens.mts --write`, `dotnet run --project csharp/tools/parity`, `cargo run -p parity`, and each source file reverted alone against `test/turkic-defects-1576.test.ts`.
+
+**Raw finding.**
+1. Stress: one onset consonant word-internally; the sonority walk (and with it `sonority`, `NASAL` and the
+   manifest's `nasals`) is gone. kitaplar → kitɑpˈlɑɾ, ilkinji → ilkinˈd͡ʒi (the nasal+stop clause had given
+   ilkiˈnd͡ʒi), plýus → ˈpljuθ (one syllable; the old walk gave plˈjuθ). 163 of 200 golden rows changed; a
+   script confirmed 162 differ only in where ˈ stands.
+2. The en dash is a sign only when it touches the digit: `Ilkinji ýyl – 1995.` no longer reads *minus*. That is the
+   163rd golden row (a spaced `– 2` that had read *minus iki*).
+3. `turkmenNumberWords` returns [] for anything but a non-negative integer (NaN overflowed the stack).
+4. NOT CHANGED: no scale above milliard. No Turkmen source for a trillion word was found (Wiktionary, tk.wikipedia,
+   a web search); *bir müň milliard* is the right quantity, so the gap is idiom, not value.
+
+**Implication.** Done; mirrored (parity 200/200).

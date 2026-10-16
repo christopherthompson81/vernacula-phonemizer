@@ -102,8 +102,8 @@ public class TurkmenTests
     // …and in running text, where the suffix was reaching the g2p as the bare word [nd͡ʒɯ].
     public void TheOrdinalInRunningText()
     {
-        Assert.Equal("jiɡɾiˈmi døɾdyˈnd͡ʒi ˈɡyn", Say("24-nji gün"));
-        Assert.Equal("biɾiˈnd͡ʒi jɑɾɯˈmɯ", Say("1-nji ýarymy"));
+        Assert.Equal("jiɡɾiˈmi døɾdynˈd͡ʒi ˈɡyn", Say("24-nji gün"));
+        Assert.Equal("biɾinˈd͡ʒi jɑɾɯˈmɯ", Say("1-nji ýarymy"));
     }
 
     [Fact]
@@ -111,10 +111,10 @@ public class TurkmenTests
     // beside it — so the bare-sign rule must not double it.
     public void Degrees()
     {
-        Assert.Equal("plˈjuθ ˈon ˈbiɾ ɡɾɑˈduθ", Say("+11° gradus"));
-        Assert.Equal("plˈjuθ ˈon ɡɾɑduˈθdɑn", Say("+10° dan")); // the ablative glued to the sign
+        Assert.Equal("ˈpljuθ ˈon ˈbiɾ ɡɾɑˈduθ", Say("+11° gradus"));
+        Assert.Equal("ˈpljuθ ˈon ɡɾɑduθˈdɑn", Say("+10° dan")); // the ablative glued to the sign
         // ⚠ `Selsi`, not `Selsiý` — the corpus's own "0 K (Kelwin)= -273,15°C (gradus Selsi)".
-        Assert.Equal("elˈli ɡɾɑˈduθ θelθiˈe jeˈtjæɾ", Say("50 ° C-e ýetýär"));
+        Assert.Equal("elˈli ɡɾɑˈduθ θelθiˈe jetˈjæɾ", Say("50 ° C-e ýetýär"));
         Assert.Equal("oˈtuð doˈkuð ɡɾɑˈduθ oˈtuð ˈbiɾ miˈnut ˈnol θeˈkunt n", Say("39°31′0″N"));
     }
 
@@ -124,7 +124,7 @@ public class TurkmenTests
     public void TheBoundedFraction()
     {
         Assert.Equal("døɾtˈden ˈyt͡ʃ bøleɡiˈne", Say("3/4 bölegine"));
-        Assert.Equal("dokuˈðdɑn ˈbiɾ", Say("1/9"));
+        Assert.Equal("dokuðˈdɑn ˈbiɾ", Say("1/9"));
         // ⚠ `10/1 bölegini` is ONE TENTH in this corpus — the Turkic order — and nothing but the
         // numerator > denominator test separates it from an ordinary fraction. Refused, not guessed.
         Assert.Equal("10, 1 bölegini", Norm("10/1 bölegini"));
@@ -146,8 +146,8 @@ public class TurkmenTests
     // suffix; a Roman numeral has none, so the policy derives it from the numeral's own last vowel.
     public void RomanCenturies()
     {
-        Assert.Equal("jiɡɾimiˈnd͡ʒi ɑˈθɯɾ", Say("XX asyr"));
-        Assert.Equal("ɑltɯˈnd͡ʒɯ ɑθɯɾˈdɑ", Say("VI asyrda"));
+        Assert.Equal("jiɡɾiminˈd͡ʒi ɑˈθɯɾ", Say("XX asyr"));
+        Assert.Equal("ɑltɯnˈd͡ʒɯ ɑθɯɾˈdɑ", Say("VI asyrda"));
     }
 
     [Fact]

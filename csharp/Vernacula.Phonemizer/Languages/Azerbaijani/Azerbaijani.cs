@@ -28,7 +28,7 @@ public static class AzerbaijaniPhonemizer
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => Manifest.MANIFEST.ClausePunctuation;
 
     private static readonly JsRe TOKEN = JsRegex.Compile(
-        $"({HostWord.LATIN_RUN})|(\\d+(?<!(?<!\\d)0)\\.\\d{{3}}(?:\\.\\d{{3}})*|\\d+,\\d+|\\d+)|([.!?…,;:])", "giu");
+        $"({HostWord.LATIN_RUN})|(\\d+(?<!(?<!\\d)0)\\.\\d{{3}}(?:\\.\\d{{3}})*(?:,\\d+)?|\\d+,\\d+|\\d+)|([.!?…,;:])", "giu");
 
     /** This language's OWN inventory — a token this class REJECTS carries a letter Azerbaijani does not use. */
     private const string NATIVE_CLASS = "[a-zçğəıiöşüx]";
@@ -64,11 +64,11 @@ public static class AzerbaijaniPhonemizer
         var bits = tok.Split(',');
         var intRaw = bits[0];
         var frac = bits.Length > 1 ? bits[1] : null;
-        var words = AzerbaijaniNumbers.NumberToWords(Js.Number(GROUP_SEPARATORS.Replace(intRaw, "")));
+        var words = AzerbaijaniNumbers.DigitsToWords(GROUP_SEPARATORS.Replace(intRaw, "")); // exact past 2⁵³ (#1576)
         if (frac is not null)
             words +=
                 $" {Manifest.MANIFEST.Numbers.DecimalConnector} " +
-                string.Join(" ", Js.CodePoints(frac).Select(d => AzerbaijaniNumbers.NumberToWords(Js.Number(d))));
+                string.Join(" ", Js.CodePoints(frac).Select(AzerbaijaniNumbers.DigitsToWords));
         return words;
     }
 

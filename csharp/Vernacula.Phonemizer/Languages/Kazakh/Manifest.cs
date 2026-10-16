@@ -14,6 +14,8 @@ public sealed class KazakhNumbersDef
     public string Hundred { get; init; } = "";
     public string Thousand { get; init; } = "";
     public string Million { get; init; } = "";
+    public string Milliard { get; init; } = "";
+    public string Trillion { get; init; } = "";
 }
 
 public sealed class KazakhManifest

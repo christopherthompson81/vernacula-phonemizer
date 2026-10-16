@@ -122,3 +122,24 @@ TS on this tree and replayed).
 - az: az-normalize 44,167, az-g2p 270,272, az-numbers 50,266, az-roman 3,898, phonemize-sync / phonemize-best / trace 3,898 each, symbols 6,910: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 7 — 2026-10-15 19:20 (the findings fixed, TS-first, #1576)
+
+**Question.** Do the four findings of Run 5 fix cleanly, and does anything move?
+
+**Command.** Probe scripts under `.probe/` on synthetic inputs (`npx tsx .probe/tt.mts <lang> …`), then `npx vitest run`, `npx tsx tools/check-goldens.mts --write`, `dotnet run --project csharp/tools/parity`, `cargo run -p parity`, and each source file reverted alone against `test/turkic-defects-1576.test.ts`.
+
+**Raw finding.**
+1. Past 2⁵³: `digitsToWords` groups the written digits (tr's #1523 shape); `numberToWords` now returns "" for an
+   unsafe integer instead of reading `String(n)`. `12345678901234567890 nəfər` reads its 20 digits one by one (7
+   groups > 6 scale words), and `1000000000000000000000` its 22. az came off `ACCEPTED_LOSSY` in
+   test/large-numeral-fidelity.test.ts.
+2. TOKEN: the period-thousands alternative takes an optional `,\d+`; `1.234,5 manat` = `1234,5 manat`.
+3. `BE` moved out of the case-insensitive MULTI_DOT table into its own `gu` regex: `be 5 il`, `Be 2010` no longer
+   read *bizim eramız*; `BE 1000` does.
+4. The Roman CONTEXT is bounded by harmony: every stem is front-voweled, so `(?![\p{L}\p{M}]*[aıou])` refuses
+   `əsrarəngiz`. ⚠ The first cut had `[aıouAIOU]` — under `i`, `I` folds to `i`, and `əsrin` was refused; the
+   existing pin "context matches the agglutinated century forms" caught it.
+- Goldens: 0 az rows changed. Each fix's test fails with its file reverted.
+
+**Implication.** Done; mirrored to C# and Rust (parity 200/200).

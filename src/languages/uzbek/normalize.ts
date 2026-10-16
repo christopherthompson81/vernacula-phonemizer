@@ -138,8 +138,11 @@ export function normalizeUzbek(input: string): string {
     //    untouched.
     s = rewrite(s, new RegExp(`${DIGITS}-(${WORD}+)(?!${WORD})`, "gu"),
         (_m: string, d: string, w: string): string => {
-            if (w.toLowerCase().startsWith("regbi") || w.toLowerCase().startsWith("moliviy"))
-                return `${numberToWords(Number(d.replace(",", ".")))} ${w}`;
+            if (w.toLowerCase().startsWith("regbi") || w.toLowerCase().startsWith("moliviy")) {
+                // A numeral past 2⁵³ stays digits, for the engine's digit-at-a-time reading (#1576).
+                const card = numberToWords(Number(d.replace(",", ".")));
+                return card === "" ? `${d} ${w}` : `${card} ${w}`;
+            }
             const ord = ordinalWords(Number(d.replace(",", ".")));
             return ord === undefined ? `${d} ${w}` : `${ord} ${w}`;
         });

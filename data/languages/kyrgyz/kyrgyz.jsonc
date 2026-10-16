@@ -35,7 +35,8 @@
     "numbers": {
         "units": ["нөл", "бир", "эки", "үч", "төрт", "беш", "алты", "жети", "сегиз", "тогуз"],
         "tens": { "10": "он", "20": "жыйырма", "30": "отуз", "40": "кырк", "50": "элүү", "60": "алтымыш", "70": "жетимиш", "80": "сексен", "90": "токсон" },
-        "magnitudes": { "hundred": "жүз", "thousand": "миң", "million": "миллион", "billion": "миллиард" }
+        // триллион is the word normalize.ts already writes for `трлн` (#1576).
+        "magnitudes": { "hundred": "жүз", "thousand": "миң", "million": "миллион", "billion": "миллиард", "trillion": "триллион" }
     },
 
     // LETTER NAMES, for the shared initialism seam (core/initialisms.ts). Kyrgyz Cyrillic acronyms are the

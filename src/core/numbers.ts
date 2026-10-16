@@ -20,6 +20,7 @@ export interface NumbersDef {
         crore?: string;
         million?: string;
         billion?: string;
+        trillion?: string; // 10¹² — the Turkic composers (ky, uz) read it; #1576
     };
     /** Optional full irregular 21..99 spellings (keyed by the number); overrides tens+unit composition. */
     compound?: Record<string, string>;

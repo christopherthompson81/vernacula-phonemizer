@@ -48,16 +48,25 @@ public static class Numbers
             if (r != 0) outp.AddRange(TurkicNumberWords(r, d));
             return outp;
         }
-        double b = Math.Floor(n / 1_000_000_000), rb = n % 1_000_000_000;
-        var res = new List<string?>(TurkicNumberWords(b, d)) { d.Magnitudes.Billion };
-        if (rb != 0) res.AddRange(TurkicNumberWords(rb, d));
-        return res;
+        if (n < 1_000_000_000_000)
+        {
+            double b = Math.Floor(n / 1_000_000_000), rb = n % 1_000_000_000;
+            var res = new List<string?>(TurkicNumberWords(b, d)) { d.Magnitudes.Billion };
+            if (rb != 0) res.AddRange(TurkicNumberWords(rb, d));
+            return res;
+        }
+        // trillion (#1576)
+        double tr = Math.Floor(n / 1_000_000_000_000), rt = n % 1_000_000_000_000;
+        var rest = new List<string?>(TurkicNumberWords(tr, d)) { d.Magnitudes.Trillion };
+        if (rt != 0) rest.AddRange(TurkicNumberWords(rt, d));
+        return rest;
     }
 
-    /** Integer → Uzbek words. Undefined/null gaps render as "?"; returns "" for unrenderable input. */
+    /** Integer → Uzbek words. Undefined/null gaps render as "?"; returns "" for unrenderable input, which includes
+     *  a number past 2⁵³, whose low digits the double has lost (#1576). */
     public static string NumberToWords(double n)
     {
-        if (!double.IsFinite(n) || n < 0) return "";
+        if (!double.IsFinite(n) || n < 0 || !Js.IsSafeInteger(Math.Floor(n))) return "";
         return string.Join(" ", TurkicNumberWords(Math.Floor(n), NUM).Select(w => w ?? "?"));
     }
 

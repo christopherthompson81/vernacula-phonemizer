@@ -287,9 +287,9 @@ public static class Normalize
     private static readonly JsRe UNIT_SUFFIX = JsRegex.Compile(
         $"(?<![\\d.,])(\\d[\\d.,]*\\d|\\d)\\s?({UNIT_KEYS})({SUFFIX_RE}){NOT_WORD}", "gu");
 
-    /** 11b) EQUALS, POSTPOSED — `A B барабар`. */
+    /** 11b) EQUALS, POSTPOSED — `A B барабар`; the operand is one word, or a number and its noun (#1576). */
     private static readonly JsRe EQUALS = JsRegex.Compile(
-        "([\\d\\p{Script=Cyrillic}])\\s*=\\s*([\\d\\p{Script=Cyrillic}][^=.,;:!?()]{0,40})", "gu");
+        "([\\d\\p{Script=Cyrillic}])\\s*=\\s*(\\d[\\d ]*(?:[.,]\\d+)?(?:\\s?[\\p{L}\\p{M}°%]+)?|\\p{Script=Cyrillic}[\\p{L}\\p{M}]*)", "gu");
 
     /** 11c) THE NUMERO SIGN. */
     private static readonly JsRe NUMERO = JsRegex.Compile("№\\s?(?=\\d)", "gu");
@@ -302,7 +302,9 @@ public static class Normalize
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile(
         "(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d.,])", "gu");
 
-    /** 14) THE DOT BETWEEN DIGITS — the pause removed, no decimal word. */
+    /** 14) THE DOT BETWEEN DIGITS — one fractional digit is a decimal, read as the comma's (#1576); otherwise the
+     *  pause removed, no decimal word. */
+    private static readonly JsRe DIGIT_DOT_DECIMAL = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d)(?![\\d.,])", "gu");
     private static readonly JsRe DIGIT_DOT = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d.,])", "gu");
 
     /** 15) INITIALISMS, LAST — an initialism with a bound case suffix first. */
@@ -454,6 +456,13 @@ public static class Normalize
         });
 
         // 14) THE DOT BETWEEN DIGITS.
+        s = Rewrite(s, DIGIT_DOT_DECIMAL, m =>
+        {
+            var w = Numbers.NumberWords(Js.Number(m.Groups[1].Value));
+            var f = Numbers.NumberWords(Js.Number(m.Groups[2].Value));
+            var den = Numbers.NumberWords(10);
+            return w is null || f is null || den is null ? m.Value : $"{w} бүтүн {Glue(den, Case.Abl)} {f}";
+        });
         s = Rewrite(s, DIGIT_DOT, "$1 $2");
 
         // 15) INITIALISMS, LAST — an initialism with a bound case suffix first.

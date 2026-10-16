@@ -36,7 +36,8 @@
     "numbers": {
         "units": ["nol", "bir", "ikki", "uch", "toʻrt", "besh", "olti", "yetti", "sakkiz", "toʻqqiz"],
         "tens": { "10": "oʻn", "20": "yigirma", "30": "oʻttiz", "40": "qirq", "50": "ellik", "60": "oltmish", "70": "yetmish", "80": "sakson", "90": "toʻqson" },
-        "magnitudes": { "hundred": "yuz", "thousand": "ming", "million": "million", "billion": "milliard" },
+        // trillion = 10¹², "ming milliard" (infoedu.uz's table of the large numbers: milliard 9 zeros, trillion 12) (#1576).
+        "magnitudes": { "hundred": "yuz", "thousand": "ming", "million": "million", "billion": "milliard", "trillion": "trillion" },
         // Uzbek marks the decimal with a COMMA and reads it "vergul" (6,5 = olti vergul besh), like Turkish virgül.
         "decimalWord": "vergul"
     }

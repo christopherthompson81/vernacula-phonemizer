@@ -46,9 +46,11 @@ public static class RomanOrdinals
         return u == 0 ? Suffixed(tens) : $"{tens} {Suffixed(N.Ones[u])}";
     }
 
-    /** Agglutinative, so unanchored at the end: `əsr` also matches əsrdə, əsrin, əsri, əsrlər, əsrdən. */
+    /** Agglutinative, so open at the end: `əsr` also matches əsrdə, əsrin, əsri, əsrlər, əsrdən — but only to a
+     *  suffix, which harmony bounds: every stem is front-voweled, so a back vowel after it means another word
+     *  (`əsrarəngiz`, #1576). Lower case on purpose: under `i` a capital `I` would fold to `i`. */
     private static readonly JsRe CONTEXT =
-        JsRegex.Compile("^(əsr|yüzil|minillik|ildönüm|konqres|sinif)", "iu");
+        JsRegex.Compile("^(əsr|yüzil|minillik|ildönüm|konqres|sinif)(?![\\p{L}\\p{M}]*[aıou])", "iu");
 
     public static readonly RomanPolicy ROMAN_POLICY = new()
     {

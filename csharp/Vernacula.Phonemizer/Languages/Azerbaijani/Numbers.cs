@@ -28,32 +28,10 @@ public static class AzerbaijaniNumbers
         return parts;
     }
 
-    /** Non-negative integer → Azerbaijani words. */
-    public static string NumberToWords(double n)
+    /** Little-endian thousands groups → words; "" when there are more groups than scale words. */
+    private static string ComposeGroups(List<double> groups)
     {
-        if (!double.IsFinite(n) || n < 0) return "";
-        if (n == 0) return N.Zero;
-        var groups = new List<double>();
-        var x = Math.Floor(n);
-        while (x > 0)
-        {
-            groups.Add(x % 1000);
-            x = Math.Floor(x / 1000);
-        }
-        // Beyond the largest scale word — read digit-by-digit rather than dropping the magnitude.
-        if (groups.Count > SCALES.Length)
-        {
-            // ⚠ `ONES[Number(d)] || N.zero` in the TS: a character the exponential rendering of a huge
-            // double contributes ("e", "+") indexes with NaN and yields `undefined`, and `ONES[0]` is the
-            // EMPTY STRING — both are falsy, so both read as `zero`. The bounds check reproduces that.
-            var digits = Js.CodePoints(Js.NumberToString(Math.Floor(n))).Select(d =>
-            {
-                var idx = Js.Number(d);
-                var w = double.IsInteger(idx) && idx >= 0 && idx < ONES.Length ? ONES[(int)idx] : "";
-                return w.Length > 0 ? w : N.Zero;
-            });
-            return string.Join(" ", digits);
-        }
+        if (groups.Count > SCALES.Length) return "";
         var parts = new List<string>();
         for (var g = groups.Count - 1; g >= 0; g--)
         {
@@ -68,5 +46,34 @@ public static class AzerbaijaniNumbers
             if (g > 0) parts.Add(SCALES[g]);
         }
         return string.Join(" ", parts);
+    }
+
+    /** Non-negative integer → Azerbaijani words; "" past 2⁵³, whose low digits the double has lost — a written
+     *  numeral goes through `DigitsToWords` (#1576). */
+    public static string NumberToWords(double n)
+    {
+        if (!double.IsFinite(n) || n < 0) return "";
+        var x = Math.Floor(n);
+        if (!Js.IsSafeInteger(x)) return "";
+        if (x == 0) return N.Zero;
+        var groups = new List<double>();
+        for (var y = x; y > 0; y = Math.Floor(y / 1000)) groups.Add(y % 1000);
+        return ComposeGroups(groups);
+    }
+
+    private static readonly JsRe LEADING_ZEROS = JsRegex.Compile("^0+(?=\\d)", "u");
+
+    /** A written digit string → words, grouped from the STRING (tr's #1523 shape); more groups than scale words →
+     *  digit by digit (#1576). See numbers.ts. */
+    public static string DigitsToWords(string digits)
+    {
+        var d = JsRegex.Replace(digits, LEADING_ZEROS, _ => "");
+        if (d == "0") return N.Zero;
+        var groups = new List<double>();
+        for (var end = d.Length; end > 0; end -= 3)
+            groups.Add(Js.Number(d[Math.Max(0, end - 3)..end]));
+        if (groups.Count > SCALES.Length)
+            return string.Join(" ", d.Select(c => c == '0' ? N.Zero : ONES[c - '0']));
+        return ComposeGroups(groups);
     }
 }

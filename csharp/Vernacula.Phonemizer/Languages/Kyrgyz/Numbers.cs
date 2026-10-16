@@ -55,20 +55,27 @@ public static class Numbers
             if (r != 0) outp.AddRange(Compose(r, d));
             return outp;
         }
-        double b = Math.Floor(n / 1_000_000_000), rb = n % 1_000_000_000;
-        var res = new List<string?>(Compose(b, d)) { d.Magnitudes.Billion };
-        if (rb != 0) res.AddRange(Compose(rb, d));
-        return res;
+        if (n < 1_000_000_000_000)
+        {
+            double b = Math.Floor(n / 1_000_000_000), rb = n % 1_000_000_000;
+            var res = new List<string?>(Compose(b, d)) { d.Magnitudes.Billion };
+            if (rb != 0) res.AddRange(Compose(rb, d));
+            return res;
+        }
+        // триллион (#1576)
+        double tr = Math.Floor(n / 1_000_000_000_000), rt = n % 1_000_000_000_000;
+        var rest = new List<string?>(Compose(tr, d)) { d.Magnitudes.Trillion };
+        if (rt != 0) rest.AddRange(Compose(rt, d));
+        return rest;
     }
 
     /**
-     * Integer → its Kyrgyz cardinal in ORTHOGRAPHY, space-separated; null above 10¹² or off the safe-integer
-     * range. This is what Normalize.cs needs (an ordinal suffix, a case suffix and a fraction denominator all
+     * Integer → its Kyrgyz cardinal in ORTHOGRAPHY, space-separated; null off the safe-integer range. This is what Normalize.cs needs (an ordinal suffix, a case suffix and a fraction denominator all
      * attach to the LAST WORD of a spoken numeral, and a digit run has no last word until composed).
      */
     public static string? NumberWords(double n)
     {
-        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0 || n >= 1_000_000_000_000)
+        if (!(double.IsInteger(n) && Math.Abs(n) <= 9007199254740991d) || n < 0)
             return null;
         return string.Join(" ", Compose(n, NUM).Where(w => w is not null && w != "").Select(w => w!));
     }

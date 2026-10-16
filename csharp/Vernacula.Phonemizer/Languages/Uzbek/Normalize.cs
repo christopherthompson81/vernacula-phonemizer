@@ -175,7 +175,11 @@ public static class Normalize
             var w = m.Groups[2].Value;
             var wl = Js.ToLowerCase(w);
             if (wl.StartsWith("regbi", StringComparison.Ordinal) || wl.StartsWith("moliviy", StringComparison.Ordinal))
-                return $"{Numbers.NumberToWords(Js.Number(Js.ReplaceFirst(d, ",", ".")))} {w}";
+            {
+                // A numeral past 2⁵³ stays digits, for the engine's digit-at-a-time reading (#1576).
+                var card = Numbers.NumberToWords(Js.Number(Js.ReplaceFirst(d, ",", ".")));
+                return card == "" ? $"{d} {w}" : $"{card} {w}";
+            }
             var ord = Numbers.OrdinalWords(Js.Number(Js.ReplaceFirst(d, ",", ".")));
             return ord is null ? $"{d} {w}" : $"{ord} {w}";
         });

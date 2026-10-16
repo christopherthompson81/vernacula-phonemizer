@@ -522,7 +522,8 @@ pub(crate) fn normalize_kyrgyz(input: &JsString) -> JsString {
     s = rewrite_with(
         &s,
         js_re!(
-            r"([\d\p{Script=Cyrillic}])\s*=\s*([\d\p{Script=Cyrillic}][^=.,;:!?()]{0,40})",
+            // the operand is one word, or a number and its noun (#1576)
+            r"([\d\p{Script=Cyrillic}])\s*=\s*(\d[\d ]*(?:[.,]\d+)?(?:\s?[\p{L}\p{M}°%]+)?|\p{Script=Cyrillic}[\p{L}\p{M}]*)",
             "gu"
         ),
         |m, t| {
@@ -559,6 +560,23 @@ pub(crate) fn normalize_kyrgyz(input: &JsString) -> JsString {
             let f = number_words(js_number(&frac));
             let den = number_words(if frac.len() == 1 { 10.0 } else { 100.0 });
             match (w, f, den) {
+                (Some(w), Some(f), Some(den)) => w
+                    .concat(&js(" бүтүн "))
+                    .concat(&glue(&den, Case::Abl))
+                    .concat(&js(" "))
+                    .concat(&f),
+                _ => m.value(t),
+            }
+        },
+    );
+    // One fractional digit after a dot is a decimal, read as the comma's (#1576).
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d.,])(\d+)\.(\d)(?![\d.,])", "gu"),
+        |m, t| {
+            let w = number_words(js_number(&g(m, t, 1)));
+            let f = number_words(js_number(&g(m, t, 2)));
+            match (w, f, number_words(10.0)) {
                 (Some(w), Some(f), Some(den)) => w
                     .concat(&js(" бүтүн "))
                     .concat(&glue(&den, Case::Abl))

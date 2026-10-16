@@ -25,17 +25,6 @@ const DEF = loadManifest<TatarDef>(import.meta.url, "tatar.jsonc");
 const CONS = DEF.consonants;
 // Cyrillic vowel letters — for the word-initial/post-vocalic ⟨е⟩→[je] iotation.
 const CYR_VOWEL = new Set(DEF.vowelLetters);
-const STRESS_NASAL = new Set(["m", "n", "ŋ"]);
-/** Sonority for maximal-onset stress: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
-function sonority(seg: string): number {
-    if ([...seg].some((c) => IPA_VOWEL.has(c))) return 6;
-    if (seg === "j" || seg === "w") return 5;
-    if (["l", "r"].includes(seg)) return 4;
-    if (STRESS_NASAL.has(seg)) return 3;
-    if (seg.includes("͡")) return 1;
-    if (["f", "v", "s", "z", "ʃ", "ʒ", "ɕ", "ʑ", "x", "χ", "h", "ʁ", "ɣ"].includes(seg)) return 2;
-    return 0;
-}
 const VOWEL = DEF.vowels;
 const IOTATED = DEF.iotated;
 // Backness for the к/г harmony: a nearby BACK vowel → [q]/[ʁ]; a FRONT vowel → [k]/[ɡ].
@@ -55,6 +44,9 @@ function nearBack(chars: string[], i: number): boolean {
     return true;
 }
 
+/** The vowel letters a separating ⟨ъ⟩ precedes: each begins with /j/ (е is read [je] there; ё ю я already are). */
+const IOTATED_AFTER_SIGN = new Set(["е", "ё", "ю", "я"]);
+
 /** Phonemize one Tatar (Cyrillic) word → canonical IPA: harmony-aware grapheme scan + word-final stress. */
 export function phonemizeWord(word: string): string {
     const w = word.normalize("NFC").toLowerCase();
@@ -66,31 +58,32 @@ export function phonemizeWord(word: string): string {
         if (ch === "к") segs.push(nearBack(chars, i) ? "q" : "k");
         else if (ch === "г") segs.push(nearBack(chars, i) ? "ʁ" : "ɡ");
         else if (ch === "а") segs.push(frontWord ? "a" : "ɑ");
-        else if (ch === "е") segs.push(i === 0 || CYR_VOWEL.has(chars[i - 1]!) ? "je" : "e"); // word-initial / post-vocalic ⟨е⟩ → [je]
+        // word-initial / post-vocalic ⟨е⟩ → [je], and after the separating ⟨ъ⟩ (съезд, йөзъеллык)
+        else if (ch === "е") segs.push(i === 0 || CYR_VOWEL.has(chars[i - 1]!) || chars[i - 1] === "ъ" ? "je" : "e");
         else if (CONS[ch] !== undefined) segs.push(CONS[ch]!);
         else if (IOTATED[ch] !== undefined) segs.push(IOTATED[ch]!);
         else if (VOWEL[ch] !== undefined) segs.push(VOWEL[ch]!);
-        else if (ch === "ъ") segs.push("ʔ"); // hard sign — glottal / hiatus
+        // ⟨ъ⟩ — THREE JOBS, and the glottal stop is only the native one (Tatar alphabet: after a closed back-vowel
+        // syllable, мәсъәлә). After ⟨к г⟩ it marks the UVULAR (мәкъалә, мәгънә), and before an iotated vowel it is
+        // the Russian separator (съезд, объект) or a compound seam (йөзъеллык). Read ʔ everywhere, it gave *ˈsʔezd*
+        // and *mæɡʔˈnæ* (#1576).
+        else if (ch === "ъ") {
+            const prev = chars[i - 1];
+            if (prev === "к" || prev === "г") segs[segs.length - 1] = prev === "к" ? "q" : "ʁ";
+            else if (!IOTATED_AFTER_SIGN.has(chars[i + 1] ?? "")) segs.push("ʔ");
+        }
         // ь (soft sign) and other marks: dropped
     });
-    // Word-final (oxytone) stress — the Turkic default: ˈ before the MAXIMAL onset of the last vowel's syllable
-    // (native Tatar has no onset clusters; loans do — спорт→ˈsport).
+    // Word-final (oxytone) stress — the Turkic default: ˈ before the onset of the last vowel's syllable.
+    // ⚠ ONE ONSET CONSONANT WORD-INTERNALLY: native Tatar has no onset clusters, so a medial cluster splits
+    // (китап.лар). Only a word-INITIAL cluster, with no vowel before it, is a whole onset — the loans спорт→ˈsport.
+    // The sonority walk this replaces took a medial obstruent+liquid as an onset and gave *kitaˈplar* (#1576).
     const isV = (s: string): boolean => [...s].some((c) => IPA_VOWEL.has(c));
-    const vidx = segs.map((s, idx) => (isV(s) ? idx : -1)).filter((x) => x >= 0);
-    if (vidx.length) {
-        const nucleus = vidx[vidx.length - 1]!;
+    const nucleus = segs.findLastIndex(isV);
+    if (nucleus >= 0) {
         let at = nucleus;
         if (at > 0 && !isV(segs[at - 1]!)) at--; // the immediate onset consonant
-        while (at > 0 && !isV(segs[at - 1]!)) {
-            const p = segs[at - 1]!,
-                l = segs[at]!;
-            // obstruent + liquid/glide (loan pl/kr) or fricative + stop (sp/st) — Turkic has NO native onset clusters,
-            // and no nasal+stop onsets (a medial nasal is a coda, e.g. якшәмбе's ⟨мб⟩), so those two suffice.
-            const obstruentLiquid = sonority(p) <= 2 && sonority(l) >= 4;
-            const sibilantStop = ["s", "ʃ", "ɕ"].includes(p) && sonority(l) <= 1; // the sC- onsets (спорт→sp), voiceless sibilant only
-            if (!(obstruentLiquid || sibilantStop)) break;
-            at--;
-        }
+        if (!segs.slice(0, at).some(isV)) at = 0; // a word-initial cluster is the whole onset
         segs.splice(at, 0, "ˈ");
     }
     return segs.join("").normalize("NFC");

@@ -79,8 +79,11 @@ public static class Normalize
         (@"e\.\s?ə\.", "eramızdan əvvəl"),
         (@"E\.\s?ə\.", "eramızdan əvvəl"),
         (@"b\.\s?e\.", "bizim eramız"),
-        (@"\bBE(?=\s+\d)", "bizim eramız"),
     };
+
+    /** ⚠ `BE` is not in the table: the table is case-insensitive, and a case-folded `BE` also took `be 5 il` and
+     *  `Be 2010` (#1576). Only the capital pair is the era marker. */
+    private static readonly JsRe BE_ERA = JsRegex.Compile(@"(?<![\p{L}\p{M}])\bBE(?=\s+\d)", "gu");
 
     /** The MULTI_DOT patterns, compiled once in the order the pass applies them (end-of-phrase, then bare). */
     private static readonly (JsRe End, JsRe Bare, string Word)[] MULTI_DOT_RE = MULTI_DOT
@@ -188,6 +191,7 @@ public static class Normalize
             s = Rewrite(s, end, $"{word}.");
             s = Rewrite(s, bare, word);
         }
+        s = Rewrite(s, BE_ERA, "bizim eramız");
 
         // 2) DOTTED CAPITAL RUNS → a bare all-caps run.
         s = Rewrite(s, DOTTED_CAPS, m0 => DOTS_AND_SPACE.Replace(m0.Value, ""));

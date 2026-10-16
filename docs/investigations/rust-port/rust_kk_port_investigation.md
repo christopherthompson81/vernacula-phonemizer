@@ -111,3 +111,26 @@ TS on this tree and replayed).
 - kk: kk-normalize 13,492, kk-g2p 91,424, kk-numbers 25,197, kk-roman 3,022, phonemize-sync / phonemize-best / trace 3,022 each, symbols 6,149: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 7 — 2026-10-15 19:20 (the findings fixed, TS-first, #1576)
+
+**Question.** Do the five findings of Run 5 fix cleanly, and what moves?
+
+**Command.** Probe scripts under `.probe/` on synthetic inputs (`npx tsx .probe/tt.mts <lang> …`), then `npx vitest run`, `npx tsx tools/check-goldens.mts --write`, `dotnet run --project csharp/tools/parity`, `cargo run -p parity`, and each source file reverted alone against `test/turkic-defects-1576.test.ts`.
+
+**Raw finding.**
+1. Scales: `milliard` and `trillion` atoms added to kazakh.jsonc. DERIVED, not typed — the g2p reads миллион as
+   mˈəjɫɫəjon and the authored atom is məjlɫəjˈon (first ɫ clear, stress on the last vowel); the same two edits on
+   the g2p's миллиард / триллион give məjlɫəjˈɑrd / trəjlɫəjˈon, and the script asserts it reproduces the million.
+   Attestation: "25 триллион теңге" in Kazakh-language financial news; миллиард has a Wiktionary Kazakh entry.
+2. Past 2⁵³: `digitsToIpa` reads the run digit by digit from the unit atoms. kk came off `ACCEPTED_LOSSY`.
+3. Range: rewritten to `$1, $2` (a pause, as tk/ba/tt/chv). ⚠ The first cut kept the trailing guard
+   `(?![\d.-])`, and test/clause-final-range.test.ts (trap 58) caught `137–151.` losing the pause — the guard
+   refused the sentence dot. Now `(?![\d-]|\.\d)`.
+4. Unit/percent suffix: after the tier, `<digit> <unit word>-<suffix>` glues the written suffix (`5 км-ге` =
+   `5 километрге`, `20%-ға` = `20 пайызға`).
+5. Round thousand: `1000-шы` → *бір мыңыншы* (Wiktionary Kazakh numeral мыңыншы, "thousandth"). The two pins that
+   held the decline were re-pinned with the source.
+- Goldens: 2 kk rows changed, the same `2-5 күн` row twice — the range pause. Nothing else.
+
+**Implication.** Done; mirrored to C# and Rust (parity 200/200).

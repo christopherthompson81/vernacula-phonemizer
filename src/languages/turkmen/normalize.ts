@@ -268,7 +268,9 @@ export function normalizeTurkmen(input: string): string {
 
     // 7) SIGNS. This corpus's climate prose writes `+11°`, `-5°`, `+28°`, `- 31°` (spaced) and the true
     //    MINUS as well as the hyphen.
-    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1minus $2");
+    //    ⚠ AN EN DASH IS A SIGN ONLY WHEN IT TOUCHES THE DIGIT. Spaced, it is the punctuation dash, and
+    //    `Ilkinji ýyl – 1995.` read *… minus 1995* (#1576). The corpus's spaced sign is the hyphen.
+    s = rewrite(s, /(^|(?<!\d)[\s(])(?:[-−]\s?|–)(\d)/gu, "$1minus $2");
     // ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT A `+`, so no `+` rule can ever match inside it.
     s = rewrite(s, /±/gu, " plýus minus ");
     s = rewrite(s, /(^|[\s(])\+\s?(\d)/gu, "$1plýus $2");

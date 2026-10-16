@@ -1,5 +1,6 @@
 //! Tatar (tt) phonemizer: the Cyrillic scan with к/г backing by the nearest vowel, а fronted in a front word,
-//! е iotated initially and after a vowel; final stress placed before the onset a sonority test allows; text()
+//! е iotated initially, after a vowel and after the separating ъ; final stress placed before the last nucleus's
+//! onset (one consonant word-internally); text()
 //! over words, numbers (comma decimal) and punctuation. Ported from src/languages/tatar/tatar.ts — see that file
 //! for the sources.
 
@@ -56,30 +57,6 @@ fn has_ipa_vowel(seg: &JsString) -> bool {
         .any(|c| c.len() == 1 && is_ipa_vowel(c.units()[0]))
 }
 
-/// `sonority(seg)`: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0.
-fn sonority(seg: &JsString) -> u8 {
-    let s = seg.to_string_lossy();
-    if has_ipa_vowel(seg) {
-        6
-    } else if s == "j" || s == "w" {
-        5
-    } else if s == "l" || s == "r" {
-        4
-    } else if ["m", "n", "ŋ"].contains(&s.as_str()) {
-        3
-    } else if s.contains('\u{361}') {
-        1
-    } else if [
-        "f", "v", "s", "z", "ʃ", "ʒ", "ɕ", "ʑ", "x", "χ", "h", "ʁ", "ɣ",
-    ]
-    .contains(&s.as_str())
-    {
-        2
-    } else {
-        0
-    }
-}
-
 fn contains(list: &[String], c: &str) -> bool {
     list.iter().any(|x| x == c)
 }
@@ -107,7 +84,8 @@ fn near_back(chars: &[String], i: usize) -> bool {
     true
 }
 
-/// `phonemizeWord(word)`: the harmony-aware scan, then the stress mark before the last nucleus and its onset.
+/// `phonemizeWord(word)`: the harmony-aware scan, then the stress mark before the last nucleus's onset — one
+/// consonant word-internally (китап.лар), the whole cluster only word-initially (#1576).
 pub(crate) fn phonemize_word(word: &JsString) -> JsString {
     let d = &*DEF;
     let w = normalize(word, Form::Nfc).to_lower_case();
@@ -128,11 +106,14 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
         } else if ch == "а" {
             Some(if front_word { "a" } else { "ɑ" })
         } else if ch == "е" {
-            Some(if i == 0 || contains(&d.vowel_letters, &chars[i - 1]) {
-                "je"
-            } else {
-                "e"
-            })
+            // initial, post-vocalic, and after the separating ъ (съезд, йөзъеллык)
+            Some(
+                if i == 0 || contains(&d.vowel_letters, &chars[i - 1]) || chars[i - 1] == "ъ" {
+                    "je"
+                } else {
+                    "e"
+                },
+            )
         } else if let Some(c) = d.consonants.get(ch) {
             Some(c.as_str())
         } else if let Some(c) = d.iotated.get(ch) {
@@ -140,7 +121,22 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
         } else if let Some(c) = d.vowels.get(ch) {
             Some(c.as_str())
         } else if ch == "ъ" {
-            Some("ʔ")
+            // The glottal stop natively (мәсъәлә); the UVULAR marker after к г (мәкъалә, мәгънә); the /j/
+            // separator before an iotated vowel (съезд, йөзъеллык). See tatar.ts (#1576).
+            let prev = if i > 0 { chars[i - 1].as_str() } else { "" };
+            if (prev == "к" || prev == "г")
+                && let Some(last) = segs.last_mut()
+            {
+                *last = js(if prev == "к" { "q" } else { "ʁ" });
+                None
+            } else if chars
+                .get(i + 1)
+                .is_some_and(|n| ["е", "ё", "ю", "я"].contains(&n.as_str()))
+            {
+                None
+            } else {
+                Some("ʔ")
+            }
         } else {
             None
         };
@@ -153,15 +149,8 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
         if at > 0 && !has_ipa_vowel(&segs[at - 1]) {
             at -= 1;
         }
-        while at > 0 && !has_ipa_vowel(&segs[at - 1]) {
-            let (p, l) = (&segs[at - 1], &segs[at]);
-            let obstruent_liquid = sonority(p) <= 2 && sonority(l) >= 4;
-            let sibilant_stop =
-                ["s", "ʃ", "ɕ"].contains(&p.to_string_lossy().as_str()) && sonority(l) <= 1;
-            if !(obstruent_liquid || sibilant_stop) {
-                break;
-            }
-            at -= 1;
+        if !segs[..at].iter().any(has_ipa_vowel) {
+            at = 0; // a word-initial cluster is the whole onset (спорт)
         }
         segs.insert(at, js("ˈ"));
     }
@@ -541,7 +530,7 @@ mod tests {
             false,
             "eq",
             "11 500 км²",
-            "unˈber ˈmeŋ ˈbiʃ ˈjøz qvɑˈdrɑt kiloˈmetr",
+            "unˈber ˈmeŋ ˈbiʃ ˈjøz qvɑdˈrɑt kiloˈmetr",
         ),
         (
             "phonemize",

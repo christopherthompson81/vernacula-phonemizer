@@ -85,23 +85,23 @@ describe("Turkmen text normalization", () => {
         expect(ordinalOf(100, true)).toBe("ýüzünji"); // ⚠ ⟨ý⟩ is the GLIDE, not a vowel — counting it
         expect(ordinalOf(3, true)).toBe("üçünji"); //    made `ýüz` look disyllabic and gave *ýüzinji*
         // …and in running text, where the suffix was reaching the g2p as the bare word [nd͡ʒɯ].
-        expect(tk.text("24-nji gün")).toBe("jiɡɾiˈmi døɾdyˈnd͡ʒi ˈɡyn");
-        expect(tk.text("1-nji ýarymy")).toBe("biɾiˈnd͡ʒi jɑɾɯˈmɯ");
+        expect(tk.text("24-nji gün")).toBe("jiɡɾiˈmi døɾdynˈd͡ʒi ˈɡyn");
+        expect(tk.text("1-nji ýarymy")).toBe("biɾinˈd͡ʒi jɑɾɯˈmɯ");
     });
 
     test("DEGREES are both thermal and angular, and the corpus glosses its own sign", () => {
         // "+11° gradus" writes the sign AND the word, so the bare-sign rule must not double it.
-        expect(tk.text("+11° gradus")).toBe("plˈjuθ ˈon ˈbiɾ ɡɾɑˈduθ");
-        expect(tk.text("+10° dan")).toBe("plˈjuθ ˈon ɡɾɑduˈθdɑn"); // the ablative glued to the sign
+        expect(tk.text("+11° gradus")).toBe("ˈpljuθ ˈon ˈbiɾ ɡɾɑˈduθ");
+        expect(tk.text("+10° dan")).toBe("ˈpljuθ ˈon ɡɾɑduθˈdɑn"); // the ablative glued to the sign
         // ⚠ `Selsi`, not `Selsiý` — the corpus's own "0 K (Kelwin)= -273,15°C (gradus Selsi)".
-        expect(tk.text("50 ° C-e ýetýär")).toBe("elˈli ɡɾɑˈduθ θelθiˈe jeˈtjæɾ");
+        expect(tk.text("50 ° C-e ýetýär")).toBe("elˈli ɡɾɑˈduθ θelθiˈe jetˈjæɾ");
         expect(tk.text("39°31′0″N")).toBe("oˈtuð doˈkuð ɡɾɑˈduθ oˈtuð ˈbiɾ miˈnut ˈnol θeˈkunt n");
     });
 
     test("the FRACTION is bounded, because this corpus writes it BOTH ways round", () => {
         // Turkmen reads it denominator-locative first: "dörtden üç".
         expect(tk.text("3/4 bölegine")).toBe("døɾtˈden ˈyt͡ʃ bøleɡiˈne");
-        expect(tk.text("1/9")).toBe("dokuˈðdɑn ˈbiɾ");
+        expect(tk.text("1/9")).toBe("dokuðˈdɑn ˈbiɾ");
         // ⚠ `10/1 bölegini` is ONE TENTH in this corpus — the Turkic order — and nothing but the
         // numerator > denominator test separates it from an ordinary fraction. Refused, not guessed.
         expect(normalizeTurkmen("10/1 bölegini")).toBe("10, 1 bölegini");
@@ -118,8 +118,8 @@ describe("Turkmen text normalization", () => {
     test("ROMAN CENTURIES — and the backness the writer never typed", () => {
         // `ordinalOf` takes the backness from the WRITTEN suffix; a Roman numeral has none, so the policy
         // derives it from the numeral's own last vowel.
-        expect(tk.text("XX asyr")).toBe("jiɡɾimiˈnd͡ʒi ɑˈθɯɾ");
-        expect(tk.text("VI asyrda")).toBe("ɑltɯˈnd͡ʒɯ ɑθɯɾˈdɑ");
+        expect(tk.text("XX asyr")).toBe("jiɡɾiminˈd͡ʒi ɑˈθɯɾ");
+        expect(tk.text("VI asyrda")).toBe("ɑltɯnˈd͡ʒɯ ɑθɯɾˈdɑ");
     });
 
     test("the symbol tier, the percent suffix, and the range's pause", () => {

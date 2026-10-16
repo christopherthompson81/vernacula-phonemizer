@@ -372,3 +372,138 @@ mod germanic_defects_1578_tests {
         assert!(phonemize("Bana", "bar").unwrap().trim().ends_with('ɐ'));
     }
 }
+
+/// #1576 — the az/kk/ky/uz/tk/tt defects the Rust port of the Turkic group found. Synthetic probes; relations
+/// where they can be, the literal pins the engine's own output after the fix. As test/turkic-defects-1576.test.ts.
+#[cfg(all(
+    test,
+    feature = "az",
+    feature = "kk",
+    feature = "ky",
+    feature = "uz",
+    feature = "tk",
+    feature = "tt"
+))]
+mod turkic_defects_1576_tests {
+    use crate::core::js_string::{js, js_number};
+    use crate::phonemize;
+
+    fn say(lang: &str, s: &str) -> String {
+        phonemize(s, lang).unwrap().trim().to_string()
+    }
+    fn spaced(digits: &str) -> String {
+        digits
+            .chars()
+            .map(String::from)
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+    const BIG: &str = "12345678901234567890"; // past 2⁵³
+
+    #[test]
+    fn az() {
+        assert_eq!(
+            say("az", &format!("{BIG} nəfər")),
+            say("az", &format!("{} nəfər", spaced(BIG)))
+        );
+        let e21 = "1000000000000000000000";
+        assert_eq!(say("az", e21), say("az", &spaced(e21)));
+        assert_eq!(say("az", "1.234,5 manat"), say("az", "1234,5 manat"));
+        assert!(say("az", "BE 1000 il").contains("bizˈim"));
+        assert!(!say("az", "be 5 il").contains("bizˈim"));
+        assert!(!say("az", "Be 2010").contains("bizˈim"));
+        let ctx = super::azerbaijani::roman_ordinals::roman_policy()
+            .ordinal_after
+            .unwrap();
+        for w in ["əsr", "əsrdə", "əsrin", "əsrlər", "sinifdə"] {
+            assert!(ctx.test(&js(w)), "{w}");
+        }
+        assert!(!ctx.test(&js("əsrarəngiz")));
+        assert_eq!(say("az", "XX əsrarəngiz"), say("az", "20 əsrarəngiz"));
+    }
+
+    #[test]
+    fn kk() {
+        let n = &super::kazakh::manifest::MANIFEST.numbers;
+        assert_eq!(say("kk", "1000000000"), n.milliard);
+        assert_eq!(say("kk", "1000000000000"), n.trillion);
+        assert_eq!(
+            say("kk", "3000000000"),
+            format!("{} {}", say("kk", "3"), n.milliard)
+        );
+        assert_eq!(say("kk", BIG), say("kk", &spaced(BIG)));
+        assert_eq!(
+            say("kk", "1977-1981 жылдары"),
+            say("kk", "1977, 1981 жылдары")
+        );
+        assert_eq!(say("kk", "137–151."), say("kk", "137, 151."));
+        assert_eq!(say("kk", "5 км-ге"), say("kk", "5 километрге"));
+        assert_eq!(say("kk", "20%-ға"), say("kk", "20 пайызға"));
+        assert_eq!(say("kk", "3 м-ден"), say("kk", "3 метрден"));
+        let norm = |s: &str| super::kazakh::normalize::normalize_kazakh(&js(s)).to_string_lossy();
+        assert_eq!(norm("1000-шы жыл"), "бір мыңыншы жыл");
+        assert_eq!(norm("3000-шы жыл"), "үш мыңыншы жыл");
+    }
+
+    #[test]
+    fn ky() {
+        assert_eq!(say("ky", "китептер"), "kitepˈter");
+        assert_eq!(say("ky", "спорт"), "ˈsport");
+        assert_eq!(say("ky", "тоо"), "ˈtoː");
+        let words = |n: f64| super::kyrgyz::kyrgyz::number_words(n).map(|w| w.to_string_lossy());
+        assert_eq!(words(1e12).as_deref(), Some("бир триллион"));
+        assert_eq!(words(2e15).as_deref(), Some("эки миң триллион"));
+        assert_eq!(say("ky", "2.5 версия"), say("ky", "2,5 версия"));
+        assert!(!say("ky", "12.00дө").contains("byˈtyn"));
+        assert_eq!(say("ky", "а = б жана в"), say("ky", "а б барабар жана в"));
+        assert_eq!(
+            say("ky", "1 теңге = 100 тыйынга"),
+            say("ky", "1 теңге 100 тыйынга барабар")
+        );
+    }
+
+    #[test]
+    fn uz() {
+        use super::uzbek::numbers::{number_to_words, ordinal_words};
+        assert_eq!(number_to_words(1e12).to_string_lossy(), "bir trillion");
+        assert_eq!(
+            number_to_words(3e12 + 5.0).to_string_lossy(),
+            "uch trillion besh"
+        );
+        assert!(number_to_words(js_number(&js(BIG))).is_empty());
+        let norm = super::uzbek::normalize::normalize_uzbek(&js(&format!("{BIG}-regbi")));
+        assert!(norm.to_string_lossy().contains(BIG));
+        assert_eq!(
+            ordinal_words(190.0).unwrap().to_string_lossy(),
+            "yuz toʻqsoninchi"
+        );
+    }
+
+    #[test]
+    fn tk() {
+        assert_eq!(say("tk", "kitaplar"), "kitɑpˈlɑɾ");
+        assert_eq!(say("tk", "ilkinji"), "ilkinˈd͡ʒi");
+        assert_eq!(say("tk", "plýus"), "ˈpljuθ");
+        assert!(!say("tk", "Ilkinji ýyl – 1995.").contains("miˈnuθ"));
+        assert_eq!(say("tk", "–5 gradus"), say("tk", "-5 gradus"));
+        use super::turkmen::numbers::number_to_words;
+        assert!(number_to_words(f64::NAN).is_empty());
+        assert!(number_to_words(-5.0).is_empty());
+        assert!(number_to_words(2.5).is_empty());
+    }
+
+    #[test]
+    fn tt() {
+        assert_eq!(say("tt", "мәсъәлә"), "mæsʔæˈlæ");
+        assert_eq!(say("tt", "мәгънә"), "mæʁˈnæ");
+        assert_eq!(say("tt", "мәкъалә"), "mæqaˈlæ");
+        assert_eq!(say("tt", "съезд"), "ˈsjezd");
+        assert_eq!(say("tt", "йөзъеллык"), "jøzjelˈlɨq");
+        assert_eq!(say("tt", "китаплар"), "kitapˈlar");
+        assert_eq!(say("tt", "спорт"), "ˈsport");
+        assert_eq!(
+            super::tatar::numbers::number_to_words(1e12),
+            vec!["бер", "триллион"]
+        );
+    }
+}
