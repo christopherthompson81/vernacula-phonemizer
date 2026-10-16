@@ -45,7 +45,8 @@
  *     segment-final                      38   ⚠ SENTENCE ENDS
  *
  * So the discriminator is the following word's CASE, and the rule falls out of the table: claim `N.` only
- * before a month name or a lowercase word. **THE INVARIANT, STATED AND MEASURED: zero sentence-final
+ * before a month name or a lowercase word. That word also decides the ordinal's own CASE, since a Finnish
+ * ordinal agrees with its noun (`2. kerran` = *toisen kerran*): see `ordinalCaseBefore` (#1574). **THE INVARIANT, STATED AND MEASURED: zero sentence-final
  * pauses are lost** — 159 capital-followed and 38 segment-final periods are outside every pattern in this
  * file, and the ordinal rule's lookahead requires a lowercase letter it cannot reach.
  *
@@ -62,15 +63,16 @@
  * over the retained text returns one hit and it is a stray `s`. Finnish glues, always — so the rule is
  * deliberately narrower than Oromo's and admits no spaced alternation (trap 9).
  *
- * ⚠ AND AGREEMENT CANNOT BE APPLIED TO DIGITS, which is what limits this rule rather than effort. A
- * Finnish numeral declines in EVERY component (`850:n` = *kahdeksansadanviidenkymmenen*, `11:nneksi` =
- * *yhdenneksitoista*, with the case marker INSIDE the compound), and no in-repo source carries those
- * forms: the referee is a LEMMA list (`kilometriä` ×0, `prosenttia` ×0, `asteen` ×0 — every inflected
- * probe returns nothing) and the corpus attests only the partitive/genitive of the unit NOUNS. So:
+ * ⚠ A Finnish numeral declines in EVERY component (`850:n` = *kahdeksansadanviidenkymmenen*, `11:nneksi` =
+ * *yhdenneksitoista*, with the case marker INSIDE the compound). The ORDINAL paradigm is now sourced
+ * (en.wiktionary, Kotus 45 and 38; see `ordinal`), and the CARDINAL one is not: the referee is a LEMMA list
+ * (`kilometriä` ×0, `prosenttia` ×0, `asteen` ×0 — every inflected probe returns nothing). So:
  *
  *     SHIPPED  the nominative ordinal `N:s` (4 instances) — the written `s` IS the nominative ending, so
  *              `33:s` is exactly `ordinal(33)` with nothing to inflect.
- *     REFUSED  every oblique colon suffix (14 on digits, 6 on a symbol). PRICED (trap 53): the refusal is
+ *     SHIPPED  the oblique ORDINAL suffixes `9:nnen`, `11:nneksi`, `30:nneksi` (#1574): the suffix names the
+ *              case, and `ordinal(n, case)` answers it.
+ *     REFUSED  every cardinal colon suffix, the plural `1:sten`, and the symbols. PRICED (trap 53): the refusal is
  *              not left neutral, because the `:` itself is read as a clause PAUSE by
  *              `clausePunctuation`, and a morpheme joint is not a pause. The colon is therefore DELETED
  *              and nothing else changes — same words as before, minus a sentence break that was never
@@ -170,8 +172,31 @@ const ORD_TEEN = "toista"; // 11–19: combining unit + toista, mirroring the ca
 const ORD_HUNDRED = "sadas"; // 100th, and the hundreds formant (kahdes+sadas = 200th, a referee lemma)
 
 /**
- * The Finnish ordinal for 1 … 999, or undefined outside it — an unclaimable number keeps its digits and
- * its period rather than getting a guessed ending.
+ * The ten cases a singular ordinal takes, besides the nominative. The forms are en.wiktionary's declension tables:
+ * Kotus 45 *kahdeksas* for every `…s` ordinal (*kolmas* → kolmannen, kolmatta, kolmannessa, …, kolmanneksi)
+ * and Kotus 38 *nainen* for *ensimmäinen* and *toinen* (ensimmäisen, ensimmäistä, …). ⚠ EVERY COMPONENT OF A
+ * COMPOUND INFLECTS (*kahdeskymmenes* → genitive *kahdennenkymmenennen*), and *-toista* in the teens never does
+ * (*yhdestoista* → *yhdennentoista*). Each component takes its own vowel harmony. See
+ * docs/investigations/fi/fi_ordinal_case_investigation.md.
+ */
+export type OrdCase = "nom" | "gen" | "par" | "ine" | "ela" | "ill" | "ade" | "abl" | "all" | "ess" | "tra";
+
+function inflect(part: string, c: OrdCase): string {
+    if (c === "nom") return part;
+    const A = /[aou]/u.test(part) ? "a" : "ä";
+    if (part.endsWith("nen")) { // Kotus 38: ensimmäi-nen → ensimmäi-sen
+        const st = part.slice(0, -3);
+        return st + { gen: "sen", par: `st${A}`, ine: `sess${A}`, ela: `sest${A}`, ill: "seen", ade: `sell${A}`,
+            abl: `selt${A}`, all: "selle", ess: `sen${A}`, tra: "seksi" }[c];
+    }
+    const st = part.slice(0, -1); // Kotus 45: kolma-s → kolma-nnen
+    return st + { gen: "nnen", par: `tt${A}`, ine: `nness${A}`, ela: `nnest${A}`, ill: "nteen", ade: `nnell${A}`,
+        abl: `nnelt${A}`, all: "nnelle", ess: `nten${A}`, tra: "nneksi" }[c];
+}
+
+/**
+ * The Finnish ordinal for 1 … 999 in case `c` (nominative by default), or undefined outside it. An unclaimable
+ * number keeps its digits and its period rather than getting a guessed ending.
  *
  * ⚠ FOUR BRANCHES, PINNED SEPARATELY IN THE TESTS (trap 13): the sub-ten table, the teens, the tens
  * (with and without a unit), and the hundreds. The corpus exercises only the first two and the tens —
@@ -183,21 +208,67 @@ const ORD_HUNDRED = "sadas"; // 100th, and the hundreds formant (kahdes+sadas = 
  * `tuhannes` ×1 and `kahdessadas` ×1 do, and stopping where the evidence stops is cheaper than a rule
  * that is right exactly where nobody looked.
  */
-export function ordinal(n: number): string | undefined {
+export function ordinal(n: number, c: OrdCase = "nom"): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n > 999) return undefined;
-    if (n < 10) return ORD_FINAL[n];
-    if (n === 10) return ORD_TEN;
-    if (n < 20) return `${ORD_COMB[n - 10]!}${ORD_TEEN}`; // 11 → yhdestoista
+    if (n < 10) return inflect(ORD_FINAL[n]!, c);
+    if (n === 10) return inflect(ORD_TEN, c);
+    if (n < 20) return `${inflect(ORD_COMB[n - 10]!, c)}${ORD_TEEN}`; // 11 → yhdestoista, yhdennentoista
     if (n < 100) {
         const t = Math.floor(n / 10);
         const o = n % 10;
-        return `${ORD_COMB[t]!}${ORD_TEN}${o ? ORD_FINAL[o]! : ""}`; // 21 → kahdeskymmenesensimmäinen
+        // 21 → kahdeskymmenesensimmäinen; genitive kahdennenkymmenennenensimmäisen
+        return `${inflect(ORD_COMB[t]!, c)}${inflect(ORD_TEN, c)}${o ? inflect(ORD_FINAL[o]!, c) : ""}`;
     }
     const h = Math.floor(n / 100);
     const r = n % 100;
-    const hundreds = h === 1 ? ORD_HUNDRED : `${ORD_COMB[h]!}${ORD_HUNDRED}`; // 200 → kahdessadas
-    return `${hundreds}${r ? ordinal(r)! : ""}`; // 126 → sadaskahdeskymmeneskuudes
+    const hundreds = h === 1 ? inflect(ORD_HUNDRED, c) : `${inflect(ORD_COMB[h]!, c)}${inflect(ORD_HUNDRED, c)}`;
+    return `${hundreds}${r ? ordinal(r, c)! : ""}`; // 126 → sadaskahdeskymmeneskuudes
 }
+
+/**
+ * The case an `N.` ordinal takes before `word`, read from the word's ending, or "nom" when the ending does not say.
+ * An ordinal agrees with its noun (`2. kerran` = *toisen kerran*, `28. päivänä` = *kahdentenakymmenentenä-
+ * kahdeksantena päivänä*), and this engine has no lexicon to look the noun up in, so the ending is the evidence.
+ *
+ * ⚠ EVERY ROW IS MEASURED, not assumed. The instrument is the fiwiki dump: 644,500 pairs of a SPELLED-OUT
+ * inflected ordinal and the next word, where the ordinal's own ending is the ground truth. With the idiom
+ * *toiseksi suurin* set aside, this table puts the ordinal in the right case 83% of the time, against 32% for the
+ * nominative it replaces, and each row beats the nominative wherever it fires. Rows measured and REFUSED: `-lta`
+ * (51% vs 45%: *ensimmäinen vasemmalta*), `-ta` (96% nominative: *maailmansota*, *kerta*), `-nen` (88% nominative:
+ * *suomalainen*), `-oona`/`-uuna` (loans: *divisioona*, *miljoona*).
+ *
+ * ORDER MATTERS: a case plus the 3rd-person possessive lengthens the case vowel and adds `n` (*kaudella* + *-an* =
+ * *kaudellaan*), and read as an illative it was the largest error, so those forms are matched first.
+ */
+export function ordinalCaseBefore(word: string): OrdCase {
+    const w = word.toLowerCase();
+    if (/ss([aä])\1n$/u.test(w)) return "ine";
+    if (/st([aä])\1n$/u.test(w)) return "ela";
+    if (/ll([aä])\1n$/u.test(w)) return "ade";
+    if (w.endsWith("lleen")) return "all";
+    if (w.endsWith("kseen")) return "tra";
+    if (/n([aä])\1n$/u.test(w)) return "ess";
+    if (/ss[aä]$/u.test(w)) return "ine";
+    if (/st[aä]$/u.test(w)) return "ela";
+    if (/ll[aä]$/u.test(w)) return "ade";
+    if (w.endsWith("lle")) return "all";
+    if (w.endsWith("ksi")) return "tra";
+    if (/(?:oo|uu)n[aä]$/u.test(w)) return "nom";
+    if (/n[aä]$/u.test(w)) return "ess";
+    if (w.endsWith("seen")) return "ill";
+    if (w.endsWith("een")) return "gen"; // the e-stem genitive: asteen, vaiheen; its illative is -eeseen
+    if (/([aeiouyäö])\1n$/u.test(w)) return (w.match(/[aeiouyäö]+/gu) ?? []).length >= 2 ? "ill" : "gen";
+    if (w.endsWith("nen")) return "nom";
+    if (w.endsWith("n")) return "gen";
+    if (/([aä])\1$/u.test(w) || /tt[aä]$/u.test(w)) return "par";
+    return "nom";
+}
+
+/** The written ordinal colon suffix → its case: `9:nnen` is the genitive ending of *yhdeksäs*. */
+const COLON_CASE: Readonly<Record<string, OrdCase>> = {
+    nnen: "gen", tta: "par", nnessa: "ine", nnesta: "ela", nteen: "ill", nnella: "ade", nnelta: "abl",
+    nnelle: "all", ntena: "ess", nneksi: "tra",
+};
 
 /**
  * Month names in the PARTITIVE, which is the case a Finnish date takes (`13. toukokuuta`, not
@@ -473,25 +544,38 @@ export function normalizeFinnish(input: string): string {
     //    `20.–24. toukokuuta`, `101.–150. maailmassa`): its LEFT operand is followed by a dash rather than
     //    by a month or a lowercase word, so the single rule would strand it and read it as a cardinal.
     //    Only the connective is refused (see the header); both ordinals are still read.
-    const ordTail = `(?=\\s+(?:${MONTH_LOOKAHEAD}|\\p{Ll}))`;
+    //    ⚠ THE ORDINAL AGREES IN CASE WITH THE WORD AFTER IT (#1574): `2. kerran` is *toisen kerran*, and `28.
+    //    päivänä` is essive. The lookahead captures that word and `ordinalCaseBefore` reads its case from the ending
+    //    (measured, see there). A month name in the partitive (`13. toukokuuta`) says nothing, so it stays
+    //    nominative, which is what a Finnish date takes. Both ordinals of a range take the one case.
+    const ordTail = `(?=\\s+(?:${MONTH_LOOKAHEAD}|\\p{Ll}))(?=\\s+([\\p{L}\\p{M}-]+))`;
     t = rewrite(t,
         new RegExp(`(?<![\\d.,:\\p{L}])(\\d{1,3})\\.\\s*[–—-]\\s*(\\d{1,3})\\.${ordTail}`, "gu"),
-        (m, a: string, b: string) => {
-            const x = ordinal(Number(a)), y = ordinal(Number(b));
+        (m, a: string, b: string, next: string) => {
+            const c = ordinalCaseBefore(next);
+            const x = ordinal(Number(a), c), y = ordinal(Number(b), c);
             return x !== undefined && y !== undefined ? `${x} ${y}` : m;
         },
     );
     t = rewrite(t,
         new RegExp(`(?<![\\d.,:\\p{L}])(\\d{1,3})\\.${ordTail}`, "gu"),
-        (m, n: string) => ordinal(Number(n)) ?? m,
+        (m, n: string, next: string) => ordinal(Number(n), ordinalCaseBefore(next)) ?? m,
     );
 
     // 6) THE ORDINAL COLON SUFFIX `N:s` (4) — `33:s`, `27:s`. The written `s` IS the nominative ordinal
-    //    ending, so there is nothing to inflect and the table answers exactly. Restricted to `:s` on
-    //    purpose: `9:nnen`, `11:nneksi`, `1:sten`, `30:nneksi` are oblique and Finnish puts the case
-    //    marker INSIDE the compound (`yhdenneksitoista`), which no in-repo source carries — see the
-    //    header. Those fall through to step 6.
+    //    ending, so there is nothing to inflect and the table answers exactly. The oblique ordinal
+    //    suffixes (`9:nnen`, `11:nneksi`) are step 6b; the plural `1:sten` falls through to step 7.
     t = rewrite(t, /(?<![\d.,:])(\d{1,3}):s(?![\p{L}\p{M}])/gu, (m, n: string) => ordinal(Number(n)) ?? m);
+
+    // 6b) THE OBLIQUE ORDINAL COLON SUFFIXES — `9:nnen`, `11:nneksi`, `30:nneksi` (#1574). The suffix IS the
+    //     ordinal's own case ending, so the case is written, not guessed, and the paradigm above answers it
+    //     exactly (`11:nneksi` = *yhdenneksitoista*, with the marker inside the compound). Only the endings
+    //     that are unique to ordinals (`nn…`, `nt…`, `tt…`): a cardinal's `850:n` or `44:stä`, and the plural
+    //     `1:sten`, fall through to step 7 unchanged.
+    t = rewrite(t,
+        /(?<![\d.,:])(\d{1,3}):(nnen|tt[aä]|nness[aä]|nnest[aä]|nteen|nnell[aä]|nnelt[aä]|nnelle|nten[aä]|nneksi)(?![\p{L}\p{M}])/gu,
+        (m, n: string, suf: string) => ordinal(Number(n), COLON_CASE[suf.replace("ä", "a")]!) ?? m,
+    );
 
     // 7) THE REMAINING COLON SUFFIXES — the PRICED REFUSAL (header). The colon is a morpheme joint and
     //    `clausePunctuation` reads it as a clause pause, so `172001:stä` came out with a sentence break

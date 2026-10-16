@@ -42,37 +42,175 @@ const ORD_TEN: &str = "kymmenes";
 const ORD_TEEN: &str = "toista";
 const ORD_HUNDRED: &str = "sadas";
 
+/// The case of a singular ordinal (#1574). See `OrdCase` and `ordinal` in normalize.ts: en.wiktionary's Kotus 45
+/// *kahdeksas* and 38 *nainen* paradigms, every compound component inflected, `-toista` never.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OrdCase {
+    Nom,
+    Gen,
+    Par,
+    Ine,
+    Ela,
+    Ill,
+    Ade,
+    Abl,
+    All,
+    Ess,
+    Tra,
+}
+
+fn inflect(part: &str, c: OrdCase) -> String {
+    use OrdCase::*;
+    if c == Nom {
+        return part.to_string();
+    }
+    let a = if part.contains(['a', 'o', 'u']) {
+        "a"
+    } else {
+        "ä"
+    };
+    if let Some(st) = part.strip_suffix("nen") {
+        let end = match c {
+            Gen => "sen".to_string(),
+            Par => format!("st{a}"),
+            Ine => format!("sess{a}"),
+            Ela => format!("sest{a}"),
+            Ill => "seen".to_string(),
+            Ade => format!("sell{a}"),
+            Abl => format!("selt{a}"),
+            All => "selle".to_string(),
+            Ess => format!("sen{a}"),
+            _ => "seksi".to_string(),
+        };
+        return format!("{st}{end}");
+    }
+    let st = part.strip_suffix('s').unwrap_or(part);
+    let end = match c {
+        Gen => "nnen".to_string(),
+        Par => format!("tt{a}"),
+        Ine => format!("nness{a}"),
+        Ela => format!("nnest{a}"),
+        Ill => "nteen".to_string(),
+        Ade => format!("nnell{a}"),
+        Abl => format!("nnelt{a}"),
+        All => "nnelle".to_string(),
+        Ess => format!("nten{a}"),
+        _ => "nneksi".to_string(),
+    };
+    format!("{st}{end}")
+}
+
 /// `ordinal(n)`: the ordinal for an integer 1 … 999, `None` outside it.
 pub fn ordinal(n: f64) -> Option<String> {
+    ordinal_case(n, OrdCase::Nom)
+}
+
+/// `ordinal(n, c)`: the ordinal for an integer 1 … 999 in case `c`, `None` outside it.
+pub fn ordinal_case(n: f64, c: OrdCase) -> Option<String> {
     if !n.is_finite() || n.trunc() != n || !(1.0..=999.0).contains(&n) {
         return None;
     }
     if n < 10.0 {
-        return Some(ORD_FINAL[n as usize].to_string());
+        return Some(inflect(ORD_FINAL[n as usize], c));
     }
     if n == 10.0 {
-        return Some(ORD_TEN.to_string());
+        return Some(inflect(ORD_TEN, c));
     }
     if n < 20.0 {
-        return Some(format!("{}{ORD_TEEN}", ORD_COMB[(n - 10.0) as usize]));
+        return Some(format!(
+            "{}{ORD_TEEN}",
+            inflect(ORD_COMB[(n - 10.0) as usize], c)
+        ));
     }
     if n < 100.0 {
         let (t, o) = ((n / 10.0).floor() as usize, n % 10.0);
-        let unit = if o != 0.0 { ORD_FINAL[o as usize] } else { "" };
-        return Some(format!("{}{ORD_TEN}{unit}", ORD_COMB[t]));
+        let unit = if o != 0.0 {
+            inflect(ORD_FINAL[o as usize], c)
+        } else {
+            String::new()
+        };
+        return Some(format!(
+            "{}{}{unit}",
+            inflect(ORD_COMB[t], c),
+            inflect(ORD_TEN, c)
+        ));
     }
     let (h, r) = ((n / 100.0).floor() as usize, n % 100.0);
     let hundreds = if h == 1 {
-        ORD_HUNDRED.to_string()
+        inflect(ORD_HUNDRED, c)
     } else {
-        format!("{}{ORD_HUNDRED}", ORD_COMB[h])
+        format!("{}{}", inflect(ORD_COMB[h], c), inflect(ORD_HUNDRED, c))
     };
     let rest = if r != 0.0 {
-        ordinal(r).unwrap()
+        ordinal_case(r, c).unwrap()
     } else {
         String::new()
     };
     Some(hundreds + &rest)
+}
+
+/// `ordinalCaseBefore(word)`: the case an `N.` ordinal takes before `word`, read from its ending (#1574). Every row
+/// is measured over fiwiki, and the order matters; see normalize.ts.
+pub fn ordinal_case_before(word: &JsString) -> OrdCase {
+    use OrdCase::*;
+    let w = word.to_lower_case();
+    let rules: [(&JsRegex, OrdCase); 15] = [
+        (js_re!(r"ss([aä])\1n$", "u"), Ine),
+        (js_re!(r"st([aä])\1n$", "u"), Ela),
+        (js_re!(r"ll([aä])\1n$", "u"), Ade),
+        (js_re!(r"lleen$", "u"), All),
+        (js_re!(r"kseen$", "u"), Tra),
+        (js_re!(r"n([aä])\1n$", "u"), Ess),
+        (js_re!(r"ss[aä]$", "u"), Ine),
+        (js_re!(r"st[aä]$", "u"), Ela),
+        (js_re!(r"ll[aä]$", "u"), Ade),
+        (js_re!(r"lle$", "u"), All),
+        (js_re!(r"ksi$", "u"), Tra),
+        (js_re!(r"(?:oo|uu)n[aä]$", "u"), Nom),
+        (js_re!(r"n[aä]$", "u"), Ess),
+        (js_re!(r"seen$", "u"), Ill),
+        (js_re!(r"een$", "u"), Gen),
+    ];
+    for (re, c) in rules {
+        if re.test(&w) {
+            return c;
+        }
+    }
+    if js_re!(r"([aeiouyäö])\1n$", "u").test(&w) {
+        return if js_re!(r"[aeiouyäö]+", "gu").match_all(&w).len() >= 2 {
+            Ill
+        } else {
+            Gen
+        };
+    }
+    if w.ends_with(&js("nen")) {
+        return Nom;
+    }
+    if w.ends_with(&js("n")) {
+        return Gen;
+    }
+    if js_re!(r"(?:([aä])\1|tt[aä])$", "u").test(&w) {
+        Par
+    } else {
+        Nom
+    }
+}
+
+/// The written ordinal colon suffix → its case: `9:nnen` is the genitive ending of *yhdeksäs*.
+fn colon_case(suffix: &str) -> OrdCase {
+    use OrdCase::*;
+    match suffix.replace('ä', "a").as_str() {
+        "nnen" => Gen,
+        "tta" => Par,
+        "nnessa" => Ine,
+        "nnesta" => Ela,
+        "nteen" => Ill,
+        "nnella" => Ade,
+        "nnelta" => Abl,
+        "nnelle" => All,
+        "ntena" => Ess,
+        _ => Tra,
+    }
 }
 
 const MONTHS: [&str; 13] = [
@@ -246,7 +384,7 @@ fn clock_body(h: &JsString, mm: &JsString) -> Option<JsString> {
 }
 
 fn ord_tail() -> String {
-    format!(r"(?=\s+(?:{MONTH_LOOKAHEAD}|\p{{Ll}}))")
+    format!(r"(?=\s+(?:{MONTH_LOOKAHEAD}|\p{{Ll}}))(?=\s+([\p{{L}}\p{{M}}-]+))")
 }
 
 static ORD_RANGE: LazyLock<JsRegex> = LazyLock::new(|| {
@@ -354,22 +492,37 @@ pub fn normalize_finnish(input: &JsString) -> JsString {
         |m, s| clock_body(&g(m, s, 1), &g(m, s, 2)).unwrap_or_else(|| m.value(s)),
     );
 
+    // The ordinal agrees in case with the word after it, which the lookahead captures (#1574).
     t = rewrite_with(&t, &ORD_RANGE, |m, s| {
-        let x = ordinal(js_number(&g(m, s, 1)));
-        let y = ordinal(js_number(&g(m, s, 2)));
+        let c = ordinal_case_before(&g(m, s, 3));
+        let x = ordinal_case(js_number(&g(m, s, 1)), c);
+        let y = ordinal_case(js_number(&g(m, s, 2)), c);
         match (x, y) {
             (Some(x), Some(y)) => js(&format!("{x} {y}")),
             _ => m.value(s),
         }
     });
     t = rewrite_with(&t, &ORD_SINGLE, |m, s| {
-        ordinal(js_number(&g(m, s, 1))).map_or_else(|| m.value(s), |o| js(&o))
+        ordinal_case(js_number(&g(m, s, 1)), ordinal_case_before(&g(m, s, 2)))
+            .map_or_else(|| m.value(s), |o| js(&o))
     });
 
     t = rewrite_with(
         &t,
         js_re!(r"(?<![\d.,:])(\d{1,3}):s(?![\p{L}\p{M}])", "gu"),
         |m, s| ordinal(js_number(&g(m, s, 1))).map_or_else(|| m.value(s), |o| js(&o)),
+    );
+    // The oblique ordinal colon suffixes `9:nnen`, `11:nneksi` (#1574): the suffix names the case.
+    t = rewrite_with(
+        &t,
+        js_re!(
+            r"(?<![\d.,:])(\d{1,3}):(nnen|tt[aä]|nness[aä]|nnest[aä]|nteen|nnell[aä]|nnelt[aä]|nnelle|nten[aä]|nneksi)(?![\p{L}\p{M}])",
+            "gu"
+        ),
+        |m, s| {
+            let c = colon_case(&g(m, s, 2).to_string_lossy());
+            ordinal_case(js_number(&g(m, s, 1)), c).map_or_else(|| m.value(s), |o| js(&o))
+        },
     );
 
     t = rewrite(

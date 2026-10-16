@@ -526,4 +526,43 @@ mod tests {
             assert_eq!(got.as_deref(), *want, "{f}{args:?}");
         }
     }
+
+    /// #1574, as test/finnish.test.ts: an `N.` ordinal takes the case of the word after it. Synthetic; the forms are
+    /// en.wiktionary's declension tables.
+    #[test]
+    fn an_ordinal_takes_the_case_of_the_word_after_it() {
+        use crate::languages::finnish::normalize::{OrdCase, ordinal_case, ordinal_case_before};
+        assert_eq!(
+            ordinal_case(3.0, OrdCase::Gen).as_deref(),
+            Some("kolmannen")
+        );
+        assert_eq!(
+            ordinal_case(11.0, OrdCase::Ine).as_deref(),
+            Some("yhdennessätoista")
+        );
+        assert_eq!(
+            ordinal_case(21.0, OrdCase::Gen).as_deref(),
+            Some("kahdennenkymmenennenensimmäisen")
+        );
+        assert_eq!(ordinal_case_before(&js("kaudellaan")), OrdCase::Ade);
+        assert_eq!(ordinal_case_before(&js("divisioona")), OrdCase::Nom);
+        let say = |s: &str| crate::phonemize(s, "fi").unwrap();
+        for (digits, words) in [
+            ("Hän voitti 2. kerran.", "Hän voitti toisen kerran."),
+            ("Se oli 3. sijalla.", "Se oli kolmannella sijalla."),
+            (
+                "kuun 28. päivänä",
+                "kuun kahdentenakymmenentenäkahdeksantena päivänä",
+            ),
+            (
+                "20.–24. päivänä",
+                "kahdentenakymmenentenä kahdentenakymmenentenäneljäntenä päivänä",
+            ),
+            ("13. toukokuuta", "kolmastoista toukokuuta"),
+            ("9:nnen kerran", "yhdeksännen kerran"),
+            ("11:nneksi", "yhdenneksitoista"),
+        ] {
+            assert_eq!(say(digits), say(words), "{digits}");
+        }
+    }
 }

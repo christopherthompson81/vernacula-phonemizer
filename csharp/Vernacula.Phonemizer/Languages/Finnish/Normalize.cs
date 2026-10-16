@@ -5,7 +5,7 @@
  *
  * Ported from src/languages/finnish/normalize.ts, whose header carries the whole evidential record: the
  * per-class corpus counts, the 333-context table behind the bare `N.` ordinal and its sentence-period
- * invariant, the colon-as-inflectional-joint census and the PRICED refusal of every oblique suffix, the
+ * invariant, the ordinal case agreement (#1574), the colon-as-inflectional-joint census and the PRICED refusal of the cardinal suffixes, the
  * range and fraction refusals, why there is no comma-grouping arm (unlike sv/nb), the sourcing tiers for
  * every emitted word, and the letter names corroborated against the referee's own spelled acronyms.
  * Nothing is re-derived here.
@@ -35,26 +35,97 @@ public static class Normalize
     private const string ORD_TEEN = "toista";
     private const string ORD_HUNDRED = "sadas";
 
-    /** The Finnish ordinal for 1 … 999, or null outside it — an unclaimable number keeps its digits and its
-     *  period rather than getting a guessed ending. ⚠ 999 IS THE CEILING because the thousands formant would
-     *  be composing a form the referee does not carry. */
-    public static string? Ordinal(double n)
+    /** The ten cases a singular ordinal takes besides the nominative (#1574). The forms are en.wiktionary's
+     *  declension tables, Kotus 45 *kahdeksas* and 38 *nainen*; every compound component inflects, `-toista`
+     *  never does. See `ordinal` and `OrdCase` in src/languages/finnish/normalize.ts. */
+    public enum OrdCase { Nom, Gen, Par, Ine, Ela, Ill, Ade, Abl, All, Ess, Tra }
+
+    private static string Inflect(string part, OrdCase c)
+    {
+        if (c == OrdCase.Nom) return part;
+        var a = part.IndexOfAny(['a', 'o', 'u']) >= 0 ? "a" : "ä";
+        if (part.EndsWith("nen", StringComparison.Ordinal))
+        {
+            var st = part[..^3];
+            return st + c switch
+            {
+                OrdCase.Gen => "sen", OrdCase.Par => $"st{a}", OrdCase.Ine => $"sess{a}", OrdCase.Ela => $"sest{a}",
+                OrdCase.Ill => "seen", OrdCase.Ade => $"sell{a}", OrdCase.Abl => $"selt{a}", OrdCase.All => "selle",
+                OrdCase.Ess => $"sen{a}", _ => "seksi",
+            };
+        }
+        var stem = part[..^1];
+        return stem + c switch
+        {
+            OrdCase.Gen => "nnen", OrdCase.Par => $"tt{a}", OrdCase.Ine => $"nness{a}", OrdCase.Ela => $"nnest{a}",
+            OrdCase.Ill => "nteen", OrdCase.Ade => $"nnell{a}", OrdCase.Abl => $"nnelt{a}", OrdCase.All => "nnelle",
+            OrdCase.Ess => $"nten{a}", _ => "nneksi",
+        };
+    }
+
+    /** The Finnish ordinal for 1 … 999 in case `c`, or null outside it — an unclaimable number keeps its digits
+     *  and its period rather than getting a guessed ending. ⚠ 999 IS THE CEILING because the thousands formant
+     *  would be composing a form the referee does not carry. */
+    public static string? Ordinal(double n, OrdCase c = OrdCase.Nom)
     {
         if (!double.IsInteger(n) || n < 1 || n > 999) return null;
-        if (n < 10) return ORD_FINAL[(int)n];
-        if (n == 10) return ORD_TEN;
-        if (n < 20) return $"{ORD_COMB[(int)n - 10]}{ORD_TEEN}";
+        if (n < 10) return Inflect(ORD_FINAL[(int)n], c);
+        if (n == 10) return Inflect(ORD_TEN, c);
+        if (n < 20) return $"{Inflect(ORD_COMB[(int)n - 10], c)}{ORD_TEEN}";
         if (n < 100)
         {
             var t = (int)Math.Floor(n / 10);
             var o = (int)(n % 10);
-            return $"{ORD_COMB[t]}{ORD_TEN}{(o != 0 ? ORD_FINAL[o] : "")}";
+            return $"{Inflect(ORD_COMB[t], c)}{Inflect(ORD_TEN, c)}{(o != 0 ? Inflect(ORD_FINAL[o], c) : "")}";
         }
         var h = (int)Math.Floor(n / 100);
         var r = n % 100;
-        var hundreds = h == 1 ? ORD_HUNDRED : $"{ORD_COMB[h]}{ORD_HUNDRED}";
-        return $"{hundreds}{(r != 0 ? Ordinal(r) : "")}";
+        var hundreds = h == 1 ? Inflect(ORD_HUNDRED, c) : $"{Inflect(ORD_COMB[h], c)}{Inflect(ORD_HUNDRED, c)}";
+        return $"{hundreds}{(r != 0 ? Ordinal(r, c) : "")}";
     }
+
+    private static readonly (JsRe Re, OrdCase Case)[] CASE_RULES =
+    [
+        (JsRegex.Compile("ss([aä])\\1n$", "u"), OrdCase.Ine),
+        (JsRegex.Compile("st([aä])\\1n$", "u"), OrdCase.Ela),
+        (JsRegex.Compile("ll([aä])\\1n$", "u"), OrdCase.Ade),
+        (JsRegex.Compile("lleen$", "u"), OrdCase.All),
+        (JsRegex.Compile("kseen$", "u"), OrdCase.Tra),
+        (JsRegex.Compile("n([aä])\\1n$", "u"), OrdCase.Ess),
+        (JsRegex.Compile("ss[aä]$", "u"), OrdCase.Ine),
+        (JsRegex.Compile("st[aä]$", "u"), OrdCase.Ela),
+        (JsRegex.Compile("ll[aä]$", "u"), OrdCase.Ade),
+        (JsRegex.Compile("lle$", "u"), OrdCase.All),
+        (JsRegex.Compile("ksi$", "u"), OrdCase.Tra),
+        (JsRegex.Compile("(?:oo|uu)n[aä]$", "u"), OrdCase.Nom),
+        (JsRegex.Compile("n[aä]$", "u"), OrdCase.Ess),
+        (JsRegex.Compile("seen$", "u"), OrdCase.Ill),
+        (JsRegex.Compile("een$", "u"), OrdCase.Gen),
+    ];
+    private static readonly JsRe LONG_VOWEL_N = JsRegex.Compile("([aeiouyäö])\\1n$", "u");
+    private static readonly JsRe VOWEL_RUN = JsRegex.Compile("[aeiouyäö]+", "gu");
+    private static readonly JsRe PARTITIVE = JsRegex.Compile("(?:([aä])\\1|tt[aä])$", "u");
+
+    /** The case an `N.` ordinal takes before `word`, read from the word's ending (#1574). Every row is measured
+     *  over fiwiki, and the order matters; see `ordinalCaseBefore` in src/languages/finnish/normalize.ts. */
+    public static OrdCase OrdinalCaseBefore(string word)
+    {
+        var w = Js.ToLowerCase(word);
+        foreach (var (re, c) in CASE_RULES)
+            if (re.IsMatch(w)) return c;
+        if (LONG_VOWEL_N.IsMatch(w)) return VOWEL_RUN.Re.Matches(w).Count >= 2 ? OrdCase.Ill : OrdCase.Gen;
+        if (w.EndsWith("nen", StringComparison.Ordinal)) return OrdCase.Nom;
+        if (w.EndsWith('n')) return OrdCase.Gen;
+        return PARTITIVE.IsMatch(w) ? OrdCase.Par : OrdCase.Nom;
+    }
+
+    /** The written ordinal colon suffix → its case: `9:nnen` is the genitive ending of *yhdeksäs*. */
+    private static readonly Dictionary<string, OrdCase> COLON_CASE = new()
+    {
+        ["nnen"] = OrdCase.Gen, ["tta"] = OrdCase.Par, ["nnessa"] = OrdCase.Ine, ["nnesta"] = OrdCase.Ela,
+        ["nteen"] = OrdCase.Ill, ["nnella"] = OrdCase.Ade, ["nnelta"] = OrdCase.Abl, ["nnelle"] = OrdCase.All,
+        ["ntena"] = OrdCase.Ess, ["nneksi"] = OrdCase.Tra,
+    };
 
     /** Month names in the PARTITIVE — the case a Finnish date takes, and the form the corpus already writes
      *  in its 147 spelled-out dates. */
@@ -188,13 +259,16 @@ public static class Normalize
         "(?<=\\()(\\d{1,2})[.:](\\d{2})(?=\\s+(?:UTC|GMT|EET|EEST|koordinoitua)(?![\\p{L}\\p{M}]))", "giu");
 
 
-    private static readonly string ORD_TAIL = $"(?=\\s+(?:{MONTH_LOOKAHEAD}|\\p{{Ll}}))";
+    private static readonly string ORD_TAIL = $"(?=\\s+(?:{MONTH_LOOKAHEAD}|\\p{{Ll}}))(?=\\s+([\\p{{L}}\\p{{M}}-]+))";
     private static readonly JsRe ORDINAL_RANGE =
         JsRegex.Compile($"(?<![\\d.,:\\p{{L}}])(\\d{{1,3}})\\.\\s*[–—-]\\s*(\\d{{1,3}})\\.{ORD_TAIL}", "gu");
     private static readonly JsRe ORDINAL_BARE =
         JsRegex.Compile($"(?<![\\d.,:\\p{{L}}])(\\d{{1,3}})\\.{ORD_TAIL}", "gu");
     private static readonly JsRe ORDINAL_COLON =
         JsRegex.Compile("(?<![\\d.,:])(\\d{1,3}):s(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe ORDINAL_COLON_OBLIQUE = JsRegex.Compile(
+        "(?<![\\d.,:])(\\d{1,3}):(nnen|tt[aä]|nness[aä]|nnest[aä]|nteen|nnell[aä]|nnelt[aä]|nnelle|nten[aä]|nneksi)(?![\\p{L}\\p{M}])",
+        "gu");
 
     private static readonly JsRe COLON_AFTER_DIGIT = JsRegex.Compile("(?<=\\d)\\s*:(?=[a-zåäö])", "gu");
     private static readonly JsRe COLON_AFTER_SYMBOL =
@@ -293,17 +367,24 @@ public static class Normalize
 
         // 5) THE BARE `N.` ORDINAL — the largest rule in the file. THE ORDINAL RANGE IS CLAIMED FIRST, or its
         //    LEFT operand is stranded and read as a cardinal; only the connective is refused.
+        //    ⚠ THE ORDINAL AGREES IN CASE WITH THE WORD AFTER IT (#1574), which the lookahead captures.
         t = Rewrite(t, ORDINAL_RANGE, m =>
         {
-            var x = Ordinal(Js.Number(m.Groups[1].Value));
-            var y = Ordinal(Js.Number(m.Groups[2].Value));
+            var c = OrdinalCaseBefore(m.Groups[3].Value);
+            var x = Ordinal(Js.Number(m.Groups[1].Value), c);
+            var y = Ordinal(Js.Number(m.Groups[2].Value), c);
             return x is not null && y is not null ? $"{x} {y}" : m.Value;
         });
-        t = Rewrite(t, ORDINAL_BARE, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
+        t = Rewrite(t, ORDINAL_BARE, m =>
+            Ordinal(Js.Number(m.Groups[1].Value), OrdinalCaseBefore(m.Groups[2].Value)) ?? m.Value);
 
         // 6) THE ORDINAL COLON SUFFIX `N:s` — the written `s` IS the nominative ending, so there is nothing
-        //    to inflect. Restricted to `:s` on purpose; the oblique forms fall through to step 7.
+        //    to inflect. The oblique ordinal suffixes are step 6b; the plural `1:sten` falls through to step 7.
         t = Rewrite(t, ORDINAL_COLON, m => Ordinal(Js.Number(m.Groups[1].Value)) ?? m.Value);
+
+        // 6b) THE OBLIQUE ORDINAL COLON SUFFIXES — `9:nnen`, `11:nneksi` (#1574). The suffix names the case.
+        t = Rewrite(t, ORDINAL_COLON_OBLIQUE, m =>
+            Ordinal(Js.Number(m.Groups[1].Value), COLON_CASE[m.Groups[2].Value.Replace('ä', 'a')]) ?? m.Value);
 
         // 7) THE REMAINING COLON SUFFIXES — the PRICED REFUSAL. The colon is a morpheme joint and
         //    `clausePunctuation` reads it as a clause pause. ⚠ THE TWO ARMS DIFFER: after DIGITS the suffix
