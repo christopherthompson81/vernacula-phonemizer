@@ -223,7 +223,7 @@ public static class StructuralTagger
     }
 
     /**
-     * The shared async neural serving pre-pass (bn, nb): tag each DISTINCT out-of-lexicon word ONCE, then
+     * The shared async neural serving pre-pass (bn, fr, sd, ckb): tag each DISTINCT out-of-lexicon word ONCE, then
      * run the ordinary sync engine with those readings injected behind its own lexicon lookup.
      */
     public static async Task<string> WordLevelNeuralPrepass(string text, NeuralPrepassOptions opts)
@@ -239,5 +239,32 @@ public static class StructuralTagger
             if (!string.IsNullOrEmpty(outp)) tagged[w] = outp; // "" = declined → leave to the rule engine
         }
         return opts.Render(text, w => tagged.TryGetValue(w, out var v) ? v : null);
+    }
+
+    /**
+     * The async neural pre-pass keyed by WHAT THE ENGINE ASKS (#1578): render once with a recording
+     * `oovOverride` that answers nothing, tag each distinct word the engine asked for, then render again with
+     * the readings. The engine consults `oovOverride` only after its lexicon misses, so the recorded words are
+     * its OOV words in exactly the spelling it looks them up by. See structuralTagger.ts for why
+     * `WordLevelNeuralPrepass`'s guessed words drifted (da, nb, af).
+     */
+    public static async Task<string> AskedWordsNeuralPrepass(
+        string text, Func<string, Task<string>> tag, Func<string, Func<string, string?>, string> render)
+    {
+        // ⚠ Insertion-ordered like the JS Set (no deletions here, so a List plus a HashSet preserves it).
+        var asked = new List<string>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        render(text, w =>
+        {
+            if (seen.Add(w)) asked.Add(w);
+            return null;
+        });
+        var tagged = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var w in asked)
+        {
+            var outp = await tag(w).ConfigureAwait(false);
+            if (!string.IsNullOrEmpty(outp)) tagged[w] = outp; // "" = declined → leave to the rule engine
+        }
+        return render(text, w => tagged.TryGetValue(w, out var v) ? v : null);
     }
 }

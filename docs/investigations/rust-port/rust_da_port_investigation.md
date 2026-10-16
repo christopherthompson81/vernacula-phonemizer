@@ -146,3 +146,28 @@ clippy: in the new files only module_inception (registry.rs collapsible_if and s
 phonemize-sync / phonemize-best / trace: 14128 identical, 0 DIFFER; phonemize-trace 14126 / 2 DIFFER — the first da
   and the first nb text (`nativised: "joao"` / `"marta"`), the lazy-lexicon trace note of da Run 3, not reproduced
 ```
+
+## Run 7 — 2026-10-15 18:33 (#1578: fixing Run 4's findings 1 and 2)
+
+**Question.** Do Run 4's two TS defects close in all three engines, and what moves in the golden?
+
+**Commands.** A best-path probe (`phonemize` and `phonemizeAsync` side by side) over the Run 4 texts;
+`npx tsx tools/check-goldens.mts --show 40 da` before the rewrite; `test/germanic-defects-1578.test.ts`, with
+each fix reverted in turn.
+
+**Raw finding.**
+1. *Number words.* The pre-pass now records the words `text()` asks `oovOverride` for
+   (`askedWordsNeuralPrepass`, core/structuralTagger.ts) instead of scanning the raw text. `47` best →
+   *ˈsywˀɐwfœːɐ*, the same as `syvogfyrre`; `Den 21. maj.` best → *ˈeːˀnɐwˌtyːvənə*, the same as
+   `Den enogtyvende maj.`.
+2. *Zero-padded ordinal.* Steps 9 and 10 now key `ORDINALS[String(Number(n))]`, as step 8 already did.
+   `Den 07. og 08. maj.` → *ˈdɛnˀ ˈsyːˀvənə ˈɐw ˈɐdənə ˈmɑjˀ .*, the same as `Den 7. og 8. maj.`. `00.` is
+   still declined (it has no ordinal).
+3. *Golden:* 19 da rows went stale, every one a number word now read by the tagger:
+   `femoghalvtreds` *fˈemoɡhalvtʁeds* → *ˈfɛmˀɐwhaltʁes*, `sekstende` *sˈekstenə* → *ˈsɑjsdənə*,
+   `nioghalvfems`, `treogfirs`, `otteoghalvfjerds`, `syvogtyve`, `niogtyve`, `niogtres`, `femogfyrre`,
+   `fireogtres`. Each new reading has the stød and r-vocalisation of the NST convention, which the rule
+   g2p never produces. Rewritten with `--write`.
+4. Reverting `danishNeural.ts` fails the best-path test; reverting `normalize.ts` fails both ordinal rows.
+
+**Implication.** Both closed in TS, C# and Rust. Finding 3 (the lazy-lexicon trace note) was fixed separately.

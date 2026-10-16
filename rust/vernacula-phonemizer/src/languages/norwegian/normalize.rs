@@ -184,7 +184,7 @@ pub fn normalize_norwegian_local(input: &JsString) -> JsString {
         },
     );
 
-    // `ORDINALS[String(Number(a))]` here, but `ORDINALS[n]` in the single-ordinal arm below.
+    // `ORDINALS[String(Number(a))]`, as in the single-ordinal arm below (#1578).
     t = rewrite_with(
         &t,
         js_re!(
@@ -200,7 +200,8 @@ pub fn normalize_norwegian_local(input: &JsString) -> JsString {
     t = rewrite_with(
         &t,
         js_re!(r"(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})", "gu"),
-        |m, s| ordinal(&g(m, s, 1)).unwrap_or_else(|| m.value(s)),
+        // Keyed by `String(Number(n))`: a zero-padded `07. mai` is claimed too (#1578).
+        |m, s| ordinal(&canon(&g(m, s, 1))).unwrap_or_else(|| m.value(s)),
     );
 
     t = rewrite(

@@ -161,8 +161,6 @@ public sealed class NorwegianPhonemizer : ILanguage
         LEX ??= LoadTsv.LoadTsvMap<string>("languages/norwegian", "nb-lexicon.tsv", (v, _) => v,
             optional: true, fold: k => Nat(k));
 
-    public static bool NorwegianLexiconHas(string word) => Lexicon().ContainsKey(word);
-
     /** TIER 1 lexicon (NST) → TIER 2 oovOverride (neural tagger, async path) → TIER 3 rule fallback. */
     public static string PhonemizeWord(string word, OovResolver? oovOverride = null)
     {
@@ -178,12 +176,14 @@ public sealed class NorwegianPhonemizer : ILanguage
     private static readonly string NB_WORD = $"{NB_LETTER}(?:{NB_LETTER}|\\p{{M}}|['’](?={NB_LETTER}))*";
     private static readonly JsRe TOKEN = JsRegex.Compile($"({NB_WORD})|(\\d+)|([.?!,;:…—])", "gu");
 
-    private static string Number(string digits)
+    // ⚠ The number words take the OOV override too (#1578): 8 of the 42 are outside the lexicon
+    // (`tohundre` … `nihundre`), so `200` read by rule while the word `tohundre` read by the tagger.
+    private static string Number(string digits, OovResolver? oovOverride)
     {
         var nn = Js.Number(digits);
         // ⚠ Above 2^53 the float has lost the low digits; read the numeral out digit-at-a-time instead.
-        if (!Js.IsSafeInteger(nn)) return Numbers.SpellDigits(digits, MANIFEST.Numbers, w => PhonemizeWord(w));
-        return Numbers.RenderNumber(nn, MANIFEST.Numbers, w => PhonemizeWord(w), Numbers.westernNumberWords);
+        if (!Js.IsSafeInteger(nn)) return Numbers.SpellDigits(digits, MANIFEST.Numbers, w => PhonemizeWord(w, oovOverride));
+        return Numbers.RenderNumber(nn, MANIFEST.Numbers, w => PhonemizeWord(w, oovOverride), Numbers.westernNumberWords);
     }
 
     public string Text(string input) => Text(input, null);
@@ -196,7 +196,7 @@ public sealed class NorwegianPhonemizer : ILanguage
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0)
                 sink.Emit(PhonemizeWord(Nat(m.Groups[1].Value), oovOverride));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                sink.Emit(Number(m.Groups[2].Value));
+                sink.Emit(Number(m.Groups[2].Value, oovOverride));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
             {
                 if (CLAUSE_MARK.TryGetValue(m.Groups[3].Value, out var mk) && mk.Length > 0) sink.Pause(mk);

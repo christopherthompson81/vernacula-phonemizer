@@ -117,3 +117,26 @@ clippy: in the new files only module_inception (registry.rs collapsible_if and s
 phonemize-sync / phonemize-best / trace: 14128 identical, 0 DIFFER; phonemize-trace 14126 / 2 DIFFER — the first da
   and the first nb text (`nativised: "joao"` / `"marta"`), the lazy-lexicon trace note of da Run 3, not reproduced
 ```
+
+## Run 7 — 2026-10-15 18:33 (#1578: fixing Run 4's finding 1)
+
+**Question.** Does recording the words the engine asks for close finding 1, and does it expose anything the
+old pre-pass kept from the tagger?
+
+**Commands.** A best-path probe; a script comparing `phonemizeWordRules` with `tagger.tag` on every number
+word and every letter name outside both lexicons; `npx tsx tools/check-goldens.mts --show 40 af`.
+
+**Raw finding.**
+1. `Dit is 90°F.` best → *fˈarənɦəit*, the same as the written-out `Fahrenheit`.
+2. **The golden caught a regression the fix created.** `USSR` is normalized to letter names (`uu es es er`),
+   which the tagger now saw. It read `er` *ər* where the rule path's letter name is *ɛr*. Of the 20 letter names
+   outside both lexicons, `er` is the only one whose segments differ (the rest differ by the stress mark alone,
+   which `withStress` adds to every tier). The letter names are therefore rule-reserved
+   (`afrikaansRuleReserved`), the seam guard that already held `'n` and the bare letters. That makes four
+   springings of this trap in this language.
+3. The 19 number words outside both lexicons (`twee`, `honderd`, `duisend`, …) read the same from the
+   tagger as from the rules, so `text()`'s number arm was left without the override: there is no observable
+   gap to close.
+4. Golden: 0 af rows stale after the letter-name guard (1 before it).
+
+**Implication.** Closed in TS, C# and Rust. Reverting the letter-name guard fails two tests in each engine.

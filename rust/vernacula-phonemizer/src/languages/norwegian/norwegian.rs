@@ -253,10 +253,11 @@ pub fn phonemize_word(word: &JsString, oov: Option<OovResolver>) -> JsString {
     phonemize_word_rules(word)
 }
 
-/// `number(digits)`: an unsafe integer is read digit at a time.
-fn number(digits: &JsString) -> JsString {
+/// `number(digits, oovOverride)`: an unsafe integer is read digit at a time. The number words take the OOV
+/// override too (#1578): 8 of the 42 are outside the lexicon (`tohundre` … `nihundre`).
+fn number(digits: &JsString, oov: Option<OovResolver>) -> JsString {
     let nn = js_number(digits);
-    let word = |w: &str| phonemize_word(&js(w), None).to_string_lossy();
+    let word = |w: &str| phonemize_word(&js(w), oov).to_string_lossy();
     if !is_safe_integer(nn) {
         return js(&spell_digits(
             &digits.to_string_lossy(),
@@ -309,7 +310,7 @@ impl NorwegianPhonemizer {
 
     /// `number(digits)` (norwegian.ts).
     pub fn number(&self, digits: &JsString) -> JsString {
-        number(digits)
+        number(digits, None)
     }
 
     /// `text(input, oovOverride)`.
@@ -318,7 +319,7 @@ impl NorwegianPhonemizer {
             if let Some(w) = m.group(1, s).filter(|w| !w.is_empty()) {
                 sink.emit(&phonemize_word(&nat(&w), oov));
             } else if let Some(d) = m.group(2, s).filter(|d| !d.is_empty()) {
-                sink.emit(&number(&d));
+                sink.emit(&number(&d, oov));
             } else if let Some(p) = m.group(3, s).filter(|p| !p.is_empty())
                 && let Some(mk) = MANIFEST
                     .clause_punctuation

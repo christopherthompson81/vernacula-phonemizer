@@ -281,3 +281,94 @@ mod fraction_guard_tests {
         }
     }
 }
+
+/// #1578, as test/germanic-defects-1578.test.ts: relational throughout, so no IPA is typed.
+#[cfg(all(test, feature = "da", feature = "nb", feature = "af", feature = "bar"))]
+mod germanic_defects_1578_tests {
+    use std::cell::RefCell;
+
+    use crate::core::js_string::{JsString, js};
+    use crate::core::structural_tagger::asked_words_neural_prepass;
+    use crate::{phonemize, phonemize_best};
+
+    /// The words the pre-pass offers the tagger, with a tagger that records and declines. Needs no model.
+    fn offered(
+        text: &str,
+        render: &dyn Fn(&JsString, &dyn Fn(&JsString) -> Option<JsString>) -> JsString,
+    ) -> Vec<String> {
+        let seen = RefCell::new(Vec::new());
+        asked_words_neural_prepass(
+            &js(text),
+            &|w| {
+                seen.borrow_mut().push(w.to_string_lossy());
+                Ok(JsString::new())
+            },
+            render,
+        )
+        .unwrap();
+        seen.into_inner()
+    }
+
+    #[test]
+    fn the_tagger_is_offered_the_words_the_engine_asks_for() {
+        let da = super::danish::danish::create_danish().unwrap();
+        assert!(offered("47", &|t, o| da.text(t, Some(o))).contains(&"syvogfyrre".to_string()));
+
+        let nb = super::norwegian::norwegian::create_norwegian().unwrap();
+        let words = offered("Dvořák og 200", &|t, o| nb.text(t, Some(o)));
+        assert!(words.contains(&"Dvorak".to_string()), "{words:?}");
+        assert!(words.contains(&"tohundre".to_string()), "{words:?}");
+
+        let af = super::afrikaans::afrikaans::create_afrikaans().unwrap();
+        assert!(
+            offered("Dit is 90°F.", &|t, o| af.text(t, Some(o)))
+                .contains(&"fahrenheit".to_string())
+        );
+        assert!(
+            !offered("Die USSR het geval.", &|t, o| af.text(t, Some(o)))
+                .contains(&"er".to_string())
+        );
+    }
+
+    #[test]
+    fn on_the_best_path_a_word_reads_as_its_written_form() {
+        let best = |s: &str, l: &str| phonemize_best(s, l).unwrap();
+        for (lang, a, b) in [
+            ("da", "47", "syvogfyrre"),
+            ("da", "Den 21. maj.", "Den enogtyvende maj."),
+            ("nb", "Han bor i Dvořák.", "Han bor i Dvorak."),
+            ("nb", "São", "Sao"),
+            ("nb", "200", "tohundre"),
+            ("af", "Dit is 90°F.", "Dit is negentig grade Fahrenheit."),
+        ] {
+            assert_eq!(best(a, lang), best(b, lang), "{lang} {a}");
+        }
+        assert_eq!(
+            best("Die USSR het geval.", "af"),
+            phonemize("Die USSR het geval.", "af").unwrap()
+        );
+    }
+
+    #[test]
+    fn a_zero_padded_ordinal_reads_as_the_unpadded_one() {
+        for (lang, padded, plain) in [
+            ("da", "Den 07. maj.", "Den 7. maj."),
+            ("da", "Den 07. og 08. maj.", "Den 7. og 8. maj."),
+            ("nb", "Den 07. mai.", "Den 7. mai."),
+        ] {
+            assert_eq!(
+                phonemize(padded, lang).unwrap(),
+                phonemize(plain, lang).unwrap(),
+                "{lang} {padded}"
+            );
+        }
+    }
+
+    #[test]
+    fn bar_a_final_a_after_a_silent_h_is_not_reduced() {
+        for w in ["Aha", "Oha"] {
+            assert!(!phonemize(w, "bar").unwrap().trim().ends_with('ɐ'), "{w}");
+        }
+        assert!(phonemize("Bana", "bar").unwrap().trim().ends_with('ɐ'));
+    }
+}

@@ -1,22 +1,15 @@
-//! Afrikaans's best-output path: the BiLSTM tags each distinct word both lexicons miss (rule-reserved words
-//! excluded), then the sync engine renders with those readings between the lexicons and the rules. Ported from
-//! src/languages/afrikaans/afrikaansNeural.ts.
+//! Afrikaans's best-output path: the BiLSTM tags each distinct word the sync engine asks its OOV override for
+//! (it asks only after both lexicons miss, and never for a rule-reserved word), then the sync engine renders with
+//! those readings between the lexicons and the rules. Ported from src/languages/afrikaans/afrikaansNeural.ts —
+//! see it for why the words are recorded rather than re-derived (#1578).
 //!
 //! Synchronous here: the TS awaits only because ONNX Runtime's Node binding is async.
 
-use std::sync::LazyLock;
-
-use super::afrikaans::{
-    AF_WORD, AfrikaansPhonemizer, afrikaans_lexicon_has, afrikaans_rule_reserved,
-};
+use super::afrikaans::AfrikaansPhonemizer;
 use super::afrikaans_tagger::AfrikaansTagger;
 use crate::core::foreign::with_host;
-use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js};
-use crate::core::provenance::{Form, normalize};
-use crate::core::structural_tagger::word_level_neural_prepass;
-
-static WORD: LazyLock<JsRegex> = LazyLock::new(|| JsRegex::new(AF_WORD, "gu").unwrap());
+use crate::core::structural_tagger::asked_words_neural_prepass;
 
 /// `phonemizeAfNeural(text)`, given the pre-passed text. Without a tagger it is exactly the sync path.
 pub fn phonemize_af_neural(
@@ -27,12 +20,7 @@ pub fn phonemize_af_neural(
     let Some(tagger) = tagger else {
         return Ok(with_host(&js("af"), || e.text(text, None)));
     };
-    word_level_neural_prepass(
-        text,
-        &WORD,
-        &|w| normalize(w, Form::Nfc).to_lower_case(),
-        &|w| afrikaans_lexicon_has(w) || afrikaans_rule_reserved(w),
-        &|w| tagger.tag(w),
-        &|t, oov| with_host(&js("af"), || e.text(t, Some(oov))),
-    )
+    asked_words_neural_prepass(text, &|w| tagger.tag(w), &|t, oov| {
+        with_host(&js("af"), || e.text(t, Some(oov)))
+    })
 }

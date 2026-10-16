@@ -76,6 +76,11 @@ static RELATIONAL: LazyLock<Vec<(&'static JsRegex, &'static str)>> = LazyLock::n
     ]
 });
 
+/// `String(Number(digits))`: the ordinal key of a run of digits, zero padding dropped.
+fn canon(digits: &JsString) -> JsString {
+    js(&js_number_to_string(js_number(digits)))
+}
+
 /// `ORDINALS[key]` (an own-key lookup: a key is digits only, so no `Object.prototype` member is reachable).
 fn ordinal(key: &JsString) -> Option<JsString> {
     MANIFEST.ordinals.get(&key.to_string_lossy()).map(|s| js(s))
@@ -137,27 +142,24 @@ pub fn normalize_danish_local(input: &JsString) -> JsString {
         t = rewrite(&t, re, &js(word));
     }
 
-    // `ORDINALS[String(Number(a))]` here, but `ORDINALS[a]` in the coordinated arm below: `07.-08.` is claimed
-    // and `07. og 08.` is not.
+    // `ORDINALS[String(Number(a))]` in every ordinal arm, so a zero-padded `07.` is the same ordinal as `7.`
+    // (#1578; the coordinated and single arms used the raw digits).
     t = rewrite_with(
         &t,
         js_re!(
             r"(?<!\d)(\d{1,2})\.\s*[-–—]\s*(\d{1,2})\.(?=\s+\p{Ll})",
             "gu"
         ),
-        |m, s| {
-            let canon = |i: usize| js(&js_number_to_string(js_number(&g(m, s, i))));
-            match (ordinal(&canon(1)), ordinal(&canon(2))) {
-                (Some(a), Some(b)) => a.concat(&js(" til ")).concat(&b),
-                _ => m.value(s),
-            }
+        |m, s| match (ordinal(&canon(&g(m, s, 1))), ordinal(&canon(&g(m, s, 2)))) {
+            (Some(a), Some(b)) => a.concat(&js(" til ")).concat(&b),
+            _ => m.value(s),
         },
     );
 
     t = rewrite_with(
         &t,
         js_re!(r"(?<!\d)(\d{1,2})\.\s+(og|eller)\s+(\d{1,2})\.", "gu"),
-        |m, s| match (ordinal(&g(m, s, 1)), ordinal(&g(m, s, 3))) {
+        |m, s| match (ordinal(&canon(&g(m, s, 1))), ordinal(&canon(&g(m, s, 3)))) {
             (Some(a), Some(b)) => a
                 .concat(&js(" "))
                 .concat(&g(m, s, 2))
@@ -170,7 +172,7 @@ pub fn normalize_danish_local(input: &JsString) -> JsString {
     t = rewrite_with(
         &t,
         js_re!(r"(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})", "gu"),
-        |m, s| ordinal(&g(m, s, 1)).unwrap_or_else(|| m.value(s)),
+        |m, s| ordinal(&canon(&g(m, s, 1))).unwrap_or_else(|| m.value(s)),
     );
 
     t = rewrite(

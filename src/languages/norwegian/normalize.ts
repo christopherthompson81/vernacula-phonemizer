@@ -217,7 +217,9 @@ export function normalizeNorwegian(input: string): string {
     // 11) ORDINAL DOT (134) — the largest defect in the language. `3. mai` read as "tre" + a SENTENCE
     //    BREAK + "mai". The following-lowercase guard is what separates it from a sentence ending in a
     //    year; see disambiguation 3 in the header.
-    t = rewrite(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[n] ?? m);
+    //    ⚠ KEYED BY `String(Number(n))`, as the date and range arms above: indexed by the raw digits, a
+    //    zero-padded `07. mai` missed and read as a cardinal plus a sentence break mid-date (#1578).
+    t = rewrite(t, /(?<!\d)(\d{1,2})\.(?=\s+\p{Ll})/gu, (m, n: string) => ORDINALS[String(Number(n))] ?? m);
 
     // 12) RANGES (40). A dash between numerals is spoken `til`. After the clock and the ordinal rules so
     //     it cannot claim their separators.

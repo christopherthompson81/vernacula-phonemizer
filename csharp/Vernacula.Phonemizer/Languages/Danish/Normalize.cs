@@ -159,15 +159,17 @@ public static class Normalize
         // 9) COORDINATED ORDINALS — a coordinator between two dotted numbers makes both ordinals.
         t = Rewrite(t, ORDINAL_PAIR, m =>
         {
-            var first = Lookup(ORDINALS, m.Groups[1].Value);
-            var second = Lookup(ORDINALS, m.Groups[3].Value);
+            // `String(Number(…))`, as step 8: a zero-padded `07.` is the same ordinal as `7.` (#1578).
+            var first = Lookup(ORDINALS, Js.NumberToString(Js.Number(m.Groups[1].Value)));
+            var second = Lookup(ORDINALS, Js.NumberToString(Js.Number(m.Groups[3].Value)));
             return first is not null && second is not null
                 ? $"{first} {m.Groups[2].Value} {second}"
                 : m.Value;
         });
 
         // 10) ORDINAL DOT — the following-lowercase guard separates it from a sentence ending in a year.
-        t = Rewrite(t, ORDINAL_DOT, m => Lookup(ORDINALS, m.Groups[1].Value) ?? m.Value);
+        //     Keyed by `String(Number(n))`, so a zero-padded `07. maj` is claimed too (#1578).
+        t = Rewrite(t, ORDINAL_DOT, m => Lookup(ORDINALS, Js.NumberToString(Js.Number(m.Groups[1].Value))) ?? m.Value);
 
         // 11) RANGES.
         t = Rewrite(t, RANGE, "$1 til $2");

@@ -157,7 +157,7 @@ export interface NeuralPrepassOptions {
 }
 
 /**
- * The shared async neural serving pre-pass (bn, nb): tag each DISTINCT out-of-lexicon word ONCE, then run the ordinary
+ * The shared async neural serving pre-pass (bn, fr, sd, ckb): tag each DISTINCT out-of-lexicon word ONCE, then run the ordinary
  * sync engine with those readings injected between the lexicon and the rule engine (lexicon → tagger → rules). Numbers,
  * punctuation, and clause assembly stay the sync engine's, so only OOV word readings change vs the plain sync path.
  */
@@ -167,6 +167,41 @@ export async function wordLevelNeuralPrepass(text: string, opts: NeuralPrepassOp
     for (const m of text.matchAll(opts.word)) {
         const w = key(m[0]!);
         if (tagged.has(w) || opts.lexHas(w)) continue;
+        const out = await opts.tag(w);
+        if (out) tagged.set(w, out); // "" = declined → leave to the rule engine
+    }
+    return opts.render(text, (w) => tagged.get(w));
+}
+
+export interface AskedWordsPrepassOptions {
+    /** the tagger; "" means it declined (out-of-vocab grapheme) → leave the word to the rule engine */
+    tag: (word: string) => Promise<string>;
+    /** run the sync engine over the full text with the given per-word oovOverride */
+    render: (text: string, oov: (word: string) => string | undefined) => string;
+}
+
+/**
+ * The async neural pre-pass keyed by WHAT THE ENGINE ASKS (#1578). It renders once with a recording
+ * `oovOverride` that answers nothing, tags each distinct word the engine asked for, then renders again with
+ * the readings. The sync engine consults `oovOverride` only after its lexicon misses, so the recorded words
+ * are its OOV words, in exactly the spelling it looks them up by.
+ *
+ * ⚠ WHY NOT `wordLevelNeuralPrepass`. That one GUESSES the asked words, by scanning the caller's text with
+ * its own word regex and key, and every guess drifted from the engine:
+ *   · it scanned the text BEFORE normalization, so a word the normalizer creates (`90°F` → `Fahrenheit`,
+ *     af) and every number word (`47` → `syvogfyrre`, da) was never tagged;
+ *   · its key differed from the engine's (`Dvořák` was offered as `Dvo` + `k` while the engine asked for
+ *     `Dvorak`, nb), so the tagger's reading was computed and then never looked up.
+ * Recording cannot drift: the engine names its own words. The cost is one extra sync render.
+ */
+export async function askedWordsNeuralPrepass(text: string, opts: AskedWordsPrepassOptions): Promise<string> {
+    const asked = new Set<string>();
+    opts.render(text, (w) => {
+        asked.add(w);
+        return undefined;
+    });
+    const tagged = new Map<string, string>();
+    for (const w of asked) {
         const out = await opts.tag(w);
         if (out) tagged.set(w, out); // "" = declined → leave to the rule engine
     }
