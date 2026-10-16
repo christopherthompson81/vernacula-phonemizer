@@ -34,6 +34,9 @@ import { rewrite } from "../../core/provenance.ts";
 const D = "0-9၀-၉";
 /** One digit, optionally quantified. `d()` is a bare class so the caller can append its own quantifier. */
 const d = (n?: number): string => `[${D}]${n === undefined ? "" : `{${n}}`}`;
+/** The value of a run of ASCII or Burmese digits (U+1040–1049). */
+const digitValue = (s: string): number =>
+    Number([...s].map((c) => (c >= "\u1040" && c <= "\u1049" ? String(c.codePointAt(0)! - 0x1040) : c)).join(""));
 
 /**
  * Unit abbreviations → their Burmese words. ⚠ Longest first, so `km` is not matched as `m` with a stray `k`
@@ -119,7 +122,20 @@ export function normalizeBurmese(input: string): string {
 
     // 3) CLOCK, before any rule that reads a bare number and before the decimal rule. The colon reaches the
     //    output as nothing at all, so `၁၄:၃၀` reads as two unrelated numerals.
-    t = rewrite(t, new RegExp(`(${d()}{1,2}):(${d(2)})(?!${d()})`, "gu"), "$1 နာရီ $2 မိနစ်");
+    //    ⚠ THREE GUARDS (#1589):
+    //    · A FOLLOWING နာရီ IS CONSUMED, or the hour word is said twice: `မနက် ၉:၃၀ နာရီ` read
+    //      *၉ နာရီ ၃၀ မိနစ် နာရီ*. 6 FLEURS my_mm lines have the shape (vi's clock consumes its `giờ` the same way).
+    //    · `:00` IS NOT SPOKEN: `12:00` read "twelve hours zero minutes"; it is the hour alone.
+    //    · A LEFT DIGIT GUARD AND A RANGE CHECK, hour ≤ 24 and minute ≤ 59. Without them `123:45` matched
+    //      `23:45` and the `1` joined it, and `99:99` read as a time. A refused shape falls through untouched.
+    //    A consumed နာရီ glued to the next word (`8:46 နာရီတိတိ`, "exactly") leaves that word separated by a space.
+    t = rewrite(t, new RegExp(`(?<![${D}])(${d()}{1,2}):(${d(2)})(?!${d()})(\\s*နာရီ(?=([\\p{L}\\p{M}]?)))?`, "gu"),
+        (m, h: string, mm: string, hour: string | undefined, glued: string | undefined) => {
+            const hv = digitValue(h), mv = digitValue(mm);
+            if (hv > 24 || mv > 59) return m;
+            const read = mv === 0 ? `${h} နာရီ` : `${h} နာရီ ${mm} မိနစ်`;
+            return hour !== undefined && glued ? `${read} ` : read;
+        });
 
     // 4) DECIMALS, after de-grouping so a grouped numeral keeps its tail, and after the clock so a time is
     //    never read as a decimal. The point reaches clausePunctuation and becomes a SENTENCE BREAK, so `၈၆.၄`

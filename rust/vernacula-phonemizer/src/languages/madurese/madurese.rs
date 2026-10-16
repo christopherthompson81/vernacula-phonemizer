@@ -298,7 +298,12 @@ mod tests {
         (
             "phonemize",
             &["pokol 18:45", "mad"],
-            Some("pɔkɔl sapɔlɔ bɤn bɤluʔ , əmpaʔ pɔlɔ bɤn lɛmaʔ"),
+            Some("pɔkɔl sapɔlɔ bɤn bɤluʔ əmpaʔ pɔlɔ bɤn lɛmaʔ"),
+        ),
+        (
+            "phonemize",
+            &["pokol 18 45", "mad"],
+            Some("pɔkɔl sapɔlɔ bɤn bɤluʔ əmpaʔ pɔlɔ bɤn lɛmaʔ"),
         ),
         (
             "phonemize",
@@ -616,5 +621,31 @@ mod tests {
         crate::core::provenance::on_poison(None);
         assert!(n > 200);
         assert_eq!(hits.get(), 0);
+    }
+}
+
+/// #1589, as test/sea-defects-1589.test.ts: relational, so no IPA is typed. Synthetic probes.
+#[cfg(all(test, feature = "mad"))]
+mod defects_1589_tests {
+    #[test]
+    fn reads_as_its_spelled_form() {
+        for (input, spelled) in [
+            ("jam 7.30", "jam 7 30"),
+            ("7.30 WIB", "7 30 WIB"),
+            ("3.14159", "3 koma 1 4 1 5 9"),
+            ("Rp 5 M", "Rp 5 m"),
+        ] {
+            assert_eq!(
+                crate::phonemize(input, "mad").unwrap(),
+                crate::phonemize(spelled, "mad").unwrap(),
+                "{input}"
+            );
+        }
+        let era = crate::phonemize("Masèhi", "mad")
+            .unwrap()
+            .trim()
+            .to_string();
+        assert!(crate::phonemize("940 M", "mad").unwrap().contains(&era));
+        assert!(!crate::phonemize("Rp 5 M", "mad").unwrap().contains(&era));
     }
 }

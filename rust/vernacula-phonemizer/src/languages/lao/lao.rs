@@ -725,3 +725,18 @@ mod tests {
         }
     }
 }
+
+/// #1589, as test/sea-defects-1589.test.ts: relational, so no IPA is typed. Synthetic probes.
+#[cfg(all(test, feature = "lo"))]
+mod defects_1589_tests {
+    #[test]
+    fn reads_as_its_spelled_form() {
+        for (input, spelled) in [("1,234.5", "1234.5"), ("1.234,5", "1234,5")] {
+            assert_eq!(
+                crate::phonemize(input, "lo").unwrap(),
+                crate::phonemize(spelled, "lo").unwrap(),
+                "{input}"
+            );
+        }
+    }
+}

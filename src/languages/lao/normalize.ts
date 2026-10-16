@@ -135,6 +135,13 @@ export function normalizeLao(input: string): string {
     //    the text has one, with no leaked character and no dropped symbol to report.
     // ⚠ AND A GROUP MAY NOT FOLLOW A LONE `0` — no convention groups from zero, so `0,001` joining to
     //    `0001` is a 1000× error rather than a reading of it.
+    // ⚠ A GROUPED NUMBER MAY END IN A DECIMAL IN THE OTHER MARK — `1,234.5`, `1.234,5`. The plain group rule's
+    //    lookahead refuses a group followed by a mark, and step 7 refuses a dotted run, so the mixed numeral fell
+    //    through to the tokenizer and `1,234.5` read "one two hundred thirty-four", a SENTENCE PAUSE, "five"
+    //    (#1589). Its groups are joined here and the decimal is left for step 7. The other mark must differ
+    //    from the grouping one: `1,234,5` is not a decimal.
+    const groupThenDecimal = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?!\2)([.,]\p{Nd}+)(?![\p{Nd}.,])/gu;
+    s = rewrite(s, groupThenDecimal, (_m, int: string, sep: string, dec: string) => int.replaceAll(sep, "") + dec);
     const group = /(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?![\p{Nd}.,])/gu;
     s = rewrite(s, group, (m, _g, sep: string) => m.replaceAll(sep, ""));
 

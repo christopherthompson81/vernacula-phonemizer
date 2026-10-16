@@ -121,11 +121,11 @@ describe("jv text normalization", () => {
     });
 
     test("⚠ a clock's dot is claimed only where the corpus proves it is a clock", () => {
-        // Whole hours only — `menit` scores ZERO in the corpus and `jam siji liwat` zero on jv.wikipedia,
-        // so a clock with real minutes is left alone rather than read with a guessed word.
+        // `menit` scores ZERO in the corpus and `jam siji liwat` zero on jv.wikipedia, so no minute word is
+        // guessed: since #1589 a clock with real minutes reads as the hour then the minutes, with no pause.
         expect(normalizeJavanese("jam 09.00")).toBe("jam 9");
         expect(normalizeJavanese("saka 00.00-03.00 ésuk")).toBe("saka 0 nganti 3 ésuk");
-        expect(normalizeJavanese("jam 08.45")).toBe("jam 08.45");
+        expect(normalizeJavanese("jam 08.45")).toBe(normalizeJavanese("jam 8 45"));
         // ⚠ THE COLON IS DECLINED ENTIRELY: every one in the corpus is a 3-field timestamp, a sports time
         // or a Qur'an verse reference — the shapes a clock rule must NOT claim.
         expect(normalizeJavanese("jam 00:02:32 WIB")).toBe("jam 00:02:32 WIB");

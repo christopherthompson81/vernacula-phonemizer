@@ -220,23 +220,30 @@ export function normalizeMadurese(input: string): string {
     // corpus writes both separators and three hour words: `pokol 14.00`, `pokol 18.56`, `pokol 18:45`,
     // `pokol 11:00`, `kol 17.30 – 21.00 WIB`, `kol 17:00 WIB`, `jhâm 8:00 PM kantos 10:00 PM`. Before this
     // rule `pokol 14.00` read *pɔkɔl sapɔlɔ bɤn əmpaʔ . nɔla* — fourteen, a phrase break, zero.
-    // ⚠ ONLY THE WHOLE HOUR IS CLAIMED, and the refusal is the same shape Javanese records: NO MADURESE
+    // ⚠ NO MINUTES CONNECTIVE IS GUESSED, the same refusal Javanese records: NO MADURESE
     // "past"/"minutes-after" construction is attested anywhere — `mennèt` ×1 and `menit` ×1 exist as the
-    // noun (`40 mennèt`, `8 menit bân 8 detik`) but never in a time-of-day reading. So `pokol 18:45` is
-    // left alone rather than read with a guessed connective; seven of the artifact's ten clocks are whole
-    // hours and are the ones repaired.
+    // noun (`40 mennèt`, `8 menit bân 8 detik`) but never in a time-of-day reading. So `pokol 18:45` gets
+    // no connective; seven of the artifact's ten clocks are whole hours. (Until #1589 a clock with minutes
+    // was left alone entirely; see the note below the first two arms.)
     // ⚠ AND THE BARE ARM IS GUARDED BY A CLOCK MARKER, NOT BY SHAPE, because `Rp 16.31 milyad` proves a
     // bare `HH.MM` rule would destroy money: that is 16.31 BILLION rupiah, two sentences from
     // `Rp 16,09 milyad` in the same article. Every markerless `H.MM` in this corpus is a decimal.
     // ⚠ THE RANGE ARM RUNS FIRST — `kol 17.30 – 21.00 WIB` needs the second endpoint claimed by its own
     // trailing marker, and step 8's range rule can only see the dash once both endpoints are bare numbers.
+    // ⚠ A CLOCK WITH REAL MINUTES IS NOW CLAIMED TOO, read as the hour then the minutes with NO connective
+    // (#1589). The refusal above was right about the word, but leaving the clock alone was not neutral: its
+    // dot reached the tokenizer as a SENTENCE PAUSE (`jam 7.30` → *ɟɤm pətːɔʔ . təlɔ pɔlɔ*), and with a marker
+    // but no hour word `7.30 WIB` read as a DECIMAL. The juxtaposition says only what the digits say, the
+    // reading Javanese takes for the same gap. Both arms still need an hour word or a clock marker, so
+    // `Rp 16.31 milyad` stays money.
+    const clock = (h: string, mm: string): string => (mm === "00" ? String(Number(h)) : `${Number(h)} ${Number(mm)}`);
     s = rewrite(s,
-        new RegExp(`(?<![\\p{L}\\p{M}])(${HOUR_WORD})(\\s*)(\\d{1,2})[.:]00(?![\\d.:])`, "giu"),
-        (_m, w: string, sp: string, h: string) => `${w}${sp}${Number(h)}`,
+        new RegExp(`(?<![\\p{L}\\p{M}])(${HOUR_WORD})(\\s*)(\\d{1,2})[.:]([0-5]\\d)(?![\\d.:])`, "giu"),
+        (_m, w: string, sp: string, h: string, mm: string) => `${w}${sp}${clock(h, mm)}`,
     );
     s = rewrite(s,
-        new RegExp(`(?<![\\d.:,])(\\d{1,2})[.:]00(?![\\d.:])(?=\\s*${CLOCK_MARK}(?!${L}))`, "gu"),
-        (_m, h: string) => String(Number(h)),
+        new RegExp(`(?<![\\d.:,])(\\d{1,2})[.:]([0-5]\\d)(?![\\d.:])(?=\\s*${CLOCK_MARK}(?!${L}))`, "gu"),
+        (_m, h: string, mm: string) => clock(h, mm),
     );
     // ⚠ AND A BARE COLON WHOLE HOUR, WITH NO WORD AND NO MARKER — but ONLY the colon, never the period.
     // Every one of the artifact's seven colon-times is a clock (`8:00 PM`, `10:00`, `11:00`, `12:00`,
@@ -325,7 +332,10 @@ export function normalizeMadurese(input: string): string {
     // marker here and excluding the period would miss it. A Roman `M` cannot reach this rule: `mad` is not
     // in `ROMAN_NATIVE`, so `core/roman.ts` has already turned any Roman numeral into digits.
     s = rewrite(s, /(?<![\p{L}\p{M}\d])(\d+)\s?SM(?![\p{L}\p{M}\d])/gu, "$1 sabellunna Masèhi");
-    s = rewrite(s, /(?<![\p{L}\p{M}\d])(\d+)\s?M(?![\p{L}\p{M}\d])/gu, "$1 Masèhi");
+    // ⚠ NOT AFTER A CURRENCY AMOUNT (#1589): `Rp 5 M` read *lɛmaʔ ɾupijah masɛhi*, "five rupiah AD". Money is
+    // never dated by era. Read as the miliar abbreviation it usually is, it would need a word this corpus never
+    // writes after `M` (all four of its `d M` are years), and id/jv/su leave the letter too; so it is left.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d])(?<!(?:Rp\.?|\$|€|£)\s?[\d.,]*)(\d+)\s?M(?![\p{L}\p{M}\d])/gu, "$1 Masèhi");
 
     // ── 7. THE TWO RATE SHAPES THE SHARED TIER CANNOT REACH ───────────────────────────────────────
     // ⚠ BEFORE the tier. The tier matches a unit only when a NUMBER is adjacent, and in both of these the
@@ -455,17 +465,20 @@ export function normalizeMadurese(input: string): string {
     // engine's own cardinal path speaks each one.
     const KOMA = MANIFEST.numbers.decimalWord;
     const decimal = (int: string, frac: string): string => `${int} ${KOMA} ${[...frac].join(" ")}`;
-    s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,3})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
+    // ⚠ ANY NUMBER OF FRACTIONAL DIGITS (#1589): `3.14159` read *təlɔ . sapɔlɔ bɤn əmpaʔ ɛbu …*, a pause and
+    // "fourteen thousand". Step 2 has spent every real thousands group, so a longer fraction is a decimal; the
+    // corpus has none either way.
+    s = rewrite(s, /(?<![\d.,])(\d+),(\d+)(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
     // ⚠ THE PERIOD ARM CARRIES TWO EXTRA GUARDS THE COMMA ARM DOES NOT NEED.
     //   · `(?!\.\d)` KEEPS A VERSION/SECTION TRIPLE OUT. The corpus writes `2.4.1` and `No 01/0/SKB/2004`;
     //     without it `2.4.1` read *duwâ koma empa' . settong*, a decimal plus a stray pause. Refusing only
     //     when ANOTHER dot-plus-digit follows is what still lets a sentence-final decimal through.
-    //   · A CLOCK CONTEXT IS EXCLUDED OUTRIGHT. Step 1 claims the whole hours it can identify; what it
-    //     leaves behind is a clock with REAL MINUTES, and this rule read `kol 17.30` as *kol 17 koma 3 0* —
+    //   · A CLOCK CONTEXT IS EXCLUDED OUTRIGHT. Step 1 now claims a clock with real minutes as well (#1589);
+    //     before that, what it left behind was read by this rule, `kol 17.30` as *kol 17 koma 3 0* —
     //     a decimal inside a time. The corpus's `pokol 18.56` is the same shape. Found by probing the
     //     leftovers of step 1's deliberate refusal, not by the corpus, whose other clocks are whole hours.
     s = rewrite(s,
-        /(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)/gu,
+        /(?<![\d.,])(\d+)\.(\d+)(?![\d,])(?!\.\d)/gu,
         (m, i: string, f: string, off: number, full: string) =>
             new RegExp(`(?<![\\p{L}\\p{M}])${HOUR_WORD}\\s*$`, "iu").test(full.slice(0, off))
                 ? m

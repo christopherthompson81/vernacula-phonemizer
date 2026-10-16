@@ -65,6 +65,10 @@ public static class Normalize
     private static readonly JsRe INVISIBLE = JsRegex.Compile("[\\u00ad\\u200c\\ufeff]", "gu");
     private static readonly JsRe US_DOLLAR = JsRegex.Compile("(?<![\\p{L}])Us\\$", "gu");
     private static readonly JsRe DOUBLE_SPACE = JsRegex.Compile("  +", "gu");
+    /** A grouped number ending in a decimal in the OTHER mark (`1,234.5`): groups joined, decimal left for step 7 (#1589). */
+    private static readonly JsRe GROUP_THEN_DECIMAL = JsRegex.Compile(
+        "(?<![\\p{Nd}.,])([1-9]\\p{Nd}{0,2}(?:([.,])\\p{Nd}{3})+)(?!\\2)([.,]\\p{Nd}+)(?![\\p{Nd}.,])", "gu");
+
     private static readonly JsRe GROUP = JsRegex.Compile(
         "(?<![\\p{Nd}.,])([1-9]\\p{Nd}{0,2}(?:([.,])\\p{Nd}{3})+)(?![\\p{Nd}.,])", "gu");
     private static readonly JsRe MINUS_SIGN = JsRegex.Compile("−(?=\\p{Nd})", "gu");
@@ -93,6 +97,8 @@ public static class Normalize
 
         // 3) THE SEPARATORS, BY GROUP SIZE — three digits after the mark is a THOUSANDS group whichever
         //    mark carries it.
+        s = Rewrite(s, GROUP_THEN_DECIMAL,
+            m => m.Groups[1].Value.Replace(m.Groups[2].Value, "", StringComparison.Ordinal) + m.Groups[3].Value);
         s = Rewrite(s, GROUP, m => m.Value.Replace(m.Groups[2].Value, "", StringComparison.Ordinal));
 
         // 4) NEGATIVE NUMBERS — U+2212 anywhere, the ASCII hyphen only where it does not follow a number.

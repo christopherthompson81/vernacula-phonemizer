@@ -83,9 +83,16 @@ public static class SundanesePhonemizer
             return (th == 1 ? NUM.Seprefix + NUM.Rebu : ToWords(th) + " " + NUM.Rebu)
                 + (r != 0 ? " " + ToWords(r) : "");
         }
-        double m = Math.Floor(n / 1_000_000), rm = n % 1_000_000;
-        return (m == 1 ? NUM.Seprefix + NUM.Yuta : ToWords(m) + " " + NUM.Yuta)
-            + (rm != 0 ? " " + ToWords(rm) : "");
+        // Above yuta: miliar (10⁹) and triliun (10¹²), then the count of triliun (#1589). See sundanese.ts.
+        return Scale(n, 1e12, NUM.Triliun) ?? Scale(n, 1e9, NUM.Miliar) ?? Scale(n, 1e6, NUM.Yuta)!;
+    }
+
+    /** `n` read as a count of `unit` plus the remainder, or null if `n` is below one `unit`. */
+    private static string? Scale(double n, double unit, string word)
+    {
+        if (n < unit) return null;
+        double c = Math.Floor(n / unit), r = n % unit;
+        return (c == 1 ? NUM.Seprefix + word : ToWords(c) + " " + word) + (r != 0 ? " " + ToWords(r) : "");
     }
 
     private static string Number(string digits)

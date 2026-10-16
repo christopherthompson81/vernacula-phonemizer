@@ -47,6 +47,7 @@
     // Aksara Jawa digits (angka) → ASCII (routed to the ngoko number compositor).
     "digits": { "꧐": "0", "꧑": "1", "꧒": "2", "꧓": "3", "꧔": "4", "꧕": "5", "꧖": "6", "꧗": "7", "꧘": "8", "꧙": "9" },
 
-    // Pada (punctuation) → canonical inline pause marks.
-    "pada": { "꧈": " , ", "꧉": " . ", "꧊": " . ", "꧋": " . ", "꧌": " , ", "꧍": " . " }
+    // Pada (punctuation) → canonical inline pause marks, UNPADDED like clausePunctuation: `sink.pause` adds the
+    // spaces itself, so a padded value reached the output as a double space (#1589).
+    "pada": { "꧈": ",", "꧉": ".", "꧊": ".", "꧋": ".", "꧌": ",", "꧍": "." }
 }

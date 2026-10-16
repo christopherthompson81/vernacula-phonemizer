@@ -67,9 +67,9 @@ public static class Normalize
     private const string RATE_UNIT = "(km|cm|mm|kg|ha|m)";
 
     private static readonly JsRe CLOCK_HOUR_WORD =
-        JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({HOUR_WORD})(\\s*)(\\d{{1,2}})[.:]00(?![\\d.:])", "giu");
+        JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}])({HOUR_WORD})(\\s*)(\\d{{1,2}})[.:]([0-5]\\d)(?![\\d.:])", "giu");
     private static readonly JsRe CLOCK_MARKED =
-        JsRegex.Compile($"(?<![\\d.:,])(\\d{{1,2}})[.:]00(?![\\d.:])(?=\\s*{CLOCK_MARK}(?!{L}))", "gu");
+        JsRegex.Compile($"(?<![\\d.:,])(\\d{{1,2}})[.:]([0-5]\\d)(?![\\d.:])(?=\\s*{CLOCK_MARK}(?!{L}))", "gu");
     private static readonly JsRe CLOCK_BARE_COLON =
         JsRegex.Compile("(?<![\\d.:,])([01]?\\d|2[0-3]):00(?![\\d.:])", "gu");
 
@@ -88,7 +88,8 @@ public static class Normalize
         JsRegex.Compile("((?:korang lebbi|ra-kèra|sakètar|kèra-kèra)\\s?)±\\s*(?=\\d)", "gu");
 
     private static readonly JsRe ERA_SM = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])(\\d+)\\s?SM(?![\\p{L}\\p{M}\\d])", "gu");
-    private static readonly JsRe ERA_M = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])(\\d+)\\s?M(?![\\p{L}\\p{M}\\d])", "gu");
+    // Not after a currency amount: `Rp 5 M` is not "five rupiah AD" (#1589). See normalize.ts step 6.
+    private static readonly JsRe ERA_M = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])(?<!(?:Rp\\.?|\\$|€|£)\\s?[\\d.,]*)(\\d+)\\s?M(?![\\p{L}\\p{M}\\d])", "gu");
 
     private static readonly JsRe SLASH_RATE =
         JsRegex.Compile($"(?<={L})\\s?/\\s?{RATE_UNIT}(²|³|2|3)?(?![\\p{{L}}\\p{{M}}\\d])", "giu");
@@ -102,8 +103,9 @@ public static class Normalize
         "(?<![\\d.,\\p{L}\\p{M}/-])(\\d+(?:[.,]\\d+)?)\\s?[-–—]\\s?(\\d+(?:[.,]\\d+)?)(?![\\d\\p{L}\\p{M}/-]|[.,]\\d)",
         "gu");
 
-    private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,3})(?![\\d,])", "gu");
-    private static readonly JsRe DECIMAL_PERIOD = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d{1,3})(?![\\d,])(?!\\.\\d)", "gu");
+    // Any number of fractional digits (#1589).
+    private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d+)(?![\\d,])", "gu");
+    private static readonly JsRe DECIMAL_PERIOD = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d,])(?!\\.\\d)", "gu");
     private static readonly JsRe HOUR_TAIL = JsRegex.Compile($"(?<![\\p{{L}}\\p{{M}}]){HOUR_WORD}\\s*$", "iu");
 
     /**
@@ -114,9 +116,13 @@ public static class Normalize
         var s = input;
 
         // ── 1. THE CLOCK — FIRST, before any rule that reads a dot ──
+        // A clock with real minutes reads as the hour then the minutes, no connective (#1589). See normalize.ts.
+        static string Clock(string h, string mm) => mm == "00"
+            ? Js.NumberToString(Js.Number(h))
+            : $"{Js.NumberToString(Js.Number(h))} {Js.NumberToString(Js.Number(mm))}";
         s = Rewrite(s, CLOCK_HOUR_WORD, m =>
-            $"{m.Groups[1].Value}{m.Groups[2].Value}{Js.NumberToString(Js.Number(m.Groups[3].Value))}");
-        s = Rewrite(s, CLOCK_MARKED, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
+            $"{m.Groups[1].Value}{m.Groups[2].Value}{Clock(m.Groups[3].Value, m.Groups[4].Value)}");
+        s = Rewrite(s, CLOCK_MARKED, m => Clock(m.Groups[1].Value, m.Groups[2].Value));
         s = Rewrite(s, CLOCK_BARE_COLON, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
 
         // ── 2. DE-GROUP THOUSANDS ──

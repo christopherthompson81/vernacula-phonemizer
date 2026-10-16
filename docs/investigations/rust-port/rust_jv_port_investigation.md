@@ -84,3 +84,19 @@ function takes one parameter): `139 pinned, 0 skipped; expects evaluated: 110, f
    garbage corpus entry (Run 1), so neither is in the regex-diff corpus.
 
 **Implication.** Reported in the PR, not fixed (TS first).
+
+## Run 5 — 2026-10-15 20:40 (#1589 fixes, TS first, mirrored to C# and Rust)
+
+**Finding.** Item 1: a clock with real minutes after `jam` now reads the hour then the minutes, with no connector:
+`jam 07.30` → *jam pitu telung puluh*, no pause. Still no minute or "past" word is attested (FLEURS jv_id writes
+its 12 clocks as digits in both columns; `menit` ×0), so none is guessed. The colon form is claimed after `jam`
+only (`jam 8:46 esuk`, ×3 FLEURS). A BARE `15:30` is DECLINED: a markerless `d:dd` can be a score or ratio, the line
+Indonesian drew in #1534, so it keeps its comma pause.
+
+Item 2: the pada values in `aksara.jsonc` are now unpadded like `clausePunctuation`. The Aksara line reads
+byte-identically to its Latin twin and has no double space. One data edit fixes all three engines.
+
+Item 3 (the extractor) was fixed by #1602. Golden jv: 0 rows changed.
+
+**Test.** `test/sea-defects-1589.test.ts`, `SeaDefects1589Tests.cs`, and `defects_1589_tests` in the language's own Rust
+module; relational, no typed IPA. Each fails with its fix reverted.

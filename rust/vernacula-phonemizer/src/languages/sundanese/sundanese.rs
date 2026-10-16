@@ -29,6 +29,8 @@ pub struct NumbersDef {
     pub rebu: String,
     pub yuta: String,
     pub seprefix: String,
+    pub miliar: String,
+    pub triliun: String,
 }
 
 /// `SundaneseDef` (sundanese.ts).
@@ -158,13 +160,29 @@ fn to_words(n: f64) -> String {
         };
         return head + &tail(r);
     }
-    let (m, r) = ((n / 1_000_000.0).floor(), n % 1_000_000.0);
-    let head = if m == 1.0 {
-        format!("{}{}", num.seprefix, num.yuta)
+    // Above yuta: miliar (10⁹) and triliun (10¹²), then the count of triliun (#1589). See sundanese.ts.
+    scale(n, 1e12, &num.triliun)
+        .or_else(|| scale(n, 1e9, &num.miliar))
+        .unwrap_or_else(|| scale(n, 1e6, &num.yuta).unwrap_or_default())
+}
+
+/// `n` read as a count of `unit` plus the remainder, or `None` if `n` is below one `unit`.
+fn scale(n: f64, unit: f64, word: &str) -> Option<String> {
+    if n < unit {
+        return None;
+    }
+    let num = &DEF.numbers;
+    let (c, r) = ((n / unit).floor(), n % unit);
+    let head = if c == 1.0 {
+        format!("{}{}", num.seprefix, word)
     } else {
-        format!("{} {}", to_words(m), num.yuta)
+        format!("{} {}", to_words(c), word)
     };
-    head + &tail(r)
+    Some(if r != 0.0 {
+        format!("{head} {}", to_words(r))
+    } else {
+        head
+    })
 }
 
 /// `number(digits)`: digit at a time above 2⁵³.
@@ -521,5 +539,25 @@ mod tests {
         crate::core::provenance::on_poison(None);
         assert!(n > 200);
         assert_eq!(hits.get(), 0);
+    }
+}
+
+/// #1589, as test/sea-defects-1589.test.ts: relational, so no IPA is typed. Synthetic probes.
+#[cfg(all(test, feature = "su"))]
+mod defects_1589_tests {
+    #[test]
+    fn reads_as_its_spelled_form() {
+        for (input, spelled) in [
+            ("3,14159", "3 koma 1 4 1 5 9"),
+            ("1000000000", "samiliar"),
+            ("1000000000000", "satriliun"),
+            ("2500000000", "dua miliar lima ratus yuta"),
+        ] {
+            assert_eq!(
+                crate::phonemize(input, "su").unwrap(),
+                crate::phonemize(spelled, "su").unwrap(),
+                "{input}"
+            );
+        }
     }
 }

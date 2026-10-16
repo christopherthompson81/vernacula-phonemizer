@@ -452,7 +452,8 @@ mod tests {
             &["saka 00.00-03.00 ésuk"],
             Some("saka 0 nganti 3 ésuk"),
         ),
-        ("normalizeJavanese", &["jam 08.45"], Some("jam 08.45")),
+        ("normalizeJavanese", &["jam 08.45"], Some("jam 8 45")),
+        ("normalizeJavanese", &["jam 8 45"], Some("jam 8 45")),
         (
             "normalizeJavanese",
             &["jam 00:02:32 WIB"],
@@ -704,5 +705,25 @@ mod tests {
         crate::core::provenance::on_poison(None);
         assert!(n > 200);
         assert_eq!(hits.get(), 0);
+    }
+}
+
+/// #1589, as test/sea-defects-1589.test.ts: relational, so no IPA is typed. Synthetic probes.
+#[cfg(all(test, feature = "jv"))]
+mod defects_1589_tests {
+    #[test]
+    fn reads_as_its_spelled_form() {
+        for (input, spelled) in [
+            ("jam 07.30", "jam 7 30"),
+            ("jam 8:46 esuk", "jam 8 46 esuk"),
+            ("ꦲꦏꦸ꧈ ꦲꦏꦸ꧉ ꦲꦏꦸ", "aku, aku. aku"),
+        ] {
+            assert_eq!(
+                crate::phonemize(input, "jv").unwrap(),
+                crate::phonemize(spelled, "jv").unwrap(),
+                "{input}"
+            );
+        }
+        assert!(!crate::phonemize("ꦲꦏꦸ꧈ ꦲꦏꦸ꧉ ꦲꦏꦸ", "jv").unwrap().contains("  "));
     }
 }

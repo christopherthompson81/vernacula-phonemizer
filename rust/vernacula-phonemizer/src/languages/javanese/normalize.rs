@@ -128,6 +128,19 @@ pub fn normalize_javanese(input: &JsString) -> JsString {
         js_re!(r"(?<=jam\s)(\d{1,2})\.00(?!\d)", "gu"),
         |m, t| num_str(&g(m, t, 1)),
     );
+    // A clock with real minutes after `jam`: the hour then the minutes, no connective (#1589). See normalize.ts.
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<=(?<![\p{L}\p{M}])jam\s)([01]?\d|2[0-4])[.:]([0-5]\d)(?!\d)(?![.:]\d)",
+            "giu"
+        ),
+        |m, t| {
+            num_str(&g(m, t, 1))
+                .concat(&js(" "))
+                .concat(&num_str(&g(m, t, 2)))
+        },
+    );
 
     // `Rp.` before an amount.
     s = rewrite(

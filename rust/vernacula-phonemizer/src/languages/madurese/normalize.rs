@@ -71,11 +71,11 @@ static BUILT: LazyLock<Built> = LazyLock::new(|| {
     let re = |p: String, f: &str| JsRegex::new(&p, f).unwrap_or_else(|e| panic!("{p}: {e}"));
     Built {
         hour_word_clock: re(
-            format!(r"(?<![\p{{L}}\p{{M}}])({HOUR_WORD})(\s*)(\d{{1,2}})[.:]00(?![\d.:])"),
+            format!(r"(?<![\p{{L}}\p{{M}}])({HOUR_WORD})(\s*)(\d{{1,2}})[.:]([0-5]\d)(?![\d.:])"),
             "giu",
         ),
         marked_clock: re(
-            format!(r"(?<![\d.:,])(\d{{1,2}})[.:]00(?![\d.:])(?=\s*{CLOCK_MARK}(?!{L}))"),
+            format!(r"(?<![\d.:,])(\d{{1,2}})[.:]([0-5]\d)(?![\d.:])(?=\s*{CLOCK_MARK}(?!{L}))"),
             "gu",
         ),
         slash_rate: re(
@@ -117,10 +117,20 @@ pub fn normalize_madurese(input: &JsString) -> JsString {
     let mut s = input.clone();
 
     // Whole-hour clocks: after an hour word, before a clock mark, and a bare `HH:00`.
+    // A clock with real minutes reads as the hour then the minutes, no connective (#1589). See normalize.ts.
+    let clock = |h: &JsString, mm: &JsString| {
+        if *mm == js("00") {
+            num_str(h)
+        } else {
+            num_str(h).concat(&js(" ")).concat(&num_str(mm))
+        }
+    };
     s = rewrite_with(&s, &bt.hour_word_clock, |m, t| {
-        g(m, t, 1).concat(&g(m, t, 2)).concat(&num_str(&g(m, t, 3)))
+        g(m, t, 1)
+            .concat(&g(m, t, 2))
+            .concat(&clock(&g(m, t, 3), &g(m, t, 4)))
     });
-    s = rewrite_with(&s, &bt.marked_clock, |m, t| num_str(&g(m, t, 1)));
+    s = rewrite_with(&s, &bt.marked_clock, |m, t| clock(&g(m, t, 1), &g(m, t, 2)));
     s = rewrite_with(
         &s,
         js_re!(r"(?<![\d.:,])([01]?\d|2[0-3]):00(?![\d.:])", "gu"),
@@ -185,7 +195,11 @@ pub fn normalize_madurese(input: &JsString) -> JsString {
     );
     s = rewrite(
         &s,
-        js_re!(r"(?<![\p{L}\p{M}\d])(\d+)\s?M(?![\p{L}\p{M}\d])", "gu"),
+        // Not after a currency amount: `Rp 5 M` is not "five rupiah AD" (#1589).
+        js_re!(
+            r"(?<![\p{L}\p{M}\d])(?<!(?:Rp\.?|\$|€|£)\s?[\d.,]*)(\d+)\s?M(?![\p{L}\p{M}\d])",
+            "gu"
+        ),
         &js("$1 Masèhi"),
     );
 
@@ -219,12 +233,12 @@ pub fn normalize_madurese(input: &JsString) -> JsString {
     // Decimals, comma then dot (a dot after an hour word is a clock and is kept).
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d.,])(\d+),(\d{1,3})(?![\d,])", "gu"),
+        js_re!(r"(?<![\d.,])(\d+),(\d+)(?![\d,])", "gu"),
         |m, t| decimal(&g(m, t, 1), &g(m, t, 2)),
     );
     rewrite_with(
         &s,
-        js_re!(r"(?<![\d.,])(\d+)\.(\d{1,3})(?![\d,])(?!\.\d)", "gu"),
+        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?![\d,])(?!\.\d)", "gu"),
         |m, t| {
             let before = t.slice(0, Some(m.index() as isize));
             if bt.hour_word_before.test(&before) {

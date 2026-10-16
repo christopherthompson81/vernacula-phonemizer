@@ -32,6 +32,10 @@
     // -belas teens + -puluh tens + ratus/rebu/yuta), like Indonesian; sa- prefix for a leading 1.
     "numbers": {
         "units": ["enol", "hiji", "dua", "tilu", "opat", "lima", "genep", "tujuh", "dalapan", "salapan"],
-        "belas": "belas", "puluh": "puluh", "ratus": "ratus", "rebu": "rebu", "yuta": "yuta", "seprefix": "sa"
+        "belas": "belas", "puluh": "puluh", "ratus": "ratus", "rebu": "rebu", "yuta": "yuta", "seprefix": "sa",
+        // 10⁹ and 10¹² (#1589), as the mined corpus writes them: `sapuluh juta nepi ka samiliar ($10^7$ nepi ka
+        // $10^9$)` (sa- on a leading 1, like every other scale), `Rp 13,1 miliar`, `sapuluh triliun`. `miliar` ×6
+        // against `milyar` ×3.
+        "miliar": "miliar", "triliun": "triliun"
     }
 }

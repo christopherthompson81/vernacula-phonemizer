@@ -135,3 +135,15 @@ HARNESS (`clear_foreign_oov()` per language in rust/tools/parity, its own commit
 other language unchanged (mag 199/200, tt 199/200, syl 195/200 are their known Arabic-run port-pending rows).
 
 **Implication.** A one-language parity run cannot see an order dependence; the full run is the gate.
+
+## Run 5 — 2026-10-15 20:40 (#1589 fixes, TS first, mirrored to C# and Rust)
+
+**Question.** Can the scale ladder go past tỷ without inventing a word?
+
+**Finding.** Vietnamese composes on tỷ: FLEURS vi_vn has *hàng nghìn tỷ dặm* and *hàng ngàn tỷ nguyên* ("thousands of
+billions"); en.wiktionary `tỉ`/`tỷ` gloss 10⁹ only and have no larger word. `numberToWords` now reads the count of tỷ as
+a number, then tỷ: `1000000000000` → *một nghìn tỷ* (was *một*), `1001e9` → *một nghìn không trăm linh một tỷ*. A
+differential against main's function over 200,005 random values below 10¹² differs in 0. Golden vi: 0 rows changed.
+
+**Test.** `test/sea-defects-1589.test.ts`, `SeaDefects1589Tests.cs`, and `defects_1589_tests` in the language's own Rust
+module; relational, no typed IPA. Each fails with its fix reverted.

@@ -84,3 +84,13 @@ normalizeBurmese, 27 phonemize, 26 phonemizeWord, 5 segment). `cargo test burmes
    fold turns them into ASCII first (`႑႒` reads as 12, the same as `၁၂`).
 
 **Implication.** Items 1–3 reported in the PR, not fixed (TS first).
+
+## Run 5 — 2026-10-15 20:40 (#1589 fixes, TS first, mirrored to C# and Rust)
+
+**Finding.** All three fixed in the clock rule: a following `\s*နာရီ` is consumed (a glued next word, `နာရီတိတိ`,
+gets its space back), `:00` emits the hour alone, and a left digit guard plus hour ≤ 24, minute ≤ 59 refuses
+`123:45` and `99:99`, which now fall through untouched. A score `ဂိုး 3:21` is still in range and still read as a
+time; not in the issue, recorded. Golden my: 0 rows changed.
+
+**Test.** `test/sea-defects-1589.test.ts`, `SeaDefects1589Tests.cs`, and `defects_1589_tests` in the language's own Rust
+module; relational, no typed IPA. Each fails with its fix reverted.

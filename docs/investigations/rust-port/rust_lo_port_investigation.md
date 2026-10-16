@@ -83,3 +83,16 @@ each reading.
    header declines. FLEURS lo_la has 0 `d/d`.
 
 **Implication.** Reported in the PR, not fixed.
+
+## Run 5 — 2026-10-15 20:40 (#1589 fixes, TS first, mirrored to C# and Rust)
+
+**Finding.** Item 1 fixed: a group rule for `[1-9]\d{0,2}(?:([.,])\d{3})+(?!\2)([.,]\d+)` joins the groups and leaves
+the decimal for step 7, so `1,234.5` and `1.234,5` read as `1234.5`. `1,234,5` (same mark twice) and `0,001.5` (zero
+head) are unchanged.
+
+Item 2, `3/4`: DECLINED. No source settles the Lao fraction's word order. lo.wikipedia has no fraction article at
+the expected title, the mined corpus uses ສ່ວນ only as "part/portion", and the one learner source found glosses
+`ສາມ ສ່ວນ` as "three parts OR thirds", which leaves numerator and denominator ambiguous. Golden lo: 0 rows changed.
+
+**Test.** `test/sea-defects-1589.test.ts`, `SeaDefects1589Tests.cs`, and `defects_1589_tests` in the language's own Rust
+module; relational, no typed IPA. Each fails with its fix reverted.

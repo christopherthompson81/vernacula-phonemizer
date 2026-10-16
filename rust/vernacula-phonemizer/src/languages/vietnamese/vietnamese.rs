@@ -456,3 +456,22 @@ mod tests {
         assert_eq!(hits.get(), 0);
     }
 }
+
+/// #1589, as test/sea-defects-1589.test.ts: relational, so no IPA is typed. Synthetic probes.
+#[cfg(all(test, feature = "vi"))]
+mod defects_1589_tests {
+    #[test]
+    fn reads_as_its_spelled_form() {
+        for (input, spelled) in [
+            ("1000000000000", "một nghìn tỷ"),
+            ("2500000000000", "hai nghìn năm trăm tỷ"),
+            ("1000000005", "một tỷ không trăm linh năm"),
+        ] {
+            assert_eq!(
+                crate::phonemize(input, "vi").unwrap(),
+                crate::phonemize(spelled, "vi").unwrap(),
+                "{input}"
+            );
+        }
+    }
+}

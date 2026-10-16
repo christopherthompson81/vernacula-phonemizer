@@ -49,6 +49,23 @@ pub fn normalize_lao(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"  +", "gu"), &js(" "));
 
     // 3) Thousands separators, by group size: `m.replaceAll(sep, "")`.
+    // A grouped number ending in a decimal in the OTHER mark (`1,234.5`): groups joined, decimal left for step 7
+    // (#1589). See normalize.ts step 3.
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\p{Nd}.,])([1-9]\p{Nd}{0,2}(?:([.,])\p{Nd}{3})+)(?!\2)([.,]\p{Nd}+)(?![\p{Nd}.,])",
+            "gu"
+        ),
+        |m, t| {
+            let sep = m.group(2, t).unwrap_or_default();
+            let int = JsString::join(
+                &m.group(1, t).unwrap_or_default().split(&sep),
+                &JsString::new(),
+            );
+            int.concat(&m.group(3, t).unwrap_or_default())
+        },
+    );
     s = rewrite_with(
         &s,
         js_re!(

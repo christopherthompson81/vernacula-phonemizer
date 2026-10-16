@@ -78,3 +78,19 @@ sundanese`: 2 passed.
    compositor should say them is a sourcing question, not settled here.
 
 **Implication.** Reported in the PR, not fixed (TS first).
+
+## Run 5 — 2026-10-15 20:40 (#1589 fixes, TS first, mirrored to C# and Rust)
+
+**Finding.** Item 1: the decimal rule takes `\d+` fractional digits. Step 1 has already spent every exact
+three-digit group, and over the mined corpus all 5 remaining 3+-digit shapes are decimals (`1.6726231 × 10⁻²⁷ kg`,
+`0.9998 g/cm³`, `13,1313`, a coordinate, `0.917`); no DOI occurs.
+
+Item 2: miliar (10⁹) and triliun (10¹²) added to `sundanese.jsonc` and the compositor. The corpus attests the exact
+composition: `sapuluh juta nepi ka samiliar ($10^7$ nepi ka $10^9$)` (sa- on a leading 1), `Rp 13,1 miliar`,
+`sapuluh triliun`; miliar ×6 against milyar ×3. Golden su: 0 rows changed.
+
+⚠ Proof note: reverting `sundanese.rs` to main also deleted the test module that lives in it, so a whole-file
+revert "passed" vacuously. Each fix was re-proved by disabling it in place.
+
+**Test.** `test/sea-defects-1589.test.ts`, `SeaDefects1589Tests.cs`, and `defects_1589_tests` in the language's own Rust
+module; relational, no typed IPA. Each fails with its fix reverted.
