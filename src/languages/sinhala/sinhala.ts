@@ -79,6 +79,18 @@ export function phonemizeWord(word: string): string {
     return out + ipa.slice(i);
 }
 
+/**
+ * A digit run → words. ⚠ ABOVE 2^53 IT IS READ ONE DIGIT AT A TIME (#1587), the `spellDigits` shape the rest of
+ * the fleet uses. The composer works on a JS number, and `Number(digits)` of an unsafe run is a rounded float:
+ * `9007199254740993` read the same as `…992`, and 10^23 read as the float's digits (`99999999999999991611392`),
+ * a confidently wrong quantity.
+ */
+function digitRunToWords(digits: string): string {
+    const n = Number(digits);
+    if (Number.isSafeInteger(n)) return numberToWords(n);
+    return [...digits].map((d) => numberToWords(Number(d))).join(" ");
+}
+
 const CLAUSE_MARK = MANIFEST.clausePunctuation;
 const TOKEN = /([඀-෿]+)|(\d+)|([.!?…,;:])/gu;
 
@@ -90,7 +102,7 @@ class SinhalaPhonemizer implements Phonemizer {
         return assembleClauses(foldNativeDigits(normalizeSinhala(input)), TOKEN, (m, sink) => {
             if (m[1]) sink.emit(phonemizeWord(m[1]));
             else if (m[2])
-                for (const wd of numberToWords(Number(m[2])).split(" "))
+                for (const wd of digitRunToWords(m[2]).split(" "))
                     sink.emit(phonemizeWord(wd));
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

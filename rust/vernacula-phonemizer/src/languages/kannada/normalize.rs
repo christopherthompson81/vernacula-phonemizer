@@ -35,7 +35,12 @@ fn re(pattern: String) -> JsRegex {
 }
 
 static KM_RE: LazyLock<JsRegex> =
-    LazyLock::new(|| re(format!(r"{NOT_LETTER_BEFORE}(?:ಕಿ\s*\.\s*ಮ[ೀಿ]|ಕಿಮ[ೀಿ])")));
+    // The dotted form takes its own trailing dot where more text follows (#1587). See KM_RE in normalize.ts.
+    LazyLock::new(|| {
+        re(format!(
+            r"{NOT_LETTER_BEFORE}(?:ಕಿ\s*\.\s*ಮ[ೀಿ](?:\.(?=\s*[\p{{L}}\p{{N}}]))?|ಕಿಮ[ೀಿ])"
+        ))
+    });
 static MI_RATE_RE: LazyLock<JsRegex> =
     LazyLock::new(|| re(r"(\d[\d.]*)\s?ಮೈ\s*\/\s*ಗಂ\.?".to_string()));
 static ORDINAL_RE: LazyLock<JsRegex> = LazyLock::new(|| {
@@ -183,6 +188,11 @@ impl KannadaNormalizer {
                 " {}",
                 lookup(&VULGAR, &m.group(1, full).unwrap_or_default())
             ))
+        });
+
+        // A bare fraction, which kn's fold opt-out would otherwise drop (#1587).
+        s = rewrite_with(&s, js_re!(r"[¼½¾]", "gu"), |m, full| {
+            js(&format!(" {} ", lookup(&VULGAR, &m.value(full))))
         });
 
         // 9) The shared symbol tier.

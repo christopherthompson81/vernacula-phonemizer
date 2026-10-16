@@ -228,3 +228,43 @@ regex-diff, clippy, test), `e2e.sh kn,te,ta,ml,si`, and the `dravidian` dump ove
 **Port-pending.** None.
 
 **Implication.** Ready for the PR.
+
+## Run 7 — 2026-10-15 21:30 (#1587: fixing the five reported TS defects, in all three engines)
+
+**Question.** Can each defect from Runs 1–5 be fixed TS-first and mirrored, without moving any golden?
+
+**What was changed.**
+- **te:** the century-year rule (step 4) declines a numeral with a `$`/`US$` or a percent sign (`%`, `٪`, `％`) on
+  either side, within the tier's optional space, so the symbol tier (step 10) reads it as an amount. Units
+  (`1200 km`) have the same ordering and were left alone: not reported, and the year reading there keeps the unit
+  word.
+- **ta:** the ordinal step declines an unsafe integer, as kn, te and ml already do. The bare-numeral path then
+  reads the written digits, and the suffix follows as its own word.
+- **si:** `digitRunToWords` composes a safe integer and reads an unsafe run one digit at a time, the `spellDigits`
+  shape.
+- **kn:**
+  - The dotted `ಕಿ.ಮೀ` takes its own trailing dot where more text follows. A sentence-final dot is kept, and after
+    the undotted `ಕಿಮೀ` a dot stays a full stop.
+  - A bare `¼ ½ ¾` is read with the file's own `VULGAR` table, after the digit-adjacent step.
+
+**Command.** Probes (synthetic):
+
+```
+te $1500 → ʋˈejːi ˈajid̪u ʋˈãn̪d̪alu ɖˈaːlaɾlu; 1500% → … ʃˈaːt̪am; 1976 / 1976లో / 1995. unchanged (year)
+ta 12345678901234567891ஆம் → the bare numeral's digits + ˈaːm; 15ஆம் still fused
+si …993 ≠ …992 (both now digit-by-digit); 10^23 → ˈekə bˈind̪uw ×23; …991 still composes
+kn 10 ಕಿ.ಮೀ. ದೂರ == 10 ಕಿಲೋಮೀಟರ್ ದೂರ; ದೂರ 10 ಕಿ.ಮೀ. keeps "."; ½ ಭಾಗ == ಅರ್ಧ ಭಾಗ
+```
+
+Then `check-goldens te ta si kn`; the new tests in TS, C# and Rust, each re-run with each fixed file reverted alone;
+`extract_regexes.mts`; both regex-diffs.
+
+**Raw finding.**
+- Goldens: `4 languages, 800 rows, 0 stale`. No golden carries any of these shapes.
+- **TS:** 10 tests. Reverting each file alone fails 2/1/2/2 of them (te/ta/si/kn); the rest are controls.
+- **C#:** 10 tests. Reverting each file alone fails 5/2/1/1 (te/ta/si/kn).
+- **Rust:** one test per language module. Each fails with its file reverted.
+- Regex corpus: 2 rows moved (te year changed, kn bare fraction added). Rust and C# regex-diff both report
+  `152970 identical, 0 DIFFER`.
+
+**Implication.** All five #1587 items are fixed in all three engines.

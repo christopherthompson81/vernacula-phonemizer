@@ -327,4 +327,15 @@ mod tests {
         }
         assert_eq!(count, 97);
     }
+
+    /// #1587: an ordinal on an unsafe integer reads the written digits. As test/dravidian-si-defects-1587.test.ts.
+    #[test]
+    fn an_unsafe_ordinal_reads_the_written_digits() {
+        let say = |s: &str, l: &str| crate::phonemize(s, l).unwrap().trim().to_string();
+        for digits in ["12345678901234567891", "1234567890123456789012"] {
+            let ordinal = say(&format!("{digits}ஆம்"), "ta");
+            assert!(ordinal.starts_with(&say(digits, "ta")), "{digits}");
+        }
+        assert!(!say("15ஆம்", "ta").starts_with(&say("15", "ta")));
+    }
 }

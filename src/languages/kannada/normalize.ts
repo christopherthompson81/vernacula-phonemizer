@@ -62,7 +62,10 @@ const SYMBOLS = makeSymbolNormalizer({
  * `ಕಿ ಮೀ` occurs zero times here, and ಕಿ is a common Kannada dative clitic — trap #2, checked, not
  * assumed.
  */
-const KM_RE = new RegExp(`${NOT_LETTER_BEFORE}(?:ಕಿ\\s*\\.\\s*ಮ[ೀಿ]|ಕಿಮ[ೀಿ])`, "gu");
+// ⚠ THE DOTTED FORM TAKES ITS OWN TRAILING DOT (#1587), as te's KM_RE does: left behind, `10 ಕಿ.ಮೀ. ದೂರ` read a
+//   clause pause mid-sentence. Only where more text follows, so a sentence-final `ಕಿ.ಮೀ.` keeps its full stop,
+//   and only on the dotted form: after the undotted ಕಿಮೀ a dot is the full stop.
+const KM_RE = new RegExp(`${NOT_LETTER_BEFORE}(?:ಕಿ\\s*\\.\\s*ಮ[ೀಿ](?:\\.(?=\\s*[\\p{L}\\p{N}]))?|ಕಿಮ[ೀಿ])`, "gu");
 /** ಮೈ for ಮೈಲಿ — ONLY as a rate numerator (40 ಮೈ/ಗಂ, ×1). The `/ಗಂ` guard is what keeps this off the
  *  many real Kannada words beginning ಮೈ (ಮೈಲಿಗಲ್ಲು, ಮೈಲರ್, ಮೈದಾನ) — trap #2. */
 const MI_RATE_RE = new RegExp(`(\\d[\\d.]*)\\s?ಮೈ\\s*\\/\\s*ಗಂ\\.?`, "gu");
@@ -180,6 +183,9 @@ export function normalizeKannada(input: string): string {
 
     // 8) VULGAR FRACTIONS
     s = rewrite(s, /(?<=\d)\s?([¼½¾])/gu, (_m, f: string) => ` ${VULGAR[f]!}`);
+    //    ⚠ AND A BARE ONE (#1587). kn opts out of the registry's fraction fold, and the rule above needs a digit
+    //    before the sign, so `½ ಭಾಗ` dropped the fraction outright. Read with the same table.
+    s = rewrite(s, /[¼½¾]/gu, (f: string) => ` ${VULGAR[f]!} `);
 
     // 9) The SHARED symbol tier: percent, currency, units, exponent. UNITS BEFORE DECIMALS (step 11) —
     //    the tier matches a unit only when a NUMBER is adjacent, and rewriting 3.5 to "3 ದಶಾಂಶ 5" first

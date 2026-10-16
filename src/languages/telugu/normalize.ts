@@ -184,7 +184,12 @@ export function normalizeTelugu(input: string): string {
     //    *ʋˈejːi t̪ˈomːid̪i ʋˈãn̪d̪ala…* ("one thousand nine hundred ninety-five") — the right number in the
     //    wrong register, which no leak class can see. Telugu's decimal is the DOT, so `.` must still be
     //    rejected before a digit; the comma is a grouping mark here and step 5 de-groups it just below.
-    s = rewrite(s, /(?<![\d.,])(1[1-9]\d{2})(?![\d]|\.\d)/gu, (_m, y: string) => yearToWords(Number(y)));
+    // ⚠ A NUMBER WITH A CURRENCY OR PERCENT SIGN IS NOT A YEAR (#1587). This rule runs before the symbol tier
+    //    (step 10), so it used to take the numeral first and leave the sign with no number to attach to:
+    //    `$1500` and `1500%` lost "dollars" and "percent" entirely, while `$2500` kept them. The guards keep
+    //    the year reading off a numeral that has a `$` (or `US$`) or a percent sign on either side, within the
+    //    tier's own optional space, so the tier reads it as an amount.
+    s = rewrite(s, /(?<![\d.,])(?<![$%٪％]\s?)(1[1-9]\d{2})(?![\d]|\.\d)(?!\s?[$%٪％])/gu, (_m, y: string) => yearToWords(Number(y)));
 
     // 5) DIGIT DE-GROUPING, before anything that reads punctuation. A grouping comma is otherwise clause
     //    punctuation: 17,000 was reading as "పదిహేడు <pause> సున్నా" — the pause plus a single zero,

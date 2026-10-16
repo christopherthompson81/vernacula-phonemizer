@@ -278,8 +278,14 @@ export function normalizeTamil(input: string): string {
     //     cardinal word (2019-ஆம் → இரண்டாயிரத்து பத்தொன்பதாம்); emitted apart, ஆம் reached the g2p as a
     //     stray [aːm]. All 105 digit-adjacent ஆம்/ம்/வது in the corpus are ordinals — checked by
     //     tabulating what follows, which is ஆண்டு / நூற்றாண்டு / தேதி / பிரிவு every time.
-    s = rewrite(s, ORDINAL_RE, (whole, digits: string, suffix: string) =>
-        ordinal(Number(digits), suffix) ?? whole);
+    // ⚠ AN UNSAFE INTEGER IS DECLINED (#1587), as kn, te and ml already decline it. `Number(digits)` of a 17+
+    //     digit run is a rounded float, and the composer then read ITS digits, not the written ones; past 10^21
+    //     it read the exponent form's (`1.2345678901234568e+21`). Declined, the run reaches the bare-numeral
+    //     path, which reads the written digits.
+    s = rewrite(s, ORDINAL_RE, (whole, digits: string, suffix: string) => {
+        const n = Number(digits);
+        return Number.isSafeInteger(n) ? ordinal(n, suffix) ?? whole : whole;
+    });
 
     // 12) The LOCATIVE clitic written as bare ல் (×14, "1444-ல்"). Alone it is a single consonant and
     //     reached the output as [l]; இல் is the full form of the same case marker and is what the corpus
