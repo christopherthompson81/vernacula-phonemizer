@@ -128,6 +128,17 @@ public static class EnglishG2pFactory
         private readonly IReadOnlySet<string> _common;
         private readonly Func<IReadOnlyList<string>, string, string> _arpabetToIpa;
         private readonly Dictionary<string, List<string>> _gchunks;
+        /// <summary>
+        /// ⚠ EACH CONTEXT'S CANDIDATES AS A LOOKUP, built on first use. `ScoreTokAt` used to scan the stored
+        /// <c>[token, count]</c> pairs, calling <c>JsonElement.GetString()</c> (a fresh string) for every one, and
+        /// the empty context alone holds 984. That scan was 22.9 s of Min Nan's 26.7 s golden run, whose Latin
+        /// runs reach this decoder through the English reader
+        /// (docs/investigations/nan/nan_csharp_perf_investigation.md). The first occurrence of a token wins, as
+        /// the TypeScript's <c>e.c.find</c> does. ⚠ LAZILY, per context: building all 61,846 tables up front
+        /// doubled `CreateEnglish` for every caller, and a run touches a small fraction of them.
+        /// </summary>
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, double>> _ngramCounts =
+            new(StringComparer.Ordinal);
         private readonly IReadOnlySet<string> VOWEL_LETTER, VOWEL, VOICELESS, SIBILANT, STOP_PIECE, STEM_STRESS_PREFIX;
         private readonly IReadOnlyDictionary<string, string> LETTER_NAME_EXCEPTIONS;
         private readonly List<(string Suf, Func<string, List<string>> Stems, Func<List<string>, List<string>> Allo)> SUFFIXES;
@@ -197,30 +208,63 @@ public static class EnglishG2pFactory
             };
         }
 
-        private (double Score, int Order) ScoreTokAt(IReadOnlyList<string> hist, string tok)
+        private Dictionary<string, double> Counts(string key, NgramEntry e) =>
+            _ngramCounts.GetOrAdd(key, _ =>
+            {
+                var count = new Dictionary<string, double>(e.C.Count, StringComparer.Ordinal);
+                foreach (var pair in e.C) count.TryAdd(pair[0].GetString()!, pair[1].GetDouble());
+                return count;
+            });
+
+        /// <summary>
+        /// The n-gram contexts of <paramref name="hist"/>, longest first: element <c>Order - 1 - o</c> is the order-o
+        /// entry, or null where the model has none. ⚠ RESOLVED ONCE PER HYPOTHESIS, not once per candidate chunk:
+        /// they depend only on the history, and rebuilding the context strings for each of ~30 chunks was most of
+        /// the decoder's time. <paramref name="hist"/> needs only its last <c>Order - 1</c> tokens.
+        /// </summary>
+        private (NgramEntry Entry, Dictionary<string, double> Counts)?[] Contexts(string[] hist)
+        {
+            var out_ = new (NgramEntry, Dictionary<string, double>)?[_model.Order];
+            for (var o = _model.Order - 1; o >= 0; o--)
+            {
+                var key = o == 0 ? "0|" : $"{o}|{string.Join(" ", hist, hist.Length - o, o)}";
+                if (_model.Ngram.TryGetValue(key, out var e)) out_[_model.Order - 1 - o] = (e, Counts(key, e));
+            }
+            return out_;
+        }
+
+        /// <summary>The highest-order context that has <paramref name="tok"/>, backed off by alpha per order skipped.</summary>
+        private (double Score, int Order) ScoreTokAt((NgramEntry Entry, Dictionary<string, double> Counts)?[] contexts, string tok)
         {
             for (var o = _model.Order - 1; o >= 0; o--)
             {
-                var ctx = o == 0 ? "" : string.Join(" ", hist.Skip(hist.Count - o));
-                if (_model.Ngram.TryGetValue($"{o}|{ctx}", out var e))
-                {
-                    foreach (var pair in e.C)
-                    {
-                        if (pair[0].GetString() != tok) continue;
-                        return (Math.Log(pair[1].GetDouble() / e.T) + (_model.Order - 1 - o) * Math.Log(_model.Alpha), o);
-                    }
-                }
+                if (contexts[_model.Order - 1 - o] is var (e, counts) && counts.TryGetValue(tok, out var n))
+                    return (Math.Log(n / e.T) + (_model.Order - 1 - o) * Math.Log(_model.Alpha), o);
             }
             return (Math.Log(1e-7), -1);
         }
 
-        private sealed record BeamItem(List<string> Hist, List<string> Phones, double Score);
+        /// <summary>A hypothesis. ⚠ <c>Hist</c> keeps only the last <c>Order - 1</c> tokens (all `ScoreTokAt` reads),
+        /// and <c>Phones</c> is a chain back to the start, materialised once at the end: copying both lists for
+        /// every candidate chunk at every letter made the decoder quadratic in word length and GC-bound.</summary>
+        private sealed record BeamItem(string[] Hist, PhoneChain? Phones, double Score);
+
+        private sealed record PhoneChain(string[] Chunk, PhoneChain? Prev);
+
+        private static List<string> Materialise(PhoneChain? p)
+        {
+            var parts = new List<string[]>();
+            for (; p != null; p = p.Prev) parts.Add(p.Chunk);
+            var out_ = new List<string>();
+            for (var i = parts.Count - 1; i >= 0; i--) out_.AddRange(parts[i]);
+            return out_;
+        }
 
         private List<string> NgramDecode(string w)
         {
             var beam = new List<BeamItem>
             {
-                new(new List<string> { START, START, START, START }, new List<string>(), 0),
+                new(Window([START, START, START, START]), null, 0),
             };
             for (var i = 0; i < w.Length; i++)
             {
@@ -239,27 +283,41 @@ public static class EnglishG2pFactory
                     return last != "S" && last != "Z";
                 }).ToList();
                 var chunks = filtered.Count > 0 ? filtered : raw;
-                var next = new List<BeamItem>();
+                // Per letter, not per hypothesis: each chunk's joint token and its phones.
+                var toks = chunks.Select(ch => $"{c}:{ch}").ToArray();
+                var pieces = chunks.Select(ch => ch.Length > 0 ? ch.Split(' ') : null).ToArray();
+                // Scored first, built only if it survives: (score, hypothesis, chunk) in insertion order.
+                var next = new List<(double Score, BeamItem H, int K)>(beam.Count * chunks.Count);
                 foreach (var h in beam)
                 {
-                    foreach (var chunk in chunks)
+                    var contexts = Contexts(h.Hist);
+                    for (var k = 0; k < chunks.Count; k++)
                     {
-                        var (lp, ord) = ScoreTokAt(h.Hist, $"{c}:{chunk}");
+                        var chunk = chunks[k];
+                        var (lp, ord) = ScoreTokAt(contexts, toks[k]);
                         var s = h.Score + lp;
                         if (chunk == "" && emptyPenalized && ord < _model.EvpOrder) s -= _model.Evp;
                         if (chunk == "" && finalConsonant) s -= _model.Evp / 2;
-                        var hist = new List<string>(h.Hist) { $"{c}:{chunk}" };
-                        var phones = chunk.Length > 0
-                            ? new List<string>(h.Phones).Concat(chunk.Split(' ')).ToList()
-                            : new List<string>(h.Phones);
-                        next.Add(new BeamItem(hist, phones, s));
+                        next.Add((s, h, k));
                     }
                 }
                 // ⚠ STABLE, like JS Array.prototype.sort — equal-scoring beam items must keep insertion order
                 // or the surviving hypothesis can differ from Node's on a tie.
-                beam = next.OrderByDescending(x => x.Score).Take(BEAM).ToList();
+                beam = next.OrderByDescending(x => x.Score).Take(BEAM)
+                    .Select(x => new BeamItem(
+                        Window([.. x.H.Hist, toks[x.K]]),
+                        pieces[x.K] is { } ps ? new PhoneChain(ps, x.H.Phones) : x.H.Phones,
+                        x.Score))
+                    .ToList();
             }
-            return beam[0].Phones;
+            return Materialise(beam[0].Phones);
+        }
+
+        /// <summary>The last <c>Order - 1</c> tokens of <paramref name="hist"/>.</summary>
+        private string[] Window(string[] hist)
+        {
+            var k = Math.Max(_model.Order - 1, 0);
+            return hist.Length <= k ? hist : hist[^k..];
         }
 
         /// <summary>
