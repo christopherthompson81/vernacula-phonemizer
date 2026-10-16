@@ -91,18 +91,27 @@ pub fn normalize_aragonese(input: &JsString) -> JsString {
     s = rewrite(&s, js_re!(r"(\d)\s?hab\s?\.\s?(?=\/)", "gu"), &js("$1 hab"));
     s = rewrite(&s, &MILLION_YEARS, &js("$1 millons d'anyadas"));
 
-    // 4) clocks
-    s = rewrite(
-        &s,
-        js_re!(r"(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])", "gu"),
-        &js("$1 $2"),
-    );
-
-    // 5) a leading minus
+    // 4) a leading minus, BEFORE the clock (#1585): its exclusion is a figure that runs into a colon, and the
+    //    clock spends the colon, so `-5:30` read *menos 5 30*
     s = rewrite(
         &s,
         js_re!(r"(^|(?<!\d)[\s(])[-−–]\s?(\d(?!\d*:))", "gu"),
         &js("$1menos $2"),
+    );
+
+    // 5) clocks
+    // `:00` is the hour alone, as es, ca and gl read it (#1585)
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])", "gu"),
+        |m, t| {
+            let (h, min) = (g(m, 1, t), g(m, 2, t));
+            if min == "00" {
+                h
+            } else {
+                h.concat(&js(" ")).concat(&min)
+            }
+        },
     );
 
     // 6) degrees: a scale, minutes, a compass point, or a licensed tail
@@ -125,7 +134,8 @@ pub fn normalize_aragonese(input: &JsString) -> JsString {
     );
     s = rewrite_with(
         &s,
-        js_re!(r"(\d)\s?[°º]\s?([NSEU])(?![\p{L}\p{M}])", "gu"),
+        // `W` too, alongside `U` (#1585)
+        js_re!(r"(\d)\s?[°º]\s?([NSEUW])(?![\p{L}\p{M}])", "gu"),
         |m, t| {
             let dir = match g(m, 2, t).to_string_lossy().as_str() {
                 "N" => "norte",
@@ -150,4 +160,28 @@ pub fn normalize_aragonese(input: &JsString) -> JsString {
     );
 
     rewrite(&s, js_re!(r"[^\S\n]{2,}", "gu"), &js(" "))
+}
+
+/// #1585, as test/west-defects-1585.test.ts: relational where a well-formed twin exists, so no IPA is typed.
+#[cfg(test)]
+mod defects_1585_tests {
+    use super::*;
+
+    fn say(text: &str, lang: &str) -> String {
+        crate::phonemize(text, lang).unwrap().trim().to_string()
+    }
+
+    fn n(s: &str) -> String {
+        normalize_aragonese(&js(s)).to_string_lossy()
+    }
+
+    #[test]
+    fn colon_figure_west_letter_and_the_hour() {
+        assert_eq!(say("-5:30", "an"), say("5:30", "an"));
+        assert_eq!(n("-5"), "menos 5");
+        assert_eq!(say("20° W", "an"), say("20° U", "an"));
+        assert_eq!(n("9:00"), "9");
+        assert_eq!(n("9:30"), "9 30");
+        assert_eq!(say("9:00", "an"), say("9", "an"));
+    }
 }

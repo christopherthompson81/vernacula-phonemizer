@@ -122,3 +122,11 @@ eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-norm
 an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
 phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
 ```
+
+## Run 7 — 2026-10-15 22:30 (#1585: the TS defects this port reproduced, fixed in all three engines)
+
+- **Glued metre.** `4.5m` read *… pump m* (the letter). The version-letter rule (`802.11n`) ran before the decimal-with-unit rule and claimed the `m`. The corpus's version letters are `a b g n`, all after `802.11`, so I moved the unit rule first. Now `4.5m` = `4.5 m`, and `802.11n` is unchanged.
+- **km.** `UNIT_WORD` and the decimal rule's literal both said *cilometr*, while the tier and welsh.ts's own measurement say *cilomedr*. Both are now *cilomedr*, so `km` reads the same after a range, after a decimal and on its own.
+- **`1/0`.** It read *un dimfed* ("one zeroth"). A denominator below 2 is now declined, so the figures read as written (`1/1` read *un cyntaf* the same way).
+
+All probes are synthetic. Each fix was made in TS first and mirrored to C# and Rust. Tests: `test/west-defects-1585.test.ts`, `WestDefects1585Tests.cs`, and a `defects_1585_tests` module in this language's `normalize.rs`. Every new test fails with its fix reverted.

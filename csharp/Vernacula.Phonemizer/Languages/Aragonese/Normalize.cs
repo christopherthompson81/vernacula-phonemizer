@@ -44,9 +44,11 @@ public static class Normalize
     private static readonly JsRe DEG_MIN = JsRegex.Compile("(\\d)\\s?[°º]\\s?(\\d+)\\s?[′']", "gu");
     private static readonly IReadOnlyDictionary<string, string> COMPASS = new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        ["N"] = "norte", ["S"] = "sud", ["E"] = "este", ["U"] = "ueste",
+        // `W` too (#1585), alongside `U` not instead of it: unambiguous after a degree, and without it `20° W` lost
+        // the degree word as well as the direction.
+        ["N"] = "norte", ["S"] = "sud", ["E"] = "este", ["U"] = "ueste", ["W"] = "ueste",
     };
-    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d)\\s?[°º]\\s?([NSEU])(?![\\p{L}\\p{M}])", "gu");
+    private static readonly JsRe DEG_COMPASS = JsRegex.Compile("(\\d)\\s?[°º]\\s?([NSEUW])(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe DEG = JsRegex.Compile($"(\\d)\\s?[°º](?={DEGREE_TAIL})", "gu");
     private static readonly JsRe DASH_RANGE = JsRegex.Compile("(\\d)\\s?[–—]\\s?(?=\\d)", "gu");
     private static readonly JsRe HYPHEN_RANGE = JsRegex.Compile(
@@ -83,10 +85,15 @@ public static class Normalize
         s = Rewrite(s, MAYA, "$1 millons d'anyadas");
 
         // 4) THE CLOCK. ⚠ THE GUARD IS THE RULE: a trailing `.dd` or a second colon is a stopwatch, not a time.
-        s = Rewrite(s, CLOCK, "$1 $2");
-
-        // 5) SIGNS, before the range rule spends the hyphen. `menos` inverts rather than pauses.
+        // ⚠ THE SIGN RULE RUNS FIRST (#1585): its exclusion is a figure that runs into a COLON, and the clock spends
+        // the colon — so `-5:30` reached it as `-5 30` and read *menos 5 30*.
         s = Rewrite(s, MINUS, "$1menos $2");
+        // ⚠ `:00` is the hour alone, as es, ca and gl read it (#1585): `9:00` read *nine zero*.
+        s = Rewrite(s, CLOCK, m => m.Groups[2].Value == "00" ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
+
+        // 5) SIGNS, before the range rule spends the hyphen. `menos` inverts rather than pauses. (Applied above,
+        //    before the clock; see there.)
+
 
         // 6) DEGREES. Both codepoints, one allow-list. `grau`/`graus`, the compass letter spelled,
         //    and the bare degree through DEGREE_TAIL.

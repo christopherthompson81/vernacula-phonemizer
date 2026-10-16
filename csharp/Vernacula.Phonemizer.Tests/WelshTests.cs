@@ -133,7 +133,7 @@ public class WelshTests
             Say("1894-1895"));
         Assert.Equal("pˈɨmp ˈiː drˈiː washˈiŋtɔn", Say("5-3 Washington"));
         Assert.Equal("kˈant ˈiː ðˈaᶤ ɡˈant mˈiɬtir", Say("100-200 milltir"));
-        Assert.Equal("dˈaᶤ ˈiː drˈiː kilˈɔmɛtr ˈoː jˈaː", Say("2-3 km o iâ")); // the unit survives the rewrite
+        Assert.Equal("dˈaᶤ ˈiː drˈiː kilˈɔmɛdr ˈoː jˈaː", Say("2-3 km o iâ")); // the unit survives the rewrite, as the tier's cilomedr (#1585)
         Assert.Equal("chwech", Normalize.Soften("chwech")); // the digraph does not mutate
         Assert.Equal("lath", Normalize.Soften("llath"));
         // the operand must END in a digit: `[\d,]*` also matches a trailing CLAUSE comma, and re-emitting

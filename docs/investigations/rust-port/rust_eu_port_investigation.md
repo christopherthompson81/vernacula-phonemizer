@@ -101,3 +101,11 @@ eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-norm
 an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
 phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
 ```
+
+## Run 7 — 2026-10-15 22:30 (#1585: the TS defects this port reproduced, fixed in all three engines)
+
+- **Bare degree.** The refusal contradicted its own source. *gradu* IS the angular degree (*latitude gradu bat*), and every bare-`°` site in the corpus is angular: coordinates, the tilt `23,4°`, `22,1° eta 24,5°`, the rotation `0,1-0,5º`. Step 2b now reads a bare `°` as *gradu*, with a glued case ending (`10°tik` → *gradutik*, `30º-ko` → *graduko*). A following letter (`58ºI`) is left alone. Golden: one row, `30º-ko … 30º eta 60º` (the stranded *ko* is gone).
+- **Dot decimal.** `2.5 km` read *bi . bost*, a sentence break. Step 1 de-groups every three-digit dot block, so a remaining dot is a decimal: 17 of the corpus's 18 single-dot figures are (`89.2 ° C`, `13.79%`, `2.37 milioi`). Steps 5 and 6 now take `[,.]`. A dotted citation (`Am 2.18.19-26`) is still declined. Golden: one row, `(1.48 km²)` now *bat koma …*.
+- **`5-eko`: FIXED after the source check the issue asked for.** The hyphen guard declines a consonant-final head because the hyphen means "the linking vowel is supplied in speech". An `e`-initial ending already carries that vowel. After *bost* (5) and *hamar* (10) the corpus writes `-eko`/`-ean`/`-etik`/`-era` ×17, against `1945an` ×1. So `5-eko` = `5eko` = *bosteko*, while `995-ko` is still declined.
+
+All probes are synthetic. Each fix was made in TS first and mirrored to C# and Rust. Tests: `test/west-defects-1585.test.ts`, `WestDefects1585Tests.cs`, and a `defects_1585_tests` module in this language's `normalize.rs`. Every new test fails with its fix reverted.

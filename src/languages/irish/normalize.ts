@@ -249,7 +249,9 @@ export function normalizeIrish(input: string): string {
     //    and read a RANGE where the text has a negative number: *a haon, go dtí a dó*. Same trailing-separator shape as
     //    the tokenizer bug closed in #1015. With the operand anchored on a digit, `\s*` can no longer
     //    straddle the comma and the rule declines, leaving the sign rule to claim `-2`.
-    s = rewrite(s, /(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])/gu, "$1 go dtí $2");
+    // ⚠ THE RIGHT GUARD REJECTS A DIGIT AND A DOT-BEFORE-A-DIGIT, NOT A BARE DOT (playbook trap 58; Welsh has
+    //    the same guard). `(?![\d.])` declined every clause-final span, so `5-3.` lost its connective (#1585).
+    s = rewrite(s, /(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?!\d|\.\d)/gu, "$1 go dtí $2");
 
     // 6) CLOCK, in the COLON form. `11:35 i.n.` → aon déag tríocha a cúig iarnóin; `8:30 p.m.` →
     //    ocht tríocha p.m. The i.n./r.n./p.m./a.m. marker (WITH the dots) expands to the Irish
@@ -272,11 +274,9 @@ export function normalizeIrish(input: string): string {
     //    dot is a DECIMAL (the corpus follows English; thousands use COMMAS). Read "pointe" (point),
     //    the fraction digit-by-digit. GIGAHERTZ is claimed FIRST on the raw digits. AFTER the clock.
     s = rewrite(s, /(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
-    // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
-    // emit it spaced so it reads as the letter name n (the corpus's 802.11n/a/b/g).
-    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
-        (m0, i: string, f: string) =>
-            `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} `);
+    // ⚠ THE DECIMAL-WITH-UNIT RULE COMES FIRST (#1585). A glued metre is one letter after the fraction, the
+    //    version letter's exact shape, so with the version rule first `4.5m` read *… a cúig mˠ*, the letter.
+    //    The corpus's version letters are `a b g n` after `802.11`, never `m`, so this order costs no reading.
     // ⚠ THE UNIT MISS BRANCH IS REACHABLE, and the `!` here spoke the word "undefined". The alternation is
     //    built from this table's own keys but the pattern carries `i`+`u`, so JS's fold widens it — `ſ`→`s`
     //    reaches `msu` — and a near-miss matches while its key is absent: measured, `1.5 mſu` read
@@ -307,6 +307,11 @@ export function normalizeIrish(input: string): string {
             //    unit refuses to SPEAK it while still separating it. Measured, not reasoned.
             return slash === undefined ? `${num} ${w}` : `${num} ${u}${slash}`;
         });
+    // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
+    // emit it spaced so it reads as the letter name n (the corpus's 802.11n/a/b/g).
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
+        (m0, i: string, f: string) =>
+            `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")} `);
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pointe ${[...f].map((d) => irishNumber(Number(d))).join(" ")}`);
 
@@ -328,6 +333,9 @@ export function normalizeIrish(input: string): string {
         // article ("an 15ú haois"), so the table must not carry one — but a FRACTION supplies its own: 1/5
         // orlach is "an cúigiú orlach" (the fifth of an inch), and a vowel-initial ordinal takes the
         // t- prefix after it (1/8 → an t-ochtú).
+        // ⚠ ONE HALF IS `leath`, NOT THE ORDINAL (#1585): `1/2` read *an dara*, "the second". The file's own
+        //    `½` rule above already says *agus leath*.
+        if (Number(a) === 1 && Number(b) === 2) return "leath";
         const article = /^[aeiouáéíóú]/u.test(ord) ? "an t-" : "an ";
         // A unit fraction (1/N) is the ordinal noun; a non-unit fraction (M/N) is "M N-ú" (dhá chúigiú).
         return Number(a) === 1 ? `${article}${ord}` : `${irishNumber(Number(a))} ${ord}`;

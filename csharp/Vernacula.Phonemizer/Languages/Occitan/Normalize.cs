@@ -40,7 +40,8 @@ public static class Normalize
         s = Rewrite(s, ERA_BC, "abans Crist");
         s = Rewrite(s, ERA_AD, "après Crist");
 
-        s = Rewrite(s, CLOCK, "$1 $2");
+        // ⚠ `:00` is the hour alone, as es, ca and gl read it (#1585): `9:00` read *nine zero*.
+        s = Rewrite(s, CLOCK, m => m.Groups[2].Value == "00" ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
         // ⚠ ORDER IS LOAD-BEARING: the sign must be claimed before the range rules below spend the hyphen.
         s = Rewrite(s, MINUS, "$1mens $2");

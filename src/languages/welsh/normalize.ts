@@ -163,7 +163,10 @@ export function soften(text: string): string {
 /** The tier's unit words, needed when a rule converts a number to WORDS and so breaks the number-unit
  *  adjacency the shared tier matches on — ⚠ units are resolved BEFORE decimals. */
 const UNIT_WORD: Readonly<Record<string, string>> = {
-    km: "cilometr", kg: "cilogram", mm: "milimetr", cm: "centimetr", m: "metr",
+    // ⚠ `cilomedr`, the tier's word (welsh.ts records the measurement: ×26 unique in the corpus, `cilometr` ×0,
+    //    and the two do not read alike). This table said `cilometr`, so `km` read one way after a range or a
+    //    decimal and the other way everywhere else (#1585).
+    km: "cilomedr", kg: "cilogram", mm: "milimetr", cm: "centimetr", m: "metr",
 };
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -320,16 +323,19 @@ export function normalizeWelsh(input: string): string {
     //    longer see. The hyphen in a decimal RANGE is joined "i" (to) here too. AFTER the clock.
     s = rewrite(s, /(?<![\d.,])(\d+\.\d+)\s*[-–]\s*(\d+\.\d+)(?![\d.])/gu, "$1 i $2");
     s = rewrite(s, /(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])/giu, "$1 gigahertz");
+    // A DECIMAL with a UNIT — `12.8 km`. ⚠ UNITS ARE RESOLVED BEFORE DECIMALS: converting the
+    // number to words breaks the tier's number-unit adjacency, so the unit's WORD must be claimed here.
+    // ⚠ AND BEFORE THE VERSION LETTER BELOW (#1585). A glued metre is one letter after the fraction, the
+    //    version letter's exact shape, so with that rule first `4.5m` read *… pump m*, the letter. The
+    //    corpus's version letters are `a b g n` after `802.11`, never `m`, so this order costs no reading.
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm)(?![\p{L}\p{M}])/giu,
+        (m0, i: string, f: string, u: string) =>
+            `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")} ${UNIT_WORD[u.toLowerCase()]!}`);
     // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
     // emit it spaced so it reads as the letter name n (the corpus's 802.11n/a/b/g).
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))/giu,
         (m0, i: string, f: string) =>
             `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")} `);
-    // A DECIMAL with a UNIT — `12.8 km`. ⚠ UNITS ARE RESOLVED BEFORE DECIMALS: converting the
-    // number to words breaks the tier's number-unit adjacency, so the unit's WORD must be claimed here.
-    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)\s?(km|m|kg|mm|cm)(?![\p{L}\p{M}])/giu,
-        (m0, i: string, f: string, u: string) =>
-            `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")} ${({ km: "cilometr", m: "metr", kg: "cilogram", mm: "milimetr", cm: "centimetr" } as Record<string, string>)[u.toLowerCase()]!}`);
     s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d.])/giu, (m0, i: string, f: string) =>
         `${i} pwynt ${[...f].map((d) => numberToWordsWelsh(Number(d))).join(" ")}`);
 
@@ -350,6 +356,9 @@ export function normalizeWelsh(input: string): string {
     s = rewrite(s, /(\d+)½/gu, "$1 a hanner");
     s = rewrite(s, /(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])/gu, (m0, a: string, b: string) => {
         const num = Number(a), den = Number(b);
+        // A DENOMINATOR BELOW 2 NAMES NO FRACTION NOUN (#1585): `1/0` read *un dimfed*, "one zeroth", and
+        // `1/1` *un cyntaf*, "one first". Declined, so the figures are read as written.
+        if (den < 2) return m0;
         if (den === 2) return num === 1 ? "hanner" : `${numberToWordsWelsh(num)} hanner`;
         const noun = den === 3 ? "traean" : den === 4 ? "chwarter" : ordinalWords(den);
         if (noun === undefined) return m0;

@@ -155,7 +155,9 @@ public static class Normalize
      *  adjacency the shared tier matches on. */
     private static readonly IReadOnlyDictionary<string, string> UNIT_WORD = new Dictionary<string, string>(StringComparer.Ordinal)
     {
-        ["km"] = "cilometr", ["kg"] = "cilogram", ["mm"] = "milimetr", ["cm"] = "centimetr", ["m"] = "metr",
+        // ⚠ `cilomedr`, the tier's word (#1585): this said `cilometr`, so `km` read differently after a range
+        // or a decimal than everywhere else. See `UNIT_WORD` in src/languages/welsh/normalize.ts.
+        ["km"] = "cilomedr", ["kg"] = "cilogram", ["mm"] = "milimetr", ["cm"] = "centimetr", ["m"] = "metr",
     };
 
     // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -338,9 +340,6 @@ public static class Normalize
         //    converts the fraction to WORDS that the unit rules can no longer see.
         s = Rewrite(s, DECIMAL_RANGE, "$1 i $2");
         s = Rewrite(s, GIGAHERTZ, "$1 gigahertz");
-        // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
-        // emit it spaced so it reads as the letter name n.
-        s = Rewrite(s, VERSION_LETTER, m => $"{m.Groups[1].Value} pwynt {SpellDigits(m.Groups[2].Value)} ");
         // A DECIMAL with a UNIT — `12.8 km`. ⚠ UNITS ARE RESOLVED BEFORE DECIMALS: converting the number to
         // words breaks the tier's number-unit adjacency, so the unit's WORD must be claimed here.
         // ⚠ THE PATTERN CARRIES `i`+`u` AND IS BUILT FROM THIS TABLE'S OWN KEYS, SO A WIDENED-FOLD NEAR-MISS
@@ -351,6 +350,11 @@ public static class Normalize
             if (!UNIT_WORD.TryGetValue(Js.ToLowerCase(m.Groups[3].Value), out var uw)) return m.Value;
             return $"{m.Groups[1].Value} pwynt {SpellDigits(m.Groups[2].Value)} {uw}";
         });
+        // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit —
+        // emit it spaced so it reads as the letter name n. ⚠ AFTER THE DECIMAL-UNIT RULE (#1585): a glued metre
+        // is the same shape, so with this rule first `4.5m` read the letter. The corpus's version letters are
+        // `a b g n` after `802.11`, never `m`.
+        s = Rewrite(s, VERSION_LETTER, m => $"{m.Groups[1].Value} pwynt {SpellDigits(m.Groups[2].Value)} ");
         s = Rewrite(s, DECIMAL_PLAIN, m => $"{m.Groups[1].Value} pwynt {SpellDigits(m.Groups[2].Value)}");
 
         // 7b) COMMA-DECIMALS — `12,5`. A European-style comma-decimal must not LEAK the comma as a clause
@@ -366,6 +370,8 @@ public static class Normalize
         {
             var num = Js.Number(m.Groups[1].Value);
             var den = Js.Number(m.Groups[2].Value);
+            // A denominator below 2 names no fraction noun (#1585): `1/0` read *un dimfed*, "one zeroth".
+            if (den < 2) return m.Value;
             if (den == 2) return num == 1 ? "hanner" : $"{Numbers.NumberToWords(num)} hanner";
             var noun = den == 3 ? "traean" : den == 4 ? "chwarter" : OrdinalWords(den);
             if (noun is null) return m.Value;

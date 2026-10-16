@@ -39,7 +39,7 @@ const NOT_YET_REPAIRED = new Set([
     // both marks (4/4 probes) — these decline the period as well as the comma
     "bo", "ceb", "cjy", "gan", "gu", "hmn", "hsn", "mr", "ne", "om", "sk", "sl", "sv", "sw", "syl", "xh", "zu",
     // one mark (2/4) — the period is already handled and the comma is not, or vice versa
-    "ff", "ga", "ha", "jv", "lg", "so", "su", "wuu",
+    "ff", "ha", "jv", "lg", "so", "su", "wuu",
 ]);
 
 const CODE_COLUMN = "code";

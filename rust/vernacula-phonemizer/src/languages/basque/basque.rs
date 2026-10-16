@@ -345,7 +345,7 @@ mod tests {
         (
             "normalizeBasque",
             &["23,4° ingurukoa"],
-            Some("23 koma 4° ingurukoa"),
+            Some("23 koma 4 gradu ingurukoa"),
         ),
         (
             "phonemize",
@@ -416,11 +416,15 @@ mod tests {
             &["0,4º C"],
             Some("0 koma 4 gradu Celsius"),
         ),
-        ("normalizeBasque", &["0,1-0,5º"], Some("0 koma 1-0 koma 5°")),
+        (
+            "normalizeBasque",
+            &["0,1-0,5º"],
+            Some("0 koma 1-0 koma 5 gradu"),
+        ),
         (
             "normalizeBasque",
             &["30º-ko latitudearen"],
-            Some("30°-ko latitudearen"),
+            Some("30 graduko latitudearen"),
         ),
         (
             "normalizeBasque",

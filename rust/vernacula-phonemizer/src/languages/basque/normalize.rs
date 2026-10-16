@@ -85,10 +85,21 @@ static UNIT_ENDING: LazyLock<JsRegex> = LazyLock::new(|| {
     )
     .unwrap()
 });
+/// The bare degree sign — the angular `gradu`, with a glued case ending on it (#1585).
+static DEGREE_BARE: LazyLock<JsRegex> = LazyLock::new(|| {
+    JsRegex::new(
+        &format!(
+            r"(\d)[ \u00a0]?°-?({})?(?![\p{{L}}\p{{M}}])",
+            CASE_ENDINGS.join("|")
+        ),
+        "gu",
+    )
+    .unwrap()
+});
 static NUMBER_ENDING: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r"(?<![\d.,\p{{L}}\p{{M}}])(\d+)(?:,(\d+))?(-?)({})(?![\p{{L}}\p{{M}}])",
+            r"(?<![\d.,\p{{L}}\p{{M}}])(\d+)(?:[,.](\d+))?(-?)({})(?![\p{{L}}\p{{M}}])",
             CASE_ENDINGS.join("|")
         ),
         "gu",
@@ -169,6 +180,12 @@ pub fn normalize_basque(input: &JsString) -> JsString {
             g(m, 1, t).concat(&js(&format!(" {DEGREE} {scale}")))
         },
     );
+    // the bare sign: `gradu` IS the angular degree, which is what every bare sign in the corpus is (#1585)
+    s = rewrite_with(&s, &DEGREE_BARE, |m, t| {
+        g(m, 1, t)
+            .concat(&js(&format!(" {DEGREE}")))
+            .concat(&g(m, 2, t))
+    });
 
     // 4) a rate, then a unit, glued to a case ending
     s = rewrite_with(&s, &RATE_ENDING, |m, t| {
@@ -222,10 +239,14 @@ pub fn normalize_basque(input: &JsString) -> JsString {
         if head.is_empty() {
             return whole;
         }
-        if !g(m, 3, t).is_empty() && !js_re!("[aeiou]$", "u").test(&js(&head)) {
+        let ending = g(m, 4, t);
+        // an `e`-initial ending already carries the linking vowel (#1585): `5-eko` is *bosteko*
+        if !g(m, 3, t).is_empty()
+            && !js_re!("[aeiou]$", "u").test(&js(&head))
+            && !ending.to_string_lossy().starts_with('e')
+        {
             return whole;
         }
-        let ending = g(m, 4, t);
         match m.group(2, t) {
             None => js(&head).concat(&ending),
             Some(frac) => glue_fraction(&head, &frac, &ending).unwrap_or(whole),
@@ -242,7 +263,45 @@ pub fn normalize_basque(input: &JsString) -> JsString {
                 .concat(&fraction_digits(&g(m, 2, t)))
         },
     );
+    // …and the dot decimal (#1585): every three-digit dot block is already de-grouped, so a dot left between
+    // digits is a decimal; a further `.digit` is a dotted citation
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?![\d,\p{L}\p{M}]|\.\d)", "gu"),
+        |m, t| {
+            g(m, 1, t)
+                .concat(&js(&format!(" {DECIMAL_WORD} ")))
+                .concat(&fraction_digits(&g(m, 2, t)))
+        },
+    );
 
     let s = rewrite(&s, js_re!(r"[^\S\n]{2,}", "gu"), &js(" "));
     rewrite(&s, js_re!(r"^[^\S\n]+|[^\S\n]+$", "gu"), &JsString::new())
+}
+
+/// #1585, as test/west-defects-1585.test.ts: relational where a well-formed twin exists, so no IPA is typed.
+#[cfg(test)]
+mod defects_1585_tests {
+    use super::*;
+
+    fn say(text: &str, lang: &str) -> String {
+        crate::phonemize(text, lang).unwrap().trim().to_string()
+    }
+
+    fn n(s: &str) -> String {
+        normalize_basque(&js(s)).to_string_lossy()
+    }
+
+    #[test]
+    fn bare_degree_dot_decimal_and_the_e_initial_ending() {
+        assert_eq!(n("20°"), "20 gradu");
+        assert_eq!(n("20º"), "20 gradu");
+        assert_eq!(n("10°tik"), "10 gradutik");
+        assert_eq!(n("26 °C"), "26 gradu Celsius");
+        assert_eq!(say("2.5 km", "eu"), say("2,5 km", "eu"));
+        assert_eq!(say("8.0ko", "eu"), say("8,0ko", "eu"));
+        assert!(!n("Am 2.18.19-26").contains("koma"));
+        assert_eq!(say("5-eko", "eu"), say("5eko", "eu"));
+        assert_eq!(n("995-ko"), "995-ko");
+    }
 }
