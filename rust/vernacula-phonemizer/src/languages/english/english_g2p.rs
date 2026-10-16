@@ -3,7 +3,6 @@
 
 use std::collections::{HashMap, HashSet};
 
-use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
 
 use super::english_arpabet::ArpabetToIpa;
@@ -11,22 +10,26 @@ use crate::core::js_math;
 use crate::core::js_string::{JsString, js};
 use crate::js_re;
 
-#[derive(FromJson)]
-pub struct NgramEntry {
-    pub t: f64,
-    pub c: Vec<(String, f64)>,
-}
-
-#[derive(FromJson)]
-#[json(rename_all = "camelCase")]
+/// The model as `g2p-model.bin` stores it (`g2p_model_binary`): a joint n-gram over grapheme:phone tokens, with
+/// the tokens as ids. Context `i` has order `ctx_order[i]`, its tokens in the LAST that many of its four
+/// `ctx_tok` slots (the rest `PAD`), total `total[i]`, and candidates `cand`/`count[row_start[i]..row_start[i + 1]]`.
 pub struct EnglishG2pModel {
     pub order: usize,
     pub alpha: f64,
     pub evp: f64,
     pub evp_order: i64,
     pub grapheme_chunks: IndexMap<String, Vec<String>>,
-    pub ngram: HashMap<String, NgramEntry>,
+    pub tokens: Vec<String>,
+    pub ctx_order: Vec<u8>,
+    pub ctx_tok: Vec<u16>,
+    pub total: Vec<u32>,
+    pub row_start: Vec<u32>,
+    pub cand: Vec<u16>,
+    pub count: Vec<u32>,
 }
+
+/// An empty context slot in `EnglishG2pModel::ctx_tok`.
+pub const PAD: u16 = 0xFFFF;
 
 const START: &str = "^";
 const BEAM: usize = 12;
@@ -111,27 +114,6 @@ type ContextKey = (u8, [u32; 4]);
 /// what the TS string lookup does for any unseen token.
 const UNSEEN: u32 = u32::MAX;
 const NO_TOKEN: u32 = u32::MAX - 1;
-
-/// A context string back into its tokens. The TS joins tokens with " ", and a token's chunk may itself hold
-/// spaces (`n:AH0 N`); every token starts `<letter>:` (or is the start token `^`) and no phone has `:`
-/// second, so a piece without one continues the token before it.
-fn split_context(ctx: &str) -> Vec<String> {
-    let mut toks: Vec<String> = Vec::new();
-    if ctx.is_empty() {
-        return toks;
-    }
-    for piece in ctx.split(' ') {
-        let starts = piece == START || piece.chars().nth(1) == Some(':');
-        match toks.last_mut() {
-            Some(last) if !starts => {
-                last.push(' ');
-                last.push_str(piece);
-            }
-            _ => toks.push(piece.to_string()),
-        }
-    }
-    toks
-}
 
 /// A hypothesis's phones, as a chain back to the start (the TS copies the whole list per candidate).
 struct Back {
@@ -302,41 +284,51 @@ impl EnglishG2p {
     ) -> Result<EnglishG2p, String> {
         if model.order > 5 {
             return Err(format!(
-                "g2p-model.json: order {} (the decoder keeps four tokens of history)",
+                "g2p-model.bin: order {} (the decoder keeps four tokens of history)",
                 model.order
             ));
         }
         let set = |v: &[String]| v.iter().cloned().collect::<HashSet<String>>();
         let jset = |v: &[String]| v.iter().map(|s| js(s)).collect::<HashSet<JsString>>();
-        let mut token_ids: HashMap<String, u32> = HashMap::new();
-        let intern = |t: &str, ids: &mut HashMap<String, u32>| -> u32 {
-            let n = ids.len() as u32;
-            *ids.entry(t.to_string()).or_insert(n)
-        };
-        let mut contexts = HashMap::new();
-        for (k, e) in &model.ngram {
-            let bad = || {
-                format!(
-                    "g2p-model.json: ngram key {k:?} is not order|context with that many tokens"
-                )
-            };
-            let (o, ctx) = k.split_once('|').ok_or_else(bad)?;
-            let o: usize = o.parse().map_err(|_| bad())?;
-            let toks = split_context(ctx);
-            if toks.len() != o || o > 4 {
-                return Err(bad());
-            }
+        let mut model = model;
+        let token_ids: HashMap<String, u32> = model
+            .tokens
+            .iter()
+            .enumerate()
+            .map(|(i, t)| (t.clone(), i as u32))
+            .collect();
+        let mut contexts = HashMap::with_capacity(model.ctx_order.len());
+        for (i, &o) in model.ctx_order.iter().enumerate() {
             let mut key = [NO_TOKEN; 4];
-            for (slot, t) in key[4 - o..].iter_mut().zip(&toks) {
-                *slot = intern(t, &mut token_ids);
+            for (slot, &t) in key.iter_mut().zip(&model.ctx_tok[i * 4..i * 4 + 4]) {
+                if t != PAD {
+                    *slot = u32::from(t);
+                }
             }
-            let mut counts = HashMap::with_capacity(e.c.len());
-            for (t, c) in &e.c {
-                let id = intern(t, &mut token_ids);
-                counts.entry(id).or_insert(*c);
+            let rows = model.row_start[i] as usize..model.row_start[i + 1] as usize;
+            let mut counts = HashMap::with_capacity(rows.len());
+            for k in rows {
+                // The first occurrence of a token wins, as the TS `find` did.
+                counts
+                    .entry(u32::from(model.cand[k]))
+                    .or_insert(f64::from(model.count[k]));
             }
-            contexts.insert((o as u8, key), Context { total: e.t, counts });
+            contexts.insert(
+                (o, key),
+                Context {
+                    total: f64::from(model.total[i]),
+                    counts,
+                },
+            );
         }
+        // The arrays are in `contexts` now; the model keeps only its parameters.
+        for v in [&mut model.ctx_tok, &mut model.cand] {
+            *v = Vec::new();
+        }
+        for v in [&mut model.total, &mut model.row_start, &mut model.count] {
+            *v = Vec::new();
+        }
+        model.ctx_order = Vec::new();
         Ok(EnglishG2p {
             contexts,
             token_ids,

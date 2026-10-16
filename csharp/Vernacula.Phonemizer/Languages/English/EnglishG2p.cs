@@ -2,29 +2,30 @@
  * English-native OOV G2P.
  * Ported from src/languages/english/englishG2p.ts — see that file for the corpus evidence.
  */
-using System.Text.Json.Serialization;
 using Vernacula.Phonemizer.Core;
 
 namespace Vernacula.Phonemizer.Languages.English;
 
-public sealed class NgramEntry
-{
-    /** full context total */
-    [JsonPropertyName("t")] public double T { get; init; }
-    /** pruned top-K [chunk, count] */
-    [JsonPropertyName("c")] public List<List<System.Text.Json.JsonElement>> C { get; init; } = new();
-}
-
-/** Serialized model: a joint n-gram over grapheme:phone tokens (`en_g2p_ngram.ts --emit`). */
+/**
+ * The model as `g2p-model.bin` stores it (<see cref="G2pModelBinary"/>): a joint n-gram over grapheme:phone
+ * tokens, with the tokens as ids. Context `i` has order `CtxOrder[i]`, its tokens in the LAST that many of its four
+ * `CtxTok` slots (the rest `Pad`), total `Total[i]`, and candidates `Cand`/`Count[RowStart[i] .. RowStart[i + 1]]`.
+ */
 public sealed class EnglishG2pModel
 {
-    public int Order { get; init; }
-    public double Alpha { get; init; }
-    public double Evp { get; init; }
-    public int EvpOrder { get; init; }
-    public Dictionary<string, List<string>> GraphemeChunks { get; init; } = new();
-    /** key `${order}|${ctx}` → { t: full context total, c: pruned top-K [chunk, count] }. */
-    public Dictionary<string, NgramEntry> Ngram { get; init; } = new();
+    public const ushort Pad = 0xFFFF;
+    public required int Order { get; init; }
+    public required double Alpha { get; init; }
+    public required double Evp { get; init; }
+    public required int EvpOrder { get; init; }
+    public required Dictionary<string, List<string>> GraphemeChunks { get; init; }
+    public required List<string> Tokens { get; init; }
+    public required byte[] CtxOrder { get; init; }
+    public required ushort[] CtxTok { get; init; }
+    public required uint[] Total { get; init; }
+    public required uint[] RowStart { get; init; }
+    public required ushort[] Cand { get; init; }
+    public required uint[] Count { get; init; }
 }
 
 /** ARPABET phonetic-class sets injected into the OOV G2P (from english.jsonc's `g2pClasses`). */
@@ -129,16 +130,22 @@ public static class EnglishG2pFactory
         private readonly Func<IReadOnlyList<string>, string, string> _arpabetToIpa;
         private readonly Dictionary<string, List<string>> _gchunks;
         /// <summary>
-        /// ⚠ EACH CONTEXT'S CANDIDATES AS A LOOKUP, built on first use. `ScoreTokAt` used to scan the stored
-        /// <c>[token, count]</c> pairs, calling <c>JsonElement.GetString()</c> (a fresh string) for every one, and
-        /// the empty context alone holds 984. That scan was 22.9 s of Min Nan's 26.7 s golden run, whose Latin
-        /// runs reach this decoder through the English reader
-        /// (docs/investigations/nan/nan_csharp_perf_investigation.md). The first occurrence of a token wins, as
-        /// the TypeScript's <c>e.c.find</c> does. ⚠ LAZILY, per context: building all 61,846 tables up front
-        /// doubled `CreateEnglish` for every caller, and a run touches a small fraction of them.
+        /// ⚠ TOKENS ARE IDS. A context is the number <c>((((o·B + a)·B + b)·B + c)·B + d)</c> over its four slots,
+        /// <c>B</c> = tokens + 1 with the last digit standing for an empty slot, so no context string is ever built.
+        /// A token the model never saw is <c>Unseen</c>: any context holding it misses, and it is never a candidate,
+        /// exactly what the string lookup did for it.
         /// </summary>
-        private readonly System.Collections.Concurrent.ConcurrentDictionary<string, Dictionary<string, double>> _ngramCounts =
-            new(StringComparer.Ordinal);
+        private const int Unseen = -1;
+        private readonly Dictionary<string, int> _tokenId;
+        private readonly long _base;
+        private readonly Dictionary<long, int> _ctxIndex;
+        /// <summary>
+        /// ⚠ EACH CONTEXT'S CANDIDATES AS A LOOKUP, built on first use. A linear scan of the candidates (984 in the
+        /// empty context) was 22.9 s of Min Nan's 26.7 s golden run, whose Latin runs reach this decoder through the
+        /// English reader (docs/investigations/nan/nan_csharp_perf_investigation.md). The first occurrence of a
+        /// token wins, as the TypeScript's <c>find</c> did. ⚠ LAZILY: a run touches a small fraction of 61,846.
+        /// </summary>
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, Dictionary<int, double>> _ngramCounts = new();
         private readonly IReadOnlySet<string> VOWEL_LETTER, VOWEL, VOICELESS, SIBILANT, STOP_PIECE, STEM_STRESS_PREFIX;
         private readonly IReadOnlyDictionary<string, string> LETTER_NAME_EXCEPTIONS;
         private readonly List<(string Suf, Func<string, List<string>> Stems, Func<List<string>, List<string>> Allo)> SUFFIXES;
@@ -151,6 +158,12 @@ public static class EnglishG2pFactory
             _common = common;
             _arpabetToIpa = arpabetToIpa;
             _gchunks = new Dictionary<string, List<string>>(model.GraphemeChunks, StringComparer.Ordinal);
+            _tokenId = new Dictionary<string, int>(model.Tokens.Count, StringComparer.Ordinal);
+            for (var i = 0; i < model.Tokens.Count; i++) _tokenId.TryAdd(model.Tokens[i], i);
+            _base = model.Tokens.Count + 1;
+            _ctxIndex = new Dictionary<long, int>(model.CtxOrder.Length);
+            for (var i = 0; i < model.CtxOrder.Length; i++)
+                _ctxIndex[CtxKey(model.CtxOrder[i], model.CtxTok.AsSpan(i * 4, 4))] = i;
             VOWEL_LETTER = new HashSet<string>(classes.VowelLetters, StringComparer.Ordinal);
             VOWEL = new HashSet<string>(classes.Vowels, StringComparer.Ordinal);
             VOICELESS = new HashSet<string>(classes.Voiceless, StringComparer.Ordinal);
@@ -208,38 +221,53 @@ public static class EnglishG2pFactory
             };
         }
 
-        private Dictionary<string, double> Counts(string key, NgramEntry e) =>
-            _ngramCounts.GetOrAdd(key, _ =>
+        private long CtxKey(int o, ReadOnlySpan<ushort> slots)
+        {
+            long k = o;
+            foreach (var t in slots) k = k * _base + (t == EnglishG2pModel.Pad ? _base - 1 : t);
+            return k;
+        }
+
+        private Dictionary<int, double> Counts(int i) =>
+            _ngramCounts.GetOrAdd(i, _ =>
             {
-                var count = new Dictionary<string, double>(e.C.Count, StringComparer.Ordinal);
-                foreach (var pair in e.C) count.TryAdd(pair[0].GetString()!, pair[1].GetDouble());
+                var count = new Dictionary<int, double>();
+                for (var k = (int)_model.RowStart[i]; k < (int)_model.RowStart[i + 1]; k++)
+                    count.TryAdd(_model.Cand[k], _model.Count[k]);
                 return count;
             });
 
         /// <summary>
         /// The n-gram contexts of <paramref name="hist"/>, longest first: element <c>Order - 1 - o</c> is the order-o
-        /// entry, or null where the model has none. ⚠ RESOLVED ONCE PER HYPOTHESIS, not once per candidate chunk:
-        /// they depend only on the history, and rebuilding the context strings for each of ~30 chunks was most of
-        /// the decoder's time. <paramref name="hist"/> needs only its last <c>Order - 1</c> tokens.
+        /// context, or null where the model has none. ⚠ RESOLVED ONCE PER HYPOTHESIS, not once per candidate chunk:
+        /// they depend only on the history. <paramref name="hist"/> needs only its last <c>Order - 1</c> tokens.
         /// </summary>
-        private (NgramEntry Entry, Dictionary<string, double> Counts)?[] Contexts(string[] hist)
+        private (double Total, Dictionary<int, double> Counts)?[] Contexts(int[] hist)
         {
-            var out_ = new (NgramEntry, Dictionary<string, double>)?[_model.Order];
+            var out_ = new (double, Dictionary<int, double>)?[_model.Order];
+            Span<ushort> slots = stackalloc ushort[4];
             for (var o = _model.Order - 1; o >= 0; o--)
             {
-                var key = o == 0 ? "0|" : $"{o}|{string.Join(" ", hist, hist.Length - o, o)}";
-                if (_model.Ngram.TryGetValue(key, out var e)) out_[_model.Order - 1 - o] = (e, Counts(key, e));
+                var seen = true;
+                for (var j = 0; j < 4; j++)
+                {
+                    var t = j < 4 - o ? EnglishG2pModel.Pad : hist[hist.Length - 4 + j];
+                    if (t == Unseen) { seen = false; break; }
+                    slots[j] = (ushort)t;
+                }
+                if (seen && _ctxIndex.TryGetValue(CtxKey(o, slots), out var i))
+                    out_[_model.Order - 1 - o] = (_model.Total[i], Counts(i));
             }
             return out_;
         }
 
         /// <summary>The highest-order context that has <paramref name="tok"/>, backed off by alpha per order skipped.</summary>
-        private (double Score, int Order) ScoreTokAt((NgramEntry Entry, Dictionary<string, double> Counts)?[] contexts, string tok)
+        private (double Score, int Order) ScoreTokAt((double Total, Dictionary<int, double> Counts)?[] contexts, int tok)
         {
             for (var o = _model.Order - 1; o >= 0; o--)
             {
-                if (contexts[_model.Order - 1 - o] is var (e, counts) && counts.TryGetValue(tok, out var n))
-                    return (Math.Log(n / e.T) + (_model.Order - 1 - o) * Math.Log(_model.Alpha), o);
+                if (contexts[_model.Order - 1 - o] is var (total, counts) && counts.TryGetValue(tok, out var n))
+                    return (Math.Log(n / total) + (_model.Order - 1 - o) * Math.Log(_model.Alpha), o);
             }
             return (Math.Log(1e-7), -1);
         }
@@ -247,7 +275,7 @@ public static class EnglishG2pFactory
         /// <summary>A hypothesis. ⚠ <c>Hist</c> keeps only the last <c>Order - 1</c> tokens (all `ScoreTokAt` reads),
         /// and <c>Phones</c> is a chain back to the start, materialised once at the end: copying both lists for
         /// every candidate chunk at every letter made the decoder quadratic in word length and GC-bound.</summary>
-        private sealed record BeamItem(string[] Hist, PhoneChain? Phones, double Score);
+        private sealed record BeamItem(int[] Hist, PhoneChain? Phones, double Score);
 
         private sealed record PhoneChain(string[] Chunk, PhoneChain? Prev);
 
@@ -264,7 +292,7 @@ public static class EnglishG2pFactory
         {
             var beam = new List<BeamItem>
             {
-                new(Window([START, START, START, START]), null, 0),
+                new(Window([StartId, StartId, StartId, StartId]), null, 0),
             };
             for (var i = 0; i < w.Length; i++)
             {
@@ -284,7 +312,7 @@ public static class EnglishG2pFactory
                 }).ToList();
                 var chunks = filtered.Count > 0 ? filtered : raw;
                 // Per letter, not per hypothesis: each chunk's joint token and its phones.
-                var toks = chunks.Select(ch => $"{c}:{ch}").ToArray();
+                var toks = chunks.Select(ch => _tokenId.TryGetValue($"{c}:{ch}", out var id) ? id : Unseen).ToArray();
                 var pieces = chunks.Select(ch => ch.Length > 0 ? ch.Split(' ') : null).ToArray();
                 // Scored first, built only if it survives: (score, hypothesis, chunk) in insertion order.
                 var next = new List<(double Score, BeamItem H, int K)>(beam.Count * chunks.Count);
@@ -314,7 +342,9 @@ public static class EnglishG2pFactory
         }
 
         /// <summary>The last <c>Order - 1</c> tokens of <paramref name="hist"/>.</summary>
-        private string[] Window(string[] hist)
+        private int StartId => _tokenId.TryGetValue(START, out var id) ? id : Unseen;
+
+        private int[] Window(int[] hist)
         {
             var k = Math.Max(_model.Order - 1, 0);
             return hist.Length <= k ? hist : hist[^k..];

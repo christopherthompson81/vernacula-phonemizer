@@ -6,14 +6,14 @@ import { readFileSync } from "node:fs";
 import { MANIFEST } from "../../../src/languages/english/manifest.ts";
 import { makeArpabetToIpa } from "../../../src/languages/english/englishArpabet.ts";
 import { loadTsvMap, loadLines } from "../../../src/core/loadTsv.ts";
-import { loadJson } from "../../../src/core/loadManifest.ts";
 import { PosTagger } from "../../../src/languages/english/posTagger.ts";
 import { loadPosModel } from "../../../src/languages/english/posModelBinary.ts";
 import { americanSpelling } from "../../../src/languages/english/spellingVariants.ts";
 import { numberToWords, ordinalToWords } from "../../../src/languages/english/numbers.ts";
 import { rpWordTransform, toRP } from "../../../src/languages/english-gb/english-gb.ts";
 import { createEnglish } from "../../../src/languages/english/english.ts";
-import { createEnglishG2p, type EnglishG2pModel } from "../../../src/languages/english/englishG2p.ts";
+import { createEnglishG2p } from "../../../src/languages/english/englishG2p.ts";
+import { loadG2pModel } from "../../../src/languages/english/g2pModelBinary.ts";
 
 import { normalizeEnglish, normalizeEnglishInitialisms } from "../../../src/languages/english/normalize.ts";
 
@@ -272,7 +272,7 @@ const dumps: Record<string, () => void | Promise<void>> = {
         const slots = (v: string): number[] => v.split(",").map(Number).filter((n) => Number.isInteger(n));
         const conv = makeArpabetToIpa(MANIFEST.arpabet, loadTsvMap(ENGLISH, "en-syllabic.tsv", slots), loadTsvMap(ENGLISH, "en-nasal-seam.tsv", slots));
         const dict = loadTsvMap(ENGLISH, "g2p-dict.tsv", (v) => v.split(" "));
-        const g2p = createEnglishG2p(loadJson<EnglishG2pModel>(ENGLISH, "g2p-model.json"), dict,
+        const g2p = createEnglishG2p(loadG2pModel(ENGLISH), dict,
             new Set(loadLines(ENGLISH, "g2p-common.txt")), conv,
             { ...MANIFEST.g2pClasses, vowels: MANIFEST.arpabet.vowels, letterNameExceptions: MANIFEST.letterNameExceptions });
         const words = new Set<string>();

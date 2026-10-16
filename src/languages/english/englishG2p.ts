@@ -8,14 +8,16 @@
  *
  * All paths emit stress-bearing ARPABET; {@link arpabetToIpa} renders the SAME canonical convention as the
  * dict, so a sentence mixing dict + G2P words has no seam. Trained cleanroom on CMUdict (public domain) by
- * `tools/english/en_g2p_ngram.ts --emit`; the shipped artifact is `g2p-model.json`.
+ * `tools/english/en_g2p_ngram.ts --emit`; the shipped artifact is `g2p-model.bin` (`g2p_model_pack.mts` packs the
+ * emitted JSON; layout in `g2pModelBinary.ts`).
  * ⚠ NOT THE SAME MODEL AS THE NEURAL PATH: `en-g2p-tagger.onnx` is a separate BiLSTM built by
  * `tools/english/en_g2p_bilstm.py` and used by englishTagger.ts. This file is the SYNC n-gram fallback.
  * ⚠ A PURE FUNCTION of its injected {model, dict, common, arpabetToIpa} — no filesystem, no globals — which is
  * what makes it portable.
  */
 
-/** Serialized model: a joint n-gram over grapheme:phone tokens (`en_g2p_ngram.ts --emit`). */
+/** The trainer's model as JSON: a joint n-gram over grapheme:phone tokens (`en_g2p_ngram.ts --emit`). The engine
+ *  takes it packed ({@link PackedG2pModel}, `g2pModelBinary.ts`). */
 export interface EnglishG2pModel {
     order: number;
     alpha: number;
@@ -25,6 +27,28 @@ export interface EnglishG2pModel {
     /** key `${order}|${ctx}` → { t: full context total, c: pruned top-K [chunk, count] }. */
     ngram: Record<string, { t: number; c: [string, number][] }>;
 }
+
+/** The model as the engine takes it: the JSON's tokens as ids, its contexts and candidates as flat arrays
+ *  (`g2pModelBinary.ts`, which loads it from `g2p-model.bin`). */
+export interface PackedG2pModel {
+    order: number;
+    alpha: number;
+    evp: number;
+    evpOrder: number;
+    minCount: number;
+    graphemeChunks: Record<string, string[]>;
+    tokens: string[];
+    ctxOrder: Uint8Array;
+    /** Four slots per context; an order-`o` context uses the last `o`. */
+    ctxTok: Uint16Array;
+    total: Uint32Array;
+    rowStart: Uint32Array;
+    cand: Uint16Array;
+    count: Uint32Array;
+}
+
+/** An empty context slot in {@link PackedG2pModel.ctxTok}. */
+export const PAD = 0xffff;
 
 const START = "^";
 const BEAM = 12;
@@ -110,7 +134,7 @@ export interface EnglishG2p {
  * is pure and mirror-friendly.
  */
 export function createEnglishG2p(
-    model: EnglishG2pModel,
+    model: PackedG2pModel,
     dict: ReadonlyMap<string, string[]>,
     common: ReadonlySet<string>,
     arpabetToIpa: (phones: string[], word?: string) => string,
@@ -181,31 +205,57 @@ export function createEnglishG2p(
     // form — a linear `find` over each context's candidates, the context strings rebuilt for every candidate
     // chunk, and the full history and phone arrays copied into every candidate — spent ~14 ms a word
     // (docs/investigations/nan/nan_csharp_perf_investigation.md, Run 4). Output is unchanged by construction.
-    type Ctx = { t: number; counts: Map<string, number> };
-    const ctxCache = new Map<string, Ctx | null>();
-    /** The context `key` as a lookup, built on first use. The FIRST occurrence of a token wins, as `find` did. */
-    function context(key: string): Ctx | null {
-        let c = ctxCache.get(key);
+    //
+    // ⚠ TOKENS ARE IDS (`g2pModelBinary.ts`). A context is the number `((((o·B + a)·B + b)·B + c)·B + d)` over its
+    // four slots, `B` = tokens + 1 with the last digit standing for an empty slot, so no context string is ever
+    // built. A token the model never saw is `UNSEEN`: any context holding it misses, and it is never a candidate —
+    // exactly what the string lookup did for it.
+    const UNSEEN = -1;
+    const tokenId = new Map<string, number>(model.tokens.map((t, i) => [t, i]));
+    const B = model.tokens.length + 1;
+    if (5 * B ** 4 >= Number.MAX_SAFE_INTEGER) throw new Error(`g2p-model: ${model.tokens.length} tokens overflow the context key`);
+    const ctxKey = (o: number, slots: ArrayLike<number>, at: number): number => {
+        let k = o;
+        for (let j = 0; j < 4; j++) {
+            const t = slots[at + j]!;
+            k = k * B + (t === PAD ? B - 1 : t);
+        }
+        return k;
+    };
+    const ctxIndex = new Map<number, number>();
+    for (let i = 0; i < model.ctxOrder.length; i++) ctxIndex.set(ctxKey(model.ctxOrder[i]!, model.ctxTok, i * 4), i);
+    type Ctx = { t: number; counts: Map<number, number> };
+    const ctxCache = new Map<number, Ctx>();
+    /** Context `i`'s candidates as a lookup, built on first use. The FIRST occurrence of a token wins, as `find` did. */
+    function context(i: number): Ctx {
+        let c = ctxCache.get(i);
         if (c === undefined) {
-            const e = model.ngram[key];
-            if (e) {
-                const counts = new Map<string, number>();
-                for (const [t, n] of e.c) if (!counts.has(t)) counts.set(t, n);
-                c = { t: e.t, counts };
-            } else c = null;
-            ctxCache.set(key, c);
+            const counts = new Map<number, number>();
+            for (let k = model.rowStart[i]!; k < model.rowStart[i + 1]!; k++)
+                if (!counts.has(model.cand[k]!)) counts.set(model.cand[k]!, model.count[k]!);
+            c = { t: model.total[i]!, counts };
+            ctxCache.set(i, c);
         }
         return c;
     }
     /** `hist`'s contexts, longest first (index `order - 1 - o` is order `o`). They depend only on the history,
      *  so they are resolved once per hypothesis, not once per candidate chunk. */
-    function contexts(hist: string[]): (Ctx | null)[] {
+    const slots = [PAD, PAD, PAD, PAD];
+    function contexts(hist: number[]): (Ctx | null)[] {
         const out: (Ctx | null)[] = [];
-        for (let o = order - 1; o >= 0; o--)
-            out.push(context(`${o}|${o === 0 ? "" : hist.slice(hist.length - o).join(" ")}`));
+        for (let o = order - 1; o >= 0; o--) {
+            let seen = true;
+            for (let j = 0; j < 4; j++) {
+                const t = j < 4 - o ? PAD : hist[hist.length - 4 + j]!;
+                if (t === UNSEEN) seen = false;
+                slots[j] = t;
+            }
+            const i = seen ? ctxIndex.get(ctxKey(o, slots, 0)) : undefined;
+            out.push(i === undefined ? null : context(i));
+        }
         return out;
     }
-    function scoreTokAt(ctxs: (Ctx | null)[], tok: string): [number, number] {
+    function scoreTokAt(ctxs: (Ctx | null)[], tok: number): [number, number] {
         for (let o = order - 1; o >= 0; o--) {
             // e.c stores the JOINT tokens `${letter}:${chunk}` (as trained), so match the full token.
             const e = ctxs[order - 1 - o];
@@ -223,11 +273,12 @@ export function createEnglishG2p(
     }
     /** The last `order - 1` tokens: all `contexts` ever reads. */
     const keep = Math.max(order - 1, 0);
-    const window = (hist: string[]): string[] => (keep === 0 ? [] : hist.slice(-keep));
+    const window = (hist: number[]): number[] => (keep === 0 ? [] : hist.slice(-keep));
+    const startId = tokenId.get(START) ?? UNSEEN;
     function ngramDecode(w: string): string[] {
-        let beam: { hist: string[]; phones: Phones; score: number }[] = [
+        let beam: { hist: number[]; phones: Phones; score: number }[] = [
             {
-                hist: window([START, START, START, START]),
+                hist: window([startId, startId, startId, startId]),
                 phones: null,
                 score: 0,
             },
@@ -262,7 +313,7 @@ export function createEnglishG2p(
                   });
             const chunks = filtered.length > 0 ? filtered : raw;
             // Per letter, not per hypothesis: each chunk's joint token and its phones.
-            const toks = chunks.map((ch) => `${c}:${ch}`);
+            const toks = chunks.map((ch) => tokenId.get(`${c}:${ch}`) ?? UNSEEN);
             const pieces = chunks.map((ch) => (ch ? ch.split(" ") : null));
             // Scored first, built only if it survives: (score, hypothesis, chunk) in insertion order.
             const next: { score: number; h: (typeof beam)[number]; k: number }[] = [];

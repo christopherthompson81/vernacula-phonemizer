@@ -1,7 +1,7 @@
 /**
  * THE CURATED LAYER MUST NOT SILENTLY DIVERGE FROM THE OOV PATH.
  *
- * ⚠ `data/languages/english/g2p-model.json` is trained on UPSTREAM CMUdict, and `--emit` regenerates
+ * ⚠ `data/languages/english/g2p-model.bin` is trained on UPSTREAM CMUdict, and `--emit` regenerates
  * `g2p-dict.tsv` from CMUdict too — so the ~20 hand corrections in `g2p-curated.tsv` reach the listed word
  * and, unless something propagates them, nothing else. Where they do not, the engine answers one way for a
  * recorded word and another for an unrecorded one IN THE SAME ENVIRONMENT, which is the defect
@@ -15,7 +15,8 @@ import { describe, expect, test } from "vitest";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createEnglishG2p, type EnglishG2pModel } from "../src/languages/english/englishG2p.ts";
+import { createEnglishG2p } from "../src/languages/english/englishG2p.ts";
+import { decodeG2pModel } from "../src/languages/english/g2pModelBinary.ts";
 import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "languages", "english");
@@ -246,7 +247,7 @@ const KNOWN_GAPS = new Map<string, string>([
 /**
  * THE STRUCTURAL GAP, kept separate from the three per-word oddities above so neither list can hide the other.
  *
- * `g2p-model.json` is trained on UPSTREAM CMUdict. So for a corrected word with NO morphological handle — a
+ * `g2p-model.bin` is trained on UPSTREAM CMUdict. So for a corrected word with NO morphological handle — a
  * root, a proper noun, a loan — the OOV path has only the n-gram, and the n-gram learned the row we corrected.
  * It reproduces the upstream shape by construction, and no amount of curation can change that.
  *
@@ -379,7 +380,7 @@ function dict(path: string): Map<string, string[]> {
 
 describe("the curated layer against the OOV path", () => {
     const full = dict(join(EN, "g2p-dict.tsv"));
-    const model = JSON.parse(readFileSync(join(EN, "g2p-model.json"), "utf8")) as EnglishG2pModel;
+    const model = decodeG2pModel(new Uint8Array(readFileSync(join(EN, "g2p-model.bin"))));
     const common = new Set(
         readFileSync(join(EN, "g2p-common.txt"), "utf8").split("\n").map((s) => s.trim()).filter(Boolean),
     );

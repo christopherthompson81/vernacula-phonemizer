@@ -10,7 +10,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { phonemize, phonemizeAsync } from "../src/index.ts";
-import { createEnglishG2p, type EnglishG2pModel } from "../src/languages/english/englishG2p.ts";
+import { createEnglishG2p } from "../src/languages/english/englishG2p.ts";
+import { decodeG2pModel } from "../src/languages/english/g2pModelBinary.ts";
 import { MANIFEST } from "../src/languages/english/manifest.ts";
 
 const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "data", "languages", "english");
@@ -20,7 +21,7 @@ for (const l of readFileSync(join(EN, "g2p-dict.tsv"), "utf8").split("\n")) {
     if (i > 0) dict.set(l.slice(0, i), l.slice(i + 1).split(" "));
 }
 const g2p = createEnglishG2p(
-    JSON.parse(readFileSync(join(EN, "g2p-model.json"), "utf8")) as EnglishG2pModel,
+    decodeG2pModel(new Uint8Array(readFileSync(join(EN, "g2p-model.bin")))),
     dict,
     new Set(readFileSync(join(EN, "g2p-common.txt"), "utf8").split("\n").map((s) => s.trim()).filter(Boolean)),
     (p: string[]) => p.join(" "),
