@@ -7,7 +7,9 @@
 import { loadManifest } from "../../core/loadManifest.ts";
 import type { ZuluManifest } from "../zulu/manifest.ts";
 
-export type XhosaManifest = ZuluManifest;
+/** Zulu's shape without `ordinalYe`: xhosa.jsonc carries no `ye-` ordinal series and nothing in xh reads one
+ *  (#1593). The Rust and C# manifests already treat the field as optional. */
+export type XhosaManifest = Omit<ZuluManifest, "ordinalYe">;
 
 /** The consolidated hand-authored Xhosa data tables (see xhosa.jsonc). */
 export const MANIFEST = loadManifest<XhosaManifest>(import.meta.url, "xhosa.jsonc");

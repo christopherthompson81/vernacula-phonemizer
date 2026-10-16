@@ -47,6 +47,7 @@ public static class Normalize
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe GROUP_SPACES = JsRegex.Compile("[    ]", "gu");
     private static readonly JsRe ORDINAL_SUFFIX = JsRegex.Compile("(\\d+)(?:st|nd|rd|th)(?![\\p{L}\\p{M}])", "giu");
+    private static readonly JsRe BARE_BN = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d[\\d.,]*)bn(?![\\p{L}\\p{M}\\d])", "gu");
     private static readonly JsRe RANGE_RE = JsRegex.Compile(
         "(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[  ]?[-–—][  ]?(\\d+)(?![-\\d\\p{L}\\p{M}])", "gu");
     private static readonly JsRe DECIMAL_METRE = JsRegex.Compile(
@@ -117,6 +118,10 @@ public static class Normalize
 
         // 5) The English ordinal suffix, stripped — Shona writes its own ordinals as words.
         s = Rewrite(s, ORDINAL_SUFFIX, "$1");
+
+        // 5b) A `bn` magnitude suffix → the billion word, with or without a currency sign (#1593). Count then
+        //     magnitude, singular, as the corpus writes `6.7 miriyoni`. Before the tier.
+        s = Rewrite(s, BARE_BN, mm => $"{mm.Groups[1].Value} {Manifest.MANIFEST.Numbers.Billion}");
 
         // 6) Ranges → `kusvika`, ASCENDING only. BEFORE THE TIER: Shona writes the unit after the SECOND
         //    operand, so once the tier has moved it no range rule can pair the two.

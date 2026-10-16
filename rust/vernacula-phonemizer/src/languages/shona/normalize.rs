@@ -5,6 +5,7 @@
 
 use std::sync::LazyLock;
 
+use super::manifest::MANIFEST;
 use super::numbers::{number_to_words, with_class6_concord};
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
@@ -114,6 +115,20 @@ pub fn normalize_shona_pre(input: &JsString) -> JsString {
         &s,
         js_re!(r"(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])", "giu"),
         &js("$1"),
+    );
+
+    // 5b — a `bn` magnitude suffix → the billion word, with or without a currency sign (#1593)
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\p{L}\p{M}\d.,])(\d[\d.,]*)bn(?![\p{L}\p{M}\d])",
+            "gu"
+        ),
+        |m, s| {
+            m.group(1, s)
+                .unwrap()
+                .concat(&js(&format!(" {}", MANIFEST.numbers.billion)))
+        },
     );
 
     s = rewrite_with(

@@ -256,3 +256,17 @@ mod tests {
         assert_eq!(count, 90);
     }
 }
+
+/// #1593, as test/sbantu-defects-1593.test.ts: `bn` reads as its word, with or without a currency sign.
+/// Relational, so no IPA is typed.
+#[cfg(test)]
+mod sbantu_defects_1593 {
+    use crate::phonemize;
+
+    #[test]
+    fn bn_reads_as_its_word() {
+        let p = |t: &str| phonemize(t, "sn").unwrap();
+        assert_eq!(p("Ne 1.5bn zvakare"), p("Ne 1.5 bhiriyoni zvakare"));
+        assert_eq!(p("Ne $1.5bn zvakare"), p("Ne $1.5 bhiriyoni zvakare"));
+    }
+}

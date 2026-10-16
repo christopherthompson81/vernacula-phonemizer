@@ -360,6 +360,13 @@ export function normalizeXhosa(input: string): string {
     //     loan. Spelled `plas` and not `plus` because this orthography is phonemic and the attested vowel is
     //     [a] — `plus` would read pʼlˈuːs. The conventional isiXhosa spelling of the loan is unsourced; this
     //     one is chosen to reproduce the phones.
+    //     ⚠ `±` IS READ HERE, AND WAS DROPPED (#1593): no step claimed it, so `bu-±5` reached the engine with the
+    //     sign and read as a bare *five*, the one outcome this step exists to rule out. It takes zu's reading,
+    //     `plas o mayinas` (zu step 8c), the English loan said whole. zu's note that ± is "not free" for xh is
+    //     about composing it from xh's OWN words: the minus word here is *thabatha*, the verb "subtract", and
+    //     "plas thabatha" would read a tolerance as an operation. The loan avoids that, as `plas` does for `+`.
+    //     BEFORE the `+` arms, so its plus half is not claimed by them.
+    s = rewrite(s, /±/gu, " plas o mayinas ");
     s = rewrite(s, /(?<=[\p{L}\d])\+(?=\d)/gu, " plas ");
     s = rewrite(s, /(?<![\p{L}\p{M}\d])\+[ \u00a0]?(?=\d)/gu, "plas ");  // space, NBSP
     s = rewrite(s, /(?<![\p{L}\p{M}\d])(?<![\p{L}\p{M}][ \u00a0])[-−](?=\d)/gu, "thabatha ");  // space, NBSP

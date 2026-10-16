@@ -8,6 +8,7 @@ use std::sync::LazyLock;
 use super::numbers::N;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, js, js_number};
+use crate::core::markers::PUA_SENTINEL;
 use crate::core::normalize_symbols::{
     SymbolData, SymbolNormalizer, alternation, make_symbol_normalizer, sorted_by_length_desc,
 };
@@ -59,6 +60,20 @@ static CONCORD_REPAIR: LazyLock<JsRegex> = LazyLock::new(|| {
     let mags = sorted_by_length_desc(MAGNITUDES.iter().map(|m| js(m)));
     JsRegex::new(
         &format!("(tse[ \u{a0}]+(?:{}))[ \u{a0}]+(?=\\d)", alternation(&mags)),
+        "gu",
+    )
+    .unwrap()
+});
+
+/// A road number after `R` (#1593): a bare 1–3 digit integer with no separator and no magnitude word. Its `R` is
+/// hidden from the tier behind `PUA_SENTINEL` (step 8b) and restored after it.
+static ROAD_R: LazyLock<JsRegex> = LazyLock::new(|| {
+    let mags = sorted_by_length_desc(MAGNITUDES.iter().map(|m| js(m)));
+    JsRegex::new(
+        &format!(
+            "(?<![\\p{{L}}\\p{{M}}\\d])R(?=[ \u{a0}]?\\d{{1,3}}(?![\\d\\p{{L}}\\p{{M}}]|[.,]\\d)(?![ \u{a0}]*(?:{}|million|billion)(?![\\p{{L}}\\p{{M}}])))",
+            alternation(&mags)
+        ),
         "gu",
     )
     .unwrap()
@@ -154,6 +169,15 @@ pub fn normalize_sesotho(input: &JsString) -> JsString {
                 .concat(&js(&format!(" {mag}")))
         },
     );
+    // 5b — `bn` with no currency sign (#1593)
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\p{L}\p{M}\d.,])(\d[\d.,]*)bn(?![\p{L}\p{M}\d])",
+            "gu"
+        ),
+        |m, s| js("dibilione tse ").concat(&m.group(1, s).unwrap()),
+    );
 
     // 6, 6b
     s = rewrite(
@@ -194,8 +218,12 @@ pub fn normalize_sesotho(input: &JsString) -> JsString {
         &js("$1"),
     );
 
+    // 8b — a road number is not money (#1593)
+    s = rewrite(&s, &ROAD_R, &js(PUA_SENTINEL));
+
     // 9 — the shared tier, mid-pass
     s = symbols.apply(&s);
+    s = rewrite(&s, js_re!("\u{E000}", "gu"), &js("R"));
 
     // 10
     s = rewrite(&s, &CONCORD_REPAIR, &js("$1 tse "));

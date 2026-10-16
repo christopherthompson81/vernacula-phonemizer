@@ -352,3 +352,19 @@ mod tests {
         assert_eq!(count, 161);
     }
 }
+
+/// #1593, as test/sbantu-defects-1593.test.ts: `±` is read, not dropped. Relational, so no IPA is typed.
+#[cfg(test)]
+mod sbantu_defects_1593 {
+    use crate::phonemize;
+
+    #[test]
+    fn plus_minus_is_read() {
+        let p = |t: &str| phonemize(t, "xh").unwrap();
+        assert_eq!(
+            p("Ubushushu bu-±5 apha"),
+            p("Ubushushu bu- plas o mayinas 5 apha")
+        );
+        assert_ne!(p("±5"), p("5"));
+    }
+}
