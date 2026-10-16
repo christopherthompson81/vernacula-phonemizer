@@ -175,28 +175,60 @@ export function createEnglishG2p(
 
 
     // --- joint n-gram: stupid-backoff score + order matched (for the guessed-silence penalty) ---
-    function scoreTokAt(hist: string[], tok: string): [number, number] {
-        for (let o = order - 1; o >= 0; o--) {
-            const ctx = o === 0 ? "" : hist.slice(hist.length - o).join(" ");
-            const e = model.ngram[`${o}|${ctx}`];
-            // e.c stores the JOINT tokens `${letter}:${chunk}` (as trained), so match the full token.
+    //
+    // ⚠ THE DECODER IS THE OOV PATH'S WHOLE COST, so its inner loop allocates nothing it can avoid. Min Nan's
+    // Latin runs (place names: Ukraina, Lietuva) reach it through the English reader, and the straightforward
+    // form — a linear `find` over each context's candidates, the context strings rebuilt for every candidate
+    // chunk, and the full history and phone arrays copied into every candidate — spent ~14 ms a word
+    // (docs/investigations/nan/nan_csharp_perf_investigation.md, Run 4). Output is unchanged by construction.
+    type Ctx = { t: number; counts: Map<string, number> };
+    const ctxCache = new Map<string, Ctx | null>();
+    /** The context `key` as a lookup, built on first use. The FIRST occurrence of a token wins, as `find` did. */
+    function context(key: string): Ctx | null {
+        let c = ctxCache.get(key);
+        if (c === undefined) {
+            const e = model.ngram[key];
             if (e) {
-                const hit = e.c.find(([t]) => t === tok);
-                if (hit)
-                    return [
-                        Math.log(hit[1] / e.t) +
-                            (order - 1 - o) * Math.log(alpha),
-                        o,
-                    ];
-            }
+                const counts = new Map<string, number>();
+                for (const [t, n] of e.c) if (!counts.has(t)) counts.set(t, n);
+                c = { t: e.t, counts };
+            } else c = null;
+            ctxCache.set(key, c);
+        }
+        return c;
+    }
+    /** `hist`'s contexts, longest first (index `order - 1 - o` is order `o`). They depend only on the history,
+     *  so they are resolved once per hypothesis, not once per candidate chunk. */
+    function contexts(hist: string[]): (Ctx | null)[] {
+        const out: (Ctx | null)[] = [];
+        for (let o = order - 1; o >= 0; o--)
+            out.push(context(`${o}|${o === 0 ? "" : hist.slice(hist.length - o).join(" ")}`));
+        return out;
+    }
+    function scoreTokAt(ctxs: (Ctx | null)[], tok: string): [number, number] {
+        for (let o = order - 1; o >= 0; o--) {
+            // e.c stores the JOINT tokens `${letter}:${chunk}` (as trained), so match the full token.
+            const e = ctxs[order - 1 - o];
+            const n = e?.counts.get(tok);
+            if (n !== undefined) return [Math.log(n / e!.t) + (order - 1 - o) * Math.log(alpha), o];
         }
         return [Math.log(1e-7), -1];
     }
+    /** A hypothesis's phones: a chain back to the start, flattened once at the end. */
+    type Phones = { chunk: string[]; prev: Phones | null } | null;
+    function flatten(p: Phones): string[] {
+        const parts: string[][] = [];
+        for (; p; p = p.prev) parts.push(p.chunk);
+        return parts.reverse().flat();
+    }
+    /** The last `order - 1` tokens: all `contexts` ever reads. */
+    const keep = Math.max(order - 1, 0);
+    const window = (hist: string[]): string[] => (keep === 0 ? [] : hist.slice(-keep));
     function ngramDecode(w: string): string[] {
-        let beam = [
+        let beam: { hist: string[]; phones: Phones; score: number }[] = [
             {
-                hist: [START, START, START, START],
-                phones: [] as string[],
+                hist: window([START, START, START, START]),
+                phones: null,
                 score: 0,
             },
         ];
@@ -229,27 +261,36 @@ export function createEnglishG2p(
                       return last !== "S" && last !== "Z";
                   });
             const chunks = filtered.length > 0 ? filtered : raw;
-            const next: typeof beam = [];
+            // Per letter, not per hypothesis: each chunk's joint token and its phones.
+            const toks = chunks.map((ch) => `${c}:${ch}`);
+            const pieces = chunks.map((ch) => (ch ? ch.split(" ") : null));
+            // Scored first, built only if it survives: (score, hypothesis, chunk) in insertion order.
+            const next: { score: number; h: (typeof beam)[number]; k: number }[] = [];
             for (const h of beam) {
-                for (const chunk of chunks) {
-                    const [lp, ord] = scoreTokAt(h.hist, `${c}:${chunk}`);
+                const ctxs = contexts(h.hist);
+                for (let k = 0; k < chunks.length; k++) {
+                    const chunk = chunks[k]!;
+                    const [lp, ord] = scoreTokAt(ctxs, toks[k]!);
                     let s = h.score + lp;
                     if (chunk === "" && emptyPenalized && ord < evpOrder)
                         s -= evp;
                     if (chunk === "" && finalConsonant) s -= evp / 2;
-                    next.push({
-                        hist: [...h.hist, `${c}:${chunk}`],
-                        phones: chunk
-                            ? [...h.phones, ...chunk.split(" ")]
-                            : h.phones,
-                        score: s,
-                    });
+                    next.push({ score: s, h, k });
                 }
             }
+            // ⚠ A STABLE sort (Array.prototype.sort is): equal scores keep insertion order, which the C# and Rust
+            // ports mirror, so the surviving hypothesis on a tie is the same everywhere.
             next.sort((a, b) => b.score - a.score);
-            beam = next.slice(0, BEAM);
+            beam = next.slice(0, BEAM).map(({ score, h, k }) => {
+                const ps = pieces[k];
+                return {
+                    hist: window([...h.hist, toks[k]!]),
+                    phones: ps ? { chunk: ps, prev: h.phones } : h.phones,
+                    score,
+                };
+            });
         }
-        return beam[0]!.phones;
+        return flatten(beam[0]!.phones);
     }
 
     // --- morphology: known-stem + inflectional suffix → dict stem + voicing-agreeing allomorph ---

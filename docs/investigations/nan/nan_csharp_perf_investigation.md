@@ -66,5 +66,31 @@ What's left: `NgramDecode` is no longer near the top of the profile. `CreateEngl
 With `nan` no longer the floor, 8 jobs now beat 4 clearly. The machine's load average was about 9–10 during
 the 8-job run, so treat that time as rough.
 
-Not done: TS has the same per-candidate context rebuild and linear `find`. Min Nan's TS run is 12.7 s, so the
-same change there would likely help too, but it wasn't measured.
+## Run 4 — 2026-10-16 11:10 — the same fix in TypeScript
+
+TS had the same shape: a linear `e.c.find` per context, context strings rebuilt per candidate chunk, and the history
+and phone arrays copied into every candidate. I applied the same four changes:
+- a lazy per-context `Map`, first occurrence wins;
+- contexts resolved once per hypothesis;
+- a history window and a phone chain;
+- objects built only for the beam survivors, after the same stable sort.
+
+**Instrument:** a scratch bench that constructs `createEnglishG2p` exactly as `rust/tools/fn-diff/dump.mts` does and
+times `g2p()` over a word list, warm, median of 5.
+
+| word list | before | after |
+|---|---|---|
+| the 604 decoder inputs logged in Run 3 | 8,726 ms per pass (~14 ms a word) | **606 ms** (14×) |
+
+**Outputs, before against after:**
+- the 604 Min Nan words: identical;
+- 20,000 constructed OOV words (every 7th lexicon word + `-ing`/`-s`/doubled `-er`/a glued pair, the fn-diff
+  recipe): identical, `cmp` on the full output.
+
+⚠ The first 20,000-word attempt timed 6 passes of the *old* decoder, which needs about 30 minutes. I stopped it
+after its fingerprint pass had already been written, and compared one pass of the new decoder against that.
+
+**`tools/check-goldens.mts nan`:** 12.7–22.4 s before (noisy, under other load), 5.8–7.6 s after.
+
+**Gates:** all green. One TS failure in the first run, `trace-token-source` "#1452 IS FIXED", which goes through the
+ONNX tagger path that this change doesn't touch. It passed alone and in a full rerun (7224/7224).
