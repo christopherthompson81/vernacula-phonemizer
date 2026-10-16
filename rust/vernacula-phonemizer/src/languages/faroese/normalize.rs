@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 
 use crate::core::boundaries::NOT_LETTER_BEFORE;
 use crate::core::js_regex::{JsMatch, JsRegex};
-use crate::core::js_string::{JsString, js};
+use crate::core::js_string::{JsString, js, js_number, js_number_to_string};
 use crate::core::provenance::{rewrite, rewrite_with};
 use crate::js_re;
 
@@ -33,10 +33,70 @@ static ABBREV: LazyLock<Vec<(JsRegex, &'static str)>> = LazyLock::new(|| {
     .collect()
 });
 
+/// The month names, in the spelling of `tools/corpus/mined/fo.jsonc` (each attested there).
+const MONTHS: [&str; 12] = [
+    "januar",
+    "februar",
+    "mars",
+    "apríl",
+    "mai",
+    "juni",
+    "juli",
+    "august",
+    "september",
+    "oktober",
+    "november",
+    "desember",
+];
+
+/// The clock after `kl.`/`klokkan`: `NOT_LETTER_BEFORE` inside the lookbehind, as the TS builds it.
+static CLOCK_MARKED: LazyLock<JsRegex> = LazyLock::new(|| {
+    JsRegex::new(
+        &format!(r"(?<={NOT_LETTER_BEFORE}(?:kl\.|klokkan)\s?)([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)"),
+        "giu",
+    )
+    .unwrap()
+});
+
 /// `normalizeFaroese(input)`.
 pub fn normalize_faroese(input: &JsString) -> JsString {
     let g = |m: &JsMatch, s: &JsString, i: usize| m.group(i, s).unwrap_or_default();
     let mut s = input.clone();
+
+    // The dotted date (#1574), before the time rule and the decimal dot.
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})(?![\d]|[.,]\d)",
+            "gu"
+        ),
+        |m, w| {
+            let (day, month) = (js_number(&g(m, w, 1)), js_number(&g(m, w, 2)));
+            if (1.0..=31.0).contains(&day) && (1.0..=12.0).contains(&month) {
+                js(&format!(
+                    "{} {} {}",
+                    js_number_to_string(day),
+                    MONTHS[month as usize - 1],
+                    g(m, w, 3).to_string_lossy()
+                ))
+            } else {
+                m.value(w)
+            }
+        },
+    );
+
+    // The clock after `kl.`/`klokkan` (#1574), before the decimal dot folds it onto the comma.
+    s = rewrite_with(&s, &CLOCK_MARKED, |m, w| {
+        let (h, mm) = (g(m, w, 1).to_string_lossy(), g(m, w, 2).to_string_lossy());
+        let mins = if mm == "00" {
+            "null null".to_string()
+        } else if let Some(rest) = mm.strip_prefix('0') {
+            format!("null {rest}")
+        } else {
+            mm
+        };
+        js(&format!("{h} {mins}"))
+    });
 
     s = rewrite(
         &s,

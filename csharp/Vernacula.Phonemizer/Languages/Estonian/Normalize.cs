@@ -215,6 +215,11 @@ public static class Normalize
     private static readonly JsRe CLOCK_MARKED =
         JsRegex.Compile("(?<=\\bkell[ao]?\\s)([01]?\\d|2[0-3])[.:]([0-5]\\d)(?![\\d]|[.,:]\\d)", "giu");
 
+    /** THE MINUTES KEEP THEIR ZERO (#1574): `08` → *null kaheksa*, `00` → *null null*, as the Finnish sibling's
+     *  `minutes()` reads them. `null` is `numbers.units[0]` in estonian.jsonc. */
+    private static string ClockMinutes(string mm) =>
+        mm == "00" ? "null null" : mm.StartsWith('0') ? $"null {mm[1..]}" : mm;
+
     private static readonly JsRe DEGROUP = JsRegex.Compile(
         "(?<![\\d.,])([1-9]\\d{0,2})((?:[ \\u00a0\\u202f\\u2009]\\d{3})+)(?!\\d)", "gu");  // space, NBSP, NNBSP, thin
     private static readonly JsRe SPACES = JsRegex.Compile("[ \\u00a0\\u202f\\u2009]", "gu");
@@ -248,7 +253,7 @@ public static class Normalize
 
     public static string NormalizeEstonian(string input)
     {
-        input = Rewrite(input, CLOCK_MARKED, "$1 $2");
+        input = Rewrite(input, CLOCK_MARKED, m => $"{m.Groups[1].Value} {ClockMinutes(m.Groups[2].Value)}");
         var t = input;
 
         t = Rewrite(t, DEGROUP, m => $"{m.Groups[1].Value}{SPACES.Replace(m.Groups[2].Value, "")}");

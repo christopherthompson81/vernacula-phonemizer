@@ -141,4 +141,12 @@ public class EstonianTests
 
     [Fact]
     public void RegistryWiring() => Assert.Equal("ˈeːsti", Phonemizer.Phonemize("Eesti", "et").Trim());
+
+    // #1574 — the marked clock's minutes keep their zero (synthetic probes).
+    [Theory]
+    [InlineData("kell 22:08 algas", "kell 22 null 8 algas")]
+    [InlineData("kell 10:00 algas", "kell 10 null null algas")]
+    [InlineData("kell 7.05-ks", "kell 7 null 5-ks")]
+    [InlineData("kell 22.30 algas", "kell 22 30 algas")]
+    public void Issue1574ClockMinutesKeepTheirZero(string input, string want) => Assert.Equal(want, Norm(input));
 }

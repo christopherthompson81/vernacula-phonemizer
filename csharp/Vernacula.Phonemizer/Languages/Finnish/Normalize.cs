@@ -179,9 +179,11 @@ public static class Normalize
 
     /** ⚠ THE GATE IS RIGHT AND ITS ADJACENCY WAS TOO TIGHT (#1114) — these two arms add CONTEXT the marker
      *  already licensed; they do not widen the marker. The sports times are still rejected by the `(?![\d.,])`
-     *  tail, not by the marker, which is what makes the widening free. See the TS for the FLEURS counts. */
+     *  tail, not by the marker, which is what makes the widening free. See the TS for the FLEURS counts.
+     *  ⚠ THE JOINER IS `ja` OR A DASH (#1574): `klo 6.30–7.30` is the commoner written range, and its right
+     *  operand kept the sentence break this arm exists to remove. The dash is kept as written. */
     private static readonly JsRe CLOCK_RANGE = JsRegex.Compile(
-        "(?<=(?:kello|klo\\.?)\\s)(\\d{1,2})[.:](\\d{2})(\\s+ja\\s+)(\\d{1,2})[.:](\\d{2})(?![\\d.,])", "giu");
+        "(?<=(?:kello|klo\\.?)\\s)(\\d{1,2})[.:](\\d{2})(\\s+ja\\s+|\\s*[–—-]\\s*)(\\d{1,2})[.:](\\d{2})(?![\\d.,])", "giu");
     private static readonly JsRe CLOCK_PAREN = JsRegex.Compile(
         "(?<=\\()(\\d{1,2})[.:](\\d{2})(?=\\s+(?:UTC|GMT|EET|EEST|koordinoitua)(?![\\p{L}\\p{M}]))", "giu");
 
@@ -203,7 +205,10 @@ public static class Normalize
     private static readonly JsRe APOSTROPHE_GENITIVE =
         JsRegex.Compile("(?<=[bcdfghjklmnpqrstvwxz])['’](?=[a-zåäö]{1,4}(?![\\p{L}\\p{M}]))", "giu");
 
-    private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(\\d),(\\d+)(?!\\d)", "gu");
+    /** ⚠ A RUN WITH TWO OR MORE COMMAS IS A LIST, NOT A DECIMAL (#1574): `1,2,3` read as `1 pilkku 2` and then a
+     *  pause. A following `,ddd` group is not a list item: `1,000,000` keeps the reading it had. See the TS. */
+    private static readonly JsRe DECIMAL_COMMA =
+        JsRegex.Compile("(?<!\\d,\\d*)(\\d),(\\d+)(?!\\d)(?!,\\d(?!\\d\\d(?!\\d)))", "gu");
 
     private static readonly JsRe DEG_C_SIGN = JsRegex.Compile("℃", "gu");
     private static readonly JsRe DEG_F_SIGN = JsRegex.Compile("℉", "gu");

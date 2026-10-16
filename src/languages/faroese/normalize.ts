@@ -48,8 +48,34 @@ import { NOT_LETTER_AFTER, NOT_LETTER_BEFORE } from "../../core/boundaries.ts";
 /** ⚠ NEVER `\b` — Faroese carries `á í ó ú ý æ ø ð`, which `\b` treats as boundaries (trap 1/23). */
 /** Normalize one Faroese input string. Pure text→text. Steps are ORDER-DEPENDENT — the five jobs of the
  *  full stop are resolved from the most constrained shape to the least. */
+/** The month names, in the spelling of `tools/corpus/mined/fo.jsonc` (each attested there). */
+const MONTHS = [
+    "januar", "februar", "mars", "apríl", "mai", "juni",
+    "juli", "august", "september", "oktober", "november", "desember",
+] as const;
+
 export function normalizeFaroese(input: string): string {
     let s = input;
+
+    // 0) THE DOTTED DATE (#1574), before the time rule and the decimal dot, both of which claimed it:
+    //    `23.4.2020` read *23 komma 4* and a sentence break, and `12.10.20` passed the time rule as three
+    //    cardinals. A middle field of 1–12 is a month and the day is 1–31; the time rule's middle field is a
+    //    minute, and its one corpus instance (`23.59.60`) has 59 there, so it still reaches step 1. The month
+    //    is named in the corpus's own spelling (all twelve are attested in `tools/corpus/mined/fo.jsonc`), and
+    //    the day stays a figure, as step 5 leaves `1. juli`'s.
+    s = rewrite(s, /(?<![\d.,])(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})(?![\d]|[.,]\d)/gu,
+        (m, d: string, mo: string, y: string) => {
+            const day = Number(d), month = Number(mo);
+            return day >= 1 && day <= 31 && month >= 1 && month <= 12 ? `${day} ${MONTHS[month - 1]!} ${y}` : m;
+        });
+
+    // 0b) THE CLOCK AFTER `kl.`/`klokkan` (#1574), before the decimal dot (step 3) folds `14.30` onto the
+    //    decimal comma. The marker is what licenses it, as in the Estonian and Finnish siblings: a bare
+    //    `d.dd` is a dollar figure in this corpus (step 3). The separator becomes a space and the minutes
+    //    keep their zero, `05` → *null 5*.
+    s = rewrite(s, new RegExp(`(?<=${NOT_LETTER_BEFORE}(?:kl\\.|klokkan)\\s?)([01]?\\d|2[0-3])[.:]([0-5]\\d)(?![\\d]|[.,:]\\d)`, "giu"),
+        (_m, h: string, mm: string) =>
+            `${h} ${mm === "00" ? "null null" : mm.startsWith("0") ? `null ${mm.slice(1)}` : mm}`);
 
     // 1) THE TIME, first, because `23.59.60` is the only shape with TWO dots and the grouping rule would
     //    otherwise take its first pair. One instance and it is the leap second — "Eitt eyka sekund,

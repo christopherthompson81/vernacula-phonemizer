@@ -645,18 +645,31 @@ function clauseWindow(full: string, start: number, end: number): string {
  * ⚠ AND THE MARKER IS NOT A PRECAUTION: `21:20` in this same corpus is a SPORTS SCORE
  * (*ühepunktiline võit, 21:20* — "a one-point win"), and `802.11a/b/n` is a Wi-Fi designation. A bare
  * separator rule would claim both.
- * ⚠ NO WORD IS EMITTED. `kell` is already written; what this removes is the CLAUSE PAUSE the colon was and
- * the SENTENCE BREAK the full stop of `8.46` was taking mid-figure.
+ * ⚠ NO HOUR WORD IS EMITTED. `kell` is already written; what this removes is the CLAUSE PAUSE the colon was
+ * and the SENTENCE BREAK the full stop of `8.46` was taking mid-figure. The minutes' zero is the one word it
+ * adds (`clockMinutes`, #1574).
  * ⚠ THE TRAILING GUARD REJECTS A DIGIT OR A SEPARATOR THAT CONTINUES THE NUMBER, NOT A CLAUSE MARK. Written
  * as `(?![\d.,:])` it declined every clock that ENDS A CLAUSE — `kusaawa 11:29,` and `ssaawa 11:00,` came
  * back untouched, which is trap 58 and is how half the marked instances were being missed.
  */
 const CLOCK_MARKED = /(?<=\bkell[ao]?\s)([01]?\d|2[0-3])[.:]([0-5]\d)(?![\d]|[.,:]\d)/giu;
 
+/**
+ * THE MINUTES KEEP THEIR ZERO (#1574). `08` reached the number path as a bare figure and lost its leading
+ * zero (`kell 22:08` spoken as 22:8), and `00` read as a single *null*. A clock reads its minutes digit by
+ * digit, as the Finnish sibling's `minutes()` does: `08` → *null kaheksa*, `00` → *null null*. `null` is
+ * `numbers.units[0]` in estonian.jsonc.
+ */
+function clockMinutes(mm: string): string {
+    if (mm === "00") return "null null";
+    if (mm.startsWith("0")) return `null ${mm.slice(1)}`;
+    return mm;
+}
+
 export function normalizeEstonian(input: string): string {
     // 0) THE MARKED CLOCK loses the separator's pause — see CLOCK_MARKED. First, because the ordinal and
     //    decimal rules below both read a dot and would spend `8.46`'s before this could see it.
-    input = rewrite(input, CLOCK_MARKED, "$1 $2");
+    input = rewrite(input, CLOCK_MARKED, (_m, h: string, mm: string) => `${h} ${clockMinutes(mm)}`);
     let t = input;
 
     // 1) SPACE-GROUPED THOUSANDS (31,010 whole-corpus; 48 in the retained text), FIRST — a space is a token

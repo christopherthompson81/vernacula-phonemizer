@@ -7,7 +7,7 @@ use std::sync::LazyLock;
 
 use super::manifest::MANIFEST;
 use crate::core::js_regex::{JsMatch, JsRegex};
-use crate::core::js_string::{JsString, js};
+use crate::core::js_string::{JsString, js, js_number};
 use crate::core::provenance::{escape, rewrite, rewrite_with};
 use crate::js_re;
 
@@ -77,12 +77,33 @@ pub fn normalize_icelandic(input: &JsString) -> JsString {
         }
     }
 
+    // An English-grouped thousand, the whole number at once (#1574).
+    t = rewrite_with(
+        &t,
+        js_re!(r"(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)", "gu"),
+        |m, s| g(m, s, 1).concat(&js_re!(",", "gu").replace(&g(m, s, 2), &JsString::new())),
+    );
+
     t = rewrite_with(&t, js_re!(r"(\d+),(\d+)", "gu"), |m, s| {
         let frac = JsString::join(&g(m, s, 2).code_point_strings(), &js(" "));
         g(m, s, 1).concat(&js(" komma ")).concat(&frac)
     });
 
-    t = rewrite(&t, js_re!(r"(\d{1,2}):(\d{2})(?!\d)", "gu"), &js("$1 $2"));
+    // Anchored on the left, and the minutes keep their zero (#1574).
+    t = rewrite_with(
+        &t,
+        js_re!(r"(?<!\d)(\d{1,2}):(\d{2})(?!\d)", "gu"),
+        |m, s| {
+            let (h, mm) = (g(m, s, 1).to_string_lossy(), g(m, s, 2).to_string_lossy());
+            js(&if mm == "00" {
+                format!("{h} núll núll")
+            } else if let Some(rest) = mm.strip_prefix('0') {
+                format!("{h} núll {rest}")
+            } else {
+                format!("{h} {mm}")
+            })
+        },
+    );
 
     t = rewrite(&t, js_re!(r"(\d+)\s*%", "gu"), &js("$1 prósent"));
     t = rewrite(
@@ -156,13 +177,21 @@ pub fn normalize_icelandic(input: &JsString) -> JsString {
         },
     );
 
-    t = rewrite(
+    t = rewrite_with(
         &t,
         js_re!(
             r"(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)",
             "gu"
         ),
-        &js("$1 til $2"),
+        // Ascending only (#1574): a descending pair is a score.
+        |m, s| {
+            let (a, b) = (g(m, s, 1), g(m, s, 2));
+            if js_number(&a) < js_number(&b) {
+                a.concat(&js(" til ")).concat(&b)
+            } else {
+                m.value(s)
+            }
+        },
     );
 
     for (before, after, rep) in CURRENCY_RES.iter() {

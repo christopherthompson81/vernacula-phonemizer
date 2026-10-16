@@ -459,6 +459,48 @@ mod tests {
             &["Noin 11.29 protesti"],
             Some("Noin 11.29 protesti"),
         ),
+        // #1574 (synthetic probes; values from the TS engine)
+        (
+            "normalizeFinnish",
+            &["klo 6.30–7.30 välillä"],
+            Some("klo 6 30–7 30 välillä"),
+        ),
+        (
+            "normalizeFinnish",
+            &["klo 6.30 - 7.30"],
+            Some("klo 6 30 - 7 30"),
+        ),
+        (
+            "normalizeFinnish",
+            &["klo 6.30 ja 7.30 välillä"],
+            Some("klo 6 30 ja 7 30 välillä"),
+        ),
+        (
+            "normalizeFinnish",
+            &["klo 6.30–25.30"],
+            Some("klo 6 30–25.30"),
+        ),
+        (
+            "normalizeFinnish",
+            &["Arvot 1,2,3 ja 4."],
+            Some("Arvot 1,2,3 ja 4."),
+        ),
+        ("normalizeFinnish", &["Arvot 1,25,3"], Some("Arvot 1,25,3")),
+        (
+            "normalizeFinnish",
+            &["luku 3,14 ja 2,5"],
+            Some("luku 3 pilkku 1 4 ja 2 pilkku 5"),
+        ),
+        (
+            "phonemize",
+            &["klo 6.30–7.30 välillä", "fi"],
+            Some("klo kuːsi kolmekymːentæ sei̯tsemæn kolmekymːentæ ʋælilːæ"),
+        ),
+        (
+            "phonemize",
+            &["Arvot 1,2,3 ja 4.", "fi"],
+            Some("ɑrʋot yksi , kɑksi , kolme jɑ neljæ ."),
+        ),
     ];
 
     #[test]

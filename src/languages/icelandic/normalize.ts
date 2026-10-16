@@ -143,13 +143,28 @@ export function normalizeIcelandic(input: string): string {
         t = rewrite(t, /(?<=\d)(?<!(?<![\d\.,])0)\.(?=\d{3}(?!\d))/gu, "");
     } while (t !== prev);
 
+    // 1b) AN ENGLISH-GROUPED THOUSAND (#1574). `100,000 manns` read as *hundrað komma núll núll núll*: the
+    //    comma followed by exactly three digits is the English convention leaking through translated text,
+    //    as the Hungarian sibling found (`hungarian/normalize.ts` step 2). FLEURS has none in is_is; across
+    //    its comma-decimal siblings every `\d{1,3},\d{3}` is a thousand (hu 4, sv 9, nb 5) and none is a
+    //    three-place decimal. A `0` is never a group's head (`0,500` stays a decimal), and the WHOLE number is
+    //    taken at once, as Faroese step 2 does: a per-comma rule whose guard refuses a following `,\d` cannot
+    //    de-group `5,000,000`, because every comma but the last has another group after it.
+    t = rewrite(t, /(?<![\d.,])([1-9]\d{0,2})((?:,\d{3})+)(?![\d]|,\d)/gu,
+        (_m, head: string, rest: string) => head + rest.replace(/,/gu, ""));
+
     // 2) DECIMAL COMMA (8). The comma is clause punctuation too, so `12,5` read as a PAUSE inside a
     //    number. Fractional part spoken digit by digit.
     t = rewrite(t, /(\d+),(\d+)/gu, (_m, whole: string, frac: string) =>
         `${whole} komma ${[...frac].join(" ")}`);
 
     // 3) CLOCK, COLON FORM ONLY (10). The period form is a decimal here — see the header.
-    t = rewrite(t, /(\d{1,2}):(\d{2})(?!\d)/gu, "$1 $2");
+    //    ⚠ ANCHORED ON THE LEFT, AND THE MINUTES KEEP THEIR ZERO (#1574). Without `(?<!\d)` the rule took the
+    //    tail of `123:45` as an hour (*hundrað tuttugu og þrír fjörutíu og fimm*), and `9:05` reached the
+    //    number path as `05`, which drops the zero (09:05 spoken as 9:5). The minutes read digit by digit,
+    //    as the Finnish sibling's `minutes()` does: `05` → *núll 5*, `00` → *núll núll*.
+    t = rewrite(t, /(?<!\d)(\d{1,2}):(\d{2})(?!\d)/gu, (_m, h: string, mm: string) =>
+        mm === "00" ? `${h} núll núll` : mm.startsWith("0") ? `${h} núll ${mm.slice(1)}` : `${h} ${mm}`);
 
     // 4) PERCENT (2) and DEGREES. Postposed.
     t = rewrite(t, /(\d+)\s*%/gu, "$1 prósent");
@@ -192,7 +207,10 @@ export function normalizeIcelandic(input: string): string {
     });
 
     // 8) RANGES (12). Spoken `til`.
-    t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, "$1 til $2");
+    //    ⚠ ASCENDING ONLY (#1574), as the Estonian sibling's range rule is. A descending pair is a score —
+    //    both of FLEURS is_is's descending pairs are match results — and *fimm til þrír* reads it as a span.
+    t = rewrite(t, /(?<![-–—])(\d+)\s*[-–—]\s*(\d+)(?!\d)(?!\s*[-–—]\s*\d)/gu, (m, a: string, b: string) =>
+        Number(a) < Number(b) ? `${a} til ${b}` : m);
 
     // 9) CURRENCY, both placements.
     for (const [sign, word] of Object.entries(CURRENCY)) {

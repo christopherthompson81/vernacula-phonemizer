@@ -348,12 +348,13 @@ describe("Estonian — the end-to-end orderings that only the real phonemizer ca
 // ─────────────────────────────────────────────────────────────────────────────────────────────────────
 // #1102 — the marked clock loses the separator's pause. This layer had no clock rule AND no refusal,
 // because the mined artifact gave it nothing to decide; FLEURS `et_ee` has 13 true clocks and 10 carry
-// `kell`/`kella` in front. NO WORD IS EMITTED — the hour noun is already written.
+// `kell`/`kella` in front. The hour noun is already written; the only word emitted is the minutes' zero
+// (#1574).
 describe("a marked clock keeps its pause off (#1102)", () => {
     test.each([
         ["Kell 11.20 palus politsei", "Kell 11 20 palus politsei"],
         ["Kella 11.29 paiku liikus", "Kella 11 29 paiku liikus"],
-        ["kell 22:08 mõõdukas", "kell 22 08 mõõdukas"],
+        ["kell 22:08 mõõdukas", "kell 22 null 8 mõõdukas"], // the minute keeps its zero (#1574)
         ["kella 11.35-ks.", "kella 11 35-ks."],          // ⚠ clause-final: the guard must not reject a `,`/`.`
     ])("%s", (a, b) => expect(normalizeEstonian(a)).toBe(b));
 
@@ -363,4 +364,14 @@ describe("a marked clock keeps its pause off (#1102)", () => {
         expect(normalizeEstonian("Standard 802.11n toimib")).toBe("Standard 802.11n toimib");
         expect(normalizeEstonian("6.30 ja 7.30 vahel")).toBe("6.30 ja 7.30 vahel"); // unmarked range
     });
+});
+
+// #1574 — the marked clock's minutes keep their zero (synthetic probes).
+describe("#1574: a marked clock reads its minutes' zero", () => {
+    test.each([
+        ["kell 22:08 algas", "kell 22 null 8 algas"],
+        ["kell 10:00 algas", "kell 10 null null algas"],
+        ["kell 7.05-ks", "kell 7 null 5-ks"],
+        ["kell 22.30 algas", "kell 22 30 algas"],
+    ])("%s", (a, b) => expect(normalizeEstonian(a)).toBe(b));
 });

@@ -151,4 +151,19 @@ public class FaroeseTests
     // …and above 1e21, where String(n) is exponent form, every digit is still read.
     public void AboveOneETwentyOneEveryDigitIsStillRead() =>
         Assert.Equal(22, Words("1000000000000000000000").Length);
+
+    // #1574 — the clock after kl., the dotted date (synthetic probes).
+    [Theory]
+    [InlineData("kl. 14.30 í dag", "klokkan 14 30 í dag")]
+    [InlineData("klokkan 10.00", "klokkan 10 null null")]
+    [InlineData("klokkan 9.05", "klokkan 9 null 5")]
+    [InlineData("3.00 kr", "3,00 kr")]
+    [InlineData("Hann kom 23.4.2020 heim", "Hann kom 23 apríl 2020 heim")]
+    [InlineData("Føddur 12.10.20 í Havn", "Føddur 12 oktober 20 í Havn")]
+    [InlineData("sekund 23.59.60 verður", "sekund 23 59 60 verður")]
+    public void Issue1574(string input, string want) => Assert.Equal(want, Norm(input));
+
+    [Fact]
+    public void Issue1574DateHasNoSentenceBreak() =>
+        Assert.DoesNotContain(" . ", Phonemizer.Phonemize("Hann kom 23.4.2020 heim", "fo"));
 }

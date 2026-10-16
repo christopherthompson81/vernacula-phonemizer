@@ -162,7 +162,7 @@ public class IcelandicTests
     // Period-grouped thousands, decimal comma, colon clock.
     [InlineData("1.234", "1234")]
     [InlineData("12,5", "12 komma 5")]
-    [InlineData("11:00", "11 00")]
+    [InlineData("11:00", "11 núll núll")] // the minutes keep their zero (#1574)
     public void GroupingDecimalAndClock(string input, string want) => Assert.Equal(want, Norm(input));
 
     [Theory]
@@ -241,4 +241,20 @@ public class IcelandicTests
     [InlineData("¥5", "5 jen")]
     [InlineData("5 ¥", "5 jen")]
     public void EveryCurrencySignEscapesToItself(string input, string want) => Assert.Equal(want, Norm(input));
+
+    // #1574 — the colon clock, an English-grouped thousand, a descending pair (synthetic probes).
+    [Theory]
+    [InlineData("123:45 var", "123:45 var")]
+    [InlineData("klukkan 9:05", "klukkan 9 núll 5")]
+    [InlineData("klukkan 10:00", "klukkan 10 núll núll")]
+    [InlineData("klukkan 9:30", "klukkan 9 30")]
+    [InlineData("Um 100,000 manns", "Um 100000 manns")]
+    [InlineData("Um 5,000,000 manns", "Um 5000000 manns")]
+    [InlineData("Um 100,000, sagði hann", "Um 100000, sagði hann")]
+    [InlineData("0,500", "0 komma 5 0 0")]
+    [InlineData("1,2345", "1 komma 2 3 4 5")]
+    [InlineData("Leikurinn fór 3-2", "Leikurinn fór 3-2")]
+    [InlineData("jafntefli 2-2", "jafntefli 2-2")]
+    [InlineData("árin 1990-1995", "árin 1990 til 1995")]
+    public void Issue1574(string input, string want) => Assert.Equal(want, Norm(input));
 }
