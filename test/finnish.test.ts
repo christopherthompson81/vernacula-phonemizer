@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { phonemizeWord, createFinnish } from "../src/languages/finnish/finnish.ts";
-import { normalizeFinnish, ordinal } from "../src/languages/finnish/normalize.ts";
+import { normalizeFinnish, ordinal, ordinalCaseBefore } from "../src/languages/finnish/normalize.ts";
 import { phonemize } from "../src/index.ts";
 
 // Finnish (fi) — Uralic (Finnic), Latin, one of the most PHONEMICALLY TRANSPARENT orthographies in the world. Greedy
@@ -257,5 +257,63 @@ describe("#1574: a dashed clock range and a comma list", () => {
         expect(phonemize("Arvot 1,2,3 ja 4.", "fi")).toBe(phonemize("Arvot 1, 2, 3 ja 4.", "fi"));
         // a one-comma decimal is still a decimal
         expect(normalizeFinnish("luku 3,14 ja 2,5")).toBe("luku 3 pilkku 1 4 ja 2 pilkku 5");
+    });
+});
+
+/**
+ * #1574: an `N.` ordinal agrees in case with the word after it. The expected forms are en.wiktionary's declension
+ * tables (kolmas, yhdestoista, ensimmäinen, kahdeskymmenes), and the case rules are the ones measured over fiwiki in
+ * docs/investigations/fi/fi_ordinal_case_investigation.md. All inputs are synthetic.
+ */
+describe("#1574: an N. ordinal takes the case of the word after it", () => {
+    test("the paradigm: every component inflects, -toista never does", () => {
+        expect(ordinal(3, "gen")).toBe("kolmannen");
+        expect(ordinal(3, "par")).toBe("kolmatta");
+        expect(ordinal(3, "ill")).toBe("kolmanteen");
+        expect(ordinal(3, "ess")).toBe("kolmantena");
+        expect(ordinal(1, "ine")).toBe("ensimmäisessä");
+        expect(ordinal(2, "gen")).toBe("toisen");
+        expect(ordinal(11, "ine")).toBe("yhdennessätoista");
+        expect(ordinal(20, "gen")).toBe("kahdennenkymmenennen");
+        expect(ordinal(21, "gen")).toBe("kahdennenkymmenennenensimmäisen");
+        expect(ordinal(126, "gen")).toBe("sadannenkahdennenkymmenennenkuudennen");
+        expect(ordinal(3)).toBe("kolmas"); // the nominative is unchanged
+    });
+
+    test("the case is read from the following word's ending", () => {
+        expect(ordinalCaseBefore("kerran")).toBe("gen");
+        expect(ordinalCaseBefore("päivänä")).toBe("ess");
+        expect(ordinalCaseBefore("sijalla")).toBe("ade");
+        expect(ordinalCaseBefore("päivään")).toBe("ill");
+        expect(ordinalCaseBefore("vaiheen")).toBe("gen"); // e-stem genitive, not an illative
+        expect(ordinalCaseBefore("kaudellaan")).toBe("ade"); // adessive + possessive
+        expect(ordinalCaseBefore("kertaa")).toBe("par");
+        // the refusals: these say nothing, so the ordinal stays nominative
+        for (const w of ["toukokuuta", "sija", "divisioona", "suomalainen", "vasemmalta", "maailmansota", "kerta"]) {
+            expect(ordinalCaseBefore(w), w).toBe("nom");
+        }
+    });
+
+    test("a digit ordinal reads as the spelled-out agreeing one", () => {
+        for (const [digits, words] of [
+            ["Hän voitti 2. kerran.", "Hän voitti toisen kerran."],
+            ["Se oli 3. sijalla.", "Se oli kolmannella sijalla."],
+            ["kuun 28. päivänä", "kuun kahdentenakymmenentenäkahdeksantena päivänä"],
+            ["20.–24. päivänä", "kahdentenakymmenentenä kahdentenakymmenentenäneljäntenä päivänä"],
+        ]) {
+            expect(phonemize(digits!, "fi"), digits).toBe(phonemize(words!, "fi"));
+        }
+        // a date, a nominative noun and a sentence end are as before
+        expect(phonemize("13. toukokuuta", "fi")).toBe(phonemize("kolmastoista toukokuuta", "fi"));
+        expect(phonemize("15. sija", "fi")).toBe(phonemize("viidestoista sija", "fi"));
+        expect(normalizeFinnish("vuonna 1978. Jakokoski")).toContain("1978.");
+    });
+
+    test("an oblique ordinal colon suffix names its own case", () => {
+        expect(phonemize("9:nnen kerran", "fi")).toBe(phonemize("yhdeksännen kerran", "fi"));
+        expect(phonemize("11:nneksi", "fi")).toBe(phonemize("yhdenneksitoista", "fi"));
+        // a cardinal suffix and the plural are not ordinal endings, so they keep the old refusal
+        expect(normalizeFinnish("850:n")).toBe(normalizeFinnish("850n"));
+        expect(normalizeFinnish("1:sten")).toBe(normalizeFinnish("1sten"));
     });
 });

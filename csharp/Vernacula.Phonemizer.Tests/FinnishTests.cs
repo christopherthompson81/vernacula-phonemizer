@@ -174,4 +174,56 @@ public class FinnishTests
         Assert.DoesNotContain(" . ", Say("klo 6.30–7.30 välillä"));
         Assert.Equal(Say("Arvot 1, 2, 3 ja 4."), Say("Arvot 1,2,3 ja 4."));
     }
+
+    // ── #1574: an N. ordinal takes the case of the word after it (synthetic; forms from en.wiktionary) ──
+
+    [Theory]
+    [InlineData(3, FiNormalize.OrdCase.Gen, "kolmannen")]
+    [InlineData(3, FiNormalize.OrdCase.Par, "kolmatta")]
+    [InlineData(3, FiNormalize.OrdCase.Ill, "kolmanteen")]
+    [InlineData(1, FiNormalize.OrdCase.Ine, "ensimmäisessä")]
+    [InlineData(2, FiNormalize.OrdCase.Gen, "toisen")]
+    [InlineData(11, FiNormalize.OrdCase.Ine, "yhdennessätoista")]
+    [InlineData(20, FiNormalize.OrdCase.Gen, "kahdennenkymmenennen")]
+    [InlineData(21, FiNormalize.OrdCase.Gen, "kahdennenkymmenennenensimmäisen")]
+    [InlineData(126, FiNormalize.OrdCase.Gen, "sadannenkahdennenkymmenennenkuudennen")]
+    [InlineData(3, FiNormalize.OrdCase.Nom, "kolmas")]
+    public void OrdinalParadigm1574(int n, FiNormalize.OrdCase c, string want) =>
+        Assert.Equal(want, FiNormalize.Ordinal(n, c));
+
+    [Theory]
+    [InlineData("kerran", FiNormalize.OrdCase.Gen)]
+    [InlineData("päivänä", FiNormalize.OrdCase.Ess)]
+    [InlineData("sijalla", FiNormalize.OrdCase.Ade)]
+    [InlineData("päivään", FiNormalize.OrdCase.Ill)]
+    [InlineData("vaiheen", FiNormalize.OrdCase.Gen)]
+    [InlineData("kaudellaan", FiNormalize.OrdCase.Ade)]
+    [InlineData("kertaa", FiNormalize.OrdCase.Par)]
+    [InlineData("toukokuuta", FiNormalize.OrdCase.Nom)]
+    [InlineData("sija", FiNormalize.OrdCase.Nom)]
+    [InlineData("divisioona", FiNormalize.OrdCase.Nom)]
+    [InlineData("suomalainen", FiNormalize.OrdCase.Nom)]
+    [InlineData("vasemmalta", FiNormalize.OrdCase.Nom)]
+    [InlineData("maailmansota", FiNormalize.OrdCase.Nom)]
+    public void OrdinalCaseFromTheNextWord1574(string word, FiNormalize.OrdCase want) =>
+        Assert.Equal(want, FiNormalize.OrdinalCaseBefore(word));
+
+    [Theory]
+    [InlineData("Hän voitti 2. kerran.", "Hän voitti toisen kerran.")]
+    [InlineData("Se oli 3. sijalla.", "Se oli kolmannella sijalla.")]
+    [InlineData("kuun 28. päivänä", "kuun kahdentenakymmenentenäkahdeksantena päivänä")]
+    [InlineData("20.–24. päivänä", "kahdentenakymmenentenä kahdentenakymmenentenäneljäntenä päivänä")]
+    [InlineData("13. toukokuuta", "kolmastoista toukokuuta")]
+    [InlineData("15. sija", "viidestoista sija")]
+    [InlineData("9:nnen kerran", "yhdeksännen kerran")]
+    [InlineData("11:nneksi", "yhdenneksitoista")]
+    public void ADigitOrdinalReadsAsTheAgreeingWords1574(string digits, string words) =>
+        Assert.Equal(Say(words), Say(digits));
+
+    [Fact]
+    public void CardinalAndPluralColonSuffixesKeepTheRefusal1574()
+    {
+        Assert.Equal(FiNormalize.NormalizeFinnish("850n"), FiNormalize.NormalizeFinnish("850:n"));
+        Assert.Equal(FiNormalize.NormalizeFinnish("1sten"), FiNormalize.NormalizeFinnish("1:sten"));
+    }
 }
