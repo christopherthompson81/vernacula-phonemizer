@@ -14,6 +14,7 @@
 // version of this file swept three characters into every shape, and two of them produced probes that
 // matched nothing, so the callbacks under test were never entered and it passed vacuously.
 using Vernacula.Phonemizer;
+using Vernacula.Phonemizer.Core;
 using Xunit;
 
 namespace Vernacula.Phonemizer.Tests;
@@ -40,9 +41,14 @@ public class CaseFoldedLookupTests
         { "nl", "drs. Jansen", "drſ. Jansen" },
         { "wo", "km&sup2 bi", "km&ſup2 bi" },
         { "qu", "km&sup2; bi", "km&ſup2; bi" },
-        { "so", "12°S", "12°ſ" },
-        { "su", "12°S", "12°ſ" },
-        { "id", "12°S", "12°ſ" },
+        { "so", "12°s", "12°ſ" },
+        { "su", "12°s", "12°ſ" },
+        { "id", "12°s", "12°ſ" },
+        { "zu", "5 m/s", "5 m/ſ" },
+        { "ha", "12.8 m/s", "12.8 m/ſ" },
+        { "hu", "stb.", "ſtb." },
+        { "lb", "asw.", "aſw." },
+        { "nci", "Castellana", "Caſtellana" },
     };
 
     /** The folded near-miss neither throws nor speaks "undefined". */
@@ -51,10 +57,20 @@ public class CaseFoldedLookupTests
     public void AFoldedNearMissIsRefused(string lang, string _wellFormed, string folded) =>
         Assert.DoesNotContain("undefined", Phonemizer.Phonemize(folded, lang), StringComparison.Ordinal);
 
-    /** ⚠ AND THE WELL-FORMED NEIGHBOUR STILL EXPANDS — without this the guard could refuse EVERYTHING and
-     *  every assertion above would still pass. The instrument is the difference between the two readings. */
+    /** ⚠ AND IT READS EXACTLY AS ITS WELL-FORMED TWIN. The registry folds the historic forms first
+     *  (`Unicode.FoldHistoricForms`), so the probe never reaches a per-site guard through `Phonemize`. Without
+     *  this, a fold that deleted the letter would pass the assertion above. */
     [Theory]
     [MemberData(nameof(Sites))]
-    public void TheWellFormedNeighbourStillExpands(string lang, string wellFormed, string folded) =>
-        Assert.NotEqual(Phonemizer.Phonemize(wellFormed, lang), Phonemizer.Phonemize(folded, lang));
+    public void TheFoldedFormReadsAsTheWellFormed(string lang, string wellFormed, string folded) =>
+        Assert.Equal(Phonemizer.Phonemize(wellFormed, lang), Phonemizer.Phonemize(folded, lang));
+
+    /** The fold itself: each historic form becomes its modern letter, and its look-alikes are left alone. */
+    [Fact]
+    public void FoldHistoricFormsMapsEachFormAndNothingElse()
+    {
+        Assert.Equal("Castellana \u1e61 вдосттъѣꙋ", Unicode.FoldHistoricForms("Caſtellana ẛ ᲀᲁᲂᲃᲄᲅᲆᲇᲈ"));
+        const string untouched = "s S ς µ ϕ ϑ \u212a \u212b";
+        Assert.Equal(untouched, Unicode.FoldHistoricForms(untouched));
+    }
 }

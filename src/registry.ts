@@ -206,7 +206,7 @@ import { ROMAN_POLICY as romanUz } from "./languages/uzbek/romanOrdinals.ts";
 import { lookupForeignOov, setDefaultForeign, setScriptReader, withHost } from "./core/foreign.ts";
 import { CYRILLIC_HOSTS, readerFor } from "./core/scripts.ts";
 import { stripMarkup } from "./core/markup.ts";
-import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldSpacedDash,
+import { foldCaretExponents, foldCyrillicConfusables, foldCyrillicStressMarks, foldFullwidthLatin, foldHistoricForms, foldLatinConfusables, foldNativeDigits, foldSquaredDegrees, foldSpacedDash,
     foldSubscriptDigits, foldVulgarFractions, repairDoubleEncoded } from "./core/unicode.ts";
 
 export interface Phonemizer {
@@ -378,6 +378,8 @@ function romanPass(lang: string, input: string): string {
  * lost its whole unit that way — the tier's trailing guard saw a letter after `km` and refused the match.
  * Measured safe across all 67 corpora (31 occurrences, all in id_id, none elsewhere); see
  * `repairDoubleEncoded`.
+ * `foldHistoricForms` runs right after the mojibake decode, before anything matches a letter: under `iu`, a regex
+ * reads `ſ` as `s`, so the fold must come before every rule that could match it. See `foldHistoricForms`.
  * `foldLatinConfusables` sits with the other repairs, and AFTER the mojibake decode: a double-encoded
  * sequence can produce Latin-1 letters, so the confusable check wants the decoded string.
  * THE CYRILLIC STRESS MARK IS FOLDED LAST, and after the Cyrillic confusable fold on purpose: the confusable
@@ -390,7 +392,7 @@ function romanPass(lang: string, input: string): string {
  * `foldCyrillicStressMarks`.
  */
 function foldPass(lang: string, input: string): string {
-    const folded = foldCyrillicStressMarks(foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(repairDoubleEncoded(stripMarkup(input)))), CYRILLIC_HOSTS.has(lang)))));
+    const folded = foldCyrillicStressMarks(foldCaretExponents(foldLatinConfusables(foldCyrillicConfusables(foldFullwidthLatin(foldSquaredDegrees(foldHistoricForms(repairDoubleEncoded(stripMarkup(input))))), CYRILLIC_HOSTS.has(lang)))));
     const pre = VULGAR_FOLD_OPT_OUT.has(lang) ? folded : foldVulgarFractions(folded);
     // Subscript digits fold for EVERY language and with no opt-out — see `foldSubscriptDigits`.
     const subs = foldSubscriptDigits(pre);

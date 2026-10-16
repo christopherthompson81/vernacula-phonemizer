@@ -226,11 +226,11 @@ public class IlocanoTests
 
     [Fact]
     // ⚠ #1122: the pattern is built from the table's own keys with `i`+`u`, so the fold widens it —
-    // `ſr.` matches `sr` while `ſr` is not a key. The match falls through UNCHANGED (the g2p then drops
-    // the long s it has no rule for) rather than reading the word "undefined", which the table's `!`
-    // used to stringify.
+    // `ſr.` matches `sr` while `ſr` is not a key. Through the registry the long s is now folded to `s`
+    // first (`Unicode.FoldHistoricForms`), so `ſr.` reads as `sr.` does. The engine-level guard (the miss
+    // falls through unchanged instead of reading "undefined") is pinned in test/ilocano.test.ts.
     public void TheFoldWidenedAbbreviationMissesTheTable() =>
-        Assert.Equal("bˈilin ɾ . mˈajsa", Say("Bilin ſr. 1"));
+        Assert.Equal(Say("Bilin sr. 1"), Say("Bilin ſr. 1"));
 
     [Fact]
     // `agarup` is the corpus's own word in the same function; a following digit is required.

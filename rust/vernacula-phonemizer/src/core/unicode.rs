@@ -458,6 +458,32 @@ pub fn fold_squared_degrees(s: &JsString) -> JsString {
     rewrite(&s, js_re!("℉", "gu"), &js("\u{00b0}F"))
 }
 
+/// Historic letter forms → their modern letter: `ſ` → `s`, `ẛ` → `ṡ`, and the historic Cyrillic forms U+1C80–U+1C88
+/// → `в д о с т т ъ ѣ ꙋ`. Their simple case folding reaches another letter while their lowercase is themselves, so an
+/// `iu` regex built from a table's keys matched them and the table had no row (#1122). See `foldHistoricForms` in
+/// src/core/unicode.ts.
+pub fn fold_historic_forms(s: &JsString) -> JsString {
+    let re = js_re!(r"[\u017f\u1e9b\u1c80-\u1c88]", "gu");
+    if !re.test(s) {
+        return s.clone();
+    }
+    rewrite_with(s, re, |m, s| {
+        JsString(vec![match m.value(s).0[0] {
+            0x017f => 0x0073,
+            0x1e9b => 0x1e61,
+            0x1c80 => 0x0432,
+            0x1c81 => 0x0434,
+            0x1c82 => 0x043e,
+            0x1c83 => 0x0441,
+            0x1c84 | 0x1c85 => 0x0442,
+            0x1c86 => 0x044a,
+            0x1c87 => 0x0463,
+            0x1c88 => 0xa64b,
+            c => c,
+        }])
+    })
+}
+
 pub fn fold_fullwidth_latin(s: &JsString) -> JsString {
     let re = js_re!(r"[０-９Ａ-Ｚａ-ｚ]", "gu");
     if !re.test(s) {
@@ -524,5 +550,44 @@ mod tests {
     #[test]
     fn vulgar_fraction_spacing() {
         assert_eq!(fold_vulgar_fractions(&js("2½ and ¼")), "2 1/2 and 1/4");
+    }
+
+    #[test]
+    fn historic_forms_fold_to_their_letter_and_nothing_else() {
+        assert_eq!(
+            fold_historic_forms(&js("Caſtellana ẛ ᲀᲁᲂᲃᲄᲅᲆᲇᲈ")),
+            "Castellana \u{1e61} вдосттъѣꙋ"
+        );
+        let untouched = js("s S ς µ ϕ ϑ \u{212a} \u{212b}");
+        assert_eq!(fold_historic_forms(&untouched), untouched);
+    }
+
+    /// #1122, fleet-wide: a long-s probe reads exactly as its plain twin, where zu, ha, hu and lb spoke "undefined".
+    #[test]
+    #[cfg(all(
+        feature = "zu",
+        feature = "ha",
+        feature = "hu",
+        feature = "lb",
+        feature = "es",
+        feature = "ru"
+    ))]
+    fn a_historic_form_reads_as_its_modern_letter() {
+        for (lang, plain, folded) in [
+            ("zu", "5 m/s", "5 m/ſ"),
+            ("ha", "12.8 m/s", "12.8 m/ſ"),
+            ("hu", "stb.", "ſtb."),
+            ("lb", "asw.", "aſw."),
+            ("es", "sr. García", "ſr. García"),
+            ("ru", "тыс. руб", "тыᲃ. руб"),
+        ] {
+            let got = crate::phonemize(folded, lang).unwrap();
+            assert!(!got.contains("undefin"), "{lang} {folded}: {got}");
+            assert_eq!(
+                got,
+                crate::phonemize(plain, lang).unwrap(),
+                "{lang} {folded}"
+            );
+        }
     }
 }

@@ -23,8 +23,15 @@
  * matched nothing, so the callbacks under test were never entered and the test passed vacuously. Here each
  * probe substitutes a character that folds INTO one the key actually contains, so it is guaranteed to reach
  * the branch.
+ *
+ * ⚠ SINCE THE REGISTRY FOLDS THESE LETTERS (`foldHistoricForms`, `core/unicode.ts`), a probe never reaches a
+ * normalizer through `phonemize`: it reads EXACTLY as its well-formed twin. That is what is asserted below, which is
+ * stronger than the old "refused, so different". The per-site guards stay, for callers that run a normalizer
+ * directly. The fold was added after zu, ha, hu and lb were found speaking "undefined" (#1574, #1578, #1593, #1597),
+ * the fifth to eighth languages with this shape.
  */
 import { describe, expect, test } from "vitest";
+import { foldHistoricForms } from "../src/core/unicode.ts";
 import { phonemize } from "../src/index.ts";
 
 /** Fold partners that widen a class written in the ordinary alphabet, from `csharp/fold-pairs.json`. */
@@ -48,6 +55,11 @@ const SITES: readonly (readonly [string, string])[] = [
     ["gd", "srl. eile"],
     ["nl", "drs. Jansen"],
     ["hil", "sr. Cruz"],
+    ["zu", "5 m/s"],
+    ["ha", "12.8 m/s"],
+    ["hu", "stb."],
+    ["lb", "asw."],
+    ["nci", "Castellana"],
 ];
 
 /** The entity and compass sites, which take a different repair (fall back to the match / refuse it). */
@@ -75,13 +87,12 @@ describe("a case-folded class never reaches an absent table entry (#1122)", () =
         });
     }
 
-    /** ⚠ AND THE WELL-FORMED NEIGHBOUR STILL EXPANDS — without this the guard could refuse everything and
-     *  every assertion above would still pass. The instrument is the DIFFERENCE between the two readings:
-     *  the abbreviation expands, the folded near-miss is refused, so they cannot be equal. */
+    /** ⚠ AND IT READS AS ITS WELL-FORMED TWIN. Without this, a fold that deleted the letter would pass every
+     *  assertion above. */
     for (const [lang, wellFormed] of SITES) {
         const probe = foldOne(wellFormed);
-        test(`${lang}: ${JSON.stringify(wellFormed)} still expands where the folded form is refused`, () => {
-            expect(phonemize(wellFormed, lang)).not.toBe(phonemize(probe!, lang));
+        test(`${lang}: ${JSON.stringify(probe)} reads exactly as ${JSON.stringify(wellFormed)}`, () => {
+            expect(phonemize(probe!, lang)).toBe(phonemize(wellFormed, lang));
         });
     }
 
@@ -91,16 +102,19 @@ describe("a case-folded class never reaches an absent table entry (#1122)", () =
         });
     }
 
-    /** ⚠ THE POSITIVE HALF FOR THE ENTITY SITES: an unconditional fallback would pass every test above. */
-    test("the entity tables still expand what they DO carry", () => {
-        expect(phonemize("km&sup2 bi", "wo")).not.toBe(phonemize("km&ſup2 bi", "wo"));
-        expect(phonemize("&nbsp; x", "qu")).not.toBe(phonemize("&nbſp; x", "qu"));
+    /** The entity and compass sites read their long-s probes as the plain `s` forms. */
+    test("the entity and compass probes read as their plain-s twins", () => {
+        expect(phonemize("km&ſup2 bi", "wo")).toBe(phonemize("km&sup2 bi", "wo"));
+        expect(phonemize("&nbſp; x", "qu")).toBe(phonemize("&nbsp; x", "qu"));
+        for (const lang of ["so", "su", "id"]) {
+            expect(phonemize("12°ſ", lang), lang).toBe(phonemize("12°s", lang));
+        }
     });
 
-    /** …and the compass tables likewise. */
-    test("the compass tables still expand what they DO carry", () => {
-        for (const lang of ["so", "su", "id"]) {
-            expect(phonemize("12°N", lang), lang).not.toBe(phonemize("12°ſ", lang));
-        }
+    /** The fold itself: every historic form becomes its modern letter, one code unit for one. */
+    test("foldHistoricForms maps each historic form and nothing else", () => {
+        expect(foldHistoricForms("Caſtellana ẛ ᲀᲁᲂᲃᲄᲅᲆᲇᲈ")).toBe("Castellana \u1e61 вдосттъѣꙋ");
+        const untouched = "s S ς µ ϕ ϑ \u212a \u212b";
+        expect(foldHistoricForms(untouched)).toBe(untouched);
     });
 });

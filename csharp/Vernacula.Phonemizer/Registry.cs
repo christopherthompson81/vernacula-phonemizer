@@ -253,8 +253,9 @@ public static class Registry
                     Unicode.FoldCyrillicConfusables(
                         Unicode.FoldFullwidthLatin(
                             Unicode.FoldSquaredDegrees(
-                                Unicode.RepairDoubleEncoded(
-                                    Markup.StripMarkup(input)))),
+                                Unicode.FoldHistoricForms(
+                                    Unicode.RepairDoubleEncoded(
+                                        Markup.StripMarkup(input))))),
                         Scripts.CYRILLIC_HOSTS.Contains(lang)))));
         var pre = VULGAR_FOLD_OPT_OUT.Contains(lang) ? folded : Unicode.FoldVulgarFractions(folded);
         // Subscript digits fold for EVERY language and with no opt-out.

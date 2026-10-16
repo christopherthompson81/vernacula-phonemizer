@@ -612,6 +612,48 @@ export function repairDoubleEncoded(s: string): string {
 }
 
 /**
+ * HISTORIC LETTER FORMS → their modern letter: U+017F LONG S `ſ` → `s`, U+1E9B `ẛ` → `ṡ`, and the nine historic
+ * Cyrillic forms U+1C80–U+1C88 `ᲀ ᲁ ᲂ ᲃ ᲄ ᲅ ᲆ ᲇ ᲈ` → `в д о с т т ъ ѣ ꙋ`.
+ *
+ * None of them is a letter of its own in any language here. Each is a typographic variant of the letter it folds
+ * to (`ſ` is early print's positional `s`), so it reads as that letter everywhere. Measured across all 163 mined
+ * artifacts: `ſ` occurs 24 times (21 in la, 3 in nci), all in early-print spellings (`Caſtellana`), and the rest
+ * occur zero times.
+ *
+ * ⚠ THE FLEET-WIDE FORM OF #1122. These are exactly the letters whose Unicode simple case folding reaches another
+ * letter while their `toLowerCase()` is themselves (computed from `csharp/fold-pairs.json`). So under the `iu`
+ * flags, a regex built from a table's keys MATCHES them, while the key computed from the lowercased match is in no
+ * table, and the miss is stringified. Measured before this fold: zu `5 m/ſ`, ha `12.8 m/ſ`, hu `ſtb.` and lb
+ * `aſw.` all spoke the word "undefined". The sites found earlier were guarded one at a time (20 of them are in
+ * `test/case-folded-lookup.test.ts`). Folding here removes the input before any normalizer reads it.
+ *
+ * WITHOUT THE TRAP IT IS STILL A DROP: `ſ` is outside every Latin tokenizer's alphabet, so nci's `Caſtellana` read
+ * *katellana*.
+ *
+ * NOT FOLDED, from the same computed set:
+ * - the Greek symbol variants `ϐ ϑ ϕ ϖ ϰ ϱ ϵ`, which in Latin-script text are mostly mathematical symbols with a
+ *   meaning of their own;
+ * - final `ς`, a real letter;
+ * - the micro sign `µ`, a unit symbol;
+ * - the combining ypogegrammeni U+0345.
+ * The Kelvin and Ångström signs are not in the set at all: they lowercase to `k` and `å`, so a lowercased key is
+ * found. Every replacement is one code unit for one, so trace offsets are unchanged.
+ */
+const HISTORIC_FORMS: Readonly<Record<string, string>> = {
+    "\u017f": "s", "\u1e9b": "\u1e61",
+    "\u1c80": "\u0432", "\u1c81": "\u0434", "\u1c82": "\u043e", "\u1c83": "\u0441", "\u1c84": "\u0442",
+    "\u1c85": "\u0442", "\u1c86": "\u044a", "\u1c87": "\u0463", "\u1c88": "\ua64b",
+};
+const HISTORIC_FORMS_RE = /[\u017f\u1e9b\u1c80-\u1c88]/gu;
+
+export function foldHistoricForms(s: string): string {
+    HISTORIC_FORMS_RE.lastIndex = 0;
+    if (!HISTORIC_FORMS_RE.test(s)) return s;
+    HISTORIC_FORMS_RE.lastIndex = 0;
+    return rewrite(s, HISTORIC_FORMS_RE, (c) => HISTORIC_FORMS[c]!);
+}
+
+/**
  * CARET EXPONENTS → real superscripts. `2^10`, `km^2`, `10^-31`, and the LaTeX-ish `10^{10}`.
  *
  * WHY THIS IS A FOLD AND NOT A LANGUAGE RULE: the caret is how a programmer types an exponent when the

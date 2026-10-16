@@ -23,8 +23,9 @@ use crate::core::roman::{RomanPolicy, normalize_romans, roman_exclusions};
 use crate::core::scripts::{CYRILLIC_HOSTS, reader_for};
 use crate::core::unicode::{
     fold_caret_exponents, fold_cyrillic_confusables, fold_cyrillic_stress_marks,
-    fold_fullwidth_latin, fold_latin_confusables, fold_native_digits, fold_spaced_dash,
-    fold_squared_degrees, fold_subscript_digits, fold_vulgar_fractions, repair_double_encoded,
+    fold_fullwidth_latin, fold_historic_forms, fold_latin_confusables, fold_native_digits,
+    fold_spaced_dash, fold_squared_degrees, fold_subscript_digits, fold_vulgar_fractions,
+    repair_double_encoded,
 };
 use crate::languages::english::english::{EnglishPhonemizer, WordTransform, create_english};
 use crate::languages::english::english_neural::{phonemize_en_neural, prewarm_foreign_english};
@@ -798,6 +799,7 @@ const VULGAR_FOLD_OPT_OUT: [&str; 10] =
 pub fn fold_pass(lang: &str, input: &JsString) -> JsString {
     let s = strip_markup(input);
     let s = repair_double_encoded(&s);
+    let s = fold_historic_forms(&s);
     let s = fold_squared_degrees(&s);
     let s = fold_fullwidth_latin(&s);
     let s = fold_cyrillic_confusables(&s, CYRILLIC_HOSTS.contains(&lang));
