@@ -238,3 +238,30 @@ mod tests {
         assert_eq!(count, 66);
     }
 }
+
+/// #1593, as test/sbantu-defects-1593.test.ts: a road number is not money, a rand amount still is, and a bare
+/// `bn` reads as its word. Relational, so no IPA is typed.
+#[cfg(test)]
+mod sbantu_defects_1593 {
+    use crate::phonemize;
+
+    #[test]
+    fn road_numbers_rand_amounts_and_bare_bn() {
+        let p = |t: &str| phonemize(t, "st").unwrap();
+        let rand = p("diranta");
+        for t in ["Tsela ya R59 le N12 e kgolo", "ka R59."] {
+            assert!(!p(t).contains(&rand), "{t}");
+        }
+        for t in [
+            "ka R30,000,000",
+            "ka R8 million",
+            "ka R332 milione",
+            "ka R2.3m",
+            "ka R3,2 milione",
+        ] {
+            assert!(p(t).contains(&rand), "{t}");
+        }
+        assert_eq!(p("Ho ne ho le 1.5bn"), p("Ho ne ho le dibilione tse 1.5"));
+        assert_eq!(p("ka 915 m"), p("ka dimithara tse 915"));
+    }
+}

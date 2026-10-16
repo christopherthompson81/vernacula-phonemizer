@@ -260,3 +260,15 @@ mod tests {
         assert_eq!(count, 100);
     }
 }
+
+/// #1593, as test/sbantu-defects-1593.test.ts: a bare `bn` reads as its word. Relational, so no IPA is typed.
+#[cfg(test)]
+mod sbantu_defects_1593 {
+    use crate::phonemize;
+
+    #[test]
+    fn bare_bn_reads_as_its_word() {
+        let p = |t: &str| phonemize(t, "tn").unwrap();
+        assert_eq!(p("Go ne go le 1.5bn"), p("Go ne go le 1.5 dibilione"));
+    }
+}

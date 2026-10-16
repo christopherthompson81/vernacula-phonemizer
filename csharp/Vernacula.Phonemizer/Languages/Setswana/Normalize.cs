@@ -56,6 +56,7 @@ public static class Normalize
     private static readonly JsRe RB_ENTITY = JsRegex.Compile("&#x5D;", "giu");
     private static readonly JsRe AMP_ENTITY = JsRegex.Compile("&amp;", "giu");
 
+    private static readonly JsRe BARE_BN = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d[\\d.,]*)bn(?![\\p{L}\\p{M}\\d])", "gu");
     private static readonly JsRe CURRENCY_SCALE = JsRegex.Compile(
         "((?:US[ \\u00a0]?\\$|\\$|£|P|R)[ \\u00a0]?\\d[\\d \\u00a0.,]*)(bn|M|m)(?![\\p{L}\\p{M}\\d])", "gu");  // space, NBSP
 
@@ -86,6 +87,8 @@ public static class Normalize
         //    number. ⚠ ANCHORED ON THE CURRENCY SIGN, which is the whole guard: `915 m` is metres.
         s = Rewrite(s, CURRENCY_SCALE, m =>
             $"{m.Groups[1].Value} {MAGNITUDE_SUFFIX[m.Groups[2].Value]}");
+        //    2b) …and `bn` with no currency sign (#1593): never a unit, so the same word in the same order.
+        s = Rewrite(s, BARE_BN, m => $"{m.Groups[1].Value} {MAGNITUDE_SUFFIX["bn"]}");
 
         // 3) THE RAND, LOCALLY — the tier cannot express the guard this sign needs.
         s = Rewrite(s, RAND, m =>

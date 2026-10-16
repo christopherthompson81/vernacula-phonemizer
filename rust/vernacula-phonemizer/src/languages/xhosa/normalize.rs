@@ -428,6 +428,8 @@ pub fn normalize_xhosa(input: &JsString) -> JsString {
         &js("$1 phindaphinda "),
     );
     s = rewrite(&s, js_re!(r"[ \u00a0]*÷[ \u00a0]*", "gu"), &js(" yahlula "));
+    // `±` takes zu's reading, the loan said whole (#1593): it was dropped. Before the `+` arms.
+    s = rewrite(&s, js_re!("±", "gu"), &js(" plas o mayinas "));
     s = rewrite(&s, js_re!(r"(?<=[\p{L}\d])\+(?=\d)", "gu"), &js(" plas "));
     s = rewrite(
         &s,

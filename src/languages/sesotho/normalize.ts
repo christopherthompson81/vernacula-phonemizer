@@ -97,6 +97,7 @@
  */
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { loadManifest } from "../../core/loadManifest.ts";
+import { PUA_SENTINEL } from "../../core/markers.ts";
 import { rewrite } from "../../core/provenance.ts";
 
 /** The manifest's own conjunction — the number joiner (*leshome LE metso e mmedi*), reused for `&`. Read
@@ -326,6 +327,11 @@ export function normalizeSesotho(input: string): string {
         /((?:US[ \u00a0]?)?[$£€R])([ \u00a0]?\d[\d.,]*)(m|bn)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, sym: string, num: string, mag: string) => `${sym}${num} ${mag === "m" ? "dimilione" : "dibilione"}`,
     );
+    //    5b) …and `bn` WITH NO CURRENCY SIGN (#1593), which was spelled as the letters *bn*: `1.5bn` read
+    //        *nŋwɛ ɬɑnɔ bn*. Only `bn`, because it is never a unit; a bare `m` is a metre and keeps step 5's
+    //        anchor. The phrase is the one step 5 + the tier produce for `$1.5bn` (*dibilione tse 1.5*), and
+    //        the order is the corpus's own for a bare magnitude: *"limilione tse 88"*, *"limilione tse 375"*.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d[\d.,]*)bn(?![\p{L}\p{M}\d])/gu, (_w, num: string) => `dibilione tse ${num}`);
 
     // 6) A PERCENT SIGN WHOSE WORD IS ALREADY WRITTEN → drop the sign (trap 12: say it ONCE, in the
     //    position the language puts it). The tier does this for its OWN declared spelling; this covers the
@@ -381,8 +387,22 @@ export function normalizeSesotho(input: string): string {
     //    the language means it. Case-insensitive (trap 7).
     s = rewrite(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
 
+    // 8b) A ROAD NUMBER IS NOT MONEY (#1593). `Tsela ya R59 le N12` read *diranta tse 59*, "59 rand": the tier's
+    //     `R` key has no guard, while setswana/normalize.ts documents exactly this hazard (`jaaka R59, N12, N17 le
+    //     N3`) and keeps `R` off its tier for it. The discriminator is tn's: a rand AMOUNT carries a separator
+    //     or a magnitude word, a road is a bare 1–3 digit integer. ⚠ THE DIGIT CAP IS LOAD-BEARING HERE, not in
+    //     tn: step 4 has already removed the grouping, so `R30,000,000` is a bare run by now and only its length
+    //     says it is money. Measured over the artifact's twelve `R`+digit instances, all money: every one has a
+    //     separator, a magnitude word or more than three digits, so none is declined.
+    //     The `R` is hidden from the tier behind PUA_SENTINEL and restored straight after it, so the road keeps
+    //     its letter and number as written.
+    s = rewrite(s, new RegExp(
+        `(?<![\\p{L}\\p{M}\\d])R(?=[ \u00a0]?\\d{1,3}(?![\\d\\p{L}\\p{M}]|[.,]\\d)(?![ \u00a0]*(?:${MAG_ALT}|million|billion)(?![\\p{L}\\p{M}])))`,  // space, NBSP
+        "gu"), PUA_SENTINEL);
+
     // 9) THE SHARED SYMBOL TIER — percent, currency, units, the rate and the squared exponent. See SYMBOLS.
     s = SYMBOLS(s);
+    s = rewrite(s, new RegExp(PUA_SENTINEL, "gu"), "R");
 
     // 10) THE CONCORD BETWEEN A MAGNITUDE AND ITS FIGURE, which the tier cannot emit. With `currencyPrefix`
     //     the tier writes `noun+concord` then the magnitude then the number — `diranta tse dimilione 8` —

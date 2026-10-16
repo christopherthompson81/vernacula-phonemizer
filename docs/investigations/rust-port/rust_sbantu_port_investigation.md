@@ -301,3 +301,49 @@ went 97 → 103, its declared length matches its entry count, and `dump.mts` par
 **Port-pending.** None.
 
 **Implication.** Ready for the PR.
+
+## Run 12 — 2026-10-15 21:30 (fixing the #1593 findings, TS-first, mirrored to C# and Rust)
+
+Question: which of the reported xh/st/tn/sn findings are real, and what does each language's own corpus say the
+reading should be? All probes are synthetic.
+
+**zu long-ſ** is already fixed fleet-wide by the registry fold of historic letter forms (#1601).
+
+**xh `±`.** Probe on main: `Ubushushu bu-±5 apha` normalized unchanged and read *… ɓˈuː kʼuɬˈaːnu …*, with no
+sign. Fixed in step 14 with zu's own reading, `plas o mayinas` (the English loan said whole). zu's step 8c note
+("± is not free for xh") concerns composing it from xh's own minus word *thabatha*, the verb "subtract"; the loan
+does not do that. Now `bu-±5` reads as `bu- plas o mayinas 5`.
+
+**xh `ordinalYe`.** Type only: `XhosaManifest` is now `Omit<ZuluManifest, "ordinalYe">`. Rust (`Option`) and C#
+(empty default) already treated it as optional.
+
+**st road number.** Census of the `R`+digit instances in `tools/corpus/mined/st.jsonc`: `R22.7 milione`, `R22.8m`,
+`R23.5 limilione`, `R2.3m` ×2, `R28.9 limilione`, `R30,000,000`, `R3,2 milione` ×2, `R332 milione`, `R470 bilione`,
+`R8 million`. Each has a separator, a magnitude word, or (once step 4 has de-grouped it) more than three digits. So
+tn's discriminator, "a bare 1–3 digit integer is a road", declines none of them. Implemented as step 8b: the `R` of
+a road hides from the tier behind `PUA_SENTINEL` and is restored right after it.
+`Tsela ya R59 le N12` now keeps `R59`, while `R30,000,000`, `R8 million`, `R332 milione`, `R2.3m` and
+`R3,2 milione` still read *diranta*.
+
+**st/tn/sn bare `bn`.** Scoped to `bn`, which is never a unit; a bare `m` is a metre in all three. Each file's own
+currency arm already gave the shape to copy:
+- st: `$1.5bn` → *didolara tse dibilione tse 1 5*, and the corpus writes a bare magnitude first, with its concord
+  (`limilione tse 88`, `limilione tse 375`). So `1.5bn` → `dibilione tse 1.5`.
+- tn: `$1.5bn` → *… 1 ntlha 5 dibilione*. So `1.5bn` → `1.5 dibilione`.
+- sn had no magnitude arm at all; even `$1.5bn` read the letters *ɓn*. The corpus pairs a decimal with a singular
+  magnitude after it (`6.7 miriyoni`, `25 miriyoni`, `110 miriyoni`), so `1.5bn` → `1.5 bhiriyoni` (the manifest's
+  `numbers.billion`), with or without `$`. It now reads byte-identically to the written-out form.
+
+**sn bare `o` degree: DECLINED, on a measurement.** In the sn corpus a free-standing `o` occurs 0 times outside
+the degree use. All 28 `<digit> o` instances are degrees, and 6 of them are followed by an ordinary word
+(`20 o iri kuMaodzanyemba` ×4, `30 o kana kuti 3` ×2). A guard on what follows the `o` would lose those 6 real
+degrees, to protect an input (`5 o kure`) that this corpus never writes.
+
+**Guard proof.** Reverting each language's normalize file alone fails its tests:
+- TS: xh 1, st 2, tn 1, sn 1;
+- C#: xh 1, st 3, tn 1, sn 1;
+- Rust: 1 per language.
+The rand-amount tests are controls and pass either way.
+
+`check-goldens`: xh, st, tn, sn and zu are fresh, 0 rows changed. The regex corpus gains 1 pattern (the shared
+`bn` arm). Both regex-diffs report 152,970 identical.

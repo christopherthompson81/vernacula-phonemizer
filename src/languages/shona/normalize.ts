@@ -108,6 +108,7 @@
  *     `letterName` table; espeak ships no Shona and no in-repo source carries one, so wiring the pass would
  *     be a no-op. A sourcing gap, not a seam gap.
  */
+import { MANIFEST } from "./manifest.ts";
 import { numberToWords, withClass6Concord } from "./numbers.ts";
 import { rewrite } from "../../core/provenance.ts";
 
@@ -260,6 +261,14 @@ export function normalizeShonaPre(input: string): string {
     //    phoneme stream as a bare [tʰ]. Stripping it is the whole fix; no ordinal morphology is invented,
     //    because Shona's is already spelled out wherever the language means it. Case-insensitive (trap 7).
     s = rewrite(s, /(\d+)(?:st|nd|rd|th)(?![\p{L}\p{M}])/giu, "$1");
+
+    // 5b) A `bn` MAGNITUDE SUFFIX → the billion word (#1593). It was spelled as the letters *ɓn*, with a currency
+    //     sign (`$1.5bn` → *mad̤ora mot͡si pojiⁿdi ʃanu ɓn*) or without. Only `bn`, which is never a unit; a bare
+    //     `m` is a metre (step 7). COUNT then MAGNITUDE, singular, which is the corpus's own shape for a decimal
+    //     beside a magnitude word: *"6.7 miriyoni"*, *"25 miriyoni"*, *"110 miriyoni"*. The word is the
+    //     manifest's (`numbers.billion`). BEFORE the tier, so `$` still finds its number.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d[\d.,]*)bn(?![\p{L}\p{M}\d])/gu,
+        (_w, num: string) => `${num} ${MANIFEST.numbers.billion}`);
 
     // 6) RANGES → `kusvika`. BEFORE THE TIER, and that ordering is the reason this pass exists at all: Shona
     //    writes the unit after the SECOND operand (`20-50 cm`, `110-120km/hr`, `0-100 km/hr`, `2-5 cm`), and

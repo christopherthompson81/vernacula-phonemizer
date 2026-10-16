@@ -215,6 +215,12 @@ export function normalizeSetswanaPre(input: string): string {
         /((?:US[ \u00a0]?\$|\$|£|P|R)[ \u00a0]?\d[\d \u00a0.,]*)(bn|M|m)(?![\p{L}\p{M}\d])/gu,  // space, NBSP
         (_w, amount: string, suf: string) => `${amount} ${MAGNITUDE_SUFFIX[suf]!}`,
     );
+    //    2b) …and `bn` WITH NO CURRENCY SIGN (#1593), which was spelled as the letters *bn*: `1.5bn` read
+    //        *bʊŋwɪ nt͡ɬʰa bʊt͡ɬʰanʊ bn*. Only `bn`: it is never a unit, while a bare `m` is a metre and keeps the
+    //        sign anchor above. Same word and order as the anchored arm, so `1.5bn` reads as `$1.5bn` does,
+    //        less the currency noun.
+    s = rewrite(s, /(?<![\p{L}\p{M}\d.,])(\d[\d.,]*)bn(?![\p{L}\p{M}\d])/gu,
+        (_w, num: string) => `${num} ${MAGNITUDE_SUFFIX.bn!}`);
 
     // 3) THE RAND, LOCALLY — because the tier CANNOT express the guard this sign needs (trap 47 reason 1).
     //    `R` + digits in the artifact: `R268.26bn` and `R1&nbsp;billion` are money, and

@@ -166,6 +166,7 @@ public static class Normalize
     private static readonly JsRe GREATER = JsRegex.Compile("[  ]*>[  ]*", "gu");
     private static readonly JsRe TIMES = JsRegex.Compile("(\\d)[  ]*×[  ]*(?=\\d)", "gu");
     private static readonly JsRe DIVIDE = JsRegex.Compile("[  ]*÷[  ]*", "gu");
+    private static readonly JsRe PLUS_MINUS = JsRegex.Compile("±", "gu");
     private static readonly JsRe PLUS_INFIX = JsRegex.Compile("(?<=[\\p{L}\\d])\\+(?=\\d)", "gu");
     private static readonly JsRe PLUS_LEAD = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])\\+[  ]?(?=\\d)", "gu");
     private static readonly JsRe MINUS = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d])(?<![\\p{L}\\p{M}][  ])[-−](?=\\d)", "gu");
@@ -288,6 +289,8 @@ public static class Normalize
         s = Rewrite(s, GREATER, " ngaphezulu kuna ");
         s = Rewrite(s, TIMES, "$1 phindaphinda ");
         s = Rewrite(s, DIVIDE, " yahlula ");
+        //     `±` takes zu's reading, the loan said whole (#1593): it was dropped. BEFORE the `+` arms.
+        s = Rewrite(s, PLUS_MINUS, " plas o mayinas ");
         s = Rewrite(s, PLUS_INFIX, " plas ");
         s = Rewrite(s, PLUS_LEAD, "plas ");
         s = Rewrite(s, MINUS, "thabatha ");

@@ -36,6 +36,15 @@ public static class Normalize
     private static readonly string MAG_ALT =
         string.Join("|", MAGNITUDES.OrderByDescending(m => m.Length));
 
+    /** A road number after `R` (#1593): a bare 1–3 digit integer with no separator and no magnitude word. ⚠ AFTER
+     *  MAG_ALT, which it is built from. See step 8b. */
+    private static readonly JsRe ROAD_R = JsRegex.Compile(
+        $"(?<![\\p{{L}}\\p{{M}}\\d])R(?=[ \\u00a0]?\\d{{1,3}}(?![\\d\\p{{L}}\\p{{M}}]|[.,]\\d)(?![ \\u00a0]*(?:{MAG_ALT}|million|billion)(?![\\p{{L}}\\p{{M}}])))",  // space, NBSP
+        "gu");
+    private static readonly JsRe ROAD_R_RESTORE = JsRegex.Compile(Markers.PUA_SENTINEL, "gu");
+    /** `bn` with no currency sign (#1593). See step 5b. */
+    private static readonly JsRe BARE_BN = JsRegex.Compile("(?<![\\p{L}\\p{M}\\d.,])(\\d[\\d.,]*)bn(?![\\p{L}\\p{M}\\d])", "gu");
+
     /** THE SPAN JOINER — *ho isa ho*, "up to". ⚠ The second operand's concord is deliberately NOT emitted:
      *  which concord depends on the head noun's class, which this layer does not know. */
     private const string SPAN = "ho isa ho";
@@ -182,6 +191,8 @@ public static class Normalize
         //    the one-letter metre key safe, and it must run after step 4 and before the tier.
         s = Rewrite(s, CURRENCY_SCALE, m =>
             $"{m.Groups[1].Value}{m.Groups[2].Value} {(m.Groups[3].Value == "m" ? "dimilione" : "dibilione")}");
+        //    5b) …and `bn` with no currency sign (#1593): never a unit, so it reads as step 5 + the tier read `$1.5bn`.
+        s = Rewrite(s, BARE_BN, m => $"dibilione tse {m.Groups[1].Value}");
 
         // 6) A PERCENT SIGN WHOSE WORD IS ALREADY WRITTEN → drop the sign. This covers the three spellings
         //    the tier cannot know about (the Lesotho forms and the SA variant `diphesente`).
@@ -201,8 +212,12 @@ public static class Normalize
         // 8) THE ENGLISH ORDINAL SUFFIX — always foreign orthography here; stripping it is the whole fix.
         s = Rewrite(s, ENGLISH_ORDINAL, "$1");
 
+        // 8b) A ROAD NUMBER IS NOT MONEY (#1593): its `R` is hidden from the tier and restored straight after.
+        s = Rewrite(s, ROAD_R, Markers.PUA_SENTINEL);
+
         // 9) THE SHARED SYMBOL TIER.
         s = SYMBOLS(s);
+        s = Rewrite(s, ROAD_R_RESTORE, "R");
 
         // 10) THE CONCORD BETWEEN A MAGNITUDE AND ITS FIGURE, which the tier cannot emit. ⚠ ONLY AFTER A
         //     CONCORD THIS FILE JUST EMITTED, so a magnitude in ordinary prose is untouched.

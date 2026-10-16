@@ -76,6 +76,18 @@ pub fn normalize_setswana_pre(input: &JsString) -> JsString {
             m.group(1, s).unwrap().concat(&js(&format!(" {suf}")))
         },
     );
+    // 2b — `bn` with no currency sign (#1593)
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\p{L}\p{M}\d.,])(\d[\d.,]*)bn(?![\p{L}\p{M}\d])",
+            "gu"
+        ),
+        |m, s| {
+            let suf = magnitude_suffix(&js("bn"));
+            m.group(1, s).unwrap().concat(&js(&format!(" {suf}")))
+        },
+    );
 
     s = rewrite_with(&s, &RAND, |m, s| {
         let n = m.group(1, s).unwrap();
