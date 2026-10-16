@@ -51,6 +51,9 @@ const lexicon = (): Map<string, string> => {
     return LEXICON;
 };
 
+/** bengali.jsonc itself, which does carry the two tables a reusing language may omit. */
+export type BengaliManifest = BengaliDef & Required<Pick<BengaliDef, "symbolTier" | "ordinals">>;
+
 export interface BengaliDef extends AbugidaDef {
     numbers: NumbersDef;
     clausePunctuation: Record<string, string>;
@@ -73,8 +76,13 @@ export interface BengaliDef extends AbugidaDef {
      * have known — so the words are language data, not engine data, and a reuser may bring its own.
      */
     unitWords?: Record<string, string[]>;
-    /** The shared symbol tier's data — moved verbatim, comments included. See the jsonc. */
-    symbolTier: {
+    /**
+     * The shared symbol tier's data — moved verbatim, comments included. See the jsonc. ⚠ OPTIONAL, because only
+     * bengali.jsonc carries it: the engine reads Bengali's (`MANIFEST`, typed `BengaliManifest`), and assamese.jsonc
+     * and bishnupriya.jsonc omit it. Declaring it required put the type in conflict with the data (#1584), as Hindi's
+     * `irregularOrdinals` once was.
+     */
+    symbolTier?: {
         percent: CountForms;
         currency: Record<string, CountForms>;
         ampersand: string;
@@ -82,7 +90,7 @@ export interface BengaliDef extends AbugidaDef {
         exponentWords: { squared: CountForms; cubed: CountForms; position?: "before" | "after" };
     };
     /** The suppletive 1–10 series and the regular suffixes. LONGEST FIRST. See the jsonc. */
-    ordinals: { suppletive: Record<string, string>; suffixes: string[] };
+    ordinals?: { suppletive: Record<string, string>; suffixes: string[] };
 }
 
 /** Foreign-run phonemizer (embedded Latin → e.g. en), injected by the registry. */

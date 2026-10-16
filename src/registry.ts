@@ -252,7 +252,7 @@ const ROMAN_POLICIES: Readonly<Record<string, RomanPolicy>> = {
  *   3. the `readAsEnglish` argument threaded into the ~46 engines that claim Latin themselves (mandarin, hindi,
  *      sindhi, amharic, vietnamese, …) — those never reach 1 or 2 at all.
  */
-function readAsEnglish(text: string): string {
+export function readAsEnglish(text: string): string {
     return withHost("en", () =>
         (getPhonemizer("en") as EnglishPhonemizer).textWithOov(foldPass("en", text), lookupForeignOov));
 }

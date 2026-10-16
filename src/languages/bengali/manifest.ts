@@ -6,7 +6,7 @@
  * and both call sites read the same object.
  */
 import { loadManifest } from "../../core/loadManifest.ts";
-import type { BengaliDef } from "./bengali.ts";
+import type { BengaliManifest } from "./bengali.ts";
 
 /** The consolidated hand-authored Bengali data tables (see bengali.jsonc). */
-export const MANIFEST = loadManifest<BengaliDef>(import.meta.url, "bengali.jsonc");
+export const MANIFEST = loadManifest<BengaliManifest>(import.meta.url, "bengali.jsonc");

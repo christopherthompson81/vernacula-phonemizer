@@ -197,11 +197,23 @@ pub fn make_assamese_normalizer(numbers: &NumbersDef) -> BengaliNormalizer {
             js(&format!("{ord} বিশ্ব যুদ্ধ"))
         });
 
-        // 9) The remaining signs.
+        // 9) The remaining signs. ⚠ `<`, `>` and `×` accept both digit scripts, as the header requires (#1584).
         s = rewrite(&s, js_re!(r"(\S)\s*=\s*(\S)", "gu"), &js("$1 সমান $2"));
-        s = rewrite(&s, js_re!(r"(\d)\s*<\s*(\d)", "gu"), &js("$1 তকৈ সৰু $2"));
-        s = rewrite(&s, js_re!(r"(\d)\s*>\s*(\d)", "gu"), &js("$1 তকৈ ডাঙৰ $2"));
-        s = rewrite(&s, js_re!(r"(\d)\s*×\s*(\d)", "gu"), &js("$1 গুণ $2"));
+        s = rewrite(
+            &s,
+            js_re!(r"([0-9\u09e6-\u09ef])\s*<\s*([0-9\u09e6-\u09ef])", "gu"),
+            &js("$1 তকৈ সৰু $2"),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"([0-9\u09e6-\u09ef])\s*>\s*([0-9\u09e6-\u09ef])", "gu"),
+            &js("$1 তকৈ ডাঙৰ $2"),
+        );
+        s = rewrite(
+            &s,
+            js_re!(r"([0-9\u09e6-\u09ef])\s*×\s*([0-9\u09e6-\u09ef])", "gu"),
+            &js("$1 গুণ $2"),
+        );
 
         s
     })
@@ -218,4 +230,41 @@ pub fn normalize_assamese(input: &JsString) -> Result<JsString, String> {
     static NORM: OnceLock<BengaliNormalizer> = OnceLock::new();
     let norm = load_once(&NORM, || Ok(make_assamese_normalizer(&try_def()?.numbers)))?;
     Ok(norm(input))
+}
+
+/// #1584, as test/eastindic-defects-1584.test.ts: the sign rules read Bengali digits as they read ASCII ones.
+#[cfg(all(test, feature = "as"))]
+mod defects_1584_tests {
+    use super::*;
+    use crate::core::unicode::BENGALI_DIGITS;
+
+    fn fold(s: &JsString) -> String {
+        s.to_string_lossy()
+            .chars()
+            .map(|c| {
+                BENGALI_DIGITS
+                    .iter()
+                    .find(|(k, _)| k.to_string_lossy().chars().next() == Some(c))
+                    .map_or(c.to_string(), |(_, v)| v.to_string_lossy())
+            })
+            .collect()
+    }
+
+    #[test]
+    fn sign_rules_read_bengali_digits_as_ascii_ones() {
+        for (bengali, ascii) in [
+            ("৩ < ৫", "3 < 5"),
+            ("৯ > ২", "9 > 2"),
+            ("৪ × ৬", "4 × 6"),
+            ("৪×6", "4×6"),
+        ] {
+            let got = normalize_assamese(&js(bengali)).unwrap();
+            assert_ne!(got.to_string_lossy(), bengali);
+            assert_eq!(
+                fold(&got),
+                normalize_assamese(&js(ascii)).unwrap().to_string_lossy(),
+                "{bengali}"
+            );
+        }
+    }
 }

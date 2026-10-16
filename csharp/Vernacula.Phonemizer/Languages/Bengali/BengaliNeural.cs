@@ -10,11 +10,13 @@ public static class BengaliNeural
 {
     private static readonly JsRe WORD = JsRegex.Compile($"[{Unicode.BENGALI_WORD}]+", "gu");
     private static Task<IWordStructuralTagger?>? taggerP;
-    // One built engine, reused across calls, wired with the same English `foreign` reader the registry gives
-    // "bn" — resolved lazily, so there is no initialization cycle between this file and the registry.
+    // One built engine, reused across calls, wired with the registry's own `ReadAsEnglish`, the reader its "bn"
+    // factory uses — resolved lazily, so there is no initialization cycle between this file and the registry.
+    // ⚠ IT USED TO BE `GetPhonemizer("en").Text`, which skips the prewarmed foreign-OOV memo, so an OOV English
+    // word inside bn got the rule reading on the best path (#1584). See bengaliNeural.ts.
     private static NativeBengaliEngine? engine;
     private static NativeBengaliEngine BnEngine() =>
-        engine ??= Bengali.CreateBengali(latin => Registry.GetPhonemizer("en").Text(latin));
+        engine ??= Bengali.CreateBengali(latin => Registry.ReadAsEnglish(latin));
 
     /** Phonemize Bengali text with the neural tagger filling the OOV tail. */
     public static async Task<string> PhonemizeBnNeural(string text)
