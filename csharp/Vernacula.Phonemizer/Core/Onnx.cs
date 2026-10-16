@@ -54,6 +54,26 @@ public static class Onnx
 {
     private static Task<IOrtLike>? _ortTask;
     private static readonly object Gate = new();
+    private static int? _intraOpNumThreads;
+    private static bool? _allowSpinning;
+
+    /**
+     * Session options merged into every session created AFTER this call. Mirrors `setOrtSessionDefaults`
+     * (src/core/onnx.ts), and for the same caller: a batch tool that runs many languages and wants ORT's pool
+     * out of the way.
+     *
+     * ⚠ NOTHING IN THE LIBRARY CALLS THIS, AND NOTHING SHOULD. ORT's default (one intra-op thread per core,
+     * spinning between ops) is right for a single request's latency.
+     * ⚠ IT IS FOR A CALLER THAT HOLDS MANY SESSIONS. The parity run builds ~15 sessions, each with a per-core
+     * pool that spins: measured 539 CPU-seconds for a 153 s run, against 226 for 141 s with
+     * `allowSpinning: false` (docs/investigations/csharp_parity_perf_investigation.md).
+     * ⚠ A SESSION ALREADY BUILT KEEPS ITS OPTIONS. Call it before any phonemization.
+     */
+    public static void SetSessionDefaults(int? intraOpNumThreads = null, bool? allowSpinning = null)
+    {
+        _intraOpNumThreads = intraOpNumThreads;
+        _allowSpinning = allowSpinning;
+    }
 
     /**
      * Get the runtime, once per process. `context` names the caller in the error (e.g. "Arabic diacritization").
@@ -85,6 +105,8 @@ public static class Onnx
         private static SessionOptions BuildOptions(IReadOnlyList<string>? executionProviders)
         {
             var opts = new SessionOptions();
+            if (_intraOpNumThreads is int n) opts.IntraOpNumThreads = n;
+            if (_allowSpinning is bool spin) opts.AddSessionConfigEntry("session.intra_op.allow_spinning", spin ? "1" : "0");
             if (executionProviders is null) return opts; // shipping default: CPU
             foreach (var ep in executionProviders)
             {

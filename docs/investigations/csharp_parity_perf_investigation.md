@@ -155,3 +155,58 @@ The best case is the real gate going ~82 s → ~50 s, and buying it costs:
 1.6× on a gate that already went 131 s → 82 s for one line in Run 1 is not worth that. Recorded so the next
 person does not re-derive the four dead ends; the ONNX finding is the one worth keeping, because it says
 something about the ENGINE (a shared session serialises concurrent callers) rather than about this tool.
+
+## Run 3 — 2026-10-16 10:10 — ORT's pool, then a work-stealing `--jobs`
+
+**Why the CPU meter looked busy while the run stayed slow.** Sampling `/proc` during a run showed 101 threads, in
+groups of 7 with identical CPU totals. Those are ORT intra-op pools, one per `InferenceSession`. `Core/Onnx.cs`
+built every session with default `SessionOptions`, which means one thread per core, spinning between ops.
+
+Run on this box (16 logical CPUs, 8 physical cores), all 189 languages byte-identical in every row of the table:
+
+| ORT setting | wall | user CPU | CPU |
+|---|---|---|---|
+| default | 153 s | 539 s | 354% |
+| `session.intra_op.allow_spinning=0` | 141 s | 226 s | 173% |
+| `IntraOpNumThreads=1` | 201 s | 178 s | 89% |
+
+The library default stays as it is, for the same reason as the TS (`setOrtSessionDefaults`: the default is right
+for one request's latency). C# gains the same opt-in, `Onnx.SetSessionDefaults`, and only the parity tool calls
+it.
+
+**`--jobs N`.** Run 1 measured static slices at default ORT settings: 1.2× for 6× the processes, and 12 were
+worse. Two things differ now, both taken from `tools/check-goldens.mts --jobs`:
+- **Work-stealing, largest golden first.** Each worker gets the next language when it reports the last one.
+- **Each worker's ORT pool is capped at one thread.**
+
+Each worker runs the same `CheckOne` as the serial loop, one language at a time, so the per-language and per-row
+resets work exactly as before. Results are merged in the serial order.
+
+`dotnet csharp/tools/parity/bin/Release/net10.0/parity.dll --jobs N`, load average about 3.3 at the start:
+
+| jobs | wall | user CPU | CPU | parent max RSS |
+|---|---|---|---|---|
+| 1 (spinning off) | 107.5 s | 192 s | 197% | 1.85 GB |
+| 4 | **48.9 s** | 198 s | 411% | 1.08 GB |
+| 8 | 45.6 s | 305 s | 684% | 0.97 GB |
+| 16 | 51.5 s | 414 s | 826% | 0.82 GB |
+
+`cmp` of the 4, 8 and 16 outputs against serial: identical, 189/189 byte-identical, 36,495 rows.
+
+**Reading it.**
+- 4 jobs spend the same CPU as serial, so the 2.2× is free.
+- Past 4 the CPU climbs much faster than the wall drops: hyperthreads on 8 physical cores, plus setup repeated
+  in each worker (Run 1's 37 s).
+- 4 is the gate setting.
+- The floor is `nan`: about 23 s of per-row work on the Sinitic path (Run 1: 3× its TS twin, not chased).
+  That's the next target if more is wanted.
+
+**Rust, same scheme** (`rust/tools/parity --jobs N`, processes for the same reason: `foreign::clear_foreign_oov`
+resets a process-wide memo):
+- 18.2 s serial;
+- 6.1 s at 4 jobs (23 s user CPU);
+- 4.8 s at 8;
+- 5.7 s at 16.
+
+All outputs are identical to serial. A worker that dies fails the run with exit 2 and names the language;
+checked with a language that has no golden.

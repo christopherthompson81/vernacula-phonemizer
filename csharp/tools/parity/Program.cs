@@ -22,13 +22,38 @@
 //   dotnet run --project csharp/tools/parity            all goldens
 //   dotnet run --project csharp/tools/parity -- fr th   just these codes
 //   dotnet run --project csharp/tools/parity -- --unported   which codes have no C# engine
+//   dotnet run --project csharp/tools/parity -- --jobs 8     8 worker processes (see ParityPool)
 using System.Text;
 using Vernacula.Phonemizer;
 using Vernacula.Phonemizer.Core;
 
 var goldens = Path.Combine(AppContext.BaseDirectory, "../../../../../goldens");
 if (!Directory.Exists(goldens)) goldens = "csharp/goldens";
-var only = args.Where(a => !a.StartsWith('-')).ToHashSet();
+var jobsAt = Array.IndexOf(args, "--jobs");
+var jobs = jobsAt < 0 ? 1
+    : jobsAt + 1 < args.Length && int.TryParse(args[jobsAt + 1], out var j) && j >= 1 ? j
+    : throw new ArgumentException("--jobs takes a positive integer");
+// ⚠ CAPPED AT THE CORE COUNT: each worker is a whole process with its own engines, data and ONNX sessions.
+jobs = Math.Min(jobs, Environment.ProcessorCount);
+var only = args.Where((a, i) => !a.StartsWith('-') && !(i > 0 && args[i - 1] == "--jobs")).ToHashSet();
+
+// ⚠ ORT'S DEFAULT POOL IS FOR ONE REQUEST, NOT FOR THIS. Every session gets one intra-op thread per core that
+// spins between ops; a run builds ~15 of them. Serially, spinning off cut CPU 539 → 226 s with wall time
+// 153 → 141 s; a `--jobs` worker takes a one-thread pool, since N of them already fill the cores (the same cap
+// `tools/check-goldens.mts --jobs` uses). Output was byte-identical in both
+// (docs/investigations/csharp_parity_perf_investigation.md, Run 3).
+if (args.Contains("--child")) Onnx.SetSessionDefaults(intraOpNumThreads: 1, allowSpinning: false);
+else Onnx.SetSessionDefaults(allowSpinning: false);
+
+// `--child`: a `--jobs` worker. One golden path per stdin line, answered with one JSON line.
+if (args.Contains("--child"))
+{
+    using var stdout = new StreamWriter(Console.OpenStandardOutput(), new UTF8Encoding(false)) { AutoFlush = true };
+    Console.SetOut(TextWriter.Null); // the protocol owns stdout; anything else an engine prints would corrupt it
+    for (string? path; (path = Console.In.ReadLine()) != null;)
+        stdout.WriteLine(System.Text.Json.JsonSerializer.Serialize(CheckOne(path)));
+    return 0;
+}
 
 /*
  * `--poison`: WHERE the mapping dies, by call site. The C# mirror of `tools/provenance-poison.mts`.
@@ -233,69 +258,20 @@ var blockedRows = new List<string>();
 var firstDiff = new List<string>();
 var dependencyGaps = new SortedSet<string>(StringComparer.Ordinal);
 
-foreach (var file in Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, StringComparer.Ordinal))
+var files = Directory.EnumerateFiles(goldens, "*.tsv").OrderBy(f => f, StringComparer.Ordinal)
+    .Where(f => only.Count == 0 || only.Contains(Path.GetFileNameWithoutExtension(f))).ToList();
+var results = jobs == 1
+    ? files.Select(CheckOne).ToList()
+    : ParityPool.Run(files, jobs);
+foreach (var r in results)
 {
-    var code = Path.GetFileNameWithoutExtension(file);
-    if (only.Count > 0 && !only.Contains(code)) continue;
-    int ok = 0, bad = 0;
-    string? sample = null;
-    // ⚠ SNAPSHOT PER LANGUAGE, not once for the run. Every UNPORTED golden also asks the registry for its own
-    // engine, so a run-wide list named all 105 of them and buried the two entries that matter — the engines a
-    // PORTED language reached through the script router and did not get.
-    var pendingBefore = Registry.PortPending.ToHashSet(StringComparer.Ordinal);
-    var blocked = 0;
-    var blockedOn = new SortedSet<string>(StringComparer.Ordinal);
-    string? blockedSample = null;
-    // ⚠ AND THE FOREIGN-OOV MEMO IS CLEARED PER LANGUAGE, for the same reason the GENERATOR clears it: it is
-    // global, so a mixed-script language's prewarm would otherwise leave BiLSTM readings that a later
-    // Latin-script language picks up through the foreign reader — making a row pass because of what ran
-    // before it. The goldens are generated per-language-isolated; the gate has to measure the same way.
-    Foreign.ClearForeignOov();
-    foreach (var line in File.ReadLines(file))
-    {
-        var t = line.Split('\t');
-        if (t.Length != 2) continue;
-        // ⚠ CLEARED PER ROW — see Registry.ClearPortPending. Without this the first Hebrew row in the run
-        // poisons every later row's verdict, because the set is process-wide and only grows.
-        Registry.ClearPortPending();
-        string got;
-        // ⚠ THE NEURAL-CAPABLE ENTRY, per the async-goldens warning above. Calling the sync Phonemize here
-        // reported the ENGINE as broken for every neural language: af showed 120/200 rows differing, all of
-        // them the rule g2p standing in for the tagger.
-        try { got = Phonemizer.PhonemizeAsync(t[0], code).GetAwaiter().GetResult(); }
-        catch (NotImplementedException) { goto notPorted; }
-        catch (Exception e) { got = $"<THREW {e.GetType().Name}: {e.Message}>"; }
-        if (got == t[1]) { ok++; continue; }
-        // ⚠ A ROW BLOCKED ON AN UNPORTED DEPENDENCY IS NOT A PORTING BUG, AND MUST NOT BE COUNTED AS ONE —
-        // but it must not be waved through either. The script router hands an embedded foreign run to
-        // ANOTHER language's engine; when that engine is unported the run is dropped and the row differs
-        // through no fault of the language under test (syl carries one Hebrew phrase; gan carries five).
-        // The test is PER ROW and evidential: this row is blocked only if phonemizing IT is what newly
-        // registered a PortPending key. A blanket per-language exemption would hide a real regression in
-        // any language that happens to have one blocked row.
-        // ⚠ THE BLIND SPOT, STATED: a blocked row is not checked for anything ELSE. If the same row also
-        // carried a genuine defect in the language under test, this would hide it. That is why blocked rows
-        // are PRINTED with their text rather than merely counted — the set is tiny (1 today) and meant to
-        // be read. It shrinks to nothing when the dependency is ported, which is the only correct exit.
-        var rowPending = Registry.PortPending;
-        if (rowPending.Count > 0)
-        {
-            blocked++;
-            foreach (var k in rowPending) blockedOn.Add(k);
-            blockedSample ??= $"  {code}: {{n}} row(s) blocked on {string.Join(", ", rowPending)} — \"{t[0][..Math.Min(44, t[0].Length)]}\"";
-            continue;
-        }
-        bad++; sample ??= $"  {code}: \"{t[0][..Math.Min(48, t[0].Length)]}\"\n    want {t[1]}\n    got  {got}";
-    }
-    rowsOk += ok; rowsBad += bad; rowsBlocked += blocked;
-    if (blockedSample != null) blockedRows.Add(blockedSample.Replace("{n}", blocked.ToString()));
-    foreach (var key in Registry.PortPending) if (!pendingBefore.Contains(key)) dependencyGaps.Add($"{code} → {key}");
-    if (bad == 0 && blocked > 0) { langsBlocked++; Console.WriteLine($"  {code,-8} OK    {ok} rows, {blocked} BLOCKED"); }
-    else if (bad == 0) { langsOk++; Console.WriteLine($"  {code,-8} OK    {ok} rows"); }
-    else { langsBad++; Console.WriteLine($"  {code,-8} DIFF  {bad}/{ok + bad} rows differ"); if (firstDiff.Count < 8 && sample != null) firstDiff.Add(sample); }
-    continue;
-notPorted:
-    Console.WriteLine($"  {code,-8} not ported");
+    if (r.NotPorted) { Console.WriteLine($"  {r.Code,-8} not ported"); continue; }
+    rowsOk += r.Ok; rowsBad += r.Bad; rowsBlocked += r.Blocked;
+    if (r.BlockedSample != null) blockedRows.Add(r.BlockedSample);
+    foreach (var g in r.Gaps) dependencyGaps.Add(g);
+    if (r.Bad == 0 && r.Blocked > 0) { langsBlocked++; Console.WriteLine($"  {r.Code,-8} OK    {r.Ok} rows, {r.Blocked} BLOCKED"); }
+    else if (r.Bad == 0) { langsOk++; Console.WriteLine($"  {r.Code,-8} OK    {r.Ok} rows"); }
+    else { langsBad++; Console.WriteLine($"  {r.Code,-8} DIFF  {r.Bad}/{r.Ok + r.Bad} rows differ"); if (firstDiff.Count < 8 && r.Sample != null) firstDiff.Add(r.Sample); }
 }
 Console.WriteLine($"\n{langsOk} languages byte-identical, {langsBad} differ ({rowsOk} rows ok, {rowsBad} differ)"
                   + (rowsBlocked > 0 ? $"; {langsBlocked} language(s) fully match except {rowsBlocked} row(s) BLOCKED on an unported dependency" : ""));
@@ -343,3 +319,139 @@ if (variantPending.Count > 0)
     Console.WriteLine("⚠ NOT PORTED, and their base language IS: " + string.Join(", ", variantPending));
 
 return langsBad == 0 ? 0 : 1;
+
+/** One language's verdict. The serial loop and every `--jobs` worker run exactly this. */
+static LangResult CheckOne(string file)
+{
+    var code = Path.GetFileNameWithoutExtension(file);
+    int ok = 0, bad = 0;
+    string? sample = null;
+    // ⚠ SNAPSHOT PER LANGUAGE, not once for the run. Every UNPORTED golden also asks the registry for its own
+    // engine, so a run-wide list named all 105 of them and buried the two entries that matter — the engines a
+    // PORTED language reached through the script router and did not get.
+    var pendingBefore = Registry.PortPending.ToHashSet(StringComparer.Ordinal);
+    var blocked = 0;
+    var blockedOn = new SortedSet<string>(StringComparer.Ordinal);
+    string? blockedSample = null;
+    // ⚠ AND THE FOREIGN-OOV MEMO IS CLEARED PER LANGUAGE, for the same reason the GENERATOR clears it: it is
+    // global, so a mixed-script language's prewarm would otherwise leave BiLSTM readings that a later
+    // Latin-script language picks up through the foreign reader — making a row pass because of what ran
+    // before it. The goldens are generated per-language-isolated; the gate has to measure the same way.
+    Foreign.ClearForeignOov();
+    foreach (var line in File.ReadLines(file))
+    {
+        var t = line.Split('\t');
+        if (t.Length != 2) continue;
+        // ⚠ CLEARED PER ROW — see Registry.ClearPortPending. Without this the first Hebrew row in the run
+        // poisons every later row's verdict, because the set is process-wide and only grows.
+        Registry.ClearPortPending();
+        string got;
+        // ⚠ THE NEURAL-CAPABLE ENTRY, per the async-goldens warning above. Calling the sync Phonemize here
+        // reported the ENGINE as broken for every neural language: af showed 120/200 rows differing, all of
+        // them the rule g2p standing in for the tagger.
+        try { got = Phonemizer.PhonemizeAsync(t[0], code).GetAwaiter().GetResult(); }
+        catch (NotImplementedException) { return LangResult.Unported(code); }
+        catch (Exception e) { got = $"<THREW {e.GetType().Name}: {e.Message}>"; }
+        if (got == t[1]) { ok++; continue; }
+        // ⚠ A ROW BLOCKED ON AN UNPORTED DEPENDENCY IS NOT A PORTING BUG, AND MUST NOT BE COUNTED AS ONE —
+        // but it must not be waved through either. The script router hands an embedded foreign run to
+        // ANOTHER language's engine; when that engine is unported the run is dropped and the row differs
+        // through no fault of the language under test (syl carries one Hebrew phrase; gan carries five).
+        // The test is PER ROW and evidential: this row is blocked only if phonemizing IT is what newly
+        // registered a PortPending key. A blanket per-language exemption would hide a real regression in
+        // any language that happens to have one blocked row.
+        // ⚠ THE BLIND SPOT, STATED: a blocked row is not checked for anything ELSE. If the same row also
+        // carried a genuine defect in the language under test, this would hide it. That is why blocked rows
+        // are PRINTED with their text rather than merely counted — the set is tiny (1 today) and meant to
+        // be read. It shrinks to nothing when the dependency is ported, which is the only correct exit.
+        var rowPending = Registry.PortPending;
+        if (rowPending.Count > 0)
+        {
+            blocked++;
+            foreach (var k in rowPending) blockedOn.Add(k);
+            blockedSample ??= $"  {code}: {{n}} row(s) blocked on {string.Join(", ", rowPending)} — \"{t[0][..Math.Min(44, t[0].Length)]}\"";
+            continue;
+        }
+        bad++; sample ??= $"  {code}: \"{t[0][..Math.Min(48, t[0].Length)]}\"\n    want {t[1]}\n    got  {got}";
+    }
+    var gaps = Registry.PortPending.Where(k => !pendingBefore.Contains(k)).Select(k => $"{code} → {k}").ToArray();
+    return new LangResult(code, false, ok, bad, blocked, sample,
+        blockedSample?.Replace("{n}", blocked.ToString()), gaps);
+}
+
+/** One language's verdict, as `CheckOne` reports it and a `--jobs` worker sends it. */
+record LangResult(string Code, bool NotPorted, int Ok, int Bad, int Blocked, string? Sample, string? BlockedSample,
+    string[] Gaps)
+{
+    public static LangResult Unported(string code) => new(code, true, 0, 0, 0, null, null, []);
+}
+
+/**
+ * `--jobs N`: N long-lived worker processes, each handed the next unstarted language as it reports the last one —
+ * the scheme `tools/check-goldens.mts --jobs` uses.
+ *
+ * ⚠ PROCESSES, NOT THREADS. `Foreign.ClearForeignOov()` per language and `Registry.ClearPortPending()` per row
+ * reset process-wide state; two languages in one process would share it and corrupt the blocked-row accounting
+ * (Run 1). A worker runs `CheckOne` exactly as the serial loop does, one language at a time.
+ * ⚠ WORK-STEALING, LARGEST GOLDEN FIRST: costs are uneven (`nan` alone is ~23 s), and a static split was
+ * measured at 1.2× for 6× the processes (Run 1).
+ * ⚠ RESULTS ARE MERGED IN THE SERIAL ORDER, so the report does not depend on scheduling. ⚠ If a `--jobs` run and
+ * a serial run ever disagree, the serial run is the one that counts.
+ */
+static class ParityPool
+{
+    public static List<LangResult> Run(List<string> files, int jobs)
+    {
+        var queue = new Queue<int>(Enumerable.Range(0, files.Count).OrderByDescending(i => new FileInfo(files[i]).Length));
+        var results = new LangResult?[files.Count];
+        var errors = new System.Collections.Concurrent.ConcurrentBag<string>();
+        // The same program, as a worker: `dotnet parity.dll --child` or the apphost directly.
+        var exe = Environment.ProcessPath!;
+        var dll = System.Reflection.Assembly.GetEntryAssembly()!.Location;
+        var viaDotnet = Path.GetFileNameWithoutExtension(exe) == "dotnet";
+        var workers = Enumerable.Range(0, Math.Min(jobs, files.Count)).Select(_ => new Thread(() =>
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo(exe)
+            {
+                RedirectStandardInput = true, RedirectStandardOutput = true, UseShellExecute = false,
+                StandardOutputEncoding = new UTF8Encoding(false), StandardInputEncoding = new UTF8Encoding(false),
+            };
+            if (viaDotnet) psi.ArgumentList.Add(dll);
+            psi.ArgumentList.Add("--child");
+            using var proc = System.Diagnostics.Process.Start(psi)!;
+            try
+            {
+                while (true)
+                {
+                    int i;
+                    lock (queue) { if (!queue.TryDequeue(out i)) break; }
+                    proc.StandardInput.WriteLine(files[i]);
+                    proc.StandardInput.Flush();
+                    var line = proc.StandardOutput.ReadLine()
+                        ?? throw new InvalidOperationException($"{Path.GetFileName(files[i])}: the worker stopped before reporting it");
+                    results[i] = System.Text.Json.JsonSerializer.Deserialize<LangResult>(line);
+                }
+                proc.StandardInput.Close();
+                proc.WaitForExit();
+                // ⚠ A WORKER THAT DIES IS A FAILED RUN, NOT A SHORTER ONE.
+                if (proc.ExitCode != 0) errors.Add($"a worker exited with status {proc.ExitCode}");
+            }
+            catch (Exception e)
+            {
+                errors.Add(e.Message);
+                try { proc.Kill(); } catch { }
+            }
+        })).ToList();
+        workers.ForEach(t => t.Start());
+        workers.ForEach(t => t.Join());
+        foreach (var e in errors) Console.Error.WriteLine($"--jobs: {e}");
+        // ⚠ EVERY LANGUAGE MUST COME BACK: a lost one would otherwise just be a shorter green report.
+        var back = results.Count(r => r != null);
+        if (errors.Count > 0 || back != files.Count)
+        {
+            Console.Error.WriteLine($"--jobs: {back} of {files.Count} languages came back — the run is incomplete");
+            Environment.Exit(2);
+        }
+        return results.Select(r => r!).ToList();
+    }
+}
