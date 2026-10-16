@@ -46,7 +46,11 @@ CC-BY: `LICENSES/LicenseRef-SindhiOpenLexicon.txt`. Affects the Devanagari tier 
 Used without obligation beyond the credit given here.
 
 - **The CMU Pronouncing Dictionary (CMUdict)** — Carnegie Mellon University. Behind
-  `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `g2p-common.txt`, and the English G2P models.
+  `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `g2p-common.txt`, `en-nasal-seam.tsv`, and the English
+  G2P models.
+- **Moby Pronunciator II** — Grady Ward, Project Gutenberg eBook #3205, public domain by grant from the
+  author (January 2001). 16,227 rows imported into `english/g2p-dict.tsv` (`moby-import.tsv`), so also
+  behind the English G2P models; a filter for `en-nasal-seam.tsv`; and two referee corpora, tools only.
 - **Peter Norvig, `count_1w`** (<https://norvig.com/ngrams/>), from the Google Web Trillion Word
   Corpus — the frequency ranking in `english/g2p-common.txt`. Membership only; no counts reproduced.
 - **NST pronunciation lexica** — Nasjonalbiblioteket / Språkbanken, CC0. Danish (`sbr-26`), Norwegian
@@ -70,12 +74,17 @@ Used without obligation beyond the credit given here.
 - **Google `language-resources/km`** (<https://github.com/google/language-resources>) — CC-BY 4.0,
   "Copyright 2018 Google Inc." `khmer/km-lexicon-dict.tsv` (the second lexicon tier) and
   `tools/referee-eval/referees/km.google-lexicon.tsv` (the secondary referee), both converted to this
-  project's IPA; the readings are Google's.
+  project's IPA; the readings are Google's. Its word forms are also training data for
+  `khmer/km-segmenter.int8.onnx`.
 - **Google FLEURS** (<https://huggingface.co/datasets/google/fleurs>) — CC-BY 4.0. Transcript-derived
   word frequencies in `tools/referee-eval/freq/pa.txt`; audio used measurement-only (never shipped).
 - **Phonikud** and **ReNikud** — thewh1teagle, CC-BY 4.0. Builders behind `hebrew/he-lexicon.tsv`.
 - **ICU `thaidict`** — Unicode, Inc., Unicode-DFS-2016. Part of `thai/seg-words.txt`.
   Text: `LICENSES/Unicode-DFS-2016.txt`.
+- **misaki** — hexgrad (<https://github.com/hexgrad/misaki>), Apache-2.0. `english/en-syllabic.tsv`
+  records the syllabic-consonant slot positions of misaki's `us_gold.json` for words the dictionary
+  already carries; no phoneme strings are copied, and the file header states the change. Text:
+  `LICENSES/Apache-2.0.txt`.
 - **CATT — Character-based Arabic Tashkeel Transformer** — AbjadAI, Apache-2.0
   (arXiv:2407.03236). Offline teacher for `arabic/diacritizer.onnx`.
 - **OpenCC** — Apache-2.0. `TSCharacters` / `STCharacters` tables, used for the
@@ -106,8 +115,9 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
   The single largest upstream: the shipped lexica and stress/tone/quality tables listed in §3, and
   the 188 Wiktionary-family referee sets in the evaluation harness.
   <https://en.wiktionary.org>
-- **Wikipedia** dumps — CC-BY-SA. Training text for `arabic/diacritizer.onnx` (arwiki) and
-  `arabic/diacritizer-egy.onnx` (arzwiki); the stem union in `afrikaans/af-stems.txt` (afwiki); the
+- **Wikipedia** dumps — CC-BY-SA. Training text for `arabic/diacritizer.onnx` (arwiki),
+  `arabic/diacritizer-egy.onnx` (arzwiki) and `khmer/km-segmenter.int8.onnx` (kmwiki, whose typed
+  U+200B word breaks are the supervision); the stem union in `afrikaans/af-stems.txt` (afwiki); the
   mined attestation corpora under `tools/corpus/`.
 - **kanjium** — CC-BY-SA. The consensus voter in `japanese/pitch-accent.tsv`.
 - **JMdict / KANJIDIC** — © EDRDG, CC-BY-SA 4.0. See the named attribution above.
@@ -144,8 +154,10 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
 - **Tajik Shahnameh corpus** — CC-BY-SA. Tajik component of `persian/fa-context-restorer.*.onnx`.
 
 Model weights that reproduce licensed pronunciation data are declared CC-BY-SA-inheriting and fenced
-with the data: `perso-arabic/riderDiacritizer.onnx`, `persian/fa-vowel-restorer.*.onnx`,
-`persian/fa-context-restorer.*.onnx` (Tajik component), `french/fr-g2p-tagger.int8.onnx`.
+with the data: `core/riderDiacritizer.onnx`, `persian/fa-vowel-restorer.*.onnx`,
+`persian/fa-context-restorer.*.onnx` (Tajik component), `french/fr-g2p-tagger.int8.onnx`,
+`afrikaans/af-g2p-tagger.int8.onnx`, `sindhi/sd-g2p-tagger.int8.onnx` (kaikki Sindhi, with the Sindhi
+Open Lexicon above).
 
 ## Copyleft — GPL-fenced (§4)
 
