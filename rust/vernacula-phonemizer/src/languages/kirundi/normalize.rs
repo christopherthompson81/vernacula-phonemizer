@@ -370,7 +370,7 @@ pub(crate) fn normalize_kirundi(input: &JsString) -> JsString {
     );
     s = rewrite_with(
         &s,
-        js_re!(r"(?<![\d.,])(\d+)\.(\d{1,2})(?!\d|[.,]\d)", "gu"),
+        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?!\d|[.,]\d)", "gu"), // any tail (#1595)
         |m, t| spell(&m.group(1, t).unwrap(), &m.group(2, t).unwrap()),
     );
     s = rewrite_with(

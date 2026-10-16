@@ -447,7 +447,9 @@ export function normalizeLingala(input: string): string {
     //     WRONG. Tight `2e`/`16e` (×184, all French ordinals) is what the rule is for and is unaffected.
     s = rewrite(s, /(?<![\d\p{L}\p{M}])1\s?(?:er|ère|re)(?![\p{L}\p{M}])/gu, `ya ${FIRST_ORDINAL}`);
     s = rewrite(s, /(?<![\d\p{L}\p{M}])(\d+)\s?(?:ème|nd)(?![\p{L}\p{M}])/gu, "ya $1");
-    s = rewrite(s, /(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])/gu, "ya $1");
+    //     ⚠ AND NOT BEFORE A DIGIT (#1595): `1e5` and `2e6` are exponent notation, and the unguarded arm read
+    //     them as ordinals, "fifteenth" and "twenty-sixth". `\d+e\d` is ×0 in the corpus.
+    s = rewrite(s, /(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}\d])/gu, "ya $1");
 
     // 13) THE AMPERSAND — ×254, and every instance read is a bibliographic "and" between two names
     //     ("De Moor & JP Jacquemin", "M. Vences & F. Glaw", "Bd 1&2"). `mpé` is the language's ordinary

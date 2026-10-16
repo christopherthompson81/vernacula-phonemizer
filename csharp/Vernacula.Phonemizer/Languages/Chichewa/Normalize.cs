@@ -59,7 +59,7 @@ public static class Normalize
     private static readonly JsRe ORDINAL_SUFFIX = JsRegex.Compile("(\\d+)(?:st|nd|rd|th)(?![\\p{L}\\p{M}])", "giu");
     private static readonly JsRe RANGE = JsRegex.Compile(
         "(?<![-\\d.,\\p{L}\\p{M}])(\\d+)[ \u00a0]?[-–—][ \u00a0]?(\\d+)(?![-\\d\\p{L}\\p{M}])", "gu");
-    private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d{1,2})(?![\\d])", "gu");
+    private static readonly JsRe DECIMAL_DOT = JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d])", "gu");  // any tail (#1595): see normalize.ts
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile("(?<![\\d.,])(\\d+),(\\d{1,2})(?![\\d,])", "gu");
     private static readonly JsRe RUN_OF_SPACES = JsRegex.Compile("[^\\S\\n]{2,}", "gu");
     private static readonly JsRe EDGE_SPACES = JsRegex.Compile("^[^\\S\\n]+|[^\\S\\n]+$", "gu");

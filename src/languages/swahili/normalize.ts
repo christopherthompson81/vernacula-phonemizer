@@ -166,6 +166,17 @@ export function normalizeSwahili(input: string): string {
         /\d\s*$/u.test(whole.slice(0, off)) ? m0 : "hasi ");
     s = rewrite(s, /(\S)\+\s?(?=\d)/gu, "$1 plas ");
     s = rewrite(s, /(^|\s)\+\s?(?=\d)/gu, "$1plas ");
+    // ⚠ A TEMPERATURE RANGE, BEFORE THE DEGREE ARMS (#1595). `10-15°C` lost its dash and its `hadi`: the
+    //    `°C` arm claimed `15°C` first and left RANGE (step 6) no second endpoint, so the span read *kumi nyuzi
+    //    joto kumi na tano Selsiasi*, "ten degrees fifteen Celsius". The span takes the measure noun once, in
+    //    front, as the corpus writes a single temperature ("nyuzi joto 45°C"), and `hadi` between the
+    //    endpoints, as RANGE does. Ascending only, for RANGE's reason; any other pair falls through unchanged.
+    s = rewrite(s, /(?<![\d.,\p{L}])(\d+(?:\.\d+)?)\s?[-–]\s?(\d+(?:\.\d+)?)\s?°\s?([CF])?(?![\p{L}\p{M}])/gui,
+        (whole, a: string, b: string, scale: string | undefined) => {
+            if (!(Number(a) < Number(b))) return whole;
+            const name = scale === undefined ? "" : scale.toUpperCase() === "C" ? " Selsiasi" : " Fahrenheit";
+            return `nyuzi joto ${a} hadi ${b}${name}`;
+        });
     s = rewrite(s, /(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])/gui, "nyuzi joto $1 Selsiasi");
     s = rewrite(s, /([+-]?)(\d[\d.,]*)\s?°\s?F(?![\p{L}\p{M}])/gui, "nyuzi joto $2 Fahrenheit");
     s = rewrite(s, /([+-]?)(\d[\d.,]*)\s?°/gu, "nyuzi joto $2");

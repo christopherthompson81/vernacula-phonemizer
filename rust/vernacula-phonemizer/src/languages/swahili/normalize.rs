@@ -85,6 +85,31 @@ pub(crate) fn normalize_swahili(input: &JsString) -> JsString {
     );
     s = rewrite(&s, js_re!(r"(\S)\+\s?(?=\d)", "gu"), &js("$1 plas "));
     s = rewrite(&s, js_re!(r"(^|\s)\+\s?(?=\d)", "gu"), &js("$1plas "));
+    // A temperature range, claimed before the degree arms (#1595): see `normalize.ts`.
+    s = rewrite_with(
+        &s,
+        js_re!(
+            r"(?<![\d.,\p{L}])(\d+(?:\.\d+)?)\s?[-–]\s?(\d+(?:\.\d+)?)\s?°\s?([CF])?(?![\p{L}\p{M}])",
+            "gui"
+        ),
+        |m, t| {
+            let (a, b) = (m.group(1, t).unwrap(), m.group(2, t).unwrap());
+            if js_number(&a) < js_number(&b) {
+                let name = match m.group(3, t) {
+                    None => "",
+                    Some(c) if c == js("C") || c == js("c") => " Selsiasi",
+                    Some(_) => " Fahrenheit",
+                };
+                js("nyuzi joto ")
+                    .concat(&a)
+                    .concat(&js(" hadi "))
+                    .concat(&b)
+                    .concat(&js(name))
+            } else {
+                m.value(t)
+            }
+        },
+    );
     s = rewrite(
         &s,
         js_re!(r"(\d[\d.,]*)\s?°\s?C(?![\p{L}\p{M}])", "gui"),

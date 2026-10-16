@@ -317,7 +317,7 @@ pub(crate) fn normalize_lingala(input: &JsString) -> JsString {
     );
     s = rewrite(
         &s,
-        js_re!(r"(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}])", "gu"),
+        js_re!(r"(?<![\d\p{L}\p{M}])(\d+)e(?![\p{L}\p{M}\d])", "gu"), // not before a digit (#1595)
         &js("ya $1"),
     );
     s = rewrite(&s, js_re!(r"\s?&\s?", "gu"), &js(" mpé "));

@@ -648,3 +648,18 @@ mod tests {
         assert_eq!(hits.get(), 0);
     }
 }
+
+/// #1595, as test/ebantu-defects-1595.test.ts: relational, so no IPA is typed. Synthetic inputs.
+#[cfg(all(test, feature = "ln"))]
+mod defects_1595_tests {
+    #[test]
+    fn an_exponent_is_not_an_ordinal() {
+        for (input, written) in [("1e5", "1 e 5"), ("2e6", "2 e 6"), ("2e", "ya 2")] {
+            assert_eq!(
+                crate::phonemize(input, "ln").unwrap(),
+                crate::phonemize(written, "ln").unwrap(),
+                "{input}"
+            );
+        }
+    }
+}

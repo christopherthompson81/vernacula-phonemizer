@@ -323,3 +323,35 @@ regex-diff, clippy, the twelve per-module dumps re-made and replayed, and `LANGS
 **Port-pending.** None: no row of the six routes to an unported engine.
 
 **Implication.** Ready for the PR.
+
+## Run 9 — 2026-10-15 20:55 (#1595: the TS defects this port recorded, fixed in all three engines)
+
+Probed on main (4b6e7511) with the TS engine, using synthetic inputs, then fixed TS-first and mirrored to C# and Rust.
+
+- **sw `10-15°C`** read *kumi nyuzi joto kumi na tano Selsiasi*: the `°C` arm claimed `15°C` before RANGE could
+  see a second endpoint. A temperature-range arm now runs before the degree arms. It gives `nyuzi joto A hadi B
+  <scale>`, which composes the corpus's own "nyuzi joto 45°C" order with RANGE's `hadi`. It is ascending only,
+  so `15-10°C` falls through unchanged.
+- **rw, rn, nya `0.125`, `3.14159`** read "zero." then an integer: the dot decimal arm took a 1–2 digit tail
+  only. Every grouped dot shape is spent by the de-grouping step first, so a longer tail that reaches the decimal
+  arm is a decimal. Measured over the mined artifacts:
+  - `\d+\.\d{4,}`: ×2 in rw, both decimal coordinates (`−2.010556`, `30.557500`); ×0 in rn and nya.
+  - `0\.\d{3,}`: ×0 in all three.
+  - No dotted date has a four-digit tail.
+  The dot arm now takes any tail. ⚠ The COMMA arm keeps its 1–2 limit, because a date comma (`Novembala
+  26,2008`) has a four-digit tail.
+- **ln `1e5`, `2e6`** read as ordinals ("fifteenth", "twenty-sixth"). The bare-`e` arm gained `\d` in its
+  negative lookahead. `\d+e\d` is ×0 in the corpus; `1e5` now reads like `1 e 5`, and a tight `2e` still reads
+  `ya 2`.
+- **rn `-5°C` loses its sign: DECLINED.** This is the refusal the file already records. Kirundi has no
+  attested reading: rn.wikipedia gives 0 hits for `"munsi ya zeru"` and 0 for `"munsi ya" dogere`, and rw's
+  `munsi ya zeru` citations are Kinyarwanda.
+
+Goldens: sw, rw, rn, nya and ln are all unchanged (1000 rows, 0 stale). Tests are relational in all three
+engines:
+- TS: 3 tests;
+- C#: 13 cases;
+- Rust: one per language, in its own module.
+
+With the fixes reverted, all 3 TS tests fail, 11 of the 13 C# cases fail (the 2 controls pass), and all 5 Rust
+tests fail.

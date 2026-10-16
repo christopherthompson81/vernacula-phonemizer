@@ -559,3 +559,18 @@ mod tests {
         assert_eq!(hits.get(), 0);
     }
 }
+
+/// #1595, as test/ebantu-defects-1595.test.ts: relational, so no IPA is typed. Synthetic inputs.
+#[cfg(all(test, feature = "rn"))]
+mod defects_1595_tests {
+    #[test]
+    fn a_long_decimal_reads_as_one_number() {
+        for (input, written) in [("0.125", "0 1 2 5"), ("3.14159", "3 1 4 1 5 9")] {
+            assert_eq!(
+                crate::phonemize(input, "rn").unwrap(),
+                crate::phonemize(written, "rn").unwrap(),
+                "{input}"
+            );
+        }
+    }
+}

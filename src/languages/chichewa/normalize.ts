@@ -286,10 +286,12 @@ export function normalizeChichewa(input: string): string {
     //     tier (which runs BEFORE this whole pass) needs the digit adjacent to its sign. The dot was
     //     reaching `clausePunctuation` and becoming a SENTENCE BREAK inside a number. NO separator word is
     //     emitted; see the header.
-    //     ⚠ BOTH SEPARATORS, both restricted to a 1–2 digit tail — the same discipline step 4 uses from the
-    //     other side. Without the tail limit these two arms would swallow any grouped thousand step 4
-    //     declined (a date comma, `Novembala 26,2008`, has a four-digit tail and is excluded by both).
-    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d{1,2})(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
+    //     ⚠ THE COMMA IS RESTRICTED TO A 1–2 DIGIT TAIL — the same discipline step 4 uses from the other side.
+    //     Without the limit it would swallow any grouped thousand step 4 declined (a date comma, `Novembala
+    //     26,2008`, has a four-digit tail).
+    //     ⚠ THE DOT IS NOT (#1595): its limit read `3.14159` as "three." then 14,159. Step 4 has spent every
+    //     grouped dot shape, so a longer tail reaching this arm is a decimal. The corpus has none either way.
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d])/gu, (_m, i: string, f: string) => spell(i, f));
     s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => spell(i, f));
 
     // ⚠ A padded replacement (` ndi `, `letters `) doubles a space that was already there and can leave one
