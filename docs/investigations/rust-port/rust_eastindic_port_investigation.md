@@ -219,3 +219,30 @@ and `hi` text, pinned as a Rust test (`group_scripts_inside_other_hosts_are_read
 **Port-pending.** syl: 5 golden rows, on `ar` (5) and `he` (1); pinned by `arabic_and_hebrew_runs_are_pending_until_ported`.
 
 **Implication.** Ready for the PR.
+
+## Run 9 — 2026-10-15 20:40 (fixing #1584 TS-first, mirrored to C# and Rust)
+
+Question: which of the four #1584 items are real, and what does each fix move?
+
+1. **bn best ignored neural English.** Probe (`phonemizeAsync`, synthetic):
+   `en Quexington → kwˈɛksɪŋtən`; `bn "আমি Quexington যাব" → ami kjˈuːʃɪŋtˌʌn d͡ʒabo` (the rule reading).
+   Fixed by building the bn neural engine with the registry's `readAsEnglish` (now exported in TS; already public in
+   C# and Rust), not `getPhonemizer("en").text`. After: `ami kwˈɛksɪŋtən d͡ʒabo`. This is not the
+   `askedWordsNeuralPrepass` shape (#1603): the Bengali words reach the tagger correctly, and only the foreign
+   reader was wrong. Golden: 1 bn best row, where `METI` goes from *mˈɛt̬ɪ* to *mˈɛt̬i*, en best's own reading.
+2. **The phôla class never matches its nukta letters.** Real at the regex level: after NFC, ড় ঢ় য় stay decomposed
+   (U+09DC/09DD/09DF are composition exclusions), so `[ক-হড়-য়]` cannot match them. But making it match is WRONG for
+   every attested word of the shape. A search of the bn lexicon, the bn/as mined corpora, the goldens and the
+   referees for `[ড ঢ য]়্[য ব ম]` finds only loans with য়্যা: `সফটওয়্যার`, `হার্ডওয়্যার` (wikipron
+   `ʃ ɔ pʰ ʈ w æ r`, `h a r ɖ w æ r`) and `রয়্যাল` (corpus). wikipron reads য়্যা as *wæ*, with no gemination.
+   With the class fixed, sync `সফটওয়্যার` goes from `ʃɔpʰʈɔojd͡ʒaɾ` to `ʃɔpʰʈɔojːaɾ`, a geminated /j/ that the
+   referee contradicts. **Declined.** The real defect is that য়্যা should read *æ* after the glide, and that is a
+   separate rule.
+3. **`BengaliDef` vs the data.** `symbolTier` and `ordinals` are now optional on `BengaliDef`. `MANIFEST` is typed
+   `BengaliManifest` (`BengaliDef` with both required), so the readers stay checked. Rust already had `Option<…>`
+   and C# had defaults, so only the TS type was wrong. Type-only; typecheck is the guard.
+4. **as `<` `>` `×` ASCII-only.** `normalizeAssamese("৩ < ৫")` came back unchanged. The class is now
+   `[0-9০-৯]`, kept as a literal so the corpus still extracts it. After: `৩ তকৈ সৰু ৫`.
+
+Guard proof: each new test (TS 2, C# 6, Rust 2) fails with its fix reverted. Corpus: +3 patterns; both
+regex-diffs report 153,086 identical.

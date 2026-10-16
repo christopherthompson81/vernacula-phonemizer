@@ -66,9 +66,10 @@ public static class Normalize
     private static readonly JsRe AMP_TIGHT = JsRegex.Compile("([A-Za-z])&([A-Za-z])", "gu");
     private static readonly JsRe REGNAL_WW = JsRegex.Compile($"([{D}]{{1,2}})\\s+বিশ্ব যুদ্ধ", "gu");
     private static readonly JsRe EQUALS_RE = JsRegex.Compile("(\\S)\\s*=\\s*(\\S)", "gu");
-    private static readonly JsRe LESS_THAN = JsRegex.Compile("(\\d)\\s*<\\s*(\\d)", "gu");
-    private static readonly JsRe GREATER_THAN = JsRegex.Compile("(\\d)\\s*>\\s*(\\d)", "gu");
-    private static readonly JsRe TIMES = JsRegex.Compile("(\\d)\\s*×\\s*(\\d)", "gu");
+    // ⚠ BOTH DIGIT SCRIPTS (#1584), as the TS: these keyed on ASCII `\d`, so `৩ < ৫` kept its sign.
+    private static readonly JsRe LESS_THAN = JsRegex.Compile("([0-9\\u09e6-\\u09ef])\\s*<\\s*([0-9\\u09e6-\\u09ef])", "gu");
+    private static readonly JsRe GREATER_THAN = JsRegex.Compile("([0-9\\u09e6-\\u09ef])\\s*>\\s*([0-9\\u09e6-\\u09ef])", "gu");
+    private static readonly JsRe TIMES = JsRegex.Compile("([0-9\\u09e6-\\u09ef])\\s*×\\s*([0-9\\u09e6-\\u09ef])", "gu");
 
     /** Build the Assamese pre-pass normalizer. Takes the numbers definition so it can re-compose a cardinal
      *  (e.g. for `1,000তম` where the suffix must stay attached to the de-grouped number). */

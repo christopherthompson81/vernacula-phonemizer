@@ -16,19 +16,21 @@
 import { createBengali, bengaliLexicon } from "./bengali.ts";
 import { withHost } from "../../core/foreign.ts";
 import { createBengaliTagger, type BengaliTagger } from "./bengaliTagger.ts";
-import { getPhonemizer } from "../../registry.ts";
+import { readAsEnglish } from "../../registry.ts";
 import { BENGALI_WORD } from "../../core/unicode.ts";
 import { wordLevelNeuralPrepass } from "../../core/structuralTagger.ts";
 import { renormalize } from "../../core/provenance.ts";
 
 const WORD = new RegExp(`[${BENGALI_WORD}]+`, "gu");
 let taggerP: Promise<BengaliTagger | undefined> | undefined;
-// One built engine, reused across calls (like the sync path's singleton — no per-call rebuild). Built WITH the same
-// English `foreign` phonemizer the registry wires for "bn", so embedded Latin is transliterated identically to
-// phonemize(text,"bn"); getPhonemizer is called lazily so there is no import cycle at module init.
+// One built engine, reused across calls (like the sync path's singleton — no per-call rebuild). Built WITH the
+// registry's own `readAsEnglish`, the reader its "bn" arm wires, so embedded Latin reads identically to
+// phonemize(text,"bn"). ⚠ IT USED TO BE `getPhonemizer("en").text`, which skips the foreign-OOV memo that
+// phonemizeAsync has just prewarmed: an OOV English word inside bn got the rule reading on the BEST path while en
+// and hi best read it neurally (`Quexington` *kjˈuːʃɪŋtˌʌn* vs *kwˈɛksɪŋtən*, #1584). Called lazily, so the import
+// cycle with the registry is harmless at module init.
 let engine: ReturnType<typeof createBengali> | undefined;
-const bnEngine = (): ReturnType<typeof createBengali> =>
-    (engine ??= createBengali((latin) => getPhonemizer("en").text(latin)));
+const bnEngine = (): ReturnType<typeof createBengali> => (engine ??= createBengali((latin) => readAsEnglish(latin)));
 
 /**
  * Phonemize Bengali text with the neural tagger filling the OOV tail. Async because the ONNX pass is; falls back to

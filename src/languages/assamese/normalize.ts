@@ -156,10 +156,14 @@ export function makeAssameseNormalizer(numbers: NumbersDef): (text: string) => s
         // 9) SIGNS the Bengali normalize does not own. It handles `-` (ঋণাত্মক) and `+` (যোগ); `=`, `<`,
         //    `>`, `×` do not occur in as_in but are read for completeness: সমান (equal), তকৈ সৰু (less),
         //    তকৈ ডাঙৰ (greater), গুণ (times). AFTER the regnal rule (which uses digits too).
+        //    ⚠ BOTH DIGIT SCRIPTS, as the header requires (#1584). These three keyed on ASCII `\d`, so `৩ < ৫` kept
+        //    its sign. Through `phonemize` the registry folds native digits first, so only a direct call showed
+        //    it. Written as literals with the class spelled out (`D` above, by escape), so the regex corpus still
+        //    extracts them.
         s = rewrite(s, /(\S)\s*=\s*(\S)/gu, "$1 সমান $2");
-        s = rewrite(s, /(\d)\s*<\s*(\d)/gu, "$1 তকৈ সৰু $2");
-        s = rewrite(s, /(\d)\s*>\s*(\d)/gu, "$1 তকৈ ডাঙৰ $2");
-        s = rewrite(s, /(\d)\s*×\s*(\d)/gu, "$1 গুণ $2");
+        s = rewrite(s, /([0-9\u09e6-\u09ef])\s*<\s*([0-9\u09e6-\u09ef])/gu, "$1 তকৈ সৰু $2");
+        s = rewrite(s, /([0-9\u09e6-\u09ef])\s*>\s*([0-9\u09e6-\u09ef])/gu, "$1 তকৈ ডাঙৰ $2");
+        s = rewrite(s, /([0-9\u09e6-\u09ef])\s*×\s*([0-9\u09e6-\u09ef])/gu, "$1 গুণ $2");
 
         return s;
     };
