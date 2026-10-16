@@ -463,6 +463,28 @@ public static class Unicode
     }
 
     /**
+     * HISTORIC LETTER FORMS → their modern letter: `ſ` → `s`, `ẛ` → `ṡ`, and the historic Cyrillic forms U+1C80–U+1C88
+     * → `в д о с т т ъ ѣ ꙋ`. These are the letters whose simple case folding reaches another letter while their
+     * lowercase is themselves. So an `iu` regex built from a table's keys matched them, and the table had no row
+     * (#1122; zu, ha, hu and lb spoke "undefined"). Each is a typographic variant of its target, so it reads as
+     * that letter everywhere. One code unit for one. See `foldHistoricForms` in src/core/unicode.ts.
+     */
+    public static string FoldHistoricForms(string s)
+    {
+        if (!HISTORIC_FORMS_RE.IsMatch(s)) return s;
+        return Rewrite(s, HISTORIC_FORMS_RE, m => HISTORIC_FORMS[m.Value]);
+    }
+
+    private static readonly Dictionary<string, string> HISTORIC_FORMS = new()
+    {
+        ["\u017f"] = "s", ["\u1e9b"] = "\u1e61",
+        ["\u1c80"] = "\u0432", ["\u1c81"] = "\u0434", ["\u1c82"] = "\u043e", ["\u1c83"] = "\u0441", ["\u1c84"] = "\u0442",
+        ["\u1c85"] = "\u0442", ["\u1c86"] = "\u044a", ["\u1c87"] = "\u0463", ["\u1c88"] = "\ua64b",
+    };
+
+    private static readonly JsRe HISTORIC_FORMS_RE = JsRegex.Compile(@"[\u017f\u1e9b\u1c80-\u1c88]", "gu");
+
+    /**
      * CARET EXPONENTS → real superscripts. `2^10`, `km^2`, `10^-31`, and the LaTeX-ish `10^{10}`: the caret is
      * how a programmer types an exponent, and it means the same thing in every language, so rendering it hands
      * it to the exponent machinery that already exists. THE GUARD IS TIGHT because a caret is also an ordinary
