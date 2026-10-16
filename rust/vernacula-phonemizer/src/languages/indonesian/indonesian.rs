@@ -5,8 +5,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_indonesian;
 use crate::core::clauses::assemble_clauses;
@@ -27,8 +27,8 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/indonesian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub belas: String,
@@ -40,7 +40,7 @@ pub struct NumbersDef {
     pub decimal_word: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
@@ -48,7 +48,7 @@ pub struct Phonotactics {
     pub digraphs: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct MultiplyDef {
     pub times: String,
     pub by: Option<String>,
@@ -56,15 +56,15 @@ pub struct MultiplyDef {
 
 /// `cubed` is optional, as in the TS interface (#1534): indonesian.jsonc declares `squared` only, so the tier has
 /// no cube word.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWordsDef {
     pub squared: CountForms,
     pub cubed: Option<CountForms>,
     pub position: Option<PositionDecl>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -76,8 +76,8 @@ pub struct SymbolTier {
 }
 
 /// `IndonesianDef`: indonesian.jsonc. Documentation keys the TS does not read are ignored.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct IndonesianDef {
     pub digraphs: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

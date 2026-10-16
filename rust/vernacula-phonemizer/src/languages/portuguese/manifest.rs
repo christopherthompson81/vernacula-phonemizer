@@ -1,19 +1,19 @@
 //! Portuguese's hand-authored tables, from `portuguese.jsonc`. Ported from src/languages/portuguese/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`). Keys the TS does not read
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`). Keys the TS does not read
 //! (`language`, `convention`, …) are documentation and are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/portuguese";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Accents {
     pub to_base: IndexMap<String, String>,
     pub acute_grave: String,
@@ -21,8 +21,8 @@ pub struct Accents {
     pub tilde: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Numbers {
     pub small: Vec<String>,
     pub tens: Vec<String>,
@@ -36,16 +36,16 @@ pub struct Numbers {
     pub dot_connector: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct Ordinals {
     pub units: Vec<String>,
     pub tens: Vec<String>,
@@ -53,30 +53,30 @@ pub struct Ordinals {
     pub thousandth: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct Fractions {
     /// Integer-like keys: JS would order them first, but the table is only ever looked up.
     pub denominators: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct Clock {
     pub hour: String,
     pub hours: String,
     pub connector: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase", deny_unknown_fields)]
 pub struct EraMarkers {
     pub before_christ: String,
     pub after_christ: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct Degree {
     pub singular: String,
     pub plural: String,
@@ -85,8 +85,8 @@ pub struct Degree {
 }
 
 /// `SignWords` (core/normalizeSymbols.ts).
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SignWords {
     pub plus_minus: String,
     pub plus: String,
@@ -102,15 +102,15 @@ pub struct SignWords {
 /// `CountForms` is `string[]`.
 pub type CountForms = Vec<String>;
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct BareExponent {
     pub squared: String,
     pub cubed: String,
@@ -118,8 +118,8 @@ pub struct BareExponent {
     pub negative: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -130,8 +130,8 @@ pub struct SymbolTier {
     pub magnitude_connective: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct PortugueseManifest {
     pub acronym_letters: Vec<String>,
     pub accents: Accents,

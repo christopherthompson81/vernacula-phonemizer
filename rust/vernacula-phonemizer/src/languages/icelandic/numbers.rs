@@ -4,7 +4,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::manifest::DIR;
 use crate::core::data_source::load_once;
@@ -12,20 +12,20 @@ use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string}
 use crate::core::load_manifest::load_manifest;
 use crate::core::numbers::digit_index;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct OnePlural {
     pub one: String,
     pub plural: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct OneWord {
     pub one: String,
     pub word: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct NumbersBlock {
     pub ones: Vec<String>,
     pub ones_feminine: Vec<String>,
@@ -39,7 +39,7 @@ pub struct NumbersBlock {
 }
 
 /// `IcelandicNumbersDef`: this module's own slice of the jsonc, as the TS declares it.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct IcelandicNumbersDef {
     pub numbers: NumbersBlock,
 }

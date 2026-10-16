@@ -1,12 +1,12 @@
 //! Spanish's hand-authored facts, from `spanish.jsonc`. Ported from src/languages/spanish/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`convention`, `provenance`, …) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -14,8 +14,8 @@ use crate::core::normalize_symbols::CountForms;
 
 pub const DIR: &str = "languages/spanish";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Vowels {
     pub strong: String,
     pub weak_unaccented: String,
@@ -23,15 +23,15 @@ pub struct Vowels {
     pub front: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Scale {
     pub value: f64,
     pub one: String,
     pub many: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -46,14 +46,14 @@ pub struct Numbers {
     pub scales: Vec<Scale>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Ordinals {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -64,22 +64,22 @@ pub struct Ordinals {
     pub apocopating: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Fractions {
     pub denominators: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct EraMarkers {
     pub before_christ: String,
     pub after_christ: String,
 }
 
 /// `SignWords` (core/normalizeSymbols.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SignWords {
     pub plus_minus: String,
     pub plus: String,
@@ -92,13 +92,13 @@ pub struct SignWords {
     pub divided_by: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct BareExponent {
     pub squared: String,
     pub cubed: String,
@@ -106,8 +106,8 @@ pub struct BareExponent {
     pub negative: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -118,8 +118,8 @@ pub struct SymbolTier {
     pub magnitude_connective: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SpanishManifest {
     pub vowels: Vowels,
     pub acronym_letters: Vec<String>,

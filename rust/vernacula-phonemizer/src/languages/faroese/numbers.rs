@@ -12,7 +12,8 @@ use crate::languages::danish::units_first_numbers::{UnitsFirstDef, units_first_n
 const DEF_JSON: &str = r#"{"ones":["null","eitt","tvey","trý","fýra","fimm","seks","sjey","átta","níggju","tíggju","ellivu","tólv","trettan","fjúrtan","fimtan","sekstan","seytjan","átjan","nítjan"],"tens":["","","tjúgu","tríati","fýrati","fimmti","seksti","sjeyti","áttati","níti"],"compoundOnes":["","ein"],"hundred":{"one":"eitt hundrað","word":"hundrað"},"thousand":{"one":"eitt túsund","word":"túsund"},"million":{"one":"ein millión","plural":"milliónir"},"billion":{"one":"ein milliard","plural":"milliardir"},"mulJoin":" ","hundredRemJoin":" og ","groupJoin":" og "}"#;
 
 static DEF: LazyLock<UnitsFirstDef> = LazyLock::new(|| {
-    let mut d: UnitsFirstDef = serde_json::from_str(DEF_JSON).expect("numbers.ts DEF literal");
+    let mut d: UnitsFirstDef =
+        crate::core::from_json::parse_json(DEF_JSON).expect("numbers.ts DEF literal");
     d.connector = |_, _| "og".to_string();
     d
 });

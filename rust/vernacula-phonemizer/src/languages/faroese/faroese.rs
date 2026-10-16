@@ -6,8 +6,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_faroese;
 use super::numbers::number_to_words;
@@ -25,8 +25,8 @@ pub const DIR: &str = "languages/faroese";
 
 /// `FaroeseDef` (faroese.jsonc). Every field the TS interface names is required; `language`, `name` and
 /// `script` are documentation the TS does not read.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct FaroeseDef {
     pub vowels: IndexMap<String, (String, String)>,
     pub consonants: IndexMap<String, String>,
@@ -309,7 +309,8 @@ fn nasal_pass(segs: &mut [Seg]) {
 const SYMBOL_DATA: &str = r#"{"percent":["prosent"],"currency":{"kr":["króna","krónur"],"$":["dollari","dollarar"],"€":["evra","evrur"]},"units":{"km":["kilometur","kilometrar"],"m":["metur","metrar"],"cm":["sentimetur","sentimetrar"],"mm":["millimetur","millimetrar"],"kg":["kilogramm","kilogrommum"]},"exponentWords":{"squared":["fervent"],"cubed":["teningsmát"],"position":"after"},"ampersand":"og","magnitudes":["túsund","milliónir","miljardir"]}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

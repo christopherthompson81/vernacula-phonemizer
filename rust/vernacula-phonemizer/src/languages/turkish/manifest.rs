@@ -1,12 +1,12 @@
 //! Turkish's hand-authored facts, from `turkish.jsonc`. Ported from src/languages/turkish/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`) except the ones it marks optional;
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`) except the ones it marks optional;
 //! documentation keys the TS does not read (`convention`, `provenance`, …) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -14,8 +14,8 @@ use crate::core::normalize_symbols::{CountForms, PositionDecl};
 
 pub const DIR: &str = "languages/turkish";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Vowels {
     pub ipa: IndexMap<String, String>,
     pub front: Vec<String>,
@@ -23,8 +23,8 @@ pub struct Vowels {
     pub back: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -34,14 +34,14 @@ pub struct Numbers {
     pub decimal_connector: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Multiply {
     pub times: String,
     pub by: Option<String>,
@@ -49,15 +49,15 @@ pub struct Multiply {
 
 /// ⚠ The TS interface types `position` as `"before" | "after"`, but the file says `"suffix"`, which the shared
 /// tier accepts; the value is passed through, so the Rust type is the tier's own.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
     pub position: Option<PositionDecl>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub multiply: Multiply,
     pub percent_prefix: bool,
@@ -67,8 +67,8 @@ pub struct SymbolTier {
     pub exponent_words: ExponentWords,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct TurkishManifest {
     pub vowels: Vowels,
     pub circumflex_fold: IndexMap<String, String>,

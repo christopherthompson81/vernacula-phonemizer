@@ -7,8 +7,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_luxembourgish;
 use super::numbers::{DIR, apply_eifeler_regel, number_to_words, try_numbers};
@@ -26,8 +26,8 @@ use crate::js_re;
 use crate::registry::{Engine, PhonemizeError};
 
 /// `LuxDef`: this module's own slice of luxembourgish.jsonc, as in the TS.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LuxDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,
@@ -276,7 +276,8 @@ static NAT: LazyLock<Nativiser> =
 const SYMBOL_DATA: &str = r#"{"multiply":{"times":"mol"},"percent":["Prozent"],"currency":{"$":["Dollar"],"€":["Euro"],"¥":["Yen"]},"units":{"km":["Kilometer"],"m":["Meter"],"cm":["Zentimeter"],"mm":["Millimeter"],"kg":["Kilogramm"]},"magnitudes":["Milliounen","Millioune","Millioun","Milliarden","Milliard"],"unitPer":{"h":"an der","s":"pro"},"rateDenominators":{"h":"Stonn","s":"Sekonn"},"exponentWords":{"squared":["Quadrat"],"cubed":["Kubik"],"position":"compound"}}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

@@ -5,8 +5,8 @@
 use std::collections::HashMap;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::JsString;
@@ -15,7 +15,7 @@ use crate::core::normalize_symbols::{CountForms, Multiply};
 
 pub const DIR: &str = "languages/korean";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Jamo {
     pub onset: String,
     pub vowel: String,
@@ -23,29 +23,29 @@ pub struct Jamo {
 }
 
 /// `coda[jamo]`: the consonant kept before a consonant or pause, and the (left, onset) split under liaison.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct CodaInfo {
     pub cons: String,
     pub lc: String,
     pub lo: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Aspiration {
     pub h_coda_lenis_onset: IndexMap<String, String>,
     pub stop_coda_h_onset: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Native {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
     pub twenty: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub ten: String,
@@ -56,15 +56,15 @@ pub struct Numbers {
 }
 
 /// `symbolTier: { percent; currency; multiply: { times; by? } }`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
     pub multiply: Multiply,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct KoreanManifest {
     pub jamo: Jamo,
     pub onset: IndexMap<String, String>,

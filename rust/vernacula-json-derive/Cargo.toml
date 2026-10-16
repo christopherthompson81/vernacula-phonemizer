@@ -1,0 +1,15 @@
+[package]
+name = "vernacula-json-derive"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+description = "#[derive(FromJson)] for vernacula-phonemizer: decodes a data struct from a serde_json::Value"
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1"
+quote = "1"
+syn = "2"

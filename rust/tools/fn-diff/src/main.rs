@@ -4,6 +4,7 @@
 //!   cargo run --release -p fn-diff -- arpabet ../.probe/rust/arpabet.jsonl
 use indexmap::IndexMap;
 use serde_json::Value;
+use vernacula_phonemizer::core::from_json::FromJson;
 use vernacula_phonemizer::core::js_string::{JsString, js_number, js_number_to_string};
 use vernacula_phonemizer::core::load_manifest::load_json;
 use vernacula_phonemizer::core::load_tsv::load_lines;
@@ -364,7 +365,7 @@ fn main() {
                         &format!("{dir}.jsonc"),
                     )
                     .unwrap();
-                serde_json::from_value(m["numbers"].clone()).unwrap()
+                FromJson::from_json(&m["numbers"]).unwrap()
             };
             let (hi, hy) = (def("hindi"), def("armenian"));
             Box::new(move |input| {
@@ -390,7 +391,7 @@ fn main() {
             let mut tiers: std::collections::HashMap<u64, SymbolNormalizer> = Default::default();
             for line in text.lines().filter(|l| l.starts_with("{\"def\"")) {
                 let row: Value = serde_json::from_str(line).unwrap();
-                let mut data: SymbolData = serde_json::from_value(row["data"].clone()).unwrap();
+                let mut data: SymbolData = FromJson::from_json(&row["data"]).unwrap();
                 let sig = row["countForm"].as_str().unwrap();
                 let cf: CountForm = count_form(sig)
                     .unwrap_or_else(|| panic!("{}: no Rust twin for countForm {sig}", row["dir"]));

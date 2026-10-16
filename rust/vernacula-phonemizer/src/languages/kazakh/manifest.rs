@@ -1,11 +1,11 @@
 //! Kazakh's hand-authored facts, from `kazakh.jsonc`. Ported from src/languages/kazakh/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -13,7 +13,7 @@ use crate::core::load_manifest::load_manifest;
 pub const DIR: &str = "languages/kazakh";
 
 /// Pre-phonemized cardinal atoms (IPA, not orthography).
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub units: Vec<String>,
     pub tens: Vec<String>,
@@ -24,8 +24,8 @@ pub struct Numbers {
     pub trillion: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct KazakhManifest {
     pub vowels: IndexMap<String, String>,
     pub glides: IndexMap<String, String>,

@@ -1,11 +1,11 @@
 //! Swahili's hand-authored tables, from `swahili.jsonc`. Ported from src/languages/swahili/manifest.ts.
 //!
-//! Every field the TS `SwahiliDef` names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS `SwahiliDef` names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -13,7 +13,7 @@ use crate::core::normalize_symbols::{CountForms, Multiply, UnitPer};
 
 pub const DIR: &str = "languages/swahili";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub ten: String,
@@ -25,8 +25,8 @@ pub struct NumbersDef {
 }
 
 /// `Required<Pick<SymbolData, …>>`: every key present.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -40,14 +40,14 @@ pub struct SymbolTier {
     pub ampersand: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct EraWords {
     pub bce: String,
     pub ad: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SwahiliManifest {
     pub velar_nasal: String,
     pub prenasal: IndexMap<String, String>,

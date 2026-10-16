@@ -1,13 +1,13 @@
 //! Bavarian's hand-authored tables, from `bavarian.jsonc` (`BarDef`): digraphs, graphemes, clause punctuation and
 //! the sourced ordinal stems. Ported from src/languages/bavarian/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); the `numbers` block is numbers.rs's
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); the `numbers` block is numbers.rs's
 //! own slice, as in the TS.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -15,8 +15,8 @@ use crate::core::load_manifest::load_manifest;
 pub const DIR: &str = "languages/bavarian";
 
 /// `BarDef` (bavarian.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BarDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,

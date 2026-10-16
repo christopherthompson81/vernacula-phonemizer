@@ -1,11 +1,11 @@
 //! Kyrgyz's hand-authored facts, from `kyrgyz.jsonc`. Ported from src/languages/kyrgyz/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -13,8 +13,8 @@ use crate::core::numbers::NumbersDef;
 
 pub const DIR: &str = "languages/kyrgyz";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct KyrgyzManifest {
     pub vowels: IndexMap<String, String>,
     pub back_vowels: String,

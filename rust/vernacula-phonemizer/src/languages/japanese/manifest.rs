@@ -1,6 +1,6 @@
 //! Japanese's hand-authored tables, from `japanese.jsonc`. Ported from src/languages/japanese/manifest.ts.
 //!
-//! Every field the TS interface (`JapaneseManifest`) names is REQUIRED here (no `#[serde(default)]`), down to
+//! Every field the TS interface (`JapaneseManifest`) names is REQUIRED here (no `#[json(default)]`), down to
 //! the symbol tier's `exponentWords.squared/cubed` and the four `bareExponent` words: those blocks have
 //! ja-local structs with required fields, converted to the shared tier's all-optional types. Only the
 //! fields the TS interface itself marks optional (`exponentWords.position`, `multiply.by`) are `Option`.
@@ -9,8 +9,8 @@
 use std::collections::HashMap;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::js_string::JsString;
 use crate::core::load_manifest::load_manifest;
@@ -20,14 +20,14 @@ use crate::core::normalize_symbols::{
 
 pub const DIR: &str = "languages/japanese";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NasalClass {
     pub onsets: String,
     pub nasal: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub hundreds: Vec<String>,
@@ -37,16 +37,16 @@ pub struct Numbers {
     pub zero: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct PitchStrip {
     pub particles: String,
     pub copula: Vec<String>,
     pub copula_final_particles: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct JapaneseManifest {
     pub vowels: IndexMap<String, String>,
     pub mora: IndexMap<String, String>,
@@ -62,8 +62,8 @@ pub struct JapaneseManifest {
 }
 
 /// The shared symbol tier's data (`symbolTier`), every field the TS interface requires.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -76,7 +76,7 @@ pub struct SymbolTier {
 }
 
 /// `exponentWords: { squared: CountForms; cubed: CountForms; position?: … }`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct JaExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
@@ -84,7 +84,7 @@ pub struct JaExponentWords {
 }
 
 /// `bareExponent: { squared: string; cubed: string; power: string; negative: string }`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct JaBareExponent {
     pub squared: String,
     pub cubed: String,

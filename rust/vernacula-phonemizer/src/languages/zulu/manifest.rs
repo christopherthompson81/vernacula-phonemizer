@@ -2,26 +2,26 @@
 //! punctuation, the number words and the `ye-` ordinals. Xhosa reads the same shape from its own file.
 //! Ported from src/languages/zulu/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`) except `ordinalYe`, below;
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`) except `ordinalYe`, below;
 //! documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/zulu";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NounClassMagnitude {
     pub one: String,
     pub many: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub ku: Vec<String>,
     pub na: Vec<String>,
@@ -33,8 +33,8 @@ pub struct Numbers {
     pub million: NounClassMagnitude,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct ZuluManifest {
     pub rules: Vec<(String, String, bool)>,
     pub tone_chao: IndexMap<String, String>,

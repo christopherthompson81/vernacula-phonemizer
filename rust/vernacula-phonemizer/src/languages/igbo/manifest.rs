@@ -1,20 +1,20 @@
 //! Igbo's hand-authored tables, from `igbo.jsonc`: clause punctuation and the modern decimal cardinal numbers.
 //! Ported from src/languages/igbo/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/igbo";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub zero: String,
     pub one: String,
@@ -28,8 +28,8 @@ pub struct Numbers {
     pub decimal_word: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct IgboManifest {
     pub language: String,
     pub name: String,

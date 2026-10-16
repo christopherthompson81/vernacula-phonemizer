@@ -3,7 +3,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::hiligaynon::DIR;
 use crate::core::data_source::load_once;
@@ -11,7 +11,7 @@ use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string}
 use crate::core::load_manifest::load_manifest;
 use crate::core::numbers::digit_index;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct HilNumbers {
     pub units: Vec<String>,
     pub tens: Vec<String>,
@@ -22,7 +22,7 @@ pub struct HilNumbers {
     pub million: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 struct NumbersFile {
     numbers: HilNumbers,
 }

@@ -38,7 +38,8 @@ fn unit_noun(u: &JsString) -> &'static str {
 const SYMBOL_DATA: &str = r#"{"percent":["ehuneko"],"percentPrefix":true,"currency":{"€":["euro"],"£":["libera"],"$":["dolar"]},"units":{"km":["kilometro"],"m":["metro"],"kg":["kilogramo"],"mm":["milimetro"]},"magnitudes":["mila milioi","milioi","mila"],"rateDenominators":{"h":"orduko","s":"segundoko"},"unitPer":"","exponentWords":{"squared":["karratu"],"cubed":["kubiko"],"position":"after"}}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let mut data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let mut data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     data.count_form = Some(Arc::new(|_| 0.0));
     make_symbol_normalizer(&data)
 });

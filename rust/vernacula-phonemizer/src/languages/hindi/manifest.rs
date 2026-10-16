@@ -4,8 +4,8 @@
 
 use std::sync::OnceLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::abugida::AbugidaDef;
 use crate::core::data_source::load_once;
@@ -15,14 +15,14 @@ use crate::core::numbers::NumbersDef;
 
 pub const DIR: &str = "languages/hindi";
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Rule {
     pub from: String,
     pub to: String,
 }
 
-#[derive(Debug, Deserialize, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone, Default)]
+#[json(rename_all = "camelCase")]
 pub struct SchwaDeletion {
     pub delete_word_final: Option<bool>,
     pub retain_in_monosyllable: Option<bool>,
@@ -30,18 +30,18 @@ pub struct SchwaDeletion {
     pub retain_on_avagraha: Option<bool>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct OrdinalSuffixes {
     pub regular: IndexMap<String, usize>,
     pub suppletive_consonants: IndexMap<String, String>,
     pub vowel_forms: IndexMap<String, usize>,
 }
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct HindiDef {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub abugida: AbugidaDef,
     pub post_rules: Vec<Rule>,
     pub final_rules: Vec<Rule>,

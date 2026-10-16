@@ -33,7 +33,7 @@ fn fnv1a64(bytes: impl Iterator<Item = u8>) -> u64 {
 }
 
 fn english_ids(word: &str) -> Vec<i64> {
-    let meta: serde_json::Value = serde_json::from_str(
+    let meta: serde_json::Value = crate::core::from_json::parse_json(
         &crate::core::data_source::read_data_text("languages/english/en-g2p-tagger.meta.json")
             .unwrap(),
     )

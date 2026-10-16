@@ -4,7 +4,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, is_safe_integer, js};
@@ -15,7 +15,7 @@ use crate::js_re;
 pub const DIR: &str = "languages/uzbek";
 
 /// `loadManifest<{ numbers: NumbersDef }>(…, "uzbek.jsonc")`: the file's `numbers` block alone.
-#[derive(Deserialize)]
+#[derive(FromJson)]
 struct NumbersOnly {
     numbers: NumbersDef,
 }

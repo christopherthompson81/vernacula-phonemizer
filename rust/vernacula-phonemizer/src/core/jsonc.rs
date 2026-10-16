@@ -76,8 +76,10 @@ pub fn strip_jsonc(src: &str) -> String {
     out
 }
 
-pub fn parse_jsonc<T: serde::de::DeserializeOwned>(src: &str) -> Result<T, serde_json::Error> {
-    serde_json::from_str(&strip_jsonc(src))
+pub fn parse_jsonc<T: crate::core::from_json::FromJson>(
+    src: &str,
+) -> Result<T, crate::core::from_json::JsonError> {
+    crate::core::from_json::parse_json(&strip_jsonc(src))
 }
 
 #[cfg(test)]

@@ -2,12 +2,12 @@
 //! the symbol readings, the vigesimal cardinal numbers and the shared symbol tier's data.
 //! Ported from src/languages/yoruba/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -15,15 +15,15 @@ use crate::core::normalize_symbols::{CountForms, UnitPer};
 
 pub const DIR: &str = "languages/yoruba";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Tones {
     pub high: String,
     pub mid: String,
     pub low: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Symbols {
     pub range: String,
     pub percent_before: String,
@@ -38,14 +38,14 @@ pub struct Symbols {
     pub times: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct TenForms {
     pub free: String,
     pub fused: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub zero: String,
     pub units: Vec<String>,
@@ -65,8 +65,8 @@ pub struct Numbers {
     pub join: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub currency: IndexMap<String, CountForms>,
     pub units: IndexMap<String, CountForms>,
@@ -74,8 +74,8 @@ pub struct SymbolTier {
     pub rate_denominators: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct YorubaManifest {
     pub consonants: IndexMap<String, String>,
     pub vowels: IndexMap<String, String>,

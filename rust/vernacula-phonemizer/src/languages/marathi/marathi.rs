@@ -4,8 +4,8 @@
 
 use std::sync::{Arc, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{MarathiWords, make_marathi_normalizer};
 use crate::core::data_source::load_once;
@@ -19,11 +19,11 @@ use crate::languages::hindi::manifest::HindiDef;
 use crate::registry::{Engine, PhonemizeError, read_as_english};
 
 /// `MarathiDef extends HindiDef, MarathiWords`.
-#[derive(Deserialize, Clone)]
+#[derive(FromJson, Clone)]
 pub struct MarathiDef {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub hindi: HindiDef,
-    #[serde(flatten)]
+    #[json(flatten)]
     pub words: MarathiWords,
     pub ampersand: String,
     pub multiply: String,

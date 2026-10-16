@@ -2,13 +2,13 @@
 //! voicing triggers, the number words, letter names, phonotactics, the symbol tier's data and the ordinal /
 //! multiplicative morphs. Ported from src/languages/hungarian/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`language`, `name`, `script`, `provenance`, `convention`) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -16,8 +16,8 @@ use crate::core::normalize_symbols::{CountForms, ExponentWords};
 
 pub const DIR: &str = "languages/hungarian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -29,15 +29,15 @@ pub struct Numbers {
     pub milliard: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -48,8 +48,8 @@ pub struct SymbolTier {
     pub exponent_words: ExponentWords,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct HungarianManifest {
     pub rules: Vec<(String, String, bool)>,
     pub voiceless_triggers: Vec<String>,

@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_akan;
 use crate::core::clauses::assemble_clauses;
@@ -23,7 +23,7 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/akan";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct AkanNumbers {
     pub zero: String,
     pub units: Vec<String>,
@@ -39,8 +39,8 @@ pub struct AkanNumbers {
 }
 
 /// `AkanDef`: the tables of akan.jsonc.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AkanDef {
     pub digraphs: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

@@ -1,20 +1,20 @@
 //! Tagalog's hand-authored tables, from `tagalog.jsonc`. Ported from src/languages/tagalog/manifest.ts (the
 //! `TagalogDef` shape is declared in tagalog.ts).
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/tagalog";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -31,8 +31,8 @@ pub struct NumbersDef {
     pub stress_penult: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct TagalogDef {
     pub digraphs: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

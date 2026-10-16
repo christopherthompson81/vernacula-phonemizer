@@ -56,7 +56,8 @@ static NAT: LazyLock<Nativiser> = LazyLock::new(|| Box::new(make_nativiser("[a-z
 const SYMBOL_DATA: &str = r#"{"percent":["pazana"],"currency":{"US$":["madhora"],"$":["madhora"]},"currencyPrefix":true,"units":{"km":["makiromita"],"m":["mamita"],"cm":["masendimita"],"mm":["mamirimita"],"kg":["makirogiramu"],"t":["matani"],"ha":["hekita"],"l":["rita"],"L":["rita"]},"unitPrefix":true,"unitPer":"pa","rateDenominators":{"h":"awa","hr":"awa","hrs":"awa","s":"sekondi","min":"mineti"},"exponentWords":{"squared":["maskweya"],"position":"before"},"multiply":{"times":"kuwanzana ne"}}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

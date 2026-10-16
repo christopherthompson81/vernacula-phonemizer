@@ -1,12 +1,12 @@
 //! French's hand-authored tables, from `french.jsonc`. Ported from src/languages/french/manifest.ts.
 //!
-//! Every field the TS interface names is required (no `#[serde(default)]`); the documentation keys
+//! Every field the TS interface names is required (no `#[json(default)]`); the documentation keys
 //! (`convention`, `provenance`, …) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::load_manifest::load_manifest;
 use crate::core::normalize_symbols::{ExponentPosition, Multiply};
@@ -15,8 +15,8 @@ pub const DIR: &str = "languages/french";
 
 pub use crate::core::normalize_symbols::CountForms;
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct HeteronymCase {
     pub ipa: String,
     pub prev: Option<Vec<String>>,
@@ -24,13 +24,13 @@ pub struct HeteronymCase {
     pub next_is_number: Option<bool>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Heteronym {
     pub default: String,
     pub cases: Vec<HeteronymCase>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NumberMagnitudes {
     pub sixty: String,
     pub eighty: String,
@@ -40,8 +40,8 @@ pub struct NumberMagnitudes {
     pub millions: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub small: Vec<String>,
     pub tens: Vec<String>,
@@ -49,21 +49,21 @@ pub struct Numbers {
     pub decimal_separator: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
     pub position: Option<ExponentPosition>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct BareExponent {
     pub squared: String,
     pub cubed: String,
@@ -71,8 +71,8 @@ pub struct BareExponent {
     pub negative: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -85,8 +85,8 @@ pub struct SymbolTier {
     pub bare_exponent: BareExponent,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct FrenchManifest {
     pub vowel_letters: String,
     pub vowel_phonemes: String,

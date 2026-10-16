@@ -3,8 +3,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -12,8 +12,8 @@ use crate::languages::serbian::manifest::{SlavicNumbers, validate_numbers};
 
 pub const DIR: &str = "languages/bosnian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BosnianManifest {
     pub language: String,
     pub name: String,

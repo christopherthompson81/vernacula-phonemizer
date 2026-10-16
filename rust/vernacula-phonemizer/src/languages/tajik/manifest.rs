@@ -1,11 +1,11 @@
 //! Tajik's hand-authored data tables, from `tajik.jsonc`, loaded once. Ported from src/languages/tajik/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -14,7 +14,7 @@ use crate::core::normalize_symbols::CountForms;
 pub const DIR: &str = "languages/tajik";
 
 /// `numbers`: the cardinal spellings and the scale ladder.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -27,7 +27,7 @@ pub struct Numbers {
     pub and: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
@@ -35,8 +35,8 @@ pub struct Phonotactics {
 }
 
 /// `symbolTier`: the shapes are core's own `SymbolData` field types.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -47,8 +47,8 @@ pub struct SymbolTier {
     pub ampersand: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct TajikManifest {
     pub vowels: IndexMap<String, String>,
     pub glides: IndexMap<String, String>,

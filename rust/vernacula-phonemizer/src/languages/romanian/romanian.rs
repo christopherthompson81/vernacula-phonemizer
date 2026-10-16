@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_romanian;
 use crate::core::clauses::assemble_clauses;
@@ -21,8 +21,8 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/romanian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Gendered {
     pub one_masculine: String,
     pub one_feminine: String,
@@ -32,7 +32,7 @@ pub struct Gendered {
 }
 
 /// `NUM` (the TS casts `numbers` to this shape; every field it reads is required here).
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -51,8 +51,8 @@ pub struct Numbers {
 }
 
 /// `RomanianDef` (romanian.jsonc).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct RomanianDef {
     pub consonants: IndexMap<String, String>,
     pub obstruents: Vec<String>,

@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -13,7 +13,7 @@ use crate::core::normalize_symbols::{CountForms, ExponentWords, Multiply, UnitPe
 
 pub const DIR: &str = "languages/javanese";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub thousand: Vec<String>,
     pub million: Vec<String>,
@@ -21,8 +21,8 @@ pub struct Magnitudes {
     pub trillion: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct JavaneseNumbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -34,7 +34,7 @@ pub struct JavaneseNumbers {
     pub hundred: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
@@ -42,8 +42,8 @@ pub struct Phonotactics {
 }
 
 /// `Required<Pick<SymbolData, …>>`: every one of the nine fields is required.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -56,8 +56,8 @@ pub struct SymbolTier {
     pub ampersand: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct JavaneseManifest {
     pub digraphs: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

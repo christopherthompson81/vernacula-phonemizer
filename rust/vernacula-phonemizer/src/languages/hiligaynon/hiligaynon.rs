@@ -5,8 +5,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_hiligaynon, try_symbols};
 use super::numbers::{number_to_words, try_numbers};
@@ -22,8 +22,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/hiligaynon";
 
 /// `HiligaynonDef`: hiligaynon.jsonc (declared in hiligaynon.ts). `numbers` is numbers.ts's own load.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct HiligaynonDef {
     pub digraphs: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

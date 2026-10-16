@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_sundanese, try_symbols};
 use super::sunda_aksara::{aksara_to_latin, is_aksara_sunda, normalize_sunda_digits};
@@ -20,7 +20,7 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/sundanese";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub belas: String,
@@ -34,8 +34,8 @@ pub struct NumbersDef {
 }
 
 /// `SundaneseDef` (sundanese.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SundaneseDef {
     pub digraphs: IndexMap<String, String>,
     pub vowels: IndexMap<String, String>,

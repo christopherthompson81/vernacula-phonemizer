@@ -2,47 +2,47 @@
 //! dark l, syllabic sonorants. Ported from src/languages/english/englishArpabet.ts — see that file for the
 //! evidence behind each rule.
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::js_string::{JsString, js};
 use crate::js_re;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct StressPair {
     pub unstressed: String,
     pub stressed: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct IyForms {
     pub before_r: String,
     pub unstressed: String,
     pub stressed: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct UwForms {
     pub before_r: String,
     pub default: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct ConditionalVowels {
-    #[serde(rename = "AH")]
+    #[json(rename = "AH")]
     pub ah: StressPair,
-    #[serde(rename = "ER")]
+    #[json(rename = "ER")]
     pub er: StressPair,
-    #[serde(rename = "IY")]
+    #[json(rename = "IY")]
     pub iy: IyForms,
-    #[serde(rename = "UW")]
+    #[json(rename = "UW")]
     pub uw: UwForms,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct ArpabetDef {
     pub map: IndexMap<String, String>,
     pub vowels: Vec<String>,

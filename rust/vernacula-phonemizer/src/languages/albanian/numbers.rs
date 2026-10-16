@@ -2,14 +2,14 @@
 //! "one" kept, and the plural `milionë`/`miliardë` above one.
 //! Ported from src/languages/albanian/numbers.ts — see that file for the sources.
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string};
 use crate::js_re;
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Magnitudes {
     pub thousand: String,
     pub million: String,
@@ -19,7 +19,7 @@ pub struct Magnitudes {
 }
 
 /// `AlbanianNumbers`: the `numbers` block of albanian.jsonc.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct AlbanianNumbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,

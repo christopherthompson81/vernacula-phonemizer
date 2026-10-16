@@ -5,6 +5,7 @@ pub mod data_path;
 pub mod data_source;
 pub mod env;
 pub mod foreign;
+pub mod from_json;
 pub mod germanic_morphology;
 pub mod host_word;
 pub mod initialisms;

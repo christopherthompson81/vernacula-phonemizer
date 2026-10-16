@@ -1,13 +1,13 @@
 //! Finnish's hand-authored data tables, from `finnish.jsonc`, loaded once, and the grapheme keys longest first.
 //! Ported from src/languages/finnish/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`language`, `name`, `script`, `provenance`, `convention`) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, js};
@@ -15,8 +15,8 @@ use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/finnish";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub zero: String,
     pub units: Vec<String>,
@@ -31,8 +31,8 @@ pub struct Numbers {
     pub million_stem: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct FinnishManifest {
     pub graphemes: IndexMap<String, String>,
     pub vowel_letters: Vec<String>,

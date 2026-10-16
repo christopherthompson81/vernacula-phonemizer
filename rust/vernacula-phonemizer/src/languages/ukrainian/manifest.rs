@@ -1,13 +1,13 @@
 //! Ukrainian's hand-authored data tables, from `ukrainian.jsonc`, loaded once.
 //! Ported from src/languages/ukrainian/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`language`, `name`, `script`, `provenance`) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -18,20 +18,20 @@ use crate::core::numbers::NumbersDef;
 pub const DIR: &str = "languages/ukrainian";
 
 /// `MagnitudeForms` (numbers.ts): nom.pl (2–4) and gen.pl.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct MagnitudeForms {
     pub few: String,
     pub many: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct MagnitudeCounts {
     pub thousand: MagnitudeForms,
     pub million: MagnitudeForms,
     pub billion: MagnitudeForms,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct Feminine {
     pub one: String,
     pub two: String,
@@ -39,32 +39,32 @@ pub struct Feminine {
 
 /// `EastSlavicNumbers & { decimalConnector }`: the core `NumbersDef` plus the magnitude count forms and the
 /// feminine 1/2.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct EastSlavicNumbers {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub base: NumbersDef,
     pub magnitude_counts: MagnitudeCounts,
     pub feminine: Feminine,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct UkNumbers {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub east: EastSlavicNumbers,
     pub decimal_connector: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct OrdinalEnding {
     pub case: String,
     pub hard: String,
     pub soft: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Ordinals {
     pub one_to_nineteen: Vec<String>,
     pub tens: Vec<String>,
@@ -73,16 +73,16 @@ pub struct Ordinals {
     pub endings: Vec<OrdinalEnding>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct GenitiveCardinals {
     pub one_to_nineteen: Vec<String>,
     pub tens: Vec<String>,
     pub hundreds: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct RomanOrdinals {
     pub one_to_nineteen: Vec<String>,
     pub tens: Vec<String>,
@@ -90,29 +90,29 @@ pub struct RomanOrdinals {
     pub context: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Clock {
     pub preposition_case: IndexMap<String, String>,
     pub default_case: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct MultiDot {
     pub written: String,
     pub reading: String,
 }
 
 /// `SignWords` (core/normalizeSymbols.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SignWords {
     pub plus_minus: String,
     pub plus: String,
@@ -126,8 +126,8 @@ pub struct SignWords {
 }
 
 /// `symbolTier`: the shapes are core's own `SymbolData` field types.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -138,8 +138,8 @@ pub struct SymbolTier {
     pub magnitudes: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct UkrainianManifest {
     pub vowels: IndexMap<String, String>,
     pub iotated: IndexMap<String, String>,

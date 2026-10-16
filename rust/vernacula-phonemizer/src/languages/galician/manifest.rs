@@ -1,20 +1,20 @@
 //! Galician's hand-authored facts, from `galician.jsonc`. Ported from src/languages/galician/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/galician";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Vowels {
     pub strong: String,
     pub weak_unaccented: String,
@@ -22,14 +22,14 @@ pub struct Vowels {
     pub front: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Scale {
     pub one: String,
     pub many: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -42,8 +42,8 @@ pub struct Numbers {
     pub billion: Scale,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct GalicianManifest {
     pub vowels: Vowels,
     pub accents: IndexMap<String, String>,

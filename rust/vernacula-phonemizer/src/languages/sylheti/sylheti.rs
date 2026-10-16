@@ -4,8 +4,8 @@
 
 use std::sync::{Arc, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_sylheti;
 use crate::core::abugida::{AbugidaDef, AbugidaG2p, make_abugida_g2p};
@@ -20,10 +20,10 @@ use crate::core::schwa::delete_medial_schwa;
 use crate::js_re;
 use crate::registry::{Engine, PhonemizeError};
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct SylhetiDef {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub abugida: AbugidaDef,
     pub numbers: NumbersDef,
     pub clause_punctuation: IndexMap<String, String>,

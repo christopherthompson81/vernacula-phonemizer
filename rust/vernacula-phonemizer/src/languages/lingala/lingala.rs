@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_lingala, try_first_ordinal};
 use crate::core::clauses::assemble_clauses;
@@ -19,8 +19,8 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/lingala";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LingalaNumbers {
     pub ordinals: Vec<String>,
     pub zero: String,
@@ -41,8 +41,8 @@ pub struct LingalaNumbers {
 }
 
 /// `LingalaDef`: every field the TS interface names is REQUIRED; documentation keys are ignored.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LingalaDef {
     pub consonants: IndexMap<String, String>,
     pub vowels: IndexMap<String, String>,

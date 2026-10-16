@@ -3,7 +3,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string};
@@ -12,15 +12,15 @@ use crate::core::numbers::digit_index;
 
 pub const DIR: &str = "languages/aragonese";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Scale {
     pub value: f64,
     pub one: String,
     pub many: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -32,7 +32,7 @@ pub struct Numbers {
 }
 
 /// `AragoneseNumbersDef`: this module's own slice of aragonese.jsonc, as in the TS.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct AragoneseNumbersDef {
     pub numbers: Numbers,
 }

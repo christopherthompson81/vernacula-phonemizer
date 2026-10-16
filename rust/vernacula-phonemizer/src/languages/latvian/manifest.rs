@@ -5,29 +5,29 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/latvian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Voicing {
     pub to_voiceless: IndexMap<String, String>,
     pub to_voiced: IndexMap<String, String>,
 }
 
 /// A counted magnitude noun: singular after …1 (not …11), else the plural.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct OneMany {
     pub one: String,
     pub many: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -37,8 +37,8 @@ pub struct Numbers {
     pub million: OneMany,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LatvianManifest {
     pub vowels: IndexMap<String, String>,
     pub long_vowels: IndexMap<String, String>,

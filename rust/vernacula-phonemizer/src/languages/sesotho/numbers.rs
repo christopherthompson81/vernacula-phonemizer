@@ -4,7 +4,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string};
@@ -13,8 +13,8 @@ use crate::core::numbers::digit_index;
 
 pub const DIR: &str = "languages/sesotho";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SesothoNumbers {
     pub zero: String,
     pub units: Vec<String>,
@@ -38,7 +38,7 @@ pub struct SesothoNumbers {
 }
 
 /// This module's own slice of sesotho.jsonc, as in the TS.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct SesothoNumbersDef {
     pub numbers: SesothoNumbers,
 }

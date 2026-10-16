@@ -6,8 +6,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -15,8 +15,8 @@ use crate::core::load_manifest::load_manifest;
 pub const DIR: &str = "languages/serbian";
 
 /// `SlavicMagnitude`: a magnitude noun's count forms, and (on a feminine noun) the multiplier's 1/2.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SlavicMagnitude {
     pub standalone: Option<String>,
     pub one: String,
@@ -27,7 +27,7 @@ pub struct SlavicMagnitude {
 }
 
 /// The number-word table: the same shape in all three standards (Croatian and Bosnian carry their own words).
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct SlavicNumbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -37,8 +37,8 @@ pub struct SlavicNumbers {
     pub million: SlavicMagnitude,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SerbianManifest {
     pub acronym_letters: Vec<String>,
     pub digraphs: IndexMap<String, String>,

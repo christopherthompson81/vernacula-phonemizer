@@ -4,14 +4,14 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::burmese::DIR;
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string};
 use crate::core::load_manifest::load_manifest;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct BurmeseNumbers {
     pub zero: String,
     pub units: Vec<String>,
@@ -19,7 +19,7 @@ pub struct BurmeseNumbers {
     pub one: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 struct NumbersBlock {
     numbers: BurmeseNumbers,
 }

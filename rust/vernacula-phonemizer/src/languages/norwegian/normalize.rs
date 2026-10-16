@@ -17,7 +17,8 @@ use crate::js_re;
 const SYMBOL_DATA: &str = r#"{"multiply":{"times":"ganger"},"ampersand":"og","percent":["prosent"],"units":{"km":["kilometer"],"m":["meter"],"mm":["millimeter"]},"unitPer":"i","rateDenominators":{"t":"timen","h":"timen","s":"sekundet"}}"#;
 
 pub(crate) static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

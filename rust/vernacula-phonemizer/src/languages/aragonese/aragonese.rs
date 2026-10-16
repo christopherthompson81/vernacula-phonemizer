@@ -6,8 +6,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_aragonese;
 use super::numbers::{DIR, number_to_words, try_numbers};
@@ -24,8 +24,8 @@ use crate::core::provenance::{Form, normalize};
 use crate::registry::{Engine, PhonemizeError};
 
 /// `AragoneseDef`: declared in aragonese.ts itself, as here. Every field is REQUIRED.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AragoneseDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,
@@ -170,7 +170,8 @@ pub fn phonemize_word(word: &JsString) -> JsString {
 const SYMBOL_DATA: &str = r#"{"percent":["por cient"],"currency":{"US$":["dólar estausunidense","dólars estausunidenses"],"€":["euro","euros"],"£":["libra","libras"],"$":["dólar","dólars"]},"units":{"km":["kilometro","kilometros"],"m":["metro","metros"],"cm":["centimetro","centimetros"],"mm":["milimetro","milimetros"],"kg":["kilogramo","kilogramos"],"g":["gramo","gramos"],"hab":["habitant","habitants"],"habitants":["habitant","habitants"]},"unitPer":"por","rateDenominators":{"h":"ora","s":"segundo"},"exponentWords":{"squared":["cuadrau","cuadraus"],"cubed":["cubico","cubicos"],"position":"after"},"ampersand":"y","magnitudes":["millón","millons","billón","billons"],"magnitudeConnective":"de"}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

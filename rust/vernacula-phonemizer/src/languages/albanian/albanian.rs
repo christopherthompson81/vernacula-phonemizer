@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_albanian, try_symbols};
 use super::numbers::{AlbanianNumbers, NumberToWords, make_number_to_words};
@@ -24,8 +24,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/albanian";
 
 /// `AlbanianDef`: declared in albanian.ts itself, as here. Every field is REQUIRED.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AlbanianDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,

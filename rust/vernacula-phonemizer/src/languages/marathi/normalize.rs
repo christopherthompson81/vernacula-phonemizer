@@ -3,8 +3,8 @@
 //! into words before tokenizing, every word from `marathi.jsonc`. Pure text to text.
 //! Ported from src/languages/marathi/normalize.ts — see that file for the corpus evidence.
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number, js_number_to_string};
@@ -14,14 +14,14 @@ use crate::core::provenance::{rewrite, rewrite_with};
 use crate::js_re;
 use crate::languages::hindi::normalize::TextFn;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Percent {
     pub plural: String,
     pub singular: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct Ordinals {
     pub suffix_form: IndexMap<String, usize>,
     pub irregular: IndexMap<String, [String; 4]>,
@@ -30,20 +30,20 @@ pub struct Ordinals {
     pub stem_tens: [String; 2],
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Clock {
     pub past: String,
     pub minutes: String,
     pub oclock: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct EraMarkers {
     pub bc: String,
     pub ad: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Degree {
     pub word: String,
     pub celsius: String,
@@ -54,8 +54,8 @@ pub struct Degree {
     pub west: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct Fractions {
     pub half: String,
     pub quarter: String,
@@ -63,8 +63,8 @@ pub struct Fractions {
     pub divided_by: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolWords {
     pub plus: String,
     pub approximately: String,
@@ -77,8 +77,8 @@ pub struct SymbolWords {
 }
 
 /// `MarathiWords` without its `numbers` (that field is `HindiDef`'s, which the manifest shares).
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct MarathiWords {
     pub currency: IndexMap<String, String>,
     pub percent: Percent,

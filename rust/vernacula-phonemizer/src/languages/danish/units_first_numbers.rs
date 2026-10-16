@@ -2,18 +2,18 @@
 //! word), shared by Danish, Faroese, Luxembourgish and Bavarian; each language supplies its words and joins.
 //! Ported from src/languages/danish/unitsFirstNumbers.ts — see that file for the four languages' parameters.
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string};
 use crate::core::numbers::digit_index;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct OneWord {
     pub one: String,
     pub word: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct OnePlural {
     pub one: String,
     pub plural: String,
@@ -24,13 +24,13 @@ pub type Connector = fn(&str, &str) -> String;
 
 /// `UnitsFirstDef`. `connector` is a function in the TS, so it is not part of a language's data literal and is
 /// supplied beside it.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct UnitsFirstDef {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
     pub compound_ones: Option<Vec<String>>,
-    #[serde(skip, default = "no_connector")]
+    #[json(skip, default = "no_connector")]
     pub connector: Connector,
     pub hundred: OneWord,
     pub thousand: OneWord,

@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_sepedi, try_symbols};
 use super::numbers::{DIR, number_to_words, try_numbers};
@@ -20,8 +20,8 @@ use crate::core::normalize_symbols::sorted_by_length_desc;
 use crate::registry::{Engine, PhonemizeError};
 
 /// `SepediDef`: this module's own slice of sepedi.jsonc, as in the TS.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SepediDef {
     pub graphemes: IndexMap<String, String>,
     pub clause_punctuation: IndexMap<String, String>,

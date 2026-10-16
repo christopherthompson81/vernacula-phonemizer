@@ -1,5 +1,5 @@
 [workspace]
-members = ["vernacula-phonemizer", "tools/regex-diff", "tools/fn-diff", "tools/parity", "tools/onnx-diff"]
+members = ["vernacula-phonemizer", "vernacula-json-derive", "tools/regex-diff", "tools/fn-diff", "tools/parity", "tools/onnx-diff"]
 exclude = ["vendor"]
 resolver = "3"
 
