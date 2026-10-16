@@ -31,7 +31,7 @@ No obligations beyond courtesy credit (rolled into NOTICE).
 
 | Artifact (shipped unless noted) | Upstream / basis | Status |
 |---|---|---|
-| `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `en-g2p-tagger.int8.onnx`, `g2p-model.json` | CMUdict, plus the 16,227 Moby Pronunciator II rows imported into the dictionary (`moby-import.tsv`, §5.3) and own-work corrections (`g2p-curated.tsv`); the tagger and the model are trained on that dictionary | Public domain (Moby by explicit grant) |
+| `english/g2p-dict.tsv`, `accent-lexicon.tsv`, `en-g2p-tagger.int8.onnx`, `g2p-model.bin` | CMUdict, plus the 16,227 Moby Pronunciator II rows imported into the dictionary (`moby-import.tsv`, §5.3) and own-work corrections (`g2p-curated.tsv`); the tagger and the model are trained on that dictionary | Public domain (Moby by explicit grant) |
 | `english/en-nasal-seam.tsv` | CMUdict `N` sites; Moby (PD) and wikipron US/UK (Wiktionary, CC-BY-SA) used only as **filters** — a site gets a row only where every covering referee writes `n` — plus the tools-only kaikki morpheme boundaries (§3). No referee bytes are reproduced; the row is a CMUdict position. Same filter shape as FrequencyWords over the NST lexica (§3) | PD + facts (filter) |
 | `english/g2p-common.txt` | CMUdict ∩ Norvig count_1w frequency ranking | PD + facts (header) |
 | `danish/da-lexicon.tsv`, `da-g2p-tagger.int8.onnx` | NST Danish (Språkbanken sbr-26) | CC0 |

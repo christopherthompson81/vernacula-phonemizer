@@ -6,14 +6,11 @@ use indexmap::IndexMap;
 use serde_json::Value;
 use vernacula_phonemizer::core::from_json::FromJson;
 use vernacula_phonemizer::core::js_string::{JsString, js_number, js_number_to_string};
-use vernacula_phonemizer::core::load_manifest::load_json;
 use vernacula_phonemizer::core::load_tsv::load_lines;
 use vernacula_phonemizer::core::load_tsv::{TsvOptions, load_tsv_map};
 use vernacula_phonemizer::languages::english::english::create_english;
 use vernacula_phonemizer::languages::english::english_arpabet::make_arpabet_to_ipa;
-use vernacula_phonemizer::languages::english::english_g2p::{
-    EnglishG2p, EnglishG2pModel, G2pClasses,
-};
+use vernacula_phonemizer::languages::english::english_g2p::{EnglishG2p, G2pClasses};
 use vernacula_phonemizer::languages::english::manifest::{DIR, MANIFEST};
 use vernacula_phonemizer::languages::english::normalize::{
     normalize_english, normalize_english_initialisms,
@@ -273,7 +270,8 @@ fn main() {
                 letter_name_exceptions: m.letter_name_exceptions.clone(),
             };
             let g2p = EnglishG2p::new(
-                load_json::<EnglishG2pModel>(DIR, "g2p-model.json").unwrap(),
+                vernacula_phonemizer::languages::english::g2p_model_binary::load_g2p_model(DIR)
+                    .unwrap(),
                 dict,
                 common,
                 conv,

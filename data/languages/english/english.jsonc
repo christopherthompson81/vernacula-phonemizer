@@ -589,7 +589,7 @@
             "note": "CMUdict → canonical IPA; the flat per-word override (the 'grapheme→IPA table' an irregular language can only express as a word list).",
         },
         "oovG2p": {
-            "model": "g2p-model.json",
+            "model": "g2p-model.bin",
             "dict": "g2p-dict.tsv",
             "common": "g2p-common.txt",
             "note": "cleanroom joint n-gram — the rule engine Hindi doesn't need (English spelling isn't rule-derivable).",

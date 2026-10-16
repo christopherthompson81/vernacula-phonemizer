@@ -2,7 +2,8 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createEnglishG2p, type EnglishG2pModel } from "../../src/languages/english/englishG2p.ts";
+import { createEnglishG2p } from "../../src/languages/english/englishG2p.ts";
+import { decodeG2pModel } from "../../src/languages/english/g2pModelBinary.ts";
 import { MANIFEST } from "../../src/languages/english/manifest.ts";
 
 const EN = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "data", "languages", "english");
@@ -17,7 +18,7 @@ const train = new Map<string, string[]>(), te: [string, string[]][] = [];
 for (const [w, p] of full) (heldout(w) ? te.push([w, p]) : train.set(w, p));
 console.log(`train ${train.size} / held-out ${te.length}`);
 
-const model = JSON.parse(readFileSync(join(EN, "g2p-model.json"), "utf8")) as EnglishG2pModel;
+const model = decodeG2pModel(new Uint8Array(readFileSync(join(EN, "g2p-model.bin"))));
 const common = new Set(readFileSync(join(EN, "g2p-common.txt"), "utf8").split("\n").map(s => s.trim()).filter(Boolean));
 const classes = { ...MANIFEST.g2pClasses, vowels: MANIFEST.arpabet.vowels };
 const g2p = createEnglishG2p(model, train, common, (ph: string[]) => ph.join(" "), classes);

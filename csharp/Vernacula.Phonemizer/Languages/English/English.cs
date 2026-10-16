@@ -591,7 +591,7 @@ public static class EnglishFactory
         var g2pDict = LoadTsv.LoadTsvMap<List<string>>(dir, "g2p-dict.tsv", (v, _) => v.Split(' ').ToList());
         var g2pCommon = new HashSet<string>(LoadTsv.LoadLines(dir, "g2p-common.txt"), StringComparer.Ordinal);
         var g2p = EnglishG2pFactory.CreateEnglishG2p(
-            LoadManifest.LoadJson<EnglishG2pModel>(dir, "g2p-model.json"),
+            G2pModelBinary.Load(dir),
             g2pDict,
             g2pCommon,
             arpabetToIpa,

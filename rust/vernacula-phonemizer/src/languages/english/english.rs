@@ -6,7 +6,8 @@ use std::collections::HashSet;
 use indexmap::IndexMap;
 
 use super::english_arpabet::make_arpabet_to_ipa;
-use super::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
+use super::english_g2p::{EnglishG2p, G2pClasses};
+use super::g2p_model_binary::load_g2p_model;
 use super::manifest::{DIR, HeteronymEntry, Slot, try_manifest};
 use super::normalize::{normalize_english, normalize_english_initialisms};
 use super::numbers::{BigNat, number_to_words, ordinal_to_words};
@@ -16,7 +17,6 @@ use super::spelling_variants::american_spelling;
 use crate::core::clauses::foreign_run;
 use crate::core::foreign::read_foreign_run;
 use crate::core::js_string::{JsString, js, js_number};
-use crate::core::load_manifest::load_json;
 use crate::core::load_tsv::{TsvOptions, load_lines, load_tsv_map};
 use crate::core::provenance::{Form, Span, normalize};
 use crate::core::trace::{TokenSource, enter_engine, note_assembled, note_token};
@@ -772,7 +772,7 @@ pub fn create_english() -> Result<EnglishPhonemizer, String> {
         letter_name_exceptions: m.letter_name_exceptions.clone(),
     };
     let g2p = EnglishG2p::new(
-        load_json::<EnglishG2pModel>(DIR, "g2p-model.json").map_err(|e| e.to_string())?,
+        load_g2p_model(DIR)?,
         g2p_dict,
         common,
         arpabet_to_ipa,

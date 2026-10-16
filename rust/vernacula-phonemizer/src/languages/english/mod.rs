@@ -3,6 +3,7 @@ pub mod english_arpabet;
 pub mod english_g2p;
 pub mod english_neural;
 pub mod english_tagger;
+pub mod g2p_model_binary;
 pub mod manifest;
 pub mod normalize;
 pub mod numbers;

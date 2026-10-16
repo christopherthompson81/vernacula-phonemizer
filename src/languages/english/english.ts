@@ -11,15 +11,14 @@ import { readForeignRun } from "../../core/foreign.ts";
 import { FOREIGN_RUN } from "../../core/clauses.ts";
 import { enterEngine, noteAssembled, noteToken, type TokenSource } from "../../core/trace.ts";
 import { MANIFEST, type HeteronymEntry } from "./manifest.ts";
-import { loadJson } from "../../core/loadManifest.ts";
 import { loadTsvMap, loadLines } from "../../core/loadTsv.ts";
 import { americanSpelling } from "./spellingVariants.ts";
 
 import {
     createEnglishG2p,
     type EnglishG2p,
-    type EnglishG2pModel,
 } from "./englishG2p.ts";
+import { loadG2pModel } from "./g2pModelBinary.ts";
 import { makeArpabetToIpa } from "./englishArpabet.ts";
 import {
     PosTagger,
@@ -682,7 +681,7 @@ export function createEnglish(): EnglishPhonemizer {
     );
     const g2pCommon = new Set(loadLines(import.meta.url, "g2p-common.txt"));
     const g2p = createEnglishG2p(
-        loadJson<EnglishG2pModel>(import.meta.url, "g2p-model.json"),
+        loadG2pModel(import.meta.url),
         g2pDict,
         g2pCommon,
         arpabetToIpa,
