@@ -6,8 +6,8 @@
 
 use std::sync::LazyLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::manifest::{MANIFEST, try_manifest};
 use super::normalize::normalize_icelandic;
@@ -19,8 +19,8 @@ use crate::core::js_string::{JsString, js, js_number};
 use crate::core::provenance::{Form, normalize};
 use crate::registry::{Engine, PhonemizeError};
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct OrdinalForms {
     pub masc: String,
     pub common: String,
@@ -29,8 +29,8 @@ pub struct OrdinalForms {
 
 /// `IcelandicDef` (icelandic.jsonc). Every field the TS interface names is required; the `numbers` block is
 /// numbers.rs's own slice, and `language`/`name`/`script` are documentation the TS does not read.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct IcelandicDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,

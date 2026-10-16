@@ -2,12 +2,12 @@
 //! punctuation and the number words.
 //! Ported from src/languages/shona/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, js};
@@ -16,8 +16,8 @@ use crate::core::normalize_symbols::sorted_by_length_desc;
 
 pub const DIR: &str = "languages/shona";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub units: Vec<String>,
     pub units_ma: Vec<String>,
@@ -35,8 +35,8 @@ pub struct Numbers {
     pub and: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct ShonaManifest {
     pub language: String,
     pub name: String,

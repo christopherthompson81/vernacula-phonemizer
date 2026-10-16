@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_burmese;
 use super::numbers::{number_to_words, spell_digits, try_numbers};
@@ -26,8 +26,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/burmese";
 
 /// `BurmeseDef` (burmese.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BurmeseDef {
     pub consonants: IndexMap<String, String>,
     pub independent_vowels: IndexMap<String, String>,

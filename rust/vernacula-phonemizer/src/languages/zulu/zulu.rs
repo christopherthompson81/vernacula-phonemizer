@@ -145,7 +145,8 @@ static TOKEN: LazyLock<JsRegex> =
 const SYMBOL_DATA: &str = r#"{"multiply":{"times":"kuphindwe ngo-"},"percent":["amaphesenti"],"currency":{"US$":["amadola"],"AUD$":["amadola"],"$":["amadola"],"£":["amaphawundi"]},"units":{"km":["amakhilomitha"],"m":["amamitha"],"mm":["amamilimitha"],"cm":["amasentimitha"],"kg":["amakhilogremu"],"mi":["amamayela"],"ft":["amafidi"]},"exponentWords":{"squared":["skwele"],"position":"after"}}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

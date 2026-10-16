@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{is_unreadable_uzbek, normalize_uzbek, normalize_uzbek_initialisms};
 use super::numbers::{DIR, NUM, number_to_words, ordinal_words, try_num, turkic_number_words};
@@ -29,8 +29,8 @@ use crate::registry::{Engine, PhonemizeError};
 
 /// `UzbekDef` (uzbek.ts). Every field the TS interface names is required; `numbers` is read through
 /// numbers.rs's own loader, as numbers.ts does.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct UzbekDef {
     pub vowels: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

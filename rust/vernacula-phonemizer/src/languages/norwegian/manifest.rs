@@ -1,12 +1,12 @@
 //! Norwegian Bokmål's hand-authored tables, from `norwegian.jsonc`. Ported from src/languages/norwegian/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`language`, `script`, `name`, `provenance`, `convention`) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -14,8 +14,8 @@ use crate::core::numbers::NumbersDef;
 
 pub const DIR: &str = "languages/norwegian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Vowels {
     pub long: IndexMap<String, String>,
     pub short: IndexMap<String, String>,
@@ -23,8 +23,8 @@ pub struct Vowels {
     pub short_before_r: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct NorwegianManifest {
     pub front_vowels: String,
     pub vowels: Vowels,

@@ -1,12 +1,12 @@
 //! Kinyarwanda's hand-authored tables, from `kinyarwanda.jsonc`, and the Rwanda-Rundi number table type that
 //! Kirundi shares. Ported from src/languages/kinyarwanda/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`) except `billion`, optional there too.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`) except `billion`, optional there too.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::JsString;
@@ -15,8 +15,8 @@ use crate::core::load_manifest::load_manifest;
 pub const DIR: &str = "languages/kinyarwanda";
 
 /// `RwandaRundiNumbers`: one instance per language (rw / rn), for the shared compositor in numbers.rs.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct RwandaRundiNumbers {
     pub units: Vec<String>,
     pub ten: String,
@@ -32,8 +32,8 @@ pub struct RwandaRundiNumbers {
     pub and: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct KinyarwandaManifest {
     pub language: String,
     pub name: String,

@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::javanese::Seg;
 use super::manifest::DIR;
@@ -15,8 +15,8 @@ use crate::core::load_manifest::load_manifest;
 use crate::core::provenance::{Form, normalize};
 
 /// `AksaraDef` (aksara.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AksaraDef {
     pub consonants: IndexMap<String, String>,
     pub syllabic: IndexMap<String, String>,

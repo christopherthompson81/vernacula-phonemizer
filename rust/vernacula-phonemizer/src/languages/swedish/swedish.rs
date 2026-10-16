@@ -300,7 +300,8 @@ impl Engine for SwedishPhonemizer {
 pub fn create_swedish() -> Result<SwedishPhonemizer, String> {
     try_manifest()?;
     try_lexicon()?;
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     Ok(SwedishPhonemizer {
         symbols: make_symbol_normalizer(&data)?,
     })

@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_scottish_gaelic;
 use super::numbers::{GaelicNumbers, NumberToWords, make_number_to_words};
@@ -24,8 +24,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/scottishgaelic";
 
 /// `GaelicManifest`: declared in scottishgaelic.ts itself, as here. Every field is REQUIRED.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct GaelicManifest {
     pub slender_vowels: String,
     pub broad_vowels: String,
@@ -247,7 +247,8 @@ pub fn phonemize_word(word: &JsString) -> JsString {
 const SYMBOL_DATA: &str = r#"{"percent":["sa cheud"],"currency":{"£":["not"],"$":["dolar"],"€":["Euro"]},"units":{"km":["cilemeatair"],"cm":["ceudameatair"],"mm":["milemeatair"],"kg":["cileagram"],"m":["meatair"],"g":["gram"]},"exponentWords":{"squared":["ceàrnagach"],"cubed":["ciùbach"],"position":"after"},"unitPer":"san","rateDenominators":{"h":"uair","u":"uair","s":"diog"},"ampersand":"agus","magnitudes":["muillean","billean"]}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

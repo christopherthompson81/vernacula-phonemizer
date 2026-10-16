@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_regex::JsRegex;
@@ -16,16 +16,16 @@ use crate::core::normalize_symbols::{
 
 pub const DIR: &str = "languages/thai";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromJson)]
+#[json(rename_all = "lowercase")]
 pub enum ThaiConsonantClass {
     Mid,
     High,
     Low,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromJson)]
+#[json(rename_all = "lowercase")]
 pub enum ThaiTone {
     Mid,
     Low,
@@ -35,7 +35,7 @@ pub enum ThaiTone {
 }
 
 /// `Record<ThaiConsonantClass, ThaiTone>`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ByClass {
     pub mid: ThaiTone,
     pub high: ThaiTone,
@@ -53,7 +53,7 @@ impl ByClass {
 }
 
 /// `Record<ThaiTone, string>`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ToneIpa {
     pub mid: String,
     pub low: String,
@@ -74,8 +74,8 @@ impl ToneIpa {
     }
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Tone {
     pub class: IndexMap<String, ThaiConsonantClass>,
     /// Keyed by the five tone marks (four Thai marks plus the respelling macron).
@@ -86,7 +86,7 @@ pub struct Tone {
 }
 
 /// `exponentWords: { squared; cubed; position? }`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ThExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
@@ -103,8 +103,8 @@ impl ThExponentWords {
     }
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -115,8 +115,8 @@ pub struct SymbolTier {
     pub exponent_words: ThExponentWords,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct ThaiManifest {
     pub onset: IndexMap<String, String>,
     pub coda: IndexMap<String, String>,

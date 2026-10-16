@@ -7,8 +7,8 @@
 use std::collections::HashSet;
 use std::sync::{Arc, LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_belarusian, normalize_belarusian_initialisms};
 use crate::core::clauses::assemble_clauses;
@@ -28,25 +28,25 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/belarusian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Voicing {
     pub to_voiceless: IndexMap<String, String>,
     pub to_voiced: IndexMap<String, String>,
 }
 
 /// `EastSlavicNumbers & { decimalConnector }`.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BeNumbers {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub east: EastSlavicNumbers,
     pub decimal_connector: String,
 }
 
 /// `BelarusianDef`: every field the TS interface names, required.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BelarusianDef {
     pub vowels: IndexMap<String, String>,
     pub iotated: IndexMap<String, String>,
@@ -394,7 +394,8 @@ impl Engine for BelarusianPhonemizer {
 /// `createBelarusian()`. Errors when the manifest cannot be loaded, or the symbol tier refuses its data.
 pub fn create_belarusian() -> Result<BelarusianPhonemizer, String> {
     try_manifest()?;
-    let mut data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let mut data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     data.count_form = Some(Arc::new(be_count_form));
     Ok(BelarusianPhonemizer {
         symbols: make_symbol_normalizer(&data)?,

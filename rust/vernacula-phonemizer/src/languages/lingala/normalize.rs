@@ -5,7 +5,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::lingala::DIR;
 use crate::core::data_source::load_once;
@@ -16,13 +16,13 @@ use crate::core::normalize_symbols::make_bare_unit_normalizer;
 use crate::core::provenance::{Form, renormalize, rewrite, rewrite_with};
 use crate::js_re;
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 struct FirstCard {
     first_card: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 struct FirstCardFile {
     numbers: FirstCard,
 }

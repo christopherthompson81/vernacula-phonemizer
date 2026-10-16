@@ -19,7 +19,8 @@ const SYMBOL_DATA: &str = r#"{"percent":["ci téeméer"],"currency":{"US$":["dol
 pub fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
     static S: OnceLock<SymbolNormalizer> = OnceLock::new();
     load_once(&S, || {
-        let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+        let data: SymbolData =
+            crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
         make_symbol_normalizer(&data)
     })
 }

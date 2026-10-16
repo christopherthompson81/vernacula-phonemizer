@@ -71,7 +71,8 @@ const SYMBOL_DATA: &str = r#"{"multiply":{"times":"krát"},"percent":["percento"
 
 /// `SYMBOLS`: the shared symbol tier as Slovak builds it, or why it refused its data. normalize.rs applies it.
 pub(crate) static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let mut data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let mut data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     data.count_form = Some(Arc::new(sk_count_form));
     make_symbol_normalizer(&data)
 });

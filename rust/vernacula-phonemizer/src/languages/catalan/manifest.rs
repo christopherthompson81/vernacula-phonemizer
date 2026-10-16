@@ -1,32 +1,32 @@
 //! Catalan's hand-authored facts, from `catalan.jsonc`. Ported from src/languages/catalan/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`convention`, `provenance`, …) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/catalan";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct VowelReal {
     pub stressed: String,
     pub reduced: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Million {
     pub sg: String,
     pub pl: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -37,8 +37,8 @@ pub struct Numbers {
     pub decimal_connector: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct CatalanManifest {
     /// Insertion order is the JSONC's: `Object.keys(V).join("")` builds the vowel class.
     pub vowels: IndexMap<String, VowelReal>,

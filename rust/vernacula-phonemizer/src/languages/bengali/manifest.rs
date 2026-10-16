@@ -4,8 +4,8 @@
 
 use std::sync::OnceLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::abugida::AbugidaDef;
 use crate::core::data_source::load_once;
@@ -15,16 +15,16 @@ use crate::core::numbers::NumbersDef;
 
 pub const DIR: &str = "languages/bengali";
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Ordinals {
     pub suppletive: IndexMap<String, String>,
     pub suffixes: Vec<String>,
 }
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct BengaliDef {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub abugida: AbugidaDef,
     pub numbers: NumbersDef,
     pub clause_punctuation: IndexMap<String, String>,

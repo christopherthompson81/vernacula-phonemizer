@@ -1,21 +1,21 @@
 //! English's hand-authored facts, from `english.jsonc`. Ported from src/languages/english/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED here (no `#[serde(default)]`), so a missing or misspelt key
+//! Every field the TS interface names is REQUIRED here (no `#[json(default)]`), so a missing or misspelt key
 //! fails the load instead of reading as empty. Keys the TS does not read (`convention`, `models`, …) are
 //! documentation and are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::english_arpabet::ArpabetDef;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/english";
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct BeforeAlternative {
     pub tags: Option<Vec<String>>,
     pub next_tags: Option<Vec<String>>,
@@ -24,8 +24,8 @@ pub struct BeforeAlternative {
 
 /// The reading a `before` condition selects. An unknown slot fails the manifest load (`PhonemizeError::Data`),
 /// where the TS would set a property nothing reads.
-#[derive(Debug, Deserialize, Clone, Copy, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, FromJson, Clone, Copy, PartialEq, Eq)]
+#[json(rename_all = "lowercase")]
 pub enum Slot {
     Verb,
     Noun,
@@ -33,14 +33,14 @@ pub enum Slot {
     Adj,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct BeforeCondition {
     pub word: String,
     pub when: Vec<BeforeAlternative>,
     pub slot: Slot,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct HeteronymEntry {
     pub default: String,
     pub verb: Option<String>,
@@ -50,7 +50,7 @@ pub struct HeteronymEntry {
     pub before: Option<BeforeCondition>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -59,8 +59,8 @@ pub struct Numbers {
     pub ordinals: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct G2pClasses {
     pub vowel_letters: Vec<String>,
     pub voiceless: Vec<String>,
@@ -69,15 +69,15 @@ pub struct G2pClasses {
     pub stem_stress_prefixes: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct EnglishManifest {
     pub heteronyms: IndexMap<String, HeteronymEntry>,
     pub acronym_letters: Vec<String>,

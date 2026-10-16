@@ -6,13 +6,13 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 /// ⚠ EVERY FIELD IS OPTIONAL, THOUGH THE TS INTERFACE REQUIRES SOME, because the data does not satisfy it:
 /// Armenian, Polish, Czech and others declare no `hundred` (the Western composer reads `hundreds`), and Lao,
 /// Shan, Tibetan and Slovenian declare no `thousand` either. A required field would refuse those manifests.
 /// A missing magnitude a composer reaches renders "?", as a `null` slot does.
-#[derive(Debug, Deserialize, Clone, Default)]
+#[derive(Debug, FromJson, Clone, Default)]
 pub struct Magnitudes {
     pub hundred: Option<String>,
     pub thousand: Option<String>,
@@ -23,21 +23,21 @@ pub struct Magnitudes {
     pub trillion: Option<String>,
 }
 
-#[derive(Deserialize, Clone, Default)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone, Default)]
+#[json(rename_all = "camelCase")]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub teens: Option<Vec<String>>,
     pub tens: HashMap<String, String>,
     pub hundreds: Option<Vec<String>>,
-    #[serde(default)]
+    #[json(default)]
     pub magnitudes: Magnitudes,
     pub compound: Option<HashMap<String, String>>,
     pub compound_order: Option<String>,
     pub bare_magnitude: Option<bool>,
     pub magnitude_paradigm: Option<HashMap<String, Vec<String>>>,
     /// Code, not data: set by the language after loading.
-    #[serde(skip)]
+    #[json(skip)]
     pub magnitude_count_form: Option<Arc<dyn Fn(u64) -> i64 + Send + Sync>>,
     pub decimal_word: Option<String>,
 }
@@ -241,8 +241,8 @@ pub fn western_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
 }
 
 /// `DravidianForms`: a magnitude/hundred noun's bare and combining forms, plus the count-inflected pair.
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct DravidianForms {
     pub bare: String,
     pub combining: String,
@@ -250,7 +250,7 @@ pub struct DravidianForms {
     pub plural_oblique: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct DravidianMagnitudeForms {
     pub hundred: DravidianForms,
     pub thousand: DravidianForms,
@@ -259,8 +259,8 @@ pub struct DravidianMagnitudeForms {
 }
 
 /// `DravidianNumbersDef`.
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct DravidianNumbersDef {
     pub units: Vec<String>,
     pub teens: Vec<String>,

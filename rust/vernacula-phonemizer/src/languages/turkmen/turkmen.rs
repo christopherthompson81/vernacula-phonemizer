@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{
     fold_turkmen_tildes, is_unreadable_turkmen, normalize_turkmen, normalize_turkmen_initialisms,
@@ -28,8 +28,8 @@ use crate::registry::{Engine, PhonemizeError};
 
 /// `TurkmenDef` (turkmen.ts). Every field the TS interface names is required; `numbers` is read through
 /// numbers.rs's own loader (the same block).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct TurkmenDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,
@@ -104,7 +104,8 @@ const SYMBOL_DATA: &str = r#"{"percent":["göterim"],"currency":{"$":["dollar"],
 fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
     static S: OnceLock<SymbolNormalizer> = OnceLock::new();
     load_once(&S, || {
-        let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+        let data: SymbolData =
+            crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
         make_symbol_normalizer(&data)
     })
 }

@@ -3,8 +3,8 @@
 
 use std::sync::OnceLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::abugida::AbugidaDef;
 use crate::core::data_source::load_once;
@@ -14,17 +14,17 @@ use crate::core::numbers::{DravidianNumbersDef, Magnitudes};
 
 /// `TeluguNumbers`: the Dravidian composer's fields (the four-form `magnitudeForms`, no `compound`) plus the
 /// inherited `NumbersDef.magnitudes`, which no composer reads for Telugu.
-#[derive(Deserialize, Clone)]
+#[derive(FromJson, Clone)]
 pub struct TeluguNumbers {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub dravidian: DravidianNumbersDef,
     pub magnitudes: Magnitudes,
 }
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct TeluguManifest {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub abugida: AbugidaDef,
     pub numbers: TeluguNumbers,
     pub clause_punctuation: IndexMap<String, String>,

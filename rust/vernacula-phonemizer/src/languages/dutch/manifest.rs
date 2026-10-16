@@ -1,12 +1,12 @@
 //! Dutch's hand-authored facts, from `dutch.jsonc`. Ported from src/languages/dutch/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`). The file's documentation keys
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`). The file's documentation keys
 //! (`convention`, `provenance`, …) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -14,20 +14,20 @@ use crate::core::normalize_symbols::{CountForms, PositionDecl};
 
 pub const DIR: &str = "languages/dutch";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Vowels {
     pub long: IndexMap<String, String>,
     pub short: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct SgPl {
     pub sg: String,
     pub pl: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -40,8 +40,8 @@ pub struct Numbers {
     pub milliard: SgPl,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Morphology {
     pub prefix_unstressed: Vec<String>,
     pub prefix_stressed: Vec<String>,
@@ -54,28 +54,28 @@ pub struct Morphology {
     pub st_keep: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Multiply {
     pub times: String,
     pub by: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
     pub position: Option<PositionDecl>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub multiply: Multiply,
     pub percent: CountForms,
@@ -87,8 +87,8 @@ pub struct SymbolTier {
     pub exponent_words: ExponentWords,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct DutchManifest {
     pub vowel_chars: String,
     pub consonant_phones: Vec<String>,
@@ -106,7 +106,7 @@ pub struct DutchManifest {
     pub letter_names: IndexMap<String, String>,
     pub phonotactics: Phonotactics,
     pub symbol_tier: SymbolTier,
-    #[serde(rename = "ordinalsBelow20")]
+    #[json(rename = "ordinalsBelow20")]
     pub ordinals_below20: Vec<String>,
 }
 

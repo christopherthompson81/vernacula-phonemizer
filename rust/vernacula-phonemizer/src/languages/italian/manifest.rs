@@ -1,14 +1,14 @@
 //! Italian's hand-authored data tables, from `italian.jsonc`, loaded once.
 //! Ported from src/languages/italian/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); keys the TS does not read
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); keys the TS does not read
 //! (`language`, `name`, `script`, `provenance`) are documentation and are ignored. Maps are `IndexMap`
 //! because the TS iterates `dottedAbbrev`'s keys to build a pattern.
 
 use std::sync::OnceLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -17,7 +17,7 @@ pub const DIR: &str = "languages/italian";
 
 pub use crate::core::normalize_symbols::CountForms;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ItalianNumbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -30,26 +30,26 @@ pub struct ItalianNumbers {
     pub and: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Fractions {
     pub denominators: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct EraMarkers {
     pub before_christ: String,
     pub after_christ: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Degree {
     pub singular: String,
     pub plural: String,
@@ -58,8 +58,8 @@ pub struct Degree {
 }
 
 /// `SignWords` (core/normalizeSymbols.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SignWords {
     pub plus_minus: String,
     pub plus: String,
@@ -72,13 +72,13 @@ pub struct SignWords {
     pub divided_by: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct BareExponent {
     pub squared: String,
     pub cubed: String,
@@ -86,8 +86,8 @@ pub struct BareExponent {
     pub negative: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -99,8 +99,8 @@ pub struct SymbolTier {
     pub bare_exponent: BareExponent,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct ItalianManifest {
     pub consonants: IndexMap<String, String>,
     pub vowels: IndexMap<String, String>,

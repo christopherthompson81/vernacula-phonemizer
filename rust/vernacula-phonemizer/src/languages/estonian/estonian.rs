@@ -5,8 +5,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{
     NOMINATIVE, is_unreadable_estonian, normalize_estonian, normalize_estonian_initialisms, ordinal,
@@ -23,8 +23,8 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/estonian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub ten: String,
@@ -38,8 +38,8 @@ pub struct NumbersDef {
 
 /// `EstonianDef` (estonian.jsonc). Every field the TS interface names is required; `language`, `name` and
 /// `script` are documentation the TS does not read.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct EstonianDef {
     pub graphemes: IndexMap<String, String>,
     pub vowel_letters: Vec<String>,
@@ -225,7 +225,8 @@ static NAT: LazyLock<Nativiser> = LazyLock::new(|| Box::new(make_nativiser(NATIV
 const SYMBOL_DATA: &str = r#"{"percent":["protsent","protsenti"],"currency":{"$":["dollar","dollarit"],"€":["euro","eurot"],"£":["nael","naela"]},"units":{"km":["kilomeeter","kilomeetrit"],"cm":["sentimeeter","sentimeetrit"],"mm":["millimeeter","millimeetrit"],"kg":["kilogramm","kilogrammi"],"ha":["hektar","hektarit"],"m":["meeter","meetrit"]},"exponentWords":{"squared":["ruut"],"cubed":["kuup"],"position":"compound"},"magnitudes":["miljon","miljonit","miljard","miljardit","biljon","biljonit"],"ampersand":"ja"}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

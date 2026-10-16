@@ -4,7 +4,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::manifest::DIR;
 use crate::core::data_source::load_once;
@@ -15,8 +15,8 @@ use crate::languages::danish::units_first_numbers::{
 };
 
 /// `BarNumbersDef.numbers`: this module's own slice of bavarian.jsonc, as in the TS.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -28,7 +28,7 @@ pub struct Numbers {
     pub billion: OnePlural,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct BarNumbersDef {
     pub numbers: Numbers,
 }

@@ -219,7 +219,8 @@ impl Engine for CzechPhonemizer {
 pub fn create_czech() -> Result<CzechPhonemizer, String> {
     try_manifest()?;
     try_lexicon()?;
-    let mut data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let mut data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     data.count_form = Some(Arc::new(cs_count_form));
     Ok(CzechPhonemizer {
         symbols: make_symbol_normalizer(&data)?,

@@ -6,8 +6,8 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_bulgarian;
 use crate::core::clauses::assemble_clauses;
@@ -22,7 +22,7 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/bulgarian";
 
 /// The local `NumbersDef` interface in bulgarian.ts.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub ten: String,
@@ -36,13 +36,13 @@ pub struct NumbersDef {
     pub billion: String,
     pub billions: String,
     pub masculine: HashMap<String, String>,
-    #[serde(rename = "and")]
+    #[json(rename = "and")]
     pub and_word: String,
 }
 
 /// `BulgarianDef`: every field the TS interface names, required.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BulgarianDef {
     pub letters: IndexMap<String, String>,
     pub palatalizing_letters: Vec<String>,
@@ -57,14 +57,14 @@ pub struct BulgarianDef {
 }
 
 /// `ordinals`: the masculine ordinal of each last cardinal word, and the endings after the masculine.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct OrdinalsDef {
     pub words: HashMap<String, String>,
     pub endings: Vec<String>,
 }
 
 /// One `magnitudeAbbrev` entry.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct MagnitudeAbbrev {
     pub exponent: u32,
     pub decimal: String,

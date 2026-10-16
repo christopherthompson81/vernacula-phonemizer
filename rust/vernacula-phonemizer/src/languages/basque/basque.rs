@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_basque, try_symbols};
 use crate::core::clauses::assemble_clauses;
@@ -20,7 +20,7 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/basque";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct BasqueNumbers {
     pub ones: Vec<String>,
     pub scores: Vec<String>,
@@ -31,8 +31,8 @@ pub struct BasqueNumbers {
 }
 
 /// `BasqueDef`: declared in basque.ts itself, as here. Every field is REQUIRED.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct BasqueDef {
     pub digraphs: Vec<(String, String)>,
     pub letters: IndexMap<String, String>,

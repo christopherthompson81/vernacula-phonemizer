@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::{JsString, js};
@@ -13,8 +13,8 @@ use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/madurese";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub units: Vec<String>,
     pub ten: String,
@@ -29,8 +29,8 @@ pub struct Numbers {
 }
 
 /// `MadureseManifest`.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct MadureseManifest {
     pub language: String,
     pub name: String,

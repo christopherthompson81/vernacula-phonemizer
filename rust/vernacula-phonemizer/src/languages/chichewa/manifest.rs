@@ -1,11 +1,11 @@
 //! Chichewa's hand-authored tables, from `chichewa.jsonc`. Ported from src/languages/chichewa/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::js_string::JsString;
@@ -13,8 +13,8 @@ use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/chichewa";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct ChichewaNumbers {
     pub units: Vec<String>,
     pub class_six: Vec<String>,
@@ -32,8 +32,8 @@ pub struct ChichewaNumbers {
     pub and: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct ChichewaManifest {
     pub language: String,
     pub name: String,

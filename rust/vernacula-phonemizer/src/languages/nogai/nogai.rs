@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_nogai;
 use super::numbers::number_to_words;
@@ -21,8 +21,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/nogai";
 
 /// `NogaiDef` (nogai.ts). Every field the TS interface names is required.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct NogaiDef {
     pub consonants: IndexMap<String, String>,
     pub vowels: IndexMap<String, String>,

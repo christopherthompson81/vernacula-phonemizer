@@ -1,13 +1,13 @@
 //! Modern Greek's hand-authored data tables, from `greek.jsonc`, loaded once.
 //! Ported from src/languages/greek/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`). Maps are `IndexMap`, because
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`). Maps are `IndexMap`, because
 //! normalize.ts iterates `abbreviations`, `ordinals.endings` and `mixedCaseInitialisms` in key order.
 
 use std::sync::OnceLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -16,7 +16,7 @@ use crate::core::normalize_symbols::{ExponentPosition, Multiply};
 
 pub const DIR: &str = "languages/greek";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Ordinals {
     pub units: Vec<String>,
     pub tens: Vec<String>,
@@ -24,8 +24,8 @@ pub struct Ordinals {
     pub endings: IndexMap<String, [String; 2]>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Clock {
     pub hours_feminine: Vec<String>,
     pub minute_units: Vec<String>,
@@ -33,7 +33,7 @@ pub struct Clock {
     pub minute_tens: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct GreekNumbers {
     pub units: Vec<String>,
     /// 10–19, indexed by the unit.
@@ -45,15 +45,15 @@ pub struct GreekNumbers {
     pub thousand: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
     pub position: Option<ExponentPosition>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -64,8 +64,8 @@ pub struct SymbolTier {
     pub exponent_words: ExponentWords,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct GreekManifest {
     pub tonos: IndexMap<String, String>,
     pub synizesis_palatal: IndexMap<String, String>,

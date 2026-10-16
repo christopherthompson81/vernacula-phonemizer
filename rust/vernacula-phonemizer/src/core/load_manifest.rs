@@ -1,8 +1,9 @@
 //! A language's JSONC manifest, deserialized. Ported from src/core/loadManifest.ts.
 //!
-//! ⚠ A manifest key the struct does not name is silently dropped by serde, and a misspelt field silently
-//! takes its default (C#'s ARPABET `AH`/`ER` lesson). Manifest structs use `#[serde(rename = "…")]` for any
-//! key that is not the field name, and a test diffs the file's key set against the struct's.
+//! ⚠ A manifest key the struct does not name is silently dropped by the decoder (`core::from_json`), and a
+//! misspelt field silently takes its default (C#'s ARPABET `AH`/`ER` lesson). Manifest structs use
+//! `#[json(rename = "…")]` for any key that is not the field name, and a test diffs the file's key set against
+//! the struct's.
 
 use super::data_path::data_file;
 use super::data_source::read_data_text;
@@ -19,7 +20,7 @@ impl std::fmt::Display for ManifestError {
 
 impl std::error::Error for ManifestError {}
 
-pub fn load_manifest<T: serde::de::DeserializeOwned>(
+pub fn load_manifest<T: crate::core::from_json::FromJson>(
     dir: &str,
     filename: &str,
 ) -> Result<T, ManifestError> {
@@ -28,11 +29,11 @@ pub fn load_manifest<T: serde::de::DeserializeOwned>(
     parse_jsonc(&text).map_err(|e| ManifestError(format!("{key}: {e}")))
 }
 
-pub fn load_json<T: serde::de::DeserializeOwned>(
+pub fn load_json<T: crate::core::from_json::FromJson>(
     dir: &str,
     filename: &str,
 ) -> Result<T, ManifestError> {
     let key = data_file(dir, filename);
     let text = read_data_text(&key).map_err(|e| ManifestError(e.to_string()))?;
-    serde_json::from_str(&text).map_err(|e| ManifestError(format!("{key}: {e}")))
+    crate::core::from_json::parse_json(&text).map_err(|e| ManifestError(format!("{key}: {e}")))
 }

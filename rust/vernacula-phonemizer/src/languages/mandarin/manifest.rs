@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -15,21 +15,21 @@ use crate::core::normalize_symbols::{
 
 pub const DIR: &str = "languages/mandarin";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ThirdThird {
     pub from: String,
     pub before: String,
     pub to: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Sandhi {
     pub third_third: ThirdThird,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub digits: Vec<String>,
     pub positions: Vec<String>,
@@ -40,14 +40,14 @@ pub struct Numbers {
 }
 
 /// `exponentWords: { squared; cubed; position? }`; cmn.jsonc says `"compound"`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct CmnExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
     pub position: Option<ExponentPosition>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct CmnBareExponent {
     pub squared: String,
     pub cubed: String,
@@ -57,8 +57,8 @@ pub struct CmnBareExponent {
 
 /// The shared symbol tier's data (`symbolTier`): the nine fields the TS interface names, which are exactly the
 /// nine mandarin.ts passes to `makeSymbolNormalizer`.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -92,8 +92,8 @@ impl CmnBareExponent {
     }
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct CmnManifest {
     /// Keyed "1".."5".
     pub tones: IndexMap<String, String>,

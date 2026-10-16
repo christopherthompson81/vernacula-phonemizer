@@ -6,23 +6,23 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/slovenian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Voicing {
     pub to_voiceless: IndexMap<String, String>,
     pub to_voiced: IndexMap<String, String>,
 }
 
 /// A magnitude noun's gender and its four count forms.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitude {
     pub gender: String,
     pub sg: String,
@@ -31,20 +31,20 @@ pub struct Magnitude {
     pub plural: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub million: Magnitude,
     pub milliard: Magnitude,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct CountFormsByGender {
     pub m: IndexMap<String, String>,
     pub f: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -57,8 +57,8 @@ pub struct Numbers {
     pub magnitudes: Magnitudes,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SlovenianManifest {
     pub vowels: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

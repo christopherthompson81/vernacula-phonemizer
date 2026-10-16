@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_ewe;
 use super::numbers::number_to_words;
@@ -21,7 +21,7 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/ewe";
 
 /// `EweDef`: the digraph and letter tables of ewe.jsonc.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct EweDef {
     pub digraphs: IndexMap<String, String>,
     pub letters: IndexMap<String, String>,

@@ -1,20 +1,20 @@
 //! Swedish's hand-authored facts, from `swedish.jsonc`. Ported from src/languages/swedish/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`convention`, `provenance`, `vowelChars`, …) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/swedish";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Vowels {
     pub long: IndexMap<String, String>,
     pub short: IndexMap<String, String>,
@@ -22,13 +22,13 @@ pub struct Vowels {
     pub short_before_r: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Million {
     pub sg: String,
     pub pl: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -37,8 +37,8 @@ pub struct Numbers {
     pub million: Million,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SwedishManifest {
     pub front_vowels: String,
     pub vowels: Vowels,

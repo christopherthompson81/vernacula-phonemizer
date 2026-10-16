@@ -3,7 +3,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -12,7 +12,7 @@ use crate::core::numbers::{NumbersDef, Word};
 pub const DIR: &str = "languages/turkmen";
 
 /// `loadManifest<{ numbers: NumbersDef }>(…, "turkmen.jsonc")`: the file's `numbers` block alone.
-#[derive(Deserialize)]
+#[derive(FromJson)]
 struct NumbersOnly {
     numbers: NumbersDef,
 }

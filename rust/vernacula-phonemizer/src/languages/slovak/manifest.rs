@@ -1,13 +1,13 @@
 //! Slovak's hand-authored data tables, from `slovak.jsonc`, loaded once.
 //! Ported from src/languages/slovak/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`language`, `name`, `script`, `convention`) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -15,20 +15,20 @@ use crate::core::load_manifest::load_manifest;
 pub const DIR: &str = "languages/slovak";
 
 /// A magnitude noun's three count forms: sg (1), paucal (2–4), plural (5+).
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Agreement {
     pub sg: String,
     pub paucal: String,
     pub plural: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub thousand: Agreement,
     pub million: Agreement,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Numbers {
     pub units: Vec<String>,
     pub teens: Vec<String>,
@@ -37,21 +37,21 @@ pub struct Numbers {
     pub magnitudes: Magnitudes,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Palatalisation {
     pub map: IndexMap<String, String>,
     pub triggers: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Voicing {
     pub to_voiceless: IndexMap<String, String>,
     pub to_voiced: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SlovakManifest {
     pub vowels: IndexMap<String, String>,
     pub palatalisation: Palatalisation,

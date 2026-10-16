@@ -3,22 +3,22 @@
 
 use std::collections::{HashMap, HashSet};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::english_arpabet::ArpabetToIpa;
 use crate::core::js_math;
 use crate::core::js_string::{JsString, js};
 use crate::js_re;
 
-#[derive(Deserialize)]
+#[derive(FromJson)]
 pub struct NgramEntry {
     pub t: f64,
     pub c: Vec<(String, f64)>,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct EnglishG2pModel {
     pub order: usize,
     pub alpha: f64,

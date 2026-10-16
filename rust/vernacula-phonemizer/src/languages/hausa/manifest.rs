@@ -2,12 +2,12 @@
 //! punctuation, the number words, letter names, phonotactics and the shared symbol tier's data.
 //! Ported from src/languages/hausa/manifest.ts — see that file for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -15,8 +15,8 @@ use crate::core::normalize_symbols::{CountForms, ExponentPosition, Multiply};
 
 pub const DIR: &str = "languages/hausa";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -28,22 +28,22 @@ pub struct Numbers {
     pub billion: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
     pub codas: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct TierExponentWords {
     pub squared: CountForms,
     pub cubed: CountForms,
     pub position: Option<ExponentPosition>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub multiply: Multiply,
     pub percent_prefix: bool,
@@ -53,8 +53,8 @@ pub struct SymbolTier {
     pub exponent_words: TierExponentWords,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct HausaManifest {
     pub rules: Vec<(String, String, bool)>,
     pub tone_chao: IndexMap<String, String>,

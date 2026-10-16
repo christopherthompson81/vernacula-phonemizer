@@ -58,7 +58,8 @@ const DOTTED_ABBREV: [(&str, &str); 6] = [
 const SYMBOL_DATA: &str = r#"{"percent":["Prozent"],"currency":{"€":["Eiro"],"US$":["Dollar"],"$":["Dollar"],"£":["Pfund"]},"units":{"km":["Kilometa"],"m":["Meta"],"cm":["Zantimeta"]},"exponentWords":{"squared":["Quadrat"],"cubed":["Kubik"],"position":"compound"},"magnitudes":["Millionan","Millionen","Milliona","Million","Mijona","Milliardn","Milliarde"]}"#;
 
 pub(crate) static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

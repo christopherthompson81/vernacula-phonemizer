@@ -7,8 +7,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -16,23 +16,23 @@ use crate::core::load_manifest::load_manifest;
 pub const DIR: &str = "languages/lithuanian";
 
 /// `LithuanianAgreement`: nom sg (…1), nom pl (…2–9), gen pl (…0 / 11–19), and whether the noun is feminine.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct Agreement {
     pub sg: String,
     pub pl: String,
-    #[serde(rename = "gen")]
+    #[json(rename = "gen")]
     pub gen_pl: String,
     pub fem: Option<bool>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Voicing {
     pub to_voiceless: IndexMap<String, String>,
     pub to_voiced: IndexMap<String, String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub hundred: Agreement,
     pub thousand: Agreement,
@@ -40,8 +40,8 @@ pub struct Magnitudes {
     pub billion: Agreement,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub units: Vec<String>,
     pub units_fem: Vec<String>,
@@ -50,8 +50,8 @@ pub struct Numbers {
     pub magnitudes: Magnitudes,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Normalization {
     pub counted_nouns: IndexMap<String, Agreement>,
     pub words: IndexMap<String, String>,
@@ -60,8 +60,8 @@ pub struct Normalization {
     pub acronym_letters: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LithuanianManifest {
     pub language: String,
     pub name: String,

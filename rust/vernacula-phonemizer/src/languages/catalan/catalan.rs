@@ -388,7 +388,8 @@ impl Engine for CatalanPhonemizer {
 pub fn create_catalan() -> Result<CatalanPhonemizer, String> {
     try_manifest()?;
     try_lists()?;
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     Ok(CatalanPhonemizer {
         symbols: make_symbol_normalizer(&data)?,
     })

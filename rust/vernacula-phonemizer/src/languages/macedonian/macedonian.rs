@@ -6,8 +6,8 @@
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{
     is_unreadable_macedonian, normalize_macedonian, normalize_macedonian_initialisms,
@@ -25,7 +25,7 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/macedonian";
 
 /// The local `NumbersDef` interface (macedonian.ts and numbers.ts).
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct NumbersDef {
     pub units: Vec<String>,
     pub ten: String,
@@ -36,14 +36,14 @@ pub struct NumbersDef {
     pub thousands: String,
     pub million: String,
     pub millions: String,
-    #[serde(rename = "and")]
+    #[json(rename = "and")]
     pub and_word: String,
 }
 
 /// `MacedonianDef` plus normalize.ts's `acronymLetters` (the three TS modules each load macedonian.jsonc with
 /// the fields they read; this is their union, every field required).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct MacedonianDef {
     pub letters: IndexMap<String, String>,
     pub front_letters: Vec<String>,
@@ -361,7 +361,8 @@ impl Engine for MacedonianPhonemizer {
 /// `createMacedonian()`. Errors when the manifest cannot be loaded, or the symbol tier refuses its data.
 pub fn create_macedonian() -> Result<MacedonianPhonemizer, String> {
     try_manifest()?;
-    let mut data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let mut data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     data.count_form = Some(Arc::new(mk_count_form));
     Ok(MacedonianPhonemizer {
         symbols: make_symbol_normalizer(&data)?,

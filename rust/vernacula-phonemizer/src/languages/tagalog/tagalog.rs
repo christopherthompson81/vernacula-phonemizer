@@ -480,7 +480,8 @@ pub fn create_tagalog() -> Result<TagalogPhonemizer, String> {
     try_final_glottal()?;
     try_stress_lex()?;
     try_loanword_lex()?;
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     Ok(TagalogPhonemizer {
         symbols: make_symbol_normalizer(&data)?,
     })

@@ -5,16 +5,16 @@
 
 use std::sync::OnceLock;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::abugida::AbugidaDef;
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 use crate::core::normalize_symbols::SymbolData;
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct TamilMagnitudes {
     pub hundred: String,
     pub thousand: String,
@@ -26,8 +26,8 @@ pub struct TamilMagnitudes {
     pub one: String,
 }
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct TamilNumbers {
     pub units: Vec<String>,
     pub tens: Vec<String>,
@@ -40,8 +40,8 @@ pub struct TamilNumbers {
     pub magnitudes: TamilMagnitudes,
 }
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct TamilVoicing {
     /// Iterated by nothing; looked up by unit.
     pub voice: IndexMap<String, String>,
@@ -49,10 +49,10 @@ pub struct TamilVoicing {
     pub voiceless_block: Vec<String>,
 }
 
-#[derive(Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct TamilManifest {
-    #[serde(flatten)]
+    #[json(flatten)]
     pub abugida: AbugidaDef,
     pub voicing: TamilVoicing,
     pub clause_punctuation: IndexMap<String, String>,

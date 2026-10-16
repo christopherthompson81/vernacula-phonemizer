@@ -4,26 +4,26 @@
 
 use std::collections::HashMap;
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::js_string::{JsString, js};
 use super::phonology::Phonology;
 use super::provenance::{Form, normalize};
 use crate::js_re;
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct Ipa {
     pub ipa: String,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct SignChar {
     pub char: String,
     pub effect: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, FromJson, Clone)]
 pub struct AbugidaSigns {
     pub virama: SignChar,
     pub anusvara: SignChar,
@@ -32,8 +32,8 @@ pub struct AbugidaSigns {
     pub nukta: SignChar,
 }
 
-#[derive(Debug, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson, Clone)]
+#[json(rename_all = "camelCase")]
 pub struct AbugidaDef {
     pub language: String,
     pub inherent_vowel: String,

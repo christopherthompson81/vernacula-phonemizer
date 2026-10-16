@@ -5,13 +5,13 @@
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::js_regex::JsRegex;
 use super::js_string::JsString;
 
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+#[derive(FromJson, Debug)]
+#[json(rename_all = "camelCase")]
 pub struct TaggerMeta {
     pub src: HashMap<String, i64>,
     pub tags: HashMap<String, String>,
@@ -214,7 +214,7 @@ pub fn load_tagger(
     use super::data_source::{read_data, read_data_text};
     let meta_key = format!("{dir}/{basename}.meta.json");
     let meta: TaggerMeta =
-        serde_json::from_str(&read_data_text(&meta_key).map_err(|e| e.to_string())?)
+        crate::core::from_json::parse_json(&read_data_text(&meta_key).map_err(|e| e.to_string())?)
             .map_err(|e| format!("{meta_key}: {e}"))?;
     let bytes = read_data(&format!("{dir}/{model_file}")).map_err(|e| e.to_string())?;
     let model = super::neural::OnnxModel::from_bytes(&bytes).map_err(|e| e.to_string())?;

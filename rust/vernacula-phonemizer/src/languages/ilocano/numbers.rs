@@ -4,7 +4,7 @@
 
 use std::sync::{LazyLock, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::ilocano::DIR;
 use crate::core::data_source::load_once;
@@ -12,7 +12,7 @@ use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string}
 use crate::core::load_manifest::load_manifest;
 use crate::core::numbers::digit_index;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub ten: String,
     pub hundred: String,
@@ -20,8 +20,8 @@ pub struct Magnitudes {
     pub million: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct IloNumbers {
     pub units: Vec<String>,
     pub one_prefix: String,
@@ -30,7 +30,7 @@ pub struct IloNumbers {
     pub magnitudes: Magnitudes,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 struct NumbersFile {
     numbers: IloNumbers,
 }

@@ -6,8 +6,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{
     is_unreadable_tatar, normalize_tatar, normalize_tatar_initialisms, ordinal_of,
@@ -28,8 +28,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/tatar";
 
 /// `TatarDef` (tatar.ts). Every field the TS interface names is required.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct TatarDef {
     pub consonants: IndexMap<String, String>,
     pub vowels: IndexMap<String, String>,
@@ -179,7 +179,8 @@ const SYMBOL_DATA: &str = r#"{"percent":["процент"],"currency":{"$":["д�
 fn try_symbols() -> Result<&'static SymbolNormalizer, String> {
     static S: OnceLock<SymbolNormalizer> = OnceLock::new();
     load_once(&S, || {
-        let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+        let data: SymbolData =
+            crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
         make_symbol_normalizer(&data)
     })
 }

@@ -3,7 +3,7 @@
 
 use std::collections::HashMap;
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use crate::core::js_string::{JsString, js};
 use crate::js_re;
@@ -93,7 +93,7 @@ pub fn is_verbal_upos(tag: &str) -> bool {
     matches!(tag, "VERB" | "AUX")
 }
 
-#[derive(Deserialize)]
+#[derive(FromJson)]
 pub struct PosModel {
     pub scale: f64,
     pub classes: Vec<String>,

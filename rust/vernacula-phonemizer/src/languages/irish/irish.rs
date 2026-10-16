@@ -155,7 +155,8 @@ static NAT: LazyLock<Nativiser> =
 const SYMBOL_DATA: &str = r#"{"multiply":{"times":"faoi"},"percent":["faoin gcéad"],"currency":{"€":["euro"],"$":["dollar","dollair"],"£":["punt"],"¥":["yen"]},"units":{"km":["ciliméadar"],"cm":["ceintiméadar"],"mm":["milliméadar"],"kg":["cileagram"],"m":["méadar"]},"exponentWords":{"squared":["cearnach"],"cubed":["ciúbach"],"position":"after"}}"#;
 
 static SYMBOLS: LazyLock<Result<SymbolNormalizer, String>> = LazyLock::new(|| {
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     make_symbol_normalizer(&data)
 });
 

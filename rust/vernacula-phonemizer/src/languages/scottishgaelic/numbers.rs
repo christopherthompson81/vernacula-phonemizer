@@ -2,13 +2,13 @@
 //! series before a magnitude, lenition after `dà` only (no eclipsis), the `agus` connector before a bare numeral.
 //! Ported from src/languages/scottishgaelic/numbers.ts — see that file for the sources and the known limitations.
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number_to_string};
 use crate::js_re;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub hundred: String,
     pub thousand: String,
@@ -17,8 +17,8 @@ pub struct Magnitudes {
 }
 
 /// `GaelicNumbers`: the `numbers` block of scottishgaelic.jsonc.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct GaelicNumbers {
     pub ones: Vec<String>,
     pub attributive: Vec<String>,

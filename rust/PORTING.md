@@ -66,7 +66,8 @@ Read that file first. Below are only the Rust dialect rules.
 2. Implement `registry::Engine` for it (`text`, and `neural` if `src/neuralRegistry.ts` lists the language).
    Add one arm to `registry::build`, one to `registry::roman_policy` if `ROMAN_POLICIES` (registry.ts) names it,
    and its code to `registry::LANGUAGES`. Nothing else in the registry changes.
-3. A manifest struct names every field the TS interface does, with no `#[serde(default)]` on required fields.
+3. A manifest struct derives `FromJson` (`core::from_json`, not serde's `Deserialize`, which cost ~9 KB of code per
+   struct) and names every field the TS interface does, with no `#[json(default)]` on required fields.
    A table built from a TS object literal is GENERATED from that object (key order preserved), never hand-typed.
 4. Prove each module with `tools/fn-diff` (a `dump.mts` entry plus its Rust replay), then the language end to end:
    the `phonemize-sync`/`phonemize-best` dumps take a language list, plus FLEURS text (column 3!) and an

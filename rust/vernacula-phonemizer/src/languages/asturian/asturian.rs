@@ -5,8 +5,8 @@
 use std::collections::HashSet;
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_asturian;
 use super::numbers::{DIR, number_to_words, try_numbers};
@@ -24,17 +24,17 @@ use crate::core::normalize_symbols::{
 use crate::core::provenance::{Form, normalize};
 use crate::registry::{Engine, PhonemizeError};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct TierExponents {
     pub squared: CountForms,
     pub cubed: CountForms,
     /// Optional in the TS interface (`position?:`).
-    #[serde(default)]
+    #[json(default)]
     pub position: Option<ExponentPosition>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -45,8 +45,8 @@ pub struct SymbolTier {
 }
 
 /// `AsturianDef`: declared in asturian.ts itself, as here. Every field is REQUIRED.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AsturianDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,

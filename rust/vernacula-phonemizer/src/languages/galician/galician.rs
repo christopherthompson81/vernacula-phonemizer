@@ -238,7 +238,8 @@ impl Engine for GalicianPhonemizer {
 /// `createGalician()`. Errors when the manifest cannot be loaded or the symbol tier refuses it.
 pub fn create_galician() -> Result<GalicianPhonemizer, String> {
     try_manifest()?;
-    let data: SymbolData = serde_json::from_str(SYMBOL_DATA).map_err(|e| e.to_string())?;
+    let data: SymbolData =
+        crate::core::from_json::parse_json(SYMBOL_DATA).map_err(|e| e.to_string())?;
     Ok(GalicianPhonemizer {
         symbols: make_symbol_normalizer(&data)?,
     })

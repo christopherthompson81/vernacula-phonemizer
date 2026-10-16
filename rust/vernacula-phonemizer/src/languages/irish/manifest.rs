@@ -1,19 +1,19 @@
 //! Irish's hand-authored tables, from `irish.jsonc`. Ported from src/languages/irish/manifest.ts — see that file
 //! for the corpus evidence.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys are ignored.
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
 
 pub const DIR: &str = "languages/irish";
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Magnitudes {
     pub hundred: String,
     pub thousand: String,
@@ -21,8 +21,8 @@ pub struct Magnitudes {
     pub billion: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub attributive: Vec<String>,
@@ -31,8 +31,8 @@ pub struct Numbers {
     pub magnitudes: Magnitudes,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct IrishManifest {
     pub slender_vowels: String,
     pub broad_vowels: String,

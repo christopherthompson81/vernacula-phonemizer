@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::{normalize_karakalpak, symbols, try_symbols};
 use super::numbers::number_to_words;
@@ -24,8 +24,8 @@ use crate::registry::{Engine, PhonemizeError};
 pub const DIR: &str = "languages/karakalpak";
 
 /// `KarakalpakDef` (karakalpak.ts). Every field the TS interface names is required.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct KarakalpakDef {
     pub digraphs: Vec<(String, String)>,
     pub letters: IndexMap<String, String>,

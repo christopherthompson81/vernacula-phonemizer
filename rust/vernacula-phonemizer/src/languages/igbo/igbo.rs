@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::manifest::{DIR, try_manifest};
 use super::normalize::{normalize_igbo, try_symbols};
@@ -19,7 +19,7 @@ use crate::core::load_manifest::load_manifest;
 use crate::core::provenance::{Form, normalize};
 use crate::registry::{Engine, PhonemizeError};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Tones {
     pub high: String,
     pub low: String,
@@ -27,8 +27,8 @@ pub struct Tones {
 }
 
 /// `IgboDef`: igbo.ts's own slice of igbo.jsonc.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct IgboDef {
     pub digraphs: IndexMap<String, String>,
     pub consonants: IndexMap<String, String>,

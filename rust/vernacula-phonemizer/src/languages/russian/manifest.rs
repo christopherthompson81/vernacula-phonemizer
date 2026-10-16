@@ -1,13 +1,13 @@
 //! Russian's hand-authored data tables, from `russian.jsonc`, loaded once.
 //! Ported from src/languages/russian/manifest.ts.
 //!
-//! Every field the TS interface names is REQUIRED (no `#[serde(default)]`); documentation keys the TS does not
+//! Every field the TS interface names is REQUIRED (no `#[json(default)]`); documentation keys the TS does not
 //! read (`language`, `name`, `script`, `provenance`, `convention`) are ignored.
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use crate::core::data_source::load_once;
 use crate::core::load_manifest::load_manifest;
@@ -16,46 +16,46 @@ use crate::core::normalize_symbols::{BareExponent, ExponentWords, Multiply};
 
 pub const DIR: &str = "languages/russian";
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AdjectiveEnding {
     pub end: String,
     /// `"hard" | "soft"`.
-    #[serde(rename = "type")]
+    #[json(rename = "type")]
     pub kind: EndingType,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromJson)]
+#[json(rename_all = "lowercase")]
 pub enum EndingType {
     Hard,
     Soft,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct AdjectiveStress {
     pub hard_lemmas: Vec<String>,
     pub soft_lemmas: Vec<String>,
     pub endings: Vec<AdjectiveEnding>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ThousandFeminine {
     pub one: String,
     pub two: String,
 }
 
 /// One oblique case of the cardinal: the same ones/tens/hundreds slots as the nominative tables.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct CardinalCaseForms {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
     pub hundreds: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Numbers {
     pub ones: Vec<String>,
     pub tens: Vec<String>,
@@ -68,7 +68,7 @@ pub struct Numbers {
     pub instrumental: CardinalCaseForms,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct Phonotactics {
     pub vowels: String,
     pub onsets: Vec<String>,
@@ -76,8 +76,8 @@ pub struct Phonotactics {
 }
 
 /// `symbolTier`: the shapes are core's own `SymbolData` field types.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolTier {
     pub percent: CountForms,
     pub currency: IndexMap<String, CountForms>,
@@ -90,8 +90,8 @@ pub struct SymbolTier {
     pub bare_exponent: BareExponent,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct RussianManifest {
     pub acronym_letters: Vec<String>,
     pub vowel_letters: String,

@@ -4,8 +4,8 @@
 
 use std::sync::{LazyLock, OnceLock};
 
+use crate::core::from_json::FromJson;
 use indexmap::IndexMap;
-use serde::Deserialize;
 
 use super::normalize::normalize_lao;
 use crate::core::clauses::assemble_clauses;
@@ -19,16 +19,16 @@ use crate::registry::{Engine, PhonemizeError};
 
 pub const DIR: &str = "languages/lao";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromJson)]
+#[json(rename_all = "lowercase")]
 pub enum Cls {
     High,
     Mid,
     Low,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LaoNumbers {
     pub units: Vec<String>,
     pub ten: String,
@@ -38,7 +38,7 @@ pub struct LaoNumbers {
 }
 
 /// One vowel PATTERN: absent `pre` means "only when there is no leading vowel".
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct VowelPattern {
     pub pre: Option<String>,
     pub signs: String,
@@ -48,7 +48,7 @@ pub struct VowelPattern {
 }
 
 /// `Partial<Record<Cls, string>> & { default?: string }`.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, FromJson)]
 pub struct ToneRow {
     pub high: Option<String>,
     pub mid: Option<String>,
@@ -66,8 +66,8 @@ impl ToneRow {
     }
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct Tone {
     pub marks: IndexMap<String, ToneRow>,
     pub live: ToneRow,
@@ -76,8 +76,8 @@ pub struct Tone {
 }
 
 /// `LaoDef` (lao.ts).
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct LaoDef {
     pub onsets: IndexMap<String, (String, Cls)>,
     pub vowel_patterns: Vec<VowelPattern>,

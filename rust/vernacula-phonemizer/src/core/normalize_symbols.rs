@@ -51,7 +51,7 @@ pub fn resolve_unit_symbol<'a, V>(
 
 use std::sync::{Arc, OnceLock};
 
-use serde::Deserialize;
+use crate::core::from_json::FromJson;
 
 use super::js_regex::{JsMatch, JsRegex};
 use super::js_string::{js, js_number};
@@ -112,8 +112,8 @@ fn unit_power_before() -> &'static JsRegex {
 }
 
 /// Where a language puts the squared/cubed measure word relative to the unit noun.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, FromJson)]
+#[json(rename_all = "lowercase")]
 pub enum ExponentPosition {
     Before,
     After,
@@ -122,8 +122,8 @@ pub enum ExponentPosition {
 }
 
 /// `position`: one value for both powers, or a per-power record.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(untagged)]
+#[derive(Debug, Clone, FromJson)]
+#[json(untagged)]
 pub enum PositionDecl {
     All(ExponentPosition),
     Per(PerPower),
@@ -131,22 +131,22 @@ pub enum PositionDecl {
 
 /// The per-power `position` record. ⚠ `deny_unknown_fields`: both fields are optional, so under `untagged`
 /// a misspelt key would otherwise load as an empty record and silently fall back to the default position.
-/// (serde takes the attribute on a struct, not on an enum variant, hence the named struct.)
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+/// (The attribute goes on a struct, not on an enum variant, hence the named struct.)
+#[derive(Debug, Clone, FromJson)]
+#[json(deny_unknown_fields)]
 pub struct PerPower {
     pub squared: Option<ExponentPosition>,
     pub cubed: Option<ExponentPosition>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, FromJson)]
 pub struct ExponentWords {
     pub squared: Option<CountForms>,
     pub cubed: Option<CountForms>,
     pub position: Option<PositionDecl>,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
+#[derive(Debug, Clone, Default, FromJson)]
 pub struct BareExponent {
     pub squared: Option<String>,
     pub cubed: Option<String>,
@@ -154,15 +154,15 @@ pub struct BareExponent {
     pub negative: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, FromJson)]
 pub struct Multiply {
     pub times: String,
     pub by: Option<String>,
 }
 
 /// `unitPer`: one word for every denominator, or a record keyed by the denominator.
-#[derive(Debug, Clone, Deserialize)]
-#[serde(untagged)]
+#[derive(Debug, Clone, FromJson)]
+#[json(untagged)]
 pub enum UnitPer {
     All(String),
     ByDenominator(IndexMap<String, String>),
@@ -171,8 +171,8 @@ pub enum UnitPer {
 /// `SymbolData` (normalizeSymbols.ts), every field optional as there. ⚠ The maps carry the TS OBJECT's key
 /// order: insertion order, except that integer-like keys come first, ascending. A caller building one from a
 /// manifest with such a key must order it that way.
-#[derive(Clone, Default, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Clone, Default, FromJson)]
+#[json(rename_all = "camelCase")]
 pub struct SymbolData {
     pub percent: Option<CountForms>,
     pub currency: Option<IndexMap<String, CountForms>>,
@@ -181,7 +181,7 @@ pub struct SymbolData {
     pub magnitude_precedes: Option<bool>,
     pub magnitude_count: Option<f64>,
     pub magnitude_connective: Option<String>,
-    #[serde(skip)]
+    #[json(skip)]
     pub count_form: Option<CountForm>,
     pub percent_prefix: Option<bool>,
     pub currency_prefix: Option<bool>,
@@ -1062,7 +1062,8 @@ mod tests {
     use super::*;
 
     fn tier(json: &str) -> SymbolNormalizer {
-        make_symbol_normalizer(&serde_json::from_str::<SymbolData>(json).unwrap()).unwrap()
+        make_symbol_normalizer(&crate::core::from_json::parse_json::<SymbolData>(json).unwrap())
+            .unwrap()
     }
 
     #[test]
@@ -1083,7 +1084,7 @@ mod tests {
 
     #[test]
     fn declared_empty_forms_are_refused() {
-        let d: SymbolData = serde_json::from_str(r#"{"percent":[]}"#).unwrap();
+        let d: SymbolData = crate::core::from_json::parse_json(r#"{"percent":[]}"#).unwrap();
         assert!(make_symbol_normalizer(&d).is_err());
     }
 
