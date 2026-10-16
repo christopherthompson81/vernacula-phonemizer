@@ -9,6 +9,7 @@ use super::normalize::{
     is_unreadable_kyrgyz, kyrgyz_ordinal, normalize_kyrgyz, normalize_kyrgyz_initialisms,
 };
 use crate::core::clauses::assemble_clauses;
+use crate::core::ipa::is_ipa_vowel;
 use crate::core::js_regex::JsRegex;
 use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
 use crate::core::numbers::{NumbersDef, Word, render_number, spell_digits};
@@ -64,42 +65,62 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
         .collect();
     let raw: Vec<JsString> = word.to_lower_case().code_point_strings();
     let m = &*MANIFEST;
-    let mut out = JsString::new();
+    let mut out: Vec<JsString> = Vec::new();
     let mut i = 0;
     while i < chars.len() {
         let c = chars[i].as_str();
         let vowel = is_vowel_letter(c);
         if vowel && raw.get(i + 1) == Some(&raw[i]) {
-            out.push_str(&js(&m.vowels[c]));
-            out.push_str(&js("ː"));
+            out.push(js(&format!("{}ː", m.vowels[c])));
             i += 2;
             continue;
         }
         if vowel {
-            out.push_str(&js(&m.vowels[c]));
+            out.push(js(&m.vowels[c]));
         } else if c == "к" {
-            out.push_str(&js(if back_harmony(&chars, i) { "q" } else { "k" }));
+            out.push(js(if back_harmony(&chars, i) { "q" } else { "k" }));
         } else if c == "г" {
-            out.push_str(&js(if back_harmony(&chars, i) { "ʁ" } else { "ɡ" }));
+            out.push(js(if back_harmony(&chars, i) { "ʁ" } else { "ɡ" }));
         } else if c == "л" {
-            out.push_str(&js(if back_harmony(&chars, i) { "ɫ" } else { "l" }));
+            out.push(js(if back_harmony(&chars, i) { "ɫ" } else { "l" }));
         } else if c == "б"
             && i > 0
             && is_vowel_letter(&chars[i - 1])
             && chars.get(i + 1).is_some_and(|n| is_vowel_letter(n))
         {
-            out.push_str(&js("β"));
+            out.push(js("β"));
         } else if let Some(io) = m.iotated.get(c) {
-            out.push_str(&js(io));
+            // `out.push(...io)`: one segment per code point, which `mark_final_stress` counts.
+            out.extend(js(io).code_point_strings());
         } else if let Some(cons) = m.consonants.get(c) {
-            out.push_str(&js(cons));
+            out.push(js(cons));
         }
         i += 1;
     }
-    out
+    JsString::join(&mark_final_stress(out), &JsString::new())
 }
 
-/// `kyrgyzNumberWords(n, d)`: tens + units + hundred / thousand / million / billion, space-separated; the
+fn is_vowel_seg(seg: &JsString) -> bool {
+    seg.units().iter().any(|&u| is_ipa_vowel(u))
+}
+
+/// `markFinalStress(segs)`: ˈ before the onset of the LAST vowel's syllable — one onset consonant word-internally
+/// (китептер → kitepˈter), the whole cluster only word-initially (спорт → ˈsport) (#1576).
+fn mark_final_stress(mut segs: Vec<JsString>) -> Vec<JsString> {
+    let Some(mut at) = segs.iter().rposition(is_vowel_seg) else {
+        return segs;
+    };
+    if at > 0 && !is_vowel_seg(&segs[at - 1]) {
+        at -= 1;
+    }
+    if !segs[..at].iter().any(is_vowel_seg) {
+        at = 0;
+    }
+    segs.insert(at, js("ˈ"));
+    segs
+}
+
+/// `kyrgyzNumberWords(n, d)`: tens + units + hundred / thousand / million / billion / trillion, space-separated; the
 /// hundred omits a leading 1, the thousand keeps it.
 pub(crate) fn kyrgyz_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
     let unit = |k: u64| d.units.get(k as usize).cloned();
@@ -136,8 +157,10 @@ pub(crate) fn kyrgyz_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
         (1000, &mag.thousand)
     } else if n < 1_000_000_000 {
         (1_000_000, &mag.million)
-    } else {
+    } else if n < 1_000_000_000_000 {
         (1_000_000_000, &mag.billion)
+    } else {
+        (1_000_000_000_000, &mag.trillion) // #1576
     };
     let mut v = kyrgyz_number_words(n / div, d);
     v.push(word.clone());
@@ -145,9 +168,9 @@ pub(crate) fn kyrgyz_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
     v
 }
 
-/// `numberWords(n)`: the cardinal in orthography, 0 … 10¹² − 1 (safe integers only); else `None`.
+/// `numberWords(n)`: the cardinal in orthography, safe integers only; else `None`.
 pub(crate) fn number_words(n: f64) -> Option<JsString> {
-    if !is_safe_integer(n) || n < 0.0 || n >= 1_000_000_000_000.0 {
+    if !is_safe_integer(n) || n < 0.0 {
         return None;
     }
     let words: Vec<JsString> = kyrgyz_number_words(n as u64, &MANIFEST.numbers)
@@ -290,30 +313,30 @@ mod tests {
     /// 65 pins extracted mechanically from test/kyrgyz.test.ts (kind, trim, op, input,
     /// expected): 65 expect() sites, 0 skipped.
     const PINS: [(&str, bool, &str, &str, &str); 65] = [
-        ("word", false, "eq", "кыз", "qɯz"),
-        ("word", false, "eq", "ак", "ɑq"),
-        ("word", false, "eq", "китеп", "kitep"),
-        ("word", false, "eq", "Баткен", "bɑtken"),
-        ("word", false, "eq", "жол", "d͡ʒoɫ"),
-        ("word", false, "eq", "көз", "køz"),
-        ("word", false, "eq", "үй", "yj"),
-        ("word", false, "eq", "ыр", "ɯr"),
-        ("word", false, "eq", "обон", "oβon"),
-        ("word", false, "eq", "тоо", "toː"),
-        ("word", false, "eq", "Айсулуу", "ɑjsuɫuː"),
-        ("engine", true, "eq", "0", "nøl"),
-        ("engine", true, "eq", "21", "d͡ʒɯjɯrmɑ bir"),
-        ("engine", true, "eq", "100", "d͡ʒyz"),
-        ("engine", true, "eq", "1000", "bir miŋ"),
+        ("word", false, "eq", "кыз", "ˈqɯz"),
+        ("word", false, "eq", "ак", "ˈɑq"),
+        ("word", false, "eq", "китеп", "kiˈtep"),
+        ("word", false, "eq", "Баткен", "bɑtˈken"),
+        ("word", false, "eq", "жол", "ˈd͡ʒoɫ"),
+        ("word", false, "eq", "көз", "ˈkøz"),
+        ("word", false, "eq", "үй", "ˈyj"),
+        ("word", false, "eq", "ыр", "ˈɯr"),
+        ("word", false, "eq", "обон", "oˈβon"),
+        ("word", false, "eq", "тоо", "ˈtoː"),
+        ("word", false, "eq", "Айсулуу", "ɑjsuˈɫuː"),
+        ("engine", true, "eq", "0", "ˈnøl"),
+        ("engine", true, "eq", "21", "d͡ʒɯjɯrˈmɑ ˈbir"),
+        ("engine", true, "eq", "100", "ˈd͡ʒyz"),
+        ("engine", true, "eq", "1000", "ˈbir ˈmiŋ"),
         (
             "engine",
             true,
             "eq",
             "1991",
-            "bir miŋ toʁuz d͡ʒyz toqson bir",
+            "ˈbir ˈmiŋ toˈʁuz ˈd͡ʒyz toqˈson ˈbir",
         ),
-        ("engine", true, "eq", "1000000000", "bir milliɑrd"),
-        ("engine", false, "eq", "Мен барам.", "men bɑrɑm ."),
+        ("engine", true, "eq", "1000000000", "ˈbir milliˈɑrd"),
+        ("engine", false, "eq", "Мен барам.", "ˈmen bɑˈrɑm ."),
         ("ordinal", false, "eq", "1", "биринчи"),
         ("ordinal", false, "eq", "3", "үчүнчү"),
         ("ordinal", false, "eq", "40", "кыркынчы"),
@@ -335,79 +358,103 @@ mod tests {
             true,
             "eq",
             "1991-жылы",
-            "bir miŋ toʁuz d͡ʒyz toqson birint͡ʃi d͡ʒɯɫɯ",
+            "ˈbir ˈmiŋ toˈʁuz ˈd͡ʒyz toqˈson birinˈt͡ʃi d͡ʒɯˈɫɯ",
         ),
-        ("engine", true, "eq", "19-кылымда", "on toʁuzunt͡ʃu qɯɫɯmdɑ"),
-        ("engine", true, "eq", "9-Май", "toʁuzunt͡ʃu mɑj"),
+        (
+            "engine",
+            true,
+            "eq",
+            "19-кылымда",
+            "ˈon toʁuzunˈt͡ʃu qɯɫɯmˈdɑ",
+        ),
+        ("engine", true, "eq", "9-Май", "toʁuzunˈt͡ʃu ˈmɑj"),
         (
             "engine",
             true,
             "eq",
             "10-12-кылымдагы",
-            "onunt͡ʃu on ekint͡ʃi qɯɫɯmdɑʁɯ",
+            "onunˈt͡ʃu ˈon ekinˈt͡ʃi qɯɫɯmdɑˈʁɯ",
         ),
         (
             "engine",
             true,
             "eq",
             "1991-ж.",
-            "bir miŋ toʁuz d͡ʒyz toqson birint͡ʃi d͡ʒɯɫɯ",
+            "ˈbir ˈmiŋ toˈʁuz ˈd͡ʒyz toqˈson birinˈt͡ʃi d͡ʒɯˈɫɯ",
         ),
-        ("engine", true, "eq", "150дөн", "d͡ʒyz elyːdøn"),
-        ("engine", true, "eq", "1000ге", "bir miŋɡe"),
-        ("engine", true, "eq", "25ге", "d͡ʒɯjɯrmɑ beʃke"),
-        ("engine", true, "eq", "2-декабрда", "ekint͡ʃi deqɑbrdɑ"),
-        ("engine", true, "eq", "50%", "elyː pɑjɯz"),
-        ("engine", true, "eq", "80%ке", "seksen pɑjɯzʁɑ"),
-        ("engine", true, "eq", "20 °C", "d͡ʒɯjɯrmɑ ʁrɑdus"),
-        ("engine", true, "eq", "-18°Сден", "minus on seɡiz ʁrɑdustɑn"),
+        ("engine", true, "eq", "150дөн", "ˈd͡ʒyz elyːˈdøn"),
+        ("engine", true, "eq", "1000ге", "ˈbir miŋˈɡe"),
+        ("engine", true, "eq", "25ге", "d͡ʒɯjɯrˈmɑ beʃˈke"),
+        ("engine", true, "eq", "2-декабрда", "ekinˈt͡ʃi deqɑbrˈdɑ"),
+        ("engine", true, "eq", "50%", "eˈlyː pɑˈjɯz"),
+        ("engine", true, "eq", "80%ке", "sekˈsen pɑjɯzˈʁɑ"),
+        ("engine", true, "eq", "20 °C", "d͡ʒɯjɯrˈmɑ ʁrɑˈdus"),
+        (
+            "engine",
+            true,
+            "eq",
+            "-18°Сден",
+            "miˈnus ˈon seˈɡiz ʁrɑdusˈtɑn",
+        ),
         ("engine", true, "same", "30 °c", "30 °C"),
-        ("engine", true, "eq", "30 °C-дан", "otuz ʁrɑdustɑn"),
+        ("engine", true, "eq", "30 °C-дан", "oˈtuz ʁrɑdusˈtɑn"),
         ("engine", true, "same", "30 °C-ДАН", "30 °-ДАН"),
         (
             "engine",
             true,
             "eq",
             "температура -38°С",
-            "temperɑturɑ minus otuz seɡiz ʁrɑdus",
+            "temperɑtuˈrɑ miˈnus oˈtuz seˈɡiz ʁrɑˈdus",
         ),
-        ("engine", true, "eq", "—40°С", "minus qɯrq ʁrɑdus"),
+        ("engine", true, "eq", "—40°С", "miˈnus ˈqɯrq ʁrɑˈdus"),
         (
             "engine",
             true,
             "contains",
             "-23...-29 °C",
-            "minus d͡ʒɯjɯrmɑ yt͡ʃ",
+            "miˈnus d͡ʒɯjɯrˈmɑ ˈyt͡ʃ",
         ),
-        ("engine", true, "not_contains", "6-16 °C", "minus"),
-        ("engine", true, "not_contains", "39°11′–43°16′", "minus"),
-        ("engine", true, "not_contains", "2750-3800 метр", "minus"),
-        ("engine", true, "eq", "2,5", "eki bytyn ondon beʃ"),
-        ("engine", true, "eq", "0,54", "nøl bytyn d͡ʒyzdøn elyː tørt"),
-        ("engine", true, "eq", "3/4", "tørttøn yt͡ʃ"),
-        ("engine", true, "eq", "1/10", "ondon bir"),
-        ("engine", true, "eq", "1 000 000", "bir million"),
-        ("engine", true, "eq", "5 км", "beʃ kiɫometr"),
+        ("engine", true, "not_contains", "6-16 °C", "miˈnus"),
+        ("engine", true, "not_contains", "39°11′–43°16′", "miˈnus"),
+        ("engine", true, "not_contains", "2750-3800 метр", "miˈnus"),
+        ("engine", true, "eq", "2,5", "eˈki byˈtyn onˈdon ˈbeʃ"),
+        (
+            "engine",
+            true,
+            "eq",
+            "0,54",
+            "ˈnøl byˈtyn d͡ʒyzˈdøn eˈlyː ˈtørt",
+        ),
+        ("engine", true, "eq", "3/4", "tørtˈtøn ˈyt͡ʃ"),
+        ("engine", true, "eq", "1/10", "onˈdon ˈbir"),
+        ("engine", true, "eq", "1 000 000", "ˈbir milliˈon"),
+        ("engine", true, "eq", "5 км", "ˈbeʃ kiɫoˈmetr"),
         (
             "engine",
             true,
             "eq",
             "1090 км²",
-            "bir miŋ toqson t͡ʃɑrt͡ʃɯ kiɫometr",
+            "ˈbir ˈmiŋ toqˈson t͡ʃɑrˈt͡ʃɯ kiɫoˈmetr",
         ),
-        ("engine", true, "eq", "$100 миллион", "d͡ʒyz million doɫɫɑr"),
-        ("engine", true, "eq", "СССР", "es es es er"),
-        ("engine", true, "eq", "СССРдин", "es es es erdin"),
-        ("engine", true, "eq", "ГЭС", "ɡes"),
+        (
+            "engine",
+            true,
+            "eq",
+            "$100 миллион",
+            "ˈd͡ʒyz milliˈon doɫˈɫɑr",
+        ),
+        ("engine", true, "eq", "СССР", "ˈes ˈes ˈes ˈer"),
+        ("engine", true, "eq", "СССРдин", "ˈes ˈes ˈes erˈdin"),
+        ("engine", true, "eq", "ГЭС", "ˈɡes"),
         (
             "engine",
             true,
             "eq",
             "Мен барам. Сен барасың.",
-            "men bɑrɑm . sen bɑrɑsɯŋ .",
+            "ˈmen bɑˈrɑm . ˈsen bɑrɑˈsɯŋ .",
         ),
-        ("engine", true, "not_contains", "ПК = Upgrading", "bɑrɑβɑr"),
+        ("engine", true, "not_contains", "ПК = Upgrading", "bɑrɑˈβɑr"),
         ("engine", true, "not_contains", "802.11г", "ɡrɑmm"),
-        ("engine", true, "eq", "3-4", "yt͡ʃ tørt"),
+        ("engine", true, "eq", "3-4", "ˈyt͡ʃ ˈtørt"),
     ];
 }

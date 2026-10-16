@@ -14,23 +14,6 @@ public static class TurkmenPhonemizer
     private static readonly IReadOnlyDictionary<string, string> G = Manifest.DEF.Graphemes;
     private static readonly IReadOnlyDictionary<string, string> CLAUSE_MARK = Manifest.DEF.ClausePunctuation;
     private static readonly IReadOnlySet<string> VOWEL = Ipa.IPA_VOWEL;
-    private static readonly IReadOnlySet<string> NASAL = Manifest.NASAL;
-
-    private static readonly IReadOnlySet<string> STRESS_FRICATIVE = new HashSet<string>(
-        ["f", "v", "θ", "ð", "ʃ", "ʒ", "x", "χ", "h"], StringComparer.Ordinal);
-
-    /** Sonority class (higher = more sonorous): vowel 6, glide 5, liquid 4, nasal 3, fricative 2,
-     *  affricate 1, stop 0. ⚠ THE AFFRICATE TEST PRECEDES THE FRICATIVE LIST — order is the tie-break. */
-    private static int Sonority(string seg)
-    {
-        if (VOWEL.Contains(seg)) return 6;
-        if (seg == "j" || seg == "w") return 5;
-        if (seg == "l" || seg == "ɾ" || seg == "r") return 4;
-        if (NASAL.Contains(seg)) return 3;
-        if (seg.Contains('\u0361')) return 1; // affricate (t͡ʃ d͡ʒ) — the tie bar
-        if (STRESS_FRICATIVE.Contains(seg)) return 2;
-        return 0; // stop (p b t d k ɡ)
-    }
 
     /** Phonemize one Turkmen word → canonical IPA: direct grapheme scan + word-final stress. */
     public static string PhonemizeWord(string word)
@@ -49,29 +32,15 @@ public static class TurkmenPhonemizer
             at0 += 1;
             if (ph is not null) segs.Add(ph);
         }
-        // Word-final (oxytone) stress — the Turkic default: ˈ before the MAXIMAL onset of the last vowel's
-        // syllable. Native Turkmen has no onset clusters; loanwords do (plan, sport→θp, klub), so back up
-        // over the whole onset by sonority sequencing plus the fricative- and nasal-initial clusters.
-        var vidx = new List<int>();
-        for (var k = 0; k < segs.Count; k++)
-            if (VOWEL.Contains(segs[k])) vidx.Add(k);
-        if (vidx.Count > 0)
+        // Word-final (oxytone) stress — the Turkic default: ˈ before the onset of the last vowel's syllable.
+        // ⚠ ONE ONSET CONSONANT word-internally (kitap.lar, ilkin.ji); a word-INITIAL cluster, with no vowel
+        // before it, is the whole onset (plan, sport→θp). See turkmen.ts (#1576).
+        var nucleus = segs.FindLastIndex(VOWEL.Contains);
+        if (nucleus >= 0)
         {
-            var nucleus = vidx[^1];
             var at = nucleus;
-            if (at > 0 && !VOWEL.Contains(segs[at - 1])) at--; // always include the immediate onset consonant
-            while (at > 0 && !VOWEL.Contains(segs[at - 1]))
-            {
-                // extend only over a valid COMPLEX onset: obstruent + liquid/glide (pl, kr), fricative +
-                // stop (θp, θt), or nasal + stop — NOT nasal/liquid + liquid/glide (a coda + the next onset).
-                var p = segs[at - 1];
-                var l = segs[at];
-                var obstruentLiquid = Sonority(p) <= 2 && Sonority(l) >= 4;
-                var fricStop = Sonority(p) == 2 && Sonority(l) <= 1;
-                var nasalStop = NASAL.Contains(p) && Sonority(l) <= 1;
-                if (!(obstruentLiquid || fricStop || nasalStop)) break;
-                at--;
-            }
+            if (at > 0 && !VOWEL.Contains(segs[at - 1])) at--; // the immediate onset consonant
+            if (!segs.Take(at).Any(VOWEL.Contains)) at = 0; // a word-initial cluster is the whole onset
             segs.Insert(at, "ˈ");
         }
         return string.Concat(segs).Normalize(NormalizationForm.FormC);

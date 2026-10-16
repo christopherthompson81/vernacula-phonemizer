@@ -28,7 +28,9 @@ const TENS: Record<number, string> = {
 const HUNDRED = "йөз",
     THOUSAND = "мең",
     MILLION = "миллион",
-    BILLION = "миллиард";
+    BILLION = "миллиард",
+    // триллион — the Wiktionary Tatar lemma for 10¹², and the magnitude tatar.ts's symbol tier already lists (#1576).
+    TRILLION = "триллион";
 
 /** A non-negative safe integer → the ordered Tatar number WORDS (spellings, not IPA). */
 export function numberToWords(n: number): string[] {
@@ -54,7 +56,12 @@ export function numberToWords(n: number): string[] {
             r = n % 1_000_000;
         return [...numberToWords(m), MILLION, ...(r ? numberToWords(r) : [])];
     }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...numberToWords(b), BILLION, ...(r ? numberToWords(r) : [])];
+    if (n < 1_000_000_000_000) {
+        const b = Math.floor(n / 1_000_000_000),
+            r = n % 1_000_000_000;
+        return [...numberToWords(b), BILLION, ...(r ? numberToWords(r) : [])];
+    }
+    const t = Math.floor(n / 1_000_000_000_000),
+        r = n % 1_000_000_000_000;
+    return [...numberToWords(t), TRILLION, ...(r ? numberToWords(r) : [])];
 }

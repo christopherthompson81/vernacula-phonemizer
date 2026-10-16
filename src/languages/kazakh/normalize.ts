@@ -52,18 +52,18 @@ const THOUSAND_CARD = "мың";
 /** Integer → the Kazakh ORDINAL, in orthography (emitted as text, phonemized by the g2p). The ordinal
  *  suffix -ыншы/-інші attaches to the LAST element only, harmony-paired (the same rule romanOrdinals
  *  documents). Extends romanOrdinals.ordinal (which caps at 100) to the hundreds the corpus writes.
- *  Above 999 → undefined (the corpus writes no 4-digit ordinal; a round thousand is its own fused form
- *  the romanOrdinals file also declines to attempt). */
+ *  The thousands take the ending on their last element too (2016 → екі мың он алтыншы, 1000 → бір мыңыншы). */
 function ordinalWord(n: number): string | undefined {
     if (!Number.isInteger(n) || n < 1 || n >= 1000000) return undefined;
     // FOUR-DIGIT ORDINALS EXIST HERE, as years in the `N-жылы` form: the corpus writes `2016-жылы` and
     // `2005-жылы` ("in the year 2016"), which Kazakh reads as an ordinal — екі мың он алтыншы жылы. Only
-    // the LAST element takes the ending, so the thousands head is the plain cardinal. A ROUND thousand
-    // still declines: `1000-шы` needs the fused мыңыншы, which romanOrdinals also refuses to construct.
+    // the LAST element takes the ending, so the thousands head is the plain cardinal. A ROUND thousand takes
+    // it on мың itself — мыңыншы ("thousandth", a Wiktionary Kazakh numeral), the regular -ыншы after a
+    // back-vowel consonant stem. Declining it left the suffix as a word: `1000-шы жыл` read *… ʃˈə ʒˈəɫ* (#1576).
     if (n >= 1000) {
         const th = Math.floor(n / 1000), r = n % 1000;
-        if (r === 0) return undefined;
         const head = `${th === 1 ? UNIT_CARD[1] : orthographic(th)} ${THOUSAND_CARD}`;
+        if (r === 0) return `${head}ыншы`;
         const tail = ordinalWord(r);
         return tail === undefined ? undefined : `${head} ${tail}`;
     }
@@ -95,6 +95,9 @@ const CASE_BY_SUFFIX: Readonly<Record<string, string>> = {
     да: "loc", де: "loc", та: "loc", те: "loc",
     мен: "ins", бен: "ins", пен: "ins",
 };
+
+/** The nouns the symbol tier spells for a unit or a percent (kazakh.ts SYMBOLS), which a case suffix can follow. */
+const SUFFIXABLE_NOUNS: readonly string[] = ["километр", "килограмм", "метр", "миллиметр", "сантиметр", "пайыз"];
 
 /** The LAST vowel of a word — the harmony class that picks the ending. */
 function lastVowel(w: string): string | undefined {
@@ -343,14 +346,23 @@ export function normalizeKazakh(input: string): string {
             return base;
         });
 
-    // 6) NUMERIC RANGES — `1977-1981`, `1418 – 1450`, `10-11`, `35-40`. Kazakh "ден" (to/from) or just
-    //    two numbers. The corpus's `2005-жылы` (a year + -жылы) is NOT a range (the hyphen is part of
-    //    the year form). A leading minus stays a sign.
-    s = rewrite(s, /(?<![\d.,])(\d[\d ]*)\s*[-–—]\s*(\d[\d ]*)(?![\d.-])/gu, "$1–$2");
+    // 6) NUMERIC RANGES — `1977-1981`, `1418 – 1450`, `10-11`, `35-40`. The corpus's `2005-жылы` (a year +
+    //    -жылы) is NOT a range (the hyphen is part of the year form). A leading minus stays a sign.
+    //    ⚠ THE DASH IS SPENT ON A PAUSE, the refusal tk, ba, tt and chv make: Kazakh marks a span with case
+    //    endings on both operands (бестен онға дейін), which this layer would have to derive. This used to
+    //    rewrite the dash to an EN DASH, which is not a token — so `1977-1981` read as two bare numbers with
+    //    nothing between them (#1576). The trailing guard refuses a DIGIT after a dot, never the dot itself, so
+    //    a range that ends a sentence keeps its reading (trap 58).
+    s = rewrite(s, /(?<![\d.,])(\d[\d ]*?)\s*[-–—]\s*(\d[\d ]*)(?![\d-]|\.\d)/gu, "$1, $2");
 
     // 7) THE SHARED SYMBOL TIER — %, units. The number must be ADJACENT to its unit and still carry its
     //    decimal comma (2,3), so it runs before step 8 folds the comma into a word.
     s = SYMBOLS(s);
+
+    // 7a) A CASE SUFFIX ON A UNIT OR A PERCENT — `5 км-ге`, `20%-ға`, `3 м-ден`. The tier has just spelled
+    //     the symbol (`5 километр-ге`), and the hyphen left the suffix as a word of its own: *километр ɡˈe*.
+    //     The writer chose the allomorph for the spoken word, so it is glued as written (#1576).
+    s = rewrite(s, new RegExp(`(?<=\\d\\s?)(${SUFFIXABLE_NOUNS.join("|")})-(${Object.keys(CASE_BY_SUFFIX).join("|")})(?![\\p{L}\\p{M}])`, "giu"), "$1$2");
 
     // 7z) FRACTIONS, AND THE READING COMES FROM THE CORPUS'S OWN AUDIO. There was no fraction rule at all here:
     //     the slash was dropped and the digits read in order, so `1/5` came out *бір бес* ("one five") and `2/3`

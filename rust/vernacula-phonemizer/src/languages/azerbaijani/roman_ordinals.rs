@@ -71,7 +71,9 @@ pub(crate) fn az_roman_ordinal(n: f64) -> Option<JsString> {
 }
 
 /// `CONTEXT`, verbatim.
-const CONTEXT: &str = r"^(əsr|yüzil|minillik|ildönüm|konqres|sinif)";
+/// Open at the end only to a suffix, which harmony bounds: every stem is front-voweled, so a back vowel after it is
+/// another word (`əsrarəngiz`, #1576). Lower case on purpose: under `i` a capital `I` would fold to `i`.
+const CONTEXT: &str = r"^(əsr|yüzil|minillik|ildönüm|konqres|sinif)(?![\p{L}\p{M}]*[aıou])";
 
 /// `ROMAN_POLICY` (registry.ts's `romanAz`): the same context on both sides; no `exclude`.
 pub fn roman_policy() -> RomanPolicy {

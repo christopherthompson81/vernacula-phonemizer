@@ -25,6 +25,7 @@ public class NumbersDef
         public string? Crore;
         public string? Million;
         public string? Billion;
+        public string? Trillion;
         /** Balochi's 10^9 word (arab) — the TS core schema has no such magnitude; Balochi's own
          *  `BalNumbersDef` extends `magnitudes` with it, and this field is where that extension binds. */
         public string? Arab;

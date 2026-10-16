@@ -9,12 +9,12 @@ use indexmap::IndexMap;
 use super::g2p::{Seg, to_segments};
 use super::manifest::{MANIFEST, try_manifest};
 use super::normalize::{normalize_kazakh, ordinal_word, orthographic};
-use super::numbers::number_to_ipa;
+use super::numbers::{digits_to_ipa, number_to_ipa};
 use super::roman_ordinals::kk_roman_ordinal;
 use crate::core::clauses::assemble_clauses;
 use crate::core::data_source::load_once;
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, js};
 use crate::core::normalize_symbols::{
     ExponentPosition, ExponentWords, Multiply, PositionDecl, SymbolData, SymbolNormalizer,
     make_symbol_normalizer,
@@ -206,7 +206,7 @@ impl KazakhPhonemizer {
                 }
             } else if let Some(n) = m.group(2, s).filter(|n| !n.is_empty()) {
                 let digits = js_re!(r" ", "gu").replace(&n, &JsString::new());
-                for ipa in number_to_ipa(js_number(&digits)).split(&js(" ")) {
+                for ipa in digits_to_ipa(&digits).split(&js(" ")) {
                     sink.emit(&ipa);
                 }
             } else if let Some(p) = m.group(3, s).filter(|p| !p.is_empty())
@@ -374,7 +374,7 @@ mod tests {
             "екі жүз қырық жетінші бабына",
         ),
         ("normalize", false, "eq", "15-і", "он бесі"),
-        ("normalize", false, "eq", "1000-шы", "1000-шы"),
+        ("normalize", false, "eq", "1000-шы", "бір мыңыншы"),
         ("phonemize", true, "eq", "08:46", "seɡˈɪz qˈərəq ˈɑɫtə"),
         ("phonemize", true, "eq", "13:15", "ˈon ˈʏʃ ˈon bˈes"),
         ("phonemize", true, "eq", "11:00-ден", "ˈon bɪrdˈen"),
@@ -423,7 +423,7 @@ mod tests {
             "15.00 UTC",
             "ˈon bˈes jˈuː tʰˈiː sˈiː",
         ),
-        ("normalize", false, "eq", "1000-ші", "1000-ші"),
+        ("normalize", false, "eq", "1000-ші", "бір мыңыншы"),
         (
             "phonemize",
             true,

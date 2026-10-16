@@ -20,6 +20,8 @@ pub struct Numbers {
     pub hundred: String,
     pub thousand: String,
     pub million: String,
+    pub milliard: String,
+    pub trillion: String,
 }
 
 #[derive(Debug, Deserialize)]

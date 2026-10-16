@@ -16,6 +16,8 @@ public static class Numbers
 {
     public static List<string?> TurkmenNumberWords(double n, NumbersDef d)
     {
+        // Not a non-negative integer, no words: NaN used to recurse until the stack overflowed (#1576).
+        if (!double.IsInteger(n) || n < 0) return [];
         if (n < 10) return [d.Units[(int)n]];
         if (n < 100)
         {

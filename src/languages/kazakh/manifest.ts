@@ -19,6 +19,8 @@ export interface KazakhManifest {
         hundred: string;
         thousand: string;
         million: string;
+        milliard: string;
+        trillion: string;
     };
 }
 

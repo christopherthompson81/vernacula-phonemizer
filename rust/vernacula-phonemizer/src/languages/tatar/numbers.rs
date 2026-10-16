@@ -42,6 +42,7 @@ const HUNDRED: &str = "йөз";
 const THOUSAND: &str = "мең";
 const MILLION: &str = "миллион";
 const BILLION: &str = "миллиард";
+const TRILLION: &str = "триллион"; // #1576
 
 /// `numberToWords(n)` over the JS number (callers pass non-negative integers; the arithmetic is the TS's `f64`).
 pub(crate) fn number_to_words(n: f64) -> Vec<&'static str> {
@@ -89,8 +90,10 @@ pub(crate) fn number_to_words(n: f64) -> Vec<&'static str> {
     }
     let (div, word) = if n < 1_000_000_000.0 {
         (1_000_000.0, MILLION)
-    } else {
+    } else if n < 1_000_000_000_000.0 {
         (1_000_000_000.0, BILLION)
+    } else {
+        (1_000_000_000_000.0, TRILLION)
     };
     let mut v = number_to_words((n / div).floor());
     v.push(word);

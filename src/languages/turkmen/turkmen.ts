@@ -19,7 +19,6 @@ import { IPA_VOWEL } from "../../core/ipa.ts";
 interface TurkmenDef {
     digraphs: Record<string, string>;
     graphemes: Record<string, string>;
-    nasals: readonly string[];
     numbers: NumbersDef; // units[0..9], tens{"10".."90"} (Turkic: 10 IS a tens entry), magnitudes{}
     clausePunctuation: Record<string, string>;
 }
@@ -27,18 +26,6 @@ const DEF = loadManifest<TurkmenDef>(import.meta.url, "turkmen.jsonc");
 const G = DEF.graphemes;
 const CLAUSE_MARK = DEF.clausePunctuation;
 const VOWEL = IPA_VOWEL;
-const NASAL = new Set(DEF.nasals);
-
-/** Sonority class (higher = more sonorous): vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0. */
-function sonority(seg: string): number {
-    if (VOWEL.has(seg)) return 6;
-    if (seg === "j" || seg === "w") return 5;
-    if (["l", "ɾ", "r"].includes(seg)) return 4;
-    if (NASAL.has(seg)) return 3;
-    if (seg.includes("͡")) return 1; // affricate (t͡ʃ d͡ʒ)
-    if (["f", "v", "θ", "ð", "ʃ", "ʒ", "x", "χ", "h"].includes(seg)) return 2;
-    return 0; // stop (p b t d k ɡ)
-}
 
 /** Phonemize one Turkmen word → canonical IPA: direct grapheme scan + word-final stress. */
 export function phonemizeWord(word: string): string {
@@ -52,25 +39,16 @@ export function phonemizeWord(word: string): string {
         at0 += 1;
         if (ph !== undefined) segs.push(ph);
     }
-    // Word-final (oxytone) stress — the Turkic default: ˈ before the MAXIMAL onset of the last vowel's syllable.
-    // Native Turkmen has no onset clusters; loanwords do (plan, sport→θp, klub), so back up over the whole onset by
-    // sonority sequencing (rising toward the vowel) + fricative-initial (θp, θt) and nasal-initial clusters.
-    const vidx = segs.map((s, idx) => (VOWEL.has(s) ? idx : -1)).filter((x) => x >= 0);
-    if (vidx.length) {
-        const nucleus = vidx[vidx.length - 1]!;
+    // Word-final (oxytone) stress — the Turkic default: ˈ before the onset of the last vowel's syllable.
+    // ⚠ A TURKMEN SYLLABLE TAKES ONE ONSET CONSONANT, so a word-internal cluster splits: kitaplar is kitap.lar,
+    // ilkinji ilkin.ji. Only a word-INITIAL cluster, with no vowel before it, is a whole onset — the loans plan,
+    // sport→θp, klub. The sonority walk this replaces took any obstruent+liquid, fricative+stop or nasal+stop as an
+    // onset wherever it stood, and gave *kitɑˈplɑɾ* and *ilkiˈnd͡ʒi* (#1576).
+    const nucleus = segs.findLastIndex((s) => VOWEL.has(s));
+    if (nucleus >= 0) {
         let at = nucleus;
-        if (at > 0 && !VOWEL.has(segs[at - 1]!)) at--; // always include the immediate onset consonant
-        while (at > 0 && !VOWEL.has(segs[at - 1]!)) {
-            // extend only over a valid COMPLEX onset: obstruent + liquid/glide (pl, kr), fricative + stop (θp, θt),
-            // or nasal + stop — NOT nasal/liquid + liquid/glide (those are a coda + the next onset).
-            const p = segs[at - 1]!,
-                l = segs[at]!;
-            const obstruentLiquid = sonority(p) <= 2 && sonority(l) >= 4;
-            const fricStop = sonority(p) === 2 && sonority(l) <= 1;
-            const nasalStop = NASAL.has(p) && sonority(l) <= 1;
-            if (!(obstruentLiquid || fricStop || nasalStop)) break;
-            at--;
-        }
+        if (at > 0 && !VOWEL.has(segs[at - 1]!)) at--; // the immediate onset consonant
+        if (!segs.slice(0, at).some((s) => VOWEL.has(s))) at = 0; // a word-initial cluster is the whole onset
         segs.splice(at, 0, "ˈ");
     }
     return segs.join("").normalize("NFC");

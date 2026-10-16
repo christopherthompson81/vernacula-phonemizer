@@ -38,21 +38,21 @@ const TENS_CARD: [&str; 10] = [
 const HUNDRED_CARD: &str = "жүз";
 const THOUSAND_CARD: &str = "мың";
 
-/// `ordinalWord(n)`: the ordinal in orthography, 1 … 999,999 except a round thousand; else `None`.
+/// `ordinalWord(n)`: the ordinal in orthography, 1 … 999,999 (a round thousand on мың: мыңыншы, #1576); else `None`.
 pub(crate) fn ordinal_word(n: f64) -> Option<JsString> {
     if !(n.is_finite() && n.fract() == 0.0) || n < 1.0 || n >= 1_000_000.0 {
         return None;
     }
     if n >= 1000.0 {
         let (th, r) = ((n / 1000.0).floor(), n % 1000.0);
-        if r == 0.0 {
-            return None;
-        }
         let head_num = if th == 1.0 {
             js(UNIT_CARD[1])
         } else {
             orthographic(th)
         };
+        if r == 0.0 {
+            return Some(head_num.concat(&js(&format!(" {THOUSAND_CARD}ыншы"))));
+        }
         let tail = ordinal_word(r)?;
         return Some(
             head_num
@@ -499,18 +499,30 @@ pub(crate) fn normalize_kazakh(input: &JsString) -> JsString {
         },
     );
 
-    // 6) numeric ranges.
+    // 6) numeric ranges: the dash is spent on a PAUSE (#1576); the trailing guard refuses a digit after a dot,
+    //    never the dot (trap 58).
     s = rewrite(
         &s,
         js_re!(
-            r"(?<![\d.,])(\d[\d ]*)\s*[-–—]\s*(\d[\d ]*)(?![\d.-])",
+            r"(?<![\d.,])(\d[\d ]*?)\s*[-–—]\s*(\d[\d ]*)(?![\d-]|\.\d)",
             "gu"
         ),
-        &js("$1–$2"),
+        &js("$1, $2"),
     );
 
     // 7) the shared symbol tier, while the number is still adjacent to its unit.
     s = symbols().apply(&s);
+
+    // 7a) a case suffix on a unit or a percent, glued to the spoken word as written (#1576). The alternations are
+    //     normalize.ts's SUFFIXABLE_NOUNS and CASE_BY_SUFFIX's keys, in order.
+    s = rewrite(
+        &s,
+        js_re!(
+            r"(?<=\d\s?)(километр|килограмм|метр|миллиметр|сантиметр|пайыз)-(ге|ға|ке|қа|ден|дан|тен|тан|нен|нан|ның|нің|дың|дің|тың|тің|да|де|та|те|мен|бен|пен)(?![\p{L}\p{M}])",
+            "giu"
+        ),
+        &js("$1$2"),
+    );
 
     // 7z) fractions: the denominator in the ablative, then the numerator.
     s = rewrite_with(

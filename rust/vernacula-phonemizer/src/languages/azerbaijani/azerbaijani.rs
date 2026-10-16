@@ -12,12 +12,12 @@ use super::normalize::{
     is_unreadable_azerbaijani, normalize_azerbaijani, normalize_azerbaijani_initialisms,
     ordinal_words,
 };
-use super::numbers::number_to_words;
+use super::numbers::{digits_to_words, number_to_words};
 use super::roman_ordinals::az_roman_ordinal;
 use crate::core::clauses::assemble_clauses;
 use crate::core::host_word::{LATIN_RUN, make_nativiser};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, js};
 use crate::core::normalize_symbols::{
     ExponentWords, Multiply, PositionDecl, SymbolData, SymbolNormalizer, make_symbol_normalizer,
 };
@@ -42,7 +42,7 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
 static TOKEN: LazyLock<JsRegex> = LazyLock::new(|| {
     JsRegex::new(
         &format!(
-            r"({})|(\d+(?<!(?<!\d)0)\.\d{{3}}(?:\.\d{{3}})*|\d+,\d+|\d+)|([.!?…,;:])",
+            r"({})|(\d+(?<!(?<!\d)0)\.\d{{3}}(?:\.\d{{3}})*(?:,\d+)?|\d+,\d+|\d+)|([.!?…,;:])",
             *LATIN_RUN
         ),
         "giu",
@@ -58,12 +58,12 @@ static NAT: LazyLock<Nativiser> = LazyLock::new(|| Box::new(make_nativiser(NATIV
 fn number_token_to_words(tok: &JsString) -> JsString {
     let parts = tok.split(&js(","));
     let int_raw = js_re!(r"[ .]", "gu").replace(&parts[0], &JsString::new());
-    let mut words = number_to_words(js_number(&int_raw));
+    let mut words = digits_to_words(&int_raw); // exact past 2⁵³ (#1576)
     if let Some(frac) = parts.get(1) {
         let digits: Vec<JsString> = frac
             .code_point_strings()
             .iter()
-            .map(|d| number_to_words(js_number(d)))
+            .map(digits_to_words)
             .collect();
         words = words
             .concat(&js(&format!(" {} ", MANIFEST.numbers.decimal_connector)))

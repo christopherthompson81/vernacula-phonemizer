@@ -72,7 +72,9 @@ const B = "1000000000000000000009";
  *     sibling `zu` has no such precedent in its own file and stays listed.
  * ⚠ A NEW LANGUAGE MUST NOT JOIN THIS LIST. It exists to be emptied.
  */
-const ACCEPTED_LOSSY = new Set("az vi si kk tg zu".split(" "));
+// az and kk came off in #1576: az now groups a written numeral from its digits (tr's #1523 shape), and kk reads a
+// run past 2⁵³ digit by digit from its own unit atoms.
+const ACCEPTED_LOSSY = new Set("vi si tg zu".split(" "));
 
 const CODES = [
     ...new Set([...readFileSync("src/registry.ts", "utf8").matchAll(/^\s*case "([^"]+)":/gmu)].map((m) => m[1]!)),

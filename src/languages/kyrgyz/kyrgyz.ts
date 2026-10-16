@@ -6,10 +6,12 @@
  * by the same back-harmony, clear [l] by front; (3) LONG vowels — a doubled vowel is [Vː] (тоо→toː, Айсулуу→ɑjsuluː).
  * The governing vowel for (1)/(2) is the NEAREST vowel (the following one if any, else the preceding: Баткен→batken —
  * к is [k] before front е though the word also has back а). Signatures: ⟨ж⟩→[d͡ʒ], ⟨ң⟩→[ŋ], ⟨а⟩=ɑ, ⟨ы⟩=ɯ, ⟨ө⟩=ø, ⟨ү⟩=y.
- * Stress is final-syllable (Turkic default; unmarked in the referee → folded).
+ * Stress is final-syllable, the Turkic default the siblings (kk tt tk ba uz) all mark. ⚠ It was described here
+ * and never emitted — the referee folds stress, so nothing measured the gap (#1576). See `markFinalStress`.
  */
 import type { Phonemizer } from "../../registry.ts";
 import { assembleClauses } from "../../core/clauses.ts";
+import { IPA_VOWELS } from "../../core/ipa.ts";
 import { renderNumber, spellDigits, type NumbersDef } from "../../core/numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizeKyrgyz } from "./normalize.ts";
@@ -53,7 +55,20 @@ export function phonemizeWord(word: string): string {
         if (cons !== undefined) out.push(cons);
         // else: ъ/ь and unknown chars → skip
     }
-    return out.join("");
+    return markFinalStress(out).join("");
+}
+
+const isVowelSeg = (seg: string): boolean => [...seg].some((c) => IPA_VOWELS.includes(c));
+
+/** Word-final stress: ˈ before the onset of the LAST vowel's syllable. A Turkic syllable takes ONE onset consonant,
+ *  so a medial cluster splits (китептер → kitepˈter); only a word-INITIAL cluster, with no vowel before it, is a
+ *  whole onset (спорт → ˈsport). A word with no vowel is left unmarked. */
+function markFinalStress(segs: string[]): string[] {
+    let at = segs.findLastIndex(isVowelSeg);
+    if (at < 0) return segs;
+    if (at > 0 && !isVowelSeg(segs[at - 1]!)) at--;
+    if (!segs.slice(0, at).some(isVowelSeg)) at = 0;
+    return [...segs.slice(0, at), "ˈ", ...segs.slice(at)];
 }
 
 /** Turkic decimal composition: tens + units + hundred/thousand/million/billion, all SPACE-separated
@@ -88,9 +103,15 @@ function kyrgyzNumberWords(n: number, d: NumbersDef): (string | null)[] {
         const r = n % 1_000_000;
         return [...kyrgyzNumberWords(m, d), d.magnitudes.million!, ...(r ? kyrgyzNumberWords(r, d) : [])];
     }
-    const b = Math.floor(n / 1_000_000_000);
-    const r = n % 1_000_000_000;
-    return [...kyrgyzNumberWords(b, d), d.magnitudes.billion!, ...(r ? kyrgyzNumberWords(r, d) : [])];
+    if (n < 1_000_000_000_000) {
+        const b = Math.floor(n / 1_000_000_000);
+        const r = n % 1_000_000_000;
+        return [...kyrgyzNumberWords(b, d), d.magnitudes.billion!, ...(r ? kyrgyzNumberWords(r, d) : [])];
+    }
+    // триллион: past it, 10¹² read *бир миң миллиард* ("one thousand milliard") (#1576).
+    const t = Math.floor(n / 1_000_000_000_000);
+    const r = n % 1_000_000_000_000;
+    return [...kyrgyzNumberWords(t, d), d.magnitudes.trillion!, ...(r ? kyrgyzNumberWords(r, d) : [])];
 }
 
 /**
@@ -100,11 +121,11 @@ function kyrgyzNumberWords(n: number, d: NumbersDef): (string | null)[] {
  * trap 14). The words are emitted back as TEXT and phonemized by the ordinary word path, so nothing here
  * reaches the phoneme sink as a spelling (trap 6).
  *
- * Bounded at 10¹² because that is where `NumbersDef` stops carrying a magnitude; above it the caller must
- * fall back to leaving the digits alone rather than emitting a partial numeral.
+ * Bounded at 2⁵³, past which the double has lost the low digits; there the caller must fall back to leaving the
+ * digits alone rather than emitting a wrong numeral.
  */
 export function numberWords(n: number): string | undefined {
-    if (!Number.isSafeInteger(n) || n < 0 || n >= 1_000_000_000_000) return undefined;
+    if (!Number.isSafeInteger(n) || n < 0) return undefined;
     return kyrgyzNumberWords(n, DEF.numbers).filter((w): w is string => w !== null && w !== "").join(" ");
 }
 

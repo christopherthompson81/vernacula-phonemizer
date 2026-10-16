@@ -39,14 +39,22 @@ export function turkicNumberWords(n: number, d: NumbersDef): (string | null)[] {
             r = n % 1_000_000;
         return [...turkicNumberWords(m, d), d.magnitudes.million!, ...(r ? turkicNumberWords(r, d) : [])];
     }
-    const b = Math.floor(n / 1_000_000_000),
-        r = n % 1_000_000_000;
-    return [...turkicNumberWords(b, d), d.magnitudes.billion!, ...(r ? turkicNumberWords(r, d) : [])];
+    if (n < 1_000_000_000_000) {
+        const b = Math.floor(n / 1_000_000_000),
+            r = n % 1_000_000_000;
+        return [...turkicNumberWords(b, d), d.magnitudes.billion!, ...(r ? turkicNumberWords(r, d) : [])];
+    }
+    // trillion: past it, 10¹² read *ming milliard* (#1576).
+    const t = Math.floor(n / 1_000_000_000_000),
+        r = n % 1_000_000_000_000;
+    return [...turkicNumberWords(t, d), d.magnitudes.trillion!, ...(r ? turkicNumberWords(r, d) : [])];
 }
 
-/** Integer → Uzbek words. Undefined/null gaps render as "?"; returns "" for unrenderable input. */
+/** Integer → Uzbek words. Undefined/null gaps render as "?"; returns "" for unrenderable input, which includes a
+ *  number past 2⁵³: the double has already lost its low digits, and composing them read `12345678901234567890` as
+ *  a number ending …168 (#1576). */
 export function numberToWords(n: number): string {
-    if (!Number.isFinite(n) || n < 0) return "";
+    if (!Number.isFinite(n) || n < 0 || !Number.isSafeInteger(Math.floor(n))) return "";
     return turkicNumberWords(Math.floor(n), NUM)
         .map((w) => (w === null ? "?" : w))
         .join(" ");
@@ -61,7 +69,7 @@ function suffixed(stem: string): string {
 
 /**
  * Integer → the Uzbek ORDINAL, ordinalizing only the LAST element: 1978 → ming toʻqqiz yuz yetmish
- * sakkizinchi, 190 → bir yuz toʻqsoninchi, 1000 → minginchi. Undefined outside the range the corpus's
+ * sakkizinchi, 190 → yuz toʻqsoninchi, 1000 → minginchi. Undefined outside the range the corpus's
  * ordinal contexts (years, centuries, dates, ranks) reach — well under 10^6.
  */
 export function ordinalWords(n: number): string | undefined {

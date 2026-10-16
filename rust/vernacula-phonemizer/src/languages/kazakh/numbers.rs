@@ -2,7 +2,7 @@
 //! glued, magnitude groups spaced. Ported from src/languages/kazakh/numbers.ts — see that file for the evidence.
 
 use super::manifest::MANIFEST;
-use crate::core::js_string::{JsString, js};
+use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
 
 /// `sub100(n)`: 0–99.
 fn sub100(n: f64) -> String {
@@ -44,14 +44,21 @@ fn number_to_ipa_str(n: f64) -> String {
         return sub1000(n);
     }
     let mut groups: Vec<String> = Vec::new();
-    let mil = (n / 1_000_000.0).floor();
-    n %= 1_000_000.0;
-    if mil != 0.0 {
-        groups.push(if mil == 1.0 {
-            nm.million.clone()
-        } else {
-            format!("{} {}", number_to_ipa_str(mil), nm.million)
-        });
+    // The scales from 10⁶ up, highest first; each, like the million, omits a leading 1 (#1576).
+    for (word, size) in [
+        (&nm.trillion, 1e12),
+        (&nm.milliard, 1e9),
+        (&nm.million, 1e6),
+    ] {
+        let count = (n / size).floor();
+        n %= size;
+        if count != 0.0 {
+            groups.push(if count == 1.0 {
+                word.clone()
+            } else {
+                format!("{} {word}", number_to_ipa_str(count))
+            });
+        }
     }
     let th = (n / 1000.0).floor();
     n %= 1000.0;
@@ -72,4 +79,20 @@ fn number_to_ipa_str(n: f64) -> String {
 /// `numberToIpa(n)`: a non-negative number → space-separated IPA; "" for a negative or non-finite one.
 pub(crate) fn number_to_ipa(n: f64) -> JsString {
     js(&number_to_ipa_str(n))
+}
+
+/// `digitsToIpa(digits)`: a written digit run → IPA; past 2⁵³ digit by digit, as the double has lost the low
+/// digits (#1576).
+pub(crate) fn digits_to_ipa(digits: &JsString) -> JsString {
+    let n = js_number(digits);
+    let text = digits.to_string_lossy();
+    if !text.is_empty() && text.bytes().all(|b| b.is_ascii_digit()) && !is_safe_integer(n) {
+        let units = &MANIFEST.numbers.units;
+        let words: Vec<&str> = text
+            .bytes()
+            .map(|b| units[(b - b'0') as usize].as_str())
+            .collect();
+        return js(&words.join(" "));
+    }
+    number_to_ipa(n)
 }

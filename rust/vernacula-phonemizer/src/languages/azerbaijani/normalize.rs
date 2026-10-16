@@ -111,13 +111,16 @@ pub(crate) fn ordinal_words(n: f64) -> Option<JsString> {
 }
 
 /// `MULTI_DOT`, verbatim and in order (`b.e.ə.` before its tail `e.ə.`).
-const MULTI_DOT: [(&str, &str); 5] = [
+const MULTI_DOT: [(&str, &str); 4] = [
     (r"b\.\s?e\.\s?ə\.", "eramızdan əvvəl"),
     (r"e\.\s?ə\.", "eramızdan əvvəl"),
     (r"E\.\s?ə\.", "eramızdan əvvəl"),
     (r"b\.\s?e\.", "bizim eramız"),
-    (r"\bBE(?=\s+\d)", "bizim eramız"),
 ];
+
+/// `BE_ERA`: not in the table, which is case-insensitive — a case-folded `BE` also took `be 5 il` (#1576).
+static BE_ERA: LazyLock<JsRegex> =
+    LazyLock::new(|| JsRegex::new(r"(?<![\p{L}\p{M}])\bBE(?=\s+\d)", "gu").unwrap());
 
 /// Each MULTI_DOT body as its two built regexes: at the end of the string, and anywhere.
 static MULTI_DOT_RES: LazyLock<Vec<(JsRegex, JsRegex, &'static str)>> = LazyLock::new(|| {
@@ -246,6 +249,7 @@ pub(crate) fn normalize_azerbaijani(input: &JsString) -> JsString {
         s = rewrite(&s, at_end, &js(&format!("{word}.")));
         s = rewrite(&s, anywhere, &js(word));
     }
+    s = rewrite(&s, &BE_ERA, &js("bizim eramız"));
 
     // 2) dotted capital runs → a bare all-caps run; an initial's dot before a capital is dropped.
     s = rewrite_with(

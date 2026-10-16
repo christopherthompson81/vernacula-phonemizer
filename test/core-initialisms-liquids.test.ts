@@ -46,7 +46,7 @@ describe("the seven strings whose verdict the fix flips — read through the rea
     // everyday word inside a shouted title, which is how an all-caps run of ordinary text reaches this pass.
     test("an ordinary Cyrillic word is read as a word", () => {
         expect(phonemize("ХӨГЖЛИЙН", "mn").trim()).toBe("xɵɡt͡ʃɮiːŋ");
-        expect(phonemize("ТҮРКСОЙ", "ky").trim()).toBe("tyrqsoj"); // TÜRKSOY, said as a word
+        expect(phonemize("ТҮРКСОЙ", "ky").trim()).toBe("tyrqˈsoj"); // TÜRKSOY, said as a word
     });
 
     // ⚠ THE HALF THAT MUST NOT REGRESS. These are genuine Soviet-era initialisms and must still be spelled
@@ -54,7 +54,7 @@ describe("the seven strings whose verdict the fix flips — read through the rea
     // the onset or coda tables lets one of these through, it reads as a nonsense word and no gate would see
     // it — that is the trap-56 shape, so the assertion is on the READING, not on the boolean.
     test("a real initialism is still spelled out, by the onset and coda signals", () => {
-        expect(phonemize("ОСФСР", "ky").trim()).toBe("o es ef es er");
+        expect(phonemize("ОСФСР", "ky").trim()).toBe("ˈo ˈes ˈef ˈes ˈer");
         expect(phonemize("АЖРВТ", "tg").trim()).toBe("ˈa ʒˈe rˈe vˈe tˈe");
         expect(phonemize("РХФЮ", "tg").trim()).toBe("rˈe χˈe fˈe jˈu");
         expect(phonemize("РСФЮ", "tg").trim()).toBe("rˈe sˈe fˈe jˈu");

@@ -111,5 +111,13 @@
         "hundred": "ʒˈʏz",
         "thousand": "mˈəŋ",
         "million": "məjlɫəjˈon",
+        // миллиард (10⁹) and триллион (10¹²) — "25 триллион теңге" is how Kazakh-language financial news writes
+        // it. DERIVED, not typed: the g2p reads миллион as mˈəjɫɫəjon, and the authored atom above differs from it
+        // in exactly two places (the first ɫ is clear, and the stress is on the last vowel, as in Russian
+        // миллио́н). The same two edits on the g2p's own миллиард (mˈəjɫɫəjɑrd) and триллион (trˈəjɫɫəjon) give
+        // these, with Russian's final stress (миллиа́рд, триллио́н). Without them 10⁹ read "one thousand
+        // million" (#1576).
+        "milliard": "məjlɫəjˈɑrd",
+        "trillion": "trəjlɫəjˈon",
     },
 }

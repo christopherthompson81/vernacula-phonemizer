@@ -19,6 +19,10 @@ const DEF = loadManifest<{ numbers: NumbersDef }>(import.meta.url, "turkmen.json
  * asymmetry Kazakh shows (жүз vs бір мың). Data + provenance: turkmen.jsonc `numbers`.
  */
 export function turkmenNumberWords(n: number, d: NumbersDef): (string | null)[] {
+    // ⚠ NOT A NON-NEGATIVE INTEGER, NO WORDS. Every caller guards today, but this is exported: NaN fails every
+    // comparison below, falls to the milliard branch and recursed until the stack overflowed, and -5 gave
+    // [undefined] (#1576).
+    if (!Number.isInteger(n) || n < 0) return [];
     if (n < 10) return [d.units[n]!];
     if (n < 100) {
         const t = Math.floor(n / 10) * 10,

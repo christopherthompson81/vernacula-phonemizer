@@ -58,11 +58,15 @@ function ordinal(n: number): string | undefined {
 }
 
 /**
- * Agglutinative, so the patterns are UNANCHORED at the end: `əsr` also matches əsrdə, əsrin, əsri, əsrlər,
+ * Agglutinative, so the patterns are open at the end: `əsr` also matches əsrdə, əsrin, əsri, əsrlər,
  * əsrdən. Covered: əsr (century), yüzil/yüzillik (century, the native synonym), minillik (millennium),
  * ildönüm(ü) (anniversary), konqres, sinif (school grade — the orthography's own ordinal-Roman example).
+ * ⚠ BUT ONLY TO A SUFFIX, WHICH VOWEL HARMONY BOUNDS. Every stem here is FRONT-voweled, so each of its suffixes
+ * is too (-də, -in, -i, -lər, -dən, -lik); a back vowel (a ı o u) after the stem means another word. Fully open,
+ * the context prefix-matched `əsrarəngiz` ("mysterious") and `XX əsrarəngiz` read *iyirminci* (#1576). The class
+ * is lower case on purpose: under `i`, a capital `I` in it would fold to `i` and refuse əsrin.
  */
-const CONTEXT = /^(əsr|yüzil|minillik|ildönüm|konqres|sinif)/iu;
+const CONTEXT = /^(əsr|yüzil|minillik|ildönüm|konqres|sinif)(?![\p{L}\p{M}]*[aıou])/iu;
 
 /** This policy always supplies `ordinal`, which is optional on `RomanPolicy` — the intersection makes it
  *  REQUIRED here so tests can call it directly without a non-null assertion. */

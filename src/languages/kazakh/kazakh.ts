@@ -9,7 +9,7 @@ import type { Phonemizer } from "../../registry.ts";
 import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
-import { numberToIpa } from "./numbers.ts";
+import { digitsToIpa } from "./numbers.ts";
 import { normalizeKazakh } from "./normalize.ts";
 import { MANIFEST } from "./manifest.ts";
 
@@ -111,7 +111,7 @@ class KazakhPhonemizer implements Phonemizer {
                 for (const part of m[1].split(/(?<=\p{Ll})(?=\p{Lu})/u))
                     sink.emit(phonemizeWord(part));
             else if (m[2])
-                for (const ipa of numberToIpa(Number(m[2].replace(/ /gu, ""))).split(" "))
+                for (const ipa of digitsToIpa(m[2].replace(/ /gu, "")).split(" "))
                     sink.emit(ipa); // numbers are pre-phonemized
             else if (m[3]) {
                 const mk = CLAUSE_MARK[m[3]];

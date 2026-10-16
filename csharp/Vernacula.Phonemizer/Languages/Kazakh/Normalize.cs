@@ -37,8 +37,8 @@ public static class Normalize
         if (n >= 1000)
         {
             double th = Math.Floor(n / 1000), r = n % 1000;
-            if (r == 0) return null;
             var head1 = $"{(th == 1 ? UNIT_CARD[1] : Orthographic(th))} {THOUSAND_CARD}";
+            if (r == 0) return $"{head1}ыншы"; // мыңыншы, the round-thousand ordinal (#1576)
             var tail1 = OrdinalWord(r);
             return tail1 is null ? null : $"{head1} {tail1}";
         }
@@ -176,7 +176,15 @@ public static class Normalize
         $@"(\d[\d ]*)\s?миля\s*\/\s*сағат(?:-)?{DEG_SUFFIX}?(?![\p{{L}}\p{{M}}])", "giu");
     private static readonly JsRe SPACES = JsRegex.Compile(" ", "gu");
 
-    private static readonly JsRe RANGE = JsRegex.Compile(@"(?<![\d.,])(\d[\d ]*)\s*[-–—]\s*(\d[\d ]*)(?![\d.-])", "gu");
+    /** A numeric range; the dash is spent on a PAUSE (#1576), and the trailing guard refuses a digit after a dot,
+     *  never the dot itself (trap 58). See normalize.ts step 6. */
+    private static readonly JsRe RANGE = JsRegex.Compile(@"(?<![\d.,])(\d[\d ]*?)\s*[-–—]\s*(\d[\d ]*)(?![\d-]|\.\d)", "gu");
+
+    /** The nouns the symbol tier spells for a unit or a percent, which a case suffix can follow (#1576). */
+    private static readonly string[] SUFFIXABLE_NOUNS = { "километр", "килограмм", "метр", "миллиметр", "сантиметр", "пайыз" };
+
+    private static readonly JsRe UNIT_SUFFIX = JsRegex.Compile(
+        $@"(?<=\d\s?)({string.Join("|", SUFFIXABLE_NOUNS)})-({string.Join("|", CASE_BY_SUFFIX.Keys)})(?![\p{{L}}\p{{M}}])", "giu");
     private static readonly JsRe FRACTION = JsRegex.Compile(@"(?<![\d.,])(\d{1,3})\s?\/\s?(\d{1,3})(?![\d.,])", "gu");
     private static readonly JsRe DECIMAL_COMMA = JsRegex.Compile(@"(?<=\d),(?=\d)", "gu");
     private static readonly JsRe SIGNED_DOT_DECIMAL = JsRegex.Compile(@"(?<![\p{L}\p{Nd}])[-−](\d+)\.(\d+)(?![\d.])", "giu");
@@ -282,10 +290,13 @@ public static class Normalize
         });
 
         // 6) NUMERIC RANGES.
-        s = Rewrite(s, RANGE, "$1–$2");
+        s = Rewrite(s, RANGE, "$1, $2");
 
         // 7) THE SHARED SYMBOL TIER — %, units.
         s = KazakhPhonemizer.SYMBOLS(s);
+
+        // 7a) A CASE SUFFIX ON A UNIT OR A PERCENT — glued to the spoken word as written (#1576).
+        s = Rewrite(s, UNIT_SUFFIX, "$1$2");
 
         // 7z) FRACTIONS — the DENOMINATOR comes first, in the ABLATIVE (бестен бір).
         s = Rewrite(s, FRACTION, m =>

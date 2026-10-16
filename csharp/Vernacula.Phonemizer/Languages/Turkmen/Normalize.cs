@@ -193,7 +193,9 @@ public static class Normalize
         "(?<![\\d.,/])(\\d{1,2})\\s?/\\s?(\\d{1,2})(?![\\d.,/])", "gu");
 
     /** 7) SIGNS. ⚠ ± IS A SINGLE CHARACTER (U+00B1), NOT a `+`, so no `+` rule can match inside it. */
-    private static readonly JsRe MINUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])[-\\u2212\\u2013]\\s?(\\d)", "gu");
+    /** A sign: the hyphen or minus, spaced or not; the EN DASH only when it touches the digit — spaced, it is the
+     *  punctuation dash (#1576). */
+    private static readonly JsRe MINUS = JsRegex.Compile("(^|(?<!\\d)[\\s(])(?:[-\\u2212]\\s?|\\u2013)(\\d)", "gu");
     private static readonly JsRe PLUS_MINUS = JsRegex.Compile("\\u00b1", "gu");
     private static readonly JsRe PLUS = JsRegex.Compile("(^|[\\s(])\\+\\s?(\\d)", "gu");
 

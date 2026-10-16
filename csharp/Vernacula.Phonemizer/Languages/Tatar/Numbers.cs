@@ -31,6 +31,7 @@ public static class Numbers
     private const string THOUSAND = "мең";
     private const string MILLION = "миллион";
     private const string BILLION = "миллиард";
+    private const string TRILLION = "триллион"; // #1576
 
     /** A non-negative safe integer → the ordered Tatar number WORDS (spellings, not IPA). */
     public static List<string> NumberToWords(double n)
@@ -73,10 +74,18 @@ public static class Numbers
             if (r != 0) outp.AddRange(NumberToWords(r));
             return outp;
         }
-        var b = Math.Floor(n / 1_000_000_000);
-        var rem = n % 1_000_000_000;
-        var res = new List<string>(NumberToWords(b)) { BILLION };
-        if (rem != 0) res.AddRange(NumberToWords(rem));
-        return res;
+        if (n < 1_000_000_000_000)
+        {
+            var b = Math.Floor(n / 1_000_000_000);
+            var rem = n % 1_000_000_000;
+            var res = new List<string>(NumberToWords(b)) { BILLION };
+            if (rem != 0) res.AddRange(NumberToWords(rem));
+            return res;
+        }
+        var tr = Math.Floor(n / 1_000_000_000_000);
+        var remT = n % 1_000_000_000_000;
+        var resT = new List<string>(NumberToWords(tr)) { TRILLION };
+        if (remT != 0) resT.AddRange(NumberToWords(remT));
+        return resT;
     }
 }

@@ -170,7 +170,7 @@ public class TatarTests
     {
         Assert.Equal("unˈber øˈter ˈbiʃ proˈt͡sent", Say("11,5%"));
         Assert.Equal("ˈjøz milliˈon dolˈlɑr", Say("$100 миллион"));
-        Assert.Equal("unˈber ˈmeŋ ˈbiʃ ˈjøz qvɑˈdrɑt kiloˈmetr", Say("11 500 км²"));
+        Assert.Equal("unˈber ˈmeŋ ˈbiʃ ˈjøz qvɑdˈrɑt kiloˈmetr", Say("11 500 км²"));
         // ⚠ `м³/с` — the river-discharge shape. Tatar does not say "A per B": the denominator takes the
         // possessive-dative and stands alone, so `UnitPer` is "" and the inflected form is the entry.
         Assert.Equal("tuˈʁɨz øˈter ˈdyrt ˈdyrt ˈqub ˈmetr sekundɨˈna", Say("9,44 м³/с"));

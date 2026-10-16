@@ -106,3 +106,25 @@ TS on this tree and replayed).
 - ky: ky-normalize 28,642, ky-g2p 32,711, ky-numbers 58,143, phonemize-sync / phonemize-best / trace 3,949 each, symbols 6,996: 0 DIFFER; parity 200/200.
 
 **Implication.** Done on this machine. The large `.probe/` dumps and `rust/target` are deleted after this run.
+
+## Run 7 — 2026-10-15 19:20 (the findings fixed, TS-first, #1576)
+
+**Question.** Which of the five Run 5 findings are defects, and do they fix cleanly?
+
+**Command.** Probe scripts under `.probe/` on synthetic inputs (`npx tsx .probe/tt.mts <lang> …`), then `npx vitest run`, `npx tsx tools/check-goldens.mts --write`, `dotnet run --project csharp/tools/parity`, `cargo run -p parity`, and each source file reverted alone against `test/turkic-defects-1576.test.ts`.
+
+**Raw finding.**
+1. Stress: now marked word-final, as kk tt tk ba uz all do — ˈ before the last vowel's single onset consonant, the
+   whole cluster only word-initially (китептер → kitepˈter, спорт → ˈsport). All 200 ky golden rows changed; a
+   script confirmed every one differs from the old row only in ˈ marks. 65 Rust PINS and the TS/C# pins
+   re-pinned by the same stress-only check. ⚠ Four negative pins (`not.toContain("minus")`, `"bɑrɑβɑr"`) would
+   have gone VACUOUS — the stressed words no longer contain the old substring — and were rewritten to the stressed
+   forms by hand.
+2. триллион added to the manifest magnitudes and the composer; `numberWords` bounded at 2⁵³ instead of 10¹².
+3. `\d+\.\d` (ONE fractional digit) reads as the comma decimal: every one-digit example the step's own comment
+   lists is a quantity; the clocks and the page number it refused are two-digit and stay as they were.
+4. `=`: the second operand is one word or a number and its noun; `а = б жана в` → `а б барабар жана в`.
+5. NOT CHANGED: a single `,ddd` group keeps its pause. The file's own count is an exact 50/50 between thousands and
+   decimals, and the pause is its stated choice of the outcome wrong only about the pause.
+
+**Implication.** Done; mirrored (C# and Rust parity 200/200).

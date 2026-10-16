@@ -7,7 +7,7 @@ import { makeSymbolNormalizer } from "../../core/normalizeSymbols.ts";
 import { LATIN_RUN, makeNativiser } from "../../core/hostWord.ts";
 import { assembleClauses } from "../../core/clauses.ts";
 import { toSegments } from "./g2p.ts";
-import { numberToWords } from "./numbers.ts";
+import { digitsToWords } from "./numbers.ts";
 import { MANIFEST } from "./manifest.ts";
 import { normalizeAzerbaijani } from "./normalize.ts";
 import { rewrite } from "../../core/provenance.ts";
@@ -32,7 +32,9 @@ const CLAUSE_MARK = MANIFEST.clausePunctuation;
 // "400 000" reads *dörd yüz sıfır* and "6,5" *altı , beş*. normalize.ts claims clocks and the version dot
 // first, so a comma reaching here is a decimal, a period-thousands is a group, and a plain digit run is a
 // bare number.
-const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?<!(?<!\\d)0)\\.\\d{3}(?:\\.\\d{3})*|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
+// ⚠ A PERIOD-THOUSANDS NUMBER CAN CARRY A COMMA DECIMAL (`1.234,5`). The two alternatives used to be exclusive,
+// so the comma became a clause pause and the decimal a bare digit (#1576).
+const TOKEN = new RegExp(`(${LATIN_RUN})|(\\d+(?<!(?<!\\d)0)\\.\\d{3}(?:\\.\\d{3})*(?:,\\d+)?|\\d+,\\d+|\\d+)|([.!?…,;:])`, "giu");
 
 /**
  * This language's OWN inventory — the TOKEN word class as it stood before the widening above, lifted
@@ -63,11 +65,9 @@ const SYMBOLS = makeSymbolNormalizer({
 /** A number token (Azerbaijani space-/period-thousands, comma-decimal) → spoken words. */
 function numberTokenToWords(tok: string): string {
     const [intRaw, frac] = tok.split(",");
-    let words = numberToWords(Number(intRaw!.replace(/[ .]/gu, "")));
+    let words = digitsToWords(intRaw!.replace(/[ .]/gu, "")); // from the digits: exact past 2⁵³ (#1576)
     if (frac !== undefined)
-        words +=
-            ` ${MANIFEST.numbers.decimalConnector} ` +
-            [...frac].map((d) => numberToWords(Number(d))).join(" ");
+        words += ` ${MANIFEST.numbers.decimalConnector} ` + [...frac].map((d) => digitsToWords(d)).join(" ");
     return words;
 }
 

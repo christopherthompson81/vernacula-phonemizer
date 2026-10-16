@@ -20,6 +20,7 @@ pub struct Magnitudes {
     pub crore: Option<String>,
     pub million: Option<String>,
     pub billion: Option<String>,
+    pub trillion: Option<String>,
 }
 
 #[derive(Deserialize, Clone, Default)]

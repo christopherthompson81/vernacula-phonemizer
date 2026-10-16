@@ -78,8 +78,10 @@ fn words_f64(n: f64, d: &NumbersDef) -> Vec<Word> {
     }
     let (div, word) = if n < 1_000_000_000.0 {
         (1_000_000.0, &mag.million)
-    } else {
+    } else if n < 1_000_000_000_000.0 {
         (1_000_000_000.0, &mag.billion)
+    } else {
+        (1_000_000_000_000.0, &mag.trillion) // #1576
     };
     let mut v = words_f64((n / div).floor(), d);
     v.push(word.clone());
@@ -92,9 +94,10 @@ pub(crate) fn turkic_number_words(n: u64, d: &NumbersDef) -> Vec<Word> {
     words_f64(n as f64, d)
 }
 
-/// `numberToWords(n)`: "" for a negative or non-finite number; a gap renders as "?".
+/// `numberToWords(n)`: "" for a negative or non-finite number, and past 2⁵³, whose low digits the double has lost
+/// (#1576); a gap renders as "?".
 pub(crate) fn number_to_words(n: f64) -> JsString {
-    if !n.is_finite() || n < 0.0 {
+    if !n.is_finite() || n < 0.0 || !is_safe_integer(n.floor()) {
         return JsString::new();
     }
     let words: Vec<String> = words_f64(n.floor(), &NUM)

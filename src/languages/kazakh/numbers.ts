@@ -16,6 +16,12 @@ const UNIT = N.units,
     HUNDRED = N.hundred,
     THOUSAND = N.thousand,
     MILLION = N.million;
+/** The scales from 10⁶ up, highest first: [word, 1000ⁿ]. Each, like the million, omits a leading 1. */
+const HIGH_SCALES: readonly (readonly [string, number])[] = [
+    [N.trillion, 1e12],
+    [N.milliard, 1e9],
+    [MILLION, 1e6],
+];
 
 /** 0–99 → concatenated IPA (tens and units glued. */
 function sub100(n: number): string {
@@ -40,13 +46,22 @@ export function numberToIpa(n: number): string {
     n = Math.floor(n);
     if (n < 1000) return sub1000(n);
     const groups: string[] = [];
-    const mil = Math.floor(n / 1000000);
-    n %= 1000000;
-    if (mil)
-        groups.push(mil === 1 ? MILLION : `${numberToIpa(mil)} ${MILLION}`); // million omits the leading 1
+    for (const [word, size] of HIGH_SCALES) {
+        const count = Math.floor(n / size);
+        n %= size;
+        if (count) groups.push(count === 1 ? word : `${numberToIpa(count)} ${word}`); // omits the leading 1
+    }
     const th = Math.floor(n / 1000);
     n %= 1000;
     if (th) groups.push(`${th === 1 ? UNIT[1]! : sub1000(th)} ${THOUSAND}`); // 1000 keeps it: бір мің
     if (n) groups.push(sub1000(n));
     return groups.join(" ");
+}
+
+/** A written digit run → IPA. Past 2⁵³ the double has already lost the low digits, so the run is read digit by
+ *  digit (core/numbers.ts `spellDigits` has the account); before #1576 it was composed from the rounded double. */
+export function digitsToIpa(digits: string): string {
+    const n = Number(digits);
+    if (/^\d+$/u.test(digits) && !Number.isSafeInteger(n)) return [...digits].map((c) => UNIT[Number(c)]!).join(" ");
+    return numberToIpa(n);
 }

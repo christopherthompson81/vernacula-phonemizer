@@ -1,5 +1,5 @@
 //! Turkmen (tk) phonemizer: the direct grapheme scan (interdental s/z), final stress placed before the last
-//! nucleus's onset by a sonority test, and text() over words, digit runs and punctuation. Ported from
+//! nucleus's onset (one consonant word-internally), and text() over words, digit runs and punctuation. Ported from
 //! src/languages/turkmen/turkmen.ts — see that file for the sources.
 
 use std::sync::{LazyLock, OnceLock};
@@ -33,7 +33,6 @@ use crate::registry::{Engine, PhonemizeError};
 pub struct TurkmenDef {
     pub digraphs: IndexMap<String, String>,
     pub graphemes: IndexMap<String, String>,
-    pub nasals: Vec<String>,
     pub clause_punctuation: IndexMap<String, String>,
 }
 
@@ -53,32 +52,8 @@ fn is_vowel(seg: &JsString) -> bool {
     seg.len() == 1 && is_ipa_vowel(seg.units()[0])
 }
 
-fn is_nasal(seg: &JsString) -> bool {
-    DEF.nasals.iter().any(|n| *seg == **n)
-}
-
-/// `sonority(seg)`: vowel 6, glide 5, liquid 4, nasal 3, fricative 2, affricate 1, stop 0.
-fn sonority(seg: &JsString) -> u8 {
-    let s = seg.to_string_lossy();
-    if is_vowel(seg) {
-        6
-    } else if s == "j" || s == "w" {
-        5
-    } else if ["l", "ɾ", "r"].contains(&s.as_str()) {
-        4
-    } else if is_nasal(seg) {
-        3
-    } else if s.contains('\u{361}') {
-        1
-    } else if ["f", "v", "θ", "ð", "ʃ", "ʒ", "x", "χ", "h"].contains(&s.as_str()) {
-        2
-    } else {
-        0
-    }
-}
-
-/// `phonemizeWord(word)`: the grapheme scan, then the stress mark before the last nucleus and the onset the
-/// sonority test lets it take.
+/// `phonemizeWord(word)`: the grapheme scan, then the stress mark before the last nucleus's onset — one consonant
+/// word-internally (kitap.lar, ilkin.ji), the whole cluster only word-initially (plan, sport) (#1576).
 pub(crate) fn phonemize_word(word: &JsString) -> JsString {
     let w = normalize(word, Form::Nfc).to_lower_case();
     let mut segs: Vec<JsString> = Vec::new();
@@ -105,15 +80,8 @@ pub(crate) fn phonemize_word(word: &JsString) -> JsString {
         if at > 0 && !is_vowel(&segs[at - 1]) {
             at -= 1;
         }
-        while at > 0 && !is_vowel(&segs[at - 1]) {
-            let (p, l) = (&segs[at - 1], &segs[at]);
-            let obstruent_liquid = sonority(p) <= 2 && sonority(l) >= 4;
-            let fric_stop = sonority(p) == 2 && sonority(l) <= 1;
-            let nasal_stop = is_nasal(p) && sonority(l) <= 1;
-            if !(obstruent_liquid || fric_stop || nasal_stop) {
-                break;
-            }
-            at -= 1;
+        if !segs[..at].iter().any(is_vowel) {
+            at = 0; // a word-initial cluster is the whole onset
         }
         segs.insert(at, js("ˈ"));
     }
@@ -338,35 +306,35 @@ mod tests {
             false,
             "eq",
             "24-nji gün",
-            "jiɡɾiˈmi døɾdyˈnd͡ʒi ˈɡyn",
+            "jiɡɾiˈmi døɾdynˈd͡ʒi ˈɡyn",
         ),
         (
             "phonemize",
             false,
             "eq",
             "1-nji ýarymy",
-            "biɾiˈnd͡ʒi jɑɾɯˈmɯ",
+            "biɾinˈd͡ʒi jɑɾɯˈmɯ",
         ),
         (
             "phonemize",
             false,
             "eq",
             "+11° gradus",
-            "plˈjuθ ˈon ˈbiɾ ɡɾɑˈduθ",
+            "ˈpljuθ ˈon ˈbiɾ ɡɾɑˈduθ",
         ),
         (
             "phonemize",
             false,
             "eq",
             "+10° dan",
-            "plˈjuθ ˈon ɡɾɑduˈθdɑn",
+            "ˈpljuθ ˈon ɡɾɑduθˈdɑn",
         ),
         (
             "phonemize",
             false,
             "eq",
             "50 ° C-e ýetýär",
-            "elˈli ɡɾɑˈduθ θelθiˈe jeˈtjæɾ",
+            "elˈli ɡɾɑˈduθ θelθiˈe jetˈjæɾ",
         ),
         (
             "phonemize",
@@ -382,7 +350,7 @@ mod tests {
             "3/4 bölegine",
             "døɾtˈden ˈyt͡ʃ bøleɡiˈne",
         ),
-        ("phonemize", false, "eq", "1/9", "dokuˈðdɑn ˈbiɾ"),
+        ("phonemize", false, "eq", "1/9", "dokuðˈdɑn ˈbiɾ"),
         ("normalize", false, "eq", "10/1 bölegini", "10, 1 bölegini"),
         ("normalize", false, "eq", "2015/16 ýyly", "2015, 16 ýyly"),
         (
@@ -407,8 +375,8 @@ mod tests {
             "biziň eramyzdan öňki III asyryň",
         ),
         ("normalize", false, "eq", "500-494ý.", "500, 494 ýyl"),
-        ("phonemize", false, "eq", "XX asyr", "jiɡɾimiˈnd͡ʒi ɑˈθɯɾ"),
-        ("phonemize", false, "eq", "VI asyrda", "ɑltɯˈnd͡ʒɯ ɑθɯɾˈdɑ"),
+        ("phonemize", false, "eq", "XX asyr", "jiɡɾiminˈd͡ʒi ɑˈθɯɾ"),
+        ("phonemize", false, "eq", "VI asyrda", "ɑltɯnˈd͡ʒɯ ɑθɯɾˈdɑ"),
         ("phonemize", false, "eq", "60%-ini", "ɑltˈmɯʃ ɡøteɾimiˈni"),
         (
             "phonemize",
