@@ -607,7 +607,7 @@ public static class EnglishFactory
                 Vowels = manifest.Arpabet.Vowels, // OOV G2P reuses arpabet.vowels (single source)
             });
 
-        var tagger = new PosTagger(LoadManifest.LoadJson<PosModel>(dir, "pos-model.json"));
+        var tagger = new PosTagger(PosModelBinary.Load(dir));
 
         return new EnglishPhonemizer(
             lexicon,

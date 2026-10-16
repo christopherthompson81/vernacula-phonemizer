@@ -8,6 +8,7 @@
  */
 import { readFileSync } from "node:fs";
 import { PosTagger, type PosModel } from "../../src/languages/english/posTagger.ts";
+import { packPosModel } from "../../src/languages/english/posModelBinary.ts";
 
 const [modelPath, evalPath, ...probes] = process.argv.slice(2);
 if (!modelPath) {
@@ -15,7 +16,7 @@ if (!modelPath) {
     process.exit(1);
 }
 const model: PosModel = JSON.parse(readFileSync(modelPath, "utf8"));
-const tagger = new PosTagger(model);
+const tagger = new PosTagger(packPosModel(model));
 
 function coarse(tag: string): string {
     if (tag === "VBD" || tag === "VBN") return "PAST";

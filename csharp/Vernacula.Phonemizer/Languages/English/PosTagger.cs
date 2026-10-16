@@ -17,13 +17,17 @@ public sealed class PosExpectation
     public required bool Adj { get; init; }
 }
 
-/** Serialized model artifact format (emitted by `tools/english/en_pos_train.ts`). */
+/** The model as `pos-model.bin` stores it (see <see cref="PosModelBinary"/>): a sparse matrix in compressed
+ *  rows. Row `Rows[feature]` is `Cls`/`Weight[RowStart[r] .. RowStart[r + 1]]`, classes ascending. */
 public sealed class PosModel
 {
-    public double Scale { get; init; }
-    public List<string> Classes { get; init; } = new();
-    public Dictionary<string, int> Tagdict { get; init; } = new();
-    public Dictionary<string, Dictionary<string, double>> Weights { get; init; } = new(); // feature -> classIdx -> intWeight
+    public required double Scale { get; init; }
+    public required List<string> Classes { get; init; }
+    public required Dictionary<string, int> Tagdict { get; init; }
+    public required Dictionary<string, int> Rows { get; init; }
+    public required uint[] RowStart { get; init; }
+    public required byte[] Cls { get; init; }
+    public required int[] Weight { get; init; }
 }
 
 public static class Pos
@@ -99,13 +103,13 @@ public sealed class PosTagger
 {
     private readonly List<string> _classes;
     private readonly Dictionary<string, int> _tagdict;
-    private readonly Dictionary<string, Dictionary<string, double>> _weights;
+    private readonly PosModel _model;
 
     public PosTagger(PosModel model)
     {
         _classes = model.Classes;
         _tagdict = model.Tagdict;
-        _weights = model.Weights;
+        _model = model;
     }
 
     private string Predict(Dictionary<string, double> features)
@@ -113,12 +117,9 @@ public sealed class PosTagger
         var scores = new double[_classes.Count];
         foreach (var (feat, val) in features)
         {
-            if (!_weights.TryGetValue(feat, out var w)) continue;
-            foreach (var (idx, weight) in w)
-            {
-                var ci = int.Parse(idx, System.Globalization.CultureInfo.InvariantCulture);
-                scores[ci] += weight * val;
-            }
+            if (!_model.Rows.TryGetValue(feat, out var r)) continue;
+            for (var k = (int)_model.RowStart[r]; k < (int)_model.RowStart[r + 1]; k++)
+                scores[_model.Cls[k]] += _model.Weight[k] * val;
         }
         var best = 0;
         var bestScore = scores.Length > 0 ? scores[0] : 0;

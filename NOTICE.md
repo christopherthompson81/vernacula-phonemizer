@@ -140,7 +140,7 @@ These files are **redistributable only under CC-BY-SA**, and are fenced as such 
 - **ChhoeTaigi 台華線頂對照典** — CC-BY-SA 4.0. `minnan/dict.tsv`, `dict-chars.tsv`.
 - **CC-CEDICT** — CC-BY-SA. Cross-check only, tools.
 - **Universal Dependencies English-EWT** — CC-BY-SA 4.0. Training data for
-  `english/pos-model.json`.
+  `english/pos-model.bin`.
 - **hermitdave FrequencyWords** — CC-BY-SA, derived from the **OpenSubtitles 2018** corpus
   (<https://opus.nlpl.eu/OpenSubtitles>). Used as a **filter** over the CC0 NST lexica, where the
   shipped intersections retain only NST content and the external ranking is FrequencyWords' sole

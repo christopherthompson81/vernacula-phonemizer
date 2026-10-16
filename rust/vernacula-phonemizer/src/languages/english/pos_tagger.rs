@@ -3,8 +3,6 @@
 
 use std::collections::HashMap;
 
-use crate::core::from_json::FromJson;
-
 use crate::core::js_string::{JsString, js};
 use crate::js_re;
 
@@ -93,58 +91,51 @@ pub fn is_verbal_upos(tag: &str) -> bool {
     matches!(tag, "VERB" | "AUX")
 }
 
-#[derive(FromJson)]
+/// The model as `pos-model.bin` stores it (`pos_model_binary`): a sparse matrix in compressed rows. Row
+/// `rows[feature]` is `cls`/`weight[row_start[r]..row_start[r + 1]]`, classes ascending.
 pub struct PosModel {
     pub scale: f64,
     pub classes: Vec<String>,
-    pub tagdict: HashMap<String, serde_json::Value>,
-    pub weights: HashMap<String, HashMap<String, f64>>,
+    pub tagdict: HashMap<String, usize>,
+    pub rows: HashMap<String, usize>,
+    pub row_start: Vec<u32>,
+    pub cls: Vec<u8>,
+    pub weight: Vec<i32>,
 }
 
 pub struct PosTagger {
     classes: Vec<String>,
     tagdict: HashMap<JsString, usize>,
-    weights: HashMap<JsString, Vec<(usize, f64)>>,
+    rows: HashMap<JsString, usize>,
+    row_start: Vec<u32>,
+    cls: Vec<u8>,
+    weight: Vec<i32>,
 }
 
 impl PosTagger {
     pub fn new(model: PosModel) -> PosTagger {
-        // A tagdict value that is not a number is ignored, as `typeof cached === "number"` ignores it.
-        let tagdict = model
-            .tagdict
-            .into_iter()
-            .filter_map(|(k, v)| v.as_u64().map(|c| (js(&k), c as usize)))
-            .collect();
-        let weights = model
-            .weights
-            .into_iter()
-            .map(|(f, w)| {
-                // `for (idx in w)` visits integer keys ascending; the sums are of integers, so order is
-                // immaterial, but keep it anyway. A non-integer key is `scores[NaN]` in the TS, a no-op.
-                let mut v: Vec<(usize, f64)> = w
-                    .into_iter()
-                    .filter_map(|(k, x)| k.parse().ok().map(|k| (k, x)))
-                    .collect();
-                v.sort_by_key(|(k, _)| *k);
-                (js(&f), v)
-            })
-            .collect();
+        let keyed = |m: HashMap<String, usize>| m.into_iter().map(|(k, v)| (js(&k), v)).collect();
         PosTagger {
             classes: model.classes,
-            tagdict,
-            weights,
+            tagdict: keyed(model.tagdict),
+            rows: keyed(model.rows),
+            row_start: model.row_start,
+            cls: model.cls,
+            weight: model.weight,
         }
     }
 
     fn predict(&self, features: &[JsString]) -> String {
         let mut scores = vec![0.0f64; self.classes.len()];
         for feat in features {
-            let Some(w) = self.weights.get(feat) else {
+            let Some(&r) = self.rows.get(feat) else {
                 continue;
             };
-            for &(ci, x) in w {
+            // Classes ascending within the row, the order `for (idx in w)` visited the JSON row in.
+            for k in self.row_start[r] as usize..self.row_start[r + 1] as usize {
+                let ci = self.cls[k] as usize;
                 if ci < scores.len() {
-                    scores[ci] += x;
+                    scores[ci] += f64::from(self.weight[k]);
                 }
             }
         }

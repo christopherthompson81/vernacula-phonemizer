@@ -1,4 +1,4 @@
-# `pos-model.json` provenance — English POS tagger
+# `pos-model.bin` provenance — English POS tagger
 
 Averaged-perceptron part-of-speech model (drives heteronym selection + de-accenting;
 `english.jsonc` posModel).

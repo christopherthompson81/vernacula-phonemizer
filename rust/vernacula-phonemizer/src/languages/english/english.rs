@@ -10,9 +10,8 @@ use super::english_g2p::{EnglishG2p, EnglishG2pModel, G2pClasses};
 use super::manifest::{DIR, HeteronymEntry, Slot, try_manifest};
 use super::normalize::{normalize_english, normalize_english_initialisms};
 use super::numbers::{BigNat, number_to_words, ordinal_to_words};
-use super::pos_tagger::{
-    PosExpectation, PosModel, PosTagger, heads_object_phrase, pos_expectation,
-};
+use super::pos_model_binary::load_pos_model;
+use super::pos_tagger::{PosExpectation, PosTagger, heads_object_phrase, pos_expectation};
 use super::spelling_variants::american_spelling;
 use crate::core::clauses::foreign_run;
 use crate::core::foreign::read_foreign_run;
@@ -779,8 +778,7 @@ pub fn create_english() -> Result<EnglishPhonemizer, String> {
         arpabet_to_ipa,
         classes,
     )?;
-    let tagger =
-        PosTagger::new(load_json::<PosModel>(DIR, "pos-model.json").map_err(|e| e.to_string())?);
+    let tagger = PosTagger::new(load_pos_model(DIR)?);
     let set = |v: &[String]| v.iter().map(|s| js(s)).collect::<HashSet<JsString>>();
     let map = |v: &IndexMap<String, String>| {
         v.iter()

@@ -97,8 +97,47 @@ compiling. That broke `cargo test` for the whole workspace, but the gate script 
 `FAILED|panicked`, so it printed nothing rather than a failure. The script now prints `RUST-TEST-EXIT` and
 `^error` lines. fn-diff now uses `FromJson::from_json`.
 
+## Run 5 — 2026-10-16 09:50
+
+**The POS weights as binary** (`data/languages/english/pos-model.bin`, replacing `pos-model.json`). This step is
+about load time and file size, not code size, and it touches all three engines.
+
+The layout is in `src/languages/english/posModelBinary.ts`, version 1:
+- two string blocks, `rowStart` (u32), `cls` (u8) and `weight` (i32), all little-endian;
+- the weights range from −13,737 to 34,605, so they don't fit an i16;
+- there are 49 classes, so a u8 holds the class index.
+
+`tools/english/pos_model_pack.mts` converts both ways. `pack` refuses to write unless the round trip is exact; it
+was exact, and Python's comparison of the unpacked file against the original JSON agrees.
+
+**File size:** 2,911,001 → 2,048,082 bytes (−30%). The feature strings (728 KB) are most of what's left.
+
+**Load time in Node** (median of 7, while another job was running, so noisy):
+
+| | ms |
+|---|---|
+| `JSON.parse` of the old file | 22–35 |
+| first decoder, decoding to the old object shape | 42 |
+| after decoding each string block once and reading the arrays in bulk | **9–13** |
+
+⚠ The first decoder was *slower* than `JSON.parse`. A breakdown put about 21 ms in building the 39k per-feature
+row objects. That's the same work `JSON.parse` does in native code, so keeping the old in-memory shape cancelled
+out the format. The tagger now holds the compressed rows directly in all three engines (`PackedPosModel` in TS,
+`PosModel` in C# and Rust). Summation order is unchanged (ascending class within each row), and every sum is
+over integers.
+
+⚠ A Node `Buffer`'s `.slice()` is a view, and its `.buffer` is the whole shared pool. A typed array built from it
+read the wrong bytes (`RangeError` in the shipped-model test). The fix is to copy with `new Uint8Array(view)`.
+
+**Guard check.** I made the Rust tagger read every weight as 0, on both the first decoder and the final one. Parity
+for en, en-GB and en-IN went to 193/200 each, and back to 200/200 when restored. ⚠ After the second restore it
+still read 193/200: the file restored by `mv` had a timestamp older than the sabotaged build, so cargo didn't
+rebuild it. `touch` fixed it.
+
+**Gates:** all green. One run had a single failure in `english-1504-able` (an async neural-path test with the
+default 5 s timeout, while another job was benchmarking). It passed alone and in a full rerun (7224/7224). The
+gate log didn't keep the failure text, so its cause is unconfirmed.
+
 ## Next
 
-- The POS model weights (`data/languages/english/pos-model.json`, 2.9 MB): a sparse integer matrix stored as
-  39,475 string-keyed maps. A binary layout read as typed arrays by all three engines is a separate PR, and it
-  needs a new HF data tag.
+- `pos-model.bin` needs a new HF data tag before inference.rs, or anyone else loading the data from HF, can use it.

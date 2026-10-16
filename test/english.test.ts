@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { phonemize } from "../src/index.ts";
 import { normalizeEnglish } from "../src/languages/english/normalize.ts";
 import { PosTagger, type PosModel } from "../src/languages/english/posTagger.ts";
+import { packPosModel } from "../src/languages/english/posModelBinary.ts";
 
 // Canonical-IPA goldens for English. Pronunciation from the CMUdict lexicon + n-gram OOV G2P + POS
 // heteronyms; sentence prosody = function-word de-accenting + nuclear tonic on the clause-final word.
@@ -95,7 +96,7 @@ describe("POS tagger — a word that is also a prototype member name", () => {
             tagdict: { dog: 0 },
             weights: { bias: { "1": 5 } }, // any un-cached word predicts VB
         };
-        const tagger = new PosTagger(model);
+        const tagger = new PosTagger(packPosModel(model));
         expect(tagger.tag(["dog"])).toEqual(["JJ"]); // a real tagdict hit still short-circuits
         expect(tagger.tag(["cat"])).toEqual(["VB"]); // an ordinary miss predicts
         for (const name of ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"])
