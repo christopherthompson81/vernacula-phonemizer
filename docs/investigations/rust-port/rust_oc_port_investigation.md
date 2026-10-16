@@ -89,3 +89,9 @@ eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-norm
 an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
 phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
 ```
+
+## Run 7 — 2026-10-15 22:30 (#1585: the TS defects this port reproduced, fixed in all three engines)
+
+- **`9:00`.** It read *nɔw zɛɾu*. `:00` is now the hour alone, as es, ca and gl read it. (`9:05` is *nine five*, like es and ca; it isn't in the issue for oc.)
+
+All probes are synthetic. Each fix was made in TS first and mirrored to C# and Rust. Tests: `test/west-defects-1585.test.ts`, `WestDefects1585Tests.cs`, and a `defects_1585_tests` module in this language's `normalize.rs`. Every new test fails with its fix reverted.

@@ -71,7 +71,9 @@ export function normalizeOccitan(input: string): string {
     //    The Aranese radio listings are where this class lives — "de 8h enquiara 9h e er aute de 12h a
     //    12:30 h deth meddia", "un butlletin de 20 menutes de 15:35 enquiara 16 h" — and the writer
     //    supplies the `h`, so the figures are left as figures and only the colon is spent.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    //    ⚠ `:00` IS THE HOUR ALONE, as es, ca and gl read it: `9:00` read *nine zero* (#1585).
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu,
+        (_m, h: string, min: string) => (min === "00" ? h : `${h} ${min}`));
 
     // 4) SIGNS, before the range rule spends the hyphen. The corpus's climate prose writes `-20,4°C`.
     s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d)/gu, "$1mens $2");

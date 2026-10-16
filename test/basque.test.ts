@@ -97,12 +97,12 @@ describe("Basque text normalization — the period groups, the comma divides, th
         expect(phonemize("120 km/h", "eu").trim()).toBe("ehun eta hoɡei kilometro orduko");
     });
 
-    test("the degree sign takes its SCALE, and a bare one is refused", () => {
+    test("the degree sign takes its SCALE, and a bare one is the angular `gradu` (#1585)", () => {
         expect(phonemize("56,7 ° C", "eu").trim()).toBe("beroɡeita hamas̺ei koma s̻as̻pi ɡradu kels̺ius̺");
         expect(normalizeBasque("26 °F")).toBe("26 gradu Fahrenheit");
-        // ⚠ THE REFUSAL: `gradu` in this corpus is the ANGULAR degree, so a bare sign is not claimed —
-        // reading it would put a temperature word on a latitude.
-        expect(normalizeBasque("23,4° ingurukoa")).toBe("23 koma 4° ingurukoa");
+        // `gradu` in this corpus IS the angular degree, which is what every bare sign here is (#1585) — the
+        // old refusal dropped the sign from the axial tilt.
+        expect(normalizeBasque("23,4° ingurukoa")).toBe("23 koma 4 gradu ingurukoa");
     });
 
     test("the glued case ending attaches to the LAST spoken word, and is not derived", () => {
@@ -161,9 +161,9 @@ describe("Basque — the six the review found", () => {
         // both defects it caused: the scale went unread (⟨C⟩ → /k/, trap 56) and `º` being \p{L} also
         // blocked the decimal guard beside it
         expect(normalizeBasque("0,4º C")).toBe("0 koma 4 gradu Celsius");
-        expect(normalizeBasque("0,1-0,5º")).toBe("0 koma 1-0 koma 5°"); // both decimals, not just the first
-        // ⚠ folding changes the CHARACTER, not the reading — a bare degree is still refused
-        expect(normalizeBasque("30º-ko latitudearen")).toContain("°");
+        expect(normalizeBasque("0,1-0,5º")).toBe("0 koma 1-0 koma 5 gradu"); // both decimals, not just the first
+        // the folded sign is then the angular `gradu`, and the hyphenated ending glues to it (#1585)
+        expect(normalizeBasque("30º-ko latitudearen")).toBe("30 graduko latitudearen");
     });
 
     test("a rate denominator takes the ending too, and must not double it", () => {

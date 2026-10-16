@@ -220,10 +220,10 @@ pub fn soften(text: &JsString) -> JsString {
     }
 }
 
-/// `UNIT_WORD` (and the decimal rule's identical literal).
+/// `UNIT_WORD`, which the decimal rule shares. `km` is the tier's `cilomedr` (#1585).
 fn unit_word(u: &JsString) -> JsString {
     js(match u.to_string_lossy().as_str() {
-        "km" => "cilometr",
+        "km" => "cilomedr",
         "kg" => "cilogram",
         "mm" => "milimetr",
         "cm" => "centimetr",
@@ -472,11 +472,8 @@ pub fn normalize_welsh(input: &JsString) -> JsString {
         js_re!(r"(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])", "giu"),
         &js("$1 gigahertz"),
     );
-    s = rewrite_with(
-        &s,
-        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))", "giu"),
-        |m, t| pwynt(&g(m, 1, t), &g(m, 2, t)).concat(&js(" ")),
-    );
+    // The decimal-unit rule runs BEFORE the version letter (#1585): a glued metre is the version letter's
+    // shape, so `4.5m` read the letter. The corpus's version letters are `a b g n`, never `m`.
     s = rewrite_with(
         &s,
         js_re!(
@@ -488,6 +485,11 @@ pub fn normalize_welsh(input: &JsString) -> JsString {
                 .concat(&js(" "))
                 .concat(&unit_word(&g(m, 3, t).to_lower_case()))
         },
+    );
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))", "giu"),
+        |m, t| pwynt(&g(m, 1, t), &g(m, 2, t)).concat(&js(" ")),
     );
     s = rewrite_with(
         &s,
@@ -510,6 +512,10 @@ pub fn normalize_welsh(input: &JsString) -> JsString {
         js_re!(r"(?<![\d/])(\d{1,3})\/(\d{1,3})(?![\d/])", "gu"),
         |m, t| {
             let (num, den) = (js_number(&g(m, 1, t)), js_number(&g(m, 2, t)));
+            // A denominator below 2 names no fraction noun (#1585): `1/0` read *un dimfed*.
+            if den < 2.0 {
+                return m.value(t);
+            }
             if den == 2.0 {
                 return if num == 1.0 {
                     js("hanner")
@@ -603,4 +609,32 @@ pub fn normalize_welsh(input: &JsString) -> JsString {
 
     let s = rewrite(&s, js_re!(r"[^\S\n]{2,}", "gu"), &js(" "));
     rewrite(&s, js_re!(r"^[^\S\n]+|[^\S\n]+$", "gu"), &JsString::new())
+}
+
+/// #1585, as test/west-defects-1585.test.ts: relational where a well-formed twin exists, so no IPA is typed.
+#[cfg(test)]
+mod defects_1585_tests {
+    use super::*;
+
+    fn say(text: &str, lang: &str) -> String {
+        crate::phonemize(text, lang).unwrap().trim().to_string()
+    }
+
+    fn n(s: &str) -> String {
+        normalize_welsh(&js(s)).to_string_lossy()
+    }
+
+    #[test]
+    fn glued_metre_km_word_and_the_zero_denominator() {
+        assert_eq!(say("4.5m", "cy"), say("4.5 m", "cy"));
+        assert_ne!(say("802.11n", "cy"), say("802.11 metr", "cy"));
+        let last = |s: String| s.rsplit(' ').next().unwrap().to_string();
+        let km = last(say("5 km", "cy"));
+        assert_eq!(last(say("2.5 km", "cy")), km);
+        assert_eq!(last(say("1-2 km", "cy")), km);
+        assert!(n("1-2 km").contains("cilomedr"));
+        assert_eq!(n("1/0"), "1/0");
+        assert_eq!(n("1/1"), "1/1");
+        assert_eq!(n("1/2"), "hanner");
+    }
 }

@@ -96,3 +96,11 @@ eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-norm
 an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
 phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
 ```
+
+## Run 7 — 2026-10-15 22:30 (#1585: the TS defects this port reproduced, fixed in all three engines)
+
+- **Three-digit dot decimal: DECLINED.** `3.141` → 3141 is not a clear defect. The corpus has four single `.ddd` figures. Three are thousands (`21.000 daoine`, `140.000 oileanaich`, Brocken `1.141m` = 1,141 m) and one is a decimal (`20.117m`, a Gunter's chain), all in German-topic articles. A fix would break three attested readings to repair one.
+- **Range connective: DECLINED.** The header records a measured decision to write no range rule: the corpus's `\d-\d` are ISO dates, ISBNs and scores. Re-measured: 9 year spans, `digit gu digit` ×0, *eadar X agus Y* ×4 (prose, not a reading of the hyphen). No source attests a spoken connective for a bare hyphen, so the decision stands.
+- No code change for gd.
+
+All probes are synthetic. Each fix was made in TS first and mirrored to C# and Rust. Tests: `test/west-defects-1585.test.ts`, `WestDefects1585Tests.cs`, and a `defects_1585_tests` module in this language's `normalize.rs`. Every new test fails with its fix reverted.

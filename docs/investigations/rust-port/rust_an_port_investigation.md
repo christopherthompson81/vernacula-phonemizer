@@ -92,3 +92,11 @@ eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-norm
 an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
 phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
 ```
+
+## Run 7 — 2026-10-15 22:30 (#1585: the TS defects this port reproduced, fixed in all three engines)
+
+- **`-5:30`.** It read *menos 5 30*. The sign rule's exclusion is "a figure that runs into a colon", but the clock rule ran first and spent the colon. The sign rule now runs before the clock, so `-5:30` reads like `5:30`. `-10º` still reads *menos*, and the stopwatch list `… - 3:40.96 min` is unchanged (checked against main).
+- **`20° W`.** It lost the degree word as well as the direction. `W` is now read as *ueste* ALONGSIDE `U`. The corpus writes `U` (`11°U`) and no `W`, and the header's objection was to using `W` instead of `U`.
+- **`9:00`.** It read *nueu cero*. `:00` is now the hour alone, as es, ca and gl read it.
+
+All probes are synthetic. Each fix was made in TS first and mirrored to C# and Rust. Tests: `test/west-defects-1585.test.ts`, `WestDefects1585Tests.cs`, and a `defects_1585_tests` module in this language's `normalize.rs`. Every new test fails with its fix reverted.

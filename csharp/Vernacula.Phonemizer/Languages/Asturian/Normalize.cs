@@ -89,7 +89,8 @@ public static class Normalize
                 : m.Value;
         });
 
-        s = Rewrite(s, CLOCK, "$1 $2");
+        // ⚠ `:00` is the hour alone, as es, ca and gl read it (#1585): `9:00` read *nine zero*.
+        s = Rewrite(s, CLOCK, m => m.Groups[2].Value == "00" ? m.Groups[1].Value : $"{m.Groups[1].Value} {m.Groups[2].Value}");
 
         s = Rewrite(s, DEG_SCALE, m =>
             $"{m.Groups[1].Value} graos {(m.Groups[2].Value.ToUpperInvariant() == "C" ? "Celsius" : "Fahrenheit")}");

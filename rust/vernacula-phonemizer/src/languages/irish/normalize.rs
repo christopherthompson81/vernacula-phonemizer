@@ -426,7 +426,7 @@ pub fn normalize_irish(input: &JsString) -> JsString {
     s = rewrite(
         &s,
         js_re!(
-            r"(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?![\d.])",
+            r"(?<![\d.,])(\d(?:[\d,]*\d)?)\s*[-–]\s*(\d(?:[\d,]*\d)?)(?!\d|\.\d)",
             "gu"
         ),
         &js("$1 go dtí $2"),
@@ -471,11 +471,8 @@ pub fn normalize_irish(input: &JsString) -> JsString {
         js_re!(r"(?<![\d.,])(\d+\.\d+)\s?Ghz?(?![\p{L}\p{M}])", "giu"),
         &js("$1 gigahertz"),
     );
-    s = rewrite_with(
-        &s,
-        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))", "giu"),
-        |m, t| pointe(&g(m, 1, t), &g(m, 2, t)).concat(&js(" ")),
-    );
+    // The decimal-unit rule runs BEFORE the version letter (#1585): a glued metre is the version letter's
+    // shape, so `4.5m` read the letter. The corpus's version letters are `a b g n`, never `m`.
     s = rewrite_with(
         &s,
         js_re!(
@@ -493,6 +490,11 @@ pub fn normalize_irish(input: &JsString) -> JsString {
                 Some(slash) => num.concat(&js(" ")).concat(&u).concat(&slash),
             }
         },
+    );
+    s = rewrite_with(
+        &s,
+        js_re!(r"(?<![\d.,])(\d+)\.(\d+)(?=[a-z](?![\p{L}\p{M}]))", "giu"),
+        |m, t| pointe(&g(m, 1, t), &g(m, 2, t)).concat(&js(" ")),
     );
     s = rewrite_with(
         &s,
@@ -517,8 +519,12 @@ pub fn normalize_irish(input: &JsString) -> JsString {
             let Some(ord) = ordinal_words(js_number(&g(m, 2, t)), &JsString::new()) else {
                 return m.value(t);
             };
-            let article = if starts_vowel(&ord) { "an t-" } else { "an " };
             let a = js_number(&g(m, 1, t));
+            // One half is `leath`, not the ordinal (#1585): `1/2` read *an dara*.
+            if a == 1.0 && js_number(&g(m, 2, t)) == 2.0 {
+                return js("leath");
+            }
+            let article = if starts_vowel(&ord) { "an t-" } else { "an " };
             if a == 1.0 {
                 js(article).concat(&ord)
             } else {
@@ -635,4 +641,27 @@ pub fn normalize_irish(input: &JsString) -> JsString {
 
     // 12) initialisms
     normalize_initialisms(&s)
+}
+
+/// #1585, as test/west-defects-1585.test.ts: relational where a well-formed twin exists, so no IPA is typed.
+#[cfg(test)]
+mod defects_1585_tests {
+    use super::*;
+
+    fn say(text: &str, lang: &str) -> String {
+        crate::phonemize(text, lang).unwrap().trim().to_string()
+    }
+
+    fn n(s: &str) -> String {
+        normalize_irish(&js(s)).to_string_lossy()
+    }
+
+    #[test]
+    fn clause_final_score_one_half_and_the_glued_metre() {
+        assert_eq!(n("Bhí sé 5-3."), "Bhí sé 5 go dtí 3.");
+        assert!(!n("1.5-2.5").contains("go dtí"));
+        assert_eq!(n("1/2"), "leath");
+        assert_eq!(n("1/5"), "an cúigiú");
+        assert_eq!(say("4.5m", "ga"), say("4.5 m", "ga"));
+    }
 }

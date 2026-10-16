@@ -128,10 +128,14 @@ public static class Normalize
 
     /** 2) THE DEGREE SIGN WITH A SCALE LETTER. ⚠ THE DEFECT WAS NOT SILENCE: the `°` dropped and ⟨C⟩ reached
      *  the g2p as a Basque LETTER, read /k/ — a plausible phoneme with no basis (trap 56), which no leak
-     *  class can see. ⚠ THE BARE `°` IS DELIBERATELY NOT CLAIMED: the corpus's bare-`°` instances are
-     *  coordinates, and claiming the sign without its scale would put a temperature word on a latitude. */
+     *  class can see. */
     private static readonly JsRe DEGREE_SCALE =
         JsRegex.Compile("(\\d)[ \\u00a0]?°[ \\u00a0]?([CF])(?![\\p{L}\\p{M}])", "gui");  // space, NBSP
+    /** 2b) THE BARE `°` IS `gradu` (#1585): `gradu` IS the angular degree, and every bare-`°` site in the corpus is
+     *  angular (coordinates, the axial tilt `23,4°`). A case ending glued to the sign attaches to the vowel-final
+     *  *gradu*. See step 2b in src/languages/basque/normalize.ts. */
+    private static readonly JsRe DEGREE_BARE = JsRegex.Compile(
+        $"(\\d)[ \\u00a0]?°-?({string.Join("|", CASE_ENDINGS)})?(?![\\p{{L}}\\p{{M}}])", "gu");  // space, NBSP
 
     /** 3) THE CASE ENDING GLUED TO THE **UNIT** — the same morpheme as step 5 attached to the other side of
      *  the quantity (trap 15). ⚠ THE HYPHEN OR THE EXPONENT MUST BE PRESENT, and that is the whole guard:
@@ -168,7 +172,7 @@ public static class Normalize
      *  (`% 80ko`). ⚠ AND THE FIGURE MAY CARRY A DECIMAL, which fell between the two steps in the first cut.
      *  ⚠ AND THE ENDING MAY BE HYPHENATED — Basque writes both `1980an` and `995-ko`. */
     private static readonly JsRe FIGURE_ENDING = JsRegex.Compile(
-        $"(?<![\\d.,\\p{{L}}\\p{{M}}])(\\d+)(?:,(\\d+))?(-?)({ENDING_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
+        $"(?<![\\d.,\\p{{L}}\\p{{M}}])(\\d+)(?:[,.](\\d+))?(-?)({ENDING_ALT})(?![\\p{{L}}\\p{{M}}])", "gu");
     private static readonly JsRe VOWEL_FINAL = JsRegex.Compile("[aeiou]$", "u");
 
     /** 6) THE DECIMAL COMMA → `koma`. It was reaching clausePunctuation and becoming a PAUSE inside a
@@ -177,6 +181,10 @@ public static class Normalize
      *  ending-carrying figure to step 5); a following clause mark is NOT excluded (trap 58). */
     private static readonly JsRe DECIMAL_COMMA =
         JsRegex.Compile("(?<![\\d,])(\\d+),(\\d+)(?![\\d,\\p{L}\\p{M}])", "gu");
+    /** …and the DOT decimal (#1585): step 1 has de-grouped every three-digit dot block, so a dot left between
+     *  digits is a decimal (17 of the corpus's 18 single-dot figures). A further `.digit` is a dotted citation. */
+    private static readonly JsRe DECIMAL_DOT =
+        JsRegex.Compile("(?<![\\d.,])(\\d+)\\.(\\d+)(?![\\d,\\p{L}\\p{M}]|\\.\\d)", "gu");
 
     private static readonly JsRe WS_RUN = JsRegex.Compile("[^\\S\\n]{2,}", "gu");
     private static readonly JsRe EDGE_WS = JsRegex.Compile("^[^\\S\\n]+|[^\\S\\n]+$", "gu");
@@ -198,6 +206,8 @@ public static class Normalize
         //    for a unit key, and before step 6 so the operand is still one figure.
         s = Rewrite(s, DEGREE_SCALE, m =>
             $"{m.Groups[1].Value} {DEGREE} {SCALES[m.Groups[2].Value.ToUpperInvariant()]}");
+        // 2b) The bare degree sign — the angular `gradu`, with a glued case ending on it.
+        s = Rewrite(s, DEGREE_BARE, m => $"{m.Groups[1].Value} {DEGREE}{(m.Groups[2].Success ? m.Groups[2].Value : "")}");
 
         // 3) The case ending glued to the UNIT, before the tier, whose trailing guard refuses a letter after
         //    a unit key and therefore declined the whole match — leaving a raw `km` in the IPA.
@@ -246,13 +256,17 @@ public static class Normalize
             // that vowel is the Mongolian problem this layer was written to avoid, so the hyphen is accepted
             // only where the bare ending is provably right — after a VOWEL-final word, where Basque adds
             // nothing.
-            if (hyphen != "" && !VOWEL_FINAL.IsMatch(head)) return whole;
+            // ⚠ Unless the writer wrote the linking vowel (#1585): an `e`-initial ending is the consonant-final
+            // allomorph itself (`-eko`, `-ean` after *bost* and *hamar*, ×17 against ×1), so `5-eko` is *bosteko*.
+            if (hyphen != "" && !VOWEL_FINAL.IsMatch(head) && !ending.StartsWith('e')) return whole;
             if (!m.Groups[2].Success) return $"{head}{ending}";
             return GlueFraction(head, m.Groups[2].Value, ending) ?? whole;
         });
 
         // 6) The decimal comma → `koma`.
         s = Rewrite(s, DECIMAL_COMMA, m =>
+            $"{m.Groups[1].Value} {DECIMAL_WORD} {FractionDigits(m.Groups[2].Value)}");
+        s = Rewrite(s, DECIMAL_DOT, m =>
             $"{m.Groups[1].Value} {DECIMAL_WORD} {FractionDigits(m.Groups[2].Value)}");
 
         return Tidy(s);

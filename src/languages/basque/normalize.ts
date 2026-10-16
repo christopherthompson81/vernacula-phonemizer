@@ -244,6 +244,17 @@ export function normalizeBasque(input: string): string {
     //    BEFORE the tier, so the scale letter cannot be mistaken for a unit key, and before step 6 so the
     //    operand is still one figure.
     s = rewrite(s, /(\d)[ \u00a0]?°[ \u00a0]?([CF])(?![\p{L}\p{M}])/gui, (_m, d: string, k: string) => `${d} ${DEGREE} ${SCALES[k.toUpperCase()]!}`);  // space, NBSP
+    // 2b) THE BARE `°` IS `gradu` (#1585), and the refusal that stood here contradicted its own source. `gradu` IS
+    //    the angular degree — the corpus's one bare use is *latitude gradu bat* — and every bare-`°` site in
+    //    the retained text is angular: coordinates, the axial tilt `23,4°`, `22,1° eta 24,5°`, the rotation
+    //    `0,1-0,5º`. A temperature needs its scale letter, and step 2 above has already claimed those, so
+    //    the sign left here is the angle the word names. Dropping it read `23,4°` as a bare number.
+    //    A case ending glued to the sign (`10°tik`, `23,439281 °-koa`) attaches to *gradu*, which is
+    //    vowel-final, so the bare ending is right (see step 3). A following letter is a compass abbreviation
+    //    (`58ºI`) or a scale this file does not read, and is left alone.
+    s = rewrite(s,
+        new RegExp(`(\\d)[ \\u00a0]?°-?(${CASE_ENDINGS.join("|")})?(?![\\p{L}\\p{M}])`, "gu"),  // space, NBSP
+        (_m, d: string, ending: string | undefined) => `${d} ${DEGREE}${ending ?? ""}`);
 
     // 3) THE CASE ENDING GLUED TO THE **UNIT**, before the tier, because the tier's trailing guard refuses a
     //    letter after a unit key and therefore declined the whole match — leaving a raw `km` in the IPA. This
@@ -348,7 +359,7 @@ export function normalizeBasque(input: string): string {
     //    the retained text (`995-ko`, `26-en`, `18-n`), and one of them is the header's own `2.18.19-26-en`.
     const endingAlt = CASE_ENDINGS.join("|");
     s = rewrite(s,
-        new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+)(?:,(\\d+))?(-?)(${endingAlt})(?![\\p{L}\\p{M}])`, "gu"),
+        new RegExp(`(?<![\\d.,\\p{L}\\p{M}])(\\d+)(?:[,.](\\d+))?(-?)(${endingAlt})(?![\\p{L}\\p{M}])`, "gu"),
         (whole, digits: string, frac: string | undefined, hyphen: string, ending: string) => {
             const n = Number(digits);
             if (!Number.isSafeInteger(n) || n < 0 || n >= 1e12) return whole;
@@ -363,7 +374,11 @@ export function normalizeBasque(input: string): string {
             // hyphen is accepted only where the bare ending is provably right — after a VOWEL-final word,
             // where Basque adds nothing. `26-en` → *hogeita seien* is claimed; `995-ko` is declined and left
             // exactly as it was. ×3 in the retained text, and this splits them 1 claimed / 2 declined.
-            if (hyphen !== "" && !/[aeiou]$/u.test(head)) return whole;
+            // ⚠ UNLESS THE WRITER WROTE THE LINKING VOWEL (#1585). An `e`-initial ending is the
+            // consonant-final allomorph itself — after *bost* (5) and *hamar* (10) the corpus writes `-eko`,
+            // `-ean`, `-etik`, `-era` ×17 against `1945an` ×1 — so `5-eko` is *bosteko*, with nothing for
+            // speech to supply. Declining it split the figure from its ending.
+            if (hyphen !== "" && !/[aeiou]$/u.test(head) && !ending.startsWith("e")) return whole;
             return frac === undefined ? `${head}${ending}` : glueFraction(head, frac, ending) ?? whole;
         },
     );
@@ -376,6 +391,13 @@ export function normalizeBasque(input: string): string {
     //    a trailing letter, which leaves an ending-carrying figure to step 4. A following clause mark is NOT
     //    excluded (trap 58) — `93,55.` at a sentence end is still a decimal.
     s = rewrite(s, /(?<![\d,])(\d+),(\d+)(?![\d,\p{L}\p{M}])/gu,
+        (_m, a: string, b: string) => `${a} ${DECIMAL_WORD} ${fractionDigits(b)}`);
+    //    ⚠ AND THE DOT DECIMAL (#1585). Step 1 has already de-grouped every three-digit dot block, so a dot
+    //    left between digits is a decimal, and the corpus writes them: 17 of its 18 single-dot figures are
+    //    (`89.2 ° C`, `5.97×10²⁴`, `13.79%`, `2.37 milioi`), the 18th a version number. Unread, the dot
+    //    became a SENTENCE BREAK inside the number: `2.5 km` read *bi . bost*. A further `.digit` is a
+    //    dotted citation (`Am 2.18.19-26`) and is declined on both sides.
+    s = rewrite(s, /(?<![\d.,])(\d+)\.(\d+)(?![\d,\p{L}\p{M}]|\.\d)/gu,
         (_m, a: string, b: string) => `${a} ${DECIMAL_WORD} ${fractionDigits(b)}`);
 
     return tidy(s);

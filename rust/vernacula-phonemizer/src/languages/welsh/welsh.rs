@@ -355,7 +355,7 @@ mod tests {
         (
             "phonemize",
             &["2-3 km o iâ", "cy"],
-            Some("dˈaᶤ ˈiː drˈiː kilˈɔmɛtr ˈoː jˈaː"),
+            Some("dˈaᶤ ˈiː drˈiː kilˈɔmɛdr ˈoː jˈaː"),
         ),
         ("soften", &["chwech"], Some("chwech")),
         ("soften", &["llath"], Some("lath")),

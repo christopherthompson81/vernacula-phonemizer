@@ -112,3 +112,11 @@ eu-normalize 2528 / eu-g2p 142643 / sq-normalize 1838 / sq-g2p 215786 / ast-norm
 an-normalize 1041 / an-g2p 295860 / oc-normalize 12339 / oc-g2p 314896: all identical, 0 DIFFER
 phonemize-sync / phonemize-best / phonemize-trace / trace: 16653 identical, 0 DIFFER each
 ```
+
+## Run 7 — 2026-10-15 22:30 (#1585: the TS defects this port reproduced, fixed in all three engines)
+
+- **Clause-final score.** `5-3.` read with no connective, because the range rule's right guard was `(?![\d.])` (trap 58). It is now `(?!\d|\.\d)`, the same as Welsh. `5 go dtí 3.` is kept, and a decimal continuation is still declined.
+- **`1/2`.** It read *an dara* ("the second"). A unit fraction over 2 is now *leath*, the word the file's own `½` rule uses.
+- **Glued metre.** `4.5m` read the letter, the same order bug as cy. The decimal-with-unit rule now runs before the version letter.
+
+All probes are synthetic. Each fix was made in TS first and mirrored to C# and Rust. Tests: `test/west-defects-1585.test.ts`, `WestDefects1585Tests.cs`, and a `defects_1585_tests` module in this language's `normalize.rs`. Every new test fails with its fix reverted.

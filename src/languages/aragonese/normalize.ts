@@ -141,9 +141,14 @@ export function normalizeAragonese(input: string): string {
     //    colon instances in this corpus are ATHLETICS TIMES (`3:40.96 min`, `28:39.11 min`) and one is a
     //    degrees:minutes:seconds coordinate, so what the rule must do is decline them: a trailing `.dd`
     //    or a second colon is what a stopwatch has and a clock has not. The figures are left as figures.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    // ⚠ THE SIGN RULE NOW RUNS FIRST (#1585). Its exclusion is a figure that runs into a COLON, and this rule
+    //    spends the colon — so with the clock first, `-5:30` reached it as `-5 30` and read *menos 5 30*.
+    //    ⚠ AND `:00` IS THE HOUR ALONE, as es, ca and gl read it: `9:00` read *nueu cero*.
+    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d(?!\d*:))/gu, "$1menos $2");
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu,
+        (_m, h: string, min: string) => (min === "00" ? h : `${h} ${min}`));
 
-    // 5) SIGNS, before the range rule spends the hyphen. `-10º`, `-19°`, `-37,8 °C`, `−0,5 °C` — the
+    // 5) SIGNS, before the range rule spends the hyphen. (Applied above, before the clock; see there.) `-10º`, `-19°`, `-37,8 °C`, `−0,5 °C` — the
     //    climate prose, and the minus INVERTS rather than pausing. `menos` is the corpus's own word.
     //    ⚠ AND THE GUARD IS THE ATHLETICS LIST AGAIN. The same articles that supply the stopwatch times
     //    write them as `EVENT - TIME`: "3.000 metros obstaclos - 8:09.09 min", "1.500 metros lisos -
@@ -151,7 +156,6 @@ export function normalizeAragonese(input: string): string {
     //    national records as NEGATIVE times — a reading the status quo did not produce, so the layer would
     //    be introducing it (trap 56). A figure whose digits run into a colon is a time, not a signed
     //    quantity; `-10º` and `-218.3°C` carry no colon and are untouched.
-    s = rewrite(s, /(^|(?<!\d)[\s(])[-−–]\s?(\d(?!\d*:))/gu, "$1menos $2");
 
     // 6) DEGREES. ⚠ BOTH CODEPOINTS, ONE ALLOW-LIST — see DEGREE_TAIL and the header. `grau` is the
     //    singular the corpus glosses ("O grau Celsius … representau como °C") and `graus` the plural it
@@ -164,8 +168,11 @@ export function normalizeAragonese(input: string): string {
     s = rewrite(s, /(\d)\s?[°º]\s?(\d+)\s?[′']/gu, "$1 graus $2 menutos ");
     //    …and the compass letter is spelled, because a bare `N` after a degree is unambiguous and the
     //    alternative is the letter name. `19° y 37°N`, `12° N`, `11°U y 12°E`, `60° de latitut sud`.
-    const COMPASS: Readonly<Record<string, string>> = { N: "norte", S: "sud", E: "este", U: "ueste" };
-    s = rewrite(s, /(\d)\s?[°º]\s?([NSEU])(?![\p{L}\p{M}])/gu,
+    //    ⚠ `W` IS READ TOO (#1585), ALONGSIDE `U`, NOT INSTEAD OF IT. The international letter is unambiguous after
+    //    a degree, and without it `20° W` lost the degree word as well as the direction. The corpus writes
+    //    `U` and no `W`, which is why `U` had to be the one this file was built on (see DEGREE_TAIL).
+    const COMPASS: Readonly<Record<string, string>> = { N: "norte", S: "sud", E: "este", U: "ueste", W: "ueste" };
+    s = rewrite(s, /(\d)\s?[°º]\s?([NSEUW])(?![\p{L}\p{M}])/gu,
         (_m, d: string, c: string) => `${d} graus ${COMPASS[c]}`);
     s = rewrite(s, new RegExp(`(\\d)\\s?[°º](?=${DEGREE_TAIL})`, "gu"), "$1 graus ");
 

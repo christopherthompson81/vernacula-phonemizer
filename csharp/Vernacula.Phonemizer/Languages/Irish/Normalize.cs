@@ -205,8 +205,10 @@ public static class Normalize
         "(\\ban )?(?<![\\d.,])(\\d[\\d,]*)ú(?![\\p{L}\\p{M}])([ \\u00a0]+([\\p{L}\\p{M}]+))?", "giu");
     private static readonly JsRe COMMAS = JsRegex.Compile(",", "gu");
     private static readonly JsRe TZ_HYPHEN = JsRegex.Compile("(?<=\\p{L})[-–](?=\\d)", "gu");
+    // ⚠ The right guard rejects a digit and a dot-before-a-digit, not a bare dot (trap 58, #1585): `5-3.` kept no
+    // connective.
     private static readonly JsRe RANGE = JsRegex.Compile(
-        "(?<![\\d.,])(\\d(?:[\\d,]*\\d)?)\\s*[-–]\\s*(\\d(?:[\\d,]*\\d)?)(?![\\d.])", "gu");
+        "(?<![\\d.,])(\\d(?:[\\d,]*\\d)?)\\s*[-–]\\s*(\\d(?:[\\d,]*\\d)?)(?!\\d|\\.\\d)", "gu");
     private static readonly JsRe CLOCK = JsRegex.Compile(
         "(?<![\\d:,])([01]?\\d|2[0-3]):([0-5]\\d)(?![:.\\d])(?:\\s*(i\\.?n\\.?|r\\.?n\\.?|[Aa]\\.?[Mm]\\.?|[Pp]\\.?[Mm]\\.?))?", "giu");
     private static readonly JsRe AP_I = JsRegex.Compile("^i", "");
@@ -363,8 +365,6 @@ public static class Normalize
         // 7) VERSION DOTS and DOT DECIMALS. The dot is a DECIMAL (the corpus follows English; thousands use
         //    COMMAS). Read "pointe", the fraction digit-by-digit. GIGAHERTZ is claimed FIRST. AFTER the clock.
         s = Rewrite(s, GIGAHERTZ, "$1 gigahertz");
-        // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit.
-        s = Rewrite(s, VERSION_LETTER, m => $"{m.Groups[1].Value} pointe {SpellDigits(m.Groups[2].Value)} ");
         // ⚠ THE UNIT MISS BRANCH IS REACHABLE, and the `!` in the TypeScript spoke the word "undefined": the
         // pattern is built from this table's own keys but carries `i`+`u`, so JS's fold widens it — `ſ`→`s`
         // reaches the `msu` key — and a near-miss matches while `mſu` is absent from the table. Refuse the
@@ -385,6 +385,10 @@ public static class Normalize
                 ? $"{num} {m.Groups[3].Value}{m.Groups[4].Value}"
                 : $"{num} {uw}";
         });
+        // A VERSION LETTER after the fraction (802.11n) is a separate letter, not glued to the last digit.
+        // ⚠ AFTER THE DECIMAL-UNIT RULE (#1585): a glued metre is the same shape, so with this rule first `4.5m`
+        // read the letter. The corpus's version letters are `a b g n` after `802.11`, never `m`.
+        s = Rewrite(s, VERSION_LETTER, m => $"{m.Groups[1].Value} pointe {SpellDigits(m.Groups[2].Value)} ");
         s = Rewrite(s, DECIMAL_PLAIN, m => $"{m.Groups[1].Value} pointe {SpellDigits(m.Groups[2].Value)}");
 
         // 7c) COMMA-DECIMALS — `12,5`. Corpus-absent (Irish follows English), but the comma must not LEAK as a
@@ -401,9 +405,11 @@ public static class Normalize
             if (ord is null) return m.Value;
             // THE ARTICLE BELONGS HERE, not in the ordinal table: a `Nú` digit is preceded by the corpus's own
             // article, but a FRACTION supplies its own, and a vowel-initial ordinal takes the t- prefix.
+            var a = Js.Number(m.Groups[1].Value);
+            // ⚠ One half is `leath`, not the ordinal (#1585): `1/2` read *an dara*, "the second".
+            if (a == 1 && Js.Number(m.Groups[2].Value) == 2) return "leath";
             var article = VOWEL_INITIAL.IsMatch(ord) ? "an t-" : "an ";
             // A unit fraction (1/N) is the ordinal noun; a non-unit fraction (M/N) is "M N-ú" (dhá chúigiú).
-            var a = Js.Number(m.Groups[1].Value);
             return a == 1 ? $"{article}{ord}" : $"{Numbers.NumberToWords(a)} {ord}";
         });
 

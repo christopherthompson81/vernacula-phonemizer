@@ -131,13 +131,13 @@ public class BasqueTests
      *  guard beside it, so `0,1-0,5º` normalised asymmetrically. */
     [Theory]
     [InlineData("0,4º C", "0 koma 4 gradu Celsius")]
-    [InlineData("0,1-0,5º", "0 koma 1-0 koma 5°")]               // BOTH decimals, not just the first
+    [InlineData("0,1-0,5º", "0 koma 1-0 koma 5 gradu")]          // BOTH decimals, not just the first
     public void TheMasculineOrdinalIndicatorIsFoldedOntoTheDegreeSign(string input, string expected) =>
         Assert.Equal(expected, Norm(input));
 
     [Fact]
-    public void FoldingChangesTheCharacterNotTheReadingABareDegreeIsStillRefused() =>
-        Assert.Contains("°", Norm("30º-ko latitudearen"));
+    public void TheFoldedSignIsTheAngularGraduAndTakesItsEnding() =>  // #1585
+        Assert.Equal("30 graduko latitudearen", Norm("30º-ko latitudearen"));
 
     /** ⚠ A RATE DENOMINATOR TAKES THE ENDING TOO, AND MUST NOT DOUBLE IT. The tier's trailing guard sees
      *  the HYPHEN rather than a letter, so it matched, emitted `orduko`, and the writer's own `-ko`

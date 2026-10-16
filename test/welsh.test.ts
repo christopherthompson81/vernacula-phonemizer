@@ -122,7 +122,7 @@ describe("Welsh text normalization", () => {
         expect(ph("1894-1895")).toBe("mˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɛdwar ˈiː vˈiːl ˈuːᶤθ kˈant nˈaːᶷ dˈeːɡ pˈɨmp");
         expect(ph("5-3 Washington")).toBe("pˈɨmp ˈiː drˈiː washˈiŋtɔn");
         expect(ph("100-200 milltir")).toBe("kˈant ˈiː ðˈaᶤ ɡˈant mˈiɬtir");
-        expect(ph("2-3 km o iâ")).toBe("dˈaᶤ ˈiː drˈiː kilˈɔmɛtr ˈoː jˈaː"); // the unit survives the rewrite
+        expect(ph("2-3 km o iâ")).toBe("dˈaᶤ ˈiː drˈiː kilˈɔmɛdr ˈoː jˈaː"); // the unit survives the rewrite, as the tier's cilomedr (#1585)
         expect(soften("chwech")).toBe("chwech"); // the digraph does not mutate
         expect(soften("llath")).toBe("lath");
         // the operand must END in a digit: `[\d,]*` also matches a trailing CLAUSE comma, and re-emitting

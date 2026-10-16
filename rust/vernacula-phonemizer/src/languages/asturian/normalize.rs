@@ -146,10 +146,18 @@ pub fn normalize_asturian(input: &JsString) -> JsString {
     });
 
     // 5) clocks
-    s = rewrite(
+    // `:00` is the hour alone, as es, ca and gl read it (#1585)
+    s = rewrite_with(
         &s,
         js_re!(r"(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])", "gu"),
-        &js("$1 $2"),
+        |m, t| {
+            let (h, min) = (g(m, 1, t), g(m, 2, t));
+            if min == "00" {
+                h
+            } else {
+                h.concat(&js(" ")).concat(&min)
+            }
+        },
     );
 
     // 6) degrees: a scale, minutes, or a licensed tail
@@ -191,4 +199,21 @@ pub fn normalize_asturian(input: &JsString) -> JsString {
     );
 
     rewrite(&s, js_re!(r"[^\S\n]{2,}", "gu"), &js(" "))
+}
+
+/// #1585, as test/west-defects-1585.test.ts: relational where a well-formed twin exists, so no IPA is typed.
+#[cfg(test)]
+mod defects_1585_tests {
+    use super::*;
+
+    fn say(text: &str, lang: &str) -> String {
+        crate::phonemize(text, lang).unwrap().trim().to_string()
+    }
+
+    #[test]
+    fn a_time_on_the_hour_is_the_hour_alone() {
+        assert_eq!(normalize_asturian(&js("9:00")).to_string_lossy(), "9");
+        assert_eq!(normalize_asturian(&js("9:30")).to_string_lossy(), "9 30");
+        assert_eq!(say("9:00", "ast"), say("9", "ast"));
+    }
 }

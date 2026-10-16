@@ -132,7 +132,9 @@ export function normalizeAsturian(input: string): string {
     //    cuarenta* — a phrase break inside a time. The corpus writes the hour word after it ("A les 23:40
     //    h. del día 14", "Fúndese a les 2:20 h del 15 d'abril"), so the figures are left as FIGURES and
     //    only the colon is spent; `hores` ×151 is attested but the writer has already supplied `h`.
-    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu, "$1 $2");
+    //    ⚠ `:00` IS THE HOUR ALONE, as es, ca and gl read it: `9:00` read *nine zero* (#1585).
+    s = rewrite(s, /(?<![\d:.,])([01]?\d|2[0-4]):([0-5]\d)(?![\d:.,])/gu,
+        (_m, h: string, min: string) => (min === "00" ? h : `${h} ${min}`));
 
     // 5) DEGREES — and the allow-listed continuation is the whole of the rule. See the header: `°` and `º`
     //    are used for each other's job in this corpus, so the sign is read as a degree only before one of
