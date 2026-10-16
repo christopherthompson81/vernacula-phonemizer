@@ -72,7 +72,8 @@ public static class Normalize
     private static readonly JsRe SUNNA_HOMOGLYPH = JsRegex.Compile("(?<![౦-౯])౦(?![౦-౯])", "gu");
     private static readonly JsRe TE_NEAR = JsRegex.Compile($"[{TE_LETTER}]", "u");
     private static readonly JsRe ORDINAL_RE = JsRegex.Compile($"(?<![\\d.,])(\\d+)\\s*-?\\s*వ(ది)?{NA}", "gu");
-    private static readonly JsRe YEAR_RE = JsRegex.Compile("(?<![\\d.,])(1[1-9]\\d{2})(?![\\d]|\\.\\d)", "gu");
+    /** ⚠ Not a numeral with a currency or percent sign on either side: that is the symbol tier's amount (#1587). */
+    private static readonly JsRe YEAR_RE = JsRegex.Compile("(?<![\\d.,])(?<![$%٪％]\\s?)(1[1-9]\\d{2})(?![\\d]|\\.\\d)(?!\\s?[$%٪％])", "gu");
     private static readonly JsRe DEGROUP = JsRegex.Compile("(?<=\\d)(?<!(?<![\\d\\.,])0),(?=\\d{3}(?:,\\d|[^\\d]|$))", "gu");
     private static readonly JsRe UDA_RE = JsRegex.Compile($"{NB}ఉదా\\s*\\.\\s*(?=[\\p{{L}}])", "gu");
     private static readonly JsRe DOT_RUN = JsRegex.Compile("\\s*\\.\\s*", "gu");

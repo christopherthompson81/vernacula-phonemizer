@@ -95,13 +95,21 @@ public sealed class SinhalaPhonemizer : ILanguage
     private static IReadOnlyDictionary<string, string> CLAUSE_MARK => MANIFEST.ClausePunctuation;
     private static readonly JsRe TOKEN = JsRegex.Compile("([඀-෿]+)|(\\d+)|([.!?…,;:])", "gu");
 
+    /** A digit run → words; above 2^53 one digit at a time (#1587). See `digitRunToWords` in sinhala.ts. */
+    private static string DigitRunToWords(string digits)
+    {
+        var n = Js.Number(digits);
+        if (Js.IsSafeInteger(n)) return Numbers.NumberToWords(n);
+        return string.Join(" ", digits.Select(d => Numbers.NumberToWords(d - '0')));
+    }
+
     public string Text(string input)
     {
         return Clauses.AssembleClauses(Unicode.FoldNativeDigits(Normalize.NormalizeSinhala(input)), TOKEN, (m, sink) =>
         {
             if (m.Groups[1].Success && m.Groups[1].Value.Length > 0) sink.Emit(PhonemizeWord(m.Groups[1].Value));
             else if (m.Groups[2].Success && m.Groups[2].Value.Length > 0)
-                foreach (var wd in Numbers.NumberToWords(Js.Number(m.Groups[2].Value)).Split(' '))
+                foreach (var wd in DigitRunToWords(m.Groups[2].Value).Split(' '))
                     sink.Emit(PhonemizeWord(wd));
             else if (m.Groups[3].Success && m.Groups[3].Value.Length > 0)
             {

@@ -9,7 +9,7 @@ use super::manifest::{TamilManifest, try_manifest};
 use super::numbers::{number_to_words, ordinal_stem};
 use crate::core::boundaries::{NOT_LETTER_AFTER, NOT_LETTER_BEFORE};
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
 use crate::core::normalize_symbols::{SymbolData, SymbolNormalizer, make_symbol_normalizer};
 use crate::core::postposed_sign::postposed_sign;
 use crate::core::provenance::{rewrite, rewrite_with};
@@ -373,9 +373,13 @@ impl TamilNormalizer {
         );
         s = rewrite(&s, js_re!(r"(\d)\s?°", "gu"), &js("$1 டிகிரி"));
 
-        // Ordinal suffixes (no safe-integer guard in the TS: a long run reads digit at a time).
+        // Ordinal suffixes. An unsafe integer is declined, as kn, te and ml decline it (#1587): the bare-numeral
+        // path reads the written digits, where the composer read the rounded float's.
         s = rewrite_with(&s, &self.ordinal_re, |m, full| {
             let n = js_number(&m.group(1, full).unwrap_or_default());
+            if !is_safe_integer(n) {
+                return m.value(full);
+            }
             self.ordinal(n, &m.group(2, full).unwrap_or_default())
                 .unwrap_or_else(|| m.value(full))
         });

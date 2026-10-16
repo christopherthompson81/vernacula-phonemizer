@@ -202,8 +202,13 @@ public static class Normalize
         s = Rewrite(s, DEG_F, m => $"{m.Groups[1].Value} டிகிரி பாரன்ஹீட்");
         s = Rewrite(s, DEG_BARE, m => $"{m.Groups[1].Value} டிகிரி");
 
+        // ⚠ An unsafe integer is declined, as kn, te and ml decline it (#1587): the bare-numeral path reads the
+        //   written digits, where the composer read the rounded float's.
         s = Rewrite(s, ORDINAL_RE, m =>
-            Ordinal(Js.Number(m.Groups[1].Value), m.Groups[2].Value) ?? m.Value);
+        {
+            var n = Js.Number(m.Groups[1].Value);
+            return Js.IsSafeInteger(n) ? Ordinal(n, m.Groups[2].Value) ?? m.Value : m.Value;
+        });
 
         s = Rewrite(s, LOCATIVE, m => $"{m.Groups[1].Value} இல்");
 

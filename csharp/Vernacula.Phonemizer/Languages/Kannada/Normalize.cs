@@ -27,7 +27,8 @@ public static class Normalize
     });
 
     /** Kannada unit abbreviations. */
-    private static readonly JsRe KM_RE = JsRegex.Compile($"{NB}(?:ಕಿ\\s*\\.\\s*ಮ[ೀಿ]|ಕಿಮ[ೀಿ])", "gu");
+    /** ⚠ The dotted form takes its own trailing dot where more text follows (#1587). See KM_RE in normalize.ts. */
+    private static readonly JsRe KM_RE = JsRegex.Compile($"{NB}(?:ಕಿ\\s*\\.\\s*ಮ[ೀಿ](?:\\.(?=\\s*[\\p{{L}}\\p{{N}}]))?|ಕಿಮ[ೀಿ])", "gu");
 
     /**
      * ಮೈ for ಮೈಲಿ — ONLY as a rate numerator (`40 ಮೈ/ಗಂ`). The `/ಗಂ` guard is what keeps this off the many
@@ -75,6 +76,8 @@ public static class Normalize
     private static readonly JsRe KM_RATE_RE = JsRegex.Compile(
         $"(\\d[\\d.]*)\\s?ಕಿಲೋಮೀಟರ್\\s*\\/\\s*(ಗಂ|ಸೆ)\\.?{NA}", "gu");
     private static readonly JsRe VULGAR_RE = JsRegex.Compile("(?<=\\d)\\s?([¼½¾])", "gu");
+    /** A bare fraction, which kn's fold opt-out would otherwise drop (#1587). */
+    private static readonly JsRe VULGAR_BARE_RE = JsRegex.Compile("[¼½¾]", "gu");
     private static readonly JsRe CLOCK_00 = JsRegex.Compile("(?<![\\d:])([01]?\\d|2[0-3]):\\s?00(?![\\d:.])", "gu");
     private static readonly JsRe CLOCK_COLON = JsRegex.Compile("(?<=\\d):\\s?(?=\\d)", "gu");
     private static readonly JsRe DECIMAL = JsRegex.Compile("(?<![\\d.])(\\d+)\\.(\\d+)(?![\\d.])", "gu");
@@ -135,6 +138,7 @@ public static class Normalize
         s = Rewrite(s, MI_RATE_RE, m => $"{Dative("ಗಂಟೆಗೆ", frozen3, m.Index)}{m.Groups[1].Value} ಮೈಲಿ");
 
         s = Rewrite(s, VULGAR_RE, m => $" {VULGAR[m.Groups[1].Value]}");
+        s = Rewrite(s, VULGAR_BARE_RE, m => $" {VULGAR[m.Value]} ");
 
         // 9. The shared symbol tier: percent, currency, units, exponent. UNITS BEFORE DECIMALS — the tier
         // matches a unit only when a NUMBER is adjacent. After de-grouping and after the rate rule.

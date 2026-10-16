@@ -269,4 +269,20 @@ mod tests {
         }
         assert_eq!(count, 65);
     }
+
+    /// #1587: the dotted unit's trailing dot, and the bare fraction. As test/dravidian-si-defects-1587.test.ts.
+    #[test]
+    fn the_dotted_unit_and_the_bare_fraction() {
+        let say = |s: &str, l: &str| crate::phonemize(s, l).unwrap().trim().to_string();
+        for (got, want) in [
+            ("10 ಕಿ.ಮೀ. ದೂರ", "10 ಕಿಲೋಮೀಟರ್ ದೂರ"),
+            ("ದೂರ 10 ಕಿ.ಮೀ.", "ದೂರ 10 ಕಿಲೋಮೀಟರ್."),
+            ("10 ಕಿಮೀ. ದೂರ", "10 ಕಿಲೋಮೀಟರ್. ದೂರ"),
+            ("½ ಭಾಗ", "ಅರ್ಧ ಭಾಗ"),
+            ("¼ ಭಾಗ", "ಕಾಲು ಭಾಗ"),
+            ("¾ ಭಾಗ", "ಮುಕ್ಕಾಲು ಭಾಗ"),
+        ] {
+            assert_eq!(say(got, "kn"), say(want, "kn"), "{got}");
+        }
+    }
 }

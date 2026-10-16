@@ -273,4 +273,23 @@ mod tests {
         }
         assert_eq!(count, 71);
     }
+
+    /// #1587: a number with a currency or percent sign is not a year. As test/dravidian-si-defects-1587.test.ts.
+    #[test]
+    fn a_signed_number_in_the_year_band_keeps_its_sign_word() {
+        let say = |s: &str, l: &str| crate::phonemize(s, l).unwrap().trim().to_string();
+        let last = |s: String| s.split(' ').next_back().unwrap_or_default().to_string();
+        for (band, outside) in [
+            ("$1500", "$2500"),
+            ("US$1500", "US$2500"),
+            ("1500 $", "2500 $"),
+            ("1500%", "2500%"),
+        ] {
+            assert_eq!(last(say(band, "te")), last(say(outside, "te")), "{band}");
+        }
+        let amount = say("$1500", "te");
+        let amount = amount.rsplit_once(' ').map(|(a, _)| a).unwrap_or_default();
+        assert_ne!(amount, say("1500", "te"));
+        assert_ne!(say("1976", "te"), say("$1976", "te"));
+    }
 }

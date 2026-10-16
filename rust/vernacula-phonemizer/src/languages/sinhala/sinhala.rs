@@ -11,7 +11,7 @@ use super::numbers::number_to_words;
 use crate::core::abugida::{AbugidaG2p, make_abugida_g2p};
 use crate::core::clauses::assemble_clauses;
 use crate::core::js_regex::JsRegex;
-use crate::core::js_string::{JsString, js, js_number};
+use crate::core::js_string::{JsString, is_safe_integer, js, js_number};
 use crate::core::phonology::load_shared_phonology;
 use crate::core::unicode::fold_native_digits;
 use crate::js_re;
@@ -89,6 +89,20 @@ impl SinhalaPhonemizer {
         normalize_sinhala(input)
     }
 
+    /// A digit run → words; above 2^53 one digit at a time (#1587). See `digitRunToWords` in sinhala.ts.
+    fn digit_run_to_words(&self, digits: &JsString) -> String {
+        let n = js_number(digits);
+        if is_safe_integer(n) {
+            return number_to_words(n, &self.def.numbers);
+        }
+        digits
+            .to_string_lossy()
+            .chars()
+            .map(|c| number_to_words(f64::from(c as u8 - b'0'), &self.def.numbers))
+            .collect::<Vec<_>>()
+            .join(" ")
+    }
+
     /// `text(input)`: the normalizer first, then this script's digits folded.
     pub fn text(&self, input: &JsString) -> JsString {
         let prepared = fold_native_digits(&normalize_sinhala(input));
@@ -99,7 +113,7 @@ impl SinhalaPhonemizer {
                 if let Some(w) = m.group(1, s) {
                     sink.emit(&self.phonemize_word(&w));
                 } else if let Some(d) = m.group(2, s) {
-                    let words = number_to_words(js_number(&d), &self.def.numbers);
+                    let words = self.digit_run_to_words(&d);
                     for wd in js(&words).split(&js(" ")) {
                         sink.emit(&self.phonemize_word(&wd));
                     }
@@ -272,5 +286,21 @@ mod tests {
                 .all(|l| !pending.iter().any(|p| p == l)),
             "{pending:?}"
         );
+    }
+
+    /// #1587: an unsafe integer is read one digit at a time. As test/dravidian-si-defects-1587.test.ts.
+    #[test]
+    fn an_unsafe_integer_is_read_digit_by_digit() {
+        let say = |s: &str, l: &str| crate::phonemize(s, l).unwrap().trim().to_string();
+        let spelled = |d: &str| {
+            d.chars()
+                .map(|c| say(&c.to_string(), "si"))
+                .collect::<Vec<_>>()
+                .join(" ")
+        };
+        assert_ne!(say("9007199254740993", "si"), say("9007199254740992", "si"));
+        let big = "100000000000000000000000";
+        assert_eq!(say(big, "si"), spelled(big));
+        assert_ne!(say("9007199254740991", "si"), spelled("9007199254740991"));
     }
 }

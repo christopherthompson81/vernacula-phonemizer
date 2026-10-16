@@ -155,10 +155,14 @@ impl TeluguNormalizer {
             if w.is_empty() { whole } else { w }
         });
 
-        // Century years.
+        // Century years, but not a numeral with a currency or percent sign on either side: that is the
+        // symbol tier's amount (#1587).
         s = rewrite_with(
             &s,
-            js_re!(r"(?<![\d.,])(1[1-9]\d{2})(?![\d]|\.\d)", "gu"),
+            js_re!(
+                r"(?<![\d.,])(?<![$%٪％]\s?)(1[1-9]\d{2})(?![\d]|\.\d)(?!\s?[$%٪％])",
+                "gu"
+            ),
             |m, full| {
                 let y = js_number(&m.group(1, full).unwrap_or_default());
                 year_to_words(y as u64, numbers)
