@@ -20,6 +20,8 @@ interface NumbersDef {
     rebu: string;
     yuta: string;
     seprefix: string;
+    miliar: string;
+    triliun: string;
 }
 interface SundaneseDef {
     digraphs: Record<string, string>;
@@ -90,9 +92,16 @@ function toWords(n: number): string {
             r = n % 1000;
         return (th === 1 ? NUM.seprefix + NUM.rebu : toWords(th) + " " + NUM.rebu) + (r ? " " + toWords(r) : "");
     }
-    const m = Math.floor(n / 1_000_000),
-        r = n % 1_000_000;
-    return (m === 1 ? NUM.seprefix + NUM.yuta : toWords(m) + " " + NUM.yuta) + (r ? " " + toWords(r) : "");
+    // ⚠ ABOVE yuta THE COMPOSITOR USED TO STACK yuta: 10⁹ read *sarébu yuta* and 10¹³ *sapuluh yuta yuta* (#1589).
+    //    miliar and triliun are the corpus's own words for 10⁹ and 10¹²; past 10¹⁵ the count of triliun is composed.
+    return scale(n, 1e12, NUM.triliun) ?? scale(n, 1e9, NUM.miliar) ?? scale(n, 1e6, NUM.yuta)!;
+}
+/** `n` read as a count of `unit` plus the remainder, or undefined if `n` is below one `unit`. */
+function scale(n: number, unit: number, word: string): string | undefined {
+    if (n < unit) return undefined;
+    const c = Math.floor(n / unit),
+        r = n % unit;
+    return (c === 1 ? NUM.seprefix + word : toWords(c) + " " + word) + (r ? " " + toWords(r) : "");
 }
 function number(digits: string): string {
     const n = Number(digits);

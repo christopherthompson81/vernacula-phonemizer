@@ -41,7 +41,45 @@ fn below_1000(n: f64, lead: bool, parts: &mut Vec<String>) {
     }
 }
 
-/// `numberToWords(n)`. A scale past `tỷ` is `SCALES[g]` = undefined in the TS, which `join` renders as "".
+/// 1 ≤ x < 1000^(scales.len()) → words; `lead` = higher digits precede x.
+fn below_top(mut x: f64, lead: bool, parts: &mut Vec<String>) {
+    let scales = &MANIFEST.numbers.scales;
+    let mut groups: Vec<f64> = Vec::new();
+    while x > 0.0 {
+        groups.push(x % 1000.0);
+        x = (x / 1000.0).floor();
+    }
+    for g in (0..groups.len()).rev() {
+        if groups[g] == 0.0 {
+            continue;
+        }
+        below_1000(groups[g], lead || g < groups.len() - 1, parts);
+        if g > 0 {
+            parts.push(scales[g].clone());
+        }
+    }
+}
+
+/// Above the top scale word (tỷ, 10⁹) the count of tỷ is read as a number, then tỷ: 10¹² is *một nghìn tỷ*
+/// (#1589). See `wordsOf` in src/languages/vietnamese/numbers.ts.
+fn words_of(x: f64, lead: bool, parts: &mut Vec<String>) {
+    let scales = &MANIFEST.numbers.scales;
+    let top = scales.len() - 1;
+    let big = 1000f64.powi(top as i32);
+    if x < big {
+        below_top(x, lead, parts);
+        return;
+    }
+    let hi = (x / big).floor();
+    let lo = x % big;
+    words_of(hi, lead, parts);
+    parts.push(scales[top].clone());
+    if lo > 0.0 {
+        below_top(lo, true, parts);
+    }
+}
+
+/// `numberToWords(n)`.
 pub fn number_to_words(n: f64) -> JsString {
     if !n.is_finite() || n < 0.0 {
         return JsString::new();
@@ -50,21 +88,7 @@ pub fn number_to_words(n: f64) -> JsString {
     if n == 0.0 {
         return js(&nm.ones[0]);
     }
-    let mut groups: Vec<f64> = Vec::new();
-    let mut x = n.floor();
-    while x > 0.0 {
-        groups.push(x % 1000.0);
-        x = (x / 1000.0).floor();
-    }
     let mut parts: Vec<String> = Vec::new();
-    for g in (0..groups.len()).rev() {
-        if groups[g] == 0.0 {
-            continue;
-        }
-        below_1000(groups[g], g < groups.len() - 1, &mut parts);
-        if g > 0 {
-            parts.push(nm.scales.get(g).cloned().unwrap_or_default());
-        }
-    }
+    words_of(n.floor(), false, &mut parts);
     js(&parts.join(" "))
 }

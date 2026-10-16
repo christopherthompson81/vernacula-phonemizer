@@ -122,9 +122,9 @@ export function normalizeJavanese(input: string): string {
     // ⚠ BEFORE EVERY DOT RULE, because a clock's dot is neither a thousands separator nor a decimal and
     // only the surrounding context says so. The corpus writes whole hours: `saka jam 09.00-12.00 bengi`,
     // `saka 00.00-03.00 ésuk`, `saka 03.00-06.00 ésuk` — MM is `00` in every instance.
-    // ⚠ ONLY `.00` IS CLAIMED. A minute word is NOT attested anywhere (`menit` scores zero in the corpus),
-    // so a clock with real minutes is left alone rather than read with a guessed word — the same refusal
-    // shape as the general fraction below. `jam 09.00` → `jam 9`; the hour is then read by the cardinal path.
+    // ⚠ NO MINUTE WORD IS GUESSED. A minute word is NOT attested anywhere (`menit` scores zero in the corpus),
+    // so a clock with real minutes gets none — the same refusal shape as the general fraction below.
+    // `jam 09.00` → `jam 9`; the hour is then read by the cardinal path. (The minutes arm below is #1589.)
     // ⚠ ⟨pukul⟩ IS NOT GUARDED, DELIBERATELY: it is the Indonesian formal clock word and scores ZERO in this
     // corpus, where all 10 clock instances use ⟨jam⟩. Adding it would be a guard with no attested instance
     // (trap 9) — so `pukul 13.30` still reads as a decimal, and that is recorded rather than papered over.
@@ -135,6 +135,17 @@ export function normalizeJavanese(input: string): string {
     s = rewrite(s,
         new RegExp(`(?<=jam\\s)(\\d{1,2})\\.00(?!\\d)`, "gu"),
         (_m, h: string) => String(Number(h)),
+    );
+    // ⚠ A CLOCK WITH REAL MINUTES IS READ AS THE HOUR THEN THE MINUTES, with no connector word (#1589). Left
+    //    alone, its dot reached the tokenizer as a SENTENCE PAUSE: `jam 07.30` read *d͡ʒˈam pˈitʊ . tˈəlʊŋ
+    //    pˈulʊh*, and FLEURS jv_id has 12 such lines (`jam 9.30 esuk`, `jam 11.35 wengi`). Still no minute or
+    //    "past" word is attested (FLEURS writes its clocks as digits, and `menit` scores zero), so none is
+    //    guessed. The juxtaposition says only what the digits say. The colon form is claimed only after
+    //    `jam` (`jam 8:46 esuk`, ×3 in FLEURS): a bare `d:dd` may be a score or a ratio, the line Indonesian
+    //    drew in #1534. A third field (`jam 00:02:32 WIB`, a timestamp) is refused by `(?![.:]\d)`.
+    s = rewrite(s,
+        /(?<=(?<![\p{L}\p{M}])jam\s)([01]?\d|2[0-4])[.:]([0-5]\d)(?!\d)(?![.:]\d)/giu,
+        (_m, h: string, mm: string) => `${Number(h)} ${Number(mm)}`,
     );
 
     // ── 1b. the rupiah's abbreviating dot ────────────────────────────────────────────────────────
@@ -172,10 +183,10 @@ export function normalizeJavanese(input: string): string {
     // "telu koma nol".
     const decimal = (int: string, frac: string): string => `${int} koma ${[...frac].join(" ")}`;
     s = rewrite(s, /(?<![\d.,])(\d+),(\d{1,2})(?![\d,])/gu, (_m, i: string, f: string) => decimal(i, f));
-    // ⚠ AND A `jam` CONTEXT IS EXCLUDED OUTRIGHT, not just `.00`. Step 1 claims the whole hours it can
-    // identify; what it leaves behind is a clock with REAL MINUTES, and this rule read `jam 08.45` as
+    // ⚠ AND A `jam` CONTEXT IS EXCLUDED OUTRIGHT, not just `.00`. Step 1 now claims a clock with real minutes
+    // too (#1589); before that, what it left behind was read here, and this rule read `jam 08.45` as
     // *jam 08 koma 4 5* — a decimal inside a time. Found by a test, not by the corpus, whose clocks all
-    // happen to be whole hours. Left alone, the minutes stay unread, which is the refusal step 1 states.
+    // happen to be whole hours. The exclusion stays for what step 1 still refuses (an hour above 24).
     // ⚠ AND `(?!\.\d)` KEEPS A VERSION/SECTION TRIPLE OUT — `nomer 1.2.3` read *siji koma loro . telu*, a
     // decimal followed by a stray pause. Refusing only when ANOTHER DOT-PLUS-DIGIT follows is what lets a
     // decimal at the end of a sentence through (`Ana 3.5.` is still a decimal); the `version-dot` cell is

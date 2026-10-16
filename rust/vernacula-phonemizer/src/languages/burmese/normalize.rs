@@ -13,6 +13,18 @@ use crate::js_re;
 const D: &str = "0-9၀-၉";
 const DASH: &str = "[-‐-―−]";
 
+/// The value of a run of ASCII or Burmese digits (U+1040–1049).
+fn digit_value(s: &JsString) -> u64 {
+    s.0.iter().fold(0, |acc, &c| {
+        let v = if (0x1040..=0x1049).contains(&c) {
+            c - 0x1040
+        } else {
+            c - u16::from(b'0')
+        };
+        acc * 10 + u64::from(v)
+    })
+}
+
 /// `d(n)`: one digit, optionally quantified.
 fn d(n: Option<u32>) -> String {
     match n {
@@ -99,7 +111,10 @@ static BUILT: LazyLock<Built> = LazyLock::new(|| {
             "gu",
         ),
         rates,
-        clock: re(format!(r"({d0}{{1,2}}):({d2})(?!{d0})"), "gu"),
+        clock: re(
+            format!(r"(?<![{D}])({d0}{{1,2}}):({d2})(?!{d0})(\s*နာရီ(?=([\p{{L}}\p{{M}}]?)))?"),
+            "gu",
+        ),
         decimal: re(format!(r"({d0}+)\.({d0}+)"), "gu"),
         percent: re(format!(r"({d0}+)\s*[%％]"), "gu"),
         celsius: re(format!(r"({d0})\s*°\s*C(?![\p{{L}}])"), "giu"),
@@ -155,7 +170,25 @@ pub fn normalize_burmese(input: &JsString) -> JsString {
     }
 
     // 3) Clock, 4) decimal, 5) percent.
-    t = rewrite(&t, &bt.clock, &js("$1 နာရီ $2 မိနစ်"));
+    // The clock guards (#1589): a following နာရီ is consumed, `:00` is the hour alone, and hour ≤ 24, minute ≤ 59
+    // behind a left digit guard. See normalize.ts step 3.
+    t = rewrite_with(&t, &bt.clock, |m, s| {
+        let h = m.group(1, s).unwrap_or_default();
+        let mm = m.group(2, s).unwrap_or_default();
+        if digit_value(&h) > 24 || digit_value(&mm) > 59 {
+            return m.value(s);
+        }
+        let mut read = if digit_value(&mm) == 0 {
+            format!("{} နာရီ", h.to_string_lossy())
+        } else {
+            format!("{} နာရီ {} မိနစ်", h.to_string_lossy(), mm.to_string_lossy())
+        };
+        let glued = m.group(4, s).is_some_and(|g| !g.is_empty());
+        if m.group(3, s).is_some() && glued {
+            read.push(' ');
+        }
+        js(&read)
+    });
     t = rewrite_with(&t, &bt.decimal, |m, s| {
         let whole = m.group(1, s).unwrap_or_default();
         let frac = m.group(2, s).unwrap_or_default();

@@ -12,6 +12,14 @@ public static class Normalize
 {
     /** Burmese digits ၀-၉ plus ASCII; the corpus mixes both, and every rule must accept either. */
     private const string D = "0-9\u1040-\u1049";
+    /** The value of a run of ASCII or Burmese digits (U+1040–1049). */
+    private static long DigitValue(string s)
+    {
+        long v = 0;
+        foreach (var c in s) v = v * 10 + (c >= '\u1040' && c <= '\u1049' ? c - '\u1040' : c - '0');
+        return v;
+    }
+
     /**
      * One digit, optionally quantified. `d()` is a bare class so the caller can append its own quantifier.
      */
@@ -90,7 +98,17 @@ public static class Normalize
                         "giu")
                     , $"တစ်{dword}လျှင် $1 {nword}");
 
-        t = Rewrite(t, JsRegex.Compile($"({Digit()}{{1,2}}):({Digit(2)})(?!{Digit()})", "gu"), "$1 နာရီ $2 မိနစ်");
+        // The clock guards (#1589): a following နာရီ is consumed, `:00` is the hour alone, and hour ≤ 24,
+        // minute ≤ 59 behind a left digit guard. See normalize.ts step 3.
+        t = Rewrite(t, JsRegex.Compile(
+            $"(?<![{D}])({Digit()}{{1,2}}):({Digit(2)})(?!{Digit()})(\\s*နာရီ(?=([\\p{{L}}\\p{{M}}]?)))?", "gu"),
+            m =>
+            {
+                string h = m.Groups[1].Value, mm = m.Groups[2].Value;
+                if (DigitValue(h) > 24 || DigitValue(mm) > 59) return m.Value;
+                var read = DigitValue(mm) == 0 ? $"{h} နာရီ" : $"{h} နာရီ {mm} မိနစ်";
+                return m.Groups[3].Success && m.Groups[4].Value.Length > 0 ? read + " " : read;
+            });
 
         t = Rewrite(t, JsRegex.Compile($"({Digit()}+)\\.({Digit()}+)", "gu"), m =>
             $"{m.Groups[1].Value} ဒသမ {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");

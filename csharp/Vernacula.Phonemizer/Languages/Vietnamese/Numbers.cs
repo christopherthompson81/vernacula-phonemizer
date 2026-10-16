@@ -41,12 +41,10 @@ public static class VietnameseNumbers
     }
 
     /** Non-negative integer → Vietnamese words. */
-    public static string NumberToWords(double n)
+    /** 1 ≤ x < 1000^(SCALES.Length) → words; `lead` = higher digits precede x. */
+    private static List<string> BelowTop(double x, bool lead)
     {
-        if (!double.IsFinite(n) || n < 0) return "";
-        if (n == 0) return ONES[0];
         var groups = new List<double>();
-        var x = Math.Floor(n);
         while (x > 0)
         {
             groups.Add(x % 1000);
@@ -56,13 +54,31 @@ public static class VietnameseNumbers
         for (var g = groups.Count - 1; g >= 0; g--)
         {
             if (groups[g] == 0) continue;
-            parts.AddRange(Below1000(groups[g], g < groups.Count - 1));
-            // ⚠ `SCALES[g]` IS AN OUT-OF-RANGE READ above the authored ladder (nghìn/triệu/tỷ, so 10¹²). The TS
-            // pushes `undefined` and `Array.join` renders it as the EMPTY string, which the caller then splits
-            // into an empty word that phonemizes to "". C# throws on the index, so the bound is explicit and
-            // pushes "" to reproduce that exactly — NOT filtered out, which would fork the engines.
-            if (g > 0) parts.Add(g < SCALES.Length ? SCALES[g] : "");
+            parts.AddRange(Below1000(groups[g], lead || g < groups.Count - 1));
+            if (g > 0) parts.Add(SCALES[g]);
         }
-        return string.Join(" ", parts);
+        return parts;
+    }
+
+    /** Above the top scale word (tỷ, 10⁹) the count of tỷ is read as a number, then tỷ: 10¹² is *một nghìn tỷ*
+     *  (#1589). See `wordsOf` in src/languages/vietnamese/numbers.ts. */
+    private static List<string> WordsOf(double x, bool lead)
+    {
+        var top = SCALES.Length - 1;
+        var big = Math.Pow(1000, top);
+        if (x < big) return BelowTop(x, lead);
+        var hi = Math.Floor(x / big);
+        var lo = x % big;
+        var parts = WordsOf(hi, lead);
+        parts.Add(SCALES[top]);
+        if (lo > 0) parts.AddRange(BelowTop(lo, true));
+        return parts;
+    }
+
+    public static string NumberToWords(double n)
+    {
+        if (!double.IsFinite(n) || n < 0) return "";
+        if (n == 0) return ONES[0];
+        return string.Join(" ", WordsOf(Math.Floor(n), false));
     }
 }

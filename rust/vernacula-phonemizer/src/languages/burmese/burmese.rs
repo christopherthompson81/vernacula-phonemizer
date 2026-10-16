@@ -686,3 +686,23 @@ mod tests {
         assert_eq!(hits.get(), 0);
     }
 }
+
+/// #1589, as test/sea-defects-1589.test.ts: relational, so no IPA is typed. Synthetic probes.
+#[cfg(all(test, feature = "my"))]
+mod defects_1589_tests {
+    #[test]
+    fn reads_as_its_spelled_form() {
+        for (input, spelled) in [
+            ("၉:၃၀ နာရီ", "၉:၃၀"),
+            ("12:00", "12 နာရီ"),
+            ("8:46 နာရီတိတိ", "8:46 နာရီ တိတိ"),
+            ("123:45", "123 45"),
+        ] {
+            assert_eq!(
+                crate::phonemize(input, "my").unwrap(),
+                crate::phonemize(spelled, "my").unwrap(),
+                "{input}"
+            );
+        }
+    }
+}

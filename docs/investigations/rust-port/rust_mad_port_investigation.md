@@ -70,3 +70,22 @@ failures: 0` (34 normalizeMadurese, 38 phonemize, 5 numberToWords, 3 phonemizeWo
    the currency. Whether to special-case it is a sourcing question.
 
 **Implication.** Reported in the PR, not fixed (TS first).
+
+## Run 5 — 2026-10-15 20:40 (#1589 fixes, TS first, mirrored to C# and Rust)
+
+**Finding.** Item 1: the hour-word and clock-marker arms now take `[0-5]\d` minutes and read the hour then the
+minutes, with no connective (same reasoning as jv): `jam 7.30`, `7.30 WIB`, `kol 17.30 – 21.00 WIB`. Both arms still
+need a word or a marker, so `Rp 16.31 milyad` stays money.
+
+Item 2: both decimal arms take `\d+`; the corpus has no 4+-digit fraction either way.
+
+Item 3: the era rule refuses a number preceded by a currency amount (`(?<!(?:Rp\.?|\$|€|£)\s?[\d.,]*)`), so
+`Rp 5 M` no longer reads "five rupiah AD". Reading `M` as miliar is DECLINED: the corpus never writes `M` after a
+currency (all four `d M` are years), and id/jv/su all leave the letter too, so it would be a fleet decision, not a
+Madurese one. `940 M` still reads *Masèhi*.
+
+Golden mad: 1 row. `kol 17.30 – 21.00 WIB` in the bus-route article lost the sentence pause inside 17.30; the rest
+of the row is identical.
+
+**Test.** `test/sea-defects-1589.test.ts`, `SeaDefects1589Tests.cs`, and `defects_1589_tests` in the language's own Rust
+module; relational, no typed IPA. Each fails with its fix reverted.

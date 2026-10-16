@@ -96,7 +96,7 @@ public static class Normalize
         "(?<=[\\p{L}\\p{M}])\\/(km|m|cm|mm|kg|g|ha|l|c)(²|³|2|3)?(?![\\p{L}\\p{M}\\d])", "giu");
     private static readonly JsRe PER_UNIT = JsRegex.Compile(
         "\\bper\\s+(km|m|cm|mm|kg|g|ha|l)(²|³|2|3)?(?![\\p{L}\\p{M}\\d])", "giu");
-    private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)[.,](\\d{1,2})(?![\\d.,])", "gu");
+    private static readonly JsRe DECIMAL = JsRegex.Compile("(\\d)[.,](\\d+)(?![\\d.,])", "gu");
     private static readonly JsRe ERA_SM = JsRegex.Compile("(\\d+(?:-an)?)\\s*SM\\b(?![\\p{L}\\p{M}])", "gu");
     private static readonly JsRe ERA_M = JsRegex.Compile("(\\d+(?:-an)?)\\s*M\\b(?![\\p{L}\\p{M}]|\\.\\p{L})", "gu");
     private static readonly JsRe RANGE = JsRegex.Compile(
@@ -168,7 +168,7 @@ public static class Normalize
         // 4. The shared tier — BEFORE the decimal rule (units before decimals), AFTER de-grouping.
         s = SYMBOLS(s);
 
-        // 5. Decimals → `koma`, read digit-by-digit after the separator.
+        // 5. Decimals → `koma`, read digit-by-digit after the separator, any number of digits (#1589).
         s = Rewrite(s, DECIMAL, m =>
             $"{m.Groups[1].Value} koma {string.Join(" ", Js.CodePoints(m.Groups[2].Value))}");
 

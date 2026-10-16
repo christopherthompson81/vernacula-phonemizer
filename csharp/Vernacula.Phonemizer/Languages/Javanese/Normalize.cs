@@ -60,6 +60,9 @@ public static class Normalize
     // here is a readability choice and not a behaviour one.
     private static readonly JsRe CLOCK_RANGE = JsRegex.Compile("(\\d{1,2})\\.00\\s*([-–])\\s*(\\d{1,2})\\.00(?!\\d)", "gu");
     private static readonly JsRe CLOCK_HOUR = JsRegex.Compile("(?<=jam\\s)(\\d{1,2})\\.00(?!\\d)", "gu");
+    /** A clock with real minutes after `jam`: the hour then the minutes, no connective (#1589). See normalize.ts. */
+    private static readonly JsRe CLOCK_MINUTES = JsRegex.Compile(
+        "(?<=(?<![\\p{L}\\p{M}])jam\\s)([01]?\\d|2[0-4])[.:]([0-5]\\d)(?!\\d)(?![.:]\\d)", "giu");
     private static readonly JsRe RP_DOT = JsRegex.Compile("(?<![\\p{L}\\p{M}])Rp\\.(?=\\s*\\d)", "gu");
     private static readonly JsRe GROUP_DOT = JsRegex.Compile("(?<![\\d.,])[1-9]\\d{0,2}(?:\\.\\d{3})+(?![\\d.])", "gu");
     private static readonly JsRe GROUP_COMMA = JsRegex.Compile("(?<![\\d.,])[1-9]\\d{0,2}(?:,\\d{3})+(?![\\d,])", "gu");
@@ -91,6 +94,8 @@ public static class Normalize
         s = Rewrite(s, CLOCK_RANGE, m =>
             $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} nganti {Js.NumberToString(Js.Number(m.Groups[3].Value))}");
         s = Rewrite(s, CLOCK_HOUR, m => Js.NumberToString(Js.Number(m.Groups[1].Value)));
+        s = Rewrite(s, CLOCK_MINUTES, m =>
+            $"{Js.NumberToString(Js.Number(m.Groups[1].Value))} {Js.NumberToString(Js.Number(m.Groups[2].Value))}");
 
         s = Rewrite(s, RP_DOT, _ => "Rp");
 

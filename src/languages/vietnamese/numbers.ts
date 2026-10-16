@@ -34,12 +34,10 @@ function below1000(n: number, lead: boolean): string[] {
     return parts;
 }
 
-/** Non-negative integer → Vietnamese words. */
-export function numberToWords(n: number): string {
-    if (!Number.isFinite(n) || n < 0) return "";
-    if (n === 0) return ONES[0]!;
+/** 1 ≤ x < 1000^(SCALES.length) → words, one scale word per non-zero thousands group. `lead` = higher digits
+ *  precede x, so its most significant group also forces the hundreds slot. */
+function belowTop(x: number, lead: boolean): string[] {
     const groups: number[] = [];
-    let x = Math.floor(n);
     while (x > 0) {
         groups.push(x % 1000);
         x = Math.floor(x / 1000);
@@ -47,8 +45,32 @@ export function numberToWords(n: number): string {
     const parts: string[] = [];
     for (let g = groups.length - 1; g >= 0; g--) {
         if (groups[g] === 0) continue;
-        parts.push(...below1000(groups[g]!, g < groups.length - 1));
+        parts.push(...below1000(groups[g]!, lead || g < groups.length - 1));
         if (g > 0) parts.push(SCALES[g]!);
     }
-    return parts.join(" ");
+    return parts;
+}
+
+/**
+ * ⚠ ABOVE THE TOP SCALE WORD (tỷ, 10⁹) THE COUNT OF tỷ IS READ AS A NUMBER, then tỷ: 10¹² is *một nghìn tỷ*, 10¹⁵
+ * *một triệu tỷ*. Vietnamese has no native word for 10¹², and running text composes this way (FLEURS vi: *hàng
+ * nghìn tỷ dặm*, *hàng ngàn tỷ nguyên*). The ladder used to stop at tỷ, and `SCALES[4]` was undefined, which
+ * `join` rendered as nothing: `1000000000000` read *một* (#1589).
+ */
+function wordsOf(x: number, lead: boolean): string[] {
+    const top = SCALES.length - 1;
+    const big = 1000 ** top;
+    if (x < big) return belowTop(x, lead);
+    const hi = Math.floor(x / big),
+        lo = x % big;
+    const parts = [...wordsOf(hi, lead), SCALES[top]!];
+    if (lo > 0) parts.push(...belowTop(lo, true));
+    return parts;
+}
+
+/** Non-negative integer → Vietnamese words. */
+export function numberToWords(n: number): string {
+    if (!Number.isFinite(n) || n < 0) return "";
+    if (n === 0) return ONES[0]!;
+    return wordsOf(Math.floor(n), false).join(" ");
 }

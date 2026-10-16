@@ -60,9 +60,9 @@ describe("text normalization", () => {
         expect(phonemize("pokol 14.00", "mad")).toBe("pɔkɔl sapɔlɔ bɤn əmpaʔ"); // hour word + period
         expect(phonemize("kol 17:00 WIB", "mad")).toBe("kɔl sapɔlɔ bɤn pətːɔʔ wip"); // clipped hour word
         expect(phonemize("2:00", "mad")).toBe("duwɤ"); // bare colon, no word and no marker
-        // ⚠ A REAL-MINUTES CLOCK IS LEFT ALONE, not read with a guessed connective: no Madurese
-        // "past"/"minutes-after" construction is attested anywhere. The pause is the recorded refusal.
-        expect(phonemize("pokol 18:45", "mad")).toBe("pɔkɔl sapɔlɔ bɤn bɤluʔ , əmpaʔ pɔlɔ bɤn lɛmaʔ");
+        // ⚠ NO CONNECTIVE IS GUESSED for a real-minutes clock: no Madurese "past"/"minutes-after" construction
+        // is attested anywhere. Since #1589 it reads as the hour then the minutes, with no pause.
+        expect(phonemize("pokol 18:45", "mad")).toBe(phonemize("pokol 18 45", "mad"));
         // ⚠ AND THE COUNTER-EXAMPLE THAT FORCED THE HOUR-WORD GUARD: 16.31 BILLION rupiah, not 16:31.
         expect(phonemize("Rp 16.31 milyad", "mad")).toContain("kɔma təlɔ sətːɔŋ");
     });

@@ -16,6 +16,8 @@ public sealed class SundaneseNumbersDef
     public string Rebu { get; init; } = "";
     public string Yuta { get; init; } = "";
     public string Seprefix { get; init; } = "";
+    public string Miliar { get; init; } = "";
+    public string Triliun { get; init; } = "";
 }
 
 public sealed class SundaneseDef

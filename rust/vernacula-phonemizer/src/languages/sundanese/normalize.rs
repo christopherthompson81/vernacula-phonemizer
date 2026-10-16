@@ -159,8 +159,8 @@ pub fn normalize_sundanese(input: &JsString) -> JsString {
         .expect("checked by create_sundanese")
         .apply(&s);
 
-    // Decimals, fractional digits one at a time.
-    s = rewrite_with(&s, js_re!(r"(\d)[.,](\d{1,2})(?![\d.,])", "gu"), |m, t| {
+    // Decimals, fractional digits one at a time, any number of them (#1589; see normalize.ts step 5).
+    s = rewrite_with(&s, js_re!(r"(\d)[.,](\d+)(?![\d.,])", "gu"), |m, t| {
         g(m, t, 1)
             .concat(&js(" koma "))
             .concat(&JsString::join(&g(m, t, 2).code_point_strings(), &js(" ")))

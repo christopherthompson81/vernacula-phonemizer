@@ -250,7 +250,12 @@ export function normalizeSundanese(input: string): string {
     // after the KOMA", glossed in English by the article itself. A written corpus is the weakest evidence
     // about how a SYMBOL is spoken (playbook), so a definitional citation outranks the raw count.
     // Read digit-by-digit after the separator, which is the Austronesian convention Indonesian also takes.
-    s = rewrite(s, /(\d)[.,](\d{1,2})(?![\d.,])/gu, (_m, a: string, b: string) => `${a} koma ${[...b].join(" ")}`);
+    // ⚠ ANY NUMBER OF FRACTIONAL DIGITS, not one or two (#1589). Step 1 has already taken every exact three-digit
+    // group after a `[1-9]` head, so what still carries a separator here is a decimal: `3.14159` read *tˈilu .
+    // ʔˈopat bəlˈas rəbˈu …* (a sentence pause and "fourteen thousand") and `0,001` *ʔənˈol , hˈid͡ʒi*. Measured
+    // over the mined corpus, all 5 such shapes are decimals (`1.6726231 × 10⁻²⁷ kg`, `0.9998 g/cm³`,
+    // `13,1313`, a coordinate `139.7667`, `0.917`); no DOI occurs.
+    s = rewrite(s, /(\d)[.,](\d+)(?![\d.,])/gu, (_m, a: string, b: string) => `${a} koma ${[...b].join(" ")}`);
 
     // ── 6. ERA MARKERS ──────────────────────────────────────────────────────────────────────────────────
     // ⚠ SM BEFORE M, always: `M` matches inside `SM` and would leave a stranded S. ×868 SM, ×417 `\d M`.
