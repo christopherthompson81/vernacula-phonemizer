@@ -257,17 +257,29 @@ pub fn escape(lit: &str) -> String {
 }
 
 /// `s.replace(re, (m, …) => …)` on the pipeline string.
+///
+/// A shim: the body lives in `rewrite_with_dyn`, which takes the callback as a trait object. Generic over
+/// the closure, the body was compiled once per call site (about 1,000 copies, 4 MiB of `.text`).
+#[inline]
 pub fn rewrite_with(
     s: &JsString,
     re: &JsRegex,
     mut f: impl FnMut(&JsMatch, &JsString) -> JsString,
 ) -> JsString {
+    rewrite_with_dyn(s, re, &mut f)
+}
+
+fn rewrite_with_dyn(
+    s: &JsString,
+    re: &JsRegex,
+    f: &mut dyn FnMut(&JsMatch, &JsString) -> JsString,
+) -> JsString {
     let Some((p, tracked)) = snapshot() else {
-        return re.replace_with(s, f);
+        return re.replace_with_dyn(s, f);
     };
     if tracked.as_ref() != Some(s) {
         poison(Some((&tracked.unwrap_or_default(), s)));
-        return re.replace_with(s, f);
+        return re.replace_with_dyn(s, f);
     }
     let all = re.match_all(s);
     let matches: &[JsMatch] = if re.global {

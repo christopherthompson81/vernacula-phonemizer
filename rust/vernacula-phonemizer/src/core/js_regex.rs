@@ -248,10 +248,22 @@ impl JsRegex {
     }
 
     /// `s.replace(re, (m, …groups) => …)`.
+    ///
+    /// A shim over `replace_with_dyn`, so the body is compiled once rather than once per closure.
+    #[inline]
     pub fn replace_with(
         &self,
         s: &JsString,
         mut f: impl FnMut(&JsMatch, &JsString) -> JsString,
+    ) -> JsString {
+        self.replace_with_dyn(s, &mut f)
+    }
+
+    /// `replace_with` with the callback as a trait object.
+    pub fn replace_with_dyn(
+        &self,
+        s: &JsString,
+        f: &mut dyn FnMut(&JsMatch, &JsString) -> JsString,
     ) -> JsString {
         let matches = if self.global {
             self.match_all(s)
